@@ -24,7 +24,7 @@ export function buildCreativeCharacterBibleV1(input={}){
     wardrobe_continuity_required:true
   }));
   return Object.freeze({
-    schema_version:'1.0.0',
+    schema_version:'1.0.1',
     mode,
     characters,
     presenter_required:presenter,
@@ -57,8 +57,8 @@ export function assertCharacterContinuityEvidenceV1({character_bible,evidence}={
   const bible=obj(character_bible),ev=obj(evidence),failures=[];
   if(!arr(bible.characters).length)failures.push('CHARACTER_BIBLE_EMPTY');
   if(ev.identity_keyed_assets!==true)failures.push('IDENTITY_KEYED_ASSETS_REQUIRED');
-  if(Number(ev.primary_character_scene_ratio||0)<Number(bible.physical_acceptance?.min_primary_character_scene_ratio||.42))failures.push('PRIMARY_CHARACTER_TOO_SPARSE');
-  if(Number(ev.unidentified_human_scene_ratio||1)>Number(bible.physical_acceptance?.max_unidentified_human_scene_ratio||.20))failures.push('RANDOM_HUMANS_TOO_HIGH');
+  if(Number(ev.primary_character_scene_ratio??0)<Number(bible.physical_acceptance?.min_primary_character_scene_ratio??.42))failures.push('PRIMARY_CHARACTER_TOO_SPARSE');
+  if(Number(ev.unidentified_human_scene_ratio??1)>Number(bible.physical_acceptance?.max_unidentified_human_scene_ratio??.20))failures.push('RANDOM_HUMANS_TOO_HIGH');
   if(bible.presenter_required&&ev.presenter_voice_consistent!==true)failures.push('PRESENTER_VOICE_INCONSISTENT');
   if(ev.face_identity_consistent!==true)failures.push('FACE_IDENTITY_INCONSISTENT');
   if(ev.wardrobe_timeline_consistent!==true)failures.push('WARDROBE_CONTINUITY_INCONSISTENT');
@@ -66,4 +66,4 @@ export function assertCharacterContinuityEvidenceV1({character_bible,evidence}={
   return Object.freeze({passed:true,verdict:'CHARACTER_CONTINUITY_GREEN'});
 }
 
-export const CREATIVE_CHARACTER_BIBLE_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',owner_engine:'CREATIVE-STUDIO-001',modes:MODES,identity_locked:true,same_core_cast_across_formats:true,random_stock_people_rejected:true,publication_authority:false,additional_cost_eur:0});
+export const CREATIVE_CHARACTER_BIBLE_V1_CONTRACT=Object.freeze({schema_version:'1.0.1',owner_engine:'CREATIVE-STUDIO-001',modes:MODES,identity_locked:true,same_core_cast_across_formats:true,random_stock_people_rejected:true,zero_unidentified_human_ratio_is_valid:true,publication_authority:false,additional_cost_eur:0});
