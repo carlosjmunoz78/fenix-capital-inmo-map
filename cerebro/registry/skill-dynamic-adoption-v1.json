@@ -6788,6 +6788,78 @@
       "promoted_at": "2026-10-22T15:23:06.998Z"
     },
     {
+      "candidate_id": "repo:ab3b204563bae36b64eaa50d0554",
+      "technical_name": "modal",
+      "source_locator": "github://TerminalSkills/skills@024bbc237d3871e9fc6327640e62edafcf8555ed/skills/modal",
+      "pinned_sha": "024bbc237d3871e9fc6327640e62edafcf8555ed",
+      "snapshot_sha256": "ab3b204563bae36b64eaa50d0554a137135f8beadc663b7d04ce9c6c28e3bdcd",
+      "manifest_sha256": "6ecbf501b848cc7328553bdf3123be93c1c8c633331c26a5d83727e549b551d6",
+      "outcome_hash": "0d4eac829233fa98098a3015b92f79ec8bc19dcb7536ad2b6ef54db32107fbd5",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:ab3b204563bae36b:cap:1",
+          "technical_name": "modal",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T13:39:46.681Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "8942a77d517ed37daf3b88e853ddcbda44ab28fd03ee75575fa4e0e10cd1cf13"
+    },
+    {
       "candidate_id": "repo:d467e64402b053e5371c1b2c7fbc",
       "technical_name": "modal",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/modal",
@@ -6989,6 +7061,76 @@
         "observed_at": "2026-10-22T19:18:26.653Z"
       },
       "promoted_at": "2026-10-22T19:18:26.653Z"
+    },
+    {
+      "candidate_id": "repo:7254fb5bbd68c2fc2f3c50bf12ea",
+      "technical_name": "motion",
+      "source_locator": "github://TerminalSkills/skills@024bbc237d3871e9fc6327640e62edafcf8555ed/skills/motion",
+      "pinned_sha": "024bbc237d3871e9fc6327640e62edafcf8555ed",
+      "snapshot_sha256": "7254fb5bbd68c2fc2f3c50bf12eae6f741b0d997586fbf4103307dfafacc1a36",
+      "manifest_sha256": "b67b9820f0d79da628de9d42e9445c793cb82831c9d9804e42e822b26a6a8935",
+      "outcome_hash": "36878a68eb7887a9121a51606b09ee1c52e52997e063f4bcd57a9ad8aafab64f",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:7254fb5bbd68c2fc:cap:1",
+          "technical_name": "motion",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T13:39:46.682Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "fc56a871d76e697a20d7633dcd6ad16fe3d71c6d5d60f10580069ea9bf58db56"
     },
     {
       "candidate_id": "repo:c527b570c445b07466c162986847",
@@ -11734,11 +11876,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 116,
-    "inserted": 0,
+    "total": 118,
+    "inserted": 2,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 2,
     "prod_readonly": 116
   }
 }
