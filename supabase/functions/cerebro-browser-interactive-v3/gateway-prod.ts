@@ -8,7 +8,7 @@ const PROD_PROJECT_REF='cluhljgonannaafpmblx';
 const UPSTREAM='cerebro-browser-interactive-v3';
 const COMPANY_ID='fenix';
 const ALLOWED_ORIGINS=new Set(['https://app.fenixcapital.es','https://www.app.fenixcapital.es']);
-const OWNER_ROUTES=new Set(['/owner/companies','/owner/start','/owner/status','/owner/key','/owner/takeover','/owner/handback','/owner/input','/owner/stop']);
+const OWNER_ROUTES=new Set(['/owner/companies','/owner/start','/owner/status','/owner/key','/owner/takeover','/owner/handback','/owner/input','/owner/command','/owner/command-status','/owner/stop']);
 const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
 const auth=createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}});
 
