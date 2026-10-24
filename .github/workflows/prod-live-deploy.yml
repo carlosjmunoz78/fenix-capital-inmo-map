@@ -10,6 +10,7 @@ on:
   push:
     branches:
       - main
+      - hotfix/browser-v3-ergonomics-20261024
 
 permissions:
   contents: write
