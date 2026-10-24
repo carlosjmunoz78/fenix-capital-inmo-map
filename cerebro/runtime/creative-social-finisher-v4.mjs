@@ -1,0 +1,20 @@
+import { execFile } from 'node:child_process';
+import path from 'node:path';
+import { promisify } from 'node:util';
+const execFileAsync=promisify(execFile);
+const SAFE_COLOR=/^#[0-9a-fA-F]{6}$/;
+function arr(v){return Array.isArray(v)?v:[]}
+function obj(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
+function ffColor(v){const s=String(v||'#f47b20');if(!SAFE_COLOR.test(s))throw new Error('SOCIAL_FINISHER_ACCENT_DENIED');return `0x${s.slice(1)}`}
+async function probe(file){const {stdout}=await execFileAsync('ffprobe',['-v','error','-show_entries','format=duration','-show_entries','stream=codec_type,width,height','-of','json',file]);const p=JSON.parse(stdout),v=arr(p.streams).find(x=>x.codec_type==='video');if(!v)throw new Error('SOCIAL_FINISHER_VIDEO_STREAM_REQUIRED');const duration=Number(p.format?.duration||0);if(!(duration>0))throw new Error('SOCIAL_FINISHER_DURATION_INVALID');return {duration,width:Number(v.width),height:Number(v.height),audio:arr(p.streams).some(x=>x.codec_type==='audio')}}
+function sceneStarts(scenes,overlap){let cursor=0;const starts=[];for(let i=0;i<scenes.length;i++){starts.push(cursor);cursor+=Math.max(1,Number(obj(scenes[i]).duration_sec||obj(scenes[i]).duration||3));if(i<scenes.length-1)cursor-=overlap}return starts}
+function f(v){return Number(v).toFixed(3).replace(/0+$/,'').replace(/\.$/,'')}
+export async function finishCreativeSocialV4({videoFile,scenes,temp,accent='#f47b20',transitionOverlapSec=.55}){
+  const meta=await probe(videoFile),sceneList=arr(scenes);if(!sceneList.length)throw new Error('SOCIAL_FINISHER_SCENES_REQUIRED');const starts=sceneStarts(sceneList,transitionOverlapSec),accentColor=ffColor(accent),filters=['eq=contrast=1.045:saturation=1.08:brightness=-0.004','unsharp=5:5:0.34:5:5:0','noise=alls=0.55:allf=t'];
+  const hookEnd=Math.min(meta.duration,.16);filters.push(`drawbox=x=0:y=0:w=iw:h=ih:color=${accentColor}@0.16:t=fill:enable='between(t,0,${f(hookEnd)})'`);
+  for(let i=1;i<starts.length;i++){const s=starts[i],flashEnd=Math.min(meta.duration,s+.055);filters.push(`drawbox=x=0:y=0:w=iw:h=ih:color=white@0.055:t=fill:enable='between(t,${f(s)},${f(flashEnd)})'`);if(i%3===0){const barEnd=Math.min(meta.duration,s+.18);filters.push(`drawbox=x=0:y=0:w='iw*min(max((t-${f(s)})/0.12,0),1)':h=7:color=${accentColor}@0.95:t=fill:enable='between(t,${f(s)},${f(barEnd)})'`)}}
+  const finalStart=Math.max(0,meta.duration-.85),finalEnd=Math.max(finalStart,meta.duration-.65);filters.push(`drawbox=x=0:y='ih-12':w='iw*min(max((t-${f(finalStart)})/0.20,0),1)':h=12:color=${accentColor}@0.95:t=fill:enable='between(t,${f(finalStart)},${f(finalEnd)})'`);
+  const out=path.join(temp,`social-finished-v4-${path.basename(videoFile)}`),args=['-hide_banner','-loglevel','error','-i',videoFile,'-vf',filters.join(','),'-map','0:v:0'];if(meta.audio)args.push('-map','0:a:0');args.push('-c:v','libx264','-preset','veryfast','-crf','20','-pix_fmt','yuv420p');if(meta.audio)args.push('-c:a','copy');args.push('-movflags','+faststart','-y',out);await execFileAsync('ffmpeg',args,{maxBuffer:40*1024*1024});const after=await probe(out);if(Math.abs(after.duration-meta.duration)>.12)throw new Error(`SOCIAL_FINISHER_DURATION_DRIFT:${meta.duration}->${after.duration}`);if(meta.audio&&!after.audio)throw new Error('SOCIAL_FINISHER_AUDIO_LOST');
+  return {file:out,evidence:{visual_finisher_version:'V4_SOCIAL',fast_transition_accents:true,repetitive_full_frame_sweeps:false,hook_flash:true,transition_flash_events:Math.max(0,starts.length-1),accent_bar_events:Math.floor((starts.length-1)/3),cta_accent:true,color_finish:true,micro_grain:true,audio_preserved:meta.audio===after.audio,duration_preserved:true,width:after.width,height:after.height}};
+}
+export const CREATIVE_SOCIAL_FINISHER_V4_CONTRACT=Object.freeze({schema_version:'4.0.0',owner_engine:'SOC-001',fast_transition_accents:true,repetitive_full_frame_sweeps:false,varied_effect_cadence:true,hook_flash:true,cta_accent:true,audio_passthrough:true,duration_preserving:true,additional_cost_eur:0,publish_authorized:false});
