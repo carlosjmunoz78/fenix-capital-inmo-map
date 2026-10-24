@@ -26,7 +26,7 @@ concurrency:
 
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-prod
-  CEREBRO_BROWSER_INTERACTIVE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-worker-v1-prod
+  CEREBRO_BROWSER_INTERACTIVE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-worker-v2-prod
   CEREBRO_BROWSER_WORKSPACE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-v1-prod
   CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
   CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
