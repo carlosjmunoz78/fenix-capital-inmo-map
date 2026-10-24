@@ -5,12 +5,18 @@ on:
     paths:
       - 'cerebro/integrations/canva/**'
       - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - 'cerebro/registry/creative-tool-capabilities.v1.json'
+      - 'cerebro/runtime/creative-capability-router-v1.mjs'
+      - 'cerebro/tests/creative-capability-router-v1.test.mjs'
       - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
       - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
   pull_request:
     paths:
       - 'cerebro/integrations/canva/**'
       - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - 'cerebro/registry/creative-tool-capabilities.v1.json'
+      - 'cerebro/runtime/creative-capability-router-v1.mjs'
+      - 'cerebro/tests/creative-capability-router-v1.test.mjs'
       - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
       - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
   workflow_dispatch:
@@ -29,9 +35,11 @@ jobs:
           node-version: 24
       - name: Shared Canva capability tests
         run: node --test cerebro/integrations/canva/canva-capability-router-v1.test.mjs
-      - name: Validate Canva JSON contracts
+      - name: Shared creative capability routing tests
+        run: node --test cerebro/tests/creative-capability-router-v1.test.mjs
+      - name: Validate creative JSON contracts
         run: >-
-          node -e "for (const f of ['cerebro/integrations/canva/CANVA-001.manifest.json','cerebro/integrations/canva/CANVA-001.mcp-contract.json','cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json','cerebro/integrations/canva/canva-capability-bindings.v1.json','cerebro/tech-scout/creative-editor-video-selected-v1.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('creative-contract-json GREEN')"
+          node -e "for (const f of ['cerebro/integrations/canva/CANVA-001.manifest.json','cerebro/integrations/canva/CANVA-001.mcp-contract.json','cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json','cerebro/integrations/canva/canva-capability-bindings.v1.json','cerebro/registry/creative-tool-capabilities.v1.json','cerebro/tech-scout/creative-editor-video-selected-v1.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('creative-contract-json GREEN')"
       - name: Assert tools are not canonical engines
         run: >-
           node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/registry/engine-registry.v1.json','utf8')); for(const bad of ['CANVA-001','OPENDESIGN-001','OPENCUT-001']) if(r.engine_ids.includes(bad)) throw new Error('tool must remain capability: '+bad); console.log('no-tool-engines GREEN')"
