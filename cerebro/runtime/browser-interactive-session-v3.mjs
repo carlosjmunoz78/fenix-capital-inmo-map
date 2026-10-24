@@ -21,7 +21,7 @@ function scrubUrl(raw){try{const u=new URL(String(raw||''));u.username='';u.pass
 function privateUrl(raw){const value=String(raw||'');if(value.startsWith('data:'))return value.slice(0,16384);try{const u=new URL(value);if(!['http:','https:','about:'].includes(u.protocol))return'';u.username='';u.password='';return u.toString().slice(0,16384);}catch{return'';}}
 function browserChannel(){return String(process.env.CEREBRO_BROWSER_CHANNEL||'').trim();}
 function browserWorkerOptions(){const channel=browserChannel();return channel?{launch_options:{channel}}:{};}
-function workspaceEnabled(job){return String(job?.environment||'')==='PREPROD'&&WORKSPACE_ENDPOINT.includes(PREPROD_PROJECT_REF);}
+function workspaceEnabled(job){const environment=String(job?.environment||'');if(environment==='PREPROD')return WORKSPACE_ENDPOINT.includes(PREPROD_PROJECT_REF);if(environment==='PROD')return String(job?.company_id||'')==='fenix'&&WORKSPACE_ENDPOINT.includes(PROD_PROJECT_REF);return false;}
 function assertInteractiveScope(job,endpoint){
   const environment=String(job?.environment||'');
   const company=String(job?.company_id||'');
@@ -216,4 +216,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,workspace_hibernate_preprod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_CONFIRMATION_FAIL_CLOSED',workspace_prod_enabled:false,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.1',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_CONFIRMATION_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
