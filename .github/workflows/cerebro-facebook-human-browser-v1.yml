@@ -1,0 +1,35 @@
+name: CEREBRO Facebook Human Browser V1
+
+on:
+  push:
+    branches:
+      - cerebro/facebook-human-browser-v1-2026-10-24
+    paths:
+      - 'cerebro/contracts/social-facebook-human-browser-v1.contract.json'
+      - 'cerebro/runtime/social-facebook-human-browser-v1.mjs'
+      - 'cerebro/runtime/social-facebook-human-browser-v1.test.mjs'
+      - '.github/workflows/cerebro-facebook-human-browser-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/contracts/social-facebook-human-browser-v1.contract.json'
+      - 'cerebro/runtime/social-facebook-human-browser-v1.mjs'
+      - 'cerebro/runtime/social-facebook-human-browser-v1.test.mjs'
+      - '.github/workflows/cerebro-facebook-human-browser-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate contract JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('cerebro/contracts/social-facebook-human-browser-v1.contract.json','utf8')); console.log('contract json ok')"
+      - name: Run adapter tests
+        run: node --test cerebro/runtime/social-facebook-human-browser-v1.test.mjs

@@ -1,0 +1,110 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-SOCIAL-FACEBOOK-CANVA-MCP-V1",
+  "status": "READY_PENDING_INITIAL_CANVA_OAUTH",
+  "company_id": "fenix",
+  "engine_id": "SOC-001",
+  "department_id": "social-facebook",
+  "environment": "PROD",
+  "version": "v1",
+  "provider": "CANVA",
+  "remote_mcp_url": "https://api.canva.com/connect/v1/mcp",
+  "transport": "REMOTE_MCP",
+  "bridge": {
+    "package": "mcp-remote",
+    "version": "0.15.2",
+    "mode": "STDIO_TO_REMOTE_MCP",
+    "version_pinned": true
+  },
+  "purpose": "Allow SOC-001 Facebook to create, edit, discover, organize and export Canva designs through Canva's official agent interface whenever the governed human browser is unavailable or Canva blocks automated Chromium.",
+  "routing": {
+    "primary": "BROWSER_1_HUMAN_OPERATOR_WHEN_PROVIDER_ALLOWS",
+    "fallback_condition": [
+      "CANVA_ANTI_BOT_INTERSTITIAL",
+      "BROWSER_PROVIDER_DENIAL",
+      "CANVA_UI_AUTOMATION_UNAVAILABLE"
+    ],
+    "fallback": "CANVA_REMOTE_MCP",
+    "never": [
+      "STEALTH_EVASION",
+      "CAPTCHA_BYPASS",
+      "MFA_BYPASS",
+      "ANTI_BOT_BYPASS"
+    ]
+  },
+  "physical_browser_evidence": {
+    "job_id": "87ee8f4e-2776-4ab7-b2ad-661ded68aa42",
+    "status": "SUCCEEDED",
+    "final_url": "https://www.canva.com/",
+    "provider_result": "CANVA_ANTI_BOT_INTERSTITIAL",
+    "ray_id": "a4f4d97f8e24a21e",
+    "decision": "DO_NOT_EVADE_USE_OFFICIAL_MCP"
+  },
+  "oauth": {
+    "per_user_required": true,
+    "service_account_not_supported": true,
+    "client_id_secret_required_for_developer_portal_client": true,
+    "credential_storage": "CEREBRO_VAULT_ONLY",
+    "raw_secret_in_repo": false,
+    "raw_secret_in_queue": false,
+    "initial_legal_gate": "LEGAL_REQUIRED",
+    "initial_user_consent_gate": "CUSTOMER_HUMAN_REQUEST"
+  },
+  "canva_plan_policy": {
+    "paid_plan_available": true,
+    "use_existing_subscription_features": true,
+    "additional_spend_eur": 0,
+    "extra_purchase_or_upgrade": "HUMAN_REQUIRED_MONEY_LIMIT"
+  },
+  "allowed_capabilities": [
+    "DESIGN_GENERATION",
+    "DESIGN_EDITING",
+    "DESIGN_SEARCH",
+    "FOLDER_MANAGEMENT",
+    "ASSET_UPLOAD",
+    "BRAND_KIT_ACCESS",
+    "BRAND_TEMPLATE_ACCESS",
+    "AUTOFILL_WHEN_AVAILABLE",
+    "RESIZE_WHEN_AVAILABLE",
+    "IMAGE_GENERATION_WHEN_AVAILABLE",
+    "BACKGROUND_REMOVAL_WHEN_AVAILABLE",
+    "EXPORT_PNG",
+    "EXPORT_JPG",
+    "EXPORT_PDF",
+    "EXPORT_MP4"
+  ],
+  "creative_policy": {
+    "leave_work_inside_canva": true,
+    "publish_outside_canva": false,
+    "brand_kit_preference": "Capital",
+    "qa_required": true,
+    "license_check_required": true,
+    "accessibility_check_required": true,
+    "provider_side_effect_authorized": false
+  },
+  "mission": {
+    "id": "FACEBOOK-CANVA-CREATIVE-FACTORY-V1",
+    "goal": "Continuously create and improve on-brand Facebook creative inventory inside Canva without external publication.",
+    "initial_batch": {
+      "posts": 12,
+      "carousels": 6,
+      "stories": 12,
+      "reel_covers": 8,
+      "thumbnails": 6,
+      "generated_images": 12,
+      "short_video_drafts": 6,
+      "animated_variants": 6
+    }
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "runtime_truth": "The browser route is physically proven but Canva blocks the cloud Chromium with its anti-bot interstitial. CEREBRO must not evade it. Official Canva MCP is the certified fallback. Full autonomous Canva execution starts only after the one-time Canva Developer/OAuth grant is completed."
+}
