@@ -9412,6 +9412,76 @@
       "promoted_at": "2026-10-21T18:53:57.028Z"
     },
     {
+      "candidate_id": "repo:c7bddaa278ca4a68e53eb3f2a363",
+      "technical_name": "radix-ui",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/radix-ui",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "c7bddaa278ca4a68e53eb3f2a363cd7d837da997b9ef993ba1c84ba51a870436",
+      "manifest_sha256": "d290a1ca5b21239a40f58d1185d1b6b97993cf677b437d2934ea33af58b8bc2f",
+      "outcome_hash": "1a3098d85e1393a60d4236ea8cc277c9065184b755f233987e7e78c0d93b4fa4",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:c7bddaa278ca4a68:cap:1",
+          "technical_name": "radix-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T21:50:45.534Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "ff04e49bddb0820b69f8201afd06ec681c0f59debeec170c4b3119f138763704"
+    },
+    {
       "candidate_id": "repo:3c8e2306694f825a73fdbe6fbe4b",
       "technical_name": "rate-limiter",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/rate-limiter",
@@ -12343,11 +12413,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 122,
-    "inserted": 0,
+    "total": 123,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 122
   }
 }
