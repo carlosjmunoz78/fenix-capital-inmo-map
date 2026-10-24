@@ -7900,6 +7900,78 @@
       "promoted_at": "2026-10-21T09:34:16.064Z"
     },
     {
+      "candidate_id": "repo:409246eb059625e7464e777b3ecb",
+      "technical_name": "notification-system",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/notification-system",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "409246eb059625e7464e777b3ecb9790166ef119ec9ffbdd0a62398a432a95cc",
+      "manifest_sha256": "b7538790d6e0c1306f6dc01ff1b3813640f95dd5a2795f87a7cfd3195ac799da",
+      "outcome_hash": "b13e2eb509aff768151be38675f706b1634eb12e8d2328ac1fcbb5fcf36f3a21",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:409246eb059625e7:cap:1",
+          "technical_name": "notification-system",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T17:02:14.899Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "c65ccc1a34d4c9feaecbdfc9dd5505db684cf0f72f7db1de2bf18929f0db6106"
+    },
+    {
       "candidate_id": "repo:8f53fbc666736b6c00f398a0b04f",
       "technical_name": "notification-system",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/notification-system",
@@ -12140,10 +12212,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 120,
-    "promoted": 2,
+    "total": 121,
+    "inserted": 1,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 120
   }
 }
