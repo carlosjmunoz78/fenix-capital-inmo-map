@@ -10,7 +10,7 @@ const EXACT_ALLOWED_ORIGINS=new Set([
  'http://127.0.0.1:5173'
 ]);
 const VERCEL_PREPROD_ORIGIN=/^https:\/\/fenix-capital-preprod(?:-[a-z0-9-]+)?\.vercel\.app$/i;
-const OWNER_ROUTES=new Set(['owner/companies','owner/status','owner/start','owner/key','owner/takeover','owner/handback','owner/input','owner/stop']);
+const OWNER_ROUTES=new Set(['owner/companies','owner/status','owner/start','owner/key','owner/takeover','owner/handback','owner/input','owner/command','owner/command-status','owner/stop']);
 
 function allowedOrigin(origin:string|null){return Boolean(origin&&(EXACT_ALLOWED_ORIGINS.has(origin)||VERCEL_PREPROD_ORIGIN.test(origin)));}
 function cors(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin','x-cerebro-browser-gateway':'v1-preprod'};if(allowedOrigin(origin)&&origin)h['access-control-allow-origin']=origin;return h;}
