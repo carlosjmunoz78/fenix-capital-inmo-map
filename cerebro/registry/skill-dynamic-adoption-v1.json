@@ -8658,11 +8658,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_PLASMO_7EDACFCE_PROD_READONLY_CANARY",
       "observed_at": "2026-10-24T19:25:01.165Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -8676,7 +8676,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "d8ab6a5eb4b09c65ec1adc02c4e90fbf3fd72dd471373db1b0efaf505cc4ffb4"
+      "capability_hash": "d8ab6a5eb4b09c65ec1adc02c4e90fbf3fd72dd471373db1b0efaf505cc4ffb4",
+      "canary": {
+        "status": "GREEN_DYNAMIC_PLASMO_7EDACFCE_PROD_READONLY_CANARY",
+        "candidate_id": "repo:5da9cd1aed8ad2e437ccc318c138",
+        "technical_name": "plasmo",
+        "head_sha": "5240104307b20738f099516a146872d5a4aeb763",
+        "run_id": 40125200424,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-24T19:25:18.115Z"
+      },
+      "promoted_at": "2026-10-24T19:25:18.115Z"
     },
     {
       "candidate_id": "repo:bef099ca21d5c7d1e8f9cdb909da",
@@ -12314,10 +12344,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 122,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 121
+    "pending_canary": 0,
+    "prod_readonly": 122
   }
 }
