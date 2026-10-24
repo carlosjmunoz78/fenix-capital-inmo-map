@@ -4,10 +4,90 @@
 
   const BATCH_MS=85;
   const MAX_DELTA=900;
+  const STYLE_ID='cerebro-browser-workmode-v2';
   const wheelState=new WeakMap();
 
   const clamp=value=>Math.max(-MAX_DELTA,Math.min(MAX_DELTA,value));
   const getBrowserRoot=()=>document.querySelector('.cerebro-browser-console');
+
+  function injectWorkModeStyles(){
+    if(document.getElementById(STYLE_ID))return;
+    const style=document.createElement('style');
+    style.id=STYLE_ID;
+    style.textContent=`
+      body.cerebro-browser-viewer-expanded{overflow:hidden!important}
+      body.cerebro-browser-viewer-expanded .cerebro-browser-frame--expanded{
+        position:fixed!important;
+        inset:8px 8px 90px 8px!important;
+        width:auto!important;
+        height:auto!important;
+        max-width:none!important;
+        margin:0!important;
+        z-index:9998!important;
+        border-radius:14px!important;
+        box-shadow:0 28px 90px rgba(0,0,0,.72),0 0 0 1px rgba(55,217,255,.18)!important;
+      }
+      body.cerebro-browser-viewer-expanded .cerebro-browser-composer{
+        position:fixed!important;
+        left:8px!important;
+        right:8px!important;
+        bottom:8px!important;
+        width:auto!important;
+        max-width:none!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:visible!important;
+        z-index:10000!important;
+        background:transparent!important;
+      }
+      body.cerebro-browser-viewer-expanded .cerebro-browser-form{
+        height:72px!important;
+        min-height:72px!important;
+        border-color:rgba(55,217,255,.42)!important;
+        background:rgba(3,16,24,.97)!important;
+        box-shadow:0 18px 60px rgba(0,0,0,.58),0 0 0 1px rgba(55,217,255,.08)!important;
+        backdrop-filter:blur(24px) saturate(135%)!important;
+      }
+      body.cerebro-browser-viewer-expanded .cerebro-browser-form textarea{
+        max-height:56px!important;
+        font-size:14px!important;
+      }
+      body.cerebro-browser-viewer-expanded .cerebro-browser-expand-button{
+        width:auto!important;
+        min-width:118px!important;
+        padding:0 12px!important;
+        color:#dff8ff!important;
+        border-color:rgba(55,217,255,.34)!important;
+        background:rgba(12,42,56,.9)!important;
+        font-size:11px!important;
+        font-weight:900!important;
+      }
+      body.cerebro-browser-viewer-expanded .cerebro-browser-composer::before{
+        content:'ORDEN A CEREBRO · ENTER ENVÍA · ESC SALE DE PANTALLA GRANDE';
+        position:absolute;
+        left:16px;
+        bottom:74px;
+        padding:5px 8px;
+        border:1px solid rgba(55,217,255,.18);
+        border-radius:8px 8px 0 0;
+        background:rgba(3,16,24,.94);
+        color:#86cfe0;
+        font-size:9px;
+        font-weight:900;
+        letter-spacing:.06em;
+        pointer-events:none;
+      }
+      @media(max-width:900px){
+        body.cerebro-browser-viewer-expanded .cerebro-browser-frame--expanded{inset:4px 4px 82px 4px!important}
+        body.cerebro-browser-viewer-expanded .cerebro-browser-composer{left:4px!important;right:4px!important;bottom:4px!important}
+        body.cerebro-browser-viewer-expanded .cerebro-browser-form{height:68px!important;min-height:68px!important}
+        body.cerebro-browser-viewer-expanded .cerebro-browser-expand-button{min-width:46px!important;padding:0 9px!important;font-size:0!important}
+        body.cerebro-browser-viewer-expanded .cerebro-browser-expand-button::after{content:'✕';font-size:16px}
+        body.cerebro-browser-viewer-expanded .cerebro-browser-composer::before{display:none}
+      }
+    `;
+    document.head.appendChild(style);
+  }
 
   function flushWheel(viewport,state){
     state.timer=0;
@@ -41,9 +121,9 @@
     const button=frame.querySelector('[data-cerebro-viewer-expand]');
     if(button){
       button.setAttribute('aria-pressed',expanded?'true':'false');
-      button.setAttribute('aria-label',expanded?'Salir del visor ampliado':'Ampliar visor');
-      button.title=expanded?'Salir del visor ampliado':'Ampliar visor';
-      button.textContent=expanded?'✕':'⛶';
+      button.setAttribute('aria-label',expanded?'Salir de pantalla grande':'Ampliar visor');
+      button.title=expanded?'Salir de pantalla grande · Esc':'Ampliar visor';
+      button.textContent=expanded?'✕  Pequeño':'⛶';
     }
   }
 
@@ -72,6 +152,7 @@
   }
 
   function sync(){
+    injectWorkModeStyles();
     const root=getBrowserRoot();
     if(!root){document.body.classList.remove('cerebro-browser-viewer-expanded');return;}
     ensureExpandButton(root);
@@ -86,10 +167,20 @@
     const root=getBrowserRoot();
     if(!root)return;
     const frame=root.querySelector('.cerebro-browser-frame');
-    if(event.key==='Escape'&&frame?.classList.contains('cerebro-browser-frame--expanded')&&event.shiftKey){
+    const expanded=frame?.classList.contains('cerebro-browser-frame--expanded');
+    if(event.key==='Escape'&&expanded){
       event.preventDefault();
       event.stopPropagation();
       setExpanded(frame,false);
+      return;
+    }
+    const typing=event.target instanceof HTMLTextAreaElement||event.target instanceof HTMLInputElement||event.target?.isContentEditable;
+    if(event.key==='/'&&!typing){
+      const composer=root.querySelector('.cerebro-browser-form textarea');
+      if(composer instanceof HTMLTextAreaElement&&!composer.disabled){
+        event.preventDefault();
+        composer.focus();
+      }
       return;
     }
     if(!(event.ctrlKey||event.metaKey)||event.altKey||event.shiftKey)return;
