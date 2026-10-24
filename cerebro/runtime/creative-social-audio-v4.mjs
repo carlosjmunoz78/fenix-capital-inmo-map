@@ -30,13 +30,13 @@ async function socialMusic(total,temp){
     '-f','lavfi','-i',`sine=frequency=192:sample_rate=48000:duration=${total}`,
     '-f','lavfi','-i',`sine=frequency=576:sample_rate=48000:duration=${total}`,
     '-f','lavfi','-i',`anoisesrc=color=pink:sample_rate=48000:duration=${total}`,
-    '-filter_complex',`[0:a]volume=.042,tremolo=f=2:d=.72[b];[1:a]volume=.018,tremolo=f=4:d=.58[m];[2:a]volume=.007,tremolo=f=4:d=.88[p];[3:a]highpass=f=2800,lowpass=f=7200,volume=.010,tremolo=f=4:d=.92[h];[b][m][p][h]amix=inputs=4:normalize=0,highpass=f=45,acompressor=threshold=-20dB:ratio=2.4:attack=12:release=160,afade=t=in:st=0:d=.35,afade=t=out:st=${fade}:d=1.8,alimiter=limit=.88[mix]`,
+    '-filter_complex',`[0:a]volume=.042,tremolo=f=2:d=.72[b];[1:a]volume=.018,tremolo=f=4:d=.58[m];[2:a]volume=.007,tremolo=f=4:d=.88[p];[3:a]highpass=f=2800,lowpass=f=7200,volume=.010,tremolo=f=4:d=.92[h];[b][m][p][h]amix=inputs=4:normalize=0,highpass=f=45,acompressor=threshold=-20dB:ratio=2.4:attack=12:release=160,afade=t=in:st=0:d=0.35,afade=t=out:st=${fade}:d=1.8,alimiter=limit=.88[mix]`,
     '-map','[mix]','-c:a','pcm_s16le','-y',out],{maxBuffer:20*1024*1024});return out;
 }
 async function socialSfx(total,starts,temp){
   const out=path.join(temp,'social-sfx-v4.wav');if(!starts.length){await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-f','lavfi','-i',`anullsrc=r=48000:cl=mono:d=${total}`,'-c:a','pcm_s16le','-y',out]);return out}
   const args=['-hide_banner','-loglevel','error'];for(const _ of starts){args.push('-f','lavfi','-i','anoisesrc=color=white:sample_rate=48000:duration=0.24','-f','lavfi','-i','sine=frequency=92:sample_rate=48000:duration=0.18')}
-  let fc='';for(let i=0;i<starts.length;i++){const n=i*2,b=i*2+1,ms=Math.round(starts[i]*1000);fc+=`[${n}:a]highpass=f=950,lowpass=f=8500,afade=t=in:st=0:d=.018,afade=t=out:st=.045:d=.18,volume=.18[wn${i}];[${b}:a]afade=t=out:st=.02:d=.16,volume=.14[bi${i}];[wn${i}][bi${i}]amix=inputs=2:normalize=0,adelay=${ms}:all=1[e${i}];`}
+  let fc='';for(let i=0;i<starts.length;i++){const n=i*2,b=i*2+1,ms=Math.round(starts[i]*1000);fc+=`[${n}:a]highpass=f=950,lowpass=f=8500,afade=t=in:st=0:d=0.018,afade=t=out:st=0.045:d=0.18,volume=.18[wn${i}];[${b}:a]afade=t=out:st=0.02:d=0.16,volume=.14[bi${i}];[wn${i}][bi${i}]amix=inputs=2:normalize=0,adelay=${ms}:all=1[e${i}];`}
   fc+=`${starts.map((_,i)=>`[e${i}]`).join('')}amix=inputs=${starts.length}:duration=longest:normalize=0,apad=pad_dur=${total},atrim=duration=${total},alimiter=limit=.90[s]`;
   args.push('-filter_complex',fc,'-map','[s]','-c:a','pcm_s16le','-y',out);await execFileAsync('ffmpeg',args,{maxBuffer:24*1024*1024});return out;
 }
@@ -60,4 +60,4 @@ export async function masterCreativeSocialAudioV4({videoFile,narrationBlocks,sce
   return {file:out,evidence:{audio_master_version:'V4_SOCIAL',audio_duration_sec:Number(audioDuration.toFixed(3)),video_duration_sec:Number(visualDuration.toFixed(3)),audio_coverage_ratio:Number(coverage.toFixed(3)),voice_block_count:voices.length,voice_seconds_total:Number(totalVoiceSec.toFixed(3)),voice_coverage_ratio:Number(voiceCoverage.toFixed(3)),max_voice_gap_sec:Number(maxGap.toFixed(3)),voice_wpm:Number(wpm.toFixed(1)),max_voice_speedup:Number(maxSpeedup.toFixed(3)),sfx_event_count:sceneStarts.length,sfx_peak_db:Number(sfxPeak.toFixed(2)),music_full_length:true,continuous_narration:true,voice_style:'SOCIAL_ENERGETIC',scene_locked_narration:false}};
 }
 
-export const CREATIVE_SOCIAL_AUDIO_V4_CONTRACT=Object.freeze({schema_version:'4.0.0',owner_engine:'SOC-001',continuous_narration:true,scene_locked_narration:false,energetic_piper_profile:true,max_voice_speedup:1.12,full_length_music:true,audible_transition_sfx:true,ducking:true,hook_deadline_sec:1.2,publish_authorized:false,additional_cost_eur:0});
+export const CREATIVE_SOCIAL_AUDIO_V4_CONTRACT=Object.freeze({schema_version:'4.0.1',owner_engine:'SOC-001',continuous_narration:true,scene_locked_narration:false,energetic_piper_profile:true,max_voice_speedup:1.12,full_length_music:true,audible_transition_sfx:true,ducking:true,hook_deadline_sec:1.2,publish_authorized:false,additional_cost_eur:0});
