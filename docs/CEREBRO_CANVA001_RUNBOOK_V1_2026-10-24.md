@@ -1,107 +1,93 @@
-# CEREBRO OS · CANVA-001 · Runbook V1
+# CEREBRO OS · Shared Canva Creative Capability · Runbook V1
 
 Date: 2026-10-24
-Company: fenix
+Capability: `CREATIVE-CANVA-V1`
+Scope: multi-company / all governed departments and future engines
 Environment: PREPROD
-Status: DEFINED / BLOCKED_PENDING_CANVA_OAUTH
+Status: ROUTING_AND_BINDINGS_GREEN / BLOCKED_PENDING_CANVA_OAUTH_FOR_PHYSICAL_MCP_EXECUTION
 Additional cost target: 0 EUR
 
-## Purpose
+## Architectural rule
 
-CANVA-001 is the transversal Canva production engine for CEREBRO. It must create, edit, organize, resize, export and retain reusable creative assets in the authorized Canva account for corporate social, personal brand, marketing, web and future company use.
+Canva is **not a canonical CEREBRO engine**. It is one shared provider capability used through existing engines/departments. `CANVA-001` must not be added to the canonical Engine Registry and no department may clone a separate Canva runtime or credential store.
+
+FACT-001 owns capability scaffolding; ACTGW-001 governs execution; RUNTIME-001 supplies shared runtime. Consumers pass `company_id + engine_id + environment + version` and an explicit operation allowlist.
+
+## Current consumers
+
+Bindings are versioned in `cerebro/integrations/canva/canva-capability-bindings.v1.json`. Current consumers include Facebook/SOC-001, MKT-001, LAB-MKT, SEO-001, WEB-001, APP-001, TRN-001 and the Social/Marketing/SEO/App bootstrap engines. Future engines declaring a creative-media need receive a FACT-001 binding candidate; they do not receive provider authority automatically.
+
+Publication remains the authority of the origin engine. Canva itself creates/edits/organizes/exports assets and cannot independently publish to Facebook, web, campaigns or other provider surfaces.
 
 ## Preserve-first rule
 
 CONSERVAR -> ENTENDER -> ENVOLVER -> PROBAR -> MEJORAR -> MIGRAR.
 
-CANVA-001 must never delete or overwrite existing Canva content during onboarding or night-factory runs. Existing folders, designs, Brand Kits, templates and assets are inventoried first.
+The capability inventories before mutation and must not delete or overwrite existing Canva content by default. Existing folders, designs, Brand Kits, templates and assets are preserved.
 
 ## Transport decision
 
-Primary: Canva official remote MCP server.
-Endpoint: https://api.canva.com/connect/v1/mcp
-Fallback: Canva Connect REST APIs where deterministic endpoints are preferable.
-Browser 1: not used as primary transport. A physical Browser 1 canary on 2026-10-24 reached Canva but Canva returned a Cloudflare/provider block page ('Muy pronto podras volver a disenar'). Evidence job: 6d5f8fc5-e484-45be-81c9-30de83813d37.
+1. Primary: official Canva remote MCP.
+2. Deterministic fallback: Canva Connect REST APIs where appropriate.
+3. Browser: secondary only when normal provider UI permits it. No stealth, CAPTCHA/MFA bypass or anti-bot evasion.
 
-## Why MCP
+Physical Browser 1 evidence on 2026-10-24 reached Canva but the provider returned its anti-bot block page (`Muy pronto podras volver a disenar`). Latest SOC-001 canary: `87ee8f4e-2776-4ab7-b2ad-661ded68aa42`. This is why Browser is not the primary high-volume transport.
 
-The official Canva MCP exposes design generation and editing, search, folders, assets, Brand Kits/templates, exports, resize, image generation and collaborative design workflows. It avoids provider anti-bot browser behavior and is the correct agent integration surface.
+## OAuth/Vault gate
 
-## OAuth gate
+The shared runtime uses one governed OAuth connection per authorized Canva identity/account scope, stored only in CEREBRO Vault. Raw credentials/tokens never enter Git, prompts, job payloads or logs.
 
-Canva requires per-user OAuth for MCP. There is no organization-wide service account that can replace the user grant.
+Provider/app consent that legally requires owner acceptance is handled under the canonical human-exception policy; CEREBRO does not accept legal terms on the owner’s behalf.
 
-Required once before execution:
-1. Create a Canva Developer app for CEREBRO (<=18 character app name if required by current Canva portal UI).
-2. Enable Outside Canva -> Canva MCP.
-3. Configure the CEREBRO OAuth redirect URL.
-4. Store Client ID and Client Secret only in CEREBRO Vault.
-5. Complete owner OAuth grant for the Canva account.
-6. Store refresh/access material only in Vault/session manager; never Git, job payloads, logs or chat.
-7. Discover tools from MCP at runtime; do not assume a stale fixed catalog.
+## Certification sequence
 
-Until that grant exists, state remains `BLOCKED_PENDING_PROVIDER_AUTHORIZATION_NOT_NEW_HUMAN_REQUIRED_CODE`.
+1. OAuth connection and identity/account binding.
+2. MCP tool discovery.
+3. Read-only recent designs/folders.
+4. Brand Kit read; confirm `Capital` when using the Fénix identity.
+5. Test folder.
+6. Editable test design.
+7. Generated image.
+8. Editing transaction.
+9. Brand Template where available.
+10. Resize where included in the existing plan.
+11. PNG/PDF/MP4 export as applicable.
+12. Origin-engine binding test.
+13. Cost check = 0 EUR incremental.
+14. Revoke/reconnect rollback test.
+15. Observability/evaluation/Tribunal before autonomous PROD mutation.
 
-## First certification sequence
+## Facebook Night Factory
 
-1. MCP connect and `tools/list`.
-2. Read-only: search recent designs and folders.
-3. Read Brand Kits; confirm `Capital` if available to the same Canva identity.
-4. Create dedicated test folder in PREPROD scope.
-5. Create one editable test design.
-6. Generate one standalone test image.
-7. Start/edit/commit one editing transaction.
-8. Create from a Brand Template if available.
-9. Resize one test design if included in plan.
-10. Export PNG and MP4/PDF where applicable.
-11. Verify all artifacts are in Canva and no external publication occurred.
-12. Verify no additional charge occurred.
-13. Revoke OAuth and prove rollback/reconnect procedure in PREPROD before autonomous PROD promotion.
+The first high-volume consumer mission is `cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json`, now owned by Facebook/SOC-001 while consuming `CREATIVE-CANVA-V1`.
 
-## Night Factory mission
+It covers inventory, reusable masters, posts, carousels, stories, reel covers, thumbnails, generated images, short-video/motion drafts, platform adaptation and QA. It leaves assets inside Canva and does not independently publish them.
 
-Mission contract: `cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json`.
+## Future departments
 
-The mission works in iterative batches:
-- inventory and structure;
-- reusable brand masters;
-- static creative production;
-- image/AI experimentation;
-- video/motion drafts;
-- cross-platform adaptation;
-- final QA and review inventory.
+When FACT-001 creates or updates an engine that declares creative-media needs:
+1. detect the need;
+2. generate a Canva binding candidate;
+3. restrict operations to the minimum required;
+4. bind company/identity/account/environment;
+5. run cost/privacy/license/security tests;
+6. run EVA/JDG/observability/rollback/rebuild gates;
+7. activate the shared capability without copying runtime or credentials.
 
-The mission must keep all useful variants in Canva, label strongest candidates `READY_FOR_REVIEW`, and document the hypothesis each variant tests.
+## Cost and premium features
 
-## Creative rules
+Canva paid-plan features already included in the account may be used. AI allowance inside the existing plan may be consumed within policy. Any extra purchase or credit spend triggers `MONEY_LIMIT`.
 
-- Use paid Canva functionality already included in the current subscription when useful.
-- Never assume an AI feature is unlimited; respect existing plan allowance.
-- Never purchase credits, elements or services outside the existing plan without MONEY_LIMIT.
-- Preserve editable master files.
-- Resize is not equivalent to native platform adaptation.
-- Maintain brand, accessibility, license, commercial-use, mobile-legibility and visual QA.
-- No fake followers, fake engagement or deceptive social mechanics.
-- Canva Voice is not the default voice engine unless specifically selected by routing/quality policy.
-- No publishing outside Canva during Night Factory.
+## Canonical human exceptions
 
-## Human exception policy
+Only: `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST`.
 
-Only canonical CEREBRO reasons are valid:
-LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT, CUSTOMER_HUMAN_REQUEST.
+## CI evidence
 
-Canva OAuth/provider consent is an execution blocker/status and does not add a ninth HUMAN_REQUIRED code.
+`CEREBRO Canva Shared Capability V1`: GREEN.
+`CEREBRO Governed Main Integration V0`: GREEN.
+`CEREBRO RSI Promotion Readiness Shadow V1`: GREEN.
 
-## Rollback
+## Rollback/rebuild
 
-Before autonomous promotion:
-- revoke Canva OAuth token/grant;
-- disable CANVA-001 connection;
-- preserve all generated designs;
-- no deletion of pre-existing Canva content;
-- stop scheduler/mission runner;
-- retain audit and artifact inventory.
-
-## Promotion gate
-
-No PROD autonomous execution until OAuth, tool discovery, read/write smoke tests, QA, observability, cost check, backup/rebuild documentation and rollback are green.
+Disable the binding or OAuth connection, stop capability jobs, preserve generated and pre-existing designs, retain audit evidence, and restore the previous provider path. Rebuild comes from the versioned capability manifest, MCP contract, binding registry, router, tests and this runbook.
