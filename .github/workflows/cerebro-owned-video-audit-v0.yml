@@ -1,0 +1,39 @@
+name: CEREBRO Owned Video Audit V0
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v2-2026-10-24]
+    paths: ['.github/workflows/cerebro-owned-video-audit-v0.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit-owned-broll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Download owned Fenix video
+        run: |
+          curl --fail --location --silent --show-error 'https://fenixcapital.es/wp-content/uploads/2026/05/Fenix-Capital-para-inmobiliarias_1080p-1.mp4' -o /tmp/fenix-broll.mp4
+          test -s /tmp/fenix-broll.mp4
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,width,height -of json /tmp/fenix-broll.mp4 | tee /tmp/ffprobe.json
+      - name: Build distributed contact sheet
+        run: |
+          mkdir -p /tmp/broll-audit
+          for pair in '01 2' '02 7' '03 12' '04 17' '05 22' '06 27'; do
+            set -- $pair
+            ffmpeg -hide_banner -loglevel error -ss "$2" -i /tmp/fenix-broll.mp4 -frames:v 1 -vf 'scale=640:-2' -y "/tmp/broll-audit/frame-$1.jpg"
+          done
+          ffmpeg -hide_banner -loglevel error -pattern_type glob -i '/tmp/broll-audit/frame-*.jpg' -filter_complex 'scale=640:-2,tile=3x2:padding=8:margin=8' -frames:v 1 -y /tmp/broll-audit/contact-sheet.jpg
+          cp /tmp/ffprobe.json /tmp/broll-audit/ffprobe.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-owned-video-audit-v0
+          path: /tmp/broll-audit
+          retention-days: 2
