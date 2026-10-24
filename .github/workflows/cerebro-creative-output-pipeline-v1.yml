@@ -40,9 +40,13 @@ jobs:
   physical-zero-cost-canary:
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      - name: Install zero-cost FFmpeg runtime in ephemeral LAB runner
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
       - name: Verify local FFmpeg lane exists
         run: |
           command -v ffmpeg
