@@ -16,7 +16,7 @@ const WORKMODE_INSTALLED='cerebroBrowserWorkmodeV2';
 
 function installBrowserWorkModeUx(){
  if(typeof document==='undefined'||typeof window==='undefined')return;
- const state=window as Window&Record<string,unknown>;
+ const state=window as unknown as Window&Record<string,unknown>;
  if(state[WORKMODE_INSTALLED])return;
  state[WORKMODE_INSTALLED]=true;
  const installStyle=()=>{
