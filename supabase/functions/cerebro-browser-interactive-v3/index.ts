@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { createRemoteJWKSet, jwtVerify } from "npm:jose@5.10.0";
+import { classifySessionReuseV3 } from "./session-liveness.mjs";
 
 const U=Deno.env.get('SUPABASE_URL')??'';
 const A=Deno.env.get('SUPABASE_ANON_KEY')??'';
@@ -40,9 +41,28 @@ async function worker(req:Request){if(!U.includes(PROD_PROJECT_REF))return{ok:fa
 async function sessionKey(sessionId:string){if(!sessionId)throw new Error('SESSION_ID_REQUIRED');const exists=await svc.from('cerebro_browser_session_v3').select('session_id').eq('session_id',sessionId).maybeSingle();if(exists.error)throw exists.error;if(!exists.data)throw new Error('SESSION_NOT_FOUND');const bytes=new TextEncoder().encode(`${S}|${sessionId}|CEREBRO_BROWSER_PHASE3_V0`);const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));let binary='';for(const b of digest)binary+=String.fromCharCode(b);return btoa(binary);}
 function profile(company:string,identity:string,account:string){const s=(x:string)=>String(x).replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120);return `b1-${s(company)}-${s(identity)}-${s(account)}-PROD`;}
 
+async function reapStaleSession(session:any,reason:string){
+  const closedAt=nowIso();
+  const r=await svc.from('cerebro_browser_session_v3').update({state:'ERROR',control_owner:'NONE',worker_alive:false,frame_ciphertext:null,frame_iv:null,human_lease_id:null,human_lease_expires_at:null,closed_at:closedAt,updated_at:closedAt}).eq('session_id',String(session.session_id)).eq('state',String(session.state)).select('session_id').maybeSingle();
+  if(r.error)throw r.error;
+  if(r.data)await event(String(session.session_id),'STALE_SESSION_REAPED','SYSTEM',{reason,previous_state:String(session.state||''),job_id:String(session.job_id||''),secret_material_logged:false});
+  return Boolean(r.data);
+}
+
 async function startSession(body:any,actor:string){
-  const existing=await svc.from('cerebro_browser_session_v3').select('session_id,state,control_owner,worker_alive,current_url,updated_at').eq('environment','PROD').eq('company_id','fenix').in('state',ACTIVE_STATES).order('updated_at',{ascending:false}).limit(1).maybeSingle();
-  if(existing.data)return{ok:true,reused:true,session:existing.data};
+  const existing=await svc.from('cerebro_browser_session_v3').select('session_id,job_id,state,control_owner,worker_alive,current_url,last_heartbeat_at,expires_at,updated_at').eq('environment','PROD').eq('company_id','fenix').in('state',ACTIVE_STATES).order('updated_at',{ascending:false}).limit(1).maybeSingle();
+  if(existing.error)throw existing.error;
+  if(existing.data){
+    let jobStatus:string|null=null;
+    if(existing.data.state==='CONNECTING'&&existing.data.job_id){
+      const job=await svc.from('cerebro_browser_job_v2').select('status').eq('job_id',String(existing.data.job_id)).maybeSingle();
+      if(job.error)throw job.error;
+      jobStatus=job.data?.status?String(job.data.status):null;
+    }
+    const decision=classifySessionReuseV3(existing.data,{job_status:jobStatus,now_ms:Date.now()});
+    if(decision.reusable)return{ok:true,reused:true,session:existing.data};
+    await reapStaleSession(existing.data,decision.reason);
+  }
   const target=String(body?.target_url||'data:text/html;charset=utf-8,%3Chtml%3E%3Cbody%20style%3D%22font-family%3Asans-serif%3Bpadding%3A48px%22%3E%3Ch1%3ECEREBRO%20Browser%201%20Phase%203%3C%2Fh1%3E%3Cp%3ESesi%C3%B3n%20interactiva%20PROD%20gobernada.%3C%2Fp%3E%3C%2Fbody%3E%3C%2Fhtml%3E');
   const identity='carlos-admin';const account='owner-console';const browserProfile=profile('fenix',identity,account);
   const {data,error}=await svc.rpc('cerebro_browser_enqueue_v2',{
@@ -71,7 +91,7 @@ async function workerComplete(body:any,w:any){const r=await svc.from('cerebro_br
 async function workerHandback(body:any,w:any){const id=String(body?.session_id||'');const r=await svc.from('cerebro_browser_session_v3').update({state:'CEREBRO_CONTROLLED',control_owner:'CEREBRO',human_lease_id:null,human_lease_expires_at:null,updated_at:nowIso()}).eq('session_id',id).eq('worker_id',w.worker_id).eq('state','HANDBACK_PENDING').select('session_id').maybeSingle();if(r.error)throw r.error;if(!r.data)return{ok:false,error:'HANDBACK_COMPLETE_PRECONDITION_FAILED'};await event(id,'AI_RESUME','SYSTEM',{snapshot_reconciled:true,secret_material_logged:false});await event(id,'CONTROL_CHANGED','SYSTEM',{from:'HUMAN',to:'CEREBRO'});return{ok:true};}
 async function workerClose(body:any,w:any){const id=String(body?.session_id||'');const state=String(body?.state||'CLOSED')==='ERROR'?'ERROR':'CLOSED';const r=await svc.from('cerebro_browser_session_v3').update({state,control_owner:'NONE',worker_alive:false,frame_ciphertext:null,frame_iv:null,human_lease_id:null,human_lease_expires_at:null,closed_at:nowIso(),updated_at:nowIso()}).eq('session_id',id).eq('worker_id',w.worker_id).select('session_id').maybeSingle();if(r.error)throw r.error;if(r.data)await event(id,'SESSION_CLOSED','SYSTEM',{state,secret_material_logged:false});return{ok:Boolean(r.data)};}
 
-Deno.serve(async req=>{const origin=req.headers.get('origin');if(req.method==='OPTIONS'){if(!origin||!ALLOWED_ORIGINS.has(origin))return new Response(null,{status:403});return new Response(null,{status:204,headers:{...headers(origin),'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,apikey','access-control-max-age':'600'}});}const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');if(req.method==='GET'&&route.endsWith('health'))return out(req,200,{ok:true,service:'cerebro-browser-interactive-v3',environment:'PROD',schema_version:'3.0.0',frames_encrypted:true,input_encrypted:true,incremental_cost_eur:0});if(req.method!=='POST')return out(req,404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});let body:any={};try{body=await req.json();}catch{}
+Deno.serve(async req=>{const origin=req.headers.get('origin');if(req.method==='OPTIONS'){if(!origin||!ALLOWED_ORIGINS.has(origin))return new Response(null,{status:403});return new Response(null,{status:204,headers:{...headers(origin),'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,content-type,apikey','access-control-max-age':'600'}});}const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');if(req.method==='GET'&&route.endsWith('health'))return out(req,200,{ok:true,service:'cerebro-browser-interactive-v3',environment:'PROD',schema_version:'3.1.0',stale_session_recovery:true,frames_encrypted:true,input_encrypted:true,incremental_cost_eur:0});if(req.method!=='POST')return out(req,404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});let body:any={};try{body=await req.json();}catch{}
   try{
     if(route.startsWith('owner/')){const o=await owner(req);if(!o.ok)return out(req,403,o);if(route==='owner/start')return out(req,200,await startSession(body,o.actor));if(route==='owner/status')return out(req,200,await ownerStatus(body));if(route==='owner/key')return out(req,200,{ok:true,session_id:String(body.session_id||''),key_b64:await sessionKey(String(body.session_id||'')),expires_in_seconds:900});if(route==='owner/takeover')return out(req,200,await takeover(String(body.session_id||'')));if(route==='owner/handback')return out(req,200,await handback(String(body.session_id||''),String(body.lease_id||'')));if(route==='owner/input')return out(req,200,await queueInput(body));if(route==='owner/stop')return out(req,200,await stopSession(String(body.session_id||'')));return out(req,404,{ok:false,error:'OWNER_ROUTE_NOT_AVAILABLE'});}
     if(route.startsWith('worker/')){const w=await worker(req);if(!w.ok)return out(req,403,w);if(route==='worker/key')return out(req,200,{ok:true,session_id:String(body.session_id||''),key_b64:await sessionKey(String(body.session_id||'')),expires_in_seconds:900});if(route==='worker/open')return out(req,200,await workerOpen(body,w));if(route==='worker/frame')return out(req,200,await workerFrame(body,w));if(route==='worker/poll')return out(req,200,await workerPoll(body,w));if(route==='worker/complete')return out(req,200,await workerComplete(body,w));if(route==='worker/handback-complete')return out(req,200,await workerHandback(body,w));if(route==='worker/close')return out(req,200,await workerClose(body,w));return out(req,404,{ok:false,error:'WORKER_ROUTE_NOT_AVAILABLE'});}
