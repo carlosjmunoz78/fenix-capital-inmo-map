@@ -9461,11 +9461,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_RADIX_UI_856A98FC_PROD_READONLY_CANARY",
       "observed_at": "2026-10-24T21:50:45.534Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -9479,7 +9479,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "ff04e49bddb0820b69f8201afd06ec681c0f59debeec170c4b3119f138763704"
+      "capability_hash": "ff04e49bddb0820b69f8201afd06ec681c0f59debeec170c4b3119f138763704",
+      "canary": {
+        "status": "GREEN_DYNAMIC_RADIX_UI_856A98FC_PROD_READONLY_CANARY",
+        "candidate_id": "repo:c7bddaa278ca4a68e53eb3f2a363",
+        "technical_name": "radix-ui",
+        "head_sha": "0307f7e6ee1ae879339654b1f8bae929ea6a5f93",
+        "run_id": 40136009219,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-24T21:51:01.652Z"
+      },
+      "promoted_at": "2026-10-24T21:51:01.652Z"
     },
     {
       "candidate_id": "repo:3c8e2306694f825a73fdbe6fbe4b",
@@ -12414,10 +12444,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 123,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 122
+    "pending_canary": 0,
+    "prod_readonly": 123
   }
 }
