@@ -1,41 +1,68 @@
 {
-  "schema_version": "1.0.1",
+  "schema_version": "1.1.0",
   "selection_id": "CEREBRO-CREATIVE-EDITOR-VIDEO-SELECTED-V1",
   "date": "2026-10-24",
-  "status": "LAB_SELECTED_PINNED_PHYSICAL_BUILD_TRIGGERED",
+  "status": "LAB_PHYSICAL_BUILD_GREEN_CAPABILITIES_REGISTERED",
   "rule": "REUSE_OR_WRAP_CAPABILITIES; DO_NOT_CREATE_NEW_CANONICAL_ENGINES",
-  "physical_lab_workflow": ".github/workflows/cerebro-creative-editor-video-lab-v1.yml",
+  "physical_lab_workflow": ".github/workflows/cerebro-canva-shared-capability-v1.yml",
+  "green_run_id": 40049827181,
   "candidates": [
     {
       "lane": "CANVA_LIKE_VISUAL_EDITOR",
+      "capability_id": "CREATIVE-VISUAL-LOCAL-V1",
       "repository": "clawnify/OpenDesign",
       "pinned_commit": "89c61f83c6c5141895d281385e90c6438ac7be1f",
       "license": "MIT",
       "license_verified_from_upstream_at_pin": true,
-      "disposition": "WRAP_LAB_P0",
+      "disposition": "WRAP_PREPROD_NEXT",
       "role": "self-hosted visual design editor and deterministic fallback/complement to Canva",
       "stack": ["Preact", "Fabric.js", "Hono", "SQLite", "Vite"],
-      "evidence": ["active upstream in Oct 2026", "design CRUD API", "templates", "uploads", "brand-kit related fixes", "resize", "local/self-host path"],
-      "integration_target": "DIGITAL_BUILD_CREATIVE / OPS-CREATIVE-001",
+      "interfaces": ["human_ui", "design_crud_http_api", "templates", "uploads", "fillable_fields"],
+      "physical_evidence": {
+        "run_id": 40049827181,
+        "clone_pin": "GREEN",
+        "license": "GREEN",
+        "install": "GREEN_AFTER_TEMP_LAB_LOCK_REPAIR",
+        "upstream_tests": "GREEN",
+        "production_build": "GREEN",
+        "secret_pattern_scan": "GREEN",
+        "known_upstream_issue": "package.json overrides do not match pnpm-lock.yaml config at pinned commit; LAB regenerates lock temporarily and never commits that repair upstream"
+      },
+      "integration_target": "CEREBRO shared creative capability router",
       "additional_cost_eur_target": 0,
       "prod_authorized": false
     },
     {
       "lane": "VIDEO_CREATION_EDITING",
+      "capability_id": "CREATIVE-VIDEO-EDITOR-V1",
       "repository": "OpenCut-app/OpenCut",
       "pinned_commit": "e668010778568641babef2cc40be4703ae6916d6",
       "license": "MIT",
       "license_verified_from_upstream_at_pin": true,
-      "disposition": "LAB_P0_REWRITE_CANDIDATE",
-      "role": "future interactive video editor/headless/MCP candidate",
+      "disposition": "LAB_GREEN_KEEP_ALONGSIDE_EXISTING_VIDEO_PATH",
+      "role": "interactive video editor candidate and future headless/MCP editor",
       "stack": ["Rust", "FFmpeg", "Bun", "Moon", "web/desktop architecture"],
       "upstream_state": "REWRITE_IN_PROGRESS",
-      "integration_target": "DIGITAL_BUILD_MULTIMEDIA / existing Multimedia Factory V0",
+      "physical_evidence": {
+        "run_id": 40049827181,
+        "clone_pin": "GREEN",
+        "license": "GREEN",
+        "cargo_metadata_locked": "GREEN",
+        "cargo_check_workspace_locked": "GREEN",
+        "warnings": "NON_BLOCKING_UNUSED_CODE_AND_FUTURE_INCOMPAT_DEPENDENCY_WARNING"
+      },
+      "automation_truth": {
+        "desktop_ui": "BUILD_GREEN",
+        "editor_api": "UPSTREAM_PLANNED_NOT_CLAIMED",
+        "mcp_server": "UPSTREAM_PLANNED_NOT_CLAIMED",
+        "headless_mode": "UPSTREAM_PLANNED_NOT_CLAIMED"
+      },
+      "integration_target": "DIGITAL-BUILD-MULTIMEDIA / existing Multimedia Factory V0",
       "existing_operational_neighbors": ["HyperFrames", "OpenMontage", "FFmpeg"],
-      "policy": "Do not replace existing video pipeline until physical build and OLD-vs-NEW demonstrate material advantage",
+      "policy": "Do not replace existing video pipeline until automation interfaces exist and OLD-vs-NEW demonstrates material advantage",
       "additional_cost_eur_target": 0,
       "prod_authorized": false
     }
   ],
-  "mandatory_gates": ["license_pin", "dependency_inventory", "secret_scan", "clean_build", "basic_function_smoke", "resource_measurement", "OLD_vs_NEW", "EVA-001", "JDG-001", "rollback", "rebuild", "PREPROD_before_PROD"]
+  "mandatory_remaining_gates_before_prod": ["dependency_inventory_final", "resource_measurement", "OLD_vs_NEW", "EVA-001", "JDG-001", "observability", "rollback", "backup", "rebuild", "PREPROD_promotion"]
 }
