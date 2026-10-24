@@ -30,7 +30,8 @@ function assertInteractiveScope(job,endpoint){
   throw new Error('INTERACTIVE_SCOPE_DENIED');
 }
 
-async function callInteractive(endpoint,route,token,body={},fetch_impl=fetch){
+async function callInteractive(endpoint,route,tokenProvider,body={},fetch_impl=fetch){
+  const token=required(await tokenProvider(),'WORKER_TOKEN');
   const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
   const data=await response.json().catch(()=>null);
   if(!response.ok||data?.ok!==true)throw new Error(`BROWSER_V3_${route.replace(/\//g,'_').toUpperCase()}_FAILED:${response.status}:${data?.error||'UNKNOWN'}`);
@@ -77,7 +78,7 @@ function humanAction(commandType,payload){
   }
 }
 
-async function captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl){
+async function captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl){
   const result=await worker.execute({...base,actions:[{type:'SCREENSHOT',label:`live-${seq}`}],keep_session_open:true,capture_final_evidence:false});
   if(result?.ok!==true)throw new Error(`INTERACTIVE_FRAME_NOT_AUTHORIZED:${result?.authorization?.status||'UNKNOWN'}`);
   const file=result.results?.[0]?.file;if(!file)throw new Error('INTERACTIVE_FRAME_FILE_MISSING');
@@ -85,12 +86,13 @@ async function captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_i
   const encrypted=encryptBytes(bytes,key);const url=scrubUrl(result.final_url);
   const tabs=Array.isArray(result.tabs)&&result.tabs.length?result.tabs.slice(0,32).map((tab,index)=>({index:Number.isInteger(tab?.index)?tab.index:index,url:scrubUrl(tab?.url),title:String(tab?.title||'').slice(0,240),active:tab?.active===true})):(url?[{index:0,url,title:'',active:true}]:[]);
   const activeTabIndex=Number.isInteger(result.active_tab_index)?result.active_tab_index:(tabs.find(tab=>tab.active)?.index??0);
-  await callInteractive(endpoint,'worker/frame',token,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:String(result.current_title||'').slice(0,240),tabs,active_tab_index:activeTabIndex,viewport_width:Number(result.viewport_width||1440),viewport_height:Number(result.viewport_height||1000)},fetch_impl);
+  await callInteractive(endpoint,'worker/frame',tokenProvider,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:String(result.current_title||'').slice(0,240),tabs,active_tab_index:activeTabIndex,viewport_width:Number(result.viewport_width||1440),viewport_height:Number(result.viewport_height||1000)},fetch_impl);
   return{final_url:url,frame_seq:seq};
 }
 
-export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch,endpoint=DEFAULT_ENDPOINT}={}){
-  required(job?.job_id,'JOB_ID');required(token,'WORKER_TOKEN');
+export async function runInteractiveBrowserSessionV3({job,token=null,token_provider=null,fetch_impl=fetch,endpoint=DEFAULT_ENDPOINT}={}){
+  required(job?.job_id,'JOB_ID');
+  const tokenProvider=typeof token_provider==='function'?token_provider:async()=>required(token,'WORKER_TOKEN');
   if(String(job.capability)!=='browser1.interactive')throw new Error('INTERACTIVE_CAPABILITY_REQUIRED');
   assertInteractiveScope(job,endpoint);
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
@@ -101,10 +103,10 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
     const initial=await worker.execute({...base,actions:initialActions,keep_session_open:true,capture_final_evidence:false});
     if(initial?.ok!==true)throw new Error(`INTERACTIVE_INITIAL_NOT_AUTHORIZED:${initial?.authorization?.status||'UNKNOWN'}`);
     lastUrl=scrubUrl(initial.final_url);
-    await callInteractive(endpoint,'worker/open',token,{session_id:sessionId},fetch_impl);opened=true;
-    const keyResult=await callInteractive(endpoint,'worker/key',token,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
+    await callInteractive(endpoint,'worker/open',tokenProvider,{session_id:sessionId},fetch_impl);opened=true;
+    const keyResult=await callInteractive(endpoint,'worker/key',tokenProvider,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
     while(Date.now()-startedAt<MAX_SESSION_MS){
-      const poll=await callInteractive(endpoint,'worker/poll',token,{session_id:sessionId},fetch_impl);
+      const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
       if(poll.stop===true||poll.state==='STOPPED')break;
       if(poll.command){
         let ok=false,errorCode=null;
@@ -114,23 +116,23 @@ export async function runInteractiveBrowserSessionV3({job,token,fetch_impl=fetch
           const result=await worker.execute({...base,actions:[action],keep_session_open:true,capture_final_evidence:false});
           ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
         }catch(error){errorCode=String(error?.message||error).slice(0,120);}
-        await callInteractive(endpoint,'worker/complete',token,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
+        await callInteractive(endpoint,'worker/complete',tokenProvider,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
       }
       if(poll.handback===true){
-        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
-        await callInteractive(endpoint,'worker/handback-complete',token,{session_id:sessionId},fetch_impl);
+        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
+        await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
       }
-      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,token,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();}
+      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();}
       await sleep(POLL_INTERVAL_MS);
     }
     await worker.stop('INTERACTIVE_SESSION_COMPLETE');
-    if(opened){await callInteractive(endpoint,'worker/close',token,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
+    if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
     return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq};
   }catch(error){
     await worker.stop('INTERACTIVE_SESSION_FAILED').catch(()=>{});
-    if(opened&&!closed)await callInteractive(endpoint,'worker/close',token,{session_id:sessionId,state:'ERROR'},fetch_impl).catch(()=>{});
+    if(opened&&!closed)await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'ERROR'},fetch_impl).catch(()=>{});
     throw error;
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.1.1',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.2.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
