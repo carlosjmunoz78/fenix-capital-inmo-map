@@ -3,7 +3,7 @@ import {ArrowLeft,ArrowRight,BrainCircuit,CircleDot,Globe2,Hand,MessageSquareTex
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
 import {decryptBrowserFrame,encryptBrowserInput,fetchBrowserInteractiveApi,importBrowserSessionKey,type BrowserCompanyV3,type BrowserSessionV3} from './cerebroBrowserInteractive';
-import {parseBrowserCommand} from './cerebroBrowserCommand';
+import {parseBrowserCommand} from '../cerebro/runtime/browser-command-parser-v3';
 import './cerebro-browser-console.css';
 
 type ViewName='V0'|'OPERATIVA'|'NAVEGADOR';
