@@ -81,6 +81,10 @@ async function startSession(body:any,actor:string){
 }
 async function ownerStatus(body:any){
  const companyId=await validateCompany(body?.company_id);
+ if(body?.list===true){
+  const listed=await svc.from('cerebro_browser_session_v3').select('session_id,state,control_owner,worker_alive,current_url,current_title,opened_at,last_heartbeat_at,closed_at,updated_at').eq('environment','PREPROD').eq('company_id',companyId).order('updated_at',{ascending:false}).limit(12);
+  if(listed.error)throw listed.error;return{ok:true,sessions:listed.data||[]};
+ }
  let q=svc.from('cerebro_browser_session_v3').select('session_id,job_id,company_id,department_id,environment,version,identity_id,account_id,browser_profile_id,state,control_owner,worker_alive,emergency_stop,current_url,current_title,tabs,active_tab_index,viewport_width,viewport_height,frame_ciphertext,frame_iv,frame_seq,frame_mime,frame_captured_at,human_lease_id,human_lease_expires_at,human_required,last_heartbeat_at,opened_at,expires_at,closed_at,updated_at').eq('environment','PREPROD').eq('company_id',companyId);
  if(body?.session_id)q=q.eq('session_id',String(body.session_id));else q=q.order('updated_at',{ascending:false});
  const r=await q.limit(1).maybeSingle();if(r.error)throw r.error;return{ok:true,session:r.data||null};
