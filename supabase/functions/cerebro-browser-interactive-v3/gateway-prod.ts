@@ -8,7 +8,7 @@ const PROD_PROJECT_REF='cluhljgonannaafpmblx';
 const UPSTREAM='cerebro-browser-interactive-v3';
 const COMPANY_ID='fenix';
 const ALLOWED_ORIGINS=new Set(['https://app.fenixcapital.es','https://www.app.fenixcapital.es']);
-const OWNER_ROUTES=new Set(['/owner/start','/owner/status','/owner/key','/owner/takeover','/owner/handback','/owner/input','/owner/stop']);
+const OWNER_ROUTES=new Set(['/owner/companies','/owner/start','/owner/status','/owner/key','/owner/takeover','/owner/handback','/owner/input','/owner/stop']);
 const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
 const auth=createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}});
 
@@ -25,6 +25,7 @@ async function owner(req:Request){
  return{ok:true,actor:'CARLOS-ADMIN',user_id:data.user.id} as const;
 }
 function validateCompany(body:any){return String(body?.company_id||'')===COMPANY_ID;}
+function companies(){return{ok:true,companies:[{company_id:COMPANY_ID,environment:'PROD',version:'v3',state:'ACTIVE',tenant_boundary:'DENY_CROSS_COMPANY',prod_authorized:true,prod_write_authorized:true,trading_access:false,additional_cost_eur:0}],source:'STATIC_CANARY_SCOPE_PENDING_PROD_REGISTRY'};}
 async function assertSessionScope(sessionId:string){
  if(!sessionId)throw new Error('SESSION_ID_REQUIRED');
  const r=await svc.from('cerebro_browser_session_v3').select('session_id,company_id,environment').eq('session_id',sessionId).maybeSingle();
@@ -61,7 +62,7 @@ Deno.serve(async req=>{
  if(req.method!=='POST'||!OWNER_ROUTES.has(route))return out(req,404,{ok:false,error:'OWNER_GATEWAY_ROUTE_NOT_AVAILABLE'});
  const o=await owner(req);if(!o.ok)return out(req,403,o);
  let body:any={};try{body=await req.json();}catch{}
- if(route==='/owner/companies')return out(req,404,{ok:false,error:'OWNER_GATEWAY_ROUTE_NOT_AVAILABLE'});
+ if(route==='/owner/companies')return out(req,200,companies());
  if(!validateCompany(body))return out(req,403,{ok:false,error:'COMPANY_SCOPE_DENIED'});
  try{
   if(route==='/owner/status')return out(req,200,await ownerStatus(body));
