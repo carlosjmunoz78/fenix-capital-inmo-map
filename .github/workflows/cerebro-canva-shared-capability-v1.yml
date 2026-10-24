@@ -1,0 +1,41 @@
+name: CEREBRO Canva Shared Capability V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/integrations/canva/**'
+      - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/integrations/canva/**'
+      - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canva-shared-capability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Shared Canva capability tests
+        run: node --test cerebro/integrations/canva/canva-capability-router-v1.test.mjs
+      - name: Validate Canva JSON contracts
+        run: >-
+          node -e "for (const f of ['cerebro/integrations/canva/CANVA-001.manifest.json','cerebro/integrations/canva/CANVA-001.mcp-contract.json','cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json','cerebro/integrations/canva/canva-capability-bindings.v1.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('canva-shared-json GREEN')"
+      - name: Assert Canva is not a canonical engine
+        run: >-
+          node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/registry/engine-registry.v1.json','utf8')); if(r.engine_ids.includes('CANVA-001')) throw new Error('CANVA-001 must remain capability, not engine'); console.log('no-canva-engine GREEN')"
+      - name: Assert transversal creative knowledge registry exists
+        run: >-
+          node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/knowledge/creative-media-knowledge-registry-v1.json','utf8')); if(r.scope!=='CEREBRO_OS_ALL_DEPARTMENTS') throw new Error('creative registry not transversal'); console.log('creative-registry GREEN')"
+      - name: Canonical CEREBRO registry validation
+        working-directory: cerebro
+        run: npm run validate
