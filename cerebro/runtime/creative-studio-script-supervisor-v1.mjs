@@ -1,3 +1,5 @@
+import { lockCreativeCastV1 } from './creative-cast-lock-v1.mjs';
+
 function obj(v){return v&&typeof v==='object'&&!Array.isArray(v)?v:{}}
 function clean(v){return String(v??'').replace(/\s+/g,' ').trim()}
 function req(v,n){const s=clean(v);if(!s)throw new Error(`STUDIO_SCRIPT_${n}_REQUIRED`);return s}
@@ -32,9 +34,10 @@ export function superviseStudioScriptV1(production){
     ];limits=[26,18,22,18,20,20];
   }else throw new Error(`STUDIO_SCRIPT_OUTPUT_UNSUPPORTED:${output}`);
   assertBlocks(blocks,limits);
-  const selected_plan={...plan,narration_blocks:blocks,script_supervised:true,voice_direction:'Conversational, smiling, quick reactions; one thought can travel across several cuts; never instructional or announcer-like.'};
-  const production_passes=[...(Array.isArray(p.production_passes)?p.production_passes:[]),{id:'SCRIPT_SUPERVISOR',status:'GREEN_CANDIDATE',notes:'Format-specific copy fit and continuous narration spacing checked before voice synthesis.'}];
-  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(6,Number(p.iteration_count||0)),script_supervisor:{version:'v1.3',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,status:'GREEN_CANDIDATE'}});
+  const castLock=lockCreativeCastV1({scenes:plan.scenes,character_bible:plan.character_bible});
+  const selected_plan={...plan,scenes:castLock.scenes,narration_blocks:blocks,script_supervised:true,cast_lock:castLock,primary_cast_video_source:castLock.primary_cast_video_source,voice_direction:'Conversational, smiling, quick reactions; one thought can travel across several cuts; never instructional or announcer-like.'};
+  const production_passes=[...(Array.isArray(p.production_passes)?p.production_passes:[]),{id:'SCRIPT_SUPERVISOR',status:'GREEN_CANDIDATE',notes:'Format-specific copy fit, continuous narration spacing and governed primary-cast source lock checked before physical production.'}];
+  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(6,Number(p.iteration_count||0)),script_supervisor:{version:'v1.4',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,cast_lock_method:castLock.method,primary_cast_video_source:castLock.primary_cast_video_source,primary_character_scene_ratio:castLock.primary_character_scene_ratio,status:'GREEN_CANDIDATE'}});
 }
 
-export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.3.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,max_social_voice_gap_sec:2.4,publication_authority:false,additional_cost_eur:0});
+export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.4.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,max_social_voice_gap_sec:2.4,governed_primary_cast_lock:true,broll_separated_from_primary:true,publication_authority:false,additional_cost_eur:0});
