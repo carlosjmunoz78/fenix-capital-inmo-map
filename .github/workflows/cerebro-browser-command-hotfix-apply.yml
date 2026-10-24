@@ -1,0 +1,49 @@
+name: CEREBRO Browser Command Hotfix Apply
+on:
+  push:
+    branches: [cerebro/navegador-command-execution-hotfix-20261024]
+    paths:
+      - scripts/apply-navegador-command-hotfix.py
+      - .github/workflows/cerebro-browser-command-hotfix-apply.yml
+permissions:
+  contents: write
+jobs:
+  apply-and-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/navegador-command-execution-hotfix-20261024
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Apply bounded patch
+        run: python3 scripts/apply-navegador-command-hotfix.py
+      - name: Assert bounded diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git diff --name-only | sort > /tmp/changed
+          cat >/tmp/expected <<'EOF'
+          src/CerebroBrowserConsole.tsx
+          supabase/functions/cerebro-browser-interactive-v3/index.ts
+          EOF
+          diff -u /tmp/expected /tmp/changed
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Reproduce real command and contract tests
+        run: node --experimental-strip-types --test cerebro/runtime/browser-natural-command-v3.test.mjs
+      - name: Build application
+        run: npm run build
+      - name: Commit bounded hotfix
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/CerebroBrowserConsole.tsx supabase/functions/cerebro-browser-interactive-v3/index.ts
+          git commit -m 'fix(navegador): route natural orders into Browser V3' || exit 0
+          git push origin HEAD:cerebro/navegador-command-execution-hotfix-20261024
