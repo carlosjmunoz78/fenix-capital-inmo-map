@@ -1,0 +1,30 @@
+name: CEREBRO Browser V3 Session Liveness
+
+on:
+  push:
+    branches: ['cerebro/navegador-runtime-recovery-20261024']
+    paths:
+      - 'supabase/functions/cerebro-browser-interactive-v3/**'
+      - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
+      - '.github/workflows/cerebro-browser-session-liveness-v3.yml'
+  pull_request:
+    paths:
+      - 'supabase/functions/cerebro-browser-interactive-v3/**'
+      - 'cerebro/runtime/browser-session-liveness-v3.test.mjs'
+      - '.github/workflows/cerebro-browser-session-liveness-v3.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  session-liveness:
+    name: Stale session recovery contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate stale-session classifier
+        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs
