@@ -1,6 +1,7 @@
 import { execFile, spawn } from 'node:child_process';
 import path from 'node:path';
 import { promisify } from 'node:util';
+import { planCreativeVoiceTimelineV1 } from './creative-voice-timeline-planner-v1.mjs';
 
 const execFileAsync=promisify(execFile);
 const VOICES=new Map([['ES_MALE',0],['ES_FEMALE',1]]);
@@ -21,7 +22,7 @@ async function piperBlock(value,temp,voiceId,index){
   await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',raw,'-af','highpass=f=85,lowpass=f=11500,equalizer=f=3000:t=q:w=1:g=2.2,acompressor=threshold=-20dB:ratio=3:attack=8:release=110,volume=1.10,alimiter=limit=0.94','-c:a','pcm_s16le','-y',out]);
   return out;
 }
-async function fitBlock(file,windowSec,temp,index){const duration=await probeDuration(file),ratio=duration/windowSec;if(ratio>1.12)throw new Error(`SOCIAL_VOICE_BLOCK_OVERFLOW:${index+1}:${duration.toFixed(2)}>${windowSec.toFixed(2)}`);if(ratio<=1)return {file,duration,speedup:1};const out=path.join(temp,`social-voice-fit-${String(index+1).padStart(2,'0')}.wav`);await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',file,'-filter:a',`atempo=${ratio.toFixed(5)}`,'-c:a','pcm_s16le','-y',out]);return {file:out,duration:await probeDuration(out),speedup:ratio}}
+async function compressBlock(file,ratio,temp,index){if(ratio<=1.0005)return {file,duration:await probeDuration(file),speedup:1};if(ratio>1.12)throw new Error(`SOCIAL_VOICE_SPEEDUP_LIMIT:${ratio.toFixed(3)}`);const out=path.join(temp,`social-voice-fit-${String(index+1).padStart(2,'0')}.wav`);await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',file,'-filter:a',`atempo=${ratio.toFixed(5)}`,'-c:a','pcm_s16le','-y',out]);return {file:out,duration:await probeDuration(out),speedup:ratio}}
 
 async function socialMusic(total,temp){
   const out=path.join(temp,'social-music-v4.wav'),fade=Math.max(0,total-1.8);
@@ -41,15 +42,24 @@ async function socialSfx(total,starts,temp){
   args.push('-filter_complex',fc,'-map','[s]','-c:a','pcm_s16le','-y',out);await execFileAsync('ffmpeg',args,{maxBuffer:24*1024*1024});return out;
 }
 
+function chooseSpeedupForTimeline(durations,total,preferredStarts){
+  for(let i=0;i<=24;i++){
+    const ratio=1+i*.005;
+    try{planCreativeVoiceTimelineV1({durations_sec:durations.map(d=>d/ratio),total_sec:total,preferred_starts_sec:preferredStarts,max_gap_sec:2.4,hook_deadline_sec:1.2});return ratio}catch(e){if(!String(e?.message||'').startsWith('VOICE_TIMELINE_TOO_DENSE'))throw e}
+  }
+  throw new Error('SOCIAL_VOICE_TIMELINE_NO_FIT_WITHIN_SPEEDUP_LIMIT');
+}
+
 export async function masterCreativeSocialAudioV4({videoFile,narrationBlocks,scenes,temp,voiceId='ES_FEMALE',transitionOverlapSec=.55}){
   const blocks=arr(narrationBlocks).map(obj).filter(x=>text(x.text||'',900));if(blocks.length<2)throw new Error('SOCIAL_NARRATION_BLOCKS_REQUIRED');
-  const sceneList=arr(scenes).map(obj),visualDuration=await probeDuration(videoFile);const ordered=blocks.map((b,i)=>({start:Number(b.start_sec??0),text:text(b.text,900),i})).sort((a,b)=>a.start-b.start);
-  if(ordered[0].start>1.2)throw new Error('SOCIAL_HOOK_TOO_LATE');
-  const voices=[];let maxSpeedup=1,totalVoiceSec=0,words=0;for(let i=0;i<ordered.length;i++){
-    const b=ordered[i],next=i<ordered.length-1?ordered[i+1].start:visualDuration-.15,window=Math.max(1,next-b.start-.10);if(b.start<0||b.start>=visualDuration-.4)throw new Error(`SOCIAL_NARRATION_START_INVALID:${i+1}`);
-    const raw=await piperBlock(b.text,temp,voiceId,i),fit=await fitBlock(raw,window,temp,i);maxSpeedup=Math.max(maxSpeedup,fit.speedup);totalVoiceSec+=fit.duration;words+=b.text.split(/\s+/).filter(Boolean).length;voices.push({...b,file:fit.file,duration:fit.duration});
-  }
-  let maxGap=Math.max(0,voices[0].start);for(let i=0;i<voices.length-1;i++)maxGap=Math.max(maxGap,voices[i+1].start-(voices[i].start+voices[i].duration));maxGap=Math.max(maxGap,visualDuration-(voices.at(-1).start+voices.at(-1).duration));
+  const sceneList=arr(scenes).map(obj),visualDuration=await probeDuration(videoFile),ordered=blocks.map((b,i)=>({preferred_start:Number(b.start_sec??0),text:text(b.text,900),i})).sort((a,b)=>a.preferred_start-b.preferred_start);
+  if(ordered[0].preferred_start>1.2)throw new Error('SOCIAL_HOOK_TOO_LATE');
+  const rawVoices=[];let words=0;for(let i=0;i<ordered.length;i++){const b=ordered[i];if(b.preferred_start<0||b.preferred_start>=visualDuration-.4)throw new Error(`SOCIAL_NARRATION_START_INVALID:${i+1}`);const file=await piperBlock(b.text,temp,voiceId,i),duration=await probeDuration(file);words+=b.text.split(/\s+/).filter(Boolean).length;rawVoices.push({...b,file,duration})}
+  const preferredStarts=rawVoices.map(v=>v.preferred_start),rawDurations=rawVoices.map(v=>v.duration),speedup=chooseSpeedupForTimeline(rawDurations,visualDuration,preferredStarts),voices=[];let totalVoiceSec=0,maxSpeedup=1;
+  for(let i=0;i<rawVoices.length;i++){const fit=await compressBlock(rawVoices[i].file,speedup,temp,i);maxSpeedup=Math.max(maxSpeedup,fit.speedup);totalVoiceSec+=fit.duration;voices.push({...rawVoices[i],file:fit.file,duration:fit.duration})}
+  const timeline=planCreativeVoiceTimelineV1({durations_sec:voices.map(v=>v.duration),total_sec:visualDuration,preferred_starts_sec:preferredStarts,max_gap_sec:2.4,hook_deadline_sec:1.2});
+  for(let i=0;i<voices.length;i++)voices[i].start=timeline.starts_sec[i];
+  const maxGap=timeline.max_gap_sec;
   let cursor=0;const sceneStarts=[];for(let i=0;i<sceneList.length;i++){sceneStarts.push(cursor);cursor+=Math.max(1,Number(sceneList[i].duration_sec||sceneList[i].duration||3));if(i<sceneList.length-1)cursor-=transitionOverlapSec}
   const music=await socialMusic(visualDuration,temp),sfx=await socialSfx(visualDuration,sceneStarts,temp),sfxPeak=await peakDb(sfx),out=path.join(temp,`social-master-v4-${path.basename(videoFile)}`);
   const args=['-hide_banner','-loglevel','error','-i',videoFile];for(const v of voices)args.push('-i',v.file);const musicIndex=1+voices.length,sfxIndex=musicIndex+1;args.push('-i',music,'-i',sfx);
@@ -57,7 +67,7 @@ export async function masterCreativeSocialAudioV4({videoFile,narrationBlocks,sce
   fc+=`${voices.map((_,i)=>`[v${i}]`).join('')}amix=inputs=${voices.length}:duration=longest:normalize=0,volume=1.02,asplit=2[voice_sc][voice_mix];[${musicIndex}:a][voice_sc]sidechaincompress=threshold=.010:ratio=10:attack=8:release=180[duck];[duck]volume=.58[music];[${sfxIndex}:a]volume=1.0[sfx];[voice_mix][music][sfx]amix=inputs=3:duration=longest:normalize=0,alimiter=limit=.95,apad=pad_dur=${visualDuration},atrim=duration=${visualDuration}[a]`;
   args.push('-filter_complex',fc,'-map','0:v:0','-map','[a]','-c:v','copy','-c:a','aac','-b:a','192k','-t',String(visualDuration),'-movflags','+faststart','-y',out);await execFileAsync('ffmpeg',args,{maxBuffer:48*1024*1024});
   const audioDuration=await probeAudioDuration(out),coverage=Math.min(1,audioDuration/visualDuration),voiceCoverage=Math.min(1,totalVoiceSec/visualDuration),wpm=totalVoiceSec>0?words/totalVoiceSec*60:0;
-  return {file:out,evidence:{audio_master_version:'V4_SOCIAL',audio_duration_sec:Number(audioDuration.toFixed(3)),video_duration_sec:Number(visualDuration.toFixed(3)),audio_coverage_ratio:Number(coverage.toFixed(3)),voice_block_count:voices.length,voice_seconds_total:Number(totalVoiceSec.toFixed(3)),voice_coverage_ratio:Number(voiceCoverage.toFixed(3)),max_voice_gap_sec:Number(maxGap.toFixed(3)),voice_wpm:Number(wpm.toFixed(1)),max_voice_speedup:Number(maxSpeedup.toFixed(3)),sfx_event_count:sceneStarts.length,sfx_peak_db:Number(sfxPeak.toFixed(2)),music_full_length:true,continuous_narration:true,voice_style:'SOCIAL_ENERGETIC',scene_locked_narration:false}};
+  return {file:out,evidence:{audio_master_version:'V4_SOCIAL_TIMELINE_PLANNED',voice_timeline_planner_version:'V1',audio_duration_sec:Number(audioDuration.toFixed(3)),video_duration_sec:Number(visualDuration.toFixed(3)),audio_coverage_ratio:Number(coverage.toFixed(3)),voice_block_count:voices.length,voice_seconds_total:Number(totalVoiceSec.toFixed(3)),voice_coverage_ratio:Number(voiceCoverage.toFixed(3)),max_voice_gap_sec:Number(maxGap.toFixed(3)),voice_wpm:Number(wpm.toFixed(1)),max_voice_speedup:Number(maxSpeedup.toFixed(3)),voice_planned_starts_sec:timeline.starts_sec,voice_planned_gaps_sec:timeline.gaps_sec,cta_voice_start_sec:timeline.cta_start_sec,cta_voice_end_sec:timeline.cta_end_sec,sfx_event_count:sceneStarts.length,sfx_peak_db:Number(sfxPeak.toFixed(2)),music_full_length:true,continuous_narration:true,voice_style:'SOCIAL_ENERGETIC',scene_locked_narration:false}};
 }
 
-export const CREATIVE_SOCIAL_AUDIO_V4_CONTRACT=Object.freeze({schema_version:'4.0.1',owner_engine:'SOC-001',continuous_narration:true,scene_locked_narration:false,energetic_piper_profile:true,max_voice_speedup:1.12,full_length_music:true,audible_transition_sfx:true,ducking:true,hook_deadline_sec:1.2,publish_authorized:false,additional_cost_eur:0});
+export const CREATIVE_SOCIAL_AUDIO_V4_CONTRACT=Object.freeze({schema_version:'4.1.0',owner_engine:'SOC-001',continuous_narration:true,scene_locked_narration:false,energetic_piper_profile:true,measures_real_tts_before_timeline:true,voice_timeline_planner:'CREATIVE-VOICE-TIMELINE-PLANNER-V1',max_voice_gap_sec:2.4,max_voice_speedup:1.12,full_length_music:true,audible_transition_sfx:true,ducking:true,hook_deadline_sec:1.2,publish_authorized:false,additional_cost_eur:0});
