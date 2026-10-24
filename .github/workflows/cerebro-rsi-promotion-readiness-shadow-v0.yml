@@ -227,7 +227,8 @@ jobs:
           deny='supabase/migrations/20261024103200_cerebro_creative_job_v1_explicit_deny_policy.sql'
           rollback='supabase/migrations/rollback/20261024103000_cerebro_creative_job_v1.rollback.sql'
           runner='cerebro/runtime/creative-job-runner-v1.mjs'
-          for file in "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner"; do test -f "$file"; done
+          worker='.github/workflows/cerebro-creative-job-runner-v1.yml'
+          for file in "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner" "$worker"; do test -f "$file"; done
           grep -F 'const GITHUB_AUDIENCE="cerebro-creative-worker-v1"' "$edge"
           grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
           grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-creative-job-runner-v1.yml"' "$edge"
@@ -247,10 +248,20 @@ jobs:
           grep -F 'revoke all on table public.cerebro_creative_job_v1 from service_role' "$rollback"
           ! grep -Eqi '\b(drop|truncate|delete[[:space:]]+from)\b' "$rollback"
           grep -F 'heavy_render_outside_supabase:true' "$runner"
+          grep -F "neural_voice_provider:'PIPER'" "$runner"
+          grep -F 'procedural_music:true' "$runner"
+          grep -F 'long_video_max_seconds:180' "$runner"
+          grep -F "const PHOTO_HOSTS=new Set(['fenixcapital.es','www.fenixcapital.es','staging.fenixcapital.es'])" "$runner"
+          grep -F "const VISUAL_STYLES=new Set(['EDITORIAL','PHOTO','DATA'])" "$runner"
+          grep -F "const VOICE_IDS=new Map([['ES_MALE',0],['ES_FEMALE',1]])" "$runner"
+          grep -F "PIPER_RELEASE: '2023.11.14-2'" "$worker"
+          grep -F "PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'" "$worker"
+          grep -F 'contents: read' "$worker"
+          grep -F 'id-token: write' "$worker"
           grep -F 'publish_authorized:false' "$runner"
           grep -F 'additional_cost_eur:0' "$runner"
-          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner"
-          echo 'Creative Pipeline is company-scoped, OIDC-bound, service-role-only, non-publishing, external-rendered, zero-cost and has a non-destructive fail-closed rollback.' >> "$GITHUB_STEP_SUMMARY"
+          ! grep -R -E 'ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]+' "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner" "$worker"
+          echo 'Creative Pipeline is company-scoped, OIDC-bound, service-role-only, non-publishing, external-rendered and zero-cost. AV extension is bounded to pinned Piper neural voice, generated procedural music, owned Fenix photo hosts and <=180 second long video.' >> "$GITHUB_STEP_SUMMARY"
       - name: Creative PROD physical-evidence contract
         shell: bash
         run: |
