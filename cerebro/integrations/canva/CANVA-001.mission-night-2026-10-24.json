@@ -1,0 +1,25 @@
+{
+  "mission_id": "FACEBOOK-CANVA-CREATIVE-NIGHT-2026-10-24",
+  "capability_id": "CREATIVE-CANVA-V1",
+  "origin_engine_id": "SOC-001",
+  "department_id": "social-facebook",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "v1",
+  "status": "READY_AFTER_SHARED_CANVA_OAUTH",
+  "objective": "Have the Facebook department use the shared Canva capability to produce a broad, high-quality creative baseline while preserving existing Canva content and publishing nothing outside Canva.",
+  "execution_mode": "ITERATIVE_BATCHES_WITH_QA",
+  "batch_plan": [
+    {"batch":1,"name":"Inventory and structure","actions":["inventory authorized folders/designs/brand kits/templates","identify Capital brand kit and reusable assets","reuse or create dedicated Facebook creative workspace without deleting existing content","record baseline"]},
+    {"batch":2,"name":"Reusable masters","actions":["create reusable layout systems","create post/story/reel-cover/carousel/testimonial/FAQ/comparison/educational masters","create clearly distinct variants"]},
+    {"batch":3,"name":"Static production","targets":{"social_posts":12,"carousel_concepts":6,"stories":12,"reel_covers":8,"thumbnails":6}},
+    {"batch":4,"name":"Image experimentation","targets":{"generated_image_concepts":12,"background_or_cutout_variants":6,"professional_lifestyle_concepts":6}},
+    {"batch":5,"name":"Video and motion drafts","targets":{"short_video_drafts":6,"animated_story_or_post_variants":6},"actions":["hook-first vertical concepts","captions and on-screen text where useful","test pacing transitions and motion","leave drafts in Canva"]},
+    {"batch":6,"name":"Platform adaptation","actions":["adapt strongest concepts for Facebook first","prepare reusable variants for Instagram LinkedIn TikTok YouTube and web","do not treat resize alone as native adaptation"]},
+    {"batch":7,"name":"QA and handoff","actions":["deduplicate low-value variants","keep useful experiments","mark strongest candidates READY_FOR_REVIEW","record hypothesis tested by each variant","produce inventory and next experiments"]}
+  ],
+  "quality_gates": ["brand_consistency","mobile_legibility","visual_hierarchy","platform_format","accessibility","license_and_commercial_use","no_unapproved_claims","editable_master_preserved","no_external_publish"],
+  "cost_policy": {"additional_cost_eur":0,"canva_paid_plan_features":"ALLOWED_WHEN_ALREADY_INCLUDED","ai_credit_usage":"ALLOWED_WITHIN_EXISTING_PLAN_ALLOWANCE","extra_purchase":"MONEY_LIMIT"},
+  "required_start_gate": "CREATIVE_CANVA_V1_OAUTH_CONNECTED_AND_SOC001_BINDING_GREEN",
+  "publish_permission": false
+}

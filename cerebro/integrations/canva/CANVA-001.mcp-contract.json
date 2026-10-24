@@ -1,0 +1,56 @@
+{
+  "schema_version": "2.0.0",
+  "capability_id": "CREATIVE-CANVA-V1",
+  "transport": "MCP_REMOTE",
+  "server_url": "https://api.canva.com/connect/v1/mcp",
+  "allowed_response_domains": ["canva.com", "canva.ai"],
+  "authentication": {
+    "type": "OAUTH_PER_USER_OR_COMPANY_ACCOUNT",
+    "application_credentials": {
+      "client_id_secret_ref": "vault://cerebro.canva.mcp.client_id.v1",
+      "client_secret_secret_ref": "vault://cerebro.canva.mcp.client_secret.v1"
+    },
+    "connection_secret_pattern": "vault://cerebro.canva.{company_id}.{identity_id}.{account_id}.oauth.v1",
+    "plaintext_tokens_in_jobs": false,
+    "plaintext_tokens_in_git": false,
+    "plaintext_tokens_in_logs": false,
+    "refresh_rotation_required": true,
+    "revoke_supported": true
+  },
+  "binding_requirements": {
+    "company_id": true,
+    "engine_id": true,
+    "environment": true,
+    "version": true,
+    "identity_id": true,
+    "account_id": true,
+    "allowed_operations": true,
+    "cross_company_access": "DENY"
+  },
+  "runtime_policy": {
+    "discover_tools_at_connection_time": true,
+    "hardcode_remote_tool_catalog": false,
+    "default_timeout_seconds": 60,
+    "retry": {
+      "max_attempts": 3,
+      "retry_on": ["temporarily_unavailable", "rate_limited", "timeout"],
+      "do_not_retry_on": ["permission_denied", "missing_scope", "invalid_grant", "security_incident"]
+    },
+    "rate_limit_policy": "HONOR_PROVIDER_TOOL_LIMITS_AND_BACKOFF",
+    "incremental_cost_eur": 0,
+    "paid_plan_features_allowed_when_included": true,
+    "extra_credit_purchase": "MONEY_LIMIT",
+    "anti_bot_or_security_bypass": false
+  },
+  "required_tool_classes": [
+    "design_search", "design_generation", "design_creation", "design_editing", "image_generation",
+    "assets", "folders", "brand_kits", "brand_templates", "resize", "export"
+  ],
+  "first_connection_checks": [
+    "oauth_authenticated", "tools_list_success", "user_identity_confirmed", "search_designs_success",
+    "search_folders_success", "list_brand_kits_success", "capital_brand_kit_detected_or_recorded_absent",
+    "create_test_folder_success", "create_test_design_success", "generate_test_image_success",
+    "edit_transaction_success", "export_test_success", "revoke_and_reconnect_runbook_proven"
+  ],
+  "state": "BLOCKED_PENDING_CANVA_APP_AND_USER_OAUTH"
+}
