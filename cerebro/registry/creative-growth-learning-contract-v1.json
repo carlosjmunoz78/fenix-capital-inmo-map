@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "owner_engine": "SOC-001",
+  "creative_source": "CREATIVE-STUDIO-001",
+  "learning_owner": "LRN-001",
+  "status": "DEFINED_NOT_ACTIVE",
+  "activation_gate": "NATIVE_CHANNEL_PREPROD_GREEN",
+  "publication_authority": false,
+  "paid_media_authority": false,
+  "additional_cost_eur": 0,
+  "objective": "Scale winning creative ideas across native channels while optimizing for qualified business outcomes rather than vanity metrics.",
+  "experiment_unit": {
+    "campaign_bible_locked": true,
+    "cast_bible_locked": true,
+    "variables_allowed": ["HOOK", "OPENING_SHOT", "EDIT_PACE", "CAPTION_OPEN", "CTA", "THUMBNAIL", "TITLE", "NATIVE_FORMAT"],
+    "variables_forbidden": ["UNSUPPORTED_FINANCIAL_PROMISE", "PROTECTED_TRAIT_FINANCIAL_TARGETING", "FAKE_URGENCY", "FAKE_TESTIMONIAL", "FAKE_METRIC", "CROSS_CHANNEL_PIXEL_COPY"]
+  },
+  "metrics": {
+    "attention": ["ONE_SECOND_HOLD", "THREE_SECOND_HOLD", "WATCH_THROUGH", "AVERAGE_WATCH_TIME", "REWATCH"],
+    "engagement_quality": ["SAVE", "SHARE", "COMMENT_QUALITY", "PROFILE_VISIT", "DM_INITIATED"],
+    "conversion": ["LANDING_VISIT", "FORM_START", "LEAD", "QUALIFIED_LEAD", "PRE_OK_START", "APPOINTMENT"],
+    "business": ["SIGNED_SERVICE", "MORTGAGE_SIGNED", "PARTNER_OPPORTUNITY", "REVENUE_ATTRIBUTED"],
+    "negative": ["HIDE", "REPORT", "UNSUBSCRIBE", "BOUNCE", "LOW_QUALITY_LEAD", "COMPLAINT"]
+  },
+  "decision_policy": {
+    "minimum_real_evidence_required": true,
+    "synthetic_metrics_forbidden": true,
+    "promote_on_single_metric_forbidden": true,
+    "business_outcome_weight_high": true,
+    "negative_signal_penalty": true,
+    "channel_specific_benchmarks_required": true,
+    "winner_must_survive_holdout": true,
+    "creative_fatigue_detection_required": true,
+    "rollback_on_quality_or_reputation_regression": true
+  },
+  "loop": ["PUBLISH_AUTHORIZED_VARIANT", "OBSERVE", "NORMALIZE_BY_CHANNEL", "ATTRIBUTE", "COMPARE", "LEARN", "PROPOSE_REWORK", "PREPROD_TEST", "PROMOTE_OR_ROLLBACK"],
+  "governance": {
+    "organic_first": true,
+    "paid_spend_requires_money_limit": true,
+    "no_autonomous_publication_before_channel_gate": true,
+    "human_exception_codes_unchanged": true,
+    "prod_activation": false
+  }
+}
