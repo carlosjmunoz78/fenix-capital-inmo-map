@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-SHARED-CREATIVE-CAPABILITIES-V1",
+  "status": "PREPROD_SHARED_ROUTING_DEFINED",
+  "company_scope": "MULTICOMPANY_BY_COMPANY_ID",
+  "owner_engine": "FACT-001",
+  "capability_family": "DIGITAL_BUILD_CREATIVE",
+  "environment": "PREPROD",
+  "version": "v1",
+  "purpose": "Expose one governed creative layer to every authorised CEREBRO engine instead of rebuilding Canva, image, video, editing, voice or composition per channel.",
+  "reuse_policy": {
+    "new_engine_required": false,
+    "reuse_existing_multimedia_factory": true,
+    "preserve_existing_social_provider_paths": true,
+    "consumer_binding": "ANY_REGISTERED_ENGINE_WITH_COMPANY_ENVIRONMENT_PERMISSION",
+    "cross_company_access": "DENY_BY_DEFAULT"
+  },
+  "shared_capabilities": {
+    "CANVA_DESIGN": {
+      "route": "CANVA_REMOTE_MCP",
+      "provider_status": "PENDING_INITIAL_CANVA_OAUTH",
+      "intended_tasks": [
+        "SOCIAL_POST_DESIGN",
+        "CAROUSEL_DESIGN",
+        "STORY_DESIGN",
+        "REEL_COVER_DESIGN",
+        "THUMBNAIL_DESIGN",
+        "SEO_INFOGRAPHIC",
+        "BLOG_VISUAL",
+        "LANDING_VISUAL",
+        "EMAIL_VISUAL",
+        "DOCUMENT_VISUAL",
+        "PRESENTATION_VISUAL",
+        "AD_CREATIVE"
+      ],
+      "external_publish_authority": false
+    },
+    "MULTIMEDIA_FACTORY": {
+      "capability_id": "DIGITAL-BUILD-MULTIMEDIA",
+      "runtime": "cerebro/digital-build/multimedia-factory-runtime-v0.mjs",
+      "tasks": [
+        "IMAGE_GENERATION",
+        "VOICE_SYNTHESIS",
+        "VIDEO_GENERATION",
+        "VIDEO_EDITING",
+        "VIDEO_UNDERSTANDING",
+        "MEDIA_COMPOSITION",
+        "EXPLAINER_VIDEO",
+        "VISUAL_WORKFLOW"
+      ],
+      "known_adapter_families": [
+        "COMFYUI",
+        "Z_IMAGE_TURBO",
+        "QWEN3_TTS",
+        "HYPERFRAMES",
+        "PROCEDURAL_FILM",
+        "OPENMONTAGE",
+        "LTX_VIDEO",
+        "WATCH",
+        "FFMPEG"
+      ],
+      "external_publish_authority": false
+    }
+  },
+  "authorised_consumer_classes": [
+    "SOCIAL_NETWORKS",
+    "SEO",
+    "MARKETING",
+    "WEB_FACTORY",
+    "APP_FACTORY",
+    "EMAIL",
+    "DOCUMENTS",
+    "SALES",
+    "TRAINING",
+    "CUSTOMER_COMMUNICATION",
+    "OTHER_REGISTERED_ENGINE"
+  ],
+  "request_contract": {
+    "required": [
+      "request_id",
+      "company_id",
+      "requester_engine_id",
+      "environment",
+      "creative_task_type",
+      "asset_ref"
+    ],
+    "brand_context_optional": true,
+    "channel_context_optional": true,
+    "requested_provider_optional": true
+  },
+  "routing_policy": {
+    "deterministic_or_existing_tool_first": true,
+    "existing_paid_subscription_before_new_spend": true,
+    "zero_additional_cost_target_eur": 0,
+    "canva_when_design_surface_is_best_fit": true,
+    "multimedia_factory_when_generation_or_editing_is_best_fit": true,
+    "ffmpeg_preferred_for_deterministic_media_composition_when_sufficient": true,
+    "provider_fallback_allowed": true,
+    "new_purchase_requires": "MONEY_LIMIT"
+  },
+  "governance": {
+    "brand_rules_required_when_available": true,
+    "qa_required": true,
+    "license_check_required": true,
+    "accessibility_check_required_when_applicable": true,
+    "provenance_required": true,
+    "audit_required": true,
+    "idempotency_required": true,
+    "raw_secrets_in_request": false,
+    "raw_credentials_in_request": false,
+    "provider_side_effect_authorized": false,
+    "external_publication_authorized": false,
+    "prod_write_authorized": false
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "rollout": {
+    "phase_1": "Shared PREPROD routing and tests for multiple requester engines",
+    "phase_2": "Bind Canva official OAuth/MCP once the one-time provider grant is valid",
+    "phase_3": "Bind physically verified video/image/audio adapters behind the same contract",
+    "phase_4": "OLD_vs_NEW per consumer before replacing any existing channel-specific workflow",
+    "phase_5": "Gradual promotion with rollback while existing provider paths remain available"
+  },
+  "runtime_truth": "This contract makes Canva and multimedia capabilities shared CEREBRO resources at the routing/governance layer. It does not claim that Canva OAuth or every multimedia adapter is physically operational yet, and it grants no automatic publication authority."
+}
