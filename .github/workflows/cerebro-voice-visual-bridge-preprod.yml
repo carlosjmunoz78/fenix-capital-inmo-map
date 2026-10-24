@@ -1,0 +1,63 @@
+name: CEREBRO VOICE-001 Visual Bridge PREPROD
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/CerebroVisualVoiceEventBridge.tsx'
+      - 'src/main.tsx'
+      - 'tests/voice-visual-event-bridge.spec.ts'
+      - '.github/workflows/cerebro-voice-visual-bridge-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  EXACT_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  voice-visual-bridge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_HEAD }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert exact PR head and observe-only boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_HEAD"
+          grep -F "authority:'OBSERVE_ONLY'" src/CerebroVisualVoiceEventBridge.tsx >/dev/null
+          grep -F "prod_authorized:false" src/CerebroVisualVoiceEventBridge.tsx >/dev/null
+          grep -F "CerebroVisualVoiceEventBridge" src/main.tsx >/dev/null
+          ! grep -E 'fetch\(|supabase|postCerebro|execute|write|insert|update|delete' src/CerebroVisualVoiceEventBridge.tsx
+          echo 'VOICE_VISUAL_BRIDGE_AUTHORITY=OBSERVE_ONLY'
+          echo 'PROD_AUTHORIZED=false'
+      - name: Install dependencies reproducibly
+        run: npm ci
+      - name: Build exact head
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Prove canonical Console voice emits visual semantic events
+        run: npx playwright test tests/voice-visual-event-bridge.spec.ts --project=desktop-chromium --reporter=list
+      - name: Classify gate
+        run: |
+          echo 'VOICE_001_VISUAL_EVENT_BRIDGE=GREEN_PREPROD'
+          echo 'AUTHORITY=OBSERVE_ONLY'
+          echo 'VOICE_BACKEND_CHANGED=false'
+          echo 'ACTION_AUTHORITY_CHANGED=false'
+          echo 'PROD_AUTHORIZED=false'
+          echo 'ADDITIONAL_COST_EUR=0'
