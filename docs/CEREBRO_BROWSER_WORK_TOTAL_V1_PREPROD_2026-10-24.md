@@ -1,54 +1,62 @@
 # CEREBRO Browser Work Total V1 · PREPROD · 2026-10-24
 
-## Estado
+## Estado ejecutivo
 
-- HECHO: rama aislada `feat/browser-work-total-v1-20261024`, creada sobre la UX realtime de PR #919 (`565898a669bb61472471a54c7863fb5338185e11`).
-- HECHO: runtime combinado `BROWSER_INTERACTIVE_V3_CONTRACT.schema_version=3.5.0` con realtime adaptativo + persistencia cifrada + hibernación inmediata.
-- HECHO: tests de bundle cifrado, contratos Work Total, syntax check y `npm run build` verdes en GitHub Actions.
-- HECHO: funciones Work Total aisladas desplegadas en PREPROD; V0/V1 anteriores permanecen intactas como rollback.
-- HECHO: dos ciclos físicos consecutivos Work Total → hibernar → worker nuevo → restaurar → continuar → hibernar.
-- HECHO: owner API PREPROD versión 2 expone perfiles, start/status, hibernate, takeover, handback, input cifrado, stop, confirm-account, forget-session y key.
-- HECHO: coste incremental contractual `0 EUR`; no se añadió SaaS de pago ni IA obligatoria.
-- HECHO: PROD no modificado por este bloque. Trading no tocado.
-- PARCIAL: perfil Google principal definido como metadata PREPROD, pero todavía requiere primera vinculación humana legítima si Google pide login/MFA.
-- PARCIAL: selector visual de perfil/cuenta todavía no está promovido en la App PROD; debe entrar por gateway/feature flag tras PREPROD UI, nunca conectando PROD directamente al owner PREPROD.
-- NO PROMOVIDO: Work Total V1 no está en PROD.
+- **HECHO**: rama aislada `feat/browser-work-total-v1-20261024`, construida sobre la UX realtime de PR #919 (`565898a669bb61472471a54c7863fb5338185e11`).
+- **HECHO**: runtime combinado `BROWSER_INTERACTIVE_V3_CONTRACT.schema_version=3.5.0`: realtime adaptativo + frame inmediato + persistencia cifrada + hibernación inmediata + restauración entre workers.
+- **HECHO**: bundles AES-256-GCM, SHA-256, storage state con IndexedDB y pestañas cifradas; `virtual_webauthn_credentials=false` y raw secret logging desactivado.
+- **HECHO**: tests de bundle, contratos Work Total, syntax check y `npm run build` verdes.
+- **HECHO**: cuatro funciones Work Total aisladas desplegadas en PREPROD; V0/V1 anteriores permanecen intactas como rollback.
+- **HECHO**: tres workers Work Total distintos han restaurado físicamente el workspace. Dos ciclos finalizaron en hibernación y un tercero certificó takeover → handback → AI resume → emergency stop.
+- **HECHO**: emergency stop cerró sin guardar un bundle nuevo; el bundle activo previo quedó intacto.
+- **HECHO**: owner API PREPROD versión 2 expone profiles, start, status, hibernate, takeover, handback, input cifrado, stop, confirm-account, forget-session y key.
+- **HECHO**: coste incremental contractual `0 EUR`; no se añadió SaaS de pago ni IA obligatoria.
+- **HECHO**: PROD no modificado por este bloque. Trading no tocado.
+- **PARCIAL**: perfil Google principal está definido como metadata PREPROD, pero la primera vinculación física legítima puede requerir login/MFA humano.
+- **PARCIAL**: selector visual de perfil/cuenta debe integrarse y certificarse en App/Gateway PREPROD antes de promoción; no conectar un token PROD directamente al owner PREPROD.
+- **NO PROMOVIDO**: Work Total V1 no está en PROD.
 
-## Rama y CI
+Estado correcto actual:
+
+`PREPROD_WORK_TOTAL_TECHNICAL_CORE_GREEN`
+
+No declarar todavía `CONFIRMED_OPERATIONAL_PROD`.
+
+## Rama, PR y CI
 
 Rama:
 
 `feat/browser-work-total-v1-20261024`
 
-Commit CI certificado:
+PR final de integración:
 
-`6ed1900daf40d992d51ac6b5e164ee2f5ece5c2c`
+`#921 · Browser Work Total V1: realtime + persistent workspace`
+
+Base:
+
+`fix/browser-realtime-workmode-20261024` / PR #919
+
+PR #921 fue recalculada por GitHub como `mergeable=true`. La integración tentativa #920 fue marcada como supersedida y cerrada.
 
 Workflow:
 
 `.github/workflows/cerebro-browser-work-total-v1-preprod.yml`
 
-Run 1:
+Commit CI base certificado:
 
-`40138818495`
+`6ed1900daf40d992d51ac6b5e164ee2f5ece5c2c`
 
-- Validate Work Total contracts and build: SUCCESS.
-- Watch PREPROD Work Total queue: SUCCESS.
-- Browser Work Total V1 governed worker: SUCCESS.
-- Rearm PREPROD Work Total consumer: SUCCESS.
+Runs físicos:
 
-Run 2:
+- `40138818495` — SUCCESS.
+- `40139153077` — SUCCESS.
+- `40139415277` — SUCCESS; incluye no-regresión de control y emergency stop.
 
-`40139153077`
-
-- Validate Work Total contracts and build: SUCCESS.
-- Watch PREPROD Work Total queue: SUCCESS.
-- Browser Work Total V1 governed worker: SUCCESS.
-- Rearm PREPROD Work Total consumer: SUCCESS.
+En cada ejecución validada se ejecutaron los gates aplicables de tests de bundle, contratos Work Total, syntax y build antes del worker.
 
 ## Runtime 3.5.0
 
-Combina sin eliminar comportamiento existente:
+Conserva el comportamiento realtime de #919 y lo envuelve con Workspace V1:
 
 - polling interactivo ≈ 90 ms;
 - frames activos ≈ 320 ms;
@@ -60,13 +68,14 @@ Combina sin eliminar comportamiento existente:
 - máximo físico de 8 tabs;
 - hibernación inmediata por `HIBERNATE_PENDING`;
 - restauración en worker nuevo;
-- verificación Google fail-closed;
+- takeover/handback gobernados;
+- Google identity verification fail-closed;
 - `workspace_prod_enabled=false`;
 - `incremental_cost_eur=0`.
 
 ## Funciones PREPROD aisladas
 
-Proyecto PREPROD:
+Proyecto:
 
 `hnqlnvakzaywtafeiybt`
 
@@ -75,17 +84,17 @@ Funciones nuevas:
 1. `cerebro-browser-work-total-dispatch-v1-preprod`
 2. `cerebro-browser-work-total-worker-v1-preprod`
 3. `cerebro-browser-work-total-v1-preprod`
-4. `cerebro-browser-work-total-owner-v1-preprod` — owner desplegado versión 2 tras cerrar paridad de rutas.
+4. `cerebro-browser-work-total-owner-v1-preprod` — ACTIVE versión 2
 
-OIDC restringido a:
+OIDC del worker restringido a:
 
 - repo `carlosjmunoz78/fenix-capital-inmo-map`;
 - rama `refs/heads/feat/browser-work-total-v1-20261024`;
 - workflow `.github/workflows/cerebro-browser-work-total-v1-preprod.yml`.
 
-No usa `main` como identidad de worker Work Total.
+No usa `main` como identidad del worker Work Total.
 
-## Cadena de bundles y workers
+## Cadena física de persistencia
 
 Bundle heredado de Workspace V1:
 
@@ -101,23 +110,21 @@ Worker:
 
 `github-work-total-v1-preprod:40138818495:1`
 
-Evidencia viva:
+Evidencia:
 
-- `SESSION_RESUMED` desde bundle `668684f8-2c4f-43f8-9b4e-b5610096bc44`;
+- `SESSION_RESUMED` desde `668684f8…`;
 - `PROFILE_LEASE_ACQUIRED`;
 - `CEREBRO_CONTROLLED`;
 - URL física `https://fenixcapital.es/`;
 - título `Hipotecas en Córdoba: estudio 24 h | Fénix Capital`;
 - `frame_seq=6` al cierre;
-- solicitud de hibernación procesada en segundos;
+- hibernación inmediata;
 - `SESSION_HIBERNATED`;
 - nuevo bundle `9ca0036d-1f59-459a-8426-d7752d3be051`;
 - `LEASE_RELEASED`;
 - job `SUCCEEDED`;
 - sesión `HIBERNATED`;
-- `worker_alive=false`;
-- `secret_material_logged=false`;
-- `credential_materialized=false`.
+- `worker_alive=false`.
 
 ### E2E Work Total 2
 
@@ -129,15 +136,14 @@ Worker distinto:
 
 `github-work-total-v1-preprod:40139153077:1`
 
-Evidencia viva:
+Evidencia:
 
-- `SESSION_RESUMED` específicamente desde bundle Work Total `9ca0036d-1f59-459a-8426-d7752d3be051`;
+- restauró exactamente `9ca0036d…`;
 - `PROFILE_LEASE_ACQUIRED` con worker nuevo;
-- URL física `https://fenixcapital.es/`;
-- título real de Fénix;
-- `frame_seq=15` al cierre;
+- URL/título reales de Fénix;
+- `frame_seq=15`;
 - `SESSION_HIBERNATED`;
-- bundle sucesor `b21eceef-82fe-4496-ac30-0b218c42e585`;
+- nuevo bundle `b21eceef-82fe-4496-ac30-0b218c42e585`;
 - `LEASE_RELEASED`;
 - job `SUCCEEDED`;
 - sesión `HIBERNATED`;
@@ -147,9 +153,40 @@ Cadena demostrada:
 
 `668684f8… → worker 40138818495 → 9ca0036d… → worker 40139153077 → b21eceef…`
 
-El bundle activo resultante es:
+## E2E Work Total 3 · control humano y parada segura
+
+Session/job:
+
+`eaccf605-0e59-46cd-9753-71da9148c093`
+
+Worker tercero:
+
+`github-work-total-v1-preprod:40139415277:1`
+
+Restauró exactamente el bundle activo:
 
 `b21eceef-82fe-4496-ac30-0b218c42e585`
+
+Evidencia de control:
+
+1. `SESSION_RESUMED` desde `b21eceef…`.
+2. `PROFILE_LEASE_ACQUIRED`.
+3. `CEREBRO_CONTROLLED` con URL/título reales y frames vivos.
+4. transición a `TAKEOVER_PENDING`.
+5. el worker creó un lease humano real y pasó a `HUMAN_CONTROLLED`.
+6. `HUMAN_TAKEOVER` + `CONTROL_CHANGED CEREBRO → HUMAN`.
+7. handback usando el lease vigente.
+8. `HUMAN_HANDBACK`.
+9. el propio worker emitió `AI_RESUME` con `snapshot_reconciled=true`.
+10. `CONTROL_CHANGED HUMAN → CEREBRO`.
+11. recuperó `CEREBRO_CONTROLLED`; siguió generando frames.
+12. se activó `EMERGENCY_STOP`.
+13. el worker liberó el lease y cerró la sesión.
+14. job final `SUCCEEDED`, sesión final `CLOSED`, `worker_alive=false`, `emergency_stop=true`, `frame_seq=21`.
+15. no existe `SESSION_HIBERNATED` en este tercer ciclo.
+16. no se creó bundle tras la parada; el bundle activo sigue siendo `b21eceef-82fe-4496-ac30-0b218c42e585`, con source session del E2E 2.
+
+Esto demuestra que la parada de emergencia no persiste un estado potencialmente peligroso.
 
 ## Identidad Google
 
@@ -160,52 +197,52 @@ Perfil PREPROD definido:
 - `provider=google`
 - `login_policy=HUMAN_LOGIN_REQUIRED`
 
-Reglas:
+Política:
 
-1. no se copia contraseña, OAuth token, cookie ni secreto de PROD;
-2. si Google pide login/MFA, HUMAN_REQUIRED;
-3. después del login, CEREBRO observa la cuenta y genera HMAC de identidad + hint enmascarado;
-4. la primera cuenta observada requiere confirmación humana;
+1. no copiar password, OAuth token, cookie ni secreto de PROD;
+2. login/MFA legítimo inicial, si Google lo solicita, es intervención humana;
+3. CEREBRO observa la cuenta y genera HMAC + hint enmascarado;
+4. primera cuenta observada requiere confirmación humana;
 5. reanudaciones posteriores deben coincidir con el HMAC esperado;
 6. mismatch → bloqueo de seguridad;
-7. reauth → HUMAN_REQUIRED;
+7. reauth → `HUMAN_REQUIRED / LOW_CONFIDENCE`;
 8. no bypass de MFA/CAPTCHA/antiabuse.
 
-## Seguridad y secretos
+## Seguridad
 
-- bundles cifrados con AES-256-GCM;
-- integridad SHA-256;
-- cuenta verificada por HMAC-SHA256;
-- raw secret logging desactivado;
-- `virtual_webauthn_credentials=false`;
-- ningún password se almacena en el catálogo de perfiles;
-- URLs observables se saneean fuera del ciphertext;
-- profile lease exclusivo evita uso simultáneo del mismo perfil;
+- AES-256-GCM para bundle;
+- SHA-256 de integridad;
+- HMAC-SHA256 para identidad de cuenta;
+- no password en catálogo de perfiles;
+- `secret_material_logged=false` en evidencia física;
+- `credential_materialized=false` en workers certificados;
+- URLs observables saneadas fuera del ciphertext;
+- profile lease exclusivo;
+- emergency stop probado sin save;
 - Trading access=false.
 
-## Rollback probado por arquitectura paralela
+## Rollback
 
 Rollback inmediato:
 
 1. dejar de invocar las cuatro funciones `cerebro-browser-work-total-*`;
 2. volver a Workspace V1 o Browser V3 PREPROD anterior;
-3. no promover esta rama;
-4. bundles/tablas aditivas pueden quedar inertes sin afectar Browser V3 PROD;
-5. PR #919 mantiene por separado la UX realtime;
+3. no promover #921;
+4. bundles/tablas son aditivos y pueden quedar inertes;
+5. #919 conserva por separado la UX realtime;
 6. PROD no depende de Work Total PREPROD.
 
 No se eliminó ni reemplazó V0/V1 para conseguir Work Total.
 
 ## Gates restantes antes de PROD autónomo
 
-1. vinculación física Google real con login humano si se solicita;
-2. confirmar cuenta y demostrar reanudación Google en worker distinto;
-3. mismatch/reauth test;
-4. takeover → input humano → handback → AI resume en candidato integrado;
-5. parada de emergencia y no-save peligroso;
-6. selector visual de perfil/cuenta en PREPROD App/Gateway;
-7. comparación OLD vs NEW de UI/latencia y no regresión;
-8. tribunal/promotion evidence final;
-9. rollout gradual con rollback probado.
+1. vinculación física de Google real con login humano solo si Google lo exige;
+2. confirmar identidad Google y demostrar reanudación en worker distinto;
+3. test físico de mismatch/reauth Google;
+4. selector visual de perfil/cuenta mediante App/Gateway PREPROD;
+5. input humano cifrado desde esa UI PREPROD (el lease/control backend ya está probado);
+6. comparación OLD vs NEW de UI/latencia y no regresión final;
+7. tribunal/promotion evidence final;
+8. rollout gradual y rollback final verificado.
 
-Hasta cerrar estos gates, estado correcto: `PREPROD_WORK_TOTAL_TECHNICAL_CORE_GREEN`, no `CONFIRMED_OPERATIONAL_PROD`.
+Hasta cerrar estos gates: `PREPROD_WORK_TOTAL_TECHNICAL_CORE_GREEN`.
