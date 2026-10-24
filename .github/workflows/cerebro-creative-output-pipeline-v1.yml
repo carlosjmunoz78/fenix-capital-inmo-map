@@ -36,3 +36,39 @@ jobs:
           if (!c.video_policy.deterministic_rendering || !c.video_policy.visual_identity_gate) process.exit(1);
           console.log('authority and deterministic render guards ok');
           NODE
+
+  physical-zero-cost-canary:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify local FFmpeg lane exists
+        run: |
+          command -v ffmpeg
+          command -v ffprobe
+          ffmpeg -version | head -n 1
+      - name: Generate deterministic SEO image and vertical reel canaries
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-creative-canary
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i "color=c=0x222222:s=1200x630:d=1" \
+            -frames:v 1 -y /tmp/cerebro-creative-canary/seo-image-1200x630.png
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i "color=c=0x870064:s=1080x1920:r=30:d=2" \
+            -f lavfi -i "sine=frequency=880:sample_rate=44100:duration=2" \
+            -shortest -c:v libx264 -pix_fmt yuv420p -c:a aac -movflags +faststart \
+            -y /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+      - name: Verify physical artifacts semantically
+        run: |
+          set -euo pipefail
+          test -s /tmp/cerebro-creative-canary/seo-image-1200x630.png
+          test -s /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /tmp/cerebro-creative-canary/seo-image-1200x630.png)" = "1200x630"
+          test "$(ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=s=x:p=0 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)" = "1080x1920"
+          test "$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_type -of default=nw=1:nk=1 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)" = "audio"
+          duration="$(ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 /tmp/cerebro-creative-canary/reel-1080x1920.mp4)"
+          awk -v d="$duration" 'BEGIN { if (d < 1.8 || d > 2.2) exit 1 }'
+          sha256sum /tmp/cerebro-creative-canary/seo-image-1200x630.png /tmp/cerebro-creative-canary/reel-1080x1920.mp4
+          echo "physical creative canary ok"
