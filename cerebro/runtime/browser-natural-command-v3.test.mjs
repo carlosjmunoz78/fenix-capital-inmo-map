@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
-import {parseBrowserCommand} from '../../src/cerebroBrowserCommand.ts';
+import {parseBrowserCommand} from '../../src/cerebroBrowserInteractive.ts';
 
 test('exact Carlos command becomes one governed Google results tab',()=>{
  const p=parseBrowserCommand('Abre una pestaña nueva, entra en https://www.google.es/, busca “Fénix Capital Córdoba” y deja los resultados abiertos.');
