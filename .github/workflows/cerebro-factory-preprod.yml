@@ -26,7 +26,7 @@ jobs:
       - name: Generate all engine skeletons
         working-directory: cerebro
         run: npm run generate -- --out /tmp/cerebro-generated
-      - name: Assert 177 generated engines and no repo mutation
+      - name: Assert 178 generated engines and no repo mutation
         run: |
-          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==177) process.exit(1);"
+          node -e "const x=require('/tmp/cerebro-generated/skeleton-index.json'); if(x.engine_count!==178) process.exit(1);"
           git diff --exit-code

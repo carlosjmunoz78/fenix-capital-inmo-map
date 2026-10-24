@@ -8,6 +8,7 @@ import { execFileSync } from 'node:child_process';
 const root = path.resolve(new URL('..', import.meta.url).pathname);
 const cli = path.join(root, 'factory.mjs');
 const registry = path.join(root, 'registry', 'engine-registry.seed.json');
+const legacy177 = path.join(root, 'evidence', 'registry-migrations', '2026-10-05', 'engine-registry.seed.177.snapshot.json');
 
 function run(out, registryFile=registry) {
   return execFileSync(process.execPath, [cli, 'generate', '--registry', registryFile, '--out', out], { encoding: 'utf8' });
@@ -15,11 +16,35 @@ function run(out, registryFile=registry) {
 function tempRegistry(mutator){const data=JSON.parse(fs.readFileSync(registry,'utf8'));mutator(data);const dir=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-registry-'));const file=path.join(dir,'registry.json');fs.writeFileSync(file,JSON.stringify(data),'utf8');return file;}
 function assertValidateFails(file,pattern){assert.throws(()=>execFileSync(process.execPath,[cli,'validate','--registry',file],{encoding:'utf8',stdio:'pipe'}),pattern);}
 
-test('registry seed contains exactly 177 unique canonical engine ids', () => {
+test('registry seed contains exactly 178 unique canonical engine ids', () => {
   const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
-  assert.equal(data.engine_ids.length, 177);
-  assert.equal(data.count, 177);
-  assert.equal(new Set(data.engine_ids).size, 177);
+  assert.equal(data.engine_ids.length, 178);
+  assert.equal(data.count, 178);
+  assert.equal(new Set(data.engine_ids).size, 178);
+});
+
+test('177 to 178 migration preserves every legacy engine and adds only BRANDBOOT-001', () => {
+  const before = JSON.parse(fs.readFileSync(legacy177, 'utf8'));
+  const after = JSON.parse(fs.readFileSync(registry, 'utf8'));
+  assert.equal(before.count, 177);
+  assert.equal(before.engine_ids.length, 177);
+  assert.equal(after.count, 178);
+  for (const id of before.engine_ids) assert.ok(after.engine_ids.includes(id), `legacy engine missing after migration: ${id}`);
+  const additions = after.engine_ids.filter(id => !before.engine_ids.includes(id));
+  assert.deepEqual(additions, ['BRANDBOOT-001']);
+  assert.equal(after.migrated_from_count, 177);
+  assert.equal(after.migration_id, 'REGISTRY-177-TO-178-BRANDBOOT-001-2026-10-05');
+});
+
+test('BRANDBOOT-001 canonical override stays safe and multi-company', () => {
+  const data = JSON.parse(fs.readFileSync(registry, 'utf8'));
+  const b = data.overrides['BRANDBOOT-001'];
+  assert.ok(b);
+  assert.equal(b.layer, 'L8');
+  assert.equal(b.company_scope, 'MULTI_COMPANY');
+  assert.notEqual(b.enabled, true);
+  assert.notEqual(b.autonomous_prod, true);
+  assert.notEqual(b.prod_writes, true);
 });
 
 test('registry defaults carry safe multi-company/version/scaffold fields', () => {
@@ -32,14 +57,14 @@ test('registry defaults carry safe multi-company/version/scaffold fields', () =>
 test('factory validates expanded registry successfully', () => {
   const output = execFileSync(process.execPath, [cli, 'validate', '--registry', registry], { encoding: 'utf8' });
   const result = JSON.parse(output);
-  assert.equal(result.engines, 177);
-  assert.equal(result.unique_ids, 177);
-  assert.equal(result.canonical_count,177);
+  assert.equal(result.engines, 178);
+  assert.equal(result.unique_ids, 178);
+  assert.equal(result.canonical_count,178);
   assert.equal(result.safe_scaffold,true);
 });
 
 test('GOV-001 rejects count drift duplicates and noncanonical override ids',()=>{
-  assertValidateFails(tempRegistry(x=>{x.engine_ids.pop();x.count=176}),/exactly 177 ids/);
+  assertValidateFails(tempRegistry(x=>{x.engine_ids.pop();x.count=177}),/exactly 178 ids/);
   assertValidateFails(tempRegistry(x=>{x.engine_ids[1]=x.engine_ids[0]}),/unique/);
   assertValidateFails(tempRegistry(x=>{x.overrides['FAKE-999']={name:'fake'}}),/noncanonical engine_id/);
 });
@@ -50,13 +75,29 @@ test('GOV-001 rejects PREPROD or PROD seed environments and unsafe autonomy flag
   assertValidateFails(tempRegistry(x=>{x.overrides['FACT-001']={...(x.overrides['FACT-001']??{}),autonomous_prod:true}}),/unsafe override autonomous_prod=true/);
 });
 
-test('factory generates all 177 skeletons with complete V0 file set', () => {
+test('factory generates all 178 skeletons with complete V0 file set', () => {
   const out = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-factory-'));
   run(out);
   const index = JSON.parse(fs.readFileSync(path.join(out, 'skeleton-index.json'), 'utf8'));
-  assert.equal(index.engine_count, 177);
+  assert.equal(index.engine_count, 178);
   assert.equal(index.template_file_count, 18);
   for (const e of index.engines) assert.equal(e.files, 18, e.engine_id);
+  assert.ok(index.engines.some(e => e.engine_id === 'BRANDBOOT-001'));
+});
+
+test('generated BRANDBOOT scaffold is disabled, deny-by-default and not autonomous PROD', () => {
+  const out = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-brandboot-safe-'));
+  run(out);
+  const base = path.join(out, 'engines', 'BRANDBOOT-001');
+  const manifest = JSON.parse(fs.readFileSync(path.join(base, 'manifest.json'), 'utf8'));
+  const config = JSON.parse(fs.readFileSync(path.join(base, 'config.json'), 'utf8'));
+  const permissions = JSON.parse(fs.readFileSync(path.join(base, 'permissions.json'), 'utf8'));
+  assert.equal(manifest.lifecycle, 'SCAFFOLD');
+  assert.equal(manifest.autonomous_prod, false);
+  assert.equal(manifest.company_scope, 'MULTI_COMPANY');
+  assert.equal(config.enabled, false);
+  assert.equal(permissions.default, 'deny');
+  assert.equal(permissions.cross_company_access, 'deny');
 });
 
 test('generated manifests default safe: scaffold, disabled/autonomy false, deny by default', () => {

@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 
-const CANONICAL_COUNT = 177;
+const CANONICAL_COUNT = 178;
 const REQUIRED_CONTEXT = ['company_id', 'engine_id', 'environment', 'version'];
 const HUMAN_REQUIRED = ['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
 const TEMPLATE_FILES = [
