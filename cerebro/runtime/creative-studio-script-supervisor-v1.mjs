@@ -11,8 +11,8 @@ export function superviseStudioScriptV1(production){
   if(output==='STORY_VIDEO'){
     blocks=[
       {start_sec:.05,text:`Te encanta. Y aparece: “${pressure}”.`},
-      {start_sec:3.35,text:'Freno. Mira primero si de verdad encaja contigo.'},
-      {start_sec:6.8,text:'¿Encaja? Genial. Ahora sí: vamos contigo. Escríbenos.'}
+      {start_sec:3.10,text:'Freno. Mira primero si de verdad encaja contigo.'},
+      {start_sec:6.35,text:'¿Encaja? Genial. Ahora sí: vamos contigo. Escríbenos.'}
     ];limits=[12,12,12];
   }else if(output==='REEL'||output==='SHORT_VIDEO'){
     blocks=[
@@ -34,7 +34,7 @@ export function superviseStudioScriptV1(production){
   assertBlocks(blocks,limits);
   const selected_plan={...plan,narration_blocks:blocks,script_supervised:true,voice_direction:'Conversational, smiling, quick reactions; one thought can travel across several cuts; never instructional or announcer-like.'};
   const production_passes=[...(Array.isArray(p.production_passes)?p.production_passes:[]),{id:'SCRIPT_SUPERVISOR',status:'GREEN_CANDIDATE',notes:'Format-specific copy fit and continuous narration spacing checked before voice synthesis.'}];
-  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(5,Number(p.iteration_count||0)),script_supervisor:{version:'v1.2',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,status:'GREEN_CANDIDATE'}});
+  return Object.freeze({...p,selected_plan,production_passes,iteration_count:Math.max(6,Number(p.iteration_count||0)),script_supervisor:{version:'v1.3',output_type:output,block_count:blocks.length,word_counts:blocks.map(x=>countWords(x.text)),starts:blocks.map(x=>x.start_sec),continuous_across_cuts:true,status:'GREEN_CANDIDATE'}});
 }
 
-export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.2.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,publication_authority:false,additional_cost_eur:0});
+export const CREATIVE_STUDIO_SCRIPT_SUPERVISOR_V1_CONTRACT=Object.freeze({schema_version:'1.3.0',owner_engine:'CREATIVE-STUDIO-001',format_aware:true,story_specific_copy:true,reel_specific_copy:true,long_form_specific_copy:true,pre_synthesis_fit_check:true,voice_direction:true,continuous_across_cuts:true,natural_timing_over_forced_speed:true,max_social_voice_gap_sec:2.4,publication_authority:false,additional_cost_eur:0});
