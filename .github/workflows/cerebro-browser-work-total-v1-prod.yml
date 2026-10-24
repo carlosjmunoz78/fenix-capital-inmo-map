@@ -22,7 +22,7 @@ permissions:
 
 concurrency:
   group: cerebro-browser-work-total-v1-prod-canary
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-prod
