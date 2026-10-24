@@ -83,8 +83,6 @@ jobs:
       matrix:
         slot: [1,2,3,4,5,6,7,8]
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
     timeout-minutes: 15
     env:
       CEREBRO_BROWSER_WORKER_SLOT: ${{ matrix.slot }}
@@ -96,6 +94,18 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Resolve browser runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v google-chrome >/dev/null 2>&1 || command -v google-chrome-stable >/dev/null 2>&1; then
+            echo 'CEREBRO_BROWSER_CHANNEL=chrome' >> "$GITHUB_ENV"
+            echo '{"browser_runtime":"SYSTEM_CHROME","fallback_install":false,"secret_material_logged":false}'
+          else
+            npx playwright install --with-deps chromium
+            echo 'CEREBRO_BROWSER_CHANNEL=' >> "$GITHUB_ENV"
+            echo '{"browser_runtime":"PLAYWRIGHT_CHROMIUM","fallback_install":true,"secret_material_logged":false}'
+          fi
       - name: Execute one governed Browser 1 V2 job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
