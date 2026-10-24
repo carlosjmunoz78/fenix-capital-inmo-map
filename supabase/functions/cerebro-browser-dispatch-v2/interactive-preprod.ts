@@ -8,25 +8,31 @@ const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}})
 const ISSUER='https://token.actions.githubusercontent.com';
 const AUD='cerebro-browser-worker-v1';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
-const WORKFLOW='.github/workflows/cerebro-browser-job-runner-v2-live.yml';
+const BRANCH_REF='refs/heads/cerebro/navegador-phase3-1-ui-20261024';
+const WORKFLOWS=[
+ '.github/workflows/cerebro-browser-interactive-v3-preprod.yml',
+ '.github/workflows/cerebro-browser-job-runner-v2-live.yml',
+] as const;
 const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const JWKS=createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks`));
 function out(status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function bearer(req:Request){const h=req.headers.get('authorization')??'';return h.toLowerCase().startsWith('bearer ')?h.slice(7).trim():'';}
+function allowedWorkflowRef(workflowRef:string){return WORKFLOWS.some(workflow=>workflowRef===`${REPO}/${workflow}@${BRANCH_REF}`);}
 async function worker(req:Request){
  if(!U.includes(PREPROD_PROJECT_REF))return{ok:false,error:'PREPROD_PROJECT_REF_MISMATCH'} as const;
  const token=bearer(req);if(!token)return{ok:false,error:'GITHUB_OIDC_REQUIRED'} as const;
  try{
   const {payload}=await jwtVerify(token,JWKS,{issuer:ISSUER,audience:AUD});
   if(payload.repository!==REPO)return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
+  if(String(payload.ref??'')!==BRANCH_REF)return{ok:false,error:'GITHUB_REF_DENIED'} as const;
   const workflowRef=String(payload.workflow_ref??'');
-  if(!workflowRef.includes(`${REPO}/${WORKFLOW}@`))return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
+  if(!allowedWorkflowRef(workflowRef))return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
   return{ok:true,worker_id:`github-preprod:${String(payload.run_id??'unknown')}:${String(payload.run_attempt??'1')}`} as const;
  }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
 }
 Deno.serve(async req=>{
  const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)??'';
- if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-dispatch-v3-preprod',environment:'PREPROD',interactive_only:true,seeding:false,credential_materialization:false,prod_access:false,trading_access:false,incremental_cost_eur:0,allowed_workflow:WORKFLOW});
+ if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-dispatch-v3-preprod',environment:'PREPROD',interactive_only:true,seeding:false,credential_materialization:false,prod_access:false,trading_access:false,incremental_cost_eur:0,branch_ref:BRANCH_REF,allowed_workflows:WORKFLOWS});
  if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
  const w=await worker(req);if(!w.ok)return out(403,w);
  let body:any={};try{body=await req.json();}catch{}
