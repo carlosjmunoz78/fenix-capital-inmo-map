@@ -1,0 +1,88 @@
+name: CEREBRO Creative Editor + Video LAB V1
+
+on:
+  push:
+    paths:
+      - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
+      - '.github/workflows/cerebro-creative-editor-video-lab-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
+      - '.github/workflows/cerebro-creative-editor-video-lab-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  opendesign:
+    name: OpenDesign pinned LAB build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Clone pinned OpenDesign
+        run: |
+          git clone https://github.com/clawnify/OpenDesign.git opendesign
+          cd opendesign
+          git checkout 89c61f83c6c5141895d281385e90c6438ac7be1f
+          test "$(git rev-parse HEAD)" = "89c61f83c6c5141895d281385e90c6438ac7be1f"
+          grep -q "MIT License" LICENSE
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install pnpm
+        run: corepack enable && corepack prepare pnpm@10.20.0 --activate
+      - name: Install locked dependencies
+        working-directory: opendesign
+        run: pnpm install --frozen-lockfile
+      - name: Upstream tests
+        working-directory: opendesign
+        run: pnpm test
+      - name: Production build
+        working-directory: opendesign
+        run: pnpm build
+      - name: Assert no CEREBRO secrets are required for build
+        working-directory: opendesign
+        run: |
+          test -f .env.example
+          ! grep -RIE '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})' --exclude-dir=.git --exclude-dir=node_modules .
+
+  opencut:
+    name: OpenCut pinned LAB structural build gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Clone pinned OpenCut
+        run: |
+          git clone https://github.com/OpenCut-app/OpenCut.git opencut
+          cd opencut
+          git checkout e668010778568641babef2cc40be4703ae6916d6
+          test "$(git rev-parse HEAD)" = "e668010778568641babef2cc40be4703ae6916d6"
+          grep -q "Permission is hereby granted" LICENSE
+          grep -q 'apps/desktop' Cargo.toml
+      - name: Install pinned Rust
+        run: |
+          rustup toolchain install 1.97.0 --profile minimal
+          rustup default 1.97.0
+      - name: Cargo metadata locked
+        working-directory: opencut
+        run: cargo metadata --locked --no-deps --format-version 1 > /tmp/opencut-metadata.json
+      - name: Rust workspace check
+        working-directory: opencut
+        run: cargo check --workspace --locked
+      - name: Record upstream rewrite truth
+        working-directory: opencut
+        run: |
+          grep -q "rewritten from the ground up\|rewriting\|rewrite" README.md
+          grep -q "MCP server" README.md
+          grep -q "Headless mode" README.md
+
+  cerebro-contract:
+    name: CEREBRO wrapper contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate selection registry
+        run: node -e "const x=JSON.parse(require('fs').readFileSync('cerebro/tech-scout/creative-editor-video-selected-v1.json','utf8')); if(x.candidates.length!==2) throw new Error('two candidates required'); if(x.candidates.some(c=>c.prod_authorized!==false || c.additional_cost_eur_target!==0 || !c.pinned_commit || c.license!=='MIT')) throw new Error('candidate governance violation'); console.log('creative-editor-video-contract GREEN')"
+      - name: Protect canonical engine registry
+        run: node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/registry/engine-registry.v1.json','utf8')); for(const bad of ['OPENDESIGN-001','OPENCUT-001','CANVA-001']) if(r.engine_ids.includes(bad)) throw new Error('tool incorrectly registered as engine: '+bad); console.log('no-tool-engines GREEN')"
