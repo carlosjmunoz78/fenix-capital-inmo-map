@@ -1,0 +1,150 @@
+name: CEREBRO Creative Quality V2
+
+on:
+  push:
+    branches:
+      - cerebro/creative-quality-v2-2026-10-24
+      - main
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2.test.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2.yml'
+      - 'docs/CEREBRO_CREATIVE_QUALITY_STANDARD_V2_2026-10-24.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
+      - 'cerebro/runtime/creative-job-runner-v2.mjs'
+      - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
+      - 'cerebro/tests/creative-job-runner-v2.test.mjs'
+      - '.github/workflows/cerebro-creative-quality-v2.yml'
+      - 'docs/CEREBRO_CREATIVE_QUALITY_STANDARD_V2_2026-10-24.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+
+jobs:
+  agency-grade-creative-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Static and contract tests
+        run: |
+          node --check cerebro/runtime/creative-quality-tribunal-v2.mjs
+          node --check cerebro/runtime/creative-job-runner-v2.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-job-runner-v2.test.mjs
+      - name: Install Chromium and FFmpeg
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+          ffmpeg -version | head -n 1
+      - name: Cache pinned Piper neural voice
+        uses: actions/cache@v4
+        with:
+          path: /tmp/cerebro-piper
+          key: quality-v2-piper-${{ runner.os }}-2023-11-14-2-b145f2a-sharvard-medium
+      - name: Materialize pinned Piper voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          if [ ! -x "$CEREBRO_PIPER_BIN" ]; then
+            curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+            tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          fi
+          if [ ! -s "$CEREBRO_PIPER_MODEL" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          fi
+          if [ ! -s "$CEREBRO_PIPER_CONFIG" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          fi
+          chmod +x "$CEREBRO_PIPER_BIN"
+          "$CEREBRO_PIPER_BIN" --help >/dev/null
+      - name: Physical agency-grade showcase
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > /tmp/showcase-v2.mjs <<'NODE'
+          import fs from 'node:fs/promises';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import { renderCreativeJobV2 } from './cerebro/runtime/creative-job-runner-v2.mjs';
+          const out='/tmp/cerebro-creative-quality-v2';await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
+          const logo='https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png';
+          const photos=[
+            'https://fenixcapital.es/wp-content/uploads/2026/10/Fenix-C2B7-Pareja-haciendo-numeros-para-comprar-vivienda-cerebro.webp',
+            'https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-revision-vivienda-asesor-scaled-1-cerebro.webp',
+            'https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-firma-documentos-vivienda-scaled-1-cerebro.webp',
+            'https://fenixcapital.es/wp-content/uploads/2026/10/huelva-llaves-compra-vivienda-scaled-1-cerebro.webp'
+          ];
+          const brand={logo_url:logo,primary:'#ffffff',accent:'#f47b20',background:'#111111'};
+          const base=(output_type,channel,cp)=>({job_id:crypto.randomUUID(),company_id:'fenix',engine_id:'SOC-001',environment:'PREPROD',version:'v2',output_type,channel,request:{publish_requested:false,expected_cost_eur:0,creative_payload:{brand,creative_concept:'Campaña Fénix · comprar con método antes de reservar',channel_fit:true,accessibility_checked:true,layer_count:8,layout_variants:4,motion_design:true,broll_required:true,scene_text_only_ratio:0,text_only_page_ratio:.2,...cp}}});
+          const audio={voice_enabled:true,voice_id:'ES_FEMALE',music_enabled:true,ducking:true,captions:true};
+          const motions=['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN','PAN_LEFT'];const transitions=['CROSSFADE','DIP_TO_BLACK','PUSH','WIPE'];
+          const jobs=[
+            ['01-post-fotografico',base('STATIC_POST','INSTAGRAM',{visual_style:'PHOTO',visual_sources:[photos[0]],headline:'La vivienda te encanta. Ahora comprueba que la operación encaja.',subheadline:'Antes de reservar, revisa cuota, ahorro, gastos, inmueble y calendario.',cta:'Primero viabilidad. Después compromiso.'})],
+            ['02-post-editorial',base('SQUARE_POST','FACEBOOK',{visual_style:'PHOTO',visual_sources:[photos[1]],headline:'Un “sí” del banco empieza mucho antes del banco',subheadline:'Un expediente ordenado explica mejor tu estabilidad, tus números y la vivienda que quieres comprar.',cta:'Prepara el caso con criterio'})],
+            ['03-post-conversion',base('STATIC_POST','LINKEDIN',{visual_style:'PHOTO',visual_sources:[photos[3]],headline:'La compra no termina cuando te dan las llaves',subheadline:'La operación buena es la que llega a firma sin sorpresas evitables.',cta:'Método, documentación y seguimiento'})],
+            ['04-carrusel',base('CAROUSEL','INSTAGRAM',{visual_style:'PHOTO',visual_sources:[photos[0],photos[1],photos[2],photos[3]],pages:[
+              {metric:'01',metric_label:'Presupuesto',headline:'Empieza por lo que puedes sostener',subheadline:'No solo la cuota: deudas, gastos y margen mensual.'},
+              {metric:'02',metric_label:'Ahorro',headline:'Cuenta el dinero que necesitas de verdad',subheadline:'Entrada, impuestos, tasación y demás gastos.'},
+              {metric:'03',metric_label:'Vivienda',headline:'La casa también debe ser financiable',subheadline:'Registro, estado, tipología y tasación importan.'},
+              {metric:'04',metric_label:'Plazos',headline:'No reserves con un calendario imposible',subheadline:'Estudio, tasación, FEIN y notaría necesitan margen.'},
+              {metric:'05',metric_label:'Decisión',headline:'Cuando todo encaja, entonces sí',subheadline:'Primero detecta riesgos. Después comprométete.',cta:'Fénix Capital'}
+            ]})],
+            ['05-story-video',base('STORY_VIDEO','INSTAGRAM',{visual_style:'PHOTO',visual_sources:[photos[0],photos[2],photos[3]],motion_profiles:motions,transitions,scenes:[
+              {duration_sec:4,headline:'¿Te urge reservar?',subheadline:'Que la prisa no decida por ti.',voiceover:'Si has encontrado una vivienda y te urge reservar, que la prisa no decida por ti.'},
+              {duration_sec:4,headline:'Comprueba tres cosas',subheadline:'Tu perfil, la vivienda y el calendario.',voiceover:'Comprueba primero tu perfil, la vivienda y el calendario real de la operación.'},
+              {duration_sec:4,headline:'Después, decide',subheadline:'Con datos y margen.',cta:'Fénix Capital',voiceover:'Después decide con datos, margen y una operación que tenga sentido.'}
+            ],audio})],
+            ['06-reel',base('REEL','INSTAGRAM',{visual_style:'PHOTO',visual_sources:photos,motion_profiles:motions,transitions,scenes:[
+              {duration_sec:5,headline:'La vivienda te encaja',subheadline:'Y todo parece urgente.',voiceover:'Has encontrado una vivienda que te encaja y todo parece urgente.'},
+              {duration_sec:5,headline:'Mira tus números completos',subheadline:'Cuota, deudas, ahorro y gastos.',voiceover:'No mires solo la cuota. Revisa deudas, ahorro disponible y todos los gastos de compra.'},
+              {duration_sec:5,headline:'Mira también la vivienda',subheadline:'Registro y tasación pueden cambiar la financiación.',voiceover:'La vivienda también cuenta. Registro, estado y tasación pueden cambiar la financiación.'},
+              {duration_sec:5,headline:'Primero viabilidad',subheadline:'Después compromiso.',cta:'Fénix Capital',voiceover:'Primero viabilidad real. Después compromiso.'}
+            ],audio})],
+            ['07-video-largo',base('LONG_VIDEO','FACEBOOK',{visual_style:'PHOTO',visual_sources:photos,motion_profiles:motions,transitions,scenes:[
+              {duration_sec:12,metric:'01',metric_label:'Presupuesto',headline:'Empieza por tu presupuesto real',subheadline:'La cuota es solo una parte.',voiceover:'Antes de mirar bancos, calcula cuánto puedes destinar cada mes sin quedarte sin margen. La cuota es importante, pero también tus gastos, tus deudas y el colchón que quieres conservar.'},
+              {duration_sec:12,metric:'02',metric_label:'Estabilidad',headline:'Explica bien cómo entra el dinero',subheadline:'Antigüedad y continuidad importan.',voiceover:'Revisa la estabilidad de tus ingresos. Hay que entender de dónde viene el dinero, desde cuándo y si existe continuidad suficiente para sostener la operación.'},
+              {duration_sec:12,metric:'03',metric_label:'Ahorro',headline:'Cuenta todos los gastos',subheadline:'No presupuestes solo la entrada.',voiceover:'Calcula el ahorro disponible incluyendo entrada, impuestos, tasación y los demás gastos para saber qué financiación necesitas de verdad.'},
+              {duration_sec:12,metric:'04',metric_label:'Inmueble',headline:'Comprueba la vivienda',subheadline:'Registro, estado y tasación pueden condicionar.',voiceover:'La vivienda también forma parte del riesgo. Registro, estado, uso y tasación pueden condicionar el porcentaje financiable.'},
+              {duration_sec:12,metric:'05',metric_label:'Calendario',headline:'Pon fechas realistas',subheadline:'Estudio, tasación, FEIN y notaría necesitan margen.',voiceover:'Coloca el calendario real. Estudio, documentación, tasación, condiciones, FEIN y notaría necesitan margen.'},
+              {duration_sec:12,metric:'06',metric_label:'Decisión',headline:'Decide cuando conozcas los riesgos',subheadline:'La velocidad funciona mejor cuando hay método.',cta:'Fénix Capital',voiceover:'Cuando comprador, vivienda, dinero y calendario encajan, puedes decidir con mucha más información. La velocidad funciona mejor cuando existe método.'}
+            ],audio:{...audio,voice_id:'ES_MALE'}})]
+          ];
+          const manifest={schema_version:'2.0.0',environment:'PREPROD',publish_authorized:false,additional_cost_eur:0,items:[]};
+          for(const [label,job] of jobs){const r=await renderCreativeJobV2(job);try{const item={label,output_type:job.output_type,quality:r.quality,artifacts:[]};for(const a of r.artifacts){const ext=path.extname(a.filename),target=path.join(out,`${label}${a.page?`-${String(a.page).padStart(2,'0')}`:''}${ext}`);await fs.copyFile(a.local_path,target);item.artifacts.push({filename:path.basename(target),mime:a.mime,bytes:a.bytes,sha256:a.sha256,width:a.width,height:a.height,duration_sec:a.duration_sec??null,audio:a.audio??null,physical_evidence:a.physical_evidence??null,quality_score:a.quality_score,quality_verdict:a.quality_verdict,logo_url:a.logo_url,visual_sources:a.visual_sources})}manifest.items.push(item)}finally{await fs.rm(r.temp,{recursive:true,force:true})}}
+          await fs.writeFile(path.join(out,'MANIFEST.json'),JSON.stringify(manifest,null,2));console.log(JSON.stringify({ok:true,items:manifest.items.length,artifacts:manifest.items.reduce((n,x)=>n+x.artifacts.length,0),out}));
+          NODE
+          node /tmp/showcase-v2.mjs | tee /tmp/showcase-v2-result.json
+          grep -F '"ok":true' /tmp/showcase-v2-result.json
+          node - <<'NODE'
+          const fs=require('fs');const m=JSON.parse(fs.readFileSync('/tmp/cerebro-creative-quality-v2/MANIFEST.json','utf8'));if(m.items.length!==7)throw new Error('SHOWCASE_ITEM_COUNT');for(const i of m.items){if(!i.quality?.passed||i.quality.score<82)throw new Error(`QUALITY_FAIL:${i.label}`);for(const a of i.artifacts){if(a.quality_verdict!=='CREATIVE_QA_GREEN')throw new Error(`ARTIFACT_QA_FAIL:${a.filename}`);if(a.mime==='video/mp4'){if(!a.audio?.voice||!a.audio?.music||a.audio.ducking!==true||a.audio.captions!==true)throw new Error(`VIDEO_AUDIO_FAIL:${a.filename}`);if(!a.physical_evidence?.audio_stream_present||a.physical_evidence.unique_frame_ratio<.25||a.physical_evidence.motion_score<.18)throw new Error(`VIDEO_MOTION_FAIL:${a.filename}`)}}}console.log('AGENCY_GRADE_SHOWCASE_GREEN');
+          NODE
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height -of json /tmp/cerebro-creative-quality-v2/06-reel.mp4
+          ffprobe -v error -show_entries stream=codec_type,codec_name,width,height -of json /tmp/cerebro-creative-quality-v2/07-video-largo.mp4
+          sha256sum /tmp/cerebro-creative-quality-v2/* > /tmp/cerebro-creative-quality-v2/SHA256SUMS.txt
+      - name: Upload quality showcase evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-creative-quality-v2-${{ github.sha }}
+          path: /tmp/cerebro-creative-quality-v2
+          retention-days: 7
