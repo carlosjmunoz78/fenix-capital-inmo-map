@@ -1,0 +1,127 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "CEREBRO-CREATIVE-OUTPUT-PIPELINE-V1",
+  "status": "PREPROD_CANDIDATE",
+  "owner_engine": "FACT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "purpose": "Turn a registered engine request into a brand-governed, zero-additional-cost-first creative output plan using the existing shared Canva/OpenDesign/Multimedia capabilities without granting publication authority.",
+  "reuse_only": true,
+  "new_canonical_engine": false,
+  "shared_capabilities": [
+    "CREATIVE-CANVA-V1",
+    "CREATIVE-VISUAL-LOCAL-V1",
+    "CREATIVE-VIDEO-EDITOR-V1",
+    "DIGITAL-BUILD-MULTIMEDIA"
+  ],
+  "default_consumers": [
+    "SOC-001",
+    "MKT-001",
+    "LAB-MKT",
+    "SEO-001",
+    "WEB-001",
+    "APP-001",
+    "TRN-001",
+    "SOCBOOT-001",
+    "MKTBOOT-001",
+    "SEOBOOT-001",
+    "APPBOOT-001"
+  ],
+  "supported_channels": [
+    "FACEBOOK",
+    "INSTAGRAM",
+    "LINKEDIN",
+    "TIKTOK",
+    "YOUTUBE",
+    "WHATSAPP",
+    "SEO",
+    "WEB",
+    "APP",
+    "EMAIL",
+    "DOCUMENT",
+    "TRAINING",
+    "MARKETING"
+  ],
+  "supported_outputs": {
+    "STATIC_POST": {"media_kind":"DESIGN","width":1080,"height":1350,"aspect_ratio":"4:5"},
+    "SQUARE_POST": {"media_kind":"DESIGN","width":1080,"height":1080,"aspect_ratio":"1:1"},
+    "CAROUSEL": {"media_kind":"DESIGN","width":1080,"height":1350,"aspect_ratio":"4:5","multi_page":true,"min_pages":2,"max_pages":20},
+    "STORY": {"media_kind":"DESIGN","width":1080,"height":1920,"aspect_ratio":"9:16"},
+    "REEL": {"media_kind":"VIDEO","width":1080,"height":1920,"aspect_ratio":"9:16","captions_default":true},
+    "SHORT_VIDEO": {"media_kind":"VIDEO","width":1080,"height":1920,"aspect_ratio":"9:16","captions_default":true},
+    "LANDSCAPE_VIDEO": {"media_kind":"VIDEO","width":1920,"height":1080,"aspect_ratio":"16:9","captions_default":true},
+    "THUMBNAIL": {"media_kind":"DESIGN","width":1280,"height":720,"aspect_ratio":"16:9"},
+    "SEO_IMAGE": {"media_kind":"DESIGN","width":1200,"height":630,"aspect_ratio":"40:21"},
+    "WEB_HERO": {"media_kind":"DESIGN","width":1920,"height":1080,"aspect_ratio":"16:9"},
+    "EMAIL_BANNER": {"media_kind":"DESIGN","width":1200,"height":600,"aspect_ratio":"2:1"},
+    "DOCUMENT_COVER": {"media_kind":"DESIGN","width":1240,"height":1754,"aspect_ratio":"A_SERIES"},
+    "APP_ASSET": {"media_kind":"DESIGN","width":1080,"height":1080,"aspect_ratio":"1:1"},
+    "INFOGRAPHIC": {"media_kind":"DESIGN","width":1080,"height":1920,"aspect_ratio":"9:16"}
+  },
+  "required_context": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "brand_profile_ref",
+    "brief_ref",
+    "channel",
+    "output_type"
+  ],
+  "brand_policy": {
+    "visual_identity_required": true,
+    "generic_unbranded_output_forbidden": true,
+    "brand_profile_reference_only": true,
+    "cross_company_brand_access": "DENY"
+  },
+  "cost_policy": {
+    "default_additional_cost_eur": 0,
+    "zero_cost_first": true,
+    "paid_provider_without_approval": "HUMAN_REQUIRED_MONEY_LIMIT",
+    "reuse_existing_subscription_features": true
+  },
+  "video_policy": {
+    "operational_automatic_path": ["HYPERFRAMES","OPENMONTAGE","FFMPEG"],
+    "interactive_editor": "CREATIVE-VIDEO-EDITOR-V1",
+    "interactive_editor_prod_status": "HOLD_UNTIL_AUTOMATION_PARITY",
+    "voice_zero_cost_candidate": "QWEN3_TTS",
+    "captions_for_spoken_video": "REQUIRED_BY_DEFAULT",
+    "deterministic_rendering": true,
+    "visual_identity_gate": true
+  },
+  "qa_gates": [
+    "BRAND_CONSISTENCY",
+    "FORMAT_DIMENSIONS",
+    "SAFE_AREA",
+    "TEXT_OVERFLOW",
+    "ACCESSIBILITY",
+    "CAPTIONS_WHEN_REQUIRED",
+    "ASSET_RIGHTS",
+    "NO_RAW_SECRET_OR_PII",
+    "COST_ZERO_OR_APPROVED",
+    "CHANNEL_POLICY",
+    "EVA_001",
+    "OBSERVABILITY"
+  ],
+  "authority_separation": {
+    "create": true,
+    "edit": true,
+    "export": true,
+    "publish": false,
+    "send": false,
+    "spend": false,
+    "origin_engine_keeps_publication_authority": true
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "rollback": "Disable the shared output pipeline binding and keep the already merged Creative Stack and each origin engine's existing provider path unchanged.",
+  "runtime_truth": "This contract plans and governs shared creative production. It does not by itself prove every physical generator/editor/provider is installed or PROD-certified. Canva OAuth and any provider-specific physical gates remain separate."
+}
