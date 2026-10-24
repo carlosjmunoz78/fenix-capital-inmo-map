@@ -29,7 +29,7 @@ test('Work Total PROD canary is isolated to the promotion branch and dedicated e
   const workflow=await read(workflowPath);
   assert.match(workflow,/branches: \['promote\/browser-work-total-prod-20261025'\]/);
   assert.match(workflow,/cerebro-browser-work-total-dispatch-v1-prod/);
-  assert.match(workflow,/cerebro-browser-work-total-worker-v1-prod/);
+  assert.match(workflow,/cerebro-browser-work-total-worker-v2-prod/);
   assert.match(workflow,/cerebro-browser-work-total-v1-prod/);
   assert.match(workflow,/CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'/);
   assert.doesNotMatch(workflow,/CEREBRO_BROWSER_DISPATCH_URL: .*cerebro-browser-dispatch-v2\b/);
