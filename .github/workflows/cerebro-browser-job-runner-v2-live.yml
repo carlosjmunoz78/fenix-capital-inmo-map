@@ -1,9 +1,8 @@
-# PREPROD proof cycle 2; restore this file to main after evidence.
 name: CEREBRO Browser 1 V2 Live Worker
 
 on:
   push:
-    branches: ['main','cerebro/navegador-phase3-1-ui-20261024']
+    branches: ['main']
     paths:
       - '.github/workflows/cerebro-browser-job-runner-v2-live.yml'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
@@ -20,7 +19,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: cerebro-browser1-v2-live-${{ github.ref }}
+  group: cerebro-browser1-v2-live
   cancel-in-progress: false
 
 env:
@@ -30,62 +29,8 @@ env:
   CEREBRO_PHYSICAL_BROWSER_E2E: '1'
 
 jobs:
-  preprod-auto-proof:
-    name: PREPROD automatic interactive consumer proof
-    if: github.ref == 'refs/heads/cerebro/navegador-phase3-1-ui-20261024'
-    runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.62.1-noble
-    timeout-minutes: 12
-    env:
-      CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-dispatch-v3-preprod
-      CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-worker-v3-preprod
-      CEREBRO_BROWSER_OIDC_AUDIENCE: cerebro-browser-worker-v1
-      CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
-      CEREBRO_BROWSER_WORKER_SLOT: '1'
-      CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
-      CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '480000'
-      CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '750'
-      CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '300'
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-          cache: npm
-      - run: npm ci
-      - name: Wait automatically for one PREPROD interactive job
-        run: |
-          node --input-type=module <<'NODE'
-          const deadline=Date.now()+7*60_000;
-          async function token(){
-            const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
-            u.searchParams.set('audience',process.env.CEREBRO_BROWSER_OIDC_AUDIENCE);
-            const r=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`},redirect:'error'});
-            if(!r.ok)throw new Error(`OIDC_TOKEN_FAILED:${r.status}`);
-            const body=await r.json();
-            if(!body?.value)throw new Error('OIDC_TOKEN_MISSING');
-            return body.value;
-          }
-          let pending=0;
-          while(Date.now()<deadline){
-            const jwt=await token();
-            const r=await fetch(`${process.env.CEREBRO_BROWSER_DISPATCH_URL}/status-v2`,{method:'POST',headers:{authorization:`Bearer ${jwt}`,'content-type':'application/json'},body:'{}',redirect:'error'});
-            const body=await r.json().catch(()=>null);
-            if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${r.status}:${body?.error||'UNKNOWN'}`);
-            pending=Number(body.states?.QUEUED||0)+Number(body.states?.RETRY_WAIT||0);
-            if(pending>0)break;
-            await new Promise(resolve=>setTimeout(resolve,3000));
-          }
-          if(pending<1)throw new Error('AUTO_CONSUMER_NO_JOB_WITHIN_PROOF_WINDOW');
-          console.log(JSON.stringify({automatic_consumer:true,pending_detected:true,manual_dispatch:false,secret_material_logged:false}));
-          NODE
-      - name: Execute one governed PREPROD interactive job
-        run: node cerebro/runtime/browser-job-runner-v2.mjs
-
   queue:
     name: Check Browser 1 V2 PROD queue
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     outputs:
@@ -113,7 +58,7 @@ jobs:
   workers:
     name: Browser 1 V2 worker ${{ matrix.slot }} / 8
     needs: queue
-    if: github.ref == 'refs/heads/main' && needs.queue.outputs.pending != '0'
+    if: needs.queue.outputs.pending != '0'
     strategy:
       fail-fast: false
       max-parallel: 8
@@ -139,7 +84,7 @@ jobs:
   status:
     name: Record live queue state
     needs: [queue, workers]
-    if: github.ref == 'refs/heads/main' && always()
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
