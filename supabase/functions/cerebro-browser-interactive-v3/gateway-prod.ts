@@ -1,9 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "npm:@supabase/supabase-js@2";
 
-// PROD CANARY CONTRACT
-// Deployment is additive as `cerebro-browser-gateway-v1`; existing Browser V1/V2/V3 remain untouched.
-// Scope is intentionally Fenix-only until a canonical PROD Company Registry is present.
 const U=Deno.env.get('SUPABASE_URL')??'';
 const A=Deno.env.get('SUPABASE_ANON_KEY')??'';
 const S=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'';
