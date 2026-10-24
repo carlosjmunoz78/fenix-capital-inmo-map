@@ -266,6 +266,27 @@ export function createCloudBrowserWorker({
     return file;
   }
 
+  async function browserMetadata() {
+    if (!context || !activePage) return {tabs:[],active_tab_index:null,current_title:'',viewport_width:null,viewport_height:null};
+    const pages=context.pages().slice(0,max_tabs);
+    const tabs=await Promise.all(pages.map(async (page,index)=>({
+      index,
+      url:page.url(),
+      title:String(await page.title().catch(()=>'' )).slice(0,240),
+      active:page===activePage
+    })));
+    const activeIndex=pages.indexOf(activePage);
+    const viewport=activePage.viewportSize();
+    const currentTitle=String(await activePage.title().catch(()=>'' )).slice(0,240);
+    return {
+      tabs,
+      active_tab_index:activeIndex>=0?activeIndex:null,
+      current_title:currentTitle,
+      viewport_width:viewport?.width??null,
+      viewport_height:viewport?.height??null
+    };
+  }
+
   async function doAction(job, action, index) {
     assertAction(action);
     if (!activePage) throw new Error('BROWSER_WORKER_NOT_STARTED');
@@ -431,8 +452,9 @@ export function createCloudBrowserWorker({
         results.push(await doAction(job, job.actions[i], i));
       }
       const finalEvidence = job.capture_final_evidence === false ? null : await evidence(job, 'final');
+      const metadata = await browserMetadata();
       await emit({ type: 'BROWSER_JOB_COMPLETED', request_id: job.request_id || null, audit_id: job.audit_id || null, ...runningScope, final_evidence: finalEvidence });
-      return { ok: true, authorization: auth, results, final_url: activePage?.url() || null, final_evidence: finalEvidence };
+      return { ok: true, authorization: auth, results, final_url: activePage?.url() || null, final_evidence: finalEvidence, ...metadata };
     } catch (error) {
       const failureEvidence = activePage ? await evidence(job, 'failure').catch(() => null) : null;
       await emit({ type: 'BROWSER_JOB_FAILED', request_id: job.request_id || null, audit_id: job.audit_id || null, ...runningScope, error: String(error?.message || error), failure_evidence: failureEvidence });
