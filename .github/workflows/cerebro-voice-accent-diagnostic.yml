@@ -1,0 +1,74 @@
+name: CEREBRO VOICE-001 es-ES Accent Diagnostic
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/accent_diagnostic_es_es.py'
+      - 'cerebro/voice/runtime/requirements.txt'
+      - 'cerebro/voice/runtime/windows/Install-VoiceLab.ps1'
+      - '.github/workflows/cerebro-voice-accent-diagnostic.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  windows-es-es-accent-diagnostic:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install reviewed VOICE-001 LAB runtime
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          ./cerebro/voice/runtime/windows/Install-VoiceLab.ps1 -RepoRoot $env:GITHUB_WORKSPACE
+
+      - name: Generate long Spanish Spain listening diagnostic
+        shell: pwsh
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+          CEREBRO_VOICE_DEVICE: cpu
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $python = Join-Path $env:LOCALAPPDATA 'CEREBRO\voice-runtime\.venv\Scripts\python.exe'
+          $out = Join-Path $env:RUNNER_TEMP 'voice001-accent-diagnostic'
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          & $python ./cerebro/voice/runtime/accent_diagnostic_es_es.py --output-dir $out --t3-model v3 --device cpu
+          if ($LASTEXITCODE -ne 0) { throw 'VOICE-001 accent diagnostic failed' }
+
+      - name: Verify non-promotional evidence
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $p = Join-Path $env:RUNNER_TEMP 'voice001-accent-diagnostic\accent-diagnostic.json'
+          if (-not (Test-Path $p)) { throw 'evidence missing' }
+          $e = Get-Content -Raw $p | ConvertFrom-Json
+          if ($e.status -ne 'ES_ES_ACCENT_DIAGNOSTIC_LISTENING_ONLY') { throw 'wrong status' }
+          if ($e.authority.automatic_promotion -ne $false) { throw 'promotion forbidden' }
+          if ($e.authority.prod_enabled -ne $false) { throw 'PROD forbidden' }
+          if ($e.audio_seconds -lt 20) { throw 'diagnostic unexpectedly short' }
+
+      - name: Upload long diagnostic audio
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-es-es-accent-diagnostic
+          path: ${{ runner.temp }}\voice001-accent-diagnostic\
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        if: success()
+        shell: pwsh
+        run: |
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'VOICE-001 generated a longer default-voice Spanish listening diagnostic aimed at es-ES accent assessment.'
+          Add-Content -Path $env:GITHUB_STEP_SUMMARY -Value 'Listening-only evidence. No real reference, no accepted bank slot, no automatic promotion and no PROD.'
