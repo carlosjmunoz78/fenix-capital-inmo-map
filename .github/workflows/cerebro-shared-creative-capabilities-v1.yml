@@ -1,0 +1,28 @@
+name: CEREBRO Shared Creative Capabilities V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/contracts/shared-creative-capabilities-v1.contract.json'
+      - 'cerebro/digital-build/shared-creative-router-v1.mjs'
+      - 'cerebro/digital-build/shared-creative-router-v1.test.mjs'
+      - '.github/workflows/cerebro-shared-creative-capabilities-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate shared creative contract
+        run: |
+          node -e "const c=require('./cerebro/contracts/shared-creative-capabilities-v1.contract.json'); if(c.owner_engine!=='FACT-001'||c.reuse_policy.new_engine_required!==false||c.governance.external_publication_authorized!==false||c.shared_capabilities.MULTIMEDIA_FACTORY.capability_id!=='DIGITAL-BUILD-MULTIMEDIA') process.exit(1)"
+      - name: Run shared creative router tests
+        run: node --test cerebro/digital-build/shared-creative-router-v1.test.mjs
