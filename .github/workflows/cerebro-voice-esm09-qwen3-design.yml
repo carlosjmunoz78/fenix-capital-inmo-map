@@ -1,0 +1,75 @@
+name: CEREBRO VOICE-001 ESM09 Qwen3 VoiceDesign Trial
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/voice/runtime/qwen3_esm09_voice_design_trial.py'
+      - 'cerebro/voice/profiles/ESM09_CEREBRO_YOUNGER_CINEMATIC_AI_ES_ES_V0.json'
+      - 'cerebro/voice/profiles/CEREBRO_MALE_VOICE_SHORTLIST_V0.json'
+      - '.github/workflows/cerebro-voice-esm09-qwen3-design.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  esm09-qwen3-voice-design:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lightweight Space client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install 'gradio_client>=1.13,<2'
+
+      - name: Generate ESM09 original Spain-Spanish VoiceDesign candidates
+        env:
+          CEREBRO_ENVIRONMENT: LAB
+        run: |
+          mkdir -p "$RUNNER_TEMP/esm09"
+          python cerebro/voice/runtime/qwen3_esm09_voice_design_trial.py --output-dir "$RUNNER_TEMP/esm09"
+
+      - name: Verify evidence boundary
+        shell: python
+        run: |
+          import json, os, pathlib
+          p = pathlib.Path(os.environ['RUNNER_TEMP']) / 'esm09' / 'ESM09_qwen3_voice_design_evidence.json'
+          e = json.loads(p.read_text(encoding='utf-8'))
+          assert e['engine_id'] == 'VOICE-001'
+          assert e['voice_target'] == 'ESM09'
+          assert e['target_locale'] == 'es-ES'
+          assert e['identity_policy']['reference_audio_used'] is False
+          assert e['identity_policy']['actor_clone'] is False
+          assert e['identity_policy']['character_clone'] is False
+          assert e['authority']['automatic_promotion'] is False
+          assert e['authority']['voice_bank_ready'] is False
+          assert e['authority']['prod_enabled'] is False
+          assert len(e['candidates']) == 3
+          print('GREEN: ESM09 Qwen3 VoiceDesign owner-listening candidates generated; no promotion.')
+
+      - name: Upload ESM09 listening candidates
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice001-esm09-qwen3-es-es-design-candidates
+          path: |
+            ${{ runner.temp }}/esm09/ESM09_A_YOUNG_BARITONE.wav
+            ${{ runner.temp }}/esm09/ESM09_B_POLISHED_TECHNICAL.wav
+            ${{ runner.temp }}/esm09/ESM09_C_DARKER_CINEMATIC.wav
+            ${{ runner.temp }}/esm09/ESM09_qwen3_voice_design_evidence.json
+          retention-days: 7
+          compression-level: 0
+          if-no-files-found: error
+
+      - name: Record scope
+        run: |
+          echo 'ESM09 uses Qwen3-TTS VoiceDesign through the official public HF Space as a zero-cost LAB trial only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'No reference audio, actor audio, movie audio, or character cloning is used.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Owner listening required. PROD=false. automatic_promotion=false.' >> "$GITHUB_STEP_SUMMARY"

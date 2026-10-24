@@ -1,0 +1,58 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "voice_id": "ESM08",
+  "environment": "LAB",
+  "status": "TARGET_OPEN_DIFFERENT_BASE_TIMBRE_REQUIRED",
+  "locale": "es-ES",
+  "presentation": "masculine",
+  "profile": "original_cinematic_ai_assistant",
+  "owner_intent": "FIND_CLOSER_CHARACTER_DIRECTION_WITHOUT_IDENTITY_CLONING",
+  "style_target": {
+    "traits": [
+      "Spain-Spanish",
+      "male",
+      "low-mid baritone",
+      "smooth",
+      "rounded",
+      "serene",
+      "technically precise",
+      "restrained",
+      "polite",
+      "measured pace",
+      "low pitch variability",
+      "clean consonants",
+      "quiet authority",
+      "cinematic AI assistant"
+    ],
+    "avoid": [
+      "nasal timbre",
+      "bright announcer timbre",
+      "excessive theatricality",
+      "LatAm drift",
+      "robotic cadence",
+      "overprocessed pitch shifting"
+    ]
+  },
+  "search_strategy": {
+    "phase_1": "Compare genuinely different permissive es-ES male base timbres before further processing.",
+    "phase_2": "If Piper timbres remain insufficient, evaluate Apache-2.0 voice-design runtime such as Qwen3-TTS in LAB on suitable GPU, with strict es-ES listening gate.",
+    "do_not_reuse_failed_strategy": "Do not keep retuning the same Sharvard speaker and expect identity-level timbre change."
+  },
+  "identity_policy": {
+    "original_cerebro_voice": true,
+    "exact_person_identity_clone": false,
+    "exact_character_identity_clone": false,
+    "movie_audio_reference": false,
+    "actor_reference_audio": false
+  },
+  "authority": {
+    "owner_style_target_accepted": true,
+    "voice_bank_ready": false,
+    "automatic_promotion": false,
+    "preprod_ready": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  },
+  "next_gate": "MULTI_BASE_ES_ES_TIMBRE_SWEEP_AND_OWNER_LISTENING_QA"
+}
