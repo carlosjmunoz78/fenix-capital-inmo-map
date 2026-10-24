@@ -5036,6 +5036,76 @@
       "promoted_at": "2026-10-20T21:34:09.433Z"
     },
     {
+      "candidate_id": "repo:58d1fe64e46b965d04085c5405e1",
+      "technical_name": "hotjar",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/hotjar",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "58d1fe64e46b965d04085c5405e1484e205c11d323e3469b02b266025078f896",
+      "manifest_sha256": "2b8ee1a4d00bd247307e7e355cd2837acd7766041c6a2479d902fd9fa1f78dc1",
+      "outcome_hash": "6e70ea4cf0acd74431dc6d6d98c4bdeaa3b845ce68a660a35783c68d59fe6025",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:58d1fe64e46b965d:cap:1",
+          "technical_name": "hotjar",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T01:00:57.752Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "0aa086abac0df4d5739227287224230ad07ecbc0cda1a6272c27887c13680c11"
+    },
+    {
       "candidate_id": "repo:1206e8b6d7e91167fc4160e35e7e",
       "technical_name": "htmx",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/htmx",
@@ -5134,6 +5204,76 @@
         "observed_at": "2026-10-20T21:34:09.433Z"
       },
       "promoted_at": "2026-10-20T21:34:09.433Z"
+    },
+    {
+      "candidate_id": "repo:b03873851b35b32f4238cec11d1a",
+      "technical_name": "htmx",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/htmx",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "b03873851b35b32f4238cec11d1a9bd37219f8d31920957f36e60b9d3bff39d2",
+      "manifest_sha256": "7b11bfb99b39ea6947055b9ff0574025b58cb5088bb67fa086a4f7f80c1bbbe3",
+      "outcome_hash": "9476378d50db95c95a0e771bcd4c99b21f07253d8b835d4ee704fc4972fa606f",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:b03873851b35b32f:cap:1",
+          "technical_name": "htmx",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T01:00:57.753Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "e182b21320d2c61f8bd3cd5892023c105bad3e3e9b623b1f70cba36c6b8c5cde"
     },
     {
       "candidate_id": "repo:7b8f38f2ab4586be2d50e0f0a525",
@@ -5257,6 +5397,163 @@
         "observed_at": "2026-10-20T21:34:09.433Z"
       },
       "promoted_at": "2026-10-20T21:34:09.433Z"
+    },
+    {
+      "candidate_id": "repo:7d3e2762d24ff6f9fd1577f88b8b",
+      "technical_name": "hydra",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/hydra",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "7d3e2762d24ff6f9fd1577f88b8ba3405d2cc104dde467995e84bf4bfd141ba2",
+      "manifest_sha256": "e15278594785b50379ef3d636cb3e574eec0ac6f0b246b368379b21131c73f36",
+      "outcome_hash": "4fd49edfe1365324f736678b8b7981e01cf502b78fcc0da5e1465b042c5ca122",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "QA-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:7d3e2762d24ff6f9:cap:1",
+          "technical_name": "hydra",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            },
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 11
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T01:00:57.753Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "ad55f4866960c75b523637966dc89dae21426c3368695456b723f04434db4413"
+    },
+    {
+      "candidate_id": "repo:74d03dd8c8f9603d9e9e41151c9b",
+      "technical_name": "image-analysis",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/image-analysis",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "74d03dd8c8f9603d9e9e41151c9b18aaff7d47862c969ccaf2fa3e34e720cef5",
+      "manifest_sha256": "1587ae2189bd34ae82f1d15466217e0f148b9a77a0f5e14debeb3e2ff53642d7",
+      "outcome_hash": "47bf9c77c4c3dc7a71345532468749d30fe269a8b12b4443c5cf69a8c6decb1b",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:74d03dd8c8f9603d:cap:1",
+          "technical_name": "image-analysis",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T01:00:57.753Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "d1ecdf3b266083c7962d4ac5a2cc59c0106238832c228fc2db844600d14ea4d2"
     },
     {
       "candidate_id": "repo:a05afec24c39f369668acdd9b0c3",
@@ -5660,6 +5957,78 @@
         "observed_at": "2026-10-20T21:34:09.433Z"
       },
       "promoted_at": "2026-10-20T21:34:09.433Z"
+    },
+    {
+      "candidate_id": "repo:b52eb35426ef4b8724c5fb6688f1",
+      "technical_name": "istio",
+      "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/istio",
+      "pinned_sha": "20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd",
+      "snapshot_sha256": "b52eb35426ef4b8724c5fb6688f14ab942c8f22fc5f43b5edea5a8e7a7a59211",
+      "manifest_sha256": "ce0197fce2427fefe44d3d8fa3ea2e6141067eb0c328934541bd6042a94c323d",
+      "outcome_hash": "71768c72a988e0c1d84264f365afdf534927a8722dda53f10c14fd21b7c96efa",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:b52eb35426ef4b87:cap:1",
+          "technical_name": "istio",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-24T01:00:57.753Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "cc14387c877d898afbf06926d8ae8fea48fae5516c81b6a29ee323e4e6f37050"
     },
     {
       "candidate_id": "repo:8176c2b2505b937d44ce37b22992",
@@ -11108,11 +11477,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 110,
-    "inserted": 0,
+    "total": 115,
+    "inserted": 5,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 5,
     "prod_readonly": 110
   }
 }
