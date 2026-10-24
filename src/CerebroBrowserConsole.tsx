@@ -113,7 +113,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  },[selectedCompany,selectedSessionId]);
 
  function resetVisualSession(){setBrowserSession(null);keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;if(frameUrlRef.current){URL.revokeObjectURL(frameUrlRef.current);frameUrlRef.current='';setFrameUrl('');}}
- function changeCompany(value:string){if(browserSession&&!TERMINAL.has(browserSession.state))return;setSelectedCompany(value);setSelectedSessionId('');setSessionOptions([]);setBrowserError('');resetVisualSession();}
+ function changeCompany(value:string){if(hasActiveSession)return;setSelectedCompany(value);setSelectedSessionId('');setSessionOptions([]);setBrowserError('');resetVisualSession();}
  function changeSession(value:string){if(value===selectedSessionId)return;setSelectedSessionId(value);setBrowserError('');resetVisualSession();}
  function submit(event?:FormEvent){event?.preventDefault();const clean=composer.trim();if(!clean||!snapshot.ready||snapshot.sending)return;const core=document.querySelector<HTMLElement>('.cerebro-host-v0 .cerebro-console');const textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea');const form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return;setReactTextareaValue(textarea,clean);window.setTimeout(()=>form.requestSubmit(),0);setComposer('');}
  function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main');if(button&&!button.disabled)button.click();}
@@ -143,7 +143,8 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const canTakeover=Boolean(browserSession?.worker_alive&&browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO'&&!browserSession.emergency_stop);
  const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
  const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
- const canStart=Boolean(selectedCompany)&&(!browserSession||TERMINAL.has(browserSession.state));
+ const hasActiveSession=sessionOptions.some(item=>!TERMINAL.has(item.state));
+ const canStart=Boolean(selectedCompany)&&!hasActiveSession;
  const tabs=browserSession?.tabs||[];
  const activeTab=tabs.find(tab=>tab.active)||tabs.find(tab=>tab.index===browserSession?.active_tab_index)||tabs[0];
  const companyLabel=browserSession?.company_id||selectedCompany||'SIN EMPRESA';
@@ -166,7 +167,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
 
   <section className="cerebro-browser-sessionbar" aria-label="Estado de Browser 1" style={{minWidth:0,maxWidth:'100%',overflow:'hidden'}}>
    <div className="cerebro-browser-session-context" style={boundedBarStyle}>
-    <span style={{minWidth:92,maxWidth:'100%',overflow:'hidden'}}><small>EMPRESA</small>{companies.length>1?<select aria-label="Seleccionar empresa" value={selectedCompany} disabled={Boolean(browserSession&&!TERMINAL.has(browserSession.state))} onChange={event=>changeCompany(event.target.value)} style={selectorStyle}>{companies.map(company=><option key={company.company_id} value={company.company_id}>{company.company_id.toUpperCase()}</option>)}</select>:<strong style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{companyLabel.toUpperCase()}</strong>}</span>
+    <span style={{minWidth:92,maxWidth:'100%',overflow:'hidden'}}><small>EMPRESA</small>{companies.length>1?<select aria-label="Seleccionar empresa" value={selectedCompany} disabled={hasActiveSession} onChange={event=>changeCompany(event.target.value)} style={selectorStyle}>{companies.map(company=><option key={company.company_id} value={company.company_id}>{company.company_id.toUpperCase()}</option>)}</select>:<strong style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{companyLabel.toUpperCase()}</strong>}</span>
     <span><small>ENTORNO</small><strong>{environmentLabel}</strong></span>
     <span style={{minWidth:112,maxWidth:190,overflow:'hidden'}}><small>SESIÓN</small>{sessionOptions.length>1?<select aria-label="Seleccionar sesión" value={selectedSessionValue} onChange={event=>changeSession(event.target.value)} style={selectorStyle}>{sessionOptions.map(item=><option key={item.session_id} value={item.session_id}>{readableId(item.session_id)} · {item.state}</option>)}</select>:<strong title={browserSession?.session_id||''}>{readableId(browserSession?.session_id,'SIN SESIÓN')}</strong>}</span>
     <span><small>RUNTIME</small><strong>Browser 1 · V3</strong></span>
