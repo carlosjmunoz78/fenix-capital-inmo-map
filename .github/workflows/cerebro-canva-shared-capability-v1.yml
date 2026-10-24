@@ -5,11 +5,13 @@ on:
     paths:
       - 'cerebro/integrations/canva/**'
       - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
       - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
   pull_request:
     paths:
       - 'cerebro/integrations/canva/**'
       - 'cerebro/knowledge/creative-media-knowledge-registry-v1.json'
+      - 'cerebro/tech-scout/creative-editor-video-selected-v1.json'
       - '.github/workflows/cerebro-canva-shared-capability-v1.yml'
   workflow_dispatch:
 
@@ -29,13 +31,71 @@ jobs:
         run: node --test cerebro/integrations/canva/canva-capability-router-v1.test.mjs
       - name: Validate Canva JSON contracts
         run: >-
-          node -e "for (const f of ['cerebro/integrations/canva/CANVA-001.manifest.json','cerebro/integrations/canva/CANVA-001.mcp-contract.json','cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json','cerebro/integrations/canva/canva-capability-bindings.v1.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('canva-shared-json GREEN')"
-      - name: Assert Canva is not a canonical engine
+          node -e "for (const f of ['cerebro/integrations/canva/CANVA-001.manifest.json','cerebro/integrations/canva/CANVA-001.mcp-contract.json','cerebro/integrations/canva/CANVA-001.mission-night-2026-10-24.json','cerebro/integrations/canva/canva-capability-bindings.v1.json','cerebro/tech-scout/creative-editor-video-selected-v1.json']) JSON.parse(require('fs').readFileSync(f,'utf8')); console.log('creative-contract-json GREEN')"
+      - name: Assert tools are not canonical engines
         run: >-
-          node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/registry/engine-registry.v1.json','utf8')); if(r.engine_ids.includes('CANVA-001')) throw new Error('CANVA-001 must remain capability, not engine'); console.log('no-canva-engine GREEN')"
+          node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/registry/engine-registry.v1.json','utf8')); for(const bad of ['CANVA-001','OPENDESIGN-001','OPENCUT-001']) if(r.engine_ids.includes(bad)) throw new Error('tool must remain capability: '+bad); console.log('no-tool-engines GREEN')"
       - name: Assert transversal creative knowledge registry exists
         run: >-
           node -e "const r=JSON.parse(require('fs').readFileSync('cerebro/knowledge/creative-media-knowledge-registry-v1.json','utf8')); if(r.scope!=='CEREBRO_OS_ALL_DEPARTMENTS') throw new Error('creative registry not transversal'); console.log('creative-registry GREEN')"
       - name: Canonical CEREBRO registry validation
         working-directory: cerebro
         run: npm run validate
+
+  opendesign-physical-lab:
+    name: OpenDesign pinned physical LAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Clone exact upstream commit and verify MIT license
+        run: |
+          git clone https://github.com/clawnify/OpenDesign.git opendesign
+          cd opendesign
+          git checkout 89c61f83c6c5141895d281385e90c6438ac7be1f
+          test "$(git rev-parse HEAD)" = "89c61f83c6c5141895d281385e90c6438ac7be1f"
+          grep -q "MIT License" LICENSE
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install pinned dependency graph
+        run: corepack enable && corepack prepare pnpm@10.20.0 --activate && cd opendesign && pnpm install --frozen-lockfile
+      - name: Upstream unit tests
+        working-directory: opendesign
+        run: pnpm test
+      - name: Production build
+        working-directory: opendesign
+        run: pnpm build
+      - name: Static secret pattern check
+        working-directory: opendesign
+        run: >-
+          ! grep -RIE '(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})' --exclude-dir=.git --exclude-dir=node_modules .
+
+  opencut-physical-lab:
+    name: OpenCut pinned physical LAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Clone exact upstream commit and verify permissive license
+        run: |
+          git clone https://github.com/OpenCut-app/OpenCut.git opencut
+          cd opencut
+          git checkout e668010778568641babef2cc40be4703ae6916d6
+          test "$(git rev-parse HEAD)" = "e668010778568641babef2cc40be4703ae6916d6"
+          grep -q "Permission is hereby granted" LICENSE
+          grep -q "apps/desktop" Cargo.toml
+      - name: Install upstream-pinned Rust
+        run: |
+          rustup toolchain install 1.97.0 --profile minimal
+          rustup default 1.97.0
+      - name: Locked workspace metadata
+        working-directory: opencut
+        run: cargo metadata --locked --no-deps --format-version 1 > /tmp/opencut-metadata.json
+      - name: Rust workspace check
+        working-directory: opencut
+        run: cargo check --workspace --locked
+      - name: Confirm rewrite status and future automation interfaces
+        working-directory: opencut
+        run: |
+          grep -Eqi 'rewritten from the ground up|rewriting|rewrite' README.md
+          grep -q 'MCP server' README.md
+          grep -q 'Headless mode' README.md
