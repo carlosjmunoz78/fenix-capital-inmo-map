@@ -1,0 +1,86 @@
+name: CEREBRO UMS Daily Knowledge Improvement V1
+
+on:
+  schedule:
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/media-studio/v2/learning/daily-specialist-learning-plan-v1.mjs'
+      - 'cerebro/media-studio/v2/learning/professional-source-watch-v1.mjs'
+      - 'cerebro/media-studio/v2/knowledge/prod-specialist-enrichment-v1.mjs'
+      - 'cerebro/media-studio/v2/knowledge/prod-specialist-depth-matrix-v1.mjs'
+      - 'cerebro/media-studio/v2/knowledge/verified-source-expansion-prod-2026-10-25.json'
+      - 'cerebro/media-studio/v2/knowledge/frontier-media-tech-watch-prod-2026-10-25.json'
+      - 'cerebro/media-studio/v2/tests/daily-specialist-learning-plan-v1.test.mjs'
+      - 'cerebro/media-studio/v2/tests/professional-source-watch-v1.test.mjs'
+      - '.github/workflows/cerebro-ums-daily-knowledge-improvement-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-daily-knowledge-improvement-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  daily-knowledge-improvement:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      STATE_DIR: ${{ runner.temp }}/cerebro-ums-knowledge-watch-state
+      PLAN_REPORT: ${{ runner.temp }}/ums-daily-specialist-learning-plan.json
+      WATCH_REPORT: ${{ runner.temp }}/ums-professional-source-watch.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore prior source-watch state
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/cerebro-ums-knowledge-watch-state
+          key: ums-knowledge-watch-v1-${{ github.ref_name }}-${{ github.run_id }}
+          restore-keys: |
+            ums-knowledge-watch-v1-${{ github.ref_name }}-
+      - name: Run daily learning contracts
+        run: node --test cerebro/media-studio/v2/tests/daily-specialist-learning-plan-v1.test.mjs cerebro/media-studio/v2/tests/professional-source-watch-v1.test.mjs
+      - name: Build one learning request for every enriched specialist
+        shell: bash
+        run: |
+          set -euo pipefail
+          TODAY="$(date -u +%F)"
+          node cerebro/media-studio/v2/learning/daily-specialist-learning-plan-v1.mjs --date "$TODAY" > "$PLAN_REPORT"
+      - name: Watch all verified professional and frontier sources for change
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$STATE_DIR"
+          PREVIOUS="$STATE_DIR/latest.json"
+          if [ -s "$PREVIOUS" ]; then
+            node cerebro/media-studio/v2/learning/professional-source-watch-v1.mjs --previous "$PREVIOUS" --out "$WATCH_REPORT"
+          else
+            node cerebro/media-studio/v2/learning/professional-source-watch-v1.mjs --out "$WATCH_REPORT"
+          fi
+          cp "$WATCH_REPORT" "$PREVIOUS"
+      - name: Enforce daily learning coverage and fail-closed authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const plan=JSON.parse(fs.readFileSync(process.env.PLAN_REPORT,'utf8'));
+          const watch=JSON.parse(fs.readFileSync(process.env.WATCH_REPORT,'utf8'));
+          if(plan.specialists!==192||plan.role_request_count!==192||plan.all_roles_request_learning_daily!==true) throw new Error('UMS_DAILY_192_ROLE_COVERAGE_FAILED');
+          if(!(plan.deduplicated_job_count>0&&plan.deduplicated_job_count<192)) throw new Error('UMS_DAILY_RESEARCH_DEDUP_FAILED');
+          if(plan.knowledge_auto_promotion!==false||plan.prod_write_authorized!==false||plan.spend_authorized!==false||Number(plan.additional_cost_eur)!==0) throw new Error('UMS_DAILY_LEARNING_AUTHORITY_EXPANSION');
+          if(!(watch.source_count>=30)||watch.knowledge_auto_promotion!==false||watch.prod_write_authorized!==false||watch.tool_execution_authorized!==false||watch.spend_authorized!==false||Number(watch.additional_cost_eur)!==0) throw new Error('UMS_SOURCE_WATCH_AUTHORITY_OR_COVERAGE_FAILURE');
+          console.log(JSON.stringify({status:'UMS_DAILY_KNOWLEDGE_IMPROVEMENT_GREEN',specialists:plan.specialists,role_requests:plan.role_request_count,deduplicated_research_jobs:plan.deduplicated_job_count,watched_sources:watch.source_count,source_signal_changes:watch.changed_signal_count,unreachable_sources:watch.unreachable,auto_promote:false,additional_cost_eur:0}));
+          NODE
+      - name: Upload daily knowledge evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-daily-knowledge-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/ums-daily-specialist-learning-plan.json
+            ${{ runner.temp }}/ums-professional-source-watch.json
+          if-no-files-found: error
+          retention-days: 30
