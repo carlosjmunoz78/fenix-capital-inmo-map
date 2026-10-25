@@ -35,12 +35,20 @@ function assertInteractiveScope(job,endpoint){
   throw new Error('INTERACTIVE_SCOPE_DENIED');
 }
 
-async function callApi(endpoint,route,tokenProvider,body={},fetch_impl=fetch,prefix='BROWSER_V3'){
-  const token=required(await tokenProvider(),'WORKER_TOKEN');
-  const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
-  const data=await response.json().catch(()=>null);
-  if(!response.ok||data?.ok!==true)throw new Error(`${prefix}_${route.replace(/\//g,'_').toUpperCase()}_FAILED:${response.status}:${data?.error||'UNKNOWN'}`);
-  return data;
+export async function callApi(endpoint,route,tokenProvider,body={},fetch_impl=fetch,prefix='BROWSER_V3'){
+  // An authentication rejection happens before the route executes. Retry only
+  // that rejection, never an ambiguous transport failure or a completed action.
+  for(let attempt=0;attempt<3;attempt++){
+    const token=required(await tokenProvider(),'WORKER_TOKEN');
+    const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
+    const data=await response.json().catch(()=>null);
+    if(response.ok&&data?.ok===true)return data;
+    if(response.status===403&&data?.error==='GITHUB_OIDC_INVALID'&&attempt<2){
+      await sleep(150*(attempt+1));
+      continue;
+    }
+    throw new Error(`${prefix}_${route.replace(/\//g,'_').toUpperCase()}_FAILED:${response.status}:${data?.error||'UNKNOWN'}`);
+  }
 }
 async function callInteractive(endpoint,route,tokenProvider,body={},fetch_impl=fetch){return callApi(endpoint,route,tokenProvider,body,fetch_impl,'BROWSER_V3');}
 async function callWorkspace(route,tokenProvider,body={},fetch_impl=fetch){if(!WORKSPACE_ENDPOINT)throw new Error('BROWSER_WORKSPACE_ENDPOINT_REQUIRED');return callApi(WORKSPACE_ENDPOINT,route,tokenProvider,body,fetch_impl,'BROWSER_WORKSPACE');}
