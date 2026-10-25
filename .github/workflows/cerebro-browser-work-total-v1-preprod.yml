@@ -14,7 +14,7 @@ permissions:
 
 concurrency:
   group: cerebro-browser-work-total-v1-preprod-consumer
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   CEREBRO_BROWSER_CANDIDATE_SHA: b52b1c75b2273a30b5a8bcb3a9ff4d6132796679
