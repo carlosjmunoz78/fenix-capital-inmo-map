@@ -1,5 +1,56 @@
 # CEREBRO Universal Media Studio V2 · Changelog
 
+## 2026-10-25 · Knowledge coverage + existing runtime reuse + BM-01 Stage 0
+
+Environment: `PREPROD`
+Base before block: `4cd2deed2f62238c5baf0e459b9ad48508592924`
+Pull request: `#933`
+Readiness before/after: `UNIVERSAL_MEDIA_STUDIO_READY = NOT_READY`
+Physical benchmarks before/after: `0/12 PASS_WITH_EVIDENCE`
+Additional recurring cost introduced: `0 €`
+
+### HECHO
+- Converted the 384 specialist knowledge packs from structural coverage into measurable source-backed gap evidence.
+- Current verified snapshot maps at least one official source to 192 specialists / 24 departments; 192 specialists / 24 departments currently have zero verified department-level source mappings.
+- Generated 48 governed research jobs, including 24 `CRITICAL` zero-source department jobs. No job can auto-promote knowledge.
+- Added repository-wide media-runtime inventory excluding the UMS namespace and UMS workflows so self-references cannot fabricate prior capability evidence.
+- Clean inventory found prior CEREBRO references for FFmpeg, SoX, ImageMagick, Remotion and HyperFrames; no prior tracked Blender reference was found outside UMS.
+- Important existing systems discovered and preserved: `creative-output-pipeline-v1`, `creative-job-runner-v1`, `multimedia-factory-runtime-v0`, their contracts/workflows and capability registries.
+- Confirmed existing creative core certification declares `CREATIVE-PROGRAMMATIC-RENDER-V1` / `CEREBRO_HTML_CHROMIUM_FFMPEG` as `PROD_GREEN`, heavy render outside Supabase and additional cost 0 € under its own evidence/authority model.
+- Added `existing-creative-pipeline-adapter.mjs` to let UMS plan reuse of that existing capability in PREPROD without creating a second media runtime. UMS physical execution and UMS PROD binding remain unproven/unauthorized.
+- Added BM-01 original synthetic character seed `UMS-SYNTH-CHAR-001` (`Nova-01`).
+- Physically generated and hashed three distinct 512×512 reference views: FRONT, PROFILE_LEFT and THREE_QUARTER_RIGHT.
+- BM-01 Stage 0 is `BM01_STAGE0_REFERENCE_GREEN`, but global BM-01 remains `NOT_RUN`; no benchmark credit or readiness mutation is granted.
+- Added durable evidence snapshot: `cerebro/media-studio/v2/evidence/preprod-knowledge-runtime-bm01-stage0-2026-10-25.json`.
+
+### BM-01 sigue pendiente
+Missing for a real BM-01 pass:
+- `VIDEO_IDENTITY_PROOF`.
+- `THREE_D_REFERENCE_PROOF`.
+- `CROSS_MODAL_CONSISTENCY_METRICS`.
+
+### EXISTENTE Y PRESERVADO
+- App Fénix, CRM, Supabase transactional core, SEO, WordPress, Training and unrelated CEREBRO engines: unchanged.
+- Existing creative/multimedia pipeline: preserved and wrapped; not replaced.
+- Existing universal learning scheduler: reused; no competing scheduler.
+- Trading isolation: unchanged.
+
+### Evidencia
+- Knowledge/runtime inventory run `40205418621`, artifact `12603128218`, digest `sha256:9d2bbf295968a38674e8475acc39493fdf25318f3ad9af3431ef92b4ded7b5e2`.
+- BM-01 Stage 0 run `40205418615`, artifact `12602998549`, digest `sha256:80acc24c9814186144eddb800b06d141aca7262ad6296f9ebf681efd514b7bc6`.
+- Character bible SHA-256 `02b2be4c5560c4bb9b3f8a1dd547530b6ac4ab53413dc3fca5305a254eaeaceb`.
+- FRONT SHA-256 `e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec`.
+- PROFILE_LEFT SHA-256 `fd18b29d82a0de3acbd178210938c5ab021aa25fde260285f5bddd741ba0b172`.
+- THREE_QUARTER_RIGHT SHA-256 `97fb7b322508f995378d7d3dfd01baa7511d91d3b78b69a05518f40a4a63b651`.
+
+### Próximo bloque
+- Physically execute the UMS wrapper against the existing creative pipeline to target BM-01 video identity evidence, without changing its underlying runtime.
+- Audit the existing creative job runner contract/evidence for the exact reuse seam and rollback.
+- Solve the genuine 3D gap separately; current clean repository inventory found no prior Blender implementation outside UMS.
+- Map verified sources to role-level required sections; current department source density is not equivalent to expert completion.
+
+---
+
 ## 2026-10-25 · Specialist knowledge + governed learning + physical runtime evidence
 
 Environment: `PREPROD`

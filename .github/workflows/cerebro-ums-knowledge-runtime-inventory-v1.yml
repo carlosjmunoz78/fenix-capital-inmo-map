@@ -1,0 +1,56 @@
+name: CEREBRO UMS Knowledge and Runtime Inventory V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/knowledge/specialty-knowledge-coverage.mjs'
+      - 'cerebro/media-studio/v2/tests/specialty-knowledge-coverage.test.mjs'
+      - 'cerebro/media-studio/v2/runtime/repository-media-runtime-inventory.mjs'
+      - 'cerebro/media-studio/v2/tests/repository-media-runtime-inventory.test.mjs'
+      - '.github/workflows/cerebro-ums-knowledge-runtime-inventory-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-knowledge-runtime-inventory-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  knowledge-and-runtime-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      COVERAGE_REPORT: /tmp/ums-specialist-knowledge-coverage.json
+      RUNTIME_REPORT: /tmp/ums-repository-media-runtime-inventory.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests using runner-native Node
+        run: node --test cerebro/media-studio/v2/tests/specialty-knowledge-coverage.test.mjs cerebro/media-studio/v2/tests/repository-media-runtime-inventory.test.mjs
+      - name: Materialize 384-role source coverage and governed research gaps
+        run: node cerebro/media-studio/v2/knowledge/specialty-knowledge-coverage.mjs --out "$COVERAGE_REPORT"
+      - name: Inventory tracked media-runtime references outside UMS
+        run: node cerebro/media-studio/v2/runtime/repository-media-runtime-inventory.mjs --out "$RUNTIME_REPORT"
+      - name: Assert evidence-only authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const coverage=JSON.parse(fs.readFileSync(process.env.COVERAGE_REPORT,'utf8'));
+          const runtime=JSON.parse(fs.readFileSync(process.env.RUNTIME_REPORT,'utf8'));
+          if(coverage.specialist_roles!==384||coverage.departments!==48) throw new Error('SPECIALIST_COVERAGE_INCOMPLETE');
+          if(coverage.deep_verified_operational_claims!==0||coverage.knowledge_auto_promotion!==false||coverage.prod_authorized!==false||Number(coverage.additional_cost_eur)!==0) throw new Error('KNOWLEDGE_FALSE_PROMOTION');
+          if(runtime.prod_binding_authorized!==false||runtime.installation_authorized!==false||runtime.spend_authorized!==false||Number(runtime.additional_cost_eur)!==0) throw new Error('RUNTIME_INVENTORY_AUTHORITY_EXPANSION');
+          console.log(JSON.stringify({status:'UMS_KNOWLEDGE_RUNTIME_INVENTORY_GREEN',specialists:coverage.specialist_roles,zero_source_roles:coverage.roles_with_zero_verified_department_sources,critical_research_jobs:coverage.research_jobs.filter(x=>x.priority==='CRITICAL').length,runtime_families:runtime.families.map(x=>({family:x.family,status:x.status,refs:x.reference_count}))}));
+          NODE
+      - name: Upload coverage and runtime inventory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-knowledge-runtime-inventory-${{ github.run_id }}
+          path: |
+            /tmp/ums-specialist-knowledge-coverage.json
+            /tmp/ums-repository-media-runtime-inventory.json
+          if-no-files-found: error
+          retention-days: 14

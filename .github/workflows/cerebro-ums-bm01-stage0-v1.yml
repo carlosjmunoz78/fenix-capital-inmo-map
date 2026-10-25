@@ -1,0 +1,106 @@
+name: CEREBRO UMS BM01 Synthetic Stage0 V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/benchmarks/bm01-synthetic-character-seed.json'
+      - 'cerebro/media-studio/v2/benchmarks/bm01-stage0-evidence.mjs'
+      - 'cerebro/media-studio/v2/tests/bm01-stage0-evidence.test.mjs'
+      - '.github/workflows/cerebro-ums-bm01-stage0-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-bm01-stage0-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bm01-synthetic-stage0:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SEED: cerebro/media-studio/v2/benchmarks/bm01-synthetic-character-seed.json
+      REPORT: /tmp/bm01-stage0-report.json
+      EVIDENCE: /tmp/bm01-stage0-evidence.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests with runner-native Node
+        run: node --test cerebro/media-studio/v2/tests/bm01-stage0-evidence.test.mjs
+      - name: Assert runner-native physical render tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome >/dev/null
+          command -v node >/dev/null
+          command -v python3 >/dev/null
+      - name: Generate three deterministic original-character HTML views
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const seed=JSON.parse(fs.readFileSync(process.env.SEED,'utf8'));
+          if(seed.identity_type!=='SYNTHETIC_ORIGINAL'||seed.real_person_reference!==false) throw new Error('SYNTHETIC_SEED_REQUIRED');
+          const palette=seed.identity_lock;
+          const views={
+            FRONT:{face:'translateX(0) scaleX(1)',nose:'left:244px;width:24px',eyeL:'left:190px',eyeR:'left:286px',earL:'display:block;left:126px',earR:'display:block;right:126px'},
+            PROFILE_LEFT:{face:'translateX(-18px) scaleX(.78)',nose:'left:142px;width:48px',eyeL:'left:180px',eyeR:'display:none',earL:'display:none',earR:'display:block;right:140px'},
+            THREE_QUARTER_RIGHT:{face:'translateX(12px) scaleX(.9)',nose:'left:270px;width:34px',eyeL:'left:198px',eyeR:'left:292px',earL:'display:block;left:138px',earR:'display:none'}
+          };
+          for(const [view,v] of Object.entries(views)){
+            const html=`<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;width:512px;height:512px;overflow:hidden;background:#171a20;font-family:Arial,sans-serif}.stage{position:relative;width:512px;height:512px;background:radial-gradient(circle at 50% 35%,#2e3540 0%,#171a20 68%)}.label{position:absolute;top:18px;left:20px;color:#fff;font-size:15px;letter-spacing:2px;opacity:.85}.shoulders{position:absolute;left:106px;top:354px;width:300px;height:170px;border-radius:120px 120px 0 0;background:${palette.wardrobe_hex};border-top:8px solid ${palette.accent_hex}}.neck{position:absolute;left:218px;top:316px;width:76px;height:86px;background:${palette.skin_tone_hex};border-radius:0 0 28px 28px}.headWrap{position:absolute;left:0;top:0;width:512px;height:512px;transform:${v.face};transform-origin:50% 55%}.ear{position:absolute;top:201px;width:34px;height:72px;background:${palette.skin_tone_hex};border-radius:50%}.earL{${v.earL}}.earR{${v.earR}}.face{position:absolute;left:151px;top:112px;width:210px;height:258px;background:${palette.skin_tone_hex};border-radius:48% 48% 46% 46%}.hair{position:absolute;left:143px;top:90px;width:226px;height:112px;background:${palette.hair_hex};border-radius:55% 50% 35% 30%;clip-path:polygon(0 52%,12% 20%,32% 6%,66% 0,92% 20%,100% 58%,78% 45%,62% 54%,42% 40%,20% 58%)}.eye{position:absolute;top:213px;width:28px;height:15px;background:#fff;border-radius:50%}.eye:after{content:'';position:absolute;left:9px;top:2px;width:11px;height:11px;background:${palette.iris_hex};border-radius:50%}.eyeL{${v.eyeL}}.eyeR{${v.eyeR}}.brow{position:absolute;top:188px;width:42px;height:7px;background:${palette.brow_hex};border-radius:8px}.browL{left:184px;transform:rotate(-5deg)}.browR{left:283px;transform:rotate(5deg)}.nose{position:absolute;top:226px;height:58px;background:rgba(120,65,50,.18);border-radius:55% 45% 50% 50%;${v.nose}}.mouth{position:absolute;left:223px;top:309px;width:70px;height:12px;border-bottom:4px solid #7f4b48;border-radius:50%}.mark{position:absolute;left:200px;top:286px;width:6px;height:6px;border-radius:50%;background:#5c3b34}.collarL,.collarR{position:absolute;top:360px;width:86px;height:88px;background:#252930}.collarL{left:179px;clip-path:polygon(0 0,100% 0,70% 100%)}.collarR{right:179px;clip-path:polygon(0 0,100% 0,30% 100%)}</style></head><body><main class="stage"><div class="label">NOVA-01 · ${view}</div><div class="shoulders"></div><div class="neck"></div><div class="headWrap"><div class="ear earL"></div><div class="ear earR"></div><div class="face"></div><div class="hair"></div><div class="brow browL"></div><div class="brow browR"></div><div class="eye eyeL"></div><div class="eye eyeR"></div><div class="nose"></div><div class="mouth"></div><div class="mark"></div></div><div class="collarL"></div><div class="collarR"></div></main></body></html>`;
+            fs.writeFileSync(`/tmp/bm01-${view}.html`,html,{mode:0o600});
+          }
+          NODE
+      - name: Render three physical PNG references with Chrome and no external network
+        shell: bash
+        run: |
+          set -euo pipefail
+          for view in FRONT PROFILE_LEFT THREE_QUARTER_RIGHT; do
+            google-chrome --headless=new --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-background-networking --disable-component-update --disable-default-apps --disable-extensions --disable-sync --metrics-recording-only --no-first-run --window-size=512,512 --screenshot="/tmp/bm01-${view}.png" "file:///tmp/bm01-${view}.html"
+            test -s "/tmp/bm01-${view}.png"
+          done
+      - name: Build stage 0 physical evidence report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,struct,datetime
+          seed=open(os.environ['SEED'],'rb').read(); seed_json=json.loads(seed)
+          assets=[]
+          for view in ['FRONT','PROFILE_LEFT','THREE_QUARTER_RIGHT']:
+              path=f'/tmp/bm01-{view}.png'; data=open(path,'rb').read()
+              if data[:8] != b'\x89PNG\r\n\x1a\n': raise SystemExit('PNG_SIGNATURE_INVALID')
+              w,h=struct.unpack('>II',data[16:24])
+              if (w,h)!=(512,512): raise SystemExit(f'BAD_DIMENSIONS:{view}:{w}x{h}')
+              assets.append({'view':view,'mime':'image/png','sha256':hashlib.sha256(data).hexdigest(),'bytes':len(data),'width':w,'height':h})
+          report={'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM01_STAGE0_REPORT_V1','environment':'PREPROD','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'character_id':seed_json['character_id'],'character_bible_sha256':hashlib.sha256(seed).hexdigest(),'installation_performed':False,'network_download_performed':False,'external_network_used_by_test':False,'observed_at':datetime.datetime.now(datetime.timezone.utc).isoformat(),'reference_assets':assets}
+          open(os.environ['REPORT'],'w').write(json.dumps(report,indent=2)+'\n')
+          print(json.dumps({'status':'BM01_STAGE0_PHYSICAL_REFERENCES_CREATED','character_id':report['character_id'],'hashes':[a['sha256'] for a in assets]}))
+          PY
+      - name: Validate Stage 0 without granting BM-01 or readiness credit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {loadAndValidateBm01Stage0Evidence} from './cerebro/media-studio/v2/benchmarks/bm01-stage0-evidence.mjs';
+          const evidence=loadAndValidateBm01Stage0Evidence(process.env.REPORT);
+          if(evidence.benchmark_state!=='NOT_RUN'||evidence.benchmark_credit||evidence.readiness_mutation||evidence.prod_authorized||Number(evidence.additional_cost_eur)!==0) throw new Error('BM01_STAGE0_FALSE_PROMOTION');
+          fs.writeFileSync(process.env.EVIDENCE,JSON.stringify(evidence,null,2)+'\n');
+          console.log(JSON.stringify({status:evidence.status,benchmark_state:evidence.benchmark_state,missing:evidence.missing_for_bm01_pass}));
+          NODE
+      - name: Upload BM-01 Stage 0 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-${{ github.run_id }}
+          path: |
+            /tmp/bm01-FRONT.png
+            /tmp/bm01-PROFILE_LEFT.png
+            /tmp/bm01-THREE_QUARTER_RIGHT.png
+            /tmp/bm01-stage0-report.json
+            /tmp/bm01-stage0-evidence.json
+          if-no-files-found: error
+          retention-days: 14
