@@ -8,6 +8,7 @@ const workflowPath='.github/workflows/cerebro-browser-work-total-v1-prod.yml';
 const ownerPath='supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts';
 const workspacePath='supabase/functions/cerebro-browser-work-total-v1-prod/index.ts';
 const dockPath='src/cerebroBrowserWorkTotalDock.ts';
+const appEntryPath='src/main.tsx';
 
 test('Work Total PROD preserves the validated fast private human-input loop',async()=>{
   const runtime=await read(runtimePath);
@@ -62,13 +63,15 @@ test('Work Total PROD owner is Fenix-only, CARLOS-ADMIN-only and never exposes s
   assert.doesNotMatch(owner,/preprod_test_actor_context_by_auth_server/);
 });
 
-test('Work Total dock is enabled in governed PROD and routes jobs to the PROD dispatcher prefix',async()=>{
+test('Work Total dock is enabled and actually mounted in governed PROD',async()=>{
   const dock=await read(dockPath);
+  const appEntry=await read(appEntryPath);
   assert.match(dock,/IS_PRODUCTION\?'cerebro-browser-work-total-owner-v1-prod'/);
   assert.match(dock,/IS_PRODUCTION\?'browser-work-total-v1-prod-ui-'/);
   assert.match(dock,/WORK TOTAL · \$\{ENVIRONMENT\}/);
   assert.doesNotMatch(dock,/if\(IS_PRODUCTION\)return/);
   assert.doesNotMatch(dock,/PROD intacto/);
+  assert.match(appEntry,/import ['"]\.\/cerebroBrowserWorkTotalDock['"];?/);
 });
 
 test('Work Total PROD canary remains isolated to its promotion branch and dedicated endpoints',async()=>{
@@ -77,6 +80,7 @@ test('Work Total PROD canary remains isolated to its promotion branch and dedica
   assert.match(workflow,/cerebro-browser-work-total-dispatch-v1-prod/);
   assert.match(workflow,/cerebro-browser-work-total-worker-v2-prod/);
   assert.match(workflow,/cerebro-browser-work-total-v1-prod/);
+  assert.match(workflow,/src\/main\.tsx/);
   assert.match(workflow,/CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'/);
   assert.match(workflow,/CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'/);
   assert.match(workflow,/CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'/);
