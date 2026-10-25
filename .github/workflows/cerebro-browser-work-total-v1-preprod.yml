@@ -2,7 +2,7 @@ name: CEREBRO Browser Work Total V1 PREPROD
 
 on:
   push:
-    branches: ['feat/browser-work-total-v1-20261024']
+    branches: ['feat/browser-work-total-v1-20261024', 'promote/browser-work-total-prod-20261025']
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-preprod.yml'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
@@ -41,9 +41,9 @@ env:
   CEREBRO_BROWSER_WORKER_SLOT: '1'
   CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
   CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
-  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '320'
-  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1200'
-  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '90'
+  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'
+  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1400'
+  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
   CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS: '3000'
 
 jobs:
