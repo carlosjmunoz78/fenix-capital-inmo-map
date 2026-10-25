@@ -1,3 +1,4 @@
+import './cerebroBrowserWorkTotalDock';
 import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 
 export type BrowserSessionV3={
