@@ -3,11 +3,19 @@
   window.__CEREBRO_BROWSER_ERGONOMICS_V1__=true;
 
   const BATCH_MS=85;
+  const TEXT_BATCH_MS=180;
   const MAX_DELTA=900;
   const wheelState=new WeakMap();
+  const typingState=new WeakMap();
 
   const clamp=value=>Math.max(-MAX_DELTA,Math.min(MAX_DELTA,value));
   const getBrowserRoot=()=>document.querySelector('.cerebro-browser-console');
+  const viewportForEvent=event=>{
+    const direct=event.target instanceof Element?event.target.closest('.cerebro-browser-viewport'):null;
+    if(direct)return direct;
+    const active=document.activeElement;
+    return active instanceof Element?active.closest('.cerebro-browser-viewport'):null;
+  };
 
   function flushWheel(viewport,state){
     state.timer=0;
@@ -19,6 +27,18 @@
     const batched=new WheelEvent('wheel',{deltaX,deltaY,deltaMode:0,bubbles:true,cancelable:true});
     Object.defineProperty(batched,'__cerebroBatched',{value:true});
     viewport.dispatchEvent(batched);
+  }
+
+  function flushTyping(viewport,state){
+    if(state.timer){window.clearTimeout(state.timer);state.timer=0;}
+    const text=state.value;
+    state.value='';
+    if(!text)return;
+    for(const key of text){
+      const batched=new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,composed:true});
+      Object.defineProperty(batched,'__cerebroTypingBatch',{value:true});
+      viewport.dispatchEvent(batched);
+    }
   }
 
   document.addEventListener('wheel',event=>{
@@ -34,6 +54,32 @@
     state.y+=Number(event.deltaY)||0;
     if(!state.timer)state.timer=window.setTimeout(()=>flushWheel(target,state),BATCH_MS);
   },{capture:true,passive:false});
+
+  function remapPointer(event){
+    if(event.__cerebroPointerMapped)return;
+    const image=event.target instanceof Element?event.target.closest('.cerebro-browser-viewport>img'):null;
+    if(!(image instanceof HTMLImageElement))return;
+    const rect=image.getBoundingClientRect();
+    const naturalWidth=image.naturalWidth;
+    const naturalHeight=image.naturalHeight;
+    if(!rect.width||!rect.height||!naturalWidth||!naturalHeight)return;
+    const scale=Math.min(rect.width/naturalWidth,rect.height/naturalHeight);
+    const containLeft=rect.left+(rect.width-naturalWidth*scale)/2;
+    const containTop=rect.top+(rect.height-naturalHeight*scale)/2;
+    const x=((event.clientX-rect.left)/rect.width)*naturalWidth;
+    const y=((event.clientY-rect.top)/rect.height)*naturalHeight;
+    const mappedX=containLeft+x*scale;
+    const mappedY=containTop+y*scale;
+    if(Math.abs(mappedX-event.clientX)<0.25&&Math.abs(mappedY-event.clientY)<0.25)return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    const mapped=new MouseEvent(event.type,{bubbles:true,cancelable:true,composed:true,view:window,detail:event.detail,screenX:event.screenX,screenY:event.screenY,clientX:mappedX,clientY:mappedY,ctrlKey:event.ctrlKey,shiftKey:event.shiftKey,altKey:event.altKey,metaKey:event.metaKey,button:event.button,buttons:event.buttons,relatedTarget:event.relatedTarget});
+    Object.defineProperty(mapped,'__cerebroPointerMapped',{value:true});
+    image.dispatchEvent(mapped);
+  }
+  document.addEventListener('click',remapPointer,true);
+  document.addEventListener('dblclick',remapPointer,true);
 
   function setExpanded(frame,expanded){
     frame.classList.toggle('cerebro-browser-frame--expanded',expanded);
@@ -83,8 +129,24 @@
   }
 
   document.addEventListener('keydown',event=>{
+    if(event.__cerebroTypingBatch)return;
     const root=getBrowserRoot();
     if(!root)return;
+    const viewport=viewportForEvent(event);
+    if(viewport){
+      let state=typingState.get(viewport);
+      if(!state){state={value:'',timer:0};typingState.set(viewport,state);}
+      const printable=event.key.length===1&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.isComposing;
+      if(printable){
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        state.value=`${state.value}${event.key}`.slice(0,4000);
+        if(!state.timer)state.timer=window.setTimeout(()=>flushTyping(viewport,state),TEXT_BATCH_MS);
+        return;
+      }
+      if(state.value)flushTyping(viewport,state);
+    }
     const frame=root.querySelector('.cerebro-browser-frame');
     if(event.key==='Escape'&&frame?.classList.contains('cerebro-browser-frame--expanded')&&event.shiftKey){
       event.preventDefault();
@@ -100,6 +162,13 @@
       event.preventDefault();
       tab.click();
     }
+  },true);
+
+  document.addEventListener('paste',event=>{
+    const viewport=viewportForEvent(event);
+    if(!viewport)return;
+    const state=typingState.get(viewport);
+    if(state?.value)flushTyping(viewport,state);
   },true);
 
   const observer=new MutationObserver(sync);
