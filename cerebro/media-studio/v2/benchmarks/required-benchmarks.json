@@ -14,7 +14,7 @@
     {"id":"BM-09","name":"Holographic or declared-device adapter dry run","required":true,"state":"NOT_RUN"},
     {"id":"BM-10","name":"Long-form multi-sequence character story image voice sound and color continuity","required":true,"state":"NOT_RUN"},
     {"id":"BM-11","name":"Thousand-shot production simulation with resumable scheduling and cost telemetry","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:f059583efef66ef99b97ed3ac6182f97c1443aea:cerebro/media-studio/v2/evidence/bm11-pass-with-evidence-2026-10-25.json"},
-    {"id":"BM-12","name":"Rebuild rollback provenance rights archive and multi-deliverable proof","required":true,"state":"NOT_RUN"}
+    {"id":"BM-12","name":"Rebuild rollback provenance rights archive and multi-deliverable proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:23072a2f2fccf16ad1363a79fd9f18618868a46c:cerebro/media-studio/v2/evidence/bm12-pass-with-evidence-2026-10-25.json"}
   ],
   "allowed_states":["NOT_RUN","RUNNING","FAIL","PASS_WITH_EVIDENCE"],
   "ready_rule":"Every required benchmark must be PASS_WITH_EVIDENCE and reference immutable evidence before READY may be true."
