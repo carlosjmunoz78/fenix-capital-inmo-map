@@ -1,0 +1,67 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "v0",
+  "voice_id": "ESM05",
+  "status": "TARGET_DEFINED_REFERENCE_REQUIRED",
+  "presentation": "masculine",
+  "locale": "es-ES",
+  "profile": "mature_authoritative",
+  "style_alias": "CEREBRO_EXECUTIVE_AI",
+  "identity_policy": {
+    "goal": "original CEREBRO voice with cinematic executive AI-assistant character",
+    "exact_person_identity_clone": false,
+    "celebrity_or_actor_reference_allowed": false,
+    "movie_or_broadcast_audio_as_reference_allowed": false,
+    "authorized_reference_required": true
+  },
+  "target_character": {
+    "pitch": "medium_low_to_low",
+    "pace": "measured",
+    "energy": "controlled",
+    "warmth": "moderate",
+    "authority": "high_without_aggression",
+    "clarity": "very_high",
+    "irony": "subtle_dry_optional",
+    "emotion": "restrained",
+    "delivery": "natural_conversational_not_announcer"
+  },
+  "accent_hard_gate": {
+    "target": "neutral_peninsular_spanish_spain",
+    "latin_american_drift_allowed": false,
+    "consistent_distincion_expected": true,
+    "vosotros_forms_required": true,
+    "regional_caricature_allowed": false
+  },
+  "negative_style_constraints": [
+    "no_latam_accent",
+    "no_sudamerican_prosody",
+    "no_radio_announcer_delivery",
+    "no_trailer_voice",
+    "no_robotic_monotone",
+    "no_overacting",
+    "no_breathy_whisper",
+    "no_identity_impersonation"
+  ],
+  "qa_thresholds": {
+    "castilian_spain_accent_score_min": 95,
+    "intelligibility_score_min": 95,
+    "accent_consistency_score_min": 95,
+    "naturalness_score_min": 90,
+    "character_fit_score_min": 90,
+    "latin_american_drift_events_max": 0,
+    "unintelligible_phrases_max": 0
+  },
+  "backend_preference": [
+    "chatterbox_single_language_es_es",
+    "openvoice_v2_authorized_reference_fallback"
+  ],
+  "authority": {
+    "automatic_promotion": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false,
+    "voice_bank_ready": false
+  }
+}

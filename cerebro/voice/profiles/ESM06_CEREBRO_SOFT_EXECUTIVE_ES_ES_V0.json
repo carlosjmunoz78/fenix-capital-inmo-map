@@ -1,0 +1,52 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "voice_id": "ESM06",
+  "environment": "LAB",
+  "status": "TARGET_DEFINED_REFERENCE_REQUIRED",
+  "locale": "es-ES",
+  "presentation": "masculine",
+  "profile": "soft_executive",
+  "owner_intent": "KEEP_AS_SECOND_CEREBRO_VOICE",
+  "style_target": {
+    "traits": [
+      "Spain-Spanish",
+      "male",
+      "soft",
+      "calm",
+      "clean",
+      "elegant",
+      "restrained",
+      "executive",
+      "warm",
+      "precise"
+    ],
+    "relative_to_ESM05": {
+      "softer_tone": true,
+      "less_grave": true,
+      "less_cinematic_weight": true,
+      "more_gentle_delivery": true
+    },
+    "forbidden": [
+      "LatAm drift",
+      "actor identity clone",
+      "character identity clone",
+      "celebrity reference audio",
+      "broadcast audio as cloning reference"
+    ]
+  },
+  "identity_policy": {
+    "original_cerebro_voice": true,
+    "exact_person_identity_clone": false,
+    "authorized_reference_required": true
+  },
+  "authority": {
+    "owner_style_target_accepted": true,
+    "voice_bank_ready": false,
+    "automatic_promotion": false,
+    "preprod_ready": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  },
+  "next_gate": "GENERATE_OR_LICENSE_CLEAN_ES_ES_REFERENCE_AND_RUN_OWNER_LISTENING_QA"
+}

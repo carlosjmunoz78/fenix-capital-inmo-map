@@ -1,0 +1,57 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "VOICE-001",
+  "voice_id": "ESM09",
+  "environment": "LAB",
+  "status": "VOICE_DESIGN_TRIAL_DEFINED",
+  "locale": "es-ES",
+  "presentation": "masculine",
+  "profile": "younger_cinematic_ai_assistant",
+  "owner_intent": "FIND_A_YOUNGER_TIMBRE_THAN_ESM08_CARLFM_WITH_CALM_TECHNICAL_CINEMATIC_CHARACTER",
+  "target": {
+    "age_impression": "35-42",
+    "register": "low-mid baritone",
+    "accent": "native European Spanish from Spain",
+    "prosody": "calm, controlled, understated, conversational",
+    "traits": [
+      "smooth",
+      "clean",
+      "intelligent",
+      "precise",
+      "technical",
+      "elegant",
+      "quiet authority",
+      "subtle dry wit",
+      "not elderly",
+      "not announcer-like"
+    ],
+    "forbidden": [
+      "LatAm drift",
+      "English accent bleed",
+      "elderly age impression",
+      "raspy old-man timbre",
+      "actor identity clone",
+      "character identity clone",
+      "movie audio reference",
+      "celebrity reference"
+    ]
+  },
+  "backend_trial": {
+    "family": "Qwen3-TTS",
+    "model": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+    "license": "Apache-2.0",
+    "mode": "voice_design",
+    "reference_audio_required": false,
+    "external_zero_cost_trial": "Qwen official Hugging Face Space / ZeroGPU",
+    "production_dependency": false
+  },
+  "authority": {
+    "owner_listening_required": true,
+    "voice_bank_ready": false,
+    "automatic_promotion": false,
+    "preprod_ready": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  },
+  "next_gate": "GENERATE_MULTIPLE_ES_ES_VOICE_DESIGN_CANDIDATES_AND_RUN_OWNER_LISTENING_QA"
+}

@@ -1,0 +1,139 @@
+{
+  "schema_version": "0.8.0",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "locale": "es-ES",
+  "owner_selection": {
+    "keep_all": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
+    "primary_direction": "ESM11",
+    "accepted_existing_candidates": ["ESM05", "ESM06", "ESM07", "ESM08-CARLFM-YOUNGER-B"],
+    "jarvis_style_target_still_open": true
+  },
+  "voices": [
+    {
+      "voice_id": "ESM05",
+      "label": "CEREBRO Executive Cinematic V1",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE"
+    },
+    {
+      "voice_id": "ESM06",
+      "label": "CEREBRO Soft Executive es-ES",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
+    },
+    {
+      "voice_id": "ESM07",
+      "label": "CEREBRO Calm Technical Cinematic es-ES",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "KEEP_BUT_NOT_JARVIS"
+    },
+    {
+      "voice_id": "ESM08-CARLFM-YOUNGER-B",
+      "label": "CEREBRO Spain-Spanish Younger B",
+      "owner_decision": "KEEP",
+      "status": "OWNER_ACCEPTED_SEED_CANDIDATE",
+      "owner_similarity_note": "LIKED_AND_KEEP_BUT_NOT_JARVIS"
+    },
+    {
+      "voice_id": "ESM08-CARLFM",
+      "label": "CEREBRO Piper Spain-Spanish Timbre A Original",
+      "owner_decision": "KEEP_AS_SOURCE_REFERENCE_ONLY",
+      "status": "OWNER_LISTENED_SALVAGEABLE_BUT_TOO_OLD_SOUNDING"
+    },
+    {
+      "voice_id": "ESM08-MLS10246",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_TIMBRE"
+    },
+    {
+      "voice_id": "ESM08-MLS9972",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_TIMBRE"
+    },
+    {
+      "voice_id": "ESM09-A",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM09-B",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM09-C",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT_REDUCED_BUT_STILL_PRESENT"
+    },
+    {
+      "voice_id": "ESM10-A",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM10-B",
+      "owner_decision": "REJECT_FOR_TARGET",
+      "status": "OWNER_REJECTED_LATAM_ACCENT"
+    },
+    {
+      "voice_id": "ESM10-C",
+      "owner_decision": "REJECT_FOR_PRIMARY_TARGET",
+      "status": "OWNER_REJECTED_ROBOTIC_QUALITY",
+      "owner_similarity_note": "LESS_LATAM_DRIFT_THAN_A_B_BUT_TOO_ROBOTIC"
+    },
+    {
+      "voice_id": "ESM11",
+      "label": "CEREBRO Original Peninsular Grave-Serene AI Assistant",
+      "owner_decision": "RESEARCH_AND_BUILD",
+      "status": "FORENSIC_STYLE_TARGET_DEFINED_NOT_GENERATED",
+      "research_ref": "../VOICE_ESM10_JARVIS_STYLE_FORENSIC_RESEARCH_V0.md",
+      "target_traits": [
+        "native Spain-Spanish",
+        "male",
+        "grave-to-medium-low register",
+        "adult but not elderly",
+        "substantial resonance without rasp",
+        "powerful base timbre with restrained delivery",
+        "serene",
+        "precise",
+        "technical",
+        "elegant",
+        "quiet authority",
+        "low pitch variance",
+        "natural conversational delivery"
+      ],
+      "fx_policy": "base timbre first; only subtle reversible micro-delay/chorus/short-room after accent and timbre pass",
+      "actor_clone": false,
+      "movie_audio_reference": false
+    }
+  ],
+  "lessons": {
+    "same_base_voice_pitch_or_pace_edits_are_insufficient": true,
+    "Piper_es_ES_catalog_exhausted_for_target_search": true,
+    "ESM08_CARLFM_younger_B_is_owner_accepted_but_not_JARVIS": true,
+    "Qwen3_VoiceDesign_without_native_reference_failed_es_ES_accent_gate": true,
+    "synthetic_timbre_to_dedicated_es_ES_bridge_succeeded_technically_but_failed_owner_quality_gate": true,
+    "ESM10_A_B_failed_latam_gate": true,
+    "ESM10_C_failed_robotic_quality_gate": true,
+    "recognizable_target_depends_primarily_on_base_timbre_and_performance_not_heavy_fx": true,
+    "next_search_uses_forensic_style_profile_and_subtle_fx_only": true,
+    "preserve_owner_accepted_candidates": true
+  },
+  "identity_policy": {
+    "original_cerebro_voices_only": true,
+    "actor_clone": false,
+    "character_clone": false,
+    "movie_audio_reference": false,
+    "unauthorized_identifiable_person_reference": false
+  },
+  "authority": {
+    "automatic_promotion": false,
+    "voice_bank_ready": false,
+    "preprod_ready": false,
+    "prod_enabled": false,
+    "public_clone_enabled": false
+  }
+}
