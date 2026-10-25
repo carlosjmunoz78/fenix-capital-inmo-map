@@ -1,0 +1,57 @@
+name: CEREBRO Browser Work Total PROD E2E Ops
+
+on:
+  push:
+    branches:
+      - ops/browser-work-total-prod-e2e-20261025
+
+permissions:
+  contents: read
+
+jobs:
+  open-google-primary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      OWNER_BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-browser-work-total-owner-v1-prod
+      USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Assert secret references exist without exposing them
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$USER_JWT"
+          test -n "$PUBLISHABLE_KEY"
+
+      - name: Verify owner identity and Google principal profile
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(curl --silent --show-error --output /tmp/profiles.json --write-out '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${USER_JWT}" \
+            -H "apikey: ${PUBLISHABLE_KEY}" \
+            -H 'content-type: application/json' \
+            --data '{"company_id":"fenix"}' \
+            "${OWNER_BASE}/profiles")"
+          test "$status" = "200"
+          jq -e '.ok == true' /tmp/profiles.json >/dev/null
+          jq -e '.profiles[] | select(.identity_id == "iam:carlos-google-primary" and .account_id == "acct:carlos-google-primary")' /tmp/profiles.json >/dev/null
+          echo 'Owner authenticated; Google principal profile authorized.'
+
+      - name: Open or resume Google principal workspace
+        shell: bash
+        run: |
+          set -euo pipefail
+          body="$(jq -cn --arg idem "browser-work-total-v1-prod-e2e-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" '{company_id:"fenix",identity_id:"iam:carlos-google-primary",account_id:"acct:carlos-google-primary",target_url:"https://www.google.com/",idempotency_key:$idem}')"
+          status="$(curl --silent --show-error --output /tmp/start.json --write-out '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer ${USER_JWT}" \
+            -H "apikey: ${PUBLISHABLE_KEY}" \
+            -H 'content-type: application/json' \
+            --data "$body" \
+            "${OWNER_BASE}/start")"
+          test "$status" = "200"
+          jq -e '.ok == true' /tmp/start.json >/dev/null
+          jq '{ok,reused,session_id:(.session.session_id // .active_session.session_id),state:(.session.state // .active_session.state),verification_state,human_login_required,secret_material_exposed:false}' /tmp/start.json
