@@ -293,7 +293,7 @@ export function createCloudBrowserWorker({
     const file = path.join(dir, `${Date.now()}-${safeSegment(label)}.png`);
     await activePage.screenshot({
       path: file,
-      fullPage: true,
+      fullPage: !String(label).startsWith('live-'),
       mask: [activePage.locator(SENSITIVE_FIELD_SELECTOR)],
       maskColor: '#000000'
     });
