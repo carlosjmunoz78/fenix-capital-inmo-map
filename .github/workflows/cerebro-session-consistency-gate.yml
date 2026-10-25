@@ -13,15 +13,25 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
+
+concurrency:
+  group: cerebro-session-consistency-preprod
+  cancel-in-progress: true
 
 jobs:
   validate:
-    name: Session consistency regression and build
+    name: Session consistency regression and isolated PREPROD publish
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
@@ -31,5 +41,53 @@ jobs:
         run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
       - name: Session consistency regression
         run: node --test cerebro/runtime/browser-session-consistency-gate.test.mjs
+      - name: Canonical Browser V3 transport regression
+        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs cerebro/runtime/browser-oidc-refresh-v2.test.mjs
       - name: Build App integration
         run: npm run build
+      - name: Build isolated PREPROD snapshot
+        run: npx vite build --base=/ --outDir dist-preprod
+      - name: Assert PREPROD isolation before publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist-preprod/index.html
+          grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-preprod >/dev/null
+          ! grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-preprod
+          grep -R -F 'NAVEGADOR' dist-preprod >/dev/null
+          grep -R -F 'Seleccionar sesión' dist-preprod >/dev/null
+      - name: Prepare isolated static snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-preprod/index.html dist-preprod/404.html
+          touch dist-preprod/.nojekyll
+          printf '%s\n' "${GITHUB_SHA}" > dist-preprod/PREPROD_SOURCE_SHA.txt
+          cat > dist-preprod/package.json <<'JSON'
+          {"name":"fenix-capital-session-consistency-preprod-static","private":true,"version":"1.0.0","scripts":{"build":"node build-static.cjs"}}
+          JSON
+          cat > dist-preprod/build-static.cjs <<'JS'
+          const fs=require('fs');const path=require('path');const root=process.cwd();const out=path.join(root,'dist');fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});const skip=new Set(['dist','.git','node_modules','package.json','package-lock.json','build-static.cjs','vercel.json']);for(const name of fs.readdirSync(root)){if(skip.has(name))continue;fs.cpSync(path.join(root,name),path.join(out,name),{recursive:true});}
+          JS
+          cat > dist-preprod/vercel.json <<'JSON'
+          {"buildCommand":"npm run build","outputDirectory":"dist","cleanUrls":false}
+          JSON
+          test ! -e dist-preprod/CNAME
+      - name: Publish isolated PREPROD snapshot branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/fenix-session-consistency-preprod
+          mkdir -p /tmp/fenix-session-consistency-preprod
+          cp -R dist-preprod/. /tmp/fenix-session-consistency-preprod/
+          cd /tmp/fenix-session-consistency-preprod
+          git init
+          git checkout -b preprod-navegador-pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "deploy: session consistency PREPROD ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin preprod-navegador-pages
