@@ -1,0 +1,143 @@
+name: CEREBRO UMS Owner Authorization Gates
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - cerebro/media-studio/v2/contracts/owner-authorization-decision.schema.json
+      - cerebro/media-studio/v2/contracts/identity-character-rights.schema.json
+      - cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py
+      - cerebro/media-studio/v2/runtime/bm02-authorized-digital-double-stack-gate.mjs
+      - cerebro/media-studio/v2/runtime/bm03-authorized-voice-stack-gate.mjs
+      - cerebro/media-studio/v2/tests/bm02-authorized-digital-double-stack-gate.test.mjs
+      - cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs
+      - .github/workflows/cerebro-ums-owner-authorization-gates.yml
+
+permissions:
+  contents: read
+
+jobs:
+  owner-authorization-gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON contracts parse
+        run: |
+          python3 -m json.tool cerebro/media-studio/v2/contracts/owner-authorization-decision.schema.json >/dev/null
+          python3 -m json.tool cerebro/media-studio/v2/contracts/identity-character-rights.schema.json >/dev/null
+
+      - name: Run BM02 and BM03 Node gate tests
+        run: |
+          node --test \
+            cerebro/media-studio/v2/tests/bm02-authorized-digital-double-stack-gate.test.mjs \
+            cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs
+
+      - name: Exercise physical source-admission contract with owner APPROVED
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ums-auth
+          printf 'authorized-test-media' > /tmp/ums-auth/sample.bin
+          SHA="$(sha256sum /tmp/ums-auth/sample.bin | awk '{print $1}')"
+          cat > /tmp/ums-auth/rights.json <<JSON
+          {
+            "identity_id":"fixture-real-authorized",
+            "identity_type":"REAL_AUTHORIZED",
+            "subject_reference":"fixture:licensed-test-subject",
+            "rights_record":{
+              "consent_status":"APPROVED",
+              "allowed_modalities":["image","video","3d","voice"],
+              "allowed_uses":["DIGITAL_DOUBLE","GENERATIVE_DERIVATIVE","VOICE_CLONE","VOICE_CONVERSION","TTS","PROSODY","MULTILINGUAL"],
+              "revocation_process":"owner may set decision REVOKED",
+              "evidence_refs":["fixture:rights"],
+              "owner_authorization":{
+                "authorization_id":"fixture-owner-approval",
+                "decision":"APPROVED",
+                "decided_by":"owner:ci-fixture",
+                "decided_at":"2026-10-26T00:00:00Z",
+                "authorization_basis":"LICENSED_DATASET",
+                "attests_rights_or_permission":true,
+                "modalities":["image","video","3d","voice"],
+                "actions":["DIGITAL_DOUBLE","GENERATIVE_DERIVATIVE","VOICE_CLONE","VOICE_CONVERSION","TTS","PROSODY","MULTILINGUAL"],
+                "environments":["PREPROD","PROD"],
+                "material_sha256":["${SHA}"],
+                "evidence_refs":["fixture:owner-decision"]
+              }
+            },
+            "provenance_record":{"source":"ci-fixture"},
+            "canonical_assets":{"face_refs":["fixture:face"],"body_refs":["fixture:body"],"voice_refs":["fixture:voice"],"motion_refs":[],"3d_assets":[],"character_bible":null},
+            "versions":[{"version":"v1"}],
+            "checksums":["${SHA}"]
+          }
+          JSON
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+            --benchmark BM-02 --rights /tmp/ums-auth/rights.json --media /tmp/ums-auth/sample.bin --environment PREPROD --out /tmp/ums-auth/bm02.json
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+            --benchmark BM-03 --rights /tmp/ums-auth/rights.json --media /tmp/ums-auth/sample.bin --environment PROD --out /tmp/ums-auth/bm03.json
+          python3 - <<'PY'
+          import json
+          b2=json.load(open('/tmp/ums-auth/bm02.json'))
+          b3=json.load(open('/tmp/ums-auth/bm03.json'))
+          assert b2['admitted'] is True and b2['human_required'] is False
+          assert b3['admitted'] is True and b3['prod_source_use_authorized'] is True
+          assert b2['benchmark_credit'] is False and b3['benchmark_credit'] is False
+          assert b2['prod_authorized'] is False and b3['prod_authorized'] is False
+          PY
+
+      - name: Verify missing owner decision fails closed as LEGAL_REQUIRED
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          p='/tmp/ums-auth/rights.json'
+          x=json.load(open(p))
+          x['rights_record']['owner_authorization']={}
+          json.dump(x,open('/tmp/ums-auth/rights-pending.json','w'))
+          PY
+          set +e
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+            --benchmark BM-03 --rights /tmp/ums-auth/rights-pending.json --media /tmp/ums-auth/sample.bin --environment PROD --out /tmp/ums-auth/pending.json
+          RC=$?
+          set -e
+          test "$RC" -eq 12
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/ums-auth/pending.json'))
+          assert x['admitted'] is False
+          assert x['blocker']=='OWNER_AUTHORIZATION_DECISION_REQUIRED'
+          assert x['human_required'] is True
+          assert x['human_required_reason']=='LEGAL_REQUIRED'
+          PY
+
+      - name: Verify DENIED and REVOKED never re-prompt
+        shell: bash
+        run: |
+          set -euo pipefail
+          for DECISION in DENIED REVOKED; do
+            python3 - "$DECISION" <<'PY'
+          import json,sys
+          d=sys.argv[1]
+          x=json.load(open('/tmp/ums-auth/rights.json'))
+          x['rights_record']['owner_authorization']['decision']=d
+          json.dump(x,open(f'/tmp/ums-auth/rights-{d.lower()}.json','w'))
+          PY
+            set +e
+            python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+              --benchmark BM-02 --rights "/tmp/ums-auth/rights-${DECISION,,}.json" --media /tmp/ums-auth/sample.bin --environment PREPROD --out "/tmp/ums-auth/${DECISION,,}.json"
+            RC=$?
+            set -e
+            test "$RC" -eq 12
+            python3 - "$DECISION" <<'PY'
+          import json,sys
+          d=sys.argv[1]
+          x=json.load(open(f'/tmp/ums-auth/{d.lower()}.json'))
+          assert x['human_required'] is False
+          assert x['blocker']==f'OWNER_AUTHORIZATION_{d}'
+          PY
+          done
