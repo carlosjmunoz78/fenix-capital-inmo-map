@@ -35,8 +35,8 @@ replaceOnce(
 'persist browser marker on login');
 
 replaceOnce(
-`    sessionStorage.setItem('fenix-session-active','1');`,
-`    localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');\n    setBrowserSessionMarker(true);`,
+`    sessionStorage.setItem('fenix-session-active','1');\n    setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);`,
+`    localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');\n    setBrowserSessionMarker(true);\n    setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);`,
 'persist browser marker after password recovery');
 
 replaceOnce(
