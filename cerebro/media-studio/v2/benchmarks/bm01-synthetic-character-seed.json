@@ -1,0 +1,37 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_BM01_SYNTHETIC_CHARACTER_SEED_V1",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "character_id":"UMS-SYNTH-CHAR-001",
+  "identity_type":"SYNTHETIC_ORIGINAL",
+  "name":"Nova-01",
+  "design_intent":"Deterministic original synthetic reference identity for UMS BM-01 engineering validation. It is not based on, cloned from, or intended to resemble a real person.",
+  "real_person_reference":false,
+  "identity_lock":{
+    "head_shape":"soft-oval",
+    "skin_tone_hex":"#C88F72",
+    "hair_shape":"short-asymmetric-wave",
+    "hair_hex":"#20242B",
+    "iris_hex":"#557A95",
+    "brow_hex":"#2A2524",
+    "signature_mark":"small-left-cheek-dot",
+    "wardrobe":"charcoal-high-collar-jacket",
+    "wardrobe_hex":"#30343B",
+    "accent_hex":"#D9B45B"
+  },
+  "reference_views":["FRONT","PROFILE_LEFT","THREE_QUARTER_RIGHT"],
+  "required_stage0_outputs":["CHARACTER_BIBLE_HASH","FRONT_REFERENCE_PNG","PROFILE_REFERENCE_PNG","THREE_QUARTER_REFERENCE_PNG","REFERENCE_PROVENANCE"],
+  "not_yet_proven":["VIDEO_IDENTITY_PROOF","THREE_D_REFERENCE_PROOF","CROSS_MODAL_CONSISTENCY_METRICS"],
+  "rights":{
+    "origin":"CEREBRO_SYNTHETIC_ORIGINAL",
+    "real_person_consent_required":false,
+    "provenance_required":true,
+    "external_training_rights_claimed":false
+  },
+  "benchmark_credit":false,
+  "prod_authorized":false,
+  "additional_cost_eur":0
+}
