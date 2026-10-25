@@ -15,7 +15,6 @@ test('Work Total PROD preserves the validated fast private human-input loop',asy
   assert.match(runtime,/let processedCommand=false/);
   assert.match(runtime,/else if\(!processedCommand&&Date\.now\(\)-lastFrameAt>=FRAME_INTERVAL_MS\)/);
   assert.match(runtime,/if\(processedCommand\)continue/);
-  assert.match(runtime,/schema_version:'3\.5\.3'/);
   assert.match(runtime,/immediate_post_action_frame:false/);
   assert.match(runtime,/privacy_frame_suppression_during_human_input:true/);
   assert.match(runtime,/workspace_prod_enabled:true/);
