@@ -22,6 +22,13 @@ test('AUTH SESSION GATE validates one legacy session before migration and never 
   assert.match(app, /setBrowserSessionMarker\(true\)/);
 });
 
+test('AUTH SESSION GATE validates every persisted session before accepting it into UI state', () => {
+  assert.match(app, /if\(data\.session\)\{\s*const \{data:\{user\},error\}=await supabase\.auth\.getUser\(\)/s);
+  assert.match(app, /if\(!user \|\| error\)\{\s*setBrowserSessionMarker\(false\);\s*await supabase\.auth\.signOut\(\{scope:'local'\}\)/s);
+  assert.match(app, /attachAuthListener/);
+  assert.match(app, /unsubscribeAuth/);
+});
+
 test('AUTH SESSION GATE converts a revoked gateway session into a local login recovery instead of zombie Usuario state', () => {
   assert.match(app, /c\.status===401 \|\| n\.status===401/);
   assert.match(app, /if\(!user \|\| error\)/);
