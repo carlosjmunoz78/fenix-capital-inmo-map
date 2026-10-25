@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CEREBRO_BROWSER_CANDIDATE_SHA: b52b1c75b2273a30b5a8bcb3a9ff4d6132796679
+  CEREBRO_BROWSER_CANDIDATE_SHA: de51ad366fa83cbab6205c644ea435421a943794
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-preprod
   CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-worker-v1-preprod
   CEREBRO_BROWSER_WORKSPACE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-v1-preprod
