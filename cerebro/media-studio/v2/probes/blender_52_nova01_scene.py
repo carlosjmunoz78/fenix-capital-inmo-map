@@ -3,14 +3,20 @@ import bpy, math, os, json, hashlib, time
 from pathlib import Path
 from mathutils import Vector
 
-OUT=Path(os.environ.get('UMS_BLENDER_OUT','.ums-blender52-nova01')).resolve(); OUT.mkdir(parents=True,exist_ok=True)
+OUT=Path(os.environ.get('UMS_BLENDER_OUT','ums-blender52-nova01')).resolve(); OUT.mkdir(parents=True,exist_ok=True)
 REF=Path(os.environ.get('NOVA01_FRONT_REFERENCE','')).resolve() if os.environ.get('NOVA01_FRONT_REFERENCE') else None
 started=time.time()
 
 def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
-def mat(name,rgb,rough=0.55):
-    rgba=(*rgb,1.0); m=bpy.data.materials.new(name); m.diffuse_color=rgba; m.use_nodes=True
+def srgb_channel_to_linear(v):
+    v=float(v)/255.0
+    return v/12.92 if v<=0.04045 else ((v+0.055)/1.055)**2.4
+def rgb8_linear(rgb): return tuple(srgb_channel_to_linear(v) for v in rgb)
+def mat(name,rgb8,rough=0.55):
+    rgb=rgb8_linear(rgb8); rgba=(*rgb,1.0); m=bpy.data.materials.new(name); m.diffuse_color=rgba; m.use_nodes=True
     bsdf=m.node_tree.nodes.get('Principled BSDF'); bsdf.inputs['Base Color'].default_value=rgba; bsdf.inputs['Roughness'].default_value=rough
+    if 'Metallic' in bsdf.inputs: bsdf.inputs['Metallic'].default_value=0.0
+    if 'IOR Level' in bsdf.inputs: bsdf.inputs['IOR Level'].default_value=0.18
     return m
 
 def look(obj,target=(0,0,1.0)): obj.rotation_euler=(Vector(target)-obj.location).to_track_quat('-Z','Y').to_euler()
@@ -30,11 +36,13 @@ def add_triangle(name,pts,material):
 bpy.ops.object.select_all(action='SELECT'); bpy.ops.object.delete(use_global=False)
 scene=bpy.context.scene; scene.render.engine='BLENDER_EEVEE'; scene.render.resolution_x=512; scene.render.resolution_y=512; scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG'; scene.render.image_settings.color_mode='RGBA'; scene.render.image_settings.color_depth='8'; scene.render.fps=24
-scene.world.color=(23/255,26/255,32/255)
+scene.view_settings.view_transform='Standard'; scene.view_settings.exposure=0.0; scene.view_settings.gamma=1.0
+scene.world.use_nodes=True
+world_bg=scene.world.node_tree.nodes.get('Background'); world_bg.inputs['Color'].default_value=(*rgb8_linear((23,26,32)),1.0); world_bg.inputs['Strength'].default_value=1.0
 
-skin=mat('Nova Skin',(200/255,143/255,114/255),0.62); skin_shadow=mat('Nova Nose',(186/255,129/255,102/255),0.65)
-hair=mat('Nova Hair',(32/255,37/255,44/255),0.72); suit=mat('Nova Suit',(48/255,52/255,59/255),0.68); shirt=mat('Nova Shirt',(36/255,41/255,49/255),0.68)
-white=mat('Eye White',(0.96,0.96,0.94),0.48); blue=mat('Eye Blue',(85/255,122/255,149/255),0.4); brow=mat('Brow',(42/255,37/255,36/255),0.7); mouth=mat('Mouth',(0.42,0.20,0.18),0.68); gold=mat('Gold Trim',(217/255,180/255,91/255),0.38)
+skin=mat('Nova Skin',(200,143,114),0.62); skin_shadow=mat('Nova Nose',(186,129,102),0.65)
+hair=mat('Nova Hair',(32,37,44),0.72); suit=mat('Nova Suit',(48,52,59),0.68); shirt=mat('Nova Shirt',(36,41,49),0.68)
+white=mat('Eye White',(245,245,240),0.48); blue=mat('Eye Blue',(85,122,149),0.4); brow=mat('Brow',(42,37,36),0.7); mouth=mat('Mouth',(107,51,46),0.68); gold=mat('Gold Trim',(217,180,91),0.38)
 
 add_uv('Head',(0,0,1.55),(1.05,0.88,1.32),skin)
 add_uv('Ear_L',(-1.03,0,1.55),(0.22,0.17,0.34),skin,48,24); add_uv('Ear_R',(1.03,0,1.55),(0.22,0.17,0.34),skin,48,24)
@@ -72,5 +80,5 @@ try: bpy.ops.wm.usd_export(filepath=str(usd)); usd_status='EXPORTED'
 except Exception as exc: usd_status=f'OPTIONAL_EXPORT_FAILED:{type(exc).__name__}'
 assets={'blend':{'path':blend.name,'sha256':sha(blend),'bytes':blend.stat().st_size},'glb':{'path':glb.name,'sha256':sha(glb),'bytes':glb.stat().st_size},'renders':renders}
 if usd.exists(): assets['usd']={'path':usd.name,'sha256':sha(usd),'bytes':usd.stat().st_size}
-manifest={'schema_version':'1.1.0','state_type':'CEREBRO_UMS_BM01_BLENDER_3D_REFERENCE_CANDIDATE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','character_id':'UMS-SYNTH-CHAR-001','character_name':'Nova-01','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'status':'THREE_D_REFERENCE_CANDIDATE_GENERATED','identity_validation':'CROSS_MODAL_METRICS_REQUIRED_BEFORE_PROOF','blender_version':bpy.app.version_string,'render_engine':scene.render.engine,'render_device':'CPU','source_reference':({'path':str(REF),'sha256':sha(REF),'bytes':REF.stat().st_size} if REF and REF.exists() else None),'assets':assets,'usd_status':usd_status,'scene_object_count':len(bpy.data.objects),'elapsed_seconds':round(time.time()-started,3),'additional_cost_eur':0,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False}
+manifest={'schema_version':'1.2.0','state_type':'CEREBRO_UMS_BM01_BLENDER_3D_REFERENCE_CANDIDATE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','character_id':'UMS-SYNTH-CHAR-001','character_name':'Nova-01','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'status':'THREE_D_REFERENCE_CANDIDATE_GENERATED','identity_validation':'CROSS_MODAL_METRICS_REQUIRED_BEFORE_PROOF','blender_version':bpy.app.version_string,'render_engine':scene.render.engine,'render_device':'CPU','color_management':'STANDARD_SRGB8_TO_LINEAR_MATERIALS','source_reference':({'path':str(REF),'sha256':sha(REF),'bytes':REF.stat().st_size} if REF and REF.exists() else None),'assets':assets,'usd_status':usd_status,'scene_object_count':len(bpy.data.objects),'elapsed_seconds':round(time.time()-started,3),'additional_cost_eur':0,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False}
 (OUT/'bm01-blender-3d-reference-candidate.json').write_text(json.dumps(manifest,indent=2),encoding='utf-8'); print(json.dumps(manifest,indent=2))
