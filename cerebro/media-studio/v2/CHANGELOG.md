@@ -1,5 +1,46 @@
 # CEREBRO Universal Media Studio V2 · Changelog
 
+## 2026-10-25 · PROD knowledge expansion for 192 specialists
+
+Environment: `PROD_KNOWLEDGE / NO_EXECUTION_AUTHORITY`
+Readiness before/after: `UNIVERSAL_MEDIA_STUDIO_READY = NOT_READY`
+Physical benchmarks before/after: `0/12 PASS_WITH_EVIDENCE`
+Additional recurring cost introduced: `0 €`
+
+### HECHO
+- Closed the previous verified-source gap affecting 24 departments / 192 specialists. Current department-level source coverage is 48/48 departments and 384/384 specialists.
+- Added a PROD professional source expansion using official/primary material across audience, research, screenwriting, narrative, creative direction, digital humans, voice, lighting, reconstruction, spatial media, illustration, motion design, directing, editorial, 2D animation, mocap, stunts/crowds, sound design, music, singing and interactive media.
+- Added an existing-CEREBRO skill reuse map so UMS reuses the current creative/multimedia stack before creating new runtimes.
+- Enriched exactly 192/192 formerly uncovered specialists with >=2 verified sources, >=6 concrete knowledge points, reusable skills/candidates/HOLDs, capability gaps, daily questions and NOW/EMERGING/COMING/FRONTIER watch.
+- Added a 192 × 12 deep knowledge matrix = 2,304 governed knowledge cells covering standards, workflows, tools/models, research, case studies, benchmarks, rights/licenses, failure modes, quality metrics, cost/latency/compute, interoperability and future watch.
+- All 2,304 cells have an active evidence/research path. No cell is falsely declared mastered.
+- Added current frontier knowledge candidates for 3D/reconstruction, video/digital humans, voice, music and sound, including Blender, SAM 3D, gsplat, Nerfstudio, TRELLIS, Hunyuan3D, Wan, LTX-2, HunyuanVideo, MuseTalk, Qwen3-TTS, IndexTTS, GPT-SoVITS, ACE-Step, Stable Audio Tools and AudioCraft/MusicGen/AudioGen.
+- Added comparison groups/metrics so candidates are evaluated OLD vs NEW rather than promoted by popularity.
+- Added one daily learning request per enriched specialist, with central deduplication and a 12-day rotation through all 12 deep knowledge sections.
+- Added professional/frontier source change watching. Changed sources become `REVALIDATION_REQUIRED`; they never overwrite accepted knowledge automatically.
+- Installed a daily GitHub workflow scheduled at 04:17 UTC and a separate PROD knowledge-regression workflow.
+- Full UMS foundation gate passed with the new knowledge tests included before this documentation update.
+
+### AUTHORITY BOUNDARY
+- Knowledge is present in PROD.
+- Knowledge presence does not authorize tool execution, PROD writes, publication, spending, paid provider calls or automatic capability promotion.
+- Operational candidates still require license/rights/security checks, physical benchmark, OLD vs NEW and tribunal review.
+
+### EXISTENTE Y REUTILIZADO
+- Existing creative render pipeline / creative job runner.
+- Chromium/HTML rendering and FFmpeg composition paths.
+- Existing multimedia-factory adapter catalog.
+- Existing universal skill intake and learning governance.
+- No second multimedia factory or duplicate FFmpeg engine created.
+
+### SIGUE PENDIENTE
+- First real scheduled daily-learning run evidence (the schedule is installed; execution is only claimed after the first scheduled run completes).
+- Deep mastery remains continuous rather than declared complete.
+- Physical binding/benchmark of 3D, current generative video, voice cloning, singing, lip-sync, mocap and reconstruction candidates.
+- BM-01 through BM-12 remain incomplete; readiness stays 0/12.
+
+---
+
 ## 2026-10-25 · Knowledge coverage + existing runtime reuse + BM-01 Stage 0
 
 Environment: `PREPROD`
