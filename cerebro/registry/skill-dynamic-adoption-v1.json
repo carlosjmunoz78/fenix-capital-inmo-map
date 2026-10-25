@@ -121,6 +121,76 @@
       "promoted_at": "2026-10-22T10:19:14.841Z"
     },
     {
+      "candidate_id": "repo:e2bc5645c9327013ee4c6c304e06",
+      "technical_name": "accessibility-auditor",
+      "source_locator": "github://TerminalSkills/skills@33b765f0904561257112a98d21df5383a6e77113/skills/accessibility-auditor",
+      "pinned_sha": "33b765f0904561257112a98d21df5383a6e77113",
+      "snapshot_sha256": "e2bc5645c9327013ee4c6c304e0632266fbfea7059a564da4034c31db898041a",
+      "manifest_sha256": "333c5382de4dc9c542ab9d99ebebc4add997096cc2599c8645bba83375a049d0",
+      "outcome_hash": "c83bce0ab587bd683350115bacc4c6ac421fe1334779f46ccc89d977d3b373cb",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:e2bc5645c9327013:cap:1",
+          "technical_name": "accessibility-auditor",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T12:31:11.000Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "f5f8c5834814ceee65a6b933b34c8b056dc49b13f3fba6b40cc7c42b510031fb"
+    },
+    {
       "candidate_id": "repo:a2c20f1cb4733d8913ce17d0dcec",
       "technical_name": "agentic",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/agentic",
@@ -13672,11 +13742,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 135,
-    "inserted": 0,
+    "total": 136,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 135
   }
 }
