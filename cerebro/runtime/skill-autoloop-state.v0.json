@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T04:42:06.168Z",
+  "updated_at": "2026-10-25T04:42:27.663Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -325,11 +325,49 @@
     "repo:b0929b19118d24dab7d88068b76c",
     "repo:5a396edeaf8114a672f4fe17f43e",
     "repo:27e7057b335c4d886049cc7b8741",
-    "repo:b9ed80f760a6a2a821bf2b6bafaf"
+    "repo:b9ed80f760a6a2a821bf2b6bafaf",
+    "github-wide-skills:ae1035355ac1c54d538e"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:ae1035355ac1c54d538e": {
+      "candidate_id": "github-wide-skills:ae1035355ac1c54d538e",
+      "name": "animate-expo",
+      "human_alias": "Animate Expo",
+      "wrapper_id": "skillwrap:28bb484eb6a8d055dded",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 87.45,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "ric-rv/custom-agent-skills",
+        "upstream_head_commit": "d4df579fcba22b19fe82f903b88ecea21d950846",
+        "manifest_sha256": "25be285175643575b87704e1930b4c4f994fad05c3175dc97c749e80ed17b7ad",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40162828111,
+      "checkpointed_at": "2026-10-25T04:42:27.663Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -19260,7 +19298,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -19273,7 +19311,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40157472097,
+  "last_discovery_run_id": 40162828111,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
