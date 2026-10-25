@@ -6,6 +6,7 @@ on:
       - fix/auth-session-cross-tab-no-global-logout-20261025
     paths:
       - '.github/workflows/temp-auth-session-cross-tab-fix.yml'
+      - 'scripts/patch-auth-session-cross-tab.mjs'
 
 permissions:
   contents: write
