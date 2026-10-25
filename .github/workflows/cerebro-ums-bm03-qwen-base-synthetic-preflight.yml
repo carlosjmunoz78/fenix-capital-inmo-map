@@ -1,0 +1,90 @@
+name: CEREBRO UMS BM03 Qwen Base Synthetic Preflight
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm03-qwen-base-synthetic-preflight.yml'
+      - 'cerebro/media-studio/v2/probes/bm03_qwen_base_synthetic_preflight.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  qwen_base_synthetic_preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      BM03_REF_RUN_ID: '40216789366'
+      BM03_REF_ARTIFACT: ums-qwen3-tts-cpu-probe-40216789366
+      BM03_SYNTH_REF_SHA256: 46b5a40abeda32296995a734c521b61fd4a1262d2c50364dfff83356d60d3d96
+      BM03_PREFLIGHT_OUT: ums-bm03-qwen-base-preflight
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover sealed synthetic Qwen reference
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BM03_REF_ARTIFACT }}
+          path: parent-ref
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BM03_REF_RUN_ID }}
+      - name: Verify synthetic reference identity
+        id: ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          WAV="$(find parent-ref -type f -name 'ums-qwen3-tts-cpu-probe.wav' -print -quit)"
+          test -n "$WAV" && test -s "$WAV"
+          test "$(sha256sum "$WAV" | awk '{print $1}')" = "$BM03_SYNTH_REF_SHA256"
+          echo "wav=$WAV" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost Qwen Base CPU runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 soundfile psutil
+          python -m pip check
+      - name: Physical synthetic voice-clone multilingual preflight
+        env:
+          BM03_SYNTH_REF: ${{ steps.ref.outputs.wav }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s python cerebro/media-studio/v2/probes/bm03_qwen_base_synthetic_preflight.py | tee bm03-qwen-base.stdout.log
+          test -s "$BM03_PREFLIGHT_OUT/bm03-qwen-base-preflight.json"
+          test "$(find "$BM03_PREFLIGHT_OUT" -type f -name 'qwen-base-clone-*.wav' | wc -l)" -eq 2
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm03-qwen-base-preflight/bm03-qwen-base-preflight.json'))
+          assert x['status']=='QWEN_BASE_VOICE_CLONE_RUNTIME_PROVEN_SYNTHETIC_ONLY'
+          assert x['benchmark_credit'] is False
+          assert x['source']['real_person_media'] is False
+          assert x['runtime']['voice_clone'] is True and x['runtime']['device']=='cpu'
+          assert {o['language'] for o in x['outputs']}=={'Spanish','English'}
+          assert all(o['duration_seconds']>=2 for o in x['outputs'])
+          assert x['human_required_reason']=='LEGAL_REQUIRED'
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          PY
+      - name: Upload immutable capability preflight
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm03-qwen-base-synthetic-preflight-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm03-qwen-base-preflight/
+            bm03-qwen-base.stdout.log
