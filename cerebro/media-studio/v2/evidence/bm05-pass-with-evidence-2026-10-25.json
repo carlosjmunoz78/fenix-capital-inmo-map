@@ -1,0 +1,20 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_BM05_PERSISTED_EVIDENCE_V1",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "benchmark_id":"BM-05",
+  "benchmark_name":"Scene with dialogue Foley SFX music mix and sync",
+  "status":"PASS_WITH_EVIDENCE",
+  "benchmark_credit":true,
+  "proof":{"sha256":"91f81cd5ba2e1a403674316b65a48841de9eb38113da93e8bc1f4c5a55b8aced","checks_passed":27,"checks_total":27},
+  "timeline":{"sha256":"6f8fa073779ffd873166da24bf79d6ee43923d2884030d9f4007469a124233a2","duration_seconds":6.0,"dialogue_start_seconds":0.85,"foley_event_count":4,"sfx_event_count":3},
+  "runtime":{"sha256":"56725433c3983a70854652430569bf92ed157fd83a03ef00582a9b6bd3e35f26","dialogue_engine":"Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice","dialogue_status":"PASSED_CPU_REAL_INFERENCE","dialogue_voice":"Aiden","dialogue_language":"Spanish","dialogue_real_person_voice":false,"paid_api_used":false},
+  "audio":{"sample_rate_hz":48000,"channels":2,"integrated_lufs":-16.92,"true_peak_dbfs":-2.23,"lra_lu":2.4,"components":{"dialogue_sha256":"5ae905ce806e1cd46def56a8ca2e3773bba9ff5ff59b05711883cd534e68fc8a","foley_sha256":"b13f8c5e54e8061b51c1bd4530c14737d833d85593f123b9552422371c7e87f1","sfx_sha256":"98e1b21f4bfa26d011ade3b7f61c4feca8f12d99b36f944279679782a4382435","music_sha256":"e37cf874254aa0f360b895fd91cf2ebebb5b791706d4d4b2ce5459e4fde3daca","mix_sha256":"f2cdb67669d67d48a2c9b6139fdb888cbcbe92cafee66f167c4de5ff5f99ed9b"},"foley_origin":"DETERMINISTIC_LOCAL_SYNTHESIS","sfx_origin":"DETERMINISTIC_LOCAL_SYNTHESIS","music_source_benchmark":"BM-04"},
+  "scene":{"sha256":"a1949cffe562e9260649037e8850f8ff035e777c2b4b1cc9809ed905bc5475c6","bytes":179561,"duration_seconds":6.0,"video_codec":"h264","audio_codec":"aac","width":256,"height":256,"source_video_benchmark":"BM-01"},
+  "dependency_chain":{"BM-01":"PASS_WITH_EVIDENCE","BM-04":"PASS_WITH_EVIDENCE"},
+  "artifact_chain":{"workflow_run_id":40226695721,"artifact_id":12611079387,"artifact_digest":"sha256:5666d3475104a317d07c48783547b189ccf2ff4d832e852dad491500e6a6ec42","source_head_sha":"32fb7b4b17c0811c305561921131f2764e24ccc7"},
+  "authority":{"readiness_mutation_authorized":false,"prod_authorized":false,"publish_authorized":false,"spend_authorized":false,"additional_cost_eur":0}
+}
