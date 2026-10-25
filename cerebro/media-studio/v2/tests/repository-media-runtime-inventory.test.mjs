@@ -20,12 +20,15 @@ test('finds tracked media runtime references outside UMS without claiming operat
   assert.equal(report.additional_cost_eur,0);
 });
 
-test('excludes UMS namespace so its own registries do not fabricate existing-runtime evidence',()=>{
+test('excludes UMS namespace and UMS workflows so self-references cannot fabricate prior runtime evidence',()=>{
   const report=inventoryMediaRuntimeReferences([
     {path:'cerebro/media-studio/v2/registry/physical-adapter-candidates.json',content:'ffmpeg blender remotion hyperframes sox imagemagick'},
-    {path:'cerebro/media-studio/v2/README.md',content:'FFmpeg Blender'}
+    {path:'cerebro/media-studio/v2/README.md',content:'FFmpeg Blender'},
+    {path:'.github/workflows/cerebro-ums-physical-runtime-audit-v1.yml',content:'probe blender --version\nprobe ffmpeg -version'}
   ]);
   assert.equal(report.scanned_entries,0);
+  assert.equal(report.excluded_ums_namespace,true);
+  assert.equal(report.excluded_ums_workflows,true);
   assert.ok(report.families.every((x)=>x.status==='NO_TRACKED_REFERENCE_FOUND'));
 });
 
