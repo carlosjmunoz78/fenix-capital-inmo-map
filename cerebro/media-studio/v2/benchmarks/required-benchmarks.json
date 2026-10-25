@@ -9,7 +9,7 @@
     {"id":"BM-04","name":"Original song end-to-end with stems mix master and provenance","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:8a6bb148d0674ff20f9d4c9663684dcf9d3f4e6f:cerebro/media-studio/v2/evidence/bm04-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-05","name":"Scene with dialogue Foley SFX music mix and sync","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:620763531d4fb05e7a9134dfa821fb7a172ba402:cerebro/media-studio/v2/evidence/bm05-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-06","name":"3D animated VFX shot","required":true,"state":"NOT_RUN"},
-    {"id":"BM-07","name":"Volumetric or spatial asset proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-07","name":"Volumetric or spatial asset proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:5cf55b5e2c3f93be97dcb1e793d238c0a510b434:cerebro/media-studio/v2/evidence/bm07-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-08","name":"XR spatial output proof","required":true,"state":"NOT_RUN"},
     {"id":"BM-09","name":"Holographic or declared-device adapter dry run","required":true,"state":"NOT_RUN"},
     {"id":"BM-10","name":"Long-form multi-sequence character story image voice sound and color continuity","required":true,"state":"NOT_RUN"},
