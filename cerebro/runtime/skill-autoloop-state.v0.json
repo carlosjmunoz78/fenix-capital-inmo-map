@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T19:32:43.735Z",
+  "updated_at": "2026-10-25T19:42:43.422Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -366,42 +366,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:b3378831b64341ce099f": {
-      "candidate_id": "github-wide-skills:b3378831b64341ce099f",
-      "name": "intent-reconstruct",
-      "human_alias": "Intent Reconstruct",
-      "wrapper_id": "skillwrap:95315171cee5b9efe9b7",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 88.4,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "travisjhicks/skills",
-        "upstream_head_commit": "23fd85522af6b26e50d34b570df1668ece77ed67",
-        "manifest_sha256": "cabe3a55c869e885a5f3d07dad26db274bdd8a93ed334817e25c1efe891d5480",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40218546500,
-      "checkpointed_at": "2026-10-25T17:52:39.016Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -21795,9 +21760,52 @@
       },
       "updated_at": "2026-10-25T12:42:02.566Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:b3378831b64341ce099f": {
+      "candidate_id": "github-wide-skills:b3378831b64341ce099f",
+      "name": "intent-reconstruct",
+      "human_alias": "Intent Reconstruct",
+      "wrapper_id": "skillwrap:95315171cee5b9efe9b7",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 88.4,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "travisjhicks/skills",
+        "upstream_head_commit": "23fd85522af6b26e50d34b570df1668ece77ed67",
+        "manifest_sha256": "cabe3a55c869e885a5f3d07dad26db274bdd8a93ed334817e25c1efe891d5480",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 40218546500,
+      "checkpointed_at": "2026-10-25T17:52:39.016Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_HOLD",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-25T19:42:43.422Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
