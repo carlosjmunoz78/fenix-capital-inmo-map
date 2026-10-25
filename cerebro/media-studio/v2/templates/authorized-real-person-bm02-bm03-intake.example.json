@@ -1,0 +1,47 @@
+{
+  "identity_id": "REPLACE_WITH_NON_SECRET_ID",
+  "identity_type": "REAL_AUTHORIZED",
+  "subject_reference": "REPLACE_WITH_SUBJECT_REFERENCE",
+  "rights_record": {
+    "consent_status": "APPROVED",
+    "allowed_modalities": ["image", "video", "voice", "3d"],
+    "allowed_uses": [
+      "DIGITAL_DOUBLE",
+      "GENERATIVE_DERIVATIVE",
+      "VOICE_CLONE",
+      "VOICE_CONVERSION",
+      "TTS",
+      "PROSODY",
+      "MULTILINGUAL"
+    ],
+    "territories": ["REPLACE_WITH_AUTHORIZED_TERRITORY"],
+    "valid_from": "REPLACE_WITH_ISO8601_OR_NULL",
+    "valid_until": null,
+    "revocation_process": "REPLACE_WITH_REVOCATION_PROCESS",
+    "evidence_refs": ["REPLACE_WITH_IMMUTABLE_CONSENT_EVIDENCE_REFERENCE"]
+  },
+  "provenance_record": {
+    "source_owner": "REPLACE_WITH_RIGHTS_HOLDER_REFERENCE",
+    "capture_context": "AUTHORIZED_BENCHMARK_SOURCE_CAPTURE",
+    "real_person_media": true,
+    "external_rights_dependencies": []
+  },
+  "canonical_assets": {
+    "face_refs": ["REPLACE_WITH_AUTHORIZED_FACE_IMAGE_PATH"],
+    "body_refs": ["REPLACE_WITH_AUTHORIZED_VIDEO_OR_BODY_PATH"],
+    "voice_refs": ["REPLACE_WITH_AUTHORIZED_VOICE_PATH"],
+    "motion_refs": [],
+    "3d_assets": [],
+    "character_bible": null
+  },
+  "versions": [
+    {
+      "version": "1.0.0",
+      "environment": "PREPROD",
+      "purpose": "BM-02_AND_BM-03_AUTHORIZED_BENCHMARK_INPUT"
+    }
+  ],
+  "checksums": [
+    "REPLACE_WITH_SHA256_FOR_EACH_AUTHORIZED_MEDIA_FILE"
+  ]
+}
