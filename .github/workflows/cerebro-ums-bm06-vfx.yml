@@ -1,0 +1,133 @@
+name: CEREBRO UMS BM06 Animated VFX
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm06-vfx.yml'
+      - 'cerebro/media-studio/v2/probes/bm06_vfx_contract.mjs'
+      - 'cerebro/media-studio/v2/probes/blender_52_bm06_vfx_shot.py'
+      - 'cerebro/media-studio/v2/probes/bm06_vfx_proof_gate.py'
+      - 'cerebro/media-studio/v2/runtime/effects-factory.mjs'
+      - 'cerebro/media-studio/v2/runtime/media-master-graph.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-bm06-vfx
+  cancel-in-progress: true
+
+jobs:
+  physical_vfx:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      UMS_BM06_OUT: ums-bm06-vfx
+      BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
+      BLENDER_BASE: https://download.blender.org/release/Blender5.2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Existing UMS effect and registry contracts
+        run: node --test cerebro/media-studio/v2/tests/media-registries.test.mjs
+
+      - name: Build governed BM06 shot contract
+        run: node cerebro/media-studio/v2/probes/bm06_vfx_contract.mjs | tee ums-bm06-contract.stdout.log
+
+      - name: Verify contract before render
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm06-vfx/bm06-vfx-contract.json'))
+          assert x['status']=='SPEC_READY' and x['benchmark_id']=='BM-06'
+          assert set(x['shot_contract']['required_vfx_families'])=={'ENERGY','PARTICLES','LIGHT','OPTICAL'}
+          assert x['shot_contract']['external_assets_allowed']==0
+          assert x['authority']['additional_cost_eur']==0
+          assert x['authority']['prod_authorized'] is False
+          for fx in x['graph']['production']['sequences'][0]['scenes'][0]['shots'][0]['vfx']:
+              assert fx['rights']['status']=='INTERNAL_ORIGINAL'
+          print('BM06 governed contract GREEN')
+          PY
+
+      - name: Install zero-cost headless VFX runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 ffmpeg python3-pil python3-numpy
+
+      - name: Download official Blender 5.2.3 LTS and verify SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --output "$BLENDER_ARCHIVE" "$BLENDER_BASE/$BLENDER_ARCHIVE"
+          curl --fail --location --retry 3 --output blender-5.2.3.sha256 "$BLENDER_BASE/blender-5.2.3.sha256"
+          grep " $BLENDER_ARCHIVE$" blender-5.2.3.sha256 | sha256sum -c -
+          tar -xf "$BLENDER_ARCHIVE"
+          ./blender-5.2.3-linux-x64/blender --version | head -n4
+
+      - name: Render physical 3D animated VFX shot
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_bm06_vfx_shot.py | tee ums-bm06-blender.stdout.log
+
+      - name: Encode physical H264 master
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y -framerate 9 -start_number 1 -i 'ums-bm06-vfx/frames/bm06_%04d.png' -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p -movflags +faststart ums-bm06-vfx/bm06-animated-vfx-shot.mp4
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,width,height,r_frame_rate,nb_frames -of json ums-bm06-vfx/bm06-animated-vfx-shot.mp4 > ums-bm06-vfx/bm06-ffprobe.json
+          cat ums-bm06-vfx/bm06-ffprobe.json
+
+      - name: Fail-closed BM06 physical tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm06_vfx_proof_gate.py \
+            --contract ums-bm06-vfx/bm06-vfx-contract.json \
+            --candidate ums-bm06-vfx/bm06-vfx-candidate.json \
+            --root ums-bm06-vfx \
+            --video ums-bm06-vfx/bm06-animated-vfx-shot.mp4 \
+            --ffprobe ums-bm06-vfx/bm06-ffprobe.json \
+            --out ums-bm06-vfx/bm06-pass-with-evidence.json | tee ums-bm06-proof.stdout.log
+
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm06-vfx/bm06-pass-with-evidence.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['proof_type']=='THREE_D_ANIMATED_VFX_SHOT_PROOF'
+          assert x['benchmark_registry_mutation_authorized'] is True
+          assert x['universal_media_studio_ready_authorized'] is False
+          assert all(x['checks'].values())
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+
+      - name: Upload immutable BM06 physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm06-vfx-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm06-vfx/
+            ums-bm06-contract.stdout.log
+            ums-bm06-blender.stdout.log
+            ums-bm06-proof.stdout.log
+            blender-5.2.3.sha256
