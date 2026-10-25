@@ -65,6 +65,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const humanTextBufferRef=useRef('');
  const humanTextTimerRef=useRef<number|null>(null);
  const humanInputQueueRef=useRef<Promise<boolean>>(Promise.resolve(true));
+ const pendingTextRef=useRef<{value:string;started:boolean;scope:string;promise:Promise<boolean>}|null>(null);
 
  useEffect(()=>{
   let raf=0;
@@ -139,7 +140,15 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  async function handback(){if(browserSession?.human_lease_id){drainHumanTextBuffer();await humanInputQueueRef.current;await browserAction('/owner/handback',{session_id:browserSession.session_id,lease_id:browserSession.human_lease_id});}}
  async function emergencyStop(){humanTextBufferRef.current='';if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}if(browserSession)await browserAction('/owner/stop',{session_id:browserSession.session_id});}
  async function humanInput(command_type:string,payload:Record<string,unknown>){const session=browserSession;if(!session||session.state!=='HUMAN_CONTROLLED'||session.control_owner!=='HUMAN'||!session.human_lease_id)return false;try{let key=keyRef.current;if(!key||keySessionRef.current!==session.session_id){const k=await fetchBrowserInteractiveApi<BrowserKeyResponse>('/owner/key',{company_id:selectedCompany,session_id:session.session_id});if(k.status!==200||!k.data?.key_b64)throw new Error(k.data?.error||'Clave de control no disponible');key=await importBrowserSessionKey(k.data.key_b64);keyRef.current=key;keySessionRef.current=session.session_id;}const encrypted=await encryptBrowserInput(key,payload);const r=await fetchBrowserInteractiveApi<BrowserActionResponse>('/owner/input',{company_id:selectedCompany,session_id:session.session_id,lease_id:session.human_lease_id,command_type,...encrypted});if(r.status!==200||!r.data?.ok)throw new Error(r.data?.error||'Entrada humana rechazada');if(r.data.command?.command_id)await waitForCommand(session.session_id,r.data.command.command_id);return true;}catch(error){setBrowserError(String((error as Error)?.message||error));return false;}}
- function queueHumanInput(command_type:string,payload:Record<string,unknown>){const run=()=>humanInput(command_type,payload);const next=humanInputQueueRef.current.then(run,run);humanInputQueueRef.current=next.catch(()=>false);return next;}
+ function queueHumanInput(command_type:string,payload:Record<string,unknown>){
+  const scope=`${browserSession?.session_id}|${browserSession?.human_lease_id}`;
+  const value=String(payload.value??'');const tail=pendingTextRef.current;
+  if(command_type==='KEYBOARD_TYPE'&&tail&&!tail.started&&tail.scope===scope&&tail.value.length+value.length<=4000){tail.value+=value;return tail.promise;}
+  pendingTextRef.current=null;
+  const batch=command_type==='KEYBOARD_TYPE'?{value,started:false,scope,promise:Promise.resolve(false)}:null;
+  const run=()=>{if(batch){batch.started=true;if(pendingTextRef.current===batch)pendingTextRef.current=null;}return humanInput(command_type,batch?{...payload,value:batch.value}:payload);};
+  const next=humanInputQueueRef.current.then(run,run);if(batch){batch.promise=next;pendingTextRef.current=batch;}humanInputQueueRef.current=next.catch(()=>false);return next;
+ }
  function clearHumanTextTimer(){if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}}
  function drainHumanTextBuffer(){clearHumanTextTimer();const value=humanTextBufferRef.current;humanTextBufferRef.current='';if(value)void queueHumanInput('KEYBOARD_TYPE',{value,delay_ms:0});return value;}
  function scheduleHumanTextFlush(){clearHumanTextTimer();humanTextTimerRef.current=window.setTimeout(()=>{humanTextTimerRef.current=null;const value=humanTextBufferRef.current;humanTextBufferRef.current='';if(value)void queueHumanInput('KEYBOARD_TYPE',{value,delay_ms:0});},HUMAN_TYPING_DEBOUNCE_MS);}
