@@ -1,0 +1,57 @@
+name: CEREBRO UMS PROD Readiness Gate
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-prod-readiness-gate.yml'
+      - 'cerebro/media-studio/v2/probes/ums_prod_readiness_gate.py'
+      - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
+      - 'cerebro/media-studio/v2/evidence/bm*-pass-with-evidence-*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compute fail-closed PROD readiness without mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-prod-readiness
+          python3 cerebro/media-studio/v2/probes/ums_prod_readiness_gate.py \
+            --registry cerebro/media-studio/v2/benchmarks/required-benchmarks.json \
+            --repo-root . \
+            --out ums-prod-readiness/ums-prod-readiness.json | tee ums-prod-readiness/stdout.log
+      - name: Current branch must remain blocked unless all twelve are proven
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-prod-readiness/ums-prod-readiness.json'))
+          if x['ready']:
+              assert x['status']=='READY_FOR_GOVERNED_PROD_PROMOTION'
+              assert x['summary']['pass_with_verified_evidence']==12
+              assert x['summary']['blocker_count']==0
+          else:
+              assert x['status']=='HOLD_PROD'
+              assert x['authority']['prod_mutation_authorized'] is False
+              assert x['authority']['prod_authorized'] is False
+              assert x['human_required'] is True
+              assert all(r in {'LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'} for r in x['human_required_reasons'])
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload readiness evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-prod-readiness-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-prod-readiness/
