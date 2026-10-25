@@ -1,0 +1,118 @@
+name: CEREBRO UMS IP-Adapter Quality
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-ip-adapter-quality.yml'
+      - 'cerebro/media-studio/v2/probes/ip_adapter_nova01_quality_probe.py'
+      - 'cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-ip-adapter-quality
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      UMS_IP_QUALITY_OUT: ums-ipadapter-nova01-quality
+      IP_QUALITY_SIZE: '384'
+      IP_QUALITY_STEPS: '16'
+      IP_QUALITY_GUIDANCE: '5.5'
+      IP_QUALITY_SCALE: '0.72'
+      IP_QUALITY_LATENCY_LIMIT_SECONDS: '600'
+      IP_QUALITY_MEMORY_LIMIT_GIB: '13.5'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover canonical Nova-01 Stage0 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Verify canonical synthetic reference
+        id: nova
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          test -n "$FRONT" && test -s "$FRONT"
+          test "$(sha256sum "$FRONT" | awk '{print $1}')" = 'e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost CPU inference and metric runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchvision==0.22.1
+          python -m pip install 'diffusers>=0.35,<0.37' 'transformers>=4.56,<5' 'accelerate>=1.10,<2' safetensors pillow psutil numpy
+          python -m pip check
+      - name: Generate higher-quality Nova-01 candidate
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.nova.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s python cerebro/media-studio/v2/probes/ip_adapter_nova01_quality_probe.py | tee ums-ip-adapter-quality.stdout.log
+      - name: Run unchanged BM01 cross-modal quality tribunal
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.nova.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py \
+            --reference "$NOVA01_FRONT_REFERENCE" \
+            --candidate ums-ipadapter-nova01-quality/nova01-ip-adapter-quality.png \
+            --out ums-ipadapter-nova01-quality/ip-adapter-cross-modal-quality.json
+      - name: Seal quality result
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          report=json.loads(Path('ums-ipadapter-nova01-quality/ip-adapter-quality-report.json').read_text())
+          metrics=json.loads(Path('ums-ipadapter-nova01-quality/ip-adapter-cross-modal-quality.json').read_text())
+          out=Path('ums-ipadapter-nova01-quality/nova01-ip-adapter-quality.png')
+          assert report['status']=='QUALITY_CANDIDATE_GENERATED'
+          assert report['real_person_reference'] is False and report['faceid_variant'] is False
+          assert report['resources']['memory_fit_verified'] is True and report['resources']['latency_fit_verified'] is True
+          assert metrics['threshold_policy']=='FIXED_BEFORE_CANDIDATE_OBSERVATION'
+          assert metrics['status']=='CROSS_MODAL_PASS'
+          seal={
+            'schema_version':'1.0.0','state_type':'CEREBRO_UMS_IP_ADAPTER_QUALITY_GATE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD',
+            'character_id':'UMS-SYNTH-CHAR-001','status':'IP_ADAPTER_QUALITY_GREEN','quality_gate':'BM01_CROSS_MODAL_FIXED_THRESHOLDS',
+            'output':{'sha256':hashlib.sha256(out.read_bytes()).hexdigest(),'bytes':out.stat().st_size},
+            'mandatory_gates':metrics['mandatory_gates'],'optional_gates':metrics['optional_gates'],'optional_passes':metrics['optional_passes'],
+            'additional_cost_eur':0,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'readiness_mutation_authorized':False
+          }
+          Path('ums-ipadapter-nova01-quality/ip-adapter-quality-gate.json').write_text(json.dumps(seal,indent=2))
+          print(json.dumps(seal,indent=2))
+          PY
+      - name: Upload IP-Adapter quality evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-ip-adapter-quality-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ums-ipadapter-nova01-quality/
+            ums-ip-adapter-quality.stdout.log
