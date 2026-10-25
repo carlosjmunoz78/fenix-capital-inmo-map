@@ -1,0 +1,34 @@
+name: CEREBRO Creative Studio V2.7 Contracts
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v27-generative-preprod-2026-10-25'
+    paths:
+      - 'cerebro/runtime/creative-character-motion-contract-v27.mjs'
+      - 'cerebro/runtime/creative-kinetic-captions-v27.mjs'
+      - 'cerebro/tests/creative-v27-contracts-smoke.mjs'
+      - '.github/workflows/cerebro-creative-v27-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate identity and kinetic captions contracts
+        env:
+          CEREBRO_V27_REPORT: .cerebro-v27/contracts/report.json
+        run: node cerebro/tests/creative-v27-contracts-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-v27-contracts-${{ github.sha }}
+          path: .cerebro-v27/contracts/report.json
+          retention-days: 7
