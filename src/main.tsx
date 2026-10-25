@@ -116,6 +116,7 @@ import AnaChatBlock from './AnaChatBlock';
 import AnaKnowledgePlacementGuard from './AnaKnowledgePlacementGuard';
 import OperationalUniformityGuard from './OperationalUniformityGuard';
 import CerebroAttachmentBridge from './CerebroAttachmentBridge';
+import './cerebroBrowserWorkTotalDock';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
