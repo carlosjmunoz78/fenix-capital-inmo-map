@@ -1,0 +1,85 @@
+{
+  "schema_version": "2.8.5-feedback-contract",
+  "engine_id": "CREATIVE-STUDIO-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "source_run": 40194558214,
+  "source_version": "2.8.4",
+  "source_status": "REJECTED_BY_HUMAN_CREATIVE_TRIBUNAL",
+  "publish_authorized": false,
+  "promotion_eligible": false,
+  "human_feedback": {
+    "captions": [
+      "audio_subtitles_out_of_sync",
+      "subtitle_line_too_wide",
+      "subtitle_text_clipped_on_mobile"
+    ],
+    "editing": [
+      "clips_are_sequential_without_professional_effect_design",
+      "transitions_are_not_visually_rich",
+      "missing_story_turns_and_visual_gags",
+      "missing_professional_intro_and_outro_masks"
+    ],
+    "voice": [
+      "age_range_read_with_bad_segmentation",
+      "ahorro_pronounced_incorrectly",
+      "questions_read_as_statements",
+      "voice_mix_has_echo_like_quality"
+    ],
+    "framing": [
+      "vertical_crop_can_cut_relevant_subjects_or_hands",
+      "source_is_cropped_to_format_instead_of_safely_reframed"
+    ],
+    "asset_diversity": [
+      "same_broll_repeated_across_videos",
+      "same_broll_repeated_inside_long_video",
+      "long_video_feels_like_reordered_repetition"
+    ],
+    "sound_design": [
+      "background_music_too_flat",
+      "missing_attention_stingers",
+      "missing_sfx_and_audio_transitions",
+      "missing_energy_changes"
+    ],
+    "retention": [
+      "hooks_not_impactful_enough_in_first_1_to_3_seconds",
+      "missing_micro_hooks",
+      "missing_delayed_payoff_structure",
+      "long_form_lacks_fast_chapter_or_slide_rehooks"
+    ]
+  },
+  "v285_fail_closed_acceptance": {
+    "caption_sync_source": "PHYSICAL_TTS_SEGMENT_TIMELINE_NOT_WORDCOUNT_ESTIMATE",
+    "caption_safe_area_horizontal_max_pct": 76,
+    "caption_max_lines": 2,
+    "caption_text_clipping_allowed": false,
+    "tts_numbers_and_ranges_normalized_for_speech": true,
+    "questions_must_be_segmented_for_question_prosody": true,
+    "pronunciation_lexicon_required": true,
+    "smart_reframe_mode_required": true,
+    "blind_center_crop_for_vertical_allowed": false,
+    "same_source_back_to_back_allowed": false,
+    "same_trim_reuse_inside_same_video_allowed": false,
+    "cross_campaign_source_overlap_target_max_pct": 25,
+    "hook_visual_event_within_sec": 1.0,
+    "hook_payload_complete_by_sec": 3.0,
+    "intro_mask_required": true,
+    "outro_mask_required": true,
+    "transition_family_count_min_per_reel": 3,
+    "visual_effect_family_count_min_per_reel": 3,
+    "sfx_event_count_min_per_reel": 3,
+    "music_energy_automation_required": true,
+    "long_form_chapter_rehook_interval_sec_max": 35,
+    "long_form_micro_hook_count_min": 5,
+    "long_form_broll_only_edit_allowed": false,
+    "voice_music_ducking_required": true,
+    "human_visual_tribunal_required": true,
+    "human_voice_tribunal_required": true
+  },
+  "governance": {
+    "additional_recurring_cost_eur": 0,
+    "prod_untouched": true,
+    "rollback_v262_preserved": true,
+    "v284_preserved_as_rejected_evidence": true
+  }
+}
