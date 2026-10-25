@@ -1,0 +1,50 @@
+name: CEREBRO UMS BM01 Readiness Registration
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm01-readiness-registration.yml'
+      - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
+      - 'cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json'
+      - 'cerebro/media-studio/v2/runtime/readiness-gate.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate evidence reference and readiness arithmetic
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import {evaluateUniversalMediaStudioReadiness} from './cerebro/media-studio/v2/runtime/readiness-gate.mjs';
+          const registry=JSON.parse(fs.readFileSync('./cerebro/media-studio/v2/benchmarks/required-benchmarks.json','utf8'));
+          const evidencePath='./cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json';
+          const evidence=JSON.parse(fs.readFileSync(evidencePath,'utf8'));
+          const bm01=registry.benchmarks.find(x=>x.id==='BM-01');
+          if(!bm01) throw new Error('BM01_MISSING');
+          if(bm01.state!=='PASS_WITH_EVIDENCE') throw new Error('BM01_NOT_REGISTERED_PASS');
+          if(!String(bm01.evidence_ref||'').includes('6d2384ad83fb047f311f347bb4de867ee2cb218f')) throw new Error('BM01_EVIDENCE_COMMIT_NOT_PINNED');
+          if(evidence.status!=='PASS_WITH_EVIDENCE'||evidence.benchmark_credit!==true) throw new Error('BM01_PERSISTED_EVIDENCE_INVALID');
+          if(evidence.authority?.prod_authorized!==false||evidence.authority?.additional_cost_eur!==0) throw new Error('BM01_AUTHORITY_OR_COST_INVALID');
+          const result=evaluateUniversalMediaStudioReadiness(registry);
+          if(result.ready!==false) throw new Error('UMS_READY_MUST_REMAIN_FALSE');
+          if(result.total_required!==12) throw new Error('REQUIRED_BENCHMARK_COUNT_CHANGED');
+          if(result.passed_with_evidence!==1) throw new Error(`EXPECTED_ONE_PASS:${result.passed_with_evidence}`);
+          if(result.incomplete.includes('BM-01')) throw new Error('BM01_STILL_INCOMPLETE');
+          if(result.incomplete.length!==11) throw new Error(`EXPECTED_11_INCOMPLETE:${result.incomplete.length}`);
+          console.log(JSON.stringify({status:'BM01_REGISTRATION_GREEN',readiness:result,evidence_sha256:crypto.createHash('sha256').update(fs.readFileSync(evidencePath)).digest('hex'),prod_authorized:false,additional_cost_eur:0},null,2));
+          NODE
