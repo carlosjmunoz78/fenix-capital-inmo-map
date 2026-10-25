@@ -1,0 +1,111 @@
+name: CEREBRO UMS BM01 Final Proof
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm01-final-proof.yml'
+      - 'cerebro/media-studio/v2/probes/bm01_final_proof_gate.py'
+      - 'cerebro/media-studio/v2/tests/bm01_final_proof_gate.test.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm01-final-proof
+  cancel-in-progress: true
+
+jobs:
+  aggregate_bm01:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Contract tests for aggregate gate
+        run: python3 -m unittest cerebro/media-studio/v2/tests/bm01_final_proof_gate.test.py -v
+
+      - name: Recover sealed THREE_D_REFERENCE_PROOF
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-blender52-bm01-40224654448
+          path: sealed-3d
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40224654448
+
+      - name: Recover independently validated VIDEO_IDENTITY_PROOF
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm01-video-identity-40225258844
+          path: sealed-video
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40225258844
+
+      - name: Locate and validate immutable source proofs
+        id: proofs
+        shell: bash
+        run: |
+          set -euo pipefail
+          STAGE0='cerebro/media-studio/v2/evidence/preprod-knowledge-runtime-bm01-stage0-2026-10-25.json'
+          THREE_D="$(find sealed-3d -type f -name 'bm01-three-d-reference-proof.json' | head -n1)"
+          VIDEO="$(find sealed-video -type f -name 'bm01-video-identity-proof.json' | head -n1)"
+          test -s "$STAGE0" && test -n "$THREE_D" && test -s "$THREE_D" && test -n "$VIDEO" && test -s "$VIDEO"
+          python3 - "$STAGE0" "$THREE_D" "$VIDEO" <<'PY'
+          import json,sys
+          s=json.load(open(sys.argv[1]))['bm01_stage0']
+          d=json.load(open(sys.argv[2])); v=json.load(open(sys.argv[3]))
+          assert s['status']=='BM01_STAGE0_REFERENCE_GREEN'
+          assert s['character_id']=='UMS-SYNTH-CHAR-001'
+          assert d['status']=='PASS_WITH_EVIDENCE' and d['proof_type']=='THREE_D_REFERENCE_PROOF'
+          assert v['status']=='PASS_WITH_EVIDENCE' and v['proof_type']=='VIDEO_IDENTITY_PROOF'
+          assert d['github_run_id']=='40224654448'
+          assert v['github_run_id']=='40225258844'
+          print('immutable BM01 parents GREEN')
+          PY
+          echo "stage0=$STAGE0" >> "$GITHUB_OUTPUT"
+          echo "three_d=$THREE_D" >> "$GITHUB_OUTPUT"
+          echo "video=$VIDEO" >> "$GITHUB_OUTPUT"
+
+      - name: Aggregate BM01 final proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-bm01-final
+          python3 cerebro/media-studio/v2/probes/bm01_final_proof_gate.py \
+            --stage0 "${{ steps.proofs.outputs.stage0 }}" \
+            --three-d-proof "${{ steps.proofs.outputs.three_d }}" \
+            --video-proof "${{ steps.proofs.outputs.video }}" \
+            --out ums-bm01-final/bm01-final-proof.json | tee ums-bm01-final.stdout.log
+
+      - name: Final semantic gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm01-final/bm01-final-proof.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['benchmark_id']=='BM-01'
+          assert x['benchmark_registry_mutation_authorized'] is True
+          assert x['universal_media_studio_ready_authorized'] is False
+          assert all(x['checks'].values())
+          assert x['physical_modalities']==['2D_REFERENCE','VIDEO','3D']
+          assert x['additional_cost_eur']==0
+          assert x['prod_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+
+      - name: Upload immutable BM01 final evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm01-final-proof-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm01-final/
+            ums-bm01-final.stdout.log
