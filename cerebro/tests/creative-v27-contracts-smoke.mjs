@@ -41,6 +41,13 @@ if (captionPlan.events.length < 5) throw new Error('KINETIC_CAPTION_EVENT_DENSIT
 if (!captionPlan.events.some((e) => e.emphasis)) throw new Error('KINETIC_CAPTION_EMPHASIS_MISSING');
 if (!ass.includes('Dialogue:')) throw new Error('ASS_DIALOGUE_MISSING');
 if (captionPlan.sidecar_only_forbidden !== true || captionPlan.burned_in_required !== true) throw new Error('CAPTION_BURNIN_GATE_MISSING');
+if (captionPlan.safe_area_required !== true) throw new Error('CAPTION_SAFE_AREA_GATE_MISSING');
+if (captionPlan.events.some((e) => e.estimated_max_render_width_px > e.safe_width_px)) {
+  throw new Error('CAPTION_SAFE_AREA_OVERFLOW');
+}
+if (captionPlan.events.some((e) => e.safe_margin_x_px < 86)) {
+  throw new Error('CAPTION_SAFE_MARGIN_TOO_SMALL');
+}
 
 const out = process.env.CEREBRO_V27_REPORT || path.join(temp, 'report.json');
 const outDir = path.dirname(out);
@@ -51,7 +58,7 @@ fs.writeFileSync(assFile, ass);
 fs.writeFileSync(planFile, JSON.stringify(captionPlan, null, 2) + '\n');
 
 const report = {
-  schema_version: '1.0.0',
+  schema_version: '1.1.0',
   test: 'CREATIVE_V27_CONTRACTS_SMOKE',
   character_contract: {
     identity_id: character.identity.identity_id,
@@ -64,6 +71,10 @@ const report = {
     motions: [...new Set(captionPlan.events.map((e) => e.motion))],
     emphasis_events: captionPlan.events.filter((e) => e.emphasis).length,
     burned_in_required: captionPlan.burned_in_required,
+    safe_area_required: captionPlan.safe_area_required,
+    safe_margin_x_px: captionPlan.safe_margin_x_px,
+    max_estimated_width_px: Math.max(...captionPlan.events.map((e) => e.estimated_max_render_width_px)),
+    safe_width_px: captionPlan.safe_width_px,
     ass_file: assFile,
     caption_plan_file: planFile,
   },
