@@ -1,0 +1,142 @@
+name: CEREBRO UMS BM01 Video Identity Proof
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm01-video-proof.yml'
+      - 'cerebro/media-studio/v2/probes/blender_52_nova01_video.py'
+      - 'cerebro/media-studio/v2/probes/bm01_video_identity_proof_gate.py'
+      - 'cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm01-video-proof
+  cancel-in-progress: true
+
+jobs:
+  video_identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      UMS_VIDEO_OUT: ums-bm01-video
+      BLENDER_PARENT_RUN_ID: '40224654448'
+      BLENDER_PARENT_ARTIFACT: ums-blender52-bm01-40224654448
+      NOVA01_BLEND_SHA256: bc42e738b7a683450b84d3065924447c8e686df8ac17f63fa5f887c093e103a2
+      BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
+      BLENDER_BASE: https://download.blender.org/release/Blender5.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover sealed THREE_D_REFERENCE_PROOF artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BLENDER_PARENT_ARTIFACT }}
+          path: sealed-3d
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BLENDER_PARENT_RUN_ID }}
+      - name: Recover canonical Nova-01 Stage0 reference
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Verify immutable parents
+        id: parents
+        shell: bash
+        run: |
+          set -euo pipefail
+          BLEND="$(find sealed-3d -type f -name 'nova01-3d-reference.blend' | head -n1)"
+          PROOF="$(find sealed-3d -type f -name 'bm01-three-d-reference-proof.json' | head -n1)"
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          test -n "$BLEND" && test -s "$BLEND"
+          test -n "$PROOF" && test -s "$PROOF"
+          test -n "$FRONT" && test -s "$FRONT"
+          test "$(sha256sum "$BLEND" | awk '{print $1}')" = "$NOVA01_BLEND_SHA256"
+          test "$(sha256sum "$FRONT" | awk '{print $1}')" = 'e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          python3 - "$PROOF" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['proof_type']=='THREE_D_REFERENCE_PROOF'
+          assert x['evidence']['blend']['sha256']=='bc42e738b7a683450b84d3065924447c8e686df8ac17f63fa5f887c093e103a2'
+          PY
+          echo "blend=$BLEND" >> "$GITHUB_OUTPUT"
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+          echo "proof=$PROOF" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost headless video runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 python3-pil python3-numpy ffmpeg
+      - name: Download official Blender 5.2.3 LTS and verify SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --output "$BLENDER_ARCHIVE" "$BLENDER_BASE/$BLENDER_ARCHIVE"
+          curl --fail --location --retry 3 --output blender-5.2.3.sha256 "$BLENDER_BASE/blender-5.2.3.sha256"
+          grep " $BLENDER_ARCHIVE$" blender-5.2.3.sha256 | sha256sum -c -
+          tar -xf "$BLENDER_ARCHIVE"
+          ./blender-5.2.3-linux-x64/blender --version | head -n4
+      - name: Render temporal Nova-01 identity from sealed 3D asset
+        env:
+          NOVA01_BLEND: ${{ steps.parents.outputs.blend }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_nova01_video.py | tee ums-bm01-video-blender.stdout.log
+      - name: Encode physical MP4
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y -framerate 6 -start_number 1 -i 'ums-bm01-video/frames/nova01_%04d.png' -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -movflags +faststart ums-bm01-video/nova01-identity-motion.mp4
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_name,width,height,r_frame_rate -of json ums-bm01-video/nova01-identity-motion.mp4 | tee ums-bm01-video/ffprobe.json
+      - name: Cross-modal tribunal frames 1 6 12
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.parents.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py --reference "$NOVA01_FRONT_REFERENCE" --candidate ums-bm01-video/frames/nova01_0001.png --out ums-bm01-video/bm01-video-metrics-0001.json
+          python3 cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py --reference "$NOVA01_FRONT_REFERENCE" --candidate ums-bm01-video/frames/nova01_0006.png --out ums-bm01-video/bm01-video-metrics-0006.json
+          python3 cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py --reference "$NOVA01_FRONT_REFERENCE" --candidate ums-bm01-video/frames/nova01_0012.png --out ums-bm01-video/bm01-video-metrics-0012.json
+      - name: Seal VIDEO_IDENTITY_PROOF
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm01_video_identity_proof_gate.py \
+            --candidate ums-bm01-video/bm01-video-identity-candidate.json \
+            --metrics ums-bm01-video/bm01-video-metrics-0001.json ums-bm01-video/bm01-video-metrics-0006.json ums-bm01-video/bm01-video-metrics-0012.json \
+            --video ums-bm01-video/nova01-identity-motion.mp4 \
+            --root ums-bm01-video \
+            --out ums-bm01-video/bm01-video-identity-proof.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm01-video/bm01-video-identity-proof.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['proof_type']=='VIDEO_IDENTITY_PROOF'
+          assert all(x['checks'].values())
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload BM01 video proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm01-video-proof-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ums-bm01-video/
+            ums-bm01-video-blender.stdout.log
+            blender-5.2.3.sha256
