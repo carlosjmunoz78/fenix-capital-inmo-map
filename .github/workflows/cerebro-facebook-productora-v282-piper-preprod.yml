@@ -1,4 +1,4 @@
-name: CEREBRO Facebook → Productora V2.8.3 Spain Voices PREPROD
+name: CEREBRO Facebook → Productora V2.8.4 Spain Voices PREPROD
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
       - '.github/workflows/cerebro-facebook-productora-v282-piper-preprod.yml'
       - 'cerebro/runtime/facebook-video-department-v2.mjs'
       - 'cerebro/runtime/creative-facebook-productora-v28.mjs'
+      - 'cerebro/runtime/creative-facebook-productora-v28-sarfix.mjs'
   workflow_dispatch:
 
 permissions:
@@ -34,15 +35,16 @@ jobs:
           sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fonts-dejavu-core
           node --check cerebro/runtime/facebook-video-department-v2.mjs
           node --check cerebro/runtime/creative-facebook-productora-v28.mjs
+          node --check cerebro/runtime/creative-facebook-productora-v28-sarfix.mjs
 
       - name: Facebook decides campaigns; Productora routes technical Spain voices
         run: |
           set -euo pipefail
-          mkdir -p /tmp/cerebro-fb-v283/audio
-          node cerebro/runtime/facebook-video-department-v2.mjs /tmp/cerebro-fb-v283/facebook-brief-source.json
+          mkdir -p /tmp/cerebro-fb-v284/audio
+          node cerebro/runtime/facebook-video-department-v2.mjs /tmp/cerebro-fb-v284/facebook-brief-source.json
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const src='/tmp/cerebro-fb-v283/facebook-brief-source.json';
+          const src='/tmp/cerebro-fb-v284/facebook-brief-source.json';
           const b=JSON.parse(fs.readFileSync(src,'utf8'));
           if(!Object.values(b.gates).every(Boolean)||b.campaigns.length!==3)throw new Error('FACEBOOK_DIRECTOR_RED');
           const map={
@@ -56,7 +58,7 @@ jobs:
             if(!c.voice)throw new Error(`VOICE_ROUTE:${c.id}`);
           }
           b.voice_routing='FACEBOOK_DEFINES_VOICE_ROLE_PRODUCTORA_SELECTS_TECHNICAL_VOICE';
-          fs.writeFileSync('/tmp/cerebro-fb-v283/facebook-brief.json',JSON.stringify(b,null,2));
+          fs.writeFileSync('/tmp/cerebro-fb-v284/facebook-brief.json',JSON.stringify(b,null,2));
           console.log('FACEBOOK_TO_PRODUCTORA_VOICE_ROUTING_GREEN');
           NODE
 
@@ -86,7 +88,7 @@ jobs:
           set -euo pipefail
           python - <<'PY'
           import json,subprocess,pathlib
-          b=json.load(open('/tmp/cerebro-fb-v283/facebook-brief.json',encoding='utf-8'))
+          b=json.load(open('/tmp/cerebro-fb-v284/facebook-brief.json',encoding='utf-8'))
           piper='/tmp/cerebro-piper/piper/piper'
           routes={
             'ES_ES_DAVEFX':('/tmp/cerebro-piper/davefx/model.onnx',None,'1.08','0.13'),
@@ -96,7 +98,7 @@ jobs:
           for c in b['campaigns']:
             model,speaker,scale,silence=routes[c['voice']['id']]
             for fmt in ('story','reel','long'):
-              out=f"/tmp/cerebro-fb-v283/audio/{c['id'].lower()}-{fmt}.wav"
+              out=f"/tmp/cerebro-fb-v284/audio/{c['id'].lower()}-{fmt}.wav"
               cmd=[piper,'--model',model,'--config',model+'.json','--length_scale',scale,'--sentence_silence',silence,'--output_file',out]
               if speaker is not None:cmd += ['--speaker',speaker]
               subprocess.run(cmd,input=c['formats'][fmt]['text'].encode('utf-8'),check=True)
@@ -110,7 +112,7 @@ jobs:
           python - <<'PY'
           import glob,subprocess,os,json
           rows=[]
-          for f in sorted(glob.glob('/tmp/cerebro-fb-v283/audio/*.wav')):
+          for f in sorted(glob.glob('/tmp/cerebro-fb-v284/audio/*.wav')):
             d=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nk=1:nw=1',f]))
             fmt='story' if '-story.wav' in f else 'reel' if '-reel.wav' in f else 'long'
             if fmt=='story' and not 13<=d<=26.4: raise SystemExit(f'STORY_VOICE_RED:{os.path.basename(f)}:{d}')
@@ -118,36 +120,37 @@ jobs:
             if fmt=='long' and d<177: raise SystemExit(f'LONG_VOICE_RED:{os.path.basename(f)}:{d}')
             rows.append({'file':os.path.basename(f),'format':fmt,'duration_sec':round(d,3)})
           assert len(rows)==9
-          json.dump({'locale':'es-ES','physical_voice_identities':['DAVEFX','SHARVARD_F','SHARVARD_M'],'items':rows},open('/tmp/cerebro-fb-v283/voice-manifest.json','w'),indent=2)
+          json.dump({'locale':'es-ES','physical_voice_identities':['DAVEFX','SHARVARD_F','SHARVARD_M'],'items':rows},open('/tmp/cerebro-fb-v284/voice-manifest.json','w'),indent=2)
           print(json.dumps(rows))
           PY
 
       - name: Materialize governed visuals and distinct CC0 music
         run: |
           set -euo pipefail
-          mkdir -p /tmp/cerebro-fb-v283/assets /tmp/cerebro-fb-v283/music
+          mkdir -p /tmp/cerebro-fb-v284/assets /tmp/cerebro-fb-v284/music
           for id in 8293019 3944018 30353173 6780089 4307346 7581281 31568471 3769951 9056542 27860328 6187216 7821811 5466764; do
-            curl --fail --location --silent --show-error --retry 3 --retry-all-errors "https://www.pexels.com/download/video/${id}/" -o "/tmp/cerebro-fb-v283/assets/${id}.mp4"
-            test "$(stat -c%s /tmp/cerebro-fb-v283/assets/${id}.mp4)" -gt 100000
+            curl --fail --location --silent --show-error --retry 3 --retry-all-errors "https://www.pexels.com/download/video/${id}/" -o "/tmp/cerebro-fb-v284/assets/${id}.mp4"
+            test "$(stat -c%s /tmp/cerebro-fb-v284/assets/${id}.mp4)" -gt 100000
           done
           root=https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music
-          curl -fsSL "$root/02-kevin-macleod-blippy-trance.mp3" -o /tmp/cerebro-fb-v283/music/02-kevin-macleod-blippy-trance.mp3
-          curl -fsSL "$root/01-bryan-teoh-starcourt-mall.mp3" -o /tmp/cerebro-fb-v283/music/01-bryan-teoh-starcourt-mall.mp3
-          curl -fsSL "$root/05-kevin-macleod-bass-meant-jazz.mp3" -o /tmp/cerebro-fb-v283/music/05-kevin-macleod-bass-meant-jazz.mp3
+          curl -fsSL "$root/02-kevin-macleod-blippy-trance.mp3" -o /tmp/cerebro-fb-v284/music/02-kevin-macleod-blippy-trance.mp3
+          curl -fsSL "$root/01-bryan-teoh-starcourt-mall.mp3" -o /tmp/cerebro-fb-v284/music/01-bryan-teoh-starcourt-mall.mp3
+          curl -fsSL "$root/05-kevin-macleod-bass-meant-jazz.mp3" -o /tmp/cerebro-fb-v284/music/05-kevin-macleod-bass-meant-jazz.mp3
 
-      - name: Productora renders nine physical Facebook pieces
+      - name: Productora renders nine physical Facebook pieces through reversible SAR wrapper
         run: |
           set -euo pipefail
-          mkdir -p /tmp/cerebro-fb-v283/out
-          node cerebro/runtime/creative-facebook-productora-v28.mjs /tmp/cerebro-fb-v283/facebook-brief.json /tmp/cerebro-fb-v283/audio /tmp/cerebro-fb-v283/assets /tmp/cerebro-fb-v283/music /tmp/cerebro-fb-v283/out | tee /tmp/cerebro-fb-v283/render.json
-          grep -F '"ok":true' /tmp/cerebro-fb-v283/render.json
+          mkdir -p /tmp/cerebro-fb-v284/out
+          node cerebro/runtime/creative-facebook-productora-v28-sarfix.mjs /tmp/cerebro-fb-v284/facebook-brief.json /tmp/cerebro-fb-v284/audio /tmp/cerebro-fb-v284/assets /tmp/cerebro-fb-v284/music /tmp/cerebro-fb-v284/out | tee /tmp/cerebro-fb-v284/render.json
+          grep -F '"ok":true' /tmp/cerebro-fb-v284/render.json
+          grep -F '"wrapper_version":"2.8.1"' /tmp/cerebro-fb-v284/render.json
 
       - name: Physical diversity tribunal
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const r='/tmp/cerebro-fb-v283/out';const m=JSON.parse(fs.readFileSync(`${r}/FACEBOOK_PRODUCTORA_V28_MANIFEST.json`));
+          const r='/tmp/cerebro-fb-v284/out';const m=JSON.parse(fs.readFileSync(`${r}/FACEBOOK_PRODUCTORA_V28_MANIFEST.json`));
           if(!Object.values(m.gates).every(Boolean)||m.productions.length!==9)throw new Error('PRODUCTORA_GATES');
           const reels=m.productions.filter(x=>x.format==='reel'),longs=m.productions.filter(x=>x.format==='long'),stories=m.productions.filter(x=>x.format==='story');
           if(reels.length!==3||reels.some(x=>x.duration_sec<48||x.duration_sec>=60))throw new Error('REELS');
@@ -158,26 +161,26 @@ jobs:
             if(new Set(vals).size!==3)throw new Error(`DIVERSITY_${key}`);
           }
           if(m.environment!=='PREPROD'||m.publish_authorized!==false||m.promotion_eligible!==false||m.additional_recurring_cost_eur!==0)throw new Error('GOVERNANCE');
-          console.log('PRODUCTORA_V283_NINE_PHYSICAL_PIECES_GREEN_HUMAN_TRIBUNAL_PENDING');
+          console.log('PRODUCTORA_V284_NINE_PHYSICAL_PIECES_GREEN_HUMAN_TRIBUNAL_PENDING');
           NODE
 
       - name: Produce review evidence
         run: |
           set -euo pipefail
-          mkdir -p /tmp/cerebro-fb-v283/out/review-frames
-          for f in /tmp/cerebro-fb-v283/out/*.mp4; do
+          mkdir -p /tmp/cerebro-fb-v284/out/review-frames
+          for f in /tmp/cerebro-fb-v284/out/*.mp4; do
             base="$(basename "$f" .mp4)";dur="$(ffprobe -v error -show_entries format=duration -of default=nk=1:nw=1 "$f")"
-            ffprobe -v error -show_entries format=duration,size:stream=codec_type,width,height,sample_rate,channels -of json "$f" > "/tmp/cerebro-fb-v283/out/${base}-probe.json"
+            ffprobe -v error -show_entries format=duration,size:stream=codec_type,width,height,sample_rate,channels -of json "$f" > "/tmp/cerebro-fb-v284/out/${base}-probe.json"
             if awk "BEGIN {exit !($dur >= 180)}"; then fps='1/12'; else fps='1/4'; fi
-            ffmpeg -hide_banner -loglevel error -i "$f" -vf "fps=${fps},scale=300:-2,tile=4x4:padding=3:margin=3" -frames:v 1 -q:v 3 -y "/tmp/cerebro-fb-v283/out/review-frames/${base}-contact-sheet.jpg"
+            ffmpeg -hide_banner -loglevel error -i "$f" -vf "fps=${fps},scale=300:-2,tile=4x4:padding=3:margin=3" -frames:v 1 -q:v 3 -y "/tmp/cerebro-fb-v284/out/review-frames/${base}-contact-sheet.jpg"
           done
-          cp /tmp/cerebro-fb-v283/facebook-brief-source.json /tmp/cerebro-fb-v283/out/FACEBOOK_DIRECTOR_SOURCE_BRIEF.json
-          cp /tmp/cerebro-fb-v283/facebook-brief.json /tmp/cerebro-fb-v283/out/PRODUCTORA_ROUTED_BRIEF.json
-          cp /tmp/cerebro-fb-v283/voice-manifest.json /tmp/cerebro-fb-v283/out/VOICE_MANIFEST.json
-          sha256sum /tmp/cerebro-fb-v283/out/*.mp4 /tmp/cerebro-fb-v283/out/*.json > /tmp/cerebro-fb-v283/out/SHA256SUMS.txt
+          cp /tmp/cerebro-fb-v284/facebook-brief-source.json /tmp/cerebro-fb-v284/out/FACEBOOK_DIRECTOR_SOURCE_BRIEF.json
+          cp /tmp/cerebro-fb-v284/facebook-brief.json /tmp/cerebro-fb-v284/out/PRODUCTORA_ROUTED_BRIEF.json
+          cp /tmp/cerebro-fb-v284/voice-manifest.json /tmp/cerebro-fb-v284/out/VOICE_MANIFEST.json
+          sha256sum /tmp/cerebro-fb-v284/out/*.mp4 /tmp/cerebro-fb-v284/out/*.json > /tmp/cerebro-fb-v284/out/SHA256SUMS.txt
 
       - uses: actions/upload-artifact@v4
         with:
-          name: cerebro-facebook-productora-v283-${{ github.sha }}
-          path: /tmp/cerebro-fb-v283/out
+          name: cerebro-facebook-productora-v284-${{ github.sha }}
+          path: /tmp/cerebro-fb-v284/out
           retention-days: 7
