@@ -1,0 +1,73 @@
+name: CEREBRO UMS BM11 Thousand Shot
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm11-thousand-shot.yml'
+      - 'cerebro/media-studio/v2/probes/bm11_thousand_shot_simulation.mjs'
+      - 'cerebro/media-studio/v2/probes/bm11_simulation_proof_gate.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-bm11-thousand-shot
+  cancel-in-progress: true
+
+jobs:
+  thousand_shot_simulation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      BM11_OUT: ums-bm11-thousand-shot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run physical resumable thousand-shot scheduling simulation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/media-studio/v2/probes/bm11_thousand_shot_simulation.mjs | tee bm11-simulation.stdout.log
+          test -s "$BM11_OUT/bm11-simulation.json"
+          test -s "$BM11_OUT/bm11-phase1-state.json"
+          test -s "$BM11_OUT/bm11-final-state.json"
+          test -s "$BM11_OUT/bm11-events.ndjson"
+
+      - name: Fail-closed BM11 tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/media-studio/v2/probes/bm11_simulation_proof_gate.mjs | tee bm11-proof.stdout.log
+
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p=JSON.parse(fs.readFileSync('ums-bm11-thousand-shot/bm11-pass-with-evidence.json','utf8'));
+          if(p.status!=='PASS_WITH_EVIDENCE'||p.benchmark_credit!==true) throw new Error('BM11_NOT_PASS');
+          if(!Object.values(p.checks).every(Boolean)) throw new Error('BM11_CHECK_FAILED');
+          if(p.metrics.shots!==1000||p.metrics.completed_events!==1000||p.metrics.unique_output_hashes!==1000) throw new Error('BM11_SCALE_INCOMPLETE');
+          if(p.metrics.completed_before_resume!==420||p.metrics.retryable_failures!==27) throw new Error('BM11_RESUME_OR_RETRY_INCOMPLETE');
+          if(p.metrics.total_cost_eur!==0||p.prod_authorized!==false) throw new Error('BM11_AUTHORITY_OR_COST_INVALID');
+          console.log(JSON.stringify(p,null,2));
+          NODE
+
+      - name: Upload immutable BM11 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm11-thousand-shot-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm11-thousand-shot/
+            bm11-simulation.stdout.log
+            bm11-proof.stdout.log
