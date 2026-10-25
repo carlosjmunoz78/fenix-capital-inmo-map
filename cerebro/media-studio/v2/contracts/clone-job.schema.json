@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://media-studio/v2/clone-job.schema.json",
+  "title": "Universal Media Studio Clone Job",
+  "type": "object",
+  "required": ["job_id", "company_id", "environment", "clone_type", "source", "target", "provenance"],
+  "properties": {
+    "job_id": {"type": "string", "minLength": 1},
+    "company_id": {"type": "string", "minLength": 1},
+    "environment": {"enum": ["PROD", "PREPROD", "LAB"]},
+    "clone_type": {
+      "enum": [
+        "VOICE_CLONE",
+        "VOICE_CONVERSION",
+        "SINGING_VOICE_CLONE",
+        "FACE_IDENTITY_RECONSTRUCTION",
+        "BODY_IDENTITY_RECONSTRUCTION",
+        "VIDEO_TO_PERSISTENT_CHARACTER",
+        "DIGITAL_DOUBLE",
+        "MOTION_TRANSFER",
+        "PERFORMANCE_TRANSFER",
+        "SCENE_RECONSTRUCTION",
+        "SHOT_RECONSTRUCTION",
+        "STYLE_REFERENCE_RECONSTRUCTION"
+      ]
+    },
+    "source": {
+      "type": "object",
+      "required": ["origin_type", "asset_refs"],
+      "properties": {
+        "origin_type": {"enum": ["USER_PROVIDED", "OWNED_LIBRARY", "LICENSED_LIBRARY", "INTERNET_REFERENCE"]},
+        "asset_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "identity_id": {"type": ["string", "null"]},
+        "identity_rights_record_ref": {"type": ["string", "null"]},
+        "license_record_ref": {"type": ["string", "null"]},
+        "source_description": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["use_case", "deliverables"],
+      "properties": {
+        "use_case": {"type": "string", "minLength": 1},
+        "deliverables": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "language": {"type": ["string", "null"]},
+        "duration_seconds": {"type": ["number", "null"], "minimum": 0},
+        "fidelity_target": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+      },
+      "additionalProperties": false
+    },
+    "provenance": {"type": "object"},
+    "rights_decision": {
+      "type": "object",
+      "properties": {
+        "status": {"enum": ["PENDING", "APPROVED", "DENIED", "REFERENCE_ONLY"]},
+        "reason": {"type": "string"},
+        "guardian_ids": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source": {
+            "properties": {"origin_type": {"const": "INTERNET_REFERENCE"}}
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "rights_decision": {
+            "type": "object",
+            "properties": {"status": {"enum": ["REFERENCE_ONLY", "APPROVED", "DENIED"]}}
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
