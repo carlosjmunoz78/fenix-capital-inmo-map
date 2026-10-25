@@ -12570,6 +12570,76 @@
       "promoted_at": "2026-10-22T19:18:26.653Z"
     },
     {
+      "candidate_id": "repo:274233c3be4406fa76f49f9b69bb",
+      "technical_name": "strapi",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/strapi",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "274233c3be4406fa76f49f9b69bb429cf826fdd6efd9f2f4f0e004f52719dd4f",
+      "manifest_sha256": "8c4a4b140261058ee43c776287206c89e67a673fa2316309da22fea19adb9887",
+      "outcome_hash": "7df56409181954731cfce36add1b36093df44a503131a478c5ed20820c63fdea",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:274233c3be4406fa:cap:1",
+          "technical_name": "strapi",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T06:59:22.719Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "9dd641ebd99d5066eafd56b55b087aed683def33490794cb0cb24e3171ed73bb"
+    },
+    {
       "candidate_id": "repo:a8e17cb1849e5b08153fdd6e8ec0",
       "technical_name": "strapi",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/strapi",
@@ -12770,6 +12840,76 @@
       "promoted_at": "2026-10-22T05:19:42.393Z"
     },
     {
+      "candidate_id": "repo:d85c586ac8584decc757b2d455a6",
+      "technical_name": "swiftui-view-refactor",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/swiftui-view-refactor",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "d85c586ac8584decc757b2d455a635b26d343b77602edbbed84964ac5506941c",
+      "manifest_sha256": "42e63a5a39bf422855b02488798ac3b57da5856cb33cc3334377f0681302a1ec",
+      "outcome_hash": "2e8029dc66421ed7b453df416c6668e3a0585fe6058a2aafcaa149f0a37c5917",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d85c586ac8584dec:cap:1",
+          "technical_name": "swiftui-view-refactor",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T06:59:22.720Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "baba6e06c493fbaba05acdb96bf66a8dc882f876f3d841b60fd1cdda14b63e0f"
+    },
+    {
       "candidate_id": "repo:5bfee3fc164d6f9585a2307d0aac",
       "technical_name": "tailwindcss",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/tailwindcss",
@@ -12868,6 +13008,76 @@
         "observed_at": "2026-10-22T05:19:42.393Z"
       },
       "promoted_at": "2026-10-22T05:19:42.393Z"
+    },
+    {
+      "candidate_id": "repo:5d5beeed861996544370f2814e4f",
+      "technical_name": "tanstack-table",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/tanstack-table",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "5d5beeed861996544370f2814e4ff2c064fe3561e70e0b7a081222ba0e60d33a",
+      "manifest_sha256": "c8a6504e28fe2b60701cf834d4e0cc52005089bf10d524a41de51372c2851619",
+      "outcome_hash": "2bdb45922f87aa5d8da772ba461c4606642f98b32cfdf9c323b883b5b2b359e5",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:5d5beeed86199654:cap:1",
+          "technical_name": "tanstack-table",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T06:59:22.720Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "7c9ab4f5131ab7809c9dc880e4106c751cb28ec5c5a8008db0a9354304023c7d"
     },
     {
       "candidate_id": "repo:8783c5ea63fcc99abdeb94b3393a",
@@ -13372,11 +13582,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 132,
-    "inserted": 0,
+    "total": 135,
+    "inserted": 3,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 3,
     "prod_readonly": 132
   }
 }
