@@ -11,6 +11,7 @@ type ActionResponse={ok:boolean;error?:string;state?:string;verification_state?:
 
 const ENVIRONMENT=IS_PRODUCTION?'PROD':'PREPROD';
 const OWNER=IS_PRODUCTION?'cerebro-browser-work-total-owner-v1-prod':'cerebro-browser-work-total-owner-v1-preprod';
+const IDEMPOTENCY_PREFIX=IS_PRODUCTION?'browser-work-total-v1-prod-ui-':'browser-work-total-v1-ui-';
 const ROOT_ID='cerebro-browser-work-total-profile-dock';
 const STYLE_ID='cerebro-browser-work-total-profile-style';
 const TERMINAL=new Set(['HIBERNATED','STOPPED','ERROR','CLOSED']);
@@ -99,7 +100,7 @@ async function act(action:string){
   }else if(action==='open'){
    const current=active();
    if(current?.active_session&&current.browser_profile_id!==profile!.browser_profile_id){await api<ActionResponse>('hibernate',{company_id:company,session_id:current.active_session.session_id,target_browser_profile_id:profile!.browser_profile_id});info=`Durmiendo ${current.display_label}…`;render();await waitForSleep(current.active_session.session_id);}
-   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`work-total-ui-${crypto.randomUUID()}`});info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';
+   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`${IDEMPOTENCY_PREFIX}${crypto.randomUUID()}`});info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';
   }else if(action==='confirm'){
    const result=await api<ActionResponse>('confirm-account',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id});info=`Cuenta confirmada${result.account_hint?` · ${result.account_hint}`:''}.`;
   }else if(action==='forget'){
