@@ -7,11 +7,13 @@ export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtim
 const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
 const PROD_SUPABASE_PUBLISHABLE_KEY='sb_publishable_yjISKmA5UPfF3d7NitP_DA_j5LGydh0';
 
+// PROD is pinned to the canonical App project. Build/Preview environment variables
+// must never redirect app.fenixcapital.es to PREPROD or a stale publishable key.
 export const SUPABASE_URL=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_URL||PROD_SUPABASE_URL)
+  ? PROD_SUPABASE_URL
   : String(import.meta.env.VITE_SUPABASE_URL||'');
 export const SUPABASE_PUBLISHABLE_KEY=IS_PRODUCTION
-  ? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PROD_SUPABASE_PUBLISHABLE_KEY)
+  ? PROD_SUPABASE_PUBLISHABLE_KEY
   : String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||'');
 if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){
   throw new Error(IS_PRODUCTION?'Configuración Supabase PROD incompleta':'Configuración Supabase PRE-PROD incompleta');
