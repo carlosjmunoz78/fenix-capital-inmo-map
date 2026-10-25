@@ -14,6 +14,7 @@ on:
       - 'cerebro/runtime/browser1-access-v1.mjs'
       - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
       - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
+      - 'src/main.tsx'
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
       - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/**'
