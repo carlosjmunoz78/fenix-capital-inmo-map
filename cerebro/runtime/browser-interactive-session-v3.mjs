@@ -2,10 +2,12 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import {createGovernedCloudBrowserWorker} from './cloud-browser-governed-session-v1.mjs';
 import {compileBrowser1Commands} from './browser1-access-v1.mjs';
+import {decryptWorkspaceSnapshot,encryptWorkspaceSnapshot,exportProfileStorageState,restoreProfileStorageState} from './browser-session-bundle-v1.mjs';
 
 const PROD_PROJECT_REF='cluhljgonannaafpmblx';
 const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || `https://${PROD_PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
+const WORKSPACE_ENDPOINT=String(process.env.CEREBRO_BROWSER_WORKSPACE_URL||'').trim();
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
 const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
 const POLL_INTERVAL_MS=Math.max(25,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||35));
@@ -14,7 +16,10 @@ function required(value,name){if(value===undefined||value===null||value==='')thr
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
 function b64ToBuffer(v){return Buffer.from(String(v||''),'base64');}
 function scrubUrl(raw){try{const u=new URL(String(raw||''));u.username='';u.password='';u.search='';u.hash='';return u.toString();}catch{return '';}}
-function browserWorkerOptions(){const channel=String(process.env.CEREBRO_BROWSER_CHANNEL||'').trim();return channel?{launch_options:{channel}}:{};}
+function privateUrl(raw){const value=String(raw||'');if(value.startsWith('data:'))return value.slice(0,16384);try{const u=new URL(value);if(!['http:','https:','about:'].includes(u.protocol))return'';u.username='';u.password='';return u.toString().slice(0,16384);}catch{return'';}}
+function browserChannel(){return String(process.env.CEREBRO_BROWSER_CHANNEL||'').trim();}
+function browserWorkerOptions(){const channel=browserChannel();return channel?{launch_options:{channel}}:{};}
+function workspaceEnabled(job){const environment=String(job?.environment||'');if(environment==='PREPROD')return WORKSPACE_ENDPOINT.includes(PREPROD_PROJECT_REF);if(environment==='PROD')return String(job?.company_id||'')==='fenix'&&WORKSPACE_ENDPOINT.includes(PROD_PROJECT_REF);return false;}
 function assertInteractiveScope(job,endpoint){
   const environment=String(job?.environment||'');
   const company=String(job?.company_id||'');
@@ -30,13 +35,15 @@ function assertInteractiveScope(job,endpoint){
   throw new Error('INTERACTIVE_SCOPE_DENIED');
 }
 
-async function callInteractive(endpoint,route,tokenProvider,body={},fetch_impl=fetch){
+async function callApi(endpoint,route,tokenProvider,body={},fetch_impl=fetch,prefix='BROWSER_V3'){
   const token=required(await tokenProvider(),'WORKER_TOKEN');
   const response=await fetch_impl(`${endpoint.replace(/\/$/,'')}/${route}`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:JSON.stringify(body),redirect:'error'});
   const data=await response.json().catch(()=>null);
-  if(!response.ok||data?.ok!==true)throw new Error(`BROWSER_V3_${route.replace(/\//g,'_').toUpperCase()}_FAILED:${response.status}:${data?.error||'UNKNOWN'}`);
+  if(!response.ok||data?.ok!==true)throw new Error(`${prefix}_${route.replace(/\//g,'_').toUpperCase()}_FAILED:${response.status}:${data?.error||'UNKNOWN'}`);
   return data;
 }
+async function callInteractive(endpoint,route,tokenProvider,body={},fetch_impl=fetch){return callApi(endpoint,route,tokenProvider,body,fetch_impl,'BROWSER_V3');}
+async function callWorkspace(route,tokenProvider,body={},fetch_impl=fetch){if(!WORKSPACE_ENDPOINT)throw new Error('BROWSER_WORKSPACE_ENDPOINT_REQUIRED');return callApi(WORKSPACE_ENDPOINT,route,tokenProvider,body,fetch_impl,'BROWSER_WORKSPACE');}
 
 function encryptBytes(bytes,key){
   const iv=crypto.randomBytes(12);
@@ -78,16 +85,84 @@ function humanAction(commandType,payload){
   }
 }
 
+function normalizePrivateTabs(raw){return Array.isArray(raw)?raw.slice(0,8).map((tab,index)=>({index:Number.isInteger(tab?.index)?tab.index:index,url:privateUrl(tab?.url),title:String(tab?.title||'').slice(0,240),active:tab?.active===true})).filter(tab=>Boolean(tab.url)):[];}
+function actionsFromWorkspaceSnapshot(snapshot){const tabs=normalizePrivateTabs(snapshot?.tabs);if(!tabs.length)return null;const actions=[{type:'NAVIGATE',url:tabs[0].url}];for(const tab of tabs.slice(1))actions.push({type:'OPEN_TAB',url:tab.url});const active=Math.max(0,Math.min(Number(snapshot?.active_tab_index||0),tabs.length-1));if(active>0)actions.push({type:'SWITCH_TAB',index:active});return actions;}
+function firstEmail(text){const match=String(text||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);return match?match[0].toLowerCase():null;}
+function identityState(value){return String(value?.status||value?.verification_state||value||'UNVERIFIED');}
+function requireVerifiedIdentity(value){const state=identityState(value);if(state!=='VERIFIED')throw new Error(`WORKSPACE_IDENTITY_NOT_VERIFIED:${state}`);return state;}
+function humanRequiredFromIdentity(value){
+  const status=identityState(value);
+  if(status==='MISMATCH')return{status,reason:'SECURITY_INCIDENT',code:'ACCOUNT_MISMATCH'};
+  if(status==='REAUTH_REQUIRED')return{status,reason:'LOW_CONFIDENCE',code:'REAUTH_REQUIRED'};
+  if(status==='PENDING_CONFIRMATION')return{status,reason:'LOW_CONFIDENCE',code:'ACCOUNT_CONFIRMATION_REQUIRED'};
+  return{status,reason:'LOW_CONFIDENCE',code:'ACCOUNT_IDENTITY_UNVERIFIED'};
+}
+
+async function restoreWorkspace(job,tokenProvider,fetch_impl){
+  if(!workspaceEnabled(job))return null;
+  const restored=await callWorkspace('worker/restore',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
+  const bundle=restored?.bundle;
+  if(!bundle)return{restored:false,reason:restored?.reason||'NO_ACTIVE_BUNDLE',profile:restored?.profile||null};
+  const verificationState=String(bundle.verification_state||'UNVERIFIED');
+  if(verificationState!=='VERIFIED')return{restored:false,reason:`IDENTITY_NOT_VERIFIED:${verificationState}`,bundle,profile:restored?.profile||null};
+  const key=b64ToBuffer(bundle.key_b64);if(key.length!==32)throw new Error('WORKSPACE_BUNDLE_KEY_INVALID');
+  const decrypted=decryptWorkspaceSnapshot(bundle.bundle_ciphertext,bundle.bundle_iv,key,bundle.bundle_sha256);
+  await restoreProfileStorageState({browser_profile_id:job.browser_profile_id,storage_state:decrypted.snapshot.storage_state,channel:browserChannel()});
+  await callWorkspace('worker/restore-complete',tokenProvider,{session_id:String(job.job_id),bundle_id:bundle.bundle_id},fetch_impl);
+  return{restored:true,snapshot:decrypted.snapshot,bundle,profile:restored?.profile||null};
+}
+
+async function saveWorkspace(job,tokenProvider,fetch_impl,privateTabs,activeTabIndex,identityVerification){
+  if(!workspaceEnabled(job))return null;
+  requireVerifiedIdentity(identityVerification);
+  const prep=await callWorkspace('worker/prepare-save',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
+  const key=b64ToBuffer(prep.key_b64);if(key.length!==32)throw new Error('WORKSPACE_BUNDLE_KEY_INVALID');
+  const exported=await exportProfileStorageState({browser_profile_id:job.browser_profile_id,storage_state:undefined,channel:browserChannel()});
+  const snapshot={storage_state:exported.storage_state,tabs:normalizePrivateTabs(privateTabs),active_tab_index:Number.isInteger(activeTabIndex)?activeTabIndex:0};
+  const encrypted=encryptWorkspaceSnapshot(snapshot,key);
+  const committed=await callWorkspace('worker/commit-save',tokenProvider,{session_id:String(job.job_id),bundle_id:prep.bundle_id,bundle_ciphertext:encrypted.ciphertext,bundle_iv:encrypted.iv,bundle_sha256:encrypted.sha256,tabs:snapshot.tabs,active_tab_index:snapshot.active_tab_index,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,expires_at:prep.expires_at},fetch_impl);
+  if(String(committed?.bundle?.verification_state||'UNVERIFIED')!=='VERIFIED')throw new Error('WORKSPACE_COMMIT_NOT_VERIFIED');
+  return{hibernated:true,bundle_id:committed.bundle.bundle_id||prep.bundle_id,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,tab_count:encrypted.tab_count,verification_state:'VERIFIED'};
+}
+
+async function verifyWorkspaceIdentity(worker,base,job,restoreUrl,endpoint,tokenProvider,fetch_impl){
+  if(!workspaceEnabled(job))return{status:'NOT_APPLICABLE'};
+  const profileState=await callWorkspace('worker/profile-state',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
+  if(String(profileState?.profile?.provider||'')!=='google')return{status:'NOT_APPLICABLE'};
+  const returnUrl=privateUrl(restoreUrl)||'https://www.google.com/';
+  const result=await worker.execute({...base,actions:[{type:'NAVIGATE',url:'https://myaccount.google.com/'},{type:'WAIT',ms:1200},{type:'EXTRACT_TEXT',target:{selector:'body'}},{type:'NAVIGATE',url:returnUrl}],keep_session_open:true,capture_final_evidence:false});
+  if(result?.ok!==true){
+    await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_IDENTITY_UNVERIFIED',provider:'google'}},fetch_impl).catch(()=>null);
+    return{status:'UNVERIFIED'};
+  }
+  const accountUrl=String(result.results?.[0]?.url||'');
+  if(accountUrl.includes('accounts.google.com')&&(accountUrl.includes('signin')||accountUrl.includes('ServiceLogin'))){
+    const observed=await callWorkspace('worker/observe-account',tokenProvider,{session_id:String(job.job_id),reauth_required:true},fetch_impl);
+    await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'REAUTH_REQUIRED',provider:'google'}},fetch_impl).catch(()=>null);
+    return observed;
+  }
+  const email=firstEmail(result.results?.[2]);
+  if(!email){
+    await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_IDENTITY_UNVERIFIED',provider:'google'}},fetch_impl).catch(()=>null);
+    return{status:'UNVERIFIED'};
+  }
+  const observed=await callWorkspace('worker/observe-account',tokenProvider,{session_id:String(job.job_id),account_email:email},fetch_impl);
+  if(observed.status==='PENDING_CONFIRMATION')await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'LOW_CONFIDENCE',detail:{code:'ACCOUNT_CONFIRMATION_REQUIRED',provider:'google',account_hint:observed.account_hint}},fetch_impl).catch(()=>null);
+  else if(observed.status==='MISMATCH')await callInteractive(endpoint,'worker/human-required',tokenProvider,{session_id:String(job.job_id),reason:'SECURITY_INCIDENT',detail:{code:'ACCOUNT_MISMATCH',provider:'google',account_hint:observed.account_hint}},fetch_impl).catch(()=>null);
+  return observed;
+}
+
 async function captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl){
   const result=await worker.execute({...base,actions:[{type:'SCREENSHOT',label:`live-${seq}`}],keep_session_open:true,capture_final_evidence:false});
   if(result?.ok!==true)throw new Error(`INTERACTIVE_FRAME_NOT_AUTHORIZED:${result?.authorization?.status||'UNKNOWN'}`);
   const file=result.results?.[0]?.file;if(!file)throw new Error('INTERACTIVE_FRAME_FILE_MISSING');
   let bytes;try{bytes=await fs.readFile(file);}finally{await fs.unlink(file).catch(()=>{});}
   const encrypted=encryptBytes(bytes,key);const url=scrubUrl(result.final_url);
-  const tabs=Array.isArray(result.tabs)&&result.tabs.length?result.tabs.slice(0,32).map((tab,index)=>({index:Number.isInteger(tab?.index)?tab.index:index,url:scrubUrl(tab?.url),title:String(tab?.title||'').slice(0,240),active:tab?.active===true})):(url?[{index:0,url,title:'',active:true}]:[]);
+  const privateTabs=normalizePrivateTabs(result.tabs);
+  const tabs=privateTabs.length?privateTabs.map(tab=>({...tab,url:scrubUrl(tab.url)})):(url?[{index:0,url,title:'',active:true}]:[]);
   const activeTabIndex=Number.isInteger(result.active_tab_index)?result.active_tab_index:(tabs.find(tab=>tab.active)?.index??0);
   await callInteractive(endpoint,'worker/frame',tokenProvider,{session_id:sessionId,frame_ciphertext:encrypted.ciphertext,frame_iv:encrypted.iv,frame_seq:seq,frame_mime:'image/png',current_url:url,current_title:String(result.current_title||'').slice(0,240),tabs,active_tab_index:activeTabIndex,viewport_width:Number(result.viewport_width||1440),viewport_height:Number(result.viewport_height||1000)},fetch_impl);
-  return{final_url:url,frame_seq:seq};
+  return{final_url:url,frame_seq:seq,private_tabs:privateTabs,active_tab_index:activeTabIndex};
 }
 
 export async function runInteractiveBrowserSessionV3({job,token=null,token_provider=null,fetch_impl=fetch,endpoint=DEFAULT_ENDPOINT}={}){
@@ -96,18 +171,24 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   if(String(job.capability)!=='browser1.interactive')throw new Error('INTERACTIVE_CAPABILITY_REQUIRED');
   assertInteractiveScope(job,endpoint);
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
+  const restoredWorkspace=await restoreWorkspace(job,tokenProvider,fetch_impl);
   const worker=createGovernedCloudBrowserWorker({max_tabs:8,...browserWorkerOptions()});
-  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false;let closed=false;
+  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false,closed=false,stopRequested=false,hibernateRequested=false;let lastPrivateTabs=[],lastActiveTabIndex=0;let identityVerification={status:'NOT_APPLICABLE'};
+  const publishFrame=async key=>{seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastPrivateTabs=frame.private_tabs;lastActiveTabIndex=frame.active_tab_index;lastFrameAt=Date.now();return frame;};
   try{
-    const initialActions=compileBrowser1Commands(job.commands||[],{mode:'MUTATE'});
+    const resumeActions=restoredWorkspace?.restored?actionsFromWorkspaceSnapshot(restoredWorkspace.snapshot):null;
+    const initialActions=resumeActions||compileBrowser1Commands(job.commands||[],{mode:'MUTATE'});
     const initial=await worker.execute({...base,actions:initialActions,keep_session_open:true,capture_final_evidence:false});
     if(initial?.ok!==true)throw new Error(`INTERACTIVE_INITIAL_NOT_AUTHORIZED:${initial?.authorization?.status||'UNKNOWN'}`);
-    lastUrl=scrubUrl(initial.final_url);
+    lastUrl=scrubUrl(initial.final_url);lastPrivateTabs=normalizePrivateTabs(initial.tabs);lastActiveTabIndex=Number.isInteger(initial.active_tab_index)?initial.active_tab_index:0;
     await callInteractive(endpoint,'worker/open',tokenProvider,{session_id:sessionId},fetch_impl);opened=true;
     const keyResult=await callInteractive(endpoint,'worker/key',tokenProvider,{session_id:sessionId},fetch_impl);const key=b64ToBuffer(keyResult.key_b64);if(key.length!==32)throw new Error('INTERACTIVE_KEY_INVALID');
+    if(workspaceEnabled(job))identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
+    await publishFrame(key);
     while(Date.now()-startedAt<MAX_SESSION_MS){
       const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
-      if(poll.stop===true||poll.state==='STOPPED')break;
+      if(poll.stop===true||poll.state==='STOPPED'){stopRequested=true;break;}
+      if(poll.hibernate===true||poll.state==='HIBERNATE_PENDING'){hibernateRequested=true;break;}
       let processedCommand=false;
       if(poll.command){
         processedCommand=true;
@@ -116,22 +197,36 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
           const payload=decryptJson(poll.command.payload_ciphertext,poll.command.payload_iv,key);
           const action=humanAction(poll.command.command_type,payload);
           const result=await worker.execute({...base,actions:[action],keep_session_open:true,capture_final_evidence:false});
-          ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
+          ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);lastPrivateTabs=normalizePrivateTabs(result?.tabs||lastPrivateTabs);lastActiveTabIndex=Number.isInteger(result?.active_tab_index)?result.active_tab_index:lastActiveTabIndex;if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
         }catch(error){errorCode=String(error?.message||error).slice(0,120);}
         await callInteractive(endpoint,'worker/complete',tokenProvider,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
       }
       if(poll.handback===true){
-        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
+        identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
+        await publishFrame(key);
         await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
       }else if(!processedCommand&&Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){
-        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
+        await publishFrame(key);
       }
       if(processedCommand)continue;
       await sleep(POLL_INTERVAL_MS);
     }
-    await worker.stop('INTERACTIVE_SESSION_COMPLETE');
-    if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
-    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq};
+    if(opened&&!stopRequested)await publishFrame(key);
+    if(workspaceEnabled(job)&&!stopRequested&&identityState(identityVerification)!=='VERIFIED')identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
+    const verificationState=identityState(identityVerification);
+    await worker.stop(stopRequested?'INTERACTIVE_SESSION_STOPPED':hibernateRequested?'INTERACTIVE_SESSION_HIBERNATE_REQUESTED':'INTERACTIVE_SESSION_AUTO_HIBERNATE');
+    if(stopRequested){
+      if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
+      return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:false,workspace_bundle_id:null,workspace_verification_state:verificationState,workspace_hibernate_reason:'STOPPED',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
+    }
+    if(workspaceEnabled(job)&&verificationState!=='VERIFIED'){
+      const human=humanRequiredFromIdentity(identityVerification);
+      if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
+      return{ok:false,authorization:{status:'HUMAN_REQUIRED',reason:human.reason,code:human.code},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,human_required:true,human_required_reason:human.reason,human_required_code:human.code,workspace_hibernated:false,workspace_bundle_id:null,workspace_verification_state:verificationState,workspace_hibernate_reason:hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
+    }
+    const workspace=await saveWorkspace(job,tokenProvider,fetch_impl,lastPrivateTabs,lastActiveTabIndex,identityVerification);
+    if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:workspace?.hibernated===true?'HIBERNATED':'CLOSED'},fetch_impl);closed=true;}
+    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:workspace?.hibernated===true,workspace_bundle_id:workspace?.bundle_id||null,workspace_verification_state:workspace?.verification_state||verificationState,workspace_hibernate_reason:hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
   }catch(error){
     await worker.stop('INTERACTIVE_SESSION_FAILED').catch(()=>{});
     if(opened&&!closed)await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'ERROR'},fetch_impl).catch(()=>{});
@@ -139,4 +234,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.2.0',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.4',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});

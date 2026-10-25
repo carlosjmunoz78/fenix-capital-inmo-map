@@ -110,7 +110,7 @@ function workerInput(job,commands=job.commands){
 
 function resultSummary(result={},credential_materialized=false){
   const firstText=!credential_materialized&&Array.isArray(result.results)?result.results.find(value=>typeof value==='string'):null;
-  return {ok:result.ok===true,authorization_status:result.authorization?.status||null,final_url:result.final_url||null,result_count:Array.isArray(result.results)?result.results.length:0,
+  return {ok:result.ok===true,authorization_status:result.authorization?.status||null,human_required:result.human_required===true,human_required_reason:result.human_required===true?String(result.human_required_reason||'').slice(0,120):null,human_required_code:result.human_required===true?String(result.human_required_code||'').slice(0,120):null,final_url:result.final_url||null,result_count:Array.isArray(result.results)?result.results.length:0,
     observed_text_sample:firstText?firstText.slice(0,300):null,evidence_captured:Boolean(result.final_evidence),credential_materialized,interactive_session:result.interactive_session===true,session_id:result.interactive_session===true?result.session_id||null:null,secret_material_logged:false};
 }
 
@@ -168,10 +168,12 @@ export async function runOneBrowserJobV2({
       if(typeof executeTool!=='function')throw new Error(`BROWSER1_${mode}_EXECUTOR_MISSING`);
       result=await executeTool(workerInput(job,effectiveCommands));
     }
-    const authorized=result.ok===true;
-    const outcome=authorized?'SUCCEEDED':(result.authorization?.status==='HUMAN_REQUIRED'?'HOLD':'FAILED');
+    const humanRequired=result.authorization?.status==='HUMAN_REQUIRED';
+    const authorized=result.ok===true&&!humanRequired;
+    const outcome=humanRequired?'HOLD':authorized?'SUCCEEDED':'FAILED';
     const summary=resultSummary(result,credentialMaterialized);
-    const completion=await dispatch('complete-v2',{worker_slot,job_id:job.job_id,lease_id:job.lease_id,outcome,error_code:authorized?null:(result.authorization?.status||'BROWSER1_NOT_AUTHORIZED'),retryable:outcome==='FAILED',result_summary:summary});
+    const errorCode=authorized?null:(humanRequired?String(result.human_required_code||result.authorization?.code||'HUMAN_REQUIRED').slice(0,240):(result.authorization?.status||'BROWSER1_NOT_AUTHORIZED'));
+    const completion=await dispatch('complete-v2',{worker_slot,job_id:job.job_id,lease_id:job.lease_id,outcome,error_code:errorCode,retryable:outcome==='FAILED',result_summary:summary});
     const end=resourceSample(); const duration=Date.now()-startMs;
     await dispatch('metrics-v2',{worker_slot,run_id,stage_concurrency,job_id:job.job_id,company_id:job.company_id,department_id:job.department_id,browser_profile_id:job.browser_profile_id,
       started_at:start.at,finished_at:end.at,duration_ms:duration,rss_start_bytes:start.rss,rss_end_bytes:end.rss,heap_used_start_bytes:start.heap_used,heap_used_end_bytes:end.heap_used,
@@ -189,13 +191,13 @@ export async function runOneBrowserJobV2({
   }
 }
 
-function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,credential_materialized:result.summary?.credential_materialized===true,interactive_session:result.summary?.interactive_session===true,secret_material_logged:false};}
+function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,human_required:result.summary?.human_required===true,human_required_reason:result.summary?.human_required_reason||null,human_required_code:result.summary?.human_required_code||null,credential_materialized:result.summary?.credential_materialized===true,interactive_session:result.summary?.interactive_session===true,secret_material_logged:false};}
 
 async function main(){
   const result=await runOneBrowserJobV2({seed_canary:process.env.CEREBRO_BROWSER_PHASE2_SEED_CANARY==='true'});
   console.log(JSON.stringify(safeConsoleResult(result)));
-  if(result.status!=='NO_JOB'&&result.ok!==true)process.exitCode=1;
+  if(!['NO_JOB','HOLD'].includes(result.status)&&result.ok!==true)process.exitCode=1;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.4.0',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC_REFRESHING',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,adaptive_ui_settle_pacing:true,interactive_phase3_opt_in:true,interactive_same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_before_expiry:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
+export const BROWSER_JOB_RUNNER_V2_CONTRACT=Object.freeze({schema_version:'2.4.1',capability_id:'BROWSER-1',orchestrator:'BROWSER-ORCH-V2',authentication:'GITHUB_ACTIONS_OIDC_REFRESHING',worker_pool:true,one_serial_browser1_per_worker:true,raw_credentials_in_queue:false,vault_credential_materialization:true,human_operator_liveness:true,human_required_hold_nonfatal:true,adaptive_ui_settle_pacing:true,interactive_phase3_opt_in:true,interactive_same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_before_expiry:true,no_stealth_evasion:true,metrics_without_secrets:true,incremental_cost_eur:0,serial_v1_rollback_preserved:true});
