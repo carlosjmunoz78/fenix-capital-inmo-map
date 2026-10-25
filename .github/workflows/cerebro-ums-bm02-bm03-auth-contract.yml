@@ -1,0 +1,76 @@
+name: CEREBRO UMS BM02 BM03 Authorization Contract
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm02-bm03-auth-contract.yml'
+      - 'cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py'
+      - 'cerebro/media-studio/v2/runtime/bm03-authorized-voice-stack-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node voice stack contract tests
+        run: node --test cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs
+      - name: Admission gate positive fixture remains non-crediting
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/ums-auth
+          printf 'fixture-image' >/tmp/ums-auth/face.bin
+          printf 'fixture-voice' >/tmp/ums-auth/voice.bin
+          cat >/tmp/ums-auth/rights.json <<'JSON'
+          {
+            "identity_id":"TEST-FIXTURE-AUTHORIZED-001",
+            "identity_type":"REAL_AUTHORIZED",
+            "subject_reference":"TEST_FIXTURE_ONLY_NOT_A_REAL_BENCHMARK_SUBJECT",
+            "rights_record":{
+              "consent_status":"APPROVED",
+              "allowed_modalities":["image","video","3d","voice"],
+              "allowed_uses":["DIGITAL_DOUBLE","GENERATIVE_DERIVATIVE","VOICE_CLONE","VOICE_CONVERSION","TTS","PROSODY","MULTILINGUAL"],
+              "territories":["TEST_ONLY"],
+              "valid_from":null,
+              "valid_until":null,
+              "revocation_process":"TEST_FIXTURE_REVOCATION",
+              "evidence_refs":["TEST_FIXTURE_ONLY"]
+            },
+            "provenance_record":{"fixture":true},
+            "canonical_assets":{"face_refs":["face.bin"],"body_refs":[],"voice_refs":["voice.bin"],"motion_refs":[],"3d_assets":[],"character_bible":null},
+            "versions":[{"version":"fixture"}],
+            "checksums":["TEST_FIXTURE_CHECKSUM"]
+          }
+          JSON
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py --benchmark BM-02 --rights /tmp/ums-auth/rights.json --media /tmp/ums-auth/face.bin --out /tmp/ums-auth/bm02.json
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py --benchmark BM-03 --rights /tmp/ums-auth/rights.json --media /tmp/ums-auth/voice.bin --out /tmp/ums-auth/bm03.json
+          python3 - <<'PY'
+          import json
+          for p in ['/tmp/ums-auth/bm02.json','/tmp/ums-auth/bm03.json']:
+              x=json.load(open(p)); assert x['admitted'] is True; assert x['benchmark_credit'] is False; assert x['prod_authorized'] is False
+          PY
+      - name: Missing consent fails closed with LEGAL_REQUIRED
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          p='/tmp/ums-auth/rights.json'; x=json.load(open(p)); x['rights_record']['consent_status']='PENDING'; open('/tmp/ums-auth/pending.json','w').write(json.dumps(x))
+          PY
+          set +e
+          python3 cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py --benchmark BM-03 --rights /tmp/ums-auth/pending.json --media /tmp/ums-auth/voice.bin --out /tmp/ums-auth/blocked.json
+          rc=$?
+          set -e
+          test "$rc" -eq 12
+          python3 - <<'PY'
+          import json
+          x=json.load(open('/tmp/ums-auth/blocked.json')); assert x['status']=='BLOCKED_FAIL_CLOSED'; assert x['human_required'] is True; assert x['human_required_reason']=='LEGAL_REQUIRED'; assert x['benchmark_credit'] is False
+          PY
