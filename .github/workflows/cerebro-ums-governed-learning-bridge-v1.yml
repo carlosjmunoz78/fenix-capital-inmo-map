@@ -1,0 +1,67 @@
+name: CEREBRO UMS Governed Learning Bridge V1
+
+on:
+  workflow_run:
+    workflows:
+      - CEREBRO Dynamic Skill Adoption V1
+    types:
+      - completed
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/learning/continuous-intake-bridge.mjs'
+      - 'cerebro/media-studio/v2/benchmarks/physical-benchmark-harness.mjs'
+      - 'cerebro/media-studio/v2/tests/continuous-intake-bridge.test.mjs'
+      - 'cerebro/media-studio/v2/tests/physical-benchmark-harness.test.mjs'
+      - 'cerebro/media-studio/v2/knowledge/**'
+      - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
+      - '.github/workflows/cerebro-ums-governed-learning-bridge-v1.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-learning-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ums-governed-learning:
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      UMS_REPORT: ${{ runner.temp }}/cerebro-ums-continuous-learning-proposal.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: UMS governed learning and physical benchmark contract tests
+        run: node --test cerebro/media-studio/v2/tests/continuous-intake-bridge.test.mjs cerebro/media-studio/v2/tests/physical-benchmark-harness.test.mjs
+      - name: Build UMS PREPROD learning proposal from governed CEREBRO capabilities
+        run: node cerebro/media-studio/v2/learning/continuous-intake-bridge.mjs --dynamic-registry cerebro/registry/skill-dynamic-adoption-v1.json --out "$UMS_REPORT"
+      - name: Assert fail-closed authority and readiness truth
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const report=JSON.parse(fs.readFileSync(process.env.UMS_REPORT,'utf8'));
+          const readiness=JSON.parse(fs.readFileSync('cerebro/media-studio/v2/benchmarks/required-benchmarks.json','utf8'));
+          if(report.state_type!=='CEREBRO_UMS_CONTINUOUS_LEARNING_PROPOSAL_V1') throw new Error('UMS_REPORT_INVALID');
+          if(report.environment!=='PREPROD'||report.knowledge_auto_promotion!==false||report.readiness_mutation!==false) throw new Error('UMS_AUTHORITY_EXPANSION');
+          if(report.prod_authorized||report.prod_write_authorized||report.prod_mutation_authorized||report.spend_authorized||report.trading_access||Number(report.additional_cost_eur)!==0) throw new Error('UMS_UNSAFE_AUTHORITY');
+          if(readiness.gate!=='UNIVERSAL_MEDIA_STUDIO_READY'||readiness.status!=='NOT_READY') throw new Error('UMS_FALSE_READY');
+          if((readiness.benchmarks||[]).some((x)=>x.state==='PASS_WITH_EVIDENCE')) throw new Error('UMS_BENCHMARK_PASS_WITHOUT_PHYSICAL_EVIDENCE');
+          console.log(JSON.stringify({status:'UMS_GOVERNED_LEARNING_PREPROD_GREEN',media_candidates:report.media_relevant_capabilities,refresh_jobs:report.source_refresh_jobs.length,readiness:readiness.status}));
+          NODE
+      - name: Upload UMS learning proposal evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-learning-proposal-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-ums-continuous-learning-proposal.json
+          if-no-files-found: error
+          retention-days: 7
