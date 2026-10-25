@@ -1,0 +1,35 @@
+name: CEREBRO Session Consistency Gate
+
+on:
+  push:
+    branches:
+      - 'fix/browser-work-total-session-viewer-sync-20261025'
+    paths:
+      - 'src/cerebroBrowserWorkTotalDock.ts'
+      - 'src/CerebroBrowserConsole.tsx'
+      - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
+      - 'cerebro/runtime/browser-session-consistency-gate.test.mjs'
+      - '.github/workflows/cerebro-session-consistency-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Session consistency regression and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Existing Work Total contracts
+        run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
+      - name: Session consistency regression
+        run: node --test cerebro/runtime/browser-session-consistency-gate.test.mjs
+      - name: Build App integration
+        run: npm run build
