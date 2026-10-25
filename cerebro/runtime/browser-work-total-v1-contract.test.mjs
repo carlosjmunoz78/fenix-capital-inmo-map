@@ -5,6 +5,7 @@ import fs from 'node:fs/promises';
 const read=(path)=>fs.readFile(new URL(`../../${path}`,import.meta.url),'utf8');
 const paths={
  runtime:'cerebro/runtime/browser-interactive-session-v3.mjs',
+ runner:'cerebro/runtime/browser-job-runner-v2.mjs',
  bundle:'cerebro/runtime/browser-session-bundle-v1.mjs',
  owner:'supabase/functions/cerebro-browser-work-total-owner-v1-preprod/index.ts',
  ownerProd:'supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts',
@@ -14,16 +15,28 @@ const paths={
  migration:'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql'
 };
 
-test('Work Total 3.5.3 keeps realtime interaction without post-human-input frame capture',async()=>{
+test('Work Total 3.5.4 keeps realtime interaction without post-human-input frame capture',async()=>{
  const runtime=await read(paths.runtime);
  for(const token of ['FRAME_INTERVAL_MS','POLL_INTERVAL_MS','processedCommand','immediate_post_action_frame:false','privacy_frame_suppression_during_human_input:true'])assert.match(runtime,new RegExp(token));
  assert.match(runtime,/CEREBRO_BROWSER_INTERACTIVE_FRAME_MS\|\|1400/);
  assert.match(runtime,/CEREBRO_BROWSER_INTERACTIVE_POLL_MS\|\|35/);
  assert.match(runtime,/else if\(!processedCommand&&Date\.now\(\)-lastFrameAt>=FRAME_INTERVAL_MS\)/);
  assert.match(runtime,/if\(processedCommand\)continue/);
- assert.match(runtime,/schema_version:'3\.5\.3'/);
+ assert.match(runtime,/schema_version:'3\.5\.4'/);
  assert.doesNotMatch(runtime,/immediate_post_action_frame:true/);
  assert.doesNotMatch(runtime,/ACTIVE_FRAME_INTERVAL_MS/);
+});
+
+test('LOW_CONFIDENCE is a governed HOLD, never a technical DEAD_LETTER',async()=>{
+ const runtime=await read(paths.runtime);const runner=await read(paths.runner);
+ assert.match(runtime,/authorization:\{status:'HUMAN_REQUIRED'/);
+ assert.match(runtime,/human_required:true/);
+ assert.match(runtime,/workspace_verification_state:verificationState/);
+ assert.match(runtime,/state:'CLOSED'/);
+ assert.match(runner,/const humanRequired=result\.authorization\?\.status==='HUMAN_REQUIRED'/);
+ assert.match(runner,/humanRequired\?'HOLD'/);
+ assert.match(runner,/retryable:outcome==='FAILED'/);
+ assert.match(runner,/\['NO_JOB','HOLD'\]\.includes\(result\.status\)/);
 });
 
 test('Work Total hibernates immediately and keeps encrypted workspace state',async()=>{
