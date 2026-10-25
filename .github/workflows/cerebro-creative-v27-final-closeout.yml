@@ -117,6 +117,7 @@ jobs:
             /tmp/cerebro-v27-music/action-techno.mp3 \
             /tmp/cerebro-v27-music/night-driving.mp3 | tee /tmp/v27-final-result.json
           grep -F '"ok":true' /tmp/v27-final-result.json
+          grep -F '"version":"2.7.4"' /tmp/v27-final-result.json
           grep -F 'CONTEXT_BROLL_PLUS_MOTION_GRAPHICS' /tmp/v27-final-result.json
 
       - name: Verify fail-closed final manifest and physical outputs
@@ -126,20 +127,25 @@ jobs:
           import fs from 'node:fs';
           const root='/tmp/cerebro-v27-final';
           const m=JSON.parse(fs.readFileSync(`${root}/V27_FINAL_CLOSEOUT_MANIFEST.json`,'utf8'));
-          if(m.schema_version!=='2.7.3'||m.environment!=='PREPROD') throw new Error('VERSION_ENV');
+          if(m.schema_version!=='2.7.4'||m.environment!=='PREPROD') throw new Error('VERSION_ENV');
           if(m.publish_authorized!==false||m.promotion_eligible!==false) throw new Error('PUBLISH_GATE');
           if(m.additional_recurring_cost_eur!==0) throw new Error('COST_GATE');
           if(m.presenter_lite.technical_state!=='PHYSICAL_SMOKE_GREEN'||m.presenter_lite.creative_state!=='RED_DIRECT_FINAL_USE'||m.presenter_lite.promoted!==false) throw new Error('PRESENTER_GATE');
           if(m.route!=='CONTEXT_BROLL_PLUS_MOTION_GRAPHICS') throw new Error('ROUTE');
           if(m.semantic_broll_gate?.passed!==true) throw new Error('SEMANTIC_BROLL');
-          if(m.voice?.engine!=='CHATTERBOX_MTL_V3') throw new Error('VOICE');
-          if(m.captions?.burned_in!==true||m.captions?.font!=='Inter') throw new Error('CAPTIONS');
+          if(m.physical_visual_repair?.trigger!=='CONTACT_SHEET_REVIEW_V27_3') throw new Error('PHYSICAL_REPAIR_GATE');
+          if(m.voice?.engine!=='CHATTERBOX_MTL_V3'||m.voice?.playback_policy!=='NATURAL_RATE_NO_SLOWDOWN') throw new Error('VOICE');
+          if(m.captions?.burned_in!==true||m.captions?.font!=='Inter'||m.captions?.timing!=='RETIMED_TO_CHATTERBOX_NATURAL_VOICE') throw new Error('CAPTIONS');
           if(m.productions.length!==3) throw new Error('PRODUCTION_COUNT');
           for(const p of m.productions){
             if(!fs.existsSync(`${root}/${p.artifact}`)) throw new Error(`MISSING:${p.artifact}`);
             if(!/^[0-9a-f]{64}$/.test(p.sha256)) throw new Error(`SHA:${p.label}`);
             if(Number(p.caption_events||0)<5) throw new Error(`CAPTIONS_EMPTY:${p.label}`);
-            if(Number(p.audio?.speedup||0)>1.16) throw new Error(`VOICE_SPEED:${p.label}`);
+            if(Number(p.audio?.voice_playback_rate)!==1) throw new Error(`VOICE_RATE:${p.label}`);
+            if(p.caption_timing!=='RETIMED_TO_CHATTERBOX_NATURAL_VOICE') throw new Error(`CAPTION_TIMING:${p.label}`);
+            if(!(Number(p.duration_sec)>Number(p.audio?.voice_duration_sec))) throw new Error(`CTA_TAIL:${p.label}`);
+            if(!(Number(p.duration_sec)<Number(p.base_duration_sec))) throw new Error(`EXCESS_FOOTAGE_NOT_TRIMMED:${p.label}`);
+            if(!Array.isArray(p.cover_windows)||!p.cover_windows.some(w=>w.kind==='PHYSICAL_REPAIR')) throw new Error(`REPAIR_WINDOW:${p.label}`);
           }
           console.log('V27_PHYSICAL_CANDIDATE_HUMAN_TRIBUNAL_PENDING');
           NODE
