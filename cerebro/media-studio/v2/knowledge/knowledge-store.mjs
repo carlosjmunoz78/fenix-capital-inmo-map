@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
 
 const ACCEPTED_SOURCE_TYPES=new Set(['STANDARD','OFFICIAL_DOC','PAPER','BOOK','COURSE','CASE_STUDY','TOOL_DOC','BENCHMARK','PRODUCTION_POSTMORTEM','INTERNAL_RESULT']);
+const BENCHMARK_REQUIRED_SOURCE_TYPES=new Set(['PAPER','TOOL_DOC','CASE_STUDY']);
 const HORIZONS=new Set(['NOW','EMERGING','COMING','FRONTIER']);
 
 export function createKnowledgeItem({role_ids=[],department_ids=[],topic,horizon='NOW',source,evidence,confidence=0.5,status='DISCOVERED',version='1.0.0',next_review_at=null,supersedes=null}){
@@ -14,7 +15,7 @@ export function createKnowledgeItem({role_ids=[],department_ids=[],topic,horizon
 export function verifyKnowledgeItem(item,{old_vs_new_ref=null,tribunal_ref=null,benchmark_ref=null}={}){
   if(!item?.knowledge_id) throw new Error('KNOWLEDGE_ITEM_REQUIRED');
   if(item.confidence<0.7) return {...item,status:'BENCHMARK_REQUIRED'};
-  if(['PAPER','VENDOR_CLAIM'].includes(item.source?.source_type)&&!benchmark_ref) return {...item,status:'BENCHMARK_REQUIRED'};
+  if(BENCHMARK_REQUIRED_SOURCE_TYPES.has(item.source?.source_type)&&!benchmark_ref) return {...item,status:'BENCHMARK_REQUIRED'};
   return {...item,status:'VERIFIED',old_vs_new_ref,tribunal_ref,benchmark_ref:benchmark_ref||null};
 }
 
