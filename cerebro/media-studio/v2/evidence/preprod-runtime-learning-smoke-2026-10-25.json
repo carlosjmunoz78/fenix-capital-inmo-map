@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UMS_PREPROD_EVIDENCE_SNAPSHOT_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "UMS-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "observed_date": "2026-10-25",
+  "evidence_source_head_sha": "453e0a39d0603c8773e3014edbde5616b1ddc1e1",
+  "readiness": {
+    "gate": "UNIVERSAL_MEDIA_STUDIO_READY",
+    "status": "NOT_READY",
+    "physical_benchmarks_passed": 0,
+    "physical_benchmarks_required": 12,
+    "readiness_mutation_authorized": false
+  },
+  "specialist_knowledge": {
+    "specialist_roles": 384,
+    "structured_packs": 384,
+    "deep_verified_operational_claims": 0,
+    "status": "STRUCTURED_RESEARCH_REQUIRED"
+  },
+  "governed_learning": {
+    "workflow_run_id": 40204350170,
+    "artifact_id": 12603725051,
+    "artifact_digest": "sha256:faa2093bbe3bea25096e6cee2d69bca4b6e8df05d820e1301921d0b0238b6ed2",
+    "input_capabilities": 136,
+    "safe_capabilities": 136,
+    "media_relevant_raw": 2,
+    "media_relevant_deduplicated": 1,
+    "duplicates_removed": 1,
+    "weak_media_signal_rejected": 134,
+    "unsafe_or_unproven_rejected": 0,
+    "candidate": {
+      "technical_name": "image-analysis",
+      "source_candidate_id": "repo:74d03dd8c8f9603d9e9e41151c9b",
+      "department": "DPT-IMAGE",
+      "status": "BENCHMARK_REQUIRED",
+      "promotion_authorized": false
+    },
+    "professional_source_snapshot": {
+      "snapshot_date": "2026-10-25",
+      "source_count": 10,
+      "stale": false,
+      "max_age_days": 7
+    },
+    "knowledge_auto_promotion": false,
+    "additional_cost_eur": 0
+  },
+  "runner_native_runtime_audit": {
+    "workflow_run_id": 40204350222,
+    "artifact_id": 12603166808,
+    "artifact_digest": "sha256:41fcfa72b3737049128821cc9afd099713532fd1da0539ff12865d7aca61d4eb",
+    "runtime_preparation_performed": false,
+    "runtime_installation_performed": false,
+    "runtime_network_download_performed": false,
+    "discovered_adapters": [
+      {
+        "adapter_id": "ADAPTER-CHROME",
+        "binary": "/usr/bin/google-chrome",
+        "version": "Google Chrome 155.0.8059.39",
+        "status": "PREPROD_DISCOVERED"
+      },
+      {
+        "adapter_id": "ADAPTER-PYTHON",
+        "binary": "/usr/bin/python3",
+        "version": "Python 3.12.3",
+        "status": "PREPROD_DISCOVERED"
+      },
+      {
+        "adapter_id": "ADAPTER-NODE",
+        "binary": "/usr/local/bin/node",
+        "version": "v22.23.3",
+        "status": "PREPROD_DISCOVERED"
+      }
+    ],
+    "additional_observed_binaries": [
+      {"binary": "/usr/bin/chromium", "version": "Chromium 155.0.8059.0"},
+      {"binary": "/usr/bin/chromium-browser", "version": "Chromium 155.0.8059.0"}
+    ],
+    "unavailable_adapters": [
+      "ADAPTER-FFMPEG",
+      "ADAPTER-FFPROBE",
+      "ADAPTER-BLENDER",
+      "ADAPTER-SOX",
+      "ADAPTER-IMAGEMAGICK"
+    ],
+    "prod_bound": 0,
+    "operational_claims": 0
+  },
+  "zero_cost_media_smoke": {
+    "workflow_run_id": 40204350257,
+    "artifact_id": 12602704703,
+    "artifact_digest": "sha256:236c601ec11bc606b1fe7956dec03a9566711b4259f7ac5469126880a8706b99",
+    "status": "PREPROD_SMOKE_GREEN",
+    "validated_adapters": ["ADAPTER-CHROME", "ADAPTER-NODE", "ADAPTER-PYTHON"],
+    "input_html_sha256": "0a7abdba5ea8f26b1689e1dc6bb147d6ba840d931004e5cf529949daeeb68b6b",
+    "output": {
+      "mime": "image/png",
+      "sha256": "f340480860d1b6ae803092bf45e759051072fa2c22eab832e3a4544863057d33",
+      "bytes": 27817,
+      "width": 640,
+      "height": 360
+    },
+    "installation_performed": false,
+    "network_download_performed": false,
+    "external_network_used_by_test": false,
+    "benchmark_credit": false,
+    "prod_operational_claim": false,
+    "additional_cost_eur": 0
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "prod_binding_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  }
+}
