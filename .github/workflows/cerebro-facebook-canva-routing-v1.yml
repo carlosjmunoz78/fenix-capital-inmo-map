@@ -1,0 +1,26 @@
+name: CEREBRO Facebook Canva Routing V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/contracts/social-facebook-canva-mcp-v1.contract.json'
+      - 'cerebro/runtime/social-facebook-canva-routing-v1.mjs'
+      - 'cerebro/runtime/social-facebook-canva-routing-v1.test.mjs'
+      - '.github/workflows/cerebro-facebook-canva-routing-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate Canva route contract
+        run: |
+          node --test cerebro/runtime/social-facebook-canva-routing-v1.test.mjs
+          node -e "const c=require('./cerebro/contracts/social-facebook-canva-mcp-v1.contract.json'); if(c.engine_id!=='SOC-001'||c.routing.fallback!=='CANVA_REMOTE_MCP'||c.routing.never.includes('ANTI_BOT_BYPASS')!==true||c.oauth.initial_legal_gate!=='LEGAL_REQUIRED') process.exit(1)"

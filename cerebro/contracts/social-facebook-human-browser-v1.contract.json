@@ -1,0 +1,119 @@
+{
+  "schema_version": "1.0.2",
+  "contract_id": "CEREBRO-SOCIAL-FACEBOOK-HUMAN-BROWSER-V1",
+  "status": "BROWSER_ENTRY_GREEN_AUTHENTICATED_CANARY_PENDING",
+  "company_id": "fenix",
+  "engine_id": "SOC-001",
+  "department_id": "social-facebook",
+  "environment": "PROD",
+  "version": "v1",
+  "browser_capability": "BROWSER-1",
+  "stable_entrypoint": "public.cerebro_social_facebook_browser_enqueue_v1(jsonb)",
+  "stable_entrypoint_execute_role": "service_role",
+  "execution_mode": "GOVERNED_HUMAN_LIKE_BROWSER",
+  "purpose": "Allow the Facebook department to operate authorised web interfaces through CEREBRO Browser 1 with human-paced navigation, typing, clicking, scrolling, tabs, uploads and evidence capture when native integrations are unavailable or insufficient.",
+  "allowed_origins": [
+    "https://www.facebook.com",
+    "https://facebook.com",
+    "https://business.facebook.com",
+    "https://www.canva.com",
+    "https://canva.com",
+    "https://accounts.google.com"
+  ],
+  "allowed_actions": [
+    "goto", "back", "forward", "reload", "open_tab", "close_tab", "switch_tab",
+    "click", "double_click", "hover", "fill", "write", "type", "press", "check",
+    "uncheck", "select", "upload", "drag", "scroll", "wait", "extract_text",
+    "extract_html", "screenshot", "download_click"
+  ],
+  "human_operator_behavior": {
+    "adaptive_settle_pacing": true,
+    "no_stealth_evasion": true,
+    "no_captcha_bypass": true,
+    "no_mfa_bypass": true,
+    "wait_for_ui_settle": true,
+    "evidence_checkpoints": true,
+    "max_actions_per_job": 50,
+    "max_tabs": 8
+  },
+  "credential_policy": {
+    "raw_credentials_in_queue": false,
+    "vault_reference_only": true,
+    "materialize_at_worker_only": true,
+    "secret_material_logged": false,
+    "origin_binding_required": true,
+    "identity_binding_required": true,
+    "company_binding_required": true
+  },
+  "autonomy_policy": {
+    "routine_low_risk_browser_work": "ALLOWED",
+    "authenticated_browser_work": "HOLD_UNTIL_VALID_CREDENTIAL_CANARY_GREEN",
+    "publish_or_external_side_effect": "REQUIRES_EXISTING_SOCIAL_POLICY_AND_PROVIDER_GATES",
+    "money_spend": "HUMAN_REQUIRED_MONEY_LIMIT",
+    "legal_or_signature": "HUMAN_REQUIRED",
+    "captcha_or_mfa": "HOLD_AND_REQUEST_HUMAN_WITH_CANONICAL_REASON",
+    "security_anomaly": "HUMAN_REQUIRED_SECURITY_INCIDENT",
+    "low_confidence": "HUMAN_REQUIRED_LOW_CONFIDENCE"
+  },
+  "required_human_reasons": [
+    "LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK",
+    "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "provider_strategy": {
+    "native_api_first_when_complete": true,
+    "existing_proven_provider_path_preserved": true,
+    "browser_when_native_missing_or_insufficient": true,
+    "preserve_existing_buffer_make_until_parity_proven": true
+  },
+  "qa": {
+    "pre_action_scope_check": true,
+    "post_action_url_check": true,
+    "screenshot_evidence": true,
+    "audit_id_required": true,
+    "idempotency_required": true,
+    "rollback": "STOP_OR_CANCEL_BROWSER_JOB_AND_KEEP_EXISTING_PROVIDER_PATH"
+  },
+  "physical_evidence": {
+    "synthetic_mutation_canary": {
+      "job_id": "8b24ee63-4bc0-42e6-9e2d-bebfe159fcf1",
+      "status": "SUCCEEDED",
+      "authorization_status": "AUTHORIZED",
+      "actions_proven": ["goto", "fill", "click", "extract_text", "screenshot"],
+      "credential_materialized": false,
+      "secret_material_logged": false
+    },
+    "facebook_real_observe_canary": {
+      "job_id": "921c5698-d863-4582-8fee-f3555c2ad5cf",
+      "status": "SUCCEEDED",
+      "authorization_status": "AUTHORIZED",
+      "final_url": "https://www.facebook.com/",
+      "evidence_captured": true,
+      "credential_materialized": false,
+      "secret_material_logged": false
+    },
+    "stable_entrypoint_canary": {
+      "job_id": "04b38085-a232-417b-a066-c0e4252734fb",
+      "status": "SUCCEEDED",
+      "authorization_status": "AUTHORIZED",
+      "final_url": "https://www.facebook.com/",
+      "evidence_captured": true
+    },
+    "negative_origin_guard": {
+      "target": "https://example.com/",
+      "result": "FACEBOOK_BROWSER_ORIGIN_DENIED",
+      "status": "GREEN"
+    },
+    "authenticated_credential_canary": "PENDING_VALID_PROVIDER_CREDENTIAL"
+  },
+  "rebuild": {
+    "migration": "supabase/migrations/20261024000900_cerebro_social_facebook_human_browser_v1.sql",
+    "runtime_adapter": "cerebro/runtime/social-facebook-human-browser-v1.mjs",
+    "tests": "cerebro/runtime/social-facebook-human-browser-v1.test.mjs"
+  },
+  "future_reuse": {
+    "pattern": "ENGINE_TO_BROWSER_HUMAN_BINDING",
+    "future_consumers": ["SEO", "MARKETING", "APP_FACTORY", "WEB_FACTORY", "LANGUAGE", "OTHER_ENGINES"],
+    "current_scope": "FACEBOOK_ONLY"
+  },
+  "runtime_truth": "SOC-001 has a physically proven stable service-role entrypoint to Browser 1 for allowed Facebook/Meta/Canva/Google-Auth surfaces. Authenticated autonomy remains blocked until a valid provider credential/session canary passes."
+}
