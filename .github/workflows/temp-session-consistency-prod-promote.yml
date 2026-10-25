@@ -1,0 +1,156 @@
+name: TEMP Session Consistency PROD Promote
+
+on:
+  push:
+    branches:
+      - promote/session-consistency-prod-20261025
+    paths:
+      - '.github/workflows/temp-session-consistency-prod-promote.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temp-session-consistency-prod-promote-20261025
+  cancel-in-progress: false
+
+env:
+  SOURCE_SHA: 4bb299a38b7416eb160f3b925ad3532b3de021f2
+  ROLLBACK_SHA: d30f728a96944f5becefff29bb82095c76f547db
+  PROD_URL: https://app.fenixcapital.es
+  VITE_FENIX_ENV: prod
+  VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+  VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+  VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout exact tested source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SOURCE_SHA }}
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assert PROD configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          case "$VITE_SUPABASE_PUBLISHABLE_KEY" in
+            sb_publishable_*) ;;
+            *) echo 'Invalid PROD publishable key' >&2; exit 1 ;;
+          esac
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Session consistency regression
+        run: node --test cerebro/runtime/browser-session-consistency-gate.test.mjs
+
+      - name: Work Total PROD contract
+        run: node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
+
+      - name: Browser V3 transport regressions
+        run: |
+          node --test cerebro/runtime/browser-session-liveness-v3.test.mjs
+          node --test cerebro/runtime/browser-live-runner-host.test.mjs
+          node --test cerebro/runtime/browser-oidc-refresh-v2.test.mjs
+
+      - name: Build exact PROD app
+        run: npx vite build --base=/ --outDir dist-live
+
+      - name: Assert PROD bundle and session UI
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
+          grep -R -F 'cerebro-console-gateway-human-v1-owner100' dist-live >/dev/null
+          grep -R -F 'Seleccionar sesión' dist-live >/dev/null
+          grep -R -F 'NAVEGADOR' dist-live >/dev/null
+
+      - name: Prepare canonical static PROD payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp dist-live/index.html dist-live/404.html
+          touch dist-live/.nojekyll
+          printf '%s\n' "$SOURCE_SHA" > dist-live/PROD_SOURCE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-live/CNAME
+
+          cat > dist-live/package.json <<'JSON'
+          {
+            "name": "fenix-capital-prod-static",
+            "private": true,
+            "version": "1.0.0",
+            "scripts": {"build": "node build-static.cjs"}
+          }
+          JSON
+
+          cat > dist-live/build-static.cjs <<'JS'
+          const fs = require('fs');
+          const path = require('path');
+          const root = process.cwd();
+          const out = path.join(root, 'dist');
+          fs.rmSync(out, { recursive: true, force: true });
+          fs.mkdirSync(out, { recursive: true });
+          const skip = new Set(['dist', '.git', 'node_modules', 'package.json', 'package-lock.json', 'build-static.cjs', 'vercel.json']);
+          for (const name of fs.readdirSync(root)) {
+            if (skip.has(name)) continue;
+            fs.cpSync(path.join(root, name), path.join(out, name), { recursive: true });
+          }
+          JS
+
+          cat > dist-live/vercel.json <<'JSON'
+          {"buildCommand":"npm run build","outputDirectory":"dist","cleanUrls":false}
+          JSON
+
+      - name: Publish PROD with rollback-on-smoke-failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/fenix-prod-live
+          mkdir -p /tmp/fenix-prod-live
+          cp -R dist-live/. /tmp/fenix-prod-live/
+          cd /tmp/fenix-prod-live
+          git init
+          git checkout -b gh-pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -m "deploy: PROD session consistency ${SOURCE_SHA} [rollback:${ROLLBACK_SHA}]"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force origin gh-pages
+
+          ok=0
+          for attempt in 1 2 3 4 5 6; do
+            stamp="$(date +%s)"
+            status="$(curl --silent --show-error --output /tmp/prod-index --write-out '%{http_code}' --max-time 20 "${PROD_URL}/?cerebro_prod_promote=${stamp}")" || status=000
+            source_status="$(curl --silent --show-error --output /tmp/prod-source --write-out '%{http_code}' --max-time 20 "${PROD_URL}/PROD_SOURCE_SHA.txt?cerebro_prod_promote=${stamp}")" || source_status=000
+            if [ "$status" = '200' ] && [ "$source_status" = '200' ] && grep -qi '<!doctype html' /tmp/prod-index && [ "$(tr -d '\r\n' </tmp/prod-source)" = "$SOURCE_SHA" ]; then
+              ok=1
+              break
+            fi
+            sleep 10
+          done
+
+          if [ "$ok" != '1' ]; then
+            git fetch origin "$ROLLBACK_SHA"
+            git push --force origin "$ROLLBACK_SHA:refs/heads/gh-pages"
+            echo 'PROD smoke failed; rollback restored.' >&2
+            exit 1
+          fi
+
+          echo "PROD promoted exact source ${SOURCE_SHA}"
