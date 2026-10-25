@@ -8,7 +8,7 @@ const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || `https://${PROD_PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
 const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
-const POLL_INTERVAL_MS=Math.max(250,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||450));
+const POLL_INTERVAL_MS=Math.max(25,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||35));
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
@@ -108,7 +108,9 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
     while(Date.now()-startedAt<MAX_SESSION_MS){
       const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
       if(poll.stop===true||poll.state==='STOPPED')break;
+      let processedCommand=false;
       if(poll.command){
+        processedCommand=true;
         let ok=false,errorCode=null;
         try{
           const payload=decryptJson(poll.command.payload_ciphertext,poll.command.payload_iv,key);
@@ -121,8 +123,10 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
       if(poll.handback===true){
         seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
         await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
+      }else if(!processedCommand&&Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){
+        seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();
       }
-      if(Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastFrameAt=Date.now();}
+      if(processedCommand)continue;
       await sleep(POLL_INTERVAL_MS);
     }
     await worker.stop('INTERACTIVE_SESSION_COMPLETE');

@@ -10,6 +10,34 @@ const ACTIONS = new Set([
   'DOWNLOAD_CLICK'
 ]);
 const MAX_STORAGE_STATE_BYTES = 5 * 1024 * 1024;
+const SENSITIVE_FIELD_SELECTOR = [
+  'input[type="password" i]',
+  'input[type="email" i]',
+  'input[autocomplete="username" i]',
+  'input[autocomplete="email" i]',
+  'input[autocomplete="current-password" i]',
+  'input[autocomplete="new-password" i]',
+  'input[name*="email" i]',
+  'input[id*="email" i]',
+  'input[name*="user" i]',
+  'input[id*="user" i]',
+  'input[name*="login" i]',
+  'input[id*="login" i]',
+  'input[name*="pass" i]',
+  'input[id*="pass" i]',
+  'input[name*="correo" i]',
+  'input[id*="correo" i]',
+  'input[name*="usuario" i]',
+  'input[id*="usuario" i]',
+  'input[name*="contrasena" i]',
+  'input[id*="contrasena" i]',
+  'input[placeholder*="email" i]',
+  'input[placeholder*="correo" i]',
+  'input[placeholder*="usuario" i]',
+  'input[placeholder*="password" i]',
+  'input[placeholder*="contrasena" i]',
+  '[data-cerebro-sensitive]'
+].join(',');
 
 let chromiumRuntime = null;
 
@@ -89,7 +117,7 @@ function validateStorageState(storageState) {
 
 export function getCloudBrowserWorkerCapabilities() {
   return Object.freeze({
-    schema_version: '0.3.2',
+    schema_version: '0.3.3',
     backend: 'PLAYWRIGHT_CHROMIUM',
     persistent_profiles: true,
     governed_storage_state_restore: true,
@@ -99,6 +127,7 @@ export function getCloudBrowserWorkerCapabilities() {
     global_keyboard_input: true,
     coordinates_bounded_to_viewport: true,
     screenshots: true,
+    screenshot_sensitive_field_redaction: true,
     pdf: true,
     uploads: true,
     downloads: true,
@@ -262,7 +291,12 @@ export function createCloudBrowserWorker({
     );
     await fs.mkdir(dir, { recursive: true });
     const file = path.join(dir, `${Date.now()}-${safeSegment(label)}.png`);
-    await activePage.screenshot({ path: file, fullPage: true });
+    await activePage.screenshot({
+      path: file,
+      fullPage: true,
+      mask: [activePage.locator(SENSITIVE_FIELD_SELECTOR)],
+      maskColor: '#000000'
+    });
     return file;
   }
 
