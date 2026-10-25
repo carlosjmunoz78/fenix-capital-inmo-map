@@ -5,22 +5,6 @@ on:
     branches: ['feat/browser-work-total-v1-20261024']
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-preprod.yml'
-      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
-      - 'cerebro/runtime/browser-session-bundle-v1.mjs'
-      - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
-      - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
-      - 'cerebro/runtime/browser-job-runner-v2.mjs'
-      - 'cerebro/runtime/browser1-access-v1.mjs'
-      - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
-      - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
-      - 'src/**'
-      - 'supabase/functions/cerebro-browser-work-total-v1-preprod/**'
-      - 'supabase/functions/cerebro-browser-work-total-dispatch-v1-preprod/**'
-      - 'supabase/functions/cerebro-browser-work-total-worker-v1-preprod/**'
-      - 'supabase/functions/cerebro-browser-work-total-owner-v1-preprod/**'
-      - 'supabase/migrations/20261024_browser_workspace_session_bundle_v1.sql'
-      - 'supabase/migrations/20261024_browser_workspace_hibernate_state_v0.sql'
-      - 'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql'
   workflow_dispatch:
 
 permissions:
@@ -33,6 +17,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  CEREBRO_BROWSER_CANDIDATE_SHA: b52b1c75b2273a30b5a8bcb3a9ff4d6132796679
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-preprod
   CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-worker-v1-preprod
   CEREBRO_BROWSER_WORKSPACE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-v1-preprod
@@ -41,22 +26,26 @@ env:
   CEREBRO_BROWSER_WORKER_SLOT: '1'
   CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
   CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
-  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '320'
-  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1200'
-  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '90'
+  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'
+  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1400'
+  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
   CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS: '3000'
 
 jobs:
   validate:
-    name: Validate Work Total contracts and build
+    name: Validate pinned Work Total 3.5.3 candidate
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CEREBRO_BROWSER_CANDIDATE_SHA }}
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
+      - name: Prove candidate SHA
+        run: test "$(git rev-parse HEAD)" = "$CEREBRO_BROWSER_CANDIDATE_SHA" && echo "candidate_sha=$CEREBRO_BROWSER_CANDIDATE_SHA"
       - run: npm ci
       - name: Test session bundle integrity
         run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
@@ -104,11 +93,11 @@ jobs:
             await new Promise(resolve=>setTimeout(resolve,5000));
           }
           fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\n`);
-          console.log(JSON.stringify({pending,environment:'PREPROD',work_total_v1:true,secret_material_logged:false}));
+          console.log(JSON.stringify({pending,environment:'PREPROD',candidate_sha:process.env.CEREBRO_BROWSER_CANDIDATE_SHA,work_total_v1:true,secret_material_logged:false}));
           NODE
 
   work-total-worker:
-    name: Browser Work Total V1 governed worker
+    name: Browser Work Total 3.5.3 governed worker
     needs: watch
     if: needs.watch.outputs.pending != '0'
     runs-on: ubuntu-latest
@@ -117,12 +106,16 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.CEREBRO_BROWSER_CANDIDATE_SHA }}
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: npm
+      - name: Prove candidate SHA
+        run: test "$(git rev-parse HEAD)" = "$CEREBRO_BROWSER_CANDIDATE_SHA" && echo "candidate_sha=$CEREBRO_BROWSER_CANDIDATE_SHA"
       - run: npm ci
-      - name: Execute at most one PREPROD Work Total job
+      - name: Execute at most one PREPROD Work Total job with candidate 3.5.3
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
   rearm:
@@ -142,5 +135,5 @@ jobs:
           const url=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/cerebro-browser-work-total-v1-preprod.yml/dispatches`;
           const r=await fetch(url,{method:'POST',headers:{authorization:`Bearer ${process.env.GH_TOKEN}`,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:process.env.REF_NAME}),redirect:'error'});
           if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
-          console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,work_total_v1:true,static_secret_added:false}));
+          console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,candidate_sha:process.env.CEREBRO_BROWSER_CANDIDATE_SHA,work_total_v1:true,static_secret_added:false}));
           NODE
