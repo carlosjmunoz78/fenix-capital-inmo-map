@@ -1,0 +1,114 @@
+name: CEREBRO UMS Zero Cost Media Smoke V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/runtime/zero-cost-smoke-evidence.mjs'
+      - 'cerebro/media-studio/v2/tests/zero-cost-smoke-evidence.test.mjs'
+      - '.github/workflows/cerebro-ums-zero-cost-media-smoke-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-zero-cost-media-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser-media-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      HTML_FILE: /tmp/ums-smoke.html
+      PNG_FILE: /tmp/ums-smoke.png
+      REPORT_FILE: /tmp/ums-zero-cost-smoke-report.json
+      EVIDENCE_FILE: /tmp/ums-zero-cost-smoke-evidence.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests using preinstalled Node
+        run: node --test cerebro/media-studio/v2/tests/zero-cost-smoke-evidence.test.mjs
+      - name: Assert required runtimes are already present
+        shell: bash
+        run: |
+          set -euo pipefail
+          command -v google-chrome >/dev/null
+          command -v node >/dev/null
+          command -v python3 >/dev/null
+      - name: Create deterministic local media fixture with Node
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const html='<!doctype html><html><head><meta charset="utf-8"><style>*{box-sizing:border-box}html,body{margin:0;width:640px;height:360px;overflow:hidden;background:#111;font-family:Arial,sans-serif}.stage{position:relative;width:640px;height:360px;background:linear-gradient(135deg,#111 0%,#333 100%)}.card{position:absolute;left:80px;top:65px;width:480px;height:230px;border:4px solid #fff;border-radius:24px;display:flex;align-items:center;justify-content:center}.mark{font-size:50px;font-weight:700;color:#fff;letter-spacing:3px}.dot{position:absolute;width:42px;height:42px;border-radius:50%;background:#fff;right:36px;bottom:30px}</style></head><body><main class="stage"><section class="card"><div class="mark">CEREBRO UMS</div><div class="dot"></div></section></main></body></html>';
+          fs.writeFileSync(process.env.HTML_FILE,html,{mode:0o600});
+          NODE
+      - name: Render fixture physically with preinstalled Chrome and no external network
+        shell: bash
+        run: |
+          set -euo pipefail
+          google-chrome \
+            --headless=new \
+            --no-sandbox \
+            --disable-gpu \
+            --disable-dev-shm-usage \
+            --disable-background-networking \
+            --disable-component-update \
+            --disable-default-apps \
+            --disable-extensions \
+            --disable-sync \
+            --metrics-recording-only \
+            --no-first-run \
+            --window-size=640,360 \
+            --screenshot="$PNG_FILE" \
+            "file://$HTML_FILE"
+          test -s "$PNG_FILE"
+      - name: Inspect PNG with Python and build evidence report
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib,json,os,struct,subprocess
+          html=open(os.environ['HTML_FILE'],'rb').read(); png=open(os.environ['PNG_FILE'],'rb').read()
+          if png[:8] != b'\x89PNG\r\n\x1a\n': raise SystemExit('PNG_SIGNATURE_INVALID')
+          width,height=struct.unpack('>II',png[16:24])
+          if (width,height)!=(640,360): raise SystemExit(f'PNG_DIMENSIONS_INVALID:{width}x{height}')
+          def ver(cmd): return subprocess.check_output(cmd,text=True,stderr=subprocess.STDOUT).strip().splitlines()[0]
+          report={
+            'schema_version':'1.0.0','state_type':'CEREBRO_UMS_ZERO_COST_SMOKE_REPORT_V1','environment':'PREPROD','observed_at':__import__('datetime').datetime.now(__import__('datetime').timezone.utc).isoformat(),
+            'installation_performed':False,'network_download_performed':False,'external_network_used_by_test':False,
+            'input_html_sha256':hashlib.sha256(html).hexdigest(),
+            'runtimes':{
+              'chrome':{'found':True,'version':ver(['google-chrome','--version'])},
+              'node':{'found':True,'version':ver(['node','--version'])},
+              'python':{'found':True,'version':ver(['python3','--version'])}
+            },
+            'outputs':{'browser_screenshot':{'mime':'image/png','sha256':hashlib.sha256(png).hexdigest(),'bytes':len(png),'width':width,'height':height}}
+          }
+          open(os.environ['REPORT_FILE'],'w').write(json.dumps(report,indent=2)+'\n')
+          print(json.dumps({'status':'PHYSICAL_BROWSER_RENDER_COMPLETE','sha256':report['outputs']['browser_screenshot']['sha256'],'bytes':len(png),'dimensions':[width,height]}))
+          PY
+      - name: Validate physical smoke evidence without granting PROD or benchmark credit
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {loadAndValidateZeroCostSmokeEvidence} from './cerebro/media-studio/v2/runtime/zero-cost-smoke-evidence.mjs';
+          const evidence=loadAndValidateZeroCostSmokeEvidence(process.env.REPORT_FILE);
+          if(evidence.prod_operational_claim||evidence.prod_binding_authorized||evidence.benchmark_credit||evidence.readiness_mutation||Number(evidence.additional_cost_eur)!==0) throw new Error('SMOKE_AUTHORITY_EXPANSION');
+          fs.writeFileSync(process.env.EVIDENCE_FILE,JSON.stringify(evidence,null,2)+'\n');
+          console.log(JSON.stringify({status:evidence.status,validated_adapters:evidence.validated_adapters,benchmark_credit:evidence.benchmark_credit,prod_operational_claim:evidence.prod_operational_claim}));
+          NODE
+      - name: Upload physical smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-zero-cost-media-smoke-${{ github.run_id }}
+          path: |
+            /tmp/ums-smoke.html
+            /tmp/ums-smoke.png
+            /tmp/ums-zero-cost-smoke-report.json
+            /tmp/ums-zero-cost-smoke-evidence.json
+          if-no-files-found: error
+          retention-days: 14

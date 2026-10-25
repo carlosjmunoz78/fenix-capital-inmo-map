@@ -1,0 +1,82 @@
+name: CEREBRO UMS Physical Runtime Audit V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/registry/physical-adapter-candidates.json'
+      - 'cerebro/media-studio/v2/runtime/physical-adapter-evidence.mjs'
+      - 'cerebro/media-studio/v2/tests/physical-adapter-evidence.test.mjs'
+      - '.github/workflows/cerebro-ums-physical-runtime-audit-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-physical-runtime-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  zero-install-runtime-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PROBE_REPORT: /tmp/ums-runtime-probe.json
+      EVIDENCE_REPORT: /tmp/ums-adapter-evidence.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Contract tests using runner-native Node only
+        run: node --test cerebro/media-studio/v2/tests/physical-adapter-evidence.test.mjs
+      - name: Probe runner-native runtimes without installing or preparing runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          probe() {
+            local key="$1"; shift
+            local path=""
+            path="$(command -v "$key" 2>/dev/null || true)"
+            local found=false version=""
+            if [ -n "$path" ]; then
+              found=true
+              version="$("$key" "$@" 2>&1 | head -n 2 | tr '\n' ' ' | cut -c1-400 || true)"
+            fi
+            printf '%s\t%s\t%s\t%s\n' "$key" "$found" "$path" "$version" >> "/tmp/ums-probes.tsv"
+          }
+          : > "/tmp/ums-probes.tsv"
+          probe ffmpeg -version
+          probe ffprobe -version
+          probe google-chrome --version
+          probe chromium --version
+          probe chromium-browser --version
+          probe blender --version
+          probe sox --version
+          probe magick --version
+          probe convert --version
+          probe python3 --version
+          probe node --version
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const rows=fs.readFileSync('/tmp/ums-probes.tsv','utf8').trim().split('\n').filter(Boolean).map((line)=>{const [key,found,path,...rest]=line.split('\t');return {key,found:found==='true',path:path||null,version:rest.join('\t')||null};});
+          const out={schema_version:'1.1.0',state_type:'CEREBRO_UMS_RUNTIME_PROBE_REPORT_V1',environment:'PREPROD',runner:'github-hosted-ubuntu',observed_at:new Date().toISOString(),runtime_preparation_performed:false,runtime_installation_performed:false,runtime_network_download_performed:false,installation_performed:false,network_download_performed:false,probes:rows};
+          fs.writeFileSync(process.env.PROBE_REPORT,JSON.stringify(out,null,2)+'\n');
+          console.log(JSON.stringify({status:'RUNNER_NATIVE_RUNTIME_PROBE_COMPLETE',found:rows.filter(x=>x.found).map(x=>x.key),missing:rows.filter(x=>!x.found).map(x=>x.key)}));
+          NODE
+      - name: Normalize discovery evidence without binding PROD
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {loadAndEvaluatePhysicalAdapterEvidence} from './cerebro/media-studio/v2/runtime/physical-adapter-evidence.mjs';
+          const report=loadAndEvaluatePhysicalAdapterEvidence({registry_file:'cerebro/media-studio/v2/registry/physical-adapter-candidates.json',probe_file:process.env.PROBE_REPORT});
+          fs.writeFileSync(process.env.EVIDENCE_REPORT,JSON.stringify(report,null,2)+'\n');
+          if(report.prod_bound!==0||report.operational_claims!==0||report.prod_authorized||report.spend_authorized) throw new Error('RUNTIME_DISCOVERY_FALSE_PROMOTION');
+          console.log(JSON.stringify({status:'PREPROD_RUNNER_NATIVE_DISCOVERY_GREEN',discovered:report.discovered,unavailable:report.unavailable,prod_bound:report.prod_bound}));
+          NODE
+      - name: Upload runner-native runtime audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-physical-runtime-audit-${{ github.run_id }}
+          path: |
+            /tmp/ums-runtime-probe.json
+            /tmp/ums-adapter-evidence.json
+          if-no-files-found: error
+          retention-days: 14

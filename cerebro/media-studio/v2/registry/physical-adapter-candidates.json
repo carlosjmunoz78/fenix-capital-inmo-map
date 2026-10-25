@@ -1,0 +1,26 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_PHYSICAL_ADAPTER_CANDIDATES_V1",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "policy":{
+    "zero_cost_first":true,
+    "installation_authorized":false,
+    "network_download_authorized":false,
+    "prod_binding_authorized":false,
+    "discovery_is_not_operational_binding":true
+  },
+  "candidates":[
+    {"id":"ADAPTER-FFMPEG","name":"FFmpeg","binary_keys":["ffmpeg"],"capabilities":["transcode","mux_demux","filter_graph","audio_video_processing","frame_extract"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-FFPROBE","name":"FFprobe","binary_keys":["ffprobe"],"capabilities":["media_inspection","stream_metadata","codec_probe"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-CHROME","name":"Chrome or Chromium","binary_keys":["google-chrome","chromium","chromium-browser"],"capabilities":["browser_render","html_capture","headless_preview"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-BLENDER","name":"Blender","binary_keys":["blender"],"capabilities":["3d_scene","animation","render","compositing","geometry"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-SOX","name":"SoX","binary_keys":["sox"],"capabilities":["audio_processing","resample","effects","analysis"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-IMAGEMAGICK","name":"ImageMagick","binary_keys":["magick","convert"],"capabilities":["image_transform","composite","format_convert","frame_sheet"],"license_review":"REQUIRED_BEFORE_PROD_BINDING","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-PYTHON","name":"Python","binary_keys":["python3"],"capabilities":["deterministic_media_automation","analysis","pipeline_glue"],"license_review":"RUNTIME_LICENSE_CHECK_REQUIRED","status":"DISCOVERY_REQUIRED"},
+    {"id":"ADAPTER-NODE","name":"Node.js","binary_keys":["node"],"capabilities":["programmatic_media_orchestration","html_video_runtime","pipeline_glue"],"license_review":"RUNTIME_LICENSE_CHECK_REQUIRED","status":"DISCOVERY_REQUIRED"}
+  ],
+  "promotion_rule":"A discovered binary remains PREPROD_DISCOVERED until version, license, security, deterministic smoke test, cost, observability and rollback evidence are all green."
+}
