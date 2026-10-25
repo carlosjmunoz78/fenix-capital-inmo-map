@@ -27,7 +27,7 @@ jobs:
       BLENDER_VERSION: '5.2.3'
       BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
       BLENDER_BASE: https://download.blender.org/release/Blender5.2
-      UMS_BLENDER_OUT: .ums-blender52-nova01
+      UMS_BLENDER_OUT: ums-blender52-nova01
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -85,7 +85,7 @@ jobs:
           python3 - <<'PY'
           import json
           from pathlib import Path
-          p=Path('.ums-blender52-nova01/bm01-blender-3d-reference-candidate.json')
+          p=Path('ums-blender52-nova01/bm01-blender-3d-reference-candidate.json')
           x=json.loads(p.read_text())
           assert x['status']=='THREE_D_REFERENCE_CANDIDATE_GENERATED'
           assert x['identity_validation']=='CROSS_MODAL_METRICS_REQUIRED_BEFORE_PROOF'
@@ -109,6 +109,6 @@ jobs:
           retention-days: 14
           if-no-files-found: error
           path: |
-            .ums-blender52-nova01/
+            ums-blender52-nova01/
             ums-blender52.stdout.log
             blender-5.2.3.sha256
