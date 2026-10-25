@@ -118,41 +118,63 @@ export default function App(){
 
   useEffect(()=>{
     let mounted=true;
-    supabase.auth.getSession().then(async ({data})=>{
+    let unsubscribeAuth:(()=>void)|undefined;
+
+    const attachAuthListener=()=>{
+      if(!mounted || unsubscribeAuth)return;
+      const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
+        if(!mounted)return;
+        setSession(next);
+        if(event==='SIGNED_OUT')setBrowserSessionMarker(false);
+        if(event==='PASSWORD_RECOVERY'){
+          setPasswordRecovery(true);
+          setRecoveryLinkVerified(Boolean(next));
+          setResetMessage('Enlace de recuperación validado. Crea ahora tu nueva contraseña.');
+        }
+      });
+      unsubscribeAuth=()=>subscription.unsubscribe();
+    };
+
+    void (async()=>{
+      const {data}=await supabase.auth.getSession();
+      if(!mounted)return;
       const remembered=localStorage.getItem('fenix-remember-device')==='true';
       const activeThisBrowser=hasBrowserSessionMarker();
       const recoveryUrl=window.location.hash.includes('type=recovery')||window.location.search.includes('type=recovery');
+
+      if(data.session){
+        const {data:{user},error}=await supabase.auth.getUser();
+        if(!mounted)return;
+        if(!user || error){
+          setBrowserSessionMarker(false);
+          await supabase.auth.signOut({scope:'local'});
+          if(mounted){setSession(null);setAuthReady(true);attachAuthListener();}
+          return;
+        }
+      }
+
       if(data.session && recoveryUrl){
-        if(mounted){setSession(data.session);setPasswordRecovery(true);setRecoveryLinkVerified(true);setAuthReady(true);}
+        if(mounted){setSession(data.session);setPasswordRecovery(true);setRecoveryLinkVerified(true);setAuthReady(true);attachAuthListener();}
         return;
       }
+
       if(data.session && !remembered && !activeThisBrowser){
         const migrationDone=localStorage.getItem(BROWSER_SESSION_MIGRATION_KEY)==='1';
         if(!migrationDone){
-          const {data:{user},error}=await supabase.auth.getUser();
-          if(user && !error){
-            setBrowserSessionMarker(true);
-            localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');
-            if(mounted){setSession(data.session);setAuthReady(true);}
-            return;
-          }
+          setBrowserSessionMarker(true);
+          localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');
+          if(mounted){setSession(data.session);setAuthReady(true);attachAuthListener();}
+          return;
         }
         await supabase.auth.signOut({scope:'local'});
-        if(mounted){setSession(null);setAuthReady(true);}
+        if(mounted){setSession(null);setAuthReady(true);attachAuthListener();}
         return;
       }
-      if(mounted){setSession(data.session);setAuthReady(true);}
-    });
-    const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
-      setSession(next);
-      if(event==='SIGNED_OUT')setBrowserSessionMarker(false);
-      if(event==='PASSWORD_RECOVERY'){
-        setPasswordRecovery(true);
-        setRecoveryLinkVerified(Boolean(next));
-        setResetMessage('Enlace de recuperación validado. Crea ahora tu nueva contraseña.');
-      }
-    });
-    return ()=>{mounted=false;subscription.unsubscribe();};
+
+      if(mounted){setSession(data.session);setAuthReady(true);attachAuthListener();}
+    })();
+
+    return ()=>{mounted=false;unsubscribeAuth?.();};
   },[]);
 
   useEffect(()=>{
