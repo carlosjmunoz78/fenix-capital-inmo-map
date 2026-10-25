@@ -169,7 +169,16 @@ export default function App(){
     Promise.all([
       fetchAppApi<SessionContextPayload>('/session/context'),
       fetchAppApi<NavData>('/navigation')
-    ]).then(([c,n])=>{
+    ]).then(async ([c,n])=>{
+      if(c.status===401 || n.status===401){
+        const {data:{user},error}=await supabase.auth.getUser();
+        if(!user || error){
+          setBrowserSessionMarker(false);
+          await supabase.auth.signOut({scope:'local'});
+          setCtx(null);setNav(null);setSession(null);
+          return;
+        }
+      }
       setCtx(c.status===200?unwrapSessionContext(c.data):null);
       setNav(n.status===200?n.data:null);
     }).finally(()=>setWorkspaceReady(true));
