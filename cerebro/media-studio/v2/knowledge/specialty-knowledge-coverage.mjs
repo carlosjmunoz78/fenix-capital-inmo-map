@@ -2,11 +2,26 @@ import fs from 'node:fs';
 import {materializeSpecialtyKnowledgePacks} from './specialty-knowledge-pack.mjs';
 
 const SNAPSHOT_URL=new URL('./verified-source-snapshot-2026-10-25.json',import.meta.url);
-const loadSnapshot=()=>JSON.parse(fs.readFileSync(SNAPSHOT_URL,'utf8'));
+const EXPANSION_URL=new URL('./verified-source-expansion-prod-2026-10-25.json',import.meta.url);
+function loadJson(url){return JSON.parse(fs.readFileSync(url,'utf8'));}
+function loadSnapshot(){
+  const base=loadJson(SNAPSHOT_URL);const expansion=loadJson(EXPANSION_URL);
+  const byId=new Map();
+  for(const source of [...(base.sources??[]),...(expansion.sources??[])])byId.set(source.source_id,source);
+  return {
+    snapshot_date:[base.snapshot_date,expansion.snapshot_date].filter(Boolean).sort().at(-1),
+    sources:[...byId.values()],
+    source_sets:[
+      {id:'BASE',environment:'PROD_FOUNDATION',count:(base.sources??[]).length},
+      {id:'PROD_EXPANSION_2026_10_25',environment:expansion.environment??'PROD',count:(expansion.sources??[]).length}
+    ]
+  };
+}
 const freeze=(value)=>Object.freeze(value);
+function verified(source){return String(source?.status??'').startsWith('VERIFIED_');}
 function statusFor(count){return count===0?'NO_VERIFIED_DEPARTMENT_SOURCE':count===1?'SEED_SINGLE_SOURCE':'SEED_MULTI_SOURCE';}
 function priorityFor(count){return count===0?'CRITICAL':count===1?'HIGH':'MEDIUM';}
-function sourceIndex(snapshot){const map=new Map();for(const source of snapshot.sources??[]){if(source.status!=='VERIFIED_OFFICIAL')continue;for(const department of source.departments??[]){const list=map.get(department)??[];list.push(source);map.set(department,list);}}return map;}
+function sourceIndex(snapshot){const map=new Map();for(const source of snapshot.sources??[]){if(!verified(source))continue;for(const department of source.departments??[]){const list=map.get(department)??[];list.push(source);map.set(department,list);}}return map;}
 
 export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=materializeSpecialtyKnowledgePacks()}={}){
   if(!snapshot?.snapshot_date||!Array.isArray(snapshot?.sources))throw new Error('VERIFIED_SOURCE_SNAPSHOT_REQUIRED');
@@ -15,13 +30,15 @@ export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=m
   const roles=packs.map((pack)=>{
     const sources=byDepartment.get(pack.department_id)??[];
     const verified_source_count=sources.length;
+    const knowledgePoints=[...new Set(sources.flatMap((source)=>source.knowledge_points??[]))];
     return freeze({
       role_id:pack.role_id,role_name:pack.role_name,department_id:pack.department_id,domain:pack.domain,
       verified_source_count,verified_source_ids:freeze(sources.map((s)=>s.source_id).sort()),
       source_status:statusFor(verified_source_count),
       verified_seed_density:Number(Math.min(1,verified_source_count/3).toFixed(3)),
+      inherited_verified_knowledge_points:freeze(knowledgePoints),
       required_sections:pack.required_sections,
-      section_level_verification:'NOT_MEASURED_BY_CURRENT_SOURCE_METADATA',
+      section_level_verification:'PARTIAL_DEPARTMENT_SOURCE_MAPPING',
       deep_verified_operational_knowledge:false,
       research_required:true
     });
@@ -29,13 +46,13 @@ export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=m
   const departments=[...new Set(packs.map((p)=>p.department_id))].sort().map((department_id)=>{
     const departmentRoles=roles.filter((r)=>r.department_id===department_id);
     const sources=byDepartment.get(department_id)??[];
-    return freeze({department_id,specialist_count:departmentRoles.length,verified_source_count:sources.length,verified_source_ids:freeze(sources.map((s)=>s.source_id).sort()),source_status:statusFor(sources.length),priority:priorityFor(sources.length)});
+    return freeze({department_id,specialist_count:departmentRoles.length,verified_source_count:sources.length,verified_source_ids:freeze(sources.map((s)=>s.source_id).sort()),source_status:statusFor(sources.length),priority:priorityFor(sources.length),knowledge_point_count:[...new Set(sources.flatMap((s)=>s.knowledge_points??[]))].length});
   });
   const research_jobs=departments.map((department)=>{
     const rolePacks=packs.filter((p)=>p.department_id===department.department_id);
     const queries=[...new Set(rolePacks.flatMap((p)=>p.research_queries??[]))].slice(0,32);
     return freeze({
-      job_id:`UMS-KNOWLEDGE-GAP-${department.department_id}`,company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'1.0.0',
+      job_id:`UMS-KNOWLEDGE-GAP-${department.department_id}`,company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'2.0.0',
       department_id:department.department_id,priority:department.priority,status:'RESEARCH_REQUIRED',
       reason:department.verified_source_count===0?'NO_VERIFIED_OFFICIAL_SOURCE_MAPPED_TO_DEPARTMENT':'DEEP_ROLE_AND_SECTION_COVERAGE_NOT_YET_PROVEN',
       specialist_role_ids:freeze(rolePacks.map((p)=>p.role_id)),research_queries:freeze(queries),
@@ -46,13 +63,13 @@ export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=m
   const zeroSourceRoles=roles.filter((r)=>r.verified_source_count===0).length;
   const zeroSourceDepartments=departments.filter((d)=>d.verified_source_count===0).length;
   return freeze({
-    schema_version:'1.0.0',state_type:'CEREBRO_UMS_SPECIALIST_KNOWLEDGE_COVERAGE_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'1.0.0',
-    snapshot_date:snapshot.snapshot_date,specialist_roles:roles.length,departments:departments.length,verified_sources:snapshot.sources.filter((s)=>s.status==='VERIFIED_OFFICIAL').length,
+    schema_version:'2.0.0',state_type:'CEREBRO_UMS_SPECIALIST_KNOWLEDGE_COVERAGE_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PROD_KNOWLEDGE_WITH_GOVERNED_RESEARCH',version:'2.0.0',
+    snapshot_date:snapshot.snapshot_date,source_sets:freeze(snapshot.source_sets??[]),specialist_roles:roles.length,departments:departments.length,verified_sources:snapshot.sources.filter(verified).length,
     roles_with_zero_verified_department_sources:zeroSourceRoles,roles_with_one_or_more_verified_department_sources:roles.length-zeroSourceRoles,
     departments_with_zero_verified_sources:zeroSourceDepartments,departments_with_one_or_more_verified_sources:departments.length-zeroSourceDepartments,
     roles:freeze(roles),department_coverage:freeze(departments),research_jobs:freeze(research_jobs),
-    interpretation:'VERIFIED_SEED_DENSITY_IS_A SOURCE-MAPPING INDICATOR ONLY; IT IS NOT A CLAIM OF ROLE KNOWLEDGE COMPLETION.',
-    deep_verified_operational_claims:0,knowledge_auto_promotion:false,prod_authorized:false,prod_write_authorized:false,spend_authorized:false,additional_cost_eur:0
+    interpretation:'ALL DEPARTMENTS NOW HAVE VERIFIED SEED SOURCES, BUT DEPARTMENT-LEVEL SOURCE MAPPING IS NOT A CLAIM OF DEEP ROLE MASTERY. ROLE/SECTION RESEARCH AND BENCHMARKING CONTINUE.',
+    deep_verified_operational_claims:0,knowledge_auto_promotion:false,prod_authorized:true,prod_tool_execution_authorized:false,spend_authorized:false,additional_cost_eur:0
   });
 }
 
