@@ -7,6 +7,8 @@ on:
     paths:
       - '.github/workflows/cerebro-ums-bm02-bm03-auth-contract.yml'
       - 'cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py'
+      - 'cerebro/media-studio/v2/runtime/bm02-authorized-digital-double-stack-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/bm02-authorized-digital-double-stack-gate.test.mjs'
       - 'cerebro/media-studio/v2/runtime/bm03-authorized-voice-stack-gate.mjs'
       - 'cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs'
   workflow_dispatch:
@@ -20,8 +22,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Node voice stack contract tests
-        run: node --test cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs
+      - name: Node digital-double and voice stack contract tests
+        run: node --test cerebro/media-studio/v2/tests/bm02-authorized-digital-double-stack-gate.test.mjs cerebro/media-studio/v2/tests/bm03-authorized-voice-stack-gate.test.mjs
       - name: Admission gate positive fixture remains non-crediting
         shell: bash
         run: |
