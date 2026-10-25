@@ -5,6 +5,7 @@ import argparse, hashlib, json, os
 from pathlib import Path
 
 CANONICAL_FRONT='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+EXPECTED_IP_RUN_ID='40224943687'
 
 def sha(p:Path)->str: return hashlib.sha256(p.read_bytes()).hexdigest()
 
@@ -17,7 +18,9 @@ def main():
     a=ap.parse_args()
     physical_path=Path(a.physical); metrics_path=Path(a.metrics); image=Path(a.image); out=Path(a.out)
     physical=json.loads(physical_path.read_text()); metrics=json.loads(metrics_path.read_text())
+    source_run=os.environ.get('IP_PARENT_RUN_ID',EXPECTED_IP_RUN_ID)
     checks={
+      'physical_parent_run_bound':source_run==EXPECTED_IP_RUN_ID,
       'physical_executed':physical.get('status')=='IP_ADAPTER_PHYSICAL_EXECUTED',
       'synthetic_identity':physical.get('reference',{}).get('identity_type')=='SYNTHETIC_ORIGINAL' and physical.get('reference',{}).get('real_person_reference') is False,
       'canonical_reference':physical.get('reference',{}).get('sha256')==CANONICAL_FRONT,
@@ -36,9 +39,9 @@ def main():
     }
     passed=all(checks.values())
     report={
-      'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM01_IMAGE_IDENTITY_PROOF_V1','benchmark_id':'BM-01','proof_type':'IMAGE_IDENTITY_PROOF',
+      'schema_version':'1.0.1','state_type':'CEREBRO_UMS_BM01_IMAGE_IDENTITY_PROOF_V1','benchmark_id':'BM-01','proof_type':'IMAGE_IDENTITY_PROOF',
       'character_id':'UMS-SYNTH-CHAR-001','environment':'PREPROD','status':'PASS_WITH_EVIDENCE' if passed else 'FAIL_CLOSED',
-      'checks':checks,
+      'source_physical_run_id':source_run,'checks':checks,
       'evidence':{
         'image':{'path':str(image),'sha256':sha(image) if image.is_file() else None,'bytes':image.stat().st_size if image.is_file() else 0},
         'physical_report_sha256':sha(physical_path),'cross_modal_metrics_sha256':sha(metrics_path),
