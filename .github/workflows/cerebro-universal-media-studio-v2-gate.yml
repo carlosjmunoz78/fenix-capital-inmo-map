@@ -6,6 +6,10 @@ on:
     paths:
       - 'cerebro/media-studio/v2/**'
       - '.github/workflows/cerebro-universal-media-studio-v2-gate.yml'
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/**'
+      - '.github/workflows/cerebro-universal-media-studio-v2-gate.yml'
   workflow_dispatch:
 
 permissions:
