@@ -1,0 +1,22 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"cerebro://media-studio/v2/pod.schema.json",
+  "title":"Universal Media Studio Ephemeral Pod",
+  "type":"object",
+  "required":["pod_id","pod_type","company_id","production_id","environment","objective","roles","capabilities","review","lifecycle"],
+  "properties":{
+    "pod_id":{"type":"string"},
+    "pod_type":{"enum":["PRODUCTION","SEQUENCE","SHOT","CHARACTER","IDENTITY","VOICE","MUSIC","ASSET","VFX","XR_SPATIAL","LIVE","DEVICE_OUTPUT","VERSION_REVIEW"]},
+    "company_id":{"type":"string"},
+    "production_id":{"type":"string"},
+    "environment":{"enum":["LAB","PREPROD","PROD"]},
+    "objective":{"type":"string","minLength":1},
+    "roles":{"type":"array","minItems":1,"items":{"type":"string"}},
+    "capabilities":{"type":"array","minItems":1,"items":{"type":"string"}},
+    "inputs":{"type":"array","items":{"type":"string"}},
+    "outputs":{"type":"array","items":{"type":"string"}},
+    "review":{"type":"object","required":["supervisors","tribunals","guardians"],"properties":{"supervisors":{"type":"array","items":{"type":"string"}},"tribunals":{"type":"array","items":{"type":"string"}},"guardians":{"type":"array","items":{"type":"string"}}}},
+    "lifecycle":{"type":"object","required":["ephemeral","destroy_when_complete","retain_audit"],"properties":{"ephemeral":{"const":true},"destroy_when_complete":{"const":true},"retain_audit":{"const":true}}}
+  },
+  "additionalProperties":false
+}
