@@ -1,0 +1,132 @@
+name: CEREBRO UMS IP-Adapter Physical
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-ip-adapter-physical.yml'
+      - 'cerebro/media-studio/v2/runtime/ip-adapter-capability-gate.mjs'
+      - 'cerebro/media-studio/v2/probes/ip_adapter_cpu_smoke.py'
+      - 'cerebro/media-studio/v2/tests/ip-adapter-capability-gate.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-ip-adapter-physical
+  cancel-in-progress: true
+
+jobs:
+  physical_cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      UMS_IP_OUT: ums-ipadapter-nova01
+      IP_ADAPTER_LATENCY_LIMIT_SECONDS: '600'
+      IP_ADAPTER_MEMORY_LIMIT_GIB: '13.5'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contract gate tests
+        run: node --test cerebro/media-studio/v2/tests/ip-adapter-capability-gate.test.mjs
+      - name: Recover canonical Nova-01 Stage0 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Verify canonical reference and license chain
+        id: nova
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          test -n "$FRONT" && test -s "$FRONT"
+          test "$(sha256sum "$FRONT" | awk '{print $1}')" = 'e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          curl -fsSL --retry 3 https://huggingface.co/h94/IP-Adapter/raw/main/README.md -o ip-adapter-model-card.md
+          curl -fsSL --retry 3 https://huggingface.co/stable-diffusion-v1-5/stable-diffusion-v1-5/raw/main/README.md -o sd15-model-card.md
+          grep -Eiq '^license:[[:space:]]*apache-2\.0' ip-adapter-model-card.md
+          grep -Eiq '^license:[[:space:]]*creativeml-openrail-m' sd15-model-card.md
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost CPU inference runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchvision==0.22.1
+          python -m pip install 'diffusers>=0.35,<0.37' 'transformers>=4.56,<5' 'accelerate>=1.10,<2' safetensors pillow psutil
+          python -m pip check
+          python - <<'PY'
+          import torch, diffusers, transformers
+          print({'torch':torch.__version__,'diffusers':diffusers.__version__,'transformers':transformers.__version__,'cuda':torch.cuda.is_available()})
+          PY
+      - name: Physical IP-Adapter Nova-01 CPU smoke
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.nova.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s python cerebro/media-studio/v2/probes/ip_adapter_cpu_smoke.py | tee ums-ip-adapter.stdout.log
+      - name: Capability gate from measured resources
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE' | tee ums-ip-adapter-gate.json
+          import fs from 'node:fs';
+          import {evaluateIpAdapterPreprodCapability} from './cerebro/media-studio/v2/runtime/ip-adapter-capability-gate.mjs';
+          const p=JSON.parse(fs.readFileSync('ums-ipadapter-nova01/ip-adapter-physical-report.json','utf8'));
+          const gate=evaluateIpAdapterPreprodCapability({
+            company_id:'GLOBAL',environment:'PREPROD',request_id:'ums:ipadapter:physical',
+            code_license_verified:true,checkpoint_license_verified:true,base_model_license_verified:true,
+            device:'cpu',cuda_available:false,
+            memory_fit_verified:p.resources.memory_fit_verified===true,
+            latency_fit_verified:p.resources.latency_fit_verified===true,
+          });
+          console.log(JSON.stringify(gate,null,2));
+          if(gate.status!=='IP_ADAPTER_ELIGIBLE_FOR_PREPROD_PHYSICAL_BINDING') process.exit(7);
+          NODE
+      - name: Semantic evidence gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('ums-ipadapter-nova01/ip-adapter-physical-report.json').read_text())
+          assert p['status']=='IP_ADAPTER_PHYSICAL_EXECUTED'
+          assert p['device']=='cpu'
+          assert p['reference']['sha256']=='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          assert p['reference']['real_person_reference'] is False
+          assert p['resources']['memory_fit_verified'] is True
+          assert p['resources']['latency_fit_verified'] is True
+          assert p['additional_cost_eur']==0 and p['prod_authorized'] is False
+          assert p['output']['bytes']>1000 and len(p['output']['sha256'])==64
+          print(json.dumps(p,indent=2))
+          PY
+      - name: Upload IP-Adapter evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-ip-adapter-nova01-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ums-ipadapter-nova01/
+            ums-ip-adapter.stdout.log
+            ums-ip-adapter-gate.json
+            ip-adapter-model-card.md
+            sd15-model-card.md
