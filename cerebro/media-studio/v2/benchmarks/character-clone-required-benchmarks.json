@@ -1,0 +1,36 @@
+{
+  "schema_version":"0.1.0",
+  "state_type":"CEREBRO_UMS_CHARACTER_CLONE_PHYSICAL_GATE_V0",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PREPROD",
+  "version":"0.1.0",
+  "policy":{
+    "zero_cost_first":true,
+    "real_identity_requires_valid_rights":true,
+    "internet_reference_is_reference_only_without_rights":true,
+    "physical_binding_requires_all_required_checks":true,
+    "prod_autonomy":false
+  },
+  "required_checks":[
+    {"id":"CC-BM-001","metric":"identity_similarity","target":">=0.90 or project-specific stricter floor","applies_to":["FACE","VIDEO","DIGITAL_DOUBLE"]},
+    {"id":"CC-BM-002","metric":"temporal_identity_drift","target":"<=0.08","applies_to":["VIDEO","ANIMATION","PERFORMANCE"]},
+    {"id":"CC-BM-003","metric":"body_proportion_drift","target":"<=0.05","applies_to":["BODY","MOTION","3D"]},
+    {"id":"CC-BM-004","metric":"voice_similarity","target":">=0.88 or project-specific stricter floor","applies_to":["VOICE","DUBBING","SINGING"]},
+    {"id":"CC-BM-005","metric":"lip_sync_offset_ms","target":"<=80","applies_to":["VOICE","VIDEO","PERFORMANCE"]},
+    {"id":"CC-BM-006","metric":"expression_continuity","target":"PASS","applies_to":["FACE","PERFORMANCE"]},
+    {"id":"CC-BM-007","metric":"wardrobe_continuity","target":"PASS","applies_to":["IMAGE","VIDEO","3D"]},
+    {"id":"CC-BM-008","metric":"mannerism_continuity","target":"PASS","applies_to":["MOTION","PERFORMANCE"]},
+    {"id":"CC-BM-009","metric":"multi_angle_identity_consistency","target":"PASS","applies_to":["FACE","BODY","3D"]},
+    {"id":"CC-BM-010","metric":"long_sequence_identity_consistency","target":"PASS","applies_to":["VIDEO","LONG_FORM"]},
+    {"id":"CC-BM-011","metric":"rights_recheck","target":"PASS","applies_to":["ALL"]},
+    {"id":"CC-BM-012","metric":"provenance_completeness","target":"PASS","applies_to":["ALL"]},
+    {"id":"CC-BM-013","metric":"license_security_review","target":"PASS","applies_to":["ALL_ADAPTERS"]},
+    {"id":"CC-BM-014","metric":"measured_cost_eur","target":"KNOWN_AND_WITHIN_POLICY","applies_to":["ALL_ADAPTERS"]},
+    {"id":"CC-BM-015","metric":"rollback_rebuild","target":"PROVEN","applies_to":["ALL"]},
+    {"id":"CC-BM-016","metric":"tribunal_identity_voice_performance","target":"PASS","applies_to":["ALL"]}
+  ],
+  "tribunals":["T02","T03","T04","T05","T10","T11"],
+  "guardians":["GRD-01","GRD-02","GRD-03","GRD-04","GRD-05","GRD-06","GRD-09","GRD-10","GRD-11","GRD-12","GRD-13"],
+  "promotion_rule":"No adapter or model may be bound for persistent-character physical generation until every applicable check is evidenced GREEN in PREPROD and rollback/rebuild have been physically demonstrated."
+}
