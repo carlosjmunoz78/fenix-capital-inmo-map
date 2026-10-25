@@ -13,7 +13,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-browser-work-total-v1-preprod-consumer
+  group: cerebro-browser-work-total-v1-preprod-consumer-353
   cancel-in-progress: true
 
 env:
