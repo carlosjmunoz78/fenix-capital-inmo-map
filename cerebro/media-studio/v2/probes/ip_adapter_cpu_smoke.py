@@ -30,28 +30,28 @@ def sha(p:Path)->str: return hashlib.sha256(p.read_bytes()).hexdigest()
 def maxrss_bytes()->int: return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024)
 
 if not REF.is_file(): raise SystemExit('CANONICAL_REFERENCE_MISSING')
-if torch.cuda.is_available():
-    # This probe intentionally certifies the zero-cost CPU fallback, not an incidental GPU.
-    device='cpu'
-else:
-    device='cpu'
+device='cpu'  # deterministic zero-cost fallback certification, even if an incidental GPU appears
 
 started=time.time(); proc=psutil.Process()
 load_started=time.time()
 pipe=StableDiffusionPipeline.from_pretrained(
     BASE,
-    torch_dtype=torch.float32,
+    dtype=torch.float32,
     low_cpu_mem_usage=True,
     safety_checker=None,
     requires_safety_checker=False,
 )
 pipe=pipe.to(device)
-pipe.enable_attention_slicing()
 pipe.set_progress_bar_config(disable=False)
 load_seconds=time.time()-load_started
 adapter_started=time.time()
+# Important: load IP-Adapter on standard attention processors first. Enabling
+# attention slicing before this step changes processor classes and breaks
+# diffusers 0.36.0 with SlicedAttnProcessor(slice_size) construction.
 pipe.load_ip_adapter(ADAPTER, subfolder=SUBFOLDER, weight_name=WEIGHT)
 pipe.set_ip_adapter_scale(0.85)
+# Use VAE slicing only; it reduces peak memory without replacing UNet attention processors.
+if hasattr(pipe,'enable_vae_slicing'): pipe.enable_vae_slicing()
 adapter_load_seconds=time.time()-adapter_started
 ref=Image.open(REF).convert('RGB')
 generator=torch.Generator(device='cpu').manual_seed(SEED)
@@ -72,8 +72,8 @@ rss=maxrss_bytes(); current_rss=proc.memory_info().rss
 memory_fit=bool(rss<=MAX_RSS_BYTES)
 latency_fit=bool(elapsed<=MAX_SECONDS)
 report={
-  'schema_version':'1.0.0','state_type':'CEREBRO_UMS_IP_ADAPTER_PHYSICAL_SMOKE_V1',
-  'company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','version':'1.0.0',
+  'schema_version':'1.0.1','state_type':'CEREBRO_UMS_IP_ADAPTER_PHYSICAL_SMOKE_V1',
+  'company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','version':'1.0.1',
   'adapter':'IP-ADAPTER-STANDARD','capability':'SYNTHETIC_REFERENCE_IMAGE_CONDITIONING',
   'status':'IP_ADAPTER_PHYSICAL_EXECUTED','device':'cpu','cuda_available':bool(torch.cuda.is_available()),
   'base_model':BASE,'base_model_license':'creativeml-openrail-m','adapter_repo':ADAPTER,'adapter_license':'apache-2.0','adapter_weight':WEIGHT,
