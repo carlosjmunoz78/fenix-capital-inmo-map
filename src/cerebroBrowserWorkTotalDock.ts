@@ -15,6 +15,7 @@ const IDEMPOTENCY_PREFIX=IS_PRODUCTION?'browser-work-total-v1-prod-ui-':'browser
 const ROOT_ID='cerebro-browser-work-total-profile-dock';
 const STYLE_ID='cerebro-browser-work-total-profile-style';
 const TERMINAL=new Set(['HIBERNATED','STOPPED','ERROR','CLOSED']);
+const ACTIVE_SESSION_EVENT='cerebro:browser-active-session';
 let profiles:WorkProfile[]=[];
 let selectedKey='';
 let busy=false;
@@ -29,6 +30,17 @@ function escapeHtml(value:unknown){return String(value??'').replace(/[&<>'"]/g,c
 function short(value:string){return value.length>20?`${value.slice(0,8)}…${value.slice(-5)}`:value;}
 function selected(){return profiles.find(profile=>keyOf(profile)===selectedKey)||profiles[0]||null;}
 function active(){return profiles.find(profile=>profile.active_session&&!TERMINAL.has(profile.active_session.state))||null;}
+function publishActiveSession(sessionId:string|null){
+ if(typeof window==='undefined'||typeof document==='undefined')return;
+ window.dispatchEvent(new CustomEvent(ACTIVE_SESSION_EVENT,{detail:{company_id:company,session_id:sessionId,environment:ENVIRONMENT,source:'WORK_TOTAL'}}));
+ if(!sessionId)return;
+ const select=document.querySelector<HTMLSelectElement>('.cerebro-browser-console select[aria-label="Seleccionar sesión"]');
+ if(!select||select.value===sessionId)return;
+ const option=Array.from(select.options).find(item=>item.value===sessionId);
+ if(!option)return;
+ select.value=sessionId;
+ select.dispatchEvent(new Event('change',{bubbles:true}));
+}
 function currentCompany(){
  const select=document.querySelector<HTMLSelectElement>('.cerebro-browser-console select[aria-label="Seleccionar empresa"]');
  if(select?.value)return select.value;
@@ -84,10 +96,10 @@ function render(){
 }
 async function refresh(){
  const nextCompany=currentCompany();if(nextCompany!==company){company=nextCompany;selectedKey='';}
- try{const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];if(!selectedKey||!profiles.some(p=>keyOf(p)===selectedKey))selectedKey=profiles[0]?keyOf(profiles[0]):'';error='';}catch(cause){error=String((cause as Error)?.message||cause);profiles=[];}render();
+ try{const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];if(!selectedKey||!profiles.some(p=>keyOf(p)===selectedKey))selectedKey=profiles[0]?keyOf(profiles[0]):'';error='';publishActiveSession(active()?.active_session?.session_id||null);}catch(cause){error=String((cause as Error)?.message||cause);profiles=[];publishActiveSession(null);}render();
 }
 async function waitForSleep(sessionId:string){
- for(let attempt=0;attempt<40;attempt++){await new Promise(resolve=>window.setTimeout(resolve,400));const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];const still=profiles.some(p=>p.active_session?.session_id===sessionId&&!TERMINAL.has(p.active_session.state));if(!still){render();return;}}
+ for(let attempt=0;attempt<40;attempt++){await new Promise(resolve=>window.setTimeout(resolve,400));const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];const still=profiles.some(p=>p.active_session?.session_id===sessionId&&!TERMINAL.has(p.active_session.state));if(!still){publishActiveSession(active()?.active_session?.session_id||null);render();return;}}
  throw new Error('WORK_TOTAL_HIBERNATE_TIMEOUT');
 }
 async function act(action:string){
@@ -100,7 +112,7 @@ async function act(action:string){
   }else if(action==='open'){
    const current=active();
    if(current?.active_session&&current.browser_profile_id!==profile!.browser_profile_id){await api<ActionResponse>('hibernate',{company_id:company,session_id:current.active_session.session_id,target_browser_profile_id:profile!.browser_profile_id});info=`Durmiendo ${current.display_label}…`;render();await waitForSleep(current.active_session.session_id);}
-   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`${IDEMPOTENCY_PREFIX}${crypto.randomUUID()}`});info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';
+   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`${IDEMPOTENCY_PREFIX}${crypto.randomUUID()}`});info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';if(start.session?.session_id)publishActiveSession(start.session.session_id);
   }else if(action==='confirm'){
    const result=await api<ActionResponse>('confirm-account',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id});info=`Cuenta confirmada${result.account_hint?` · ${result.account_hint}`:''}.`;
   }else if(action==='forget'){
