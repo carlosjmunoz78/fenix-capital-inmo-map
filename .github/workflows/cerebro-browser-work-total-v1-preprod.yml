@@ -29,7 +29,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-browser-work-total-v1-preprod-consumer
+  group: cerebro-browser-work-total-v1-preprod-consumer-${{ github.ref_name }}
   cancel-in-progress: false
 
 env:
