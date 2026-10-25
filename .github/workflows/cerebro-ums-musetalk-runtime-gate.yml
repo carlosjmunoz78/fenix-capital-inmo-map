@@ -1,0 +1,43 @@
+name: CEREBRO UMS MuseTalk Runtime Gate
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-musetalk-runtime-gate.yml'
+      - 'cerebro/media-studio/v2/runtime/musetalk-capability-gate.mjs'
+      - 'cerebro/media-studio/v2/probes/musetalk_runtime_gate.mjs'
+      - 'cerebro/media-studio/v2/tests/musetalk-capability-gate.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capability_gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Contract tests
+        run: node --test cerebro/media-studio/v2/tests/musetalk-capability-gate.test.mjs
+      - name: Physical runtime gate
+        run: node cerebro/media-studio/v2/probes/musetalk_runtime_gate.mjs
+      - name: Assert current worker is safely classified
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const x=JSON.parse(fs.readFileSync('ums-musetalk-runtime-gate.json','utf8'));
+          if(x.runtime.cuda_available===false && x.status!=='HOLD_HARDWARE') process.exit(1);
+          if(x.human_required!==false || x.prod_authorized!==false || x.additional_cost_eur!==0) process.exit(2);
+          console.log(JSON.stringify(x,null,2));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ums-musetalk-runtime-gate-${{ github.run_id }}
+          retention-days: 7
+          path: ums-musetalk-runtime-gate.json
