@@ -83,14 +83,23 @@ function authenticatedContextFallback(session:Awaited<ReturnType<typeof supabase
  return{actor_code:actorCode,role,context_source:'authenticated-user-metadata'};
 }
 
-async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
+async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,init?:RequestInit,timeoutMs=0):Promise<{status:number;data:T|null}>{
   const {data:{session}}=await supabase.auth.getSession();
   const token=session?.access_token;
   if(!token)return{status:401,data:null};
+  const controller=timeoutMs>0?new AbortController():null;
+  const upstreamSignal=init?.signal;
+  const abortFromUpstream=()=>controller?.abort();
+  if(controller&&upstreamSignal){
+    if(upstreamSignal.aborted)controller.abort();
+    else upstreamSignal.addEventListener('abort',abortFromUpstream,{once:true});
+  }
+  const timeoutId=controller?globalThis.setTimeout(()=>controller.abort(),timeoutMs):null;
   let response:Response;
   try{
     response=await fetch(`${SUPABASE_URL}/functions/v1/${functionName(baseFunctionName)}${path}`,{
       ...init,
+      signal:controller?.signal??upstreamSignal,
       headers:{
         'content-type':'application/json',
         ...(init?.headers||{}),
@@ -98,7 +107,12 @@ async function authenticatedEdgeFetch<T>(baseFunctionName:string,path:string,ini
         apikey:SUPABASE_PUBLISHABLE_KEY
       }
     });
-  }catch{return{status:0,data:null};}
+  }catch{
+    return{status:0,data:null};
+  }finally{
+    if(timeoutId!==null)globalThis.clearTimeout(timeoutId);
+    if(controller&&upstreamSignal)upstreamSignal.removeEventListener('abort',abortFromUpstream);
+  }
   let raw:unknown=null;
   try{raw=await response.json();}catch{raw=null;}
   return{status:response.status,data:raw as T|null};
@@ -141,7 +155,7 @@ export async function fetchUserAdminApi<T>(path='',init?:RequestInit):Promise<{s
 }
 
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init);
+  const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,6000);
   if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
   if(path==='/session/context'&&(result.status===0||result.status>=500)){
     const {data:{session}}=await supabase.auth.getSession();
