@@ -37,12 +37,18 @@ const captionPlan = planKineticCaptionsV27({
 });
 
 const ass = renderKineticAssV27(captionPlan);
-const assFile = path.join(temp, 'captions.ass');
-fs.writeFileSync(assFile, ass);
 if (captionPlan.events.length < 5) throw new Error('KINETIC_CAPTION_EVENT_DENSITY_TOO_LOW');
 if (!captionPlan.events.some((e) => e.emphasis)) throw new Error('KINETIC_CAPTION_EMPHASIS_MISSING');
 if (!ass.includes('Dialogue:')) throw new Error('ASS_DIALOGUE_MISSING');
 if (captionPlan.sidecar_only_forbidden !== true || captionPlan.burned_in_required !== true) throw new Error('CAPTION_BURNIN_GATE_MISSING');
+
+const out = process.env.CEREBRO_V27_REPORT || path.join(temp, 'report.json');
+const outDir = path.dirname(out);
+fs.mkdirSync(outDir, { recursive: true });
+const assFile = process.env.CEREBRO_V27_ASS || path.join(outDir, 'captions.ass');
+const planFile = process.env.CEREBRO_V27_CAPTION_PLAN || path.join(outDir, 'caption-plan.json');
+fs.writeFileSync(assFile, ass);
+fs.writeFileSync(planFile, JSON.stringify(captionPlan, null, 2) + '\n');
 
 const report = {
   schema_version: '1.0.0',
@@ -58,13 +64,13 @@ const report = {
     motions: [...new Set(captionPlan.events.map((e) => e.motion))],
     emphasis_events: captionPlan.events.filter((e) => e.emphasis).length,
     burned_in_required: captionPlan.burned_in_required,
+    ass_file: assFile,
+    caption_plan_file: planFile,
   },
   publish_authorized: false,
   promotion_eligible: false,
   additional_recurring_cost_eur: 0,
 };
 
-const out = process.env.CEREBRO_V27_REPORT || path.join(temp, 'report.json');
-fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(out, JSON.stringify(report, null, 2) + '\n');
 process.stdout.write(JSON.stringify(report, null, 2) + '\n');
