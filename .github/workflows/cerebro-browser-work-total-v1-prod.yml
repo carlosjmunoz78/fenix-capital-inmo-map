@@ -16,7 +16,11 @@ on:
       - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
-      - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts'
+      - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/**'
+      - 'supabase/functions/cerebro-browser-work-total-v1-prod/**'
+      - 'supabase/functions/cerebro-browser-work-total-dispatch-v1-prod/**'
+      - 'supabase/functions/cerebro-browser-work-total-worker-v1-prod/**'
+      - 'supabase/functions/cerebro-browser-work-total-worker-v2-prod/**'
 
 permissions:
   contents: read
