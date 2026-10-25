@@ -9,10 +9,8 @@ const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
 const DEFAULT_ENDPOINT=process.env.CEREBRO_BROWSER_INTERACTIVE_URL || `https://${PROD_PROJECT_REF}.supabase.co/functions/v1/cerebro-browser-interactive-v3`;
 const WORKSPACE_ENDPOINT=String(process.env.CEREBRO_BROWSER_WORKSPACE_URL||'').trim();
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
-const ACTIVE_FRAME_INTERVAL_MS=Math.max(220,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||320));
-const IDLE_FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS||1200));
+const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
 const POLL_INTERVAL_MS=Math.max(25,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||35));
-const ACTIVE_WINDOW_MS=Math.max(1500,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS||3000));
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
@@ -168,7 +166,7 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   const base=buildBaseJob(job);const sessionId=String(job.job_id);
   const restoredWorkspace=await restoreWorkspace(job,tokenProvider,fetch_impl);
   const worker=createGovernedCloudBrowserWorker({max_tabs:8,...browserWorkerOptions()});
-  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='',lastActivityAt=startedAt;let opened=false,closed=false,stopRequested=false,hibernateRequested=false;let lastPrivateTabs=[],lastActiveTabIndex=0;let identityVerification={status:'NOT_APPLICABLE'};
+  const startedAt=Date.now();let seq=0,lastFrameAt=0,lastUrl='';let opened=false,closed=false,stopRequested=false,hibernateRequested=false;let lastPrivateTabs=[],lastActiveTabIndex=0;let identityVerification={status:'NOT_APPLICABLE'};
   const publishFrame=async key=>{seq+=1;const frame=await captureFrame(worker,base,sessionId,key,seq,endpoint,tokenProvider,fetch_impl);lastUrl=frame.final_url||lastUrl;lastPrivateTabs=frame.private_tabs;lastActiveTabIndex=frame.active_tab_index;lastFrameAt=Date.now();return frame;};
   try{
     const resumeActions=restoredWorkspace?.restored?actionsFromWorkspaceSnapshot(restoredWorkspace.snapshot):null;
@@ -187,7 +185,6 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
       let processedCommand=false;
       if(poll.command){
         processedCommand=true;
-        lastActivityAt=Date.now();
         let ok=false,errorCode=null;
         try{
           const payload=decryptJson(poll.command.payload_ciphertext,poll.command.payload_iv,key);
@@ -198,14 +195,11 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
         await callInteractive(endpoint,'worker/complete',tokenProvider,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
       }
       if(poll.handback===true){
-        lastActivityAt=Date.now();
-        await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
         identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
         await publishFrame(key);
-      }else if(!processedCommand){
-        const active=Date.now()-lastActivityAt<=ACTIVE_WINDOW_MS;
-        const frameInterval=active?ACTIVE_FRAME_INTERVAL_MS:IDLE_FRAME_INTERVAL_MS;
-        if(Date.now()-lastFrameAt>=frameInterval)await publishFrame(key);
+        await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
+      }else if(!processedCommand&&Date.now()-lastFrameAt>=FRAME_INTERVAL_MS){
+        await publishFrame(key);
       }
       if(processedCommand)continue;
       await sleep(POLL_INTERVAL_MS);
