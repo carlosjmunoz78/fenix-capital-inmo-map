@@ -1,0 +1,2 @@
+alter table public.cerebro_browser_control_v3 drop constraint cerebro_browser_control_v3_command_type_check;
+alter table public.cerebro_browser_control_v3 add constraint cerebro_browser_control_v3_command_type_check check (command_type in ('CLICK_POINT','DOUBLE_CLICK_POINT','MOVE_POINT','KEYBOARD_TYPE','KEYBOARD_PRESS','SCROLL','SWITCH_TAB','BACK','FORWARD','RELOAD','OPEN_TAB','CLOSE_TAB','NAVIGATE'));

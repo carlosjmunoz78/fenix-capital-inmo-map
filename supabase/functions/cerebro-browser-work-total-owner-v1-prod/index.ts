@@ -12,7 +12,7 @@ const COMPANY='fenix';
 const OWNER_ACTOR='CARLOS-ADMIN';
 const ACTIVE_STATES=['CONNECTING','CEREBRO_CONTROLLED','HUMAN_REQUIRED','TAKEOVER_PENDING','HUMAN_CONTROLLED','HANDBACK_PENDING','AI_RESUMING','HIBERNATE_PENDING'];
 const ALLOWED_ORIGINS=new Set(['https://app.fenixcapital.es','https://carlosjmunoz78.github.io']);
-const INPUT_TYPES=new Set(['CLICK_POINT','DOUBLE_CLICK_POINT','MOVE_POINT','KEYBOARD_TYPE','KEYBOARD_PRESS','SCROLL','SWITCH_TAB','BACK','FORWARD','RELOAD','OPEN_TAB','CLOSE_TAB']);
+const INPUT_TYPES=new Set(['CLICK_POINT','DOUBLE_CLICK_POINT','MOVE_POINT','KEYBOARD_TYPE','KEYBOARD_PRESS','SCROLL','SWITCH_TAB','BACK','FORWARD','RELOAD','OPEN_TAB','CLOSE_TAB','NAVIGATE']);
 const ENGINE_AUTHORITY=Object.freeze({browser_use_authorized:true,operation_authorized:true,prod_mutation_authorized:true,promotion_gate_green:true,rollback_ready:true,observability_ready:true,audit_ready:true,idempotency_proven:true});
 function headers(origin:string|null=null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin'};if(origin&&ALLOWED_ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
 function out(req:Request,status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:headers(req.headers.get('origin'))});}

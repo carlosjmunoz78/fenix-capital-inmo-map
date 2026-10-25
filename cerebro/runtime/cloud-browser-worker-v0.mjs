@@ -362,7 +362,10 @@ export function createCloudBrowserWorker({
       case 'DOUBLE_CLICK': await target.dblclick({ timeout }); break;
       case 'HOVER': await target.hover({ timeout }); break;
       case 'FILL': await target.fill(String(action.value ?? ''), { timeout }); break;
-      case 'TYPE': await target.pressSequentially(String(action.value ?? ''), { delay: action.delay_ms || 0, timeout }); break;
+      case 'TYPE':
+        if(action.key_events_required===true)await target.pressSequentially(String(action.value ?? ''), {delay:0,timeout});
+        else await target.fill(String(action.value ?? ''), {timeout});
+        break;
       case 'PRESS': await target.press(required(action.key, 'KEY'), { timeout }); break;
       case 'CHECK': await target.check({ timeout }); break;
       case 'UNCHECK': await target.uncheck({ timeout }); break;
@@ -386,7 +389,7 @@ export function createCloudBrowserWorker({
         break;
       }
       case 'KEYBOARD_TYPE':
-        await page.keyboard.type(String(action.value ?? ''), {delay:Math.max(0,Math.min(Number(action.delay_ms || 0),1000))});
+        await page.keyboard.insertText(String(action.value ?? ''));
         result = {characters:String(action.value ?? '').length};
         break;
       case 'KEYBOARD_PRESS':

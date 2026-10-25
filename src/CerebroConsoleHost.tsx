@@ -15,6 +15,7 @@ const VIEW_STORAGE_KEY='cerebro_console_view_v1';
 
 function initialView():CerebroView{
  if(typeof window==='undefined')return'OPERATIVA';
+ if(new URLSearchParams(window.location.search).get('section')==='browser')return'NAVEGADOR';
  try{
   const stored=window.sessionStorage.getItem(VIEW_STORAGE_KEY);
   return stored==='V0'||stored==='NAVEGADOR'?stored:'OPERATIVA';

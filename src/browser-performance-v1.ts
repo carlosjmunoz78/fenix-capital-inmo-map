@@ -90,6 +90,7 @@ const PASSTHROUGH_KEYS=new Set(['Shift','Control','Alt','Meta','CapsLock']);
 document.addEventListener('keydown',event=>{
   const target=event.target;
   if(!(target instanceof Element)||!target.closest('.cerebro-browser-viewport'))return;
+  if(target.closest('[data-browser-native-input]'))return;
   if(event.isComposing||PASSTHROUGH_KEYS.has(event.key))return;
 
   const printable=event.key.length===1&&!event.ctrlKey&&!event.metaKey&&!event.altKey;

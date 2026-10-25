@@ -72,13 +72,14 @@ function humanAction(commandType,payload){
     case'CLICK_POINT':return{type:'CLICK_POINT',x:Number(payload.x),y:Number(payload.y),button:payload.button||'left'};
     case'DOUBLE_CLICK_POINT':return{type:'DOUBLE_CLICK_POINT',x:Number(payload.x),y:Number(payload.y),button:payload.button||'left'};
     case'MOVE_POINT':return{type:'MOVE_POINT',x:Number(payload.x),y:Number(payload.y),steps:Math.max(1,Math.min(Number(payload.steps||1),20))};
-    case'KEYBOARD_TYPE':return{type:'KEYBOARD_TYPE',value:String(payload.value??'').slice(0,4000),delay_ms:Math.max(0,Math.min(Number(payload.delay_ms||0),80))};
+    case'KEYBOARD_TYPE':return{type:'KEYBOARD_TYPE',value:String(payload.value??'').slice(0,4000),delay_ms:0};
     case'KEYBOARD_PRESS':return{type:'KEYBOARD_PRESS',key:String(payload.key||'').slice(0,80)};
     case'SCROLL':return{type:'SCROLL',delta_x:Number(payload.delta_x||0),delta_y:Number(payload.delta_y||0)};
     case'SWITCH_TAB':return{type:'SWITCH_TAB',index:Number(payload.index)};
     case'BACK':return{type:'BACK'};
     case'FORWARD':return{type:'FORWARD'};
     case'RELOAD':return{type:'RELOAD'};
+    case'NAVIGATE':return{type:'NAVIGATE',url:String(payload.url||'').slice(0,4000)};
     case'OPEN_TAB':return{type:'OPEN_TAB',url:String(payload.url||'').slice(0,4000)};
     case'CLOSE_TAB':return{type:'CLOSE_TAB'};
     default:throw new Error('HUMAN_COMMAND_TYPE_DENIED');

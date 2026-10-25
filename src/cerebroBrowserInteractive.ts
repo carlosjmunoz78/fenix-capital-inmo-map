@@ -1,5 +1,5 @@
 import './cerebroBrowserWorkTotalDock';
-import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 
 export type BrowserSessionV3={
  session_id:string;job_id:string;company_id:string;department_id:string;environment:string;version:string;
@@ -62,7 +62,7 @@ export async function fetchBrowserInteractiveApi<T>(path:string,body:unknown={})
  const {data:{session}}=await supabase.auth.getSession();
  const token=session?.access_token;if(!token)return{status:401,data:null};
  try{
-  const response=await fetch(`${SUPABASE_URL}/functions/v1/${BROWSER_GATEWAY}${path}`,{
+  const response=await fetch(`${SUPABASE_URL}/functions/v1/${IS_PRODUCTION&&['/owner/takeover','/owner/handback','/owner/input','/owner/stop'].includes(path)?'cerebro-browser-work-total-owner-v1-prod/'+path.split('/').at(-1):BROWSER_GATEWAY+path}`,{
    method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${token}`,apikey:SUPABASE_PUBLISHABLE_KEY},body:JSON.stringify(body)
   });
   const data=await response.json().catch(()=>null) as T|null;
