@@ -1,0 +1,111 @@
+{
+  "schema_version": "2.0.0",
+  "state_type": "CEREBRO_UMS_BENCHMARK_EVIDENCE_V2",
+  "company_id": "fenix",
+  "engine_id": "CEREBRO_UMS",
+  "environment": "PREPROD",
+  "version": "v2",
+  "benchmark_id": "BM-03",
+  "benchmark_name": "Authorized voice clone voice-conversion TTS prosody and multilingual proof",
+  "status": "PASS_WITH_EVIDENCE",
+  "benchmark_credit": true,
+  "proof": {
+    "tribunal_status": "PASS_WITH_PHYSICAL_EVIDENCE",
+    "tribunal_checks_passed": 15,
+    "tribunal_checks_total": 15,
+    "licensed_real_human_source": true,
+    "source_admitted": true,
+    "capabilities_proven": [
+      "VOICE_CLONE",
+      "VOICE_CONVERSION",
+      "TTS",
+      "PROSODY",
+      "MULTILINGUAL"
+    ]
+  },
+  "source": {
+    "dataset": "RAVDESS",
+    "source_ref": "https://doi.org/10.5281/zenodo.1188976",
+    "dataset_license": "CC-BY-NC-SA-4.0",
+    "usage_boundary": "INTERNAL_NONCOMMERCIAL_BENCHMARK_ONLY",
+    "source_manifest_sha256": "af513947396d9e480c710d2d425ff9f3869b3d5a2cd81f88f8e81b1a57fc3762",
+    "source_admission_sha256": "5a7802333cdb227ea0eca13bb0d6343aeeee9723f564a13d2efe768878657a07",
+    "reference_audio_sha256": "42800f94c8b108d48abef86686cf643e0b87a7d6bc6d2a471c64226f594a9168"
+  },
+  "qwen": {
+    "engine": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+    "device": "cpu",
+    "code_license": "Apache-2.0",
+    "checkpoint_license": "Apache-2.0",
+    "manifest_sha256": "03f306873749fa62a33c145e45cfc10b43226c0e45eb02e4ce5bd9c4429ff3f8",
+    "outputs": [
+      {
+        "language": "Spanish",
+        "path": "qwen-real-clone-spanish.wav",
+        "sha256": "bd2346fd2f44c5d574039123fcdcc57076162ca90b5685175c7592bb71d123fa",
+        "bytes": 230444,
+        "sample_rate_hz": 24000,
+        "duration_seconds": 4.8,
+        "generation_seconds": 28.441
+      },
+      {
+        "language": "English",
+        "path": "qwen-real-clone-english.wav",
+        "sha256": "54e9806800386e69c9913fb3d678820f18c8708a3c5d6787124e895326033b66",
+        "bytes": 218924,
+        "sample_rate_hz": 24000,
+        "duration_seconds": 4.56,
+        "generation_seconds": 26.65
+      }
+    ],
+    "probe_elapsed_seconds": 68.432
+  },
+  "openvoice": {
+    "engine": "OpenVoice-V2",
+    "repository_commit": "74a1d147b17a8c3092dd5430504bd83ef6c7eb23",
+    "checkpoint_revision": "0ca21e94934d02c13c161296791a5a35972d019c",
+    "checkpoint_sha256": "9652c27e92b6b2a91632590ac9962ef7ae2b712e5c5b7f4c34ec55ee2b37ab9e",
+    "code_license": "MIT",
+    "checkpoint_license": "MIT",
+    "manifest_sha256": "95402a6ebc52bc851d0e94758aac8a1090720c0340353b7bba29e671abcec91a",
+    "outputs": [
+      {
+        "path": "openvoice-target-prosody-1.wav",
+        "sha256": "bc6f3f133805323a4d12f94df4734d861b8637b8f432b5149bf6f4f1ccc34341"
+      },
+      {
+        "path": "openvoice-target-prosody-2.wav",
+        "sha256": "9d38b15f2ce20cfb0e187e85499deb57f08012160c3d734a65752edabfb6f19a"
+      }
+    ],
+    "prosody_criterion_pass": true
+  },
+  "artifact_chain": {
+    "source_run_id": 40246569906,
+    "source_artifact_id": 12618429176,
+    "source_artifact_digest": "sha256:0e1fe3cbb683b83a32626617df5a7543e90fb268554dd124515294ffa8db285c",
+    "benchmark_run_id": 40246683478,
+    "qwen_artifact_id": 12618349394,
+    "qwen_artifact_digest": "sha256:f4406779af573185841cd80a7e82f40c2f20366cf2d850d4a375c88cd6fa355d",
+    "openvoice_artifact_id": 12618903108,
+    "openvoice_artifact_digest": "sha256:a8777e8f7f773f5c7296183e41e2ebed7ddd7bd5ed380fbe77cb1257eb821f51",
+    "tribunal_artifact_id": 12619032634,
+    "tribunal_artifact_name": "ums-bm03-authorized-voice-proof-40246683478",
+    "tribunal_artifact_digest": "sha256:4222cb3a4219eb2a30c0ae8872eecf91c44b1b2fc0e8cf25bab6f43ff43e1d24",
+    "tribunal_artifact_size_bytes": 2831,
+    "source_head_sha": "e52606c9f3add8189d4cc28766088ad2c8365c73"
+  },
+  "authority": {
+    "readiness_mutation_authorized": true,
+    "prod_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "additional_cost_eur": 0,
+    "universal_media_studio_ready_authorized": false
+  },
+  "notes": [
+    "The RAVDESS actor is used only as internal benchmark material under CC BY-NC-SA 4.0 and is not a published/commercial PROD asset.",
+    "Qwen and OpenVoice runtime licensing is verified independently from the benchmark source-media license.",
+    "This evidence grants BM-03 benchmark credit only; final UMS PROD authority remains with the global readiness tribunal."
+  ]
+}
