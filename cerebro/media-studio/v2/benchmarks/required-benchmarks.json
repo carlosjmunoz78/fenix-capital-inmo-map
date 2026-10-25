@@ -1,0 +1,21 @@
+{
+  "schema_version":"2.0.0",
+  "gate":"UNIVERSAL_MEDIA_STUDIO_READY",
+  "status":"NOT_READY",
+  "benchmarks":[
+    {"id":"BM-01","name":"Persistent synthetic character across image video and 3D references","required":true,"state":"NOT_RUN"},
+    {"id":"BM-02","name":"Authorized real-person media to digital-double proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-03","name":"Authorized voice clone voice-conversion TTS prosody and multilingual proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-04","name":"Original song end-to-end with stems mix master and provenance","required":true,"state":"NOT_RUN"},
+    {"id":"BM-05","name":"Scene with dialogue Foley SFX music mix and sync","required":true,"state":"NOT_RUN"},
+    {"id":"BM-06","name":"3D animated VFX shot","required":true,"state":"NOT_RUN"},
+    {"id":"BM-07","name":"Volumetric or spatial asset proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-08","name":"XR spatial output proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-09","name":"Holographic or declared-device adapter dry run","required":true,"state":"NOT_RUN"},
+    {"id":"BM-10","name":"Long-form multi-sequence character story image voice sound and color continuity","required":true,"state":"NOT_RUN"},
+    {"id":"BM-11","name":"Thousand-shot production simulation with resumable scheduling and cost telemetry","required":true,"state":"NOT_RUN"},
+    {"id":"BM-12","name":"Rebuild rollback provenance rights archive and multi-deliverable proof","required":true,"state":"NOT_RUN"}
+  ],
+  "allowed_states":["NOT_RUN","RUNNING","FAIL","PASS_WITH_EVIDENCE"],
+  "ready_rule":"Every required benchmark must be PASS_WITH_EVIDENCE and reference immutable evidence before READY may be true."
+}
