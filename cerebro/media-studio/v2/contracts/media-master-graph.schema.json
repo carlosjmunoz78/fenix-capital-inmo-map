@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://media-studio/v2/media-master-graph.schema.json",
+  "title": "CEREBRO Universal Media Studio Media Master Graph",
+  "type": "object",
+  "required": ["graph_id","company_id","studio_id","production_id","environment","version","universe","production","audit"],
+  "properties": {
+    "graph_id": {"type":"string","minLength":1},
+    "company_id": {"type":"string","minLength":1},
+    "studio_id": {"type":"string","minLength":1},
+    "production_id": {"type":"string","minLength":1},
+    "environment": {"enum":["LAB","PREPROD","PROD"]},
+    "version": {"type":"string","minLength":1},
+    "universe": {
+      "type":"object",
+      "required":["identities","characters","worlds","stories","music_themes","sound_identities","rights_provenance"],
+      "properties": {
+        "identities":{"type":"array","items":{"type":"string"}},
+        "characters":{"type":"array","items":{"type":"string"}},
+        "worlds":{"type":"array","items":{"type":"string"}},
+        "stories":{"type":"array","items":{"type":"string"}},
+        "music_themes":{"type":"array","items":{"type":"string"}},
+        "sound_identities":{"type":"array","items":{"type":"string"}},
+        "rights_provenance":{"type":"array","items":{"type":"string"}}
+      },
+      "additionalProperties": false
+    },
+    "production": {
+      "type":"object",
+      "required":["sequences","edit_timelines","mix_sessions","color_di","spatial_masters","media_masters","deliverables"],
+      "properties": {
+        "sequences": {"type":"array","items":{"$ref":"#/$defs/sequence"}},
+        "edit_timelines":{"type":"array","items":{"type":"string"}},
+        "mix_sessions":{"type":"array","items":{"type":"string"}},
+        "color_di":{"type":"array","items":{"type":"string"}},
+        "spatial_masters":{"type":"array","items":{"type":"string"}},
+        "media_masters":{"type":"array","items":{"type":"string"}},
+        "deliverables":{"type":"array","items":{"type":"string"}}
+      },
+      "additionalProperties": false
+    },
+    "audit": {
+      "type":"object",
+      "required":["created_at","created_by","provenance_root","rights_gate_state"],
+      "properties": {
+        "created_at":{"type":"string"},
+        "created_by":{"type":"string"},
+        "provenance_root":{"type":"string"},
+        "rights_gate_state":{"enum":["UNKNOWN","PASS","HUMAN_REQUIRED","DENY"]}
+      }
+    }
+  },
+  "$defs": {
+    "sequence": {
+      "type":"object",
+      "required":["sequence_id","scenes"],
+      "properties": {"sequence_id":{"type":"string"},"scenes":{"type":"array","items":{"$ref":"#/$defs/scene"}}}
+    },
+    "scene": {
+      "type":"object",
+      "required":["scene_id","shots"],
+      "properties": {"scene_id":{"type":"string"},"shots":{"type":"array","items":{"$ref":"#/$defs/shot"}}}
+    },
+    "shot": {
+      "type":"object",
+      "required":["shot_id","performances","camera","lighting","assets","audio","vfx","versions_reviews"],
+      "properties": {
+        "shot_id":{"type":"string"},
+        "performances":{"type":"array","items":{"type":"string"}},
+        "camera":{"type":"array","items":{"type":"string"}},
+        "lighting":{"type":"array","items":{"type":"string"}},
+        "assets":{"type":"array","items":{"type":"string"}},
+        "audio":{"type":"array","items":{"type":"string"}},
+        "vfx":{"type":"array","items":{"type":"string"}},
+        "versions_reviews":{"type":"array","items":{"type":"string"}}
+      }
+    }
+  },
+  "additionalProperties": false
+}
