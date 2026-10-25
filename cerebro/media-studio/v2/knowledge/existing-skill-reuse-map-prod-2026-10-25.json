@@ -1,12 +1,12 @@
 {
-  "schema_version":"1.0.0",
+  "schema_version":"1.1.0",
   "state_type":"CEREBRO_UMS_EXISTING_SKILL_REUSE_MAP_V1",
   "company_id":"GLOBAL",
   "engine_id":"UMS-001",
   "environment":"PROD",
-  "version":"1.0.0",
+  "version":"1.1.0",
   "observed_date":"2026-10-25",
-  "rule":"REUSE existing CEREBRO capability before creating a new runtime. A catalog/seam/hold entry is knowledge and routing context only, not proof of operational execution.",
+  "rule":"REUSE existing CEREBRO capability before creating a new runtime. A catalog/seam/hold/frontier entry is knowledge and routing context only, not proof of operational execution.",
   "skills":[
     {"skill_id":"CREATIVE-PROGRAMMATIC-RENDER-V1","source":"cerebro/runtime/creative-output-pipeline-v1.mjs","status":"REUSE_EXISTING_PROD_CORE","capabilities":["HTML_CHROMIUM_RENDER","FFMPEG_COMPOSITION","STATIC_IMAGE","CAROUSEL","REEL","SHORT_VIDEO","LANDSCAPE_VIDEO","LONG_VIDEO","ARTIFACT_HASHING"],"departments":["D17","D19","D23","D24","D40","D45"],"notes":"Existing CEREBRO core has PROD certification for deterministic programmatic render. UMS must wrap rather than duplicate."},
     {"skill_id":"FFMPEG","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"REUSE_IF_PRESENT","capabilities":["MEDIA_COMPOSITION","TRANSCODE","MUX_DEMUX","AUDIO_VIDEO_FILTERING"],"departments":["D23","D24","D33","D34","D37","D40","D43","D45"],"notes":"Open-source composition lane already exists in CEREBRO. Do not create another FFmpeg engine."},
@@ -26,11 +26,15 @@
     {"skill_id":"IMAGE_ANALYSIS","source":"cerebro/registry/skill-dynamic-adoption-v1.json","status":"BENCHMARK_REQUIRED","capabilities":["IMAGE_ANALYSIS"],"departments":["D05","D17","D20","D48"],"notes":"Governed learning candidate already detected by UMS; keep benchmark-required until quality/cost/privacy OLD-vs-NEW passes."}
   ],
   "known_missing_or_unbound":[
-    {"gap_id":"GAP-3D-DCC-RUNTIME","departments":["D26","D27","D28","D31","D42","D45"],"status":"MISSING_PHYSICAL_BINDING","preferred_search_order":["existing CEREBRO runtime","open-source local","already contracted tool","free tier","self-hosted"],"notes":"No prior Blender runtime reference was found in clean repository inventory. Do not add blindly; benchmark Blender or equivalent."},
+    {"gap_id":"GAP-3D-DCC-RUNTIME","departments":["D26","D27","D28","D31","D42","D45"],"status":"MISSING_PHYSICAL_BINDING_WITH_STRONG_CANDIDATES","preferred_search_order":["existing CEREBRO runtime","open-source local","already contracted tool","free tier","self-hosted"],"preferred_candidates":["BLENDER-5.2-LTS","BLENDER-5.3-BETA future watch"],"notes":"No prior Blender runtime reference was found in clean repository inventory. Blender 5.2 LTS is current priority benchmark; 5.3 remains future-watch until stable."},
+    {"gap_id":"GAP-3D-RECONSTRUCTION","departments":["D10","D15","D16","D26","D27","D31","D42"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["SAM-3D-OBJECTS","SAM-3D-BODY","GSPLAT-1.6","NERFSTUDIO","COLMAP"],"notes":"Benchmark single-image reconstruction, multiview reconstruction, human mesh recovery and Gaussian/NeRF scene reconstruction separately."},
+    {"gap_id":"GAP-GENERATIVE-3D-ASSETS","departments":["D18","D26","D31","D42"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["HUNYUAN3D-2.1","TRELLIS","SAM-3D-OBJECTS"],"notes":"Evaluate geometry, topology, PBR material quality, editability, cleanup required and Blender/USD interoperability."},
     {"gap_id":"GAP-VOICE-CLONE-PHYSICAL","departments":["D11"],"status":"SEAM_EXISTS_PHYSICAL_BENCHMARK_PENDING","preferred_candidates":["QWEN3_TTS","AMPHION_VEVO2","other zero-cost local candidates"],"notes":"Technical capability must remain separate from consent/rights proof."},
+    {"gap_id":"GAP-LIPSYNC-DUBBING-PHYSICAL","departments":["D10","D11","D12","D30","D33","D39"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["MUSETALK-1.5","HUNYUANVIDEO-AVATAR-CUSTOM","existing CEREBRO render/audio pipeline"],"notes":"Evaluate lip-sync accuracy, identity stability, language coverage, real-time factor, face artifacts and rights/provenance."},
+    {"gap_id":"GAP-GENERATIVE-VIDEO-CURRENT","departments":["D17","D21","D22","D24","D31"],"status":"MULTI_CANDIDATE_OLD_VS_NEW_REQUIRED","preferred_candidates":["LTX-2","WAN-2.2","HUNYUANVIDEO-1.5","existing LTX_VIDEO seam"],"notes":"Do not pick a fashionable model by name; benchmark identity consistency, motion, prompt adherence, audio sync, latency, VRAM, throughput, license and reproducibility."},
     {"gap_id":"GAP-SINGING-SYNTHESIS-PHYSICAL","departments":["D36"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["OpenUtau","DiffSinger","Amphion Vevo2"],"notes":"Compare quality, multilingual phonemization, melody control, voice rights, training-data/license posture and local compute."},
-    {"gap_id":"GAP-PHOTOGRAMMETRY-NEURAL-RECON","departments":["D15","D16"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["COLMAP","Apple Object Capture where platform-appropriate","NeRF/Gaussian Splatting candidates"],"notes":"Need physical reconstruction benchmark before binding."},
-    {"gap_id":"GAP-MOCAP-PHYSICAL","departments":["D12","D30"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["MetaHuman Animator","existing camera/browser capture","open-source markerless alternatives"],"notes":"Benchmark body, face, hands, cleanup and retargeting separately."}
+    {"gap_id":"GAP-PHOTOGRAMMETRY-NEURAL-RECON","departments":["D15","D16"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["COLMAP","Apple Object Capture where platform-appropriate","NERFSTUDIO","GSPLAT-1.6","SAM-3D-OBJECTS"],"notes":"Need physical reconstruction benchmark before binding."},
+    {"gap_id":"GAP-MOCAP-PHYSICAL","departments":["D12","D30"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["MetaHuman Animator","SAM-3D-BODY","existing camera/browser capture","open-source markerless alternatives"],"notes":"Benchmark body, face, hands, cleanup and retargeting separately."}
   ],
   "additional_cost_eur":0
 }
