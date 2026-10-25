@@ -2,23 +2,29 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { loadReadinessBenchmarks,evaluateUniversalMediaStudioReadiness,assertUniversalMediaStudioReady } from '../runtime/readiness-gate.mjs';
 
-test('UMS readiness remains fail-closed with BM-01 and BM-04 proven and 10 benchmarks incomplete',()=>{
+test('UMS readiness reflects persisted evidence and remains fail-closed until every required benchmark passes',()=>{
   const doc=loadReadinessBenchmarks();
+  const required=doc.benchmarks.filter((b)=>b.required!==false);
+  const persisted=required.filter((b)=>b.state==='PASS_WITH_EVIDENCE'&&typeof b.evidence_ref==='string'&&b.evidence_ref.length>0);
+  const incomplete=required.filter((b)=>b.state!=='PASS_WITH_EVIDENCE'||!b.evidence_ref);
   const result=evaluateUniversalMediaStudioReadiness(doc);
   assert.equal(result.total_required,12);
-  assert.equal(result.ready,false);
-  assert.equal(result.passed_with_evidence,2);
-  assert.equal(result.incomplete.length,10);
-  assert.equal(result.incomplete.includes('BM-01'),false);
-  assert.equal(result.incomplete.includes('BM-04'),false);
-  assert.equal(result.incomplete.includes('BM-02'),true);
-  const bm01=doc.benchmarks.find((b)=>b.id==='BM-01');
-  const bm04=doc.benchmarks.find((b)=>b.id==='BM-04');
-  assert.equal(bm01.state,'PASS_WITH_EVIDENCE');
-  assert.equal(bm04.state,'PASS_WITH_EVIDENCE');
-  assert.match(bm01.evidence_ref,/^git:[0-9a-f]{40}:cerebro\/media-studio\/v2\/evidence\/bm01-pass-with-evidence-2026-10-25\.json$/);
-  assert.match(bm04.evidence_ref,/^git:[0-9a-f]{40}:cerebro\/media-studio\/v2\/evidence\/bm04-pass-with-evidence-2026-10-25\.json$/);
-  assert.throws(()=>assertUniversalMediaStudioReady(doc),/UNIVERSAL_MEDIA_STUDIO_NOT_READY/);
+  assert.equal(result.passed_with_evidence,persisted.length);
+  assert.equal(result.incomplete.length,incomplete.length);
+  assert.deepEqual(new Set(result.incomplete),new Set(incomplete.map((b)=>b.id)));
+  assert.equal(result.ready,persisted.length===required.length);
+  for(const b of persisted){
+    assert.match(b.evidence_ref,/^git:[0-9a-f]{40}:cerebro\/media-studio\/v2\/evidence\/bm\d{2}-pass-with-evidence-\d{4}-\d{2}-\d{2}\.json$/);
+  }
+  for(const id of ['BM-01','BM-04','BM-05']){
+    const b=doc.benchmarks.find((x)=>x.id===id);
+    assert.equal(b.state,'PASS_WITH_EVIDENCE',`${id} must remain physically proven`);
+    assert.ok(b.evidence_ref,`${id} must keep immutable evidence_ref`);
+    assert.equal(result.incomplete.includes(id),false);
+  }
+  // Real-person / real-voice benchmarks stay fail-closed until separately authorized evidence exists.
+  for(const id of ['BM-02','BM-03']) assert.equal(result.incomplete.includes(id),true);
+  if(!result.ready) assert.throws(()=>assertUniversalMediaStudioReady(doc),/UNIVERSAL_MEDIA_STUDIO_NOT_READY/);
 });
 
 test('synthetic all-green fixture becomes ready only with evidence refs',()=>{
