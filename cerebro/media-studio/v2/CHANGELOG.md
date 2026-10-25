@@ -1,5 +1,44 @@
 # CEREBRO Universal Media Studio V2 · Changelog
 
+## 2026-10-25 · Character Clone Engine V0 · persistent character governance
+
+Environment: `PREPROD -> main control-plane candidate`
+Pull request: `#934`
+Readiness before/after: `UNIVERSAL_MEDIA_STUDIO_READY = NOT_READY`
+Physical benchmark credit: `0` new PASS_WITH_EVIDENCE
+Additional recurring cost introduced: `0 €`
+
+### HECHO
+- Added canonical persistent-character contract covering face, body, voice, motion, performance, expressions, wardrobe and behavior under `company_id`, `engine_id`, `environment` and `version`.
+- Reused the existing UMS clone contract and `rights-gate.mjs`; no parallel rights system was created.
+- Added identity classes `SYNTHETIC_ORIGINAL`, `FICTIONAL_LICENSED` and `REAL_AUTHORIZED` with fail-closed governance for real identities.
+- Real-person digital doubles require valid rights/consent, provenance and revocation evidence and return `HUMAN_REQUIRED: LEGAL_REQUIRED` when those records are incomplete.
+- Added `character-clone-orchestrator.mjs` to assemble only the departments/guardians required by the requested clone components.
+- Added explicit continuity targets for identity similarity, temporal identity drift, body-proportion drift, voice similarity, lip-sync offset, wardrobe continuity and mannerism continuity.
+- Added a dedicated physical acceptance gate with multi-angle identity, long-sequence consistency, rights recheck, provenance, license/security, measured cost, rollback/rebuild and tribunal requirements.
+- Physical adapter binding remains disabled until PREPROD adapter evidence + benchmark evidence + provenance + rollback are GREEN.
+- Added six block-specific tests covering synthetic originals, real-person rights failure, authorized-real planning, physical binding evidence, voice-only routing and mandatory provenance.
+- The first CI attempt exposed an unrelated prior daily-learning deduplication regression; corrected the central scout to deduplicate the common 12-section curriculum while retaining exact consumer role/department routing.
+- UMS V2 foundation gate then passed GREEN with all 91 tests, including the six new character-clone tests and the no-false-PROD/no-paid-dependency controls.
+
+### EXISTENTE Y PRESERVADO
+- Existing `clone-job.schema.json` and `rights-gate.mjs`: wrapped and preserved.
+- Existing creative/multimedia runtime and role graph: unchanged.
+- App Fénix, CRM, Supabase transactional core, SEO, WordPress, Training and Trading isolation: unchanged.
+
+### PARCIAL / NO CONFUNDIR CON CAPACIDAD FÍSICA COMPLETA
+- Character/digital-human control plane is implemented and tested.
+- No new face, body, voice, motion, 3D or video model is silently installed or declared operational by this block.
+- No real-person identity is cloned by this block.
+- Physical quality remains subject to adapter selection and real PREPROD benchmarks; UMS global readiness remains `NOT_READY`.
+
+### Rollback / rebuild
+- Change is additive under `cerebro/media-studio/v2/**`.
+- PR `#934` is the block-level rollback boundary before main integration.
+- Rebuild source of truth: persistent-character schema + existing rights gate + character orchestrator + physical benchmark contract + tests.
+
+---
+
 ## 2026-10-25 · PROD knowledge expansion for 192 specialists
 
 Environment: `PROD_KNOWLEDGE / NO_EXECUTION_AUTHORITY`
