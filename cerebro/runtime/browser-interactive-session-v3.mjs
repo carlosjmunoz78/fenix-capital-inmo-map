@@ -90,13 +90,16 @@ function humanAction(commandType,payload){
 function normalizePrivateTabs(raw){return Array.isArray(raw)?raw.slice(0,8).map((tab,index)=>({index:Number.isInteger(tab?.index)?tab.index:index,url:privateUrl(tab?.url),title:String(tab?.title||'').slice(0,240),active:tab?.active===true})).filter(tab=>Boolean(tab.url)):[];}
 function actionsFromWorkspaceSnapshot(snapshot){const tabs=normalizePrivateTabs(snapshot?.tabs);if(!tabs.length)return null;const actions=[{type:'NAVIGATE',url:tabs[0].url}];for(const tab of tabs.slice(1))actions.push({type:'OPEN_TAB',url:tab.url});const active=Math.max(0,Math.min(Number(snapshot?.active_tab_index||0),tabs.length-1));if(active>0)actions.push({type:'SWITCH_TAB',index:active});return actions;}
 function firstEmail(text){const match=String(text||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);return match?match[0].toLowerCase():null;}
+function identityState(value){return String(value?.status||value?.verification_state||value||'UNVERIFIED');}
+function requireVerifiedIdentity(value){const state=identityState(value);if(state!=='VERIFIED')throw new Error(`WORKSPACE_IDENTITY_NOT_VERIFIED:${state}`);return state;}
 
 async function restoreWorkspace(job,tokenProvider,fetch_impl){
   if(!workspaceEnabled(job))return null;
   const restored=await callWorkspace('worker/restore',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
   const bundle=restored?.bundle;
   if(!bundle)return{restored:false,reason:restored?.reason||'NO_ACTIVE_BUNDLE',profile:restored?.profile||null};
-  if(['MISMATCH','REAUTH_REQUIRED'].includes(String(bundle.verification_state||'')))return{restored:false,reason:String(bundle.verification_state),bundle,profile:restored?.profile||null};
+  const verificationState=String(bundle.verification_state||'UNVERIFIED');
+  if(verificationState!=='VERIFIED')return{restored:false,reason:`IDENTITY_NOT_VERIFIED:${verificationState}`,bundle,profile:restored?.profile||null};
   const key=b64ToBuffer(bundle.key_b64);if(key.length!==32)throw new Error('WORKSPACE_BUNDLE_KEY_INVALID');
   const decrypted=decryptWorkspaceSnapshot(bundle.bundle_ciphertext,bundle.bundle_iv,key,bundle.bundle_sha256);
   await restoreProfileStorageState({browser_profile_id:job.browser_profile_id,storage_state:decrypted.snapshot.storage_state,channel:browserChannel()});
@@ -104,15 +107,17 @@ async function restoreWorkspace(job,tokenProvider,fetch_impl){
   return{restored:true,snapshot:decrypted.snapshot,bundle,profile:restored?.profile||null};
 }
 
-async function saveWorkspace(job,tokenProvider,fetch_impl,privateTabs,activeTabIndex){
+async function saveWorkspace(job,tokenProvider,fetch_impl,privateTabs,activeTabIndex,identityVerification){
   if(!workspaceEnabled(job))return null;
+  requireVerifiedIdentity(identityVerification);
   const prep=await callWorkspace('worker/prepare-save',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
   const key=b64ToBuffer(prep.key_b64);if(key.length!==32)throw new Error('WORKSPACE_BUNDLE_KEY_INVALID');
   const exported=await exportProfileStorageState({browser_profile_id:job.browser_profile_id,channel:browserChannel()});
   const snapshot={storage_state:exported.storage_state,tabs:normalizePrivateTabs(privateTabs),active_tab_index:Number.isInteger(activeTabIndex)?activeTabIndex:0};
   const encrypted=encryptWorkspaceSnapshot(snapshot,key);
   const committed=await callWorkspace('worker/commit-save',tokenProvider,{session_id:String(job.job_id),bundle_id:prep.bundle_id,bundle_ciphertext:encrypted.ciphertext,bundle_iv:encrypted.iv,bundle_sha256:encrypted.sha256,tabs:snapshot.tabs,active_tab_index:snapshot.active_tab_index,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,expires_at:prep.expires_at},fetch_impl);
-  return{hibernated:true,bundle_id:committed?.bundle?.bundle_id||prep.bundle_id,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,tab_count:encrypted.tab_count,verification_state:committed?.bundle?.verification_state||'UNVERIFIED'};
+  if(String(committed?.bundle?.verification_state||'UNVERIFIED')!=='VERIFIED')throw new Error('WORKSPACE_COMMIT_NOT_VERIFIED');
+  return{hibernated:true,bundle_id:committed.bundle.bundle_id||prep.bundle_id,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,tab_count:encrypted.tab_count,verification_state:'VERIFIED'};
 }
 
 async function verifyWorkspaceIdentity(worker,base,job,restoreUrl,endpoint,tokenProvider,fetch_impl){
@@ -206,7 +211,8 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
     }
     if(opened&&!stopRequested)await publishFrame(key);
     await worker.stop(stopRequested?'INTERACTIVE_SESSION_STOPPED':hibernateRequested?'INTERACTIVE_SESSION_HIBERNATE_REQUESTED':'INTERACTIVE_SESSION_AUTO_HIBERNATE');
-    const workspace=stopRequested?null:await saveWorkspace(job,tokenProvider,fetch_impl,lastPrivateTabs,lastActiveTabIndex);
+    if(workspaceEnabled(job))requireVerifiedIdentity(identityVerification);
+    const workspace=stopRequested?null:await saveWorkspace(job,tokenProvider,fetch_impl,lastPrivateTabs,lastActiveTabIndex,identityVerification);
     if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:workspace?.hibernated===true?'HIBERNATED':'CLOSED'},fetch_impl);closed=true;}
     return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:workspace?.hibernated===true,workspace_bundle_id:workspace?.bundle_id||null,workspace_verification_state:workspace?.verification_state||identityVerification?.status||null,workspace_hibernate_reason:stopRequested?'STOPPED':hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
   }catch(error){
@@ -216,4 +222,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.1',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_CONFIRMATION_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.2',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
