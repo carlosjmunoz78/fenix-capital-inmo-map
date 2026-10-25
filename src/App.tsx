@@ -34,6 +34,24 @@ const testLoginAliases: Record<string,string> = {
   visb: 'vis-b@test.fenixcapital.es'
 };
 
+const BROWSER_SESSION_COOKIE='fenix-session-active';
+const BROWSER_SESSION_MIGRATION_KEY='fenix-browser-session-cookie-v1';
+
+function hasBrowserSessionMarker(){
+  if(sessionStorage.getItem('fenix-session-active')==='1')return true;
+  return document.cookie.split(';').some(part=>part.trim()===BROWSER_SESSION_COOKIE+'=1');
+}
+
+function setBrowserSessionMarker(active:boolean){
+  if(active){
+    sessionStorage.setItem('fenix-session-active','1');
+    document.cookie=BROWSER_SESSION_COOKIE+'=1; Path=/; SameSite=Lax; Secure';
+    return;
+  }
+  sessionStorage.removeItem('fenix-session-active');
+  document.cookie=BROWSER_SESSION_COOKIE+'=; Path=/; Max-Age=0; SameSite=Lax; Secure';
+}
+
 function resolveLogin(value:string){
   const trimmed=value.trim().toLowerCase();
   if(trimmed.includes('@')) return trimmed;
@@ -102,14 +120,24 @@ export default function App(){
     let mounted=true;
     supabase.auth.getSession().then(async ({data})=>{
       const remembered=localStorage.getItem('fenix-remember-device')==='true';
-      const activeThisBrowser=sessionStorage.getItem('fenix-session-active')==='1';
+      const activeThisBrowser=hasBrowserSessionMarker();
       const recoveryUrl=window.location.hash.includes('type=recovery')||window.location.search.includes('type=recovery');
       if(data.session && recoveryUrl){
         if(mounted){setSession(data.session);setPasswordRecovery(true);setRecoveryLinkVerified(true);setAuthReady(true);}
         return;
       }
       if(data.session && !remembered && !activeThisBrowser){
-        await supabase.auth.signOut();
+        const migrationDone=localStorage.getItem(BROWSER_SESSION_MIGRATION_KEY)==='1';
+        if(!migrationDone){
+          const {data:{user},error}=await supabase.auth.getUser();
+          if(user && !error){
+            setBrowserSessionMarker(true);
+            localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');
+            if(mounted){setSession(data.session);setAuthReady(true);}
+            return;
+          }
+        }
+        await supabase.auth.signOut({scope:'local'});
         if(mounted){setSession(null);setAuthReady(true);}
         return;
       }
@@ -117,6 +145,7 @@ export default function App(){
     });
     const {data:{subscription}}=supabase.auth.onAuthStateChange((event,next)=>{
       setSession(next);
+      if(event==='SIGNED_OUT')setBrowserSessionMarker(false);
       if(event==='PASSWORD_RECOVERY'){
         setPasswordRecovery(true);
         setRecoveryLinkVerified(Boolean(next));
@@ -187,8 +216,8 @@ export default function App(){
       return;
     }
     localStorage.setItem('fenix-remember-device',rememberDevice?'true':'false');
-    if(rememberDevice) sessionStorage.removeItem('fenix-session-active');
-    else sessionStorage.setItem('fenix-session-active','1');
+    localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');
+    setBrowserSessionMarker(!rememberDevice);
     setLoadingLogin(false);
   }
 
@@ -240,14 +269,18 @@ export default function App(){
     const {error}=await supabase.auth.updateUser({password:newPassword});
     setLoadingLogin(false);
     if(error){setAuthError('La recuperación se validó, pero no se pudo guardar la nueva contraseña.');return;}
-    sessionStorage.setItem('fenix-session-active','1');
+    localStorage.setItem(BROWSER_SESSION_MIGRATION_KEY,'1');
+    setBrowserSessionMarker(true);
     setRecoveryCode('');setNewPassword('');setConfirmPassword('');setPasswordRecovery(false);setRecoveryLinkVerified(false);setResetMessage('');
     setShowNewPassword(false);setShowConfirmPassword(false);
     navigate('/inicio',{replace:true});
   }
 
   async function leavePasswordRecovery(){
-    if(recoveryLinkVerified) await supabase.auth.signOut();
+    if(recoveryLinkVerified){
+      setBrowserSessionMarker(false);
+      await supabase.auth.signOut({scope:'local'});
+    }
     setPasswordRecovery(false);setRecoveryLinkVerified(false);setRecoveryCode('');setNewPassword('');setConfirmPassword('');setAuthError('');setResetMessage('');setShowNewPassword(false);setShowConfirmPassword(false);
   }
 
@@ -255,9 +288,9 @@ export default function App(){
     const uid=session?.user?.id;
     suppressCalcPersistence.current = true;
     if(uid)sessionStorage.removeItem(`fenix-calc:${uid}`);
-    sessionStorage.removeItem('fenix-session-active');
+    setBrowserSessionMarker(false);
     setCtx(null);setNav(null);setWorkspaceReady(false);setPassword('');setShowPassword(false);
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({scope:'local'});
     setCalc(defaultCalc);
     navigate('/',{replace:true});
   }
