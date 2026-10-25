@@ -1,0 +1,100 @@
+name: CEREBRO UMS Qwen3-TTS Routed E2E
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-qwen3-tts-routed-e2e.yml'
+      - 'cerebro/media-studio/v2/runtime/qwen3-tts-physical-adapter.mjs'
+      - 'cerebro/media-studio/v2/probes/qwen3_tts_cpu_probe.py'
+      - 'cerebro/media-studio/v2/probes/qwen3_tts_ums_e2e.mjs'
+      - 'cerebro/media-studio/v2/tests/qwen3-tts-physical-adapter.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-qwen3-tts-routed-e2e
+  cancel-in-progress: false
+
+jobs:
+  contract_tests:
+    name: Qwen adapter contract tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run focused unit/contract tests
+        run: node --test cerebro/media-studio/v2/tests/qwen3-tts-physical-adapter.test.mjs
+
+  routed_physical_e2e:
+    name: Qwen through UMS + creative pipeline
+    needs: contract_tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      UMS_E2E_DIR: .ums-qwen3-tts-e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Runtime baseline
+        run: |
+          set -euo pipefail
+          node --version
+          python --version
+          free -h
+          df -h .
+          command -v nvidia-smi >/dev/null 2>&1 && nvidia-smi || echo 'nvidia-smi: absent; CPU route expected'
+      - name: Install zero-cost CPU runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends sox libsox-fmt-all ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 psutil
+          python -m pip check
+      - name: Execute routed UMS E2E
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s node cerebro/media-studio/v2/probes/qwen3_tts_ums_e2e.mjs | tee ums-qwen3-tts-routed-e2e.stdout.log
+      - name: Semantic E2E gate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.ums-qwen3-tts-e2e/ums-qwen3-tts-routed-e2e.json')
+          data=json.loads(p.read_text())
+          assert data['status']=='QWEN3_TTS_UMS_ROUTED_E2E_GREEN'
+          assert data['creative_pipeline']['qwen_stage']['adapter']=='QWEN3_TTS'
+          assert data['physical_binding']['status']=='QWEN3_TTS_PREPROD_PHYSICAL_GREEN'
+          assert data['physical_binding']['artifact']['duration_seconds']>0
+          assert len(data['physical_binding']['artifact']['sha256'])==64
+          assert data['gates']['additional_cost_eur']==0
+          assert data['gates']['prod_authorized'] is False
+          assert data['gates']['real_person_voice'] is False
+          print(json.dumps(data,indent=2))
+          PY
+      - name: Upload routed evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-qwen3-tts-routed-e2e-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            .ums-qwen3-tts-e2e/
+            ums-qwen3-tts-routed-e2e.stdout.log
