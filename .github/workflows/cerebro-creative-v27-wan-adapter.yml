@@ -1,0 +1,44 @@
+name: CEREBRO Creative Studio V2.7 Wan Adapter
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v27-generative-preprod-2026-10-25'
+    paths:
+      - 'cerebro/runtime/creative-wan-animate2-adapter-v27.mjs'
+      - 'cerebro/tests/creative-wan-animate2-adapter-v27-smoke.mjs'
+      - '.github/workflows/cerebro-creative-v27-wan-adapter.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  wan-adapter-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify pinned upstream source
+        run: |
+          test "$(curl -fsSL https://api.github.com/repos/Wan-Video/Wan-Animate-2/commits/main | node -e "let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>process.stdout.write(JSON.parse(d).sha))")" = "3ad2fef7d61d6200c9c653e0fe47be7616b323f3"
+      - name: Verify official CLI surface at pinned commit
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/Wan-Video/Wan-Animate-2/3ad2fef7d61d6200c9c653e0fe47be7616b323f3/infer/wan_animate_2_demo.py > /tmp/wan_animate_2_demo.py
+          grep -q -- '--refer-img-file' /tmp/wan_animate_2_demo.py
+          grep -q -- '--refer-video-file' /tmp/wan_animate_2_demo.py
+          grep -q -- '--sample_guide_scale' /tmp/wan_animate_2_demo.py
+          grep -q -- '--step' /tmp/wan_animate_2_demo.py
+          grep -q -- '--output-dir' /tmp/wan_animate_2_demo.py
+      - name: Dry-run CEREBRO Wan adapter
+        env:
+          CEREBRO_WAN_SMOKE_REPORT: .cerebro-v27/wan/adapter-report.json
+        run: node cerebro/tests/creative-wan-animate2-adapter-v27-smoke.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-v27-wan-adapter-${{ github.sha }}
+          path: .cerebro-v27/wan/adapter-report.json
+          retention-days: 7
