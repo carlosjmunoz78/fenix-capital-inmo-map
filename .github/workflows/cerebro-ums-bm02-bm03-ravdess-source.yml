@@ -1,0 +1,152 @@
+name: CEREBRO UMS BM02 BM03 Licensed Human Source
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm02-bm03-ravdess-source.yml'
+      - 'cerebro/media-studio/v2/probes/bm02_bm03_ravdess_source_prepare.py'
+      - 'cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py'
+      - 'cerebro/media-studio/v2/policy/owner-authorization-policy-v1.md'
+
+permissions:
+  contents: read
+
+jobs:
+  seal_ravdess_source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      ZENODO_RECORD_ID: '1188976'
+      RAVDESS_ARCHIVE_KEY: 'Video_Speech_Actor_01.zip'
+      RAVDESS_CLIP_NAME: '01-01-01-01-01-01-01.mp4'
+      SOURCE_OUT: 'ums-ravdess-authorized-source'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install media tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg unzip curl
+          mkdir -p "$SOURCE_OUT" ravdess-extract
+
+      - name: Resolve official Zenodo archive metadata
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 5 --retry-delay 3 \
+            -o zenodo-record.json "https://zenodo.org/api/records/$ZENODO_RECORD_ID"
+          python - <<'PY'
+          import json,os
+          r=json.load(open('zenodo-record.json'))
+          key=os.environ['RAVDESS_ARCHIVE_KEY']
+          matches=[f for f in r.get('files',[]) if f.get('key')==key]
+          if len(matches)!=1: raise SystemExit(f'ARCHIVE_NOT_UNIQUE:{key}:{len(matches)}')
+          f=matches[0]
+          link=(f.get('links') or {}).get('self') or (f.get('links') or {}).get('download')
+          if not link: raise SystemExit('ARCHIVE_DOWNLOAD_LINK_MISSING')
+          meta={'key':key,'size':f.get('size'),'checksum':f.get('checksum'),'download_url':link,'record_id':str(r.get('id')),'doi':r.get('doi'),'license':((r.get('metadata') or {}).get('license') or {}).get('id') if isinstance((r.get('metadata') or {}).get('license'),dict) else (r.get('metadata') or {}).get('license')}
+          json.dump(meta,open('archive-metadata.json','w'),indent=2)
+          with open(os.environ['GITHUB_OUTPUT'],'a') as gh:
+              gh.write(f"url={link}\n")
+          print(json.dumps(meta,indent=2))
+          PY
+          python - <<'PY'
+          import json
+          r=json.load(open('zenodo-record.json'))
+          lic=(r.get('metadata') or {}).get('license')
+          licid=lic.get('id') if isinstance(lic,dict) else lic
+          assert str(r.get('id'))=='1188976'
+          assert str(licid).lower() in {'cc-by-nc-sa-4.0','cc-by-nc-sa-4.0-international'} or 'nc-sa' in str(licid).lower()
+          PY
+
+      - name: Download and verify official RAVDESS Actor 01 archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 5 --retry-delay 5 --continue-at - \
+            -o ravdess-actor01.zip '${{ steps.source.outputs.url }}'
+          test -s ravdess-actor01.zip
+          python - <<'PY'
+          import hashlib,json,re
+          meta=json.load(open('archive-metadata.json'))
+          data=open('ravdess-actor01.zip','rb').read()
+          assert len(data)==int(meta['size']), (len(data),meta['size'])
+          algo,expected=str(meta['checksum']).split(':',1)
+          h=hashlib.new(algo); h.update(data)
+          assert h.hexdigest().lower()==expected.lower(), (h.hexdigest(),expected)
+          print('ARCHIVE_CHECKSUM_OK',algo,expected)
+          PY
+
+      - name: Extract one canonical full-AV human sample
+        id: media
+        shell: bash
+        run: |
+          set -euo pipefail
+          unzip -q ravdess-actor01.zip -d ravdess-extract
+          CLIP="$(find ravdess-extract -type f -name "$RAVDESS_CLIP_NAME" -print -quit)"
+          test -n "$CLIP" && test -s "$CLIP"
+          cp "$CLIP" "$SOURCE_OUT/$RAVDESS_CLIP_NAME"
+          ffmpeg -hide_banner -loglevel error -y -i "$CLIP" -vn -ac 1 -ar 24000 "$SOURCE_OUT/ravdess-actor01-neutral.wav"
+          ffmpeg -hide_banner -loglevel error -y -ss 0.50 -i "$CLIP" -frames:v 1 "$SOURCE_OUT/ravdess-actor01-frame.png"
+          test -s "$SOURCE_OUT/ravdess-actor01-neutral.wav"
+          test -s "$SOURCE_OUT/ravdess-actor01-frame.png"
+          ffprobe -v error -show_entries stream=codec_type,width,height,sample_rate -show_entries format=duration -of json "$SOURCE_OUT/$RAVDESS_CLIP_NAME" > "$SOURCE_OUT/ffprobe.json"
+          echo "clip=$SOURCE_OUT/$RAVDESS_CLIP_NAME" >> "$GITHUB_OUTPUT"
+          echo "audio=$SOURCE_OUT/ravdess-actor01-neutral.wav" >> "$GITHUB_OUTPUT"
+          echo "frame=$SOURCE_OUT/ravdess-actor01-frame.png" >> "$GITHUB_OUTPUT"
+
+      - name: Seal rights provenance and owner authorization
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm02_bm03_ravdess_source_prepare.py \
+            --clip '${{ steps.media.outputs.clip }}' \
+            --audio '${{ steps.media.outputs.audio }}' \
+            --frame '${{ steps.media.outputs.frame }}' \
+            --record-metadata zenodo-record.json \
+            --archive-metadata archive-metadata.json \
+            --out "$SOURCE_OUT" | tee "$SOURCE_OUT/source-prepare.stdout.log"
+          test -s "$SOURCE_OUT/identity-rights.json"
+          test -s "$SOURCE_OUT/source-manifest.json"
+
+      - name: Exercise BM02 and BM03 real-person admission gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+            --benchmark BM-02 --rights "$SOURCE_OUT/identity-rights.json" \
+            --media "$SOURCE_OUT/$RAVDESS_CLIP_NAME" --media "$SOURCE_OUT/ravdess-actor01-frame.png" \
+            --environment PREPROD --out "$SOURCE_OUT/bm02-source-admission.json"
+          python cerebro/media-studio/v2/probes/bm02_bm03_authorized_source_gate.py \
+            --benchmark BM-03 --rights "$SOURCE_OUT/identity-rights.json" \
+            --media "$SOURCE_OUT/ravdess-actor01-neutral.wav" \
+            --environment PREPROD --out "$SOURCE_OUT/bm03-source-admission.json"
+          python - <<'PY'
+          import json
+          for b in ('bm02','bm03'):
+              x=json.load(open(f'ums-ravdess-authorized-source/{b}-source-admission.json'))
+              assert x['admitted'] is True
+              assert x['human_required'] is False
+              assert x['benchmark_credit'] is False
+              assert x['publish_authorized'] is False
+              assert x['commercial_use_authorized'] is False
+          PY
+
+      - name: Upload sealed licensed source artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-ravdess-authorized-source-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-ravdess-authorized-source/
+            archive-metadata.json
