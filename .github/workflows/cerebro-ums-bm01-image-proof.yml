@@ -1,0 +1,102 @@
+name: CEREBRO UMS BM01 Image Identity Proof
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm01-image-proof.yml'
+      - 'cerebro/media-studio/v2/probes/bm01_image_identity_proof_gate.py'
+      - 'cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm01-image-proof
+  cancel-in-progress: true
+
+jobs:
+  image_identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      IP_PARENT_RUN_ID: '40224943687'
+      IP_PARENT_ARTIFACT: ums-ip-adapter-nova01-40224943687
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover physical IP-Adapter evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.IP_PARENT_ARTIFACT }}
+          path: physical-ip
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.IP_PARENT_RUN_ID }}
+      - name: Recover canonical Nova-01 Stage0
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Install deterministic metric runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends python3-pil python3-numpy
+      - name: Locate and verify immutable inputs
+        id: inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          REPORT="$(find physical-ip -type f -name 'ip-adapter-physical-report.json' | head -n1)"
+          IMAGE="$(find physical-ip -type f -name 'nova01-ip-adapter-smoke.png' | head -n1)"
+          test -n "$FRONT" && test -s "$FRONT"
+          test -n "$REPORT" && test -s "$REPORT"
+          test -n "$IMAGE" && test -s "$IMAGE"
+          test "$(sha256sum "$FRONT" | awk '{print $1}')" = 'e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          test "$(sha256sum "$IMAGE" | awk '{print $1}')" = '147ff9e26fa1ccae643564cb601f1801cb789b3e8d07ecc3d91c289474b44b8c'
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+          echo "report=$REPORT" >> "$GITHUB_OUTPUT"
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+      - name: Cross-modal image identity tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-bm01-image-proof
+          python3 cerebro/media-studio/v2/probes/bm01_cross_modal_metrics.py \
+            --reference "${{ steps.inputs.outputs.front }}" \
+            --candidate "${{ steps.inputs.outputs.image }}" \
+            --out ums-bm01-image-proof/bm01-image-cross-modal-metrics.json
+      - name: Seal IMAGE_IDENTITY_PROOF
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "${{ steps.inputs.outputs.image }}" ums-bm01-image-proof/nova01-ip-adapter-smoke.png
+          cp "${{ steps.inputs.outputs.report }}" ums-bm01-image-proof/ip-adapter-physical-report.json
+          python3 cerebro/media-studio/v2/probes/bm01_image_identity_proof_gate.py \
+            --physical ums-bm01-image-proof/ip-adapter-physical-report.json \
+            --metrics ums-bm01-image-proof/bm01-image-cross-modal-metrics.json \
+            --image ums-bm01-image-proof/nova01-ip-adapter-smoke.png \
+            --out ums-bm01-image-proof/bm01-image-identity-proof.json
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm01-image-proof/bm01-image-identity-proof.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['proof_type']=='IMAGE_IDENTITY_PROOF'
+          assert all(x['checks'].values())
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload BM01 image proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm01-image-proof-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: ums-bm01-image-proof/
