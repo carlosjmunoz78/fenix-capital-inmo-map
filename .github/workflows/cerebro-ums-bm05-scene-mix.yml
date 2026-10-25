@@ -1,0 +1,229 @@
+name: CEREBRO UMS BM05 Scene Mix
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm05-scene-mix.yml'
+      - 'cerebro/media-studio/v2/probes/bm05_scene_audio_assets.py'
+      - 'cerebro/media-studio/v2/probes/bm05_scene_mix_proof_gate.py'
+      - 'cerebro/media-studio/v2/probes/qwen3_tts_cpu_probe.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm05-scene-mix
+  cancel-in-progress: true
+
+jobs:
+  physical_scene:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BM05_OUT: ums-bm05-scene
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Recover sealed BM01 video identity evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm01-video-identity-40225258844
+          path: bm01-video-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40225258844
+
+      - name: Recover sealed BM04 original music evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm04-original-song-40226247105
+          path: bm04-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40226247105
+
+      - name: Verify immutable source proofs
+        id: sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          VIDEO_PROOF="$(find bm01-video-source -type f -name 'bm01-video-identity-proof.json' | head -n1)"
+          VIDEO="$(find bm01-video-source -type f -name 'nova01-video-identity.mp4' | head -n1)"
+          MUSIC_PROOF="$(find bm04-source -type f -name 'bm04-original-song-proof.json' | head -n1)"
+          MUSIC="$(find bm04-source -type f -name 'bm04-master.wav' | head -n1)"
+          test -s "$VIDEO_PROOF" && test -s "$VIDEO" && test -s "$MUSIC_PROOF" && test -s "$MUSIC"
+          python3 - "$VIDEO_PROOF" "$VIDEO" "$MUSIC_PROOF" "$MUSIC" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          vp=json.loads(Path(sys.argv[1]).read_text()); video=Path(sys.argv[2]); mp=json.loads(Path(sys.argv[3]).read_text()); music=Path(sys.argv[4])
+          assert vp['status']=='PASS_WITH_EVIDENCE' and vp['benchmark_id']=='BM-01'
+          assert vp['video']['sha256']==sha(video)
+          assert mp['status']=='PASS_WITH_EVIDENCE' and mp['benchmark_id']=='BM-04'
+          assert mp['evidence']['master_wav']['sha256']==sha(music)
+          assert vp['prod_authorized'] is False and mp['prod_authorized'] is False
+          print('BM01 video + BM04 music immutable source proofs GREEN')
+          PY
+          echo "video_proof=$VIDEO_PROOF" >> "$GITHUB_OUTPUT"
+          echo "video=$VIDEO" >> "$GITHUB_OUTPUT"
+          echo "music_proof=$MUSIC_PROOF" >> "$GITHUB_OUTPUT"
+          echo "music=$MUSIC" >> "$GITHUB_OUTPUT"
+
+      - name: Install zero-cost audio and Qwen synthetic dialogue runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends sox libsox-fmt-all ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 psutil numpy
+          python -m pip check
+          ffmpeg -version | head -n 1
+
+      - name: Generate original Foley SFX and timeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm05_scene_audio_assets.py | tee bm05-assets.stdout.log
+
+      - name: Generate physical synthetic dialogue with Qwen3-TTS
+        env:
+          UMS_QWEN_REPORT: ums-bm05-scene/qwen-dialogue-report.json
+          UMS_QWEN_OUTPUT: ums-bm05-scene/qwen-dialogue-raw.wav
+          UMS_QWEN_TEXT: 'Nova, sistema listo. Comenzamos la secuencia.'
+          UMS_QWEN_SPEAKER: Aiden
+          UMS_QWEN_LANGUAGE: Spanish
+          UMS_QWEN_MAX_NEW_TOKENS: '96'
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s python cerebro/media-studio/v2/probes/qwen3_tts_cpu_probe.py | tee bm05-qwen.stdout.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('ums-bm05-scene/qwen-dialogue-report.json').read_text())
+          assert x['status']=='PASSED_CPU_REAL_INFERENCE'
+          assert x['paid_api_calls']==0 and x['external_mutations'] is False
+          assert x['artifact']['duration_seconds']>0 and x['artifact']['channels']==1
+          print('Qwen synthetic dialogue physical GREEN')
+          PY
+
+      - name: Build synchronized 6-second component stems
+        env:
+          BM04_MUSIC: ${{ steps.sources.outputs.music }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BM05_OUT/components"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM05_OUT/qwen-dialogue-raw.wav" \
+            -af "adelay=850|850,apad=whole_dur=6,atrim=0:6,aresample=48000,aformat=channel_layouts=stereo" \
+            -t 6 -ar 48000 -ac 2 -c:a pcm_s16le "$BM05_OUT/components/dialogue.wav"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM05_OUT/bm05-foley.wav" -t 6 -ar 48000 -ac 2 -c:a pcm_s16le "$BM05_OUT/components/foley.wav"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM05_OUT/bm05-sfx.wav" -t 6 -ar 48000 -ac 2 -c:a pcm_s16le "$BM05_OUT/components/sfx.wav"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM04_MUSIC" -t 6 -ar 48000 -ac 2 -c:a pcm_s16le "$BM05_OUT/components/music.wav"
+          for f in dialogue foley sfx music; do test -s "$BM05_OUT/components/${f}.wav"; done
+
+      - name: Mix dialogue Foley SFX and music
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y \
+            -i "$BM05_OUT/components/dialogue.wav" -i "$BM05_OUT/components/foley.wav" -i "$BM05_OUT/components/sfx.wav" -i "$BM05_OUT/components/music.wav" \
+            -filter_complex "[0:a]volume=-1dB[a0];[1:a]volume=-7dB[a1];[2:a]volume=-5dB[a2];[3:a]volume=-13dB[a3];[a0][a1][a2][a3]amix=inputs=4:duration=longest:normalize=0:dropout_transition=0,loudnorm=I=-16:TP=-1.5:LRA=11[out]" \
+            -map '[out]' -t 6 -ar 48000 -ac 2 -c:a pcm_s24le "$BM05_OUT/bm05-scene-mix.wav"
+          test -s "$BM05_OUT/bm05-scene-mix.wav"
+
+      - name: Mux synchronized scene with BM01 physical video
+        env:
+          BM01_VIDEO: ${{ steps.sources.outputs.video }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y -stream_loop 2 -i "$BM01_VIDEO" -i "$BM05_OUT/bm05-scene-mix.wav" \
+            -t 6 -map 0:v:0 -map 1:a:0 -c:v libx264 -preset medium -crf 18 -pix_fmt yuv420p -r 6 -c:a aac -b:a 192k -ar 48000 -movflags +faststart -shortest "$BM05_OUT/bm05-final-scene.mp4"
+          test -s "$BM05_OUT/bm05-final-scene.mp4"
+          ffprobe -v error -show_entries format=duration:stream=index,codec_type,codec_name,width,height,sample_rate,channels -of json "$BM05_OUT/bm05-final-scene.mp4" > "$BM05_OUT/bm05-final-ffprobe.json"
+
+      - name: Analyze final mix and build runtime evidence
+        env:
+          BM01_VIDEO_PROOF: ${{ steps.sources.outputs.video_proof }}
+          BM04_MUSIC_PROOF: ${{ steps.sources.outputs.music_proof }}
+          BM04_MUSIC: ${{ steps.sources.outputs.music }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostats -i "$BM05_OUT/bm05-scene-mix.wav" -af "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json" -f null - 2> "$BM05_OUT/bm05-loudness.log"
+          python3 - <<'PY'
+          import hashlib,json,os,re,subprocess
+          from pathlib import Path
+          root=Path(os.environ['BM05_OUT'])
+          def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          def aprobe(p):
+              p=Path(p); raw=subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration:stream=codec_name,sample_rate,channels','-select_streams','a:0','-of','json',str(p)],text=True); x=json.loads(raw); s=x['streams'][0]
+              return {'path':str(p.relative_to(root)),'sha256':sha(p),'bytes':p.stat().st_size,'codec':s['codec_name'],'sample_rate_hz':int(s['sample_rate']),'channels':int(s['channels']),'duration_seconds':float(x['format']['duration']),'valid_audio':True}
+          vp=json.loads(Path(os.environ['BM01_VIDEO_PROOF']).read_text()); mp=json.loads(Path(os.environ['BM04_MUSIC_PROOF']).read_text()); q=json.loads((root/'qwen-dialogue-report.json').read_text())
+          loudlog=(root/'bm05-loudness.log').read_text(errors='replace'); blocks=re.findall(r'\{\s*"input_i".*?\}',loudlog,re.S); loud=json.loads(blocks[-1])
+          scene=json.loads((root/'bm05-final-ffprobe.json').read_text()); streams=scene['streams']; v=next(s for s in streams if s['codec_type']=='video'); a=next(s for s in streams if s['codec_type']=='audio')
+          components={n:aprobe(root/'components'/f'{n}.wav') for n in ['dialogue','foley','sfx','music']}
+          components['dialogue']['source']='QWEN3_TTS_SYNTHETIC_BUILTIN_VOICE'; components['dialogue']['real_person_voice']=False
+          components['foley']['origin']='DETERMINISTIC_LOCAL_SYNTHESIS'; components['sfx']['origin']='DETERMINISTIC_LOCAL_SYNTHESIS'
+          components['music']['source_benchmark']='BM-04'; components['music']['source_proof_status']=mp['status']; components['music']['source_sha256']=sha(Path(os.environ['BM04_MUSIC']))
+          final=root/'bm05-final-scene.mp4'; mix=aprobe(root/'bm05-scene-mix.wav')
+          evidence={
+            'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM05_PHYSICAL_SCENE_EVIDENCE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','benchmark_id':'BM-05','status':'PHYSICAL_SCENE_EXECUTED',
+            'dialogue_runtime':q,
+            'audio':{'components':components,'mix':mix},
+            'mix':{'dialogue_delay_seconds':0.85,'timeline_contract_applied':True,'dialogue_gain_db':-1.0,'foley_gain_db':-7.0,'sfx_gain_db':-5.0,'music_gain_db':-13.0},
+            'loudness':{'integrated_lufs':float(loud['input_i']),'true_peak_dbfs':float(loud['input_tp']),'lra_lu':float(loud['input_lra'])},
+            'final_scene':{'path':final.name,'sha256':sha(final),'bytes':final.stat().st_size,'duration_seconds':float(scene['format']['duration']),'video_codec':v['codec_name'],'audio_codec':a['codec_name'],'width':int(v['width']),'height':int(v['height']),'audio_sample_rate_hz':int(a['sample_rate']),'audio_channels':int(a['channels']),'source_video_benchmark':'BM-01','source_video_proof_status':vp['status']},
+            'additional_cost_eur':0,'paid_api_used':False,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'readiness_mutation_authorized':False
+          }
+          (root/'bm05-runtime-evidence.json').write_text(json.dumps(evidence,indent=2)); print(json.dumps(evidence,indent=2))
+          PY
+
+      - name: Seal BM05 PASS_WITH_EVIDENCE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm05_scene_mix_proof_gate.py \
+            --timeline "$BM05_OUT/bm05-timeline.json" \
+            --runtime "$BM05_OUT/bm05-runtime-evidence.json" \
+            --root "$BM05_OUT" \
+            --out "$BM05_OUT/bm05-scene-mix-proof.json"
+
+      - name: Final semantic gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('ums-bm05-scene/bm05-scene-mix-proof.json').read_text())
+          assert p['status']=='PASS_WITH_EVIDENCE' and p['benchmark_credit'] is True
+          assert all(p['checks'].values())
+          assert p['additional_cost_eur']==0 and p['prod_authorized'] is False
+          print(json.dumps(p,indent=2))
+          PY
+
+      - name: Upload BM05 evidence and scene
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm05-scene-mix-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm05-scene/
+            bm05-assets.stdout.log
+            bm05-qwen.stdout.log
