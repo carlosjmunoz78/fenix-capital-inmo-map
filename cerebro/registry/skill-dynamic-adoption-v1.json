@@ -11670,6 +11670,76 @@
       "promoted_at": "2026-10-21T09:39:06.003Z"
     },
     {
+      "candidate_id": "repo:bde0f85a6a35cc7b11393050e10f",
+      "technical_name": "skipfish",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/skipfish",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "bde0f85a6a35cc7b11393050e10fa4450c54987d4e07af140cb06134da5269b0",
+      "manifest_sha256": "0ad3c43a1255fac24eb93b5b19a0495039c89d1bc6ec09ccb64db06349aae715",
+      "outcome_hash": "c284397daf89877f8dc322983aa627bf41d029af3610c563fc0cdd0a7067f2d0",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:bde0f85a6a35cc7b:cap:1",
+          "technical_name": "skipfish",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T01:45:57.375Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "68f7e0b76750583b582942ea81eabd5ff0241b3a2ba04ada3d8453c20c086b1e"
+    },
+    {
       "candidate_id": "repo:fc95c594e37c0110a64de220020a",
       "technical_name": "skipfish",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/skipfish",
@@ -11968,6 +12038,76 @@
         "observed_at": "2026-10-21T09:39:06.003Z"
       },
       "promoted_at": "2026-10-21T09:39:06.003Z"
+    },
+    {
+      "candidate_id": "repo:641eb321f473992db547038a8dfb",
+      "technical_name": "spline",
+      "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/spline",
+      "pinned_sha": "d9ad8723e712dff2cc2acee0b37147d3937cebc8",
+      "snapshot_sha256": "641eb321f473992db547038a8dfbd8ac5f734ae28603e22b3df5d0d2cf22a7ff",
+      "manifest_sha256": "8c3b96ab7605ee420eb9c82e26d95112a8a336a791d805351cd506416bf7e8f1",
+      "outcome_hash": "cb4ae230a67c24ea015f1d01968bfff82b4e5562f6192bf5693f55a5009e1652",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:641eb321f473992d:cap:1",
+          "technical_name": "spline",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T01:45:57.374Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "cc66d695d7171113826ab1d24c32ca219da924e5da9930958212ff76cef95c55"
     },
     {
       "candidate_id": "repo:df8a7fb42ca04a362d69c04d690d",
@@ -13172,10 +13312,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 130,
-    "promoted": 7,
+    "total": 132,
+    "inserted": 2,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 2,
     "prod_readonly": 130
   }
 }
