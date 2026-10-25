@@ -1,0 +1,45 @@
+name: TEMP Validate PROD Canonical Supabase Config
+
+on:
+  push:
+    branches:
+      - fix/prod-canonical-supabase-config-20261025
+    paths:
+      - 'src/supabase.ts'
+      - '.github/workflows/temp-prod-canonical-config-validate.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Assert PROD config cannot be overridden
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "? PROD_SUPABASE_URL" src/supabase.ts
+          grep -F "? PROD_SUPABASE_PUBLISHABLE_KEY" src/supabase.ts
+          ! grep -F "? String(import.meta.env.VITE_SUPABASE_URL||PROD_SUPABASE_URL)" src/supabase.ts
+          ! grep -F "? String(import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY||PROD_SUPABASE_PUBLISHABLE_KEY)" src/supabase.ts
+      - name: Session consistency regressions
+        run: |
+          node --test cerebro/runtime/browser-session-consistency-gate.test.mjs
+          node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
+          node --test cerebro/runtime/browser-session-liveness-v3.test.mjs
+          node --test cerebro/runtime/browser-live-runner-host.test.mjs
+          node --test cerebro/runtime/browser-oidc-refresh-v2.test.mjs
+      - name: Build PROD
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://intentionally-invalid-preprod.example
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_INTENTIONALLY_INVALID
+        run: npx vite build --base=/ --outDir dist-prod-verify
