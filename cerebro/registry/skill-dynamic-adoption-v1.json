@@ -421,6 +421,76 @@
       "promoted_at": "2026-10-22T19:18:26.653Z"
     },
     {
+      "candidate_id": "repo:d5ce3f78bf63e730e592b8ed8dbc",
+      "technical_name": "alpine",
+      "source_locator": "github://TerminalSkills/skills@33b765f0904561257112a98d21df5383a6e77113/skills/alpine",
+      "pinned_sha": "33b765f0904561257112a98d21df5383a6e77113",
+      "snapshot_sha256": "d5ce3f78bf63e730e592b8ed8dbc0610030e951229dfefaf0d5474f3e27f00cf",
+      "manifest_sha256": "6c85e04ada61ac02497cc6174ddfa22f0f334059cabbb25abea38ae9512df41f",
+      "outcome_hash": "883a9a0529ece44ef1bd2000e7554f0d9bd621e2832c68a60a166b8f64008104",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d5ce3f78bf63e730:cap:1",
+          "technical_name": "alpine",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T19:20:02.427Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "623c2bae3c029bd7942be0171f4cdfbbe52a64b873bca0180415ed5640a17809"
+    },
+    {
       "candidate_id": "repo:e56cf81cdd4a9d3401bb454f85ec",
       "technical_name": "ant",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/ant",
@@ -13972,10 +14042,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 138,
-    "promoted": 1,
+    "total": 139,
+    "inserted": 1,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 138
   }
 }
