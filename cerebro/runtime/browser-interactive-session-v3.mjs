@@ -70,6 +70,7 @@ function decryptJson(ciphertextB64,ivB64,key){
 function buildBaseJob(job){
   const authority=job.authority&&typeof job.authority==='object'?job.authority:{};
   return{
+    viewport:workspaceEnabled(job)?{width:1100,height:750}:undefined,
     request_id:String(job.job_id),audit_id:required(job.audit_id,'AUDIT_ID'),company_id:required(job.company_id,'COMPANY_ID'),department_id:required(job.department_id,'DEPARTMENT_ID'),engine_id:required(job.engine_id,'ENGINE_ID'),environment:required(job.environment,'ENVIRONMENT'),version:job.version||'v3',identity_id:job.identity_id||'public',account_id:job.account_id||'public',browser_profile_id:required(job.browser_profile_id,'BROWSER_PROFILE_ID'),
     profile_scope:{company_id:job.company_id,identity_id:job.identity_id||'public',environment:job.environment},canonical_engine_ids:authority.canonical_engine_ids||[],browser_binding:authority.browser_binding||{},engine_authority:authority.engine_authority||{},kill_switch_enabled:authority.kill_switch_enabled===true,
     operation:{kind:'ROUTINE_MUTATION',authenticated_session_required:false,incremental_spend_eur:0},action_timeout_ms:30000,capture_final_evidence:false,keep_session_open:true
