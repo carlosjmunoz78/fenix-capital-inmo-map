@@ -100,7 +100,7 @@ jobs:
           const fs=require('fs');
           const p='/tmp/cerebro-creative-studio-v26/NATIVE_CINEMATIC_MANIFEST.json';
           const m=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(m.schema_version!=='2.6.0'||m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
+          if(m.schema_version!=='2.6.1'||m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
           if(m.promotion_eligible!==false||m.human_creative_review_required!==true||m.human_creative_gate!=='PENDING_REVIEW') throw new Error('HUMAN_GATE');
           if(m.source_policy!=='NO_IDENTIFIABLE_STOCK_HUMANS') throw new Error('SOURCE_POLICY');
           if(m.audio_delivery!=='AAC_256K_48KHZ_STEREO') throw new Error('AUDIO_DELIVERY');
