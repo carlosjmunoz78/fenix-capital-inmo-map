@@ -90,6 +90,13 @@ function actionsFromWorkspaceSnapshot(snapshot){const tabs=normalizePrivateTabs(
 function firstEmail(text){const match=String(text||'').match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);return match?match[0].toLowerCase():null;}
 function identityState(value){return String(value?.status||value?.verification_state||value||'UNVERIFIED');}
 function requireVerifiedIdentity(value){const state=identityState(value);if(state!=='VERIFIED')throw new Error(`WORKSPACE_IDENTITY_NOT_VERIFIED:${state}`);return state;}
+function humanRequiredFromIdentity(value){
+  const status=identityState(value);
+  if(status==='MISMATCH')return{status,reason:'SECURITY_INCIDENT',code:'ACCOUNT_MISMATCH'};
+  if(status==='REAUTH_REQUIRED')return{status,reason:'LOW_CONFIDENCE',code:'REAUTH_REQUIRED'};
+  if(status==='PENDING_CONFIRMATION')return{status,reason:'LOW_CONFIDENCE',code:'ACCOUNT_CONFIRMATION_REQUIRED'};
+  return{status,reason:'LOW_CONFIDENCE',code:'ACCOUNT_IDENTITY_UNVERIFIED'};
+}
 
 async function restoreWorkspace(job,tokenProvider,fetch_impl){
   if(!workspaceEnabled(job))return null;
@@ -110,7 +117,7 @@ async function saveWorkspace(job,tokenProvider,fetch_impl,privateTabs,activeTabI
   requireVerifiedIdentity(identityVerification);
   const prep=await callWorkspace('worker/prepare-save',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
   const key=b64ToBuffer(prep.key_b64);if(key.length!==32)throw new Error('WORKSPACE_BUNDLE_KEY_INVALID');
-  const exported=await exportProfileStorageState({browser_profile_id:job.browser_profile_id,channel:browserChannel()});
+  const exported=await exportProfileStorageState({browser_profile_id:job.browser_profile_id,storage_state:undefined,channel:browserChannel()});
   const snapshot={storage_state:exported.storage_state,tabs:normalizePrivateTabs(privateTabs),active_tab_index:Number.isInteger(activeTabIndex)?activeTabIndex:0};
   const encrypted=encryptWorkspaceSnapshot(snapshot,key);
   const committed=await callWorkspace('worker/commit-save',tokenProvider,{session_id:String(job.job_id),bundle_id:prep.bundle_id,bundle_ciphertext:encrypted.ciphertext,bundle_iv:encrypted.iv,bundle_sha256:encrypted.sha256,tabs:snapshot.tabs,active_tab_index:snapshot.active_tab_index,cookie_count:encrypted.cookie_count,origin_count:encrypted.origin_count,expires_at:prep.expires_at},fetch_impl);
@@ -205,11 +212,21 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
       await sleep(POLL_INTERVAL_MS);
     }
     if(opened&&!stopRequested)await publishFrame(key);
+    if(workspaceEnabled(job)&&!stopRequested&&identityState(identityVerification)!=='VERIFIED')identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
+    const verificationState=identityState(identityVerification);
     await worker.stop(stopRequested?'INTERACTIVE_SESSION_STOPPED':hibernateRequested?'INTERACTIVE_SESSION_HIBERNATE_REQUESTED':'INTERACTIVE_SESSION_AUTO_HIBERNATE');
-    if(workspaceEnabled(job))requireVerifiedIdentity(identityVerification);
-    const workspace=stopRequested?null:await saveWorkspace(job,tokenProvider,fetch_impl,lastPrivateTabs,lastActiveTabIndex,identityVerification);
+    if(stopRequested){
+      if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
+      return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:false,workspace_bundle_id:null,workspace_verification_state:verificationState,workspace_hibernate_reason:'STOPPED',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
+    }
+    if(workspaceEnabled(job)&&verificationState!=='VERIFIED'){
+      const human=humanRequiredFromIdentity(identityVerification);
+      if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'CLOSED'},fetch_impl);closed=true;}
+      return{ok:false,authorization:{status:'HUMAN_REQUIRED',reason:human.reason,code:human.code},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,human_required:true,human_required_reason:human.reason,human_required_code:human.code,workspace_hibernated:false,workspace_bundle_id:null,workspace_verification_state:verificationState,workspace_hibernate_reason:hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
+    }
+    const workspace=await saveWorkspace(job,tokenProvider,fetch_impl,lastPrivateTabs,lastActiveTabIndex,identityVerification);
     if(opened){await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:workspace?.hibernated===true?'HIBERNATED':'CLOSED'},fetch_impl);closed=true;}
-    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:workspace?.hibernated===true,workspace_bundle_id:workspace?.bundle_id||null,workspace_verification_state:workspace?.verification_state||identityVerification?.status||null,workspace_hibernate_reason:stopRequested?'STOPPED':hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
+    return{ok:true,authorization:{status:'AUTHORIZED'},results:[],final_url:lastUrl,final_evidence:null,interactive_session:true,session_id:sessionId,frame_seq:seq,workspace_hibernated:workspace?.hibernated===true,workspace_bundle_id:workspace?.bundle_id||null,workspace_verification_state:workspace?.verification_state||verificationState,workspace_hibernate_reason:hibernateRequested?'REQUESTED':'AUTO_TIMEOUT',workspace_restore:restoredWorkspace?.restored===true?'RESTORED':restoredWorkspace?.reason||'NONE'};
   }catch(error){
     await worker.stop('INTERACTIVE_SESSION_FAILED').catch(()=>{});
     if(opened&&!closed)await callInteractive(endpoint,'worker/close',tokenProvider,{session_id:sessionId,state:'ERROR'},fetch_impl).catch(()=>{});
@@ -217,4 +234,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.3',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.4',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
