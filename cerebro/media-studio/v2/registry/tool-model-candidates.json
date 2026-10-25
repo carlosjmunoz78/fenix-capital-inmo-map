@@ -1,0 +1,49 @@
+{
+  "schema_version":"2.0.0",
+  "environment":"PROD",
+  "policy":"availability is not operational binding; every candidate must pass license/security/cost/runtime/quality review before UMS PROD routing",
+  "candidates":[
+    {
+      "id":"TOOL-HYPERFRAMES-001",
+      "name":"HyperFrames",
+      "kind":"INSTALLED_PLUGIN_SKILL",
+      "capabilities":["html_video_composition","animation","title_cards","overlays","captions","voiceovers","audio_reactive_visuals","scene_transitions","transcription","tts","preview","render","layout_inspection","render_benchmark"],
+      "route_class":"contracted_existing",
+      "availability":"INSTALLED_SKILL_AVAILABLE",
+      "execution_surface":"BEST_IN_CODEX",
+      "license_status":"REVIEW_REQUIRED_BEFORE_PROD_BINDING",
+      "security_status":"REVIEW_REQUIRED_BEFORE_PROD_BINDING",
+      "cost_status":"UNKNOWN_NO_SILENT_SPEND",
+      "runtime_requirements":["Node.js >= 22","FFmpeg","Chrome for inspect/render"],
+      "evidence_refs":["skills://plugins/hyperframes/hyperframes/skill.md","skills://plugins/hyperframes/hyperframes-cli/skill.md"],
+      "prod_binding_status":"AVAILABLE_NOT_BOUND",
+      "tested_in_ums_prod":false,
+      "real_identity_allowed":false,
+      "notes":"Strong candidate for deterministic/programmatic short and long video composition. Installed skill availability does not prove production runtime availability."
+    },
+    {
+      "id":"TOOL-REMOTION-001",
+      "name":"Remotion",
+      "kind":"INSTALLED_PLUGIN_SKILL",
+      "capabilities":["react_video_composition","multimedia","captions","3d_markup","maps","interactive_video_markup","preview","render","saas_render_architecture"],
+      "route_class":"contracted_existing",
+      "availability":"INSTALLED_SKILL_AVAILABLE",
+      "execution_surface":"BEST_IN_CODEX",
+      "license_status":"REVIEW_REQUIRED_BEFORE_PROD_BINDING",
+      "security_status":"REVIEW_REQUIRED_BEFORE_PROD_BINDING",
+      "cost_status":"UNKNOWN_NO_SILENT_SPEND",
+      "runtime_requirements":["Node.js","Remotion project/runtime","browser/render runtime as required"],
+      "evidence_refs":["skills://plugins/remotion/remotion-best-practices/skill.md"],
+      "prod_binding_status":"AVAILABLE_NOT_BOUND",
+      "tested_in_ums_prod":false,
+      "real_identity_allowed":false,
+      "notes":"Strong candidate for programmatic React video and render workflows. Must be benchmarked against HyperFrames and other routes before promotion."
+    }
+  ],
+  "candidate_rules":{
+    "operational_claim_requires":["tested_in_ums_prod=true","license_status=PASS","security_status=PASS","cost_status known","quality benchmark evidence","rollback/fallback defined"],
+    "unknown_cost":"never silently spend",
+    "real_identity":"false by default; separate rights and tool policy review required",
+    "promotion":"LAB/PREPROD benchmark plus OLD vs NEW for future changes after initial studio build is complete"
+  }
+}
