@@ -1,0 +1,119 @@
+name: CEREBRO Creative Studio V2.7 Presenter Lite CPU
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v27-generative-preprod-2026-10-25'
+    paths:
+      - '.github/workflows/cerebro-creative-v27-presenter-lite-cpu.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  presenter-lite-cpu-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SADTALKER_SHA: cd4c0465ae0b54a6f85af57f5c65fec9fe23e7f8
+      PYTHONUNBUFFERED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg espeak-ng git wget
+          ffmpeg -version | head -n 1
+          espeak-ng --version | head -n 1
+      - name: Clone pinned SadTalker
+        run: |
+          git clone --filter=blob:none https://github.com/OpenTalker/SadTalker.git /tmp/SadTalker
+          git -C /tmp/SadTalker checkout "$SADTALKER_SHA"
+          test "$(git -C /tmp/SadTalker rev-parse HEAD)" = "$SADTALKER_SHA"
+          grep -q -- '--cpu' /tmp/SadTalker/inference.py
+      - name: Install CPU runtime
+        run: |
+          python -m pip install --upgrade 'pip<25' wheel setuptools
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
+          pip install -r /tmp/SadTalker/requirements.txt
+      - name: Download minimal 256 checkpoints
+        working-directory: /tmp/SadTalker
+        run: |
+          mkdir -p checkpoints
+          wget -q --show-progress https://github.com/OpenTalker/SadTalker/releases/download/v0.0.2-rc/mapping_00229-model.pth.tar -O checkpoints/mapping_00229-model.pth.tar
+          wget -q --show-progress https://github.com/OpenTalker/SadTalker/releases/download/v0.0.2-rc/SadTalker_V0.0.2_256.safetensors -O checkpoints/SadTalker_V0.0.2_256.safetensors
+          test -s checkpoints/mapping_00229-model.pth.tar
+          test -s checkpoints/SadTalker_V0.0.2_256.safetensors
+      - name: Create short synthetic Spanish speech
+        run: |
+          mkdir -p /tmp/presenter-lite
+          espeak-ng -v es-es -s 155 -w /tmp/presenter-lite/voice.wav 'No reserves por presión. Primero decide con datos.'
+          ffmpeg -hide_banner -loglevel error -i /tmp/presenter-lite/voice.wav -t 2.8 -ar 16000 -ac 1 -y /tmp/presenter-lite/voice-short.wav
+          ffprobe -v error -show_entries format=duration -of default=nw=1:nk=1 /tmp/presenter-lite/voice-short.wav
+      - name: Run physical Presenter Lite CPU smoke
+        working-directory: /tmp/SadTalker
+        run: |
+          mkdir -p /tmp/presenter-lite/results
+          /usr/bin/time -v python inference.py \
+            --cpu \
+            --driven_audio /tmp/presenter-lite/voice-short.wav \
+            --source_image examples/source_image/full_body_1.png \
+            --checkpoint_dir checkpoints \
+            --result_dir /tmp/presenter-lite/results \
+            --size 256 \
+            --batch_size 1 \
+            --preprocess crop \
+            --still \
+            2>&1 | tee /tmp/presenter-lite/runtime.log
+          OUT="$(find /tmp/presenter-lite/results -maxdepth 1 -type f -name '*.mp4' | head -n 1)"
+          test -n "$OUT"
+          test -s "$OUT"
+          cp "$OUT" /tmp/presenter-lite/presenter-lite-cpu.mp4
+          ffprobe -v error -show_entries stream=codec_name,width,height,r_frame_rate:format=duration,size -of json "$OUT" > /tmp/presenter-lite/probe.json
+          ffmpeg -hide_banner -loglevel error -i "$OUT" -vf 'fps=2,scale=360:-2,tile=3x2:padding=4:margin=4' -frames:v 1 -q:v 2 -y /tmp/presenter-lite/contact-sheet.jpg
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p = json.loads(Path('/tmp/presenter-lite/probe.json').read_text())
+          duration = float(p['format']['duration'])
+          size = int(p['format']['size'])
+          assert duration > 1.5, duration
+          assert size > 50000, size
+          report = {
+              'schema_version': '1.0.0',
+              'engine_id': 'CREATIVE-PRESENTER-LITE-CPU-V27',
+              'company_id': 'fenix',
+              'environment': 'PREPROD',
+              'version': 'v2.7',
+              'upstream': 'OpenTalker/SadTalker',
+              'upstream_sha': 'cd4c0465ae0b54a6f85af57f5c65fec9fe23e7f8',
+              'upstream_license': 'Apache-2.0',
+              'device': 'cpu',
+              'size': 256,
+              'duration_seconds': duration,
+              'bytes': size,
+              'technical_smoke_only': True,
+              'official_example_identity_non_prod': True,
+              'production_identity_must_be_owned_or_synthetic': True,
+              'publish_authorized': False,
+              'promotion_eligible': False,
+              'human_creative_review_required': True,
+              'additional_recurring_cost_eur': 0,
+              'baseline_preserved': 'Creative Studio V2.6.2',
+          }
+          Path('/tmp/presenter-lite/report.json').write_text(json.dumps(report, indent=2) + '\n')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-v27-presenter-lite-cpu-${{ github.sha }}
+          path: |
+            /tmp/presenter-lite/presenter-lite-cpu.mp4
+            /tmp/presenter-lite/contact-sheet.jpg
+            /tmp/presenter-lite/probe.json
+            /tmp/presenter-lite/report.json
+            /tmp/presenter-lite/runtime.log
+          retention-days: 7
