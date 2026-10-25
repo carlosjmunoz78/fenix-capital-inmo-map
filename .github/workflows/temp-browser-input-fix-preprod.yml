@@ -46,8 +46,8 @@ jobs:
           grep -F "if(processedCommand)continue" cerebro/runtime/browser-interactive-session-v3.mjs >/dev/null
           ! grep -F "humanInput('KEYBOARD_TYPE',{value:event.key})" src/CerebroBrowserConsole.tsx
 
-      - name: Run Browser V3 transport regression
-        run: npm run test:browser-v3
+      - name: Run canonical Browser V3 transport regression
+        run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs cerebro/runtime/browser-oidc-refresh-v2.test.mjs
 
       - name: TypeScript and Vite build
         run: npm run build
