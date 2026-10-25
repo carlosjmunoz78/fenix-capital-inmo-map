@@ -1,0 +1,115 @@
+name: CEREBRO UMS BM01 Aggregate Proof
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm01-aggregate-proof.yml'
+      - 'cerebro/media-studio/v2/probes/bm01_aggregate_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm01-aggregate-proof
+  cancel-in-progress: true
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Recover immutable Stage0 evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: stage0
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+
+      - name: Recover immutable THREE_D_REFERENCE_PROOF
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-blender52-bm01-40224654448
+          path: three-d
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40224654448
+
+      - name: Recover immutable VIDEO_IDENTITY_PROOF
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm01-video-identity-40225258844
+          path: video
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40225258844
+
+      - name: Verify artifact digests and expected files
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s stage0/bm01-stage0-evidence.json
+          test -s stage0/bm01-stage0-report.json
+          test -s three-d/ums-blender52-nova01/bm01-three-d-reference-proof.json
+          test -s three-d/ums-blender52-nova01/bm01-cross-modal-metrics.json
+          test -s video/ums-bm01-video/bm01-video-identity-proof.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          s=json.loads(Path('stage0/bm01-stage0-evidence.json').read_text())
+          d=json.loads(Path('three-d/ums-blender52-nova01/bm01-three-d-reference-proof.json').read_text())
+          v=json.loads(Path('video/ums-bm01-video/bm01-video-identity-proof.json').read_text())
+          assert s['status']=='BM01_STAGE0_REFERENCE_GREEN'
+          assert d['status']=='PASS_WITH_EVIDENCE'
+          assert v['status']=='PASS_WITH_EVIDENCE'
+          assert s['character_id']==d['character_id']==v['character_id']=='UMS-SYNTH-CHAR-001'
+          print('child evidence roots GREEN')
+          PY
+
+      - name: Run BM01 fail-closed aggregate tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-bm01-aggregate
+          python3 cerebro/media-studio/v2/probes/bm01_aggregate_proof_gate.py \
+            --stage0-evidence stage0/bm01-stage0-evidence.json \
+            --stage0-report stage0/bm01-stage0-report.json \
+            --three-d-proof three-d/ums-blender52-nova01/bm01-three-d-reference-proof.json \
+            --three-d-metrics three-d/ums-blender52-nova01/bm01-cross-modal-metrics.json \
+            --video-proof video/ums-bm01-video/bm01-video-identity-proof.json \
+            --out ums-bm01-aggregate/bm01-aggregate-proof.json
+
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('ums-bm01-aggregate/bm01-aggregate-proof.json').read_text())
+          assert p['status']=='PASS_WITH_EVIDENCE'
+          assert p['benchmark_credit'] is True
+          assert p['benchmark_id']=='BM-01'
+          assert p['proven_modalities']==['IMAGE_2D','THREE_D','VIDEO']
+          assert p['cross_modal_consistency_proven'] is True
+          assert all(p['checks'].values())
+          assert p['readiness_mutation_authorized'] is False
+          assert p['prod_authorized'] is False
+          assert p['additional_cost_eur']==0
+          print(json.dumps(p,indent=2))
+          PY
+
+      - name: Upload BM01 aggregate proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm01-aggregate-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-bm01-aggregate/
