@@ -1,0 +1,173 @@
+name: CEREBRO UMS BM04 Original Song
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm04-original-song.yml'
+      - 'cerebro/media-studio/v2/probes/bm04_original_cinematic_score.py'
+      - 'cerebro/media-studio/v2/probes/bm04_original_song_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-bm04-original-song
+  cancel-in-progress: true
+
+jobs:
+  physical_music:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BM04_OUT: ums-bm04-original-song
+      CEREBRO_ENVIRONMENT: PREPROD
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zero-cost music runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends fluidsynth fluid-soundfont-gm ffmpeg sox
+          fluidsynth --version
+          ffmpeg -version | head -n 1
+          sox --version
+
+      - name: Verify and locate licensed SoundFont runtime
+        id: runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          SF2="$(dpkg -L fluid-soundfont-gm | grep -E '/FluidR3_GM\.sf2$' | head -n1)"
+          SFCOPY="$(dpkg -L fluid-soundfont-gm | grep -E '/copyright$' | head -n1)"
+          FSCOPY="$(dpkg -L fluidsynth | grep -E '/copyright$' | head -n1)"
+          test -n "$SF2" && test -s "$SF2"
+          test -n "$SFCOPY" && test -s "$SFCOPY"
+          test -n "$FSCOPY" && test -s "$FSCOPY"
+          grep -Eiq 'MIT|Expat' "$SFCOPY"
+          grep -Eiq 'LGPL|Lesser General Public License' "$FSCOPY"
+          echo "sf2=$SF2" >> "$GITHUB_OUTPUT"
+          echo "sfcopy=$SFCOPY" >> "$GITHUB_OUTPUT"
+          echo "fscopy=$FSCOPY" >> "$GITHUB_OUTPUT"
+          sha256sum "$SF2" "$SFCOPY" "$FSCOPY"
+
+      - name: Generate original score and MIDI stems
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm04_original_cinematic_score.py | tee bm04-composition.stdout.log
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('ums-bm04-original-song/bm04-composition.json').read_text())
+          assert x['copyright_source']=='ORIGINAL_GENERATED_FROM_DECLARED_NOTE_EVENTS'
+          assert x['pretrained_music_model_used'] is False
+          assert x['external_composition_used'] is False
+          assert len(x['stems'])==5 and x['expected_duration_seconds']==30.0
+          print('composition contract GREEN')
+          PY
+
+      - name: Render five physical audio stems with FluidSynth
+        env:
+          SOUNDFONT: ${{ steps.runtime.outputs.sf2 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$BM04_OUT/stems"
+          for STEM in strings piano bass horn drums; do
+            fluidsynth -ni -g 0.7 -r 48000 -F "$BM04_OUT/stems/${STEM}.wav" "$SOUNDFONT" "$BM04_OUT/${STEM}.mid" >/tmp/fluidsynth-${STEM}.log 2>&1
+            test -s "$BM04_OUT/stems/${STEM}.wav"
+          done
+
+      - name: Mix premaster and master
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -loglevel error -y \
+            -i "$BM04_OUT/stems/strings.wav" -i "$BM04_OUT/stems/piano.wav" -i "$BM04_OUT/stems/bass.wav" -i "$BM04_OUT/stems/horn.wav" -i "$BM04_OUT/stems/drums.wav" \
+            -filter_complex "[0:a]volume=0.60[a0];[1:a]volume=0.45[a1];[2:a]volume=0.75[a2];[3:a]volume=0.70[a3];[4:a]volume=0.55[a4];[a0][a1][a2][a3][a4]amix=inputs=5:duration=longest:normalize=0:dropout_transition=0,alimiter=limit=0.85[out]" \
+            -map '[out]' -t 30 -ar 48000 -ac 2 -c:a pcm_s24le "$BM04_OUT/bm04-premaster.wav"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM04_OUT/bm04-premaster.wav" \
+            -af "loudnorm=I=-16:TP=-1.5:LRA=11" -t 30 -ar 48000 -ac 2 -c:a pcm_s24le "$BM04_OUT/bm04-master.wav"
+          ffmpeg -hide_banner -loglevel error -y -i "$BM04_OUT/bm04-master.wav" -c:a flac "$BM04_OUT/bm04-master.flac"
+          test -s "$BM04_OUT/bm04-premaster.wav" && test -s "$BM04_OUT/bm04-master.wav" && test -s "$BM04_OUT/bm04-master.flac"
+
+      - name: Analyze loudness and create physical runtime evidence
+        env:
+          SOUNDFONT: ${{ steps.runtime.outputs.sf2 }}
+          SOUND_FONT_COPYRIGHT: ${{ steps.runtime.outputs.sfcopy }}
+          FLUIDSYNTH_COPYRIGHT: ${{ steps.runtime.outputs.fscopy }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          ffmpeg -hide_banner -nostats -i "$BM04_OUT/bm04-master.wav" -af "loudnorm=I=-16:TP=-1.5:LRA=11:print_format=json" -f null - 2> "$BM04_OUT/master-loudness.log"
+          mkdir -p "$BM04_OUT/licenses"
+          cp "$SOUND_FONT_COPYRIGHT" "$BM04_OUT/licenses/fluidr3-copyright"
+          cp "$FLUIDSYNTH_COPYRIGHT" "$BM04_OUT/licenses/fluidsynth-copyright"
+          python3 - <<'PY'
+          import hashlib,json,os,re,subprocess
+          from pathlib import Path
+          root=Path(os.environ['BM04_OUT'])
+          def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          def probe(p):
+              raw=subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration:stream=codec_name,sample_rate,channels','-select_streams','a:0','-of','json',str(p)],text=True)
+              x=json.loads(raw); s=x['streams'][0]
+              return {'path':str(Path(p).relative_to(root)),'sha256':sha(p),'bytes':Path(p).stat().st_size,'codec':s['codec_name'],'sample_rate_hz':int(s['sample_rate']),'channels':int(s['channels']),'duration_seconds':float(x['format']['duration']),'valid_audio':True}
+          log=(root/'master-loudness.log').read_text(errors='replace')
+          blocks=re.findall(r'\{\s*"input_i".*?\}',log,re.S)
+          if not blocks: raise SystemExit('LOUDNORM_JSON_NOT_FOUND')
+          loud=json.loads(blocks[-1])
+          stems={n:probe(root/'stems'/f'{n}.wav') for n in ['strings','piano','bass','horn','drums']}
+          sf2=Path(os.environ['SOUNDFONT']); sfc=Path(os.environ['SOUND_FONT_COPYRIGHT']); fsc=Path(os.environ['FLUIDSYNTH_COPYRIGHT'])
+          fluid_ver=subprocess.check_output(['fluidsynth','--version'],text=True,stderr=subprocess.STDOUT).splitlines()[0]
+          ff_ver=subprocess.check_output(['ffmpeg','-version'],text=True).splitlines()[0]
+          ev={
+            'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM04_PHYSICAL_RUNTIME_EVIDENCE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD','benchmark_id':'BM-04',
+            'status':'PHYSICAL_AUDIO_PIPELINE_EXECUTED',
+            'tools':{'fluidsynth_verified':True,'fluidsynth_version':fluid_ver,'ffmpeg_verified':True,'ffmpeg_version':ff_ver},
+            'licenses':{'fluidr3_mit_verified':True,'fluidr3_soundfont_sha256':sha(sf2),'fluidr3_copyright_sha256':sha(sfc),'fluidsynth_lgpl_verified':True,'fluidsynth_copyright_sha256':sha(fsc)},
+            'audio_assets':{'stems':stems,'premaster':probe(root/'bm04-premaster.wav'),'master_wav':probe(root/'bm04-master.wav'),'master_flac':probe(root/'bm04-master.flac')},
+            'loudness':{'integrated_lufs':float(loud['input_i']),'true_peak_dbfs':float(loud['input_tp']),'lra_lu':float(loud['input_lra'])},
+            'additional_cost_eur':0,'paid_api_used':False,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'readiness_mutation_authorized':False
+          }
+          (root/'bm04-runtime-evidence.json').write_text(json.dumps(ev,indent=2)); print(json.dumps(ev,indent=2))
+          PY
+
+      - name: Seal BM04 PASS_WITH_EVIDENCE
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm04_original_song_proof_gate.py \
+            --composition "$BM04_OUT/bm04-composition.json" \
+            --runtime "$BM04_OUT/bm04-runtime-evidence.json" \
+            --root "$BM04_OUT" \
+            --out "$BM04_OUT/bm04-original-song-proof.json"
+
+      - name: Final semantic gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=json.loads(Path('ums-bm04-original-song/bm04-original-song-proof.json').read_text())
+          assert p['status']=='PASS_WITH_EVIDENCE' and p['benchmark_credit'] is True
+          assert all(p['checks'].values())
+          assert p['additional_cost_eur']==0 and p['prod_authorized'] is False
+          print(json.dumps(p,indent=2))
+          PY
+
+      - name: Upload BM04 evidence and deliverables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm04-original-song-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm04-original-song/
+            bm04-composition.stdout.log
