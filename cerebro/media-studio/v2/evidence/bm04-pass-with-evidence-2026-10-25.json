@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UMS_BM04_PERSISTED_EVIDENCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "UMS-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "benchmark_id": "BM-04",
+  "benchmark_name": "Original song end-to-end with stems mix master and provenance",
+  "title": "Nova-01: First Light",
+  "status": "PASS_WITH_EVIDENCE",
+  "benchmark_credit": true,
+  "composition": {
+    "type": "ORIGINAL_DETERMINISTIC_CINEMATIC_CUE",
+    "seed": "CEREBRO-BM04-NOVA-ORIGINAL-CUE-V1",
+    "copyright_source": "ORIGINAL_GENERATED_FROM_DECLARED_NOTE_EVENTS",
+    "pretrained_music_model_used": false,
+    "external_composition_used": false,
+    "tempo_bpm": 96,
+    "time_signature": "4/4",
+    "bars": 12,
+    "expected_duration_seconds": 30.0,
+    "composition_sha256": "00e11645f142b92c700dbef58a310fa71156f368b9cf6d2277687b236733034b"
+  },
+  "physical_audio": {
+    "premaster_sha256": "a6cee62bf9265a87bf9fe61fcd7116fc75d4cdabfa211861901916d471936057",
+    "master_wav_sha256": "857ae61d0dd6a4a9d60f0f78213445f8af618e13474f01683354d73f137a6c68",
+    "master_flac_sha256": "0d452251a68ccf310e0cd5643965d0ca3ec2c9cb4ee9fde2a7c46fa409176b3b",
+    "sample_rate_hz": 48000,
+    "master_channels": 2,
+    "integrated_lufs": -14.88,
+    "true_peak_dbfs": -2.82,
+    "lra_lu": 2.5,
+    "stem_sha256": {
+      "strings": "c15356eb9c171846ca1bf821333f65b2a75695f29cec39091f4e2b05d74d85f0",
+      "piano": "9d72124570247549130cee580760d685dd23791474bd92818de70b012ebcdb35",
+      "bass": "c61fdf58acb740d9dc5b594edf96aaa80508a39e1987068a6760ee18202beea2",
+      "horn": "691c060e1b284ee592b5736c5eb8e27989810c9b9a5db8149beac7028baba1ac",
+      "drums": "9c72f5b11763eca33eb2c22e385374e1e220545bc8e8595fe8494fdd4569b6f7"
+    }
+  },
+  "runtime_and_licenses": {
+    "fluidsynth_version": "FluidSynth runtime version 2.3.4",
+    "ffmpeg_version": "ffmpeg version 6.1.1-3ubuntu5 Copyright (c) 2000-2023 the FFmpeg developers",
+    "fluidr3_mit_verified": true,
+    "fluidr3_soundfont_sha256": "74594e8f4250680adf590507a306655a299935343583256f3b722c48a1bc1cb0",
+    "fluidr3_copyright_sha256": "f2f5e6358fc7c1fe62aafc6c8229c4c5898e5afb0d4ce1322b15362a8cbd600e",
+    "fluidsynth_lgpl_verified": true,
+    "fluidsynth_copyright_sha256": "0a46b5f6e1bebb093c950d1cfffe434ab163b7cf8b61809bd09e59cb3aed0610"
+  },
+  "proof_chain": {
+    "proof_sha256": "0850afc559ca12946895e63061fd6ca39527f479c34810c7b9110acf31cee3f5",
+    "runtime_evidence_sha256": "d53261c463d14e372ae9af796e0ed567d6b34f58756047729645ffb079231fee",
+    "workflow_run_id": 40226247105,
+    "artifact_id": 12610998618,
+    "artifact_digest": "sha256:8cfd95e7072813bb55f45e8b2281de620316bd1a783e20c78227703521fc0189",
+    "source_head_sha": "2470012a035e424e4f932dc005a3bb97f3c4ae88"
+  },
+  "authority": {
+    "readiness_mutation_authorized": false,
+    "prod_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "additional_cost_eur": 0
+  }
+}
