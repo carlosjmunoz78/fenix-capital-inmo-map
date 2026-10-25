@@ -1,4 +1,4 @@
-import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent,type MouseEvent,type WheelEvent} from 'react';
+import {useEffect,useMemo,useRef,useState,type ClipboardEvent,type FormEvent,type KeyboardEvent,type MouseEvent,type WheelEvent} from 'react';
 import {ArrowLeft,ArrowRight,BrainCircuit,CircleDot,Globe2,Hand,MessageSquareText,Mic,Paperclip,Play,Plus,RefreshCw,RotateCcw,Send,ShieldAlert,Square,X} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {CerebroVoiceSettings} from './CerebroVoiceSettings';
@@ -20,6 +20,7 @@ type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?
 
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false};
 const TERMINAL=new Set(['STOPPED','ERROR','CLOSED']);
+const HUMAN_TYPING_DEBOUNCE_MS=350;
 
 function stateLabel(session:BrowserSessionV3|null){
  if(!session)return'SIN SESIÓN VISUAL';
@@ -59,6 +60,9 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const frameSeqRef=useRef(-1);
  const frameUrlRef=useRef('');
  const commandLockRef=useRef(false);
+ const humanTextBufferRef=useRef('');
+ const humanTextTimerRef=useRef<number|null>(null);
+ const humanInputQueueRef=useRef<Promise<boolean>>(Promise.resolve(true));
 
  useEffect(()=>{
   let raf=0;
@@ -66,7 +70,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
  },[]);
 
- useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* already stopped */}}if(frameUrlRef.current)URL.revokeObjectURL(frameUrlRef.current);},[]);
+ useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* already stopped */}}if(frameUrlRef.current)URL.revokeObjectURL(frameUrlRef.current);if(humanTextTimerRef.current!==null)window.clearTimeout(humanTextTimerRef.current);humanTextBufferRef.current='';},[]);
 
  useEffect(()=>{
   let cancelled=false;
@@ -112,7 +116,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
   void refresh();const interval=window.setInterval(()=>{void refresh()},900);return()=>{cancelled=true;window.clearInterval(interval)};
  },[selectedCompany,selectedSessionId]);
 
- function resetVisualSession(){setBrowserSession(null);keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;if(frameUrlRef.current){URL.revokeObjectURL(frameUrlRef.current);frameUrlRef.current='';setFrameUrl('');}}
+ function resetVisualSession(){setBrowserSession(null);keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;humanTextBufferRef.current='';if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}if(frameUrlRef.current){URL.revokeObjectURL(frameUrlRef.current);frameUrlRef.current='';setFrameUrl('');}}
  function changeCompany(value:string){if(hasActiveSession)return;setSelectedCompany(value);setSelectedSessionId('');setSessionOptions([]);setBrowserError('');resetVisualSession();}
  function changeSession(value:string){if(value===selectedSessionId)return;setSelectedSessionId(value);setBrowserError('');resetVisualSession();}
  async function waitForCerebroSession(){for(let attempt=0;attempt<40;attempt++){const r=await fetchBrowserInteractiveApi<BrowserStatusResponse>('/owner/status',{company_id:selectedCompany});const s=r.data?.session;if(r.status===200&&r.data?.ok&&s?.worker_alive&&s.state==='CEREBRO_CONTROLLED'&&s.control_owner==='CEREBRO'&&!s.emergency_stop)return s;await new Promise(resolve=>window.setTimeout(resolve,500));}throw new Error('BROWSER_WORKER_NO_QUEDO_LISTO');}
@@ -127,21 +131,26 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  async function browserAction(path:string,body:Record<string,unknown>={}){if(!selectedCompany){setBrowserError('No hay empresa autorizada disponible');return false}setBrowserBusy(true);setBrowserError('');try{const result=await fetchBrowserInteractiveApi<BrowserActionResponse>(path,{company_id:selectedCompany,...body});if(result.status!==200||!result.data?.ok)throw new Error(result.data?.error||`Browser 1 respondió ${result.status}`);return true}catch(error){setBrowserError(String((error as Error)?.message||error));return false}finally{setBrowserBusy(false)}}
  async function startBrowser(){const ok=await browserAction('/owner/start');if(ok){setSelectedSessionId('');resetVisualSession();}}
  async function takeover(){if(browserSession)await browserAction('/owner/takeover',{session_id:browserSession.session_id});}
- async function handback(){if(browserSession?.human_lease_id)await browserAction('/owner/handback',{session_id:browserSession.session_id,lease_id:browserSession.human_lease_id});}
- async function emergencyStop(){if(browserSession)await browserAction('/owner/stop',{session_id:browserSession.session_id});}
+ async function handback(){if(browserSession?.human_lease_id){drainHumanTextBuffer();await humanInputQueueRef.current;await browserAction('/owner/handback',{session_id:browserSession.session_id,lease_id:browserSession.human_lease_id});}}
+ async function emergencyStop(){humanTextBufferRef.current='';if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}if(browserSession)await browserAction('/owner/stop',{session_id:browserSession.session_id});}
  async function humanInput(command_type:string,payload:Record<string,unknown>){const session=browserSession;if(!session||session.state!=='HUMAN_CONTROLLED'||session.control_owner!=='HUMAN'||!session.human_lease_id)return false;try{let key=keyRef.current;if(!key||keySessionRef.current!==session.session_id){const k=await fetchBrowserInteractiveApi<BrowserKeyResponse>('/owner/key',{company_id:selectedCompany,session_id:session.session_id});if(k.status!==200||!k.data?.key_b64)throw new Error(k.data?.error||'Clave de control no disponible');key=await importBrowserSessionKey(k.data.key_b64);keyRef.current=key;keySessionRef.current=session.session_id;}const encrypted=await encryptBrowserInput(key,payload);const r=await fetchBrowserInteractiveApi<BrowserActionResponse>('/owner/input',{company_id:selectedCompany,session_id:session.session_id,lease_id:session.human_lease_id,command_type,...encrypted});if(r.status!==200||!r.data?.ok)throw new Error(r.data?.error||'Entrada humana rechazada');return true;}catch(error){setBrowserError(String((error as Error)?.message||error));return false;}}
+ function queueHumanInput(command_type:string,payload:Record<string,unknown>){const run=()=>humanInput(command_type,payload);const next=humanInputQueueRef.current.then(run,run);humanInputQueueRef.current=next.catch(()=>false);return next;}
+ function clearHumanTextTimer(){if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}}
+ function drainHumanTextBuffer(){clearHumanTextTimer();const value=humanTextBufferRef.current;humanTextBufferRef.current='';if(value)void queueHumanInput('KEYBOARD_TYPE',{value,delay_ms:0});return value;}
+ function scheduleHumanTextFlush(){clearHumanTextTimer();humanTextTimerRef.current=window.setTimeout(()=>{humanTextTimerRef.current=null;const value=humanTextBufferRef.current;humanTextBufferRef.current='';if(value)void queueHumanInput('KEYBOARD_TYPE',{value,delay_ms:0});},HUMAN_TYPING_DEBOUNCE_MS);}
  function viewerPoint(event:MouseEvent<HTMLImageElement>){const session=browserSession;if(!session?.viewport_width||!session.viewport_height)return null;const rect=event.currentTarget.getBoundingClientRect();return{x:Math.max(0,Math.min(session.viewport_width,(event.clientX-rect.left)*session.viewport_width/rect.width)),y:Math.max(0,Math.min(session.viewport_height,(event.clientY-rect.top)*session.viewport_height/rect.height))};}
- function onViewerClick(event:MouseEvent<HTMLImageElement>){const p=viewerPoint(event);if(p)void humanInput('CLICK_POINT',p)}
- function onViewerDoubleClick(event:MouseEvent<HTMLImageElement>){const p=viewerPoint(event);if(p)void humanInput('DOUBLE_CLICK_POINT',p)}
- function onViewerWheel(event:WheelEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;event.preventDefault();void humanInput('SCROLL',{delta_x:event.deltaX,delta_y:event.deltaY})}
- function onViewerKeyDown(event:KeyboardEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;event.preventDefault();if(event.key.length===1&&!event.ctrlKey&&!event.metaKey)void humanInput('KEYBOARD_TYPE',{value:event.key});else void humanInput('KEYBOARD_PRESS',{key:event.key})}
- function switchTab(index:number){if(humanControl)void humanInput('SWITCH_TAB',{index});}
+ function onViewerClick(event:MouseEvent<HTMLImageElement>){drainHumanTextBuffer();const p=viewerPoint(event);if(p)void queueHumanInput('CLICK_POINT',p)}
+ function onViewerDoubleClick(event:MouseEvent<HTMLImageElement>){drainHumanTextBuffer();const p=viewerPoint(event);if(p)void queueHumanInput('DOUBLE_CLICK_POINT',p)}
+ function onViewerWheel(event:WheelEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;event.preventDefault();drainHumanTextBuffer();void queueHumanInput('SCROLL',{delta_x:event.deltaX,delta_y:event.deltaY})}
+ function onViewerKeyDown(event:KeyboardEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='v')return;event.preventDefault();if(event.key.length===1&&!event.ctrlKey&&!event.metaKey&&!event.altKey){humanTextBufferRef.current=`${humanTextBufferRef.current}${event.key}`.slice(0,4000);scheduleHumanTextFlush();return;}drainHumanTextBuffer();void queueHumanInput('KEYBOARD_PRESS',{key:event.key});}
+ function onViewerPaste(event:ClipboardEvent<HTMLDivElement>){if(browserSession?.state!=='HUMAN_CONTROLLED')return;const pasted=event.clipboardData.getData('text');if(!pasted)return;event.preventDefault();clearHumanTextTimer();const value=`${humanTextBufferRef.current}${pasted}`.slice(0,4000);humanTextBufferRef.current='';if(value)void queueHumanInput('KEYBOARD_TYPE',{value,delay_ms:0});}
+ function switchTab(index:number){if(humanControl){drainHumanTextBuffer();void queueHumanInput('SWITCH_TAB',{index});}}
  function onTabKeyDown(event:KeyboardEvent<HTMLSpanElement>,index:number){if(!humanControl)return;if(event.key==='Enter'||event.key===' '){event.preventDefault();switchTab(index)}}
- function navigateBack(){if(humanControl)void humanInput('BACK',{});}
- function navigateForward(){if(humanControl)void humanInput('FORWARD',{});}
- function reloadPage(){if(humanControl)void humanInput('RELOAD',{});}
- function openTab(){if(humanControl&&tabs.length<8)void humanInput('OPEN_TAB',{url:'about:blank'});}
- function closeTab(){if(humanControl&&tabs.length>1)void humanInput('CLOSE_TAB',{});}
+ function navigateBack(){if(humanControl){drainHumanTextBuffer();void queueHumanInput('BACK',{});}}
+ function navigateForward(){if(humanControl){drainHumanTextBuffer();void queueHumanInput('FORWARD',{});}}
+ function reloadPage(){if(humanControl){drainHumanTextBuffer();void queueHumanInput('RELOAD',{});}}
+ function openTab(){if(humanControl&&tabs.length<8){drainHumanTextBuffer();void queueHumanInput('OPEN_TAB',{url:'about:blank'});}}
+ function closeTab(){if(humanControl&&tabs.length>1){drainHumanTextBuffer();void queueHumanInput('CLOSE_TAB',{});}}
 
  const live=Boolean(browserSession?.worker_alive&&frameUrl&&!TERMINAL.has(browserSession.state));
  const canTakeover=Boolean(browserSession?.worker_alive&&browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO'&&!browserSession.emergency_stop);
@@ -201,9 +210,9 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
     <button type="button" style={navButtonStyle} onClick={closeTab} disabled={!humanControl||tabs.length<=1} title={tabs.length<=1?'Debe quedar al menos una pestaña':'Cerrar pestaña activa'} aria-label="Cerrar pestaña activa"><X size={14}/></button>
     <span style={{flex:'none',paddingLeft:10,borderLeft:'1px solid rgba(77,184,255,.12)',fontSize:7,fontWeight:900,letterSpacing:'.08em'}}>{sessionHealth}</span>
    </div>
-   <div className="cerebro-browser-viewport" tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown} style={humanControl?{boxShadow:'inset 0 0 0 2px rgba(255,183,66,.46), inset 0 0 50px rgba(255,172,55,.03)'}:undefined}>
+   <div className="cerebro-browser-viewport" tabIndex={humanControl?0:-1} onWheel={onViewerWheel} onKeyDown={onViewerKeyDown} onPaste={onViewerPaste} style={humanControl?{boxShadow:'inset 0 0 0 2px rgba(255,183,66,.46), inset 0 0 50px rgba(255,172,55,.03)'}:undefined}>
     {live?<img src={frameUrl} alt="Vista en vivo de Browser 1" onClick={onViewerClick} onDoubleClick={onViewerDoubleClick} draggable={false} style={{position:'relative',zIndex:1,display:'block',width:'100%',height:'100%',objectFit:'contain',userSelect:'none',cursor:humanControl?'crosshair':'default'}}/>:<div className="cerebro-browser-awaiting"><span className="cerebro-browser-awaiting-icon"><Globe2 size={38}/></span><small>LIVE VIEWER · GOVERNED CONTROL</small><h2>{browserSession?.state==='CONNECTING'?'Arrancando navegador':'Navegador preparado'}</h2><p>{browserSession?.state==='CONNECTING'?'La sesión espera al worker gobernado.':'La consola está preparada para una sesión física real; no se simula navegación ni estado.'}</p><div className="cerebro-browser-awaiting-meta"><span>{stateLabel(browserSession)}</span><span>{browserSession?.session_id?`ID ${readableId(browserSession.session_id)}`:'Sin sesión activa'}</span><span>{humanControl?'Entrada humana habilitada':'Control gobernado por CEREBRO'}</span></div></div>}
-    {humanControl?<div aria-live="polite" style={{position:'absolute',zIndex:3,left:12,top:12,padding:'7px 9px',border:'1px solid rgba(255,183,66,.28)',borderRadius:9,background:'rgba(45,31,10,.8)',color:'#ffd78a',fontSize:7,fontWeight:900,letterSpacing:'.08em'}}>CONTROL HUMANO · CLICK · DOBLE CLICK · SCROLL · TECLADO · PESTAÑAS</div>:null}
+    {humanControl?<div aria-live="polite" style={{position:'absolute',zIndex:3,left:12,top:12,padding:'7px 9px',border:'1px solid rgba(255,183,66,.28)',borderRadius:9,background:'rgba(45,31,10,.8)',color:'#ffd78a',fontSize:7,fontWeight:900,letterSpacing:'.08em'}}>CONTROL HUMANO · CLICK · DOBLE CLICK · SCROLL · TECLADO/PEGADO CIFRADO · PESTAÑAS</div>:null}
     {humanRequired?<div role="alert" style={{position:'absolute',zIndex:4,right:12,top:12,display:'flex',alignItems:'center',gap:9,padding:'9px 11px',border:'1px solid rgba(255,106,66,.3)',borderRadius:11,background:'rgba(44,18,13,.88)',color:'#ff9c83',boxShadow:'0 10px 30px rgba(0,0,0,.25)'}}><ShieldAlert size={14}/><div style={{display:'flex',flexDirection:'column',gap:2}}><small style={{fontSize:6,fontWeight:900,letterSpacing:'.13em'}}>HUMAN_REQUIRED</small><strong style={{fontSize:9}}>{humanRequired}</strong></div></div>:null}
    </div>
    {browserError?<div role="status" style={{position:'absolute',right:14,bottom:12,zIndex:6,maxWidth:'min(620px,80%)',color:'#ff9b80',background:'#24110d',border:'1px solid rgba(255,106,66,.2)',borderRadius:9,padding:'7px 10px',fontSize:8,boxShadow:'0 10px 30px rgba(0,0,0,.3)'}}>{browserError}</div>:null}
