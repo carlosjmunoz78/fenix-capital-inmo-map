@@ -3,7 +3,7 @@
   "gate":"UNIVERSAL_MEDIA_STUDIO_READY",
   "status":"NOT_READY",
   "benchmarks":[
-    {"id":"BM-01","name":"Persistent synthetic character across image video and 3D references","required":true,"state":"NOT_RUN"},
+    {"id":"BM-01","name":"Persistent synthetic character across image video and 3D references","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:6d2384ad83fb047f311f347bb4de867ee2cb218f:cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-02","name":"Authorized real-person media to digital-double proof","required":true,"state":"NOT_RUN"},
     {"id":"BM-03","name":"Authorized voice clone voice-conversion TTS prosody and multilingual proof","required":true,"state":"NOT_RUN"},
     {"id":"BM-04","name":"Original song end-to-end with stems mix master and provenance","required":true,"state":"NOT_RUN"},
