@@ -1,0 +1,171 @@
+name: CEREBRO UMS BM12 Rebuild Rollback Archive
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm12-rebuild-rollback.yml'
+      - 'cerebro/media-studio/v2/probes/bm12_archive_builder.py'
+      - 'cerebro/media-studio/v2/probes/bm12_archive_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm12-rebuild-rollback
+  cancel-in-progress: true
+
+jobs:
+  archive_rebuild_rollback:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Recover BM04 audio master
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm04-original-song-40226247105
+          path: parents/bm04
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40226247105
+
+      - name: Recover BM05 audiovisual master
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm05-scene-mix-40226695721
+          path: parents/bm05
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40226695721
+
+      - name: Recover BM07 spatial master and rights proof
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm07-spatial-40227215020
+          path: parents/bm07
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40227215020
+
+      - name: Locate immutable deliverables and build package
+        id: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUDIO="$(find parents/bm04 -type f -name 'bm04-master.flac' | head -n1)"
+          VIDEO="$(find parents/bm05 -type f -name 'bm05-final-scene.mp4' | head -n1)"
+          SPATIAL="$(find parents/bm07 -type f -name 'bm07-spatial-asset.glb' | head -n1)"
+          BM07_PROOF="$(find parents/bm07 -type f -name 'bm07-pass-with-evidence.json' | head -n1)"
+          test -n "$AUDIO" && test -s "$AUDIO" && test -n "$VIDEO" && test -s "$VIDEO" && test -n "$SPATIAL" && test -s "$SPATIAL" && test -n "$BM07_PROOF" && test -s "$BM07_PROOF"
+          test "$(sha256sum "$AUDIO" | awk '{print $1}')" = '0d452251a68ccf310e0cd5643965d0ca3ec2c9cb4ee9fde2a7c46fa409176b3b'
+          test "$(sha256sum "$VIDEO" | awk '{print $1}')" = 'a1949cffe562e9260649037e8850f8ff035e777c2b4b1cc9809ed905bc5475c6'
+          test "$(sha256sum "$SPATIAL" | awk '{print $1}')" = 'cfbc386d1150d5d08babd176cc858156df9ced716c9e9fb5cd2921fc3fbad9d8'
+          git fetch --no-tags origin main
+          MAIN_SHA="$(git rev-parse origin/main)"
+          BRANCH_SHA="$(git rev-parse HEAD)"
+          mkdir -p ums-bm12
+          python3 cerebro/media-studio/v2/probes/bm12_archive_builder.py \
+            --out ums-bm12/package \
+            --audio "$AUDIO" --video "$VIDEO" --spatial "$SPATIAL" \
+            --evidence-dir cerebro/media-studio/v2/evidence \
+            --bm07-proof "$BM07_PROOF" \
+            --main-sha "$MAIN_SHA" --branch-sha "$BRANCH_SHA" | tee ums-bm12/builder.stdout.log
+          echo "main_sha=$MAIN_SHA" >> "$GITHUB_OUTPUT"
+          echo "branch_sha=$BRANCH_SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Create deterministic backup archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar --sort=name --mtime='UTC 1970-01-01' --owner=0 --group=0 --numeric-owner -C ums-bm12 -cf - package | gzip -n > ums-bm12/bm12-backup.tar.gz
+          sha256sum ums-bm12/bm12-backup.tar.gz | tee ums-bm12/bm12-backup.sha256
+          test -s ums-bm12/bm12-backup.tar.gz
+
+      - name: Rebuild from backup and verify every manifest hash
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/bm12-rebuild && mkdir -p /tmp/bm12-rebuild
+          gzip -dc ums-bm12/bm12-backup.tar.gz | tar -xf - -C /tmp/bm12-rebuild
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('/tmp/bm12-rebuild/package'); m=json.loads((root/'manifest.json').read_text())
+          def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+          checks=[]
+          for f in m['files']:
+              p=root/f['path']; checks.append(p.is_file() and p.stat().st_size==f['bytes'] and sha(p)==f['sha256'])
+          ds=m['deliverables']; restored=sum(1 for d in ds if (root/d['path']).is_file() and sha(root/d['path'])==d['sha256'])
+          r={'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM12_REBUILD_REPORT_V1','status':'PASS_WITH_EVIDENCE' if all(checks) and restored==3 else 'FAIL_CLOSED','all_manifest_hashes_match':all(checks),'manifest_entries_checked':len(checks),'deliverables_restored':restored,'sandbox_root':str(root),'prod_mutated':False}
+          Path('ums-bm12/rebuild-report.json').write_text(json.dumps(r,indent=2))
+          print(json.dumps(r,indent=2))
+          if r['status']!='PASS_WITH_EVIDENCE': raise SystemExit(4)
+          PY
+
+      - name: Rollback simulation against immutable main snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN_SHA='${{ steps.build.outputs.main_sha }}'
+          rm -rf /tmp/bm12-rollback && mkdir -p /tmp/bm12-rollback/baseline /tmp/bm12-rollback/mutation /tmp/bm12-rollback/restored
+          git archive --format=tar "$MAIN_SHA" cerebro/media-studio/v2 > /tmp/bm12-main-snapshot.tar
+          tar -xf /tmp/bm12-main-snapshot.tar -C /tmp/bm12-rollback/baseline
+          cp -a /tmp/bm12-rollback/baseline/. /tmp/bm12-rollback/mutation/
+          TARGET="$(find /tmp/bm12-rollback/mutation -type f | head -n1)"
+          test -n "$TARGET"
+          printf '\nBM12_SANDBOX_MUTATION\n' >> "$TARGET"
+          tar -xf /tmp/bm12-main-snapshot.tar -C /tmp/bm12-rollback/restored
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          def tree(root):
+              root=Path(root); h=hashlib.sha256(); n=0
+              for p in sorted(x for x in root.rglob('*') if x.is_file()):
+                  rel=str(p.relative_to(root)).encode(); digest=hashlib.sha256(p.read_bytes()).digest(); h.update(rel+b'\0'+digest); n+=1
+              return h.hexdigest(),n
+          b,bn=tree('/tmp/bm12-rollback/baseline'); m,mn=tree('/tmp/bm12-rollback/mutation'); r,rn=tree('/tmp/bm12-rollback/restored')
+          doc={'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM12_ROLLBACK_REPORT_V1','status':'PASS_WITH_EVIDENCE' if b==r and m!=b and bn==rn else 'FAIL_CLOSED','baseline_tree_digest':b,'mutation_tree_digest':m,'restored_tree_digest':r,'baseline_files':bn,'mutation_files':mn,'restored_files':rn,'sandbox_only':True,'repo_mutated':False,'main_snapshot_sha':'${{ steps.build.outputs.main_sha }}'}
+          Path('ums-bm12/rollback-report.json').write_text(json.dumps(doc,indent=2)); print(json.dumps(doc,indent=2))
+          if doc['status']!='PASS_WITH_EVIDENCE': raise SystemExit(5)
+          PY
+
+      - name: Fail-closed BM12 tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm12_archive_proof_gate.py \
+            --package ums-bm12/package \
+            --archive ums-bm12/bm12-backup.tar.gz \
+            --archive-sha ums-bm12/bm12-backup.sha256 \
+            --rebuild ums-bm12/rebuild-report.json \
+            --rollback ums-bm12/rollback-report.json \
+            --out ums-bm12/bm12-pass-with-evidence.json | tee ums-bm12/proof.stdout.log
+
+      - name: Semantic benchmark-credit gate
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm12/bm12-pass-with-evidence.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE' and x['benchmark_credit'] is True
+          assert x['proof_type']=='REBUILD_ROLLBACK_PROVENANCE_RIGHTS_ARCHIVE_MULTI_DELIVERABLE_PROOF'
+          assert all(x['checks'].values())
+          assert x['benchmark_registry_mutation_authorized'] is True and x['universal_media_studio_ready_authorized'] is False
+          assert set(x['deliverable_types'])=={'AUDIO_MASTER','VIDEO_MASTER','SPATIAL_3D'}
+          print(json.dumps(x,indent=2))
+          PY
+
+      - name: Upload immutable BM12 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm12-rebuild-rollback-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-bm12/
