@@ -1633,6 +1633,76 @@
       "promoted_at": "2026-10-23T00:53:55.004Z"
     },
     {
+      "candidate_id": "repo:160e5adcd1cd7c62e963d7c9bf68",
+      "technical_name": "blog-article-design",
+      "source_locator": "github://TerminalSkills/skills@33b765f0904561257112a98d21df5383a6e77113/skills/blog-article-design",
+      "pinned_sha": "33b765f0904561257112a98d21df5383a6e77113",
+      "snapshot_sha256": "160e5adcd1cd7c62e963d7c9bf68e2d163c1680452eeb8fdc89c8e6bc557c7f0",
+      "manifest_sha256": "bad132e6eda715ab6136e55eef8f0bc37cf40619f9d76253690c51e234b551e7",
+      "outcome_hash": "a29a01fe0ec46d8ad35ecf7ccc8939d572aee44b2c61e065a1973269825d101b",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:160e5adcd1cd7c62:cap:1",
+          "technical_name": "blog-article-design",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T19:10:00.804Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "71eff15bc5ad75190178a86d6d325840a05dea764151cfc62a8e003b5f37e23b"
+    },
+    {
       "candidate_id": "repo:dbd00f2cfc5b33e91c1c65f0499f",
       "technical_name": "blog-article-design",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/blog-article-design",
@@ -13872,10 +13942,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 137,
-    "promoted": 1,
+    "total": 138,
+    "inserted": 1,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 137
   }
 }
