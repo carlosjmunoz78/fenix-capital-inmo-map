@@ -1,0 +1,104 @@
+{
+  "schema_version": "2.0.0",
+  "state_type": "CEREBRO_UMS_BENCHMARK_EVIDENCE_V2",
+  "company_id": "fenix",
+  "engine_id": "CEREBRO_UMS",
+  "environment": "PREPROD",
+  "version": "v2",
+  "benchmark_id": "BM-02",
+  "benchmark_name": "Authorized real-person media to digital-double proof",
+  "status": "PASS_WITH_EVIDENCE",
+  "benchmark_credit": true,
+  "proof": {
+    "tribunal_status": "PASS_WITH_PHYSICAL_EVIDENCE",
+    "tribunal_checks_passed": 16,
+    "tribunal_checks_total": 16,
+    "licensed_real_human_source": true,
+    "source_admitted": true,
+    "geometry_only_render": true,
+    "source_pixels_in_render": false,
+    "capabilities_proven": [
+      "REAL_PERSON_MEDIA_INGEST",
+      "DENSE_3D_FACE_GEOMETRY",
+      "FACIAL_MOTION_TRACK",
+      "GEOMETRY_ONLY_DIGITAL_DOUBLE",
+      "PROD_SAFE_RUNTIME_LICENSE_CHAIN"
+    ]
+  },
+  "source": {
+    "dataset": "RAVDESS",
+    "source_ref": "https://doi.org/10.5281/zenodo.1188976",
+    "dataset_license": "CC-BY-NC-SA-4.0",
+    "usage_boundary": "INTERNAL_NONCOMMERCIAL_BENCHMARK_ONLY",
+    "source_manifest_sha256": "af513947396d9e480c710d2d425ff9f3869b3d5a2cd81f88f8e81b1a57fc3762",
+    "source_admission_sha256": "05813e833f47323a96b53a722e4e4a567eadc7ca901d9ab94f25e0cc25e545fb",
+    "source_video_sha256": "e4f25a8061367784e4272a2963a653557a4f58bcbc9b5272ae329066bf84d160"
+  },
+  "runtime": {
+    "engine": "MediaPipe FaceMesh",
+    "package_version": "0.10.21",
+    "repository_commit": "cad7f3ab99ebf175947e40c5252c642612aae927",
+    "code_license": "Apache-2.0",
+    "code_license_verified": true,
+    "code_license_sha256": "8707eef0533987efc5b155d64761eeb6e20793f50b9bd1a68dad1cf4719d0ed8",
+    "model": "MediaPipe FaceMesh V2",
+    "model_license": "Apache-2.0",
+    "model_license_verified": true,
+    "model_card_sha256": "c6add060f4ebfb37b2690136b6c711c7e5fcb7038baa2649ae3338b83979565a",
+    "prod_runtime_license_safe": true,
+    "additional_cost_eur": 0
+  },
+  "physical_metrics": {
+    "decoded_frames": 98,
+    "tracked_frames": 98,
+    "tracking_ratio": 1.0,
+    "landmarks_per_tracked_frame": 478,
+    "edge_count": 1322,
+    "motion_rms_normalized": 0.00165257,
+    "fps": 29.97,
+    "elapsed_seconds": 1.13
+  },
+  "outputs": {
+    "wireframe_video": {
+      "path": "digital-double-wireframe.mp4",
+      "sha256": "a53d258ca41b49eb6b858aee887d5281feaf4801b282568f22305717ae58e289",
+      "bytes": 2874079
+    },
+    "wireframe_obj": {
+      "path": "digital-double-neutral.obj",
+      "sha256": "f0a8f3d838f112456185d060b99a92ec9d75905667db7e54b74e0f89dda0f403",
+      "bytes": 28707
+    },
+    "motion_track": {
+      "path": "digital-double-motion.npz",
+      "sha256": "2008c07efcdc7031942f886856878798293f48445305a93a4ca0b13ef7fc0cb2",
+      "bytes": 515869
+    },
+    "digital_double_manifest_sha256": "953d38b90daea5915e39c48c76b4c2ee8a15ae4f87e9bcb31eca9fd8e644acb0",
+    "license_evidence_sha256": "1b79cc3a49d4cbc47b9a563b7dda746fa5efe272fba0e53c74722d76edef27e0"
+  },
+  "artifact_chain": {
+    "source_run_id": 40246569906,
+    "source_artifact_id": 12618429176,
+    "source_artifact_digest": "sha256:0e1fe3cbb683b83a32626617df5a7543e90fb268554dd124515294ffa8db285c",
+    "benchmark_run_id": 40246812109,
+    "benchmark_artifact_id": 12618479375,
+    "benchmark_artifact_name": "ums-bm02-digital-double-proof-40246812109",
+    "benchmark_artifact_digest": "sha256:40fa975118b40fb99f5890abe59ccb0631665d7b830cb8ed32f68cb359d313ce",
+    "benchmark_artifact_size_bytes": 6690311,
+    "source_head_sha": "a8c107a4f2664c4db8b08c0b7bef1b67e5a756ca"
+  },
+  "authority": {
+    "readiness_mutation_authorized": true,
+    "prod_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "additional_cost_eur": 0,
+    "universal_media_studio_ready_authorized": false
+  },
+  "notes": [
+    "The RAVDESS actor is benchmark-only material and is not promoted or published as a PROD asset.",
+    "The production digital-double runtime proof uses the independently verified Apache-2.0 MediaPipe FaceMesh code/model route.",
+    "This evidence grants BM-02 benchmark credit only; final UMS PROD authority remains with the global readiness tribunal."
+  ]
+}
