@@ -21,7 +21,6 @@ MODEL_DIR_DEFAULT = "/tmp/cerebro-chatterbox-es-es"
 
 EXPECTED_SHA256 = {
     "t3_es_es.safetensors": "d85844b13ea8cb45e95b8d84a55bcfeccb2d743035cf304ee3d778fc6be39546",
-    "s3gen_v3.pt": "f7abce4b196dae2d08d9296cbebc6521b046079577643b42a19a03499d08721e",
     "ve.pt": "4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1",
     "conds.pt": "6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e",
 }
@@ -45,13 +44,23 @@ def checked_copy(src: str, dst: Path, expected_sha: str | None = None) -> str:
 
 
 def materialize_es_es_model(model_dir: Path) -> dict:
+    """
+    Build a local checkpoint directory compatible with the pinned Chatterbox runtime.
+
+    The Spanish-Spain specialization lives in the regional T3 checkpoint. S3Gen,
+    tokenizer, voice encoder and builtin conditionals stay on the exact pinned
+    shared Chatterbox revision because the regional repository's s3gen_v3.pt has
+    a different tokenizer state schema and is not load-compatible with the
+    pinned runtime. This keeps the regional linguistic model without silently
+    changing the decoder/runtime contract.
+    """
     model_dir.mkdir(parents=True, exist_ok=True)
     regional_files = {
         "t3_es_es.safetensors": "t3_es_es.safetensors",
-        "s3gen_v3.pt": "s3gen.pt",
-        "grapheme_mtl_merged_expanded_v1.json": "grapheme_mtl_merged_expanded_v1.json",
     }
     shared_files = {
+        "s3gen.pt": "s3gen.pt",
+        "grapheme_mtl_merged_expanded_v1.json": "grapheme_mtl_merged_expanded_v1.json",
         "ve.pt": "ve.pt",
         "conds.pt": "conds.pt",
     }
@@ -64,9 +73,9 @@ def materialize_es_es_model(model_dir: Path) -> dict:
             revision=REGIONAL_REVISION,
             token=os.getenv("HF_TOKEN"),
         )
-        expected = EXPECTED_SHA256.get(remote_name)
-        digest = checked_copy(src, model_dir / local_name, expected)
+        digest = checked_copy(src, model_dir / local_name, EXPECTED_SHA256.get(remote_name))
         assets.append({
+            "role": "REGIONAL_ES_ES_T3",
             "source_repo": REGIONAL_REPO,
             "source_revision": REGIONAL_REVISION,
             "source_file": remote_name,
@@ -81,8 +90,9 @@ def materialize_es_es_model(model_dir: Path) -> dict:
             revision=SHARED_REVISION,
             token=os.getenv("HF_TOKEN"),
         )
-        digest = checked_copy(src, model_dir / local_name, EXPECTED_SHA256[remote_name])
+        digest = checked_copy(src, model_dir / local_name, EXPECTED_SHA256.get(remote_name))
         assets.append({
+            "role": "PINNED_SHARED_RUNTIME_COMPATIBILITY",
             "source_repo": SHARED_REPO,
             "source_revision": SHARED_REVISION,
             "source_file": remote_name,
@@ -94,8 +104,10 @@ def materialize_es_es_model(model_dir: Path) -> dict:
         "profile": REGIONAL_PROFILE,
         "regional_repo": REGIONAL_REPO,
         "regional_revision": REGIONAL_REVISION,
+        "regional_t3": "t3_es_es.safetensors",
         "shared_repo": SHARED_REPO,
         "shared_revision": SHARED_REVISION,
+        "compatibility_policy": "REGIONAL_ES_ES_T3_PLUS_PINNED_SHARED_DECODER_TOKENIZER_VOICE_CONDITIONALS",
         "assets": assets,
     }
 
@@ -176,7 +188,7 @@ def main():
         })
 
     manifest = {
-        "schema_version": "1.1.0",
+        "schema_version": "1.1.1",
         "adapter_version": ADAPTER_VERSION,
         "engine": "CHATTERBOX_MTL_V3_ES_ES",
         "upstream": "resemble-ai/chatterbox",
@@ -186,7 +198,7 @@ def main():
         "regional_target": REGIONAL_PROFILE,
         "regional_profile_enforced": True,
         "regional_model": regional_model,
-        "voice_conditioning": "PRESERVE_BUILTIN_VOICE_CONDITIONALS_WITH_ES_ES_T3",
+        "voice_conditioning": "REGIONAL_ES_ES_T3_WITH_PINNED_COMPATIBLE_SHARED_S3GEN_AND_BUILTIN_CONDITIONALS",
         "device": device,
         "model_loaded_once": True,
         "generation": {
