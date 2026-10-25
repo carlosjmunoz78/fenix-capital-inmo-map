@@ -49,7 +49,7 @@ async function poll(body:any,w:any){
   const id=String(body?.session_id||'');let s=await svc.from('cerebro_browser_session_v3').select('state,control_owner,human_lease_id,human_lease_expires_at,emergency_stop,worker_id,human_required').eq('session_id',id).eq('environment','PREPROD').maybeSingle();if(s.error)throw s.error;if(!s.data||s.data.worker_id!==w.worker_id)return{ok:false,error:'WORKER_SESSION_MISMATCH'};
   if(s.data.emergency_stop||s.data.state==='STOPPED')return{ok:true,stop:true,state:'STOPPED'};
   if(s.data.state==='HIBERNATE_PENDING')return{ok:true,hibernate:true,state:'HIBERNATE_PENDING'};
-  if(s.data.state==='HUMAN_REQUIRED')return{ok:true,human_required:true,state:'HUMAN_REQUIRED',detail:s.data.human_required||null};
+  if(s.data.state==='HUMAN_REQUIRED')return{ok:true,human_required:true,hibernate:true,state:'HUMAN_REQUIRED',detail:s.data.human_required||null};
   if(s.data.state==='TAKEOVER_PENDING'){
     const lease=crypto.randomUUID();const exp=new Date(Date.now()+5*60_000).toISOString();
     const u=await svc.from('cerebro_browser_session_v3').update({state:'HUMAN_CONTROLLED',control_owner:'HUMAN',human_lease_id:lease,human_lease_expires_at:exp,updated_at:nowIso()}).eq('session_id',id).eq('state','TAKEOVER_PENDING').select('state,control_owner,human_lease_id,human_lease_expires_at').maybeSingle();if(u.error)throw u.error;
@@ -82,7 +82,7 @@ async function close(body:any,w:any){
 }
 Deno.serve(async req=>{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)??'';
-  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-worker-v1-preprod',environment:'PREPROD',owner_routes_exposed:false,allowed_refs:[...REFS],frames_encrypted:true,input_encrypted:true,hibernate_signal:true,hibernated_terminal_state:true,prod_access:false,trading_access:false,incremental_cost_eur:0});
+  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-worker-v1-preprod',environment:'PREPROD',owner_routes_exposed:false,allowed_refs:[...REFS],human_required_immediate_exit:true,frames_encrypted:true,input_encrypted:true,hibernate_signal:true,hibernated_terminal_state:true,prod_access:false,trading_access:false,incremental_cost_eur:0});
   if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
   const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
   try{
