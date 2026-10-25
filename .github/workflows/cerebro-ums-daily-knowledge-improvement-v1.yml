@@ -29,15 +29,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      STATE_DIR: ${{ runner.temp }}/cerebro-ums-knowledge-watch-state
-      PLAN_REPORT: ${{ runner.temp }}/ums-daily-specialist-learning-plan.json
-      WATCH_REPORT: ${{ runner.temp }}/ums-professional-source-watch.json
+      STATE_DIR: /tmp/cerebro-ums-knowledge-watch-state
+      PLAN_REPORT: /tmp/ums-daily-specialist-learning-plan.json
+      WATCH_REPORT: /tmp/ums-professional-source-watch.json
     steps:
       - uses: actions/checkout@v4
       - name: Restore prior source-watch state
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/cerebro-ums-knowledge-watch-state
+          path: /tmp/cerebro-ums-knowledge-watch-state
           key: ums-knowledge-watch-v1-${{ github.ref_name }}-${{ github.run_id }}
           restore-keys: |
             ums-knowledge-watch-v1-${{ github.ref_name }}-
@@ -80,7 +80,7 @@ jobs:
         with:
           name: cerebro-ums-daily-knowledge-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/ums-daily-specialist-learning-plan.json
-            ${{ runner.temp }}/ums-professional-source-watch.json
+            /tmp/ums-daily-specialist-learning-plan.json
+            /tmp/ums-professional-source-watch.json
           if-no-files-found: error
           retention-days: 30
