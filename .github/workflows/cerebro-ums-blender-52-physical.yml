@@ -1,0 +1,108 @@
+name: CEREBRO UMS Blender 5.2 Physical BM01
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-blender-52-physical.yml'
+      - 'cerebro/media-studio/v2/runtime/blender-52-capability-gate.mjs'
+      - 'cerebro/media-studio/v2/probes/blender_52_nova01_scene.py'
+      - 'cerebro/media-studio/v2/tests/blender-52-capability-gate.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-blender-52-physical
+  cancel-in-progress: false
+
+jobs:
+  contract_and_physical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      BLENDER_VERSION: '5.2.3'
+      BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
+      BLENDER_BASE: https://download.blender.org/release/Blender5.2
+      UMS_BLENDER_OUT: .ums-blender52-nova01
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Contract gate tests
+        run: node --test cerebro/media-studio/v2/tests/blender-52-capability-gate.test.mjs
+      - name: Recover canonical Nova-01 Stage0 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Verify canonical FRONT reference
+        id: nova
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          test -n "$FRONT" && test -s "$FRONT"
+          ACTUAL="$(sha256sum "$FRONT" | awk '{print $1}')"
+          EXPECTED='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          test "$ACTUAL" = "$EXPECTED"
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+          echo "Nova-01 FRONT provenance GREEN: $ACTUAL"
+      - name: Download official Blender 5.2.3 LTS and verify SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --output "$BLENDER_ARCHIVE" "$BLENDER_BASE/$BLENDER_ARCHIVE"
+          curl --fail --location --retry 3 --output blender-5.2.3.sha256 "$BLENDER_BASE/blender-5.2.3.sha256"
+          grep " $BLENDER_ARCHIVE$" blender-5.2.3.sha256 | sha256sum -c -
+          tar -xf "$BLENDER_ARCHIVE"
+          ./blender-5.2.3-linux-x64/blender --version | head -n 4
+      - name: Physical Nova-01 3D reference render on CPU
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.nova.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_nova01_scene.py | tee ums-blender52.stdout.log
+      - name: Semantic physical gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('.ums-blender52-nova01/bm01-blender-3d-reference-proof.json')
+          x=json.loads(p.read_text())
+          assert x['status']=='THREE_D_REFERENCE_PROOF_GENERATED'
+          assert x['character_id']=='UMS-SYNTH-CHAR-001'
+          assert x['identity_type']=='SYNTHETIC_ORIGINAL'
+          assert x['real_person_reference'] is False
+          assert x['blender_version'].startswith('5.2.3')
+          assert x['render_device']=='CPU'
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          assert x['source_reference']['sha256']=='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          assert len(x['assets']['renders'])==3
+          for r in x['assets']['renders'].values():
+              assert r['bytes']>1000 and len(r['sha256'])==64
+          for k in ('blend','glb'):
+              assert x['assets'][k]['bytes']>1000 and len(x['assets'][k]['sha256'])==64
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload Blender BM01 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-blender52-bm01-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            .ums-blender52-nova01/
+            ums-blender52.stdout.log
+            blender-5.2.3.sha256
