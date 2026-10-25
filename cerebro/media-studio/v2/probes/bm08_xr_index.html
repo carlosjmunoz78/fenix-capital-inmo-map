@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>CEREBRO UMS BM-08 XR Spatial Output</title>
+  <style>
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#03050a;color:#d8e7ff;font:14px system-ui,sans-serif}
+    #xr-canvas{width:100%;height:100%;touch-action:none;display:block}
+    #status{position:fixed;left:12px;bottom:12px;padding:8px 10px;background:#000a;border:1px solid #356;border-radius:6px;pointer-events:none}
+  </style>
+</head>
+<body data-benchmark="BM-08" data-environment="PREPROD" data-asset-loaded="false" data-unit="meter">
+  <canvas id="xr-canvas"></canvas>
+  <div id="status">BM-08 XR package loading…</div>
+  <script src="./app.js"></script>
+</body>
+</html>
