@@ -7,6 +7,7 @@ on:
     paths:
       - 'cerebro/runtime/creative-generative-router-v27.mjs'
       - 'cerebro/runtime/creative-voice-chatterbox-v27.py'
+      - 'cerebro/runtime/creative-voice-delivery-v27.mjs'
       - '.github/workflows/cerebro-creative-v27-generative-preprod.yml'
   workflow_dispatch:
 
@@ -53,6 +54,14 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg
+          ffmpeg -version | head -n 1
       - name: Install CPU PyTorch
         run: |
           python -m pip install --upgrade pip
@@ -66,12 +75,12 @@ jobs:
           mkdir -p .cerebro-v27/voice
           python cerebro/runtime/creative-voice-chatterbox-v27.py \
             --text 'Para. Si una casa te encanta, no dejes que la prisa decida por ti. Primero comprobamos si la operación encaja y después decides con datos.' \
-            --output .cerebro-v27/voice/chatterbox-v3-es.wav \
-            --manifest .cerebro-v27/voice/manifest.json
+            --output .cerebro-v27/voice/chatterbox-v3-es-raw.wav \
+            --manifest .cerebro-v27/voice/raw-manifest.json
           python - <<'PY'
           import json
           from pathlib import Path
-          m = json.loads(Path('.cerebro-v27/voice/manifest.json').read_text())
+          m = json.loads(Path('.cerebro-v27/voice/raw-manifest.json').read_text())
           assert m['engine'] == 'CHATTERBOX_MTL_V3'
           assert m['language_id'] == 'es'
           assert m['publish_authorized'] is False
@@ -80,6 +89,22 @@ jobs:
           assert m['sample_rate_hz'] > 0
           assert m['duration_seconds'] > 1
           PY
+      - name: Master physical voice delivery
+        run: |
+          node cerebro/runtime/creative-voice-delivery-v27.mjs \
+            .cerebro-v27/voice/chatterbox-v3-es-raw.wav \
+            .cerebro-v27/voice/chatterbox-v3-es-master-48k-stereo.wav \
+            .cerebro-v27/voice/master-report.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const r = JSON.parse(fs.readFileSync('.cerebro-v27/voice/master-report.json', 'utf8'));
+          if (r.physical_output.sample_rate_hz !== 48000) throw new Error('master sample rate must be 48 kHz');
+          if (r.physical_output.channels !== 2) throw new Error('master must be stereo');
+          if (r.measured_output.integrated_lufs === null || Math.abs(r.measured_output.integrated_lufs - (-16)) > 0.6) throw new Error(`master loudness out of gate: ${r.measured_output.integrated_lufs}`);
+          if (r.measured_output.true_peak_dbfs === null || r.measured_output.true_peak_dbfs > -1.3) throw new Error(`master true peak out of gate: ${r.measured_output.true_peak_dbfs}`);
+          if (r.raw_preserved !== true) throw new Error('raw audio must remain preserved');
+          if (r.publish_authorized !== false || r.promotion_eligible !== false) throw new Error('voice master must remain PREPROD');
+          NODE
       - uses: actions/upload-artifact@v4
         with:
           name: cerebro-v27-chatterbox-es-${{ github.sha }}
