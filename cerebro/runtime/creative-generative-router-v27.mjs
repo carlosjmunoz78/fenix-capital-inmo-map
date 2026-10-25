@@ -3,12 +3,13 @@ import os from 'node:os';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
-export const GENERATIVE_ROUTER_VERSION = '2.7.0';
+export const GENERATIVE_ROUTER_VERSION = '2.7.1';
 
 export const ENGINE_CATALOG = Object.freeze({
   WAN_ANIMATE_2: {
     kind: 'VIDEO_CHARACTER_ANIMATION',
     upstream: 'Wan-Video/Wan-Animate-2',
+    upstream_pin: '3ad2fef7d61d6200c9c653e0fe47be7616b323f3',
     license: 'Apache-2.0',
     commercial_policy: 'ALLOWED_BY_UPSTREAM_LICENSE',
     preferred: true,
@@ -25,6 +26,7 @@ export const ENGINE_CATALOG = Object.freeze({
   CHATTERBOX_MTL_V3: {
     kind: 'TTS',
     upstream: 'resemble-ai/chatterbox',
+    upstream_pin: '5de7a54aa4e5e2baadb0182dde554908b48b85c2',
     license: 'MIT',
     commercial_policy: 'ALLOWED_BY_UPSTREAM_LICENSE',
     preferred: true,
@@ -63,14 +65,24 @@ function probeNvidia() {
   }
 }
 
+function readGitHead(root) {
+  if (!root || !pathExists(`${root}/.git`)) return null;
+  try {
+    return execFileSync('git', ['-C', root, 'rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 5000 }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export function probeGenerativeCapabilities(env = process.env) {
   const nvidia = probeNvidia();
   const wanRoot = env.CEREBRO_WAN_ANIMATE2_ROOT || '';
   const ltxRoot = env.CEREBRO_LTX2_ROOT || '';
-  const wanRuntime = pathExists(wanRoot) && (
-    pathExists(`${wanRoot}/infer/wan_animate_2_gradio_distillation.py`) ||
-    pathExists(`${wanRoot}/infer/wan_animate_2_gradio.py`)
-  );
+  const wanEntry = `${wanRoot}/infer/wan_animate_2_demo.py`;
+  const wanConfig = `${wanRoot}/infer/wan_animate_2_distillation.yaml`;
+  const wanRepoHead = readGitHead(wanRoot);
+  const wanPinned = wanRepoHead === ENGINE_CATALOG.WAN_ANIMATE_2.upstream_pin;
+  const wanRuntime = pathExists(wanEntry) && pathExists(wanConfig) && wanPinned;
   const ltxRuntime = pathExists(ltxRoot);
   const ltxLicenseOk = envTrue(env.CEREBRO_LTX_COMMERCIAL_LICENSE_OK) || envTrue(env.CEREBRO_LTX_ENTITY_BELOW_UPSTREAM_REVENUE_THRESHOLD_CONFIRMED);
 
@@ -80,7 +92,11 @@ export function probeGenerativeCapabilities(env = process.env) {
       ready: nvidia.available && wanRuntime,
       blockers: [
         ...(!nvidia.available ? ['CUDA_GPU_UNAVAILABLE'] : []),
-        ...(!wanRuntime ? ['WAN_LOCAL_RUNTIME_UNAVAILABLE'] : []),
+        ...(!wanRoot ? ['WAN_RUNTIME_ROOT_UNSET'] : []),
+        ...(wanRoot && !pathExists(wanEntry) ? ['WAN_INFERENCE_SCRIPT_MISSING'] : []),
+        ...(wanRoot && !pathExists(wanConfig) ? ['WAN_DISTILLED_CONFIG_MISSING'] : []),
+        ...(wanRoot && !wanRepoHead ? ['WAN_REPO_HEAD_UNVERIFIED'] : []),
+        ...(wanRoot && wanRepoHead && !wanPinned ? [`WAN_UPSTREAM_SHA_MISMATCH:${wanRepoHead}`] : []),
       ],
     },
     {
@@ -98,7 +114,7 @@ export function probeGenerativeCapabilities(env = process.env) {
   const state = selected ? 'READY_PREPROD' : 'CAPABILITY_BLOCKED';
 
   return {
-    schema_version: '1.0.0',
+    schema_version: '1.1.0',
     router_version: GENERATIVE_ROUTER_VERSION,
     environment: env.CEREBRO_ENVIRONMENT || 'PREPROD',
     company_id: env.CEREBRO_COMPANY_ID || 'fenix',
