@@ -9,7 +9,7 @@ from pathlib import Path
 OUT=Path(os.environ.get('BM10_OUT','ums-bm10-longform')).resolve(); OUT.mkdir(parents=True,exist_ok=True)
 SRC=Path(os.environ['BM10_SOURCE_VIDEO']).resolve(); MUSIC=Path(os.environ['BM10_MUSIC']).resolve()
 EXPECTED_VIDEO=os.environ.get('BM10_SOURCE_VIDEO_SHA256','').lower(); EXPECTED_MUSIC=os.environ.get('BM10_MUSIC_SHA256','').lower()
-MODEL='Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice'; SPEAKER='Aiden'; LANGUAGE='Spanish'; SEQ_DUR=15.0
+MODEL='Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice'; SPEAKER='Aiden'; LANGUAGE='Spanish'; SEQ_DUR=16.0; XFADE=0.75
 TEXTS=[
  'Nova despierta en el umbral de una ciudad silenciosa. La primera luz dibuja una ruta y ella decide avanzar.',
  'En la segunda secuencia, Nova descubre señales entre la niebla. Mantiene el rumbo, observa y aprende sin perder su identidad.',
@@ -44,24 +44,36 @@ for i,text in enumerate(TEXTS,1):
 dejavu='/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
 seqs=[]
 for i,(v,title) in enumerate(zip(voice,TITLES),1):
-    out=OUT/f'sequence-{i:02d}.mp4'; vf=(f"scale=512:512:flags=lanczos,eq=contrast=1.03:saturation=1.02:brightness=-0.005,"
-        f"fade=t=in:st=0:d=0.35,fade=t=out:st=14.65:d=0.35,"
+    out=OUT/f'sequence-{i:02d}.mp4'
+    vf=(f"scale=512:512:flags=lanczos,eq=contrast=1.03:saturation=1.02:brightness=-0.005,"
         f"drawtext=fontfile={dejavu}:text='{title}':fontcolor=white:fontsize=20:box=1:boxcolor=black@0.35:boxborderw=8:x=24:y=24,format=yuv420p")
-    fc=(f"[1:a]volume=0.20,atrim=duration={SEQ_DUR},asetpts=N/SR/TB,afade=t=in:st=0:d=0.4,afade=t=out:st=14.4:d=0.6[m];"
+    fc=(f"[1:a]volume=0.20,atrim=duration={SEQ_DUR},asetpts=N/SR/TB[m];"
         f"[2:a]apad=pad_dur={SEQ_DUR},atrim=duration={SEQ_DUR},volume=1.0[n];"
         f"[m][n]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.95[a]")
     run(['ffmpeg','-hide_banner','-loglevel','error','-y','-stream_loop','-1','-i',str(SRC),'-stream_loop','-1','-i',str(MUSIC),'-i',str(OUT/v['path']),'-filter_complex',fc,'-map','0:v:0','-map','[a]','-t',str(SEQ_DUR),'-vf',vf,'-r','24','-c:v','libx264','-preset','medium','-crf','18','-c:a','aac','-b:a','192k','-ar','48000','-ac','2','-movflags','+faststart',str(out)])
     pr=probe(out); seqs.append({'index':i,'title':title,'path':out.name,'sha256':sha(out),'bytes':out.stat().st_size,'duration_seconds':float(pr['format']['duration'])})
 
-concat=OUT/'concat.txt'; concat.write_text(''.join(f"file '{(OUT/s['path']).as_posix()}'\n" for s in seqs),encoding='utf-8')
+# Smoothly overlap each sequence instead of hard-cutting a restarted source loop.
+starts=[SEQ_DUR-XFADE,2*SEQ_DUR-2*XFADE,3*SEQ_DUR-3*XFADE]
+centers=[round(x+XFADE/2,3) for x in starts]
 final=OUT/'bm10-nova01-longform-story.mp4'
-run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(final)])
-fp=probe(final)
+fc_final=(
+ f"[0:v][1:v]xfade=transition=fade:duration={XFADE}:offset={starts[0]}[v01];"
+ f"[v01][2:v]xfade=transition=fade:duration={XFADE}:offset={starts[1]}[v012];"
+ f"[v012][3:v]xfade=transition=fade:duration={XFADE}:offset={starts[2]}[v];"
+ f"[0:a][1:a]acrossfade=d={XFADE}:c1=tri:c2=tri[a01];"
+ f"[a01][2:a]acrossfade=d={XFADE}:c1=tri:c2=tri[a012];"
+ f"[a012][3:a]acrossfade=d={XFADE}:c1=tri:c2=tri[a]"
+)
+cmd=['ffmpeg','-hide_banner','-loglevel','error','-y']
+for s in seqs: cmd += ['-i',str(OUT/s['path'])]
+cmd += ['-filter_complex',fc_final,'-map','[v]','-map','[a]','-c:v','libx264','-preset','medium','-crf','18','-pix_fmt','yuv420p','-c:a','aac','-b:a','192k','-ar','48000','-ac','2','-movflags','+faststart',str(final)]
+run(cmd); fp=probe(final)
 
 from PIL import Image
 import numpy as np
 boundary=[]
-for idx,t0 in enumerate((15.0,30.0,45.0),1):
+for idx,t0 in enumerate(centers,1):
     a=OUT/f'boundary-{idx:02d}-pre.png'; b=OUT/f'boundary-{idx:02d}-post.png'
     run(['ffmpeg','-hide_banner','-loglevel','error','-y','-ss',f'{t0-0.05:.3f}','-i',str(final),'-frames:v','1',str(a)])
     run(['ffmpeg','-hide_banner','-loglevel','error','-y','-ss',f'{t0+0.05:.3f}','-i',str(final),'-frames:v','1',str(b)])
@@ -74,10 +86,10 @@ video_stream=next(s for s in fp['streams'] if s.get('codec_type')=='video'); aud
 manifest={
  'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM10_LONGFORM_STORY_V1','benchmark_id':'BM-10','environment':'PREPROD','status':'LONGFORM_MULTI_SEQUENCE_GENERATED',
  'character':{'id':'UMS-SYNTH-CHAR-001','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'source_benchmark':'BM-01','source_video_sha256':sha(SRC)},
- 'story':{'sequence_count':len(seqs),'sequence_duration_seconds':SEQ_DUR,'expected_total_seconds':SEQ_DUR*len(seqs),'sequences':seqs},
+ 'story':{'sequence_count':len(seqs),'sequence_duration_seconds':SEQ_DUR,'crossfade_seconds':XFADE,'transition_starts_seconds':starts,'transition_centers_seconds':centers,'expected_total_seconds':SEQ_DUR*len(seqs)-XFADE*(len(seqs)-1),'sequences':seqs},
  'voice':{'engine':MODEL,'speaker':SPEAKER,'language':LANGUAGE,'real_person_voice':False,'clips':voice},
- 'sound':{'music_source_benchmark':'BM-04','music_sha256':sha(MUSIC),'mix_sample_rate_hz':sr,'mix_channels':2,'peak_linear':round(peak,6),'rms_linear':round(rms,6),'limiter_peak_target':0.95},
- 'color_continuity':{'metric':'MEAN_ABSOLUTE_RGB_DELTA_AT_SEQUENCE_BOUNDARIES','boundaries':boundary},
+ 'sound':{'music_source_benchmark':'BM-04','music_sha256':sha(MUSIC),'mix_sample_rate_hz':sr,'mix_channels':2,'peak_linear':round(peak,6),'rms_linear':round(rms,6),'limiter_peak_target':0.95,'transition_method':'ACROSSFADE_TRIANGLE'},
+ 'color_continuity':{'metric':'MEAN_ABSOLUTE_RGB_DELTA_AROUND_XFADE_CENTERS','transition_method':'XFADE_FADE','boundaries':boundary},
  'final':{'path':final.name,'sha256':sha(final),'bytes':final.stat().st_size,'duration_seconds':float(fp['format']['duration']),'video_codec':video_stream['codec_name'],'audio_codec':audio_stream['codec_name'],'width':int(video_stream['width']),'height':int(video_stream['height']),'fps':video_stream.get('r_frame_rate')},
  'provenance':{'visual_source':'BM-01_PASS_WITH_EVIDENCE','music_source':'BM-04_PASS_WITH_EVIDENCE','voice_runtime':'QWEN3_TTS_CPU_REAL_INFERENCE','external_real_person_media':False},
  'elapsed_seconds':round(time.time()-START,3),'additional_cost_eur':0,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'readiness_mutation_authorized':False
