@@ -22,7 +22,31 @@
         "valid_from": {"type": ["string", "null"]},
         "valid_until": {"type": ["string", "null"]},
         "revocation_process": {"type": "string"},
-        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+        "evidence_refs": {"type": "array", "items": {"type": "string"}},
+        "owner_authorization": {
+          "type": ["object", "null"],
+          "required": ["authorization_id", "decision", "decided_by", "decided_at", "modalities", "actions", "environments"],
+          "properties": {
+            "authorization_id": {"type": "string", "minLength": 1},
+            "decision": {"enum": ["APPROVED", "DENIED", "REVOKED"]},
+            "decided_by": {"type": "string", "minLength": 1},
+            "decided_at": {"type": "string"},
+            "authorization_basis": {"enum": ["OWNER_ATTESTATION", "DOCUMENTED_PERMISSION", "LICENSED_DATASET", "OTHER_VERIFIED"]},
+            "attests_rights_or_permission": {"type": "boolean"},
+            "modalities": {
+              "type": "array",
+              "items": {"enum": ["image", "video", "voice", "singing", "3d", "motion", "live"]},
+              "uniqueItems": true
+            },
+            "actions": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+            "environments": {"type": "array", "items": {"enum": ["DEV", "PREPROD", "PROD"]}, "uniqueItems": true},
+            "material_refs": {"type": "array", "items": {"type": "string"}},
+            "material_sha256": {"type": "array", "items": {"type": "string"}},
+            "evidence_refs": {"type": "array", "items": {"type": "string"}},
+            "notes": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
       },
       "additionalProperties": false
     },
