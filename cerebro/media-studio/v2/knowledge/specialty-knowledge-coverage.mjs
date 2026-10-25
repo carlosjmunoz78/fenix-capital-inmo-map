@@ -52,7 +52,7 @@ export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=m
     const rolePacks=packs.filter((p)=>p.department_id===department.department_id);
     const queries=[...new Set(rolePacks.flatMap((p)=>p.research_queries??[]))].slice(0,32);
     return freeze({
-      job_id:`UMS-KNOWLEDGE-GAP-${department.department_id}`,company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'2.0.0',
+      job_id:`UMS-KNOWLEDGE-GAP-${department.department_id}`,company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'2.0.1',
       department_id:department.department_id,priority:department.priority,status:'RESEARCH_REQUIRED',
       reason:department.verified_source_count===0?'NO_VERIFIED_OFFICIAL_SOURCE_MAPPED_TO_DEPARTMENT':'DEEP_ROLE_AND_SECTION_COVERAGE_NOT_YET_PROVEN',
       specialist_role_ids:freeze(rolePacks.map((p)=>p.role_id)),research_queries:freeze(queries),
@@ -63,13 +63,14 @@ export function buildSpecialtyKnowledgeCoverage({snapshot=loadSnapshot(),packs=m
   const zeroSourceRoles=roles.filter((r)=>r.verified_source_count===0).length;
   const zeroSourceDepartments=departments.filter((d)=>d.verified_source_count===0).length;
   return freeze({
-    schema_version:'2.0.0',state_type:'CEREBRO_UMS_SPECIALIST_KNOWLEDGE_COVERAGE_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PROD_KNOWLEDGE_WITH_GOVERNED_RESEARCH',version:'2.0.0',
+    schema_version:'2.0.1',state_type:'CEREBRO_UMS_SPECIALIST_KNOWLEDGE_COVERAGE_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PROD_KNOWLEDGE_WITH_GOVERNED_RESEARCH',version:'2.0.1',
     snapshot_date:snapshot.snapshot_date,source_sets:freeze(snapshot.source_sets??[]),specialist_roles:roles.length,departments:departments.length,verified_sources:snapshot.sources.filter(verified).length,
     roles_with_zero_verified_department_sources:zeroSourceRoles,roles_with_one_or_more_verified_department_sources:roles.length-zeroSourceRoles,
     departments_with_zero_verified_sources:zeroSourceDepartments,departments_with_one_or_more_verified_sources:departments.length-zeroSourceDepartments,
     roles:freeze(roles),department_coverage:freeze(departments),research_jobs:freeze(research_jobs),
     interpretation:'ALL DEPARTMENTS NOW HAVE VERIFIED SEED SOURCES, BUT DEPARTMENT-LEVEL SOURCE MAPPING IS NOT A CLAIM OF DEEP ROLE MASTERY. ROLE/SECTION RESEARCH AND BENCHMARKING CONTINUE.',
-    deep_verified_operational_claims:0,knowledge_auto_promotion:false,prod_authorized:true,prod_tool_execution_authorized:false,spend_authorized:false,additional_cost_eur:0
+    prod_knowledge_loaded:true,
+    deep_verified_operational_claims:0,knowledge_auto_promotion:false,prod_authorized:false,prod_write_authorized:false,prod_tool_execution_authorized:false,spend_authorized:false,additional_cost_eur:0
   });
 }
 
