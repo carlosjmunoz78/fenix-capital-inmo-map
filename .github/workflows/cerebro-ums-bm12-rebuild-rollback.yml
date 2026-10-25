@@ -118,7 +118,7 @@ jobs:
           git archive --format=tar "$MAIN_SHA" cerebro/media-studio/v2 > /tmp/bm12-main-snapshot.tar
           tar -xf /tmp/bm12-main-snapshot.tar -C /tmp/bm12-rollback/baseline
           cp -a /tmp/bm12-rollback/baseline/. /tmp/bm12-rollback/mutation/
-          TARGET="$(find /tmp/bm12-rollback/mutation -type f | head -n1)"
+          TARGET="$(find /tmp/bm12-rollback/mutation -type f -print -quit)"
           test -n "$TARGET"
           printf '\nBM12_SANDBOX_MUTATION\n' >> "$TARGET"
           tar -xf /tmp/bm12-main-snapshot.tar -C /tmp/bm12-rollback/restored
