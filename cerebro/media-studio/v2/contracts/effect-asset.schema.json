@@ -1,0 +1,21 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"cerebro://media-studio/v2/effect-asset.schema.json",
+  "title":"Universal Media Studio Effect Asset",
+  "type":"object",
+  "required":["effect_id","family","origin","rights","parameters","compatible_surfaces","version","provenance"],
+  "properties":{
+    "effect_id":{"type":"string"},
+    "family":{"enum":["PARTICLES","FIRE_SMOKE","FLUIDS","DESTRUCTION","ELECTRICITY","ENERGY","ATMOSPHERE","WEATHER","OPTICAL","LENS","LIGHT","MAGIC_FANTASY","SCI_FI","IMPACT","TRANSITION","MOTION_GRAPHICS","FOLEY","SFX","AMBIENCE","MUSIC_STINGER","CREATURE","CROWD","PRACTICAL_FX","CUSTOM"]},
+    "origin":{"enum":["GENERATED","PROCEDURAL","CAPTURED_AUTHORIZED","LICENSED_LIBRARY","INTERNAL_ORIGINAL"]},
+    "rights":{"type":"object","required":["status","license_ref"],"properties":{"status":{"enum":["VALID","HUMAN_REQUIRED","DENY"]},"license_ref":{"type":"string"},"territories":{"type":"array","items":{"type":"string"}},"restrictions":{"type":"array","items":{"type":"string"}}}},
+    "parameters":{"type":"object"},
+    "compatible_surfaces":{"type":"array","items":{"type":"string"}},
+    "deterministic_seed":{"type":["string","null"]},
+    "preview_ref":{"type":["string","null"]},
+    "master_refs":{"type":"array","items":{"type":"string"}},
+    "version":{"type":"string"},
+    "provenance":{"type":"string"}
+  },
+  "additionalProperties":false
+}
