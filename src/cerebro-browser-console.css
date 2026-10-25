@@ -34,3 +34,5 @@
 .cerebro-browser-details .cerebro-browser-view-switch{display:inline-flex;margin:5px}
 body:has(.cerebro-console-host.view-navegador) .fenix-chat-launcher-restored,body:has(.cerebro-console-host.view-navegador) .fenix-mini-chat,body:has(.cerebro-console-host.view-navegador) [aria-label="Abrir chat interno"]{display:none!important}
 @media(max-width:640px){.cerebro-browser-console .cerebro-browser-header{gap:8px;padding:0 8px;font-size:11px}.cerebro-browser-console .cerebro-browser-header>[role=status]{font-size:9px}.cerebro-browser-bottom{padding:0 6px 6px}.cerebro-browser-console .cerebro-browser-frame{margin:4px}.cerebro-browser-bottom>.cerebro-browser-controlbar button{font-size:11px;padding:0 9px}.cerebro-browser-bottom .cerebro-browser-send{width:auto;min-width:55px}}
+
+.cerebro-browser-console .cerebro-browser-viewport>img{position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:100%;max-height:100%;object-fit:contain}
