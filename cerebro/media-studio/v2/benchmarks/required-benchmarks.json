@@ -10,7 +10,7 @@
     {"id":"BM-05","name":"Scene with dialogue Foley SFX music mix and sync","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:620763531d4fb05e7a9134dfa821fb7a172ba402:cerebro/media-studio/v2/evidence/bm05-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-06","name":"3D animated VFX shot","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:a73926db389a966c1191f909bb9e9ea35e75f5f7:cerebro/media-studio/v2/evidence/bm06-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-07","name":"Volumetric or spatial asset proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:5cf55b5e2c3f93be97dcb1e793d238c0a510b434:cerebro/media-studio/v2/evidence/bm07-pass-with-evidence-2026-10-25.json"},
-    {"id":"BM-08","name":"XR spatial output proof","required":true,"state":"NOT_RUN"},
+    {"id":"BM-08","name":"XR spatial output proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:a51aeb3f0b3f165a0fce2c1d2316f7b1a2c7cdcb:cerebro/media-studio/v2/evidence/bm08-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-09","name":"Holographic or declared-device adapter dry run","required":true,"state":"NOT_RUN"},
     {"id":"BM-10","name":"Long-form multi-sequence character story image voice sound and color continuity","required":true,"state":"NOT_RUN"},
     {"id":"BM-11","name":"Thousand-shot production simulation with resumable scheduling and cost telemetry","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:f059583efef66ef99b97ed3ac6182f97c1443aea:cerebro/media-studio/v2/evidence/bm11-pass-with-evidence-2026-10-25.json"},
