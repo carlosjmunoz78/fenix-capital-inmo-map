@@ -1,0 +1,133 @@
+name: CEREBRO UMS Qwen3-TTS CPU Probe
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-qwen3-tts-cpu-probe.yml'
+      - 'cerebro/media-studio/v2/probes/qwen3_tts_cpu_probe.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-qwen3-tts-cpu-probe
+  cancel-in-progress: false
+
+jobs:
+  qwen3_tts_cpu_probe:
+    name: Qwen3-TTS 0.6B real CPU inference
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      UMS_QWEN_MODEL: Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice
+      UMS_QWEN_MAX_NEW_TOKENS: '96'
+      UMS_QWEN_REPORT: ums-qwen3-tts-cpu-probe.json
+      UMS_QWEN_OUTPUT: ums-qwen3-tts-cpu-probe.wav
+
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Runtime baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python --version
+          uname -a
+          free -h
+          df -h .
+          if command -v nvidia-smi >/dev/null 2>&1; then
+            echo 'Unexpected GPU visible; CPU guard in probe will fail closed.'
+            nvidia-smi || true
+          else
+            echo 'nvidia-smi: absent (expected for current CPU baseline)'
+          fi
+
+      - name: Install CPU-only runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends sox libsox-fmt-all ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 psutil
+          python -m pip check
+
+      - name: Run bounded real inference
+        id: inference
+        shell: bash
+        run: |
+          set +e
+          timeout --signal=TERM --kill-after=30s 900s \
+            python cerebro/media-studio/v2/probes/qwen3_tts_cpu_probe.py \
+            > ums-qwen3-tts-cpu-probe.stdout.log \
+            2> ums-qwen3-tts-cpu-probe.stderr.log
+          code=$?
+          echo "$code" > ums-qwen3-tts-cpu-probe.exit-code.txt
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+          if [ ! -s ums-qwen3-tts-cpu-probe.json ]; then
+            python - <<'PY'
+          import json
+          from pathlib import Path
+          code = int(Path('ums-qwen3-tts-cpu-probe.exit-code.txt').read_text().strip())
+          status = 'TIMEOUT' if code == 124 else 'CRASH_BEFORE_REPORT'
+          Path('ums-qwen3-tts-cpu-probe.json').write_text(json.dumps({
+              'schema': 'cerebro_ums_qwen3_tts_cpu_probe_v1',
+              'environment': 'PREPROD_LAB',
+              'external_mutations': False,
+              'paid_api_calls': 0,
+              'target_cost_eur': 0,
+              'status': status,
+              'exit_code': code,
+              'decision': 'CPU_FALLBACK_NOT_YET_PROVEN'
+          }, indent=2) + '\n')
+          PY
+          fi
+
+          cat ums-qwen3-tts-cpu-probe.json
+          exit 0
+
+      - name: Upload probe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-qwen3-tts-cpu-probe-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ums-qwen3-tts-cpu-probe.json
+            ums-qwen3-tts-cpu-probe.wav
+            ums-qwen3-tts-cpu-probe.stdout.log
+            ums-qwen3-tts-cpu-probe.stderr.log
+            ums-qwen3-tts-cpu-probe.exit-code.txt
+
+      - name: Semantic gate
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+          report = json.loads(Path('ums-qwen3-tts-cpu-probe.json').read_text())
+          print('status=', report.get('status'))
+          print('decision=', report.get('decision'))
+          if report.get('status') != 'PASSED_CPU_REAL_INFERENCE':
+              sys.exit(1)
+          artifact = report.get('artifact') or {}
+          if not artifact.get('sha256') or artifact.get('duration_seconds', 0) <= 0:
+              sys.exit(2)
+          PY
