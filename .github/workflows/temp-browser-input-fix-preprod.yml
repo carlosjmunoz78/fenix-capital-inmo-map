@@ -46,6 +46,15 @@ jobs:
           grep -F "if(processedCommand)continue" cerebro/runtime/browser-interactive-session-v3.mjs >/dev/null
           ! grep -F "humanInput('KEYBOARD_TYPE',{value:event.key})" src/CerebroBrowserConsole.tsx
 
+      - name: Validate sensitive frame redaction contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "const SENSITIVE_FIELD_SELECTOR" cerebro/runtime/cloud-browser-worker-v0.mjs >/dev/null
+          grep -F "mask: [activePage.locator(SENSITIVE_FIELD_SELECTOR)]" cerebro/runtime/cloud-browser-worker-v0.mjs >/dev/null
+          grep -F "screenshot_sensitive_field_redaction: true" cerebro/runtime/cloud-browser-worker-v0.mjs >/dev/null
+          node --test cerebro/runtime/cloud-browser-worker-sensitive-redaction-contract.test.mjs
+
       - name: Run canonical Browser V3 transport regression
         run: node --test cerebro/runtime/browser-session-liveness-v3.test.mjs cerebro/runtime/browser-live-runner-host.test.mjs cerebro/runtime/browser-oidc-refresh-v2.test.mjs
 
