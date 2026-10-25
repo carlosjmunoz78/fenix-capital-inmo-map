@@ -13,11 +13,11 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-browser-work-total-v1-preprod-consumer-353
+  group: cerebro-browser-work-total-v1-preprod-consumer-354
   cancel-in-progress: true
 
 env:
-  CEREBRO_BROWSER_CANDIDATE_SHA: de51ad366fa83cbab6205c644ea435421a943794
+  CEREBRO_BROWSER_CANDIDATE_SHA: 8440dfeb610d6fea9e3e721c2c429b5a3a9d060b
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-preprod
   CEREBRO_BROWSER_INTERACTIVE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-worker-v1-preprod
   CEREBRO_BROWSER_WORKSPACE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-v1-preprod
@@ -33,7 +33,7 @@ env:
 
 jobs:
   validate:
-    name: Validate pinned Work Total 3.5.3 candidate
+    name: Validate pinned Work Total 3.5.4 candidate
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -99,7 +99,7 @@ jobs:
           NODE
 
   work-total-worker:
-    name: Browser Work Total 3.5.3 governed worker
+    name: Browser Work Total 3.5.4 governed worker
     needs: watch
     if: needs.watch.outputs.pending != '0'
     runs-on: ubuntu-latest
@@ -119,7 +119,7 @@ jobs:
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           test "$(git rev-parse HEAD)" = "$CEREBRO_BROWSER_CANDIDATE_SHA" && echo "candidate_sha=$CEREBRO_BROWSER_CANDIDATE_SHA"
       - run: npm ci
-      - name: Execute at most one PREPROD Work Total job with candidate 3.5.3
+      - name: Execute at most one PREPROD Work Total job with candidate 3.5.4
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
   rearm:
