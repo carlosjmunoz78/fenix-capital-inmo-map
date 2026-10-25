@@ -1,0 +1,209 @@
+name: CEREBRO Facebook → Productora V2.8 Diversity PREPROD
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v28-different-preprod-2026-10-25'
+    paths:
+      - 'cerebro/runtime/facebook-video-department-v1.mjs'
+      - 'cerebro/runtime/creative-facebook-productora-v28.mjs'
+      - '.github/workflows/cerebro-facebook-productora-v28-preprod.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_TTS_DEVICE: cpu
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+
+jobs:
+  facebook-productora-diversity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install deterministic media runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fonts-dejavu-core espeak-ng
+          ffmpeg -version | head -n 1
+          test "$(fc-match -f '%{family}' Inter | head -n 1)" = "Inter"
+          node --check cerebro/runtime/facebook-video-department-v1.mjs
+          node --check cerebro/runtime/creative-facebook-productora-v28.mjs
+
+      - name: Facebook department decides three different financial video briefs
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-fb-v28
+          node cerebro/runtime/facebook-video-department-v1.mjs /tmp/cerebro-fb-v28/facebook-brief.json | tee /tmp/cerebro-fb-v28/facebook-director-result.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const b=JSON.parse(fs.readFileSync('/tmp/cerebro-fb-v28/facebook-brief.json','utf8'));
+          if(b.engine_id!=='SOCIAL-FACEBOOK-VIDEO-DIRECTOR-001'||b.campaigns.length!==3)throw new Error('FACEBOOK_DIRECTOR_CONTRACT');
+          if(!Object.values(b.gates).every(Boolean))throw new Error('FACEBOOK_DIRECTOR_GATE_RED');
+          if(new Set(b.campaigns.map(x=>x.target.age_band)).size!==3)throw new Error('TARGET_DIVERSITY_RED');
+          if(new Set(b.campaigns.map(x=>x.voice.id)).size!==3)throw new Error('VOICE_DIVERSITY_RED');
+          if(new Set(b.campaigns.map(x=>x.visual_profile.id)).size!==3)throw new Error('VISUAL_DIVERSITY_RED');
+          console.log('FACEBOOK_DEPARTMENT_THREE_TARGETS_GREEN');
+          NODE
+
+      - name: Materialize pinned Piper Spain voice with two physical speakers
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+          tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          chmod +x "$CEREBRO_PIPER_BIN"
+          python - <<'PY'
+          import json
+          c=json.load(open('/tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json',encoding='utf-8'))
+          assert c.get('language',{}).get('code')=='es_ES', c.get('language')
+          assert c.get('num_speakers')==2, c.get('num_speakers')
+          m=c.get('speaker_id_map') or {}
+          assert m.get('M')==0 and m.get('F')==1, m
+          print('PIPER_ES_ES_TWO_SPEAKERS_GREEN')
+          PY
+
+      - name: Install pinned Chatterbox Spain-Spanish runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0 torchaudio==2.6.0
+          pip install 'git+https://github.com/resemble-ai/chatterbox.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2'
+
+      - name: Productora creates three distinct Spain-Spanish voice identities
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-fb-v28/audio /tmp/cerebro-fb-v28/chatterbox
+          python - <<'PY'
+          import json
+          b=json.load(open('/tmp/cerebro-fb-v28/facebook-brief.json',encoding='utf-8'))
+          young=next(x for x in b['campaigns'] if x['voice']['engine']=='CHATTERBOX_MTL_V3_ES_ES')
+          items=[{'id':f,'text':young['formats'][f]['text']} for f in ('story','reel','long')]
+          json.dump({'items':items},open('/tmp/cerebro-fb-v28/chatterbox/input.json','w',encoding='utf-8'),ensure_ascii=False,indent=2)
+          PY
+          python cerebro/runtime/creative-voice-chatterbox-batch-v27.py \
+            --input /tmp/cerebro-fb-v28/chatterbox/input.json \
+            --out-dir /tmp/cerebro-fb-v28/chatterbox \
+            --manifest /tmp/cerebro-fb-v28/chatterbox/manifest.json \
+            --language es --regional-profile es-ES --exaggeration 0.62 --cfg-weight 0.36 --temperature 0.72
+          cp /tmp/cerebro-fb-v28/chatterbox/story-raw.wav /tmp/cerebro-fb-v28/audio/fb-fin-25-30-first-home-story.wav
+          cp /tmp/cerebro-fb-v28/chatterbox/reel-raw.wav /tmp/cerebro-fb-v28/audio/fb-fin-25-30-first-home-reel.wav
+          cp /tmp/cerebro-fb-v28/chatterbox/long-raw.wav /tmp/cerebro-fb-v28/audio/fb-fin-25-30-first-home-long.wav
+          python - <<'PY'
+          import json,subprocess,pathlib
+          b=json.load(open('/tmp/cerebro-fb-v28/facebook-brief.json',encoding='utf-8'))
+          piper='/tmp/cerebro-piper/piper/piper'; model='/tmp/cerebro-piper/es_ES-sharvard-medium.onnx'; config=model+'.json'
+          for c in b['campaigns']:
+            if c['voice']['engine']!='PIPER_ES_ES_SHARVARD': continue
+            sid=str(c['voice']['speaker_id']); scale='1.05' if c['voice']['speaker']=='F' else '1.02'
+            slug=c['id'].lower()
+            for fmt in ('story','reel','long'):
+              out=f'/tmp/cerebro-fb-v28/audio/{slug}-{fmt}.wav'
+              subprocess.run([piper,'--model',model,'--config',config,'--speaker',sid,'--length_scale',scale,'--sentence_silence','0.18','--output_file',out],input=c['formats'][fmt]['text'].encode('utf-8'),check=True)
+              assert pathlib.Path(out).stat().st_size>10000
+          print('THREE_ES_ES_VOICE_IDENTITIES_GENERATED')
+          PY
+          python - <<'PY'
+          import json,subprocess,glob,os
+          rows=[]
+          for f in sorted(glob.glob('/tmp/cerebro-fb-v28/audio/*.wav')):
+            d=float(subprocess.check_output(['ffprobe','-v','error','-show_entries','format=duration','-of','default=nk=1:nw=1',f]))
+            rows.append({'file':os.path.basename(f),'duration_sec':round(d,3)})
+          assert len(rows)==9, rows
+          json.dump({'locale':'es-ES','physical_voice_identities':['CHATTERBOX_ES_ES','SHARVARD_F','SHARVARD_M'],'items':rows},open('/tmp/cerebro-fb-v28/voice-manifest.json','w'),indent=2)
+          print(json.dumps(rows))
+          PY
+
+      - name: Materialize governed visual sources and three CC0 music identities
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-fb-v28/assets /tmp/cerebro-fb-v28/music
+          for id in 8293019 3944018 30353173 6780089 4307346 7581281 31568471 3769951 9056542 27860328 6187216 7821811 5466764; do
+            curl --fail --location --silent --show-error --retry 3 --retry-all-errors \
+              "https://www.pexels.com/download/video/${id}/" -o "/tmp/cerebro-fb-v28/assets/${id}.mp4"
+            test "$(stat -c%s /tmp/cerebro-fb-v28/assets/${id}.mp4)" -gt 100000
+          done
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music/02-kevin-macleod-blippy-trance.mp3 -o /tmp/cerebro-fb-v28/music/02-kevin-macleod-blippy-trance.mp3
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music/01-bryan-teoh-starcourt-mall.mp3 -o /tmp/cerebro-fb-v28/music/01-bryan-teoh-starcourt-mall.mp3
+          curl --fail --location --silent --show-error https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music/05-kevin-macleod-bass-meant-jazz.mp3 -o /tmp/cerebro-fb-v28/music/05-kevin-macleod-bass-meant-jazz.mp3
+
+      - name: Productora renders 3 stories + 3 near-minute reels + 3 long videos
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-fb-v28/out
+          node cerebro/runtime/creative-facebook-productora-v28.mjs \
+            /tmp/cerebro-fb-v28/facebook-brief.json \
+            /tmp/cerebro-fb-v28/audio \
+            /tmp/cerebro-fb-v28/assets \
+            /tmp/cerebro-fb-v28/music \
+            /tmp/cerebro-fb-v28/out | tee /tmp/cerebro-fb-v28/render-result.json
+          grep -F '"ok":true' /tmp/cerebro-fb-v28/render-result.json
+
+      - name: Fail-closed physical duration voice and diversity tribunal
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='/tmp/cerebro-fb-v28/out';
+          const m=JSON.parse(fs.readFileSync(`${root}/FACEBOOK_PRODUCTORA_V28_MANIFEST.json`,'utf8'));
+          if(m.schema_version!=='2.8.0'||m.environment!=='PREPROD'||m.channel!=='FACEBOOK')throw new Error('MANIFEST_IDENTITY');
+          if(m.upstream_decision_engine!=='SOCIAL-FACEBOOK-VIDEO-DIRECTOR-001')throw new Error('DEPARTMENT_HANDOFF');
+          if(m.separation_of_concerns!=='FACEBOOK_DECIDES_WHAT_PRODUCTORA_DECIDES_HOW')throw new Error('RESPONSIBILITY_SPLIT');
+          if(!Object.values(m.gates).every(Boolean))throw new Error(`GATES_RED:${JSON.stringify(m.gates)}`);
+          if(m.productions.length!==9)throw new Error('COUNT');
+          const reels=m.productions.filter(x=>x.format==='reel'), longs=m.productions.filter(x=>x.format==='long'), stories=m.productions.filter(x=>x.format==='story');
+          if(reels.some(x=>x.duration_sec<48||x.duration_sec>=60))throw new Error('REEL_DURATION');
+          if(longs.some(x=>x.duration_sec<180))throw new Error('LONG_DURATION');
+          if(stories.some(x=>x.duration_sec<15||x.duration_sec>28))throw new Error('STORY_DURATION');
+          if(new Set(m.productions.map(x=>x.voice.id)).size!==3)throw new Error('VOICE_IDENTITIES');
+          if(new Set(m.productions.map(x=>x.visual_profile.id)).size!==3)throw new Error('VISUAL_IDENTITIES');
+          if(new Set(m.productions.map(x=>x.visual_profile.camera)).size!==3)throw new Error('CAMERA_DIVERSITY');
+          if(new Set(m.productions.map(x=>x.visual_profile.lighting)).size!==3)throw new Error('LIGHTING_DIVERSITY');
+          if(new Set(m.productions.map(x=>x.visual_profile.transition)).size!==3)throw new Error('TRANSITION_DIVERSITY');
+          if(new Set(m.productions.map(x=>x.music.id)).size!==3)throw new Error('MUSIC_DIVERSITY');
+          if(m.publish_authorized!==false||m.promotion_eligible!==false||m.additional_recurring_cost_eur!==0)throw new Error('GOVERNANCE');
+          for(const p of m.productions)if(!fs.existsSync(`${root}/${p.artifact}`))throw new Error(`MISSING:${p.artifact}`);
+          console.log('FACEBOOK_PRODUCTORA_V28_PHYSICAL_DIVERSITY_GREEN_HUMAN_TRIBUNAL_PENDING');
+          NODE
+
+      - name: Extract physical review contact sheets and checksums
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-fb-v28/out/review-frames
+          for f in /tmp/cerebro-fb-v28/out/*.mp4; do
+            base="$(basename "$f" .mp4)"
+            ffprobe -v error -show_entries format=duration,size:stream=codec_type,width,height,sample_rate,channels -of json "$f" > "/tmp/cerebro-fb-v28/out/${base}-probe.json"
+            dur="$(ffprobe -v error -show_entries format=duration -of default=nk=1:nw=1 "$f")"
+            if awk "BEGIN {exit !($dur >= 180)}"; then fps='1/12'; else fps='1/4'; fi
+            ffmpeg -hide_banner -loglevel error -i "$f" -vf "fps=${fps},scale=300:-2,tile=4x4:padding=3:margin=3" -frames:v 1 -q:v 3 -y "/tmp/cerebro-fb-v28/out/review-frames/${base}-contact-sheet.jpg"
+          done
+          cp /tmp/cerebro-fb-v28/facebook-brief.json /tmp/cerebro-fb-v28/out/FACEBOOK_DIRECTOR_BRIEF.json
+          cp /tmp/cerebro-fb-v28/voice-manifest.json /tmp/cerebro-fb-v28/out/VOICE_MANIFEST.json
+          cp /tmp/cerebro-fb-v28/chatterbox/manifest.json /tmp/cerebro-fb-v28/out/CHATTERBOX_ES_ES_MANIFEST.json
+          sha256sum /tmp/cerebro-fb-v28/out/*.mp4 /tmp/cerebro-fb-v28/out/*.json > /tmp/cerebro-fb-v28/out/SHA256SUMS.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-facebook-productora-v28-${{ github.sha }}
+          path: /tmp/cerebro-fb-v28/out
+          retention-days: 7
