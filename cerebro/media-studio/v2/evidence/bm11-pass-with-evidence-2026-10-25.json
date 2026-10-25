@@ -1,0 +1,18 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_BM11_PERSISTED_EVIDENCE_V1",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PREPROD",
+  "version":"1.0.0",
+  "benchmark_id":"BM-11",
+  "benchmark_name":"Thousand-shot production simulation with resumable scheduling and cost telemetry",
+  "status":"PASS_WITH_EVIDENCE",
+  "benchmark_credit":true,
+  "proof":{"sha256":"d77e6770917645bef9de94c4a3758f44aa8f7e07d92cf27bd8da7c36e20546f9","checks_passed":19,"checks_total":19,"proof_type":"THOUSAND_SHOT_RESUMABLE_SCHEDULING_AND_COST_TELEMETRY_PROOF"},
+  "simulation":{"sha256":"9bdf918174b872172328a9026dbd7288081fd049dcef7d65dab8a0d9bbeaa7ad","shots":1000,"sequences":10,"scenes":100,"frames_per_shot":24,"workers":12,"completed_events":1000,"retryable_failures":27,"shots_with_retry":27,"checkpoints":12,"unique_output_hashes":1000,"exactly_once":true,"all_done":true,"completed_before_resume":420,"resume_event_present":true,"logical_steps":1027},
+  "scheduler_artifacts":{"phase1_state_sha256":"a202b9822f7902a9360da3f5947488ee8ee88699126e4b750c0a32b0ecba4856","final_state_sha256":"2e9fcbc3dcd2932c79a88bdb14f374b3966d9e214b47265a6dc25b13899c5d75","events_sha256":"e7b42aa3c9ea9ee12096728dabebaa323103818c7198856e6d614330494412c3"},
+  "telemetry":{"total_cost_eur":0,"per_shot_cost_eur":0,"paid_api_calls":0,"external_side_effects":false,"wall_clock_ms":35},
+  "artifact_chain":{"workflow_run_id":40227335524,"artifact_id":12611551866,"artifact_digest":"sha256:17ad3c86ad24bb9993a76d440129b238c4d0c0b7ac9b475882b9554ed3f62e37","source_head_sha":"ebbd44f63ff9983caac099da560c46adc6f0b34c"},
+  "authority":{"readiness_mutation_authorized":false,"prod_authorized":false,"publish_authorized":false,"spend_authorized":false,"additional_cost_eur":0}
+}
