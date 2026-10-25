@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""CEREBRO UMS · Qwen3-TTS CPU probe.
+"""CEREBRO UMS · Qwen3-TTS CPU physical worker/probe.
 
-LAB/PREPROD only. No external mutations. The probe intentionally uses the
+LAB/PREPROD only. No external mutations. The worker intentionally uses the
 smallest released Qwen3-TTS CustomVoice model and CPU-only PyTorch so that
-CEREBRO can determine whether the existing GitHub-hosted worker is a viable
-fallback before provisioning any GPU runtime.
+CEREBRO can execute and evidence the zero-cost fallback route before any GPU
+runtime is provisioned.
 """
 
 from __future__ import annotations
@@ -23,6 +23,7 @@ OUTPUT_PATH = Path(os.environ.get("UMS_QWEN_OUTPUT", "ums-qwen3-tts-cpu-probe.wa
 MODEL_ID = os.environ.get("UMS_QWEN_MODEL", "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice")
 TEXT = os.environ.get("UMS_QWEN_TEXT", "CEREBRO, prueba de voz en español.")
 SPEAKER = os.environ.get("UMS_QWEN_SPEAKER", "Aiden")
+LANGUAGE = os.environ.get("UMS_QWEN_LANGUAGE", "Spanish")
 MAX_NEW_TOKENS = int(os.environ.get("UMS_QWEN_MAX_NEW_TOKENS", "96"))
 
 started = time.time()
@@ -36,6 +37,7 @@ report: dict = {
     "device_requested": "cpu",
     "text": TEXT,
     "speaker": SPEAKER,
+    "language": LANGUAGE,
     "max_new_tokens": MAX_NEW_TOKENS,
     "runtime": {
         "python": sys.version.split()[0],
@@ -47,6 +49,7 @@ report: dict = {
 
 
 def write_report() -> None:
+    REPORT_PATH.parent.mkdir(parents=True, exist_ok=True)
     report["elapsed_seconds"] = round(time.time() - started, 3)
     REPORT_PATH.write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
@@ -99,10 +102,15 @@ try:
     report["supported_languages"] = sorted(list(model.model.get_supported_languages()))
     report["supported_speakers"] = sorted(list(model.model.get_supported_speakers()))
 
+    if LANGUAGE.lower() not in {str(value).lower() for value in report["supported_languages"]}:
+        raise RuntimeError(f"Unsupported requested language: {LANGUAGE}")
+    if SPEAKER.lower() not in {str(value).lower() for value in report["supported_speakers"]}:
+        raise RuntimeError(f"Unsupported requested speaker: {SPEAKER}")
+
     generation_started = time.time()
     wavs, sample_rate = model.generate_custom_voice(
         text=TEXT,
-        language="Spanish",
+        language=LANGUAGE,
         speaker=SPEAKER,
         max_new_tokens=MAX_NEW_TOKENS,
     )
@@ -111,6 +119,7 @@ try:
     if not wavs:
         raise RuntimeError("Qwen3-TTS returned no waveform")
 
+    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     sf.write(str(OUTPUT_PATH), wavs[0], sample_rate)
     payload = OUTPUT_PATH.read_bytes()
     info = sf.info(str(OUTPUT_PATH))
