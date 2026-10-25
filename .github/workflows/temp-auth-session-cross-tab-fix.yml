@@ -1,0 +1,54 @@
+name: TEMP Auth Session Cross-Tab Fix
+
+on:
+  push:
+    branches:
+      - fix/auth-session-cross-tab-no-global-logout-20261025
+    paths:
+      - '.github/workflows/temp-auth-session-cross-tab-fix.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temp-auth-session-cross-tab-fix-20261025
+  cancel-in-progress: false
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/auth-session-cross-tab-no-global-logout-20261025
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Apply deterministic auth lifecycle patch
+        run: node scripts/patch-auth-session-cross-tab.mjs
+      - name: Auth cross-tab regression
+        run: node --test cerebro/runtime/auth-session-cross-tab-gate.test.mjs
+      - name: Install dependencies
+        run: npm ci
+      - name: CEREBRO browser regressions
+        run: |
+          node --test cerebro/runtime/browser-session-consistency-gate.test.mjs
+          node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
+          node --test cerebro/runtime/browser-session-liveness-v3.test.mjs
+          node --test cerebro/runtime/browser-live-runner-host.test.mjs
+          node --test cerebro/runtime/browser-oidc-refresh-v2.test.mjs
+      - name: Build
+        run: npm run build
+      - name: Commit validated source patch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/App.tsx
+          git diff --cached --quiet && { echo 'No patch produced'; exit 1; }
+          git commit -m 'fix(auth): prevent cross-tab global session revocation [skip ci]'
+          git push origin HEAD:fix/auth-session-cross-tab-no-global-logout-20261025
