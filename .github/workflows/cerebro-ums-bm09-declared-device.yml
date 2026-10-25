@@ -46,8 +46,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          GLB="$(find bm07-parent -type f -name 'bm07-spatial-asset.glb' | head -n1)"
-          PROOF="$(find bm07-parent -type f -name 'bm07-pass-with-evidence.json' | head -n1)"
+          GLB="$(find bm07-parent -type f -name 'bm07-spatial-asset.glb' -print -quit)"
+          PROOF="$(find bm07-parent -type f -name 'bm07-pass-with-evidence.json' -print -quit)"
           test -n "$GLB" && test -s "$GLB" && test -n "$PROOF" && test -s "$PROOF"
           test "$(sha256sum "$GLB" | awk '{print $1}')" = "$BM09_SOURCE_SHA256"
           python3 - "$PROOF" <<'PY'
