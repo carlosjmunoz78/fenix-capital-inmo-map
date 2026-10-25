@@ -1,0 +1,13 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_BM07_PERSISTED_EVIDENCE_V1",
+  "company_id":"GLOBAL","engine_id":"UMS-001","environment":"PREPROD","version":"1.0.0",
+  "benchmark_id":"BM-07","benchmark_name":"Volumetric or spatial asset proof",
+  "status":"PASS_WITH_EVIDENCE","benchmark_credit":true,
+  "proof":{"sha256":"49c8dd3ed4f03ff0cbac8a5fb16eac938ff4cc99a3974e2bc1300acd1da20c5a","checks_passed":26,"checks_total":26,"proof_type":"VOLUMETRIC_OR_SPATIAL_ASSET_PROOF"},
+  "volume":{"source_sha256":"052df7ba4f592f73517713258ab8f30007966d935a384804eb3085d472f62588","grid_shape":[64,64,64],"voxel_count":262144,"occupied_voxels":22002,"occupied_fraction":0.08393096923828125,"density_min":7.499255700760136e-31,"density_max":1.0,"density_mean":0.0769529864192009,"iso":0.43,"density_field_sha256":"191315e2e0b78e338aed16fd7f7695f8cdf61867b0c820dd2944d443ae2b9163"},
+  "spatial_mesh":{"vertices":10314,"faces":20620,"watertight":true,"volume":9.713471080549938,"extents":[3.4000568361475416,2.985426370603818,2.7506335117609524],"ply_sha256":"34cdeb55ae7216e50e8d87d9446870c757860039a590ed8657f655186272f085"},
+  "physical_render":{"render_evidence_sha256":"0700f371058a7e49664f69dac1ee72b8be279e92ad0a01b660e050702c963441","blender_version":"5.2.3 LTS","device":"CPU","imported_vertices":10314,"imported_polygons":20620,"glb_sha256":"cfbc386d1150d5d08babd176cc858156df9ced716c9e9fb5cd2921fc3fbad9d8","usdc_sha256":"2d6eccae7dc9bf041903699c235350ace808c1019d3058b5ed3095f0c63f08c1","blend_sha256":"add36a2c39893ab454e4f53a0cd43584130e014e43dc047b3e3739c5f332f210","render_sha256":{"front":"6c72f6de13b295079eb368a3b7c947e65dc9c2cdb0c0f842827e39338eff36d9","oblique":"0e835ccb701e4d3a12dd7e805e34d55335ba7e100ecd4c8fbb6dfcfdd2ab8ef3","top_oblique":"f36eb7dc89bf8919dc1a6c5dc6cf22ffd4b3bcc723c0c147ed306d63f4ec6ced"}},
+  "artifact_chain":{"workflow_run_id":40227215020,"artifact_id":12612185438,"artifact_digest":"sha256:2d6241acfb3bfe12e416ce58de34ebe02134fa4400a3f238206d4708e44b8204","source_head_sha":"2e8f8d2d4649e7c5df51d683ce4b2cbefa559c17"},
+  "authority":{"readiness_mutation_authorized":false,"prod_authorized":false,"publish_authorized":false,"spend_authorized":false,"additional_cost_eur":0}
+}
