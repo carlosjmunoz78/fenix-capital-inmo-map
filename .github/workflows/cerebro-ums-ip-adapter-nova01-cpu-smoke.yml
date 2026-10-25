@@ -1,0 +1,141 @@
+name: CEREBRO UMS IP-Adapter Nova01 CPU Smoke
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-ip-adapter-nova01-cpu-smoke.yml'
+      - 'cerebro/media-studio/v2/probes/ip_adapter_nova01_cpu_smoke.py'
+      - 'cerebro/media-studio/v2/runtime/ip-adapter-capability-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/ip-adapter-capability-gate.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-ip-adapter-nova01-cpu-smoke
+  cancel-in-progress: true
+
+jobs:
+  physical_cpu_smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+      UMS_IP_OUT: ums-ip-adapter-nova01
+      IP_STEPS: '4'
+      IP_SIZE: '256'
+      IP_SCALE: '0.80'
+      IP_MAX_SECONDS: '900'
+      IP_MAX_RSS_GB: '14'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Contract gate tests
+        run: node --test cerebro/media-studio/v2/tests/ip-adapter-capability-gate.test.mjs
+      - name: Recover canonical Nova-01 Stage0 artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-ums-bm01-stage0-40205418615
+          path: bm01-stage0-source
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: 40205418615
+      - name: Verify canonical synthetic FRONT reference
+        id: nova
+        shell: bash
+        run: |
+          set -euo pipefail
+          FRONT="$(find bm01-stage0-source -type f -iname '*front*.png' | head -n1)"
+          test -n "$FRONT" && test -s "$FRONT"
+          ACTUAL="$(sha256sum "$FRONT" | awk '{print $1}')"
+          test "$ACTUAL" = 'e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          echo "front=$FRONT" >> "$GITHUB_OUTPUT"
+      - name: Runtime baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          python --version
+          free -h
+          df -h .
+          if command -v nvidia-smi >/dev/null 2>&1; then nvidia-smi; else echo 'nvidia-smi absent; CPU smoke expected'; fi
+      - name: Install pinned zero-cost inference layer
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchvision==0.22.1
+          python -m pip install diffusers==0.42.0 transformers accelerate safetensors huggingface_hub psutil pillow numpy
+          python -m pip check
+          python - <<'PY'
+          import diffusers,torch,transformers
+          print('diffusers',diffusers.__version__,'torch',torch.__version__,'transformers',transformers.__version__)
+          assert diffusers.__version__=='0.42.0'
+          assert torch.cuda.is_available() is False
+          PY
+      - name: Physical IP-Adapter A/B conditioning smoke
+        env:
+          NOVA01_FRONT_REFERENCE: ${{ steps.nova.outputs.front }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s python cerebro/media-studio/v2/probes/ip_adapter_nova01_cpu_smoke.py | tee ums-ip-adapter.stdout.log
+      - name: Semantic resource and conditioning gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('ums-ip-adapter-nova01/ip-adapter-nova01-cpu-smoke.json')
+          x=json.loads(p.read_text())
+          assert x['status']=='IP_ADAPTER_CPU_SMOKE_GREEN'
+          assert x['reference']['sha256']=='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
+          assert x['real_person_reference'] is False and x['faceid_variant'] is False
+          assert x['license_chain_verified_for_preprod_smoke'] is True
+          assert x['conditioning_effect']['material'] is True
+          assert x['runtime']['memory_fit_verified'] is True
+          assert x['runtime']['latency_fit_verified'] is True
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False and x['publish_authorized'] is False
+          for meta in x['artifacts'].values():
+              assert meta['bytes']>1000 and len(meta['sha256'])==64
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Bind result through existing PREPROD capability gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {evaluateIpAdapterPreprodCapability} from './cerebro/media-studio/v2/runtime/ip-adapter-capability-gate.mjs';
+          const x=JSON.parse(fs.readFileSync('ums-ip-adapter-nova01/ip-adapter-nova01-cpu-smoke.json','utf8'));
+          const gate=evaluateIpAdapterPreprodCapability({
+            company_id:'GLOBAL',environment:'PREPROD',request_id:'ums:ipadapter:nova01:cpu-smoke',
+            code_license_verified:true,checkpoint_license_verified:x.adapter_license_verified===true,base_model_license_verified:x.base_model_license_verified===true,
+            device:'cpu',cuda_available:false,memory_fit_verified:x.runtime.memory_fit_verified===true,latency_fit_verified:x.runtime.latency_fit_verified===true,
+            real_person_face_requested:false,faceid_variant_requested:false
+          });
+          if(gate.status!=='IP_ADAPTER_ELIGIBLE_FOR_PREPROD_PHYSICAL_BINDING') throw new Error(JSON.stringify(gate));
+          fs.writeFileSync('ums-ip-adapter-nova01/ip-adapter-capability-gate.json',JSON.stringify(gate,null,2));
+          console.log(JSON.stringify(gate,null,2));
+          NODE
+      - name: Upload IP-Adapter physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-ip-adapter-nova01-${{ github.run_id }}
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            ums-ip-adapter-nova01/
+            ums-ip-adapter.stdout.log
