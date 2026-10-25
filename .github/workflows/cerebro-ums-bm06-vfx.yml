@@ -52,6 +52,7 @@ jobs:
           assert x['status']=='SPEC_READY' and x['benchmark_id']=='BM-06'
           assert set(x['shot_contract']['required_vfx_families'])=={'ENERGY','PARTICLES','LIGHT','OPTICAL'}
           assert x['shot_contract']['external_assets_allowed']==0
+          assert x['shot_contract']['optical_implementation']=='EMISSIVE_GEOMETRY'
           assert x['authority']['additional_cost_eur']==0
           assert x['authority']['prod_authorized'] is False
           for fx in x['graph']['production']['sequences'][0]['scenes'][0]['shots'][0]['vfx']:
@@ -80,7 +81,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          timeout --signal=TERM --kill-after=30s 1200s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_bm06_vfx_shot.py | tee ums-bm06-blender.stdout.log
+          timeout --signal=TERM --kill-after=30s 1200s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_bm06_vfx_shot.py 2>&1 | tee ums-bm06-blender.stdout.log
+          test -s ums-bm06-vfx/bm06-vfx-candidate.json
+          test -s ums-bm06-vfx/bm06-animated-vfx-shot.blend
+          test "$(find ums-bm06-vfx/frames -maxdepth 1 -type f -name 'bm06_*.png' | wc -l)" -eq 18
+          if grep -E 'Traceback \(most recent call last\)|BM06_FRAME_NOT_RENDERED|Error: Python' ums-bm06-blender.stdout.log; then
+            echo 'Blender emitted a Python/render error; fail closed.' >&2
+            exit 31
+          fi
 
       - name: Encode physical H264 master
         shell: bash
@@ -88,6 +96,7 @@ jobs:
           set -euo pipefail
           ffmpeg -hide_banner -loglevel error -y -framerate 9 -start_number 1 -i 'ums-bm06-vfx/frames/bm06_%04d.png' -c:v libx264 -preset medium -crf 17 -pix_fmt yuv420p -movflags +faststart ums-bm06-vfx/bm06-animated-vfx-shot.mp4
           ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,width,height,r_frame_rate,nb_frames -of json ums-bm06-vfx/bm06-animated-vfx-shot.mp4 > ums-bm06-vfx/bm06-ffprobe.json
+          test -s ums-bm06-vfx/bm06-animated-vfx-shot.mp4
           cat ums-bm06-vfx/bm06-ffprobe.json
 
       - name: Fail-closed BM06 physical tribunal
