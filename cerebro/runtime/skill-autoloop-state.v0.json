@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T21:09:47.428Z",
+  "updated_at": "2026-10-25T21:15:33.951Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -362,11 +362,49 @@
     "repo:0c958042c436a99a6c50ad0543d2",
     "repo:4089ecb69904c30152b148a1066c",
     "repo:a6c1926d19a5ef5283c19f99713c",
-    "repo:880affeb51786d8d41df16f3d2dd"
+    "repo:880affeb51786d8d41df16f3d2dd",
+    "github-wide-skills:6a5600f704bd367140eb"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:6a5600f704bd367140eb": {
+      "candidate_id": "github-wide-skills:6a5600f704bd367140eb",
+      "name": "release-notes",
+      "human_alias": "Release Notes",
+      "wrapper_id": "skillwrap:db12f50da20364aa22a8",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 90.23,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "TonbokiriRaikiriMuramasa-Taikoubou/Actor-si",
+        "upstream_head_commit": "defcd30fadd5a60d6d983104dd3e24131f97e3af",
+        "manifest_sha256": "527dc67183a201f4f6da921a9cda4ae4ec02d1de93c1141494cb5783c706555e",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40234598045,
+      "checkpointed_at": "2026-10-25T21:15:33.951Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -21805,7 +21843,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -21818,7 +21856,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40221262097,
+  "last_discovery_run_id": 40234598045,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
