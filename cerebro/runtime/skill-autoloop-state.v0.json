@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T21:54:11.656Z",
+  "updated_at": "2026-10-25T22:32:21.131Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -371,7 +371,8 @@
     "repo:0a7c4c9d8745d46b224d2387ae53",
     "repo:531ada94b518f79e5f55cff9bb3a",
     "repo:d48629928739ccbfc375616a0f5e",
-    "repo:cf8fcc75d416d5f003240049c6b7"
+    "repo:cf8fcc75d416d5f003240049c6b7",
+    "github-wide-skills:36369deaebd54392ebaf"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -404,6 +405,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 40234598045,
       "checkpointed_at": "2026-10-25T21:15:33.951Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:36369deaebd54392ebaf": {
+      "candidate_id": "github-wide-skills:36369deaebd54392ebaf",
+      "name": "code-review",
+      "human_alias": "Code Review",
+      "wrapper_id": "skillwrap:62ac7b855020626d0b8c",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.83,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "TonbokiriRaikiriMuramasa-Taikoubou/Actor-si",
+        "upstream_head_commit": "f5fe3b538932b89e7b161511e2a51260cbf43f0f",
+        "manifest_sha256": "b16e3a2a55b386e0569d4bafb02e04a61ab87f39036d57f9b8527b2b4a11c15a",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40240621249,
+      "checkpointed_at": "2026-10-25T22:32:21.131Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -22426,7 +22463,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "ROUTE_SAFE_ACTION_BATCH_8_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -22439,7 +22476,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40234598045,
+  "last_discovery_run_id": 40240621249,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
