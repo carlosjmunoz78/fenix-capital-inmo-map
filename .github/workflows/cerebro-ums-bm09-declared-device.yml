@@ -1,0 +1,124 @@
+name: CEREBRO UMS BM09 Declared Device Adapter
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm09-declared-device.yml'
+      - 'cerebro/media-studio/v2/probes/blender_52_bm09_declared_adapter.py'
+      - 'cerebro/media-studio/v2/probes/bm09_declared_adapter_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm09-declared-device
+  cancel-in-progress: true
+
+jobs:
+  declared_adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      UMS_BM09_OUT: ums-bm09-declared-device
+      BM07_RUN_ID: '40227215020'
+      BM07_ARTIFACT: ums-bm07-spatial-40227215020
+      BM09_SOURCE_SHA256: cfbc386d1150d5d08babd176cc858156df9ced716c9e9fb5cd2921fc3fbad9d8
+      BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
+      BLENDER_BASE: https://download.blender.org/release/Blender5.2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Recover immutable BM07 spatial asset
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BM07_ARTIFACT }}
+          path: bm07-parent
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BM07_RUN_ID }}
+      - name: Verify source proof
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          GLB="$(find bm07-parent -type f -name 'bm07-spatial-asset.glb' | head -n1)"
+          PROOF="$(find bm07-parent -type f -name 'bm07-pass-with-evidence.json' | head -n1)"
+          test -n "$GLB" && test -s "$GLB" && test -n "$PROOF" && test -s "$PROOF"
+          test "$(sha256sum "$GLB" | awk '{print $1}')" = "$BM09_SOURCE_SHA256"
+          python3 - "$PROOF" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1])); assert x['status']=='PASS_WITH_EVIDENCE'; assert x['benchmark_id']=='BM-07'; assert x['additional_cost_eur']==0; assert x['prod_authorized'] is False
+          PY
+          echo "glb=$GLB" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost Blender/Pillow runtime
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0 python3-pil python3-numpy
+          curl --fail --location --retry 3 --output "$BLENDER_ARCHIVE" "$BLENDER_BASE/$BLENDER_ARCHIVE"
+          curl --fail --location --retry 3 --output blender-5.2.3.sha256 "$BLENDER_BASE/blender-5.2.3.sha256"
+          grep " $BLENDER_ARCHIVE$" blender-5.2.3.sha256 | sha256sum -c -
+          tar -xf "$BLENDER_ARCHIVE"
+      - name: Physical eight-view declared-device render
+        env:
+          BM09_SOURCE_GLB: ${{ steps.source.outputs.glb }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_bm09_declared_adapter.py 2>&1 | tee ums-bm09-blender.stdout.log
+          test -s ums-bm09-declared-device/bm09-adapter-manifest.json
+          test "$(find ums-bm09-declared-device/views -type f -name 'bm09-view-*.png' | wc -l)" -eq 8
+          ! grep -Eq 'Traceback \(most recent call last\)|BM09_VIEW_NOT_RENDERED|Error: Python' ums-bm09-blender.stdout.log
+      - name: Build 4x2 multiview quilt
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from PIL import Image
+          from pathlib import Path
+          ps=sorted(Path('ums-bm09-declared-device/views').glob('bm09-view-*.png'))
+          assert len(ps)==8
+          ims=[Image.open(p).convert('RGB') for p in ps]
+          assert all(im.size==(256,256) for im in ims)
+          q=Image.new('RGB',(1024,512))
+          for i,im in enumerate(ims): q.paste(im,((i%4)*256,(i//4)*256))
+          q.save('ums-bm09-declared-device/bm09-lightfield-quilt.png',optimize=True)
+          PY
+      - name: Fail-closed BM09 tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm09_declared_adapter_proof_gate.py \
+            --manifest ums-bm09-declared-device/bm09-adapter-manifest.json \
+            --root ums-bm09-declared-device \
+            --quilt ums-bm09-declared-device/bm09-lightfield-quilt.png \
+            --out ums-bm09-declared-device/bm09-pass-with-evidence.json | tee ums-bm09-proof.stdout.log
+      - name: Semantic benchmark-credit gate
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm09-declared-device/bm09-pass-with-evidence.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE' and x['benchmark_credit'] is True
+          assert x['proof_type']=='DECLARED_DEVICE_ADAPTER_DRY_RUN_PROOF'
+          assert x['device_claim']['hardware_present'] is False and x['device_claim']['hardware_runtime_proven'] is False and x['device_claim']['dry_run_only'] is True
+          assert all(x['checks'].values())
+          assert x['benchmark_registry_mutation_authorized'] is True and x['universal_media_studio_ready_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload immutable BM09 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm09-declared-device-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm09-declared-device/
+            ums-bm09-blender.stdout.log
+            ums-bm09-proof.stdout.log
+            blender-5.2.3.sha256
