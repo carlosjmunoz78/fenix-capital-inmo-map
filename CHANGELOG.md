@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-25 · Browser humano: latencia y privacidad de credenciales
+
+### Corregido
+- La entrada de texto en `HUMAN_CONTROLLED` deja de enviar una orden por carácter: el texto imprimible se agrupa y las teclas especiales se serializan detrás del buffer pendiente.
+- El pegado se envía como una única orden cifrada AES-GCM.
+- El worker evita capturas intermedias mientras procesa una cola de entrada humana para reducir latencia y reordenaciones.
+- Las capturas/evidencias del navegador enmascaran campos estándar de contraseña, email, usuario, login y otros campos marcados como sensibles antes de generar la imagen.
+- La auditoría conserva metadatos operativos sin incorporar el valor del texto sensible.
+
+### Validación y promoción
+- Hotfix de producto fusionado en `main`: `7758a4bf8014dead68bd15636b842fade7f22849`.
+- PREPROD, Browser V3, Cloud Browser Worker V0 físico, gateway, liveness, gobernanza, tribunal, Continuous Human QA y build/restoration de App superados antes de promoción.
+- Snapshot PROD previo conservado en `backup/prod-gh-pages-20261025-before-browser-input-fix`, apuntando al snapshot `gh-pages` `8086ab9de8064c4c517f80f5e97c4edca9cd8d8e`.
+- Este commit documental activa el workflow canónico `PROD Live Deploy`; el cierre exige verificación posterior del `PROD_SOURCE_SHA.txt` y smoke de `app.fenixcapital.es`.
+
 ## 2026-08-20 · Reproducibilidad cerrada en PRE-PROD
 
 ### Dependencias
