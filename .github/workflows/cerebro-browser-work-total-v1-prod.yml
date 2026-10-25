@@ -14,6 +14,9 @@ on:
       - 'cerebro/runtime/browser1-access-v1.mjs'
       - 'cerebro/runtime/cloud-browser-worker-v0.mjs'
       - 'cerebro/runtime/cloud-browser-governed-session-v1.mjs'
+      - 'src/cerebroBrowserWorkTotalDock.ts'
+      - 'src/cerebroBrowserInteractive.ts'
+      - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts'
 
 permissions:
   contents: read
@@ -33,10 +36,8 @@ env:
   CEREBRO_BROWSER_WORKER_SLOT: '1'
   CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
   CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
-  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '320'
-  CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS: '1200'
-  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '90'
-  CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS: '3000'
+  CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'
+  CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
 
 jobs:
   validate:
