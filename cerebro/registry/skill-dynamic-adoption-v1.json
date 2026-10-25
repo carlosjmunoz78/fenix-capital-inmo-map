@@ -1933,6 +1933,76 @@
       "promoted_at": "2026-10-21T14:40:37.050Z"
     },
     {
+      "candidate_id": "repo:e814cbcb98327c34d7674d99b0ed",
+      "technical_name": "blog-article-design",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/blog-article-design",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "e814cbcb98327c34d7674d99b0edb818bb2ff8b64dbbf6c924ecc1bc9d9899e5",
+      "manifest_sha256": "9c41e9bcb8c8e44510ede4dc566ce402eee618f331cf43297e5c603056c7a9f4",
+      "outcome_hash": "d911fb1ed979ddfc9ff651e6e01dff0db17fb56d92dfa930f55f51845fa36a43",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:e814cbcb98327c34:cap:1",
+          "technical_name": "blog-article-design",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-25T23:38:51.436Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "a2c7b8e136c22cfce92054b7b11d7885daae45178b21abdbcac29dbd6b65aaba"
+    },
+    {
       "candidate_id": "repo:9c06672fa1ae78ff5d1f7c46f5ee",
       "technical_name": "bold",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/bold",
@@ -14072,11 +14142,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 139,
-    "inserted": 0,
+    "total": 140,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 139
   }
 }
