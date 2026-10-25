@@ -8,7 +8,7 @@ const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}})
 const ISSUER='https://token.actions.githubusercontent.com';
 const AUD='cerebro-browser-worker-v1';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
-const REF='refs/heads/feat/browser-work-total-v1-20261024';
+const REFS=new Set(['refs/heads/feat/browser-work-total-v1-20261024','refs/heads/promote/browser-work-total-prod-20261025']);
 const WORKFLOW='.github/workflows/cerebro-browser-work-total-v1-preprod.yml';
 const PROJECT='hnqlnvakzaywtafeiybt';
 const JWKS=createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks`));
@@ -23,8 +23,9 @@ async function worker(req:Request){
   try{
     const {payload}=await jwtVerify(token,JWKS,{issuer:ISSUER,audience:AUD});
     if(payload.repository!==REPO)return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
-    if(String(payload.ref??'')!==REF)return{ok:false,error:'GITHUB_REF_DENIED'} as const;
-    if(String(payload.workflow_ref??'')!==`${REPO}/${WORKFLOW}@${REF}`)return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
+    const ref=String(payload.ref??'');
+    if(!REFS.has(ref))return{ok:false,error:'GITHUB_REF_DENIED'} as const;
+    if(String(payload.workflow_ref??'')!==`${REPO}/${WORKFLOW}@${ref}`)return{ok:false,error:'GITHUB_WORKFLOW_DENIED'} as const;
     return{ok:true,worker_id:`github-work-total-v1-preprod:${String(payload.run_id??'unknown')}:${String(payload.run_attempt??'1')}`} as const;
   }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
 }
@@ -81,7 +82,7 @@ async function close(body:any,w:any){
 }
 Deno.serve(async req=>{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)??'';
-  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-worker-v1-preprod',environment:'PREPROD',owner_routes_exposed:false,branch_ref:REF,frames_encrypted:true,input_encrypted:true,hibernate_signal:true,hibernated_terminal_state:true,prod_access:false,trading_access:false,incremental_cost_eur:0});
+  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-worker-v1-preprod',environment:'PREPROD',owner_routes_exposed:false,allowed_refs:[...REFS],frames_encrypted:true,input_encrypted:true,hibernate_signal:true,hibernated_terminal_state:true,prod_access:false,trading_access:false,incremental_cost_eur:0});
   if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
   const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
   try{
