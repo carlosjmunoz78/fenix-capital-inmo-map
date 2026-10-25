@@ -12,7 +12,9 @@ const paths={
  broker:'supabase/functions/cerebro-browser-work-total-v1-preprod/index.ts',
  worker:'supabase/functions/cerebro-browser-work-total-worker-v1-preprod/index.ts',
  dispatch:'supabase/functions/cerebro-browser-work-total-dispatch-v1-preprod/index.ts',
- migration:'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql'
+ migration:'supabase/migrations/20261024223500_browser_workspace_v1_contracts.sql',
+ dock:'src/cerebroBrowserWorkTotalDock.ts',
+ console:'src/CerebroBrowserConsole.tsx'
 };
 
 test('Work Total 3.5.4 keeps realtime interaction without post-human-input frame capture',async()=>{
@@ -71,6 +73,17 @@ test('Work Total migration contains hibernation and account audit lifecycle',asy
  const sql=await read(paths.migration);
  for(const token of ['HIBERNATED','PROFILE_SELECTED','PROFILE_LEASE_ACQUIRED','PROFILE_SWITCH_REQUESTED','SESSION_HIBERNATED','SESSION_RESUMED','ACCOUNT_VERIFICATION_OBSERVED','ACCOUNT_VERIFIED','REAUTH_REQUIRED','LEASE_RELEASED'])assert.match(sql,new RegExp(token));
  assert.match(sql,/cerebro_browser_workspace_profile_v1/);
+});
+
+test('Work Total start binds the effective workspace session to the main viewer selector',async()=>{
+ const dock=await read(paths.dock);const consoleSource=await read(paths.console);
+ assert.match(dock,/VIEWER_SESSION_SELECTOR='\.cerebro-browser-console select\[aria-label="Seleccionar sesión"\]'/);
+ assert.match(dock,/select\.dispatchEvent\(new Event\('change',\{bubbles:true\}\)\)/);
+ assert.match(dock,/const effectiveSessionId=start\.session\?\.session_id\|\|start\.active_session\?\.session_id/);
+ assert.match(dock,/await syncMainViewerSession\(effectiveSessionId\)/);
+ assert.match(dock,/WORK_TOTAL_VIEWER_SESSION_SYNC_TIMEOUT/);
+ assert.match(consoleSource,/aria-label="Seleccionar sesión"/);
+ assert.match(consoleSource,/onChange=\{event=>changeSession\(event\.target\.value\)\}/);
 });
 
 test('Work Total keeps zero incremental cost and scopes PROD strictly to Fenix',async()=>{
