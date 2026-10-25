@@ -1,0 +1,23 @@
+{
+  "schema_version":"2.0.0",
+  "status":"SEED_REGISTRY_REQUIRES_CONTINUOUS_REVALIDATION",
+  "source_classes":[
+    {"id":"SRC-STANDARDS","priority":1,"types":["SMPTE","AES","EBU","ITU","ISO_IEC","DCP_IMF","MPEG"],"use":"formats, mastering, broadcast, audio, cinema, delivery"},
+    {"id":"SRC-INTEROP","priority":1,"types":["OpenUSD","OpenTimelineIO","OpenColorIO","ACES","OpenEXR","MaterialX","OpenVDB","OpenCue","OpenXR","C2PA"],"use":"pipeline, scene, timeline, color, assets, render, XR, provenance"},
+    {"id":"SRC-PROFESSIONAL-BODIES","priority":1,"types":["ASC","Academy_Science_Technology_Council","VES","AES","SMPTE","MovieLabs"],"use":"cinematography, VFX, production technology, workflow, professional practice"},
+    {"id":"SRC-VENDOR-OFFICIAL","priority":2,"types":["camera_vendor_docs","DCC_vendor_docs","render_engine_docs","codec_docs","GPU_platform_docs","audio_vendor_docs","XR_device_docs"],"use":"current implementation details and supported workflows"},
+    {"id":"SRC-RESEARCH","priority":2,"types":["peer_reviewed_papers","conference_proceedings","SIGGRAPH","CVPR","ICASSP","arXiv_with_secondary_validation"],"use":"emerging and frontier capabilities"},
+    {"id":"SRC-PRODUCTION","priority":2,"types":["studio_postmortems","making_of_technical","production_case_studies","open_source_reference_implementations"],"use":"real production patterns and failure modes"},
+    {"id":"SRC-INTERNAL","priority":1,"types":["UMS_benchmark","production_result","tribunal_result","failure_postmortem","cost_telemetry"],"use":"learning from actual CEREBRO productions"}
+  ],
+  "trust_rules":{
+    "official_standard_or_spec":"may be VERIFIED after version/date/provenance check",
+    "vendor_claim":"requires independent or benchmark verification before capability promotion",
+    "paper":"requires reproducibility/applicability check before operational promotion",
+    "community_content":"discovery only unless corroborated",
+    "internal_result":"high operational relevance but scoped to measured conditions",
+    "unknown_source":"never auto-promote"
+  },
+  "refresh_policy":{"NOW":"daily_or_change_driven","EMERGING":"daily","COMING":"weekly_plus_announcements","FRONTIER":"weekly_research_scan"},
+  "rule":"Source names in this seed registry are categories, not proof that a current version has been fetched. Every concrete item stores its own URI, version/date, provenance and next review."
+}
