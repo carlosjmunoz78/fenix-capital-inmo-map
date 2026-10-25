@@ -1,0 +1,126 @@
+name: CEREBRO UMS BM10 Longform Continuity
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm10-longform-continuity.yml'
+      - 'cerebro/media-studio/v2/probes/bm10_longform_story.py'
+      - 'cerebro/media-studio/v2/probes/bm10_longform_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm10-longform-continuity
+  cancel-in-progress: true
+
+jobs:
+  physical_longform:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      BM10_OUT: ums-bm10-longform
+      BM01_RUN_ID: '40225258844'
+      BM01_ARTIFACT: ums-bm01-video-identity-40225258844
+      BM10_SOURCE_VIDEO_SHA256: ec5ae95b1ee160873336300a25d1a048fbaf0caf19215b8254cf548440029452
+      BM04_RUN_ID: '40226247105'
+      BM04_ARTIFACT: ums-bm04-original-song-40226247105
+      BM10_MUSIC_SHA256: 0d452251a68ccf310e0cd5643965d0ca3ec2c9cb4ee9fde2a7c46fa409176b3b
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover sealed Nova-01 video
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BM01_ARTIFACT }}
+          path: parent-bm01
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BM01_RUN_ID }}
+      - name: Recover sealed original music master
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BM04_ARTIFACT }}
+          path: parent-bm04
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BM04_RUN_ID }}
+      - name: Verify immutable parents
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          VIDEO="$(find parent-bm01 -type f -name 'nova01-video-identity.mp4' -print -quit)"
+          MUSIC="$(find parent-bm04 -type f -name 'bm04-master.flac' -print -quit)"
+          test -n "$VIDEO" && test -s "$VIDEO" && test -n "$MUSIC" && test -s "$MUSIC"
+          test "$(sha256sum "$VIDEO" | awk '{print $1}')" = "$BM10_SOURCE_VIDEO_SHA256"
+          test "$(sha256sum "$MUSIC" | awk '{print $1}')" = "$BM10_MUSIC_SHA256"
+          echo "video=$VIDEO" >> "$GITHUB_OUTPUT"
+          echo "music=$MUSIC" >> "$GITHUB_OUTPUT"
+      - name: Install zero-cost physical media and Qwen runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core sox libsox-fmt-all
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 soundfile pillow numpy psutil
+          python -m pip check
+      - name: Build physical 60-second multi-sequence story
+        env:
+          BM10_SOURCE_VIDEO: ${{ steps.source.outputs.video }}
+          BM10_MUSIC: ${{ steps.source.outputs.music }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1800s python cerebro/media-studio/v2/probes/bm10_longform_story.py | tee bm10-builder.stdout.log
+          test -s "$BM10_OUT/bm10-story-manifest.json"
+          test -s "$BM10_OUT/bm10-nova01-longform-story.mp4"
+          test "$(find "$BM10_OUT" -maxdepth 1 -type f -name 'sequence-*.mp4' | wc -l)" -eq 4
+          test "$(find "$BM10_OUT" -maxdepth 1 -type f -name 'narration-*.wav' | wc -l)" -eq 4
+      - name: Fail-closed BM10 continuity tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm10_longform_proof_gate.py \
+            --manifest "$BM10_OUT/bm10-story-manifest.json" \
+            --root "$BM10_OUT" \
+            --out "$BM10_OUT/bm10-pass-with-evidence.json" | tee bm10-proof.stdout.log
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm10-longform/bm10-pass-with-evidence.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE' and x['benchmark_credit'] is True
+          assert x['proof_type']=='LONGFORM_MULTI_SEQUENCE_CHARACTER_STORY_IMAGE_VOICE_SOUND_COLOR_CONTINUITY_PROOF'
+          assert all(x['checks'].values())
+          assert x['metrics']['duration_seconds']>=59.0
+          assert x['metrics']['sequence_count']==4
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          assert x['benchmark_registry_mutation_authorized'] is True and x['universal_media_studio_ready_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload immutable BM10 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm10-longform-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm10-longform/
+            bm10-builder.stdout.log
+            bm10-proof.stdout.log
