@@ -1,0 +1,22 @@
+{
+  "snapshot_date":"2026-10-25",
+  "purpose":"Current authoritative baseline for UMS professional media pipeline knowledge. Revalidate continuously; this file is an observation snapshot, not eternal truth.",
+  "sources":[
+    {"source_id":"ACES-2","publisher":"Academy / ACES","topic":"color_management","observed_version":"2.0","uri":"https://docs.acescentral.com/background/about-aces-2/","status":"VERIFIED_OFFICIAL","departments":["D13","D22","D38","D40","D45"]},
+    {"source_id":"OPENUSD","publisher":"Alliance for OpenUSD / Pixar ecosystem","topic":"scene_description_3d_interop","observed_version":"26.08 current release; 26.11 docs under development at observation","uri":"https://openusd.org/","status":"VERIFIED_OFFICIAL","departments":["D26","D27","D29","D31","D41","D42","D45","D46"]},
+    {"source_id":"MATERIALX","publisher":"MaterialX / ASWF ecosystem","topic":"materials_shading_interop","observed_version":"1.39","uri":"https://materialx.org/Specification.html","status":"VERIFIED_OFFICIAL","departments":["D26","D29","D31","D45"]},
+    {"source_id":"OPENVDB","publisher":"Academy Software Foundation","topic":"sparse_volumes_vfx","observed_version":"13.1.0","uri":"https://www.openvdb.org/documentation/doxygen/changes.html","status":"VERIFIED_OFFICIAL","departments":["D28","D31","D45","D47"]},
+    {"source_id":"OPENEXR","publisher":"Academy Software Foundation","topic":"professional_hdr_image_storage","observed_version":"3.5.2","uri":"https://openexr.com/en/latest/","status":"VERIFIED_OFFICIAL","departments":["D17","D20","D28","D38","D40","D45","D46"]},
+    {"source_id":"OPENXR","publisher":"Khronos Group","topic":"xr_api_interop","observed_version":"1.1","uri":"https://registry.khronos.org/OpenXR/","status":"VERIFIED_OFFICIAL","departments":["D29","D41","D42","D45"]},
+    {"source_id":"C2PA","publisher":"Coalition for Content Provenance and Authenticity","topic":"content_credentials_provenance","observed_version":"2.4 (April 2026)","uri":"https://spec.c2pa.org/specifications/specifications/2.4/specs/C2PA_Specification.html","status":"VERIFIED_OFFICIAL","departments":["D04","D39","D40","D46","D48"]},
+    {"source_id":"SMPTE-STANDARDS","publisher":"SMPTE","topic":"motion_imaging_standards","observed_version":"living standards library; key areas include ST 2110, MXF, IMF, D-Cinema, timecode, HDR and metadata","uri":"https://www.smpte.org/standards/overview","status":"VERIFIED_OFFICIAL","departments":["D13","D33","D37","D38","D40","D43","D45","D46"]},
+    {"source_id":"MOVIELABS-2030","publisher":"MovieLabs","topic":"studio_cloud_workflow_security_interop","observed_version":"2030 Vision + current Media Creation documentation","uri":"https://movielabs.com/the-2030-vision/","status":"VERIFIED_OFFICIAL","departments":["D01","D02","D04","D45","D46","D47","D48"]},
+    {"source_id":"OPENCUE","publisher":"Academy Software Foundation","topic":"production_render_management","observed_version":"active production-aligned OpenCue documentation","uri":"https://docs.opencue.io/","status":"VERIFIED_OFFICIAL","departments":["D45","D46","D47"]}
+  ],
+  "security_notes":[
+    "OpenEXR current release tracking is security-sensitive: 2026 release notes include multiple security hardening updates; ingesting untrusted media must remain sandboxed and patched.",
+    "C2PA manifests must be preserved and interpreted with forward/backward compatibility rules; unknown fields are not permission to discard provenance.",
+    "MovieLabs production guidance emphasizes asset-centric security and verified identities/access, aligned with CEREBRO multi-company isolation."
+  ],
+  "refresh":"daily version/change check by Media Technology Scout; immediate refresh on security advisory or major release"
+}
