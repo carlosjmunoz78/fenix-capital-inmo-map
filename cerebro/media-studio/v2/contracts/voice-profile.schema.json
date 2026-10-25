@@ -1,0 +1,25 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"cerebro://media-studio/v2/voice-profile.schema.json",
+  "title":"Universal Media Studio Voice Profile",
+  "type":"object",
+  "required":["voice_id","company_id","identity_type","rights_record","languages","modalities","canonical_refs","version"],
+  "properties":{
+    "voice_id":{"type":"string"},
+    "company_id":{"type":"string"},
+    "identity_type":{"enum":["REAL_AUTHORIZED","SYNTHETIC_ORIGINAL","FICTIONAL_LICENSED"]},
+    "rights_record":{"type":"object","required":["status","provenance_record"],"properties":{"status":{"enum":["VALID","HUMAN_REQUIRED","DENY"]},"allowed_uses":{"type":"array","items":{"type":"string"}},"territories":{"type":"array","items":{"type":"string"}},"valid_until":{"type":["string","null"]},"revocation_process":{"type":"string"},"provenance_record":{"type":"string"}}},
+    "languages":{"type":"array","items":{"type":"string"}},
+    "dialects":{"type":"array","items":{"type":"string"}},
+    "modalities":{"type":"array","items":{"enum":["speech","tts","voice_conversion","singing","adr","dubbing","live"]}},
+    "canonical_refs":{"type":"array","items":{"type":"string"}},
+    "phoneme_map":{"type":"object"},
+    "prosody_profile":{"type":"object"},
+    "emotion_profile":{"type":"object"},
+    "singing_profile":{"type":"object"},
+    "quality_benchmarks":{"type":"object"},
+    "version":{"type":"string"}
+  },
+  "allOf":[{"if":{"properties":{"identity_type":{"const":"REAL_AUTHORIZED"}}},"then":{"properties":{"rights_record":{"properties":{"status":{"const":"VALID"}}}}}}],
+  "additionalProperties":false
+}
