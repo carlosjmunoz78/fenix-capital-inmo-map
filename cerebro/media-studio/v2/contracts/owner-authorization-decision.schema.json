@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://media-studio/v2/owner-authorization-decision.schema.json",
+  "title": "CEREBRO UMS Owner Authorization Decision",
+  "type": "object",
+  "required": [
+    "authorization_id",
+    "company_id",
+    "engine_id",
+    "decision",
+    "decided_by",
+    "decided_at",
+    "subject_ref",
+    "modalities",
+    "actions",
+    "environments"
+  ],
+  "properties": {
+    "schema_version": {"const": "1.0.0"},
+    "authorization_id": {"type": "string", "minLength": 1},
+    "company_id": {"type": "string", "minLength": 1},
+    "engine_id": {"type": "string", "minLength": 1},
+    "decision": {"enum": ["APPROVED", "DENIED", "REVOKED"]},
+    "decided_by": {"type": "string", "minLength": 1},
+    "decided_at": {"type": "string", "format": "date-time"},
+    "subject_ref": {"type": "string", "minLength": 1},
+    "authorization_basis": {
+      "enum": ["OWNER_ATTESTATION", "DOCUMENTED_PERMISSION", "LICENSED_DATASET", "OTHER_VERIFIED"]
+    },
+    "attests_rights_or_permission": {"type": "boolean"},
+    "modalities": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["image", "video", "voice", "singing", "3d", "motion", "live"]}
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "DIGITAL_DOUBLE",
+          "GENERATIVE_DERIVATIVE",
+          "VOICE_CLONE",
+          "VOICE_CONVERSION",
+          "TTS",
+          "PROSODY",
+          "MULTILINGUAL",
+          "INTERNAL_VALIDATION",
+          "PROD_INFERENCE",
+          "PUBLISH",
+          "COMMERCIAL_USE"
+        ]
+      }
+    },
+    "environments": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"enum": ["DEV", "PREPROD", "PROD"]}
+    },
+    "material_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "material_sha256": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+    },
+    "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "revocation_ref": {"type": ["string", "null"]},
+    "notes": {"type": ["string", "null"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"decision": {"const": "APPROVED"}}},
+      "then": {
+        "required": ["authorization_basis", "attests_rights_or_permission", "evidence_refs"],
+        "properties": {
+          "attests_rights_or_permission": {"const": true},
+          "evidence_refs": {"minItems": 1}
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
