@@ -21,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      PROBE_REPORT: ${{ runner.temp }}/ums-runtime-probe.json
-      EVIDENCE_REPORT: ${{ runner.temp }}/ums-adapter-evidence.json
+      PROBE_REPORT: /tmp/ums-runtime-probe.json
+      EVIDENCE_REPORT: /tmp/ums-adapter-evidence.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,9 +43,9 @@ jobs:
               found=true
               version="$("$key" "$@" 2>&1 | head -n 2 | tr '\n' ' ' | cut -c1-400 || true)"
             fi
-            printf '%s\t%s\t%s\t%s\n' "$key" "$found" "$path" "$version" >> "$RUNNER_TEMP/ums-probes.tsv"
+            printf '%s\t%s\t%s\t%s\n' "$key" "$found" "$path" "$version" >> "/tmp/ums-probes.tsv"
           }
-          : > "$RUNNER_TEMP/ums-probes.tsv"
+          : > "/tmp/ums-probes.tsv"
           probe ffmpeg -version
           probe ffprobe -version
           probe google-chrome --version
@@ -59,8 +59,8 @@ jobs:
           probe node --version
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
-          const rows=fs.readFileSync(process.env.RUNNER_TEMP+'/ums-probes.tsv','utf8').trim().split('\n').filter(Boolean).map((line)=>{const [key,found,path,...rest]=line.split('\t');return {key,found:found==='true',path:path||null,version:rest.join('\t')||null};});
-          const out={schema_version:'1.0.0',state_type:'CEREBRO_UMS_RUNTIME_PROBE_REPORT_V1',environment:'PREPROD',runner:process.env.RUNNER_ENVIRONMENT||'github-hosted-ubuntu',observed_at:new Date().toISOString(),installation_performed:false,network_download_performed:false,probes:rows};
+          const rows=fs.readFileSync('/tmp/ums-probes.tsv','utf8').trim().split('\n').filter(Boolean).map((line)=>{const [key,found,path,...rest]=line.split('\t');return {key,found:found==='true',path:path||null,version:rest.join('\t')||null};});
+          const out={schema_version:'1.0.0',state_type:'CEREBRO_UMS_RUNTIME_PROBE_REPORT_V1',environment:'PREPROD',runner:'github-hosted-ubuntu',observed_at:new Date().toISOString(),installation_performed:false,network_download_performed:false,probes:rows};
           fs.writeFileSync(process.env.PROBE_REPORT,JSON.stringify(out,null,2)+'\n');
           console.log(JSON.stringify({status:'RUNTIME_PROBE_COMPLETE',found:rows.filter(x=>x.found).map(x=>x.key),missing:rows.filter(x=>!x.found).map(x=>x.key)}));
           NODE
@@ -74,12 +74,12 @@ jobs:
           if(report.prod_bound!==0||report.operational_claims!==0||report.prod_authorized||report.spend_authorized) throw new Error('RUNTIME_DISCOVERY_FALSE_PROMOTION');
           console.log(JSON.stringify({status:'PREPROD_DISCOVERY_EVIDENCE_GREEN',discovered:report.discovered,unavailable:report.unavailable,prod_bound:report.prod_bound}));
           NODE
-      - name: Upload immutable-ish run evidence artifact
+      - name: Upload runtime audit evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-ums-physical-runtime-audit-${{ github.run_id }}
           path: |
-            ${{ runner.temp }}/ums-runtime-probe.json
-            ${{ runner.temp }}/ums-adapter-evidence.json
+            /tmp/ums-runtime-probe.json
+            /tmp/ums-adapter-evidence.json
           if-no-files-found: error
           retention-days: 14
