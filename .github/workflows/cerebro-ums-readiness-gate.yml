@@ -1,0 +1,61 @@
+name: CEREBRO UMS Readiness Gate
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-readiness-gate.yml'
+      - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
+      - 'cerebro/media-studio/v2/runtime/readiness-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/readiness-gate.test.mjs'
+      - 'cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-readiness-gate
+  cancel-in-progress: true
+
+jobs:
+  readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run readiness contract tests
+        run: node --test cerebro/media-studio/v2/tests/readiness-gate.test.mjs
+      - name: Emit machine-readable readiness evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-readiness-evidence
+          node --input-type=module <<'NODE' | tee ums-readiness-evidence/readiness-status.json
+          import {loadReadinessBenchmarks,evaluateUniversalMediaStudioReadiness} from './cerebro/media-studio/v2/runtime/readiness-gate.mjs';
+          const doc=loadReadinessBenchmarks();
+          const result=evaluateUniversalMediaStudioReadiness(doc);
+          const out={
+            schema_version:'1.0.0',state_type:'CEREBRO_UMS_READINESS_EVIDENCE_V1',
+            gate:'UNIVERSAL_MEDIA_STUDIO_READY',environment:'PREPROD',
+            ready:result.ready,total_required:result.total_required,
+            passed_with_evidence:result.passed_with_evidence,incomplete:result.incomplete,failed:result.failed,
+            bm01:doc.benchmarks.find((b)=>b.id==='BM-01'),
+            expected_after_bm01:{ready:false,passed_with_evidence:1,incomplete:11},
+            prod_authorized:false,publish_authorized:false,spend_authorized:false,additional_cost_eur:0,
+            github_run_id:process.env.GITHUB_RUN_ID,github_sha:process.env.GITHUB_SHA
+          };
+          if(out.ready!==false||out.passed_with_evidence!==1||out.incomplete.length!==11||out.bm01?.state!=='PASS_WITH_EVIDENCE'||!out.bm01?.evidence_ref) process.exit(9);
+          console.log(JSON.stringify(out,null,2));
+          NODE
+      - name: Upload readiness evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-readiness-after-bm01-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-readiness-evidence/
