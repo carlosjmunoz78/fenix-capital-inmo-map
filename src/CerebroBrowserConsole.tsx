@@ -19,7 +19,7 @@ type BrowserSessionSummary={session_id:string;state:string;control_owner:string;
 type BrowserSessionsResponse={ok:boolean;sessions:BrowserSessionSummary[];error?:string};
 
 const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false};
-const TERMINAL=new Set(['STOPPED','ERROR','CLOSED']);
+const TERMINAL=new Set(['STOPPED','ERROR','CLOSED','HIBERNATED']);
 const HUMAN_TYPING_DEBOUNCE_MS=350;
 
 function stateLabel(session:BrowserSessionV3|null){
@@ -37,6 +37,7 @@ function stateLabel(session:BrowserSessionV3|null){
 function readableId(value:string|null|undefined,fallback='—'){if(!value)return fallback;return value.length>20?`${value.slice(0,8)}…${value.slice(-5)}`:value;}
 function formatTime(value:string|null|undefined){if(!value)return'—';const date=new Date(value);if(Number.isNaN(date.getTime()))return'—';return new Intl.DateTimeFormat('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(date);}
 function humanRequiredLabel(value:unknown){if(!value)return'';if(typeof value==='string')return value;if(typeof value==='object'){const record=value as Record<string,unknown>;const code=record.code||record.reason||record.type||record.status;if(typeof code==='string')return code;}return'HUMAN_REQUIRED';}
+function isCanonicalSessionCandidate(session:BrowserSessionSummary){return Boolean(session?.session_id)&&!TERMINAL.has(String(session?.state||'').trim().toUpperCase());}
 
 export default function CerebroBrowserConsole({onViewChange}:Props){
  const[composer,setComposer]=useState('');
@@ -91,7 +92,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    if(cancelled||result.status===0)return;
    if(result.status!==200||!result.data?.ok){setBrowserError(result.data?.error||'No se pudo cargar el historial de sesiones');return;}
    const list=Array.isArray(result.data.sessions)?result.data.sessions:[];setSessionOptions(list);
-   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current)?current:(list[0]?.session_id||''));
+   setSelectedSessionId(current=>current&&list.some(item=>item.session_id===current&&isCanonicalSessionCandidate(item))?current:(list.find(isCanonicalSessionCandidate)?.session_id||''));
   };
   void refreshSessions();const interval=window.setInterval(()=>{void refreshSessions()},2500);return()=>{cancelled=true;window.clearInterval(interval)};
  },[selectedCompany]);
@@ -118,7 +119,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
 
  function resetVisualSession(){setBrowserSession(null);keyRef.current=null;keySessionRef.current='';frameSeqRef.current=-1;humanTextBufferRef.current='';if(humanTextTimerRef.current!==null){window.clearTimeout(humanTextTimerRef.current);humanTextTimerRef.current=null;}if(frameUrlRef.current){URL.revokeObjectURL(frameUrlRef.current);frameUrlRef.current='';setFrameUrl('');}}
  function changeCompany(value:string){if(hasActiveSession)return;setSelectedCompany(value);setSelectedSessionId('');setSessionOptions([]);setBrowserError('');resetVisualSession();}
- function changeSession(value:string){if(value===selectedSessionId)return;setSelectedSessionId(value);setBrowserError('');resetVisualSession();}
+ function changeSession(value:string){if(value===selectedSessionId)return;const candidate=sessionOptions.find(item=>item.session_id===value);if(!candidate||!isCanonicalSessionCandidate(candidate))return;setSelectedSessionId(value);setBrowserError('');resetVisualSession();}
  async function waitForCerebroSession(){for(let attempt=0;attempt<40;attempt++){const r=await fetchBrowserInteractiveApi<BrowserStatusResponse>('/owner/status',{company_id:selectedCompany});const s=r.data?.session;if(r.status===200&&r.data?.ok&&s?.worker_alive&&s.state==='CEREBRO_CONTROLLED'&&s.control_owner==='CEREBRO'&&!s.emergency_stop)return s;await new Promise(resolve=>window.setTimeout(resolve,500));}throw new Error('BROWSER_WORKER_NO_QUEDO_LISTO');}
  async function waitForCommand(sessionId:string,commandId:string){for(let attempt=0;attempt<60;attempt++){const r=await fetchBrowserInteractiveApi<BrowserCommandStatusResponse>('/owner/command-status',{company_id:selectedCompany,session_id:sessionId,command_id:commandId});const c=r.data?.command;if(r.status!==200||!r.data?.ok)throw new Error(r.data?.error||'No se pudo consultar la orden');if(c?.status==='COMPLETED')return;if(c?.status==='FAILED')throw new Error(c.error_code||'La orden del navegador falló');await new Promise(resolve=>window.setTimeout(resolve,250));}throw new Error('TIMEOUT_EJECUTANDO_ORDEN');}
  async function waitForPostcondition(sessionId:string,postcondition:BrowserPostcondition|undefined){if(!postcondition)return;for(let attempt=0;attempt<24;attempt++){const r=await fetchBrowserInteractiveApi<BrowserStatusResponse>('/owner/status',{company_id:selectedCompany,session_id:sessionId});if(r.status!==200||!r.data?.ok)throw new Error(r.data?.error||'No se pudo verificar el resultado de la orden');const result=evaluateBrowserPostcondition(postcondition,r.data.session||{});if(result.state==='SATISFIED')return;if(result.state==='FAILED')throw new Error(result.error||'POSTCONDITION_FAILED');await new Promise(resolve=>window.setTimeout(resolve,250));}throw new Error('POSTCONDITION_NOT_MET');}
@@ -156,7 +157,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
  const canTakeover=Boolean(browserSession?.worker_alive&&browserSession.state==='CEREBRO_CONTROLLED'&&browserSession.control_owner==='CEREBRO'&&!browserSession.emergency_stop);
  const humanControl=Boolean(browserSession?.worker_alive&&browserSession.state==='HUMAN_CONTROLLED'&&browserSession.control_owner==='HUMAN'&&browserSession.human_lease_id);
  const canStop=Boolean(browserSession?.worker_alive&&!TERMINAL.has(browserSession.state));
- const hasActiveSession=sessionOptions.some(item=>!TERMINAL.has(item.state));
+ const hasActiveSession=sessionOptions.some(isCanonicalSessionCandidate);
  const canStart=Boolean(selectedCompany)&&!hasActiveSession;
  const tabs=browserSession?.tabs||[];
  const activeTab=tabs.find(tab=>tab.active)||tabs.find(tab=>tab.index===browserSession?.active_tab_index)||tabs[0];
@@ -182,7 +183,7 @@ export default function CerebroBrowserConsole({onViewChange}:Props){
    <div className="cerebro-browser-session-context" style={boundedBarStyle}>
     <span style={{minWidth:92,maxWidth:'100%',overflow:'hidden'}}><small>EMPRESA</small>{companies.length>1?<select aria-label="Seleccionar empresa" value={selectedCompany} disabled={hasActiveSession} onChange={event=>changeCompany(event.target.value)} style={selectorStyle}>{companies.map(company=><option key={company.company_id} value={company.company_id}>{company.company_id.toUpperCase()}</option>)}</select>:<strong style={{overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{companyLabel.toUpperCase()}</strong>}</span>
     <span><small>ENTORNO</small><strong>{environmentLabel}</strong></span>
-    <span style={{minWidth:112,maxWidth:190,overflow:'hidden'}}><small>SESIÓN</small>{sessionOptions.length>1?<select aria-label="Seleccionar sesión" value={selectedSessionValue} onChange={event=>changeSession(event.target.value)} style={selectorStyle}>{sessionOptions.map(item=><option key={item.session_id} value={item.session_id}>{readableId(item.session_id)} · {item.state}</option>)}</select>:<strong title={browserSession?.session_id||''}>{readableId(browserSession?.session_id,'SIN SESIÓN')}</strong>}</span>
+    <span style={{minWidth:112,maxWidth:190,overflow:'hidden'}}><small>SESIÓN</small>{sessionOptions.length>1?<select aria-label="Seleccionar sesión" value={selectedSessionValue} onChange={event=>changeSession(event.target.value)} style={selectorStyle}>{sessionOptions.map(item=><option key={item.session_id} value={item.session_id} disabled={!isCanonicalSessionCandidate(item)}>{readableId(item.session_id)} · {item.state}</option>)}</select>:<strong title={browserSession?.session_id||''}>{readableId(browserSession?.session_id,'SIN SESIÓN')}</strong>}</span>
     <span><small>RUNTIME</small><strong>Browser 1 · V3</strong></span>
     <span><small>PESTAÑAS</small><strong>{tabs.length}/8</strong></span>
     <span><small>CONTROL</small><strong>{browserSession?.control_owner||'NONE'}</strong></span>
