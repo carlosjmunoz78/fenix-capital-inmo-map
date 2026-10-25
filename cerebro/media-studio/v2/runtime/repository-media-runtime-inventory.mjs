@@ -10,7 +10,7 @@ const FAMILIES=Object.freeze({
   HYPERFRAMES:[/\bhyperframes\b/i]
 });
 const TEXT_EXT=/\.(?:js|mjs|cjs|ts|tsx|jsx|json|ya?ml|md|txt|sh|ps1|py|toml|ini|conf|env|dockerfile)$/i;
-const EXCLUDED_PREFIXES=['cerebro/media-studio/v2/','.git/','node_modules/','dist/','build/'];
+const EXCLUDED_PREFIXES=['cerebro/media-studio/v2/','.github/workflows/cerebro-ums-','.git/','node_modules/','dist/','build/'];
 function excluded(path){return EXCLUDED_PREFIXES.some((prefix)=>path.startsWith(prefix))||path.includes('/node_modules/');}
 function classifyLine(line,patterns){return patterns.some((pattern)=>pattern.test(line));}
 
@@ -31,8 +31,8 @@ export function inventoryMediaRuntimeReferences(entries=[]){
     return Object.freeze({family,status:refs.length?'REFERENCES_FOUND_REVIEW_REQUIRED':'NO_TRACKED_REFERENCE_FOUND',reference_count:refs.reduce((n,x)=>n+x.hits.length,0),paths:Object.freeze([...new Set(refs.map((x)=>x.path))].sort()),operational_claim:false});
   });
   return Object.freeze({
-    schema_version:'1.0.0',state_type:'CEREBRO_UMS_REPOSITORY_MEDIA_RUNTIME_INVENTORY_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'1.0.0',
-    scanned_entries:entries.filter((x)=>!excluded(x?.path??'')).length,excluded_ums_namespace:true,families:Object.freeze(families),findings:Object.freeze(findings),
+    schema_version:'1.1.0',state_type:'CEREBRO_UMS_REPOSITORY_MEDIA_RUNTIME_INVENTORY_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PREPROD',version:'1.1.0',
+    scanned_entries:entries.filter((x)=>!excluded(x?.path??'')).length,excluded_ums_namespace:true,excluded_ums_workflows:true,families:Object.freeze(families),findings:Object.freeze(findings),
     interpretation:'A tracked text reference is discovery evidence only. It does not prove an installed, executable, licensed, secure or production-ready runtime.',
     prod_binding_authorized:false,installation_authorized:false,spend_authorized:false,additional_cost_eur:0
   });
