@@ -3,6 +3,7 @@
 .cerebro-browser-tabs span[role="button"]:hover{transform:translateY(-1px)!important}
 .cerebro-browser-tabs span[role="button"].is-active{color:#fff!important;background:#0b2638!important;box-shadow:inset 0 3px 0 #2f9dff,0 -4px 18px rgba(47,157,255,.08)!important}
 .cerebro-browser-viewport{touch-action:none!important;overscroll-behavior:contain!important}
+.cerebro-browser-viewport>img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important}
 .cerebro-browser-viewport>[aria-live="polite"]{pointer-events:none!important;top:auto!important;bottom:10px!important;left:10px!important;opacity:.88!important;max-width:min(680px,calc(100% - 20px))!important}
 .cerebro-browser-expand-button{width:38px!important;height:38px!important;min-width:38px!important;border:1px solid rgba(77,184,255,.22)!important;border-radius:9px!important;background:rgba(16,58,78,.34)!important;color:#d8f4ff!important;font-size:18px!important;line-height:1!important;cursor:pointer!important;display:inline-grid!important;place-items:center!important;flex:none!important}
 .cerebro-browser-expand-button:hover{background:rgba(28,103,138,.42)!important;border-color:rgba(55,217,255,.4)!important}
@@ -11,7 +12,7 @@
 .cerebro-browser-frame.cerebro-browser-frame--expanded .cerebro-browser-tabs span[role="button"]{min-width:96px!important;max-width:none!important}
 .cerebro-browser-frame.cerebro-browser-frame--expanded .cerebro-browser-address{margin:6px 10px!important;height:38px!important}
 .cerebro-browser-frame.cerebro-browser-frame--expanded .cerebro-browser-viewport{min-height:0!important}
-.cerebro-browser-frame.cerebro-browser-frame--expanded .cerebro-browser-viewport img{object-fit:contain!important}
+.cerebro-browser-frame.cerebro-browser-frame--expanded .cerebro-browser-viewport img{object-fit:fill!important}
 body.cerebro-browser-viewer-expanded{overflow:hidden!important}
 @media(max-width:900px){
   .cerebro-browser-session-context>span:nth-child(2),.cerebro-browser-session-context>span:nth-child(4),.cerebro-browser-session-context>span:nth-child(7),.cerebro-browser-session-context>span:nth-child(8){display:none!important}
