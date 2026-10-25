@@ -11,7 +11,7 @@ const WORKSPACE_ENDPOINT=String(process.env.CEREBRO_BROWSER_WORKSPACE_URL||'').t
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
 const ACTIVE_FRAME_INTERVAL_MS=Math.max(220,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||320));
 const IDLE_FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_IDLE_FRAME_MS||1200));
-const POLL_INTERVAL_MS=Math.max(60,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||90));
+const POLL_INTERVAL_MS=Math.max(25,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||35));
 const ACTIVE_WINDOW_MS=Math.max(1500,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_ACTIVE_WINDOW_MS||3000));
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
@@ -184,8 +184,9 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
       const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
       if(poll.stop===true||poll.state==='STOPPED'){stopRequested=true;break;}
       if(poll.hibernate===true||poll.state==='HIBERNATE_PENDING'){hibernateRequested=true;break;}
-      let commandCompleted=false;
+      let processedCommand=false;
       if(poll.command){
+        processedCommand=true;
         lastActivityAt=Date.now();
         let ok=false,errorCode=null;
         try{
@@ -195,18 +196,18 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
           ok=result?.ok===true;lastUrl=scrubUrl(result?.final_url||lastUrl);lastPrivateTabs=normalizePrivateTabs(result?.tabs||lastPrivateTabs);lastActiveTabIndex=Number.isInteger(result?.active_tab_index)?result.active_tab_index:lastActiveTabIndex;if(!ok)errorCode=result?.authorization?.status||'HUMAN_ACTION_NOT_AUTHORIZED';
         }catch(error){errorCode=String(error?.message||error).slice(0,120);}
         await callInteractive(endpoint,'worker/complete',tokenProvider,{session_id:sessionId,command_id:poll.command.command_id,ok,error_code:errorCode},fetch_impl);
-        commandCompleted=ok;
-        if(ok){await publishFrame(key);lastActivityAt=Date.now();}
       }
       if(poll.handback===true){
         lastActivityAt=Date.now();
         await callInteractive(endpoint,'worker/handback-complete',tokenProvider,{session_id:sessionId},fetch_impl);
         identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastUrl,endpoint,tokenProvider,fetch_impl);
         await publishFrame(key);
+      }else if(!processedCommand){
+        const active=Date.now()-lastActivityAt<=ACTIVE_WINDOW_MS;
+        const frameInterval=active?ACTIVE_FRAME_INTERVAL_MS:IDLE_FRAME_INTERVAL_MS;
+        if(Date.now()-lastFrameAt>=frameInterval)await publishFrame(key);
       }
-      const active=Date.now()-lastActivityAt<=ACTIVE_WINDOW_MS;
-      const frameInterval=active?ACTIVE_FRAME_INTERVAL_MS:IDLE_FRAME_INTERVAL_MS;
-      if(!commandCompleted&&Date.now()-lastFrameAt>=frameInterval)await publishFrame(key);
+      if(processedCommand)continue;
       await sleep(POLL_INTERVAL_MS);
     }
     if(opened&&!stopRequested)await publishFrame(key);
@@ -222,4 +223,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.2',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.3',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
