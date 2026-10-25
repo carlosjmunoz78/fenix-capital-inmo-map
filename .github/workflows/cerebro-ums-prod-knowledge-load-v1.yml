@@ -1,0 +1,71 @@
+name: CEREBRO UMS PROD Knowledge Load V1
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/media-studio/v2/knowledge/verified-source-expansion-prod-2026-10-25.json'
+      - 'cerebro/media-studio/v2/knowledge/existing-skill-reuse-map-prod-2026-10-25.json'
+      - 'cerebro/media-studio/v2/knowledge/frontier-media-tech-watch-prod-2026-10-25.json'
+      - 'cerebro/media-studio/v2/knowledge/prod-specialist-enrichment-v1.mjs'
+      - 'cerebro/media-studio/v2/knowledge/prod-specialist-depth-matrix-v1.mjs'
+      - 'cerebro/media-studio/v2/knowledge/specialty-knowledge-coverage.mjs'
+      - 'cerebro/media-studio/v2/tests/prod-specialist-enrichment-v1.test.mjs'
+      - 'cerebro/media-studio/v2/tests/prod-specialist-depth-matrix-v1.test.mjs'
+      - 'cerebro/media-studio/v2/tests/specialty-knowledge-coverage.test.mjs'
+      - '.github/workflows/cerebro-ums-prod-knowledge-load-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-prod-knowledge-load-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-prod-knowledge-load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ENRICHMENT_SUMMARY: /tmp/ums-prod-specialist-enrichment-summary.json
+      DEPTH_SUMMARY: /tmp/ums-prod-specialist-depth-summary.json
+      COVERAGE_REPORT: /tmp/ums-prod-specialist-coverage.json
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run UMS knowledge contract tests
+        run: node --test cerebro/media-studio/v2/tests/prod-specialist-enrichment-v1.test.mjs cerebro/media-studio/v2/tests/prod-specialist-depth-matrix-v1.test.mjs cerebro/media-studio/v2/tests/specialty-knowledge-coverage.test.mjs
+      - name: Materialize PROD specialist summaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/media-studio/v2/knowledge/prod-specialist-enrichment-v1.mjs --summary > "$ENRICHMENT_SUMMARY"
+          node cerebro/media-studio/v2/knowledge/prod-specialist-depth-matrix-v1.mjs --summary > "$DEPTH_SUMMARY"
+          node cerebro/media-studio/v2/knowledge/specialty-knowledge-coverage.mjs --out "$COVERAGE_REPORT"
+      - name: Enforce no knowledge regression or authority expansion
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const enrichment=JSON.parse(fs.readFileSync(process.env.ENRICHMENT_SUMMARY,'utf8'));
+          const depth=JSON.parse(fs.readFileSync(process.env.DEPTH_SUMMARY,'utf8'));
+          const coverage=JSON.parse(fs.readFileSync(process.env.COVERAGE_REPORT,'utf8'));
+          if(enrichment.target_specialists!==192||enrichment.target_departments!==24||enrichment.roles_active!==192) throw new Error('UMS_192_SPECIALIST_KNOWLEDGE_REGRESSION');
+          if(enrichment.roles_with_two_or_more_verified_sources!==192||enrichment.roles_with_six_or_more_verified_knowledge_points!==192) throw new Error('UMS_SPECIALIST_SOURCE_DEPTH_REGRESSION');
+          if(enrichment.deep_mastery_claims!==0||Number(enrichment.additional_cost_eur)!==0) throw new Error('UMS_FALSE_MASTERY_OR_COST');
+          if(depth.specialists!==192||depth.total_cells!==2304||depth.cells_with_active_queries!==2304||depth.mastery_cells!==0) throw new Error('UMS_DEEP_MATRIX_REGRESSION');
+          if(coverage.specialist_roles!==384||coverage.departments!==48||coverage.roles_with_zero_verified_department_sources!==0||coverage.departments_with_zero_verified_sources!==0) throw new Error('UMS_VERIFIED_SOURCE_GAP_REGRESSION');
+          if(coverage.prod_knowledge_loaded!==true||coverage.prod_authorized!==false||coverage.prod_write_authorized!==false||coverage.prod_tool_execution_authorized!==false||coverage.spend_authorized!==false) throw new Error('UMS_KNOWLEDGE_AUTHORITY_BOUNDARY_BROKEN');
+          console.log(JSON.stringify({status:'UMS_PROD_KNOWLEDGE_LOAD_GREEN',specialists:enrichment.target_specialists,departments:coverage.departments,depth_cells:depth.total_cells,source_gaps:coverage.roles_with_zero_verified_department_sources,frontier_links:enrichment.frontier_candidate_links,additional_cost_eur:0}));
+          NODE
+      - name: Upload knowledge evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-ums-prod-knowledge-load-${{ github.run_id }}
+          path: |
+            /tmp/ums-prod-specialist-enrichment-summary.json
+            /tmp/ums-prod-specialist-depth-summary.json
+            /tmp/ums-prod-specialist-coverage.json
+          if-no-files-found: error
+          retention-days: 30
