@@ -1,0 +1,234 @@
+name: CEREBRO UMS BM03 Authorized Voice Proof
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm03-authorized-voice-proof.yml'
+      - 'cerebro/media-studio/v2/probes/bm03_qwen_authorized_human.py'
+      - 'cerebro/media-studio/v2/probes/bm03_openvoice_authorized_human.py'
+      - 'cerebro/media-studio/v2/probes/bm03_authorized_voice_proof_gate.py'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_SPEND_AUTHORIZED: 'false'
+  SOURCE_RUN_ID: '40246569906'
+  SOURCE_ARTIFACT: 'ums-ravdess-authorized-source-40246569906'
+  OPENVOICE_COMMIT: '74a1d147b17a8c3092dd5430504bd83ef6c7eb23'
+  OPENVOICE_HF_REV: '0ca21e94934d02c13c161296791a5a35972d019c'
+  BM03_OV_CHECKPOINT_SHA256: '9652c27e92b6b2a91632590ac9962ef7ae2b712e5c5b7f4c34ec55ee2b37ab9e'
+
+jobs:
+  qwen_authorized_clone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download sealed licensed human source
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.SOURCE_ARTIFACT }}
+          path: source-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - name: Locate and verify admitted source
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUDIO="$(find source-artifact -type f -name 'ravdess-actor01-neutral.wav' -print -quit)"
+          ADM="$(find source-artifact -type f -name 'bm03-source-admission.json' -print -quit)"
+          test -n "$AUDIO" && test -s "$AUDIO" && test -n "$ADM" && test -s "$ADM"
+          python - "$ADM" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1])); assert x['admitted'] is True and x['benchmark_id']=='BM-03' and x['human_required'] is False
+          PY
+          echo "audio=$AUDIO" >> "$GITHUB_OUTPUT"
+          echo "admission=$ADM" >> "$GITHUB_OUTPUT"
+      - name: Install Qwen3-TTS Base zero-cost CPU runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 soundfile numpy psutil
+          python -m pip check
+      - name: Physical authorized-human clone and multilingual TTS
+        env:
+          BM03_REAL_REF: ${{ steps.source.outputs.audio }}
+          BM03_SOURCE_ADMISSION: ${{ steps.source.outputs.admission }}
+          BM03_QWEN_OUT: ums-bm03-qwen-authorized-human
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1500s python cerebro/media-studio/v2/probes/bm03_qwen_authorized_human.py | tee bm03-qwen-authorized.stdout.log
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm03-qwen-authorized-human/bm03-qwen-authorized-human.json'))
+          assert x['status']=='QWEN_BASE_REAL_HUMAN_VOICE_CLONE_MULTILINGUAL_PROVEN'
+          assert {o['language'] for o in x['outputs']}=={'Spanish','English'}
+          assert x['human_required'] is False and x['additional_cost_eur']==0
+          PY
+      - name: Upload Qwen physical proof component
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm03-qwen-authorized-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm03-qwen-authorized-human/
+            bm03-qwen-authorized.stdout.log
+
+  openvoice_authorized_conversion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Download sealed licensed human source
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.SOURCE_ARTIFACT }}
+          path: source-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - name: Locate and verify admitted source
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          AUDIO="$(find source-artifact -type f -name 'ravdess-actor01-neutral.wav' -print -quit)"
+          ADM="$(find source-artifact -type f -name 'bm03-source-admission.json' -print -quit)"
+          test -n "$AUDIO" && test -s "$AUDIO" && test -n "$ADM" && test -s "$ADM"
+          echo "audio=$AUDIO" >> "$GITHUB_OUTPUT"
+          echo "admission=$ADM" >> "$GITHUB_OUTPUT"
+      - name: Install OpenVoice V2 isolated CPU runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends espeak-ng ffmpeg git libsndfile1
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.2.2
+          git clone --filter=blob:none https://github.com/myshell-ai/OpenVoice.git openvoice-upstream
+          git -C openvoice-upstream checkout "$OPENVOICE_COMMIT"
+          test "$(git -C openvoice-upstream rev-parse HEAD)" = "$OPENVOICE_COMMIT"
+          grep -Fq 'Permission is hereby granted, free of charge' openvoice-upstream/LICENSE
+          python -m pip install numpy==1.23.5 librosa==0.9.2 soundfile==0.12.1 pydub==0.25.1 wavmark==0.0.3 eng_to_ipa==0.0.2 inflect==7.0.0 unidecode==1.3.7 pypinyin==0.50.0 cn2an==0.5.22 jieba==0.42.1 langid==1.1.6
+          python -m pip install -e ./openvoice-upstream --no-deps
+          mkdir -p openvoice-checkpoint prosody-sources ums-bm03-openvoice-authorized-human
+      - name: Pin and verify OpenVoice V2 MIT checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE="https://huggingface.co/myshell-ai/OpenVoiceV2/resolve/$OPENVOICE_HF_REV/converter"
+          curl --fail --location --retry 3 -o openvoice-checkpoint/config.json "$BASE/config.json"
+          curl --fail --location --retry 3 -o openvoice-checkpoint/checkpoint.pth "$BASE/checkpoint.pth"
+          test "$(sha256sum openvoice-checkpoint/checkpoint.pth | awk '{print $1}')" = "$BM03_OV_CHECKPOINT_SHA256"
+          curl --fail --location --retry 3 -o openvoice-checkpoint/model-card.md "https://huggingface.co/myshell-ai/OpenVoiceV2/raw/$OPENVOICE_HF_REV/README.md"
+          grep -Eiq '^license:[[:space:]]*mit[[:space:]]*$' openvoice-checkpoint/model-card.md
+      - name: Generate two physically distinct source-prosody utterances
+        shell: bash
+        run: |
+          set -euo pipefail
+          TEXT='Cerebro verifies controlled rhythm, timing, emphasis and voice conversion.'
+          espeak-ng -v en-us+m3 -s 118 -p 38 -a 150 -w prosody-sources/slow-low.wav "$TEXT"
+          espeak-ng -v en-us+m3 -s 220 -p 72 -a 180 -w prosody-sources/fast-high.wav "$TEXT"
+          test -s prosody-sources/slow-low.wav && test -s prosody-sources/fast-high.wav
+          test "$(sha256sum prosody-sources/slow-low.wav | awk '{print $1}')" != "$(sha256sum prosody-sources/fast-high.wav | awk '{print $1}')"
+      - name: Physical target-timbre conversion and prosody proof
+        env:
+          BM03_REAL_REF: ${{ steps.source.outputs.audio }}
+          BM03_SOURCE_ADMISSION: ${{ steps.source.outputs.admission }}
+          BM03_OV_SOURCES: prosody-sources/slow-low.wav:prosody-sources/fast-high.wav
+          BM03_OV_CONFIG: openvoice-checkpoint/config.json
+          BM03_OV_CHECKPOINT: openvoice-checkpoint/checkpoint.pth
+          BM03_OV_OUT: ums-bm03-openvoice-authorized-human
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 1200s python cerebro/media-studio/v2/probes/bm03_openvoice_authorized_human.py | tee bm03-openvoice-authorized.stdout.log
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm03-openvoice-authorized-human/bm03-openvoice-authorized-human.json'))
+          assert x['status']=='OPENVOICE_V2_REAL_HUMAN_TARGET_CONVERSION_AND_PROSODY_PROVEN'
+          assert x['prosody']['criterion_pass'] is True and x['prosody']['duration_ratio']>=1.15
+          assert x['human_required'] is False and x['additional_cost_eur']==0
+          PY
+      - name: Upload OpenVoice physical proof component
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm03-openvoice-authorized-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm03-openvoice-authorized-human/
+            prosody-sources/
+            openvoice-checkpoint/model-card.md
+            bm03-openvoice-authorized.stdout.log
+
+  tribunal:
+    needs: [qwen_authorized_clone, openvoice_authorized_conversion]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download sealed source
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.SOURCE_ARTIFACT }}
+          path: source-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+      - name: Download Qwen component
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm03-qwen-authorized-${{ github.run_id }}
+          path: qwen-artifact
+      - name: Download OpenVoice component
+        uses: actions/download-artifact@v4
+        with:
+          name: ums-bm03-openvoice-authorized-${{ github.run_id }}
+          path: openvoice-artifact
+      - name: Aggregate fail-closed BM03 physical tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          SM="$(find source-artifact -type f -name source-manifest.json -print -quit)"
+          ADM="$(find source-artifact -type f -name bm03-source-admission.json -print -quit)"
+          Q="$(find qwen-artifact -type f -name bm03-qwen-authorized-human.json -print -quit)"
+          OV="$(find openvoice-artifact -type f -name bm03-openvoice-authorized-human.json -print -quit)"
+          test -s "$SM" && test -s "$ADM" && test -s "$Q" && test -s "$OV"
+          mkdir -p ums-bm03-authorized-voice-proof
+          python cerebro/media-studio/v2/probes/bm03_authorized_voice_proof_gate.py \
+            --source-manifest "$SM" --admission "$ADM" --qwen "$Q" --openvoice "$OV" \
+            --out ums-bm03-authorized-voice-proof/bm03-tribunal.json | tee ums-bm03-authorized-voice-proof/tribunal.stdout.log
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm03-authorized-voice-proof/bm03-tribunal.json'))
+          assert x['status']=='PASS_WITH_PHYSICAL_EVIDENCE'
+          assert x['benchmark_credit_eligible'] is True
+          assert x['passed_check_count']==x['check_count']
+          assert set(x['capabilities_proven'])=={'VOICE_CLONE','VOICE_CONVERSION','TTS','PROSODY','MULTILINGUAL'}
+          PY
+      - name: Upload BM03 tribunal artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm03-authorized-voice-proof-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-bm03-authorized-voice-proof/
