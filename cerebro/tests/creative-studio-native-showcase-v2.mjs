@@ -16,20 +16,21 @@ const photos=[
 'https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-revision-vivienda-asesor-scaled-1-cerebro.webp',
 'https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-firma-documentos-vivienda-scaled-1-cerebro.webp',
 'https://fenixcapital.es/wp-content/uploads/2026/10/huelva-llaves-compra-vivienda-scaled-1-cerebro.webp'];
-const finalVids=['PEXELS:4307346','PEXELS:3769951','PEXELS:6780089','PEXELS:27860328','PEXELS:31568471','PEXELS:8293019'];
+const finalVids=['PEXELS:4307346','PEXELS:3769951','PEXELS:6780089','PEXELS:27860328','PEXELS:31568471','PEXELS:8293019','PEXELS:3944018','PEXELS:5466764','PEXELS:30353173','PEXELS:9056542','PEXELS:7821811','PEXELS:7581281','PEXELS:29229032','PEXELS:6187216'];
 const legacyCastBootstrap='PEXELS:7817205';
 const legacyBootstrapVids=[legacyCastBootstrap,...finalVids];
 const brand={logo_url:'https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png',primary:'#ffffff',accent:'#f47b20',background:'#111111'};
 const brief={objective:'Crear una campaña social que detenga scroll, dramatice la tensión real de reservar una vivienda y convierta con energía cinematográfica.',audience:'Personas que han encontrado una vivienda que les encanta y sienten presión por reservar.',desire:'Ves la casa, ves la cocina y ya sabes dónde va el sofá',pressure:'hay que reservar hoy',truth:'primero conviene comprobar que la operación encaja contigo y con la vivienda',benefit:'puedes decidir con ilusión, sin ir a ciegas y sin matar el momento',cta:'Cuéntanos tu caso y lo miramos contigo'};
 const built=buildStudioCampaignV1({company_id:'fenix',environment:'PREPROD',brief,assets:{visual_sources:photos,video_sources:legacyBootstrapVids}});
 const base=JSON.parse(JSON.stringify(built));
+let globalVideoCursor=0;
 for(const key of ['story','reel','long']){
   const scenes=base?.video_productions?.[key]?.selected_plan?.scenes||[];
-  let j=0;
   for(const scene of scenes){
     if(String(scene.source_kind||'').toUpperCase()!=='VIDEO')continue;
-    scene.video_source=finalVids[j++%finalVids.length];
-    scene.source_start_sec=Number(((j*1.17)%5.2).toFixed(2));
+    const n=++globalVideoCursor;
+    scene.video_source=finalVids[(n-1)%finalVids.length];
+    scene.source_start_sec=Number(((n*1.17)%5.2).toFixed(2));
     scene.continuity={...(scene.continuity||{}),character_intent:'CONTEXT_BROLL',identity_must_match_when_human_primary:false};
   }
 }
@@ -37,11 +38,11 @@ const campaign=upgradeStudioCampaignNativeV2(base);
 for(const key of ['story','reel','long'])for(const scene of campaign.video_productions[key].selected_plan.scenes){
   if(String(scene.video_source||'').toUpperCase()===legacyCastBootstrap)throw new Error(`LEGACY_CAST_BOOTSTRAP_LEAKED_TO_FINAL:${key}`);
 }
-const manifest={schema_version:'2.6.1',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',studio_mode:campaign.studio_mode,campaign_id:campaign.campaign_id,publish_authorized:false,additional_cost_eur:0,promotion_eligible:false,human_creative_review_required:true,human_creative_gate:'PENDING_REVIEW',human_rejection_parent:'V2.5_PHYSICAL_REJECTED_GENERIC_STOCK_CAST',source_policy:'NO_IDENTIFIABLE_STOCK_HUMANS',legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_source:legacyCastBootstrap,audio_delivery:'AAC_256K_48KHZ_STEREO',legacy_prerender_voice_mode:'HOOK_ONLY_REPLACED_BY_V5',native_pipeline_order:'LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER',captions_mode:'REAL_DIALOGUE_SRT_SIDECAR',productions:[]};
+const manifest={schema_version:'2.6.2',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',studio_mode:campaign.studio_mode,campaign_id:campaign.campaign_id,publish_authorized:false,additional_cost_eur:0,promotion_eligible:false,human_creative_review_required:true,human_creative_gate:'PENDING_REVIEW',human_rejection_parent:'V2.6.1_PHYSICAL_REJECTED_PRIMARY_DRIFT_AND_BROLL_REPETITION',source_policy:'NO_IDENTIFIABLE_STOCK_HUMANS',context_catalog_size:finalVids.length,max_context_source_reuse:2,physical_primary_binding:'SINGLE_RENDER_VISUAL_SOURCE',legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_source:legacyCastBootstrap,audio_delivery:'AAC_256K_48KHZ_STEREO',legacy_prerender_voice_mode:'HOOK_ONLY_REPLACED_BY_V5',native_pipeline_order:'LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER',captions_mode:'REAL_DIALOGUE_SRT_SIDECAR',productions:[]};
 function baseJob(plan){
   const hook=String(plan.narration_blocks?.[0]?.text||'Fénix Capital.').trim();
   const prerenderScenes=plan.scenes.map((scene,i)=>({...scene,voiceover:i===0?hook:''}));
-  return {job_id:crypto.randomUUID(),company_id:'fenix',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',version:'v2.6',output_type:plan.output_type,channel:plan.channel,request:{publish_requested:false,expected_cost_eur:0,creative_payload:{brand,channel_fit:true,accessibility_checked:true,layer_count:12,layout_variants:5,motion_design:true,broll_required:true,scene_text_only_ratio:0,text_only_page_ratio:.05,motion_profiles:['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN','PAN_LEFT','PULL_OUT'],transitions:['CROSSFADE','DIP_TO_BLACK','PUSH','WIPE','ZOOM_CUT'],video_mode:'LIVE_ACTION_MIXED',visual_sources:photos,video_sources:finalVids,scenes:prerenderScenes,audio:{voice_enabled:true,voice_id:'ES_FEMALE',music_enabled:true,ducking:true,captions:true}}}};
+  return {job_id:crypto.randomUUID(),company_id:'fenix',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',version:'v2.6.2',output_type:plan.output_type,channel:plan.channel,request:{publish_requested:false,expected_cost_eur:0,creative_payload:{brand,channel_fit:true,accessibility_checked:true,layer_count:12,layout_variants:5,motion_design:true,broll_required:true,scene_text_only_ratio:0,text_only_page_ratio:.05,motion_profiles:['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN','PAN_LEFT','PULL_OUT'],transitions:['CROSSFADE','DIP_TO_BLACK','PUSH','WIPE','ZOOM_CUT'],video_mode:'LIVE_ACTION_MIXED',visual_sources:[plan.primary_cast_asset],video_sources:finalVids,scenes:prerenderScenes,audio:{voice_enabled:true,voice_id:'ES_FEMALE',music_enabled:true,ducking:true,captions:true}}}};
 }
 function srtStamp(sec){const ms=Math.max(0,Math.round(Number(sec||0)*1000)),h=Math.floor(ms/3600000),m=Math.floor(ms%3600000/60000),s=Math.floor(ms%60000/1000),r=ms%1000;return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')},${String(r).padStart(3,'0')}`}
 async function writeDialogueSrt(label,plan,evidence){
@@ -53,20 +54,28 @@ async function writeDialogueSrt(label,plan,evidence){
   }
   const file=path.join(out,`${label}.srt`);await fs.writeFile(file,lines.join('\n'),'utf8');return path.basename(file);
 }
-const configs=[{key:'story',label:'story-v26',music:'ACTION_TECHNO',sibling:'reel'},{key:'reel',label:'reel-v26',music:'NIGHT_DRIVING',sibling:'story'},{key:'long',label:'video-largo-v26',music:'ACTION_TECHNO',sibling:null}];
+function contextStats(plan){
+  const refs=plan.scenes.filter(s=>String(s.source_kind||'').toUpperCase()==='VIDEO').map(s=>String(s.video_source||'').toUpperCase()).filter(Boolean),counts=new Map();
+  for(const ref of refs)counts.set(ref,(counts.get(ref)||0)+1);
+  return {refs,unique_count:counts.size,max_occurrences:Math.max(0,...counts.values()),counts:Object.fromEntries(counts)};
+}
+const configs=[{key:'story',label:'story-v26',music:'ACTION_TECHNO',sibling:'reel',minContextUnique:8},{key:'reel',label:'reel-v26',music:'NIGHT_DRIVING',sibling:'story',minContextUnique:14},{key:'long',label:'video-largo-v26',music:'ACTION_TECHNO',sibling:null,minContextUnique:14}];
 const primaryRefs=new Set();
 for(const cfg of configs){
-  const production=campaign.video_productions[cfg.key],plan=production.selected_plan,cast=assertPrimaryCastGovernanceV2({scenes:plan.scenes,primary_cast_asset:plan.primary_cast_asset});
+  const production=campaign.video_productions[cfg.key],plan=production.selected_plan,cast=assertPrimaryCastGovernanceV2({scenes:plan.scenes,primary_cast_asset:plan.primary_cast_asset}),ctx=contextStats(plan);
   for(const ref of cast.primary_asset_refs)primaryRefs.add(ref);
   if(cast.identifiable_stock_human_context_forbidden!==true)throw new Error(`IDENTIFIABLE_STOCK_HUMAN_GATE_MISSING:${cfg.label}`);
+  if(ctx.unique_count<cfg.minContextUnique)throw new Error(`CONTEXT_DIVERSITY_TOO_LOW:${cfg.label}:${ctx.unique_count}:${cfg.minContextUnique}`);
+  if(ctx.max_occurrences>2)throw new Error(`CONTEXT_SOURCE_OVERUSED:${cfg.label}:${ctx.max_occurrences}`);
   for(const scene of plan.scenes)if(String(scene.video_source||'').toUpperCase()===legacyCastBootstrap)throw new Error(`LEGACY_CAST_BOOTSTRAP_RENDER_LEAK:${cfg.label}`);
   const r=await renderCreativeJobV2Live(baseJob(plan));
   try{
     const art=r.artifacts.find(x=>x.mime==='video/mp4');if(!art)throw new Error(`NATIVE_VIDEO_MISSING:${cfg.label}`);
+    if(!Array.isArray(art.visual_sources)||art.visual_sources.length!==1||String(art.visual_sources[0])!==String(plan.primary_cast_asset))throw new Error(`PHYSICAL_PRIMARY_BINDING_FAILED:${cfg.label}`);
     const finished=await finishCreativeSocialV5({videoFile:art.local_path,scenes:plan.scenes,temp:r.temp,transitionOverlapSec:.55});
     const mastered=await masterCreativeSocialAudioV5({videoFile:finished.file,narrationBlocks:plan.narration_blocks,scenes:plan.scenes,temp:r.temp,musicTrackId:cfg.music,transitionOverlapSec:.55});
     const captions=await writeDialogueSrt(cfg.label,plan,mastered.evidence);
-    const evidence={...(art.physical_evidence||{}),...finished.evidence,...mastered.evidence,primary_cast_governance:cast,legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_present_in_final:false,legacy_prerender_audio_replaced_by_v5:true,legacy_prerender_voice_hook_only:true,audio_mastered_after_native_recut:true,real_dialogue_caption_sidecar:true,caption_sidecar_file:captions};
+    const evidence={...(art.physical_evidence||{}),...finished.evidence,...mastered.evidence,primary_cast_governance:cast,physical_primary_render_asset:art.visual_sources[0],physical_primary_render_asset_count:art.visual_sources.length,physical_primary_binding_passed:true,context_catalog_size:finalVids.length,context_source_unique_count:ctx.unique_count,context_source_max_occurrences:ctx.max_occurrences,context_source_counts:ctx.counts,legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_present_in_final:false,legacy_prerender_audio_replaced_by_v5:true,legacy_prerender_voice_hook_only:true,audio_mastered_after_native_recut:true,real_dialogue_caption_sidecar:true,caption_sidecar_file:captions};
     const sibling=cfg.sibling?campaign.video_productions[cfg.sibling].selected_plan:null;
     const cinematic=assertCreativeCinematicV1({plan,physical_evidence:evidence,sibling_plan:sibling});
     const target=path.join(out,`${cfg.label}.mp4`);await fs.copyFile(mastered.file,target);
@@ -76,4 +85,4 @@ for(const cfg of configs){
 if(primaryRefs.size!==1)throw new Error(`NATIVE_PRIMARY_CAST_SOURCE_DRIFT:${[...primaryRefs].join(',')}`);
 manifest.cross_format_primary_cast_source=[...primaryRefs][0];
 await fs.writeFile(path.join(out,'NATIVE_CINEMATIC_MANIFEST.json'),JSON.stringify(manifest,null,2));
-console.log(JSON.stringify({ok:true,technical_candidate:true,human_creative_gate:'PENDING_REVIEW',promotion_eligible:false,version:'v2.6',out,source_policy:manifest.source_policy,legacy_cast_bootstrap_isolated:true,audio_delivery:manifest.audio_delivery,primary_cast:manifest.cross_format_primary_cast_source,captions_mode:manifest.captions_mode,pipeline_order:manifest.native_pipeline_order,productions:manifest.productions.map(x=>({label:x.label,scene_count:x.scene_count,music:x.physical_evidence.music_track_id,music_license_provenance:x.physical_evidence.music_license_provenance_url,voices:x.physical_evidence.distinct_voice_count,audio_rate:x.physical_evidence.audio_sample_rate_hz,audio_channels:x.physical_evidence.audio_channels,voice_wpm:x.physical_evidence.voice_wpm,max_voice_gap_sec:x.physical_evidence.max_voice_gap_sec,avg_shot_sec:x.physical_evidence.avg_shot_sec,max_shot_sec:x.physical_evidence.max_shot_sec,camera_profiles:x.physical_evidence.camera_motion_profile_count,vfx_profiles:x.physical_evidence.vfx_profile_count,captions:x.caption_sidecar}))}));
+console.log(JSON.stringify({ok:true,technical_candidate:true,human_creative_gate:'PENDING_REVIEW',promotion_eligible:false,version:'v2.6.2',out,source_policy:manifest.source_policy,context_catalog_size:manifest.context_catalog_size,physical_primary_binding:manifest.physical_primary_binding,legacy_cast_bootstrap_isolated:true,audio_delivery:manifest.audio_delivery,primary_cast:manifest.cross_format_primary_cast_source,captions_mode:manifest.captions_mode,pipeline_order:manifest.native_pipeline_order,productions:manifest.productions.map(x=>({label:x.label,scene_count:x.scene_count,context_unique:x.physical_evidence.context_source_unique_count,context_max_reuse:x.physical_evidence.context_source_max_occurrences,physical_primary:x.physical_evidence.physical_primary_render_asset,music:x.physical_evidence.music_track_id,music_license_provenance:x.physical_evidence.music_license_provenance_url,voices:x.physical_evidence.distinct_voice_count,audio_rate:x.physical_evidence.audio_sample_rate_hz,audio_channels:x.physical_evidence.audio_channels,voice_wpm:x.physical_evidence.voice_wpm,max_voice_gap_sec:x.physical_evidence.max_voice_gap_sec,avg_shot_sec:x.physical_evidence.avg_shot_sec,max_shot_sec:x.physical_evidence.max_shot_sec,camera_profiles:x.physical_evidence.camera_motion_profile_count,vfx_profiles:x.physical_evidence.vfx_profile_count,captions:x.caption_sidecar}))}));
