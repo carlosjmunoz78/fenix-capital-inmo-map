@@ -11,7 +11,7 @@ function replaceOnce(from,to,label){
 
 replaceOnce(
 `};\n\nfunction resolveLogin(value:string){`,
-`};\n\nconst BROWSER_SESSION_COOKIE='fenix-session-active';\nconst BROWSER_SESSION_MIGRATION_KEY='fenix-browser-session-cookie-v1';\n\nfunction hasBrowserSessionMarker(){\n  if(sessionStorage.getItem('fenix-session-active')==='1')return true;\n  return document.cookie.split(';').some(part=>part.trim()===\\`${BROWSER_SESSION_COOKIE}=1\\`);\n}\n\nfunction setBrowserSessionMarker(active:boolean){\n  if(active){\n    sessionStorage.setItem('fenix-session-active','1');\n    document.cookie=\\`${BROWSER_SESSION_COOKIE}=1; Path=/; SameSite=Lax; Secure\\`;\n    return;\n  }\n  sessionStorage.removeItem('fenix-session-active');\n  document.cookie=\\`${BROWSER_SESSION_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax; Secure\\`;\n}\n\nfunction resolveLogin(value:string){`,
+`};\n\nconst BROWSER_SESSION_COOKIE='fenix-session-active';\nconst BROWSER_SESSION_MIGRATION_KEY='fenix-browser-session-cookie-v1';\n\nfunction hasBrowserSessionMarker(){\n  if(sessionStorage.getItem('fenix-session-active')==='1')return true;\n  return document.cookie.split(';').some(part=>part.trim()===BROWSER_SESSION_COOKIE+'=1');\n}\n\nfunction setBrowserSessionMarker(active:boolean){\n  if(active){\n    sessionStorage.setItem('fenix-session-active','1');\n    document.cookie=BROWSER_SESSION_COOKIE+'=1; Path=/; SameSite=Lax; Secure';\n    return;\n  }\n  sessionStorage.removeItem('fenix-session-active');\n  document.cookie=BROWSER_SESSION_COOKIE+'=; Path=/; Max-Age=0; SameSite=Lax; Secure';\n}\n\nfunction resolveLogin(value:string){`,
 'insert browser session marker helpers');
 
 replaceOnce(
