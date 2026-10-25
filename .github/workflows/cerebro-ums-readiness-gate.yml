@@ -9,7 +9,7 @@ on:
       - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
       - 'cerebro/media-studio/v2/runtime/readiness-gate.mjs'
       - 'cerebro/media-studio/v2/tests/readiness-gate.test.mjs'
-      - 'cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json'
+      - 'cerebro/media-studio/v2/evidence/bm*-pass-with-evidence-*.json'
   workflow_dispatch:
 
 permissions:
@@ -39,23 +39,33 @@ jobs:
           import {loadReadinessBenchmarks,evaluateUniversalMediaStudioReadiness} from './cerebro/media-studio/v2/runtime/readiness-gate.mjs';
           const doc=loadReadinessBenchmarks();
           const result=evaluateUniversalMediaStudioReadiness(doc);
+          const required=doc.benchmarks.filter((b)=>b.required!==false);
+          const persisted=required.filter((b)=>b.state==='PASS_WITH_EVIDENCE'&&typeof b.evidence_ref==='string'&&b.evidence_ref.length>0);
+          const malformedPass=required.filter((b)=>b.state==='PASS_WITH_EVIDENCE'&&!b.evidence_ref);
+          const expectedIncomplete=required.length-persisted.length;
           const out={
-            schema_version:'1.0.0',state_type:'CEREBRO_UMS_READINESS_EVIDENCE_V1',
+            schema_version:'1.1.0',state_type:'CEREBRO_UMS_READINESS_EVIDENCE_V1',
             gate:'UNIVERSAL_MEDIA_STUDIO_READY',environment:'PREPROD',
             ready:result.ready,total_required:result.total_required,
             passed_with_evidence:result.passed_with_evidence,incomplete:result.incomplete,failed:result.failed,
-            bm01:doc.benchmarks.find((b)=>b.id==='BM-01'),
-            expected_after_bm01:{ready:false,passed_with_evidence:1,incomplete:11},
+            persisted_benchmark_ids:persisted.map((b)=>b.id),
+            persisted_evidence_refs:Object.fromEntries(persisted.map((b)=>[b.id,b.evidence_ref])),
+            invariant:{expected_incomplete:expectedIncomplete,malformed_pass_ids:malformedPass.map((b)=>b.id)},
             prod_authorized:false,publish_authorized:false,spend_authorized:false,additional_cost_eur:0,
             github_run_id:process.env.GITHUB_RUN_ID,github_sha:process.env.GITHUB_SHA
           };
-          if(out.ready!==false||out.passed_with_evidence!==1||out.incomplete.length!==11||out.bm01?.state!=='PASS_WITH_EVIDENCE'||!out.bm01?.evidence_ref) process.exit(9);
+          if(result.total_required!==required.length) process.exit(9);
+          if(result.passed_with_evidence!==persisted.length) process.exit(10);
+          if(result.incomplete.length!==expectedIncomplete) process.exit(11);
+          if(malformedPass.length!==0) process.exit(12);
+          if(persisted.length<required.length && result.ready!==false) process.exit(13);
+          if(persisted.length===required.length && result.ready!==true) process.exit(14);
           console.log(JSON.stringify(out,null,2));
           NODE
       - name: Upload readiness evidence
         uses: actions/upload-artifact@v4
         with:
-          name: ums-readiness-after-bm01-${{ github.run_id }}
+          name: ums-readiness-${{ github.run_id }}
           retention-days: 30
           if-no-files-found: error
           path: ums-readiness-evidence/
