@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T09:53:05.913Z",
+  "updated_at": "2026-10-25T10:10:20.521Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -336,7 +336,8 @@
     "repo:81e2927c97d48651df9d842ac9ec",
     "repo:772d1c5ac069431d57cf247027b2",
     "github-wide-skills:47abef3743d9101dfa20",
-    "github-wide-skills:3d4525c03d4ccaf14b84"
+    "github-wide-skills:3d4525c03d4ccaf14b84",
+    "github-wide-skills:64c4b4fc31394e0da80e"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -367,6 +368,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 40182459690,
       "checkpointed_at": "2026-10-25T09:53:05.913Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:64c4b4fc31394e0da80e": {
+      "candidate_id": "github-wide-skills:64c4b4fc31394e0da80e",
+      "name": "cma-bank-loan",
+      "human_alias": "Cma Bank Loan",
+      "wrapper_id": "skillwrap:c3b28d891d93a4c22b09",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 84.91,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "parinshahAIbuilder/india-finance-agent-skills",
+        "upstream_head_commit": "5c48c408decac564ac558af791776761d3b0ef66",
+        "manifest_sha256": "d56a3cf6cf547e219ee9db31e74b2ea7c352901827ea9eb26a3db3f98b0f12e3",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40183629018,
+      "checkpointed_at": "2026-10-25T10:10:20.521Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -19975,7 +20010,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40182459690,
+  "last_discovery_run_id": 40183629018,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
