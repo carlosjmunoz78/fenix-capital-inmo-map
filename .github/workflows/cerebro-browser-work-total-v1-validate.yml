@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - 'promote/browser-work-total-main-final-20261025'
+      - 'fix/browser-realtime-fullsize-20261026'
       - 'main'
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-validate.yml'
+      - 'public/browser-ergonomics-v1.css'
+      - 'public/browser-ergonomics-v1.js'
       - 'src/main.tsx'
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
@@ -16,6 +19,7 @@ on:
       - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
       - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
       - 'cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs'
+      - 'cerebro/runtime/browser-ergonomics-p0.test.mjs'
       - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/**'
       - 'supabase/functions/cerebro-browser-work-total-v1-prod/**'
   workflow_dispatch:
@@ -45,6 +49,8 @@ jobs:
         run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
       - name: Test Work Total PROD contracts
         run: node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
+      - name: Test browser P0 ergonomics
+        run: node --test cerebro/runtime/browser-ergonomics-p0.test.mjs
       - name: Syntax-check interactive runtime
         run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
       - name: Build App with Work Total dock mounted

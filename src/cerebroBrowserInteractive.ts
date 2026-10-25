@@ -14,19 +14,27 @@ type ApiResult<T>=Promise<{status:number;data:T|null}>;
 const BROWSER_GATEWAY='cerebro-browser-gateway-v1';
 const WORKMODE_STYLE_ID='cerebro-browser-workmode-v2';
 const WORKMODE_INSTALLED='cerebroBrowserWorkmodeV2';
+const HUMAN_TEXT_BATCH_MS=180;
+
+type HumanTypingState={value:string;timer:number};
+type BatchedKeyboardEvent=globalThis.KeyboardEvent&{__cerebroTypingBatch?:boolean};
+type MappedMouseEvent=globalThis.MouseEvent&{__cerebroPointerMapped?:boolean};
 
 function installBrowserWorkModeUx(){
  if(typeof document==='undefined'||typeof window==='undefined')return;
  const state=window as unknown as Window&Record<string,unknown>;
  if(state[WORKMODE_INSTALLED])return;
  state[WORKMODE_INSTALLED]=true;
+ const typingState=new WeakMap<Element,HumanTypingState>();
  const installStyle=()=>{
   if(!document.head||document.getElementById(WORKMODE_STYLE_ID))return;
   const style=document.createElement('style');
   style.id=WORKMODE_STYLE_ID;
   style.textContent=`
+   .cerebro-browser-console .cerebro-browser-viewport>img{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;object-fit:fill!important}
    body.cerebro-browser-viewer-expanded{overflow:hidden!important}
    body.cerebro-browser-viewer-expanded .cerebro-browser-frame--expanded{position:fixed!important;inset:8px 8px 90px 8px!important;width:auto!important;height:auto!important;max-width:none!important;margin:0!important;z-index:9998!important;border-radius:14px!important;box-shadow:0 28px 90px rgba(0,0,0,.72),0 0 0 1px rgba(55,217,255,.18)!important}
+   body.cerebro-browser-viewer-expanded .cerebro-browser-frame--expanded .cerebro-browser-viewport>img{object-fit:fill!important}
    body.cerebro-browser-viewer-expanded .cerebro-browser-composer{position:fixed!important;left:8px!important;right:8px!important;bottom:8px!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;overflow:visible!important;z-index:10000!important;background:transparent!important}
    body.cerebro-browser-viewer-expanded .cerebro-browser-form{height:72px!important;min-height:72px!important;border-color:rgba(55,217,255,.42)!important;background:rgba(3,16,24,.97)!important;box-shadow:0 18px 60px rgba(0,0,0,.58),0 0 0 1px rgba(55,217,255,.08)!important;backdrop-filter:blur(24px) saturate(135%)!important}
    body.cerebro-browser-viewer-expanded .cerebro-browser-form textarea{max-height:56px!important;font-size:14px!important}
@@ -37,9 +45,43 @@ function installBrowserWorkModeUx(){
   `;
   document.head.appendChild(style);
  };
+ const viewportForEvent=(event:Event)=>{
+  const direct=event.target instanceof Element?event.target.closest('.cerebro-browser-viewport'):null;
+  if(direct)return direct;
+  const active=document.activeElement;
+  return active instanceof Element?active.closest('.cerebro-browser-viewport'):null;
+ };
+ const flushTyping=(viewport:Element,typing:HumanTypingState)=>{
+  if(typing.timer){window.clearTimeout(typing.timer);typing.timer=0;}
+  const text=typing.value;
+  typing.value='';
+  if(!text)return;
+  for(const key of text){
+   const batched=new KeyboardEvent('keydown',{key,bubbles:true,cancelable:true,composed:true}) as BatchedKeyboardEvent;
+   batched.__cerebroTypingBatch=true;
+   viewport.dispatchEvent(batched);
+  }
+ };
  const onKeyDown=(event:globalThis.KeyboardEvent)=>{
+  const enriched=event as BatchedKeyboardEvent;
+  if(enriched.__cerebroTypingBatch)return;
   const root=document.querySelector('.cerebro-browser-console');
   if(!root)return;
+  const viewport=viewportForEvent(event);
+  if(viewport){
+   let typing=typingState.get(viewport);
+   if(!typing){typing={value:'',timer:0};typingState.set(viewport,typing);}
+   const printable=event.key.length===1&&!event.ctrlKey&&!event.metaKey&&!event.altKey&&!event.isComposing;
+   if(printable){
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    typing.value=`${typing.value}${event.key}`.slice(0,4000);
+    if(!typing.timer)typing.timer=window.setTimeout(()=>flushTyping(viewport,typing!),HUMAN_TEXT_BATCH_MS);
+    return;
+   }
+   if(typing.value)flushTyping(viewport,typing);
+  }
   const expanded=document.body.classList.contains('cerebro-browser-viewer-expanded');
   if(event.key==='Escape'&&expanded){
    const button=root.querySelector<HTMLButtonElement>('[data-cerebro-viewer-expand]');
@@ -47,14 +89,47 @@ function installBrowserWorkModeUx(){
    return;
   }
   const target=event.target;
-  const typing=target instanceof HTMLTextAreaElement||target instanceof HTMLInputElement||(target instanceof HTMLElement&&target.isContentEditable);
-  if(event.key==='/'&&!typing){
+  const typingTarget=target instanceof HTMLTextAreaElement||target instanceof HTMLInputElement||(target instanceof HTMLElement&&target.isContentEditable);
+  if(event.key==='/'&&!typingTarget){
    const composer=root.querySelector<HTMLTextAreaElement>('.cerebro-browser-form textarea');
    if(composer&&!composer.disabled){event.preventDefault();composer.focus();}
   }
  };
+ const remapPointer=(event:globalThis.MouseEvent)=>{
+  const enriched=event as MappedMouseEvent;
+  if(enriched.__cerebroPointerMapped)return;
+  const image=event.target instanceof Element?event.target.closest('.cerebro-browser-viewport>img'):null;
+  if(!(image instanceof HTMLImageElement))return;
+  const rect=image.getBoundingClientRect();
+  const naturalWidth=image.naturalWidth;
+  const naturalHeight=image.naturalHeight;
+  if(!rect.width||!rect.height||!naturalWidth||!naturalHeight)return;
+  const scale=Math.min(rect.width/naturalWidth,rect.height/naturalHeight);
+  const containLeft=rect.left+(rect.width-naturalWidth*scale)/2;
+  const containTop=rect.top+(rect.height-naturalHeight*scale)/2;
+  const remoteX=((event.clientX-rect.left)/rect.width)*naturalWidth;
+  const remoteY=((event.clientY-rect.top)/rect.height)*naturalHeight;
+  const mappedX=containLeft+remoteX*scale;
+  const mappedY=containTop+remoteY*scale;
+  if(Math.abs(mappedX-event.clientX)<.25&&Math.abs(mappedY-event.clientY)<.25)return;
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation();
+  const mapped=new MouseEvent(event.type,{bubbles:true,cancelable:true,composed:true,view:window,detail:event.detail,screenX:event.screenX,screenY:event.screenY,clientX:mappedX,clientY:mappedY,ctrlKey:event.ctrlKey,shiftKey:event.shiftKey,altKey:event.altKey,metaKey:event.metaKey,button:event.button,buttons:event.buttons,relatedTarget:event.relatedTarget}) as MappedMouseEvent;
+  mapped.__cerebroPointerMapped=true;
+  image.dispatchEvent(mapped);
+ };
+ const onPaste=(event:ClipboardEvent)=>{
+  const viewport=viewportForEvent(event);
+  if(!viewport)return;
+  const typing=typingState.get(viewport);
+  if(typing?.value)flushTyping(viewport,typing);
+ };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installStyle,{once:true});else installStyle();
  document.addEventListener('keydown',onKeyDown,true);
+ document.addEventListener('paste',onPaste,true);
+ document.addEventListener('click',remapPointer,true);
+ document.addEventListener('dblclick',remapPointer,true);
 }
 installBrowserWorkModeUx();
 
