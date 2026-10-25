@@ -2,9 +2,12 @@ name: CEREBRO Browser Work Total V1 Validate
 
 on:
   push:
-    branches: ['feat/browser-work-total-v1-20261024']
+    branches:
+      - 'promote/browser-work-total-main-final-20261025'
+      - 'main'
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-validate.yml'
+      - 'src/main.tsx'
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
       - 'src/CerebroBrowserConsole.tsx'
@@ -12,6 +15,9 @@ on:
       - 'cerebro/runtime/browser-session-bundle-v1.mjs'
       - 'cerebro/runtime/browser-session-bundle-v1.test.mjs'
       - 'cerebro/runtime/browser-work-total-v1-contract.test.mjs'
+      - 'cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs'
+      - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/**'
+      - 'supabase/functions/cerebro-browser-work-total-v1-prod/**'
   workflow_dispatch:
 
 permissions:
@@ -37,7 +43,9 @@ jobs:
         run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
       - name: Test Work Total contracts
         run: node --test cerebro/runtime/browser-work-total-v1-contract.test.mjs
+      - name: Test Work Total PROD contracts
+        run: node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
       - name: Syntax-check interactive runtime
         run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
-      - name: Build App with PREPROD Work Total dock
+      - name: Build App with Work Total dock mounted
         run: npm run build
