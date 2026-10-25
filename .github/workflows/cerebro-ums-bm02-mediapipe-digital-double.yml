@@ -1,0 +1,153 @@
+name: CEREBRO UMS BM02 MediaPipe Digital Double
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm02-mediapipe-digital-double.yml'
+      - 'cerebro/media-studio/v2/probes/bm02_mediapipe_digital_double.py'
+      - 'cerebro/media-studio/v2/probes/bm02_digital_double_proof_gate.py'
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_SPEND_AUTHORIZED: 'false'
+  SOURCE_RUN_ID: '40246569906'
+  SOURCE_ARTIFACT: 'ums-ravdess-authorized-source-40246569906'
+  MEDIAPIPE_VERSION: '0.10.21'
+
+jobs:
+  mediapipe_digital_double:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Download sealed licensed human source
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.SOURCE_ARTIFACT }}
+          path: source-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.SOURCE_RUN_ID }}
+
+      - name: Locate BM02 admitted video source
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          CLIP="$(find source-artifact -type f -name '01-01-01-01-01-01-01.mp4' -print -quit)"
+          ADM="$(find source-artifact -type f -name 'bm02-source-admission.json' -print -quit)"
+          SM="$(find source-artifact -type f -name 'source-manifest.json' -print -quit)"
+          test -n "$CLIP" && test -s "$CLIP" && test -n "$ADM" && test -s "$ADM" && test -n "$SM" && test -s "$SM"
+          echo "clip=$CLIP" >> "$GITHUB_OUTPUT"
+          echo "admission=$ADM" >> "$GITHUB_OUTPUT"
+          echo "source_manifest=$SM" >> "$GITHUB_OUTPUT"
+
+      - name: Install zero-cost MediaPipe digital-double runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends git curl poppler-utils ffmpeg
+          python -m pip install --upgrade pip
+          python -m pip install "numpy==1.26.4" "mediapipe==$MEDIAPIPE_VERSION" "opencv-python-headless==4.10.0.84"
+          python -m pip check
+          python - <<'PY'
+          import mediapipe as mp
+          assert hasattr(mp,'solutions') and hasattr(mp.solutions,'face_mesh')
+          print('mediapipe',mp.__version__)
+          PY
+
+      - name: Verify Apache-2.0 code and FaceMesh model licenses
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p license-evidence
+          git clone --depth 1 --branch "v$MEDIAPIPE_VERSION" https://github.com/google-ai-edge/mediapipe.git mediapipe-license-src
+          grep -Fq 'Apache License' mediapipe-license-src/LICENSE
+          grep -Fq 'Version 2.0' mediapipe-license-src/LICENSE
+          cp mediapipe-license-src/LICENSE license-evidence/mediapipe-code-LICENSE.txt
+          MP_COMMIT="$(git -C mediapipe-license-src rev-parse HEAD)"
+          curl --fail --location --retry 3 \
+            -o license-evidence/FaceMesh-Model-Card.pdf \
+            'https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Face%20Mesh%20V2.pdf'
+          pdftotext license-evidence/FaceMesh-Model-Card.pdf license-evidence/FaceMesh-Model-Card.txt
+          grep -Fq 'LICENSED UNDER' license-evidence/FaceMesh-Model-Card.txt
+          grep -Fq 'Apache License, Version 2.0' license-evidence/FaceMesh-Model-Card.txt
+          python - "$MP_COMMIT" <<'PY'
+          import hashlib,json,sys
+          from pathlib import Path
+          def sha(p): return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+          doc={
+            'schema_version':'1.0.0','engine':'MediaPipe FaceMesh','package_version':'0.10.21','repo_commit':sys.argv[1],
+            'code_license':'Apache-2.0','code_license_verified':True,'code_license_sha256':sha('license-evidence/mediapipe-code-LICENSE.txt'),
+            'model':'MediaPipe FaceMesh V2','model_license':'Apache-2.0','model_license_verified':True,'model_card_sha256':sha('license-evidence/FaceMesh-Model-Card.pdf'),
+            'model_card_url':'https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Face%20Mesh%20V2.pdf',
+            'prod_runtime_license_safe':True,'additional_cost_eur':0
+          }
+          json.dump(doc,open('license-evidence/license-evidence.json','w'),indent=2)
+          print(json.dumps(doc,indent=2))
+          PY
+
+      - name: Build physical geometry-only digital double from real human video
+        env:
+          BM02_REAL_CLIP: ${{ steps.source.outputs.clip }}
+          BM02_SOURCE_ADMISSION: ${{ steps.source.outputs.admission }}
+          BM02_DD_OUT: ums-bm02-mediapipe-digital-double
+          BM02_MEDIAPIPE_CODE_LICENSE_VERIFIED: 'true'
+          BM02_FACE_MESH_MODEL_LICENSE_VERIFIED: 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s python cerebro/media-studio/v2/probes/bm02_mediapipe_digital_double.py | tee bm02-digital-double.stdout.log
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm02-mediapipe-digital-double/bm02-mediapipe-digital-double.json'))
+          assert x['status']=='MEDIAPIPE_REAL_HUMAN_DIGITAL_DOUBLE_PHYSICAL_PROVEN'
+          assert x['tracking']['tracking_ratio']>=0.90
+          assert x['tracking']['landmarks_per_tracked_frame']>=468
+          assert x['runtime']['prod_runtime_license_safe'] is True
+          assert x['source']['source_pixels_in_render'] is False
+          PY
+
+      - name: Run BM02 fail-closed tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p ums-bm02-digital-double-proof
+          python cerebro/media-studio/v2/probes/bm02_digital_double_proof_gate.py \
+            --source-manifest '${{ steps.source.outputs.source_manifest }}' \
+            --admission '${{ steps.source.outputs.admission }}' \
+            --digital-double ums-bm02-mediapipe-digital-double/bm02-mediapipe-digital-double.json \
+            --license-evidence license-evidence/license-evidence.json \
+            --out ums-bm02-digital-double-proof/bm02-tribunal.json | tee ums-bm02-digital-double-proof/tribunal.stdout.log
+          python - <<'PY'
+          import json
+          x=json.load(open('ums-bm02-digital-double-proof/bm02-tribunal.json'))
+          assert x['status']=='PASS_WITH_PHYSICAL_EVIDENCE'
+          assert x['benchmark_credit_eligible'] is True
+          assert x['passed_check_count']==x['check_count']
+          assert 'PROD_SAFE_RUNTIME_LICENSE_CHAIN' in x['capabilities_proven']
+          PY
+
+      - name: Upload immutable BM02 physical proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm02-digital-double-proof-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm02-mediapipe-digital-double/
+            ums-bm02-digital-double-proof/
+            license-evidence/
+            bm02-digital-double.stdout.log
