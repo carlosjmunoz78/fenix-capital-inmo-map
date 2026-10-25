@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""PREPROD quality probe for Nova-01 with standard IP-Adapter.
+"""PREPROD quality probe for Nova-01 with IP-Adapter Plus.
 
-This is deliberately separate from the physical runtime certificate. It attempts to
-meet the existing BM-01 cross-modal quality tribunal without changing its thresholds.
-Synthetic reference only; no real-person or FaceID path; no PROD/publish/spend.
+Separate from the physical runtime certificate. Uses the non-FaceID Plus checkpoint,
+which the upstream model card describes as closer to the reference image via patch
+embeddings. Synthetic reference only; no real-person or FaceID path; no PROD/publish/spend.
 """
 from __future__ import annotations
 import hashlib, json, os, resource, time
@@ -18,16 +18,18 @@ if os.environ.get('CEREBRO_ENVIRONMENT','PREPROD').upper()!='PREPROD': raise Sys
 REF=Path(os.environ['NOVA01_FRONT_REFERENCE']).resolve()
 OUT=Path(os.environ.get('UMS_IP_QUALITY_OUT','ums-ipadapter-nova01-quality')).resolve(); OUT.mkdir(parents=True,exist_ok=True)
 IMAGE=OUT/'nova01-ip-adapter-quality.png'; REPORT=OUT/'ip-adapter-quality-report.json'
-BASE='stable-diffusion-v1-5/stable-diffusion-v1-5'; ADAPTER='h94/IP-Adapter'; WEIGHT='ip-adapter_sd15.bin'
+BASE='stable-diffusion-v1-5/stable-diffusion-v1-5'; ADAPTER='h94/IP-Adapter'; WEIGHT='ip-adapter-plus_sd15.bin'
 CANONICAL='e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec'
-SIZE=int(os.environ.get('IP_QUALITY_SIZE','384')); STEPS=int(os.environ.get('IP_QUALITY_STEPS','16'))
-GUIDANCE=float(os.environ.get('IP_QUALITY_GUIDANCE','5.5')); SCALE=float(os.environ.get('IP_QUALITY_SCALE','0.72')); SEED=20261025
+SIZE=int(os.environ.get('IP_QUALITY_SIZE','384')); STEPS=int(os.environ.get('IP_QUALITY_STEPS','18'))
+GUIDANCE=float(os.environ.get('IP_QUALITY_GUIDANCE','5.0')); SCALE=float(os.environ.get('IP_QUALITY_SCALE','0.90')); SEED=20261025
 MAX_SECONDS=float(os.environ.get('IP_QUALITY_LATENCY_LIMIT_SECONDS','600')); MAX_RSS=int(float(os.environ.get('IP_QUALITY_MEMORY_LIMIT_GIB','13.5'))*1024**3)
-PROMPT=('Nova-01, original fictional adult man, stylized animated character portrait, warm copper skin, short angular dark charcoal hair, '
-        'blue gray eyes, small beauty mark on left cheek, dark charcoal formal suit, subtle gold shoulder piping, centered bust, '
-        'symmetrical front view, dark neutral charcoal studio background, clean controlled cinematic lighting, crisp character model sheet')
+PROMPT=('Nova-01, original fictional adult man, stylized animated male character model sheet, warm copper skin, short angular dark charcoal hair, '
+        'clearly visible blue gray irises, small beauty mark on left cheek, dark charcoal formal suit, thin gold piping only along both shoulders, '
+        'centered symmetrical frontal bust, head and upper torso fully visible, dark charcoal neutral studio background matching the reference, '
+        'clean flat controlled lighting, crisp simple shapes, no lettering')
 NEG=('woman, female, photorealistic, duplicate face, extra face, extra eyes, malformed eyes, asymmetrical eyes, extra ears, extra limbs, '
-     'deformed, glitch, noise, grain, oversaturated, text, typography, logo, watermark, frame, border, cropped head')
+     'deformed, glitch, noise, grain, oversaturated, text, letters, typography, logo, watermark, caption, signature, border, belt, sash, '
+     'horizontal gold stripe, gold belt, cropped head, gray background, bright background')
 
 def sha(p:Path): return hashlib.sha256(p.read_bytes()).hexdigest()
 def maxrss(): return int(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss*1024)
@@ -46,9 +48,9 @@ image=pipe(prompt=PROMPT,negative_prompt=NEG,ip_adapter_image=ref,num_inference_
 inference=time.time()-t; image.save(IMAGE)
 elapsed=time.time()-started; rss=maxrss(); current=psutil.Process().memory_info().rss
 report={
- 'schema_version':'1.0.0','state_type':'CEREBRO_UMS_IP_ADAPTER_QUALITY_PROBE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD',
+ 'schema_version':'1.1.0','state_type':'CEREBRO_UMS_IP_ADAPTER_QUALITY_PROBE_V1','company_id':'GLOBAL','engine_id':'UMS-001','environment':'PREPROD',
  'character_id':'UMS-SYNTH-CHAR-001','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'faceid_variant':False,
- 'status':'QUALITY_CANDIDATE_GENERATED','adapter':'IP-ADAPTER-STANDARD','base_model':BASE,'adapter_repo':ADAPTER,'adapter_weight':WEIGHT,
+ 'status':'QUALITY_CANDIDATE_GENERATED','adapter':'IP-ADAPTER-PLUS-STANDARD','base_model':BASE,'adapter_repo':ADAPTER,'adapter_weight':WEIGHT,
  'reference':{'sha256':sha(REF),'bytes':REF.stat().st_size},'output':{'path':IMAGE.name,'sha256':sha(IMAGE),'bytes':IMAGE.stat().st_size,'width':SIZE,'height':SIZE},
  'generation':{'steps':STEPS,'seed':SEED,'guidance_scale':GUIDANCE,'ip_adapter_scale':SCALE,'scheduler':'DPMSolverMultistepScheduler','prompt_gender':'adult_man'},
  'timing':{'model_load_seconds':round(model_load,3),'adapter_load_seconds':round(adapter_load,3),'inference_seconds':round(inference,3),'total_seconds':round(elapsed,3)},
