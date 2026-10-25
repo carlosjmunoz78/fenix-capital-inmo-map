@@ -28,18 +28,41 @@ export function buildDailySpecialistLearningPlan({date=new Date().toISOString().
       auto_promote:false,prod_write_authorized:false,tool_execution_authorized:false,spend_authorized:false,additional_cost_eur:0
     });
   });
+
+  // The central scout deduplicates by the shared deep-knowledge section, not by role or
+  // department. The 12-section curriculum is intentionally common across all enriched
+  // specialists, so one governed research job can fan evidence back out to every
+  // interested department/role while retaining exact consumer routing below.
   const groups=new Map();
   for(const request of role_requests){
-    const key=`${request.department_id}|${request.primary_section}`;const group=groups.get(key)??{department_id:request.department_id,section:request.primary_section,role_ids:[],questions:new Set(),source_ids:new Set(),frontier_ids:new Set(),gap_ids:new Set()};
-    group.role_ids.push(request.role_id);request.questions.forEach(q=>group.questions.add(q));request.source_revalidation_ids.forEach(x=>group.source_ids.add(x));request.frontier_watch_ids.forEach(x=>group.frontier_ids.add(x));request.known_gap_ids.forEach(x=>group.gap_ids.add(x));groups.set(key,group);
+    const key=request.primary_section;
+    const group=groups.get(key)??{section:request.primary_section,department_ids:new Set(),role_ids:[],questions:new Set(),source_ids:new Set(),frontier_ids:new Set(),gap_ids:new Set()};
+    group.department_ids.add(request.department_id);
+    group.role_ids.push(request.role_id);
+    request.questions.forEach(q=>group.questions.add(q));
+    request.source_revalidation_ids.forEach(x=>group.source_ids.add(x));
+    request.frontier_watch_ids.forEach(x=>group.frontier_ids.add(x));
+    request.known_gap_ids.forEach(x=>group.gap_ids.add(x));
+    groups.set(key,group);
   }
-  const research_jobs=[...groups.values()].map((g)=>freeze({
-    job_id:`UMS-DAILY-RESEARCH-${date}-${g.department_id}-${g.section}`,
-    date,department_id:g.department_id,section:g.section,consumer_role_ids:freeze(g.role_ids.sort()),
-    questions:freeze([...g.questions].sort()),source_revalidation_ids:freeze([...g.source_ids].sort()),frontier_watch_ids:freeze([...g.frontier_ids].sort()),known_gap_ids:freeze([...g.gap_ids].sort()),
-    status:'RESEARCH_REQUESTED',required_pipeline:freeze(['deduplicate','research','source_verify','rights_license_security','role_fit','benchmark_if_operational','OLD_vs_NEW','tribunal','knowledge_store']),
-    auto_promote:false,prod_write_authorized:false,spend_authorized:false,additional_cost_eur:0
-  })).sort((a,b)=>a.job_id.localeCompare(b.job_id));
+  const research_jobs=[...groups.values()].map((g)=>{
+    const department_ids=[...g.department_ids].sort();
+    return freeze({
+      job_id:`UMS-DAILY-RESEARCH-${date}-${g.section}`,
+      date,
+      department_id:department_ids.length===1?department_ids[0]:'MULTI',
+      department_ids:freeze(department_ids),
+      section:g.section,
+      consumer_role_ids:freeze(g.role_ids.sort()),
+      questions:freeze([...g.questions].sort()),
+      source_revalidation_ids:freeze([...g.source_ids].sort()),
+      frontier_watch_ids:freeze([...g.frontier_ids].sort()),
+      known_gap_ids:freeze([...g.gap_ids].sort()),
+      status:'RESEARCH_REQUESTED',
+      required_pipeline:freeze(['deduplicate','research','source_verify','rights_license_security','role_fit','benchmark_if_operational','OLD_vs_NEW','tribunal','knowledge_store']),
+      auto_promote:false,prod_write_authorized:false,spend_authorized:false,additional_cost_eur:0
+    });
+  }).sort((a,b)=>a.job_id.localeCompare(b.job_id));
   const report={schema_version:'1.0.0',state_type:'CEREBRO_UMS_DAILY_SPECIALIST_LEARNING_PLAN_V1',company_id:'GLOBAL',engine_id:'UMS-001',environment:'PROD_KNOWLEDGE_REQUESTS',version:'1.0.0',date,specialists:roles.length,role_requests:freeze(role_requests),deduplicated_research_jobs:freeze(research_jobs),role_request_count:role_requests.length,deduplicated_job_count:research_jobs.length,all_roles_request_learning_daily:true,knowledge_auto_promotion:false,prod_write_authorized:false,spend_authorized:false,additional_cost_eur:0};
   return freeze({...report,plan_hash:hash(report)});
 }

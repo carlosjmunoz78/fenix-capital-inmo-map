@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://media-studio/v2/persistent-character.schema.json",
+  "title": "CEREBRO UMS Persistent Character",
+  "type": "object",
+  "required": ["character_id", "company_id", "engine_id", "environment", "version", "identity_type", "canonical", "provenance", "rights"],
+  "properties": {
+    "character_id": {"type": "string", "minLength": 1},
+    "company_id": {"type": "string", "minLength": 1},
+    "engine_id": {"type": "string", "minLength": 1},
+    "studio_id": {"type": ["string", "null"]},
+    "production_id": {"type": ["string", "null"]},
+    "environment": {"enum": ["PROD", "PREPROD", "LAB"]},
+    "version": {"type": "string", "minLength": 1},
+    "identity_type": {"enum": ["SYNTHETIC_ORIGINAL", "FICTIONAL_LICENSED", "REAL_AUTHORIZED"]},
+    "canonical": {
+      "type": "object",
+      "required": ["face", "body", "voice", "motion", "appearance", "behavior"],
+      "properties": {
+        "face": {"type": "object", "additionalProperties": true},
+        "body": {"type": "object", "additionalProperties": true},
+        "voice": {"type": "object", "additionalProperties": true},
+        "motion": {"type": "object", "additionalProperties": true},
+        "appearance": {"type": "object", "additionalProperties": true},
+        "behavior": {"type": "object", "additionalProperties": true},
+        "expressions": {"type": "object", "additionalProperties": true},
+        "wardrobe": {"type": "object", "additionalProperties": true}
+      },
+      "additionalProperties": false
+    },
+    "source_assets": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["source_class", "evidence_refs"],
+      "properties": {
+        "source_class": {"enum": ["CREATED_BY_CEREBRO", "USER_PROVIDED", "OWNED_LIBRARY", "LICENSED_LIBRARY"]},
+        "evidence_refs": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "c2pa_manifest_ref": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "rights": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["NOT_REQUIRED_SYNTHETIC", "VALID", "PENDING", "DENIED"]},
+        "rights_record_ref": {"type": ["string", "null"]},
+        "provenance_record": {"type": ["string", "null"]},
+        "revocation_process": {"type": ["string", "null"]},
+        "territories": {"type": "array", "items": {"type": "string"}},
+        "expiry_at": {"type": ["string", "null"], "format": "date-time"}
+      },
+      "additionalProperties": false
+    },
+    "continuity": {
+      "type": "object",
+      "properties": {
+        "identity_similarity_floor": {"type": "number", "minimum": 0, "maximum": 1},
+        "temporal_identity_drift_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "body_proportion_drift_max": {"type": "number", "minimum": 0, "maximum": 1},
+        "voice_similarity_floor": {"type": "number", "minimum": 0, "maximum": 1},
+        "lip_sync_offset_ms_max": {"type": "number", "minimum": 0},
+        "wardrobe_continuity_required": {"type": "boolean"},
+        "mannerism_continuity_required": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "state": {"enum": ["DEFINED", "BENCHMARKING", "APPROVED", "REJECTED", "REVOKED"]}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"identity_type": {"const": "REAL_AUTHORIZED"}}},
+      "then": {
+        "properties": {
+          "rights": {
+            "required": ["status", "rights_record_ref", "provenance_record", "revocation_process"],
+            "properties": {"status": {"const": "VALID"}}
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

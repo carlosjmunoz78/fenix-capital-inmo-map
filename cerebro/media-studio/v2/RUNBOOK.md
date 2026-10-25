@@ -15,6 +15,60 @@ Global readiness: `UNIVERSAL_MEDIA_STUDIO_READY = NOT_READY`
 - Real-person voice/face/body cloning requires valid authorization, provenance, revocation and scope.
 - Trading is isolated and out of scope.
 
+## Persistent character / digital-double V0
+Canonical contract: `cerebro/media-studio/v2/contracts/persistent-character.schema.json`
+Orchestrator: `cerebro/media-studio/v2/runtime/character-clone-orchestrator.mjs`
+Physical acceptance contract: `cerebro/media-studio/v2/benchmarks/character-clone-required-benchmarks.json`
+
+Supported logical character components:
+- face
+- body
+- voice
+- motion
+- performance
+- expressions
+- wardrobe
+- behavior
+
+Identity classes:
+- `SYNTHETIC_ORIGINAL`: original synthetic character owned/created inside the governed pipeline.
+- `FICTIONAL_LICENSED`: fictional/licensed identity with rights evidence.
+- `REAL_AUTHORIZED`: real person only with valid authorization, provenance and revocation evidence.
+
+Required flow:
+`request -> provenance check -> rights gate -> character plan -> component routing -> PREPROD adapter evidence -> physical benchmark -> tribunals/guardians -> release decision`
+
+Fail-closed rules:
+- Missing provenance: reject planning.
+- Real person with incomplete rights/consent/revocation: `HUMAN_REQUIRED: LEGAL_REQUIRED`.
+- Passing rights does not authorize physical generation by itself.
+- Physical adapter binding stays blocked until license/security/cost evidence, applicable quality metrics, provenance and rollback/rebuild are GREEN.
+- Internet images/videos are reference material only unless the rights record permits the requested use.
+- Voice-only jobs must include the Voice Consent Guardian.
+- Digital-double/face/body jobs must include Identity & Likeness Consent plus Rights & Provenance guardians.
+- Release remains subject to Release Guardian; there is no autonomous PROD publication from this V0.
+
+Minimum continuity checks before a persistent character can be considered physically stable:
+- identity similarity
+- temporal identity drift
+- body proportion drift
+- voice similarity when voice is present
+- lip-sync offset when talking video is present
+- expression continuity
+- wardrobe continuity
+- mannerism continuity
+- multi-angle identity consistency
+- long-sequence identity consistency where applicable
+- rights/provenance recheck
+- license/security and measured cost
+- rollback/rebuild proof
+- tribunal pass
+
+Important status distinction:
+- The control plane may be merged to `main` after CI GREEN.
+- That does **not** mean a face/body/voice/video/3D model is physically installed or PROD-certified.
+- Each physical adapter/model is promoted independently through PREPROD evidence and OLD vs NEW comparison.
+
 ## Continuous learning
 Workflow: `.github/workflows/cerebro-ums-governed-learning-bridge-v1.yml`
 
@@ -30,6 +84,8 @@ Expected report invariants:
 - duplicate media candidates collapse to the newest governed evidence
 
 If style-only or weakly related skills enter the media candidate set, treat it as a filtering regression and block promotion.
+
+The specialist daily-learning scout must deduplicate the shared 12-section curriculum centrally while retaining the exact consumer role and department IDs. A day with `deduplicated_job_count >= role_request_count` is a regression and blocks the UMS gate.
 
 ## Runner-native runtime audit
 Workflow: `.github/workflows/cerebro-ums-physical-runtime-audit-v1.yml`
