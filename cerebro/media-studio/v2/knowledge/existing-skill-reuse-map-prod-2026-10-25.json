@@ -1,0 +1,36 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"CEREBRO_UMS_EXISTING_SKILL_REUSE_MAP_V1",
+  "company_id":"GLOBAL",
+  "engine_id":"UMS-001",
+  "environment":"PROD",
+  "version":"1.0.0",
+  "observed_date":"2026-10-25",
+  "rule":"REUSE existing CEREBRO capability before creating a new runtime. A catalog/seam/hold entry is knowledge and routing context only, not proof of operational execution.",
+  "skills":[
+    {"skill_id":"CREATIVE-PROGRAMMATIC-RENDER-V1","source":"cerebro/runtime/creative-output-pipeline-v1.mjs","status":"REUSE_EXISTING_PROD_CORE","capabilities":["HTML_CHROMIUM_RENDER","FFMPEG_COMPOSITION","STATIC_IMAGE","CAROUSEL","REEL","SHORT_VIDEO","LANDSCAPE_VIDEO","LONG_VIDEO","ARTIFACT_HASHING"],"departments":["D17","D19","D23","D24","D40","D45"],"notes":"Existing CEREBRO core has PROD certification for deterministic programmatic render. UMS must wrap rather than duplicate."},
+    {"skill_id":"FFMPEG","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"REUSE_IF_PRESENT","capabilities":["MEDIA_COMPOSITION","TRANSCODE","MUX_DEMUX","AUDIO_VIDEO_FILTERING"],"departments":["D23","D24","D33","D34","D37","D40","D43","D45"],"notes":"Open-source composition lane already exists in CEREBRO. Do not create another FFmpeg engine."},
+    {"skill_id":"COMFYUI","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"P1_ADAPTER_SEAM_ONLY","capabilities":["VISUAL_AI_WORKFLOW_ORCHESTRATION"],"departments":["D10","D17","D18","D20","D26","D28","D31"],"notes":"Reuse as workflow candidate; requires physical binding/benchmark before operational promotion."},
+    {"skill_id":"Z_IMAGE_TURBO","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"LAB_CANDIDATE","capabilities":["IMAGE_GENERATION"],"departments":["D17","D18","D20"],"notes":"Local model candidate. Benchmark quality, license, latency, VRAM and identity consistency before promotion."},
+    {"skill_id":"QWEN3_TTS","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"P1_ADAPTER_SEAM_ONLY","capabilities":["TTS","VOICE_DESIGN","VOICE_CLONE_CANDIDATE","MULTILINGUAL_SPEECH"],"departments":["D11","D33","D36","D39"],"notes":"High-priority local voice candidate; consent/rights remain separate from technical capability."},
+    {"skill_id":"HYPERFRAMES","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"P1_AVAILABLE_CAPABILITY_REFERENCE","capabilities":["PROGRAMMATIC_VIDEO","ANIMATION","CAPTIONS","TTS_INTEGRATION","AUDIO_REACTIVE_VISUALS"],"departments":["D19","D23","D24","D25","D43","D45"],"notes":"Available capability reference. Bind through adapter only after deterministic render/evidence checks."},
+    {"skill_id":"PROCEDURAL_FILM","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"P1_OPEN_SOURCE_CANDIDATE","capabilities":["EXPLAINER_VIDEO","DOODLE_VIDEO"],"departments":["D21","D23","D24","D25"],"notes":"Reuse candidate for educational/explainer formats."},
+    {"skill_id":"OPENMONTAGE","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"LAB_CANDIDATE","capabilities":["VIDEO_EDITING"],"departments":["D23","D24"],"notes":"LAB editor candidate. Compare against existing creative-job-runner and NLE interchange before adding runtime."},
+    {"skill_id":"LTX_VIDEO","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"LAB_CANDIDATE","capabilities":["LOCAL_GENERATIVE_VIDEO"],"departments":["D17","D21","D22","D24","D31"],"notes":"Heavy local candidate; benchmark identity continuity, motion, prompt adherence, latency and VRAM."},
+    {"skill_id":"WATCH","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"P1_ADAPTER_SEAM_ONLY","capabilities":["VIDEO_UNDERSTANDING"],"departments":["D03","D05","D23","D24","D48"],"notes":"Use for video analysis candidate; do not assume physical binding from catalog status."},
+    {"skill_id":"OPEN_SORA","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"HOLD_HARDWARE","capabilities":["HEAVY_GENERATIVE_VIDEO"],"departments":["D17","D21","D22","D31"],"notes":"Keep disabled until hardware/cost evidence justifies it."},
+    {"skill_id":"REMOTION","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"HOLD_LICENSE","capabilities":["PROGRAMMATIC_VIDEO_REFERENCE"],"departments":["D19","D23","D24","D43","D45"],"notes":"Reference exists; preserve HOLD until license review and OLD-vs-NEW justify binding."},
+    {"skill_id":"FISH_AUDIO","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"HOLD_COMMERCIAL","capabilities":["VOICE_BENCHMARK"],"departments":["D11","D33","D36"],"notes":"Benchmark/reference only; no commercial spend authorized."},
+    {"skill_id":"ELEVENLABS","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"HOLD_COMMERCIAL","capabilities":["VOICE_BENCHMARK"],"departments":["D11","D33","D36","D39"],"notes":"Benchmark/reference only; no commercial spend authorized."},
+    {"skill_id":"OPEN_GENERATIVE_AI","source":"cerebro/digital-build/multimedia-factory-runtime-v0.mjs","status":"CATALOG_ONLY","capabilities":["WORKFLOW_REFERENCE"],"departments":["D48"],"notes":"Reference only."},
+    {"skill_id":"IMAGE_ANALYSIS","source":"cerebro/registry/skill-dynamic-adoption-v1.json","status":"BENCHMARK_REQUIRED","capabilities":["IMAGE_ANALYSIS"],"departments":["D05","D17","D20","D48"],"notes":"Governed learning candidate already detected by UMS; keep benchmark-required until quality/cost/privacy OLD-vs-NEW passes."}
+  ],
+  "known_missing_or_unbound":[
+    {"gap_id":"GAP-3D-DCC-RUNTIME","departments":["D26","D27","D28","D31","D42","D45"],"status":"MISSING_PHYSICAL_BINDING","preferred_search_order":["existing CEREBRO runtime","open-source local","already contracted tool","free tier","self-hosted"],"notes":"No prior Blender runtime reference was found in clean repository inventory. Do not add blindly; benchmark Blender or equivalent."},
+    {"gap_id":"GAP-VOICE-CLONE-PHYSICAL","departments":["D11"],"status":"SEAM_EXISTS_PHYSICAL_BENCHMARK_PENDING","preferred_candidates":["QWEN3_TTS","AMPHION_VEVO2","other zero-cost local candidates"],"notes":"Technical capability must remain separate from consent/rights proof."},
+    {"gap_id":"GAP-SINGING-SYNTHESIS-PHYSICAL","departments":["D36"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["OpenUtau","DiffSinger","Amphion Vevo2"],"notes":"Compare quality, multilingual phonemization, melody control, voice rights, training-data/license posture and local compute."},
+    {"gap_id":"GAP-PHOTOGRAMMETRY-NEURAL-RECON","departments":["D15","D16"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["COLMAP","Apple Object Capture where platform-appropriate","NeRF/Gaussian Splatting candidates"],"notes":"Need physical reconstruction benchmark before binding."},
+    {"gap_id":"GAP-MOCAP-PHYSICAL","departments":["D12","D30"],"status":"RESEARCH_AND_BENCHMARK_REQUIRED","preferred_candidates":["MetaHuman Animator","existing camera/browser capture","open-source markerless alternatives"],"notes":"Benchmark body, face, hands, cleanup and retargeting separately."}
+  ],
+  "additional_cost_eur":0
+}
