@@ -18,7 +18,7 @@ const photos=[
 'https://fenixcapital.es/wp-content/uploads/2026/10/huelva-llaves-compra-vivienda-scaled-1-cerebro.webp'];
 const finalVids=['PEXELS:4307346','PEXELS:3769951','PEXELS:6780089','PEXELS:27860328','PEXELS:31568471','PEXELS:8293019','PEXELS:3944018','PEXELS:5466764','PEXELS:30353173','PEXELS:9056542','PEXELS:7821811','PEXELS:7581281','PEXELS:29229032','PEXELS:6187216'];
 const legacyCastBootstrap='PEXELS:7817205';
-const legacyBootstrapVids=[legacyCastBootstrap,...finalVids];
+const legacyBootstrapVids=[legacyCastBootstrap,'PEXELS:7816382','PEXELS:7646690','PEXELS:7735853','PEXELS:7646396'];
 const brand={logo_url:'https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png',primary:'#ffffff',accent:'#f47b20',background:'#111111'};
 const brief={objective:'Crear una campaña social que detenga scroll, dramatice la tensión real de reservar una vivienda y convierta con energía cinematográfica.',audience:'Personas que han encontrado una vivienda que les encanta y sienten presión por reservar.',desire:'Ves la casa, ves la cocina y ya sabes dónde va el sofá',pressure:'hay que reservar hoy',truth:'primero conviene comprobar que la operación encaja contigo y con la vivienda',benefit:'puedes decidir con ilusión, sin ir a ciegas y sin matar el momento',cta:'Cuéntanos tu caso y lo miramos contigo'};
 const built=buildStudioCampaignV1({company_id:'fenix',environment:'PREPROD',brief,assets:{visual_sources:photos,video_sources:legacyBootstrapVids}});
@@ -36,9 +36,9 @@ for(const key of ['story','reel','long']){
 }
 const campaign=upgradeStudioCampaignNativeV2(base);
 for(const key of ['story','reel','long'])for(const scene of campaign.video_productions[key].selected_plan.scenes){
-  if(String(scene.video_source||'').toUpperCase()===legacyCastBootstrap)throw new Error(`LEGACY_CAST_BOOTSTRAP_LEAKED_TO_FINAL:${key}`);
+  if(legacyBootstrapVids.includes(String(scene.video_source||'').toUpperCase()))throw new Error(`LEGACY_CAST_BOOTSTRAP_LEAKED_TO_FINAL:${key}:${scene.video_source}`);
 }
-const manifest={schema_version:'2.6.2',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',studio_mode:campaign.studio_mode,campaign_id:campaign.campaign_id,publish_authorized:false,additional_cost_eur:0,promotion_eligible:false,human_creative_review_required:true,human_creative_gate:'PENDING_REVIEW',human_rejection_parent:'V2.6.1_PHYSICAL_REJECTED_PRIMARY_DRIFT_AND_BROLL_REPETITION',source_policy:'NO_IDENTIFIABLE_STOCK_HUMANS',context_catalog_size:finalVids.length,max_context_source_reuse:2,physical_primary_binding:'SINGLE_RENDER_VISUAL_SOURCE',legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_source:legacyCastBootstrap,audio_delivery:'AAC_256K_48KHZ_STEREO',legacy_prerender_voice_mode:'HOOK_ONLY_REPLACED_BY_V5',native_pipeline_order:'LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER',captions_mode:'REAL_DIALOGUE_SRT_SIDECAR',productions:[]};
+const manifest={schema_version:'2.6.2',engine_id:'CREATIVE-STUDIO-001',environment:'PREPROD',studio_mode:campaign.studio_mode,campaign_id:campaign.campaign_id,publish_authorized:false,additional_cost_eur:0,promotion_eligible:false,human_creative_review_required:true,human_creative_gate:'PENDING_REVIEW',human_rejection_parent:'V2.6.1_PHYSICAL_REJECTED_PRIMARY_DRIFT_AND_BROLL_REPETITION',source_policy:'NO_IDENTIFIABLE_STOCK_HUMANS',context_catalog_size:finalVids.length,max_context_source_reuse:2,physical_primary_binding:'SINGLE_RENDER_VISUAL_SOURCE',legacy_cast_bootstrap_isolated:true,legacy_cast_bootstrap_source:legacyCastBootstrap,legacy_cast_bootstrap_set:legacyBootstrapVids,audio_delivery:'AAC_256K_48KHZ_STEREO',legacy_prerender_voice_mode:'HOOK_ONLY_REPLACED_BY_V5',native_pipeline_order:'LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER',captions_mode:'REAL_DIALOGUE_SRT_SIDECAR',productions:[]};
 function baseJob(plan){
   const hook=String(plan.narration_blocks?.[0]?.text||'Fénix Capital.').trim();
   const prerenderScenes=plan.scenes.map((scene,i)=>({...scene,voiceover:i===0?hook:''}));
@@ -67,7 +67,7 @@ for(const cfg of configs){
   if(cast.identifiable_stock_human_context_forbidden!==true)throw new Error(`IDENTIFIABLE_STOCK_HUMAN_GATE_MISSING:${cfg.label}`);
   if(ctx.unique_count<cfg.minContextUnique)throw new Error(`CONTEXT_DIVERSITY_TOO_LOW:${cfg.label}:${ctx.unique_count}:${cfg.minContextUnique}`);
   if(ctx.max_occurrences>2)throw new Error(`CONTEXT_SOURCE_OVERUSED:${cfg.label}:${ctx.max_occurrences}`);
-  for(const scene of plan.scenes)if(String(scene.video_source||'').toUpperCase()===legacyCastBootstrap)throw new Error(`LEGACY_CAST_BOOTSTRAP_RENDER_LEAK:${cfg.label}`);
+  for(const scene of plan.scenes)if(legacyBootstrapVids.includes(String(scene.video_source||'').toUpperCase()))throw new Error(`LEGACY_CAST_BOOTSTRAP_RENDER_LEAK:${cfg.label}:${scene.video_source}`);
   const r=await renderCreativeJobV2Live(baseJob(plan));
   try{
     const art=r.artifacts.find(x=>x.mime==='video/mp4');if(!art)throw new Error(`NATIVE_VIDEO_MISSING:${cfg.label}`);
