@@ -40,6 +40,7 @@ function currentCompany(){
 function selectMainViewerSession(sessionId:string){
  const select=document.querySelector<HTMLSelectElement>(VIEWER_SESSION_SELECTOR);
  if(!select||!Array.from(select.options).some(option=>option.value===sessionId))return false;
+ if(select.value===sessionId)return true;
  select.value=sessionId;
  select.dispatchEvent(new Event('change',{bubbles:true}));
  return true;
@@ -99,7 +100,7 @@ function render(){
 }
 async function refresh(){
  const nextCompany=currentCompany();if(nextCompany!==company){company=nextCompany;selectedKey='';}
- try{const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];if(!selectedKey||!profiles.some(p=>keyOf(p)===selectedKey))selectedKey=profiles[0]?keyOf(profiles[0]):'';error='';}catch(cause){error=String((cause as Error)?.message||cause);profiles=[];}render();
+ try{const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];if(!selectedKey||!profiles.some(p=>keyOf(p)===selectedKey))selectedKey=profiles[0]?keyOf(profiles[0]):'';error='';const activeSessionId=active()?.active_session?.session_id;if(activeSessionId)void syncMainViewerSession(activeSessionId);}catch(cause){error=String((cause as Error)?.message||cause);profiles=[];}render();
 }
 async function waitForSleep(sessionId:string){
  for(let attempt=0;attempt<40;attempt++){await new Promise(resolve=>window.setTimeout(resolve,400));const data=await api<ProfilesResponse>('profiles',{company_id:company});profiles=Array.isArray(data.profiles)?data.profiles:[];const still=profiles.some(p=>p.active_session?.session_id===sessionId&&!TERMINAL.has(p.active_session.state));if(!still){render();return;}}
