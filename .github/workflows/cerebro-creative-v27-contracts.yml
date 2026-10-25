@@ -1,0 +1,65 @@
+name: CEREBRO Creative Studio V2.7 Contracts
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v27-generative-preprod-2026-10-25'
+    paths:
+      - 'cerebro/runtime/creative-character-motion-contract-v27.mjs'
+      - 'cerebro/runtime/creative-brand-theme-fenix-v27.mjs'
+      - 'cerebro/runtime/creative-kinetic-captions-v27.mjs'
+      - 'cerebro/tests/creative-v27-contracts-smoke.mjs'
+      - '.github/workflows/cerebro-creative-v27-contracts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contracts-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install FFmpeg and Inter
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-inter
+          ffmpeg -version | head -n 1
+          FONT_FAMILY="$(fc-match -f '%{family}' Inter | head -n 1)"
+          echo "Resolved caption font: ${FONT_FAMILY}"
+          test "${FONT_FAMILY}" = "Inter"
+      - name: Validate identity, brand and kinetic captions contracts
+        env:
+          CEREBRO_V27_REPORT: .cerebro-v27/contracts/report.json
+          CEREBRO_V27_ASS: .cerebro-v27/contracts/captions.ass
+          CEREBRO_V27_CAPTION_PLAN: .cerebro-v27/contracts/caption-plan.json
+        run: node cerebro/tests/creative-v27-contracts-smoke.mjs
+      - name: Burn Fenix kinetic captions into physical vertical MP4
+        run: |
+          ffmpeg -hide_banner -loglevel error \
+            -f lavfi -i 'color=c=0x222222:s=1080x1920:r=30:d=6.6' \
+            -vf "ass=.cerebro-v27/contracts/captions.ass" \
+            -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart -y \
+            .cerebro-v27/contracts/captions-physical.mp4
+          ffprobe -v error -show_entries format=duration,size -of json \
+            .cerebro-v27/contracts/captions-physical.mp4 > .cerebro-v27/contracts/captions-probe.json
+          ffmpeg -hide_banner -loglevel error -i .cerebro-v27/contracts/captions-physical.mp4 \
+            -vf 'fps=2,scale=360:-2,tile=4x4:padding=4:margin=4' -frames:v 1 -q:v 2 -y \
+            .cerebro-v27/contracts/captions-contact-sheet.jpg
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p = JSON.parse(fs.readFileSync('.cerebro-v27/contracts/captions-probe.json', 'utf8'));
+          const duration = Number(p.format?.duration || 0);
+          const size = Number(p.format?.size || 0);
+          if (duration < 6.4 || duration > 6.8) throw new Error(`CAPTION_PHYSICAL_DURATION_INVALID:${duration}`);
+          if (size < 100000) throw new Error(`CAPTION_PHYSICAL_FILE_TOO_SMALL:${size}`);
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-v27-contracts-${{ github.sha }}
+          path: .cerebro-v27/contracts/
+          retention-days: 7

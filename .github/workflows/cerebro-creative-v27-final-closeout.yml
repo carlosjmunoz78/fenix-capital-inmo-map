@@ -1,0 +1,194 @@
+name: CEREBRO Creative Studio V2.7.5 Refinement PREPROD
+
+on:
+  push:
+    branches:
+      - 'cerebro/creative-v27-generative-preprod-2026-10-25'
+    paths:
+      - 'cerebro/runtime/creative-voice-chatterbox-batch-v27.py'
+      - 'cerebro/runtime/creative-v27-final-closeout.mjs'
+      - '.github/workflows/cerebro-creative-v27-final-closeout.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+  CEREBRO_NATIVE_STUDIO_OUT: /tmp/cerebro-v26-baseline
+  CEREBRO_TTS_DEVICE: cpu
+  CEREBRO_CHATTERBOX_ES_ES_DIR: /tmp/cerebro-chatterbox-es-es
+
+jobs:
+  final-closeout-physical:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install locked app dependencies and media stack
+        run: |
+          set -euo pipefail
+          npm ci
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-inter fonts-dejavu-core espeak-ng
+          ffmpeg -version | head -n 1
+          test "$(fc-match -f '%{family}' Inter | head -n 1)" = "Inter"
+
+      - name: Materialize pinned Piper only for immutable V2.6.2 baseline render
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+          tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          chmod +x "$CEREBRO_PIPER_BIN"
+
+      - name: Render preserved V2.6.2 physical baseline
+        run: |
+          set -euo pipefail
+          node cerebro/tests/creative-studio-native-showcase-v2.mjs | tee /tmp/v26-result.json
+          grep -F '"ok":true' /tmp/v26-result.json
+          grep -F '"version":"v2.6.2"' /tmp/v26-result.json
+          grep -F '"promotion_eligible":false' /tmp/v26-result.json
+
+      - name: Install pinned Chatterbox V3 CPU runtime
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0 torchaudio==2.6.0
+          pip install 'git+https://github.com/resemble-ai/chatterbox.git@5de7a54aa4e5e2baadb0182dde554908b48b85c2'
+
+      - name: Generate polished Spanish-Spain narrations with dedicated es-ES model
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-v27-voice /tmp/cerebro-v27-final /tmp/cerebro-v27-music
+          cat > /tmp/cerebro-v27-voice/input.json <<'JSON'
+          {
+            "items": [
+              {"id":"story","text":"Para un segundo. Que la prisa no decida por ti. ¿Te preocupa perder la casa? Primero comprobamos si la operación encaja. Si encaja, aceleramos contigo. Ilusión, sí. Ir a ciegas, no. Cuéntanos tu caso antes de reservar."},
+              {"id":"reel","text":"Que te metan prisa no significa que tengas que reservar a ciegas. Si te dicen que hoy se decide, primero comprobamos si la operación encaja de verdad. Si los números salen, aceleramos contigo. Con ilusión, sí; con los números claros, también. Cuéntanos tu caso antes de reservar."},
+              {"id":"long","text":"Te encanta la casa y, justo entonces, llega la frase: hay que reservar hoy. Es normal pensar que, si te paras a preguntar, puedes perderla. Pero una cosa es tener ilusión y otra dejar que la prisa decida. Nosotros no te frenamos: comprobamos lo importante. Si la operación encaja, aceleramos contigo. Primero, claridad. Después, velocidad. Así puedes seguir ilusionado con la casa y decidir con criterio, sin dar un salto al vacío. Cuéntanos tu caso antes de reservar. Y si hay que correr, correremos después de comprobar."}
+            ]
+          }
+          JSON
+          python cerebro/runtime/creative-voice-chatterbox-batch-v27.py \
+            --input /tmp/cerebro-v27-voice/input.json \
+            --out-dir /tmp/cerebro-v27-voice \
+            --manifest /tmp/cerebro-v27-voice/batch-manifest.json \
+            --language es \
+            --regional-profile es-ES
+          test -s /tmp/cerebro-v27-voice/story-raw.wav
+          test -s /tmp/cerebro-v27-voice/reel-raw.wav
+          test -s /tmp/cerebro-v27-voice/long-raw.wav
+          python - <<'PY'
+          import json
+          p='/tmp/cerebro-v27-voice/batch-manifest.json'
+          m=json.load(open(p,encoding='utf-8'))
+          assert m['engine']=='CHATTERBOX_MTL_V3_ES_ES'
+          assert m['regional_target']=='es-ES'
+          assert m['regional_profile_enforced'] is True
+          assert m['additional_recurring_cost_eur']==0
+          assert len(m['items'])==3
+          print('CHATTERBOX_ES_ES_REGIONAL_GATE_GREEN')
+          PY
+
+      - name: Materialize CC0 music with provenance inherited from V2.6.2
+        run: |
+          set -euo pipefail
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music/06-komiku-action-techno.mp3 \
+            -o /tmp/cerebro-v27-music/action-techno.mp3
+          curl --fail --location --silent --show-error \
+            https://raw.githubusercontent.com/cwilliams5/matrix-music-visualizer/main/music/07-holiznacc0-night-driving.mp3 \
+            -o /tmp/cerebro-v27-music/night-driving.mp3
+          test "$(stat -c%s /tmp/cerebro-v27-music/action-techno.mp3)" -gt 100000
+          test "$(stat -c%s /tmp/cerebro-v27-music/night-driving.mp3)" -gt 100000
+
+      - name: Build physical V2.7.5 Story Reel Long with orange-dominant Fenix motion graphics
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/creative-v27-final-closeout.mjs \
+            /tmp/cerebro-v26-baseline \
+            /tmp/cerebro-v27-voice \
+            /tmp/cerebro-v27-final \
+            /tmp/cerebro-v27-music/action-techno.mp3 \
+            /tmp/cerebro-v27-music/night-driving.mp3 | tee /tmp/v27-final-result.json
+          grep -F '"ok":true' /tmp/v27-final-result.json
+          grep -F '"version":"2.7.5"' /tmp/v27-final-result.json
+          grep -F 'CONTEXT_BROLL_PLUS_MOTION_GRAPHICS' /tmp/v27-final-result.json
+
+      - name: Verify fail-closed Spanish-Spain brand and physical gates
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='/tmp/cerebro-v27-final';
+          const m=JSON.parse(fs.readFileSync(`${root}/V27_FINAL_CLOSEOUT_MANIFEST.json`,'utf8'));
+          const vm=JSON.parse(fs.readFileSync('/tmp/cerebro-v27-voice/batch-manifest.json','utf8'));
+          if(m.schema_version!=='2.7.5'||m.environment!=='PREPROD') throw new Error('VERSION_ENV');
+          if(m.publish_authorized!==false||m.promotion_eligible!==false) throw new Error('PUBLISH_GATE');
+          if(m.additional_recurring_cost_eur!==0) throw new Error('COST_GATE');
+          if(m.presenter_lite.technical_state!=='PHYSICAL_SMOKE_GREEN'||m.presenter_lite.creative_state!=='RED_DIRECT_FINAL_USE'||m.presenter_lite.promoted!==false) throw new Error('PRESENTER_GATE');
+          if(m.route!=='CONTEXT_BROLL_PLUS_MOTION_GRAPHICS') throw new Error('ROUTE');
+          if(m.semantic_broll_gate?.passed!==true) throw new Error('SEMANTIC_BROLL');
+          if(m.physical_visual_repair?.trigger!=='CONTACT_SHEET_REVIEW_V27_4_AND_USER_FEEDBACK') throw new Error('PHYSICAL_REPAIR_GATE');
+          if(m.brand_visual_gate?.passed!==true||m.brand_visual_gate?.purple_large_surface_allowed!==false) throw new Error('BRAND_VISUAL_GATE');
+          if(m.brand_visual_gate?.removed_legacy_unapproved_hex!=='#3A163B') throw new Error('LEGACY_COLOR_GATE');
+          if(m.voice?.engine!=='CHATTERBOX_MTL_V3_ES_ES'||m.voice?.regional_target!=='es-ES'||m.voice?.regional_profile_enforced!==true) throw new Error('VOICE_REGION');
+          if(vm.engine!=='CHATTERBOX_MTL_V3_ES_ES'||vm.regional_target!=='es-ES'||vm.regional_profile_enforced!==true) throw new Error('VOICE_BATCH_REGION');
+          if(m.captions?.burned_in!==true||m.captions?.font!=='Inter'||m.captions?.timing!=='GENERATED_FROM_ES_ES_NARRATION_TEXT'||m.captions?.source!=='CHATTERBOX_BATCH_TEXT') throw new Error('CAPTIONS');
+          if(m.script_policy?.locale!=='es-ES'||m.script_policy?.user_feedback_applied!==true) throw new Error('SCRIPT_POLICY');
+          if(m.productions.length!==3) throw new Error('PRODUCTION_COUNT');
+          for(const p of m.productions){
+            if(!fs.existsSync(`${root}/${p.artifact}`)) throw new Error(`MISSING:${p.artifact}`);
+            if(!/^[0-9a-f]{64}$/.test(p.sha256)) throw new Error(`SHA:${p.label}`);
+            if(Number(p.caption_events||0)<5) throw new Error(`CAPTIONS_EMPTY:${p.label}`);
+            if(Number(p.audio?.voice_playback_rate)!==1) throw new Error(`VOICE_RATE:${p.label}`);
+            if(p.caption_timing!=='GENERATED_FROM_ES_ES_NARRATION_TEXT'||p.caption_source!=='CHATTERBOX_BATCH_TEXT') throw new Error(`CAPTION_SOURCE:${p.label}`);
+            if(!(Number(p.duration_sec)>Number(p.audio?.voice_duration_sec))) throw new Error(`CTA_TAIL:${p.label}`);
+            if(!(Number(p.duration_sec)<Number(p.base_duration_sec))) throw new Error(`EXCESS_FOOTAGE_NOT_TRIMMED:${p.label}`);
+            if(!Array.isArray(p.cover_windows)||!p.cover_windows.some(w=>w.kind==='PHYSICAL_REPAIR')) throw new Error(`REPAIR_WINDOW:${p.label}`);
+            for(const w of p.cover_windows){
+              if(w.background_hex==='#870064'||w.background_hex==='#3A163B') throw new Error(`PURPLE_OR_UNAPPROVED_LARGE_SURFACE:${p.label}:${w.kind}`);
+              if(!['#222222','#FF5F00'].includes(w.background_hex)) throw new Error(`NON_DOMINANT_BRAND_BG:${p.label}:${w.background_hex}`);
+            }
+          }
+          console.log('V275_ES_ES_ORANGE_DOMINANT_PHYSICAL_CANDIDATE_HUMAN_AUDIO_TRIBUNAL_PENDING');
+          NODE
+
+      - name: Extract contact sheets and probes for human creative tribunal
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-v27-final/review-frames
+          for f in story-v27 reel-v27 video-largo-v27; do
+            ffprobe -v error -show_entries format=duration,size:stream=codec_type,width,height,sample_rate,channels -of json \
+              "/tmp/cerebro-v27-final/$f.mp4" > "/tmp/cerebro-v27-final/$f-probe.json"
+            ffmpeg -hide_banner -loglevel error -i "/tmp/cerebro-v27-final/$f.mp4" \
+              -vf 'fps=1,scale=360:-2,tile=8x8:padding=4:margin=4' -frames:v 1 -q:v 2 -y \
+              "/tmp/cerebro-v27-final/review-frames/$f-contact-sheet.jpg"
+          done
+          sha256sum /tmp/cerebro-v27-final/*.mp4 /tmp/cerebro-v27-final/*.ass /tmp/cerebro-v27-final/V27_FINAL_CLOSEOUT_MANIFEST.json > /tmp/cerebro-v27-final/SHA256SUMS.txt
+          cp /tmp/cerebro-v27-voice/batch-manifest.json /tmp/cerebro-v27-final/CHATTERBOX_BATCH_MANIFEST.json
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-v275-es-es-orange-refinement-${{ github.sha }}
+          path: /tmp/cerebro-v27-final
+          retention-days: 7
