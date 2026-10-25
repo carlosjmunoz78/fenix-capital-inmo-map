@@ -1,0 +1,141 @@
+name: CEREBRO UMS BM08 XR Spatial Output
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm08-xr.yml'
+      - 'cerebro/media-studio/v2/probes/bm08_xr_app.js'
+      - 'cerebro/media-studio/v2/probes/bm08_xr_index.html'
+      - 'cerebro/media-studio/v2/probes/bm08_xr_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-ums-bm08-xr
+  cancel-in-progress: true
+
+jobs:
+  xr_spatial_output:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      BM07_RUN_ID: '40227215020'
+      BM07_ARTIFACT: ums-bm07-spatial-40227215020
+      BM07_GLB_SHA256: cfbc386d1150d5d08babd176cc858156df9ced716c9e9fb5cd2921fc3fbad9d8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recover immutable BM07 spatial parent
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.BM07_ARTIFACT }}
+          path: bm07-parent
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ env.BM07_RUN_ID }}
+      - name: Verify parent and build XR manifest
+        id: parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          GLB="$(find bm07-parent -type f -name 'bm07-spatial-asset.glb' | head -n1)"
+          PROOF="$(find bm07-parent -type f -name 'bm07-pass-with-evidence.json' | head -n1)"
+          test -n "$GLB" && test -s "$GLB" && test -n "$PROOF" && test -s "$PROOF"
+          test "$(sha256sum "$GLB" | awk '{print $1}')" = "$BM07_GLB_SHA256"
+          python3 - "$PROOF" <<'PY'
+          import json,sys
+          x=json.load(open(sys.argv[1]))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['benchmark_id']=='BM-07'
+          assert x['proof_type']=='VOLUMETRIC_OR_SPATIAL_ASSET_PROOF'
+          assert x['checks']['glb_export'] is True
+          assert x['additional_cost_eur']==0
+          assert x['prod_authorized'] is False
+          PY
+          mkdir -p ums-bm08-xr
+          cp "$GLB" ums-bm08-xr/bm07-spatial-asset.glb
+          cp cerebro/media-studio/v2/probes/bm08_xr_index.html ums-bm08-xr/index.html
+          python3 - "$PROOF" <<'PY'
+          import json,sys
+          p=json.load(open(sys.argv[1]))
+          m={
+            'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM08_XR_MANIFEST_V1','benchmark_id':'BM-08','environment':'PREPROD','output_type':'XR_SPATIAL_WEB_PACKAGE',
+            'source':{'benchmark_id':'BM-07','status':'PASS_WITH_EVIDENCE','workflow_run_id':40227215020,'proof_sha256':p['evidence']['candidate_sha256'] if 'candidate_sha256' in p.get('evidence',{}) else p.get('source_sha256')},
+            'asset':{'file':'bm07-spatial-asset.glb','format':'glTF 2.0 binary','sha256':'cfbc386d1150d5d08babd176cc858156df9ced716c9e9fb5cd2921fc3fbad9d8'},
+            'spatial':{'linear_unit':'meter','coordinate_system':'RIGHT_HANDED_Y_UP','front_axis':'+Z'},
+            'placement':{'anchor':'LOCAL_FLOOR_OR_HIT_TEST','translation_m':[0.0,1.1,-2.2],'scale':0.55,'rotation_radians':[0.0,0.0,0.0]},
+            'xr_routes':['immersive-ar','immersive-vr'],'reference_space':'local-floor','xr_hardware_session_proven':False,
+            'authority':{'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'additional_cost_eur':0}
+          }
+          open('ums-bm08-xr/xr-manifest.json','w').write(json.dumps(m,indent=2))
+          PY
+          echo "glb=$GLB" >> "$GITHUB_OUTPUT"
+      - name: Bundle local XR renderer with no CDN dependency
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-save --ignore-scripts @babylonjs/core @babylonjs/loaders esbuild
+          npx esbuild cerebro/media-studio/v2/probes/bm08_xr_app.js --bundle --format=iife --target=chrome120 --outfile=ums-bm08-xr/app.js
+          test -s ums-bm08-xr/app.js
+          npm ls @babylonjs/core @babylonjs/loaders esbuild --json > ums-bm08-xr/runtime-packages.json
+      - name: Physical Chromium render of XR output package
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME="$(command -v google-chrome || command -v chromium || command -v chromium-browser || true)"
+          test -n "$CHROME"
+          python3 -m http.server 8128 --bind 127.0.0.1 --directory ums-bm08-xr >ums-bm08-xr/http.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill $SERVER_PID || true' EXIT
+          sleep 1
+          FLAGS=(--headless=new --no-sandbox --enable-unsafe-swiftshader --use-angle=swiftshader --use-gl=angle --window-size=1280,720 --virtual-time-budget=12000)
+          "$CHROME" "${FLAGS[@]}" --screenshot=ums-bm08-xr/xr-browser-render.png http://127.0.0.1:8128/index.html >ums-bm08-xr/chrome-screenshot.log 2>&1
+          "$CHROME" "${FLAGS[@]}" --dump-dom http://127.0.0.1:8128/index.html > ums-bm08-xr/browser-dom.html 2>ums-bm08-xr/chrome-dom.log
+          grep -Eq 'data-asset-loaded="true"' ums-bm08-xr/browser-dom.html
+          grep -Eq 'data-unit="meter"' ums-bm08-xr/browser-dom.html
+          grep -Fq "$BM07_GLB_SHA256" ums-bm08-xr/browser-dom.html
+          test -s ums-bm08-xr/xr-browser-render.png
+      - name: Fail-closed BM08 tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 cerebro/media-studio/v2/probes/bm08_xr_proof_gate.py \
+            --manifest ums-bm08-xr/xr-manifest.json \
+            --html ums-bm08-xr/index.html \
+            --bundle ums-bm08-xr/app.js \
+            --asset ums-bm08-xr/bm07-spatial-asset.glb \
+            --dom ums-bm08-xr/browser-dom.html \
+            --screenshot ums-bm08-xr/xr-browser-render.png \
+            --out ums-bm08-xr/bm08-pass-with-evidence.json | tee ums-bm08-xr/proof.stdout.log
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          x=json.load(open('ums-bm08-xr/bm08-pass-with-evidence.json'))
+          assert x['status']=='PASS_WITH_EVIDENCE'
+          assert x['benchmark_credit'] is True
+          assert x['proof_type']=='XR_SPATIAL_OUTPUT_PACKAGE_PROOF'
+          assert x['xr']['physical_browser_render_proven'] is True
+          assert x['xr']['xr_hardware_session_proven'] is False
+          assert all(x['checks'].values())
+          assert x['benchmark_registry_mutation_authorized'] is True
+          assert x['universal_media_studio_ready_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+      - name: Upload immutable BM08 output evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm08-xr-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: ums-bm08-xr/
