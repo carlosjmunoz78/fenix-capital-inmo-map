@@ -1,0 +1,40 @@
+name: CEREBRO Universal Media Studio V2 Gate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/media-studio/v2/**'
+      - '.github/workflows/cerebro-universal-media-studio-v2-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ums-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  foundation-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Registry and runtime tests
+        run: node --test cerebro/media-studio/v2/tests/*.test.mjs
+      - name: Fail if PROD runtime is falsely declared ready
+        run: |
+          if grep -R "UNIVERSAL_MEDIA_STUDIO_READY.*true" cerebro/media-studio/v2 --exclude='*.test.mjs'; then
+            echo 'UMS may not be declared ready before physical benchmark suite.'
+            exit 1
+          fi
+      - name: Confirm no paid dependency is introduced by UMS foundation
+        run: |
+          test -f cerebro/media-studio/v2/registry/capability-registry.json
+          node -e "const r=require('./cerebro/media-studio/v2/registry/capability-registry.json'); if(r.router_preference[0]!=='deterministic') process.exit(1)"
