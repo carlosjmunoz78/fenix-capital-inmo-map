@@ -1,0 +1,88 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_UMS_BM01_PERSISTED_EVIDENCE_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "UMS-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "benchmark_id": "BM-01",
+  "benchmark_name": "Persistent synthetic character across image video and 3D references",
+  "character_id": "UMS-SYNTH-CHAR-001",
+  "identity_type": "SYNTHETIC_ORIGINAL",
+  "real_person_reference": false,
+  "status": "PASS_WITH_EVIDENCE",
+  "benchmark_credit": true,
+  "proven_modalities": ["IMAGE_2D", "THREE_D", "VIDEO"],
+  "cross_modal_consistency_proven": true,
+  "aggregate_checks": {
+    "stage0_green": true,
+    "stage0_synthetic": true,
+    "three_distinct_2d_refs": true,
+    "canonical_front_present": true,
+    "three_d_pass": true,
+    "three_d_same_character": true,
+    "cross_modal_pass": true,
+    "cross_modal_thresholds_frozen": true,
+    "video_pass": true,
+    "video_same_character": true,
+    "child_checks_all_green": true,
+    "zero_cost": true,
+    "no_prod_authority": true,
+    "no_spend_authority": true,
+    "no_readiness_self_mutation": true
+  },
+  "canonical_reference": {
+    "front_sha256": "e0f5968b9919f87c420f3c7ba4127bc1d48c01ddab2505f93f93d858958d04ec",
+    "profile_left_sha256": "fd18b29d82a0de3acbd178210938c5ab021aa25fde260285f5bddd741ba0b172",
+    "three_quarter_right_sha256": "97fb7b322508f995378d7d3dfd01baa7511d91d3b78b69a05518f40a4a63b651",
+    "character_bible_sha256": "02b2be4c5560c4bb9b3f8a1dd547530b6ac4ab53413dc3fca5305a254eaeaceb"
+  },
+  "child_evidence_sha256": {
+    "stage0_evidence": "d936a6b8e19506501980657501f8f581563e9926e1db89d15c18effa5e47e68c",
+    "stage0_report": "7915bc21661e24c81ef39d69a9ae2aaab5bf399a1ff0537aaee7e9751dd12175",
+    "three_d_proof": "65ee92d83087bf8fd326572f0f3877d2d9788b11f381163d2349c45e835939a2",
+    "three_d_metrics": "beb104d79a4e8e36de064feb1a42ad6f7fce248d52c3c6c4c8bc8f9814476804",
+    "video_proof": "30e4dc8a221983890192c8fb22d822f7ec18ee20ccecf5c0cd61cda6d8864b70"
+  },
+  "artifact_chain": [
+    {
+      "stage": "STAGE0",
+      "workflow_run_id": 40205418615,
+      "artifact_id": 12602998549,
+      "artifact_digest": "sha256:80acc24c9814186144eddb800b06d141aca7262ad6296f9ebf681efd514b7bc6"
+    },
+    {
+      "stage": "THREE_D_REFERENCE_PROOF",
+      "workflow_run_id": 40224654448,
+      "artifact_id": 12610534648,
+      "artifact_digest": "sha256:f4903a424edb22f6fd88c199991cf94d39fe06871eaa1c568baf29c233dd7e9a"
+    },
+    {
+      "stage": "VIDEO_IDENTITY_PROOF",
+      "workflow_run_id": 40225258844,
+      "artifact_id": 12610219321,
+      "artifact_digest": "sha256:ce018bf887fa114fff9996a42b666b43ce6e8dd907aadae4e34e840847ef49c1"
+    },
+    {
+      "stage": "BM01_AGGREGATE_PROOF",
+      "workflow_run_id": 40225762178,
+      "artifact_id": 12610848402,
+      "artifact_digest": "sha256:bb86d82fecf0bd67aa7ba6b9b771b705961186bd9742a22c1226a85cb6391cd8",
+      "source_head_sha": "ef5574051a0445b18101a7893503947945d67f4a"
+    }
+  ],
+  "aggregate_proof": {
+    "state_type": "CEREBRO_UMS_BM01_AGGREGATE_PROOF_V1",
+    "github_run_id": "40225762178",
+    "github_sha": "ef5574051a0445b18101a7893503947945d67f4a",
+    "status": "PASS_WITH_EVIDENCE",
+    "benchmark_credit": true
+  },
+  "authority": {
+    "readiness_mutation_authorized": false,
+    "prod_authorized": false,
+    "publish_authorized": false,
+    "spend_authorized": false,
+    "additional_cost_eur": 0
+  }
+}
