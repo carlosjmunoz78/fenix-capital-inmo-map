@@ -22,7 +22,7 @@ for p in (SRC,TGT,CFG,CKPT):
     if not p.is_file() or p.stat().st_size==0: raise SystemExit(f'BM03_OV_MISSING:{p}')
 if EXPECTED and sha(CKPT)!=EXPECTED: raise SystemExit(f'BM03_OV_CHECKPOINT_HASH_MISMATCH:{sha(CKPT)}')
 if torch.cuda.is_available(): raise SystemExit('BM03_OV_CPU_PREFLIGHT_EXPECTED')
-converter=ToneColorConverter(str(CFG),device='cpu',enable_watermark=False); converter.load_ckpt(str(CKPT))
+converter=ToneColorConverter(str(CFG),device='cpu'); converter.load_ckpt(str(CKPT))
 src_se=converter.extract_se([str(SRC)]); tgt_se=converter.extract_se([str(TGT)])
 emb_dist=float(torch.linalg.vector_norm(src_se-tgt_se).item())
 if emb_dist<=1e-5: raise SystemExit('BM03_OV_SYNTHETIC_EMBEDDINGS_NOT_DISTINCT')
@@ -35,7 +35,7 @@ manifest={
  'schema_version':'1.0.0','state_type':'CEREBRO_UMS_BM03_OPENVOICE_V2_SYNTHETIC_PREFLIGHT_V1','benchmark_id':'BM-03','environment':'PREPROD','status':'OPENVOICE_V2_VOICE_CONVERSION_RUNTIME_PROVEN_SYNTHETIC_ONLY','benchmark_credit':False,
  'source':{'identity_type':'SYNTHETIC_TTS','real_person_media':False,'engine':'espeak-ng','sha256':sha(SRC),'bytes':SRC.stat().st_size},
  'target':{'identity_type':'SYNTHETIC_TTS','real_person_media':False,'engine':'espeak-ng','sha256':sha(TGT),'bytes':TGT.stat().st_size},
- 'runtime':{'engine':'OpenVoice-V2','device':'cpu','code_license':'MIT','checkpoint_license':'MIT','checkpoint_sha256':sha(CKPT),'embedding_distance':emb_dist,'tau':0.3,'watermark_enabled':False},
+ 'runtime':{'engine':'OpenVoice-V2','device':'cpu','code_license':'MIT','checkpoint_license':'MIT','checkpoint_sha256':sha(CKPT),'embedding_distance':emb_dist,'tau':0.3,'watermark_message':'CEREBRO_SYNTHETIC_PREFLIGHT'},
  'output':{'path':out.name,'sha256':sha(out),'bytes':out.stat().st_size,'sample_rate_hz':info.samplerate,'duration_seconds':round(info.duration,3),'peak_linear':round(peak,6),'rms_linear':round(rms,6),'conversion_seconds':round(time.time()-t,3)},
  'human_required':True,'human_required_reason':'LEGAL_REQUIRED','next_requirement':'AUTHORIZED_REAL_PERSON_VOICE_AND_CONSENT_FOR_BM03_CREDIT','elapsed_seconds':round(time.time()-START,3),
  'additional_cost_eur':0,'prod_authorized':False,'publish_authorized':False,'spend_authorized':False,'readiness_mutation_authorized':False
