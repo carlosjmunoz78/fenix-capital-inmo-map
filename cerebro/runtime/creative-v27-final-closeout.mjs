@@ -42,9 +42,10 @@ async function makeAudio({voice,videoDuration,music,musicId,out}){
   if(speed>1.16) throw new Error(`CHATTERBOX_TOO_LONG_FOR_NATIVE_TIMELINE:${speed.toFixed(3)}`);
   const voiceFilter=speed>1.005?`${atempoChain(speed)},` : '';
   const fade=Math.max(0,videoDuration-1.15);
-  const fc=`[0:a]${voiceFilter}highpass=f=80,lowpass=f=12000,loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000,aformat=channel_layouts=stereo,apad,atrim=duration=${videoDuration}[v];`+
+  const fc=`[0:a]${voiceFilter}highpass=f=80,lowpass=f=12000,loudnorm=I=-16:TP=-1.5:LRA=7,aresample=48000,aformat=channel_layouts=stereo,apad,atrim=duration=${videoDuration}[vbase];`+
+    `[vbase]asplit=2[vsc][vmix];`+
     `[1:a]highpass=f=45,lowpass=f=15500,loudnorm=I=-22:TP=-2:LRA=8,volume=0.72,afade=t=in:st=0:d=0.18,afade=t=out:st=${fade}:d=1.15,aresample=48000,aformat=channel_layouts=stereo,apad,atrim=duration=${videoDuration}[m];`+
-    `[m][v]sidechaincompress=threshold=0.012:ratio=7:attack=7:release=220[duck];[v][duck]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.94,atrim=duration=${videoDuration}[a]`;
+    `[m][vsc]sidechaincompress=threshold=0.012:ratio=7:attack=7:release=220[duck];[vmix][duck]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.94,atrim=duration=${videoDuration}[a]`;
   await execFileAsync('ffmpeg',['-hide_banner','-loglevel','error','-i',voice,'-stream_loop','-1','-i',music,'-filter_complex',fc,'-map','[a]','-c:a','pcm_s24le','-ar','48000','-ac','2','-y',out],{maxBuffer:32*1024*1024});
   return {voice_duration_sec:Number(vd.toFixed(3)),speedup:Number(speed.toFixed(4)),music_track_id:musicId};
 }
