@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://media-studio/v2/identity-character-rights.schema.json",
+  "title": "Universal Media Studio Identity & Character Rights Record",
+  "type": "object",
+  "required": ["identity_id", "identity_type", "provenance_record", "canonical_assets", "versions", "checksums"],
+  "properties": {
+    "identity_id": {"type": "string", "minLength": 1},
+    "identity_type": {"enum": ["REAL_AUTHORIZED", "SYNTHETIC_ORIGINAL", "FICTIONAL_LICENSED"]},
+    "subject_reference": {"type": ["string", "null"]},
+    "rights_record": {
+      "type": ["object", "null"],
+      "properties": {
+        "consent_status": {"type": "string"},
+        "allowed_modalities": {
+          "type": "array",
+          "items": {"enum": ["image", "video", "voice", "singing", "3d", "motion", "live"]},
+          "uniqueItems": true
+        },
+        "allowed_uses": {"type": "array", "items": {"type": "string"}},
+        "territories": {"type": "array", "items": {"type": "string"}},
+        "valid_from": {"type": ["string", "null"]},
+        "valid_until": {"type": ["string", "null"]},
+        "revocation_process": {"type": "string"},
+        "evidence_refs": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "provenance_record": {"type": "object"},
+    "canonical_assets": {
+      "type": "object",
+      "properties": {
+        "face_refs": {"type": "array", "items": {"type": "string"}},
+        "body_refs": {"type": "array", "items": {"type": "string"}},
+        "voice_refs": {"type": "array", "items": {"type": "string"}},
+        "motion_refs": {"type": "array", "items": {"type": "string"}},
+        "3d_assets": {"type": "array", "items": {"type": "string"}},
+        "character_bible": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "versions": {"type": "array", "items": {"type": "object"}},
+    "checksums": {"type": "array", "items": {"type": "string"}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"identity_type": {"const": "REAL_AUTHORIZED"}}},
+      "then": {
+        "required": ["rights_record"],
+        "properties": {
+          "rights_record": {
+            "type": "object",
+            "required": ["consent_status", "allowed_modalities", "allowed_uses", "revocation_process", "evidence_refs"]
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}
