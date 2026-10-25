@@ -6,6 +6,7 @@ on:
       - 'cerebro/creative-v27-generative-preprod-2026-10-25'
     paths:
       - 'cerebro/runtime/creative-character-motion-contract-v27.mjs'
+      - 'cerebro/runtime/creative-brand-theme-fenix-v27.mjs'
       - 'cerebro/runtime/creative-kinetic-captions-v27.mjs'
       - 'cerebro/tests/creative-v27-contracts-smoke.mjs'
       - '.github/workflows/cerebro-creative-v27-contracts.yml'
@@ -23,21 +24,24 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install FFmpeg
+      - name: Install FFmpeg and Inter
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg
+          sudo apt-get install -y -qq ffmpeg fonts-inter
           ffmpeg -version | head -n 1
-      - name: Validate identity and kinetic captions contracts
+          FONT_FAMILY="$(fc-match -f '%{family}' Inter | head -n 1)"
+          echo "Resolved caption font: ${FONT_FAMILY}"
+          test "${FONT_FAMILY}" = "Inter"
+      - name: Validate identity, brand and kinetic captions contracts
         env:
           CEREBRO_V27_REPORT: .cerebro-v27/contracts/report.json
           CEREBRO_V27_ASS: .cerebro-v27/contracts/captions.ass
           CEREBRO_V27_CAPTION_PLAN: .cerebro-v27/contracts/caption-plan.json
         run: node cerebro/tests/creative-v27-contracts-smoke.mjs
-      - name: Burn kinetic captions into physical vertical MP4
+      - name: Burn Fenix kinetic captions into physical vertical MP4
         run: |
           ffmpeg -hide_banner -loglevel error \
-            -f lavfi -i 'color=c=0x101820:s=1080x1920:r=30:d=6.6' \
+            -f lavfi -i 'color=c=0x222222:s=1080x1920:r=30:d=6.6' \
             -vf "ass=.cerebro-v27/contracts/captions.ass" \
             -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p -movflags +faststart -y \
             .cerebro-v27/contracts/captions-physical.mp4
