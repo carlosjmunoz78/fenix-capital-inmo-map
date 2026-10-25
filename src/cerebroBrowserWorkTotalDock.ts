@@ -14,6 +14,7 @@ const OWNER=IS_PRODUCTION?'cerebro-browser-work-total-owner-v1-prod':'cerebro-br
 const IDEMPOTENCY_PREFIX=IS_PRODUCTION?'browser-work-total-v1-prod-ui-':'browser-work-total-v1-ui-';
 const ROOT_ID='cerebro-browser-work-total-profile-dock';
 const STYLE_ID='cerebro-browser-work-total-profile-style';
+const VIEWER_SESSION_SELECTOR='.cerebro-browser-console select[aria-label="Seleccionar sesión"]';
 const TERMINAL=new Set(['HIBERNATED','STOPPED','ERROR','CLOSED']);
 let profiles:WorkProfile[]=[];
 let selectedKey='';
@@ -35,6 +36,20 @@ function currentCompany(){
  const first=document.querySelector<HTMLElement>('.cerebro-browser-console .cerebro-browser-session-context span strong');
  const text=first?.textContent?.trim().toLowerCase();
  return text&&/^[a-z0-9._:-]+$/.test(text)?text:'fenix';
+}
+function selectMainViewerSession(sessionId:string){
+ const select=document.querySelector<HTMLSelectElement>(VIEWER_SESSION_SELECTOR);
+ if(!select||!Array.from(select.options).some(option=>option.value===sessionId))return false;
+ select.value=sessionId;
+ select.dispatchEvent(new Event('change',{bubbles:true}));
+ return true;
+}
+async function syncMainViewerSession(sessionId:string){
+ for(let attempt=0;attempt<60;attempt++){
+  if(selectMainViewerSession(sessionId))return true;
+  await new Promise(resolve=>window.setTimeout(resolve,100));
+ }
+ return false;
 }
 async function api<T extends {ok:boolean;error?:string}>(route:string,body:Record<string,unknown>):Promise<T>{
  const {data:{session}}=await supabase.auth.getSession();
@@ -100,7 +115,10 @@ async function act(action:string){
   }else if(action==='open'){
    const current=active();
    if(current?.active_session&&current.browser_profile_id!==profile!.browser_profile_id){await api<ActionResponse>('hibernate',{company_id:company,session_id:current.active_session.session_id,target_browser_profile_id:profile!.browser_profile_id});info=`Durmiendo ${current.display_label}…`;render();await waitForSleep(current.active_session.session_id);}
-   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`${IDEMPOTENCY_PREFIX}${crypto.randomUUID()}`});info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';
+   const start=await api<ActionResponse>('start',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id,idempotency_key:`${IDEMPOTENCY_PREFIX}${crypto.randomUUID()}`});
+   const effectiveSessionId=start.session?.session_id||start.active_session?.session_id;
+   if(effectiveSessionId&&!(await syncMainViewerSession(effectiveSessionId)))throw new Error('WORK_TOTAL_VIEWER_SESSION_SYNC_TIMEOUT');
+   info=start.session?.session_id?`Workspace iniciado ${short(start.session.session_id)}.`:'Workspace reanudado.';
   }else if(action==='confirm'){
    const result=await api<ActionResponse>('confirm-account',{company_id:company,identity_id:profile!.identity_id,account_id:profile!.account_id});info=`Cuenta confirmada${result.account_hint?` · ${result.account_hint}`:''}.`;
   }else if(action==='forget'){
