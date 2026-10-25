@@ -1,0 +1,125 @@
+name: CEREBRO UMS BM07 Volumetric Spatial
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-bm07-spatial.yml'
+      - 'cerebro/media-studio/v2/probes/bm07_volumetric_asset.py'
+      - 'cerebro/media-studio/v2/probes/blender_52_bm07_spatial_render.py'
+      - 'cerebro/media-studio/v2/probes/bm07_spatial_proof_gate.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-ums-bm07-spatial
+  cancel-in-progress: true
+
+jobs:
+  physical_spatial:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      BM07_OUT: ums-bm07-spatial
+      BLENDER_ARCHIVE: blender-5.2.3-linux-x64.tar.xz
+      BLENDER_BASE: https://download.blender.org/release/Blender5.2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install zero-cost volumetric generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip
+          python -m pip install numpy==2.3.4 scikit-image==0.25.2 trimesh==4.8.3
+          python -m pip check
+
+      - name: Generate physical 64-cubed density field and marching-cubes mesh
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm07_volumetric_asset.py | tee bm07-volume.stdout.log
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('ums-bm07-spatial/bm07-volume-source.json').read_text())
+          assert x['status']=='VOLUMETRIC_SOURCE_GENERATED'
+          assert x['grid']['shape']==[64,64,64]
+          assert x['grid']['voxel_count']==262144 and x['grid']['occupied_voxels']>1000
+          assert x['mesh']['vertices']>=1000 and x['mesh']['faces']>=1000
+          assert all(v>1.0 for v in x['mesh']['extents'])
+          assert x['external_assets']==0 and x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          print('BM07 volumetric source GREEN')
+          PY
+
+      - name: Install zero-cost Blender headless runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0
+          curl --fail --location --retry 3 --output "$BLENDER_ARCHIVE" "$BLENDER_BASE/$BLENDER_ARCHIVE"
+          curl --fail --location --retry 3 --output blender-5.2.3.sha256 "$BLENDER_BASE/blender-5.2.3.sha256"
+          grep " $BLENDER_ARCHIVE$" blender-5.2.3.sha256 | sha256sum -c -
+          tar -xf "$BLENDER_ARCHIVE"
+          ./blender-5.2.3-linux-x64/blender --version | head -n4
+
+      - name: Physically import render and export spatial asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=30s 900s ./blender-5.2.3-linux-x64/blender --background --factory-startup --python cerebro/media-studio/v2/probes/blender_52_bm07_spatial_render.py 2>&1 | tee bm07-blender.stdout.log
+          test -s "$BM07_OUT/bm07-spatial-render-evidence.json"
+          test -s "$BM07_OUT/bm07-spatial-asset.glb"
+          test -s "$BM07_OUT/bm07-spatial-asset.usdc"
+          if grep -E 'Traceback \(most recent call last\)|Error: Python|BM07_.*FAIL' bm07-blender.stdout.log; then
+            echo 'Blender spatial proof emitted an error; fail closed.' >&2
+            exit 41
+          fi
+
+      - name: Fail-closed BM07 volumetric spatial tribunal
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/probes/bm07_spatial_proof_gate.py \
+            --source "$BM07_OUT/bm07-volume-source.json" \
+            --render "$BM07_OUT/bm07-spatial-render-evidence.json" \
+            --root "$BM07_OUT" \
+            --out "$BM07_OUT/bm07-pass-with-evidence.json" | tee bm07-proof.stdout.log
+
+      - name: Semantic benchmark-credit gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('ums-bm07-spatial/bm07-pass-with-evidence.json').read_text())
+          assert x['status']=='PASS_WITH_EVIDENCE' and x['benchmark_credit'] is True
+          assert x['proof_type']=='VOLUMETRIC_OR_SPATIAL_ASSET_PROOF'
+          assert all(x['checks'].values())
+          assert x['volume_metrics']['shape']==[64,64,64]
+          assert x['additional_cost_eur']==0 and x['prod_authorized'] is False
+          print(json.dumps(x,indent=2))
+          PY
+
+      - name: Upload immutable BM07 physical evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-bm07-spatial-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          path: |
+            ums-bm07-spatial/
+            bm07-volume.stdout.log
+            bm07-blender.stdout.log
+            bm07-proof.stdout.log
+            blender-5.2.3.sha256
