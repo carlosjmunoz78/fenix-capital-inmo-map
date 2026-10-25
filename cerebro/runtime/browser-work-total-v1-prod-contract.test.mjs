@@ -6,6 +6,7 @@ const read=(path)=>fs.readFile(new URL(`../../${path}`,import.meta.url),'utf8');
 const runtimePath='cerebro/runtime/browser-interactive-session-v3.mjs';
 const workflowPath='.github/workflows/cerebro-browser-work-total-v1-prod.yml';
 const ownerPath='supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts';
+const workspacePath='supabase/functions/cerebro-browser-work-total-v1-prod/index.ts';
 const dockPath='src/cerebroBrowserWorkTotalDock.ts';
 
 test('Work Total PROD preserves the validated fast private human-input loop',async()=>{
@@ -32,6 +33,19 @@ test('Work Total PROD preserves encrypted persistence and VERIFIED-only Google i
   assert.match(runtime,/workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED'/);
   assert.match(runtime,/raw_cdp_exposed:false/);
   assert.match(runtime,/incremental_cost_eur:0/);
+});
+
+test('Work Total PROD workspace fails closed for all non-VERIFIED bundles',async()=>{
+  const workspace=await read(workspacePath);
+  assert.match(workspace,/const VERIFIED='VERIFIED'/);
+  assert.match(workspace,/requireVerifiedProfile/);
+  assert.match(workspace,/WORKSPACE_IDENTITY_NOT_VERIFIED/);
+  assert.match(workspace,/profileState!==VERIFIED\|\|bundleState!==VERIFIED/);
+  assert.match(workspace,/\.eq\('verification_state',VERIFIED\)/);
+  assert.match(workspace,/verification_state:VERIFIED/);
+  assert.match(workspace,/identity_gate:'VERIFIED_ONLY_FAIL_CLOSED'/);
+  assert.match(workspace,/trading_access:false/);
+  assert.doesNotMatch(workspace,/verificationState=\['VERIFIED','REAUTH_REQUIRED','MISMATCH'\]/);
 });
 
 test('Work Total PROD owner is Fenix-only, CARLOS-ADMIN-only and never exposes secrets',async()=>{
