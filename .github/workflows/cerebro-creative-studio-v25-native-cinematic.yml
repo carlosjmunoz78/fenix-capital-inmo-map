@@ -90,7 +90,7 @@ jobs:
           set -euo pipefail
           node cerebro/tests/creative-studio-native-showcase-v2.mjs | tee /tmp/v26-result.json
           grep -F '"ok":true' /tmp/v26-result.json
-          grep -F '"version":"v2.6"' /tmp/v26-result.json
+          grep -F '"version":"v2.6.2"' /tmp/v26-result.json
           grep -F '"promotion_eligible":false' /tmp/v26-result.json
       - name: Verify fail-closed physical contract
         shell: bash
@@ -100,9 +100,10 @@ jobs:
           const fs=require('fs');
           const p='/tmp/cerebro-creative-studio-v26/NATIVE_CINEMATIC_MANIFEST.json';
           const m=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(m.schema_version!=='2.6.1'||m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
+          if(m.schema_version!=='2.6.2'||m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
           if(m.promotion_eligible!==false||m.human_creative_review_required!==true||m.human_creative_gate!=='PENDING_REVIEW') throw new Error('HUMAN_GATE');
-          if(m.source_policy!=='NO_IDENTIFIABLE_STOCK_HUMANS') throw new Error('SOURCE_POLICY');
+          if(m.source_policy!=='NO_IDENTIFIABLE_STOCK_HUMANS'||m.context_catalog_size<14||m.max_context_source_reuse!==2) throw new Error('SOURCE_POLICY');
+          if(m.physical_primary_binding!=='SINGLE_RENDER_VISUAL_SOURCE') throw new Error('PRIMARY_BINDING_POLICY');
           if(m.audio_delivery!=='AAC_256K_48KHZ_STEREO') throw new Error('AUDIO_DELIVERY');
           if(m.native_pipeline_order!=='LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER') throw new Error('PIPELINE_ORDER');
           if(m.captions_mode!=='REAL_DIALOGUE_SRT_SIDECAR') throw new Error('CAPTIONS_MODE');
@@ -114,6 +115,9 @@ jobs:
             if(c.passed!==true||c.stock_primary_forbidden!==true||c.stock_video_context_only!==true||c.identifiable_stock_human_context_forbidden!==true) throw new Error(`CAST:${x.label}`);
             if(c.primary_scene_count!==2) throw new Error(`PRIMARY_STILL_REPEAT:${x.label}:${c.primary_scene_count}`);
             if((c.stock_context_assets||[]).some(a=>a.identifiable_human_content===true)) throw new Error(`IDENTIFIABLE_STOCK_HUMAN:${x.label}`);
+            if(e.physical_primary_binding_passed!==true||e.physical_primary_render_asset_count!==1||String(e.physical_primary_render_asset)!==String(m.cross_format_primary_cast_source)) throw new Error(`PHYSICAL_PRIMARY_DRIFT:${x.label}`);
+            const minContext=x.key==='story'?8:14;
+            if(Number(e.context_source_unique_count||0)<minContext||Number(e.context_source_max_occurrences||99)>2) throw new Error(`CONTEXT_DIVERSITY:${x.label}:${e.context_source_unique_count}:${e.context_source_max_occurrences}`);
             if(e.legacy_prerender_recut!==true||e.planned_duration_enforced!==true||e.audio_mastered_after_native_recut!==true) throw new Error(`NATIVE_TIMELINE:${x.label}`);
             if(Math.abs(Number(e.video_duration_sec)-Number(e.native_timeline_output_sec))>0.35) throw new Error(`AUDIO_VIDEO_TIMELINE_DRIFT:${x.label}`);
             if(e.music_real_track!==true||e.music_full_length!==true||e.music_license!=='CC0-1.0'||!String(e.music_license_provenance_url||'').startsWith('https://freemusicarchive.org/')||e.music_peak_db<-8) throw new Error(`MUSIC:${x.label}`);
@@ -125,7 +129,7 @@ jobs:
             if(e.real_dialogue_caption_sidecar!==true||!String(e.caption_sidecar_file||'').endsWith('.srt')) throw new Error(`CAPTIONS:${x.label}`);
             if(x.human_creative_gate!=='PENDING_REVIEW'||x.promotion_eligible!==false) throw new Error(`PROMOTION_GATE:${x.label}`);
           }
-          console.log('V26_TECHNICAL_CANDIDATE_HUMAN_PENDING');
+          console.log('V26_2_TECHNICAL_CANDIDATE_HUMAN_PENDING');
           NODE
       - name: Extract human review contact sheets
         shell: bash
