@@ -1,4 +1,4 @@
-name: CEREBRO UMS BM01 Readiness Registration
+name: CEREBRO UMS Evidence Registry Integrity
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     paths:
       - '.github/workflows/cerebro-ums-bm01-readiness-registration.yml'
       - 'cerebro/media-studio/v2/benchmarks/required-benchmarks.json'
-      - 'cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json'
+      - 'cerebro/media-studio/v2/evidence/**'
       - 'cerebro/media-studio/v2/runtime/readiness-gate.mjs'
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Validate evidence reference and readiness arithmetic
+      - name: Validate all registered evidence and readiness arithmetic
         shell: bash
         run: |
           set -euo pipefail
@@ -32,19 +32,27 @@ jobs:
           import crypto from 'node:crypto';
           import {evaluateUniversalMediaStudioReadiness} from './cerebro/media-studio/v2/runtime/readiness-gate.mjs';
           const registry=JSON.parse(fs.readFileSync('./cerebro/media-studio/v2/benchmarks/required-benchmarks.json','utf8'));
-          const evidencePath='./cerebro/media-studio/v2/evidence/bm01-pass-with-evidence-2026-10-25.json';
-          const evidence=JSON.parse(fs.readFileSync(evidencePath,'utf8'));
-          const bm01=registry.benchmarks.find(x=>x.id==='BM-01');
-          if(!bm01) throw new Error('BM01_MISSING');
-          if(bm01.state!=='PASS_WITH_EVIDENCE') throw new Error('BM01_NOT_REGISTERED_PASS');
-          if(!String(bm01.evidence_ref||'').includes('6d2384ad83fb047f311f347bb4de867ee2cb218f')) throw new Error('BM01_EVIDENCE_COMMIT_NOT_PINNED');
-          if(evidence.status!=='PASS_WITH_EVIDENCE'||evidence.benchmark_credit!==true) throw new Error('BM01_PERSISTED_EVIDENCE_INVALID');
-          if(evidence.authority?.prod_authorized!==false||evidence.authority?.additional_cost_eur!==0) throw new Error('BM01_AUTHORITY_OR_COST_INVALID');
+          const passRows=registry.benchmarks.filter(x=>x.state==='PASS_WITH_EVIDENCE');
+          const evidence=[];
+          for(const row of passRows){
+            const ref=String(row.evidence_ref||'');
+            const m=ref.match(/^git:([0-9a-f]{40}):(.+)$/);
+            if(!m) throw new Error(`INVALID_EVIDENCE_REF:${row.id}:${ref}`);
+            const [,commit,path]=m;
+            if(!fs.existsSync(path)) throw new Error(`EVIDENCE_FILE_MISSING:${row.id}:${path}`);
+            const raw=fs.readFileSync(path);
+            const doc=JSON.parse(raw.toString('utf8'));
+            if(doc.status!=='PASS_WITH_EVIDENCE'||doc.benchmark_credit!==true) throw new Error(`EVIDENCE_NOT_PASS:${row.id}`);
+            if(doc.benchmark_id!==row.id) throw new Error(`EVIDENCE_BENCHMARK_MISMATCH:${row.id}:${doc.benchmark_id}`);
+            if(doc.authority?.prod_authorized!==false||doc.authority?.additional_cost_eur!==0) throw new Error(`EVIDENCE_AUTHORITY_OR_COST_INVALID:${row.id}`);
+            evidence.push({benchmark_id:row.id,commit,path,sha256:crypto.createHash('sha256').update(raw).digest('hex')});
+          }
           const result=evaluateUniversalMediaStudioReadiness(registry);
-          if(result.ready!==false) throw new Error('UMS_READY_MUST_REMAIN_FALSE');
-          if(result.total_required!==12) throw new Error('REQUIRED_BENCHMARK_COUNT_CHANGED');
-          if(result.passed_with_evidence!==1) throw new Error(`EXPECTED_ONE_PASS:${result.passed_with_evidence}`);
-          if(result.incomplete.includes('BM-01')) throw new Error('BM01_STILL_INCOMPLETE');
-          if(result.incomplete.length!==11) throw new Error(`EXPECTED_11_INCOMPLETE:${result.incomplete.length}`);
-          console.log(JSON.stringify({status:'BM01_REGISTRATION_GREEN',readiness:result,evidence_sha256:crypto.createHash('sha256').update(fs.readFileSync(evidencePath)).digest('hex'),prod_authorized:false,additional_cost_eur:0},null,2));
+          if(result.total_required!==12) throw new Error(`REQUIRED_BENCHMARK_COUNT_CHANGED:${result.total_required}`);
+          if(result.passed_with_evidence!==passRows.length) throw new Error(`PASS_ARITHMETIC_MISMATCH:${result.passed_with_evidence}:${passRows.length}`);
+          if(result.incomplete.length!==result.total_required-result.passed_with_evidence) throw new Error('INCOMPLETE_ARITHMETIC_MISMATCH');
+          if(result.passed_with_evidence<result.total_required && result.ready!==false) throw new Error('UMS_PREMATURE_READY');
+          if(result.ready && registry.status!=='READY') throw new Error('REGISTRY_STATUS_NOT_READY_WHEN_GATE_READY');
+          if(!result.ready && registry.status!=='NOT_READY') throw new Error('REGISTRY_STATUS_MUST_REMAIN_NOT_READY');
+          console.log(JSON.stringify({status:'UMS_EVIDENCE_REGISTRY_GREEN',readiness:result,registered_evidence:evidence,prod_authorized:false,additional_cost_eur:0},null,2));
           NODE
