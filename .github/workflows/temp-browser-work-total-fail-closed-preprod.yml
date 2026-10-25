@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - fix/browser-work-total-fail-closed-20261025
+  pull_request:
+    branches:
+      - promote/browser-work-total-prod-20261025
   workflow_dispatch:
 
 permissions:
