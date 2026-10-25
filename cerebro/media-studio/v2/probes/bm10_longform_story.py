@@ -48,7 +48,8 @@ for i,(v,title) in enumerate(zip(voice,TITLES),1):
         f"fade=t=in:st=0:d=0.35,fade=t=out:st=14.65:d=0.35,"
         f"drawtext=fontfile={dejavu}:text='{title}':fontcolor=white:fontsize=20:box=1:boxcolor=black@0.35:boxborderw=8:x=24:y=24,format=yuv420p")
     fc=(f"[1:a]volume=0.20,atrim=duration={SEQ_DUR},asetpts=N/SR/TB,afade=t=in:st=0:d=0.4,afade=t=out:st=14.4:d=0.6[m];"
-        f"[2:a]apad=pad_dur={SEQ_DUR},atrim=duration={SEQ_DUR},volume=1.0[n];[m][n]amix=inputs=2:duration=first:dropout_transition=0:normalize=0[a]")
+        f"[2:a]apad=pad_dur={SEQ_DUR},atrim=duration={SEQ_DUR},volume=1.0[n];"
+        f"[m][n]amix=inputs=2:duration=first:dropout_transition=0:normalize=0,alimiter=limit=0.95[a]")
     run(['ffmpeg','-hide_banner','-loglevel','error','-y','-stream_loop','-1','-i',str(SRC),'-stream_loop','-1','-i',str(MUSIC),'-i',str(OUT/v['path']),'-filter_complex',fc,'-map','0:v:0','-map','[a]','-t',str(SEQ_DUR),'-vf',vf,'-r','24','-c:v','libx264','-preset','medium','-crf','18','-c:a','aac','-b:a','192k','-ar','48000','-ac','2','-movflags','+faststart',str(out)])
     pr=probe(out); seqs.append({'index':i,'title':title,'path':out.name,'sha256':sha(out),'bytes':out.stat().st_size,'duration_seconds':float(pr['format']['duration'])})
 
@@ -57,7 +58,6 @@ final=OUT/'bm10-nova01-longform-story.mp4'
 run(['ffmpeg','-hide_banner','-loglevel','error','-y','-f','concat','-safe','0','-i',str(concat),'-c','copy','-movflags','+faststart',str(final)])
 fp=probe(final)
 
-# Extract boundary frames after the common cinematic fade. Thresholds are evaluated by a separate gate.
 from PIL import Image
 import numpy as np
 boundary=[]
@@ -76,7 +76,7 @@ manifest={
  'character':{'id':'UMS-SYNTH-CHAR-001','identity_type':'SYNTHETIC_ORIGINAL','real_person_reference':False,'source_benchmark':'BM-01','source_video_sha256':sha(SRC)},
  'story':{'sequence_count':len(seqs),'sequence_duration_seconds':SEQ_DUR,'expected_total_seconds':SEQ_DUR*len(seqs),'sequences':seqs},
  'voice':{'engine':MODEL,'speaker':SPEAKER,'language':LANGUAGE,'real_person_voice':False,'clips':voice},
- 'sound':{'music_source_benchmark':'BM-04','music_sha256':sha(MUSIC),'mix_sample_rate_hz':sr,'mix_channels':2,'peak_linear':round(peak,6),'rms_linear':round(rms,6)},
+ 'sound':{'music_source_benchmark':'BM-04','music_sha256':sha(MUSIC),'mix_sample_rate_hz':sr,'mix_channels':2,'peak_linear':round(peak,6),'rms_linear':round(rms,6),'limiter_peak_target':0.95},
  'color_continuity':{'metric':'MEAN_ABSOLUTE_RGB_DELTA_AT_SEQUENCE_BOUNDARIES','boundaries':boundary},
  'final':{'path':final.name,'sha256':sha(final),'bytes':final.stat().st_size,'duration_seconds':float(fp['format']['duration']),'video_codec':video_stream['codec_name'],'audio_codec':audio_stream['codec_name'],'width':int(video_stream['width']),'height':int(video_stream['height']),'fps':video_stream.get('r_frame_rate')},
  'provenance':{'visual_source':'BM-01_PASS_WITH_EVIDENCE','music_source':'BM-04_PASS_WITH_EVIDENCE','voice_runtime':'QWEN3_TTS_CPU_REAL_INFERENCE','external_real_person_media':False},
