@@ -1,0 +1,24 @@
+{
+  "schema_version": "2.0.0",
+  "environment": "PROD",
+  "status": "REGISTERED_NOT_FULLY_OPERATIONAL",
+  "universes": {
+    "IDENTITY_CHARACTER": ["real_person_authorized_capture","synthetic_character_genesis","persistent_face_body_identity","digital_double","age_appearance_variants","wardrobe_hair_makeup_continuity","character_bible","identity_versioning"],
+    "VOICE_SPEECH": ["authorized_voice_clone","tts","voice_conversion","accent_dialect","adr_dubbing","lip_sync","emotion_prosody","multilingual_speech","singing_voice"],
+    "MUSIC": ["lyrics","melody","harmony","arrangement","orchestration","instrument_timbre_synthesis","singing_voice","stems","score_to_picture","mix_master","spatial_music","adaptive_music"],
+    "IMAGE": ["photography","synthetic_image","illustration","key_art","retouch","restoration","relighting","super_resolution","colorization","graphics"],
+    "VIDEO": ["live_action","synthetic_video","image_to_video","video_to_video","motion_transfer","camera_path_transfer","subject_tracking","reframing","slow_fast_motion","restoration","scene_reconstruction"],
+    "THREED": ["modeling","sculpting","materials","rigging","animation","environment","digital_twin","procedural_world","physics","render"],
+    "VFX": ["keying","roto","paint","compositing","particles","fluids","fire_smoke","destruction","crowds","set_extension"],
+    "CAPTURE_RECON": ["photogrammetry","lidar","multi_view","depth","mocap","facial_capture","nerf","gaussian_splats","volumetric_capture","light_field_capture"],
+    "AUDIO": ["dialogue","cleanup","foley","sfx_synthesis","ambience","binaural","ambisonics","spatial_mix","mastering"],
+    "IMMERSIVE": ["vr","ar","mr","360_180","stereo","6dof","volumetric","light_field","spatial_video","holographic_device_adapter"],
+    "LIVE_INTERACTIVE": ["broadcast","multicam","streaming","live_graphics","game_cinematics","branching_narrative","adaptive_audiovisual","digital_actors"],
+    "RESTORE_FORENSICS": ["denoise","deblur","repair","frame_reconstruction","artifact_detection","sync_verification","provenance_validation","alteration_review"],
+    "DELIVERY": ["cinema_dcp","imf","ott","broadcast","social","web_app","xr_runtime","spatial_display","archive_master","future_adapter"]
+  },
+  "surface_types": ["RASTER_IMAGE_2D","RASTER_VIDEO_2D","STEREOSCOPIC_VIDEO","EQUIRECT_360","VR180","CUBEMAP","USD_SCENE","GLTF_SCENE","MESH_3D","POINT_CLOUD","GAUSSIAN_SPLAT_SCENE","VOXEL_VOLUME","VOLUMETRIC_VIDEO","LIGHT_FIELD","SPATIAL_VIDEO","HOLOGRAPHIC_DEVICE_STREAM","HOLOGRAPHIC_WAVEFRONT_WHEN_SUPPORTED","STEREO_AUDIO","MULTICHANNEL_AUDIO","BINAURAL_AUDIO","AMBISONIC_AUDIO","OBJECT_BASED_SPATIAL_AUDIO","INTERACTIVE_REALTIME_SCENE","LIVE_STREAM","DCP","IMF","PLATFORM_DERIVATIVE"],
+  "interop_spine": ["OpenUSD","OpenTimelineIO","OpenColorIO","ACES","OpenEXR","MaterialX","OpenVDB","OpenCue","OpenXR","MPEG_immersive","C2PA","MovieLabs_OMC_CSAP","IMF","DCP","FFmpeg"],
+  "router_preference": ["deterministic","oss_local","contracted_existing","free_tier","self_hosted","cheap_external","paid_burst_authorized"],
+  "expansion_policy": "FACT-001 may add capability or role only after duplicate/gap analysis, tests, rights/license/security review and rollback definition."
+}
