@@ -1,0 +1,89 @@
+name: CEREBRO UMS Studio Showcase V1
+
+on:
+  push:
+    branches:
+      - cerebro/ums-qwen3-tts-cpu-probe-20261025
+    paths:
+      - '.github/workflows/cerebro-ums-studio-showcase-v1.yml'
+      - 'cerebro/media-studio/v2/showcase/ums_studio_showcase_v1.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  physical_showcase:
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_SPEND_AUTHORIZED: 'false'
+      UMS_SHOWCASE_OUT: ums-studio-showcase-v1
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      TRANSFORMERS_NO_ADVISORY_WARNINGS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install zero-cost physical media runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core libsndfile1
+          python -m pip install --upgrade pip
+          python -m pip install --index-url https://download.pytorch.org/whl/cpu torch==2.7.1 torchaudio==2.7.1
+          python -m pip install qwen-tts==0.1.1 soundfile==0.12.1 pillow==11.3.0 numpy==2.2.6 psutil
+          python -m pip check
+      - name: Render three physical UMS showcase films
+        shell: bash
+        run: |
+          set -euo pipefail
+          timeout --signal=TERM --kill-after=60s 3000s python cerebro/media-studio/v2/showcase/ums_studio_showcase_v1.py | tee ums-studio-showcase.stdout.log
+      - name: Verify deliverables and hard gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$UMS_SHOWCASE_OUT/ums-studio-showcase-manifest.json"
+          test -s "$UMS_SHOWCASE_OUT/cerebro-ums-story-showcase.mp4"
+          test -s "$UMS_SHOWCASE_OUT/cerebro-ums-reel-showcase.mp4"
+          test -s "$UMS_SHOWCASE_OUT/cerebro-ums-hero-showcase.mp4"
+          python - <<'PY'
+          import json, pathlib
+          p=pathlib.Path('ums-studio-showcase-v1/ums-studio-showcase-manifest.json')
+          x=json.loads(p.read_text())
+          assert x['status']=='PASS_WITH_PHYSICAL_DELIVERABLES'
+          assert len(x['deliverables'])==3
+          ds={d['film']:d for d in x['deliverables']}
+          assert ds['story']['height']>ds['story']['width']
+          assert ds['reel']['height']>ds['reel']['width']
+          assert ds['hero']['width']>ds['hero']['height']
+          assert ds['hero']['duration_seconds']>=180
+          assert len({d['speaker'] for d in x['deliverables']})==3
+          assert all(d['language']=='Spanish' for d in x['deliverables'])
+          assert all(all(d['checks'].values()) for d in x['deliverables'])
+          assert x['governance']['additional_cost_eur']==0
+          assert x['governance']['prod_mutation'] is False
+          assert x['governance']['publish'] is False
+          PY
+          ffprobe -v error -show_entries format=duration,size -of json "$UMS_SHOWCASE_OUT/cerebro-ums-hero-showcase.mp4"
+          sha256sum "$UMS_SHOWCASE_OUT"/*.mp4 "$UMS_SHOWCASE_OUT/ums-studio-showcase-manifest.json" | tee ums-studio-showcase.sha256
+      - name: Upload physical showcase bundle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums-studio-showcase-v1-${{ github.run_id }}
+          retention-days: 30
+          if-no-files-found: error
+          compression-level: 0
+          path: |
+            ums-studio-showcase-v1/cerebro-ums-story-showcase.mp4
+            ums-studio-showcase-v1/cerebro-ums-reel-showcase.mp4
+            ums-studio-showcase-v1/cerebro-ums-hero-showcase.mp4
+            ums-studio-showcase-v1/ums-studio-showcase-manifest.json
+            ums-studio-showcase.stdout.log
+            ums-studio-showcase.sha256
