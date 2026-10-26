@@ -22,7 +22,7 @@ for datablocks in (bpy.data.curves, bpy.data.meshes, bpy.data.materials, bpy.dat
     pass
 
 scene = bpy.context.scene
-scene.render.engine = "BLENDER_EEVEE_NEXT"
+scene.render.engine = "BLENDER_EEVEE"
 scene.render.resolution_x = 540
 scene.render.resolution_y = 960
 scene.render.resolution_percentage = 100
