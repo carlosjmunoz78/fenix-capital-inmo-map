@@ -1,8 +1,8 @@
 {
   "kind": "cerebro.ums.production_order.v1",
   "schema_version": "2.0.0",
-  "idempotency_key": "ums-fenix-premium-trial-20261026-v3",
-  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V3",
+  "idempotency_key": "ums-fenix-premium-trial-20261026-v4",
+  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V4",
   "company_id": "fenix",
   "target_company_id": "fenix",
   "engine_id": "UMS-001",
@@ -21,7 +21,7 @@
   "delivery_requested": true,
   "delivery_mode": "OWNER_REVIEW",
   "brief": {
-    "objective": "Producir una pieza vertical Fénix Capital con acabado cinematográfico de superproducción, narrativa humana creíble, cámara, VFX/composición cuando aporten, montaje, sonido y finishing de gran estudio.",
+    "objective": "Producir una pieza vertical Fénix Capital con acabado cinematográfico de superproducción, narrativa humana creíble, cámara, VFX/composición cuando aporten, montaje, voz, música, diseño sonoro y finishing de gran estudio.",
     "hook": "Tu casa no debería depender de improvisar.",
     "audience": "Personas que quieren comprar vivienda y necesitan financiación hipotecaria en Córdoba.",
     "tone": "Cinematográfico, humano, elegante, contundente y contemporáneo; nunca slideshow, stock barato ni demo técnica.",
@@ -43,6 +43,8 @@
       "visual_generation",
       "camera_or_animation",
       "edit",
+      "voice",
+      "music",
       "sound",
       "independent_qa"
     ],
@@ -95,23 +97,27 @@
       "shot_classes": ["HUMAN_CINEMATIC_REFIT", "DOCUMENT_CINEMATIC_REFIT", "NATIVE_3D_VFX_CAMERA", "PROPERTY_ENVIRONMENT", "BRAND_END_CARD"]
     },
     "voice": {
-      "enabled": false,
+      "enabled": true,
+      "required": true,
       "provider_preference": ["QWEN3_TTS_PHYSICAL_PREPROD"],
       "voice_id": "ES_FEMALE",
       "text": "Comprar una vivienda no debería depender de improvisar. En Fénix Capital estudiamos tu financiación, ordenamos tu expediente y te acompañamos en cada paso. Fénix Capital. Hipotecas en Córdoba."
     },
     "audio": {
       "music_required": true,
-      "ducking": false,
+      "ducking": true,
+      "target_integrated_lufs": -16,
+      "target_true_peak_db": -1.5,
+      "min_audio_duration_ratio": 0.98,
       "sound_design": "ORIGINAL_ZERO_COST_CINEMATIC_SYNTH_AMBIENCE_AND_TRANSIENTS"
     },
     "subtitles": {
-      "enabled": false,
+      "enabled": true,
       "horizontal_safe_margin_pct": 10,
       "bottom_safe_margin_pct": 12,
       "max_lines": 2,
       "max_chars_per_line": 30,
-      "measured_bbox_required": false,
+      "measured_bbox_required": true,
       "style_profile": "FENIX_BRAND_TITLE_CARDS"
     },
     "showcase_coverage": {
@@ -129,9 +135,18 @@
     "qa": {
       "independent_perceptual_tribunal": true,
       "min_sampled_frames": 12,
-      "subtitle_bbox_validation": false,
+      "subtitle_bbox_validation": true,
       "composition_validation": true,
-      "audio_mix_validation": true
+      "audio_mix_validation": true,
+      "delivery_gate": {
+        "require_people": true,
+        "require_voice": true,
+        "require_music": true,
+        "min_audio_duration_ratio": 0.98,
+        "min_mean_dbfs": -28,
+        "min_peak_dbfs": -12,
+        "reject_missing_semantic_evidence": true
+      }
     }
   }
 }
