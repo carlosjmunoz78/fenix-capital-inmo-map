@@ -39,7 +39,7 @@ async function activeJob(sessionId:string,workerId:string){
  if(q.error)throw q.error;if(!q.data||Date.parse(q.data.lease_expires_at||'')<=Date.now())throw new Error('INTERACTIVE_JOB_LEASE_NOT_ACTIVE');if(String(q.data.mode)!=='MUTATE')throw new Error('INTERACTIVE_MUTATE_REQUIRED');return q.data;
 }
 async function profileForJob(job:any){
- const p=await svc.from('cerebro_browser_workspace_profile_v1').select('workspace_profile_id,company_id,environment,identity_id,account_id,browser_profile_id,provider,login_policy,credential_ref_id,verification_state,expected_account_hash,allowed_origins,active').eq('company_id',job.company_id).eq('environment',ENV).eq('identity_id',job.identity_id).eq('account_id',job.account_id).eq('browser_profile_id',job.browser_profile_id).eq('active',true).maybeSingle();
+ const p=await svc.from('cerebro_browser_workspace_profile_v1').select('workspace_profile_id,company_id,environment,identity_id,account_id,browser_profile_id,provider,login_policy,credential_ref_id,verification_state,expected_account_hash,allowed_origins,login_config,active').eq('company_id',job.company_id).eq('environment',ENV).eq('identity_id',job.identity_id).eq('account_id',job.account_id).eq('browser_profile_id',job.browser_profile_id).eq('active',true).maybeSingle();
  if(p.error)throw p.error;if(!p.data)return null;return p.data;
 }
 function brokerOrigin(p:any){
@@ -67,7 +67,7 @@ async function materialize(job:any,w:any){
  const allowed=profileOrigins(p);if(!allowed.includes(origin))return{ok:false,error:'PROFILE_LOGIN_ORIGIN_DENIED'};
  const {data,error}=await svc.rpc('cerebro_browser_credential_materialize_v3',{p_job_id:job.job_id,p_lease_id:job.lease_id,p_worker_id:w.worker_id,p_credential_ref_id:p.credential_ref_id,p_origin:origin});
  if(error)throw error;if(!data?.ok)return data||{ok:false,error:'CREDENTIAL_MATERIALIZATION_FAILED'};
- return{...data,provider,login_origin:origin,allowed_origins:allowed,universal_form_autologin:true,secret_material_logged:false};
+ return{...data,provider,login_origin:origin,allowed_origins:allowed,login_config:p.login_config&&typeof p.login_config==='object'?p.login_config:{},universal_form_autologin:true,secret_material_logged:false};
 }
 async function confirmCredentialAccount(body:any,w:any){
  const sessionId=String(body?.session_id||'');const observed=String(body?.account_email||'').trim().toLowerCase();
@@ -103,7 +103,7 @@ async function confirmBoundLogin(body:any,w:any){
 
 Deno.serve(async req=>{
  const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');
- if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-autologin-v1-prod',environment:ENV,schema_version:'1.2.0',credential_materialization:true,interactive_autologin:true,profile_resolved_credential:true,owner_ui_unchanged:true,first_account_auto_confirmation:true,universal_form_autologin:true,allowed_origin_bound:true,manual_login_default:false,auth_challenge_requires_human:true,secret_material_exposed_to_frontend:false,trading_access:false,incremental_cost_eur:0});
+ if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-autologin-v1-prod',environment:ENV,schema_version:'1.3.0',credential_materialization:true,interactive_autologin:true,profile_resolved_credential:true,owner_ui_unchanged:true,first_account_auto_confirmation:true,universal_form_autologin:true,allowed_origin_bound:true,login_metadata_separated:true,manual_login_default:false,auth_challenge_requires_human:true,secret_material_exposed_to_frontend:false,trading_access:false,incremental_cost_eur:0});
  if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
  const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
  try{
