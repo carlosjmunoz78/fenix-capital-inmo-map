@@ -94,6 +94,25 @@ jobs:
           echo "BLENDER_BIN=${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" >> "$GITHUB_ENV"
           "${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" --version | head -2
 
+      - name: Diagnose Blender scene with fail-closed Python exit code
+        shell: bash
+        run: |
+          set -euo pipefail
+          diag_dir="$RUNNER_TEMP/bm13-scene-diagnostic"
+          rm -rf "$diag_dir"
+          mkdir -p "$diag_dir"
+          set +e
+          "$BLENDER_BIN" --background --factory-startup --python-exit-code 17 --python cerebro/media-studio/v2/runtime/bm13-fenix-cinematic-scene.py -- "$diag_dir" > blender-scene-diagnostic.log 2>&1
+          code=$?
+          set -e
+          cat blender-scene-diagnostic.log
+          if [[ $code -ne 0 ]]; then
+            echo "BLENDER_SCENE_DIAGNOSTIC_FAILED=$code"
+            exit "$code"
+          fi
+          grep -F 'BM13_BLEND_RENDER_COMPLETE:' blender-scene-diagnostic.log >/dev/null || { echo 'BLENDER_SCENE_COMPLETION_MARKER_MISSING'; exit 41; }
+          echo 'BLENDER_SCENE_DIAGNOSTIC=PASS'
+
       - name: Execute BM13 physical premium proof
         run: |
           set -euo pipefail
