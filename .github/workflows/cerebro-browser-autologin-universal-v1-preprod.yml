@@ -9,6 +9,7 @@ on:
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
+      - 'scripts/patch-browser-autologin-preprod-fixture-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
       - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
@@ -44,6 +45,8 @@ jobs:
         run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - name: Apply universal governed login adapter
         run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - name: Apply isolated PREPROD synthetic fixture policy
+        run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - name: Preserve auth challenge human-exception contract
         run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Test universal autonomous relogin contract
@@ -55,6 +58,7 @@ jobs:
           node --check scripts/patch-browser-autologin-v1.mjs
           node --check scripts/patch-browser-autologin-ownerless-v1.mjs
           node --check scripts/patch-browser-autologin-universal-v1.mjs
+          node --check scripts/patch-browser-autologin-preprod-fixture-v1.mjs
           node --check scripts/patch-browser-autologin-contract-v1.mjs
           node --check cerebro/runtime/browser-interactive-session-v3.mjs
           node --check cerebro/runtime/browser-job-runner-v2.mjs
