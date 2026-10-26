@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { probePremiumPhysicalRenderer, renderPremiumPhysicalVideo } from './premium-physical-renderer-v2.mjs';
+import { validatePremiumDeliverable } from './premium-deliverable-gate-v1.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
 const root=path.resolve(here,'../../../..');
@@ -16,7 +17,29 @@ try {
     console.error(JSON.stringify({ok:false,status:'WAITING_FOR_CAPABILITY',probe},null,2));
     process.exit(2);
   }
+
   const rendered=await renderPremiumPhysicalVideo(order,{blender_bin:blenderBin,export_dir:exportDir});
+  const deliveryGate=await validatePremiumDeliverable({order,rendered});
+  await fs.mkdir(exportDir,{recursive:true});
+
+  if(deliveryGate.status!=='PASS'){
+    const rejected={
+      ok:false,
+      status:'PHYSICAL_DELIVERABLE_REJECTED_BY_HARD_GATE',
+      bm13_status:'NOT_PASSED',
+      export_dir:exportDir,
+      additional_cost_eur:0,
+      publish_authorized:false,
+      delivery_authorized:false,
+      technical:rendered.technical,
+      delivery_gate:deliveryGate,
+      artifacts:rendered.artifacts.map(a=>({filename:a.filename,mime:a.mime,bytes:a.bytes,sha256:a.sha256,width:a.width??null,height:a.height??null,duration_sec:a.duration_sec??null}))
+    };
+    await fs.writeFile(path.join(exportDir,'RUN_SUMMARY.json'),JSON.stringify(rejected,null,2));
+    console.error(JSON.stringify(rejected,null,2));
+    process.exit(3);
+  }
+
   const summary={
     ok:true,
     status:'PHYSICAL_DELIVERABLE_TECHNICALLY_VALID',
@@ -24,10 +47,11 @@ try {
     export_dir:exportDir,
     additional_cost_eur:0,
     publish_authorized:false,
+    delivery_authorized:false,
     technical:rendered.technical,
+    delivery_gate:deliveryGate,
     artifacts:rendered.artifacts.map(a=>({filename:a.filename,mime:a.mime,bytes:a.bytes,sha256:a.sha256,width:a.width??null,height:a.height??null,duration_sec:a.duration_sec??null}))
   };
-  await fs.mkdir(exportDir,{recursive:true});
   await fs.writeFile(path.join(exportDir,'RUN_SUMMARY.json'),JSON.stringify(summary,null,2));
   console.log(JSON.stringify(summary));
 } catch (error) {
