@@ -17,6 +17,7 @@ on:
       - 'cerebro/runtime/browser-work-total-autologin-v1.test.mjs'
       - 'supabase/functions/cerebro-browser-work-total-autologin-v1-prod/**'
       - 'supabase/migrations/20261026100000_cerebro_browser_credential_broker_v3_interactive.sql'
+      - 'supabase/migrations/20261026123000_cerebro_browser_workspace_login_config_v1.sql'
 
 permissions:
   contents: read
