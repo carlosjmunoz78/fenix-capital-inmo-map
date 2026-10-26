@@ -10,13 +10,17 @@ const workspacePath='supabase/functions/cerebro-browser-work-total-v1-prod/index
 const dockPath='src/cerebroBrowserWorkTotalDock.ts';
 const appEntryPath='src/main.tsx';
 
-test('Work Total PROD preserves the validated fast private human-input loop',async()=>{
+test('Work Total PROD preserves governed realtime human input with durable fallback',async()=>{
   const runtime=await read(runtimePath);
   assert.match(runtime,/POLL_INTERVAL_MS=Math\.max\(25,Number\(process\.env\.CEREBRO_BROWSER_INTERACTIVE_POLL_MS\|\|35\)\)/);
+  assert.match(runtime,/HUMAN_FRAME_INTERVAL_MS=Math\.max\(120,Number\(process\.env\.CEREBRO_BROWSER_INTERACTIVE_HUMAN_FRAME_MS\|\|220\)\)/);
+  assert.match(runtime,/createBrowserRealtimeFastlane/);
+  assert.match(runtime,/browserInputDedupeKey/);
   assert.match(runtime,/let processedCommand=false/);
-  assert.match(runtime,/else if\(!processedCommand&&Date\.now\(\)-lastFrameAt>=FRAME_INTERVAL_MS\)/);
   assert.match(runtime,/if\(processedCommand\)continue/);
-  assert.match(runtime,/immediate_post_action_frame:false/);
+  assert.match(runtime,/realtime_human_input_fastlane:true/);
+  assert.match(runtime,/durable_queue_fallback:true/);
+  assert.match(runtime,/realtime_input_dedupe:true/);
   assert.match(runtime,/privacy_frame_suppression_during_human_input:true/);
   assert.match(runtime,/workspace_prod_enabled:true/);
   assert.match(runtime,/workspace_hibernate_prod:true/);
@@ -80,10 +84,12 @@ test('Work Total PROD canary remains isolated to its promotion branch and dedica
   assert.match(workflow,/cerebro-browser-work-total-dispatch-v1-prod/);
   assert.match(workflow,/cerebro-browser-work-total-worker-v2-prod/);
   assert.match(workflow,/cerebro-browser-work-total-v1-prod/);
+  assert.match(workflow,/browser-realtime-fastlane-v1\.mjs/);
   assert.match(workflow,/src\/main\.tsx/);
   assert.match(workflow,/CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'/);
   assert.match(workflow,/CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'/);
   assert.match(workflow,/CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'/);
+  assert.match(workflow,/CEREBRO_BROWSER_INTERACTIVE_HUMAN_FRAME_MS: '220'/);
   assert.doesNotMatch(workflow,/CEREBRO_BROWSER_DISPATCH_URL: .*cerebro-browser-dispatch-v2\b/);
 });
 
