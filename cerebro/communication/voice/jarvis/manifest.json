@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "VOICEUI-001",
+  "voice_profile_id": "CEREBRO_JARVIS_ES_ES_V1",
+  "agent_id": "CEREBRO_CORE_VOICE",
+  "display_name": "CEREBRO / JARVIS ES",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "REFERENCE_CORPUS_PARTIAL",
+  "locale": "es-ES",
+  "gender": "male",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "identity_policy": {
+    "speaker_identity_locked_when_approved": true,
+    "accent_locked": "es-ES",
+    "reference_actor": "Víctor Iturrioz",
+    "private_cerebro_profile": true,
+    "no_external_impersonation": true,
+    "reject_latam": true
+  },
+  "runtime_strategy": {
+    "primary_candidate": "ResembleAI/Chatterbox-Multilingual-es-es",
+    "reason": "dedicated Spanish (Spain) runtime with reusable reference audio and prosody controls",
+    "generic_spanish_voice_design": "REJECTED_FOR_ACCENT_DRIFT",
+    "stock_voice_catalog": "REJECTED_FOR_IDENTITY_MISMATCH"
+  },
+  "required_controls": [
+    "speaking_rate",
+    "pitch_with_identity_preservation",
+    "pitch_variability",
+    "partial_loudness",
+    "dynamic_range",
+    "pause_density",
+    "phrase_attack",
+    "semantic_emphasis",
+    "warmth",
+    "urgency",
+    "calm"
+  ],
+  "gates": {
+    "verified_es_es_reference": "PARTIAL",
+    "clean_reference_binary_owned": "PENDING",
+    "speaker_isolation": "PENDING",
+    "identity_stability": "PENDING",
+    "12_state_prosody": "DEFINED_NOT_PHYSICALLY_VALIDATED",
+    "latency": "PENDING",
+    "streaming": "PENDING",
+    "backup": "PENDING",
+    "preprod_e2e": "PENDING",
+    "prod": "BLOCKED"
+  }
+}
