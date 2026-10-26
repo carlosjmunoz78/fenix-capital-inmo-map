@@ -96,22 +96,6 @@ jobs:
           node --check cerebro/runtime/browser-interactive-session-v3.mjs
           node --check cerebro/runtime/browser-job-runner-v2.mjs
           node --check cerebro/runtime/cloud-browser-worker-v0.mjs
-      - name: Assert PREPROD semantic acceptance is recorded
-        run: |
-          node --input-type=module <<'NODE'
-          const acceptance={
-            preprod_job_id:'42452f0c-4534-4e84-8a40-bce1ab020eab',
-            status:'SUCCEEDED',
-            credential_materialized:true,
-            human_required:false,
-            secret_material_logged:false,
-            verification_method:'CREDENTIAL_BROKER_AUTH_ACCEPTED',
-            session_bundle:'ACTIVE_VERIFIED',
-            incremental_cost_eur:0
-          };
-          if(acceptance.status!=='SUCCEEDED'||acceptance.human_required!==false||acceptance.secret_material_logged!==false||acceptance.verification_method!=='CREDENTIAL_BROKER_AUTH_ACCEPTED')throw new Error('PREPROD_SEMANTIC_ACCEPTANCE_MISSING');
-          console.log(JSON.stringify(acceptance));
-          NODE
       - name: Build application
         run: npm run build
 
