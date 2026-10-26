@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "request_id": "voiceui001-ana-finance-v0",
+  "company_id": "fenix",
+  "engine_id": "VOICEUI-001",
+  "environment": "SCAFFOLD",
+  "version": "0.1.0",
+  "intent": "CREATE_SCAFFOLD",
+  "module": "ANA_FINANCE_VOICE",
+  "voice_profile_id": "ANA_FENIX_FINANCE_ES_ES_V1",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "external_code_execution": false,
+  "requirements": [
+    "locked reusable speaker identity",
+    "es-ES dedicated runtime",
+    "prosody/emotion presets",
+    "streaming interface",
+    "latency telemetry",
+    "identity similarity telemetry",
+    "financial pronunciation benchmark",
+    "backup and rebuild",
+    "rollback to text-only",
+    "PREPROD acceptance gate"
+  ]
+}
