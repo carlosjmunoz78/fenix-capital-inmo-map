@@ -1,0 +1,116 @@
+{
+  "kind": "cerebro.ums.production_order.v1",
+  "schema_version": "2.0.0",
+  "idempotency_key": "ums-fenix-premium-trial-20261026-v2",
+  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V2",
+  "company_id": "fenix",
+  "target_company_id": "fenix",
+  "engine_id": "UMS-001",
+  "department_id": "productora",
+  "environment": "PREPROD",
+  "version": "v2",
+  "channel": "OWNER_REVIEW",
+  "output_type": "REEL",
+  "quality_profile": "PREMIUM_CINEMATIC",
+  "quality_standard_id": "CINEMATIC_BLOCKBUSTER_STUDIO_V1",
+  "priority": 100,
+  "max_attempts": 3,
+  "spend_ceiling_eur": 0,
+  "expected_cost_eur": 0,
+  "publish_requested": false,
+  "delivery_requested": true,
+  "delivery_mode": "OWNER_REVIEW",
+  "brief": {
+    "objective": "Producir una pieza vertical Fénix Capital con acabado cinematográfico de superproducción, narrativa humana creíble, cámara, VFX/composición cuando aporten, montaje, sonido y finishing de gran estudio.",
+    "hook": "Tu casa no debería depender de improvisar.",
+    "audience": "Personas que quieren comprar vivienda y necesitan financiación hipotecaria en Córdoba.",
+    "tone": "Cinematográfico, humano, elegante, contundente y contemporáneo; nunca slideshow, stock barato ni demo técnica.",
+    "duration_target_sec": 15,
+    "format": "9:16 vertical 1080x1920",
+    "message": "La compra de una vivienda merece una financiación preparada con criterio, documentación y acompañamiento.",
+    "cta": "Fénix Capital · Hipotecas en Córdoba"
+  },
+  "creative_payload": {
+    "primary_renderer": "PREMIUM_PHYSICAL_RENDERER_V2",
+    "visual_strategy": "PHYSICAL_PREMIUM_MULTI_ASSET_CINEMATIC",
+    "legacy_programmatic_renderer_allowed": false,
+    "procedural_geometry_as_primary": false,
+    "franchise_imitation_requested": false,
+    "copy_identifiable_ip": false,
+    "execution_capabilities": [
+      "creative_direction",
+      "story_or_script",
+      "visual_generation",
+      "camera_or_animation",
+      "edit",
+      "sound",
+      "independent_qa"
+    ],
+    "brand": {
+      "charcoal": "#222222",
+      "magenta": "#870064",
+      "gold": "#FFB71B",
+      "orange": "#FF5F00",
+      "typeface": "Montserrat"
+    },
+    "narrative": {
+      "hook": "Tu casa no debería depender de improvisar.",
+      "hook_duration_sec": 1.6
+    },
+    "assets": [
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/huelva-asesor-hipotecario-reunion-scaled-1-cerebro.webp",
+        "asset_class": "character_or_human",
+        "scene_role": "advisor_meeting",
+        "business_context": "asesoramiento hipotecario Fénix Capital",
+        "geographic_context": "Córdoba, España",
+        "source_rights": "FENIX_OWNED_OR_AUTHORIZED_ASSET_RUNTIME_VERIFICATION_REQUIRED",
+        "context_relevance_score": 0.95,
+        "composition": {"target_aspect":"9:16","subject_safe":true,"reframe_method":"MANUAL_SMART_REFIT"}
+      }
+    ],
+    "motion_plan": {
+      "still_derived_runtime_ratio": 0.15,
+      "shot_classes": ["LIVE_OR_TRUE_VIDEO", "CHARACTER_CLOSEUP", "CINEMATIC_WIDE", "3D_OR_VFX", "BRAND_END_CARD"]
+    },
+    "voice": {
+      "enabled": true,
+      "provider_preference": ["QWEN3_TTS_PHYSICAL_PREPROD"],
+      "voice_id": "ES_FEMALE",
+      "text": "Comprar una vivienda no debería depender de improvisar. En Fénix Capital estudiamos tu financiación, ordenamos tu expediente y te acompañamos en cada paso. Fénix Capital. Hipotecas en Córdoba."
+    },
+    "audio": {
+      "music_required": true,
+      "ducking": true,
+      "sound_design": "LAYERED_REAL_FOLEY_AMBIENCE_TRANSIENTS_AND_CINEMATIC_SCORE"
+    },
+    "subtitles": {
+      "enabled": true,
+      "horizontal_safe_margin_pct": 10,
+      "bottom_safe_margin_pct": 12,
+      "max_lines": 2,
+      "max_chars_per_line": 30,
+      "measured_bbox_required": true,
+      "style_profile": "DYNAMIC_FENIX_BRAND_CAPTIONS"
+    },
+    "showcase_coverage": {
+      "character_or_human": true,
+      "photoreal_or_live_scene": true,
+      "three_d_or_vfx": true,
+      "design_or_illustration": true,
+      "editing_and_camera": true,
+      "audio_voice_music": true
+    },
+    "visual_provenance": {
+      "procedural_frame_ratio": 0.1,
+      "asset_classes": ["LIVE_FOOTAGE", "CHARACTER_SHOT", "THREE_D_RENDER", "VFX_COMPOSITE", "ILLUSTRATION", "COLOR_GRADE"]
+    },
+    "qa": {
+      "independent_perceptual_tribunal": true,
+      "min_sampled_frames": 12,
+      "subtitle_bbox_validation": true,
+      "composition_validation": true,
+      "audio_mix_validation": true
+    }
+  }
+}

@@ -1,0 +1,36 @@
+name: CEREBRO UMS Premium Executor V2
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'cerebro/ums-physical-production-executor-*'
+    paths:
+      - 'cerebro/media-studio/v2/runtime/production-job-contract.mjs'
+      - 'cerebro/media-studio/v2/runtime/physical-capability-registry.mjs'
+      - 'cerebro/media-studio/v2/runtime/media-production-queue.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-production-executor.mjs'
+      - 'cerebro/media-studio/v2/runtime/studio-quality-standard.mjs'
+      - 'cerebro/media-studio/v2/tests/premium-production-executor-v2.test.mjs'
+      - 'cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v2.json'
+      - '.github/workflows/cerebro-ums-premium-executor-v2.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  premium-executor-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run physical premium executor and regression gates
+        run: >-
+          node --test
+          cerebro/media-studio/v2/tests/premium-production-executor-v2.test.mjs
+          cerebro/media-studio/v2/tests/premium-creative-preflight-gate.test.mjs
+          cerebro/media-studio/v2/tests/production-quality-gate.test.mjs
+          cerebro/media-studio/v2/tests/ums-production-job-runner.test.mjs
