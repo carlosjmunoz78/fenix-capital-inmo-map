@@ -5,7 +5,6 @@ on:
     branches: ['preprod/browser-autologin-universal-v1-20261026']
     paths:
       - '.github/workflows/cerebro-browser-work-total-v1-preprod.yml'
-      - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
@@ -53,7 +52,6 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
@@ -102,7 +100,6 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
