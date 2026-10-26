@@ -1,0 +1,38 @@
+name: CEREBRO UMS Creative Quality Gate
+
+on:
+  push:
+    branches:
+      - 'cerebro/ums-showcase-quality-gate-*'
+    paths:
+      - 'cerebro/media-studio/v2/runtime/production-quality-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/production-quality-gate.test.mjs'
+      - 'cerebro/media-studio/v2/docs/SHOWCASE_QUALITY_CONTRACT_V2.md'
+      - 'cerebro/media-studio/v2/showcase/QUALITY_RECLASSIFICATION_*.md'
+      - '.github/workflows/cerebro-ums-creative-quality-gate.yml'
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/runtime/production-quality-gate.mjs'
+      - 'cerebro/media-studio/v2/tests/production-quality-gate.test.mjs'
+      - 'cerebro/media-studio/v2/docs/SHOWCASE_QUALITY_CONTRACT_V2.md'
+      - 'cerebro/media-studio/v2/showcase/QUALITY_RECLASSIFICATION_*.md'
+
+permissions:
+  contents: read
+
+jobs:
+  ums-creative-quality:
+    name: ums-creative-quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout exact head
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run UMS creative false-green regression tests
+        run: node --test cerebro/media-studio/v2/tests/production-quality-gate.test.mjs
