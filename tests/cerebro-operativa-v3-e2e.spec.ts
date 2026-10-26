@@ -69,8 +69,12 @@ test('JARVIS is the real V0 core with authenticated Gateway chat, voice and reve
   await expect(jarvis).toBeVisible();
   await expect(page.locator('.cerebro-operative')).toHaveCount(0);
   await expect(jarvis.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
-  await expect(jarvis.getByLabel('Empresa',{exact:true})).toBeVisible();
-  await expect(jarvis.getByLabel('Contexto',{exact:true})).toBeVisible();
+  const fields=jarvis.locator('.cerebro-fields select');
+  await expect(fields).toHaveCount(2);
+  await expect(fields.nth(0)).toBeVisible();
+  await expect(fields.nth(0)).toHaveValue('Fénix · sesión autenticada');
+  await expect(fields.nth(1)).toBeVisible();
+  await expect(fields.nth(1)).toHaveValue('GENERAL');
   await expect(jarvis.getByText('Decisión humana por excepción',{exact:true})).toBeVisible();
 
   const floatingVoice=page.getByRole('button',{name:'Abrir acciones por voz'});
