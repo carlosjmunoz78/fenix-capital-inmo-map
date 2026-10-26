@@ -1,0 +1,83 @@
+name: CEREBRO UMS Owner Review Delivery V1
+
+on:
+  push:
+    branches:
+      - cerebro/ums-physical-production-executor-20261026
+    paths:
+      - '.github/workflows/cerebro-ums-review-delivery-v1.yml'
+      - 'supabase/functions/cerebro-ums-review-delivery-v1/**'
+      - 'supabase/migrations/*cerebro_ums_owner_review_recipient_v1*'
+  workflow_dispatch:
+    inputs:
+      job_id:
+        description: 'UMS PREPROD job id to deliver'
+        required: false
+        default: 'f9bcf54d-6dbb-4b6b-8c20-9702bb8cac45'
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  CEREBRO_UMS_REVIEW_DELIVERY_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-ums-review-delivery-v1
+  CEREBRO_UMS_REVIEW_AUDIENCE: cerebro-ums-review-delivery-v1
+  DEFAULT_JOB_ID: f9bcf54d-6dbb-4b6b-8c20-9702bb8cac45
+
+jobs:
+  deliver-owner-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Get GitHub OIDC token
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          RESPONSE="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${CEREBRO_UMS_REVIEW_AUDIENCE}")"
+          TOKEN="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<< "$RESPONSE")"
+          test -n "$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
+      - name: Deliver private owner review link
+        id: deliver
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          INPUT_JOB_ID: ${{ github.event.inputs.job_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          JOB_ID="${INPUT_JOB_ID:-$DEFAULT_JOB_ID}"
+          RESPONSE="$(curl --fail --silent --show-error \
+            -X POST \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "{\"job_id\":\"$JOB_ID\"}" \
+            "$CEREBRO_UMS_REVIEW_DELIVERY_URL")"
+          echo "$RESPONSE" | tee /tmp/ums-review-delivery.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/ums-review-delivery.json'))
+          assert data.get('ok') is True, data
+          assert data.get('delivery_status') == 'SENT', data
+          print('delivery_status=SENT')
+          print('idempotent=', data.get('idempotent'))
+          print('message_id=', data.get('message_id'))
+          PY
+
+      - name: PREPROD delivery truth
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo '## CEREBRO UMS owner review delivery'
+            echo '- environment: PREPROD'
+            echo '- engine: UMS-001'
+            echo '- delivery: private signed review link by email'
+            echo '- link_ttl: 7 days'
+            echo '- bucket_public: false'
+            echo '- publish_authorized: false'
+            echo '- creative_status remains HOLD / CREATIVE_REVIEW_REQUIRED'
+          } >> "$GITHUB_STEP_SUMMARY"
