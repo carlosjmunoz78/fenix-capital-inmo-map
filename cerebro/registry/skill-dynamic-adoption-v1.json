@@ -2839,6 +2839,76 @@
       "promoted_at": "2026-10-22T10:19:14.841Z"
     },
     {
+      "candidate_id": "repo:2095b08349aea5d72076e1f308d2",
+      "technical_name": "class-variance-authority",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/class-variance-authority",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "2095b08349aea5d72076e1f308d2d8738c446e82a200894bcd3280531578e1b3",
+      "manifest_sha256": "5e7b9bb356491d6313f107ead5cb5eb284c18ff6afbcb98a0f4b03d30a62def2",
+      "outcome_hash": "a9b446cf7a698f9ba8a482602de68d2fb25d06d1a6ee0f33e47d557ea496a50d",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:2095b08349aea5d7:cap:1",
+          "technical_name": "class-variance-authority",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-26T01:41:06.274Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "735c255e448387ecd87e3733ae765000a38ff8a61bc1b210a154956ddadfb753"
+    },
+    {
       "candidate_id": "repo:4d676a38c2c612d9080ab5ca43f0",
       "technical_name": "claymorphism",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/claymorphism",
@@ -3237,6 +3307,76 @@
         "observed_at": "2026-10-22T10:19:14.841Z"
       },
       "promoted_at": "2026-10-22T10:19:14.841Z"
+    },
+    {
+      "candidate_id": "repo:1d1efbcde43772dd2928c475bb2d",
+      "technical_name": "comfyui",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/comfyui",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "1d1efbcde43772dd2928c475bb2dfa9f6f13bf097c057029205723b9a8361f5e",
+      "manifest_sha256": "f36341ab3e89b28c37b4e57797d1afff696e6d6127bcfd6cc8e3fc6f85f0089d",
+      "outcome_hash": "33b41ed17624cfae36082380eaf01eba6818f3868bf97c4d9305fc4c6a516418",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:1d1efbcde43772dd:cap:1",
+          "technical_name": "comfyui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-26T01:41:06.272Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "03cd52c80eddebbec427045559d6f965e367989dcc47f3a20ac6cd29e67ca78b"
     },
     {
       "candidate_id": "repo:c58a78a6404f31c6a05cf4d1d938",
@@ -14172,10 +14312,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 140,
-    "promoted": 1,
+    "total": 142,
+    "inserted": 2,
+    "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 2,
     "prod_readonly": 140
   }
 }
