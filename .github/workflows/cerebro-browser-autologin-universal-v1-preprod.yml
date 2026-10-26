@@ -6,7 +6,7 @@ on:
     branches: ['preprod/browser-autologin-universal-v1-20261026']
     paths:
       - '.github/workflows/cerebro-browser-autologin-universal-v1-preprod.yml'
-      - 'scripts/patch-browser-autologin-v1.mjs'
+      - 'scripts/patch-browser-autologin-core-v2.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
       - 'scripts/patch-browser-autologin-google-state-machine-v1.mjs'
@@ -38,8 +38,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Apply existing governed autonomous relogin patch
-        run: node scripts/patch-browser-autologin-v1.mjs
+      - name: Apply handback-compatible autonomous relogin core
+        run: node scripts/patch-browser-autologin-core-v2.mjs
       - name: Preserve canonical owner and broker-only secret resolution
         run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - name: Apply universal governed login adapter
@@ -56,7 +56,7 @@ jobs:
         run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
       - name: Syntax-check patched runtime and patches
         run: |
-          node --check scripts/patch-browser-autologin-v1.mjs
+          node --check scripts/patch-browser-autologin-core-v2.mjs
           node --check scripts/patch-browser-autologin-ownerless-v1.mjs
           node --check scripts/patch-browser-autologin-universal-v1.mjs
           node --check scripts/patch-browser-autologin-google-state-machine-v1.mjs
