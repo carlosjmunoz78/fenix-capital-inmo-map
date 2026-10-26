@@ -10,20 +10,22 @@ test('interactive Work Total materializes credentials only in the governed worke
  assert.match(runner,/interactiveCredentialFlow/);
  assert.match(runner,/job\.credential_ref_id\|\|interactiveCredentialFlow/);
  assert.match(runner,/callAutologin\('worker\/materialize'/);
- assert.match(runner,/credential:credentialMaterialized\?\{provider:credentialProvider,secret_payload:secretPayload,login_origin:credentialLoginOrigin,allowed_origins:credentialAllowedOrigins\}:null/);
+ assert.match(runner,/credential:credentialMaterialized\?\{provider:credentialProvider,secret_payload:secretPayload,login_origin:credentialLoginOrigin,allowed_origins:credentialAllowedOrigins,login_config:credentialLoginConfig\}:null/);
  assert.match(runner,/scrub\(secretPayload\)/);
  assert.match(runner,/secret_material_logged:false/);
  assert.match(runner,/interactive_vault_autologin:true/);
 });
 
-test('autonomous login keeps Google specialized and adds governed generic form fallback',async()=>{
+test('autonomous login keeps Google specialized, generic fallback, metadata separation and frame runtime intact',async()=>{
  const runtime=await read('cerebro/runtime/browser-interactive-session-v3.mjs');
  assert.match(runtime,/credential_broker_autologin:true/);
  assert.match(runtime,/google_autologin_adapter:true/);
  assert.match(runtime,/universal_form_autologin:true/);
  assert.match(runtime,/manual_login_default:false/);
  assert.match(runtime,/allowed_origin_bound:true/);
+ assert.match(runtime,/login_metadata_separated:true/);
  assert.match(runtime,/credentialLoginMetadata/);
+ assert.match(runtime,/credential\.login_config/);
  assert.match(runtime,/CREDENTIAL_LOGIN_URL_REQUIRED/);
  assert.match(runtime,/AUTH_LOGIN_ORIGIN_DENIED/);
  assert.match(runtime,/AUTH_REDIRECT_ORIGIN_DENIED/);
@@ -31,6 +33,9 @@ test('autonomous login keeps Google specialized and adds governed generic form f
  assert.match(runtime,/type:'FILL'.*usernameSelector/s);
  assert.match(runtime,/type:'FILL'.*passwordSelector/s);
  assert.match(runtime,/AUTH_CHALLENGE_REQUIRED/);
+ assert.match(runtime,/async function captureFrame\(/);
+ assert.match(runtime,/async function saveWorkspace\(/);
+ assert.match(runtime,/export async function runInteractiveBrowserSessionV3/);
  assert.doesNotMatch(runtime,/AUTO_LOGIN_PROVIDER_NOT_READY/);
  assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
 });
