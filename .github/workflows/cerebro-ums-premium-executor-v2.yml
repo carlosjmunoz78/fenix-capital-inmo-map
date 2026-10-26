@@ -94,6 +94,17 @@ jobs:
           echo "BLENDER_BIN=${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" >> "$GITHUB_ENV"
           "${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" --version | head -2
 
+      - name: Ensure minimal EGL runtime for headless Eevee
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! ldconfig -p | grep -F 'libEGL.so.1' >/dev/null; then
+            echo 'libEGL.so.1=MISSING; installing libegl1 only'
+            timeout 90s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends libegl1
+          fi
+          ldconfig -p | grep -F 'libEGL.so.1' >/dev/null || { echo 'libEGL.so.1=STILL_MISSING'; exit 42; }
+          echo 'libEGL.so.1=READY'
+
       - name: Diagnose Blender scene with fail-closed Python exit code
         shell: bash
         run: |
