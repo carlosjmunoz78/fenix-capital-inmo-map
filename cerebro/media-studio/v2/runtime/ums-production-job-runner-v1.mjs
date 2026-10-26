@@ -1,6 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { evaluatePremiumCreativePreflight } from './premium-creative-preflight-gate.mjs';
 import { renderOwnedAssetsPremiumVideo } from './premium-owned-assets-renderer.mjs';
 
 const DEFAULT_ENDPOINT='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-ums-production-dispatch-v1';
@@ -49,6 +50,25 @@ async function exportForWorkflow(rendered,exportDir){
   await fs.writeFile(path.join(exportDir,'PROVENANCE.json'),JSON.stringify({technical:rendered.technical,provenance:rendered.provenance},null,2));
 }
 
+async function holdPreflightFailure(endpoint,token,job,preflight,fetch_impl){
+  const errorCode=preflight.status==='WAITING_FOR_CAPABILITY'?'WAITING_FOR_CAPABILITY':'CREATIVE_REJECTED_PRE_FLIGHT';
+  const resultSummary={
+    ok:false,
+    stage:preflight.status,
+    physical_deliverable:false,
+    artifact_count:0,
+    output_type:job.output_type,
+    quality_profile:job.request?.quality_profile,
+    preflight,
+    bm13_status:'NOT_PASSED',
+    legacy_programmatic_renderer:false,
+    additional_cost_eur:0,
+    publish_authorized:false
+  };
+  await dispatch(endpoint,'complete',token,{job_id:job.job_id,lease_id:job.lease_id,status:'HOLD',result_summary:resultSummary,artifact_manifest:null,error_code:errorCode},fetch_impl);
+  return Object.freeze({ok:false,status:preflight.status,job_id:job.job_id,result_summary:resultSummary});
+}
+
 export async function runOneUmsProductionJob({
   endpoint=process.env.CEREBRO_UMS_DISPATCH_URL||DEFAULT_ENDPOINT,
   seed_order_path=process.env.CEREBRO_UMS_SEED_ORDER_PATH||'',
@@ -67,6 +87,18 @@ export async function runOneUmsProductionJob({
   let rendered=null;
   try{
     if(job.engine_id!=='UMS-001'||job.environment!=='PREPROD'||job.request?.kind!=='cerebro.ums.production_order.v1')throw new Error('UMS_JOB_SCOPE_DENIED');
+
+    const preflight=evaluatePremiumCreativePreflight(job);
+    if(!preflight.ok)return await holdPreflightFailure(endpoint,token,job,preflight,fetch_impl);
+
+    // Compatibility renderer is explicitly not a premium primary renderer. Premium orders only reach this line
+    // when the preflight contract proves the required premium capability chain. Until a V2 physical adapter is
+    // bound, this renderer may only be selected for CANARY/SUPPORTING or non-premium profiles.
+    const profile=String(job.request?.quality_profile??'').toUpperCase();
+    if(profile.startsWith('PREMIUM_')){
+      return await holdPreflightFailure(endpoint,token,job,Object.freeze({ok:false,status:'WAITING_FOR_CAPABILITY',premium:true,issues:[],missing_capabilities:['PREMIUM_PHYSICAL_RENDERER_V2_BOUND_AND_TESTED'],warnings:[]}),fetch_impl);
+    }
+
     rendered=await renderOwnedAssetsPremiumVideo(job,{fetch_impl});
     await exportForWorkflow(rendered,export_dir);
     const manifest=await uploadArtifacts(endpoint,token,job,rendered,fetch_impl);
@@ -101,8 +133,9 @@ async function main(){
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
 export const UMS_PRODUCTION_JOB_RUNNER_V1_CONTRACT=Object.freeze({
-  schema_version:'1.0.0',engine_id:'UMS-001',environment:'PREPROD',queue:'cerebro_creative_job_v1',
-  dispatcher:'cerebro-ums-production-dispatch-v1',renderer:'UMS_OWNED_ASSETS_CINEMATIC_V1',
-  terminal_before_owner_review:'HOLD',stage:'CREATIVE_REVIEW_REQUIRED',legacy_programmatic_renderer:false,
+  schema_version:'1.1.0',engine_id:'UMS-001',environment:'PREPROD',queue:'cerebro_creative_job_v1',
+  dispatcher:'cerebro-ums-production-dispatch-v1',compatibility_renderer:'UMS_OWNED_ASSETS_CANARY_V1',
+  premium_renderer_requirement:'PREMIUM_PHYSICAL_RENDERER_V2_BOUND_AND_TESTED',
+  premium_fail_closed:true,terminal_before_owner_review:'HOLD',legacy_programmatic_renderer:false,
   additional_cost_eur:0,publish_authorized:false
 });
