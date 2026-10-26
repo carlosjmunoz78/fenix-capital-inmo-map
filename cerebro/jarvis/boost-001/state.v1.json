@@ -3,7 +3,9 @@
   "boost_id": "JARVIS-BOOST-001",
   "recorded_at": "2026-10-26",
   "branch": "cerebro/jarvis-boost-001-bootstrap-20261026",
-  "base_main_sha": "632bf7767f80bf2757068c25bd04d2862e5d0368",
+  "initial_main_sha": "632bf7767f80bf2757068c25bd04d2862e5d0368",
+  "reconciled_main_sha": "a907ffbfdfee10dd39192e74711077da71f5194b",
+  "reconciliation_commit": "730bba8802e49a2539d325ef819f9bcf81b72feb",
   "evidence_state": "DOCUMENTED_PARTIAL",
   "prepared": {
     "owner_root_constitution": true,
@@ -14,19 +16,20 @@
     "provider_unit_tests_candidate": true,
     "audit_queue": true,
     "eval_suite": true,
-    "activation_runbook": true
+    "activation_runbook": true,
+    "latest_main_delta_reconciled": true
   },
-  "not_yet_done": {
-    "deepseek_funded": true,
-    "deepseek_secret_connected": true,
-    "live_provider_canary": true,
-    "cost_telemetry_live_proof": true,
-    "super_audit_executed": true,
-    "jarvis_benchmark_executed": true,
-    "prod_promotion": true
-  },
+  "pending": [
+    "branch_ci_green",
+    "deepseek_funding",
+    "deepseek_secret_connection",
+    "live_provider_canary",
+    "cost_telemetry_live_proof",
+    "super_audit_execution",
+    "jarvis_benchmark_execution"
+  ],
   "prod_touched": false,
   "main_touched": false,
   "secret_value_stored": false,
-  "next_action": "Run branch CI/tests and reconcile with latest main; then on 2026-10-27 fund DeepSeek, attach secret through approved secret store and execute tiny canary before any audit batch."
+  "next_action": "Close branch CI. On 2026-10-27 re-check main drift, fund DeepSeek, attach secret through approved secret store and execute tiny canary before any audit batch."
 }
