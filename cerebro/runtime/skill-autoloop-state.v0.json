@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-26T06:21:42.861Z",
+  "updated_at": "2026-10-26T06:26:12.493Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -394,42 +394,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:a3393c9e4789c1c6b0ca": {
-      "candidate_id": "github-wide-skills:a3393c9e4789c1c6b0ca",
-      "name": "adversarial-review",
-      "human_alias": "Adversarial Review",
-      "wrapper_id": "skillwrap:648bfd4ce34eb7f2b8fa",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 86.51,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "sichenai/sichen-skills",
-        "upstream_head_commit": "71b0ffa3a701d7084255c98d19b545c70164a1b0",
-        "manifest_sha256": "3db1c0453213b033a54c25745efd986a31049c3596c7609ce131a96e0cb8a9cc",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40279303852,
-      "checkpointed_at": "2026-10-26T06:21:42.861Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -23682,9 +23647,52 @@
       },
       "updated_at": "2026-10-26T01:16:20.579Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:a3393c9e4789c1c6b0ca": {
+      "candidate_id": "github-wide-skills:a3393c9e4789c1c6b0ca",
+      "name": "adversarial-review",
+      "human_alias": "Adversarial Review",
+      "wrapper_id": "skillwrap:648bfd4ce34eb7f2b8fa",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.51,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "sichenai/sichen-skills",
+        "upstream_head_commit": "71b0ffa3a701d7084255c98d19b545c70164a1b0",
+        "manifest_sha256": "3db1c0453213b033a54c25745efd986a31049c3596c7609ce131a96e0cb8a9cc",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 40279303852,
+      "checkpointed_at": "2026-10-26T06:21:42.861Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-26T06:26:12.493Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
