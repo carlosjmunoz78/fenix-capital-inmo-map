@@ -10,6 +10,9 @@ on:
       - 'cerebro/media-studio/v2/runtime/physical-capability-registry.mjs'
       - 'cerebro/media-studio/v2/runtime/media-production-queue.mjs'
       - 'cerebro/media-studio/v2/runtime/premium-production-executor.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-physical-renderer-v2.mjs'
+      - 'cerebro/media-studio/v2/runtime/bm13-fenix-cinematic-scene.py'
+      - 'cerebro/media-studio/v2/runtime/bm13-physical-proof.mjs'
       - 'cerebro/media-studio/v2/runtime/studio-quality-standard.mjs'
       - 'cerebro/media-studio/v2/tests/premium-production-executor-v2.test.mjs'
       - 'cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v2.json'
@@ -27,10 +30,62 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run physical premium executor and regression gates
+      - name: Run premium executor and regression gates
         run: >-
           node --test
           cerebro/media-studio/v2/tests/premium-production-executor-v2.test.mjs
           cerebro/media-studio/v2/tests/premium-creative-preflight-gate.test.mjs
           cerebro/media-studio/v2/tests/production-quality-gate.test.mjs
           cerebro/media-studio/v2/tests/ums-production-job-runner.test.mjs
+
+  bm13-physical-proof:
+    needs: premium-executor-contract
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      BLENDER_VERSION: '5.2.3'
+      BLENDER_ARCHIVE: 'blender-5.2.3-linux-x64.tar.xz'
+      CEREBRO_UMS_EXPORT_DIR: '${{ github.workspace }}/dist/ums-bm13-physical-v2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install physical media dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fontconfig curl xz-utils
+          mkdir -p "$HOME/.local/share/fonts/montserrat"
+          curl -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o "$HOME/.local/share/fonts/montserrat/Montserrat.ttf"
+          fc-cache -f
+          ffmpeg -version | head -1
+          fc-match Montserrat
+
+      - name: Install and verify Blender 5.2.3 official binary
+        run: |
+          set -euo pipefail
+          curl -fsSLO "https://download.blender.org/release/Blender5.2/${BLENDER_ARCHIVE}"
+          curl -fsSLO "https://download.blender.org/release/Blender5.2/blender-${BLENDER_VERSION}.sha256"
+          grep " ${BLENDER_ARCHIVE}$" "blender-${BLENDER_VERSION}.sha256" | sha256sum -c -
+          tar -xf "${BLENDER_ARCHIVE}"
+          echo "BLENDER_BIN=${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" >> "$GITHUB_ENV"
+          "${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" --version | head -2
+
+      - name: Execute BM13 physical premium proof
+        run: |
+          set -euo pipefail
+          node --check cerebro/media-studio/v2/runtime/premium-physical-renderer-v2.mjs
+          node cerebro/media-studio/v2/runtime/bm13-physical-proof.mjs | tee bm13-physical-proof.log
+          test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_PREMIUM_PHYSICAL_V2.mp4
+          test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_CONTACT_SHEET.jpg
+          test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_EVIDENCE.json
+          sha256sum dist/ums-bm13-physical-v2/* > dist/ums-bm13-physical-v2/SHA256SUMS.txt
+
+      - name: Upload physical proof package
+        uses: actions/upload-artifact@v4
+        with:
+          name: FENIX-BM13-PREMIUM-PHYSICAL-V2
+          path: dist/ums-bm13-physical-v2/
+          if-no-files-found: error
+          retention-days: 14
