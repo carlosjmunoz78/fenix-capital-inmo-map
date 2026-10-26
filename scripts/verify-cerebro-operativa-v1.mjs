@@ -26,6 +26,8 @@ must(css,'.cerebro-host-v0.is-hidden','Browser hidden-but-mounted V0 wrapper');
 must(css,'.cerebro-jarvis-shell .cerebro-console','JARVIS styles wrap canonical V0');
 must(css,'JARVIS · NÚCLEO CEREBRO V0','explicit JARVIS-on-V0 provenance');
 must(css,'.cerebro-host-topbar{position:sticky','rollback console chrome');
+must(css,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO global App launcher isolation retained by active host stylesheet');
+must(css,"html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']",'competing global voice launcher suppressed by active host stylesheet');
 
 must(shell,'postCerebroConsoleChat','canonical Gateway chat client');
 must(shell,'className="cerebro-voice-main"','canonical voice control');
@@ -44,10 +46,8 @@ must(operative,"progress!==null?`${progress}%`:isIndeterminate?'LIVE':'—'",'fa
 mustNot(operative,'cerebro-process-route','fixed phase timeline removed');
 mustNot(operative,"['En cola','En ejecución'",'fixed phase labels removed');
 
-must(cssV2,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO-only mobile chrome suppression preserved');
-must(cssV2,"html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']",'CEREBRO-only floating voice launcher suppression preserved');
-must(cssV2,'.cerebro-process-strip{display:flex','horizontal rail layout preserved');
-must(cssV2,'overflow-x:auto','horizontal scroll contract preserved');
+must(cssV2,'.cerebro-process-strip{display:flex','historical Operativa horizontal rail preserved as rollback/reference');
+must(cssV2,'overflow-x:auto','historical Operativa horizontal scroll contract preserved');
 
 must(activityApi,'cerebro-console-activity-v0','activity gateway endpoint preserved');
 must(activityApi,"progress_provenance:CerebroProgressProvenance",'typed progress provenance');
