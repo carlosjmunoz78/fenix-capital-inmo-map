@@ -6,7 +6,9 @@
   "baseline": {
     "repository": "carlosjmunoz78/fenix-capital-inmo-map",
     "branch": "main",
-    "sha": "632bf7767f80bf2757068c25bd04d2862e5d0368"
+    "initial_observed_sha": "632bf7767f80bf2757068c25bd04d2862e5d0368",
+    "reconciled_main_sha": "a907ffbfdfee10dd39192e74711077da71f5194b",
+    "reconciliation_commit": "730bba8802e49a2539d325ef819f9bcf81b72feb"
   },
   "scope": {
     "company_id": "cerebro-global",
