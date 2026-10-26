@@ -1,0 +1,40 @@
+{
+  "voice_profile_id": "ANA_FENIX_FINANCE_ES_ES_V1",
+  "name": "Ana",
+  "company_id": "fenix",
+  "agent_id": "ANA_FINANCE",
+  "locale": "es-ES",
+  "speaker_identity": "LOCKED",
+  "primary_domain": "financial_mortgage_operations",
+  "usage": [
+    "expedientes hipotecarios",
+    "documentación",
+    "bancos",
+    "tasaciones",
+    "FEIN",
+    "ratios de endeudamiento",
+    "importes y porcentajes",
+    "citas y fechas",
+    "seguimiento de clientes",
+    "explicaciones de proceso",
+    "alertas",
+    "resúmenes ejecutivos"
+  ],
+  "voice_behavior": {
+    "default_state": "EMPATHIC_PROFESSIONAL",
+    "preserve_identity_across_states": true,
+    "preserve_es_es_accent": true,
+    "allow_rate_change": true,
+    "allow_pitch_change_within_identity_tolerance": true,
+    "allow_partial_loudness_change": true,
+    "allow_pause_change": true,
+    "allow_emphasis_change": true
+  },
+  "forbidden": [
+    "speaker replacement without explicit approval",
+    "Latin-American accent drift",
+    "robotic/vocoder processing",
+    "use as JARVIS male identity",
+    "PROD autonomous use before gates pass"
+  ]
+}
