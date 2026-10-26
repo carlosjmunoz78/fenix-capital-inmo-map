@@ -1,6 +1,8 @@
 -- CEREBRO Browser · Credential Broker V3 · interactive autonomous login
--- Additive only. Preserves V1/V2 and permits browser1.interactive to use an existing
--- browser1.act credential binding under the same active job/profile lease.
+-- Additive only. Preserves V1/V2. The interactive worker may use an existing
+-- browser1.act credential binding only while holding the exact active job/profile lease.
+-- The credential reference and login origin are resolved by the OIDC-bound autologin broker,
+-- not by the browser frontend and not by the owner UI.
 
 create table if not exists public.cerebro_credential_lease_audit_v3 (
   audit_row_id uuid primary key default gen_random_uuid(),
@@ -30,7 +32,9 @@ create index if not exists cerebro_credential_lease_audit_v3_job_idx
 create or replace function public.cerebro_browser_credential_materialize_v3(
   p_job_id uuid,
   p_lease_id uuid,
-  p_worker_id text
+  p_worker_id text,
+  p_credential_ref_id text,
+  p_origin text
 ) returns jsonb
 language plpgsql
 security definer
@@ -41,7 +45,6 @@ declare
   v_binding public.cerebro_credential_binding_v1%rowtype;
   v_profile public.cerebro_browser_profile_lease_v2%rowtype;
   v_origin text;
-  v_binding_capability text;
   v_secret_text text;
   v_payload jsonb;
   v_scope_key text;
@@ -57,8 +60,11 @@ begin
   if v_job.job_id is null then
     return jsonb_build_object('ok',false,'error','LEASE_NOT_ACTIVE');
   end if;
-  if v_job.credential_ref_id is null then
-    return jsonb_build_object('ok',false,'error','CREDENTIAL_REF_NOT_REQUESTED');
+  if v_job.capability is distinct from 'browser1.interactive' or upper(v_job.mode)<>'MUTATE' then
+    return jsonb_build_object('ok',false,'error','INTERACTIVE_MUTATE_REQUIRED');
+  end if;
+  if coalesce(trim(p_credential_ref_id),'')='' then
+    return jsonb_build_object('ok',false,'error','CREDENTIAL_REF_REQUIRED');
   end if;
 
   v_scope_key:=v_job.company_id||'::'||v_job.environment||'::'||v_job.browser_profile_id;
@@ -79,7 +85,7 @@ begin
 
   select * into v_binding
   from public.cerebro_credential_binding_v1
-  where credential_ref_id=v_job.credential_ref_id
+  where credential_ref_id=p_credential_ref_id
     and active=true
     and coalesce(revocation_state,'ACTIVE')<>'REVOKED';
 
@@ -98,31 +104,18 @@ begin
   if not (v_job.environment=any(v_binding.allowed_environments)) then
     return jsonb_build_object('ok',false,'error','CREDENTIAL_ENVIRONMENT_DENIED');
   end if;
+  if cardinality(v_binding.allowed_capabilities)>0
+     and not ('browser1.act'=any(v_binding.allowed_capabilities)) then
+    return jsonb_build_object('ok',false,'error','CREDENTIAL_CAPABILITY_DENIED');
+  end if;
 
-  v_origin:=lower(substring(v_job.target_url from '^https?://[^/]+'));
-  if v_origin is null then
-    return jsonb_build_object('ok',false,'error','CREDENTIAL_TARGET_ORIGIN_INVALID');
+  v_origin:=lower(trim(coalesce(p_origin,'')));
+  if v_origin !~ '^https://[a-z0-9.-]+(:[0-9]+)?$' then
+    return jsonb_build_object('ok',false,'error','CREDENTIAL_LOGIN_ORIGIN_INVALID');
   end if;
   if cardinality(v_binding.allowed_origins)>0
      and not exists(select 1 from unnest(v_binding.allowed_origins) x where lower(x)=v_origin) then
     return jsonb_build_object('ok',false,'error','CREDENTIAL_ORIGIN_DENIED');
-  end if;
-
-  if v_job.capability='browser1.interactive' then
-    if upper(v_job.mode)<>'MUTATE' then
-      return jsonb_build_object('ok',false,'error','INTERACTIVE_MUTATE_REQUIRED');
-    end if;
-    v_binding_capability:='browser1.act';
-  else
-    v_binding_capability:=case when upper(v_job.mode)='MUTATE' then 'browser1.act' else 'browser1.observe' end;
-    if v_job.capability is distinct from v_binding_capability then
-      return jsonb_build_object('ok',false,'error','JOB_CAPABILITY_MISMATCH');
-    end if;
-  end if;
-
-  if cardinality(v_binding.allowed_capabilities)>0
-     and not (v_binding_capability=any(v_binding.allowed_capabilities)) then
-    return jsonb_build_object('ok',false,'error','CREDENTIAL_CAPABILITY_DENIED');
   end if;
 
   select decrypted_secret into v_secret_text
@@ -145,7 +138,7 @@ begin
     environment,requested_capability,binding_capability,origin,worker_id,lease_id,secret_material_logged
   ) values (
     v_job.job_id,v_binding.credential_ref_id,v_job.company_id,v_job.identity_id,v_job.account_id,v_job.browser_profile_id,
-    v_job.environment,v_job.capability,v_binding_capability,v_origin,p_worker_id,p_lease_id,false
+    v_job.environment,v_job.capability,'browser1.act',v_origin,p_worker_id,p_lease_id,false
   );
 
   return jsonb_build_object(
@@ -160,5 +153,5 @@ begin
 end;
 $$;
 
-revoke all on function public.cerebro_browser_credential_materialize_v3(uuid,uuid,text) from public, anon, authenticated;
-grant execute on function public.cerebro_browser_credential_materialize_v3(uuid,uuid,text) to service_role;
+revoke all on function public.cerebro_browser_credential_materialize_v3(uuid,uuid,text,text,text) from public, anon, authenticated;
+grant execute on function public.cerebro_browser_credential_materialize_v3(uuid,uuid,text,text,text) to service_role;
