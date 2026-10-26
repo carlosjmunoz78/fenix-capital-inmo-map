@@ -9,6 +9,7 @@ on:
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
+      - 'scripts/patch-browser-autologin-google-state-machine-v1.mjs'
       - 'scripts/patch-browser-autologin-preprod-fixture-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
       - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
@@ -46,6 +47,8 @@ jobs:
         run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - name: Apply universal governed login adapter
         run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - name: Apply staged Google auth state machine
+        run: node scripts/patch-browser-autologin-google-state-machine-v1.mjs
       - name: Apply isolated PREPROD synthetic fixture policy
         run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - name: Preserve auth challenge human-exception contract
@@ -59,6 +62,7 @@ jobs:
           node --check scripts/patch-browser-autologin-v1.mjs
           node --check scripts/patch-browser-autologin-ownerless-v1.mjs
           node --check scripts/patch-browser-autologin-universal-v1.mjs
+          node --check scripts/patch-browser-autologin-google-state-machine-v1.mjs
           node --check scripts/patch-browser-autologin-preprod-fixture-v1.mjs
           node --check scripts/patch-browser-autologin-contract-v1.mjs
           node --check cerebro/runtime/browser-interactive-session-v3.mjs
