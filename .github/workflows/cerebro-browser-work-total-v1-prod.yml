@@ -57,6 +57,7 @@ env:
   CEREBRO_BROWSER_INTERACTIVE_HUMAN_FRAME_MS: '220'
   CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
   CEREBRO_BROWSER_HEADLESS: 'false'
+  CEREBRO_BROWSER_CHANNEL: 'chrome'
 
 jobs:
   validate:
@@ -155,6 +156,8 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Install official Chrome channel for compatibility canary
+        run: npx playwright install chrome
       - name: Apply governed realtime A+B patch
         run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - name: Apply governed autonomous relogin patch
@@ -165,7 +168,7 @@ jobs:
         run: node scripts/patch-browser-autologin-universal-v1.mjs
       - name: Assert auth challenges remain human-required
         run: node scripts/patch-browser-autologin-contract-v1.mjs
-      - name: Execute at most one isolated PROD Work Total job in visible Chromium
+      - name: Execute one isolated PROD job in visible official Chrome
         run: xvfb-run -a node cerebro/runtime/browser-job-runner-v2.mjs
 
   rearm:
@@ -188,4 +191,4 @@ jobs:
           console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,environment:'PROD',work_total_v1:true,static_secret_added:false}));
           NODE
 
-# CEREBRO Console browser uses visible Chromium for governed interactive provider logins.
+# Compatibility canary: same CEREBRO Console runtime/profile/broker, visible official Chrome channel, no stealth or auth bypass.
