@@ -119,6 +119,16 @@ to:
 
 This preserves evidence while removing the false green.
 
+## Fénix social-reel reference floor
+
+For Fénix social content, creative acceptance must also compare the candidate against:
+
+`cerebro/media-studio/v2/benchmarks/FENIX_SOCIAL_REEL_REFERENCE_BENCHMARK_V1.md`
+
+That reference is a **minimum floor, not a ceiling**. A technically correct candidate that is materially weaker than the reference in scroll-stop, narrative clarity, human relevance, pacing, mobile readability, CTA resolution or perceived production quality must be rejected.
+
+The reference does not waive specialist execution or BM-13 provenance requirements. CEREBRO must produce a new artifact that exceeds the floor and passes the normal independent tribunal.
+
 ## Cost policy
 
 No new paid subscription is required by this correction. The gate must first use installed/available UMS roles, tools, local/open-source capabilities and already-authorized resources. Paid models remain optional candidates subject to Router/FinOps/MONEY_LIMIT policy.
