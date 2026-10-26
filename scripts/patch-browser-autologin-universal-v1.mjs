@@ -25,7 +25,7 @@ runner=replaceOnce(runner,
 fs.writeFileSync(runnerPath,runner);
 
 const start=runtime.indexOf('async function autoLoginWithCredential(worker,base,credential){');
-const end=runtime.indexOf('export async function runInteractiveBrowserSessionV3',start);
+const end=runtime.indexOf('async function captureFrame(',start);
 if(start<0||end<0||end<=start)throw new Error('UNIVERSAL_AUTOLOGIN_PATCH_ANCHOR_MISSING:RUNTIME_LOGIN_BLOCK');
 const universalBlock=`function normalizedAuthOrigin(raw){try{const u=new URL(String(raw||''));if(u.protocol!=='https:')return'';return u.origin.toLowerCase();}catch{return'';}}
 function normalizedAuthUrl(raw){try{const u=new URL(String(raw||''));if(u.protocol!=='https:')return'';u.username='';u.password='';u.hash='';return u.toString();}catch{return'';}}
@@ -95,4 +95,4 @@ runtime=replaceOnce(runtime,
  'RUNTIME_CONTRACT');
 fs.writeFileSync(runtimePath,runtime);
 
-console.log(JSON.stringify({ok:true,patch:'browser-autologin-universal-v1',universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,login_metadata_separated:true,session_reuse_first:true,auth_challenges_human_only:true,mfa_bypass:false,captcha_bypass:false,secret_material_logged:false}));
+console.log(JSON.stringify({ok:true,patch:'browser-autologin-universal-v1',universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,login_metadata_separated:true,frame_helpers_preserved:true,session_reuse_first:true,auth_challenges_human_only:true,mfa_bypass:false,captcha_bypass:false,secret_material_logged:false}));
