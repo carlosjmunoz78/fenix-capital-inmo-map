@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0.0",
+  "candidate_id": "CEREBRO_JARVIS_ES_ES_CANDIDATE_001",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "AWAITING_LISTENING",
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "identity_policy": "ORIGINAL_SYNTHETIC_NO_REAL_PERSON_CLONE",
+  "pipeline": [
+    "Qwen3-TTS VoiceDesign original identity",
+    "Chatterbox Multilingual TTS Spanish (Spain) normalization"
+  ],
+  "design": {
+    "gender": "male",
+    "age_impression": "adult_about_40",
+    "locale_target": "es-ES",
+    "timbre": "medium_light_clean_forward_low_chest_resonance",
+    "delivery": "calm_precise_elegant_subtle_warmth",
+    "prohibited": ["real_person_clone", "latam_accent", "radio_announcer", "trailer_voice", "robotic_voice"]
+  },
+  "chatterbox_parameters": {
+    "exaggeration": 0.38,
+    "temperature": 0.65,
+    "seed": 31,
+    "cfg_pace": 0.42
+  },
+  "benchmark_text": "Carlos, he completado el análisis. No hay ninguna incidencia crítica. He revisado las alternativas y tengo una recomendación clara. Podemos continuar sin afectar a producción.",
+  "audio": {
+    "url": "https://resembleai-chatterbox-multilingual-tts-es-es.hf.space/gradio_api/file=/tmp/gradio/833cad26d585d0b8f92d46e6c32aaba0c29762252da6814ee9072454d433caa5/audio.wav",
+    "storage_status": "TEMPORARY_PROVIDER_ASSET",
+    "local_backup_status": "PENDING"
+  },
+  "acceptance_gate": [
+    "clear Spain-Spanish perception",
+    "closer target timbre than prior rejected stock voices",
+    "natural human delivery",
+    "no robotic artefacts",
+    "sufficient headroom for JARVIS prosody states"
+  ],
+  "notes": "First audible candidate from the safe original-synthetic pipeline. Do not promote or freeze identity until Carlos listens and approves direction. Make was used only as an inactive LAB bridge and is not a runtime dependency."
+}
