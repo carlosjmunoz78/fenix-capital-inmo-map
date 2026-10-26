@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "job_id": "f9bcf54d-6dbb-4b6b-8c20-9702bb8cac45",
+  "reviewed_at": "2026-10-26",
+  "reviewer_role": "OWNER",
+  "verdict": "REJECT",
+  "severity": "STRUCTURAL",
+  "bm13": "NOT_PASSED",
+  "publish_authorized": false,
+  "additional_cost_eur": 0,
+  "failures": [
+    "Context/casting is not selected for the intended mortgage-advisory scene and target context.",
+    "The visual language is a slideshow/PowerPoint-like sequence of still images rather than genuine audiovisual direction.",
+    "There is no proper music bed or musical arc.",
+    "The Spanish-Spain voice is flat, linear and emotionally weak.",
+    "The opening/script is too expository and not sufficiently engaging.",
+    "Subtitles are visually flat.",
+    "Subtitle text can leave the horizontal safe area or be cropped.",
+    "Source images are not composition-aware for 9:16 and can be cropped poorly.",
+    "Overall perceived quality is below the premium threshold."
+  ],
+  "mandatory_regressions": [
+    "Premium primary output cannot use the owned-stills/Piper renderer.",
+    "Casting and asset selection must use role, scene, business context, geography/context and source-rights metadata; protected-trait filtering or inference is forbidden.",
+    "Still-derived pan/zoom may be supporting material only and may not exceed 40% of premium runtime.",
+    "A hook must land within 2.5 seconds.",
+    "Premium voice must be expressive, prosody-controlled and bound/tested for es-ES.",
+    "Music, sound design and narration ducking are mandatory for PREMIUM_SOCIAL.",
+    "Subtitles require measured bounding boxes, safe margins, line-length limits and dynamic brand styling.",
+    "9:16 framing requires subject-aware composition evidence; blind center crop is rejected.",
+    "Independent perceptual QA must run before owner review."
+  ],
+  "status": "NEGATIVE_REFERENCE_LOCKED"
+}
