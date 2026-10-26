@@ -12,15 +12,15 @@ function replaceOnce(source,from,to,label){
 
 runner=replaceOnce(runner,
  "  let secretPayload=null; let credentialProvider=null; let effectiveCommands=job.commands; let credentialMaterialized=false; let heartbeatTimer=null;",
- "  let secretPayload=null; let credentialProvider=null; let credentialLoginOrigin=''; let credentialAllowedOrigins=[]; let effectiveCommands=job.commands; let credentialMaterialized=false; let heartbeatTimer=null;",
+ "  let secretPayload=null; let credentialProvider=null; let credentialLoginOrigin=''; let credentialAllowedOrigins=[]; let credentialLoginConfig={}; let effectiveCommands=job.commands; let credentialMaterialized=false; let heartbeatTimer=null;",
  'RUNNER_STATE');
 runner=replaceOnce(runner,
  "      secretPayload=materialized.secret_payload;credentialProvider=String(materialized.provider||'').trim().toLowerCase();",
- "      secretPayload=materialized.secret_payload;credentialProvider=String(materialized.provider||'').trim().toLowerCase();credentialLoginOrigin=String(materialized.login_origin||'').trim().toLowerCase();credentialAllowedOrigins=Array.isArray(materialized.allowed_origins)?materialized.allowed_origins.map(x=>String(x||'').trim().toLowerCase()).filter(Boolean):[];",
+ "      secretPayload=materialized.secret_payload;credentialProvider=String(materialized.provider||'').trim().toLowerCase();credentialLoginOrigin=String(materialized.login_origin||'').trim().toLowerCase();credentialAllowedOrigins=Array.isArray(materialized.allowed_origins)?materialized.allowed_origins.map(x=>String(x||'').trim().toLowerCase()).filter(Boolean):[];credentialLoginConfig=materialized.login_config&&typeof materialized.login_config==='object'&&!Array.isArray(materialized.login_config)?materialized.login_config:{};",
  'RUNNER_CREDENTIAL_METADATA');
 runner=replaceOnce(runner,
  "credential:credentialMaterialized?{provider:credentialProvider,secret_payload:secretPayload}:null",
- "credential:credentialMaterialized?{provider:credentialProvider,secret_payload:secretPayload,login_origin:credentialLoginOrigin,allowed_origins:credentialAllowedOrigins}:null",
+ "credential:credentialMaterialized?{provider:credentialProvider,secret_payload:secretPayload,login_origin:credentialLoginOrigin,allowed_origins:credentialAllowedOrigins,login_config:credentialLoginConfig}:null",
  'RUNNER_CREDENTIAL_ENVELOPE');
 fs.writeFileSync(runnerPath,runner);
 
@@ -31,16 +31,18 @@ const universalBlock=`function normalizedAuthOrigin(raw){try{const u=new URL(Str
 function normalizedAuthUrl(raw){try{const u=new URL(String(raw||''));if(u.protocol!=='https:')return'';u.username='';u.password='';u.hash='';return u.toString();}catch{return'';}}
 function credentialLoginMetadata(credential){
   const secret=credential?.secret_payload;
+  const config=credential?.login_config&&typeof credential.login_config==='object'&&!Array.isArray(credential.login_config)?credential.login_config:{};
   const provider=String(credential?.provider||'generic').trim().toLowerCase()||'generic';
   const allowedOrigins=Array.isArray(credential?.allowed_origins)?credential.allowed_origins.map(normalizedAuthOrigin).filter(Boolean):[];
   const brokerOrigin=normalizedAuthOrigin(credential?.login_origin);
-  const configuredUrl=credentialScalar(secret,['loginurl','signinurl','authurl','authenticationurl']);
+  const meta=(keys)=>credentialScalar(config,keys)||credentialScalar(secret,keys);
+  const configuredUrl=meta(['loginurl','signinurl','authurl','authenticationurl']);
   const loginUrl=provider==='google'?'https://accounts.google.com/ServiceLogin':(normalizedAuthUrl(configuredUrl)||(brokerOrigin?brokerOrigin+'/':''));
-  const usernameSelector=credentialScalar(secret,['usernameselector','emailselector','identifierselector'])||'input[autocomplete="username"],input[type="email"],input[name*="user" i],input[name*="login" i]';
-  const usernameSubmitSelector=credentialScalar(secret,['usernamesubmitselector','identifiersubmitselector','nextselector']);
-  const passwordSelector=credentialScalar(secret,['passwordselector'])||'input[autocomplete="current-password"],input[type="password"]';
-  const submitSelector=credentialScalar(secret,['submitselector','loginsubmitselector','signinsubmitselector']);
-  const successUrlContains=credentialScalar(secret,['successurlcontains','authenticatedurlcontains','successpathcontains']);
+  const usernameSelector=meta(['usernameselector','emailselector','identifierselector'])||'input[autocomplete="username"],input[type="email"],input[name*="user" i],input[name*="login" i]';
+  const usernameSubmitSelector=meta(['usernamesubmitselector','identifiersubmitselector','nextselector']);
+  const passwordSelector=meta(['passwordselector'])||'input[autocomplete="current-password"],input[type="password"]';
+  const submitSelector=meta(['submitselector','loginsubmitselector','signinsubmitselector']);
+  const successUrlContains=meta(['successurlcontains','authenticatedurlcontains','successpathcontains']);
   return{provider,allowedOrigins,brokerOrigin,loginUrl,usernameSelector,usernameSubmitSelector,passwordSelector,submitSelector,successUrlContains};
 }
 function genericAuthChallenge(raw){const value=String(raw||'').toLowerCase();if(/captcha|recaptcha|challenge|webauthn|security[-_]?key|\\/mfa(?:\\/|$)|\\/2fa(?:\\/|$)|\\/otp(?:\\/|$)|verify[-_]?identity|device[-_]?approval/.test(value))return'AUTH_CHALLENGE_REQUIRED';return'';}
@@ -65,7 +67,7 @@ async function autoLoginWithCredential(worker,base,credential){
     if(result?.ok!==true)return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:'AUTH_FORM_UNAVAILABLE'};
     const finalUrl=normalizedAuthUrl(result.final_url);const challenge=meta.provider==='google'?googleChallenge(finalUrl):genericAuthChallenge(finalUrl);if(challenge)return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:challenge};
     const finalOrigin=normalizedAuthOrigin(finalUrl);if(finalOrigin&&!meta.allowedOrigins.includes(finalOrigin))return{status:'HUMAN_REQUIRED',reason:'SECURITY_INCIDENT',code:'AUTH_REDIRECT_ORIGIN_DENIED'};
-    if(meta.successUrlContains&& !String(finalUrl).includes(meta.successUrlContains))return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:'AUTH_SUCCESS_NOT_CONFIRMED'};
+    if(meta.successUrlContains&&!String(finalUrl).includes(meta.successUrlContains))return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:'AUTH_SUCCESS_NOT_CONFIRMED'};
     if(meta.provider!=='google'&&!meta.successUrlContains&&sameLoginLocation(finalUrl,meta.loginUrl))return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:'AUTH_SUCCESS_NOT_CONFIRMED'};
     return{status:'ATTEMPTED',provider:meta.provider,final_url:finalUrl};
   }catch{return{status:'HUMAN_REQUIRED',reason:'LOW_CONFIDENCE',code:'AUTH_CHALLENGE_OR_FORM_UNAVAILABLE'};}
@@ -89,8 +91,8 @@ async function verifyOrAutoLogin(worker,base,job,restoreUrl,endpoint,tokenProvid
 runtime=runtime.slice(0,start)+universalBlock+runtime.slice(end);
 runtime=replaceOnce(runtime,
  'credential_broker_autologin:true,google_autologin_adapter:true,no_mfa_or_captcha_bypass:true',
- 'credential_broker_autologin:true,google_autologin_adapter:true,universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,no_mfa_or_captcha_bypass:true',
+ 'credential_broker_autologin:true,google_autologin_adapter:true,universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,login_metadata_separated:true,no_mfa_or_captcha_bypass:true',
  'RUNTIME_CONTRACT');
 fs.writeFileSync(runtimePath,runtime);
 
-console.log(JSON.stringify({ok:true,patch:'browser-autologin-universal-v1',universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,session_reuse_first:true,auth_challenges_human_only:true,mfa_bypass:false,captcha_bypass:false,secret_material_logged:false}));
+console.log(JSON.stringify({ok:true,patch:'browser-autologin-universal-v1',universal_form_autologin:true,manual_login_default:false,allowed_origin_bound:true,login_metadata_separated:true,session_reuse_first:true,auth_challenges_human_only:true,mfa_bypass:false,captcha_bypass:false,secret_material_logged:false}));
