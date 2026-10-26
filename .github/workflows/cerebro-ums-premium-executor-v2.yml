@@ -18,6 +18,10 @@ on:
       - 'cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v2.json'
       - '.github/workflows/cerebro-ums-premium-executor-v2.yml'
 
+concurrency:
+  group: cerebro-ums-bm13-physical-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -52,21 +56,25 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install physical media dependencies
+      - name: Verify runner media tools and install Montserrat locally
         run: |
-          sudo apt-get update
-          sudo apt-get install -y ffmpeg fontconfig curl xz-utils
+          set -euo pipefail
+          command -v ffmpeg
+          command -v ffprobe
+          command -v curl
+          command -v xz
+          command -v fc-match
           mkdir -p "$HOME/.local/share/fonts/montserrat"
-          curl -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o "$HOME/.local/share/fonts/montserrat/Montserrat.ttf"
-          fc-cache -f
+          curl --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 45 -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o "$HOME/.local/share/fonts/montserrat/Montserrat.ttf"
+          fc-cache -f "$HOME/.local/share/fonts"
           ffmpeg -version | head -1
           fc-match Montserrat
 
       - name: Install and verify Blender 5.2.3 official binary
         run: |
           set -euo pipefail
-          curl -fsSLO "https://download.blender.org/release/Blender5.2/${BLENDER_ARCHIVE}"
-          curl -fsSLO "https://download.blender.org/release/Blender5.2/blender-${BLENDER_VERSION}.sha256"
+          curl --retry 3 --retry-delay 3 --connect-timeout 15 -fsSLO "https://download.blender.org/release/Blender5.2/${BLENDER_ARCHIVE}"
+          curl --retry 3 --retry-delay 3 --connect-timeout 15 -fsSLO "https://download.blender.org/release/Blender5.2/blender-${BLENDER_VERSION}.sha256"
           grep " ${BLENDER_ARCHIVE}$" "blender-${BLENDER_VERSION}.sha256" | sha256sum -c -
           tar -xf "${BLENDER_ARCHIVE}"
           echo "BLENDER_BIN=${GITHUB_WORKSPACE}/blender-${BLENDER_VERSION}-linux-x64/blender" >> "$GITHUB_ENV"
