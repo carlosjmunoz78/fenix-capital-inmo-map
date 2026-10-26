@@ -1,0 +1,83 @@
+{
+  "kind": "cerebro.ums.production_order.v1",
+  "schema_version": "1.0.0",
+  "idempotency_key": "ums-fenix-premium-trial-20261026-v1",
+  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V1",
+  "company_id": "fenix",
+  "target_company_id": "fenix",
+  "engine_id": "UMS-001",
+  "department_id": "productora",
+  "environment": "PREPROD",
+  "version": "v1",
+  "channel": "OWNER_REVIEW",
+  "output_type": "REEL",
+  "quality_profile": "PREMIUM_SOCIAL",
+  "priority": 100,
+  "max_attempts": 2,
+  "expected_cost_eur": 0,
+  "publish_requested": false,
+  "delivery_requested": true,
+  "delivery_mode": "OWNER_REVIEW",
+  "brief": {
+    "objective": "Demostrar que CEREBRO Productora puede recibir una orden, asignar producción y entregar un vídeo físico con personas y escenas reales, montaje, voz y branding Fénix Capital.",
+    "audience": "Personas que quieren comprar vivienda y necesitan financiación hipotecaria.",
+    "tone": "Premium, cinematográfico, humano, seguro y contemporáneo. Nunca infantil ni presentación de diapositivas.",
+    "duration_target_sec": 15,
+    "format": "9:16 vertical 1080x1920",
+    "message": "La compra de una vivienda merece una financiación preparada con criterio, documentación y acompañamiento.",
+    "cta": "Fénix Capital · Hipotecas en Córdoba"
+  },
+  "creative_payload": {
+    "visual_strategy": "OWNED_REAL_HUMAN_ASSETS_CINEMATIC_MOTION",
+    "legacy_programmatic_renderer_allowed": false,
+    "procedural_geometry_as_primary": false,
+    "brand": {
+      "charcoal": "#222222",
+      "magenta": "#870064",
+      "gold": "#FFB71B",
+      "orange": "#FF5F00"
+    },
+    "logo_url": "https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png",
+    "assets": [
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/huelva-asesor-hipotecario-reunion-scaled-1-cerebro.webp",
+        "asset_class": "character_or_human",
+        "role": "advisor_meeting",
+        "caption": "Tu operación empieza entendiendo bien tu caso"
+      },
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/huelva-planificacion-documental-pareja-scaled-1-cerebro.webp",
+        "asset_class": "photoreal_or_live_scene",
+        "role": "planning",
+        "caption": "Documentación, números y plazos bajo control"
+      },
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/cadiz-firma-documentos-vivienda-scaled-1-cerebro.webp",
+        "asset_class": "photoreal_or_live_scene",
+        "role": "signature",
+        "caption": "Decisiones importantes, sin improvisar"
+      },
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/huelva-llaves-compra-vivienda-scaled-1-cerebro.webp",
+        "asset_class": "character_or_human",
+        "role": "keys",
+        "caption": "Hasta llegar a las llaves"
+      }
+    ],
+    "voice": {
+      "enabled": true,
+      "provider_preference": ["QWEN3_TTS_PHYSICAL_PREPROD", "PIPER_PINNED_FALLBACK"],
+      "voice_id": "ES_FEMALE",
+      "text": "Comprar una vivienda no debería depender de improvisar. En Fénix Capital estudiamos tu financiación, ordenamos tu expediente y te acompañamos para que cada paso llegue con más claridad. Fénix Capital. Hipotecas en Córdoba."
+    },
+    "audio": {
+      "music_required": false,
+      "sound_design": "SUBTLE_CINEMATIC_TONAL_BED"
+    },
+    "qa": {
+      "extract_review_frames": 8,
+      "creative_acceptance": "OWNER_REVIEW_REQUIRED_FOR_FIRST_PREPROD_TRIAL",
+      "human_exception_reason": "CUSTOMER_HUMAN_REQUEST"
+    }
+  }
+}
