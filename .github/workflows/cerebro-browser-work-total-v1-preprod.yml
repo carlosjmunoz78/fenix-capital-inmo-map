@@ -21,7 +21,7 @@ permissions:
 
 concurrency:
   group: cerebro-browser-autologin-universal-physical-preprod
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   CEREBRO_BROWSER_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-browser-work-total-dispatch-v1-preprod
