@@ -129,7 +129,11 @@ async function saveWorkspace(job,tokenProvider,fetch_impl,privateTabs,activeTabI
 async function verifyWorkspaceIdentity(worker,base,job,restoreActiveTabIndex,endpoint,tokenProvider,fetch_impl){
   if(!workspaceEnabled(job))return{status:'NOT_APPLICABLE'};
   const profileState=await callWorkspace('worker/profile-state',tokenProvider,{session_id:String(job.job_id)},fetch_impl);
-  if(String(profileState?.profile?.provider||'')!=='google')return{status:'NOT_APPLICABLE'};
+  const profile=profileState?.profile||null;
+  const profileVerification=String(profile?.verification_state||'UNVERIFIED');
+  const provider=String(profile?.provider||'');
+  if(profileVerification==='VERIFIED')return{status:'VERIFIED',provider};
+  if(provider!=='google')return{status:profileVerification,provider};
   const originalIndex=Number.isInteger(restoreActiveTabIndex)?Math.max(0,restoreActiveTabIndex):0;
   let verificationTabOpened=false;
   try{
@@ -249,4 +253,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.5',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'GOOGLE_HMAC_VERIFIED_ONLY_FAIL_CLOSED',handback_preserves_active_tab:true,human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.6',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'OWNER_OR_GOOGLE_VERIFIED_ONLY_FAIL_CLOSED',handback_preserves_active_tab:true,human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
