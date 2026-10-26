@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "VOICEUI-001",
+  "voice_profile_id": "ANA_FENIX_FINANCE_ES_ES_V1",
+  "agent_id": "ANA_FINANCE",
+  "display_name": "Ana",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "LOCKED_REFERENCE",
+  "locale": "es-ES",
+  "gender": "female",
+  "role": "Agente financiero de Fénix / CEREBRO",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "identity_policy": {
+    "speaker_identity_locked": true,
+    "accent_locked": "es-ES",
+    "replace_only_with_explicit_user_approval": true,
+    "do_not_mix_with_jarvis_search": true
+  },
+  "source": {
+    "provider": "ResembleAI",
+    "runtime_family": "Chatterbox Multilingual V3 Single Language",
+    "model": "ResembleAI/Chatterbox-Multilingual-es-es",
+    "space": "ResembleAI/Chatterbox-Multilingual-TTS-es-es",
+    "reference_filename": "es_es_f1.wav",
+    "reference_url": "https://storage.googleapis.com/chatterbox-demo-samples/mtl-v3-single-language-prompts/es-es/es_es_f1.wav",
+    "reference_sha256": null,
+    "reference_backup_status": "UPSTREAM_CANONICAL_REFERENCE_REGISTERED_LOCAL_BINARY_BACKUP_PENDING",
+    "model_checkpoint_sha256": "d85844b13ea8cb45e95b8d84a55bcfeccb2d743035cf304ee3d778fc6be39546"
+  },
+  "capabilities": [
+    "text_to_speech",
+    "voice_reference_reuse",
+    "es_es_pronunciation",
+    "prosody_variation",
+    "emotion_variation",
+    "pace_variation",
+    "partial_loudness_variation",
+    "financial_vocabulary"
+  ],
+  "gates": {
+    "identity_stability": "PENDING",
+    "financial_vocabulary": "PENDING",
+    "numbers_dates_amounts": "PENDING",
+    "latency": "PENDING",
+    "streaming": "PENDING",
+    "backup_binary_owned": "PENDING",
+    "preprod_e2e": "PENDING",
+    "prod": "BLOCKED"
+  }
+}
