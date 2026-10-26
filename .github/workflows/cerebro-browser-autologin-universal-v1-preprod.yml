@@ -60,13 +60,19 @@ jobs:
           node --check cerebro/runtime/browser-job-runner-v2.mjs
       - name: Build application
         run: npm run build
-      - name: Assert no PROD execution path exists in this workflow
+      - name: Assert this workflow is validation-only
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const yml=fs.readFileSync('.github/workflows/cerebro-browser-autologin-universal-v1-preprod.yml','utf8');
-          for(const forbidden of ['cluhljgonannaafpmblx.supabase.co','browser-work-total-v1-prod-canary','Execute at most one isolated PROD Work Total job']){
-            if(yml.includes(forbidden))throw new Error(`PREPROD_WORKFLOW_PROD_PATH_FORBIDDEN:${forbidden}`);
+          const forbiddenPatterns=[
+            /CEREBRO_BROWSER_(DISPATCH|INTERACTIVE|WORKSPACE|AUTOLOGIN)_URL\s*:/,
+            /\n\s*worker:\s*\n/,
+            /actions\/workflows\/.*\/dispatches/,
+            /supabase\.co\/functions\/v1\//
+          ];
+          for(const pattern of forbiddenPatterns){
+            if(pattern.test(yml))throw new Error(`PREPROD_VALIDATION_EXTERNAL_EXECUTION_PATH_FORBIDDEN:${pattern}`);
           }
-          console.log(JSON.stringify({ok:true,environment:'PREPROD_VALIDATION',prod_execution:false,incremental_cost_eur:0}));
+          console.log(JSON.stringify({ok:true,environment:'PREPROD_VALIDATION',external_execution:false,prod_execution:false,incremental_cost_eur:0}));
           NODE
