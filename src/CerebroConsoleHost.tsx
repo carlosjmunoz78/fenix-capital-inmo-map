@@ -17,7 +17,7 @@ function initialView():CerebroView{
  if(typeof window==='undefined')return'OPERATIVA';
  const section=new URLSearchParams(window.location.search).get('section');
  if(section==='browser')return'NAVEGADOR';
- if(section==='v0')return'V0';
+ if(section==='legacy-v0')return'V0';
  return'OPERATIVA';
 }
 
@@ -26,6 +26,7 @@ export default function CerebroConsoleHost(){
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
+ const changeView=(next:CerebroView)=>setView(next==='V0'?'OPERATIVA':next);
 
  useEffect(()=>{
   if(!isCerebroPath)return;
@@ -62,9 +63,9 @@ export default function CerebroConsoleHost(){
 
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
   <CerebroSpeechOutputGuard/>
-  {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Cambiar vista de CEREBRO"><span className="cerebro-view-switch-label">INTERFAZ</span><button type="button" className="is-active">VISTA 0</button><button type="button" onClick={()=>setView('OPERATIVA')}>JARVIS</button><button type="button" disabled title="NEURAL se recuperará desde los artefactos existentes; no se reconstruirá desde cero.">NEURAL · POR AUDITAR</button><button type="button" onClick={()=>setView('NAVEGADOR')}>NAVEGADOR</button></nav></div>:null}
+  {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>JARVIS</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>:null}
   <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
-  {view==='OPERATIVA'?<><CerebroOperativeConsole onViewChange={setView}/><button type="button" className="cerebro-browser-entry-button" onClick={()=>setView('NAVEGADOR')} aria-label="Abrir interfaz Navegador">NAVEGADOR</button></>:null}
-  {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={setView}/>:null}
+  {view==='OPERATIVA'?<><CerebroOperativeConsole onViewChange={changeView}/><button type="button" className="cerebro-browser-entry-button" onClick={()=>changeView('NAVEGADOR')} aria-label="Abrir interfaz Navegador">NAVEGADOR</button></>:null}
+  {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={changeView}/>:null}
  </div>;
 }
