@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-25T23:39:07.124Z",
+  "updated_at": "2026-10-26T01:06:16.867Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -23081,7 +23081,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "ROUTE_SAFE_ACTION_BATCH_8_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -23094,7 +23094,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40245340455,
+  "last_discovery_run_id": 40252506643,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
