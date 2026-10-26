@@ -2,6 +2,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { probePremiumPhysicalRenderer, renderPremiumPhysicalVideo } from './premium-physical-renderer-v2.mjs';
+import { applyPremiumAudioMaster } from './premium-audio-master-v1.mjs';
 import { validatePremiumDeliverable } from './premium-deliverable-gate-v1.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
@@ -18,7 +19,8 @@ try {
     process.exit(2);
   }
 
-  const rendered=await renderPremiumPhysicalVideo(order,{blender_bin:blenderBin,export_dir:exportDir});
+  const baseRendered=await renderPremiumPhysicalVideo(order,{blender_bin:blenderBin,export_dir:exportDir});
+  const rendered=await applyPremiumAudioMaster({order,rendered:baseRendered,export_dir:exportDir});
   const deliveryGate=await validatePremiumDeliverable({order,rendered});
   await fs.mkdir(exportDir,{recursive:true});
 
@@ -50,6 +52,12 @@ try {
     delivery_authorized:false,
     technical:rendered.technical,
     delivery_gate:deliveryGate,
+    provenance:{
+      voice_rendered:rendered.provenance?.voice_rendered===true,
+      music_rendered:rendered.provenance?.music_rendered===true,
+      people_rendered:rendered.provenance?.people_rendered===true,
+      voice_provider:rendered.provenance?.audio_master?.voice_provider??null
+    },
     artifacts:rendered.artifacts.map(a=>({filename:a.filename,mime:a.mime,bytes:a.bytes,sha256:a.sha256,width:a.width??null,height:a.height??null,duration_sec:a.duration_sec??null}))
   };
   await fs.writeFile(path.join(exportDir,'RUN_SUMMARY.json'),JSON.stringify(summary,null,2));
