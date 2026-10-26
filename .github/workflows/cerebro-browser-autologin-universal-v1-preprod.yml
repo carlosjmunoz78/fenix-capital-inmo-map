@@ -12,7 +12,6 @@ on:
       - 'scripts/patch-browser-autologin-google-state-machine-v1.mjs'
       - 'scripts/patch-browser-autologin-preprod-fixture-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
-      - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
       - 'cerebro/runtime/browser-work-total-autologin-v1.test.mjs'
@@ -39,8 +38,6 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Apply governed realtime patch
-        run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - name: Apply existing governed autonomous relogin patch
         run: node scripts/patch-browser-autologin-v1.mjs
       - name: Preserve canonical owner and broker-only secret resolution
