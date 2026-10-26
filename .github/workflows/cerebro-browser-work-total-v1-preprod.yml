@@ -9,7 +9,9 @@ on:
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
+      - 'scripts/patch-browser-autologin-preprod-fixture-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
+      - 'cerebro/runtime/autologin-canary-server.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser-job-runner-v2.mjs'
       - 'cerebro/runtime/browser-work-total-autologin-v1.test.mjs'
@@ -54,11 +56,13 @@ jobs:
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - run: node scripts/patch-browser-autologin-contract-v1.mjs
       - run: node --test cerebro/runtime/browser-work-total-autologin-v1.test.mjs
       - run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
       - run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
       - run: node --check cerebro/runtime/browser-job-runner-v2.mjs
+      - run: node --check cerebro/runtime/autologin-canary-server.mjs
 
   watch:
     name: Watch isolated PREPROD autologin canary queue
@@ -99,6 +103,12 @@ jobs:
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - run: node scripts/patch-browser-autologin-contract-v1.mjs
+      - name: Start isolated local login fixture
+        run: |
+          node cerebro/runtime/autologin-canary-server.mjs > /tmp/cerebro-autologin-canary.log 2>&1 &
+          echo $! > /tmp/cerebro-autologin-canary.pid
+          node --input-type=module -e "const r=await fetch('http://127.0.0.1:8787/health');if(!r.ok)process.exit(1);const j=await r.json();if(j.ok!==true||j.secrets!==false)process.exit(1);console.log(JSON.stringify(j));"
       - name: Execute exactly one isolated PREPROD canary job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
