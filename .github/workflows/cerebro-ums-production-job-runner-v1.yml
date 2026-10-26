@@ -6,9 +6,12 @@ on:
       - cerebro/ums-physical-production-executor-20261026
     paths:
       - 'cerebro/media-studio/v2/runtime/premium-owned-assets-renderer.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-creative-preflight-gate.mjs'
       - 'cerebro/media-studio/v2/runtime/ums-production-job-runner-v1.mjs'
       - 'cerebro/media-studio/v2/tests/ums-production-job-runner.test.mjs'
+      - 'cerebro/media-studio/v2/tests/premium-creative-preflight-gate.test.mjs'
       - 'cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v1.json'
+      - 'cerebro/media-studio/v2/evaluation/owner-feedback/**'
       - 'supabase/functions/cerebro-ums-production-dispatch-v1/**'
       - 'supabase/migrations/*cerebro_ums_production_lease_v1*'
       - '.github/workflows/cerebro-ums-production-job-runner-v1.yml'
@@ -16,23 +19,11 @@ on:
 
 permissions:
   contents: read
-  id-token: write
-
-env:
-  CEREBRO_UMS_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-ums-production-dispatch-v1
-  CEREBRO_UMS_OIDC_AUDIENCE: cerebro-ums-production-worker-v1
-  CEREBRO_UMS_SEED_ORDER_PATH: cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v1.json
-  CEREBRO_UMS_EXPORT_DIR: /tmp/cerebro-ums-export
-  PIPER_RELEASE: '2023.11.14-2'
-  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
-  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
-  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
-  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
 
 jobs:
-  ums-premium-production-preprod:
+  ums-premium-governance-preprod:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
 
@@ -40,91 +31,38 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Contract tests
-        run: node --test cerebro/media-studio/v2/tests/ums-production-job-runner.test.mjs
+      - name: Contract and owner-regression tests
+        run: |
+          node --test \
+            cerebro/media-studio/v2/tests/ums-production-job-runner.test.mjs \
+            cerebro/media-studio/v2/tests/premium-creative-preflight-gate.test.mjs
 
-      - name: Install physical media runtime
+      - name: Verify rejected BM-13 trial is fail-closed
         shell: bash
         run: |
           set -euo pipefail
-          sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends ffmpeg fontconfig fonts-montserrat
-          ffmpeg -version | head -n 1
-          ffprobe -version | head -n 1
-          FONT="$(fc-match -f '%{file}\n' 'Montserrat:style=SemiBold' | head -n 1)"
-          test -n "$FONT"
-          test -s "$FONT"
-          echo "CEREBRO_MONTSERRAT_FONT=$FONT" >> "$GITHUB_ENV"
-          echo "Montserrat=$FONT" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Cache pinned Piper voice runtime
-        uses: actions/cache@v4
-        with:
-          path: /tmp/cerebro-piper
-          key: ums-piper-${{ runner.os }}-2023-11-14-2-b145f2a-sharvard-medium
-
-      - name: Materialize pinned Piper voice runtime
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p /tmp/cerebro-piper
-          if [ ! -x "$CEREBRO_PIPER_BIN" ]; then
-            curl --fail --location --silent --show-error \
-              "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" \
-              -o /tmp/cerebro-piper/piper.tar.gz
-            tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
-          fi
-          if [ ! -s "$CEREBRO_PIPER_MODEL" ]; then
-            curl --fail --location --silent --show-error \
-              "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" \
-              -o "$CEREBRO_PIPER_MODEL"
-          fi
-          if [ ! -s "$CEREBRO_PIPER_CONFIG" ]; then
-            curl --fail --location --silent --show-error \
-              "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" \
-              -o "$CEREBRO_PIPER_CONFIG"
-          fi
-          chmod +x "$CEREBRO_PIPER_BIN"
-          "$CEREBRO_PIPER_BIN" --help >/dev/null
-          sha256sum "$CEREBRO_PIPER_BIN" "$CEREBRO_PIPER_MODEL" "$CEREBRO_PIPER_CONFIG" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Execute governed UMS production order
-        shell: bash
-        run: |
-          set -euo pipefail
-          rm -rf "$CEREBRO_UMS_EXPORT_DIR"
-          mkdir -p "$CEREBRO_UMS_EXPORT_DIR"
-          node cerebro/media-studio/v2/runtime/ums-production-job-runner-v1.mjs | tee /tmp/ums-production-result.json
-          grep -F '"status":"CREATIVE_REVIEW_REQUIRED"' /tmp/ums-production-result.json >/dev/null
-          grep -F '"legacy_programmatic_renderer":false' /tmp/ums-production-result.json >/dev/null
-          grep -F '"additional_cost_eur":0' /tmp/ums-production-result.json >/dev/null
-          test -s "$CEREBRO_UMS_EXPORT_DIR/fenix-premium-trial.mp4"
-          test -s "$CEREBRO_UMS_EXPORT_DIR/qa-frames-8.png"
-          ffprobe -v error -show_entries stream=codec_name,codec_type,width,height -of json "$CEREBRO_UMS_EXPORT_DIR/fenix-premium-trial.mp4" | tee /tmp/ums-ffprobe.json
-          cp /tmp/ums-production-result.json "$CEREBRO_UMS_EXPORT_DIR/RESULT.json"
-          cp /tmp/ums-ffprobe.json "$CEREBRO_UMS_EXPORT_DIR/FFPROBE.json"
-
-      - name: Upload physical review deliverables
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ums-fenix-premium-trial-v1
-          path: /tmp/cerebro-ums-export/
-          if-no-files-found: warn
-          retention-days: 7
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { evaluatePremiumCreativePreflight } from './cerebro/media-studio/v2/runtime/premium-creative-preflight-gate.mjs';
+          const order=JSON.parse(fs.readFileSync('./cerebro/media-studio/v2/orders/bm13-fenix-premium-trial-v1.json','utf8'));
+          const result=evaluatePremiumCreativePreflight(order);
+          if(result.ok) throw new Error('REJECTED_OWNER_TRIAL_FALSE_GREEN');
+          if(result.status!=='CREATIVE_REJECTED_PRE_FLIGHT') throw new Error(`UNEXPECTED_STATUS:${result.status}`);
+          console.log(JSON.stringify(result));
+          NODE
 
       - name: PREPROD truth
-        if: always()
         shell: bash
         run: |
           {
             echo '## CEREBRO UMS Productora PREPROD'
             echo '- engine: UMS-001'
-            echo '- production_order: cerebro.ums.production_order.v1'
-            echo '- legacy_renderer_allowed: false'
-            echo '- heavy_render_outside_supabase: true'
+            echo '- owner_trial: REJECTED / NEGATIVE_REFERENCE_LOCKED'
+            echo '- canary_owned_stills_renderer: NOT PREMIUM PRIMARY'
+            echo '- piper_voice: CANARY ONLY'
+            echo '- premium_fail_closed: true'
+            echo '- premium_physical_renderer_v2: WAITING_FOR_BOUND_AND_TESTED_CAPABILITY'
             echo '- expected_cost_eur: 0'
             echo '- publish_authorized: false'
-            echo '- terminal_before_owner_review: HOLD / CREATIVE_REVIEW_REQUIRED'
-            echo '- BM-13: NOT PASSED until creative tribunal accepts the physical deliverable'
+            echo '- BM-13: NOT PASSED'
           } >> "$GITHUB_STEP_SUMMARY"
