@@ -15,7 +15,7 @@
   "prod_authorized": false,
   "prod_write_authorized": false,
   "trading_access": false,
-  "last_planned_at": "2026-10-26T00:20:24.574Z",
+  "last_planned_at": "2026-10-26T05:05:55.300Z",
   "last_result": {
     "cadence": "DAILY",
     "status": "GREEN",
