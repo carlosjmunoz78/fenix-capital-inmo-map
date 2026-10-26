@@ -2182,11 +2182,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_BRAINSTORMING_6EB73E5D_PROD_READONLY_CANARY",
       "observed_at": "2026-10-26T19:41:20.145Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -2200,7 +2200,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "0204632a55ddcf4526580d6a2934d1059a9af45e428d003b47fc270ada1cc8be"
+      "capability_hash": "0204632a55ddcf4526580d6a2934d1059a9af45e428d003b47fc270ada1cc8be",
+      "canary": {
+        "status": "GREEN_DYNAMIC_BRAINSTORMING_6EB73E5D_PROD_READONLY_CANARY",
+        "candidate_id": "repo:1a65e7edfb33a4cdc376639a549c",
+        "technical_name": "brainstorming",
+        "head_sha": "ffaf6467162e6d08ea281276d049812c6ea69898",
+        "run_id": 40388974916,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-26T19:41:38.491Z"
+      },
+      "promoted_at": "2026-10-26T19:41:38.491Z"
     },
     {
       "candidate_id": "repo:783c28edde19a6876926de4d2d11",
@@ -2252,11 +2282,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_BRAINSTORMING_6E537B70_PROD_READONLY_CANARY",
       "observed_at": "2026-10-26T19:41:20.144Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -2270,7 +2300,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "32006635601468902e90465c060d50dd82d67d83fb10e6b297d0c5b51fa6ee3b"
+      "capability_hash": "32006635601468902e90465c060d50dd82d67d83fb10e6b297d0c5b51fa6ee3b",
+      "canary": {
+        "status": "GREEN_DYNAMIC_BRAINSTORMING_6E537B70_PROD_READONLY_CANARY",
+        "candidate_id": "repo:783c28edde19a6876926de4d2d11",
+        "technical_name": "brainstorming",
+        "head_sha": "ffaf6467162e6d08ea281276d049812c6ea69898",
+        "run_id": 40388974916,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-26T19:41:38.491Z"
+      },
+      "promoted_at": "2026-10-26T19:41:38.491Z"
     },
     {
       "candidate_id": "repo:97fe65c62aa3cd8cfc6b8525fac7",
@@ -14713,10 +14773,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 146,
-    "inserted": 2,
-    "updated": 0,
+    "promoted": 2,
     "skipped": 0,
-    "pending_canary": 2,
-    "prod_readonly": 144
+    "pending_canary": 0,
+    "prod_readonly": 146
   }
 }
