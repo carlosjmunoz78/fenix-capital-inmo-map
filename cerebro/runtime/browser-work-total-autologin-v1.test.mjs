@@ -7,6 +7,8 @@ const read=(path)=>fs.readFile(new URL(`../../${path}`,import.meta.url),'utf8');
 test('interactive Work Total materializes credentials only in the governed worker path',async()=>{
  const runner=await read('cerebro/runtime/browser-job-runner-v2.mjs');
  assert.doesNotMatch(runner,/INTERACTIVE_V3_CREDENTIAL_MATERIALIZATION_NOT_YET_ALLOWED/);
+ assert.match(runner,/interactiveCredentialFlow/);
+ assert.match(runner,/job\.credential_ref_id\|\|interactiveCredentialFlow/);
  assert.match(runner,/callAutologin\('worker\/materialize'/);
  assert.match(runner,/credential:credentialMaterialized\?\{provider:credentialProvider,secret_payload:secretPayload\}:null/);
  assert.match(runner,/scrub\(secretPayload\)/);
@@ -26,37 +28,39 @@ test('Google autonomous login uses direct fill and escalates auth challenges to 
  assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
 });
 
-test('owner chooses broker auto-login when no verified session can be restored',async()=>{
+test('owner surface remains canonical and does not materialize credentials',async()=>{
  const owner=await read('supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts');
- assert.match(owner,/credentialRef=String\(p\.login_policy\|\|''\)==='CREDENTIAL_BROKER_ALLOWED'/);
- assert.match(owner,/p_credential_ref_id:resumable\?null:\(credentialRef\|\|null\)/);
- assert.match(owner,/https:\/\/accounts\.google\.com\/ServiceLogin/);
- assert.match(owner,/auto_login_expected:Boolean\(!resumable&&credentialRef\)/);
- assert.match(owner,/human_login_required:Boolean\(!resumable&&!credentialRef\)/);
- assert.match(owner,/automatic_relogin:true/);
+ assert.match(owner,/p_credential_ref_id:null/);
+ assert.match(owner,/credential_materialization:false/);
+ assert.doesNotMatch(owner,/secret_payload|vault\.decrypted_secrets|credential_materialize_v3/);
 });
 
 test('interactive credential broker v3 remains lease-bound and maps interactive to existing act permission',async()=>{
  const migration=await read('supabase/migrations/20261026100000_cerebro_browser_credential_broker_v3_interactive.sql');
  assert.match(migration,/status='LEASED'/);
  assert.match(migration,/lease_expires_at>now\(\)/);
- assert.match(migration,/browser1\.interactive/);
- assert.match(migration,/v_binding_capability:='browser1\.act'/);
+ assert.match(migration,/v_job\.capability is distinct from 'browser1\.interactive'/);
+ assert.match(migration,/'browser1\.act'=any\(v_binding\.allowed_capabilities\)/);
  assert.match(migration,/CREDENTIAL_IDENTITY_DENIED/);
  assert.match(migration,/CREDENTIAL_ACCOUNT_DENIED/);
  assert.match(migration,/CREDENTIAL_ORIGIN_DENIED/);
+ assert.match(migration,/p_credential_ref_id text/);
+ assert.match(migration,/p_origin text/);
  assert.match(migration,/secret_material_logged boolean not null default false/);
 });
 
-test('autologin broker auto-confirms only an exact credential/account match and exposes no secret to the frontend',async()=>{
+test('autologin broker resolves credential from exact leased workspace profile and exposes no secret to frontend',async()=>{
  const edge=await read('supabase/functions/cerebro-browser-work-total-autologin-v1-prod/index.ts');
+ assert.match(edge,/profileForJob/);
+ assert.match(edge,/login_policy.*CREDENTIAL_BROKER_ALLOWED/s);
  assert.match(edge,/cerebro_browser_credential_materialize_v3/);
+ assert.match(edge,/p_credential_ref_id:p\.credential_ref_id/);
+ assert.match(edge,/p_origin:origin/);
  assert.match(edge,/credentialEmail!==observed/);
  assert.match(edge,/expectedMismatch\|\|credentialMismatch/);
  assert.match(edge,/verification_state:'VERIFIED'/);
  assert.match(edge,/verification_state:'MISMATCH'/);
  assert.match(edge,/secret_material_exposed_to_frontend:false/);
- assert.match(edge,/mfa_bypass:false/);
- assert.match(edge,/captcha_bypass:false/);
+ assert.match(edge,/auth_challenge_requires_human:true/);
  assert.doesNotMatch(edge,/console\.log\(|secret_payload\s*:\s*secret\.secret_payload/);
 });
