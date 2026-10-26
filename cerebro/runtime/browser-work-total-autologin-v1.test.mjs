@@ -61,12 +61,14 @@ test('interactive credential broker v3 remains lease-bound and maps interactive 
  assert.match(migration,/secret_material_logged boolean not null default false/);
 });
 
-test('autologin broker resolves any authorized provider from the exact leased workspace profile',async()=>{
+test('autologin broker resolves any authorized provider and returns only non-secret adapter metadata beside the scoped secret',async()=>{
  const edge=await read('supabase/functions/cerebro-browser-work-total-autologin-v1-prod/index.ts');
  assert.match(edge,/profileForJob/);
  assert.match(edge,/login_policy.*CREDENTIAL_BROKER_ALLOWED/s);
  assert.match(edge,/cerebro_browser_credential_materialize_v3/);
  assert.match(edge,/allowed_origins:allowed/);
+ assert.match(edge,/login_config:p\.login_config/);
+ assert.match(edge,/login_metadata_separated:true/);
  assert.match(edge,/universal_form_autologin:true/);
  assert.match(edge,/manual_login_default:false/);
  assert.match(edge,/confirmBoundLogin/);
