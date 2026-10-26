@@ -2,15 +2,16 @@
 
 Date target: 2026-10-27
 Current state before funding: `PREPARED_NOT_FUNDED`
+Reconciled main baseline: `a907ffbfdfee10dd39192e74711077da71f5194b`
 
 ## Goal
 The first paid DeepSeek call must happen only after secrets, hard-cost controls, evidence baseline and rollback boundaries are ready. Paid inference begins with a tiny connectivity canary, then a bounded read-only audit batch.
 
-## Step 0 · rebase/reconcile before activation
-`main` may move overnight. Before using this branch as execution baseline:
+## Step 0 · re-check main before activation
+`main` moved while this bootstrap was being prepared and was reconciled without overwriting its newer Browser work. Before using this branch tomorrow:
 - read current `main` SHA;
-- compare it with the recorded baseline `632bf7767f80bf2757068c25bd04d2862e5d0368`;
-- if main moved, inspect delta and reconcile this bootstrap rather than overwriting newer work;
+- compare it with reconciled baseline `a907ffbfdfee10dd39192e74711077da71f5194b`;
+- if main moved again, inspect delta and reconcile rather than overwriting newer work;
 - preserve all existing App/CRM/Supabase/Notion/WordPress/SEO/Training/Trading/Browser/Voice/Learning behaviour.
 
 ## Step 1 · funding
