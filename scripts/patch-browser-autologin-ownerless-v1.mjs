@@ -13,7 +13,7 @@ fs.writeFileSync(runnerPath,runner);
 // The first patch intentionally models the owner-assisted variant for comparison.
 // The selected architecture restores the canonical owner source unchanged and lets
 // the OIDC-bound broker resolve credentials from the leased workspace profile.
-const canonicalOwner=execFileSync('git',['show',`HEAD:${ownerPath}`],{encoding:'utf8'});
+const canonicalOwner=execFileSync('git',['-c',`safe.directory=${process.cwd()}`,'show',`HEAD:${ownerPath}`],{encoding:'utf8'});
 fs.writeFileSync(ownerPath,canonicalOwner);
 
 console.log(JSON.stringify({ok:true,patch:'browser-autologin-ownerless-v1',owner_ui_unchanged:true,interactive_profile_credential_resolution:true,secret_material_logged:false}));
