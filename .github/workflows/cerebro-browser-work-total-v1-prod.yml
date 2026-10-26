@@ -8,6 +8,7 @@ on:
       - '.github/workflows/cerebro-browser-work-total-v1-prod.yml'
       - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
       - 'scripts/patch-browser-autologin-v1.mjs'
+      - 'scripts/patch-browser-autologin-contract-v1.mjs'
       - 'cerebro/runtime/browser-realtime-fastlane-v1.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
       - 'cerebro/runtime/browser-session-bundle-v1.mjs'
@@ -69,6 +70,8 @@ jobs:
         run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - name: Apply governed autonomous relogin patch
         run: node scripts/patch-browser-autologin-v1.mjs
+      - name: Assert auth challenges remain human-required
+        run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Test session bundle integrity
         run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
       - name: Test Work Total PROD contract
@@ -79,6 +82,7 @@ jobs:
         run: |
           node --check scripts/patch-browser-realtime-fastlane-v1.mjs
           node --check scripts/patch-browser-autologin-v1.mjs
+          node --check scripts/patch-browser-autologin-contract-v1.mjs
           node --check cerebro/runtime/browser-realtime-fastlane-v1.mjs
           node --check cerebro/runtime/browser-interactive-session-v3.mjs
           node --check cerebro/runtime/browser-job-runner-v2.mjs
@@ -145,6 +149,8 @@ jobs:
         run: node scripts/patch-browser-realtime-fastlane-v1.mjs
       - name: Apply governed autonomous relogin patch
         run: node scripts/patch-browser-autologin-v1.mjs
+      - name: Assert auth challenges remain human-required
+        run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Execute at most one isolated PROD Work Total job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
