@@ -19,7 +19,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-browser1-v2-live-host-workspace-v1
+  group: cerebro-browser1-v2-live-runtime357-v1
   cancel-in-progress: false
 
 env:
