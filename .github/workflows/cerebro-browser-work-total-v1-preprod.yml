@@ -9,6 +9,7 @@ on:
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
       - 'scripts/patch-browser-autologin-universal-v1.mjs'
+      - 'scripts/patch-browser-autologin-google-state-machine-v1.mjs'
       - 'scripts/patch-browser-autologin-preprod-fixture-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
       - 'cerebro/runtime/autologin-canary-server.mjs'
@@ -56,10 +57,12 @@ jobs:
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - run: node scripts/patch-browser-autologin-google-state-machine-v1.mjs
       - run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - run: node scripts/patch-browser-autologin-contract-v1.mjs
       - run: node --test cerebro/runtime/browser-work-total-autologin-v1.test.mjs
       - run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
+      - run: node --check scripts/patch-browser-autologin-google-state-machine-v1.mjs
       - run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
       - run: node --check cerebro/runtime/browser-job-runner-v2.mjs
       - run: node --check cerebro/runtime/autologin-canary-server.mjs
@@ -103,6 +106,7 @@ jobs:
       - run: node scripts/patch-browser-autologin-v1.mjs
       - run: node scripts/patch-browser-autologin-ownerless-v1.mjs
       - run: node scripts/patch-browser-autologin-universal-v1.mjs
+      - run: node scripts/patch-browser-autologin-google-state-machine-v1.mjs
       - run: node scripts/patch-browser-autologin-preprod-fixture-v1.mjs
       - run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Start isolated local login fixture
