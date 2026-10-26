@@ -1,3 +1,12 @@
+/* /cerebro owns the full surface. Global App launchers must never float over JARVIS, legacy V0 or Browser. */
+html[data-cerebro-console='1'] .ops-mobile-menu-button,
+html[data-cerebro-console='1'] .ops-mobile-drawer,
+html[data-cerebro-console='1'] .ops-mobile-backdrop,
+html[data-cerebro-console='1'] .calc-launcher,
+html[data-cerebro-console='1'] .calc-panel,
+html[data-cerebro-console='1'] .f-offcanvas-trigger,
+html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']{display:none!important}
+
 .cerebro-console-host{min-height:100vh;position:relative;background:#020a10}.cerebro-host-v0.is-hidden{position:fixed!important;inset:0!important;visibility:hidden!important;pointer-events:none!important;opacity:0!important;z-index:-10!important;overflow:hidden!important}.cerebro-host-v0.is-visible{position:relative;visibility:visible;opacity:1;z-index:auto}.cerebro-host-topbar{position:sticky;top:0;z-index:40;display:flex;justify-content:flex-end;min-height:46px;padding:6px 20px;border-bottom:1px solid rgba(76,216,224,.12);background:rgba(2,10,16,.76);backdrop-filter:blur(22px) saturate(130%)}.cerebro-view-switch{display:flex;align-items:center;gap:3px;padding:3px;border-radius:12px;background:rgba(8,24,31,.64);box-shadow:0 10px 26px rgba(0,0,0,.16)}.cerebro-view-switch-label{padding:0 8px;color:#658391;font-size:8px;font-weight:900;letter-spacing:.14em}.cerebro-view-switch button{border:0;border-radius:9px;background:transparent;color:#84a3b0;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:.06em;cursor:pointer}.cerebro-view-switch button.is-active{background:rgba(20,241,176,.09);color:#68f8d0}.cerebro-view-switch button:disabled{opacity:.3;cursor:not-allowed}.cerebro-view-switch button:focus-visible{outline:2px solid #14f1b0;outline-offset:2px}.cerebro-browser-entry-button{position:fixed;top:18px;right:18px;z-index:90;height:34px;padding:0 12px;border:1px solid rgba(55,217,255,.3);border-radius:9px;background:linear-gradient(180deg,rgba(31,133,255,.24),rgba(19,87,158,.18));box-shadow:inset 0 -2px 0 #2f9dff,0 0 24px rgba(47,157,255,.1);color:#d9f8ff;font-size:10px;font-weight:900;letter-spacing:.055em;cursor:pointer}.cerebro-browser-entry-button:hover{border-color:rgba(55,217,255,.55);background:linear-gradient(180deg,rgba(31,133,255,.34),rgba(19,87,158,.24))}.cerebro-browser-entry-button:focus-visible{outline:2px solid #37d9ff;outline-offset:2px}
 
 /* JARVIS is a presentation layer over the real Console V0. No duplicate chat/Gateway core. */
