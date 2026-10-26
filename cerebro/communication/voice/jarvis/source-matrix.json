@@ -1,0 +1,62 @@
+{
+  "voice_profile_id": "CEREBRO_JARVIS_ES_ES_V1",
+  "version": "1.0.0",
+  "locale_gate": "es-ES only",
+  "approved_references": [
+    {
+      "id": "JARVIS-IM1-MARKII-ES",
+      "title": "Iron Man · Mark II / Primer vuelo · Español Castellano",
+      "url": "https://www.youtube.com/watch?v=HzW5Ayz6-Bo",
+      "state": "CALM_TECHNICAL",
+      "source_status": "ACCEPTED_REFERENCE_PENDING_LOCAL_BINARY"
+    },
+    {
+      "id": "JARVIS-AOU-ULTRON-ES",
+      "title": "Vengadores: La era de Ultrón · Ultron mata a J.A.R.V.I.S · Español Castellano",
+      "url": "https://www.youtube.com/watch?v=Yf8v2rmn-WY",
+      "state": "FOCUSED_ALERT",
+      "source_status": "ACCEPTED_REFERENCE_PENDING_LOCAL_BINARY"
+    },
+    {
+      "id": "JARVIS-IM3-RTVE-MALIBU",
+      "title": "Iron Man 3 · ataque a la mansión de Malibú",
+      "url": "https://www.rtve.es/play/videos/cultura-en-rtvees/irm3-malibuattackpart1/1773489/",
+      "rtve_api": "https://www.rtve.es/api/videos/1773489.json",
+      "language_evidence": "RTVE ficha técnica: Castellano",
+      "state": "EMPATHIC",
+      "priority": "PRIMARY",
+      "source_status": "ACCEPTED_OFFICIAL_REFERENCE_ASSET_EXTRACTION_PENDING"
+    }
+  ],
+  "hard_rejections": [
+    {
+      "id": "IM3-DM-001",
+      "reason": "user-verified non-Spain / LATAM audio",
+      "status": "DO_NOT_USE"
+    },
+    {
+      "id": "IRON-MAN-2-VIDEOGAME",
+      "reason": "JARVIS voiced by Fran Canals, not core film Spain reference",
+      "status": "DO_NOT_USE"
+    },
+    {
+      "id": "MARVEL-STUDIOS-LEGENDS-JARVIS",
+      "reason": "possible later redub / not reliable original-film reference",
+      "status": "DO_NOT_USE_UNLESS_PROVEN_ORIGINAL"
+    },
+    {
+      "id": "GENERIC-SPANISH-QWEN-VOICEDESIGN",
+      "reason": "physical tests produced accent outside Spain Spanish",
+      "status": "REJECTED"
+    }
+  ],
+  "acceptance_pipeline": [
+    "SOURCE_FOUND",
+    "ES_ES_VERIFIED",
+    "VOICE_MATCH_REFERENCE",
+    "SPEAKER_ISOLATED",
+    "ACOUSTIC_QA",
+    "GOLD"
+  ],
+  "gold_rule": "30 clean verified seconds beats long contaminated or wrong-dialect audio"
+}
