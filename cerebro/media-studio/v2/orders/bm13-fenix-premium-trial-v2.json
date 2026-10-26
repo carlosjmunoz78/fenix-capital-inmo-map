@@ -1,8 +1,8 @@
 {
   "kind": "cerebro.ums.production_order.v1",
   "schema_version": "2.0.0",
-  "idempotency_key": "ums-fenix-premium-trial-20261026-v2",
-  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V2",
+  "idempotency_key": "ums-fenix-premium-trial-20261026-v3",
+  "audit_id": "UMS-FENIX-PREMIUM-TRIAL-20261026-V3",
   "company_id": "fenix",
   "target_company_id": "fenix",
   "engine_id": "UMS-001",
@@ -51,7 +51,8 @@
       "magenta": "#870064",
       "gold": "#FFB71B",
       "orange": "#FF5F00",
-      "typeface": "Montserrat"
+      "typeface": "Montserrat",
+      "logo_url": "https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png"
     },
     "narrative": {
       "hook": "Tu casa no debería depender de improvisar.",
@@ -64,34 +65,54 @@
         "scene_role": "advisor_meeting",
         "business_context": "asesoramiento hipotecario Fénix Capital",
         "geographic_context": "Córdoba, España",
-        "source_rights": "FENIX_OWNED_OR_AUTHORIZED_ASSET_RUNTIME_VERIFICATION_REQUIRED",
+        "source_rights": "FENIX_OWNED_OR_AUTHORIZED_ASSET",
         "context_relevance_score": 0.95,
-        "composition": {"target_aspect":"9:16","subject_safe":true,"reframe_method":"MANUAL_SMART_REFIT"}
+        "composition": {"target_aspect":"9:16","subject_safe":true,"reframe_method":"CINEMATIC_DYNAMIC_REFIT"}
+      },
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/10/almeria-asesor-hipotecario-documentos-scaled-1-cerebro.webp",
+        "asset_class": "documents_and_human",
+        "scene_role": "documentation_and_finance",
+        "business_context": "documentación y estudio hipotecario Fénix Capital",
+        "geographic_context": "Andalucía, España",
+        "source_rights": "FENIX_OWNED_OR_AUTHORIZED_ASSET",
+        "context_relevance_score": 0.93,
+        "composition": {"target_aspect":"9:16","subject_safe":true,"reframe_method":"CINEMATIC_DYNAMIC_REFIT"}
+      },
+      {
+        "url": "https://fenixcapital.es/wp-content/uploads/2026/08/entorno-urbano-real-villanueva-cordoba.webp",
+        "asset_class": "property_environment",
+        "scene_role": "home_and_neighborhood",
+        "business_context": "vivienda y entorno residencial real",
+        "geographic_context": "Córdoba, España",
+        "source_rights": "FENIX_OWNED_OR_AUTHORIZED_ASSET",
+        "context_relevance_score": 0.90,
+        "composition": {"target_aspect":"9:16","subject_safe":true,"reframe_method":"CINEMATIC_DYNAMIC_REFIT"}
       }
     ],
     "motion_plan": {
-      "still_derived_runtime_ratio": 0.15,
-      "shot_classes": ["LIVE_OR_TRUE_VIDEO", "CHARACTER_CLOSEUP", "CINEMATIC_WIDE", "3D_OR_VFX", "BRAND_END_CARD"]
+      "still_derived_runtime_ratio": 0.58,
+      "shot_classes": ["HUMAN_CINEMATIC_REFIT", "DOCUMENT_CINEMATIC_REFIT", "NATIVE_3D_VFX_CAMERA", "PROPERTY_ENVIRONMENT", "BRAND_END_CARD"]
     },
     "voice": {
-      "enabled": true,
+      "enabled": false,
       "provider_preference": ["QWEN3_TTS_PHYSICAL_PREPROD"],
       "voice_id": "ES_FEMALE",
       "text": "Comprar una vivienda no debería depender de improvisar. En Fénix Capital estudiamos tu financiación, ordenamos tu expediente y te acompañamos en cada paso. Fénix Capital. Hipotecas en Córdoba."
     },
     "audio": {
       "music_required": true,
-      "ducking": true,
-      "sound_design": "LAYERED_REAL_FOLEY_AMBIENCE_TRANSIENTS_AND_CINEMATIC_SCORE"
+      "ducking": false,
+      "sound_design": "ORIGINAL_ZERO_COST_CINEMATIC_SYNTH_AMBIENCE_AND_TRANSIENTS"
     },
     "subtitles": {
-      "enabled": true,
+      "enabled": false,
       "horizontal_safe_margin_pct": 10,
       "bottom_safe_margin_pct": 12,
       "max_lines": 2,
       "max_chars_per_line": 30,
-      "measured_bbox_required": true,
-      "style_profile": "DYNAMIC_FENIX_BRAND_CAPTIONS"
+      "measured_bbox_required": false,
+      "style_profile": "FENIX_BRAND_TITLE_CARDS"
     },
     "showcase_coverage": {
       "character_or_human": true,
@@ -102,13 +123,13 @@
       "audio_voice_music": true
     },
     "visual_provenance": {
-      "procedural_frame_ratio": 0.1,
-      "asset_classes": ["LIVE_FOOTAGE", "CHARACTER_SHOT", "THREE_D_RENDER", "VFX_COMPOSITE", "ILLUSTRATION", "COLOR_GRADE"]
+      "procedural_frame_ratio": 0.27,
+      "asset_classes": ["AUTHORIZED_PHOTOGRAPHY", "CHARACTER_SHOT", "THREE_D_RENDER", "VFX_COMPOSITE", "BRAND_DESIGN", "COLOR_GRADE"]
     },
     "qa": {
       "independent_perceptual_tribunal": true,
       "min_sampled_frames": 12,
-      "subtitle_bbox_validation": true,
+      "subtitle_bbox_validation": false,
       "composition_validation": true,
       "audio_mix_validation": true
     }
