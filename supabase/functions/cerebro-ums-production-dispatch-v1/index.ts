@@ -14,6 +14,8 @@ const GITHUB_WORKFLOW=".github/workflows/cerebro-ums-production-job-runner-v1.ym
 const GITHUB_REF="refs/heads/cerebro/ums-physical-production-executor-20261026";
 const JWKS=createRemoteJWKSet(new URL(`${GITHUB_ISSUER}/.well-known/jwks`));
 const MIME=new Set(["image/png","image/jpeg","image/webp","application/pdf","video/mp4","audio/wav","audio/mpeg"]);
+const QUALITY=new Set(["PREMIUM_GENERAL","PREMIUM_SOCIAL","PREMIUM_BRAND"]);
+const VIDEO_OUTPUTS=new Set(["REEL","SHORT_VIDEO","LANDSCAPE_VIDEO","LONG_VIDEO"]);
 
 function json(status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});}
 function bearer(req:Request){const h=req.headers.get("authorization")??"";return h.toLowerCase().startsWith("bearer ")?h.slice(7).trim():"";}
@@ -33,6 +35,28 @@ async function githubWorker(req:Request){
   }catch(e){return {ok:false,error:"GITHUB_OIDC_INVALID",detail:safeError(e)} as const;}
 }
 
+function validateProductionOrder(body:any){
+  if(!body||typeof body!=="object"||Array.isArray(body))throw new Error("UMS_ORDER_INVALID");
+  if(String(body.kind??"")!=="cerebro.ums.production_order.v1")throw new Error("UMS_ORDER_KIND_DENIED");
+  if(String(body.company_id??"")!=="fenix"||String(body.engine_id??"")!=="UMS-001")throw new Error("UMS_ORDER_SCOPE_DENIED");
+  if(String(body.environment??"PREPROD").toUpperCase()!=="PREPROD")throw new Error("UMS_ORDER_PREPROD_ONLY");
+  if(!QUALITY.has(String(body.quality_profile??"").toUpperCase()))throw new Error("UMS_ORDER_QUALITY_PROFILE_REQUIRED");
+  if(!VIDEO_OUTPUTS.has(String(body.output_type??"").toUpperCase()))throw new Error("UMS_ORDER_VIDEO_OUTPUT_REQUIRED");
+  if(Number(body.expected_cost_eur??0)!==0)throw new Error("UMS_ORDER_MONEY_LIMIT");
+  if(body.publish_requested===true)throw new Error("UMS_ORDER_PUBLISH_DENIED");
+  if(!body.idempotency_key||!body.audit_id)throw new Error("UMS_ORDER_AUDIT_REQUIRED");
+  if(!body.creative_payload||typeof body.creative_payload!=="object"||Array.isArray(body.creative_payload))throw new Error("UMS_ORDER_PAYLOAD_REQUIRED");
+  const assets=body.creative_payload.assets;
+  if(!Array.isArray(assets)||assets.length<4)throw new Error("UMS_ORDER_REAL_ASSETS_MIN_4");
+}
+
+async function enqueueOrder(body:any,workerId:string){
+  validateProductionOrder(body);
+  const request={...body,created_by:workerId,environment:"PREPROD",expected_cost_eur:0,publish_requested:false};
+  const {data,error}=await svc.rpc("cerebro_creative_enqueue_v1",{p_request:request});
+  if(error)throw error;return data;
+}
+
 async function leaseRow(jobId:string,leaseId:string,workerId:string){
   const {data,error}=await svc.from("cerebro_creative_job_v1")
     .select("job_id,company_id,engine_id,environment,status,lease_id,lease_owner,request")
@@ -48,6 +72,11 @@ Deno.serve(async req=>{
   if(req.method==="GET"&&route==="health")return json(200,{ok:true,service:"cerebro-ums-production-dispatch-v1",environment:"PREPROD",engine_id:"UMS-001",queue:"cerebro_creative_job_v1",lease_rpc:"cerebro_ums_production_lease_v1",bucket:BUCKET,github_oidc:true,legacy_renderer_allowed:false,heavy_render_outside_supabase:true,additional_cost_eur:0,publish_authorized:false});
 
   const w=await githubWorker(req);if(!w.ok)return json(403,w);
+
+  if(req.method==="POST"&&route==="enqueue"){
+    try{return json(200,await enqueueOrder(await req.json(),w.worker_id));}
+    catch(e){return json(400,{ok:false,error:"UMS_ENQUEUE_FAILED",detail:safeError(e)});}
+  }
 
   if(req.method==="POST"&&route==="lease"){
     const {data,error}=await svc.rpc("cerebro_ums_production_lease_v1",{p_worker_id:w.worker_id,p_lease_seconds:900});
