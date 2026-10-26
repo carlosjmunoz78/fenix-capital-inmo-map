@@ -38,8 +38,20 @@ runner=replaceOnce(runner,
   "result=await runInteractiveBrowserSessionV3({job:{...job,commands:effectiveCommands},credential:null,credential_loader:interactiveCredentialLoader,token_provider:tokenProvider,fetch_impl});",
   'RUNNER_INTERACTIVE_CALL');
 runner=replaceOnce(runner,
+  "  if(seed_canary)await dispatch('phase2-canary-seed',{worker_slot,stage_concurrency});",
+  "  if(seed_canary)await dispatch('phase2-canary-seed',{worker_slot,stage_concurrency,phase:String(process.env.CEREBRO_BROWSER_CANARY_PHASE||'login'),canary_id:`${String(process.env.GITHUB_RUN_ID||run_id)}-${String(process.env.GITHUB_RUN_ATTEMPT||'1')}`});",
+  'RUNNER_DETERMINISTIC_CANARY_SEED');
+runner=replaceOnce(runner,
+  "evidence_captured:Boolean(result.final_evidence),credential_materialized,interactive_session:result.interactive_session===true,session_id:result.interactive_session===true?result.session_id||null:null,secret_material_logged:false};",
+  "evidence_captured:Boolean(result.final_evidence),credential_materialized,interactive_session:result.interactive_session===true,session_id:result.interactive_session===true?result.session_id||null:null,workspace_restore:result.workspace_restore||null,workspace_hibernated:result.workspace_hibernated===true,workspace_bundle_id:result.workspace_bundle_id||null,workspace_verification_state:result.workspace_verification_state||null,workspace_hibernate_reason:result.workspace_hibernate_reason||null,secret_material_logged:false};",
+  'RUNNER_RESULT_SUMMARY');
+runner=replaceOnce(runner,
+  "function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,human_required:result.summary?.human_required===true,human_required_reason:result.summary?.human_required_reason||null,human_required_code:result.summary?.human_required_code||null,credential_materialized:result.summary?.credential_materialized===true,interactive_session:result.summary?.interactive_session===true,secret_material_logged:false};}",
+  "function safeConsoleResult(result){return {ok:result.ok,status:result.status,job_id:result.job_id||null,worker_slot:result.worker_slot,stage_concurrency:result.stage_concurrency,duration_ms:result.duration_ms||null,final_url:result.summary?.final_url||null,authorization_status:result.summary?.authorization_status||null,human_required:result.summary?.human_required===true,human_required_reason:result.summary?.human_required_reason||null,human_required_code:result.summary?.human_required_code||null,credential_materialized:result.summary?.credential_materialized===true,interactive_session:result.summary?.interactive_session===true,workspace_restore:result.summary?.workspace_restore||null,workspace_hibernated:result.summary?.workspace_hibernated===true,workspace_bundle_id:result.summary?.workspace_bundle_id||null,workspace_verification_state:result.summary?.workspace_verification_state||null,workspace_hibernate_reason:result.summary?.workspace_hibernate_reason||null,secret_material_logged:false};}",
+  'RUNNER_SAFE_CONSOLE_RESULT');
+runner=replaceOnce(runner,
   "interactive_vault_autologin:true,credential_secret_memory_only:true",
-  "interactive_vault_autologin:true,credential_secret_memory_only:true,lazy_credential_materialization:true,restore_before_credential_materialization:true",
+  "interactive_vault_autologin:true,credential_secret_memory_only:true,lazy_credential_materialization:true,restore_before_credential_materialization:true,deterministic_two_phase_canary:true",
   'RUNNER_CONTRACT');
 fs.writeFileSync(runnerPath,runner);
 
@@ -74,4 +86,4 @@ runtime=replaceOnce(runtime,
   'RUNTIME_CONTRACT');
 fs.writeFileSync(runtimePath,runtime);
 
-console.log(JSON.stringify({ok:true,patch:'browser-autologin-lazy-credential-v1',restore_before_credential_materialization:true,lazy_credential_materialization:true,verified_bundle_short_circuit:true,secret_material_logged:false}));
+console.log(JSON.stringify({ok:true,patch:'browser-autologin-lazy-credential-v1',restore_before_credential_materialization:true,lazy_credential_materialization:true,verified_bundle_short_circuit:true,deterministic_two_phase_canary:true,workspace_restore_evidence:true,secret_material_logged:false}));
