@@ -56,38 +56,32 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Detect and install missing media dependencies
+      - name: Install isolated static FFmpeg toolchain and Montserrat
         shell: bash
         run: |
           set -euo pipefail
-          declare -a packages=()
-          for bin in ffmpeg ffprobe curl xz fc-match; do
-            if command -v "$bin" >/dev/null 2>&1; then
-              echo "$bin=FOUND:$(command -v "$bin")"
-            else
-              echo "$bin=MISSING"
-              case "$bin" in
-                ffmpeg|ffprobe) packages+=(ffmpeg) ;;
-                curl) packages+=(curl) ;;
-                xz) packages+=(xz-utils) ;;
-                fc-match) packages+=(fontconfig) ;;
-              esac
-            fi
-          done
-          if ((${#packages[@]})); then
-            mapfile -t packages < <(printf '%s\n' "${packages[@]}" | awk '!seen[$0]++')
-            echo "Installing missing packages: ${packages[*]}"
-            timeout 180s sudo apt-get update -qq
-            timeout 180s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${packages[@]}"
-          fi
-          for bin in ffmpeg ffprobe curl xz fc-match; do
-            command -v "$bin" >/dev/null 2>&1 || { echo "$bin=STILL_MISSING"; exit 31; }
+          for bin in curl xz fc-match; do
+            command -v "$bin" >/dev/null 2>&1 || { echo "$bin=MISSING"; exit 31; }
             echo "$bin=READY:$(command -v "$bin")"
           done
+          toolroot="$RUNNER_TEMP/cerebro-ums-media-tools"
+          mkdir -p "$toolroot/npm" "$toolroot/bin"
+          cd "$toolroot/npm"
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund --save-exact ffmpeg-static@5.2.0 ffprobe-static@3.1.0
+          ffmpeg_src="$(node -p "require('ffmpeg-static')")"
+          ffprobe_src="$(node -p "require('ffprobe-static').path")"
+          test -x "$ffmpeg_src"
+          test -x "$ffprobe_src"
+          ln -sf "$ffmpeg_src" "$toolroot/bin/ffmpeg"
+          ln -sf "$ffprobe_src" "$toolroot/bin/ffprobe"
+          echo "$toolroot/bin" >> "$GITHUB_PATH"
+          export PATH="$toolroot/bin:$PATH"
           mkdir -p "$HOME/.local/share/fonts/montserrat"
           curl --retry 3 --retry-delay 2 --connect-timeout 10 --max-time 45 -fsSL 'https://raw.githubusercontent.com/google/fonts/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf' -o "$HOME/.local/share/fonts/montserrat/Montserrat.ttf"
           fc-cache -f "$HOME/.local/share/fonts"
           ffmpeg -version | head -1
+          ffprobe -version | head -1
           fc-match Montserrat
 
       - name: Install and verify Blender 5.2.3 official binary
