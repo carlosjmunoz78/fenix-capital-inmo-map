@@ -109,6 +109,18 @@ jobs:
         run: |
           node cerebro/runtime/autologin-canary-server.mjs > /tmp/cerebro-autologin-canary.log 2>&1 &
           echo $! > /tmp/cerebro-autologin-canary.pid
-          node --input-type=module -e "const r=await fetch('http://127.0.0.1:8787/health');if(!r.ok)process.exit(1);const j=await r.json();if(j.ok!==true||j.secrets!==false)process.exit(1);console.log(JSON.stringify(j));"
+          node --input-type=module <<'NODE'
+          let last='NOT_READY';
+          for(let i=0;i<30;i++){
+            try{
+              const r=await fetch('http://127.0.0.1:8787/health');
+              const j=await r.json();
+              if(r.ok&&j.ok===true&&j.secrets===false){console.log(JSON.stringify(j));process.exit(0);}
+              last=`BAD_HEALTH:${r.status}`;
+            }catch(e){last=String(e?.message||e);}
+            await new Promise(resolve=>setTimeout(resolve,250));
+          }
+          console.error(last);process.exit(1);
+          NODE
       - name: Execute exactly one isolated PREPROD canary job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
