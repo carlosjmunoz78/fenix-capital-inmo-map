@@ -223,23 +223,8 @@ target.keyframe_insert(data_path="location", frame=1)
 target.location = (0.12, 0.0, 0.95)
 target.keyframe_insert(data_path="location", frame=96)
 
-# Filmic compositor: glare + subtle lens distortion, controlled and brand-safe.
-scene.use_nodes = True
-nodes = scene.node_tree.nodes
-links = scene.node_tree.links
-nodes.clear()
-rlayers = nodes.new("CompositorNodeRLayers")
-glare = nodes.new("CompositorNodeGlare")
-glare.glare_type = "FOG_GLOW"
-glare.quality = "HIGH"
-glare.threshold = 0.75
-glare.size = 7
-lens = nodes.new("CompositorNodeLensdist")
-lens.inputs["Distortion"].default_value = 0.006
-comp = nodes.new("CompositorNodeComposite")
-links.new(rlayers.outputs["Image"], glare.inputs["Image"])
-links.new(glare.outputs["Image"], lens.inputs["Image"])
-links.new(lens.outputs["Image"], comp.inputs["Image"])
+# Blender 5.2 compositor APIs are intentionally not used here; physical finishing/glow
+# is applied later by the FFmpeg finishing stage so this scene remains stable and rebuildable.
 
 # Ensure smooth interpolation.
 for action in bpy.data.actions:
