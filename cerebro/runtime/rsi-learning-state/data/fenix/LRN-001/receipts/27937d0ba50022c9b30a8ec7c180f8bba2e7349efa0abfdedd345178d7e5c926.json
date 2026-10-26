@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "batch_ref": "sha256:27937d0ba50022c9b30a8ec7c180f8bba2e7349efa0abfdedd345178d7e5c926",
+  "source_file": "remote-lrn-batch_a59465e36290e8376d8b082c.json",
+  "processed_at": "2026-10-26T17:21:24.737Z",
+  "result": {
+    "status": "GREEN",
+    "persisted_total": 4,
+    "duplicates_total": 0,
+    "held_total": 0,
+    "human_required": []
+  },
+  "source_preserved": true,
+  "prod_authorized": false
+}
