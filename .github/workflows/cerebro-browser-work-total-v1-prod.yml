@@ -56,6 +56,7 @@ env:
   CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'
   CEREBRO_BROWSER_INTERACTIVE_HUMAN_FRAME_MS: '220'
   CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
+  CEREBRO_BROWSER_HEADLESS: 'false'
 
 jobs:
   validate:
@@ -164,8 +165,8 @@ jobs:
         run: node scripts/patch-browser-autologin-universal-v1.mjs
       - name: Assert auth challenges remain human-required
         run: node scripts/patch-browser-autologin-contract-v1.mjs
-      - name: Execute at most one isolated PROD Work Total job
-        run: node cerebro/runtime/browser-job-runner-v2.mjs
+      - name: Execute at most one isolated PROD Work Total job in visible Chromium
+        run: xvfb-run -a node cerebro/runtime/browser-job-runner-v2.mjs
 
   rearm:
     name: Rearm isolated PROD Work Total consumer
@@ -187,4 +188,4 @@ jobs:
           console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,environment:'PROD',work_total_v1:true,static_secret_added:false}));
           NODE
 
-# Manual governed login canary for profile Carlos · Google principal · 2026-10-26
+# CEREBRO Console browser uses visible Chromium for governed interactive provider logins.
