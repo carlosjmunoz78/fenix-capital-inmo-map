@@ -16,10 +16,12 @@ test('interactive Work Total materializes credentials only in the governed worke
  assert.match(runner,/interactive_vault_autologin:true/);
 });
 
-test('autonomous login keeps Google specialized, generic fallback, metadata separation and frame runtime intact',async()=>{
+test('autonomous login keeps Google specialized, staged, generic fallback, metadata separation and frame runtime intact',async()=>{
  const runtime=await read('cerebro/runtime/browser-interactive-session-v3.mjs');
  assert.match(runtime,/credential_broker_autologin:true/);
  assert.match(runtime,/google_autologin_adapter:true/);
+ assert.match(runtime,/auth_state_machine:true/);
+ assert.match(runtime,/auth_stage_diagnostics:true/);
  assert.match(runtime,/universal_form_autologin:true/);
  assert.match(runtime,/manual_login_default:false/);
  assert.match(runtime,/allowed_origin_bound:true/);
@@ -29,6 +31,12 @@ test('autonomous login keeps Google specialized, generic fallback, metadata sepa
  assert.match(runtime,/CREDENTIAL_LOGIN_URL_REQUIRED/);
  assert.match(runtime,/AUTH_LOGIN_ORIGIN_DENIED/);
  assert.match(runtime,/AUTH_REDIRECT_ORIGIN_DENIED/);
+ assert.match(runtime,/executeAuthStage/);
+ assert.match(runtime,/AUTH_IDENTIFIER_FORM_UNAVAILABLE/);
+ assert.match(runtime,/AUTH_PASSWORD_FORM_UNAVAILABLE/);
+ assert.match(runtime,/CREDENTIAL_REJECTED_OR_PASSWORD_NOT_ACCEPTED/);
+ assert.match(runtime,/googlePasswordRoute/);
+ assert.match(runtime,/auth_stage:'PASSWORD_SUBMITTED'/);
  assert.match(runtime,/worker\/confirm-bound-login/);
  assert.match(runtime,/type:'FILL'.*usernameSelector/s);
  assert.match(runtime,/type:'FILL'.*passwordSelector/s);
@@ -38,6 +46,15 @@ test('autonomous login keeps Google specialized, generic fallback, metadata sepa
  assert.match(runtime,/export async function runInteractiveBrowserSessionV3/);
  assert.doesNotMatch(runtime,/AUTO_LOGIN_PROVIDER_NOT_READY/);
  assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
+});
+
+test('Google auth state machine is wired into validation and physical PREPROD workflows',async()=>{
+ const validate=await read('.github/workflows/cerebro-browser-autologin-universal-v1-preprod.yml');
+ const physical=await read('.github/workflows/cerebro-browser-work-total-v1-preprod.yml');
+ for(const workflow of [validate,physical]){
+   assert.match(workflow,/patch-browser-autologin-google-state-machine-v1\.mjs/);
+   assert.match(workflow,/node scripts\/patch-browser-autologin-google-state-machine-v1\.mjs/);
+ }
 });
 
 test('universal login metadata is an additive non-secret workspace contract',async()=>{
