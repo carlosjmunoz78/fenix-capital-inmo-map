@@ -1,0 +1,55 @@
+{
+  "voice_profile_id": "ANA_FENIX_FINANCE_ES_ES_V1",
+  "version": "1.0.0",
+  "required_before_prod": true,
+  "test_groups": {
+    "identity": [
+      "same speaker perceived across all presets",
+      "no accent drift outside es-ES",
+      "no robotic artifacts",
+      "no material timbre drift on long answers"
+    ],
+    "financial_language": [
+      "FEIN",
+      "CIRBE",
+      "tasación",
+      "pretasación",
+      "ratio de endeudamiento",
+      "novación",
+      "subrogación",
+      "provisión de fondos",
+      "compraventa",
+      "cuota hipotecaria"
+    ],
+    "numbers_dates_amounts": [
+      "3.500 euros más IVA",
+      "ciento veinte mil euros",
+      "treinta y cinco por ciento",
+      "veinticuatro a cuarenta y ocho horas",
+      "15 de noviembre de 2026",
+      "1.275,43 euros"
+    ],
+    "entities": [
+      "BBVA",
+      "Abanca",
+      "Caja Rural Granada",
+      "Fénix Capital",
+      "Córdoba"
+    ],
+    "dialogue": [
+      "short command",
+      "long explanation",
+      "client reassurance",
+      "serious financial warning",
+      "executive summary",
+      "urgent operational alert"
+    ]
+  },
+  "promotion_thresholds": {
+    "human_voice_acceptance_min_10": 9.0,
+    "es_es_authenticity_min_10": 9.5,
+    "identity_stability_min_10": 9.0,
+    "financial_pronunciation_min_10": 9.0,
+    "critical_failures_allowed": 0
+  }
+}
