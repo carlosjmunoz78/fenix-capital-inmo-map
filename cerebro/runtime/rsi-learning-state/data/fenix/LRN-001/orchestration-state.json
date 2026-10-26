@@ -6,20 +6,20 @@
   "environment": "PREPROD",
   "version": "0.6.0",
   "last_success": {
-    "DAILY": "2026-10-25T19:35:15.935Z",
+    "DAILY": "2026-10-26T21:44:26.398Z",
     "WEEKLY": "2026-10-22T22:33:59.575Z",
     "MONTHLY": "2026-10-08T18:22:32.144Z"
   },
-  "plans_emitted": 21,
+  "plans_emitted": 22,
   "additional_cost_eur": 0,
   "prod_authorized": false,
   "prod_write_authorized": false,
   "trading_access": false,
-  "last_planned_at": "2026-10-26T17:21:24.737Z",
+  "last_planned_at": "2026-10-26T21:44:26.398Z",
   "last_result": {
     "cadence": "DAILY",
     "status": "GREEN",
-    "completed_at": "2026-10-25T19:35:15.935Z"
+    "completed_at": "2026-10-26T21:44:26.398Z"
   },
   "migration_history": [
     {
