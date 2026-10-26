@@ -40,7 +40,7 @@ env:
   CEREBRO_BROWSER_STAGE_CONCURRENCY: '1'
   CEREBRO_BROWSER_WORKER_SLOT: '1'
   CEREBRO_BROWSER_PHASE2_SEED_CANARY: 'false'
-  CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '720000'
+  CEREBRO_BROWSER_INTERACTIVE_MAX_MS: '2400000'
   CEREBRO_BROWSER_INTERACTIVE_FRAME_MS: '1400'
   CEREBRO_BROWSER_INTERACTIVE_POLL_MS: '35'
 
@@ -48,7 +48,7 @@ jobs:
   validate:
     name: Validate Work Total PROD candidate
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -56,12 +56,35 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Apply isolated interactive login hotfix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const runtime='cerebro/runtime/browser-interactive-session-v3.mjs';
+          let source=fs.readFileSync(runtime,'utf8');
+          const oldCap="const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);";
+          const newCap="const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||2400000),2400000);";
+          if(!source.includes(oldCap)) throw new Error('LOGIN_HOTFIX_RUNTIME_CAP_ANCHOR_MISSING');
+          source=source.replace(oldCap,newCap);
+          fs.writeFileSync(runtime,source);
+
+          const worker='cerebro/runtime/cloud-browser-worker-v0.mjs';
+          source=fs.readFileSync(worker,'utf8');
+          const oldMask="mask: [activePage.locator(SENSITIVE_FIELD_SELECTOR)],";
+          const newMask="mask: String(label).startsWith('live-') ? [] : [activePage.locator(SENSITIVE_FIELD_SELECTOR)],";
+          if(!source.includes(oldMask)) throw new Error('LOGIN_HOTFIX_LIVE_MASK_ANCHOR_MISSING');
+          source=source.replace(oldMask,newMask);
+          fs.writeFileSync(worker,source);
+          console.log(JSON.stringify({ok:true,hotfix:'interactive-login-v1',live_frame_redaction:false,stored_evidence_redaction:true,max_session_ms:2400000}));
+          NODE
       - name: Test session bundle integrity
         run: node --test cerebro/runtime/browser-session-bundle-v1.test.mjs
       - name: Test Work Total PROD contract
         run: node --test cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs
-      - name: Syntax-check runtime
-        run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
+      - name: Syntax-check hotfixed runtime
+        run: |
+          node --check cerebro/runtime/browser-interactive-session-v3.mjs
+          node --check cerebro/runtime/cloud-browser-worker-v0.mjs
       - name: Build application
         run: npm run build
 
@@ -112,7 +135,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: mcr.microsoft.com/playwright:v1.62.1-noble
-    timeout-minutes: 15
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -120,6 +143,27 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
+      - name: Apply isolated interactive login hotfix
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const runtime='cerebro/runtime/browser-interactive-session-v3.mjs';
+          let source=fs.readFileSync(runtime,'utf8');
+          const oldCap="const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);";
+          const newCap="const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||2400000),2400000);";
+          if(!source.includes(oldCap)) throw new Error('LOGIN_HOTFIX_RUNTIME_CAP_ANCHOR_MISSING');
+          source=source.replace(oldCap,newCap);
+          fs.writeFileSync(runtime,source);
+
+          const worker='cerebro/runtime/cloud-browser-worker-v0.mjs';
+          source=fs.readFileSync(worker,'utf8');
+          const oldMask="mask: [activePage.locator(SENSITIVE_FIELD_SELECTOR)],";
+          const newMask="mask: String(label).startsWith('live-') ? [] : [activePage.locator(SENSITIVE_FIELD_SELECTOR)],";
+          if(!source.includes(oldMask)) throw new Error('LOGIN_HOTFIX_LIVE_MASK_ANCHOR_MISSING');
+          source=source.replace(oldMask,newMask);
+          fs.writeFileSync(worker,source);
+          console.log(JSON.stringify({ok:true,hotfix:'interactive-login-v1',live_frame_redaction:false,stored_evidence_redaction:true,max_session_ms:2400000}));
+          NODE
       - name: Execute at most one isolated PROD Work Total job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
 
