@@ -24,6 +24,8 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(work).toContain('<CerebroConsoleShell/>');
   expect(work).toContain('fetchCerebroActivity');
   expect(work).not.toContain('querySelector');
+  const browserConsole=fs.readFileSync('src/CerebroBrowserConsole.tsx','utf8');
+  expect(browserConsole).toContain("document.querySelector<HTMLElement>('.cerebro-host-v0 .cerebro-console')");
   const workCss=fs.readFileSync('src/cerebro-jarvis-work.css','utf8');
   expect(workCss).toContain('--jw-bg:#020a10');
   expect(workCss).toContain('--jw-blue:#2c9cff');
