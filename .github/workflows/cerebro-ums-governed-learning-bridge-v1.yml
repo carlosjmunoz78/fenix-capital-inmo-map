@@ -49,14 +49,36 @@ jobs:
           set -euo pipefail
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
+          import {evaluateUniversalMediaStudioReadiness} from './cerebro/media-studio/v2/runtime/readiness-gate.mjs';
           const report=JSON.parse(fs.readFileSync(process.env.UMS_REPORT,'utf8'));
           const readiness=JSON.parse(fs.readFileSync('cerebro/media-studio/v2/benchmarks/required-benchmarks.json','utf8'));
           if(report.state_type!=='CEREBRO_UMS_CONTINUOUS_LEARNING_PROPOSAL_V1') throw new Error('UMS_REPORT_INVALID');
           if(report.environment!=='PREPROD'||report.knowledge_auto_promotion!==false||report.readiness_mutation!==false) throw new Error('UMS_AUTHORITY_EXPANSION');
           if(report.prod_authorized||report.prod_write_authorized||report.prod_mutation_authorized||report.spend_authorized||report.trading_access||Number(report.additional_cost_eur)!==0) throw new Error('UMS_UNSAFE_AUTHORITY');
-          if(readiness.gate!=='UNIVERSAL_MEDIA_STUDIO_READY'||readiness.status!=='NOT_READY') throw new Error('UMS_FALSE_READY');
-          if((readiness.benchmarks||[]).some((x)=>x.state==='PASS_WITH_EVIDENCE')) throw new Error('UMS_BENCHMARK_PASS_WITHOUT_PHYSICAL_EVIDENCE');
-          console.log(JSON.stringify({status:'UMS_GOVERNED_LEARNING_PREPROD_GREEN',media_candidates:report.media_relevant_capabilities,refresh_jobs:report.source_refresh_jobs.length,readiness:readiness.status}));
+          if(readiness.gate!=='UNIVERSAL_MEDIA_STUDIO_READY') throw new Error('UMS_READINESS_GATE_INVALID');
+
+          const allowedStates=new Set(['NOT_RUN','RUNNING','FAIL','PASS_WITH_EVIDENCE']);
+          for(const benchmark of readiness.benchmarks||[]){
+            if(!allowedStates.has(benchmark.state)) throw new Error(`UMS_BENCHMARK_STATE_INVALID:${benchmark.id}:${benchmark.state}`);
+            if(benchmark.state==='PASS_WITH_EVIDENCE' && (typeof benchmark.evidence_ref!=='string'||benchmark.evidence_ref.length===0)){
+              throw new Error(`UMS_BENCHMARK_PASS_WITHOUT_PHYSICAL_EVIDENCE:${benchmark.id}`);
+            }
+          }
+
+          const evaluated=evaluateUniversalMediaStudioReadiness(readiness);
+          const expectedStatus=evaluated.ready?'READY':'NOT_READY';
+          if(readiness.status!==expectedStatus) throw new Error(`UMS_READINESS_STATUS_MISMATCH:${readiness.status}:${expectedStatus}`);
+          if(evaluated.ready) throw new Error('UMS_PREMATURE_READY_FOR_THIS_PR');
+          if(!evaluated.incomplete.includes('BM-13')) throw new Error('UMS_PREMIUM_CREATIVE_PROOF_MUST_REMAIN_PENDING');
+
+          console.log(JSON.stringify({
+            status:'UMS_GOVERNED_LEARNING_PREPROD_GREEN',
+            media_candidates:report.media_relevant_capabilities,
+            refresh_jobs:report.source_refresh_jobs.length,
+            readiness:readiness.status,
+            passed_with_evidence:evaluated.passed_with_evidence,
+            incomplete:evaluated.incomplete
+          }));
           NODE
       - name: Upload UMS learning proposal evidence
         uses: actions/upload-artifact@v4
