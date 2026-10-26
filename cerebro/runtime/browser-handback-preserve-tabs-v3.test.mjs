@@ -22,8 +22,9 @@ test('human handback snapshots the live human tab before identity verification',
 });
 
 test('runtime contract advertises preserved handback tab and no secret relaxation',()=>{
-  assert.match(source,/schema_version:'3\.5\.5'/);
+  assert.match(source,/schema_version:'3\.5\.7'/);
   assert.match(source,/handback_preserves_active_tab:true/);
+  assert.match(source,/transient_poll_retry:true/);
   assert.match(source,/human_input_encrypted_aes_gcm:true/);
   assert.match(source,/raw_cdp_exposed:false/);
   assert.match(source,/incremental_cost_eur:0/);
