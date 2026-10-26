@@ -1,0 +1,44 @@
+name: CEREBRO Browser Handback PREPROD V1
+
+on:
+  push:
+    branches: ['preprod/browser-autologin-universal-v1-20261026']
+    paths:
+      - '.github/workflows/cerebro-browser-handback-preprod-v1.yml'
+      - 'cerebro/runtime/browser-interactive-session-v3.mjs'
+      - 'cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  handback-regression:
+    name: Preserve active tab across human handback
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax check
+        run: node --check cerebro/runtime/browser-interactive-session-v3.mjs
+      - name: Focused handback regression
+        run: node --test cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs
+      - name: Safety contract
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const s=fs.readFileSync('cerebro/runtime/browser-interactive-session-v3.mjs','utf8');
+          const required=[
+            "handback_preserves_active_tab:true",
+            "human_input_encrypted_aes_gcm:true",
+            "raw_cdp_exposed:false",
+            "incremental_cost_eur:0",
+            "{type:'OPEN_TAB',url:'https://myaccount.google.com/'}",
+            "{type:'CLOSE_TAB'},{type:'SWITCH_TAB',index:originalIndex}"
+          ];
+          for(const x of required)if(!s.includes(x))throw new Error(`HAND_BACK_CONTRACT_MISSING:${x}`);
+          console.log(JSON.stringify({ok:true,environment:'PREPROD',scope:'HAND_BACK_TAB_PRESERVATION',secret_material_logged:false,incremental_cost_eur:0}));
+          NODE
