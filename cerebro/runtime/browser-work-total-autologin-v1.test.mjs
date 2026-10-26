@@ -40,6 +40,16 @@ test('autonomous login keeps Google specialized, generic fallback, metadata sepa
  assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
 });
 
+test('synthetic localhost fixture remains PREPROD-only and can preserve its explicit login URL',async()=>{
+ const runtime=await read('cerebro/runtime/browser-interactive-session-v3.mjs');
+ assert.match(runtime,/preprod_local_fixture_isolated:true/);
+ assert.match(runtime,/normalizedFixtureUrl/);
+ assert.match(runtime,/base\?\.environment==='PREPROD'/);
+ assert.match(runtime,/meta\.provider==='synthetic'/);
+ assert.match(runtime,/fixtureLoginOrigin===configuredFixtureOrigin/);
+ assert.doesNotMatch(runtime,/base\?\.environment==='PROD'.*synthetic/s);
+});
+
 test('owner surface remains canonical and does not materialize credentials',async()=>{
  const owner=await read('supabase/functions/cerebro-browser-work-total-owner-v1-prod/index.ts');
  assert.match(owner,/p_credential_ref_id:null/);
