@@ -9,6 +9,7 @@ on:
       - 'scripts/patch-browser-realtime-fastlane-v1.mjs'
       - 'scripts/patch-browser-autologin-v1.mjs'
       - 'scripts/patch-browser-autologin-ownerless-v1.mjs'
+      - 'scripts/patch-browser-autologin-universal-v1.mjs'
       - 'scripts/patch-browser-autologin-contract-v1.mjs'
       - 'cerebro/runtime/browser-realtime-fastlane-v1.mjs'
       - 'cerebro/runtime/browser-interactive-session-v3.mjs'
@@ -24,6 +25,7 @@ on:
       - 'src/cerebroBrowserWorkTotalDock.ts'
       - 'src/cerebroBrowserInteractive.ts'
       - 'supabase/migrations/20261026100000_cerebro_browser_credential_broker_v3_interactive.sql'
+      - 'supabase/migrations/20261026123000_cerebro_browser_workspace_login_config_v1.sql'
       - 'supabase/functions/cerebro-browser-work-total-autologin-v1-prod/**'
       - 'supabase/functions/cerebro-browser-work-total-owner-v1-prod/**'
       - 'supabase/functions/cerebro-browser-work-total-v1-prod/**'
@@ -73,6 +75,8 @@ jobs:
         run: node scripts/patch-browser-autologin-v1.mjs
       - name: Preserve canonical owner and resolve credential in broker
         run: node scripts/patch-browser-autologin-ownerless-v1.mjs
+      - name: Apply universal governed login adapter
+        run: node scripts/patch-browser-autologin-universal-v1.mjs
       - name: Assert auth challenges remain human-required
         run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Test session bundle integrity
@@ -86,6 +90,7 @@ jobs:
           node --check scripts/patch-browser-realtime-fastlane-v1.mjs
           node --check scripts/patch-browser-autologin-v1.mjs
           node --check scripts/patch-browser-autologin-ownerless-v1.mjs
+          node --check scripts/patch-browser-autologin-universal-v1.mjs
           node --check scripts/patch-browser-autologin-contract-v1.mjs
           node --check cerebro/runtime/browser-realtime-fastlane-v1.mjs
           node --check cerebro/runtime/browser-interactive-session-v3.mjs
@@ -155,6 +160,8 @@ jobs:
         run: node scripts/patch-browser-autologin-v1.mjs
       - name: Preserve canonical owner and resolve credential in broker
         run: node scripts/patch-browser-autologin-ownerless-v1.mjs
+      - name: Apply universal governed login adapter
+        run: node scripts/patch-browser-autologin-universal-v1.mjs
       - name: Assert auth challenges remain human-required
         run: node scripts/patch-browser-autologin-contract-v1.mjs
       - name: Execute at most one isolated PROD Work Total job
