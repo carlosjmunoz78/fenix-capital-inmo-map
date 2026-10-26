@@ -20,6 +20,7 @@ must(host,"return'OPERATIVA'",'JARVIS Work default view');
 must(host,"import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';",'Work surface import');
 must(host,'<CerebroJarvisWorkConsole','Work surface mount');
 must(host,'hidden={browser}','Work stays mounted while Browser is visible');
+must(host,'className="cerebro-work-mount cerebro-host-v0"','Browser retains canonical V0 host contract around Work');
 must(host,"if(section==='legacy-v0')return'V0'",'legacy V0 rollback route');
 must(host,'<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>','legacy canonical V0 rollback');
 mustNot(host,'CerebroOperativeConsole','parallel Operativa console must not be mounted by host');
