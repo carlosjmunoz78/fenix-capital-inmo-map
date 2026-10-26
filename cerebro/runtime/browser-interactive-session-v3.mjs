@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import {createGovernedCloudBrowserWorker} from './cloud-browser-governed-session-v1.mjs';
 import {compileBrowser1Commands} from './browser1-access-v1.mjs';
 import {decryptWorkspaceSnapshot,encryptWorkspaceSnapshot,exportProfileStorageState,restoreProfileStorageState} from './browser-session-bundle-v1.mjs';
+import {pollInteractiveWithRetry} from './browser-interactive-poll-retry-v1.mjs';
 
 const PROD_PROJECT_REF='cluhljgonannaafpmblx';
 const PREPROD_PROJECT_REF='hnqlnvakzaywtafeiybt';
@@ -11,6 +12,8 @@ const WORKSPACE_ENDPOINT=String(process.env.CEREBRO_BROWSER_WORKSPACE_URL||'').t
 const MAX_SESSION_MS=Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_MAX_MS||780000),780000);
 const FRAME_INTERVAL_MS=Math.max(900,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_FRAME_MS||1400));
 const POLL_INTERVAL_MS=Math.max(25,Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_MS||35));
+const POLL_TRANSIENT_MAX_ATTEMPTS=Math.max(1,Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_RETRY_ATTEMPTS||4),8));
+const POLL_TRANSIENT_BASE_DELAY_MS=Math.max(25,Math.min(Number(process.env.CEREBRO_BROWSER_INTERACTIVE_POLL_RETRY_BASE_MS||300),3000));
 
 function required(value,name){if(value===undefined||value===null||value==='')throw new Error(`MISSING_${name}`);return value;}
 function sleep(ms){return new Promise(resolve=>setTimeout(resolve,ms));}
@@ -204,7 +207,12 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
     if(workspaceEnabled(job))identityVerification=await verifyWorkspaceIdentity(worker,base,job,lastActiveTabIndex,endpoint,tokenProvider,fetch_impl);
     await publishFrame(key);
     while(Date.now()-startedAt<MAX_SESSION_MS){
-      const poll=await callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl);
+      const poll=await pollInteractiveWithRetry({
+        poll:()=>callInteractive(endpoint,'worker/poll',tokenProvider,{session_id:sessionId},fetch_impl),
+        sleep,
+        max_attempts:POLL_TRANSIENT_MAX_ATTEMPTS,
+        base_delay_ms:POLL_TRANSIENT_BASE_DELAY_MS
+      });
       if(poll.stop===true||poll.state==='STOPPED'){stopRequested=true;break;}
       if(poll.hibernate===true||poll.state==='HIBERNATE_PENDING'){hibernateRequested=true;break;}
       let processedCommand=false;
@@ -253,4 +261,4 @@ export async function runInteractiveBrowserSessionV3({job,token=null,token_provi
   }
 }
 
-export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.6',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'OWNER_OR_GOOGLE_VERIFIED_ONLY_FAIL_CLOSED',handback_preserves_active_tab:true,human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
+export const BROWSER_INTERACTIVE_V3_CONTRACT=Object.freeze({schema_version:'3.5.7',capability:'browser1.interactive',supported_environments:['PREPROD','PROD'],environment_endpoint_binding:true,multi_company_preprod:true,prod_company_scope:'fenix',same_runtime:'PLAYWRIGHT_CHROMIUM',same_v2_queue:true,host_browser_channel_supported:true,oidc_refresh_provider_supported:true,exclusive_control_lease:true,frames_encrypted_aes_gcm:true,human_input_encrypted_aes_gcm:true,adaptive_realtime_loop:true,transient_poll_retry:true,transient_poll_retry_attempts:POLL_TRANSIENT_MAX_ATTEMPTS,immediate_post_action_frame:false,privacy_frame_suppression_during_human_input:true,workspace_hibernate_preprod:true,workspace_hibernate_prod:true,workspace_immediate_hibernate:true,workspace_tabs_encrypted:true,workspace_identity_verification:'OWNER_OR_GOOGLE_VERIFIED_ONLY_FAIL_CLOSED',handback_preserves_active_tab:true,human_required_queue_outcome:'HOLD',workspace_prod_enabled:true,raw_cdp_exposed:false,max_tabs:8,default_browser1_unchanged:true,incremental_cost_eur:0});
