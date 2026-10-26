@@ -69,7 +69,7 @@ export default function CerebroConsoleHost(){
    <div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>JARVIS WORK</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>
    <div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>
   </>:null}
-  {!legacy?<div className={`cerebro-work-mount ${browser?'is-hidden':'is-visible'}`} aria-hidden={browser}>
+  {!legacy?<div className="cerebro-work-mount" hidden={browser} aria-hidden={browser}>
    <CerebroJarvisWorkConsole onViewChange={next=>changeView(next)}/>
   </div>:null}
   {browser?<CerebroBrowserConsole onViewChange={changeView}/>:null}
