@@ -1,13 +1,13 @@
 import {test,expect} from '@playwright/test';
 
 function encode(value:unknown){return Buffer.from(JSON.stringify(value)).toString('base64url')}
-const accessToken=`${encode({alg:'none',typ:'JWT'})}.${encode({aud:'authenticated',role:'authenticated',sub:'carlos-admin-test-000000000000',email:'carlos.operativa@fenix.test',exp:1999999999})}.test-signature`;
+const accessToken=`${encode({alg:'none',typ:'JWT'})}.${encode({aud:'authenticated',role:'authenticated',sub:'carlos-admin-test-000000000000',email:'carlos.jarvis@fenix.test',exp:1999999999})}.test-signature`;
 
 const session={
   access_token:accessToken,
   token_type:'bearer',expires_in:3600,expires_at:1999999999,refresh_token:'qa-refresh-not-real',
   user:{
-    id:'carlos-admin-test-000000000000',aud:'authenticated',role:'authenticated',email:'carlos.operativa@fenix.test',
+    id:'carlos-admin-test-000000000000',aud:'authenticated',role:'authenticated',email:'carlos.jarvis@fenix.test',
     app_metadata:{},user_metadata:{full_name:'Carlos QA',actor_code:'CARLOS-ADMIN',role:'Dirección'},
     created_at:'2026-10-19T00:00:00.000Z'
   }
@@ -20,7 +20,7 @@ const corsHeaders={
   'content-type':'application/json'
 };
 
-test('OPERATIVA V4 uses aliases, real progress, process help and one horizontal rail',async({page})=>{
+test('JARVIS is the real V0 core with authenticated Gateway chat, voice and reversible legacy presentation',async({page})=>{
   test.setTimeout(20_000);
   let postedChat:any=null;
 
@@ -28,18 +28,10 @@ test('OPERATIVA V4 uses aliases, real progress, process help and one horizontal 
     localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(s));
     localStorage.setItem('fenix-remember-device','true');
     sessionStorage.setItem('fenix-session-active','1');
-    sessionStorage.setItem('cerebro_console_view_v1','OPERATIVA');
     class FakeRecognition{
       lang='';continuous=false;interimResults=false;maxAlternatives=1;
       onstart:any=null;onresult:any=null;onerror:any=null;onend:any=null;
-      start(){
-        this.onstart?.(new Event('start'));
-        setTimeout(()=>{
-          const alternative={transcript:'Dictado operativo',confidence:.96};
-          this.onresult?.({results:{0:{0:alternative,length:1,isFinal:true},length:1}} as any);
-          this.onend?.(new Event('end'));
-        },20);
-      }
+      start(){this.onstart?.(new Event('start'))}
       stop(){this.onend?.(new Event('end'))}
       abort(){this.onend?.(new Event('end'))}
     }
@@ -67,72 +59,44 @@ test('OPERATIVA V4 uses aliases, real progress, process help and one horizontal 
     const url=request.url();
     if(url.endsWith('/health'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',service:'cerebro-console-gateway-v0',environment:'TEST_ISOLATED',version:'e2e',authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'OWNER_DECISION_BY_EXCEPTION_V1'})});
     if(url.endsWith('/preferences'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',preferences:{response_length:'concise'}})});
-    if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_OPERATIVA',executed:false})})}
+    if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_JARVIS_V0',executed:false})})}
     return route.fulfill({status:404,headers:corsHeaders,body:'{}'});
   });
 
-  await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/**',async route=>{
-    if(route.request().method()==='OPTIONS')return route.fulfill({status:204,headers:corsHeaders,body:''});
-    return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({
-      status:'OK',observed_at:'2026-10-20T18:00:00.000Z',source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',
-      runs:[
-        {run_id:101,workflow_name:'CEREBRO SEO-001 city execution',workflow_alias:'SEO-001',workflow_path:'.github/workflows/cerebro-seo.yml',status:'in_progress',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',created_at:'2026-10-20T17:54:00.000Z',run_started_at:'2026-10-20T17:55:00.000Z',updated_at:'2026-10-20T17:59:00.000Z',engine_id:'SEO-001',company_id:'fenix',environment:'PROD',version:'abc123def456',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:42,progress_completed_steps:8,progress_total_steps:19,current_step:'publish · Validate city output',next_step:'publish · Tribunal',progress_provenance:'REAL_GITHUB_JOBS'},
-        {run_id:102,workflow_name:'CEREBRO FACT-001 build',workflow_alias:'FACT-001',workflow_path:'.github/workflows/cerebro-fact.yml',status:'queued',conclusion:null,event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/102',created_at:'2026-10-20T17:58:00.000Z',run_started_at:null,updated_at:'2026-10-20T17:58:00.000Z',engine_id:'FACT-001',company_id:'fenix',environment:'PREPROD',version:'def456abc123',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,progress_provenance:'UNAVAILABLE'},
-        {run_id:100,workflow_name:'CEREBRO JOB-001 worker',workflow_alias:'JOB-001',workflow_path:'.github/workflows/cerebro-job.yml',status:'completed',conclusion:'success',event:'push',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/100',created_at:'2026-10-20T17:40:00.000Z',run_started_at:'2026-10-20T17:41:00.000Z',updated_at:'2026-10-20T17:47:00.000Z',engine_id:'JOB-001',company_id:'fenix',environment:'PREPROD',version:'456abc123def',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:100,progress_completed_steps:null,progress_total_steps:null,current_step:'Finalizado',next_step:null,progress_provenance:'TERMINAL_STATUS'}
-      ]
-    })});
-  });
-
   await page.goto('/cerebro',{waitUntil:'domcontentloaded'});
-  const operativa=page.locator('.cerebro-operative');
-  await expect(operativa).toBeVisible();
-  await expect(operativa.getByRole('heading',{name:'Actividad'})).toBeVisible();
 
-  const strip=operativa.locator('.cerebro-process-strip');
-  await expect(strip).toBeVisible();
-  await expect(strip.getByText('SEO-001',{exact:true})).toBeVisible();
-  await expect(strip.getByText('FACT-001',{exact:true})).toBeVisible();
-  await expect(strip.getByText('JOB-001',{exact:true})).toBeVisible();
-  await expect(strip.getByText('42%',{exact:true})).toBeVisible();
-  await expect(strip.getByText('100%',{exact:true})).toBeVisible();
-  await expect(operativa.locator('.cerebro-process-route')).toHaveCount(0);
-  await expect(operativa.locator('.cerebro-live-progress').first()).toBeVisible();
-  await expect.poll(()=>strip.evaluate(el=>getComputedStyle(el).overflowX)).toBe('auto');
-
-  await strip.getByText('SEO-001',{exact:true}).click();
-  const inspector=page.getByRole('dialog',{name:'Detalle de SEO-001'});
-  await expect(inspector).toBeVisible();
-  await expect(inspector.getByText('¿Para qué sirve?',{exact:true})).toBeVisible();
-  await expect(inspector.getByText('publish · Validate city output',{exact:true})).toBeVisible();
-  await expect(inspector.getByText('publish · Tribunal',{exact:true})).toBeVisible();
-  await expect(inspector.getByRole('link',{name:'Ver evidencia'})).toBeVisible();
-  await inspector.getByRole('button',{name:'Cerrar detalle'}).click();
+  const jarvis=page.locator('.cerebro-host-v0.cerebro-jarvis-shell');
+  await expect(jarvis).toBeVisible();
+  await expect(page.locator('.cerebro-operative')).toHaveCount(0);
+  await expect(jarvis.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
+  await expect(jarvis.getByText('Empresa',{exact:true})).toBeVisible();
+  await expect(jarvis.getByText('Contexto',{exact:true})).toBeVisible();
+  await expect(jarvis.getByText('Decisión humana por excepción',{exact:true})).toBeVisible();
 
   const floatingVoice=page.getByRole('button',{name:'Abrir acciones por voz'});
   if(await floatingVoice.count())await expect(floatingVoice).toBeHidden();
 
-  const visibleComposer=operativa.getByRole('textbox',{name:'Escribe una orden para CEREBRO'});
-  await expect(visibleComposer).toBeEnabled();
-  await expect(operativa.getByRole('button',{name:'Adjuntar archivo'})).toBeDisabled();
-  await expect(operativa.getByRole('button',{name:'Dictar'})).toBeEnabled();
-  await expect(operativa.getByRole('button',{name:'Hablar con CEREBRO'})).toBeVisible();
-  await expect(operativa.getByRole('button',{name:'Enviar a CEREBRO'})).toBeVisible();
+  const talk=jarvis.getByRole('button',{name:'Hablar con CEREBRO'});
+  await expect(talk).toBeVisible();
+  await expect(talk).toBeEnabled();
 
-  await operativa.getByRole('button',{name:'Dictar'}).click();
-  await expect(visibleComposer).toHaveValue('Dictado operativo');
-  await visibleComposer.press('Shift+Enter');
-  await visibleComposer.type('segunda línea');
-  await expect(visibleComposer).toHaveValue('Dictado operativo\nsegunda línea');
-  await visibleComposer.press('Enter');
-  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Dictado operativo\nsegunda línea');
-  await expect(operativa.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
+  const composer=jarvis.getByPlaceholder('También puedes escribir a CEREBRO…');
+  await expect(composer).toBeEnabled();
+  await composer.fill('Prueba JARVIS sobre V0');
+  await jarvis.getByRole('button',{name:'Enviar'}).click();
+  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba JARVIS sobre V0');
+  await expect(jarvis.getByText('PONG_JARVIS_V0',{exact:true})).toBeVisible();
 
-  await page.getByRole('button',{name:'VISTA 0'}).click();
-  await expect(page.locator('.cerebro-host-v0')).toHaveClass(/is-visible/);
-  await expect(page.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
-  await expect(page.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
+  await page.goto('/cerebro?section=legacy-v0',{waitUntil:'domcontentloaded'});
+  const legacy=page.locator('.cerebro-host-v0.is-visible');
+  await expect(legacy).toBeVisible();
+  await expect(legacy).not.toHaveClass(/cerebro-jarvis-shell/);
+  await expect(legacy.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'LEGACY V0'})).toBeVisible();
+  await expect(page.getByRole('button',{name:'JARVIS'})).toBeVisible();
 
-  await page.getByRole('button',{name:'OPERATIVA'}).click();
-  await expect(operativa).toBeVisible();
-  await expect(operativa.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
+  await page.goto('/cerebro?section=v0',{waitUntil:'domcontentloaded'});
+  const oldV0Route=page.locator('.cerebro-host-v0.cerebro-jarvis-shell');
+  await expect(oldV0Route).toBeVisible();
+  await expect(oldV0Route.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
 });
