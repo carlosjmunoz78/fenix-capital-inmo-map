@@ -5,7 +5,7 @@ import path from 'node:path';
 const root=process.cwd();
 const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
 
-test('CEREBRO V4 keeps one horizontal live process rail without fixed timelines',async()=>{
+test('historical Operativa keeps one horizontal live process rail without fixed timelines as rollback reference',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  const css=read('src/cerebro-operative-console-v2.css');
  expect(source).toContain('cerebro-process-strip');
@@ -15,7 +15,7 @@ test('CEREBRO V4 keeps one horizontal live process rail without fixed timelines'
  expect(css).toContain('flex:0 0 268px');
 });
 
-test('CEREBRO V4 shows aliases and never invents a numeric progress value',async()=>{
+test('historical Operativa shows aliases and never invents a numeric progress value',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  expect(source).toContain('compactAlias(run)');
  expect(source).toContain("run.progress_provenance!=='REAL_GITHUB_JOBS'");
@@ -24,7 +24,7 @@ test('CEREBRO V4 shows aliases and never invents a numeric progress value',async
  expect(source).toContain("'Estimación aún no disponible'");
 });
 
-test('each real process opens a transparent inspector explaining what it does',async()=>{
+test('historical process inspector remains available in rollback reference code',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  const css=read('src/cerebro-operative-console-v2.css');
  expect(source).toContain('function processPurpose(run:CerebroActivityRun)');
@@ -36,7 +36,7 @@ test('each real process opens a transparent inspector explaining what it does',a
  expect(css).toContain('backdrop-filter:blur(28px)');
 });
 
-test('activity projection exposes real GitHub job-step progress when authenticated',async()=>{
+test('activity projection still exposes real GitHub job-step progress when authenticated',async()=>{
  const edge=read('supabase/functions/cerebro-console-activity-v0/index.ts');
  const api=read('src/cerebroActivityApi.ts');
  expect(edge).toContain('/jobs?per_page=100');
@@ -46,8 +46,8 @@ test('activity projection exposes real GitHub job-step progress when authenticat
  expect(api).toContain("progress_provenance:CerebroProgressProvenance");
 });
 
-test('/cerebro suppresses global launchers even before owner session is ready',async()=>{
- const css=read('src/cerebro-operative-console-v2.css');
+test('/cerebro suppresses global launchers from the retained host stylesheet even before owner session is ready',async()=>{
+ const css=read('src/cerebro-console-host.css');
  const host=read('src/CerebroConsoleHost.tsx');
  expect(css).toContain("html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']");
  expect(css).toContain("html[data-cerebro-console='1'] .calc-launcher");
@@ -56,17 +56,21 @@ test('/cerebro suppresses global launchers even before owner session is ready',a
  expect(host).toContain("if(ownerAccess!=='allowed')return <CerebroConsoleShell/>");
 });
 
-test('OPERATIVA integrates view switch and settings into one compact header',async()=>{
- const source=read('src/CerebroOperativeConsole.tsx');
+test('JARVIS mounts the canonical V0 directly instead of the parallel Operativa console',async()=>{
  const host=read('src/CerebroConsoleHost.tsx');
- expect(source).toContain('cerebro-inline-view-switch');
- expect(source).toContain('<CerebroVoiceSettings/>');
- expect(source).not.toContain('cerebro-top-metrics');
- expect(host).toContain("view==='V0'?<div className=\"cerebro-host-topbar\"");
- expect(host).toContain('<CerebroOperativeConsole onViewChange={setView}/>');
+ const shell=read('src/CerebroConsoleShell.tsx');
+ const css=read('src/cerebro-console-host.css');
+ expect(host).toContain("const jarvis=view==='OPERATIVA'");
+ expect(host).toContain("${browser?'is-hidden':'is-visible'} ${jarvis?'cerebro-jarvis-shell':''}");
+ expect(host).toContain('<CerebroConsoleShell/>');
+ expect(host).not.toContain('CerebroOperativeConsole');
+ expect(shell).toContain('className="cerebro-voice-main"');
+ expect(shell).toContain('postCerebroConsoleChat');
+ expect(css).toContain('.cerebro-jarvis-shell .cerebro-console');
+ expect(css).toContain('JARVIS · NÚCLEO CEREBRO V0');
 });
 
-test('composer keeps attach dictation talk send and Enter semantics',async()=>{
+test('historical Operativa composer contract remains preserved as rollback/reference',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  expect(source).toContain('aria-label="Adjuntar archivo"');
  expect(source).toContain("aria-label={dictating?'Detener dictado':'Dictar'}");
@@ -75,7 +79,7 @@ test('composer keeps attach dictation talk send and Enter semantics',async()=>{
  expect(source).toContain('aria-label="Enviar a CEREBRO"');
 });
 
-test('automatic activity refresh remains and settings stay scalable',async()=>{
+test('automatic activity refresh and scalable voice settings remain preserved as rollback/reference',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  const settings=read('src/CerebroVoiceSettings.tsx');
  const css=read('src/cerebro-voice-settings.css');

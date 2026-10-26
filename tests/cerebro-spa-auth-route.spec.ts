@@ -11,8 +11,15 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(guard).toContain('<CerebroConsoleHost/>');
   const host=fs.readFileSync('src/CerebroConsoleHost.tsx','utf8');
   expect(host).toContain('<CerebroConsoleShell/>');
-  expect(host).toContain("type CerebroView='V0'|'OPERATIVA'");
-  expect(host).toContain("view==='V0'?'is-visible':'is-hidden'");
+  expect(host).toContain("type CerebroView='V0'|'OPERATIVA'|'NAVEGADOR'");
+  expect(host).toContain("if(section==='legacy-v0')return'V0'");
+  expect(host).toContain("const jarvis=view==='OPERATIVA'");
+  expect(host).toContain("const browser=view==='NAVEGADOR'");
+  expect(host).toContain("${browser?'is-hidden':'is-visible'} ${jarvis?'cerebro-jarvis-shell':''}");
+  expect(host).not.toContain('CerebroOperativeConsole');
+  const hostCss=fs.readFileSync('src/cerebro-console-host.css','utf8');
+  expect(hostCss).toContain('.cerebro-jarvis-shell .cerebro-console');
+  expect(hostCss).toContain('JARVIS · NÚCLEO CEREBRO V0');
   const gateway=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
   expect(gateway).toContain('actor==="CARLOS-ADMIN"');
   expect(gateway).toContain('reason:"OWNER_ONLY"');

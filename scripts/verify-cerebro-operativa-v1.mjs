@@ -5,6 +5,7 @@ function must(text,needle,label){if(!text.includes(needle))throw new Error(`Miss
 function mustNot(text,needle,label){if(text.includes(needle))throw new Error(`Forbidden ${label}: ${needle}`)}
 
 const host=read('src/CerebroConsoleHost.tsx');
+const shell=read('src/CerebroConsoleShell.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
 const route=read('src/RouteAccessGuard.tsx');
 const css=read('src/cerebro-console-host.css');
@@ -14,35 +15,41 @@ const activityGateway=read('supabase/functions/cerebro-console-activity-v0/index
 
 must(route,"import CerebroConsoleHost from './CerebroConsoleHost';",'reversible host route');
 must(route,'return <CerebroConsoleHost/>;','host mount');
-must(host,"return'OPERATIVA'",'OPERATIVA default');
-must(host,'<CerebroConsoleShell/>','preserved V0 core');
-must(host,"view==='V0'?'is-visible':'is-hidden'",'reversible V0 visibility');
-must(host,'NEURAL · POR AUDITAR','neural recovery gate');
-must(host,'cerebro-host-topbar','integrated interface selector');
-must(css,'.cerebro-host-v0.is-hidden','V0 hidden-but-mounted wrapper');
-must(css,'.cerebro-host-topbar{position:sticky','non-floating fixed console chrome');
+must(host,"return'OPERATIVA'",'JARVIS/default compatibility view');
+must(host,'<CerebroConsoleShell/>','canonical V0 core mounted directly');
+must(host,"const jarvis=view==='OPERATIVA'",'JARVIS presentation selector');
+must(host,"const browser=view==='NAVEGADOR'",'browser selector');
+must(host,"${browser?'is-hidden':'is-visible'} ${jarvis?'cerebro-jarvis-shell':''}",'V0 visible as JARVIS and hidden only for Browser');
+must(host,"if(section==='legacy-v0')return'V0'",'legacy V0 rollback route');
+mustNot(host,'CerebroOperativeConsole','parallel Operativa console must not be mounted by host');
+must(css,'.cerebro-host-v0.is-hidden','Browser hidden-but-mounted V0 wrapper');
+must(css,'.cerebro-jarvis-shell .cerebro-console','JARVIS styles wrap canonical V0');
+must(css,'JARVIS · NÚCLEO CEREBRO V0','explicit JARVIS-on-V0 provenance');
+must(css,'.cerebro-host-topbar{position:sticky','rollback console chrome');
+must(css,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO global App launcher isolation retained by active host stylesheet');
+must(css,"html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']",'competing global voice launcher suppressed by active host stylesheet');
 
-must(operative,'fetchCerebroActivity','real activity projection client');
-must(operative,'cerebro-process-strip','single horizontal process rail');
-must(operative,'cerebro-live-progress','live process progress bar');
-must(operative,'compactAlias(run)','compact process aliases');
+must(shell,'postCerebroConsoleChat','canonical Gateway chat client');
+must(shell,'className="cerebro-voice-main"','canonical voice control');
+must(shell,'onClick={toggleVoiceSession}','direct V0 voice session control');
+must(shell,"voiceSessionActive?'Finalizar conversación':'Hablar con CEREBRO'",'continuous voice UI');
+must(shell,'Decisión humana por excepción','human-by-exception policy visible');
+
+// Preserve the previous Operativa implementation and its real-data contracts as rollback/reference code,
+// but it must no longer be the visible JARVIS surface.
+must(operative,'fetchCerebroActivity','real activity projection client preserved');
+must(operative,'cerebro-process-strip','single horizontal process rail preserved');
+must(operative,'cerebro-live-progress','live process progress bar preserved');
+must(operative,'compactAlias(run)','compact process aliases preserved');
 must(operative,"run.progress_provenance!=='REAL_GITHUB_JOBS'",'ETA only derives from real GitHub steps');
 must(operative,"progress!==null?`${progress}%`:isIndeterminate?'LIVE':'—'",'fail-closed progress display');
 mustNot(operative,'cerebro-process-route','fixed phase timeline removed');
 mustNot(operative,"['En cola','En ejecución'",'fixed phase labels removed');
 
-must(operative,'Dictar','separate dictation control');
-must(operative,'Hablar con CEREBRO','separate voice conversation control');
-must(operative,"event.key==='Enter'&&!event.shiftKey",'Enter send Shift+Enter newline contract');
-must(operative,'Adjuntar archivo · pendiente de contrato real','attachments fail-closed');
-mustNot(operative,'cerebro-composer-actions">','legacy extra composer action row');
+must(cssV2,'.cerebro-process-strip{display:flex','historical Operativa horizontal rail preserved as rollback/reference');
+must(cssV2,'overflow-x:auto','historical Operativa horizontal scroll contract preserved');
 
-must(cssV2,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO-only mobile chrome suppression');
-must(cssV2,"html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']",'CEREBRO-only floating voice launcher suppression');
-must(cssV2,'.cerebro-process-strip{display:flex','horizontal rail layout');
-must(cssV2,'overflow-x:auto','horizontal scroll contract');
-
-must(activityApi,'cerebro-console-activity-v0','activity gateway endpoint');
+must(activityApi,'cerebro-console-activity-v0','activity gateway endpoint preserved');
 must(activityApi,"progress_provenance:CerebroProgressProvenance",'typed progress provenance');
 must(activityGateway,'source:"GITHUB_ACTIONS"','real source declaration');
 must(activityGateway,'company_provenance:"DERIVED_REPOSITORY_SCOPE"','derived company provenance');
@@ -58,4 +65,4 @@ mustNot(operative,'45%','reference demo percentage');
 mustNot(operative,'70%','reference demo percentage');
 mustNot(operative,'90%','reference demo percentage');
 
-console.log('CEREBRO OPERATIVA V3 contracts: OK');
+console.log('CEREBRO JARVIS-on-V0 contracts: OK');

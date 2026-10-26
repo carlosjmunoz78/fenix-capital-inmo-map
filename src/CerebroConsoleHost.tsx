@@ -1,12 +1,10 @@
 import {useEffect,useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
-import CerebroOperativeConsole from './CerebroOperativeConsole';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
-import './cerebro-operative-console-v2.css';
 
 type CerebroView='V0'|'OPERATIVA'|'NAVEGADOR';
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -61,11 +59,16 @@ export default function CerebroConsoleHost(){
  if(!isCerebroPath)return <CerebroConsoleShell/>;
  if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
 
+ const jarvis=view==='OPERATIVA';
+ const browser=view==='NAVEGADOR';
+
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
   <CerebroSpeechOutputGuard/>
   {view==='V0'?<div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>JARVIS</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>:null}
-  <div className={`cerebro-host-v0 ${view==='V0'?'is-visible':'is-hidden'}`} aria-hidden={view!=='V0'}><CerebroConsoleShell/></div>
-  {view==='OPERATIVA'?<><CerebroOperativeConsole onViewChange={changeView}/><button type="button" className="cerebro-browser-entry-button" onClick={()=>changeView('NAVEGADOR')} aria-label="Abrir interfaz Navegador">NAVEGADOR</button></>:null}
-  {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={changeView}/>:null}
+  <div className={`cerebro-host-v0 ${browser?'is-hidden':'is-visible'} ${jarvis?'cerebro-jarvis-shell':''}`} aria-hidden={browser}>
+   <CerebroConsoleShell/>
+  </div>
+  {jarvis?<button type="button" className="cerebro-browser-entry-button" onClick={()=>changeView('NAVEGADOR')} aria-label="Abrir interfaz Navegador">NAVEGADOR</button>:null}
+  {browser?<CerebroBrowserConsole onViewChange={changeView}/>:null}
  </div>;
 }
