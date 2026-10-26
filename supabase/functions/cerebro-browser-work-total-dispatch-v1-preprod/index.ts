@@ -10,15 +10,17 @@ const AUD='cerebro-browser-worker-v1';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
 const FEATURE_REF='refs/heads/feat/browser-work-total-v1-20261024';
 const FINAL_REF='refs/heads/promote/browser-work-total-prod-20261025';
-const REFS=new Set([FEATURE_REF,FINAL_REF]);
+const CANARY_REF='refs/heads/preprod/browser-autologin-universal-v1-20261026';
+const REFS=new Set([FEATURE_REF,FINAL_REF,CANARY_REF]);
 const WORKFLOW='.github/workflows/cerebro-browser-work-total-v1-preprod.yml';
 const PROJECT='hnqlnvakzaywtafeiybt';
 const FEATURE_PREFIX='browser-work-total-v1-legacy-';
 const FINAL_PREFIX='browser-work-total-v1-final-';
+const CANARY_PREFIX='browser-autologin-universal-v1-canary-';
 const JWKS=createRemoteJWKSet(new URL(`${ISSUER}/.well-known/jwks`));
 function out(status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 function bearer(req:Request){const h=req.headers.get('authorization')??'';return h.toLowerCase().startsWith('bearer ')?h.slice(7).trim():'';}
-function prefixForRef(ref:string){return ref===FINAL_REF?FINAL_PREFIX:FEATURE_PREFIX;}
+function prefixForRef(ref:string){return ref===FINAL_REF?FINAL_PREFIX:ref===CANARY_REF?CANARY_PREFIX:FEATURE_PREFIX;}
 async function worker(req:Request){
   if(!U.includes(PROJECT))return{ok:false,error:'PREPROD_PROJECT_REF_MISMATCH'} as const;
   const token=bearer(req);if(!token)return{ok:false,error:'GITHUB_OIDC_REQUIRED'} as const;
@@ -39,7 +41,7 @@ async function status(prefix:string){
 }
 Deno.serve(async req=>{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)??'';
-  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-dispatch-v1-preprod',environment:'PREPROD',branch_refs:[...REFS],branch_isolated_prefixes:{feature:FEATURE_PREFIX,final:FINAL_PREFIX},credential_materialization:false,prod_access:false,trading_access:false,incremental_cost_eur:0});
+  if(req.method==='GET'&&route==='health')return out(200,{ok:true,service:'cerebro-browser-work-total-dispatch-v1-preprod',environment:'PREPROD',branch_refs:[...REFS],branch_isolated_prefixes:{feature:FEATURE_PREFIX,final:FINAL_PREFIX,autologin_canary:CANARY_PREFIX},credential_materialization:false,prod_access:false,trading_access:false,incremental_cost_eur:0});
   if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
   const w=await worker(req);if(!w.ok)return out(403,w);
   let body:any={};try{body=await req.json();}catch{}
