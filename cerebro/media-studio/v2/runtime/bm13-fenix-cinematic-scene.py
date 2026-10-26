@@ -226,11 +226,8 @@ target.keyframe_insert(data_path="location", frame=96)
 # Blender 5.2 compositor APIs are intentionally not used here; physical finishing/glow
 # is applied later by the FFmpeg finishing stage so this scene remains stable and rebuildable.
 
-# Ensure smooth interpolation.
-for action in bpy.data.actions:
-    for fcurve in action.fcurves:
-        for kp in fcurve.keyframe_points:
-            kp.interpolation = "BEZIER"
+# Blender 5.2 changed the Action API. Default keyframe interpolation is retained here
+# instead of mutating legacy fcurve collections, keeping the animation compatible and deterministic.
 
 # Save a .blend snapshot for provenance/rebuild, then render animation.
 bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out_dir, "bm13_fenix_scene.blend"))
