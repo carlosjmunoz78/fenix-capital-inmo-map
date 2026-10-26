@@ -1,5 +1,5 @@
 {
-  "schema_version":"2.0.0",
+  "schema_version":"2.1.0",
   "gate":"UNIVERSAL_MEDIA_STUDIO_READY",
   "status":"NOT_READY",
   "benchmarks":[
@@ -14,8 +14,9 @@
     {"id":"BM-09","name":"Holographic or declared-device adapter dry run","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:92be75f487207c0f30669aa3dfa610d15e3fa08f:cerebro/media-studio/v2/evidence/bm09-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-10","name":"Long-form multi-sequence character story image voice sound and color continuity","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:506f54e3ae9b3e99fbdb52674fc7b5b7ab998ada:cerebro/media-studio/v2/evidence/bm10-pass-with-evidence-2026-10-25.json"},
     {"id":"BM-11","name":"Thousand-shot production simulation with resumable scheduling and cost telemetry","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:f059583efef66ef99b97ed3ac6182f97c1443aea:cerebro/media-studio/v2/evidence/bm11-pass-with-evidence-2026-10-25.json"},
-    {"id":"BM-12","name":"Rebuild rollback provenance rights archive and multi-deliverable proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:23072a2f2fccf16ad1363a79fd9f18618868a46c:cerebro/media-studio/v2/evidence/bm12-pass-with-evidence-2026-10-25.json"}
+    {"id":"BM-12","name":"Rebuild rollback provenance rights archive and multi-deliverable proof","required":true,"state":"PASS_WITH_EVIDENCE","evidence_ref":"git:23072a2f2fccf16ad1363a79fd9f18618868a46c:cerebro/media-studio/v2/evidence/bm12-pass-with-evidence-2026-10-25.json"},
+    {"id":"BM-13","name":"Premium creative showcase executed through real specialist pods with provenance and independent perceptual tribunal","required":true,"state":"NOT_RUN","evidence_ref":null,"acceptance_contract":"cerebro/media-studio/v2/docs/SHOWCASE_QUALITY_CONTRACT_V2.md","quality_gate":"cerebro/media-studio/v2/runtime/production-quality-gate.mjs","note":"Added after the 2026-10-26 false-green audit. The previous procedural Story/Reel/Hero files are technical regression evidence only and cannot satisfy BM-13."}
   ],
   "allowed_states":["NOT_RUN","RUNNING","FAIL","PASS_WITH_EVIDENCE"],
-  "ready_rule":"Every required benchmark must be PASS_WITH_EVIDENCE and reference immutable evidence before READY may be true."
+  "ready_rule":"Every required benchmark, including BM-13 premium creative proof, must be PASS_WITH_EVIDENCE and reference immutable evidence before READY may be true. Technical codec/render success alone cannot make UMS READY."
 }
