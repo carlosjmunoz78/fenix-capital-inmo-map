@@ -11,6 +11,9 @@ on:
       - 'cerebro/media-studio/v2/runtime/media-production-queue.mjs'
       - 'cerebro/media-studio/v2/runtime/premium-production-executor.mjs'
       - 'cerebro/media-studio/v2/runtime/premium-physical-renderer-v2.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-deliverable-gate-v1.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-audio-master-v1.mjs'
+      - 'cerebro/media-studio/v2/runtime/premium-voice-kokoro.py'
       - 'cerebro/media-studio/v2/runtime/bm13-fenix-cinematic-scene.py'
       - 'cerebro/media-studio/v2/runtime/bm13-physical-proof.mjs'
       - 'cerebro/media-studio/v2/runtime/studio-quality-standard.mjs'
@@ -45,16 +48,36 @@ jobs:
   bm13-physical-proof:
     needs: premium-executor-contract
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     env:
       BLENDER_VERSION: '5.2.3'
       BLENDER_ARCHIVE: 'blender-5.2.3-linux-x64.tar.xz'
       CEREBRO_UMS_EXPORT_DIR: '${{ github.workspace }}/dist/ums-bm13-physical-v2'
+      HF_HOME: '${{ runner.temp }}/cerebro-hf-cache'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install zero-cost Spanish neural voice runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v espeak-ng >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            timeout 120s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends espeak-ng libsndfile1
+          fi
+          python -m pip install --disable-pip-version-check --no-input --index-url https://download.pytorch.org/whl/cpu torch
+          python -m pip install --disable-pip-version-check --no-input 'kokoro>=0.9.4,<1' soundfile
+          python - <<'PY'
+          from kokoro import KPipeline
+          p=KPipeline(lang_code='e', device='cpu')
+          print('KOKORO_SPANISH_CPU=READY', type(p).__name__)
+          PY
 
       - name: Install isolated static FFmpeg toolchain and Montserrat
         shell: bash
@@ -109,16 +132,22 @@ jobs:
         run: |
           set -euo pipefail
           node --check cerebro/media-studio/v2/runtime/premium-physical-renderer-v2.mjs
+          node --check cerebro/media-studio/v2/runtime/premium-audio-master-v1.mjs
+          node --check cerebro/media-studio/v2/runtime/premium-deliverable-gate-v1.mjs
+          python -m py_compile cerebro/media-studio/v2/runtime/premium-voice-kokoro.py
           node cerebro/media-studio/v2/runtime/bm13-physical-proof.mjs | tee bm13-physical-proof.log
           test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_PREMIUM_PHYSICAL_V2.mp4
           test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_CONTACT_SHEET.jpg
           test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_EVIDENCE.json
+          test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_VOICE_EVIDENCE.json
+          test -s dist/ums-bm13-physical-v2/FENIX_CAPITAL_BM13_AUDIO_MASTER_EVIDENCE.json
           sha256sum dist/ums-bm13-physical-v2/* > dist/ums-bm13-physical-v2/SHA256SUMS.txt
 
       - name: Upload physical proof package
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: FENIX-BM13-PREMIUM-PHYSICAL-V2
           path: dist/ums-bm13-physical-v2/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 14
