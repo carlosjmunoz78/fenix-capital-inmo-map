@@ -31,9 +31,14 @@ async function worker(req:Request){
  }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
 }
 async function activeJob(sessionId:string,workerId:string){
- const q=await svc.from('cerebro_browser_job_v2').select('job_id,company_id,environment,identity_id,account_id,browser_profile_id,credential_ref_id,capability,lease_id,leased_by,lease_expires_at,status').eq('job_id',sessionId).eq('environment',ENV).eq('capability','browser1.interactive').eq('status','LEASED').eq('leased_by',workerId).maybeSingle();
- if(q.error)throw q.error;if(!q.data||Date.parse(q.data.lease_expires_at||'')<=Date.now())throw new Error('INTERACTIVE_JOB_LEASE_NOT_ACTIVE');return q.data;
+ const q=await svc.from('cerebro_browser_job_v2').select('job_id,company_id,environment,identity_id,account_id,browser_profile_id,capability,mode,lease_id,leased_by,lease_expires_at,status').eq('job_id',sessionId).eq('environment',ENV).eq('capability','browser1.interactive').eq('status','LEASED').eq('leased_by',workerId).maybeSingle();
+ if(q.error)throw q.error;if(!q.data||Date.parse(q.data.lease_expires_at||'')<=Date.now())throw new Error('INTERACTIVE_JOB_LEASE_NOT_ACTIVE');if(String(q.data.mode)!=='MUTATE')throw new Error('INTERACTIVE_MUTATE_REQUIRED');return q.data;
 }
+async function profileForJob(job:any){
+ const p=await svc.from('cerebro_browser_workspace_profile_v1').select('workspace_profile_id,company_id,environment,identity_id,account_id,browser_profile_id,provider,login_policy,credential_ref_id,verification_state,expected_account_hash,allowed_origins,active').eq('company_id',job.company_id).eq('environment',ENV).eq('identity_id',job.identity_id).eq('account_id',job.account_id).eq('browser_profile_id',job.browser_profile_id).eq('active',true).maybeSingle();
+ if(p.error)throw p.error;if(!p.data)return null;return p.data;
+}
+function loginOrigin(provider:string){if(provider==='google')return'https://accounts.google.com';return'';}
 function findEmail(value:unknown,depth=0):string{
  if(depth>4||value===null||value===undefined)return'';
  if(typeof value==='string'){const v=value.trim().toLowerCase();return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)?v:'';}
@@ -42,42 +47,42 @@ function findEmail(value:unknown,depth=0):string{
  const obj=value as Record<string,unknown>;
  for(const [key,nested] of Object.entries(obj)){
   const normalized=key.toLowerCase().replace(/[^a-z0-9]/g,'');
-  if(['email','username','user','login','account','identifier'].includes(normalized)){
-   const found=findEmail(nested,depth+1);if(found)return found;
-  }
+  if(['email','username','user','login','account','identifier'].includes(normalized)){const found=findEmail(nested,depth+1);if(found)return found;}
  }
  for(const nested of Object.values(obj)){const found=findEmail(nested,depth+1);if(found)return found;}
  return'';
 }
 async function materialize(job:any,w:any){
- const {data,error}=await svc.rpc('cerebro_browser_credential_materialize_v3',{p_job_id:job.job_id,p_lease_id:job.lease_id,p_worker_id:w.worker_id});
+ const p=await profileForJob(job);if(!p)return{ok:false,error:'WORKSPACE_PROFILE_NOT_FOUND'};
+ if(String(p.login_policy)!=='CREDENTIAL_BROKER_ALLOWED'||!p.credential_ref_id)return{ok:false,error:'AUTOLOGIN_NOT_AUTHORIZED_FOR_PROFILE'};
+ const provider=String(p.provider||'').toLowerCase();const origin=loginOrigin(provider);if(!origin)return{ok:false,error:'AUTO_LOGIN_PROVIDER_NOT_READY'};
+ if(Array.isArray(p.allowed_origins)&&p.allowed_origins.length&&!p.allowed_origins.map((x:string)=>String(x).toLowerCase()).includes(origin))return{ok:false,error:'PROFILE_LOGIN_ORIGIN_DENIED'};
+ const {data,error}=await svc.rpc('cerebro_browser_credential_materialize_v3',{p_job_id:job.job_id,p_lease_id:job.lease_id,p_worker_id:w.worker_id,p_credential_ref_id:p.credential_ref_id,p_origin:origin});
  if(error)throw error;if(!data?.ok)return data||{ok:false,error:'CREDENTIAL_MATERIALIZATION_FAILED'};return data;
 }
 async function confirmCredentialAccount(body:any,w:any){
  const sessionId=String(body?.session_id||'');const observed=String(body?.account_email||'').trim().toLowerCase();
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(observed))return{ok:false,error:'ACCOUNT_EMAIL_INVALID'};
- const job=await activeJob(sessionId,w.worker_id);if(!job.credential_ref_id)return{ok:false,error:'CREDENTIAL_REF_NOT_REQUESTED'};
- const p=await svc.from('cerebro_browser_workspace_profile_v1').select('workspace_profile_id,provider,verification_state,expected_account_hash,browser_profile_id').eq('company_id',job.company_id).eq('environment',ENV).eq('identity_id',job.identity_id).eq('account_id',job.account_id).eq('browser_profile_id',job.browser_profile_id).eq('active',true).maybeSingle();
- if(p.error)throw p.error;if(!p.data)return{ok:false,error:'WORKSPACE_PROFILE_NOT_FOUND'};
+ const job=await activeJob(sessionId,w.worker_id);const p=await profileForJob(job);if(!p)return{ok:false,error:'WORKSPACE_PROFILE_NOT_FOUND'};
  const secret=await materialize(job,w);if(!secret?.ok)return secret;
  const credentialEmail=findEmail(secret.secret_payload);(secret as any).secret_payload=null;
  if(!credentialEmail)return{ok:false,error:'CREDENTIAL_IDENTITY_UNAVAILABLE',secret_material_logged:false};
  const scope=`${job.company_id}|${ENV}|${job.identity_id}|${job.account_id}|${job.browser_profile_id}`;const observedHash=await hmac('CEREBRO_BROWSER_ACCOUNT_V1',`${scope}|${observed}`);const hint=maskEmail(observed);const when=new Date().toISOString();
- const expectedMismatch=Boolean(p.data.expected_account_hash&&p.data.expected_account_hash!==observedHash);const credentialMismatch=credentialEmail!==observed;
+ const expectedMismatch=Boolean(p.expected_account_hash&&p.expected_account_hash!==observedHash);const credentialMismatch=credentialEmail!==observed;
  if(expectedMismatch||credentialMismatch){
-  const up=await svc.from('cerebro_browser_workspace_profile_v1').update({verification_state:'MISMATCH',pending_account_hash:observedHash,pending_account_hint:hint,updated_at:when}).eq('workspace_profile_id',p.data.workspace_profile_id);if(up.error)throw up.error;
+  const up=await svc.from('cerebro_browser_workspace_profile_v1').update({verification_state:'MISMATCH',pending_account_hash:observedHash,pending_account_hint:hint,updated_at:when}).eq('workspace_profile_id',p.workspace_profile_id);if(up.error)throw up.error;
   await svc.from('cerebro_browser_session_bundle_v1').update({status:'REVOKED',verification_state:'MISMATCH',revoked_at:when,updated_at:when}).eq('company_id',job.company_id).eq('environment',ENV).eq('browser_profile_id',job.browser_profile_id).eq('status','ACTIVE');
-  await event(sessionId,'ACCOUNT_VERIFICATION_OBSERVED',{provider:p.data.provider,account_hint:hint,status:'MISMATCH',verification_method:'CREDENTIAL_BROKER_EXACT_MATCH'});
+  await event(sessionId,'ACCOUNT_VERIFICATION_OBSERVED',{provider:p.provider,account_hint:hint,status:'MISMATCH',verification_method:'CREDENTIAL_BROKER_EXACT_MATCH'});
   return{ok:true,status:'MISMATCH',account_hint:hint,secret_material_logged:false};
  }
- const up=await svc.from('cerebro_browser_workspace_profile_v1').update({expected_account_hash:observedHash,expected_account_hint:hint,pending_account_hash:null,pending_account_hint:null,verification_state:'VERIFIED',last_verified_at:when,updated_at:when}).eq('workspace_profile_id',p.data.workspace_profile_id);if(up.error)throw up.error;
- await event(sessionId,'ACCOUNT_VERIFIED',{provider:p.data.provider,account_hint:hint,verification_method:'CREDENTIAL_BROKER_EXACT_MATCH'});
+ const up=await svc.from('cerebro_browser_workspace_profile_v1').update({expected_account_hash:observedHash,expected_account_hint:hint,pending_account_hash:null,pending_account_hint:null,verification_state:'VERIFIED',last_verified_at:when,updated_at:when}).eq('workspace_profile_id',p.workspace_profile_id);if(up.error)throw up.error;
+ await event(sessionId,'ACCOUNT_VERIFIED',{provider:p.provider,account_hint:hint,verification_method:'CREDENTIAL_BROKER_EXACT_MATCH'});
  return{ok:true,status:'VERIFIED',account_hint:hint,secret_material_logged:false};
 }
 
 Deno.serve(async req=>{
  const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');
- if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-autologin-v1-prod',environment:ENV,schema_version:'1.0.0',credential_materialization:true,interactive_autologin:true,first_account_auto_confirmation:true,mfa_bypass:false,captcha_bypass:false,secret_material_exposed_to_frontend:false,trading_access:false,incremental_cost_eur:0});
+ if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-autologin-v1-prod',environment:ENV,schema_version:'1.1.0',credential_materialization:true,interactive_autologin:true,profile_resolved_credential:true,owner_ui_unchanged:true,first_account_auto_confirmation:true,auth_challenge_requires_human:true,secret_material_exposed_to_frontend:false,trading_access:false,incremental_cost_eur:0});
  if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});
  const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
  try{
