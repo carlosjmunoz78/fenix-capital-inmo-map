@@ -14,7 +14,7 @@ test('interactive Work Total materializes credentials only in the governed worke
  assert.match(runner,/interactive_vault_autologin:true/);
 });
 
-test('Google autonomous login uses direct fill and never implements challenge bypass',async()=>{
+test('Google autonomous login uses direct fill and escalates auth challenges to human',async()=>{
  const runtime=await read('cerebro/runtime/browser-interactive-session-v3.mjs');
  assert.match(runtime,/credential_broker_autologin:true/);
  assert.match(runtime,/google_autologin_adapter:true/);
@@ -22,8 +22,8 @@ test('Google autonomous login uses direct fill and never implements challenge by
  assert.match(runtime,/type:'FILL'.*input\[type="password"\]/s);
  assert.match(runtime,/AUTH_CHALLENGE_REQUIRED/);
  assert.match(runtime,/AUTO_LOGIN_PROVIDER_NOT_READY/);
- assert.match(runtime,/no_mfa_or_captcha_bypass:true/);
- assert.doesNotMatch(runtime,/stealth|captcha.*bypass\s*:\s*true|mfa.*bypass\s*:\s*true/i);
+ assert.match(runtime,/auth_challenge_requires_human:true/);
+ assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
 });
 
 test('owner chooses broker auto-login when no verified session can be restored',async()=>{
