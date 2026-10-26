@@ -62,6 +62,7 @@ test('JARVIS Work mounts canonical V0 directly and stays mounted while Browser i
  const css=read('src/cerebro-jarvis-work.css');
  expect(host).toContain("import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';");
  expect(host).toContain('hidden={browser}');
+ expect(host).toContain('className="cerebro-work-mount cerebro-host-v0"');
  expect(host).toContain('<CerebroJarvisWorkConsole');
  expect(host).not.toContain('CerebroOperativeConsole');
  expect(work).toContain("import CerebroConsoleShell from './CerebroConsoleShell';");
