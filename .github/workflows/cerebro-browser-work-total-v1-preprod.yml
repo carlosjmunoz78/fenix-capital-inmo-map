@@ -124,3 +124,5 @@ jobs:
           NODE
       - name: Execute exactly one isolated PREPROD canary job
         run: node cerebro/runtime/browser-job-runner-v2.mjs
+
+# Physical rerun: synthetic PREPROD canary is created with the same session precondition as owner/start.
