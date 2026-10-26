@@ -1,0 +1,23 @@
+{
+  "voice_profile_id": "ANA_FENIX_FINANCE_ES_ES_V1",
+  "version": "1.0.0",
+  "presets": {
+    "EMPATHIC_PROFESSIONAL": {"rate":0.94,"pitch_semitones":-0.1,"loudness_db":-0.4,"pause_density":0.58,"emphasis":0.42,"warmth":0.90,"urgency":0.10},
+    "CALM_TECHNICAL": {"rate":0.92,"pitch_semitones":-0.3,"loudness_db":-0.2,"pause_density":0.50,"emphasis":0.38,"warmth":0.48,"urgency":0.08},
+    "CLIENT_GUIDANCE": {"rate":0.90,"pitch_semitones":0.0,"loudness_db":-0.3,"pause_density":0.62,"emphasis":0.46,"warmth":0.95,"urgency":0.08},
+    "EXECUTIVE": {"rate":1.02,"pitch_semitones":-0.2,"loudness_db":0.4,"pause_density":0.34,"emphasis":0.62,"warmth":0.40,"urgency":0.35},
+    "FOCUSED_ALERT": {"rate":1.08,"pitch_semitones":0.3,"loudness_db":1.2,"pause_density":0.28,"emphasis":0.68,"warmth":0.30,"urgency":0.82},
+    "URGENT": {"rate":1.15,"pitch_semitones":0.5,"loudness_db":2.0,"pause_density":0.18,"emphasis":0.80,"warmth":0.20,"urgency":1.0},
+    "SERIOUS_FINANCIAL": {"rate":0.88,"pitch_semitones":-0.5,"loudness_db":-0.2,"pause_density":0.65,"emphasis":0.58,"warmth":0.42,"urgency":0.35},
+    "SATISFIED": {"rate":1.00,"pitch_semitones":0.15,"loudness_db":0.2,"pause_density":0.40,"emphasis":0.48,"warmth":0.72,"urgency":0.12}
+  },
+  "safety": {
+    "max_pitch_abs_semitones": 1.5,
+    "max_loudness_db": 2.5,
+    "min_loudness_db": -3.0,
+    "normalize_output": true,
+    "prevent_clipping": true,
+    "identity_must_remain_same": true,
+    "no_humor_on_financial_loss_or_legal_risk": true
+  }
+}
