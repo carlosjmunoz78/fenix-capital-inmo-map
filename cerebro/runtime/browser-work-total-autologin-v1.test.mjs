@@ -40,6 +40,13 @@ test('autonomous login keeps Google specialized, generic fallback, metadata sepa
  assert.doesNotMatch(runtime,/stealth|captcha.*bypass|mfa.*bypass/i);
 });
 
+test('universal login metadata is an additive non-secret workspace contract',async()=>{
+ const migration=await read('supabase/migrations/20261026123000_cerebro_browser_workspace_login_config_v1.sql');
+ assert.match(migration,/add column if not exists login_config jsonb not null default '\{\}'::jsonb/);
+ assert.match(migration,/Non-secret browser login adapter metadata/);
+ assert.match(migration,/Credentials remain in the credential broker\/vault/);
+});
+
 test('synthetic localhost fixture remains PREPROD-only and can preserve its explicit login URL',async()=>{
  const runtime=await read('cerebro/runtime/browser-interactive-session-v3.mjs');
  assert.match(runtime,/preprod_local_fixture_isolated:true/);
