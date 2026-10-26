@@ -1,4 +1,5 @@
 import './cerebroBrowserWorkTotalDock';
+import './cerebroBrowserRealtimeFastlane';
 import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 
 export type BrowserSessionV3={
@@ -14,7 +15,7 @@ type ApiResult<T>=Promise<{status:number;data:T|null}>;
 const BROWSER_GATEWAY='cerebro-browser-gateway-v1';
 const WORKMODE_STYLE_ID='cerebro-browser-workmode-v2';
 const WORKMODE_INSTALLED='cerebroBrowserWorkmodeV2';
-const HUMAN_TEXT_BATCH_MS=180;
+const HUMAN_TEXT_BATCH_MS=30;
 
 type HumanTypingState={value:string;timer:number};
 type BatchedKeyboardEvent=globalThis.KeyboardEvent&{__cerebroTypingBatch?:boolean};
