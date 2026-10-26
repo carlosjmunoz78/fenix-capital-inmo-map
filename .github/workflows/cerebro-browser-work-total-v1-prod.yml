@@ -186,3 +186,5 @@ jobs:
           if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
           console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,environment:'PROD',work_total_v1:true,static_secret_added:false}));
           NODE
+
+# Manual governed login canary for profile Carlos · Google principal · 2026-10-26
