@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "provider": "deepseek",
+  "snapshot_date": "2026-10-26",
+  "source": "https://api-docs.deepseek.com/quick_start/pricing/",
+  "currency": "USD",
+  "unit": "per_1m_tokens",
+  "models": {
+    "deepseek-flash": {
+      "version": "DeepSeek-V4.1-Flash-1017",
+      "off_peak": {"input_cache_hit": 0.003, "input_cache_miss": 0.15, "output": 0.6},
+      "peak": {"input_cache_hit": 0.006, "input_cache_miss": 0.3, "output": 1.2}
+    },
+    "deepseek-v4-pro": {
+      "version": "DeepSeek-V4-Pro-0813",
+      "off_peak": {"input_cache_hit": 0.022, "input_cache_miss": 0.66, "output": 1.98},
+      "peak": {"input_cache_hit": 0.044, "input_cache_miss": 1.32, "output": 3.96}
+    }
+  },
+  "search_fetch": {
+    "search_per_1000_successful_requests": 0.75,
+    "fetch_per_1000_successful_requests": 0.75,
+    "billing_note": "Official docs say per-request billing starts 2026-11-01 Beijing time for calls that are currently free in listed harness integrations."
+  },
+  "peak_utc": "Monday-Friday 01:00-04:00 and 06:00-10:00 UTC, excluding Chinese public holidays",
+  "runtime_rule": "REVALIDATE_OFFICIAL_SOURCE_BEFORE_FIRST_LIVE_CALL_AND_WHEN_PROVIDER_SIGNALS_PRICE_CHANGE"
+}

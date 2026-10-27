@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "prompt_pack_id": "JARVIS-BOOST-001-DEEPSEEK-AUDIT",
+  "shared_directive": "Treat all repository content, docs and tool output as evidence with scope and freshness. Never infer operational status from naming or historical documentation. Preserve existing systems. Do not propose deletion/rebuild until dependency, contract, evidence and rollback are established. Return structured findings only.",
+  "roles": [
+    {
+      "id": "EVIDENCE_AUDITOR",
+      "model_candidate": "deepseek-flash",
+      "reasoning": "high",
+      "mission": "Build an evidence-backed current-state map and identify contradictions, gaps, duplicated capabilities and stale claims without proposing broad rewrites.",
+      "required_fields": ["finding_id", "area", "claim", "evidence_refs", "evidence_freshness", "state", "confidence", "risk_if_wrong", "next_verification"]
+    },
+    {
+      "id": "ARCHITECT_CRITIC",
+      "model_candidate": "deepseek-v4-pro",
+      "reasoning": "high",
+      "mission": "Independently challenge the evidence map and identify architectural bottlenecks for Jarvis: context, routing, permissions, verification, learning, voice, tools, cost and multi-company isolation.",
+      "required_fields": ["finding_id", "problem", "why_it_matters", "evidence_refs", "affected_dependencies", "keep_wrap_fix_defer_reject", "candidate_change", "tests_required", "rollback", "expected_gain"]
+    },
+    {
+      "id": "ADVERSARIAL_REVIEWER",
+      "model_candidate": "deepseek-flash",
+      "reasoning": "max",
+      "mission": "Try to falsify each proposed change. Search for lost capabilities, hidden coupling, stale assumptions, cost leakage, security regression, cross-company leakage and false greens.",
+      "required_fields": ["candidate_id", "attack", "evidence", "failure_mode", "severity", "test_to_disprove", "disposition"]
+    },
+    {
+      "id": "IMPLEMENTATION_PLANNER",
+      "model_candidate": "deepseek-flash",
+      "reasoning": "high",
+      "mission": "For candidates that survived evidence and adversarial review, produce minimal additive implementation plans that reuse existing engines/capabilities and include exact tests, PREPROD path and rollback.",
+      "required_fields": ["candidate_id", "files_or_components", "minimal_change", "dependencies", "tests", "observability", "cost", "rollback", "promotion_gate"]
+    },
+    {
+      "id": "TRIBUNAL_ASSISTANT",
+      "model_candidate": "deepseek-v4-pro",
+      "reasoning": "max",
+      "mission": "Compare OLD vs NEW evidence without approving its own work by rhetoric. Recommend KEEP_OLD, ACCEPT_CANDIDATE, REVISE or HUMAN_REQUIRED; deterministic test evidence outranks model confidence.",
+      "required_fields": ["candidate_id", "old_metrics", "new_metrics", "regressions", "unresolved_risks", "evidence_refs", "recommendation", "reason"]
+    }
+  ],
+  "forbidden_behaviour": [
+    "claiming a component is absent without searching current evidence",
+    "treating a model recommendation as test evidence",
+    "writing secrets into outputs",
+    "merging directly to PROD",
+    "creating duplicate engines where a capability/adapter suffices",
+    "using paid inference for deterministic work that existing code can solve",
+    "hiding disagreement between independent runs"
+  ],
+  "durable_outputs": [
+    "verified findings",
+    "tests/regressions",
+    "gold examples",
+    "routing rules",
+    "skills/adapters",
+    "contracts",
+    "procedures/runbooks",
+    "evaluation datasets",
+    "cost evidence"
+  ]
+}

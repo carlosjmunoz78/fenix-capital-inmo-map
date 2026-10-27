@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "boost_id": "JARVIS-BOOST-001",
+  "recorded_at": "2026-10-27",
+  "branch": "cerebro/jarvis-boost-001-bootstrap-20261026",
+  "initial_main_sha": "632bf7767f80bf2757068c25bd04d2862e5d0368",
+  "reconciled_main_sha": "a907ffbfdfee10dd39192e74711077da71f5194b",
+  "reconciliation_commit": "730bba8802e49a2539d325ef819f9bcf81b72feb",
+  "evidence_state": "DOCUMENTED_PARTIAL",
+  "prepared": {
+    "owner_root_constitution": true,
+    "boost_manifest": true,
+    "budget_hard_stop_policy": true,
+    "deepseek_provider_contract": true,
+    "deepseek_provider_adapter_candidate": true,
+    "provider_unit_tests_candidate": true,
+    "audit_queue": true,
+    "eval_suite": true,
+    "activation_runbook": true,
+    "latest_main_delta_reconciled": true,
+    "branch_ci_green": true,
+    "deepseek_funding": true,
+    "deepseek_secret_connection": true,
+    "official_provider_contract_revalidated": true,
+    "live_provider_canary": true,
+    "cost_telemetry_live_proof": true
+  },
+  "live_canary_evidence": {
+    "workflow_run_id": 40482787704,
+    "workflow_job_id": 122117014920,
+    "head_sha": "b8b742149b345b16741de5482a91f4e781e865d9",
+    "result": "SUCCESS",
+    "semantic_ok": true,
+    "expected_output_verified": true,
+    "input_tokens": 63,
+    "output_tokens": 9,
+    "unit_tests_passed": 13,
+    "unit_tests_failed": 0,
+    "secret_value_exposed": false,
+    "auto_recharge": false,
+    "prod_touched": false
+  },
+  "post_canary_ci": {
+    "governed_main_integration_run": 1783,
+    "governed_main_integration_result": "SUCCESS",
+    "rsi_promotion_readiness_shadow_run": 1585,
+    "rsi_promotion_readiness_shadow_result": "SUCCESS"
+  },
+  "pending": [
+    "super_audit_execution",
+    "jarvis_benchmark_execution"
+  ],
+  "prod_touched": false,
+  "main_touched": false,
+  "secret_value_stored": false,
+  "next_action": "Execute the bounded read-only SUPER AUDIT batch A00-A04, then tribunal/reconciliation. Keep PR #942 DRAFT/PREPROD and do not promote to PROD."
+}
