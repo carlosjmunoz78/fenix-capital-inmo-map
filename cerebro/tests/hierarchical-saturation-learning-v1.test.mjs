@@ -67,6 +67,27 @@ test('saturated worker refills a freed lane before a slow sibling finishes', asy
   assert.equal(queue.listForContext(CTX).filter(job => job.status === 'SUCCEEDED').length, 4);
 });
 
+test('saturated round budget is an exact claim limit even with a deeper queue', async t => {
+  const dir = tempDir(t, 'cerebro-l10-budget-');
+  const queue = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
+  for (let i = 0; i < 8; i += 1) {
+    queue.enqueue({ name: 'work', context: CTX, payload: { i }, timeout_ms: 1000, idempotency_key: `budget:${i}` });
+  }
+  const worker = new DurableWorkerRunnerV1({
+    job_runtime: queue,
+    worker_id: 'l10-budget-worker',
+    lease_ms: 1000,
+    heartbeat_ms: 20,
+    max_concurrency: 3,
+    max_per_company: 3,
+  }).register({ name: 'work', handler: async ({ payload }) => ({ i: payload.i }) });
+  const outcomes = await worker.runSaturatedRound({ contexts: [CTX, CTX, CTX], completion_budget: 4 });
+  assert.equal(outcomes.filter(item => item.status === 'SUCCEEDED').length, 4);
+  const jobs = queue.listForContext(CTX);
+  assert.equal(jobs.filter(job => job.status === 'SUCCEEDED').length, 4);
+  assert.equal(jobs.filter(job => job.status === 'QUEUED').length, 4);
+});
+
 test('saturated worker surfaces immediate dispatch failures instead of losing them', async t => {
   const dir = tempDir(t, 'cerebro-l10-dispatch-');
   const queue = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
