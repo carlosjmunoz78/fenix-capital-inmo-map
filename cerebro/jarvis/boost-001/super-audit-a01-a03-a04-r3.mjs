@@ -2,22 +2,25 @@ import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { DeepSeekProviderV0 } from '../../runtime/deepseek-provider-v0.mjs';
-import { DeepSeekBudgetGuardV0 } from '../../runtime/deepseek-budget-guard-v0.mjs';
+import { DeepSeekLiveBalanceGuardV0 } from '../../runtime/deepseek-live-balance-guard-v0.mjs';
 
 const ROOT = process.cwd();
 const BOOST = join(ROOT, 'cerebro/jarvis/boost-001');
 const OUT = join(ROOT, 'artifacts/boost001-super-audit-a01-a03-a04-r3');
 const IDS = ['A01', 'A03', 'A04'];
 const MAX_OUTPUT_TOKENS = 16_000;
-const SPENT_EUR = Number(process.env.DEEPSEEK_SUPER_AUDIT_SPENT_EUR ?? '0.25');
-const PROJECTED_EUR = Number(process.env.DEEPSEEK_SUPER_AUDIT_PROJECTED_EUR ?? '0.15');
+const PROJECTED_USD = Number(process.env.DEEPSEEK_SUPER_AUDIT_PROJECTED_USD ?? '0.15');
+const BASELINE_USD = Number(process.env.DEEPSEEK_APPROVED_BASELINE_USD ?? '100');
 
 if (process.env.CEREBRO_ALLOW_PAID_SUPER_AUDIT !== 'YES') throw new Error('SUPER AUDIT not authorised');
 if (!process.env.DEEPSEEK_API_KEY) throw new Error('DEEPSEEK_API_KEY missing');
 
-const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, monthlyVariableCeilingEur: 10, autoRecharge: false });
-const authorization = guard.authorize({ phase: 'bootstrap', spentEur: SPENT_EUR, projectedCostEur: PROJECTED_EUR });
-if (!authorization.allowed) throw new Error(`Budget guard denied r3: ${authorization.result}`);
+const liveGuard = new DeepSeekLiveBalanceGuardV0({ baselineUsd: BASELINE_USD, autoRecharge: false });
+const authorization = await liveGuard.authorize({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  projectedCostUsd: PROJECTED_USD,
+});
+if (!authorization.allowed) throw new Error(`MONEY_LIMIT:${authorization.reason}`);
 
 function json(name) { return JSON.parse(readFileSync(join(BOOST, name), 'utf8')); }
 function git(args, fallback = '') {
@@ -49,12 +52,15 @@ const patterns = {
   A03: 'RUNTIME-001|EVT-001|JOB-001|ROUTE-001|FINOPS-001|AIBUD-001|router|runtime|cost guard|budget|continuous.supervisor|durable.worker',
   A04: 'IAM|credential.broker|vault|standing.permission|kill.switch|multi.account|tenant|secret|permission|scope|identity|revocation',
 };
-const scope = ['cerebro/**', 'docs/**', 'scripts/**', 'src/**', '.github/workflows/**'];
-function grep(pattern, ref = null) {
+const evidenceScopes = ['cerebro', 'src', 'scripts', 'docs', '.github/workflows'];
+function grepPath(pattern, path, ref = null) {
   const args = ['grep', '-n', '-I', '-E', pattern];
   if (ref) args.push(ref);
-  args.push('--', ...scope);
+  args.push('--', path);
   return git(args);
+}
+function scopedEvidence(pattern, ref = null) {
+  return Object.fromEntries(evidenceScopes.map((path) => [path, clip(grepPath(pattern, path, ref), 1_400)]));
 }
 
 const queue = json('audit-queue.v1.json');
@@ -98,6 +104,8 @@ const preflight = Object.freeze({
   deepseek_provider_cost_budget_tests: process.env.CEREBRO_PREFLIGHT_DEEPSEEK_GUARDS ?? 'NOT_RUN',
   deepseek_same_head_canary: process.env.CEREBRO_PREFLIGHT_DEEPSEEK_CANARY ?? 'NOT_RUN',
   same_head_workflow_runs: sameHeadWorkflowRuns,
+  live_balance_guard: authorization,
+  evidence_sampling: { strategy: 'PER_PATH_BUDGET', scopes: evidenceScopes, max_chars_per_scope: 1_400 },
   secret_values_included: false,
   physical_runtime_health_claimed: false,
   main_integration_is_not_prod_activation: true,
@@ -110,8 +118,8 @@ for (const id of IDS) {
   const work = queue.work_packages.find((x) => x.id === id);
   if (!work) throw new Error(`Work package ${id} missing`);
   const evidence = {
-    candidate: clip(grep(patterns[id]), 7_000),
-    live_main: clip(grep(patterns[id], 'origin/main'), 7_000),
+    candidate: scopedEvidence(patterns[id]),
+    live_main: scopedEvidence(patterns[id], 'origin/main'),
   };
 
   const instructions = [
@@ -121,12 +129,14 @@ for (const id of IDS) {
     'Keep reasoning quality HIGH, but make the visible final answer deliberately SHORT.',
     'READ ONLY. Do not claim any mutation or PROD action.',
     'Use only supplied evidence. File/workflow presence proves existence, not live runtime health.',
+    'Repository evidence is sampled independently across cerebro, src, scripts, docs and .github/workflows; do not treat absence in one scope as absence everywhere.',
     'Evaluate two distinct gates: (1) safe code integration to main with PROD execution still disabled; (2) later physical PROD activation. Never conflate them.',
     'A current green same-head Governed Main Integration or RSI Promotion Readiness run may satisfy code-integration evidence, but it never proves physical PROD runtime health.',
     'Untouched global-system gaps, such as live health of every registry engine, are non-blocking for BOOST code integration unless this diff changes or depends on that surface. Record them separately instead of using them as a false global blocker.',
     'Current-workflow preflight PASS values are current-head test execution evidence because this DeepSeek step only runs after those steps succeed; they are not proof of a physically always-on host or PROD runtime health.',
     'If deepseek_same_head_canary=PASS, do not claim the current-head canary is absent. If same_head_workflow_runs contains a completed success for the current SHA, cite that run instead of asking for a missing run ID.',
     'Interpret divergence using divergence_semantics. main_only_commits=0 means candidate is reconciled with current live main even when candidate_only_commits>0.',
+    'The live_balance_guard is current account-budget evidence. If it says ALLOW, do not claim cumulative spend is reset per run; if it says MONEY_LIMIT, treat that as a hard stop.',
     'Do not expose secrets. Treat missing physical runtime evidence as a separate POR_AUDITAR/EVIDENCE_GAP for activation, not automatically as a blocker to safe main integration.',
     'Explicitly account for live-main drift from the supplied current SHAs, not stale baseline text.',
     'overall_state must describe the audited BOOST work package for safe main integration; list physical PROD activation readiness separately in findings/gaps.',
@@ -170,7 +180,7 @@ for (const id of IDS) {
 
   const report = parseOutput(response.output_text);
   const record = {
-    schema_version: '1.1', boost_id: 'JARVIS-BOOST-001', pass: 'r3', work_package: id,
+    schema_version: '1.2', boost_id: 'JARVIS-BOOST-001', pass: 'r3', work_package: id,
     role: 'EVIDENCE_AUDITOR', read_only: true, candidate_head: head, live_main_head: main,
     current_workflow_preflight: preflight,
     provider: response.provider, model: response.model, request_id: response.request_id,
@@ -190,7 +200,7 @@ for (const id of IDS) {
 }
 
 const batch = {
-  schema_version: '1.1', boost_id: 'JARVIS-BOOST-001', pass: 'r3', batch: 'A01-A03-A04',
+  schema_version: '1.2', boost_id: 'JARVIS-BOOST-001', pass: 'r3', batch: 'A01-A03-A04',
   mode: 'READ_ONLY', candidate_head: head, live_main_head: main, divergence,
   current_workflow_preflight: preflight,
   budget_authorization: authorization, auto_recharge: false, repo_mutation_attempted: false, results,
