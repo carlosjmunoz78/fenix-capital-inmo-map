@@ -6488,11 +6488,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_HOTWIRE_F00CE17A_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T02:22:58.993Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -6506,7 +6506,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "ddbcdd910f556653c815fb0292040cee52d8dcf7c6720963ff1bf7415d047e9d"
+      "capability_hash": "ddbcdd910f556653c815fb0292040cee52d8dcf7c6720963ff1bf7415d047e9d",
+      "canary": {
+        "status": "GREEN_DYNAMIC_HOTWIRE_F00CE17A_PROD_READONLY_CANARY",
+        "candidate_id": "repo:6cd5c24d9ac9daad31730f48d926",
+        "technical_name": "hotwire",
+        "head_sha": "99b691fa194ff281dd83027639bd358910b99177",
+        "run_id": 40438103958,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T02:23:16.863Z"
+      },
+      "promoted_at": "2026-10-27T02:23:16.863Z"
     },
     {
       "candidate_id": "repo:1206e8b6d7e91167fc4160e35e7e",
@@ -7021,11 +7051,11 @@
         "binding_count": 11
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_HYDRA_3C30D81F_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T02:22:58.992Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -7039,7 +7069,43 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "811820de77fe4d27b6a253a11a444ba900f4bb3042e1d959b6542a4d6e1af193"
+      "capability_hash": "811820de77fe4d27b6a253a11a444ba900f4bb3042e1d959b6542a4d6e1af193",
+      "canary": {
+        "status": "GREEN_DYNAMIC_HYDRA_3C30D81F_PROD_READONLY_CANARY",
+        "candidate_id": "repo:d1784e2546fc3d09629f526db282",
+        "technical_name": "hydra",
+        "head_sha": "99b691fa194ff281dd83027639bd358910b99177",
+        "run_id": 40438103958,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "QA-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T02:23:16.863Z"
+      },
+      "promoted_at": "2026-10-27T02:23:16.863Z"
     },
     {
       "candidate_id": "repo:74d03dd8c8f9603d9e9e41151c9b",
@@ -7291,11 +7357,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_IMAGE_ANALYSIS_79933EF9_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T02:22:58.989Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -7309,7 +7375,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "61ca509185fd9fd36fdab5ff2f5788356def398b231fcaa82d63b17b19a60504"
+      "capability_hash": "61ca509185fd9fd36fdab5ff2f5788356def398b231fcaa82d63b17b19a60504",
+      "canary": {
+        "status": "GREEN_DYNAMIC_IMAGE_ANALYSIS_79933EF9_PROD_READONLY_CANARY",
+        "candidate_id": "repo:d509548d9fb8ac0d55997000a8fa",
+        "technical_name": "image-analysis",
+        "head_sha": "99b691fa194ff281dd83027639bd358910b99177",
+        "run_id": 40438103958,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T02:23:16.863Z"
+      },
+      "promoted_at": "2026-10-27T02:23:16.863Z"
     },
     {
       "candidate_id": "repo:7ed60a75687b4dfaf6ab1c097889",
@@ -7561,11 +7657,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_IPTABLES_230AB10C_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T02:22:58.992Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -7579,7 +7675,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "11cfb3123294ddfc25293b348ffadf3b5a1e48438b621d4a6ad0966e1c660f04"
+      "capability_hash": "11cfb3123294ddfc25293b348ffadf3b5a1e48438b621d4a6ad0966e1c660f04",
+      "canary": {
+        "status": "GREEN_DYNAMIC_IPTABLES_230AB10C_PROD_READONLY_CANARY",
+        "candidate_id": "repo:271b7447be36f1aa59e56c540eac",
+        "technical_name": "iptables",
+        "head_sha": "99b691fa194ff281dd83027639bd358910b99177",
+        "run_id": 40438103958,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T02:23:16.863Z"
+      },
+      "promoted_at": "2026-10-27T02:23:16.863Z"
     },
     {
       "candidate_id": "repo:5efb8423d2baa90972c5db747ab1",
@@ -7633,11 +7759,11 @@
         "binding_count": 6
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_ISTIO_A82E12FD_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T02:22:58.992Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -7651,7 +7777,38 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "03c17315c5ea02780d1057c783a2bf9d7d4ebe182ee3eeda8ad699ecfc158991"
+      "capability_hash": "03c17315c5ea02780d1057c783a2bf9d7d4ebe182ee3eeda8ad699ecfc158991",
+      "canary": {
+        "status": "GREEN_DYNAMIC_ISTIO_A82E12FD_PROD_READONLY_CANARY",
+        "candidate_id": "repo:5efb8423d2baa90972c5db747ab1",
+        "technical_name": "istio",
+        "head_sha": "99b691fa194ff281dd83027639bd358910b99177",
+        "run_id": 40438103958,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T02:23:16.863Z"
+      },
+      "promoted_at": "2026-10-27T02:23:16.863Z"
     },
     {
       "candidate_id": "repo:7462cf20446353f5b5a77b316704",
@@ -15142,10 +15299,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 151,
-    "inserted": 5,
-    "updated": 0,
+    "promoted": 5,
     "skipped": 0,
-    "pending_canary": 5,
-    "prod_readonly": 146
+    "pending_canary": 0,
+    "prod_readonly": 151
   }
 }
