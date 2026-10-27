@@ -96,20 +96,15 @@ jobs:
       - name: Assert stable Console and unrelated App gateway are untouched
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
           base="${BASE_SHA:-}"
-          if [ -z "$base" ]; then
-            if [ "${GITHUB_EVENT_NAME}" = "push" ] && [ -n "${GITHUB_EVENT_BEFORE:-}" ] && [ "${GITHUB_EVENT_BEFORE}" != "0000000000000000000000000000000000000000" ]; then
-              base="${GITHUB_EVENT_BEFORE}"
-              git fetch origin "$base" --depth=1 || true
-            else
-              git fetch origin main --depth=2
-              base="$(git rev-parse HEAD^)"
-            fi
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            git fetch origin main --depth=2
+            base="$(git rev-parse HEAD^)"
           else
-            git fetch origin "$base" --depth=1
+            git fetch origin "$base" --depth=1 || true
           fi
           changed="$(git diff --name-only "$base" HEAD)"
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
