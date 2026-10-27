@@ -80,6 +80,7 @@ export class CerebroContinuousSupervisorV0 {
       last_outcome: this.#lastOutcome,
       stop_reason: this.#stopReason,
       context_count: this.#contexts.length,
+      execution_mode: typeof this.#worker.runSaturatedRound === 'function' ? 'SATURATED_CONTINUOUS' : 'FAIR_ROUND_FALLBACK',
       prod_authorized: false,
       prod_write_authorized: false,
       trading_access: false,
@@ -90,7 +91,9 @@ export class CerebroContinuousSupervisorV0 {
     integer(now_ms, 'now_ms');
     if (!this.#enabled) return Object.freeze({ status: 'STOPPED', repaired: [], outcomes: [], snapshot: this.snapshot() });
     const repaired = this.#runtime.watchdog({ now_ms });
-    const outcomes = await this.#worker.runFairRound({ contexts: this.#contexts });
+    const outcomes = typeof this.#worker.runSaturatedRound === 'function'
+      ? await this.#worker.runSaturatedRound({ contexts: this.#contexts })
+      : await this.#worker.runFairRound({ contexts: this.#contexts });
     this.#cycles += 1;
     this.#lastCycleAt = nowIso();
     const idle = outcomes.length === 0 || outcomes.every(item => item?.status === 'IDLE' || item?.status === 'SATURATED');
@@ -123,6 +126,8 @@ export const CEREBRO_CONTINUOUS_SUPERVISOR_V0_CONTRACT = Object.freeze({
   capability: 'RUNTIME-001/continuous-supervisor-v0',
   environment: PREPROD,
   continuous_while_host_alive: true,
+  continuous_slot_refill_preferred: true,
+  fair_round_rollback_preserved: true,
   durable_queue_required: true,
   lease_heartbeat_required: true,
   stale_lease_reclaim: true,
