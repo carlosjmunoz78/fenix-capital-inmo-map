@@ -1,0 +1,13 @@
+{
+  "schema_version":"1.0.0",
+  "family_id":"ENGINEERING-QA-SRE-LEARNING-GAP",
+  "version":"v1",
+  "cost_policy":{"additional_cost_eur":0,"hard_caps_required":true,"auto_recharge":false},
+  "domains":["architecture","frontend","backend","mobile","desktop","devops","security","qa","sre","performance","accessibility","integrations","data"],
+  "gap_scout":{"continuous":true,"priority":["reuse_existing","deterministic_local","open_source","free_tier","contracted_tool","safe_integration"],"free_parity":true,"tech_scout":true,"improve_before_create":true},
+  "lifecycle":{"auto_registration":true,"versioning":true,"impact_analysis":true,"old_vs_new":true,"rollback":true},
+  "lrn_001":{"loop":["event","outcome","metric","comparison","learning","candidate_rule","validation","retest"],"sensitive_rule_auto_promotion":false,"fail_closed":true},
+  "model_router":{"deepseek_optional":true,"assign_by_benchmark_not_name":true,"hard_caps":true,"token_cost_observability":true,"fallback":true,"auto_recharge":false},
+  "authority":{"prod_write":false,"trading":false,"new_recurring_subscription":false},
+  "next_block":"wrap existing engineering specialist plus registry/factory/evidence into deterministic capability lifecycle"
+}
