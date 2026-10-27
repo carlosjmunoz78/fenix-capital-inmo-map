@@ -9,7 +9,7 @@ import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dy
 import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
 import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
-import { HierarchicalAgentWorkPumpV1 } from './hierarchical-agent-work-pump-v1.mjs';
+import { HierarchicalAgentWorkPumpV2 } from './hierarchical-agent-work-pump-v2.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
@@ -28,10 +28,16 @@ const MODEL_CONTEXT = Object.freeze({
   company_id: DEFAULT_CONTEXT.company_id,
   engine_id: 'BOOST-001',
   environment: ENV,
-  version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v1',
+  version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v2',
 });
-const WORK_PUMP_FLAG = process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP;
-const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES';
+const WORK_PUMP_FLAG = String(process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP || 'AUTO').toUpperCase();
+if (!['AUTO', 'YES', 'NO'].includes(WORK_PUMP_FLAG)) throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP must be AUTO, YES or NO');
+const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES' || (WORK_PUMP_FLAG === 'AUTO' && Boolean(process.env.DEEPSEEK_API_KEY));
+const WORK_PUMP_MODE = WORK_PUMP_FLAG === 'NO'
+  ? 'DISABLED_EXPLICIT'
+  : WORK_PUMP_FLAG === 'YES'
+    ? 'ENABLED_EXPLICIT'
+    : WORK_PUMP_ENABLED ? 'AUTO_KEY_PRESENT' : 'AUTO_NO_KEY';
 
 function positiveInt(name, fallback, max = 60_000) {
   const raw = process.env[name];
@@ -127,7 +133,7 @@ function writeJsonAtomic(file, data) {
 
 function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, extra = {}) {
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.4',
+    schema_version: '1.5',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -143,6 +149,7 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler
     learning_candidate_count: learningSpool.size,
     deepseek_agent_handler: deepSeekHandler.snapshot(),
     deepseek_budget: budgetLedger.snapshot(),
+    work_pump_mode: WORK_PUMP_MODE,
     work_pump: workPump.snapshot(),
     kill_switch_present: fs.existsSync(KILL),
     dynamic_concurrency: dynamicWorker.policy_snapshot,
@@ -168,7 +175,7 @@ const budgetLedger = new DeepSeekBudgetLedgerV1({ file_path: DEEPSEEK_BUDGET_JOU
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
 const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
-const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
+const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', Math.min(16, maxGlobal), maxGlobal);
 const initialGlobalDefault = WORK_PUMP_ENABLED ? Math.min(16, maxGlobal) : Math.min(4, maxGlobal);
 const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', initialGlobalDefault, maxGlobal);
 const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), Math.min(8, maxGlobal));
@@ -200,14 +207,16 @@ worker.register({
 const deepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
 worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
 
-const workPump = new HierarchicalAgentWorkPumpV1({
+const workPump = new HierarchicalAgentWorkPumpV2({
   job_runtime: queue,
   context: MODEL_CONTEXT,
-  scope_version: process.env.CEREBRO_WORK_PUMP_SCOPE_VERSION || '2026-10-27',
-  max_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_MAX_SUBTASKS_PER_BLOCK', 8, 32),
-  max_total_subtasks: positiveInt('CEREBRO_WORK_PUMP_MAX_TOTAL_SUBTASKS', 200, 1000),
-  parent_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_PARENT_PROJECTED_EUR', 0.05, budgetCapEur),
-  child_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_CHILD_PROJECTED_EUR', 0.04, budgetCapEur),
+  scope_version: process.env.CEREBRO_WORK_PUMP_SCOPE_VERSION || '2026-10-27-v2',
+  max_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_MAX_SUBTASKS_PER_BLOCK', 12, 32),
+  target_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_TARGET_SUBTASKS_PER_BLOCK', 12, 32),
+  max_total_subtasks: positiveInt('CEREBRO_WORK_PUMP_MAX_TOTAL_SUBTASKS', 400, 1000),
+  ready_buffer_target: positiveInt('CEREBRO_WORK_PUMP_READY_BUFFER_TARGET', 24, 256),
+  parent_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_PARENT_PROJECTED_EUR', 0.03, budgetCapEur),
+  child_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_CHILD_PROJECTED_EUR', 0.025, budgetCapEur),
   enabled: WORK_PUMP_ENABLED,
 });
 if (WORK_PUMP_ENABLED) workPump.seed();
@@ -218,7 +227,7 @@ const supervisor = new CerebroContinuousSupervisorV0({
   job_runtime: queue,
   worker: dynamicWorker,
   contexts: runtimeContexts,
-  idle_delay_ms: positiveInt('CEREBRO_IDLE_DELAY_MS', 2_000, 60_000),
+  idle_delay_ms: positiveInt('CEREBRO_IDLE_DELAY_MS', 500, 60_000),
   outcome_sink: ({ outcome, latency_ms }) => learningSpool.appendJobOutcome({ outcome, latency_ms }),
 });
 
@@ -259,6 +268,7 @@ safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetL
   booted: true,
   context_count: runtimeContexts.length,
   work_pump_enabled: WORK_PUMP_ENABLED,
+  work_pump_mode: WORK_PUMP_MODE,
 });
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
@@ -275,6 +285,9 @@ try {
         cycle_status: result.status,
         learning_receipts_count: result.learning_receipts?.length ?? 0,
         work_pump_enqueued_children: pumpSnapshot.enqueued_children_this_reconcile ?? 0,
+        work_pump_useful_queued: pumpSnapshot.useful_queued ?? 0,
+        work_pump_useful_running: pumpSnapshot.useful_running ?? 0,
+        work_pump_starvation: Boolean(pumpSnapshot.starvation),
         snapshot: result.snapshot,
       });
     },
