@@ -56,7 +56,7 @@ test('runtime accepts multiple PREPROD contexts with explicit governed routes', 
   }, ['--cycles', '1']);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
-  assert.equal(heartbeat.context_count, 2);
+  assert.equal(heartbeat.snapshot.context_count, 2);
 });
 
 test('missing route fails closed instead of silently running work in wrong pool', t => {
@@ -76,7 +76,7 @@ test('missing route fails closed instead of silently running work in wrong pool'
   assert.match(`${result.stderr}\n${result.stdout}`, /SCHEDULING_ROUTE_MISSING/);
 });
 
-test('explicit override can lower but not silently exceed the hard worker contract', t => {
+test('explicit override can raise global runtime without raising measured DeepSeek ceiling', t => {
   const dir = tempDir(t);
   const result = run(dir, { CEREBRO_MAX_CONCURRENCY: '128', CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8' }, ['--cycles', '1']);
   assert.equal(result.status, 0, result.stderr || result.stdout);
