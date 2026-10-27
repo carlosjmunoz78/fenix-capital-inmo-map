@@ -1,0 +1,43 @@
+{
+  "schema_version": "cerebro.sandbox_backend.v1",
+  "candidate_id": "space-firecracker",
+  "state": "DISABLED_CANDIDATE",
+  "authority": {
+    "policy_owner": "CEREBRO_GATEKEEPER",
+    "backend_may_self_grant": false,
+    "secrets_in_guest_image": false,
+    "network_default": "DENY"
+  },
+  "required_capabilities": {
+    "isolated_execution": true,
+    "deterministic_teardown": true,
+    "resource_limits": true,
+    "network_policy_enforcement": true,
+    "filesystem_boundary": true,
+    "evidence_export": true,
+    "rollback_route": true
+  },
+  "promotion_gates": [
+    "LICENSE_PROVENANCE_VERIFIED",
+    "PLATFORM_COMPATIBILITY_VERIFIED",
+    "NO_RAW_EXTERNAL_CODE_IN_CONTROL_PLANE",
+    "NETWORK_DENY_BY_DEFAULT_PROVEN",
+    "SECRET_NON_DISCLOSURE_PROVEN",
+    "RESOURCE_CEILINGS_PROVEN",
+    "TEARDOWN_AND_CLEANUP_PROVEN",
+    "HOST_ESCAPE_NEGATIVE_TESTS_PASS",
+    "EVIDENCE_EXPORT_PASS",
+    "ROLLBACK_PASS",
+    "OLD_VS_NEW_NO_SECURITY_REGRESSION"
+  ],
+  "forbidden": [
+    "TRADING_REAL",
+    "AUTH_BYPASS",
+    "CAPTCHA_BYPASS",
+    "RATE_LIMIT_BYPASS",
+    "PAYWALL_BYPASS",
+    "SILENT_NETWORK_FALLBACK",
+    "SILENT_CLOUD_FALLBACK",
+    "UNBOUNDED_COST"
+  ]
+}
