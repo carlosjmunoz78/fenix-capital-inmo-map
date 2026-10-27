@@ -7,6 +7,7 @@ import { DurableWorkerRunnerV1 } from './durable-worker-runner-v1.mjs';
 import { CerebroContinuousSupervisorV0 } from './cerebro-continuous-supervisor-v0.mjs';
 import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dynamic-concurrency-policy-v1.mjs';
 import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
+import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
@@ -94,9 +95,9 @@ function writeJsonAtomic(file, data) {
   fs.renameSync(tmp, file);
 }
 
-function safeHeartbeat(supervisor, dynamicWorker, learningSpool, extra = {}) {
+function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, extra = {}) {
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.2',
+    schema_version: '1.3',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -109,6 +110,7 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, extra = {}) {
     queue_journal_present: fs.existsSync(JOURNAL),
     learning_journal_present: fs.existsSync(LEARNING_JOURNAL),
     learning_candidate_count: learningSpool.size,
+    deepseek_agent_handler: deepSeekHandler.snapshot(),
     kill_switch_present: fs.existsSync(KILL),
     dynamic_concurrency: dynamicWorker.policy_snapshot,
     prod_authorized: false,
@@ -128,7 +130,7 @@ const learningSpool = new LearningCandidateSpoolV1({ file_path: LEARNING_JOURNAL
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
 const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
-const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', Math.min(16, maxGlobal), maxGlobal);
+const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
 const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', Math.min(4, maxGlobal), maxGlobal);
 const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), maxGlobal);
 const maxRepoWrites = positiveInt('CEREBRO_MAX_REPO_WRITE_CONCURRENCY', 1, Math.max(1, maxGlobal));
@@ -156,6 +158,8 @@ worker.register({
   name: 'runtime.health.probe',
   handler: async () => ({ ok: true, environment: ENV, host: os.hostname(), at: new Date().toISOString() }),
 });
+const deepSeekHandler = createDeepSeekAgentHandlerV1();
+worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
 
 const dynamicWorker = new DynamicConcurrencyControllerV1({ worker, policy, routes: schedulingRoutes });
 const supervisor = new CerebroContinuousSupervisorV0({
@@ -173,17 +177,17 @@ function shutdown(reason) {
   stopping = true;
   supervisor.stop(reason);
   abort.abort(reason);
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { stop_reason: reason });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { stop_reason: reason });
 }
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('uncaughtException', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNCAUGHT_EXCEPTION');
 });
 process.on('unhandledRejection', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNHANDLED_REJECTION');
 });
@@ -191,7 +195,7 @@ process.on('unhandledRejection', (error) => {
 const probeEvery = positiveInt('CEREBRO_HEARTBEAT_MS', 10_000, 60_000);
 const timer = setInterval(() => {
   if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-  else safeHeartbeat(supervisor, dynamicWorker, learningSpool, { snapshot: supervisor.snapshot() });
+  else safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { snapshot: supervisor.snapshot() });
 }, probeEvery);
 timer.unref();
 
@@ -199,7 +203,7 @@ if (process.argv.includes('--enqueue-health-probe')) {
   queue.enqueue({ name: 'runtime.health.probe', context: DEFAULT_CONTEXT, payload: {}, timeout_ms: 10_000 });
 }
 
-safeHeartbeat(supervisor, dynamicWorker, learningSpool, { booted: true, context_count: runtimeContexts.length });
+safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { booted: true, context_count: runtimeContexts.length });
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
 if (maxCycles !== Infinity && (!Number.isSafeInteger(maxCycles) || maxCycles < 1)) throw new Error('--cycles requires integer >= 1');
@@ -210,7 +214,7 @@ try {
     max_cycles: maxCycles,
     on_cycle: async (result) => {
       if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-      safeHeartbeat(supervisor, dynamicWorker, learningSpool, {
+      safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, {
         cycle_status: result.status,
         learning_receipts_count: result.learning_receipts?.length ?? 0,
         snapshot: result.snapshot,
@@ -219,5 +223,5 @@ try {
   });
 } finally {
   clearInterval(timer);
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { exited: true, snapshot: supervisor.snapshot() });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { exited: true, snapshot: supervisor.snapshot() });
 }
