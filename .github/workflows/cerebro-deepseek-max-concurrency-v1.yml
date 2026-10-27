@@ -1,0 +1,83 @@
+name: CEREBRO DeepSeek Max Concurrency V1
+
+on:
+  push:
+    branches:
+      - cerebro/l9-deepseek-max-dag-20261027
+    paths:
+      - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
+      - 'cerebro/tests/dynamic-concurrency-policy-v1.test.mjs'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
+      - 'cerebro/runtime/deepseek-*.mjs'
+      - '.github/workflows/cerebro-deepseek-max-concurrency-v1.yml'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
+      - 'cerebro/tests/dynamic-concurrency-policy-v1.test.mjs'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
+      - 'cerebro/runtime/deepseek-*.mjs'
+      - '.github/workflows/cerebro-deepseek-max-concurrency-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-deepseek-max-concurrency-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy-runtime-tribunal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      DEEPSEEK_APPROVED_BASELINE_USD: '100'
+      DEEPSEEK_CANARY_PROJECTED_USD: '0.01'
+      CEREBRO_ALLOW_PAID_CANARY: 'YES'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned repository dependencies
+        run: npm ci --ignore-scripts
+      - name: Dynamic concurrency policy unit and isolation tests
+        run: node --test cerebro/tests/dynamic-concurrency-policy-v1.test.mjs
+      - name: Existing durable runtime regression
+        run: >-
+          node --test
+          cerebro/tests/durable-job-runtime-v1.test.mjs
+          cerebro/tests/durable-worker-runner-v1.test.mjs
+          cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs
+          cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
+      - name: DeepSeek provider and budget guards
+        run: >-
+          node --test
+          cerebro/tests/deepseek-budget-guard-v0.test.mjs
+          cerebro/tests/deepseek-live-balance-guard-v0.test.mjs
+          cerebro/tests/deepseek-cost-v0.test.mjs
+          cerebro/tests/deepseek-provider-v0.test.mjs
+      - name: Tiny live DeepSeek same-head canary
+        if: ${{ env.DEEPSEEK_API_KEY != '' }}
+        run: node cerebro/jarvis/boost-001/canary.mjs
+      - name: Verify no duplicate scheduler or PROD authority claim
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "second_daemon: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+          grep -F "prod_authorized: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+          grep -F "trading_access: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+          grep -F "hard_cost_cap_eur: 100" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+      - name: Full CEREBRO regression suite
+        working-directory: cerebro
+        run: npm test
