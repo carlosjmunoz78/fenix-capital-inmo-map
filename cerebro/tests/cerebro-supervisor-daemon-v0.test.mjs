@@ -87,6 +87,8 @@ test('AUTO without provider secret stays disabled and cannot create paid work', 
   const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
   assert.equal(heartbeat.work_pump_mode, 'AUTO_NO_KEY');
   assert.equal(heartbeat.work_pump.enabled, false);
-  assert.equal(heartbeat.deepseek_agent_handler.calls, 0);
-  assert.equal(heartbeat.deepseek_budget.spent_eur, 0);
+  assert.equal(heartbeat.deepseek_agent_handler.reserved_spend_eur, 0);
+  assert.equal(heartbeat.deepseek_budget.reserved_projected_eur, 0);
+  assert.equal(heartbeat.deepseek_budget.reservation_count, 0);
+  assert.equal(heartbeat.deepseek_budget.auto_recharge, false);
 });
