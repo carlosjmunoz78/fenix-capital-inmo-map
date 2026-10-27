@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "JARVIS-PROJECT-HUB-V1",
+  "company_id": "fenix",
+  "engine_id": "PROJECT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "purpose": "Canonical ordered project/subproject and audit workspace for Carlos and JARVIS.",
+  "required_project_fields": [
+    "project_id",
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "title",
+    "order",
+    "status",
+    "owner",
+    "editors",
+    "autonomy_state",
+    "objective",
+    "subprojects",
+    "dependencies",
+    "audit_refs",
+    "last_reconciled_at",
+    "source"
+  ],
+  "actors": {
+    "CARLOS": {
+      "role": "FULL_OWNER",
+      "can_create_project": true,
+      "can_edit_project_metadata": true,
+      "can_override_jarvis_metadata": true,
+      "can_create_audit": true
+    },
+    "JARVIS": {
+      "role": "GOVERNED_AGENT",
+      "can_create_project": true,
+      "can_edit_project_metadata": true,
+      "can_create_audit": true,
+      "must_append_provenance": true,
+      "must_preserve_revision_history": true
+    }
+  },
+  "ordering": {
+    "first": "PRJ-AUDITORIAS",
+    "then": "PRJ-001..PRJ-018",
+    "custom_projects": "AFTER_CANONICAL_NUMERIC_BY_CREATED_AT"
+  },
+  "audit_model": {
+    "canonical_project_id": "PRJ-AUDITORIAS",
+    "immutable_evidence": true,
+    "mutable_current_summary": true,
+    "revision_history": true,
+    "evidence_may_not_be_rewritten": true,
+    "summary_reconciliation": "latest_supported_state_from_evidence"
+  },
+  "authority_firewall": {
+    "project_metadata_can_grant_runtime_authority": false,
+    "protected_fields": [
+      "prod_authorized",
+      "prod_write_authorized",
+      "prod_mutation_authorized",
+      "spend_authorized",
+      "trading_access",
+      "live_writes",
+      "autonomous_prod"
+    ],
+    "protected_fields_expected_value": false,
+    "trading_isolation": true,
+    "additional_cost_target_eur": 0
+  },
+  "multiempresa": {
+    "required": ["company_id", "engine_id", "environment", "version"],
+    "cross_company_edits": "DENY_BY_DEFAULT"
+  },
+  "api_intent": [
+    "GET /api/projects",
+    "POST /api/projects",
+    "PATCH /api/projects/:id",
+    "GET /api/audits",
+    "POST /api/audits"
+  ],
+  "persistence": {
+    "reference_mode": "local_append_only_journal_plus_registry_snapshot",
+    "supabase_required": false,
+    "rebuild": "registry_plus_revision_journal_replay",
+    "rollback": "restore_registry_and_replay_to_revision"
+  },
+  "promotion": {
+    "preprod_required": true,
+    "tests_required": true,
+    "tribunal_required": true,
+    "rollback_required": true,
+    "prod_write_authority": false
+  }
+}
