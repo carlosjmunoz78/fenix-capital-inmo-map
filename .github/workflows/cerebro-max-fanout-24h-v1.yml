@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - 'cerebro/max-fanout-24h-*'
-      - 'cerebro/l10-hierarchical-saturation-*'
   pull_request:
     paths:
       - 'cerebro/runtime/max-fanout-block-worker-v1.mjs'
