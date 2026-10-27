@@ -6,7 +6,10 @@ on:
       - cerebro/l9-deepseek-max-dag-20261027
     paths:
       - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
+      - 'cerebro/runtime/dynamic-dag-planner-v1.mjs'
       - 'cerebro/tests/dynamic-concurrency-policy-v1.test.mjs'
+      - 'cerebro/tests/dynamic-dag-planner-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
@@ -16,7 +19,10 @@ on:
   pull_request:
     paths:
       - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
+      - 'cerebro/runtime/dynamic-dag-planner-v1.mjs'
       - 'cerebro/tests/dynamic-concurrency-policy-v1.test.mjs'
+      - 'cerebro/tests/dynamic-dag-planner-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
@@ -53,8 +59,12 @@ jobs:
           node-version: '24'
       - name: Install pinned repository dependencies
         run: npm ci --ignore-scripts
-      - name: Dynamic concurrency policy unit and isolation tests
-        run: node --test cerebro/tests/dynamic-concurrency-policy-v1.test.mjs
+      - name: Dynamic concurrency DAG and multi-company gates
+        run: >-
+          node --test
+          cerebro/tests/dynamic-concurrency-policy-v1.test.mjs
+          cerebro/tests/dynamic-dag-planner-v1.test.mjs
+          cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs
       - name: Existing durable runtime regression
         run: >-
           node --test
@@ -89,9 +99,11 @@ jobs:
         run: |
           set -euo pipefail
           grep -F "second_daemon: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+          grep -F "second_queue: false" cerebro/runtime/dynamic-dag-planner-v1.mjs
           grep -F "prod_authorized: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
           grep -F "trading_access: false" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
           grep -F "hard_cost_cap_eur: 100" cerebro/runtime/dynamic-concurrency-policy-v1.mjs
+          grep -F "Math.min(8, maxGlobal)" cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
       - name: Full CEREBRO regression suite
         working-directory: cerebro
         run: npm test
