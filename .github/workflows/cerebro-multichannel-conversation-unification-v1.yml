@@ -16,6 +16,21 @@ on:
       - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
       - 'cerebro/tests/channel-access-profiles-v1.test.mjs'
       - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/functions/_shared/cerebro-conversation-policy-v1.ts'
+      - 'supabase/functions/_shared/cerebro-channel-access-policy-v1.ts'
+      - 'supabase/functions/cerebro-telegram-gateway-v0/**'
+      - 'supabase/functions/cerebro-telegram-voice-v1/**'
+      - 'supabase/migrations/20261013010500_cerebro_multichannel_ana_overlay_v1.sql'
+      - 'supabase/migrations/20261013042000_cerebro_channel_access_profiles_v1.sql'
+      - 'cerebro/multichannel/**'
+      - 'cerebro/registry/rsi-learning-subscribers.v0.json'
+      - 'cerebro/tests/multichannel-conversation-policy-v1.test.mjs'
+      - 'cerebro/tests/multichannel-conversation-old-vs-new-v1.test.mjs'
+      - 'cerebro/tests/channel-access-profiles-v1.test.mjs'
+      - '.github/workflows/cerebro-multichannel-conversation-unification-v1.yml'
   workflow_dispatch:
 
 permissions:
@@ -81,11 +96,16 @@ jobs:
       - name: Assert stable Console and unrelated App gateway are untouched
         shell: bash
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           set -euo pipefail
           base="${BASE_SHA:-}"
-          if [ -z "$base" ]; then git fetch origin main --depth=1; base="$(git rev-parse FETCH_HEAD)"; else git fetch origin "$base" --depth=1; fi
+          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
+            git fetch origin main --depth=2
+            base="$(git rev-parse HEAD^)"
+          else
+            git fetch origin "$base" --depth=1 || true
+          fi
           changed="$(git diff --name-only "$base" HEAD)"
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/functions/cerebro-console-gateway-v0/'
           ! printf '%s\n' "$changed" | grep -Eq '^supabase/functions/fenix-app-gateway/'
