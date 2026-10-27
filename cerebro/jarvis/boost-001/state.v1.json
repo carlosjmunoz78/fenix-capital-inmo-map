@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "boost_id": "JARVIS-BOOST-001",
   "recorded_at": "2026-10-27",
-  "branch": "cerebro/jarvis-boost-001-bootstrap-20261026",
-  "initial_main_sha": "632bf7767f80bf2757068c25bd04d2862e5d0368",
-  "reconciled_main_sha": "a907ffbfdfee10dd39192e74711077da71f5194b",
-  "reconciliation_commit": "730bba8802e49a2539d325ef819f9bcf81b72feb",
-  "evidence_state": "DOCUMENTED_PARTIAL",
+  "branch": "cerebro/boost-001-reconciled-20261027",
+  "live_main_sha_at_reconciliation": "d61a0b9a403b5801aabdba63142e9d869a87513d",
+  "reconciliation_commit": "3ab9ded969d98ae096d8e8e9c388ff5015e7fb0c",
+  "latest_proven_candidate_sha": "66912f33d91ecb0f0deb4c7daf32ec826d0ccf2e",
+  "evidence_state": "PREPROD_PROVIDER_GREEN_AUDIT_PARTIAL",
   "prepared": {
     "owner_root_constitution": true,
     "boost_manifest": true,
@@ -19,39 +19,53 @@
     "activation_runbook": true,
     "latest_main_delta_reconciled": true,
     "branch_ci_green": true,
-    "deepseek_funding": true,
+    "deepseek_funding_available": true,
     "deepseek_secret_connection": true,
-    "official_provider_contract_revalidated": true,
     "live_provider_canary": true,
-    "cost_telemetry_live_proof": true
+    "cost_telemetry_live_proof": true,
+    "prod_promotion_ready": false
   },
   "live_canary_evidence": {
-    "workflow_run_id": 40482787704,
-    "workflow_job_id": 122117014920,
-    "head_sha": "b8b742149b345b16741de5482a91f4e781e865d9",
+    "workflow_run_id": 40499206008,
+    "workflow_job_id": 122172331650,
+    "head_sha": "66912f33d91ecb0f0deb4c7daf32ec826d0ccf2e",
     "result": "SUCCESS",
     "semantic_ok": true,
-    "expected_output_verified": true,
+    "provider": "deepseek",
+    "model": "deepseek-flash",
+    "status": "completed",
     "input_tokens": 63,
-    "output_tokens": 9,
+    "output_tokens": 23,
+    "reasoning_tokens": 14,
     "unit_tests_passed": 13,
     "unit_tests_failed": 0,
     "secret_value_exposed": false,
     "auto_recharge": false,
     "prod_touched": false
   },
-  "post_canary_ci": {
-    "governed_main_integration_run": 1783,
+  "current_candidate_ci": {
+    "governed_main_integration_run_id": 40499213350,
     "governed_main_integration_result": "SUCCESS",
-    "rsi_promotion_readiness_shadow_run": 1585,
+    "rsi_promotion_readiness_shadow_run_id": 40499213230,
     "rsi_promotion_readiness_shadow_result": "SUCCESS"
   },
+  "latest_super_audit": {
+    "workflow_run_id": 40499090657,
+    "execution_result": "SUCCESS",
+    "finding_a01": "PARCIAL",
+    "finding_a03": "PARCIAL",
+    "finding_a04": "POR_AUDITAR"
+  },
   "pending": [
-    "super_audit_execution",
-    "jarvis_benchmark_execution"
+    "live_registry_health_map_177",
+    "current_external_crm_seo_binding_evidence",
+    "authoritative_promotion_gate_mapping",
+    "runtime_durability_and_route_live_evidence",
+    "runtime_iam_credential_lifecycle_evidence",
+    "tribunal_reconciliation_after_gap_closure"
   ],
   "prod_touched": false,
   "main_touched": false,
-  "secret_value_stored": false,
-  "next_action": "Execute the bounded read-only SUPER AUDIT batch A00-A04, then tribunal/reconciliation. Keep PR #942 DRAFT/PREPROD and do not promote to PROD."
+  "direct_main_write_authorized": false,
+  "next_action": "Re-run bounded A01/A03/A04 audit on the reconciled candidate with current-head IAM/routing tests and explicit live-main diff evidence. Keep PROD disabled until mandatory gates are evidenced GREEN."
 }
