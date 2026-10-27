@@ -1,0 +1,150 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { DeepSeekProviderV0 } from './deepseek-provider-v0.mjs';
+import { DeepSeekBudgetGuardV0 } from './deepseek-budget-guard-v0.mjs';
+
+export const FANOUT_BLOCKS = Object.freeze([
+  ['W00','Live-state freeze and evidence inventory'],
+  ['W01','CEREBRO Browser primary web operating surface'],
+  ['W02','Universal browser extension'],
+  ['W03','Universal PC control plane'],
+  ['W04','Universal Mobile Jarvis'],
+  ['W05','Notification and event fabric'],
+  ['W06','Identity multi-account credential control'],
+  ['W07','Social Department reference architecture'],
+  ['W08','Clone social pattern to relevant networks'],
+  ['W09','SEO department restructuring'],
+  ['W10','Agent and subagent knowledge bootstrap'],
+  ['W11','Agent Skill Engine catalogue reconciliation'],
+  ['W12','App Fenix integration audit and repair'],
+  ['W13','CEREBRO Console Jarvis interface'],
+  ['W14','Jarvis identity personality voice'],
+  ['W15','Context memory knowledge continuity'],
+  ['W16','Model Execution Router with DeepSeek'],
+  ['W17','Learning RSI Factory closure'],
+  ['W18','Cross-system Browser procedures'],
+  ['W19','Security audit rollback kill switches'],
+  ['W20','E2E acceptance matrix'],
+  ['W21','CEREBRO interface completion JARVIS View 0'],
+  ['W22','APPFACT-001 autonomous app factory'],
+  ['W23','ZEUS Control Map route registry'],
+  ['W24','ZEUS Living Project'],
+].map(([id,title], index) => Object.freeze({ id, title, index })));
+
+const KEYWORDS = Object.freeze({
+  W00:['inventory','state','evidence','registry'], W01:['browser','bridge','session'], W02:['extension','chromium'], W03:['pc','computer','device'],
+  W04:['mobile','android','ios'], W05:['notification','event','outbox'], W06:['iam','vault','credential','identity'], W07:['social','facebook'],
+  W08:['instagram','linkedin','tiktok','youtube','pinterest'], W09:['seo','search-console'], W10:['knowledge','agent','subagent'], W11:['registry','skill','engine','capability'],
+  W12:['app','fenix','crm'], W13:['console','jarvis','gateway'], W14:['voice','tts','stt','persona'], W15:['memory','context','knowledge'],
+  W16:['router','deepseek','model'], W17:['learning','rsi','factory','tribunal'], W18:['procedure','browser'], W19:['security','rollback','kill','audit'],
+  W20:['e2e','acceptance','playwright'], W21:['jarvis','console','neural','work'], W22:['appfact','digital-build','factory'], W23:['zeus','map','route','resolver'], W24:['zeus','living','project','timeline'],
+});
+
+const BOOST_DIR = path.resolve('cerebro/jarvis/boost-001');
+const OUT_ROOT = path.resolve(process.env.CEREBRO_FANOUT_OUT_DIR || 'artifacts/max-fanout-v1');
+
+export function blocksForShard(shard, shards = 8) {
+  if (!Number.isInteger(shard) || !Number.isInteger(shards) || shard < 0 || shards < 1 || shard >= shards) throw new Error('invalid shard');
+  return FANOUT_BLOCKS.filter(block => block.index % shards === shard);
+}
+
+function gitFiles() {
+  const text = execFileSync('git', ['ls-files'], { encoding: 'utf8' });
+  return text.split(/\r?\n/).filter(Boolean);
+}
+
+function evidenceFor(block) {
+  const terms = KEYWORDS[block.id] || [block.id.toLowerCase()];
+  const files = gitFiles();
+  const hits = files.filter(file => {
+    const lower = file.toLowerCase();
+    return terms.some(term => lower.includes(term));
+  }).slice(0, 120);
+  return {
+    schema_version: '1.0',
+    block_id: block.id,
+    title: block.title,
+    environment: 'PREPROD',
+    prod_authorized: false,
+    trading_access: false,
+    generated_at: new Date().toISOString(),
+    git_sha: process.env.GITHUB_SHA || null,
+    keyword_terms: terms,
+    matching_paths: hits,
+    matching_path_count: hits.length,
+  };
+}
+
+function readText(file) {
+  try { return fs.readFileSync(file, 'utf8'); } catch { return ''; }
+}
+
+function scopeFor(block) {
+  const docs = [
+    'MASTER_SCOPE_2026-10-27.md',
+    'ADDENDUM_W21_W22_JARVIS_VIEW0_APPFACT_2026-10-27.md',
+    'ADDENDUM_W23_ZEUS_CONTROL_MAP_2026-10-27.md',
+    'ADDENDUM_W24_ZEUS_LIVING_PROJECT_2026-10-27.md',
+  ].map(name => readText(path.join(BOOST_DIR, name))).join('\n\n');
+  const marker = block.id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = docs.match(new RegExp(`(?:^|\\n)#{1,3}\\s+${marker}\\b[\\s\\S]*?(?=\\n#{1,3}\\s+W\\d{2}\\b|$)`, 'm'));
+  return (match?.[0] || `${block.id} · ${block.title}`).slice(0, 12000);
+}
+
+function writeJson(file, value) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
+}
+
+export async function runEvidence(blockId) {
+  const block = FANOUT_BLOCKS.find(x => x.id === blockId);
+  if (!block) throw new Error(`unknown block ${blockId}`);
+  const packet = evidenceFor(block);
+  writeJson(path.join(OUT_ROOT, block.id, 'evidence.json'), packet);
+  return packet;
+}
+
+export async function runDeepSeekShard(shard, shards = 8) {
+  if (process.env.CEREBRO_ALLOW_PAID_FANOUT !== 'YES') throw new Error('paid fanout not authorized by runtime flag');
+  const blocks = blocksForShard(shard, shards);
+  const projectedPerBlock = Number(process.env.CEREBRO_FANOUT_PROJECTED_EUR_PER_BLOCK || '0.05');
+  const spentEur = Number(process.env.CEREBRO_FANOUT_SPENT_EUR || '0');
+  const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, autoRecharge: false });
+  const authorization = guard.authorize({ phase: 'bootstrap', spentEur, projectedCostEur: projectedPerBlock * blocks.length });
+  if (!authorization.allowed) throw new Error('HUMAN_REQUIRED:MONEY_LIMIT');
+  const provider = new DeepSeekProviderV0();
+  const results = [];
+  for (const block of blocks) {
+    const evidence = evidenceFor(block);
+    const input = [
+      `BLOCK ${block.id}: ${block.title}`,
+      scopeFor(block),
+      `REPO_EVIDENCE=${JSON.stringify(evidence).slice(0, 12000)}`,
+      'Return a compact JSON object only with: status_assessment, confirmed_evidence, missing_gates, next_parallel_actions, implementation_targets, tests_required, prod_blockers. Never claim PROD without live evidence. Never expose secrets. Preserve existing systems. Trading stays isolated.',
+    ].join('\n\n').slice(0, 28000);
+    const response = await provider.respond({
+      model: 'deepseek-flash',
+      instructions: 'You are a bounded CEREBRO evidence/implementation planner. Deterministic tests and Tribunal, not you, decide promotion.',
+      input,
+      maxOutputTokens: 768,
+    }, { requestId: `max-fanout-${block.id}-${process.env.GITHUB_RUN_ID || 'local'}` });
+    const record = { block_id: block.id, title: block.title, usage: response.usage, output_text: response.output_text, authorization };
+    writeJson(path.join(OUT_ROOT, block.id, `deepseek-shard-${shard}.json`), record);
+    results.push(record);
+  }
+  return results;
+}
+
+async function main() {
+  const args = Object.fromEntries(process.argv.slice(2).map(arg => {
+    const [k,v='true'] = arg.replace(/^--/, '').split('='); return [k,v];
+  }));
+  if (args.mode === 'evidence') await runEvidence(args.block);
+  else if (args.mode === 'deepseek') await runDeepSeekShard(Number(args.shard), Number(args.shards || 8));
+  else throw new Error('use --mode=evidence --block=Wxx OR --mode=deepseek --shard=N --shards=8');
+}
+
+const self = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (self) main().catch(error => { console.error(String(error?.message || error)); process.exitCode = 1; });
