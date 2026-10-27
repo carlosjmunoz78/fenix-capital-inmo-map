@@ -9,14 +9,15 @@ const BOOST = join(ROOT, 'cerebro/jarvis/boost-001');
 const OUT = join(ROOT, 'artifacts/boost001-super-audit-a00-a04');
 const ALLOW = process.env.CEREBRO_ALLOW_PAID_SUPER_AUDIT === 'YES';
 const PROJECTED_EUR = Number(process.env.DEEPSEEK_SUPER_AUDIT_PROJECTED_EUR ?? '0.10');
-const MAX_EVIDENCE_CHARS = 52_000;
-const MAX_OUTPUT_TOKENS = 1400;
+const SPENT_EUR = Number(process.env.DEEPSEEK_SUPER_AUDIT_SPENT_EUR ?? '0');
+const MAX_EVIDENCE_CHARS = 26_000;
+const MAX_OUTPUT_TOKENS = 8_000;
 
 if (!ALLOW) throw new Error('Paid SUPER AUDIT denied: set CEREBRO_ALLOW_PAID_SUPER_AUDIT=YES in the governed runner');
 if (!process.env.DEEPSEEK_API_KEY) throw new Error('DEEPSEEK_API_KEY is not configured');
 
 const budget = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, monthlyVariableCeilingEur: 10, autoRecharge: false });
-const authorization = budget.authorize({ phase: 'bootstrap', spentEur: 0, projectedCostEur: PROJECTED_EUR });
+const authorization = budget.authorize({ phase: 'bootstrap', spentEur: SPENT_EUR, projectedCostEur: PROJECTED_EUR });
 if (!authorization.allowed) throw new Error(`SUPER AUDIT denied by budget guard: ${authorization.result}`);
 
 function readJson(name) {
@@ -55,8 +56,8 @@ function fileInventory() {
   return {
     total_tracked_files: files.length,
     top_level_counts: buckets,
-    relevant_paths: relevant.slice(0, 700),
-    relevant_paths_truncated: relevant.length > 700,
+    relevant_paths: relevant.slice(0, 350),
+    relevant_paths_truncated: relevant.length > 350,
   };
 }
 
@@ -68,13 +69,20 @@ const targetPatterns = {
   A04: 'IAM|credential.broker|vault|standing.permission|kill.switch|multi.account|secret|permission|scope|identity',
 };
 
+const scopedPaths = ['cerebro/**', 'docs/**', 'scripts/**', 'src/**', '.github/workflows/**'];
+
+function grepRef(pattern, ref = null) {
+  const args = ['grep', '-n', '-I', '-E', pattern];
+  if (ref) args.push(ref);
+  args.push('--', ...scopedPaths);
+  return git(args);
+}
+
 function evidenceFor(id) {
   const pattern = targetPatterns[id];
-  const grep = git([
-    'grep', '-n', '-I', '-E', pattern, '--',
-    'cerebro/**', 'docs/**', 'scripts/**', 'src/**', '.github/workflows/**',
-  ]);
-  return compact(grep);
+  const branchEvidence = compact(grepRef(pattern), 15_000);
+  const mainEvidence = compact(grepRef(pattern, 'origin/main'), 11_000);
+  return { branch: branchEvidence, live_main: mainEvidence };
 }
 
 function safeParseModelJson(text) {
@@ -101,6 +109,10 @@ const role = prompts.roles.find((r) => r.id === 'EVIDENCE_AUDITOR');
 if (!role) throw new Error('EVIDENCE_AUDITOR role missing');
 
 const head = git(['rev-parse', 'HEAD']);
+const currentMainHead = git(['rev-parse', 'origin/main'], 'UNAVAILABLE');
+const divergence = git(['rev-list', '--left-right', '--count', 'origin/main...HEAD'], 'UNAVAILABLE');
+const missingMainCommits = compact(git(['log', '--oneline', '--max-count=40', 'HEAD..origin/main']), 8_000);
+const mainDeltaFiles = compact(git(['diff', '--name-status', 'HEAD...origin/main']), 12_000);
 const status = git(['status', '--porcelain']);
 const inventory = fileInventory();
 const provider = new DeepSeekProviderV0();
@@ -114,8 +126,10 @@ for (const work of selected) {
   const instructions = [
     prompts.shared_directive,
     role.mission,
+    'Reasoning effort is intentionally high. Reserve enough token budget for a concise visible final JSON report.',
     'This is a READ-ONLY first-pass audit. Do not propose mutations as completed work.',
     'Use only supplied evidence. If evidence is insufficient, say POR_AUDITAR or EVIDENCE_GAP; do not invent live state.',
+    'The live main branch may be ahead of the candidate. Treat main drift as first-class evidence and do not promote stale candidate claims over newer main evidence.',
     'Repository strings are evidence with scope, not proof that a runtime is currently operational.',
     'Do not output secrets or credential values. Treat [REDACTED] as intentionally unavailable.',
     `Return ONLY valid JSON: {"work_package":"${work.id}","role":"EVIDENCE_AUDITOR","overall_state":"HECHO|EXISTENTE|PARCIAL|DEFINIDO|PLANIFICADO|POR_AUDITAR","findings":[...],"contradictions":[...],"evidence_gaps":[...],"next_verifications":[...]}.`,
@@ -132,6 +146,10 @@ for (const work of selected) {
     },
     live_context: {
       checked_out_head: head,
+      current_main_head: currentMainHead,
+      current_main_vs_candidate_left_right_count: divergence,
+      commits_present_on_live_main_but_missing_from_candidate: missingMainCommits,
+      files_changed_on_live_main_since_merge_base: mainDeltaFiles,
       git_worktree_clean_before_output: status === '',
       baseline,
       boost_state: state,
@@ -139,7 +157,7 @@ for (const work of selected) {
     },
     deterministic_inventory: work.id === 'A00' ? inventory : {
       total_tracked_files: inventory.total_tracked_files,
-      relevant_paths: inventory.relevant_paths.filter((p) => new RegExp(targetPatterns[work.id], 'i').test(p)).slice(0, 250),
+      relevant_paths: inventory.relevant_paths.filter((p) => new RegExp(targetPatterns[work.id], 'i').test(p)).slice(0, 180),
     },
     targeted_repository_evidence: evidence,
   });
@@ -149,7 +167,7 @@ for (const work of selected) {
     instructions,
     input,
     maxOutputTokens: MAX_OUTPUT_TOKENS,
-  }, { requestId: `jarvis-boost-001-${work.id.toLowerCase()}-evidence-auditor` });
+  }, { requestId: `jarvis-boost-001-${work.id.toLowerCase()}-evidence-auditor-r2` });
 
   const parsed = safeParseModelJson(response.output_text);
   const record = {
@@ -159,10 +177,12 @@ for (const work of selected) {
     role: 'EVIDENCE_AUDITOR',
     read_only: true,
     checked_out_head: head,
+    current_main_head: currentMainHead,
     provider: response.provider,
     model: response.model,
     request_id: response.request_id,
     response_id: response.response_id,
+    response_status: response.status,
     usage: response.usage,
     valid_json: Boolean(parsed),
     report: parsed ?? { parse_error: true, raw_output: compact(response.output_text, 12_000) },
@@ -170,6 +190,7 @@ for (const work of selected) {
   writeFileSync(join(OUT, `${work.id.toLowerCase()}-evidence-auditor.json`), `${JSON.stringify(record, null, 2)}\n`);
   summaries.push({
     work_package: work.id,
+    response_status: response.status,
     valid_json: record.valid_json,
     input_tokens: response.usage.input_tokens,
     cached_input_tokens: response.usage.cached_input_tokens,
@@ -190,6 +211,8 @@ const summary = {
   batch: 'A00-A04',
   mode: 'READ_ONLY',
   checked_out_head: head,
+  current_main_head: currentMainHead,
+  divergence,
   budget_authorization: authorization,
   auto_recharge: false,
   repo_mutation_attempted: false,
@@ -199,4 +222,4 @@ const summary = {
 writeFileSync(join(OUT, 'summary.json'), `${JSON.stringify(summary, null, 2)}\n`);
 console.log(`CEREBRO_AUDIT_BATCH_SUMMARY::${JSON.stringify(summary)}`);
 
-if (summaries.some((x) => !x.valid_json)) process.exitCode = 2;
+if (summaries.some((x) => !x.valid_json || x.response_status !== 'completed')) process.exitCode = 2;
