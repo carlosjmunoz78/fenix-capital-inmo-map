@@ -25,7 +25,6 @@ class AdaptiveBacklogRuntimeV1 {
   #baseMultiplier;
   #maxMultiplier;
   #fairnessSkew;
-  #last = null;
 
   constructor({
     job_runtime,
@@ -93,7 +92,6 @@ class AdaptiveBacklogRuntimeV1 {
       min_active_block_pending: minBlockPending,
       pending_by_block: Object.freeze(Object.fromEntries([...pendingByBlock.entries()].sort())),
     });
-    this.#last = snapshot;
     return { ...snapshot, pendingByBlock, minBlockPending };
   }
 
