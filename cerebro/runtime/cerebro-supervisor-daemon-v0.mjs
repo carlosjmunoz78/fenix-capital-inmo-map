@@ -8,11 +8,14 @@ import { CerebroContinuousSupervisorV0 } from './cerebro-continuous-supervisor-v
 import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dynamic-concurrency-policy-v1.mjs';
 import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
+import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
+import { HierarchicalAgentWorkPumpV1 } from './hierarchical-agent-work-pump-v1.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
 const JOURNAL = path.join(ROOT, 'jobs.v8journal');
 const LEARNING_JOURNAL = path.join(ROOT, 'learning-candidates.v8journal');
+const DEEPSEEK_BUDGET_JOURNAL = path.join(ROOT, 'deepseek-budget.v8journal');
 const HEARTBEAT = path.join(ROOT, 'heartbeat.json');
 const KILL = path.join(ROOT, 'KILL_SWITCH');
 const DEFAULT_CONTEXT = Object.freeze({
@@ -21,12 +24,28 @@ const DEFAULT_CONTEXT = Object.freeze({
   environment: ENV,
   version: process.env.CEREBRO_SUPERVISOR_VERSION || 'v0',
 });
+const MODEL_CONTEXT = Object.freeze({
+  company_id: DEFAULT_CONTEXT.company_id,
+  engine_id: 'BOOST-001',
+  environment: ENV,
+  version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v1',
+});
+const WORK_PUMP_FLAG = process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP;
+const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES';
 
 function positiveInt(name, fallback, max = 60_000) {
   const raw = process.env[name];
   if (!raw) return fallback;
   const value = Number(raw);
   if (!Number.isSafeInteger(value) || value < 0 || value > max) throw new Error(`${name} invalid`);
+  return value;
+}
+
+function positiveNumber(name, fallback, max = 10_000) {
+  const raw = process.env[name];
+  if (!raw) return fallback;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value <= 0 || value > max) throw new Error(`${name} invalid`);
   return value;
 }
 
@@ -62,6 +81,7 @@ function loadRuntimeContexts() {
   const raw = parseJsonEnv('CEREBRO_RUNTIME_CONTEXTS_JSON', [DEFAULT_CONTEXT]);
   if (!Array.isArray(raw) || raw.length === 0) throw new Error('CEREBRO_RUNTIME_CONTEXTS_JSON must be a non-empty array');
   const contexts = raw.map((value, index) => safeContext(value, `CEREBRO_RUNTIME_CONTEXTS_JSON[${index}]`));
+  if (WORK_PUMP_ENABLED && !contexts.some(context => contextKey(context) === contextKey(MODEL_CONTEXT))) contexts.push(MODEL_CONTEXT);
   const seen = new Set();
   for (const context of contexts) {
     const key = contextKey(context);
@@ -71,19 +91,29 @@ function loadRuntimeContexts() {
   return Object.freeze(contexts);
 }
 
+function defaultRoute(context) {
+  if (contextKey(context) === contextKey(MODEL_CONTEXT)) {
+    return { pool: 'MODEL', provider_id: 'deepseek', resource_key: 'provider:deepseek' };
+  }
+  return { pool: 'CPU', resource_key: `engine:${context.company_id}:${context.engine_id}` };
+}
+
 function loadSchedulingRoutes(contexts) {
-  const fallback = Object.fromEntries(contexts.map(context => [contextKey(context), {
-    pool: 'CPU',
-    resource_key: `engine:${context.company_id}:${context.engine_id}`,
-  }]));
-  const raw = parseJsonEnv('CEREBRO_SCHEDULING_ROUTES_JSON', fallback);
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) throw new Error('CEREBRO_SCHEDULING_ROUTES_JSON must be an object');
+  const fallback = Object.fromEntries(contexts.map(context => [contextKey(context), defaultRoute(context)]));
+  const configured = parseJsonEnv('CEREBRO_SCHEDULING_ROUTES_JSON', fallback);
+  if (!configured || typeof configured !== 'object' || Array.isArray(configured)) throw new Error('CEREBRO_SCHEDULING_ROUTES_JSON must be an object');
   const routes = {};
   for (const context of contexts) {
     const key = contextKey(context);
-    const route = raw[key];
+    const route = configured[key];
     if (!route) throw new Error(`SCHEDULING_ROUTE_MISSING:${key}`);
     routes[key] = route;
+  }
+  if (WORK_PUMP_ENABLED) {
+    const modelRoute = routes[contextKey(MODEL_CONTEXT)];
+    if (modelRoute?.pool !== 'MODEL' || modelRoute?.provider_id !== 'deepseek') {
+      throw new Error('WORK_PUMP_MODEL_ROUTE_MUST_BE_MODEL_DEEPSEEK');
+    }
   }
   return Object.freeze(routes);
 }
@@ -95,9 +125,9 @@ function writeJsonAtomic(file, data) {
   fs.renameSync(tmp, file);
 }
 
-function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, extra = {}) {
+function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, extra = {}) {
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.3',
+    schema_version: '1.4',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -109,8 +139,11 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler
     updated_at: new Date().toISOString(),
     queue_journal_present: fs.existsSync(JOURNAL),
     learning_journal_present: fs.existsSync(LEARNING_JOURNAL),
+    deepseek_budget_journal_present: fs.existsSync(DEEPSEEK_BUDGET_JOURNAL),
     learning_candidate_count: learningSpool.size,
     deepseek_agent_handler: deepSeekHandler.snapshot(),
+    deepseek_budget: budgetLedger.snapshot(),
+    work_pump: workPump.snapshot(),
     kill_switch_present: fs.existsSync(KILL),
     dynamic_concurrency: dynamicWorker.policy_snapshot,
     prod_authorized: false,
@@ -123,16 +156,22 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler
 if ((process.env.CEREBRO_SUPERVISOR_ENV || ENV).toUpperCase() !== ENV) {
   throw new Error('daemon-v0 is PREPROD-only; PROD requires a separate promoted contract');
 }
+if (WORK_PUMP_FLAG === 'YES' && !process.env.DEEPSEEK_API_KEY) {
+  throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP=YES requires DEEPSEEK_API_KEY in the runtime secret store');
+}
 
 fs.mkdirSync(ROOT, { recursive: true });
 const queue = new DurableJobRuntimeV1({ file_path: JOURNAL });
 const learningSpool = new LearningCandidateSpoolV1({ file_path: LEARNING_JOURNAL });
+const budgetCapEur = positiveNumber('CEREBRO_DEEPSEEK_WORK_PUMP_BUDGET_EUR', 12, 10_000);
+const budgetLedger = new DeepSeekBudgetLedgerV1({ file_path: DEEPSEEK_BUDGET_JOURNAL, hard_cap_eur: budgetCapEur });
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
 const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
 const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
-const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', Math.min(4, maxGlobal), maxGlobal);
-const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), maxGlobal);
+const initialGlobalDefault = WORK_PUMP_ENABLED ? Math.min(16, maxGlobal) : Math.min(4, maxGlobal);
+const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', initialGlobalDefault, maxGlobal);
+const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), Math.min(8, maxGlobal));
 const maxRepoWrites = positiveInt('CEREBRO_MAX_REPO_WRITE_CONCURRENCY', 1, Math.max(1, maxGlobal));
 
 const policy = new DynamicConcurrencyPolicyV1({
@@ -153,13 +192,26 @@ const worker = new DurableWorkerRunnerV1({
   max_per_company: maxCompany,
 });
 
-// V0 deliberately exposes no arbitrary shell/process handler. Capabilities are registered explicitly.
+// No arbitrary shell/process handler. Capabilities are registered explicitly.
 worker.register({
   name: 'runtime.health.probe',
   handler: async () => ({ ok: true, environment: ENV, host: os.hostname(), at: new Date().toISOString() }),
 });
-const deepSeekHandler = createDeepSeekAgentHandlerV1();
+const deepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
 worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
+
+const workPump = new HierarchicalAgentWorkPumpV1({
+  job_runtime: queue,
+  context: MODEL_CONTEXT,
+  scope_version: process.env.CEREBRO_WORK_PUMP_SCOPE_VERSION || '2026-10-27',
+  max_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_MAX_SUBTASKS_PER_BLOCK', 8, 32),
+  max_total_subtasks: positiveInt('CEREBRO_WORK_PUMP_MAX_TOTAL_SUBTASKS', 200, 1000),
+  parent_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_PARENT_PROJECTED_EUR', 0.05, budgetCapEur),
+  child_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_CHILD_PROJECTED_EUR', 0.04, budgetCapEur),
+  enabled: WORK_PUMP_ENABLED,
+});
+if (WORK_PUMP_ENABLED) workPump.seed();
+workPump.reconcile();
 
 const dynamicWorker = new DynamicConcurrencyControllerV1({ worker, policy, routes: schedulingRoutes });
 const supervisor = new CerebroContinuousSupervisorV0({
@@ -177,17 +229,17 @@ function shutdown(reason) {
   stopping = true;
   supervisor.stop(reason);
   abort.abort(reason);
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { stop_reason: reason });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { stop_reason: reason });
 }
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('uncaughtException', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNCAUGHT_EXCEPTION');
 });
 process.on('unhandledRejection', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNHANDLED_REJECTION');
 });
@@ -195,7 +247,7 @@ process.on('unhandledRejection', (error) => {
 const probeEvery = positiveInt('CEREBRO_HEARTBEAT_MS', 10_000, 60_000);
 const timer = setInterval(() => {
   if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-  else safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { snapshot: supervisor.snapshot() });
+  else safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { snapshot: supervisor.snapshot() });
 }, probeEvery);
 timer.unref();
 
@@ -203,7 +255,11 @@ if (process.argv.includes('--enqueue-health-probe')) {
   queue.enqueue({ name: 'runtime.health.probe', context: DEFAULT_CONTEXT, payload: {}, timeout_ms: 10_000 });
 }
 
-safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { booted: true, context_count: runtimeContexts.length });
+safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, {
+  booted: true,
+  context_count: runtimeContexts.length,
+  work_pump_enabled: WORK_PUMP_ENABLED,
+});
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
 if (maxCycles !== Infinity && (!Number.isSafeInteger(maxCycles) || maxCycles < 1)) throw new Error('--cycles requires integer >= 1');
@@ -214,14 +270,17 @@ try {
     max_cycles: maxCycles,
     on_cycle: async (result) => {
       if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-      safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, {
+      const pumpSnapshot = workPump.reconcile();
+      safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, {
         cycle_status: result.status,
         learning_receipts_count: result.learning_receipts?.length ?? 0,
+        work_pump_enqueued_children: pumpSnapshot.enqueued_children_this_reconcile ?? 0,
         snapshot: result.snapshot,
       });
     },
   });
 } finally {
   clearInterval(timer);
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, { exited: true, snapshot: supervisor.snapshot() });
+  workPump.reconcile();
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { exited: true, snapshot: supervisor.snapshot() });
 }
