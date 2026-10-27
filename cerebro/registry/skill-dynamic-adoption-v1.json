@@ -6439,6 +6439,76 @@
       "promoted_at": "2026-10-24T01:01:14.287Z"
     },
     {
+      "candidate_id": "repo:6cd5c24d9ac9daad31730f48d926",
+      "technical_name": "hotwire",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/hotwire",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "6cd5c24d9ac9daad31730f48d926972b08e8754a54ecee7b2643db3f4b7e8f88",
+      "manifest_sha256": "f8a6cc062d0dfd562e8d542b8da5e51e126efb9e172c5a094cc1ff1a9088a691",
+      "outcome_hash": "724994891f4a9e76586afe9400dbaf544615345b55bbe0d9923f3558f228b677",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:6cd5c24d9ac9daad:cap:1",
+          "technical_name": "hotwire",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-27T02:22:58.993Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "ddbcdd910f556653c815fb0292040cee52d8dcf7c6720963ff1bf7415d047e9d"
+    },
+    {
       "candidate_id": "repo:1206e8b6d7e91167fc4160e35e7e",
       "technical_name": "htmx",
       "source_locator": "github://TerminalSkills/skills@6edcf94159d9f46b0759d2e1b59dd545cfaca254/skills/htmx",
@@ -6885,6 +6955,93 @@
       "promoted_at": "2026-10-24T01:01:14.287Z"
     },
     {
+      "candidate_id": "repo:d1784e2546fc3d09629f526db282",
+      "technical_name": "hydra",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/hydra",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "d1784e2546fc3d09629f526db282a7644104825e6dfdb755f9122195b2a2080c",
+      "manifest_sha256": "4d8997f89137d15fd1493cb55e6fc5924bd39722b56160c3e042d1c0cd19f2a1",
+      "outcome_hash": "886d7aab741cbd278c49c51bdf2d73111bee419d371a6c9e85b04ba0aa32e4e1",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "QA-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d1784e2546fc3d09:cap:1",
+          "technical_name": "hydra",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            },
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 11
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-27T02:22:58.992Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "811820de77fe4d27b6a253a11a444ba900f4bb3042e1d959b6542a4d6e1af193"
+    },
+    {
       "candidate_id": "repo:74d03dd8c8f9603d9e9e41151c9b",
       "technical_name": "image-analysis",
       "source_locator": "github://TerminalSkills/skills@20719c32fa1cc0bf4598bd3d2c75c058f8c19ddd/skills/image-analysis",
@@ -7085,6 +7242,76 @@
       "promoted_at": "2026-10-20T21:34:09.433Z"
     },
     {
+      "candidate_id": "repo:d509548d9fb8ac0d55997000a8fa",
+      "technical_name": "image-analysis",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/image-analysis",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "d509548d9fb8ac0d55997000a8fa0425b47f9d6fe82cfa1778597e07460d7dc8",
+      "manifest_sha256": "16bf966b4f0d72859039d687664e4ddbf5d0017b9f4d7058006427a36006c2ac",
+      "outcome_hash": "5e386540005865ea46f9cea689e9b0917e2ede039d7351aded196bf5fd4cf1e6",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:d509548d9fb8ac0d:cap:1",
+          "technical_name": "image-analysis",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-27T02:22:58.989Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "61ca509185fd9fd36fdab5ff2f5788356def398b231fcaa82d63b17b19a60504"
+    },
+    {
       "candidate_id": "repo:7ed60a75687b4dfaf6ab1c097889",
       "technical_name": "immersive",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/immersive",
@@ -7283,6 +7510,148 @@
         "observed_at": "2026-10-22T15:23:06.998Z"
       },
       "promoted_at": "2026-10-22T15:23:06.998Z"
+    },
+    {
+      "candidate_id": "repo:271b7447be36f1aa59e56c540eac",
+      "technical_name": "iptables",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/iptables",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "271b7447be36f1aa59e56c540eaca6d3b1a840f809c119e222f7bb319d298513",
+      "manifest_sha256": "b9a67e030a1d7ed820d3c1a20ded8d82ae6808c53d9081e876544e07ea030885",
+      "outcome_hash": "47f297be1e50d95870d15f58c83117cab64f18d1c8d025bd0bccddde3a922fa5",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:271b7447be36f1aa:cap:1",
+          "technical_name": "iptables",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-27T02:22:58.992Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "11cfb3123294ddfc25293b348ffadf3b5a1e48438b621d4a6ad0966e1c660f04"
+    },
+    {
+      "candidate_id": "repo:5efb8423d2baa90972c5db747ab1",
+      "technical_name": "istio",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/istio",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "5efb8423d2baa90972c5db747ab1a6fa50c60d7f819915990da5aa2565a6f693",
+      "manifest_sha256": "a40af52871d56eaf838be276b646abf7c62715a88305fac5df7da2b069a5d247",
+      "outcome_hash": "896f03c6c2a9ddaa9c3abef3f95fd72be51637391c1c9db12e620aa54905f123",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:5efb8423d2baa909:cap:1",
+          "technical_name": "istio",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-27T02:22:58.992Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "03c17315c5ea02780d1057c783a2bf9d7d4ebe182ee3eeda8ad699ecfc158991"
     },
     {
       "candidate_id": "repo:7462cf20446353f5b5a77b316704",
@@ -14772,11 +15141,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 146,
-    "inserted": 0,
+    "total": 151,
+    "inserted": 5,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 5,
     "prod_readonly": 146
   }
 }
