@@ -71,13 +71,13 @@ jobs:
           cerebro/tests/deepseek-cost-v0.test.mjs
           cerebro/tests/deepseek-provider-v0.test.mjs
       - name: Tiny live DeepSeek same-head canary
-        if: ${{ env.DEEPSEEK_API_KEY != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && env.DEEPSEEK_API_KEY != '' }}
         run: node cerebro/jarvis/boost-001/canary.mjs
       - name: Find live DeepSeek concurrency ceiling with hard cost guard
-        if: ${{ env.DEEPSEEK_API_KEY != '' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && env.DEEPSEEK_API_KEY != '' }}
         run: node cerebro/runtime/deepseek-concurrency-benchmark-v1.mjs
       - name: Upload concurrency benchmark evidence
-        if: always()
+        if: ${{ always() && github.event_name == 'workflow_dispatch' }}
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-deepseek-concurrency-v1
