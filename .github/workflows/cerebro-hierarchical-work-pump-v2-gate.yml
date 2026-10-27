@@ -1,0 +1,44 @@
+name: CEREBRO Hierarchical Work Pump V2 Gate
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/hierarchical-agent-work-pump-v1.mjs'
+      - 'cerebro/runtime/hierarchical-agent-work-pump-v2.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
+      - 'cerebro/runtime/dynamic-dag-planner-v1.mjs'
+      - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
+      - 'cerebro/tests/hierarchical-agent-work-pump-v1.test.mjs'
+      - 'cerebro/tests/hierarchical-agent-work-pump-v2.test.mjs'
+      - 'cerebro/tests/dynamic-dag-planner-v1.test.mjs'
+      - 'cerebro/tests/dynamic-concurrency-policy-v1.test.mjs'
+      - '.github/workflows/cerebro-hierarchical-work-pump-v2-gate.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: cerebro-hierarchical-work-pump-v2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  contract-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax proof
+        run: |
+          node --check cerebro/runtime/hierarchical-agent-work-pump-v2.mjs
+          node --check cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+      - name: Work-pump and scheduler regression
+        run: |
+          node --test \
+            cerebro/tests/hierarchical-agent-work-pump-v1.test.mjs \
+            cerebro/tests/hierarchical-agent-work-pump-v2.test.mjs \
+            cerebro/tests/dynamic-dag-planner-v1.test.mjs \
+            cerebro/tests/dynamic-concurrency-policy-v1.test.mjs
