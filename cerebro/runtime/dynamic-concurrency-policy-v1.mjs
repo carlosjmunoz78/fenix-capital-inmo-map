@@ -80,7 +80,7 @@ export class DynamicConcurrencyPolicyV1 {
   } = {}) {
     if (environment !== PREPROD) throw new Error('dynamic concurrency V1 is PREPROD-only');
     this.max_global_concurrency = positiveInt(max_global_concurrency, 'max_global_concurrency');
-    this.max_company_concurrency = positiveInt(max_company_concurrency ?? Math.min(16, this.max_global_concurrency), 'max_company_concurrency', { max: this.max_global_concurrency });
+    this.max_company_concurrency = positiveInt(max_company_concurrency ?? this.max_global_concurrency, 'max_company_concurrency', { max: this.max_global_concurrency });
     this.max_resource_concurrency = limitMap(max_resource_concurrency, 'max_resource_concurrency');
     this.max_provider_concurrency = limitMap(max_provider_concurrency, 'max_provider_concurrency');
     this.max_repo_write_concurrency = positiveInt(max_repo_write_concurrency, 'max_repo_write_concurrency', { max: this.max_global_concurrency });
