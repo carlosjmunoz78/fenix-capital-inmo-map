@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - cerebro/boost-001-reconciled-20261027
+      - cerebro/jarvis-project-hub-v0-20261027
     paths:
       - '.github/workflows/cerebro-deepseek-super-audit-a00-a04.yml'
       - 'cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs'
@@ -14,6 +15,15 @@ on:
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
       - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
+      - 'cerebro/runtime/jarvis-project-hub-v1.mjs'
+      - 'cerebro/console/jarvis-project-hub-binding-v1.mjs'
+      - 'cerebro/console/project-hub-ui-v0.html'
+      - 'cerebro/registry/jarvis-project-registry.v1.json'
+      - 'cerebro/registry/console-project-hub-binding-v1.json'
+      - 'cerebro/contracts/jarvis-project-hub.v1.json'
+      - 'cerebro/audit/jarvis-audit-index.v1.json'
+      - 'cerebro/runbooks/jarvis-project-hub-v1.md'
+      - 'cerebro/runtime/test-jarvis-project-hub-v1.mjs'
       - 'cerebro/tests/deepseek-*.test.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
@@ -40,7 +50,7 @@ jobs:
       DEEPSEEK_CANARY_PROJECTED_USD: '0.01'
       DEEPSEEK_SUPER_AUDIT_PROJECTED_USD: '0.15'
     steps:
-      - name: Checkout BOOST-001 candidate with live-main history
+      - name: Checkout current candidate with live-main history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -76,6 +86,17 @@ jobs:
           echo "CEREBRO_DIFF_BEGIN"
           git diff --name-status origin/main...HEAD
           echo "CEREBRO_DIFF_END"
+
+      - name: Project Hub contract and authority-firewall evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f cerebro/runtime/test-jarvis-project-hub-v1.mjs ]; then
+            node cerebro/runtime/test-jarvis-project-hub-v1.mjs
+            echo "CEREBRO_PREFLIGHT_PROJECT_HUB=PASS" >> "$GITHUB_ENV"
+          else
+            echo "CEREBRO_PREFLIGHT_PROJECT_HUB=NOT_PRESENT" >> "$GITHUB_ENV"
+          fi
 
       - name: Current-head IAM and routing negative-control evidence
         shell: bash
