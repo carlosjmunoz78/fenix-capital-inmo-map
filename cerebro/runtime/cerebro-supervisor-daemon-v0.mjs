@@ -31,7 +31,7 @@ const MODEL_CONTEXT = Object.freeze({
   version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v1',
 });
 const WORK_PUMP_FLAG = process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP;
-const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES' || (WORK_PUMP_FLAG !== 'NO' && Boolean(process.env.DEEPSEEK_API_KEY));
+const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES';
 
 function positiveInt(name, fallback, max = 60_000) {
   const raw = process.env[name];
