@@ -9,12 +9,16 @@ on:
       - '.github/workflows/cerebro-deepseek-super-audit-a00-a04.yml'
       - 'cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs'
       - 'cerebro/jarvis/boost-001/**'
+      - 'cerebro/runtime/deepseek-*.mjs'
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
+      - 'cerebro/tests/deepseek-*.test.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
       - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs'
 
 permissions:
   contents: read
@@ -30,6 +34,8 @@ jobs:
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       CEREBRO_ALLOW_PAID_SUPER_AUDIT: 'YES'
+      CEREBRO_ALLOW_PAID_CANARY: 'YES'
+      DEEPSEEK_CANARY_PROJECTED_EUR: '0.01'
       DEEPSEEK_SUPER_AUDIT_SPENT_EUR: '0.25'
       DEEPSEEK_SUPER_AUDIT_PROJECTED_EUR: '0.15'
     steps:
@@ -77,15 +83,13 @@ jobs:
           node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/identity-credential-broker-v0.test.mjs cerebro/tests/identity-session-lifecycle-v0.test.mjs cerebro/tests/execution-model-router-v0.test.mjs
           echo "CEREBRO_PREFLIGHT_IAM_ROUTING=PASS" >> "$GITHUB_ENV"
 
-      - name: Current-head durable runtime and supervisor evidence
+      - name: Current-head durable runtime supervisor and daemon evidence
         shell: bash
         run: |
           set -euo pipefail
-          node --test cerebro/tests/durable-job-runtime-v1.test.mjs cerebro/tests/durable-worker-runner-v1.test.mjs cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs cerebro/tests/bounded-recovery-supervisor.test.mjs
+          node --test cerebro/tests/durable-job-runtime-v1.test.mjs cerebro/tests/durable-worker-runner-v1.test.mjs cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs cerebro/tests/bounded-recovery-supervisor.test.mjs
           echo "CEREBRO_PREFLIGHT_RUNTIME_SUPERVISOR=PASS" >> "$GITHUB_ENV"
-
-      - name: Syntax-check bounded r3 completion runner
-        run: node --check cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs
+          echo "CEREBRO_PREFLIGHT_DAEMON_CONTRACT=PASS" >> "$GITHUB_ENV"
 
       - name: Re-run DeepSeek provider and cost guards
         shell: bash
@@ -93,6 +97,16 @@ jobs:
           set -euo pipefail
           node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
           echo "CEREBRO_PREFLIGHT_DEEPSEEK_GUARDS=PASS" >> "$GITHUB_ENV"
+
+      - name: Same-head paid tiny canary before auditor
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/canary.mjs
+          echo "CEREBRO_PREFLIGHT_DEEPSEEK_CANARY=PASS" >> "$GITHUB_ENV"
+
+      - name: Syntax-check bounded r3 completion runner
+        run: node --check cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs
 
       - name: Complete only A01 A03 A04 read-only reports
         run: node cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs
