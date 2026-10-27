@@ -9,6 +9,12 @@ on:
       - '.github/workflows/cerebro-deepseek-super-audit-a00-a04.yml'
       - 'cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs'
       - 'cerebro/jarvis/boost-001/**'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
+      - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
+      - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
 
 permissions:
   contents: read
@@ -50,21 +56,43 @@ jobs:
       - name: Record candidate versus live main evidence
         shell: bash
         run: |
-          echo "CEREBRO_MAIN_HEAD=$(git rev-parse origin/main)"
-          echo "CEREBRO_CANDIDATE_HEAD=$(git rev-parse HEAD)"
-          echo "CEREBRO_MAIN_DELTA=$(git rev-list --left-right --count origin/main...HEAD | tr '\t' ':')"
+          set -euo pipefail
+          MAIN_HEAD="$(git rev-parse origin/main)"
+          CANDIDATE_HEAD="$(git rev-parse HEAD)"
+          MAIN_DELTA="$(git rev-list --left-right --count origin/main...HEAD | tr '\t' ':')"
+          echo "CEREBRO_MAIN_HEAD=$MAIN_HEAD"
+          echo "CEREBRO_CANDIDATE_HEAD=$CANDIDATE_HEAD"
+          echo "CEREBRO_MAIN_DELTA=$MAIN_DELTA"
+          echo "CEREBRO_PREFLIGHT_MAIN_HEAD=$MAIN_HEAD" >> "$GITHUB_ENV"
+          echo "CEREBRO_PREFLIGHT_CANDIDATE_HEAD=$CANDIDATE_HEAD" >> "$GITHUB_ENV"
+          echo "CEREBRO_PREFLIGHT_MAIN_DELTA=$MAIN_DELTA" >> "$GITHUB_ENV"
           echo "CEREBRO_DIFF_BEGIN"
           git diff --name-status origin/main...HEAD
           echo "CEREBRO_DIFF_END"
 
       - name: Current-head IAM and routing negative-control evidence
-        run: node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/identity-credential-broker-v0.test.mjs cerebro/tests/identity-session-lifecycle-v0.test.mjs cerebro/tests/execution-model-router-v0.test.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs cerebro/tests/identity-credential-broker-v0.test.mjs cerebro/tests/identity-session-lifecycle-v0.test.mjs cerebro/tests/execution-model-router-v0.test.mjs
+          echo "CEREBRO_PREFLIGHT_IAM_ROUTING=PASS" >> "$GITHUB_ENV"
+
+      - name: Current-head durable runtime and supervisor evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/durable-job-runtime-v1.test.mjs cerebro/tests/durable-worker-runner-v1.test.mjs cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs cerebro/tests/bounded-recovery-supervisor.test.mjs
+          echo "CEREBRO_PREFLIGHT_RUNTIME_SUPERVISOR=PASS" >> "$GITHUB_ENV"
 
       - name: Syntax-check bounded r3 completion runner
         run: node --check cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs
 
       - name: Re-run DeepSeek provider and cost guards
-        run: node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+          echo "CEREBRO_PREFLIGHT_DEEPSEEK_GUARDS=PASS" >> "$GITHUB_ENV"
 
       - name: Complete only A01 A03 A04 read-only reports
         run: node cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs

@@ -59,7 +59,6 @@ export class DurableWorkerRunnerV1 {
   #heartbeatMs;
   #maxConcurrency;
   #maxPerCompany;
-  #clock;
   #handlers = new Map();
   #active = new Map();
   #companyActive = new Map();
@@ -72,8 +71,7 @@ export class DurableWorkerRunnerV1 {
     lease_ms = 60_000,
     heartbeat_ms = 15_000,
     max_concurrency = 4,
-    max_per_company = 2,
-    clock = Date.now
+    max_per_company = 2
   }) {
     if (environment !== PREPROD) throw new Error('durable worker runner V1 accepts exact PREPROD only');
     this.#runtime = runtimeContract(job_runtime);
@@ -83,12 +81,6 @@ export class DurableWorkerRunnerV1 {
     if (this.#heartbeatMs >= this.#leaseMs) throw new Error('heartbeat_ms must be lower than lease_ms');
     this.#maxConcurrency = integer(max_concurrency, 'max_concurrency', { min: 1, max: 1024 });
     this.#maxPerCompany = integer(max_per_company, 'max_per_company', { min: 1, max: this.#maxConcurrency });
-    if (typeof clock !== 'function') throw new TypeError('clock must be a function');
-    this.#clock = clock;
-  }
-
-  #now() {
-    return integer(this.#clock(), 'clock()', { min: 0, max: Number.MAX_SAFE_INTEGER });
   }
 
   register({ name, handler }) {
@@ -120,17 +112,17 @@ export class DurableWorkerRunnerV1 {
       return { started: false, outcome: { status: 'SATURATED', reason: 'COMPANY_CONCURRENCY_LIMIT', company_id: context.company_id } };
     }
 
-    const claimed = this.#runtime.claim({ context, worker_id: this.#workerId, now_ms: this.#now(), lease_ms: this.#leaseMs });
+    const claimed = this.#runtime.claim({ context, worker_id: this.#workerId, now_ms: Date.now(), lease_ms: this.#leaseMs });
     if (!claimed) return { started: false, outcome: { status: 'IDLE', context } };
 
     const handler = this.#handlers.get(claimed.name);
     if (!handler) {
-      const failed = this.#runtime.fail({ job_id: claimed.job_id, worker_id: this.#workerId, error: `HANDLER_NOT_REGISTERED:${claimed.name}`, now_ms: this.#now() });
+      const failed = this.#runtime.fail({ job_id: claimed.job_id, worker_id: this.#workerId, error: `HANDLER_NOT_REGISTERED:${claimed.name}`, now_ms: Date.now() });
       return { started: false, outcome: { status: 'DISPATCH_FAILED', reason: 'HANDLER_NOT_REGISTERED', job: failed } };
     }
 
     const controller = new AbortController();
-    this.#active.set(claimed.job_id, { controller, context, started_at_ms: this.#now() });
+    this.#active.set(claimed.job_id, { controller, context, started_at_ms: Date.now() });
     this.#companyActive.set(context.company_id, companyCount + 1);
     const promise = this.#execute({ job: claimed, handler, controller }).finally(() => {
       this.#active.delete(claimed.job_id);
@@ -157,14 +149,14 @@ export class DurableWorkerRunnerV1 {
       if (controller.signal.aborted) return null;
       const current = activeLease(this.#runtime, job.job_id, this.#workerId);
       if (!current) throw new Error('WORKER_LEASE_LOST');
-      return this.#runtime.heartbeat({ job_id: job.job_id, worker_id: this.#workerId, now_ms: this.#now(), lease_ms: this.#leaseMs });
+      return this.#runtime.heartbeat({ job_id: job.job_id, worker_id: this.#workerId, now_ms: Date.now(), lease_ms: this.#leaseMs });
     };
 
     const checkpoint = value => {
       if (controller.signal.aborted) throw abortError(controller.signal.reason ?? 'ABORTED');
       const current = activeLease(this.#runtime, job.job_id, this.#workerId);
       if (!current) throw new Error('WORKER_LEASE_LOST');
-      return this.#runtime.checkpoint({ job_id: job.job_id, worker_id: this.#workerId, checkpoint: value, now_ms: this.#now() });
+      return this.#runtime.checkpoint({ job_id: job.job_id, worker_id: this.#workerId, checkpoint: value, now_ms: Date.now() });
     };
 
     heartbeatTimer = setInterval(() => {
@@ -208,10 +200,10 @@ export class DurableWorkerRunnerV1 {
       }
       if (result?.status === 'HUMAN_REQUIRED') {
         if (!HUMAN_REQUIRED_REASONS.has(result.reason)) throw new Error(`INVALID_HUMAN_REQUIRED_REASON:${result.reason}`);
-        const completed = this.#runtime.complete({ job_id: job.job_id, worker_id: this.#workerId, result, now_ms: this.#now() });
+        const completed = this.#runtime.complete({ job_id: job.job_id, worker_id: this.#workerId, result, now_ms: Date.now() });
         return { status: 'HUMAN_REQUIRED', reason: result.reason, job: completed };
       }
-      const completed = this.#runtime.complete({ job_id: job.job_id, worker_id: this.#workerId, result, now_ms: this.#now() });
+      const completed = this.#runtime.complete({ job_id: job.job_id, worker_id: this.#workerId, result, now_ms: Date.now() });
       return { status: 'SUCCEEDED', job: completed };
     } catch (error) {
       const current = activeLease(this.#runtime, job.job_id, this.#workerId);
@@ -220,7 +212,7 @@ export class DurableWorkerRunnerV1 {
         return { status: latest?.status === 'CANCELLED' ? 'CANCELLED' : 'LEASE_LOST', error: errorText(error), job: latest };
       }
       const reason = timedOut ? 'JOB_TIMEOUT' : heartbeatFailure ? `HEARTBEAT_FAILURE:${errorText(heartbeatFailure)}` : errorText(error);
-      const failed = this.#runtime.fail({ job_id: job.job_id, worker_id: this.#workerId, error: reason, now_ms: this.#now() });
+      const failed = this.#runtime.fail({ job_id: job.job_id, worker_id: this.#workerId, error: reason, now_ms: Date.now() });
       return { status: failed.status === 'DEAD_LETTER' ? 'DEAD_LETTER' : 'RETRY_SCHEDULED', error: reason, job: failed };
     } finally {
       if (heartbeatTimer) clearInterval(heartbeatTimer);
@@ -232,7 +224,7 @@ export class DurableWorkerRunnerV1 {
     const id = nonEmpty(job_id, 'job_id');
     const active = this.#active.get(id);
     if (active && !active.controller.signal.aborted) active.controller.abort(reason);
-    return this.#runtime.cancel({ job_id: id, reason, now_ms: this.#now() });
+    return this.#runtime.cancel({ job_id: id, reason, now_ms: Date.now() });
   }
 
   async runFairRound({ contexts }) {
@@ -281,7 +273,6 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   heartbeat_lease_extension: true,
   checkpoint_resume: true,
   stale_lease_fail_closed: true,
-  injectable_clock_for_deterministic_scheduler_testing: true,
   human_required_reasons: Object.freeze([...HUMAN_REQUIRED_REASONS]),
   additional_cost_target_eur: 0,
   supabase_required: false,

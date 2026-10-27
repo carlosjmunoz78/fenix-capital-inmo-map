@@ -1,23 +1,29 @@
-name: CEREBRO Runtime Durable JOB-001 V1
+name: CEREBRO Runtime Durable Supervisor V0
 
 on:
   push:
+    branches:
+      - cerebro/boost-001-reconciled-20261027
     paths:
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
       - 'cerebro/runtime/persistent-runtime.mjs'
-      - 'cerebro/runtime/runtime.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
+      - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
       - '.github/workflows/cerebro-runtime-durable-job-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
       - 'cerebro/runtime/persistent-runtime.mjs'
-      - 'cerebro/runtime/runtime.mjs'
+      - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
+      - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
       - '.github/workflows/cerebro-runtime-durable-job-v1.yml'
   workflow_dispatch:
 
@@ -25,19 +31,22 @@ permissions:
   contents: read
 
 jobs:
-  durable-job-v1:
+  durable-supervisor-v0:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Durable JOB-001 V1 and worker runner focused tests
+      - name: Install pinned repository dependencies
+        run: npm ci --ignore-scripts
+      - name: Durable queue worker and continuous supervisor focused tests
         run: >-
           node --test
           cerebro/tests/durable-job-runtime-v1.test.mjs
           cerebro/tests/durable-worker-runner-v1.test.mjs
+          cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
       - name: Full CEREBRO regression suite
         working-directory: cerebro
