@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "baseline_id": "JARVIS-BOOST-001-LIVE-BASELINE",
+  "recorded_at": "2026-10-26",
+  "reconciled_main_sha": "a907ffbfdfee10dd39192e74711077da71f5194b",
+  "principle": "Repository/document claims are scope-bounded evidence, not universal proof of live autonomy.",
+  "observations": [
+    {
+      "area": "FACT-001/GOV-001",
+      "state": "HECHO_STRUCTURAL_REFERENCE_GREEN",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "Factory V0 and canonical 177-engine registry/scaffold are structurally green; this does not mean 177 autonomous live engines."
+    },
+    {
+      "area": "Console/Gateway V0",
+      "state": "HECHO_STRUCTURAL_REFERENCE_GREEN",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "CONSOLE-001, CHAT-001, CTX-001, CMD-001 and ACTGW-001 have a V0 boundary; final autonomous production control-plane status remains separately gated."
+    },
+    {
+      "area": "Governance",
+      "state": "HECHO_STRUCTURAL_REFERENCE_GREEN",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "POL-001/HEX-001 reference is green with autonomous_prod disabled."
+    },
+    {
+      "area": "EVT/JOB persistence",
+      "state": "PARCIAL",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "Persistent PREPROD single-writer reference exists; SharedRuntime wiring/scaling/autonomous PROD are not implied."
+    },
+    {
+      "area": "VOICE/conversation",
+      "state": "PARCIAL_ADVANCED",
+      "evidence": ["cerebro/docs/CURRENT_STATE.md"],
+      "claim": "VOICE-001, explicit/conversational memory and spoken-output iterations have real deployment evidence; neural Jarvis voice, final naturalness and current cross-device acceptance must be audited from latest state rather than rebuilt."
+    },
+    {
+      "area": "Browser/Computer Use",
+      "state": "ACTIVE_DEVELOPMENT_REQUIRES_LIVE_RECHECK",
+      "evidence": ["main commits through a907ffbfdfee10dd39192e74711077da71f5194b"],
+      "claim": "Browser interactive runtime is actively changing; BOOST must never replace it from a stale snapshot."
+    },
+    {
+      "area": "RSI/LRN",
+      "state": "PARCIAL_REQUIRES_LIVE_RECHECK",
+      "evidence": ["project continuity evidence outside this baseline file"],
+      "claim": "Project evidence reports a merged RSI Learning Control Plane and first green run, while full repeated Skill Factory -> durable event/outbox -> LRN proof remains a required audit item."
+    },
+    {
+      "area": "CRM/SEO/external systems",
+      "state": "CONFLICTING_OR_STALE_EVIDENCE_REQUIRES_AUDIT",
+      "evidence": ["cerebro/docs/CURRENT_STATE.md", "newer project evidence"],
+      "claim": "Older repository state labels must not override newer live evidence; audit current external bindings before any structural recommendation."
+    }
+  ],
+  "tomorrow_instruction": "DeepSeek starts from this baseline but must verify current live evidence and main drift before concluding that a component is missing, broken or redundant."
+}

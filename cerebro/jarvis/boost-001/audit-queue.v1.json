@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0",
+  "queue_id": "JARVIS-BOOST-001-AUDIT",
+  "execution_mode": "ordered_with_parallel_read_only_subtasks",
+  "mutation_default": "deny_until_evidence_and_gate",
+  "work_packages": [
+    {
+      "id": "A00",
+      "name": "Baseline freeze and evidence inventory",
+      "priority": 0,
+      "mode": "READ_ONLY",
+      "outputs": ["live-state-map", "repo-and-system-inventory", "evidence-gaps", "dependency-map-delta"],
+      "success": "No historical snapshot is promoted to current truth without live evidence."
+    },
+    {
+      "id": "A01",
+      "name": "Factory Registry Governance audit",
+      "priority": 1,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["FACT-001", "GOV-001", "POL-001", "HEX-001", "QA", "EVA", "tribunal"],
+      "outputs": ["duplication-map", "missing-contracts", "promotion-gate-gaps"]
+    },
+    {
+      "id": "A02",
+      "name": "Learning RSI audit",
+      "priority": 1,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["LRN/RSI", "skill-registration", "impact-analysis", "OLD-vs-NEW", "rollback"],
+      "success": "Prove or disposition the full Skill Factory -> durable event/outbox -> LRN -> validated improvement loop."
+    },
+    {
+      "id": "A03",
+      "name": "Runtime Jobs Router FinOps audit",
+      "priority": 1,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["RUNTIME-001", "EVT-001", "JOB-001", "ROUTE-001", "FINOPS-001", "AIBUD-001"],
+      "outputs": ["routing-gap-map", "durability-gaps", "cost-guard-verification", "DeepSeek-integration-point"]
+    },
+    {
+      "id": "A04",
+      "name": "Identity permissions secrets audit",
+      "priority": 1,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["IAM", "credential-broker", "vault", "standing-permissions", "kill-switches", "multi-account"],
+      "success": "Jarvis can execute authorised ordinary work without secret sprawl or repeated owner prompts."
+    },
+    {
+      "id": "A05",
+      "name": "Console Gateway Context Command audit",
+      "priority": 2,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["CONSOLE-001", "CHAT-001", "CTX-001", "CMD-001", "ACTGW-001"],
+      "outputs": ["Jarvis-profile-gap", "context-resolution-gap", "single-voice-gap"]
+    },
+    {
+      "id": "A06",
+      "name": "Voice and conversational presence audit",
+      "priority": 2,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["VOICE-001", "spoken-digest", "barge-in", "conversation-memory", "Qwen3-TTS candidate", "Kokoro fallback", "STT"],
+      "outputs": ["existing-voice-preservation-map", "neural-voice-gap", "latency-plan", "cloud-runtime-plan"]
+    },
+    {
+      "id": "A07",
+      "name": "Browser Computer Use execution audit",
+      "priority": 2,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["Browser Bridge", "browser runtime", "computer use", "procedure learning", "verification"],
+      "success": "Separate confirmed live control from planned or partially evidenced capabilities."
+    },
+    {
+      "id": "A08",
+      "name": "Knowledge and memory audit",
+      "priority": 2,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["project docs", "operational memory", "conversation memory", "provenance", "RAG/cache", "company isolation"],
+      "outputs": ["knowledge-source-map", "staleness-policy", "conflict-policy", "retrieval-evals"]
+    },
+    {
+      "id": "A09",
+      "name": "Business systems preservation audit",
+      "priority": 3,
+      "mode": "READ_ONLY_FIRST",
+      "targets": ["Fenix App", "CRM", "Supabase", "Notion", "WordPress", "SEO", "Training", "AION", "CAPTACASA"],
+      "success": "Jarvis wraps and governs existing systems without rebuilding them or mixing company boundaries."
+    },
+    {
+      "id": "A10",
+      "name": "Jarvis executive identity build",
+      "priority": 4,
+      "mode": "CANDIDATE_MUTATIONS_ONLY",
+      "depends_on": ["A00", "A01", "A03", "A04", "A05", "A08"],
+      "outputs": ["Jarvis persona contract", "OWNER_ROOT control contract", "context envelope", "tool-routing policy", "spoken-output policy"]
+    },
+    {
+      "id": "A11",
+      "name": "Adversarial simulation and regression corpus",
+      "priority": 5,
+      "mode": "LAB",
+      "depends_on": ["A10"],
+      "outputs": ["gold-cases", "failure-cases", "tool-use-cases", "cross-company-cases", "cost-limit-cases", "human-required-cases"]
+    },
+    {
+      "id": "A12",
+      "name": "Consolidation and promotion candidates",
+      "priority": 6,
+      "mode": "PREPROD_GATED",
+      "depends_on": ["A11"],
+      "success": "Only objectively better candidates survive OLD-vs-NEW and normal CEREBRO promotion gates."
+    }
+  ]
+}
