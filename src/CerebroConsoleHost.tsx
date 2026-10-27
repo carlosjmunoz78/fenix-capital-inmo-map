@@ -18,13 +18,13 @@ function initialView():CerebroView{
  if(typeof window==='undefined')return'JARVIS';
  const section=(new URLSearchParams(window.location.search).get('section')||'').toLowerCase();
  if(section==='browser'||section==='navegador')return'NAVEGADOR';
- if(section==='technical'||section==='tecnica'||section==='técnica'||section==='v0')return'TECNICA';
+ if(section==='operativa'||section==='technical'||section==='tecnica'||section==='técnica'||section==='v0')return'OPERATIVA';
  if(section==='neural'||section==='neuronal')return'NEURONAL';
  if(section==='legacy-v0')return'LEGACY';
  return'JARVIS';
 }
 
-function sectionFor(view:CerebroPrimaryView){if(view==='TECNICA')return'technical';if(view==='NEURONAL')return'neuronal';if(view==='NAVEGADOR')return'browser';return''}
+function sectionFor(view:CerebroPrimaryView){if(view==='OPERATIVA')return'operativa';if(view==='NEURONAL')return'neuronal';if(view==='NAVEGADOR')return'browser';return''}
 
 export default function CerebroConsoleHost(){
  const location=useLocation();
@@ -41,14 +41,14 @@ export default function CerebroConsoleHost(){
  if(!isCerebroPath)return <CerebroConsoleShell/>;
  if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
 
- if(view==='LEGACY')return <div className="cerebro-console-host cerebro-legacy-host"><CerebroSpeechOutputGuard/><div className="cerebro-legacy-top"><strong>ROLLBACK · LEGACY V0</strong><button type="button" onClick={()=>changeView('TECNICA')}>VOLVER A TÉCNICA</button></div><div className="cerebro-host-v0 cerebro-legacy-v0"><CerebroConsoleShell/></div></div>;
+ if(view==='LEGACY')return <div className="cerebro-console-host cerebro-legacy-host"><CerebroSpeechOutputGuard/><div className="cerebro-legacy-top"><strong>ROLLBACK · LEGACY V0</strong><button type="button" onClick={()=>changeView('OPERATIVA')}>VOLVER A OPERATIVA</button></div><div className="cerebro-host-v0 cerebro-legacy-v0"><CerebroConsoleShell/></div></div>;
 
  return <div className="cerebro-console-host cerebro-four-interface-host">
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={view} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    <div className="cerebro-interface-panel cerebro-jarvis-surface" hidden={view!=='JARVIS'} aria-hidden={view!=='JARVIS'}><CerebroJarvisWorkConsole/></div>
-   <div className="cerebro-interface-panel cerebro-host-v0 cerebro-technical-surface" hidden={view!=='TECNICA'} aria-hidden={view!=='TECNICA'}><CerebroConsoleShell/></div>
+   <div className="cerebro-interface-panel cerebro-host-v0 cerebro-technical-surface" hidden={view!=='OPERATIVA'} aria-hidden={view!=='OPERATIVA'}><CerebroConsoleShell/></div>
    {view==='NEURONAL'?<CerebroNeuralView/>:null}
    {view==='NAVEGADOR'?<div className="cerebro-interface-panel cerebro-browser-surface"><CerebroBrowserConsole onViewChange={next=>{if(next==='NAVEGADOR')changeView('NAVEGADOR');else changeView('JARVIS')}}/></div>:null}
   </div>
