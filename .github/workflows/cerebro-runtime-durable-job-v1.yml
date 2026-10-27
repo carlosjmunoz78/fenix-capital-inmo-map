@@ -8,22 +8,28 @@ on:
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
       - 'cerebro/runtime/persistent-runtime.mjs'
       - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
       - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs'
+      - 'scripts/cerebro/install-supervisor-preprod-windows.ps1'
       - '.github/workflows/cerebro-runtime-durable-job-v1.yml'
   pull_request:
     paths:
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
       - 'cerebro/runtime/cerebro-continuous-supervisor-v0.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
       - 'cerebro/runtime/persistent-runtime.mjs'
       - 'cerebro/runtime/bounded-recovery-supervisor.mjs'
       - 'cerebro/tests/durable-job-runtime-v1.test.mjs'
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
       - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs'
+      - 'scripts/cerebro/install-supervisor-preprod-windows.ps1'
       - '.github/workflows/cerebro-runtime-durable-job-v1.yml'
   workflow_dispatch:
 
@@ -41,13 +47,21 @@ jobs:
           node-version: 24
       - name: Install pinned repository dependencies
         run: npm ci --ignore-scripts
-      - name: Durable queue worker and continuous supervisor focused tests
+      - name: Durable queue worker continuous supervisor and daemon focused tests
         run: >-
           node --test
           cerebro/tests/durable-job-runtime-v1.test.mjs
           cerebro/tests/durable-worker-runner-v1.test.mjs
           cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs
+          cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs
           cerebro/tests/bounded-recovery-supervisor.test.mjs
+      - name: Syntax-check Windows PREPROD installer as text contract
+        shell: bash
+        run: |
+          test -s scripts/cerebro/install-supervisor-preprod-windows.ps1
+          grep -F "CEREBRO-Supervisor-PREPROD" scripts/cerebro/install-supervisor-preprod-windows.ps1
+          grep -F "prod_authorized" scripts/cerebro/install-supervisor-preprod-windows.ps1
+          grep -F "RunLevel Limited" scripts/cerebro/install-supervisor-preprod-windows.ps1
       - name: Full CEREBRO regression suite
         working-directory: cerebro
         run: npm test
