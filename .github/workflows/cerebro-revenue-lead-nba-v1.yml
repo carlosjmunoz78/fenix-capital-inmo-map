@@ -29,6 +29,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install pinned repository dependencies
+        run: npm ci --ignore-scripts
       - name: LEAD-001 + NBA-001 focused revenue tests
         run: >-
           node --test
