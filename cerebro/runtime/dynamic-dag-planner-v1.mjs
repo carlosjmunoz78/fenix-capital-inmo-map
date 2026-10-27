@@ -25,6 +25,10 @@ function safeInteger(value, label, fallback) {
 
 function clone(value) { return structuredClone(value); }
 
+function optionalId(value, label) {
+  return value == null ? null : nonEmpty(value, label);
+}
+
 function normalizeTask(value, index) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new TypeError(`tasks[${index}] must be an object`);
   const task_id = nonEmpty(value.task_id, `tasks[${index}].task_id`);
@@ -33,6 +37,9 @@ function normalizeTask(value, index) {
   const deps = Object.freeze([...new Set(depends_on.map((item, depIndex) => nonEmpty(item, `tasks[${index}].depends_on[${depIndex}]`)))]);
   return Object.freeze({
     task_id,
+    block_id: optionalId(value.block_id, `tasks[${index}].block_id`),
+    subtask_id: optionalId(value.subtask_id, `tasks[${index}].subtask_id`),
+    parent_task_id: optionalId(value.parent_task_id, `tasks[${index}].parent_task_id`),
     name: nonEmpty(value.name, `tasks[${index}].name`),
     context: safeContext(value.context, `tasks[${index}].context`),
     depends_on: deps,
@@ -51,6 +58,11 @@ function buildGraph(tasks) {
     byId.set(task.task_id, task);
   }
   for (const task of tasks) {
+    if (task.parent_task_id) {
+      const parent = byId.get(task.parent_task_id);
+      if (!parent) throw new Error(`DAG_UNKNOWN_PARENT:${task.task_id}:${task.parent_task_id}`);
+      if (parent.context.company_id !== task.context.company_id) throw new Error(`DAG_CROSS_COMPANY_PARENT_DENIED:${task.task_id}:${task.parent_task_id}`);
+    }
     for (const dep of task.depends_on) {
       const parent = byId.get(dep);
       if (!parent) throw new Error(`DAG_UNKNOWN_DEPENDENCY:${task.task_id}:${dep}`);
@@ -83,7 +95,57 @@ function criticalDepth(taskId, children, memo) {
   return depth;
 }
 
+export function expandHierarchicalBlocksV1(blocks) {
+  if (!Array.isArray(blocks) || blocks.length === 0) throw new TypeError('blocks must be a non-empty array');
+  const tasks = [];
+  const blockIds = new Set();
+  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex += 1) {
+    const block = blocks[blockIndex];
+    if (!block || typeof block !== 'object' || Array.isArray(block)) throw new TypeError(`blocks[${blockIndex}] must be an object`);
+    const block_id = nonEmpty(block.block_id, `blocks[${blockIndex}].block_id`);
+    if (blockIds.has(block_id)) throw new Error(`DAG_DUPLICATE_BLOCK:${block_id}`);
+    blockIds.add(block_id);
+    const context = safeContext(block.context, `blocks[${blockIndex}].context`);
+    const subtasks = block.subtasks ?? [];
+    if (!Array.isArray(subtasks) || subtasks.length === 0) throw new TypeError(`blocks[${blockIndex}].subtasks must be a non-empty array`);
+    const localIds = new Set();
+    for (let subIndex = 0; subIndex < subtasks.length; subIndex += 1) {
+      const subtask = subtasks[subIndex];
+      if (!subtask || typeof subtask !== 'object' || Array.isArray(subtask)) throw new TypeError(`blocks[${blockIndex}].subtasks[${subIndex}] must be an object`);
+      const subtask_id = nonEmpty(subtask.subtask_id, `blocks[${blockIndex}].subtasks[${subIndex}].subtask_id`);
+      if (localIds.has(subtask_id)) throw new Error(`DAG_DUPLICATE_SUBTASK:${block_id}:${subtask_id}`);
+      localIds.add(subtask_id);
+      const task_id = `${block_id}/${subtask_id}`;
+      const depends = subtask.depends_on ?? [];
+      if (!Array.isArray(depends)) throw new TypeError(`blocks[${blockIndex}].subtasks[${subIndex}].depends_on must be an array`);
+      const depends_on = depends.map(dep => {
+        const safe = nonEmpty(dep, `blocks[${blockIndex}].subtasks[${subIndex}].depends_on[]`);
+        return safe.includes('/') ? safe : `${block_id}/${safe}`;
+      });
+      tasks.push({
+        task_id,
+        block_id,
+        subtask_id,
+        parent_task_id: subtask.parent_task_id ?? null,
+        name: nonEmpty(subtask.name, `blocks[${blockIndex}].subtasks[${subIndex}].name`),
+        context: subtask.context ? safeContext(subtask.context, `blocks[${blockIndex}].subtasks[${subIndex}].context`) : context,
+        depends_on,
+        priority: subtask.priority ?? block.priority ?? 100,
+        payload: { ...clone(block.payload ?? {}), ...clone(subtask.payload ?? {}), __hierarchy: { block_id, subtask_id } },
+        timeout_ms: subtask.timeout_ms ?? block.timeout_ms ?? 30_000,
+        max_attempts: subtask.max_attempts ?? block.max_attempts ?? 5,
+        route: clone(subtask.route ?? block.route ?? null),
+      });
+    }
+  }
+  return Object.freeze(tasks.map((task, index) => normalizeTask(task, index)));
+}
+
 export class DynamicDagPlannerV1 {
+  static fromBlocks({ dag_id, blocks, environment = PREPROD }) {
+    return new DynamicDagPlannerV1({ dag_id, tasks: expandHierarchicalBlocksV1(blocks), environment });
+  }
+
   constructor({ dag_id, tasks, environment = PREPROD }) {
     if (environment !== PREPROD) throw new Error('DAG planner V1 is PREPROD-only');
     this.dag_id = nonEmpty(dag_id, 'dag_id');
@@ -152,7 +214,17 @@ export class DynamicDagPlannerV1 {
         receipt: job_runtime.enqueue({
           name: task.name,
           context: task.context,
-          payload: { ...clone(task.payload), __dag: { dag_id: this.dag_id, task_id: task.task_id } },
+          payload: {
+            ...clone(task.payload),
+            __dag: {
+              dag_id: this.dag_id,
+              task_id: task.task_id,
+              block_id: task.block_id,
+              subtask_id: task.subtask_id,
+              parent_task_id: task.parent_task_id,
+              route: clone(task.route),
+            },
+          },
           priority: task.priority,
           max_attempts: task.max_attempts,
           timeout_ms: task.timeout_ms,
@@ -171,6 +243,8 @@ export const DYNAMIC_DAG_PLANNER_V1_CONTRACT = Object.freeze({
   environment: PREPROD,
   extends_existing_job_runtime: true,
   second_queue: false,
+  hierarchical_blocks: true,
+  independent_subtasks_parallel_ready: true,
   explicit_dependencies: true,
   ready_blocked_states: true,
   critical_path_priority: true,

@@ -69,7 +69,7 @@ export class DynamicConcurrencyPolicyV1 {
     max_global_concurrency = 64,
     max_company_concurrency = null,
     max_resource_concurrency = { CPU: 32, IO: 48, MODEL: 32, BROWSER_DEVICE: 4, REPO_CI: 4 },
-    max_provider_concurrency = { deepseek: 32 },
+    max_provider_concurrency = { deepseek: 8 },
     max_repo_write_concurrency = 1,
     max_p95_ms = 120_000,
     max_error_rate = 0.05,
@@ -80,7 +80,7 @@ export class DynamicConcurrencyPolicyV1 {
   } = {}) {
     if (environment !== PREPROD) throw new Error('dynamic concurrency V1 is PREPROD-only');
     this.max_global_concurrency = positiveInt(max_global_concurrency, 'max_global_concurrency');
-    this.max_company_concurrency = positiveInt(max_company_concurrency ?? Math.min(16, this.max_global_concurrency), 'max_company_concurrency', { max: this.max_global_concurrency });
+    this.max_company_concurrency = positiveInt(max_company_concurrency ?? this.max_global_concurrency, 'max_company_concurrency', { max: this.max_global_concurrency });
     this.max_resource_concurrency = limitMap(max_resource_concurrency, 'max_resource_concurrency');
     this.max_provider_concurrency = limitMap(max_provider_concurrency, 'max_provider_concurrency');
     this.max_repo_write_concurrency = positiveInt(max_repo_write_concurrency, 'max_repo_write_concurrency', { max: this.max_global_concurrency });
@@ -194,7 +194,7 @@ export class DynamicConcurrencyControllerV1 {
     return safeRoute(route);
   }
 
-  async runFairRound({ contexts }) {
+  #selectLanes(contexts) {
     if (!Array.isArray(contexts) || contexts.length === 0) throw new TypeError('contexts must be a non-empty array');
     const normalized = contexts.map(safeContext);
     const reservations = [];
@@ -218,10 +218,10 @@ export class DynamicConcurrencyControllerV1 {
       spins += 1;
     }
     this.#cursor = (this.#cursor + 1) % normalized.length;
-    if (!selected.length) return [];
+    return { selected, reservations, target };
+  }
 
-    const startedAt = Date.now();
-    const outcomes = await this.#worker.runFairRound({ contexts: selected });
+  #observe({ selected, outcomes, startedAt }) {
     const elapsed = Math.max(1, Date.now() - startedAt);
     const worked = outcomes.filter(item => item?.status !== 'IDLE' && item?.status !== 'SATURATED');
     const success = outcomes.filter(item => item?.status === 'SUCCEEDED' || item?.status === 'HUMAN_REQUIRED').length;
@@ -231,15 +231,35 @@ export class DynamicConcurrencyControllerV1 {
     const rate429 = errors.filter(text => /429|rate[_ -]?limit/i.test(text)).length;
     this.#policy.observe({
       ready_count: selected.length,
-      started_count: worked.length,
+      started_count: Math.min(selected.length, worked.length),
       success_count: success,
       failure_count: failures,
       conflict_count: conflicts,
       rate_limit_429_count: rate429,
       elapsed_ms: elapsed,
-      latencies_ms: worked.length ? Array(worked.length).fill(elapsed) : [elapsed],
+      latencies_ms: worked.length ? Array(worked.length).fill(elapsed / Math.max(1, worked.length)) : [elapsed],
       cumulative_cost_eur: 0,
     });
+  }
+
+  async runFairRound({ contexts }) {
+    const { selected } = this.#selectLanes(contexts);
+    if (!selected.length) return [];
+    const startedAt = Date.now();
+    const outcomes = await this.#worker.runFairRound({ contexts: selected });
+    this.#observe({ selected, outcomes, startedAt });
+    return outcomes;
+  }
+
+  async runSaturatedRound({ contexts, completion_budget = null }) {
+    const { selected, target } = this.#selectLanes(contexts);
+    if (!selected.length) return [];
+    const startedAt = Date.now();
+    const budget = completion_budget ?? Math.max(target, selected.length * 4);
+    const outcomes = typeof this.#worker.runSaturatedRound === 'function'
+      ? await this.#worker.runSaturatedRound({ contexts: selected, completion_budget: budget })
+      : await this.#worker.runFairRound({ contexts: selected });
+    this.#observe({ selected, outcomes, startedAt });
     return outcomes;
   }
 }
@@ -251,7 +271,9 @@ export const DYNAMIC_CONCURRENCY_V1_CONTRACT = Object.freeze({
   second_daemon: false,
   pools: Object.freeze([...POOLS]),
   adaptive_scale: '1->2->4->N bounded by policy and telemetry',
+  continuous_slot_refill: true,
   provider_backpressure: true,
+  deepseek_measured_default_ceiling: 8,
   company_isolation: true,
   repo_write_locking: true,
   fail_closed_unknown_routes: true,
