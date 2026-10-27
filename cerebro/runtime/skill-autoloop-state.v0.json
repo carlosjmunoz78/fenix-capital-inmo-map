@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-27T14:39:27.064Z",
+  "updated_at": "2026-10-27T15:51:13.526Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -452,11 +452,47 @@
     "repo:a02bb50e26495917274abb83f7a8",
     "repo:44ec5f1595ff43f723789343c80b",
     "repo:74198824de75aaddd73e14d48464",
-    "repo:d4a9f2832cfa694607fa61703d1f"
+    "repo:d4a9f2832cfa694607fa61703d1f",
+    "github-wide-skills:a1a13f4643fe285d3305"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:a1a13f4643fe285d3305": {
+      "candidate_id": "github-wide-skills:a1a13f4643fe285d3305",
+      "name": "alpaca-broker-account-onboarding",
+      "human_alias": "Alpaca Broker Account Onboarding",
+      "wrapper_id": "skillwrap:ee065e78403166985888",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.51,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "alpacahq/alpaca-skills",
+        "upstream_head_commit": "89d0943084f311db5199e63ebd77b29c6819d317",
+        "manifest_sha256": "3b1909a650612b1ac96cc5077593b8920adaa79e8b33c25a54a9fc9e2aa190b7",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40534954396,
+      "checkpointed_at": "2026-10-27T15:51:13.526Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -28067,7 +28103,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "ROUTE_SAFE_ACTION_BATCH_8_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -28080,7 +28116,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40521360804,
+  "last_discovery_run_id": 40534954396,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
