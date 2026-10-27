@@ -1,4 +1,4 @@
-import {ArrowLeft,BrainCircuit,CircuitBoard,Globe2,Network,Sparkles} from 'lucide-react';
+import {ArrowLeft,CircuitBoard,Globe2,Network,Sparkles} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import './cerebro-interface-bar.css';
 
@@ -16,10 +16,9 @@ const ITEMS:[CerebroPrimaryView,string,typeof Sparkles][]=[
 export default function CerebroInterfaceBar({view,onViewChange}:Props){
  const navigate=useNavigate();
  return <header className="cerebro-interface-bar" aria-label="Interfaces de CEREBRO">
-  <div className="cerebro-interface-brand"><span><BrainCircuit size={20}/></span><div><strong>CEREBRO</strong><small>FÉNIX · PROD</small></div></div>
   <nav className="cerebro-interface-nav" aria-label="Cambiar interfaz de CEREBRO">
+   <button type="button" className="cerebro-interface-exit" onClick={()=>navigate('/inicio')}><ArrowLeft size={15}/><span>VOLVER A APP</span></button>
    {ITEMS.map(([key,label,Icon])=><button key={key} type="button" className={view===key?'is-active':''} aria-pressed={view===key} onClick={()=>onViewChange(key)}><Icon size={14}/><span>{label}</span></button>)}
   </nav>
-  <button type="button" className="cerebro-interface-exit" onClick={()=>navigate('/inicio')}><ArrowLeft size={15}/><span>VOLVER A APP</span></button>
  </header>;
 }
