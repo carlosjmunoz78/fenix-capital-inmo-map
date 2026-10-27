@@ -99,12 +99,15 @@ function defaultRoute(context) {
 }
 
 function loadSchedulingRoutes(contexts) {
-  const configured = parseJsonEnv('CEREBRO_SCHEDULING_ROUTES_JSON', {});
+  const fallback = Object.fromEntries(contexts.map(context => [contextKey(context), defaultRoute(context)]));
+  const configured = parseJsonEnv('CEREBRO_SCHEDULING_ROUTES_JSON', fallback);
   if (!configured || typeof configured !== 'object' || Array.isArray(configured)) throw new Error('CEREBRO_SCHEDULING_ROUTES_JSON must be an object');
   const routes = {};
   for (const context of contexts) {
     const key = contextKey(context);
-    routes[key] = configured[key] ?? defaultRoute(context);
+    const route = configured[key];
+    if (!route) throw new Error(`SCHEDULING_ROUTE_MISSING:${key}`);
+    routes[key] = route;
   }
   if (WORK_PUMP_ENABLED) {
     const modelRoute = routes[contextKey(MODEL_CONTEXT)];
@@ -177,7 +180,7 @@ const policy = new DynamicConcurrencyPolicyV1({
   max_company_concurrency: maxCompany,
   max_provider_concurrency: { deepseek: maxDeepSeek },
   max_repo_write_concurrency: maxRepoWrites,
-  hard_cost_cap_eur: budgetCapEur,
+  hard_cost_cap_eur: 100,
 });
 
 const worker = new DurableWorkerRunnerV1({
