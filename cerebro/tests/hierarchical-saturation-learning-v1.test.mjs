@@ -9,6 +9,8 @@ import { DynamicConcurrencyPolicyV1 } from '../runtime/dynamic-concurrency-polic
 import { DynamicDagPlannerV1 } from '../runtime/dynamic-dag-planner-v1.mjs';
 import { LearningCandidateSpoolV1, LEARNING_CANDIDATE_SPOOL_V1_CONTRACT } from '../runtime/learning-candidate-spool-v1.mjs';
 import { CerebroContinuousSupervisorV0 } from '../runtime/cerebro-continuous-supervisor-v0.mjs';
+import { createDeepSeekAgentHandlerV1, DEEPSEEK_AGENT_HANDLER_V1_CONTRACT } from '../runtime/deepseek-agent-handler-v1.mjs';
+import { DeepSeekBudgetGuardV0 } from '../runtime/deepseek-budget-guard-v0.mjs';
 
 const CTX = Object.freeze({ company_id: 'fenix', engine_id: 'L10-TEST', environment: 'PREPROD', version: 'v1' });
 
@@ -65,9 +67,36 @@ test('saturated worker refills a freed lane before a slow sibling finishes', asy
   assert.equal(queue.listForContext(CTX).filter(job => job.status === 'SUCCEEDED').length, 4);
 });
 
-test('default DeepSeek provider ceiling remains the measured useful maximum of 8', () => {
+test('saturated worker surfaces immediate dispatch failures instead of losing them', async t => {
+  const dir = tempDir(t, 'cerebro-l10-dispatch-');
+  const queue = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
+  queue.enqueue({
+    name: 'handler.not.registered',
+    context: CTX,
+    timeout_ms: 500,
+    retry: { base_delay_ms: 1000, max_delay_ms: 1000, jitter_ratio: 0 },
+  });
+  const worker = new DurableWorkerRunnerV1({
+    job_runtime: queue,
+    worker_id: 'l10-worker',
+    lease_ms: 1000,
+    heartbeat_ms: 20,
+    max_concurrency: 4,
+    max_per_company: 4,
+  });
+  const outcomes = await worker.runSaturatedRound({ contexts: [CTX], completion_budget: 1 });
+  assert.equal(outcomes.length, 1);
+  assert.equal(outcomes[0].status, 'DISPATCH_FAILED');
+  assert.equal(outcomes[0].job.status, 'RETRY_WAIT');
+  assert.match(outcomes[0].job.error, /HANDLER_NOT_REGISTERED/);
+});
+
+test('global Fenix capacity can scale to 64 while DeepSeek remains capped at measured 8', () => {
   const policy = new DynamicConcurrencyPolicyV1({ initial_global_concurrency: 16, max_global_concurrency: 64 });
-  assert.equal(policy.snapshot().max_provider_concurrency.deepseek, 8);
+  const snapshot = policy.snapshot();
+  assert.equal(snapshot.max_global_concurrency, 64);
+  assert.equal(snapshot.max_company_concurrency, 64);
+  assert.equal(snapshot.max_provider_concurrency.deepseek, 8);
 });
 
 test('hierarchical blocks flatten to parallel READY subtasks and preserve real dependencies only', () => {
@@ -123,6 +152,46 @@ test('learning candidate spool is durable, append-only and idempotent without PR
   assert.equal(reopened.list()[0].governance_state, 'CANDIDATE_ONLY');
   assert.equal(reopened.list()[0].prod_mutation_authorized, false);
   assert.equal(LEARNING_CANDIDATE_SPOOL_V1_CONTRACT.direct_prod_learning, false);
+});
+
+test('native DeepSeek handler shares a process budget and fails closed with MONEY_LIMIT', async () => {
+  let providerCalls = 0;
+  const fakeProvider = {
+    respond: async request => {
+      providerCalls += 1;
+      return {
+        provider: 'deepseek',
+        model: request.model,
+        response_id: `fake-${providerCalls}`,
+        output_text: 'candidate work product',
+        usage: { input_tokens: 10, output_tokens: 5 },
+      };
+    },
+  };
+  const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 0.06, autoRecharge: false });
+  const handler = createDeepSeekAgentHandlerV1({ provider: fakeProvider, budget_guard: guard, initial_spent_eur: 0 });
+  const signal = new AbortController().signal;
+  const first = await handler({
+    job: { job_id: 'deepseek-1' },
+    payload: { input: 'task one', projected_cost_eur: 0.04 },
+    signal,
+    checkpoint: () => {},
+  });
+  const second = await handler({
+    job: { job_id: 'deepseek-2' },
+    payload: { input: 'task two', projected_cost_eur: 0.04 },
+    signal,
+    checkpoint: () => {},
+  });
+  assert.equal(first.provider, 'deepseek');
+  assert.equal(first.governance_state, 'CANDIDATE_ONLY');
+  assert.equal(second.status, 'HUMAN_REQUIRED');
+  assert.equal(second.reason, 'MONEY_LIMIT');
+  assert.equal(providerCalls, 1);
+  assert.equal(handler.snapshot().reserved_spend_eur, 0.04);
+  assert.equal(DEEPSEEK_AGENT_HANDLER_V1_CONTRACT.arbitrary_shell_access, false);
+  assert.equal(DEEPSEEK_AGENT_HANDLER_V1_CONTRACT.arbitrary_repo_write_access, false);
+  assert.equal(DEEPSEEK_AGENT_HANDLER_V1_CONTRACT.direct_prod_mutation, false);
 });
 
 test('continuous supervisor prefers saturated execution and emits learning receipts', async () => {
