@@ -9,7 +9,7 @@ import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dy
 import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
 import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
-import { HierarchicalAgentWorkPumpV2 } from './hierarchical-agent-work-pump-v2.mjs';
+import { AdaptiveHierarchicalAgentWorkPumpV3 } from './adaptive-hierarchical-agent-work-pump-v3.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
@@ -28,7 +28,7 @@ const MODEL_CONTEXT = Object.freeze({
   company_id: DEFAULT_CONTEXT.company_id,
   engine_id: 'BOOST-001',
   environment: ENV,
-  version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v2',
+  version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v3-adaptive',
 });
 const WORK_PUMP_FLAG = String(process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP || 'AUTO').toUpperCase();
 if (!['AUTO', 'YES', 'NO'].includes(WORK_PUMP_FLAG)) throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP must be AUTO, YES or NO');
@@ -132,8 +132,9 @@ function writeJsonAtomic(file, data) {
 }
 
 function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, extra = {}) {
+  const pumpSnapshot = workPump.snapshot();
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.5',
+    schema_version: '1.6',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -150,7 +151,16 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler
     deepseek_agent_handler: deepSeekHandler.snapshot(),
     deepseek_budget: budgetLedger.snapshot(),
     work_pump_mode: WORK_PUMP_MODE,
-    work_pump: workPump.snapshot(),
+    work_pump: pumpSnapshot,
+    useful_work: {
+      scheduling_strategy: pumpSnapshot.scheduling_strategy ?? null,
+      model_capacity: pumpSnapshot.measured_model_capacity ?? null,
+      target_active_backlog: pumpSnapshot.target_active_backlog ?? null,
+      queue_pressure: pumpSnapshot.queue_pressure ?? null,
+      useful_queued: pumpSnapshot.useful_queued ?? null,
+      useful_running: pumpSnapshot.useful_running ?? null,
+      starvation: Boolean(pumpSnapshot.starvation),
+    },
     kill_switch_present: fs.existsSync(KILL),
     dynamic_concurrency: dynamicWorker.policy_snapshot,
     prod_authorized: false,
@@ -199,7 +209,6 @@ const worker = new DurableWorkerRunnerV1({
   max_per_company: maxCompany,
 });
 
-// No arbitrary shell/process handler. Capabilities are registered explicitly.
 worker.register({
   name: 'runtime.health.probe',
   handler: async () => ({ ok: true, environment: ENV, host: os.hostname(), at: new Date().toISOString() }),
@@ -207,14 +216,15 @@ worker.register({
 const deepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
 worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
 
-const workPump = new HierarchicalAgentWorkPumpV2({
+const workPump = new AdaptiveHierarchicalAgentWorkPumpV3({
   job_runtime: queue,
   context: MODEL_CONTEXT,
-  scope_version: process.env.CEREBRO_WORK_PUMP_SCOPE_VERSION || '2026-10-27-v2',
+  scope_version: process.env.CEREBRO_WORK_PUMP_SCOPE_VERSION || '2026-10-27-v3-adaptive',
+  model_capacity: maxDeepSeek,
+  max_generated_tasks: positiveInt('CEREBRO_WORK_PUMP_MAX_GENERATED_TASKS', 30_000, 100_000),
   max_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_MAX_SUBTASKS_PER_BLOCK', 12, 32),
   target_subtasks_per_block: positiveInt('CEREBRO_WORK_PUMP_TARGET_SUBTASKS_PER_BLOCK', 12, 32),
   max_total_subtasks: positiveInt('CEREBRO_WORK_PUMP_MAX_TOTAL_SUBTASKS', 400, 1000),
-  ready_buffer_target: positiveInt('CEREBRO_WORK_PUMP_READY_BUFFER_TARGET', 24, 256),
   parent_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_PARENT_PROJECTED_EUR', 0.03, budgetCapEur),
   child_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_CHILD_PROJECTED_EUR', 0.025, budgetCapEur),
   enabled: WORK_PUMP_ENABLED,
@@ -287,6 +297,8 @@ try {
         work_pump_enqueued_children: pumpSnapshot.enqueued_children_this_reconcile ?? 0,
         work_pump_useful_queued: pumpSnapshot.useful_queued ?? 0,
         work_pump_useful_running: pumpSnapshot.useful_running ?? 0,
+        work_pump_target_active_backlog: pumpSnapshot.target_active_backlog ?? null,
+        work_pump_queue_pressure: pumpSnapshot.queue_pressure ?? null,
         work_pump_starvation: Boolean(pumpSnapshot.starvation),
         snapshot: result.snapshot,
       });
