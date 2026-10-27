@@ -8366,11 +8366,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MATERIAL_UI_EE9237C1_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T14:22:24.333Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -8384,7 +8384,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "869dfeff2e31ab6f891cc8071baed239f6675cba23044efd2af66f8945aa775f"
+      "capability_hash": "869dfeff2e31ab6f891cc8071baed239f6675cba23044efd2af66f8945aa775f",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MATERIAL_UI_EE9237C1_PROD_READONLY_CANARY",
+        "candidate_id": "repo:925b0d93b1b771f5af73a19da6c5",
+        "technical_name": "material-ui",
+        "head_sha": "ddb715c2bcde587b6afc53d16b84825c30edb7ce",
+        "run_id": 40523163857,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T14:39:25.472Z"
+      },
+      "promoted_at": "2026-10-27T14:39:25.472Z"
     },
     {
       "candidate_id": "repo:d53b3ddb37bc5b2c880d8324cd82",
@@ -15369,10 +15399,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 152,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 151
+    "pending_canary": 0,
+    "prod_readonly": 152
   }
 }
