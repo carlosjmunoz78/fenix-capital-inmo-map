@@ -1,14 +1,19 @@
 import { DeepSeekProviderV0 } from '../../runtime/deepseek-provider-v0.mjs';
-import { DeepSeekBudgetGuardV0 } from '../../runtime/deepseek-budget-guard-v0.mjs';
+import { DeepSeekLiveBalanceGuardV0 } from '../../runtime/deepseek-live-balance-guard-v0.mjs';
 
 if (process.env.CEREBRO_ALLOW_PAID_CANARY !== 'YES') {
   throw new Error('Paid canary disabled. Set CEREBRO_ALLOW_PAID_CANARY=YES only after funding, secret setup and pricing revalidation.');
 }
+if (!process.env.DEEPSEEK_API_KEY) throw new Error('DEEPSEEK_API_KEY missing');
 
-const projectedCanaryCostEur = Number(process.env.DEEPSEEK_CANARY_PROJECTED_EUR ?? '0.01');
-const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, monthlyVariableCeilingEur: 10, autoRecharge: false });
-const authorization = guard.authorize({ phase: 'bootstrap', spentEur: 0, projectedCostEur: projectedCanaryCostEur });
-if (!authorization.allowed) throw new Error('MONEY_LIMIT');
+const projectedCanaryCostUsd = Number(process.env.DEEPSEEK_CANARY_PROJECTED_USD ?? '0.01');
+const baselineUsd = Number(process.env.DEEPSEEK_APPROVED_BASELINE_USD ?? '100');
+const liveGuard = new DeepSeekLiveBalanceGuardV0({ baselineUsd, autoRecharge: false });
+const authorization = await liveGuard.authorize({
+  apiKey: process.env.DEEPSEEK_API_KEY,
+  projectedCostUsd: projectedCanaryCostUsd,
+});
+if (!authorization.allowed) throw new Error(`MONEY_LIMIT:${authorization.reason}`);
 
 const started = Date.now();
 const result = await new DeepSeekProviderV0().tinyCanary({ requestId: `jarvis-boost-001-canary-${Date.now()}` });
@@ -23,7 +28,7 @@ console.log(JSON.stringify({
   status: result.status,
   usage: result.usage,
   elapsed_ms: Date.now() - started,
-  projected_budget_authorization: authorization,
+  live_budget_authorization: authorization,
 }, null, 2));
 
 if (!semanticOk) process.exitCode = 2;
