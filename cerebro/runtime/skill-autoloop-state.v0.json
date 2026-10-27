@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-27T23:07:29.836Z",
+  "updated_at": "2026-10-27T23:49:26.530Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -474,41 +474,7 @@
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {
-    "github-wide-skills:9d316d385ba36df43aee": {
-      "candidate_id": "github-wide-skills:9d316d385ba36df43aee",
-      "name": "docs-fetch-ladder",
-      "human_alias": "Docs Fetch Ladder",
-      "wrapper_id": "skillwrap:25787ecab3bfca0020cc",
-      "domain": "browser-automation-scraping",
-      "engine_bindings": [
-        "AUTO-001",
-        "AUTBOOT-001",
-        "QA-001",
-        "WEB-001",
-        "SCAN-001"
-      ],
-      "value_score": 86.54,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "aunysillyme-dev/aunx-skills",
-        "upstream_head_commit": "a60b138d13ac5176bb20dc650eac1c1647636539",
-        "manifest_sha256": "dbc92e5ab1b62f475bd24bd9268e4c7fa0563b9531f9573d7678db75f07043c1",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40597604504,
-      "checkpointed_at": "2026-10-27T22:49:21.479Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    }
-  },
+  "waiting_safe_handler": {},
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -29367,9 +29333,51 @@
       },
       "updated_at": "2026-10-27T19:33:36.469Z",
       "prod_authorized": false
+    },
+    "github-wide-skills:9d316d385ba36df43aee": {
+      "candidate_id": "github-wide-skills:9d316d385ba36df43aee",
+      "name": "docs-fetch-ladder",
+      "human_alias": "Docs Fetch Ladder",
+      "wrapper_id": "skillwrap:25787ecab3bfca0020cc",
+      "domain": "browser-automation-scraping",
+      "engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "value_score": 86.54,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "aunysillyme-dev/aunx-skills",
+        "upstream_head_commit": "a60b138d13ac5176bb20dc650eac1c1647636539",
+        "manifest_sha256": "dbc92e5ab1b62f475bd24bd9268e4c7fa0563b9531f9573d7678db75f07043c1",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SAFE_HANDLER_TERMINAL_HOLD",
+      "status": "TERMINAL_HOLD",
+      "source_discovery_run_id": 40597604504,
+      "checkpointed_at": "2026-10-27T22:49:21.479Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "evidence": {
+        "reason": "STATIC_LAB_REJECT_LOW_COVERAGE",
+        "decision_id": null,
+        "decision": null,
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-27T23:49:26.530Z",
+      "prod_authorized": false
     }
   },
-  "last_action": "ROUTE_SAFE_ACTION_BATCH_8_CONTINUE_OTHER_SAFE_WORK",
+  "last_action": "TERMINAL_HOLD_CONTINUE_OTHER_SAFE_WORK",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
