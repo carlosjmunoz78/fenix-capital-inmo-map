@@ -1,0 +1,61 @@
+name: CEREBRO 24H MAX FANOUT V1
+
+on:
+  push:
+    branches:
+      - main
+      - 'cerebro/max-fanout-24h-*'
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-max-fanout-24h-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Validate 25-block fanout contract
+        run: node --test cerebro/tests/max-fanout-block-worker-v1.test.mjs
+
+  evidence-workers:
+    needs: validate
+    strategy:
+      fail-fast: false
+      max-parallel: 25
+      matrix:
+        block: [W00,W01,W02,W03,W04,W05,W06,W07,W08,W09,W10,W11,W12,W13,W14,W15,W16,W17,W18,W19,W20,W21,W22,W23,W24]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Build deterministic evidence packet ${{ matrix.block }}
+        run: node cerebro/runtime/max-fanout-block-worker-v1.mjs --mode=evidence --block=${{ matrix.block }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fanout-evidence-${{ matrix.block }}-${{ github.run_id }}
+          path: artifacts/max-fanout-v1/${{ matrix.block }}/
+          retention-days: 3
+
+  summary:
+    needs: [validate, evidence-workers]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'CEREBRO MAX FANOUT V1'
+          echo '25 deterministic block workers requested'
+          echo 'No PROD authority granted by this workflow'
+          echo 'Trading remains isolated'
