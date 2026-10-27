@@ -22,6 +22,10 @@ function run(dir, env = {}, args = ['--enqueue-health-probe', '--cycles', '2']) 
       CEREBRO_SUPERVISOR_ENV: 'PREPROD',
       CEREBRO_IDLE_DELAY_MS: '0',
       CEREBRO_HEARTBEAT_MS: '25',
+      // Dynamic-policy tests validate scheduling limits, not paid provider execution.
+      // Never inherit a workflow-level DeepSeek secret into the daemon under test.
+      CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'NO',
+      DEEPSEEK_API_KEY: '',
       ...env,
     },
   });
