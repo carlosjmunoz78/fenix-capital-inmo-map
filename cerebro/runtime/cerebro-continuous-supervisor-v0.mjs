@@ -46,19 +46,23 @@ export class CerebroContinuousSupervisorV0 {
   #worker;
   #contexts;
   #idleDelayMs;
+  #outcomeSink;
   #enabled = true;
   #running = false;
   #cycles = 0;
   #lastCycleAt = null;
   #lastOutcome = null;
   #stopReason = null;
+  #learningFailures = 0;
 
-  constructor({ job_runtime, worker, contexts, environment = PREPROD, idle_delay_ms = 1000 }) {
+  constructor({ job_runtime, worker, contexts, environment = PREPROD, idle_delay_ms = 1000, outcome_sink = null }) {
     if (environment !== PREPROD) throw new Error('continuous supervisor V0 accepts exact PREPROD only');
     this.#runtime = runtimeContract(job_runtime);
     this.#worker = workerContract(worker);
     this.#contexts = safeContexts(contexts);
     this.#idleDelayMs = integer(idle_delay_ms, 'idle_delay_ms', { min: 0, max: 60_000 });
+    if (outcome_sink !== null && typeof outcome_sink !== 'function') throw new TypeError('outcome_sink must be a function when provided');
+    this.#outcomeSink = outcome_sink;
   }
 
   get running() { return this.#running; }
@@ -81,6 +85,8 @@ export class CerebroContinuousSupervisorV0 {
       stop_reason: this.#stopReason,
       context_count: this.#contexts.length,
       execution_mode: typeof this.#worker.runSaturatedRound === 'function' ? 'SATURATED_CONTINUOUS' : 'FAIR_ROUND_FALLBACK',
+      learning_sink_enabled: this.#outcomeSink !== null,
+      learning_sink_failures: this.#learningFailures,
       prod_authorized: false,
       prod_write_authorized: false,
       trading_access: false,
@@ -89,16 +95,36 @@ export class CerebroContinuousSupervisorV0 {
 
   async tick({ now_ms = Date.now() } = {}) {
     integer(now_ms, 'now_ms');
-    if (!this.#enabled) return Object.freeze({ status: 'STOPPED', repaired: [], outcomes: [], snapshot: this.snapshot() });
+    if (!this.#enabled) return Object.freeze({ status: 'STOPPED', repaired: [], outcomes: [], learning_receipts: [], snapshot: this.snapshot() });
     const repaired = this.#runtime.watchdog({ now_ms });
+    const cycleStartedAt = Date.now();
     const outcomes = typeof this.#worker.runSaturatedRound === 'function'
       ? await this.#worker.runSaturatedRound({ contexts: this.#contexts })
       : await this.#worker.runFairRound({ contexts: this.#contexts });
+    const elapsed = Math.max(1, Date.now() - cycleStartedAt);
+    const worked = outcomes.filter(item => item?.status !== 'IDLE' && item?.status !== 'SATURATED');
+    const learningReceipts = [];
+    if (this.#outcomeSink) {
+      const averageLatency = worked.length ? elapsed / worked.length : elapsed;
+      for (const outcome of worked) {
+        try { learningReceipts.push(await this.#outcomeSink({ outcome, latency_ms: averageLatency })); }
+        catch (error) {
+          this.#learningFailures += 1;
+          learningReceipts.push({ accepted: false, error: String(error?.message || error).slice(0, 500) });
+        }
+      }
+    }
     this.#cycles += 1;
     this.#lastCycleAt = nowIso();
     const idle = outcomes.length === 0 || outcomes.every(item => item?.status === 'IDLE' || item?.status === 'SATURATED');
-    this.#lastOutcome = Object.freeze({ repaired_count: repaired.length, outcomes_count: outcomes.length, idle });
-    return Object.freeze({ status: idle ? 'IDLE' : 'WORKED', repaired, outcomes, snapshot: this.snapshot() });
+    this.#lastOutcome = Object.freeze({
+      repaired_count: repaired.length,
+      outcomes_count: outcomes.length,
+      learning_receipts_count: learningReceipts.length,
+      learning_failure_count: learningReceipts.filter(item => item?.error).length,
+      idle,
+    });
+    return Object.freeze({ status: idle ? 'IDLE' : 'WORKED', repaired, outcomes, learning_receipts: Object.freeze(learningReceipts), snapshot: this.snapshot() });
   }
 
   async start({ signal = null, max_cycles = Infinity, on_cycle = null } = {}) {
@@ -128,6 +154,8 @@ export const CEREBRO_CONTINUOUS_SUPERVISOR_V0_CONTRACT = Object.freeze({
   continuous_while_host_alive: true,
   continuous_slot_refill_preferred: true,
   fair_round_rollback_preserved: true,
+  governed_learning_outcome_sink: true,
+  learning_sink_failure_does_not_mutate_job_result: true,
   durable_queue_required: true,
   lease_heartbeat_required: true,
   stale_lease_reclaim: true,
