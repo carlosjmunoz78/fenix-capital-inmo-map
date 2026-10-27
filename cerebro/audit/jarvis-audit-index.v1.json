@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0.0",
+  "audit_project_id": "PRJ-AUDITORIAS",
+  "company_id": "fenix",
+  "engine_id": "PROJECT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "current_summary": {
+    "revision": 1,
+    "updated_at": "2026-10-27T15:30:00+01:00",
+    "updated_by": "JARVIS",
+    "text": "Índice inicial canónico. La evidencia histórica no se reescribe; este resumen vivo se reconcilia contra la evidencia disponible. Estado conocido: supervisor físico Windows PREPROD GREEN con heartbeat persistente, journal durable y restart/recovery; DeepSeek/BOOST integrado; capacidades dinámicas 152/152 disponibles en PROD read-only; Knowledge 100 multicanal reparado; SPACE permanece candidato desactivado hasta completar aislamiento físico."
+  },
+  "categories": [
+    {"audit_id":"AUD-SECURITY","title":"Seguridad","current_state":"PARCIAL","evidence_refs":[]},
+    {"audit_id":"AUD-SEO","title":"SEO","current_state":"PARCIAL","evidence_refs":[]},
+    {"audit_id":"AUD-KNOWLEDGE","title":"Conocimiento / RAG / memoria","current_state":"PARCIAL","evidence_refs":["PR-962"]},
+    {"audit_id":"AUD-RUNTIME","title":"Runtime / supervisor / daemon","current_state":"PARCIAL","evidence_refs":["PHYSICAL-WINDOWS-2026-10-27"]},
+    {"audit_id":"AUD-APP-CRM","title":"App / CRM","current_state":"POR_AUDITAR","evidence_refs":[]},
+    {"audit_id":"AUD-BROWSER-PC","title":"Browser / PC control","current_state":"PARCIAL","evidence_refs":["BROWSER-BRIDGE-GREEN-2026-10-27","PHYSICAL-WINDOWS-2026-10-27"]},
+    {"audit_id":"AUD-DEEPSEEK","title":"DeepSeek / Model Router","current_state":"HECHO_INTEGRACION","evidence_refs":["PR-960"]},
+    {"audit_id":"AUD-QA-TRIBUNAL","title":"QA / Tribunal","current_state":"PARCIAL","evidence_refs":[]},
+    {"audit_id":"AUD-PROD-PROMOTION","title":"Promoción PROD","current_state":"PARCIAL_READONLY","evidence_refs":["MAIN-d75052f55fc62111feb250e93bba382c83f0ca48"]},
+    {"audit_id":"AUD-FINOPS","title":"FINOPS / coste","current_state":"PARCIAL","evidence_refs":[]},
+    {"audit_id":"AUD-BACKUP-ROLLBACK","title":"Backup / rollback / rebuild","current_state":"PARCIAL","evidence_refs":[]},
+    {"audit_id":"AUD-DEPENDENCIES","title":"Dependencias / Tech Adoption","current_state":"PARCIAL","evidence_refs":["PR-963"]}
+  ],
+  "immutable_evidence": [
+    {
+      "evidence_id": "PHYSICAL-WINDOWS-2026-10-27",
+      "recorded_at": "2026-10-27T14:31:42+01:00",
+      "source": "OWNER_PHYSICAL_ACCEPTANCE",
+      "summary": "CEREBRO-Supervisor-PREPROD Running; heartbeat GREEN; environment PREPROD; prod_authorized false; trading_access false; journal durable present; restart/recovery Windows GREEN."
+    },
+    {
+      "evidence_id": "PR-960",
+      "recorded_at": "2026-10-27T14:04:09+01:00",
+      "source": "GITHUB",
+      "summary": "BOOST-001/DeepSeek autonomous supervisor runtime merged to main with governed gates."
+    },
+    {
+      "evidence_id": "PR-962",
+      "recorded_at": "2026-10-27T15:25:47+01:00",
+      "source": "GITHUB",
+      "summary": "Knowledge 100 multichannel live-evidence fix merged to main."
+    },
+    {
+      "evidence_id": "MAIN-d75052f55fc62111feb250e93bba382c83f0ca48",
+      "recorded_at": "2026-10-27T15:39:26+01:00",
+      "source": "GITHUB",
+      "summary": "FACT-001 promoted dynamic capability registry to 152/152 governed PROD read-only; no PROD mutation authority."
+    }
+  ],
+  "summary_revisions": [
+    {
+      "revision": 1,
+      "updated_at": "2026-10-27T15:30:00+01:00",
+      "updated_by": "JARVIS",
+      "reason": "OWNER_REQUEST_CANONICAL_AUDIT_PROJECT_CREATED"
+    }
+  ]
+}
