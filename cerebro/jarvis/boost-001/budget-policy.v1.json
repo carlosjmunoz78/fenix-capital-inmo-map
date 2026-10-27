@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "budget_id": "JARVIS-BOOST-001",
+  "currency": "EUR",
+  "initial_funding_target": 100,
+  "initial_total_hard_cap": 200,
+  "post_bootstrap_monthly_variable_ceiling": 10,
+  "monthly_commitment_required": false,
+  "auto_recharge": false,
+  "silent_payg_upgrade": false,
+  "paid_ai_allowlist": ["deepseek"],
+  "alerts_percent": [50, 75, 90, 100],
+  "on_hard_stop": [
+    "stop_new_paid_jobs",
+    "allow_inflight_job_to_finish_only_if_policy_allows",
+    "fallback_to_zero_cost_routes",
+    "emit_MONEY_LIMIT_if_paid_capacity_is_required"
+  ],
+  "cost_evidence_dimensions": [
+    "request_id",
+    "company_id",
+    "engine_id_or_capability_id",
+    "environment",
+    "model",
+    "input_tokens",
+    "output_tokens",
+    "estimated_or_actual_cost",
+    "timestamp"
+  ],
+  "pricing_snapshot_policy": "Revalidate official DeepSeek pricing immediately before first live canary and store dated snapshot; do not treat prices in repository as permanent contract.",
+  "spend_principle": "Paid inference must create or validate durable CEREBRO assets or resolve a workload whose value exceeds its cost."
+}

@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.1",
+  "boost_id": "JARVIS-BOOST-001",
+  "created_at": "2026-10-26",
+  "updated_at": "2026-10-27",
+  "status": "PREPROD_PROVIDER_GREEN_AUDIT_PARTIAL",
+  "baseline": {
+    "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+    "branch": "main",
+    "live_main_sha_at_reconciliation": "d61a0b9a403b5801aabdba63142e9d869a87513d",
+    "reconciliation_commit": "3ab9ded969d98ae096d8e8e9c388ff5015e7fb0c",
+    "latest_proven_candidate_sha": "66912f33d91ecb0f0deb4c7daf32ec826d0ccf2e",
+    "pull_request": 960
+  },
+  "scope": {
+    "company_id": "cerebro-global",
+    "engine_id": "JARVIS-BOOST-001",
+    "environment": ["LAB", "PREPROD"],
+    "version": "v1.1",
+    "prod_execution_enabled": false,
+    "autonomous_prod": false,
+    "direct_main_write": false,
+    "paid_ai_providers": ["deepseek"]
+  },
+  "objectives": [
+    "audit current CEREBRO before changing it",
+    "close real Jarvis-readiness gaps without duplicating existing engines",
+    "improve routing, context, tools, memory, verification and executive interaction",
+    "convert paid inference into durable CEREBRO-owned assets",
+    "establish objective OLD-vs-NEW Jarvis benchmarks"
+  ],
+  "preserve": [
+    "App Fenix",
+    "CRM",
+    "Supabase",
+    "Notion",
+    "WordPress",
+    "SEO",
+    "Training",
+    "Trading isolation",
+    "FACT-001",
+    "Console/Gateway",
+    "VOICE-001",
+    "existing RSI/LRN evidence"
+  ],
+  "live_evidence": {
+    "deepseek_canary_run_id": 40499206008,
+    "deepseek_canary_green": true,
+    "deepseek_provider_tests_passed": 13,
+    "governed_main_integration_run_id": 40499213350,
+    "governed_main_integration_green": true,
+    "promotion_readiness_shadow_run_id": 40499213230,
+    "promotion_readiness_shadow_green": true,
+    "super_audit_run_id": 40499090657,
+    "super_audit_execution_green": true,
+    "super_audit_findings_green": false
+  },
+  "promotion_rule": "CONSERVAR->ENTENDER->ENVOLVER->PROBAR->MEJORAR->MIGRAR",
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "exit_criteria": {
+    "provider_canary_green": true,
+    "cost_telemetry_green": true,
+    "audit_findings_green_or_exceptions_documented": false,
+    "critical_gaps_have_disposition": false,
+    "eval_suite_green_or_exceptions_documented": false,
+    "rollback_rebuild_documented": true,
+    "no_unapproved_prod_mutation": true
+  }
+}

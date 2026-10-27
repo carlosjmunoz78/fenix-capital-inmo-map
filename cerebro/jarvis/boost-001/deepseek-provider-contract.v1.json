@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0",
+  "provider_id": "deepseek",
+  "status": "PREPARED_NOT_CONNECTED",
+  "base_url": "https://api.deepseek.com",
+  "api_style": "openai-compatible",
+  "preferred_api": "responses",
+  "allowed_models": ["deepseek-flash", "deepseek-v4-pro"],
+  "secret": {
+    "environment_variable": "DEEPSEEK_API_KEY",
+    "store_value_in_repo": false,
+    "store_value_in_prompt": false,
+    "store_value_in_logs": false,
+    "store_value_in_notion": false,
+    "required_source": "approved_secret_store_or_runtime_secret_reference"
+  },
+  "routing": {
+    "default_bulk": "deepseek-flash",
+    "vision": "deepseek-flash",
+    "hard_reasoning_candidate": "deepseek-v4-pro",
+    "final_selection": "benchmark_by_workload_not_brand_assumption",
+    "use_deterministic_route_first_when_sufficient": true
+  },
+  "capabilities_to_verify_live": [
+    "authentication",
+    "responses_api",
+    "structured_output",
+    "function_tool_calls",
+    "thinking_levels",
+    "usage_reporting",
+    "vision_flash",
+    "provider_error_handling"
+  ],
+  "safety": {
+    "live_disabled_until_secret_present": true,
+    "tiny_canary_required": true,
+    "cost_guard_required": true,
+    "prod_mutations_from_model": false,
+    "tool_arguments_must_be_schema_validated": true
+  },
+  "official_docs_snapshot_checked_at": "2026-10-26",
+  "notes": "DeepSeek docs currently expose base_url https://api.deepseek.com and model IDs deepseek-flash / deepseek-v4-pro. Revalidate immediately before activation because provider contracts can change."
+}

@@ -1,0 +1,48 @@
+name: CEREBRO DeepSeek BOOST-001 Tiny Canary
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/boost-001-reconciled-20261027
+    paths:
+      - '.github/workflows/cerebro-deepseek-boost001-canary.yml'
+      - 'cerebro/runtime/deepseek-*.mjs'
+      - 'cerebro/tests/deepseek-*.test.mjs'
+      - 'cerebro/jarvis/boost-001/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-deepseek-boost001-canary-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  tiny-canary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      CEREBRO_ALLOW_PAID_CANARY: 'YES'
+      DEEPSEEK_CANARY_PROJECTED_EUR: '0.01'
+    steps:
+      - name: Checkout current BOOST-001 candidate
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify secret reference without exposing value
+        shell: bash
+        run: |
+          test -n "$DEEPSEEK_API_KEY" || { echo "DEEPSEEK_API_KEY_MISSING"; exit 1; }
+          echo "DEEPSEEK_API_KEY_PRESENT=true"
+
+      - name: DeepSeek provider and cost guards
+        run: node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+
+      - name: Paid tiny canary
+        run: node cerebro/jarvis/boost-001/canary.mjs

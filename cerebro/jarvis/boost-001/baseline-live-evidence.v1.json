@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.1",
+  "baseline_id": "JARVIS-BOOST-001-LIVE-BASELINE",
+  "recorded_at": "2026-10-27",
+  "live_main_sha_at_reconciliation": "d61a0b9a403b5801aabdba63142e9d869a87513d",
+  "reconciliation_commit": "3ab9ded969d98ae096d8e8e9c388ff5015e7fb0c",
+  "principle": "Repository/document claims are scope-bounded evidence, not universal proof of live autonomy.",
+  "observations": [
+    {
+      "area": "FACT-001/GOV-001",
+      "state": "HECHO_STRUCTURAL_REFERENCE_GREEN",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "Factory V0 and canonical 177-engine registry/scaffold are structurally green; current live health of every one of the 177 engines remains POR_AUDITAR."
+    },
+    {
+      "area": "DeepSeek BOOST-001 provider",
+      "state": "HECHO_LIVE_CANARY_GREEN",
+      "evidence": ["GitHub Actions run 40499206008", "job 122172331650"],
+      "claim": "Live DeepSeek flash canary completed semantically OK on candidate 66912f33d91ecb0f0deb4c7daf32ec826d0ccf2e; 13 provider/cost/budget tests passed; no secret value exposed; auto recharge remains disabled."
+    },
+    {
+      "area": "Candidate governance checks",
+      "state": "HECHO_CURRENT_HEAD_GREEN",
+      "evidence": ["Governed Main Integration run 40499213350", "Promotion Readiness Shadow run 40499213230"],
+      "claim": "Both checks succeeded on candidate head 66912f33d91ecb0f0deb4c7daf32ec826d0ccf2e. Shadow success is evidence only and is not treated as PROD authorization."
+    },
+    {
+      "area": "DeepSeek A01/A03/A04 audit",
+      "state": "PARCIAL",
+      "evidence": ["GitHub Actions run 40499090657"],
+      "claim": "Audit execution succeeded, while findings remained A01 PARCIAL, A03 PARCIAL and A04 POR_AUDITAR; those findings are active gaps, not GREEN claims."
+    },
+    {
+      "area": "EVT/JOB persistence",
+      "state": "PARCIAL",
+      "evidence": ["cerebro/README.md", "cerebro/docs/CURRENT_STATE.md"],
+      "claim": "Persistent PREPROD single-writer reference exists; live durability/scaling/autonomous PROD are not implied."
+    },
+    {
+      "area": "IAM/credential lifecycle",
+      "state": "PARCIAL_CODE_TEST_EVIDENCE",
+      "evidence": ["cerebro/governance/identity-credential-broker.mjs", "cerebro/governance/identity-session-lifecycle.mjs", "cerebro/tests/identity-session-lifecycle-v0.test.mjs"],
+      "claim": "Fail-closed metadata-only lifecycle, expiry, raw-secret/JWT rejection, kill-switch and PROD browser denial exist in code/tests; current-head CI evidence is being added, while live broker issuance/revocation telemetry remains POR_AUDITAR."
+    },
+    {
+      "area": "CRM/SEO/external systems",
+      "state": "POR_AUDITAR_CURRENT_BINDINGS",
+      "evidence": ["cerebro/docs/CURRENT_STATE.md", "project continuity evidence"],
+      "claim": "No older repository label may override newer live evidence; current external bindings must be verified before structural recommendations."
+    }
+  ],
+  "next_instruction": "Audit only unresolved gaps against live main and current candidate evidence. Do not reclassify documented unresolved items as GREEN without runtime evidence."
+}
