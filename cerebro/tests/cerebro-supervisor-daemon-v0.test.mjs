@@ -23,12 +23,15 @@ function runDaemon(dir, extraEnv = {}, args = ['--enqueue-health-probe', '--cycl
       CEREBRO_SUPERVISOR_ENV: 'PREPROD',
       CEREBRO_IDLE_DELAY_MS: '0',
       CEREBRO_HEARTBEAT_MS: '25',
+      // Tests must never inherit a live provider secret and accidentally spend money.
+      CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'NO',
+      DEEPSEEK_API_KEY: '',
       ...extraEnv,
     },
   });
 }
 
-test('daemon runs bounded PREPROD cycles, executes explicit health capability and writes sanitized heartbeat', t => {
+test('daemon runs bounded PREPROD cycles, executes explicit health capability and writes sanitized adaptive heartbeat', t => {
   const dir = tempDir(t);
   const result = runDaemon(dir);
   assert.equal(result.status, 0, result.stderr || result.stdout);
@@ -39,6 +42,10 @@ test('daemon runs bounded PREPROD cycles, executes explicit health capability an
   assert.equal(heartbeat.prod_write_authorized, false);
   assert.equal(heartbeat.trading_access, false);
   assert.equal(heartbeat.exited, true);
+  assert.equal(heartbeat.work_pump_mode, 'DISABLED_EXPLICIT');
+  assert.equal(heartbeat.work_pump.enabled, false);
+  assert.equal(heartbeat.useful_work.scheduling_strategy, 'ADAPTIVE_USEFUL_THROUGHPUT');
+  assert.equal(heartbeat.useful_work.starvation, false);
   assert.equal(fs.existsSync(path.join(dir, 'jobs.v8journal')), true);
 });
 
@@ -58,4 +65,28 @@ test('kill-switch file causes bounded daemon to stop with canonical local reason
   assert.equal(heartbeat.kill_switch_present, true);
   assert.equal(heartbeat.snapshot.enabled, false);
   assert.equal(heartbeat.snapshot.stop_reason, 'KILL_SWITCH_FILE');
+});
+
+test('explicit work-pump enable fails closed without DeepSeek secret', t => {
+  const dir = tempDir(t);
+  const result = runDaemon(dir, {
+    CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'YES',
+    DEEPSEEK_API_KEY: '',
+  }, ['--cycles', '1']);
+  assert.notEqual(result.status, 0);
+  assert.match(`${result.stderr}\n${result.stdout}`, /requires DEEPSEEK_API_KEY/);
+});
+
+test('AUTO without provider secret stays disabled and cannot create paid work', t => {
+  const dir = tempDir(t);
+  const result = runDaemon(dir, {
+    CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'AUTO',
+    DEEPSEEK_API_KEY: '',
+  }, ['--cycles', '1']);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
+  assert.equal(heartbeat.work_pump_mode, 'AUTO_NO_KEY');
+  assert.equal(heartbeat.work_pump.enabled, false);
+  assert.equal(heartbeat.deepseek_agent_handler.calls, 0);
+  assert.equal(heartbeat.deepseek_budget.spent_eur, 0);
 });
