@@ -257,11 +257,11 @@ export class DurableWorkerRunnerV1 {
     const running = new Set();
     const outcomes = [];
     let passiveOutcome = null;
-    let completed = 0;
+    let scheduled = 0;
     let cursor = this.#fairCursor % lanes.length;
 
     const launch = lane => {
-      if (lane.active || completed >= budget || this.#active.size >= this.#maxConcurrency) return 'BLOCKED';
+      if (lane.active || scheduled >= budget || this.#active.size >= this.#maxConcurrency) return 'BLOCKED';
       const begun = this.#begin(lane.context);
       if (!begun.started) {
         if (begun.outcome?.status === 'IDLE' || begun.outcome?.status === 'SATURATED') {
@@ -269,9 +269,10 @@ export class DurableWorkerRunnerV1 {
           return 'PASSIVE';
         }
         outcomes.push(begun.outcome);
-        completed += 1;
+        scheduled += 1;
         return 'CONSUMED';
       }
+      scheduled += 1;
       lane.active = true;
       let tracked;
       tracked = begun.promise.then(outcome => ({ lane, outcome, tracked }));
@@ -282,7 +283,7 @@ export class DurableWorkerRunnerV1 {
     const refill = () => {
       let started = 0;
       let consumed = 0;
-      for (let offset = 0; offset < lanes.length && completed < budget; offset += 1) {
+      for (let offset = 0; offset < lanes.length && scheduled < budget; offset += 1) {
         const lane = lanes[(cursor + offset) % lanes.length];
         const state = launch(lane);
         if (state === 'STARTED') started += 1;
@@ -292,7 +293,7 @@ export class DurableWorkerRunnerV1 {
       return { started, consumed };
     };
 
-    while (completed < budget) {
+    while (scheduled < budget) {
       const progress = refill();
       if (running.size === 0) {
         if (progress.consumed > 0) continue;
@@ -302,7 +303,6 @@ export class DurableWorkerRunnerV1 {
       running.delete(settled.tracked);
       settled.lane.active = false;
       outcomes.push(settled.outcome);
-      completed += 1;
     }
 
     while (running.size > 0) {
@@ -342,6 +342,7 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   continuous_slot_refill: true,
   batch_barrier_removed_in_saturated_mode: true,
   immediate_dispatch_failures_surface: true,
+  exact_saturated_round_budget: true,
   timeout_abort_signal: true,
   heartbeat_lease_extension: true,
   checkpoint_resume: true,
