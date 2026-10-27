@@ -10,12 +10,6 @@ function integer(value, label, { min = 0, max = 1_000_000 } = {}) {
   return n;
 }
 
-function finite(value, label, { min = 0, max = 1_000_000 } = {}) {
-  const n = Number(value);
-  if (!Number.isFinite(n) || n < min || n > max) throw new TypeError(`${label} must be between ${min} and ${max}`);
-  return n;
-}
-
 function meta(job) { return job?.payload?.__work_pump ?? null; }
 function latency(job) {
   if (!Number.isSafeInteger(job?.created_at_ms) || !Number.isSafeInteger(job?.completed_at_ms)) return null;
@@ -119,7 +113,8 @@ class AdaptiveBacklogRuntimeV1 {
   }
 
   snapshot() {
-    return this.#last ?? this.#metrics();
+    // Recompute after materialization so telemetry and control never lag the durable queue by one enqueue.
+    return this.#metrics();
   }
 }
 
@@ -223,6 +218,7 @@ export const ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT = Object.freeze({
   fairness_backpressure: true,
   fairness_never_caps_single_ready_block_below_model_capacity: true,
   work_steal_friendly: true,
+  fresh_post_enqueue_telemetry: true,
   deepseek_concurrency_above_measured_ceiling: false,
   repo_write_concurrency: 1,
   arbitrary_shell_access: false,
