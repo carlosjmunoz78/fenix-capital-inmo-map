@@ -50,6 +50,12 @@ export function blocksForShard(shard, shards = 8) {
   return FANOUT_BLOCKS.filter(block => block.index % shards === shard);
 }
 
+function blockById(blockId) {
+  const block = FANOUT_BLOCKS.find(x => x.id === blockId);
+  if (!block) throw new Error(`unknown block ${blockId}`);
+  return block;
+}
+
 function gitFiles() {
   const text = execFileSync('git', ['ls-files'], { encoding: 'utf8' });
   return text.split(/\r?\n/).filter(Boolean);
@@ -99,41 +105,59 @@ function writeJson(file, value) {
 }
 
 export async function runEvidence(blockId) {
-  const block = FANOUT_BLOCKS.find(x => x.id === blockId);
-  if (!block) throw new Error(`unknown block ${blockId}`);
+  const block = blockById(blockId);
   const packet = evidenceFor(block);
   writeJson(path.join(OUT_ROOT, block.id, 'evidence.json'), packet);
   return packet;
 }
 
-export async function runDeepSeekShard(shard, shards = 8) {
+export function buildDeepSeekBlockInput(blockId) {
+  const block = blockById(blockId);
+  const evidence = evidenceFor(block);
+  const input = [
+    `BLOCK ${block.id}: ${block.title}`,
+    scopeFor(block),
+    `REPO_EVIDENCE=${JSON.stringify(evidence).slice(0, 12000)}`,
+    'Work as one bounded CEREBRO agent. Return a compact JSON object only with: status_assessment, confirmed_evidence, independent_subtasks, dependency_edges, ready_now, missing_gates, implementation_targets, concrete_work_product, tests_required, learning_candidates, prod_blockers. Split independent work so sibling subtasks can execute in parallel. Never claim PROD without live evidence. Never expose secrets. Preserve existing systems. Trading stays isolated.',
+  ].join('\n\n').slice(0, 28000);
+  return { block, evidence, input };
+}
+
+export async function runDeepSeekBlock(blockId) {
   if (process.env.CEREBRO_ALLOW_PAID_FANOUT !== 'YES') throw new Error('paid fanout not authorized by runtime flag');
-  const blocks = blocksForShard(shard, shards);
-  const projectedPerBlock = Number(process.env.CEREBRO_FANOUT_PROJECTED_EUR_PER_BLOCK || '0.05');
+  const projectedCostEur = Number(process.env.CEREBRO_FANOUT_PROJECTED_EUR_PER_BLOCK || '0.05');
   const spentEur = Number(process.env.CEREBRO_FANOUT_SPENT_EUR || '0');
   const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, autoRecharge: false });
-  const authorization = guard.authorize({ phase: 'bootstrap', spentEur, projectedCostEur: projectedPerBlock * blocks.length });
+  const authorization = guard.authorize({ phase: 'bootstrap', spentEur, projectedCostEur });
   if (!authorization.allowed) throw new Error('HUMAN_REQUIRED:MONEY_LIMIT');
   const provider = new DeepSeekProviderV0();
+  const { block, evidence, input } = buildDeepSeekBlockInput(blockId);
+  const response = await provider.respond({
+    model: 'deepseek-flash',
+    instructions: 'You are a bounded CEREBRO execution-planning agent. Produce concrete work product and a hierarchical dependency graph. Deterministic tests and Tribunal, not you, decide promotion.',
+    input,
+    maxOutputTokens: 1024,
+  }, { requestId: `max-fanout-${block.id}-${process.env.GITHUB_RUN_ID || 'local'}` });
+  const record = {
+    schema_version: '1.1',
+    block_id: block.id,
+    title: block.title,
+    evidence,
+    usage: response.usage,
+    output_text: response.output_text,
+    authorization,
+    governance_state: 'CANDIDATE_ONLY',
+    prod_authorized: false,
+  };
+  writeJson(path.join(OUT_ROOT, block.id, 'deepseek-agent.json'), record);
+  return record;
+}
+
+// Backward-compatible rollback path. New orchestration should prefer one block per worker.
+export async function runDeepSeekShard(shard, shards = 8) {
+  const blocks = blocksForShard(shard, shards);
   const results = [];
-  for (const block of blocks) {
-    const evidence = evidenceFor(block);
-    const input = [
-      `BLOCK ${block.id}: ${block.title}`,
-      scopeFor(block),
-      `REPO_EVIDENCE=${JSON.stringify(evidence).slice(0, 12000)}`,
-      'Return a compact JSON object only with: status_assessment, confirmed_evidence, missing_gates, next_parallel_actions, implementation_targets, tests_required, prod_blockers. Never claim PROD without live evidence. Never expose secrets. Preserve existing systems. Trading stays isolated.',
-    ].join('\n\n').slice(0, 28000);
-    const response = await provider.respond({
-      model: 'deepseek-flash',
-      instructions: 'You are a bounded CEREBRO evidence/implementation planner. Deterministic tests and Tribunal, not you, decide promotion.',
-      input,
-      maxOutputTokens: 768,
-    }, { requestId: `max-fanout-${block.id}-${process.env.GITHUB_RUN_ID || 'local'}` });
-    const record = { block_id: block.id, title: block.title, usage: response.usage, output_text: response.output_text, authorization };
-    writeJson(path.join(OUT_ROOT, block.id, `deepseek-shard-${shard}.json`), record);
-    results.push(record);
-  }
+  for (const block of blocks) results.push(await runDeepSeekBlock(block.id));
   return results;
 }
 
@@ -142,8 +166,9 @@ async function main() {
     const [k,v='true'] = arg.replace(/^--/, '').split('='); return [k,v];
   }));
   if (args.mode === 'evidence') await runEvidence(args.block);
+  else if (args.mode === 'deepseek-block') await runDeepSeekBlock(args.block);
   else if (args.mode === 'deepseek') await runDeepSeekShard(Number(args.shard), Number(args.shards || 8));
-  else throw new Error('use --mode=evidence --block=Wxx OR --mode=deepseek --shard=N --shards=8');
+  else throw new Error('use --mode=evidence --block=Wxx OR --mode=deepseek-block --block=Wxx OR --mode=deepseek --shard=N --shards=8');
 }
 
 const self = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
