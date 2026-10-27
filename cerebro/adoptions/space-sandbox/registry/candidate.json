@@ -1,0 +1,28 @@
+{
+  "id": "space-firecracker",
+  "name": "SPACE",
+  "upstream": "https://github.com/perplexityai/space",
+  "category": ["security_defensive", "sandbox", "computer_use", "app_dev", "multiagent"],
+  "classification": ["ADAPT", "WRAP"],
+  "priority": "P0_EVAL",
+  "runtime_state": "DISABLED_CANDIDATE",
+  "additional_cost_eur": 0,
+  "self_host_local": true,
+  "language_stack": ["Rust", "Firecracker", "Linux/KVM"],
+  "dependencies_policy": "NO_INSTALL_UNTIL_GATES_PASS",
+  "security_privacy": "microVM boundary candidate; network/secret authority remains external and deny-by-default",
+  "maturity": "EVALUATE_UPSTREAM; do not infer production readiness from popularity",
+  "integration_ease": "MEDIUM",
+  "old_vs_new": "Evaluate microVM isolation for selected untrusted workloads versus currently approved sandbox backends; NEW must not widen authority.",
+  "risks": [
+    "requires compatible Linux/KVM host",
+    "additional VM lifecycle/resource overhead",
+    "new daemon/control-plane attack surface",
+    "upstream maturity and audit claims require independent reproduction",
+    "guest image and kernel provenance become supply-chain inputs"
+  ],
+  "potential_engines": ["SECURITY_FLOOR", "SKILL_FACTORY", "APP_FACTORY", "COMPUTER_USE", "QA", "EVIDENCE_LEDGER"],
+  "environment_policy": "SUBSYSTEM_DECIDES; PROD_FORBIDDEN_WHILE_CANDIDATE",
+  "rollback": "disable registry entry and route to prior approved backend",
+  "last_reviewed": "2026-10-27"
+}
