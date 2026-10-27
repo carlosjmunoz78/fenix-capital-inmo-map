@@ -30,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+      - name: Install pinned repository dependencies
+        run: npm ci --ignore-scripts
       - name: Public source security contracts
         run: node --test cerebro/tests/public-source-adapter-v0.test.mjs
       - name: Resolve deterministic UTC cycle anchor
