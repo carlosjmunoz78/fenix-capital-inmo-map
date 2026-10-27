@@ -1,0 +1,72 @@
+name: CEREBRO DeepSeek SUPER AUDIT A00-A04
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-boost-001-bootstrap-20261026
+    paths:
+      - '.github/workflows/cerebro-deepseek-super-audit-a00-a04.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-deepseek-super-audit-a00-a04
+  cancel-in-progress: false
+
+jobs:
+  audit-a00-a04:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      CEREBRO_ALLOW_PAID_SUPER_AUDIT: 'YES'
+      DEEPSEEK_SUPER_AUDIT_PROJECTED_EUR: '0.10'
+    steps:
+      - name: Checkout BOOST-001 candidate
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Verify secret reference without exposing value
+        shell: bash
+        run: |
+          test -n "$DEEPSEEK_API_KEY" || { echo "DEEPSEEK_API_KEY_MISSING"; exit 1; }
+          echo "DEEPSEEK_API_KEY_PRESENT=true"
+
+      - name: Syntax-check bounded read-only audit runner
+        run: node --check cerebro/jarvis/boost-001/super-audit-a00-a04.mjs
+
+      - name: Re-run DeepSeek provider and cost guards
+        run: node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+
+      - name: Execute read-only A00-A04 evidence audits
+        run: node cerebro/jarvis/boost-001/super-audit-a00-a04.mjs
+
+      - name: Emit bounded structured reports
+        if: always()
+        shell: bash
+        run: |
+          if [ -d artifacts/boost001-super-audit-a00-a04 ]; then
+            for f in artifacts/boost001-super-audit-a00-a04/a*-evidence-auditor.json; do
+              [ -f "$f" ] || continue
+              echo "CEREBRO_AUDIT_REPORT_BEGIN::$f"
+              cat "$f"
+              echo "CEREBRO_AUDIT_REPORT_END::$f"
+            done
+            echo "CEREBRO_AUDIT_SUMMARY_BEGIN"
+            cat artifacts/boost001-super-audit-a00-a04/summary.json || true
+            echo "CEREBRO_AUDIT_SUMMARY_END"
+          fi
+
+      - name: Upload read-only audit evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-boost001-super-audit-a00-a04
+          path: artifacts/boost001-super-audit-a00-a04/
+          if-no-files-found: warn
+          retention-days: 7
