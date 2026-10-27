@@ -9072,11 +9072,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_MOTION_D8A29621_PROD_READONLY_CANARY",
       "observed_at": "2026-10-27T19:30:13.390Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -9090,7 +9090,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "afefe73bae8c10fb90a032d1e99fc5c84320980c9eee19f3b5e68f787bb895fa"
+      "capability_hash": "afefe73bae8c10fb90a032d1e99fc5c84320980c9eee19f3b5e68f787bb895fa",
+      "canary": {
+        "status": "GREEN_DYNAMIC_MOTION_D8A29621_PROD_READONLY_CANARY",
+        "candidate_id": "repo:075055e543349b944a74de027566",
+        "technical_name": "motion",
+        "head_sha": "ec1199a2cceb2a446034ae3e17f412feb10438e2",
+        "run_id": 40569709093,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-10-27T19:30:34.335Z"
+      },
+      "promoted_at": "2026-10-27T19:30:34.335Z"
     },
     {
       "candidate_id": "repo:7254fb5bbd68c2fc2f3c50bf12ea",
@@ -15469,10 +15499,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 153,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 152
+    "pending_canary": 0,
+    "prod_readonly": 153
   }
 }
