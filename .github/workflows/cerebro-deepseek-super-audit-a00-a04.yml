@@ -21,10 +21,17 @@ jobs:
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       CEREBRO_ALLOW_PAID_SUPER_AUDIT: 'YES'
+      DEEPSEEK_SUPER_AUDIT_SPENT_EUR: '0.10'
       DEEPSEEK_SUPER_AUDIT_PROJECTED_EUR: '0.10'
     steps:
-      - name: Checkout BOOST-001 candidate
+      - name: Checkout BOOST-001 candidate with live-main history
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Refresh live main reference
+        shell: bash
+        run: git fetch --no-tags origin main
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -66,7 +73,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-boost001-super-audit-a00-a04
+          name: cerebro-boost001-super-audit-a00-a04-r2
           path: artifacts/boost001-super-audit-a00-a04/
           if-no-files-found: warn
           retention-days: 7
