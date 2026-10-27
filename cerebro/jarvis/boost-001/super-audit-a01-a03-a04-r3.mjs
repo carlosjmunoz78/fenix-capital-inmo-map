@@ -68,8 +68,17 @@ if (!role) throw new Error('EVIDENCE_AUDITOR missing');
 const head = git(['rev-parse', 'HEAD']);
 const main = git(['rev-parse', 'origin/main']);
 const divergence = git(['rev-list', '--left-right', '--count', 'origin/main...HEAD']);
+const [mainOnlyCount = null, candidateOnlyCount = null] = divergence.split(/\s+/).map((x) => Number(x));
 const mainOnlyCommits = clip(git(['log', '--oneline', '--max-count=25', 'HEAD..origin/main']), 4_000);
 const mainDelta = clip(git(['diff', '--name-status', 'HEAD...origin/main']), 5_000);
+let sameHeadWorkflowRuns = { head_sha: head, runs: [] };
+if (process.env.CEREBRO_PREFLIGHT_RUN_INDEX_FILE) {
+  try {
+    sameHeadWorkflowRuns = JSON.parse(readFileSync(process.env.CEREBRO_PREFLIGHT_RUN_INDEX_FILE, 'utf8'));
+  } catch {
+    sameHeadWorkflowRuns = { head_sha: head, runs: [], read_error: true };
+  }
+}
 const preflight = Object.freeze({
   workflow: process.env.GITHUB_WORKFLOW ?? null,
   workflow_run_id: process.env.GITHUB_RUN_ID ?? null,
@@ -78,11 +87,20 @@ const preflight = Object.freeze({
   candidate_head: process.env.CEREBRO_PREFLIGHT_CANDIDATE_HEAD ?? head,
   live_main_head: process.env.CEREBRO_PREFLIGHT_MAIN_HEAD ?? main,
   main_delta: process.env.CEREBRO_PREFLIGHT_MAIN_DELTA ?? divergence,
+  divergence_semantics: {
+    main_only_commits: Number.isFinite(mainOnlyCount) ? mainOnlyCount : null,
+    candidate_only_commits: Number.isFinite(candidateOnlyCount) ? candidateOnlyCount : null,
+    meaning: '0:N means live main has no unreconciled commits and candidate is N commits ahead; it is not a reconciliation contradiction',
+  },
   iam_routing_tests: process.env.CEREBRO_PREFLIGHT_IAM_ROUTING ?? 'NOT_RUN',
   durable_runtime_supervisor_tests: process.env.CEREBRO_PREFLIGHT_RUNTIME_SUPERVISOR ?? 'NOT_RUN',
+  daemon_contract_tests: process.env.CEREBRO_PREFLIGHT_DAEMON_CONTRACT ?? 'NOT_RUN',
   deepseek_provider_cost_budget_tests: process.env.CEREBRO_PREFLIGHT_DEEPSEEK_GUARDS ?? 'NOT_RUN',
+  deepseek_same_head_canary: process.env.CEREBRO_PREFLIGHT_DEEPSEEK_CANARY ?? 'NOT_RUN',
+  same_head_workflow_runs: sameHeadWorkflowRuns,
   secret_values_included: false,
   physical_runtime_health_claimed: false,
+  main_integration_is_not_prod_activation: true,
 });
 const provider = new DeepSeekProviderV0();
 mkdirSync(OUT, { recursive: true });
@@ -103,9 +121,15 @@ for (const id of IDS) {
     'Keep reasoning quality HIGH, but make the visible final answer deliberately SHORT.',
     'READ ONLY. Do not claim any mutation or PROD action.',
     'Use only supplied evidence. File/workflow presence proves existence, not live runtime health.',
+    'Evaluate two distinct gates: (1) safe code integration to main with PROD execution still disabled; (2) later physical PROD activation. Never conflate them.',
+    'A current green same-head Governed Main Integration or RSI Promotion Readiness run may satisfy code-integration evidence, but it never proves physical PROD runtime health.',
+    'Untouched global-system gaps, such as live health of every registry engine, are non-blocking for BOOST code integration unless this diff changes or depends on that surface. Record them separately instead of using them as a false global blocker.',
     'Current-workflow preflight PASS values are current-head test execution evidence because this DeepSeek step only runs after those steps succeed; they are not proof of a physically always-on host or PROD runtime health.',
-    'Do not expose secrets. Treat any missing physical runtime evidence as POR_AUDITAR/EVIDENCE_GAP.',
+    'If deepseek_same_head_canary=PASS, do not claim the current-head canary is absent. If same_head_workflow_runs contains a completed success for the current SHA, cite that run instead of asking for a missing run ID.',
+    'Interpret divergence using divergence_semantics. main_only_commits=0 means candidate is reconciled with current live main even when candidate_only_commits>0.',
+    'Do not expose secrets. Treat missing physical runtime evidence as a separate POR_AUDITAR/EVIDENCE_GAP for activation, not automatically as a blocker to safe main integration.',
     'Explicitly account for live-main drift from the supplied current SHAs, not stale baseline text.',
+    'overall_state must describe the audited BOOST work package for safe main integration; list physical PROD activation readiness separately in findings/gaps.',
     'Return ONLY one valid compact JSON object. No markdown, no prose before or after.',
     `Schema: {"work_package":"${id}","role":"EVIDENCE_AUDITOR","overall_state":"HECHO|EXISTENTE|PARCIAL|DEFINIDO|PLANIFICADO|POR_AUDITAR","findings":[...],"contradictions":[...],"evidence_gaps":[...],"next_verifications":[...]}.`,
     `Each finding must contain: ${role.required_fields.join(', ')}.`,
@@ -120,6 +144,8 @@ for (const id of IDS) {
       candidate_head: head,
       live_main_head: main,
       main_vs_candidate_left_right_count: divergence,
+      main_only_commits_count: mainOnlyCount,
+      candidate_only_commits_count: candidateOnlyCount,
       main_only_commits: mainOnlyCommits,
       main_delta_files: mainDelta,
       current_workflow_preflight: preflight,
