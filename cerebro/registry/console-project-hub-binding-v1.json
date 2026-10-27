@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "binding_id": "CONSOLE-PROJECT-HUB-BINDING-001",
+  "company_id": "fenix",
+  "engine_id": "PROJECT-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "extends": "CEREBRO Console V0",
+  "preserve_existing_gateway": true,
+  "capabilities": [
+    "PROJECT_LIST",
+    "PROJECT_CREATE",
+    "PROJECT_UPDATE_METADATA",
+    "AUDIT_LIST",
+    "AUDIT_RECORD",
+    "REVISION_HISTORY"
+  ],
+  "canonical_registry": "cerebro/registry/jarvis-project-registry.v1.json",
+  "audit_index": "cerebro/audit/jarvis-audit-index.v1.json",
+  "runtime": "cerebro/runtime/jarvis-project-hub-v1.mjs",
+  "gateway_binding": "cerebro/console/jarvis-project-hub-binding-v1.mjs",
+  "authority": {
+    "project_metadata_only": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "prod_mutation_authorized": false,
+    "spend_authorized": false,
+    "trading_access": false
+  },
+  "additional_cost_target_eur": 0,
+  "rollback": "remove binding and retain existing Console V0 unchanged"
+}
