@@ -6,10 +6,12 @@ import { DurableJobRuntimeV1 } from './durable-job-runtime-v1.mjs';
 import { DurableWorkerRunnerV1 } from './durable-worker-runner-v1.mjs';
 import { CerebroContinuousSupervisorV0 } from './cerebro-continuous-supervisor-v0.mjs';
 import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dynamic-concurrency-policy-v1.mjs';
+import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
 const JOURNAL = path.join(ROOT, 'jobs.v8journal');
+const LEARNING_JOURNAL = path.join(ROOT, 'learning-candidates.v8journal');
 const HEARTBEAT = path.join(ROOT, 'heartbeat.json');
 const KILL = path.join(ROOT, 'KILL_SWITCH');
 const DEFAULT_CONTEXT = Object.freeze({
@@ -92,9 +94,9 @@ function writeJsonAtomic(file, data) {
   fs.renameSync(tmp, file);
 }
 
-function safeHeartbeat(supervisor, dynamicWorker, extra = {}) {
+function safeHeartbeat(supervisor, dynamicWorker, learningSpool, extra = {}) {
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.1',
+    schema_version: '1.2',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -105,6 +107,8 @@ function safeHeartbeat(supervisor, dynamicWorker, extra = {}) {
     version: DEFAULT_CONTEXT.version,
     updated_at: new Date().toISOString(),
     queue_journal_present: fs.existsSync(JOURNAL),
+    learning_journal_present: fs.existsSync(LEARNING_JOURNAL),
+    learning_candidate_count: learningSpool.size,
     kill_switch_present: fs.existsSync(KILL),
     dynamic_concurrency: dynamicWorker.policy_snapshot,
     prod_authorized: false,
@@ -120,6 +124,7 @@ if ((process.env.CEREBRO_SUPERVISOR_ENV || ENV).toUpperCase() !== ENV) {
 
 fs.mkdirSync(ROOT, { recursive: true });
 const queue = new DurableJobRuntimeV1({ file_path: JOURNAL });
+const learningSpool = new LearningCandidateSpoolV1({ file_path: LEARNING_JOURNAL });
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
 const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
@@ -158,6 +163,7 @@ const supervisor = new CerebroContinuousSupervisorV0({
   worker: dynamicWorker,
   contexts: runtimeContexts,
   idle_delay_ms: positiveInt('CEREBRO_IDLE_DELAY_MS', 2_000, 60_000),
+  outcome_sink: ({ outcome, latency_ms }) => learningSpool.appendJobOutcome({ outcome, latency_ms }),
 });
 
 const abort = new AbortController();
@@ -167,17 +173,17 @@ function shutdown(reason) {
   stopping = true;
   supervisor.stop(reason);
   abort.abort(reason);
-  safeHeartbeat(supervisor, dynamicWorker, { stop_reason: reason });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { stop_reason: reason });
 }
 process.on('SIGINT', () => shutdown('SIGINT'));
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('uncaughtException', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNCAUGHT_EXCEPTION');
 });
 process.on('unhandledRejection', (error) => {
-  safeHeartbeat(supervisor, dynamicWorker, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { status: 'RED', error: String(error?.message || error).slice(0, 500) });
   process.exitCode = 1;
   shutdown('UNHANDLED_REJECTION');
 });
@@ -185,7 +191,7 @@ process.on('unhandledRejection', (error) => {
 const probeEvery = positiveInt('CEREBRO_HEARTBEAT_MS', 10_000, 60_000);
 const timer = setInterval(() => {
   if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-  else safeHeartbeat(supervisor, dynamicWorker, { snapshot: supervisor.snapshot() });
+  else safeHeartbeat(supervisor, dynamicWorker, learningSpool, { snapshot: supervisor.snapshot() });
 }, probeEvery);
 timer.unref();
 
@@ -193,7 +199,7 @@ if (process.argv.includes('--enqueue-health-probe')) {
   queue.enqueue({ name: 'runtime.health.probe', context: DEFAULT_CONTEXT, payload: {}, timeout_ms: 10_000 });
 }
 
-safeHeartbeat(supervisor, dynamicWorker, { booted: true, context_count: runtimeContexts.length });
+safeHeartbeat(supervisor, dynamicWorker, learningSpool, { booted: true, context_count: runtimeContexts.length });
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
 if (maxCycles !== Infinity && (!Number.isSafeInteger(maxCycles) || maxCycles < 1)) throw new Error('--cycles requires integer >= 1');
@@ -204,10 +210,14 @@ try {
     max_cycles: maxCycles,
     on_cycle: async (result) => {
       if (fs.existsSync(KILL)) shutdown('KILL_SWITCH_FILE');
-      safeHeartbeat(supervisor, dynamicWorker, { cycle_status: result.status, snapshot: result.snapshot });
+      safeHeartbeat(supervisor, dynamicWorker, learningSpool, {
+        cycle_status: result.status,
+        learning_receipts_count: result.learning_receipts?.length ?? 0,
+        snapshot: result.snapshot,
+      });
     },
   });
 } finally {
   clearInterval(timer);
-  safeHeartbeat(supervisor, dynamicWorker, { exited: true, snapshot: supervisor.snapshot() });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, { exited: true, snapshot: supervisor.snapshot() });
 }
