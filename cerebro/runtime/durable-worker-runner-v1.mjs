@@ -247,6 +247,58 @@ export class DurableWorkerRunnerV1 {
     return [...immediate, ...completed];
   }
 
+  async runSaturatedRound({ contexts, completion_budget = null }) {
+    if (!Array.isArray(contexts) || contexts.length === 0) throw new TypeError('contexts must be a non-empty array');
+    const normalized = contexts.map(safeContext);
+    const budget = completion_budget === null
+      ? Math.max(normalized.length, normalized.length * 4)
+      : integer(completion_budget, 'completion_budget', { min: 1, max: 1_000_000 });
+    const lanes = normalized.map((context, index) => ({ context, index, active: false }));
+    const running = new Set();
+    const outcomes = [];
+    let completed = 0;
+    let cursor = this.#fairCursor % lanes.length;
+
+    const launch = lane => {
+      if (lane.active || completed >= budget || this.#active.size >= this.#maxConcurrency) return false;
+      const begun = this.#begin(lane.context);
+      if (!begun.started) return false;
+      lane.active = true;
+      let tracked;
+      tracked = begun.promise.then(outcome => ({ lane, outcome, tracked }));
+      running.add(tracked);
+      return true;
+    };
+
+    const refill = () => {
+      let started = 0;
+      for (let offset = 0; offset < lanes.length; offset += 1) {
+        const lane = lanes[(cursor + offset) % lanes.length];
+        if (launch(lane)) started += 1;
+      }
+      cursor = (cursor + 1) % lanes.length;
+      return started;
+    };
+
+    refill();
+    while (running.size > 0) {
+      const settled = await Promise.race(running);
+      running.delete(settled.tracked);
+      settled.lane.active = false;
+      outcomes.push(settled.outcome);
+      completed += 1;
+      if (completed < budget) refill();
+    }
+
+    this.#fairCursor = cursor;
+    if (outcomes.length === 0) {
+      const probe = this.#begin(lanes[cursor].context);
+      if (probe.started) outcomes.push(await probe.promise);
+      else outcomes.push(probe.outcome);
+    }
+    return outcomes;
+  }
+
   async drainFair({ contexts, max_rounds = 100, idle_delay_ms = 0 }) {
     integer(max_rounds, 'max_rounds', { min: 1, max: 100_000 });
     integer(idle_delay_ms, 'idle_delay_ms', { min: 0, max: 60_000 });
@@ -269,6 +321,8 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   per_company_concurrency: true,
   fair_round_robin_contexts: true,
   scans_past_idle_contexts: true,
+  continuous_slot_refill: true,
+  batch_barrier_removed_in_saturated_mode: true,
   timeout_abort_signal: true,
   heartbeat_lease_extension: true,
   checkpoint_resume: true,
