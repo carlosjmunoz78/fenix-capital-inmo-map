@@ -108,7 +108,7 @@ export class DeepSeekProviderV0 {
       model: 'deepseek-flash',
       instructions: 'This is a CEREBRO provider connectivity canary. Follow the user instruction exactly and do nothing else.',
       input: 'Return exactly: DEEPSEEK_CANARY_OK',
-      maxOutputTokens: 32,
+      maxOutputTokens: 128,
     }, { requestId });
   }
 }
