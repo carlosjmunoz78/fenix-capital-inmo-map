@@ -22,6 +22,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: cerebro-deepseek-super-audit-a01-a03-a04-r3-${{ github.ref }}
@@ -104,6 +105,28 @@ jobs:
           set -euo pipefail
           node cerebro/jarvis/boost-001/canary.mjs
           echo "CEREBRO_PREFLIGHT_DEEPSEEK_CANARY=PASS" >> "$GITHUB_ENV"
+
+      - name: Collect same-head workflow evidence without secrets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          api="https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?head_sha=${GITHUB_SHA}&per_page=100"
+          for attempt in $(seq 1 12); do
+            curl --fail --silent --show-error \
+              -H "Authorization: Bearer ${GH_TOKEN}" \
+              -H 'Accept: application/vnd.github+json' \
+              -H 'X-GitHub-Api-Version: 2022-11-28' \
+              "$api" > /tmp/cerebro-current-runs-raw.json
+            jq --arg sha "$GITHUB_SHA" '{head_sha:$sha,runs:[.workflow_runs[] | select(.head_sha==$sha) | {id,name,event,status,conclusion,head_sha,run_number,run_attempt}]}' \
+              /tmp/cerebro-current-runs-raw.json > /tmp/cerebro-current-runs.json
+            green="$(jq '[.runs[] | select((.name=="CEREBRO Governed Main Integration V0" or .name=="CEREBRO Runtime Durable Supervisor V0" or .name=="CEREBRO RSI Promotion Readiness Shadow V1") and .status=="completed" and .conclusion=="success")] | length' /tmp/cerebro-current-runs.json)"
+            if [ "$green" -ge 3 ]; then break; fi
+            sleep 5
+          done
+          cat /tmp/cerebro-current-runs.json
+          echo "CEREBRO_PREFLIGHT_RUN_INDEX_FILE=/tmp/cerebro-current-runs.json" >> "$GITHUB_ENV"
 
       - name: Syntax-check bounded r3 completion runner
         run: node --check cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs
