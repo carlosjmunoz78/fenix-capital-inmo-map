@@ -14,6 +14,11 @@ These are promotion tests, not claims that the upstream currently passes them.
 10. **Rollback** — disabling the registry entry routes the workload class to the previously approved backend without changing mission semantics.
 11. **OLD-vs-NEW** — same synthetic workload and authority envelope. NEW must improve the selected isolation metric and show no regression in IAM, FINOPS, latency ceiling, cleanup or evidence completeness.
 12. **No forbidden behavior** — no Trading real; no auth/CAPTCHA/rate-limit/paywall/anti-abuse bypass; no paid/cloud fallback.
+13. **Fail-closed substrate proof** — if a required isolation/resource primitive cannot be established and read back from the substrate, startup must refuse. No silent downgrade to a weaker compatibility mode.
+14. **Process-tree cleanup verification** — terminate a workload that forks children and opens resources; teardown must prove the complete process tree and backend-owned mounts/network/runtime artifacts are gone.
+15. **Enforcement read-back** — configured CPU/memory/PID/network/filesystem limits are not accepted merely because configuration returned success; the evaluator must read back or independently observe effective enforcement.
+16. **Harness non-escalation** — MCP/skill/CLI surfaces exposed to a worker cannot select unsafe modes, widen network/filesystem scope, disable redaction/evidence, or bypass Gatekeeper/DefenseClaw policy.
+17. **Secret exfiltration negative test** — a synthetic canary secret presented only through the approved mediation path must not appear in guest persistent storage, snapshots, stdout/stderr, audit payloads or unauthorized network requests.
 
 ## Promotion result
 Only `PASS` on all mandatory gates may move the candidate from `DISABLED_CANDIDATE` to the subsystem-specific evaluation environment. PROD requires a separate governed promotion decision and evidence bundle.
