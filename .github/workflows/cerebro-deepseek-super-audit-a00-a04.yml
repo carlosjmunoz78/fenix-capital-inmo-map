@@ -6,6 +6,7 @@ on:
       - cerebro/jarvis-boost-001-bootstrap-20261026
     paths:
       - '.github/workflows/cerebro-deepseek-super-audit-a00-a04.yml'
+      - 'cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs'
 
 permissions:
   contents: read
