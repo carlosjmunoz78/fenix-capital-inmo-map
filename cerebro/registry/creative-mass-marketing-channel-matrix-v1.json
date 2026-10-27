@@ -1,0 +1,133 @@
+{
+  "schema_version": "1.0.0",
+  "owner_engine": "CREATIVE-STUDIO-001",
+  "distribution_owner": "SOC-001",
+  "action_gateway": "ACTGW-001",
+  "status": "DEFINED_NOT_ACTIVE",
+  "activation_gate": "CREATIVE_STUDIO_PHYSICAL_AND_HUMAN_VISUAL_REVIEW_GREEN",
+  "publication_authority": false,
+  "paid_media_authority": false,
+  "additional_cost_eur": 0,
+  "strategy": {
+    "name": "HOLLYWOOD_NATIVE_MASS_MARKETING",
+    "master_campaign_first": true,
+    "native_rewrite_per_channel": true,
+    "cross_channel_pixel_copy_forbidden": true,
+    "organic_first": true,
+    "paid_activation_requires_money_limit": true,
+    "spam_forbidden": true,
+    "protected_traits_individual_financial_targeting_forbidden": true,
+    "campaign_roles": ["AWARENESS", "ENTERTAINMENT", "TRUST", "CONSIDERATION", "CONVERSION", "RETENTION", "REFERRAL", "B2B_PARTNERSHIP"],
+    "creative_system": ["CAMPAIGN_BIBLE", "CAST_BIBLE", "SHOT_LIBRARY", "SONIC_MOTIF", "BRAND_SIGNATURE", "HOOK_VARIANTS", "RETENTION_CURVE", "CTA_VARIANTS", "LOCAL_CONTEXT", "CHANNEL_NATIVE_EDIT"]
+  },
+  "channels": [
+    {
+      "id": "INSTAGRAM",
+      "priority": 1,
+      "status": "EXISTING_PREPROD_EXTEND_AFTER_GATE",
+      "formats": ["REEL", "STORY", "FEED_POST", "CAROUSEL"],
+      "creative_rule": "Visual-first, human reactions, fast pattern interrupts, premium subtle branding. Story/Reel are related but not identical edits."
+    },
+    {
+      "id": "FACEBOOK",
+      "priority": 1,
+      "status": "EXISTING_PREPROD_EXTEND_AFTER_GATE",
+      "formats": ["REEL", "FEED_POST", "LONG_VIDEO", "CAROUSEL"],
+      "creative_rule": "Broader narrative context than Instagram; long-form can carry more story and proof without becoming a course."
+    },
+    {
+      "id": "LINKEDIN_COMPANY",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "audience": "B2B_INMOBILIARIAS_PROFESIONALES",
+      "formats": ["PAGE_VIDEO", "NATIVE_POST", "DOCUMENT_CAROUSEL"],
+      "creative_rule": "Business consequence first: recovered deals, faster pre-OK, better conversion and operational trust. No consumer Reel copy pasted verbatim.",
+      "platform_constraints": {"video_min_sec": 3, "video_max_sec": 900, "fps_min": 10, "fps_max": 60, "safe_edges_required": true},
+      "spec_reference": "https://www.linkedin.com/help/linkedin/answer/a7494039"
+    },
+    {
+      "id": "YOUTUBE_SHORTS",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["SHORT_VERTICAL"],
+      "creative_rule": "Story-led discovery asset with an immediate visual promise; title/thumbnail logic is separate from TikTok/Reels.",
+      "platform_constraints": {"max_sec": 180, "aspect": ["VERTICAL", "SQUARE"]},
+      "spec_reference": "https://support.google.com/youtube/answer/15424877"
+    },
+    {
+      "id": "YOUTUBE_LONG",
+      "priority": 3,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["LANDSCAPE_STORY", "CASE_STORY", "EXPLAINER_ENTERTAINMENT"],
+      "creative_rule": "Cinematic long-form with cold open, chapters by tension/payoff and retention resets; never a slide-course."
+    },
+    {
+      "id": "TIKTOK",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["VERTICAL_NATIVE"],
+      "creative_rule": "TikTok-native, sound-on, human, less polished when useful, trend-aware but brand-safe; never auto-copy an Instagram Reel.",
+      "platform_constraints": {"preferred_aspect": "9:16", "min_vertical_resolution": "720p", "hook_target_sec": 3, "safe_zone_required": true},
+      "spec_reference": "https://ads.tiktok.com/resources/help/article/creative-best-practices"
+    },
+    {
+      "id": "THREADS",
+      "priority": 3,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["TEXT", "IMAGE", "VIDEO", "CAROUSEL"],
+      "creative_rule": "Conversation-first companion content: opinion, tension, behind-the-scenes, rapid response and campaign extensions rather than polished ad duplication.",
+      "platform_constraints": {"oauth_required": true, "carousel_max_items": 20},
+      "spec_reference": "https://www.postman.com/meta/threads/documentation/dht3nzz/threads-api"
+    },
+    {
+      "id": "PINTEREST",
+      "priority": 3,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["VIDEO_PIN", "STATIC_PIN"],
+      "creative_rule": "Evergreen discovery: home-buying moments, visual aspiration and searchable value with restrained text and long shelf life.",
+      "platform_constraints": {"video_min_sec": 4, "preferred_aspect": "9:16", "preferred_resolution": "1080x1920", "safe_zone": {"top_px": 270, "left_px": 65, "right_px": 195, "bottom_px": 790}},
+      "spec_reference": "https://help.pinterest.com/en/article/review-pin-specs"
+    },
+    {
+      "id": "GOOGLE_BUSINESS_PROFILE",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "formats": ["LOCAL_VIDEO", "LOCAL_PHOTO"],
+      "creative_rule": "Local proof, office/team/context and services grounded in reality; no excessive filters or misleading visual transformation.",
+      "platform_constraints": {"video_max_sec": 30, "video_max_mb": 75, "video_min_resolution": "720p"},
+      "spec_reference": "https://support.google.com/business/answer/6103862"
+    },
+    {
+      "id": "NEWSLETTER_B2C",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "name": "Hipotecas sin vueltas",
+      "formats": ["WEEKLY_EDITORIAL", "CAMPAIGN_FOLLOWUP", "LEAD_MAGNET_SEQUENCE"],
+      "creative_rule": "Human, clear and entertaining editorial companion to the campaign; not a dump of social captions. Consent and unsubscribe required."
+    },
+    {
+      "id": "NEWSLETTER_B2B",
+      "priority": 2,
+      "status": "DEFINED_NOT_ACTIVE",
+      "name": null,
+      "formats": ["WEEKLY_PARTNER_BRIEF", "CASE_STORY", "TOOLKIT_SEQUENCE"],
+      "creative_rule": "For inmobiliarias and partners: commercial outcome, process reliability and useful evidence. Separate content stream from B2C."
+    },
+    {
+      "id": "WHATSAPP_BUSINESS",
+      "priority": 3,
+      "status": "ASSET_AND_CONVERSATION_PREP_ONLY_UNTIL_SUPPORTED_ROUTE_AUDITED",
+      "formats": ["STATUS_ASSET", "OPTED_IN_CONVERSATION_ASSET"],
+      "creative_rule": "Prepare assets and consent-safe follow-up only. No spam and no assumption that Status publishing is available through an official automated route."
+    }
+  ],
+  "activation_sequence": ["CREATIVE_STUDIO_CORE_GREEN", "HUMAN_VISUAL_REVIEW_GREEN", "OLD_VS_NEW_GREEN", "SOC001_EXISTING_IMPLEMENTATION_AUDIT", "CHANNEL_ADAPTER_CONTRACTS", "PREPROD_CHANNEL_TESTS", "ANALYTICS_FEEDBACK_LOOP", "GRADUAL_ACTIVATION"],
+  "governance": {
+    "studio_never_publishes_directly": true,
+    "route": "CREATIVE-STUDIO-001 -> APPROVED_ASSET -> SOC-001 -> ACTGW-001 -> CHANNEL",
+    "credentials_must_use_authorized_connector_or_vault": true,
+    "captcha_mfa_or_platform_consent_not_bypassed": true,
+    "money_limit_before_paid_media": true,
+    "production_activation": false
+  }
+}

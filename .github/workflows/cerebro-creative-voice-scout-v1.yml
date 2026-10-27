@@ -1,0 +1,69 @@
+name: CEREBRO Creative Voice Scout V1
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24]
+    paths:
+      - 'cerebro/tests/creative-voice-scout-v1.mjs'
+      - '.github/workflows/cerebro-creative-voice-scout-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+  CEREBRO_VOICE_SCOUT_OUT: /tmp/cerebro-voice-scout-v1
+
+jobs:
+  spanish-voice-physical-scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked repo dependencies
+        run: npm ci
+      - name: Install pinned Kokoro scout dependency without persisting package changes
+        run: npm install --no-save --package-lock=false kokoro-js@1.2.1
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Materialize pinned Piper baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+          tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          chmod +x "$CEREBRO_PIPER_BIN"
+      - name: Generate identical Spanish copy with Piper and Kokoro
+        run: node cerebro/tests/creative-voice-scout-v1.mjs
+      - name: Verify physical WAV outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "$CEREBRO_VOICE_SCOUT_OUT/piper-es-female.wav"
+          test -s "$CEREBRO_VOICE_SCOUT_OUT/kokoro-ef-dora.wav"
+          for f in "$CEREBRO_VOICE_SCOUT_OUT"/*.wav; do
+            ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,sample_rate,channels -of json "$f"
+            ffmpeg -hide_banner -i "$f" -af volumedetect -f null - 2> "$f.volumedetect.txt"
+            grep -E 'max_volume|mean_volume' "$f.volumedetect.txt"
+          done
+          sha256sum "$CEREBRO_VOICE_SCOUT_OUT"/*.wav "$CEREBRO_VOICE_SCOUT_OUT/VOICE_SCOUT_MANIFEST.json" > "$CEREBRO_VOICE_SCOUT_OUT/SHA256SUMS.txt"
+      - name: Upload voice comparison package
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-creative-voice-scout-v1-${{ github.sha }}
+          path: /tmp/cerebro-voice-scout-v1
+          retention-days: 7

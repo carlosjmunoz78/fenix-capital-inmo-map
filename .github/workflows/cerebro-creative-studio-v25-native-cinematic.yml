@@ -1,0 +1,148 @@
+name: CEREBRO Creative Studio V2.6 Native Cinematic
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24]
+    paths:
+      - 'cerebro/runtime/creative-studio-native-cut-v2.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-social-audio-v5.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v5.mjs'
+      - 'cerebro/runtime/creative-cinematic-quality-v1.mjs'
+      - 'cerebro/runtime/creative-primary-cast-governance-v2.mjs'
+      - 'cerebro/tests/creative-studio-native-showcase-v2.mjs'
+      - '.github/workflows/cerebro-creative-studio-v25-native-cinematic.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/creative-studio-native-cut-v2.mjs'
+      - 'cerebro/runtime/creative-media-sources-v2.mjs'
+      - 'cerebro/runtime/creative-social-audio-v5.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v5.mjs'
+      - 'cerebro/runtime/creative-cinematic-quality-v1.mjs'
+      - 'cerebro/runtime/creative-primary-cast-governance-v2.mjs'
+      - 'cerebro/tests/creative-studio-native-showcase-v2.mjs'
+      - '.github/workflows/cerebro-creative-studio-v25-native-cinematic.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PIPER_RELEASE: '2023.11.14-2'
+  PIPER_VOICE_REV: 'b145f2ac26522d6a2ccde0164b7b0e48b1e3199c'
+  CEREBRO_PIPER_BIN: /tmp/cerebro-piper/piper/piper
+  CEREBRO_PIPER_MODEL: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx
+  CEREBRO_PIPER_CONFIG: /tmp/cerebro-piper/es_ES-sharvard-medium.onnx.json
+  CEREBRO_NATIVE_STUDIO_OUT: /tmp/cerebro-creative-studio-v26
+
+jobs:
+  native-cinematic-physical-candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Static contract checks
+        run: |
+          set -euo pipefail
+          node --check cerebro/runtime/creative-studio-native-cut-v2.mjs
+          node --check cerebro/runtime/creative-media-sources-v2.mjs
+          node --check cerebro/runtime/creative-social-audio-v5.mjs
+          node --check cerebro/runtime/creative-social-finisher-v5.mjs
+          node --check cerebro/runtime/creative-cinematic-quality-v1.mjs
+          node --check cerebro/runtime/creative-primary-cast-governance-v2.mjs
+          node --check cerebro/tests/creative-studio-native-showcase-v2.mjs
+      - name: Install Chromium and FFmpeg
+        run: |
+          npx playwright install --with-deps chromium
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg fonts-dejavu-core
+      - name: Cache pinned Piper voice
+        uses: actions/cache@v4
+        with:
+          path: /tmp/cerebro-piper
+          key: studio-v26-piper-${{ runner.os }}-2023-11-14-2-b145f2a-sharvard-medium
+      - name: Materialize pinned Piper voice
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-piper
+          if [ ! -x "$CEREBRO_PIPER_BIN" ]; then
+            curl --fail --location --silent --show-error "https://github.com/rhasspy/piper/releases/download/${PIPER_RELEASE}/piper_linux_x86_64.tar.gz" -o /tmp/cerebro-piper/piper.tar.gz
+            tar -xzf /tmp/cerebro-piper/piper.tar.gz -C /tmp/cerebro-piper
+          fi
+          if [ ! -s "$CEREBRO_PIPER_MODEL" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx" -o "$CEREBRO_PIPER_MODEL"
+          fi
+          if [ ! -s "$CEREBRO_PIPER_CONFIG" ]; then
+            curl --fail --location --silent --show-error "https://huggingface.co/rhasspy/piper-voices/resolve/${PIPER_VOICE_REV}/es/es_ES/sharvard/medium/es_ES-sharvard-medium.onnx.json" -o "$CEREBRO_PIPER_CONFIG"
+          fi
+          chmod +x "$CEREBRO_PIPER_BIN"
+      - name: Render physical V2.6 native cinematic candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/creative-studio-native-showcase-v2.mjs | tee /tmp/v26-result.json
+          grep -F '"ok":true' /tmp/v26-result.json
+          grep -F '"version":"v2.6.2"' /tmp/v26-result.json
+          grep -F '"promotion_eligible":false' /tmp/v26-result.json
+      - name: Verify fail-closed physical contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const p='/tmp/cerebro-creative-studio-v26/NATIVE_CINEMATIC_MANIFEST.json';
+          const m=JSON.parse(fs.readFileSync(p,'utf8'));
+          if(m.schema_version!=='2.6.2'||m.environment!=='PREPROD'||m.publish_authorized!==false||m.additional_cost_eur!==0) throw new Error('GOVERNANCE');
+          if(m.promotion_eligible!==false||m.human_creative_review_required!==true||m.human_creative_gate!=='PENDING_REVIEW') throw new Error('HUMAN_GATE');
+          if(m.source_policy!=='NO_IDENTIFIABLE_STOCK_HUMANS'||m.context_catalog_size<14||m.max_context_source_reuse!==2) throw new Error('SOURCE_POLICY');
+          if(m.physical_primary_binding!=='SINGLE_RENDER_VISUAL_SOURCE') throw new Error('PRIMARY_BINDING_POLICY');
+          if(m.audio_delivery!=='AAC_256K_48KHZ_STEREO') throw new Error('AUDIO_DELIVERY');
+          if(m.native_pipeline_order!=='LEGACY_RENDER_THEN_NATIVE_RECUT_THEN_FINAL_AUDIO_MASTER') throw new Error('PIPELINE_ORDER');
+          if(m.captions_mode!=='REAL_DIALOGUE_SRT_SIDECAR') throw new Error('CAPTIONS_MODE');
+          if(m.productions.length!==3) throw new Error('PRODUCTION_COUNT');
+          if(!String(m.cross_format_primary_cast_source||'').includes('fenixcapital.es/')) throw new Error('PRIMARY_CAST_NOT_FENIX_GOVERNED');
+          for(const x of m.productions){
+            const q=x.technical_cinematic_qa||{},e=x.physical_evidence||{},c=x.primary_cast_governance||{};
+            if(q.technical_passed!==true||q.promotion_eligible!==false) throw new Error(`TECH_QA:${x.label}`);
+            if(c.passed!==true||c.stock_primary_forbidden!==true||c.stock_video_context_only!==true||c.identifiable_stock_human_context_forbidden!==true) throw new Error(`CAST:${x.label}`);
+            if(c.primary_scene_count!==2) throw new Error(`PRIMARY_STILL_REPEAT:${x.label}:${c.primary_scene_count}`);
+            if((c.stock_context_assets||[]).some(a=>a.identifiable_human_content===true)) throw new Error(`IDENTIFIABLE_STOCK_HUMAN:${x.label}`);
+            if(e.physical_primary_binding_passed!==true||e.physical_primary_render_asset_count!==1||String(e.physical_primary_render_asset)!==String(m.cross_format_primary_cast_source)) throw new Error(`PHYSICAL_PRIMARY_DRIFT:${x.label}`);
+            const minContext=x.key==='story'?8:14;
+            if(Number(e.context_source_unique_count||0)<minContext||Number(e.context_source_max_occurrences||99)>2) throw new Error(`CONTEXT_DIVERSITY:${x.label}:${e.context_source_unique_count}:${e.context_source_max_occurrences}`);
+            if(e.legacy_prerender_recut!==true||e.planned_duration_enforced!==true||e.audio_mastered_after_native_recut!==true) throw new Error(`NATIVE_TIMELINE:${x.label}`);
+            if(Math.abs(Number(e.video_duration_sec)-Number(e.native_timeline_output_sec))>0.35) throw new Error(`AUDIO_VIDEO_TIMELINE_DRIFT:${x.label}`);
+            if(e.music_real_track!==true||e.music_full_length!==true||e.music_license!=='CC0-1.0'||!String(e.music_license_provenance_url||'').startsWith('https://freemusicarchive.org/')||e.music_peak_db<-8) throw new Error(`MUSIC:${x.label}`);
+            if(!['ACTION_TECHNO','NIGHT_DRIVING'].includes(e.music_track_id)) throw new Error(`MUSIC_CATALOG:${x.label}`);
+            if(e.audio_sample_rate_hz!==48000||e.audio_channels!==2) throw new Error(`AUDIO_FORMAT:${x.label}:${e.audio_sample_rate_hz}:${e.audio_channels}`);
+            if(e.distinct_voice_count<2||e.max_voice_gap_sec>2.2||e.max_voice_speedup>1.12) throw new Error(`VOICES:${x.label}`);
+            if(e.per_shot_camera_motion!==true||e.camera_motion_profile_count<5) throw new Error(`CAMERA:${x.label}`);
+            if(e.named_vfx_match_physical_filters!==true||e.vfx_profile_count<4) throw new Error(`VFX:${x.label}`);
+            if(e.real_dialogue_caption_sidecar!==true||!String(e.caption_sidecar_file||'').endsWith('.srt')) throw new Error(`CAPTIONS:${x.label}`);
+            if(x.human_creative_gate!=='PENDING_REVIEW'||x.promotion_eligible!==false) throw new Error(`PROMOTION_GATE:${x.label}`);
+          }
+          console.log('V26_2_TECHNICAL_CANDIDATE_HUMAN_PENDING');
+          NODE
+      - name: Extract human review contact sheets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CEREBRO_NATIVE_STUDIO_OUT/review-frames"
+          for f in story-v26 reel-v26 video-largo-v26; do
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_NATIVE_STUDIO_OUT/$f.mp4" -vf 'fps=1,scale=360:-2,tile=8x8:padding=4:margin=4' -frames:v 1 -y "$CEREBRO_NATIVE_STUDIO_OUT/review-frames/$f-contact-sheet.jpg"
+          done
+          sha256sum "$CEREBRO_NATIVE_STUDIO_OUT"/*.mp4 "$CEREBRO_NATIVE_STUDIO_OUT"/*.srt "$CEREBRO_NATIVE_STUDIO_OUT/NATIVE_CINEMATIC_MANIFEST.json" > "$CEREBRO_NATIVE_STUDIO_OUT/SHA256SUMS.txt"
+      - name: Upload PREPROD candidate for human review
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-creative-studio-v26-native-${{ github.sha }}
+          path: /tmp/cerebro-creative-studio-v26
+          retention-days: 7

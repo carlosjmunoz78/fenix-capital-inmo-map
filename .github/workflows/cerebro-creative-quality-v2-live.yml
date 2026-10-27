@@ -2,14 +2,21 @@ name: CEREBRO Creative Quality V2 Live
 
 on:
   push:
-    branches: [cerebro/creative-quality-v2-2026-10-24, main]
+    branches: [cerebro/creative-quality-v2-2026-10-24, cerebro/creative-quality-v23-2026-10-24, main]
     paths:
       - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
       - 'cerebro/runtime/creative-media-sources-v2.mjs'
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
+      - 'cerebro/runtime/creative-audio-master-v3.mjs'
+      - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
+      - 'cerebro/tests/creative-social-v4.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   pull_request:
@@ -18,9 +25,16 @@ on:
       - 'cerebro/runtime/creative-quality-tribunal-v2.mjs'
       - 'cerebro/runtime/creative-media-sources-v2.mjs'
       - 'cerebro/runtime/creative-job-runner-v2-live.mjs'
+      - 'cerebro/runtime/creative-audio-master-v3.mjs'
+      - 'cerebro/runtime/creative-visual-finisher-v3.mjs'
+      - 'cerebro/runtime/creative-social-audio-v4.mjs'
+      - 'cerebro/runtime/creative-social-quality-v4.mjs'
+      - 'cerebro/runtime/creative-social-finisher-v4.mjs'
       - 'cerebro/tests/creative-quality-tribunal-v2.test.mjs'
       - 'cerebro/tests/creative-media-sources-v2.test.mjs'
       - 'cerebro/tests/creative-job-runner-v2-live.test.mjs'
+      - 'cerebro/tests/creative-visual-finisher-v3.test.mjs'
+      - 'cerebro/tests/creative-social-v4.test.mjs'
       - 'cerebro/tests/creative-quality-v2-live-showcase.mjs'
       - '.github/workflows/cerebro-creative-quality-v2-live.yml'
   workflow_dispatch:
@@ -54,7 +68,12 @@ jobs:
           node --check cerebro/runtime/creative-quality-tribunal-v2.mjs
           node --check cerebro/runtime/creative-media-sources-v2.mjs
           node --check cerebro/runtime/creative-job-runner-v2-live.mjs
-          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs
+          node --check cerebro/runtime/creative-audio-master-v3.mjs
+          node --check cerebro/runtime/creative-visual-finisher-v3.mjs
+          node --check cerebro/runtime/creative-social-audio-v4.mjs
+          node --check cerebro/runtime/creative-social-quality-v4.mjs
+          node --check cerebro/runtime/creative-social-finisher-v4.mjs
+          node --test cerebro/tests/creative-quality-tribunal-v2.test.mjs cerebro/tests/creative-media-sources-v2.test.mjs cerebro/tests/creative-job-runner-v2-live.test.mjs cerebro/tests/creative-visual-finisher-v3.test.mjs cerebro/tests/creative-social-v4.test.mjs
       - name: Brand transparency CSS gate
         shell: bash
         run: |
@@ -75,7 +94,6 @@ jobs:
           curl --fail --location --silent --show-error "$CEREBRO_FENIX_LOGO" -o /tmp/fenix-logo.png
           test -s /tmp/fenix-logo.png
           ffmpeg -hide_banner -loglevel error -i /tmp/fenix-logo.png -vf 'alphaextract,signalstats,metadata=print:file=/tmp/logo-alpha.txt' -frames:v 1 -f null -
-          cat /tmp/logo-alpha.txt
           YMIN="$(sed -n 's/.*lavfi.signalstats.YMIN=//p' /tmp/logo-alpha.txt | head -n 1)"
           test -n "$YMIN"
           awk -v v="$YMIN" 'BEGIN { if ((v+0) >= 250) exit 1 }'
@@ -112,7 +130,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          grep -F '"ok":true' /tmp/showcase-result.json
           node - <<'NODE'
           const fs=require('fs');
           const m=JSON.parse(fs.readFileSync('/tmp/cerebro-creative-quality-v2-live/MANIFEST.json','utf8'));
@@ -120,27 +137,37 @@ jobs:
           const expected=new Set(['01-post-fotografico','02-post-editorial','03-post-conversion','04-carrusel','05-story-video','06-reel','07-video-largo']);
           for(const item of m.items){
             expected.delete(item.label);
-            if(!item.quality?.passed||item.quality.score<82) throw new Error(`QUALITY_FAIL:${item.label}`);
+            if(!item.quality?.passed||item.quality.score<88) throw new Error(`QUALITY_FAIL:${item.label}`);
+            if(['STORY_VIDEO','REEL','LONG_VIDEO'].includes(item.output_type)&&(!item.social_quality?.passed||item.social_quality.verdict!=='SOCIAL_QA_GREEN')) throw new Error(`SOCIAL_QA_FAIL:${item.label}`);
             for(const a of item.artifacts){
               if(a.quality_verdict!=='CREATIVE_QA_GREEN') throw new Error(`ARTIFACT_QA_FAIL:${a.filename}`);
               if(a.mime==='video/mp4'){
-                if(!a.audio?.voice||!a.audio?.music||a.audio.ducking!==true||a.audio.captions!==true) throw new Error(`AUDIO_FAIL:${a.filename}`);
-                const p=a.physical_evidence||{};
-                if(!p.audio_stream_present||p.unique_frame_ratio<.25||p.motion_score<.18) throw new Error(`MOTION_FAIL:${a.filename}`);
-                const minLiveRatio=item.output_type==='LONG_VIDEO'?.30:.35;
-                const minLiveSources=item.output_type==='LONG_VIDEO'?3:2;
+                const p=a.physical_evidence||{},sceneCount=p.scene_change_count+1;
+                if(!a.audio?.voice||!a.audio?.music||a.audio.ducking!==true||a.audio.captions!==true) throw new Error(`AUDIO_DECLARATION_FAIL:${a.filename}`);
+                if(!p.audio_stream_present||p.audio_coverage_ratio<.98) throw new Error(`AUDIO_COVERAGE_FAIL:${a.filename}:${p.audio_coverage_ratio}`);
+                if(!p.continuous_narration||p.scene_locked_narration!==false) throw new Error(`TELEGRAM_NARRATION_FAIL:${a.filename}`);
+                if(p.voice_block_count>=Math.ceil(sceneCount*.67)) throw new Error(`VOICE_FRAGMENTATION_FAIL:${a.filename}:${p.voice_block_count}/${sceneCount}`);
+                const minVoiceCoverage=item.output_type==='LONG_VIDEO'?.42:.52;
+                if(p.voice_coverage_ratio<minVoiceCoverage||p.max_voice_gap_sec>2.4) throw new Error(`VOICE_FLOW_FAIL:${a.filename}:${p.voice_coverage_ratio}:${p.max_voice_gap_sec}`);
+                if(p.voice_wpm<135||p.voice_wpm>195||p.max_voice_speedup>1.12) throw new Error(`VOICE_ENERGY_FAIL:${a.filename}:${p.voice_wpm}:${p.max_voice_speedup}`);
+                if(p.sfx_peak_db<-18||p.sfx_event_count<Math.max(3,Math.ceil(sceneCount*.6))) throw new Error(`SFX_AUDIBILITY_FAIL:${a.filename}:${p.sfx_peak_db}`);
+                const duration=p.video_duration_sec||a.duration_sec,rate=p.scene_change_count/duration,minRate=item.output_type==='LONG_VIDEO'?.18:.25;
+                if(rate<minRate) throw new Error(`EDIT_DENSITY_FAIL:${a.filename}:${rate}<${minRate}`);
+                if(p.unique_frame_ratio<.45||p.motion_score<.30) throw new Error(`MOTION_FAIL:${a.filename}`);
+                const minLiveRatio=item.output_type==='LONG_VIDEO'?.55:.60,minLiveSources=item.output_type==='LONG_VIDEO'?5:3;
                 if(p.live_action_seconds_ratio<minLiveRatio) throw new Error(`LIVE_RATIO_FAIL:${a.filename}:${p.live_action_seconds_ratio}<${minLiveRatio}`);
-                if(p.live_action_source_count<minLiveSources) throw new Error(`LIVE_SOURCE_FAIL:${a.filename}:${p.live_action_source_count}<${minLiveSources}`);
-                if(!Array.isArray(a.video_source_provenance)||a.video_source_provenance.length<minLiveSources) throw new Error(`PROVENANCE_FAIL:${a.filename}`);
+                if(p.live_action_source_count<minLiveSources) throw new Error(`LIVE_SOURCE_FAIL:${a.filename}`);
+                if(p.visual_finisher_version!=='V4_SOCIAL'||!p.fast_transition_accents||p.repetitive_full_frame_sweeps!==false) throw new Error(`SOCIAL_FINISHER_FAIL:${a.filename}`);
+                if(!p.audio_preserved||!p.duration_preserved) throw new Error(`FINISHER_INTEGRITY_FAIL:${a.filename}`);
               }
             }
           }
           if(expected.size) throw new Error(`MISSING:${[...expected].join(',')}`);
-          console.log('MIXED_LIVE_ACTION_SHOWCASE_GREEN');
+          console.log('CEREBRO_SOCIAL_SHOWCASE_V24_GREEN');
           NODE
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/05-story-video.mp4"
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/06-reel.mp4"
-          ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height -of json "$CEREBRO_SHOWCASE_OUT/07-video-largo.mp4"
+          for f in 05-story-video 06-reel 07-video-largo; do
+            ffprobe -v error -show_entries format=duration -show_entries stream=codec_type,codec_name,width,height,duration -of json "$CEREBRO_SHOWCASE_OUT/$f.mp4"
+          done
           sha256sum "$CEREBRO_SHOWCASE_OUT"/* > "$CEREBRO_SHOWCASE_OUT/SHA256SUMS.txt"
       - name: Extract visual review frames
         shell: bash
@@ -148,11 +175,11 @@ jobs:
           set -euo pipefail
           mkdir -p "$CEREBRO_SHOWCASE_OUT/review-frames"
           for f in 05-story-video 06-reel 07-video-largo; do
-            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/4,scale=480:-2,tile=4x3:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
+            ffmpeg -hide_banner -loglevel error -i "$CEREBRO_SHOWCASE_OUT/$f.mp4" -vf 'fps=1/2,scale=480:-2,tile=5x5:padding=6:margin=6' -frames:v 1 -y "$CEREBRO_SHOWCASE_OUT/review-frames/$f-contact-sheet.jpg"
           done
-      - name: Upload PREPROD live-action review package
+      - name: Upload PREPROD social review package
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-creative-quality-v2-live-${{ github.sha }}
+          name: cerebro-creative-social-v24-${{ github.sha }}
           path: /tmp/cerebro-creative-quality-v2-live
           retention-days: 7

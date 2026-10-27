@@ -1,0 +1,69 @@
+name: CEREBRO HyperFrames Scout V1
+
+on:
+  push:
+    branches: [cerebro/creative-quality-v23-2026-10-24]
+    paths:
+      - '.github/workflows/cerebro-hyperframes-scout-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  HYPERFRAMES_VERSION: '0.8.191'
+  CEREBRO_HF_SCOUT_DIR: /tmp/cerebro-hyperframes-scout-v1
+
+jobs:
+  motion-vfx-physical-scout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Verify pinned HyperFrames CLI
+        run: |
+          set -euo pipefail
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} info
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} doctor
+      - name: Scaffold deterministic kinetic-type scout
+        run: |
+          set -euo pipefail
+          rm -rf "$CEREBRO_HF_SCOUT_DIR"
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} init "$CEREBRO_HF_SCOUT_DIR" --example kinetic-type --non-interactive
+          test -s "$CEREBRO_HF_SCOUT_DIR/index.html"
+      - name: Lint composition
+        run: |
+          set -euo pipefail
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} lint "$CEREBRO_HF_SCOUT_DIR" --json | tee /tmp/hyperframes-lint.json
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/hyperframes-lint.json','utf8'));if((x.errorCount||0)>0)process.exit(1)"
+      - name: Inspect visual layout
+        run: |
+          set -euo pipefail
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} inspect "$CEREBRO_HF_SCOUT_DIR" --json --samples 12 | tee /tmp/hyperframes-inspect.json
+      - name: Render physical MP4
+        working-directory: /tmp/cerebro-hyperframes-scout-v1
+        run: |
+          set -euo pipefail
+          npx --yes hyperframes@${HYPERFRAMES_VERSION} render --output "$CEREBRO_HF_SCOUT_DIR/hyperframes-scout.mp4" --quality draft --fps 30 --workers 1 --strict
+          test -s "$CEREBRO_HF_SCOUT_DIR/hyperframes-scout.mp4"
+      - name: Verify physical render
+        run: |
+          set -euo pipefail
+          ffprobe -v error -show_entries format=duration,size -show_entries stream=codec_type,codec_name,width,height,r_frame_rate -of json "$CEREBRO_HF_SCOUT_DIR/hyperframes-scout.mp4" | tee "$CEREBRO_HF_SCOUT_DIR/FFPROBE.json"
+          cp /tmp/hyperframes-lint.json "$CEREBRO_HF_SCOUT_DIR/LINT.json"
+          cp /tmp/hyperframes-inspect.json "$CEREBRO_HF_SCOUT_DIR/INSPECT.json"
+          printf '%s\n' '{"schema_version":"1.0.0","engine_id":"CREATIVE-STUDIO-001","capability":"HYPERFRAMES","environment":"PREPROD","version":"0.8.191","state":"PHYSICAL_SCOUT","required_sequence":["doctor","init","lint","inspect","render","ffprobe"],"publish_authorized":false,"additional_cost_eur":0}' > "$CEREBRO_HF_SCOUT_DIR/SCOUT_MANIFEST.json"
+          sha256sum "$CEREBRO_HF_SCOUT_DIR/hyperframes-scout.mp4" "$CEREBRO_HF_SCOUT_DIR/SCOUT_MANIFEST.json" > "$CEREBRO_HF_SCOUT_DIR/SHA256SUMS.txt"
+      - name: Upload HyperFrames scout evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-hyperframes-scout-v1-${{ github.sha }}
+          path: /tmp/cerebro-hyperframes-scout-v1
+          retention-days: 7

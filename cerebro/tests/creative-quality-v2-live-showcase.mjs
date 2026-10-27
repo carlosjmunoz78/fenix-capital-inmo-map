@@ -2,6 +2,10 @@ import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { renderCreativeJobV2Live } from '../runtime/creative-job-runner-v2-live.mjs';
+import { masterCreativeSocialAudioV4 } from '../runtime/creative-social-audio-v4.mjs';
+import { finishCreativeSocialV4 } from '../runtime/creative-social-finisher-v4.mjs';
+import { assertCreativePlanV2 } from '../runtime/creative-quality-tribunal-v2.mjs';
+import { assertCreativeSocialV4 } from '../runtime/creative-social-quality-v4.mjs';
 
 const out=process.env.CEREBRO_SHOWCASE_OUT||'/tmp/cerebro-creative-quality-v2-live';
 await fs.rm(out,{recursive:true,force:true});await fs.mkdir(out,{recursive:true});
@@ -14,37 +18,60 @@ const photos=[
 const vids=['PEXELS:7817205','PEXELS:7816382','PEXELS:7646690','PEXELS:7735853','PEXELS:7646396'];
 const brand={logo_url:logo,primary:'#ffffff',accent:'#f47b20',background:'#111111'};
 const audio={voice_enabled:true,voice_id:'ES_FEMALE',music_enabled:true,ducking:true,captions:true};
-const base=(output_type,channel,cp)=>({job_id:crypto.randomUUID(),company_id:'fenix',engine_id:'SOC-001',environment:'PREPROD',version:'v2-live',output_type,channel,request:{publish_requested:false,expected_cost_eur:0,creative_payload:{brand,creative_concept:'Fénix Capital · decidir antes de reservar',channel_fit:true,accessibility_checked:true,layer_count:10,layout_variants:5,motion_design:true,broll_required:true,scene_text_only_ratio:0,text_only_page_ratio:.15,motion_profiles:['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN','PAN_LEFT'],transitions:['CROSSFADE','DIP_TO_BLACK','PUSH','WIPE'],...cp}}});
+const base=(output_type,channel,cp)=>({job_id:crypto.randomUUID(),company_id:'fenix',engine_id:'SOC-001',environment:'PREPROD',version:'v2.4-social',output_type,channel,request:{publish_requested:false,expected_cost_eur:0,creative_payload:{brand,creative_concept:'Fénix Capital · social first · vivienda sin sustos',channel_fit:true,accessibility_checked:true,layer_count:12,layout_variants:5,motion_design:true,broll_required:true,scene_text_only_ratio:0,text_only_page_ratio:.15,motion_profiles:['KEN_BURNS_IN','PAN_RIGHT','PUSH_IN','PAN_LEFT','PULL_OUT'],transitions:['CROSSFADE','DIP_TO_BLACK','PUSH','WIPE','ZOOM_CUT'],...cp}}});
+const social=(extra={})=>({social_narrative:true,hook_within_sec:.2,voice_style:'SOCIAL_ENERGETIC',social_arc:['HOOK','TENSION','RELIEF','PAYOFF','CTA'],...extra});
 const jobs=[
-['01-post-fotografico',base('STATIC_POST','INSTAGRAM',{visual_sources:[photos[0]],layout_style:'FULL_BLEED',headline:'La casa te encanta. Ahora comprueba la operación.',subheadline:'Antes de reservar, revisa números, vivienda y calendario.',cta:'Primero viabilidad · Después compromiso'})],
-['02-post-editorial',base('SQUARE_POST','FACEBOOK',{visual_sources:[photos[1]],layout_style:'SPLIT_EDITORIAL',headline:'Un “sí” del banco empieza mucho antes del banco',subheadline:'Ordenar bien el expediente cambia la claridad de la decisión.',cta:'Prepara el caso con criterio'})],
-['03-post-conversion',base('STATIC_POST','LINKEDIN',{visual_sources:[photos[3]],layout_style:'GLASS_CARD',headline:'Llegar a firma sin sorpresas evitables',subheadline:'Ese es el objetivo real de una operación bien preparada.',cta:'Método · documentación · seguimiento'})],
+['01-post-fotografico',base('STATIC_POST','INSTAGRAM',{visual_sources:[photos[0]],layout_style:'FULL_BLEED',headline:'La casa te ha hecho ojitos. Vale.',subheadline:'Ahora falta que la operación también te los haga.',cta:'Primero viabilidad · después flechazo'})],
+['02-post-editorial',base('SQUARE_POST','FACEBOOK',{visual_sources:[photos[1]],layout_style:'SPLIT_EDITORIAL',headline:'Reservar con prisas sale caro',subheadline:'La ilusión está bien. Las sorpresas, mejor antes de firmar nada.',cta:'Míralo antes de correr'})],
+['03-post-conversion',base('STATIC_POST','LINKEDIN',{visual_sources:[photos[3]],layout_style:'GLASS_CARD',headline:'Las llaves molan más que los sustos',subheadline:'Preparar bien la operación es llegar a firma con la cabeza tranquila.',cta:'Fénix Capital'})],
 ['04-carrusel',base('CAROUSEL','INSTAGRAM',{visual_sources:photos,pages:[
-{layout_style:'FULL_BLEED',metric:'01',metric_label:'PRESUPUESTO',headline:'Empieza por lo que puedes sostener',subheadline:'Cuota, deudas y margen mensual.'},
-{layout_style:'SPLIT_EDITORIAL',metric:'02',metric_label:'AHORRO',headline:'Cuenta el dinero que necesitas de verdad',subheadline:'Entrada, impuestos, tasación y gastos.'},
-{layout_style:'GLASS_CARD',metric:'03',metric_label:'VIVIENDA',headline:'La casa también debe ser financiable',subheadline:'Registro, estado y tasación importan.'},
-{layout_style:'METRIC_HERO',metric:'04',metric_label:'PLAZOS',headline:'No reserves con un calendario imposible',subheadline:'Estudio, tasación, FEIN y notaría necesitan margen.'},
-{layout_style:'FRAME_MINIMAL',metric:'05',metric_label:'DECISIÓN',headline:'Cuando todo encaja, entonces sí',subheadline:'Detecta riesgos antes de comprometerte.',cta:'Fénix Capital'}]})],
-['05-story-video',base('STORY_VIDEO','INSTAGRAM',{video_mode:'LIVE_ACTION_MIXED',visual_sources:[photos[0],photos[2]],video_sources:[vids[0],vids[1]],scenes:[
-{source_kind:'VIDEO',video_source:vids[0],source_start_sec:2,duration_sec:4,headline:'¿Te urge reservar?',subheadline:'Que la prisa no decida por ti.',voiceover:'Si has encontrado una vivienda y te urge reservar, que la prisa no decida por ti.'},
-{source_kind:'PHOTO',duration_sec:4,headline:'Comprueba tres cosas',subheadline:'Tu perfil, la vivienda y el calendario.',voiceover:'Comprueba primero tu perfil, la vivienda y el calendario real de la operación.'},
-{source_kind:'VIDEO',video_source:vids[1],source_start_sec:3,duration_sec:4,headline:'Después, decide',subheadline:'Con datos y margen.',voiceover:'Después decide con datos, margen y una operación que tenga sentido.'}],audio})],
-['06-reel',base('REEL','INSTAGRAM',{video_mode:'LIVE_ACTION_MIXED',visual_sources:[photos[0],photos[2]],video_sources:[vids[0],vids[2],vids[1]],scenes:[
-{source_kind:'VIDEO',video_source:vids[0],source_start_sec:5,duration_sec:5,headline:'La vivienda te encaja',subheadline:'Y todo parece urgente.',voiceover:'Has encontrado una vivienda que te encaja y todo parece urgente.'},
-{source_kind:'VIDEO',video_source:vids[2],source_start_sec:1,duration_sec:5,headline:'Mira los documentos',subheadline:'No solo la cuota.',voiceover:'No mires solo la cuota. Revisa documentación, deudas, ahorro disponible y los gastos.'},
-{source_kind:'PHOTO',duration_sec:5,headline:'Mira también la vivienda',subheadline:'Registro y tasación pueden cambiar la financiación.',voiceover:'La vivienda también cuenta. Registro, estado y tasación pueden cambiar la financiación.'},
-{source_kind:'VIDEO',video_source:vids[1],source_start_sec:8,duration_sec:5,headline:'Primero viabilidad',subheadline:'Después compromiso.',voiceover:'Primero viabilidad real. Después compromiso.'}],audio})],
-['07-video-largo',base('LONG_VIDEO','FACEBOOK',{video_mode:'LIVE_ACTION_MIXED',visual_sources:photos,video_sources:[vids[3],vids[2],vids[1],vids[4]],scenes:[
-{source_kind:'VIDEO',video_source:vids[3],source_start_sec:1,duration_sec:8,metric:'01',metric_label:'PRESUPUESTO',headline:'Empieza por tu presupuesto real',subheadline:'La cuota es solo una parte.',voiceover:'Antes de mirar bancos, calcula cuánto puedes destinar cada mes sin quedarte sin margen.'},
-{source_kind:'PHOTO',duration_sec:8,metric:'02',metric_label:'ESTABILIDAD',headline:'Explica bien cómo entra el dinero',subheadline:'Antigüedad y continuidad importan.',voiceover:'Revisa la estabilidad de tus ingresos y la continuidad suficiente para sostener la operación.'},
-{source_kind:'VIDEO',video_source:vids[2],source_start_sec:1,duration_sec:8,metric:'03',metric_label:'DOCUMENTOS',headline:'Ordena el expediente',subheadline:'Lo que presentas tiene que contar una historia coherente.',voiceover:'Ordena el expediente para que ingresos, deudas, ahorro y objetivo de compra se entiendan con claridad.'},
-{source_kind:'PHOTO',duration_sec:8,metric:'04',metric_label:'AHORRO',headline:'Cuenta todos los gastos',subheadline:'No presupuestes solo la entrada.',voiceover:'Calcula entrada, impuestos, tasación y demás gastos para saber qué financiación necesitas.'},
-{source_kind:'VIDEO',video_source:vids[1],source_start_sec:5,duration_sec:8,metric:'05',metric_label:'VIVIENDA',headline:'La casa también forma parte del riesgo',subheadline:'Registro, estado y tasación condicionan.',voiceover:'La vivienda también forma parte del riesgo y puede condicionar el porcentaje financiable.'},
-{source_kind:'PHOTO',duration_sec:8,metric:'06',metric_label:'CALENDARIO',headline:'Pon fechas realistas',subheadline:'Estudio, tasación, FEIN y notaría necesitan margen.',voiceover:'Coloca un calendario realista para estudio, documentación, tasación, FEIN y notaría.'},
-{source_kind:'VIDEO',video_source:vids[4],source_start_sec:1,duration_sec:8,metric:'07',metric_label:'DECISIÓN',headline:'Decide cuando conozcas los riesgos',subheadline:'La velocidad funciona mejor cuando hay método.',voiceover:'Cuando comprador, vivienda, dinero y calendario encajan, puedes decidir con mucha más información.'},
-{source_kind:'PHOTO',duration_sec:8,metric:'08',metric_label:'FÉNIX CAPITAL',headline:'Primero viabilidad. Después compromiso.',subheadline:'Método antes de prisa.',voiceover:'Primero viabilidad. Después compromiso. Ese es el método.'}],audio:{...audio,voice_id:'ES_MALE'}})]
+{layout_style:'FULL_BLEED',headline:'Te encanta la casa',subheadline:'Perfecto. Esa parte ya la tenemos.'},
+{layout_style:'SPLIT_EDITORIAL',headline:'Ahora no corras',subheadline:'La reserva no necesita adrenalina.'},
+{layout_style:'GLASS_CARD',headline:'¿La operación respira?',subheadline:'Eso es lo que miramos primero.'},
+{layout_style:'METRIC_HERO',headline:'Si algo chirría…',subheadline:'Mejor descubrirlo ahora que después.'},
+{layout_style:'FRAME_MINIMAL',headline:'Si encaja, a por las llaves',subheadline:'Tú disfruta la casa. Nosotros vigilamos la operación.',cta:'Fénix Capital'}]})],
+['05-story-video',base('STORY_VIDEO','INSTAGRAM',{...social(),video_mode:'LIVE_ACTION_MIXED',visual_sources:photos,video_sources:[vids[0],vids[1],vids[2]],narration_blocks:[
+{start_sec:.1,text:'¿Te ha enamorado la casa? Genial. No te cases con la reserva todavía.'},
+{start_sec:5.0,text:'Primero vemos si la operación respira. Si respira, ahora sí: llaves.'}],scenes:[
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:2,duration_sec:2.4,headline:'¿LA casa?',subheadline:'Vale. Respira.'},
+{source_kind:'VIDEO',video_source:vids[2],source_start_sec:1,duration_sec:2.4,headline:'No te cases aún',subheadline:'Con la reserva, queremos decir.'},
+{source_kind:'PHOTO',duration_sec:2.4,headline:'Primero una cosa',subheadline:'¿La operación respira?'},
+{source_kind:'VIDEO',video_source:vids[1],source_start_sec:3,duration_sec:2.4,headline:'Si encaja…',subheadline:'Ahora sí.'},
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:7,duration_sec:2.4,headline:'A por las llaves',subheadline:'Sin sustos evitables.'}],audio})],
+['06-reel',base('REEL','INSTAGRAM',{...social(),video_mode:'LIVE_ACTION_MIXED',visual_sources:photos,video_sources:[vids[0],vids[2],vids[1],vids[4]],narration_blocks:[
+{start_sec:.1,text:'Ves la casa, ves la cocina... y ya sabes dónde va el sofá. Normal.'},
+{start_sec:5.4,text:'Y llega el “hay que reservar hoy”. Ahí, freno. Primero miramos si encaja.'},
+{start_sec:11.0,text:'Si encaja, corremos contigo. Si no, mejor descubrirlo antes de soltar dinero.'}],scenes:[
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:5,duration_sec:2.8,headline:'Te has enamorado',subheadline:'Sí, se te nota.'},
+{source_kind:'VIDEO',video_source:vids[2],source_start_sec:1,duration_sec:2.8,headline:'Ya ves el sofá',subheadline:'Y hasta la lámpara.'},
+{source_kind:'PHOTO',duration_sec:2.8,headline:'“Hay que reservar hoy”',subheadline:'Momento dramático.'},
+{source_kind:'VIDEO',video_source:vids[2],source_start_sec:7,duration_sec:2.8,headline:'Freno',subheadline:'Primero: ¿encaja?'},
+{source_kind:'VIDEO',video_source:vids[4],source_start_sec:1,duration_sec:2.8,headline:'Banco + casa + tú',subheadline:'Que se lleven bien.'},
+{source_kind:'VIDEO',video_source:vids[1],source_start_sec:5,duration_sec:2.8,headline:'¿Todo bien?',subheadline:'Entonces corremos.'},
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:10,duration_sec:2.8,headline:'Ahora sí',subheadline:'A por las llaves.'}],audio})],
+['07-video-largo',base('LONG_VIDEO','FACEBOOK',{...social(),video_mode:'LIVE_ACTION_MIXED',visual_sources:photos,video_sources:vids,narration_blocks:[
+{start_sec:.1,text:'Entras en una casa y en diez segundos ya has colocado el sofá. A todos nos pasa.'},
+{start_sec:7.2,text:'El problema es querer colocar también la hipoteca en diez segundos. Ahí empiezan los sustos.'},
+{start_sec:14.6,text:'Nosotros hacemos justo lo contrario: miramos si tú, el banco y esa vivienda se llevan bien.'},
+{start_sec:22.3,text:'Si algo chirría, mejor verlo antes de reservar. Y si todo encaja, entonces sí: a correr.'},
+{start_sec:30.0,text:'Tú piensa en las llaves. Nosotros vigilamos que la operación no se tuerza. ¿La vemos?'}],scenes:[
+{source_kind:'VIDEO',video_source:vids[3],source_start_sec:1,duration_sec:3.2,headline:'Entras y…',subheadline:'Ya estás decorando.'},
+{source_kind:'VIDEO',video_source:vids[3],source_start_sec:5,duration_sec:3.2,headline:'El sofá aquí',subheadline:'La tele allí.'},
+{source_kind:'PHOTO',duration_sec:3.2,headline:'Y la hipoteca…',subheadline:'Bueno. Esa mejor la miramos.'},
+{source_kind:'VIDEO',video_source:vids[2],source_start_sec:1,duration_sec:3.2,headline:'No hace falta un máster',subheadline:'Hace falta saber si encaja.'},
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:2,duration_sec:3.2,headline:'Tú',subheadline:'Tu situación real.'},
+{source_kind:'VIDEO',video_source:vids[2],source_start_sec:7,duration_sec:3.2,headline:'El banco',subheadline:'Lo que acepta de verdad.'},
+{source_kind:'VIDEO',video_source:vids[4],source_start_sec:1,duration_sec:3.2,headline:'La casa',subheadline:'Sí, ella también cuenta.'},
+{source_kind:'PHOTO',duration_sec:3.2,headline:'¿Algo chirría?',subheadline:'Mejor ahora.'},
+{source_kind:'VIDEO',video_source:vids[4],source_start_sec:7,duration_sec:3.2,headline:'¿Todo encaja?',subheadline:'Perfecto.'},
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:8,duration_sec:3.2,headline:'Entonces sí',subheadline:'Nos movemos.'},
+{source_kind:'VIDEO',video_source:vids[1],source_start_sec:3,duration_sec:3.2,headline:'Papeles',subheadline:'Sin convertirlo en un drama.'},
+{source_kind:'VIDEO',video_source:vids[1],source_start_sec:8,duration_sec:3.2,headline:'Firma',subheadline:'Cada cosa a su tiempo.'},
+{source_kind:'VIDEO',video_source:vids[0],source_start_sec:11,duration_sec:3.2,headline:'Tú',subheadline:'Pensando en las llaves.'},
+{source_kind:'PHOTO',duration_sec:3.2,headline:'Nosotros',subheadline:'Vigilando que no se tuerza.',cta:'¿La vemos?'}],audio:{...audio,voice_id:'ES_FEMALE'}})]
 ];
-const manifest={schema_version:'2.2.0',environment:'PREPROD',publish_authorized:false,additional_cost_eur:0,items:[]};
-for(const [label,job] of jobs){const r=await renderCreativeJobV2Live(job);try{const item={label,output_type:job.output_type,quality:r.quality,video_source_provenance:r.video_source_provenance,artifacts:[]};for(const a of r.artifacts){const ext=path.extname(a.filename),suffix=a.page?`-${String(a.page).padStart(2,'0')}`:'',target=path.join(out,`${label}${suffix}${ext}`);await fs.copyFile(a.local_path,target);item.artifacts.push({...a,local_path:undefined,filename:path.basename(target)})}manifest.items.push(item)}finally{await fs.rm(r.temp,{recursive:true,force:true})}}
+const manifest={schema_version:'2.4.0',environment:'PREPROD',publish_authorized:false,additional_cost_eur:0,items:[]};
+for(const [label,job] of jobs){const r=await renderCreativeJobV2Live(job);try{const cp=job.request.creative_payload,item={label,output_type:job.output_type,quality:r.quality,social_quality:null,video_source_provenance:r.video_source_provenance,artifacts:[]};for(const a of r.artifacts){let local=a.local_path,physical={...(a.physical_evidence||{})};if(a.mime==='video/mp4'){const mastered=await masterCreativeSocialAudioV4({videoFile:a.local_path,narrationBlocks:cp.narration_blocks,scenes:cp.scenes,temp:r.temp,voiceId:cp.audio?.voice_id||'ES_FEMALE'});const finished=await finishCreativeSocialV4({videoFile:mastered.file,scenes:cp.scenes,temp:r.temp,accent:cp.brand?.accent||'#f47b20'});local=finished.file;Object.assign(physical,mastered.evidence,finished.evidence,{scene_change_count:cp.scenes.length-1,video_duration_sec:mastered.evidence.video_duration_sec});item.quality=assertCreativePlanV2({plan:r.plan,physical_evidence:physical});const socialPlan={...r.plan,social_narrative:cp.social_narrative,hook_within_sec:cp.hook_within_sec,voice_style:cp.voice_style,social_arc:cp.social_arc,narration_blocks:cp.narration_blocks};item.social_quality=assertCreativeSocialV4({plan:socialPlan,physical_evidence:physical});}
+const ext=path.extname(a.filename),suffix=a.page?`-${String(a.page).padStart(2,'0')}`:'',target=path.join(out,`${label}${suffix}${ext}`);await fs.copyFile(local,target);item.artifacts.push({...a,local_path:undefined,filename:path.basename(target),physical_evidence:physical,quality_verdict:item.quality.verdict,quality_score:item.quality.score,social_quality_verdict:item.social_quality?.verdict||null,social_quality_score:item.social_quality?.score||null})}manifest.items.push(item)}finally{await fs.rm(r.temp,{recursive:true,force:true})}}
 await fs.writeFile(path.join(out,'MANIFEST.json'),JSON.stringify(manifest,null,2));
 console.log(JSON.stringify({ok:true,items:manifest.items.length,artifacts:manifest.items.reduce((n,x)=>n+x.artifacts.length,0),out}));
