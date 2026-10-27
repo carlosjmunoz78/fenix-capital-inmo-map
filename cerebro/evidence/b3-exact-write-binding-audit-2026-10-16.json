@@ -1,0 +1,66 @@
+{
+  "schema_version": "1",
+  "state_type": "CEREBRO_B3_EXACT_WRITE_BINDING_AUDIT",
+  "company_id": "fenix",
+  "engine_id": "ACTGW-001",
+  "environment": "PREPROD",
+  "version": "v0",
+  "status": "HUMAN_REQUIRED_POLICY_CONFLICT",
+  "base_main_sha": "9baf5a1885d3fbd8fc18614fb3b867a49583f40f",
+  "live_wordpress": {
+    "host": "staging.fenixcapital.es",
+    "core_guard_health_score": 100,
+    "core_guard_mode": "observer",
+    "runtime_gate_active": false,
+    "operational_writes_allowed": false,
+    "universal_qa_live_integration_enabled": true,
+    "universal_qa_writes_enabled": true,
+    "universal_qa_safe_mode": false,
+    "universal_qa_scope": "PREPROD_SYNTHETIC_ALLOWLIST",
+    "b3_readonly_observation_previously_verified": true,
+    "b3_journal_namespace": "cerebro-b3-journal-lab/v1"
+  },
+  "current_connector_contract": {
+    "connector": "MCP_Server_For_WordPress",
+    "rest_list_routes_available": true,
+    "b3_namespace_granted": false,
+    "b3_routes_returned": 0,
+    "generic_cerebro_routes_returned": 0,
+    "b3_direct_ability_discovered": false,
+    "permission_expansion_performed": false
+  },
+  "installed_and_historical_contract": {
+    "installed_v1_journal_observation": "INTENT_REPLAY_LEASED_UNIQUE_WINNER_CLEANUP_PREVIOUSLY_PHYSICALLY_OBSERVED",
+    "storage_model": "WORDPRESS_OPTIONS_WITH_UNIQUE_OPTION_NAME_AND_CAS",
+    "write_protocol": "INTENT_TO_LEASE_TO_GATE_TO_VERIFY_TO_RECEIPT",
+    "unknown_side_effect_policy": "QUARANTINE_NO_BLIND_RETRY",
+    "physical_write_certified": false,
+    "publication_allowed": false,
+    "prod_authorized": false
+  },
+  "offline_v2_candidate": {
+    "contract": "cerebro.b3.write.v2",
+    "journal_prefix": "cerebro_b3_v2_",
+    "live_adapter_installed": false,
+    "live_core_guard_attestation_adapter_verified": false,
+    "rest_routes_or_hooks_in_candidate": false,
+    "promotion_authorized": false
+  },
+  "blocked_action": {
+    "next_gate": "VERIFY_EXACT_INSTALLED_B3_WRITE_ADAPTER_AND_GRANT_CONTRACT_THEN_NEW_SYNTHETIC_DRAFT_INTENT_LEASE_GATE_RECEIPT_CLEANUP_ROLLBACK_E2E",
+    "reason": "The current authenticated WordPress connector has no grant for the installed B3 journal namespace, while Core Guard operational writes remain closed. Expanding the connector grant or opening an ephemeral Core Guard write gate would cross the current explicit policy boundary.",
+    "human_required": "POLICY_CONFLICT"
+  },
+  "actions_not_taken": {
+    "core_guard_gate_opened": false,
+    "mcp_permissions_expanded": false,
+    "wordpress_plugin_replaced": false,
+    "wp_config_modified": false,
+    "synthetic_post_written": false,
+    "production_touched": false,
+    "customer_data_touched": false,
+    "trading_touched": false,
+    "paid_service_used": false
+  },
+  "additional_cost_eur": 0
+}
