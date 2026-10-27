@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - cerebro/l9-deepseek-max-dag-20261027
+      - 'cerebro/useful-run-dedupe-*'
     paths:
       - 'cerebro/runtime/dynamic-concurrency-policy-v1.mjs'
       - 'cerebro/runtime/dynamic-dag-planner-v1.mjs'
@@ -35,7 +36,8 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-deepseek-max-concurrency-v1-${{ github.ref }}
+  # Deduplicate identical code heads even when several PR refs point to main.
+  group: cerebro-deepseek-max-concurrency-v1-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:

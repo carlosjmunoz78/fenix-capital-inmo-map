@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - cerebro/boost-001-reconciled-20261027
+      - 'cerebro/useful-run-dedupe-*'
     paths:
       - 'cerebro/runtime/durable-job-runtime-v1.mjs'
       - 'cerebro/runtime/durable-worker-runner-v1.mjs'
@@ -35,6 +36,12 @@ on:
 
 permissions:
   contents: read
+
+concurrency:
+  # Different refs/PRs can point to the exact same code head. Test it once and
+  # free the runner for distinct work instead of duplicating the full suite.
+  group: cerebro-runtime-durable-supervisor-v0-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
 
 jobs:
   durable-supervisor-v0:

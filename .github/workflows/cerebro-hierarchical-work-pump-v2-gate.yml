@@ -18,7 +18,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: cerebro-hierarchical-work-pump-v2-v3-${{ github.event.pull_request.number || github.ref }}
+  group: cerebro-hierarchical-work-pump-v2-v3-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 permissions:
