@@ -56,7 +56,7 @@ test('isolated visual runtime recognizes persisted QA session and mounts workspa
   await expect(opsRoot).toBeVisible();
 });
 
-test('isolated owner runtime switches JARVIS TÉCNICA NEURONAL and NAVEGADOR from one shared bar',async({page})=>{
+test('isolated owner runtime switches JARVIS OPERATIVA NEURONAL and NAVEGADOR from one shared bar',async({page})=>{
   test.setTimeout(20_000);
   await seedSession(page,ownerSession);
   await page.route('**/functions/v1/fenix-app-gateway-test/**',async route=>{
@@ -74,7 +74,7 @@ test('isolated owner runtime switches JARVIS TÉCNICA NEURONAL and NAVEGADOR fro
   await expect(bar.getByRole('button')).toHaveCount(5);
 
   const jarvis=bar.getByRole('button',{name:'JARVIS'});
-  const tecnica=bar.getByRole('button',{name:'TÉCNICA'});
+  const operativa=bar.getByRole('button',{name:'OPERATIVA'});
   const neuronal=bar.getByRole('button',{name:'NEURONAL'});
   const navegador=bar.getByRole('button',{name:'NAVEGADOR'});
   const exit=bar.getByRole('button',{name:'VOLVER A APP'});
@@ -82,9 +82,9 @@ test('isolated owner runtime switches JARVIS TÉCNICA NEURONAL and NAVEGADOR fro
   await expect(jarvis).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('.cerebro-jarvis-surface')).toBeVisible();
 
-  await tecnica.click();
-  await expect(tecnica).toHaveAttribute('aria-pressed','true');
-  await expect(page).toHaveURL(/\/cerebro\?section=technical$/);
+  await operativa.click();
+  await expect(operativa).toHaveAttribute('aria-pressed','true');
+  await expect(page).toHaveURL(/\/cerebro\?section=operativa$/);
   await expect(page.locator('.cerebro-technical-surface')).toBeVisible();
 
   await neuronal.click();
