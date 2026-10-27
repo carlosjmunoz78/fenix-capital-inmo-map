@@ -80,7 +80,9 @@ class AdaptiveBacklogRuntimeV1 {
       const blockId = meta(job)?.block_id ?? 'UNKNOWN';
       pendingByBlock.set(blockId, (pendingByBlock.get(blockId) ?? 0) + 1);
     }
-    const minBlockPending = pendingByBlock.size ? Math.min(...pendingByBlock.values(), 0) : 0;
+    // Only compare blocks that actually have active work. Injecting an artificial zero here
+    // starved a single ready block at ~3 tasks even when the measured model capacity was 8.
+    const minBlockPending = pendingByBlock.size ? Math.min(...pendingByBlock.values()) : 0;
     const snapshot = Object.freeze({
       model_capacity: this.#modelCapacity,
       adaptive_multiplier: multiplier,
@@ -94,6 +96,7 @@ class AdaptiveBacklogRuntimeV1 {
       headroom: Math.max(0, target - active.length),
       queue_pressure: target === 0 ? 0 : Number((active.length / target).toFixed(4)),
       fairness_skew: this.#fairnessSkew,
+      min_active_block_pending: minBlockPending,
       pending_by_block: Object.freeze(Object.fromEntries([...pendingByBlock.entries()].sort())),
     });
     this.#last = snapshot;
@@ -109,7 +112,7 @@ class AdaptiveBacklogRuntimeV1 {
     if (m.active_leaf_jobs >= m.target_active_backlog) {
       return Object.freeze({ accepted: false, duplicate: false, deferred: true, reason: 'ADAPTIVE_BACKLOG_FULL', target_active_backlog: m.target_active_backlog });
     }
-    if (blockPending > m.minBlockPending + this.#fairnessSkew) {
+    if (m.pendingByBlock.size > 1 && blockPending > m.minBlockPending + this.#fairnessSkew) {
       return Object.freeze({ accepted: false, duplicate: false, deferred: true, reason: 'FAIRNESS_WORK_STEAL_ELIGIBLE', block_id: work.block_id });
     }
     return this.#runtime.enqueue(spec);
@@ -218,6 +221,7 @@ export const ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT = Object.freeze({
   second_scheduler: false,
   second_daemon: false,
   fairness_backpressure: true,
+  fairness_never_caps_single_ready_block_below_model_capacity: true,
   work_steal_friendly: true,
   deepseek_concurrency_above_measured_ceiling: false,
   repo_write_concurrency: 1,
