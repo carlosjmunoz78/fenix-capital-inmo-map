@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - 'cerebro/max-fanout-24h-*'
+      - 'cerebro/useful-run-dedupe-*'
   pull_request:
     paths:
       - 'cerebro/runtime/max-fanout-block-worker-v1.mjs'
@@ -24,7 +25,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-max-fanout-24h-v1-${{ github.ref }}
+  # One physical fanout per exact code head. Multiple PR refs pointing to the same
+  # head must not consume 25 runners each for identical evidence.
+  group: cerebro-max-fanout-24h-v1-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
 jobs:
@@ -96,6 +99,6 @@ jobs:
           echo 'CEREBRO MAX FANOUT V1'
           echo '25 deterministic block workers requested'
           echo 'DeepSeek agent workers are dispatch-only and capped at 8 concurrent'
-          echo 'Stale duplicate fanout runs are cancelled automatically'
+          echo 'Same-head duplicate fanout runs are cancelled automatically'
           echo 'No PROD authority granted by this workflow'
           echo 'Trading remains isolated'
