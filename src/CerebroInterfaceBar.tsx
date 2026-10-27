@@ -2,13 +2,13 @@ import {ArrowLeft,CircuitBoard,Globe2,Network,Sparkles} from 'lucide-react';
 import {useNavigate} from 'react-router-dom';
 import './cerebro-interface-bar.css';
 
-export type CerebroPrimaryView='JARVIS'|'TECNICA'|'NEURONAL'|'NAVEGADOR';
+export type CerebroPrimaryView='JARVIS'|'OPERATIVA'|'NEURONAL'|'NAVEGADOR';
 
 type Props={view:CerebroPrimaryView;onViewChange:(view:CerebroPrimaryView)=>void};
 
 const ITEMS:[CerebroPrimaryView,string,typeof Sparkles][]=[
  ['JARVIS','JARVIS',Sparkles],
- ['TECNICA','TÉCNICA',CircuitBoard],
+ ['OPERATIVA','OPERATIVA',CircuitBoard],
  ['NEURONAL','NEURONAL',Network],
  ['NAVEGADOR','NAVEGADOR',Globe2],
 ];
