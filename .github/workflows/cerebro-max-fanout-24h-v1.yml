@@ -5,6 +5,11 @@ on:
     branches:
       - main
       - 'cerebro/max-fanout-24h-*'
+  pull_request:
+    paths:
+      - 'cerebro/runtime/max-fanout-block-worker-v1.mjs'
+      - 'cerebro/tests/max-fanout-block-worker-v1.test.mjs'
+      - '.github/workflows/cerebro-max-fanout-24h-v1.yml'
   schedule:
     - cron: '*/15 * * * *'
   workflow_dispatch:
