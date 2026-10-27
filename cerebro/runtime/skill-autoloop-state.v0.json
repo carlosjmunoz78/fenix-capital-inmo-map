@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-27T05:40:09.258Z",
+  "updated_at": "2026-10-27T06:30:10.561Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -439,42 +439,6 @@
   "in_flight": {},
   "waiting_human": {},
   "waiting_safe_handler": {
-    "github-wide-skills:d6c9009271bfc9026abf": {
-      "candidate_id": "github-wide-skills:d6c9009271bfc9026abf",
-      "name": "codebase-explorer",
-      "human_alias": "Codebase Explorer",
-      "wrapper_id": "skillwrap:c28274cbf8c4bef2d1a1",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 86.54,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "van90bg/agent-skills-collection",
-        "upstream_head_commit": "6a6b3c04b0f63022f67e562af4898e5f89915f57",
-        "manifest_sha256": "3a1624268942937a4798efe0ff77ede74743421c13c58e5f6995761ed44269f9",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40453326603,
-      "checkpointed_at": "2026-10-27T05:06:00.735Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
     "github-wide-skills:8a83b27e39d15a848671": {
       "candidate_id": "github-wide-skills:8a83b27e39d15a848671",
       "name": "audit-report-format",
@@ -23486,6 +23450,57 @@
       "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
       "handoff_id": "skill-engine-extension:5d7c033d876c399eae2ab7c7"
+    },
+    "github-wide-skills:d6c9009271bfc9026abf": {
+      "candidate_id": "github-wide-skills:d6c9009271bfc9026abf",
+      "name": "codebase-explorer",
+      "human_alias": "Codebase Explorer",
+      "wrapper_id": "skillwrap:c28274cbf8c4bef2d1a1",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86.54,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "van90bg/agent-skills-collection",
+        "upstream_head_commit": "6a6b3c04b0f63022f67e562af4898e5f89915f57",
+        "manifest_sha256": "3a1624268942937a4798efe0ff77ede74743421c13c58e5f6995761ed44269f9",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 40453326603,
+      "checkpointed_at": "2026-10-27T05:06:00.735Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "LICENSE_INCOMPATIBLE_OR_DISALLOWED",
+        "decision_id": "skill-autonomy:0a928a57d9217d288ab6e0da",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-27T06:30:10.561Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:1ede9f6751e13a1db81947d0",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -26754,7 +26769,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -41193,6 +41208,47 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-27T02:23:15.827Z"
+    },
+    "github-wide-skills:d6c9009271bfc9026abf": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:1ede9f6751e13a1db81947d0",
+      "decision_id": "skill-autonomy:0a928a57d9217d288ab6e0da",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:d6c9009271bfc9026abf",
+      "skill_version": "skillwrap:c28274cbf8c4bef2d1a1",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "ARCH-001",
+        "DEP-001",
+        "DOCS-001",
+        "FACT-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-27T06:30:10.561Z"
     }
   },
   "autonomy_action_queue": {},
