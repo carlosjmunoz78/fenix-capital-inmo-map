@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-27T12:36:31.016Z",
+  "updated_at": "2026-10-27T13:26:29.302Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -477,40 +477,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 40484360695,
       "checkpointed_at": "2026-10-27T09:55:05.235Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:7afa3d4ac838f690320d": {
-      "candidate_id": "github-wide-skills:7afa3d4ac838f690320d",
-      "name": "orchestrate",
-      "human_alias": "Orchestrate",
-      "wrapper_id": "skillwrap:06cd55b9e7e327b48d18",
-      "domain": "agent-ai-orchestration",
-      "engine_bindings": [
-        "ORCH-001",
-        "ROUTE-001",
-        "FACT-001",
-        "RAG-001",
-        "LRN-001",
-        "ACTGW-001"
-      ],
-      "value_score": 86.4,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "ammadeo/skills",
-        "upstream_head_commit": "06a739b5ae9c363135cbcd0a3febbf1184c3da7e",
-        "manifest_sha256": "77b697990303e08a93e6ff88c0b580f39b635aa0a505a9ea52518e99df6a6960",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 40492958084,
-      "checkpointed_at": "2026-10-27T11:01:39.099Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -24154,6 +24120,55 @@
       "action_status": "ROUTED_TO_EXISTING_GOVERNED_PIPELINE",
       "next_gate": "SKILL_CAPABILITY_EVOLUTION_EXISTING_ENGINE",
       "handoff_id": "skill-engine-extension:11cdb7e59d96cc0454fc70f3"
+    },
+    "github-wide-skills:7afa3d4ac838f690320d": {
+      "candidate_id": "github-wide-skills:7afa3d4ac838f690320d",
+      "name": "orchestrate",
+      "human_alias": "Orchestrate",
+      "wrapper_id": "skillwrap:06cd55b9e7e327b48d18",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.4,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "ammadeo/skills",
+        "upstream_head_commit": "06a739b5ae9c363135cbcd0a3febbf1184c3da7e",
+        "manifest_sha256": "77b697990303e08a93e6ff88c0b580f39b635aa0a505a9ea52518e99df6a6960",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 40492958084,
+      "checkpointed_at": "2026-10-27T11:01:39.099Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:60a57e129b39b61aac6e9692",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-10-27T13:26:29.302Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:a3d0968c4e31df5dbe3a7cb3",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -27465,7 +27480,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -42336,6 +42351,45 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-10-27T08:03:28.057Z"
+    },
+    "github-wide-skills:7afa3d4ac838f690320d": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:a3d0968c4e31df5dbe3a7cb3",
+      "decision_id": "skill-autonomy:60a57e129b39b61aac6e9692",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:7afa3d4ac838f690320d",
+      "skill_version": "skillwrap:06cd55b9e7e327b48d18",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "ACTGW-001",
+        "FACT-001",
+        "LRN-001",
+        "ORCH-001",
+        "RAG-001",
+        "ROUTE-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-10-27T13:26:29.302Z"
     }
   },
   "autonomy_action_queue": {},
