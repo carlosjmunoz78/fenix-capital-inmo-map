@@ -1,0 +1,15 @@
+{
+  "schema_version":"1.0.0",
+  "family_id":"SEO-WEB-FACTORY",
+  "version":"v1",
+  "mode":"shared_multi_company",
+  "fork_per_company":false,
+  "cost_policy":{"additional_cost_eur":0,"paid_tools_require_reserved_budget":true},
+  "safety":{"preserve_existing_systems":true,"preserve_valid_urls":true,"blind_prod_replace":false,"prod_write_authorized":false,"trading":false},
+  "capabilities":[
+    "market_competitor_research","keyword_intent_research","architecture_url_map","technical_seo","local_seo","content","schema","internal_linking","indexation_gsc","cro","performance","wordpress","web_app_landing_funnel","forms","lead_magnets","crm_email_newsletter","analytics_testing"
+  ],
+  "promotion_contract":{"focused_tests_first":true,"old_vs_new":true,"regression_gate":true,"rollback_required":true,"independent_capability_promotion":true},
+  "shared_dependencies":["cerebro/digital-build","cerebro/contracts","cerebro/evidence","cerebro/audit"],
+  "next_block":"implement deterministic shared orchestrator around existing engines; bind each capability independently"
+}
