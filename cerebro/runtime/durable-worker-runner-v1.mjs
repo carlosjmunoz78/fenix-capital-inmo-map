@@ -256,46 +256,64 @@ export class DurableWorkerRunnerV1 {
     const lanes = normalized.map((context, index) => ({ context, index, active: false }));
     const running = new Set();
     const outcomes = [];
+    let passiveOutcome = null;
     let completed = 0;
     let cursor = this.#fairCursor % lanes.length;
 
     const launch = lane => {
-      if (lane.active || completed >= budget || this.#active.size >= this.#maxConcurrency) return false;
+      if (lane.active || completed >= budget || this.#active.size >= this.#maxConcurrency) return 'BLOCKED';
       const begun = this.#begin(lane.context);
-      if (!begun.started) return false;
+      if (!begun.started) {
+        if (begun.outcome?.status === 'IDLE' || begun.outcome?.status === 'SATURATED') {
+          passiveOutcome ??= begun.outcome;
+          return 'PASSIVE';
+        }
+        outcomes.push(begun.outcome);
+        completed += 1;
+        return 'CONSUMED';
+      }
       lane.active = true;
       let tracked;
       tracked = begun.promise.then(outcome => ({ lane, outcome, tracked }));
       running.add(tracked);
-      return true;
+      return 'STARTED';
     };
 
     const refill = () => {
       let started = 0;
-      for (let offset = 0; offset < lanes.length; offset += 1) {
+      let consumed = 0;
+      for (let offset = 0; offset < lanes.length && completed < budget; offset += 1) {
         const lane = lanes[(cursor + offset) % lanes.length];
-        if (launch(lane)) started += 1;
+        const state = launch(lane);
+        if (state === 'STARTED') started += 1;
+        else if (state === 'CONSUMED') consumed += 1;
       }
       cursor = (cursor + 1) % lanes.length;
-      return started;
+      return { started, consumed };
     };
 
-    refill();
-    while (running.size > 0) {
+    while (completed < budget) {
+      const progress = refill();
+      if (running.size === 0) {
+        if (progress.consumed > 0) continue;
+        break;
+      }
       const settled = await Promise.race(running);
       running.delete(settled.tracked);
       settled.lane.active = false;
       outcomes.push(settled.outcome);
       completed += 1;
-      if (completed < budget) refill();
+    }
+
+    while (running.size > 0) {
+      const settled = await Promise.race(running);
+      running.delete(settled.tracked);
+      settled.lane.active = false;
+      outcomes.push(settled.outcome);
     }
 
     this.#fairCursor = cursor;
-    if (outcomes.length === 0) {
-      const probe = this.#begin(lanes[cursor].context);
-      if (probe.started) outcomes.push(await probe.promise);
-      else outcomes.push(probe.outcome);
-    }
+    if (outcomes.length === 0 && passiveOutcome) outcomes.push(passiveOutcome);
     return outcomes;
   }
 
@@ -323,6 +341,7 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   scans_past_idle_contexts: true,
   continuous_slot_refill: true,
   batch_barrier_removed_in_saturated_mode: true,
+  immediate_dispatch_failures_surface: true,
   timeout_abort_signal: true,
   heartbeat_lease_extension: true,
   checkpoint_resume: true,
