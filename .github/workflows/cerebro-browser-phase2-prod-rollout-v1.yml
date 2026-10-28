@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - 'cerebro/browser1-phase2-prod-canary-v1'
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
 
 permissions:
@@ -21,6 +25,10 @@ env:
 
 jobs:
   rollout:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.ref_name == 'cerebro/browser1-phase2-prod-canary-v1' ||
+      (github.event_name == 'pull_request' && github.head_ref == 'cerebro/browser1-phase2-prod-canary-v1')
     name: Staged PROD canary 1-2-4-8
     runs-on: ubuntu-latest
     container:
