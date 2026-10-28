@@ -37,7 +37,8 @@ export function isMaintenanceDrainActiveV1(config) {
 export function installMaintenanceDrainV1({ env = process.env } = {}) {
   const config = maintenanceDrainConfigV1(env);
   const already = globalThis[PATCH_KEY];
-  if (already?.installed) return already.receipt;
+  if (already?.installed && already.config?.drain_file === config.drain_file) return already.receipt;
+  if (already?.installed) already.uninstall();
 
   const originalClaim = DurableJobRuntimeV1.prototype.claim;
   const originalReconcile = AdaptiveHierarchicalAgentWorkPumpV3.prototype.reconcile;
@@ -109,10 +110,10 @@ export function installMaintenanceDrainV1({ env = process.env } = {}) {
     DurableJobRuntimeV1.prototype.claim = originalClaim;
     AdaptiveHierarchicalAgentWorkPumpV3.prototype.reconcile = originalReconcile;
     AdaptiveHierarchicalAgentWorkPumpV3.prototype.snapshot = originalSnapshot;
-    delete globalThis[PATCH_KEY];
+    if (globalThis[PATCH_KEY]?.config?.drain_file === config.drain_file) delete globalThis[PATCH_KEY];
   };
 
-  globalThis[PATCH_KEY] = Object.freeze({ installed: true, receipt, uninstall });
+  globalThis[PATCH_KEY] = Object.freeze({ installed: true, config, receipt, uninstall });
   return receipt;
 }
 
