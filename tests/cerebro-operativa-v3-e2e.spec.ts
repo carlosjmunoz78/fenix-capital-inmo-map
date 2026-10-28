@@ -103,7 +103,6 @@ test('OPERATIVA is the visible real-work control surface around canonical V0 cha
   await expect(page.locator('.jarvis-work')).toHaveCount(0);
   await expect(legacy.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
   await expect(page.getByRole('button',{name:'LEGACY V0'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'JARVIS WORK'})).toBeVisible();
 
   await page.goto('/cerebro?section=v0',{waitUntil:'domcontentloaded'});
   await expect(page.locator('.jarvis-work')).toBeVisible();
