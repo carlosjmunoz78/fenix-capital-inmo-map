@@ -14,8 +14,8 @@ if (-not (Test-Path $LegacySource)) { throw "Legacy supervisor daemon V0 not fou
 
 $node = (Get-Command node -ErrorAction Stop).Source
 $InstallRoot = Join-Path $env:LOCALAPPDATA 'CEREBRO\SupervisorRuntime\app'
-# Match the daemon's canonical default so the scheduled task and the smoke/live
-# checks use one durable journal/heartbeat location.
+# Match the daemon's canonical default so the scheduled task and live checks use
+# the same durable journals and heartbeat location already used by V0.
 $StateRoot = Join-Path $env:LOCALAPPDATA 'CEREBRO\SupervisorRuntime'
 $SmokeStateRoot = Join-Path $env:TEMP ('CEREBRO-SupervisorSmoke-' + [guid]::NewGuid().ToString('N'))
 $BackupRoot = Join-Path $env:LOCALAPPDATA ('CEREBRO\SupervisorRuntime\backup-' + (Get-Date -Format 'yyyyMMdd-HHmmss'))
@@ -44,11 +44,18 @@ try {
   if (-not (Test-Path $Entrypoint)) { throw 'Installed entrypoint V1 missing after copy' }
   if (-not (Test-Path $Legacy)) { throw 'Installed legacy daemon V0 missing after copy' }
 
-  # Isolated smoke: no mutation of the durable production-like PREPROD journals.
+  # Isolated zero-cost smoke: do not touch the durable journals and do not allow
+  # MODEL or REPO execution even if the host already has provider credentials.
   $oldStateDir = $env:CEREBRO_SUPERVISOR_STATE_DIR
   $oldSupervisorEnv = $env:CEREBRO_SUPERVISOR_ENV
+  $oldWorkPump = $env:CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP
+  $oldRepoSandbox = $env:CEREBRO_ENABLE_REPO_SANDBOX
+  $oldRemoteTelemetry = $env:CEREBRO_REMOTE_TELEMETRY
   $env:CEREBRO_SUPERVISOR_STATE_DIR = $SmokeStateRoot
   $env:CEREBRO_SUPERVISOR_ENV = 'PREPROD'
+  $env:CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP = 'NO'
+  $env:CEREBRO_ENABLE_REPO_SANDBOX = 'NO'
+  $env:CEREBRO_REMOTE_TELEMETRY = 'NO'
   try {
     & $node $Entrypoint --enqueue-health-probe --cycles 2
     if ($LASTEXITCODE -ne 0) { throw "PREPROD V1 smoke failed with exit code $LASTEXITCODE" }
@@ -56,6 +63,9 @@ try {
   finally {
     $env:CEREBRO_SUPERVISOR_STATE_DIR = $oldStateDir
     $env:CEREBRO_SUPERVISOR_ENV = $oldSupervisorEnv
+    $env:CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP = $oldWorkPump
+    $env:CEREBRO_ENABLE_REPO_SANDBOX = $oldRepoSandbox
+    $env:CEREBRO_REMOTE_TELEMETRY = $oldRemoteTelemetry
   }
 
   $SmokeHeartbeat = Join-Path $SmokeStateRoot 'heartbeat.json'
