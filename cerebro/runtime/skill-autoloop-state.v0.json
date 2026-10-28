@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-28T13:27:13.428Z",
+  "updated_at": "2026-10-28T13:33:55.563Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -488,11 +488,47 @@
     "repo:6ddf45c2ad5b54c0f7dddebb5a46",
     "repo:809dbeda7e78221fe618d6c24bd5",
     "repo:f772bc56392da37bdb3dadedcbad",
-    "github-wide-skills:d7426c2d7bce1a319874"
+    "github-wide-skills:d7426c2d7bce1a319874",
+    "github-wide-skills:787252ac0a6ddb4dd296"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:787252ac0a6ddb4dd296": {
+      "candidate_id": "github-wide-skills:787252ac0a6ddb4dd296",
+      "name": "make-skill",
+      "human_alias": "Make Skill",
+      "wrapper_id": "skillwrap:f91a3312476f219d02bb",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 88.52,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "sevenevesai/skills",
+        "upstream_head_commit": "eca454fdedf60b2d324dcf2ebf170b4940cf67fa",
+        "manifest_sha256": "7230090dcbc461e4e9c1180fa822315db9d6a404e09b6adabe3e1f791adeb3f9",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40697500812,
+      "checkpointed_at": "2026-10-28T13:33:55.563Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -30613,7 +30649,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -30626,7 +30662,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40693290625,
+  "last_discovery_run_id": 40697500812,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
