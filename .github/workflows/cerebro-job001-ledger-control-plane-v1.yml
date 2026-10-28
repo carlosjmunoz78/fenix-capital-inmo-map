@@ -5,16 +5,22 @@ on:
     paths:
       - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
+      - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
+      - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
+      - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
   push:
     branches: [main]
     paths:
       - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
+      - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
+      - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
+      - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
   workflow_dispatch:
 
@@ -32,7 +38,9 @@ jobs:
           node-version: '24'
       - name: JOB-001 ledger control plane contract tests
         run: node --test cerebro/tests/job001-ledger-control-plane-v1.test.mjs
-      - name: Control-plane contract is PREPROD fail-closed
+      - name: JOB-001 remote sanitized telemetry tests
+        run: node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
+      - name: Control-plane contract is PREPROD fail-closed at 48/64
         run: |
           node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
-          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8')); if(x.environment!=='PREPROD'||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.max_global_default!==64||x.max_deepseek_default!==8||x.max_repo_write_default!==1||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
+          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8')); if(x.environment!=='PREPROD'||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.target_useful_default!==48||x.max_global_default!==64||x.max_company_default!==48||x.max_deepseek_default!==8||x.max_repo_write_default!==1||x.heartbeat_ttl_max_ms!==120000||x.dynamic_concurrency_whitelist_only!==true||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
