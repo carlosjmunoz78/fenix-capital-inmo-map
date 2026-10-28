@@ -41,20 +41,23 @@ export function createDeepSeekGovernedHandoffHandlerV1({ base_handler, handoff_r
     };
   };
 
-  handler.snapshot = () => Object.freeze({
-    schema_version: '1.0.0',
-    state_type: 'CEREBRO_DEEPSEEK_GOVERNED_HANDOFF_HANDLER_V1',
-    base_handler: typeof base_handler.snapshot === 'function' ? base_handler.snapshot() : null,
-    router: typeof handoff_router.snapshot === 'function' ? handoff_router.snapshot() : null,
-    handled,
-    enqueued,
-    duplicates,
-    rejected,
-    no_handoff: noHandoff,
-    prod_authorized: false,
-    prod_writes: false,
-    trading_access: false,
-  });
+  handler.snapshot = () => {
+    const base = typeof base_handler.snapshot === 'function' ? base_handler.snapshot() : {};
+    const router = typeof handoff_router.snapshot === 'function' ? handoff_router.snapshot() : null;
+    return Object.freeze({
+      ...base,
+      governed_handoff_wrapper: 'V1',
+      governed_execution_handoff_router: router,
+      handoff_handled: handled,
+      handoff_enqueued: enqueued,
+      handoff_duplicates: duplicates,
+      handoff_rejected: rejected,
+      handoff_no_handoff: noHandoff,
+      prod_authorized: false,
+      prod_writes: false,
+      trading_access: false,
+    });
+  };
 
   return handler;
 }
@@ -63,6 +66,7 @@ export const DEEPSEEK_GOVERNED_HANDOFF_HANDLER_V1_CONTRACT = Object.freeze({
   capability: 'BOOST-001/JOB-001/deepseek-governed-handoff-handler-v1',
   environment: 'PREPROD',
   wraps_existing_deepseek_handler: true,
+  preserves_base_telemetry_shape: true,
   same_durable_queue: true,
   second_daemon: false,
   target_allowlist_required: true,
