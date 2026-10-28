@@ -21,7 +21,7 @@ class FakeRuntime {
   listForContext(context) { return structuredClone(this.data.get(key(context)) || []); }
 }
 
-test('inspect reports useful runnable/running totals and 40/64/8/1 limits without creating work', () => {
+test('inspect reports useful runnable/running totals and 48/64/48/8/1 limits without creating work', () => {
   const runtime = new FakeRuntime({
     [key(MODEL)]: [
       { status: 'QUEUED' }, { status: 'RETRY_WAIT' }, { status: 'LEASED' }, { status: 'HEARTBEATING' }, { status: 'SUCCEEDED' },
@@ -37,9 +37,10 @@ test('inspect reports useful runnable/running totals and 40/64/8/1 limits withou
   assert.equal(status.totals.useful, 5);
   assert.equal(status.totals.blocked, 2);
   assert.equal(status.totals.done, 2);
-  assert.equal(status.saturation.headroom_to_target, 35);
-  assert.equal(status.limits.target_useful, 40);
+  assert.equal(status.saturation.headroom_to_target, 43);
+  assert.equal(status.limits.target_useful, 48);
   assert.equal(status.limits.max_global, 64);
+  assert.equal(status.limits.max_company, 48);
   assert.equal(status.limits.max_deepseek, 8);
   assert.equal(status.limits.max_repo_write, 1);
   assert.equal(status.second_queue, false);
@@ -93,8 +94,18 @@ test('heartbeat view is sanitized, PREPROD-only, company-bound and freshness-gat
     environment: 'PREPROD',
     version: 'v0',
     updated_at: '2026-10-28T13:59:30.000Z',
-    useful_work: { scheduling_strategy: 'ADAPTIVE_USEFUL_THROUGHPUT', model_capacity: 8, target_active_backlog: 48, useful_queued: 40, useful_running: 8, queue_pressure: 1, starvation: false },
-    dynamic_concurrency: { max_global_concurrency: 64 },
+    useful_work: { scheduling_strategy: 'ADAPTIVE_USEFUL_THROUGHPUT', model_capacity: 8, target_active_backlog: 48, useful_queued: 40, useful_running: 8, queue_pressure: 1, starvation: false, secret_nested: 'deny' },
+    dynamic_concurrency: {
+      target_global_concurrency: 48,
+      max_global_concurrency: 64,
+      max_company_concurrency: 48,
+      max_provider_concurrency: { deepseek: 8, secret_provider: 999 },
+      max_repo_write_concurrency: 1,
+      max_resource_concurrency: { CPU: 32, IO: 48 },
+      decision: 'HOLD',
+      hard_cost_cap_eur: 100,
+      secret_should_not_escape: 'deny',
+    },
     work_pump_mode: 'AUTO_KEY_PRESENT',
     kill_switch_present: false,
     prod_authorized: false,
@@ -107,22 +118,49 @@ test('heartbeat view is sanitized, PREPROD-only, company-bound and freshness-gat
   assert.equal(view.useful_work.model_capacity, 8);
   assert.equal(view.useful_work.useful_queued, 40);
   assert.equal(view.useful_work.useful_running, 8);
+  assert.equal(view.dynamic_concurrency.target_global_concurrency, 48);
+  assert.equal(view.dynamic_concurrency.max_global_concurrency, 64);
+  assert.equal(view.dynamic_concurrency.max_company_concurrency, 48);
+  assert.equal(view.dynamic_concurrency.max_deepseek_concurrency, 8);
+  assert.equal(view.dynamic_concurrency.max_repo_write_concurrency, 1);
+  assert.equal(view.dynamic_concurrency.decision, 'HOLD');
+  assert.equal('max_resource_concurrency' in view.dynamic_concurrency, false);
+  assert.equal('secret_provider' in view.dynamic_concurrency, false);
+  assert.equal('secret_should_not_escape' in view.dynamic_concurrency, false);
   assert.equal(view.age_ms, 30_000);
   assert.equal('secret_should_not_escape' in view, false);
   assert.equal(view.trading_access, false);
   assert.throws(() => readSupervisorHeartbeatV1({ heartbeat_file: file, actor: READ, expected_company_id: 'other', now_ms: now }), /COMPANY_MISMATCH/);
   assert.throws(() => readSupervisorHeartbeatV1({ heartbeat_file: file, actor: READ, expected_company_id: 'fenix', now_ms: now + 200_000, max_age_ms: 120_000 }), /HEARTBEAT_STALE/);
+  assert.throws(() => readSupervisorHeartbeatV1({ heartbeat_file: file, actor: READ, expected_company_id: 'fenix', now_ms: now, max_age_ms: 120_001 }), /max_age_ms/);
 });
 
-test('contract explicitly preserves JOB-001 and zero-cost governance boundaries', () => {
+test('heartbeat view rejects PROD-write or Trading claims', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-ledger-control-policy-'));
+  const file = path.join(dir, 'heartbeat.json');
+  const base = {
+    status: 'GREEN', company_id: 'fenix', engine_id: 'RUNTIME-001', environment: 'PREPROD', version: 'v0', updated_at: '2026-10-28T13:59:30.000Z',
+  };
+  const now = Date.parse('2026-10-28T14:00:00.000Z');
+  fs.writeFileSync(file, JSON.stringify({ ...base, prod_write_authorized: true }));
+  assert.throws(() => readSupervisorHeartbeatV1({ heartbeat_file: file, actor: READ, expected_company_id: 'fenix', now_ms: now }), /PROD_WRITE_DENIED/);
+  fs.writeFileSync(file, JSON.stringify({ ...base, trading_access: true }));
+  assert.throws(() => readSupervisorHeartbeatV1({ heartbeat_file: file, actor: READ, expected_company_id: 'fenix', now_ms: now }), /TRADING_DENIED/);
+});
+
+test('contract explicitly preserves JOB-001 and 48/64 zero-cost governance boundaries', () => {
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.reuses_existing_runtime, true);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.reuses_existing_work_pump, true);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.second_queue, false);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.second_scheduler, false);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.second_daemon, false);
+  assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.target_useful_default, 48);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.max_global_default, 64);
+  assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.max_company_default, 48);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.max_deepseek_default, 8);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.max_repo_write_default, 1);
+  assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.heartbeat_ttl_max_ms, 120_000);
+  assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.dynamic_concurrency_whitelist_only, true);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.prod_authorized, false);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.trading_access, false);
 });
