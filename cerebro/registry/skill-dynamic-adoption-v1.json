@@ -11641,6 +11641,76 @@
       "promoted_at": "2026-10-21T18:53:57.028Z"
     },
     {
+      "candidate_id": "repo:847129814be0a852894f6c2007dc",
+      "technical_name": "radix-ui",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/radix-ui",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "847129814be0a852894f6c2007dc6eef9b270efcc15c840ccf43701b930d876a",
+      "manifest_sha256": "1dbf59f537421eb91b66b368464b25f4b5227e04b0e39d41eccb8f59919dfd36",
+      "outcome_hash": "250549c9c770640d8fc0e939831639d90b66f417712208654d75a011cc6f92c7",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:847129814be0a852:cap:1",
+          "technical_name": "radix-ui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.024Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "66da48cea61a7aaae129882aee3010952ecca3737659b9babaae464993d21cf5"
+    },
+    {
       "candidate_id": "repo:c7bddaa278ca4a68e53eb3f2a363",
       "technical_name": "radix-ui",
       "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/radix-ui",
@@ -11844,6 +11914,78 @@
       "promoted_at": "2026-10-21T22:02:21.479Z"
     },
     {
+      "candidate_id": "repo:47f12d455df99ec719f4e65d8cd8",
+      "technical_name": "rate-limiter",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/rate-limiter",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "47f12d455df99ec719f4e65d8cd85306e4779715e2a08a6748627a010fca1e37",
+      "manifest_sha256": "d5361ba2a9e7e2566da941856dc1cf9f5e6d83e20471020ab46e1b4931058fbb",
+      "outcome_hash": "99cc56d4f3da8fdf6cf2147946bd247337de095000c23129c0613225588d9bca",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:47f12d455df99ec7:cap:1",
+          "technical_name": "rate-limiter",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.025Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "83764d7daa5cbb1fa6c4a5487f9addb895e693b3d5d87b71002a74b56a0980dc"
+    },
+    {
       "candidate_id": "repo:49145353f2f58455a0f6328fcb35",
       "technical_name": "rate-limiter",
       "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/rate-limiter",
@@ -12045,6 +12187,76 @@
         "observed_at": "2026-10-24T23:49:04.456Z"
       },
       "promoted_at": "2026-10-24T23:49:04.456Z"
+    },
+    {
+      "candidate_id": "repo:1c3748c6725a6b85d1454ca8c1ff",
+      "technical_name": "react-aria",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/react-aria",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "1c3748c6725a6b85d1454ca8c1ff16af6c36896bfbd965db7e39dd934d2a14fe",
+      "manifest_sha256": "80aba26e7f056043426edde36b564600e11ee3b4e0eb316ebce898bbf1b592d9",
+      "outcome_hash": "d245a18c5f3fead53c6e4bcbaa8d3fa3d74a66040d0c16d478a63603d1c15ce4",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:1c3748c6725a6b85:cap:1",
+          "technical_name": "react-aria",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.025Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "77dfdf21b1fbfc145fc1258f70660645ed33a225940d0980d445b1ef0d86e099"
     },
     {
       "candidate_id": "repo:59632c7e81569c5141f6fe9054a2",
@@ -12347,6 +12559,76 @@
       "promoted_at": "2026-10-21T22:02:21.479Z"
     },
     {
+      "candidate_id": "repo:7931ae20d87a804f90fa9150d3f8",
+      "technical_name": "react-three-fiber",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/react-three-fiber",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "7931ae20d87a804f90fa9150d3f85ae07538280942bc215540cdb267be5c5150",
+      "manifest_sha256": "a8aba463b76cdf2533ed0e256bce99a5f363395decce1258a026d8fbb502b86e",
+      "outcome_hash": "8aa99dcb53428c0b1768ec0ff611d7e37a31e9f4d2df228a04b6f0955e5bb522",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:7931ae20d87a804f:cap:1",
+          "technical_name": "react-three-fiber",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.025Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "f25303de7f6ccda7c28adc3cd85908c9213b1cdf9137fbc28e2c88d9f0372e5c"
+    },
+    {
       "candidate_id": "repo:9265164322b2698bb21bc44b008d",
       "technical_name": "react-three-fiber",
       "source_locator": "github://TerminalSkills/skills@d9ad8723e712dff2cc2acee0b37147d3937cebc8/skills/react-three-fiber",
@@ -12647,6 +12929,76 @@
       "promoted_at": "2026-10-24T23:49:04.456Z"
     },
     {
+      "candidate_id": "repo:65941fc34cb7b5ebb7fb82933d66",
+      "technical_name": "refine",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/refine",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "65941fc34cb7b5ebb7fb82933d66da73ab162e9e98a1b09cb753e124cc0b4b79",
+      "manifest_sha256": "ed45a50ceab3c5c010f93ffbb6b0203769ea9f58af5074f24f378ca4db6d5030",
+      "outcome_hash": "0413505988021eb2d491e325cea2079f46f1fdb07b9258be17bc35a7d60d7655",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:65941fc34cb7b5eb:cap:1",
+          "technical_name": "refine",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.025Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "7a97bb1b119e01ba60bdddc6a301c9b5666b0864b7f9b7eaea924ec537383694"
+    },
+    {
       "candidate_id": "repo:f23baa3b09be2f1e431a32b7d592",
       "technical_name": "refined",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/refined",
@@ -12745,6 +13097,78 @@
         "observed_at": "2026-10-21T09:39:06.003Z"
       },
       "promoted_at": "2026-10-21T09:39:06.003Z"
+    },
+    {
+      "candidate_id": "repo:ab528fd63fed4f0b785749a0a24a",
+      "technical_name": "rest-api",
+      "source_locator": "github://TerminalSkills/skills@3bfbf7f76459d89422eddc0e5f572ad0e6c393c9/skills/rest-api",
+      "pinned_sha": "3bfbf7f76459d89422eddc0e5f572ad0e6c393c9",
+      "snapshot_sha256": "ab528fd63fed4f0b785749a0a24accfe40e577b813e7f47814284847146d5806",
+      "manifest_sha256": "f95cb54095dc4b1216a2ed80d341c97b553cbb03eb403ea571529a13c93534c2",
+      "outcome_hash": "38494dd3fb14f3c4240add977ef87bd51ec25bb415c2da7ed1525b2c58ecd6cd",
+      "target_engine_bindings": [
+        "CMP-002",
+        "DPO-001",
+        "IAM-001",
+        "RED-001",
+        "SEC-001",
+        "SEC-002"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:ab528fd63fed4f0b:cap:1",
+          "technical_name": "rest-api",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "security-identity-privacy",
+              "engine_bindings": [
+                "CMP-002",
+                "DPO-001",
+                "IAM-001",
+                "RED-001",
+                "SEC-001",
+                "SEC-002"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 6
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-10-28T15:15:01.025Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "e229f8b828249575f22a2f517a87dcce2435a991280599adb29132b27dd45032"
     },
     {
       "candidate_id": "repo:b2b99335c9916d9eab916467dbe7",
@@ -15901,11 +16325,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 157,
-    "inserted": 0,
+    "total": 163,
+    "inserted": 6,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 6,
     "prod_readonly": 157
   }
 }
