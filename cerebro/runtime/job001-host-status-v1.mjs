@@ -50,7 +50,7 @@ function projectDynamicConcurrency(value = {}) {
     target_global_concurrency: integerOrNull(value?.target_global_concurrency),
     max_global_concurrency: integerOrNull(value?.max_global_concurrency),
     max_company_concurrency: integerOrNull(value?.max_company_concurrency),
-    max_provider_deepseek_concurrency: integerOrNull(provider?.deepseek),
+    max_provider_deepseek_concurrency: integerOrNull(value?.max_deepseek_concurrency ?? provider?.deepseek),
     max_repo_write_concurrency: integerOrNull(value?.max_repo_write_concurrency),
     decision: typeof value?.decision === 'string' ? value.decision : null,
   });
