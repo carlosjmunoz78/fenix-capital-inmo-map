@@ -1,0 +1,38 @@
+name: CEREBRO JOB-001 Ledger Control Plane V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
+      - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
+      - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
+      - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
+      - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
+      - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
+      - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
+      - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
+      - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JOB-001 ledger control plane contract tests
+        run: node --test cerebro/tests/job001-ledger-control-plane-v1.test.mjs
+      - name: Control-plane contract is PREPROD fail-closed
+        run: |
+          node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
+          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8')); if(x.environment!=='PREPROD'||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.max_global_default!==64||x.max_deepseek_default!==8||x.max_repo_write_default!==1||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
