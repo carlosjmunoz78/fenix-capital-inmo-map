@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { sanitizeDynamicConcurrencyV1 } from './job001-remote-telemetry-v1.mjs';
 
 const PREPROD = 'PREPROD';
 const READ_SCOPE = 'cerebro:ledger:read';
@@ -79,9 +80,9 @@ export class Job001LedgerControlPlaneV1 {
     this.#workPump = work_pump;
     this.#contexts = Object.freeze(contexts.map((context, index) => safeContext(context, `contexts[${index}]`)));
     this.#limits = Object.freeze({
-      target_useful: integerOrNull(limits.target_useful) ?? 40,
+      target_useful: integerOrNull(limits.target_useful) ?? 48,
       max_global: integerOrNull(limits.max_global) ?? 64,
-      max_company: integerOrNull(limits.max_company) ?? 40,
+      max_company: integerOrNull(limits.max_company) ?? 48,
       max_deepseek: Math.min(integerOrNull(limits.max_deepseek) ?? 8, 8),
       max_repo_write: Math.min(integerOrNull(limits.max_repo_write) ?? 1, 1),
     });
@@ -168,13 +169,15 @@ export function readSupervisorHeartbeatV1({ heartbeat_file, actor, expected_comp
   const heartbeat = JSON.parse(fs.readFileSync(file, 'utf8'));
   if (heartbeat?.environment !== PREPROD) throw new Error('CONTROL_PLANE_HEARTBEAT_PREPROD_ONLY');
   if (heartbeat?.trading_access === true) throw new Error('CONTROL_PLANE_HEARTBEAT_TRADING_DENIED');
+  if (heartbeat?.prod_authorized === true || heartbeat?.prod_write_authorized === true) throw new Error('CONTROL_PLANE_HEARTBEAT_PROD_WRITE_DENIED');
   if (expected_company_id && heartbeat?.company_id !== expected_company_id) throw new Error('CONTROL_PLANE_HEARTBEAT_COMPANY_MISMATCH');
+  if (!Number.isSafeInteger(max_age_ms) || max_age_ms < 1_000 || max_age_ms > 120_000) throw new TypeError('max_age_ms must be integer 1000..120000');
   const updatedAtMs = Date.parse(heartbeat?.updated_at || '');
   if (!Number.isFinite(updatedAtMs)) throw new Error('CONTROL_PLANE_HEARTBEAT_TIMESTAMP_INVALID');
   const ageMs = Math.max(0, now_ms - updatedAtMs);
   if (ageMs > max_age_ms) throw new Error(`CONTROL_PLANE_HEARTBEAT_STALE:${ageMs}`);
   const useful = heartbeat.useful_work || {};
-  const policy = heartbeat.dynamic_concurrency || {};
+  const policy = sanitizeDynamicConcurrencyV1(heartbeat.dynamic_concurrency || {});
   return Object.freeze({
     schema_version: '1.0.0',
     state_type: 'CEREBRO_JOB001_HEARTBEAT_VIEW_V1',
@@ -208,10 +211,13 @@ export const JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT = Object.freeze({
   environment: PREPROD,
   read_scope: READ_SCOPE,
   refill_scope: REFILL_SCOPE,
-  target_useful_default: 40,
+  target_useful_default: 48,
   max_global_default: 64,
+  max_company_default: 48,
   max_deepseek_default: 8,
   max_repo_write_default: 1,
+  heartbeat_ttl_max_ms: 120_000,
+  dynamic_concurrency_whitelist_only: true,
   reuses_existing_runtime: true,
   reuses_existing_work_pump: true,
   second_queue: false,
