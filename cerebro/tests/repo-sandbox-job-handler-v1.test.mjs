@@ -157,3 +157,36 @@ test('contract stays PREPROD/read-only/zero-cost and explicitly reuses the exist
   assert.equal(REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.prod_writes, false);
   assert.equal(REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.trading_access, false);
 });
+
+const physical = process.env.CEREBRO_PHYSICAL_REPO_DURABLE_E2E === '1';
+test('physical JOB-001 -> durable worker -> repo handler -> exact-SHA OCI sandbox is GREEN in PREPROD', { skip: !physical, timeout: 180_000 }, async t => {
+  const image = process.env.CEREBRO_SANDBOX_IMAGE;
+  assert.match(image ?? '', /@sha256:[a-f0-9]{64}$/);
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-repo-durable-physical-'));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const runtime = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
+  const worker = new DurableWorkerRunnerV1({ job_runtime: runtime, worker_id: 'repo-ci-physical', lease_ms: 60_000, heartbeat_ms: 2_000, max_concurrency: 1, max_per_company: 1 });
+  const handler = createRepoSandboxJobHandlerV1({ workspace_root: dir, image_ref: image });
+  worker.register({ name: REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name, handler });
+  const probe = "const fs=require('node:fs');if(!fs.existsSync('/workspace/package.json'))process.exit(31);try{fs.writeFileSync('/workspace/blocked','x');process.exit(32)}catch{};console.log('DURABLE_REPO_SANDBOX_OK')";
+  const enqueued = runtime.enqueue({
+    name: REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name,
+    context: CONTEXT,
+    payload: payload({ command: ['node', '-e', probe] }),
+    timeout_ms: 120_000,
+    max_attempts: 2,
+    idempotency_key: 'repo-sandbox-physical-durable-v1',
+  });
+  const outcome = await worker.runOne({ context: CONTEXT });
+  assert.equal(outcome.status, 'SUCCEEDED', JSON.stringify(outcome));
+  const stored = runtime.get(enqueued.job.job_id);
+  assert.equal(stored.status, 'SUCCEEDED');
+  assert.equal(stored.result.status, 'PHYSICAL_PREPROD_GREEN');
+  assert.equal(stored.result.evidence.network, 'DENY');
+  assert.equal(stored.result.evidence.workspace_mount, 'READ_ONLY');
+  assert.equal(stored.result.evidence.secrets_bound, false);
+  assert.equal(stored.result.evidence.host_mutated, false);
+  assert.equal(stored.result.evidence.prod_touched, false);
+  assert.equal(stored.result.evidence.trading_touched, false);
+  assert.equal(stored.result.additional_cost_eur, 0);
+});
