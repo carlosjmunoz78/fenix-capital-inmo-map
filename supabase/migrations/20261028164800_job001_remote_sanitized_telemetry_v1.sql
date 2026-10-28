@@ -27,8 +27,7 @@ create index if not exists cerebro_job001_telemetry_preprod_expires_at_idx
 alter table public.cerebro_job001_telemetry_preprod enable row level security;
 
 revoke all on table public.cerebro_job001_telemetry_preprod from anon;
-revoke insert, update, delete, truncate, references, trigger on table public.cerebro_job001_telemetry_preprod from authenticated;
-grant select on table public.cerebro_job001_telemetry_preprod to authenticated;
+revoke all on table public.cerebro_job001_telemetry_preprod from authenticated;
 grant select, insert, update, delete on table public.cerebro_job001_telemetry_preprod to service_role;
 
 drop policy if exists cerebro_job001_telemetry_company_read on public.cerebro_job001_telemetry_preprod;
@@ -45,4 +44,4 @@ create policy cerebro_job001_telemetry_company_read
   );
 
 comment on table public.cerebro_job001_telemetry_preprod is
-  'JOB-001 sanitized latest-only PREPROD telemetry. No payloads, prompts, journals, tokens, cookies, storage state or arbitrary filesystem data.';
+  'JOB-001 sanitized latest-only PREPROD telemetry. Server-side only. No payloads, prompts, journals, tokens, cookies, storage state or arbitrary filesystem data.';
