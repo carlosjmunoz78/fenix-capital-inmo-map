@@ -23,10 +23,12 @@ test('JARVIS Work shows aliases and never invents a numeric progress value',asyn
  expect(source).toContain('No se inventan trabajos ni estados.');
 });
 
-test('JARVIS Work inspector explains real work and links its evidence',async()=>{
+test('shared JARVIS/OPERATIVA work inspector explains real work and links its evidence',async()=>{
  const source=read('src/CerebroJarvisWorkConsole.tsx');
  const css=read('src/cerebro-jarvis-work.css');
- expect(source).toContain('function processPurpose(run:CerebroActivityRun)');
+ expect(source).toContain('function processPurpose(run:CerebroActivityRun,surface:SurfaceName)');
+ expect(source).toContain("type SurfaceName='JARVIS'|'OPERATIVA'");
+ expect(source).toContain("surface==='OPERATIVA'?'OPERATIVA · CONTROL':'JARVIS · WORK'");
  expect(source).toContain('QUÉ ESTÁ HACIENDO');
  expect(source).toContain('PASO ACTUAL');
  expect(source).toContain('SIGUIENTE');

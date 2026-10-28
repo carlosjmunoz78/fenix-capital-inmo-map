@@ -1,11 +1,11 @@
 import {useEffect,useMemo,useState} from 'react';
-import {Activity,BrainCircuit,CheckCircle2,Clock3,ExternalLink,Factory,History,Radio,Rows3,ShieldAlert,Sparkles} from 'lucide-react';
+import {Activity,CheckCircle2,Clock3,ExternalLink,Factory,History,Radio,ShieldAlert} from 'lucide-react';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import './cerebro-jarvis-work.css';
 
-type ViewName='OPERATIVA'|'NAVEGADOR';
-type Props={onViewChange:(view:ViewName)=>void};
+type SurfaceName='JARVIS'|'OPERATIVA';
+type Props={surface?:SurfaceName};
 type WorkFilter='ACTIVE'|'HISTORY'|'FACTORY';
 
 const ACTIVE_STATUSES=new Set(['in_progress']);
@@ -34,7 +34,7 @@ function progressValue(run:CerebroActivityRun){
  return Number.isFinite(value)?Math.max(0,Math.min(99,Math.round(value))):null;
 }
 
-function processPurpose(run:CerebroActivityRun){
+function processPurpose(run:CerebroActivityRun,surface:SurfaceName){
  const text=`${run.workflow_name} ${run.workflow_path}`.toUpperCase();
  if(text.includes('SESSION CONTEXT'))return'Protege identidad, permisos, CORS y acceso autenticado al Gateway de CEREBRO.';
  if(text.includes('CONTINUOUS HUMAN QA'))return'Recorre la App como un humano y detecta degradaciones o mejoras medibles sin tocar negocio PROD.';
@@ -42,12 +42,10 @@ function processPurpose(run:CerebroActivityRun){
  if(text.includes('PROD LIVE DEPLOY')||text.includes('DEPLOY'))return'Construye o valida la publicación del snapshot gobernado de la App.';
  if(text.includes('FACTORY')||text.includes('FABRICA')||run.engine_id==='FACT-001')return'Ejecuta o valida la Fábrica de Motores CEREBRO y su scaffold estándar.';
  if(run.engine_id)return`Trabajo real del motor ${run.engine_id}. La evidencia detallada procede del workflow enlazado.`;
- return`Workflow real «${run.workflow_name}». JARVIS muestra únicamente el estado y evidencia publicados por su ejecución.`;
+ return`Workflow real «${run.workflow_name}». ${surface} muestra únicamente el estado y evidencia publicados por su ejecución.`;
 }
 
-function isFactory(run:CerebroActivityRun){
- return run.engine_id==='FACT-001'||/FACTORY|FABRICA|FÁBRICA/i.test(`${run.workflow_name} ${run.workflow_alias}`);
-}
+function isFactory(run:CerebroActivityRun){return run.engine_id==='FACT-001'||/FACTORY|FABRICA|FÁBRICA/i.test(`${run.workflow_name} ${run.workflow_alias}`)}
 
 function WorkCard({run,selected,onSelect}:{run:CerebroActivityRun;selected:boolean;onSelect:(run:CerebroActivityRun)=>void}){
  const state=workState(run),progress=progressValue(run);
@@ -59,29 +57,17 @@ function WorkCard({run,selected,onSelect}:{run:CerebroActivityRun;selected:boole
  </button>;
 }
 
-export default function CerebroJarvisWorkConsole({onViewChange}:Props){
+export default function CerebroJarvisWorkConsole({surface='JARVIS'}:Props){
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
  const[source,setSource]=useState<'LIVE'|'CACHED'|'UNAVAILABLE'>('UNAVAILABLE');
  const[observedAt,setObservedAt]=useState('');
  const[filter,setFilter]=useState<WorkFilter>('ACTIVE');
  const[selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
-
  useEffect(()=>{
   let cancelled=false;
-  const refresh=async()=>{
-   const{status,data}=await fetchCerebroActivity();
-   if(cancelled)return;
-   if(status===200&&data?.status==='OK'){
-    const next=data.runs||[];
-    setRuns(next);setSource(data.source_status);setObservedAt(data.observed_at);
-    setSelectedRun(current=>current?next.find(run=>run.run_id===current.run_id)??current:next.find(run=>ACTIVE_STATUSES.has(run.status))??next[0]??null);
-   }else setSource('UNAVAILABLE');
-  };
-  void refresh();
-  const timer=window.setInterval(()=>{void refresh()},30_000);
-  return()=>{cancelled=true;window.clearInterval(timer)};
+  const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){const next=data.runs||[];setRuns(next);setSource(data.source_status);setObservedAt(data.observed_at);setSelectedRun(current=>current?next.find(run=>run.run_id===current.run_id)??current:next.find(run=>ACTIVE_STATUSES.has(run.status))??next[0]??null)}else setSource('UNAVAILABLE')};
+  void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)};
  },[]);
-
  const activeRuns=useMemo(()=>runs.filter(run=>ACTIVE_STATUSES.has(run.status)||QUEUED_STATUSES.has(run.status)),[runs]);
  const historyRuns=useMemo(()=>runs.filter(run=>run.status==='completed').slice(0,18),[runs]);
  const factoryRuns=useMemo(()=>runs.filter(isFactory).slice(0,18),[runs]);
@@ -90,55 +76,18 @@ export default function CerebroJarvisWorkConsole({onViewChange}:Props){
  const queuedCount=useMemo(()=>runs.filter(run=>QUEUED_STATUSES.has(run.status)).length,[runs]);
  const selectedState=selectedRun?workState(selectedRun):null;
  const selectedProgress=selectedRun?progressValue(selectedRun):null;
-
- return <main className="jarvis-work" aria-label="CEREBRO JARVIS Work">
-  <header className="jarvis-work-header">
-   <div className="jarvis-work-brand"><span><BrainCircuit size={23}/></span><div><h1>CEREBRO</h1><p>JARVIS · WORK</p></div></div>
-   <nav className="jarvis-work-view-switch" aria-label="Vistas de CEREBRO">
-    <button type="button" className="is-active"><Sparkles size={14}/> JARVIS</button>
-    <button type="button" onClick={()=>onViewChange('NAVEGADOR')}><Rows3 size={14}/> NAVEGADOR</button>
-   </nav>
-   <div className="jarvis-work-head-state"><span className={`is-${source.toLowerCase()}`}><Radio size={13}/>{source}</span><strong>{runningCount} trabajando</strong></div>
-  </header>
-
+ const surfaceTitle=surface==='OPERATIVA'?'OPERATIVA · CONTROL':'JARVIS · WORK';
+ return <main className={`jarvis-work is-${surface.toLowerCase()}`} aria-label={`CEREBRO ${surface}`}>
+  <div className="jarvis-work-statusbar" aria-label={`Estado ${surface}`}><strong>{surfaceTitle}</strong><span className={`is-${source.toLowerCase()}`}><Radio size={12}/>{source}</span><span>{runningCount} trabajando</span><span>{queuedCount} en cola</span></div>
   <div className="jarvis-work-grid">
    <aside className="jarvis-work-rail" aria-label="Trabajo de CEREBRO">
     <div className="jarvis-work-rail-title"><div><small>TRABAJO</small><h2>Procesos reales</h2></div><Activity size={18}/></div>
-    <div className="jarvis-work-tabs">
-     <button type="button" className={filter==='ACTIVE'?'is-active':''} onClick={()=>setFilter('ACTIVE')}><Radio size={13}/> Activo <b>{activeRuns.length}</b></button>
-     <button type="button" className={filter==='HISTORY'?'is-active':''} onClick={()=>setFilter('HISTORY')}><History size={13}/> Historial</button>
-     <button type="button" className={filter==='FACTORY'?'is-active':''} onClick={()=>setFilter('FACTORY')}><Factory size={13}/> Fábrica</button>
-    </div>
-    <div className="jarvis-work-list">
-     {visibleRuns.length?visibleRuns.map(run=><WorkCard key={run.run_id} run={run} selected={selectedRun?.run_id===run.run_id} onSelect={setSelectedRun}/>):<div className="jarvis-work-empty"><Clock3 size={19}/><strong>{filter==='ACTIVE'?'Sin trabajos activos':filter==='FACTORY'?'Sin ejecuciones FACT-001 visibles':'Sin historial disponible'}</strong><span>No se inventan trabajos ni estados.</span></div>}
-    </div>
+    <div className="jarvis-work-tabs"><button type="button" className={filter==='ACTIVE'?'is-active':''} onClick={()=>setFilter('ACTIVE')}><Radio size={13}/> Activo <b>{activeRuns.length}</b></button><button type="button" className={filter==='HISTORY'?'is-active':''} onClick={()=>setFilter('HISTORY')}><History size={13}/> Historial</button><button type="button" className={filter==='FACTORY'?'is-active':''} onClick={()=>setFilter('FACTORY')}><Factory size={13}/> Fábrica</button></div>
+    <div className="jarvis-work-list">{visibleRuns.length?visibleRuns.map(run=><WorkCard key={run.run_id} run={run} selected={selectedRun?.run_id===run.run_id} onSelect={setSelectedRun}/>):<div className="jarvis-work-empty"><Clock3 size={19}/><strong>{filter==='ACTIVE'?'Sin trabajos activos':filter==='FACTORY'?'Sin ejecuciones FACT-001 visibles':'Sin historial disponible'}</strong><span>No se inventan trabajos ni estados.</span></div>}</div>
     <div className="jarvis-work-rail-footer"><span><i className="is-running"/> {runningCount} en curso</span><span><i className="is-queued"/> {queuedCount} en cola</span></div>
    </aside>
-
-   <section className="jarvis-work-core" aria-label="Conversación con CEREBRO">
-    <div className="jarvis-work-corebar"><div><small>WORKSPACE</small><strong>Conversación + ejecución</strong></div><span>FÉNIX · GENERAL</span></div>
-    <div className="jarvis-work-core-shell"><CerebroConsoleShell/></div>
-   </section>
-
-   <aside className="jarvis-work-inspector" aria-label="Inspector de trabajo">
-    <div className="jarvis-work-inspector-title"><div><small>EVIDENCIA</small><h2>Inspector</h2></div><ShieldAlert size={18}/></div>
-    {selectedRun&&selectedState?<div className="jarvis-work-inspector-body">
-     <div className="jarvis-work-run-title"><span className={`is-${selectedState.tone}`}>{selectedState.label}</span><h3>{compactAlias(selectedRun)}</h3><p>{selectedRun.workflow_name}</p></div>
-     <div className="jarvis-work-big-progress"><div><span>PROGRESO REAL</span><strong>{selectedProgress===null?(selectedRun.status==='in_progress'?'LIVE':'—'):`${selectedProgress}%`}</strong></div><i><b className={selectedProgress===null&&selectedRun.status==='in_progress'?'is-live':''} style={selectedProgress===null?undefined:{width:`${selectedProgress}%`}}/></i><small>{selectedRun.progress_provenance==='REAL_GITHUB_JOBS'?'GitHub Jobs · pasos reales':selectedRun.progress_provenance==='TERMINAL_STATUS'?'Estado terminal confirmado':'Sin porcentaje verificable'}</small></div>
-     <div className="jarvis-work-purpose"><small>QUÉ ESTÁ HACIENDO</small><p>{processPurpose(selectedRun)}</p></div>
-     <dl className="jarvis-work-facts">
-      <div><dt>Empresa</dt><dd>{selectedRun.company_id}</dd></div>
-      <div><dt>Motor</dt><dd>{selectedRun.engine_id||'—'}</dd></div>
-      <div><dt>Entorno</dt><dd>{selectedRun.environment}</dd></div>
-      <div><dt>Versión</dt><dd title={selectedRun.version}>{selectedRun.version.slice(0,10)}</dd></div>
-     </dl>
-     <div className="jarvis-work-step"><small>PASO ACTUAL</small><strong>{selectedRun.current_step||'No publicado'}</strong></div>
-     <div className="jarvis-work-step"><small>SIGUIENTE</small><strong>{selectedRun.next_step||'No publicado'}</strong></div>
-     <a className="jarvis-work-evidence" href={selectedRun.html_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Abrir evidencia real</a>
-    </div>:<div className="jarvis-work-inspector-empty"><CheckCircle2 size={28}/><strong>Selecciona un trabajo</strong><span>Aquí aparecerán sus pasos, procedencia y evidencia real.</span></div>}
-    <div className="jarvis-work-policy"><ShieldAlert size={15}/><div><strong>HUMAN_REQUIRED</strong><span>Solo se eleva cuando el Gateway o un motor publica una excepción válida. Esta vista no fabrica alertas.</span></div></div>
-    <div className="jarvis-work-observed">Última observación: {observedAt?new Date(observedAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'—'}</div>
-   </aside>
+   <section className="jarvis-work-core" aria-label="Conversación con CEREBRO"><div className="jarvis-work-corebar"><div><small>{surface}</small><strong>{surface==='JARVIS'?'Conversación y trabajo':'Control operativo y ejecución'}</strong></div><span>FÉNIX · GENERAL</span></div><div className="jarvis-work-core-shell"><CerebroConsoleShell/></div></section>
+   <aside className="jarvis-work-inspector" aria-label="Inspector de trabajo"><div className="jarvis-work-inspector-title"><div><small>EVIDENCIA</small><h2>Inspector</h2></div><ShieldAlert size={18}/></div>{selectedRun&&selectedState?<div className="jarvis-work-inspector-body"><div className="jarvis-work-run-title"><span className={`is-${selectedState.tone}`}>{selectedState.label}</span><h3>{compactAlias(selectedRun)}</h3><p>{selectedRun.workflow_name}</p></div><div className="jarvis-work-big-progress"><div><span>PROGRESO REAL</span><strong>{selectedProgress===null?(selectedRun.status==='in_progress'?'LIVE':'—'):`${selectedProgress}%`}</strong></div><i><b className={selectedProgress===null&&selectedRun.status==='in_progress'?'is-live':''} style={selectedProgress===null?undefined:{width:`${selectedProgress}%`}}/></i><small>{selectedRun.progress_provenance==='REAL_GITHUB_JOBS'?'GitHub Jobs · pasos reales':selectedRun.progress_provenance==='TERMINAL_STATUS'?'Estado terminal confirmado':'Sin porcentaje verificable'}</small></div><div className="jarvis-work-purpose"><small>QUÉ ESTÁ HACIENDO</small><p>{processPurpose(selectedRun,surface)}</p></div><dl className="jarvis-work-facts"><div><dt>Empresa</dt><dd>{selectedRun.company_id}</dd></div><div><dt>Motor</dt><dd>{selectedRun.engine_id||'—'}</dd></div><div><dt>Entorno</dt><dd>{selectedRun.environment}</dd></div><div><dt>Versión</dt><dd title={selectedRun.version}>{selectedRun.version.slice(0,10)}</dd></div></dl><div className="jarvis-work-step"><small>PASO ACTUAL</small><strong>{selectedRun.current_step||'No publicado'}</strong></div><div className="jarvis-work-step"><small>SIGUIENTE</small><strong>{selectedRun.next_step||'No publicado'}</strong></div><a className="jarvis-work-evidence" href={selectedRun.html_url} target="_blank" rel="noreferrer"><ExternalLink size={15}/> Abrir evidencia real</a></div>:<div className="jarvis-work-inspector-empty"><CheckCircle2 size={28}/><strong>Selecciona un trabajo</strong><span>Aquí aparecerán sus pasos, procedencia y evidencia real.</span></div>}<div className="jarvis-work-policy"><ShieldAlert size={15}/><div><strong>HUMAN_REQUIRED</strong><span>Solo se eleva cuando el Gateway o un motor publica una excepción válida. Esta vista no fabrica alertas.</span></div></div><div className="jarvis-work-observed">Última observación: {observedAt?new Date(observedAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'—'}</div></aside>
   </div>
  </main>;
 }

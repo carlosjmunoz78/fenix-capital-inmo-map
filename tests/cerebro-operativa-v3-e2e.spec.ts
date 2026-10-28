@@ -16,7 +16,7 @@ const corsHeaders={
   'content-type':'application/json'
 };
 
-test('JARVIS Work is blue real-work shell around canonical V0 chat voice and evidence',async({page})=>{
+test('OPERATIVA is the visible real-work control surface around canonical V0 chat voice and evidence',async({page})=>{
   test.setTimeout(25_000);
   let postedChat:any=null;
 
@@ -49,7 +49,7 @@ test('JARVIS Work is blue real-work shell around canonical V0 chat voice and evi
     const url=request.url();
     if(url.endsWith('/health'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',service:'cerebro-console-gateway-v0',environment:'TEST_ISOLATED',version:'e2e',authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'OWNER_DECISION_BY_EXCEPTION_V1'})});
     if(url.endsWith('/preferences'))return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'ok',preferences:{response_length:'concise'}})});
-    if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_JARVIS_WORK',executed:false})})}
+    if(url.endsWith('/chat')){postedChat=request.postDataJSON();return route.fulfill({status:200,headers:corsHeaders,body:JSON.stringify({status:'OK',intent:'e2e_probe',message:'PONG_OPERATIVA',executed:false})})}
     return route.fulfill({status:404,headers:corsHeaders,body:'{}'});
   });
 
@@ -66,7 +66,9 @@ test('JARVIS Work is blue real-work shell around canonical V0 chat voice and evi
   const work=page.locator('.jarvis-work');
   await expect(work).toBeVisible();
   await expect(page.locator('.cerebro-operative')).toHaveCount(0);
-  await expect(work.getByText('JARVIS · WORK',{exact:true})).toBeVisible();
+  await expect(work.getByText('OPERATIVA · CONTROL',{exact:true})).toBeVisible();
+  await expect(work.getByRole('button',{name:'OPERATIVA'})).toBeVisible();
+  await expect(work.getByText('JARVIS · WORK',{exact:true})).toHaveCount(0);
   await expect(work.getByRole('heading',{name:'Procesos reales'})).toBeVisible();
   await expect(work.getByRole('heading',{name:'Inspector'})).toBeVisible();
   await expect(work.getByText('FACT-001',{exact:true}).first()).toBeVisible();
@@ -87,10 +89,10 @@ test('JARVIS Work is blue real-work shell around canonical V0 chat voice and evi
   await expect(talk).toBeVisible();
   await expect(talk).toBeEnabled();
   const composer=core.getByPlaceholder('También puedes escribir a CEREBRO…');
-  await composer.fill('Prueba Work azul sobre V0');
+  await composer.fill('Prueba OPERATIVA sobre V0');
   await core.getByRole('button',{name:'Enviar'}).click();
-  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba Work azul sobre V0');
-  await expect(core.getByText('PONG_JARVIS_WORK',{exact:true})).toBeVisible();
+  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba OPERATIVA sobre V0');
+  await expect(core.getByText('PONG_OPERATIVA',{exact:true})).toBeVisible();
 
   const floatingVoice=page.getByRole('button',{name:'Abrir acciones por voz'});
   if(await floatingVoice.count())await expect(floatingVoice).toBeHidden();
@@ -101,7 +103,6 @@ test('JARVIS Work is blue real-work shell around canonical V0 chat voice and evi
   await expect(page.locator('.jarvis-work')).toHaveCount(0);
   await expect(legacy.getByRole('heading',{name:'Transporte autenticado verificado'})).toBeVisible();
   await expect(page.getByRole('button',{name:'LEGACY V0'})).toBeVisible();
-  await expect(page.getByRole('button',{name:'JARVIS WORK'})).toBeVisible();
 
   await page.goto('/cerebro?section=v0',{waitUntil:'domcontentloaded'});
   await expect(page.locator('.jarvis-work')).toBeVisible();
