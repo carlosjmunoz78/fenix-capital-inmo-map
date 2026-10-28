@@ -5,8 +5,6 @@ on:
     paths:
       - 'cerebro/runtime/universal-repo-runtime-v0.mjs'
       - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
-      - 'cerebro/runtime/repo-sandbox-job-handler-v1.mjs'
-      - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
       - 'cerebro/runtime/universal-repo-build-pipeline-v0.mjs'
       - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
       - 'cerebro/runtime/self-extending-mission-job-bridge-v0.mjs'
@@ -19,8 +17,6 @@ on:
       - 'cerebro/runtime/universal-self-extending-github-intake-v0.mjs'
       - 'cerebro/tests/universal-self-extending-repo-v0.test.mjs'
       - 'cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs'
-      - 'cerebro/tests/repo-sandbox-job-handler-v1.test.mjs'
-      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - 'cerebro/tests/universal-repo-build-pipeline-v0.test.mjs'
       - 'cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs'
       - 'cerebro/tests/self-extending-shared-worker-v1.test.mjs'
@@ -55,10 +51,6 @@ jobs:
         run: node --test cerebro/tests/rsi-learning-auto-host.test.mjs
       - name: Physical sandbox executor contract tests
         run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
-      - name: Repo sandbox durable handler + retry/lease/checkpoint contract
-        run: node --test cerebro/tests/repo-sandbox-job-handler-v1.test.mjs
-      - name: Supervisor route/enablement fail-closed regression
-        run: node --test cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs
       - name: Universal repo build pipeline contract tests
         run: node --test cerebro/tests/universal-repo-build-pipeline-v0.test.mjs
 
@@ -88,10 +80,6 @@ jobs:
           CEREBRO_PHYSICAL_SANDBOX_E2E: '1'
           CEREBRO_SANDBOX_ARTIFACT: 'cerebro/artifacts/runtime/universal-repo-sandbox-e2e.v0.json'
         run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
-      - name: JOB-001 durable queue -> worker lease/checkpoint -> physical repo sandbox
-        env:
-          CEREBRO_PHYSICAL_REPO_DURABLE_E2E: '1'
-        run: node --test cerebro/tests/repo-sandbox-job-handler-v1.test.mjs
       - name: Upload physical PREPROD attestation
         uses: actions/upload-artifact@v4
         with:

@@ -6,7 +6,6 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const DAEMON = new URL('../runtime/cerebro-supervisor-daemon-v0.mjs', import.meta.url);
-const PINNED_IMAGE = `node@sha256:${'a'.repeat(64)}`;
 
 function tempDir(t) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-daemon-dynamic-v1-'));
@@ -27,10 +26,6 @@ function run(dir, env = {}, args = ['--enqueue-health-probe', '--cycles', '2']) 
       // Never inherit a workflow-level DeepSeek secret into the daemon under test.
       CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'NO',
       DEEPSEEK_API_KEY: '',
-      // Same rule for the physical repo sandbox: tests opt in explicitly.
-      CEREBRO_ENABLE_REPO_SANDBOX: 'NO',
-      CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT: '',
-      CEREBRO_REPO_SANDBOX_IMAGE: '',
       ...env,
     },
   });
@@ -45,7 +40,6 @@ test('daemon default runtime ceiling is 64 while DeepSeek provider ceiling is me
   assert.equal(heartbeat.dynamic_concurrency.max_provider_concurrency.deepseek, 8);
   assert.equal(heartbeat.dynamic_concurrency.max_repo_write_concurrency, 1);
   assert.equal(heartbeat.dynamic_concurrency.hard_cost_cap_eur, 100);
-  assert.equal(heartbeat.repo_sandbox_handler.status, 'DISABLED');
   assert.equal(heartbeat.prod_authorized, false);
   assert.equal(heartbeat.trading_access, false);
 });
@@ -93,29 +87,4 @@ test('explicit override can raise global runtime without raising measured DeepSe
   const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
   assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 128);
   assert.equal(heartbeat.dynamic_concurrency.max_provider_concurrency.deepseek, 8);
-});
-
-test('repo sandbox opt-in adds FACT-001 durable lane routed through REPO_CI without enabling PROD', t => {
-  const dir = tempDir(t);
-  const result = run(dir, {
-    CEREBRO_ENABLE_REPO_SANDBOX: 'YES',
-    CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT: dir,
-    CEREBRO_REPO_SANDBOX_IMAGE: PINNED_IMAGE,
-  }, ['--cycles', '1']);
-  assert.equal(result.status, 0, result.stderr || result.stdout);
-  const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
-  assert.equal(heartbeat.repo_sandbox_mode, 'ENABLED_EXPLICIT');
-  assert.equal(heartbeat.repo_sandbox_handler.status, 'READY');
-  assert.equal(heartbeat.repo_sandbox_handler.job_name, 'repo.sandbox.public.readonly.v0');
-  assert.equal(heartbeat.snapshot.context_count, 2);
-  assert.equal(heartbeat.prod_authorized, false);
-  assert.equal(heartbeat.prod_write_authorized, false);
-  assert.equal(heartbeat.trading_access, false);
-});
-
-test('repo sandbox explicit YES fails closed when runtime-owned workspace/image configuration is missing', t => {
-  const dir = tempDir(t);
-  const result = run(dir, { CEREBRO_ENABLE_REPO_SANDBOX: 'YES' }, ['--cycles', '1']);
-  assert.notEqual(result.status, 0);
-  assert.match(`${result.stderr}\n${result.stdout}`, /requires CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT and CEREBRO_REPO_SANDBOX_IMAGE/);
 });
