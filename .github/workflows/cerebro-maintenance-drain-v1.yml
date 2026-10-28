@@ -7,6 +7,7 @@ on:
       - '.github/workflows/cerebro-maintenance-drain-v1.yml'
   workflow_run:
     workflows:
+      - 'CEREBRO Runtime Durable Supervisor V0'
       - 'CEREBRO Browser 1 V2 Live Worker'
       - 'CEREBRO Browser Work Total V1 PROD'
       - 'CEREBRO Browser 1 V3 PREPROD Interactive'
