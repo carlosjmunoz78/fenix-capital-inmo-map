@@ -1,6 +1,7 @@
 import os from 'node:os';
 import path from 'node:path';
 import { publishSupervisorHeartbeatFileV1 } from './job001-remote-telemetry-v1.mjs';
+import { installMaintenanceDrainV1 } from './job001-maintenance-drain-v1.mjs';
 
 const PREPROD = 'PREPROD';
 
@@ -65,8 +66,9 @@ export function canPublishRemoteTelemetryV1(config) {
   return Boolean(config?.enabled && config?.device_id && config?.supabase_url && config?.api_key);
 }
 
-export async function startSupervisorEntrypointV1({ env = process.env, import_supervisor = async () => import('./cerebro-supervisor-daemon-v0.mjs'), publisher = publishSupervisorHeartbeatFileV1, set_interval = setInterval } = {}) {
+export async function startSupervisorEntrypointV1({ env = process.env, import_supervisor = async () => import('./cerebro-supervisor-daemon-v0.mjs'), publisher = publishSupervisorHeartbeatFileV1, set_interval = setInterval, install_drain = installMaintenanceDrainV1 } = {}) {
   const limits = configureSupervisor48V1(env);
+  const drain = install_drain({ env });
   const telemetry = telemetryConfigFromEnvV1(env);
   let inFlight = false;
   let lastReceipt = Object.freeze({ ok: false, non_fatal: true, error_code: canPublishRemoteTelemetryV1(telemetry) ? 'NOT_PUBLISHED_YET' : 'REMOTE_TELEMETRY_CONFIG_MISSING' });
@@ -98,14 +100,15 @@ export async function startSupervisorEntrypointV1({ env = process.env, import_su
     void tick();
   }
 
-  // The V0 daemon has top-level await and is intentionally long-lived. Start the
-  // publisher before importing it; otherwise the publisher would never start in
-  // normal continuous operation. V0 remains the single supervisor daemon.
+  // The drain adapter is installed before the long-lived V0 daemon import. If
+  // DRAIN_MODE exists, already-running leases continue while new claims and the
+  // adaptive refill are suppressed. Removing the sentinel resumes the same queue.
   await import_supervisor();
 
   return Object.freeze({
     status: 'EXITED',
     limits,
+    drain,
     telemetry: Object.freeze({
       enabled: telemetry.enabled,
       configured: canPublishRemoteTelemetryV1(telemetry),
@@ -136,6 +139,11 @@ export const CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT = Object.freeze({
   wraps_existing_daemon_v0: true,
   preserves_v0_for_rollback: true,
   publisher_starts_before_long_lived_daemon_import: true,
+  maintenance_drain_installed_before_daemon_import: true,
+  maintenance_drain_preserves_running_leases: true,
+  maintenance_drain_blocks_new_claims: true,
+  maintenance_drain_suppresses_adaptive_refill: true,
+  maintenance_drain_resume_is_remove_sentinel: true,
   daemon_env_keys: Object.freeze({
     max_global: 'CEREBRO_MAX_CONCURRENCY',
     initial_global: 'CEREBRO_INITIAL_CONCURRENCY',
