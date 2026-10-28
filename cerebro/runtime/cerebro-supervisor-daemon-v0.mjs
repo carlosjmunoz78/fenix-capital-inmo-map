@@ -8,8 +8,6 @@ import { CerebroContinuousSupervisorV0 } from './cerebro-continuous-supervisor-v
 import { DynamicConcurrencyPolicyV1, DynamicConcurrencyControllerV1 } from './dynamic-concurrency-policy-v1.mjs';
 import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
-import { createDeepSeekGovernedHandoffHandlerV1 } from './deepseek-governed-handoff-handler-v1.mjs';
-import { GovernedExecutionHandoffRouterV1 } from './governed-execution-handoff-router-v1.mjs';
 import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
 import { AdaptiveHierarchicalAgentWorkPumpV3 } from './adaptive-hierarchical-agent-work-pump-v3.mjs';
 import { createRepoSandboxJobHandlerV1, REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT } from './repo-sandbox-job-handler-v1.mjs';
@@ -153,23 +151,6 @@ function loadSchedulingRoutes(contexts) {
   return Object.freeze(routes);
 }
 
-function sanitizeRepoSandboxHandoffPayload(payload, { target_context: targetContext }) {
-  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new TypeError('repo handoff payload required');
-  for (const key of ['image_ref', 'docker_bin', 'git_bin', 'workspace_root']) {
-    if (key in payload) throw new Error(`runtime-owned sandbox configuration cannot be overridden: ${key}`);
-  }
-  if (!payload.plan || typeof payload.plan !== 'object' || Array.isArray(payload.plan)) throw new TypeError('repo handoff payload.plan required');
-  return {
-    ...payload,
-    plan: {
-      ...payload.plan,
-      company_id: targetContext.company_id,
-      engine_id: targetContext.engine_id,
-      environment: targetContext.environment,
-    },
-  };
-}
-
 function writeJsonAtomic(file, data) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
@@ -180,7 +161,7 @@ function writeJsonAtomic(file, data) {
 function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, extra = {}) {
   const pumpSnapshot = workPump.snapshot();
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.8',
+    schema_version: '1.7',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -238,7 +219,11 @@ const budgetLedger = new DeepSeekBudgetLedgerV1({ file_path: DEEPSEEK_BUDGET_JOU
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
 const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
+// Do not strand safe capacity when only one company has READY work. Provider,
+// pool, device and repo-write limits still independently bound real resources.
 const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
+// Keep a high initial floor so broad READY work fans out immediately; adaptive
+// policy can still scale down on degradation and up toward maxGlobal on healthy saturation.
 const initialGlobalDefault = Math.min(40, maxGlobal);
 const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', initialGlobalDefault, maxGlobal);
 const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), Math.min(8, maxGlobal));
@@ -266,22 +251,7 @@ worker.register({
   name: 'runtime.health.probe',
   handler: async () => ({ ok: true, environment: ENV, host: os.hostname(), at: new Date().toISOString() }),
 });
-
-const handoffRouter = new GovernedExecutionHandoffRouterV1({
-  job_runtime: queue,
-  targets: REPO_SANDBOX_ENABLED ? {
-    [REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name]: {
-      context: REPO_SANDBOX_CONTEXT,
-      enabled: true,
-      sanitize_payload: sanitizeRepoSandboxHandoffPayload,
-      priority: 40,
-      max_attempts: 3,
-      timeout_ms: 300_000,
-    },
-  } : {},
-});
-const baseDeepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
-const deepSeekHandler = createDeepSeekGovernedHandoffHandlerV1({ base_handler: baseDeepSeekHandler, handoff_router: handoffRouter });
+const deepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
 worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
 if (REPO_SANDBOX_ENABLED) {
   repoSandboxHandler = createRepoSandboxJobHandlerV1({
@@ -358,7 +328,6 @@ safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetL
   work_pump_mode: WORK_PUMP_MODE,
   repo_sandbox_enabled: REPO_SANDBOX_ENABLED,
   repo_sandbox_mode: REPO_SANDBOX_MODE,
-  governed_handoff: handoffRouter.snapshot(),
 });
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
@@ -380,7 +349,6 @@ try {
         work_pump_target_active_backlog: pumpSnapshot.target_active_backlog ?? null,
         work_pump_queue_pressure: pumpSnapshot.queue_pressure ?? null,
         work_pump_starvation: Boolean(pumpSnapshot.starvation),
-        governed_handoff: handoffRouter.snapshot(),
         snapshot: result.snapshot,
       });
     },
@@ -388,5 +356,5 @@ try {
 } finally {
   clearInterval(timer);
   workPump.reconcile();
-  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { exited: true, governed_handoff: handoffRouter.snapshot(), snapshot: supervisor.snapshot() });
+  safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, { exited: true, snapshot: supervisor.snapshot() });
 }

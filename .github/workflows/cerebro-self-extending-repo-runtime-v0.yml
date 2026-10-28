@@ -7,8 +7,6 @@ on:
       - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
       - 'cerebro/runtime/repo-sandbox-job-handler-v1.mjs'
       - 'cerebro/runtime/cerebro-supervisor-daemon-v0.mjs'
-      - 'cerebro/runtime/governed-execution-handoff-router-v1.mjs'
-      - 'cerebro/runtime/deepseek-governed-handoff-handler-v1.mjs'
       - 'cerebro/runtime/universal-repo-build-pipeline-v0.mjs'
       - 'cerebro/runtime/self-extending-capability-resolver-v0.mjs'
       - 'cerebro/runtime/self-extending-mission-job-bridge-v0.mjs'
@@ -23,9 +21,6 @@ on:
       - 'cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs'
       - 'cerebro/tests/repo-sandbox-job-handler-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
-      - 'cerebro/tests/governed-execution-handoff-router-v1.test.mjs'
-      - 'cerebro/tests/deepseek-governed-handoff-handler-v1.test.mjs'
-      - 'cerebro/tests/governed-handoff-durable-soak-v1.test.mjs'
       - 'cerebro/tests/universal-repo-build-pipeline-v0.test.mjs'
       - 'cerebro/tests/self-extending-mission-job-bridge-v0.test.mjs'
       - 'cerebro/tests/self-extending-shared-worker-v1.test.mjs'
@@ -58,12 +53,6 @@ jobs:
         run: node --test cerebro/tests/self-extending-shared-worker-v1.test.mjs
       - name: Existing RSI persistent host + shared self-extending worker integration
         run: node --test cerebro/tests/rsi-learning-auto-host.test.mjs
-      - name: Governed MODEL -> typed execution handoff router
-        run: node --test cerebro/tests/governed-execution-handoff-router-v1.test.mjs
-      - name: DeepSeek micro-worker governed handoff wrapper
-        run: node --test cerebro/tests/deepseek-governed-handoff-handler-v1.test.mjs
-      - name: Durable handoff soak + restart/idempotency proof
-        run: node --test cerebro/tests/governed-handoff-durable-soak-v1.test.mjs
       - name: Physical sandbox executor contract tests
         run: node --test cerebro/tests/universal-repo-sandbox-executor-v0.test.mjs
       - name: Repo sandbox durable handler + retry/lease/checkpoint contract
