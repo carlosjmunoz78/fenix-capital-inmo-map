@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0.0",
+  "base_sha": "c39d9aeb4a517b67ae18b6f0101b7dae3640371c",
+  "claimed_at": "2026-10-27T19:38:41+01:00",
+  "authority": {
+    "prod_write": false,
+    "trading": false,
+    "new_recurring_spend": false,
+    "global_budget_eur": 100,
+    "reserved_this_lane_eur": 0
+  },
+  "lanes": {
+    "L7": {
+      "status": "CLAIMED",
+      "lock": "L7-SEO-WEB-FACTORY-20261027-1938",
+      "family_root": "cerebro/digital-build",
+      "next_block": "SEO_WEB_FACTORY_SHARED_CONTRACTS_AND_RUNTIME",
+      "preserve_first": true
+    },
+    "L8": {
+      "status": "CLAIMED",
+      "lock": "L8-ENGINEERING-QA-SRE-LRN-GAP-20261027-1938",
+      "family_root": "cerebro/engineering",
+      "next_block": "ENGINEERING_CAPABILITY_FAMILY_AND_LRN001_CONTRACT",
+      "sensitive_rule_auto_promotion": false
+    }
+  }
+}
