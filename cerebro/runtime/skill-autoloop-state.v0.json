@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-28T15:07:53.533Z",
+  "updated_at": "2026-10-28T15:08:23.912Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -489,7 +489,8 @@
     "repo:809dbeda7e78221fe618d6c24bd5",
     "repo:f772bc56392da37bdb3dadedcbad",
     "github-wide-skills:d7426c2d7bce1a319874",
-    "github-wide-skills:787252ac0a6ddb4dd296"
+    "github-wide-skills:787252ac0a6ddb4dd296",
+    "github-wide-skills:a76c8d16c8c8c679b14a"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -520,6 +521,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 40697500812,
       "checkpointed_at": "2026-10-28T13:33:55.563Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:a76c8d16c8c8c679b14a": {
+      "candidate_id": "github-wide-skills:a76c8d16c8c8c679b14a",
+      "name": "data-change",
+      "human_alias": "Data Change",
+      "wrapper_id": "skillwrap:3583c985c63c319a15f4",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 85.73,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "rpraharaj/ai-engineer",
+        "upstream_head_commit": "eb2bf3be7d3f52067e96fd38f7c0f8e9bffd364e",
+        "manifest_sha256": "761b28b45372a33ad8ed73e7b1ccd163fbcaac774d102592af1f6869ba038d31",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40712788440,
+      "checkpointed_at": "2026-10-28T15:08:23.912Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -30649,7 +30686,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -30662,7 +30699,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40697500812,
+  "last_discovery_run_id": 40712788440,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
