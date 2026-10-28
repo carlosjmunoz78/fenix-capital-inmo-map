@@ -76,8 +76,9 @@ export default function CerebroJarvisWorkConsole({surface='JARVIS'}:Props){
  const queuedCount=useMemo(()=>runs.filter(run=>QUEUED_STATUSES.has(run.status)).length,[runs]);
  const selectedState=selectedRun?workState(selectedRun):null;
  const selectedProgress=selectedRun?progressValue(selectedRun):null;
+ const surfaceTitle=surface==='OPERATIVA'?'OPERATIVA · CONTROL':'JARVIS · WORK';
  return <main className={`jarvis-work is-${surface.toLowerCase()}`} aria-label={`CEREBRO ${surface}`}>
-  <div className="jarvis-work-statusbar" aria-label={`Estado ${surface}`}><strong>{surface}</strong><span className={`is-${source.toLowerCase()}`}><Radio size={12}/>{source}</span><span>{runningCount} trabajando</span><span>{queuedCount} en cola</span></div>
+  <div className="jarvis-work-statusbar" aria-label={`Estado ${surface}`}><strong>{surfaceTitle}</strong><span className={`is-${source.toLowerCase()}`}><Radio size={12}/>{source}</span><span>{runningCount} trabajando</span><span>{queuedCount} en cola</span></div>
   <div className="jarvis-work-grid">
    <aside className="jarvis-work-rail" aria-label="Trabajo de CEREBRO">
     <div className="jarvis-work-rail-title"><div><small>TRABAJO</small><h2>Procesos reales</h2></div><Activity size={18}/></div>
