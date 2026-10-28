@@ -5,9 +5,9 @@
   "engine_id": "ROUTE-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.2.0",
-  "updated_at": "2026-10-28T05:59:53.000Z",
-  "source_run_id": 40641168440,
-  "source_head_sha": "117c6f816c7bc995b6c5e53786257ccb37c8c356",
+  "updated_at": "2026-10-28T13:19:38.000Z",
+  "source_run_id": 40695368868,
+  "source_head_sha": "69f4a7099b13ebb4964a94c285b681b04a1567d9",
   "repository_visibility": "public",
   "resources": [
     {
@@ -28,8 +28,8 @@
       "quota_state": "NOT_APPLICABLE",
       "current_observation": true,
       "evidence_refs": [
-        "runtime:node:v24.21.0",
-        "github-run:40641168440"
+        "runtime:node:v24.22.1",
+        "github-run:40695368868"
       ],
       "reason": null
     },
@@ -51,7 +51,7 @@
       "current_observation": true,
       "evidence_refs": [
         "runtime:python:Python 3.12.15",
-        "github-run:40641168440"
+        "github-run:40695368868"
       ],
       "reason": null
     },
@@ -76,8 +76,8 @@
       "current_observation": true,
       "evidence_refs": [
         "repo:visibility:public",
-        "runtime:gh:gh version 2.102.0 (2026-09-30)",
-        "github-run:40641168440"
+        "runtime:gh:gh version 2.103.2 (2026-10-23)",
+        "github-run:40695368868"
       ],
       "reason": null
     },
@@ -211,8 +211,8 @@
     "selected_resource_class": "DETERMINISTIC_LOCAL",
     "actual_runtime": "node",
     "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
-    "observed_at": "2026-10-28T05:59:53.000Z",
-    "duration_ms": 0.565838,
+    "observed_at": "2026-10-28T13:19:38.000Z",
+    "duration_ms": 0.590188,
     "learning_events": 3,
     "business_execution": false
   },
@@ -225,9 +225,8 @@
   "multicompany_continuation": false,
   "additional_cost_eur": 0,
   "repeatability": {
-    "consecutive_live_green_cycles": 70,
+    "consecutive_live_green_cycles": 71,
     "recent_live_green_run_ids": [
-      40190719035,
       40212722936,
       40233508189,
       40272415524,
@@ -236,10 +235,11 @@
       40454820818,
       40504370546,
       40594991047,
-      40641168440
+      40641168440,
+      40695368868
     ],
     "last_rehearsal_status": "REPEATABILITY_REHEARSAL_GREEN",
-    "last_rehearsal_observed_at": "2026-10-28T05:59:53.000Z",
+    "last_rehearsal_observed_at": "2026-10-28T13:19:38.000Z",
     "fallback_rehearsal_green": true,
     "restoration_green": true,
     "full_loss_hold_green": true,
