@@ -5,7 +5,8 @@ import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi
 import './cerebro-jarvis-work.css';
 
 type ViewName='OPERATIVA'|'NAVEGADOR';
-type Props={onViewChange:(view:ViewName)=>void};
+type SurfaceName='JARVIS'|'OPERATIVA';
+type Props={onViewChange:(view:ViewName)=>void;surface?:SurfaceName};
 type WorkFilter='ACTIVE'|'HISTORY'|'FACTORY';
 
 const ACTIVE_STATUSES=new Set(['in_progress']);
@@ -34,7 +35,7 @@ function progressValue(run:CerebroActivityRun){
  return Number.isFinite(value)?Math.max(0,Math.min(99,Math.round(value))):null;
 }
 
-function processPurpose(run:CerebroActivityRun){
+function processPurpose(run:CerebroActivityRun,surface:SurfaceName){
  const text=`${run.workflow_name} ${run.workflow_path}`.toUpperCase();
  if(text.includes('SESSION CONTEXT'))return'Protege identidad, permisos, CORS y acceso autenticado al Gateway de CEREBRO.';
  if(text.includes('CONTINUOUS HUMAN QA'))return'Recorre la App como un humano y detecta degradaciones o mejoras medibles sin tocar negocio PROD.';
@@ -42,7 +43,7 @@ function processPurpose(run:CerebroActivityRun){
  if(text.includes('PROD LIVE DEPLOY')||text.includes('DEPLOY'))return'Construye o valida la publicación del snapshot gobernado de la App.';
  if(text.includes('FACTORY')||text.includes('FABRICA')||run.engine_id==='FACT-001')return'Ejecuta o valida la Fábrica de Motores CEREBRO y su scaffold estándar.';
  if(run.engine_id)return`Trabajo real del motor ${run.engine_id}. La evidencia detallada procede del workflow enlazado.`;
- return`Workflow real «${run.workflow_name}». JARVIS muestra únicamente el estado y evidencia publicados por su ejecución.`;
+ return`Workflow real «${run.workflow_name}». ${surface} muestra únicamente el estado y evidencia publicados por su ejecución.`;
 }
 
 function isFactory(run:CerebroActivityRun){
@@ -59,7 +60,7 @@ function WorkCard({run,selected,onSelect}:{run:CerebroActivityRun;selected:boole
  </button>;
 }
 
-export default function CerebroJarvisWorkConsole({onViewChange}:Props){
+export default function CerebroJarvisWorkConsole({onViewChange,surface='JARVIS'}:Props){
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
  const[source,setSource]=useState<'LIVE'|'CACHED'|'UNAVAILABLE'>('UNAVAILABLE');
  const[observedAt,setObservedAt]=useState('');
@@ -90,12 +91,13 @@ export default function CerebroJarvisWorkConsole({onViewChange}:Props){
  const queuedCount=useMemo(()=>runs.filter(run=>QUEUED_STATUSES.has(run.status)).length,[runs]);
  const selectedState=selectedRun?workState(selectedRun):null;
  const selectedProgress=selectedRun?progressValue(selectedRun):null;
+ const surfaceCaption=surface==='OPERATIVA'?'OPERATIVA · CONTROL':'JARVIS · WORK';
 
- return <main className="jarvis-work" aria-label="CEREBRO JARVIS Work">
+ return <main className="jarvis-work" aria-label={`CEREBRO ${surface}`}>
   <header className="jarvis-work-header">
-   <div className="jarvis-work-brand"><span><BrainCircuit size={23}/></span><div><h1>CEREBRO</h1><p>JARVIS · WORK</p></div></div>
+   <div className="jarvis-work-brand"><span><BrainCircuit size={23}/></span><div><h1>CEREBRO</h1><p>{surfaceCaption}</p></div></div>
    <nav className="jarvis-work-view-switch" aria-label="Vistas de CEREBRO">
-    <button type="button" className="is-active"><Sparkles size={14}/> JARVIS</button>
+    <button type="button" className="is-active"><Sparkles size={14}/> {surface}</button>
     <button type="button" onClick={()=>onViewChange('NAVEGADOR')}><Rows3 size={14}/> NAVEGADOR</button>
    </nav>
    <div className="jarvis-work-head-state"><span className={`is-${source.toLowerCase()}`}><Radio size={13}/>{source}</span><strong>{runningCount} trabajando</strong></div>
@@ -125,7 +127,7 @@ export default function CerebroJarvisWorkConsole({onViewChange}:Props){
     {selectedRun&&selectedState?<div className="jarvis-work-inspector-body">
      <div className="jarvis-work-run-title"><span className={`is-${selectedState.tone}`}>{selectedState.label}</span><h3>{compactAlias(selectedRun)}</h3><p>{selectedRun.workflow_name}</p></div>
      <div className="jarvis-work-big-progress"><div><span>PROGRESO REAL</span><strong>{selectedProgress===null?(selectedRun.status==='in_progress'?'LIVE':'—'):`${selectedProgress}%`}</strong></div><i><b className={selectedProgress===null&&selectedRun.status==='in_progress'?'is-live':''} style={selectedProgress===null?undefined:{width:`${selectedProgress}%`}}/></i><small>{selectedRun.progress_provenance==='REAL_GITHUB_JOBS'?'GitHub Jobs · pasos reales':selectedRun.progress_provenance==='TERMINAL_STATUS'?'Estado terminal confirmado':'Sin porcentaje verificable'}</small></div>
-     <div className="jarvis-work-purpose"><small>QUÉ ESTÁ HACIENDO</small><p>{processPurpose(selectedRun)}</p></div>
+     <div className="jarvis-work-purpose"><small>QUÉ ESTÁ HACIENDO</small><p>{processPurpose(selectedRun,surface)}</p></div>
      <dl className="jarvis-work-facts">
       <div><dt>Empresa</dt><dd>{selectedRun.company_id}</dd></div>
       <div><dt>Motor</dt><dd>{selectedRun.engine_id||'—'}</dd></div>
