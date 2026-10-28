@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
-import CerebroOperativaConsole from './CerebroOperativaConsole';
+import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
@@ -70,7 +70,7 @@ export default function CerebroConsoleHost(){
    <div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>
   </>:null}
   {!legacy?<div className="cerebro-work-mount cerebro-host-v0" hidden={browser} aria-hidden={browser}>
-   <CerebroOperativaConsole onViewChange={next=>changeView(next)}/>
+   <CerebroJarvisWorkConsole surface="OPERATIVA" onViewChange={next=>changeView(next)}/>
   </div>:null}
   {browser?<CerebroBrowserConsole onViewChange={changeView}/>:null}
  </div>;
