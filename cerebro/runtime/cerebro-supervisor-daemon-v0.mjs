@@ -188,9 +188,9 @@ const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
 // Do not strand safe capacity when only one company has READY work. Provider,
 // pool, device and repo-write limits still independently bound real resources.
 const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
-// Start with a useful floor for every runtime mode; adaptive policy can still
-// scale down on degradation and up toward maxGlobal on healthy saturation.
-const initialGlobalDefault = Math.min(16, maxGlobal);
+// Keep a high initial floor so broad READY work fans out immediately; adaptive
+// policy can still scale down on degradation and up toward maxGlobal on healthy saturation.
+const initialGlobalDefault = Math.min(40, maxGlobal);
 const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', initialGlobalDefault, maxGlobal);
 const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), Math.min(8, maxGlobal));
 const maxRepoWrites = positiveInt('CEREBRO_MAX_REPO_WRITE_CONCURRENCY', 1, Math.max(1, maxGlobal));
