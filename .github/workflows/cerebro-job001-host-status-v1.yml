@@ -1,0 +1,38 @@
+name: CEREBRO JOB-001 Host Status V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/job001-host-status-v1.mjs'
+      - 'cerebro/runtime/job001-host-status-cli-v1.mjs'
+      - 'cerebro/tests/job001-host-status-v1.test.mjs'
+      - 'cerebro/docs/JOB001_WINDOWS_REMOTE_TELEMETRY_V1.md'
+      - '.github/workflows/cerebro-job001-host-status-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/job001-host-status-v1.mjs'
+      - 'cerebro/runtime/job001-host-status-cli-v1.mjs'
+      - 'cerebro/tests/job001-host-status-v1.test.mjs'
+      - 'cerebro/docs/JOB001_WINDOWS_REMOTE_TELEMETRY_V1.md'
+      - '.github/workflows/cerebro-job001-host-status-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: JOB-001 host status contract tests
+        run: node --test cerebro/tests/job001-host-status-v1.test.mjs cerebro/tests/job001-ledger-control-plane-v1.test.mjs
+      - name: Host status contract is PREPROD fail-closed
+        run: |
+          node cerebro/runtime/job001-host-status-cli-v1.mjs contract > host-status-contract.json
+          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('host-status-contract.json','utf8')); if(x.environment!=='PREPROD'||x.company_bound!==true||x.model_context_engine_id!=='BOOST-001'||x.model_provider_id!=='deepseek'||x.raw_jobs_exposed!==false||x.raw_payloads_exposed!==false||x.raw_journal_exposed!==false||x.secrets_exposed!==false||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.additional_cost_target_eur!==0||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
