@@ -2,7 +2,7 @@ import {useEffect,useState} from 'react';
 import {useLocation} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
-import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
+import CerebroOperativaConsole from './CerebroOperativaConsole';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
@@ -66,11 +66,11 @@ export default function CerebroConsoleHost(){
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
   <CerebroSpeechOutputGuard/>
   {legacy?<>
-   <div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>JARVIS WORK</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>
+   <div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>OPERATIVA</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>
    <div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>
   </>:null}
   {!legacy?<div className="cerebro-work-mount cerebro-host-v0" hidden={browser} aria-hidden={browser}>
-   <CerebroJarvisWorkConsole onViewChange={next=>changeView(next)}/>
+   <CerebroOperativaConsole onViewChange={next=>changeView(next)}/>
   </div>:null}
   {browser?<CerebroBrowserConsole onViewChange={changeView}/>:null}
  </div>;
