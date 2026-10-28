@@ -104,5 +104,5 @@ for (const count of [10, 25, 50]) {
 test('PROD_MAX load matrix remains PREPROD-only and cost-free by construction', () => {
   assert.equal(CONTEXT.environment, 'PREPROD');
   assert.equal(CONTEXT.company_id, 'fenix');
-  assert.notMatch(CONTEXT.engine_id, /trading/i);
+  assert.equal(/trading/i.test(CONTEXT.engine_id), false);
 });
