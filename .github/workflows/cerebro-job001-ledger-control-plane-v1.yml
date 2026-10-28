@@ -7,6 +7,7 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
+      - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
@@ -20,6 +21,7 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
+      - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
@@ -46,6 +48,20 @@ jobs:
         run: node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
       - name: Supervisor 48/64 entrypoint tests
         run: node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
+      - name: Canonical Windows PREPROD installer is entrypoint V1 and fail-closed
+        shell: bash
+        run: |
+          test -s cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "cerebro\\runtime\\cerebro-supervisor-entrypoint-v1.mjs" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "CEREBRO-Supervisor-PREPROD" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "RunLevel Limited" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "prod_write_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "target_global_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_global_concurrency -ne 64" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_company_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_repo_write_concurrency -ne 1" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP = 'NO'" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "CEREBRO_REMOTE_TELEMETRY = 'NO'" cerebro/scripts/install-supervisor-preprod-windows.ps1
       - name: Control-plane contract is PREPROD fail-closed at 48/64
         run: |
           node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
