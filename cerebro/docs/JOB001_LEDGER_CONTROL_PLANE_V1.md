@@ -67,14 +67,14 @@ No imprime secretos ni el journal completo.
 
 ## Telemetría remota sanitizada V1
 
-La ruta preferente era reutilizar un publisher gobernado ya existente del Browser Bridge 1.4.1. La evidencia viva confirma transporte cloud ONLINE, pero no expone un contrato reutilizable para publicar el heartbeat JOB-001 sin reconstruir el Bridge por memoria.
+La ruta preferente es reutilizar un publisher gobernado ya existente del Browser Bridge 1.4.1. La evidencia viva confirma transporte cloud ONLINE, pero la superficie recuperada todavía no expone un contrato de publicación JOB-001 reutilizable sin reconstruir el Bridge por memoria.
 
-Por tanto se usa el fallback canónico mínimo permitido por el traspaso:
+El fallback canónico mínimo ya está preparado en PREPROD:
 
-- tabla PREPROD `public.cerebro_job001_telemetry_preprod`;
+- tabla `public.cerebro_job001_telemetry_preprod`;
 - una única fila latest-only por `(company_id, engine_id, environment, device_id)`;
 - RLS habilitado;
-- acceso server-side solamente (`service_role`); anon/authenticated sin grants de tabla;
+- acceso server-side solamente; anon/authenticated sin grants de tabla;
 - TTL del payload: 120 s;
 - multiempresa por clave y contrato;
 - coste adicional objetivo: 0 EUR;
@@ -83,20 +83,41 @@ Por tanto se usa el fallback canónico mínimo permitido por el traspaso:
 
 El publisher está en `cerebro/runtime/job001-remote-telemetry-v1.mjs`. Un fallo de publicación es **no fatal**: el supervisor y JOB-001 siguen trabajando localmente.
 
+**Regla de credenciales:** no colocar una `service_role` nueva en el PC por comodidad. El publisher remoto solo se activa cuando el host ya dispone de una referencia server-side autorizada o cuando el Browser Bridge exponga un transporte gobernado reutilizable. La alineación 48/64 no depende de esa credencial.
+
 ## Supervisor entrypoint V1
 
 `cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs` envuelve, no sustituye, `cerebro-supervisor-daemon-v0.mjs`.
 
-Antes de importarlo fija los defaults seguros:
+V0 consume estos nombres de entorno y V1 los fija antes de importarlo:
 
-- `CEREBRO_INITIAL_GLOBAL_CONCURRENCY=48`;
-- `CEREBRO_MAX_GLOBAL_CONCURRENCY=64`;
-- `CEREBRO_MAX_COMPANY_CONCURRENCY=48`;
-- `CEREBRO_MODEL_CAPACITY=8`.
+- `CEREBRO_INITIAL_CONCURRENCY=48`;
+- `CEREBRO_MAX_CONCURRENCY=64`;
+- `CEREBRO_MAX_PER_COMPANY=48`;
+- `CEREBRO_MAX_DEEPSEEK_CONCURRENCY=8`;
+- `CEREBRO_MAX_REPO_WRITE_CONCURRENCY=1`;
+- `CEREBRO_SUPERVISOR_ENV=PREPROD`.
 
-Si existe una política más restrictiva (`max_global < 48`), no la supera. Después carga el daemon V0 en el mismo proceso. Si existen referencias server-side a Supabase PREPROD + `device_id`, activa el publisher latest-only dentro del mismo proceso; si faltan, el daemon arranca igualmente.
+Si existe un `CEREBRO_MAX_CONCURRENCY` explícitamente más restrictivo que 48, V1 no lo supera y deriva de él el límite por empresa. En el despliegue canónico 48/64 el instalador valida físicamente 48/64/48/8/1.
 
-No existe segundo daemon ni segundo scheduler.
+El publisher se arma **antes** de importar V0 porque el daemon tiene top-level await y es long-lived. V0 sigue siendo el único daemon; el publisher usa un timer del mismo proceso. Si faltan referencias autorizadas para telemetría remota, V0 arranca igualmente.
+
+## Instalador Windows PREPROD canónico
+
+Ruta: `cerebro/scripts/install-supervisor-preprod-windows.ps1`.
+
+El instalador:
+
+1. conserva el task `CEREBRO-Supervisor-PREPROD` y exporta su XML antes de cambiarlo;
+2. crea backup del `cerebro` actualmente instalado;
+3. copia el árbol nuevo de forma paralela;
+4. ejecuta un smoke **aislado y coste 0** con Work Pump, repo sandbox y telemetría remota deshabilitados;
+5. exige heartbeat smoke PREPROD con 48/64/48/8/1 y PROD/Trading false;
+6. registra el mismo task con `RunLevel Limited`, apuntando al entrypoint V1;
+7. espera heartbeat **fresco real** del task y vuelve a exigir 48/64/48/8/1;
+8. si algo falla, restaura app anterior + XML del task anterior automáticamente.
+
+El state root vuelve a coincidir con el default histórico de V0: `%LOCALAPPDATA%\CEREBRO\SupervisorRuntime`. No se crea un segundo journal.
 
 ## Tests
 
@@ -106,7 +127,7 @@ node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
 node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
 ```
 
-El workflow `CEREBRO JOB-001 Ledger Control Plane V1` valida contrato, aislamiento, sanitización, TTL y límites 48/64/48/8/1.
+Los workflows `CEREBRO JOB-001 Ledger Control Plane V1` y `CEREBRO Runtime Durable Supervisor V0` validan contrato, aislamiento, sanitización, ordering del publisher, nombres de entorno V0, instalador y límites 48/64/48/8/1.
 
 ## Dependencias conservadas
 
@@ -114,6 +135,7 @@ El workflow `CEREBRO JOB-001 Ledger Control Plane V1` valida contrato, aislamien
 - `AdaptiveHierarchicalAgentWorkPumpV3`;
 - `DynamicConcurrencyPolicyV1`;
 - `cerebro-supervisor-daemon-v0.mjs` y su heartbeat existente;
+- task Windows `CEREBRO-Supervisor-PREPROD`;
 - Browser Bridge 1.4.1 sin reconstruirlo ni sustituirlo.
 
 No se sustituye ninguna de estas piezas.
@@ -125,6 +147,8 @@ No se sustituye ninguna de estas piezas.
 - Ledger target: 40;
 - max company: 40;
 - daemon V0 default inicial: 40;
+- instalador apuntaba directamente a V0;
+- smoke y scheduled task no validaban físicamente 48/64/48/8/1;
 - heartbeat local solamente;
 - `dynamic_concurrency` proyectado completo por el lector Ledger.
 
@@ -135,15 +159,19 @@ No se sustituye ninguna de estas piezas.
 - max global: 64;
 - DeepSeek: 8;
 - repo-write: 1;
-- entrypoint V1 fija arranque 48 sin modificar V0;
+- entrypoint V1 configura los nombres de entorno que V0 realmente consume;
+- publisher se arma antes del daemon long-lived;
+- instalador canónico conserva el task existente y verifica heartbeat fresco 48/64/48/8/1;
 - `dynamic_concurrency` se proyecta por whitelist;
-- telemetría remota latest-only, TTL 120 s, server-side y no fatal.
+- fallback remoto latest-only, TTL 120 s, server-side y no fatal.
 
 ## Rollback
 
-Rollback de runtime: volver a arrancar directamente `cerebro-supervisor-daemon-v0.mjs`; no requiere borrar ni modificar V0.
+Rollback físico del instalador: si la prueba live falla, el script restaura automáticamente el árbol anterior y el XML anterior de `CEREBRO-Supervisor-PREPROD`.
 
-Rollback de Git: revertir el PR de este bloque.
+Rollback manual del runtime: volver a arrancar directamente `cerebro-supervisor-daemon-v0.mjs`; V0 no se elimina ni se modifica para conseguir 48/64.
+
+Rollback de Git: revertir el PR del bloque.
 
 Rollback de almacenamiento PREPROD, solo si ya no existe ningún consumidor y después de snapshot/verificación:
 
