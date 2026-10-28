@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-10-28T08:06:09.041Z",
+  "updated_at": "2026-10-28T08:06:29.866Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -478,11 +478,46 @@
     "repo:ec0dc6fecc9aecf531412683179c",
     "repo:b3d3bb06b1419f6f6e0288d6810e",
     "repo:1c0ad205a566ba0f9674b7c67b22",
-    "repo:4529bb9f0be1b44571865986834c"
+    "repo:4529bb9f0be1b44571865986834c",
+    "github-wide-skills:e818188aad76359aaf65"
   ],
   "in_flight": {},
   "waiting_human": {},
-  "waiting_safe_handler": {},
+  "waiting_safe_handler": {
+    "github-wide-skills:e818188aad76359aaf65": {
+      "candidate_id": "github-wide-skills:e818188aad76359aaf65",
+      "name": "api-endpoint-deprecation",
+      "human_alias": "Api Endpoint Deprecation",
+      "wrapper_id": "skillwrap:bc70eb94a13fa2c0d526",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 88.11,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "dprakash2101/dotnet-production-agent-skills",
+        "upstream_head_commit": "14e8edb8cead65a3680dcd91ff49706f68132974",
+        "manifest_sha256": "43f9ebe5078451edec8a709e9bb696bbdc84dcebfa31c1fbeeaeedc5c93b798b",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 40654379352,
+      "checkpointed_at": "2026-10-28T08:06:29.866Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    }
+  },
   "completed": {
     "lobehub-skills:9a6e3fac20369220df43": {
       "candidate_id": "lobehub-skills:9a6e3fac20369220df43",
@@ -29958,7 +29993,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -29971,7 +30006,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 40643292375,
+  "last_discovery_run_id": 40654379352,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
