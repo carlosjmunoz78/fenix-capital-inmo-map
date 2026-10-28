@@ -19,7 +19,7 @@ function makeState({ updated_at = '2026-10-28T15:00:00.000Z', company_id = 'feni
   const runtime = new DurableJobRuntimeV1({ file_path: path.join(root, 'jobs.v8journal') });
   const now = Date.parse('2026-10-28T15:00:30.000Z');
 
-  for (let index = 0; index < 40; index += 1) {
+  for (let index = 0; index < 48; index += 1) {
     runtime.enqueue({
       name: 'deepseek-governed-work',
       context: MODEL,
@@ -44,17 +44,17 @@ function makeState({ updated_at = '2026-10-28T15:00:00.000Z', company_id = 'feni
     useful_work: {
       scheduling_strategy: 'ADAPTIVE_USEFUL_THROUGHPUT',
       model_capacity: 8,
-      target_active_backlog: 40,
-      useful_queued: 32,
+      target_active_backlog: 48,
+      useful_queued: 40,
       useful_running: 8,
       queue_pressure: 1,
       starvation: false,
     },
     dynamic_concurrency: {
       environment: 'PREPROD',
-      target_global_concurrency: 40,
+      target_global_concurrency: 48,
       max_global_concurrency: 64,
-      max_company_concurrency: 40,
+      max_company_concurrency: 48,
       max_provider_concurrency: { deepseek: 8, secret_provider_key: 'must-not-escape' },
       max_repo_write_concurrency: 1,
       decision: 'HOLD',
@@ -71,7 +71,7 @@ function makeState({ updated_at = '2026-10-28T15:00:00.000Z', company_id = 'feni
   return { root, now };
 }
 
-test('host status proves 40 useful and 8 DeepSeek running without exposing jobs, payloads or secrets', () => {
+test('host status proves 48 useful and 8 DeepSeek running without exposing jobs, payloads or secrets', () => {
   const { root, now } = makeState();
   const status = readJob001HostStatusV1({
     state_dir: root,
@@ -83,18 +83,18 @@ test('host status proves 40 useful and 8 DeepSeek running without exposing jobs,
 
   assert.equal(status.status, 'GREEN');
   assert.equal(status.environment, 'PREPROD');
-  assert.equal(status.useful_work.useful_total, 40);
-  assert.equal(status.useful_work.target_useful, 40);
+  assert.equal(status.useful_work.useful_total, 48);
+  assert.equal(status.useful_work.target_useful, 48);
   assert.equal(status.useful_work.headroom_to_target, 0);
   assert.equal(status.useful_work.target_satisfied, true);
-  assert.equal(status.model_lane.total, 40);
+  assert.equal(status.model_lane.total, 48);
   assert.equal(status.model_lane.running, 8);
-  assert.equal(status.model_lane.runnable, 32);
-  assert.equal(status.model_lane.useful, 40);
+  assert.equal(status.model_lane.runnable, 40);
+  assert.equal(status.model_lane.useful, 48);
   assert.equal(status.model_lane.max_concurrency, 8);
   assert.equal(status.model_lane.at_capacity, true);
   assert.equal(status.dynamic_concurrency.max_global_concurrency, 64);
-  assert.equal(status.dynamic_concurrency.max_company_concurrency, 40);
+  assert.equal(status.dynamic_concurrency.max_company_concurrency, 48);
   assert.equal(status.dynamic_concurrency.max_provider_deepseek_concurrency, 8);
   assert.equal(status.repo_write_lane.running, null);
   assert.equal(status.repo_write_lane.max_concurrency, 1);
