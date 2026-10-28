@@ -14,21 +14,32 @@ function nonEmpty(value) {
 }
 
 export function configureSupervisor48V1(env = process.env) {
-  if (env.CEREBRO_ENVIRONMENT && env.CEREBRO_ENVIRONMENT !== PREPROD) throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
-  const maxGlobal = integer(env.CEREBRO_MAX_GLOBAL_CONCURRENCY, 64, { min: 1, max: 64 });
+  if (env.CEREBRO_SUPERVISOR_ENV && String(env.CEREBRO_SUPERVISOR_ENV).toUpperCase() !== PREPROD) {
+    throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
+  }
+  if (env.CEREBRO_ENVIRONMENT && String(env.CEREBRO_ENVIRONMENT).toUpperCase() !== PREPROD) {
+    throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
+  }
+
+  const maxGlobal = integer(env.CEREBRO_MAX_CONCURRENCY, 64, { min: 1, max: 64 });
   const target = Math.min(48, maxGlobal);
+  const maxDeepSeek = Math.min(8, maxGlobal);
+
   env.CEREBRO_ENVIRONMENT = PREPROD;
-  env.CEREBRO_MAX_GLOBAL_CONCURRENCY = String(maxGlobal);
-  env.CEREBRO_INITIAL_GLOBAL_CONCURRENCY = String(target);
-  env.CEREBRO_MAX_COMPANY_CONCURRENCY = String(Math.min(integer(env.CEREBRO_MAX_COMPANY_CONCURRENCY, 48, { min: 1, max: 64 }), 48));
-  env.CEREBRO_MODEL_CAPACITY = String(Math.min(integer(env.CEREBRO_MODEL_CAPACITY, 8, { min: 1, max: 8 }), 8));
+  env.CEREBRO_SUPERVISOR_ENV = PREPROD;
+  env.CEREBRO_MAX_CONCURRENCY = String(maxGlobal);
+  env.CEREBRO_INITIAL_CONCURRENCY = String(target);
+  env.CEREBRO_MAX_PER_COMPANY = String(target);
+  env.CEREBRO_MAX_DEEPSEEK_CONCURRENCY = String(maxDeepSeek);
+  env.CEREBRO_MAX_REPO_WRITE_CONCURRENCY = '1';
+
   return Object.freeze({
     environment: PREPROD,
     target_useful: 48,
     initial_global_concurrency: target,
     max_global_concurrency: maxGlobal,
-    max_company_concurrency: Number(env.CEREBRO_MAX_COMPANY_CONCURRENCY),
-    max_deepseek_concurrency: 8,
+    max_company_concurrency: target,
+    max_deepseek_concurrency: maxDeepSeek,
     max_repo_write_concurrency: 1,
     prod_authorized: false,
     trading_access: false,
@@ -57,7 +68,6 @@ export function canPublishRemoteTelemetryV1(config) {
 export async function startSupervisorEntrypointV1({ env = process.env, import_supervisor = async () => import('./cerebro-supervisor-daemon-v0.mjs'), publisher = publishSupervisorHeartbeatFileV1, set_interval = setInterval } = {}) {
   const limits = configureSupervisor48V1(env);
   const telemetry = telemetryConfigFromEnvV1(env);
-  await import_supervisor();
   let inFlight = false;
   let lastReceipt = Object.freeze({ ok: false, non_fatal: true, error_code: canPublishRemoteTelemetryV1(telemetry) ? 'NOT_PUBLISHED_YET' : 'REMOTE_TELEMETRY_CONFIG_MISSING' });
 
@@ -81,13 +91,20 @@ export async function startSupervisorEntrypointV1({ env = process.env, import_su
     }
   };
 
+  let telemetryTimer = null;
   if (canPublishRemoteTelemetryV1(telemetry)) {
-    set_interval(() => { void tick(); }, telemetry.interval_ms)?.unref?.();
+    telemetryTimer = set_interval(() => { void tick(); }, telemetry.interval_ms);
+    telemetryTimer?.unref?.();
     void tick();
   }
 
+  // The V0 daemon has top-level await and is intentionally long-lived. Start the
+  // publisher before importing it; otherwise the publisher would never start in
+  // normal continuous operation. V0 remains the single supervisor daemon.
+  await import_supervisor();
+
   return Object.freeze({
-    status: 'STARTED',
+    status: 'EXITED',
     limits,
     telemetry: Object.freeze({
       enabled: telemetry.enabled,
@@ -97,6 +114,7 @@ export async function startSupervisorEntrypointV1({ env = process.env, import_su
       publisher_failure_is_fatal: false,
     }),
     tick,
+    telemetry_timer_created: Boolean(telemetryTimer),
     get last_receipt() { return lastReceipt; },
     second_daemon: false,
     second_scheduler: false,
@@ -117,6 +135,14 @@ export const CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT = Object.freeze({
   environment: PREPROD,
   wraps_existing_daemon_v0: true,
   preserves_v0_for_rollback: true,
+  publisher_starts_before_long_lived_daemon_import: true,
+  daemon_env_keys: Object.freeze({
+    max_global: 'CEREBRO_MAX_CONCURRENCY',
+    initial_global: 'CEREBRO_INITIAL_CONCURRENCY',
+    max_company: 'CEREBRO_MAX_PER_COMPANY',
+    max_deepseek: 'CEREBRO_MAX_DEEPSEEK_CONCURRENCY',
+    max_repo_write: 'CEREBRO_MAX_REPO_WRITE_CONCURRENCY',
+  }),
   target_useful: 48,
   max_global: 64,
   max_company: 48,
