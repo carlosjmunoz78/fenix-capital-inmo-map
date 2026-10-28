@@ -1,0 +1,53 @@
+name: CEREBRO PROD_MAX Load Matrix V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/tests/prod-max-load-matrix-v1.test.mjs'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - '.github/workflows/cerebro-prod-max-load-matrix-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/tests/prod-max-load-matrix-v1.test.mjs'
+      - 'cerebro/runtime/durable-job-runtime-v1.mjs'
+      - 'cerebro/runtime/durable-worker-runner-v1.mjs'
+      - '.github/workflows/cerebro-prod-max-load-matrix-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-prod-max-load-matrix-v1-${{ github.event.pull_request.head.sha || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  prod-max-load-matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install pinned repository dependencies
+        run: npm ci --ignore-scripts
+      - name: Exact deterministic 10 / 25 / 50 durable load matrix
+        run: node --test cerebro/tests/prod-max-load-matrix-v1.test.mjs
+      - name: Durable failure/recovery/idempotency focused regression
+        run: >-
+          node --test
+          cerebro/tests/durable-job-runtime-v1.test.mjs
+          cerebro/tests/durable-worker-runner-v1.test.mjs
+          cerebro/tests/bounded-recovery-supervisor.test.mjs
+          cerebro/tests/job001-maintenance-drain-v1.test.mjs
+      - name: Full CEREBRO regression including DAG Router FinOps rollback and existing gates
+        working-directory: cerebro
+        run: npm test
+      - name: Fail-closed promotion boundary remains intact until physical canary
+        shell: bash
+        run: |
+          grep -F "durable JOB-001 V1 accepts exact PREPROD only" cerebro/runtime/durable-job-runtime-v1.mjs
+          grep -F "durable worker runner V1 accepts exact PREPROD only" cerebro/runtime/durable-worker-runner-v1.mjs
