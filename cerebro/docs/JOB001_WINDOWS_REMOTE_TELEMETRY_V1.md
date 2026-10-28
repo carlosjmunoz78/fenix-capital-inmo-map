@@ -33,7 +33,7 @@ The status reader is fail-closed when the heartbeat is missing, stale, non-PREPR
 `CEREBRO_JOB001_HOST_STATUS_V1` exposes only:
 
 - status, company, engine, environment, version, timestamp and heartbeat age;
-- useful queued/running/total, target 40, target headroom and starvation;
+- useful queued/running/total, target 48, target headroom and starvation;
 - canonical `BOOST-001` lane counts: runnable/running/useful/blocked/done;
 - DeepSeek provider maximum from the dynamic concurrency policy;
 - global/company/repo-write limits and policy decision;
@@ -60,9 +60,9 @@ and enforces its scheduling route as `pool=MODEL`, `provider_id=deepseek` whenev
 
 ## Limits preserved
 
-- useful target: 40
+- useful target: 48
 - global max: 64
-- company max: 40
+- company max: 48
 - DeepSeek max: 8
 - repo-write max: 1
 - additional cost target: 0 EUR
