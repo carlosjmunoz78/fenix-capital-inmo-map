@@ -6,8 +6,10 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
@@ -17,8 +19,10 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-v1.mjs'
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
+      - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
@@ -40,6 +44,8 @@ jobs:
         run: node --test cerebro/tests/job001-ledger-control-plane-v1.test.mjs
       - name: JOB-001 remote sanitized telemetry tests
         run: node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
+      - name: Supervisor 48/64 entrypoint tests
+        run: node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
       - name: Control-plane contract is PREPROD fail-closed at 48/64
         run: |
           node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
