@@ -253,16 +253,15 @@ export class DurableWorkerRunnerV1 {
     const budget = completion_budget === null
       ? Math.max(normalized.length, normalized.length * 4)
       : integer(completion_budget, 'completion_budget', { min: 1, max: 1_000_000 });
-    const lanes = normalized.map((context, index) => ({ context, index, active: false }));
     const running = new Set();
     const outcomes = [];
     let passiveOutcome = null;
     let scheduled = 0;
-    let cursor = this.#fairCursor % lanes.length;
+    let cursor = this.#fairCursor % normalized.length;
 
-    const launch = lane => {
-      if (lane.active || scheduled >= budget || this.#active.size >= this.#maxConcurrency) return 'BLOCKED';
-      const begun = this.#begin(lane.context);
+    const launch = context => {
+      if (scheduled >= budget || this.#active.size >= this.#maxConcurrency) return 'BLOCKED';
+      const begun = this.#begin(context);
       if (!begun.started) {
         if (begun.outcome?.status === 'IDLE' || begun.outcome?.status === 'SATURATED') {
           passiveOutcome ??= begun.outcome;
@@ -273,9 +272,8 @@ export class DurableWorkerRunnerV1 {
         return 'CONSUMED';
       }
       scheduled += 1;
-      lane.active = true;
       let tracked;
-      tracked = begun.promise.then(outcome => ({ lane, outcome, tracked }));
+      tracked = begun.promise.then(outcome => ({ outcome, tracked }));
       running.add(tracked);
       return 'STARTED';
     };
@@ -283,13 +281,25 @@ export class DurableWorkerRunnerV1 {
     const refill = () => {
       let started = 0;
       let consumed = 0;
-      for (let offset = 0; offset < lanes.length && scheduled < budget; offset += 1) {
-        const lane = lanes[(cursor + offset) % lanes.length];
-        const state = launch(lane);
-        if (state === 'STARTED') started += 1;
-        else if (state === 'CONSUMED') consumed += 1;
+      let noProgress = 0;
+      while (
+        scheduled < budget &&
+        this.#active.size < this.#maxConcurrency &&
+        noProgress < normalized.length
+      ) {
+        const context = normalized[cursor];
+        cursor = (cursor + 1) % normalized.length;
+        const state = launch(context);
+        if (state === 'STARTED') {
+          started += 1;
+          noProgress = 0;
+        } else if (state === 'CONSUMED') {
+          consumed += 1;
+          noProgress = 0;
+        } else {
+          noProgress += 1;
+        }
       }
-      cursor = (cursor + 1) % lanes.length;
       return { started, consumed };
     };
 
@@ -301,14 +311,12 @@ export class DurableWorkerRunnerV1 {
       }
       const settled = await Promise.race(running);
       running.delete(settled.tracked);
-      settled.lane.active = false;
       outcomes.push(settled.outcome);
     }
 
     while (running.size > 0) {
       const settled = await Promise.race(running);
       running.delete(settled.tracked);
-      settled.lane.active = false;
       outcomes.push(settled.outcome);
     }
 
@@ -341,6 +349,7 @@ export const DURABLE_WORKER_RUNNER_V1_CONTRACT = Object.freeze({
   scans_past_idle_contexts: true,
   continuous_slot_refill: true,
   batch_barrier_removed_in_saturated_mode: true,
+  single_context_slot_fanout: true,
   immediate_dispatch_failures_surface: true,
   exact_saturated_round_budget: true,
   timeout_abort_signal: true,
