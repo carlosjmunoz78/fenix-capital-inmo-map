@@ -49,6 +49,30 @@ test('daemon runs bounded PREPROD cycles, executes explicit health capability an
   assert.equal(fs.existsSync(path.join(dir, 'jobs.v8journal')), true);
 });
 
+test('default runtime does not strand safe capacity behind a fixed per-company 16 ceiling', t => {
+  const dir = tempDir(t);
+  const result = runDaemon(dir, {}, ['--cycles', '1']);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
+  assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 64);
+  assert.equal(heartbeat.dynamic_concurrency.max_company_concurrency, 64);
+  assert.equal(heartbeat.dynamic_concurrency.target_global_concurrency, 16);
+  assert.equal(heartbeat.dynamic_concurrency.max_provider_concurrency.deepseek, 8);
+  assert.equal(heartbeat.dynamic_concurrency.max_repo_write_concurrency, 1);
+});
+
+test('explicit lower company limit remains available as a governed override', t => {
+  const dir = tempDir(t);
+  const result = runDaemon(dir, {
+    CEREBRO_MAX_PER_COMPANY: '8',
+    CEREBRO_INITIAL_CONCURRENCY: '8',
+  }, ['--cycles', '1']);
+  assert.equal(result.status, 0, result.stderr || result.stdout);
+  const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
+  assert.equal(heartbeat.dynamic_concurrency.max_company_concurrency, 8);
+  assert.equal(heartbeat.dynamic_concurrency.target_global_concurrency, 8);
+});
+
 test('daemon rejects PROD instead of silently widening authority', t => {
   const dir = tempDir(t);
   const result = runDaemon(dir, { CEREBRO_SUPERVISOR_ENV: 'PROD' }, ['--cycles', '1']);
