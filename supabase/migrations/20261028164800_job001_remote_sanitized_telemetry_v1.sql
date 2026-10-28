@@ -28,6 +28,7 @@ alter table public.cerebro_job001_telemetry_preprod enable row level security;
 
 revoke all on table public.cerebro_job001_telemetry_preprod from anon;
 revoke all on table public.cerebro_job001_telemetry_preprod from authenticated;
+revoke truncate, references, trigger on table public.cerebro_job001_telemetry_preprod from service_role;
 grant select, insert, update, delete on table public.cerebro_job001_telemetry_preprod to service_role;
 
 drop policy if exists cerebro_job001_telemetry_company_read on public.cerebro_job001_telemetry_preprod;
