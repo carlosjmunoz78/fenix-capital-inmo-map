@@ -10,6 +10,7 @@ import { LearningCandidateSpoolV1 } from './learning-candidate-spool-v1.mjs';
 import { createDeepSeekAgentHandlerV1 } from './deepseek-agent-handler-v1.mjs';
 import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
 import { AdaptiveHierarchicalAgentWorkPumpV3 } from './adaptive-hierarchical-agent-work-pump-v3.mjs';
+import { createRepoSandboxJobHandlerV1, REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT } from './repo-sandbox-job-handler-v1.mjs';
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
@@ -30,6 +31,12 @@ const MODEL_CONTEXT = Object.freeze({
   environment: ENV,
   version: process.env.CEREBRO_WORK_PUMP_VERSION || 'work-pump-v3-adaptive',
 });
+const REPO_SANDBOX_CONTEXT = Object.freeze({
+  company_id: DEFAULT_CONTEXT.company_id,
+  engine_id: 'FACT-001',
+  environment: ENV,
+  version: process.env.CEREBRO_REPO_SANDBOX_VERSION || 'repo-sandbox-v1',
+});
 const WORK_PUMP_FLAG = String(process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP || 'AUTO').toUpperCase();
 if (!['AUTO', 'YES', 'NO'].includes(WORK_PUMP_FLAG)) throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP must be AUTO, YES or NO');
 const WORK_PUMP_ENABLED = WORK_PUMP_FLAG === 'YES' || (WORK_PUMP_FLAG === 'AUTO' && Boolean(process.env.DEEPSEEK_API_KEY));
@@ -38,6 +45,16 @@ const WORK_PUMP_MODE = WORK_PUMP_FLAG === 'NO'
   : WORK_PUMP_FLAG === 'YES'
     ? 'ENABLED_EXPLICIT'
     : WORK_PUMP_ENABLED ? 'AUTO_KEY_PRESENT' : 'AUTO_NO_KEY';
+const REPO_SANDBOX_FLAG = String(process.env.CEREBRO_ENABLE_REPO_SANDBOX || 'AUTO').toUpperCase();
+if (!['AUTO', 'YES', 'NO'].includes(REPO_SANDBOX_FLAG)) throw new Error('CEREBRO_ENABLE_REPO_SANDBOX must be AUTO, YES or NO');
+const REPO_SANDBOX_CONFIGURED = Boolean(process.env.CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT && process.env.CEREBRO_REPO_SANDBOX_IMAGE);
+const REPO_SANDBOX_ENABLED = REPO_SANDBOX_FLAG === 'YES' || (REPO_SANDBOX_FLAG === 'AUTO' && REPO_SANDBOX_CONFIGURED);
+const REPO_SANDBOX_MODE = REPO_SANDBOX_FLAG === 'NO'
+  ? 'DISABLED_EXPLICIT'
+  : REPO_SANDBOX_FLAG === 'YES'
+    ? 'ENABLED_EXPLICIT'
+    : REPO_SANDBOX_ENABLED ? 'AUTO_CONFIG_PRESENT' : 'AUTO_CONFIG_ABSENT';
+let repoSandboxHandler = null;
 
 function positiveInt(name, fallback, max = 60_000) {
   const raw = process.env[name];
@@ -88,6 +105,7 @@ function loadRuntimeContexts() {
   if (!Array.isArray(raw) || raw.length === 0) throw new Error('CEREBRO_RUNTIME_CONTEXTS_JSON must be a non-empty array');
   const contexts = raw.map((value, index) => safeContext(value, `CEREBRO_RUNTIME_CONTEXTS_JSON[${index}]`));
   if (WORK_PUMP_ENABLED && !contexts.some(context => contextKey(context) === contextKey(MODEL_CONTEXT))) contexts.push(MODEL_CONTEXT);
+  if (REPO_SANDBOX_ENABLED && !contexts.some(context => contextKey(context) === contextKey(REPO_SANDBOX_CONTEXT))) contexts.push(REPO_SANDBOX_CONTEXT);
   const seen = new Set();
   for (const context of contexts) {
     const key = contextKey(context);
@@ -100,6 +118,9 @@ function loadRuntimeContexts() {
 function defaultRoute(context) {
   if (contextKey(context) === contextKey(MODEL_CONTEXT)) {
     return { pool: 'MODEL', provider_id: 'deepseek', resource_key: 'provider:deepseek' };
+  }
+  if (contextKey(context) === contextKey(REPO_SANDBOX_CONTEXT)) {
+    return { pool: 'REPO_CI', resource_key: `repo-sandbox:${context.company_id}` };
   }
   return { pool: 'CPU', resource_key: `engine:${context.company_id}:${context.engine_id}` };
 }
@@ -121,6 +142,12 @@ function loadSchedulingRoutes(contexts) {
       throw new Error('WORK_PUMP_MODEL_ROUTE_MUST_BE_MODEL_DEEPSEEK');
     }
   }
+  if (REPO_SANDBOX_ENABLED) {
+    const repoRoute = routes[contextKey(REPO_SANDBOX_CONTEXT)];
+    if (repoRoute?.pool !== 'REPO_CI' || repoRoute?.provider_id) {
+      throw new Error('REPO_SANDBOX_ROUTE_MUST_BE_REPO_CI_WITHOUT_PROVIDER');
+    }
+  }
   return Object.freeze(routes);
 }
 
@@ -134,7 +161,7 @@ function writeJsonAtomic(file, data) {
 function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetLedger, workPump, extra = {}) {
   const pumpSnapshot = workPump.snapshot();
   writeJsonAtomic(HEARTBEAT, {
-    schema_version: '1.6',
+    schema_version: '1.7',
     service: 'CEREBRO Continuous Supervisor',
     status: supervisor.enabled ? 'GREEN' : 'STOPPED',
     pid: process.pid,
@@ -152,6 +179,10 @@ function safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler
     deepseek_budget: budgetLedger.snapshot(),
     work_pump_mode: WORK_PUMP_MODE,
     work_pump: pumpSnapshot,
+    repo_sandbox_mode: REPO_SANDBOX_MODE,
+    repo_sandbox_handler: repoSandboxHandler
+      ? repoSandboxHandler.snapshot()
+      : { schema_version: '1.0.0', state_type: 'CEREBRO_REPO_SANDBOX_DURABLE_HANDLER_V1', status: 'DISABLED', environment: ENV, job_name: REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name, additional_cost_eur: 0, prod_authorized: false, prod_writes: false, trading_access: false },
     useful_work: {
       scheduling_strategy: pumpSnapshot.scheduling_strategy ?? null,
       model_capacity: pumpSnapshot.measured_model_capacity ?? null,
@@ -175,6 +206,9 @@ if ((process.env.CEREBRO_SUPERVISOR_ENV || ENV).toUpperCase() !== ENV) {
 }
 if (WORK_PUMP_FLAG === 'YES' && !process.env.DEEPSEEK_API_KEY) {
   throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP=YES requires DEEPSEEK_API_KEY in the runtime secret store');
+}
+if (REPO_SANDBOX_FLAG === 'YES' && !REPO_SANDBOX_CONFIGURED) {
+  throw new Error('CEREBRO_ENABLE_REPO_SANDBOX=YES requires CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT and CEREBRO_REPO_SANDBOX_IMAGE');
 }
 
 fs.mkdirSync(ROOT, { recursive: true });
@@ -219,6 +253,15 @@ worker.register({
 });
 const deepSeekHandler = createDeepSeekAgentHandlerV1({ budget_ledger: budgetLedger });
 worker.register({ name: 'model.deepseek.agent', handler: deepSeekHandler });
+if (REPO_SANDBOX_ENABLED) {
+  repoSandboxHandler = createRepoSandboxJobHandlerV1({
+    workspace_root: process.env.CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT,
+    image_ref: process.env.CEREBRO_REPO_SANDBOX_IMAGE,
+    docker_bin: process.env.CEREBRO_REPO_SANDBOX_DOCKER_BIN || 'docker',
+    git_bin: process.env.CEREBRO_REPO_SANDBOX_GIT_BIN || 'git',
+  });
+  worker.register({ name: REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name, handler: repoSandboxHandler });
+}
 
 const workPump = new AdaptiveHierarchicalAgentWorkPumpV3({
   job_runtime: queue,
@@ -283,6 +326,8 @@ safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetL
   context_count: runtimeContexts.length,
   work_pump_enabled: WORK_PUMP_ENABLED,
   work_pump_mode: WORK_PUMP_MODE,
+  repo_sandbox_enabled: REPO_SANDBOX_ENABLED,
+  repo_sandbox_mode: REPO_SANDBOX_MODE,
 });
 const cyclesArg = process.argv.indexOf('--cycles');
 const maxCycles = cyclesArg >= 0 ? Number(process.argv[cyclesArg + 1]) : Infinity;
