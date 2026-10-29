@@ -1,4 +1,5 @@
 name: CEREBRO Browser 1 V2 Live Worker
+# Operational rearm marker: 2026-10-29. No runtime or authority change.
 
 on:
   push:
