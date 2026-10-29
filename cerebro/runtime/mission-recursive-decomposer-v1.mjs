@@ -60,7 +60,7 @@ export function defaultMissionRoots() {
 }
 
 function common(root, environment, now) {
-  return {company_id:root.company_id||DEFAULT_COMPANY,engine_id:root.engine_id||ENGINE_ID,environment,version:VERSION,estimated_cost_eur:0,paid_ai_allowed:false,prod_write_allowed:false,trading_access:false,canonical_scope_ref:root.canonical_scope_ref,generated_at:now};
+  return {company_id:root.company_id||DEFAULT_COMPANY,engine_id:root.engine_id||ENGINE_ID,environment,version:VERSION,estimated_cost_eur:0,paid_ai_allowed:false,prod_write_allowed:false,trading_access:false,canonical_scope_ref:root.canonical_scope_ref,source_status:root.source_status||'UNKNOWN',generated_at:now};
 }
 
 export function buildMissionDag(roots=defaultMissionRoots(),options={}) {
@@ -103,8 +103,8 @@ export function buildMissionDag(roots=defaultMissionRoots(),options={}) {
   const dfs=id=>{if(visiting.has(id)) throw new Error(`Cycle detected at ${id}`); if(visited.has(id)) return; visiting.add(id); for(const dep of byId.get(id).dependencies) dfs(dep); visiting.delete(id); visited.add(id);};
   for(const id of byId.keys()) dfs(id);
 
-  const graph_fingerprint=digest(units.map(u=>({id:u.work_unit_id,deps:u.dependencies,key:u.idempotency_key})));
-  return {schema_version:SCHEMA_VERSION,engine:VERSION,company_id:DEFAULT_COMPANY,environment,mission_count:roots.length,work_unit_count:units.length,atomic_count:units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit').length,capability_work_unit_count:units.filter(u=>u.kind==='capability_work_unit').length,graph_fingerprint,safeguards:{paid_ai:false,prod_write:false,trading:false,max_depth:2,dedup:true,cycle_check:true,idempotent:true},roots:roots.map(r=>r.mission_id),units};
+  const graph_fingerprint=digest(units.map(u=>({id:u.work_unit_id,deps:u.dependencies,key:u.idempotency_key,source_status:u.source_status})));
+  return {schema_version:SCHEMA_VERSION,engine:VERSION,company_id:DEFAULT_COMPANY,environment,mission_count:roots.length,work_unit_count:units.length,atomic_count:units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit').length,capability_work_unit_count:units.filter(u=>u.kind==='capability_work_unit').length,graph_fingerprint,safeguards:{paid_ai:false,prod_write:false,trading:false,max_depth:2,dedup:true,cycle_check:true,idempotent:true,scope_hydration_fail_closed:true},roots:roots.map(r=>r.mission_id),units};
 }
 
 export const readyQueue=graph=>graph.units.filter(u=>u.status==='READY').sort((a,b)=>b.priority-a.priority||a.work_unit_id.localeCompare(b.work_unit_id));
