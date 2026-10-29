@@ -1,15 +1,15 @@
 name: CEREBRO Continuous Useful Worker V0
-run-name: CEREBRO CONTINUOUS ${{ inputs.lane }} · C${{ inputs.cycle }} · PREPROD
+run-name: CEREBRO CONTINUOUS V0 DRAIN ${{ inputs.lane }} · C${{ inputs.cycle }} · PREPROD
 
 on:
   workflow_dispatch:
     inputs:
       lane:
-        description: 'Continuous useful-work lane 0..67'
+        description: 'Legacy continuous useful-work lane 0..67'
         required: true
         type: string
       cycle:
-        description: 'Self-feeding cycle 0..999999'
+        description: 'Legacy cycle 0..999999'
         required: false
         default: '0'
         type: string
@@ -23,17 +23,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  continuous-useful-work:
-    name: CONTINUOUS-${{ inputs.lane }}-C${{ inputs.cycle }}
+  drain-to-v1:
+    name: DRAIN-V0-${{ inputs.lane }}-C${{ inputs.cycle }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       CEREBRO_SUPERVISOR_ENV: PREPROD
-      CEREBRO_INITIAL_CONCURRENCY: '48'
-      CEREBRO_MAX_CONCURRENCY: '68'
-      CEREBRO_MAX_PER_COMPANY: '68'
       CEREBRO_ALLOW_PAID_FANOUT: 'NO'
       CEREBRO_PROD_WRITE: 'false'
       CEREBRO_TRADING_ACCESS: 'false'
@@ -41,7 +38,7 @@ jobs:
       - name: Checkout immutable execution revision
         uses: actions/checkout@v4
 
-      - name: Enforce continuous PREPROD zero-paid guard
+      - name: Enforce PREPROD zero-paid migration guard
         shell: bash
         run: |
           set -euo pipefail
@@ -59,31 +56,31 @@ jobs:
       - name: Contract tests
         run: node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
 
-      - name: Execute one live self-fed useful work unit
+      - name: Execute final V0 work unit
         run: node cerebro/runtime/continuous-useful-work-factory-v0.mjs --lane=${{ inputs.lane }} --cycle=${{ inputs.cycle }}
 
-      - name: Publish inspectable evidence
+      - name: Publish V0 drain evidence
         uses: actions/upload-artifact@v4
         with:
-          name: cerebro-continuous-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
+          name: cerebro-v0-drain-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
           path: artifacts/continuous-work-v0/**
           if-no-files-found: error
           retention-days: 1
 
-      - name: Self-refill same lane with fresh work
+      - name: Migrate lane to sustained V1
         if: success()
         shell: bash
         run: |
           set -euo pipefail
           current=${{ inputs.cycle }}
           if [ "$current" -ge 999999 ]; then next=0; else next=$((current + 1)); fi
-          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v0.yml/dispatches" \
+          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
             -f ref=main \
             -f "inputs[lane]=${{ inputs.lane }}" \
             -f "inputs[cycle]=${next}"
-          echo "self_refilled_lane=${{ inputs.lane }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "migration=V0_TO_V1" >> "$GITHUB_STEP_SUMMARY"
+          echo "lane=${{ inputs.lane }}" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
-          echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
