@@ -1,0 +1,97 @@
+name: CEREBRO MISSION SUSTAINED PREPROD V1
+run-name: CEREBRO MISSION WAVE · 28 lanes · PREPROD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/mission-dag-v1-preprod-20261029
+    paths:
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
+      - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
+      - 'cerebro/tests/mission-derived-useful-work-v1.test.mjs'
+      - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+      - '.github/workflows/cerebro-mission-sustained-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-mission-sustained-preprod-v1
+  cancel-in-progress: true
+
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Existing continuous worker contract
+        run: node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+      - name: Mission DAG contract
+        run: node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
+      - name: Mission-derived worker contract and collision coverage
+        run: node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+      - name: Verify sustained worker is wired MISSION-DAG first and preserves fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+          grep -q 'mission-derived-useful-work-v1.mjs' "$file"
+          grep -q -- '--fallback=true' "$file"
+          grep -q 'artifacts/mission-derived-work-v1' "$file"
+          grep -q 'artifacts/continuous-work-v0' "$file"
+          grep -q 'primary_source=MISSION_DAG_V1' "$file"
+          grep -q 'ref="${GITHUB_REF_NAME}"' "$file"
+          ! grep -q 'CEREBRO_ALLOW_PAID_FANOUT:.*YES' "$file"
+          ! grep -q 'CEREBRO_PROD_WRITE:.*true' "$file"
+          ! grep -q 'CEREBRO_TRADING_ACCESS:.*true' "$file"
+
+  mission-wave:
+    needs: contract-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 28
+      matrix:
+        lane: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27]
+    env:
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      CEREBRO_MISSION_WORK_OUT_DIR: artifacts/mission-derived-work-v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute three unique mission-derived work units
+        shell: bash
+        run: |
+          set -euo pipefail
+          for cycle in 0 1 2; do
+            node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane=${{ matrix.lane }} --cycle=$cycle --fallback=true
+          done
+      - name: Verify evidence was produced
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find artifacts/mission-derived-work-v1 -type f -name '*.json' | wc -l | tr -d ' ')"
+          test "$count" -ge 3
+          echo "lane=${{ matrix.lane }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "mission_units_completed=$count" >> "$GITHUB_STEP_SUMMARY"
+          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-mission-wave-lane-${{ matrix.lane }}-${{ github.run_id }}
+          path: |
+            artifacts/mission-derived-work-v1/**
+            artifacts/continuous-work-v0/**
+          if-no-files-found: error
+          retention-days: 2

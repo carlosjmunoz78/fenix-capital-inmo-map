@@ -1,0 +1,36 @@
+{
+  "component_id": "ORCH-001/MISSION-DECOMPOSER-V1",
+  "component_type": "orchestrator_capability",
+  "parent_engine_id": "ORCH-001",
+  "state": "PREPROD_CANDIDATE",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "purpose": "Convert the 28 canonical mission roots M01-M28 into an idempotent dependency DAG and executable work-unit backlog.",
+  "canonical_roots": "cerebro/config/mission-roots-v1.json",
+  "runtime": "cerebro/runtime/mission-recursive-decomposer-v1.mjs",
+  "tests": "cerebro/runtime/mission-recursive-decomposer-v1.test.mjs",
+  "workflow": ".github/workflows/cerebro-mission-dag-preprod-v1.yml",
+  "contracts": {
+    "company_id_required": true,
+    "engine_id_required": true,
+    "environment_required": true,
+    "version_required": true,
+    "dedup": true,
+    "idempotency": true,
+    "cycle_detection": true,
+    "capability_ensure_if_missing": true
+  },
+  "policy": {
+    "additional_cost_eur": 0,
+    "paid_ai_allowed": false,
+    "prod_write_allowed": false,
+    "trading_access": false,
+    "human_exception_reasons": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]
+  },
+  "rollback": {
+    "strategy": "delete/close PREPROD branch; existing continuous worker V1 remains untouched",
+    "baseline_main_sha": "33ea122a9c09fa71d81dc4f2598225bb0cf69bcd"
+  },
+  "autonomy": "PREPROD_ONLY_UNTIL_CANONICAL_SCOPE_HYDRATION_AND_EXECUTION_GATE_GREEN"
+}

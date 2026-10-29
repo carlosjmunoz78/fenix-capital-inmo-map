@@ -1,0 +1,109 @@
+name: CEREBRO MISSION DAG PREPROD V1
+run-name: CEREBRO MISSION DAG · M01-M28 · PREPROD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/mission-dag-v1-preprod-20261029
+    paths:
+      - 'cerebro/config/mission-roots-v1.json'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.test.mjs'
+      - '.github/workflows/cerebro-mission-dag-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-mission-dag-preprod-v1
+  cancel-in-progress: true
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      CEREBRO_MISSION_OUT_DIR: artifacts/cerebro-mission-dag-v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safety guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = "PREPROD"
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
+          test "$CEREBRO_PROD_WRITE" = "false"
+          test "$CEREBRO_TRADING_ACCESS" = "false"
+      - name: Test recursive decomposer
+        run: node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
+      - name: Generate M01-M28 DAG and backlog
+        run: node cerebro/runtime/mission-recursive-decomposer-v1.mjs
+      - name: Verify physical artifact invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=JSON.parse(fs.readFileSync('artifacts/cerebro-mission-dag-v1/summary.json','utf8'));
+          if(s.mission_count!==28) throw new Error(`mission_count=${s.mission_count}`);
+          if(s.work_unit_count<2000) throw new Error(`work_unit_count=${s.work_unit_count}`);
+          if(s.atomic_count<2000) throw new Error(`atomic_count=${s.atomic_count}`);
+          if(s.capability_work_unit_count!==168) throw new Error(`capability_work_unit_count=${s.capability_work_unit_count}`);
+          if(s.safeguards.paid_ai||s.safeguards.prod_write||s.safeguards.trading) throw new Error('unsafe safeguard state');
+          console.log(JSON.stringify(s));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-mission-dag-preprod-v1-${{ github.run_id }}
+          path: artifacts/cerebro-mission-dag-v1/
+          retention-days: 7
+
+  mission-preflight:
+    needs: verify-and-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    strategy:
+      fail-fast: false
+      max-parallel: 28
+      matrix:
+        mission: [M01,M02,M03,M04,M05,M06,M07,M08,M09,M10,M11,M12,M13,M14,M15,M16,M17,M18,M19,M20,M21,M22,M23,M24,M25,M26,M27,M28]
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify one canonical root and its recursive packet
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = "PREPROD"
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
+          test "$CEREBRO_PROD_WRITE" = "false"
+          test "$CEREBRO_TRADING_ACCESS" = "false"
+          mkdir -p artifacts/mission-preflight
+          MISSION='${{ matrix.mission }}' node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {buildMissionDag,defaultMissionRoots} from './cerebro/runtime/mission-recursive-decomposer-v1.mjs';
+          const mission=process.env.MISSION;
+          const graph=buildMissionDag(defaultMissionRoots(),{environment:'PREPROD',generated_at:'1970-01-01T00:00:00.000Z'});
+          const units=graph.units.filter(u=>u.mission_id===mission);
+          if(units.length!==99) throw new Error(`${mission} expected 99 work units, got ${units.length}`);
+          const capabilities=units.filter(u=>u.kind==='capability_work_unit');
+          if(capabilities.length!==6) throw new Error(`${mission} expected 6 capability work units, got ${capabilities.length}`);
+          const result={mission_id:mission,work_units:units.length,atomic_units:units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit').length,capability_units:capabilities.length,scope_ref:units[0].canonical_scope_ref,scope_hydration_required:true,paid_ai:false,prod_write:false,trading:false,graph_fingerprint:graph.graph_fingerprint};
+          fs.writeFileSync(`artifacts/mission-preflight/${mission}.json`,JSON.stringify(result,null,2));
+          console.log(JSON.stringify(result));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-mission-preflight-${{ matrix.mission }}-${{ github.run_id }}
+          path: artifacts/mission-preflight/${{ matrix.mission }}.json
+          retention-days: 2

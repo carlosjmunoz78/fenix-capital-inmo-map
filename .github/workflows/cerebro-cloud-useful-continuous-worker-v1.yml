@@ -39,6 +39,7 @@ jobs:
       CEREBRO_TRADING_ACCESS: 'false'
       CEREBRO_WORKER_LEASE_SECONDS: '420'
       CEREBRO_MAX_UNITS_PER_LEASE: '256'
+      CEREBRO_MISSION_WORK_OUT_DIR: artifacts/mission-derived-work-v1
     steps:
       - name: Checkout immutable execution revision
         uses: actions/checkout@v4
@@ -62,10 +63,13 @@ jobs:
           test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 67
           test "${{ inputs.cycle }}" -ge 0 && test "${{ inputs.cycle }}" -le 999999
 
-      - name: Contract tests
-        run: node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+      - name: Contract tests OLD + MISSION DAG NEW
+        run: |
+          node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+          node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
+          node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
 
-      - name: Execute sustained self-fed useful-work lease
+      - name: Execute sustained mission-derived lease with V0 fallback
         id: lease
         shell: bash
         run: |
@@ -76,9 +80,10 @@ jobs:
           units=0
 
           while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$CEREBRO_MAX_UNITS_PER_LEASE" ]; do
-            node cerebro/runtime/continuous-useful-work-factory-v0.mjs \
+            node cerebro/runtime/mission-derived-useful-work-v1.mjs \
               --lane=${{ inputs.lane }} \
-              --cycle="$current"
+              --cycle="$current" \
+              --fallback=true
             units=$((units + 1))
             if [ "$current" -ge 999999 ]; then current=0; else current=$((current + 1)); fi
           done
@@ -89,6 +94,8 @@ jobs:
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
           echo "lane=${{ inputs.lane }}" >> "$GITHUB_OUTPUT"
           echo "sustained_worker=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
+          echo "fallback_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
@@ -97,7 +104,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-sustained-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
-          path: artifacts/continuous-work-v0/**
+          path: |
+            artifacts/mission-derived-work-v1/**
+            artifacts/continuous-work-v0/**
           if-no-files-found: error
           retention-days: 1
 
@@ -108,13 +117,17 @@ jobs:
           set -euo pipefail
           next='${{ steps.lease.outputs.next_cycle }}'
           test -n "$next"
+          ref="${GITHUB_REF_NAME}"
+          test -n "$ref"
           gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
-            -f ref=main \
+            -f "ref=${ref}" \
             -f "inputs[lane]=${{ inputs.lane }}" \
             -f "inputs[cycle]=${next}"
           echo "self_refilled_lane=${{ inputs.lane }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "self_refilled_ref=${ref}" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
