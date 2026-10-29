@@ -1,0 +1,36 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { buildTaskDescriptor, WORK_FAMILIES } from '../runtime/continuous-useful-work-factory-v0.mjs';
+
+test('continuous work descriptor is deterministic for the same lane and cycle', () => {
+  const a = buildTaskDescriptor(7, 1234);
+  const b = buildTaskDescriptor(7, 1234);
+  assert.deepEqual(a, b);
+  assert.equal(a.lane, 7);
+  assert.equal(a.cycle, 1234);
+  assert.match(a.task_key, /^continuous:7:1234:/);
+});
+
+test('68 lanes are accepted and out-of-range lanes fail closed', () => {
+  assert.equal(buildTaskDescriptor(0, 0).lane, 0);
+  assert.equal(buildTaskDescriptor(67, 0).lane, 67);
+  assert.throws(() => buildTaskDescriptor(68, 0), /lane must be an integer 0\.\.67/);
+});
+
+test('cycles rotate work families instead of repeating one static audit forever', () => {
+  const seen = new Set();
+  for (let cycle = 0; cycle < WORK_FAMILIES.length; cycle += 1) {
+    seen.add(buildTaskDescriptor(0, cycle).family_id);
+  }
+  assert.equal(seen.size, WORK_FAMILIES.length);
+});
+
+test('task descriptors preserve PREPROD-safe bounded work metadata', () => {
+  const task = buildTaskDescriptor(12, 88);
+  assert.ok(task.family_id);
+  assert.ok(task.family_title);
+  assert.ok(Array.isArray(task.terms));
+  assert.ok(task.terms.length > 0);
+  assert.ok(task.mode);
+  assert.ok(task.shard_rotation >= 0 && task.shard_rotation <= 67);
+});
