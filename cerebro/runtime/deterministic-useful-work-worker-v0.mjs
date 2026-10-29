@@ -30,6 +30,26 @@ const AUDITS = Object.freeze([
   ['A45','Model Router coverage',['model','router','provider']],
   ['A46','Testing and acceptance coverage',['test','acceptance','e2e']],
   ['A47','Documentation and changelog coverage',['changelog','documentation','readme']],
+  ['A48','Notion continuity and sync coverage',['notion','knowledge','sync','database']],
+  ['A49','WordPress and plugin dependency coverage',['wordpress','wpcode','plugin','staging']],
+  ['A50','CRM workflow coverage',['crm','lead','pipeline','customer']],
+  ['A51','App and device surface coverage',['app','pwa','mobile','tablet']],
+  ['A52','Company bootstrap coverage',['company_registry','bootstrap','onboarding','company_id']],
+  ['A53','Business discovery coverage',['business','discovery','footprint','scanner']],
+  ['A54','Local SEO coverage',['local seo','google business','location','maps']],
+  ['A55','Social media automation coverage',['social','instagram','facebook','linkedin','tiktok']],
+  ['A56','Market and competitor intelligence coverage',['competitor','market','intelligence','research']],
+  ['A57','Lead magnet and newsletter coverage',['lead','newsletter','download','consent']],
+  ['A58','Browser identity and session coverage',['browser','profile','session','identity']],
+  ['A59','Credential broker and secret isolation coverage',['credential','broker','secret','oidc']],
+  ['A60','Task deduplication and idempotency coverage',['idempotent','dedupe','duplicate','job']],
+  ['A61','Queue fairness and lease coverage',['lease','claim','queue','retry']],
+  ['A62','PREPROD parity and promotion coverage',['preprod','promotion','prod','parity']],
+  ['A63','Acceptance evidence and physical verification coverage',['acceptance','evidence','physical','gate']],
+  ['A64','Data retention and privacy coverage',['retention','privacy','consent','pii']],
+  ['A65','Incident response and kill-switch coverage',['incident','kill_switch','security','rollback']],
+  ['A66','Zero-cost infrastructure coverage',['zero_cost','free','cost','self-hosted']],
+  ['A67','Autonomy and human-exception state coverage',['autonomy','human_required','confidence','policy']],
 ]);
 
 const PHASES = Object.freeze([
@@ -95,8 +115,8 @@ function runCoverage({ lane, pass, title, terms, product }) {
     scanned += 1;
   }
   const report = Object.freeze({
-    schema_version: '1.1', lane, pass, title, environment: PREPROD,
-    company_id: 'fenix', engine_id: 'JOB-001', version: 'deterministic-useful-work-v1-refill',
+    schema_version: '1.2', lane, pass, title, environment: PREPROD,
+    company_id: 'fenix', engine_id: 'JOB-001', version: 'deterministic-useful-work-v2-max68',
     generated_at: new Date().toISOString(), git_sha: process.env.GITHUB_SHA || null,
     files_scanned: scanned, matching_path_count: hits.length, matching_paths: hits.slice(0, 160),
     useful_work_product: product, paid_ai_used: false, prod_authorized: false,
@@ -107,15 +127,15 @@ function runCoverage({ lane, pass, title, terms, product }) {
 }
 
 async function main() {
-  const lane = boundedInteger(arg('lane'), 'lane', 0, 47);
+  const lane = boundedInteger(arg('lane'), 'lane', 0, 67);
   const pass = boundedInteger(arg('pass', '0'), 'pass', 0, 7);
   let result;
 
   if (pass === 0 && lane < FANOUT_BLOCKS.length) {
     result = await runEvidence(FANOUT_BLOCKS[lane].id);
     writeJson(path.join(OUT_ROOT, `lane-${String(lane).padStart(2,'0')}`, 'pass-0.json'), {
-      schema_version: '1.1', lane, pass, environment: PREPROD, company_id: 'fenix', engine_id: 'JOB-001',
-      version: 'deterministic-useful-work-v1-refill', useful_work_product: 'bounded mission evidence inventory',
+      schema_version: '1.2', lane, pass, environment: PREPROD, company_id: 'fenix', engine_id: 'JOB-001',
+      version: 'deterministic-useful-work-v2-max68', useful_work_product: 'bounded mission evidence inventory',
       paid_ai_used: false, prod_authorized: false, prod_write_authorized: false, trading_access: false, result,
     });
   } else {
@@ -130,7 +150,7 @@ async function main() {
     });
   }
 
-  console.log(JSON.stringify({ ok: true, lane, pass, next_pass: pass < 7 ? pass + 1 : null, environment: PREPROD, paid_ai_used: false, result_type: pass === 0 && lane < 25 ? 'MISSION_EVIDENCE' : 'GOVERNANCE_PHASE' }));
+  console.log(JSON.stringify({ ok: true, lane, pass, next_pass: pass < 7 ? pass + 1 : null, environment: PREPROD, paid_ai_used: false, max_lane: 67, result_type: pass === 0 && lane < 25 ? 'MISSION_EVIDENCE' : 'GOVERNANCE_PHASE' }));
 }
 
 main().catch(error => { console.error(String(error?.stack || error)); process.exitCode = 1; });
