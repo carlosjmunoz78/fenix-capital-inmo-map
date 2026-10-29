@@ -9,11 +9,16 @@ const safeEnv=()=>{
   process.env.CEREBRO_TRADING_ACCESS='false';
 };
 
-test('same lane/cycle selects the same mission atomic unit',()=>{
+test('same lane/cycle selects the same hydrated mission atomic unit',()=>{
   const a=selectMissionUnit(7,3);const b=selectMissionUnit(7,3);
   assert.equal(a.unit.work_unit_id,b.unit.work_unit_id);
   assert.equal(a.graph_fingerprint,b.graph_fingerprint);
   assert.equal(a.atomic_count,2352);
+  assert.equal(a.scope_hydrated,true);
+  assert.equal(a.hydrated_mission_count,28);
+  assert.match(a.canonical_source_sha256,/^[a-f0-9]{64}$/);
+  assert.equal(a.unit.source_status,'CANONICAL_SCOPE_HYDRATED');
+  assert.ok(a.unit.mission_scope);
 });
 
 test('linear lane/cycle mapping reaches all 2352 atomic units exactly once before wrap',()=>{
@@ -35,11 +40,15 @@ test('first 28 lanes span all 28 mission roots immediately',()=>{
   assert.equal(missions.size,28);
 });
 
-test('safe deterministic mission work produces evidence',()=>{
+test('safe deterministic mission work produces hydrated evidence',()=>{
   safeEnv();
   const r=executeMissionDerivedWork({lane:0,cycle:0,fallback:false});
   assert.equal(r.execution_state,'EVIDENCE_COLLECTED');
   assert.equal(r.environment,'PREPROD');
+  assert.equal(r.scope_hydrated,true);
+  assert.equal(r.hydrated_mission_count,28);
+  assert.equal(r.scope_hydration_required,false);
+  assert.ok(r.mission_scope.scope_text);
   assert.equal(r.paid_ai_used,false);
   assert.equal(r.prod_write_authorized,false);
   assert.equal(r.trading_access,false);
@@ -52,15 +61,19 @@ test('capability packet is audited and routed without paid acquisition',()=>{
   assert.ok(r.capability);
   assert.equal(r.capability.additional_cost_eur,0);
   assert.equal(r.capability.paid_ai,false);
+  assert.equal(r.scope_hydration_required,false);
 });
 
-test('scope-dependent implementation fails closed and old deterministic worker is fallback',()=>{
+test('scope-dependent implementation consumes canonical hydrated scope without legacy fallback',()=>{
   safeEnv();
   const r=executeMissionDerivedWork({lane:36,cycle:0,fallback:true});
   assert.equal(r.phase,'implement');
-  assert.equal(r.execution_state,'SCOPE_HYDRATION_REQUIRED');
-  assert.equal(r.scope_hydration_required,true);
-  assert.equal(r.fallback.used,true);
+  assert.equal(r.execution_state,'SCOPE_HYDRATED_EVIDENCE_COLLECTED');
+  assert.equal(r.scope_hydration_required,false);
+  assert.equal(r.work_unit.source_status,'CANONICAL_SCOPE_HYDRATED');
+  assert.ok(r.mission_scope.title);
+  assert.ok(r.mission_scope.scope_text);
+  assert.equal(r.fallback.used,false);
 });
 
 test('unsafe environments fail closed',()=>{
