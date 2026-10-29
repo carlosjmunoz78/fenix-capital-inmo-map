@@ -1,0 +1,64 @@
+name: CEREBRO CLOUD USEFUL WORKER V0
+run-name: CEREBRO USEFUL ${{ inputs.lane }} · PREPROD deterministic
+
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: 'Deterministic useful-work lane 0..47'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-useful-worker-v0-${{ inputs.lane }}
+  cancel-in-progress: false
+
+jobs:
+  useful-work:
+    name: USEFUL-${{ inputs.lane }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_INITIAL_CONCURRENCY: '48'
+      CEREBRO_MAX_CONCURRENCY: '64'
+      CEREBRO_MAX_PER_COMPANY: '48'
+      CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'
+      CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - name: Checkout immutable execution revision
+        uses: actions/checkout@v4
+
+      - name: Enforce PREPROD zero-paid-AI guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = "PREPROD"
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
+          test "$CEREBRO_PROD_WRITE" = "false"
+          test "$CEREBRO_TRADING_ACCESS" = "false"
+          case "${{ inputs.lane }}" in
+            ''|*[!0-9]*) exit 2 ;;
+          esac
+          test "${{ inputs.lane }}" -ge 0
+          test "${{ inputs.lane }}" -le 47
+
+      - name: Execute bounded useful work
+        run: node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=${{ inputs.lane }}
+
+      - name: Publish inspectable evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-useful-${{ inputs.lane }}-${{ github.run_id }}
+          path: |
+            artifacts/useful-work-v0/**
+            artifacts/max-fanout-v1/**
+          if-no-files-found: warn
+          retention-days: 7
