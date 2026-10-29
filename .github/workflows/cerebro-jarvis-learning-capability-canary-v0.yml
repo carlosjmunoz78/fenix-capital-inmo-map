@@ -1,5 +1,5 @@
 name: CEREBRO JARVIS Learning Capability Canary V0
-run-name: JARVIS LEARNING CANARY · PREPROD · ${{ github.sha }}
+run-name: JARVIS LEARNING CANARY · DURABLE PREPROD · ${{ github.sha }}
 
 on:
   workflow_dispatch:
@@ -8,34 +8,44 @@ on:
       - cerebro-jarvis-learning-loop-v0-20261029
     paths:
       - 'cerebro/runtime/mission-capability-learning-loop-v0.mjs'
+      - 'cerebro/runtime/mission-fact001-gap-adapter-v0.mjs'
       - 'cerebro/tests/mission-capability-learning-loop-v0.test.mjs'
+      - 'cerebro/tests/mission-fact001-gap-adapter-v0.test.mjs'
       - 'cerebro/contracts/jarvis-learning-capability-loop-v0.json'
+      - 'cerebro/evidence/jarvis-learning-cross-run-trigger-v0.txt'
       - 'cerebro/jarvis/boost-001/**'
       - '.github/workflows/cerebro-jarvis-learning-capability-canary-v0.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cerebro-jarvis-learning-capability-canary-v0
-  cancel-in-progress: true
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_JARVIS_LEARNING_OUT_DIR: /tmp/cerebro-rsi-learning-state/cerebro/runtime/rsi-learning-state/mission-jarvis
+  CEREBRO_JARVIS_DEEPSEEK_SAMPLE_MODULO: '16384'
+  LRN_STATE_BRANCH: cerebro-rsi-learning-state-v0
+  LRN_STATE_ROOT: cerebro/runtime/rsi-learning-state
 
 jobs:
-  preprod-canary:
+  durable-preprod-canary:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
-    env:
-      CEREBRO_SUPERVISOR_ENV: PREPROD
-      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
-      CEREBRO_PROD_WRITE: 'false'
-      CEREBRO_TRADING_ACCESS: 'false'
-      CEREBRO_JARVIS_LEARNING_OUT_DIR: artifacts/jarvis-learning-loop-v0
-      CEREBRO_JARVIS_DEEPSEEK_SAMPLE_MODULO: '16384'
-      DEEPSEEK_APPROVED_BASELINE_USD: '100'
-      DEEPSEEK_LEARNING_PROJECTED_USD: '0.01'
+    timeout-minutes: 15
     steps:
-      - name: Checkout candidate branch
+      - name: Checkout candidate branch with state history access
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
       - name: Enforce PREPROD preservation guard
         shell: bash
@@ -47,30 +57,151 @@ jobs:
           test "$CEREBRO_TRADING_ACCESS" = 'false'
           test -f cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
           test -f cerebro/jarvis/boost-001/budget-policy.v1.json
-          test -f cerebro/jarvis/boost-001/DEEPSEEK_PRICING_REVALIDATION_2026-10-29.md
           test -f cerebro/contracts/jarvis-learning-capability-loop-v0.json
+          test -f cerebro/runtime/mission-fact001-gap-adapter-v0.mjs
+
+      - name: Restore dedicated durable LRN state from prior runner
+        id: durable_before
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/cerebro-rsi-learning-state
+          git fetch --no-tags origin "+refs/heads/$LRN_STATE_BRANCH:refs/remotes/origin/$LRN_STATE_BRANCH"
+          git worktree add --detach /tmp/cerebro-rsi-learning-state "refs/remotes/origin/$LRN_STATE_BRANCH"
+          mkdir -p "$CEREBRO_JARVIS_LEARNING_OUT_DIR/learning-ledgers/lane-00"
+          LEDGER="$CEREBRO_JARVIS_LEARNING_OUT_DIR/learning-ledgers/lane-00/learning-ledger.v8"
+          if test -f "$LEDGER"; then
+            echo 'restored=true' >> "$GITHUB_OUTPUT"
+            sha256sum "$LEDGER" | awk '{print "before_sha256="$1}' >> "$GITHUB_OUTPUT"
+          else
+            echo 'restored=false' >> "$GITHUB_OUTPUT"
+            echo 'before_sha256=ABSENT' >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Contract and regression tests
         shell: bash
         run: |
           set -euo pipefail
           node --test cerebro/tests/mission-capability-learning-loop-v0.test.mjs
+          node --test cerebro/tests/mission-fact001-gap-adapter-v0.test.mjs
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
           node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
 
-      - name: Execute end-to-end mission to learning to JARVIS feed
+      - name: Execute deterministic mission learning against durable LRN ledger
+        id: mission_learning
         shell: bash
         env:
-          CEREBRO_ALLOW_JARVIS_DEEPSEEK: 'YES'
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          CEREBRO_ALLOW_JARVIS_DEEPSEEK: 'NO'
         run: |
           set -euo pipefail
           node cerebro/runtime/mission-capability-learning-loop-v0.mjs \
             --lane=0 \
             --cycle=0 \
             --fallback=true \
-            --forceDeepSeek=true | tee /tmp/jarvis-learning-canary-result.json
-          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/jarvis-learning-canary-result.json','utf8').trim().split(/\n/).at(-1)); if(!x.ok) process.exit(2); if(x.learning_candidates<1) process.exit(3); if(x.jarvis_feed_state!=='CANDIDATE_READY_FOR_EVALUATION') process.exit(4); console.log(JSON.stringify({ok:x.ok,learning_candidates:x.learning_candidates,jarvis_feed_state:x.jarvis_feed_state,factory_gap:x.factory_gap,deepseek_status:x.deepseek_status,human_required:x.human_required,prod_write_authorized:x.prod_write_authorized,trading_access:x.trading_access}));"
+            --forceDeepSeek=false | tee /tmp/jarvis-learning-canary-result.json
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/jarvis-learning-canary-result.json','utf8').trim().split(/\n/).at(-1)); if(!x.ok) process.exit(2); if(x.learning_candidates<1) process.exit(3); if(x.jarvis_feed_state!=='CANDIDATE_READY_FOR_EVALUATION') process.exit(4); if(x.deepseek_status!=='SKIPPED_POLICY') process.exit(5); console.log(JSON.stringify({ok:x.ok,learning_candidates:x.learning_candidates,learning_persisted_total:x.learning_persisted_total,jarvis_feed_state:x.jarvis_feed_state,deepseek_status:x.deepseek_status,prod_write_authorized:x.prod_write_authorized,trading_access:x.trading_access}));"
+
+      - name: Prove seed-or-restore cross-run semantics
+        id: cross_run
+        shell: bash
+        env:
+          RESTORED: ${{ steps.durable_before.outputs.restored }}
+          BEFORE_SHA256: ${{ steps.durable_before.outputs.before_sha256 }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/jarvis-learning-cross-run-v0
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const root=process.env.CEREBRO_JARVIS_LEARNING_OUT_DIR;
+          const summaries=[];
+          const walk=(d)=>{for(const n of fs.readdirSync(d)){const f=path.join(d,n);const s=fs.statSync(f);if(s.isDirectory())walk(f);else if(n.endsWith('.loop-summary.json'))summaries.push(f);}};
+          walk(root);
+          const lane0=summaries.map(f=>({f,x:JSON.parse(fs.readFileSync(f,'utf8'))})).find(v=>v.x.source_work_unit_id==='M01.scope.resolve_source'||v.x.work_unit_id==='M01.scope.resolve_source') ?? summaries.map(f=>({f,x:JSON.parse(fs.readFileSync(f,'utf8'))})).find(v=>v.x.mission_id==='M01');
+          if(!lane0) throw new Error('lane-00 learning summary missing');
+          const restored=process.env.RESTORED==='true';
+          if(restored && lane0.x.learning_duplicates_total<1) throw new Error('restored durable ledger did not deduplicate replay');
+          if(!restored && lane0.x.learning_persisted_total<1) throw new Error('initial durable seed was not persisted');
+          const proof={
+            schema_version:'1.0.0',state_type:'CEREBRO_JARVIS_LEARNING_CROSS_RUN_PROOF',
+            company_id:'fenix',engine_id:'LRN-001',environment:'PREPROD',version:'v0',
+            github_run_id:process.env.GITHUB_RUN_ID,source_head_sha:process.env.GITHUB_SHA,
+            prior_runner_state_restored:restored,before_sha256:process.env.BEFORE_SHA256,
+            learning_persisted_total:lane0.x.learning_persisted_total,
+            learning_duplicates_total:lane0.x.learning_duplicates_total,
+            proof_state:restored?'CROSS_RUN_RESTORE_DEDUP_PROVEN':'SEED_PERSISTED_FOR_NEXT_RUN',
+            additional_cost_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false
+          };
+          fs.writeFileSync('artifacts/jarvis-learning-cross-run-v0/cross-run-proof.json',JSON.stringify(proof,null,2)+'\n');
+          console.log(JSON.stringify(proof));
+          NODE
+          PROOF_STATE="$(jq -r '.proof_state' artifacts/jarvis-learning-cross-run-v0/cross-run-proof.json)"
+          echo "proof_state=$PROOF_STATE" >> "$GITHUB_OUTPUT"
+
+      - name: Discover one real mission capability gap from M01-M28
+        id: real_gap
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import {selectMissionUnit,executeMissionDerivedWork} from './cerebro/runtime/mission-derived-useful-work-v1.mjs';
+          let found=null;
+          const visited=new Set();
+          outer: for(let cycle=0;cycle<36;cycle++){
+            for(let lane=0;lane<68;lane++){
+              const selected=selectMissionUnit(lane,cycle);
+              const unit=selected.unit;
+              if(visited.has(unit.work_unit_id)) continue;
+              visited.add(unit.work_unit_id);
+              if(unit.kind!=='capability_work_unit'||!unit.work_unit_id.endsWith('.capability_ensure')) continue;
+              const report=executeMissionDerivedWork({lane,cycle,fallback:true});
+              if(report.capability?.action==='ROUTE_TO_FACTORY'){
+                found={lane,cycle,mission_id:report.work_unit.mission_id,work_unit_id:report.work_unit.work_unit_id,requested_capability:report.capability.capability,source_fingerprint:report.source_fingerprint};
+                break outer;
+              }
+            }
+          }
+          if(!found) throw new Error('no real ROUTE_TO_FACTORY mission capability gap found');
+          fs.writeFileSync('/tmp/real-fact-gap-selection.json',JSON.stringify(found,null,2)+'\n');
+          console.log(JSON.stringify(found));
+          NODE
+          echo "lane=$(jq -r '.lane' /tmp/real-fact-gap-selection.json)" >> "$GITHUB_OUTPUT"
+          echo "cycle=$(jq -r '.cycle' /tmp/real-fact-gap-selection.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Route real mission gap through learning and governed FACT-001 Gateway
+        shell: bash
+        env:
+          GAP_LANE: ${{ steps.real_gap.outputs.lane }}
+          GAP_CYCLE: ${{ steps.real_gap.outputs.cycle }}
+          CEREBRO_ALLOW_JARVIS_DEEPSEEK: 'NO'
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/mission-capability-learning-loop-v0.mjs \
+            --lane="$GAP_LANE" \
+            --cycle="$GAP_CYCLE" \
+            --fallback=true \
+            --forceDeepSeek=false | tee /tmp/jarvis-fact-gap-result.json
+          node -e "const fs=require('fs');const x=JSON.parse(fs.readFileSync('/tmp/jarvis-fact-gap-result.json','utf8').trim().split(/\n/).at(-1)); if(!x.ok||x.factory_gap!==true) process.exit(2); if(x.prod_write_authorized!==false||x.trading_access!==false) process.exit(3); console.log(JSON.stringify({ok:x.ok,factory_gap:x.factory_gap,deepseek_status:x.deepseek_status}));"
+          HANDOFF="$(find "$CEREBRO_JARVIS_LEARNING_OUT_DIR" -type f -name '*.factory-gap-handoff.json' | sort | tail -n1)"
+          test -n "$HANDOFF" && test -f "$HANDOFF"
+          export HANDOFF
+          mkdir -p artifacts/jarvis-learning-cross-run-v0
+          mkdir -p "/tmp/cerebro-rsi-learning-state/$LRN_STATE_ROOT/fact001-gap-receipts"
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {consumeMissionCapabilityGapWithFact001} from './cerebro/runtime/mission-fact001-gap-adapter-v0.mjs';
+          const handoff=JSON.parse(fs.readFileSync(process.env.HANDOFF,'utf8'));
+          const receipt=consumeMissionCapabilityGapWithFact001(handoff);
+          if(receipt.physically_consumed!==true) throw new Error('FACT-001 did not consume handoff');
+          if(receipt.create_new_engine_authorized!==false||receipt.prod_write_authorized!==false||receipt.trading_access!==false) throw new Error('unsafe FACT-001 receipt');
+          const artifact='artifacts/jarvis-learning-cross-run-v0/fact001-gap-consumption-receipt.json';
+          fs.writeFileSync(artifact,JSON.stringify(receipt,null,2)+'\n');
+          const durable=path.join('/tmp/cerebro-rsi-learning-state',process.env.LRN_STATE_ROOT,'fact001-gap-receipts',`${handoff.handoff_id.replace(/[^a-zA-Z0-9._-]/g,'_')}.json`);
+          fs.writeFileSync(durable,JSON.stringify(receipt,null,2)+'\n');
+          console.log(JSON.stringify({physically_consumed:receipt.physically_consumed,route:receipt.route,status:receipt.factory_receipt_status,next_gate:receipt.next_gate,failed_gates:receipt.failed_gates.length,additional_cost_eur:receipt.additional_cost_eur}));
+          NODE
 
       - name: Verify no direct JARVIS self-modification or PROD authorization
         shell: bash
@@ -81,8 +212,8 @@ jobs:
           import path from 'node:path';
           const files=[];
           const walk=d=>{for(const n of fs.readdirSync(d)){const f=path.join(d,n);const s=fs.statSync(f);if(s.isDirectory())walk(f);else if(n.endsWith('.jarvis-feed.json'))files.push(f);}};
-          walk('artifacts/jarvis-learning-loop-v0');
-          if(files.length<1) throw new Error('JARVIS feed artifact missing');
+          walk(process.env.CEREBRO_JARVIS_LEARNING_OUT_DIR);
+          if(files.length<2) throw new Error('expected learning + real-gap JARVIS feed evidence');
           for(const file of files){
             const feed=JSON.parse(fs.readFileSync(file,'utf8'));
             if(feed.prod_authorized!==false||feed.prod_write_authorized!==false||feed.trading_access!==false) throw new Error('unsafe JARVIS feed authorization');
@@ -91,12 +222,45 @@ jobs:
           console.log(JSON.stringify({jarvis_feed_files:files.length,safety:'GREEN'}));
           NODE
 
+      - name: Persist only bounded durable LRN and FACT receipt state
+        shell: bash
+        run: |
+          set -euo pipefail
+          STATE_DIR="/tmp/cerebro-rsi-learning-state/$LRN_STATE_ROOT"
+          mkdir -p "$STATE_DIR/mission-jarvis/proofs"
+          cp artifacts/jarvis-learning-cross-run-v0/cross-run-proof.json "$STATE_DIR/mission-jarvis/proofs/last-cross-run-proof.json"
+          cd /tmp/cerebro-rsi-learning-state
+          git config user.name 'cerebro-jarvis-learning[bot]'
+          git config user.email 'cerebro-jarvis-learning[bot]@users.noreply.github.com'
+          git add "$LRN_STATE_ROOT/mission-jarvis/learning-ledgers" "$LRN_STATE_ROOT/mission-jarvis/proofs/last-cross-run-proof.json" "$LRN_STATE_ROOT/fact001-gap-receipts"
+          if git diff --cached --quiet; then
+            echo 'No durable learning/FACT state delta; idempotent no-op.'
+          else
+            git commit -m "chore(cerebro): persist JARVIS cross-run LRN and FACT-001 receipt from run $GITHUB_RUN_ID"
+            git fetch --no-tags origin "+refs/heads/$LRN_STATE_BRANCH:refs/remotes/origin/$LRN_STATE_BRANCH"
+            if ! git merge-base --is-ancestor "refs/remotes/origin/$LRN_STATE_BRANCH" HEAD; then
+              git rebase "refs/remotes/origin/$LRN_STATE_BRANCH"
+            fi
+            git push origin "HEAD:refs/heads/$LRN_STATE_BRANCH"
+          fi
+
+      - name: Copy bounded inspectable evidence out of durable worktree
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf artifacts/jarvis-learning-loop-v0
+          mkdir -p artifacts/jarvis-learning-loop-v0
+          for d in "$CEREBRO_JARVIS_LEARNING_OUT_DIR"/lane-*; do
+            test -d "$d" && cp -a "$d" artifacts/jarvis-learning-loop-v0/
+          done
+
       - name: Publish inspectable PREPROD evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-jarvis-learning-capability-canary-${{ github.run_id }}
           path: |
             artifacts/jarvis-learning-loop-v0/**
+            artifacts/jarvis-learning-cross-run-v0/**
             artifacts/mission-derived-work-v1/**
             artifacts/continuous-work-v0/**
           if-no-files-found: error
@@ -107,9 +271,11 @@ jobs:
         shell: bash
         run: |
           echo 'environment=PREPROD' >> "$GITHUB_STEP_SUMMARY"
-          echo 'chain=MISSION -> LEARNING_CANDIDATE -> RSI_SHADOW -> FACT001_GAP_IF_NEEDED -> JARVIS_FEED' >> "$GITHUB_STEP_SUMMARY"
-          echo 'deepseek=BOUNDED_ADVISORY_WITH_LIVE_BALANCE_GUARD_IF_SECRET_AVAILABLE' >> "$GITHUB_STEP_SUMMARY"
-          echo 'auto_recharge=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'chain=MISSION -> DURABLE_LRN -> JARVIS_FEED -> REAL_GAP -> FACT001_NATIVE_ROUTE' >> "$GITHUB_STEP_SUMMARY"
+          echo 'durable_state_branch=cerebro-rsi-learning-state-v0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'cross_run_proof=${{ steps.cross_run.outputs.proof_state }}' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=OFF_FOR_CROSS_RUN_PROOF' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
           echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
           echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
-          echo 'stable_memory_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'stable_memory_promotion=false_until_independent_evaluation' >> "$GITHUB_STEP_SUMMARY"
