@@ -3,7 +3,7 @@ name: CEREBRO RECOVER MAX FANOUT LIVE V0
 on:
   push:
     branches:
-      - cerebro/max-fanout-24h-live-20261029-1609
+      - main
     paths:
       - .github/workflows/cerebro-recover-max-fanout-live-v0.yml
 
@@ -32,11 +32,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          body=$(printf '{"ref":"%s","inputs":{"run_deepseek":"false"}}' "${GITHUB_REF_NAME}")
           curl -fsS -X POST \
             -H "Authorization: Bearer ${GH_TOKEN}" \
             -H "Accept: application/vnd.github+json" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
             -H "Content-Type: application/json" \
             "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-max-fanout-24h-v1.yml/dispatches" \
-            -d "${body}"
+            -d '{"ref":"main","inputs":{"run_deepseek":"false"}}'
