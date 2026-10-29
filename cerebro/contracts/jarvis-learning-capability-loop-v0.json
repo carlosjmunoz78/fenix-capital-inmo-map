@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "contract:jarvis-learning-capability-loop-v0",
+  "owner_engine_id": "JARVIS-BOOST-001",
+  "factory_engine_id": "FACT-001",
+  "learning_engine_id": "LRN-001",
+  "work_engine_id": "JOB-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "purpose": "Convert every mission-derived PREPROD outcome into a deduplicable learning candidate, route evidenced capability gaps to the existing FACT-001 governed path, and feed only candidate evidence to JARVIS until independent evaluation and tribunal approve promotion.",
+  "dependencies": [
+    "cerebro/runtime/mission-derived-useful-work-v1.mjs",
+    "cerebro/skills/skill-rsi-shadow-bridge.mjs",
+    "cerebro/runtime/continuous-improvement-contract.mjs",
+    "cerebro/skills/skill-autonomy-safe-action-worker-v1.mjs",
+    "cerebro/runtime/deepseek-provider-v0.mjs",
+    "cerebro/runtime/deepseek-live-balance-guard-v0.mjs",
+    "cerebro/jarvis/boost-001/budget-policy.v1.json"
+  ],
+  "invariants": {
+    "preserve_existing": true,
+    "reuse_existing_capability_first": true,
+    "every_execution_produces_learning_candidate_evidence": true,
+    "learning_candidate_is_not_stable_memory": true,
+    "independent_evaluation_required": true,
+    "tribunal_required": true,
+    "factory_gap_create_default": false,
+    "deepseek_is_advisory_only": true,
+    "deepseek_auto_recharge": false,
+    "deepseek_output_requires_cerebro_evaluation": true,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false
+  },
+  "human_required_allowlist": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "deepseek": {
+    "allowed_model": "deepseek-flash",
+    "activation_gate": "CEREBRO_ALLOW_JARVIS_DEEPSEEK=YES",
+    "secret_env": "DEEPSEEK_API_KEY",
+    "live_balance_guard_required": true,
+    "default_projected_request_usd": 0.01,
+    "default_sampling_modulo": 16384,
+    "customer_data_allowed": false,
+    "credentials_in_prompt_allowed": false,
+    "prod_write_allowed": false,
+    "trading_allowed": false
+  },
+  "rollback": {
+    "method": "Disable the additive loop and continue using mission-derived-useful-work-v1 unchanged.",
+    "existing_worker_replaced": false
+  },
+  "rebuild": {
+    "source_of_truth": "Git repository plus deterministic mission DAG and existing RSI learning contract",
+    "state_required_from_supabase": false
+  }
+}
