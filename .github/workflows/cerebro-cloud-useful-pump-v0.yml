@@ -1,0 +1,43 @@
+name: CEREBRO CLOUD USEFUL PUMP V0
+run-name: CEREBRO CLOUD USEFUL PUMP · 48 lanes
+
+on:
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-cloud-useful-pump-v0
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    name: Dispatch 48 bounded useful PREPROD lanes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Guard execution authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "main" || true
+          echo "PREPROD only; paid AI disabled; no PROD write; Trading denied"
+
+      - name: Dispatch 48 distinct useful workers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for lane in $(seq 0 47); do
+            gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-worker-v0.yml/dispatches" \
+              -f ref=main \
+              -f "inputs[lane]=${lane}"
+          done
+          echo "dispatched=48" >> "$GITHUB_STEP_SUMMARY"
+          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
