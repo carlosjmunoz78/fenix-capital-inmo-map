@@ -30,6 +30,11 @@ test('first 68 simultaneous lanes do not collide',()=>{
   assert.equal(ids.size,68);
 });
 
+test('first 28 lanes span all 28 mission roots immediately',()=>{
+  const missions=new Set(Array.from({length:28},(_,lane)=>selectMissionUnit(lane,0).unit.mission_id));
+  assert.equal(missions.size,28);
+});
+
 test('safe deterministic mission work produces evidence',()=>{
   safeEnv();
   const r=executeMissionDerivedWork({lane:0,cycle:0,fallback:false});
