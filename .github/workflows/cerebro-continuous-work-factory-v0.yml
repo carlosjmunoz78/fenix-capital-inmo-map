@@ -1,5 +1,5 @@
-name: CEREBRO Continuous Work Factory V0
-run-name: CEREBRO CONTINUOUS FACTORY · target 68 · watchdog
+name: CEREBRO Continuous Work Factory V1
+run-name: CEREBRO CONTINUOUS FACTORY · 68 sustained lanes · watchdog
 
 on:
   workflow_dispatch:
@@ -11,6 +11,7 @@ on:
     paths:
       - '.github/workflows/cerebro-continuous-work-factory-v0.yml'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v0.yml'
+      - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - 'cerebro/runtime/continuous-useful-work-factory-v0.mjs'
       - 'cerebro/tests/continuous-useful-work-factory-v0.test.mjs'
 
@@ -19,12 +20,12 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-continuous-work-factory-v0
+  group: cerebro-continuous-work-factory-v1
   cancel-in-progress: false
 
 jobs:
   watchdog:
-    name: Maintain 68 self-feeding PREPROD lanes
+    name: Maintain 68 sustained self-feeding PREPROD lanes
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -55,20 +56,27 @@ jobs:
       - name: Validate continuous factory contract
         run: node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
 
-      - name: Discover live lanes and refill every missing lane
+      - name: Discover live lanes and refill missing capacity with sustained V1
         shell: bash
         run: |
           set -euo pipefail
-          workflow='cerebro-cloud-useful-continuous-worker-v0.yml'
+          v1='cerebro-cloud-useful-continuous-worker-v1.yml'
+          v0='cerebro-cloud-useful-continuous-worker-v0.yml'
           tmp="$(mktemp)"
           : > "$tmp"
 
-          for status in in_progress queued pending waiting requested; do
-            gh api "/repos/${GH_REPO}/actions/workflows/${workflow}/runs?status=${status}&per_page=100" \
-              --jq '.workflow_runs[].display_title' >> "$tmp" || true
+          for workflow in "$v1" "$v0"; do
+            for status in in_progress queued pending waiting requested; do
+              gh api "/repos/${GH_REPO}/actions/workflows/${workflow}/runs?status=${status}&per_page=100" \
+                --jq '.workflow_runs[].display_title' >> "$tmp" || true
+            done
           done
 
-          present="$(grep -Eo 'CEREBRO CONTINUOUS [0-9]+' "$tmp" | awk '{print $3}' | sort -n -u || true)"
+          present="$({
+            sed -n -E 's/.*CEREBRO SUSTAINED ([0-9]+).*/\1/p' "$tmp"
+            sed -n -E 's/.*CEREBRO CONTINUOUS V0 DRAIN ([0-9]+).*/\1/p' "$tmp"
+            sed -n -E 's/.*CEREBRO CONTINUOUS ([0-9]+).*/\1/p' "$tmp"
+          } | sort -n -u)"
           present_count="$(printf '%s\n' "$present" | sed '/^$/d' | wc -l | tr -d ' ')"
           dispatched=0
           seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
@@ -76,7 +84,7 @@ jobs:
           for lane in $(seq 0 67); do
             if ! printf '%s\n' "$present" | grep -qx "$lane"; then
               cycle=$(( (seed_cycle + lane) % 1000000 ))
-              gh api --method POST "/repos/${GH_REPO}/actions/workflows/${workflow}/dispatches" \
+              gh api --method POST "/repos/${GH_REPO}/actions/workflows/${v1}/dispatches" \
                 -f ref=main \
                 -f "inputs[lane]=${lane}" \
                 -f "inputs[cycle]=${cycle}"
@@ -85,9 +93,11 @@ jobs:
           done
 
           echo "live_or_queued_lanes_before=${present_count}" >> "$GITHUB_STEP_SUMMARY"
-          echo "dispatched_missing_lanes=${dispatched}" >> "$GITHUB_STEP_SUMMARY"
+          echo "dispatched_missing_v1_lanes=${dispatched}" >> "$GITHUB_STEP_SUMMARY"
           echo "target_lanes=68" >> "$GITHUB_STEP_SUMMARY"
           echo "target_floor=48" >> "$GITHUB_STEP_SUMMARY"
+          echo "sustained_lease_seconds=420" >> "$GITHUB_STEP_SUMMARY"
+          echo "v0_migration_aware=true" >> "$GITHUB_STEP_SUMMARY"
           echo "self_refill=true" >> "$GITHUB_STEP_SUMMARY"
           echo "watchdog_every_5m=true" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
