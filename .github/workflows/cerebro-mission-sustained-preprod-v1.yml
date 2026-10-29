@@ -10,6 +10,7 @@ on:
       - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
       - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
       - 'cerebro/tests/mission-derived-useful-work-v1.test.mjs'
+      - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - '.github/workflows/cerebro-mission-sustained-preprod-v1.yml'
 
 permissions:
@@ -36,6 +37,20 @@ jobs:
         run: node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
       - name: Mission-derived worker contract and collision coverage
         run: node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+      - name: Verify sustained worker is wired MISSION-DAG first and preserves fallback
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+          grep -q 'mission-derived-useful-work-v1.mjs' "$file"
+          grep -q -- '--fallback=true' "$file"
+          grep -q 'artifacts/mission-derived-work-v1' "$file"
+          grep -q 'artifacts/continuous-work-v0' "$file"
+          grep -q 'primary_source=MISSION_DAG_V1' "$file"
+          grep -q 'ref="${GITHUB_REF_NAME}"' "$file"
+          ! grep -q 'CEREBRO_ALLOW_PAID_FANOUT:.*YES' "$file"
+          ! grep -q 'CEREBRO_PROD_WRITE:.*true' "$file"
+          ! grep -q 'CEREBRO_TRADING_ACCESS:.*true' "$file"
 
   mission-wave:
     needs: contract-tests
