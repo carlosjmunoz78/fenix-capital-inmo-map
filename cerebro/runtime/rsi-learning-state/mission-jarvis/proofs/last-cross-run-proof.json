@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_JARVIS_LEARNING_CROSS_RUN_PROOF",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "v0",
+  "github_run_id": "40968953225",
+  "source_head_sha": "8c12a674180d0823e005fcbcf1ded0fb57a95527",
+  "prior_runner_state_restored": false,
+  "before_sha256": "ABSENT",
+  "learning_persisted_total": 1,
+  "learning_duplicates_total": 0,
+  "proof_state": "SEED_PERSISTED_FOR_NEXT_RUN",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false
+}
