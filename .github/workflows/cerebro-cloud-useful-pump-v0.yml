@@ -3,6 +3,11 @@ run-name: CEREBRO CLOUD USEFUL PUMP · 48 lanes
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-cloud-useful-pump-v0.yml'
 
 permissions:
   actions: write
@@ -25,7 +30,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "${GITHUB_REF_NAME}" = "main" || true
+          test "${GITHUB_REF_NAME}" = "main"
           echo "PREPROD only; paid AI disabled; no PROD write; Trading denied"
 
       - name: Dispatch 48 distinct useful workers
