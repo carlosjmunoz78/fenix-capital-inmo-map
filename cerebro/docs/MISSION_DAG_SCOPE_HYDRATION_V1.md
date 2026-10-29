@@ -15,7 +15,7 @@
 
 `/28_MACROFRENTES.md`, recuperado del traspaso canónico del 2026-10-28. El runtime exige 28 secciones ordenadas M01..M28, título y scope no vacíos. El contenido completo se sella con SHA-256 y cada misión recibe su propio `scope_fingerprint`.
 
-SHA-256 esperado para esta revisión: `05d87f13edbecdd62e93789285a52c548d27246bc4c53deb1c8fb466d7cf47be`.
+SHA-256 esperado para esta revisión: `7329dcb5c3b063f228769a2d334f3a2114bc084e1b10d9a6a9d45a06ca0332b2`.
 
 ## Contrato OLD vs NEW
 
