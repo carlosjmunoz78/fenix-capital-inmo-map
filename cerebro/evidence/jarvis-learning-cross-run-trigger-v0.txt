@@ -1,0 +1,6 @@
+CEREBRO JARVIS durable learning cross-run proof trigger
+phase=RUN_B
+purpose=restore_prior_runner_state_and_prove_deduplication
+prod_write_authorized=false
+trading_access=false
+additional_cost_eur=0
