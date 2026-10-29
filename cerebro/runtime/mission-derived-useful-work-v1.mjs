@@ -9,6 +9,8 @@ const PREPROD='PREPROD';
 const OUT_ROOT=path.resolve(process.env.CEREBRO_MISSION_WORK_OUT_DIR||'artifacts/mission-derived-work-v1');
 const SCOPE_HYDRATION_BLOCKED=new Set(['design','implement','accept','promote_gate']);
 const PERMUTATION_MULTIPLIER=85;
+const MISSION_GRAPH=buildMissionDag(defaultMissionRoots(),{environment:PREPROD,generated_at:'1970-01-01T00:00:00.000Z'});
+const ATOMIC_UNITS=Object.freeze(MISSION_GRAPH.units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit'));
 
 function boundedInteger(raw,label,min,max){const n=Number(raw);if(!Number.isSafeInteger(n)||n<min||n>max)throw new Error(`${label} must be an integer ${min}..${max}`);return n;}
 function digest(v){return crypto.createHash('sha256').update(String(v)).digest('hex');}
@@ -21,11 +23,9 @@ function atomOf(unit){return unit.work_unit_id.split('.')[2]||null;}
 export function selectMissionUnit(laneRaw,cycleRaw){
   const lane=boundedInteger(laneRaw,'lane',0,67);
   const cycle=boundedInteger(cycleRaw,'cycle',0,999999);
-  const graph=buildMissionDag(defaultMissionRoots(),{environment:PREPROD,generated_at:'1970-01-01T00:00:00.000Z'});
-  const atomic=graph.units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit');
-  const linear=(cycle*68+lane)%atomic.length;
-  const index=(linear*PERMUTATION_MULTIPLIER)%atomic.length;
-  return {lane,cycle,linear,index,unit:atomic[index],graph_fingerprint:graph.graph_fingerprint,atomic_count:atomic.length,permutation_multiplier:PERMUTATION_MULTIPLIER};
+  const linear=(cycle*68+lane)%ATOMIC_UNITS.length;
+  const index=(linear*PERMUTATION_MULTIPLIER)%ATOMIC_UNITS.length;
+  return {lane,cycle,linear,index,unit:ATOMIC_UNITS[index],graph_fingerprint:MISSION_GRAPH.graph_fingerprint,atomic_count:ATOMIC_UNITS.length,permutation_multiplier:PERMUTATION_MULTIPLIER};
 }
 
 function evidenceTerms(unit){
