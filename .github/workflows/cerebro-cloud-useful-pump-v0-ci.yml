@@ -1,0 +1,33 @@
+name: CEREBRO CLOUD USEFUL PUMP V0 CI
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/deterministic-useful-work-worker-v0.mjs'
+      - '.github/workflows/cerebro-cloud-useful-worker-v0.yml'
+      - '.github/workflows/cerebro-cloud-useful-pump-v0.yml'
+      - '.github/workflows/cerebro-cloud-useful-pump-v0-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax
+        run: node --check cerebro/runtime/deterministic-useful-work-worker-v0.mjs
+      - name: Boundary mission lanes
+        run: |
+          node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=0
+          node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=24
+      - name: Boundary governance lanes
+        run: |
+          node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=25
+          node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=47
+      - name: Reject invalid lanes
+        run: |
+          ! node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=48
+          ! node cerebro/runtime/deterministic-useful-work-worker-v0.mjs --lane=-1
