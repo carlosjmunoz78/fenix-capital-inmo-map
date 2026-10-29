@@ -1,0 +1,56 @@
+name: PROD Browser Live Restore V1
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - '.github/workflows/prod-browser-live-restore-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: prod-browser-live-restore-v1
+  cancel-in-progress: true
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Enable governed Browser V2 bootstrap and live worker, then start a fresh consumer
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          node --input-type=module <<'NODE'
+          const headers={
+            authorization:`Bearer ${process.env.GH_TOKEN}`,
+            accept:'application/vnd.github+json',
+            'x-github-api-version':'2022-11-28',
+            'content-type':'application/json'
+          };
+          const ids={live:394368970,bootstrap:400255118};
+          const states={};
+          for(const [key,id] of Object.entries(ids)){
+            const base=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/${id}`;
+            let r=await fetch(base,{headers,redirect:'error'});
+            let body=await r.json().catch(()=>({}));
+            if(!r.ok)throw new Error(`WORKFLOW_READ_FAILED:${key}:${r.status}`);
+            const before=body.state;
+            if(before!=='active'){
+              r=await fetch(`${base}/enable`,{method:'PUT',headers,redirect:'error'});
+              if(r.status!==204)throw new Error(`WORKFLOW_ENABLE_FAILED:${key}:${r.status}`);
+            }
+            r=await fetch(base,{headers,redirect:'error'});
+            body=await r.json().catch(()=>({}));
+            if(!r.ok||body.state!=='active')throw new Error(`WORKFLOW_NOT_ACTIVE:${key}:${r.status}:${body.state||'UNKNOWN'}`);
+            states[key]={id,state_before:before,state_after:body.state};
+          }
+          const liveBase=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/${ids.live}`;
+          const dispatch=await fetch(`${liveBase}/dispatches`,{method:'POST',headers,body:JSON.stringify({ref:'main'}),redirect:'error'});
+          if(dispatch.status!==200&&dispatch.status!==204)throw new Error(`LIVE_DISPATCH_FAILED:${dispatch.status}`);
+          console.log(JSON.stringify({ok:true,states,live_dispatched:true,dispatch_status:dispatch.status,ref:'main',incremental_cost_eur:0,secret_material_logged:false,trading_access:false}));
+          NODE
