@@ -1,10 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import { buildRsiShadowBridge } from '../skills/skill-rsi-shadow-bridge.mjs';
 import {
   buildMissionLearningEvent,
   buildFactoryCapabilityGapHandoff,
   buildJarvisLearningFeed,
+  persistMissionLearningCandidate,
   shouldUseDeepSeek,
   maybeDeepSeekLearningAdvisory
 } from '../runtime/mission-capability-learning-loop-v0.mjs';
@@ -72,7 +76,42 @@ test('failed test is learned as evidence but never auto-promoted',()=>{
   assert.equal(feed.next_gate,'LRN-001_INDEPENDENT_EVALUATION_AND_TRIBUNAL');
 });
 
-test('DeepSeek is selective and remains an untrusted advisory behind live money guard',async()=>{
+test('mission learning candidate persists through existing LRN-001 worker and deduplicates replay',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-jarvis-learning-'));
+  try{
+    const ledgerFile=path.join(root,'learning-ledger.v8');
+    const event=buildMissionLearningEvent(report());
+    const first=persistMissionLearningCandidate(event,{ledgerFile});
+    assert.equal(first.status,'GREEN');
+    assert.equal(first.persisted_total,1);
+    assert.equal(first.duplicates_total,0);
+    assert.equal(first.held_total,0);
+    assert.equal(first.prod_write_authorized,false);
+    assert.equal(first.trading_access,false);
+    const second=persistMissionLearningCandidate(event,{ledgerFile});
+    assert.equal(second.status,'GREEN');
+    assert.equal(second.persisted_total,0);
+    assert.equal(second.duplicates_total,1);
+    assert.equal(second.held_total,0);
+  }finally{
+    fs.rmSync(root,{recursive:true,force:true});
+  }
+});
+
+test('learning persistence rejects non-PREPROD or unsafe authorization before ledger write',()=>{
+  const root=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-jarvis-learning-unsafe-'));
+  try{
+    const ledgerFile=path.join(root,'learning-ledger.v8');
+    const event=buildMissionLearningEvent(report());
+    assert.throws(()=>persistMissionLearningCandidate({...event,source_environment:'PROD'},{ledgerFile}),/PREPROD/);
+    assert.throws(()=>persistMissionLearningCandidate({...event,prod_write_authorized:true},{ledgerFile}),/unsafe/);
+    assert.equal(fs.existsSync(ledgerFile),false);
+  }finally{
+    fs.rmSync(root,{recursive:true,force:true});
+  }
+});
+
+test('DeepSeek is selective, guarded, and parses JSON even when provider adds a preamble',async()=>{
   const source=report({
     phase:'capabilities',
     work_unit:{work_unit_id:'M09.capabilities.capability_ensure',mission_id:'M09'},
@@ -82,13 +121,15 @@ test('DeepSeek is selective and remains an untrusted advisory behind live money 
   let authorized=0;let called=0;
   const advisory=await maybeDeepSeekLearningAdvisory(source,{
     allowPaid:true,apiKey:'test-secret-never-logged',force:true,projectedCostUsd:0.001,
-    guard:{authorize:async()=>{authorized+=1;return {allowed:true,result:'ALLOW',auto_recharge:false};}},
-    provider:{respond:async()=>{called+=1;return {provider:'deepseek',model:'deepseek-flash',request_id:'test',response_id:'resp-test',status:'completed',usage:{input_tokens:10,cached_input_tokens:0,output_tokens:20,reasoning_tokens:0},output_text:'{"learning_hypothesis":"reuse before build","reusable_procedure":["inspect","test"],"capability_recommendation":"reuse","confidence":0.9}'};}}
+    guard:{authorize:async()=>{authorized+=1;return {allowed:true,result:'ALLOW',reason:'TEST',auto_recharge:false,balance:{danger:'do-not-persist'}};}},
+    provider:{respond:async()=>{called+=1;return {provider:'deepseek',model:'deepseek-flash',request_id:'test',response_id:'resp-test',status:'completed',usage:{input_tokens:10,cached_input_tokens:0,output_tokens:20,reasoning_tokens:0},output_text:'Advisory only. {"learning_hypothesis":"reuse before build","reusable_procedure":["inspect","test"],"capability_recommendation":"reuse","confidence":0.9}'};}}
   });
   assert.equal(authorized,1);assert.equal(called,1);
   assert.equal(advisory.status,'ENRICHED');
   assert.equal(advisory.trust,'UNTRUSTED_ADVISORY_PENDING_EVALUATION');
   assert.equal(advisory.parsed.capability_recommendation,'reuse');
+  assert.equal(advisory.authorization_result.allowed,true);
+  assert.equal(Object.hasOwn(advisory.authorization_result,'balance'),false);
   assert.equal(advisory.prod_write_authorized,false);
 });
 
