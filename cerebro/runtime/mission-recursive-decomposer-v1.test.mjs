@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { buildMissionDag, defaultMissionRoots, readyQueue } from './mission-recursive-decomposer-v1.mjs';
+
+const roots=defaultMissionRoots();
+const opts={environment:'PREPROD',generated_at:'1970-01-01T00:00:00.000Z'};
+const a=buildMissionDag(roots,opts);
+const b=buildMissionDag(roots,opts);
+assert.equal(a.mission_count,28);
+assert.equal(a.roots.length,28);
+assert.equal(new Set(a.roots).size,28);
+assert.ok(a.work_unit_count>=2000,`expected >=2000 work units; got ${a.work_unit_count}`);
+assert.ok(a.atomic_count>=2000,`expected >=2000 atomic units; got ${a.atomic_count}`);
+assert.equal(a.capability_work_unit_count,28*6);
+assert.equal(a.graph_fingerprint,b.graph_fingerprint,'same source must create same graph fingerprint');
+assert.equal(new Set(a.units.map(u=>u.work_unit_id)).size,a.work_unit_count);
+assert.equal(new Set(a.units.map(u=>u.idempotency_key)).size,a.work_unit_count);
+assert.ok(a.units.every(u=>u.environment==='PREPROD'));
+assert.ok(a.units.every(u=>u.estimated_cost_eur===0));
+assert.ok(a.units.every(u=>u.paid_ai_allowed===false));
+assert.ok(a.units.every(u=>u.prod_write_allowed===false));
+assert.ok(a.units.every(u=>u.trading_access===false));
+assert.equal(readyQueue(a).length,28);
+assert.throws(()=>buildMissionDag(roots,{environment:'PROD'}),/refuses PROD/);
+assert.throws(()=>buildMissionDag(roots.slice(0,27),opts),/exactly 28/);
+console.log(JSON.stringify({ok:true,mission_count:a.mission_count,work_unit_count:a.work_unit_count,atomic_count:a.atomic_count,capability_work_unit_count:a.capability_work_unit_count,ready_roots:readyQueue(a).length,graph_fingerprint:a.graph_fingerprint}));
