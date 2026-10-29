@@ -8,6 +8,8 @@ on:
   workflow_run:
     workflows: ['PROD Runtime Smoke']
     types: [completed]
+  schedule:
+    - cron: '*/5 * * * *'
 
 permissions:
   contents: read
