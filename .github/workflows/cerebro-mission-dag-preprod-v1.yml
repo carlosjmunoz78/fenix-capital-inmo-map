@@ -1,0 +1,65 @@
+name: CEREBRO MISSION DAG PREPROD V1
+run-name: CEREBRO MISSION DAG · M01-M28 · PREPROD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/mission-dag-v1-preprod-20261029
+    paths:
+      - 'cerebro/config/mission-roots-v1.json'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.test.mjs'
+      - '.github/workflows/cerebro-mission-dag-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-mission-dag-preprod-v1
+  cancel-in-progress: true
+
+jobs:
+  verify-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      CEREBRO_MISSION_OUT_DIR: artifacts/cerebro-mission-dag-v1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safety guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = "PREPROD"
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
+          test "$CEREBRO_PROD_WRITE" = "false"
+          test "$CEREBRO_TRADING_ACCESS" = "false"
+      - name: Test recursive decomposer
+        run: node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
+      - name: Generate M01-M28 DAG and backlog
+        run: node cerebro/runtime/mission-recursive-decomposer-v1.mjs
+      - name: Verify physical artifact invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          node - <<'NODE'
+          const fs=require('fs');
+          const s=JSON.parse(fs.readFileSync('artifacts/cerebro-mission-dag-v1/summary.json','utf8'));
+          if(s.mission_count!==28) throw new Error(`mission_count=${s.mission_count}`);
+          if(s.work_unit_count<2000) throw new Error(`work_unit_count=${s.work_unit_count}`);
+          if(s.atomic_count<2000) throw new Error(`atomic_count=${s.atomic_count}`);
+          if(s.capability_work_unit_count!==168) throw new Error(`capability_work_unit_count=${s.capability_work_unit_count}`);
+          if(s.safeguards.paid_ai||s.safeguards.prod_write||s.safeguards.trading) throw new Error('unsafe safeguard state');
+          console.log(JSON.stringify(s));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-mission-dag-preprod-v1-${{ github.run_id }}
+          path: artifacts/cerebro-mission-dag-v1/
+          retention-days: 7
