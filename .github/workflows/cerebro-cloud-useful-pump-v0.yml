@@ -1,5 +1,5 @@
 name: CEREBRO CLOUD USEFUL PUMP V0
-run-name: CEREBRO CLOUD USEFUL PUMP · 48 lanes · refill V1
+run-name: CEREBRO CLOUD USEFUL PUMP · 68 lanes · refill V2 MAX
 
 on:
   workflow_dispatch:
@@ -19,33 +19,39 @@ concurrency:
 
 jobs:
   dispatch:
-    name: Dispatch 48 bounded useful PREPROD lanes
+    name: Dispatch 68 bounded useful PREPROD lanes
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      CEREBRO_USEFUL_REFILL_VERSION: v1
+      CEREBRO_USEFUL_REFILL_VERSION: v2-max68
+      CEREBRO_INITIAL_CONCURRENCY: '48'
+      CEREBRO_MAX_CONCURRENCY: '68'
     steps:
       - name: Guard execution authority
         shell: bash
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "main"
-          test "$CEREBRO_USEFUL_REFILL_VERSION" = "v1"
-          echo "PREPROD only; paid AI disabled; no PROD write; Trading denied"
+          test "$CEREBRO_USEFUL_REFILL_VERSION" = "v2-max68"
+          test "$CEREBRO_INITIAL_CONCURRENCY" = "48"
+          test "$CEREBRO_MAX_CONCURRENCY" = "68"
+          echo "PREPROD only; paid AI disabled; no PROD write; Trading denied; target floor 48 ceiling 68"
 
-      - name: Dispatch 48 distinct useful workers at phase zero
+      - name: Dispatch 68 distinct useful workers at phase zero
         shell: bash
         run: |
           set -euo pipefail
-          for lane in $(seq 0 47); do
+          for lane in $(seq 0 67); do
             gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-worker-v0.yml/dispatches" \
               -f ref=main \
               -f "inputs[lane]=${lane}" \
               -f "inputs[pass]=0"
           done
-          echo "dispatched=48" >> "$GITHUB_STEP_SUMMARY"
+          echo "dispatched=68" >> "$GITHUB_STEP_SUMMARY"
+          echo "target_floor=48" >> "$GITHUB_STEP_SUMMARY"
+          echo "target_ceiling=68" >> "$GITHUB_STEP_SUMMARY"
           echo "refill_phases=8" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
