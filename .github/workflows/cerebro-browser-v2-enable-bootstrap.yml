@@ -1,0 +1,55 @@
+name: CEREBRO Browser V2 Enable Bootstrap
+
+on:
+  push:
+    branches: ['main']
+    paths:
+      - '.github/workflows/cerebro-browser-v2-enable-bootstrap.yml'
+  workflow_run:
+    workflows: ['PROD Runtime Smoke']
+    types: [completed]
+
+permissions:
+  contents: read
+  actions: write
+
+concurrency:
+  group: cerebro-browser-v2-enable-bootstrap
+  cancel-in-progress: true
+
+jobs:
+  enable-and-start:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Enable and start canonical Browser V2 Live workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          WORKFLOW_ID: '394368970'
+        run: |
+          node --input-type=module <<'NODE'
+          const headers={
+            authorization:`Bearer ${process.env.GH_TOKEN}`,
+            accept:'application/vnd.github+json',
+            'x-github-api-version':'2022-11-28',
+            'content-type':'application/json'
+          };
+          const base=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/${process.env.WORKFLOW_ID}`;
+          const before=await fetch(base,{headers,redirect:'error'});
+          const beforeBody=await before.json().catch(()=>({}));
+          if(!before.ok)throw new Error(`WORKFLOW_STATE_READ_FAILED:${before.status}`);
+          console.log(JSON.stringify({workflow_id:beforeBody.id,name:beforeBody.name,path:beforeBody.path,state_before:beforeBody.state,secret_material_logged:false}));
+          if(beforeBody.state!=='active'){
+            const enable=await fetch(`${base}/enable`,{method:'PUT',headers,redirect:'error'});
+            if(enable.status!==204)throw new Error(`WORKFLOW_ENABLE_FAILED:${enable.status}`);
+          }
+          const after=await fetch(base,{headers,redirect:'error'});
+          const afterBody=await after.json().catch(()=>({}));
+          if(!after.ok||afterBody.state!=='active')throw new Error(`WORKFLOW_NOT_ACTIVE:${after.status}:${afterBody.state||'UNKNOWN'}`);
+          console.log(JSON.stringify({workflow_id:afterBody.id,state_after:afterBody.state,enabled:true,secret_material_logged:false}));
+          const dispatch=await fetch(`${base}/dispatches`,{method:'POST',headers,body:JSON.stringify({ref:'main'}),redirect:'error'});
+          if(dispatch.status!==200&&dispatch.status!==204)throw new Error(`WORKFLOW_DISPATCH_FAILED:${dispatch.status}`);
+          console.log(JSON.stringify({ok:true,workflow_id:afterBody.id,dispatched:true,dispatch_status:dispatch.status,ref:'main',incremental_cost_eur:0,secret_material_logged:false}));
+          NODE
