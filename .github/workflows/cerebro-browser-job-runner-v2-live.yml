@@ -12,6 +12,9 @@ on:
       - 'supabase/functions/cerebro-browser-dispatch-v2/**'
       - 'supabase/functions/cerebro-browser-interactive-v3/**'
       - 'supabase/functions/cerebro-browser-work-total-v1-prod/**'
+  workflow_run:
+    workflows: ['PROD Runtime Smoke']
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -33,6 +36,7 @@ env:
 
 jobs:
   queue:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     name: Watch Browser 1 PROD queue
     runs-on: ubuntu-latest
     timeout-minutes: 48
