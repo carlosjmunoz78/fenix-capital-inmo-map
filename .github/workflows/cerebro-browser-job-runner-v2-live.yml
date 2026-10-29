@@ -1,5 +1,5 @@
 name: CEREBRO Browser 1 V2 Live Worker
-# Operational rearm marker: 2026-10-29. No runtime or authority change.
+# Durable live consumer: workflow_run bootstrap + schedule fallback. No authority expansion.
 
 on:
   push:
@@ -15,6 +15,8 @@ on:
   workflow_run:
     workflows: ['PROD Runtime Smoke']
     types: [completed]
+  schedule:
+    - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
@@ -39,14 +41,14 @@ jobs:
     if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     name: Watch Browser 1 PROD queue
     runs-on: ubuntu-latest
-    timeout-minutes: 48
+    timeout-minutes: 5
     outputs:
       pending: ${{ steps.status.outputs.pending }}
     steps:
       - name: Reject stale workflow reruns
         if: ${{ github.run_attempt != 1 }}
         run: |
-          echo 'STALE_RUN_ATTEMPT_DENIED: start a fresh workflow_dispatch so the worker checks out current main.'
+          echo 'STALE_RUN_ATTEMPT_DENIED: use a fresh event so the worker checks out current main.'
           exit 1
       - id: status
         name: Wait for governed PROD work
@@ -55,7 +57,7 @@ jobs:
           import fs from 'node:fs';
           const endpoint=process.env.CEREBRO_BROWSER_DISPATCH_URL;
           const audience=process.env.CEREBRO_BROWSER_OIDC_AUDIENCE;
-          const deadline=Date.now()+45*60_000;
+          const deadline=Date.now()+4*60_000;
           let pending=0;
           let lastStates={};
           async function oidc(){
@@ -141,11 +143,11 @@ jobs:
   rearm:
     name: Rearm fresh PROD consumer
     needs: [queue, workers, status]
-    if: always() && github.run_attempt == 1
+    if: always() && github.run_attempt == 1 && github.event_name != 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
-      - name: Dispatch next bounded consumer cycle
+      - name: Dispatch next bounded consumer cycle or use schedule fallback
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
@@ -153,6 +155,11 @@ jobs:
           node --input-type=module <<'NODE'
           const url=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/cerebro-browser-job-runner-v2-live.yml/dispatches`;
           const r=await fetch(url,{method:'POST',headers:{authorization:`Bearer ${process.env.GH_TOKEN}`,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:'main'}),redirect:'error'});
-          if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
-          console.log(JSON.stringify({ok:true,rearmed:true,ref:'main',fresh_run_required:true,static_secret_added:false,incremental_cost_eur:0}));
+          if(r.status===200||r.status===204){
+            console.log(JSON.stringify({ok:true,rearmed:true,ref:'main',dispatch_status:r.status,schedule_fallback:true,static_secret_added:false,incremental_cost_eur:0}));
+          }else if(r.status===422){
+            console.log(JSON.stringify({ok:true,rearmed:false,ref:'main',dispatch_status:422,schedule_fallback:true,static_secret_added:false,incremental_cost_eur:0}));
+          }else{
+            throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
+          }
           NODE
