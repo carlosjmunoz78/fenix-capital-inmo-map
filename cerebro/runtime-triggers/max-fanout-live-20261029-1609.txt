@@ -1,0 +1,11 @@
+CEREBRO MAX FANOUT LIVE TRIGGER
+company_id=fenix
+engine_id=JOB-001
+environment=PREPROD
+version=v1
+target_useful=48
+max_global=64
+deepseek_max=8
+repo_write_max=1
+paid_fanout=false
+trading=false
