@@ -1,3 +1,4 @@
+// activation_nonce: 2026-10-29T19:43Z
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { buildTaskDescriptor, WORK_FAMILIES } from '../runtime/continuous-useful-work-factory-v0.mjs';
