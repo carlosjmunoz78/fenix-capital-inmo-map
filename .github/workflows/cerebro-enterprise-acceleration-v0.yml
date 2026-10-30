@@ -1,0 +1,137 @@
+name: CEREBRO Enterprise Acceleration V0
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/**'
+      - '.github/copilot-instructions.md'
+      - '.github/workflows/cerebro-enterprise-acceleration-v0.yml'
+      - 'docs/CEREBRO_GITHUB_ENTERPRISE_ACCELERATION_V0.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-enterprise-accel-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy-gate:
+    name: Policy gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate acceleration policy is fail-closed
+        run: >-
+          node -e "const p=require('./cerebro/config/github-enterprise-execution.v1.json');
+          if(p.status!=='PREPROD_CANDIDATE') process.exit(1);
+          if(p.verified_platform_limits.enterprise_standard_runner_concurrent_jobs_ceiling!==500) process.exit(1);
+          if(p.verified_platform_limits.matrix_jobs_per_workflow_run_ceiling!==256) process.exit(1);
+          if(p.workflow_policy.production_deploy_from_acceleration_workflow!==false) process.exit(1);
+          if(p.workflow_policy.write_external_systems!==false) process.exit(1);
+          if(p.workflow_policy.use_actions_as_permanent_transactional_runtime!==false) process.exit(1);
+          if(p.copilot_policy.copilot_is_runtime_dependency!==false) process.exit(1);
+          if(p.copilot_policy.automerge_prod!==false) process.exit(1);
+          if(p.entitlement_gate.enterprise_organization_verified_for_canonical_repo!==false) process.exit(1);
+          console.log('CEREBRO GitHub acceleration policy GREEN / Enterprise repo entitlement remains fail-closed');"
+
+  discover-tests:
+    name: Discover independent test files
+    needs: policy-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: discover
+        name: Build dynamic test matrix
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const dir = path.join(process.cwd(), 'cerebro', 'tests');
+          const tests = fs.readdirSync(dir)
+            .filter((name) => name.endsWith('.test.mjs'))
+            .sort()
+            .map((name) => `cerebro/tests/${name}`);
+          if (tests.length === 0) throw new Error('No CEREBRO test files discovered');
+          if (tests.length > 256) {
+            throw new Error(`Discovered ${tests.length} tests; V0 single-matrix safety ceiling is 256. Split into multiple lanes before increasing capacity.`);
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(tests)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `count=${tests.length}\n`);
+          console.log(`Discovered ${tests.length} independent test files`);
+          NODE
+
+  parallel-tests:
+    name: Test · ${{ matrix.test }}
+    needs: discover-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      max-parallel: 64
+      matrix:
+        test: ${{ fromJSON(needs.discover-tests.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Run isolated test file
+        run: node --test "${{ matrix.test }}"
+
+  old-vs-new-regression:
+    name: OLD vs NEW · full canonical regression
+    needs: [discover-tests, parallel-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate canonical Engine Factory contracts
+        working-directory: cerebro
+        run: npm run validate
+      - name: Run existing complete regression baseline
+        working-directory: cerebro
+        run: npm test
+      - name: Record acceleration evidence
+        shell: bash
+        run: |
+          printf '%s\n' \
+            "status=GREEN" \
+            "discovered_test_files=${{ needs.discover-tests.outputs.count }}" \
+            "parallel_matrix_ceiling=256" \
+            "v0_max_parallel=64" \
+            "prod_deploy=false" \
+            "external_writes=false" \
+            > /tmp/cerebro-enterprise-acceleration-v0.txt
+          cat /tmp/cerebro-enterprise-acceleration-v0.txt
+      - name: Upload PREPROD evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-enterprise-acceleration-v0-evidence
+          path: /tmp/cerebro-enterprise-acceleration-v0.txt
+          retention-days: 14
+
+  acceptance:
+    name: Acceleration V0 acceptance
+    needs: [discover-tests, parallel-tests, old-vs-new-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Accept only tested additive acceleration
+        run: |
+          echo "CEREBRO Enterprise Acceleration V0 GREEN"
+          echo "Test files: ${{ needs.discover-tests.outputs.count }}"
+          echo "No PROD deployment. No external writes. No service retirement."
