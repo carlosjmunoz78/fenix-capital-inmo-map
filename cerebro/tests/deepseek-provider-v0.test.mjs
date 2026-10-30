@@ -13,6 +13,7 @@ test('DeepSeek provider allowlists only BOOST-001 models', () => {
   assert.throws(() => validateDeepSeekModel('some-unapproved-model'), /not allowlisted/);
   assert.equal(DEEPSEEK_PROVIDER_V0.auto_recharge, false);
   assert.equal(DEEPSEEK_PROVIDER_V0.live_by_default, false);
+  assert.ok(DEEPSEEK_PROVIDER_V0.allowed_reasoning_efforts.includes('none'));
 });
 
 test('request builder is deterministic and bounded', () => {
@@ -29,6 +30,19 @@ test('request builder is deterministic and bounded', () => {
     instructions: 'test',
   });
   assert.throws(() => buildDeepSeekResponseRequest({ input: 'x', maxOutputTokens: 0 }), /between 1 and 393216/);
+});
+
+test('request builder supports explicit non-thinking JSON mode', () => {
+  const body = buildDeepSeekResponseRequest({
+    model: 'deepseek-flash',
+    input: 'return json',
+    maxOutputTokens: 256,
+    reasoningEffort: 'none',
+    jsonMode: true,
+  });
+  assert.deepEqual(body.reasoning, { effort: 'none' });
+  assert.deepEqual(body.text, { format: { type: 'json_object' } });
+  assert.throws(() => buildDeepSeekResponseRequest({input:'x', reasoningEffort:'ultra'}), /reasoning effort is not allowlisted/);
 });
 
 test('live request fails closed when secret is absent', async () => {
@@ -71,7 +85,9 @@ test('tiny canary uses exact DeepSeek responses endpoint and returns sanitised t
   const result = await provider.tinyCanary({ requestId: 'req-1' });
   assert.equal(captured.url, 'https://api.deepseek.com/responses');
   assert.equal(captured.init.method, 'POST');
-  assert.equal(JSON.parse(captured.init.body).model, 'deepseek-flash');
+  const requestBody=JSON.parse(captured.init.body);
+  assert.equal(requestBody.model, 'deepseek-flash');
+  assert.deepEqual(requestBody.reasoning,{effort:'none'});
   assert.equal(result.output_text, 'DEEPSEEK_CANARY_OK');
   assert.equal(result.usage.input_tokens, 10);
   assert.equal(JSON.stringify(result).includes('TEST_SECRET_DO_NOT_LOG'), false);
