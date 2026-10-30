@@ -83,6 +83,36 @@ test('V3 fills the normal adaptive backlog to 48 useful leaf jobs when enough pl
   assert.equal(duplicate.enqueued_children_this_reconcile, 0);
 });
 
+test('V3 reconciles additive durable sources through the same canonical call', t => {
+  const dir = tempDir(t, 'cerebro-pump-v3-additive-');
+  const queue = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
+  let reconciles = 0;
+  const source = {
+    reconcile() {
+      reconciles += 1;
+      return Object.freeze({ state_type: 'TEST_ADDITIVE_SOURCE', accepted_this_reconcile: 1, prod_authorized: false });
+    },
+    snapshot() {
+      return Object.freeze({ state_type: 'TEST_ADDITIVE_SOURCE', accepted_this_reconcile: 0, prod_authorized: false });
+    },
+  };
+  const pump = new AdaptiveHierarchicalAgentWorkPumpV3({
+    job_runtime: queue,
+    context: CTX,
+    scope_version: 'test-v3-additive',
+    additional_sources: [source],
+  });
+
+  const snapshot = pump.reconcile();
+  assert.equal(reconciles, 1);
+  assert.equal(snapshot.additional_work_source_count, 1);
+  assert.equal(snapshot.additional_work_sources[0].state_type, 'TEST_ADDITIVE_SOURCE');
+  assert.equal(snapshot.additional_work_sources[0].accepted_this_reconcile, 1);
+  assert.equal(snapshot.prod_authorized, false);
+  assert.equal(snapshot.trading_access, false);
+  assert.throws(() => new AdaptiveHierarchicalAgentWorkPumpV3({ job_runtime: queue, context: CTX, additional_sources: [{}] }), /reconcile\/snapshot/);
+});
+
 test('V3 remains PREPROD-only and contract keeps DeepSeek at measured ceiling without new authority', t => {
   const dir = tempDir(t, 'cerebro-pump-v3-guard-');
   const queue = new DurableJobRuntimeV1({ file_path: path.join(dir, 'jobs.v8journal') });
@@ -94,6 +124,10 @@ test('V3 remains PREPROD-only and contract keeps DeepSeek at measured ceiling wi
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.model_capacity_default, 8);
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.deepseek_concurrency_above_measured_ceiling, false);
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.repo_write_concurrency, 1);
+  assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.additive_sources_supported, true);
+  assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.additive_sources_share_canonical_reconcile, true);
+  assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.second_scheduler, false);
+  assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.second_daemon, false);
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.auto_recharge, false);
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.prod_authorized, false);
   assert.equal(ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT.trading_access, false);
