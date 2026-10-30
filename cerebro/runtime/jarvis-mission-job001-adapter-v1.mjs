@@ -1,16 +1,22 @@
+import crypto from 'node:crypto';
 import {buildJarvisDag} from './jarvis-mission-dag-v2.mjs';
 
 const PREPROD='PREPROD';
 const ACTIVE=new Set(['QUEUED','RETRY_WAIT','LEASED','HEARTBEATING','RUNNING']);
-const TERMINAL=new Set(['SUCCEEDED','DONE','CANCELLED','FAILED_MANUAL','DEAD_LETTER']);
 export const JARVIS_MISSION_JOB_NAME_V1='jarvis.mission.work-unit.v1';
 
 function required(v,n){if(typeof v!=='string'||!v.trim())throw new TypeError(`${n} required`);return v.trim();}
 function integer(v,n,min,max){const x=Number(v);if(!Number.isSafeInteger(x)||x<min||x>max)throw new TypeError(`${n} must be integer ${min}..${max}`);return x;}
 function runtimeContract(r){if(!r||typeof r.enqueue!=='function'||typeof r.listForContext!=='function')throw new TypeError('job_runtime enqueue/listForContext required');return r;}
 function runnerContract(r){if(!r||typeof r.register!=='function')throw new TypeError('worker_runner.register required');return r;}
+const digest=v=>crypto.createHash('sha256').update(JSON.stringify(v)).digest('hex');
 export function jarvisMissionJob001ContextV1({company_id='zeus',version='jarvis-mission-job001-v1'}={}){return Object.freeze({company_id:required(company_id,'company_id'),engine_id:'JOB-001',environment:PREPROD,version:required(version,'version')});}
 function jobs(runtime,context){return runtime.listForContext(context).filter(j=>j?.name===JARVIS_MISSION_JOB_NAME_V1&&j?.payload?.mission_id==='MISSION-JARVIS-001');}
+
+export function createCheckpointJournalEntryV1({event_type,mission_id,work_unit_id,wave,idempotency_key,previous_hash,details={}}={}){
+ const body={schema_version:'1.0',event_type:required(event_type,'event_type'),mission_id:required(mission_id,'mission_id'),work_unit_id:required(work_unit_id,'work_unit_id'),wave:integer(wave??0,'wave',0,999),idempotency_key:required(idempotency_key||`jarvis:${work_unit_id}`,'idempotency_key'),previous_hash:required(previous_hash,'previous_hash'),details};
+ return Object.freeze({...body,entry_hash:digest(body)});
+}
 
 export class JarvisMissionJob001SourceV1{
  #runtime;#context;#wave;#targetActive;#maxEnqueue;#dag;
@@ -23,7 +29,15 @@ export class JarvisMissionJob001SourceV1{
 
 export function registerJarvisMissionJob001HandlerV1({worker_runner,execute_work}={}){
  const runner=runnerContract(worker_runner);if(typeof execute_work!=='function')throw new TypeError('execute_work required');
- runner.register({name:JARVIS_MISSION_JOB_NAME_V1,handler:async({payload,signal,heartbeat,checkpoint})=>{if(signal?.aborted)throw new Error(`ABORTED:${signal.reason??'UNKNOWN'}`);required(payload?.work_unit_id,'payload.work_unit_id');if(payload?.mission_id!=='MISSION-JARVIS-001')throw new Error('MISSION_ID_MISMATCH');heartbeat?.();checkpoint?.({stage:'JARVIS_WORK_START',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,wave:payload.wave});const result=await execute_work({work_unit_id:payload.work_unit_id,wave:payload.wave,route_class:payload.route_class,phase:payload.phase,source_ref:payload.source_ref,signal});if(signal?.aborted)throw new Error(`ABORTED:${signal.reason??'UNKNOWN'}`);checkpoint?.({stage:'JARVIS_WORK_DONE',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,state:result?.execution_state??null});return Object.freeze({status:'SUCCEEDED',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,execution_state:result?.execution_state??'EVIDENCE_COLLECTED',evidence_ref:result?.evidence_ref??null,human_required:result?.human_required??null,prod_authorized:false,prod_write_authorized:false,trading_access:false});}});return runner;
+ runner.register({name:JARVIS_MISSION_JOB_NAME_V1,handler:async({payload,signal,heartbeat,checkpoint})=>{
+  if(signal?.aborted)throw new Error(`ABORTED:${signal.reason??'UNKNOWN'}`);required(payload?.work_unit_id,'payload.work_unit_id');if(payload?.mission_id!=='MISSION-JARVIS-001')throw new Error('MISSION_ID_MISMATCH');
+  const genesis=`GENESIS:${payload.work_unit_id}`;const startEntry=createCheckpointJournalEntryV1({event_type:'WORK_UNIT_STARTED',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,wave:payload.wave,idempotency_key:payload.idempotency_key||`jarvis:${payload.work_unit_id}`,previous_hash:genesis,details:{route_class:payload.route_class??null,phase:payload.phase??null,source_ref:payload.source_ref??null}});
+  heartbeat?.();checkpoint?.({stage:'JARVIS_WORK_START',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,wave:payload.wave,journal_entry:startEntry});
+  const result=await execute_work({work_unit_id:payload.work_unit_id,wave:payload.wave,route_class:payload.route_class,phase:payload.phase,source_ref:payload.source_ref,signal});if(signal?.aborted)throw new Error(`ABORTED:${signal.reason??'UNKNOWN'}`);
+  const doneEntry=createCheckpointJournalEntryV1({event_type:'WORK_UNIT_COMPLETED',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,wave:payload.wave,idempotency_key:payload.idempotency_key||`jarvis:${payload.work_unit_id}`,previous_hash:startEntry.entry_hash,details:{execution_state:result?.execution_state??null,evidence_ref:result?.evidence_ref??null,human_required:result?.human_required??null}});
+  checkpoint?.({stage:'JARVIS_WORK_DONE',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,state:result?.execution_state??null,journal_entry:doneEntry});
+  return Object.freeze({status:'SUCCEEDED',mission_id:payload.mission_id,work_unit_id:payload.work_unit_id,execution_state:result?.execution_state??'EVIDENCE_COLLECTED',evidence_ref:result?.evidence_ref??null,human_required:result?.human_required??null,journal_head_hash:doneEntry.entry_hash,prod_authorized:false,prod_write_authorized:false,trading_access:false});
+ }});return runner;
 }
 
-export const JARVIS_MISSION_JOB001_ADAPTER_V1_CONTRACT=Object.freeze({capability:'JOB-001/JARVIS-MISSION-ADAPTER-V1',environment:PREPROD,mission_id:'MISSION-JARVIS-001',job_name:JARVIS_MISSION_JOB_NAME_V1,reuses_existing_runtime:true,reuses_existing_queue:true,reuses_existing_worker:true,idempotency_scope:'mission_source_sha256+work_unit_id',wave_aware:true,target_active_max:48,max_enqueue_per_reconcile:48,second_queue:false,second_scheduler:false,second_daemon:false,paid_ai_by_adapter:false,prod_authorized:false,trading_access:false});
+export const JARVIS_MISSION_JOB001_ADAPTER_V1_CONTRACT=Object.freeze({capability:'JOB-001/JARVIS-MISSION-ADAPTER-V1',environment:PREPROD,mission_id:'MISSION-JARVIS-001',job_name:JARVIS_MISSION_JOB_NAME_V1,reuses_existing_runtime:true,reuses_existing_queue:true,reuses_existing_worker:true,idempotency_scope:'mission_source_sha256+work_unit_id',wave_aware:true,target_active_max:48,max_enqueue_per_reconcile:48,checkpoint_hash_chain:true,checkpoint_journal_schema:'1.0',second_queue:false,second_scheduler:false,second_daemon:false,paid_ai_by_adapter:false,prod_authorized:false,trading_access:false});
