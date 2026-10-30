@@ -98,7 +98,7 @@ jobs:
     needs: plan
     strategy:
       fail-fast: false
-      max-parallel: 16
+      max-parallel: 48
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 12
