@@ -52,7 +52,7 @@ permissions:
 jobs:
   contract-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,11 +62,11 @@ jobs:
         run: node --test cerebro/tests/job001-ledger-control-plane-v1.test.mjs
       - name: JOB-001 remote sanitized telemetry tests
         run: node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
-      - name: Supervisor 48/64 entrypoint tests
+      - name: Supervisor verified 180-cap entrypoint tests
         run: node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
       - name: Sustained worker canonical JOB-001 binding guard
         run: node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
-      - name: Mission-derived durable JOB-001 adapter restart/idempotency tests
+      - name: Mission-derived durable JOB-001 adapter restart idempotency and exhaustion tests
         run: node --test cerebro/tests/mission-derived-job001-adapter-v1.test.mjs
       - name: Canonical V3 pump additive-source reconcile tests
         run: node --test cerebro/tests/adaptive-hierarchical-agent-work-pump-v3.test.mjs
@@ -80,13 +80,14 @@ jobs:
           grep -F "CEREBRO-Supervisor-PREPROD" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "RunLevel Limited" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "prod_write_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "target_global_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_global_concurrency -ne 64" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_company_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "target_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_company_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_provider_concurrency.deepseek -ne 8" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "max_repo_write_concurrency -ne 1" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP = 'NO'" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "CEREBRO_REMOTE_TELEMETRY = 'NO'" cerebro/scripts/install-supervisor-preprod-windows.ps1
-      - name: Control-plane contract is PREPROD fail-closed at 48/64
+      - name: Control-plane contract is PREPROD fail-closed at verified 180 cap
         run: |
           node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
-          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8')); if(x.environment!=='PREPROD'||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.target_useful_default!==48||x.max_global_default!==64||x.max_company_default!==48||x.max_deepseek_default!==8||x.max_repo_write_default!==1||x.heartbeat_ttl_max_ms!==120000||x.dynamic_concurrency_whitelist_only!==true||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
+          node --input-type=module -e "import fs from 'node:fs'; const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8')); if(x.environment!=='PREPROD'||x.second_queue!==false||x.second_scheduler!==false||x.second_daemon!==false||x.target_useful_default!==180||x.max_global_default!==180||x.max_company_default!==180||x.max_deepseek_default!==8||x.max_repo_write_default!==1||x.heartbeat_ttl_max_ms!==120000||x.dynamic_concurrency_whitelist_only!==true||x.prod_authorized!==false||x.trading_access!==false) process.exit(1);"
