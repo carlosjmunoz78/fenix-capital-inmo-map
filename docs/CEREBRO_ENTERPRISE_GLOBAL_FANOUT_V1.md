@@ -4,63 +4,58 @@ Date: 2026-10-30
 Status: PREPROD_CANDIDATE
 
 ## Objective
-Use the verified GitHub Enterprise standard-runner ceiling of 500 concurrent jobs as a governed global capacity budget for useful CEREBRO PREPROD work, without creating another queue, scheduler, daemon or permanent Actions runtime.
+Prepare a governed global GitHub Actions fanout topology capable of 500 unique useful PREPROD work units once paid Enterprise Actions concurrency is actually entitled, while remaining fail-closed during the current Enterprise trial.
 
 ## Existing components reused
-- `mission-recursive-decomposer-v1.mjs` as the canonical Mission DAG source.
-- `mission-derived-useful-work-v1.mjs` as the bounded useful-work executor.
-- `github-enterprise-execution.v1.json` as the verified Enterprise entitlement and platform policy.
-- Existing CEREBRO JOB-001/control-plane governance remains authoritative for JOB-001-specific work.
+- canonical Mission DAG from `mission-recursive-decomposer-v1.mjs`;
+- bounded executor `mission-derived-useful-work-v1.mjs`;
+- verified repository/organization policy;
+- existing JOB-001/control-plane governance.
 
-This V1 is a finite GitHub fanout layer only. It is not a second scheduler and it does not replace the durable runtime or adaptive work pump.
+No second queue, scheduler, daemon or permanent Actions runtime is created.
 
 ## Available useful work
-The canonical Mission DAG contains 28 macrofronts. Each macrofront has 14 phases, each with 6 atomic/capability units, yielding 2,352 selectable atomic/capability work units.
+The Mission DAG exposes 28 macrofronts × 14 phases × 6 atomic/capability units = 2,352 selectable work units. V1 requires unique `work_unit_id` values and never fabricates empty jobs.
 
-The V1 planner maps deterministic `(lane, cycle)` pairs through the existing `selectMissionUnit()` selector, requires unique `work_unit_id` values and refuses to fabricate empty capacity jobs.
+## Paid 500-job topology
+The paid Enterprise standard-runner ceiling documented by GitHub is 500 concurrent jobs; a single matrix is capped at 256.
 
-## 500-job topology
-GitHub Enterprise platform ceiling: 500 standard-runner concurrent jobs.
-GitHub matrix ceiling: 256 jobs per matrix.
+Prepared topology:
+- Matrix A: up to 250 unique useful units.
+- Matrix B: up to 250 unique useful units.
+- Combined paid-readiness topology: 500.
 
-V1 therefore uses two independent matrices:
-- Matrix A: up to 250 useful work units.
-- Matrix B: up to 250 useful work units.
-- Combined governed ceiling: 500.
+This topology is statically and contract-tested even while physical 500 execution remains disabled.
 
-The split alternates work slots so both matrices are exercised even by small canaries.
+## Current TRIAL gate
+Live Enterprise state is TRIAL. GitHub documentation states that increased Actions job concurrency is not included in the Enterprise trial.
+
+Current policy therefore requires:
+- `enterprise_organization_verified_for_canonical_repo=true`;
+- `enterprise_actions_concurrency_entitlement_verified=false`;
+- `global_500_fanout_enabled=false`;
+- `cerebro_trial_safe_parallelism_cap=16`.
+
+A physical request above 16 fails before matrix creation. The PR canary uses 16 real work units, split 8 + 8. The default manual dispatch is also 16 until paid entitlement is explicitly verified.
+
+## Paid activation gate
+Physical 500 execution becomes eligible only after separate evidence that the account has paid Enterprise Actions concurrency, followed by a policy change setting:
+- `enterprise_actions_concurrency_entitlement_verified=true`;
+- `global_500_fanout_enabled=true`.
+
+Activating a paid plan is `HUMAN_REQUIRED · MONEY_LIMIT`; CEREBRO must not purchase or activate it silently.
 
 ## Safety boundaries
-Every selected unit must be:
-- `environment=PREPROD`;
-- no PROD write authority;
-- no Trading access;
-- no paid AI;
-- zero additional subscription cost;
-- finite;
-- non-self-refilling.
-
-Workflow permissions are read-only (`contents: read`). The fanout cannot deploy PROD or write external systems.
+Every selected unit is PREPROD, finite and non-self-refilling, with no PROD write, external write, Trading or paid AI authority. Workflow permissions remain read-only.
 
 ## Relationship to JOB-001
-The 500 ceiling is global GitHub platform capacity, not a JOB-001 company limit. JOB-001 retains its own canonical `max_company_default=48` and `max_global_default=64` contract.
-
-Global Fanout V1 is intended for independent hostless Mission DAG work. Engine/company-specific limits remain authoritative and cannot be bypassed by the platform ceiling.
-
-## PR acceptance
-Pull requests run a physical 32-unit canary:
-- 16 units in Matrix A;
-- 16 units in Matrix B;
-- unique Mission DAG work;
-- same PREPROD executor used by the existing finite burst path.
-
-The default manual dispatch after promotion requests 500 useful units. The planner will produce exactly 250+250 only when 500 unique governed units exist; otherwise planning fails closed rather than creating placeholders.
+500 is a global paid-platform readiness ceiling, not a JOB-001 limit. JOB-001 retains `max_company_default=48` and `max_global_default=64`; during TRIAL it is additionally capped by CEREBRO at 16.
 
 ## Rollback
-Revert/delete only:
+Revert/delete:
 - `cerebro/runtime/enterprise-global-fanout-v1.mjs`
 - `cerebro/tests/enterprise-global-fanout-v1.test.mjs`
 - `.github/workflows/cerebro-enterprise-global-fanout-v1.yml`
 - this document.
 
-No data migration is required. No existing worker or scheduler is removed or reactivated.
+No data migration is required. Existing workers/schedulers remain preserved.
