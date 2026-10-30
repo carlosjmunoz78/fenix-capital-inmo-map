@@ -11,6 +11,7 @@ const SCOPE_HYDRATION_BLOCKED=new Set(['design','implement','accept','promote_ga
 const PERMUTATION_MULTIPLIER=85;
 const MISSION_GRAPH=buildMissionDag(defaultMissionRoots(),{environment:PREPROD,generated_at:'1970-01-01T00:00:00.000Z'});
 const ATOMIC_UNITS=Object.freeze(MISSION_GRAPH.units.filter(u=>u.kind==='atomic_work_unit'||u.kind==='capability_work_unit'));
+const MISSION_IDS=Object.freeze([...new Set(ATOMIC_UNITS.map(u=>u.mission_id))]);
 
 function boundedInteger(raw,label,min,max){const n=Number(raw);if(!Number.isSafeInteger(n)||n<min||n>max)throw new Error(`${label} must be an integer ${min}..${max}`);return n;}
 function digest(v){return crypto.createHash('sha256').update(String(v)).digest('hex');}
@@ -22,13 +23,27 @@ function atomOf(unit){return unit.work_unit_id.split('.')[2]||null;}
 function normalizeWords(value){
   return String(value||'').normalize('NFD').replace(/\p{Diacritic}/gu,'').toLowerCase().split(/[^a-z0-9_-]+/).filter(w=>w.length>=5);
 }
+function normalizeMissionId(value){
+  if(value==null||String(value).trim()==='')return null;
+  const out=String(value).trim().toUpperCase();
+  if(!MISSION_IDS.includes(out))throw new Error(`unknown mission_id ${out}`);
+  return out;
+}
 
-export function selectMissionUnit(laneRaw,cycleRaw){
+export function selectMissionUnit(laneRaw,cycleRaw,options={}){
   const lane=boundedInteger(laneRaw,'lane',0,67);
   const cycle=boundedInteger(cycleRaw,'cycle',0,999999);
+  const missionId=normalizeMissionId(options?.mission_id??options?.missionId??null);
+  if(missionId){
+    const pool=ATOMIC_UNITS.filter(u=>u.mission_id===missionId);
+    if(!pool.length)throw new Error(`no atomic units for ${missionId}`);
+    const laneOffset=(lane*61)%pool.length;
+    const index=(cycle+laneOffset)%pool.length;
+    return {lane,cycle,linear:index,index,unit:pool[index],graph_fingerprint:MISSION_GRAPH.graph_fingerprint,atomic_count:ATOMIC_UNITS.length,mission_atomic_count:pool.length,mission_filter:missionId,permutation_multiplier:null,scope_hydrated:MISSION_GRAPH.scope_hydrated,hydrated_mission_count:MISSION_GRAPH.hydrated_mission_count,canonical_source_sha256:MISSION_GRAPH.canonical_source_sha256};
+  }
   const linear=(cycle*68+lane)%ATOMIC_UNITS.length;
   const index=(linear*PERMUTATION_MULTIPLIER)%ATOMIC_UNITS.length;
-  return {lane,cycle,linear,index,unit:ATOMIC_UNITS[index],graph_fingerprint:MISSION_GRAPH.graph_fingerprint,atomic_count:ATOMIC_UNITS.length,permutation_multiplier:PERMUTATION_MULTIPLIER,scope_hydrated:MISSION_GRAPH.scope_hydrated,hydrated_mission_count:MISSION_GRAPH.hydrated_mission_count,canonical_source_sha256:MISSION_GRAPH.canonical_source_sha256};
+  return {lane,cycle,linear,index,unit:ATOMIC_UNITS[index],graph_fingerprint:MISSION_GRAPH.graph_fingerprint,atomic_count:ATOMIC_UNITS.length,mission_atomic_count:null,mission_filter:null,permutation_multiplier:PERMUTATION_MULTIPLIER,scope_hydrated:MISSION_GRAPH.scope_hydrated,hydrated_mission_count:MISSION_GRAPH.hydrated_mission_count,canonical_source_sha256:MISSION_GRAPH.canonical_source_sha256};
 }
 
 function evidenceTerms(unit){
@@ -74,19 +89,19 @@ function executionState({phase,hydrationBlocked,test}){
   return 'EVIDENCE_COLLECTED';
 }
 
-export function executeMissionDerivedWork({lane,cycle,fallback=true}){
+export function executeMissionDerivedWork({lane,cycle,fallback=true,mission_id=null,missionId=null}){
   if((process.env.CEREBRO_SUPERVISOR_ENV||PREPROD)!==PREPROD)throw new Error('mission-derived worker is PREPROD-only');
   if(process.env.CEREBRO_ALLOW_PAID_FANOUT==='YES')throw new Error('paid AI is not permitted');
   if(process.env.CEREBRO_PROD_WRITE==='true')throw new Error('PROD writes are not permitted');
   if(process.env.CEREBRO_TRADING_ACCESS==='true')throw new Error('Trading access is not permitted');
-  const selected=selectMissionUnit(lane,cycle);const unit=selected.unit;const phase=phaseOf(unit);const repo=inspectRepo(unit);
+  const selected=selectMissionUnit(lane,cycle,{mission_id:mission_id??missionId});const unit=selected.unit;const phase=phaseOf(unit);const repo=inspectRepo(unit);
   const scopeHydrated=unit.source_status==='CANONICAL_SCOPE_HYDRATED'&&Boolean(unit.mission_scope)&&Boolean(unit.scope_fingerprint)&&Boolean(unit.canonical_source_sha256);
   const hydrationBlocked=SCOPE_HYDRATION_BLOCKED.has(phase)&&!scopeHydrated;
   const capability=unit.kind==='capability_work_unit'?capabilityAudit(unit,repo):null;
   const test=hydrationBlocked?null:maybeRunTest(unit);
   const state=executionState({phase,hydrationBlocked,test});
   const report={
-    schema_version:'1.1',
+    schema_version:'1.2',
     generated_at:new Date().toISOString(),
     company_id:unit.company_id,
     engine_id:'JOB-001',
@@ -100,6 +115,8 @@ export function executeMissionDerivedWork({lane,cycle,fallback=true}){
     source:'MISSION_DAG_V1',
     graph_fingerprint:selected.graph_fingerprint,
     atomic_count:selected.atomic_count,
+    mission_filter:selected.mission_filter,
+    mission_atomic_count:selected.mission_atomic_count,
     scope_hydrated:selected.scope_hydrated,
     hydrated_mission_count:selected.hydrated_mission_count,
     canonical_source_sha256:selected.canonical_source_sha256,
@@ -121,7 +138,8 @@ export function executeMissionDerivedWork({lane,cycle,fallback=true}){
     prod_write_authorized:false,
     trading_access:false
   };
-  const out=path.join(OUT_ROOT,`lane-${String(selected.lane).padStart(2,'0')}`,`cycle-${String(selected.cycle).padStart(6,'0')}-${unit.work_unit_id.replaceAll('.','_')}.json`);writeJson(out,report);
+  const missionSegment=selected.mission_filter?`mission-${selected.mission_filter.toLowerCase()}`:`lane-${String(selected.lane).padStart(2,'0')}`;
+  const out=path.join(OUT_ROOT,missionSegment,`cycle-${String(selected.cycle).padStart(6,'0')}-${unit.work_unit_id.replaceAll('.','_')}.json`);writeJson(out,report);
   if(fallback&&state==='SCOPE_HYDRATION_REQUIRED'){
     const legacy=executeContinuousWork({lane:selected.lane,cycle:selected.cycle});
     report.fallback={used:true,source:'continuous-useful-work-factory-v0',task_key:legacy.task.task_key,selected_file_count:legacy.selected_file_count};writeJson(out,report);
@@ -129,5 +147,5 @@ export function executeMissionDerivedWork({lane,cycle,fallback=true}){
   return report;
 }
 
-async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v];}));const r=executeMissionDerivedWork({lane:args.lane,cycle:args.cycle,fallback:args.fallback!=='false'});console.log(JSON.stringify({ok:true,lane:r.lane,cycle:r.cycle,work_unit_id:r.work_unit.work_unit_id,mission_id:r.work_unit.mission_id,mission_title:r.mission_scope.title,phase:r.phase,state:r.execution_state,scope_hydrated:r.scope_hydrated,scope_hydration_required:r.scope_hydration_required,capability_action:r.capability?.action||null,fallback:r.fallback?.used||false,paid_ai_used:false,prod_write_authorized:false,trading_access:false}));}
+async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v];}));const r=executeMissionDerivedWork({lane:args.lane,cycle:args.cycle,fallback:args.fallback!=='false',mission_id:args.mission_id??args.mission});console.log(JSON.stringify({ok:true,lane:r.lane,cycle:r.cycle,work_unit_id:r.work_unit.work_unit_id,mission_id:r.work_unit.mission_id,mission_filter:r.mission_filter,mission_atomic_count:r.mission_atomic_count,mission_title:r.mission_scope.title,phase:r.phase,state:r.execution_state,scope_hydrated:r.scope_hydrated,scope_hydration_required:r.scope_hydration_required,capability_action:r.capability?.action||null,fallback:r.fallback?.used||false,paid_ai_used:false,prod_write_authorized:false,trading_access:false}));}
 const self=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname);if(self)main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1;});
