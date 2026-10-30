@@ -1,0 +1,157 @@
+name: CEREBRO Edge Device Dispatch Canary V1
+run-name: CEREBRO EDGE OFFLINE PERSISTENCE · PREPROD · ${{ github.run_id }}
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/edge-device-dispatch-canary-v10-20261030
+    paths:
+      - '.github/workflows/cerebro-edge-device-dispatch-canary-v1.yml'
+      - 'supabase/functions/cerebro-device-gateway-preprod-lean-canary/index.ts'
+      - 'cerebro/tests/edge-device-dispatch-canary-v1.test.mjs'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: cerebro-edge-device-dispatch-canary-v1
+  cancel-in-progress: false
+
+jobs:
+  offline-edge-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      OLD_HEALTH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-device-gateway-preprod/health
+      CANARY_BASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-device-gateway-preprod-lean-canary
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_COMPANY_ID: fenix
+      CEREBRO_ENGINE_ID: JOB-001-EDGE-CANARY
+      CEREBRO_VERSION: edge-dispatch-canary-v1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Static contract tests
+        run: |
+          node --test cerebro/tests/execution-placement-policy-v1.test.mjs
+          node --test cerebro/tests/edge-device-dispatch-canary-v1.test.mjs
+
+      - name: Verify OLD V9 and NEW canary health
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/edge-device-dispatch-canary-v1
+          curl -fsS "$OLD_HEALTH_URL" | tee artifacts/edge-device-dispatch-canary-v1/old-v9-health.json
+          curl -fsS "$CANARY_BASE_URL/health" | tee artifacts/edge-device-dispatch-canary-v1/new-canary-health.json
+          jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/old-v9-health.json >/dev/null
+          jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .old_gateway_untouched == true and .existing_device_queue_reused == true and .explicit_command_uuid == true and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/new-canary-health.json >/dev/null
+
+      - name: Mint GitHub OIDC token for edge dispatch canary
+        id: oidc
+        shell: bash
+        run: |
+          set -euo pipefail
+          response="$(curl -fsS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=cerebro-device-dispatch-v1")"
+          token="$(jq -r '.value' <<<"$response")"
+          test -n "$token" && test "$token" != "null"
+          echo "::add-mask::$token"
+          echo "token=$token" >> "$GITHUB_OUTPUT"
+
+      - name: Create isolated synthetic OFFLINE edge fixture
+        id: fixture
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          out='artifacts/edge-device-dispatch-canary-v1/fixture.json'
+          curl -fsS -X POST "$CANARY_BASE_URL/v1/control/canary-fixture" \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{}' | tee "$out"
+          jq -e '.ok == true and .fixture.environment == "PREPROD" and .fixture.status == "OFFLINE" and .prod_allowed == false' "$out" >/dev/null
+          device_id="$(jq -r '.fixture.device_id' "$out")"
+          test -n "$device_id" && test "$device_id" != "null"
+          echo "device_id=$device_id" >> "$GITHUB_OUTPUT"
+
+      - name: Enqueue once and replay same idempotency key
+        id: enqueue
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          DEVICE_ID: ${{ steps.fixture.outputs.device_id }}
+        run: |
+          set -euo pipefail
+          idem="edge-offline-persistence-${GITHUB_RUN_ID}"
+          payload="$(jq -cn --arg run "$GITHUB_RUN_ID" '{action:"CANARY_OFFLINE_PERSISTENCE",run_id:$run}')"
+          body="$(jq -cn \
+            --arg company "$CEREBRO_COMPANY_ID" \
+            --arg environment "$CEREBRO_ENVIRONMENT" \
+            --arg device "$DEVICE_ID" \
+            --arg engine "$CEREBRO_ENGINE_ID" \
+            --arg version "$CEREBRO_VERSION" \
+            --arg idem "$idem" \
+            --argjson payload "$payload" \
+            '{company_id:$company,environment:$environment,device_id:$device,engine_id:$engine,version:$version,idempotency_key:$idem,payload:$payload}')"
+          first='artifacts/edge-device-dispatch-canary-v1/enqueue-first.json'
+          second='artifacts/edge-device-dispatch-canary-v1/enqueue-replay.json'
+          curl -fsS -X POST "$CANARY_BASE_URL/v1/control/enqueue" -H "Authorization: Bearer $OIDC_TOKEN" -H 'Content-Type: application/json' -d "$body" | tee "$first"
+          jq -e '.ok == true and .decision == "QUEUED" and .command.state == "QUEUED" and .command.delivery_attempt == 0 and .edge.placement == "DEFERRED_EDGE" and .edge.queued_for_resume == true and .edge.human_required == false and .prod_allowed == false' "$first" >/dev/null
+          curl -fsS -X POST "$CANARY_BASE_URL/v1/control/enqueue" -H "Authorization: Bearer $OIDC_TOKEN" -H 'Content-Type: application/json' -d "$body" | tee "$second"
+          jq -e '.ok == true and (.decision == "REUSED" or .decision == "REUSED_AFTER_RACE") and .command.state == "QUEUED" and .command.delivery_attempt == 0 and .prod_allowed == false' "$second" >/dev/null
+          first_id="$(jq -r '.command.command_id' "$first")"
+          second_id="$(jq -r '.command.command_id' "$second")"
+          test "$first_id" = "$second_id"
+          echo "idempotency_key=$idem" >> "$GITHUB_OUTPUT"
+          echo "command_id=$first_id" >> "$GITHUB_OUTPUT"
+
+      - name: Prove command remains durable while edge is OFFLINE
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          DEVICE_ID: ${{ steps.fixture.outputs.device_id }}
+          IDEMPOTENCY_KEY: ${{ steps.enqueue.outputs.idempotency_key }}
+          COMMAND_ID: ${{ steps.enqueue.outputs.command_id }}
+        run: |
+          set -euo pipefail
+          body="$(jq -cn --arg device "$DEVICE_ID" --arg idem "$IDEMPOTENCY_KEY" '{device_id:$device,idempotency_key:$idem}')"
+          out='artifacts/edge-device-dispatch-canary-v1/status-offline.json'
+          curl -fsS -X POST "$CANARY_BASE_URL/v1/control/status" -H "Authorization: Bearer $OIDC_TOKEN" -H 'Content-Type: application/json' -d "$body" | tee "$out"
+          jq -e --arg command "$COMMAND_ID" '.ok == true and .command.command_id == $command and .command.state == "QUEUED" and .command.delivery_attempt == 0 and .command.delivered_at == null and .command.completed_at == null and .command.lease_until == null and .prod_allowed == false' "$out" >/dev/null
+          echo "offline_persistence=GREEN" >> "$GITHUB_STEP_SUMMARY"
+          echo "idempotency=GREEN" >> "$GITHUB_STEP_SUMMARY"
+          echo "human_required=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_allowed=false" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Cleanup isolated canary fixture
+        if: always() && steps.oidc.outputs.token != ''
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+        run: |
+          set -euo pipefail
+          out='artifacts/edge-device-dispatch-canary-v1/cleanup.json'
+          curl -fsS -X POST "$CANARY_BASE_URL/v1/control/canary-cleanup" \
+            -H "Authorization: Bearer $OIDC_TOKEN" \
+            -H 'Content-Type: application/json' \
+            -d '{}' | tee "$out"
+          jq -e '.ok == true and .prod_allowed == false' "$out" >/dev/null
+
+      - name: Verify OLD V9 remained healthy after NEW canary
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsS "$OLD_HEALTH_URL" | tee artifacts/edge-device-dispatch-canary-v1/old-v9-health-after.json
+          jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/old-v9-health-after.json >/dev/null
+
+      - name: Upload inspectable canary evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-edge-device-dispatch-canary-v1-${{ github.run_id }}
+          path: artifacts/edge-device-dispatch-canary-v1/
+          if-no-files-found: error
+          retention-days: 7

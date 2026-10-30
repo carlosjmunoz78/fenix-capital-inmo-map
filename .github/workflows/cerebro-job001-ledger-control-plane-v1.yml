@@ -10,6 +10,7 @@ on:
       - 'cerebro/runtime/mission-derived-job001-adapter-v1.mjs'
       - 'cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs'
       - 'cerebro/runtime/execution-placement-policy-v1.mjs'
+      - 'supabase/functions/cerebro-device-gateway-preprod-lean-canary/index.ts'
       - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
@@ -18,8 +19,10 @@ on:
       - 'cerebro/tests/mission-derived-job001-adapter-v1.test.mjs'
       - 'cerebro/tests/adaptive-hierarchical-agent-work-pump-v3.test.mjs'
       - 'cerebro/tests/execution-placement-policy-v1.test.mjs'
+      - 'cerebro/tests/edge-device-dispatch-canary-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+      - '.github/workflows/cerebro-edge-device-dispatch-canary-v1.yml'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
   push:
@@ -32,6 +35,7 @@ on:
       - 'cerebro/runtime/mission-derived-job001-adapter-v1.mjs'
       - 'cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs'
       - 'cerebro/runtime/execution-placement-policy-v1.mjs'
+      - 'supabase/functions/cerebro-device-gateway-preprod-lean-canary/index.ts'
       - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
@@ -40,8 +44,10 @@ on:
       - 'cerebro/tests/mission-derived-job001-adapter-v1.test.mjs'
       - 'cerebro/tests/adaptive-hierarchical-agent-work-pump-v3.test.mjs'
       - 'cerebro/tests/execution-placement-policy-v1.test.mjs'
+      - 'cerebro/tests/edge-device-dispatch-canary-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+      - '.github/workflows/cerebro-edge-device-dispatch-canary-v1.yml'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
       - '.github/workflows/cerebro-job001-ledger-control-plane-v1.yml'
   workflow_dispatch:
@@ -72,6 +78,8 @@ jobs:
         run: node --test cerebro/tests/adaptive-hierarchical-agent-work-pump-v3.test.mjs
       - name: Hostless-first edge-optional placement tests
         run: node --test cerebro/tests/execution-placement-policy-v1.test.mjs
+      - name: Edge device dispatch canary static contract tests
+        run: node --test cerebro/tests/edge-device-dispatch-canary-v1.test.mjs
       - name: Canonical Windows PREPROD installer is entrypoint V1 and fail-closed
         shell: bash
         run: |
