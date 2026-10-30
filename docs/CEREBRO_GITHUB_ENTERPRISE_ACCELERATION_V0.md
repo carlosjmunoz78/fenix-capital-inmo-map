@@ -12,27 +12,27 @@ Exploit GitHub safely for CEREBRO engineering, tests, evaluation, generation and
 - Organization `fenix-cerebro` belongs to Enterprise account `cerebro-os`.
 - ChatGPT GitHub connector is installed for `fenix-cerebro` and can write to the canonical repository.
 - OIDC compatibility OLD + NEW was prepared before transfer.
-- The Enterprise account is still in its 30-day TRIAL state.
+- The Enterprise account is PAID; the current live standard-runner maximum is 180 (issue #1026 evidence).
 - GitHub documentation states that increased GitHub Actions job concurrency is not included in the Enterprise trial.
 - GitHub documents a 20-job standard hosted-runner baseline without the Enterprise increase.
 
 ## Entitlement model
 CEREBRO separates two independent facts:
 1. `enterprise_organization_verified_for_canonical_repo=true`: ownership/governance is verified.
-2. `enterprise_actions_concurrency_entitlement_verified=false`: paid Enterprise Actions concurrency is not yet verified because the account is still TRIAL.
+2. `enterprise_actions_concurrency_entitlement_verified=true`: paid Enterprise Actions concurrency is verified.
 
-Therefore `global_500_fanout_enabled=false`.
+The global fanout capability is enabled, but its physical cap remains `min(live runner max 180, documented paid ceiling 500) = 180`.
 
-The paid Enterprise plan documents a standard-runner ceiling of 500 concurrent jobs and GitHub matrices are capped at 256 jobs. Those are readiness targets, not current trial execution authority.
+The paid Enterprise plan documents a standard-runner ceiling of 500 concurrent jobs and GitHub matrices are capped at 256 jobs. The current live setting, not the published ceiling, controls physical fanout.
 
-During TRIAL CEREBRO uses the full documented standard baseline: `cerebro_trial_safe_parallelism_cap=20`.
+The general acceleration regression workflow intentionally retains a conservative 20-shard test cap. The Enterprise global fanout workflow has a 20-unit PR canary and a manual dispatch default of 180.
 
 ## Acceleration model
 - Discover actual independent work only.
 - Never create empty capacity jobs.
 - One matrix never exceeds 256 jobs.
-- During TRIAL this workflow uses at most 20 parallel shards.
-- Paid 500-job topology may be prepared and statically tested, but physical execution above 20 requires separate paid Actions concurrency evidence.
+- The regression test-sharding workflow uses at most 20 parallel shards.
+- Enterprise global fanout plans at most the verified live runner maximum; raising 180 to 500 requires fresh live settings evidence.
 - Preserve full OLD vs NEW regression.
 - Keep old continuous PREPROD workers drained; organization verification does not reactivate permanent runner occupancy.
 - Use Linux by default; macOS only when technically required.
@@ -52,12 +52,12 @@ Repository instructions remain additive. Copilot is an engineering accelerator, 
 ## Acceptance
 1. Repository and organization evidence verified.
 2. Trial vs paid Actions concurrency entitlement represented separately.
-3. TRIAL execution uses the documented standard 20-job baseline and remains fail-closed above it.
+3. Global fanout is capped at the current live maximum of 180; PR canaries and regression shards remain capped at 20.
 4. Full regression passes.
 5. No PROD/external writes occur.
-6. Paid activation remains `HUMAN_REQUIRED · MONEY_LIMIT` until explicitly approved.
+6. Paid plan activation remains `HUMAN_REQUIRED · MONEY_LIMIT`; this policy records existing paid entitlement and does not purchase or activate a plan.
 
 ## Rollback
-Revert the policy/workflow/runbook changes. If entitlement evidence is lost, keep `enterprise_actions_concurrency_entitlement_verified=false` and `global_500_fanout_enabled=false`.
+If rollback is needed, disable both fanout entitlement flags and restore the manual fanout default to 20, while preserving the factual `PAID` account state and observed live maximum. Keep the 20-shard regression workflow and all existing workers unchanged.
 
 No data migration is required.

@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: 'Useful PREPROD Mission DAG units. Paid 500 topology is entitlement-gated.'
+        description: 'Useful PREPROD Mission DAG units, bounded by the current live runner maximum.'
         required: false
-        default: '20'
+        default: '180'
         type: string
   pull_request:
     paths:
@@ -52,7 +52,7 @@ jobs:
       - id: plan
         name: Discover unique useful Mission DAG work under effective entitlement
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || inputs.units || '20' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || inputs.units || '180' }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'

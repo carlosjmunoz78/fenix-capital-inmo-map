@@ -21,7 +21,12 @@ function assertBasePolicy(policy) {
   const entitlement = policy.entitlement_gate || {};
   const parallelism = policy.parallelism || {};
   const workflow = policy.workflow_policy || {};
-  integer(limits.live_standard_runner_concurrent_jobs_max, 'live_standard_runner_concurrent_jobs_max', 1, PAID_ENTERPRISE_GLOBAL_CEILING);
+  const liveRunnerCap = integer(limits.live_standard_runner_concurrent_jobs_max, 'live_standard_runner_concurrent_jobs_max', 1, PAID_ENTERPRISE_GLOBAL_CEILING);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(limits.live_standard_runner_concurrent_jobs_max_observed_at || '')
+    || typeof limits.live_standard_runner_concurrent_jobs_max_evidence !== 'string'
+    || !limits.live_standard_runner_concurrent_jobs_max_evidence.trim()) {
+    throw new Error('LIVE_RUNNER_LIMIT_EVIDENCE_REQUIRED');
+  }
   if (entitlement.enterprise_organization_verified_for_canonical_repo !== true) throw new Error('ENTERPRISE_ORGANIZATION_REQUIRED');
   if (entitlement.canonical_repository !== 'fenix-cerebro/fenix-capital-inmo-map') throw new Error('CANONICAL_REPOSITORY_MISMATCH');
   if (entitlement.enterprise_slug !== 'cerebro-os') throw new Error('ENTERPRISE_SLUG_MISMATCH');
@@ -33,6 +38,7 @@ function assertBasePolicy(policy) {
   if (workflow.production_deploy_from_acceleration_workflow !== false) throw new Error('PROD_DEPLOY_DENIED');
   if (workflow.write_external_systems !== false) throw new Error('EXTERNAL_WRITE_DENIED');
   if (workflow.use_actions_as_permanent_transactional_runtime !== false) throw new Error('PERMANENT_RUNTIME_DENIED');
+  return liveRunnerCap;
 }
 
 function specForSlot(slot) {
@@ -76,11 +82,19 @@ export function buildPaidEnterpriseTopologyV1(requested_units = PAID_ENTERPRISE_
 }
 
 export function planEnterpriseGlobalFanoutV1({ policy, requested_units = TRIAL_SAFE_CAP } = {}) {
-  assertBasePolicy(policy);
+  const liveRunnerCap = assertBasePolicy(policy);
   const entitlement = policy.entitlement_gate || {};
   const paidConcurrencyVerified = entitlement.enterprise_actions_concurrency_entitlement_verified === true
     && entitlement.global_500_fanout_enabled === true;
-  const liveRunnerCap = policy.verified_platform_limits.live_standard_runner_concurrent_jobs_max;
+  if (paidConcurrencyVerified && entitlement.enterprise_account_state !== 'PAID') {
+    throw new Error('PAID_ENTITLEMENT_STATE_MISMATCH');
+  }
+  if (paidConcurrencyVerified
+    && (!/^\d{4}-\d{2}-\d{2}$/.test(entitlement.enterprise_actions_concurrency_entitlement_verified_at || '')
+      || typeof entitlement.enterprise_actions_concurrency_entitlement_evidence !== 'string'
+      || !entitlement.enterprise_actions_concurrency_entitlement_evidence.trim())) {
+    throw new Error('PAID_ENTITLEMENT_EVIDENCE_REQUIRED');
+  }
   const entitlementCap = paidConcurrencyVerified ? PAID_ENTERPRISE_GLOBAL_CEILING : TRIAL_SAFE_CAP;
   const effectiveCap = Math.min(liveRunnerCap, entitlementCap);
   const requested = integer(requested_units, 'requested_units', 1, effectiveCap);

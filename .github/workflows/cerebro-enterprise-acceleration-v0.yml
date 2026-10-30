@@ -27,12 +27,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate trial-safe Enterprise acceleration policy
+      - name: Validate paid Enterprise entitlement and live runner cap
         run: >-
           node -e "const p=require('./cerebro/config/github-enterprise-execution.v1.json');
           if(p.status!=='PREPROD_CANDIDATE') process.exit(1);
           if(p.verified_platform_limits.standard_runner_concurrent_jobs_baseline_without_enterprise_increase!==20) process.exit(1);
           if(p.verified_platform_limits.paid_enterprise_standard_runner_concurrent_jobs_ceiling!==500) process.exit(1);
+          if(p.verified_platform_limits.live_standard_runner_concurrent_jobs_max!==180) process.exit(1);
           if(p.verified_platform_limits.matrix_jobs_per_workflow_run_ceiling!==256) process.exit(1);
           if(p.verified_platform_limits.enterprise_trial_includes_increased_actions_concurrency!==false) process.exit(1);
           if(p.parallelism.cerebro_trial_safe_parallelism_cap!==20) process.exit(1);
@@ -42,12 +43,12 @@ jobs:
           if(p.copilot_policy.copilot_is_runtime_dependency!==false) process.exit(1);
           if(p.copilot_policy.automerge_prod!==false) process.exit(1);
           if(p.entitlement_gate.enterprise_organization_verified_for_canonical_repo!==true) process.exit(1);
-          if(p.entitlement_gate.enterprise_actions_concurrency_entitlement_verified!==false) process.exit(1);
-          if(p.entitlement_gate.enterprise_account_state!=='TRIAL') process.exit(1);
-          if(p.entitlement_gate.global_500_fanout_enabled!==false) process.exit(1);
+          if(p.entitlement_gate.enterprise_actions_concurrency_entitlement_verified!==true) process.exit(1);
+          if(p.entitlement_gate.enterprise_account_state!=='PAID') process.exit(1);
+          if(p.entitlement_gate.global_500_fanout_enabled!==true) process.exit(1);
           if(p.entitlement_gate.canonical_repository!=='fenix-cerebro/fenix-capital-inmo-map') process.exit(1);
           if(p.entitlement_gate.enterprise_slug!=='cerebro-os') process.exit(1);
-          console.log('CEREBRO GitHub acceleration policy GREEN / full standard 20-job trial baseline / paid 500 fail-closed');"
+          console.log('CEREBRO GitHub acceleration policy GREEN / paid entitlement verified / live fanout cap 180 / test shards remain capped at 20');"
 
   discover-tests:
     name: Discover and shard independent test files
@@ -61,7 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - id: discover
-        name: Build trial-safe adaptive test-shard matrix
+        name: Build conservative adaptive test-shard matrix
         shell: bash
         run: |
           node <<'NODE'
@@ -76,7 +77,7 @@ jobs:
           if (tests.length === 0) throw new Error('No CEREBRO test files discovered');
 
           const safeCap = policy.parallelism.cerebro_trial_safe_parallelism_cap;
-          if (safeCap !== 20) throw new Error('TRIAL_SAFE_CAP_MISMATCH');
+          if (safeCap !== 20) throw new Error('CONSERVATIVE_TEST_SHARD_CAP_MISMATCH');
           const targetShards = Math.min(safeCap, tests.length);
           const shards = Array.from({ length: targetShards }, (_, shard) => ({ shard, tests: [] }));
           tests.forEach((test, index) => shards[index % targetShards].tests.push(test));
@@ -89,13 +90,13 @@ jobs:
               tests_json: JSON.stringify(entry.tests)
             }));
 
-          if (include.length > safeCap) throw new Error('Trial-safe shard cap exceeded');
+          if (include.length > safeCap) throw new Error('Conservative test-shard cap exceeded');
           if (include.length > 256) throw new Error('Matrix exceeds GitHub 256-job ceiling');
           const matrix = { include };
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `count=${tests.length}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `shard_count=${include.length}\n`);
-          console.log(`Discovered ${tests.length} test files -> ${include.length} full-baseline parallel shards`);
+          console.log(`Discovered ${tests.length} test files -> ${include.length} conservative parallel shards`);
           NODE
 
   parallel-tests:
@@ -174,12 +175,13 @@ jobs:
             "discovered_test_files=${{ needs.discover-tests.outputs.count }}" \
             "parallel_shards=${{ needs.discover-tests.outputs.shard_count }}" \
             "parallel_matrix_ceiling=256" \
-            "trial_safe_max_parallel=20" \
+            "conservative_test_shard_max_parallel=20" \
             "paid_enterprise_platform_ceiling=500" \
             "enterprise_org_verified=true" \
-            "enterprise_actions_concurrency_entitlement_verified=false" \
-            "enterprise_account_state=TRIAL" \
-            "global_500_fanout_enabled=false" \
+            "enterprise_actions_concurrency_entitlement_verified=true" \
+            "enterprise_account_state=PAID" \
+            "global_500_fanout_enabled=true" \
+            "live_standard_runner_concurrent_jobs_max=180" \
             "canonical_repository=fenix-cerebro/fenix-capital-inmo-map" \
             "prod_deploy=false" \
             "external_writes=false" \
@@ -202,7 +204,7 @@ jobs:
         run: |
           echo "CEREBRO Enterprise Acceleration V0 GREEN"
           echo "Organization/repository: VERIFIED"
-          echo "Paid Actions concurrency entitlement: NOT VERIFIED (TRIAL)"
-          echo "Trial-safe CEREBRO cap: 20"
-          echo "Paid Enterprise documented ceiling: 500; single matrix ceiling: 256."
+          echo "Paid Actions concurrency entitlement: VERIFIED"
+          echo "Live Enterprise runner cap: 180; paid platform ceiling: 500"
+          echo "Conservative regression test-shard cap: 20; single matrix ceiling: 256."
           echo "No PROD deployment. No external writes. No service retirement."

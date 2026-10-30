@@ -9,7 +9,7 @@ import {
 
 const policy = JSON.parse(fs.readFileSync(new URL('../config/github-enterprise-execution.v1.json', import.meta.url), 'utf8'));
 
-test('contract is finite PREPROD, trial fail-closed and creates no second control plane', () => {
+test('contract is finite PREPROD, live-capped and creates no second control plane', () => {
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.environment, 'PREPROD');
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.paid_enterprise_global_platform_ceiling, 500);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.trial_safe_physical_cap, 20);
@@ -37,17 +37,32 @@ test('paid 500 topology is prepared as two legal 250-job matrices with 500 uniqu
   assert.ok(topology.all.every(item => item.environment === 'PREPROD'));
 });
 
-test('live Enterprise trial uses the full standard 20-job physical cap', () => {
-  const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: 20 });
-  assert.equal(plan.enterprise_account_state, 'TRIAL');
+test('current paid entitlement uses live 180 cap rather than the published 500 ceiling', () => {
+  const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: 180 });
+  assert.equal(plan.enterprise_account_state, 'PAID');
+  assert.equal(plan.enterprise_actions_concurrency_entitlement_verified, true);
+  assert.equal(plan.effective_physical_cap, 180);
+  assert.equal(plan.planned_units, 180);
+  assert.equal(plan.unique_work_units, 180);
+  assert.equal(plan.matrix_a_count, 90);
+  assert.equal(plan.matrix_b_count, 90);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 181 }), /requested_units must be an integer 1\.\.180/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 500 }), /requested_units must be an integer 1\.\.180/);
+});
+
+test('disabled paid gate falls back to the conservative 20-unit cap', () => {
+  const fallback = structuredClone(policy);
+  fallback.entitlement_gate.enterprise_actions_concurrency_entitlement_verified = false;
+  fallback.entitlement_gate.global_500_fanout_enabled = false;
+
+  const plan = planEnterpriseGlobalFanoutV1({ policy: fallback, requested_units: 20 });
+  assert.equal(plan.enterprise_account_state, 'PAID');
   assert.equal(plan.enterprise_actions_concurrency_entitlement_verified, false);
   assert.equal(plan.effective_physical_cap, 20);
   assert.equal(plan.planned_units, 20);
-  assert.equal(plan.unique_work_units, 20);
   assert.equal(plan.matrix_a_count, 10);
   assert.equal(plan.matrix_b_count, 10);
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 21 }), /requested_units must be an integer 1\.\.20/);
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 500 }), /requested_units must be an integer 1\.\.20/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: fallback, requested_units: 21 }), /requested_units must be an integer 1\.\.20/);
 });
 
 test('paid Enterprise physical plan unlocks 500 only when concurrency entitlement is separately verified', () => {
@@ -84,6 +99,21 @@ test('paid physical plan is capped at the live runner maximum rather than the pu
   assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: paid, requested_units: 181 }), /requested_units must be an integer 1\.\.180/);
 });
 
+test('verified paid flags cannot contradict the recorded Enterprise account state', () => {
+  const inconsistent = structuredClone(policy);
+  inconsistent.entitlement_gate.enterprise_account_state = 'TRIAL';
+  assert.throws(
+    () => planEnterpriseGlobalFanoutV1({ policy: inconsistent, requested_units: 20 }),
+    /PAID_ENTITLEMENT_STATE_MISMATCH/,
+  );
+});
+
+test('manual dispatch defaults to live 180 while PR canary remains 20', () => {
+  const workflow = fs.readFileSync(new URL('../../.github/workflows/cerebro-enterprise-global-fanout-v1.yml', import.meta.url), 'utf8');
+  assert.match(workflow, /default: '180'/);
+  assert.match(workflow, /REQUESTED_UNITS: \$\{\{ github\.event_name == 'pull_request' && '20' \|\| inputs\.units \|\| '180' \}\}/);
+});
+
 test('missing or invalid live runner maximum fails closed instead of assuming 500', () => {
   const missing = structuredClone(policy);
   delete missing.verified_platform_limits.live_standard_runner_concurrent_jobs_max;
@@ -92,6 +122,16 @@ test('missing or invalid live runner maximum fails closed instead of assuming 50
   const invalid = structuredClone(policy);
   invalid.verified_platform_limits.live_standard_runner_concurrent_jobs_max = 501;
   assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: invalid, requested_units: 20 }), /live_standard_runner_concurrent_jobs_max must be an integer 1\.\.500/);
+});
+
+test('missing live-cap evidence or paid-entitlement evidence fails closed', () => {
+  const missingLiveEvidence = structuredClone(policy);
+  delete missingLiveEvidence.verified_platform_limits.live_standard_runner_concurrent_jobs_max_evidence;
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: missingLiveEvidence, requested_units: 20 }), /LIVE_RUNNER_LIMIT_EVIDENCE_REQUIRED/);
+
+  const missingPaidEvidence = structuredClone(policy);
+  delete missingPaidEvidence.entitlement_gate.enterprise_actions_concurrency_entitlement_evidence;
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: missingPaidEvidence, requested_units: 20 }), /PAID_ENTITLEMENT_EVIDENCE_REQUIRED/);
 });
 
 test('planner is fail-closed when organization ownership evidence is lost', () => {
