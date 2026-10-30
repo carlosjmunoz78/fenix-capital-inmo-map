@@ -8,8 +8,8 @@ const ENV='PREPROD';
 const VERSION='jarvis-mission-dag-v2';
 const ROOT='MISSION-JARVIS-001';
 const MASTER_DEFAULT='cerebro/jarvis/mission-001/master-parts';
-const MASTER_PART_COUNT=7;
-const MASTER_B64_LENGTH=53461;
+const MASTER_PART_FILES=['part-00','part-01a','part-01b','part-01c','part-01d','part-02','part-03','part-04','part-05','part-06'];
+const MASTER_B64_LENGTH=53460;
 const MASTER_SHA256='278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e';
 
 const PROGRAMS=[
@@ -40,26 +40,18 @@ function sha(v){return crypto.createHash('sha256').update(typeof v==='string'?v:
 function slug(v){return v.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,80);}
 
 function loadMaster(masterPath){
- const abs=path.resolve(masterPath);
- const stat=fs.statSync(abs);
- let text;
- let transport='plain';
- let partCount=0;
- let b64Length=null;
+ const abs=path.resolve(masterPath);const stat=fs.statSync(abs);let text;let transport='plain';let partCount=0;let b64Length=null;
  if(stat.isDirectory()){
-   const parts=fs.readdirSync(abs).filter(n=>/^part-\d{2}$/.test(n)).sort();
-   if(parts.length!==MASTER_PART_COUNT)throw new Error(`JARVIS_MASTER_PART_COUNT_MISMATCH:${parts.length}`);
-   const encoded=parts.map(n=>fs.readFileSync(path.join(abs,n),'utf8').trim()).join('');
-   partCount=parts.length;b64Length=encoded.length;transport='multipart_gzip_base64';
+   for(const name of MASTER_PART_FILES)if(!fs.existsSync(path.join(abs,name)))throw new Error(`JARVIS_MASTER_PART_MISSING:${name}`);
+   const encoded=MASTER_PART_FILES.map(n=>fs.readFileSync(path.join(abs,n),'utf8').trim()).join('');
+   partCount=MASTER_PART_FILES.length;b64Length=encoded.length;transport='multipart_gzip_base64';
    if(encoded.length!==MASTER_B64_LENGTH)throw new Error(`JARVIS_MASTER_B64_LENGTH_MISMATCH:${encoded.length}`);
    text=zlib.gunzipSync(Buffer.from(encoded,'base64')).toString('utf8');
  }else{
    const raw=fs.readFileSync(abs,'utf8').trim();
-   if(masterPath.endsWith('.gz.b64')){transport='single_gzip_base64';b64Length=raw.length;text=zlib.gunzipSync(Buffer.from(raw,'base64')).toString('utf8');}
-   else text=raw;
+   if(masterPath.endsWith('.gz.b64')){transport='single_gzip_base64';b64Length=raw.length;text=zlib.gunzipSync(Buffer.from(raw,'base64')).toString('utf8');}else text=raw;
  }
- const sourceSha=sha(text);
- if(sourceSha!==MASTER_SHA256)throw new Error(`JARVIS_MASTER_SHA256_MISMATCH:${sourceSha}`);
+ const sourceSha=sha(text);if(sourceSha!==MASTER_SHA256)throw new Error(`JARVIS_MASTER_SHA256_MISMATCH:${sourceSha}`);
  return {text,sourceSha,transport,partCount,b64Length};
 }
 
@@ -68,18 +60,14 @@ function classify(s){const hay=`${s.title} ${s.body}`.toLowerCase();let best=PRO
 function unitBase(id,parent,kind,wave,route,title){return{work_unit_id:id,parent_id:parent,kind,wave,route_class:route,title,company_id:'zeus',engine_id:ENGINE_ID,environment:ENV,version:VERSION,status:'READY',paid_ai_allowed:route==='deepseek_candidate',prod_write_allowed:false,trading_access:false,estimated_cost_eur:0,idempotency_key:sha(`${VERSION}|${id}`)};}
 
 export function buildJarvisDag({masterPath=process.env.JARVIS_MASTER_FILE||MASTER_DEFAULT}={}){
- const source=loadMaster(masterPath);const sections=parseSections(source.text);
- if(sections.length<400)throw new Error(`JARVIS_MASTER_SECTION_COUNT_TOO_LOW:${sections.length}`);
- const units=[];
+ const source=loadMaster(masterPath);const sections=parseSections(source.text);if(sections.length<400)throw new Error(`JARVIS_MASTER_SECTION_COUNT_TOO_LOW:${sections.length}`);const units=[];
  units.push({...unitBase(ROOT,null,'mission_root',0,'orchestrator','BUILD JARVIS MASTER V1'),dependencies:[],acceptance_criteria:['all mandatory programs accepted or governed HUMAN_REQUIRED recorded']});
- let prev=ROOT;
- CORE.forEach((name,i)=>{const id=`${ROOT}.CORE.${String(i+1).padStart(2,'0')}.${name}`;units.push({...unitBase(id,ROOT,'core_gate_unit',i+1,i===3?'deepseek_candidate':'deterministic',name),dependencies:[prev],acceptance_criteria:[`${name} contract and verifier evidence exist`]});prev=id;});
+ let prev=ROOT;CORE.forEach((name,i)=>{const id=`${ROOT}.CORE.${String(i+1).padStart(2,'0')}.${name}`;units.push({...unitBase(id,ROOT,'core_gate_unit',i+1,i===3?'deepseek_candidate':'deterministic',name),dependencies:[prev],acceptance_criteria:[`${name} contract and verifier evidence exist`]});prev=id;});
  const coreGate=`${ROOT}.CORE.GATE`;units.push({...unitBase(coreGate,ROOT,'core_gate',11,'governance','MINIMAL IMMUTABLE CORE GATE'),dependencies:[prev],acceptance_criteria:['all ten minimal core units resolved','no PROD authority']});
  for(const[pid,pname]of PROGRAMS)units.push({...unitBase(`${ROOT}.${pid}`,ROOT,'program',12,'orchestrator',pname),dependencies:[coreGate],program_id:pid,program_name:pname,acceptance_criteria:['all requirement lifecycle units resolved or governed exception recorded']});
  for(const s of sections){const c=classify(s);const sid=`S${String(s.section).padStart(3,'0')}-${slug(s.title)}`;const req=`${ROOT}.${c.program_id}.${sid}`;units.push({...unitBase(req,`${ROOT}.${c.program_id}`,'requirement',13,'orchestrator',s.title),dependencies:[`${ROOT}.${c.program_id}`],program_id:c.program_id,program_name:c.program_name,master_section:s.section,source_ref:`JARVIS_MASTER_V1_RC2#${s.section}`,scope_text:s.body,acceptance_criteria:['lifecycle complete','evidence attached','rollback/rebuild impact known']});let dep=req;LIFECYCLE.forEach(([phase,route],idx)=>{const id=`${req}.${phase}`;units.push({...unitBase(id,req,'task',20+idx,route,`${phase}: ${s.title}`),dependencies:[dep],program_id:c.program_id,program_name:c.program_name,master_section:s.section,phase,risk_class:['implement','security','accept'].includes(phase)?'medium_preprod':'low_preprod',authority_required:'CEREBRO_PREPROD',success_criteria:[`${phase} evidence exists`,'preserve existing behavior','no PROD write'],evidence_required:[`${id}.json`]});dep=id;});}
- const ids=new Set(units.map(u=>u.work_unit_id));if(ids.size!==units.length)throw new Error('DUPLICATE_WORK_UNIT_ID');for(const u of units)for(const d of u.dependencies||[])if(!ids.has(d))throw new Error(`MISSING_DEP:${d}`);
- const waves={};for(const u of units){waves[u.wave]??=[];waves[u.wave].push(u.work_unit_id);}
- return{schema_version:'2.1',mission_id:ROOT,source_master:path.basename(masterPath),source_sha256:source.sourceSha,source_transport:source.transport,source_part_count:source.partCount,source_b64_length:source.b64Length,generated_at:new Date(0).toISOString(),program_count:PROGRAMS.length,master_section_count:sections.length,work_unit_count:units.length,task_count:units.filter(u=>u.kind==='task').length,core_gate_count:CORE.length,wave_count:Object.keys(waves).length,safeguards:{environment:ENV,prod_write:false,trading:false,deepseek_temporary:true,deepseek_dependency_target:0,max_repo_write_concurrency:1,master_integrity_verified:true},programs:PROGRAMS.map(([id,name])=>({id,name})),waves:Object.fromEntries(Object.entries(waves).map(([k,v])=>[k,{count:v.length}])),units};
+ const ids=new Set(units.map(u=>u.work_unit_id));if(ids.size!==units.length)throw new Error('DUPLICATE_WORK_UNIT_ID');for(const u of units)for(const d of u.dependencies||[])if(!ids.has(d))throw new Error(`MISSING_DEP:${d}`);const waves={};for(const u of units){waves[u.wave]??=[];waves[u.wave].push(u.work_unit_id);}
+ return{schema_version:'2.2',mission_id:ROOT,source_master:path.basename(masterPath),source_sha256:source.sourceSha,source_transport:source.transport,source_part_count:source.partCount,source_b64_length:source.b64Length,generated_at:new Date(0).toISOString(),program_count:PROGRAMS.length,master_section_count:sections.length,work_unit_count:units.length,task_count:units.filter(u=>u.kind==='task').length,core_gate_count:CORE.length,wave_count:Object.keys(waves).length,safeguards:{environment:ENV,prod_write:false,trading:false,deepseek_temporary:true,deepseek_dependency_target:0,max_repo_write_concurrency:1,master_integrity_verified:true},programs:PROGRAMS.map(([id,name])=>({id,name})),waves:Object.fromEntries(Object.entries(waves).map(([k,v])=>[k,{count:v.length}])),units};
 }
 function main(){const out=process.env.JARVIS_DAG_OUT||'artifacts/jarvis-mission-001-dag';const dag=buildJarvisDag();fs.mkdirSync(out,{recursive:true});fs.writeFileSync(path.join(out,'mission-dag.json'),JSON.stringify(dag,null,2));fs.writeFileSync(path.join(out,'work-units.jsonl'),dag.units.map(x=>JSON.stringify(x)).join('\n')+'\n');fs.writeFileSync(path.join(out,'summary.json'),JSON.stringify({mission_id:dag.mission_id,source_sha256:dag.source_sha256,source_transport:dag.source_transport,source_part_count:dag.source_part_count,source_b64_length:dag.source_b64_length,program_count:dag.program_count,master_section_count:dag.master_section_count,work_unit_count:dag.work_unit_count,task_count:dag.task_count,wave_count:dag.wave_count,safeguards:dag.safeguards},null,2));console.log(JSON.stringify({ok:true,mission_id:dag.mission_id,programs:dag.program_count,sections:dag.master_section_count,units:dag.work_unit_count,tasks:dag.task_count,waves:dag.wave_count,sha256:dag.source_sha256,transport:dag.source_transport,parts:dag.source_part_count,b64_length:dag.source_b64_length}));}
 if(import.meta.url===`file://${process.argv[1]}`)main();
