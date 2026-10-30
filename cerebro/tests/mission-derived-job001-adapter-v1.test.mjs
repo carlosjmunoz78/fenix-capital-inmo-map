@@ -25,8 +25,11 @@ test('adapter contract reuses JOB-001 and stays PREPROD fail-closed at verified 
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.durable_worker_reused, true);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_default, 180);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_max, 180);
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.unique_atomic_work_units, 2352);
   assert.deepEqual(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.lane_range, { min: 0, max: 67 });
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.auto_refill, true);
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.refill_until_unique_backlog_exhausted, true);
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.duplicate_replay_after_exhaustion, false);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_queue, false);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_scheduler, false);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_daemon, false);
@@ -65,10 +68,38 @@ test('180-cap source spans all 68 canonical lanes before cycling', () => {
   const seeded = source.reconcile();
   assert.equal(seeded.accepted_this_reconcile, 180);
   assert.equal(seeded.active_jobs, 180);
+  assert.equal(seeded.remaining_unique_work_units, 2352 - 180);
   const jobs = runtime.listForContext(context);
   assert.equal(new Set(jobs.map(job => job.payload.lane)).size, 68);
   assert.ok(jobs.some(job => job.payload.lane === 67));
   assert.ok(jobs.some(job => job.payload.cycle >= 2));
+});
+
+test('source drains the 2352-unit unique Mission DAG exactly once and then idles', () => {
+  const { journal } = fixture();
+  const context = missionDerivedJob001ContextV1();
+  const runtime = new DurableJobRuntimeV1({ file_path: journal });
+  const source = new MissionDerivedJob001SourceV1({ job_runtime: runtime, context });
+  let guard = 0;
+  while (!source.snapshot().exhausted && guard < 20) {
+    source.reconcile();
+    for (const job of runtime.listForContext(context)) {
+      if (job.status === 'QUEUED') {
+        job.status = 'SUCCEEDED';
+        job.result = { status: 'SUCCEEDED' };
+      }
+    }
+    guard += 1;
+  }
+  const drained = source.snapshot();
+  assert.equal(drained.exhausted, true);
+  assert.equal(drained.total_jobs, 2352);
+  assert.equal(drained.remaining_unique_work_units, 0);
+  assert.equal(new Set(runtime.listForContext(context).map(job => job.payload.__mission_derived.sequence)).size, 2352);
+  const after = source.reconcile();
+  assert.equal(after.accepted_this_reconcile, 0);
+  assert.equal(after.requested_this_reconcile, 0);
+  assert.equal(runtime.listForContext(context).length, 2352);
 });
 
 test('registered handler executes through the existing DurableWorkerRunnerV1 with checkpoint and completion', async () => {
