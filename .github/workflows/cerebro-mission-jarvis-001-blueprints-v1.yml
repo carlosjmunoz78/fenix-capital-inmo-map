@@ -1,0 +1,15 @@
+name: JARVIS-001 BLUEPRINTS V1 · SUPERSEDED
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  superseded:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'SUPERSEDED_BY=cerebro-mission-jarvis-001-blueprints-v2.yml'
+          echo 'Reason: V1 validated transport/bounds but did not reject empty reasoning-only DeepSeek outputs.'

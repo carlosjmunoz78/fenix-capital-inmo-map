@@ -1,0 +1,99 @@
+{
+  "program_id": "P17",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 227,
+    "cached_input_tokens": 0,
+    "output_tokens": 797,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00051225,
+  "blueprint": {
+    "existing_to_reuse": [
+      "Jarvis view shell and routing from P17 section 16 scaffold",
+      "Existing telemetry/event bus for console signals",
+      "Existing component library (buttons, cards, tables, modals)",
+      "Existing RBAC/feature-flag service for view gating",
+      "Existing API gateway + typed client for read-only endpoints",
+      "Existing notification/toast system",
+      "Existing data adapters for Jarvis read models",
+      "Existing i18n and theme tokens"
+    ],
+    "gaps": [
+      "No single JARVIS View 0 composition contract tying panels to data adapters",
+      "No adaptive layout policy (breakpoints, density, priority tiers)",
+      "Missing empty/loading/error state matrix for View 0 panels",
+      "No console event schema for UI telemetry (view/panel interactions)",
+      "No handoff brief format for downstream UX/program consumers",
+      "No degradation contract when adapters unavailable",
+      "No accessibility baseline documented for View 0"
+    ],
+    "contracts": [
+      "View0Composition: {panels[],layoutPolicy,density,priorityTier}",
+      "PanelDescriptor: {id,title,adapterRef,stateTemplates,priorityTier}",
+      "AdaptivePolicy: {breakpoints,minDensity,reorderByTier,maxPanels}",
+      "ReadAdapterResult: {status:ok|degraded|unavailable,data?,reason?}",
+      "ConsoleTelemetryEvent: {view,panel,action,ts,meta} (read-only, no PII)",
+      "HandoffBrief: {programId,scope,panels,decisions,openQuestions}",
+      "FeatureGate: {viewId,flag,rbacRole} (advisor-only)"
+    ],
+    "implementation_batches": [
+      "B1: Freeze View0Composition + PanelDescriptor contracts; wire existing shell to read adapters (wrappers only)",
+      "B2: Implement state templates (empty/loading/error/degraded) via existing components",
+      "B3: Add AdaptivePolicy resolver as pure function over breakpoints/priorityTier",
+      "B4: Emit ConsoleTelemetryEvent through existing bus; validate schema (no PII)",
+      "B5: Generate HandoffBrief from composition + decisions; snapshot in preprod"
+    ],
+    "tests": [
+      "Contract tests for View0Composition/PanelDescriptor schema validity",
+      "Adapter wrapper tests for ok/degraded/unavailable mapping",
+      "AdaptivePolicy unit tests across breakpoints and tier reordering",
+      "State-template rendering tests per panel",
+      "Telemetry event schema + PII-absence assertions",
+      "Feature-gate tests: hidden when flag/role absent",
+      "HandoffBrief structural validation",
+      "No-write assertion: all endpoints/adapters read-only in tests"
+    ],
+    "security": [
+      "Read-only adapters only; assert no prod write paths in wiring",
+      "Advisor-only gating via existing RBAC/feature flags",
+      "Telemetry excludes PII; allowlist fields",
+      "No trading/capital-actions surfaces in View 0",
+      "Secrets via existing config; no new credentials"
+    ],
+    "observability": [
+      "ConsoleTelemetryEvent counters per panel/view",
+      "Adapter health gauges (ok/degraded/unavailable)",
+      "State-template fallback rate metric",
+      "AdaptivePolicy resolution trace (debug, preprod)",
+      "HandoffBrief generation success metric",
+      "Structured logs tagged mission=P17 preprod"
+    ],
+    "rollback": [
+      "Feature flag disables View 0 composition back to legacy shell",
+      "AdaptivePolicy resolver config-revertible (no code change)",
+      "Adapters wrappers fail-safe to degraded state, never throw",
+      "Telemetry emission toggleable; no blocking",
+      "HandoffBrief generation non-blocking; skip on failure"
+    ],
+    "distillation_targets": [
+      "View0Composition + PanelDescriptor as canonical UX contract",
+      "AdaptivePolicy module as reusable cross-view policy",
+      "ReadAdapterResult as standard degradation envelope",
+      "ConsoleTelemetryEvent as shared UI signal schema",
+      "HandoffBrief as reusable program handoff template"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

@@ -1,0 +1,21 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "name": "BUILD JARVIS MASTER V1",
+  "status": "DEFINED",
+  "source_master": "JARVIS_MASTER_V1_RC2_2026-10-30.md",
+  "execution_state": "NOT_STARTED_NOT_CONFIRMED",
+  "hierarchy": ["MISSION","PROGRAM","EPIC","CAPABILITY","CONTRACT","TASK","TEST","EVIDENCE"],
+  "core_first": true,
+  "programs": [
+    {"id":"P01","name":"JARVIS CORE"},{"id":"P02","name":"MEMORY & WORLD MODEL"},{"id":"P03","name":"CAPABILITY FABRIC & ROUTING"},{"id":"P04","name":"SECURITY / AUTHORITY / IFC"},{"id":"P05","name":"DURABLE CLOUD RUNTIME"},{"id":"P06","name":"EXECUTION / TRANSACTIONS / RECONCILIATION"},{"id":"P07","name":"EVALUATION / VERIFICATION / TRIBUNAL"},{"id":"P08","name":"SWARMS / CLONES / SOCIETY GOVERNOR"},{"id":"P09","name":"CONVERSATION / PERSONALITY / REPRESENTATION"},{"id":"P10","name":"VOICE / LANGUAGES / INTERPRETATION"},{"id":"P11","name":"OBSERVATORY / INSTRUMENTATION"},{"id":"P12","name":"DISCOVERY / LEARNING / KNOWLEDGE"},{"id":"P13","name":"SELF-IMPROVEMENT / SELF-REPAIR"},{"id":"P14","name":"FUTURE SIMULATION / ANTICIPATION"},{"id":"P15","name":"MULTIPROJECT / MULTICOMPANY / LIFE OS"},{"id":"P16","name":"RECOVERY / REBUILD / SOVEREIGNTY"},{"id":"P17","name":"JARVIS CONSOLE / UX / HANDOFF"},{"id":"P18","name":"INSTITUTIONAL ACCEPTANCE / ZERO-CARLOS"}
+  ],
+  "deepseek": {
+    "role": "TEMPORARY_COGNITIVE_ACCELERATOR",
+    "target_dependency_rate": 0.0,
+    "ordinary_operation_required": false,
+    "roles": ["DS-BUILDER","DS-CRITIC","DS-KNOWLEDGE","DS-CONVERSATION-COACH","DS-LANGUAGE-COACH","DS-DISTILLER","DS-CHALLENGER"],
+    "distillation_required": true
+  },
+  "promotion_path": ["CONTRACT","IMPLEMENT","TEST","SECURITY","EVAL","VERIFIER","OLD_VS_NEW","TRIBUNAL","PREPROD","CANARY","PROMOTE","OBSERVE"],
+  "human_required_classes": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]
+}

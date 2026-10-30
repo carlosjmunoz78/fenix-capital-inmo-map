@@ -1,0 +1,128 @@
+{
+  "program_id": "P09",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1201,
+    "cached_input_tokens": 0,
+    "output_tokens": 861,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00069675,
+  "blueprint": {
+    "reuse_map": {
+      "conversation_store": "backing store for DecisionItem queue and RepresentationTurn transcripts",
+      "persona_registry": "wrap into PersonalityCanon registry (versioned, hashed)",
+      "message_bus": "transport for attention spends, turn-taking events, voice eval signals",
+      "scheduler": "drives precompute/prefetch jobs and reservation expiry sweeps",
+      "notification_service": "owner friction / attention budget alerts",
+      "translation_provider_interface": "extend for original-language preservation layer",
+      "voice_pipeline": "host for turn-taking policy and champion/challenger eval hooks",
+      "attention_queue": "extend into AttentionBudget + DecisionItem enforcement",
+      "audit_log": "record all attention spends, canon changes, reservation grants",
+      "config_flags": "feature flags for B1–B6 rollout/rollback"
+    },
+    "files_to_add": [
+      "cerebro/personality/canonical_registry.py",
+      "cerebro/personality/canon_v1.json",
+      "cerebro/representation/language_preservation.py",
+      "cerebro/attention/budget.py",
+      "cerebro/attention/decision_queue.py",
+      "cerebro/attention/owner_friction.py",
+      "cerebro/voice/turn_taking.py",
+      "cerebro/voice/champion_challenger.py",
+      "cerebro/reservations/precompute.py",
+      "cerebro/reservations/manager.py",
+      "cerebro/learning/representation_feedback.py",
+      "cerebro/governance/portfolio_governor.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "cerebro/conversation/store.py",
+      "cerebro/persona/registry.py",
+      "cerebro/bus/message_bus.py",
+      "cerebro/scheduler/jobs.py",
+      "cerebro/notify/service.py",
+      "cerebro/i18n/translation_provider.py",
+      "cerebro/voice/pipeline.py",
+      "cerebro/attention/queue.py",
+      "cerebro/audit/log.py",
+      "cerebro/config/flags.py"
+    ],
+    "contracts": [
+      "PersonalityCanon{v,traits,invariants,hash}",
+      "RepresentationTurn{lang_original,translation,twin_state}",
+      "AttentionBudget{total,reserved,spent,owner_friction}",
+      "DecisionItem{id,priority,budget_cost,deadline}",
+      "VoiceEval{champion,challenger,score,turn_taking_metrics}",
+      "PrecomputePlan{keys,ttl,owner}",
+      "Reservation{kind,scope,amount,expiry}",
+      "ExperienceIndex{score,factors}"
+    ],
+    "tests": [
+      "personality_canonical_hash_stable",
+      "original_language_roundtrip",
+      "attention_budget_not_exceeded",
+      "owner_friction_computed",
+      "turn_taking_latency_bounds",
+      "champion_challenger_selection",
+      "precompute_ttl_respected",
+      "reservation_expiry",
+      "no_prod_write_guard",
+      "experience_index_monotonic"
+    ],
+    "rollout_order": [
+      "B1 personality_and_representation",
+      "B2 attention_and_decisions",
+      "B3 voice_turn_taking",
+      "B4 precompute_and_reservations",
+      "B5 learning_and_index",
+      "B6 governance"
+    ],
+    "rollback": [
+      "feature_flag_personality_v1",
+      "disable_voice_eval_batch",
+      "revert_canon_to_prev_hash",
+      "drop_reservations_table",
+      "stop_precompute_job"
+    ],
+    "evidence": [
+      "friction_index_gauge",
+      "attention_budget_used",
+      "decision_queue_depth",
+      "turn_taking_p95",
+      "voice_eval_scores",
+      "reservation_utilization",
+      "experience_index_trend",
+      "translation_latency"
+    ],
+    "distillation": {
+      "persona_traits_compact": "PersonalityCanon.traits reduced to invariant-preserving summary",
+      "attention_policy_summary": "AttentionBudget enforcement rules and thresholds",
+      "turn_taking_rules": "VoiceTurnTaking policy parameters",
+      "translation_preferences": "original-language preservation + provider prefs"
+    },
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve_canonical_personality_v1_hash",
+    "approve_owner_friction_thresholds",
+    "approve_voice_champion_promotion",
+    "approve_reservation_defaults",
+    "approve_portfolio_governor_weights"
+  ],
+  "model_advisory_approvals": [
+    "approve_canonical_personality_v1_hash",
+    "approve_owner_friction_thresholds",
+    "approve_voice_champion_promotion",
+    "approve_reservation_defaults",
+    "approve_portfolio_governor_weights"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

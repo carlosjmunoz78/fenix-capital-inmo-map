@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "programs": 18,
+  "valid_blueprints": 36,
+  "deepseek_calls_this_run": 37,
+  "reused_blueprints": 0,
+  "recovered_designs": 0,
+  "retry_events": [
+    {
+      "label": "DESIGN:P01",
+      "attempt": 1,
+      "reason": "INVALID_OR_EMPTY_JSON"
+    }
+  ],
+  "task_evidence": 842,
+  "estimated_cost_usd_this_run": 0.028316442,
+  "human_required": [],
+  "deepseek_dependency_target": 0,
+  "semantic_gate": "GREEN",
+  "prod_write": false,
+  "trading": false,
+  "governance_gate": "GREEN",
+  "source_run_id": 41013849206,
+  "raw_model_advisory_approval_count": 69,
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": [],
+  "governance_rule": "ONLY_DETERMINISTIC_POLICY_CAN_RAISE_CANONICAL_HUMAN_REQUIRED"
+}

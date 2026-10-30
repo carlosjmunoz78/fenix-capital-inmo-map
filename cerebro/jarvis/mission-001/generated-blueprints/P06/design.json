@@ -1,0 +1,111 @@
+{
+  "program_id": "P06",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 241,
+    "cached_input_tokens": 0,
+    "output_tokens": 808,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00052095,
+  "blueprint": {
+    "existing_to_reuse": [
+      "P05 kafka producer/consumer wrappers + outbox pattern",
+      "P02 Postgres schema + migration tooling",
+      "P01 OpenTelemetry tracing + structured logging",
+      "Existing idempotency-key store / dedupe service",
+      "Existing retry/backoff utility (resilience4j or equivalent)",
+      "Existing config service and feature-flag client",
+      "Existing secrets manager integration (preprod vault)"
+    ],
+    "gaps": [
+      "No unified transactional action engine abstraction",
+      "No saga coordinator (compensation + step registry)",
+      "No declarative desired-state reconciler / drift detector",
+      "No cross-service transaction boundary contract tests",
+      "No action audit trail enforcement",
+      "No compensation idempotency guarantees",
+      "No drift event schema / drift-to-remediation loop"
+    ],
+    "contracts": [
+      "ActionRequest/ActionResult DTOs (idempotency_key, actor, trace_id, schema_version)",
+      "SagaDefinition schema: steps[], compensations[], timeouts, DLQ policy",
+      "DesiredStateDocument schema + reconcile(diff)->plan->apply contract",
+      "DriftEvent {resource, expected, actual, detected_at, severity}",
+      "Engine SPI: execute(), compensate(), reconcile() with stable versioning",
+      "Reconciler scheduling contract (interval, jitter, lock ownership)"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "Action engine core: idempotency wrapper + SPI + Postgres action log",
+        "exit": "unit + contract tests green in preprod"
+      },
+      {
+        "id": "B2",
+        "scope": "Saga orchestration: step registry, state machine, compensation, DLQ",
+        "exit": "happy-path + injected-failure compensation tests"
+      },
+      {
+        "id": "B3",
+        "scope": "Reconciler: desired-state loader, differ, planner, applier (dry-run default)",
+        "exit": "drift detection tests with synthetic drift"
+      },
+      {
+        "id": "B4",
+        "scope": "Observability + audit wiring, OTel spans, metrics, alerts",
+        "exit": "traces/metrics verified in preprod dashboards"
+      }
+    ],
+    "tests": [
+      "Idempotency: duplicate ActionRequest yields single effect",
+      "Saga: mid-step failure triggers ordered compensation, idempotent retries",
+      "Compensation failure escalates to DLQ + alert",
+      "Drift: mutate resource -> DriftEvent emitted within interval",
+      "Apply is dry-run by default; live apply gated by flag",
+      "Contract tests for all SPI/DTO versions",
+      "Property test: reconcile is convergent (no infinite diff)"
+    ],
+    "security": [
+      "Enforce actor identity + authorization on every action (preprod RBAC)",
+      "Secrets via vault only; no plaintext in desired-state docs",
+      "Sign/verify DriftEvent and reconciliation apply requests",
+      "Audit log immutable, tamper-evident (hash chain)",
+      "No prod credentials issued; prod write endpoints hard-blocked in config",
+      "Rate-limit actions per actor to prevent abuse"
+    ],
+    "observability": [
+      "Spans: action.execute, saga.step, saga.compensate, reconcile.cycle",
+      "Metrics: action_latency, saga_success/failure, compensate_failures, drift_count, reconcile_duration",
+      "Structured logs with trace_id + action_id + saga_id correlation",
+      "Alerts: DLQ depth, compensation failure, persistent drift, reconcile lag",
+      "Dashboards per engine component in preprod Grafana"
+    ],
+    "rollback": [
+      "Feature-flag disable per engine (action, saga, reconciler)",
+      "Reconciler defaults to dry-run; live apply reversible via snapshot",
+      "Saga definitions versioned; revert by pointer swap",
+      "Action log append-only enables replay-based recovery",
+      "DB migrations forward+backward compatible; documented down-migrations"
+    ],
+    "distillation_targets": [
+      "Action engine SPI + idempotency wrapper (reusable P06 primitive)",
+      "Saga step/compensation registry pattern",
+      "Desired-state differ/planner library",
+      "DriftEvent schema + remediation hook",
+      "Observability conventions for transactional flows"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

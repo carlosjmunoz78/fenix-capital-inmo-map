@@ -1,0 +1,2495 @@
+{
+  "schema_version": "1.0",
+  "mission_id": "MISSION-JARVIS-001",
+  "environment": "PREPROD",
+  "generated_at": "1970-01-01T00:00:00.000Z",
+  "principle": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR",
+  "items": [
+    {
+      "id": "IDENTITY_IAM",
+      "program": "P01/P04",
+      "terms": [
+        "identity",
+        "credential",
+        "iam"
+      ],
+      "preferred": [
+        "cerebro/governance/identity-credential-broker.mjs",
+        "cerebro/registry/identity-access-registry.v0.json"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/governance/identity-credential-broker.mjs",
+        "cerebro/registry/identity-access-registry.v0.json"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/governance/identity-credential-broker.mjs",
+          "score": 120
+        },
+        {
+          "path": "cerebro/registry/identity-access-registry.v0.json",
+          "score": 112
+        },
+        {
+          "path": ".github/workflows/cerebro-iam001-identity-credential-audit-v0.yml",
+          "score": 30
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_IAM001_IDENTITY_CREDENTIAL_BROKER_AUDIT_V0_2026-10-09.md",
+          "score": 30
+        },
+        {
+          "path": "cerebro/tests/identity-credential-broker-v0.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S051-identity-vault-credential-broker.design.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S051-identity-vault-credential-broker.implement.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/registry/credential-lifecycle-policy.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/credential-reference-registry.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/iam-browser-vault-refresh-plan.v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/identity-session-lifecycle-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-browser-credential-broker-v2.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-iam001-lifecycle-health-v0.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_IAM001_LIFECYCLE_SESSION_BINDING_V0_2026-10-09.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/governance/identity-session-lifecycle.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S025-durable-identity-durable-missions.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S025-durable-identity-durable-missions.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S043-universal-identity-resolution.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S043-universal-identity-resolution.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S050-root-of-trust-identity-continuity.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S050-root-of-trust-identity-continuity.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S162-multilingual-voice-identity.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S162-multilingual-voice-identity.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/media-studio/v2/contracts/identity-character-rights.schema.json",
+          "score": 10
+        },
+        {
+          "path": "src/DirectionIdentityGuard.tsx",
+          "score": 10
+        },
+        {
+          "path": "src/OperationalIdentityGuard.tsx",
+          "score": 10
+        },
+        {
+          "path": "src/privatePhysicalIdentityNormalizer.ts",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/20261023093100_cerebro_browser_credential_broker_v1.sql",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/20261023194500_cerebro_browser_credential_broker_v2.sql",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/20261023195500_cerebro_browser_credential_broker_v2_scope_fix.sql",
+          "score": 10
+        },
+        {
+          "path": "tests/advanced-search-identity.spec.ts",
+          "score": 10
+        },
+        {
+          "path": "tests/direction-identity.spec.ts",
+          "score": 10
+        },
+        {
+          "path": "tests/operational-identity.spec.ts",
+          "score": 10
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "GATEWAY_CONSOLE",
+      "program": "P01/P17",
+      "terms": [
+        "gateway",
+        "console"
+      ],
+      "preferred": [
+        "cerebro/console/gateway.mjs",
+        "cerebro/console/jarvis-project-hub-binding-v1.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/console/gateway.mjs",
+        "cerebro/console/jarvis-project-hub-binding-v1.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/console/gateway.mjs",
+          "score": 120
+        },
+        {
+          "path": "cerebro/console/jarvis-project-hub-binding-v1.mjs",
+          "score": 110
+        },
+        {
+          "path": "cerebro/tests/console-gateway.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/console/action-gateway-binding-v1.mjs",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/index.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/live5.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/overlay.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/owner100.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/router-live5.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-human-v1-canary/router.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-v0/index.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-v0/knowledge.ts",
+          "score": 20
+        },
+        {
+          "path": "cerebro/registry/console-project-hub-binding-v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/console-v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/action-gateway-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/browser1-action-gateway-binding-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/console-human-required-classification.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/human-intelligence-gateway-routing-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/backups/supabase/2026-10-29/cerebro-device-gateway-preprod-v8.ts",
+          "score": 10
+        },
+        {
+          "path": "cerebro/contracts/console-owner-decision-v1.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CONSOLE_CHANGELOG.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CONSOLE_MOBILE_HUMAN_EXCEPTION_RUNBOOK_V1.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CONSOLE_OWNER_DECISION_BY_EXCEPTION_V1.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/gateway/action-gateway-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/gateway/browser1-action-gateway-binding-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/human-intelligence/integration/human-gateway-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/human-intelligence/lab/run-gateway-shadow-canary-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P17.S016-cerebro-console-jarvis-view-0.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P17.S016-cerebro-console-jarvis-view-0.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/snapshots/cerebro-telegram-gateway-v0-v4/index.ts",
+          "score": 10
+        },
+        {
+          "path": "docs/operations/prod-deployments/2026-10-19-cerebro-console-browser-cors-repair.md",
+          "score": 10
+        },
+        {
+          "path": "docs/operations/prod-deployments/2026-10-19-cerebro-console-repair.md",
+          "score": 10
+        },
+        {
+          "path": "docs/SECDEF_GATEWAY_PROMOTION_PLAN_20260915.md",
+          "score": 10
+        },
+        {
+          "path": "scripts/rehearse-app-rpc-gateway-migration.mjs",
+          "score": 10
+        },
+        {
+          "path": "src/cerebro-browser-console.css",
+          "score": 10
+        },
+        {
+          "path": "src/cerebro-console-host.css",
+          "score": 10
+        },
+        {
+          "path": "src/cerebro-console.css",
+          "score": 10
+        },
+        {
+          "path": "src/cerebro-operative-console-v2.css",
+          "score": 10
+        },
+        {
+          "path": "src/cerebro-operative-console.css",
+          "score": 10
+        },
+        {
+          "path": "src/CerebroBrowserConsole.tsx",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "PROJECT_HUB",
+      "program": "P15/P17",
+      "terms": [
+        "jarvis-project-hub",
+        "project-hub"
+      ],
+      "preferred": [
+        "cerebro/runtime/jarvis-project-hub-v1.mjs",
+        "cerebro/console/jarvis-project-hub-binding-v1.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/runtime/jarvis-project-hub-v1.mjs",
+        "cerebro/console/jarvis-project-hub-binding-v1.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/jarvis-project-hub-v1.mjs",
+          "score": 123
+        },
+        {
+          "path": "cerebro/console/jarvis-project-hub-binding-v1.mjs",
+          "score": 120
+        },
+        {
+          "path": "cerebro/runtime/test-jarvis-project-hub-v1.mjs",
+          "score": 23
+        },
+        {
+          "path": "cerebro/contracts/jarvis-project-hub.v1.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/runbooks/jarvis-project-hub-v1.md",
+          "score": 20
+        },
+        {
+          "path": "cerebro/registry/console-project-hub-binding-v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/build-android-preprod-v0.sh",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-native-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "MODEL_ROUTER",
+      "program": "P03",
+      "terms": [
+        "execution-model-router",
+        "model-router",
+        "route-001"
+      ],
+      "preferred": [
+        "cerebro/router/execution-model-router.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/router/execution-model-router.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/router/execution-model-router.mjs",
+          "score": 120
+        },
+        {
+          "path": "cerebro/registry/execution-model-router-policy.v0.json",
+          "score": 22
+        },
+        {
+          "path": "cerebro/tests/execution-model-router-v0.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S340-model-router.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S340-model-router.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S408-model-router-during-build.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S408-model-router-during-build.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/media-studio/v2/runtime/character-physical-model-router.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/media-studio/v2/runtime/tool-model-router.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/media-studio/v2/tests/character-physical-model-router.test.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "JOB_CONTROL_PLANE",
+      "program": "P05/P06/P08",
+      "terms": [
+        "job001",
+        "control-plane"
+      ],
+      "preferred": [
+        "cerebro/runtime/job001-ledger-control-plane-v1.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/runtime/job001-ledger-control-plane-v1.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/job001-ledger-control-plane-v1.mjs",
+          "score": 123
+        },
+        {
+          "path": "cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs",
+          "score": 23
+        },
+        {
+          "path": "cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/tests/job001-ledger-control-plane-v1.test.mjs",
+          "score": 22
+        },
+        {
+          "path": ".github/workflows/cerebro-job001-ledger-control-plane-v1.yml",
+          "score": 20
+        },
+        {
+          "path": "cerebro/runtime/cerebro-fast-evolution-job001-bridge-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/jarvis-mission-job001-adapter-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/job001-host-status-cli-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/job001-host-status-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/job001-maintenance-drain-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/job001-remote-telemetry-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/mission-derived-job001-adapter-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/tests/cerebro-fast-evolution-job001-bridge-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/job001-host-status-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/job001-maintenance-drain-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/job001-remote-telemetry-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/mission-derived-job001-adapter-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/rsi-hostless-control-plane-workflow.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-job001-host-status-v1.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-rsi-learning-control-plane-v0.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/JOB001_WINDOWS_REMOTE_TELEMETRY_V1.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S385-distributed-resilience-control-plane.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P03.S385-distributed-resilience-control-plane.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P07.S382-jarvis-evaluation-control-plane.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P07.S382-jarvis-evaluation-control-plane.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P08.S124-massive-swarm-control-plane.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P08.S124-massive-swarm-control-plane.implement.json",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "MISSION_ORCHESTRATOR",
+      "program": "P01/P06",
+      "terms": [
+        "mission-recursive-decomposer",
+        "mission-derived-useful-work"
+      ],
+      "preferred": [
+        "cerebro/runtime/mission-recursive-decomposer-v1.mjs",
+        "cerebro/runtime/mission-derived-useful-work-v1.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/runtime/mission-recursive-decomposer-v1.mjs",
+        "cerebro/runtime/mission-derived-useful-work-v1.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/mission-derived-useful-work-v1.mjs",
+          "score": 113
+        },
+        {
+          "path": "cerebro/runtime/mission-recursive-decomposer-v1.mjs",
+          "score": 113
+        },
+        {
+          "path": "cerebro/runtime/mission-recursive-decomposer-v1.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/tests/mission-derived-useful-work-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/build-android-preprod-v0.sh",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-native-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cerebro-184-fact001-gap-router-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cerebro-continuous-supervisor-v0.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "DEEPSEEK_PROVIDER",
+      "program": "P03/P12",
+      "terms": [
+        "deepseek-provider",
+        "deepseek-budget",
+        "deepseek-cost"
+      ],
+      "preferred": [
+        "cerebro/runtime/deepseek-provider-v0.mjs",
+        "cerebro/runtime/deepseek-budget-guard-v0.mjs",
+        "cerebro/runtime/deepseek-cost-v0.mjs"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/runtime/deepseek-provider-v0.mjs",
+        "cerebro/runtime/deepseek-budget-guard-v0.mjs",
+        "cerebro/runtime/deepseek-cost-v0.mjs"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/deepseek-budget-guard-v0.mjs",
+          "score": 113
+        },
+        {
+          "path": "cerebro/runtime/deepseek-cost-v0.mjs",
+          "score": 113
+        },
+        {
+          "path": "cerebro/runtime/deepseek-provider-v0.mjs",
+          "score": 113
+        },
+        {
+          "path": "cerebro/runtime/deepseek-budget-ledger-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/tests/deepseek-budget-guard-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/deepseek-cost-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/deepseek-provider-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/jarvis/boost-001/deepseek-provider-contract.v1.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/build-android-preprod-v0.sh",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "CONSTITUTION",
+      "program": "P01/P04",
+      "terms": [
+        "jarvis_constitution",
+        "constitution"
+      ],
+      "preferred": [
+        "cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md"
+      ],
+      "state": "EXISTING_REUSE_FIRST",
+      "preferred_found": [
+        "cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md"
+      ],
+      "evidence": [
+        {
+          "path": "cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md",
+          "score": 120
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S229-values-constitution.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S229-values-constitution.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/bounded-recovery-supervisor.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/build-android-preprod-v0.sh",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-native-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cerebro-184-fact001-gap-router-v1.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cerebro-continuous-supervisor-v0.mjs",
+          "score": 3
+        },
+        {
+          "path": "cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs",
+          "score": 3
+        }
+      ]
+    },
+    {
+      "id": "EVALUATION_TRIBUNAL",
+      "program": "P07",
+      "terms": [
+        "eval",
+        "tribunal",
+        "judge",
+        "evaluation"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/evaluation-tribunal.mjs",
+          "score": 33
+        },
+        {
+          "path": "cerebro/runtime/rsi-old-new-evaluation-tribunal-gate.mjs",
+          "score": 33
+        },
+        {
+          "path": "cerebro/tests/evaluation-tribunal.test.mjs",
+          "score": 32
+        },
+        {
+          "path": "cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs",
+          "score": 32
+        },
+        {
+          "path": ".github/workflows/cerebro-rsi-b3-old-new-evaluation-tribunal-v0.yml",
+          "score": 30
+        },
+        {
+          "path": "cerebro/human-intelligence/evaluation/tribunal-v1.mjs",
+          "score": 30
+        },
+        {
+          "path": "cerebro/human-intelligence/evaluation/behavior-observer-v1.mjs",
+          "score": 20
+        },
+        {
+          "path": "cerebro/human-intelligence/evaluation/conversation-metrics-v1.mjs",
+          "score": 20
+        },
+        {
+          "path": "cerebro/human-intelligence/evaluation/hard-gate-evaluator.mjs",
+          "score": 20
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P07.S382-jarvis-evaluation-control-plane.design.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P07.S382-jarvis-evaluation-control-plane.implement.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/runtime/creative-quality-tribunal-v2.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/skill-eval-enhancements-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/tests/creative-quality-tribunal-v2.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/human-intelligence-tribunal-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-agent-browser-tribunal-readiness.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-eval-enhancements-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-independent-judge.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-lab-eval-plan.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-obsidian-admission-tribunal-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-tribunal.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-value-evaluator.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-browser-phase2-tribunal-v1.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_AUTO001_REPAIR_VALIDATION_TRIBUNAL_V0_2026-10-11.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/governance/auto001-repair-tribunal-v0.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/human-intelligence/evidence/PROMOTION_READINESS_REVALIDATION_2026-10-20.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/human-intelligence/lab/run-tribunal-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/boost-001/eval-suite.v1.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-agent-browser-tribunal.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-creator-preprod-tribunal.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-creator-prod-readonly-canary-tribunal.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-github-preprod-tribunal.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-github-tribunal.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-independent-judge.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-lab-eval-plan.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-obsidian-admission-judge-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-obsidian-admission-tribunal-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-obsidian-preprod-binding-judge-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-obsidian-preprod-binding-tribunal-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-obsidian-prod-readonly-canary-tribunal.mjs",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "BACKUP_REBUILD",
+      "program": "P16",
+      "terms": [
+        "backup",
+        "restore",
+        "rebuild",
+        "rollback"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/docs/SELF_EXTENDING_SHARED_WORKER_V1_BACKUP_ROLLBACK_REBUILD_AUTONOMY.md",
+          "score": 30
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P16.S183-backup-restore-rebuild.design.json",
+          "score": 30
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P16.S183-backup-restore-rebuild.implement.json",
+          "score": 30
+        },
+        {
+          "path": "cerebro/docs/AUTONOMY_BACKUP_REBUILD.md",
+          "score": 20
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_B18_LRN_MEASURED_ENGINEER_OUTCOME_LOOP_V1_BACKUP_REBUILD_AUTONOMY.md",
+          "score": 20
+        },
+        {
+          "path": "cerebro/docs/SKILL_SUPPLY_CHAIN_BACKUP_REBUILD_V0.md",
+          "score": 20
+        },
+        {
+          "path": "docs/BACKUP_RESTORE.md",
+          "score": 20
+        },
+        {
+          "path": "cerebro/tests/skill-rollback-proof.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/prod-browser-live-restore-v1.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/prod-rollback-rehearsal.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/backups/supabase/2026-10-29/cerebro-device-gateway-preprod-v8.ts",
+          "score": 10
+        },
+        {
+          "path": "cerebro/backups/supabase/2026-10-29/seo001-preprod-dispatchers-before-state-aware.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/REBUILD.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/human-intelligence/lab/run-preprod-rollback-rehearsal-v1.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/preprod/preprod-channel-contract-parity-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/rollback/ana-knowledge-overlay-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/rollback/channel-access-canary-v1.rollback.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/rollback/channel-access-profiles-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multichannel/rollback/telegram-rollback-manifest.v1.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/bootstrap-tier-preprod-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/company-onboarding-preprod-persistence-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/company-registry-preprod-persistence-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/final-onboarding-chain-preprod-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/lrn001-autonomous-continuation-preprod-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/marketing-crm-bootstrap-preprod-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/post-scan-parallel-preprod-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/multicompany/rollback/scan001-preprod-persistence-v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "cerebro/rollback/workflows/cerebro-cloud-useful-continuous-worker-v0_2026-10-29.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/skills/skill-rollback-proof.mjs",
+          "score": 10
+        },
+        {
+          "path": "docs/CEREBRO_BROWSER_PHASE2_CAPACITY_ROLLBACK_2026-10-23.md",
+          "score": 10
+        },
+        {
+          "path": "docs/CEREBRO_BROWSER_PHASE2_PROD_ROLLBACK_RUNBOOK_2026-10-23.md",
+          "score": 10
+        },
+        {
+          "path": "docs/PROD_ROLLBACK_RUNBOOK.md",
+          "score": 10
+        },
+        {
+          "path": "docs/rollback/browser-p0-owner-prod.original.ts",
+          "score": 10
+        },
+        {
+          "path": "docs/rollback/browser-p0-worker-prod.original.ts",
+          "score": 10
+        },
+        {
+          "path": "scripts/audit-app-restoration-backend-rollback.mjs",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/rollback/20261024103000_cerebro_creative_job_v1.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "supabase/migrations/rollback/20261024230000_cerebro_browser_phase3_interactive_v0.rollback.sql",
+          "score": 10
+        },
+        {
+          "path": "supabase/rollback/fenix-document-intelligence-v12/index.ts",
+          "score": 10
+        },
+        {
+          "path": "supabase/rollback/fenix-expediente-people-v2/index.ts",
+          "score": 10
+        },
+        {
+          "path": "tests/prod-rollback-rehearsal.spec.ts",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "OBSERVABILITY",
+      "program": "P07/P11",
+      "terms": [
+        "observability",
+        "metric",
+        "health",
+        "audit"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/observability-audit-finops.mjs",
+          "score": 23
+        },
+        {
+          "path": "cerebro/tests/observability-audit-finops-hardening-regressions.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/tests/observability-audit-finops-inventory.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/tests/observability-audit-finops-persistent.test.mjs",
+          "score": 22
+        },
+        {
+          "path": "cerebro/docs/OBSERVABILITY_AUDIT_FINOPS_V0.md",
+          "score": 20
+        },
+        {
+          "path": "cerebro/evidence/observability-audit-finops-inventory-v0.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/evidence/observability-audit-finops-persistent-v0.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/runtime/hygiene-audit.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/meta-observability-ledger.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/owner-executor-capability-audit.contract.v0.json",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/owner-executor-capability-audit.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/rsi-observability-adapter.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/universal-skill-web-seo-debt-audit-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/registry/aion-product-delivery-live-adapter-audit.v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/b3-readonly-audit-schema-blocker.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/current-physical-adapter-audit.v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/physical-adapter-audit-v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/physical-adapter-audit-v2.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/physical-adapter-audit-v3.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/universal-skill-b16-web-seo-debt-audit.v1.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/human-intelligence-conversation-metrics-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/hygiene-audit.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/meta-observability-ledger.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/owner-executor-capability-audit-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/phase2-evidence-audit.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/physical-adapter-audit-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/rsi-observability-adapter.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/skill-zero-cost-route-audit.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/universal-skill-b16-web-seo-debt-audit-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-app-crm-rpc-audit.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-deepseek-super-audit-a00-a04.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-hygiene-audit-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-iam001-identity-credential-audit-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-iam001-lifecycle-health-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-owned-video-audit-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-owner-executor-capability-audit-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-pexels-broll-audit-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-physical-adapter-audit-v1.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-secdef-wrapper-audit.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-secret-ref-audit.yml",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "FACTORY",
+      "program": "P03/P13",
+      "terms": [
+        "factory",
+        "skill-factory",
+        "capability-factory"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/continuous-useful-work-factory-v0.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/factory-supervisor-improvement.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/improvement-candidate-factory.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/jarvis-core-scaffold-factory-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/skill-wrappers/governed-wrapper-factory-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/universal-skill-adapter-factory-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/multimedia-factory-profile.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/skill-multilane-factory.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/universal-skill-activation-factory-v1.closeout-2026-10-18.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/registry/universal-skill-activation-factory-v1.state.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/continuous-useful-work-factory-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/fact001-autofactory-v1-workflow.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/fact001-autofactory-workflow.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/factory-supervisor-improvement.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/factory-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/factory.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/improvement-candidate-factory.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/jarvis-core-scaffold-factory-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/multimedia-factory-runtime-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/universal-skill-adapter-factory-v1.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-continuous-work-factory-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-fact001-autofactory-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-fact001-autofactory-v1.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-factory-preprod.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-phase14-multimedia-factory-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-phase15-brand-commerce-appfactory-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-rsi-improvement-candidate-factory-v0.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-universal-skill-activation-factory-v1.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/digital-build/multimedia-factory-runtime-v0.mjs",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_PHASE14_MULTIMEDIA_FACTORY_BLOCKS_162_175_V0_2026-10-14.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_CLOSEOUT_2026-10-18.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_HANDOFF.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_MASTER_2026-10-17.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_UNIVERSAL_SKILL_ACTIVATION_FACTORY_V1_RUNBOOK_2026-10-17.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/FACT001_AUTOMATIC_FACTORY_ACCEPTANCE_2026-10-08.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/FACT001_AUTOMATIC_FACTORY_V0.md",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "VOICE",
+      "program": "P10",
+      "terms": [
+        "voice",
+        "stt",
+        "tts"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/registry/voice001-outreach-profile.v0.json",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/owned-voice-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/voice-physical-lab-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/voice-reference-capture-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/voice-v3-backend-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": "cerebro/tests/voice001-outreach-runtime-v0.test.mjs",
+          "score": 12
+        },
+        {
+          "path": ".github/workflows/cerebro-operativa-voice-contract-v1.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-owned-voice-preprod.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice-model-weight-smoke.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice-physical-lab-preprod.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice-reference-capture-preprod.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice-v3-model-smoke.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice-windows-install-smoke.yml",
+          "score": 10
+        },
+        {
+          "path": ".github/workflows/cerebro-voice001-outreach-v0.yml",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/acceptance-tests.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/manifest.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/profile.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/prosody-presets.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/ana/REBUILD.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/jarvis/manifest.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/communication/voice/jarvis/source-matrix.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/docs/VOICE_EXPERIENCE_LAB_V0_2026-10-10.md",
+          "score": 10
+        },
+        {
+          "path": "cerebro/evidence/voice001-blocks-105-117-v0.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/factory/requests-v1/voiceui001-ana-finance.v0.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/factory/requests/voice001-quality-lab.v0.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/factory/requests/voiceui001-experience-lab.v0.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P09.S139-voice-champion-challenger.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P09.S139-voice-champion-challenger.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P09.S143-voice-turn-taking.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P09.S143-voice-turn-taking.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S137-voice-interface.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S137-voice-interface.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S138-voice-lab.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S138-voice-lab.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S162-multilingual-voice-identity.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S162-multilingual-voice-identity.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S317-language-voice-ux-self-improvement.design.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S317-language-voice-ux-self-improvement.implement.json",
+          "score": 10
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P10.S411-voice-build-strategy.design.json",
+          "score": 10
+        }
+      ]
+    },
+    {
+      "id": "BROWSER_DEVICE",
+      "program": "P05/P17",
+      "terms": [
+        "browser",
+        "device",
+        "worker"
+      ],
+      "preferred": [],
+      "state": "PARTIAL_AUDIT_REQUIRED",
+      "preferred_found": [],
+      "evidence": [
+        {
+          "path": "cerebro/runtime/cloud-browser-worker-sensitive-redaction-contract.test.mjs",
+          "score": 23
+        },
+        {
+          "path": "cerebro/runtime/cloud-browser-worker-v0.mjs",
+          "score": 23
+        },
+        {
+          "path": "cerebro/registry/cloud-browser-worker-v0.json",
+          "score": 22
+        },
+        {
+          "path": "cerebro/tests/cloud-browser-worker-v0.test.mjs",
+          "score": 22
+        },
+        {
+          "path": ".github/workflows/cerebro-cloud-browser-worker-v0.yml",
+          "score": 20
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S169-device-workers.design.json",
+          "score": 20
+        },
+        {
+          "path": "cerebro/jarvis/mission-001/generated-blueprints/task-evidence/MISSION-JARVIS-001.P01.S169-device-workers.implement.json",
+          "score": 20
+        },
+        {
+          "path": "docs/rollback/browser-p0-worker-prod.original.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-browser-interactive-v3/worker-preprod.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-browser-work-total-worker-v1-preprod/index.ts",
+          "score": 20
+        },
+        {
+          "path": "supabase/functions/cerebro-browser-work-total-worker-v1-prod/index.ts",
+          "score": 20
+        },
+        {
+          "path": "cerebro/runtime/authorized-execution-device-profile-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-attachments-v0.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-command-parser-v3.ts",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-computer-use-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-ergonomics-p0.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-handback-preserve-tabs-v3.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-poll-retry-v1.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-interactive-session-v3.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-job-runner-v2.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-live-runner-host.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-natural-command-v3.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-oidc-refresh-v2.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-orchestrator-v2.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-pool-benchmark-v2.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-prod-rollout-v2.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-session-binding-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-session-bundle-v1.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-session-liveness-v3.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-session-secret-resolver-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-transversal-autonomy-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-vision-fallback-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-fail-closed-contract.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-contract.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser-work-total-v1-prod-contract.test.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/browser1-access-v1.mjs",
+          "score": 13
+        },
+        {
+          "path": "cerebro/runtime/cerebro-fast-evolution-worker-v1.mjs",
+          "score": 13
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "existing": 8,
+    "partial": 6,
+    "gaps": 0,
+    "total": 14
+  },
+  "prod_write": false,
+  "trading": false
+}

@@ -1,0 +1,126 @@
+name: JARVIS-001 SEMANTIC RECOVERY + CORE READINESS V4 · PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - '.github/workflows/cerebro-mission-jarvis-001-semantic-v4.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mission-jarvis-001-semantic-v4
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_ALLOW_PAID_JARVIS_BUILD: 'YES'
+  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+  JARVIS_BLUEPRINT_OUT: cerebro/jarvis/mission-001/generated-blueprints
+  JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_FLOOR_USD: '0.123340086'
+
+jobs:
+  recover-and-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Hard PREPROD guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test -n "$DEEPSEEK_API_KEY"
+      - name: Run current Core, readiness, integration, DAG and provider tests
+        run: |
+          node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
+          node --test cerebro/tests/jarvis-integration-v1.test.mjs
+          node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
+          node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+      - name: Recover 15 preserved designs and repair only missing semantic blueprints
+        run: node cerebro/runtime/jarvis-program-blueprints-v1.mjs
+      - name: Semantic, boundary and bounded-retry gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const s=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
+          if(!s.ok||s.semantic_gate!=='GREEN'||s.valid_blueprints!==36) throw new Error('SEMANTIC_BLUEPRINTS_NOT_GREEN');
+          const fresh=36-s.reused_blueprints;
+          if(s.deepseek_calls_this_run<fresh||s.deepseek_calls_this_run>fresh*2) throw new Error(`BOUNDED_RETRY_VIOLATION:${s.deepseek_calls_this_run}:fresh=${fresh}`);
+          if(s.recovered_designs<15) throw new Error(`RECOVERY_SEED_NOT_USED:${s.recovered_designs}`);
+          if(s.prod_write!==false||s.trading!==false) throw new Error('BOUNDARY_VIOLATION');
+          if(Array.isArray(s.human_required)&&s.human_required.length) throw new Error(`HUMAN_REQUIRED:${s.human_required.join(',')}`);
+          console.log(JSON.stringify(s));
+          NODE
+      - name: Persist semantic blueprints on latest branch head
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO JARVIS PREPROD'
+          git config user.email 'actions@users.noreply.github.com'
+          git add cerebro/jarvis/mission-001/generated-blueprints
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(jarvis): persist recovered semantic blueprints v4 [generated]'
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi
+      - name: Re-run binding and readiness after generated assets persist
+        run: |
+          node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
+          node --test cerebro/tests/jarvis-integration-v1.test.mjs
+      - name: Build reuse map and mission state without overclaim
+        shell: bash
+        run: |
+          set -euo pipefail
+          JARVIS_REUSE_MAP_OUT=cerebro/jarvis/mission-001/reuse-map.v1.json node cerebro/runtime/jarvis-reuse-map-v1.mjs
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const {coreReadiness}=await import('./cerebro/jarvis/core-v1/core-readiness-v1.mjs');
+          const summary=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
+          const reuse=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/reuse-map.v1.json','utf8'));
+          const core=coreReadiness();
+          const priorFloor=Number(process.env.JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_FLOOR_USD||0);
+          const current=Number(summary.estimated_cost_usd_this_run||0);
+          const state={schema_version:'1.3',mission_id:'MISSION-JARVIS-001',environment:'PREPROD',status:`CORE_${core.minimal_core_status}_SEMANTIC_BLUEPRINTS_GREEN`,master:'JARVIS_MASTER_V1_RC2',programs:18,master_sections:421,work_units:5924,tasks:5473,deepseek:{role:'TEMPORARY_COGNITIVE_ACCELERATOR',valid_blueprints:36,calls_this_run:summary.deepseek_calls_this_run,reused_blueprints:summary.reused_blueprints,recovered_designs:summary.recovered_designs,retry_events:summary.retry_events,estimated_cost_usd_this_run:current,known_estimated_cost_floor_usd_before_this_run:priorFloor,known_estimated_cost_floor_usd_after_this_run:Math.round((priorFloor+current)*1e9)/1e9,unreconciled_failed_calls:1,dependency_target:0},reuse_map:reuse.summary,minimal_core:{status:core.minimal_core_status,green_or_defined_count:core.green_or_defined_count,partial_count:core.partial_count,missing_evidence_count:core.missing_evidence_count,components:core.components},human_required:[],prod_touched:false,trading_touched:false,multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND',next_action:'Close World/Memory, JARVIS V2 durable handler, Capability Fabric per-engine evidence and Journal runtime binding; then execute bounded P01/P03/P04/P07 implementation batches.'};
+          fs.writeFileSync('cerebro/jarvis/mission-001/state.v1.json',JSON.stringify(state,null,2)+'\n');
+          console.log(JSON.stringify({status:state.status,deepseek:state.deepseek,reuse_map:state.reuse_map,minimal_core:state.minimal_core}));
+          NODE
+      - name: Persist state and reuse map safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add cerebro/jarvis/mission-001/state.v1.json cerebro/jarvis/mission-001/reuse-map.v1.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'chore(jarvis): advance mission state after semantic V4 [generated]'
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin HEAD:"$GITHUB_REF_NAME"
+          fi
+      - name: Evidence artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-jarvis-001-semantic-v4-${{ github.run_id }}
+          path: |
+            cerebro/jarvis/mission-001/generated-blueprints/**
+            cerebro/jarvis/mission-001/state.v1.json
+            cerebro/jarvis/mission-001/reuse-map.v1.json
+          if-no-files-found: warn
+          retention-days: 7

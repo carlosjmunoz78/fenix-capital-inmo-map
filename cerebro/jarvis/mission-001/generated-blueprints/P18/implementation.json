@@ -1,0 +1,147 @@
+{
+  "program_id": "P18",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 844,
+    "cached_input_tokens": 0,
+    "output_tokens": 930,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0006846,
+  "blueprint": {
+    "reuse_map": {
+      "jarvis.drill.zero_carlos": "extend with canonical assertion set + fixed seed (B1)",
+      "jarvis.acceptance.runner": "wrap to consume institutional manifest (B2)",
+      "jarvis.governance.owner_capacity": "add preprod threshold spec (B3)",
+      "jarvis.policy.denylist": "reuse NO_TRADING/NO_PROD_WRITE guards; add enforcement test only (B5)",
+      "jarvis.audit.logger": "emit drill.start/stop + denylist events, append-only, no change to schema",
+      "jarvis.trace.otel_hooks": "trace each acceptance check",
+      "jarvis.report.json_emitter": "emit verdict.json summary (B4)",
+      "jarvis.preprod.env harness": "enforce PREPROD_ONLY at runner entry"
+    },
+    "files_to_add": [
+      "jarvis/drill/zero_carlos_spec_v1.yaml (scenario, seed, assertions)",
+      "jarvis/acceptance/institutional_manifest_v1.yaml (checks, thresholds)",
+      "jarvis/governance/owner_capacity_contract_v1.yaml",
+      "jarvis/acceptance/verdict_schema.py (acceptance.verdict.json schema)",
+      "jarvis/acceptance/verdict_emitter.py (B4)",
+      "tests/preprod/test_zero_carlos_canonical.py",
+      "tests/preprod/test_denylist_no_prod_write.py",
+      "tests/preprod/test_owner_capacity_threshold.py",
+      "tests/preprod/test_verdict_schema.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "jarvis/drill/zero_carlos.py (assertion set + deterministic seed)",
+      "jarvis/acceptance/runner.py (manifest consumer, PREPROD_ONLY entry gate)",
+      "jarvis/governance/owner_capacity.py (threshold probe, feature-flagged)",
+      "jarvis/policy/denylist.py (NO_PROD_WRITE test hook, no behavior change in prod)",
+      "jarvis/report/json_emitter.py (verdict summary output, non-blocking)"
+    ],
+    "contracts": [
+      {
+        "id": "drill.zero_carlos.spec.v1",
+        "fields": [
+          "scenario",
+          "seed",
+          "assertions[]"
+        ]
+      },
+      {
+        "id": "acceptance.institutional.manifest.v1",
+        "fields": [
+          "checks[]",
+          "thresholds{}",
+          "verdict_mapping{}"
+        ]
+      },
+      {
+        "id": "governance.owner_capacity.contract.v1",
+        "fields": [
+          "min_capacity",
+          "evaluation_window",
+          "verdict_on_below"
+        ]
+      },
+      {
+        "id": "acceptance.verdict.json.schema",
+        "fields": [
+          "verdict",
+          "checks[]{id,status,detail}",
+          "seed",
+          "timestamp",
+          "env=preprod"
+        ]
+      },
+      {
+        "id": "denylist.guard.assert.v1",
+        "fields": [
+          "preprod_only",
+          "no_trading",
+          "no_prod_write_refute"
+        ]
+      },
+      {
+        "id": "audit.event.schema.v1",
+        "note": "reuse unchanged"
+      }
+    ],
+    "tests": [
+      "zero-carlos drill deterministic with fixed seed passes",
+      "drill fails closed on NO_TRADING violation",
+      "manifest all checks green on preprod",
+      "owner_capacity below threshold yields non-accept verdict",
+      "NO_PROD_WRITE denylist blocks prod target",
+      "verdict artifact validates against schema",
+      "PREPROD_ONLY rejected when env tag=prod"
+    ],
+    "rollout_order": [
+      "B1 drill assertion set + seed (candidate)",
+      "B5 denylist enforcement test (candidate)",
+      "B3 owner_capacity thresholds (feature-flag off)",
+      "B2 acceptance runner manifest wrapper (flag off)",
+      "B4 verdict emitter (non-blocking noop first)",
+      "enable flags in PREPROD, run full acceptance",
+      "publish verdict + concise summary"
+    ],
+    "rollback": [
+      "feature-flag off institutional manifest → legacy runner",
+      "revert drill wrapper to prior seed set",
+      "flag off owner_capacity probe",
+      "verdict emitter noop (safe)",
+      "denylist test hooks removed (no prod behavior change)"
+    ],
+    "evidence": [
+      "drill.start/stop audit events with seed",
+      "otel traces per acceptance check",
+      "verdict.json in preprod artifact store",
+      "denylist trigger alert log",
+      "concise summary log: pass/fail counts"
+    ],
+    "distillation": [
+      "zero-carlos canonical assertion list",
+      "institutional acceptance manifest checklist",
+      "owner governance capacity thresholds",
+      "preprod-only guard test specs"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve institutional manifest thresholds",
+    "approve owner_capacity threshold values",
+    "sign off final PREPROD acceptance verdict"
+  ],
+  "model_advisory_approvals": [
+    "approve institutional manifest thresholds",
+    "approve owner_capacity threshold values",
+    "sign off final PREPROD acceptance verdict"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

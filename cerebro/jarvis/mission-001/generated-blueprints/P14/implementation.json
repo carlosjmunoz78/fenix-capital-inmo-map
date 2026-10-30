@@ -1,0 +1,137 @@
+{
+  "program_id": "P14",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1308,
+    "cached_input_tokens": 0,
+    "output_tokens": 986,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0007878,
+  "blueprint": {
+    "reuse_map": {
+      "P13_registry": "watchlist + weak-signal substrate",
+      "P9_policy_engine": "counterfactual + policy simulation wrappers",
+      "P7_scoring": "forecast council calibration ledger",
+      "P4_event_bus": "anticipatory action triggers + scenario kernel transport",
+      "negotiation_dialogue_service": "wrap for negotiation tree, no rewrite",
+      "capital_allocation_ledger": "read-only projections",
+      "presence_handoff_router": "handoff simulate|live modes",
+      "DeepSeek_adapter": "sandboxed redacted scenario generation"
+    },
+    "files_to_add": [
+      "sim/kernel/scenario_runner.py",
+      "sim/barrier/tag.py",
+      "sim/watchlist/weak_signal_queue.py",
+      "sim/counterfactual/wrapper_p9.py",
+      "sim/policy_sim/wrapper.py",
+      "sim/forecast/council_ledger.py",
+      "sim/anticipatory/action_gate.py",
+      "sim/regret/engine.py",
+      "sim/options/real_options.py",
+      "sim/negotiation/tree_builder.py",
+      "sim/fidelity/harness.py",
+      "sim/governor/scarcity_mode.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "services/event_bus/subscribers.py",
+      "services/policy_engine/hooks.py",
+      "services/scoring/calibration.py",
+      "services/presence/handoff_router.py",
+      "adapters/deepseek/client.py",
+      "ledger/capital_allocation/read_api.py",
+      "registry/p13/watchlist_api.py",
+      "config/feature_flags/sim.yaml"
+    ],
+    "contracts": [
+      "ScenarioRun{id,horizon,assumptions,tags,sim_barrier=true}",
+      "WatchlistItem{signal,strength,ttl,provenance}",
+      "AnticipatoryAction{trigger,preconditions,dry_run_only=true}",
+      "Counterfactual{baseline,intervention,delta,confidence}",
+      "FidelityReport{scenario_id,metrics,drift}",
+      "PolicySim{policy_id,outcomes,constraints}",
+      "Handoff{from,to,mode,audit_id}",
+      "Forecast{id,distribution,calibration_ref}",
+      "RegretOutcome{chosen,forgone,regret_score}",
+      "RealOption{path,cost,optionality,expiry}",
+      "NegotiationNode{state,moves[],probabilities}",
+      "WeakSignal{source,entropy,decay}"
+    ],
+    "tests": [
+      "barrier_tag_enforced_no_sim_to_prod_sinks",
+      "determinism_identical_inputs_identical_outputs",
+      "calibration_brier_ece_vs_ledger_baseline",
+      "weak_signal_decay_monotonicity",
+      "anticipatory_requires_dry_run_true",
+      "regret_symmetry_sanity",
+      "real_options_no_negative_optionality",
+      "negotiation_tree_probability_sum_one",
+      "scarcity_escalation_idempotent",
+      "handoff_audit_chain_integrity",
+      "scenario_token_scope_no_prod_writes",
+      "sim_data_egress_blocked"
+    ],
+    "rollout_order": [
+      "B1_kernel+barrier",
+      "B2_watchlist+weak_signal",
+      "B3_counterfactual+policy_sim",
+      "B4_forecast_council_ledger",
+      "B5_anticipatory_dryrun+handoff",
+      "B6_regret+real_options",
+      "B7_negotiation_tree+cap_alloc_readonly",
+      "B8_fidelity+scarcity_governor",
+      "B9_distillation_adapter"
+    ],
+    "rollback": [
+      "feature_flag_per_batch_default_off",
+      "kernel_version_pinned_snapshot",
+      "calibration_ledger_append_only_revert_pointer",
+      "barrier_tag_immutable_disable_producer_only",
+      "additive_schema_only_no_migration"
+    ],
+    "evidence": [
+      "barrier_violation_total==0",
+      "scenario_run_total status breakdown",
+      "calibration_ece vs baseline",
+      "weak_signal_decay_histogram",
+      "anticipatory_action_dryrun_total",
+      "regret_score_distribution",
+      "fidelity_drift gauge",
+      "scarcity_mode_active gauge",
+      "handoff audit chain sample",
+      "determinism reproducibility hash"
+    ],
+    "distillation": [
+      "kernel->minimal_deterministic_core",
+      "watchlist->single_scored_queue",
+      "forecast_council->calibration_adapter",
+      "regret+options->unified_optionality_score",
+      "negotiation_tree->compact_policy_prior",
+      "fidelity->single_drift_metric"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve_sim_scoped_token_issuance",
+    "sign_off_barrier_immutability_spec",
+    "review_deepseek_redaction_policy",
+    "approve_B9_distillation_target",
+    "final_PREPROD_promotion_gate"
+  ],
+  "model_advisory_approvals": [
+    "approve_sim_scoped_token_issuance",
+    "sign_off_barrier_immutability_spec",
+    "review_deepseek_redaction_policy",
+    "approve_B9_distillation_target",
+    "final_PREPROD_promotion_gate"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

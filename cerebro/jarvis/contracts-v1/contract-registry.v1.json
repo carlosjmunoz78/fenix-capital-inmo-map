@@ -1,0 +1,101 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "JARVIS-CONTRACTS-V1",
+  "environment": "PREPROD",
+  "canonical_human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "common_context_required": ["company_id", "project_id", "environment", "version"],
+  "contracts": {
+    "MissionContract": {
+      "version": "1.0",
+      "required": ["mission_id", "objective", "success_criteria", "constraints", "authority", "budget", "reversibility", "evidence_required"]
+    },
+    "SuccessCriteriaLock": {
+      "version": "1.0",
+      "required": ["mission_id", "criteria", "locked_at", "lock_hash"]
+    },
+    "AbortCriteria": {
+      "version": "1.0",
+      "required": ["mission_id", "max_loss", "max_failures", "deadline", "confidence_floor", "risk_ceiling", "cost_ceiling"]
+    },
+    "CommandEnvelope": {
+      "version": "1.0",
+      "required": ["command_id", "initiator", "authority", "mission_id", "target", "expected_effect", "issued_at", "idempotency_key"]
+    },
+    "IdentityAssertion": {
+      "version": "1.0",
+      "required": ["identity_id", "actor_role", "authority_scope", "issued_at", "expires_at", "proof_ref"]
+    },
+    "CapabilityManifest": {
+      "version": "1.0",
+      "required": ["capability_id", "capability_version", "input_contract", "output_contract", "environments", "cost_class", "permissions", "provenance", "verifier"]
+    },
+    "HandshakeRequest": {
+      "version": "1.0",
+      "required": ["capability_id", "identity_assertion_ref", "budget", "policy_context", "requested_at"]
+    },
+    "HandshakeResponse": {
+      "version": "1.0",
+      "required": ["granted", "constraints", "expires_at", "deny_reason", "decision_ref"]
+    },
+    "RoutingDecision": {
+      "version": "1.0",
+      "required": ["request_id", "chosen_capability", "fallback_chain", "score_breakdown", "rationale_ref", "decided_at"]
+    },
+    "AuthzDecision": {
+      "version": "1.0",
+      "required": ["decision_id", "actor", "action", "target", "allowed", "reason", "policy_ref", "decided_at"]
+    },
+    "ExceptionRequest": {
+      "version": "1.0",
+      "required": ["exception_id", "reason", "what_happened", "why_human_needed", "deadline", "risk", "options", "recommendation", "minimum_decision_required"]
+    },
+    "EvidenceRecord": {
+      "version": "1.0",
+      "required": ["evidence_id", "mission_id", "work_unit_id", "evidence_type", "source", "recorded_at", "content_hash", "provenance"]
+    },
+    "Verdict": {
+      "version": "1.0",
+      "required": ["verdict_id", "candidate_ref", "verifier_id", "decision", "criteria_results", "evidence_refs", "decided_at"]
+    },
+    "ClosureRecord": {
+      "version": "1.0",
+      "required": ["mission_id", "success_criteria_result", "side_effects_checked", "evidence_refs", "follow_up", "closed_at"]
+    },
+    "PointInTimeSnapshot": {
+      "version": "1.0",
+      "required": ["snapshot_id", "effective_at", "observed_at", "recorded_at", "state_hash", "source_refs"]
+    },
+    "ReplayRequest": {
+      "version": "1.0",
+      "required": ["replay_id", "target_ref", "as_of", "mode", "requested_by", "requested_at"]
+    },
+    "ExecutionJournalEntry": {
+      "version": "1.0",
+      "required": ["entry_id", "sequence", "event_type", "mission_id", "work_unit_id", "idempotency_key", "recorded_at", "previous_hash", "entry_hash"]
+    },
+    "ComplexityBudget": {
+      "version": "1.0",
+      "required": ["max_steps", "token_ceiling", "cost_ceiling_eur", "parallelism_ceiling", "novelty_allowance"]
+    },
+    "ProvenanceRecord": {
+      "version": "1.0",
+      "required": ["source", "source_type", "license", "collected_at", "integrity", "confidentiality"]
+    },
+    "JurisdictionPolicy": {
+      "version": "1.0",
+      "required": ["policy_id", "allowed_regions", "data_residency", "blocked_regions", "purpose", "effective_at"]
+    }
+  },
+  "promotion_rule": "CONTRACT_CHANGE_REQUIRES_VERSION_COMPATIBILITY_TESTS_AND_ROLLBACK",
+  "prod_authorized": false,
+  "trading_access": false
+}

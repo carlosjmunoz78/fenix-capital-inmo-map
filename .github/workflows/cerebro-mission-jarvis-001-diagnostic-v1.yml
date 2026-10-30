@@ -1,0 +1,56 @@
+name: JARVIS-001 ZERO-COST TEST DIAGNOSTIC · PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - '.github/workflows/cerebro-mission-jarvis-001-diagnostic-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run each JARVIS prerequisite test independently
+        shell: bash
+        run: |
+          set +e
+          mkdir -p artifacts/jarvis-test-diagnostic
+          rc=0
+          for t in \
+            cerebro/tests/jarvis-core-v1.test.mjs \
+            cerebro/tests/jarvis-core-readiness-v1.test.mjs \
+            cerebro/tests/jarvis-integration-v1.test.mjs \
+            cerebro/tests/jarvis-mission-dag-v2.test.mjs \
+            cerebro/tests/deepseek-budget-guard-v0.test.mjs \
+            cerebro/tests/deepseek-cost-v0.test.mjs \
+            cerebro/tests/deepseek-provider-v0.test.mjs
+          do
+            name="$(basename "$t")"
+            node --test "$t" > "artifacts/jarvis-test-diagnostic/$name.log" 2>&1
+            code=$?
+            echo "$code $t" | tee -a artifacts/jarvis-test-diagnostic/exit-codes.txt
+            if [ "$code" -ne 0 ]; then rc=1; fi
+          done
+          echo "$rc" > artifacts/jarvis-test-diagnostic/overall-exit.txt
+          exit 0
+      - name: Upload diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-jarvis-001-test-diagnostic-${{ github.run_id }}
+          path: artifacts/jarvis-test-diagnostic/**
+          if-no-files-found: error
+          retention-days: 2
+      - name: Mark diagnostic result
+        shell: bash
+        run: |
+          test "$(cat artifacts/jarvis-test-diagnostic/overall-exit.txt)" = '0'

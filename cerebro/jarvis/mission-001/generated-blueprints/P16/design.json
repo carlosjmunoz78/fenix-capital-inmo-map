@@ -1,0 +1,141 @@
+{
+  "program_id": "P16",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 408,
+    "cached_input_tokens": 256,
+    "output_tokens": 960,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.000599568,
+  "blueprint": {
+    "existing_to_reuse": [
+      "Factory pipeline (P08) for build orchestration and evidence emission",
+      "Secrets/key store + rotation primitives from P04 for recovery keys and succession handoff",
+      "Containerized service templates and IaC modules from P12 for rebuild/restore targets",
+      "Observability stack (metrics/logs/traces) from P07 for degradation and resilience scoring",
+      "Chaos harness patterns from existing fault-injection tests where present",
+      "Backup jobs/scheduling already defined for persistent volumes",
+      "Policy engine / rule gates from P10 for owner-absence and mode gating"
+    ],
+    "gaps": [
+      "No canonical Zeus Seed capsule format or signing spec",
+      "No end-to-end backup→restore→rebuild verification loop",
+      "No CHAOS/failure-injection matrix tied to graceful degradation SLAs",
+      "No resilience score definition (weights, thresholds, reporting)",
+      "No explicit operating-mode state machine (normal/degraded/recovery/succession)",
+      "No owner-absence governance (quorum, time-locks, delegated authority)",
+      "No key recovery & succession ceremony runbook",
+      "No emergency fallback interface contract",
+      "No digital-estate / patrimonial disclosure plan",
+      "No build evidence package schema for recovery drills"
+    ],
+    "contracts": [
+      "CapsuleManifest{v,seedId,signature,payloadRef,createdAt,restoreHints}",
+      "RestoreRequest{targetEnv,seedId,pointInTime,mode}",
+      "RestoreResult{status,rto,rpo,verified,evidenceId}",
+      "ModeState{mode∈{NORMAL,DEGRADED,RECOVERY,SUCCESSION},since,reason,authority}",
+      "AbsenceRule{principal,threshold,timeLock,delegates}",
+      "FallbackInterface{version,endpoints,degradedOps[],authzRef}",
+      "ResilienceReport{score,components{},thresholds,runId}",
+      "EvidencePackage{runId,builds[],restores[],chaos[],signatures[]}",
+      "ChaosSpec{target,faultType,duration,blastRadius,expectedDegradation}"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "Contract stubs + capsule manifest + mode state machine (PREPROD)",
+        "deps": []
+      },
+      {
+        "id": "B2",
+        "scope": "Backup/restore/rebuild pipeline wired to Factory with evidence emission",
+        "deps": [
+          "B1"
+        ]
+      },
+      {
+        "id": "B3",
+        "scope": "Chaos/failure-injection matrix + graceful degradation handlers",
+        "deps": [
+          "B2"
+        ]
+      },
+      {
+        "id": "B4",
+        "scope": "Resilience scoring + observability dashboards",
+        "deps": [
+          "B3"
+        ]
+      },
+      {
+        "id": "B5",
+        "scope": "Key recovery, succession ceremony, owner-absence governance",
+        "deps": [
+          "B2"
+        ]
+      },
+      {
+        "id": "B6",
+        "scope": "Emergency fallback interface + digital-estate disclosure plan + final evidence package",
+        "deps": [
+          "B4",
+          "B5"
+        ]
+      }
+    ],
+    "tests": [
+      "Restore-from-capsule drill with RTO/RPO assertions",
+      "Rebuild-from-scratch determinism check (build reproducibility)",
+      "Chaos matrix: node loss, dependency timeout, key-store outage",
+      "Graceful degradation: degraded-mode still serves fallback ops",
+      "Mode transition unit + integration tests",
+      "Absence simulation: quorum/time-lock triggers succession",
+      "Resilience score regression thresholds",
+      "Evidence package schema validation + signature verification"
+    ],
+    "security": [
+      "Capsule signing + verification (asymmetric)",
+      "Recovery key split/threshold (e.g., Shamir) + sealed storage",
+      "Succession handoff audited and time-locked",
+      "Fallback interface least-privilege authz",
+      "No PROD writes; PREPROD-only enforced by policy gate",
+      "Evidence package tamper-evident (hash chain + signatures)"
+    ],
+    "observability": [
+      "restore_latency / rto_seconds / rpo_seconds",
+      "mode_state gauge with transition events",
+      "chaos_injection_events + recovery outcomes",
+      "resilience_score gauge with component breakdown",
+      "fallback_activation counter and duration",
+      "evidence_package_emit_success"
+    ],
+    "rollback": [
+      "Revert mode state via signed transition to NORMAL",
+      "Abort batch deploy to PREPROD prior stage",
+      "Restore previous capsule via point-in-time restore",
+      "Disable fallback interface flag",
+      "Revoke any succession delegation tokens",
+      "Discard evidence package drafts not signed"
+    ],
+    "distillation_targets": [
+      "Recovery runbook → canonical ops doc",
+      "Chaos matrix → test suite + SLO catalog",
+      "Resilience score definition → policy config",
+      "Capsule format → schema registry entry",
+      "Mode state machine → canonical services spec"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

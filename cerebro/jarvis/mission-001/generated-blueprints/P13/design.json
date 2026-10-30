@@ -1,0 +1,85 @@
+{
+  "program_id": "P13",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 244,
+    "cached_input_tokens": 0,
+    "output_tokens": 474,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.000321,
+  "blueprint": {
+    "existing_to_reuse": [
+      "self_eval_report_generator",
+      "weakness_queue_store",
+      "complexity_budget_config_loader",
+      "preprod_deployment_gate",
+      "event_logger_schema",
+      "feature_flag_runtime_control"
+    ],
+    "gaps": [
+      "no canonical self-weakness taxonomy",
+      "no velocity metric definition or trend store",
+      "no enforced complexity-budget thresholds at merge",
+      "no repair-candidate ranking engine",
+      "no rollback-aware repair scheduler"
+    ],
+    "contracts": [
+      "WeaknessRecord{id,area,severity,evidence_ref,detected_at}",
+      "VelocitySample{period,repairs_closed,median_cycle_hours}",
+      "ComplexityBudget{file,loc_ceiling,dep_depth_ceiling,status}",
+      "RepairProposal{weakness_id,diff_ref,risk_score,rollback_plan}",
+      "PreprodOnlyGuard{env in [preprod,local]}"
+    ],
+    "implementation_batches": [
+      "B1: wrappers for weakness map + record schema",
+      "B2: velocity sampler + trend store adapter",
+      "B3: complexity budget checker in preprod CI",
+      "B4: repair ranking + rollback-aware scheduler",
+      "B5: integrated dashboard + guard tests"
+    ],
+    "tests": [
+      "taxonomy integrity (unique ids, all areas covered)",
+      "velocity sampler deterministic given fixtures",
+      "budget checker blocks over-ceiling PR in preprod only",
+      "repair proposal rejected if unranked or lacks rollback",
+      "preprod guard rejects prod-target writes"
+    ],
+    "security": [
+      "preprod-only enforcement via PreprodOnlyGuard on all writes",
+      "no prod credentials in runtime env",
+      "diff refs signed and scoped to preprod",
+      "audit log immutable for weakness/repair events"
+    ],
+    "observability": [
+      "weakness_map_coverage_ratio",
+      "repair_velocity_per_period",
+      "complexity_budget_violations_total",
+      "repair_cycle_hours_p50",
+      "scheduler_rollback_events_total"
+    ],
+    "rollback": [
+      "disable via SELF_IMPROVE flag",
+      "revert batch-level feature flag per B1-B5",
+      "restore prior budget config snapshot",
+      "halt scheduler and drain queue safely"
+    ],
+    "distillation_targets": [
+      "weakness taxonomy -> compact classifier prompt",
+      "velocity definition -> single metric spec",
+      "budget rules -> config schema doc"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

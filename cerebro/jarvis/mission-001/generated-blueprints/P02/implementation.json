@@ -1,0 +1,155 @@
+{
+  "program_id": "P02",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 2907,
+    "cached_input_tokens": 0,
+    "output_tokens": 1144,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00112245,
+  "blueprint": {
+    "reuse_map": {
+      "postgres_redis_event_store": "canonical state + audit log (406,377)",
+      "memory_rag_store": "Memory Sovereign layer (69,71,73)",
+      "vector_db_embedding_pipeline": "Causal & Context Graph (71,76)",
+      "scheduler_cron": "consolidation + half-life jobs (72,75)",
+      "auth_compartment_rbac": "information compartments (281)",
+      "observability_stack": "Observatories + KQI (141,144,251,252,315)",
+      "translation_i18n_service": "Canonical Semantic + cultural layer (154,159,163)",
+      "notification_escalation_bus": "CriticalDelivery + HumanHandoff (6,248,325)",
+      "namespaces": "RoleClone isolation (128)",
+      "cache_layer": "Cache of understanding (146,185)"
+    },
+    "files_to_add": [
+      "src/contracts/memory_record.py",
+      "src/contracts/knowledge_candidate.py",
+      "src/contracts/reconciliation_debt.py",
+      "src/contracts/context_bundle.py",
+      "src/contracts/handoff_delivery.py",
+      "src/graph/context_graph_schema.py",
+      "src/graph/world_model_skeleton.py",
+      "src/memory/consolidation_pipeline.py",
+      "src/memory/immune_and_negative_knowledge.py",
+      "src/compiler/context_compiler.py",
+      "src/ledger/debt_and_no_loss_audit.py",
+      "src/observatory/kqi_emitter.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "src/memory/rag_adapter.py",
+      "src/graph/vector_adapter.py",
+      "src/scheduler/job_registry.py",
+      "src/auth/compartment_guard.py",
+      "src/i18n/semantic_adapter.py",
+      "src/notify/escalation_bus.py",
+      "src/observability/trace_hooks.py",
+      "src/cache/understanding_cache.py",
+      "src/rbac/namespace_isolation.py",
+      "config/feature_flags.yaml"
+    ],
+    "contracts": [
+      "MemoryRecord{id,source_uri,provenance,confidence,t_half,compartment,state,created_at,supersedes}",
+      "KnowledgeCandidate{id,state:RAW|CANDIDATE|VERIFIED|DEPRECATED|RETRACTED,evidence[],debt_ref}",
+      "ReconciliationEvent{entity,expected,observed,delta,resolution,audit_id}",
+      "ContextBundle{query,tier,records[],tokens,compiled_at,source_hash}",
+      "HumanHandoff{id,reason,severity,owner,ack,deadline}",
+      "CriticalDelivery{msg_id,priority,ack_required,escalation_path,status}",
+      "CompartmentAccess{subject,compartment,scope,expiry}",
+      "RoleClone{id,source_role,isolated_memory_ns,expiry}",
+      "LocationEvent{device,ts,geo,context_ref}",
+      "DebtEntry{id,kind:EPISTEMIC|REALITY,severity,owner,resolve_by}"
+    ],
+    "tests": [
+      "no-loss reconciliation mutate+verify audit delta",
+      "context compiler determinism bundle hash",
+      "half-life decay T_half invariants",
+      "memory immune poisoned record quarantined",
+      "compartment isolation cross-ns read denied",
+      "human handoff ack+escalation timing",
+      "critical delivery ack SLA",
+      "debt ledger unresolved blocks RC1",
+      "clone memory isolation negative test",
+      "reality reconciliation event ordering",
+      "world model reconciliation idempotency",
+      "preprod-only guard no prod write attempted"
+    ],
+    "rollout_order": [
+      "B1 contracts+debt ledger (shadow writes)",
+      "B2 context graph + world model skeleton",
+      "B3 memory sovereignty/consolidation dry-run",
+      "B4 immune + half-life + negative knowledge",
+      "B5 context compiler behind flag",
+      "B6 observatories + KQI dashboards",
+      "B7 expert directory + human handoff e2e",
+      "B8 role clone isolation",
+      "B9 interpreter/presence preprod sim (default off)",
+      "B10 digital immune + disagreement detectors",
+      "B11 institutional memory + compounding metrics",
+      "B12 no-loss audit + RC1/RC2 closure report"
+    ],
+    "rollback": [
+      "per-batch feature flags disable behavior",
+      "context compiler flag reverts to legacy retrieval",
+      "reconciliation events replayable from audit",
+      "shadow-mode memory writes before promote",
+      "immune quarantine reversible via ledger",
+      "clone factory kill-switch",
+      "interpreter/presence default-off in preprod",
+      "debt ledger read-only fallback on failure"
+    ],
+    "evidence": [
+      "emitted ReconciliationEvents with audit_id chain",
+      "ContextBundle source_hash reproducibility logs",
+      "half-life decay metric series",
+      "quarantine ledger entries for poisoned records",
+      "RBAC denial traces for cross-ns",
+      "handoff ack/escalation timings",
+      "critical delivery SLA records",
+      "debt ledger open count snapshot",
+      "KQI dashboard export",
+      "preprod-only guard attestation (no prod writes)"
+    ],
+    "distillation": {
+      "targets": [
+        "world model state schema",
+        "context compiler contract",
+        "reconciliation + debt ledger contracts",
+        "half-life + immune rules",
+        "human handoff protocol",
+        "KQI definition",
+        "clone isolation model",
+        "negative knowledge encoding"
+      ],
+      "format": "contract-first markdown + schema JSON, candidate branch only",
+      "gates": [
+        "PREPROD_ONLY",
+        "NO_PROD_WRITE",
+        "REUSE_EXISTING_FIRST"
+      ]
+    },
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve feature-flag rollout per batch",
+    "sign off RC1 closure report",
+    "validate handoff SLA targets",
+    "confirm compartment taxonomy",
+    "approve KQI weights"
+  ],
+  "model_advisory_approvals": [
+    "approve feature-flag rollout per batch",
+    "sign off RC1 closure report",
+    "validate handoff SLA targets",
+    "confirm compartment taxonomy",
+    "approve KQI weights"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

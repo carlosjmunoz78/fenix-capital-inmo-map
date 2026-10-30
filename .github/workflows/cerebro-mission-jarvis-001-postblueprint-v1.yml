@@ -1,0 +1,15 @@
+name: JARVIS-001 POST-BLUEPRINT V1 · SUPERSEDED
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  superseded:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'SUPERSEDED=true'
+          echo 'Use artifact recovery/governance + evidence-true Core readiness workflows.'

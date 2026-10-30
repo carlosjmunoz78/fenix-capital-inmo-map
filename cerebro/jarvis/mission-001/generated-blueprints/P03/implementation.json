@@ -1,0 +1,195 @@
+{
+  "program_id": "P03",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1636,
+    "cached_input_tokens": 0,
+    "output_tokens": 1082,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0008946,
+  "blueprint": {
+    "reuse_map": {
+      "capability_registry": "zeus.capability base manifest schema extended to CapabilityManifest v1",
+      "tool_adapters": "existing MCP clients and tool adapters wrapped, not rewritten",
+      "auth_rbac": "handshake validator reuses auth/RBAC layer as passport_proof verifier",
+      "scheduler": "current queue retained as fallback chain tail; capability-aware scoring layered on top",
+      "model_gateway": "existing gateway abstraction hosts router scoring and Model Router",
+      "event_bus": "trace emitter extended for journal, provenance, uncertainty events",
+      "sandbox": "existing preprod sandbox reused for tool firewall and attested-execution stubs",
+      "secrets_config": "feature flags and manifest pins stored in existing config service",
+      "eval_harness": "reused for distillation codecs and passport scoring",
+      "browser_computer_use": "browser/computer-use adapter registered as capability with provenance metadata"
+    },
+    "files_to_add": [
+      "zeus/fabric/contracts/capability_manifest_v1.py",
+      "zeus/fabric/contracts/handshake.py",
+      "zeus/fabric/contracts/routing_decision.py",
+      "zeus/fabric/contracts/execution_journal.py",
+      "zeus/fabric/contracts/complexity_budget.py",
+      "zeus/fabric/contracts/provenance.py",
+      "zeus/fabric/contracts/jurisdiction_policy.py",
+      "zeus/fabric/router/scoring.py",
+      "zeus/fabric/router/fallback_chain.py",
+      "zeus/fabric/router/uncertainty_gate.py",
+      "zeus/fabric/journal/replay.py",
+      "zeus/fabric/provenance/attestation_verify.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "zeus/capability/registry.py",
+      "zeus/scheduler/queue.py",
+      "zeus/scheduler/dispatch.py",
+      "zeus/auth/handshake_context.py",
+      "zeus/gateway/model_router.py",
+      "zeus/telemetry/trace_emitter.py",
+      "zeus/config/feature_flags.py",
+      "zeus/sandbox/tool_firewall.py",
+      "zeus/eval/harness.py",
+      "zeus/agents/reputation.py"
+    ],
+    "contracts": [
+      {
+        "name": "CapabilityManifest",
+        "version": "v1",
+        "fields": [
+          "id",
+          "version",
+          "input_schema",
+          "output_schema",
+          "cost",
+          "jurisdictions",
+          "license",
+          "attestation"
+        ]
+      },
+      {
+        "name": "HandshakeRequest",
+        "fields": [
+          "capability_id",
+          "passport_proof",
+          "budget",
+          "policy_context"
+        ]
+      },
+      {
+        "name": "HandshakeResponse",
+        "fields": [
+          "granted",
+          "expires_at",
+          "constraints",
+          "deny_reason"
+        ]
+      },
+      {
+        "name": "RoutingDecision",
+        "fields": [
+          "chosen_capability",
+          "fallback_chain",
+          "score_breakdown",
+          "rationale_ref"
+        ]
+      },
+      {
+        "name": "ExecutionJournalEntry",
+        "fields": [
+          "seed",
+          "inputs_hash",
+          "capability_ref",
+          "replay_handle",
+          "timestamp"
+        ]
+      },
+      {
+        "name": "ComplexityBudget",
+        "fields": [
+          "max_latent_steps",
+          "token_ceiling",
+          "usd_ceiling",
+          "novelty_allowance"
+        ]
+      },
+      {
+        "name": "ProvenanceRecord",
+        "fields": [
+          "license",
+          "copyright",
+          "source",
+          "attestation_chain"
+        ]
+      },
+      {
+        "name": "JurisdictionPolicy",
+        "fields": [
+          "allowed_regions",
+          "data_residency",
+          "blocklist"
+        ]
+      }
+    ],
+    "tests": [
+      "handshake_happy_and_denied_paths",
+      "router_determinism_seeded_scoring",
+      "fallback_chain_on_capability_failure",
+      "residency_denial_disallowed_region",
+      "complexity_budget_exhaustion_gating",
+      "journal_replay_byte_equal_outputs",
+      "ood_novelty_routes_to_safe_path",
+      "passport_expiry_handling",
+      "supply_chain_attestation_mismatch_rejected",
+      "concurrent_handshakes_same_capability_race"
+    ],
+    "rollout_order": [
+      "B1 manifest+passport schema and registry wrappers (flag off)",
+      "B2 router scoring with fallback chain behind router_v2.enabled",
+      "B3 complexity budget + uncertainty/OOD gating in scheduler",
+      "B4 execution journal + black-box replay",
+      "B5 provenance/license/residency + supply-chain attest stub",
+      "B6 distillation harness + passport scoring",
+      "B7 instrumentation/hypothesis/synthetic-world factory adapters",
+      "B8 erasure/unlearning hooks + resilience control-plane stubs"
+    ],
+    "rollback": [
+      "flip router_v2.enabled=false to revert to existing scheduler",
+      "pin prior manifest snapshot version",
+      "keep journal independent for post-rollback replay",
+      "allowlist-disable new capabilities without redeploy"
+    ],
+    "evidence": [
+      "seeded router decision logs with score_breakdown",
+      "byte-equal replay diff reports",
+      "residency denial audit records",
+      "complexity budget consumption traces per tenant",
+      "attestation verification logs",
+      "OOD/novelty routing telemetry samples"
+    ],
+    "distillation": [
+      "routing score function codec (state/features/weights)",
+      "handshake validator codec",
+      "journal entry schema codec",
+      "budget enforcement codec",
+      "passport schema and transition codec"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve CapabilityManifest v1 field set before B2",
+    "review jurisdiction/residency blocklist source",
+    "authorize preprod-only credentials scope",
+    "sign off on distillation codec promotion criteria"
+  ],
+  "model_advisory_approvals": [
+    "approve CapabilityManifest v1 field set before B2",
+    "review jurisdiction/residency blocklist source",
+    "authorize preprod-only credentials scope",
+    "sign off on distillation codec promotion criteria"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

@@ -1,0 +1,146 @@
+{
+  "program_id": "P07",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 2158,
+    "cached_input_tokens": 0,
+    "output_tokens": 1234,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0010641,
+  "blueprint": {
+    "reuse_map": {
+      "ledger": "Existing hash-chained append-only audit ledger → evidence, verdicts, legal-hold, overrides (append superseding records; never delete)",
+      "policy_engine": "Wrap existing policy/rules evaluator as decision point for promotion gates, owner-override, delete-candidate, bias/confounder checks",
+      "scheduler": "Drive champion/challenger, calibration scoring, regression runs, swarm retries",
+      "telemetry": "OTel-style traces/spans/metrcs for tribunal, gates, calibration, closure",
+      "vault": "Model creds + DeepSeek temporary TTL keys",
+      "eval_harness": "Wrap existing golden-set runner as verifier substrate for dynamic verifier generator",
+      "db": "Existing DB row-level audit columns for records, disputes, claim state, closure",
+      "notify": "Slack/webhook for human-required escalations, gate failures, owner-override use",
+      "api_gateway": "M2M negotiation authz/scoping and signed requests",
+      "flags": "Feature-flag/kill-switch for per-gate rollback and PREPROD_ONLY default-off"
+    },
+    "files_to_add": [
+      "schemas/evidence_record.v1.json",
+      "schemas/task_contract.v1.json",
+      "schemas/verdict.v1.json",
+      "schemas/closure_record.v1.json",
+      "p07/tribunal/state_machine.py",
+      "p07/gates/promotion_gate.py",
+      "p07/gates/delete_candidate_gate.py",
+      "p07/calibration/scorer.py",
+      "p07/monitor/collusion_graph.py",
+      "p07/dispute/claims_fsm.py",
+      "p07/m2m/negotiation_v1.py",
+      "p07/api/eval_control_plane.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "policy/evaluator_adapter.py (wrap existing, add P07 decision hooks)",
+      "scheduler/queue_adapter.py (register calibration/regression/challenger jobs)",
+      "telemetry/span_hooks.py (add P07 span names + metrics)",
+      "ledger/append_adapter.py (evidence/verdict/override event kinds)",
+      "flags/registry.py (P07 flags, PREPROD_ONLY defaults)",
+      "notify/escalation_adapter.py (gate-failure + human-required routing)",
+      "gateway/authz_adapter.py (M2M scopes, verifier/adversary least-privilege)",
+      "db/migrations/ (add tables: evidence, verdicts, disputes, calibration, closures, delete_candidates)",
+      "eval_harness/runner_adapter.py (verifier registration hook)",
+      "vault/deepseek_key_adapter.py (short-TTL temporary creds, no prompt persistence)"
+    ],
+    "contracts": [
+      "EvidenceRecord{v1}",
+      "TaskContract{v1}",
+      "Verdict{v1}",
+      "CalibrationSample{v1}",
+      "PromotionGate{v1}",
+      "Dispute{v1}",
+      "NegotiationMsg{v1}",
+      "ClosureRecord{v1}",
+      "OwnerOverride{v1}",
+      "DeleteCandidate{v1}"
+    ],
+    "tests": [
+      "NO_EVIDENCE→NOT_DONE: close blocked without EvidenceRecord",
+      "Proof-carrying action rejected without proof artifact",
+      "Tribunal verdict requires actor+verifier+adversary sigs (quorum)",
+      "Owner-override requires second approver + expiry; logged+audited",
+      "Calibration Brier/log-loss matches reference on fixture set",
+      "Injected behavior drift triggers regression alert",
+      "Promotion gate fails on missing evidence or failed regression",
+      "Delete gate fails when downstream_refs non-empty",
+      "Synthetic colluding agent pair flagged by graph detector",
+      "Tampered M2M offer rejected on sig mismatch",
+      "Dispute lifecycle open→resolve honors legal_hold",
+      "PREPROD_ONLY enforces deny on production write attempts"
+    ],
+    "rollout_order": [
+      "B1 contracts+ledger+NO_EVIDENCE",
+      "B2 tribunal+override wrapper",
+      "B3 calibration+regression",
+      "B4 promotion+delete gates+bias checks",
+      "B5 collusion+m2m+proof-carrying actions",
+      "B6 dispute+legal-hold+closure",
+      "B7 discovery council+swarm+dynamic verifier",
+      "B8 control plane UI/API+observability+rollback drill"
+    ],
+    "rollback": [
+      "Kill-switch per gate and per swarm component (existing flags)",
+      "All P07 flows feature-flagged default-off outside preprod",
+      "Ledger rollback = append superseding record, never delete",
+      "Promotion/delete reversible via prior snapshot reference",
+      "Legal-hold blocks deletion at DB layer",
+      "Rollback drill required in B8 before staging sign-off"
+    ],
+    "evidence": [
+      "Schema-validation report for all v1 contracts",
+      "Ledger append + hash-chain integrity proof (preprod)",
+      "Tribunal end-to-end transcript with quorum + appeal",
+      "Calibration fixture scores vs reference",
+      "Injected-drift regression alert capture",
+      "Promotion-gate and delete-gate block/fail captures",
+      "Collusion detection run on synthetic colluder fixture",
+      "M2M sig-tamper rejection log",
+      "Dispute lifecycle + legal-hold enforcement trace",
+      "PREPROD_ONLY deny-on-prod-write test output",
+      "Control-plane span/audit-dashboard screenshot",
+      "Rollback drill report (kill-switch exercised)"
+    ],
+    "distillation": [
+      "P07 evaluator playbook/rubric from tribunal outcomes",
+      "Lightweight calibration scorer from calibration model",
+      "Verifier generator patterns → reusable verifier library",
+      "Gate policy bundle for future programs",
+      "Dispute resolution precedents → claims knowledge base"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "Approve owner-override policy (second approver, expiry defaults)",
+    "Sign off promotion-gate blocking criteria before staging",
+    "Review/approbate collusion-detector thresholds",
+    "Authorize PREPROD_ONLY network/policy enforcement config",
+    "Approve legal-hold DB-layer enforcement change",
+    "Sign off B8 rollback drill before staging sign-off",
+    "Approve human-required escalation routing (on-call/owners)",
+    "Accept distillation artifacts into reusable library"
+  ],
+  "model_advisory_approvals": [
+    "Approve owner-override policy (second approver, expiry defaults)",
+    "Sign off promotion-gate blocking criteria before staging",
+    "Review/approbate collusion-detector thresholds",
+    "Authorize PREPROD_ONLY network/policy enforcement config",
+    "Approve legal-hold DB-layer enforcement change",
+    "Sign off B8 rollback drill before staging sign-off",
+    "Approve human-required escalation routing (on-call/owners)",
+    "Accept distillation artifacts into reusable library"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

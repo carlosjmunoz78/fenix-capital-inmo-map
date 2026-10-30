@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P05.S035-hot-standby.design",
+  "program_id": "P05",
+  "master_section": 35,
+  "phase": "design",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
+  "program_blueprint_ref": "P05/design.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

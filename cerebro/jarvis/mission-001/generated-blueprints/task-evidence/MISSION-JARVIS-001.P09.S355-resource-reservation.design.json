@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P09.S355-resource-reservation.design",
+  "program_id": "P09",
+  "master_section": 355,
+  "phase": "design",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
+  "program_blueprint_ref": "P09/design.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

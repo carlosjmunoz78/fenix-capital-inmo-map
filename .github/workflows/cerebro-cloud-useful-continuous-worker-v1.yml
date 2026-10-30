@@ -1,169 +1,148 @@
+# JARVIS-001 canary trigger v2
 name: CEREBRO Continuous Useful Worker V1
-run-name: CEREBRO SUSTAINED ${{ inputs.lane }} · C${{ inputs.cycle }} · PREPROD
+run-name: JARVIS-001 · W${{ inputs.wave || '0' }} · C${{ inputs.cycle || '0' }} · PREPROD
 
 on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - .github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml
   workflow_dispatch:
     inputs:
+      mission_id:
+        description: 'Mission id'
+        required: false
+        default: 'MISSION-JARVIS-001'
+        type: string
       lane:
-        description: 'Sustained useful-work lane 0..63'
-        required: true
+        description: 'Single-writer lane'
+        required: false
+        default: '0'
         type: string
       cycle:
-        description: 'Starting self-feeding cycle 0..999999'
+        description: 'Self-feeding cycle'
+        required: false
+        default: '0'
+        type: string
+      wave:
+        description: 'JARVIS DAG wave'
         required: false
         default: '0'
         type: string
 
 permissions:
   actions: write
-  contents: read
+  contents: write
 
 concurrency:
-  group: cerebro-continuous-useful-worker-v1-${{ inputs.lane }}
+  group: cerebro-jarvis-001-single-writer
   cancel-in-progress: false
 
 jobs:
-  sustained-useful-work:
-    name: SUSTAINED-${{ inputs.lane }}-C${{ inputs.cycle }}
+  sustained-jarvis-mission:
     runs-on: ubuntu-latest
     timeout-minutes: 11
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
+      MISSION_ID: ${{ inputs.mission_id || 'MISSION-JARVIS-001' }}
+      LANE: ${{ inputs.lane || '0' }}
+      CYCLE: ${{ inputs.cycle || '0' }}
+      WAVE: ${{ inputs.wave || '0' }}
       CEREBRO_SUPERVISOR_ENV: PREPROD
-      CEREBRO_INITIAL_CONCURRENCY: '48'
-      CEREBRO_MAX_CONCURRENCY: '64'
-      CEREBRO_MAX_PER_COMPANY: '48'
-      CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'
-      CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
-      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
       CEREBRO_PROD_WRITE: 'false'
       CEREBRO_TRADING_ACCESS: 'false'
-      CEREBRO_WORKER_LEASE_SECONDS: '420'
-      CEREBRO_MAX_UNITS_PER_LEASE: '256'
-      CEREBRO_MISSION_WORK_OUT_DIR: artifacts/mission-derived-work-v1
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
+      CEREBRO_JOB001_LEDGER_FILE: cerebro/jarvis/mission-001/runtime/job001-ledger.v1.json
+      JARVIS_EXEC_OUT: artifacts/jarvis-mission-001-exec
+
     steps:
-      - name: Checkout immutable execution revision
+      - name: Checkout mission branch
         uses: actions/checkout@v4
-
-      - name: Enforce sustained PREPROD zero-paid guard
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "${{ github.repository_visibility }}" = "public"
-          test "$CEREBRO_SUPERVISOR_ENV" = "PREPROD"
-          test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
-          test "$CEREBRO_PROD_WRITE" = "false"
-          test "$CEREBRO_TRADING_ACCESS" = "false"
-          test "$CEREBRO_INITIAL_CONCURRENCY" = "48"
-          test "$CEREBRO_MAX_CONCURRENCY" = "64"
-          test "$CEREBRO_MAX_PER_COMPANY" = "48"
-          test "$CEREBRO_MAX_DEEPSEEK_CONCURRENCY" = "8"
-          test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = "1"
-          test "$CEREBRO_WORKER_LEASE_SECONDS" -ge 300
-          test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
-          test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
-          test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
-          for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
-            case "$value" in ''|*[!0-9]*) exit 2 ;; esac
-          done
-          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 63
-          test "${{ inputs.cycle }}" -ge 0 && test "${{ inputs.cycle }}" -le 999999
-
-      - name: Enforce canonical JOB-001 Control Plane capacity contract
-        shell: bash
-        run: |
-          set -euo pipefail
-          node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
-          node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8'));
-          const expected={
-            environment:'PREPROD',
-            target_useful_default:48,
-            max_global_default:64,
-            max_company_default:48,
-            max_deepseek_default:8,
-            max_repo_write_default:1,
-            second_queue:false,
-            second_scheduler:false,
-            second_daemon:false,
-            prod_authorized:false,
-            trading_access:false,
-          };
-          for (const [key,value] of Object.entries(expected)) {
-            if (x[key] !== value) throw new Error(`JOB001_CONTROL_CONTRACT_MISMATCH:${key}:${x[key]}!=${value}`);
-          }
-          NODE
-
-      - name: Contract tests OLD + MISSION DAG NEW
-        run: |
-          node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
-          node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
-          node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
-          node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
-
-      - name: Execute sustained mission-derived lease with V0 fallback
-        id: lease
-        shell: bash
-        run: |
-          set -euo pipefail
-          start="$(date +%s)"
-          deadline=$((start + CEREBRO_WORKER_LEASE_SECONDS))
-          current=${{ inputs.cycle }}
-          units=0
-
-          while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$CEREBRO_MAX_UNITS_PER_LEASE" ]; do
-            node cerebro/runtime/mission-derived-useful-work-v1.mjs \
-              --lane=${{ inputs.lane }} \
-              --cycle="$current" \
-              --fallback=true
-            units=$((units + 1))
-            if [ "$current" -ge 999999 ]; then current=0; else current=$((current + 1)); fi
-          done
-
-          elapsed=$(( $(date +%s) - start ))
-          echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
-          echo "units_completed=$units" >> "$GITHUB_OUTPUT"
-          echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
-          echo "lane=${{ inputs.lane }}" >> "$GITHUB_OUTPUT"
-          echo "sustained_worker=true" >> "$GITHUB_STEP_SUMMARY"
-          echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
-          echo "fallback_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
-          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
-          echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
-          echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
-          echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Publish inspectable lease evidence
-        uses: actions/upload-artifact@v4
         with:
-          name: cerebro-sustained-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
-          path: |
-            artifacts/mission-derived-work-v1/**
-            artifacts/continuous-work-v0/**
-          if-no-files-found: error
-          retention-days: 1
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
-      - name: Self-refill sustained lane before releasing capacity
-        if: success()
+      - name: Hard PREPROD guards
         shell: bash
         run: |
           set -euo pipefail
-          next='${{ steps.lease.outputs.next_cycle }}'
-          test -n "$next"
-          ref="${GITHUB_REF_NAME}"
-          test -n "$ref"
-          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
-            -f "ref=${ref}" \
-            -f "inputs[lane]=${{ inputs.lane }}" \
-            -f "inputs[cycle]=${next}"
-          echo "self_refilled_lane=${{ inputs.lane }}" >> "$GITHUB_STEP_SUMMARY"
-          echo "self_refilled_ref=${ref}" >> "$GITHUB_STEP_SUMMARY"
-          echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
-          echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
-          echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
-          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
-          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          test "$MISSION_ID" = 'MISSION-JARVIS-001'
+          test "$CEREBRO_SUPERVISOR_ENV" = 'PREPROD'
+          test "$CEREBRO_PROD_WRITE" = 'false'
+          test "$CEREBRO_TRADING_ACCESS" = 'false'
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = 'NO'
+          test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = '1'
+          case "$LANE:$CYCLE:$WAVE" in *[!0-9:]*) exit 2;; esac
+          test "$LANE" = '0'
+
+      - name: Contract and durability tests
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/job001-runtime-v1.test.mjs
+          node --test cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs
+          node --test cerebro/tests/jarvis-state-fabric-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
+
+      - name: Execute one durable JARVIS batch
+        id: execute
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/jarvis-mission-continuous-executor-v1.mjs --wave="$WAVE" --max_units=48 | tee /tmp/jarvis-cycle.log
+          tail -n 1 /tmp/jarvis-cycle.log > /tmp/jarvis-cycle.json
+          jq -e '.ok == true and .mission_id == "MISSION-JARVIS-001" and .prod_write == false and .trading == false' /tmp/jarvis-cycle.json >/dev/null
+          next_wave="$(jq -r '.next_wave // empty' /tmp/jarvis-cycle.json)"
+          blocked="$(jq -r '.blocked' /tmp/jarvis-cycle.json)"
+          completed="$(jq -r '.completed' /tmp/jarvis-cycle.json)"
+          echo "next_wave=$next_wave" >> "$GITHUB_OUTPUT"
+          echo "blocked=$blocked" >> "$GITHUB_OUTPUT"
+          echo "completed=$completed" >> "$GITHUB_OUTPUT"
+          echo "mission_id=MISSION-JARVIS-001" >> "$GITHUB_STEP_SUMMARY"
+          echo "wave=$WAVE" >> "$GITHUB_STEP_SUMMARY"
+          echo "completed=$completed" >> "$GITHUB_STEP_SUMMARY"
+          echo "blocked=$blocked" >> "$GITHUB_STEP_SUMMARY"
+          echo "next_wave=$next_wave" >> "$GITHUB_STEP_SUMMARY"
+          echo "job001_durable_ledger=true" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Persist JOB-001 ledger and mission checkpoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cerebro/jarvis/mission-001/runtime
+          cp /tmp/jarvis-cycle.json cerebro/jarvis/mission-001/runtime/last-cycle.v1.json
+          git config user.name 'cerebro-preprod-bot'
+          git config user.email 'cerebro-preprod-bot@users.noreply.github.com'
+          git add cerebro/jarvis/mission-001/runtime/job001-ledger.v1.json cerebro/jarvis/mission-001/runtime/last-cycle.v1.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "chore(cerebro): persist JARVIS-001 durable cycle C${CYCLE} W${WAVE}"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+      - name: Publish detailed evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-001-w${{ inputs.wave || '0' }}-c${{ inputs.cycle || '0' }}-${{ github.run_id }}
+          path: artifacts/jarvis-mission-001-exec/**
+          if-no-files-found: error
+          retention-days: 3
+
+      - name: Self-refill same mission
+        if: success() && steps.execute.outputs.blocked == '0' && steps.execute.outputs.next_wave != ''
+        shell: bash
+        run: |
+          set -euo pipefail
+          next_cycle=$((CYCLE + 1))
+          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
+            -f "ref=${GITHUB_REF_NAME}" \
+            -f 'inputs[mission_id]=MISSION-JARVIS-001' \
+            -f 'inputs[lane]=0' \
+            -f "inputs[cycle]=${next_cycle}" \
+            -f "inputs[wave]=${{ steps.execute.outputs.next_wave }}"
+          echo "self_refilled=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "next_cycle=$next_cycle" >> "$GITHUB_STEP_SUMMARY"

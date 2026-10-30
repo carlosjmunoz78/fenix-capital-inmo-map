@@ -1,0 +1,73 @@
+name: JARVIS-001 CORE INTEGRATION + REUSE MAP · PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - '.github/workflows/cerebro-mission-jarvis-001-integration-v1.yml'
+      - 'cerebro/jarvis/integration-v1/**'
+      - 'cerebro/jarvis/core-v1/**'
+      - 'cerebro/jarvis/memory-v1/**'
+      - 'cerebro/tests/jarvis-integration-v1.test.mjs'
+      - 'cerebro/tests/jarvis-core-readiness-v1.test.mjs'
+      - 'cerebro/tests/jarvis-memory-v1.test.mjs'
+      - 'cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs'
+      - 'cerebro/runtime/jarvis-mission-job001-adapter-v1.mjs'
+      - 'cerebro/runtime/jarvis-reuse-map-v1.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mission-jarvis-001-integration-v1
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Hard guards
+        run: |
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+      - name: Core integration memory readiness and durable JOB-001 adapter tests
+        run: |
+          node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
+          node --test cerebro/tests/jarvis-memory-v1.test.mjs
+          node --test cerebro/tests/jarvis-integration-v1.test.mjs
+          node --test cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs
+      - name: Generate deterministic reuse map
+        env:
+          JARVIS_REUSE_MAP_OUT: artifacts/jarvis-reuse-map-v1.json
+        run: node cerebro/runtime/jarvis-reuse-map-v1.mjs
+      - name: Validate reuse-first evidence
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const x=JSON.parse(fs.readFileSync('artifacts/jarvis-reuse-map-v1.json','utf8'));
+          if(x.prod_write!==false||x.trading!==false) throw new Error('BOUNDARY_VIOLATION');
+          if(x.summary.total<10) throw new Error('REUSE_MAP_TOO_SMALL');
+          if(!x.items.some(i=>i.id==='IDENTITY_IAM'&&i.state==='EXISTING_REUSE_FIRST')) throw new Error('IAM_REUSE_NOT_CONFIRMED');
+          if(!x.items.some(i=>i.id==='GATEWAY_CONSOLE'&&i.state==='EXISTING_REUSE_FIRST')) throw new Error('GATEWAY_REUSE_NOT_CONFIRMED');
+          if(!x.items.some(i=>i.id==='JOB_CONTROL_PLANE'&&i.state==='EXISTING_REUSE_FIRST')) throw new Error('JOB001_REUSE_NOT_CONFIRMED');
+          console.log(JSON.stringify(x.summary));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mission-jarvis-001-integration-reuse-${{ github.run_id }}
+          path: artifacts/jarvis-reuse-map-v1.json
+          if-no-files-found: error
+          retention-days: 7

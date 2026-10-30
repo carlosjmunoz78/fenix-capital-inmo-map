@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P02.S248-critical-delivery.implement",
+  "program_id": "P02",
+  "master_section": 248,
+  "phase": "implement",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
+  "program_blueprint_ref": "P02/implementation.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

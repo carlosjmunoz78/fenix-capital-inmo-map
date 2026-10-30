@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P06.S038-saga-orchestration.design",
+  "program_id": "P06",
+  "master_section": 38,
+  "phase": "design",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
+  "program_blueprint_ref": "P06/design.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

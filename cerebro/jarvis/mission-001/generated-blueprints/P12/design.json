@@ -1,0 +1,164 @@
+{
+  "program_id": "P12",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 416,
+    "cached_input_tokens": 256,
+    "output_tokens": 1486,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.000916368,
+  "blueprint": {
+    "existing_to_reuse": [
+      "existing discovery_pipeline core (stage orchestration + persistence) — extend with new stage contracts rather than new pipelines",
+      "existing supabase client + migration framework — add versioned migrations; wrap unsupported SQL primitives behind RPCs/edge functions",
+      "existing question-generation / prompt registry — parameterize per-domain instead of new generator",
+      "existing clone/learning sandbox isolation layer — add quarantine wrapper on top",
+      "existing process-mining event log schema — add conformance + bottleneck wrappers",
+      "existing strategic pattern library store — add versioned pattern contracts + retrieval API",
+      "existing daily cron/scheduler — extend to opening/closure runbooks",
+      "existing feature-flag + kill-switch service for all DISCOVERY→AUTOMATION/PRODUCT handoffs",
+      "existing observability stack (logs/metrics/traces) — add discovery-specific spans and KPIs",
+      "existing LLM gateway/abstraction — implement DEEPSEEK_TEMPORARY as a pluggable provider behind the gateway"
+    ],
+    "gaps": [
+      "No canonical DiscoveryStage contract (inputs/outputs/exit-criteria) across sections 92/95/98/99/100",
+      "No autonomous question quality scoring / dedup ledger (section 93)",
+      "No quarantine state machine with promotion gates (section 129)",
+      "No discovery→automation handoff contract with PREPROD_ONLY enforcement (section 99)",
+      "No discovery→product/IP handoff contract with provenance (section 100)",
+      "No operations-research solver wrapper (section 112)",
+      "No Project Genesis / New Company bootstrap template engine (12/13)",
+      "No Time-to-Mastery metric definition and instrumentation (270)",
+      "No daily opening/closure runbook executor with evidence (176)",
+      "No Supabase capability matrix mapping unsupported features to wrappers (10)",
+      "No DeepSeek dependency policy enforcement (allowlist, expiry, fallback) (404)",
+      "No pattern-library schema versioning/retrieval for section 226"
+    ],
+    "contracts": [
+      "DiscoveryStage{stage_id, inputs, outputs, exit_criteria, budget, version}",
+      "QuestionCandidate{prompt, domain, score, dedup_hash, provenance, status}",
+      "ProcessMiningResult{log_ref, conformance, bottlenecks, variants}",
+      "ResearchProblem{objective, constraints, solver, solution_ref, sensitivity}",
+      "DiscoveryHandoff{target: AUTOMATION|PRODUCT, artifact_ref, preprod_only:true, approval_ref}",
+      "QuarantineRecord{clone_id, status, evidence, promotion_gate, reviewer}",
+      "PatternEntry{pattern_id, version, trigger, action, evidence_refs, ttl}",
+      "BootstrapTemplate{company_id, steps, required_assets, validation_rules}",
+      "DailyRunbook{date, opening[], closure[], evidence, kpis}",
+      "LLMProvider{name, policy, expiry, fallback, allowlist}",
+      "MasteryMetric{skill_id, trials, proficiency_curve, ttm_estimate}",
+      "SupabaseCapability{feature, supported, wrapper: RPC|EDGE|APP}"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "Supabase capability matrix + wrappers (10); LLM gateway + DeepSeek policy (404)",
+        "exit": "capability matrix published; DeepSeek behind gateway with expiry flag",
+        "risk": "low"
+      },
+      {
+        "id": "B2",
+        "scope": "DiscoveryStage contract + pipeline refactor (92,95); question generator scoring/dedup (93)",
+        "exit": "pipeline runs on contract; question ledger + dedup enforced",
+        "risk": "medium"
+      },
+      {
+        "id": "B3",
+        "scope": "Process mining wrappers (98); operations research engine wrapper (112)",
+        "exit": "both engines emit contracted results on sample data",
+        "risk": "medium"
+      },
+      {
+        "id": "B4",
+        "scope": "Discovery→Automation and →Product/IP handoffs with PREPROD_ONLY (99,100)",
+        "exit": "handoffs blocked in PROD; provenance recorded",
+        "risk": "high"
+      },
+      {
+        "id": "B5",
+        "scope": "Clone learning quarantine state machine (129); pattern library v1 (226)",
+        "exit": "promotion gates enforced; patterns versioned/retrievable",
+        "risk": "medium"
+      },
+      {
+        "id": "B6",
+        "scope": "Project Genesis / New Company bootstrap (12,13); daily opening/closure runbook (176)",
+        "exit": "one bootstrap dry-run + one daily runbook executed with evidence",
+        "risk": "medium"
+      },
+      {
+        "id": "B7",
+        "scope": "Time-to-Mastery instrumentation (270); consolidated e2e validation",
+        "exit": "TTM metric emitted; all contracts validated end-to-end",
+        "risk": "low"
+      }
+    ],
+    "tests": [
+      "Contract tests per DiscoveryStage (schema + exit criteria)",
+      "PREPROD_ONLY enforcement test: PROD write blocked at handoff",
+      "Question dedup/score threshold tests",
+      "Supabase wrapper parity tests (RPC/edge vs native behavior)",
+      "Quarantine promotion gate negative tests",
+      "Process mining conformance fixtures",
+      "OR engine solver determinism/sensitivity tests",
+      "DeepSeek policy expiry & fallback tests",
+      "Bootstrap dry-run golden test",
+      "Daily runbook idempotency test",
+      "TTM metric accuracy on synthetic skill curves",
+      "Pattern library versioning/retrieval tests"
+    ],
+    "security": [
+      "All handoffs operate in PREPROD namespace only; PROD write requires explicit elevated approval",
+      "Quarantine clones isolated with no cross-tenant read; promotion requires human review",
+      "DeepSeek deny-by-default allowlist with expiry and fallback provider",
+      "No trading endpoints or credentials exposed to discovery engines",
+      "Provenance and audit log for every discovery artifact",
+      "Secret scoping per engine; least-privilege Supabase roles via RLS + RPC wrappers"
+    ],
+    "observability": [
+      "Discovery stage spans with duration/failure metrics",
+      "Question ledger metrics (generated, dedup_rate, score_dist)",
+      "Quarantine status gauge and promotion latency",
+      "Handoff counters by target and PREPROD enforcement hits",
+      "OR solver runtime / infeasibility rate",
+      "Pattern retrieval hit-rate and staleness",
+      "Daily runbook success/evidence completeness",
+      "TTM histogram per skill",
+      "DeepSeek call share and expiry warnings",
+      "Supabase wrapper error/latency dashboard"
+    ],
+    "rollback": [
+      "Feature-flag every new stage/handoff; disable flag reverts to prior pipeline path",
+      "Versioned migrations with down-migrations for all schema changes",
+      "Quarantine and handoff are additive writes; delete by run_id on rollback",
+      "DeepSeek route revertible to baseline provider via gateway config",
+      "Bootstrap engine produces dry-run artifacts only until approval; abort deletes run namespace",
+      "Pattern library versioned; rollback = pin prior version",
+      "Daily runbook idempotent; rerun overwrites same-day evidence"
+    ],
+    "distillation_targets": [
+      "DiscoveryStage contract + pipeline wiring guide",
+      "Supabase capability matrix and wrapper patterns",
+      "DeepSeek temporary dependency policy runbook",
+      "Quarantine promotion gate checklist",
+      "Discovery→Automation / →Product handoff contract spec",
+      "Pattern library schema + retrieval API",
+      "Project Genesis bootstrap template spec",
+      "Daily opening/closure runbook template",
+      "TTM metric definition and dashboard",
+      "PREPROD-only enforcement patterns and tests"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

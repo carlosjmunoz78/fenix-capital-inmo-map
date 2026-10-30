@@ -1,0 +1,133 @@
+{
+  "program_id": "P04",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1456,
+    "cached_input_tokens": 0,
+    "output_tokens": 834,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0007188,
+  "blueprint": {
+    "reuse_map": {
+      "event_bus": "s27: pub/sub for wakeup.trigger.v1",
+      "authz_policy_engine": "s192: wrap for zero-trust decisions",
+      "ifc_approval_gateway": "s5: extend human-by-exception path",
+      "incident_workflow": "s187: runbook executor for incident.command.v1",
+      "data_purpose_tagger": "s280: purpose limitation at access",
+      "quality_scorer": "s314: multi-objective ROI/quality metrics",
+      "consent_registry": "s359: extend consent brain hooks + trace",
+      "sandbox_runner": "s302: experiment safety gate",
+      "audit_log": "immutable append store for all decisions",
+      "metrics_roi": "s83: measurement pipeline"
+    },
+    "files_to_add": [
+      "cerebro/security/guardian_root.py",
+      "cerebro/security/zero_trust_context.py",
+      "cerebro/security/trading_isolation.py",
+      "cerebro/security/counterintel_fusion.py",
+      "cerebro/fraud/tx_gateway_hook.py",
+      "cerebro/consent/decision_trace.py",
+      "cerebro/board/board_mode_view.py",
+      "cerebro/safety/safety_gate.py",
+      "cerebro/schemas/authz_decision_v1.py",
+      "cerebro/schemas/exception_request_v1.py",
+      "cerebro/schemas/fraud_signal_v1.py",
+      "cerebro/schemas/consent_decision_v1.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "cerebro/authz/policy_engine.py",
+      "cerebro/ifc/approval_gateway.py",
+      "cerebro/event_bus/wakeup_binding.py",
+      "cerebro/incident/runbook_executor.py",
+      "cerebro/consent/consent_registry.py",
+      "cerebro/sandbox/runner.py",
+      "cerebro/metrics/roi_pipeline.py",
+      "cerebro/audit/log_store.py",
+      "cerebro/data/purpose_tagger.py",
+      "cerebro/quality/scorer.py"
+    ],
+    "contracts": [
+      "wakeup.trigger.v1",
+      "authz.decision.v1",
+      "exception.request.v1",
+      "incident.command.v1",
+      "fraud.signal.v1",
+      "isolation.boundary.v1",
+      "guardian.root.v1",
+      "consent.decision.v1",
+      "safety.gate.v1",
+      "board.view.v1"
+    ],
+    "tests": [
+      "authz deny-by-default matrix",
+      "exception SLA expiry enforcement",
+      "wakeup idempotency/dedupe",
+      "guardian root key-op blocked without human approval",
+      "trading lane egress denied",
+      "fraud verdict on synthetic tx set",
+      "consent purpose mismatch blocked",
+      "safety gate blocks risky experiment",
+      "board view redaction checks",
+      "audit completeness for all decisions"
+    ],
+    "rollout_order": [
+      "B1 policy/zero-trust core",
+      "B2 human-by-exception",
+      "B3 event-driven wakeup",
+      "B4 guardian root + IFC (human_required)",
+      "B5 fraud + trading isolation",
+      "B6 consent/safety/board",
+      "B7 incident + counterintel",
+      "B8 measurement"
+    ],
+    "rollback": [
+      "feature flags per batch",
+      "policy engine version pin + instant revert",
+      "disable wakeup binding",
+      "revoke guardian root session",
+      "restore prior consent ruleset",
+      "dry-run mode for safety gate"
+    ],
+    "evidence": [
+      "authz decision rate/latency",
+      "exception open/expired counts",
+      "wakeup trigger→eval SLO",
+      "fraud verdict distribution",
+      "isolation breach attempts",
+      "consent verdicts by purpose",
+      "safety gate blocks",
+      "incident MTTR",
+      "ROI per program",
+      "audit gap alerts"
+    ],
+    "distillation": [
+      "zero-trust decision wrapper pattern",
+      "human-by-exception canonical flow",
+      "guardian root op checklist",
+      "consent brain decision schema",
+      "fraud signal integration pattern",
+      "isolation deny-by-default template"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "guardian_root key operations",
+    "trading-isolation policy changes",
+    "exception SLA approval policy changes"
+  ],
+  "model_advisory_approvals": [
+    "guardian_root key operations",
+    "trading-isolation policy changes",
+    "exception SLA approval policy changes"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

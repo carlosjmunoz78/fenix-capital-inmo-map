@@ -1,0 +1,134 @@
+{
+  "program_id": "P10",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1249,
+    "cached_input_tokens": 0,
+    "output_tokens": 934,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00074775,
+  "blueprint": {
+    "reuse_map": {
+      "ILanguageDetector": "wrap existing language auto-detection utility (152)",
+      "IUniversalTranslator": "extend Universal language layer adapter pattern (151)",
+      "STT/TTS": "wrap existing provider clients, no rewrite (137)",
+      "IPronunciationDictionary": "extend existing user lexicon storage (140)",
+      "IPersonalLM": "adapt existing spell/typo correction pipeline (142)",
+      "ICrossLanguageSearch": "wrap existing search core index (160)",
+      "IVoiceIdentity": "extend existing voice identity service via wrapper (162)",
+      "IRegulatoryApplicability": "reuse regulatory applicability registry as metadata tags (201)",
+      "Observability": "reuse existing logging/metrics stack for language telemetry (165)",
+      "IVoiceLab": "reuse existing test harness runner in preprod (138)",
+      "IBiasAudit": "reuse existing audit logging for bias hooks (164)",
+      "ICompetencyPassport": "extend existing user profile store (166)"
+    },
+    "files_to_add": [
+      "src/contracts/ILanguageDetector.ts",
+      "src/contracts/IPronunciationDictionary.ts",
+      "src/contracts/IPersonalLM.ts",
+      "src/contracts/IUniversalTranslator.ts",
+      "src/contracts/ICrossLanguageSearch.ts",
+      "src/contracts/IVoiceIdentity.ts",
+      "src/contracts/ILanguageObservatory.ts",
+      "src/contracts/ICompetencyPassport.ts",
+      "src/contracts/IRegulatoryApplicability.ts",
+      "src/contracts/IVoiceLab.ts",
+      "src/adapters/LanguageLayerAdapter.ts",
+      "src/adapters/VoiceProviderWrapper.ts"
+    ],
+    "files_to_modify_candidate_only": [
+      "src/services/lexicon/UserLexiconService.ts",
+      "src/services/search/SearchCore.ts",
+      "src/services/voice/VoiceIdentityService.ts",
+      "src/services/detect/LanguageDetector.ts",
+      "src/services/i18n/UniversalTranslator.ts",
+      "src/observability/metricsRegistry.ts",
+      "src/registry/RegulatoryRegistry.ts",
+      "src/profile/UserProfileStore.ts",
+      "src/config/flags.ts"
+    ],
+    "contracts": [
+      "ILanguageDetector.detect(text|audio)->{lang,confidence,alternatives}",
+      "IPronunciationDictionary.upsert/resolve(term,locale)->phonemes",
+      "IPersonalLM.correct(text,userId)->{corrected,edits[]}",
+      "IUniversalTranslator.translate(text,src,tgt,opts)->text",
+      "ICrossLanguageSearch.query(q,langs)->hits[]",
+      "IVoiceIdentity.enroll/verify(userId,audio)->score",
+      "ILanguageObservatory.record(event)/.snapshot()",
+      "ICompetencyPassport.get(userId)->levels",
+      "IRegulatoryApplicability.resolve(jurisdiction)->rules[]",
+      "IVoiceLab.run(script)->trace (preprod only)"
+    ],
+    "tests": [
+      "Contract unit tests per interface",
+      "Golden-set language detection accuracy",
+      "Pronunciation round-trip resolve tests",
+      "Typo correction fixture suite",
+      "Cross-language search recall/precision",
+      "Voice identity FAR/FRR on synthetic set",
+      "Observatory event schema validation",
+      "Passport schema conformance",
+      "Bias audit deterministic replay",
+      "Preprod isolation assertion (no prod write)"
+    ],
+    "rollout_order": [
+      "B1 contracts+wrappers (137,151,152)",
+      "B2 pronunciation+personal LM (140,142)",
+      "B3 cross-language search+voice identity (160,162)",
+      "B4 observatory+passport (165,166)",
+      "B5 bias audit+voice lab+self-improvement (164,138,317)",
+      "B6 regulatory+build orchestration (201,405,411)"
+    ],
+    "rollback": [
+      "Feature-flag each wrapper contract",
+      "Version contracts; pin prior versions",
+      "Batch-level toggles in preprod",
+      "Blue/green for observatory schema",
+      "Provider client fallback to prior wrapper",
+      "Dictionary/personal-LM data revert snapshots"
+    ],
+    "evidence": [
+      "Contract unit test reports",
+      "Golden-set detection accuracy metrics",
+      "Cross-language recall/precision report",
+      "Voice identity FAR/FRR report",
+      "Observability metric dashboards",
+      "Bias audit immutable logs",
+      "Preprod isolation assertion proof"
+    ],
+    "distillation": [
+      "Language detection wrapper spec",
+      "Pronunciation dictionary contract",
+      "Personal LM correction contract",
+      "Cross-language search adapter spec",
+      "Voice identity wrapper spec",
+      "Observatory metrics schema",
+      "Competency passport schema",
+      "Regulatory applicability resolver spec",
+      "Voice lab harness spec"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "Approve pronunciation dictionary data model",
+    "Approve voice biometric template encryption approach",
+    "Sign off bias audit methodology",
+    "Approve preprod→prod promotion gating"
+  ],
+  "model_advisory_approvals": [
+    "Approve pronunciation dictionary data model",
+    "Approve voice biometric template encryption approach",
+    "Sign off bias audit methodology",
+    "Approve preprod→prod promotion gating"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

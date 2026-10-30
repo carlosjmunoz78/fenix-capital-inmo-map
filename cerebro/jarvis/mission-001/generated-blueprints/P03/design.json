@@ -1,0 +1,113 @@
+{
+  "program_id": "P03",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 862,
+    "cached_input_tokens": 640,
+    "output_tokens": 778,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00050202,
+  "blueprint": {
+    "existing_to_reuse": [
+      "zeus.capability registry (base manifest schema)",
+      "existing tool adapters and MCP clients",
+      "auth/RBAC layer for capability handshake",
+      "current scheduler queue as fallback",
+      "existing model gateway abstraction",
+      "event bus / trace emitter",
+      "sandbox runtime already used in preprod",
+      "secrets & config service",
+      "existing eval harness for distillation/tests"
+    ],
+    "gaps": [
+      "router lacks capability-aware scoring and handshake contract",
+      "no BOM/competency passport binding",
+      "no jurisdiction/residency routing metadata",
+      "no complexity budget enforcer",
+      "no uncertainty/OOD signals in routing",
+      "no deterministic execution journal",
+      "no erasure/unlearning graph hooks",
+      "no model/software/skill supply-chain attestation",
+      "no black-box replay for capability decisions",
+      "no complexity-budget-aware scheduler",
+      "no synthetic world / instrumentation factory hooks",
+      "competency passport + reputation not wired to scheduler"
+    ],
+    "contracts": [
+      "CapabilityManifest v1 (id, version, input/output schema, cost, jurisdictions, license, attestation)",
+      "HandshakeRequest/Response (capability_id, passport_proof, budget, policy_context)",
+      "RoutingDecision (chosen_capability, fallback_chain, score_breakdown, rationale_ref)",
+      "ExecutionJournalEntry (deterministic seed, inputs_hash, capability_ref, replay_handle)",
+      "ComplexityBudget (max latent steps, token/$ ceiling, novelty allowance)",
+      "ProvenanceRecord (license, copyright, source, attestation chain)",
+      "JurisdictionPolicy (allowed_regions, data_residency, blocklist)"
+    ],
+    "implementation_batches": [
+      "B1: Manifest+Passport schema, registry wrappers, handshake stub",
+      "B2: Router scoring (utility/cost/latency/jurisdiction/uncertainty) with fallback chain",
+      "B3: Complexity budget + uncertainty/OOD gating in scheduler",
+      "B4: Execution journal + black-box replay wrapper",
+      "B5: Provenance/license/residency metadata + supply-chain attest stub",
+      "B6: Distillation loop harness + competency passport scoring",
+      "B7: Instrumentation/hypothesis/synthetic-world factory adapters (preprod)",
+      "B8: Erasure/unlearning graph hooks and resilience control-plane stubs"
+    ],
+    "tests": [
+      "handshake happy/denied paths",
+      "router determinism with seeded scoring",
+      "fallback chain on capability failure",
+      "residency denial for disallowed region",
+      "complexity budget exhaustion gating",
+      "journal replay byte-equal outputs",
+      "OOD/novelty flag routing to safe path",
+      "passport expiry handling",
+      "supply-chain attestation mismatch rejected",
+      "race: concurrent handshakes to same capability"
+    ],
+    "security": [
+      "preprod-only credentials, no prod write",
+      "capability allowlist + tool firewall on router output",
+      "signed manifest + attestation verify",
+      "PII/residency check before dispatch",
+      "journal encrypted, replay access audited",
+      "least-privilege per capability",
+      "block provenance-unknown capabilities from sensitive routes"
+    ],
+    "observability": [
+      "routing_decision_total{chosen,reason}",
+      "handshake_latency_seconds",
+      "fallback_trigger_total{capability}",
+      "budget_consumed{tenant,capability}",
+      "journal_write_total / replay_total",
+      "uncertainty_score histogram",
+      "provenance_reject_total",
+      "erasure_requests_pending"
+    ],
+    "rollback": [
+      "flag: router_v2.enabled=false reverts to existing scheduler",
+      "manifest version pinning with prior manifest snapshot",
+      "journal retained independently for replay post-rollback",
+      "disable new capabilities via allowlist without redeploy"
+    ],
+    "distillation_targets": [
+      "routing score function (state/features/weights)",
+      "handshake validator as codec",
+      "journal entry schema codec",
+      "budget enforcement as codec",
+      "passport schema and transitions"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

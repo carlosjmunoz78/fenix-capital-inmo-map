@@ -1,0 +1,129 @@
+{
+  "program_id": "P05",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1098,
+    "cached_input_tokens": 0,
+    "output_tokens": 937,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.0007269,
+  "blueprint": {
+    "reuse_map": {
+      "runtime_supervisor": "P05 runtime supervisor + job scheduler (wrapped by B2 policy router)",
+      "checkpoint_store": "checkpoint store abstraction + resume controller (extended by B3 verifier)",
+      "mesh": "execution-mesh node registry + dispatcher (wrapped by B4 partition dispatch)",
+      "provider_adapter": "cloud provider adapter interface (wrapped by B1, metered by B9)",
+      "sync_state": "sync/partition state machine (extends B8 reconciliation)",
+      "standby": "hot-standby promotion controller (extended by B5 drift detection)",
+      "economy": "node-economy ledger + quota service (fed by B9 adapter hooks)",
+      "gating": "feature flags + PREPROD gating (enforced at adapter boundary)",
+      "sovereign": "offline sovereign mode toggle (attested via OfflineSovereignContract)",
+      "observability": "observability pipeline (spans added in B10)"
+    },
+    "files_to_add": [
+      "policy/router_capability_manifest.py",
+      "policy/cloud_primary_router.py",
+      "runtime/checkpoint_exact_resume_verifier.py",
+      "mesh/partition_aware_dispatch.py",
+      "standby/drift_detector.py",
+      "risk/concentration_scorer.py",
+      "exit/readiness_exporter.py",
+      "sovereign/reconcile_protocol.py",
+      "economy/adapter_metering_hooks.py",
+      "observability/durable_runtime_spans.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "runtime/supervisor.py (wrap with policy router, flag-gated)",
+      "runtime/resume_controller.py (invoke exact-resume verifier)",
+      "mesh/dispatcher.py (route via partition layer)",
+      "standby/promotion_controller.py (drift gate pre-promotion)",
+      "adapters/provider_adapter.py (capability manifest + metering hooks)",
+      "economy/quota_service.py (consume adapter metered units)",
+      "flags/feature_flags.py (B1–B10 kill switches)",
+      "observability/tracer.py (register new span names)"
+    ],
+    "contracts": [
+      "CheckpointContract v1: versioned, content-addressed, exact-resume verifiable",
+      "ResumeContract: idempotent deterministic replay",
+      "MeshDispatchContract: partition-aware routing",
+      "PresenceContract: cloud/dev/local capability advertising",
+      "ProviderAdapterContract: capability manifest + metering hooks",
+      "StandbyContract: promotion eligibility + drift bounds",
+      "ExitReadinessContract: portable export bundle schema",
+      "NodeEconomyContract: metered units + quota enforcement",
+      "OfflineSovereignContract: local-authoritative attestation",
+      "ConcentrationRiskContract: exposure metrics + thresholds"
+    ],
+    "tests": [
+      "checkpoint round-trip exact-resume determinism",
+      "resume idempotency under duplicate triggers",
+      "mesh dispatch under simulated partition",
+      "hot-standby drift within bounds + promotion dry-run",
+      "offline→online reconciliation convergence",
+      "provider failover via adapter wrapper",
+      "concentration risk threshold crossing alerts",
+      "exit-readiness bundle reconstructs runtime",
+      "node-economy quota enforcement",
+      "PREPROD gating blocks prod writes"
+    ],
+    "rollout_order": [
+      "B1 capability manifest + adapter wrapper",
+      "B2 policy router (cloud-primary/dev-extended/local-capable)",
+      "B3 checkpoint exact-resume verifier",
+      "B10 observability spans on B1–B3",
+      "B4 mesh partition-aware dispatch",
+      "B5 standby drift + promotion hooks",
+      "B9 node-economy metering hooks",
+      "B6 concentration risk scorer",
+      "B8 offline sovereign reconciliation",
+      "B7 cloud-exit readiness exporter"
+    ],
+    "rollback": [
+      "per-batch feature flag disable (B1–B10)",
+      "adapter wrapper fallback to legacy direct path",
+      "checkpoint schema version pin with dual-read",
+      "standby promotion reversible pre-commit",
+      "exit bundle read-only export (no runtime mutation)",
+      "policy router revert to existing supervisor default"
+    ],
+    "evidence": [
+      "PREPROD gate check logs at adapter boundary",
+      "exact-resume verifier pass/fail traces",
+      "partition dispatch simulated-partition traces",
+      "drift_delta + standing promotion dry-run report",
+      "concentration_index metric snapshots",
+      "exit-readiness bundle reconstruction proof",
+      "offline→online reconciliation convergence log"
+    ],
+    "distillation": [
+      "policy router decision table",
+      "provider capability manifest",
+      "exact-resume verification checklist",
+      "concentration risk thresholds",
+      "offline reconciliation protocol steps"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "Approve PREPROD→prod promotion gate for durable runtime",
+    "Sign-off standby promotion policy bounds",
+    "Ratify concentration risk thresholds",
+    "Authorize cloud-exit readiness bundle publication"
+  ],
+  "model_advisory_approvals": [
+    "Approve PREPROD→prod promotion gate for durable runtime",
+    "Sign-off standby promotion policy bounds",
+    "Ratify concentration risk thresholds",
+    "Authorize cloud-exit readiness bundle publication"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}

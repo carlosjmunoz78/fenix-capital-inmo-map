@@ -1,0 +1,71 @@
+name: JARVIS-001 ENGINE EVIDENCE AUDIT · PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - '.github/workflows/cerebro-mission-jarvis-001-engine-evidence-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: mission-jarvis-001-engine-evidence-v1
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  JARVIS_ENGINE_EVIDENCE_OUT: cerebro/jarvis/mission-001/engine-evidence-audit.v1.json
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Hard PREPROD guards
+        run: |
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+      - name: Run engine evidence audit tests
+        run: node --test cerebro/tests/jarvis-engine-evidence-audit-v1.test.mjs
+      - name: Generate evidence classification for all registered engines
+        run: node cerebro/runtime/jarvis-engine-evidence-audit-v1.mjs
+      - name: Enforce no operational overclaim
+        shell: bash
+        run: |
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const a=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/engine-evidence-audit.v1.json','utf8'));
+          if(a.registry_count!==177||a.audited_engine_count!==177) throw new Error('ENGINE_COUNT_MISMATCH');
+          if(a.operational_claim_count!==0) throw new Error('OPERATIONAL_OVERCLAIM');
+          if(a.prod_authorized!==false||a.trading_access!==false) throw new Error('BOUNDARY_VIOLATION');
+          console.log(JSON.stringify({count:a.audited_engine_count,states:a.evidence_state_counts,fingerprint:a.audit_fingerprint}));
+          NODE
+      - name: Persist audit safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO JARVIS PREPROD'
+          git config user.email 'actions@users.noreply.github.com'
+          git add cerebro/jarvis/mission-001/engine-evidence-audit.v1.json
+          git commit -m 'chore(jarvis): persist 177-engine evidence audit [generated]'
+          git fetch origin "$GITHUB_REF_NAME"
+          git rebase "origin/$GITHUB_REF_NAME"
+          git push origin HEAD:"$GITHUB_REF_NAME"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mission-jarvis-001-engine-evidence-${{ github.run_id }}
+          path: cerebro/jarvis/mission-001/engine-evidence-audit.v1.json
+          if-no-files-found: error
+          retention-days: 7

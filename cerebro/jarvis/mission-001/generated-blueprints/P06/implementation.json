@@ -1,0 +1,134 @@
+{
+  "program_id": "P06",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
+  "usage": {
+    "input_tokens": 1045,
+    "cached_input_tokens": 0,
+    "output_tokens": 1024,
+    "reasoning_tokens": 0
+  },
+  "cost_usd": 0.00077115,
+  "blueprint": {
+    "reuse_map": {
+      "action_execution": "P05 kafka producer/consumer wrappers + outbox pattern",
+      "persistence": "P02 Postgres schema + migration tooling",
+      "observability": "P01 OpenTelemetry tracing + structured logging",
+      "idempotency": "Existing idempotency-key store / dedupe service",
+      "retry": "Existing retry/backoff utility (resilience4j or equivalent)",
+      "config_flags": "Existing config service and feature-flag client",
+      "secrets": "Existing secrets manager integration (preprod vault)"
+    },
+    "files_to_add": [
+      "engine/api/ActionRequest.java",
+      "engine/api/ActionResult.java",
+      "engine/spi/TransactionalActionEngine.java",
+      "engine/idempotency/IdempotencyWrapper.java",
+      "engine/log/PostgresActionLogRepository.java",
+      "saga/registry/SagaStepRegistry.java",
+      "saga/runtime/SagaCoordinator.java",
+      "saga/runtime/SagaStateMachine.java",
+      "saga/compensation/CompensationExecutor.java",
+      "reconcile/DesiredStateLoader.java",
+      "reconcile/Differ.java",
+      "reconcile/Planner.java",
+      "reconcile/Applier.java",
+      "reconcile/DriftEventPublisher.java",
+      "contracts/schema/ActionRequest.schema.json",
+      "contracts/schema/SagaDefinition.schema.json",
+      "contracts/schema/DesiredStateDocument.schema.json",
+      "contracts/schema/DriftEvent.schema.json",
+      "migrations/V1__action_log.sql",
+      "migrations/V2__saga_state.sql",
+      "migrations/V3__drift_events.sql",
+      "telemetry/TransactionalFlowSpans.java",
+      "telemetry/TransactionalFlowMetrics.java",
+      "security/ActionAuthorizer.java",
+      "security/DriftEventSigner.java",
+      "audit/HashChainAuditLog.java"
+    ],
+    "files_to_modify_candidate_only": [
+      "config/preprod/engine-feature-flags.yaml (new flags default off/dry-run)",
+      "observability/preprod/grafana-dashboards.json",
+      "alerts/preprod/transactional-flow-alerts.yaml",
+      "contracts/contract-registry.json (register v1 DTO/SPI contracts)",
+      "rbac/preprod/action-authorization-policy.yaml"
+    ],
+    "contracts": [
+      "ActionRequest{schema_version,idempotency_key,actor,trace_id,payload}",
+      "ActionResult{schema_version,status,action_id,trace_id,effects}",
+      "SagaDefinition{version,steps[],compensations[],timeouts,dlq_policy}",
+      "DesiredStateDocument{schema_version,resources[],metadata}",
+      "DriftEvent{schema_version,resource,expected,actual,detected_at,severity,signature}",
+      "EngineSPI{v1: execute(), compensate(), reconcile()}",
+      "ReconcilerScheduling{interval,jitter,lock_owner_ttl}"
+    ],
+    "tests": [
+      "idempotency: duplicate ActionRequest -> single effect",
+      "saga happy-path ordered execution",
+      "saga mid-step failure -> ordered idempotent compensation",
+      "compensation failure -> DLQ + alert emitted",
+      "drift mutation -> DriftEvent within interval",
+      "apply defaults to dry-run; live gated by flag",
+      "contract tests: SPI v1 + all DTO schemas",
+      "property: reconcile convergence (no infinite diff)",
+      "authorization: unauthorized actor blocked",
+      "audit hash-chain tamper detection"
+    ],
+    "rollout_order": [
+      "B1 action engine core (flag off)",
+      "B1 contract + idempotency tests green",
+      "B2 saga orchestration (flag off, dry compensation)",
+      "B2 failure-injection compensation tests",
+      "B3 reconciler dry-run default in PREPROD",
+      "B3 synthetic drift detection tests",
+      "B4 observability/audit wiring + dashboards",
+      "PREPROD validation of traces, metrics, alerts"
+    ],
+    "rollback": [
+      "feature-flag disable: action_engine / saga_engine / reconciler",
+      "reconciler live-apply revert via desired-state snapshot",
+      "saga definition pointer swap to prior version",
+      "action log append-only replay recovery",
+      "DOWN migrations for V1-V3 documented"
+    ],
+    "evidence": [
+      "unit + contract test reports per batch",
+      "saga compensation failure-injection traces",
+      "DriftEvent emission within interval proof",
+      "PREPROD Grafana screenshots: latency, saga, drift",
+      "alert firing proofs: DLQ, compensation failure, drift",
+      "feature-flag state screenshots (all off/dry-run)",
+      "audit hash-chain integrity test output",
+      "migration up/down success logs"
+    ],
+    "distillation": [
+      "Action engine SPI + idempotency wrapper (P06 primitive)",
+      "Saga step/compensation registry pattern",
+      "Desired-state differ/planner library",
+      "DriftEvent schema + remediation hook",
+      "Transactional-flow observability conventions"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve enabling live-apply flag in PREPROD",
+    "review RBAC action-authorization policy",
+    "sign off saga DLQ escalation policy",
+    "approve promotion beyond PREPROD (out of current scope)"
+  ],
+  "model_advisory_approvals": [
+    "approve enabling live-apply flag in PREPROD",
+    "review RBAC action-authorization policy",
+    "sign off saga DLQ escalation policy",
+    "approve promotion beyond PREPROD (out of current scope)"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
+}
