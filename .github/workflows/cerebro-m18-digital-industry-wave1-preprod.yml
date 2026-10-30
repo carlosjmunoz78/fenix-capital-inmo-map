@@ -1,0 +1,142 @@
+name: CEREBRO M18 DIGITAL INDUSTRY · PREPROD WAVE 1
+run-name: M18 Digital Industry · scope + inventory + dependencies + contracts + capabilities
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/m18-digital-industry-preprod-20261030
+    paths:
+      - '28_MACROFRENTES.md'
+      - 'cerebro/missions/M18-DIGITAL-INDUSTRY-2026-10-30.json'
+      - '.github/workflows/cerebro-m18-digital-industry-wave1-preprod.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-m18-digital-industry-wave1-preprod
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_MISSION_WORK_OUT_DIR: artifacts/m18-digital-industry-wave1
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate M18 mission packet and hydrated canonical scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { loadCanonicalMissionRoots, buildMissionDag } from './cerebro/runtime/mission-recursive-decomposer-v1.mjs';
+          const packet=JSON.parse(fs.readFileSync('cerebro/missions/M18-DIGITAL-INDUSTRY-2026-10-30.json','utf8'));
+          if(packet.canonical_root!=='M18') throw new Error('mission packet is not bound to M18');
+          if(packet.environment!=='PREPROD') throw new Error('mission packet must be PREPROD');
+          if(packet.hard_guards?.prod_write_allowed!==false) throw new Error('PROD write guard missing');
+          if(packet.hard_guards?.paid_ai_allowed!==false) throw new Error('paid AI guard missing');
+          if(packet.hard_guards?.trading_access!==false) throw new Error('Trading guard missing');
+          if(Number(packet.hard_guards?.additional_cost_eur)!==0) throw new Error('cost guard must be zero');
+          const loaded=loadCanonicalMissionRoots();
+          if(!loaded.hydrated) throw new Error(`canonical mission hydration failed: ${loaded.error}`);
+          const m18=loaded.roots.find(x=>x.mission_id==='M18');
+          if(!m18) throw new Error('M18 missing');
+          if(!m18.scope_text.includes('DIGITAL INDUSTRY')) throw new Error('expanded M18 scope not active');
+          if(!m18.scope_text.includes('Digital Twin Builder')) throw new Error('Digital Twin requirement missing');
+          if(!m18.scope_text.includes('Product DNA')) throw new Error('Product DNA requirement missing');
+          const graph=buildMissionDag(loaded.roots,{environment:'PREPROD',generated_at:'1970-01-01T00:00:00.000Z'});
+          if(graph.mission_count!==28 || graph.hydrated_mission_count!==28) throw new Error('mission graph is not fully hydrated');
+          console.log(JSON.stringify({ok:true,mission_id:packet.mission_id,canonical_root:'M18',scope_fingerprint:m18.scope_fingerprint,graph_fingerprint:graph.graph_fingerprint,work_unit_count:graph.work_unit_count,atomic_count:graph.atomic_count,prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
+          NODE
+      - name: Existing Mission DAG contract tests
+        run: node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+
+  wave1:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        include:
+          - { phase: scope, atom: resolve_source, lane: 0, cycle: 21 }
+          - { phase: scope, atom: extract_objective, lane: 53, cycle: 19 }
+          - { phase: scope, atom: extract_constraints, lane: 38, cycle: 18 }
+          - { phase: scope, atom: define_done, lane: 23, cycle: 17 }
+          - { phase: scope, atom: risk_classify, lane: 8, cycle: 16 }
+          - { phase: scope, atom: scope_fingerprint, lane: 61, cycle: 14 }
+          - { phase: inventory, atom: repo_inventory, lane: 46, cycle: 13 }
+          - { phase: inventory, atom: runtime_inventory, lane: 31, cycle: 12 }
+          - { phase: inventory, atom: integration_inventory, lane: 16, cycle: 11 }
+          - { phase: inventory, atom: data_inventory, lane: 1, cycle: 10 }
+          - { phase: inventory, atom: environment_inventory, lane: 54, cycle: 8 }
+          - { phase: inventory, atom: gap_inventory, lane: 39, cycle: 7 }
+          - { phase: dependencies, atom: direct_dependencies, lane: 24, cycle: 6 }
+          - { phase: dependencies, atom: reverse_dependencies, lane: 9, cycle: 5 }
+          - { phase: dependencies, atom: shared_runtime, lane: 62, cycle: 3 }
+          - { phase: dependencies, atom: credential_boundaries, lane: 47, cycle: 2 }
+          - { phase: dependencies, atom: data_boundaries, lane: 32, cycle: 1 }
+          - { phase: dependencies, atom: dependency_fingerprint, lane: 17, cycle: 0 }
+          - { phase: contracts, atom: inputs, lane: 42, cycle: 33 }
+          - { phase: contracts, atom: outputs, lane: 27, cycle: 32 }
+          - { phase: contracts, atom: permissions, lane: 12, cycle: 31 }
+          - { phase: contracts, atom: events_jobs_api, lane: 65, cycle: 29 }
+          - { phase: contracts, atom: invariants, lane: 50, cycle: 28 }
+          - { phase: contracts, atom: compatibility, lane: 35, cycle: 27 }
+          - { phase: capabilities, atom: capability_audit, lane: 20, cycle: 26 }
+          - { phase: capabilities, atom: capability_ensure, lane: 5, cycle: 25 }
+          - { phase: capabilities, atom: capability_test, lane: 58, cycle: 23 }
+          - { phase: capabilities, atom: capability_evaluate, lane: 43, cycle: 22 }
+          - { phase: capabilities, atom: capability_register, lane: 28, cycle: 21 }
+          - { phase: capabilities, atom: capability_unblock, lane: 13, cycle: 20 }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Execute targeted M18 work unit
+        shell: bash
+        run: |
+          set -euo pipefail
+          output="$(node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane=${{ matrix.lane }} --cycle=${{ matrix.cycle }} --fallback=false)"
+          printf '%s\n' "$output"
+          printf '%s' "$output" | grep -q '"mission_id":"M18"'
+          printf '%s' "$output" | grep -q '"scope_hydrated":true'
+          printf '%s' "$output" | grep -q '"paid_ai_used":false'
+          printf '%s' "$output" | grep -q '"prod_write_authorized":false'
+          printf '%s' "$output" | grep -q '"trading_access":false'
+          printf '%s' "$output" | grep -q '"phase":"${{ matrix.phase }}"'
+          printf '%s' "$output" | grep -q '"work_unit_id":"M18.${{ matrix.phase }}.${{ matrix.atom }}"'
+      - name: Verify evidence artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find artifacts/m18-digital-industry-wave1 -type f -name '*.json' | wc -l | tr -d ' ')"
+          test "$count" -ge 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m18-${{ matrix.phase }}-${{ matrix.atom }}-${{ github.run_id }}
+          path: artifacts/m18-digital-industry-wave1/**
+          if-no-files-found: error
+          retention-days: 7
+
+  summary:
+    needs: wave1
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Safety summary
+        shell: bash
+        run: |
+          echo 'M18 Digital Industry Wave 1 requested 30 targeted PREPROD evidence units.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD write: false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Paid AI: false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Trading: false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Additional cost authorization: 0 EUR' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Next gate: inspect evidence, classify REUSE/WRAP/EXTEND/BUILD/DEFER/REJECT, then open Wave 2 only for verified gaps.' >> "$GITHUB_STEP_SUMMARY"
