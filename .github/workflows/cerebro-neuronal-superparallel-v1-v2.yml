@@ -1,0 +1,191 @@
+name: CEREBRO NEURONAL Superparallel V1 V2
+
+on:
+  push:
+    branches:
+      - 'cerebro/neuronal-superparallel-*'
+    paths:
+      - 'cerebro/data/neuronal-superparallel-v1.part*.b64'
+      - 'cerebro/runtime/prepare-neuronal-source-v1.mjs'
+      - 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
+      - 'cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs'
+      - 'cerebro/tests/neuronal-superparallel-source-v1.test.mjs'
+      - '.github/workflows/cerebro-neuronal-superparallel-v1-v2.yml'
+      - 'docs/CEREBRO_NEURONAL_SUPERPARALLEL_V1.md'
+  workflow_dispatch:
+    inputs:
+      units:
+        description: 'Read-only discovery units; max 147 to preserve headroom for existing CEREBRO missions.'
+        required: false
+        default: '147'
+        type: string
+      offset:
+        description: 'Offset into the deterministic 6,449-submission campaign.'
+        required: false
+        default: '0'
+        type: string
+      run_deepseek:
+        description: 'Run bounded DeepSeek planning/challenger shards, max 8 concurrent.'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-neuronal-superparallel-v1-v2-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_NEURONAL_OUT_DIR: artifacts/neuronal-superparallel-v1
+
+jobs:
+  validate-materialize:
+    name: Validate and materialize 6,449 submissions
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Rebuild and checksum canonical source
+        run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
+      - name: Syntax gates
+        run: |
+          node --check cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          node --check cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs
+      - name: Contract and DAG tests
+        run: node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+      - name: Validate canonical campaign
+        run: node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=validate
+      - name: Materialize all 6,449 submissions as campaign artifact
+        run: node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=materialize
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neuronal-superparallel-campaign-${{ github.run_id }}
+          path: artifacts/neuronal-superparallel-v1/
+          retention-days: 7
+
+  plan:
+    name: Plan maximum useful NEURONAL discovery fanout
+    needs: validate-materialize
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      planned: ${{ steps.plan.outputs.planned }}
+      offset: ${{ steps.plan.outputs.offset }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Rebuild and checksum canonical source
+        run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
+      - id: plan
+        env:
+          REQUESTED_UNITS: ${{ github.event_name == 'workflow_dispatch' && inputs.units || '147' }}
+          REQUESTED_OFFSET: ${{ github.event_name == 'workflow_dispatch' && inputs.offset || '0' }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { planNeuronalFanoutV1 } from './cerebro/runtime/neuronal-superparallel-source-v1.mjs';
+          const plan = planNeuronalFanoutV1({requested_units:Number(process.env.REQUESTED_UNITS),offset:Number(process.env.REQUESTED_OFFSET)});
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include:plan.matrix})}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned=${plan.planned_units}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `offset=${plan.offset}\n`);
+          console.log(JSON.stringify(plan));
+          NODE
+
+  evidence-fanout:
+    name: NEURONAL evidence · ${{ matrix.submission_id }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 147
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Rebuild and checksum canonical source
+        run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
+      - name: Collect bounded read-only evidence
+        env:
+          SUBMISSION_ID: ${{ matrix.submission_id }}
+        run: |
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission="$SUBMISSION_ID"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neuronal-evidence-${{ matrix.slot }}-${{ github.run_id }}
+          path: artifacts/neuronal-superparallel-v1/evidence/${{ matrix.submission_id }}.json
+          retention-days: 5
+
+  deepseek-planning:
+    name: NEURONAL DeepSeek shard ${{ matrix.shard }}
+    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.run_deepseek) }}
+    needs: validate-materialize
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 8
+      matrix:
+        shard: [0,1,2,3,4,5,6,7]
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      CEREBRO_ALLOW_PAID_FANOUT: 'YES'
+      CEREBRO_NEURONAL_PROJECTED_EUR_PER_SUBMISSION: '0.05'
+      CEREBRO_NEURONAL_PROJECTED_USD_PER_SUBMISSION: '0.05'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Rebuild and checksum canonical source
+        run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
+      - name: Execute bounded candidate planning
+        run: node cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs --mode=shard --shard=${{ matrix.shard }} --shards=8 --limit=32
+      - uses: actions/upload-artifact@v4
+        with:
+          name: neuronal-deepseek-${{ matrix.shard }}-${{ github.run_id }}
+          path: artifacts/neuronal-superparallel-v1/deepseek/
+          if-no-files-found: error
+          retention-days: 5
+
+  acceptance:
+    name: NEURONAL launch acceptance
+    if: always()
+    needs: [validate-materialize, plan, evidence-fanout, deepseek-planning]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record launch state
+        run: |
+          echo 'CEREBRO NEURONAL SUPERPARALLEL V1 V2'
+          echo 'canonical_submissions=6449'
+          echo 'approved_requirements=493'
+          echo 'planned_discovery=${{ needs.plan.outputs.planned }}'
+          echo 'discovery_offset=${{ needs.plan.outputs.offset }}'
+          echo 'enterprise_neuronal_max_parallel=147'
+          echo 'deepseek_max_parallel=8'
+          echo 'existing_cerebro_headroom_preserved=true'
+          echo 'discovery_completion_authority=false'
+          echo 'second_queue=false'
+          echo 'second_scheduler=false'
+          echo 'second_daemon=false'
+          echo 'prod_authorized=false'
+          echo 'prod_write_authorized=false'
+          echo 'trading_access=false'
