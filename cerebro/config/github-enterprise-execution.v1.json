@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "policy_id": "CEREBRO-GITHUB-ENTERPRISE-EXECUTION-V1",
   "status": "PREPROD_CANDIDATE",
   "effective_scope": {
@@ -10,37 +10,37 @@
     "version": "v1"
   },
   "verified_platform_limits": {
-    "enterprise_standard_runner_concurrent_jobs_ceiling": 500,
-    "enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
+    "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "paid_enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
     "matrix_jobs_per_workflow_run_ceiling": 256,
-    "enterprise_included_actions_minutes_per_month": 50000
+    "enterprise_trial_includes_increased_actions_concurrency": false
   },
   "entitlement_gate": {
     "enterprise_organization_verified_for_canonical_repo": true,
+    "enterprise_actions_concurrency_entitlement_verified": false,
+    "enterprise_account_state": "TRIAL",
     "canonical_repository": "fenix-cerebro/fenix-capital-inmo-map",
     "enterprise_slug": "cerebro-os",
     "organization": "fenix-cerebro",
-    "verified_at": "2026-10-30",
-    "reason": "Canonical repository ownership was transferred to organization fenix-cerebro, the organization is part of Enterprise account cerebro-os, and the GitHub connector now has a dedicated organization installation. Enterprise repository entitlement is evidence-backed.",
-    "required_before_enterprise_burst": false
+    "organization_verified_at": "2026-10-30",
+    "global_500_fanout_enabled": false,
+    "required_before_500_global_fanout": true,
+    "reason": "Repository and organization ownership are verified under Enterprise account cerebro-os, but the account is still in the 30-day Enterprise trial. GitHub documents that increased GitHub Actions job concurrency is not included in the Enterprise trial. Do not claim or physically request the paid-Enterprise 500-job concurrency until a paid Actions concurrency entitlement is separately verified."
   },
   "parallelism": {
-    "mode": "ADAPTIVE",
-    "default_linux_max_parallel": 64,
-    "preprod_burst_linux_max_parallel": 128,
-    "enterprise_verified_linux_hard_ceiling": 500,
+    "mode": "ADAPTIVE_FAIL_CLOSED",
+    "cerebro_trial_safe_parallelism_cap": 16,
+    "paid_enterprise_verified_linux_hard_ceiling": 500,
     "single_matrix_hard_ceiling": 256,
     "spawn_jobs_only_for_discovered_work": true,
     "parallelize_only_independent_work": true,
     "never_spawn_empty_capacity_jobs": true
   },
   "usage_guard": {
-    "included_minutes_monthly_reference": 50000,
-    "warning_threshold_percent": 50,
-    "throttle_threshold_percent": 75,
-    "hard_review_threshold_percent": 90,
+    "trial_mode": true,
     "silent_overage_allowed": false,
-    "money_limit_on_unapproved_overage": true
+    "money_limit_on_unapproved_overage": true,
+    "paid_plan_activation_requires_human": true
   },
   "workflow_policy": {
     "cancel_stale_branch_runs": true,
