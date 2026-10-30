@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
@@ -62,9 +62,10 @@ jobs:
           if(s.deepseek_calls!==36) throw new Error(`UNEXPECTED_DEEPSEEK_CALLS:${s.deepseek_calls}`);
           if(s.prod_write!==false||s.trading!==false) throw new Error('BOUNDARY_VIOLATION');
           if(s.deepseek_dependency_target!==0) throw new Error('DEPENDENCY_TARGET_MUST_BE_ZERO');
+          if(Array.isArray(s.human_required)&&s.human_required.length) throw new Error(`HUMAN_REQUIRED:${s.human_required.join(',')}`);
           console.log(JSON.stringify(s));
           NODE
-      - name: Persist durable blueprint assets on candidate branch
+      - name: Persist durable blueprint assets on latest candidate branch head
         shell: bash
         run: |
           set -euo pipefail
@@ -75,9 +76,12 @@ jobs:
             echo 'no_new_blueprint_assets=true' >> "$GITHUB_STEP_SUMMARY"
           else
             git commit -m 'chore(jarvis): persist MISSION-JARVIS-001 program blueprints [generated]'
-            git push origin HEAD:${GITHUB_REF_NAME}
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin HEAD:"$GITHUB_REF_NAME"
           fi
       - name: Publish evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: mission-jarvis-001-blueprints-${{ github.run_id }}
