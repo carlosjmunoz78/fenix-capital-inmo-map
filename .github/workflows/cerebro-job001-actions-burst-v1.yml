@@ -1,0 +1,160 @@
+name: CEREBRO JOB-001 Finite Burst V1
+
+on:
+  workflow_dispatch:
+    inputs:
+      lanes:
+        description: 'Requested burst lanes (capped by governed entitlement)'
+        required: false
+        default: '8'
+        type: string
+      units_per_lane:
+        description: 'Finite useful-work units per lane'
+        required: false
+        default: '8'
+        type: string
+      cycle_base:
+        description: 'Deterministic starting cycle'
+        required: false
+        default: '0'
+        type: string
+  workflow_call:
+    inputs:
+      lanes:
+        required: false
+        default: '8'
+        type: string
+      units_per_lane:
+        required: false
+        default: '8'
+        type: string
+      cycle_base:
+        required: false
+        default: '0'
+        type: string
+  pull_request:
+    paths:
+      - 'cerebro/config/github-actions-burst.v1.json'
+      - 'cerebro/runtime/job001-actions-burst-router-v1.mjs'
+      - 'cerebro/tests/job001-actions-burst-router-v1.test.mjs'
+      - '.github/workflows/cerebro-job001-actions-burst-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-job001-burst-v1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+
+jobs:
+  plan:
+    name: Governed burst plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      lanes: ${{ steps.plan.outputs.lanes }}
+      total_units: ${{ steps.plan.outputs.total_units }}
+      entitlement_state: ${{ steps.plan.outputs.entitlement_state }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Contract tests
+        run: node --test cerebro/tests/job001-actions-burst-router-v1.test.mjs
+      - id: plan
+        name: Resolve finite burst against canonical JOB-001 contract
+        env:
+          REQUESTED_LANES: ${{ inputs.lanes || '8' }}
+          UNITS_PER_LANE: ${{ inputs.units_per_lane || '2' }}
+          CYCLE_BASE: ${{ inputs.cycle_base || '0' }}
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { planJob001ActionsBurstV1 } from './cerebro/runtime/job001-actions-burst-router-v1.mjs';
+          import { JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT } from './cerebro/runtime/job001-ledger-control-plane-v1.mjs';
+          const policy=JSON.parse(fs.readFileSync('./cerebro/config/github-actions-burst.v1.json','utf8'));
+          const plan=planJob001ActionsBurstV1({
+            contract:JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
+            policy,
+            request:{lanes:Number(process.env.REQUESTED_LANES),units_per_lane:Number(process.env.UNITS_PER_LANE),cycle_base:Number(process.env.CYCLE_BASE)}
+          });
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`matrix=${JSON.stringify({include:plan.matrix})}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`lanes=${plan.lanes}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`total_units=${plan.total_units}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`entitlement_state=${plan.entitlement_state}\n`);
+          console.log(JSON.stringify(plan));
+          NODE
+
+  burst:
+    name: Burst lane ${{ matrix.lane }} · ${{ matrix.units }} units
+    needs: plan
+    strategy:
+      fail-fast: false
+      max-parallel: 48
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute finite mission-derived useful work
+        env:
+          LANE: ${{ matrix.lane }}
+          CYCLE_START: ${{ matrix.cycle_start }}
+          UNITS: ${{ matrix.units }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          cycle="$CYCLE_START"
+          for ((i=0; i<UNITS; i++)); do
+            node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane="$LANE" --cycle="$cycle" --fallback=true
+            if [ "$cycle" -ge 999999 ]; then cycle=0; else cycle=$((cycle + 1)); fi
+          done
+          echo "lane=$LANE" >> "$GITHUB_STEP_SUMMARY"
+          echo "units=$UNITS" >> "$GITHUB_STEP_SUMMARY"
+          echo "finite=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "self_refill=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload bounded PREPROD evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: job001-burst-v1-lane-${{ matrix.lane }}-${{ github.run_id }}
+          path: |
+            artifacts/mission-derived-work-v1/**
+            artifacts/continuous-work-v0/**
+          if-no-files-found: error
+          retention-days: 1
+
+  acceptance:
+    name: Finite burst acceptance
+    needs: [plan, burst]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record physical PREPROD acceptance
+        run: |
+          echo 'CEREBRO JOB-001 Finite Burst V1 GREEN'
+          echo 'lanes=${{ needs.plan.outputs.lanes }}'
+          echo 'total_units=${{ needs.plan.outputs.total_units }}'
+          echo 'entitlement=${{ needs.plan.outputs.entitlement_state }}'
+          echo 'self_refill=false'
+          echo 'second_queue=false'
+          echo 'second_scheduler=false'
+          echo 'second_daemon=false'
+          echo 'prod_authorized=false'
+          echo 'trading_access=false'
