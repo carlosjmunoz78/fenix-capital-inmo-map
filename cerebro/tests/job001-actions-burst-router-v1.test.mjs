@@ -17,7 +17,7 @@ test('default burst is finite PREPROD and trial-safe', () => {
   assert.equal(out.enterprise_account_state, 'TRIAL');
   assert.equal(out.entitlement_state, 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED');
   assert.equal(out.lanes, 8);
-  assert.equal(out.hard_cap, 16);
+  assert.equal(out.hard_cap, 20);
   assert.equal(out.units_per_lane, 8);
   assert.equal(out.total_units, 64);
   assert.equal(out.second_queue, false);
@@ -31,26 +31,26 @@ test('default burst is finite PREPROD and trial-safe', () => {
   assert.equal(out.additional_cost_eur, 0);
 });
 
-test('organization ownership alone does not unlock JOB001 above the trial-safe 16-lane gate', () => {
+test('organization ownership alone does not unlock JOB001 above the full standard 20-lane gate', () => {
   const out = plan({ lanes: 64, units_per_lane: 2, cycle_base: 100 });
   assert.equal(policy.entitlement.enterprise_organization_verified_for_canonical_repo, true);
   assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, false);
   assert.equal(out.entitlement_state, 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED');
   assert.equal(out.requested_lanes, 64);
-  assert.equal(out.lanes, 16);
-  assert.equal(out.hard_cap, 16);
-  assert.equal(out.matrix.length, 16);
-  assert.equal(out.total_units, 32);
+  assert.equal(out.lanes, 20);
+  assert.equal(out.hard_cap, 20);
+  assert.equal(out.matrix.length, 20);
+  assert.equal(out.total_units, 40);
 });
 
-test('500-lane platform intent remains fail-closed at 16 during Enterprise trial', () => {
+test('500-lane platform intent remains fail-closed at 20 during Enterprise trial', () => {
   const out = plan({ lanes: 500, units_per_lane: 1 });
   assert.equal(policy.entitlement.paid_enterprise_standard_runner_concurrent_jobs_ceiling, 500);
   assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, false);
   assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
   assert.equal(out.requested_lanes, 500);
-  assert.equal(out.lanes, 16);
-  assert.equal(out.hard_cap, 16);
+  assert.equal(out.lanes, 20);
+  assert.equal(out.hard_cap, 20);
   assert.equal(out.platform_request_ceiling, 500);
   assert.equal(out.matrix_ceiling, 256);
 });
@@ -79,8 +79,8 @@ test('loss of organization evidence also remains fail-closed', () => {
     request: { lanes: 64, units_per_lane: 1 },
   });
   assert.equal(out.entitlement_state, 'ENTITLEMENT_UNVERIFIED');
-  assert.equal(out.lanes, 16);
-  assert.equal(out.hard_cap, 16);
+  assert.equal(out.lanes, 20);
+  assert.equal(out.hard_cap, 20);
 });
 
 test('burst rejects authority expansion in policy', () => {
