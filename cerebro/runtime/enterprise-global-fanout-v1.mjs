@@ -6,6 +6,7 @@ const MATRIX_CEILING = 256;
 const MATRIX_TARGET = 250;
 const STANDARD_FALLBACK_CAP = 20;
 const LANE_COUNT = 68;
+const TOTAL_MISSION_UNITS = selectMissionUnit(0, 0).atomic_count;
 
 function integer(value, label, min, max) {
   const n = Number(value);
@@ -38,8 +39,9 @@ function assertBasePolicy(policy) {
 }
 
 function specForSlot(slot) {
-  const lane = slot % LANE_COUNT;
-  const cycle = Math.floor(slot / LANE_COUNT);
+  const absolute = integer(slot, 'slot', 0, TOTAL_MISSION_UNITS - 1);
+  const lane = absolute % LANE_COUNT;
+  const cycle = Math.floor(absolute / LANE_COUNT);
   const selected = selectMissionUnit(lane, cycle);
   const unit = selected.unit;
   if (unit.environment !== PREPROD) throw new Error('NON_PREPROD_WORK_UNIT_DENIED');
@@ -47,7 +49,7 @@ function specForSlot(slot) {
     throw new Error('WORK_UNIT_AUTHORITY_EXPANSION_DENIED');
   }
   return Object.freeze({
-    slot,
+    slot: absolute,
     lane,
     cycle,
     company_id: unit.company_id,
@@ -60,12 +62,14 @@ function specForSlot(slot) {
   });
 }
 
-export function buildPaidEnterpriseTopologyV1(requested_units = DOCUMENTED_ENTERPRISE_GLOBAL_CEILING) {
+export function buildPaidEnterpriseTopologyV1(requested_units = DOCUMENTED_ENTERPRISE_GLOBAL_CEILING, offset = 0) {
   const requested = integer(requested_units, 'requested_units', 1, DOCUMENTED_ENTERPRISE_GLOBAL_CEILING);
+  const start = integer(offset, 'offset', 0, TOTAL_MISSION_UNITS - 1);
+  const planned = Math.min(requested, TOTAL_MISSION_UNITS - start);
   const all = [];
   const ids = new Set();
-  for (let slot = 0; slot < requested; slot += 1) {
-    const spec = specForSlot(slot);
+  for (let index = 0; index < planned; index += 1) {
+    const spec = specForSlot(start + index);
     if (ids.has(spec.work_unit_id)) throw new Error(`DUPLICATE_WORK_UNIT:${spec.work_unit_id}`);
     ids.add(spec.work_unit_id);
     all.push(spec);
@@ -74,10 +78,22 @@ export function buildPaidEnterpriseTopologyV1(requested_units = DOCUMENTED_ENTER
   const matrix_b = Object.freeze(all.filter((_, index) => index % 2 === 1));
   if (matrix_a.length > MATRIX_TARGET || matrix_b.length > MATRIX_TARGET) throw new Error('MATRIX_TARGET_EXCEEDED');
   if (matrix_a.length > MATRIX_CEILING || matrix_b.length > MATRIX_CEILING) throw new Error('GITHUB_MATRIX_CEILING_EXCEEDED');
-  return Object.freeze({ requested_units: requested, all, ids, matrix_a, matrix_b });
+  const nextOffset = start + all.length;
+  return Object.freeze({
+    requested_units: requested,
+    offset: start,
+    planned_units: all.length,
+    total_work_units: TOTAL_MISSION_UNITS,
+    next_offset: nextOffset,
+    has_more: nextOffset < TOTAL_MISSION_UNITS,
+    all,
+    ids,
+    matrix_a,
+    matrix_b,
+  });
 }
 
-export function planEnterpriseGlobalFanoutV1({ policy, requested_units } = {}) {
+export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset = 0 } = {}) {
   const liveLimit = assertBasePolicy(policy);
   const entitlement = policy.entitlement_gate || {};
   const paidConcurrencyVerified = entitlement.enterprise_account_state === 'PAID'
@@ -92,10 +108,11 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units } = {}) {
   const requested = requested_units == null
     ? effectiveCap
     : integer(requested_units, 'requested_units', 1, effectiveCap);
-  const topology = buildPaidEnterpriseTopologyV1(requested);
+  const start = integer(offset, 'offset', 0, TOTAL_MISSION_UNITS - 1);
+  const topology = buildPaidEnterpriseTopologyV1(requested, start);
 
   return Object.freeze({
-    schema_version: '1.2.0',
+    schema_version: '1.3.0',
     state_type: 'CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1',
     environment: PREPROD,
     enterprise_account_state: entitlement.enterprise_account_state || 'UNKNOWN',
@@ -104,6 +121,10 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units } = {}) {
     requested_units: requested,
     planned_units: topology.all.length,
     unique_work_units: topology.ids.size,
+    offset: topology.offset,
+    next_offset: topology.next_offset,
+    has_more: topology.has_more,
+    total_work_units: topology.total_work_units,
     effective_physical_cap: effectiveCap,
     live_enterprise_runner_limit: liveLimit,
     documented_enterprise_platform_ceiling: DOCUMENTED_ENTERPRISE_GLOBAL_CEILING,
@@ -118,8 +139,9 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units } = {}) {
     second_queue: false,
     second_scheduler: false,
     second_daemon: false,
-    self_refill: false,
-    finite: true,
+    self_refill: true,
+    finite_wave: true,
+    stops_when_backlog_exhausted: true,
     paid_ai_used: false,
     additional_cost_eur: 0,
     prod_authorized: false,
@@ -142,6 +164,8 @@ export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   paid_500_physical_execution_requires_live_limit_500: true,
   work_source: 'MISSION_DAG_V1',
   executor: 'mission-derived-useful-work-v1',
+  total_mission_work_units: TOTAL_MISSION_UNITS,
+  offset_aware: true,
   only_discovered_useful_work: true,
   unique_work_units_required: true,
   reuses_existing_mission_dag: true,
@@ -149,8 +173,9 @@ export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   second_queue: false,
   second_scheduler: false,
   second_daemon: false,
-  self_refill: false,
-  finite: true,
+  self_refill: true,
+  finite_wave: true,
+  stops_when_backlog_exhausted: true,
   additional_cost_eur: 0,
   prod_authorized: false,
   trading_access: false,
