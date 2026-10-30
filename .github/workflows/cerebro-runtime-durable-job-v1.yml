@@ -21,6 +21,7 @@ on:
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
       - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/job001-maintenance-drain-v1.test.mjs'
@@ -41,6 +42,7 @@ on:
       - 'cerebro/tests/durable-worker-runner-v1.test.mjs'
       - 'cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/job001-maintenance-drain-v1.test.mjs'
@@ -75,6 +77,7 @@ jobs:
           cerebro/tests/durable-worker-runner-v1.test.mjs
           cerebro/tests/cerebro-continuous-supervisor-v0.test.mjs
           cerebro/tests/cerebro-supervisor-daemon-v0.test.mjs
+          cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs
           cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
           cerebro/tests/job001-remote-telemetry-v1.test.mjs
           cerebro/tests/job001-maintenance-drain-v1.test.mjs
@@ -88,9 +91,10 @@ jobs:
           grep -F "prod_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "prod_write_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "RunLevel Limited" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "target_global_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_global_concurrency -ne 64" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_company_concurrency -ne 48" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "target_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_company_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_provider_concurrency.deepseek -ne 8" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "max_repo_write_concurrency -ne 1" cerebro/scripts/install-supervisor-preprod-windows.ps1
       - name: Full CEREBRO regression suite
         working-directory: cerebro
