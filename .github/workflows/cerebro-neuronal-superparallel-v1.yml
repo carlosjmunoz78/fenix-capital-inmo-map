@@ -10,6 +10,7 @@ on:
       - 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
       - 'cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs'
       - 'cerebro/tests/neuronal-superparallel-source-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
       - 'docs/CEREBRO_NEURONAL_SUPERPARALLEL_V1.md'
   pull_request:
@@ -18,6 +19,7 @@ on:
       - 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
       - 'cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs'
       - 'cerebro/tests/neuronal-superparallel-source-v1.test.mjs'
+      - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
       - 'docs/CEREBRO_NEURONAL_SUPERPARALLEL_V1.md'
   workflow_dispatch:
