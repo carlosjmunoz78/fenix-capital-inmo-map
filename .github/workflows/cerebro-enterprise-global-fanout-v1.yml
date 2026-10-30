@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: 'Useful PREPROD Mission DAG units. Bounded by the live Enterprise runner limit.'
+        description: 'Useful PREPROD Mission DAG units buffered in this wave. Physical execution remains bounded by the verified live 180-runner cap.'
         required: false
-        default: '180'
+        default: '360'
         type: string
       offset:
         description: 'Deterministic Mission DAG offset for the next non-overlapping wave.'
@@ -65,6 +65,7 @@ jobs:
       matrix_b_count: ${{ steps.plan.outputs.matrix_b_count }}
       planned_units: ${{ steps.plan.outputs.planned_units }}
       effective_cap: ${{ steps.plan.outputs.effective_cap }}
+      queue_buffer_cap: ${{ steps.plan.outputs.queue_buffer_cap }}
       paid_entitlement: ${{ steps.plan.outputs.paid_entitlement }}
       global_500_enabled: ${{ steps.plan.outputs.global_500_enabled }}
       offset: ${{ steps.plan.outputs.offset }}
@@ -83,7 +84,7 @@ jobs:
       - id: plan
         name: Discover unique useful Mission DAG work under live entitlement
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '180' || inputs.units || '180' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '360' || inputs.units || '360' }}
           REQUESTED_OFFSET: ${{ github.event_name == 'pull_request' && '0' || github.event_name == 'push' && '0' || inputs.offset || '0' }}
         shell: bash
         run: |
@@ -102,6 +103,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b_count=${plan.matrix_b_count}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned_units=${plan.planned_units}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `effective_cap=${plan.effective_physical_cap}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `queue_buffer_cap=${plan.queue_buffer_cap}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `paid_entitlement=${plan.enterprise_actions_concurrency_entitlement_verified}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `global_500_enabled=${plan.global_500_fanout_enabled}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `offset=${plan.offset}\n`);
@@ -117,6 +119,7 @@ jobs:
             has_more: plan.has_more,
             total_work_units: plan.total_work_units,
             effective_physical_cap: plan.effective_physical_cap,
+            queue_buffer_cap: plan.queue_buffer_cap,
             live_enterprise_runner_limit: plan.live_enterprise_runner_limit,
             matrix_a_count: plan.matrix_a_count,
             matrix_b_count: plan.matrix_b_count,
@@ -135,7 +138,7 @@ jobs:
     timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 250
+      max-parallel: 180
       matrix: ${{ fromJSON(needs.plan.outputs.matrix_a) }}
     steps:
       - uses: actions/checkout@v4
@@ -172,7 +175,7 @@ jobs:
     timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 250
+      max-parallel: 180
       matrix: ${{ fromJSON(needs.plan.outputs.matrix_b) }}
     steps:
       - uses: actions/checkout@v4
@@ -219,30 +222,33 @@ jobs:
           echo 'matrix_a=${{ needs.plan.outputs.matrix_a_count }}'
           echo 'matrix_b=${{ needs.plan.outputs.matrix_b_count }}'
           echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
+          echo 'queue_buffer_cap=${{ needs.plan.outputs.queue_buffer_cap }}'
           echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
           echo 'global_500_fanout_enabled=${{ needs.plan.outputs.global_500_enabled }}'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'
+          echo 'buffered_queue=true'
           echo 'self_refill=true'
           echo 'prod_authorized=false'
           echo 'trading_access=false'
-      - name: Self-refill next non-overlapping wave
+      - name: Self-refill next non-overlapping buffered wave
         if: ${{ github.event_name != 'pull_request' && needs.plan.outputs.has_more == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           NEXT_OFFSET: ${{ needs.plan.outputs.next_offset }}
-          EFFECTIVE_CAP: ${{ needs.plan.outputs.effective_cap }}
+          QUEUE_BUFFER_CAP: ${{ needs.plan.outputs.queue_buffer_cap }}
         shell: bash
         run: |
           set -euo pipefail
           gh api --method POST "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-enterprise-global-fanout-v1.yml/dispatches" \
             -f "ref=${GITHUB_REF_NAME}" \
-            -f "inputs[units]=${EFFECTIVE_CAP}" \
+            -f "inputs[units]=${QUEUE_BUFFER_CAP}" \
             -f "inputs[offset]=${NEXT_OFFSET}"
           echo "self_refilled=true" >> "$GITHUB_STEP_SUMMARY"
           echo "next_offset=${NEXT_OFFSET}" >> "$GITHUB_STEP_SUMMARY"
-          echo "effective_cap=${EFFECTIVE_CAP}" >> "$GITHUB_STEP_SUMMARY"
+          echo "queue_buffer_cap=${QUEUE_BUFFER_CAP}" >> "$GITHUB_STEP_SUMMARY"
+          echo "physical_cap=180" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
