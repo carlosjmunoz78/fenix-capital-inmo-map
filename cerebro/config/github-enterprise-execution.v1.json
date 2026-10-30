@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2",
+  "schema_version": "1.3",
   "policy_id": "CEREBRO-GITHUB-ENTERPRISE-EXECUTION-V1",
   "status": "PREPROD_CANDIDATE",
   "effective_scope": {
@@ -12,7 +12,7 @@
   "verified_platform_limits": {
     "standard_runner_concurrent_jobs_baseline_without_enterprise_increase": 20,
     "paid_enterprise_standard_runner_documented_ceiling": 500,
-    "live_enterprise_runner_concurrent_jobs_limit": 180,
+    "live_enterprise_runner_concurrent_jobs_limit": 360,
     "paid_enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
     "matrix_jobs_per_workflow_run_ceiling": 256,
     "enterprise_trial_includes_increased_actions_concurrency": false
@@ -26,17 +26,22 @@
     "organization": "fenix-cerebro",
     "organization_verified_at": "2026-10-30",
     "paid_enterprise_verified_at": "2026-10-30",
-    "live_runner_limit_verified_at": "2026-10-30",
+    "live_runner_limit_verified_at": "2026-10-31",
+    "live_runner_limit_verification_source": "OWNER_GITHUB_SUPPORT_CONFIRMATION",
     "global_fanout_enabled": true,
     "global_500_topology_prepared": true,
     "global_500_fanout_enabled": false,
     "required_before_500_global_fanout": true,
-    "reason": "Paid Enterprise is active and billed monthly. GitHub documents a 500-job standard hosted-runner ceiling for Enterprise, while the live CEREBRO OS GitHub-hosted runners panel currently reports 1/180 All jobs usage. CEREBRO therefore unlocks the verified live physical cap of 180 now and keeps the 500-job topology prepared but fail-closed until the live runner limit is raised to 500 or higher."
+    "reason": "GitHub support confirmed the organization-wide simultaneous job limit has been raised to 360, the maximum applied to the current plan, including up to 50 simultaneous macOS jobs. CEREBRO therefore uses the verified live cap of 360 and keeps the documented 500-job Enterprise topology fail-closed because the live entitlement is not 500."
   },
   "parallelism": {
     "mode": "ADAPTIVE_LIVE_CAP",
     "cerebro_standard_fallback_parallelism_cap": 20,
-    "current_live_enterprise_parallelism_cap": 180,
+    "current_live_enterprise_parallelism_cap": 360,
+    "portfolio_parallelism_cap": 250,
+    "neuronal_parallelism_cap": 100,
+    "control_reserve": 10,
+    "macos_parallelism_cap": 50,
     "enterprise_acceleration_test_parallelism": 128,
     "paid_enterprise_documented_linux_ceiling": 500,
     "single_matrix_hard_ceiling": 256,

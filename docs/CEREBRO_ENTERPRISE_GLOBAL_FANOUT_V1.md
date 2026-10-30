@@ -1,85 +1,53 @@
-# CEREBRO OS · Enterprise Global Finite Fanout V1
+# CEREBRO OS · Enterprise Global Fanout V1
 
-Date: 2026-10-30
+Date: 2026-10-31
 Status: PREPROD_CANDIDATE
 
 ## Objective
-Run CEREBRO at the maximum physically verified GitHub Actions capacity while keeping the documented 500-job Enterprise topology ready for immediate promotion when GitHub exposes that full limit to this Enterprise account.
-
-## Existing components reused
-- canonical Mission DAG from `mission-recursive-decomposer-v1.mjs`;
-- bounded executor `mission-derived-useful-work-v1.mjs`;
-- paid Enterprise account `cerebro-os`;
-- organization `fenix-cerebro`;
-- existing JOB-001/control-plane governance.
-
-No second queue, scheduler, daemon or permanent Actions runtime is created.
-
-## Available useful work
-The Mission DAG exposes 28 macrofronts × 14 phases × 6 atomic/capability units = 2,352 selectable work units. V1 requires unique `work_unit_id` values and never fabricates empty capacity jobs.
+Use the maximum physically verified GitHub Enterprise Actions capacity for useful, independent CEREBRO work while preserving governance, fair-share and rollback.
 
 ## Verified live state
-Paid GitHub Enterprise is active and billed monthly. The live Enterprise GitHub-hosted runners page reports `All jobs usage 1/180` on 2026-10-30, so the physically verified concurrent runner cap is 180 now.
+GitHub support confirmed the company-wide simultaneous-job limit has been raised to **360**, the maximum applied to the current plan, including up to **50 simultaneous macOS jobs**.
 
-GitHub documentation separately publishes:
-- Enterprise standard GitHub-hosted runner ceiling: 500 concurrent jobs;
-- single workflow matrix ceiling: 256 jobs.
-
-CEREBRO therefore distinguishes:
-- `documented_enterprise_platform_ceiling=500`;
-- `live_enterprise_runner_limit=180`;
-- `effective_physical_cap=180`;
+CEREBRO therefore records:
+- `live_enterprise_runner_limit=360`;
+- `effective_physical_cap=360`;
+- `macos_live_cap=50`;
+- documented Enterprise topology ceiling remains 500;
 - `global_500_topology_prepared=true`;
-- `global_500_fanout_enabled=false` until the live runner panel reports at least 500.
+- `global_500_fanout_enabled=false` because the live entitlement is 360, not 500.
 
-## Current physical topology
-At the verified live cap of 180:
-- Matrix A: 90 unique useful Mission DAG units.
-- Matrix B: 90 unique useful Mission DAG units.
-- Combined physical burst: 180.
+## Fair-share topology
+The live pool is deliberately shared so one campaign cannot monopolize Enterprise:
+- **250** concurrent portfolio jobs across W00-W24;
+- **100** concurrent NEURONAL jobs;
+- **10** slots reserved for planning, acceptance and control;
+- total target = **360**.
 
-A request above 180 fails before matrix creation.
+The portfolio uses **25 fronts × 10 distinct shards = 250** potential jobs. Shards partition different repository paths, and CEREBRO never creates empty jobs merely to occupy capacity.
 
-## Prepared 500 topology
-The same planner already supports:
-- Matrix A: up to 250 unique useful units.
-- Matrix B: up to 250 unique useful units.
-- Combined: 500.
+## macOS
+The entitlement permits up to 50 simultaneous macOS jobs. These slots are used only for work that genuinely requires macOS/iOS/Safari or Apple-specific tooling. No empty macOS jobs are fabricated.
 
-When GitHub raises the live runner limit to 500 or higher, promotion only requires updating the verified live limit and setting `global_500_fanout_enabled=true`; no new scheduler, queue, daemon or executor is required.
+## Existing components reused
+- JOB-001/control-plane governance;
+- NEURONAL 6,449-submission campaign;
+- W00-W24 multi-front worker;
+- JARVIS Project Registry;
+- Mission DAG and FACT-001 bridges where applicable.
 
-## Pull-request canary
-PR validation stays deliberately bounded at 20 real work units so governance changes can be tested without occupying the whole Enterprise account before merge. This is a validation canary, not the production capacity limit.
-
-## One-shot post-merge proof
-The workflow accepts a tagged main push containing `[CEREBRO-LIVE-FANOUT]`. That tagged merge requests 180 real PREPROD Mission DAG units exactly once. Ordinary future pushes do not auto-launch the full burst.
+No second queue, scheduler or daemon is introduced.
 
 ## Safety boundaries
-Every selected unit is PREPROD, finite and non-self-refilling, with:
-- no PROD write;
-- no external write;
-- no Trading;
-- no paid AI;
-- read-only workflow permissions.
+- PREPROD only for this acceleration layer.
+- PROD write: false.
+- Trading access: false.
+- DeepSeek: explicit opt-in only, max 8 concurrent, no automatic recharge.
+- Only independent work is parallelized.
+- Existing App Fénix, CRM, Supabase, Notion, WordPress, SEO, Training and automations are preserved.
 
-## Relationship to JOB-001
-The global runner cap is not a JOB-001 limit. JOB-001 keeps its canonical contract:
-- `max_global_default=64`;
-- `max_company_default=48`;
-- `max_deepseek_default=8`;
-- `max_repo_write_default=1`.
-
-With paid Enterprise verified, JOB-001 can use its full 48-company lane cap while the global fanout layer uses the wider Enterprise capacity for other independent work.
-
-## Cost
-Enterprise Cloud is already active as one paid seat. This capability does not authorize larger runners, extra seats, new subscriptions or silent overage. Standard public-repository Actions remain the preferred execution path.
+## 500-job topology
+GitHub documentation exposes a higher Enterprise ceiling in some configurations, and CEREBRO keeps the 500 topology prepared. It remains fail-closed until the organization receives and verifies a live entitlement of 500 or higher.
 
 ## Rollback
-Revert:
-- `cerebro/config/github-enterprise-execution.v1.json`;
-- `cerebro/runtime/enterprise-global-fanout-v1.mjs`;
-- `cerebro/tests/enterprise-global-fanout-v1.test.mjs`;
-- `.github/workflows/cerebro-enterprise-global-fanout-v1.yml`;
-- this document.
-
-Rollback returns physical fanout to the previous bounded state without deleting existing queues, workers, schedulers or production services.
+If CI, PREPROD or physical evidence shows regression, revert the fair-share workflow/policy changes to the last green revision. Do not remove the previous path until equivalence or improvement is demonstrated.
