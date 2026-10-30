@@ -8,6 +8,8 @@ on:
       - cerebro/edge-device-dispatch-canary-v10-20261030
     paths:
       - '.github/workflows/cerebro-edge-device-dispatch-canary-v1.yml'
+      - 'supabase/functions/cerebro-device-gateway-preprod-lean-canary/index.ts'
+      - 'cerebro/tests/edge-device-dispatch-canary-v1.test.mjs'
 
 permissions:
   contents: read
@@ -44,7 +46,7 @@ jobs:
           curl -fsS "$OLD_HEALTH_URL" | tee artifacts/edge-device-dispatch-canary-v1/old-v9-health.json
           curl -fsS "$CANARY_BASE_URL/health" | tee artifacts/edge-device-dispatch-canary-v1/new-canary-health.json
           jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/old-v9-health.json >/dev/null
-          jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .old_gateway_untouched == true and .existing_device_queue_reused == true and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/new-canary-health.json >/dev/null
+          jq -e '.ok == true and .status == "READY" and .environment == "PREPROD" and .old_gateway_untouched == true and .existing_device_queue_reused == true and .explicit_command_uuid == true and .prod_allowed == false' artifacts/edge-device-dispatch-canary-v1/new-canary-health.json >/dev/null
 
       - name: Mint GitHub OIDC token for edge dispatch canary
         id: oidc
