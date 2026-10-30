@@ -1,0 +1,64 @@
+name: CEREBRO NEURONAL Autofill Wire V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/neuronal-superparallel-*'
+    paths:
+      - 'cerebro/runtime/neuronal-source-integrity-v1.mjs'
+      - 'cerebro/runtime/neuronal-hierarchical-job001-adapter-v1.mjs'
+      - 'cerebro/tests/neuronal-hierarchical-job001-adapter-v1.test.mjs'
+      - 'cerebro/scripts/wire-neuronal-autofill-v1.mjs'
+      - '.github/workflows/cerebro-neuronal-autofill-wire-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cerebro-neuronal-autofill-wire-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  validate-wire-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Integrity and syntax gates
+        run: |
+          node --check cerebro/runtime/neuronal-source-integrity-v1.mjs
+          node --check cerebro/runtime/neuronal-hierarchical-job001-adapter-v1.mjs
+          node --check cerebro/scripts/wire-neuronal-autofill-v1.mjs
+          node --check cerebro/tests/neuronal-hierarchical-job001-adapter-v1.test.mjs
+      - name: Hierarchical queue contract tests
+        run: node --test cerebro/tests/neuronal-hierarchical-job001-adapter-v1.test.mjs
+      - name: Wire existing supervisor in-place
+        run: node cerebro/scripts/wire-neuronal-autofill-v1.mjs cerebro/runtime/cerebro-supervisor-daemon-v0.mjs --apply
+      - name: Validate patched supervisor
+        run: |
+          node --check cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          git diff --check
+          grep -q 'NEURONAL_AUTOFILL_V1_WIRED' cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          grep -q 'additional_sources: neuronalSource ? \[neuronalSource\] : \[\]' cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+      - name: Commit deterministic wiring if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- cerebro/runtime/cerebro-supervisor-daemon-v0.mjs; then
+            echo 'Supervisor already wired; no commit needed.'
+            exit 0
+          fi
+          git config user.name 'cerebro-autofill-bot'
+          git config user.email 'cerebro-autofill-bot@users.noreply.github.com'
+          git add cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          git commit -m 'CEREBRO NEURONAL: wire hierarchical JOB-001 autofill'
+          git push origin HEAD:${GITHUB_REF_NAME}
