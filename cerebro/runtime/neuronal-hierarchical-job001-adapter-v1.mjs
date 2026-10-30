@@ -5,6 +5,7 @@ const CAMPAIGN = 'NEURONAL-SUPERPARALLEL-V1';
 const ACTIVE = new Set(['QUEUED', 'RETRY_WAIT', 'RUNNING']);
 const TERMINAL = new Set(['SUCCEEDED', 'DEAD_LETTER', 'CANCELLED']);
 const MODEL_JOB = 'model.deepseek.agent';
+const VERIFIED_GLOBAL_CAP = 180;
 export const NEURONAL_AUDIT_JOB_NAME_V1 = 'neuronal.audit.evidence.v1';
 
 export const NEURONAL_QUEUE_HIERARCHY_V1 = Object.freeze([
@@ -89,15 +90,15 @@ export function neuronalJob001ContextV1({ company_id = 'fenix', version = 'neuro
 
 export class NeuronalHierarchicalJob001SourceV1 {
   #runtime; #queueContext; #modelContext; #submissions; #targetActive; #maxEnqueue; #modelActiveCap; #modelEnabled;
-  constructor({ job_runtime, queue_context = neuronalJob001ContextV1(), model_context, submissions = buildNeuronalSubmissionsV1(), target_active = 40, max_enqueue_per_reconcile = 48, model_active_cap = 8, model_enabled = true } = {}) {
+  constructor({ job_runtime, queue_context = neuronalJob001ContextV1(), model_context, submissions = buildNeuronalSubmissionsV1(), target_active = VERIFIED_GLOBAL_CAP, max_enqueue_per_reconcile = VERIFIED_GLOBAL_CAP, model_active_cap = 8, model_enabled = true } = {}) {
     this.#runtime = runtimeContract(job_runtime);
     if (!queue_context || queue_context.environment !== PREPROD || queue_context.engine_id !== 'JOB-001') throw new Error('neuronal queue context must be JOB-001 PREPROD');
     if (!model_context || model_context.environment !== PREPROD || model_context.engine_id !== 'BOOST-001') throw new Error('neuronal model context must be BOOST-001 PREPROD');
     this.#queueContext = Object.freeze({ ...queue_context });
     this.#modelContext = Object.freeze({ ...model_context });
     this.#submissions = Object.freeze([...submissions]);
-    this.#targetActive = integer(target_active, 'target_active', { min: 1, max: 64 });
-    this.#maxEnqueue = integer(max_enqueue_per_reconcile, 'max_enqueue_per_reconcile', { min: 1, max: 64 });
+    this.#targetActive = integer(target_active, 'target_active', { min: 1, max: VERIFIED_GLOBAL_CAP });
+    this.#maxEnqueue = integer(max_enqueue_per_reconcile, 'max_enqueue_per_reconcile', { min: 1, max: VERIFIED_GLOBAL_CAP });
     this.#modelActiveCap = integer(model_active_cap, 'model_active_cap', { min: 0, max: 8 });
     this.#modelEnabled = Boolean(model_enabled);
   }
@@ -151,7 +152,7 @@ export class NeuronalHierarchicalJob001SourceV1 {
   snapshot() {
     const s = this.#state();
     return Object.freeze({
-      schema_version: '1.0.0', state_type: 'CEREBRO_NEURONAL_HIERARCHICAL_JOB001_SOURCE_V1', campaign_id: CAMPAIGN,
+      schema_version: '1.1.0', state_type: 'CEREBRO_NEURONAL_HIERARCHICAL_JOB001_SOURCE_V1', campaign_id: CAMPAIGN,
       environment: PREPROD, queue_context: this.#queueContext, model_context: this.#modelContext,
       queue_count: NEURONAL_QUEUE_HIERARCHY_V1.length, total_submissions: this.#submissions.length,
       completed_submissions: s.completed.size, active_jobs: s.active.length, active_model_jobs: s.activeModel.length,
@@ -162,6 +163,7 @@ export class NeuronalHierarchicalJob001SourceV1 {
       queues: Object.freeze(s.queues),
       hierarchy: Object.freeze(NEURONAL_QUEUE_HIERARCHY_V1.map(({ queue_id, rank, phase_code }) => Object.freeze({ queue_id, rank, phase_code: phase_code ?? 'FOUNDATION' }))),
       auto_refill: true, dependency_gated: true, factory_gap_policy: 'WAITING_CAPABILITY_NOT_FAKE_SUCCESS',
+      verified_global_cap: VERIFIED_GLOBAL_CAP,
       second_queue: false, second_scheduler: false, second_daemon: false,
       prod_authorized: false, prod_write_authorized: false, trading_access: false,
     });
@@ -262,7 +264,7 @@ export const NEURONAL_HIERARCHICAL_JOB001_ADAPTER_V1_CONTRACT = Object.freeze({
   capability: 'CONSOLE-001/NEURONAL/JOB-001-HIERARCHICAL-AUTOFILL-V1', campaign_id: CAMPAIGN, environment: PREPROD,
   logical_queue_count: 14, physical_queue: 'JOB-001/DurableJobRuntimeV1', auto_refill: true, dependency_gated: true,
   priority_order: 'FOUNDATION->AUDIT->CONTRACT->DATA->UX->VISUAL->BUILD->UNIT->INTEGRATION->PERF_A11Y->ADVERSARIAL->EVIDENCE->EVAL->PROMOTION',
-  model_provider_cap_respected: true, model_active_cap_max: 8, queue_active_cap_max: 64,
+  model_provider_cap_respected: true, model_active_cap_max: 8, queue_active_cap_max: VERIFIED_GLOBAL_CAP,
   build_without_governed_executor: 'WAITING_CAPABILITY', fake_completion_forbidden: true,
   money_limit_becomes_human_required: true, auto_recharge: false,
   second_queue: false, second_scheduler: false, second_daemon: false,
