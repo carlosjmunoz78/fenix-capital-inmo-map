@@ -9,7 +9,10 @@ const svc = createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}
 const auth = createClient(U,A,{auth:{persistSession:false,autoRefreshToken:false}});
 const GITHUB_ISSUER="https://token.actions.githubusercontent.com";
 const GITHUB_AUDIENCE="cerebro-browser-worker-v1";
-const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
+const GITHUB_REPOSITORIES=new Set([
+  "carlosjmunoz78/fenix-capital-inmo-map",
+  "fenix-cerebro/fenix-capital-inmo-map"
+]);
 const GITHUB_WORKFLOW=".github/workflows/cerebro-browser-job-runner-v1.yml";
 const JWKS=createRemoteJWKSet(new URL(`${GITHUB_ISSUER}/.well-known/jwks`));
 const ALLOWED_ORIGINS=new Set(["https://app.fenixcapital.es","https://www.app.fenixcapital.es"]);
@@ -28,15 +31,16 @@ async function githubWorker(req:Request){
   const token=bearer(req); if(!token)return {ok:false,error:"GITHUB_OIDC_REQUIRED"} as const;
   try{
     const {payload}=await jwtVerify(token,JWKS,{issuer:GITHUB_ISSUER,audience:GITHUB_AUDIENCE});
-    if(payload.repository!==GITHUB_REPOSITORY)return {ok:false,error:"GITHUB_REPOSITORY_DENIED"} as const;
+    const repository=String(payload.repository??"");
+    if(!GITHUB_REPOSITORIES.has(repository))return {ok:false,error:"GITHUB_REPOSITORY_DENIED"} as const;
     const workflowRef=String(payload.workflow_ref??"");
-    if(!workflowRef.includes(`${GITHUB_REPOSITORY}/${GITHUB_WORKFLOW}@`))return {ok:false,error:"GITHUB_WORKFLOW_DENIED"} as const;
+    if(!workflowRef.includes(`${repository}/${GITHUB_WORKFLOW}@`))return {ok:false,error:"GITHUB_WORKFLOW_DENIED"} as const;
     const ref=String(payload.ref??"");
     if(PREPROD){
       const preprodRefs=new Set(["refs/heads/main","refs/heads/cerebro/browser1-live-dispatch-v1","refs/heads/cerebro/browser1-live-dispatch-v1-final"]);
       if(!preprodRefs.has(ref))return {ok:false,error:"GITHUB_REF_DENIED"} as const;
     } else if(ref!=="refs/heads/main") return {ok:false,error:"GITHUB_REF_DENIED"} as const;
-    return {ok:true,worker_id:`github:${String(payload.run_id??"unknown")}:${String(payload.run_attempt??"1")}`,claims:{repository:payload.repository,ref,workflow_ref:workflowRef,run_id:payload.run_id,runner_environment:payload.runner_environment}} as const;
+    return {ok:true,worker_id:`github:${String(payload.run_id??"unknown")}:${String(payload.run_attempt??"1")}`,claims:{repository,ref,workflow_ref:workflowRef,run_id:payload.run_id,runner_environment:payload.runner_environment}} as const;
   }catch(e){return {ok:false,error:"GITHUB_OIDC_INVALID",detail:safeError(e)} as const;}
 }
 
@@ -91,7 +95,7 @@ Deno.serve(async req=>{
     return new Response(null,{status:204,headers:{...headers(origin),"access-control-allow-methods":"GET,POST,OPTIONS","access-control-allow-headers":"authorization,content-type,apikey","access-control-max-age":"600"}});
   }
   const url=new URL(req.url); const route=url.pathname.split("/").filter(Boolean).slice(-1)[0]||"";
-  if(req.method==="GET"&&route==="health")return out(req,200,{ok:true,service:"cerebro-browser-dispatch-v1",environment:PREPROD?"PREPROD":"PROD",queue:"cerebro_browser_job_v1",github_oidc:true,vault_broker:true,raw_secrets_in_jobs:false,incremental_cost_eur:0});
+  if(req.method==="GET"&&route==="health")return out(req,200,{ok:true,service:"cerebro-browser-dispatch-v1",environment:PREPROD?"PREPROD":"PROD",queue:"cerebro_browser_job_v1",github_oidc:true,repository_allowlist:[...GITHUB_REPOSITORIES],vault_broker:true,raw_secrets_in_jobs:false,incremental_cost_eur:0});
 
   if(req.method==="POST"&&(route==="canary-seed"||route==="canary-credential-seed")){
     if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"});
