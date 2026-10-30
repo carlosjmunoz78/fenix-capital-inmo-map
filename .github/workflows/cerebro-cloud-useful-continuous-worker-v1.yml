@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: 'Sustained useful-work lane 0..67'
+        description: 'Sustained useful-work lane 0..63'
         required: true
         type: string
       cycle:
@@ -32,8 +32,10 @@ jobs:
       GH_REPO: ${{ github.repository }}
       CEREBRO_SUPERVISOR_ENV: PREPROD
       CEREBRO_INITIAL_CONCURRENCY: '48'
-      CEREBRO_MAX_CONCURRENCY: '68'
-      CEREBRO_MAX_PER_COMPANY: '68'
+      CEREBRO_MAX_CONCURRENCY: '64'
+      CEREBRO_MAX_PER_COMPANY: '48'
+      CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'
+      CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
       CEREBRO_ALLOW_PAID_FANOUT: 'NO'
       CEREBRO_PROD_WRITE: 'false'
       CEREBRO_TRADING_ACCESS: 'false'
@@ -53,6 +55,11 @@ jobs:
           test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
           test "$CEREBRO_PROD_WRITE" = "false"
           test "$CEREBRO_TRADING_ACCESS" = "false"
+          test "$CEREBRO_INITIAL_CONCURRENCY" = "48"
+          test "$CEREBRO_MAX_CONCURRENCY" = "64"
+          test "$CEREBRO_MAX_PER_COMPANY" = "48"
+          test "$CEREBRO_MAX_DEEPSEEK_CONCURRENCY" = "8"
+          test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = "1"
           test "$CEREBRO_WORKER_LEASE_SECONDS" -ge 300
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
@@ -60,14 +67,41 @@ jobs:
           for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
             case "$value" in ''|*[!0-9]*) exit 2 ;; esac
           done
-          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 67
+          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 63
           test "${{ inputs.cycle }}" -ge 0 && test "${{ inputs.cycle }}" -le 999999
+
+      - name: Enforce canonical JOB-001 Control Plane capacity contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs contract > control-plane-contract.json
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8'));
+          const expected={
+            environment:'PREPROD',
+            target_useful_default:48,
+            max_global_default:64,
+            max_company_default:48,
+            max_deepseek_default:8,
+            max_repo_write_default:1,
+            second_queue:false,
+            second_scheduler:false,
+            second_daemon:false,
+            prod_authorized:false,
+            trading_access:false,
+          };
+          for (const [key,value] of Object.entries(expected)) {
+            if (x[key] !== value) throw new Error(`JOB001_CONTROL_CONTRACT_MISMATCH:${key}:${x[key]}!=${value}`);
+          }
+          NODE
 
       - name: Contract tests OLD + MISSION DAG NEW
         run: |
           node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
           node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+          node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
 
       - name: Execute sustained mission-derived lease with V0 fallback
         id: lease
@@ -96,6 +130,7 @@ jobs:
           echo "sustained_worker=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "fallback_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
+          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
@@ -128,6 +163,7 @@ jobs:
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
+          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
