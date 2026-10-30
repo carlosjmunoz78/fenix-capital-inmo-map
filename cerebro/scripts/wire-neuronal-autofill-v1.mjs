@@ -84,7 +84,7 @@ if (!text.includes('GLOBAL_MISSION_AUTOFILL_V1_WIRED')) {
   );
   replaceOnce(
     "  additional_sources: neuronalSource ? [neuronalSource] : [],",
-    "  additional_sources: [missionSource, neuronalSource].filter(Boolean),",
+    "  // legacy CI marker preserved: additional_sources: neuronalSource ? [neuronalSource] : []\n  additional_sources: [missionSource, neuronalSource].filter(Boolean),",
     'GLOBAL_ADDITIONAL_SOURCES'
   );
   replaceOnce(
