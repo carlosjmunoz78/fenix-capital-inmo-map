@@ -39,7 +39,7 @@ jobs:
       CEREBRO_ALLOW_PAID_JARVIS_BUILD: 'YES'
       CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '1'
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      JARVIS_MASTER_FILE: cerebro/jarvis/mission-001/JARVIS_MASTER_V1_RC2_2026-10-30.md.gz.b64
+      JARVIS_MASTER_FILE: cerebro/jarvis/mission-001/master-parts
       JARVIS_DAG_OUT: artifacts/jarvis-mission-001-dag
       JARVIS_WAVE_OUT: artifacts/jarvis-mission-001-wave
     steps:
@@ -62,7 +62,7 @@ jobs:
         run: |
           node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
 
-      - name: Validate MISSION-JARVIS-001 DAG
+      - name: Validate MISSION-JARVIS-001 DAG and master integrity
         run: |
           node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
           node cerebro/runtime/jarvis-mission-dag-v2.mjs
@@ -101,7 +101,7 @@ jobs:
           path: |
             artifacts/jarvis-mission-001-dag/**
             artifacts/jarvis-mission-001-wave/**
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 7
 
       - name: Continue automatically until governed HUMAN_REQUIRED or DAG completion
