@@ -16,12 +16,15 @@ The existing `CEREBRO Continuous Useful Worker V1` remains available as the OLD 
 | `cerebro-continuous-work-factory-v0.yml` → `cerebro-cloud-useful-continuous-worker-v1.yml` | PREPROD scheduler/watchdog plus self-rearming useful-work lanes; not a bridge | Watchdog now seeds only lanes 0..15, matching the existing unverified-entitlement rearm limit. |
 | `cerebro-cloud-useful-continuous-worker-v0.yml` | One-run legacy drain/migration into V1 | Preserved; it is not itself a self-rearming loop. |
 | `cerebro-cloud-useful-worker-v0.yml` | Bounded deterministic work, capped at pass 7 | Finite; no migration needed. |
-| `cerebro-browser-job-runner-v2-live.yml` | PROD queue consumer with workflow-run bootstrap and schedule fallback | Legitimate queue bridge; explicitly out of scope and unchanged. |
-| `cerebro-browser-interactive-v3-preprod.yml`, `cerebro-browser-work-total-v1-preprod.yml` | PREPROD queued-work consumers with bounded queue waits that dispatch another cycle | Bridge-like, but further changes need fresh queue/consumer evidence; unchanged. |
+| `cerebro-mission-sustained-preprod-v1.yml` | Finite 28-lane PREPROD wave, three work units per lane | Finite; no migration needed. |
+| `cerebro-browser-job-runner-v2-live.yml`, `cerebro-browser-work-total-v1-prod.yml` | PROD queue consumers with bounded invocations and schedule/workflow rearming | Existing queue bridges; PROD behavior is explicitly out of scope and unchanged. |
+| `cerebro-browser-interactive-v3-preprod.yml`, `cerebro-browser-work-total-v1-preprod.yml` | PREPROD queue consumers; wait up to 45 minutes for work, execute at most one job, then dispatch another cycle | Self-rearming bridge candidates for finite/event-driven wakeups. Do not change without live queue and wake-contract evidence; HUMAN_REQUIRED before migration to avoid stranding work. |
 | `cerebro-skill-adoption-sla-v1.yml` | Workflow-run SLA watchdog with a 600-second hard stop | Event-driven and bounded, not a permanent worker. |
 | `cerebro-skill-chain-driver-v0.yml` | Sequential child-workflow coordinator with a configured step bound | Bounded orchestration, not a permanent worker. |
+| `cerebro-human-qa-hourly-trigger-v0.yml` | Hourly event/schedule trigger for finite QA work | Finite scheduled bridge; no self-refill. |
 
 Other `schedule`-triggered workflows are finite scheduled jobs unless they dispatch/refill work; a schedule alone is not evidence of permanent runner occupancy.
+This is a repository-static audit; it does not assert which workflows are currently enabled or running, nor measured runner minutes.
 
 ## PREPROD watchdog correction: OLD vs NEW
 
