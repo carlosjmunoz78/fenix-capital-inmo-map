@@ -1,0 +1,17 @@
+{
+  "schema": "CEREBRO_JARVIS_STATE_V1",
+  "generated_at": "2026-10-30T08:33:00+01:00",
+  "mode": "MAXIMUM_SAFE_THROUGHPUT",
+  "environment": "PREPROD",
+  "program_status": "PLANIFICADO",
+  "current_milestone": "BASELINE_GREEN",
+  "current_phase": "P00",
+  "next_block": "P00 · Gobierno, evidencia y baseline",
+  "human_required": [],
+  "locks": [],
+  "autonomous_prod": false,
+  "production_mutation_allowed": false,
+  "cost_policy": "ZERO_COST_FIRST",
+  "canonical_backlog_sha256": "8d2e0793b7ad5afe7a99390dddb650c71892ece883b281e67ac20e966168fb8f",
+  "expected_counts": {"phases": 26, "tasks": 394, "microtasks": 5692}
+}
