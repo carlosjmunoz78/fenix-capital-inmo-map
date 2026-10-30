@@ -40,6 +40,24 @@ test('first 28 lanes span all 28 mission roots immediately',()=>{
   assert.equal(missions.size,28);
 });
 
+test('M18 mission filter walks all 84 atomic units with one sustained lane',()=>{
+  const ids=new Set();
+  for(let cycle=0;cycle<84;cycle++){
+    const selected=selectMissionUnit(0,cycle,{mission_id:'M18'});
+    assert.equal(selected.unit.mission_id,'M18');
+    assert.equal(selected.mission_filter,'M18');
+    assert.equal(selected.mission_atomic_count,84);
+    ids.add(selected.unit.work_unit_id);
+  }
+  assert.equal(ids.size,84);
+});
+
+test('M18 mission filter wraps deterministically after 84 atomic units',()=>{
+  const a=selectMissionUnit(0,0,{mission_id:'M18'});
+  const b=selectMissionUnit(0,84,{mission_id:'M18'});
+  assert.equal(a.unit.work_unit_id,b.unit.work_unit_id);
+});
+
 test('safe deterministic mission work produces hydrated evidence',()=>{
   safeEnv();
   const r=executeMissionDerivedWork({lane:0,cycle:0,fallback:false});
@@ -52,6 +70,16 @@ test('safe deterministic mission work produces hydrated evidence',()=>{
   assert.equal(r.paid_ai_used,false);
   assert.equal(r.prod_write_authorized,false);
   assert.equal(r.trading_access,false);
+});
+
+test('mission-filtered M18 work remains PREPROD and hydrated',()=>{
+  safeEnv();
+  const r=executeMissionDerivedWork({lane:0,cycle:0,fallback:false,mission_id:'M18'});
+  assert.equal(r.work_unit.mission_id,'M18');
+  assert.equal(r.mission_filter,'M18');
+  assert.equal(r.mission_atomic_count,84);
+  assert.equal(r.scope_hydration_required,false);
+  assert.equal(r.prod_write_authorized,false);
 });
 
 test('capability packet is audited and routed without paid acquisition',()=>{
