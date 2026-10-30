@@ -16,6 +16,16 @@ function latency(job) {
   return Math.max(0, job.completed_at_ms - job.created_at_ms);
 }
 
+function normalizeAdditionalSources(value) {
+  if (!Array.isArray(value)) throw new TypeError('additional_sources must be an array');
+  return Object.freeze(value.map((source, index) => {
+    if (!source || typeof source.reconcile !== 'function' || typeof source.snapshot !== 'function') {
+      throw new TypeError(`additional_sources[${index}] reconcile/snapshot required`);
+    }
+    return source;
+  }));
+}
+
 class AdaptiveBacklogRuntimeV1 {
   #runtime;
   #context;
@@ -73,8 +83,6 @@ class AdaptiveBacklogRuntimeV1 {
       const blockId = meta(job)?.block_id ?? 'UNKNOWN';
       pendingByBlock.set(blockId, (pendingByBlock.get(blockId) ?? 0) + 1);
     }
-    // Only compare blocks that actually have active work. Injecting an artificial zero here
-    // starved a single ready block at ~3 tasks even when the measured model capacity was 8.
     const minBlockPending = pendingByBlock.size ? Math.min(...pendingByBlock.values()) : 0;
     const snapshot = Object.freeze({
       model_capacity: this.#modelCapacity,
@@ -111,7 +119,6 @@ class AdaptiveBacklogRuntimeV1 {
   }
 
   snapshot() {
-    // Recompute after materialization so telemetry and control never lag the durable queue by one enqueue.
     return this.#metrics();
   }
 }
@@ -121,6 +128,7 @@ export class AdaptiveHierarchicalAgentWorkPumpV3 {
   #pump;
   #scopeVersion;
   #maxGenerated;
+  #additionalSources;
   #lastSnapshot = null;
 
   constructor({
@@ -135,10 +143,12 @@ export class AdaptiveHierarchicalAgentWorkPumpV3 {
     parent_projected_cost_eur = 0.03,
     child_projected_cost_eur = 0.025,
     enabled = true,
+    additional_sources = [],
   }) {
     if (context?.environment !== PREPROD) throw new Error('adaptive work pump V3 is PREPROD-only');
     this.#scopeVersion = String(scope_version);
     this.#maxGenerated = integer(max_generated_tasks, 'max_generated_tasks', { min: 1, max: 100_000 });
+    this.#additionalSources = normalizeAdditionalSources(additional_sources);
     this.#backlogRuntime = new AdaptiveBacklogRuntimeV1({
       job_runtime,
       context,
@@ -163,9 +173,24 @@ export class AdaptiveHierarchicalAgentWorkPumpV3 {
   get enabled() { return this.#pump.enabled; }
   seed() { return this.#pump.seed(); }
 
+  #reconcileAdditionalSources() {
+    return Object.freeze(this.#additionalSources.map((source, index) => Object.freeze({
+      source_index: index,
+      ...source.reconcile(),
+    })));
+  }
+
+  #snapshotAdditionalSources() {
+    return Object.freeze(this.#additionalSources.map((source, index) => Object.freeze({
+      source_index: index,
+      ...source.snapshot(),
+    })));
+  }
+
   reconcile() {
     const base = this.#pump.reconcile();
     const pressure = this.#backlogRuntime.snapshot();
+    const additionalSources = this.#reconcileAdditionalSources();
     const snapshot = Object.freeze({
       ...base,
       scope_version: this.#scopeVersion,
@@ -176,7 +201,9 @@ export class AdaptiveHierarchicalAgentWorkPumpV3 {
       measured_model_capacity: pressure.model_capacity,
       target_active_backlog: pressure.target_active_backlog,
       queue_pressure: pressure.queue_pressure,
-      rationale: 'Generate/materialize only enough useful work to keep measured workers saturated; more queued tasks do not increase throughput.',
+      additional_work_sources: additionalSources,
+      additional_work_source_count: additionalSources.length,
+      rationale: 'Generate/materialize only enough useful work to keep measured workers saturated; additive durable sources share this same reconcile path and JOB-001 runtime.',
       prod_authorized: false,
       prod_write_authorized: false,
       trading_access: false,
@@ -193,6 +220,8 @@ export class AdaptiveHierarchicalAgentWorkPumpV3 {
       fixed_task_target: false,
       max_generated_tasks_safety_ceiling: this.#maxGenerated,
       adaptive_backlog: this.#backlogRuntime.snapshot(),
+      additional_work_sources: this.#snapshotAdditionalSources(),
+      additional_work_source_count: this.#additionalSources.length,
       prod_authorized: false,
       prod_write_authorized: false,
       trading_access: false,
@@ -211,6 +240,9 @@ export const ADAPTIVE_HIERARCHICAL_AGENT_WORK_PUMP_V3_CONTRACT = Object.freeze({
   max_generated_tasks_is_target: false,
   preserves_v2_for_rollback: true,
   extends_existing_durable_runtime: true,
+  additive_sources_supported: true,
+  additive_sources_share_canonical_reconcile: true,
+  additive_sources_require_reconcile_and_snapshot: true,
   second_scheduler: false,
   second_daemon: false,
   fairness_backpressure: true,
