@@ -10,6 +10,7 @@
     "version": "v1"
   },
   "verified_platform_limits": {
+    "standard_runner_concurrent_jobs_baseline_without_enterprise_increase": 20,
     "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 500,
     "paid_enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
     "matrix_jobs_per_workflow_run_ceiling": 256,
@@ -25,11 +26,11 @@
     "organization_verified_at": "2026-10-30",
     "global_500_fanout_enabled": false,
     "required_before_500_global_fanout": true,
-    "reason": "Repository and organization ownership are verified under Enterprise account cerebro-os, but the account is still in the 30-day Enterprise trial. GitHub documents that increased GitHub Actions job concurrency is not included in the Enterprise trial. Do not claim or physically request the paid-Enterprise 500-job concurrency until a paid Actions concurrency entitlement is separately verified."
+    "reason": "Repository and organization ownership are verified under Enterprise account cerebro-os, but the account is still in the 30-day Enterprise trial. GitHub documents that increased GitHub Actions job concurrency is not included in the Enterprise trial. During TRIAL, CEREBRO uses the documented standard baseline of 20 concurrent GitHub-hosted jobs and does not claim or physically request the paid-Enterprise 500-job concurrency until that entitlement is separately verified."
   },
   "parallelism": {
     "mode": "ADAPTIVE_FAIL_CLOSED",
-    "cerebro_trial_safe_parallelism_cap": 16,
+    "cerebro_trial_safe_parallelism_cap": 20,
     "paid_enterprise_verified_linux_hard_ceiling": 500,
     "single_matrix_hard_ceiling": 256,
     "spawn_jobs_only_for_discovered_work": true,
