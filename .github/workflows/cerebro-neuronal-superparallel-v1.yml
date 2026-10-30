@@ -26,9 +26,9 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: 'Normal deterministic NEURONAL units per wave. Max 180 under the verified shared enterprise cap.'
+        description: 'Normal deterministic NEURONAL units per wave. Fair-share cap 50 under the verified shared enterprise pool.'
         required: false
-        default: '180'
+        default: '50'
         type: string
       offset:
         description: 'Offset into the deterministic 6,449-submission campaign.'
@@ -84,7 +84,7 @@ jobs:
           retention-days: 7
 
   plan:
-    name: Plan maximum useful NEURONAL fanout
+    name: Plan useful NEURONAL fair-share fanout
     needs: validate-materialize
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -103,7 +103,7 @@ jobs:
         run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
       - id: plan
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'workflow_dispatch' && inputs.units || '180' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'workflow_dispatch' && inputs.units || '50' }}
           REQUESTED_OFFSET: ${{ github.event_name == 'workflow_dispatch' && inputs.offset || '0' }}
         shell: bash
         run: |
@@ -118,7 +118,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `offset=${plan.offset}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `next_offset=${nextOffset}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `has_more=${hasMore}\n`);
-          console.log(JSON.stringify({...plan,next_offset:nextOffset,has_more:hasMore}));
+          console.log(JSON.stringify({...plan,next_offset:nextOffset,has_more:hasMore,fair_share_cap:50}));
           NODE
 
   evidence-fanout:
@@ -128,7 +128,7 @@ jobs:
     timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 180
+      max-parallel: 50
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -199,7 +199,9 @@ jobs:
           echo 'discovery_offset=${{ needs.plan.outputs.offset }}'
           echo 'next_offset=${{ needs.plan.outputs.next_offset }}'
           echo 'has_more=${{ needs.plan.outputs.has_more }}'
-          echo 'enterprise_neuronal_max_parallel=180'
+          echo 'enterprise_neuronal_fair_share_max_parallel=50'
+          echo 'enterprise_portfolio_reserved_parallel=125'
+          echo 'enterprise_control_reserve=5'
           echo 'deepseek_max_parallel=8'
           echo 'paid_deepseek_automatic=false'
           echo 'shared_enterprise_cap=true'
@@ -221,5 +223,5 @@ jobs:
             -H 'Accept: application/vnd.github+json' \
             "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-neuronal-superparallel-v1.yml/dispatches" \
             --input - <<EOF
-          {"ref":"main","inputs":{"units":"180","offset":"${NEXT_OFFSET}","run_deepseek":false}}
+          {"ref":"main","inputs":{"units":"50","offset":"${NEXT_OFFSET}","run_deepseek":false}}
           EOF
