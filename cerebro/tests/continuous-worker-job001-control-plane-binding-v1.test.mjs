@@ -10,7 +10,7 @@ function expectLine(fragment) {
   assert.ok(workflow.includes(fragment), `missing sustained-worker contract fragment: ${fragment}`);
 }
 
-test('canonical JOB-001 control and physical entrypoint agree on 48/64/48', () => {
+test('canonical JOB-001 control and physical entrypoint agree on 48/64/48 logical capacity', () => {
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.environment, 'PREPROD');
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.target_useful_default, 48);
   assert.equal(JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT.max_global_default, 64);
@@ -32,17 +32,34 @@ test('canonical JOB-001 control and physical entrypoint agree on 48/64/48', () =
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.second_scheduler, false);
 });
 
-test('sustained GitHub worker cannot exceed canonical JOB-001 capacity', () => {
-  expectLine("description: 'Sustained useful-work lane 0..63'");
+test('sustained workflow keeps JOB-001 logical 48/64 while GitHub executor slots are separately reserved', () => {
+  expectLine("description: 'Sustained useful-work logical lane 0..63; GitHub executor admission is separately bounded'");
   expectLine("CEREBRO_INITIAL_CONCURRENCY: '48'");
   expectLine("CEREBRO_MAX_CONCURRENCY: '64'");
   expectLine("CEREBRO_MAX_PER_COMPANY: '48'");
   expectLine("CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'");
   expectLine("CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'");
-  expectLine('test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 63');
+  expectLine("CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES: '12'");
+  expectLine("CEREBRO_GITHUB_ACTIONS_OBSERVED_CAPACITY: '20'");
+  expectLine("CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES: '8'");
+  expectLine('test "$lane" -ge 0 && test "$lane" -le 63');
   assert.ok(!workflow.includes("CEREBRO_MAX_CONCURRENCY: '68'"));
   assert.ok(!workflow.includes("CEREBRO_MAX_PER_COMPANY: '68'"));
   assert.ok(!workflow.includes('-le 67'));
+});
+
+test('high sustained lanes retire green and cannot self-refill after executor admission denies them', () => {
+  const admission = workflow.indexOf('Reserve GitHub Actions executor capacity for safety gates');
+  const missionExecution = workflow.indexOf('Execute sustained mission-derived lease with V0 fallback');
+  const selfRefill = workflow.indexOf('Self-refill sustained lane before releasing capacity');
+  assert.ok(admission >= 0, 'executor admission gate missing');
+  assert.ok(missionExecution > admission, 'mission execution must occur only after executor admission');
+  assert.ok(selfRefill > missionExecution, 'self-refill must remain after mission execution');
+  expectLine("if [ \"$lane\" -ge \"$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES\" ]; then");
+  expectLine("echo 'active=false' >> \"$GITHUB_OUTPUT\"");
+  expectLine('executor_admission=RETIRED_FOR_GATE_CAPACITY');
+  expectLine("if: success() && steps.executor_admission.outputs.active == 'true'");
+  expectLine("if: steps.executor_admission.outputs.active == 'true'");
 });
 
 test('sustained worker executes the canonical control-plane contract before mission work', () => {
@@ -58,14 +75,14 @@ test('sustained worker executes the canonical control-plane contract before miss
   expectLine("max_repo_write_default:1");
 });
 
-test('transition remains PREPROD/zero-paid/no PROD/no Trading while physical binding is incomplete', () => {
+test('capacity reservation remains PREPROD/zero-paid/no PROD/no Trading and adds no runtime', () => {
   expectLine("CEREBRO_SUPERVISOR_ENV: PREPROD");
   expectLine("CEREBRO_ALLOW_PAID_FANOUT: 'NO'");
   expectLine("CEREBRO_PROD_WRITE: 'false'");
   expectLine("CEREBRO_TRADING_ACCESS: 'false'");
   assert.ok(workflow.includes('mission-derived-useful-work-v1.mjs'));
   assert.ok(workflow.includes('Self-refill sustained lane before releasing capacity'));
-  // This last assertion intentionally records current transition truth: the GitHub
-  // worker is capacity-governed but still self-refills. A later FULL binding must
-  // replace this expectation with the durable JOB-001 queue/Control Plane path.
+  assert.ok(!workflow.includes('new_queue'));
+  assert.ok(!workflow.includes('new_scheduler'));
+  assert.ok(!workflow.includes('new_daemon'));
 });
