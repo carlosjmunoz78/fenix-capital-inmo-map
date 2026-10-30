@@ -1,5 +1,5 @@
 name: CEREBRO Continuous Work Factory V1
-run-name: CEREBRO CONTINUOUS FACTORY · 68 sustained lanes · watchdog
+run-name: CEREBRO CONTINUOUS FACTORY · 16 sustained lanes · watchdog
 
 on:
   workflow_dispatch:
@@ -31,8 +31,8 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
-      TARGET_LANES: '68'
-      TARGET_FLOOR: '48'
+      TARGET_LANES: '16'
+      TARGET_FLOOR: '16'
       CEREBRO_SUPERVISOR_ENV: PREPROD
       CEREBRO_ALLOW_PAID_FANOUT: 'NO'
       CEREBRO_PROD_WRITE: 'false'
@@ -50,8 +50,8 @@ jobs:
           test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
           test "$CEREBRO_PROD_WRITE" = "false"
           test "$CEREBRO_TRADING_ACCESS" = "false"
-          test "$TARGET_LANES" = "68"
-          test "$TARGET_FLOOR" = "48"
+          test "$TARGET_LANES" = "16"
+          test "$TARGET_FLOOR" = "16"
 
       - name: Validate continuous factory contract
         run: node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
@@ -81,7 +81,7 @@ jobs:
           dispatched=0
           seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
 
-          for lane in $(seq 0 67); do
+          for lane in $(seq 0 15); do
             if ! printf '%s\n' "$present" | grep -qx "$lane"; then
               cycle=$(( (seed_cycle + lane) % 1000000 ))
               gh api --method POST "/repos/${GH_REPO}/actions/workflows/${v1}/dispatches" \
@@ -94,8 +94,8 @@ jobs:
 
           echo "live_or_queued_lanes_before=${present_count}" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatched_missing_v1_lanes=${dispatched}" >> "$GITHUB_STEP_SUMMARY"
-          echo "target_lanes=68" >> "$GITHUB_STEP_SUMMARY"
-          echo "target_floor=48" >> "$GITHUB_STEP_SUMMARY"
+          echo "target_lanes=16" >> "$GITHUB_STEP_SUMMARY"
+          echo "target_floor=16" >> "$GITHUB_STEP_SUMMARY"
           echo "sustained_lease_seconds=420" >> "$GITHUB_STEP_SUMMARY"
           echo "v0_migration_aware=true" >> "$GITHUB_STEP_SUMMARY"
           echo "self_refill=true" >> "$GITHUB_STEP_SUMMARY"
