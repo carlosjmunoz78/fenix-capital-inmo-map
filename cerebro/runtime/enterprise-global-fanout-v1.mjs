@@ -4,7 +4,7 @@ const PREPROD = 'PREPROD';
 const PAID_ENTERPRISE_GLOBAL_CEILING = 500;
 const MATRIX_CEILING = 256;
 const MATRIX_TARGET = 250;
-const TRIAL_SAFE_CAP = 16;
+const TRIAL_SAFE_CAP = 20;
 const LANE_COUNT = 68;
 
 function integer(value, label, min, max) {
@@ -24,6 +24,7 @@ function assertBasePolicy(policy) {
   if (entitlement.enterprise_organization_verified_for_canonical_repo !== true) throw new Error('ENTERPRISE_ORGANIZATION_REQUIRED');
   if (entitlement.canonical_repository !== 'fenix-cerebro/fenix-capital-inmo-map') throw new Error('CANONICAL_REPOSITORY_MISMATCH');
   if (entitlement.enterprise_slug !== 'cerebro-os') throw new Error('ENTERPRISE_SLUG_MISMATCH');
+  if (limits.standard_runner_concurrent_jobs_baseline_without_enterprise_increase !== TRIAL_SAFE_CAP) throw new Error('STANDARD_BASELINE_MISMATCH');
   if (limits.paid_enterprise_standard_runner_concurrent_jobs_ceiling !== PAID_ENTERPRISE_GLOBAL_CEILING) throw new Error('PAID_ENTERPRISE_GLOBAL_CEILING_MISMATCH');
   if (limits.matrix_jobs_per_workflow_run_ceiling !== MATRIX_CEILING) throw new Error('MATRIX_CEILING_MISMATCH');
   if (limits.enterprise_trial_includes_increased_actions_concurrency !== false) throw new Error('TRIAL_CONCURRENCY_POLICY_MISMATCH');
