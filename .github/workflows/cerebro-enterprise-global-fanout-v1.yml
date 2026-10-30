@@ -15,17 +15,29 @@ on:
         type: string
   pull_request:
     paths:
+      - '28_MACROFRENTES.md'
+      - 'cerebro/registry/jarvis-project-registry.v1.json'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
+      - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
       - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
+      - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
       - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
       - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
   push:
     branches: [main]
     paths:
+      - '28_MACROFRENTES.md'
+      - 'cerebro/registry/jarvis-project-registry.v1.json'
+      - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
+      - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
+      - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
+      - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
       - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
+      - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
 
 permissions:
   contents: read
@@ -43,7 +55,6 @@ env:
 
 jobs:
   plan:
-    if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[CEREBRO-LIVE-FANOUT]') }}
     name: Governed global fanout plan
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -66,7 +77,9 @@ jobs:
         with:
           node-version: 24
       - name: Contract tests
-        run: node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
+        run: |
+          node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
+          node --test cerebro/tests/enterprise-global-autostart-v1.test.mjs
       - id: plan
         name: Discover unique useful Mission DAG work under live entitlement
         env:
