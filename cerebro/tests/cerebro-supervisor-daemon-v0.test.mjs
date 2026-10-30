@@ -23,6 +23,9 @@ function runDaemon(dir, extraEnv = {}, args = ['--enqueue-health-probe', '--cycl
       CEREBRO_SUPERVISOR_ENV: 'PREPROD',
       CEREBRO_IDLE_DELAY_MS: '0',
       CEREBRO_HEARTBEAT_MS: '25',
+      // Baseline daemon tests preserve the pre-NEURONAL concurrency contract.
+      // NEURONAL autofill has its own adapter/source tests and is enabled explicitly there/runtime.
+      CEREBRO_ENABLE_NEURONAL_AUTOFILL: 'NO',
       // Tests must never inherit a live provider secret and accidentally spend money.
       CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'NO',
       DEEPSEEK_API_KEY: '',
