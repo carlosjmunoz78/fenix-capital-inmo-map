@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "version": "m18-deep-gap-verifier-v1",
+  "mission_id": "M18-DIGITAL-INDUSTRY-2026-10-30",
+  "environment": "PREPROD",
+  "candidate_count": 9,
+  "verified_states": {
+    "EXISTING_PHYSICAL_STACK": 6,
+    "NO_EVIDENCE": 1,
+    "EXISTING_GOVERNED_SURFACE": 2
+  },
+  "disposition_candidates": {
+    "REUSE_OR_EXTEND": 6,
+    "BUILD_PENDING_BUSINESS_VALUE": 1,
+    "WRAP_OR_EXTEND": 2
+  },
+  "build_pending_business_value": [
+    "localization_factory"
+  ],
+  "final_build_decisions": 0,
+  "safety": {
+    "prod_write": false,
+    "paid_ai": false,
+    "trading": false,
+    "additional_cost_eur": 0
+  },
+  "next_gate": "M18_AUTOPILOT_CONTRACT_BEHAVIOR_OWNERSHIP_AND_VALUE_GATE",
+  "source_workflow_run_id": 41099969529,
+  "source_artifact_id": 12997929222,
+  "source_artifact_sha256": "ffa6d0aa16ac7af32c9389106923c2d578ff171febf7680ab8edcf929778f380",
+  "controls": {
+    "reuse_first": true,
+    "no_new_engine_identity_without_gap_proof": true,
+    "prod_write": false,
+    "external_publish": false,
+    "destructive_migration": false,
+    "paid_ai": false,
+    "trading": false,
+    "additional_cost_eur": 0
+  }
+}
