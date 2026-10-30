@@ -2,20 +2,25 @@ import {createJarvisCore} from '../core-v1/core-v1.mjs';
 import {CerebroJarvisGatewayV1} from '../../console/jarvis-project-hub-binding-v1.mjs';
 import {loadIdentityCredentialFoundation,identityCredentialAuditSummary} from '../../governance/identity-credential-broker.mjs';
 import {routeWork} from '../../router/execution-model-router.mjs';
+import {loadEngineRegistryCapabilities,engineRegistryCapabilitySummary} from './engine-registry-adapter-v1.mjs';
 
 export class JarvisCerebroBindingV1{
- #core;#gateway;#iam;
+ #core;#gateway;#iam;#registrySummary;
  constructor({environment='PREPROD',version='1.0.0-preprod',project_state_dir}={}){
   if(environment!=='PREPROD')throw new Error('JARVIS_BINDING_PREPROD_ONLY');
   this.#core=createJarvisCore();
   this.#gateway=new CerebroJarvisGatewayV1({environment,version,project_state_dir});
   this.#iam=loadIdentityCredentialFoundation();
+  const explicit=['IAM-001','ROUTE-001','CONSOLE-001'];
+  const registered=loadEngineRegistryCapabilities({exclude:explicit});
+  for(const c of registered)this.#core.fabric.register(c);
   for(const c of [
-   {capability_id:'IAM-001',version:'existing',environments:['PREPROD'],company_ids:['fenix'],source:'cerebro/governance/identity-credential-broker.mjs'},
-   {capability_id:'ROUTE-001',version:'existing',environments:['PREPROD'],company_ids:['fenix'],source:'cerebro/router/execution-model-router.mjs'},
-   {capability_id:'CONSOLE-001',version:'existing',environments:['PREPROD'],source:'cerebro/console/gateway.mjs'},
-   {capability_id:'JARVIS-PROJECT-HUB',version:'existing',environments:['PREPROD'],source:'cerebro/console/jarvis-project-hub-binding-v1.mjs'}
+   {capability_id:'IAM-001',version:'existing',environments:['PREPROD'],company_ids:['fenix'],source:'cerebro/governance/identity-credential-broker.mjs',evidence_state:'EXISTING_PARTIAL',operational_claim:false,reuse_policy:'REUSE_EXISTING_FAIL_CLOSED'},
+   {capability_id:'ROUTE-001',version:'existing',environments:['PREPROD'],company_ids:['fenix'],source:'cerebro/router/execution-model-router.mjs',evidence_state:'EXISTING_PARTIAL',operational_claim:false,reuse_policy:'REUSE_EXISTING_ZERO_COST_FIRST'},
+   {capability_id:'CONSOLE-001',version:'existing',environments:['PREPROD'],source:'cerebro/console/gateway.mjs',evidence_state:'EXISTING_PARTIAL',operational_claim:false,reuse_policy:'REUSE_EXISTING_GATEWAY'},
+   {capability_id:'JARVIS-PROJECT-HUB',version:'existing',environments:['PREPROD'],source:'cerebro/console/jarvis-project-hub-binding-v1.mjs',evidence_state:'EXISTING_PARTIAL',operational_claim:false,reuse_policy:'REUSE_EXISTING_PROJECT_HUB'}
   ])this.#core.fabric.register(c);
+  this.#registrySummary=engineRegistryCapabilitySummary({exclude:[]});
  }
  get core(){return this.#core}
  createSession(input){return this.#gateway.createSession(input)}
@@ -24,6 +29,7 @@ export class JarvisCerebroBindingV1{
  queryProjects(input){return this.#gateway.queryProjects(input)}
  queryEngines(){return this.#gateway.queryEngines()}
  iamSummary(){return identityCredentialAuditSummary({foundation:this.#iam})}
+ capabilitySummary(){return Object.freeze({...this.#registrySummary,fabric_capability_count:this.#core.fabric.list().length,rule:'REGISTERED_DOES_NOT_MEAN_OPERATIONAL'});}
  compileContext(input){return this.#core.compileContext(input)}
  authorize(input){return this.#core.authorizeAction(input)}
  route({context,...input}){
@@ -32,5 +38,5 @@ export class JarvisCerebroBindingV1{
   if(context.company_id!=='fenix')return{status:'HOLD',reason:'MULTICOMPANY_ROUTE_NOT_YET_BOUND',human_required:null,company_id:context.company_id,implementation_state:'PARCIAL'};
   return routeWork({company_id:'fenix',task_type:input.task_type,environment:'PREPROD',confidence:input.confidence??1,risk:input.risk||'LOW',available_resources:input.available_resources||[],contains_customer_data:input.contains_customer_data===true,contains_secrets:false,prod_write_requested:false,trading_requested:false,paid_route_requested:input.paid_route_requested===true,estimated_paid_cost_eur:input.estimated_paid_cost_eur||0});
  }
- contract(){return Object.freeze({schema_version:'1.0',identity:'JARVIS',environment:'PREPROD',gateway:this.#gateway.contract(),core_version:this.#core.version,capabilities:this.#core.fabric.list(),iam_fail_closed:true,direct_model_access:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND'});}
+ contract(){return Object.freeze({schema_version:'1.1',identity:'JARVIS',environment:'PREPROD',gateway:this.#gateway.contract(),core_version:this.#core.version,capability_registry:this.capabilitySummary(),iam_fail_closed:true,direct_model_access:false,prod_authorized:false,prod_write_authorized:false,trading_access:false,multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND'});}
 }
