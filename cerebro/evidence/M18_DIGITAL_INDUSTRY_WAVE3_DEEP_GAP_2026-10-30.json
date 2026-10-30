@@ -1,19 +1,22 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "version": "m18-deep-gap-verifier-v1",
   "mission_id": "M18-DIGITAL-INDUSTRY-2026-10-30",
   "environment": "PREPROD",
   "candidate_count": 9,
   "verified_states": {
     "EXISTING_PHYSICAL_STACK": 6,
-    "NO_EVIDENCE": 1,
+    "EXISTING_FRAGMENT": 1,
     "EXISTING_GOVERNED_SURFACE": 2
   },
   "disposition_candidates": {
     "REUSE_OR_EXTEND": 6,
-    "BUILD_PENDING_BUSINESS_VALUE": 1,
+    "EXTEND": 1,
     "WRAP_OR_EXTEND": 2
   },
+  "current_observation_semantics": "POST_AUTOPILOT_REPOSITORY_OBSERVATION",
+  "baseline_reports_semantics": "FROZEN_PRE_AUTOPILOT_GAP_BASELINE_FOR_BUILD_DECISION",
+  "baseline_reports_frozen_before_autopilot": true,
   "reports": [
     {"capability_family":"accessibility_factory","verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
     {"capability_family":"funnel_and_landing_factory","verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
@@ -36,9 +39,19 @@
     "support_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
     "wordpress_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"}
   },
-  "build_pending_business_value": [
-    "localization_factory"
-  ],
+  "current_deep_results": {
+    "accessibility_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "funnel_and_landing_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "legal_compliance_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "localization_factory": {"verified_state":"EXISTING_FRAGMENT","disposition_candidate":"EXTEND","reason":"M18 autopilot/controller now creates governed localization-related evidence; baseline remains frozen to prevent self-evaluation contamination."},
+    "marketplace_factory": {"verified_state":"EXISTING_GOVERNED_SURFACE","disposition_candidate":"WRAP_OR_EXTEND"},
+    "pwa_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "saas_factory": {"verified_state":"EXISTING_GOVERNED_SURFACE","disposition_candidate":"WRAP_OR_EXTEND"},
+    "support_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "wordpress_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"}
+  },
+  "build_pending_business_value": [],
+  "baseline_build_pending_business_value": ["localization_factory"],
   "final_build_decisions": 0,
   "safety": {
     "prod_write": false,
@@ -50,9 +63,13 @@
   "source_workflow_run_id": 41099969529,
   "source_artifact_id": 12997929222,
   "source_artifact_sha256": "ffa6d0aa16ac7af32c9389106923c2d578ff171febf7680ab8edcf929778f380",
+  "post_autopilot_observation_run_id": 41113263121,
+  "post_autopilot_observation_artifact_id": 13004606714,
+  "post_autopilot_observation_artifact_sha256": "60924de061745623d570da5e6be91253b2eb0eb53a2604c322d65f9c1dfde802",
   "controls": {
     "reuse_first": true,
     "no_new_engine_identity_without_gap_proof": true,
+    "benchmark_contamination_guard": true,
     "prod_write": false,
     "external_publish": false,
     "destructive_migration": false,
