@@ -4,7 +4,7 @@ Date: 2026-10-30
 Status: PREPROD_CANDIDATE
 
 ## Objective
-Prepare a governed global GitHub Actions fanout topology capable of 500 unique useful PREPROD work units once paid Enterprise Actions concurrency is actually entitled, while remaining fail-closed during the current Enterprise trial.
+Prepare a governed global GitHub Actions fanout topology capable of 500 unique useful PREPROD work units once paid Enterprise Actions concurrency is actually entitled, while using the full documented standard-runner baseline during the current Enterprise trial.
 
 ## Existing components reused
 - canonical Mission DAG from `mission-recursive-decomposer-v1.mjs`;
@@ -28,15 +28,15 @@ Prepared topology:
 This topology is statically and contract-tested even while physical 500 execution remains disabled.
 
 ## Current TRIAL gate
-Live Enterprise state is TRIAL. GitHub documentation states that increased Actions job concurrency is not included in the Enterprise trial.
+Live Enterprise state is TRIAL. GitHub documentation states that increased Actions job concurrency is not included in the Enterprise trial. GitHub's standard hosted-runner baseline without the Enterprise increase is 20 concurrent jobs.
 
 Current policy therefore requires:
 - `enterprise_organization_verified_for_canonical_repo=true`;
 - `enterprise_actions_concurrency_entitlement_verified=false`;
 - `global_500_fanout_enabled=false`;
-- `cerebro_trial_safe_parallelism_cap=16`.
+- `cerebro_trial_safe_parallelism_cap=20`.
 
-A physical request above 16 fails before matrix creation. The PR canary uses 16 real work units, split 8 + 8. The default manual dispatch is also 16 until paid entitlement is explicitly verified.
+A physical request above 20 fails before matrix creation. The PR canary uses 20 real work units, split 10 + 10. The default manual dispatch is also 20 until paid entitlement is explicitly verified.
 
 ## Paid activation gate
 Physical 500 execution becomes eligible only after separate evidence that the account has paid Enterprise Actions concurrency, followed by a policy change setting:
@@ -49,7 +49,10 @@ Activating a paid plan is `HUMAN_REQUIRED · MONEY_LIMIT`; CEREBRO must not purc
 Every selected unit is PREPROD, finite and non-self-refilling, with no PROD write, external write, Trading or paid AI authority. Workflow permissions remain read-only.
 
 ## Relationship to JOB-001
-500 is a global paid-platform readiness ceiling, not a JOB-001 limit. JOB-001 retains `max_company_default=48` and `max_global_default=64`; during TRIAL it is additionally capped by CEREBRO at 16.
+500 is a global paid-platform readiness ceiling, not a JOB-001 limit. JOB-001 retains `max_company_default=48` and `max_global_default=64`; during TRIAL it is additionally capped by CEREBRO at 20.
+
+## Cost
+The canonical repository is public. Standard GitHub-hosted runners are free for public repositories; larger runners remain separately billable and are not authorized by this capability.
 
 ## Rollback
 Revert/delete:
