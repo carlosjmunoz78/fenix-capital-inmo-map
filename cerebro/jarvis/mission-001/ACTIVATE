@@ -7,3 +7,6 @@ deepseek_role=TEMPORARY_COGNITIVE_ACCELERATOR
 deepseek_dependency_target=0
 prod_write=false
 trading_access=false
+activation_revision=2
+master_transport=multipart_gzip_base64
+master_sha256=278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e
