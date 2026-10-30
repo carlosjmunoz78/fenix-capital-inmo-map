@@ -54,7 +54,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}
+  group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && inputs.offset || github.event_name == 'pull_request' && github.event.pull_request.number || 'seed' }}
   cancel-in-progress: false
 
 env:
