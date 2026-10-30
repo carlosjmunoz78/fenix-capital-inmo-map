@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: 'Sustained useful-work lane 0..63'
+        description: 'Sustained useful-work lane 0..67'
         required: true
         type: string
       cycle:
-        description: 'Starting self-feeding cycle 0..999999'
+        description: 'Starting unique Mission DAG cycle 0..999999'
         required: false
         default: '0'
         type: string
@@ -23,8 +23,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CEREBRO_REARM_LANE_LIMIT: '0'
-  CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'false'
+  CEREBRO_REARM_LANE_LIMIT: '68'
+  CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'true'
+  CEREBRO_MISSION_LANE_COUNT: '68'
 
 jobs:
   sustained-useful-work:
@@ -35,9 +36,9 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       GH_REPO: ${{ github.repository }}
       CEREBRO_SUPERVISOR_ENV: PREPROD
-      CEREBRO_INITIAL_CONCURRENCY: '48'
-      CEREBRO_MAX_CONCURRENCY: '64'
-      CEREBRO_MAX_PER_COMPANY: '48'
+      CEREBRO_INITIAL_CONCURRENCY: '180'
+      CEREBRO_MAX_CONCURRENCY: '180'
+      CEREBRO_MAX_PER_COMPANY: '180'
       CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'
       CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
       CEREBRO_ALLOW_PAID_FANOUT: 'NO'
@@ -59,22 +60,22 @@ jobs:
           test "$CEREBRO_ALLOW_PAID_FANOUT" = "NO"
           test "$CEREBRO_PROD_WRITE" = "false"
           test "$CEREBRO_TRADING_ACCESS" = "false"
-          test "$CEREBRO_INITIAL_CONCURRENCY" = "48"
-          test "$CEREBRO_MAX_CONCURRENCY" = "64"
-          test "$CEREBRO_MAX_PER_COMPANY" = "48"
+          test "$CEREBRO_INITIAL_CONCURRENCY" = "180"
+          test "$CEREBRO_MAX_CONCURRENCY" = "180"
+          test "$CEREBRO_MAX_PER_COMPANY" = "180"
           test "$CEREBRO_MAX_DEEPSEEK_CONCURRENCY" = "8"
           test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = "1"
           test "$CEREBRO_WORKER_LEASE_SECONDS" -ge 300
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
-          test "$CEREBRO_REARM_LANE_LIMIT" -ge 0
-          test "$CEREBRO_REARM_LANE_LIMIT" -le 64
-          test "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" = "false"
+          test "$CEREBRO_REARM_LANE_LIMIT" -eq 68
+          test "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" = "true"
+          test "$CEREBRO_MISSION_LANE_COUNT" -eq 68
           for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
             case "$value" in ''|*[!0-9]*) exit 2 ;; esac
           done
-          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 63
+          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 67
           test "${{ inputs.cycle }}" -ge 0 && test "${{ inputs.cycle }}" -le 999999
 
       - name: Enforce canonical JOB-001 Control Plane capacity contract
@@ -87,9 +88,9 @@ jobs:
           const x=JSON.parse(fs.readFileSync('control-plane-contract.json','utf8'));
           const expected={
             environment:'PREPROD',
-            target_useful_default:48,
-            max_global_default:64,
-            max_company_default:48,
+            target_useful_default:180,
+            max_global_default:180,
+            max_company_default:180,
             max_deepseek_default:8,
             max_repo_write_default:1,
             second_queue:false,
@@ -110,7 +111,7 @@ jobs:
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
           node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
 
-      - name: Execute sustained mission-derived lease with V0 fallback
+      - name: Execute sustained unique mission-derived lease with V0 fallback
         id: lease
         shell: bash
         run: |
@@ -118,31 +119,46 @@ jobs:
           start="$(date +%s)"
           deadline=$((start + CEREBRO_WORKER_LEASE_SECONDS))
           current=${{ inputs.cycle }}
+          lane=${{ inputs.lane }}
           units=0
+          atomic_count="$(node --input-type=module -e "import {selectMissionUnit} from './cerebro/runtime/mission-derived-useful-work-v1.mjs'; console.log(selectMissionUnit(0,0).atomic_count)")"
+          test "$atomic_count" -ge 1
 
           while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$CEREBRO_MAX_UNITS_PER_LEASE" ]; do
+            linear=$((current * CEREBRO_MISSION_LANE_COUNT + lane))
+            if [ "$linear" -ge "$atomic_count" ]; then
+              break
+            fi
             node cerebro/runtime/mission-derived-useful-work-v1.mjs \
-              --lane=${{ inputs.lane }} \
+              --lane="$lane" \
               --cycle="$current" \
               --fallback=true
             units=$((units + 1))
-            if [ "$current" -ge 999999 ]; then current=0; else current=$((current + 1)); fi
+            current=$((current + 1))
           done
 
+          next_linear=$((current * CEREBRO_MISSION_LANE_COUNT + lane))
+          exhausted=false
+          if [ "$next_linear" -ge "$atomic_count" ]; then exhausted=true; fi
           elapsed=$(( $(date +%s) - start ))
           echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
           echo "units_completed=$units" >> "$GITHUB_OUTPUT"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
-          echo "lane=${{ inputs.lane }}" >> "$GITHUB_OUTPUT"
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+          echo "atomic_count=$atomic_count" >> "$GITHUB_OUTPUT"
+          echo "exhausted=$exhausted" >> "$GITHUB_OUTPUT"
           echo "sustained_worker=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "fallback_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
-          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
+          echo "job001_capacity_contract=180/180/180" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
+          echo "atomic_count=$atomic_count" >> "$GITHUB_STEP_SUMMARY"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
+          echo "exhausted=$exhausted" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish inspectable lease evidence
+        if: steps.lease.outputs.units_completed != '0'
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-sustained-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
@@ -152,20 +168,29 @@ jobs:
           if-no-files-found: error
           retention-days: 1
 
-      - name: Self-refill sustained lane before releasing capacity
+      - name: Self-refill sustained lane only while unique backlog remains
         if: success()
         shell: bash
         run: |
           set -euo pipefail
           lane='${{ inputs.lane }}'
           next='${{ steps.lease.outputs.next_cycle }}'
+          exhausted='${{ steps.lease.outputs.exhausted }}'
           test -n "$next"
           ref="${GITHUB_REF_NAME}"
           test -n "$ref"
 
-          if [ "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" != "true" ] && [ "$lane" -ge "$CEREBRO_REARM_LANE_LIMIT" ]; then
+          if [ "$exhausted" = "true" ]; then
             echo "self_refilled_lane=false" >> "$GITHUB_STEP_SUMMARY"
-            echo "drain_reason=ENTERPRISE_ENTITLEMENT_UNVERIFIED" >> "$GITHUB_STEP_SUMMARY"
+            echo "drain_reason=UNIQUE_MISSION_BACKLOG_EXHAUSTED" >> "$GITHUB_STEP_SUMMARY"
+            echo "lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+            echo "continuous=false" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          if [ "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" != "true" ] || [ "$lane" -ge "$CEREBRO_REARM_LANE_LIMIT" ]; then
+            echo "self_refilled_lane=false" >> "$GITHUB_STEP_SUMMARY"
+            echo "drain_reason=ENTERPRISE_CAPACITY_GUARD" >> "$GITHUB_STEP_SUMMARY"
             echo "rearm_lane_limit=$CEREBRO_REARM_LANE_LIMIT" >> "$GITHUB_STEP_SUMMARY"
             echo "lane=$lane" >> "$GITHUB_STEP_SUMMARY"
             echo "continuous=false" >> "$GITHUB_STEP_SUMMARY"
@@ -181,7 +206,7 @@ jobs:
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
-          echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
+          echo "job001_capacity_contract=180/180/180" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
