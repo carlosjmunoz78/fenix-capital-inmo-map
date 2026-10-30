@@ -1,5 +1,6 @@
 const DEFAULT_BASE_URL = 'https://api.deepseek.com';
 const ALLOWED_MODELS = new Set(['deepseek-flash', 'deepseek-v4-pro']);
+const ALLOWED_REASONING_EFFORTS = new Set(['none', 'low', 'high', 'max']);
 
 function cleanBaseUrl(value = DEFAULT_BASE_URL) {
   return String(value).replace(/\/+$/, '');
@@ -17,6 +18,8 @@ export function buildDeepSeekResponseRequest({
   input,
   instructions,
   maxOutputTokens = 256,
+  reasoningEffort = null,
+  jsonMode = false,
 }) {
   validateDeepSeekModel(model);
   if (typeof input !== 'string' && !Array.isArray(input)) {
@@ -25,12 +28,17 @@ export function buildDeepSeekResponseRequest({
   if (!Number.isInteger(maxOutputTokens) || maxOutputTokens < 1 || maxOutputTokens > 393216) {
     throw new Error('maxOutputTokens must be an integer between 1 and 393216');
   }
+  if (reasoningEffort !== null && !ALLOWED_REASONING_EFFORTS.has(reasoningEffort)) {
+    throw new Error(`DeepSeek reasoning effort is not allowlisted: ${reasoningEffort}`);
+  }
   const body = {
     model,
     input,
     max_output_tokens: maxOutputTokens,
   };
   if (instructions) body.instructions = String(instructions);
+  if (reasoningEffort !== null) body.reasoning = { effort: reasoningEffort };
+  if (jsonMode === true) body.text = { format: { type: 'json_object' } };
   return body;
 }
 
@@ -109,6 +117,7 @@ export class DeepSeekProviderV0 {
       instructions: 'This is a CEREBRO provider connectivity canary. Follow the user instruction exactly and do nothing else.',
       input: 'Return exactly: DEEPSEEK_CANARY_OK',
       maxOutputTokens: 128,
+      reasoningEffort: 'none',
     }, { requestId });
   }
 }
@@ -117,6 +126,7 @@ export const DEEPSEEK_PROVIDER_V0 = Object.freeze({
   provider: 'deepseek',
   base_url: DEFAULT_BASE_URL,
   allowed_models: [...ALLOWED_MODELS],
+  allowed_reasoning_efforts: [...ALLOWED_REASONING_EFFORTS],
   secret_env: 'DEEPSEEK_API_KEY',
   live_by_default: false,
   auto_recharge: false,
