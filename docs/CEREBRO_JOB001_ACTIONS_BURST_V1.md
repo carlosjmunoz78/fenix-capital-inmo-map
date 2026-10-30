@@ -7,7 +7,7 @@ Status: PREPROD_CANDIDATE
 Replace wasteful permanent GitHub Actions occupancy with bounded bursts while preserving the canonical JOB-001 runtime, work pump, safety contract and rollback path.
 
 ## Existing preserved path
-The existing `CEREBRO Continuous Useful Worker V1` remains unchanged in this V1. It is the OLD path and can continue to self-refill until NEW has passed physical PREPROD and OLD-vs-NEW acceptance.
+The existing `CEREBRO Continuous Useful Worker V1` remains available as the OLD path. A separate PREPROD capacity-relief canary has now been promoted to `main` at `bd8eb55d0c27f442d32ca7a5fc83bdc06a12e1a9`: while GitHub Enterprise entitlement remains unverified, only OLD lanes 0..15 may self-refill; lanes 16..63 drain after their next governed cycle. PROD and Browser PROD are untouched.
 
 ## NEW path
 `CEREBRO JOB-001 Finite Burst V1`:
@@ -20,6 +20,9 @@ The existing `CEREBRO Continuous Useful Worker V1` remains unchanged in this V1.
 - denies PROD writes, Trading and paid fan-out;
 - uploads one-day bounded evidence per lane.
 
+## Physical PREPROD evidence
+Run `41036983202` completed the governed plan, 8 finite burst lanes x 2 useful-work units, evidence upload and final acceptance successfully. NEW therefore has physical evidence that mission-derived work can execute and release runners without self-refill.
+
 ## Capacity
 Current account/repository Enterprise entitlement remains unverified. Therefore V1 caps standard-runner fan-out at 16 lanes even if a larger request is supplied.
 
@@ -28,17 +31,18 @@ When `enterprise_organization_verified_for_canonical_repo` is evidence-backed an
 ## OLD vs NEW
 OLD:
 - continuous worker lease;
-- self-refill;
-- intended sustained 48/64 occupancy.
+- self-refill now bounded to lanes 0..15 by the promoted PREPROD canary while entitlement is unverified;
+- canonical 48/64 remains the contract maximum and rollback target.
 
 NEW V1:
 - same mission-derived useful-work implementation;
 - same PREPROD and zero-paid safety boundary;
 - finite lanes;
 - no self-refill;
-- releases GitHub runners after completion.
+- releases GitHub runners after completion;
+- physical PREPROD acceptance GREEN.
 
-The old path is not disabled by this PR. Retirement requires physical PREPROD evidence and a separate promotion change with rollback.
+Full retirement of the OLD path is not part of this PR. Further reduction requires fresh OLD-vs-NEW evidence after the drain and remains reversible.
 
 ## Rollback
 V1 is additive. Rollback is deletion/revert of:
