@@ -331,8 +331,8 @@ if (NEURONAL_AUTOFILL_ENABLED) {
     job_runtime: queue,
     queue_context: NEURONAL_CONTEXT,
     model_context: MODEL_CONTEXT,
-    target_active: positiveInt('CEREBRO_NEURONAL_TARGET_ACTIVE', Math.min(40, maxGlobal), Math.min(64, maxGlobal)),
-    max_enqueue_per_reconcile: positiveInt('CEREBRO_NEURONAL_MAX_ENQUEUE_PER_RECONCILE', Math.min(48, maxGlobal), Math.min(64, maxGlobal)),
+    target_active: positiveInt('CEREBRO_NEURONAL_TARGET_ACTIVE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)), // NEURONAL_180_CAP_V1_WIRED
+    max_enqueue_per_reconcile: positiveInt('CEREBRO_NEURONAL_MAX_ENQUEUE_PER_RECONCILE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)),
     model_active_cap: maxDeepSeek,
     model_enabled: WORK_PUMP_ENABLED,
   });
