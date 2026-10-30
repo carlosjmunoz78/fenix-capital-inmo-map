@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: 'Useful PREPROD Mission DAG units. Paid 500 topology is entitlement-gated.'
+        description: 'Useful PREPROD Mission DAG units. Bounded by the live Enterprise runner limit.'
         required: false
-        default: '20'
+        default: '180'
         type: string
   pull_request:
     paths:
@@ -15,6 +15,12 @@ on:
       - 'cerebro/config/github-enterprise-execution.v1.json'
       - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
       - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
+      - 'cerebro/config/github-enterprise-execution.v1.json'
+      - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
 
 permissions:
   contents: read
@@ -31,6 +37,7 @@ env:
 
 jobs:
   plan:
+    if: ${{ github.event_name != 'push' || contains(github.event.head_commit.message, '[CEREBRO-LIVE-FANOUT]') }}
     name: Governed global fanout plan
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -42,6 +49,7 @@ jobs:
       planned_units: ${{ steps.plan.outputs.planned_units }}
       effective_cap: ${{ steps.plan.outputs.effective_cap }}
       paid_entitlement: ${{ steps.plan.outputs.paid_entitlement }}
+      global_500_enabled: ${{ steps.plan.outputs.global_500_enabled }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -50,9 +58,9 @@ jobs:
       - name: Contract tests
         run: node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
       - id: plan
-        name: Discover unique useful Mission DAG work under effective entitlement
+        name: Discover unique useful Mission DAG work under live entitlement
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || inputs.units || '20' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '180' || inputs.units || '180' }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -69,6 +77,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned_units=${plan.planned_units}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `effective_cap=${plan.effective_physical_cap}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `paid_entitlement=${plan.enterprise_actions_concurrency_entitlement_verified}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `global_500_enabled=${plan.global_500_fanout_enabled}\n`);
           console.log(JSON.stringify({
             state_type: plan.state_type,
             enterprise_account_state: plan.enterprise_account_state,
@@ -77,7 +86,9 @@ jobs:
             planned_units: plan.planned_units,
             unique_work_units: plan.unique_work_units,
             effective_physical_cap: plan.effective_physical_cap,
-            paid_enterprise_platform_ceiling: plan.paid_enterprise_platform_ceiling,
+            live_enterprise_runner_limit: plan.live_enterprise_runner_limit,
+            documented_enterprise_platform_ceiling: plan.documented_enterprise_platform_ceiling,
+            global_500_fanout_enabled: plan.global_500_fanout_enabled,
             matrix_a_count: plan.matrix_a_count,
             matrix_b_count: plan.matrix_b_count,
             second_queue: plan.second_queue,
@@ -176,9 +187,9 @@ jobs:
           echo 'matrix_b=${{ needs.plan.outputs.matrix_b_count }}'
           echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
           echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
-          echo 'paid_enterprise_platform_ceiling=500'
+          echo 'global_500_fanout_enabled=${{ needs.plan.outputs.global_500_enabled }}'
+          echo 'documented_enterprise_platform_ceiling=500'
           echo 'single_matrix_ceiling=256'
-          echo 'paid_topology_matrix_target_each=250'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'

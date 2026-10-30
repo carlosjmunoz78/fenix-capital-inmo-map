@@ -4,60 +4,68 @@ Date: 2026-10-30
 Status: PREPROD_CANDIDATE
 
 ## Objective
-Exploit GitHub safely for CEREBRO engineering, tests, evaluation, generation and finite batch work without turning GitHub Actions into a permanent application runtime and without removing existing services before equivalence is proven.
+Exploit GitHub Enterprise safely for CEREBRO engineering, tests, evaluation, generation and finite batch work without turning GitHub Actions into a permanent application runtime and without removing existing services before equivalence is proven.
 
 ## Verified live state
 - Canonical repository: `fenix-cerebro/fenix-capital-inmo-map`.
 - Repository owner: organization `fenix-cerebro`.
-- Organization `fenix-cerebro` belongs to Enterprise account `cerebro-os`.
-- ChatGPT GitHub connector is installed for `fenix-cerebro` and can write to the canonical repository.
-- OIDC compatibility OLD + NEW was prepared before transfer.
-- The Enterprise account is still in its 30-day TRIAL state.
-- GitHub documentation states that increased GitHub Actions job concurrency is not included in the Enterprise trial.
-- GitHub documents a 20-job standard hosted-runner baseline without the Enterprise increase.
+- Organization belongs to Enterprise account `cerebro-os`.
+- GitHub Enterprise is PAID and billed monthly.
+- Next enterprise billing date observed live: 2026-11-30.
+- GitHub Enterprise runners page reports `All jobs usage 1/180` on 2026-10-30.
+- GitHub documentation publishes 500 concurrent standard hosted jobs for Enterprise and 256 jobs per workflow matrix.
+- ChatGPT GitHub connector can write to the canonical repository.
+- OIDC OLD + NEW compatibility remains preserved.
 
 ## Entitlement model
-CEREBRO separates two independent facts:
-1. `enterprise_organization_verified_for_canonical_repo=true`: ownership/governance is verified.
-2. `enterprise_actions_concurrency_entitlement_verified=false`: paid Enterprise Actions concurrency is not yet verified because the account is still TRIAL.
+CEREBRO separates three facts:
+1. Enterprise ownership/governance is verified.
+2. Paid Actions concurrency entitlement is verified.
+3. The physically exposed live runner cap is currently 180, while GitHub documents a 500 Enterprise ceiling.
 
-Therefore `global_500_fanout_enabled=false`.
-
-The paid Enterprise plan documents a standard-runner ceiling of 500 concurrent jobs and GitHub matrices are capped at 256 jobs. Those are readiness targets, not current trial execution authority.
-
-During TRIAL CEREBRO uses the full documented standard baseline: `cerebro_trial_safe_parallelism_cap=20`.
+Therefore:
+- `enterprise_actions_concurrency_entitlement_verified=true`;
+- `enterprise_account_state=PAID`;
+- `current_live_enterprise_parallelism_cap=180`;
+- `global_500_topology_prepared=true`;
+- `global_500_fanout_enabled=false` until live runner capacity reaches at least 500.
 
 ## Acceleration model
 - Discover actual independent work only.
 - Never create empty capacity jobs.
 - One matrix never exceeds 256 jobs.
-- During TRIAL this workflow uses at most 20 parallel shards.
-- Paid 500-job topology may be prepared and statically tested, but physical execution above 20 requires separate paid Actions concurrency evidence.
+- Pull-request canaries remain at 20 shards to avoid consuming the whole account before merge.
+- Manual acceleration can use up to 128 test shards, bounded by the live 180 cap.
+- Global Mission-DAG fanout can use up to the live 180 cap.
+- The 500 topology remains prepared as two legal matrices and requires no second scheduler/queue/daemon.
 - Preserve full OLD vs NEW regression.
-- Keep old continuous PREPROD workers drained; organization verification does not reactivate permanent runner occupancy.
+- Keep old continuous PREPROD workers drained; paid Enterprise does not reactivate permanent runner occupancy.
 - Use Linux by default; macOS only when technically required.
 
 ## Cost
-The canonical repository is public, so standard GitHub-hosted runners are free. Larger runners are not authorized by this capability and remain separately billable.
+Enterprise Cloud is already active as one paid seat. This capability does not authorize larger runners, extra seats, new subscriptions or silent overage. The canonical repository is public and standard hosted runners remain the preferred path.
+
+## DeepSeek
+DeepSeek remains provider-scoped and PREPROD-only. Maximum provider concurrency is 8. Auto recharge remains false. Main-push agent fanout is protected by deterministic budget and live prepaid-balance guards.
+
+## Copilot
+Copilot Pro is active. CEREBRO may use up to the plan's 4 concurrent CLI subagents for independent engineering work. Additional AI usage budget remains $0 unless explicitly approved. Copilot is an engineering accelerator, not a runtime dependency and not authority for automatic PROD changes.
 
 ## Safety
-No PROD deployment, external writes, Trading access, paid AI fan-out or service retirement is authorized by this capability.
+No PROD deployment, external writes, Trading access, silent paid AI expansion or service retirement is authorized by this capability.
 
 For service changes:
 `INVENTORY -> DEPENDENCIES -> CURRENT CONTRACT -> COST -> REPLACEMENT CONTRACT -> PARALLEL IMPLEMENTATION -> PREPROD -> OLD vs NEW -> ROLLBACK -> DECISION`
 
-## Copilot
-Repository instructions remain additive. Copilot is an engineering accelerator, not a runtime dependency and not authority for automatic PROD changes.
-
 ## Acceptance
-1. Repository and organization evidence verified.
-2. Trial vs paid Actions concurrency entitlement represented separately.
-3. TRIAL execution uses the documented standard 20-job baseline and remains fail-closed above it.
-4. Full regression passes.
+1. Paid Enterprise evidence verified.
+2. Live physical runner cap recorded separately from documented 500 ceiling.
+3. PR canary and full regression pass.
+4. Global fanout uses only discovered useful PREPROD work.
 5. No PROD/external writes occur.
-6. Paid activation remains `HUMAN_REQUIRED · MONEY_LIMIT` until explicitly approved.
+6. 500 physical fanout remains fail-closed until GitHub exposes a live limit of at least 500.
 
 ## Rollback
-Revert the policy/workflow/runbook changes. If entitlement evidence is lost, keep `enterprise_actions_concurrency_entitlement_verified=false` and `global_500_fanout_enabled=false`.
+Revert the policy/workflow/runbook changes. If paid entitlement evidence is lost, set `enterprise_actions_concurrency_entitlement_verified=false`; the runtime falls back to the standard 20-job safety cap.
 
 No data migration is required.

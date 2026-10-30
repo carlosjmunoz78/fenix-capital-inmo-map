@@ -4,6 +4,7 @@ import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { DeepSeekProviderV0 } from './deepseek-provider-v0.mjs';
 import { DeepSeekBudgetGuardV0 } from './deepseek-budget-guard-v0.mjs';
+import { DeepSeekLiveBalanceGuardV0 } from './deepseek-live-balance-guard-v0.mjs';
 
 export const FANOUT_BLOCKS = Object.freeze([
   ['W00','Live-state freeze and evidence inventory'],
@@ -125,11 +126,22 @@ export function buildDeepSeekBlockInput(blockId) {
 
 export async function runDeepSeekBlock(blockId) {
   if (process.env.CEREBRO_ALLOW_PAID_FANOUT !== 'YES') throw new Error('paid fanout not authorized by runtime flag');
+  if (!process.env.DEEPSEEK_API_KEY) throw new Error('DEEPSEEK_API_KEY missing');
   const projectedCostEur = Number(process.env.CEREBRO_FANOUT_PROJECTED_EUR_PER_BLOCK || '0.05');
+  const projectedCostUsd = Number(process.env.CEREBRO_FANOUT_PROJECTED_USD_PER_BLOCK || '0.05');
   const spentEur = Number(process.env.CEREBRO_FANOUT_SPENT_EUR || '0');
-  const guard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, autoRecharge: false });
-  const authorization = guard.authorize({ phase: 'bootstrap', spentEur, projectedCostEur });
-  if (!authorization.allowed) throw new Error('HUMAN_REQUIRED:MONEY_LIMIT');
+
+  const budgetGuard = new DeepSeekBudgetGuardV0({ initialHardCapEur: 200, autoRecharge: false });
+  const budgetAuthorization = budgetGuard.authorize({ phase: 'bootstrap', spentEur, projectedCostEur });
+  if (!budgetAuthorization.allowed) throw new Error('HUMAN_REQUIRED:MONEY_LIMIT');
+
+  const liveGuard = new DeepSeekLiveBalanceGuardV0({ baselineUsd: 100, autoRecharge: false });
+  const liveAuthorization = await liveGuard.authorize({
+    apiKey: process.env.DEEPSEEK_API_KEY,
+    projectedCostUsd,
+  });
+  if (!liveAuthorization.allowed) throw new Error(`HUMAN_REQUIRED:MONEY_LIMIT:${liveAuthorization.reason}`);
+
   const provider = new DeepSeekProviderV0();
   const { block, evidence, input } = buildDeepSeekBlockInput(blockId);
   const response = await provider.respond({
@@ -139,21 +151,24 @@ export async function runDeepSeekBlock(blockId) {
     maxOutputTokens: 1024,
   }, { requestId: `max-fanout-${block.id}-${process.env.GITHUB_RUN_ID || 'local'}` });
   const record = {
-    schema_version: '1.1',
+    schema_version: '1.2',
     block_id: block.id,
     title: block.title,
     evidence,
     usage: response.usage,
     output_text: response.output_text,
-    authorization,
+    authorization: {
+      budget: budgetAuthorization,
+      live_balance: liveAuthorization,
+    },
     governance_state: 'CANDIDATE_ONLY',
     prod_authorized: false,
+    auto_recharge: false,
   };
   writeJson(path.join(OUT_ROOT, block.id, 'deepseek-agent.json'), record);
   return record;
 }
 
-// Backward-compatible rollback path. New orchestration should prefer one block per worker.
 export async function runDeepSeekShard(shard, shards = 8) {
   const blocks = blocksForShard(shard, shards);
   const results = [];

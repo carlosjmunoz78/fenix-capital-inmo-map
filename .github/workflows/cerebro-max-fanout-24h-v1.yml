@@ -16,18 +16,15 @@ on:
   workflow_dispatch:
     inputs:
       run_deepseek:
-        description: 'Run the 25 DeepSeek block agents (paid balance, max 8 concurrent, no auto recharge)'
+        description: 'Run the 25 DeepSeek block agents (prepaid balance, max 8 concurrent, no auto recharge)'
         required: true
-        default: false
+        default: true
         type: boolean
 
 permissions:
   contents: read
 
 concurrency:
-  # Deduplicate only the exact revision Actions actually checks out. On PR events
-  # github.sha is the synthetic merge revision, so integration validation cannot
-  # be cancelled by a push run of the branch head.
   group: cerebro-max-fanout-24h-v1-${{ github.sha }}
   cancel-in-progress: true
 
@@ -65,7 +62,7 @@ jobs:
           retention-days: 3
 
   deepseek-workers:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.run_deepseek }}
+    if: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'workflow_dispatch' && inputs.run_deepseek) }}
     needs: validate
     strategy:
       fail-fast: false
@@ -78,6 +75,7 @@ jobs:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       CEREBRO_ALLOW_PAID_FANOUT: 'YES'
       CEREBRO_FANOUT_PROJECTED_EUR_PER_BLOCK: '0.05'
+      CEREBRO_FANOUT_PROJECTED_USD_PER_BLOCK: '0.05'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -99,7 +97,10 @@ jobs:
       - run: |
           echo 'CEREBRO MAX FANOUT V1'
           echo '25 deterministic block workers requested'
-          echo 'DeepSeek agent workers are dispatch-only and capped at 8 concurrent'
+          echo 'DeepSeek agents auto-run on main pushes and manual dispatch only'
+          echo 'DeepSeek provider concurrency capped at 8'
+          echo 'Live prepaid balance guard enabled; auto recharge=false'
+          echo 'Scheduled hourly runs remain deterministic evidence-only and do not spend DeepSeek balance'
           echo 'Same-tested-revision duplicate fanout runs are cancelled automatically'
           echo 'No PROD authority granted by this workflow'
           echo 'Trading remains isolated'

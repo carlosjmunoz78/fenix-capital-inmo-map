@@ -1,10 +1,10 @@
 import { selectMissionUnit } from './mission-derived-useful-work-v1.mjs';
 
 const PREPROD = 'PREPROD';
-const PAID_ENTERPRISE_GLOBAL_CEILING = 500;
+const DOCUMENTED_ENTERPRISE_GLOBAL_CEILING = 500;
 const MATRIX_CEILING = 256;
 const MATRIX_TARGET = 250;
-const TRIAL_SAFE_CAP = 20;
+const STANDARD_FALLBACK_CAP = 20;
 const LANE_COUNT = 68;
 
 function integer(value, label, min, max) {
@@ -24,14 +24,17 @@ function assertBasePolicy(policy) {
   if (entitlement.enterprise_organization_verified_for_canonical_repo !== true) throw new Error('ENTERPRISE_ORGANIZATION_REQUIRED');
   if (entitlement.canonical_repository !== 'fenix-cerebro/fenix-capital-inmo-map') throw new Error('CANONICAL_REPOSITORY_MISMATCH');
   if (entitlement.enterprise_slug !== 'cerebro-os') throw new Error('ENTERPRISE_SLUG_MISMATCH');
-  if (limits.standard_runner_concurrent_jobs_baseline_without_enterprise_increase !== TRIAL_SAFE_CAP) throw new Error('STANDARD_BASELINE_MISMATCH');
-  if (limits.paid_enterprise_standard_runner_concurrent_jobs_ceiling !== PAID_ENTERPRISE_GLOBAL_CEILING) throw new Error('PAID_ENTERPRISE_GLOBAL_CEILING_MISMATCH');
+  if (limits.standard_runner_concurrent_jobs_baseline_without_enterprise_increase !== STANDARD_FALLBACK_CAP) throw new Error('STANDARD_BASELINE_MISMATCH');
+  if (limits.paid_enterprise_standard_runner_documented_ceiling !== DOCUMENTED_ENTERPRISE_GLOBAL_CEILING) throw new Error('DOCUMENTED_ENTERPRISE_GLOBAL_CEILING_MISMATCH');
   if (limits.matrix_jobs_per_workflow_run_ceiling !== MATRIX_CEILING) throw new Error('MATRIX_CEILING_MISMATCH');
   if (limits.enterprise_trial_includes_increased_actions_concurrency !== false) throw new Error('TRIAL_CONCURRENCY_POLICY_MISMATCH');
-  if (parallelism.cerebro_trial_safe_parallelism_cap !== TRIAL_SAFE_CAP) throw new Error('TRIAL_SAFE_CAP_MISMATCH');
+  const liveLimit = integer(limits.live_enterprise_runner_concurrent_jobs_limit, 'live_enterprise_runner_concurrent_jobs_limit', 1, DOCUMENTED_ENTERPRISE_GLOBAL_CEILING);
+  if (parallelism.current_live_enterprise_parallelism_cap !== liveLimit) throw new Error('LIVE_ENTERPRISE_CAP_MISMATCH');
+  if (parallelism.cerebro_standard_fallback_parallelism_cap !== STANDARD_FALLBACK_CAP) throw new Error('STANDARD_FALLBACK_CAP_MISMATCH');
   if (workflow.production_deploy_from_acceleration_workflow !== false) throw new Error('PROD_DEPLOY_DENIED');
   if (workflow.write_external_systems !== false) throw new Error('EXTERNAL_WRITE_DENIED');
   if (workflow.use_actions_as_permanent_transactional_runtime !== false) throw new Error('PERMANENT_RUNTIME_DENIED');
+  return liveLimit;
 }
 
 function specForSlot(slot) {
@@ -57,8 +60,8 @@ function specForSlot(slot) {
   });
 }
 
-export function buildPaidEnterpriseTopologyV1(requested_units = PAID_ENTERPRISE_GLOBAL_CEILING) {
-  const requested = integer(requested_units, 'requested_units', 1, PAID_ENTERPRISE_GLOBAL_CEILING);
+export function buildPaidEnterpriseTopologyV1(requested_units = DOCUMENTED_ENTERPRISE_GLOBAL_CEILING) {
+  const requested = integer(requested_units, 'requested_units', 1, DOCUMENTED_ENTERPRISE_GLOBAL_CEILING);
   const all = [];
   const ids = new Set();
   for (let slot = 0; slot < requested; slot += 1) {
@@ -74,26 +77,36 @@ export function buildPaidEnterpriseTopologyV1(requested_units = PAID_ENTERPRISE_
   return Object.freeze({ requested_units: requested, all, ids, matrix_a, matrix_b });
 }
 
-export function planEnterpriseGlobalFanoutV1({ policy, requested_units = TRIAL_SAFE_CAP } = {}) {
-  assertBasePolicy(policy);
+export function planEnterpriseGlobalFanoutV1({ policy, requested_units } = {}) {
+  const liveLimit = assertBasePolicy(policy);
   const entitlement = policy.entitlement_gate || {};
-  const paidConcurrencyVerified = entitlement.enterprise_actions_concurrency_entitlement_verified === true
-    && entitlement.global_500_fanout_enabled === true;
-  const effectiveCap = paidConcurrencyVerified ? PAID_ENTERPRISE_GLOBAL_CEILING : TRIAL_SAFE_CAP;
-  const requested = integer(requested_units, 'requested_units', 1, effectiveCap);
+  const paidConcurrencyVerified = entitlement.enterprise_account_state === 'PAID'
+    && entitlement.enterprise_actions_concurrency_entitlement_verified === true
+    && entitlement.global_fanout_enabled === true;
+  const global500Enabled = paidConcurrencyVerified
+    && entitlement.global_500_fanout_enabled === true
+    && liveLimit >= DOCUMENTED_ENTERPRISE_GLOBAL_CEILING;
+  const effectiveCap = paidConcurrencyVerified
+    ? Math.min(liveLimit, DOCUMENTED_ENTERPRISE_GLOBAL_CEILING)
+    : STANDARD_FALLBACK_CAP;
+  const requested = requested_units == null
+    ? effectiveCap
+    : integer(requested_units, 'requested_units', 1, effectiveCap);
   const topology = buildPaidEnterpriseTopologyV1(requested);
 
   return Object.freeze({
-    schema_version: '1.1.0',
+    schema_version: '1.2.0',
     state_type: 'CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1',
     environment: PREPROD,
     enterprise_account_state: entitlement.enterprise_account_state || 'UNKNOWN',
     enterprise_actions_concurrency_entitlement_verified: paidConcurrencyVerified,
+    global_500_fanout_enabled: global500Enabled,
     requested_units: requested,
     planned_units: topology.all.length,
     unique_work_units: topology.ids.size,
     effective_physical_cap: effectiveCap,
-    paid_enterprise_platform_ceiling: PAID_ENTERPRISE_GLOBAL_CEILING,
+    live_enterprise_runner_limit: liveLimit,
+    documented_enterprise_platform_ceiling: DOCUMENTED_ENTERPRISE_GLOBAL_CEILING,
     matrix_ceiling: MATRIX_CEILING,
     matrix_target: MATRIX_TARGET,
     matrix_a: topology.matrix_a,
@@ -119,13 +132,14 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units = TRIAL_S
 export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   capability: 'RUNTIME-001/GITHUB-ENTERPRISE-GLOBAL-FANOUT-V1',
   environment: PREPROD,
-  paid_enterprise_global_platform_ceiling: PAID_ENTERPRISE_GLOBAL_CEILING,
-  trial_safe_physical_cap: TRIAL_SAFE_CAP,
+  documented_enterprise_global_platform_ceiling: DOCUMENTED_ENTERPRISE_GLOBAL_CEILING,
+  standard_fallback_physical_cap: STANDARD_FALLBACK_CAP,
   matrix_ceiling: MATRIX_CEILING,
   matrices: 2,
   matrix_target_each: MATRIX_TARGET,
   paid_500_topology_prepared: true,
-  paid_500_physical_execution_requires_verified_entitlement: true,
+  physical_execution_uses_live_runner_limit: true,
+  paid_500_physical_execution_requires_live_limit_500: true,
   work_source: 'MISSION_DAG_V1',
   executor: 'mission-derived-useful-work-v1',
   only_discovered_useful_work: true,
