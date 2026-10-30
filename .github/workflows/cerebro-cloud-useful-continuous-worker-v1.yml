@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CEREBRO_REARM_LANE_LIMIT: '16'
+  CEREBRO_REARM_LANE_LIMIT: '0'
   CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'false'
 
 jobs:
@@ -68,7 +68,7 @@ jobs:
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
-          test "$CEREBRO_REARM_LANE_LIMIT" -ge 1
+          test "$CEREBRO_REARM_LANE_LIMIT" -ge 0
           test "$CEREBRO_REARM_LANE_LIMIT" -le 64
           test "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" = "false"
           for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
