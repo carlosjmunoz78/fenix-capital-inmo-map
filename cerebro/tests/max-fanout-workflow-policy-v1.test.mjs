@@ -5,17 +5,33 @@ import fs from 'node:fs';
 const workflow=fs.readFileSync(new URL('../../.github/workflows/cerebro-max-fanout-24h-v1.yml',import.meta.url),'utf8');
 const neuronal=fs.readFileSync(new URL('../../.github/workflows/cerebro-neuronal-superparallel-v1.yml',import.meta.url),'utf8');
 
-test('PR validation does not consume the 250 portfolio workers',()=>{
-  assert.ok(workflow.includes("evidence-workers:\n    if: ${{ github.event_name != 'pull_request' }}"));
-  assert.ok(workflow.includes('PRs run contract/policy validation only; no 250-worker portfolio fanout'));
+test('PR validation does not consume the portfolio workers',()=>{
+  assert.ok(workflow.includes("portfolio-plan:\n    if: ${{ github.event_name != 'pull_request' }}"));
+  assert.ok(workflow.includes('PRs run contract/policy validation only; no portfolio fanout'));
 });
 
-test('portfolio fanout covers 25 blocks x 10 distinct shards with 250 cap',()=>{
+test('portfolio fanout is capped at 250 and plans only non-empty shards',()=>{
   assert.ok(workflow.includes('max-parallel: 250'));
-  assert.ok(workflow.includes('shard: [0,1,2,3,4,5,6,7,8,9]'));
-  assert.ok(workflow.includes('--shards=10'));
-  assert.ok(workflow.includes('portfolio_blocks=25'));
-  assert.ok(workflow.includes('portfolio_parallel_cap=250'));
+  assert.ok(workflow.includes('const shards = Math.min(requested,total);'));
+  assert.ok(workflow.includes('if (include.length > 250)'));
+  assert.ok(workflow.includes("empty_capacity_jobs=false"));
+});
+
+test('JARVIS superagent and interface are P0 and receive the largest desired share',()=>{
+  assert.ok(workflow.includes('W13:30, W21:30'));
+  assert.ok(workflow.includes("W13:'P0', W21:'P0'"));
+  assert.ok(workflow.includes("W10:'P0'"));
+  assert.ok(workflow.includes("W11:'P0'"));
+  assert.ok(workflow.includes("W15:'P0'"));
+  assert.ok(workflow.includes("W16:'P0'"));
+  assert.ok(workflow.includes('priority_p0=JARVIS_SUPERAGENT+JARVIS_INTERFACE+KNOWLEDGE+AGENTS+MODEL_ROUTER+SKILL_ENGINE'));
+});
+
+test('actuation dependencies are P1, factories P2 and business fronts fall through to P3',()=>{
+  assert.ok(workflow.includes("W01:'P1'"));
+  assert.ok(workflow.includes("W20:'P1'"));
+  assert.ok(workflow.includes("W22:'P2'"));
+  assert.ok(workflow.includes("const level = priority[block.id] ?? 'P3';"));
 });
 
 test('NEURONAL is fair-share capped at 100 and self-refills with 100',()=>{
