@@ -55,6 +55,7 @@ test('paid Enterprise physical plan unlocks 500 only when concurrency entitlemen
   paid.entitlement_gate.enterprise_account_state = 'PAID';
   paid.entitlement_gate.enterprise_actions_concurrency_entitlement_verified = true;
   paid.entitlement_gate.global_500_fanout_enabled = true;
+  paid.verified_platform_limits.live_standard_runner_concurrent_jobs_max = 500;
   const plan = planEnterpriseGlobalFanoutV1({ policy: paid, requested_units: 500 });
   assert.equal(plan.enterprise_actions_concurrency_entitlement_verified, true);
   assert.equal(plan.effective_physical_cap, 500);
@@ -64,6 +65,33 @@ test('paid Enterprise physical plan unlocks 500 only when concurrency entitlemen
   assert.equal(plan.matrix_b_count, 250);
   assert.equal(plan.paid_enterprise_platform_ceiling, 500);
   assert.equal(plan.matrix_ceiling, 256);
+});
+
+test('paid physical plan is capped at the live runner maximum rather than the published ceiling', () => {
+  const paid = structuredClone(policy);
+  paid.entitlement_gate.enterprise_account_state = 'PAID';
+  paid.entitlement_gate.enterprise_actions_concurrency_entitlement_verified = true;
+  paid.entitlement_gate.global_500_fanout_enabled = true;
+  paid.verified_platform_limits.live_standard_runner_concurrent_jobs_max = 180;
+
+  const plan = planEnterpriseGlobalFanoutV1({ policy: paid, requested_units: 180 });
+  assert.equal(plan.paid_enterprise_platform_ceiling, 500);
+  assert.equal(plan.effective_physical_cap, 180);
+  assert.equal(plan.planned_units, 180);
+  assert.equal(plan.unique_work_units, 180);
+  assert.equal(plan.matrix_a_count, 90);
+  assert.equal(plan.matrix_b_count, 90);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: paid, requested_units: 181 }), /requested_units must be an integer 1\.\.180/);
+});
+
+test('missing or invalid live runner maximum fails closed instead of assuming 500', () => {
+  const missing = structuredClone(policy);
+  delete missing.verified_platform_limits.live_standard_runner_concurrent_jobs_max;
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: missing, requested_units: 20 }), /live_standard_runner_concurrent_jobs_max must be an integer 1\.\.500/);
+
+  const invalid = structuredClone(policy);
+  invalid.verified_platform_limits.live_standard_runner_concurrent_jobs_max = 501;
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: invalid, requested_units: 20 }), /live_standard_runner_concurrent_jobs_max must be an integer 1\.\.500/);
 });
 
 test('planner is fail-closed when organization ownership evidence is lost', () => {
