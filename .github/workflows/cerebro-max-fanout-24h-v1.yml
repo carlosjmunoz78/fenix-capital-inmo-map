@@ -40,20 +40,70 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Validate 25-block / 250-shard portfolio contract and workflow policy
+      - name: Validate prioritized 25-block portfolio contract and workflow policy
         run: |
           node --test cerebro/tests/max-fanout-block-worker-v1.test.mjs
           node --test cerebro/tests/max-fanout-workflow-policy-v1.test.mjs
 
-  evidence-workers:
+  portfolio-plan:
     if: ${{ github.event_name != 'pull_request' }}
     needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      planned: ${{ steps.plan.outputs.planned }}
+      p0_planned: ${{ steps.plan.outputs.p0_planned }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - id: plan
+        name: Build non-empty priority matrix with JARVIS first
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { FANOUT_BLOCKS, evidenceForBlockShard } from './cerebro/runtime/max-fanout-block-worker-v1.mjs';
+
+          const desired = {
+            W13:30, W21:30,
+            W10:15, W11:15, W15:15, W16:15,
+            W01:8, W02:8, W03:8, W04:8, W05:8, W06:8, W14:8, W18:8, W19:8, W20:8,
+            W22:10,
+            W00:5, W07:5, W08:5, W09:5, W12:5, W17:5, W23:5, W24:5,
+          };
+          const priority = {
+            W13:'P0', W21:'P0', W10:'P0', W11:'P0', W15:'P0', W16:'P0',
+            W01:'P1', W02:'P1', W03:'P1', W04:'P1', W05:'P1', W06:'P1', W14:'P1', W18:'P1', W19:'P1', W20:'P1',
+            W22:'P2',
+          };
+          const rank = {P0:0,P1:1,P2:2,P3:3};
+          const include=[];
+          for (const block of FANOUT_BLOCKS) {
+            const total = evidenceForBlockShard(block.id,0,1).matching_path_total;
+            const requested = desired[block.id] ?? 5;
+            const shards = Math.min(requested,total);
+            const level = priority[block.id] ?? 'P3';
+            for (let shard=0; shard<shards; shard+=1) include.push({block:block.id,shard,shards,priority:level,priority_rank:rank[level]});
+          }
+          include.sort((a,b)=>a.priority_rank-b.priority_rank || a.block.localeCompare(b.block) || a.shard-b.shard);
+          if (include.length > 250) throw new Error(`PORTFOLIO_CAP_EXCEEDED:${include.length}`);
+          const p0=include.filter(x=>x.priority==='P0').length;
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include})}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned=${include.length}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `p0_planned=${p0}\n`);
+          console.log(JSON.stringify({planned:include.length,p0_planned:p0,cap:250,priority_order:['P0_JARVIS','P1_ACTUATION','P2_FACTORIES','P3_BUSINESS'],empty_jobs:false}));
+          NODE
+
+  evidence-workers:
+    if: ${{ github.event_name != 'pull_request' && needs.portfolio-plan.outputs.planned != '0' }}
+    needs: [validate, portfolio-plan]
     strategy:
       fail-fast: false
       max-parallel: 250
-      matrix:
-        block: [W00,W01,W02,W03,W04,W05,W06,W07,W08,W09,W10,W11,W12,W13,W14,W15,W16,W17,W18,W19,W20,W21,W22,W23,W24]
-        shard: [0,1,2,3,4,5,6,7,8,9]
+      matrix: ${{ fromJSON(needs.portfolio-plan.outputs.matrix) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -61,12 +111,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Build deterministic portfolio packet ${{ matrix.block }} shard ${{ matrix.shard }}/10
-        run: node cerebro/runtime/max-fanout-block-worker-v1.mjs --mode=evidence --block=${{ matrix.block }} --shard=${{ matrix.shard }} --shards=10
+      - name: Build ${{ matrix.priority }} portfolio packet ${{ matrix.block }} shard ${{ matrix.shard }}/${{ matrix.shards }}
+        run: node cerebro/runtime/max-fanout-block-worker-v1.mjs --mode=evidence --block=${{ matrix.block }} --shard=${{ matrix.shard }} --shards=${{ matrix.shards }}
       - uses: actions/upload-artifact@v4
         with:
-          name: fanout-evidence-${{ matrix.block }}-s${{ matrix.shard }}-${{ github.run_id }}
-          path: artifacts/max-fanout-v1/${{ matrix.block }}/shard-${{ matrix.shard }}-of-10/
+          name: fanout-evidence-${{ matrix.priority }}-${{ matrix.block }}-s${{ matrix.shard }}-${{ github.run_id }}
+          path: artifacts/max-fanout-v1/${{ matrix.block }}/shard-${{ matrix.shard }}-of-${{ matrix.shards }}/
           retention-days: 3
 
   deepseek-workers:
@@ -98,25 +148,28 @@ jobs:
           retention-days: 3
 
   summary:
-    needs: [validate, evidence-workers, deepseek-workers]
+    needs: [validate, portfolio-plan, evidence-workers, deepseek-workers]
     if: always()
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo 'CEREBRO MAX FANOUT V1 · PORTFOLIO FAIR SHARE'
-          echo 'portfolio_blocks=25'
-          echo 'portfolio_shards_per_block=10'
+          echo 'CEREBRO MAX FANOUT V1 · PRIORITIZED PORTFOLIO FAIR SHARE'
+          echo 'priority_p0=JARVIS_SUPERAGENT+JARVIS_INTERFACE+KNOWLEDGE+AGENTS+MODEL_ROUTER+SKILL_ENGINE'
+          echo 'priority_p1=BROWSER+PC+MOBILE+IDENTITY+NOTIFICATIONS+SECURITY+E2E'
+          echo 'priority_p2=APP_FACTORY_AND_FACTORIES'
+          echo 'priority_p3=SEO+SOCIAL+APP_FENIX+OTHER_BUSINESS_FRONTS'
+          echo 'portfolio_planned=${{ needs.portfolio-plan.outputs.planned }}'
+          echo 'jarvis_p0_planned=${{ needs.portfolio-plan.outputs.p0_planned }}'
           echo 'portfolio_parallel_cap=250'
           echo 'neuronal_reserved_parallel_cap=100'
           echo 'control_reserve=10'
           echo 'enterprise_live_cap=360'
           echo 'macos_live_cap=50'
-          echo 'PRs run contract/policy validation only; no 250-worker portfolio fanout'
-          echo 'Deterministic portfolio fanout runs on main/authorized branches, schedule and dispatch'
+          echo 'empty_capacity_jobs=false'
+          echo 'PRs run contract/policy validation only; no portfolio fanout'
           echo 'DeepSeek runs only after explicit workflow_dispatch opt-in'
           echo 'DeepSeek provider concurrency capped at 8'
           echo 'macOS capacity is reserved for work that actually requires macOS/iOS/Safari; no empty capacity jobs'
           echo 'No automatic paid AI on push, PR or schedule'
-          echo 'Same-tested-revision duplicate fanout runs are cancelled automatically'
           echo 'No PROD authority granted by this workflow'
           echo 'Trading remains isolated'
