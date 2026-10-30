@@ -6,6 +6,7 @@ on:
     paths:
       - 'cerebro/**'
       - '.github/copilot-instructions.md'
+      - '.github/agents/**'
       - '.github/workflows/cerebro-enterprise-acceleration-v0.yml'
       - 'docs/CEREBRO_GITHUB_ENTERPRISE_ACCELERATION_V0.md'
 
@@ -102,14 +103,40 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Run shard
+          cache: npm
+      - name: Run shard with dependency-on-demand fallback
         env:
           TESTS_JSON: ${{ matrix.tests_json }}
-        run: >-
-          node -e "const {spawnSync}=require('child_process');
-          const tests=JSON.parse(process.env.TESTS_JSON);
-          const r=spawnSync(process.execPath,['--test',...tests],{stdio:'inherit'});
-          process.exit(r.status ?? 1);"
+        shell: bash
+        run: |
+          node <<'NODE'
+          const {spawnSync} = require('child_process');
+          const tests = JSON.parse(process.env.TESTS_JSON);
+
+          function runTests() {
+            const result = spawnSync(process.execPath, ['--test', ...tests], {
+              encoding: 'utf8',
+              maxBuffer: 64 * 1024 * 1024
+            });
+            if (result.stdout) process.stdout.write(result.stdout);
+            if (result.stderr) process.stderr.write(result.stderr);
+            return result;
+          }
+
+          let result = runTests();
+          if ((result.status ?? 1) === 0) process.exit(0);
+
+          const diagnostic = `${result.stdout || ''}\n${result.stderr || ''}`;
+          const missingDependency = /ERR_MODULE_NOT_FOUND|Cannot find package/.test(diagnostic);
+          if (!missingDependency) process.exit(result.status ?? 1);
+
+          console.log('::notice::Shard requires locked repository dependencies; running npm ci --ignore-scripts and retrying once');
+          const install = spawnSync('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], {stdio: 'inherit'});
+          if ((install.status ?? 1) !== 0) process.exit(install.status ?? 1);
+
+          result = runTests();
+          process.exit(result.status ?? 1);
+          NODE
 
   old-vs-new-regression:
     name: OLD vs NEW · full canonical regression
@@ -121,6 +148,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+      - name: Install locked repository dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Validate canonical Engine Factory contracts
         working-directory: cerebro
         run: npm run validate
@@ -136,6 +166,7 @@ jobs:
             "parallel_shards=${{ needs.discover-tests.outputs.shard_count }}" \
             "parallel_matrix_ceiling=256" \
             "v0_max_parallel=64" \
+            "dependency_install_mode=ON_DEMAND_PER_SHARD" \
             "enterprise_platform_ceiling=500" \
             "enterprise_repo_entitlement_verified=false" \
             "prod_deploy=false" \
