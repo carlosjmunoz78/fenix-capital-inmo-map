@@ -45,6 +45,33 @@ test('declares exactly 14 logical queues over one durable queue', () => {
   assert.equal(NEURONAL_HIERARCHICAL_JOB001_ADAPTER_V1_CONTRACT.second_daemon, false);
 });
 
+test('normal NEURONAL JOB-001 queue may fill verified global 180 while DeepSeek remains hard-capped at 8', () => {
+  assert.equal(NEURONAL_HIERARCHICAL_JOB001_ADAPTER_V1_CONTRACT.queue_active_cap_max, 180);
+  assert.equal(NEURONAL_HIERARCHICAL_JOB001_ADAPTER_V1_CONTRACT.model_active_cap_max, 8);
+  const runtime = new FakeRuntime();
+  const submissions = Array.from({ length: 180 }, (_, i) => Object.freeze({
+    submission_id: `AUD-${String(i).padStart(3,'0')}`,
+    requirement_id: `REQ-${i}`,
+    domain: '01',
+    phase: 'audit',
+    phase_code: 'A_AUDIT',
+    title: `audit ${i}`,
+    priority: 'P0',
+    horizon: 'NOW',
+    dependencies: [],
+    deepseek_allowed: false,
+  }));
+  const s = new NeuronalHierarchicalJob001SourceV1({
+    job_runtime: runtime, queue_context: queueContext, model_context: modelContext, submissions,
+    target_active: 180, max_enqueue_per_reconcile: 180, model_active_cap: 8, model_enabled: true,
+  });
+  const snap = s.reconcile();
+  assert.equal(snap.accepted_this_reconcile, 180);
+  assert.equal(snap.active_jobs, 180);
+  assert.equal(snap.active_model_jobs, 0);
+  assert.equal(snap.model_active_cap, 8);
+});
+
 test('reconcile releases only dependency-ready work and progresses hierarchy', () => {
   const { runtime, source: s } = source();
   let snap = s.reconcile();
