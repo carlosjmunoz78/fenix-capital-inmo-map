@@ -7,7 +7,11 @@ on:
     paths:
       - '.github/workflows/cerebro-mission-jarvis-001-integration-v1.yml'
       - 'cerebro/jarvis/integration-v1/**'
+      - 'cerebro/jarvis/core-v1/**'
       - 'cerebro/tests/jarvis-integration-v1.test.mjs'
+      - 'cerebro/tests/jarvis-core-readiness-v1.test.mjs'
+      - 'cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs'
+      - 'cerebro/runtime/jarvis-mission-job001-adapter-v1.mjs'
       - 'cerebro/runtime/jarvis-reuse-map-v1.mjs'
 
 permissions:
@@ -25,7 +29,7 @@ env:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,10 +40,12 @@ jobs:
           test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
-      - name: Core and integration tests
+      - name: Core integration readiness and durable JOB-001 adapter tests
         run: |
           node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
           node --test cerebro/tests/jarvis-integration-v1.test.mjs
+          node --test cerebro/tests/jarvis-mission-job001-adapter-v1.test.mjs
       - name: Generate deterministic reuse map
         env:
           JARVIS_REUSE_MAP_OUT: artifacts/jarvis-reuse-map-v1.json
