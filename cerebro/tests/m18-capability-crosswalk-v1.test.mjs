@@ -35,6 +35,10 @@ test('real M18 capability audit is PREPROD and zero-cost guarded',()=>{
   assert.ok(r.evidence_hits>0);
 });
 
+test('unknown capability fails closed instead of inventing work',()=>{
+  assert.throws(()=>auditCapability('invented_capability_not_in_mission'),/unknown M18 capability family/);
+});
+
 test('aggregate keeps candidate decisions non-final',()=>{
   const base={version:'m18-capability-crosswalk-v1',report_fingerprint:'x'};
   const a=aggregateReports([
