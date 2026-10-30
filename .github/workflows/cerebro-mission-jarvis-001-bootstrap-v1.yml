@@ -1,0 +1,133 @@
+name: CEREBRO MISSION-JARVIS-001 Bootstrap V1
+run-name: JARVIS-001 CORE + DAG · PREPROD
+
+on:
+  push:
+    branches:
+      - cerebro/mission-jarvis-001-20261030
+    paths:
+      - '.github/workflows/cerebro-mission-jarvis-001-bootstrap-v1.yml'
+      - 'cerebro/jarvis/mission-001/**'
+      - 'cerebro/runtime/jarvis-mission-*.mjs'
+      - 'cerebro/tests/jarvis-mission-*.test.mjs'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mission-jarvis-001-bootstrap-preprod
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      CEREBRO_ALLOW_PAID_JARVIS_BUILD: 'YES'
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      JARVIS_DAG_OUT: artifacts/jarvis-mission-001-dag
+      JARVIS_WAVE_OUT: artifacts/jarvis-mission-001-wave
+    steps:
+      - name: Checkout immutable candidate
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Enforce PREPROD hard guards
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = 'PREPROD'
+          test "$CEREBRO_PROD_WRITE" = 'false'
+          test "$CEREBRO_TRADING_ACCESS" = 'false'
+          test -n "$DEEPSEEK_API_KEY"
+
+      - name: Validate JARVIS mission DAG contract
+        run: node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
+
+      - name: Generate complete MISSION-JARVIS-001 DAG
+        run: node cerebro/runtime/jarvis-mission-dag-v2.mjs
+
+      - name: Process Minimal Immutable Core sequentially
+        shell: bash
+        run: |
+          set -euo pipefail
+          export JARVIS_REPO_FILE_LIST="$(git ls-files)"
+          for wave in 0 1 2 3 4 5 6 7 8 9 10 11; do
+            node cerebro/runtime/jarvis-mission-wave-runner-v1.mjs --wave="$wave" --offset=0 --batch=48
+          done
+
+      - name: Open 18 programs after Core gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          export JARVIS_REPO_FILE_LIST="$(git ls-files)"
+          CEREBRO_ALLOW_PAID_JARVIS_BUILD=NO node cerebro/runtime/jarvis-mission-wave-runner-v1.mjs --wave=12 --offset=0 --batch=48
+
+      - name: Inventory every MASTER requirement into governed program queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          export JARVIS_REPO_FILE_LIST="$(git ls-files)"
+          total=$(node --input-type=module - <<'NODE'
+          import {buildJarvisDag} from './cerebro/runtime/jarvis-mission-dag-v2.mjs';
+          const d=buildJarvisDag();
+          console.log(d.units.filter(x=>x.wave===13).length);
+          NODE
+          )
+          offset=0
+          while [ "$offset" -lt "$total" ]; do
+            CEREBRO_ALLOW_PAID_JARVIS_BUILD=NO node cerebro/runtime/jarvis-mission-wave-runner-v1.mjs --wave=13 --offset="$offset" --batch=48
+            offset=$((offset+48))
+          done
+
+      - name: Execute zero-cost scope inventory dependency and contract waves
+        shell: bash
+        run: |
+          set -euo pipefail
+          export JARVIS_REPO_FILE_LIST="$(git ls-files)"
+          for wave in 20 21 22 23; do
+            total=$(node --input-type=module - "$wave" <<'NODE'
+          import {buildJarvisDag} from './cerebro/runtime/jarvis-mission-dag-v2.mjs';
+          const wave=Number(process.argv[2]);
+          const d=buildJarvisDag();
+          console.log(d.units.filter(x=>x.wave===wave).length);
+          NODE
+            )
+            offset=0
+            while [ "$offset" -lt "$total" ]; do
+              CEREBRO_ALLOW_PAID_JARVIS_BUILD=NO node cerebro/runtime/jarvis-mission-wave-runner-v1.mjs --wave="$wave" --offset="$offset" --batch=48
+              offset=$((offset+48))
+            done
+          done
+
+      - name: Publish bootstrap evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mission-jarvis-001-bootstrap-${{ github.run_id }}
+          path: |
+            artifacts/jarvis-mission-001-dag/**
+            artifacts/jarvis-mission-001-wave/**
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          echo 'mission=MISSION-JARVIS-001' >> "$GITHUB_STEP_SUMMARY"
+          echo 'environment=PREPROD' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'deepseek_role=TEMPORARY_COGNITIVE_ACCELERATOR' >> "$GITHUB_STEP_SUMMARY"
+          echo 'deepseek_dependency_target=0' >> "$GITHUB_STEP_SUMMARY"
+          test -f artifacts/jarvis-mission-001-dag/summary.json && cat artifacts/jarvis-mission-001-dag/summary.json >> "$GITHUB_STEP_SUMMARY" || true
