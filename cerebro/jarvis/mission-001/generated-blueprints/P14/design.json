@@ -2,14 +2,113 @@
   "program_id": "P14",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 5629,
-    "cached_input_tokens": 5376,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 468,
+    "cached_input_tokens": 256,
+    "output_tokens": 844,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001134078,
+  "cost_usd": 0.000538968,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "P13 opportunity/watchlist registry as substrate for future watchlist",
+      "P9 policy engine hooks for counterfactual + policy simulation wrappers",
+      "P7 scoring/calibration utilities for forecast council ledger",
+      "P4 event bus for anticipatory action triggers",
+      "Existing negotiation/dialogue service (wrap, don't rewrite)",
+      "Capital allocation ledger (read-only projections)",
+      "Presence/handoff router from prior presence program",
+      "DeepSeek adapter (temporary, sandboxed) for scenario generation"
+    ],
+    "gaps": [
+      "No unified simulation kernel (deterministic scenario runner)",
+      "No reality/simulation barrier tag on state objects",
+      "No weak-signal ingestion + scoring pipeline",
+      "No real-options valuation module",
+      "No regret computation surface",
+      "No scarcity-mode governor",
+      "No fidelity scoring harness",
+      "No future negotiation tree builder"
+    ],
+    "contracts": [
+      "ScenarioRun{id,horizon,assumptions,tags,sim_barrier=true}",
+      "WatchlistItem{signal,strength,ttl,provenance}",
+      "AnticipatoryAction{trigger,preconditions,dry_run_only=true}",
+      "Counterfactual{baseline,intervention,delta,confidence}",
+      "WeakSignal{source,entropy,decay}",
+      "FidelityReport{scenario_id,metrics,drift}",
+      "PolicySim{policy_id,outcomes,constraints}",
+      "Handoff{from,to,mode=simulate|live,audit_id}",
+      "Forecast{id,distribution,calibration_ref}",
+      "RegretOutcome{chosen,forgone,regret_score}",
+      "RealOption{path,cost,optionality,expiry}",
+      "NegotiationNode{state,moves[],probabilities}"
+    ],
+    "implementation_batches": [
+      "B1: scenario kernel + reality/simulation barrier tag (wraps P13/event bus)",
+      "B2: watchlist + weak-signal pipeline over existing registry",
+      "B3: counterfactual + policy simulation wrappers on P9",
+      "B4: forecast council + calibration ledger (reuse scoring)",
+      "B5: anticipatory action (dry-run only) + presence handoff router",
+      "B6: regret engine + real-options valuation",
+      "B7: negotiation tree + capital allocation projections (read-only)",
+      "B8: fidelity harness + scarcity-mode governor",
+      "B9: future JARVIS/ZEUS-next distillation adapter"
+    ],
+    "tests": [
+      "Barrier tag enforced: no sim object reaches prod sinks",
+      "Determinism: identical scenario inputs → identical outputs",
+      "Calibration Brier/ECE regression vs ledger baseline",
+      "Weak-signal decay monotonicity",
+      "Anticipatory actions blocked without dry_run=true",
+      "Regret symmetry sanity checks",
+      "Real-options no-negative-optionality invariant",
+      "Negotiation tree probability sum ≈ 1",
+      "Scarcity-mode escalation idempotent",
+      "Handoff audit chain integrity"
+    ],
+    "security": [
+      "Simulation-scoped tokens; no prod write credentials",
+      "All LLM calls via temporary DeepSeek adapter with redaction",
+      "Scenario data classified sim-only; egress blocked",
+      "Audit every anticipatory action attempt",
+      "No trading/execution paths reachable from sim kernel"
+    ],
+    "observability": [
+      "scenario_run_total{status}",
+      "barrier_violation_total (must be 0)",
+      "calibration_ece gauge",
+      "weak_signal_decay_histogram",
+      "anticipatory_action_dryrun_total",
+      "regret_score_distribution",
+      "fidelity_drift gauge",
+      "scarcity_mode_active gauge"
+    ],
+    "rollback": [
+      "Feature-flag each batch; default off",
+      "Kernel versioned; pin prior run snapshots",
+      "Calibration ledger append-only with revert pointer",
+      "Barrier tag immutable; rollback = disable producer not tag",
+      "No schema migration on existing tables; additive only"
+    ],
+    "distillation_targets": [
+      "Scenario kernel → minimal deterministic core",
+      "Watchlist/weak-signal → single scored queue",
+      "Forecast council → calibration ledger adapter",
+      "Regret + real-options → unified optionality score",
+      "Negotiation tree → compact policy prior",
+      "Fidelity harness → single drift metric"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

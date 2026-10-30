@@ -2,14 +2,148 @@
   "program_id": "P07",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 9912,
-    "cached_input_tokens": 9728,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 652,
+    "cached_input_tokens": 512,
+    "output_tokens": 1510,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001136784,
+  "cost_usd": 0.000928536,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "Append-only audit ledger (hash-chained event log) — reuse for proof-carrying actions, tribunal verdicts, and legal hold records",
+      "Policy engine / rule evaluator — reuse as the owner-override and promotion-gate decision point (wrap, don't rewrite)",
+      "Scheduler + job queue — reuse to drive champion/challenger, calibration, and regression runs",
+      "Metrics/telemetry pipeline (OTel-style traces + spans) — reuse for observability of all P07 flows",
+      "Secrets/config vault — reuse for model credentials and DeepSeek temporary keys",
+      "Existing eval harness / golden-set runner — wrap as the verifier substrate for dynamic verifier generation",
+      "Existing database with row-level audit columns — reuse for records, disputes, and closure state",
+      "Notification/alerting channel (Slack/webhook) — reuse for human-required escalations and gate failures",
+      "Existing API gateway + authz layer — reuse for M2M negotiation authentication and scoping",
+      "Feature-flag / kill-switch service — reuse for rollback and preprod-only enforcement"
+    ],
+    "gaps": [
+      "No canonical evidence schema binding task→proof→verdict (blocks NO_EVIDENCE→NOT_DONE and proof-carrying actions)",
+      "No formal model of the multi-agent tribunal (actor/verifier/adversary roles, quorum, appeal)",
+      "No calibration store linking forecasts to realized outcomes with Brier/log scoring",
+      "No collusion detector over inter-agent message graphs",
+      "No dispute/claims state machine (open→triage→adjudicate→resolve→legal hold)",
+      "No promotion gate contract (staging→preprod→promoted) with automated blocking criteria",
+      "No delete-candidate gate with provenance + downstream-reference checks",
+      "No self-repair swarm supervisor with bounded retry and blast-radius limits",
+      "No machine-readable task contract schema (acceptance tests, evidence, rollback)",
+      "No regression baseline registry for model behavior drift",
+      "No discovery-council intake pipeline (candidate techno/technique → triage → absorb)",
+      "No closure engine unifying done-ness across all P07 sub-flows"
+    ],
+    "contracts": [
+      "EvidenceRecord{v1}: {id, task_id, kind, artifact_uri, hash, produced_by, ts, verifier_sig}",
+      "TaskContract{v1}: {id, goal, acceptance_tests[], evidence_required[], rollback_plan, owner, preprod_only:true}",
+      "Verdict{v1}: {task_id, actor, verifier, adversary, decision(PASS|FAIL|APPEAL), rationale, evidence_refs[], ts}",
+      "CalibrationSample{v1}: {forecast_id, p, outcome, brier, horizon, model_version}",
+      "PromotionGate{v1}: {artifact_id, gates:{evidence,regression,calibration,security}, decision, approver, ts}",
+      "Dispute{v1}: {id, claimant, claim, evidence_refs, state, resolution, legal_hold:bool}",
+      "NegotiationMsg{v1}: {session_id, from, to, offer, constraints, sig}",
+      "ClosureRecord{v1}: {task_id, done:bool, evidence_refs[], closed_by, ts}",
+      "OwnerOverride{v1}: {actor, reason, scope, expiry, approved_by, audit_ref}",
+      "DeleteCandidate{v1}: {artifact_id, justification, downstream_refs[], decision, approver, ts}"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "Contracts + evidence ledger schema; TaskContract, EvidenceRecord, Verdict, ClosureRecord",
+        "exit": "schemas validated; ledger append works; NO_EVIDENCE→NOT_DONE enforced in preprod"
+      },
+      {
+        "id": "B2",
+        "scope": "Tribunal core: actor/verifier/adversary + tribunal state machine + owner-override wrapper",
+        "exit": "tribunal runs end-to-end with quorum and appeal path"
+      },
+      {
+        "id": "B3",
+        "scope": "Calibration + regression: forecast store, scoring, model-behavior baseline registry",
+        "exit": "calibration samples scored; regression drift alerts fire"
+      },
+      {
+        "id": "B4",
+        "scope": "Gates: promotion gate + delete-candidate gate + bias/confounder checks",
+        "exit": "gates block on missing evidence; promote/delete only in preprod"
+      },
+      {
+        "id": "B5",
+        "scope": "Collusion monitor + M2M negotiation contracts + proof-carrying action wrapper",
+        "exit": "graph detector flags synthetic collusion; neg msgs signed"
+      },
+      {
+        "id": "B6",
+        "scope": "Dispute/claims + records/legal-hold + closure engine",
+        "exit": "dispute lifecycle + hold flag enforced; closures require evidence_refs"
+      },
+      {
+        "id": "B7",
+        "scope": "Discovery council + tech absorption + self-repair swarm + dynamic verifier generator",
+        "exit": "intake→triage→absorb path; verifier generated and registered"
+      },
+      {
+        "id": "B8",
+        "scope": "Evaluation control plane UI/API + observability wiring + rollback drill",
+        "exit": "single pane for P07; kill-switch exercised"
+      }
+    ],
+    "tests": [
+      "NO_EVIDENCE→NOT_DONE: task without EvidenceRecord cannot close",
+      "Proof-carrying action: action without proof artifact rejected by gate",
+      "Tribunal quorum: verdict requires actor+verifier+adversary signatures",
+      "Owner-override: logged, scoped, time-boxed, audited",
+      "Calibration scoring: brier/log-loss matches reference on fixture set",
+      "Regression: injected behavior drift triggers alert",
+      "Promotion gate: fails on missing evidence or failed regression",
+      "Delete gate: fails when downstream_refs non-empty",
+      "Collusion: synthetic colluding agent pair detected",
+      "M2M negotiation: tampered offer rejected on sig mismatch",
+      "Dispute lifecycle: open→resolve with legal_hold honored",
+      "Preprod-only: production write attempts denied"
+    ],
+    "security": [
+      "Enforce PREPROD_ONLY at network + policy layer; deny prod writes",
+      "Hash-chain ledger for tamper-evident proofs and verdicts",
+      "Signed M2M negotiation messages; replay protection",
+      "Least-privilege scopes for verifier/adversary roles",
+      "DeepSeek temporary credentials: short TTL, no persistence of prompts beyond eval window",
+      "Owner-override requires second approver + expiry",
+      "Legal-hold flag blocks deletion at DB layer, not just app"
+    ],
+    "observability": [
+      "Span every tribunal, gate, calibration, and closure flow",
+      "Emit metrics: gate_pass/fail, calibration_brier, regression_drift, collusion_score, closure_rate",
+      "Structured logs with task_id + evidence_id correlation",
+      "Alert on gate failure spikes and owner-override usage",
+      "Audit dashboard over ledger (append-only reads)"
+    ],
+    "rollback": [
+      "Kill-switch per gate and per swarm component",
+      "Feature-flag all new P07 flows; default-off outside preprod",
+      "Ledger appends immutable — rollback via superseding records, never deletes",
+      "Promotion/delete actions reversible via prior snapshot reference",
+      "Rollback drill in B8 before any staging sign-off"
+    ],
+    "distillation_targets": [
+      "Reusable P07 judgment rubric (evaluator playbook) from tribunal outcomes",
+      "Calibration model distilled into lightweight scorer",
+      "Verifier generator patterns → reusable verifier library",
+      "Gate policy set → baseline policy bundle for future programs",
+      "Dispute resolution precedents → claims knowledge base"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

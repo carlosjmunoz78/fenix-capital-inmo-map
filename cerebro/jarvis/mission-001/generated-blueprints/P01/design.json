@@ -2,14 +2,585 @@
   "program_id": "P01",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 2,
   "usage": {
-    "input_tokens": 37182,
-    "cached_input_tokens": 36992,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 2015,
+    "cached_input_tokens": 1792,
+    "output_tokens": 2464,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001219476,
+  "cost_usd": 0.001517226,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      {
+        "item": "Event bus / message fabric",
+        "note": "Reuse existing queue/stream infra as substrate for Universal Event Fabric and Command Log"
+      },
+      {
+        "item": "Identity provider (OIDC/SSO)",
+        "note": "Wrap for ROOT_OF_TRUST, DURABLE_IDENTITY, IDENTITY_CONTINUITY"
+      },
+      {
+        "item": "Secrets manager / KMS",
+        "note": "Back IDENTITY_VAULT and CREDENTIAL_BROKER"
+      },
+      {
+        "item": "Existing policy engine (OPA/Cedar-like)",
+        "note": "Base for POLICY_COMPILER and POLICY_CONFLICT_RESOLUTION"
+      },
+      {
+        "item": "Existing observability stack (metrics/logs/traces)",
+        "note": "Feed OBSERVATION_COVERAGE_MAP, COMPLETENESS_INDEX"
+      },
+      {
+        "item": "Existing CI/CD + feature flags",
+        "note": "Gate AUTONOMY_LADDER steps and HIGH_IMPACT_CHANGE"
+      },
+      {
+        "item": "Existing search/index (lexical+vector)",
+        "note": "Found UNIVERSAL_SEARCH / RECALL / CAUSAL_TRACE"
+      },
+      {
+        "item": "Existing workflow orchestrator (Temporal-like)",
+        "note": "Back DURABLE_MISSIONS, HUMAN_WORK_ORCHESTRATOR"
+      },
+      {
+        "item": "Existing graph DB",
+        "note": "Base AUTHORITY_GRAPH, RELATIONSHIP_GRAPH, CORPORATE_STRUCTURE_GRAPH, TRUST_FABRIC, CAUSAL_MAP"
+      },
+      {
+        "item": "Existing ledger/append-only store",
+        "note": "EVIDENCE_INTEGRITY_LEDGER and COMMITMENT_LEDGER"
+      },
+      {
+        "item": "Existing billing/cost tagging",
+        "note": "COST_FINOPS and COST_VS_QUALITY"
+      },
+      {
+        "item": "Existing localization/translation service",
+        "note": "LOCALIZATION_ENGINE and MULTILINGUAL_REPRESENTATION"
+      }
+    ],
+    "gaps": [
+      {
+        "id": "G1",
+        "gap": "Canonical schema registry for Mission Contract, Success Criteria Lock, Policy DSL versions",
+        "priority": "P0"
+      },
+      {
+        "id": "G2",
+        "gap": "Secure Time Authority with signed timestamps and clock-skew guards",
+        "priority": "P0"
+      },
+      {
+        "id": "G3",
+        "gap": "Split-brain detection and fencing token service",
+        "priority": "P0"
+      },
+      {
+        "id": "G4",
+        "gap": "Split-brain-safe distributed state reconciliation",
+        "priority": "P0"
+      },
+      {
+        "id": "G5",
+        "gap": "Intent Compiler contract (intent->mission->criteria)",
+        "priority": "P0"
+      },
+      {
+        "id": "G6",
+        "gap": "Abort/Kill switch with audited authority chain",
+        "priority": "P0"
+      },
+      {
+        "id": "G7",
+        "gap": "Point-in-time reality snapshots and time-travel replay",
+        "priority": "P1"
+      },
+      {
+        "id": "G8",
+        "gap": "Autonomy Ladder state machine and per-domain caps",
+        "priority": "P1"
+      },
+      {
+        "id": "G9",
+        "gap": "Triangulation and Active Uncertainty Reduction runtime",
+        "priority": "P1"
+      },
+      {
+        "id": "G10",
+        "gap": "Anti-gaming / Goodhart detectors on success metrics",
+        "priority": "P1"
+      },
+      {
+        "id": "G11",
+        "gap": "Quality Degradation Ladder runtime",
+        "priority": "P1"
+      },
+      {
+        "id": "G12",
+        "gap": "Money Guard intersector for all spend paths",
+        "priority": "P0"
+      }
+    ],
+    "contracts": [
+      {
+        "name": "MissionContract",
+        "v": "1.0",
+        "fields": [
+          "mission_id",
+          "intent_ref",
+          "owner_root",
+          "success_criteria",
+          "abort_criteria",
+          "autonomy_level",
+          "budget",
+          "deadline",
+          "evidence_requirements",
+          "policy_refs"
+        ]
+      },
+      {
+        "name": "SuccessCriteriaLock",
+        "v": "1.0",
+        "fields": [
+          "criteria_id",
+          "metric_defs",
+          "thresholds",
+          "triangulation_set",
+          "goodhart_guards",
+          "locked_at",
+          "locked_by"
+        ]
+      },
+      {
+        "name": "AbortCriteria",
+        "v": "1.0",
+        "fields": [
+          "abort_id",
+          "triggers",
+          "authority_required",
+          "effects",
+          "audit_ref"
+        ]
+      },
+      {
+        "name": "CommandEnvelope",
+        "v": "1.0",
+        "fields": [
+          "cmd_id",
+          "tsa_time",
+          "issuer",
+          "authority_chain",
+          "mission_id",
+          "payload_ref",
+          "signature"
+        ]
+      },
+      {
+        "name": "PolicyBundle",
+        "v": "1.0",
+        "fields": [
+          "policy_id",
+          "version",
+          "rules",
+          "conflict_resolution",
+          "precedence",
+          "signed_by"
+        ]
+      },
+      {
+        "name": "EvidenceRecord",
+        "v": "1.0",
+        "fields": [
+          "ev_id",
+          "source",
+          "hash",
+          "tsa_time",
+          "chain_prev",
+          "custody",
+          "mission_id"
+        ]
+      },
+      {
+        "name": "IdentityAssertion",
+        "v": "1.0",
+        "fields": [
+          "subject",
+          "issuer",
+          "roles",
+          "delegation_chain",
+          "valid_from",
+          "valid_to",
+          "signature"
+        ]
+      },
+      {
+        "name": "VaultLease",
+        "v": "1.0",
+        "fields": [
+          "lease_id",
+          "subject",
+          "secret_ref",
+          "scope",
+          "ttl",
+          "issued_by"
+        ]
+      },
+      {
+        "name": "PointInTimeSnapshot",
+        "v": "1.0",
+        "fields": [
+          "snap_id",
+          "as_of",
+          "sources",
+          "consistency_level",
+          "hash"
+        ]
+      },
+      {
+        "name": "ReplayRequest",
+        "v": "1.0",
+        "fields": [
+          "replay_id",
+          "mission_id",
+          "as_of",
+          "what_if",
+          "max_depth"
+        ]
+      }
+    ],
+    "implementation_batches": [
+      {
+        "batch": 1,
+        "name": "Substrate",
+        "scope": [
+          "G1 schema registry",
+          "G2 Secure Time Authority",
+          "G3 fencing tokens",
+          "CommandEnvelope",
+          "MissionContract"
+        ],
+        "exit": "signed contracts + TSA in preprod"
+      },
+      {
+        "batch": 2,
+        "name": "Identity & Trust",
+        "scope": [
+          "IdentityAssertion",
+          "VaultLease",
+          "AUTHORITY_GRAPH (transitive)",
+          "ROOT_OF_TRUST continuity"
+        ],
+        "exit": "delegation & revocation proven"
+      },
+      {
+        "batch": 3,
+        "name": "Intent & Missions",
+        "scope": [
+          "Intent Compiler",
+          "SuccessCriteriaLock",
+          "AbortCriteria",
+          "durbale mission state"
+        ],
+        "exit": "mission lifecycle end-to-end"
+      },
+      {
+        "batch": 4,
+        "name": "Event Fabric & Log",
+        "scope": [
+          "Universal Event Fabric",
+          "PointInTimeSnapshot",
+          "CommandLog"
+        ],
+        "exit": "replayable snapshots"
+      },
+      {
+        "batch": 5,
+        "name": "Autonomy & Safety",
+        "scope": [
+          "AutonomyLadder",
+          "MoneyGuard",
+          "AntiGaming",
+          "QualityDegradationLadder",
+          "FormalSafetyCore hooks"
+        ],
+        "exit": "caps enforced; guards fire"
+      },
+      {
+        "batch": 6,
+        "name": "Intel & Search",
+        "scope": [
+          "UniversalSearch/Recall",
+          "CausalMap",
+          "Triangulation",
+          "UncertaintyReduction"
+        ],
+        "exit": "causal trace demo"
+      },
+      {
+        "batch": 7,
+        "name": "Governance & Audit",
+        "scope": [
+          "PolicyCompiler",
+          "ConflictResolution",
+          "EvidenceLedger",
+          "ExternalAuditMode"
+        ],
+        "exit": "audited preprod export"
+      },
+      {
+        "batch": 8,
+        "name": "Experience",
+        "scope": [
+          "IntentFirstUI",
+          "WhatDoIKnowNow",
+          "DecisionReplay/WhatIf"
+        ],
+        "exit": "owner flow demo"
+      },
+      {
+        "batch": 9,
+        "name": "Scale-out wrappers",
+        "scope": [
+          "Backpressure",
+          "StorageTiering",
+          "ResourceAutopilot",
+          "HumanWorkOrchestrator"
+        ],
+        "exit": "load & cost SLOs"
+      },
+      {
+        "batch": 10,
+        "name": "Hardening",
+        "scope": [
+          "SplitBrain tests",
+          "SuccessorTest",
+          "IntelHotSwap",
+          "MiniCore freeze"
+        ],
+        "exit": "invariants green"
+      }
+    ],
+    "tests": [
+      {
+        "id": "T1",
+        "test": "MissionContract schema fuzz + backward-compat evolution"
+      },
+      {
+        "id": "T2",
+        "test": "TSA monotonicity and skew rejection"
+      },
+      {
+        "id": "T3",
+        "test": "Split-brain: two leaders => one fenced, zero writes"
+      },
+      {
+        "id": "T4",
+        "test": "Abort/Kill within SLO across all runtimes"
+      },
+      {
+        "id": "T5",
+        "test": "Transitive authority: revoked ancestor blocks leaf"
+      },
+      {
+        "id": "T6",
+        "test": "Vault lease TTL expiry and audit trail"
+      },
+      {
+        "id": "T7",
+        "test": "Success criteria Goodhart simulation (gaming attempts rejected)"
+      },
+      {
+        "id": "T8",
+        "test": "MoneyGuard blocks over-budget spend pre-prod"
+      },
+      {
+        "id": "T9",
+        "test": "Point-in-time replay reproduces decision deterministically"
+      },
+      {
+        "id": "T10",
+        "test": "EvidenceLedger tamper detection (hash chain)"
+      },
+      {
+        "id": "T11",
+        "test": "Autonomy ladder cap violations rejected"
+      },
+      {
+        "id": "T12",
+        "test": "Intent-first UI flows map 1:1 to compiled missions"
+      }
+    ],
+    "security": [
+      {
+        "k": "OwnerRoot",
+        "v": "single root identity with hardware-backed key; all authority derives via signed chain"
+      },
+      {
+        "k": "LeastPrivilege",
+        "v": "per-mission scoped tokens and short-lived vault leases"
+      },
+      {
+        "k": "NoProdWrite",
+        "v": "env tags enforced at API gateway and policy engine"
+      },
+      {
+        "k": "SignedCommands",
+        "v": "every command carries TSA time + chain + signature"
+      },
+      {
+        "k": "Fencing",
+        "v": "split-brain protected by monotonic fencing tokens"
+      },
+      {
+        "k": "ImmutableEvidence",
+        "v": "append-only ledger with hash chain"
+      },
+      {
+        "k": "PolicyPrecedence",
+        "v": "values constitution > safety core > mission > defaults"
+      },
+      {
+        "k": "ExternalAgentDiplomacy",
+        "v": "trust fabric with due diligence gates"
+      },
+      {
+        "k": "SecretHygiene",
+        "v": "no secrets in logs; broker-only issuance"
+      },
+      {
+        "k": "AuditMode",
+        "v": "external audit read-only export with redaction rules"
+      }
+    ],
+    "observability": [
+      {
+        "k": "CoverageMap",
+        "v": "observation coverage per domain with gaps surfaced"
+      },
+      {
+        "k": "CompletenessIndex",
+        "v": "per-domain completeness score with trend"
+      },
+      {
+        "k": "DecisionLatencyBudget",
+        "v": "p50/p95 by decision class"
+      },
+      {
+        "k": "CausalTrace",
+        "v": "per-mission causal graph exportable"
+      },
+      {
+        "k": "MissionTimeline",
+        "v": "tail of mission events with criteria/threshold markers"
+      },
+      {
+        "k": "GuardFires",
+        "v": "counters for MoneyGuard, AntiGaming, SafetyCore"
+      },
+      {
+        "k": "AutonomyDrift",
+        "v": "delta between granted vs used autonomy"
+      },
+      {
+        "k": "CostFinOps",
+        "v": "cost per mission and per resolved item"
+      },
+      {
+        "k": "SplitBrainAlerts",
+        "v": "fence conflicts and state divergence"
+      },
+      {
+        "k": "SemanticDrift",
+        "v": "embedding drift of key terms per policy"
+      }
+    ],
+    "rollback": [
+      {
+        "k": "ContractVersioning",
+        "v": "schema registry keeps prior versions; readers dual-read"
+      },
+      {
+        "k": "PolicyRollback",
+        "v": "signed bundle pin; instant revert to prior bundle"
+      },
+      {
+        "k": "MissionAbort",
+        "v": "AbortCriteria triggers compensation saga then quarantine"
+      },
+      {
+        "k": "AutonomyDowngrade",
+        "v": "ladder drops to lower tier on guard fire"
+      },
+      {
+        "k": "IntelHotSwap",
+        "v": "route to previous model/profile via feature flag"
+      },
+      {
+        "k": "StateSnapshots",
+        "v": "point-in-time restore in preprod"
+      },
+      {
+        "k": "FeatureFlagsKill",
+        "v": "per-batch off-switches"
+      },
+      {
+        "k": "LedgerPreserved",
+        "v": "rollback never mutates evidence chain"
+      }
+    ],
+    "distillation_targets": [
+      {
+        "k": "MiniCore",
+        "v": "minimal immutable kernel: CommandEnvelope, TSA, fencing, policy precedence"
+      },
+      {
+        "k": "InvariantsList",
+        "v": "owner-root, no-prod-write, signed-commands, evidence-immutability, abort-within-SLO, split-brain-single-leader"
+      },
+      {
+        "k": "SuccessorTest",
+        "v": "new model/agent replays N missions to parity"
+      },
+      {
+        "k": "TeachOnce",
+        "v": "preference/decision captured once -> durable policy"
+      },
+      {
+        "k": "NeverAskAgain",
+        "v": "answered intents become policy defaults"
+      },
+      {
+        "k": "Supersession",
+        "v": "new specs supersede older without loss via ledger"
+      },
+      {
+        "k": "AuthorityGraphSubset",
+        "v": "core subgraph frozen with invariants"
+      },
+      {
+        "k": "FastPath",
+        "v": "pre-approved low-risk action classes"
+      },
+      {
+        "k": "ValuesConstitution",
+        "v": "signed, versioned, immutable"
+      },
+      {
+        "k": "BuildPhilosophy",
+        "v": "wrappers-first, reuse-first, preprod-only"
+      }
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

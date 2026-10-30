@@ -2,14 +2,111 @@
   "program_id": "P05",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 3709,
-    "cached_input_tokens": 3456,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 372,
+    "cached_input_tokens": 128,
+    "output_tokens": 730,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001128318,
+  "cost_usd": 0.000474984,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "P05 runtime supervisor and job scheduler",
+      "checkpoint store abstraction and resume controller",
+      "execution-mesh node registry and dispatcher",
+      "cloud provider adapter interface",
+      "sync/partition state machine",
+      "hot-standby promotion controller",
+      "node-economy ledger and quota service",
+      "feature flags and PREPROD gating",
+      "offline sovereign mode toggle",
+      "observability pipeline (traces/metrics/logs)"
+    ],
+    "gaps": [
+      "cloud-primary/dev-extended/local-capable policy router",
+      "always-on cloud core liveness SLA enforcement",
+      "exact-resume determinism guarantees across providers",
+      "mesh partition-aware scheduling",
+      "provider-concentration risk scoring",
+      "cloud-exit readiness export/packager",
+      "provider abstraction for node economy metering",
+      "offline-to-online reconciliation protocol",
+      "hot-standby drift detection",
+      "unified provider capability manifest"
+    ],
+    "contracts": [
+      "CheckpointContract: versioned, content-addressed, exact-resume verifiable",
+      "ResumeContract: idempotent, deterministic replay semantics",
+      "MeshDispatchContract: partition-aware routing",
+      "PresenceContract: cloud/dev/local capability advertising",
+      "ProviderAdapterContract: capability manifest + metering hooks",
+      "StandbyContract: promotion eligibility and drift bounds",
+      "ExitReadinessContract: portable export bundle schema",
+      "NodeEconomyContract: metered units and quota enforcement",
+      "OfflineSovereignContract: local-authoritative mode attestation",
+      "ConcentrationRiskContract: exposure metrics and thresholds"
+    ],
+    "implementation_batches": [
+      "B1: capability manifest + provider adapter wrapper (reuse existing adapter)",
+      "B2: policy router for cloud-primary/dev-extended/local-capable (wraps existing supervisor)",
+      "B3: checkpoint exact-resume verifier added to resume controller",
+      "B4: mesh partition-aware dispatch layer",
+      "B5: hot-standby drift detection + promotion hooks",
+      "B6: provider-concentration risk scorer",
+      "B7: cloud-exit readiness exporter",
+      "B8: offline sovereign reconciliation protocol",
+      "B9: node-economy metering via adapter hooks",
+      "B10: observability spans across all new wrappers"
+    ],
+    "tests": [
+      "checkpoint round-trip exact-resume determinism",
+      "resume idempotency under duplicate triggers",
+      "mesh dispatch under simulated partition",
+      "hot-standby drift within bounds, promotion dry-run",
+      "offline→online reconciliation convergence",
+      "provider failover via adapter wrapper",
+      "concentration risk threshold crossing alerts",
+      "exit-readiness bundle reconstructs runtime",
+      "node-economy quota enforcement",
+      "PREPROD gating blocks prod writes"
+    ],
+    "security": [
+      "no prod writes: PREPROD_ONLY enforced at adapter boundary",
+      "signed checkpoint bundles (integrity)",
+      "offline sovereign attestation with device binding",
+      "provider credentials via secret manager only",
+      "audit trail for standby promotion and exit export"
+    ],
+    "observability": [
+      "spans: policy.route, checkpoint.verify, mesh.dispatch, standby.promote, reconcile",
+      "metrics: resume_latency, drift_delta, concentration_index, quota_usage",
+      "logs: adapter fallback events, partition transitions",
+      "alerts: liveness SLA breach, drift over bound, concentration over threshold"
+    ],
+    "rollback": [
+      "feature-flag disable per batch (B1–B10)",
+      "adapter wrapper fallback to legacy direct path",
+      "checkpoint schema version pin with dual-read",
+      "standby promotion reversible pre-commit",
+      "exit bundle is read-only export (no runtime mutation)"
+    ],
+    "distillation_targets": [
+      "policy router decision table",
+      "provider capability manifest",
+      "exact-resume verification checklist",
+      "concentration risk thresholds",
+      "offline reconciliation protocol steps"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

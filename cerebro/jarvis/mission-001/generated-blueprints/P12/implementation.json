@@ -2,14 +2,149 @@
   "program_id": "P12",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 330,
-    "cached_input_tokens": 128,
-    "output_tokens": 2000,
-    "reasoning_tokens": 2000
+    "input_tokens": 1898,
+    "cached_input_tokens": 0,
+    "output_tokens": 1340,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001230684,
+  "cost_usd": 0.0010887,
   "blueprint": {
-    "raw_text": ""
-  }
+    "reuse_map": {
+      "discovery_pipeline_core": "extend with DiscoveryStage contracts (no new pipelines)",
+      "supabase_client_migrations": "add versioned migrations + RPC/edge wrappers for unsupported SQL",
+      "question_generator_prompt_registry": "parameterize per-domain; add scoring/dedup ledger",
+      "clone_learning_sandbox": "wrap with quarantine state machine",
+      "process_mining_event_schema": "add conformance/bottleneck wrappers",
+      "strategic_pattern_store": "add versioned PatternEntry + retrieval API",
+      "scheduler_cron": "extend to opening/closure runbook executor",
+      "feature_flag_killswitch": "gate all DISCOVERY→AUTOMATION/PRODUCT handoffs",
+      "observability_stack": "add discovery spans, ledger metrics, TTM histogram",
+      "llm_gateway": "plug DEEPSEEK_TEMPORARY as provider behind policy/fallback",
+      "preprod_namespace": "enforce PREPROD_ONLY at handoff ingress"
+    },
+    "files_to_add": [
+      "contracts/discovery_stage.schema.json",
+      "contracts/question_candidate.schema.json",
+      "contracts/process_mining_result.schema.json",
+      "contracts/research_problem.schema.json",
+      "contracts/discovery_handoff.schema.json",
+      "contracts/quarantine_record.schema.json",
+      "contracts/pattern_entry.schema.json",
+      "contracts/bootstrap_template.schema.json",
+      "contracts/daily_runbook.schema.json",
+      "contracts/llm_provider.schema.json",
+      "contracts/mastery_metric.schema.json",
+      "contracts/supabase_capability.schema.json"
+    ],
+    "files_to_modify_candidate_only": [
+      "discovery_pipeline/stages/*.py (adopt DiscoveryStage contract)",
+      "llm_gateway/providers/registry.py (add DEEPSEEK_TEMPORARY+policy)",
+      "supabase/adapters/capability_matrix.json",
+      "clone_learning/quarantine_state_machine.py",
+      "strategic_patterns/store.py (versioning)",
+      "scheduler/daily_runbook_executor.py",
+      "observability/spans/discovery.py",
+      "feature_flags/handoff_gates.yaml",
+      "question_gen/generator.py (scoring/dedup hooks)",
+      "migrations/ (versioned up/down)",
+      "handoff/ingress_preprod_guard.py",
+      "bootstrap/genesis_engine.py"
+    ],
+    "contracts": [
+      "DiscoveryStage{stage_id, inputs, outputs, exit_criteria, budget, version}",
+      "QuestionCandidate{prompt, domain, score, dedup_hash, provenance, status}",
+      "ProcessMiningResult{log_ref, conformance, bottlenecks, variants}",
+      "ResearchProblem{objective, constraints, solver, solution_ref, sensitivity}",
+      "DiscoveryHandoff{target: AUTOMATION|PRODUCT, artifact_ref, preprod_only:true, approval_ref}",
+      "QuarantineRecord{clone_id, status, evidence, promotion_gate, reviewer}",
+      "PatternEntry{pattern_id, version, trigger, action, evidence_refs, ttl}",
+      "BootstrapTemplate{company_id, steps, required_assets, validation_rules}",
+      "DailyRunbook{date, opening[], closure[], evidence, kpis}",
+      "LLMProvider{name, policy, expiry, fallback, allowlist}",
+      "MasteryMetric{skill_id, trials, proficiency_curve, ttm_estimate}",
+      "SupabaseCapability{feature, supported, wrapper: RPC|EDGE|APP}"
+    ],
+    "tests": [
+      "contract_tests_per_discovery_stage",
+      "preprod_only_handoff_block_test",
+      "question_dedup_score_threshold_test",
+      "supabase_wrapper_parity_test",
+      "quarantine_promotion_gate_negative_test",
+      "process_mining_conformance_fixture_test",
+      "or_engine_determinism_sensitivity_test",
+      "deepseek_policy_expiry_fallback_test",
+      "genesis_bootstrap_dryrun_golden_test",
+      "daily_runbook_idempotency_test",
+      "ttm_metric_synthetic_curve_test",
+      "pattern_library_versioning_retrieval_test"
+    ],
+    "rollout_order": [
+      "B1 supabase_capability_matrix + llm_gateway_deepseek_policy",
+      "B2 discovery_stage_contract + question_scoring_dedup",
+      "B3 process_mining + or_engine_wrappers",
+      "B4 discovery_handoffs_preprod_only",
+      "B5 quarantine_sm + pattern_library_v1",
+      "B6 genesis_bootstrap + daily_runbook",
+      "B7 ttm_instrumentation + e2e_validation"
+    ],
+    "rollback": [
+      "feature_flag_per_stage_and_handoff (disable reverts path)",
+      "down_migrations_for_all_schema_changes",
+      "delete_by_run_id_for_additive_writes",
+      "deepseek_route_revert_via_gateway_config",
+      "bootstrap_dryrun_only_abort_deletes_namespace",
+      "pattern_library_pin_prior_version",
+      "daily_runbook_rerun_overwrites_same_day_evidence",
+      "handoff_counter_reset_and_flag_off"
+    ],
+    "evidence": [
+      "capability_matrix_published_snapshot",
+      "deepseek_policy_flag_and_expiry_artifact",
+      "pipeline_runs_on_contract_log",
+      "question_ledger_dedup_report",
+      "engine_sample_contract_outputs",
+      "handoff_blocked_in_prod_test_log",
+      "quarantine_promotion_gate_records",
+      "genesis_dryrun_artifacts",
+      "daily_runbook_evidence_bundle",
+      "ttm_histogram_sample",
+      "supabase_wrapper_latency_dashboard"
+    ],
+    "distillation": [
+      "discovery_stage_contract_wiring_guide",
+      "supabase_capability_matrix_wrapper_patterns",
+      "deepseek_temporary_dependency_policy_runbook",
+      "quarantine_promotion_gate_checklist",
+      "handoff_contract_spec_automation_product",
+      "pattern_library_schema_retrieval_api",
+      "genesis_bootstrap_template_spec",
+      "daily_opening_closure_runbook_template",
+      "ttm_metric_definition_dashboard",
+      "preprod_only_enforcement_patterns"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve_discovery_handoff_contract_and_preprod_enforcement (B4)",
+    "approve_quarantine_promotion_reviews (B5)",
+    "approve_deepseek_allowlist_and_expiry (B1)",
+    "approve_genesis_bootstrap_promotion_from_dryrun (B6)",
+    "approve_pattern_library_v1_schema (B5)"
+  ],
+  "model_advisory_approvals": [
+    "approve_discovery_handoff_contract_and_preprod_enforcement (B4)",
+    "approve_quarantine_promotion_reviews (B5)",
+    "approve_deepseek_allowlist_and_expiry (B1)",
+    "approve_genesis_bootstrap_promotion_from_dryrun (B6)",
+    "approve_pattern_library_v1_schema (B5)"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

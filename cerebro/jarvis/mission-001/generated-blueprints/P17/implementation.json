@@ -2,14 +2,117 @@
   "program_id": "P17",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 140,
+    "input_tokens": 1020,
     "cached_input_tokens": 0,
-    "output_tokens": 2000,
-    "reasoning_tokens": 2000
+    "output_tokens": 921,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001221,
+  "cost_usd": 0.0007056,
   "blueprint": {
-    "raw_text": ""
-  }
+    "reuse_map": {
+      "view_shell": "P17 section 16 Jarvis scaffold (routing/layout)",
+      "telemetry_bus": "existing telemetry/event bus",
+      "components": "existing component library (buttons/cards/tables/modals)",
+      "gating": "existing RBAC + feature-flag service",
+      "data_access": "existing API gateway + typed client (read-only)",
+      "notifications": "existing toast/notification system",
+      "adapters": "existing Jarvis read-model data adapters",
+      "theming": "existing i18n + theme tokens"
+    },
+    "files_to_add": [
+      "src/jarvis/view0/View0Composition.ts",
+      "src/jarvis/view0/PanelDescriptor.ts",
+      "src/jarvis/view0/AdaptivePolicy.ts",
+      "src/jarvis/view0/ReadAdapterResult.ts",
+      "src/jarvis/view0/ConsoleTelemetryEvent.ts",
+      "src/jarvis/view0/HandoffBrief.ts",
+      "src/jarvis/view0/stateTemplates.tsx",
+      "src/jarvis/view0/__tests__/contracts.test.ts",
+      "src/jarvis/view0/__tests__/adaptivePolicy.test.ts",
+      "src/jarvis/view0/__tests__/telemetry.test.ts",
+      "src/jarvis/view0/__tests__/readonly.test.ts"
+    ],
+    "files_to_modify_candidate_only": [
+      "src/jarvis/view0/JarvisView0.tsx (wire panels to ReadAdapterResult wrappers)",
+      "src/jarvis/view0/routes.ts (register composition)",
+      "src/jarvis/adapters/jarvisReadAdapter.ts (wrap existing adapters, no rewrite)",
+      "src/jarvis/telemetry/emit.ts (emit ConsoleTelemetryEvent)",
+      "src/jarvis/flags/viewGates.ts (advisor-only gating)",
+      "config/jarvis/view0.policy.json (AdaptivePolicy breakpoints/priorities)"
+    ],
+    "contracts": [
+      "View0Composition:{panels[],layoutPolicy,density,priorityTier}",
+      "PanelDescriptor:{id,title,adapterRef,stateTemplates,priorityTier}",
+      "AdaptivePolicy:{breakpoints,minDensity,reorderByTier,maxPanels}",
+      "ReadAdapterResult:{status:ok|degraded|unavailable,data?,reason?}",
+      "ConsoleTelemetryEvent:{view,panel,action,ts,meta} (no PII)",
+      "HandoffBrief:{programId,scope,panels,decisions,openQuestions}",
+      "FeatureGate:{viewId,flag,rbacRole} (advisor-only)"
+    ],
+    "tests": [
+      "View0Composition/PanelDescriptor schema validity",
+      "Adapter wrapper ok/degraded/unavailable mapping",
+      "AdaptivePolicy breakpoint + tier reorder unit tests",
+      "State-template rendering per panel",
+      "Telemetry schema + PII-absence assertions",
+      "Feature-gate hidden when flag/role absent",
+      "HandoffBrief structural validation",
+      "No-prod-write assertion across adapters/endpoints"
+    ],
+    "rollout_order": [
+      "B1 contracts freeze + shell wiring (candidate branch)",
+      "B2 state templates via existing components",
+      "B3 AdaptivePolicy pure resolver from config",
+      "B4 telemetry emission via existing bus (validated, no PII)",
+      "B5 HandoffBrief generation + preprod snapshot"
+    ],
+    "rollback": [
+      "Feature flag reverts View 0 to legacy shell",
+      "AdaptivePolicy config-revert (no code change)",
+      "Adapter wrappers fail-safe to degraded, never throw",
+      "Telemetry emission toggle off (non-blocking)",
+      "HandoffBrief skip-on-failure (non-blocking)"
+    ],
+    "evidence": [
+      "Contract schema test reports",
+      "AdaptivePolicy breakpoint/tier test outputs",
+      "Telemetry PII-absence assertion log",
+      "Read-only assertion test results",
+      "Preprod HandoffBrief snapshot artifact",
+      "Feature-gate gating evidence (flag/role absent)",
+      "State-template fallback rate metric sample",
+      "Adapter health gauge capture (preprod)"
+    ],
+    "distillation": [
+      "View0Composition + PanelDescriptor as canonical UX contract",
+      "AdaptivePolicy as reusable cross-view resolver",
+      "ReadAdapterResult as standard degradation envelope",
+      "ConsoleTelemetryEvent as shared UI signal schema",
+      "HandoffBrief as reusable program handoff template"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "Approve View0Composition + PanelDescriptor freeze before B1 merge",
+    "Confirm advisor-only RBAC roles for View 0 gating",
+    "Sign off AdaptivePolicy breakpoints/density defaults",
+    "Review HandoffBrief template fields",
+    "Authorize preprod snapshot release"
+  ],
+  "model_advisory_approvals": [
+    "Approve View0Composition + PanelDescriptor freeze before B1 merge",
+    "Confirm advisor-only RBAC roles for View 0 gating",
+    "Sign off AdaptivePolicy breakpoints/density defaults",
+    "Review HandoffBrief template fields",
+    "Authorize preprod snapshot release"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

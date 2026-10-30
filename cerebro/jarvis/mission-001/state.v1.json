@@ -1,0 +1,146 @@
+{
+  "schema_version": "1.5",
+  "mission_id": "MISSION-JARVIS-001",
+  "environment": "PREPROD",
+  "status": "CORE_PARCIAL_SEMANTIC_BLUEPRINTS_GOVERNED_GREEN",
+  "master": "JARVIS_MASTER_V1_RC2",
+  "programs": 18,
+  "master_sections": 421,
+  "work_units": 5924,
+  "tasks": 5473,
+  "blueprint_provenance": {
+    "source_run_id": 41013849206,
+    "source_artifact_id": 12958732178,
+    "recovered_without_new_paid_calls": true,
+    "valid_blueprints": 36,
+    "semantic_gate": "GREEN",
+    "governance_gate": "GREEN",
+    "model_advisory_approval_count": 69,
+    "active_human_required": []
+  },
+  "deepseek": {
+    "role": "TEMPORARY_COGNITIVE_ACCELERATOR",
+    "new_calls_in_recovery": 0,
+    "source_run_estimated_cost_usd": 0.028316442,
+    "known_estimated_cost_floor_usd_before_source_run": 0.123340086,
+    "known_estimated_cost_floor_usd_after_source_run": 0.151656528,
+    "unreconciled_failed_calls": 1,
+    "exact_total_cost_known": false,
+    "dependency_target": 0
+  },
+  "reuse_map": {
+    "existing": 8,
+    "partial": 6,
+    "gaps": 0,
+    "total": 14
+  },
+  "minimal_core": {
+    "status": "PARCIAL",
+    "green_or_defined_count": 6,
+    "partial_count": 4,
+    "missing_evidence_count": 0,
+    "components": [
+      {
+        "id": "IDENTITY",
+        "state": "CANDIDATE_GREEN",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs",
+          "cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "CONSTITUTION",
+        "state": "EXISTING_DEFINED",
+        "evidence": [
+          "cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "AUTHORITY",
+        "state": "CANDIDATE_GREEN",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs",
+          "cerebro/governance/identity-credential-broker.mjs"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "CONTEXT_COMPILER",
+        "state": "CANDIDATE_GREEN",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "WORLD_MEMORY_ACCESS",
+        "state": "PARCIAL",
+        "evidence": [
+          "cerebro/runtime/jarvis-project-hub-v1.mjs",
+          "cerebro/console/gateway.mjs"
+        ],
+        "gap": "SOVEREIGN_LONG_TERM_MEMORY_AND_WORLD_MODEL_NOT_YET_BOUND",
+        "evidence_present": true
+      },
+      {
+        "id": "ORCHESTRATOR",
+        "state": "CANDIDATE_GREEN_PLANNING_PARTIAL_RUNTIME",
+        "evidence": [
+          "cerebro/runtime/mission-recursive-decomposer-v1.mjs",
+          "cerebro/runtime/jarvis-mission-dag-v2.mjs",
+          "cerebro/runtime/job001-ledger-control-plane-v1.mjs",
+          "cerebro/jarvis/integration-v1/cerebro-binding-v1.mjs"
+        ],
+        "gap": "JARVIS_V2_JOB_HANDLER_NOT_YET_LIVE_BOUND",
+        "evidence_present": true
+      },
+      {
+        "id": "CAPABILITY_FABRIC",
+        "state": "CANDIDATE_GREEN_REGISTRY_AUDIT_REQUIRED",
+        "evidence": [
+          "cerebro/registry/engine-registry.seed.json",
+          "cerebro/jarvis/integration-v1/engine-registry-adapter-v1.mjs"
+        ],
+        "gap": "REGISTERED_ENGINES_MUST_NOT_BE_TREATED_AS_OPERATIONAL_WITHOUT_EVIDENCE",
+        "evidence_present": true
+      },
+      {
+        "id": "IFC_SECURITY",
+        "state": "CANDIDATE_GREEN",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs",
+          "cerebro/governance/identity-credential-broker.mjs"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "VERIFIER_EVALUATION",
+        "state": "CANDIDATE_GREEN_BOUND",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs",
+          "cerebro/runtime/evaluation-tribunal.mjs",
+          "cerebro/jarvis/integration-v1/cerebro-binding-v1.mjs",
+          "cerebro/tests/jarvis-integration-v1.test.mjs"
+        ],
+        "evidence_present": true
+      },
+      {
+        "id": "EVENT_EXECUTION_JOURNAL",
+        "state": "CANDIDATE_GREEN_EXISTING_JOB_PARTIAL",
+        "evidence": [
+          "cerebro/jarvis/core-v1/core-v1.mjs",
+          "cerebro/runtime/job001-ledger-control-plane-v1.mjs"
+        ],
+        "gap": "JOURNAL_TO_DURABLE_JOB_EVENT_RUNTIME_BINDING_NOT_YET_ACCEPTED",
+        "evidence_present": true
+      }
+    ]
+  },
+  "human_required": [],
+  "prod_touched": false,
+  "trading_touched": false,
+  "multicompany_router_state": "PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND",
+  "next_action": "Close remaining Minimal Core partials: sovereign World/Memory, live JARVIS JOB-001 E2E acceptance, per-engine Capability Fabric evidence, and Journal-to-runtime binding. Then execute bounded P01/P03/P04/P07 implementation batches."
+}

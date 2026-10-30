@@ -2,14 +2,149 @@
   "program_id": "P11",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 3055,
-    "cached_input_tokens": 2816,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1617
+    "input_tokens": 333,
+    "cached_input_tokens": 128,
+    "output_tokens": 1261,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001124298,
+  "cost_usd": 0.000787734,
   "blueprint": {
-    "raw_text": "{\n  \"existing_to_reuse\": [\n    {\n      \"name\": \"ORCH-001 mission DAG runner\",\n      \"reuse_as\": \"Execute P11 work units with dependencies, statuses, idempotency_key, evidence attachment, and PREPROD lifecycle.\"\n    },\n    {\n      \"name\": \"Mission evidence attachment pattern\",\n      \"reuse_as\": \"Attach evidence to each acceptance criterion without building a new evidence system.\"\n    },\n    {\n      \"name\": \"PREPROD environment policy gate\",\n      \"reuse_as\": \"Enforce PREPROD_ONLY, NO_PROD_WRITE, NO_TRADING, PAID_AI_DISABLED.\"\n    },\n    {\n      \"name\": \"Existing scheduler/job runner\",\n      \"reuse_as\": \"Schedule sensor acquisition and calibration checks; wrap instead of rewriting.\"\n    },\n   "
-  }
+    "existing_to_reuse": [
+      "Existing telemetry/metrics emitters and dashboards (Prometheus/Grafana or equivalent)",
+      "Existing structured logging + log aggregation pipeline",
+      "Existing OpenTelemetry trace instrumentation, if present",
+      "Existing experiment/feature-flag framework for preprod gating",
+      "Existing auth/RBAC for read-only observatory access",
+      "Existing event bus / message queue for sensor signal ingestion",
+      "Existing schema registry and data catalog if any",
+      "Existing retention/lifecycle policies for telemetry data",
+      "Existing CI contract-test harness (e.g., pact-style)",
+      "Existing alerting/runbook framework"
+    ],
+    "gaps": [
+      "No unified sensor registry with ownership, calibration state, and versioning",
+      "No measurement governance layer (metric definitions, owners, approval states)",
+      "No end-to-end data lineage from sensor emission to derived metric",
+      "No metric integrity checksums / tamper-evidence",
+      "No ground-truth acquisition planner (sampling, labeling, coverage planning)",
+      "No unknown-unknown hunter (anomaly surfacing beyond known dashboards)",
+      "No effectiveness observatory tying forward outcomes to interventions",
+      "No UX observatory for interaction-level signal capture (consented, preprod)",
+      "No calibration lifecycle (drift detection, recalibration scheduling)",
+      "No contract tests binding sensors to metric definitions"
+    ],
+    "contracts": [
+      "SensorDescriptor v1: {id, owner, version, unit, cadence, calibration_ref, schema_ref}",
+      "MetricDefinition v1: {metric_id, owner, formula_ref, unit, lineage_ref, integrity_ref, approval_state}",
+      "CalibrationRecord v1: {sensor_id, timestamp, method, params, drift_delta, next_due}",
+      "LineageEdge v1: {source_id, target_id, transform_ref, ts, hash}",
+      "IntegrityAttestation v1: {metric_id, window, checksum, computed_at, verifier}",
+      "GroundTruthPlan v1: {plan_id, hypothesis_ref, sampling_strategy, coverage_targets, labels_ref}",
+      "AnomalyCandidate v1: {id, detector_ref, signal_ref, score, first_seen, triage_state}",
+      "EffectivenessReport v1: {report_id, metric_refs, baseline_window, compare_window, delta, confidence}",
+      "UxSignalEvent v1: {session_ref (hashed), event_type, route_ref, dwell_ms, consent_flag}",
+      "ReadOnlyObservatoryAPI v1: all endpoints GET-only, POST returns 405 in preprod observatory namespace"
+    ],
+    "implementation_batches": [
+      {
+        "batch": 1,
+        "scope": "Registry + contracts scaffolding",
+        "notes": "Stand up SensorRegistry and MetricDefinition stores; add contract tests; reuse schema registry if present."
+      },
+      {
+        "batch": 2,
+        "scope": "Calibration lifecycle",
+        "notes": "Add CalibrationRecord store, drift detector wrapper, scheduling; read-only UI."
+      },
+      {
+        "batch": 3,
+        "scope": "Lineage capture",
+        "notes": "Instrument emitters to publish LineageEdge records; wrapper around existing emitters, no rewrite."
+      },
+      {
+        "batch": 4,
+        "scope": "Metric integrity",
+        "notes": "Checksum/attestation service over metric windows; verifier hook + alert."
+      },
+      {
+        "batch": 5,
+        "scope": "Ground-truth planner",
+        "notes": "Plan objects + coverage computation from existing signal catalog; read-only reporting."
+      },
+      {
+        "batch": 6,
+        "scope": "Unknown-unknown hunter (shadow mode)",
+        "notes": "Detector ensemble over existing signals; emits AnomalyCandidate only; no auto-action."
+      },
+      {
+        "batch": 7,
+        "scope": "Effectiveness + UX observatory",
+        "notes": "EffectivenessReport generator and consented UX signal capture behind preprod flag."
+      },
+      {
+        "batch": 8,
+        "scope": "Governance + distillation",
+        "notes": "Approval workflow for metrics, distillation targets, runbooks, docs."
+      }
+    ],
+    "tests": [
+      "Contract tests for all v1 schemas (SensorDescriptor, MetricDefinition, etc.)",
+      "Lineage completeness test: every derived metric traces to ≥1 sensor edge",
+      "Integrity attestation determinism test (same window → same checksum)",
+      "Calibration drift detector unit + replay tests on synthetic drift",
+      "Read-only API test: all observatory endpoints reject writes (405)",
+      "Ground-truth plan coverage computation property tests",
+      "Anomaly hunter shadow-mode test: no outbound side-effects, no prod writes",
+      "EffectivenessReport statistical sanity (delta bounds, confidence sane)",
+      "UX event consent gating test: events without consent_flag rejected",
+      "Retention/lifecycle test: telemetry expires per policy",
+      "PREPROD_ONLY guard test: production env fails fast on bootstrap"
+    ],
+    "security": [
+      "Read-only RBAC for observatory roles; least-privilege service accounts",
+      "Hashed session/driver identifiers in UX signals; no PII in telemetry",
+      "Tamper-evident checksums for metric integrity; append-only store",
+      "Secrets for detector/model refs via existing secret manager",
+      "Preprod-only namespace enforced via config guard at startup",
+      "Audit log for governance approvals and calibration changes"
+    ],
+    "observability": [
+      "Observatory self-metrics: registry size, lineage edge count, attestation latency",
+      "Calibration drift alarms with runbook links",
+      "AnomalyCandidate backlog and triage latency",
+      "EffectivenessReport generation success/freshness",
+      "Read-only API error rate and latency SLOs",
+      "Schema-registry contract-violation counter"
+    ],
+    "rollback": [
+      "Feature flags per batch (registry, calibration, lineage, integrity, planner, hunter, effectiveness, ux)",
+      "Shadow mode default for unknown-unknown hunter; disable flag reverts to no emission",
+      "Contract versions additive; deprecate via version bump not deletion",
+      "Append-only stores; rollback = disable writers + retain data",
+      "PREPROD_ONLY bootstrap guard fails closed",
+      "Per-batch migration scripts with documented down path"
+    ],
+    "distillation_targets": [
+      "Sensor registry + calibration playbook (concise)",
+      "Metric definition governance SOP",
+      "Lineage capture wrapper usage guide for engineers",
+      "Unknown-unknown triage runbook",
+      "Effectiveness measurement playbook",
+      "UX observatory consent + capture guide"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": "Approve metric definitions and governance/approval policy ownership, since metric semantics and sign-off authority cannot be safely inferred or auto-assigned.",
+  "model_advisory_approvals": [
+    "Approve metric definitions and governance/approval policy ownership, since metric semantics and sign-off authority cannot be safely inferred or auto-assigned."
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

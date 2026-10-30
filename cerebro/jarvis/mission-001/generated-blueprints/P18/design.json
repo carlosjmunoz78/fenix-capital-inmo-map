@@ -2,14 +2,92 @@
   "program_id": "P18",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 1156,
-    "cached_input_tokens": 1022,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1447
+    "input_tokens": 242,
+    "cached_input_tokens": 0,
+    "output_tokens": 606,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001103166,
+  "cost_usd": 0.0003999,
   "blueprint": {
-    "raw_text": "{\n  \"existing_to_reuse\": [\n    {\n      \"id\": \"ORCH-001_DAG_WRAPPER\",\n      \"reuse_as\": \"Execution wrapper for S179/S181/S232 dependency scheduling, idempotency keys, lifecycle state tracking, and run isolation.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"PREPROD_GUARD_POLICY_ENGINE\",\n      \"reuse_as\": \"Enforce PREPROD_ONLY, NO_PROD_WRITE, NO_TRADING, PAID_AI_ALLOWED=false.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"EVIDENCE_LEDGER_ARTIFACT_STORE\",\n      \"reuse_as\": \"Attach lifecycle-complete evidence, acceptance evidence, rollback/rebuild impact, and drill artifacts.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"LIFECYCLE_STATE_MACHINE\",\n      \"reuse_as\": \"Track READY -> RUNNING -> EVIDENCE_ATTACHED -> ACCEPTED/REJECTED for each requirement.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"INCIDENT_ESCALATION_HARNESS\",\n      \"reuse_as\": \"Simulate owner-unavailable escalation paths and minimal escalation behavior.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"METRICS_TELEMETRY_STACK\",\n      \"reuse_as\": \"Compute and expose OWNER_DEPENDENCY_RATE, escalation counts, evidence completeness, and drill status.\",\n      \"pre"
-  }
+    "existing_to_reuse": [
+      "jarvis.preprod.env harness",
+      "jarvis.policy.denylist (NO_TRADING/NO_PROD_WRITE guards)",
+      "jarvis.acceptance.runner",
+      "jarvis.drill.zero_carlos scenario lib",
+      "jarvis.audit.logger (append-only)",
+      "jarvis.governance.owner_capacity probe",
+      "jarvis.report.json_emitter",
+      "jarvis.trace.otel_hooks"
+    ],
+    "gaps": [
+      "No canonical zero-carlos drill assertion set",
+      "Institutional acceptance criteria scattered, no single manifest",
+      "Owner governance capacity has no preprod threshold spec",
+      "No unified acceptance verdict artifact",
+      "Drill needs deterministic replay seed",
+      "Missing denylist enforcement test for NO_PROD_WRITE",
+      "Lack of concise human-readable acceptance summary"
+    ],
+    "contracts": [
+      "drill.zero_carlos.spec.v1 (scenario, seeds, assertions)",
+      "acceptance.institutional.manifest.v1 (checks, thresholds)",
+      "governance.owner_capacity.contract.v1 (capacity thresholds)",
+      "religion/verdict artifact: acceptance.verdict.json schema",
+      "denylist.guard.assert.v1 (preprod-only enforcement)",
+      "audit.event.schema.v1 reuse, no change"
+    ],
+    "implementation_batches": [
+      "B1: extend jarvis.drill.zero_carlos with canonical assertion set + seed",
+      "B2: wrapper jarvis.acceptance.runner to consume institutional manifest",
+      "B3: add owner_capacity probe thresholds to governance module",
+      "B4: verdict emitter + concise JSON summary",
+      "B5: denylist enforcement test hooks"
+    ],
+    "tests": [
+      "zero-carlos drill passes deterministically with fixed seed",
+      "drill fails closed when NO_TRADING violated",
+      "acceptance manifest all checks green on preprod",
+      "owner_capacity below threshold yields non-accept verdict",
+      "NO_PROD_WRITE denylist blocks prod target",
+      "verdict artifact schema validates"
+    ],
+    "security": [
+      "enforce PREPROD_ONLY at runner entry",
+      "NO_TRADING denylist hard-fail (no override in preprod)",
+      "NO_PROD_WRITE guard asserts env tag ≠ prod",
+      "DEEPSEEK_TEMPORARY scope-limited, no secrets",
+      "audit append-only, no PII"
+    ],
+    "observability": [
+      "emit drill.start/stop audit events",
+      "trace each acceptance check via otel hooks",
+      "verdict.json written to preprod artifact store",
+      "alert on denylist trigger",
+      "summary log with pass/fail counts"
+    ],
+    "rollback": [
+      "disable new manifest via feature flag, fallback to legacy runner",
+      "revert drill assertion wrapper to prior seed set",
+      "feature-flag off owner_capacity probe",
+      "verdict emitter non-blocking; safe to noop"
+    ],
+    "distillation_targets": [
+      "zero-carlos canonical assertion list",
+      "institutional acceptance manifest checklist",
+      "owner governance capacity thresholds",
+      "preprod-only guard tests"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

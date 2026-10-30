@@ -4,7 +4,7 @@
   "program_id": "P02",
   "master_section": 154,
   "phase": "design",
-  "state": "PROGRAM_BLUEPRINT_REUSED",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
   "program_blueprint_ref": "P02/design.json",
   "human_required": null,
   "prod_write": false,

@@ -2,14 +2,133 @@
   "program_id": "P06",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 152,
+    "input_tokens": 1045,
     "cached_input_tokens": 0,
-    "output_tokens": 2000,
-    "reasoning_tokens": 970
+    "output_tokens": 1024,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.0012228,
+  "cost_usd": 0.00077115,
   "blueprint": {
-    "raw_text": "{\"reuse_map\":{\"policy\":\"Extend existing P06 platform primitives on candidate branch only; no production rollout. Reuse action, event, config, and observability components where present rather than introducing parallel engines.\",\"reuse\":[{\"component\":\"action dispatcher and executor\",\"target\":\"services/action-engine\",\"decision\":\"extend with idempotency keys, durable outbox, retry policy, cancellation, and transactional status model\"},{\"component\":\"saga/state-machine runtime\",\"target\":\"services/saga-orchestrator\",\"decision\":\"reuse persistence and event infrastructure; add compensation contracts, timeout handling, and replay-safe transitions\"},{\"component\":\"desired-state store and config provider\",\"target\":\"services/config-state\",\"decision\":\"reuse configuration read path; add normalized desired-state schema and drift evaluation hooks\"},{\"component\":\"event bus and outbox relay\",\"target\":\"platform/events\",\"decision\":\"reuse existing event bus; enforce at-least-once delivery with idempotent consumers\"},{\"component\":\"observability\",\"target\":\"platform/observability\",\"decision\":\"reuse tracing, metrics, audit log; add saga/action/drift correlation IDs\"},{\"component\":\"feature flags\",\"target\":\"platform/feature-flags\",\"decision\":\"reuse flags for candidate/preprod activation and rollback\"}],\"do_not_reuse\":[\"ad-hoc retry loops outside action engine\",\"direct provider mutations bypassing saga orchestration\",\"unversioned desired-state documents\",\"manual drift remediation without audit trail\"]},\"files_to_add\":[\"services/action-engine/src/idempotency.ts\",\"services/action-engine/src/outbox-relay.ts\",\"services/action-engine/src/transactional-action.ts\",\"services/action-engine/src/action-status.ts\",\"services/action-engine/src/retry-policy.ts\",\"services/action-engine/src/cancellation.ts\",\"services/action-engine/src/compensation-client.ts\",\"services/saga-orchestrator/src/saga-definition.ts\",\"services/saga-orchestrator/src/saga-runtime.ts\",\"services/saga-orchestrator/src/saga-state-store.ts\",\"services/saga-orchestrator/src/compensation-registry.ts\",\"services/saga-orchestrator/src/timeout-reconciler.ts\",\"services/config-state/src/desired-state-schema.ts\",\"services/config-state/src/drift-evaluator.ts\",\"services/config-state/src/drift-report.ts\",\"services/config-state/src/remediation-planner.ts\",\"contracts/openapi/action-engine.v1.yaml\",\"contracts/asyncapi/saga-events.v1.yaml\",\"contracts/jsonschema/desired-state.v1.json\",\"contracts/jsonschema/drift-report.v1.json\",\"contracts/jsonschema/action-request.v1.json\",\"contracts/jsonschema/compensation-request.v1.json\",\"tests/action-engine/idempotency.spec.ts\",\"tests/action-engine/outbox-relay.spec.ts\",\"tests/action-engine/transactional-action.spec.ts\",\"tests/saga-orchestrator/compensation.spec.ts\",\"tests/saga-orchestrator/timeout-reconciler.spec.ts\",\"tests/config-state/drift-evaluator.spec.ts\",\"tests/contracts/action-engine.contract.spec.ts\",\"tests/contracts/saga-events.contract.spec.ts\",\"tests/integration/preprod/action-saga-drift.e2e.spec.ts\",\"tests/chaos/saga-timeout-retry.spec.ts\",\"docs/preprod/action-engine-rollout.md\",\"docs/preprod/saga-compensation-runbook.md\",\"docs/preprod/config-drift-remediation-runbook.md\"],\"files_to_modify_candidate_only\":[\"services/action-engine/src/index.ts\",\"services/action-engine/src/router.ts\",\"services/action-engine/src/executor.ts\",\"services/action-engine/src/persistence.ts\",\"services/action-engine/src/metrics.ts\",\"services/saga-orchestrator/src/index.ts\",\"services/saga-orchestrator/src/router.ts\",\"services/saga-orchestrator/src/persistence.ts\",\"services/saga-orchestrator/src/metrics.ts\",\"services/config-state/src/index.ts\",\"services/config-state/src/api.ts\",\"services/config-state/src/reconciler.ts\",\"services/config-state/src/metrics.ts\",\"platform/events/src/consumer.ts\",\"platform/events/src/outbox.ts\",\"platform/observability/src/correlation.ts\",\"platform/feature-flags/src/flags.ts\",\"deploy/preprod/action-engine.values.yaml\",\"deploy/preprod/saga-orchestrator.values.yaml\",\"deploy/preprod/config-state.values.yaml\"],\"contracts\":[{\"name\":\"Action Engine API\",\"type\":\"OpenAPI 3.1\",\"path\":\"contracts/openapi/action-engine.v1.yaml\",\"covers\":[\"submit action\",\"query status\",\"cancel action\",\"idempotency key\",\"error taxonomy\"],\"compatibility\":\"additive only in candidate/preprod\"},{\"name\":\"Saga Events\",\"type\":\""
-  }
+    "reuse_map": {
+      "action_execution": "P05 kafka producer/consumer wrappers + outbox pattern",
+      "persistence": "P02 Postgres schema + migration tooling",
+      "observability": "P01 OpenTelemetry tracing + structured logging",
+      "idempotency": "Existing idempotency-key store / dedupe service",
+      "retry": "Existing retry/backoff utility (resilience4j or equivalent)",
+      "config_flags": "Existing config service and feature-flag client",
+      "secrets": "Existing secrets manager integration (preprod vault)"
+    },
+    "files_to_add": [
+      "engine/api/ActionRequest.java",
+      "engine/api/ActionResult.java",
+      "engine/spi/TransactionalActionEngine.java",
+      "engine/idempotency/IdempotencyWrapper.java",
+      "engine/log/PostgresActionLogRepository.java",
+      "saga/registry/SagaStepRegistry.java",
+      "saga/runtime/SagaCoordinator.java",
+      "saga/runtime/SagaStateMachine.java",
+      "saga/compensation/CompensationExecutor.java",
+      "reconcile/DesiredStateLoader.java",
+      "reconcile/Differ.java",
+      "reconcile/Planner.java",
+      "reconcile/Applier.java",
+      "reconcile/DriftEventPublisher.java",
+      "contracts/schema/ActionRequest.schema.json",
+      "contracts/schema/SagaDefinition.schema.json",
+      "contracts/schema/DesiredStateDocument.schema.json",
+      "contracts/schema/DriftEvent.schema.json",
+      "migrations/V1__action_log.sql",
+      "migrations/V2__saga_state.sql",
+      "migrations/V3__drift_events.sql",
+      "telemetry/TransactionalFlowSpans.java",
+      "telemetry/TransactionalFlowMetrics.java",
+      "security/ActionAuthorizer.java",
+      "security/DriftEventSigner.java",
+      "audit/HashChainAuditLog.java"
+    ],
+    "files_to_modify_candidate_only": [
+      "config/preprod/engine-feature-flags.yaml (new flags default off/dry-run)",
+      "observability/preprod/grafana-dashboards.json",
+      "alerts/preprod/transactional-flow-alerts.yaml",
+      "contracts/contract-registry.json (register v1 DTO/SPI contracts)",
+      "rbac/preprod/action-authorization-policy.yaml"
+    ],
+    "contracts": [
+      "ActionRequest{schema_version,idempotency_key,actor,trace_id,payload}",
+      "ActionResult{schema_version,status,action_id,trace_id,effects}",
+      "SagaDefinition{version,steps[],compensations[],timeouts,dlq_policy}",
+      "DesiredStateDocument{schema_version,resources[],metadata}",
+      "DriftEvent{schema_version,resource,expected,actual,detected_at,severity,signature}",
+      "EngineSPI{v1: execute(), compensate(), reconcile()}",
+      "ReconcilerScheduling{interval,jitter,lock_owner_ttl}"
+    ],
+    "tests": [
+      "idempotency: duplicate ActionRequest -> single effect",
+      "saga happy-path ordered execution",
+      "saga mid-step failure -> ordered idempotent compensation",
+      "compensation failure -> DLQ + alert emitted",
+      "drift mutation -> DriftEvent within interval",
+      "apply defaults to dry-run; live gated by flag",
+      "contract tests: SPI v1 + all DTO schemas",
+      "property: reconcile convergence (no infinite diff)",
+      "authorization: unauthorized actor blocked",
+      "audit hash-chain tamper detection"
+    ],
+    "rollout_order": [
+      "B1 action engine core (flag off)",
+      "B1 contract + idempotency tests green",
+      "B2 saga orchestration (flag off, dry compensation)",
+      "B2 failure-injection compensation tests",
+      "B3 reconciler dry-run default in PREPROD",
+      "B3 synthetic drift detection tests",
+      "B4 observability/audit wiring + dashboards",
+      "PREPROD validation of traces, metrics, alerts"
+    ],
+    "rollback": [
+      "feature-flag disable: action_engine / saga_engine / reconciler",
+      "reconciler live-apply revert via desired-state snapshot",
+      "saga definition pointer swap to prior version",
+      "action log append-only replay recovery",
+      "DOWN migrations for V1-V3 documented"
+    ],
+    "evidence": [
+      "unit + contract test reports per batch",
+      "saga compensation failure-injection traces",
+      "DriftEvent emission within interval proof",
+      "PREPROD Grafana screenshots: latency, saga, drift",
+      "alert firing proofs: DLQ, compensation failure, drift",
+      "feature-flag state screenshots (all off/dry-run)",
+      "audit hash-chain integrity test output",
+      "migration up/down success logs"
+    ],
+    "distillation": [
+      "Action engine SPI + idempotency wrapper (P06 primitive)",
+      "Saga step/compensation registry pattern",
+      "Desired-state differ/planner library",
+      "DriftEvent schema + remediation hook",
+      "Transactional-flow observability conventions"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "approve enabling live-apply flag in PREPROD",
+    "review RBAC action-authorization policy",
+    "sign off saga DLQ escalation policy",
+    "approve promotion beyond PREPROD (out of current scope)"
+  ],
+  "model_advisory_approvals": [
+    "approve enabling live-apply flag in PREPROD",
+    "review RBAC action-authorization policy",
+    "sign off saga DLQ escalation policy",
+    "approve promotion beyond PREPROD (out of current scope)"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

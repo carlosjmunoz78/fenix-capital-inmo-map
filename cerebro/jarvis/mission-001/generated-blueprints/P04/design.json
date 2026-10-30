@@ -2,14 +2,183 @@
   "program_id": "P04",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 4484,
-    "cached_input_tokens": 4350,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 397,
+    "cached_input_tokens": 256,
+    "output_tokens": 1063,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.00111315,
+  "cost_usd": 0.000659718,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "event_bus (s27): reuse existing pub/sub for wakeup triggers",
+      "authz_policy_engine (s192): wrap for zero-trust decisions",
+      "ifc/approval_gateway (s5): extend human-by-exception path",
+      "incident_workflow (s187): reuse runbook executor",
+      "data_purpose_tagger (s280): reuse for purpose limitation",
+      "quality_scorer (s314): reuse multi-objective metrics",
+      "consent_registry (s359): extend consent brain hooks",
+      "sandbox_runner (s302): reuse experiment safety gate",
+      "audit_log: reuse immutable append store",
+      "metrics_roi (s83): reuse measurement pipeline"
+    ],
+    "gaps": [
+      "guardian_root (s238) root-of-trust orchestration not bound to policy engine",
+      "trading_isolation (s233) boundary not enforced in process/net policy",
+      "fraud_detector (s193) hooks missing at tx gateway",
+      "counterintel (s259) signal fusion absent",
+      "board_mode (s293) read-only view not gated by policy",
+      "human_by_exception (s5) escalation SLAs undefined",
+      "zero_trust session posture scoring missing",
+      "consent brain (s359) decision trace not linked to audit"
+    ],
+    "contracts": [
+      "wakeup.trigger.v1 (event→policy eval)",
+      "authz.decision.v1 (subject,resource,action,context→allow/deny/reason)",
+      "exception.request.v1 (requester,scope,ttl,approver)",
+      "incident.command.v1 (severity,owner,containment actions)",
+      "fraud.signal.v1 (tx_id,score,verdict)",
+      "isolation.boundary.v1 (trading lane denied by default)",
+      "guardian.root.v1 (root key ops, human_required gate)",
+      "consent.decision.v1 (purpose,subject→verdict,trace_id)",
+      "safety.gate.v1 (experiment,risk→pass/block)",
+      "board.view.v1 (read-only, redacted, policy-gated)"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "policy/zero-trust core",
+        "items": [
+          "wrap authz_policy_engine with zero-trust posture",
+          "publish authz.decision.v1"
+        ],
+        "gate": "no prod write"
+      },
+      {
+        "id": "B2",
+        "scope": "human-by-exception",
+        "items": [
+          "exception.request.v1",
+          "SLA + audit hook"
+        ],
+        "gate": "preprod"
+      },
+      {
+        "id": "B3",
+        "scope": "event-driven wakeup",
+        "items": [
+          "bind wakeup.trigger.v1 to policy eval",
+          "idempotency keys"
+        ],
+        "gate": "preprod"
+      },
+      {
+        "id": "B4",
+        "scope": "guardian root + IFC",
+        "items": [
+          "guardian.root.v1 root ops",
+          "human_required on key ops"
+        ],
+        "gate": "human_required"
+      },
+      {
+        "id": "B5",
+        "scope": "fraud + trading isolation",
+        "items": [
+          "fraud.signal.v1 at gateway",
+          "isolation.boundary.v1 deny-by-default"
+        ],
+        "gate": "no trading"
+      },
+      {
+        "id": "B6",
+        "scope": "consent/safety/board",
+        "items": [
+          "consent.decision.v1",
+          "safety.gate.v1",
+          "board.view.v1 redaction"
+        ],
+        "gate": "preprod"
+      },
+      {
+        "id": "B7",
+        "scope": "incident + counterintel",
+        "items": [
+          "incident.command.v1",
+          "signal fusion stub"
+        ],
+        "gate": "preprod"
+      },
+      {
+        "id": "B8",
+        "scope": "measurement",
+        "items": [
+          "ROI + quality_scorer wiring",
+          "dashboards"
+        ],
+        "gate": "preprod"
+      }
+    ],
+    "tests": [
+      "authz deny-by-default matrix",
+      "exception SLA expiry enforcement",
+      "wakeup idempotency/dedupe",
+      "guardian root key-op blocked without human approval",
+      "trading lane egress denied",
+      "fraud verdict on synthetic tx set",
+      "consent purpose mismatch blocked",
+      "safety gate blocks risky experiment",
+      "board view redaction checks",
+      "audit completeness for all decisions"
+    ],
+    "security": [
+      "zero-trust per-request context",
+      "deny-by-default for trading/isolation",
+      "guardian root ops require human_required",
+      "purpose limitation enforced at access",
+      "secrets scoped, no prod write",
+      "consent trace linked to audit"
+    ],
+    "observability": [
+      "authz decision rate/latency",
+      "exception open/expired counts",
+      "wakeup trigger→eval SLO",
+      "fraud verdict distribution",
+      "isolation breach attempts",
+      "consent verdicts by purpose",
+      "safety gate blocks",
+      "incident MTTR",
+      "ROI per program",
+      "audit gap alerts"
+    ],
+    "rollback": [
+      "feature flags per batch",
+      "policy engine version pin + instant revert",
+      "disable wakeup binding",
+      "revoke guardian root session",
+      "restore prior consent ruleset",
+      "dry-run mode for safety gate"
+    ],
+    "distillation_targets": [
+      "zero-trust decision wrapper pattern",
+      "human-by-exception canonical flow",
+      "guardian root op checklist",
+      "consent brain decision schema",
+      "fraud signal integration pattern",
+      "isolation deny-by-default template"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": "Human approval required for guardian_root key operations and any trading-isolation policy change.",
+  "model_advisory_approvals": [
+    "Human approval required for guardian_root key operations and any trading-isolation policy change."
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

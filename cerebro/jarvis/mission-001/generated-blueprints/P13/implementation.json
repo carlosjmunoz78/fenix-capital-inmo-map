@@ -2,14 +2,118 @@
   "program_id": "P13",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 154,
+    "input_tokens": 714,
     "cached_input_tokens": 0,
-    "output_tokens": 2000,
-    "reasoning_tokens": 1330
+    "output_tokens": 840,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.0012231,
+  "cost_usd": 0.0006111,
   "blueprint": {
-    "raw_text": "{\"reuse_map\":[{\"component\":\"telemetry/metrics\",\"reuse\":\"reuse counters, gauges, histograms and event emission for weakness, velocity, and complexity signals\",\"candidate_only\":true},{\"component\":\"scheduler/jobs\",\"reuse\":\"reuse periodic job framework for self-scan and metric recomputation\",\"candidate_only\":true},{\"component\":\"feature_flags\",\"reuse\":\"gate all P13 behavior behind PREPROD-only flags\",\"candidate_only\":true},{\"component\":\"event_bus\",\"reuse\":\"publish weakness.detected, weakness.updated, velocity.calculated, complexity.budget_exceeded\",\"candidate_only\":true},{\"component\":\"config loader\",\"reuse\":\"add p13.yaml thresholds and budgets without changing core config semantics\",\"candidate_only\":true},{\"component\":\"internal API router\",\"reuse\":\"expose read-only internal endpoints in PREPROD\",\"candidate_only\":true},{\"component\":\"test fixtures\",\"reuse\":\"reuse deterministic time, event capture, and config override fixtures\",\"candidate_only\":true}],\"files_to_add\":[{\"path\":\"src/jarvis/self_model/__init__.py\",\"purpose\":\"package marker and public exports\"},{\"path\":\"src/jarvis/self_model/schemas.py\",\"purpose\":\"Pydantic/dataclass contracts for weakness map, velocity, complexity budget, events\"},{\"path\":\"src/jarvis/self_model/weakness_map.py\",\"purpose\":\"collect, normalize, score, and snapshot system weaknesses\"},{\"path\":\"src/jarvis/self_model/improvement_velocity.py\",\"purpose\":\"compute baseline/current deltas and improvement velocity metrics\"},{\"path\":\"src/jarvis/self_model/complexity_budget.py\",\"purpose\":\"track and enforce complexity budget thresholds in warn-only PREPROD mode\"},{\"path\":\"src/jarvis/self_model/service.py\",\"purpose\":\"orchestrate weakness map, velocity, and budget recomputation\"},{\"path\":\"src/jarvis/self_model/events.py\",\"purpose\":\"typed event constructors and emission helpers\"},{\"path\":\"config/self_model/p13.yaml\",\"purpose\":\"PREPROD-only weights, budgets, windows, flags, and thresholds\"},{\"path\":\"tests/self_model/test_schemas.py\",\"purpose\":\"contract schema validation tests\"},{\"path\":\"tests/self_model/test_weakness_map.py\",\"purpose\":\"weakness detection, scoring, deduplication, and snapshot tests\"},{\"path\":\"tests/self_model/test_improvement_velocity.py\",\"purpose\":\"velocity calculation, baseline handling, and confidence tests\"},{\"path\":\"tests/self_model/test_complexity_budget.py\",\"purpose\":\"budget consumption, thresholds, exceptions, and warn-only behavior tests\"},{\"path\":\"tests/self_model/test_service.py\",\"purpose\":\"orchestration and idempotency tests\"},{\"path\":\"tests/self_model/test_events.py\",\"purpose\":\"event payload and emission tests\"},{\"path\":\"tests/self_model/test_internal_api_contract.py\",\"purpose\":\"PREPROD internal API contract tests\"}],\"files_to_modify_candidate_only\":[{\"path\":\"src/jarvis/api/internal_router.py\",\"change"
-  }
+    "reuse_map": [
+      {
+        "capability": "self_eval_report_generator",
+        "reuse_for": "B1 weakness map source",
+        "adapter": "map report weaknesses to WeaknessRecord"
+      },
+      {
+        "capability": "weakness_queue_store",
+        "reuse_for": "B1/B4 weakness persistence and ranking queue",
+        "adapter": "schema-extend with WeaknessRecord"
+      },
+      {
+        "capability": "complexity_budget_config_loader",
+        "reuse_for": "B3 budget thresholds",
+        "adapter": "load ComplexityBudget entries"
+      },
+      {
+        "capability": "preprod_deployment_gate",
+        "reuse_for": "B3/B5 preprod CI enforcement",
+        "adapter": "hook budget checker + PreprodOnlyGuard"
+      },
+      {
+        "capability": "event_logger_schema",
+        "reuse_for": "observability events",
+        "adapter": "emit weakness/repair/budget events"
+      },
+      {
+        "capability": "feature_flag_runtime_control",
+        "reuse_for": "rollback per batch B1-B5",
+        "adapter": "SELF_IMPROVE flags SELF_IMPROVE_B1..B5"
+      }
+    ],
+    "files_to_add": [
+      "cerebro/self_improve/weakness_taxonomy.py",
+      "cerebro/self_improve/weakness_record_adapter.py",
+      "cerebro/self_improve/velocity_sampler.py",
+      "cerebro/self_improve/velocity_store_adapter.py",
+      "cerebro/self_improve/complexity_budget_checker.py",
+      "cerebro/self_improve/repair_ranker.py",
+      "cerebro/self_improve/repair_scheduler.py",
+      "cerebro/self_improve/preprod_guard.py",
+      "config/self_improve/complexity_budget.schema.json",
+      "tests/self_improve/test_preprod_guard.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "cerebro/ci/preprod_pipeline.yaml",
+      "cerebro/telemetry/event_logger.py",
+      "config/feature_flags/self_improve.yaml",
+      "cerebro/reports/self_eval_report_generator.py",
+      "cerebro/queues/weakness_queue_store.py",
+      "docs/self_improve/README.md"
+    ],
+    "contracts": [
+      "WeaknessRecord{id,area,severity,evidence_ref,detected_at}",
+      "VelocitySample{period,repairs_closed,median_cycle_hours}",
+      "ComplexityBudget{file,loc_ceiling,dep_depth_ceiling,status}",
+      "RepairProposal{weakness_id,diff_ref,risk_score,rollback_plan}",
+      "PreprodOnlyGuard{env in [preprod,local]}"
+    ],
+    "tests": [
+      "taxonomy integrity: unique ids, all areas covered",
+      "weakness_record_adapter maps self_eval weaknesses deterministically",
+      "velocity sampler deterministic given fixtures",
+      "budget checker blocks over-ceiling PR in preprod only",
+      "repair proposal rejected if unranked or missing rollback_plan",
+      "preprod guard rejects prod-target writes",
+      "scheduler drains queue safely on flag disable",
+      "event emission schema validated"
+    ],
+    "rollout_order": [
+      "B1 SELF_IMPROVE_B1 taxonomy + records",
+      "B2 SELF_IMPROVE_B2 velocity sampler/store",
+      "B3 SELF_IMPROVE_B3 budget checker in preprod CI",
+      "B4 SELF_IMPROVE_B4 ranker + scheduler",
+      "B5 SELF_IMPROVE_B5 dashboard + guard tests"
+    ],
+    "rollback": [
+      "flip SELF_IMPROVE off",
+      "revert per-batch flag SELF_IMPROVE_Bn",
+      "restore prior complexity_budget config snapshot",
+      "halt scheduler, drain queue, emit rollback event"
+    ],
+    "evidence": [
+      "weakness_map_coverage_ratio metric snapshot",
+      "velocity trend sample before/after",
+      "preprod CI budget-block demonstration",
+      "scheduler rollback event log",
+      "disabled-flag behavior test transcript"
+    ],
+    "distillation": [
+      "weakness taxonomy -> compact classifier prompt",
+      "velocity definition -> single metric spec",
+      "budget rules -> config schema doc"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

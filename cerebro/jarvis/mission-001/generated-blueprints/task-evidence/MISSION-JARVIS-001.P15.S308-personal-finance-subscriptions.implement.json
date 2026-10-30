@@ -4,7 +4,7 @@
   "program_id": "P15",
   "master_section": 308,
   "phase": "implement",
-  "state": "PROGRAM_BLUEPRINT_REUSED",
+  "state": "PROGRAM_BLUEPRINT_VALIDATED_REUSED",
   "program_blueprint_ref": "P15/implementation.json",
   "human_required": null,
   "prod_write": false,

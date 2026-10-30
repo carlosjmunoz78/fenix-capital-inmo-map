@@ -2,14 +2,130 @@
   "program_id": "P11",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 460,
+    "input_tokens": 1590,
     "cached_input_tokens": 0,
-    "output_tokens": 2000,
-    "reasoning_tokens": 2000
+    "output_tokens": 1221,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001269,
+  "cost_usd": 0.0009711,
   "blueprint": {
-    "raw_text": ""
-  }
+    "reuse_map": {
+      "sensor_ingestion": "Existing event bus / message queue for sensor signal ingestion",
+      "schema_validation": "Existing schema registry and data catalog if any",
+      "telemetry_emitters": "Existing telemetry/metrics emitters and dashboards (Prometheus/Grafana or equivalent)",
+      "logging": "Existing structured logging + log aggregation pipeline",
+      "tracing": "Existing OpenTelemetry trace instrumentation, if present",
+      "preprod_gating": "Existing experiment/feature-flag framework for preprod gating",
+      "authz": "Existing auth/RBAC for read-only observatory access",
+      "retention": "Existing retention/lifecycle policies for telemetry data",
+      "contract_tests": "Existing CI contract-test harness (e.g., pact-style)",
+      "alerting": "Existing alerting/runbook framework"
+    },
+    "files_to_add": [
+      "observatory/contracts/v1/schemas.json",
+      "observatory/registry/sensor_registry_store.py",
+      "observatory/registry/metric_definition_store.py",
+      "observatory/calibration/calibration_service.py",
+      "observatory/calibration/drift_detector_wrapper.py",
+      "observatory/lineage/emitter_wrapper.py",
+      "observatory/integrity/attestation_service.py",
+      "observatory/planner/ground_truth_planner.py",
+      "observatory/hunter/shadow_detector_ensemble.py",
+      "observatory/effectiveness/report_generator.py",
+      "observatory/ux/consent_gated_capture.py",
+      "observatory/api/readonly_router.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "observatory/config/flags.yaml (add per-batch feature flags)",
+      "observatory/api/app_factory.py (mount read-only router, PREPROD_ONLY guard)",
+      "observatory/telemetry/emitter_init.py (wire lineage wrapper, no rewrite)",
+      "observatory/migrations/ (add per-batch up/down scripts)",
+      "observatory/rbac/policies.yaml (read-only observatory roles)",
+      "observatory/ci/contract_tests.py (register v1 schemas)",
+      "observatory/ci/pipeline.yaml (add PREPROD_ONLY guard test, contract run)",
+      "observatory/alerts/rules.yaml (drift, backlog, attestation, freshness)",
+      "observatory/docs/README.md (batch rollout + rollback pointers)"
+    ],
+    "contracts": [
+      "SensorDescriptor v1: {id, owner, version, unit, cadence, calibration_ref, schema_ref}",
+      "MetricDefinition v1: {metric_id, owner, formula_ref, unit, lineage_ref, integrity_ref, approval_state}",
+      "CalibrationRecord v1: {sensor_id, timestamp, method, params, drift_delta, next_due}",
+      "LineageEdge v1: {source_id, target_id, transform_ref, ts, hash}",
+      "IntegrityAttestation v1: {metric_id, window, checksum, computed_at, verifier}",
+      "GroundTruthPlan v1: {plan_id, hypothesis_ref, sampling_strategy, coverage_targets, labels_ref}",
+      "AnomalyCandidate v1: {id, detector_ref, signal_ref, score, first_seen, triage_state}",
+      "EffectivenessReport v1: {report_id, metric_refs, baseline_window, compare_window, delta, confidence}",
+      "UxSignalEvent v1: {session_ref (hashed), event_type, route_ref, dwell_ms, consent_flag}",
+      "ReadOnlyObservatoryAPI v1: GET-only; POST → 405 in preprod observatory namespace"
+    ],
+    "tests": [
+      "Contract tests for all v1 schemas",
+      "Lineage completeness: every derived metric traces to ≥1 sensor edge",
+      "Integrity attestation determinism (same window → same checksum)",
+      "Calibration drift detector unit + replay on synthetic drift",
+      "Read-only API: all observatory endpoints reject writes (405)",
+      "Ground-truth plan coverage property tests",
+      "Anomaly hunter shadow-mode: no outbound side-effects, no prod writes",
+      "EffectivenessReport statistical sanity (delta bounds, confidence sane)",
+      "UX consent gating: events without consent_flag rejected",
+      "Retention/lifecycle: telemetry expires per policy",
+      "PREPROD_ONLY guard: production env fails fast on bootstrap"
+    ],
+    "rollout_order": [
+      "Batch 1: registry + contract scaffolding (flags: registry=false default)",
+      "Batch 2: calibration lifecycle + read-only UI",
+      "Batch 3: lineage capture via emitter wrapper",
+      "Batch 4: metric integrity attestation + verifier hook",
+      "Batch 5: ground-truth planner (read-only reporting)",
+      "Batch 6: unknown-unknown hunter shadow mode (no auto-action)",
+      "Batch 7: effectiveness + consented UX capture behind preprod flag",
+      "Batch 8: governance workflow + distillation docs"
+    ],
+    "rollback": [
+      "Per-batch feature flags disable writers; retain append-only data",
+      "Hunter shadow default; disable flag → no emission",
+      "Contract versions additive; deprecate via version bump",
+      "Append-only stores; rollback = disable writers + keep data",
+      "PREPROD_ONLY bootstrap guard fails closed",
+      "Per-batch migration down scripts documented"
+    ],
+    "evidence": [
+      "Observatory self-metrics dashboards (registry size, lineage edges, attestation latency)",
+      "Contract-violation counter and CI contract test results",
+      "Drift alarm history with runbook links",
+      "Read-only API 405 conformance test output",
+      "PREPROD_ONLY guard test log (prod env fails fast)",
+      "Shadow-mode hunter: zero outbound side-effect assertions"
+    ],
+    "distillation": [
+      "Sensor registry + calibration playbook",
+      "Metric definition governance SOP",
+      "Lineage capture wrapper usage guide",
+      "Unknown-unknown triage runbook",
+      "Effectiveness measurement playbook",
+      "UX observatory consent + capture guide"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": [
+    "Approve metric definitions and semantics",
+    "Assign governance/approval policy ownership and sign-off authority",
+    "Approve calibration recalibration schedule policy",
+    "Approve preprod-only rollout and flag defaults before enablement"
+  ],
+  "model_advisory_approvals": [
+    "Approve metric definitions and semantics",
+    "Assign governance/approval policy ownership and sign-off authority",
+    "Approve calibration recalibration schedule policy",
+    "Approve preprod-only rollout and flag defaults before enablement"
+  ],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

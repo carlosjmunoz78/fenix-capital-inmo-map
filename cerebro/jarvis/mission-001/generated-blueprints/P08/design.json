@@ -2,14 +2,143 @@
   "program_id": "P08",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 4781,
-    "cached_input_tokens": 4608,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 382,
+    "cached_input_tokens": 128,
+    "output_tokens": 977,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001119774,
+  "cost_usd": 0.000624684,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "Mission DAG scheduler (P04) as the sole execution substrate for swarm DAGs",
+      "Worker/job runtime + lease/heartbeat primitives (P03) for clone lifecycle",
+      "Role/permission registry (P05) extended with governor role types",
+      "Capability gateway for model/tool access with zero-cost routing (section 9)",
+      "Observability bus (P06) for per-clone spans and swarm metrics",
+      "Artifact/versioned state store for clone checkpoints and replay",
+      "Cost/rate governor for free-tier quota budgeting",
+      "Feature-flag/config service for scale caps and overrides"
+    ],
+    "gaps": [
+      "No logical-vs-physical clone abstraction (section 123)",
+      "No swarm control plane API for hierarchical swarms (124/125)",
+      "No role governor enforcing role-to-clone binding (127)",
+      "No owner scale override with audit (122)",
+      "No DAG-native fan-out/fan-in clone orchestration (400/402)",
+      "No clone-count budgeting tied to zero-cost quota",
+      "No extreme-scenario acceptance harness (371)",
+      "No final definition/contract for clone lifecycle states (374)"
+    ],
+    "contracts": [
+      "CloneSpec{logical_id,parent_id,depth,role,capabilities,physical_ref|virtual,budget,ttl}",
+      "SwarmTopology{root,levels[],fanout_limits,role_bindings}",
+      "ScaleOverride{owner,requested,max_allowed,justification,expiry,audit_id}",
+      "CloneLifecycle: proposed→admitted→running→completed|failed|evicted",
+      "ControlPlaneAPI: spawn/despawn/fanout/join/status/topology",
+      "RoleGovernorPolicy{role→allowed_actions,allowed_models,quota}",
+      "DAGNode: {type: clone|task|join, deps[],clone_spec?}",
+      "BudgetLedger{logical_clone_id,free_tier_slots,cost=0_invariant}"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "CloneSpec + lifecycle contract + logical/physical split (123/374)",
+        "depends": []
+      },
+      {
+        "id": "B2",
+        "scope": "Swarm control plane API + topology model (124/125)",
+        "depends": [
+          "B1"
+        ]
+      },
+      {
+        "id": "B3",
+        "scope": "DAG fan-out/fan-in node types wired to P04 scheduler (400/402)",
+        "depends": [
+          "B2"
+        ]
+      },
+      {
+        "id": "B4",
+        "scope": "Role governor policy engine (127) atop P05",
+        "depends": [
+          "B1"
+        ]
+      },
+      {
+        "id": "B5",
+        "scope": "Owner scale override + audit + caps (122)",
+        "depends": [
+          "B2"
+        ]
+      },
+      {
+        "id": "B6",
+        "scope": "Zero-cost budget ledger + free-tier quota gating (9)",
+        "depends": [
+          "B2",
+          "B4"
+        ]
+      },
+      {
+        "id": "B7",
+        "scope": "Extreme-scenario acceptance suite (371)",
+        "depends": [
+          "B3",
+          "B5",
+          "B6"
+        ]
+      }
+    ],
+    "tests": [
+      "Unit: CloneSpec validation and lifecycle transitions",
+      "Unit: RoleGovernorPolicy denies out-of-role model/action",
+      "Property: parallel fan-out N clones yields N join results deterministically",
+      "Integration: hierarchical swarm 3 levels via DAG-first execution",
+      "Load: thousands of logical clones within free-tier quota; cost==0 invariant holds",
+      "Chaos: clone crash/eviction triggers DAG retry without orphaning",
+      "Acceptance: extreme scenarios V1 (371) matrix executed PREPROD"
+    ],
+    "security": [
+      "Scale override requires owner identity + audit record; no PROD writes",
+      "Clone inherits least-privilege from role; capability gateway enforces",
+      "No trading/model-prod side effects; PREPROD_ONLY flags enforced",
+      "Budget ledger prevents cost>0; DEEPSEEK treated as temporary provider",
+      "Audit trail for every spawn/despawn/override"
+    ],
+    "observability": [
+      "Per-clone spans: spawn latency, lifetime, depth, role",
+      "Swarm metrics: logical vs physical counts, fan-out width, join skew",
+      "Budget gauge: free-tier slots used vs cap",
+      "Override counter with owner attribution",
+      "DAG execution timeline per swarm"
+    ],
+    "rollback": [
+      "Disable control plane feature-flag → fall back to single-worker DAG (P04 default)",
+      "Cap logical clones to configured max; evict lowest-priority clones",
+      "Revert topology to last known-good snapshot",
+      "Override expiry auto-revokes elevated scale"
+    ],
+    "distillation_targets": [
+      "Clone lifecycle state machine doc",
+      "Swarm control plane API reference",
+      "Role governor policy schema",
+      "Owner override runbook",
+      "Zero-cost budget model note",
+      "Extreme-scenario acceptance playbook"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

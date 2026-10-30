@@ -2,14 +2,462 @@
   "program_id": "P01",
   "phase": "IMPLEMENTATION_BLUEPRINT",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 1934,
-    "cached_input_tokens": 1792,
-    "output_tokens": 2000,
-    "reasoning_tokens": 2000
+    "input_tokens": 4475,
+    "cached_input_tokens": 0,
+    "output_tokens": 2038,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001226676,
+  "cost_usd": 0.00189405,
   "blueprint": {
-    "raw_text": ""
-  }
+    "reuse_map": [
+      {
+        "capability": "Event bus/message fabric",
+        "jarvis_use": [
+          "UNIVERSAL_EVENT_FABRIC",
+          "COMMAND_LOG"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "OIDC/SSO identity provider",
+        "jarvis_use": [
+          "ROOT_OF_TRUST",
+          "DURABLE_IDENTITY",
+          "IDENTITY_CONTINUITY"
+        ],
+        "mode": "wrapper"
+      },
+      {
+        "capability": "Secrets manager/KMS",
+        "jarvis_use": [
+          "IDENTITY_VAULT",
+          "CREDENTIAL_BROKER"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "Policy engine (OPA/Cedar-like)",
+        "jarvis_use": [
+          "POLICY_COMPILER",
+          "POLICY_CONFLICT_RESOLUTION"
+        ],
+        "mode": "extend"
+      },
+      {
+        "capability": "Observability stack",
+        "jarvis_use": [
+          "OBSERVATION_COVERAGE_MAP",
+          "COMPLETENESS_INDEX",
+          "DECISION_LATENCY_BUDGET"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "CI/CD + feature flags",
+        "jarvis_use": [
+          "AUTONOMY_LADDER gating",
+          "HIGH_IMPACT_CHANGE",
+          "KILL_SWITCHES"
+        ],
+        "mode": "wrapper"
+      },
+      {
+        "capability": "Search/index (lexical+vector)",
+        "jarvis_use": [
+          "UNIVERSAL_SEARCH",
+          "RECALL",
+          "SEMANTIC_DRIFT"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "Workflow orchestrator (Temporal-like)",
+        "jarvis_use": [
+          "DURABLE_MISSIONS",
+          "HUMAN_WORK_ORCHESTRATOR"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "Graph DB",
+        "jarvis_use": [
+          "AUTHORITY_GRAPH",
+          "RELATIONSHIP_GRAPH",
+          "CORPORATE_STRUCTURE_GRAPH",
+          "TRUST_FABRIC",
+          "CAUSAL_MAP"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "Append-only ledger store",
+        "jarvis_use": [
+          "EVIDENCE_INTEGRITY_LEDGER",
+          "COMMITMENT_LEDGER"
+        ],
+        "mode": "adapter"
+      },
+      {
+        "capability": "Billing/cost tagging",
+        "jarvis_use": [
+          "COST_FINOPS",
+          "COST_VS_QUALITY",
+          "MONEY_GUARD"
+        ],
+        "mode": "extend"
+      },
+      {
+        "capability": "Localization/translation service",
+        "jarvis_use": [
+          "LOCALIZATION_ENGINE",
+          "MULTILINGUAL_REPRESENTATION",
+          "CODE_SWITCHING"
+        ],
+        "mode": "adapter"
+      }
+    ],
+    "files_to_add": [
+      "schemas/mission_contract.v1.json",
+      "schemas/success_criteria_lock.v1.json",
+      "schemas/abort_criteria.v1.json",
+      "schemas/command_envelope.v1.json",
+      "schemas/policy_bundle.v1.json",
+      "schemas/evidence_record.v1.json",
+      "schemas/identity_assertion.v1.json",
+      "schemas/vault_lease.v1.json",
+      "schemas/point_in_time_snapshot.v1.json",
+      "schemas/replay_request.v1.json",
+      "services/secure_time_authority/tsa_signer.py",
+      "services/fencing/fencing_token_service.py"
+    ],
+    "files_to_modify_candidate_only": [
+      "services/api_gateway/routes.py",
+      "services/api_gateway/env_guard.py",
+      "services/policy_engine/bootstrap.py",
+      "services/observability/exporters.py",
+      "services/workflow_orchestrator/mission_adapter.py",
+      "services/search/recall_adapter.py",
+      "services/graph/authority_graph_ingest.py",
+      "services/ledger/evidence_chain_writer.py",
+      "services/billing/cost_tagger.py",
+      "services/localization/engine_adapter.py",
+      "ci/pipelines/preprod_jarvis.yaml",
+      "feature_flags/jarvis_batches.json"
+    ],
+    "contracts": [
+      {
+        "name": "MissionContract",
+        "version": "1.0",
+        "owner": "intent_compiler",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "SuccessCriteriaLock",
+        "version": "1.0",
+        "owner": "intent_compiler",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "AbortCriteria",
+        "version": "1.0",
+        "owner": "safety",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "CommandEnvelope",
+        "version": "1.0",
+        "owner": "command_log",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "PolicyBundle",
+        "version": "1.0",
+        "owner": "policy_compiler",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "EvidenceRecord",
+        "version": "1.0",
+        "owner": "evidence_ledger",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "IdentityAssertion",
+        "version": "1.0",
+        "owner": "identity",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "VaultLease",
+        "version": "1.0",
+        "owner": "credential_broker",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "PointInTimeSnapshot",
+        "version": "1.0",
+        "owner": "event_fabric",
+        "persisted": "schema_registry"
+      },
+      {
+        "name": "ReplayRequest",
+        "version": "1.0",
+        "owner": "decision_replay",
+        "persisted": "schema_registry"
+      }
+    ],
+    "tests": [
+      {
+        "id": "T1",
+        "scope": "schemas/mission_contract",
+        "preprod": true
+      },
+      {
+        "id": "T2",
+        "scope": "services/secure_time_authority",
+        "preprod": true
+      },
+      {
+        "id": "T3",
+        "scope": "services/fencing",
+        "preprod": true
+      },
+      {
+        "id": "T4",
+        "scope": "abort_kill_e2e",
+        "preprod": true
+      },
+      {
+        "id": "T5",
+        "scope": "authority_graph_transitive",
+        "preprod": true
+      },
+      {
+        "id": "T6",
+        "scope": "vault_lease_ttl",
+        "preprod": true
+      },
+      {
+        "id": "T7",
+        "scope": "goodhart_simulator",
+        "preprod": true
+      },
+      {
+        "id": "T8",
+        "scope": "money_guard",
+        "preprod": true
+      },
+      {
+        "id": "T9",
+        "scope": "decision_replay_determinism",
+        "preprod": true
+      },
+      {
+        "id": "T10",
+        "scope": "evidence_ledger_tamper",
+        "preprod": true
+      },
+      {
+        "id": "T11",
+        "scope": "autonomy_ladder_caps",
+        "preprod": true
+      },
+      {
+        "id": "T12",
+        "scope": "intent_first_ui_to_mission",
+        "preprod": true
+      }
+    ],
+    "rollout_order": [
+      {
+        "step": 1,
+        "batch": "Substrate",
+        "gates": [
+          "G1",
+          "G2",
+          "G3"
+        ],
+        "flag": "jarvis_b1_on"
+      },
+      {
+        "step": 2,
+        "batch": "Identity & Trust",
+        "gates": [
+          "G5"
+        ],
+        "flag": "jarvis_b2_on"
+      },
+      {
+        "step": 3,
+        "batch": "Intent & Missions",
+        "gates": [
+          "G5"
+        ],
+        "flag": "jarvis_b3_on"
+      },
+      {
+        "step": 4,
+        "batch": "Event Fabric & Log",
+        "gates": [
+          "G7"
+        ],
+        "flag": "jarvis_b4_on"
+      },
+      {
+        "step": 5,
+        "batch": "Autonomy & Safety",
+        "gates": [
+          "G8",
+          "G10",
+          "G11",
+          "G12",
+          "G6"
+        ],
+        "flag": "jarvis_b5_on"
+      },
+      {
+        "step": 6,
+        "batch": "Intel & Search",
+        "gates": [
+          "G9"
+        ],
+        "flag": "jarvis_b6_on"
+      },
+      {
+        "step": 7,
+        "batch": "Governance & Audit",
+        "gates": [],
+        "flag": "jarvis_b7_on"
+      },
+      {
+        "step": 8,
+        "batch": "Experience",
+        "gates": [],
+        "flag": "jarvis_b8_on"
+      },
+      {
+        "step": 9,
+        "batch": "Scale-out wrappers",
+        "gates": [],
+        "flag": "jarvis_b9_on"
+      },
+      {
+        "step": 10,
+        "batch": "Hardening",
+        "gates": [
+          "successor",
+          "split-brain"
+        ],
+        "flag": "jarvis_b10_on"
+      }
+    ],
+    "rollback": [
+      {
+        "trigger": "schema_incompat",
+        "action": "schema_registry dual-read + pin prior version"
+      },
+      {
+        "trigger": "policy_regression",
+        "action": "revert to signed prior PolicyBundle"
+      },
+      {
+        "trigger": "guard_fire",
+        "action": "AbortCriteria saga + quarantine mission"
+      },
+      {
+        "trigger": "autonomy_violation",
+        "action": "downgrade ladder tier via flag"
+      },
+      {
+        "trigger": "model_regression",
+        "action": "IntelHotSwap to previous profile"
+      },
+      {
+        "trigger": "state_corruption",
+        "action": "restore PointInTimeSnapshot in preprod"
+      },
+      {
+        "trigger": "batch_anomaly",
+        "action": "flip jarvis_bN_on off"
+      },
+      {
+        "trigger": "split_brain",
+        "action": "fencing token wins; loser quarantined; evidence chain untouched"
+      }
+    ],
+    "evidence": [
+      {
+        "item": "CommandEnvelope signatures",
+        "proves": "SignedCommands"
+      },
+      {
+        "item": "TSA timestamps + monotonic guard",
+        "proves": "TimeAuthority"
+      },
+      {
+        "item": "Fencing token log",
+        "proves": "split-brain single leader"
+      },
+      {
+        "item": "EvidenceRecord hash chain",
+        "proves": "ImmutableEvidence"
+      },
+      {
+        "item": "PolicyBundle signed pins",
+        "proves": "PolicyPrecedence + rollback"
+      },
+      {
+        "item": "VaultLease TTL audit",
+        "proves": "SecretHygiene"
+      },
+      {
+        "item": "AuthorityGraph transitive trace",
+        "proves": "OwnerRoot derivation"
+      },
+      {
+        "item": "PointInTimeSnapshot hashes",
+        "proves": "Replay determinism"
+      },
+      {
+        "item": "Abort/Kill audit",
+        "proves": "AbortCriteria within SLO"
+      },
+      {
+        "item": "AutonomyDrift metrics",
+        "proves": "ladder caps"
+      },
+      {
+        "item": "Goodhart guard counters",
+        "proves": "AntiGaming"
+      },
+      {
+        "item": "CostFinOps tags",
+        "proves": "MoneyGuard + cost per mission"
+      }
+    ],
+    "distillation": [
+      "MiniCore = CommandEnvelope + TSA + fencing + policy precedence + abort + evidence-immutability",
+      "InvariantsList frozen and signed",
+      "SuccessorTest harness with N-mission replay parity",
+      "TeachOnce -> durable policy",
+      "NeverAskAgain -> intent defaults",
+      "Supersession via ledger without loss",
+      "AuthorityGraphSubset frozen",
+      "FastPath pre-approved low-risk classes",
+      "ValuesConstitution signed + versioned",
+      "Reuse-first wrappers-first preprod-only"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

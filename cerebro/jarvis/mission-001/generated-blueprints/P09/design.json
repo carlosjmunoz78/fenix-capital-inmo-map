@@ -2,14 +2,160 @@
   "program_id": "P09",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 5632,
-    "cached_input_tokens": 5376,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 454,
+    "cached_input_tokens": 256,
+    "output_tokens": 751,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001134528,
+  "cost_usd": 0.000481068,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "conversation_store",
+      "persona_registry",
+      "message_bus",
+      "scheduler",
+      "notification_service",
+      "translation_provider_interface",
+      "voice_pipeline",
+      "attention_queue",
+      "audit_log",
+      "config_flags"
+    ],
+    "gaps": [
+      "no_canonical_personality_versioning",
+      "missing_owner_friction_index_metric",
+      "no_decision_queue_budget_enforcement",
+      "no_voice_champion_challenger_eval",
+      "turn_taking_policy_undefined",
+      "no_precompute_prefetch_policy",
+      "no_original_language_preservation_layer",
+      "no_portfolio_governor_scoring",
+      "no_representation_learning_feedback",
+      "attention_and_resource_reservation_unified_model"
+    ],
+    "contracts": [
+      "PersonalityCanon{v,traits,invariants,hash}",
+      "RepresentationTurn{lang_original,translation,twin_state}",
+      "AttentionBudget{total,reserved,spent,owner_friction}",
+      "DecisionItem{id,priority,budget_cost,deadline}",
+      "VoiceEval{champion,challenger,score,turn_taking_metrics}",
+      "PrecomputePlan{keys,ttl,owner}",
+      "Reservation{kind,scope,amount,expiry}",
+      "ExperienceIndex{score,factors}"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "personality_and_representation",
+        "items": [
+          "PersonalityCanon wrapper",
+          "CANONICAL personality registry",
+          "language preservation layer"
+        ],
+        "outputs": "canon_personality_v1"
+      },
+      {
+        "id": "B2",
+        "scope": "attention_and_decisions",
+        "items": [
+          "AttentionBudget",
+          "DecisionItem queue",
+          "owner_friction_index"
+        ],
+        "outputs": "attention_v1"
+      },
+      {
+        "id": "B3",
+        "scope": "voice_turn_taking",
+        "items": [
+          "turn_taking policy",
+          "champion/challenger eval"
+        ],
+        "outputs": "voice_eval_v1"
+      },
+      {
+        "id": "B4",
+        "scope": "precompute_and_reservations",
+        "items": [
+          "Preserve original lang translation engine",
+          "precompute/prefetch",
+          "resource+attention reservations"
+        ],
+        "outputs": "reservation_v1"
+      },
+      {
+        "id": "B5",
+        "scope": "learning_and_index",
+        "items": [
+          "representation learning feedback",
+          "JARVIS experience index",
+          "improvement backlog"
+        ],
+        "outputs": "learning_v1"
+      },
+      {
+        "id": "B6",
+        "scope": "governance",
+        "items": [
+          "portfolio governor scoring",
+          "integration tests"
+        ],
+        "outputs": "governor_v1"
+      }
+    ],
+    "tests": [
+      "personality_canonical_hash_stable",
+      "original_language_roundtrip",
+      "attention_budget_not_exceeded",
+      "owner_friction_computed",
+      "turn_taking_latency_bounds",
+      "champion_challenger_selection",
+      "precompute_ttl_respected",
+      "reservation_expiry",
+      "no_prod_write_guard",
+      "experience_index_monotonic"
+    ],
+    "security": [
+      "preprod_scope_only",
+      "no_trading_guard",
+      "pii_redaction_in_transcripts",
+      "audit_all_attention_spends",
+      "signed_canon_personality"
+    ],
+    "observability": [
+      "friction_index_gauge",
+      "attention_budget_used",
+      "decision_queue_depth",
+      "turn_taking_p95",
+      "voice_eval_scores",
+      "reservation_utilization",
+      "experience_index_trend",
+      "translation_latency"
+    ],
+    "rollback": [
+      "feature_flag_personality_v1",
+      "disable_voice_eval_batch",
+      "revert_canon_to_prev_hash",
+      "drop_reservations_table",
+      "stop_precompute_job"
+    ],
+    "distillation_targets": [
+      "persona_traits_compact",
+      "attention_policy_summary",
+      "turn_taking_rules",
+      "translation_preferences"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }

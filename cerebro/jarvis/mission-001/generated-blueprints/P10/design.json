@@ -2,14 +2,139 @@
   "program_id": "P10",
   "phase": "DESIGN",
   "model": "deepseek-flash",
+  "status": "completed",
+  "incomplete_reason": null,
+  "attempts": 1,
   "usage": {
-    "input_tokens": 5166,
-    "cached_input_tokens": 4992,
-    "output_tokens": 1800,
-    "reasoning_tokens": 1800
+    "input_tokens": 424,
+    "cached_input_tokens": 256,
+    "output_tokens": 829,
+    "reasoning_tokens": 0
   },
-  "cost_usd": 0.001121076,
+  "cost_usd": 0.000523368,
   "blueprint": {
-    "raw_text": ""
-  }
+    "existing_to_reuse": [
+      "Universal language layer adapter pattern (section 151) as canonical interface wrapper",
+      "Existing STT/TTS provider clients wrapped, not rewritten",
+      "Language auto-detection utility wrapped behind ILanguageDetector",
+      "Personal dictionary storage reused as extension of user lexicon service",
+      "Cross-language search index wrapper over existing search core",
+      "Voice identity service extension via wrapper, not fork",
+      "Regulatory applicability registry reused as metadata tag source",
+      "Observability/logging stack reused for language telemetry"
+    ],
+    "gaps": [
+      "No personal pronunciation dictionary contract (section 140)",
+      "No typo-robustness / personal LM layer (section 142)",
+      "Missing language observatory metrics schema (section 165)",
+      "No language competency passport model (section 166)",
+      "No multilingual voice identity wrapper (section 162)",
+      "Language research bias audit hooks absent (section 164)",
+      "Voice lab sandbox harness undefined (section 138)",
+      "Self-improvement loop contract missing (section 317)",
+      "Voice build strategy orchestration undefined (section 411)"
+    ],
+    "contracts": [
+      "ILanguageDetector.detect(text|audio)->{lang,confidence,alternatives}",
+      "IPronunciationDictionary.upsert/resolve(term,locale)->phonemes",
+      "IPersonalLM.correct(text,userId)->{corrected,edits[]}",
+      "IUniversalTranslator.translate(text,src,tgt,opts)->text",
+      "ICrossLanguageSearch.query(q,langs)->hits[]",
+      "IVoiceIdentity.enroll/verify(userId,audio)->score",
+      "ILanguageObservatory.record(event) / .snapshot()",
+      "ICompetencyPassport.get(userId)->levels",
+      "IRegulatoryApplicability.resolve(jurisdiction)->rules[]",
+      "IVoiceLab.run(script)->trace (preprod only)"
+    ],
+    "implementation_batches": [
+      {
+        "id": "B1",
+        "scope": "Contracts + wrappers for sections 137,151,152",
+        "mode": "preprod"
+      },
+      {
+        "id": "B2",
+        "scope": "Pronunciation dictionary + personal LM (140,142)",
+        "mode": "preprod"
+      },
+      {
+        "id": "B3",
+        "scope": "Cross-language search + voice identity (160,162)",
+        "mode": "preprod"
+      },
+      {
+        "id": "B4",
+        "scope": "Observatory + competency passport (165,166)",
+        "mode": "preprod"
+      },
+      {
+        "id": "B5",
+        "scope": "Bias audit + voice lab + self-improvement (164,138,317)",
+        "mode": "preprod"
+      },
+      {
+        "id": "B6",
+        "scope": "Regulatory mapping + build orchestration (201,405,411)",
+        "mode": "preprod"
+      }
+    ],
+    "tests": [
+      "Contract unit tests per interface",
+      "Golden-set language detection accuracy",
+      "Pronunciation round-trip resolve tests",
+      "Typo correction fixture suite",
+      "Cross-language search recall/precision",
+      "Voice identity FAR/FRR on synthetic set",
+      "Observatory event schema validation",
+      "Passport schema conformance",
+      "Bias audit deterministic replay",
+      "Preprod isolation assertion (no prod write)"
+    ],
+    "security": [
+      "No prod writes; preprod boundary enforced",
+      "Audio PII minimization + retention caps",
+      "Per-user dictionary access control",
+      "Voice biometric template encryption",
+      "DeepSeek credentials temporary, scoped, revoked",
+      "Bias audit logs immutable in preprod",
+      "Regulatory rule resolution auditable"
+    ],
+    "observability": [
+      "Language detection confidence histogram",
+      "Pronunciation hit/miss counters",
+      "Typo-edit rate per user",
+      "Cross-language query latency",
+      "Voice identity score distribution",
+      "Bias metric dashboards",
+      "Passport state change events",
+      "Lab run traces (preprod only)"
+    ],
+    "rollback": [
+      "Feature-flag each wrapper contract",
+      "Version contracts; pin prior versions",
+      "Batch-level toggles in preprod",
+      "Blue/green for observatory schema",
+      "Provider client fallback to prior wrapper",
+      "Dictionary personal-LM data revert snapshots"
+    ],
+    "distillation_targets": [
+      "Language detection wrapper spec",
+      "Pronunciation dictionary contract",
+      "Personal LM correction contract",
+      "Cross-language search adapter spec",
+      "Voice identity wrapper spec",
+      "Observatory metrics schema",
+      "Competency passport schema",
+      "Regulatory applicability resolver spec",
+      "Voice lab harness spec"
+    ],
+    "human_required": null
+  },
+  "reused": false,
+  "source_run_id": 41013849206,
+  "raw_model_human_required": null,
+  "model_advisory_approvals": [],
+  "model_canonical_human_required_candidates": [],
+  "active_human_required": null,
+  "governance_rule": "MODEL_CANNOT_SELF_DECLARE_HUMAN_REQUIRED"
 }
