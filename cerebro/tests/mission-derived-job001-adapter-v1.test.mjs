@@ -18,13 +18,14 @@ function fixture() {
   return { dir, journal: path.join(dir, 'jobs.v8journal') };
 }
 
-test('adapter contract reuses JOB-001 and stays PREPROD fail-closed', () => {
+test('adapter contract reuses JOB-001 and stays PREPROD fail-closed at verified 180 cap', () => {
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.environment, 'PREPROD');
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.durable_runtime_reused, true);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.durable_worker_reused, true);
-  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_default, 1);
-  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_max, 48);
-  assert.deepEqual(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.lane_range, { min: 0, max: 63 });
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_default, 180);
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.target_active_max, 180);
+  assert.deepEqual(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.lane_range, { min: 0, max: 67 });
+  assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.auto_refill, true);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_queue, false);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_scheduler, false);
   assert.equal(MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT.second_daemon, false);
@@ -55,11 +56,25 @@ test('source fills only bounded headroom and preserves deterministic sequence ac
   assert.equal(runtime.listForContext(context).length, 2);
 });
 
+test('180-cap source spans all 68 canonical lanes before cycling', () => {
+  const { journal } = fixture();
+  const context = missionDerivedJob001ContextV1();
+  const runtime = new DurableJobRuntimeV1({ file_path: journal });
+  const source = new MissionDerivedJob001SourceV1({ job_runtime: runtime, context });
+  const seeded = source.reconcile();
+  assert.equal(seeded.accepted_this_reconcile, 180);
+  assert.equal(seeded.active_jobs, 180);
+  const jobs = runtime.listForContext(context);
+  assert.equal(new Set(jobs.map(job => job.payload.lane)).size, 68);
+  assert.ok(jobs.some(job => job.payload.lane === 67));
+  assert.ok(jobs.some(job => job.payload.cycle >= 2));
+});
+
 test('registered handler executes through the existing DurableWorkerRunnerV1 with checkpoint and completion', async () => {
   const { journal } = fixture();
   const context = missionDerivedJob001ContextV1();
   const runtime = new DurableJobRuntimeV1({ file_path: journal });
-  const source = new MissionDerivedJob001SourceV1({ job_runtime: runtime, context, target_active: 1 });
+  const source = new MissionDerivedJob001SourceV1({ job_runtime: runtime, context, target_active: 1, max_enqueue_per_reconcile: 1 });
   const seeded = source.reconcile();
   assert.equal(seeded.accepted_this_reconcile, 1);
 
@@ -106,5 +121,6 @@ test('adapter rejects capacity and context outside the canonical boundary', () =
     job_runtime: runtime,
     context: { company_id: 'fenix', engine_id: 'JOB-001', environment: 'PROD', version: 'v1' },
   }), /PREPROD/);
-  assert.throws(() => new MissionDerivedJob001SourceV1({ job_runtime: runtime, target_active: 49 }), /target_active/);
+  assert.throws(() => new MissionDerivedJob001SourceV1({ job_runtime: runtime, target_active: 181 }), /target_active/);
+  assert.throws(() => new MissionDerivedJob001SourceV1({ job_runtime: runtime, max_enqueue_per_reconcile: 181 }), /max_enqueue_per_reconcile/);
 });
