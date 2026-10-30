@@ -1,100 +1,15 @@
-name: JARVIS-001 POST-BLUEPRINT CORE GATE · PREPROD
+name: JARVIS-001 POST-BLUEPRINT V1 · SUPERSEDED
 
 on:
-  push:
-    branches:
-      - cerebro/mission-jarvis-001-20261030
-    paths:
-      - 'cerebro/jarvis/mission-001/generated-blueprints/**'
+  workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: mission-jarvis-001-postblueprint-v1
-  cancel-in-progress: false
-
-env:
-  CEREBRO_SUPERVISOR_ENV: PREPROD
-  CEREBRO_PROD_WRITE: 'false'
-  CEREBRO_TRADING_ACCESS: 'false'
+  contents: read
 
 jobs:
-  core-gate:
+  superseded:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Validate persisted blueprint summary
-        shell: bash
-        run: |
-          set -euo pipefail
-          node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const p='cerebro/jarvis/mission-001/generated-blueprints/summary.json';
-          const s=JSON.parse(fs.readFileSync(p,'utf8'));
-          if(s.deepseek_calls!==36) throw new Error(`DEEPSEEK_CALL_COUNT:${s.deepseek_calls}`);
-          if(s.prod_write!==false||s.trading!==false) throw new Error('BOUNDARY_VIOLATION');
-          if(Array.isArray(s.human_required)&&s.human_required.length) throw new Error(`HUMAN_REQUIRED:${s.human_required.join(',')}`);
-          console.log(JSON.stringify(s));
-          NODE
-      - name: Run JARVIS Core and CEREBRO integration tests
-        run: |
-          node --test cerebro/tests/jarvis-core-v1.test.mjs
-          node --test cerebro/tests/jarvis-integration-v1.test.mjs
-      - name: Enforce Constitution compatibility
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -Fq 'Carlos = OWNER_ROOT' cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
-          grep -Fq 'Jarvis = OWNER_ROOT_DELEGATE / CEREBRO_EXECUTIVE_IDENTITY' cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
-          grep -Fq 'LEGAL_REQUIRED' cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
-          grep -Fq 'MONEY_LIMIT' cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
-          grep -Fq 'CUSTOMER_HUMAN_REQUEST' cerebro/jarvis/boost-001/JARVIS_CONSTITUTION_V1.md
-      - name: Enforce additive generated commit isolation
-        shell: bash
-        run: |
-          set -euo pipefail
-          git diff --name-only HEAD^ HEAD > /tmp/changed.txt
-          if grep -Ev '^(cerebro/jarvis/mission-001/generated-blueprints/)' /tmp/changed.txt | grep -q .; then
-            echo 'Generated blueprint commit touched unexpected paths' >&2
-            cat /tmp/changed.txt >&2
-            exit 1
-          fi
-          test "$CEREBRO_PROD_WRITE" = false
-          test "$CEREBRO_TRADING_ACCESS" = false
-      - name: Create governed mission state
-        shell: bash
-        run: |
-          node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const summary=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
-          const state={schema_version:'1.0',mission_id:'MISSION-JARVIS-001',environment:'PREPROD',status:'CORE_CANDIDATE_GREEN_BLUEPRINTS_READY',master:'JARVIS_MASTER_V1_RC2',programs:18,master_sections:421,work_units:5924,tasks:5473,deepseek_calls:summary.deepseek_calls,deepseek_estimated_cost_usd:summary.estimated_cost_usd,deepseek_dependency_target:0,human_required:[],prod_touched:false,trading_touched:false,core_candidate:{path:'cerebro/jarvis/core-v1/core-v1.mjs',tests:'GREEN',integration_binding:'GREEN'},multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND',next_action:'Build reuse map and integrate P01/P03/P04/P07 capabilities in PREPROD; keep PROD blocked.'};
-          fs.writeFileSync('cerebro/jarvis/mission-001/state.v1.json',JSON.stringify(state,null,2)+'\n');
-          console.log(JSON.stringify(state));
-          NODE
-      - name: Persist mission state safely on latest branch head
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'CEREBRO JARVIS PREPROD'
-          git config user.email 'actions@users.noreply.github.com'
-          git add cerebro/jarvis/mission-001/state.v1.json
-          git commit -m 'chore(jarvis): advance MISSION-JARVIS-001 core gate [generated]'
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
-          git push origin HEAD:"$GITHUB_REF_NAME"
-      - name: Publish core gate evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: mission-jarvis-001-core-gate-${{ github.run_id }}
-          path: |
-            cerebro/jarvis/mission-001/state.v1.json
-            cerebro/jarvis/mission-001/generated-blueprints/summary.json
-          if-no-files-found: error
-          retention-days: 7
+      - run: |
+          echo 'SUPERSEDED=true'
+          echo 'Use artifact recovery/governance + evidence-true Core readiness workflows.'
