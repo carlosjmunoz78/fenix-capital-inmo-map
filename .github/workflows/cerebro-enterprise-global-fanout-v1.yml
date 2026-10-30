@@ -1,0 +1,187 @@
+name: CEREBRO Enterprise Global Fanout V1
+
+on:
+  workflow_dispatch:
+    inputs:
+      units:
+        description: 'Useful PREPROD Mission DAG units. Paid 500 topology is entitlement-gated.'
+        required: false
+        default: '20'
+        type: string
+  pull_request:
+    paths:
+      - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
+      - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
+      - 'cerebro/config/github-enterprise-execution.v1.json'
+      - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
+      - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+
+jobs:
+  plan:
+    name: Governed global fanout plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix_a: ${{ steps.plan.outputs.matrix_a }}
+      matrix_b: ${{ steps.plan.outputs.matrix_b }}
+      matrix_a_count: ${{ steps.plan.outputs.matrix_a_count }}
+      matrix_b_count: ${{ steps.plan.outputs.matrix_b_count }}
+      planned_units: ${{ steps.plan.outputs.planned_units }}
+      effective_cap: ${{ steps.plan.outputs.effective_cap }}
+      paid_entitlement: ${{ steps.plan.outputs.paid_entitlement }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Contract tests
+        run: node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
+      - id: plan
+        name: Discover unique useful Mission DAG work under effective entitlement
+        env:
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || inputs.units || '20' }}
+        shell: bash
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import { planEnterpriseGlobalFanoutV1 } from './cerebro/runtime/enterprise-global-fanout-v1.mjs';
+          const policy = JSON.parse(fs.readFileSync('./cerebro/config/github-enterprise-execution.v1.json', 'utf8'));
+          const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: Number(process.env.REQUESTED_UNITS) });
+          const matrixA = { include: plan.matrix_a };
+          const matrixB = { include: plan.matrix_b };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a=${JSON.stringify(matrixA)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b=${JSON.stringify(matrixB)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a_count=${plan.matrix_a_count}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b_count=${plan.matrix_b_count}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned_units=${plan.planned_units}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `effective_cap=${plan.effective_physical_cap}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `paid_entitlement=${plan.enterprise_actions_concurrency_entitlement_verified}\n`);
+          console.log(JSON.stringify({
+            state_type: plan.state_type,
+            enterprise_account_state: plan.enterprise_account_state,
+            paid_actions_concurrency_entitlement: plan.enterprise_actions_concurrency_entitlement_verified,
+            requested_units: plan.requested_units,
+            planned_units: plan.planned_units,
+            unique_work_units: plan.unique_work_units,
+            effective_physical_cap: plan.effective_physical_cap,
+            paid_enterprise_platform_ceiling: plan.paid_enterprise_platform_ceiling,
+            matrix_a_count: plan.matrix_a_count,
+            matrix_b_count: plan.matrix_b_count,
+            second_queue: plan.second_queue,
+            second_scheduler: plan.second_scheduler,
+            second_daemon: plan.second_daemon,
+            prod_authorized: plan.prod_authorized,
+            trading_access: plan.trading_access
+          }));
+          NODE
+
+  fanout-a:
+    name: Global A · ${{ matrix.work_unit_id }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 250
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix_a) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute one finite unique Mission DAG unit
+        env:
+          LANE: ${{ matrix.lane }}
+          CYCLE: ${{ matrix.cycle }}
+          EXPECTED_WORK_UNIT_ID: ${{ matrix.work_unit_id }}
+          CEREBRO_MISSION_WORK_OUT_DIR: artifacts/enterprise-global-fanout-v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          result="$(node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
+          printf '%s\n' "$result"
+          RESULT_JSON="$result" node --input-type=module <<'NODE'
+          const lines = String(process.env.RESULT_JSON || '').trim().split(/\r?\n/).filter(Boolean);
+          const result = JSON.parse(lines.at(-1));
+          if (!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
+          if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
+          if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
+          NODE
+
+  fanout-b:
+    name: Global B · ${{ matrix.work_unit_id }}
+    needs: plan
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 250
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix_b) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute one finite unique Mission DAG unit
+        env:
+          LANE: ${{ matrix.lane }}
+          CYCLE: ${{ matrix.cycle }}
+          EXPECTED_WORK_UNIT_ID: ${{ matrix.work_unit_id }}
+          CEREBRO_MISSION_WORK_OUT_DIR: artifacts/enterprise-global-fanout-v1
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          result="$(node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
+          printf '%s\n' "$result"
+          RESULT_JSON="$result" node --input-type=module <<'NODE'
+          const lines = String(process.env.RESULT_JSON || '').trim().split(/\r?\n/).filter(Boolean);
+          const result = JSON.parse(lines.at(-1));
+          if (!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
+          if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
+          if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
+          NODE
+
+  acceptance:
+    name: Global fanout V1 acceptance
+    needs: [plan, fanout-a, fanout-b]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Record bounded global fanout acceptance
+        run: |
+          echo 'CEREBRO Enterprise Global Fanout V1 GREEN'
+          echo 'planned_units=${{ needs.plan.outputs.planned_units }}'
+          echo 'matrix_a=${{ needs.plan.outputs.matrix_a_count }}'
+          echo 'matrix_b=${{ needs.plan.outputs.matrix_b_count }}'
+          echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
+          echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
+          echo 'paid_enterprise_platform_ceiling=500'
+          echo 'single_matrix_ceiling=256'
+          echo 'paid_topology_matrix_target_each=250'
+          echo 'second_queue=false'
+          echo 'second_scheduler=false'
+          echo 'second_daemon=false'
+          echo 'self_refill=false'
+          echo 'prod_authorized=false'
+          echo 'trading_access=false'

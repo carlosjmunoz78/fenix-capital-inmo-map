@@ -38,8 +38,8 @@ export function planJob001ActionsBurstV1({ contract, policy, request = {} }) {
   const p = assertPolicy(policy);
 
   const platformRequestCeiling = integer(
-    p.entitlement?.enterprise_standard_runner_concurrent_jobs_ceiling ?? 500,
-    'enterprise_standard_runner_concurrent_jobs_ceiling',
+    p.entitlement?.paid_enterprise_standard_runner_concurrent_jobs_ceiling ?? 500,
+    'paid_enterprise_standard_runner_concurrent_jobs_ceiling',
     1,
     10000,
   );
@@ -49,10 +49,12 @@ export function planJob001ActionsBurstV1({ contract, policy, request = {} }) {
     1,
     256,
   );
-  const enterpriseVerified = p.entitlement?.enterprise_organization_verified_for_canonical_repo === true;
-  const entitlementCap = enterpriseVerified
-    ? integer(p.burst.max_lanes_after_enterprise_verified, 'max_lanes_after_enterprise_verified', 1, matrixCeiling)
-    : integer(p.burst.max_lanes_until_enterprise_verified, 'max_lanes_until_enterprise_verified', 1, matrixCeiling);
+  const organizationVerified = p.entitlement?.enterprise_organization_verified_for_canonical_repo === true;
+  const actionsConcurrencyVerified = organizationVerified
+    && p.entitlement?.enterprise_actions_concurrency_entitlement_verified === true;
+  const entitlementCap = actionsConcurrencyVerified
+    ? integer(p.burst.max_lanes_after_actions_concurrency_verified, 'max_lanes_after_actions_concurrency_verified', 1, matrixCeiling)
+    : integer(p.burst.max_lanes_until_actions_concurrency_verified, 'max_lanes_until_actions_concurrency_verified', 1, matrixCeiling);
   const contractCap = Math.min(c.max_global_default, c.max_company_default, matrixCeiling);
   const hardCap = Math.min(entitlementCap, contractCap, matrixCeiling);
 
@@ -72,14 +74,19 @@ export function planJob001ActionsBurstV1({ contract, policy, request = {} }) {
   }));
 
   return Object.freeze({
-    schema_version: '1.0.0',
+    schema_version: '1.1.0',
     state_type: 'CEREBRO_JOB001_ACTIONS_BURST_PLAN_V1',
     company_id: p.company_id,
     engine_id: p.engine_id,
     environment: PREPROD,
     version: p.version,
     mode: 'FINITE_BURST',
-    entitlement_state: enterpriseVerified ? 'ENTERPRISE_VERIFIED' : 'ENTITLEMENT_UNVERIFIED',
+    enterprise_account_state: p.entitlement?.enterprise_account_state || 'UNKNOWN',
+    entitlement_state: actionsConcurrencyVerified
+      ? 'PAID_ACTIONS_CONCURRENCY_VERIFIED'
+      : organizationVerified
+        ? 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED'
+        : 'ENTITLEMENT_UNVERIFIED',
     requested_lanes: requestedLanes,
     lanes,
     units_per_lane: unitsPerLane,
