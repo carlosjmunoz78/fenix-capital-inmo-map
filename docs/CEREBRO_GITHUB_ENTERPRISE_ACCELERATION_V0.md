@@ -6,12 +6,23 @@ Status: PREPROD_CANDIDATE
 ## Objective
 Exploit already-contracted GitHub capacity to accelerate CEREBRO engineering, tests, evaluation, generation and finite batch work without turning GitHub Actions into a permanent application runtime and without removing existing services before equivalence is proven.
 
-## Live findings at creation time
-- Canonical repository: `carlosjmunoz78/fenix-capital-inmo-map`.
-- Repository owner type observed through the connected GitHub account: personal `User`, not an organization.
-- Authenticated GitHub connection reported zero organization memberships.
-- Therefore the Enterprise 500-job ceiling is treated as PLATFORM_AVAILABLE_BUT_REPO_ENTITLEMENT_UNVERIFIED until the canonical repository is governed by the purchased Enterprise organization/account.
-- Current CEREBRO workflows include substantial sequential `node --test` regression work, so test-file sharding can create a real speedup without changing product behavior.
+## Verified live state
+- Canonical repository: `fenix-cerebro/fenix-capital-inmo-map`.
+- Repository owner type: organization `fenix-cerebro`.
+- Organization `fenix-cerebro` is part of Enterprise account `cerebro-os`.
+- The ChatGPT GitHub connector has a dedicated installation for organization `fenix-cerebro` and can write to the canonical repository.
+- Repository transfer preserved the same repository identity while moving ownership from the personal account to the Enterprise organization.
+- OIDC compatibility was prepared OLD + NEW before transfer and the post-transfer repository runs under the new owner.
+- Enterprise repository entitlement is therefore VERIFIED for the canonical repository.
+
+## Capacity model
+- GitHub Enterprise standard-runner platform ceiling: 500 concurrent jobs globally, subject to the contracted account/platform limit.
+- A single workflow matrix is capped at 256 jobs.
+- This V0 acceleration workflow caps PREPROD test sharding at 128 parallel jobs.
+- Jobs are created only for discovered independent work; CEREBRO never spawns empty capacity jobs just to occupy the ceiling.
+- Per-engine and per-company contracts remain authoritative below the platform ceiling.
+- JOB-001, for example, remains capped by its canonical `max_company_default=48` even when a request expresses 500-lane platform intent.
+- The 500-job ceiling is therefore a global capacity budget across independent engines/workflows/companies, not permission for one engine to bypass its own safety contract.
 
 ## What GitHub Actions should absorb first
 Candidate workloads, only after tests prove equivalence:
@@ -37,10 +48,11 @@ Candidate workloads, only after tests prove equivalence:
 - Discover actual independent units of work.
 - Generate dynamic matrices only for those units.
 - One matrix never exceeds 256 jobs.
-- Default PREPROD parallelism is bounded below the platform ceiling until Enterprise entitlement for the canonical repository is verified.
-- Preserve a full baseline regression job during V0 so sharded execution is checked against the existing behavior.
+- PREPROD acceleration workflow uses at most 128 parallel shards.
+- Preserve a full baseline regression job so sharded execution is checked against existing behavior.
 - Cancel stale branch/PR runs so obsolete work does not consume capacity.
 - Use Linux runners by default; macOS only when the artifact genuinely requires it.
+- Keep old continuous PREPROD workers drained; verified Enterprise entitlement does not reactivate permanent runner occupancy.
 
 ## Copilot integration
 Repository-level instructions live at `.github/copilot-instructions.md` and encode CEREBRO governance, PREPROD-first behavior, zero-cost preference, anti-loop rules and rollback requirements.
@@ -62,17 +74,20 @@ Only then classify:
 ## Acceptance criteria for V0
 1. Copilot repository instructions present.
 2. Execution policy is machine-readable.
-3. Dynamic parallel test workflow passes on a draft PR.
-4. Full existing CEREBRO regression also passes in the same PR.
-5. No PROD deployment or external writes are performed.
-6. No existing service is removed.
-7. Enterprise organization/repository entitlement is explicitly verified before claiming 500 jobs are usable by this canonical repository.
+3. Enterprise organization/repository entitlement is evidence-backed and marked verified.
+4. Dynamic parallel test workflow passes on a PR under `fenix-cerebro`.
+5. Full existing CEREBRO regression also passes in the same PR.
+6. No PROD deployment or external writes are performed.
+7. No existing service is removed.
+8. Capacity claims distinguish global platform ceiling (500), single-matrix ceiling (256), workflow cap (128) and engine-specific caps.
 
 ## Rollback
-This entire V0 is additive. Rollback is deletion/revert of:
+This V0 remains additive. Rollback is revert of:
 - `.github/copilot-instructions.md`
 - `cerebro/config/github-enterprise-execution.v1.json`
 - `.github/workflows/cerebro-enterprise-acceleration-v0.yml`
 - this runbook
+
+Entitlement rollback is fail-closed: set `enterprise_organization_verified_for_canonical_repo=false` and restore the previous bounded policy if organization/repository evidence is lost.
 
 No data migration is required.

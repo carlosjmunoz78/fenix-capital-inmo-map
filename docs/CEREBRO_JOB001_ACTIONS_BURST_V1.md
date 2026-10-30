@@ -7,7 +7,7 @@ Status: PREPROD_CANDIDATE
 Replace wasteful permanent GitHub Actions occupancy with bounded bursts while preserving the canonical JOB-001 runtime, work pump, safety contract and rollback path.
 
 ## Existing preserved path
-The existing `CEREBRO Continuous Useful Worker V1` remains available as the OLD path. A separate PREPROD capacity-relief canary has now been promoted to `main` at `bd8eb55d0c27f442d32ca7a5fc83bdc06a12e1a9`: while GitHub Enterprise entitlement remains unverified, only OLD lanes 0..15 may self-refill; lanes 16..63 drain after their next governed cycle. PROD and Browser PROD are untouched.
+The existing `CEREBRO Continuous Useful Worker V1` remains available as the OLD rollback path, but its PREPROD self-rearm has been drained to zero by the promoted capacity-relief change. This drain is intentional and remains in place even though Enterprise entitlement is now verified, because CEREBRO prefers finite bursts over permanent runner occupancy. PROD and Browser PROD are untouched.
 
 ## NEW path
 `CEREBRO JOB-001 Finite Burst V1`:
@@ -24,15 +24,18 @@ The existing `CEREBRO Continuous Useful Worker V1` remains available as the OLD 
 Run `41036983202` completed the governed plan, 8 finite burst lanes x 2 useful-work units, evidence upload and final acceptance successfully. NEW therefore has physical evidence that mission-derived work can execute and release runners without self-refill.
 
 ## Capacity
-Current account/repository Enterprise entitlement remains unverified. Therefore V1 caps standard-runner fan-out at 16 lanes even if a larger request is supplied.
+Enterprise entitlement for the canonical repository is now verified after transfer to `fenix-cerebro/fenix-capital-inmo-map` inside Enterprise account `cerebro-os`.
 
-When `enterprise_organization_verified_for_canonical_repo` is evidence-backed and changed to `true`, the router can increase capacity, but JOB-001 still respects its canonical `max_global_default=64` and `max_company_default=48`. Enterprise's platform ceiling is not authority to exceed JOB-001's own safety limits.
+The platform can expose up to 500 concurrent standard-runner jobs globally, while a single matrix remains capped at 256. JOB-001 does not inherit 500 as its own per-company limit: its canonical contract remains `max_global_default=64` and `max_company_default=48`, so a 500-lane request is accepted as platform intent but clamps to 48 JOB-001 lanes for Fénix.
+
+This preserves the principle that platform capacity is a shared global budget across engines/workflows/companies and never overrides engine-specific safety contracts.
 
 ## OLD vs NEW
 OLD:
 - continuous worker lease;
-- self-refill now bounded to lanes 0..15 by the promoted PREPROD canary while entitlement is unverified;
-- canonical 48/64 remains the contract maximum and rollback target.
+- self-refill drained to zero in PREPROD;
+- retained only as rollback evidence/path;
+- canonical 48/64 contract remains preserved.
 
 NEW V1:
 - same mission-derived useful-work implementation;
@@ -40,9 +43,11 @@ NEW V1:
 - finite lanes;
 - no self-refill;
 - releases GitHub runners after completion;
+- Enterprise entitlement verified;
+- up to 48 lanes for the current Fénix JOB-001 company contract;
 - physical PREPROD acceptance GREEN.
 
-Full retirement of the OLD path is not part of this PR. Further reduction requires fresh OLD-vs-NEW evidence after the drain and remains reversible.
+Full deletion of the OLD path is not part of this change. Retirement still requires inventory, dependency map, OLD-vs-NEW evidence and tested rollback.
 
 ## Rollback
 V1 is additive. Rollback is deletion/revert of:
@@ -51,5 +56,7 @@ V1 is additive. Rollback is deletion/revert of:
 - `cerebro/tests/job001-actions-burst-router-v1.test.mjs`
 - `.github/workflows/cerebro-job001-actions-burst-v1.yml`
 - this document.
+
+Entitlement rollback is fail-closed: setting `enterprise_organization_verified_for_canonical_repo=false` restores the 16-lane safety cap without reactivating the old continuous workers.
 
 No data migration or external mutation is performed.

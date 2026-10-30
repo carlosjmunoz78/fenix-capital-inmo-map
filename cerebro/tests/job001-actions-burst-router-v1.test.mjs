@@ -14,6 +14,7 @@ test('default burst is finite PREPROD and reuses canonical JOB001 control plane'
   const out = plan();
   assert.equal(out.environment, 'PREPROD');
   assert.equal(out.mode, 'FINITE_BURST');
+  assert.equal(out.entitlement_state, 'ENTERPRISE_VERIFIED');
   assert.equal(out.lanes, 8);
   assert.equal(out.units_per_lane, 8);
   assert.equal(out.total_units, 64);
@@ -28,38 +29,40 @@ test('default burst is finite PREPROD and reuses canonical JOB001 control plane'
   assert.equal(out.additional_cost_eur, 0);
 });
 
-test('unverified entitlement caps Actions burst at 16 lanes even when more is requested', () => {
+test('verified Enterprise entitlement allows JOB001 above the former 16-lane gate but respects company cap', () => {
   const out = plan({ lanes: 64, units_per_lane: 2, cycle_base: 100 });
-  assert.equal(out.entitlement_state, 'ENTITLEMENT_UNVERIFIED');
-  assert.equal(out.requested_lanes, 64);
-  assert.equal(out.lanes, 16);
-  assert.equal(out.hard_cap, 16);
-  assert.equal(out.matrix.length, 16);
-  assert.equal(out.total_units, 32);
-});
-
-test('a 500-lane request cannot bypass the unverified entitlement gate', () => {
-  const out = plan({ lanes: 500, units_per_lane: 1 });
-  assert.equal(policy.entitlement.enterprise_standard_runner_concurrent_jobs_ceiling, 500);
-  assert.equal(policy.entitlement.enterprise_organization_verified_for_canonical_repo, false);
-  assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
-  assert.equal(out.entitlement_state, 'ENTITLEMENT_UNVERIFIED');
-  assert.equal(out.requested_lanes, 500);
-  assert.equal(out.lanes, 16);
-  assert.equal(out.hard_cap, 16);
-});
-
-test('verified enterprise can use canonical JOB001 company cap but never exceed it', () => {
-  const enterprise = structuredClone(policy);
-  enterprise.entitlement.enterprise_organization_verified_for_canonical_repo = true;
-  const out = planJob001ActionsBurstV1({
-    contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
-    policy: enterprise,
-    request: { lanes: 200, units_per_lane: 1 },
-  });
   assert.equal(out.entitlement_state, 'ENTERPRISE_VERIFIED');
+  assert.equal(out.requested_lanes, 64);
   assert.equal(out.lanes, 48);
   assert.equal(out.hard_cap, 48);
+  assert.equal(out.matrix.length, 48);
+  assert.equal(out.total_units, 96);
+});
+
+test('a 500-lane request is accepted at platform intent level but JOB001 cannot bypass its canonical company cap', () => {
+  const out = plan({ lanes: 500, units_per_lane: 1 });
+  assert.equal(policy.entitlement.enterprise_standard_runner_concurrent_jobs_ceiling, 500);
+  assert.equal(policy.entitlement.enterprise_organization_verified_for_canonical_repo, true);
+  assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
+  assert.equal(out.entitlement_state, 'ENTERPRISE_VERIFIED');
+  assert.equal(out.requested_lanes, 500);
+  assert.equal(out.lanes, 48);
+  assert.equal(out.hard_cap, 48);
+  assert.equal(out.platform_request_ceiling, 500);
+  assert.equal(out.matrix_ceiling, 256);
+});
+
+test('fail-closed rollback still caps an explicitly unverified policy at 16 lanes', () => {
+  const unverified = structuredClone(policy);
+  unverified.entitlement.enterprise_organization_verified_for_canonical_repo = false;
+  const out = planJob001ActionsBurstV1({
+    contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
+    policy: unverified,
+    request: { lanes: 64, units_per_lane: 1 },
+  });
+  assert.equal(out.entitlement_state, 'ENTITLEMENT_UNVERIFIED');
+  assert.equal(out.lanes, 16);
+  assert.equal(out.hard_cap, 16);
 });
 
 test('burst rejects authority expansion in policy', () => {
