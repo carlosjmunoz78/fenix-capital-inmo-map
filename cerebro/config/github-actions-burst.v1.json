@@ -7,8 +7,8 @@
   "version": "v1",
   "mode": "FINITE_BURST",
   "entitlement": {
-    "enterprise_organization_verified_for_canonical_repo": false,
-    "current_safe_standard_runner_parallelism": 16,
+    "enterprise_organization_verified_for_canonical_repo": true,
+    "current_safe_standard_runner_parallelism": 48,
     "enterprise_standard_runner_concurrent_jobs_ceiling": 500,
     "matrix_jobs_per_workflow_run_ceiling": 256
   },
