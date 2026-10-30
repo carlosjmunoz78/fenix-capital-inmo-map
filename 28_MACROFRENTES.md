@@ -53,8 +53,34 @@ Login, selector empresa/contexto, chat, órdenes, motores, jobs, HUMAN_REQUIRED 
 ## M17 · Multiempresa + Company Bootstrap
 company_id/engine_id/environment/version; Registry, tenant isolation, discovery, CRM/App/Automation/Training bootstrap, supervisor, backup/rebuild y offboarding.
 
-## M18 · Digital Build + App Factory + Brand/Commerce/Multimedia
-Web, PWA, móvil, escritorio, plugins, themes, design systems, BRANDBOOT, commerce, multimedia y deployment/migration reutilizando FACT.
+## M18 · Digital Build + App Factory + Brand/Commerce/Multimedia · DIGITAL INDUSTRY
+Objetivo: convertir una necesidad de negocio o un brief en activos digitales completos, probados, entregables, observables, reversibles y reutilizables, sin rehacer lo que ya existe. Reutilizar primero FACT-001, APPFACT-001, BRANDBOOT-001, Technology Scout, runtimes, templates, skills, contratos, QA/EVA/Tribunal, Browser QA, deployment y aprendizaje existentes.
+
+Cobertura funcional mínima: Business-to-Digital Architect; Buy/Build/Improve Gate; Technology Scout; Brand Factory; Design System Factory; UX/Prototype Factory; Web Factory; WordPress/Gutenberg/Block Theme/Elementor when justified; Funnel/Landing Factory; Ecommerce Factory; SaaS Factory; Marketplace Factory; PWA/Mobile/Desktop Factory; Browser Extension Factory; Plugin/Theme/Module Factory; API/Backend/Connector/MCP Factory; Automation Factory; Data Product Factory; AI Feature Factory; Multimedia Factory; Content/SEO/ASO/Localization Factory; Legal/Compliance/Accessibility/Security/QA/Performance Factory; Deployment/Migration/Backup/Rebuild/Observability/Growth/Monetization/Support/Evolution Factory.
+
+Un brief debe poder producir, según necesidad real: discovery, competencia, buyer personas, naming/brand, design tokens, web, SEO, CRM/forms, automatizaciones, calculadoras, área cliente, PWA/app, plugins, documentación, social, imágenes, vídeo, campañas, analítica, dashboards, backups y monitorización. No se construyen piezas irrelevantes: el Build/No-Build Gate decide qué fabricar, reutilizar, envolver, mejorar, posponer o rechazar.
+
+Todo producto debe compartir un Product DNA versionado: Business DNA, Brand DNA, Product DNA, Design DNA, Content DNA, Data DNA, Automation DNA, Deployment DNA y Growth DNA. Artefactos mínimos: company_id, product_id, artifact_id, artifact_type, engine_id/capability_id, environment, version, source_spec_version, brand_version, template_version, dependencies, licenses/provenance, data_classification, security_profile, deployment_target, cost_budget y rollback_ref.
+
+Transformaciones soportadas de forma gobernada: web→PWA; web→móvil; web app→desktop; Figma/diseño autorizado→app; screenshot/mockup autorizado→componentes UI; WordPress legado→arquitectura mejorada; WooCommerce→headless cuando aporte valor; Excel/Sheets→app; Notion→portal; formulario→mini CRM; proceso manual→software; API→plugin/MCP; software→white-label; producto→multiempresa; empresa existente→Digital Twin + sistema mejorado. La ingeniería inversa solo se aplica a activos propios/autorizados y nunca debe saltarse propiedad intelectual, términos ni controles de terceros.
+
+Digital Twin Builder obligatorio antes de sustituir sistemas existentes: inventariar rutas, componentes, datos, formularios, APIs, dependencias, SEO, tracking, permisos, integraciones, comportamiento y contratos; luego crear implementación paralela, PREPROD, OLD vs NEW y rollback probado.
+
+Template Genome: mantener catálogo versionado de templates, componentes y patrones reutilizables (header, hero, pricing, features, testimonials, calculator, FAQ, CTA, checkout, dashboard, map, directory, table, profile, wizard, timeline, chat, auth, settings, admin, notifications). Reutilizar componentes probados; crear uno nuevo solo si existe ventaja medible.
+
+AI-native por diseño cuando sea útil: interfaz humana + API + webhooks + MCP/tools/adapters para que un mismo producto pueda ser consumido desde web, móvil, JARVIS/CEREBRO, agentes autorizados y API. Ningún producto debe quedar acoplado a un modelo concreto.
+
+White-label/multiempresa por defecto cuando aplique: company_id, brand_id, product_id, features, permissions, domain, locale e integrations; evitar forks por cliente. Debe existir aislamiento estricto de datos, secretos, conocimiento, permisos y métricas.
+
+Multimedia Factory: un campaign brief puede generar concepto, copy, storyboard, imágenes, vídeo multiformato, subtítulos, voz autorizada, audio permitido, thumbnail, GIF, carrusel, story, banner, email, landing, PDF/presentación y variantes A/B, siempre conservando editables, licencias/provenance y reglas de marca.
+
+Lifecycle obligatorio: DISCOVER → VALIDATE → SPECIFY → DESIGN → BUILD → VERIFY → LAB/PREPROD → LAUNCH GATE → OBSERVE → LEARN → EVOLVE → RETIRE. Gates mínimos: BUILD_PARITY, BUSINESS_VALUE, LEGAL/IP, SECURITY/PRIVACY, ACCESSIBILITY, SEO/DISCOVERABILITY, PERFORMANCE, COST, QA, USER_ACCEPTANCE, RELEASE, BACKUP/REBUILD y ROLLBACK.
+
+Autonomía: dividir automáticamente este alcance en parent tasks y subtareas lazily materialized, con DAG, dependencias, dedupe, idempotencia, evidence y fan-in. CEREBRO ejecuta trabajo ordinario en LAB/PREPROD; escalar solo por LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT o CUSTOMER_HUMAN_REQUEST.
+
+Política de coste: lógica determinista/open-source/local/stack ya contratado/free tier antes de pago; IA de pago no es requisito. No comprar suscripciones, dominios, planes, app-store accounts ni infraestructura sin MONEY_LIMIT/ROI aprobado.
+
+Definition of Done de M18: capability/inventory crosswalk completo; duplicados eliminados; gaps clasificados REUSE/WRAP/EXTEND/BUILD/DEFER/REJECT; Capability Graph + Dependency Graph + Artifact Graph; control plane y contratos verificados; candidatos construidos solo en LAB/PREPROD; tests/evals/Tribunal/observabilidad/coste/backup/rollback/rebuild GREEN; al menos un producto representativo construido de idea a preview aceptado; aprendizaje capturado en FACT/LRN; PROD solo mediante promoción gradual autorizada.
 
 ## M19 · Technology Scout + Safe Engineering
 Vigilar OSS/free tiers/capabilities, benchmark LAB, OpenCode/Superpowers/patrones de skills, worktrees/sandboxes y adopción solo con evidencia.
