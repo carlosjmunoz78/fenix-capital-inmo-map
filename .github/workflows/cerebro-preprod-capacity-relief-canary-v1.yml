@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   guard:
-    name: PREPROD entitlement drain guard
+    name: PREPROD verified-capacity continuous-refill guard
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -25,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Validate drain canary contract
+      - name: Validate verified-capacity continuous-refill canary contract
         run: node --test cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs
       - name: Revalidate canonical JOB-001 sustained binding
         run: node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
@@ -33,9 +33,15 @@ jobs:
         run: |
           echo 'PREPROD capacity relief canary GREEN'
           echo 'old_worker_preserved=true'
-          echo 'unverified_rearm_lane_limit=0'
-          echo 'all_legacy_continuous_lanes_drain_after_current_lease=true'
+          echo 'verified_rearm_lane_limit=68'
+          echo 'enterprise_entitlement_verified=true'
+          echo 'global_concurrency_cap=180'
+          echo 'deepseek_concurrency_cap=8'
+          echo 'repo_write_concurrency_cap=1'
+          echo 'self_refill_until_unique_backlog_exhausted=true'
+          echo 'duplicate_replay_after_exhaustion=false'
           echo 'in_progress_runs_cancelled=false'
           echo 'prod_untouched=true'
           echo 'browser_prod_untouched=true'
+          echo 'trading_untouched=true'
           echo 'rollback=revert'
