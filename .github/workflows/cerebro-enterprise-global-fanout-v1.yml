@@ -8,6 +8,11 @@ on:
         required: false
         default: '180'
         type: string
+      offset:
+        description: 'Deterministic Mission DAG offset for the next non-overlapping wave.'
+        required: false
+        default: '0'
+        type: string
   pull_request:
     paths:
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
@@ -24,10 +29,11 @@ on:
 
 permissions:
   contents: read
+  actions: write
 
 concurrency:
   group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   CEREBRO_SUPERVISOR_ENV: PREPROD
@@ -50,6 +56,10 @@ jobs:
       effective_cap: ${{ steps.plan.outputs.effective_cap }}
       paid_entitlement: ${{ steps.plan.outputs.paid_entitlement }}
       global_500_enabled: ${{ steps.plan.outputs.global_500_enabled }}
+      offset: ${{ steps.plan.outputs.offset }}
+      next_offset: ${{ steps.plan.outputs.next_offset }}
+      has_more: ${{ steps.plan.outputs.has_more }}
+      total_work_units: ${{ steps.plan.outputs.total_work_units }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -61,34 +71,40 @@ jobs:
         name: Discover unique useful Mission DAG work under live entitlement
         env:
           REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '180' || inputs.units || '180' }}
+          REQUESTED_OFFSET: ${{ github.event_name == 'pull_request' && '0' || github.event_name == 'push' && '0' || inputs.offset || '0' }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           import { planEnterpriseGlobalFanoutV1 } from './cerebro/runtime/enterprise-global-fanout-v1.mjs';
           const policy = JSON.parse(fs.readFileSync('./cerebro/config/github-enterprise-execution.v1.json', 'utf8'));
-          const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: Number(process.env.REQUESTED_UNITS) });
-          const matrixA = { include: plan.matrix_a };
-          const matrixB = { include: plan.matrix_b };
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a=${JSON.stringify(matrixA)}\n`);
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b=${JSON.stringify(matrixB)}\n`);
+          const plan = planEnterpriseGlobalFanoutV1({
+            policy,
+            requested_units: Number(process.env.REQUESTED_UNITS),
+            offset: Number(process.env.REQUESTED_OFFSET),
+          });
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a=${JSON.stringify({include:plan.matrix_a})}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b=${JSON.stringify({include:plan.matrix_b})}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a_count=${plan.matrix_a_count}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b_count=${plan.matrix_b_count}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned_units=${plan.planned_units}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `effective_cap=${plan.effective_physical_cap}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `paid_entitlement=${plan.enterprise_actions_concurrency_entitlement_verified}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `global_500_enabled=${plan.global_500_fanout_enabled}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `offset=${plan.offset}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `next_offset=${plan.next_offset}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `has_more=${plan.has_more}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `total_work_units=${plan.total_work_units}\n`);
           console.log(JSON.stringify({
             state_type: plan.state_type,
-            enterprise_account_state: plan.enterprise_account_state,
-            paid_actions_concurrency_entitlement: plan.enterprise_actions_concurrency_entitlement_verified,
             requested_units: plan.requested_units,
             planned_units: plan.planned_units,
-            unique_work_units: plan.unique_work_units,
+            offset: plan.offset,
+            next_offset: plan.next_offset,
+            has_more: plan.has_more,
+            total_work_units: plan.total_work_units,
             effective_physical_cap: plan.effective_physical_cap,
             live_enterprise_runner_limit: plan.live_enterprise_runner_limit,
-            documented_enterprise_platform_ceiling: plan.documented_enterprise_platform_ceiling,
-            global_500_fanout_enabled: plan.global_500_fanout_enabled,
             matrix_a_count: plan.matrix_a_count,
             matrix_b_count: plan.matrix_b_count,
             second_queue: plan.second_queue,
@@ -183,18 +199,37 @@ jobs:
         run: |
           echo 'CEREBRO Enterprise Global Fanout V1 GREEN'
           echo 'planned_units=${{ needs.plan.outputs.planned_units }}'
+          echo 'offset=${{ needs.plan.outputs.offset }}'
+          echo 'next_offset=${{ needs.plan.outputs.next_offset }}'
+          echo 'has_more=${{ needs.plan.outputs.has_more }}'
+          echo 'total_work_units=${{ needs.plan.outputs.total_work_units }}'
           echo 'matrix_a=${{ needs.plan.outputs.matrix_a_count }}'
           echo 'matrix_b=${{ needs.plan.outputs.matrix_b_count }}'
           echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
           echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
           echo 'global_500_fanout_enabled=${{ needs.plan.outputs.global_500_enabled }}'
-          echo 'documented_enterprise_platform_ceiling=500'
-          echo 'single_matrix_ceiling=256'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'
-          echo 'self_refill=false'
+          echo 'self_refill=true'
           echo 'prod_authorized=false'
           echo 'trading_access=false'
-
-# Operational trigger marker: harmless PREPROD fanout launch; no authority expansion.
+      - name: Self-refill next non-overlapping wave
+        if: ${{ github.event_name != 'pull_request' && needs.plan.outputs.has_more == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEXT_OFFSET: ${{ needs.plan.outputs.next_offset }}
+          EFFECTIVE_CAP: ${{ needs.plan.outputs.effective_cap }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-enterprise-global-fanout-v1.yml/dispatches" \
+            -f "ref=${GITHUB_REF_NAME}" \
+            -f "inputs[units]=${EFFECTIVE_CAP}" \
+            -f "inputs[offset]=${NEXT_OFFSET}"
+          echo "self_refilled=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "next_offset=${NEXT_OFFSET}" >> "$GITHUB_STEP_SUMMARY"
+          echo "effective_cap=${EFFECTIVE_CAP}" >> "$GITHUB_STEP_SUMMARY"
+          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
