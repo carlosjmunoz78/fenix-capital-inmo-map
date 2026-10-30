@@ -3,6 +3,11 @@ run-name: CEREBRO EDGE OFFLINE PERSISTENCE · PREPROD · ${{ github.run_id }}
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - cerebro/edge-device-dispatch-canary-v10-20261030
+    paths:
+      - '.github/workflows/cerebro-edge-device-dispatch-canary-v1.yml'
 
 permissions:
   contents: read
