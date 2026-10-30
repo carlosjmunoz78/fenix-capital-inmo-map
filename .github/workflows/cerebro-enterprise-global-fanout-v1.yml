@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       units:
-        description: 'Useful PREPROD Mission DAG units to execute (1..500)'
+        description: 'Useful PREPROD Mission DAG units. Paid 500 topology is entitlement-gated.'
         required: false
-        default: '500'
+        default: '16'
         type: string
   pull_request:
     paths:
@@ -40,6 +40,8 @@ jobs:
       matrix_a_count: ${{ steps.plan.outputs.matrix_a_count }}
       matrix_b_count: ${{ steps.plan.outputs.matrix_b_count }}
       planned_units: ${{ steps.plan.outputs.planned_units }}
+      effective_cap: ${{ steps.plan.outputs.effective_cap }}
+      paid_entitlement: ${{ steps.plan.outputs.paid_entitlement }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -48,9 +50,9 @@ jobs:
       - name: Contract tests
         run: node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
       - id: plan
-        name: Discover unique useful Mission DAG work and split into two legal matrices
+        name: Discover unique useful Mission DAG work under effective entitlement
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '32' || inputs.units || '500' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '16' || inputs.units || '16' }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -65,15 +67,19 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a_count=${plan.matrix_a_count}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b_count=${plan.matrix_b_count}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned_units=${plan.planned_units}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `effective_cap=${plan.effective_physical_cap}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `paid_entitlement=${plan.enterprise_actions_concurrency_entitlement_verified}\n`);
           console.log(JSON.stringify({
             state_type: plan.state_type,
+            enterprise_account_state: plan.enterprise_account_state,
+            paid_actions_concurrency_entitlement: plan.enterprise_actions_concurrency_entitlement_verified,
             requested_units: plan.requested_units,
             planned_units: plan.planned_units,
             unique_work_units: plan.unique_work_units,
+            effective_physical_cap: plan.effective_physical_cap,
+            paid_enterprise_platform_ceiling: plan.paid_enterprise_platform_ceiling,
             matrix_a_count: plan.matrix_a_count,
             matrix_b_count: plan.matrix_b_count,
-            global_platform_ceiling: plan.global_platform_ceiling,
-            matrix_ceiling: plan.matrix_ceiling,
             second_queue: plan.second_queue,
             second_scheduler: plan.second_scheduler,
             second_daemon: plan.second_daemon,
@@ -118,10 +124,6 @@ jobs:
           if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
           if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
           NODE
-          echo "work_unit_id=$EXPECTED_WORK_UNIT_ID" >> "$GITHUB_STEP_SUMMARY"
-          echo "finite=true" >> "$GITHUB_STEP_SUMMARY"
-          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
-          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
 
   fanout-b:
     name: Global B · ${{ matrix.work_unit_id }}
@@ -159,10 +161,6 @@ jobs:
           if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
           if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
           NODE
-          echo "work_unit_id=$EXPECTED_WORK_UNIT_ID" >> "$GITHUB_STEP_SUMMARY"
-          echo "finite=true" >> "$GITHUB_STEP_SUMMARY"
-          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
-          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
 
   acceptance:
     name: Global fanout V1 acceptance
@@ -176,9 +174,11 @@ jobs:
           echo 'planned_units=${{ needs.plan.outputs.planned_units }}'
           echo 'matrix_a=${{ needs.plan.outputs.matrix_a_count }}'
           echo 'matrix_b=${{ needs.plan.outputs.matrix_b_count }}'
-          echo 'global_platform_ceiling=500'
+          echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
+          echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
+          echo 'paid_enterprise_platform_ceiling=500'
           echo 'single_matrix_ceiling=256'
-          echo 'matrix_target_each=250'
+          echo 'paid_topology_matrix_target_each=250'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'
