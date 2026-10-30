@@ -94,9 +94,18 @@ if (!text.includes('GLOBAL_MISSION_AUTOFILL_V1_WIRED')) {
   );
 }
 
+if (!text.includes('NEURONAL_180_CAP_V1_WIRED')) {
+  replaceOnce(
+    "    target_active: positiveInt('CEREBRO_NEURONAL_TARGET_ACTIVE', Math.min(40, maxGlobal), Math.min(64, maxGlobal)),\n    max_enqueue_per_reconcile: positiveInt('CEREBRO_NEURONAL_MAX_ENQUEUE_PER_RECONCILE', Math.min(48, maxGlobal), Math.min(64, maxGlobal)),",
+    "    target_active: positiveInt('CEREBRO_NEURONAL_TARGET_ACTIVE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)), // NEURONAL_180_CAP_V1_WIRED\n    max_enqueue_per_reconcile: positiveInt('CEREBRO_NEURONAL_MAX_ENQUEUE_PER_RECONCILE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)),",
+    'NEURONAL_180_CAP'
+  );
+}
+
 const required = [
   'NEURONAL_AUTOFILL_V1_WIRED',
   'GLOBAL_MISSION_AUTOFILL_V1_WIRED',
+  'NEURONAL_180_CAP_V1_WIRED',
   'additional_sources: [missionSource, neuronalSource].filter(Boolean)',
   'registerNeuronalAuditHandlerV1({ worker_runner: worker })',
   'registerMissionDerivedJob001HandlerV1({ worker_runner: worker })',
