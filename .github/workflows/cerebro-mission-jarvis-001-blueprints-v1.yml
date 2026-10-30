@@ -1,90 +1,15 @@
-name: JARVIS-001 BLUEPRINTS + CORE VALIDATION · PREPROD
+name: JARVIS-001 BLUEPRINTS V1 · SUPERSEDED
 
 on:
-  push:
-    branches:
-      - cerebro/mission-jarvis-001-20261030
-    paths:
-      - '.github/workflows/cerebro-mission-jarvis-001-blueprints-v1.yml'
-      - 'cerebro/runtime/jarvis-program-blueprints-v1.mjs'
-      - 'cerebro/jarvis/core-v1/**'
-      - 'cerebro/tests/jarvis-core-v1.test.mjs'
   workflow_dispatch:
 
 permissions:
-  contents: write
-
-concurrency:
-  group: mission-jarvis-001-blueprints-v1
-  cancel-in-progress: false
-
-env:
-  CEREBRO_SUPERVISOR_ENV: PREPROD
-  CEREBRO_PROD_WRITE: 'false'
-  CEREBRO_TRADING_ACCESS: 'false'
-  CEREBRO_ALLOW_PAID_JARVIS_BUILD: 'YES'
-  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-  JARVIS_BLUEPRINT_OUT: cerebro/jarvis/mission-001/generated-blueprints
+  contents: read
 
 jobs:
-  blueprints:
+  superseded:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - name: Enforce PREPROD hard guards
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
-          test "$CEREBRO_PROD_WRITE" = false
-          test "$CEREBRO_TRADING_ACCESS" = false
-          test -n "$DEEPSEEK_API_KEY"
-      - name: Validate core, DAG and DeepSeek guards
-        run: |
-          node --test cerebro/tests/jarvis-core-v1.test.mjs
-          node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
-          node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
-      - name: Generate 18x2 DeepSeek program blueprints
-        run: node cerebro/runtime/jarvis-program-blueprints-v1.mjs
-      - name: Enforce blueprint boundedness
-        shell: bash
-        run: |
-          node --input-type=module - <<'NODE'
-          import fs from 'node:fs';
-          const s=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
-          if(!s.ok) throw new Error('BLUEPRINTS_NOT_OK');
-          if(s.deepseek_calls!==36) throw new Error(`UNEXPECTED_DEEPSEEK_CALLS:${s.deepseek_calls}`);
-          if(s.prod_write!==false||s.trading!==false) throw new Error('BOUNDARY_VIOLATION');
-          if(s.deepseek_dependency_target!==0) throw new Error('DEPENDENCY_TARGET_MUST_BE_ZERO');
-          if(Array.isArray(s.human_required)&&s.human_required.length) throw new Error(`HUMAN_REQUIRED:${s.human_required.join(',')}`);
-          console.log(JSON.stringify(s));
-          NODE
-      - name: Persist durable blueprint assets on latest candidate branch head
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name 'CEREBRO JARVIS PREPROD'
-          git config user.email 'actions@users.noreply.github.com'
-          git add cerebro/jarvis/mission-001/generated-blueprints
-          if git diff --cached --quiet; then
-            echo 'no_new_blueprint_assets=true' >> "$GITHUB_STEP_SUMMARY"
-          else
-            git commit -m 'chore(jarvis): persist MISSION-JARVIS-001 program blueprints [generated]'
-            git fetch origin "$GITHUB_REF_NAME"
-            git rebase "origin/$GITHUB_REF_NAME"
-            git push origin HEAD:"$GITHUB_REF_NAME"
-          fi
-      - name: Publish evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mission-jarvis-001-blueprints-${{ github.run_id }}
-          path: cerebro/jarvis/mission-001/generated-blueprints/**
-          if-no-files-found: error
-          retention-days: 7
+      - run: |
+          echo 'SUPERSEDED_BY=cerebro-mission-jarvis-001-blueprints-v2.yml'
+          echo 'Reason: V1 validated transport/bounds but did not reject empty reasoning-only DeepSeek outputs.'
