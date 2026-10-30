@@ -191,8 +191,29 @@ function termsFor(sub) {
   return [...new Set(raw.split(/[^a-z0-9_-]+/).filter(x=>x.length>=4))].slice(0,24);
 }
 
+function filesystemFiles(root = process.cwd()) {
+  const roots = ['cerebro','src','docs','.github'].filter(name => fs.existsSync(path.join(root,name)));
+  const files = [];
+  const walk = (absolute, relative) => {
+    for (const entry of fs.readdirSync(absolute,{withFileTypes:true})) {
+      if (entry.name === '.git' || entry.name === 'node_modules' || entry.name === 'artifacts') continue;
+      const abs = path.join(absolute,entry.name);
+      const rel = path.join(relative,entry.name).replace(/\\/g,'/');
+      if (entry.isDirectory()) walk(abs,rel);
+      else if (entry.isFile()) files.push(rel);
+    }
+  };
+  for (const name of roots) walk(path.join(root,name),name);
+  return files.sort();
+}
+
 function gitFiles() {
-  return execFileSync('git',['ls-files'],{encoding:'utf8'}).split(/\r?\n/).filter(Boolean);
+  if (process.env.CEREBRO_NEURONAL_FORCE_FS_INVENTORY !== 'YES') {
+    try {
+      return execFileSync('git',['ls-files'],{encoding:'utf8',stdio:['ignore','pipe','ignore']}).split(/\r?\n/).filter(Boolean);
+    } catch { }
+  }
+  return filesystemFiles();
 }
 
 function writeJson(file, value) {
