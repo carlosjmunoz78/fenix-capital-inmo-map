@@ -196,3 +196,5 @@ jobs:
           echo 'self_refill=false'
           echo 'prod_authorized=false'
           echo 'trading_access=false'
+
+# Operational trigger marker: harmless PREPROD fanout launch; no authority expansion.
