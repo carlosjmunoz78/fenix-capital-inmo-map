@@ -37,16 +37,28 @@ export function planJob001ActionsBurstV1({ contract, policy, request = {} }) {
   const c = assertContract(contract);
   const p = assertPolicy(policy);
 
+  const platformRequestCeiling = integer(
+    p.entitlement?.enterprise_standard_runner_concurrent_jobs_ceiling ?? 500,
+    'enterprise_standard_runner_concurrent_jobs_ceiling',
+    1,
+    10000,
+  );
+  const matrixCeiling = integer(
+    p.entitlement?.matrix_jobs_per_workflow_run_ceiling ?? 256,
+    'matrix_jobs_per_workflow_run_ceiling',
+    1,
+    256,
+  );
   const enterpriseVerified = p.entitlement?.enterprise_organization_verified_for_canonical_repo === true;
   const entitlementCap = enterpriseVerified
-    ? integer(p.burst.max_lanes_after_enterprise_verified, 'max_lanes_after_enterprise_verified', 1, 256)
-    : integer(p.burst.max_lanes_until_enterprise_verified, 'max_lanes_until_enterprise_verified', 1, 256);
-  const contractCap = Math.min(c.max_global_default, c.max_company_default, 256);
-  const hardCap = Math.min(entitlementCap, contractCap, p.entitlement?.matrix_jobs_per_workflow_run_ceiling ?? 256);
+    ? integer(p.burst.max_lanes_after_enterprise_verified, 'max_lanes_after_enterprise_verified', 1, matrixCeiling)
+    : integer(p.burst.max_lanes_until_enterprise_verified, 'max_lanes_until_enterprise_verified', 1, matrixCeiling);
+  const contractCap = Math.min(c.max_global_default, c.max_company_default, matrixCeiling);
+  const hardCap = Math.min(entitlementCap, contractCap, matrixCeiling);
 
   const requestedLanes = request.lanes == null
     ? integer(p.burst.default_lanes, 'default_lanes', 1, hardCap)
-    : integer(request.lanes, 'lanes', 1, 256);
+    : integer(request.lanes, 'lanes', 1, platformRequestCeiling);
   const lanes = Math.min(requestedLanes, hardCap);
   const unitsPerLane = request.units_per_lane == null
     ? integer(p.burst.default_units_per_lane, 'default_units_per_lane', 1, p.burst.max_units_per_lane)
@@ -72,6 +84,8 @@ export function planJob001ActionsBurstV1({ contract, policy, request = {} }) {
     lanes,
     units_per_lane: unitsPerLane,
     total_units: lanes * unitsPerLane,
+    platform_request_ceiling: platformRequestCeiling,
+    matrix_ceiling: matrixCeiling,
     hard_cap: hardCap,
     matrix: Object.freeze(matrix),
     reuses_existing_runtime: true,
