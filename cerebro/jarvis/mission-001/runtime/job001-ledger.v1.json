@@ -53656,7 +53656,1687 @@
       "error": null,
       "created_at": "2026-10-30T07:47:20.119Z",
       "updated_at": "2026-10-30T07:47:20.905Z"
+    },
+    {
+      "job_id": "job-f5cd51d8-1f4d-4c0e-8c07-5bb0ea8c3789",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S240-reality-completeness.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "41555bfa35614d60216c5992c6f5328fa6b8d747bb1f6c5899c72096a0112a3c"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S240-reality-completeness.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "af9ab02c-7b02-4d72-ab03-56d57c025b7b",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S240-reality-completeness_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.932Z",
+      "updated_at": "2026-10-30T07:47:41.411Z"
+    },
+    {
+      "job_id": "job-cd86e197-0c8e-4704-acd8-e9d644a8b27a",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P07.S241-closure-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "3cd5848f7cd331d298b12b746c06b985346e2a965819a6de0c80b3da2087848a"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P07.S241-closure-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "11f5b6be-0da2-4805-bc79-ff038eec01a3",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P07_S241-closure-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.941Z",
+      "updated_at": "2026-10-30T07:47:41.431Z"
+    },
+    {
+      "job_id": "job-1d8d6ea8-7680-481b-9c16-483e1e6138ce",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S242-incompleteness-detector.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "763694594390307c7e9847406e68e0c74f0bd8a13038b4e75f460688498a91a8"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S242-incompleteness-detector.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "b7d930a4-1485-4684-bdaf-c368ec504994",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S242-incompleteness-detector_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.950Z",
+      "updated_at": "2026-10-30T07:47:41.451Z"
+    },
+    {
+      "job_id": "job-fe1b31b0-18da-4260-88f1-188d3efb5880",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S243-anti-entropy-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "0f64e77d76ec670d0fe983b8b07f8eff92eb374349b0cd9a82612399aac88795"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S243-anti-entropy-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "f9343306-a7b5-46a0-8a86-cfed04b29209",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S243-anti-entropy-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.961Z",
+      "updated_at": "2026-10-30T07:47:41.471Z"
+    },
+    {
+      "job_id": "job-23558bc4-f351-40cc-914e-2414c25b915b",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P13.S244-complexity-budget.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "bb984d3845e2540b6f70bb6fc7f0db3cf0854f51c4b40924e20d9ea1b3c6209a"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P13.S244-complexity-budget.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "ae6ed0f4-3205-470d-b1f0-fb97af14415e",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P13_S244-complexity-budget_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.980Z",
+      "updated_at": "2026-10-30T07:47:41.490Z"
+    },
+    {
+      "job_id": "job-119ac63e-5c02-4bfa-b3d4-b6e966460a13",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P15.S245-change-impact-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "a7bb91fe1ee4c9599f5e4a2f0ef16f734830132b5b67b1f5859a5909f5c1bb45"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P15.S245-change-impact-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "65baf488-aa06-42a8-9fbc-505b28880081",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P15_S245-change-impact-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.989Z",
+      "updated_at": "2026-10-30T07:47:41.508Z"
+    },
+    {
+      "job_id": "job-98617071-1448-48ea-b8e7-e574d354ee1f",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S246-decision-latency-budget.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "7a97d72f06001ec41924c486b037f5c3e53a17e8b1b5be6ee3fff7403c156e51"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S246-decision-latency-budget.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "93380a3e-1868-407b-ac81-e3e7fa760502",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S246-decision-latency-budget_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:40.997Z",
+      "updated_at": "2026-10-30T07:47:41.528Z"
+    },
+    {
+      "job_id": "job-a405e5e9-52de-4103-8788-d161ae086340",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P07.S247-model-behavior-regression.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "13c84a2c073dab58650fb44c20d46ccbd64b60c57d4bdd15cf72318cef5cd001"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P07.S247-model-behavior-regression.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "2a3359e3-2a5a-4a6c-8e31-9b525431ba95",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P07_S247-model-behavior-regression_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.006Z",
+      "updated_at": "2026-10-30T07:47:41.547Z"
+    },
+    {
+      "job_id": "job-fe4677d9-9351-47f0-b509-f1cacbd4c1b6",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S248-critical-delivery.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "a26c7c0cc0a576dfe0a8841124985b8326c343e22f086c8ee4a1413fce26befa"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S248-critical-delivery.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "0df49111-5497-42d4-b3fc-330b27b81b30",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S248-critical-delivery_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.016Z",
+      "updated_at": "2026-10-30T07:47:41.566Z"
+    },
+    {
+      "job_id": "job-6f38fde7-cc5e-4325-bbe8-43dda66558c6",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P16.S249-emergency-fallback-interface.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "510deb54a8b5b052e467f916281ffaf71639470c17abfde7df830a8cbcf95e39"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P16.S249-emergency-fallback-interface.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "80691609-5b59-4029-b581-5ee4f632e5c4",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P16_S249-emergency-fallback-interface_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.025Z",
+      "updated_at": "2026-10-30T07:47:41.585Z"
+    },
+    {
+      "job_id": "job-3ef75452-7608-49f4-835d-74c6af15dadc",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S250-physical-jarvis-multi-body.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "e69b8fca59be10700b54aa9994c571c51b96ea55df6f03278cd079d3496833c3"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S250-physical-jarvis-multi-body.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "c52a0b3b-10fa-4454-b878-0d93cd7d5257",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S250-physical-jarvis-multi-body_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.033Z",
+      "updated_at": "2026-10-30T07:47:41.606Z"
+    },
+    {
+      "job_id": "job-b24c08a2-2298-451f-9ca3-731d62230a51",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S251-digital-reflex-cortex-cerebellum-hippocampus.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "510c1d7db11ee5695dff6c2da7961dc4d63a360a26f2fce201813803a5b4a55a"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S251-digital-reflex-cortex-cerebellum-hippocampus.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "f9581f31-0bc6-46f3-8916-84e23f1f8356",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S251-digital-reflex-cortex-cerebellum-hippocampus_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.042Z",
+      "updated_at": "2026-10-30T07:47:41.626Z"
+    },
+    {
+      "job_id": "job-981e5595-7a69-4f15-b9e7-d9e5e28f10cc",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S252-jarvis-digital-nervous-system.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "5d4dd32e5277947a839626d303abf9c7eabb57427f451154de3cb2ff3dc7fffe"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S252-jarvis-digital-nervous-system.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "c1326934-e039-4b2f-bd49-1405b2e8bd15",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S252-jarvis-digital-nervous-system_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.051Z",
+      "updated_at": "2026-10-30T07:47:41.644Z"
+    },
+    {
+      "job_id": "job-ad968a3a-8da5-4c24-bcc2-f358e6242c83",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S253-presence-ambient.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "da2c8b6d1a20be9bffaf987ffff5573003804a0659d9cb1a122f8afe687221a2"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S253-presence-ambient.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "5d93513f-a31f-42a9-8e33-d1fdf56cc8f0",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S253-presence-ambient_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.060Z",
+      "updated_at": "2026-10-30T07:47:41.665Z"
+    },
+    {
+      "job_id": "job-f1f9f80f-d7c5-4005-ba28-632812855a9c",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P15.S254-privacy-compartments.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "4e9cf465fb13a3adff731e40c4b3fb235978f5f4c8a06a1b3ba42c18ead4615b"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P15.S254-privacy-compartments.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "0aaa139b-5d88-4f2c-b372-55ece9a8d5d9",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P15_S254-privacy-compartments_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.069Z",
+      "updated_at": "2026-10-30T07:47:41.683Z"
+    },
+    {
+      "job_id": "job-38465566-c785-4ef0-8a76-9964a9a8d774",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S255-information-intelligence.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "114ed3160358089f18cf9c96ef7884eeafa5f594800768aad0c2fee505b6cd0b"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S255-information-intelligence.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "8dbc77cb-7a43-43ad-bc4e-dff6c4ec4f1d",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S255-information-intelligence_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.079Z",
+      "updated_at": "2026-10-30T07:47:41.702Z"
+    },
+    {
+      "job_id": "job-584a19e8-0650-4cc6-865d-f6984702f0a4",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S256-talent-organization-architect.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "52f71f49902c7c877fb4407d3b0e805c17834fb8a3e02db17e1de3ed3d34dc17"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S256-talent-organization-architect.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "9f5539d0-3a3f-49e1-9019-dbf648789260",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S256-talent-organization-architect_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.088Z",
+      "updated_at": "2026-10-30T07:47:41.720Z"
+    },
+    {
+      "job_id": "job-11d53ab1-3322-4496-b00a-3e8feffce325",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S257-treasury-capital.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "c463c4fc618368ffc8a3f9207ee249104f0dbf289247c8cf1c903efa297e7ebe"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S257-treasury-capital.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "afe4572e-f19d-4041-ac03-f94cbdfa25e1",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S257-treasury-capital_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.097Z",
+      "updated_at": "2026-10-30T07:47:41.738Z"
+    },
+    {
+      "job_id": "job-337bfd80-ae21-4a49-b5a7-36cdb9c7b3cc",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S258-legal-regulatory-radar.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "2a9ffb212b8bdd141ae987aa023c56a21a93c83aeace94b7ca86c5b4521a5856"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S258-legal-regulatory-radar.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "fce13b66-df36-4cfe-bc66-76d990e3f96b",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S258-legal-regulatory-radar_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.105Z",
+      "updated_at": "2026-10-30T07:47:41.757Z"
+    },
+    {
+      "job_id": "job-a558c91c-438f-4406-8a8c-294e9cd1af85",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P04.S259-security-counterintelligence.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "991cc19ddf01f18cdd7727e4a915b4c275790839c0c785e7f29fb7e451cc93dd"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P04.S259-security-counterintelligence.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "a3016b08-b2b8-42e4-978a-0ad7dbbeaeff",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P04_S259-security-counterintelligence_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.118Z",
+      "updated_at": "2026-10-30T07:47:41.774Z"
+    },
+    {
+      "job_id": "job-1f21cc4e-059c-44d5-8c4c-082fc61ef6c5",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S260-market-nervous-system.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "05c2152eea1e3df0b31204e5793ff49a8db77de6444f402c641d0b19b1ed788d"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S260-market-nervous-system.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "e857003d-1816-4aca-8b0d-3fb7e29502c3",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S260-market-nervous-system_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.130Z",
+      "updated_at": "2026-10-30T07:47:41.793Z"
+    },
+    {
+      "job_id": "job-6c4b2370-3bd8-4d92-8a6a-f4cd4db58b1e",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S261-customer-twin-product-evolution.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "5a62b0d16bc36ec1383e3ce0999c9d273e719533f88181b38b623fa509e8a9ca"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S261-customer-twin-product-evolution.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "6f429f0e-d9a7-4129-bb9d-5b3fc5921cb2",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S261-customer-twin-product-evolution_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.139Z",
+      "updated_at": "2026-10-30T07:47:41.810Z"
+    },
+    {
+      "job_id": "job-dc303aa1-6eae-4fcd-b4b1-cc35c535fbf9",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S262-supply-procurement-brain.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "87782871279a2d3a198376475adc7992849c581450c57b76a84ae7c8a92d8f9e"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S262-supply-procurement-brain.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "9f72ede4-e93f-4ca4-947b-65fc6c093088",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S262-supply-procurement-brain_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.150Z",
+      "updated_at": "2026-10-30T07:47:41.829Z"
+    },
+    {
+      "job_id": "job-5e60b62a-a423-447e-9bd1-93743a5766ba",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S263-invention-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "bb0c5d738308214b2db4eadb05ae7c8c375dedb8ee0c2f0e5bb7e5854e73d855"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S263-invention-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "7c6fc68f-4843-4d76-9709-20711314a001",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S263-invention-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.159Z",
+      "updated_at": "2026-10-30T07:47:41.846Z"
+    },
+    {
+      "job_id": "job-d69ab9ba-adfe-4353-aa00-8ffe6ab9a9c1",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S264-ip-knowledge-moat.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "e4bd007e6001c0c274db00df933a83f36015a3bdcb1c9aabe1f5a2a6f61d0661"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S264-ip-knowledge-moat.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "cf9cdb82-4c71-426a-b90c-986e6cc76cf2",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S264-ip-knowledge-moat_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.168Z",
+      "updated_at": "2026-10-30T07:47:41.864Z"
+    },
+    {
+      "job_id": "job-7a890e7d-7564-45a1-a91c-c2a7083f4536",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P14.S265-future-jarvis-zeus-next.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "d0efbb487ce8a621c988bd0c244896e9512d6a1127117012474b7b6b4fd3c315"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P14.S265-future-jarvis-zeus-next.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "ac059aa5-6ca3-4ffb-8136-1d81198e179b",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P14_S265-future-jarvis-zeus-next_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.177Z",
+      "updated_at": "2026-10-30T07:47:41.883Z"
+    },
+    {
+      "job_id": "job-222bc5e4-f765-41ed-9c5e-650b41e26c65",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S266-successor-test.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "e276fbdc68507fd8fd1ca0b8d17f719647ae6ad50c09d389eaf4d468e0d6b295"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S266-successor-test.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "cde527b7-aef5-4cf2-9859-217480ae6c9f",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S266-successor-test_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.188Z",
+      "updated_at": "2026-10-30T07:47:41.900Z"
+    },
+    {
+      "job_id": "job-c3d06265-47b8-49a0-8f05-83b232f3ecbf",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S267-intelligence-hot-swap.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "29146187540e0e258840b5ab59f9c5970ee890eff94a3527babea2f1da1dc702"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S267-intelligence-hot-swap.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "319af897-da2b-44c2-a36f-a9f249b834c2",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S267-intelligence-hot-swap_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.197Z",
+      "updated_at": "2026-10-30T07:47:41.919Z"
+    },
+    {
+      "job_id": "job-df098dd4-d735-49ab-b595-d35d543bc094",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S268-compounding-intelligence.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "37e3147ac24eaedc285623861033e63b5eb4dff2b7953d0411846f65b2c6c21b"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S268-compounding-intelligence.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "d9685610-c4d3-42b7-a420-06522c8e7e0d",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S268-compounding-intelligence_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.207Z",
+      "updated_at": "2026-10-30T07:47:41.937Z"
+    },
+    {
+      "job_id": "job-1fd5b45a-2077-4404-97d0-28528b9fc16d",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S269-learning-velocity-moat.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "fd13a3510f76df69e8cf2ff779b1e8175fa5dbc2e5fb4687c8eb8977986f1527"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S269-learning-velocity-moat.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "ec79e3ce-fccd-4ce5-aaef-7012d404022c",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S269-learning-velocity-moat_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.218Z",
+      "updated_at": "2026-10-30T07:47:41.956Z"
+    },
+    {
+      "job_id": "job-30b0d33e-943f-4e75-80b2-5966c3c1a188",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P12.S270-time-to-mastery.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "1e828c033c8e6eb7e7b09513120c9fbfb41bb0e8ca5e94824c541abe6350e826"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P12.S270-time-to-mastery.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "3c125cf7-436e-4a2d-8e4d-557c046e8fe7",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P12_S270-time-to-mastery_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.227Z",
+      "updated_at": "2026-10-30T07:47:41.974Z"
+    },
+    {
+      "job_id": "job-f3c581b1-c2ed-48c6-9376-384a982f3e0b",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S271-jarvis-genesis.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "79a34664efbeb1d5b2f58d773eb9c6d95fdd6336351fb73f104980259cbc1798"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S271-jarvis-genesis.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "938fdfb9-1d32-4355-8962-aa765ffc3ca8",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S271-jarvis-genesis_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.236Z",
+      "updated_at": "2026-10-30T07:47:41.992Z"
+    },
+    {
+      "job_id": "job-c7cd4e18-8ee7-41c3-a7f8-7206b225f671",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P15.S272-company-cloning.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "57d53df4ef01e7ea7c47495cfb6987b92b9b1f12514a026b84f1dd073f0dbf9c"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P15.S272-company-cloning.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "65721943-0d3d-481d-b4f4-e6bb26717fa9",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P15_S272-company-cloning_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.244Z",
+      "updated_at": "2026-10-30T07:47:42.010Z"
+    },
+    {
+      "job_id": "job-3b9220a1-b143-46b9-a5b7-a5efbce7d843",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S273-cross-domain-transfer.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "b4becfcd26b345bb9ccb3a8f113f74d285475706a139996924c5ebff1eb228e8"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S273-cross-domain-transfer.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "3e32f970-713e-4c07-9fb8-8f0a70db5a78",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S273-cross-domain-transfer_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.254Z",
+      "updated_at": "2026-10-30T07:47:42.028Z"
+    },
+    {
+      "job_id": "job-358cc202-2443-4e39-b9f6-b3c2f570f2a9",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P11.S274-unknown-unknown-hunter.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "606e020b2f6b94f28a99ed6acf66e47cde126aee904d7ed4af887c9812351412"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P11.S274-unknown-unknown-hunter.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "f6dab1a1-bff8-47f5-8ba9-913ceb669418",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P11_S274-unknown-unknown-hunter_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.263Z",
+      "updated_at": "2026-10-30T07:47:42.046Z"
+    },
+    {
+      "job_id": "job-ad92eaa4-7c4d-43e2-8167-a10cea651ba9",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S275-surprise-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "451f210be2652c92fbf128aa4034e15fe560678e94f22b8a4197772503566026"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S275-surprise-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "38433a63-9ba2-414b-ae45-b147868dfd91",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S275-surprise-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.272Z",
+      "updated_at": "2026-10-30T07:47:42.064Z"
+    },
+    {
+      "job_id": "job-4fdc0485-a947-4ee7-8906-f867cec4002c",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P14.S276-real-options-optionality.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "f12db7c0cc9230b3bcb5577492678d765e16a706464290e545f91630fd8b4945"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P14.S276-real-options-optionality.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "f991d74b-f87a-4723-89ef-0203ed61453a",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P14_S276-real-options-optionality_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.282Z",
+      "updated_at": "2026-10-30T07:47:42.083Z"
+    },
+    {
+      "job_id": "job-f71ad975-768d-46ef-8d22-be1f493323b6",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P05.S277-provider-concentration-risk.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "48cc38c5e38c81e57428ee86560caba881f7b992756f9b83fbd3908dc756a02c"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P05.S277-provider-concentration-risk.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "99612ddd-168b-4ebc-8d18-23526a13d38f",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P05_S277-provider-concentration-risk_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.290Z",
+      "updated_at": "2026-10-30T07:47:42.100Z"
+    },
+    {
+      "job_id": "job-31c5bf59-f0e5-4044-acf2-4b002ad2689b",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P05.S278-cloud-exit-readiness.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "3617e9bd66dde7baac508df1fdd2c3aee278694a215d5f6ff17436f905d6e281"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P05.S278-cloud-exit-readiness.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "19d8af41-92f2-4444-abc9-fc6a951ace64",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P05_S278-cloud-exit-readiness_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.299Z",
+      "updated_at": "2026-10-30T07:47:42.119Z"
+    },
+    {
+      "job_id": "job-4b2f893b-b56d-4439-8644-732cb7f48c05",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S279-sovereign-mode.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "de8ff27daaeb7188b2c52cb3fb957091c7852643a4e81e0e034e2e87c0cc6289"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S279-sovereign-mode.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "df9d46e4-5ef8-40c9-a9f8-bca5d000c524",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S279-sovereign-mode_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.308Z",
+      "updated_at": "2026-10-30T07:47:42.138Z"
+    },
+    {
+      "job_id": "job-57060f0f-2da3-482a-8598-e0af82c10402",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P04.S280-data-rights-purpose-limitation.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "5ecd47e5c98bfbe7e1ee52cd65160fff2a596d9b76660d9c3bbc037367561638"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P04.S280-data-rights-purpose-limitation.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "42ba9d24-08ab-42f7-bbed-cb512c07d0d8",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P04_S280-data-rights-purpose-limitation_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.318Z",
+      "updated_at": "2026-10-30T07:47:42.155Z"
+    },
+    {
+      "job_id": "job-c3942df0-16d7-4101-9146-4225b36a18e9",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P02.S281-information-compartments.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "6b155a8a9990ccb4593692f05118c1fd3b87255fc4e2589084f43b1f618a4489"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P02.S281-information-compartments.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "f92460e0-953d-4cfe-847d-caef10e3fe1e",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P02_S281-information-compartments_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.327Z",
+      "updated_at": "2026-10-30T07:47:42.173Z"
+    },
+    {
+      "job_id": "job-d1b72946-c62a-426c-9423-13b24a6827cb",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S282-authenticity-engine.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "01f2564c305efb046685a4ef1196e1c573db840278020dd251e764ba85f154c2"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S282-authenticity-engine.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "ece66ae0-b5d1-4e9d-bde6-925cc35a556b",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S282-authenticity-engine_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.336Z",
+      "updated_at": "2026-10-30T07:47:42.190Z"
+    },
+    {
+      "job_id": "job-0f96d19f-e534-4569-9f9f-8af3efe639f1",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P03.S283-software-model-skill-supply-chain.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "ffeb88cb603632b7189bf56f3f46e667dd191d5c7c215f0e4dca40f9be1a860f"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P03.S283-software-model-skill-supply-chain.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "60ba74e9-0e8e-4d4c-b749-982d4a91d1d9",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P03_S283-software-model-skill-supply-chain_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.347Z",
+      "updated_at": "2026-10-30T07:47:42.208Z"
+    },
+    {
+      "job_id": "job-c8abfb6a-e8bc-4fd1-9d1b-115a4367012a",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S284-policy-compiler.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "0c59d6073b7a68a53ba1fe4b6b6628bf9abf78027f40f80a9e3cfd102d4a515d"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S284-policy-compiler.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "177694d5-7e40-4861-a92d-992a02c01875",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S284-policy-compiler_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.356Z",
+      "updated_at": "2026-10-30T07:47:42.226Z"
+    },
+    {
+      "job_id": "job-f01d9540-6fb8-4c27-8d0e-0546c826ad37",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S285-policy-conflict-resolution.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "89add70c43b574829f8465b1d59d5744171cda54b7e521d5dfbfc097e4b7b111"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S285-policy-conflict-resolution.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "34e01731-1527-47fc-9e3a-f2e9237afbfc",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S285-policy-conflict-resolution_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.365Z",
+      "updated_at": "2026-10-30T07:47:42.244Z"
+    },
+    {
+      "job_id": "job-6750e5f7-f90a-4b5a-ac37-ca188766b8a3",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P15.S286-goal-drift-self-alignment-drift.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "eaa99749968ce096fd113b534b78ce896503c1df1680acd429603ee53c1ccd4e"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P15.S286-goal-drift-self-alignment-drift.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "79c704cb-32f7-43eb-99e8-afb2bff081df",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P15_S286-goal-drift-self-alignment-drift_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.374Z",
+      "updated_at": "2026-10-30T07:47:42.262Z"
+    },
+    {
+      "job_id": "job-0395bc28-18e8-41b4-8e2b-fd10239185dd",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 22,
+        "work_unit_id": "MISSION-JARVIS-001.P01.S287-preference-drift.dependencies",
+        "route_class": "repo_read",
+        "phase": "dependencies",
+        "source_ref": null,
+        "idempotency_key": "23462e25a2d2b7b5e188ac09add11c0a9199d8b0d4780990f90d0edb64dc6e6b"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.P01.S287-preference-drift.dependencies",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41022242821-1",
+      "lease_token": "8e737e7e-862a-4954-a491-37dfb2f8812b",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_P01_S287-preference-drift_dependencies.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:47:41.383Z",
+      "updated_at": "2026-10-30T07:47:42.279Z"
     }
   ],
-  "updated_at": "2026-10-30T07:47:20.905Z"
+  "updated_at": "2026-10-30T07:47:42.279Z"
 }
