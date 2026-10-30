@@ -38,6 +38,17 @@ test('unverified entitlement caps Actions burst at 16 lanes even when more is re
   assert.equal(out.total_units, 32);
 });
 
+test('a 500-lane request cannot bypass the unverified entitlement gate', () => {
+  const out = plan({ lanes: 500, units_per_lane: 1 });
+  assert.equal(policy.entitlement.enterprise_standard_runner_concurrent_jobs_ceiling, 500);
+  assert.equal(policy.entitlement.enterprise_organization_verified_for_canonical_repo, false);
+  assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
+  assert.equal(out.entitlement_state, 'ENTITLEMENT_UNVERIFIED');
+  assert.equal(out.requested_lanes, 500);
+  assert.equal(out.lanes, 16);
+  assert.equal(out.hard_cap, 16);
+});
+
 test('verified enterprise can use canonical JOB001 company cap but never exceed it', () => {
   const enterprise = structuredClone(policy);
   enterprise.entitlement.enterprise_organization_verified_for_canonical_repo = true;
