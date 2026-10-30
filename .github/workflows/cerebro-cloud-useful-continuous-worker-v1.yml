@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       lane:
-        description: 'Sustained useful-work lane 0..63'
+        description: 'Sustained useful-work logical lane 0..63; GitHub executor admission is separately bounded'
         required: true
         type: string
       cycle:
@@ -36,6 +36,9 @@ jobs:
       CEREBRO_MAX_PER_COMPANY: '48'
       CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8'
       CEREBRO_MAX_REPO_WRITE_CONCURRENCY: '1'
+      CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES: '12'
+      CEREBRO_GITHUB_ACTIONS_OBSERVED_CAPACITY: '20'
+      CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES: '8'
       CEREBRO_ALLOW_PAID_FANOUT: 'NO'
       CEREBRO_PROD_WRITE: 'false'
       CEREBRO_TRADING_ACCESS: 'false'
@@ -46,7 +49,43 @@ jobs:
       - name: Checkout immutable execution revision
         uses: actions/checkout@v4
 
+      - name: Reserve GitHub Actions executor capacity for safety gates
+        id: executor_admission
+        shell: bash
+        run: |
+          set -euo pipefail
+          lane='${{ inputs.lane }}'
+          cycle='${{ inputs.cycle }}'
+          for value in "$lane" "$cycle" "$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" "$CEREBRO_GITHUB_ACTIONS_OBSERVED_CAPACITY" "$CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES"; do
+            case "$value" in ''|*[!0-9]*) exit 2 ;; esac
+          done
+          test "$lane" -ge 0 && test "$lane" -le 63
+          test "$cycle" -ge 0 && test "$cycle" -le 999999
+          test "$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" -eq 12
+          test "$CEREBRO_GITHUB_ACTIONS_OBSERVED_CAPACITY" -eq 20
+          test "$CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES" -eq 8
+          test $(( CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES + CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES )) -le "$CEREBRO_GITHUB_ACTIONS_OBSERVED_CAPACITY"
+
+          if [ "$lane" -ge "$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" ]; then
+            echo 'active=false' >> "$GITHUB_OUTPUT"
+            echo "executor_admission=RETIRED_FOR_GATE_CAPACITY" >> "$GITHUB_STEP_SUMMARY"
+            echo "logical_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+            echo "github_sustained_active_lanes=$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" >> "$GITHUB_STEP_SUMMARY"
+            echo "github_reserved_gate_slots=$CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES" >> "$GITHUB_STEP_SUMMARY"
+            echo "job001_logical_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
+            echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+            echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          echo 'active=true' >> "$GITHUB_OUTPUT"
+          echo "executor_admission=ACTIVE" >> "$GITHUB_STEP_SUMMARY"
+          echo "logical_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+          echo "github_sustained_active_lanes=$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" >> "$GITHUB_STEP_SUMMARY"
+          echo "github_reserved_gate_slots=$CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Enforce sustained PREPROD zero-paid guard
+        if: steps.executor_admission.outputs.active == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -60,17 +99,15 @@ jobs:
           test "$CEREBRO_MAX_PER_COMPANY" = "48"
           test "$CEREBRO_MAX_DEEPSEEK_CONCURRENCY" = "8"
           test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = "1"
+          test "$CEREBRO_GITHUB_SUSTAINED_ACTIVE_LANES" = "12"
+          test "$CEREBRO_GITHUB_ACTIONS_RESERVED_FOR_GATES" = "8"
           test "$CEREBRO_WORKER_LEASE_SECONDS" -ge 300
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
-          for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
-            case "$value" in ''|*[!0-9]*) exit 2 ;; esac
-          done
-          test "${{ inputs.lane }}" -ge 0 && test "${{ inputs.lane }}" -le 63
-          test "${{ inputs.cycle }}" -ge 0 && test "${{ inputs.cycle }}" -le 999999
 
       - name: Enforce canonical JOB-001 Control Plane capacity contract
+        if: steps.executor_admission.outputs.active == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -97,6 +134,7 @@ jobs:
           NODE
 
       - name: Contract tests OLD + MISSION DAG NEW
+        if: steps.executor_admission.outputs.active == 'true'
         run: |
           node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
           node cerebro/runtime/mission-recursive-decomposer-v1.test.mjs
@@ -104,6 +142,7 @@ jobs:
           node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
 
       - name: Execute sustained mission-derived lease with V0 fallback
+        if: steps.executor_admission.outputs.active == 'true'
         id: lease
         shell: bash
         run: |
@@ -131,11 +170,13 @@ jobs:
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "fallback_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
           echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
+          echo "github_executor_capacity_contract=12_active+8_reserved" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish inspectable lease evidence
+        if: steps.executor_admission.outputs.active == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-sustained-${{ inputs.lane }}-c${{ inputs.cycle }}-${{ github.run_id }}
@@ -146,7 +187,7 @@ jobs:
           retention-days: 1
 
       - name: Self-refill sustained lane before releasing capacity
-        if: success()
+        if: success() && steps.executor_admission.outputs.active == 'true'
         shell: bash
         run: |
           set -euo pipefail
@@ -164,6 +205,7 @@ jobs:
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "job001_capacity_contract=48/64/48" >> "$GITHUB_STEP_SUMMARY"
+          echo "github_executor_capacity_contract=12_active+8_reserved" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
