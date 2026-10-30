@@ -19,7 +19,12 @@ on:
       - 'cerebro/registry/jarvis-project-registry.v1.json'
       - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
       - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
+      - 'cerebro/runtime/mission-real-work-router-v1.mjs'
+      - 'cerebro/runtime/mission-fact001-scaffold-bridge-v1.mjs'
+      - 'cerebro/runtime/fact001-request-runner.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
+      - 'cerebro/tests/mission-real-work-router-v1.test.mjs'
+      - 'cerebro/tests/mission-fact001-scaffold-bridge-v1.test.mjs'
       - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
       - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
@@ -32,7 +37,12 @@ on:
       - 'cerebro/registry/jarvis-project-registry.v1.json'
       - 'cerebro/runtime/mission-recursive-decomposer-v1.mjs'
       - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
+      - 'cerebro/runtime/mission-real-work-router-v1.mjs'
+      - 'cerebro/runtime/mission-fact001-scaffold-bridge-v1.mjs'
+      - 'cerebro/runtime/fact001-request-runner.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
+      - 'cerebro/tests/mission-real-work-router-v1.test.mjs'
+      - 'cerebro/tests/mission-fact001-scaffold-bridge-v1.test.mjs'
       - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
       - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
@@ -57,7 +67,7 @@ jobs:
   plan:
     name: Governed global fanout plan
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
     outputs:
       matrix_a: ${{ steps.plan.outputs.matrix_a }}
       matrix_b: ${{ steps.plan.outputs.matrix_b }}
@@ -81,6 +91,8 @@ jobs:
         run: |
           node --test cerebro/tests/enterprise-global-fanout-v1.test.mjs
           node --test cerebro/tests/enterprise-global-autostart-v1.test.mjs
+          node --test cerebro/tests/mission-fact001-scaffold-bridge-v1.test.mjs
+          node --test cerebro/tests/mission-real-work-router-v1.test.mjs
       - id: plan
         name: Discover unique useful Mission DAG work under live entitlement
         env:
@@ -92,11 +104,7 @@ jobs:
           import fs from 'node:fs';
           import { planEnterpriseGlobalFanoutV1 } from './cerebro/runtime/enterprise-global-fanout-v1.mjs';
           const policy = JSON.parse(fs.readFileSync('./cerebro/config/github-enterprise-execution.v1.json', 'utf8'));
-          const plan = planEnterpriseGlobalFanoutV1({
-            policy,
-            requested_units: Number(process.env.REQUESTED_UNITS),
-            offset: Number(process.env.REQUESTED_OFFSET),
-          });
+          const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units:Number(process.env.REQUESTED_UNITS), offset:Number(process.env.REQUESTED_OFFSET) });
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a=${JSON.stringify({include:plan.matrix_a})}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_b=${JSON.stringify({include:plan.matrix_b})}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix_a_count=${plan.matrix_a_count}\n`);
@@ -110,25 +118,7 @@ jobs:
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `next_offset=${plan.next_offset}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `has_more=${plan.has_more}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `total_work_units=${plan.total_work_units}\n`);
-          console.log(JSON.stringify({
-            state_type: plan.state_type,
-            requested_units: plan.requested_units,
-            planned_units: plan.planned_units,
-            offset: plan.offset,
-            next_offset: plan.next_offset,
-            has_more: plan.has_more,
-            total_work_units: plan.total_work_units,
-            effective_physical_cap: plan.effective_physical_cap,
-            queue_buffer_cap: plan.queue_buffer_cap,
-            live_enterprise_runner_limit: plan.live_enterprise_runner_limit,
-            matrix_a_count: plan.matrix_a_count,
-            matrix_b_count: plan.matrix_b_count,
-            second_queue: plan.second_queue,
-            second_scheduler: plan.second_scheduler,
-            second_daemon: plan.second_daemon,
-            prod_authorized: plan.prod_authorized,
-            trading_access: plan.trading_access
-          }));
+          console.log(JSON.stringify({state_type:plan.state_type,requested_units:plan.requested_units,planned_units:plan.planned_units,offset:plan.offset,next_offset:plan.next_offset,has_more:plan.has_more,total_work_units:plan.total_work_units,effective_physical_cap:plan.effective_physical_cap,queue_buffer_cap:plan.queue_buffer_cap,matrix_a_count:plan.matrix_a_count,matrix_b_count:plan.matrix_b_count,prod_authorized:false,trading_access:false}));
           NODE
 
   fanout-a:
@@ -151,6 +141,7 @@ jobs:
           CYCLE: ${{ matrix.cycle }}
           EXPECTED_WORK_UNIT_ID: ${{ matrix.work_unit_id }}
           CEREBRO_MISSION_WORK_OUT_DIR: artifacts/enterprise-global-fanout-v1
+          CEREBRO_MISSION_FACT001_OUT_DIR: artifacts/mission-fact001-scaffold-v1
         shell: bash
         run: |
           set -euo pipefail
@@ -158,15 +149,22 @@ jobs:
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
           test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
-          result="$(node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
+          result="$(node cerebro/runtime/mission-real-work-router-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
           printf '%s\n' "$result"
           RESULT_JSON="$result" node --input-type=module <<'NODE'
-          const lines = String(process.env.RESULT_JSON || '').trim().split(/\r?\n/).filter(Boolean);
-          const result = JSON.parse(lines.at(-1));
-          if (!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
-          if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
-          if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
+          const lines=String(process.env.RESULT_JSON||'').trim().split(/\r?\n/).filter(Boolean); const result=JSON.parse(lines.at(-1));
+          if(!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
+          if(result.work_unit_id!==process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
+          if(result.paid_ai_used!==false||result.prod_write_authorized!==false||result.trading_access!==false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
           NODE
+      - name: Persist FACT-001 scaffold artifact
+        if: ${{ matrix.work_unit_id == 'M16.implement.scaffold' || matrix.work_unit_id == 'M18.implement.scaffold' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-${{ matrix.work_unit_id }}-${{ github.run_id }}
+          path: artifacts/mission-fact001-scaffold-v1
+          if-no-files-found: error
+          retention-days: 14
 
   fanout-b:
     name: Global B · ${{ matrix.work_unit_id }}
@@ -188,6 +186,7 @@ jobs:
           CYCLE: ${{ matrix.cycle }}
           EXPECTED_WORK_UNIT_ID: ${{ matrix.work_unit_id }}
           CEREBRO_MISSION_WORK_OUT_DIR: artifacts/enterprise-global-fanout-v1
+          CEREBRO_MISSION_FACT001_OUT_DIR: artifacts/mission-fact001-scaffold-v1
         shell: bash
         run: |
           set -euo pipefail
@@ -195,15 +194,22 @@ jobs:
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
           test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
-          result="$(node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
+          result="$(node cerebro/runtime/mission-real-work-router-v1.mjs --lane="$LANE" --cycle="$CYCLE" --fallback=true)"
           printf '%s\n' "$result"
           RESULT_JSON="$result" node --input-type=module <<'NODE'
-          const lines = String(process.env.RESULT_JSON || '').trim().split(/\r?\n/).filter(Boolean);
-          const result = JSON.parse(lines.at(-1));
-          if (!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
-          if (result.work_unit_id !== process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
-          if (result.paid_ai_used !== false || result.prod_write_authorized !== false || result.trading_access !== false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
+          const lines=String(process.env.RESULT_JSON||'').trim().split(/\r?\n/).filter(Boolean); const result=JSON.parse(lines.at(-1));
+          if(!result.ok) throw new Error('GLOBAL_FANOUT_WORK_FAILED');
+          if(result.work_unit_id!==process.env.EXPECTED_WORK_UNIT_ID) throw new Error(`GLOBAL_FANOUT_WORK_ID_MISMATCH:${result.work_unit_id}`);
+          if(result.paid_ai_used!==false||result.prod_write_authorized!==false||result.trading_access!==false) throw new Error('GLOBAL_FANOUT_AUTHORITY_EXPANSION_DENIED');
           NODE
+      - name: Persist FACT-001 scaffold artifact
+        if: ${{ matrix.work_unit_id == 'M16.implement.scaffold' || matrix.work_unit_id == 'M18.implement.scaffold' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-${{ matrix.work_unit_id }}-${{ github.run_id }}
+          path: artifacts/mission-fact001-scaffold-v1
+          if-no-files-found: error
+          retention-days: 14
 
   acceptance:
     name: Global fanout V1 acceptance
@@ -225,6 +231,8 @@ jobs:
           echo 'queue_buffer_cap=${{ needs.plan.outputs.queue_buffer_cap }}'
           echo 'paid_actions_concurrency_entitlement=${{ needs.plan.outputs.paid_entitlement }}'
           echo 'global_500_fanout_enabled=${{ needs.plan.outputs.global_500_enabled }}'
+          echo 'mission_real_work_router=true'
+          echo 'fact001_scaffold_routes=M16,M18'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'
