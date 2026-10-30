@@ -41,17 +41,18 @@ jobs:
           console.log('CEREBRO GitHub acceleration policy GREEN / Enterprise repo entitlement remains fail-closed');"
 
   discover-tests:
-    name: Discover independent test files
+    name: Discover and shard independent test files
     needs: policy-gate
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       matrix: ${{ steps.discover.outputs.matrix }}
       count: ${{ steps.discover.outputs.count }}
+      shard_count: ${{ steps.discover.outputs.shard_count }}
     steps:
       - uses: actions/checkout@v4
       - id: discover
-        name: Build dynamic test matrix
+        name: Build adaptive test-shard matrix
         shell: bash
         run: |
           node <<'NODE'
@@ -63,31 +64,52 @@ jobs:
             .sort()
             .map((name) => `cerebro/tests/${name}`);
           if (tests.length === 0) throw new Error('No CEREBRO test files discovered');
-          if (tests.length > 256) {
-            throw new Error(`Discovered ${tests.length} tests; V0 single-matrix safety ceiling is 256. Split into multiple lanes before increasing capacity.`);
-          }
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(tests)}\n`);
+
+          // V0 intentionally stays below the Enterprise platform ceiling until the
+          // canonical repository is verified inside the purchased Enterprise org.
+          // Work is sharded instead of creating hundreds of runner-startup jobs.
+          const targetShards = Math.min(64, tests.length);
+          const shards = Array.from({ length: targetShards }, (_, shard) => ({ shard, tests: [] }));
+          tests.forEach((test, index) => shards[index % targetShards].tests.push(test));
+
+          const include = shards
+            .filter((entry) => entry.tests.length > 0)
+            .map((entry) => ({
+              shard: entry.shard,
+              count: entry.tests.length,
+              tests_json: JSON.stringify(entry.tests)
+            }));
+
+          if (include.length > 256) throw new Error('Matrix exceeds GitHub 256-job ceiling');
+          const matrix = { include };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `count=${tests.length}\n`);
-          console.log(`Discovered ${tests.length} independent test files`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `shard_count=${include.length}\n`);
+          console.log(`Discovered ${tests.length} test files -> ${include.length} parallel shards`);
           NODE
 
   parallel-tests:
-    name: Test · ${{ matrix.test }}
+    name: Shard ${{ matrix.shard }} · ${{ matrix.count }} test files
     needs: discover-tests
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       max-parallel: 64
-      matrix:
-        test: ${{ fromJSON(needs.discover-tests.outputs.matrix) }}
+      matrix: ${{ fromJSON(needs.discover-tests.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - name: Run isolated test file
-        run: node --test "${{ matrix.test }}"
+      - name: Run shard
+        env:
+          TESTS_JSON: ${{ matrix.tests_json }}
+        run: >-
+          node -e "const {spawnSync}=require('child_process');
+          const tests=JSON.parse(process.env.TESTS_JSON);
+          const r=spawnSync(process.execPath,['--test',...tests],{stdio:'inherit'});
+          process.exit(r.status ?? 1);"
 
   old-vs-new-regression:
     name: OLD vs NEW · full canonical regression
@@ -111,8 +133,11 @@ jobs:
           printf '%s\n' \
             "status=GREEN" \
             "discovered_test_files=${{ needs.discover-tests.outputs.count }}" \
+            "parallel_shards=${{ needs.discover-tests.outputs.shard_count }}" \
             "parallel_matrix_ceiling=256" \
             "v0_max_parallel=64" \
+            "enterprise_platform_ceiling=500" \
+            "enterprise_repo_entitlement_verified=false" \
             "prod_deploy=false" \
             "external_writes=false" \
             > /tmp/cerebro-enterprise-acceleration-v0.txt
@@ -134,4 +159,5 @@ jobs:
         run: |
           echo "CEREBRO Enterprise Acceleration V0 GREEN"
           echo "Test files: ${{ needs.discover-tests.outputs.count }}"
+          echo "Parallel shards: ${{ needs.discover-tests.outputs.shard_count }}"
           echo "No PROD deployment. No external writes. No service retirement."
