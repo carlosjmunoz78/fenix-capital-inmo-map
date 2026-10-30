@@ -31,6 +31,9 @@ function run(dir, env = {}, args = ['--enqueue-health-probe', '--cycles', '2']) 
       CEREBRO_ENABLE_REPO_SANDBOX: 'NO',
       CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT: '',
       CEREBRO_REPO_SANDBOX_IMAGE: '',
+      // These legacy dynamic-policy tests isolate their original contexts.
+      // NEURONAL autofill has dedicated adapter/integration tests and remains enabled by default in runtime.
+      CEREBRO_ENABLE_NEURONAL_AUTOFILL: 'NO',
       ...env,
     },
   });
