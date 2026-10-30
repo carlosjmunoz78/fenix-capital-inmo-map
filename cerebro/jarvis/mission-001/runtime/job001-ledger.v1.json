@@ -211,7 +211,42 @@
       "error": null,
       "created_at": "2026-10-30T07:31:27.733Z",
       "updated_at": "2026-10-30T07:31:27.806Z"
+    },
+    {
+      "job_id": "job-395e5358-9505-498e-9823-f31fd6ef169b",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 6,
+        "work_unit_id": "MISSION-JARVIS-001.CORE.06.ORCHESTRATOR",
+        "route_class": "deterministic",
+        "phase": "core_gate_unit",
+        "source_ref": null,
+        "idempotency_key": "bc18d7c408f326f7c06d525a33ea7b637087fc64ca7bfbb59da6bd5ccd3c040e"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.CORE.06.ORCHESTRATOR",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41020616723-1",
+      "lease_token": "dbbd8267-2e94-4882-8644-76a123020594",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_CORE_06_ORCHESTRATOR.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:31:54.296Z",
+      "updated_at": "2026-10-30T07:31:54.584Z"
     }
   ],
-  "updated_at": "2026-10-30T07:31:27.806Z"
+  "updated_at": "2026-10-30T07:31:54.584Z"
 }
