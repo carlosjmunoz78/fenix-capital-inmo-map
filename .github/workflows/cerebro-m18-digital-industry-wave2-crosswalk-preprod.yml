@@ -1,0 +1,175 @@
+name: CEREBRO M18 DIGITAL INDUSTRY · PREPROD WAVE 2 CROSSWALK
+run-name: M18 Digital Industry · 45 capability families · reuse-first crosswalk
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - cerebro/m18-digital-industry-preprod-20261030
+    paths:
+      - 'cerebro/digital-build/m18-capability-crosswalk-v1.mjs'
+      - 'cerebro/tests/m18-capability-crosswalk-v1.test.mjs'
+      - '.github/workflows/cerebro-m18-digital-industry-wave2-crosswalk-preprod.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-m18-digital-industry-wave2-crosswalk-preprod
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Crosswalk contract tests
+        run: node --test cerebro/tests/m18-capability-crosswalk-v1.test.mjs
+      - name: Mission guard validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p=JSON.parse(fs.readFileSync('cerebro/missions/M18-DIGITAL-INDUSTRY-2026-10-30.json','utf8'));
+          if(p.environment!=='PREPROD') throw new Error('PREPROD required');
+          if(p.capability_families.length!==45) throw new Error(`expected 45 capability families, got ${p.capability_families.length}`);
+          if(p.hard_guards.prod_write_allowed!==false||p.hard_guards.paid_ai_allowed!==false||p.hard_guards.trading_access!==false) throw new Error('safety guard mismatch');
+          console.log(JSON.stringify({ok:true,capability_families:p.capability_families.length,prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
+          NODE
+
+  crosswalk:
+    needs: preflight
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      max-parallel: 12
+      matrix:
+        capability:
+          - business_to_digital_architecture
+          - buy_build_improve_gate
+          - technology_scout
+          - brand_factory
+          - design_system_factory
+          - ux_and_prototype_factory
+          - web_factory
+          - wordpress_factory
+          - funnel_and_landing_factory
+          - ecommerce_factory
+          - saas_factory
+          - marketplace_factory
+          - pwa_factory
+          - mobile_app_factory
+          - desktop_app_factory
+          - browser_extension_factory
+          - plugin_theme_module_factory
+          - api_backend_factory
+          - connector_mcp_factory
+          - automation_factory
+          - data_product_factory
+          - ai_feature_factory
+          - multimedia_factory
+          - content_factory
+          - seo_aso_discoverability_factory
+          - localization_factory
+          - legal_compliance_factory
+          - accessibility_factory
+          - security_factory
+          - qa_factory
+          - synthetic_user_and_visual_qa_factory
+          - performance_factory
+          - deployment_factory
+          - migration_factory
+          - backup_rebuild_factory
+          - observability_factory
+          - growth_factory
+          - monetization_factory
+          - support_factory
+          - evolution_factory
+          - digital_twin_builder
+          - product_dna_registry
+          - template_genome_registry
+          - white_label_multi_tenant_factory
+          - transformation_factory
+    steps:
+      - uses: actions/checkout@v4
+      - name: Audit capability family against live repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts/m18-crosswalk
+          output="$(node cerebro/digital-build/m18-capability-crosswalk-v1.mjs --capability=${{ matrix.capability }} --out=artifacts/m18-crosswalk/${{ matrix.capability }}.json)"
+          printf '%s\n' "$output"
+          printf '%s' "$output" | grep -q '"ok":true'
+          printf '%s' "$output" | grep -q '"prod_write":false'
+          printf '%s' "$output" | grep -q '"paid_ai":false'
+          printf '%s' "$output" | grep -q '"trading":false'
+          test -s artifacts/m18-crosswalk/${{ matrix.capability }}.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m18-crosswalk-${{ matrix.capability }}-${{ github.run_id }}
+          path: artifacts/m18-crosswalk/${{ matrix.capability }}.json
+          if-no-files-found: error
+          retention-days: 14
+
+  aggregate:
+    needs: crosswalk
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: m18-crosswalk-*-${{ github.run_id }}
+          path: artifacts/m18-crosswalk-input
+          merge-multiple: true
+      - name: Build crosswalk, gap register and disposition candidate matrix
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(find artifacts/m18-crosswalk-input -type f -name '*.json' | wc -l | tr -d ' ')"
+          test "$count" -eq 45
+          node cerebro/digital-build/m18-capability-crosswalk-v1.mjs --aggregate=artifacts/m18-crosswalk-input --out=artifacts/m18-crosswalk-aggregate.json
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const a=JSON.parse(fs.readFileSync('artifacts/m18-crosswalk-aggregate.json','utf8'));
+          if(a.capability_count!==45) throw new Error('aggregate incomplete');
+          if(a.final_decisions_made!==0) throw new Error('crosswalk cannot make final build decisions');
+          if(a.safety.prod_write!==false||a.safety.paid_ai!==false||a.safety.trading!==false||a.safety.additional_cost_eur!==0) throw new Error('aggregate safety mismatch');
+          const gaps=a.reports.filter(x=>x.disposition_candidate==='BUILD');
+          const reuse=a.reports.filter(x=>x.disposition_candidate==='REUSE');
+          const extend=a.reports.filter(x=>x.disposition_candidate==='EXTEND');
+          const wrap=a.reports.filter(x=>x.disposition_candidate==='WRAP');
+          fs.writeFileSync('artifacts/M18_GAP_REGISTER.json',JSON.stringify({schema_version:'1.0.0',mission_id:a.mission_id,environment:'PREPROD',build_candidates:gaps,final_decisions:false},null,2)+'\n');
+          fs.writeFileSync('artifacts/M18_REUSE_WRAP_EXTEND_BUILD_MATRIX.json',JSON.stringify({schema_version:'1.0.0',mission_id:a.mission_id,environment:'PREPROD',counts:a.disposition_candidates,REUSE:reuse.map(x=>x.capability_family),WRAP:wrap.map(x=>x.capability_family),EXTEND:extend.map(x=>x.capability_family),BUILD:gaps.map(x=>x.capability_family),final_decisions:false},null,2)+'\n');
+          console.log(JSON.stringify({ok:true,capability_count:a.capability_count,counts:a.disposition_candidates,final_decisions:false,prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m18-crosswalk-aggregate-${{ github.run_id }}
+          path: |
+            artifacts/m18-crosswalk-aggregate.json
+            artifacts/M18_GAP_REGISTER.json
+            artifacts/M18_REUSE_WRAP_EXTEND_BUILD_MATRIX.json
+          if-no-files-found: error
+          retention-days: 14
+
+  summary:
+    needs: aggregate
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wave 2 safety summary
+        shell: bash
+        run: |
+          echo 'M18 Wave 2 audits 45 capability families against physical repository evidence.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This wave creates candidate dispositions only; it does not authorize BUILD or PROD.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD write: false | Paid AI: false | Trading: false | New spend authority: 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
