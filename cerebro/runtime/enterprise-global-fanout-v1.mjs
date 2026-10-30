@@ -21,6 +21,7 @@ function assertBasePolicy(policy) {
   const entitlement = policy.entitlement_gate || {};
   const parallelism = policy.parallelism || {};
   const workflow = policy.workflow_policy || {};
+  integer(limits.live_standard_runner_concurrent_jobs_max, 'live_standard_runner_concurrent_jobs_max', 1, PAID_ENTERPRISE_GLOBAL_CEILING);
   if (entitlement.enterprise_organization_verified_for_canonical_repo !== true) throw new Error('ENTERPRISE_ORGANIZATION_REQUIRED');
   if (entitlement.canonical_repository !== 'fenix-cerebro/fenix-capital-inmo-map') throw new Error('CANONICAL_REPOSITORY_MISMATCH');
   if (entitlement.enterprise_slug !== 'cerebro-os') throw new Error('ENTERPRISE_SLUG_MISMATCH');
@@ -79,7 +80,9 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units = TRIAL_S
   const entitlement = policy.entitlement_gate || {};
   const paidConcurrencyVerified = entitlement.enterprise_actions_concurrency_entitlement_verified === true
     && entitlement.global_500_fanout_enabled === true;
-  const effectiveCap = paidConcurrencyVerified ? PAID_ENTERPRISE_GLOBAL_CEILING : TRIAL_SAFE_CAP;
+  const liveRunnerCap = policy.verified_platform_limits.live_standard_runner_concurrent_jobs_max;
+  const entitlementCap = paidConcurrencyVerified ? PAID_ENTERPRISE_GLOBAL_CEILING : TRIAL_SAFE_CAP;
+  const effectiveCap = Math.min(liveRunnerCap, entitlementCap);
   const requested = integer(requested_units, 'requested_units', 1, effectiveCap);
   const topology = buildPaidEnterpriseTopologyV1(requested);
 
