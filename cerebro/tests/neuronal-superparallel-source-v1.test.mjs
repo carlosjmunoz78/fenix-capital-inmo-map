@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { ensureNeuronalSourceV1 } from '../runtime/neuronal-source-integrity-v1.mjs';
 import {
   buildNeuronalSubmissionsV1,
   validateNeuronalDagV1,
@@ -7,6 +8,11 @@ import {
   deepSeekCandidatesV1,
   NEURONAL_SUPERPARALLEL_SOURCE_V1_CONTRACT,
 } from '../runtime/neuronal-superparallel-source-v1.mjs';
+
+// Global sharded CI may run this test directly before a campaign-specific prepare step.
+// Rebuild and checksum the canonical source from the eight immutable parts so the
+// same test is deterministic in GitHub, the installed Windows runtime and local PREPROD.
+ensureNeuronalSourceV1();
 
 test('canonical neuronal campaign reconstructs exactly 6,449 unique acyclic submissions',()=>{
   const submissions=buildNeuronalSubmissionsV1();
