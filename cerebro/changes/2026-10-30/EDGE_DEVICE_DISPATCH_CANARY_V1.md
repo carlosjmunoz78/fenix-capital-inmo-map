@@ -18,7 +18,7 @@ Prove that an explicit DEVICE_REQUIRED workload can be persisted while an edge P
 - Existing agent registry `public.cerebro_device_agents_preprod`.
 - Existing result ledger `public.cerebro_device_results_preprod`.
 - Existing active gateway `cerebro-device-gateway-preprod` V9.
-- Existing parallel gateway `cerebro-device-gateway-preprod-lean-canary` V1.
+- Existing parallel gateway `cerebro-device-gateway-preprod-lean-canary`.
 - Existing Browser Bridge/local agent polling path.
 - Existing cloud/hostless LRN, FACT-001, useful worker and Playwright browser paths.
 
@@ -77,6 +77,59 @@ Required evidence:
 8. Cleanup deletes only synthetic canary-owned data.
 9. OLD V9 health remains GREEN after NEW.
 
+## Execution evidence
+
+### Initial canary run
+
+- GitHub run: `40983195851`.
+- OLD V9 health: GREEN before and after.
+- GitHub OIDC: GREEN.
+- Synthetic OFFLINE fixture: GREEN.
+- Failure isolated to command insertion.
+- PostgreSQL evidence: SQLSTATE `23502`, `command_id` arrived NULL.
+- Root cause: producer relied on an implicit/default UUID behavior that the live PostgREST insert path did not provide.
+- No schema change was made.
+- Cleanup: GREEN; no synthetic agent/command residue.
+
+### Corrective change
+
+One-variable application fix only:
+
+- producer now creates `command_id` explicitly with `crypto.randomUUID()`;
+- static regression asserts explicit UUID generation;
+- Supabase schema, queue, V9 gateway and physical agents remain unchanged.
+
+Canary function after correction:
+
+- `cerebro-device-gateway-preprod-lean-canary` version 3;
+- custom GitHub OIDC auth retained;
+- active V9 gateway unchanged.
+
+### Green physical canary
+
+- GitHub run: `40983676930`.
+- Static contract tests: GREEN.
+- OLD V9 + NEW canary health before test: GREEN.
+- GitHub OIDC mint/verification: GREEN.
+- Synthetic OFFLINE edge fixture: GREEN.
+- First enqueue: GREEN, state `QUEUED`, delivery_attempt `0`.
+- Same idempotency key replay: GREEN, same command reused, no duplicate.
+- Durable status while edge remained OFFLINE: GREEN, still `QUEUED`, no delivered/completed/lease timestamps.
+- Edge placement: `DEFERRED_EDGE`, queued for automatic resume, `human_required=false`.
+- Cleanup: GREEN.
+- OLD V9 health after NEW canary: GREEN.
+- Post-cleanup database verification: `0` synthetic agents and `0` synthetic commands.
+
+Result: offline-edge persistence and idempotency are **HECHO in PREPROD canary**. This proves that an edge PC/device may be absent without becoming a global CEREBRO failure; explicit edge work can remain durable and resume through the existing device transport when the enrolled edge returns.
+
 ## Promotion gate
 
-This canary alone does not authorize promotion to the active V9 gateway or PROD. A later promotion requires physical canary GREEN, OLD vs NEW, rollback verification, observability, registry/changelog update and no known regressions.
+This canary does not authorize PROD. Promotion of the OIDC producer from the parallel canary into the active PREPROD device gateway requires:
+
+- PR/general regression gates GREEN;
+- OLD vs NEW preserved;
+- rollback source retained and deployable;
+- observability and change documentation current;
+- no known canary residues or regression failures.
+
+Any later PROD promotion remains a separate governed gate.
