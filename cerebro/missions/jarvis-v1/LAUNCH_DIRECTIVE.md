@@ -4,10 +4,11 @@
 
 Esta rama inicia JARVIS V1 en **PREPROD / MAXIMUM_SAFE_THROUGHPUT** sin alterar el mission graph histórico de `28_MACROFRENTES_Y_MISIONES_AUTONOMAS.md`.
 
-## Fuentes canónicas
+## Fuente canónica del task graph
 
-- `cerebro/missions/jarvis-v1/JARVIS_MASTER_BACKLOG_V1_2026-10-30.json.br.b64`
-- SHA256 del JSON descomprimido: `8d2e0793b7ad5afe7a99390dddb650c71892ece883b281e67ac20e966168fb8f`
+- Seed compacto: `cerebro/missions/jarvis-v1/backlog/compact.part-*.b64`
+- SHA256 del seed compacto descomprimido: `8a7a94dbe8047987d6cde18bf4ca8b3ba3dcc747b4575b78a4f3a8f2bf7ce57d`
+- El loader reconstruye el task graph completo y lo guarda como evidencia CI.
 - Conteos obligatorios: **26 fases / 394 tareas / 5.692 microtareas**.
 
 ## Principios
@@ -27,7 +28,7 @@ CONSERVAR → ENTENDER → INVENTARIAR → MAPEAR → BACKUP → ENVOLVER → PR
 
 1. Ejecutar `cerebro/runtime/jarvis-v1-backlog-loader.mjs`.
 2. Validar hash y conteos.
-3. Generar STATE y cola inicial P00.
+3. Reconstruir las 5.692 microtareas y generar STATE + cola inicial P00.
 4. Ejecutar `cerebro/runtime/jarvis-p00-baseline-audit-v1.mjs`.
 5. Guardar evidencias como artifact CI.
 6. Continuar P00 en paralelo seguro y desbloquear el DAG por evidencia.
