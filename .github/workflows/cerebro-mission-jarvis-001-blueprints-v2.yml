@@ -1,4 +1,4 @@
-name: JARVIS-001 SEMANTIC BLUEPRINTS + CORE GATE V2 · PREPROD
+name: JARVIS-001 SEMANTIC BLUEPRINTS + CORE GATE V3 · PREPROD
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: mission-jarvis-001-blueprints-v2
+  group: mission-jarvis-001-blueprints-v3
   cancel-in-progress: false
 
 env:
@@ -22,12 +22,12 @@ env:
   CEREBRO_ALLOW_PAID_JARVIS_BUILD: 'YES'
   DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
   JARVIS_BLUEPRINT_OUT: cerebro/jarvis/mission-001/generated-blueprints
-  JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_USD: '0.106392636'
+  JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_FLOOR_USD: '0.123340086'
 
 jobs:
   semantic-blueprints-core-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,15 +43,16 @@ jobs:
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
           test -n "$DEEPSEEK_API_KEY"
-      - name: Validate Core DAG integration and DeepSeek contracts
+      - name: Validate Core DAG integration readiness and DeepSeek contracts
         run: |
           node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
           node --test cerebro/tests/jarvis-mission-dag-v2.test.mjs
           node --test cerebro/tests/jarvis-integration-v1.test.mjs
           node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
-      - name: Repair only invalid program blueprints using non-thinking JSON mode
+      - name: Recover preserved valid designs and repair only remaining invalid blueprints
         run: node cerebro/runtime/jarvis-program-blueprints-v1.mjs
-      - name: Enforce semantic blueprint gate
+      - name: Enforce semantic blueprint and bounded-call gate
         shell: bash
         run: |
           set -euo pipefail
@@ -60,8 +61,8 @@ jobs:
           const s=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
           if(!s.ok||s.semantic_gate!=='GREEN') throw new Error('SEMANTIC_GATE_NOT_GREEN');
           if(s.valid_blueprints!==36) throw new Error(`VALID_BLUEPRINTS:${s.valid_blueprints}`);
-          if(s.deepseek_calls_this_run<0||s.deepseek_calls_this_run>36) throw new Error(`CALL_BOUND:${s.deepseek_calls_this_run}`);
-          if(s.reused_blueprints+s.deepseek_calls_this_run!==36) throw new Error('REUSE_CALL_ACCOUNTING_MISMATCH');
+          const fresh=36-s.reused_blueprints;
+          if(s.deepseek_calls_this_run<fresh||s.deepseek_calls_this_run>fresh*2) throw new Error(`CALL_BOUND:${s.deepseek_calls_this_run}:fresh=${fresh}`);
           if(s.prod_write!==false||s.trading!==false) throw new Error('BOUNDARY_VIOLATION');
           if(Array.isArray(s.human_required)&&s.human_required.length) throw new Error(`HUMAN_REQUIRED:${s.human_required.join(',')}`);
           console.log(JSON.stringify(s));
@@ -74,7 +75,7 @@ jobs:
           git config user.email 'actions@users.noreply.github.com'
           git add cerebro/jarvis/mission-001/generated-blueprints
           if ! git diff --cached --quiet; then
-            git commit -m 'chore(jarvis): repair semantic program blueprints [generated]'
+            git commit -m 'chore(jarvis): persist semantic program blueprints v3 [generated]'
             git fetch origin "$GITHUB_REF_NAME"
             git rebase "origin/$GITHUB_REF_NAME"
             git push origin HEAD:"$GITHUB_REF_NAME"
@@ -82,21 +83,24 @@ jobs:
       - name: Re-run Core and CEREBRO binding after semantic repair
         run: |
           node --test cerebro/tests/jarvis-core-v1.test.mjs
+          node --test cerebro/tests/jarvis-core-readiness-v1.test.mjs
           node --test cerebro/tests/jarvis-integration-v1.test.mjs
-      - name: Build durable reuse map and mission state
+      - name: Build durable reuse map and evidence-true mission state
         shell: bash
         run: |
           set -euo pipefail
           JARVIS_REUSE_MAP_OUT=cerebro/jarvis/mission-001/reuse-map.v1.json node cerebro/runtime/jarvis-reuse-map-v1.mjs
           node --input-type=module - <<'NODE'
           import fs from 'node:fs';
+          const {coreReadiness}=await import('./cerebro/jarvis/core-v1/core-readiness-v1.mjs');
           const summary=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/generated-blueprints/summary.json','utf8'));
           const reuse=JSON.parse(fs.readFileSync('cerebro/jarvis/mission-001/reuse-map.v1.json','utf8'));
-          const prior=Number(process.env.JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_USD||0);
+          const core=coreReadiness();
+          const priorFloor=Number(process.env.JARVIS_DEEPSEEK_KNOWN_PRIOR_COST_FLOOR_USD||0);
           const current=Number(summary.estimated_cost_usd_this_run||0);
-          const state={schema_version:'1.1',mission_id:'MISSION-JARVIS-001',environment:'PREPROD',status:'CORE_CANDIDATE_GREEN_SEMANTIC_BLUEPRINTS_GREEN',master:'JARVIS_MASTER_V1_RC2',programs:18,master_sections:421,work_units:5924,tasks:5473,deepseek:{role:'TEMPORARY_COGNITIVE_ACCELERATOR',valid_blueprints:summary.valid_blueprints,calls_this_run:summary.deepseek_calls_this_run,reused_blueprints:summary.reused_blueprints,estimated_cost_usd_this_run:current,known_estimated_cost_usd_before_this_run:prior,known_estimated_cost_usd_total:Math.round((prior+current)*1e9)/1e9,dependency_target:0},reuse_map:reuse.summary,human_required:[],prod_touched:false,trading_touched:false,core_candidate:{path:'cerebro/jarvis/core-v1/core-v1.mjs',tests:'GREEN',integration_binding:'GREEN',capability_registry_binding:'177_REGISTERED_ENGINES_NO_OPERATIONAL_OVERCLAIM'},multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND',next_action:'Convert P01/P03/P04/P07 semantic blueprints into bounded PREPROD implementation batches; verify each with tests and OLD-vs-NEW.'};
+          const state={schema_version:'1.2',mission_id:'MISSION-JARVIS-001',environment:'PREPROD',status:`CORE_${core.minimal_core_status}_SEMANTIC_BLUEPRINTS_GREEN`,master:'JARVIS_MASTER_V1_RC2',programs:18,master_sections:421,work_units:5924,tasks:5473,deepseek:{role:'TEMPORARY_COGNITIVE_ACCELERATOR',valid_blueprints:summary.valid_blueprints,calls_this_run:summary.deepseek_calls_this_run,reused_blueprints:summary.reused_blueprints,recovered_designs:summary.recovered_designs,retry_events:summary.retry_events,estimated_cost_usd_this_run:current,known_estimated_cost_floor_usd_before_this_run:priorFloor,known_estimated_cost_floor_usd_after_this_run:Math.round((priorFloor+current)*1e9)/1e9,unreconciled_failed_calls:1,dependency_target:0},reuse_map:reuse.summary,minimal_core:{status:core.minimal_core_status,partial_count:core.partial_count,missing_evidence_count:core.missing_evidence_count,components:core.components},human_required:[],prod_touched:false,trading_touched:false,multicompany_router_state:'PARCIAL_FENIX_EXISTING_OTHER_COMPANIES_NOT_BOUND',next_action:'Close Minimal Core partial bindings for World/Memory, Orchestrator acceptance, independent Eval/Verifier and durable Journal; then implement P01/P03/P04/P07 batches in PREPROD.'};
           fs.writeFileSync('cerebro/jarvis/mission-001/state.v1.json',JSON.stringify(state,null,2)+'\n');
-          console.log(JSON.stringify(state));
+          console.log(JSON.stringify({status:state.status,deepseek:state.deepseek,reuse_map:state.reuse_map,minimal_core:{status:core.minimal_core_status,partial_count:core.partial_count}}));
           NODE
       - name: Persist state and reuse map safely
         shell: bash
@@ -104,7 +108,7 @@ jobs:
           set -euo pipefail
           git add cerebro/jarvis/mission-001/state.v1.json cerebro/jarvis/mission-001/reuse-map.v1.json
           if ! git diff --cached --quiet; then
-            git commit -m 'chore(jarvis): advance semantic Core gate and reuse map [generated]'
+            git commit -m 'chore(jarvis): advance evidence-true semantic Core gate [generated]'
             git fetch origin "$GITHUB_REF_NAME"
             git rebase "origin/$GITHUB_REF_NAME"
             git push origin HEAD:"$GITHUB_REF_NAME"
@@ -113,7 +117,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: mission-jarvis-001-semantic-core-gate-${{ github.run_id }}
+          name: mission-jarvis-001-semantic-core-gate-v3-${{ github.run_id }}
           path: |
             cerebro/jarvis/mission-001/generated-blueprints/**
             cerebro/jarvis/mission-001/state.v1.json
