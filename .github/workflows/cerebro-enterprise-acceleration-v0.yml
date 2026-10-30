@@ -1,0 +1,194 @@
+name: CEREBRO Enterprise Acceleration V0
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'cerebro/**'
+      - '.github/copilot-instructions.md'
+      - '.github/agents/**'
+      - '.github/workflows/cerebro-enterprise-acceleration-v0.yml'
+      - 'docs/CEREBRO_GITHUB_ENTERPRISE_ACCELERATION_V0.md'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-enterprise-accel-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  policy-gate:
+    name: Policy gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate acceleration policy is fail-closed
+        run: >-
+          node -e "const p=require('./cerebro/config/github-enterprise-execution.v1.json');
+          if(p.status!=='PREPROD_CANDIDATE') process.exit(1);
+          if(p.verified_platform_limits.enterprise_standard_runner_concurrent_jobs_ceiling!==500) process.exit(1);
+          if(p.verified_platform_limits.matrix_jobs_per_workflow_run_ceiling!==256) process.exit(1);
+          if(p.workflow_policy.production_deploy_from_acceleration_workflow!==false) process.exit(1);
+          if(p.workflow_policy.write_external_systems!==false) process.exit(1);
+          if(p.workflow_policy.use_actions_as_permanent_transactional_runtime!==false) process.exit(1);
+          if(p.copilot_policy.copilot_is_runtime_dependency!==false) process.exit(1);
+          if(p.copilot_policy.automerge_prod!==false) process.exit(1);
+          if(p.entitlement_gate.enterprise_organization_verified_for_canonical_repo!==false) process.exit(1);
+          console.log('CEREBRO GitHub acceleration policy GREEN / Enterprise repo entitlement remains fail-closed');"
+
+  discover-tests:
+    name: Discover and shard independent test files
+    needs: policy-gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+      count: ${{ steps.discover.outputs.count }}
+      shard_count: ${{ steps.discover.outputs.shard_count }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: discover
+        name: Build adaptive test-shard matrix
+        shell: bash
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+          const dir = path.join(process.cwd(), 'cerebro', 'tests');
+          const tests = fs.readdirSync(dir)
+            .filter((name) => name.endsWith('.test.mjs'))
+            .sort()
+            .map((name) => `cerebro/tests/${name}`);
+          if (tests.length === 0) throw new Error('No CEREBRO test files discovered');
+
+          // V0 intentionally stays below the Enterprise platform ceiling until the
+          // canonical repository is verified inside the purchased Enterprise org.
+          // Work is sharded instead of creating hundreds of runner-startup jobs.
+          const targetShards = Math.min(64, tests.length);
+          const shards = Array.from({ length: targetShards }, (_, shard) => ({ shard, tests: [] }));
+          tests.forEach((test, index) => shards[index % targetShards].tests.push(test));
+
+          const include = shards
+            .filter((entry) => entry.tests.length > 0)
+            .map((entry) => ({
+              shard: entry.shard,
+              count: entry.tests.length,
+              tests_json: JSON.stringify(entry.tests)
+            }));
+
+          if (include.length > 256) throw new Error('Matrix exceeds GitHub 256-job ceiling');
+          const matrix = { include };
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify(matrix)}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `count=${tests.length}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `shard_count=${include.length}\n`);
+          console.log(`Discovered ${tests.length} test files -> ${include.length} parallel shards`);
+          NODE
+
+  parallel-tests:
+    name: Shard ${{ matrix.shard }} · ${{ matrix.count }} test files
+    needs: discover-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 64
+      matrix: ${{ fromJSON(needs.discover-tests.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Run shard with dependency-on-demand fallback
+        env:
+          TESTS_JSON: ${{ matrix.tests_json }}
+        shell: bash
+        run: |
+          node <<'NODE'
+          const {spawnSync} = require('child_process');
+          const tests = JSON.parse(process.env.TESTS_JSON);
+
+          function runTests() {
+            const result = spawnSync(process.execPath, ['--test', ...tests], {
+              encoding: 'utf8',
+              maxBuffer: 64 * 1024 * 1024
+            });
+            if (result.stdout) process.stdout.write(result.stdout);
+            if (result.stderr) process.stderr.write(result.stderr);
+            return result;
+          }
+
+          let result = runTests();
+          if ((result.status ?? 1) === 0) process.exit(0);
+
+          const diagnostic = `${result.stdout || ''}\n${result.stderr || ''}`;
+          const missingDependency = /ERR_MODULE_NOT_FOUND|Cannot find package/.test(diagnostic);
+          if (!missingDependency) process.exit(result.status ?? 1);
+
+          console.log('::notice::Shard requires locked repository dependencies; running npm ci --ignore-scripts and retrying once');
+          const install = spawnSync('npm', ['ci', '--ignore-scripts', '--no-audit', '--no-fund'], {stdio: 'inherit'});
+          if ((install.status ?? 1) !== 0) process.exit(install.status ?? 1);
+
+          result = runTests();
+          process.exit(result.status ?? 1);
+          NODE
+
+  old-vs-new-regression:
+    name: OLD vs NEW · full canonical regression
+    needs: [discover-tests, parallel-tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked repository dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate canonical Engine Factory contracts
+        working-directory: cerebro
+        run: npm run validate
+      - name: Run existing complete regression baseline
+        working-directory: cerebro
+        run: npm test
+      - name: Record acceleration evidence
+        shell: bash
+        run: |
+          printf '%s\n' \
+            "status=GREEN" \
+            "discovered_test_files=${{ needs.discover-tests.outputs.count }}" \
+            "parallel_shards=${{ needs.discover-tests.outputs.shard_count }}" \
+            "parallel_matrix_ceiling=256" \
+            "v0_max_parallel=64" \
+            "dependency_install_mode=ON_DEMAND_PER_SHARD" \
+            "enterprise_platform_ceiling=500" \
+            "enterprise_repo_entitlement_verified=false" \
+            "prod_deploy=false" \
+            "external_writes=false" \
+            > /tmp/cerebro-enterprise-acceleration-v0.txt
+          cat /tmp/cerebro-enterprise-acceleration-v0.txt
+      - name: Upload PREPROD evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-enterprise-acceleration-v0-evidence
+          path: /tmp/cerebro-enterprise-acceleration-v0.txt
+          retention-days: 14
+
+  acceptance:
+    name: Acceleration V0 acceptance
+    needs: [discover-tests, parallel-tests, old-vs-new-regression]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Accept only tested additive acceleration
+        run: |
+          echo "CEREBRO Enterprise Acceleration V0 GREEN"
+          echo "Test files: ${{ needs.discover-tests.outputs.count }}"
+          echo "Parallel shards: ${{ needs.discover-tests.outputs.shard_count }}"
+          echo "No PROD deployment. No external writes. No service retirement."
