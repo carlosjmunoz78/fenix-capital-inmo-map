@@ -33,7 +33,9 @@ jobs:
         run: |
           echo 'PREPROD capacity relief canary GREEN'
           echo 'old_worker_preserved=true'
-          echo 'unverified_rearm_lane_limit=16'
+          echo 'unverified_rearm_lane_limit=0'
+          echo 'all_legacy_continuous_lanes_drain_after_current_lease=true'
+          echo 'in_progress_runs_cancelled=false'
           echo 'prod_untouched=true'
           echo 'browser_prod_untouched=true'
           echo 'rollback=revert'

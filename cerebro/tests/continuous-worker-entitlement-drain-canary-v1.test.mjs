@@ -4,13 +4,14 @@ import fs from 'node:fs';
 
 const workflow = fs.readFileSync(new URL('../../.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml', import.meta.url), 'utf8');
 
-test('continuous PREPROD worker preserves canonical safety and caps self-refill while enterprise is unverified', () => {
-  assert.match(workflow, /CEREBRO_REARM_LANE_LIMIT: '16'/);
+test('continuous PREPROD worker preserves canonical safety and drains all legacy self-refill while enterprise is unverified', () => {
+  assert.match(workflow, /CEREBRO_REARM_LANE_LIMIT: '0'/);
   assert.match(workflow, /CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'false'/);
   assert.match(workflow, /CEREBRO_SUPERVISOR_ENV: PREPROD/);
   assert.match(workflow, /CEREBRO_PROD_WRITE: 'false'/);
   assert.match(workflow, /CEREBRO_TRADING_ACCESS: 'false'/);
   assert.match(workflow, /CEREBRO_ALLOW_PAID_FANOUT: 'NO'/);
+  assert.match(workflow, /test "\$CEREBRO_REARM_LANE_LIMIT" -ge 0/);
   assert.match(workflow, /if \[ "\$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" != "true" \] && \[ "\$lane" -ge "\$CEREBRO_REARM_LANE_LIMIT" \]/);
   assert.match(workflow, /drain_reason=ENTERPRISE_ENTITLEMENT_UNVERIFIED/);
   assert.match(workflow, /exit 0/);
