@@ -1,3 +1,4 @@
+# JARVIS-001 canary trigger v2
 name: CEREBRO Continuous Useful Worker V1
 run-name: JARVIS-001 · W${{ inputs.wave || '0' }} · C${{ inputs.cycle || '0' }} · PREPROD
 
