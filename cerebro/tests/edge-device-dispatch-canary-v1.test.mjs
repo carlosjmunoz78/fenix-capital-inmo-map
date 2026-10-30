@@ -32,6 +32,12 @@ test('offline edge is queued and never escalated to human', () => {
   assert.match(source, /delivery_attempt/);
 });
 
+test('device command ID is explicit so PostgREST cannot insert a NULL command_id', () => {
+  assert.match(source, /const commandId = crypto\.randomUUID\(\)/);
+  assert.match(source, /command_id: commandId/);
+  assert.match(source, /explicit_command_uuid: true/);
+});
+
 test('idempotency and secret guards are explicit', () => {
   assert.match(source, /edge_idempotency_conflict/);
   assert.match(source, /REUSED_AFTER_RACE/);
