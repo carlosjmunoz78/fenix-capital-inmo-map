@@ -24,3 +24,10 @@ test('global autostart preserves buffered continuous refill and authority guards
   assert.ok(workflow.includes("CEREBRO_TRADING_ACCESS: 'false'"));
   assert.ok(workflow.includes("github.event_name != 'pull_request' && needs.plan.outputs.has_more == 'true'"));
 });
+
+test('global fanout concurrency is offset-aware so distinct buffered waves do not serialize each other', () => {
+  assert.ok(workflow.includes("github.event_name == 'workflow_dispatch' && inputs.offset"));
+  assert.ok(workflow.includes("github.event_name == 'pull_request' && github.event.pull_request.number"));
+  assert.ok(workflow.includes("|| 'seed'"));
+  assert.ok(workflow.includes('cancel-in-progress: false'));
+});
