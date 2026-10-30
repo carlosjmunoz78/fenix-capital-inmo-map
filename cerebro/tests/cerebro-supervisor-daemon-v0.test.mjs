@@ -23,6 +23,10 @@ function runDaemon(dir, extraEnv = {}, args = ['--enqueue-health-probe', '--cycl
       CEREBRO_SUPERVISOR_ENV: 'PREPROD',
       CEREBRO_IDLE_DELAY_MS: '0',
       CEREBRO_HEARTBEAT_MS: '25',
+      // Baseline daemon tests isolate the base runtime contract.
+      // Mission/NEURONAL autofill each have dedicated adapter/integration tests.
+      CEREBRO_ENABLE_NEURONAL_AUTOFILL: 'NO',
+      CEREBRO_ENABLE_MISSION_AUTOFILL: 'NO',
       // Tests must never inherit a live provider secret and accidentally spend money.
       CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP: 'NO',
       DEEPSEEK_API_KEY: '',
@@ -49,14 +53,14 @@ test('daemon runs bounded PREPROD cycles, executes explicit health capability an
   assert.equal(fs.existsSync(path.join(dir, 'jobs.v8journal')), true);
 });
 
-test('default runtime starts at 40 useful concurrent slots and does not strand safe single-company capacity', t => {
+test('default runtime exposes verified 180 global/company capacity while sensitive lanes stay bounded', t => {
   const dir = tempDir(t);
   const result = runDaemon(dir, {}, ['--cycles', '1']);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
-  assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 64);
-  assert.equal(heartbeat.dynamic_concurrency.max_company_concurrency, 64);
-  assert.equal(heartbeat.dynamic_concurrency.target_global_concurrency, 40);
+  assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 180);
+  assert.equal(heartbeat.dynamic_concurrency.max_company_concurrency, 180);
+  assert.equal(heartbeat.dynamic_concurrency.target_global_concurrency, 180);
   assert.equal(heartbeat.dynamic_concurrency.max_provider_concurrency.deepseek, 8);
   assert.equal(heartbeat.dynamic_concurrency.max_repo_write_concurrency, 1);
 });

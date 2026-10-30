@@ -1,0 +1,65 @@
+name: CEREBRO NEURONAL Installed Runtime Fallback V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/neuronal-superparallel-*'
+    paths:
+      - 'cerebro/scripts/patch-neuronal-filesystem-inventory-v1.mjs'
+      - '.github/workflows/cerebro-neuronal-installed-runtime-fallback-v1.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cerebro-neuronal-installed-runtime-fallback-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  patch-test-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Apply installed-runtime inventory fallback
+        run: node cerebro/scripts/patch-neuronal-filesystem-inventory-v1.mjs cerebro/runtime/neuronal-superparallel-source-v1.mjs --apply
+      - name: Rebuild canonical source and run source tests
+        run: |
+          node cerebro/runtime/prepare-neuronal-source-v1.mjs
+          node --check cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+      - name: Prove evidence collection without git inventory
+        env:
+          CEREBRO_NEURONAL_FORCE_FS_INVENTORY: 'YES'
+          CEREBRO_NEURONAL_OUT_DIR: artifacts/neuronal-fs-fallback-smoke
+        run: |
+          node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission=NREQ-0001-A_AUDIT
+          test -s artifacts/neuronal-fs-fallback-smoke/evidence/NREQ-0001-A_AUDIT.json
+          node -e "const x=require('./artifacts/neuronal-fs-fallback-smoke/evidence/NREQ-0001-A_AUDIT.json'); if(x.execution_state!=='DISCOVERY_EVIDENCE_COLLECTED'||x.submission_completed!==false||x.prod_authorized!==false||x.trading_access!==false) process.exit(1)"
+      - name: Diff and authority gates
+        run: |
+          git diff --check
+          test "$(git diff --name-only | tr -d '\r')" = 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
+          grep -q 'CEREBRO_NEURONAL_FORCE_FS_INVENTORY' cerebro/runtime/neuronal-superparallel-source-v1.mjs
+      - name: Commit fallback if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- cerebro/runtime/neuronal-superparallel-source-v1.mjs; then
+            echo 'Fallback already present.'
+            exit 0
+          fi
+          git config user.name 'cerebro-autofill-bot'
+          git config user.email 'cerebro-autofill-bot@users.noreply.github.com'
+          git add cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          git commit -m 'CEREBRO NEURONAL: support installed runtime without git metadata'
+          git push origin HEAD:${GITHUB_REF_NAME}

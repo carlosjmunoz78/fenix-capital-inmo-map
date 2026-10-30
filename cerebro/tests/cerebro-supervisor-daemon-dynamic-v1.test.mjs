@@ -31,17 +31,21 @@ function run(dir, env = {}, args = ['--enqueue-health-probe', '--cycles', '2']) 
       CEREBRO_ENABLE_REPO_SANDBOX: 'NO',
       CEREBRO_REPO_SANDBOX_WORKSPACE_ROOT: '',
       CEREBRO_REPO_SANDBOX_IMAGE: '',
+      // Legacy dynamic-policy tests isolate only their declared contexts.
+      // Mission and NEURONAL autofill have dedicated adapter/integration tests.
+      CEREBRO_ENABLE_NEURONAL_AUTOFILL: 'NO',
+      CEREBRO_ENABLE_MISSION_AUTOFILL: 'NO',
       ...env,
     },
   });
 }
 
-test('daemon default runtime ceiling is 64 while DeepSeek provider ceiling is measured 8', t => {
+test('daemon default runtime ceiling is verified 180 while DeepSeek provider ceiling remains measured 8', t => {
   const dir = tempDir(t);
   const result = run(dir);
   assert.equal(result.status, 0, result.stderr || result.stdout);
   const heartbeat = JSON.parse(fs.readFileSync(path.join(dir, 'heartbeat.json'), 'utf8'));
-  assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 64);
+  assert.equal(heartbeat.dynamic_concurrency.max_global_concurrency, 180);
   assert.equal(heartbeat.dynamic_concurrency.max_provider_concurrency.deepseek, 8);
   assert.equal(heartbeat.dynamic_concurrency.max_repo_write_concurrency, 1);
   assert.equal(heartbeat.dynamic_concurrency.hard_cost_cap_eur, 100);
@@ -86,7 +90,7 @@ test('missing route fails closed instead of silently running work in wrong pool'
   assert.match(`${result.stderr}\n${result.stdout}`, /SCHEDULING_ROUTE_MISSING/);
 });
 
-test('explicit override can raise global runtime without raising measured DeepSeek ceiling', t => {
+test('explicit lower override preserves lower global runtime without raising measured DeepSeek ceiling', t => {
   const dir = tempDir(t);
   const result = run(dir, { CEREBRO_MAX_CONCURRENCY: '128', CEREBRO_MAX_DEEPSEEK_CONCURRENCY: '8' }, ['--cycles', '1']);
   assert.equal(result.status, 0, result.stderr || result.stdout);

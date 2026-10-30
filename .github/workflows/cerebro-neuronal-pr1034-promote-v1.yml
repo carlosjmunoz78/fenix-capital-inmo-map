@@ -1,0 +1,140 @@
+name: CEREBRO NEURONAL PR1034 Promote V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/neuronal-superparallel-v1-20261030'
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  actions: read
+
+concurrency:
+  group: cerebro-neuronal-pr1034-promote-v1
+  cancel-in-progress: true
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  PR_NUMBER: '1034'
+
+jobs:
+  promote-pr1034:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Apply installed-runtime fallback if missing
+        id: fallback
+        shell: bash
+        run: |
+          node cerebro/scripts/patch-neuronal-filesystem-inventory-v1.mjs cerebro/runtime/neuronal-superparallel-source-v1.mjs --apply
+          if git diff --quiet -- cerebro/runtime/neuronal-superparallel-source-v1.mjs; then
+            echo 'changed=false' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          node cerebro/runtime/prepare-neuronal-source-v1.mjs
+          node --check cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+          CEREBRO_NEURONAL_FORCE_FS_INVENTORY=YES CEREBRO_NEURONAL_OUT_DIR=artifacts/neuronal-fs-promote-smoke node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission=NREQ-0001-A_AUDIT
+          test -s artifacts/neuronal-fs-promote-smoke/evidence/NREQ-0001-A_AUDIT.json
+          git diff --check
+          git config user.name 'cerebro-autofill-bot'
+          git config user.email 'cerebro-autofill-bot@users.noreply.github.com'
+          git add cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          git commit -m 'CEREBRO NEURONAL: support installed runtime without git metadata'
+          git push origin HEAD:${GITHUB_REF_NAME}
+          echo 'changed=true' >> "$GITHUB_OUTPUT"
+
+      - name: Local PREPROD promotion gates
+        if: steps.fallback.outputs.changed != 'true'
+        shell: bash
+        run: |
+          node cerebro/runtime/prepare-neuronal-source-v1.mjs
+          node --check cerebro/runtime/neuronal-source-integrity-v1.mjs
+          node --check cerebro/runtime/neuronal-hierarchical-job001-adapter-v1.mjs
+          node --check cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          node --check cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          node --test cerebro/tests/neuronal-hierarchical-job001-adapter-v1.test.mjs
+          node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+          CEREBRO_NEURONAL_FORCE_FS_INVENTORY=YES CEREBRO_NEURONAL_OUT_DIR=artifacts/neuronal-fs-promote-smoke node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission=NREQ-0001-A_AUDIT
+          node -e "const x=require('./artifacts/neuronal-fs-promote-smoke/evidence/NREQ-0001-A_AUDIT.json'); if(x.prod_authorized!==false||x.trading_access!==false||x.execution_state!=='DISCOVERY_EVIDENCE_COLLECTED') process.exit(1)"
+          grep -q 'NEURONAL_AUTOFILL_V1_WIRED' cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          grep -q 'additional_sources: neuronalSource ? \[neuronalSource\] : \[\]' cerebro/runtime/cerebro-supervisor-daemon-v0.mjs
+          grep -q 'CEREBRO_NEURONAL_FORCE_FS_INVENTORY' cerebro/runtime/neuronal-superparallel-source-v1.mjs
+          git diff --check
+
+      - name: Wait for exact-head independent CI gates
+        if: steps.fallback.outputs.changed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in $(seq 1 180); do
+            pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+            state="$(jq -r '.state' <<<"$pr")"
+            head="$(jq -r '.head.sha' <<<"$pr")"
+            base="$(jq -r '.base.ref' <<<"$pr")"
+            if [ "$state" != open ] || [ "$head" != "$GITHUB_SHA" ] || [ "$base" != main ]; then
+              echo "Stale or closed revision; exit without merge. state=$state head=$head base=$base expected=$GITHUB_SHA"
+              exit 0
+            fi
+
+            checks="$(gh api -H 'Accept: application/vnd.github+json' "repos/${GITHUB_REPOSITORY}/commits/${GITHUB_SHA}/check-runs?filter=latest&per_page=100")"
+            filtered="$(jq '[.check_runs[] | select(.name != "promote-pr1034")]' <<<"$checks")"
+            bad="$(jq '[.[] | select(.status=="completed" and (.conclusion|IN("success","neutral","skipped")|not))] | length' <<<"$filtered")"
+            pending="$(jq '[.[] | select(.status!="completed")] | length' <<<"$filtered")"
+            codeql="$(jq '[.[] | select(.name=="CodeQL" and .status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            supervisor="$(jq '[.[] | select(.name=="durable-supervisor-v0" and .status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            policy="$(jq '[.[] | select(.name=="Policy gate" and .status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            validate="$(jq '[.[] | select(.name=="Validate and materialize 6,449 submissions" and .status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            acceptance="$(jq '[.[] | select(.name=="NEURONAL launch acceptance" and .status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            shards="$(jq '[.[] | select(.name|startswith("Shard ")) | select(.status=="completed" and .conclusion=="success")] | length' <<<"$filtered")"
+            total="$(jq 'length' <<<"$filtered")"
+
+            echo "attempt=$attempt total=$total pending=$pending bad=$bad codeql=$codeql supervisor=$supervisor policy=$policy validate=$validate acceptance=$acceptance shards=$shards"
+            if [ "$bad" -gt 0 ]; then
+              jq -r '.[] | select(.status=="completed" and (.conclusion|IN("success","neutral","skipped")|not)) | "RED: \(.name)=\(.conclusion)"' <<<"$filtered"
+              exit 1
+            fi
+            if [ "$pending" -eq 0 ] && [ "$total" -ge 25 ] && [ "$codeql" -ge 1 ] && [ "$supervisor" -ge 1 ] && [ "$policy" -ge 1 ] && [ "$validate" -ge 1 ] && [ "$acceptance" -ge 1 ] && [ "$shards" -ge 20 ]; then
+              echo 'All exact-head independent PREPROD gates GREEN.'
+              exit 0
+            fi
+            sleep 20
+          done
+          echo 'Promotion gate timed out without bypassing CI.'
+          exit 1
+
+      - name: Squash merge exact tested head into main
+        if: steps.fallback.outputs.changed != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          pr="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          test "$(jq -r '.state' <<<"$pr")" = open
+          test "$(jq -r '.head.sha' <<<"$pr")" = "$GITHUB_SHA"
+          test "$(jq -r '.base.ref' <<<"$pr")" = main
+          merge="$(gh api -X PUT "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}/merge" -f merge_method=squash -f sha="$GITHUB_SHA")"
+          test "$(jq -r '.merged' <<<"$merge")" = true
+          echo "$merge" | jq '{merged,message,sha}'
+
+      - name: Authority statement
+        if: always()
+        run: |
+          echo 'PREPROD code promotion only.'
+          echo 'No PROD deployment authority.'
+          echo 'No PROD writes.'
+          echo 'Trading remains isolated.'

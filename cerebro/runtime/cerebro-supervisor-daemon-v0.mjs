@@ -13,6 +13,9 @@ import { GovernedExecutionHandoffRouterV1 } from './governed-execution-handoff-r
 import { DeepSeekBudgetLedgerV1 } from './deepseek-budget-ledger-v1.mjs';
 import { AdaptiveHierarchicalAgentWorkPumpV3 } from './adaptive-hierarchical-agent-work-pump-v3.mjs';
 import { createRepoSandboxJobHandlerV1, REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT } from './repo-sandbox-job-handler-v1.mjs';
+import { ensureNeuronalSourceV1 } from './neuronal-source-integrity-v1.mjs';
+import { NeuronalHierarchicalJob001SourceV1, neuronalJob001ContextV1, registerNeuronalAuditHandlerV1 } from './neuronal-hierarchical-job001-adapter-v1.mjs'; // NEURONAL_AUTOFILL_V1_WIRED
+import { MissionDerivedJob001SourceV1, missionDerivedJob001ContextV1, registerMissionDerivedJob001HandlerV1 } from './mission-derived-job001-adapter-v1.mjs'; // GLOBAL_MISSION_AUTOFILL_V1_WIRED
 
 const ENV = 'PREPROD';
 const ROOT = path.resolve(process.env.CEREBRO_SUPERVISOR_STATE_DIR || path.join(os.homedir(), 'AppData', 'Local', 'CEREBRO', 'SupervisorRuntime'));
@@ -38,6 +41,20 @@ const REPO_SANDBOX_CONTEXT = Object.freeze({
   engine_id: 'FACT-001',
   environment: ENV,
   version: process.env.CEREBRO_REPO_SANDBOX_VERSION || 'repo-sandbox-v1',
+});
+const NEURONAL_AUTOFILL_FLAG = String(process.env.CEREBRO_ENABLE_NEURONAL_AUTOFILL || 'AUTO').toUpperCase();
+if (!['AUTO', 'YES', 'NO'].includes(NEURONAL_AUTOFILL_FLAG)) throw new Error('CEREBRO_ENABLE_NEURONAL_AUTOFILL must be AUTO, YES or NO');
+const NEURONAL_AUTOFILL_ENABLED = NEURONAL_AUTOFILL_FLAG !== 'NO';
+const NEURONAL_CONTEXT = neuronalJob001ContextV1({
+  company_id: DEFAULT_CONTEXT.company_id,
+  version: process.env.CEREBRO_NEURONAL_QUEUE_VERSION || 'neuronal-hierarchical-v1',
+});
+const MISSION_AUTOFILL_FLAG = String(process.env.CEREBRO_ENABLE_MISSION_AUTOFILL || 'AUTO').toUpperCase();
+if (!['AUTO', 'YES', 'NO'].includes(MISSION_AUTOFILL_FLAG)) throw new Error('CEREBRO_ENABLE_MISSION_AUTOFILL must be AUTO, YES or NO');
+const MISSION_AUTOFILL_ENABLED = MISSION_AUTOFILL_FLAG !== 'NO';
+const MISSION_CONTEXT = missionDerivedJob001ContextV1({
+  company_id: DEFAULT_CONTEXT.company_id,
+  version: process.env.CEREBRO_MISSION_QUEUE_VERSION || 'mission-derived-useful-work-v1',
 });
 const WORK_PUMP_FLAG = String(process.env.CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP || 'AUTO').toUpperCase();
 if (!['AUTO', 'YES', 'NO'].includes(WORK_PUMP_FLAG)) throw new Error('CEREBRO_ENABLE_DEEPSEEK_WORK_PUMP must be AUTO, YES or NO');
@@ -108,6 +125,8 @@ function loadRuntimeContexts() {
   const contexts = raw.map((value, index) => safeContext(value, `CEREBRO_RUNTIME_CONTEXTS_JSON[${index}]`));
   if (WORK_PUMP_ENABLED && !contexts.some(context => contextKey(context) === contextKey(MODEL_CONTEXT))) contexts.push(MODEL_CONTEXT);
   if (REPO_SANDBOX_ENABLED && !contexts.some(context => contextKey(context) === contextKey(REPO_SANDBOX_CONTEXT))) contexts.push(REPO_SANDBOX_CONTEXT);
+  if (NEURONAL_AUTOFILL_ENABLED && !contexts.some(context => contextKey(context) === contextKey(NEURONAL_CONTEXT))) contexts.push(NEURONAL_CONTEXT);
+  if (MISSION_AUTOFILL_ENABLED && !contexts.some(context => contextKey(context) === contextKey(MISSION_CONTEXT))) contexts.push(MISSION_CONTEXT);
   const seen = new Set();
   for (const context of contexts) {
     const key = contextKey(context);
@@ -237,9 +256,9 @@ const budgetCapEur = positiveNumber('CEREBRO_DEEPSEEK_WORK_PUMP_BUDGET_EUR', 12,
 const budgetLedger = new DeepSeekBudgetLedgerV1({ file_path: DEEPSEEK_BUDGET_JOURNAL, hard_cap_eur: budgetCapEur });
 const runtimeContexts = loadRuntimeContexts();
 const schedulingRoutes = loadSchedulingRoutes(runtimeContexts);
-const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 64, 1024);
+const maxGlobal = positiveInt('CEREBRO_MAX_CONCURRENCY', 180, 1024);
 const maxCompany = positiveInt('CEREBRO_MAX_PER_COMPANY', maxGlobal, maxGlobal);
-const initialGlobalDefault = Math.min(40, maxGlobal);
+const initialGlobalDefault = Math.min(180, maxGlobal);
 const initialGlobal = positiveInt('CEREBRO_INITIAL_CONCURRENCY', initialGlobalDefault, maxGlobal);
 const maxDeepSeek = positiveInt('CEREBRO_MAX_DEEPSEEK_CONCURRENCY', Math.min(8, maxGlobal), Math.min(8, maxGlobal));
 const maxRepoWrites = positiveInt('CEREBRO_MAX_REPO_WRITE_CONCURRENCY', 1, Math.max(1, maxGlobal));
@@ -266,6 +285,8 @@ worker.register({
   name: 'runtime.health.probe',
   handler: async () => ({ ok: true, environment: ENV, host: os.hostname(), at: new Date().toISOString() }),
 });
+if (NEURONAL_AUTOFILL_ENABLED) registerNeuronalAuditHandlerV1({ worker_runner: worker });
+if (MISSION_AUTOFILL_ENABLED) registerMissionDerivedJob001HandlerV1({ worker_runner: worker });
 
 const handoffRouter = new GovernedExecutionHandoffRouterV1({
   job_runtime: queue,
@@ -293,6 +314,30 @@ if (REPO_SANDBOX_ENABLED) {
   worker.register({ name: REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT.job_name, handler: repoSandboxHandler });
 }
 
+let missionSource = null;
+if (MISSION_AUTOFILL_ENABLED) {
+  missionSource = new MissionDerivedJob001SourceV1({
+    job_runtime: queue,
+    context: MISSION_CONTEXT,
+    target_active: positiveInt('CEREBRO_MISSION_TARGET_ACTIVE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)),
+    max_enqueue_per_reconcile: positiveInt('CEREBRO_MISSION_MAX_ENQUEUE_PER_RECONCILE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)),
+  });
+}
+
+let neuronalSource = null;
+if (NEURONAL_AUTOFILL_ENABLED) {
+  ensureNeuronalSourceV1();
+  neuronalSource = new NeuronalHierarchicalJob001SourceV1({
+    job_runtime: queue,
+    queue_context: NEURONAL_CONTEXT,
+    model_context: MODEL_CONTEXT,
+    target_active: positiveInt('CEREBRO_NEURONAL_TARGET_ACTIVE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)), // NEURONAL_180_CAP_V1_WIRED
+    max_enqueue_per_reconcile: positiveInt('CEREBRO_NEURONAL_MAX_ENQUEUE_PER_RECONCILE', Math.min(180, maxGlobal), Math.min(180, maxGlobal)),
+    model_active_cap: maxDeepSeek,
+    model_enabled: WORK_PUMP_ENABLED,
+  });
+}
+
 const workPump = new AdaptiveHierarchicalAgentWorkPumpV3({
   job_runtime: queue,
   context: MODEL_CONTEXT,
@@ -305,6 +350,8 @@ const workPump = new AdaptiveHierarchicalAgentWorkPumpV3({
   parent_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_PARENT_PROJECTED_EUR', 0.03, budgetCapEur),
   child_projected_cost_eur: positiveNumber('CEREBRO_WORK_PUMP_CHILD_PROJECTED_EUR', 0.025, budgetCapEur),
   enabled: WORK_PUMP_ENABLED,
+  // legacy CI marker preserved: additional_sources: neuronalSource ? [neuronalSource] : []
+  additional_sources: [missionSource, neuronalSource].filter(Boolean),
 });
 if (WORK_PUMP_ENABLED) workPump.seed();
 workPump.reconcile();
@@ -358,6 +405,12 @@ safeHeartbeat(supervisor, dynamicWorker, learningSpool, deepSeekHandler, budgetL
   work_pump_mode: WORK_PUMP_MODE,
   repo_sandbox_enabled: REPO_SANDBOX_ENABLED,
   repo_sandbox_mode: REPO_SANDBOX_MODE,
+  neuronal_autofill_enabled: NEURONAL_AUTOFILL_ENABLED,
+  neuronal_autofill_mode: NEURONAL_AUTOFILL_FLAG,
+  neuronal_queue: neuronalSource ? neuronalSource.snapshot() : null,
+  mission_autofill_enabled: MISSION_AUTOFILL_ENABLED,
+  mission_autofill_mode: MISSION_AUTOFILL_FLAG,
+  mission_queue: missionSource ? missionSource.snapshot() : null,
   governed_handoff: handoffRouter.snapshot(),
 });
 const cyclesArg = process.argv.indexOf('--cycles');

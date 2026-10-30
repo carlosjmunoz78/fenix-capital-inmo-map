@@ -4,6 +4,9 @@ import { publishSupervisorHeartbeatFileV1 } from './job001-remote-telemetry-v1.m
 import { installMaintenanceDrainV1 } from './job001-maintenance-drain-v1.mjs';
 
 const PREPROD = 'PREPROD';
+const VERIFIED_GLOBAL_CAP = 180;
+const DEEPSEEK_CAP = 8;
+const REPO_WRITE_CAP = 1;
 
 function integer(value, fallback, { min = 1, max = 1_000_000 } = {}) {
   const n = Number(value);
@@ -14,7 +17,7 @@ function nonEmpty(value) {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
 }
 
-export function configureSupervisor48V1(env = process.env) {
+export function configureSupervisor180V1(env = process.env) {
   if (env.CEREBRO_SUPERVISOR_ENV && String(env.CEREBRO_SUPERVISOR_ENV).toUpperCase() !== PREPROD) {
     throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
   }
@@ -22,9 +25,9 @@ export function configureSupervisor48V1(env = process.env) {
     throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
   }
 
-  const maxGlobal = integer(env.CEREBRO_MAX_CONCURRENCY, 64, { min: 1, max: 64 });
-  const target = Math.min(48, maxGlobal);
-  const maxDeepSeek = Math.min(8, maxGlobal);
+  const maxGlobal = integer(env.CEREBRO_MAX_CONCURRENCY, VERIFIED_GLOBAL_CAP, { min: 1, max: VERIFIED_GLOBAL_CAP });
+  const target = Math.min(VERIFIED_GLOBAL_CAP, maxGlobal);
+  const maxDeepSeek = Math.min(DEEPSEEK_CAP, maxGlobal);
 
   env.CEREBRO_ENVIRONMENT = PREPROD;
   env.CEREBRO_SUPERVISOR_ENV = PREPROD;
@@ -32,20 +35,23 @@ export function configureSupervisor48V1(env = process.env) {
   env.CEREBRO_INITIAL_CONCURRENCY = String(target);
   env.CEREBRO_MAX_PER_COMPANY = String(target);
   env.CEREBRO_MAX_DEEPSEEK_CONCURRENCY = String(maxDeepSeek);
-  env.CEREBRO_MAX_REPO_WRITE_CONCURRENCY = '1';
+  env.CEREBRO_MAX_REPO_WRITE_CONCURRENCY = String(REPO_WRITE_CAP);
 
   return Object.freeze({
     environment: PREPROD,
-    target_useful: 48,
+    target_useful: VERIFIED_GLOBAL_CAP,
     initial_global_concurrency: target,
     max_global_concurrency: maxGlobal,
     max_company_concurrency: target,
     max_deepseek_concurrency: maxDeepSeek,
-    max_repo_write_concurrency: 1,
+    max_repo_write_concurrency: REPO_WRITE_CAP,
     prod_authorized: false,
     trading_access: false,
   });
 }
+
+// Backward-compatible export for older callers; semantics now follow the verified 180-cap contract.
+export const configureSupervisor48V1 = configureSupervisor180V1;
 
 export function telemetryConfigFromEnvV1(env = process.env) {
   const userProfile = nonEmpty(env.USERPROFILE) || os.homedir();
@@ -67,7 +73,7 @@ export function canPublishRemoteTelemetryV1(config) {
 }
 
 export async function startSupervisorEntrypointV1({ env = process.env, import_supervisor = async () => import('./cerebro-supervisor-daemon-v0.mjs'), publisher = publishSupervisorHeartbeatFileV1, set_interval = setInterval, install_drain = installMaintenanceDrainV1 } = {}) {
-  const limits = configureSupervisor48V1(env);
+  const limits = configureSupervisor180V1(env);
   const drain = install_drain({ env });
   const telemetry = telemetryConfigFromEnvV1(env);
   let inFlight = false;
@@ -100,9 +106,6 @@ export async function startSupervisorEntrypointV1({ env = process.env, import_su
     void tick();
   }
 
-  // The drain adapter is installed before the long-lived V0 daemon import. If
-  // DRAIN_MODE exists, already-running leases continue while new claims and the
-  // adaptive refill are suppressed. Removing the sentinel resumes the same queue.
   await import_supervisor();
 
   return Object.freeze({
@@ -151,11 +154,11 @@ export const CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT = Object.freeze({
     max_deepseek: 'CEREBRO_MAX_DEEPSEEK_CONCURRENCY',
     max_repo_write: 'CEREBRO_MAX_REPO_WRITE_CONCURRENCY',
   }),
-  target_useful: 48,
-  max_global: 64,
-  max_company: 48,
-  max_deepseek: 8,
-  max_repo_write: 1,
+  target_useful: VERIFIED_GLOBAL_CAP,
+  max_global: VERIFIED_GLOBAL_CAP,
+  max_company: VERIFIED_GLOBAL_CAP,
+  max_deepseek: DEEPSEEK_CAP,
+  max_repo_write: REPO_WRITE_CAP,
   remote_telemetry: 'SANITIZED_LATEST_ONLY',
   remote_telemetry_ttl_ms: 120_000,
   publisher_failure_is_fatal: false,
