@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "policy_id": "CEREBRO-GITHUB-ENTERPRISE-EXECUTION-V1",
   "status": "PREPROD_CANDIDATE",
   "effective_scope": {
@@ -11,34 +11,43 @@
   },
   "verified_platform_limits": {
     "standard_runner_concurrent_jobs_baseline_without_enterprise_increase": 20,
-    "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "paid_enterprise_standard_runner_documented_ceiling": 500,
+    "live_enterprise_runner_concurrent_jobs_limit": 180,
     "paid_enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
     "matrix_jobs_per_workflow_run_ceiling": 256,
     "enterprise_trial_includes_increased_actions_concurrency": false
   },
   "entitlement_gate": {
     "enterprise_organization_verified_for_canonical_repo": true,
-    "enterprise_actions_concurrency_entitlement_verified": false,
-    "enterprise_account_state": "TRIAL",
+    "enterprise_actions_concurrency_entitlement_verified": true,
+    "enterprise_account_state": "PAID",
     "canonical_repository": "fenix-cerebro/fenix-capital-inmo-map",
     "enterprise_slug": "cerebro-os",
     "organization": "fenix-cerebro",
     "organization_verified_at": "2026-10-30",
+    "paid_enterprise_verified_at": "2026-10-30",
+    "live_runner_limit_verified_at": "2026-10-30",
+    "global_fanout_enabled": true,
+    "global_500_topology_prepared": true,
     "global_500_fanout_enabled": false,
     "required_before_500_global_fanout": true,
-    "reason": "Repository and organization ownership are verified under Enterprise account cerebro-os, but the account is still in the 30-day Enterprise trial. GitHub documents that increased GitHub Actions job concurrency is not included in the Enterprise trial. During TRIAL, CEREBRO uses the documented standard baseline of 20 concurrent GitHub-hosted jobs and does not claim or physically request the paid-Enterprise 500-job concurrency until that entitlement is separately verified."
+    "reason": "Paid Enterprise is active and billed monthly. GitHub documents a 500-job standard hosted-runner ceiling for Enterprise, while the live CEREBRO OS GitHub-hosted runners panel currently reports 1/180 All jobs usage. CEREBRO therefore unlocks the verified live physical cap of 180 now and keeps the 500-job topology prepared but fail-closed until the live runner limit is raised to 500 or higher."
   },
   "parallelism": {
-    "mode": "ADAPTIVE_FAIL_CLOSED",
-    "cerebro_trial_safe_parallelism_cap": 20,
-    "paid_enterprise_verified_linux_hard_ceiling": 500,
+    "mode": "ADAPTIVE_LIVE_CAP",
+    "cerebro_standard_fallback_parallelism_cap": 20,
+    "current_live_enterprise_parallelism_cap": 180,
+    "enterprise_acceleration_test_parallelism": 128,
+    "paid_enterprise_documented_linux_ceiling": 500,
     "single_matrix_hard_ceiling": 256,
     "spawn_jobs_only_for_discovered_work": true,
     "parallelize_only_independent_work": true,
     "never_spawn_empty_capacity_jobs": true
   },
   "usage_guard": {
-    "trial_mode": true,
+    "trial_mode": false,
+    "paid_enterprise_active": true,
+    "enterprise_monthly_seat_usd": 21,
     "silent_overage_allowed": false,
     "money_limit_on_unapproved_overage": true,
     "paid_plan_activation_requires_human": true
@@ -55,6 +64,10 @@
   },
   "copilot_policy": {
     "repository_instructions_required": true,
+    "copilot_plan": "PRO",
+    "copilot_cli_max_concurrency": 4,
+    "included_ai_credits_monthly": 1500,
+    "additional_usage_budget_usd": 0,
     "copilot_is_runtime_dependency": false,
     "copilot_as_generic_paid_api": false,
     "draft_pr_by_default": true,
