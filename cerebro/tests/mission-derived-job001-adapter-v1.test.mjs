@@ -1,3 +1,4 @@
+// Exact-head CI revalidation: global Mission JOB-001 autofill remains PREPROD-only and bounded by the verified 180 cap.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
