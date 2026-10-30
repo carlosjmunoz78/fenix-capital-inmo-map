@@ -8,6 +8,9 @@ const REFILL_SCOPE = 'cerebro:refill:request';
 const ACTIVE_RUNNING = new Set(['LEASED', 'HEARTBEATING', 'RUNNING']);
 const ACTIVE_RUNNABLE = new Set(['QUEUED', 'RETRY_WAIT']);
 const BLOCKED = new Set(['DEAD_LETTER', 'HUMAN_REQUIRED', 'FAILED_MANUAL']);
+const VERIFIED_GLOBAL_CAP = 180;
+const DEEPSEEK_CAP = 8;
+const REPO_WRITE_CAP = 1;
 
 function requiredString(value, label) {
   if (typeof value !== 'string' || value.trim() === '') throw new TypeError(`${label} required`);
@@ -80,11 +83,11 @@ export class Job001LedgerControlPlaneV1 {
     this.#workPump = work_pump;
     this.#contexts = Object.freeze(contexts.map((context, index) => safeContext(context, `contexts[${index}]`)));
     this.#limits = Object.freeze({
-      target_useful: integerOrNull(limits.target_useful) ?? 48,
-      max_global: integerOrNull(limits.max_global) ?? 64,
-      max_company: integerOrNull(limits.max_company) ?? 48,
-      max_deepseek: Math.min(integerOrNull(limits.max_deepseek) ?? 8, 8),
-      max_repo_write: Math.min(integerOrNull(limits.max_repo_write) ?? 1, 1),
+      target_useful: Math.min(integerOrNull(limits.target_useful) ?? VERIFIED_GLOBAL_CAP, VERIFIED_GLOBAL_CAP),
+      max_global: Math.min(integerOrNull(limits.max_global) ?? VERIFIED_GLOBAL_CAP, VERIFIED_GLOBAL_CAP),
+      max_company: Math.min(integerOrNull(limits.max_company) ?? VERIFIED_GLOBAL_CAP, VERIFIED_GLOBAL_CAP),
+      max_deepseek: Math.min(integerOrNull(limits.max_deepseek) ?? DEEPSEEK_CAP, DEEPSEEK_CAP),
+      max_repo_write: Math.min(integerOrNull(limits.max_repo_write) ?? REPO_WRITE_CAP, REPO_WRITE_CAP),
     });
   }
 
@@ -115,7 +118,7 @@ export class Job001LedgerControlPlaneV1 {
     const headroomToTarget = Math.max(0, this.#limits.target_useful - useful);
     const globalHeadroom = Math.max(0, this.#limits.max_global - running);
     return Object.freeze({
-      schema_version: '1.0.0',
+      schema_version: '1.1.0',
       state_type: 'CEREBRO_JOB001_LEDGER_CONTROL_PLANE_V1',
       environment: PREPROD,
       company_ids: Object.freeze([...new Set(selected.map(item => item.company_id))].sort()),
@@ -127,7 +130,6 @@ export class Job001LedgerControlPlaneV1 {
         global_running_headroom: globalHeadroom,
         target_satisfied: useful >= this.#limits.target_useful,
       }),
-      by_context: Object.freeze(byContext),
       second_queue: false,
       second_scheduler: false,
       second_daemon: false,
@@ -211,11 +213,11 @@ export const JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT = Object.freeze({
   environment: PREPROD,
   read_scope: READ_SCOPE,
   refill_scope: REFILL_SCOPE,
-  target_useful_default: 48,
-  max_global_default: 64,
-  max_company_default: 48,
-  max_deepseek_default: 8,
-  max_repo_write_default: 1,
+  target_useful_default: VERIFIED_GLOBAL_CAP,
+  max_global_default: VERIFIED_GLOBAL_CAP,
+  max_company_default: VERIFIED_GLOBAL_CAP,
+  max_deepseek_default: DEEPSEEK_CAP,
+  max_repo_write_default: REPO_WRITE_CAP,
   heartbeat_ttl_max_ms: 120_000,
   dynamic_concurrency_whitelist_only: true,
   reuses_existing_runtime: true,
