@@ -22,6 +22,10 @@ concurrency:
   group: cerebro-continuous-useful-worker-v1-${{ inputs.lane }}
   cancel-in-progress: false
 
+env:
+  CEREBRO_REARM_LANE_LIMIT: '16'
+  CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'false'
+
 jobs:
   sustained-useful-work:
     name: SUSTAINED-${{ inputs.lane }}-C${{ inputs.cycle }}
@@ -64,6 +68,9 @@ jobs:
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
           test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
+          test "$CEREBRO_REARM_LANE_LIMIT" -ge 1
+          test "$CEREBRO_REARM_LANE_LIMIT" -le 64
+          test "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" = "false"
           for value in "${{ inputs.lane }}" "${{ inputs.cycle }}"; do
             case "$value" in ''|*[!0-9]*) exit 2 ;; esac
           done
@@ -150,15 +157,26 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          lane='${{ inputs.lane }}'
           next='${{ steps.lease.outputs.next_cycle }}'
           test -n "$next"
           ref="${GITHUB_REF_NAME}"
           test -n "$ref"
+
+          if [ "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" != "true" ] && [ "$lane" -ge "$CEREBRO_REARM_LANE_LIMIT" ]; then
+            echo "self_refilled_lane=false" >> "$GITHUB_STEP_SUMMARY"
+            echo "drain_reason=ENTERPRISE_ENTITLEMENT_UNVERIFIED" >> "$GITHUB_STEP_SUMMARY"
+            echo "rearm_lane_limit=$CEREBRO_REARM_LANE_LIMIT" >> "$GITHUB_STEP_SUMMARY"
+            echo "lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+            echo "continuous=false" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
             -f "ref=${ref}" \
-            -f "inputs[lane]=${{ inputs.lane }}" \
+            -f "inputs[lane]=${lane}" \
             -f "inputs[cycle]=${next}"
-          echo "self_refilled_lane=${{ inputs.lane }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "self_refilled_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
           echo "self_refilled_ref=${ref}" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
