@@ -1,9 +1,10 @@
-import { executeMissionDerivedWork } from './mission-derived-useful-work-v1.mjs';
+import { executeMissionDerivedWork, selectMissionUnit } from './mission-derived-useful-work-v1.mjs';
 
 const PREPROD = 'PREPROD';
 const ACTIVE = new Set(['QUEUED', 'RETRY_WAIT', 'RUNNING']);
 const LANE_COUNT = 68;
 const VERIFIED_GLOBAL_CAP = 180;
+const MISSION_ATOMIC_COUNT = selectMissionUnit(0, 0).atomic_count;
 export const MISSION_DERIVED_JOB_NAME_V1 = 'mission.derived.useful-work.v1';
 
 function integer(value, label, { min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
@@ -65,9 +66,11 @@ export class MissionDerivedJob001SourceV1 {
     const jobs = missionJobs(this.#runtime, this.#context);
     const active = jobs.filter(job => ACTIVE.has(job.status));
     const sequences = jobs.map(sequenceOf).filter(value => value !== null);
-    const nextSequence = sequences.length ? Math.max(...sequences) + 1 : 0;
+    const uniqueSequences = new Set(sequences.filter(value => value < MISSION_ATOMIC_COUNT));
+    const nextSequence = uniqueSequences.size ? Math.max(...uniqueSequences) + 1 : 0;
+    const remainingUnique = Math.max(0, MISSION_ATOMIC_COUNT - nextSequence);
     return Object.freeze({
-      schema_version: '1.1.0',
+      schema_version: '1.2.0',
       state_type: 'CEREBRO_MISSION_DERIVED_JOB001_SOURCE_V1',
       environment: PREPROD,
       context: this.#context,
@@ -75,9 +78,15 @@ export class MissionDerivedJob001SourceV1 {
       target_active: this.#targetActive,
       active_jobs: active.length,
       total_jobs: jobs.length,
+      unique_atomic_work_units: MISSION_ATOMIC_COUNT,
+      issued_unique_work_units: nextSequence,
+      remaining_unique_work_units: remainingUnique,
       next_sequence: nextSequence,
       headroom: Math.max(0, this.#targetActive - active.length),
       auto_refill: true,
+      refill_until_unique_backlog_exhausted: true,
+      duplicate_replay_after_exhaustion: false,
+      exhausted: remainingUnique === 0,
       lane_count: LANE_COUNT,
       verified_global_cap: VERIFIED_GLOBAL_CAP,
       second_queue: false,
@@ -92,13 +101,14 @@ export class MissionDerivedJob001SourceV1 {
 
   reconcile() {
     const before = this.snapshot();
-    const requested = Math.min(before.headroom, this.#maxEnqueue);
+    const requested = Math.min(before.headroom, this.#maxEnqueue, before.remaining_unique_work_units);
     let accepted = 0;
     let duplicates = 0;
     for (let offset = 0; offset < requested; offset += 1) {
       const sequence = before.next_sequence + offset;
+      if (sequence >= MISSION_ATOMIC_COUNT) break;
       const lane = sequence % LANE_COUNT;
-      const cycle = Math.floor(sequence / LANE_COUNT) % 1_000_000;
+      const cycle = Math.floor(sequence / LANE_COUNT);
       const result = this.#runtime.enqueue({
         name: MISSION_DERIVED_JOB_NAME_V1,
         context: this.#context,
@@ -106,7 +116,7 @@ export class MissionDerivedJob001SourceV1 {
           lane,
           cycle,
           fallback: true,
-          __mission_derived: { sequence, source: 'MISSION_DAG_V1' },
+          __mission_derived: { sequence, source: 'MISSION_DAG_V1', unique_backlog_size: MISSION_ATOMIC_COUNT },
         },
         priority: 60,
         max_attempts: 3,
@@ -134,7 +144,7 @@ export function registerMissionDerivedJob001HandlerV1({ worker_runner, execute_w
     handler: async ({ payload, signal, heartbeat, checkpoint }) => {
       if (signal?.aborted) throw new Error(`ABORTED:${signal.reason ?? 'UNKNOWN'}`);
       const lane = integer(payload?.lane, 'payload.lane', { min: 0, max: LANE_COUNT - 1 });
-      const cycle = integer(payload?.cycle, 'payload.cycle', { min: 0, max: 999_999 });
+      const cycle = integer(payload?.cycle, 'payload.cycle', { min: 0, max: Math.ceil(MISSION_ATOMIC_COUNT / LANE_COUNT) });
       const fallback = payload?.fallback !== false;
       heartbeat?.();
       checkpoint?.({ stage: 'MISSION_DERIVED_START', lane, cycle });
@@ -168,8 +178,11 @@ export const MISSION_DERIVED_JOB001_ADAPTER_V1_CONTRACT = Object.freeze({
   idempotency_scope: 'company_id+engine_id+environment+version+sequence',
   target_active_default: VERIFIED_GLOBAL_CAP,
   target_active_max: VERIFIED_GLOBAL_CAP,
+  unique_atomic_work_units: MISSION_ATOMIC_COUNT,
   lane_range: Object.freeze({ min: 0, max: LANE_COUNT - 1 }),
   auto_refill: true,
+  refill_until_unique_backlog_exhausted: true,
+  duplicate_replay_after_exhaustion: false,
   second_queue: false,
   second_scheduler: false,
   second_daemon: false,
