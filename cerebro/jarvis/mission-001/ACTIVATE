@@ -1,0 +1,9 @@
+MISSION-JARVIS-001
+source_of_truth=JARVIS_MASTER_V1_RC2_2026-10-30.md
+environment=PREPROD
+core_first=true
+auto_continue_until=HUMAN_REQUIRED_OR_DAG_COMPLETE
+deepseek_role=TEMPORARY_COGNITIVE_ACCELERATOR
+deepseek_dependency_target=0
+prod_write=false
+trading_access=false
