@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "policy_id": "CEREBRO-GITHUB-ENTERPRISE-EXECUTION-V1",
+  "status": "PREPROD_CANDIDATE",
+  "effective_scope": {
+    "company_id": "fenix",
+    "engine_id": "RUNTIME-001",
+    "capability_id": "GITHUB-ACTIONS-ACCELERATION",
+    "environment": "PREPROD",
+    "version": "v1"
+  },
+  "verified_platform_limits": {
+    "enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "enterprise_standard_runner_macos_concurrent_jobs_ceiling": 50,
+    "matrix_jobs_per_workflow_run_ceiling": 256,
+    "enterprise_included_actions_minutes_per_month": 50000
+  },
+  "entitlement_gate": {
+    "enterprise_organization_verified_for_canonical_repo": false,
+    "reason": "Current canonical repository is owned by personal user carlosjmunoz78 and the authenticated GitHub connection reports zero organization memberships. Do not claim the Enterprise 500-job ceiling applies to this repository until organization/enterprise ownership is verified.",
+    "required_before_enterprise_burst": true
+  },
+  "parallelism": {
+    "mode": "ADAPTIVE",
+    "default_linux_max_parallel": 64,
+    "preprod_burst_linux_max_parallel": 128,
+    "enterprise_verified_linux_hard_ceiling": 500,
+    "single_matrix_hard_ceiling": 256,
+    "spawn_jobs_only_for_discovered_work": true,
+    "parallelize_only_independent_work": true,
+    "never_spawn_empty_capacity_jobs": true
+  },
+  "usage_guard": {
+    "included_minutes_monthly_reference": 50000,
+    "warning_threshold_percent": 50,
+    "throttle_threshold_percent": 75,
+    "hard_review_threshold_percent": 90,
+    "silent_overage_allowed": false,
+    "money_limit_on_unapproved_overage": true
+  },
+  "workflow_policy": {
+    "cancel_stale_branch_runs": true,
+    "use_path_filters": true,
+    "use_dynamic_test_discovery": true,
+    "retain_full_old_vs_new_regression": true,
+    "failure_artifacts_only_where_practical": true,
+    "production_deploy_from_acceleration_workflow": false,
+    "write_external_systems": false,
+    "use_actions_as_permanent_transactional_runtime": false
+  },
+  "copilot_policy": {
+    "repository_instructions_required": true,
+    "copilot_is_runtime_dependency": false,
+    "copilot_as_generic_paid_api": false,
+    "draft_pr_by_default": true,
+    "automerge_prod": false
+  },
+  "migration_policy": {
+    "service_removal_requires_inventory": true,
+    "service_removal_requires_dependency_map": true,
+    "service_removal_requires_old_vs_new": true,
+    "service_removal_requires_preprod": true,
+    "service_removal_requires_tested_rollback": true,
+    "replace_only_after_equivalence_or_improvement": true
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
