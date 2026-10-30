@@ -15,24 +15,37 @@ export async function generateProgramBlueprints(){
  if((process.env.CEREBRO_SUPERVISOR_ENV||'PREPROD')!=='PREPROD')throw new Error('PREPROD_ONLY');
  if(process.env.CEREBRO_PROD_WRITE==='true'||process.env.CEREBRO_TRADING_ACCESS==='true')throw new Error('FORBIDDEN_TARGET');
  if(process.env.CEREBRO_ALLOW_PAID_JARVIS_BUILD!=='YES')throw new Error('PAID_BUILD_DISABLED');
- const dag=buildJarvisDag();const provider=new DeepSeekProviderV0();let liveCalls=0;
+ const dag=buildJarvisDag();const provider=new DeepSeekProviderV0();let liveCalls=0;let liveCostUsd=0;const recovery=[];
+ async function semanticCall({label,requestId,input,instructions,firstMax=3000,retryMax=8000}){
+  const attempts=[firstMax,retryMax];let last=null;
+  for(let i=0;i<attempts.length;i++){
+   const r=await provider.respond({model:'deepseek-flash',instructions,input:JSON.stringify(input),maxOutputTokens:attempts[i],reasoningEffort:'none',jsonMode:true},{requestId:`${requestId}-a${i+1}`});
+   liveCalls++;const callCost=costOf(r);liveCostUsd+=callCost;last={response:r,cost_usd:callCost,attempt:i+1,max_output_tokens:attempts[i]};
+   if(r.status==='completed'){
+    try{return{response:r,blueprint:parseStrict(r.output_text,label),attempts:i+1,cost_usd_total:attempts.slice(0,i+1).reduce((s,_,j)=>s+(j===i?callCost:0),0)}}catch(error){if(i===attempts.length-1)throw error;recovery.push({label,attempt:i+1,reason:'INVALID_OR_EMPTY_JSON'});continue;}
+   }
+   const reason=r.incomplete_reason||'unknown';recovery.push({label,attempt:i+1,reason,status:r.status});
+   if(reason==='content_filter')throw new Error(`DEEPSEEK_CONTENT_FILTER:${label}`);
+   if(i===attempts.length-1)throw new Error(`DEEPSEEK_INCOMPLETE:${label}:${r.status}:${reason}`);
+  }
+  throw new Error(`DEEPSEEK_NO_RESULT:${label}:${last?.response?.status||'unknown'}`);
+ }
  const programs=dag.programs.map(p=>({...p,requirements:dag.units.filter(u=>u.kind==='requirement'&&u.program_id===p.id)}));
  const designs=await pool(programs,4,async p=>{
   const file=path.join(OUT,p.id,'design.json');const existing=loadValid(file);if(existing)return existing;
-  const input={mission:'MISSION-JARVIS-001',program:{id:p.id,name:p.name},requirements:p.requirements.map(r=>({section:r.master_section,title:r.title})),rules:['PREPROD_ONLY','REUSE_EXISTING_FIRST','NO_PROD_WRITE','NO_TRADING','DEEPSEEK_TEMPORARY']};
-  const r=await provider.respond({model:'deepseek-flash',instructions:'Return one valid JSON object only. Required keys: existing_to_reuse,gaps,contracts,implementation_batches,tests,security,observability,rollback,distillation_targets,human_required. Prefer wrappers over rewrites. human_required must be null unless one canonical exception is genuinely required.',input:JSON.stringify(input),maxOutputTokens:3000,reasoningEffort:'none',jsonMode:true},{requestId:`jarvis-design-v2-${p.id}`});
-  if(r.status!=='completed')throw new Error(`DEEPSEEK_INCOMPLETE:DESIGN:${p.id}:${r.status}`);liveCalls++;
-  const o={program_id:p.id,phase:'DESIGN',model:r.model,status:r.status,usage:r.usage,cost_usd:costOf(r),blueprint:parseStrict(r.output_text,`DESIGN:${p.id}`),reused:false};write(file,o);return o;
+  const input={mission:'MISSION-JARVIS-001',program:{id:p.id,name:p.name},requirements:p.requirements.map(r=>({section:r.master_section,title:r.title})),rules:['PREPROD_ONLY','REUSE_EXISTING_FIRST','NO_PROD_WRITE','NO_TRADING','DEEPSEEK_TEMPORARY','CONCISE_BLUEPRINT_MAX_12_ITEMS_PER_LIST']};
+  const x=await semanticCall({label:`DESIGN:${p.id}`,requestId:`jarvis-design-v3-${p.id}`,input,instructions:'Return one concise valid JSON object only. Required keys: existing_to_reuse,gaps,contracts,implementation_batches,tests,security,observability,rollback,distillation_targets,human_required. Maximum 12 items per list. Prefer wrappers over rewrites. human_required must be null unless one canonical exception is genuinely required.',firstMax:3000,retryMax:8000});
+  const r=x.response;const o={program_id:p.id,phase:'DESIGN',model:r.model,status:r.status,incomplete_reason:r.incomplete_reason,attempts:x.attempts,usage:r.usage,cost_usd:x.cost_usd_total,blueprint:x.blueprint,reused:false};write(file,o);return o;
  });
  const implementations=await pool(programs,4,async(p,i)=>{
   const file=path.join(OUT,p.id,'implementation.json');const existing=loadValid(file);if(existing)return existing;
-  const r=await provider.respond({model:'deepseek-flash',instructions:'Return one valid JSON object only. Required keys: reuse_map,files_to_add,files_to_modify_candidate_only,contracts,tests,rollout_order,rollback,evidence,distillation,human_required. Candidate branch and PREPROD only. Prefer existing CEREBRO capabilities and adapters over rewrites.',input:JSON.stringify({mission:'MISSION-JARVIS-001',program:{id:p.id,name:p.name},design:designs[i].blueprint,requirements:p.requirements.map(x=>({section:x.master_section,title:x.title}))}),maxOutputTokens:3200,reasoningEffort:'none',jsonMode:true},{requestId:`jarvis-implement-v2-${p.id}`});
-  if(r.status!=='completed')throw new Error(`DEEPSEEK_INCOMPLETE:IMPLEMENT:${p.id}:${r.status}`);liveCalls++;
-  const o={program_id:p.id,phase:'IMPLEMENTATION_BLUEPRINT',model:r.model,status:r.status,usage:r.usage,cost_usd:costOf(r),blueprint:parseStrict(r.output_text,`IMPLEMENT:${p.id}`),reused:false};write(file,o);return o;
+  const input={mission:'MISSION-JARVIS-001',program:{id:p.id,name:p.name},design:designs[i].blueprint,requirements:p.requirements.map(x=>({section:x.master_section,title:x.title})),constraints:['candidate_branch_only','PREPROD_ONLY','REUSE_EXISTING_FIRST','NO_PROD_WRITE','NO_TRADING','MAX_12_ITEMS_PER_LIST']};
+  const x=await semanticCall({label:`IMPLEMENT:${p.id}`,requestId:`jarvis-implement-v3-${p.id}`,input,instructions:'Return one concise valid JSON object only. Required keys: reuse_map,files_to_add,files_to_modify_candidate_only,contracts,tests,rollout_order,rollback,evidence,distillation,human_required. Maximum 12 items per list. Candidate branch and PREPROD only. Prefer existing CEREBRO capabilities and adapters over rewrites.',firstMax:3200,retryMax:8000});
+  const r=x.response;const o={program_id:p.id,phase:'IMPLEMENTATION_BLUEPRINT',model:r.model,status:r.status,incomplete_reason:r.incomplete_reason,attempts:x.attempts,usage:r.usage,cost_usd:x.cost_usd_total,blueprint:x.blueprint,reused:false};write(file,o);return o;
  });
  const all=[...designs,...implementations];
- for(const x of all){if(!x.blueprint||Object.prototype.hasOwnProperty.call(x.blueprint,'raw_text')||Object.keys(x.blueprint).length<2)throw new Error(`SEMANTIC_BLUEPRINT_GATE_FAILED:${x.program_id}:${x.phase}`);}
+ for(const x of all)if(!x.blueprint||Object.prototype.hasOwnProperty.call(x.blueprint,'raw_text')||Object.keys(x.blueprint).length<2)throw new Error(`SEMANTIC_BLUEPRINT_GATE_FAILED:${x.program_id}:${x.phase}`);
  for(const p of programs)for(const r of p.requirements)for(const phase of ['design','implement'])write(path.join(OUT,'task-evidence',`${r.work_unit_id}.${phase}.json`),{mission_id:'MISSION-JARVIS-001',work_unit_id:`${r.work_unit_id}.${phase}`,program_id:p.id,master_section:r.master_section,phase,state:'PROGRAM_BLUEPRINT_VALIDATED_REUSED',program_blueprint_ref:`${p.id}/${phase==='design'?'design.json':'implementation.json'}`,human_required:null,prod_write:false,trading:false});
- const summary={ok:true,programs:18,valid_blueprints:all.length,deepseek_calls_this_run:liveCalls,reused_blueprints:all.filter(x=>x.reused).length,task_evidence:programs.reduce((s,p)=>s+p.requirements.length*2,0),estimated_cost_usd_this_run:all.filter(x=>!x.reused).reduce((s,x)=>s+Number(x.cost_usd||0),0),human_required:[...new Set(all.map(x=>x.blueprint?.human_required).filter(Boolean))],deepseek_dependency_target:0,semantic_gate:'GREEN',prod_write:false,trading:false};write(path.join(OUT,'summary.json'),summary);console.log(JSON.stringify(summary));return summary;
+ const summary={ok:true,programs:18,valid_blueprints:all.length,deepseek_calls_this_run:liveCalls,reused_blueprints:all.filter(x=>x.reused).length,retry_events:recovery,task_evidence:programs.reduce((s,p)=>s+p.requirements.length*2,0),estimated_cost_usd_this_run:Math.round(liveCostUsd*1e9)/1e9,human_required:[...new Set(all.map(x=>x.blueprint?.human_required).filter(Boolean))],deepseek_dependency_target:0,semantic_gate:'GREEN',prod_write:false,trading:false};write(path.join(OUT,'summary.json'),summary);console.log(JSON.stringify(summary));return summary;
 }
 if(import.meta.url===`file://${process.argv[1]}`)generateProgramBlueprints().catch(e=>{console.error(e);process.exitCode=1});
