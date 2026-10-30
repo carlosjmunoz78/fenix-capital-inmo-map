@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "status": "PREPROD_CANDIDATE",
   "company_id": "fenix",
   "engine_id": "JOB-001",
@@ -8,8 +8,10 @@
   "mode": "FINITE_BURST",
   "entitlement": {
     "enterprise_organization_verified_for_canonical_repo": true,
-    "current_safe_standard_runner_parallelism": 48,
-    "enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "enterprise_actions_concurrency_entitlement_verified": false,
+    "enterprise_account_state": "TRIAL",
+    "current_safe_standard_runner_parallelism": 16,
+    "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 500,
     "matrix_jobs_per_workflow_run_ceiling": 256
   },
   "job001_contract": {
@@ -26,8 +28,8 @@
   },
   "burst": {
     "default_lanes": 8,
-    "max_lanes_until_enterprise_verified": 16,
-    "max_lanes_after_enterprise_verified": 64,
+    "max_lanes_until_actions_concurrency_verified": 16,
+    "max_lanes_after_actions_concurrency_verified": 64,
     "default_units_per_lane": 8,
     "max_units_per_lane": 32,
     "self_refill": false,
@@ -47,6 +49,6 @@
     "require_old_vs_new": true,
     "require_preprod": true,
     "require_rollback": true,
-    "require_enterprise_entitlement_before_parallelism_above_16": true
+    "require_paid_actions_concurrency_entitlement_before_parallelism_above_16": true
   }
 }
