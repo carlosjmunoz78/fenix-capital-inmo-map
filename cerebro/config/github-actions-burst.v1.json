@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "status": "PREPROD_CANDIDATE",
+  "company_id": "fenix",
+  "engine_id": "JOB-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "mode": "FINITE_BURST",
+  "entitlement": {
+    "enterprise_organization_verified_for_canonical_repo": false,
+    "current_safe_standard_runner_parallelism": 16,
+    "enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "matrix_jobs_per_workflow_run_ceiling": 256
+  },
+  "job001_contract": {
+    "target_useful_default": 48,
+    "max_global_default": 64,
+    "max_company_default": 48,
+    "max_deepseek_default": 8,
+    "max_repo_write_default": 1,
+    "reuse_existing_runtime": true,
+    "reuse_existing_work_pump": true,
+    "second_queue": false,
+    "second_scheduler": false,
+    "second_daemon": false
+  },
+  "burst": {
+    "default_lanes": 8,
+    "max_lanes_until_enterprise_verified": 16,
+    "max_lanes_after_enterprise_verified": 64,
+    "default_units_per_lane": 8,
+    "max_units_per_lane": 32,
+    "self_refill": false,
+    "finite": true,
+    "cancel_stale_branch_runs": true
+  },
+  "authority": {
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "external_write_authorized": false,
+    "trading_access": false,
+    "paid_ai_fanout_authorized": false,
+    "additional_cost_eur": 0
+  },
+  "promotion_gate": {
+    "require_contract_tests": true,
+    "require_old_vs_new": true,
+    "require_preprod": true,
+    "require_rollback": true,
+    "require_enterprise_entitlement_before_parallelism_above_16": true
+  }
+}
