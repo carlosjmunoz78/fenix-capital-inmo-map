@@ -35,12 +35,16 @@ jobs:
         run: |
           node --check cerebro/runtime/jarvis-v1-backlog-loader.mjs
           node --check cerebro/runtime/jarvis-p00-baseline-audit-v1.mjs
+          node --check cerebro/runtime/jarvis-p00-control-plane-v1.mjs
 
       - name: Validate canonical backlog and seed P00 queue
         run: node cerebro/runtime/jarvis-v1-backlog-loader.mjs
 
       - name: Execute read-only P00 repository baseline
         run: node cerebro/runtime/jarvis-p00-baseline-audit-v1.mjs
+
+      - name: Materialize P00 control-plane registries and task ledger
+        run: node cerebro/runtime/jarvis-p00-control-plane-v1.mjs
 
       - name: Verify safety ceiling
         shell: bash
