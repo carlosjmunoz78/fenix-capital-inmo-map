@@ -14,6 +14,17 @@
     "BUILD_PENDING_BUSINESS_VALUE": 1,
     "WRAP_OR_EXTEND": 2
   },
+  "deep_results": {
+    "accessibility_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "funnel_and_landing_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "legal_compliance_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "localization_factory": {"verified_state":"NO_EVIDENCE","disposition_candidate":"BUILD_PENDING_BUSINESS_VALUE"},
+    "marketplace_factory": {"verified_state":"EXISTING_GOVERNED_SURFACE","disposition_candidate":"WRAP_OR_EXTEND"},
+    "pwa_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "saas_factory": {"verified_state":"EXISTING_GOVERNED_SURFACE","disposition_candidate":"WRAP_OR_EXTEND"},
+    "support_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"},
+    "wordpress_factory": {"verified_state":"EXISTING_PHYSICAL_STACK","disposition_candidate":"REUSE_OR_EXTEND"}
+  },
   "build_pending_business_value": [
     "localization_factory"
   ],
