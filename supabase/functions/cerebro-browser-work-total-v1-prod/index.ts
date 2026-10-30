@@ -7,7 +7,10 @@ const S=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')??'';
 const svc=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
 const ISSUER='https://token.actions.githubusercontent.com';
 const AUD='cerebro-browser-worker-v1';
-const REPO='carlosjmunoz78/fenix-capital-inmo-map';
+const REPOSITORIES=new Set([
+  'carlosjmunoz78/fenix-capital-inmo-map',
+  'fenix-cerebro/fenix-capital-inmo-map'
+]);
 const LEGACY_REF='refs/heads/promote/browser-work-total-prod-20261025';
 const LEGACY_WORKFLOW='.github/workflows/cerebro-browser-work-total-v1-prod.yml';
 const LIVE_REF='refs/heads/main';
@@ -29,13 +32,14 @@ async function worker(req:Request){
  const token=bearer(req);if(!token)return{ok:false,error:'GITHUB_OIDC_REQUIRED'} as const;
  try{
   const {payload}=await jwtVerify(token,JWKS,{issuer:ISSUER,audience:AUD});
-  if(payload.repository!==REPO)return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
+  const repository=String(payload.repository??'');
+  if(!REPOSITORIES.has(repository))return{ok:false,error:'GITHUB_REPOSITORY_DENIED'} as const;
   const ref=String(payload.ref??'');
   const workflowRef=String(payload.workflow_ref??'');
   const runId=String(payload.run_id??'unknown');
   const runAttempt=String(payload.run_attempt??'1');
-  if(ref===LEGACY_REF&&workflowRef===`${REPO}/${LEGACY_WORKFLOW}@${LEGACY_REF}`)return{ok:true,worker_kind:'LEGACY',worker_id:`github-work-total-v1-prod:${runId}:${runAttempt}`} as const;
-  if(ref===LIVE_REF&&workflowRef===`${REPO}/${LIVE_WORKFLOW}@${LIVE_REF}`)return{ok:true,worker_kind:'LIVE',worker_id:`github:${runId}:${runAttempt}`} as const;
+  if(ref===LEGACY_REF&&workflowRef===`${repository}/${LEGACY_WORKFLOW}@${LEGACY_REF}`)return{ok:true,repository,worker_kind:'LEGACY',worker_id:`github-work-total-v1-prod:${runId}:${runAttempt}`} as const;
+  if(ref===LIVE_REF&&workflowRef===`${repository}/${LIVE_WORKFLOW}@${LIVE_REF}`)return{ok:true,repository,worker_kind:'LIVE',worker_id:`github:${runId}:${runAttempt}`} as const;
   return{ok:false,error:'GITHUB_WORKFLOW_OR_REF_DENIED'} as const;
  }catch(e){return{ok:false,error:'GITHUB_OIDC_INVALID',detail:e instanceof Error?e.message:String(e)} as const;}
 }
@@ -72,6 +76,6 @@ async function observeAccount(body:any,w:any){
  const email=String(body?.account_email||'').trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return{ok:false,error:'ACCOUNT_EMAIL_INVALID'};const scope=`${job.company_id}|${ENV}|${job.identity_id}|${job.account_id}|${job.browser_profile_id}`;const hash=await hmac('CEREBRO_BROWSER_ACCOUNT_V1',`${scope}|${email}`);const hint=maskEmail(email);const status=p.expected_account_hash?(p.expected_account_hash===hash?'VERIFIED':'MISMATCH'):'PENDING_CONFIRMATION';const patch:any={pending_account_hash:hash,pending_account_hint:hint,verification_state:status,updated_at:new Date().toISOString()};if(status==='VERIFIED')patch.last_verified_at=new Date().toISOString();const up=await svc.from('cerebro_browser_workspace_profile_v1').update(patch).eq('workspace_profile_id',p.workspace_profile_id);if(up.error)throw up.error;if(status==='MISMATCH')await revokeActiveBundles(job,'MISMATCH');await event(sessionId,'ACCOUNT_VERIFICATION_OBSERVED',{provider:'google',account_hint:hint,status});if(status==='VERIFIED')await event(sessionId,'ACCOUNT_VERIFIED',{provider:'google',account_hint:hint});return{ok:true,status,account_hint:hint,secret_material_logged:false};
 }
 Deno.serve(async req=>{
- const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-v1-prod',environment:ENV,schema_version:'1.2.0',session_bundles:'AES-256-GCM',account_binding:'OWNER_PROFILE_OR_HMAC',identity_gate:'VERIFIED_ONLY_FAIL_CLOSED',profile_isolation:true,legacy_branch_ref:LEGACY_REF,live_branch_ref:LIVE_REF,live_workflow:LIVE_WORKFLOW,prod_write_authorized:true,trading_access:false,incremental_cost_eur:0});if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
+ const route=new URL(req.url).pathname.split('/').filter(Boolean).slice(-2).join('/');if(req.method==='GET'&&route.endsWith('health'))return out(200,{ok:U.includes(PROJECT),service:'cerebro-browser-work-total-v1-prod',environment:ENV,schema_version:'1.2.1',session_bundles:'AES-256-GCM',account_binding:'OWNER_PROFILE_OR_HMAC',identity_gate:'VERIFIED_ONLY_FAIL_CLOSED',repository_allowlist:[...REPOSITORIES],profile_isolation:true,legacy_branch_ref:LEGACY_REF,live_branch_ref:LIVE_REF,live_workflow:LIVE_WORKFLOW,prod_write_authorized:true,trading_access:false,incremental_cost_eur:0});if(req.method!=='POST')return out(404,{ok:false,error:'ROUTE_NOT_AVAILABLE'});const w=await worker(req);if(!w.ok)return out(403,w);let body:any={};try{body=await req.json();}catch{}
  try{if(route==='worker/prepare-save')return out(200,await prepareSave(body,w));if(route==='worker/commit-save')return out(200,await commitSave(body,w));if(route==='worker/restore')return out(200,await restore(body,w));if(route==='worker/restore-complete')return out(200,await restoreComplete(body,w));if(route==='worker/profile-state')return out(200,await profileState(body,w));if(route==='worker/observe-account')return out(200,await observeAccount(body,w));return out(404,{ok:false,error:'WORK_TOTAL_BROKER_ROUTE_NOT_AVAILABLE'});}catch(e){return out(400,{ok:false,error:'BROWSER_WORK_TOTAL_V1_PROD_OPERATION_FAILED',detail:e instanceof Error?e.message:String(e)});}
 });
