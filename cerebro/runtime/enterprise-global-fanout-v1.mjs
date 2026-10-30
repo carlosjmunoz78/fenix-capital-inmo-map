@@ -5,6 +5,7 @@ const DOCUMENTED_ENTERPRISE_GLOBAL_CEILING = 500;
 const MATRIX_CEILING = 256;
 const MATRIX_TARGET = 250;
 const STANDARD_FALLBACK_CAP = 20;
+const QUEUE_BUFFER_MULTIPLIER = 2;
 const LANE_COUNT = 68;
 const TOTAL_MISSION_UNITS = selectMissionUnit(0, 0).atomic_count;
 
@@ -105,14 +106,15 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset =
   const effectiveCap = paidConcurrencyVerified
     ? Math.min(liveLimit, DOCUMENTED_ENTERPRISE_GLOBAL_CEILING)
     : STANDARD_FALLBACK_CAP;
+  const queueBufferCap = Math.min(DOCUMENTED_ENTERPRISE_GLOBAL_CEILING, effectiveCap * QUEUE_BUFFER_MULTIPLIER);
   const requested = requested_units == null
-    ? effectiveCap
-    : integer(requested_units, 'requested_units', 1, effectiveCap);
+    ? queueBufferCap
+    : integer(requested_units, 'requested_units', 1, queueBufferCap);
   const start = integer(offset, 'offset', 0, TOTAL_MISSION_UNITS - 1);
   const topology = buildPaidEnterpriseTopologyV1(requested, start);
 
   return Object.freeze({
-    schema_version: '1.3.0',
+    schema_version: '1.4.0',
     state_type: 'CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1',
     environment: PREPROD,
     enterprise_account_state: entitlement.enterprise_account_state || 'UNKNOWN',
@@ -126,6 +128,8 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset =
     has_more: topology.has_more,
     total_work_units: topology.total_work_units,
     effective_physical_cap: effectiveCap,
+    queue_buffer_cap: queueBufferCap,
+    queue_buffer_multiplier: QUEUE_BUFFER_MULTIPLIER,
     live_enterprise_runner_limit: liveLimit,
     documented_enterprise_platform_ceiling: DOCUMENTED_ENTERPRISE_GLOBAL_CEILING,
     matrix_ceiling: MATRIX_CEILING,
@@ -141,6 +145,7 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset =
     second_daemon: false,
     self_refill: true,
     finite_wave: true,
+    buffered_queue: true,
     stops_when_backlog_exhausted: true,
     paid_ai_used: false,
     additional_cost_eur: 0,
@@ -156,6 +161,7 @@ export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   environment: PREPROD,
   documented_enterprise_global_platform_ceiling: DOCUMENTED_ENTERPRISE_GLOBAL_CEILING,
   standard_fallback_physical_cap: STANDARD_FALLBACK_CAP,
+  queue_buffer_multiplier: QUEUE_BUFFER_MULTIPLIER,
   matrix_ceiling: MATRIX_CEILING,
   matrices: 2,
   matrix_target_each: MATRIX_TARGET,
@@ -175,6 +181,7 @@ export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   second_daemon: false,
   self_refill: true,
   finite_wave: true,
+  buffered_queue: true,
   stops_when_backlog_exhausted: true,
   additional_cost_eur: 0,
   prod_authorized: false,
