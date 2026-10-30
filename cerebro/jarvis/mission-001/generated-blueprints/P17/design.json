@@ -1,0 +1,15 @@
+{
+  "program_id": "P17",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 832,
+    "cached_input_tokens": 640,
+    "output_tokens": 1800,
+    "reasoning_tokens": 1800
+  },
+  "cost_usd": 0.00111072,
+  "blueprint": {
+    "raw_text": ""
+  }
+}

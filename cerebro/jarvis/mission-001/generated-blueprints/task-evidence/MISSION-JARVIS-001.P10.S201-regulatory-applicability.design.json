@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P10.S201-regulatory-applicability.design",
+  "program_id": "P10",
+  "master_section": 201,
+  "phase": "design",
+  "state": "PROGRAM_BLUEPRINT_REUSED",
+  "program_blueprint_ref": "P10/design.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

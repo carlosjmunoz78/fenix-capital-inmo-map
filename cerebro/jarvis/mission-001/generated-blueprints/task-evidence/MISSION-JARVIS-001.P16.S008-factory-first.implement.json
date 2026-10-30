@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P16.S008-factory-first.implement",
+  "program_id": "P16",
+  "master_section": 8,
+  "phase": "implement",
+  "state": "PROGRAM_BLUEPRINT_REUSED",
+  "program_blueprint_ref": "P16/implementation.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

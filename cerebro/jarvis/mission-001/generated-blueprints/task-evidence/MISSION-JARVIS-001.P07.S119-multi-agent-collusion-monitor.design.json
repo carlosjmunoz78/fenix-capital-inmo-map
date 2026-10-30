@@ -1,0 +1,12 @@
+{
+  "mission_id": "MISSION-JARVIS-001",
+  "work_unit_id": "MISSION-JARVIS-001.P07.S119-multi-agent-collusion-monitor.design",
+  "program_id": "P07",
+  "master_section": 119,
+  "phase": "design",
+  "state": "PROGRAM_BLUEPRINT_REUSED",
+  "program_blueprint_ref": "P07/design.json",
+  "human_required": null,
+  "prod_write": false,
+  "trading": false
+}

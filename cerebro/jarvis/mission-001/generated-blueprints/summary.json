@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "programs": 18,
+  "deepseek_calls": 36,
+  "task_evidence": 842,
+  "estimated_cost_usd": 0.04272663599999999,
+  "human_required": [],
+  "deepseek_dependency_target": 0,
+  "prod_write": false,
+  "trading": false
+}

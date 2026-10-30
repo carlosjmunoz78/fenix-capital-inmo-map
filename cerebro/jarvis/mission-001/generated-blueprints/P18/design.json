@@ -1,0 +1,15 @@
+{
+  "program_id": "P18",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 1156,
+    "cached_input_tokens": 1022,
+    "output_tokens": 1800,
+    "reasoning_tokens": 1447
+  },
+  "cost_usd": 0.001103166,
+  "blueprint": {
+    "raw_text": "{\n  \"existing_to_reuse\": [\n    {\n      \"id\": \"ORCH-001_DAG_WRAPPER\",\n      \"reuse_as\": \"Execution wrapper for S179/S181/S232 dependency scheduling, idempotency keys, lifecycle state tracking, and run isolation.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"PREPROD_GUARD_POLICY_ENGINE\",\n      \"reuse_as\": \"Enforce PREPROD_ONLY, NO_PROD_WRITE, NO_TRADING, PAID_AI_ALLOWED=false.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"EVIDENCE_LEDGER_ARTIFACT_STORE\",\n      \"reuse_as\": \"Attach lifecycle-complete evidence, acceptance evidence, rollback/rebuild impact, and drill artifacts.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"LIFECYCLE_STATE_MACHINE\",\n      \"reuse_as\": \"Track READY -> RUNNING -> EVIDENCE_ATTACHED -> ACCEPTED/REJECTED for each requirement.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"INCIDENT_ESCALATION_HARNESS\",\n      \"reuse_as\": \"Simulate owner-unavailable escalation paths and minimal escalation behavior.\",\n      \"preference\": \"wrap\"\n    },\n    {\n      \"id\": \"METRICS_TELEMETRY_STACK\",\n      \"reuse_as\": \"Compute and expose OWNER_DEPENDENCY_RATE, escalation counts, evidence completeness, and drill status.\",\n      \"pre"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "program_id": "P15",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 398,
+    "cached_input_tokens": 256,
+    "output_tokens": 2000,
+    "reasoning_tokens": 1827
+  },
+  "cost_usd": 0.001222068,
+  "blueprint": {
+    "raw_text": "{\n  \"reuse_map\": {\n    \"shared_capabilities\": [\n      \"tenant_context_and_isolation\",\n      \"authz_policy_engine\",\n      \"feature_flag_control_plane\",\n      \"event_bus_and_audit_log\",\n      \"workflow_task_scheduler\",\n      \"graph_store\",\n      \"layered_memory_store\",\n      \"i18n_glossary_registry\",\n      \"secrets_and_encryption_router\",\n      \"approval_gateway\",\n      \"snapshot_reconciliation_service\",\n      \"telemetry_and_evidence_collector\"\n    ],\n    \"by_requirement\": {\n      \"11\": [\"tenant_context\", \"project_scope\", \"data_partition_policy\"],\n      \"17\": [\"workflow_engine\", \"task_store\", \"milestone_tracker"
+  }
+}

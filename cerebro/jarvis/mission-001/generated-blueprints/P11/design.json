@@ -1,0 +1,15 @@
+{
+  "program_id": "P11",
+  "phase": "DESIGN",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 3055,
+    "cached_input_tokens": 2816,
+    "output_tokens": 1800,
+    "reasoning_tokens": 1617
+  },
+  "cost_usd": 0.001124298,
+  "blueprint": {
+    "raw_text": "{\n  \"existing_to_reuse\": [\n    {\n      \"name\": \"ORCH-001 mission DAG runner\",\n      \"reuse_as\": \"Execute P11 work units with dependencies, statuses, idempotency_key, evidence attachment, and PREPROD lifecycle.\"\n    },\n    {\n      \"name\": \"Mission evidence attachment pattern\",\n      \"reuse_as\": \"Attach evidence to each acceptance criterion without building a new evidence system.\"\n    },\n    {\n      \"name\": \"PREPROD environment policy gate\",\n      \"reuse_as\": \"Enforce PREPROD_ONLY, NO_PROD_WRITE, NO_TRADING, PAID_AI_DISABLED.\"\n    },\n    {\n      \"name\": \"Existing scheduler/job runner\",\n      \"reuse_as\": \"Schedule sensor acquisition and calibration checks; wrap instead of rewriting.\"\n    },\n   "
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "program_id": "P08",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 294,
+    "cached_input_tokens": 0,
+    "output_tokens": 2000,
+    "reasoning_tokens": 1400
+  },
+  "cost_usd": 0.0012441,
+  "blueprint": {
+    "raw_text": "{\n  \"reuse_map\": {\n    \"dag_orchestrator\": {\n      \"path\": \"orchestration/dag\",\n      \"reuse\": \"topological sort, node contracts, retries, idempotency keys, execution traces\"\n    },\n    \"queue_and_workers\": {\n      \"path\": \"infra/queue\",\n      \"reuse\": \"fan-out, backpressure, dead-letter queues, worker leases\"\n    },\n    \"role_registry\": {\n      \"path\": \"services/roles\",\n      \"reuse\": \"role definitions, capability bindings, owner metadata\"\n    },\n    \"policy_engine\": {\n      \"path\": \"services/policy\",\n      \"reuse\": \"RBAC/ABAC, quotas, override audit hooks\"\n    },\n    \"observability\": {\n      \"path\": \"observability\",\n      \"reuse\": \"metrics, structured logs, traces, dashboards, audit trail\"\n    },\n    \"feature_flags\": {\n      \"path\": \"config/features\",\n      \"reuse\": \"candidate-only and PREPROD-only gating\"\n    },\n    \"sandbox\": {\n      \"path\": \"infra/sandbox\",\n      \"reuse\": \"isolated clone execution, resource caps, no paid external calls\"\n    },\n    \"artifact_store\": {\n      \"path\": \"infra/artifacts\",\n      \"reuse\": \"persist DAG plans, clone specs, execution results, acceptance evidence\"\n    },\n    \"test_harness\": {\n      \"path\": \"tests\",\n      \"reuse\": \"contract, integration, load, chaos, and extreme-scenario tests\"\n    },\n    \"cost_guard\": {\n      \"path\": \"services/cost\",\n      \"reuse\": \"zero-cost-first policy, budget checks, paid-resource denial\"\n    }\n  },\n  \"files_to_add\": [\n    {\n      \"path\": \"services/swarm_control_plane/control_plane.py\",\n      \"purpose\": \"Massive swarm control plane: admits logical swarms, schedules physical clones, enforces quotas and hierarchy limits\",\n      \"scope\": \"candidate branch + PREPROD only\"\n    },\n    {\n      \"path\": \"services/swarm_control_plane/hierarchy.py\",\n      \"purpose\": \"Hierarchical swarm model: parent/child swarms, max depth, max breadth, fan-out budgets\",\n      \"scope\": \"candidate branch + PREPROD only\"\n    },\n    {\n      \"path\": \"services/swarm_control_plane/clone_registry.py\",\n      \"purpose\": \"Clone registry separating logical clones from physical clones with lifecycle and audit metadata\",\n      \"scope\": \"candidate branch + PREPROD only\"\n    },\n    {\n      \"path\": \"services/role_governor/role_governor.py\",\n"
+  }
+}

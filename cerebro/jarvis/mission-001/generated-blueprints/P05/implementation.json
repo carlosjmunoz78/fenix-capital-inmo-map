@@ -1,0 +1,15 @@
+{
+  "program_id": "P05",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 287,
+    "cached_input_tokens": 0,
+    "output_tokens": 2000,
+    "reasoning_tokens": 1836
+  },
+  "cost_usd": 0.00124305,
+  "blueprint": {
+    "raw_text": "{\n  \"reuse_map\": [\n    {\n      \"capability\": \"cloud runtime and orchestration\",\n      \"reuse_candidates\": [\n        \"existing service scheduler\",\n        \"health/readiness probes\",\n        \"retry/backoff utilities\",\n        \"deployment config\",\n        \"observability hooks\"\n      ],\n      \"sections\": [23, 24, 28]\n    },\n    {\n      \"capability\": \"checkpoint and resume\",\n      \"reuse_candidates\": [\n        \"existing persistence layer\",\n        \"event/outbox patterns\",\n        \"idempotency keys\",\n        \"state snapshot utilities\"\n      ],\n      \"sections\": [26, 33]\n    },\n    {\n      \"capability\": \"execution mesh\",\n      \"reuse"
+  }
+}

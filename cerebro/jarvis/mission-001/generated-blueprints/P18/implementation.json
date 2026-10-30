@@ -1,0 +1,15 @@
+{
+  "program_id": "P18",
+  "phase": "IMPLEMENTATION_BLUEPRINT",
+  "model": "deepseek-flash",
+  "usage": {
+    "input_tokens": 563,
+    "cached_input_tokens": 0,
+    "output_tokens": 2000,
+    "reasoning_tokens": 2000
+  },
+  "cost_usd": 0.00128445,
+  "blueprint": {
+    "raw_text": ""
+  }
+}
