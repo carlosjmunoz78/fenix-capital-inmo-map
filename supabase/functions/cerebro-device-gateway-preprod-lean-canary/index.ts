@@ -5,7 +5,6 @@ import { createRemoteJWKSet, jwtVerify } from "npm:jose@5.10.0";
 const U = Deno.env.get("SUPABASE_URL") ?? "";
 const S = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const CANARY_SLUG = "/cerebro-device-gateway-preprod-lean-canary";
-const OLD_SLUG = "/cerebro-device-gateway-preprod";
 const PREPROD = "PREPROD";
 const ISSUER = "https://token.actions.githubusercontent.com";
 const AUDIENCE = "cerebro-device-dispatch-v1";
@@ -27,7 +26,7 @@ function j(data: unknown, status = 200) {
       "content-type": "application/json; charset=utf-8",
       "cache-control": "no-store",
       "x-cerebro-env": PREPROD,
-      "x-cerebro-canary": "EDGE-DISPATCH-V2",
+      "x-cerebro-canary": "EDGE-DISPATCH-V3",
     },
   });
 }
@@ -117,7 +116,7 @@ function assertPreprodScope(body: any) {
   return { companyId, environment, deviceId, engineId, version, idempotencyKey };
 }
 
-async function edgeState(agent: any) {
+function edgeState(agent: any) {
   const lastSeenMs = agent?.last_seen_at ? Date.parse(String(agent.last_seen_at)) : 0;
   const fresh = Number.isFinite(lastSeenMs) && lastSeenMs > 0 && Date.now() - lastSeenMs <= EDGE_FRESH_MS;
   const ready = agent?.status === "ONLINE" && fresh && !agent?.revoked_at;
@@ -157,6 +156,7 @@ Deno.serve(async (req: Request) => {
         old_gateway_untouched: true,
         existing_device_queue_reused: true,
         offline_edge_persists_work: true,
+        explicit_command_uuid: true,
         no_new_queue: true,
         no_new_scheduler: true,
         no_new_daemon: true,
@@ -226,11 +226,13 @@ Deno.serve(async (req: Request) => {
         if (existing.engine_id !== scope.engineId || existing.version !== scope.version || existing.payload_sha256 !== payloadSha256) {
           return j({ ok: false, error: "edge_idempotency_conflict", command_id: existing.command_id }, 409);
         }
-        return j({ ok: true, decision: "REUSED", command: existing, edge: await edgeState(agent), prod_allowed: false });
+        return j({ ok: true, decision: "REUSED", command: existing, edge: edgeState(agent), prod_allowed: false });
       }
 
+      const commandId = crypto.randomUUID();
       const { data: inserted, error: insertError } = await db.from("cerebro_device_commands_preprod")
         .insert({
+          command_id: commandId,
           company_id: scope.companyId,
           environment: PREPROD,
           device_id: scope.deviceId,
@@ -247,12 +249,12 @@ Deno.serve(async (req: Request) => {
         if (insertError.code === "23505") {
           const { data: raced } = await existingQuery();
           if (raced && raced.engine_id === scope.engineId && raced.version === scope.version && raced.payload_sha256 === payloadSha256) {
-            return j({ ok: true, decision: "REUSED_AFTER_RACE", command: raced, edge: await edgeState(agent), prod_allowed: false });
+            return j({ ok: true, decision: "REUSED_AFTER_RACE", command: raced, edge: edgeState(agent), prod_allowed: false });
           }
         }
         return j({ ok: false, error: "edge_command_insert_failed", detail: insertError.code }, 500);
       }
-      return j({ ok: true, decision: "QUEUED", command: inserted, edge: await edgeState(agent), prod_allowed: false });
+      return j({ ok: true, decision: "QUEUED", command: inserted, edge: edgeState(agent), prod_allowed: false });
     }
 
     if (path === "/v1/control/status") {
@@ -283,7 +285,10 @@ Deno.serve(async (req: Request) => {
         const { error: commandDeleteError } = await db.from("cerebro_device_commands_preprod").delete().in("command_id", ids).eq("device_id", deviceId);
         if (commandDeleteError) return j({ ok: false, error: "canary_cleanup_commands_failed" }, 500);
       }
-      const { error: agentDeleteError } = await db.from("cerebro_device_agents_preprod").delete().eq("device_id", deviceId).eq("agent_version", "synthetic-offline-canary-v1");
+      const { error: agentDeleteError } = await db.from("cerebro_device_agents_preprod")
+        .delete()
+        .eq("device_id", deviceId)
+        .eq("agent_version", "synthetic-offline-canary-v1");
       if (agentDeleteError) return j({ ok: false, error: "canary_cleanup_agent_failed" }, 500);
       return j({ ok: true, cleaned_device_id: deviceId, command_count: ids.length, prod_allowed: false });
     }
