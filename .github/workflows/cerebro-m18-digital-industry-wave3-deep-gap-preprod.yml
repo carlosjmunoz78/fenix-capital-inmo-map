@@ -1,5 +1,5 @@
-name: CEREBRO M18 DIGITAL INDUSTRY · PREPROD WAVE 3 DEEP GAP
-run-name: M18 Digital Industry · deep verify 9 BUILD candidates
+name: CEREBRO M18 DIGITAL INDUSTRY · PREPROD WAVE 3 + AUTOPILOT
+run-name: M18 Digital Industry · deep verify + autonomous PREPROD chain
 
 on:
   workflow_dispatch:
@@ -8,15 +8,20 @@ on:
       - cerebro/m18-digital-industry-preprod-20261030
     paths:
       - 'cerebro/digital-build/m18-deep-gap-verifier-v1.mjs'
+      - 'cerebro/digital-build/m18-autopilot-controller-v1.mjs'
+      - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
       - 'cerebro/tests/m18-deep-gap-verifier-v1.test.mjs'
+      - 'cerebro/tests/m18-autopilot-controller-v1.test.mjs'
+      - 'cerebro/tests/mission-derived-useful-work-v1.test.mjs'
       - 'cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE2_CROSSWALK_2026-10-30.json'
+      - 'cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE3_DEEP_GAP_2026-10-30.json'
       - '.github/workflows/cerebro-m18-digital-industry-wave3-deep-gap-preprod.yml'
 
 permissions:
   contents: read
 
 concurrency:
-  group: cerebro-m18-digital-industry-wave3-deep-gap-preprod
+  group: cerebro-m18-digital-industry-wave3-autopilot-preprod
   cancel-in-progress: false
 
 env:
@@ -31,19 +36,24 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: Deep verifier contract tests
-        run: node --test cerebro/tests/m18-deep-gap-verifier-v1.test.mjs
-      - name: Validate Wave2 receipt and guards
+      - name: Deep verifier and autopilot contract tests
+        run: |
+          node --test cerebro/tests/m18-deep-gap-verifier-v1.test.mjs
+          node --test cerebro/tests/m18-autopilot-controller-v1.test.mjs
+          node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+      - name: Validate Wave2 and persisted Wave3 receipts and guards
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
-          const p=JSON.parse(fs.readFileSync('cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE2_CROSSWALK_2026-10-30.json','utf8'));
-          if(p.environment!=='PREPROD'||p.final_decisions_made!==0) throw new Error('Wave2 receipt invalid');
-          if(p.BUILD_CANDIDATES_REQUIRING_DEEP_VERIFICATION.length!==9) throw new Error('expected exactly 9 deep candidates');
-          if(p.safety.prod_write!==false||p.safety.paid_ai!==false||p.safety.trading!==false||p.safety.additional_cost_eur!==0) throw new Error('safety mismatch');
-          console.log(JSON.stringify({ok:true,candidates:9,prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
+          const w2=JSON.parse(fs.readFileSync('cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE2_CROSSWALK_2026-10-30.json','utf8'));
+          const w3=JSON.parse(fs.readFileSync('cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE3_DEEP_GAP_2026-10-30.json','utf8'));
+          if(w2.environment!=='PREPROD'||w2.final_decisions_made!==0) throw new Error('Wave2 receipt invalid');
+          if(w2.BUILD_CANDIDATES_REQUIRING_DEEP_VERIFICATION.length!==9) throw new Error('expected exactly 9 Wave2 candidates');
+          if(w3.environment!=='PREPROD'||w3.final_build_decisions!==0||w3.candidate_count!==9) throw new Error('Wave3 receipt invalid');
+          for(const [name,p] of Object.entries({w2,w3})) if(p.safety.prod_write!==false||p.safety.paid_ai!==false||p.safety.trading!==false||p.safety.additional_cost_eur!==0) throw new Error(`${name} safety mismatch`);
+          console.log(JSON.stringify({ok:true,wave2_candidates:9,wave3_candidates:9,prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
           NODE
 
   verify:
@@ -118,13 +128,102 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-  summary:
+  autopilot:
     needs: aggregate
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: m18-wave3-aggregate-${{ github.run_id }}
+          path: artifacts/m18-wave3-aggregate
+      - name: Reconfirm live Wave3 result matches the persisted guarded receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const live=JSON.parse(fs.readFileSync('artifacts/m18-wave3-aggregate/M18_WAVE3_DEEP_GAP_VERIFICATION.json','utf8'));
+          const persisted=JSON.parse(fs.readFileSync('cerebro/evidence/M18_DIGITAL_INDUSTRY_WAVE3_DEEP_GAP_2026-10-30.json','utf8'));
+          if(JSON.stringify(live.verified_states)!==JSON.stringify(persisted.verified_states)) throw new Error('Wave3 verified-state drift');
+          if(JSON.stringify(live.disposition_candidates)!==JSON.stringify(persisted.disposition_candidates)) throw new Error('Wave3 disposition drift');
+          if(live.safety.prod_write!==false||live.safety.paid_ai!==false||live.safety.trading!==false||live.safety.additional_cost_eur!==0) throw new Error('unsafe live Wave3');
+          NODE
+      - name: Materialize M18 decision matrix, graph, localization scaffold and representative product dry-run
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/digital-build/m18-autopilot-controller-v1.mjs --out=artifacts/m18-autopilot
+          node --test artifacts/m18-autopilot/localization-factory/localization-factory-v1.scaffold.test.mjs
+          jq -e '.capability_count==45 and .final_engine_identities_created==0 and .internal_capability_scaffolds_authorized==["localization_factory"] and .safety.prod_write==false and .safety.additional_cost_eur==0' artifacts/m18-autopilot/M18_CAPABILITY_DECISIONS_V1.json >/dev/null
+          jq -e '.status=="AUTOPILOT_ACTIVE_PREPROD" and .m18_atomic_units==84 and .prod_authorized==false and .safety.prod_write==false' artifacts/m18-autopilot/M18_AUTOPILOT_STATE_V1.json >/dev/null
+      - name: Execute one complete M18 Mission-DAG sweep without manual continuation
+        shell: bash
+        env:
+          CEREBRO_MISSION_WORK_OUT_DIR: artifacts/m18-full-sweep
+        run: |
+          set -euo pipefail
+          for cycle in $(seq 0 83); do
+            node cerebro/runtime/mission-derived-useful-work-v1.mjs --lane=0 --cycle="$cycle" --mission_id=M18 --fallback=false
+          done
+          count="$(find artifacts/m18-full-sweep -type f -name '*.json' | wc -l | tr -d ' ')"
+          test "$count" -eq 84
+      - name: Aggregate the full sweep and build autonomous implementation handoff
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+          const files=walk('artifacts/m18-full-sweep').filter(f=>f.endsWith('.json'));
+          const reports=files.map(f=>JSON.parse(fs.readFileSync(f,'utf8')));
+          const ids=new Set(reports.map(r=>r.work_unit.work_unit_id));
+          const phases={}; const states={}; let testFailures=0;
+          for(const r of reports){phases[r.phase]=(phases[r.phase]||0)+1;states[r.execution_state]=(states[r.execution_state]||0)+1;if(r.test_result?.ran&&r.test_result?.passed===false)testFailures++;}
+          if(reports.length!==84||ids.size!==84) throw new Error(`M18 sweep coverage invalid ${reports.length}/${ids.size}`);
+          if(testFailures!==0||states.SCOPE_HYDRATION_REQUIRED||states.FAILED_TEST) throw new Error(`M18 sweep red ${JSON.stringify({testFailures,states})}`);
+          const decisions=JSON.parse(fs.readFileSync('artifacts/m18-autopilot/M18_CAPABILITY_DECISIONS_V1.json','utf8'));
+          const action={REUSE:'VERIFY_AND_BIND_EXISTING',WRAP:'BUILD_GOVERNED_WRAPPER',EXTEND:'IMPLEMENT_BOUNDED_EXTENSION',REUSE_OR_EXTEND:'VERIFY_BEHAVIOR_THEN_EXTEND_IF_NEEDED',WRAP_OR_EXTEND:'WRAP_EXISTING_SURFACE_THEN_EVALUATE',BUILD_INTERNAL_CAPABILITY_SCAFFOLD:'IMPLEMENT_INTERNAL_CAPABILITY_FROM_SCAFFOLD',HOLD_DEEPER_AUDIT:'DEEP_AUDIT_BEFORE_ACTION'};
+          const tasks=decisions.decisions.map((d,i)=>({task_id:`M18.CAP.${String(i+1).padStart(2,'0')}`,capability_family:d.capability_family,disposition:d.decision,action:action[d.decision]||'DEEP_AUDIT_BEFORE_ACTION',status:'READY',environment:'PREPROD',company_id:'GLOBAL',owner:'ORCH-001/FACT-001',prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}));
+          const plannedAtomic=tasks.length*84;
+          const sweep={schema_version:'1.0.0',state_type:'M18_AUTOPILOT_FULL_SWEEP_V1',mission_id:'M18-DIGITAL-INDUSTRY-2026-10-30',environment:'PREPROD',report_count:reports.length,unique_work_units:ids.size,phase_counts:phases,state_counts:states,test_failures:testFailures,status:'GREEN_FULL_M18_SWEEP',safety:{prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0},fingerprint:crypto.createHash('sha256').update(JSON.stringify(reports.map(r=>[r.work_unit.work_unit_id,r.execution_state,r.repo_evidence.evidence_hits]))).digest('hex')};
+          const backlog={schema_version:'1.0.0',state_type:'M18_IMPLEMENTATION_BACKLOG_V1',mission_id:sweep.mission_id,environment:'PREPROD',capability_tasks:tasks.length,lazy_atomic_subtasks_planned:plannedAtomic,lazy_materialization:true,tasks,safety:{prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0},human_required:null,next_gate:'BOUNDED_PREPROD_IMPLEMENTATION_ROUTING'};
+          const promotion={schema_version:'1.0.0',state_type:'M18_PREPROD_PROMOTION_PACKET_V1',mission_id:sweep.mission_id,environment:'PREPROD',status:'AUTOPILOT_CONTINUE_IMPLEMENTATION_BACKLOG_OPEN',wave3_green:true,full_m18_sweep_green:true,capability_decisions_green:true,reference_product_plan_green:true,localization_scaffold_green:true,implementation_backlog_open:tasks.length,planned_atomic_subtasks:plannedAtomic,prod_authorized:false,prod_write_authorized:false,human_required:null,next_gate:'IMPLEMENT_BACKLOG_THEN_EVA_JDG_RESILIENCE_AND_REPRESENTATIVE_PREVIEW',safety:{prod_write:false,paid_ai:false,trading:false,additional_cost_eur:0}};
+          fs.writeFileSync('artifacts/m18-autopilot/M18_AUTOPILOT_FULL_SWEEP_V1.json',JSON.stringify(sweep,null,2)+'\n');
+          fs.writeFileSync('artifacts/m18-autopilot/M18_IMPLEMENTATION_BACKLOG_V1.json',JSON.stringify(backlog,null,2)+'\n');
+          fs.writeFileSync('artifacts/m18-autopilot/M18_PREPROD_PROMOTION_PACKET_V1.json',JSON.stringify(promotion,null,2)+'\n');
+          console.log(JSON.stringify({ok:true,full_sweep:reports.length,capability_tasks:tasks.length,lazy_atomic_subtasks_planned:plannedAtomic,status:promotion.status,prod_authorized:false,human_required:null}));
+          NODE
+      - name: Final regression gate before handing the backlog back to CEREBRO
+        run: |
+          node --test cerebro/tests/m18-capability-crosswalk-v1.test.mjs
+          node --test cerebro/tests/m18-deep-gap-verifier-v1.test.mjs
+          node --test cerebro/tests/m18-autopilot-controller-v1.test.mjs
+          node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
+          node --test artifacts/m18-autopilot/localization-factory/localization-factory-v1.scaffold.test.mjs
+          jq -e '.status=="GREEN_FULL_M18_SWEEP" and .test_failures==0 and .safety.prod_write==false' artifacts/m18-autopilot/M18_AUTOPILOT_FULL_SWEEP_V1.json >/dev/null
+          jq -e '.capability_tasks==45 and .lazy_atomic_subtasks_planned==3780 and .human_required==null and .safety.additional_cost_eur==0' artifacts/m18-autopilot/M18_IMPLEMENTATION_BACKLOG_V1.json >/dev/null
+          jq -e '.prod_authorized==false and .human_required==null and .status=="AUTOPILOT_CONTINUE_IMPLEMENTATION_BACKLOG_OPEN"' artifacts/m18-autopilot/M18_PREPROD_PROMOTION_PACKET_V1.json >/dev/null
+      - uses: actions/upload-artifact@v4
+        with:
+          name: m18-digital-industry-autopilot-${{ github.run_id }}
+          path: |
+            artifacts/m18-autopilot/**
+            artifacts/m18-full-sweep/**
+          if-no-files-found: error
+          retention-days: 14
+
+  summary:
+    needs: [aggregate, autopilot]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Safety summary
+      - name: Safety and autonomy summary
         shell: bash
         run: |
-          echo 'M18 Wave 3 deeply verifies the 9 Wave2 BUILD candidates before FACT-001 may scaffold anything.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'No BUILD decision is made here. PROD write: false | Paid AI: false | Trading: false | additional spend: 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'M18 is chained through deep verification, capability decisions, safe scaffold, representative-product dry-run, all 84 M18 atomic Mission-DAG units, regression gate and a 45-capability implementation backlog.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The backlog represents 3,780 lazily materialized atomic implementation subtasks. No PROD write, paid AI, Trading access or additional spend is authorized.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The chain stops only at the bounded PREPROD implementation/evaluation gate; no manual continue is required inside this run.' >> "$GITHUB_STEP_SUMMARY"
