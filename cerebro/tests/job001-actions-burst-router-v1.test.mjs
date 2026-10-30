@@ -10,16 +10,16 @@ function plan(request = {}) {
   return planJob001ActionsBurstV1({ contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT, policy, request });
 }
 
-test('default burst is finite PREPROD and trial-safe', () => {
+test('default burst is finite PREPROD at canonical JOB-001 paid-Enterprise company cap', () => {
   const out = plan();
   assert.equal(out.environment, 'PREPROD');
   assert.equal(out.mode, 'FINITE_BURST');
-  assert.equal(out.enterprise_account_state, 'TRIAL');
-  assert.equal(out.entitlement_state, 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED');
-  assert.equal(out.lanes, 8);
-  assert.equal(out.hard_cap, 20);
+  assert.equal(out.enterprise_account_state, 'PAID');
+  assert.equal(out.entitlement_state, 'PAID_ACTIONS_CONCURRENCY_VERIFIED');
+  assert.equal(out.lanes, 48);
+  assert.equal(out.hard_cap, 48);
   assert.equal(out.units_per_lane, 8);
-  assert.equal(out.total_units, 64);
+  assert.equal(out.total_units, 384);
   assert.equal(out.second_queue, false);
   assert.equal(out.second_scheduler, false);
   assert.equal(out.second_daemon, false);
@@ -31,48 +31,48 @@ test('default burst is finite PREPROD and trial-safe', () => {
   assert.equal(out.additional_cost_eur, 0);
 });
 
-test('organization ownership alone does not unlock JOB001 above the full standard 20-lane gate', () => {
-  const out = plan({ lanes: 64, units_per_lane: 2, cycle_base: 100 });
+test('paid Enterprise unlocks JOB001 to its canonical 48-company cap, never the global platform cap', () => {
+  const out = plan({ lanes: 500, units_per_lane: 1, cycle_base: 100 });
   assert.equal(policy.entitlement.enterprise_organization_verified_for_canonical_repo, true);
-  assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, false);
-  assert.equal(out.entitlement_state, 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED');
-  assert.equal(out.requested_lanes, 64);
-  assert.equal(out.lanes, 20);
-  assert.equal(out.hard_cap, 20);
-  assert.equal(out.matrix.length, 20);
-  assert.equal(out.total_units, 40);
-});
-
-test('500-lane platform intent remains fail-closed at 20 during Enterprise trial', () => {
-  const out = plan({ lanes: 500, units_per_lane: 1 });
-  assert.equal(policy.entitlement.paid_enterprise_standard_runner_concurrent_jobs_ceiling, 500);
-  assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, false);
-  assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
-  assert.equal(out.requested_lanes, 500);
-  assert.equal(out.lanes, 20);
-  assert.equal(out.hard_cap, 20);
-  assert.equal(out.platform_request_ceiling, 500);
-  assert.equal(out.matrix_ceiling, 256);
-});
-
-test('paid Actions concurrency entitlement can unlock JOB001 to its canonical company cap, never 500', () => {
-  const paid = structuredClone(policy);
-  paid.entitlement.enterprise_account_state = 'PAID';
-  paid.entitlement.enterprise_actions_concurrency_entitlement_verified = true;
-  const out = planJob001ActionsBurstV1({
-    contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
-    policy: paid,
-    request: { lanes: 500, units_per_lane: 1 },
-  });
+  assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, true);
   assert.equal(out.entitlement_state, 'PAID_ACTIONS_CONCURRENCY_VERIFIED');
   assert.equal(out.requested_lanes, 500);
   assert.equal(out.lanes, 48);
   assert.equal(out.hard_cap, 48);
+  assert.equal(out.matrix.length, 48);
+  assert.equal(out.total_units, 48);
+});
+
+test('documented 500 platform intent remains bounded by JOB001 contract and matrix ceilings', () => {
+  const out = plan({ lanes: 500, units_per_lane: 1 });
+  assert.equal(policy.entitlement.paid_enterprise_standard_runner_concurrent_jobs_ceiling, 500);
+  assert.equal(policy.entitlement.enterprise_actions_concurrency_entitlement_verified, true);
+  assert.equal(policy.entitlement.matrix_jobs_per_workflow_run_ceiling, 256);
+  assert.equal(out.requested_lanes, 500);
+  assert.equal(out.lanes, 48);
+  assert.equal(out.hard_cap, 48);
+  assert.equal(out.platform_request_ceiling, 500);
+  assert.equal(out.matrix_ceiling, 256);
+});
+
+test('loss of paid entitlement falls back to the standard 20-lane gate', () => {
+  const fallback = structuredClone(policy);
+  fallback.entitlement.enterprise_actions_concurrency_entitlement_verified = false;
+  fallback.entitlement.enterprise_account_state = 'TRIAL';
+  const out = planJob001ActionsBurstV1({
+    contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
+    policy: fallback,
+    request: { lanes: 64, units_per_lane: 1 },
+  });
+  assert.equal(out.entitlement_state, 'ORG_VERIFIED_ACTIONS_CONCURRENCY_UNVERIFIED');
+  assert.equal(out.lanes, 20);
+  assert.equal(out.hard_cap, 20);
 });
 
 test('loss of organization evidence also remains fail-closed', () => {
   const unverified = structuredClone(policy);
   unverified.entitlement.enterprise_organization_verified_for_canonical_repo = false;
+  unverified.entitlement.enterprise_actions_concurrency_entitlement_verified = false;
   const out = planJob001ActionsBurstV1({
     contract: JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT,
     policy: unverified,
