@@ -79,7 +79,7 @@ const initialQueue = initialTasks.flatMap((t) => t.microtasks.map((m, index) => 
   environment: 'PREPROD',
   company_id: 'cerebro',
   project_id: 'jarvis-v1'
-})) ;
+})));
 
 const validation = {
   schema: 'JARVIS_BACKLOG_VALIDATION_V1',
