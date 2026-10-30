@@ -14,6 +14,7 @@ Exploit GitHub safely for CEREBRO engineering, tests, evaluation, generation and
 - OIDC compatibility OLD + NEW was prepared before transfer.
 - The Enterprise account is still in its 30-day TRIAL state.
 - GitHub documentation states that increased GitHub Actions job concurrency is not included in the Enterprise trial.
+- GitHub documents a 20-job standard hosted-runner baseline without the Enterprise increase.
 
 ## Entitlement model
 CEREBRO separates two independent facts:
@@ -24,17 +25,20 @@ Therefore `global_500_fanout_enabled=false`.
 
 The paid Enterprise plan documents a standard-runner ceiling of 500 concurrent jobs and GitHub matrices are capped at 256 jobs. Those are readiness targets, not current trial execution authority.
 
-During TRIAL CEREBRO uses a conservative internal `cerebro_trial_safe_parallelism_cap=16`. This is a CEREBRO safety cap, not a claim that 16 is GitHub's contractual account limit.
+During TRIAL CEREBRO uses the full documented standard baseline: `cerebro_trial_safe_parallelism_cap=20`.
 
 ## Acceleration model
 - Discover actual independent work only.
 - Never create empty capacity jobs.
 - One matrix never exceeds 256 jobs.
-- During TRIAL this workflow uses at most 16 parallel shards.
-- Paid 500-job topology may be prepared and statically tested, but physical execution above the trial-safe cap requires separate paid Actions concurrency evidence.
+- During TRIAL this workflow uses at most 20 parallel shards.
+- Paid 500-job topology may be prepared and statically tested, but physical execution above 20 requires separate paid Actions concurrency evidence.
 - Preserve full OLD vs NEW regression.
 - Keep old continuous PREPROD workers drained; organization verification does not reactivate permanent runner occupancy.
 - Use Linux by default; macOS only when technically required.
+
+## Cost
+The canonical repository is public, so standard GitHub-hosted runners are free. Larger runners are not authorized by this capability and remain separately billable.
 
 ## Safety
 No PROD deployment, external writes, Trading access, paid AI fan-out or service retirement is authorized by this capability.
@@ -48,7 +52,7 @@ Repository instructions remain additive. Copilot is an engineering accelerator, 
 ## Acceptance
 1. Repository and organization evidence verified.
 2. Trial vs paid Actions concurrency entitlement represented separately.
-3. TRIAL execution remains fail-closed at the CEREBRO safety cap.
+3. TRIAL execution uses the documented standard 20-job baseline and remains fail-closed above it.
 4. Full regression passes.
 5. No PROD/external writes occur.
 6. Paid activation remains `HUMAN_REQUIRED · MONEY_LIMIT` until explicitly approved.
