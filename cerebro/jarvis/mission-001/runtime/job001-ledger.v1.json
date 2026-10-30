@@ -246,7 +246,42 @@
       "error": null,
       "created_at": "2026-10-30T07:31:54.296Z",
       "updated_at": "2026-10-30T07:31:54.584Z"
+    },
+    {
+      "job_id": "job-10a34e3d-1348-4d31-86b4-7170aed6a414",
+      "name": "jarvis.mission.work-unit.v1",
+      "company_id": "zeus",
+      "engine_id": "JOB-001",
+      "environment": "PREPROD",
+      "version": "jarvis-mission-job001-v1",
+      "payload": {
+        "mission_id": "MISSION-JARVIS-001",
+        "wave": 7,
+        "work_unit_id": "MISSION-JARVIS-001.CORE.07.CAPABILITY_FABRIC",
+        "route_class": "deterministic",
+        "phase": "core_gate_unit",
+        "source_ref": null,
+        "idempotency_key": "b24d929652a3805f306d1c896dbe08a3c53d3efa031843573f4720eca34dcf42"
+      },
+      "idempotency_key": "jarvis-mission-v1:278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e:MISSION-JARVIS-001.CORE.07.CAPABILITY_FABRIC",
+      "max_attempts": 3,
+      "attempts": 1,
+      "status": "SUCCEEDED",
+      "worker_id": "gha-41020659462-1",
+      "lease_token": "ffaaed58-674b-47d0-8769-94199df84c69",
+      "lease_expires_at": null,
+      "result": {
+        "status": "SUCCEEDED",
+        "evidence": [
+          "artifacts/jarvis-mission-001-exec/MISSION-JARVIS-001_CORE_07_CAPABILITY_FABRIC.json"
+        ],
+        "prod_write": false,
+        "trading": false
+      },
+      "error": null,
+      "created_at": "2026-10-30T07:32:25.379Z",
+      "updated_at": "2026-10-30T07:32:25.381Z"
     }
   ],
-  "updated_at": "2026-10-30T07:31:54.584Z"
+  "updated_at": "2026-10-30T07:32:25.381Z"
 }
