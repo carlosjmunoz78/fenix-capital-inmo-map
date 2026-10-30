@@ -12,7 +12,7 @@ const policy = JSON.parse(fs.readFileSync(new URL('../config/github-enterprise-e
 test('contract is finite PREPROD, trial fail-closed and creates no second control plane', () => {
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.environment, 'PREPROD');
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.paid_enterprise_global_platform_ceiling, 500);
-  assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.trial_safe_physical_cap, 16);
+  assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.trial_safe_physical_cap, 20);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.matrix_ceiling, 256);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.matrices, 2);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.matrix_target_each, 250);
@@ -37,17 +37,17 @@ test('paid 500 topology is prepared as two legal 250-job matrices with 500 uniqu
   assert.ok(topology.all.every(item => item.environment === 'PREPROD'));
 });
 
-test('live Enterprise trial is fail-closed at the CEREBRO 16-job physical cap', () => {
-  const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: 16 });
+test('live Enterprise trial uses the full standard 20-job physical cap', () => {
+  const plan = planEnterpriseGlobalFanoutV1({ policy, requested_units: 20 });
   assert.equal(plan.enterprise_account_state, 'TRIAL');
   assert.equal(plan.enterprise_actions_concurrency_entitlement_verified, false);
-  assert.equal(plan.effective_physical_cap, 16);
-  assert.equal(plan.planned_units, 16);
-  assert.equal(plan.unique_work_units, 16);
-  assert.equal(plan.matrix_a_count, 8);
-  assert.equal(plan.matrix_b_count, 8);
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 17 }), /requested_units must be an integer 1\.\.16/);
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 500 }), /requested_units must be an integer 1\.\.16/);
+  assert.equal(plan.effective_physical_cap, 20);
+  assert.equal(plan.planned_units, 20);
+  assert.equal(plan.unique_work_units, 20);
+  assert.equal(plan.matrix_a_count, 10);
+  assert.equal(plan.matrix_b_count, 10);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 21 }), /requested_units must be an integer 1\.\.20/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy, requested_units: 500 }), /requested_units must be an integer 1\.\.20/);
 });
 
 test('paid Enterprise physical plan unlocks 500 only when concurrency entitlement is separately verified', () => {
@@ -69,7 +69,7 @@ test('paid Enterprise physical plan unlocks 500 only when concurrency entitlemen
 test('planner is fail-closed when organization ownership evidence is lost', () => {
   const unsafe = structuredClone(policy);
   unsafe.entitlement_gate.enterprise_organization_verified_for_canonical_repo = false;
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafe, requested_units: 16 }), /ENTERPRISE_ORGANIZATION_REQUIRED/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafe, requested_units: 20 }), /ENTERPRISE_ORGANIZATION_REQUIRED/);
 });
 
 test('planner rejects topology requests above the paid Enterprise platform ceiling', () => {
@@ -79,8 +79,8 @@ test('planner rejects topology requests above the paid Enterprise platform ceili
 test('planner rejects policy authority expansion', () => {
   const unsafeProd = structuredClone(policy);
   unsafeProd.workflow_policy.production_deploy_from_acceleration_workflow = true;
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafeProd, requested_units: 16 }), /PROD_DEPLOY_DENIED/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafeProd, requested_units: 20 }), /PROD_DEPLOY_DENIED/);
   const unsafeExternal = structuredClone(policy);
   unsafeExternal.workflow_policy.write_external_systems = true;
-  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafeExternal, requested_units: 16 }), /EXTERNAL_WRITE_DENIED/);
+  assert.throws(() => planEnterpriseGlobalFanoutV1({ policy: unsafeExternal, requested_units: 20 }), /EXTERNAL_WRITE_DENIED/);
 });
