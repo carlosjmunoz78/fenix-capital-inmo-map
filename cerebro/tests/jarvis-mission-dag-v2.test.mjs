@@ -13,8 +13,8 @@ test('MISSION-JARVIS-001 builds a large PREPROD DAG from verified RC2 master',()
  assert.ok(dag.task_count>=5000);
  assert.equal(dag.source_sha256,MASTER_SHA);
  assert.equal(dag.source_transport,'multipart_gzip_base64');
- assert.equal(dag.source_part_count,7);
- assert.equal(dag.source_b64_length,53461);
+ assert.equal(dag.source_part_count,10);
+ assert.equal(dag.source_b64_length,53460);
  assert.equal(dag.safeguards.master_integrity_verified,true);
  assert.equal(dag.safeguards.environment,'PREPROD');
  assert.equal(dag.safeguards.prod_write,false);
