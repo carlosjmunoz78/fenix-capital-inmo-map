@@ -9,8 +9,20 @@ const root=path.resolve(new URL('..',import.meta.url).pathname);
 const cli=path.join(root,'factory-v1.mjs');
 const baseFile=path.join(root,'registry','engine-registry.seed.json');
 const v1File=path.join(root,'registry','engine-registry.v1.json');
+const scaffoldFiles=[
+  'manifest.json','config.json','contracts/data-contract.json','permissions.json','policy.json',
+  'events.json','jobs.json','api/handlers.json','tests/contract.test.json','evaluation.json',
+  'tribunal.json','observability.json','finops.json','backup.json','rollback.json','rebuild.json',
+  'training-hooks.json','README.md'
+];
 
 function run(out){return execFileSync(process.execPath,[cli,'generate','--registry',v1File,'--out',out],{encoding:'utf8'})}
+function listFiles(directory, relative=''){
+  return fs.readdirSync(directory,{withFileTypes:true}).flatMap(entry=>{
+    const child=path.posix.join(relative,entry.name);
+    return entry.isDirectory()?listFiles(path.join(directory,entry.name),child):[child];
+  }).sort();
+}
 
 test('V1 preserves all 177 canonical V0 ids and adds exactly HCI-001 and MOTION-001',()=>{
   const base=JSON.parse(fs.readFileSync(baseFile,'utf8'));const v1=JSON.parse(fs.readFileSync(v1File,'utf8'));
@@ -34,6 +46,24 @@ test('Factory V1 generates all 179 scaffolds and extension engines have the comp
   const out=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-factory-v1-test-'));run(out);
   const index=JSON.parse(fs.readFileSync(path.join(out,'skeleton-index.json'),'utf8'));
   assert.equal(index.engine_count,179);assert.equal(index.base_engine_count,177);assert.equal(index.template_file_count,18);assert.deepEqual(index.added_engine_ids,['HCI-001','MOTION-001']);
+  for(const engine of index.engines){
+    const base=path.join(out,'engines',engine.engine_id);
+    assert.deepEqual(listFiles(base),scaffoldFiles.slice().sort(),`${engine.engine_id}: scaffold file contract`);
+    for(const file of scaffoldFiles.filter(file=>file.endsWith('.json'))){
+      const contract=JSON.parse(fs.readFileSync(path.join(base,file),'utf8'));
+      assert.ok(Object.hasOwn(contract,'company_id'),`${engine.engine_id}/${file}: company_id`);
+      assert.equal(contract.engine_id,engine.engine_id,`${engine.engine_id}/${file}: engine_id`);
+      assert.equal(contract.environment,'SCAFFOLD',`${engine.engine_id}/${file}: environment`);
+      assert.equal(contract.version,engine.version,`${engine.engine_id}/${file}: version`);
+    }
+    const manifest=JSON.parse(fs.readFileSync(path.join(base,'manifest.json'),'utf8'));
+    const config=JSON.parse(fs.readFileSync(path.join(base,'config.json'),'utf8'));
+    const permissions=JSON.parse(fs.readFileSync(path.join(base,'permissions.json'),'utf8'));
+    const finops=JSON.parse(fs.readFileSync(path.join(base,'finops.json'),'utf8'));
+    assert.equal(manifest.lifecycle,'SCAFFOLD');assert.equal(manifest.autonomous_prod,false);
+    assert.equal(config.enabled,false);assert.equal(permissions.default,'deny');assert.equal(permissions.cross_company_access,'deny');
+    assert.equal(finops.additional_cost_eur,0);
+  }
   for(const id of ['HCI-001','MOTION-001']){
     const base=path.join(out,'engines',id);assert.ok(fs.existsSync(path.join(base,'manifest.json')));assert.ok(fs.existsSync(path.join(base,'contracts','data-contract.json')));assert.ok(fs.existsSync(path.join(base,'permissions.json')));assert.ok(fs.existsSync(path.join(base,'policy.json')));assert.ok(fs.existsSync(path.join(base,'evaluation.json')));assert.ok(fs.existsSync(path.join(base,'tribunal.json')));assert.ok(fs.existsSync(path.join(base,'observability.json')));assert.ok(fs.existsSync(path.join(base,'backup.json')));assert.ok(fs.existsSync(path.join(base,'rollback.json')));assert.ok(fs.existsSync(path.join(base,'rebuild.json')));assert.ok(fs.existsSync(path.join(base,'training-hooks.json')));
     const manifest=JSON.parse(fs.readFileSync(path.join(base,'manifest.json'),'utf8'));assert.equal(manifest.engine_id,id);assert.equal(manifest.lifecycle,'SCAFFOLD');assert.equal(manifest.autonomous_prod,false);assert.equal(manifest.layer,'L9');
