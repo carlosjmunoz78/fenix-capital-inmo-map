@@ -1,7 +1,10 @@
 // activation_nonce: 2026-10-29T19:43Z
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { buildTaskDescriptor, WORK_FAMILIES } from '../runtime/continuous-useful-work-factory-v0.mjs';
+
+const factoryWorkflow = fs.readFileSync(new URL('../../.github/workflows/cerebro-continuous-work-factory-v0.yml', import.meta.url), 'utf8');
 
 test('continuous work descriptor is deterministic for the same lane and cycle', () => {
   const a = buildTaskDescriptor(7, 1234);
@@ -16,6 +19,13 @@ test('68 lanes are accepted and out-of-range lanes fail closed', () => {
   assert.equal(buildTaskDescriptor(0, 0).lane, 0);
   assert.equal(buildTaskDescriptor(67, 0).lane, 67);
   assert.throws(() => buildTaskDescriptor(68, 0), /lane must be an integer 0\.\.67/);
+});
+
+test('PREPROD watchdog only refills lanes allowed to self-rearm under unverified entitlement', () => {
+  assert.match(factoryWorkflow, /TARGET_LANES: '16'/);
+  assert.match(factoryWorkflow, /TARGET_FLOOR: '16'/);
+  assert.match(factoryWorkflow, /for lane in \$\(seq 0 15\); do/);
+  assert.doesNotMatch(factoryWorkflow, /for lane in \$\(seq 0 67\); do/);
 });
 
 test('cycles rotate work families instead of repeating one static audit forever', () => {
