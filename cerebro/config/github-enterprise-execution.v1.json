@@ -16,9 +16,13 @@
     "enterprise_included_actions_minutes_per_month": 50000
   },
   "entitlement_gate": {
-    "enterprise_organization_verified_for_canonical_repo": false,
-    "reason": "Current canonical repository is owned by personal user carlosjmunoz78 and the authenticated GitHub connection reports zero organization memberships. Do not claim the Enterprise 500-job ceiling applies to this repository until organization/enterprise ownership is verified.",
-    "required_before_enterprise_burst": true
+    "enterprise_organization_verified_for_canonical_repo": true,
+    "canonical_repository": "fenix-cerebro/fenix-capital-inmo-map",
+    "enterprise_slug": "cerebro-os",
+    "organization": "fenix-cerebro",
+    "verified_at": "2026-10-30",
+    "reason": "Canonical repository ownership was transferred to organization fenix-cerebro, the organization is part of Enterprise account cerebro-os, and the GitHub connector now has a dedicated organization installation. Enterprise repository entitlement is evidence-backed.",
+    "required_before_enterprise_burst": false
   },
   "parallelism": {
     "mode": "ADAPTIVE",
