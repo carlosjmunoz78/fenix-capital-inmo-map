@@ -10,10 +10,12 @@ const files=[
   'supabase/functions/cerebro-browser-work-total-dispatch-v1-prod/index.ts',
   'supabase/functions/cerebro-browser-work-total-v1-prod/index.ts',
 ];
+const repoRoot=new URL('../../',import.meta.url);
+const readRepoFile=(file)=>fs.readFileSync(new URL(file,repoRoot),'utf8');
 
 for(const file of files){
   test(`${file} keeps OLD+NEW OIDC repo compatibility`,()=>{
-    const source=fs.readFileSync(file,'utf8');
+    const source=readRepoFile(file);
     assert.match(source,new RegExp(OLD_REPO.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
     assert.match(source,new RegExp(NEW_REPO.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')));
     assert.match(source,/new Set\s*\(\s*\[/);
@@ -25,7 +27,7 @@ for(const file of files){
 
 test('workflow_ref validation follows the repository claim rather than a fixed owner',()=>{
   for(const file of files){
-    const source=fs.readFileSync(file,'utf8');
+    const source=readRepoFile(file);
     assert.match(source,/\$\{repository\}\//,`${file} must build workflow_ref from verified repository claim`);
   }
 });
