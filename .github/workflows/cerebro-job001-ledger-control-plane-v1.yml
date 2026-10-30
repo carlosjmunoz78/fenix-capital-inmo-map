@@ -7,11 +7,13 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
+      - 'cerebro/runtime/mission-derived-job001-adapter-v1.mjs'
       - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs'
+      - 'cerebro/tests/mission-derived-job001-adapter-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
@@ -23,11 +25,13 @@ on:
       - 'cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs'
       - 'cerebro/runtime/job001-remote-telemetry-v1.mjs'
       - 'cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs'
+      - 'cerebro/runtime/mission-derived-job001-adapter-v1.mjs'
       - 'cerebro/scripts/install-supervisor-preprod-windows.ps1'
       - 'cerebro/tests/job001-ledger-control-plane-v1.test.mjs'
       - 'cerebro/tests/job001-remote-telemetry-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs'
       - 'cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs'
+      - 'cerebro/tests/mission-derived-job001-adapter-v1.test.mjs'
       - 'cerebro/docs/JOB001_LEDGER_CONTROL_PLANE_V1.md'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - 'supabase/migrations/20261028164800_job001_remote_sanitized_telemetry_v1.sql'
@@ -54,6 +58,8 @@ jobs:
         run: node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
       - name: Sustained worker canonical JOB-001 binding guard
         run: node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Mission-derived durable JOB-001 adapter restart/idempotency tests
+        run: node --test cerebro/tests/mission-derived-job001-adapter-v1.test.mjs
       - name: Canonical Windows PREPROD installer is entrypoint V1 and fail-closed
         shell: bash
         run: |
