@@ -15,9 +15,10 @@ test('global fanout autostarts from canonical portfolio sources without manual c
   ]) assert.ok(workflow.includes(source), `missing canonical trigger source: ${source}`);
 });
 
-test('global autostart preserves continuous refill and authority guards', () => {
+test('global autostart preserves buffered continuous refill and authority guards', () => {
   assert.ok(workflow.includes('actions: write'));
-  assert.ok(workflow.includes('Self-refill next non-overlapping wave'));
+  assert.ok(workflow.includes('Self-refill next non-overlapping buffered wave'));
+  assert.ok(workflow.includes('queue_buffer_cap'));
   assert.ok(workflow.includes("CEREBRO_ALLOW_PAID_FANOUT: 'NO'"));
   assert.ok(workflow.includes("CEREBRO_PROD_WRITE: 'false'"));
   assert.ok(workflow.includes("CEREBRO_TRADING_ACCESS: 'false'"));
