@@ -1,0 +1,39 @@
+name: CEREBRO PREPROD Capacity Relief Canary V1
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
+      - '.github/workflows/cerebro-preprod-capacity-relief-canary-v1.yml'
+      - 'cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-preprod-capacity-relief-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: PREPROD entitlement drain guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Validate drain canary contract
+        run: node --test cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs
+      - name: Revalidate canonical JOB-001 sustained binding
+        run: node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Acceptance
+        run: |
+          echo 'PREPROD capacity relief canary GREEN'
+          echo 'old_worker_preserved=true'
+          echo 'unverified_rearm_lane_limit=16'
+          echo 'prod_untouched=true'
+          echo 'browser_prod_untouched=true'
+          echo 'rollback=revert'
