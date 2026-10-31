@@ -124,12 +124,56 @@ jobs:
           done
           sort -u "$active_tmp" -o "$active_tmp"
 
-          critical_queued_count="$(awk -F '\t' -v re="$critical_regex" '$2!="in_progress" && $3 ~ re {print $1}' "$active_tmp" | sort -u | wc -l | tr -d ' ')"
+          # CONTROL_PRESSURE is job-aware. A matrix workflow counts by queued jobs,
+          # not as one parent run, so 20 critical shards can request 20 slots.
+          critical_runs_tmp="$(mktemp)"
+          awk -F '\t' -v re="$critical_regex" '$2!="in_progress" && $3 ~ re {print $1}' "$active_tmp" | sort -u > "$critical_runs_tmp"
+          critical_queued_run_count="$(sed '/^$/d' "$critical_runs_tmp" | wc -l | tr -d ' ')"
+          critical_queued_jobs_count=0
+          critical_job_probe_status='GREEN'
+          critical_job_probe_failures=0
+          critical_job_probe_api_calls=0
+
+          while IFS= read -r critical_run_id; do
+            [ -n "$critical_run_id" ] || continue
+            critical_jobs_json=''
+            critical_jobs_error="$(mktemp)"
+            for attempt in 1 2 3; do
+              : > "$critical_jobs_error"
+              critical_job_probe_api_calls=$((critical_job_probe_api_calls + 1))
+              if critical_jobs_json="$(gh api "/repos/${GH_REPO}/actions/runs/${critical_run_id}/jobs?per_page=100" 2>"$critical_jobs_error")"; then
+                break
+              fi
+              if grep -qi 'rate limit' "$critical_jobs_error"; then
+                sleep $((attempt * 2))
+                continue
+              fi
+              critical_jobs_json=''
+              break
+            done
+
+            if [ -n "$critical_jobs_json" ]; then
+              run_queued_jobs="$(printf '%s' "$critical_jobs_json" | jq '[.jobs[] | select(.status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
+              # Parent is active/queued even if GitHub has not materialized a job yet.
+              if [ "$run_queued_jobs" -lt 1 ]; then run_queued_jobs=1; fi
+              critical_queued_jobs_count=$((critical_queued_jobs_count + run_queued_jobs))
+            else
+              critical_job_probe_status='FAIL_CLOSED'
+              critical_job_probe_failures=$((critical_job_probe_failures + 1))
+            fi
+          done < "$critical_runs_tmp"
+
+          critical_queued_count="$critical_queued_jobs_count"
           critical_pressure=false
           pressure_cancel_budget=0
-          if [ "$critical_queued_count" -gt "$CONTROL_RESERVE" ]; then
+          if [ "$critical_job_probe_failures" -gt 0 ]; then
+            # Unknown critical fanout must not cause fresh background dispatch.
+            # Free at most the contractual reserve; never touch in-progress work.
             critical_pressure=true
-            pressure_cancel_budget=$((critical_queued_count - CONTROL_RESERVE))
+            pressure_cancel_budget="$CONTROL_RESERVE"
+          elif [ "$critical_queued_jobs_count" -gt "$CONTROL_RESERVE" ]; then
+            critical_pressure=true
+            pressure_cancel_budget=$((critical_queued_jobs_count - CONTROL_RESERVE))
           fi
 
           maint_tmp="$(mktemp)"
@@ -155,7 +199,7 @@ jobs:
               break
             fi
             if grep -qi 'rate limit' "$neuronal_probe_error"; then
-              sleep "$((attempt * 2))"
+              sleep "$((attempt * 2))
               continue
             fi
             neuronal_probe_status='FAIL_CLOSED'
@@ -255,17 +299,22 @@ jobs:
           echo "priority_dispatched=$priority_dispatched" >> "$GITHUB_STEP_SUMMARY"
           echo "cancelled_neuronal_return_loans=$cancelled_neuronal_return_loans" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_queued_count=$critical_queued_count" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_queued_run_count=$critical_queued_run_count" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_queued_jobs_count=$critical_queued_jobs_count" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_job_probe_status=$critical_job_probe_status" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_job_probe_failures=$critical_job_probe_failures" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_job_probe_api_calls=$critical_job_probe_api_calls" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_control_pressure=$critical_pressure" >> "$GITHUB_STEP_SUMMARY"
           echo "pressure_cancel_budget=$pressure_cancel_budget" >> "$GITHUB_STEP_SUMMARY"
           echo "cancelled_background_queue_runs=$cancelled_background_queue_runs" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
-          echo "api_snapshot_calls_max=21" >> "$GITHUB_STEP_SUMMARY"
+          echo "api_snapshot_calls_base=21" >> "$GITHUB_STEP_SUMMARY"
           echo "worker_pressure_reads=0" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_non_transient_retry=false" >> "$GITHUB_STEP_SUMMARY"
           echo "in_progress_background_cancelled=false" >> "$GITHUB_STEP_SUMMARY"
-          echo "control_pressure_policy=reserve10_then_cancel_excess_only" >> "$GITHUB_STEP_SUMMARY"
+          echo "control_pressure_policy=job_aware_reserve10_then_cancel_excess_only" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_order=CRITICAL_GATES > P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
