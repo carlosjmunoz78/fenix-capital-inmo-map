@@ -41,6 +41,14 @@ export type CerebroActivityRun={
   jobs_provenance?:CerebroJobsProvenance;
 };
 
+export type CerebroActivityTotals={
+  running_observed:number;
+  queued_observed:number;
+  active_observed:number;
+  provenance:'GITHUB_ACTION_RUN_TOTALS';
+  semantics:'LOWER_BOUND_PHYSICAL_JOBS';
+};
+
 export type CerebroActivityResponse={
   status:'OK'|'ERROR';
   observed_at:string;
@@ -48,6 +56,7 @@ export type CerebroActivityResponse={
   source_status:'LIVE'|'CACHED'|'UNAVAILABLE';
   repository:string;
   runs:CerebroActivityRun[];
+  physical_totals?:CerebroActivityTotals;
   reason?:string;
 };
 
