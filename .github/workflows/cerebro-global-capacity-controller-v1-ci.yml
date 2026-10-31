@@ -60,12 +60,16 @@ jobs:
           grep -q 'test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
           grep -q 'test $((MAINTENANCE_RAMP_LANES + PRIORITY_MAX_LANES)) -eq "$BACKGROUND_MAX_USEFUL"' "$controller"
           grep -q 'priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))' "$controller"
+          grep -q 'actions/workflows/${neuronal}/runs?per_page=30' "$controller"
+          grep -q "neuronal_probe_status='GREEN'" "$controller"
+          grep -q "neuronal_active_ids='UNKNOWN_FAIL_CLOSED'" "$controller"
+          grep -q 'neuronal_probe_api_calls=1' "$controller"
           grep -q 'total_useful_target=$((background_target + neuronal_reserved))' "$controller"
           grep -q 'test "$total_useful_target" -eq "$USEFUL_POOL"' "$controller"
           grep -q 'test $((total_useful_target + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
           grep -q "capacity_mode='RAMP350_TOTAL'" "$controller"
           grep -q 'cancelled_neuronal_return_loans' "$controller"
-          grep -q 'api_snapshot_calls_max=20' "$controller"
+          grep -q 'api_snapshot_calls_max=21' "$controller"
           grep -q 'worker_pressure_reads=0' "$controller"
           grep -q 'controller_self_rearmed=false' "$controller"
           grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
@@ -114,6 +118,7 @@ jobs:
           echo 'background max=350 when NEURONAL idle'
           echo 'background target=325 when NEURONAL parent active'
           echo 'neuronal conservative reservation=25 physical'
+          echo 'neuronal detection=direct workflow endpoint, fail-closed on uncertainty'
           echo 'total useful target always=350'
           echo 'maintenance lanes=68'
           echo 'priority max lanes=282 (182 base + 100 loan)'
