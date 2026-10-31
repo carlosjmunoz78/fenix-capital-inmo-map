@@ -120,15 +120,34 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          dispatch_with_transient_retry() {
+            local endpoint="$1"; shift
+            local attempt output
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "$endpoint" "$@" 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                return 0
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
+                  ;;
+                *) return 1 ;;
+              esac
+              return 1
+            done
+          }
           # Critical-pressure admission is owned centrally by the Global Capacity
           # Controller. Base workers do not repeat Actions API scans per lease.
-          gh api --method POST "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
+          dispatch_with_transient_retry "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
             -f ref=main \
             -f "inputs[lane]=${{ inputs.lane }}" \
             -f "inputs[cycle]=${{ steps.lease.outputs.next_cycle }}"
           echo 'self_refill=true' >> "$GITHUB_STEP_SUMMARY"
           echo 'critical_gate_priority=central_controller' >> "$GITHUB_STEP_SUMMARY"
           echo 'pressure_reads_per_worker=0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'dispatch_transient_retry=500,502,503,504:max4' >> "$GITHUB_STEP_SUMMARY"
       - name: Loan lanes return authority to global controller
         if: success() && fromJSON(inputs.lane) >= 182
         run: echo 'self_refill=false; loan lane must be re-authorized by global capacity controller' >> "$GITHUB_STEP_SUMMARY"
