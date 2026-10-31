@@ -24,6 +24,7 @@ on:
       - 'cerebro/runtime/fact001-request-runner.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
       - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
+      - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
       - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
       - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
@@ -39,6 +40,7 @@ on:
       - 'cerebro/runtime/fact001-request-runner.mjs'
       - 'cerebro/runtime/enterprise-global-fanout-v1.mjs'
       - 'cerebro/tests/enterprise-global-fanout-v1.test.mjs'
+      - 'cerebro/tests/enterprise-global-autostart-v1.test.mjs'
       - 'cerebro/config/github-enterprise-execution.v1.json'
       - '.github/workflows/cerebro-enterprise-global-fanout-v1.yml'
       - 'docs/CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1.md'
@@ -48,7 +50,7 @@ permissions:
   actions: write
 
 concurrency:
-  group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && inputs.offset || github.event_name == 'pull_request' && github.event.pull_request.number || 'seed' }}
+  group: cerebro-enterprise-global-fanout-v1-${{ github.workflow }}-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && inputs.offset || github.event_name == 'pull_request' && github.event.pull_request.number || 'validation' }}
   cancel-in-progress: false
 
 env:
@@ -87,8 +89,8 @@ jobs:
           node --test cerebro/tests/mission-real-work-router-v1.test.mjs
       - id: plan
         env:
-          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '360' || inputs.units || '360' }}
-          REQUESTED_OFFSET: ${{ github.event_name == 'pull_request' && '0' || github.event_name == 'push' && '0' || inputs.offset || '0' }}
+          REQUESTED_UNITS: ${{ github.event_name == 'pull_request' && '20' || github.event_name == 'push' && '20' || inputs.units || '360' }}
+          REQUESTED_OFFSET: ${{ github.event_name == 'workflow_dispatch' && inputs.offset || '0' }}
         shell: bash
         run: |
           node --input-type=module <<'NODE'
@@ -100,6 +102,7 @@ jobs:
           NODE
 
   fanout-a:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     name: Global A · ${{ matrix.work_unit_id }}
     needs: plan
     runs-on: ubuntu-latest
@@ -128,6 +131,7 @@ jobs:
           NODE
 
   fanout-b:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     name: Global B · ${{ matrix.work_unit_id }}
     needs: plan
     runs-on: ubuntu-latest
@@ -156,6 +160,7 @@ jobs:
           NODE
 
   acceptance:
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     name: Global fanout V1 acceptance
     needs: [plan, fanout-a, fanout-b]
     runs-on: ubuntu-latest
@@ -167,13 +172,15 @@ jobs:
           echo 'effective_physical_cap=${{ needs.plan.outputs.effective_cap }}'
           echo 'queue_buffer_cap=${{ needs.plan.outputs.queue_buffer_cap }}'
           echo 'live_cap=360'
+          echo 'global_capacity_controller_is_primary_admission_owner=true'
+          echo 'automatic_heavy_fanout=false'
           echo 'second_queue=false'
           echo 'second_scheduler=false'
           echo 'second_daemon=false'
           echo 'prod_authorized=false'
           echo 'trading_access=false'
       - name: Self-refill next non-overlapping buffered wave
-        if: ${{ github.event_name != 'pull_request' && needs.plan.outputs.has_more == 'true' }}
+        if: ${{ github.event_name == 'workflow_dispatch' && needs.plan.outputs.has_more == 'true' }}
         env:
           GH_TOKEN: ${{ github.token }}
           NEXT_OFFSET: ${{ needs.plan.outputs.next_offset }}
