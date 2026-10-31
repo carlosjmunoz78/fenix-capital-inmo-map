@@ -6,9 +6,10 @@ const REPOSITORY="fenix-cerebro/fenix-capital-inmo-map";
 const RUNS_URL=`https://api.github.com/repos/${REPOSITORY}/actions/runs?per_page=100`;
 const CACHE_TTL_MS=45_000;
 const PREPROD_PROJECT_REF="hnqlnvakzaywtafeiybt";
-const MAX_ACTIVE_RUNS=64;
+const MAX_ACTIVE_RUNS=360;
+const MAX_ACTIVE_RUN_PAGES=4;
 const MAX_HISTORY_RUNS=24;
-const MAX_DETAILED_PROGRESS_RUNS=16;
+const MAX_DETAILED_PROGRESS_RUNS=20;
 const MAX_JOB_PAGES=6;
 const ALLOWED_ORIGINS=new Set([
   "https://app.fenixcapital.es",
@@ -106,11 +107,19 @@ function githubHeaders(){
   return headers;
 }
 
-async function fetchRunTotal(status:"in_progress"|"queued"){
-  const response=await fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=1`,{headers:githubHeaders()});
-  if(!response.ok)throw new Error(`GITHUB_RUN_TOTAL_${status}_${response.status}`);
-  const data=await response.json() as {total_count?:number};
-  return Math.max(0,Number(data.total_count)||0);
+async function fetchActiveRuns(status:"in_progress"|"queued"){
+  const runs:GithubRun[]=[];
+  let totalCount=0;
+  for(let page=1;page<=MAX_ACTIVE_RUN_PAGES;page+=1){
+    const response=await fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=100&page=${page}`,{headers:githubHeaders()});
+    if(!response.ok)throw new Error(`GITHUB_RUNS_${status}_${response.status}`);
+    const data=await response.json() as {workflow_runs?:GithubRun[];total_count?:number};
+    if(page===1)totalCount=Math.max(0,Number(data.total_count)||0);
+    const batch=data.workflow_runs??[];
+    runs.push(...batch);
+    if(batch.length<100||runs.length>=totalCount)break;
+  }
+  return{runs,totalCount};
 }
 
 function engineId(name:string){return name.match(/\b([A-Z][A-Z0-9]{1,15}-\d{3})\b/)?.[1]??null}
@@ -129,7 +138,6 @@ function workflowAlias(name:string){
 }
 function environment(name:string,path:string){const text=`${name} ${path}`.toUpperCase();if(text.includes("PREPROD")||text.includes("STAGING"))return "PREPROD";if(text.includes("PROD")||text.includes("LIVE"))return "PROD";if(text.includes("LAB"))return "LAB";return "UNKNOWN"}
 function isCerebroWorkflow(run:GithubRun){const text=`${run.name??""} ${run.path??""}`.toUpperCase();return text.includes("CEREBRO")||text.includes("PROD LIVE DEPLOY")||text.includes("ENGINE FACTORY")}
-function isUsefulActive(run:GithubRun){return String(run.status??"")!=="completed"}
 
 function terminalProgress(run:GithubRun):JobProjection{
   const status=String(run.status??"unknown");
@@ -200,22 +208,24 @@ async function loadActivity():Promise<ActivityPayload>{
   const now=Date.now();
   if(cache&&now-cache.at<CACHE_TTL_MS)return{...cache.payload,source_status:"CACHED",observed_at:new Date().toISOString()};
   try{
-    const [response,runningObserved,queuedObserved]=await Promise.all([
+    const [historyResponse,runningSource,queuedSource]=await Promise.all([
       fetch(RUNS_URL,{headers:githubHeaders()}),
-      fetchRunTotal("in_progress"),
-      fetchRunTotal("queued")
+      fetchActiveRuns("in_progress"),
+      fetchActiveRuns("queued")
     ]);
-    if(!response.ok)throw new Error(`GITHUB_${response.status}`);
-    const data=await response.json() as {workflow_runs?:GithubRun[]};
-    const cerebroRuns=(data.workflow_runs??[]).filter(isCerebroWorkflow);
-    const active=cerebroRuns.filter(isUsefulActive).slice(0,MAX_ACTIVE_RUNS);
-    const history=cerebroRuns.filter(run=>!isUsefulActive(run)).slice(0,MAX_HISTORY_RUNS);
+    if(!historyResponse.ok)throw new Error(`GITHUB_${historyResponse.status}`);
+    const historyData=await historyResponse.json() as {workflow_runs?:GithubRun[]};
+    const activeMap=new Map<number,GithubRun>();
+    for(const run of [...runningSource.runs,...queuedSource.runs])if(isCerebroWorkflow(run))activeMap.set(run.id,run);
+    const active=[...activeMap.values()].sort((a,b)=>String(b.updated_at??b.created_at??"").localeCompare(String(a.updated_at??a.created_at??""))).slice(0,MAX_ACTIVE_RUNS);
+    const activeIds=new Set(active.map(run=>run.id));
+    const history=(historyData.workflow_runs??[]).filter(run=>isCerebroWorkflow(run)&&String(run.status)==="completed"&&!activeIds.has(run.id)).slice(0,MAX_HISTORY_RUNS);
     const selected=[...active,...history];
     const runs=await Promise.all(selected.map((run,index)=>projectRun(run,index<MAX_DETAILED_PROGRESS_RUNS)));
     const physical_totals:ActivityTotals={
-      running_observed:runningObserved,
-      queued_observed:queuedObserved,
-      active_observed:runningObserved+queuedObserved,
+      running_observed:runningSource.totalCount,
+      queued_observed:queuedSource.totalCount,
+      active_observed:runningSource.totalCount+queuedSource.totalCount,
       provenance:"GITHUB_ACTION_RUN_TOTALS",
       semantics:"LOWER_BOUND_PHYSICAL_JOBS"
     };
