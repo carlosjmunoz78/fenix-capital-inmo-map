@@ -7,6 +7,7 @@ on:
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - '.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
       - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
+      - '.github/workflows/cerebro-global-capacity-heartbeat-v1.yml'
       - '.github/workflows/cerebro-global-capacity-controller-v1-ci.yml'
       - 'cerebro/runtime/continuous-useful-work-factory-v0.mjs'
       - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
@@ -21,7 +22,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -44,6 +45,7 @@ jobs:
         run: |
           set -euo pipefail
           controller='.github/workflows/cerebro-continuous-work-factory-v0.yml'
+          heartbeat='.github/workflows/cerebro-global-capacity-heartbeat-v1.yml'
           maintenance='.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
           priority='.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
           neuronal='.github/workflows/cerebro-neuronal-superparallel-v1.yml'
@@ -75,6 +77,28 @@ jobs:
           grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
           ! grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
 
+          grep -q 'name: CEREBRO Global Capacity Heartbeat V1' "$heartbeat"
+          grep -q 'runs-on: macos-latest' "$heartbeat"
+          grep -q "HEARTBEAT_SECONDS: '240'" "$heartbeat"
+          grep -q "CEREBRO_SUPERVISOR_ENV: PREPROD" "$heartbeat"
+          grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'NO'" "$heartbeat"
+          grep -q "CEREBRO_PROD_WRITE: 'false'" "$heartbeat"
+          grep -q "CEREBRO_TRADING_ACCESS: 'false'" "$heartbeat"
+          grep -Fq "cron: '*/15 * * * *'" "$heartbeat"
+          grep -q "controller='cerebro-continuous-work-factory-v0.yml'" "$heartbeat"
+          grep -q 'actions/workflows/${controller}/runs?per_page=20' "$heartbeat"
+          grep -q 'actions/workflows/${controller}/dispatches' "$heartbeat"
+          grep -q "heartbeat='cerebro-global-capacity-heartbeat-v1.yml'" "$heartbeat"
+          grep -q 'actions/workflows/${heartbeat}/runs?per_page=20' "$heartbeat"
+          grep -q 'actions/workflows/${heartbeat}/dispatches' "$heartbeat"
+          grep -q 'current_run=' "$heartbeat"
+          grep -q 'sleep "$HEARTBEAT_SECONDS"' "$heartbeat"
+          grep -q 'other_heartbeat_active' "$heartbeat"
+          grep -q 'fail_closed_on_probe_error=true' "$heartbeat"
+          grep -q 'cadence_source=self_rearm_plus_schedule_backup' "$heartbeat"
+          grep -q 'control_slots_consumed=1' "$heartbeat"
+          grep -q 'additional_cost_eur=0' "$heartbeat"
+
           for critical in \
             cerebro-enterprise-acceleration-v0.yml \
             cerebro-global-capacity-controller-v1-ci.yml \
@@ -86,13 +110,15 @@ jobs:
             grep -q "$critical" "$controller"
           done
 
-          for file in "$controller" "$maintenance" "$priority"; do
-            grep -q 'dispatch_with_transient_retry' "$file"
+          for file in "$controller" "$maintenance" "$priority" "$heartbeat"; do
             grep -q "'HTTP 500'" "$file"
             grep -q "'HTTP 502'" "$file"
             grep -q "'HTTP 503'" "$file"
             grep -q "'HTTP 504'" "$file"
             grep -q 'attempt in 1 2 3 4' "$file"
+          done
+          for file in "$controller" "$maintenance" "$priority"; do
+            grep -q 'dispatch_with_transient_retry' "$file"
           done
           grep -q 'dispatch_non_transient_retry=false' "$controller"
           grep -q 'in_progress_background_cancelled=false' "$controller"
@@ -106,9 +132,9 @@ jobs:
             grep -q 'submission_ids' "$neuronal"
           fi
 
-          ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$maintenance" "$priority"
-          ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
-          ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
+          ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$maintenance" "$priority" "$heartbeat"
+          ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$maintenance" "$priority" "$neuronal" "$heartbeat"
+          ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority" "$neuronal" "$heartbeat"
 
       - name: Acceptance summary
         run: |
@@ -124,5 +150,7 @@ jobs:
           echo 'priority max lanes=282 (182 base + 100 loan)'
           echo 'worker critical-pressure API scans=0'
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
-          echo 'controller reconciliation=5m schedule plus push/manual'
+          echo 'controller reconciliation=heartbeat 240s plus schedule/push/manual backup'
+          echo 'heartbeat runner=macos control slot; self-rearm deduplicated and fail-closed'
+          echo 'critical capacity CI runner=macos control plane'
           echo 'additional cost=0 EUR'
