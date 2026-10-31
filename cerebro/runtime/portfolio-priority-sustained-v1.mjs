@@ -84,15 +84,20 @@ function runTest(files,d){
   return {target,passed:r.status===0,exit_code:r.status,signal:r.signal||null,stdout_tail:String(r.stdout||'').slice(-2000),stderr_tail:String(r.stderr||'').slice(-2000)};
 }
 
-export function executePortfolioPriorityUnit({lane,cycle}){
+export function executePortfolioPriorityUnit({lane,cycle,slot=0}){
   if((process.env.CEREBRO_SUPERVISOR_ENV||PREPROD)!==PREPROD)throw new Error('PREPROD only');
   if(process.env.CEREBRO_ALLOW_PAID_FANOUT==='YES')throw new Error('paid AI forbidden');
   if(process.env.CEREBRO_PROD_WRITE==='true')throw new Error('PROD writes forbidden');
   if(process.env.CEREBRO_TRADING_ACCESS==='true')throw new Error('Trading forbidden');
+  const execution_slot=bounded(slot,'slot',0,3);
+  const evidence_write_mode=process.env.CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE||'cycle';
+  if(!['cycle','rolling'].includes(evidence_write_mode))throw new Error('CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE must be cycle or rolling');
   const task=laneDescriptor(lane,cycle);const files=gitFiles();const selected=selectFiles(files,task);const scan=inspect(selected,task);const test_result=runTest(files,task);
-  const report=Object.freeze({schema_version:'1.0',generated_at:new Date().toISOString(),company_id:'fenix',engine_id:'JOB-001',environment:PREPROD,version:'portfolio-priority-sustained-v1',task,repository_file_count:files.length,selected_file_count:selected.length,matched_file_count:scan.matched,debt_marker_count:scan.debt,doc_file_count:scan.docs,test_file_count:scan.tests,findings:scan.findings,test_result,useful_work:true,implementation_claim:false,paid_ai_used:false,additional_subscription_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,next_cycle:task.cycle===999999?0:task.cycle+1});
-  writeJson(path.join(OUT_ROOT,`lane-${String(task.lane).padStart(3,'0')}`,`cycle-${String(task.cycle).padStart(6,'0')}.json`),report);return report;
+  const report=Object.freeze({schema_version:'1.1',generated_at:new Date().toISOString(),company_id:'fenix',engine_id:'JOB-001',environment:PREPROD,version:'portfolio-priority-sustained-v1',execution_slot,evidence_write_mode,task,repository_file_count:files.length,selected_file_count:selected.length,matched_file_count:scan.matched,debt_marker_count:scan.debt,doc_file_count:scan.docs,test_file_count:scan.tests,findings:scan.findings,test_result,useful_work:true,implementation_claim:false,paid_ai_used:false,additional_subscription_eur:0,prod_authorized:false,prod_write_authorized:false,trading_access:false,next_cycle:task.cycle===999999?0:task.cycle+1});
+  const laneDir=path.join(OUT_ROOT,`lane-${String(task.lane).padStart(3,'0')}`);
+  const out=evidence_write_mode==='rolling'?path.join(laneDir,`slot-${execution_slot}.json`):path.join(laneDir,`cycle-${String(task.cycle).padStart(6,'0')}.json`);
+  writeJson(out,report);return report;
 }
 
-async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v]}));const r=executePortfolioPriorityUnit({lane:args.lane,cycle:args.cycle});console.log(JSON.stringify({ok:true,lane:r.task.lane,cycle:r.task.cycle,block:r.task.block_id,priority:r.task.priority,mode:r.task.mode,loan_lane:r.task.loan_lane,selected:r.selected_file_count,debt:r.debt_marker_count,test_passed:r.test_result?.passed??null,next_cycle:r.next_cycle,implementation_claim:false}))}
+async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v]}));const r=executePortfolioPriorityUnit({lane:args.lane,cycle:args.cycle,slot:args.slot??0});console.log(JSON.stringify({ok:true,lane:r.task.lane,cycle:r.task.cycle,slot:r.execution_slot,block:r.task.block_id,priority:r.task.priority,mode:r.task.mode,loan_lane:r.task.loan_lane,selected:r.selected_file_count,debt:r.debt_marker_count,test_passed:r.test_result?.passed??null,next_cycle:r.next_cycle,evidence_write_mode:r.evidence_write_mode,implementation_claim:false}))}
 const self=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname);if(self)main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1});
