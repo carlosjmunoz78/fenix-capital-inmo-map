@@ -77,6 +77,16 @@ jobs:
           grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
           ! grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
 
+          # CONTROL_PRESSURE must consume the pre-reserved 10 control slots first.
+          # It may trim only the excess over that reserve and never drain the whole queue.
+          grep -q 'if \[ "$critical_queued_count" -gt "$CONTROL_RESERVE" \]' "$controller"
+          grep -q 'pressure_cancel_budget=$((critical_queued_count - CONTROL_RESERVE))' "$controller"
+          grep -q "capacity_mode='CONTROL_PRESSURE_BOUNDED'" "$controller"
+          grep -q '\[ "$cancelled_background_queue_runs" -lt "$pressure_cancel_budget" \] || break' "$controller"
+          grep -q 'pressure_cancel_budget=$pressure_cancel_budget' "$controller"
+          grep -q 'control_pressure_policy=reserve10_then_cancel_excess_only' "$controller"
+          ! grep -q 'if \[ "$critical_queued_count" -gt 0 \]; then critical_pressure=true' "$controller"
+
           grep -q 'name: CEREBRO Global Capacity Heartbeat V1' "$heartbeat"
           grep -q 'runs-on: macos-latest' "$heartbeat"
           grep -q "HEARTBEAT_SECONDS: '240'" "$heartbeat"
@@ -148,6 +158,7 @@ jobs:
           echo 'total useful target always=350'
           echo 'maintenance lanes=68'
           echo 'priority max lanes=282 (182 base + 100 loan)'
+          echo 'control pressure=10 reserved slots first; cancel only overflow beyond reserve'
           echo 'worker critical-pressure API scans=0'
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
           echo 'controller reconciliation=heartbeat 240s plus schedule/push/manual backup'
