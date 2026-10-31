@@ -29,6 +29,8 @@ env:
   CEREBRO_TRADING_ACCESS: 'false'
   CEREBRO_PORTFOLIO_BASE_LANES: '182'
   CEREBRO_PORTFOLIO_MAX_LANES: '282'
+  CEREBRO_PORTFOLIO_WINDOWS_BASE_START: '132'
+  CEREBRO_PORTFOLIO_WINDOWS_BASE_END: '181'
   CEREBRO_PORTFOLIO_MACOS_LOAN_START: '232'
   CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'
   CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
@@ -37,7 +39,7 @@ env:
 jobs:
   priority-useful-work:
     name: PRIORITY-${{ inputs.lane }}-C${{ inputs.cycle }}
-    runs-on: ${{ fromJSON(inputs.lane) >= 232 && 'macos-latest' || 'ubuntu-latest' }}
+    runs-on: ${{ fromJSON(inputs.lane) >= 232 && 'macos-latest' || (fromJSON(inputs.lane) >= 132 && fromJSON(inputs.lane) < 182) && 'windows-latest' || 'ubuntu-latest' }}
     timeout-minutes: 11
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +57,10 @@ jobs:
           test "$CEREBRO_TRADING_ACCESS" = false
           test "$CEREBRO_PORTFOLIO_INNER_PARALLELISM" -eq 4
           test "$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" = rolling
+          test "$CEREBRO_PORTFOLIO_BASE_LANES" -eq 182
+          test "$CEREBRO_PORTFOLIO_WINDOWS_BASE_START" -eq 132
+          test "$CEREBRO_PORTFOLIO_WINDOWS_BASE_END" -eq 181
+          test $((CEREBRO_PORTFOLIO_WINDOWS_BASE_END - CEREBRO_PORTFOLIO_WINDOWS_BASE_START + 1)) -eq 50
           test "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" -eq 232
           test $((CEREBRO_PORTFOLIO_MAX_LANES - CEREBRO_PORTFOLIO_MACOS_LOAN_START)) -eq 50
           case '${{ inputs.lane }}' in ''|*[!0-9]*) exit 2 ;; esac
@@ -97,6 +103,13 @@ jobs:
           echo "inner_parallelism=$parallelism" >> "$GITHUB_OUTPUT"
           echo "lane=$lane" >> "$GITHUB_OUTPUT"
           echo "loan_lane=$([ "$lane" -ge 182 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          if [ "$lane" -ge "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" ]; then
+            runner_pool=macos
+          elif [ "$lane" -ge "$CEREBRO_PORTFOLIO_WINDOWS_BASE_START" ] && [ "$lane" -le "$CEREBRO_PORTFOLIO_WINDOWS_BASE_END" ]; then
+            runner_pool=windows
+          else
+            runner_pool=ubuntu
+          fi
           echo "portfolio_priority_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
           echo "batches_completed=$batches" >> "$GITHUB_STEP_SUMMARY"
@@ -104,7 +117,7 @@ jobs:
           echo "inner_parallelism=$parallelism" >> "$GITHUB_STEP_SUMMARY"
           echo "evidence_write_mode=$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
           echo "base_lane=$([ "$lane" -lt 182 ] && echo true || echo false)" >> "$GITHUB_STEP_SUMMARY"
-          echo "runner_pool=$([ "$lane" -ge "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" ] && echo macos || echo ubuntu)" >> "$GITHUB_STEP_SUMMARY"
+          echo "runner_pool=$runner_pool" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
@@ -142,15 +155,16 @@ jobs:
               return 1
             done
           }
-          # Critical-pressure admission is owned centrally by the Global Capacity
-          # Controller. Base workers do not repeat Actions API scans per lease.
-          dispatch_with_transient_retry "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
+          # No leading slash keeps gh api portable under Git Bash on Windows.
+          # Critical-pressure admission remains owned centrally by the Global Capacity Controller.
+          dispatch_with_transient_retry "repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
             -f ref=main \
             -f "inputs[lane]=${{ inputs.lane }}" \
             -f "inputs[cycle]=${{ steps.lease.outputs.next_cycle }}"
           echo 'self_refill=true' >> "$GITHUB_STEP_SUMMARY"
           echo 'critical_gate_priority=central_controller' >> "$GITHUB_STEP_SUMMARY"
           echo 'pressure_reads_per_worker=0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'gh_api_endpoint_style=no_leading_slash' >> "$GITHUB_STEP_SUMMARY"
           echo 'dispatch_transient_retry=500,502,503,504:max4' >> "$GITHUB_STEP_SUMMARY"
       - name: Loan lanes return authority to global controller
         if: success() && fromJSON(inputs.lane) >= 182
