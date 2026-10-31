@@ -40,6 +40,20 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
+      - name: macOS loan-lane runtime smoke
+        shell: bash
+        env:
+          CEREBRO_SUPERVISOR_ENV: PREPROD
+          CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+          CEREBRO_PROD_WRITE: 'false'
+          CEREBRO_TRADING_ACCESS: 'false'
+          CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
+          CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
+        run: |
+          set -euo pipefail
+          node cerebro/runtime/portfolio-priority-sustained-v1.mjs --lane=232 --cycle=0 --slot=0
+          test -d artifacts/portfolio-priority-sustained-v1
+
       - name: Verify RAMP350 total contract and dynamic NEURONAL reservation
         shell: bash
         run: |
@@ -136,6 +150,10 @@ jobs:
           grep -q "CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'" "$maintenance"
           grep -q "CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'" "$priority"
           grep -q "CEREBRO_PORTFOLIO_MAX_LANES: '282'" "$priority"
+          grep -q "CEREBRO_PORTFOLIO_MACOS_LOAN_START: '232'" "$priority"
+          grep -q "runs-on:.*macos-latest.*ubuntu-latest" "$priority"
+          grep -q 'test $((CEREBRO_PORTFOLIO_MAX_LANES - CEREBRO_PORTFOLIO_MACOS_LOAN_START)) -eq 50' "$priority"
+          grep -q 'runner_pool=' "$priority"
           grep -q 'Loan lanes return authority to global controller' "$priority"
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then
             grep -q 'max-parallel: 25' "$neuronal"
@@ -158,6 +176,7 @@ jobs:
           echo 'total useful target always=350'
           echo 'maintenance lanes=68'
           echo 'priority max lanes=282 (182 base + 100 loan)'
+          echo 'priority macOS overflow=50 loan lanes 232..281; same 350 useful total'
           echo 'control pressure=10 reserved slots first; cancel only overflow beyond reserve'
           echo 'worker critical-pressure API scans=0'
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
