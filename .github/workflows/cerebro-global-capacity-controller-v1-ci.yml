@@ -6,6 +6,7 @@ on:
       - '.github/workflows/cerebro-continuous-work-factory-v0.yml'
       - '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
       - '.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+      - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
       - '.github/workflows/cerebro-global-capacity-controller-v1-ci.yml'
       - 'cerebro/runtime/continuous-useful-work-factory-v0.mjs'
       - 'cerebro/runtime/mission-derived-useful-work-v1.mjs'
@@ -13,6 +14,7 @@ on:
       - 'cerebro/tests/continuous-useful-work-factory-v0.test.mjs'
       - 'cerebro/tests/mission-derived-useful-work-v1.test.mjs'
       - 'cerebro/tests/portfolio-priority-sustained-v1.test.mjs'
+      - 'cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs'
 
 permissions:
   contents: read
@@ -34,6 +36,7 @@ jobs:
           node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
+          if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
       - name: Verify 360 shared-capacity equations critical-gate priority and safety
         shell: bash
         run: |
@@ -41,6 +44,7 @@ jobs:
           controller='.github/workflows/cerebro-continuous-work-factory-v0.yml'
           maintenance='.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
           priority='.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+          neuronal='.github/workflows/cerebro-neuronal-superparallel-v1.yml'
           continuous_runtime='cerebro/runtime/continuous-useful-work-factory-v0.mjs'
           mission_runtime='cerebro/runtime/mission-derived-useful-work-v1.mjs'
           priority_runtime='cerebro/runtime/portfolio-priority-sustained-v1.mjs'
@@ -62,7 +66,8 @@ jobs:
             cerebro-global-capacity-controller-v1-ci.yml \
             cerebro-auto001-preprod-patch-executor-v0.yml \
             cerebro-auto001-prod-closure-v1.yml \
-            cerebro-governed-promotion-v1.yml; do
+            cerebro-governed-promotion-v1.yml \
+            cerebro-fact001-repair-worker-factory-v1.yml; do
             grep -q "$critical" "$controller"
             grep -q "$critical" "$maintenance"
             grep -q "$critical" "$priority"
@@ -106,25 +111,32 @@ jobs:
           grep -q "\['cycle','rolling'\]" "$priority_runtime"
           grep -q 'slot-${execution_slot}.json' "$priority_runtime"
 
+          if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then
+            grep -q 'max-parallel: 25' "$neuronal"
+            grep -q 'batch.submissions' "$neuronal"
+            grep -q 'CRITICAL_CONTROL_PRESSURE' "$neuronal"
+          fi
+
           grep -q 'Self-rearm global capacity controller' "$controller"
           grep -q 'controller_self_rearmed=true' "$controller"
           grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
           ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$maintenance" "$priority"
-          ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$maintenance" "$priority"
-          ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority"
+          ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
+          ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
       - name: Acceptance summary
         run: |
           echo 'useful pool=350'
           echo 'control reserve=10'
           echo 'maximum physical entitlement=360'
           echo 'maintenance normal ceiling=68, not sacred reserved quota'
-          echo 'critical gates outrank background queue attempts'
+          echo 'critical gates including FACT-001 outrank background queue attempts'
           echo 'queued background may drain under control pressure'
           echo 'maintenance and priority base self-refill pause under critical pressure'
           echo 'in-progress background work is never cancelled by this controller'
           echo 'maintenance worker inner parallelism=4'
           echo 'priority portfolio base=182'
           echo 'priority worker inner parallelism=4'
+          echo 'neuronal physical packing target=up to 4 logical units per standard runner when candidate is present'
           echo 'neuronal reservation=0..100 from real active jobs'
           echo 'unused neuronal share is loaned immediately to priority portfolio'
           echo 'controller self-rearm=true'
