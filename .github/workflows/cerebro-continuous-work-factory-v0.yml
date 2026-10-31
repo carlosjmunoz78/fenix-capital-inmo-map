@@ -95,6 +95,7 @@ jobs:
             'cerebro-auto001-preprod-patch-executor-v0.yml'
             'cerebro-auto001-prod-closure-v1.yml'
             'cerebro-governed-promotion-v1.yml'
+            'cerebro-fact001-repair-worker-factory-v1.yml'
           )
           critical_tmp="$(mktemp)"; : > "$critical_tmp"
           for workflow in "${critical_workflows[@]}"; do
