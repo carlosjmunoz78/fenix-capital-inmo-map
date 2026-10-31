@@ -2,7 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {withSupabase} from "jsr:@supabase/server@^1";
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
 
-const REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map";
+const REPOSITORY="fenix-cerebro/fenix-capital-inmo-map";
 const RUNS_URL=`https://api.github.com/repos/${REPOSITORY}/actions/runs?per_page=100`;
 const CACHE_TTL_MS=45_000;
 const PREPROD_PROJECT_REF="hnqlnvakzaywtafeiybt";
@@ -51,6 +51,14 @@ type JobProjection=ProgressProjection&{
   jobs_provenance:"REAL_GITHUB_JOBS"|"UNAVAILABLE";
 };
 
+type ActivityTotals={
+  running_observed:number;
+  queued_observed:number;
+  active_observed:number;
+  provenance:"GITHUB_ACTION_RUN_TOTALS";
+  semantics:"LOWER_BOUND_PHYSICAL_JOBS";
+};
+
 type ActivityPayload={
   status:"OK"|"ERROR";
   observed_at:string;
@@ -58,6 +66,7 @@ type ActivityPayload={
   source_status:"LIVE"|"CACHED"|"UNAVAILABLE";
   repository:string;
   runs:Array<Record<string,unknown>>;
+  physical_totals?:ActivityTotals;
   reason?:string;
 };
 
@@ -97,11 +106,20 @@ function githubHeaders(){
   return headers;
 }
 
+async function fetchRunTotal(status:"in_progress"|"queued"){
+  const response=await fetch(`https://api.github.com/repos/${REPOSITORY}/actions/runs?status=${status}&per_page=1`,{headers:githubHeaders()});
+  if(!response.ok)throw new Error(`GITHUB_RUN_TOTAL_${status}_${response.status}`);
+  const data=await response.json() as {total_count?:number};
+  return Math.max(0,Number(data.total_count)||0);
+}
+
 function engineId(name:string){return name.match(/\b([A-Z][A-Z0-9]{1,15}-\d{3})\b/)?.[1]??null}
 function workflowAlias(name:string){
   const declared=engineId(name);if(declared)return{alias:declared,provenance:"ENGINE_ID" as const};
   const upper=name.toUpperCase();
   if(upper.includes("OPERATIVA"))return{alias:"OPERATIVA",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("PRIORITY"))return{alias:"PRIORIDAD",provenance:"DERIVED_WORKFLOW_NAME" as const};
+  if(upper.includes("GLOBAL CAPACITY"))return{alias:"CAPACIDAD",provenance:"DERIVED_WORKFLOW_NAME" as const};
   if(upper.includes("PROD LIVE DEPLOY"))return{alias:"DEPLOY",provenance:"DERIVED_WORKFLOW_NAME" as const};
   if(upper.includes("RUNTIME")&&upper.includes("SMOKE"))return{alias:"SMOKE",provenance:"DERIVED_WORKFLOW_NAME" as const};
   if(upper.includes("VOICE"))return{alias:"VOICE",provenance:"DERIVED_WORKFLOW_NAME" as const};
@@ -136,7 +154,6 @@ async function fetchRunJobs(runId:number){
 
 async function liveProjection(run:GithubRun,detailed=true):Promise<JobProjection>{
   if(String(run.status)==="completed"||!detailed)return terminalProgress(run);
-  if(!(Deno.env.get("GITHUB_TOKEN")??"").trim())return terminalProgress(run);
   try{
     const jobs=await fetchRunJobs(run.id);
     if(!jobs.length)return terminalProgress(run);
@@ -183,7 +200,11 @@ async function loadActivity():Promise<ActivityPayload>{
   const now=Date.now();
   if(cache&&now-cache.at<CACHE_TTL_MS)return{...cache.payload,source_status:"CACHED",observed_at:new Date().toISOString()};
   try{
-    const response=await fetch(RUNS_URL,{headers:githubHeaders()});
+    const [response,runningObserved,queuedObserved]=await Promise.all([
+      fetch(RUNS_URL,{headers:githubHeaders()}),
+      fetchRunTotal("in_progress"),
+      fetchRunTotal("queued")
+    ]);
     if(!response.ok)throw new Error(`GITHUB_${response.status}`);
     const data=await response.json() as {workflow_runs?:GithubRun[]};
     const cerebroRuns=(data.workflow_runs??[]).filter(isCerebroWorkflow);
@@ -191,7 +212,14 @@ async function loadActivity():Promise<ActivityPayload>{
     const history=cerebroRuns.filter(run=>!isUsefulActive(run)).slice(0,MAX_HISTORY_RUNS);
     const selected=[...active,...history];
     const runs=await Promise.all(selected.map((run,index)=>projectRun(run,index<MAX_DETAILED_PROGRESS_RUNS)));
-    const payload:ActivityPayload={status:"OK",observed_at:new Date().toISOString(),source:"GITHUB_ACTIONS",source_status:"LIVE",repository:REPOSITORY,runs};
+    const physical_totals:ActivityTotals={
+      running_observed:runningObserved,
+      queued_observed:queuedObserved,
+      active_observed:runningObserved+queuedObserved,
+      provenance:"GITHUB_ACTION_RUN_TOTALS",
+      semantics:"LOWER_BOUND_PHYSICAL_JOBS"
+    };
+    const payload:ActivityPayload={status:"OK",observed_at:new Date().toISOString(),source:"GITHUB_ACTIONS",source_status:"LIVE",repository:REPOSITORY,runs,physical_totals};
     cache={at:now,payload};
     return payload;
   }catch(error){
