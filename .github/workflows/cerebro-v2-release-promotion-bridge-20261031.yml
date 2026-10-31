@@ -1,0 +1,165 @@
+name: CEREBRO V2 Exact Release Promotion Bridge 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-v2-release-promotion-bridge-20261031.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+  checks: read
+
+concurrency:
+  group: cerebro-v2-release-promotion-bridge-20261031
+  cancel-in-progress: false
+
+jobs:
+  dispatch-governed-v2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_REF: release/app-fenix-static/app001-mobile-touch-20261031
+      RELEASE_SHA: 10efb154840e32bde4f3cf527c88a417d4526d42
+      BASE_PROD_SHA: f813d19939d5bf52051ef1ffe50cc17a8ae4da80
+      PREPROD_RUN_ID: '41213985837'
+      V2_CI_RUN_ID: '41213800016'
+    steps:
+      - name: Checkout main control plane
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Revalidate V2 control plane and exact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          node --test cerebro/tests/governed-release-promotion-executor-v2.test.mjs
+
+          ci="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${V2_CI_RUN_ID}")"
+          test "$(jq -r '.status' <<<"$ci")" = completed
+          test "$(jq -r '.conclusion' <<<"$ci")" = success
+          test "$(jq -r '.path' <<<"$ci")" = '.github/workflows/cerebro-governed-release-promotion-v2-ci.yml'
+
+          pre="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${PREPROD_RUN_ID}")"
+          test "$(jq -r '.status' <<<"$pre")" = completed
+          test "$(jq -r '.conclusion' <<<"$pre")" = success
+          test "$(jq -r '.head_sha' <<<"$pre")" = "$RELEASE_SHA"
+          test "$(jq -r '.head_branch' <<<"$pre")" = "$RELEASE_REF"
+          test "$(jq -r '.path' <<<"$pre")" = '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
+
+          remote_sha="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${RELEASE_REF}" | awk 'NR==1{print $1}')"
+          test "$remote_sha" = "$RELEASE_SHA"
+
+          proof='https://app.fenixcapital.es/PROD_SOURCE_SHA.txt'
+          live="$(curl -fsSL --max-time 20 "${proof}?bridge_base=${BASE_PROD_SHA}" | tr -d '\r\n[:space:]')"
+          test "$live" = "$BASE_PROD_SHA"
+
+          compare="$(gh api "/repos/${GITHUB_REPOSITORY}/compare/${BASE_PROD_SHA}...${RELEASE_SHA}")"
+          test "$(jq -r '.behind_by' <<<"$compare")" -eq 0
+          test "$(jq -r '.ahead_by' <<<"$compare")" -ge 1
+          jq -r '.files[].filename' <<<"$compare" > /tmp/release-files.txt
+          while read -r file; do
+            case "$file" in
+              src/login-layout-fix.css|tests/app001-preprod-mobile-touch.spec.ts|.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml|.github/workflows/prod-live-deploy.yml|.github/workflows/prod-runtime-smoke.yml) ;;
+              *) echo "unauthorized exact-release path: $file" >&2; exit 3 ;;
+            esac
+          done < /tmp/release-files.txt
+          grep -qx 'src/login-layout-fix.css' /tmp/release-files.txt
+
+          jq -e '.state_type=="CEREBRO_PROD_PROMOTION_POLICY_OVERRIDES_V1" and .company_id=="fenix" and .environment=="PROD_CONTROL_PLANE" and .trading_access==false and .additional_cost_eur==0 and .default=="FAIL_CLOSED"' cerebro/registry/prod-promotion-policy-overrides.v1.json >/dev/null
+          jq -e '.policies[] | select(.engine_id=="APP-001" and .target=="APP_FENIX_STATIC") | .prod_authorized==true and .prod_write_authorized==true and .kill_switch_enabled==true and .kill_switch_state=="ARMED" and .automatic_rollback_allowed==true and .additional_cost_limit_eur==0 and (.required_gates|index("contracts")!=null) and (.required_gates|index("permissions")!=null) and (.required_gates|index("tests")!=null) and (.required_gates|index("evaluation")!=null) and (.required_gates|index("tribunal")!=null) and (.required_gates|index("observability")!=null) and (.required_gates|index("rollback")!=null) and (.required_gates|index("backup")!=null) and (.required_gates|index("rebuild")!=null) and (.required_gates|index("cost_measured")!=null) and (.required_gates|index("policy")!=null) and (.required_gates|index("preprod")!=null) and (.required_gates|index("old_vs_new")!=null) and (.required_gates|index("canary")!=null)' cerebro/registry/prod-promotion-policy-overrides.v1.json >/dev/null
+
+          grep -F 'PROD_SOURCE_SHA.txt' .github/workflows/prod-live-deploy.yml >/dev/null
+          grep -F 'PROD_SOURCE_SHA.txt' .github/workflows/prod-runtime-smoke.yml >/dev/null
+
+      - name: Build governed exact-release promotion packet V2
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg release_ref "$RELEASE_REF" \
+            --arg expected_release_sha "$RELEASE_SHA" \
+            --arg base_prod_sha "$BASE_PROD_SHA" \
+            --argjson preprod_run "$PREPROD_RUN_ID" \
+            --argjson v2_ci_run "$V2_CI_RUN_ID" \
+            '{
+              state_type:"CEREBRO_GOVERNED_RELEASE_PROMOTION_PACKET_V2",
+              company_id:"fenix",
+              engine_id:"APP-001",
+              target:"APP_FENIX_STATIC",
+              release_ref:$release_ref,
+              expected_release_sha:$expected_release_sha,
+              base_prod_sha:$base_prod_sha,
+              preprod_evidence_run_id:$preprod_run,
+              gates:{
+                contracts:true,
+                permissions:true,
+                tests:true,
+                evaluation:true,
+                tribunal:true,
+                observability:true,
+                rollback:true,
+                backup:true,
+                rebuild:true,
+                cost_measured:true,
+                policy:true,
+                preprod:true,
+                old_vs_new:true,
+                canary:true
+              },
+              prod_source_audit_green:true,
+              additional_subscription_eur:0,
+              trading_access:false,
+              evidence:{
+                v2_contract_ci_run_id:$v2_ci_run,
+                preprod_physical_qa_run_id:$preprod_run,
+                prod_source_marker:$base_prod_sha,
+                release_sha:$expected_release_sha,
+                release_ref:$release_ref,
+                control_policy:"cerebro/registry/prod-promotion-policy-overrides.v1.json",
+                rollback_mode:"exact static source SHA redeploy",
+                rebuild_mode:"git source + reproducible npm build",
+                backup_mode:"immutable git history + physical PROD source marker",
+                additional_cost_eur:0,
+                trading:false
+              }
+            }' > /tmp/promotion-packet-v2.json
+
+          node cerebro/governance/governed-release-promotion-executor-v2.mjs \
+            --packet /tmp/promotion-packet-v2.json \
+            --out /tmp/promotion-decision-v2.json
+          test "$(jq -r '.status' /tmp/promotion-decision-v2.json)" = PROMOTE_READY
+          base64 -w0 /tmp/promotion-packet-v2.json > /tmp/promotion-packet-v2.b64
+
+      - name: Dispatch canonical governed V2 promotion
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run cerebro-governed-release-promotion-v2.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f "release_ref=${RELEASE_REF}" \
+            -f "expected_release_sha=${RELEASE_SHA}" \
+            -f "base_prod_sha=${BASE_PROD_SHA}" \
+            -f "preprod_evidence_run_id=${PREPROD_RUN_ID}" \
+            -f "promotion_packet_b64=$(cat /tmp/promotion-packet-v2.b64)"
+
+          echo 'bridge_state=DISPATCHED_GOVERNED_V2' >> "$GITHUB_STEP_SUMMARY"
+          echo "release_ref=${RELEASE_REF}" >> "$GITHUB_STEP_SUMMARY"
+          echo "release_sha=${RELEASE_SHA}" >> "$GITHUB_STEP_SUMMARY"
+          echo "base_prod_sha=${BASE_PROD_SHA}" >> "$GITHUB_STEP_SUMMARY"
+          echo "preprod_run_id=${PREPROD_RUN_ID}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'target_terminal_state=PROD_PROMOTED' >> "$GITHUB_STEP_SUMMARY"
