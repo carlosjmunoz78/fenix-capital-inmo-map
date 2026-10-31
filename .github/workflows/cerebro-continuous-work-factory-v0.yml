@@ -84,6 +84,11 @@ jobs:
           queue_statuses='queued pending waiting requested'
           seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
 
+          # Critical control-plane work must not sit behind hundreds of idempotent
+          # background attempts when GitHub provisions fewer runners than the
+          # verified Enterprise entitlement. 68 is therefore a normal maintenance
+          # ceiling, not a sacred reservation: under control pressure background
+          # queue attempts drain temporarily while in-progress useful work finishes.
           critical_workflows=(
             'cerebro-enterprise-acceleration-v0.yml'
             'cerebro-global-capacity-controller-v1-ci.yml'
@@ -105,6 +110,9 @@ jobs:
           critical_pressure=false
           if [ "$critical_queued_count" -gt 0 ]; then critical_pressure=true; fi
 
+          # Reserve NEURONAL capacity from real physical jobs, not from the mere
+          # existence of a parent workflow run. Any unused part of the 100-lane
+          # NEURONAL share is immediately loaned to the prioritized portfolio.
           neuronal_runs_tmp="$(mktemp)"; : > "$neuronal_runs_tmp"
           for status in $active_statuses; do
             for page in 1 2; do
@@ -206,7 +214,7 @@ jobs:
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
           echo "capacity_equation=$USEFUL_POOL+$CONTROL_RESERVE=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
-          echo "priority_order=CRITICAL_GATES > FACT001_FACTORY > P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
+          echo "priority_order=CRITICAL_GATES > P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_68_is_ceiling_not_reserved_quota=true" >> "$GITHUB_STEP_SUMMARY"
           echo "in_progress_background_cancelled=false" >> "$GITHUB_STEP_SUMMARY"
           echo "physical_neuronal_accounting=true" >> "$GITHUB_STEP_SUMMARY"
