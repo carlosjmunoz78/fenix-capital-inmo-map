@@ -80,12 +80,30 @@ jobs:
           active_statuses='in_progress queued pending waiting requested'
           seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
 
-          neuronal_active=false
+          # Reserve NEURONAL capacity from real physical jobs, not from the mere
+          # existence of a parent workflow run. Any unused part of the 100-lane
+          # NEURONAL share is immediately loaned to the prioritized portfolio.
+          neuronal_runs_tmp="$(mktemp)"; : > "$neuronal_runs_tmp"
           for status in $active_statuses; do
-            count="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?status=${status}&per_page=20" --jq '.workflow_runs|length' 2>/dev/null || echo 0)"
-            if [ "${count:-0}" -gt 0 ]; then neuronal_active=true; break; fi
+            for page in 1 2; do
+              gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?status=${status}&per_page=100&page=${page}" --jq '.workflow_runs[].id' >> "$neuronal_runs_tmp" 2>/dev/null || true
+            done
           done
-          if [ "$neuronal_active" = true ]; then priority_target=182; neuronal_reserved=100; else priority_target=282; neuronal_reserved=0; fi
+          neuronal_jobs_tmp="$(mktemp)"; : > "$neuronal_jobs_tmp"
+          while read -r run_id; do
+            [ -n "$run_id" ] || continue
+            for page in 1 2; do
+              gh api "/repos/${GH_REPO}/actions/runs/${run_id}/jobs?filter=latest&per_page=100&page=${page}" \
+                --jq '.jobs[] | select(.status=="in_progress" or .status=="queued" or .status=="waiting" or .status=="pending" or .status=="requested") | .id' \
+                >> "$neuronal_jobs_tmp" 2>/dev/null || true
+            done
+          done < <(sort -n -u "$neuronal_runs_tmp")
+          neuronal_physical_active="$(sort -n -u "$neuronal_jobs_tmp" | sed '/^$/d' | wc -l | tr -d ' ')"
+          neuronal_reserved="$neuronal_physical_active"
+          if [ "$neuronal_reserved" -gt "$NEURONAL_RESERVED_LANES" ]; then neuronal_reserved="$NEURONAL_RESERVED_LANES"; fi
+          priority_target=$((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES - neuronal_reserved))
+          if [ "$priority_target" -lt "$PORTFOLIO_BASE_LANES" ]; then priority_target="$PORTFOLIO_BASE_LANES"; fi
+          if [ "$priority_target" -gt $((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES)) ]; then priority_target=$((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES)); fi
 
           maint_tmp="$(mktemp)"; : > "$maint_tmp"
           for status in $active_statuses; do
@@ -110,15 +128,13 @@ jobs:
           done
 
           cancelled_loans=0
-          if [ "$neuronal_active" = true ]; then
-            while IFS=$'\t' read -r run_id title; do
-              lane="$(printf '%s' "$title" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p')"
-              if [ -n "$lane" ] && [ "$lane" -ge 182 ]; then
-                gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
-                cancelled_loans=$((cancelled_loans + 1))
-              fi
-            done < "$priority_tmp"
-          fi
+          while IFS=$'\t' read -r run_id title; do
+            lane="$(printf '%s' "$title" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p')"
+            if [ -n "$lane" ] && [ "$lane" -ge "$priority_target" ]; then
+              gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+              cancelled_loans=$((cancelled_loans + 1))
+            fi
+          done < "$priority_tmp"
 
           priority_present="$({ while IFS=$'\t' read -r _ title; do printf '%s\n' "$title"; done < "$priority_tmp"; } | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p' | sort -n -u)"
           priority_count="$(printf '%s\n' "$priority_present" | awk -v max="$priority_target" '$1>=0 && $1<max' | wc -l | tr -d ' ')"
@@ -134,19 +150,21 @@ jobs:
 
           target_useful=$((MAINTENANCE_LANES + priority_target + neuronal_reserved))
           test $((target_useful + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"
-          echo "neuronal_active=$neuronal_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_physical_active=$neuronal_physical_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_reserved=$neuronal_reserved" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_unused_loaned_to_portfolio=$((NEURONAL_RESERVED_LANES - neuronal_reserved))" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_present_before=$maint_count" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_dispatched=$maint_dispatched" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_target=$priority_target" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_present_before=$priority_count" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_dispatched=$priority_dispatched" >> "$GITHUB_STEP_SUMMARY"
           echo "cancelled_priority_loan_runs=$cancelled_loans" >> "$GITHUB_STEP_SUMMARY"
-          echo "neuronal_reserved=$neuronal_reserved" >> "$GITHUB_STEP_SUMMARY"
           echo "target_useful=$target_useful" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
           echo "capacity_equation=$target_useful+$CONTROL_RESERVE=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_order=P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
+          echo "physical_neuronal_accounting=true" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
