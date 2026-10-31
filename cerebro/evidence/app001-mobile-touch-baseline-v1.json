@@ -1,0 +1,25 @@
+{
+  "state_type": "CEREBRO_APP001_MOBILE_TOUCH_BASELINE_V1",
+  "company_id": "fenix",
+  "engine_id": "APP-001",
+  "environment": "PROD_READONLY",
+  "version": "v1",
+  "source_run_id": 40712515505,
+  "source_workflow": "CEREBRO Continuous Human QA V0",
+  "viewport": {"width": 412, "height": 839},
+  "threshold_px": 44,
+  "small_touch_targets": 6,
+  "targets": [
+    {"name": "theme-toggle", "width": 44, "height": 38},
+    {"name": "username", "width": 326, "height": 37},
+    {"name": "password", "width": 326, "height": 37},
+    {"name": "show-password", "width": 34, "height": 34},
+    {"name": "remember", "width": 17, "height": 17},
+    {"name": "forgot-password", "width": 326, "height": 35}
+  ],
+  "provenance": {
+    "artifact": "playwright-report.json",
+    "observation": "smallTouchTargetSamples",
+    "audited": true
+  }
+}
