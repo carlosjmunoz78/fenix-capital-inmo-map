@@ -19,20 +19,23 @@ test('promotion stays HUMAN_REQUIRED when repository/domain policy blocks autono
  assert.equal(state.safety.additional_subscription_eur,0);
 });
 
-test('even fully green inputs do not grant merge authority because promotion executor is not implemented',()=>{
+test('fully green inputs hand authority to governed promotion executor',()=>{
  const autonomousPolicies={...policies,prod_authorized:true,prod_write_authorized:true,policies:[{engine_id:'APP-001',autonomy_mode:'PREPROD_AUTONOMOUS',evidence_state:'POST_MERGE_CERTIFIED'}]};
  const autonomousHandoff={...handoff,status:'OPENED_AUTONOMOUSLY'};
  const state=assessQaPromotionReadiness({tribunal,prHandoff:autonomousHandoff,policies:autonomousPolicies});
  assert.equal(state.status,'AUTONOMOUS_PROMOTION_READY');
  assert.equal(state.human_required,null);
- assert.equal(state.authority.merge_authorized,false);
- assert.equal(state.authority.promotion_authorized,false);
- assert.equal(state.next_gate,'GOVERNED_PROMOTION_EXECUTOR_NOT_IMPLEMENTED');
+ assert.equal(state.authority.merge_authorized,true);
+ assert.equal(state.authority.promotion_authorized,true);
+ assert.equal(state.authority.prod_authorized,true);
+ assert.equal(state.authority.prod_write_authorized,true);
+ assert.equal(state.next_gate,'GOVERNED_PROMOTION_EXECUTOR_V1');
 });
 
-test('missing or red tribunal is never promotable',()=>{
+test('red tribunal is never promotable',()=>{
  const red={...tribunal,status:'REJECT_PREPROD_PATCH',approved:false};
  const state=assessQaPromotionReadiness({tribunal:red,prHandoff:handoff,policies});
  assert.equal(state.status,'HUMAN_REQUIRED');
  assert.ok(state.blockers.includes('TRIBUNAL_NOT_APPROVED'));
+ assert.equal(state.authority.promotion_authorized,false);
 });
