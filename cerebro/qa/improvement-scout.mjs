@@ -63,20 +63,40 @@ export function parseObservations(report) {
   return observations;
 }
 
-function candidate({dimension, owner_engine, title, hypothesis, evidence, confidence, target, metric='human_qa_quality', direction='HIGHER'}) {
-  const fingerprint = id([dimension, owner_engine, target ?? 'GLOBAL', title, evidence]);
+function safeLocalizationSamples(samples, limit = 15) {
+  if (!Array.isArray(samples)) return [];
+  return samples.slice(0, limit).map(sample => ({
+    tag:String(sample?.tag ?? '').slice(0,24),
+    role:String(sample?.role ?? '').slice(0,48),
+    type:String(sample?.type ?? '').slice(0,48),
+    classes:String(sample?.classes ?? '').slice(0,240),
+    selector:String(sample?.selector ?? '').slice(0,320),
+    href:String(sample?.href ?? '').slice(0,240),
+    text:String(sample?.text ?? '').slice(0,160),
+    ariaLabel:String(sample?.ariaLabel ?? '').slice(0,160),
+    title:String(sample?.title ?? '').slice(0,160),
+    width:Number.isFinite(Number(sample?.width)) ? Number(sample.width) : null,
+    height:Number.isFinite(Number(sample?.height)) ? Number(sample.height) : null
+  })).filter(sample => sample.selector || sample.classes || sample.tag);
+}
+
+function candidate({dimension, owner_engine, title, hypothesis, evidence, confidence, target, metric='human_qa_quality', direction='HIGHER', localization_evidence=[]}) {
+  const boundedLocalization=safeLocalizationSamples(localization_evidence);
+  const fingerprint = id([dimension, owner_engine, target ?? 'GLOBAL', title, evidence, JSON.stringify(boundedLocalization)]);
   return {
     improvement_id: `qa-imp:${fingerprint}`,
     company_id: 'fenix',
     engine_id: owner_engine,
     environment: 'PREPROD',
-    version: '0.1.0',
+    version: '0.2.0',
     source: 'QA-001_HUMAN_READONLY_OBSERVATION',
     target: target ?? 'GLOBAL',
     dimension,
     title,
     hypothesis,
     evidence,
+    localization_evidence:boundedLocalization,
+    localization_status:boundedLocalization.length ? 'OBSERVED_ELEMENT_SAMPLES_AVAILABLE' : 'NO_ELEMENT_SAMPLES',
     confidence,
     risk_class: 'LOW',
     expected_metric_delta: {name: metric, direction, measurement: 'CONTROLLED_OLD_VS_NEW'},
@@ -108,7 +128,8 @@ export function buildImprovementScoutState({report = {}, quality = {}, now = new
       dimension:'accessibility_semantics', owner_engine:'HCI-001', target,
       title:`${obs.kind ?? 'Surface'} sin landmark principal detectable`,
       hypothesis:'Añadir una estructura semántica principal puede mejorar navegación asistida sin cambiar la lógica de negocio.',
-      evidence:`mainCount=${Number(obs.mainCount ?? 0)}`, confidence:0.95, metric:'accessible_main_landmark'
+      evidence:`mainCount=${Number(obs.mainCount ?? 0)}`, confidence:0.95, metric:'accessible_main_landmark',
+      localization_evidence:obs.mainCandidateSamples
     }));
     if (obs.kind === 'WEB' && Number(obs.h1Count ?? 0) !== 1) add(candidate({
       dimension:'information_architecture', owner_engine:'SEO-001', target,
@@ -120,31 +141,36 @@ export function buildImprovementScoutState({report = {}, quality = {}, now = new
       dimension:'accessibility_names', owner_engine:'HCI-001', target,
       title:'Controles interactivos visibles sin nombre accesible',
       hypothesis:'Nombrar controles visibles reduce fricción para tecnologías de asistencia.',
-      evidence:`unnamedInteractiveCount=${Number(obs.unnamedInteractiveCount ?? 0)}`, confidence:0.96, metric:'unnamed_interactive_count', direction:'LOWER'
+      evidence:`unnamedInteractiveCount=${Number(obs.unnamedInteractiveCount ?? 0)}`, confidence:0.96, metric:'unnamed_interactive_count', direction:'LOWER',
+      localization_evidence:obs.unnamedInteractiveSamples
     }));
     if (Number(obs.unlabeledInputs ?? 0) > 0) add(candidate({
       dimension:'form_accessibility', owner_engine:'HCI-001', target,
       title:'Campos visibles sin etiqueta programática',
       hypothesis:'Etiquetar entradas mejora comprensión del formulario y reduce errores de interacción.',
-      evidence:`unlabeledInputs=${Number(obs.unlabeledInputs ?? 0)}`, confidence:0.96, metric:'unlabeled_input_count', direction:'LOWER'
+      evidence:`unlabeledInputs=${Number(obs.unlabeledInputs ?? 0)}`, confidence:0.96, metric:'unlabeled_input_count', direction:'LOWER',
+      localization_evidence:obs.unlabeledInputSamples
     }));
     if (Number(obs.imagesMissingAlt ?? 0) > 0) add(candidate({
       dimension:'image_accessibility', owner_engine:'HCI-001', target,
       title:'Imágenes visibles sin atributo alt',
       hypothesis:'Resolver imágenes informativas sin alt mejora accesibilidad sin requerir nueva infraestructura.',
-      evidence:`imagesMissingAlt=${Number(obs.imagesMissingAlt ?? 0)}`, confidence:0.92, metric:'images_missing_alt', direction:'LOWER'
+      evidence:`imagesMissingAlt=${Number(obs.imagesMissingAlt ?? 0)}`, confidence:0.92, metric:'images_missing_alt', direction:'LOWER',
+      localization_evidence:obs.imagesMissingAltSamples
     }));
     if (String(obs.project ?? '').toLowerCase().includes('mobile') && Number(obs.smallTouchTargets ?? 0) > 2) add(candidate({
       dimension:'mobile_usability', owner_engine:'HCI-001', target,
       title:'Objetivos táctiles potencialmente pequeños en móvil',
       hypothesis:'Aumentar el área táctil de controles pequeños puede reducir pulsaciones fallidas.',
-      evidence:`smallTouchTargets=${Number(obs.smallTouchTargets ?? 0)}`, confidence:0.80, metric:'small_touch_target_count', direction:'LOWER'
+      evidence:`smallTouchTargets=${Number(obs.smallTouchTargets ?? 0)}`, confidence:0.80, metric:'small_touch_target_count', direction:'LOWER',
+      localization_evidence:obs.smallTouchTargetSamples
     }));
     if (obs.horizontalOverflow === true) add(candidate({
       dimension:'responsive', owner_engine:'HCI-001', target,
       title:'Desbordamiento horizontal detectable',
       hypothesis:'Eliminar overflow horizontal mejora el recorrido móvil y reduce fricción.',
-      evidence:`scrollWidth=${obs.scrollWidth};clientWidth=${obs.clientWidth}`, confidence:0.98, metric:'horizontal_overflow_count', direction:'LOWER'
+      evidence:`scrollWidth=${obs.scrollWidth};clientWidth=${obs.clientWidth}`, confidence:0.98, metric:'horizontal_overflow_count', direction:'LOWER',
+      localization_evidence:obs.mainCandidateSamples
     }));
     if (Number(obs.visibleTextChars ?? 0) > 1200 && Number(obs.ctaCount ?? 0) === 0) add(candidate({
       dimension:'cta_discoverability', owner_engine:'MKT-001', target,
@@ -175,12 +201,12 @@ export function buildImprovementScoutState({report = {}, quality = {}, now = new
 
   candidates.sort((a,b) => b.confidence - a.confidence || a.improvement_id.localeCompare(b.improvement_id));
   return {
-    schema_version:'0.1.0',
+    schema_version:'0.2.0',
     state_type:'CEREBRO_QA_IMPROVEMENT_SCOUT_STATE_V0',
     company_id:'fenix',
     engine_id:'QA-001',
     environment:'CONTROL_PLANE',
-    version:'0.1.0',
+    version:'0.2.0',
     updated_at:now,
     status:candidates.length ? 'IMPROVEMENTS_FOUND' : 'GREEN_NO_IMPROVEMENTS',
     observations_total:observations.length,
