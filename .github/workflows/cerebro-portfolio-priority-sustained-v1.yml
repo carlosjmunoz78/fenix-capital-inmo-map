@@ -29,6 +29,8 @@ env:
   CEREBRO_TRADING_ACCESS: 'false'
   CEREBRO_PORTFOLIO_BASE_LANES: '182'
   CEREBRO_PORTFOLIO_MAX_LANES: '282'
+  CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'
+  CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
   CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
 
 jobs:
@@ -50,6 +52,8 @@ jobs:
           test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
+          test "$CEREBRO_PORTFOLIO_INNER_PARALLELISM" -eq 4
+          test "$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" = rolling
           case '${{ inputs.lane }}' in ''|*[!0-9]*) exit 2 ;; esac
           case '${{ inputs.cycle }}' in ''|*[!0-9]*) exit 2 ;; esac
           test '${{ inputs.lane }}' -ge 0 && test '${{ inputs.lane }}' -le 281
@@ -61,24 +65,44 @@ jobs:
           set -euo pipefail
           lane='${{ inputs.lane }}'
           current='${{ inputs.cycle }}'
-          if [ "$lane" -lt 182 ]; then lease_seconds=420; max_units=128; else lease_seconds=240; max_units=64; fi
+          parallelism="$CEREBRO_PORTFOLIO_INNER_PARALLELISM"
+          if [ "$lane" -lt 182 ]; then lease_seconds=420; max_units=8192; else lease_seconds=240; max_units=4096; fi
           start="$(date +%s)"
           deadline=$((start + lease_seconds))
           units=0
+          batches=0
           while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$max_units" ]; do
-            node cerebro/runtime/portfolio-priority-sustained-v1.mjs --lane="$lane" --cycle="$current"
-            units=$((units + 1))
-            current=$((current + 1))
-            if [ "$current" -gt 999999 ]; then current=0; fi
+            pids=''
+            for slot in $(seq 0 $((parallelism - 1))); do
+              cycle=$(( (current + slot) % 1000000 ))
+              node cerebro/runtime/portfolio-priority-sustained-v1.mjs \
+                --lane="$lane" \
+                --cycle="$cycle" \
+                --slot="$slot" &
+              pids="$pids $!"
+            done
+            for pid in $pids; do wait "$pid"; done
+            units=$((units + parallelism))
+            batches=$((batches + 1))
+            current=$(( (current + parallelism) % 1000000 ))
           done
+          elapsed=$(( $(date +%s) - start ))
           echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
           echo "units_completed=$units" >> "$GITHUB_OUTPUT"
+          echo "batches_completed=$batches" >> "$GITHUB_OUTPUT"
+          echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
+          echo "inner_parallelism=$parallelism" >> "$GITHUB_OUTPUT"
           echo "lane=$lane" >> "$GITHUB_OUTPUT"
           echo "loan_lane=$([ "$lane" -ge 182 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
           echo "portfolio_priority_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
+          echo "batches_completed=$batches" >> "$GITHUB_STEP_SUMMARY"
+          echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
+          echo "inner_parallelism=$parallelism" >> "$GITHUB_STEP_SUMMARY"
+          echo "evidence_write_mode=$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
           echo "base_lane=$([ "$lane" -lt 182 ] && echo true || echo false)" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
       - name: Publish useful-work evidence
