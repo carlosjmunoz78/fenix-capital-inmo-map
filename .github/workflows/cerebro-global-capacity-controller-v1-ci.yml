@@ -87,6 +87,7 @@ jobs:
           grep -q 'cancelled_neuronal_return_loans' "$controller"
           grep -q 'api_snapshot_calls_base=21' "$controller"
           grep -q 'worker_pressure_reads=0' "$controller"
+          grep -Fq 'sleep "$((attempt * 2))"' "$controller"
           grep -q 'controller_self_rearmed=false' "$controller"
           grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
           ! grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
