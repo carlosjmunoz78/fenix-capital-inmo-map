@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "status": "PREPROD_CANDIDATE",
   "company_id": "fenix",
   "engine_id": "JOB-001",
@@ -10,14 +10,14 @@
     "enterprise_organization_verified_for_canonical_repo": true,
     "enterprise_actions_concurrency_entitlement_verified": true,
     "enterprise_account_state": "PAID",
-    "current_live_enterprise_runner_parallelism": 180,
-    "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 500,
+    "current_live_enterprise_runner_parallelism": 360,
+    "paid_enterprise_standard_runner_concurrent_jobs_ceiling": 360,
     "matrix_jobs_per_workflow_run_ceiling": 256
   },
   "job001_contract": {
-    "target_useful_default": 180,
-    "max_global_default": 180,
-    "max_company_default": 180,
+    "target_useful_default": 360,
+    "max_global_default": 360,
+    "max_company_default": 360,
     "max_deepseek_default": 8,
     "max_repo_write_default": 1,
     "reuse_existing_runtime": true,
@@ -27,9 +27,9 @@
     "second_daemon": false
   },
   "burst": {
-    "default_lanes": 180,
+    "default_lanes": 256,
     "max_lanes_until_actions_concurrency_verified": 20,
-    "max_lanes_after_actions_concurrency_verified": 180,
+    "max_lanes_after_actions_concurrency_verified": 256,
     "default_units_per_lane": 8,
     "max_units_per_lane": 32,
     "self_refill": false,
