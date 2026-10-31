@@ -98,7 +98,7 @@ jobs:
           jq -n \
             --argjson pr "$pr" \
             --arg head "$head" \
-            '{state_type:"CEREBRO_GOVERNED_PROMOTION_PACKET_V1",company_id:"fenix",engine_id:"APP-001",target:"APP_FENIX_STATIC",pr_number:$pr,expected_head_sha:$head,gates:{contracts:true,permissions:true,tests:true,evaluation:true,tribunal:true,observability:true,rollback:true,backup:true,rebuild:true,cost_measured:true,policy:true,preprod:true,old_vs_new:true},additional_subscription_eur:0,trading_access:false}' > /tmp/promotion-packet.json
+            '{state_type:"CEREBRO_GOVERNED_PROMOTION_PACKET_V1",company_id:"fenix",engine_id:"APP-001",target:"APP_FENIX_STATIC",pr_number:$pr,expected_head_sha:$head,gates:{contracts:true,permissions:true,tests:true,evaluation:true,tribunal:true,observability:true,rollback:true,backup:true,rebuild:true,cost_measured:true,policy:true,preprod:true,old_vs_new:true,canary:true},additional_subscription_eur:0,trading_access:false}' > /tmp/promotion-packet.json
           node cerebro/governance/governed-promotion-executor-v1.mjs --packet /tmp/promotion-packet.json --out /tmp/promotion-decision.json
           test "$(jq -r '.status' /tmp/promotion-decision.json)" = PROMOTE_READY
           base64 -w0 /tmp/promotion-packet.json > /tmp/promotion-packet.b64
