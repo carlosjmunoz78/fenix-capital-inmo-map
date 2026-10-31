@@ -6,7 +6,7 @@
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "1.0.0",
   "status": "DEFINED_NOT_LIVE",
-  "source_branch": "feat/fact001-certified-repair-worker-factory-v1-20261031",
+  "source_branch": "feat/fact001-repair-worker-factory-clean-v1-20261031",
   "live_workflow_run_id": null,
   "certified_profile_count_declared": 1,
   "physical_acceptance_verified": false,
