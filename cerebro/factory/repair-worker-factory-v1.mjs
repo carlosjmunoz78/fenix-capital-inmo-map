@@ -26,6 +26,7 @@ const HUMAN_REQUIRED=[
   'LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK',
   'POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'
 ];
+const SAFE_PROFILE_ID=/^[A-Z0-9][A-Z0-9_-]{0,127}$/;
 
 function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
 function json(value){return `${JSON.stringify(value,null,2)}\n`;}
@@ -33,7 +34,7 @@ function stable(value){return crypto.createHash('sha256').update(value).digest('
 function plainObject(value,label){if(!value||typeof value!=='object'||Array.isArray(value))throw new Error(`${label} must be object`);return value;}
 function nonEmpty(value,label){if(typeof value!=='string'||!value.trim())throw new Error(`${label} required`);return value.trim();}
 function safeRepoPath(value,label){const p=nonEmpty(value,label);if(path.isAbsolute(p)||p.includes('..')||p.startsWith('.git/'))throw new Error(`${label} unsafe path`);return p;}
-function sameSet(actual,expected){return actual.length===expected.length&&actual.every(x=>expected.includes(x));}
+function exactUniqueSet(actual,expected){if(!Array.isArray(actual)||actual.length!==expected.length||new Set(actual).size!==actual.length)return false;const set=new Set(actual);return expected.every(x=>set.has(x));}
 
 export function validateRepairWorkerRegistry(registry,{engineRegistry=readJson(DEFAULT_ENGINES),repoRoot=REPO_ROOT}={}){
   plainObject(registry,'registry');
@@ -44,7 +45,7 @@ export function validateRepairWorkerRegistry(registry,{engineRegistry=readJson(D
   const policy=plainObject(registry.policy,'registry.policy');
   if(policy.new_engine_identity!==false||policy.shared_runtime!==true||policy.repo_write_max_concurrency!==1||policy.deterministic_first!==true)throw new Error('factory policy drift');
   if(policy.additional_cost_eur!==0||policy.paid_ai_required!==false||policy.prod_authorized!==false||policy.prod_write_authorized!==false||policy.trading_access!==false)throw new Error('unsafe factory authority');
-  if(!Array.isArray(policy.human_required_reasons)||!sameSet(policy.human_required_reasons,HUMAN_REQUIRED))throw new Error('HUMAN_REQUIRED contract drift');
+  if(!exactUniqueSet(policy.human_required_reasons,HUMAN_REQUIRED))throw new Error('HUMAN_REQUIRED contract drift');
 
   const canonical=new Set(engineRegistry.engine_ids??[]);
   if(!canonical.has('FACT-001')||!canonical.has('AUTO-001')||!canonical.has('QA-001'))throw new Error('canonical engine registry missing repair factory dependencies');
@@ -54,6 +55,7 @@ export function validateRepairWorkerRegistry(registry,{engineRegistry=readJson(D
   for(const [index,profile] of registry.profiles.entries()){
     plainObject(profile,`profiles[${index}]`);
     const profileId=nonEmpty(profile.profile_id,`profiles[${index}].profile_id`);
+    if(!SAFE_PROFILE_ID.test(profileId))throw new Error(`${profileId}: unsafe profile_id`);
     if(seen.has(profileId))throw new Error(`duplicate profile_id ${profileId}`);seen.add(profileId);
     for(const key of ['company_id','engine_id','owner_engine_id','target_engine_id','environment','version','status','transform_id'])nonEmpty(profile[key],`${profileId}.${key}`);
     if(profile.environment!=='PREPROD'||profile.status!=='CERTIFIED_EXISTING_REPAIR_PATH')throw new Error(`${profileId}: only certified PREPROD repair paths accepted`);
@@ -71,11 +73,13 @@ export function validateRepairWorkerRegistry(registry,{engineRegistry=readJson(D
     if(!fileBindings.workflow_path.startsWith('.github/workflows/'))throw new Error(`${profileId}: workflow binding invalid`);
     if(!Array.isArray(profile.allowed_files)||profile.allowed_files.length<1)throw new Error(`${profileId}: allowed_files required`);
     const allowedFiles=profile.allowed_files.map((p,i)=>safeRepoPath(p,`${profileId}.allowed_files[${i}]`));
+    if(new Set(allowedFiles).size!==allowedFiles.length)throw new Error(`${profileId}: duplicate allowed_files`);
     if(!Number.isSafeInteger(profile.max_files_changed)||profile.max_files_changed<1||profile.max_files_changed>allowedFiles.length)throw new Error(`${profileId}: max_files_changed invalid`);
     if(!Number.isSafeInteger(profile.max_line_delta)||profile.max_line_delta<1||profile.max_line_delta>500)throw new Error(`${profileId}: max_line_delta invalid`);
     if(profile.worker_parallelism!==1||profile.repo_write_concurrency!==1)throw new Error(`${profileId}: repository mutations must remain serial`);
-    if(!Array.isArray(profile.idempotency_scope)||!['company_id','profile_id','base_sha','transform_id','target'].every(x=>profile.idempotency_scope.includes(x)))throw new Error(`${profileId}: idempotency contract incomplete`);
-    if(!Array.isArray(profile.required_gates)||!REQUIRED_GATES.every(x=>profile.required_gates.includes(x)))throw new Error(`${profileId}: required gates incomplete`);
+    const requiredIdempotency=['company_id','profile_id','base_sha','transform_id','target'];
+    if(!exactUniqueSet(profile.idempotency_scope,requiredIdempotency))throw new Error(`${profileId}: idempotency contract incomplete`);
+    if(!exactUniqueSet(profile.required_gates,REQUIRED_GATES))throw new Error(`${profileId}: required gates incomplete`);
     if(profile.repair_execution_capability!=='EXISTING_GOVERNED_PREPROD_WORKFLOW'||profile.factory_may_dispatch!==false)throw new Error(`${profileId}: FACT-001 may describe but not dispatch repair execution`);
     for(const flag of ['auto_merge','promotion_authorized','prod_authorized','prod_write_authorized','customer_data','trading_access'])if(profile[flag]!==false)throw new Error(`${profileId}: unsafe ${flag}`);
     if(profile.additional_cost_eur!==0)throw new Error(`${profileId}: additional cost must be zero`);
