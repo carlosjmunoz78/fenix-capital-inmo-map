@@ -1,8 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {assessGovernedPromotion,finalizeGovernedPromotion,HUMAN_EXCEPTION_REASONS,REQUIRED_PROMOTION_GATES} from '../governance/governed-promotion-executor-v1.mjs';
 
+const HERE=path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT=path.resolve(HERE,'../..');
+const repoFile=(...parts)=>path.join(REPO_ROOT,...parts);
 const SHA='a'.repeat(40);
 const greenGates=Object.fromEntries(REQUIRED_PROMOTION_GATES.map(k=>[k,true]));
 function packet(overrides={}){return {state_type:'CEREBRO_GOVERNED_PROMOTION_PACKET_V1',company_id:'fenix',engine_id:'APP-001',target:'APP_FENIX_STATIC',pr_number:1055,expected_head_sha:SHA,gates:{...greenGates},additional_subscription_eur:0,trading_access:false,...overrides};}
@@ -16,14 +21,14 @@ test('all required gates produce PROMOTE_READY, never a false PROD claim',()=>{
 });
 
 test('AUTO-001 closure packet declares every required PROD gate explicitly green',()=>{
-  const workflow=fs.readFileSync('.github/workflows/cerebro-auto001-prod-closure-v1.yml','utf8');
+  const workflow=fs.readFileSync(repoFile('.github','workflows','cerebro-auto001-prod-closure-v1.yml'),'utf8');
   for(const gate of REQUIRED_PROMOTION_GATES){
     assert.match(workflow,new RegExp(`${gate}:true`),`closure packet missing ${gate}:true`);
   }
 });
 
 test('governed promotion requires canonical PROD Live Deploy and Runtime Smoke on exact SHA',()=>{
-  const workflow=fs.readFileSync('.github/workflows/cerebro-governed-promotion-v1.yml','utf8');
+  const workflow=fs.readFileSync(repoFile('.github','workflows','cerebro-governed-promotion-v1.yml'),'utf8');
   assert.match(workflow,/gh workflow run prod-live-deploy\.yml/);
   assert.match(workflow,/gh workflow run prod-runtime-smoke\.yml/);
   assert.match(workflow,/expected_live_sha=\$\{?main_sha\}?|expected_live_sha=\$main_sha|expected_live_sha=\$\{main_sha\}/);
@@ -32,7 +37,7 @@ test('governed promotion requires canonical PROD Live Deploy and Runtime Smoke o
 });
 
 test('APP-001 PROD policy stays in exact gate and HUMAN_REQUIRED parity with executor',()=>{
-  const registry=JSON.parse(fs.readFileSync('cerebro/registry/prod-promotion-policy-overrides.v1.json','utf8'));
+  const registry=JSON.parse(fs.readFileSync(repoFile('cerebro','registry','prod-promotion-policy-overrides.v1.json'),'utf8'));
   const app=registry.policies.find(p=>p.engine_id==='APP-001'&&p.target==='APP_FENIX_STATIC');
   assert.ok(app);
   assert.deepEqual([...app.required_gates].sort(),[...REQUIRED_PROMOTION_GATES].sort());
