@@ -4,7 +4,7 @@ import { publishSupervisorHeartbeatFileV1 } from './job001-remote-telemetry-v1.m
 import { installMaintenanceDrainV1 } from './job001-maintenance-drain-v1.mjs';
 
 const PREPROD = 'PREPROD';
-const VERIFIED_GLOBAL_CAP = 180;
+const VERIFIED_GLOBAL_CAP = 360;
 const DEEPSEEK_CAP = 8;
 const REPO_WRITE_CAP = 1;
 
@@ -17,7 +17,7 @@ function nonEmpty(value) {
   return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
 }
 
-export function configureSupervisor180V1(env = process.env) {
+export function configureSupervisor360V1(env = process.env) {
   if (env.CEREBRO_SUPERVISOR_ENV && String(env.CEREBRO_SUPERVISOR_ENV).toUpperCase() !== PREPROD) {
     throw new Error('CEREBRO_SUPERVISOR_ENTRYPOINT_PREPROD_ONLY');
   }
@@ -50,8 +50,9 @@ export function configureSupervisor180V1(env = process.env) {
   });
 }
 
-// Backward-compatible export for older callers; semantics now follow the verified 180-cap contract.
-export const configureSupervisor48V1 = configureSupervisor180V1;
+// Backward-compatible exports for older callers; semantics now follow the verified 360-cap contract.
+export const configureSupervisor180V1 = configureSupervisor360V1;
+export const configureSupervisor48V1 = configureSupervisor360V1;
 
 export function telemetryConfigFromEnvV1(env = process.env) {
   const userProfile = nonEmpty(env.USERPROFILE) || os.homedir();
@@ -73,7 +74,7 @@ export function canPublishRemoteTelemetryV1(config) {
 }
 
 export async function startSupervisorEntrypointV1({ env = process.env, import_supervisor = async () => import('./cerebro-supervisor-daemon-v0.mjs'), publisher = publishSupervisorHeartbeatFileV1, set_interval = setInterval, install_drain = installMaintenanceDrainV1 } = {}) {
-  const limits = configureSupervisor180V1(env);
+  const limits = configureSupervisor360V1(env);
   const drain = install_drain({ env });
   const telemetry = telemetryConfigFromEnvV1(env);
   let inFlight = false;
