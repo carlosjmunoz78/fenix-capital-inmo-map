@@ -1,0 +1,57 @@
+name: CEREBRO Global Capacity Controller V1 CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-continuous-work-factory-v0.yml'
+      - '.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+      - '.github/workflows/cerebro-global-capacity-controller-v1-ci.yml'
+      - 'cerebro/runtime/portfolio-priority-sustained-v1.mjs'
+      - 'cerebro/tests/portfolio-priority-sustained-v1.test.mjs'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Syntax and topology tests
+        run: |
+          node --check cerebro/runtime/portfolio-priority-sustained-v1.mjs
+          node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
+          node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+      - name: Verify 360 shared-capacity equations and safety
+        shell: bash
+        run: |
+          set -euo pipefail
+          controller='.github/workflows/cerebro-continuous-work-factory-v0.yml'
+          worker='.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+          grep -q "MAINTENANCE_LANES: '68'" "$controller"
+          grep -q "PORTFOLIO_BASE_LANES: '182'" "$controller"
+          grep -q "PORTFOLIO_LOAN_LANES: '100'" "$controller"
+          grep -q "NEURONAL_RESERVED_LANES: '100'" "$controller"
+          grep -q "CONTROL_RESERVE: '10'" "$controller"
+          grep -q "ENTERPRISE_CAP: '360'" "$controller"
+          grep -q 'neuronal_active' "$controller"
+          grep -q 'cancelled_priority_loan_runs' "$controller"
+          grep -q 'Self-refill base lanes only' "$worker"
+          grep -q 'Loan lanes return authority to global controller' "$worker"
+          ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$worker"
+          ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$worker"
+          ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$worker"
+      - name: Acceptance summary
+        run: |
+          echo 'base maintenance=68'
+          echo 'priority portfolio base=182'
+          echo 'neuronal reserved when active=100'
+          echo 'portfolio temporary loan when neuronal inactive=100'
+          echo 'control reserve=10'
+          echo 'maximum physical entitlement=360'
+          echo 'target useful=350'
+          echo 'additional cost=0 EUR'

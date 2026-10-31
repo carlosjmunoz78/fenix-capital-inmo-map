@@ -1,0 +1,106 @@
+name: CEREBRO Priority Portfolio Sustained V1
+run-name: CEREBRO PRIORITY ${{ inputs.lane }} · C${{ inputs.cycle }} · PREPROD
+
+on:
+  workflow_dispatch:
+    inputs:
+      lane:
+        description: 'Priority portfolio lane 0..281; 0..181 base, 182..281 temporary loan lanes'
+        required: true
+        type: string
+      cycle:
+        description: 'Deterministic cycle 0..999999'
+        required: false
+        default: '0'
+        type: string
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-priority-portfolio-sustained-v1-${{ inputs.lane }}
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_PORTFOLIO_BASE_LANES: '182'
+  CEREBRO_PORTFOLIO_MAX_LANES: '282'
+  CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
+
+jobs:
+  priority-useful-work:
+    name: PRIORITY-${{ inputs.lane }}-C${{ inputs.cycle }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Guard PREPROD and capacity topology
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.repository_visibility }}" = public
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          case '${{ inputs.lane }}' in ''|*[!0-9]*) exit 2 ;; esac
+          case '${{ inputs.cycle }}' in ''|*[!0-9]*) exit 2 ;; esac
+          test '${{ inputs.lane }}' -ge 0 && test '${{ inputs.lane }}' -le 281
+          test '${{ inputs.cycle }}' -ge 0 && test '${{ inputs.cycle }}' -le 999999
+      - name: Execute sustained prioritized useful lease
+        id: lease
+        shell: bash
+        run: |
+          set -euo pipefail
+          lane='${{ inputs.lane }}'
+          current='${{ inputs.cycle }}'
+          if [ "$lane" -lt 182 ]; then lease_seconds=420; max_units=128; else lease_seconds=240; max_units=64; fi
+          start="$(date +%s)"
+          deadline=$((start + lease_seconds))
+          units=0
+          while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$max_units" ]; do
+            node cerebro/runtime/portfolio-priority-sustained-v1.mjs --lane="$lane" --cycle="$current"
+            units=$((units + 1))
+            current=$((current + 1))
+            if [ "$current" -gt 999999 ]; then current=0; fi
+          done
+          echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
+          echo "units_completed=$units" >> "$GITHUB_OUTPUT"
+          echo "lane=$lane" >> "$GITHUB_OUTPUT"
+          echo "loan_lane=$([ "$lane" -ge 182 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          echo "portfolio_priority_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+          echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
+          echo "base_lane=$([ "$lane" -lt 182 ] && echo true || echo false)" >> "$GITHUB_STEP_SUMMARY"
+          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+      - name: Publish useful-work evidence
+        if: steps.lease.outputs.units_completed != '0'
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority-portfolio-${{ inputs.lane }}-${{ github.run_id }}
+          path: artifacts/portfolio-priority-sustained-v1/lane-*/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Self-refill base lanes only
+        if: success() && fromJSON(inputs.lane) < 182
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
+            -f ref=main \
+            -f "inputs[lane]=${{ inputs.lane }}" \
+            -f "inputs[cycle]=${{ steps.lease.outputs.next_cycle }}"
+          echo 'self_refill=true' >> "$GITHUB_STEP_SUMMARY"
+      - name: Loan lanes return authority to global controller
+        if: success() && fromJSON(inputs.lane) >= 182
+        run: echo 'self_refill=false; loan lane must be re-authorized by global capacity controller' >> "$GITHUB_STEP_SUMMARY"
