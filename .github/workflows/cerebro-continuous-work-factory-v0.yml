@@ -1,5 +1,5 @@
 name: CEREBRO Global Capacity Controller V1
-run-name: CEREBRO GLOBAL CAPACITY · RAMP200 · PREPROD
+run-name: CEREBRO GLOBAL CAPACITY · RAMP250 · PREPROD
 
 on:
   workflow_dispatch:
@@ -37,9 +37,9 @@ jobs:
       USEFUL_POOL: '350'
       CONTROL_RESERVE: '10'
       ENTERPRISE_CAP: '360'
-      RAMP_TARGET_USEFUL: '200'
+      RAMP_TARGET_USEFUL: '250'
       MAINTENANCE_RAMP_LANES: '68'
-      PRIORITY_RAMP_LANES: '132'
+      PRIORITY_RAMP_LANES: '182'
       MAINTENANCE_MAX_LANES: '68'
       PORTFOLIO_BASE_LANES: '182'
       PORTFOLIO_LOAN_LANES: '100'
@@ -67,7 +67,7 @@ jobs:
           test "$CONTROL_RESERVE" -eq 10
           test "$ENTERPRISE_CAP" -eq 360
           test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"
-          test "$RAMP_TARGET_USEFUL" -eq 200
+          test "$RAMP_TARGET_USEFUL" -eq 250
           test $((MAINTENANCE_RAMP_LANES + PRIORITY_RAMP_LANES)) -eq "$RAMP_TARGET_USEFUL"
           test "$MAINTENANCE_RAMP_LANES" -le "$MAINTENANCE_MAX_LANES"
           test "$PRIORITY_RAMP_LANES" -le "$PORTFOLIO_BASE_LANES"
@@ -115,9 +115,9 @@ jobs:
           : > "$active_tmp"
 
           # One repository-wide snapshot family replaces workflow-by-workflow scans.
-          # Two pages cover the staged 200 pool plus control work with margin.
+          # Three pages cover the staged 250 pool plus control work with margin.
           for status in in_progress queued pending waiting requested; do
-            for page in 1 2; do
+            for page in 1 2 3; do
               gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
                 --jq '.workflow_runs[] | [.id,.status,.path,.display_title] | @tsv' \
                 >> "$active_tmp" 2>/dev/null || true
@@ -144,7 +144,7 @@ jobs:
           cancelled_background_queue_runs=0
           maintenance_dispatched=0
           priority_dispatched=0
-          capacity_mode='RAMP200'
+          capacity_mode='RAMP250'
 
           if [ "$critical_pressure" = true ]; then
             capacity_mode='CONTROL_PRESSURE'
@@ -180,7 +180,7 @@ jobs:
           observed_background=$((maintenance_active + priority_active))
 
           echo "capacity_mode=$capacity_mode" >> "$GITHUB_STEP_SUMMARY"
-          echo "ramp_stage=2" >> "$GITHUB_STEP_SUMMARY"
+          echo "ramp_stage=3" >> "$GITHUB_STEP_SUMMARY"
           echo "ramp_target_useful=$RAMP_TARGET_USEFUL" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_ramp_target=$MAINTENANCE_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_ramp_target=$PRIORITY_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
@@ -195,7 +195,7 @@ jobs:
           echo "useful_pool_entitlement=$USEFUL_POOL" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
-          echo "api_snapshot_calls_max=10" >> "$GITHUB_STEP_SUMMARY"
+          echo "api_snapshot_calls_max=15" >> "$GITHUB_STEP_SUMMARY"
           echo "worker_pressure_reads=0" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_non_transient_retry=false" >> "$GITHUB_STEP_SUMMARY"
