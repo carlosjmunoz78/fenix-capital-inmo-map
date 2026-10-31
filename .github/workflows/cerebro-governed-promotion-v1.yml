@@ -30,7 +30,7 @@ jobs:
   governed-promote:
     name: Governed exact-head promotion to physical PROD
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
     env:
       GH_TOKEN: ${{ github.token }}
       PR_NUMBER: ${{ inputs.pr_number }}
@@ -131,7 +131,7 @@ jobs:
           done
           test -n "$run_id"
           printf '%s\n' "$run_id" > /tmp/prod-run-id.txt
-          for _ in $(seq 1 90); do
+          for _ in $(seq 1 120); do
             state="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" --jq '.status + ":" + (.conclusion // "")')"
             case "$state" in
               completed:success) exit 0 ;;
@@ -140,6 +140,40 @@ jobs:
             sleep 5
           done
           echo 'PROD deploy receipt timeout' >&2
+          exit 1
+
+      - name: Dispatch canonical PROD Runtime Smoke for exact live SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(cat /tmp/prod-main-sha.txt)"
+          gh workflow run prod-runtime-smoke.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f "expected_live_sha=${main_sha}"
+
+      - name: Require canonical PROD Runtime Smoke green
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(cat /tmp/prod-main-sha.txt)"
+          smoke_id=''
+          for _ in $(seq 1 30); do
+            smoke_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/prod-runtime-smoke.yml/runs?event=workflow_dispatch&head_sha=${main_sha}&per_page=10" --jq '.workflow_runs[0].id // empty')"
+            [ -n "$smoke_id" ] && break
+            sleep 5
+          done
+          test -n "$smoke_id"
+          printf '%s\n' "$smoke_id" > /tmp/prod-smoke-run-id.txt
+          for _ in $(seq 1 120); do
+            state="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${smoke_id}" --jq '.status + ":" + (.conclusion // "")')"
+            case "$state" in
+              completed:success) exit 0 ;;
+              completed:*) echo "PROD Runtime Smoke failed: $state" >&2; exit 1 ;;
+            esac
+            sleep 5
+          done
+          echo 'PROD Runtime Smoke timeout' >&2
           exit 1
 
       - name: Prove physical PROD source and monitor stability
@@ -175,6 +209,7 @@ jobs:
             --monitor-passed true \
             --proof-url "$(cat /tmp/prod-proof-url.txt)"
           test "$(jq -r '.status' /tmp/cerebro-promotion-final.json)" = PROD_PROMOTED
+          printf '\nCanonical PROD Runtime Smoke run: %s\n' "$(cat /tmp/prod-smoke-run-id.txt)" >> "$GITHUB_STEP_SUMMARY"
           cat /tmp/cerebro-promotion-final.json >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload immutable promotion evidence
@@ -187,6 +222,7 @@ jobs:
             /tmp/cerebro-promotion-final.json
             /tmp/prod-main-sha.txt
             /tmp/prod-run-id.txt
+            /tmp/prod-smoke-run-id.txt
             /tmp/prod-proof-url.txt
           if-no-files-found: error
           retention-days: 30
