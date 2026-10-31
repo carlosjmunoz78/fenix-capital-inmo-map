@@ -37,11 +37,14 @@ test('actuation dependencies are P1, factories P2 and business fronts fall throu
   assert.ok(workflow.includes("const level = priority[block.id] ?? 'P3';"));
 });
 
-test('NEURONAL is fair-share capped at 100 and self-refills with 100',()=>{
-  assert.ok(neuronal.includes('max-parallel: 100'));
+test('NEURONAL preserves fair-share 100 logical units with 4x batching and self-refills with 100',()=>{
+  assert.ok(neuronal.includes('max-parallel: 25'));
+  assert.ok(neuronal.includes("CEREBRO_NEURONAL_INNER_PARALLELISM: '4'"));
   assert.ok(neuronal.includes("default: '100'"));
   assert.ok(neuronal.includes('"units":"100"'));
-  assert.ok(neuronal.includes('enterprise_neuronal_fair_share_max_parallel=100'));
+  assert.ok(neuronal.includes('enterprise_neuronal_logical_fair_share=100'));
+  assert.ok(neuronal.includes('enterprise_neuronal_physical_runner_cap=25'));
+  assert.ok(neuronal.includes('physical_runner_savings_at_100_logical=75'));
 });
 
 test('legacy allocation metadata remains bounded by the verified 360 live cap',()=>{
@@ -58,9 +61,9 @@ test('macOS entitlement is recorded but empty macOS jobs are not fabricated',()=
 });
 
 test('DeepSeek fanout is explicit opt-in only and remains capped at 8',()=>{
-  assert.ok(workflow.includes('default: false'));
-  assert.ok(workflow.includes("github.event_name == 'workflow_dispatch' && inputs.run_deepseek == true"));
-  assert.equal(workflow.includes("github.event_name == 'push' && github.ref == 'refs/heads/main'"),false);
-  assert.ok(workflow.includes('max-parallel: 8'));
-  assert.ok(workflow.includes("CEREBRO_ALLOW_PAID_FANOUT: 'YES'"));
+  assert.ok(neuronal.includes('default: false'));
+  assert.ok(neuronal.includes("github.event_name == 'workflow_dispatch' && inputs.run_deepseek"));
+  assert.equal(neuronal.includes("github.event_name == 'push' && github.ref == 'refs/heads/main'"),false);
+  assert.ok(neuronal.includes('max-parallel: 8'));
+  assert.ok(neuronal.includes("CEREBRO_ALLOW_PAID_FANOUT: 'YES'"));
 });
