@@ -168,3 +168,16 @@ jobs:
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
           echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
+      - name: Self-rearm global capacity controller
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches" -f ref=main
+          echo "controller_self_rearmed=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "controller_ref=main" >> "$GITHUB_STEP_SUMMARY"
+          echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"

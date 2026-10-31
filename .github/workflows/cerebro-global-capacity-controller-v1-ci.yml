@@ -47,6 +47,9 @@ jobs:
           ! grep -q 'if \[ "$neuronal_active" = true \]; then priority_target=182' "$controller"
           grep -q 'Self-refill base lanes only' "$worker"
           grep -q 'Loan lanes return authority to global controller' "$worker"
+          grep -q 'Self-rearm global capacity controller' "$controller"
+          grep -q 'controller_self_rearmed=true' "$controller"
+          grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
           ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$worker"
           ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$worker"
           ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$worker"
@@ -59,4 +62,5 @@ jobs:
           echo 'control reserve=10'
           echo 'maximum physical entitlement=360'
           echo 'target useful=350'
+          echo 'controller self-rearm=true'
           echo 'additional cost=0 EUR'
