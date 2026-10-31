@@ -1,0 +1,167 @@
+name: CEREBRO Global Capacity Heartbeat V1
+run-name: CEREBRO CAPACITY HEARTBEAT · G${{ inputs.generation || 'bootstrap' }} · PREPROD
+
+on:
+  workflow_dispatch:
+    inputs:
+      generation:
+        description: 'Heartbeat generation 0..999999'
+        required: false
+        default: '0'
+        type: string
+  schedule:
+    - cron: '*/15 * * * *'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-global-capacity-heartbeat-v1.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-global-capacity-heartbeat-v1
+  cancel-in-progress: false
+
+jobs:
+  heartbeat:
+    name: Keep global capacity reconciliation alive
+    runs-on: macos-latest
+    timeout-minutes: 7
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      HEARTBEAT_SECONDS: '240'
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - name: Guard zero-cost PREPROD control authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.repository_visibility }}" = public
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$HEARTBEAT_SECONDS" -ge 180
+          test "$HEARTBEAT_SECONDS" -le 300
+
+      - name: Ensure one global capacity reconciliation is active
+        id: ensure
+        shell: bash
+        run: |
+          set -euo pipefail
+          controller='cerebro-continuous-work-factory-v0.yml'
+          probe_error="$(mktemp)"
+          active='1'
+          probe_status='FAIL_CLOSED'
+          for attempt in 1 2 3; do
+            : > "$probe_error"
+            if active="$(gh api "/repos/${GH_REPO}/actions/workflows/${controller}/runs?per_page=20" \
+              --jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length' 2>"$probe_error")"; then
+              probe_status='GREEN'
+              break
+            fi
+            if grep -qi 'rate limit' "$probe_error"; then
+              sleep "$((attempt * 2))"
+              continue
+            fi
+            break
+          done
+
+          dispatched=false
+          if [ "$probe_status" = GREEN ] && [ "$active" -eq 0 ]; then
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "/repos/${GH_REPO}/actions/workflows/${controller}/dispatches" -f ref=main 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                dispatched=true
+                break
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
+                  ;;
+                *) exit 1 ;;
+              esac
+              [ "$attempt" -lt 4 ] || exit 1
+            done
+          fi
+
+          echo "controller_probe_status=$probe_status" >> "$GITHUB_STEP_SUMMARY"
+          echo "controller_active_before=$active" >> "$GITHUB_STEP_SUMMARY"
+          echo "controller_dispatched=$dispatched" >> "$GITHUB_STEP_SUMMARY"
+          echo "fail_closed_on_probe_error=true" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Hold one control slot for governed cadence
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep "$HEARTBEAT_SECONDS"
+          echo "heartbeat_seconds=$HEARTBEAT_SECONDS" >> "$GITHUB_STEP_SUMMARY"
+          echo 'control_slots_consumed=1' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Rearm exactly one heartbeat successor
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          heartbeat='cerebro-global-capacity-heartbeat-v1.yml'
+          current_run='${{ github.run_id }}'
+          generation='${{ inputs.generation }}'
+          if [ -z "$generation" ]; then generation=0; fi
+          case "$generation" in ''|*[!0-9]*) exit 2 ;; esac
+          test "$generation" -ge 0 && test "$generation" -le 999999
+          next=$(( (generation + 1) % 1000000 ))
+
+          probe_error="$(mktemp)"
+          other_active='1'
+          probe_status='FAIL_CLOSED'
+          for attempt in 1 2 3; do
+            : > "$probe_error"
+            if other_active="$(gh api "/repos/${GH_REPO}/actions/workflows/${heartbeat}/runs?per_page=20" \
+              --jq "[.workflow_runs[] | select((.status == \"in_progress\" or .status == \"queued\" or .status == \"pending\" or .status == \"waiting\" or .status == \"requested\") and (.id != ${current_run}))] | length" 2>"$probe_error")"; then
+              probe_status='GREEN'
+              break
+            fi
+            if grep -qi 'rate limit' "$probe_error"; then
+              sleep "$((attempt * 2))"
+              continue
+            fi
+            break
+          done
+
+          rearmed=false
+          if [ "$probe_status" = GREEN ] && [ "$other_active" -eq 0 ]; then
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "/repos/${GH_REPO}/actions/workflows/${heartbeat}/dispatches" \
+                -f ref=main -f "inputs[generation]=${next}" 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                rearmed=true
+                break
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
+                  ;;
+                *) exit 1 ;;
+              esac
+              [ "$attempt" -lt 4 ] || exit 1
+            done
+          fi
+
+          echo "heartbeat_probe_status=$probe_status" >> "$GITHUB_STEP_SUMMARY"
+          echo "other_heartbeat_active=$other_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "heartbeat_rearmed=$rearmed" >> "$GITHUB_STEP_SUMMARY"
+          echo "next_generation=$next" >> "$GITHUB_STEP_SUMMARY"
+          echo 'cadence_source=self_rearm_plus_schedule_backup' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
