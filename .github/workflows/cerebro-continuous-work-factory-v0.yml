@@ -137,7 +137,36 @@ jobs:
 
           maint_present="$(awk -F '\t' '{print $4}' "$maint_tmp" | sed -n -E 's/.*CEREBRO SUSTAINED ([0-9]+).*/\1/p' | sort -n -u)"
           priority_present="$(awk -F '\t' '{print $4}' "$priority_tmp" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p' | sort -n -u)"
-          neuronal_parent_active="$(awk 'END{print NR+0}' "$neuronal_tmp")"
+
+          # GitHub's repository-wide runs listing can transiently omit an older
+          # queued workflow even while its exact run remains queued. Probe the
+          # NEURONAL workflow directly so its 25 physical slots are never loaned
+          # back to PRIORITY because of a pagination/eventual-consistency gap.
+          neuronal_probe_status='GREEN'
+          neuronal_probe_json=''
+          neuronal_probe_error="$(mktemp)"
+          for attempt in 1 2 3; do
+            : > "$neuronal_probe_error"
+            if neuronal_probe_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30" 2>"$neuronal_probe_error")"; then
+              break
+            fi
+            if grep -qi 'rate limit' "$neuronal_probe_error"; then
+              sleep "$((attempt * 2))"
+              continue
+            fi
+            neuronal_probe_status='FAIL_CLOSED'
+            break
+          done
+          if [ -n "$neuronal_probe_json" ]; then
+            neuronal_parent_active="$(printf '%s' "$neuronal_probe_json" | jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
+            neuronal_active_ids="$(printf '%s' "$neuronal_probe_json" | jq -r '.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested") | .id' | paste -sd, -)"
+          else
+            # Fail closed: uncertainty must reserve NEURONAL capacity rather
+            # than overcommit the Enterprise 360 entitlement.
+            neuronal_probe_status='FAIL_CLOSED'
+            neuronal_parent_active=1
+            neuronal_active_ids='UNKNOWN_FAIL_CLOSED'
+          fi
 
           # Reserve the full possible 25 physical NEURONAL runners whenever a
           # NEURONAL parent is active. When it is idle, loan those 25 slots back
@@ -210,6 +239,9 @@ jobs:
           echo "maintenance_target=$MAINTENANCE_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_target=$priority_target" >> "$GITHUB_STEP_SUMMARY"
           echo "neuronal_parent_runs_active=$neuronal_parent_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_probe_status=$neuronal_probe_status" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_active_ids=${neuronal_active_ids:-none}" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_probe_api_calls=1" >> "$GITHUB_STEP_SUMMARY"
           echo "neuronal_reserved=$neuronal_reserved" >> "$GITHUB_STEP_SUMMARY"
           echo "neuronal_max_physical=$NEURONAL_MAX_PHYSICAL" >> "$GITHUB_STEP_SUMMARY"
           echo "total_useful_target=$total_useful_target" >> "$GITHUB_STEP_SUMMARY"
@@ -222,7 +254,7 @@ jobs:
           echo "cancelled_background_queue_runs=$cancelled_background_queue_runs" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
-          echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"
+          echo "api_snapshot_calls_max=21" >> "$GITHUB_STEP_SUMMARY"
           echo "worker_pressure_reads=0" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_non_transient_retry=false" >> "$GITHUB_STEP_SUMMARY"
