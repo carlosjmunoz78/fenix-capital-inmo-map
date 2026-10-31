@@ -26,14 +26,14 @@ export function assessQaPromotionReadiness({tribunal,prHandoff,policies,owner_en
   if(policies.prod_authorized!==true||policies.prod_write_authorized!==true)blockers.push('PROD_AUTHORITY_NOT_GRANTED');
   const autonomousReady=blockers.length===0;
   return {
-    schema_version:'0.1.0',state_type:'CEREBRO_QA_PROMOTION_READINESS_V0',company_id:'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.1.0',updated_at:now,
+    schema_version:'0.2.0',state_type:'CEREBRO_QA_PROMOTION_READINESS_V0',company_id:'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.2.0',updated_at:now,
     status:autonomousReady?'AUTONOMOUS_PROMOTION_READY':'HUMAN_REQUIRED',
     human_required:autonomousReady?null:{reason:CANONICAL_REASON,scope:'LOW_RISK_APP_PATCH_PROMOTION',owner_engine,domain_engine,blockers},
     owner_engine,domain_engine,
     evidence:{tribunal_status:tribunal.status,tribunal_approved:tribunal.approved===true,pr_handoff_status:prHandoff.status,preprod_patch_validated:prHandoff.preprod_patch_validated===true,domain_autonomy_mode:domainPolicy.autonomy_mode,domain_evidence_state:domainPolicy.evidence_state,registry_prod_authorized:policies.prod_authorized===true,registry_prod_write_authorized:policies.prod_write_authorized===true},
     blockers,
-    authority:{merge_authorized:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false},
-    next_gate:autonomousReady?'GOVERNED_PROMOTION_EXECUTOR_NOT_IMPLEMENTED':'POLICY_AND_DOMAIN_EVIDENCE_REQUIRED',
+    authority:{merge_authorized:autonomousReady,promotion_authorized:autonomousReady,prod_authorized:autonomousReady,prod_write_authorized:autonomousReady},
+    next_gate:autonomousReady?'GOVERNED_PROMOTION_EXECUTOR_V1':'POLICY_AND_DOMAIN_EVIDENCE_REQUIRED',
     safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}
   };
 }
