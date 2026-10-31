@@ -84,7 +84,7 @@ jobs:
           grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'NO'" "$heartbeat"
           grep -q "CEREBRO_PROD_WRITE: 'false'" "$heartbeat"
           grep -q "CEREBRO_TRADING_ACCESS: 'false'" "$heartbeat"
-          grep -q "cron: '*/15 \* \* \* \*'" "$heartbeat"
+          grep -Fq "cron: '*/15 * * * *'" "$heartbeat"
           grep -q "controller='cerebro-continuous-work-factory-v0.yml'" "$heartbeat"
           grep -q 'actions/workflows/${controller}/runs?per_page=20' "$heartbeat"
           grep -q 'actions/workflows/${controller}/dispatches' "$heartbeat"
