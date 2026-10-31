@@ -29,6 +29,7 @@ env:
   CEREBRO_TRADING_ACCESS: 'false'
   CEREBRO_PORTFOLIO_BASE_LANES: '182'
   CEREBRO_PORTFOLIO_MAX_LANES: '282'
+  CEREBRO_PORTFOLIO_MACOS_LOAN_START: '232'
   CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'
   CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
   CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
@@ -36,7 +37,7 @@ env:
 jobs:
   priority-useful-work:
     name: PRIORITY-${{ inputs.lane }}-C${{ inputs.cycle }}
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(inputs.lane) >= 232 && 'macos-latest' || 'ubuntu-latest' }}
     timeout-minutes: 11
     steps:
       - uses: actions/checkout@v4
@@ -54,6 +55,8 @@ jobs:
           test "$CEREBRO_TRADING_ACCESS" = false
           test "$CEREBRO_PORTFOLIO_INNER_PARALLELISM" -eq 4
           test "$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" = rolling
+          test "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" -eq 232
+          test $((CEREBRO_PORTFOLIO_MAX_LANES - CEREBRO_PORTFOLIO_MACOS_LOAN_START)) -eq 50
           case '${{ inputs.lane }}' in ''|*[!0-9]*) exit 2 ;; esac
           case '${{ inputs.cycle }}' in ''|*[!0-9]*) exit 2 ;; esac
           test '${{ inputs.lane }}' -ge 0 && test '${{ inputs.lane }}' -le 281
@@ -101,6 +104,7 @@ jobs:
           echo "inner_parallelism=$parallelism" >> "$GITHUB_STEP_SUMMARY"
           echo "evidence_write_mode=$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
           echo "base_lane=$([ "$lane" -lt 182 ] && echo true || echo false)" >> "$GITHUB_STEP_SUMMARY"
+          echo "runner_pool=$([ "$lane" -ge "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" ] && echo macos || echo ubuntu)" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
