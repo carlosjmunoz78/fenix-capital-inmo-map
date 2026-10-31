@@ -1,0 +1,153 @@
+name: CEREBRO macOS Loan Queue Migration V1
+run-name: CEREBRO macOS LOAN MIGRATION · PREPROD
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-macos-loan-queue-migration-v1.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/cerebro-macos-loan-queue-migration-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-macos-loan-queue-migration-v1
+  cancel-in-progress: false
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  MACOS_LOAN_START: '232'
+  PRIORITY_MAX_LANES: '282'
+  NEURONAL_MAX_PHYSICAL: '25'
+
+jobs:
+  validate:
+    name: Validate migration contract
+    runs-on: macos-latest
+    timeout-minutes: 5
+    steps:
+      - name: Guard zero-cost PREPROD migration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.repository_visibility }}" = public
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$MACOS_LOAN_START" -eq 232
+          test "$PRIORITY_MAX_LANES" -eq 282
+          test $((PRIORITY_MAX_LANES - MACOS_LOAN_START)) -eq 50
+          test "$NEURONAL_MAX_PHYSICAL" -eq 25
+          echo 'migration_scope=queued_or_pending_stale_macos_loan_lanes_only' >> "$GITHUB_STEP_SUMMARY"
+          echo 'in_progress_cancelled=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
+
+  migrate:
+    name: Replace stale queued loan lanes with current-main macOS lanes
+    if: github.event_name != 'pull_request'
+    needs: validate
+    runs-on: macos-latest
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Migrate stale queued macOS loan lanes safely
+        shell: bash
+        run: |
+          set -euo pipefail
+          priority='cerebro-portfolio-priority-sustained-v1.yml'
+          neuronal='cerebro-neuronal-superparallel-v1.yml'
+          current_main="$(gh api "/repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
+          test -n "$current_main"
+
+          neuronal_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30")"
+          neuronal_active="$(printf '%s' "$neuronal_json" | jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
+          priority_target="$PRIORITY_MAX_LANES"
+          if [ "$neuronal_active" -gt 0 ]; then
+            priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))
+          fi
+
+          active="$(mktemp)"
+          : > "$active"
+          for status in in_progress queued pending waiting requested; do
+            for page in 1 2 3 4; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | [.id,.status,.path,.display_title,.head_sha] | @tsv' \
+                >> "$active" 2>/dev/null || true
+            done
+          done
+          sort -u "$active" -o "$active"
+
+          priority_active="$(mktemp)"
+          awk -F '\t' -v p=".github/workflows/${priority}" '$3==p' "$active" > "$priority_active"
+
+          migrated=0
+          stale_cancelled=0
+          skipped_in_progress=0
+          skipped_current_main=0
+          seed=$(( $(date +%s) / 60 % 1000000 ))
+
+          for lane in $(seq "$MACOS_LOAN_START" $((priority_target - 1))); do
+            lane_rows="$(awk -F '\t' -v lane="$lane" '$4 ~ ("CEREBRO PRIORITY " lane " ·") {print}' "$priority_active")"
+            [ -n "$lane_rows" ] || continue
+
+            if printf '%s\n' "$lane_rows" | awk -F '\t' '$2=="in_progress" {found=1} END {exit !found}'; then
+              skipped_in_progress=$((skipped_in_progress + 1))
+              continue
+            fi
+
+            if printf '%s\n' "$lane_rows" | awk -F '\t' -v sha="$current_main" '$5==sha {found=1} END {exit !found}'; then
+              skipped_current_main=$((skipped_current_main + 1))
+              continue
+            fi
+
+            stale_ids="$(printf '%s\n' "$lane_rows" | awk -F '\t' -v sha="$current_main" '$2!="in_progress" && $5!=sha {print $1}' | sort -u)"
+            [ -n "$stale_ids" ] || continue
+            for run_id in $stale_ids; do
+              gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+              stale_cancelled=$((stale_cancelled + 1))
+            done
+
+            cycle=$(( (seed + lane) % 1000000 ))
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
+                -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}" 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                migrated=$((migrated + 1))
+                break
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
+                  ;;
+                *) exit 1 ;;
+              esac
+              [ "$attempt" -lt 4 ] || exit 1
+            done
+          done
+
+          echo "current_main=$current_main" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_parent_runs_active=$neuronal_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "priority_target=$priority_target" >> "$GITHUB_STEP_SUMMARY"
+          echo "macos_lane_start=$MACOS_LOAN_START" >> "$GITHUB_STEP_SUMMARY"
+          echo "migrated_lanes=$migrated" >> "$GITHUB_STEP_SUMMARY"
+          echo "stale_queued_runs_cancelled=$stale_cancelled" >> "$GITHUB_STEP_SUMMARY"
+          echo "skipped_in_progress_lanes=$skipped_in_progress" >> "$GITHUB_STEP_SUMMARY"
+          echo "skipped_current_main_lanes=$skipped_current_main" >> "$GITHUB_STEP_SUMMARY"
+          echo 'in_progress_cancelled=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
