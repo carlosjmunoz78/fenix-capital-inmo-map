@@ -5,11 +5,12 @@
   "engine_id": "FACT-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "1.0.0",
-  "status": "DEFINED_NOT_LIVE",
-  "source_branch": "feat/fact001-repair-worker-factory-clean-v1-20261031",
-  "live_workflow_run_id": null,
+  "status": "PREPROD_LIVE_PHYSICALLY_VERIFIED",
+  "source_branch": "main",
+  "live_workflow_run_id": 41190222649,
+  "live_main_sha": "e29e669c80658882e171d5ebf6e3b9e8bdcd8dbf",
   "certified_profile_count_declared": 1,
-  "physical_acceptance_verified": false,
+  "physical_acceptance_verified": true,
   "factory_dispatch_authorized": false,
   "merge_authorized": false,
   "promotion_authorized": false,
@@ -25,5 +26,5 @@
   "backup_declared": true,
   "rollback_declared": true,
   "rebuild_declared": true,
-  "next_gate": "PR_EXACT_HEAD_CI_AND_PREPROD_ACCEPTANCE"
+  "next_gate": "CERTIFY_NEXT_REPAIR_PROFILE_FROM_PHYSICAL_QA_EVIDENCE"
 }
