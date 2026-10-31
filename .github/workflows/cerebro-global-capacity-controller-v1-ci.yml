@@ -32,6 +32,7 @@ jobs:
           set -euo pipefail
           controller='.github/workflows/cerebro-continuous-work-factory-v0.yml'
           worker='.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+          runtime='cerebro/runtime/portfolio-priority-sustained-v1.mjs'
           grep -q "MAINTENANCE_LANES: '68'" "$controller"
           grep -q "PORTFOLIO_BASE_LANES: '182'" "$controller"
           grep -q "PORTFOLIO_LOAN_LANES: '100'" "$controller"
@@ -47,6 +48,13 @@ jobs:
           ! grep -q 'if \[ "$neuronal_active" = true \]; then priority_target=182' "$controller"
           grep -q 'Self-refill base lanes only' "$worker"
           grep -q 'Loan lanes return authority to global controller' "$worker"
+          grep -q "CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'" "$worker"
+          grep -q 'CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling' "$worker"
+          grep -q 'lease_seconds=420; max_units=8192' "$worker"
+          grep -q 'lease_seconds=240; max_units=4096' "$worker"
+          grep -q 'for slot in $(seq 0 $((parallelism - 1)))' "$worker"
+          grep -q "\['cycle','rolling'\]" "$runtime"
+          grep -q 'slot-${execution_slot}.json' "$runtime"
           grep -q 'Self-rearm global capacity controller' "$controller"
           grep -q 'controller_self_rearmed=true' "$controller"
           grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
@@ -57,6 +65,10 @@ jobs:
         run: |
           echo 'base maintenance=68'
           echo 'priority portfolio base=182'
+          echo 'priority worker inner parallelism=4'
+          echo 'priority rolling evidence=true'
+          echo 'priority base lease=420s'
+          echo 'priority loan lease=240s'
           echo 'neuronal reservation=0..100 from real active jobs'
           echo 'unused neuronal share is loaned immediately to priority portfolio'
           echo 'control reserve=10'
