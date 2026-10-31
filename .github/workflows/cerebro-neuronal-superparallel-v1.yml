@@ -265,12 +265,32 @@ jobs:
             'cerebro-governed-promotion-v1.yml'
             'cerebro-fact001-repair-worker-factory-v1.yml'
           )
+          runs_json=''
+          error_file="${RUNNER_TEMP}/neuronal-refill-gh-error.txt"
+          for attempt in 1 2 3; do
+            : > "$error_file"
+            if runs_json="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?per_page=100" 2>"$error_file")"; then
+              break
+            fi
+            if grep -qi 'rate limit' "$error_file"; then
+              sleep "$((attempt * 2))"
+              continue
+            fi
+            echo 'neuronal_self_refill=false' >> "$GITHUB_STEP_SUMMARY"
+            echo 'drain_reason=CRITICAL_PRESSURE_CHECK_ERROR' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          done
+          if [ -z "$runs_json" ]; then
+            echo 'neuronal_self_refill=false' >> "$GITHUB_STEP_SUMMARY"
+            echo 'drain_reason=GITHUB_API_RATE_LIMIT' >> "$GITHUB_STEP_SUMMARY"
+            echo 'refill_fail_safe=true' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           critical_queued=0
           for workflow in "${critical_workflows[@]}"; do
-            for status in queued pending waiting requested; do
-              count="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/runs?status=${status}&per_page=100" --jq '.total_count' 2>/dev/null || echo 0)"
-              critical_queued=$((critical_queued + count))
-            done
+            workflow_path=".github/workflows/${workflow}"
+            count="$(printf '%s' "$runs_json" | jq --arg path "$workflow_path" '[.workflow_runs[] | select(.path == $path and (.status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested"))] | length')"
+            critical_queued=$((critical_queued + count))
           done
           if [ "$critical_queued" -gt 0 ]; then
             echo 'neuronal_self_refill=false' >> "$GITHUB_STEP_SUMMARY"
@@ -278,11 +298,17 @@ jobs:
             echo "critical_queued=$critical_queued" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
-          gh api --method POST \
+          if ! gh api --method POST \
             -H 'Accept: application/vnd.github+json' \
             "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-neuronal-superparallel-v1.yml/dispatches" \
             --input - <<EOF
           {"ref":"main","inputs":{"units":"100","offset":"${NEXT_OFFSET}","run_deepseek":false}}
           EOF
+          then
+            echo 'neuronal_self_refill=false' >> "$GITHUB_STEP_SUMMARY"
+            echo 'drain_reason=REFILL_DISPATCH_DEFERRED' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           echo 'neuronal_self_refill=true' >> "$GITHUB_STEP_SUMMARY"
           echo 'critical_gate_priority=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'critical_pressure_api_calls=1' >> "$GITHUB_STEP_SUMMARY"
