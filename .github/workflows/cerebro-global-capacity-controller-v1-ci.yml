@@ -38,8 +38,13 @@ jobs:
           grep -q "NEURONAL_RESERVED_LANES: '100'" "$controller"
           grep -q "CONTROL_RESERVE: '10'" "$controller"
           grep -q "ENTERPRISE_CAP: '360'" "$controller"
-          grep -q 'neuronal_active' "$controller"
+          grep -q 'neuronal_physical_active' "$controller"
+          grep -q 'physical_neuronal_accounting=true' "$controller"
+          grep -q 'priority_target=$((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES - neuronal_reserved))' "$controller"
+          grep -q 'neuronal_unused_loaned_to_portfolio' "$controller"
+          grep -q 'lane" -ge "$priority_target' "$controller"
           grep -q 'cancelled_priority_loan_runs' "$controller"
+          ! grep -q 'if \[ "$neuronal_active" = true \]; then priority_target=182' "$controller"
           grep -q 'Self-refill base lanes only' "$worker"
           grep -q 'Loan lanes return authority to global controller' "$worker"
           ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$worker"
@@ -49,8 +54,8 @@ jobs:
         run: |
           echo 'base maintenance=68'
           echo 'priority portfolio base=182'
-          echo 'neuronal reserved when active=100'
-          echo 'portfolio temporary loan when neuronal inactive=100'
+          echo 'neuronal reservation=0..100 from real active jobs'
+          echo 'unused neuronal share is loaned immediately to priority portfolio'
           echo 'control reserve=10'
           echo 'maximum physical entitlement=360'
           echo 'target useful=350'
