@@ -1,0 +1,102 @@
+name: APP-001 PREPROD Physical Mobile QA V1
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/login-layout-fix.css'
+      - 'src/App.tsx'
+      - 'src/supabase.ts'
+      - 'tests/app001-preprod-mobile-touch.spec.ts'
+      - 'playwright.config.ts'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
+  push:
+    branches:
+      - main
+      - 'release/app-fenix-static/**'
+    paths:
+      - 'src/login-layout-fix.css'
+      - 'src/App.tsx'
+      - 'src/supabase.ts'
+      - 'tests/app001-preprod-mobile-touch.spec.ts'
+      - '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app001-preprod-physical-mobile-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  physical-mobile-qa:
+    name: APP-001 isolated PREPROD · 412x839 · 6 touch targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      QA_APP_URL: http://127.0.0.1:4173/
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Guard isolated PREPROD authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test "$QA_APP_URL" = 'http://127.0.0.1:4173/'
+
+      - name: Install dependencies reproducibly
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+        timeout-minutes: 5
+
+      - name: Build isolated PREPROD candidate
+        run: npm run build
+
+      - name: Physical mobile QA
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/app001-preprod-mobile-touch.spec.ts --project=desktop-chromium
+
+      - name: Upload QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app001-preprod-mobile-physical-qa-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Acceptance summary
+        if: success()
+        run: |
+          echo 'APP-001 PREPROD_PHYSICAL_QA=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo "candidate_sha=${GITHUB_SHA}" >> "$GITHUB_STEP_SUMMARY"
+          echo "candidate_ref=${GITHUB_REF}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'viewport=412x839' >> "$GITHUB_STEP_SUMMARY"
+          echo 'required_touch_targets=6' >> "$GITHUB_STEP_SUMMARY"
+          echo 'minimum_hit_area=44x44' >> "$GITHUB_STEP_SUMMARY"
+          echo 'horizontal_overflow=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
