@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+
       - name: Syntax and topology tests
         run: |
           node --check cerebro/runtime/continuous-useful-work-factory-v0.mjs
@@ -37,7 +38,8 @@ jobs:
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
-      - name: Verify 360 shared-capacity equations critical-gate priority and safety
+
+      - name: Verify staged 120 capacity contract and centralized critical admission
         shell: bash
         run: |
           set -euo pipefail
@@ -45,21 +47,22 @@ jobs:
           maintenance='.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml'
           priority='.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
           neuronal='.github/workflows/cerebro-neuronal-superparallel-v1.yml'
-          continuous_runtime='cerebro/runtime/continuous-useful-work-factory-v0.mjs'
-          mission_runtime='cerebro/runtime/mission-derived-useful-work-v1.mjs'
-          priority_runtime='cerebro/runtime/portfolio-priority-sustained-v1.mjs'
 
           grep -q "USEFUL_POOL: '350'" "$controller"
-          grep -q "MAINTENANCE_MAX_LANES: '68'" "$controller"
-          ! grep -q "MAINTENANCE_LANES: '68'" "$controller"
-          grep -q "PORTFOLIO_BASE_LANES: '182'" "$controller"
-          grep -q "PORTFOLIO_LOAN_LANES: '100'" "$controller"
-          grep -q "NEURONAL_RESERVED_LANES: '100'" "$controller"
           grep -q "CONTROL_RESERVE: '10'" "$controller"
           grep -q "ENTERPRISE_CAP: '360'" "$controller"
+          grep -q "RAMP_TARGET_USEFUL: '120'" "$controller"
+          grep -q "MAINTENANCE_RAMP_LANES: '40'" "$controller"
+          grep -q "PRIORITY_RAMP_LANES: '80'" "$controller"
+          grep -q "NEURONAL_MAX_PHYSICAL: '25'" "$controller"
           grep -q 'test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
-          grep -q 'normal_target_useful=$((MAINTENANCE_MAX_LANES + priority_target + neuronal_reserved))' "$controller"
-          grep -q 'test "$normal_target_useful" -eq "$USEFUL_POOL"' "$controller"
+          grep -q 'test $((MAINTENANCE_RAMP_LANES + PRIORITY_RAMP_LANES)) -eq "$RAMP_TARGET_USEFUL"' "$controller"
+          grep -q "capacity_mode='RAMP120'" "$controller"
+          grep -q 'api_snapshot_calls_max=10' "$controller"
+          grep -q 'worker_pressure_reads=0' "$controller"
+          grep -q 'controller_self_rearmed=false' "$controller"
+          grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
+          ! grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
 
           for critical in \
             cerebro-enterprise-acceleration-v0.yml \
@@ -69,75 +72,44 @@ jobs:
             cerebro-governed-promotion-v1.yml \
             cerebro-fact001-repair-worker-factory-v1.yml; do
             grep -q "$critical" "$controller"
-            grep -q "$critical" "$maintenance"
-            grep -q "$critical" "$priority"
           done
-          grep -q "capacity_mode='CONTROL_PRESSURE'" "$controller"
           grep -q 'critical_queued_count' "$controller"
           grep -q 'critical_control_pressure' "$controller"
           grep -q 'cancelled_background_queue_runs' "$controller"
-          grep -q 'maintenance_68_is_ceiling_not_reserved_quota=true' "$controller"
           grep -q 'in_progress_background_cancelled=false' "$controller"
-          grep -q "if \[ \"\$critical_pressure\" = true \]" "$controller"
-          grep -q 'CRITICAL_CONTROL_PRESSURE' "$maintenance"
-          grep -q 'CRITICAL_CONTROL_PRESSURE' "$priority"
-          grep -q 'critical_gate_priority=true' "$maintenance"
-          grep -q 'critical_gate_priority=true' "$priority"
-
-          grep -q 'neuronal_physical_active' "$controller"
-          grep -q 'physical_neuronal_accounting=true' "$controller"
-          grep -q 'priority_target=$((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES - neuronal_reserved))' "$controller"
-          grep -q 'neuronal_unused_loaned_to_portfolio' "$controller"
-          grep -q 'cancelled_priority_loan_runs' "$controller"
-          ! grep -q 'if \[ "$neuronal_active" = true \]; then priority_target=182' "$controller"
 
           grep -q "CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'" "$maintenance"
-          grep -q 'CEREBRO_MISSION_WORK_WRITE_MODE: rolling' "$maintenance"
-          grep -q 'CEREBRO_CONTINUOUS_WORK_WRITE_MODE: rolling' "$maintenance"
-          grep -q "CEREBRO_MAX_UNITS_PER_LEASE: '8192'" "$maintenance"
-          grep -q 'for slot in $(seq 0 $((batch_size - 1)))' "$maintenance"
-          grep -q "\['cycle','rolling'\]" "$continuous_runtime"
-          grep -q 'slot-${execution_slot}.json' "$continuous_runtime"
-          grep -q "\['cycle','rolling'\]" "$mission_runtime"
-          grep -q 'slot-${execution_slot}.json' "$mission_runtime"
+          grep -q 'Self-refill sustained lane while a useful source is available' "$maintenance"
+          grep -q 'critical_gate_priority=central_controller' "$maintenance"
+          grep -q 'pressure_reads_per_worker=0' "$maintenance"
+          ! grep -q 'for workflow in "${critical_workflows\[@\]}"' "$maintenance"
 
-          grep -q 'Self-refill base lanes only' "$priority"
-          grep -q 'Loan lanes return authority to global controller' "$priority"
           grep -q "CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'" "$priority"
-          grep -q 'CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling' "$priority"
-          grep -q 'lease_seconds=420; max_units=8192' "$priority"
-          grep -q 'lease_seconds=240; max_units=4096' "$priority"
-          grep -q 'for slot in $(seq 0 $((parallelism - 1)))' "$priority"
-          grep -q "\['cycle','rolling'\]" "$priority_runtime"
-          grep -q 'slot-${execution_slot}.json' "$priority_runtime"
+          grep -q 'Self-refill base lanes only' "$priority"
+          grep -q 'critical_gate_priority=central_controller' "$priority"
+          grep -q 'pressure_reads_per_worker=0' "$priority"
+          grep -q 'Loan lanes return authority to global controller' "$priority"
+          ! grep -q 'for workflow in "${critical_workflows\[@\]}"' "$priority"
 
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then
             grep -q 'max-parallel: 25' "$neuronal"
             grep -q 'submission_ids' "$neuronal"
-            grep -q 'CRITICAL_CONTROL_PRESSURE' "$neuronal"
           fi
 
-          grep -q 'Self-rearm global capacity controller' "$controller"
-          grep -q 'controller_self_rearmed=true' "$controller"
-          grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
           ! grep -q "CEREBRO_ALLOW_PAID_FANOUT: 'YES'" "$controller" "$maintenance" "$priority"
           ! grep -q "CEREBRO_PROD_WRITE: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
           ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority" "$neuronal"
+
       - name: Acceptance summary
         run: |
-          echo 'useful pool=350'
-          echo 'control reserve=10'
-          echo 'maximum physical entitlement=360'
-          echo 'maintenance normal ceiling=68, not sacred reserved quota'
-          echo 'critical gates including FACT-001 outrank background queue attempts'
-          echo 'queued background may drain under control pressure'
-          echo 'maintenance and priority base self-refill pause under critical pressure'
-          echo 'in-progress background work is never cancelled by this controller'
-          echo 'maintenance worker inner parallelism=4'
-          echo 'priority portfolio base=182'
-          echo 'priority worker inner parallelism=4'
-          echo 'neuronal physical packing target=up to 4 logical units per standard runner when candidate is present'
-          echo 'neuronal reservation=0..100 from real active jobs'
-          echo 'unused neuronal share is loaned immediately to priority portfolio'
-          echo 'controller self-rearm=true'
+          echo 'enterprise entitlement=360 physical jobs total'
+          echo 'useful entitlement=350; control reserve=10'
+          echo 'ramp stage 1 sustained background target=120'
+          echo 'maintenance ramp lanes=40'
+          echo 'priority ramp lanes=80'
+          echo 'neuronal physical cap=25 when separately triggered'
+          echo 'critical admission owner=Global Capacity Controller'
+          echo 'worker critical-pressure API scans=0'
+          echo 'controller reconciliation=schedule every 5 minutes plus push/manual'
+          echo 'controller tight self-rearm=false'
           echo 'additional cost=0 EUR'
