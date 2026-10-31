@@ -1,0 +1,67 @@
+name: CEREBRO CONTROL_PRESSURE Unblock Critical Gates 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-control-pressure-unblock-20261031.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-control-pressure-unblock-20261031
+  cancel-in-progress: false
+
+jobs:
+  unblock:
+    runs-on: macos-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      PR_CI_RUN_ID: '41221488455'
+      NEURONAL_RUN_ID: '41220705383'
+    steps:
+      - name: Confirm critical gates are still waiting
+        shell: bash
+        run: |
+          set -euo pipefail
+          pr_status="$(gh api "/repos/${GH_REPO}/actions/runs/${PR_CI_RUN_ID}" --jq '.status')"
+          neuronal_status="$(gh api "/repos/${GH_REPO}/actions/runs/${NEURONAL_RUN_ID}" --jq '.status')"
+          echo "pr_ci_status=${pr_status}"
+          echo "neuronal_parent_status=${neuronal_status}"
+          if [ "$pr_status" = completed ] && [ "$neuronal_status" = completed ]; then
+            echo 'critical_pressure=false; nothing to do'
+            exit 0
+          fi
+      - name: Cancel queued background only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cancelled=0
+          for status in queued pending waiting requested; do
+            for page in 1 2 3 4 5; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | select(.path==".github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml" or .path==".github/workflows/cerebro-portfolio-priority-sustained-v1.yml") | [.id,.path,.display_title] | @tsv' 2>/dev/null || true
+            done
+          done | sort -u > /tmp/background-queued.tsv
+
+          while IFS=$'\t' read -r run_id _path _title; do
+            [ -n "$run_id" ] || continue
+            gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+            cancelled=$((cancelled + 1))
+          done < /tmp/background-queued.tsv
+
+          echo "control_pressure=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "queued_background_cancelled=${cancelled}" >> "$GITHUB_STEP_SUMMARY"
+          echo "in_progress_cancelled=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_pr_ci_run=${PR_CI_RUN_ID}" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_neuronal_run=${NEURONAL_RUN_ID}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'refill_after_gates=canonical_global_controller' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
