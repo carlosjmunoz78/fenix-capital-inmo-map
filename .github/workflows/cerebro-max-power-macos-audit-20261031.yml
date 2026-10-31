@@ -1,0 +1,60 @@
+name: CEREBRO Max Power macOS Audit 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-max-power-macos-audit-20261031.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: macos-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Count live CEREBRO capacity by workflow and state
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp)"
+          : > "$tmp"
+          for status in in_progress queued pending waiting requested; do
+            for page in 1 2 3 4 5; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | [.id,.status,.path,.display_title] | @tsv' >> "$tmp" 2>/dev/null || true
+            done
+          done
+          sort -u "$tmp" -o "$tmp"
+
+          count_path_state(){
+            local path="$1" state="$2"
+            awk -F '\t' -v p="$path" -v s="$state" '$2==s && $3==p{n++} END{print n+0}' "$tmp"
+          }
+          unique_lanes(){
+            local path="$1" prefix="$2"
+            awk -F '\t' -v p="$path" '$3==p{print $4}' "$tmp" | sed -n -E "s/.*${prefix} ([0-9]+).*/\\1/p" | sort -n -u | wc -l | tr -d ' '
+          }
+
+          sustained_unique="$(unique_lanes '.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml' 'CEREBRO SUSTAINED')"
+          priority_unique="$(unique_lanes '.github/workflows/cerebro-portfolio-priority-sustained-v1.yml' 'CEREBRO PRIORITY')"
+          neuronal_active="$(awk -F '\t' '$3==".github/workflows/cerebro-neuronal-superparallel-v1.yml" && ($2=="in_progress"||$2=="queued"||$2=="pending"||$2=="waiting"||$2=="requested"){n++} END{print n+0}' "$tmp")"
+          neuronal_in_progress="$(count_path_state '.github/workflows/cerebro-neuronal-superparallel-v1.yml' 'in_progress')"
+          neuronal_queued="$(awk -F '\t' '$3==".github/workflows/cerebro-neuronal-superparallel-v1.yml" && ($2=="queued"||$2=="pending"||$2=="waiting"||$2=="requested"){n++} END{print n+0}' "$tmp")"
+          total_in_progress="$(awk -F '\t' '$2=="in_progress"{n++} END{print n+0}' "$tmp")"
+          total_queued="$(awk -F '\t' '$2=="queued"||$2=="pending"||$2=="waiting"||$2=="requested"{n++} END{print n+0}' "$tmp")"
+          fact_active="$(awk -F '\t' '$3==".github/workflows/cerebro-fact001-repair-worker-factory-v1.yml" && ($2=="in_progress"||$2=="queued"||$2=="pending"||$2=="waiting"||$2=="requested"){n++} END{print n+0}' "$tmp")"
+          controller_active="$(awk -F '\t' '$3==".github/workflows/cerebro-continuous-work-factory-v0.yml" && ($2=="in_progress"||$2=="queued"||$2=="pending"||$2=="waiting"||$2=="requested"){n++} END{print n+0}' "$tmp")"
+
+          echo "MAX_POWER_LIVE sustained_unique=${sustained_unique} priority_unique=${priority_unique} neuronal_active=${neuronal_active} neuronal_in_progress=${neuronal_in_progress} neuronal_queued=${neuronal_queued} fact001_active=${fact_active} controller_active=${controller_active} total_in_progress=${total_in_progress} total_queued_or_pending=${total_queued}"
+          echo 'TARGET useful=350 control=10 sustained=68 priority_with_neuronal=257 neuronal_physical=25 neuronal_logical=100 deepseek=false paid_ai=false prod_write=false trading=false'
+
+          test "$sustained_unique" -le 68
+          test "$priority_unique" -le 282
+          test "$neuronal_active" -ge 1
