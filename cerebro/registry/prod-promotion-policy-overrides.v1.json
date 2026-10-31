@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_PROD_PROMOTION_POLICY_OVERRIDES_V1",
+  "company_id": "fenix",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "v1",
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "default": "FAIL_CLOSED",
+  "policies": [
+    {
+      "policy_id": "prod-promotion:fenix-app-low-risk-v1",
+      "company_id": "fenix",
+      "engine_id": "APP-001",
+      "target": "APP_FENIX_STATIC",
+      "autonomy_mode": "PREPROD_AUTONOMOUS",
+      "evidence_state": "GOVERNED_PROD_PROMOTION_V1_ELIGIBLE",
+      "prod_authorized": true,
+      "prod_write_authorized": true,
+      "kill_switch_enabled": true,
+      "kill_switch_state": "ARMED",
+      "automatic_rollback_allowed": true,
+      "additional_cost_limit_eur": 0,
+      "allowed_risk_classes": ["LOW"],
+      "max_files_changed": 1,
+      "allowed_paths": ["src/App.tsx"],
+      "required_terminal_state": "PROD_PROMOTED",
+      "required_gates": [
+        "contracts",
+        "permissions",
+        "tests",
+        "evaluation",
+        "tribunal",
+        "observability",
+        "rollback",
+        "backup",
+        "rebuild",
+        "cost_measured",
+        "policy",
+        "preprod",
+        "old_vs_new",
+        "canary"
+      ],
+      "human_required_reasons": [
+        "LEGAL_REQUIRED",
+        "SIGNATURE_REQUIRED",
+        "LOW_CONFIDENCE",
+        "HIGH_RISK",
+        "POLICY_CONFLICT",
+        "SECURITY_INCIDENT",
+        "MONEY_LIMIT",
+        "CUSTOMER_HUMAN_REQUEST"
+      ]
+    }
+  ]
+}
