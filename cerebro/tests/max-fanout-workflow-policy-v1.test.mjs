@@ -5,9 +5,12 @@ import fs from 'node:fs';
 const workflow=fs.readFileSync(new URL('../../.github/workflows/cerebro-max-fanout-24h-v1.yml',import.meta.url),'utf8');
 const neuronal=fs.readFileSync(new URL('../../.github/workflows/cerebro-neuronal-superparallel-v1.yml',import.meta.url),'utf8');
 
-test('PR validation does not consume the portfolio workers',()=>{
-  assert.ok(workflow.includes("portfolio-plan:\n    if: ${{ github.event_name != 'pull_request' }}"));
-  assert.ok(workflow.includes('PRs run contract/policy validation only; no portfolio fanout'));
+test('push schedule and PR validate only; legacy portfolio burst requires explicit dispatch',()=>{
+  assert.ok(workflow.includes("portfolio-plan:\n    if: ${{ github.event_name == 'workflow_dispatch' }}"));
+  assert.ok(workflow.includes("evidence-workers:\n    if: ${{ github.event_name == 'workflow_dispatch' && needs.portfolio-plan.outputs.planned != '0' }}"));
+  assert.ok(workflow.includes('push_schedule_pr_validation_only=true'));
+  assert.ok(workflow.includes('portfolio_heavy_fanout_requires_workflow_dispatch=true'));
+  assert.ok(workflow.includes('global_capacity_controller_is_primary_admission_owner=true'));
 });
 
 test('portfolio fanout is capped at 250 and plans only non-empty shards',()=>{
@@ -41,7 +44,7 @@ test('NEURONAL is fair-share capped at 100 and self-refills with 100',()=>{
   assert.ok(neuronal.includes('enterprise_neuronal_fair_share_max_parallel=100'));
 });
 
-test('shared Enterprise allocation preserves 10 control slots under the 360 live cap',()=>{
+test('legacy allocation metadata remains bounded by the verified 360 live cap',()=>{
   assert.ok(workflow.includes('portfolio_parallel_cap=250'));
   assert.ok(workflow.includes('neuronal_reserved_parallel_cap=100'));
   assert.ok(workflow.includes('control_reserve=10'));
