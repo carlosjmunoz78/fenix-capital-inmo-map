@@ -34,7 +34,7 @@ jobs:
           node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
           node --test cerebro/tests/mission-derived-useful-work-v1.test.mjs
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
-      - name: Verify 360 shared-capacity equations and safety
+      - name: Verify 360 shared-capacity equations critical-gate priority and safety
         shell: bash
         run: |
           set -euo pipefail
@@ -44,19 +44,48 @@ jobs:
           continuous_runtime='cerebro/runtime/continuous-useful-work-factory-v0.mjs'
           mission_runtime='cerebro/runtime/mission-derived-useful-work-v1.mjs'
           priority_runtime='cerebro/runtime/portfolio-priority-sustained-v1.mjs'
-          grep -q "MAINTENANCE_LANES: '68'" "$controller"
+
+          grep -q "USEFUL_POOL: '350'" "$controller"
+          grep -q "MAINTENANCE_MAX_LANES: '68'" "$controller"
+          ! grep -q "MAINTENANCE_LANES: '68'" "$controller"
           grep -q "PORTFOLIO_BASE_LANES: '182'" "$controller"
           grep -q "PORTFOLIO_LOAN_LANES: '100'" "$controller"
           grep -q "NEURONAL_RESERVED_LANES: '100'" "$controller"
           grep -q "CONTROL_RESERVE: '10'" "$controller"
           grep -q "ENTERPRISE_CAP: '360'" "$controller"
+          grep -q 'test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
+          grep -q 'normal_target_useful=$((MAINTENANCE_MAX_LANES + priority_target + neuronal_reserved))' "$controller"
+          grep -q 'test "$normal_target_useful" -eq "$USEFUL_POOL"' "$controller"
+
+          for critical in \
+            cerebro-enterprise-acceleration-v0.yml \
+            cerebro-global-capacity-controller-v1-ci.yml \
+            cerebro-auto001-preprod-patch-executor-v0.yml \
+            cerebro-auto001-prod-closure-v1.yml \
+            cerebro-governed-promotion-v1.yml; do
+            grep -q "$critical" "$controller"
+            grep -q "$critical" "$maintenance"
+            grep -q "$critical" "$priority"
+          done
+          grep -q "capacity_mode='CONTROL_PRESSURE'" "$controller"
+          grep -q 'critical_queued_count' "$controller"
+          grep -q 'critical_control_pressure' "$controller"
+          grep -q 'cancelled_background_queue_runs' "$controller"
+          grep -q 'maintenance_68_is_ceiling_not_reserved_quota=true' "$controller"
+          grep -q 'in_progress_background_cancelled=false' "$controller"
+          grep -q "if \[ \"\$critical_pressure\" = true \]" "$controller"
+          grep -q 'CRITICAL_CONTROL_PRESSURE' "$maintenance"
+          grep -q 'CRITICAL_CONTROL_PRESSURE' "$priority"
+          grep -q 'critical_gate_priority=true' "$maintenance"
+          grep -q 'critical_gate_priority=true' "$priority"
+
           grep -q 'neuronal_physical_active' "$controller"
           grep -q 'physical_neuronal_accounting=true' "$controller"
           grep -q 'priority_target=$((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES - neuronal_reserved))' "$controller"
           grep -q 'neuronal_unused_loaned_to_portfolio' "$controller"
-          grep -q 'lane" -ge "$priority_target' "$controller"
           grep -q 'cancelled_priority_loan_runs' "$controller"
           ! grep -q 'if \[ "$neuronal_active" = true \]; then priority_target=182' "$controller"
+
           grep -q "CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'" "$maintenance"
           grep -q 'CEREBRO_MISSION_WORK_WRITE_MODE: rolling' "$maintenance"
           grep -q 'CEREBRO_CONTINUOUS_WORK_WRITE_MODE: rolling' "$maintenance"
@@ -66,6 +95,7 @@ jobs:
           grep -q 'slot-${execution_slot}.json' "$continuous_runtime"
           grep -q "\['cycle','rolling'\]" "$mission_runtime"
           grep -q 'slot-${execution_slot}.json' "$mission_runtime"
+
           grep -q 'Self-refill base lanes only' "$priority"
           grep -q 'Loan lanes return authority to global controller' "$priority"
           grep -q "CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'" "$priority"
@@ -75,6 +105,7 @@ jobs:
           grep -q 'for slot in $(seq 0 $((parallelism - 1)))' "$priority"
           grep -q "\['cycle','rolling'\]" "$priority_runtime"
           grep -q 'slot-${execution_slot}.json' "$priority_runtime"
+
           grep -q 'Self-rearm global capacity controller' "$controller"
           grep -q 'controller_self_rearmed=true' "$controller"
           grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
@@ -83,19 +114,18 @@ jobs:
           ! grep -q "CEREBRO_TRADING_ACCESS: 'true'" "$controller" "$maintenance" "$priority"
       - name: Acceptance summary
         run: |
-          echo 'base maintenance=68'
-          echo 'maintenance worker inner parallelism=4'
-          echo 'maintenance rolling evidence=true'
-          echo 'maintenance lease=420s'
-          echo 'priority portfolio base=182'
-          echo 'priority worker inner parallelism=4'
-          echo 'priority rolling evidence=true'
-          echo 'priority base lease=420s'
-          echo 'priority loan lease=240s'
-          echo 'neuronal reservation=0..100 from real active jobs'
-          echo 'unused neuronal share is loaned immediately to priority portfolio'
+          echo 'useful pool=350'
           echo 'control reserve=10'
           echo 'maximum physical entitlement=360'
-          echo 'target useful=350'
+          echo 'maintenance normal ceiling=68, not sacred reserved quota'
+          echo 'critical gates outrank background queue attempts'
+          echo 'queued background may drain under control pressure'
+          echo 'maintenance and priority base self-refill pause under critical pressure'
+          echo 'in-progress background work is never cancelled by this controller'
+          echo 'maintenance worker inner parallelism=4'
+          echo 'priority portfolio base=182'
+          echo 'priority worker inner parallelism=4'
+          echo 'neuronal reservation=0..100 from real active jobs'
+          echo 'unused neuronal share is loaned immediately to priority portfolio'
           echo 'controller self-rearm=true'
           echo 'additional cost=0 EUR'

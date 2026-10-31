@@ -246,6 +246,30 @@ jobs:
             exit 0
           fi
 
+          critical_workflows=(
+            'cerebro-enterprise-acceleration-v0.yml'
+            'cerebro-global-capacity-controller-v1-ci.yml'
+            'cerebro-auto001-preprod-patch-executor-v0.yml'
+            'cerebro-auto001-prod-closure-v1.yml'
+            'cerebro-governed-promotion-v1.yml'
+          )
+          critical_pressure=false
+          for workflow in "${critical_workflows[@]}"; do
+            for status in queued pending waiting requested; do
+              count="$(gh api "/repos/${GH_REPO}/actions/workflows/${workflow}/runs?status=${status}&per_page=1" --jq '.total_count' 2>/dev/null || echo 0)"
+              case "$count" in ''|*[!0-9]*) count=0 ;; esac
+              if [ "$count" -gt 0 ]; then critical_pressure=true; break 2; fi
+            done
+          done
+          if [ "$critical_pressure" = true ]; then
+            echo "self_refilled_lane=false" >> "$GITHUB_STEP_SUMMARY"
+            echo "drain_reason=CRITICAL_CONTROL_PRESSURE" >> "$GITHUB_STEP_SUMMARY"
+            echo "critical_gate_priority=true" >> "$GITHUB_STEP_SUMMARY"
+            echo "lane=$lane" >> "$GITHUB_STEP_SUMMARY"
+            echo "continuous=false" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
           gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
             -f "ref=${ref}" \
             -f "inputs[lane]=${lane}" \
@@ -254,6 +278,7 @@ jobs:
           echo "self_refilled_ref=${ref}" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=${next}" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "critical_gate_priority=true" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "post_dag_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
           echo "job001_capacity_contract=360/360/360" >> "$GITHUB_STEP_SUMMARY"
