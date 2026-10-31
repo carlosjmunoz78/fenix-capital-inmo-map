@@ -38,7 +38,8 @@
         "cost_measured",
         "policy",
         "preprod",
-        "old_vs_new"
+        "old_vs_new",
+        "canary"
       ],
       "human_required_reasons": [
         "LEGAL_REQUIRED",
