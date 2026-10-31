@@ -46,7 +46,7 @@ jobs:
           node --test cerebro/tests/max-fanout-workflow-policy-v1.test.mjs
 
   portfolio-plan:
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event_name == 'workflow_dispatch' }}
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -98,7 +98,7 @@ jobs:
           NODE
 
   evidence-workers:
-    if: ${{ github.event_name != 'pull_request' && needs.portfolio-plan.outputs.planned != '0' }}
+    if: ${{ github.event_name == 'workflow_dispatch' && needs.portfolio-plan.outputs.planned != '0' }}
     needs: [validate, portfolio-plan]
     strategy:
       fail-fast: false
@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo 'CEREBRO MAX FANOUT V1 · PRIORITIZED PORTFOLIO FAIR SHARE'
+          echo 'CEREBRO MAX FANOUT V1 · LEGACY MANUAL BURST UNDER GLOBAL ADMISSION'
           echo 'priority_p0=JARVIS_SUPERAGENT+JARVIS_INTERFACE+KNOWLEDGE+AGENTS+MODEL_ROUTER+SKILL_ENGINE'
           echo 'priority_p1=BROWSER+PC+MOBILE+IDENTITY+NOTIFICATIONS+SECURITY+E2E'
           echo 'priority_p2=APP_FACTORY_AND_FACTORIES'
@@ -166,7 +166,9 @@ jobs:
           echo 'enterprise_live_cap=360'
           echo 'macos_live_cap=50'
           echo 'empty_capacity_jobs=false'
-          echo 'PRs run contract/policy validation only; no portfolio fanout'
+          echo 'push_schedule_pr_validation_only=true'
+          echo 'portfolio_heavy_fanout_requires_workflow_dispatch=true'
+          echo 'global_capacity_controller_is_primary_admission_owner=true'
           echo 'DeepSeek runs only after explicit workflow_dispatch opt-in'
           echo 'DeepSeek provider concurrency capped at 8'
           echo 'macOS capacity is reserved for work that actually requires macOS/iOS/Safari; no empty capacity jobs'
