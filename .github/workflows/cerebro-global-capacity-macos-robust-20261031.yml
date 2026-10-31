@@ -1,0 +1,126 @@
+name: CEREBRO Global Capacity macOS Robust Reconcile 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-global-capacity-macos-robust-20261031.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-global-capacity-macos-robust-20261031
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: macos-latest
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      USEFUL_POOL: '350'
+      CONTROL_RESERVE: '10'
+      MAINTENANCE_TARGET: '68'
+      PRIORITY_IDLE_TARGET: '282'
+      NEURONAL_RESERVE: '25'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Revalidate canonical worker contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ github.repository_visibility }}' = public
+          node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+          node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
+          test "$USEFUL_POOL" -eq 350
+          test "$CONTROL_RESERVE" -eq 10
+          test $((USEFUL_POOL + CONTROL_RESERVE)) -eq 360
+      - name: Robust reconcile with direct NEURONAL workflow query
+        shell: bash
+        run: |
+          set -euo pipefail
+          maintenance='cerebro-cloud-useful-continuous-worker-v1.yml'
+          priority='cerebro-portfolio-priority-sustained-v1.yml'
+          neuronal='cerebro-neuronal-superparallel-v1.yml'
+          seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
+
+          active_tmp="$(mktemp)"
+          : > "$active_tmp"
+          for status in in_progress queued pending waiting requested; do
+            for page in 1 2 3 4 5; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | [.id,.status,.path,.display_title] | @tsv' >> "$active_tmp" 2>/dev/null || true
+            done
+          done
+          sort -u "$active_tmp" -o "$active_tmp"
+
+          maint_tmp="$(mktemp)"
+          priority_tmp="$(mktemp)"
+          awk -F '\t' -v p=".github/workflows/${maintenance}" '$3==p' "$active_tmp" > "$maint_tmp"
+          awk -F '\t' -v p=".github/workflows/${priority}" '$3==p' "$active_tmp" > "$priority_tmp"
+
+          maint_present="$(awk -F '\t' '{print $4}' "$maint_tmp" | sed -n -E 's/.*CEREBRO SUSTAINED ([0-9]+).*/\1/p' | sort -n -u)"
+          priority_present="$(awk -F '\t' '{print $4}' "$priority_tmp" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p' | sort -n -u)"
+
+          neuronal_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30")"
+          neuronal_parent_active="$(printf '%s' "$neuronal_json" | jq '[.workflow_runs[] | select(.status=="in_progress" or .status=="queued" or .status=="pending" or .status=="waiting" or .status=="requested")] | length')"
+          neuronal_active_ids="$(printf '%s' "$neuronal_json" | jq -r '.workflow_runs[] | select(.status=="in_progress" or .status=="queued" or .status=="pending" or .status=="waiting" or .status=="requested") | .id' | paste -sd, -)"
+
+          priority_target="$PRIORITY_IDLE_TARGET"
+          neuronal_reserved=0
+          if [ "$neuronal_parent_active" -gt 0 ]; then
+            priority_target=$((PRIORITY_IDLE_TARGET - NEURONAL_RESERVE))
+            neuronal_reserved="$NEURONAL_RESERVE"
+          fi
+          total_target=$((MAINTENANCE_TARGET + priority_target + neuronal_reserved))
+          test "$total_target" -eq "$USEFUL_POOL"
+
+          cancelled=0
+          while IFS=$'\t' read -r run_id status _path title; do
+            [ -n "$run_id" ] || continue
+            lane="$(printf '%s' "$title" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p')"
+            if [ -n "$lane" ] && [ "$lane" -ge "$priority_target" ] && [ "$status" != in_progress ]; then
+              gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+              cancelled=$((cancelled + 1))
+            fi
+          done < "$priority_tmp"
+
+          maint_dispatched=0
+          lane=0
+          while [ "$lane" -lt "$MAINTENANCE_TARGET" ]; do
+            if ! printf '%s\n' "$maint_present" | grep -qx "$lane"; then
+              cycle=$(( (seed_cycle + lane) % 1000000 ))
+              gh api --method POST "/repos/${GH_REPO}/actions/workflows/${maintenance}/dispatches" \
+                -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}"
+              maint_dispatched=$((maint_dispatched + 1))
+            fi
+            lane=$((lane + 1))
+          done
+
+          priority_dispatched=0
+          lane=0
+          while [ "$lane" -lt "$priority_target" ]; do
+            if ! printf '%s\n' "$priority_present" | grep -qx "$lane"; then
+              cycle=$(( (seed_cycle + 1000 + lane) % 1000000 ))
+              gh api --method POST "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
+                -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}"
+              priority_dispatched=$((priority_dispatched + 1))
+            fi
+            lane=$((lane + 1))
+          done
+
+          maint_before="$(printf '%s\n' "$maint_present" | sed '/^$/d' | wc -l | tr -d ' ')"
+          priority_before="$(printf '%s\n' "$priority_present" | sed '/^$/d' | wc -l | tr -d ' ')"
+
+          echo "ROBUST_CAPACITY_RECONCILE neuronal_parent_active=${neuronal_parent_active} neuronal_active_ids=${neuronal_active_ids:-none} neuronal_reserved=${neuronal_reserved} maintenance_before=${maint_before} priority_before=${priority_before} maintenance_dispatched=${maint_dispatched} priority_dispatched=${priority_dispatched} priority_target=${priority_target} cancelled_priority_loans=${cancelled} total_useful_target=${total_target} control_reserve=${CONTROL_RESERVE}"
+          echo 'deepseek=false paid_ai=false prod_write=false trading=false'
+          test "$neuronal_parent_active" -ge 1
