@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_CERTIFIED_REPAIR_WORKER_PROFILES_V1",
+  "company_id": "GLOBAL",
+  "engine_id": "FACT-001",
+  "environment": "PREPROD_CONTROL_PLANE",
+  "version": "1.0.0",
+  "policy": {
+    "new_engine_identity": false,
+    "shared_runtime": true,
+    "repo_write_max_concurrency": 1,
+    "deterministic_first": true,
+    "additional_cost_eur": 0,
+    "paid_ai_required": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "human_required_reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "profiles": [
+    {
+      "profile_id": "AUTO001_APP_HCI_AUTH_SHELL_ROLE_MAIN_V1",
+      "company_id": "fenix",
+      "engine_id": "AUTO-001",
+      "owner_engine_id": "HCI-001",
+      "target_engine_id": "APP-001",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "status": "CERTIFIED_EXISTING_REPAIR_PATH",
+      "transform_id": "APP_AUTH_SHELL_ROLE_MAIN_V0",
+      "planner_path": "cerebro/platform/auto001-preprod-patch-planner-v0.mjs",
+      "transform_path": "cerebro/platform/patch-transforms/app-auth-shell-role-main-v0.mjs",
+      "validator_path": "cerebro/qa/auto001-repair-validator-v0.mjs",
+      "tribunal_path": "cerebro/governance/auto001-repair-tribunal-v0.mjs",
+      "workflow_path": ".github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml",
+      "allowed_files": [
+        "src/App.tsx"
+      ],
+      "max_files_changed": 1,
+      "max_line_delta": 4,
+      "worker_parallelism": 1,
+      "repo_write_concurrency": 1,
+      "idempotency_scope": [
+        "company_id",
+        "profile_id",
+        "base_sha",
+        "transform_id",
+        "target"
+      ],
+      "required_gates": [
+        "VERIFIED_SOURCE_MAPPING",
+        "SNAPSHOT_BOUND_BASE_SHA",
+        "APPLY_CERTIFIED_TRANSFORM",
+        "BUILD_GREEN",
+        "TARGETED_TESTS_GREEN",
+        "DIFF_LIMIT_GREEN",
+        "OLD_VS_NEW_GREEN",
+        "REGRESSION_GREEN",
+        "REBUILD_GREEN",
+        "ROLLBACK_GREEN",
+        "INDEPENDENT_TRIBUNAL_APPROVED"
+      ],
+      "repair_execution_capability": "EXISTING_GOVERNED_PREPROD_WORKFLOW",
+      "factory_may_dispatch": false,
+      "auto_merge": false,
+      "promotion_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "customer_data": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    }
+  ]
+}

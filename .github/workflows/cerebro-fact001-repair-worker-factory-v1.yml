@@ -1,0 +1,96 @@
+name: CEREBRO FACT-001 Certified Repair Worker Factory V1
+run-name: FACT-001 REPAIR WORKER FACTORY · PREPROD · ${{ github.ref_name }}
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-fact001-repair-worker-factory-v1.yml'
+      - 'cerebro/factory/repair-worker-factory-v1.mjs'
+      - 'cerebro/registry/certified-repair-worker-profiles.v1.json'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/platform/patch-transforms/**'
+      - 'cerebro/qa/auto001-repair-validator-v0.mjs'
+      - 'cerebro/governance/auto001-repair-tribunal-v0.mjs'
+      - 'cerebro/tests/repair-worker-factory-v1.test.mjs'
+      - 'cerebro/docs/FACT001_CERTIFIED_REPAIR_WORKER_FACTORY_V1.md'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-fact001-repair-worker-factory-v1.yml'
+      - 'cerebro/factory/repair-worker-factory-v1.mjs'
+      - 'cerebro/registry/certified-repair-worker-profiles.v1.json'
+      - 'cerebro/platform/auto001-preprod-patch-planner-v0.mjs'
+      - 'cerebro/platform/patch-transforms/**'
+      - 'cerebro/qa/auto001-repair-validator-v0.mjs'
+      - 'cerebro/governance/auto001-repair-tribunal-v0.mjs'
+      - 'cerebro/tests/repair-worker-factory-v1.test.mjs'
+      - 'cerebro/docs/FACT001_CERTIFIED_REPAIR_WORKER_FACTORY_V1.md'
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_SUPERVISOR_ENV: PREPROD
+  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  validate-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Guard zero-cost PREPROD factory authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.repository_visibility }}" = public
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+      - name: Validate factory runtime and certified profile contracts
+        run: |
+          node --check cerebro/factory/repair-worker-factory-v1.mjs
+          node --test cerebro/tests/repair-worker-factory-v1.test.mjs
+          node cerebro/factory/repair-worker-factory-v1.mjs validate
+      - name: Generate deterministic repair worker bundle
+        run: |
+          rm -rf artifacts/fact001-repair-worker-factory-v1
+          node cerebro/factory/repair-worker-factory-v1.mjs generate --out artifacts/fact001-repair-worker-factory-v1
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='artifacts/fact001-repair-worker-factory-v1/repair-worker-bundle.json';
+          const x=JSON.parse(fs.readFileSync(file,'utf8'));
+          if(x.state_type!=='CEREBRO_REPAIR_WORKER_FACTORY_BUNDLE_V1')throw new Error('bundle state drift');
+          if(x.worker_count<1)throw new Error('no certified repair workers');
+          if(x.factory_may_dispatch!==false||x.new_engine_identity!==false)throw new Error('factory authority expansion');
+          if(x.repo_write_max_concurrency!==1)throw new Error('repo write concurrency drift');
+          if(x.additional_cost_eur!==0||x.prod_authorized!==false||x.prod_write_authorized!==false||x.trading_access!==false)throw new Error('unsafe bundle authority');
+          console.log(JSON.stringify({status:'CERTIFIED_REPAIR_WORKER_BUNDLE_GREEN',worker_count:x.worker_count,bundle_sha256:x.bundle_sha256,additional_cost_eur:0,prod_authorized:false,trading_access:false}));
+          NODE
+      - name: Publish inspectable factory evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: fact001-certified-repair-workers-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/fact001-repair-worker-factory-v1/
+          if-no-files-found: error
+          retention-days: 1
+      - name: Acceptance summary
+        run: |
+          echo 'factory=FACT-001' >> "$GITHUB_STEP_SUMMARY"
+          echo 'repair_executor=AUTO-001' >> "$GITHUB_STEP_SUMMARY"
+          echo 'environment=PREPROD' >> "$GITHUB_STEP_SUMMARY"
+          echo 'shared_runtime=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'new_engine_identity=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'repo_write_max_concurrency=1' >> "$GITHUB_STEP_SUMMARY"
+          echo 'factory_dispatch_authority=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
