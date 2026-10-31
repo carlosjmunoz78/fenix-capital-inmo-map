@@ -35,7 +35,8 @@ export function buildSourceMappingState({improvements={},remediation={},healing=
     const improvement=improvementsByLearning.get(c.source_learning_id);
     const target=improvement?.target??defaultTarget(plan.owner_engine);
     const dimension=improvement?.dimension??(c.source==='BUG'?'bug_repair':'unknown');
-    const resolved=resolveQaSource({target,dimension,owner_engine:plan.owner_engine});
+    const localizationEvidence=Array.isArray(improvement?.localization_evidence)?improvement.localization_evidence:[];
+    const resolved=resolveQaSource({target,dimension,owner_engine:plan.owner_engine,localization_evidence:localizationEvidence});
     mappings.push({
       repair_id:plan.repair_id,
       case_id:plan.case_id,
@@ -43,18 +44,22 @@ export function buildSourceMappingState({improvements={},remediation={},healing=
       owner_engine:plan.owner_engine,
       target,
       dimension,
+      improvement_id:improvement?.improvement_id??null,
+      expected_metric_delta:improvement?.expected_metric_delta??null,
+      localization_status:resolved.localization_status??'POR_AUDITAR',
       resolution:resolved,
       execution_authority:{code_mutation_authorized:false,preprod_only:true,auto_merge:false,prod_write_authorized:false}
     });
   }
   return {
-    schema_version:'0.1.0',state_type:'CEREBRO_QA_SOURCE_MAPPING_STATE_V0',company_id:remediation.company_id??'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.1.0',updated_at:now,
+    schema_version:'0.2.0',state_type:'CEREBRO_QA_SOURCE_MAPPING_STATE_V0',company_id:remediation.company_id??'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.2.0',updated_at:now,
     mappings_total:mappings.length,
     verified_repo_hints:mappings.filter(x=>x.resolution.status==='SOURCE_HINT_VERIFIED').length,
+    localized_element_samples:mappings.reduce((sum,x)=>sum+(x.resolution.localization_evidence?.length??0),0),
     external_owner_routes:mappings.filter(x=>x.resolution.status==='EXTERNAL_SURFACE_OWNER_VERIFIED').length,
     por_auditar:mappings.filter(x=>String(x.resolution.status).startsWith('POR_AUDITAR')).length,
     mappings,
-    next_gate:'AUTO001_PREPROD_PATCH_EXECUTOR_V0_DESIGN',
+    next_gate:'AUTO001_CERTIFIED_TRANSFORM_LOCALIZATION',
     safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}
   };
 }
@@ -66,5 +71,5 @@ if(import.meta.url===`file://${process.argv[1]}`){
   const out=req(arg('--out'),'--out');
   const state=buildSourceMappingState({improvements:read(improvements),remediation:read(remediation),healing:read(healing)});
   fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,JSON.stringify(state,null,2)+'\n');
-  console.log(JSON.stringify({status:'SOURCE_MAPPING_READY',mappings:state.mappings_total,repo_hints:state.verified_repo_hints,external_routes:state.external_owner_routes,por_auditar:state.por_auditar,cost_eur:0}));
+  console.log(JSON.stringify({status:'SOURCE_MAPPING_READY',mappings:state.mappings_total,repo_hints:state.verified_repo_hints,localized_element_samples:state.localized_element_samples,external_routes:state.external_owner_routes,por_auditar:state.por_auditar,cost_eur:0}));
 }
