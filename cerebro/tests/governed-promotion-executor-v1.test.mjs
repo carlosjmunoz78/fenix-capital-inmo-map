@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {assessGovernedPromotion,finalizeGovernedPromotion,HUMAN_EXCEPTION_REASONS,REQUIRED_PROMOTION_GATES} from '../governance/governed-promotion-executor-v1.mjs';
 
 const SHA='a'.repeat(40);
@@ -12,6 +13,13 @@ test('all required gates produce PROMOTE_READY, never a false PROD claim',()=>{
   assert.equal(r.environment,'PREPROD');
   assert.equal(r.authority.prod_write_authorized,true);
   assert.equal(r.next_gate,'EXACT_HEAD_MERGE_AND_PHYSICAL_PROD_PROOF');
+});
+
+test('AUTO-001 closure packet declares every required PROD gate explicitly green',()=>{
+  const workflow=fs.readFileSync('.github/workflows/cerebro-auto001-prod-closure-v1.yml','utf8');
+  for(const gate of REQUIRED_PROMOTION_GATES){
+    assert.match(workflow,new RegExp(`${gate}:true`),`closure packet missing ${gate}:true`);
+  }
 });
 
 test('any missing gate returns REPAIR_REQUIRED',()=>{
