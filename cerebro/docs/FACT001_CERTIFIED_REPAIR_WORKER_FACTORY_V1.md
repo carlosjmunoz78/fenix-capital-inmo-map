@@ -4,7 +4,7 @@ Date: 2026-10-31
 
 ## Status
 
-**DEFINED / PREPROD CANDIDATE.** This capability is prepared on a feature branch and is not operational on `main` until its pull request passes the required gates and is merged.
+**HECHO / PREPROD LIVE PHYSICALLY VERIFIED.** La capacidad está integrada en `main` y su ejecución física canónica `41190222649` terminó `success` sobre `e29e669c80658882e171d5ebf6e3b9e8bdcd8dbf`. `PROD Live Deploy` quedó `skipped`, por lo que esta activación no desplegó la App en producción. La fábrica sigue sin autoridad para despachar reparaciones, fusionar cambios o escribir en PROD por sí sola.
 
 ## Objective
 
@@ -126,6 +126,8 @@ The workflow emits:
 - PROD/Trading denial state;
 - inspectable artifact containing the generated bundle and worker profiles.
 
+Physical acceptance evidence for V1: GitHub Actions run `41190222649`, `completed/success`, on `main` SHA `e29e669c80658882e171d5ebf6e3b9e8bdcd8dbf`.
+
 ## Promotion rule
 
-This factory capability may move to `main` only after its PR gates are green. A generated repair profile does not become PROD authority merely because FACT-001 can package it. PROD remains governed by the separate promotion path and policy.
+The factory capability is now live in PREPROD on `main`. A generated repair profile does not become PROD authority merely because FACT-001 can package it. PROD remains governed by the separate promotion path and policy. The next functional gate is to certify additional repair profiles from physical QA evidence, never from an inferred or invented patch.
