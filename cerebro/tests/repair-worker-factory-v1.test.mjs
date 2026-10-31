@@ -76,3 +76,15 @@ test('FACT-001 repair worker factory fails closed on authority, concurrency or i
   const dispatch=clone(read(PROFILES));dispatch.profiles[0].factory_may_dispatch=true;
   assert.throws(()=>validateRepairWorkerRegistry(dispatch,{engineRegistry:engines,repoRoot:ROOT}),/FACT-001 may describe but not dispatch/);
 });
+
+test('FACT-001 repair worker factory rejects path-capable profile ids and duplicate contract values',()=>{
+  const engines=read(ENGINES);
+  const unsafeId=clone(read(PROFILES));unsafeId.profiles[0].profile_id='../ESCAPE';
+  assert.throws(()=>validateRepairWorkerRegistry(unsafeId,{engineRegistry:engines,repoRoot:ROOT}),/unsafe profile_id/);
+  const duplicateHuman=clone(read(PROFILES));duplicateHuman.policy.human_required_reasons[7]=duplicateHuman.policy.human_required_reasons[0];
+  assert.throws(()=>validateRepairWorkerRegistry(duplicateHuman,{engineRegistry:engines,repoRoot:ROOT}),/HUMAN_REQUIRED contract drift/);
+  const duplicateGate=clone(read(PROFILES));duplicateGate.profiles[0].required_gates[10]=duplicateGate.profiles[0].required_gates[0];
+  assert.throws(()=>validateRepairWorkerRegistry(duplicateGate,{engineRegistry:engines,repoRoot:ROOT}),/required gates incomplete/);
+  const duplicateAllowed=clone(read(PROFILES));duplicateAllowed.profiles[0].allowed_files=['src/App.tsx','src/App.tsx'];duplicateAllowed.profiles[0].max_files_changed=1;
+  assert.throws(()=>validateRepairWorkerRegistry(duplicateAllowed,{engineRegistry:engines,repoRoot:ROOT}),/duplicate allowed_files/);
+});
