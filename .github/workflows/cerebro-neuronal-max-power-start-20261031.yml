@@ -1,0 +1,52 @@
+name: CEREBRO NEURONAL Max Power Start 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-neuronal-max-power-start-20261031.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+jobs:
+  start-and-rebalance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Guard zero-cost PREPROD max-power start
+        run: |
+          test '${{ github.repository_visibility }}' = public
+          echo 'neuronal_logical_units=100'
+          echo 'neuronal_physical_cap=25'
+          echo 'run_deepseek=false'
+          echo 'paid_ai=false'
+          echo 'prod_write=false'
+          echo 'trading=false'
+      - name: Dispatch one canonical NEURONAL parent
+        shell: bash
+        run: |
+          set -euo pipefail
+          active=0
+          for status in in_progress queued pending waiting requested; do
+            count="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs?status=${status}&per_page=100" --jq '[.workflow_runs[] | select(.path==".github/workflows/cerebro-neuronal-superparallel-v1.yml")] | length' 2>/dev/null || echo 0)"
+            active=$((active + count))
+          done
+          if [ "$active" -gt 0 ]; then
+            echo "NEURONAL_PARENT_ALREADY_ACTIVE count=${active}"
+          else
+            gh workflow run cerebro-neuronal-superparallel-v1.yml --repo "$GITHUB_REPOSITORY" --ref main \
+              -f units=100 -f offset=0 -f run_deepseek=false
+            echo 'NEURONAL_PARENT_DISPATCHED logical=100 physical_cap=25 deepseek=false'
+          fi
+      - name: Rebalance Global Capacity Controller for NEURONAL reserve
+        shell: bash
+        run: |
+          set -euo pipefail
+          sleep 3
+          gh workflow run cerebro-continuous-work-factory-v0.yml --repo "$GITHUB_REPOSITORY" --ref main
+          echo 'GLOBAL_REBALANCE_DISPATCHED target=68_sustained+257_priority+25_neuronal=350_useful reserve_control=10'
