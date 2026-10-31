@@ -39,7 +39,7 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
-      - name: Verify staged 120 capacity contract and centralized critical admission
+      - name: Verify staged 200 capacity contract and centralized critical admission
         shell: bash
         run: |
           set -euo pipefail
@@ -51,13 +51,13 @@ jobs:
           grep -q "USEFUL_POOL: '350'" "$controller"
           grep -q "CONTROL_RESERVE: '10'" "$controller"
           grep -q "ENTERPRISE_CAP: '360'" "$controller"
-          grep -q "RAMP_TARGET_USEFUL: '120'" "$controller"
-          grep -q "MAINTENANCE_RAMP_LANES: '40'" "$controller"
-          grep -q "PRIORITY_RAMP_LANES: '80'" "$controller"
+          grep -q "RAMP_TARGET_USEFUL: '200'" "$controller"
+          grep -q "MAINTENANCE_RAMP_LANES: '68'" "$controller"
+          grep -q "PRIORITY_RAMP_LANES: '132'" "$controller"
           grep -q "NEURONAL_MAX_PHYSICAL: '25'" "$controller"
           grep -q 'test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
           grep -q 'test $((MAINTENANCE_RAMP_LANES + PRIORITY_RAMP_LANES)) -eq "$RAMP_TARGET_USEFUL"' "$controller"
-          grep -q "capacity_mode='RAMP120'" "$controller"
+          grep -q "capacity_mode='RAMP200'" "$controller"
           grep -q 'api_snapshot_calls_max=10' "$controller"
           grep -q 'worker_pressure_reads=0' "$controller"
           grep -q 'controller_self_rearmed=false' "$controller"
@@ -104,9 +104,9 @@ jobs:
         run: |
           echo 'enterprise entitlement=360 physical jobs total'
           echo 'useful entitlement=350; control reserve=10'
-          echo 'ramp stage 1 sustained background target=120'
-          echo 'maintenance ramp lanes=40'
-          echo 'priority ramp lanes=80'
+          echo 'ramp stage 2 sustained background target=200'
+          echo 'maintenance ramp lanes=68'
+          echo 'priority ramp lanes=132'
           echo 'neuronal physical cap=25 when separately triggered'
           echo 'critical admission owner=Global Capacity Controller'
           echo 'worker critical-pressure API scans=0'
