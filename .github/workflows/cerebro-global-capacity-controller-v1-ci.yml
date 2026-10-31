@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -152,4 +152,5 @@ jobs:
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
           echo 'controller reconciliation=heartbeat 240s plus schedule/push/manual backup'
           echo 'heartbeat runner=macos control slot; self-rearm deduplicated and fail-closed'
+          echo 'critical capacity CI runner=macos control plane'
           echo 'additional cost=0 EUR'
