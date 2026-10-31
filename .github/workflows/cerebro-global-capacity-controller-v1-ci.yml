@@ -57,11 +57,16 @@ jobs:
           grep -q 'normal_target_useful=$((MAINTENANCE_MAX_LANES + priority_target + neuronal_reserved))' "$controller"
           grep -q 'test "$normal_target_useful" -eq "$USEFUL_POOL"' "$controller"
 
-          grep -q "'cerebro-enterprise-acceleration-v0.yml'" "$controller"
-          grep -q "'cerebro-global-capacity-controller-v1-ci.yml'" "$controller"
-          grep -q "'cerebro-auto001-preprod-patch-executor-v0.yml'" "$controller"
-          grep -q "'cerebro-auto001-prod-closure-v1.yml'" "$controller"
-          grep -q "'cerebro-governed-promotion-v1.yml'" "$controller"
+          for critical in \
+            cerebro-enterprise-acceleration-v0.yml \
+            cerebro-global-capacity-controller-v1-ci.yml \
+            cerebro-auto001-preprod-patch-executor-v0.yml \
+            cerebro-auto001-prod-closure-v1.yml \
+            cerebro-governed-promotion-v1.yml; do
+            grep -q "$critical" "$controller"
+            grep -q "$critical" "$maintenance"
+            grep -q "$critical" "$priority"
+          done
           grep -q "capacity_mode='CONTROL_PRESSURE'" "$controller"
           grep -q 'critical_queued_count' "$controller"
           grep -q 'critical_control_pressure' "$controller"
@@ -69,7 +74,10 @@ jobs:
           grep -q 'maintenance_68_is_ceiling_not_reserved_quota=true' "$controller"
           grep -q 'in_progress_background_cancelled=false' "$controller"
           grep -q "if \[ \"\$critical_pressure\" = true \]" "$controller"
-          grep -q 'awk -F.*$2!="in_progress"' "$controller"
+          grep -q 'CRITICAL_CONTROL_PRESSURE' "$maintenance"
+          grep -q 'CRITICAL_CONTROL_PRESSURE' "$priority"
+          grep -q 'critical_gate_priority=true' "$maintenance"
+          grep -q 'critical_gate_priority=true' "$priority"
 
           grep -q 'neuronal_physical_active' "$controller"
           grep -q 'physical_neuronal_accounting=true' "$controller"
@@ -112,6 +120,7 @@ jobs:
           echo 'maintenance normal ceiling=68, not sacred reserved quota'
           echo 'critical gates outrank background queue attempts'
           echo 'queued background may drain under control pressure'
+          echo 'maintenance and priority base self-refill pause under critical pressure'
           echo 'in-progress background work is never cancelled by this controller'
           echo 'maintenance worker inner parallelism=4'
           echo 'priority portfolio base=182'
