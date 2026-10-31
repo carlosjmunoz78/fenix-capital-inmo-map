@@ -14,10 +14,13 @@ on:
       - 'package-lock.json'
       - '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
   push:
-    branches: [main]
+    branches:
+      - main
+      - 'release/app-fenix-static/**'
     paths:
       - 'src/login-layout-fix.css'
       - 'src/App.tsx'
+      - 'src/supabase.ts'
       - 'tests/app001-preprod-mobile-touch.spec.ts'
       - '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
 
@@ -88,6 +91,8 @@ jobs:
         if: success()
         run: |
           echo 'APP-001 PREPROD_PHYSICAL_QA=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo "candidate_sha=${GITHUB_SHA}" >> "$GITHUB_STEP_SUMMARY"
+          echo "candidate_ref=${GITHUB_REF}" >> "$GITHUB_STEP_SUMMARY"
           echo 'viewport=412x839' >> "$GITHUB_STEP_SUMMARY"
           echo 'required_touch_targets=6' >> "$GITHUB_STEP_SUMMARY"
           echo 'minimum_hit_area=44x44' >> "$GITHUB_STEP_SUMMARY"
