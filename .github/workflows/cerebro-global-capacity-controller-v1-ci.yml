@@ -113,7 +113,7 @@ jobs:
 
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then
             grep -q 'max-parallel: 25' "$neuronal"
-            grep -q 'batch.submissions' "$neuronal"
+            grep -q 'submission_ids' "$neuronal"
             grep -q 'CRITICAL_CONTROL_PRESSURE' "$neuronal"
           fi
 
