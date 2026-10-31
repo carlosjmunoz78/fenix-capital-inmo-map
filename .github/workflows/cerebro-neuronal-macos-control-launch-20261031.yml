@@ -1,0 +1,81 @@
+name: CEREBRO NEURONAL macOS Control Launch 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-neuronal-macos-control-launch-20261031.yml'
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-neuronal-macos-control-launch-20261031
+  cancel-in-progress: false
+
+jobs:
+  launch:
+    runs-on: macos-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Guard max-power control lane
+        shell: bash
+        run: |
+          set -euo pipefail
+          test '${{ github.repository_visibility }}' = public
+          echo 'control_runtime=macos-latest'
+          echo 'github_enterprise_macos_grant_max=50'
+          echo 'additional_subscription_eur=0'
+          echo 'deepseek=false'
+          echo 'prod_write=false'
+          echo 'trading=false'
+      - name: Launch canonical NEURONAL 100 logical / 25 physical max
+        shell: bash
+        run: |
+          set -euo pipefail
+          active=0
+          for status in in_progress queued pending waiting requested; do
+            count="$(gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100" --jq '[.workflow_runs[] | select(.path==".github/workflows/cerebro-neuronal-superparallel-v1.yml")] | length' 2>/dev/null || echo 0)"
+            active=$((active + count))
+          done
+          if [ "$active" -eq 0 ]; then
+            gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-neuronal-superparallel-v1.yml/dispatches" \
+              -f ref=main -f 'inputs[units]=100' -f 'inputs[offset]=0' -F 'inputs[run_deepseek]=false'
+            echo 'neuronal_parent=DISPATCHED'
+          else
+            echo "neuronal_parent=ALREADY_ACTIVE count=${active}"
+          fi
+      - name: Return only queued PRIORITY loan lanes 257-281 to NEURONAL
+        shell: bash
+        run: |
+          set -euo pipefail
+          cancelled=0
+          for status in queued pending waiting requested; do
+            for page in 1 2 3 4; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | select(.path==".github/workflows/cerebro-portfolio-priority-sustained-v1.yml") | [.id,.display_title] | @tsv' 2>/dev/null || true
+            done
+          done | sort -u > /tmp/priority-queued.tsv
+          while IFS=$'\t' read -r run_id title; do
+            [ -n "$run_id" ] || continue
+            lane="$(printf '%s' "$title" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p')"
+            if [ -n "$lane" ] && [ "$lane" -ge 257 ] && [ "$lane" -le 281 ]; then
+              gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+              cancelled=$((cancelled + 1))
+            fi
+          done < /tmp/priority-queued.tsv
+          echo "priority_loan_queue_cancelled=${cancelled}"
+          echo 'in_progress_cancelled=false'
+          echo 'target=68_sustained+257_priority+25_neuronal=350_useful'
+          echo 'control_reserve=10'
+      - name: Request canonical controller reconciliation
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches" -f ref=main
+          echo 'global_controller_reconcile=DISPATCHED'
