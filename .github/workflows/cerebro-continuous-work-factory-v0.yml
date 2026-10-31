@@ -199,7 +199,7 @@ jobs:
               break
             fi
             if grep -qi 'rate limit' "$neuronal_probe_error"; then
-              sleep "$((attempt * 2))
+              sleep "$((attempt * 2))"
               continue
             fi
             neuronal_probe_status='FAIL_CLOSED'
