@@ -11,6 +11,7 @@ on:
       - 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
       - 'cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs'
       - 'cerebro/tests/neuronal-superparallel-source-v1.test.mjs'
+      - 'cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
       - 'docs/CEREBRO_NEURONAL_SUPERPARALLEL_V1.md'
@@ -20,13 +21,14 @@ on:
       - 'cerebro/runtime/neuronal-superparallel-source-v1.mjs'
       - 'cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs'
       - 'cerebro/tests/neuronal-superparallel-source-v1.test.mjs'
+      - 'cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs'
       - 'cerebro/tests/cerebro-supervisor-daemon-dynamic-v1.test.mjs'
       - '.github/workflows/cerebro-neuronal-superparallel-v1.yml'
       - 'docs/CEREBRO_NEURONAL_SUPERPARALLEL_V1.md'
   workflow_dispatch:
     inputs:
       units:
-        description: 'Normal deterministic NEURONAL units per wave. Fair-share cap 100 under the verified shared Enterprise 360 pool.'
+        description: 'Normal deterministic NEURONAL logical units per wave. Fair-share cap 100 under the verified shared Enterprise 360 pool.'
         required: false
         default: '100'
         type: string
@@ -54,6 +56,7 @@ env:
   CEREBRO_PROD_WRITE: 'false'
   CEREBRO_TRADING_ACCESS: 'false'
   CEREBRO_NEURONAL_OUT_DIR: artifacts/neuronal-superparallel-v1
+  CEREBRO_NEURONAL_INNER_PARALLELISM: '4'
 
 jobs:
   validate-materialize:
@@ -72,7 +75,9 @@ jobs:
           node --check cerebro/runtime/neuronal-superparallel-source-v1.mjs
           node --check cerebro/runtime/neuronal-superparallel-deepseek-v1.mjs
       - name: Contract and DAG tests
-        run: node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+        run: |
+          node --test cerebro/tests/neuronal-superparallel-source-v1.test.mjs
+          node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs
       - name: Validate canonical campaign
         run: node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=validate
       - name: Materialize all 6,449 submissions as durable campaign artifact
@@ -91,6 +96,7 @@ jobs:
     outputs:
       matrix: ${{ steps.plan.outputs.matrix }}
       planned: ${{ steps.plan.outputs.planned }}
+      physical_jobs: ${{ steps.plan.outputs.physical_jobs }}
       offset: ${{ steps.plan.outputs.offset }}
       next_offset: ${{ steps.plan.outputs.next_offset }}
       has_more: ${{ steps.plan.outputs.has_more }}
@@ -111,24 +117,32 @@ jobs:
           import fs from 'node:fs';
           import { planNeuronalFanoutV1 } from './cerebro/runtime/neuronal-superparallel-source-v1.mjs';
           const plan = planNeuronalFanoutV1({requested_units:Number(process.env.REQUESTED_UNITS),offset:Number(process.env.REQUESTED_OFFSET)});
+          const batchSize = 4;
+          const batches = [];
+          for (let index=0; index<plan.matrix.length; index+=batchSize) {
+            const rows = plan.matrix.slice(index,index+batchSize);
+            if (rows.some(row=>String(row.submission_id).includes(','))) throw new Error('NEURONAL_SUBMISSION_ID_DELIMITER_UNSAFE');
+            batches.push({batch_slot:Math.floor(index/batchSize),first_slot:rows[0].slot,logical_units:rows.length,submission_ids:rows.map(row=>row.submission_id).join(',')});
+          }
           const nextOffset = plan.offset + plan.planned_units;
           const hasMore = nextOffset < 6449;
-          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include:plan.matrix})}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `matrix=${JSON.stringify({include:batches})}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `planned=${plan.planned_units}\n`);
+          fs.appendFileSync(process.env.GITHUB_OUTPUT, `physical_jobs=${batches.length}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `offset=${plan.offset}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `next_offset=${nextOffset}\n`);
           fs.appendFileSync(process.env.GITHUB_OUTPUT, `has_more=${hasMore}\n`);
-          console.log(JSON.stringify({...plan,next_offset:nextOffset,has_more:hasMore,fair_share_cap:100}));
+          console.log(JSON.stringify({logical_units:plan.planned_units,physical_jobs:batches.length,batch_size:batchSize,next_offset:nextOffset,has_more:hasMore,fair_share_logical_cap:100,physical_runner_cap:25}));
           NODE
 
   evidence-fanout:
-    name: NEURONAL evidence · ${{ matrix.submission_id }}
+    name: NEURONAL evidence batch · ${{ matrix.batch_slot }} · ${{ matrix.logical_units }} units
     needs: plan
     runs-on: ubuntu-latest
     timeout-minutes: 12
     strategy:
       fail-fast: false
-      max-parallel: 100
+      max-parallel: 25
       matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
     steps:
       - uses: actions/checkout@v4
@@ -137,18 +151,36 @@ jobs:
           node-version: 24
       - name: Rebuild canonical source
         run: node cerebro/runtime/prepare-neuronal-source-v1.mjs
-      - name: Collect bounded deterministic evidence
+      - name: Collect up to four deterministic evidence units per runner
         env:
-          SUBMISSION_ID: ${{ matrix.submission_id }}
+          SUBMISSION_IDS: ${{ matrix.submission_ids }}
+          LOGICAL_UNITS: ${{ matrix.logical_units }}
+        shell: bash
         run: |
+          set -euo pipefail
           test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
-          node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission="$SUBMISSION_ID"
+          test "$CEREBRO_NEURONAL_INNER_PARALLELISM" -eq 4
+          case "$LOGICAL_UNITS" in ''|*[!0-9]*) exit 2 ;; esac
+          test "$LOGICAL_UNITS" -ge 1
+          test "$LOGICAL_UNITS" -le "$CEREBRO_NEURONAL_INNER_PARALLELISM"
+          IFS=',' read -r -a submissions <<< "$SUBMISSION_IDS"
+          test "${#submissions[@]}" -eq "$LOGICAL_UNITS"
+          pids=''
+          for submission_id in "${submissions[@]}"; do
+            test -n "$submission_id"
+            node cerebro/runtime/neuronal-superparallel-source-v1.mjs --mode=evidence --submission="$submission_id" &
+            pids="$pids $!"
+          done
+          for pid in $pids; do wait "$pid"; done
+          count="$(find artifacts/neuronal-superparallel-v1/evidence -maxdepth 1 -type f -name '*.json' | wc -l | tr -d ' ')"
+          test "$count" -eq "$LOGICAL_UNITS"
       - uses: actions/upload-artifact@v4
         with:
-          name: neuronal-evidence-${{ matrix.slot }}-${{ github.run_id }}
-          path: artifacts/neuronal-superparallel-v1/evidence/${{ matrix.submission_id }}.json
+          name: neuronal-evidence-batch-${{ matrix.batch_slot }}-${{ github.run_id }}
+          path: artifacts/neuronal-superparallel-v1/evidence/*.json
+          if-no-files-found: error
           retention-days: 5
 
   deepseek-planning:
@@ -195,12 +227,16 @@ jobs:
           echo 'CEREBRO NEURONAL SUPERPARALLEL V1'
           echo 'canonical_submissions=6449'
           echo 'approved_requirements=493'
-          echo 'planned_discovery=${{ needs.plan.outputs.planned }}'
+          echo 'planned_logical_discovery=${{ needs.plan.outputs.planned }}'
+          echo 'planned_physical_jobs=${{ needs.plan.outputs.physical_jobs }}'
           echo 'discovery_offset=${{ needs.plan.outputs.offset }}'
           echo 'next_offset=${{ needs.plan.outputs.next_offset }}'
           echo 'has_more=${{ needs.plan.outputs.has_more }}'
-          echo 'enterprise_neuronal_fair_share_max_parallel=100'
-          echo 'enterprise_portfolio_reserved_parallel=250'
+          echo 'neuronal_inner_parallelism=4'
+          echo 'enterprise_neuronal_logical_fair_share=100'
+          echo 'enterprise_neuronal_physical_runner_cap=25'
+          echo 'physical_runner_savings_at_100_logical=75'
+          echo 'enterprise_shared_useful_pool=350'
           echo 'enterprise_control_reserve=10'
           echo 'enterprise_live_cap=360'
           echo 'deepseek_max_parallel=8'
@@ -220,9 +256,33 @@ jobs:
           NEXT_OFFSET: ${{ needs.plan.outputs.next_offset }}
         shell: bash
         run: |
+          set -euo pipefail
+          critical_workflows=(
+            'cerebro-enterprise-acceleration-v0.yml'
+            'cerebro-global-capacity-controller-v1-ci.yml'
+            'cerebro-auto001-preprod-patch-executor-v0.yml'
+            'cerebro-auto001-prod-closure-v1.yml'
+            'cerebro-governed-promotion-v1.yml'
+            'cerebro-fact001-repair-worker-factory-v1.yml'
+          )
+          critical_queued=0
+          for workflow in "${critical_workflows[@]}"; do
+            for status in queued pending waiting requested; do
+              count="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/runs?status=${status}&per_page=100" --jq '.total_count' 2>/dev/null || echo 0)"
+              critical_queued=$((critical_queued + count))
+            done
+          done
+          if [ "$critical_queued" -gt 0 ]; then
+            echo 'neuronal_self_refill=false' >> "$GITHUB_STEP_SUMMARY"
+            echo 'drain_reason=CRITICAL_CONTROL_PRESSURE' >> "$GITHUB_STEP_SUMMARY"
+            echo "critical_queued=$critical_queued" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           gh api --method POST \
             -H 'Accept: application/vnd.github+json' \
             "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-neuronal-superparallel-v1.yml/dispatches" \
             --input - <<EOF
           {"ref":"main","inputs":{"units":"100","offset":"${NEXT_OFFSET}","run_deepseek":false}}
           EOF
+          echo 'neuronal_self_refill=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'critical_gate_priority=true' >> "$GITHUB_STEP_SUMMARY"
