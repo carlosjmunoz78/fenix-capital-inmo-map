@@ -8,7 +8,7 @@ export const HUMAN_EXCEPTION_REASONS=Object.freeze([
 
 export const REQUIRED_PROMOTION_GATES=Object.freeze([
   'contracts','permissions','tests','evaluation','tribunal','observability',
-  'rollback','backup','rebuild','cost_measured','policy','preprod','old_vs_new'
+  'rollback','backup','rebuild','cost_measured','policy','preprod','old_vs_new','canary'
 ]);
 
 export const SUPPORTED_TARGETS=Object.freeze(['APP_FENIX_STATIC']);
@@ -27,11 +27,12 @@ export function assessGovernedPromotion(packet,{now=new Date().toISOString()}={}
   const pr_number=Number(packet.pr_number);
   if(!Number.isSafeInteger(pr_number)||pr_number<1)throw new Error('pr_number must be a positive integer');
   if(!validSha(packet.expected_head_sha))throw new Error('expected_head_sha must be a 40-char git SHA');
+  if(!validSha(packet.expected_base_sha))throw new Error('expected_base_sha must be a 40-char git SHA');
 
   if(packet.human_exception){
     const reason=reqString(packet.human_exception.reason,'human_exception.reason');
     if(!HUMAN_EXCEPTION_REASONS.includes(reason))throw new Error(`invalid HUMAN_REQUIRED reason:${reason}`);
-    return {schema_version:'1.0',state_type:'CEREBRO_GOVERNED_PROMOTION_DECISION_V1',company_id,engine_id,environment:'PREPROD',version:'v1',updated_at:now,status:'HUMAN_REQUIRED',human_required:{...packet.human_exception,reason},blockers:[],authority:{merge_authorized:false,promotion_authorized:false,prod_write_authorized:false},next_gate:'HUMAN_EXCEPTION_RESOLUTION',safety:{trading:false,additional_subscription_eur:0}};
+    return {schema_version:'1.1',state_type:'CEREBRO_GOVERNED_PROMOTION_DECISION_V1',company_id,engine_id,environment:'PREPROD',version:'v1',updated_at:now,status:'HUMAN_REQUIRED',human_required:{...packet.human_exception,reason},blockers:[],authority:{merge_authorized:false,promotion_authorized:false,prod_write_authorized:false},next_gate:'HUMAN_EXCEPTION_RESOLUTION',safety:{trading:false,additional_subscription_eur:0}};
   }
 
   const gates=packet.gates&&typeof packet.gates==='object'?packet.gates:{};
@@ -42,7 +43,7 @@ export function assessGovernedPromotion(packet,{now=new Date().toISOString()}={}
   if(packet.trading_access===true)blockers.push('TRADING_ISOLATION_VIOLATION');
 
   const ready=blockers.length===0;
-  return {schema_version:'1.0',state_type:'CEREBRO_GOVERNED_PROMOTION_DECISION_V1',company_id,engine_id,environment:'PREPROD',version:'v1',updated_at:now,status:ready?'PROMOTE_READY':'REPAIR_REQUIRED',human_required:null,blockers,pr_number,expected_head_sha:packet.expected_head_sha,target,authority:{merge_authorized:ready,promotion_authorized:ready,prod_write_authorized:ready},next_gate:ready?'EXACT_HEAD_MERGE_AND_PHYSICAL_PROD_PROOF':'REPAIR_AND_RECHECK',safety:{trading:false,additional_subscription_eur:0}};
+  return {schema_version:'1.1',state_type:'CEREBRO_GOVERNED_PROMOTION_DECISION_V1',company_id,engine_id,environment:'PREPROD',version:'v1',updated_at:now,status:ready?'PROMOTE_READY':'REPAIR_REQUIRED',human_required:null,blockers,pr_number,expected_head_sha:packet.expected_head_sha,expected_base_sha:packet.expected_base_sha,target,authority:{merge_authorized:ready,promotion_authorized:ready,prod_write_authorized:ready},next_gate:ready?'EXACT_BASE_AND_HEAD_MERGE_AND_PHYSICAL_PROD_PROOF':'REPAIR_AND_RECHECK',safety:{trading:false,additional_subscription_eur:0}};
 }
 
 export function finalizeGovernedPromotion(packet,physicalEvidence,{now=new Date().toISOString()}={}){
