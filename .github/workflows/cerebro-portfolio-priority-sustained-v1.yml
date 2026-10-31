@@ -120,34 +120,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          critical_workflows=(
-            'cerebro-enterprise-acceleration-v0.yml'
-            'cerebro-global-capacity-controller-v1-ci.yml'
-            'cerebro-auto001-preprod-patch-executor-v0.yml'
-            'cerebro-auto001-prod-closure-v1.yml'
-            'cerebro-governed-promotion-v1.yml'
-            'cerebro-fact001-repair-worker-factory-v1.yml'
-          )
-          critical_pressure=false
-          for workflow in "${critical_workflows[@]}"; do
-            for status in queued pending waiting requested; do
-              count="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/${workflow}/runs?status=${status}&per_page=1" --jq '.total_count' 2>/dev/null || echo 0)"
-              case "$count" in ''|*[!0-9]*) count=0 ;; esac
-              if [ "$count" -gt 0 ]; then critical_pressure=true; break 2; fi
-            done
-          done
-          if [ "$critical_pressure" = true ]; then
-            echo 'self_refill=false' >> "$GITHUB_STEP_SUMMARY"
-            echo 'drain_reason=CRITICAL_CONTROL_PRESSURE' >> "$GITHUB_STEP_SUMMARY"
-            echo 'critical_gate_priority=true' >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
+          # Critical-pressure admission is owned centrally by the Global Capacity
+          # Controller. Base workers do not repeat Actions API scans per lease.
           gh api --method POST "/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
             -f ref=main \
             -f "inputs[lane]=${{ inputs.lane }}" \
             -f "inputs[cycle]=${{ steps.lease.outputs.next_cycle }}"
           echo 'self_refill=true' >> "$GITHUB_STEP_SUMMARY"
-          echo 'critical_gate_priority=true' >> "$GITHUB_STEP_SUMMARY"
+          echo 'critical_gate_priority=central_controller' >> "$GITHUB_STEP_SUMMARY"
+          echo 'pressure_reads_per_worker=0' >> "$GITHUB_STEP_SUMMARY"
       - name: Loan lanes return authority to global controller
         if: success() && fromJSON(inputs.lane) >= 182
         run: echo 'self_refill=false; loan lane must be re-authorized by global capacity controller' >> "$GITHUB_STEP_SUMMARY"
