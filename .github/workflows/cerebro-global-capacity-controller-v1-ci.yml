@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: macos-latest
+    runs-on: windows-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
-      - name: macOS loan-lane runtime smoke
+      - name: Loan-lane runtime smoke on Windows control plane
         shell: bash
         env:
           CEREBRO_SUPERVISOR_ENV: PREPROD
@@ -198,5 +198,5 @@ jobs:
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
           echo 'controller reconciliation=heartbeat 240s plus schedule/push/manual backup'
           echo 'heartbeat runner=macos control slot; self-rearm deduplicated and fail-closed'
-          echo 'critical capacity CI runner=macos control plane'
+          echo 'critical capacity CI runner=windows control plane'
           echo 'additional cost=0 EUR'
