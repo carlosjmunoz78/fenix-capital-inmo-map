@@ -1,5 +1,5 @@
 name: CEREBRO Global Capacity Controller V1
-run-name: CEREBRO GLOBAL CAPACITY · RAMP300 · PREPROD
+run-name: CEREBRO GLOBAL CAPACITY · RAMP350_TOTAL · PREPROD
 
 on:
   workflow_dispatch:
@@ -28,7 +28,7 @@ concurrency:
 
 jobs:
   controller:
-    name: Maintain staged useful-work pool inside Enterprise 360
+    name: Maintain governed 350 useful jobs inside Enterprise 360
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -37,9 +37,9 @@ jobs:
       USEFUL_POOL: '350'
       CONTROL_RESERVE: '10'
       ENTERPRISE_CAP: '360'
-      RAMP_TARGET_USEFUL: '300'
+      BACKGROUND_MAX_USEFUL: '350'
       MAINTENANCE_RAMP_LANES: '68'
-      PRIORITY_RAMP_LANES: '232'
+      PRIORITY_MAX_LANES: '282'
       MAINTENANCE_MAX_LANES: '68'
       PORTFOLIO_BASE_LANES: '182'
       PORTFOLIO_LOAN_LANES: '100'
@@ -54,7 +54,7 @@ jobs:
         with:
           node-version: '24'
 
-      - name: Guard entitlement ramp and zero-cost authority
+      - name: Guard Enterprise 350+10 and zero-cost authority
         shell: bash
         run: |
           set -euo pipefail
@@ -67,12 +67,11 @@ jobs:
           test "$CONTROL_RESERVE" -eq 10
           test "$ENTERPRISE_CAP" -eq 360
           test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"
-          test "$RAMP_TARGET_USEFUL" -eq 300
-          test $((MAINTENANCE_RAMP_LANES + PRIORITY_RAMP_LANES)) -eq "$RAMP_TARGET_USEFUL"
-          test "$MAINTENANCE_RAMP_LANES" -le "$MAINTENANCE_MAX_LANES"
-          test "$PRIORITY_RAMP_LANES" -le $((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES))
-          test "$PRIORITY_RAMP_LANES" -ge "$PORTFOLIO_BASE_LANES"
-          test "$RAMP_TARGET_USEFUL" -lt "$USEFUL_POOL"
+          test "$BACKGROUND_MAX_USEFUL" -eq "$USEFUL_POOL"
+          test "$MAINTENANCE_RAMP_LANES" -eq 68
+          test "$PRIORITY_MAX_LANES" -eq 282
+          test $((MAINTENANCE_RAMP_LANES + PRIORITY_MAX_LANES)) -eq "$BACKGROUND_MAX_USEFUL"
+          test "$PRIORITY_MAX_LANES" -eq $((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES))
           test "$NEURONAL_MAX_PHYSICAL" -eq 25
 
       - name: Validate worker contracts
@@ -80,7 +79,7 @@ jobs:
           node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
 
-      - name: Reconcile staged capacity from one aggregated active-runs snapshot
+      - name: Reconcile maximum useful capacity with NEURONAL reservation
         shell: bash
         run: |
           set -euo pipefail
@@ -111,12 +110,11 @@ jobs:
             done
           }
 
-          critical_regex='cerebro-enterprise-acceleration-v0.yml|cerebro-global-capacity-controller-v1-ci.yml|cerebro-auto001-preprod-patch-executor-v0.yml|cerebro-auto001-prod-closure-v1.yml|cerebro-governed-promotion-v1.yml|cerebro-fact001-repair-worker-factory-v1.yml'
+          critical_regex='cerebro-enterprise-acceleration-v0.yml|cerebro-global-capacity-controller-v1-ci.yml|cerebro-auto001-preprod-patch-executor-v0.yml|cerebro-auto001-prod-closure-v1.yml|cerebro-governed-promotion-v1.yml|cerebro-fact001-repair-worker-factory-v1.yml|cerebro-app001-preprod-physical-qa-v1.yml'
           active_tmp="$(mktemp)"
           : > "$active_tmp"
 
-          # One repository-wide snapshot family replaces workflow-by-workflow scans.
-          # Four pages cover the staged 300 pool plus control work with margin.
+          # Four pages per status cover 350 useful + 10 control with margin.
           for status in in_progress queued pending waiting requested; do
             for page in 1 2 3 4; do
               gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
@@ -124,7 +122,6 @@ jobs:
                 >> "$active_tmp" 2>/dev/null || true
             done
           done
-
           sort -u "$active_tmp" -o "$active_tmp"
 
           critical_queued_count="$(awk -F '\t' -v re="$critical_regex" '$2!="in_progress" && $3 ~ re {print $1}' "$active_tmp" | sort -u | wc -l | tr -d ' ')"
@@ -142,10 +139,25 @@ jobs:
           priority_present="$(awk -F '\t' '{print $4}' "$priority_tmp" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p' | sort -n -u)"
           neuronal_parent_active="$(awk 'END{print NR+0}' "$neuronal_tmp")"
 
+          # Reserve the full possible 25 physical NEURONAL runners whenever a
+          # NEURONAL parent is active. When it is idle, loan those 25 slots back
+          # to the portfolio so the background can reach all 350 useful slots.
+          neuronal_reserved=0
+          priority_target="$PRIORITY_MAX_LANES"
+          if [ "$neuronal_parent_active" -gt 0 ]; then
+            neuronal_reserved="$NEURONAL_MAX_PHYSICAL"
+            priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))
+          fi
+          background_target=$((MAINTENANCE_RAMP_LANES + priority_target))
+          total_useful_target=$((background_target + neuronal_reserved))
+          test "$total_useful_target" -eq "$USEFUL_POOL"
+          test $((total_useful_target + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"
+
           cancelled_background_queue_runs=0
+          cancelled_neuronal_return_loans=0
           maintenance_dispatched=0
           priority_dispatched=0
-          capacity_mode='RAMP300'
+          capacity_mode='RAMP350_TOTAL'
 
           if [ "$critical_pressure" = true ]; then
             capacity_mode='CONTROL_PRESSURE'
@@ -157,6 +169,17 @@ jobs:
               fi
             done < <(cat "$maint_tmp" "$priority_tmp" | sort -u)
           else
+            # If NEURONAL is active, return only queued/waiting loan lanes above
+            # the reduced priority target. Never cancel useful in-progress work.
+            while IFS=$'\t' read -r run_id status _path title; do
+              [ -n "$run_id" ] || continue
+              lane="$(printf '%s' "$title" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p')"
+              if [ -n "$lane" ] && [ "$lane" -ge "$priority_target" ] && [ "$status" != in_progress ]; then
+                gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+                cancelled_neuronal_return_loans=$((cancelled_neuronal_return_loans + 1))
+              fi
+            done < "$priority_tmp"
+
             for lane in $(seq 0 $((MAINTENANCE_RAMP_LANES - 1))); do
               if ! printf '%s\n' "$maint_present" | grep -qx "$lane"; then
                 cycle=$(( (seed_cycle + lane) % 1000000 ))
@@ -166,7 +189,7 @@ jobs:
               fi
             done
 
-            for lane in $(seq 0 $((PRIORITY_RAMP_LANES - 1))); do
+            for lane in $(seq 0 $((priority_target - 1))); do
               if ! printf '%s\n' "$priority_present" | grep -qx "$lane"; then
                 cycle=$(( (seed_cycle + 1000 + lane) % 1000000 ))
                 dispatch_with_transient_retry "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
@@ -181,19 +204,22 @@ jobs:
           observed_background=$((maintenance_active + priority_active))
 
           echo "capacity_mode=$capacity_mode" >> "$GITHUB_STEP_SUMMARY"
-          echo "ramp_stage=4" >> "$GITHUB_STEP_SUMMARY"
-          echo "ramp_target_useful=$RAMP_TARGET_USEFUL" >> "$GITHUB_STEP_SUMMARY"
-          echo "maintenance_ramp_target=$MAINTENANCE_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
-          echo "priority_ramp_target=$PRIORITY_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
+          echo "ramp_stage=5" >> "$GITHUB_STEP_SUMMARY"
+          echo "useful_pool_target=$USEFUL_POOL" >> "$GITHUB_STEP_SUMMARY"
+          echo "background_target=$background_target" >> "$GITHUB_STEP_SUMMARY"
+          echo "maintenance_target=$MAINTENANCE_RAMP_LANES" >> "$GITHUB_STEP_SUMMARY"
+          echo "priority_target=$priority_target" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_parent_runs_active=$neuronal_parent_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_reserved=$neuronal_reserved" >> "$GITHUB_STEP_SUMMARY"
+          echo "neuronal_max_physical=$NEURONAL_MAX_PHYSICAL" >> "$GITHUB_STEP_SUMMARY"
+          echo "total_useful_target=$total_useful_target" >> "$GITHUB_STEP_SUMMARY"
           echo "observed_background_before=$observed_background" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_dispatched=$maintenance_dispatched" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_dispatched=$priority_dispatched" >> "$GITHUB_STEP_SUMMARY"
+          echo "cancelled_neuronal_return_loans=$cancelled_neuronal_return_loans" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_queued_count=$critical_queued_count" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_control_pressure=$critical_pressure" >> "$GITHUB_STEP_SUMMARY"
           echo "cancelled_background_queue_runs=$cancelled_background_queue_runs" >> "$GITHUB_STEP_SUMMARY"
-          echo "neuronal_parent_runs_active=$neuronal_parent_active" >> "$GITHUB_STEP_SUMMARY"
-          echo "neuronal_max_physical=$NEURONAL_MAX_PHYSICAL" >> "$GITHUB_STEP_SUMMARY"
-          echo "useful_pool_entitlement=$USEFUL_POOL" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
           echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"
