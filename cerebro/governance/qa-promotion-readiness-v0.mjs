@@ -4,7 +4,6 @@ import fs from 'node:fs';
 function arg(name){const i=process.argv.indexOf(name);return i>=0?process.argv[i+1]:null}
 function req(v,l){if(typeof v!=='string'||!v.trim())throw new Error(`${l} required`);return v.trim()}
 function read(file){return JSON.parse(fs.readFileSync(file,'utf8'))}
-const CANONICAL_REASON='POLICY_CONFLICT';
 const ELIGIBLE_EVIDENCE=new Set(['POST_MERGE_CERTIFIED','FIRST_REAL_DOMAIN_POST_MERGE_CERTIFIED','GOVERNED_PROD_PROMOTION_V1_ELIGIBLE']);
 const DEFAULT_PROD_OVERRIDE='cerebro/registry/prod-promotion-policy-overrides.v1.json';
 
@@ -17,6 +16,11 @@ function prodOverrideFor(registry,engineId){
   if(registry.state_type!=='CEREBRO_PROD_PROMOTION_POLICY_OVERRIDES_V1')throw new Error('invalid PROD promotion policy override registry');
   if(registry.trading_access!==false||Number(registry.additional_cost_eur)!==0||registry.default!=='FAIL_CLOSED')throw new Error('unsafe PROD promotion override registry');
   return (registry.policies??[]).find(p=>p.engine_id===engineId)??null;
+}
+function humanReason(blockers){
+  if(blockers.includes('DOMAIN_COST_LIMIT_NOT_ZERO'))return 'MONEY_LIMIT';
+  if(blockers.some(b=>b==='PR_CREATION_BLOCKED_BY_REPOSITORY_POLICY'||b.startsWith('DOMAIN_AUTONOMY_MODE_')||b==='DOMAIN_PROD_AUTHORITY_NOT_GRANTED'||b==='DOMAIN_KILL_SWITCH_NOT_ARMED'||b==='DOMAIN_ROLLBACK_NOT_ALLOWED'))return 'POLICY_CONFLICT';
+  return null;
 }
 
 export function assessQaPromotionReadiness({tribunal,prHandoff,policies,prodOverrides=null,owner_engine='HCI-001',domain_engine='APP-001',now=new Date().toISOString()}={}){
@@ -37,16 +41,18 @@ export function assessQaPromotionReadiness({tribunal,prHandoff,policies,prodOver
   if(domainPolicy.kill_switch_enabled!==true||domainPolicy.kill_switch_state!=='ARMED')blockers.push('DOMAIN_KILL_SWITCH_NOT_ARMED');
   if(domainPolicy.automatic_rollback_allowed!==true)blockers.push('DOMAIN_ROLLBACK_NOT_ALLOWED');
   if(Number(domainPolicy.additional_cost_limit_eur)!==0)blockers.push('DOMAIN_COST_LIMIT_NOT_ZERO');
+  const reason=humanReason(blockers);
   const autonomousReady=blockers.length===0;
+  const status=autonomousReady?'AUTONOMOUS_PROMOTION_READY':reason?'HUMAN_REQUIRED':'REPAIR_REQUIRED';
   return {
-    schema_version:'0.4.0',state_type:'CEREBRO_QA_PROMOTION_READINESS_V0',company_id:'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.4.0',updated_at:now,
-    status:autonomousReady?'AUTONOMOUS_PROMOTION_READY':'HUMAN_REQUIRED',
-    human_required:autonomousReady?null:{reason:CANONICAL_REASON,scope:'LOW_RISK_APP_PATCH_PROMOTION',owner_engine,domain_engine,blockers},
+    schema_version:'0.5.0',state_type:'CEREBRO_QA_PROMOTION_READINESS_V0',company_id:'fenix',engine_id:'QA-001',environment:'PREPROD_CONTROL_PLANE',version:'0.5.0',updated_at:now,
+    status,
+    human_required:reason?{reason,scope:'LOW_RISK_APP_PATCH_PROMOTION',owner_engine,domain_engine,blockers}:null,
     owner_engine,domain_engine,
     evidence:{tribunal_status:tribunal.status,tribunal_approved:tribunal.approved===true,pr_handoff_status:prHandoff.status,preprod_patch_validated:prHandoff.preprod_patch_validated===true,domain_autonomy_mode:domainPolicy.autonomy_mode,domain_evidence_state:domainPolicy.evidence_state,domain_prod_authorized:domainPolicy.prod_authorized===true,domain_prod_write_authorized:domainPolicy.prod_write_authorized===true,kill_switch_armed:domainPolicy.kill_switch_enabled===true&&domainPolicy.kill_switch_state==='ARMED',prod_override_applied:Boolean(override)},
     blockers,
     authority:{merge_authorized:autonomousReady,promotion_authorized:autonomousReady,prod_authorized:autonomousReady,prod_write_authorized:autonomousReady},
-    next_gate:autonomousReady?'GOVERNED_PROMOTION_EXECUTOR_V1':'POLICY_AND_DOMAIN_EVIDENCE_REQUIRED',
+    next_gate:autonomousReady?'GOVERNED_PROMOTION_EXECUTOR_V1':reason?'HUMAN_EXCEPTION_RESOLUTION':'AUTONOMOUS_REPAIR_LOOP',
     safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}
   };
 }
