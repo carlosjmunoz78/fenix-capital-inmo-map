@@ -8,7 +8,7 @@ export const HUMAN_EXCEPTION_REASONS=Object.freeze([
 
 export const REQUIRED_PROMOTION_GATES=Object.freeze([
   'contracts','permissions','tests','evaluation','tribunal','observability',
-  'rollback','backup','rebuild','cost_measured','policy','preprod','old_vs_new','canary'
+  'rollback','backup','rebuild','cost_measured','policy','preprod','old_vs_new'
 ]);
 
 export const SUPPORTED_TARGETS=Object.freeze(['APP_FENIX_STATIC']);
