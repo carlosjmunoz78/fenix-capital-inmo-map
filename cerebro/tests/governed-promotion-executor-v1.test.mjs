@@ -22,6 +22,16 @@ test('AUTO-001 closure packet declares every required PROD gate explicitly green
   }
 });
 
+test('APP-001 PROD policy stays in exact gate and HUMAN_REQUIRED parity with executor',()=>{
+  const registry=JSON.parse(fs.readFileSync('cerebro/registry/prod-promotion-policy-overrides.v1.json','utf8'));
+  const app=registry.policies.find(p=>p.engine_id==='APP-001'&&p.target==='APP_FENIX_STATIC');
+  assert.ok(app);
+  assert.deepEqual([...app.required_gates].sort(),[...REQUIRED_PROMOTION_GATES].sort());
+  assert.deepEqual([...app.human_required_reasons].sort(),[...HUMAN_EXCEPTION_REASONS].sort());
+  assert.equal(app.required_terminal_state,'PROD_PROMOTED');
+  assert.equal(app.additional_cost_limit_eur,0);
+});
+
 test('any missing gate returns REPAIR_REQUIRED',()=>{
   const r=assessGovernedPromotion(packet({gates:{...greenGates,rollback:false}}));
   assert.equal(r.status,'REPAIR_REQUIRED');
