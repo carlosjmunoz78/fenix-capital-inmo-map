@@ -15,14 +15,14 @@ type SessionContext={actor_code?:string;role?:string};
 const VIEW_STORAGE_KEY='cerebro_console_view_v2';
 
 function initialView():CerebroView{
- if(typeof window==='undefined')return'JARVIS';
+ if(typeof window==='undefined')return'OPERATIVA';
  const section=new URLSearchParams(window.location.search).get('section');
  if(section==='browser')return'NAVEGADOR';
  if(section==='operativa')return'OPERATIVA';
  if(section==='neuronal'||section==='neural')return'NEURONAL';
  if(section==='legacy-v0')return'V0';
  if(section==='jarvis'||section==='v0')return'JARVIS';
- return'JARVIS';
+ return'OPERATIVA';
 }
 
 const SECTION_BY_VIEW:Record<CerebroPrimaryView,string>={JARVIS:'jarvis',OPERATIVA:'operativa',NEURONAL:'neuronal',NAVEGADOR:'browser'};
