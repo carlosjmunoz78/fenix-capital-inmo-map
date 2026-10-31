@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { execFileSync, spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 
 const PREPROD='PREPROD';
 const MAX_LANES=282;
@@ -100,4 +101,4 @@ export function executePortfolioPriorityUnit({lane,cycle,slot=0}){
 }
 
 async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v]}));const r=executePortfolioPriorityUnit({lane:args.lane,cycle:args.cycle,slot:args.slot??0});console.log(JSON.stringify({ok:true,lane:r.task.lane,cycle:r.task.cycle,slot:r.execution_slot,block:r.task.block_id,priority:r.task.priority,mode:r.task.mode,loan_lane:r.task.loan_lane,selected:r.selected_file_count,debt:r.debt_marker_count,test_passed:r.test_result?.passed??null,next_cycle:r.next_cycle,evidence_write_mode:r.evidence_write_mode,implementation_claim:false}))}
-const self=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname);if(self)main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1});
+const self=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(fileURLToPath(import.meta.url));if(self)main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1});

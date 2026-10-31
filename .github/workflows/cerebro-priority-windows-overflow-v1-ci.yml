@@ -1,0 +1,111 @@
+name: CEREBRO PRIORITY Windows Overflow V1 CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-portfolio-priority-sustained-v1.yml'
+      - '.github/workflows/cerebro-priority-windows-overflow-v1-ci.yml'
+      - 'cerebro/runtime/portfolio-priority-sustained-v1.mjs'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  windows-priority-smoke:
+    name: Real PRIORITY lane 132 smoke on Windows
+    runs-on: windows-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_SUPERVISOR_ENV: PREPROD
+      CEREBRO_ALLOW_PAID_FANOUT: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
+      CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Verify Windows tools, API path and target routing contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ github.repository_visibility }}" = public
+          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
+          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          command -v git
+          command -v node
+          command -v gh
+          command -v seq
+          command -v date
+          api_main="$(gh api "repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
+          test -n "$api_main"
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          const text=fs.readFileSync('.github/workflows/cerebro-portfolio-priority-sustained-v1.yml','utf8');
+          const required=[
+            "CEREBRO_PORTFOLIO_WINDOWS_BASE_START: '132'",
+            "CEREBRO_PORTFOLIO_WINDOWS_BASE_END: '181'",
+            "CEREBRO_PORTFOLIO_MACOS_LOAN_START: '232'",
+            "'windows-latest'",
+            "'macos-latest'",
+            'repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches'
+          ];
+          for(const token of required){if(!text.includes(token))throw new Error(`missing routing token: ${token}`)}
+          NODE
+          echo "api_smoke_main_sha=$api_main" >> "$GITHUB_STEP_SUMMARY"
+          echo 'target_topology=ubuntu250_windows50_macos50' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Execute the real PRIORITY runtime on Windows with four parallel slots
+        shell: bash
+        run: |
+          set -euo pipefail
+          lane=132
+          pids=''
+          for slot in $(seq 0 3); do
+            node cerebro/runtime/portfolio-priority-sustained-v1.mjs \
+              --lane="$lane" \
+              --cycle="$slot" \
+              --slot="$slot" &
+            pids="$pids $!"
+          done
+          for pid in $pids; do wait "$pid"; done
+          for slot in $(seq 0 3); do
+            test -s "artifacts/portfolio-priority-sustained-v1/lane-132/slot-${slot}.json"
+          done
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          for(let slot=0;slot<4;slot++){
+            const p=`artifacts/portfolio-priority-sustained-v1/lane-132/slot-${slot}.json`;
+            const r=JSON.parse(fs.readFileSync(p,'utf8'));
+            if(r.environment!=='PREPROD')throw new Error('not PREPROD');
+            if(r.task?.lane!==132)throw new Error('wrong lane');
+            if(r.execution_slot!==slot)throw new Error('wrong slot');
+            if(r.useful_work!==true)throw new Error('not useful work');
+            if(r.paid_ai_used!==false||r.additional_subscription_eur!==0)throw new Error('cost contract broken');
+            if(r.prod_write_authorized!==false||r.trading_access!==false)throw new Error('safety contract broken');
+          }
+          NODE
+          echo 'windows_priority_runtime_smoke=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'parallel_slots=4' >> "$GITHUB_STEP_SUMMARY"
+          echo 'lane=132' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Publish Windows PRIORITY smoke evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: priority-windows-overflow-smoke-${{ github.run_id }}
+          path: artifacts/portfolio-priority-sustained-v1/lane-132/
+          if-no-files-found: error
+          retention-days: 1
