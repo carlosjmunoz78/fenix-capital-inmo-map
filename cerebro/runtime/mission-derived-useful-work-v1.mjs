@@ -74,11 +74,14 @@ function executionState({phase,hydrationBlocked,test}){
   return 'EVIDENCE_COLLECTED';
 }
 
-export function executeMissionDerivedWork({lane,cycle,fallback=true}){
+export function executeMissionDerivedWork({lane,cycle,slot=0,fallback=true}){
   if((process.env.CEREBRO_SUPERVISOR_ENV||PREPROD)!==PREPROD)throw new Error('mission-derived worker is PREPROD-only');
   if(process.env.CEREBRO_ALLOW_PAID_FANOUT==='YES')throw new Error('paid AI is not permitted');
   if(process.env.CEREBRO_PROD_WRITE==='true')throw new Error('PROD writes are not permitted');
   if(process.env.CEREBRO_TRADING_ACCESS==='true')throw new Error('Trading access is not permitted');
+  const execution_slot=boundedInteger(slot,'slot',0,3);
+  const evidence_write_mode=process.env.CEREBRO_MISSION_WORK_WRITE_MODE||'cycle';
+  if(!['cycle','rolling'].includes(evidence_write_mode))throw new Error('CEREBRO_MISSION_WORK_WRITE_MODE must be cycle or rolling');
   const selected=selectMissionUnit(lane,cycle);const unit=selected.unit;const phase=phaseOf(unit);const repo=inspectRepo(unit);
   const scopeHydrated=unit.source_status==='CANONICAL_SCOPE_HYDRATED'&&Boolean(unit.mission_scope)&&Boolean(unit.scope_fingerprint)&&Boolean(unit.canonical_source_sha256);
   const hydrationBlocked=SCOPE_HYDRATION_BLOCKED.has(phase)&&!scopeHydrated;
@@ -86,12 +89,14 @@ export function executeMissionDerivedWork({lane,cycle,fallback=true}){
   const test=hydrationBlocked?null:maybeRunTest(unit);
   const state=executionState({phase,hydrationBlocked,test});
   const report={
-    schema_version:'1.1',
+    schema_version:'1.2',
     generated_at:new Date().toISOString(),
     company_id:unit.company_id,
     engine_id:'JOB-001',
     environment:PREPROD,
     version:'mission-derived-useful-work-v1',
+    execution_slot,
+    evidence_write_mode,
     lane:selected.lane,
     cycle:selected.cycle,
     linear:selected.linear,
@@ -121,13 +126,17 @@ export function executeMissionDerivedWork({lane,cycle,fallback=true}){
     prod_write_authorized:false,
     trading_access:false
   };
-  const out=path.join(OUT_ROOT,`lane-${String(selected.lane).padStart(2,'0')}`,`cycle-${String(selected.cycle).padStart(6,'0')}-${unit.work_unit_id.replaceAll('.','_')}.json`);writeJson(out,report);
+  const laneDir=path.join(OUT_ROOT,`lane-${String(selected.lane).padStart(2,'0')}`);
+  const out=evidence_write_mode==='rolling'
+    ? path.join(laneDir,`slot-${execution_slot}.json`)
+    : path.join(laneDir,`cycle-${String(selected.cycle).padStart(6,'0')}-${unit.work_unit_id.replaceAll('.','_')}.json`);
+  writeJson(out,report);
   if(fallback&&state==='SCOPE_HYDRATION_REQUIRED'){
-    const legacy=executeContinuousWork({lane:selected.lane,cycle:selected.cycle});
+    const legacy=executeContinuousWork({lane:selected.lane,cycle:selected.cycle,slot:execution_slot});
     report.fallback={used:true,source:'continuous-useful-work-factory-v0',task_key:legacy.task.task_key,selected_file_count:legacy.selected_file_count};writeJson(out,report);
   }else report.fallback={used:false};
   return report;
 }
 
-async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v];}));const r=executeMissionDerivedWork({lane:args.lane,cycle:args.cycle,fallback:args.fallback!=='false'});console.log(JSON.stringify({ok:true,lane:r.lane,cycle:r.cycle,work_unit_id:r.work_unit.work_unit_id,mission_id:r.work_unit.mission_id,mission_title:r.mission_scope.title,phase:r.phase,state:r.execution_state,scope_hydrated:r.scope_hydrated,scope_hydration_required:r.scope_hydration_required,capability_action:r.capability?.action||null,fallback:r.fallback?.used||false,paid_ai_used:false,prod_write_authorized:false,trading_access:false}));}
+async function main(){const args=Object.fromEntries(process.argv.slice(2).map(a=>{const[k,v='true']=a.replace(/^--/,'').split('=');return[k,v];}));const r=executeMissionDerivedWork({lane:args.lane,cycle:args.cycle,slot:args.slot??0,fallback:args.fallback!=='false'});console.log(JSON.stringify({ok:true,lane:r.lane,cycle:r.cycle,slot:r.execution_slot,work_unit_id:r.work_unit.work_unit_id,mission_id:r.work_unit.mission_id,mission_title:r.mission_scope.title,phase:r.phase,state:r.execution_state,scope_hydrated:r.scope_hydrated,scope_hydration_required:r.scope_hydration_required,capability_action:r.capability?.action||null,fallback:r.fallback?.used||false,evidence_write_mode:r.evidence_write_mode,paid_ai_used:false,prod_write_authorized:false,trading_access:false}));}
 const self=process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname);if(self)main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1;});

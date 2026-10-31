@@ -146,12 +146,15 @@ function runOneTest(files, task) {
   };
 }
 
-export function executeContinuousWork({ lane, cycle }) {
+export function executeContinuousWork({ lane, cycle, slot = 0 }) {
   if ((process.env.CEREBRO_SUPERVISOR_ENV || PREPROD) !== PREPROD) throw new Error('continuous work factory is PREPROD-only');
   if (process.env.CEREBRO_ALLOW_PAID_FANOUT === 'YES') throw new Error('paid AI is not permitted in continuous deterministic factory');
   if (process.env.CEREBRO_PROD_WRITE === 'true') throw new Error('PROD writes are not permitted');
   if (process.env.CEREBRO_TRADING_ACCESS === 'true') throw new Error('Trading access is not permitted');
 
+  const execution_slot = boundedInteger(slot, 'slot', 0, 3);
+  const evidence_write_mode = process.env.CEREBRO_CONTINUOUS_WORK_WRITE_MODE || 'cycle';
+  if (!['cycle','rolling'].includes(evidence_write_mode)) throw new Error('CEREBRO_CONTINUOUS_WORK_WRITE_MODE must be cycle or rolling');
   const task = buildTaskDescriptor(lane, cycle);
   const files = gitFiles();
   const selected = selectFiles(files, task);
@@ -159,12 +162,14 @@ export function executeContinuousWork({ lane, cycle }) {
   const test_result = runOneTest(files, task);
 
   const report = Object.freeze({
-    schema_version: '1.0',
+    schema_version: '1.1',
     generated_at: new Date().toISOString(),
     company_id: 'fenix',
     engine_id: 'JOB-001',
     environment: PREPROD,
     version: 'continuous-useful-work-factory-v0',
+    execution_slot,
+    evidence_write_mode,
     task,
     repository_file_count: files.length,
     selected_file_count: selected.length,
@@ -182,7 +187,10 @@ export function executeContinuousWork({ lane, cycle }) {
     trading_access: false,
   });
 
-  const out = path.join(OUT_ROOT, `lane-${String(task.lane).padStart(2,'0')}`, `cycle-${String(task.cycle).padStart(6,'0')}.json`);
+  const laneDir = path.join(OUT_ROOT, `lane-${String(task.lane).padStart(2,'0')}`);
+  const out = evidence_write_mode === 'rolling'
+    ? path.join(laneDir, `slot-${execution_slot}.json`)
+    : path.join(laneDir, `cycle-${String(task.cycle).padStart(6,'0')}.json`);
   writeJson(out, report);
   return report;
 }
@@ -191,13 +199,15 @@ async function main() {
   const args = Object.fromEntries(process.argv.slice(2).map(arg => {
     const [k,v='true'] = arg.replace(/^--/, '').split('='); return [k,v];
   }));
-  const report = executeContinuousWork({ lane: args.lane, cycle: args.cycle });
+  const report = executeContinuousWork({ lane: args.lane, cycle: args.cycle, slot: args.slot ?? 0 });
   console.log(JSON.stringify({
     ok: true,
     lane: report.task.lane,
     cycle: report.task.cycle,
+    slot: report.execution_slot,
     family: report.task.family_id,
     mode: report.task.mode,
+    evidence_write_mode: report.evidence_write_mode,
     selected_file_count: report.selected_file_count,
     debt_marker_count: report.debt_marker_count,
     test_passed: report.test_result?.passed ?? null,
