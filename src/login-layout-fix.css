@@ -111,4 +111,81 @@
   }
   .auth-card:has(#fenix-user) h1{font-size:21px}
   .auth-card:has(#fenix-user) > p::before{font-size:28px;max-width:none}
+
+  /* APP-001 mobile accessibility repair. QA requires interactive targets >=44px. */
+  .auth-shell:has(#fenix-user) > .auth-theme{
+    min-height:44px!important;
+    height:44px!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+  }
+  .auth-card:has(#fenix-user) .auth-field > input,
+  .auth-card:has(#fenix-user) .auth-field > div > input{
+    min-height:44px!important;
+    height:44px!important;
+  }
+  .auth-card:has(#fenix-user) .auth-field > div > button{
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    right:4px!important;
+    bottom:0!important;
+  }
+  .auth-card:has(#fenix-user) .forgot-link{
+    min-height:44px!important;
+    height:44px!important;
+  }
+  .auth-card:has(#fenix-user) .remember-row{
+    position:relative;
+    min-height:44px!important;
+    align-items:center!important;
+    gap:8px!important;
+  }
+  .auth-card:has(#fenix-user) .remember-row > input[type='checkbox']{
+    appearance:none;
+    -webkit-appearance:none;
+    width:44px!important;
+    height:44px!important;
+    min-width:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    flex:0 0 44px!important;
+    opacity:0;
+    cursor:pointer;
+  }
+  .auth-card:has(#fenix-user) .remember-row::before{
+    content:'';
+    position:absolute;
+    left:13px;
+    top:50%;
+    width:18px;
+    height:18px;
+    transform:translateY(-50%);
+    border:1.5px solid var(--muted);
+    border-radius:5px;
+    background:var(--panel);
+    pointer-events:none;
+    box-sizing:border-box;
+  }
+  .auth-card:has(#fenix-user) .remember-row:has(> input[type='checkbox']:checked)::before{
+    background:var(--orange);
+    border-color:var(--orange);
+  }
+  .auth-card:has(#fenix-user) .remember-row:has(> input[type='checkbox']:checked)::after{
+    content:'✓';
+    position:absolute;
+    left:17px;
+    top:50%;
+    transform:translateY(-53%);
+    color:#fff;
+    font-size:12px;
+    line-height:1;
+    font-weight:800;
+    pointer-events:none;
+  }
+  .auth-card:has(#fenix-user) .remember-row:has(> input[type='checkbox']:focus-visible)::before{
+    outline:3px solid rgba(243,108,33,.28);
+    outline-offset:2px;
+  }
 }
