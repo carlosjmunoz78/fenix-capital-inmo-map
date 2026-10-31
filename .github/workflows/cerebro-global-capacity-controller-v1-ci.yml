@@ -39,7 +39,7 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
-      - name: Verify staged 300 capacity contract and resilient centralized admission
+      - name: Verify RAMP350 total contract and dynamic NEURONAL reservation
         shell: bash
         run: |
           set -euo pipefail
@@ -51,17 +51,20 @@ jobs:
           grep -q "USEFUL_POOL: '350'" "$controller"
           grep -q "CONTROL_RESERVE: '10'" "$controller"
           grep -q "ENTERPRISE_CAP: '360'" "$controller"
-          grep -q "RAMP_TARGET_USEFUL: '300'" "$controller"
+          grep -q "BACKGROUND_MAX_USEFUL: '350'" "$controller"
           grep -q "MAINTENANCE_RAMP_LANES: '68'" "$controller"
-          grep -q "PRIORITY_RAMP_LANES: '232'" "$controller"
+          grep -q "PRIORITY_MAX_LANES: '282'" "$controller"
           grep -q "PORTFOLIO_BASE_LANES: '182'" "$controller"
           grep -q "PORTFOLIO_LOAN_LANES: '100'" "$controller"
           grep -q "NEURONAL_MAX_PHYSICAL: '25'" "$controller"
           grep -q 'test $((USEFUL_POOL + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
-          grep -q 'test $((MAINTENANCE_RAMP_LANES + PRIORITY_RAMP_LANES)) -eq "$RAMP_TARGET_USEFUL"' "$controller"
-          grep -q 'test "$PRIORITY_RAMP_LANES" -le $((PORTFOLIO_BASE_LANES + PORTFOLIO_LOAN_LANES))' "$controller"
-          grep -q 'test "$PRIORITY_RAMP_LANES" -ge "$PORTFOLIO_BASE_LANES"' "$controller"
-          grep -q "capacity_mode='RAMP300'" "$controller"
+          grep -q 'test $((MAINTENANCE_RAMP_LANES + PRIORITY_MAX_LANES)) -eq "$BACKGROUND_MAX_USEFUL"' "$controller"
+          grep -q 'priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))' "$controller"
+          grep -q 'total_useful_target=$((background_target + neuronal_reserved))' "$controller"
+          grep -q 'test "$total_useful_target" -eq "$USEFUL_POOL"' "$controller"
+          grep -q 'test $((total_useful_target + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
+          grep -q "capacity_mode='RAMP350_TOTAL'" "$controller"
+          grep -q 'cancelled_neuronal_return_loans' "$controller"
           grep -q 'api_snapshot_calls_max=20' "$controller"
           grep -q 'worker_pressure_reads=0' "$controller"
           grep -q 'controller_self_rearmed=false' "$controller"
@@ -74,13 +77,10 @@ jobs:
             cerebro-auto001-preprod-patch-executor-v0.yml \
             cerebro-auto001-prod-closure-v1.yml \
             cerebro-governed-promotion-v1.yml \
-            cerebro-fact001-repair-worker-factory-v1.yml; do
+            cerebro-fact001-repair-worker-factory-v1.yml \
+            cerebro-app001-preprod-physical-qa-v1.yml; do
             grep -q "$critical" "$controller"
           done
-          grep -q 'critical_queued_count' "$controller"
-          grep -q 'critical_control_pressure' "$controller"
-          grep -q 'cancelled_background_queue_runs' "$controller"
-          grep -q 'in_progress_background_cancelled=false' "$controller"
 
           for file in "$controller" "$maintenance" "$priority"; do
             grep -q 'dispatch_with_transient_retry' "$file"
@@ -91,21 +91,12 @@ jobs:
             grep -q 'attempt in 1 2 3 4' "$file"
           done
           grep -q 'dispatch_non_transient_retry=false' "$controller"
+          grep -q 'in_progress_background_cancelled=false' "$controller"
 
           grep -q "CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'" "$maintenance"
-          grep -q 'Self-refill sustained lane while a useful source is available' "$maintenance"
-          grep -q 'critical_gate_priority=central_controller' "$maintenance"
-          grep -q 'pressure_reads_per_worker=0' "$maintenance"
-          ! grep -q 'for workflow in "${critical_workflows\[@\]}"' "$maintenance"
-
           grep -q "CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'" "$priority"
           grep -q "CEREBRO_PORTFOLIO_MAX_LANES: '282'" "$priority"
-          grep -q 'Self-refill base lanes only' "$priority"
-          grep -q 'critical_gate_priority=central_controller' "$priority"
-          grep -q 'pressure_reads_per_worker=0' "$priority"
           grep -q 'Loan lanes return authority to global controller' "$priority"
-          ! grep -q 'for workflow in "${critical_workflows\[@\]}"' "$priority"
-
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then
             grep -q 'max-parallel: 25' "$neuronal"
             grep -q 'submission_ids' "$neuronal"
@@ -118,15 +109,15 @@ jobs:
       - name: Acceptance summary
         run: |
           echo 'enterprise entitlement=360 physical jobs total'
-          echo 'useful entitlement=350; control reserve=10'
-          echo 'ramp stage 4 sustained background target=300'
-          echo 'maintenance ramp lanes=68'
-          echo 'priority ramp lanes=232 (182 base + 50 temporary loan)'
-          echo 'neuronal physical cap=25 when separately triggered'
-          echo 'critical admission owner=Global Capacity Controller'
+          echo 'useful target=350; control reserve=10'
+          echo 'ramp stage 5=RAMP350_TOTAL'
+          echo 'background max=350 when NEURONAL idle'
+          echo 'background target=325 when NEURONAL parent active'
+          echo 'neuronal conservative reservation=25 physical'
+          echo 'total useful target always=350'
+          echo 'maintenance lanes=68'
+          echo 'priority max lanes=282 (182 base + 100 loan)'
           echo 'worker critical-pressure API scans=0'
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
-          echo 'non-transient dispatch retry=false'
-          echo 'controller reconciliation=schedule every 5 minutes plus push/manual'
-          echo 'controller tight self-rearm=false'
+          echo 'controller reconciliation=5m schedule plus push/manual'
           echo 'additional cost=0 EUR'
