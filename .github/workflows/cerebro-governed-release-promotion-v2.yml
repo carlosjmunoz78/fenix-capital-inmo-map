@@ -1,0 +1,252 @@
+name: CEREBRO Governed Exact Release Promotion V2
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: 'Exact release branch under release/app-fenix-static/'
+        required: true
+        type: string
+      expected_release_sha:
+        description: 'Exact 40-char release SHA'
+        required: true
+        type: string
+      base_prod_sha:
+        description: 'Physically audited PROD source SHA used as release base'
+        required: true
+        type: string
+      preprod_evidence_run_id:
+        description: 'Successful APP-001 PREPROD Physical Mobile QA run for exact release SHA'
+        required: true
+        type: string
+      promotion_packet_b64:
+        description: 'Base64-encoded CEREBRO_GOVERNED_RELEASE_PROMOTION_PACKET_V2 JSON'
+        required: true
+        type: string
+
+permissions:
+  actions: write
+  checks: read
+  contents: read
+
+concurrency:
+  group: cerebro-governed-exact-release-promotion-v2
+  cancel-in-progress: false
+
+jobs:
+  governed-release-promote:
+    name: Exact release PREPROD proof → physical PROD
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_REF: ${{ inputs.release_ref }}
+      EXPECTED_RELEASE_SHA: ${{ inputs.expected_release_sha }}
+      BASE_PROD_SHA: ${{ inputs.base_prod_sha }}
+      PREPROD_EVIDENCE_RUN_ID: ${{ inputs.preprod_evidence_run_id }}
+      PROMOTION_PACKET_B64: ${{ inputs.promotion_packet_b64 }}
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - name: Guard immutable release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$RELEASE_REF" in release/app-fenix-static/*) ;; *) echo 'invalid release_ref namespace' >&2; exit 2 ;; esac
+          printf '%s' "$EXPECTED_RELEASE_SHA" | grep -Eq '^[0-9a-fA-F]{40}$'
+          printf '%s' "$BASE_PROD_SHA" | grep -Eq '^[0-9a-fA-F]{40}$'
+          case "$PREPROD_EVIDENCE_RUN_ID" in ''|*[!0-9]*) echo 'invalid PREPROD evidence run id' >&2; exit 2 ;; esac
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+          test -n "$PROMOTION_PACKET_B64"
+          printf '%s' "$PROMOTION_PACKET_B64" | base64 -d > /tmp/cerebro-release-promotion-packet.json
+          jq -e . /tmp/cerebro-release-promotion-packet.json >/dev/null
+
+      - name: Checkout control-plane implementation from main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assess governed release packet
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/governance/governed-release-promotion-executor-v2.mjs \
+            --packet /tmp/cerebro-release-promotion-packet.json \
+            --out /tmp/cerebro-release-promotion-pre.json
+          test "$(jq -r '.status' /tmp/cerebro-release-promotion-pre.json)" = PROMOTE_READY
+          test "$(jq -r '.target' /tmp/cerebro-release-promotion-pre.json)" = APP_FENIX_STATIC
+          test "$(jq -r '.engine_id' /tmp/cerebro-release-promotion-pre.json)" = APP-001
+          test "$(jq -r '.release_ref' /tmp/cerebro-release-promotion-pre.json)" = "$RELEASE_REF"
+          test "$(jq -r '.expected_release_sha' /tmp/cerebro-release-promotion-pre.json)" = "$EXPECTED_RELEASE_SHA"
+          test "$(jq -r '.base_prod_sha' /tmp/cerebro-release-promotion-pre.json)" = "$BASE_PROD_SHA"
+          test "$(jq -r '.preprod_evidence_run_id' /tmp/cerebro-release-promotion-pre.json)" = "$PREPROD_EVIDENCE_RUN_ID"
+
+      - name: Verify physical PROD base is still current
+        shell: bash
+        run: |
+          set -euo pipefail
+          proof='https://app.fenixcapital.es/PROD_SOURCE_SHA.txt'
+          actual=''
+          for attempt in 1 2 3 4 5; do
+            actual="$(curl -fsSL --max-time 20 "${proof}?v2_base=${BASE_PROD_SHA}&attempt=${attempt}" | tr -d '\r\n[:space:]' || true)"
+            [ "$actual" = "$BASE_PROD_SHA" ] && break
+            sleep $((attempt * 2))
+          done
+          test "$actual" = "$BASE_PROD_SHA"
+
+      - name: Verify exact release ref, ancestry and APP-001-only diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          remote_sha="$(git ls-remote "https://github.com/${GITHUB_REPOSITORY}.git" "refs/heads/${RELEASE_REF}" | awk 'NR==1{print $1}')"
+          test "$remote_sha" = "$EXPECTED_RELEASE_SHA"
+          gh api "/repos/${GITHUB_REPOSITORY}/commits/${BASE_PROD_SHA}" --jq '.sha' | grep -qx "$BASE_PROD_SHA"
+          gh api "/repos/${GITHUB_REPOSITORY}/commits/${EXPECTED_RELEASE_SHA}" --jq '.sha' | grep -qx "$EXPECTED_RELEASE_SHA"
+          compare="$(gh api "/repos/${GITHUB_REPOSITORY}/compare/${BASE_PROD_SHA}...${EXPECTED_RELEASE_SHA}")"
+          test "$(jq -r '.behind_by' <<<"$compare")" -eq 0
+          test "$(jq -r '.ahead_by' <<<"$compare")" -ge 1
+          jq -r '.files[].filename' <<<"$compare" > /tmp/release-files.txt
+          test -s /tmp/release-files.txt
+          while read -r file; do
+            case "$file" in
+              src/login-layout-fix.css|tests/app001-preprod-mobile-touch.spec.ts|.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml|.github/workflows/prod-live-deploy.yml|.github/workflows/prod-runtime-smoke.yml) ;;
+              *) echo "APP-001 exact release contains unauthorized path: $file" >&2; exit 3 ;;
+            esac
+          done < /tmp/release-files.txt
+          grep -qx 'src/login-layout-fix.css' /tmp/release-files.txt
+
+      - name: Require exact-SHA PREPROD physical QA evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          run="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${PREPROD_EVIDENCE_RUN_ID}")"
+          test "$(jq -r '.status' <<<"$run")" = completed
+          test "$(jq -r '.conclusion' <<<"$run")" = success
+          test "$(jq -r '.head_sha' <<<"$run")" = "$EXPECTED_RELEASE_SHA"
+          test "$(jq -r '.head_branch' <<<"$run")" = "$RELEASE_REF"
+          test "$(jq -r '.path' <<<"$run")" = '.github/workflows/cerebro-app001-preprod-physical-qa-v1.yml'
+
+      - name: Dispatch physical PROD deploy for exact release ref
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_PROD_WRITE" = false
+          gh workflow run prod-live-deploy.yml --repo "$GITHUB_REPOSITORY" --ref "$RELEASE_REF" -f confirm=DEPLOY_PROD
+
+      - name: Require exact release deployment receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=''
+          for _ in $(seq 1 30); do
+            run_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/prod-live-deploy.yml/runs?event=workflow_dispatch&head_sha=${EXPECTED_RELEASE_SHA}&per_page=10" --jq '.workflow_runs[0].id // empty')"
+            [ -n "$run_id" ] && break
+            sleep 5
+          done
+          test -n "$run_id"
+          run_head="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" --jq '.head_sha')"
+          test "$run_head" = "$EXPECTED_RELEASE_SHA"
+          printf '%s\n' "$run_id" > /tmp/prod-run-id.txt
+          for _ in $(seq 1 120); do
+            state="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" --jq '.status + ":" + (.conclusion // "")')"
+            case "$state" in
+              completed:success) break ;;
+              completed:*) echo "PROD deploy failed: $state" >&2; exit 1 ;;
+              *) sleep 5 ;;
+            esac
+          done
+          test "$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}" --jq '.conclusion')" = success
+
+      - name: Dispatch canonical PROD Runtime Smoke for exact release SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run prod-runtime-smoke.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$RELEASE_REF" \
+            -f "expected_live_sha=${EXPECTED_RELEASE_SHA}"
+
+      - name: Require exact release PROD Runtime Smoke green
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_id=''
+          for _ in $(seq 1 30); do
+            smoke_id="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/prod-runtime-smoke.yml/runs?event=workflow_dispatch&head_sha=${EXPECTED_RELEASE_SHA}&per_page=10" --jq '.workflow_runs[0].id // empty')"
+            [ -n "$smoke_id" ] && break
+            sleep 5
+          done
+          test -n "$smoke_id"
+          printf '%s\n' "$smoke_id" > /tmp/prod-smoke-run-id.txt
+          for _ in $(seq 1 120); do
+            state="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${smoke_id}" --jq '.status + ":" + (.conclusion // "")')"
+            case "$state" in
+              completed:success) break ;;
+              completed:*) echo "PROD Runtime Smoke failed: $state" >&2; exit 1 ;;
+              *) sleep 5 ;;
+            esac
+          done
+          test "$(gh api "/repos/${GITHUB_REPOSITORY}/actions/runs/${smoke_id}" --jq '.conclusion')" = success
+
+      - name: Prove exact physical PROD SHA and monitor stability
+        shell: bash
+        run: |
+          set -euo pipefail
+          proof='https://app.fenixcapital.es/PROD_SOURCE_SHA.txt'
+          matched=false
+          for attempt in $(seq 1 36); do
+            actual="$(curl -fsSL --max-time 20 "${proof}?release=${EXPECTED_RELEASE_SHA}&attempt=${attempt}" | tr -d '\r\n[:space:]' || true)"
+            if [ "$actual" = "$EXPECTED_RELEASE_SHA" ]; then matched=true; break; fi
+            sleep 5
+          done
+          test "$matched" = true
+          for sample in 1 2 3; do
+            actual="$(curl -fsSL --max-time 20 "${proof}?release=${EXPECTED_RELEASE_SHA}&monitor=${sample}" | tr -d '\r\n[:space:]')"
+            test "$actual" = "$EXPECTED_RELEASE_SHA"
+            [ "$sample" -eq 3 ] || sleep 10
+          done
+          printf '%s\n' "$proof" > /tmp/prod-proof-url.txt
+
+      - name: Seal terminal PROD_PROMOTED evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/governance/governed-release-promotion-executor-v2.mjs \
+            --packet /tmp/cerebro-release-promotion-packet.json \
+            --out /tmp/cerebro-release-promotion-final.json \
+            --deployment-run-id "$(cat /tmp/prod-run-id.txt)" \
+            --prod-source-sha "$EXPECTED_RELEASE_SHA" \
+            --smoke-passed true \
+            --monitor-passed true \
+            --proof-url "$(cat /tmp/prod-proof-url.txt)"
+          test "$(jq -r '.status' /tmp/cerebro-release-promotion-final.json)" = PROD_PROMOTED
+          echo "release_ref=$RELEASE_REF" >> "$GITHUB_STEP_SUMMARY"
+          echo "release_sha=$EXPECTED_RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "base_prod_sha=$BASE_PROD_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "preprod_evidence_run_id=$PREPROD_EVIDENCE_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
+          echo "deployment_run_id=$(cat /tmp/prod-run-id.txt)" >> "$GITHUB_STEP_SUMMARY"
+          echo "smoke_run_id=$(cat /tmp/prod-smoke-run-id.txt)" >> "$GITHUB_STEP_SUMMARY"
+          echo 'terminal_state=PROD_PROMOTED' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload immutable exact-release promotion evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-exact-release-promotion-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-release-promotion-packet.json
+            /tmp/cerebro-release-promotion-pre.json
+            /tmp/cerebro-release-promotion-final.json
+            /tmp/release-files.txt
+            /tmp/prod-run-id.txt
+            /tmp/prod-smoke-run-id.txt
+            /tmp/prod-proof-url.txt
+          if-no-files-found: error
+          retention-days: 30

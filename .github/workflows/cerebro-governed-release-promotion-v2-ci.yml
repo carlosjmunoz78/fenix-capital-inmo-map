@@ -1,0 +1,51 @@
+name: CEREBRO Governed Exact Release Promotion V2 CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'cerebro/governance/governed-release-promotion-executor-v2.mjs'
+      - 'cerebro/tests/governed-release-promotion-executor-v2.test.mjs'
+      - '.github/workflows/cerebro-governed-release-promotion-v2.yml'
+      - '.github/workflows/cerebro-governed-release-promotion-v2-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax and policy tests
+        run: |
+          node --check cerebro/governance/governed-release-promotion-executor-v2.mjs
+          node --test cerebro/tests/governed-release-promotion-executor-v2.test.mjs
+      - name: Fail-closed workflow contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          wf='.github/workflows/cerebro-governed-release-promotion-v2.yml'
+          grep -q 'release/app-fenix-static/' "$wf"
+          grep -q 'APP-001 exact release contains unauthorized path' "$wf"
+          grep -q 'cerebro-app001-preprod-physical-qa-v1.yml' "$wf"
+          grep -q -- '--ref "$RELEASE_REF" -f confirm=DEPLOY_PROD' "$wf"
+          grep -q -- '--ref "$RELEASE_REF"' "$wf"
+          grep -q 'expected_live_sha=${EXPECTED_RELEASE_SHA}' "$wf"
+          grep -q 'PROD_SOURCE_SHA.txt' "$wf"
+          grep -q "CEREBRO_PROD_WRITE: 'false'" "$wf"
+          grep -q "CEREBRO_TRADING_ACCESS: 'false'" "$wf"
+          ! grep -q 'gh pr merge' "$wf"
+          ! grep -q -- '--ref main -f confirm=DEPLOY_PROD' "$wf"
+      - name: Acceptance summary
+        run: |
+          echo 'exact release promotion V2 contract=GREEN'
+          echo 'main merge authority=NONE'
+          echo 'release namespace=release/app-fenix-static/**'
+          echo 'exact PREPROD SHA proof=REQUIRED'
+          echo 'physical PROD source proof=REQUIRED'
+          echo 'additional cost=0 EUR'
