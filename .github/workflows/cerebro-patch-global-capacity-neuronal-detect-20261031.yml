@@ -35,62 +35,75 @@ jobs:
 
           controller = Path('.github/workflows/cerebro-continuous-work-factory-v0.yml')
           text = controller.read_text()
-          old = '''          neuronal_parent_active="$(awk 'END{print NR+0}' "$neuronal_tmp")"
-'''
-          new = '''          # GitHub's repository-wide runs listing can transiently omit an older
-          # queued workflow even while its exact run remains queued. Probe the
-          # NEURONAL workflow directly so its 25 physical slots are never loaned
-          # back to PRIORITY because of a pagination/eventual-consistency gap.
-          neuronal_probe_status='GREEN'
-          neuronal_probe_json=''
-          neuronal_probe_error="$(mktemp)"
-          for attempt in 1 2 3; do
-            : > "$neuronal_probe_error"
-            if neuronal_probe_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30" 2>"$neuronal_probe_error")"; then
-              break
-            fi
-            if grep -qi 'rate limit' "$neuronal_probe_error"; then
-              sleep "$((attempt * 2))"
-              continue
-            fi
-            neuronal_probe_status='FAIL_CLOSED'
-            break
-          done
-          if [ -n "$neuronal_probe_json" ]; then
-            neuronal_parent_active="$(printf '%s' "$neuronal_probe_json" | jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
-            neuronal_active_ids="$(printf '%s' "$neuronal_probe_json" | jq -r '.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested") | .id' | paste -sd, -)"
-          else
-            # Fail closed: uncertainty must reserve NEURONAL capacity rather
-            # than overcommit the Enterprise 360 entitlement.
-            neuronal_probe_status='FAIL_CLOSED'
-            neuronal_parent_active=1
-            neuronal_active_ids='UNKNOWN_FAIL_CLOSED'
-          fi
-'''
+          old = "          neuronal_parent_active=\"$(awk 'END{print NR+0}' \"$neuronal_tmp\")\"\n"
+          new = ''.join([
+              "          # GitHub's repository-wide runs listing can transiently omit an older\n",
+              "          # queued workflow even while its exact run remains queued. Probe the\n",
+              "          # NEURONAL workflow directly so its 25 physical slots are never loaned\n",
+              "          # back to PRIORITY because of a pagination/eventual-consistency gap.\n",
+              "          neuronal_probe_status='GREEN'\n",
+              "          neuronal_probe_json=''\n",
+              "          neuronal_probe_error=\"$(mktemp)\"\n",
+              "          for attempt in 1 2 3; do\n",
+              "            : > \"$neuronal_probe_error\"\n",
+              "            if neuronal_probe_json=\"$(gh api \"/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30\" 2>\"$neuronal_probe_error\")\"; then\n",
+              "              break\n",
+              "            fi\n",
+              "            if grep -qi 'rate limit' \"$neuronal_probe_error\"; then\n",
+              "              sleep \"$((attempt * 2))\"\n",
+              "              continue\n",
+              "            fi\n",
+              "            neuronal_probe_status='FAIL_CLOSED'\n",
+              "            break\n",
+              "          done\n",
+              "          if [ -n \"$neuronal_probe_json\" ]; then\n",
+              "            neuronal_parent_active=\"$(printf '%s' \"$neuronal_probe_json\" | jq '[.workflow_runs[] | select(.status == \"in_progress\" or .status == \"queued\" or .status == \"pending\" or .status == \"waiting\" or .status == \"requested\")] | length')\"\n",
+              "            neuronal_active_ids=\"$(printf '%s' \"$neuronal_probe_json\" | jq -r '.workflow_runs[] | select(.status == \"in_progress\" or .status == \"queued\" or .status == \"pending\" or .status == \"waiting\" or .status == \"requested\") | .id' | paste -sd, -)\"\n",
+              "          else\n",
+              "            # Fail closed: uncertainty must reserve NEURONAL capacity rather\n",
+              "            # than overcommit the Enterprise 360 entitlement.\n",
+              "            neuronal_probe_status='FAIL_CLOSED'\n",
+              "            neuronal_parent_active=1\n",
+              "            neuronal_active_ids='UNKNOWN_FAIL_CLOSED'\n",
+              "          fi\n",
+          ])
           if text.count(old) != 1:
               raise SystemExit(f'controller target count={text.count(old)}')
           text = text.replace(old, new)
-          if text.count('echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"') != 1:
-              raise SystemExit('api_snapshot_calls_max=20 target mismatch')
-          text = text.replace('echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"', 'echo "api_snapshot_calls_max=21" >> "$GITHUB_STEP_SUMMARY"')
+          old_api = '          echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"\n'
+          new_api = '          echo "api_snapshot_calls_max=21" >> "$GITHUB_STEP_SUMMARY"\n'
+          if text.count(old_api) != 1:
+              raise SystemExit('api snapshot target mismatch')
+          text = text.replace(old_api, new_api)
           anchor = '          echo "neuronal_parent_runs_active=$neuronal_parent_active" >> "$GITHUB_STEP_SUMMARY"\n'
-          addition = anchor + '          echo "neuronal_probe_status=$neuronal_probe_status" >> "$GITHUB_STEP_SUMMARY"\n          echo "neuronal_active_ids=${neuronal_active_ids:-none}" >> "$GITHUB_STEP_SUMMARY"\n          echo "neuronal_probe_api_calls=1" >> "$GITHUB_STEP_SUMMARY"\n'
+          extra = ''.join([
+              anchor,
+              '          echo "neuronal_probe_status=$neuronal_probe_status" >> "$GITHUB_STEP_SUMMARY"\n',
+              '          echo "neuronal_active_ids=${neuronal_active_ids:-none}" >> "$GITHUB_STEP_SUMMARY"\n',
+              '          echo "neuronal_probe_api_calls=1" >> "$GITHUB_STEP_SUMMARY"\n',
+          ])
           if text.count(anchor) != 1:
-              raise SystemExit('neuronal summary anchor mismatch')
-          text = text.replace(anchor, addition)
-          controller.write_text(text)
+              raise SystemExit('summary anchor mismatch')
+          controller.write_text(text.replace(anchor, extra))
 
           ci = Path('.github/workflows/cerebro-global-capacity-controller-v1-ci.yml')
           c = ci.read_text()
-          if c.count("grep -q 'api_snapshot_calls_max=20' \"$controller\"") != 1:
-              raise SystemExit('CI api count target mismatch')
-          c = c.replace("grep -q 'api_snapshot_calls_max=20' \"$controller\"", "grep -q 'api_snapshot_calls_max=21' \"$controller\"")
+          old_ci_api = "          grep -q 'api_snapshot_calls_max=20' \"$controller\"\n"
+          new_ci_api = "          grep -q 'api_snapshot_calls_max=21' \"$controller\"\n"
+          if c.count(old_ci_api) != 1:
+              raise SystemExit('CI api target mismatch')
+          c = c.replace(old_ci_api, new_ci_api)
           anchor2 = "          grep -q 'priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))' \"$controller\"\n"
-          addition2 = anchor2 + "          grep -q 'actions/workflows/${neuronal}/runs?per_page=30' \"$controller\"\n          grep -q \"neuronal_probe_status='GREEN'\" \"$controller\"\n          grep -q \"neuronal_active_ids='UNKNOWN_FAIL_CLOSED'\" \"$controller\"\n          grep -q 'neuronal_probe_api_calls=1' \"$controller\"\n"
+          extra2 = ''.join([
+              anchor2,
+              "          grep -q 'actions/workflows/${neuronal}/runs?per_page=30' \"$controller\"\n",
+              "          grep -q \"neuronal_probe_status='GREEN'\" \"$controller\"\n",
+              "          grep -q \"neuronal_active_ids='UNKNOWN_FAIL_CLOSED'\" \"$controller\"\n",
+              "          grep -q 'neuronal_probe_api_calls=1' \"$controller\"\n",
+          ])
           if c.count(anchor2) != 1:
-              raise SystemExit('CI NEURONAL anchor mismatch')
-          c = c.replace(anchor2, addition2)
-          ci.write_text(c)
+              raise SystemExit('CI neuronal anchor mismatch')
+          ci.write_text(c.replace(anchor2, extra2))
           PY
 
           git diff --check
