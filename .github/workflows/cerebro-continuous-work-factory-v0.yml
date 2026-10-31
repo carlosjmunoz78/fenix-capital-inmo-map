@@ -126,7 +126,11 @@ jobs:
 
           critical_queued_count="$(awk -F '\t' -v re="$critical_regex" '$2!="in_progress" && $3 ~ re {print $1}' "$active_tmp" | sort -u | wc -l | tr -d ' ')"
           critical_pressure=false
-          if [ "$critical_queued_count" -gt 0 ]; then critical_pressure=true; fi
+          pressure_cancel_budget=0
+          if [ "$critical_queued_count" -gt "$CONTROL_RESERVE" ]; then
+            critical_pressure=true
+            pressure_cancel_budget=$((critical_queued_count - CONTROL_RESERVE))
+          fi
 
           maint_tmp="$(mktemp)"
           priority_tmp="$(mktemp)"
@@ -189,9 +193,10 @@ jobs:
           capacity_mode='RAMP350_TOTAL'
 
           if [ "$critical_pressure" = true ]; then
-            capacity_mode='CONTROL_PRESSURE'
+            capacity_mode='CONTROL_PRESSURE_BOUNDED'
             while IFS=$'\t' read -r run_id status _path _title; do
               [ -n "$run_id" ] || continue
+              [ "$cancelled_background_queue_runs" -lt "$pressure_cancel_budget" ] || break
               if [ "$status" != in_progress ]; then
                 gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
                 cancelled_background_queue_runs=$((cancelled_background_queue_runs + 1))
@@ -251,6 +256,7 @@ jobs:
           echo "cancelled_neuronal_return_loans=$cancelled_neuronal_return_loans" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_queued_count=$critical_queued_count" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_control_pressure=$critical_pressure" >> "$GITHUB_STEP_SUMMARY"
+          echo "pressure_cancel_budget=$pressure_cancel_budget" >> "$GITHUB_STEP_SUMMARY"
           echo "cancelled_background_queue_runs=$cancelled_background_queue_runs" >> "$GITHUB_STEP_SUMMARY"
           echo "control_reserve=$CONTROL_RESERVE" >> "$GITHUB_STEP_SUMMARY"
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
@@ -259,6 +265,7 @@ jobs:
           echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
           echo "dispatch_non_transient_retry=false" >> "$GITHUB_STEP_SUMMARY"
           echo "in_progress_background_cancelled=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "control_pressure_policy=reserve10_then_cancel_excess_only" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_order=CRITICAL_GATES > P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
           echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
