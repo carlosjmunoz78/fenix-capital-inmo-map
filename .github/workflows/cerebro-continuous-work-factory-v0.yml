@@ -133,7 +133,7 @@ jobs:
           done
 
           target_useful=$((MAINTENANCE_LANES + priority_target + neuronal_reserved))
-          test $((target_useful + CONTROL_RESERVE)) -eq ENTERPRISE_CAP
+          test $((target_useful + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"
           echo "neuronal_active=$neuronal_active" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_present_before=$maint_count" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_dispatched=$maint_dispatched" >> "$GITHUB_STEP_SUMMARY"
