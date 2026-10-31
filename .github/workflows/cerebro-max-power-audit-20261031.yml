@@ -1,0 +1,53 @@
+name: CEREBRO Max Power Audit 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-max-power-audit-20261031.yml'
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+    steps:
+      - name: Audit active governed capacity
+        shell: bash
+        run: |
+          set -euo pipefail
+          active="$(mktemp)"
+          : > "$active"
+          for status in in_progress queued pending waiting requested; do
+            for page in 1 2 3 4; do
+              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+                --jq '.workflow_runs[] | [.id,.status,.path,.display_title] | @tsv' >> "$active" 2>/dev/null || true
+            done
+          done
+          sort -u "$active" -o "$active"
+
+          sustained="$(awk -F '\t' '$3==".github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml"{print $4}' "$active" | sed -n -E 's/.*CEREBRO SUSTAINED ([0-9]+).*/\1/p' | sort -n -u | wc -l | tr -d ' ')"
+          priority="$(awk -F '\t' '$3==".github/workflows/cerebro-portfolio-priority-sustained-v1.yml"{print $4}' "$active" | sed -n -E 's/.*CEREBRO PRIORITY ([0-9]+).*/\1/p' | sort -n -u | wc -l | tr -d ' ')"
+          neuronal_parent="$(awk -F '\t' '$3==".github/workflows/cerebro-neuronal-superparallel-v1.yml"{n++} END{print n+0}' "$active")"
+          fact001="$(awk -F '\t' '$3==".github/workflows/cerebro-fact001-repair-worker-factory-v1.yml"{n++} END{print n+0}' "$active")"
+          critical="$(awk -F '\t' '$2!="in_progress" && $3 ~ /cerebro-enterprise-acceleration-v0.yml|cerebro-global-capacity-controller-v1-ci.yml|cerebro-auto001-preprod-patch-executor-v0.yml|cerebro-auto001-prod-closure-v1.yml|cerebro-governed-promotion-v1.yml|cerebro-fact001-repair-worker-factory-v1.yml|cerebro-app001-preprod-physical-qa-v1.yml/{n++} END{print n+0}' "$active")"
+
+          neuronal_reserved=0
+          if [ "$neuronal_parent" -gt 0 ]; then neuronal_reserved=25; fi
+          useful_reserved=$((sustained + priority + neuronal_reserved))
+          total_records="$(wc -l < "$active" | tr -d ' ')"
+
+          echo "MAX_POWER_AUDIT sustained_unique_lanes=${sustained} priority_unique_lanes=${priority} neuronal_parent_runs=${neuronal_parent} neuronal_physical_reserve=${neuronal_reserved} fact001_active_runs=${fact001} critical_queued=${critical} useful_reserved=${useful_reserved} active_records_all=${total_records}"
+          echo "EXPECTED enterprise_useful=350 control_reserve=10 enterprise_cap=360 maintenance=68 priority_idle_neuronal=282 priority_with_neuronal=257 neuronal_max_physical=25"
+
+          test "$sustained" -le 68
+          test "$priority" -le 282
+          test "$useful_reserved" -le 350
+          test "$critical" -eq 0
