@@ -22,6 +22,15 @@ test('AUTO-001 closure packet declares every required PROD gate explicitly green
   }
 });
 
+test('governed promotion requires canonical PROD Live Deploy and Runtime Smoke on exact SHA',()=>{
+  const workflow=fs.readFileSync('.github/workflows/cerebro-governed-promotion-v1.yml','utf8');
+  assert.match(workflow,/gh workflow run prod-live-deploy\.yml/);
+  assert.match(workflow,/gh workflow run prod-runtime-smoke\.yml/);
+  assert.match(workflow,/expected_live_sha=\$\{?main_sha\}?|expected_live_sha=\$main_sha|expected_live_sha=\$\{main_sha\}/);
+  assert.match(workflow,/PROD_SOURCE_SHA\.txt/);
+  assert.match(workflow,/PROD_PROMOTED/);
+});
+
 test('APP-001 PROD policy stays in exact gate and HUMAN_REQUIRED parity with executor',()=>{
   const registry=JSON.parse(fs.readFileSync('cerebro/registry/prod-promotion-policy-overrides.v1.json','utf8'));
   const app=registry.policies.find(p=>p.engine_id==='APP-001'&&p.target==='APP_FENIX_STATIC');
