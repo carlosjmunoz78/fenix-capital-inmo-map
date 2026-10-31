@@ -1,0 +1,79 @@
+name: CEREBRO PROD Source Audit V1
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */6 * * *'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-prod-source-audit-v1.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-prod-source-audit-v1.yml'
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_ENVIRONMENT: PROD_READONLY
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+  PROD_SOURCE_URL: https://app.fenixcapital.es/PROD_SOURCE_SHA.txt
+
+jobs:
+  audit:
+    name: Read physical PROD source SHA · no writes
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Guard read-only authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = PROD_READONLY
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
+
+      - name: Read and verify physical PROD source stamp
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_sha=''
+          for attempt in 1 2 3 4 5; do
+            source_sha="$(curl -fsSL --max-time 20 "${PROD_SOURCE_URL}?audit_run=${GITHUB_RUN_ID}&attempt=${attempt}" | tr -d '\r\n' || true)"
+            if printf '%s' "$source_sha" | grep -Eq '^[0-9a-fA-F]{40}$'; then break; fi
+            source_sha=''
+            sleep $((attempt * 2))
+          done
+          test -n "$source_sha"
+          printf '%s' "$source_sha" | grep -Eq '^[0-9a-fA-F]{40}$'
+          gh api "/repos/${GITHUB_REPOSITORY}/commits/${source_sha}" --jq '.sha' | grep -qx "$source_sha"
+          printf '%s\n' "$source_sha" > /tmp/prod-source-sha.txt
+          printf 'source_sha=%s\n' "$source_sha" >> "$GITHUB_OUTPUT"
+          printf '{"state_type":"CEREBRO_PROD_SOURCE_AUDIT_V1","environment":"PROD_READONLY","source_sha":"%s","source_url":"%s","run_id":%s,"prod_write":false,"trading":false}\n' \
+            "$source_sha" "$PROD_SOURCE_URL" "$GITHUB_RUN_ID" > /tmp/prod-source-audit.json
+
+      - name: Upload immutable source evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-prod-source-audit-${{ github.run_id }}
+          path: |
+            /tmp/prod-source-sha.txt
+            /tmp/prod-source-audit.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Summary
+        run: |
+          echo 'PROD_SOURCE_AUDIT=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo "physical_prod_source_sha=${{ steps.source.outputs.source_sha }}" >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
