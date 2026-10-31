@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { selectMissionUnit, executeMissionDerivedWork } from '../runtime/mission-derived-useful-work-v1.mjs';
@@ -74,6 +76,34 @@ test('scope-dependent implementation consumes canonical hydrated scope without l
   assert.ok(r.mission_scope.title);
   assert.ok(r.mission_scope.scope_text);
   assert.equal(r.fallback.used,false);
+});
+
+test('rolling Mission DAG evidence supports four bounded execution slots',()=>{
+  safeEnv();
+  const previousMission=process.env.CEREBRO_MISSION_WORK_WRITE_MODE;
+  const previousContinuous=process.env.CEREBRO_CONTINUOUS_WORK_WRITE_MODE;
+  process.env.CEREBRO_MISSION_WORK_WRITE_MODE='rolling';
+  process.env.CEREBRO_CONTINUOUS_WORK_WRITE_MODE='rolling';
+  const laneDir=path.resolve('artifacts/mission-derived-work-v1/lane-01');
+  try{
+    for(let slot=0;slot<4;slot++){
+      const r=executeMissionDerivedWork({lane:1,cycle:slot,slot,fallback:true});
+      assert.equal(r.execution_slot,slot);
+      assert.equal(r.evidence_write_mode,'rolling');
+      assert.equal(r.additional_subscription_eur,0);
+      assert.equal(r.prod_write_authorized,false);
+      assert.equal(r.trading_access,false);
+      assert.equal(fs.existsSync(path.join(laneDir,`slot-${slot}.json`)),true);
+    }
+    assert.equal(fs.readdirSync(laneDir).filter(x=>x.startsWith('slot-')).length,4);
+    assert.throws(()=>executeMissionDerivedWork({lane:1,cycle:0,slot:4,fallback:false}),/slot must be an integer 0\.\.3/);
+  }finally{
+    if(previousMission===undefined) delete process.env.CEREBRO_MISSION_WORK_WRITE_MODE;
+    else process.env.CEREBRO_MISSION_WORK_WRITE_MODE=previousMission;
+    if(previousContinuous===undefined) delete process.env.CEREBRO_CONTINUOUS_WORK_WRITE_MODE;
+    else process.env.CEREBRO_CONTINUOUS_WORK_WRITE_MODE=previousContinuous;
+    fs.rmSync(laneDir,{recursive:true,force:true});
+  }
 });
 
 test('unsafe environments fail closed',()=>{

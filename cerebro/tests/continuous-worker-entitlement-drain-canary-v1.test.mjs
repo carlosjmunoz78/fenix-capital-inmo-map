@@ -37,7 +37,10 @@ test('Mission DAG exhaustion switches to deterministic useful maintenance instea
 
 test('continuous fallback is real bounded work, not idle runner padding', () => {
   assert.doesNotMatch(workflow, /\bsleep\s+[0-9]+/);
-  assert.match(workflow, /CEREBRO_MAX_UNITS_PER_LEASE: '256'/);
+  assert.match(workflow, /CEREBRO_MAX_UNITS_PER_LEASE: '8192'/);
+  assert.match(workflow, /test "\$CEREBRO_MAX_UNITS_PER_LEASE" -ge 256/);
+  assert.match(workflow, /test "\$CEREBRO_MAX_UNITS_PER_LEASE" -le 8192/);
+  assert.match(workflow, /CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'/);
   assert.match(workflow, /CEREBRO_WORKER_LEASE_SECONDS: '420'/);
   assert.match(workflow, /artifacts\/continuous-work-v0/);
 });

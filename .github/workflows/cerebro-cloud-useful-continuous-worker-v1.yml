@@ -45,7 +45,10 @@ jobs:
       CEREBRO_PROD_WRITE: 'false'
       CEREBRO_TRADING_ACCESS: 'false'
       CEREBRO_WORKER_LEASE_SECONDS: '420'
-      CEREBRO_MAX_UNITS_PER_LEASE: '256'
+      CEREBRO_MAX_UNITS_PER_LEASE: '8192'
+      CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'
+      CEREBRO_MISSION_WORK_WRITE_MODE: rolling
+      CEREBRO_CONTINUOUS_WORK_WRITE_MODE: rolling
       CEREBRO_MISSION_WORK_OUT_DIR: artifacts/mission-derived-work-v1
       CEREBRO_CONTINUOUS_WORK_OUT_DIR: artifacts/continuous-work-v0
     steps:
@@ -68,8 +71,11 @@ jobs:
           test "$CEREBRO_MAX_REPO_WRITE_CONCURRENCY" = "1"
           test "$CEREBRO_WORKER_LEASE_SECONDS" -ge 300
           test "$CEREBRO_WORKER_LEASE_SECONDS" -le 480
-          test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 1
-          test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 256
+          test "$CEREBRO_MAX_UNITS_PER_LEASE" -ge 256
+          test "$CEREBRO_MAX_UNITS_PER_LEASE" -le 8192
+          test "$CEREBRO_MAINTENANCE_INNER_PARALLELISM" -eq 4
+          test "$CEREBRO_MISSION_WORK_WRITE_MODE" = rolling
+          test "$CEREBRO_CONTINUOUS_WORK_WRITE_MODE" = rolling
           test "$CEREBRO_REARM_LANE_LIMIT" -eq 68
           test "$CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED" = "true"
           test "$CEREBRO_MISSION_LANE_COUNT" -eq 68
@@ -121,7 +127,9 @@ jobs:
           deadline=$((start + CEREBRO_WORKER_LEASE_SECONDS))
           current=${{ inputs.cycle }}
           lane=${{ inputs.lane }}
+          parallelism="$CEREBRO_MAINTENANCE_INNER_PARALLELISM"
           units=0
+          batches=0
           mission_units=0
           maintenance_units=0
           mission_exhausted=false
@@ -129,24 +137,38 @@ jobs:
           test "$atomic_count" -ge 1
 
           while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$CEREBRO_MAX_UNITS_PER_LEASE" ]; do
-            linear=$((current * CEREBRO_MISSION_LANE_COUNT + lane))
-            if [ "$linear" -lt "$atomic_count" ]; then
-              node cerebro/runtime/mission-derived-useful-work-v1.mjs \
-                --lane="$lane" \
-                --cycle="$current" \
-                --fallback=true
-              mission_units=$((mission_units + 1))
-            else
-              mission_exhausted=true
-              if [ "$current" -ge 999999 ]; then current=0; fi
-              node cerebro/runtime/continuous-useful-work-factory-v0.mjs \
-                --lane="$lane" \
-                --cycle="$current"
-              maintenance_units=$((maintenance_units + 1))
-            fi
-            units=$((units + 1))
-            current=$((current + 1))
-            if [ "$current" -gt 999999 ]; then current=0; fi
+            remaining=$((CEREBRO_MAX_UNITS_PER_LEASE - units))
+            batch_size="$parallelism"
+            if [ "$remaining" -lt "$batch_size" ]; then batch_size="$remaining"; fi
+            pids=''
+            batch_mission=0
+            batch_maintenance=0
+            for slot in $(seq 0 $((batch_size - 1))); do
+              cycle=$(( (current + slot) % 1000000 ))
+              linear=$((cycle * CEREBRO_MISSION_LANE_COUNT + lane))
+              if [ "$linear" -lt "$atomic_count" ]; then
+                node cerebro/runtime/mission-derived-useful-work-v1.mjs \
+                  --lane="$lane" \
+                  --cycle="$cycle" \
+                  --slot="$slot" \
+                  --fallback=true &
+                batch_mission=$((batch_mission + 1))
+              else
+                mission_exhausted=true
+                node cerebro/runtime/continuous-useful-work-factory-v0.mjs \
+                  --lane="$lane" \
+                  --cycle="$cycle" \
+                  --slot="$slot" &
+                batch_maintenance=$((batch_maintenance + 1))
+              fi
+              pids="$pids $!"
+            done
+            for pid in $pids; do wait "$pid"; done
+            units=$((units + batch_size))
+            mission_units=$((mission_units + batch_mission))
+            maintenance_units=$((maintenance_units + batch_maintenance))
+            batches=$((batches + 1))
+            current=$(( (current + batch_size) % 1000000 ))
           done
 
           next_linear=$((current * CEREBRO_MISSION_LANE_COUNT + lane))
@@ -154,9 +176,11 @@ jobs:
           elapsed=$(( $(date +%s) - start ))
           echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
           echo "units_completed=$units" >> "$GITHUB_OUTPUT"
+          echo "batches_completed=$batches" >> "$GITHUB_OUTPUT"
           echo "mission_units=$mission_units" >> "$GITHUB_OUTPUT"
           echo "maintenance_units=$maintenance_units" >> "$GITHUB_OUTPUT"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
+          echo "inner_parallelism=$parallelism" >> "$GITHUB_OUTPUT"
           echo "lane=$lane" >> "$GITHUB_OUTPUT"
           echo "atomic_count=$atomic_count" >> "$GITHUB_OUTPUT"
           echo "mission_exhausted=$mission_exhausted" >> "$GITHUB_OUTPUT"
@@ -166,13 +190,21 @@ jobs:
           echo "post_dag_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
           echo "job001_capacity_contract=360/360/360" >> "$GITHUB_STEP_SUMMARY"
           echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
+          echo "batches_completed=$batches" >> "$GITHUB_STEP_SUMMARY"
           echo "mission_units=$mission_units" >> "$GITHUB_STEP_SUMMARY"
           echo "maintenance_units=$maintenance_units" >> "$GITHUB_STEP_SUMMARY"
           echo "atomic_count=$atomic_count" >> "$GITHUB_STEP_SUMMARY"
           echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
+          echo "inner_parallelism=$parallelism" >> "$GITHUB_STEP_SUMMARY"
+          echo "mission_evidence_write_mode=$CEREBRO_MISSION_WORK_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
+          echo "continuous_evidence_write_mode=$CEREBRO_CONTINUOUS_WORK_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
           echo "next_cycle=$current" >> "$GITHUB_STEP_SUMMARY"
           echo "mission_exhausted=$mission_exhausted" >> "$GITHUB_STEP_SUMMARY"
           echo "continuous_source_available=true" >> "$GITHUB_STEP_SUMMARY"
+          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"
+          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish inspectable lease evidence
         if: steps.lease.outputs.units_completed != '0'
