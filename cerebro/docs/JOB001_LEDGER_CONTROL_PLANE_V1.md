@@ -8,13 +8,13 @@ PREPROD. Aditivo. Coste adicional: 0 EUR. No autoriza PROD ni Trading.
 
 Exponer una vista gobernada y sanitizada del ledger/runtime JOB-001 existente para que coordinadores, watchdogs y CEREBRO Console puedan medir saturación real sin inferirla desde GitHub Actions.
 
-La superficie NO crea una segunda cola, NO crea un scheduler y NO crea un segundo daemon. `requestRefill()` delega únicamente en `AdaptiveHierarchicalAgentWorkPumpV3.reconcile()` ya existente.
+La superficie NO crea una segunda cola, NO crea un scheduler y NO crea un segundo daemon. `requestRefill()` delega únicamente en el Work Pump ya existente.
 
-## Contrato 48/64
+## Contrato Enterprise 360
 
-- target útil por defecto: **48** jobs `runnable + running` cuando exista backlog seguro;
-- máximo global: **64**;
-- máximo por empresa por defecto: **48**;
+- target útil por defecto: **360** jobs `runnable + running` cuando exista backlog seguro;
+- máximo global: **360**;
+- máximo por empresa por defecto: **360**;
 - DeepSeek: máximo **8**;
 - repo-write: máximo **1**;
 - contexto obligatorio: `company_id`, `engine_id`, `environment`, `version`;
@@ -22,7 +22,18 @@ La superficie NO crea una segunda cola, NO crea un scheduler y NO crea un segund
 - Trading: denegado;
 - PROD / PROD-write: denegado.
 
-El target 48 no es una cola nueva ni un número arbitrario: `AdaptiveHierarchicalAgentWorkPumpV3` ya define como rango normal `model_capacity=8 × backlog_multiplier=6 = 48`, con techo 64. Este bloque alinea el control plane y el arranque del supervisor con ese contrato existente.
+El entitlement vivo verificado para la organización es 360 jobs simultáneos. Ese techo físico no amplía por sí mismo las autoridades sensibles: DeepSeek permanece limitado a 8 y repo-write a 1.
+
+## Continuidad de trabajo después del Mission DAG
+
+El Mission DAG V1 tiene **2.352 unidades únicas** y sigue ejecutándose exactamente una vez. Su agotamiento ya no significa que JOB-001 deba quedarse sin actividad.
+
+El worker sostenido usa dos fuentes ordenadas:
+
+1. mientras exista una unidad única del Mission DAG, ejecuta `mission-derived-useful-work-v1.mjs`;
+2. cuando ese DAG se agota, cambia a `continuous-useful-work-factory-v0.mjs` y mantiene el self-refill con mantenimiento, cobertura, deuda, tests, gobernanza, dependencias, documentación, calidad y continuidad.
+
+El fallback continuo no se presenta como un programador general. Si una tarea necesita una capacidad de implementación que no existe, debe permanecer `WAITING_CAPABILITY`; no se sustituye por evidencia ficticia.
 
 ## Scopes
 
@@ -63,61 +74,30 @@ $env:CEREBRO_CONTROL_PLANE_SCOPES='cerebro:ledger:read'
 node cerebro/runtime/job001-ledger-control-plane-cli-v1.mjs status
 ```
 
-No imprime secretos ni el journal completo.
-
 ## Telemetría remota sanitizada V1
 
-La ruta preferente es reutilizar un publisher gobernado ya existente del Browser Bridge 1.4.1. La evidencia viva confirma transporte cloud ONLINE, pero la superficie recuperada todavía no expone un contrato de publicación JOB-001 reutilizable sin reconstruir el Bridge por memoria.
-
-El fallback canónico mínimo ya está preparado en PREPROD:
-
-- tabla `public.cerebro_job001_telemetry_preprod`;
-- una única fila latest-only por `(company_id, engine_id, environment, device_id)`;
-- RLS habilitado;
-- acceso server-side solamente; anon/authenticated sin grants de tabla;
-- TTL del payload: 120 s;
-- multiempresa por clave y contrato;
-- coste adicional objetivo: 0 EUR;
-- sin históricos pesados ni logs;
-- sin PROD ni Trading.
-
-El publisher está en `cerebro/runtime/job001-remote-telemetry-v1.mjs`. Un fallo de publicación es **no fatal**: el supervisor y JOB-001 siguen trabajando localmente.
-
-**Regla de credenciales:** no colocar una `service_role` nueva en el PC por comodidad. El publisher remoto solo se activa cuando el host ya dispone de una referencia server-side autorizada o cuando el Browser Bridge exponga un transporte gobernado reutilizable. La alineación 48/64 no depende de esa credencial.
+La tabla canónica PREPROD es `public.cerebro_job001_telemetry_preprod`, latest-only por `(company_id, engine_id, environment, device_id)`, RLS habilitado, server-side, TTL 120 s, multiempresa, sin históricos pesados, sin PROD ni Trading. Un fallo de publicación es no fatal.
 
 ## Supervisor entrypoint V1
 
 `cerebro/runtime/cerebro-supervisor-entrypoint-v1.mjs` envuelve, no sustituye, `cerebro-supervisor-daemon-v0.mjs`.
 
-V0 consume estos nombres de entorno y V1 los fija antes de importarlo:
+V1 fija antes de importar V0:
 
-- `CEREBRO_INITIAL_CONCURRENCY=48`;
-- `CEREBRO_MAX_CONCURRENCY=64`;
-- `CEREBRO_MAX_PER_COMPANY=48`;
+- `CEREBRO_INITIAL_CONCURRENCY=360`;
+- `CEREBRO_MAX_CONCURRENCY=360`;
+- `CEREBRO_MAX_PER_COMPANY=360`;
 - `CEREBRO_MAX_DEEPSEEK_CONCURRENCY=8`;
 - `CEREBRO_MAX_REPO_WRITE_CONCURRENCY=1`;
 - `CEREBRO_SUPERVISOR_ENV=PREPROD`.
 
-Si existe un `CEREBRO_MAX_CONCURRENCY` explícitamente más restrictivo que 48, V1 no lo supera y deriva de él el límite por empresa. En el despliegue canónico 48/64 el instalador valida físicamente 48/64/48/8/1.
-
-El publisher se arma **antes** de importar V0 porque el daemon tiene top-level await y es long-lived. V0 sigue siendo el único daemon; el publisher usa un timer del mismo proceso. Si faltan referencias autorizadas para telemetría remota, V0 arranca igualmente.
+Un límite explícito inferior se conserva como safety cap. V0 sigue siendo el único daemon.
 
 ## Instalador Windows PREPROD canónico
 
 Ruta: `cerebro/scripts/install-supervisor-preprod-windows.ps1`.
 
-El instalador:
-
-1. conserva el task `CEREBRO-Supervisor-PREPROD` y exporta su XML antes de cambiarlo;
-2. crea backup del `cerebro` actualmente instalado;
-3. copia el árbol nuevo de forma paralela;
-4. ejecuta un smoke **aislado y coste 0** con Work Pump, repo sandbox y telemetría remota deshabilitados;
-5. exige heartbeat smoke PREPROD con 48/64/48/8/1 y PROD/Trading false;
-6. registra el mismo task con `RunLevel Limited`, apuntando al entrypoint V1;
-7. espera heartbeat **fresco real** del task y vuelve a exigir 48/64/48/8/1;
-8. si algo falla, restaura app anterior + XML del task anterior automáticamente.
-
-El state root vuelve a coincidir con el default histórico de V0: `%LOCALAPPDATA%\CEREBRO\SupervisorRuntime`. No se crea un segundo journal.
+El instalador conserva backup y rollback, ejecuta smoke aislado sin paid work, exige heartbeat PREPROD con **360/360/360/8/1**, registra el mismo task con `RunLevel Limited`, comprueba heartbeat fresco y restaura la versión anterior automáticamente si algo falla.
 
 ## Tests
 
@@ -125,61 +105,42 @@ El state root vuelve a coincidir con el default histórico de V0: `%LOCALAPPDATA
 node --test cerebro/tests/job001-ledger-control-plane-v1.test.mjs
 node --test cerebro/tests/job001-remote-telemetry-v1.test.mjs
 node --test cerebro/tests/cerebro-supervisor-entrypoint-v1.test.mjs
+node --test cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+node --test cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs
 ```
 
-Los workflows `CEREBRO JOB-001 Ledger Control Plane V1` y `CEREBRO Runtime Durable Supervisor V0` validan contrato, aislamiento, sanitización, ordering del publisher, nombres de entorno V0, instalador y límites 48/64/48/8/1.
+Los workflows `CEREBRO JOB-001 Ledger Control Plane V1` y `CEREBRO Runtime Durable Supervisor V0` validan contrato, aislamiento, sanitización, instalador, continuidad post-DAG y límites 360/360/360/8/1.
 
 ## Dependencias conservadas
 
 - `DurableJobRuntimeV1`;
-- `AdaptiveHierarchicalAgentWorkPumpV3`;
+- Work Pump existente;
 - `DynamicConcurrencyPolicyV1`;
-- `cerebro-supervisor-daemon-v0.mjs` y su heartbeat existente;
+- `cerebro-supervisor-daemon-v0.mjs`;
 - task Windows `CEREBRO-Supervisor-PREPROD`;
-- Browser Bridge 1.4.1 sin reconstruirlo ni sustituirlo.
-
-No se sustituye ninguna de estas piezas.
+- Browser Bridge existente.
 
 ## OLD vs NEW
 
 **OLD**
 
-- Ledger target: 40;
-- max company: 40;
-- daemon V0 default inicial: 40;
-- instalador apuntaba directamente a V0;
-- smoke y scheduled task no validaban físicamente 48/64/48/8/1;
-- heartbeat local solamente;
-- `dynamic_concurrency` proyectado completo por el lector Ledger.
+- contrato canónico todavía retenía el cap histórico 180;
+- worker sostenido terminaba cuando el Mission DAG finito quedaba agotado;
+- self-refill publicaba `UNIQUE_MISSION_BACKLOG_EXHAUSTED` y la lane moría.
 
 **NEW PREPROD**
 
-- Ledger target: 48;
-- max company: 48;
-- max global: 64;
+- target/global/company: 360/360/360;
 - DeepSeek: 8;
 - repo-write: 1;
-- entrypoint V1 configura los nombres de entorno que V0 realmente consume;
-- publisher se arma antes del daemon long-lived;
-- instalador canónico conserva el task existente y verifica heartbeat fresco 48/64/48/8/1;
-- `dynamic_concurrency` se proyecta por whitelist;
-- fallback remoto latest-only, TTL 120 s, server-side y no fatal.
+- Mission DAG mantiene ejecución única, sin replay duplicado;
+- al agotarlo, la lane cambia a `continuous-useful-work-factory-v0`;
+- self-refill continúa mientras exista esa fuente útil;
+- no se crean sleeps, jobs vacíos, segunda cola, segundo scheduler ni segundo daemon.
 
 ## Rollback
 
-Rollback físico del instalador: si la prueba live falla, el script restaura automáticamente el árbol anterior y el XML anterior de `CEREBRO-Supervisor-PREPROD`.
-
-Rollback manual del runtime: volver a arrancar directamente `cerebro-supervisor-daemon-v0.mjs`; V0 no se elimina ni se modifica para conseguir 48/64.
-
-Rollback de Git: revertir el PR del bloque.
-
-Rollback de almacenamiento PREPROD, solo si ya no existe ningún consumidor y después de snapshot/verificación:
-
-```sql
-DROP TABLE public.cerebro_job001_telemetry_preprod;
-```
-
-La tabla no contiene jobs, payloads ni journal; solo la última proyección sanitizada.
+El instalador restaura árbol y XML previos ante fallo. El runtime V0 se conserva. El cambio Git es reversible mediante revert de la PR. La tabla PREPROD no contiene jobs, payloads ni journal; solo la última proyección sanitizada.
 
 ## Gate de promoción
 

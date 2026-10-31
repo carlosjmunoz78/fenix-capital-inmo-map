@@ -54,8 +54,6 @@ permissions:
   contents: read
 
 concurrency:
-  # Different refs/PRs can point to the exact same code head. Test it once and
-  # free the runner for distinct work instead of duplicating the full suite.
   group: cerebro-runtime-durable-supervisor-v0-${{ github.event.pull_request.head.sha || github.sha }}
   cancel-in-progress: true
 
@@ -91,9 +89,9 @@ jobs:
           grep -F "prod_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "prod_write_authorized" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "RunLevel Limited" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "target_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_global_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
-          grep -F "max_company_concurrency -ne 180" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "target_global_concurrency -ne 360" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_global_concurrency -ne 360" cerebro/scripts/install-supervisor-preprod-windows.ps1
+          grep -F "max_company_concurrency -ne 360" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "max_provider_concurrency.deepseek -ne 8" cerebro/scripts/install-supervisor-preprod-windows.ps1
           grep -F "max_repo_write_concurrency -ne 1" cerebro/scripts/install-supervisor-preprod-windows.ps1
       - name: Full CEREBRO regression suite

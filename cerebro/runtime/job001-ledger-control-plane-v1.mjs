@@ -8,7 +8,7 @@ const REFILL_SCOPE = 'cerebro:refill:request';
 const ACTIVE_RUNNING = new Set(['LEASED', 'HEARTBEATING', 'RUNNING']);
 const ACTIVE_RUNNABLE = new Set(['QUEUED', 'RETRY_WAIT']);
 const BLOCKED = new Set(['DEAD_LETTER', 'HUMAN_REQUIRED', 'FAILED_MANUAL']);
-const VERIFIED_GLOBAL_CAP = 180;
+const VERIFIED_GLOBAL_CAP = 360;
 const DEEPSEEK_CAP = 8;
 const REPO_WRITE_CAP = 1;
 

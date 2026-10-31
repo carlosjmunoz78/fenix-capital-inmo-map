@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
+  configureSupervisor360V1,
   configureSupervisor180V1,
   configureSupervisor48V1,
   telemetryConfigFromEnvV1,
@@ -9,20 +10,20 @@ import {
   CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT,
 } from '../runtime/cerebro-supervisor-entrypoint-v1.mjs';
 
-test('entrypoint aligns the existing V0 daemon to the verified 180/180/180/8/1 PREPROD contract', () => {
+test('entrypoint aligns the existing V0 daemon to the verified 360/360/360/8/1 PREPROD contract', () => {
   const env = {};
-  const result = configureSupervisor180V1(env);
-  assert.equal(result.target_useful, 180);
-  assert.equal(result.initial_global_concurrency, 180);
-  assert.equal(result.max_global_concurrency, 180);
-  assert.equal(result.max_company_concurrency, 180);
+  const result = configureSupervisor360V1(env);
+  assert.equal(result.target_useful, 360);
+  assert.equal(result.initial_global_concurrency, 360);
+  assert.equal(result.max_global_concurrency, 360);
+  assert.equal(result.max_company_concurrency, 360);
   assert.equal(result.max_deepseek_concurrency, 8);
   assert.equal(result.max_repo_write_concurrency, 1);
   assert.equal(env.CEREBRO_ENVIRONMENT, 'PREPROD');
   assert.equal(env.CEREBRO_SUPERVISOR_ENV, 'PREPROD');
-  assert.equal(env.CEREBRO_INITIAL_CONCURRENCY, '180');
-  assert.equal(env.CEREBRO_MAX_CONCURRENCY, '180');
-  assert.equal(env.CEREBRO_MAX_PER_COMPANY, '180');
+  assert.equal(env.CEREBRO_INITIAL_CONCURRENCY, '360');
+  assert.equal(env.CEREBRO_MAX_CONCURRENCY, '360');
+  assert.equal(env.CEREBRO_MAX_PER_COMPANY, '360');
   assert.equal(env.CEREBRO_MAX_DEEPSEEK_CONCURRENCY, '8');
   assert.equal(env.CEREBRO_MAX_REPO_WRITE_CONCURRENCY, '1');
   assert.equal('CEREBRO_INITIAL_GLOBAL_CONCURRENCY' in env, false);
@@ -31,16 +32,18 @@ test('entrypoint aligns the existing V0 daemon to the verified 180/180/180/8/1 P
   assert.equal(result.trading_access, false);
 });
 
-test('legacy configureSupervisor48V1 export remains a compatibility alias to the 180-cap contract', () => {
-  const env = {};
-  const result = configureSupervisor48V1(env);
-  assert.equal(result.max_global_concurrency, 180);
-  assert.equal(env.CEREBRO_MAX_CONCURRENCY, '180');
+test('legacy supervisor exports remain compatibility aliases to the 360-cap contract', () => {
+  for (const configure of [configureSupervisor180V1,configureSupervisor48V1]) {
+    const env = {};
+    const result = configure(env);
+    assert.equal(result.max_global_concurrency, 360);
+    assert.equal(env.CEREBRO_MAX_CONCURRENCY, '360');
+  }
 });
 
 test('entrypoint preserves a stricter lower global safety cap', () => {
   const env = { CEREBRO_MAX_CONCURRENCY: '32' };
-  const result = configureSupervisor180V1(env);
+  const result = configureSupervisor360V1(env);
   assert.equal(result.initial_global_concurrency, 32);
   assert.equal(result.max_global_concurrency, 32);
   assert.equal(result.max_company_concurrency, 32);
@@ -50,8 +53,8 @@ test('entrypoint preserves a stricter lower global safety cap', () => {
 });
 
 test('entrypoint refuses an explicit non-PREPROD environment through either supported guard', () => {
-  assert.throws(() => configureSupervisor180V1({ CEREBRO_ENVIRONMENT: 'PROD' }), /PREPROD_ONLY/);
-  assert.throws(() => configureSupervisor180V1({ CEREBRO_SUPERVISOR_ENV: 'PROD' }), /PREPROD_ONLY/);
+  assert.throws(() => configureSupervisor360V1({ CEREBRO_ENVIRONMENT: 'PROD' }), /PREPROD_ONLY/);
+  assert.throws(() => configureSupervisor360V1({ CEREBRO_SUPERVISOR_ENV: 'PROD' }), /PREPROD_ONLY/);
 });
 
 test('publisher is armed before the long-lived V0 daemon import can settle', async () => {
@@ -143,16 +146,16 @@ test('publisher failures remain non-fatal to the supervisor process', async () =
   assert.equal(runtime.second_daemon, false);
 });
 
-test('contract declares exact V0 binding, rollback and verified 180-cap governance', () => {
+test('contract declares exact V0 binding, rollback and verified 360-cap governance', () => {
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.wraps_existing_daemon_v0, true);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.preserves_v0_for_rollback, true);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.publisher_starts_before_long_lived_daemon_import, true);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.daemon_env_keys.max_global, 'CEREBRO_MAX_CONCURRENCY');
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.daemon_env_keys.initial_global, 'CEREBRO_INITIAL_CONCURRENCY');
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.daemon_env_keys.max_company, 'CEREBRO_MAX_PER_COMPANY');
-  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.target_useful, 180);
-  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_global, 180);
-  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_company, 180);
+  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.target_useful, 360);
+  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_global, 360);
+  assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_company, 360);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_deepseek, 8);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.max_repo_write, 1);
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.publisher_failure_is_fatal, false);

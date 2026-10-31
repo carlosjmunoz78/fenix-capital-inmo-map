@@ -52,9 +52,9 @@ function makeState({ updated_at = '2026-10-28T15:00:00.000Z', company_id = 'feni
     },
     dynamic_concurrency: {
       environment: 'PREPROD',
-      target_global_concurrency: 180,
-      max_global_concurrency: 180,
-      max_company_concurrency: 180,
+      target_global_concurrency: 360,
+      max_global_concurrency: 360,
+      max_company_concurrency: 360,
       max_provider_concurrency: { deepseek: 8, secret_provider_key: 'must-not-escape' },
       max_repo_write_concurrency: 1,
       decision: 'HOLD',
@@ -71,7 +71,7 @@ function makeState({ updated_at = '2026-10-28T15:00:00.000Z', company_id = 'feni
   return { root, now };
 }
 
-test('host status proves 48 useful against 180 global target while DeepSeek remains capped at 8 without exposing jobs, payloads or secrets', () => {
+test('host status proves 48 useful against 360 global target while DeepSeek remains capped at 8 without exposing jobs, payloads or secrets', () => {
   const { root, now } = makeState();
   const status = readJob001HostStatusV1({
     state_dir: root,
@@ -84,8 +84,8 @@ test('host status proves 48 useful against 180 global target while DeepSeek rema
   assert.equal(status.status, 'GREEN');
   assert.equal(status.environment, 'PREPROD');
   assert.equal(status.useful_work.useful_total, 48);
-  assert.equal(status.useful_work.target_useful, 180);
-  assert.equal(status.useful_work.headroom_to_target, 132);
+  assert.equal(status.useful_work.target_useful, 360);
+  assert.equal(status.useful_work.headroom_to_target, 312);
   assert.equal(status.useful_work.target_satisfied, false);
   assert.equal(status.model_lane.total, 48);
   assert.equal(status.model_lane.running, 8);
@@ -93,9 +93,9 @@ test('host status proves 48 useful against 180 global target while DeepSeek rema
   assert.equal(status.model_lane.useful, 48);
   assert.equal(status.model_lane.max_concurrency, 8);
   assert.equal(status.model_lane.at_capacity, true);
-  assert.equal(status.dynamic_concurrency.target_global_concurrency, 180);
-  assert.equal(status.dynamic_concurrency.max_global_concurrency, 180);
-  assert.equal(status.dynamic_concurrency.max_company_concurrency, 180);
+  assert.equal(status.dynamic_concurrency.target_global_concurrency, 360);
+  assert.equal(status.dynamic_concurrency.max_global_concurrency, 360);
+  assert.equal(status.dynamic_concurrency.max_company_concurrency, 360);
   assert.equal(status.dynamic_concurrency.max_provider_deepseek_concurrency, 8);
   assert.equal(status.repo_write_lane.running, null);
   assert.equal(status.repo_write_lane.max_concurrency, 1);

@@ -68,12 +68,12 @@ try {
   if ($smoke.environment -ne 'PREPROD' -or $smoke.prod_authorized -ne $false -or $smoke.prod_write_authorized -ne $false -or $smoke.trading_access -ne $false) {
     throw 'Smoke heartbeat policy mismatch; refusing scheduled task registration'
   }
-  if ($smoke.dynamic_concurrency.target_global_concurrency -ne 180 -or
-      $smoke.dynamic_concurrency.max_global_concurrency -ne 180 -or
-      $smoke.dynamic_concurrency.max_company_concurrency -ne 180 -or
+  if ($smoke.dynamic_concurrency.target_global_concurrency -ne 360 -or
+      $smoke.dynamic_concurrency.max_global_concurrency -ne 360 -or
+      $smoke.dynamic_concurrency.max_company_concurrency -ne 360 -or
       $smoke.dynamic_concurrency.max_provider_concurrency.deepseek -ne 8 -or
       $smoke.dynamic_concurrency.max_repo_write_concurrency -ne 1) {
-    throw 'Smoke heartbeat 180/180/180/8/1 mismatch; refusing scheduled task registration'
+    throw 'Smoke heartbeat 360/360/360/8/1 mismatch; refusing scheduled task registration'
   }
 
   $arg = '"' + $Entrypoint + '" --enqueue-health-probe'
@@ -81,7 +81,7 @@ try {
   $trigger = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
   $settings = New-ScheduledTaskSettingsSet -RestartCount 10 -RestartInterval (New-TimeSpan -Minutes 1) -ExecutionTimeLimit ([TimeSpan]::Zero) -MultipleInstances IgnoreNew
   $principal = New-ScheduledTaskPrincipal -UserId $env:USERNAME -LogonType Interactive -RunLevel Limited
-  $task = New-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description 'CEREBRO continuous supervisor PREPROD 180/180 via entrypoint V1. V0 preserved for rollback. DeepSeek max 8. Repo write max 1. No PROD authority. No Trading access.'
+  $task = New-ScheduledTask -Action $action -Trigger $trigger -Settings $settings -Principal $principal -Description 'CEREBRO continuous supervisor PREPROD 360/360 via entrypoint V1. V0 preserved for rollback. DeepSeek max 8. Repo write max 1. No PROD authority. No Trading access.'
   Register-ScheduledTask -TaskName $TaskName -InputObject $task -Force | Out-Null
   Start-ScheduledTask -TaskName $TaskName
 
@@ -102,17 +102,17 @@ try {
   if ($hb.environment -ne 'PREPROD' -or $hb.prod_authorized -ne $false -or $hb.prod_write_authorized -ne $false -or $hb.trading_access -ne $false) {
     throw 'Live heartbeat policy mismatch after scheduled task start'
   }
-  if ($hb.dynamic_concurrency.target_global_concurrency -ne 180 -or
-      $hb.dynamic_concurrency.max_global_concurrency -ne 180 -or
-      $hb.dynamic_concurrency.max_company_concurrency -ne 180 -or
+  if ($hb.dynamic_concurrency.target_global_concurrency -ne 360 -or
+      $hb.dynamic_concurrency.max_global_concurrency -ne 360 -or
+      $hb.dynamic_concurrency.max_company_concurrency -ne 360 -or
       $hb.dynamic_concurrency.max_provider_concurrency.deepseek -ne 8 -or
       $hb.dynamic_concurrency.max_repo_write_concurrency -ne 1) {
-    throw 'Live heartbeat 180/180/180/8/1 mismatch after scheduled task start'
+    throw 'Live heartbeat 360/360/360/8/1 mismatch after scheduled task start'
   }
 
   $info = Get-ScheduledTaskInfo -TaskName $TaskName
   $result = [ordered]@{
-    status = 'INSTALLED_PREPROD_180'
+    status = 'INSTALLED_PREPROD_360'
     task_name = $TaskName
     entrypoint = $Entrypoint
     legacy_daemon_v0 = $Legacy
