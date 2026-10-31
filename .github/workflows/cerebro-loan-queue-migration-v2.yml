@@ -34,8 +34,11 @@ jobs:
     name: Validate Windows migration control plane
     runs-on: windows-latest
     timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
     steps:
-      - name: Guard zero-cost PREPROD contract and runtime dependencies
+      - name: Guard zero-cost PREPROD contract, runtime dependencies and gh API path
         shell: bash
         run: |
           set -euo pipefail
@@ -53,6 +56,10 @@ jobs:
           command -v awk
           command -v mktemp
           command -v seq
+          api_main="$(gh api "repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
+          test -n "$api_main"
+          echo "api_smoke_main_sha=$api_main" >> "$GITHUB_STEP_SUMMARY"
+          echo 'windows_gh_api_endpoint_style=no_leading_slash' >> "$GITHUB_STEP_SUMMARY"
           echo 'control_runner=windows-latest' >> "$GITHUB_STEP_SUMMARY"
           echo 'migration_scope=stale_nonrunning_loan_lanes_232_281_only' >> "$GITHUB_STEP_SUMMARY"
           echo 'in_progress_cancelled=false' >> "$GITHUB_STEP_SUMMARY"
@@ -74,10 +81,10 @@ jobs:
           set -euo pipefail
           priority='cerebro-portfolio-priority-sustained-v1.yml'
           neuronal='cerebro-neuronal-superparallel-v1.yml'
-          current_main="$(gh api "/repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
+          current_main="$(gh api "repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
           test -n "$current_main"
 
-          neuronal_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30")"
+          neuronal_json="$(gh api "repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30")"
           neuronal_active="$(printf '%s' "$neuronal_json" | jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
           priority_target="$PRIORITY_MAX_LANES"
           if [ "$neuronal_active" -gt 0 ]; then
@@ -88,7 +95,7 @@ jobs:
           : > "$active"
           for status in in_progress queued pending waiting requested; do
             for page in 1 2 3 4; do
-              gh api "/repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
+              gh api "repos/${GH_REPO}/actions/runs?status=${status}&per_page=100&page=${page}" \
                 --jq '.workflow_runs[] | [.id,.status,.path,.display_title,.head_sha] | @tsv' \
                 >> "$active" 2>/dev/null || true
             done
@@ -122,13 +129,13 @@ jobs:
             [ -n "$stale_ids" ] || continue
 
             for run_id in $stale_ids; do
-              gh api --method POST "/repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
+              gh api --method POST "repos/${GH_REPO}/actions/runs/${run_id}/cancel" >/dev/null 2>&1 || true
               stale_cancelled=$((stale_cancelled + 1))
             done
 
             cycle=$(( (seed + lane) % 1000000 ))
             for attempt in 1 2 3 4; do
-              if output="$(gh api --method POST "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
+              if output="$(gh api --method POST "repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
                 -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}" 2>&1)"; then
                 [ -n "$output" ] && printf '%s\n' "$output"
                 migrated=$((migrated + 1))
@@ -155,6 +162,7 @@ jobs:
           echo "skipped_current_main_lanes=$skipped_current_main" >> "$GITHUB_STEP_SUMMARY"
           echo 'in_progress_cancelled=false' >> "$GITHUB_STEP_SUMMARY"
           echo 'control_runner=windows-latest' >> "$GITHUB_STEP_SUMMARY"
+          echo 'windows_gh_api_endpoint_style=no_leading_slash' >> "$GITHUB_STEP_SUMMARY"
           echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
           echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
           echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
