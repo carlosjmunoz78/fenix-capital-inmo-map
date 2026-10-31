@@ -9,12 +9,17 @@ on:
       - 'cerebro/qa/auto001-repair-validator-v0.mjs'
       - 'cerebro/governance/auto001-repair-tribunal-v0.mjs'
       - 'cerebro/governance/qa-promotion-readiness-v0.mjs'
+      - 'cerebro/governance/governed-promotion-executor-v1.mjs'
       - 'cerebro/registry/rsi-domain-autonomy-policies.v0.json'
+      - 'cerebro/registry/prod-promotion-policy-overrides.v1.json'
       - 'cerebro/tests/incident-root-cause-escalator-v0.test.mjs'
       - 'cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs'
       - 'cerebro/tests/auto001-repair-validation-v0.test.mjs'
       - 'cerebro/tests/qa-promotion-readiness-v0.test.mjs'
+      - 'cerebro/tests/governed-promotion-executor-v1.test.mjs'
       - '.github/workflows/cerebro-auto001-preprod-patch-executor-v0.yml'
+      - '.github/workflows/cerebro-auto001-prod-closure-v1.yml'
+      - '.github/workflows/cerebro-governed-promotion-v1.yml'
   push:
     branches: [main]
     paths:
@@ -81,6 +86,7 @@ jobs:
           cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs
           cerebro/tests/auto001-repair-validation-v0.test.mjs
           cerebro/tests/qa-promotion-readiness-v0.test.mjs
+          cerebro/tests/governed-promotion-executor-v1.test.mjs
       - name: Stop after contract proof on pull requests
         if: github.event_name == 'pull_request'
         run: echo 'PR validation only; autonomous branch mutation is disabled for PR events.'
@@ -133,7 +139,7 @@ jobs:
           set -euo pipefail
           npm ci
           npm run build
-          node --test cerebro/tests/incident-root-cause-escalator-v0.test.mjs cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs cerebro/tests/auto001-repair-validation-v0.test.mjs cerebro/tests/qa-promotion-readiness-v0.test.mjs
+          node --test cerebro/tests/incident-root-cause-escalator-v0.test.mjs cerebro/tests/auto001-preprod-patch-executor-v0.test.mjs cerebro/tests/auto001-repair-validation-v0.test.mjs cerebro/tests/qa-promotion-readiness-v0.test.mjs cerebro/tests/governed-promotion-executor-v1.test.mjs
       - name: Prove OLD vs NEW rebuild rollback and independent tribunal before any push
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
@@ -155,7 +161,7 @@ jobs:
           PR_STATUS='ALREADY_OPEN'
           if gh pr list --repo "$GITHUB_REPOSITORY" --head "$BRANCH" --state open --json number --jq 'length' | grep -qx '0'; then
             set +e
-            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title 'AUTO-001: certified PREPROD HCI main landmark repair' --body "Automated bounded PREPROD repair from $PLAN_ID. Base snapshot: $BASE_SHA. Build, OLD vs NEW, regression, rebuild, rollback and tribunal passed. No PROD/customer data/Trading/cost. AUTO-MERGE DISABLED." > artifacts/auto001/pr-create.stdout 2> artifacts/auto001/pr-create.stderr
+            gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$BRANCH" --title 'AUTO-001: certified PREPROD HCI main landmark repair' --body "Automated bounded PREPROD repair from $PLAN_ID. Base snapshot: $BASE_SHA. Build, OLD vs NEW, regression, rebuild, rollback and tribunal passed. No direct PROD/customer data/Trading/cost. Governed PROD closure is handled separately." > artifacts/auto001/pr-create.stdout 2> artifacts/auto001/pr-create.stderr
             RC=$?; set -e
             if [ "$RC" -eq 0 ]; then PR_STATUS='OPENED_AUTONOMOUSLY'; elif grep -F 'GitHub Actions is not permitted to create or approve pull requests' artifacts/auto001/pr-create.stderr >/dev/null; then PR_STATUS='BLOCKED_REPOSITORY_ACTIONS_POLICY'; else cat artifacts/auto001/pr-create.stderr >&2; exit "$RC"; fi
           fi
@@ -163,15 +169,15 @@ jobs:
       - name: Evaluate promotion readiness against current domain policy
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
-          node cerebro/governance/qa-promotion-readiness-v0.mjs --tribunal artifacts/auto001/tribunal.json --pr-handoff artifacts/auto001/pr-handoff.json --policies cerebro/registry/rsi-domain-autonomy-policies.v0.json --out artifacts/auto001/promotion-readiness.json
-          jq -e '.authority.merge_authorized==false and .authority.promotion_authorized==false and .authority.prod_authorized==false and .authority.prod_write_authorized==false and .safety.prod_write==false and .safety.additional_subscription_eur==0' artifacts/auto001/promotion-readiness.json >/dev/null
+          node cerebro/governance/qa-promotion-readiness-v0.mjs --tribunal artifacts/auto001/tribunal.json --pr-handoff artifacts/auto001/pr-handoff.json --policies cerebro/registry/rsi-domain-autonomy-policies.v0.json --prod-overrides cerebro/registry/prod-promotion-policy-overrides.v1.json --out artifacts/auto001/promotion-readiness.json
+          jq -e '((.status=="AUTONOMOUS_PROMOTION_READY" and .authority.merge_authorized==true and .authority.promotion_authorized==true and .authority.prod_authorized==true and .authority.prod_write_authorized==true) or (.status=="HUMAN_REQUIRED" and .authority.merge_authorized==false and .authority.promotion_authorized==false and .authority.prod_authorized==false and .authority.prod_write_authorized==false)) and .safety.prod_write==false and .safety.additional_subscription_eur==0' artifacts/auto001/promotion-readiness.json >/dev/null
       - name: Build canonical AUTO repair autonomy state
         if: github.event_name != 'pull_request' && steps.plan.outputs.status == 'PATCH_PLAN_READY' && steps.patch.outputs.existing != 'true'
         run: |
           node --input-type=module <<'NODE'
           import fs from 'node:fs';
           const plan=JSON.parse(fs.readFileSync('artifacts/auto001/plan.json','utf8')), validation=JSON.parse(fs.readFileSync('artifacts/auto001/validation.json','utf8')), tribunal=JSON.parse(fs.readFileSync('artifacts/auto001/tribunal.json','utf8')), handoff=JSON.parse(fs.readFileSync('artifacts/auto001/pr-handoff.json','utf8')), readiness=JSON.parse(fs.readFileSync('artifacts/auto001/promotion-readiness.json','utf8'));
-          const state={schema_version:'0.2.0',state_type:'CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0',company_id:'fenix',engine_id:'AUTO-001',environment:'PREPROD_CONTROL_PLANE',version:'0.2.0',updated_at:new Date().toISOString(),plan_id:plan.plan_id,branch:handoff.branch,base_sha:plan.base_sha,transform_id:plan.transform_id,owner_engine:plan.owner_engine,target:plan.target,preprod_patch_validated:validation.status==='VALIDATION_GREEN',old_vs_new:validation.old_vs_new,regression_passed:validation.regression?.passed===true,rebuild_passed:validation.rebuild?.passed===true,rollback_passed:validation.rollback?.passed===true,tribunal_approved:tribunal.approved===true,tribunal_status:tribunal.status,pr_handoff_status:handoff.status,promotion_readiness:readiness,anti_loop_root_cause_escalation:true,authority:{auto_merge:false,promotion_authorized:false,prod_authorized:false,prod_write_authorized:false},safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}};
+          const state={schema_version:'0.3.0',state_type:'CEREBRO_AUTO001_REPAIR_AUTONOMY_STATE_V0',company_id:'fenix',engine_id:'AUTO-001',environment:'PREPROD_CONTROL_PLANE',version:'0.3.0',updated_at:new Date().toISOString(),plan_id:plan.plan_id,branch:handoff.branch,base_sha:plan.base_sha,transform_id:plan.transform_id,owner_engine:plan.owner_engine,target:plan.target,preprod_patch_validated:validation.status==='VALIDATION_GREEN',old_vs_new:validation.old_vs_new,regression_passed:validation.regression?.passed===true,rebuild_passed:validation.rebuild?.passed===true,rollback_passed:validation.rollback?.passed===true,tribunal_approved:tribunal.approved===true,tribunal_status:tribunal.status,pr_handoff_status:handoff.status,promotion_readiness:readiness,anti_loop_root_cause_escalation:true,authority:{auto_merge:false,promotion_authorized:readiness.authority?.promotion_authorized===true,prod_authorized:readiness.authority?.prod_authorized===true,prod_write_authorized:readiness.authority?.prod_write_authorized===true},safety:{prod_write:false,customer_data:false,trading:false,paid_fallback:false,additional_subscription_eur:0}};
           fs.writeFileSync('artifacts/auto001/repair-autonomy-state.json',JSON.stringify(state,null,2)+'\n');
           NODE
       - name: Persist AUTO repair evidence on dedicated QA state branch
