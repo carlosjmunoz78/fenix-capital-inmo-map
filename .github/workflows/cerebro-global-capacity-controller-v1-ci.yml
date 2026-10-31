@@ -39,7 +39,7 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
-      - name: Verify staged 200 capacity contract and centralized critical admission
+      - name: Verify staged 200 capacity contract and resilient centralized admission
         shell: bash
         run: |
           set -euo pipefail
@@ -78,6 +78,16 @@ jobs:
           grep -q 'cancelled_background_queue_runs' "$controller"
           grep -q 'in_progress_background_cancelled=false' "$controller"
 
+          for file in "$controller" "$maintenance" "$priority"; do
+            grep -q 'dispatch_with_transient_retry' "$file"
+            grep -q "'HTTP 500'" "$file"
+            grep -q "'HTTP 502'" "$file"
+            grep -q "'HTTP 503'" "$file"
+            grep -q "'HTTP 504'" "$file"
+            grep -q 'attempt in 1 2 3 4' "$file"
+          done
+          grep -q 'dispatch_non_transient_retry=false' "$controller"
+
           grep -q "CEREBRO_MAINTENANCE_INNER_PARALLELISM: '4'" "$maintenance"
           grep -q 'Self-refill sustained lane while a useful source is available' "$maintenance"
           grep -q 'critical_gate_priority=central_controller' "$maintenance"
@@ -110,6 +120,8 @@ jobs:
           echo 'neuronal physical cap=25 when separately triggered'
           echo 'critical admission owner=Global Capacity Controller'
           echo 'worker critical-pressure API scans=0'
+          echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
+          echo 'non-transient dispatch retry=false'
           echo 'controller reconciliation=schedule every 5 minutes plus push/manual'
           echo 'controller tight self-rearm=false'
           echo 'additional cost=0 EUR'

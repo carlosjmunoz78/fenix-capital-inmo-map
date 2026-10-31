@@ -246,9 +246,28 @@ jobs:
             exit 0
           fi
 
+          dispatch_with_transient_retry() {
+            local endpoint="$1"; shift
+            local attempt output
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "$endpoint" "$@" 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                return 0
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
+                  ;;
+                *) return 1 ;;
+              esac
+              return 1
+            done
+          }
+
           # Critical-pressure admission is owned centrally by the Global Capacity
-          # Controller. Workers do not repeat 24 Actions API reads per lease.
-          gh api --method POST "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
+          # Controller. Workers do not repeat Actions API reads per lease.
+          dispatch_with_transient_retry "/repos/${GH_REPO}/actions/workflows/cerebro-cloud-useful-continuous-worker-v1.yml/dispatches" \
             -f "ref=${ref}" \
             -f "inputs[lane]=${lane}" \
             -f "inputs[cycle]=${next}"
@@ -258,6 +277,7 @@ jobs:
           echo "continuous=true" >> "$GITHUB_STEP_SUMMARY"
           echo "critical_gate_priority=central_controller" >> "$GITHUB_STEP_SUMMARY"
           echo "pressure_reads_per_worker=0" >> "$GITHUB_STEP_SUMMARY"
+          echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
           echo "primary_source=MISSION_DAG_V1" >> "$GITHUB_STEP_SUMMARY"
           echo "post_dag_source=continuous-useful-work-factory-v0" >> "$GITHUB_STEP_SUMMARY"
           echo "job001_capacity_contract=360/360/360" >> "$GITHUB_STEP_SUMMARY"

@@ -88,6 +88,28 @@ jobs:
           neuronal='cerebro-neuronal-superparallel-v1.yml'
           seed_cycle=$(( $(date +%s) / 300 % 1000000 ))
 
+          dispatch_with_transient_retry() {
+            local endpoint="$1"; shift
+            local attempt output
+            for attempt in 1 2 3 4; do
+              if output="$(gh api --method POST "$endpoint" "$@" 2>&1)"; then
+                [ -n "$output" ] && printf '%s\n' "$output"
+                return 0
+              fi
+              printf '%s\n' "$output" >&2
+              case "$output" in
+                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
+                  if [ "$attempt" -lt 4 ]; then
+                    sleep $((attempt * 2))
+                    continue
+                  fi
+                  ;;
+                *) return 1 ;;
+              esac
+              return 1
+            done
+          }
+
           critical_regex='cerebro-enterprise-acceleration-v0.yml|cerebro-global-capacity-controller-v1-ci.yml|cerebro-auto001-preprod-patch-executor-v0.yml|cerebro-auto001-prod-closure-v1.yml|cerebro-governed-promotion-v1.yml|cerebro-fact001-repair-worker-factory-v1.yml'
           active_tmp="$(mktemp)"
           : > "$active_tmp"
@@ -137,7 +159,7 @@ jobs:
             for lane in $(seq 0 $((MAINTENANCE_RAMP_LANES - 1))); do
               if ! printf '%s\n' "$maint_present" | grep -qx "$lane"; then
                 cycle=$(( (seed_cycle + lane) % 1000000 ))
-                gh api --method POST "/repos/${GH_REPO}/actions/workflows/${maintenance}/dispatches" \
+                dispatch_with_transient_retry "/repos/${GH_REPO}/actions/workflows/${maintenance}/dispatches" \
                   -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}"
                 maintenance_dispatched=$((maintenance_dispatched + 1))
               fi
@@ -146,7 +168,7 @@ jobs:
             for lane in $(seq 0 $((PRIORITY_RAMP_LANES - 1))); do
               if ! printf '%s\n' "$priority_present" | grep -qx "$lane"; then
                 cycle=$(( (seed_cycle + 1000 + lane) % 1000000 ))
-                gh api --method POST "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
+                dispatch_with_transient_retry "/repos/${GH_REPO}/actions/workflows/${priority}/dispatches" \
                   -f ref=main -f "inputs[lane]=${lane}" -f "inputs[cycle]=${cycle}"
                 priority_dispatched=$((priority_dispatched + 1))
               fi
@@ -175,6 +197,8 @@ jobs:
           echo "enterprise_cap=$ENTERPRISE_CAP" >> "$GITHUB_STEP_SUMMARY"
           echo "api_snapshot_calls_max=10" >> "$GITHUB_STEP_SUMMARY"
           echo "worker_pressure_reads=0" >> "$GITHUB_STEP_SUMMARY"
+          echo "dispatch_transient_retry=500,502,503,504:max4" >> "$GITHUB_STEP_SUMMARY"
+          echo "dispatch_non_transient_retry=false" >> "$GITHUB_STEP_SUMMARY"
           echo "in_progress_background_cancelled=false" >> "$GITHUB_STEP_SUMMARY"
           echo "priority_order=CRITICAL_GATES > P0_JARVIS_OPERATIVA_KNOWLEDGE > P1_BROWSER_ACTUATION > P2_FACTORIES > P3_BUSINESS" >> "$GITHUB_STEP_SUMMARY"
           echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
