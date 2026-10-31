@@ -1,7 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {assessGovernedReleasePromotion,finalizeGovernedReleasePromotion,HUMAN_EXCEPTION_REASONS,REQUIRED_RELEASE_GATES,RELEASE_REF_PREFIX} from '../governance/governed-release-promotion-executor-v2.mjs';
 
+const HERE=path.dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT=path.resolve(HERE,'../..');
+const repoFile=(...parts)=>path.join(REPO_ROOT,...parts);
 const RELEASE_SHA='b'.repeat(40);
 const BASE_SHA='a'.repeat(40);
 const greenGates=Object.fromEntries(REQUIRED_RELEASE_GATES.map(k=>[k,true]));
@@ -50,4 +56,24 @@ test('PROD_PROMOTED requires exact physical source SHA plus smoke and monitor',(
   const green=finalizeGovernedReleasePromotion(packet(),{deployment_run_id:9,prod_source_sha:RELEASE_SHA,smoke_passed:true,monitor_passed:true,proof_url:'https://app.fenixcapital.es/PROD_SOURCE_SHA.txt'});
   assert.equal(green.status,'PROD_PROMOTED');
   assert.equal(green.environment,'PROD');
+});
+
+test('V2 workflow never merges main and deploys exact release ref only after exact PREPROD proof',()=>{
+  const workflow=fs.readFileSync(repoFile('.github','workflows','cerebro-governed-release-promotion-v2.yml'),'utf8');
+  assert.match(workflow,/release\/app-fenix-static\/\*/);
+  assert.match(workflow,/cerebro-app001-preprod-physical-qa-v1\.yml/);
+  assert.match(workflow,/gh workflow run prod-live-deploy\.yml[\s\S]*--ref "\$RELEASE_REF"/);
+  assert.match(workflow,/gh workflow run prod-runtime-smoke\.yml[\s\S]*--ref "\$RELEASE_REF"/);
+  assert.match(workflow,/PROD_SOURCE_SHA\.txt/);
+  assert.match(workflow,/terminal_state=PROD_PROMOTED/);
+  assert.doesNotMatch(workflow,/gh pr merge/);
+  assert.doesNotMatch(workflow,/--ref main -f confirm=DEPLOY_PROD/);
+});
+
+test('V2 workflow restricts APP-001 release diff and preserves isolation',()=>{
+  const workflow=fs.readFileSync(repoFile('.github','workflows','cerebro-governed-release-promotion-v2.yml'),'utf8');
+  assert.match(workflow,/src\/login-layout-fix\.css/);
+  assert.match(workflow,/unauthorized path/);
+  assert.match(workflow,/CEREBRO_PROD_WRITE: 'false'/);
+  assert.match(workflow,/CEREBRO_TRADING_ACCESS: 'false'/);
 });
