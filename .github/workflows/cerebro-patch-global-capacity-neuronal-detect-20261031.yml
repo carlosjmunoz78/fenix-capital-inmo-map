@@ -1,0 +1,118 @@
+name: CEREBRO Patch Global Capacity NEURONAL Detect 20261031
+
+on:
+  push:
+    branches:
+      - control/v2-release-promotion-20261031
+    paths:
+      - '.github/workflows/cerebro-patch-global-capacity-neuronal-detect-20261031.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cerebro-patch-global-capacity-neuronal-detect-20261031
+  cancel-in-progress: false
+
+jobs:
+  patch:
+    runs-on: macos-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: fix/global-capacity-neuronal-direct-detect-20261031
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Patch controller fail-closed direct NEURONAL detection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          controller = Path('.github/workflows/cerebro-continuous-work-factory-v0.yml')
+          text = controller.read_text()
+          old = '''          neuronal_parent_active="$(awk 'END{print NR+0}' "$neuronal_tmp")"
+'''
+          new = '''          # GitHub's repository-wide runs listing can transiently omit an older
+          # queued workflow even while its exact run remains queued. Probe the
+          # NEURONAL workflow directly so its 25 physical slots are never loaned
+          # back to PRIORITY because of a pagination/eventual-consistency gap.
+          neuronal_probe_status='GREEN'
+          neuronal_probe_json=''
+          neuronal_probe_error="$(mktemp)"
+          for attempt in 1 2 3; do
+            : > "$neuronal_probe_error"
+            if neuronal_probe_json="$(gh api "/repos/${GH_REPO}/actions/workflows/${neuronal}/runs?per_page=30" 2>"$neuronal_probe_error")"; then
+              break
+            fi
+            if grep -qi 'rate limit' "$neuronal_probe_error"; then
+              sleep "$((attempt * 2))"
+              continue
+            fi
+            neuronal_probe_status='FAIL_CLOSED'
+            break
+          done
+          if [ -n "$neuronal_probe_json" ]; then
+            neuronal_parent_active="$(printf '%s' "$neuronal_probe_json" | jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
+            neuronal_active_ids="$(printf '%s' "$neuronal_probe_json" | jq -r '.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested") | .id' | paste -sd, -)"
+          else
+            # Fail closed: uncertainty must reserve NEURONAL capacity rather
+            # than overcommit the Enterprise 360 entitlement.
+            neuronal_probe_status='FAIL_CLOSED'
+            neuronal_parent_active=1
+            neuronal_active_ids='UNKNOWN_FAIL_CLOSED'
+          fi
+'''
+          if text.count(old) != 1:
+              raise SystemExit(f'controller target count={text.count(old)}')
+          text = text.replace(old, new)
+          if text.count('echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"') != 1:
+              raise SystemExit('api_snapshot_calls_max=20 target mismatch')
+          text = text.replace('echo "api_snapshot_calls_max=20" >> "$GITHUB_STEP_SUMMARY"', 'echo "api_snapshot_calls_max=21" >> "$GITHUB_STEP_SUMMARY"')
+          anchor = '          echo "neuronal_parent_runs_active=$neuronal_parent_active" >> "$GITHUB_STEP_SUMMARY"\n'
+          addition = anchor + '          echo "neuronal_probe_status=$neuronal_probe_status" >> "$GITHUB_STEP_SUMMARY"\n          echo "neuronal_active_ids=${neuronal_active_ids:-none}" >> "$GITHUB_STEP_SUMMARY"\n          echo "neuronal_probe_api_calls=1" >> "$GITHUB_STEP_SUMMARY"\n'
+          if text.count(anchor) != 1:
+              raise SystemExit('neuronal summary anchor mismatch')
+          text = text.replace(anchor, addition)
+          controller.write_text(text)
+
+          ci = Path('.github/workflows/cerebro-global-capacity-controller-v1-ci.yml')
+          c = ci.read_text()
+          if c.count("grep -q 'api_snapshot_calls_max=20' \"$controller\"") != 1:
+              raise SystemExit('CI api count target mismatch')
+          c = c.replace("grep -q 'api_snapshot_calls_max=20' \"$controller\"", "grep -q 'api_snapshot_calls_max=21' \"$controller\"")
+          anchor2 = "          grep -q 'priority_target=$((PRIORITY_MAX_LANES - NEURONAL_MAX_PHYSICAL))' \"$controller\"\n"
+          addition2 = anchor2 + "          grep -q 'actions/workflows/${neuronal}/runs?per_page=30' \"$controller\"\n          grep -q \"neuronal_probe_status='GREEN'\" \"$controller\"\n          grep -q \"neuronal_active_ids='UNKNOWN_FAIL_CLOSED'\" \"$controller\"\n          grep -q 'neuronal_probe_api_calls=1' \"$controller\"\n"
+          if c.count(anchor2) != 1:
+              raise SystemExit('CI NEURONAL anchor mismatch')
+          c = c.replace(anchor2, addition2)
+          ci.write_text(c)
+          PY
+
+          git diff --check
+          grep -q 'actions/workflows/${neuronal}/runs?per_page=30' .github/workflows/cerebro-continuous-work-factory-v0.yml
+          grep -q "neuronal_active_ids='UNKNOWN_FAIL_CLOSED'" .github/workflows/cerebro-continuous-work-factory-v0.yml
+          grep -q 'api_snapshot_calls_max=21' .github/workflows/cerebro-continuous-work-factory-v0.yml
+
+      - name: Run canonical controller tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/continuous-useful-work-factory-v0.test.mjs
+          node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
+          node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs
+
+      - name: Commit fix branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .github/workflows/cerebro-continuous-work-factory-v0.yml .github/workflows/cerebro-global-capacity-controller-v1-ci.yml
+          git diff --cached --quiet && { echo 'No changes'; exit 0; }
+          git commit -m 'CEREBRO: make NEURONAL capacity reservation detection fail-closed'
+          git push origin HEAD:fix/global-capacity-neuronal-direct-detect-20261031
