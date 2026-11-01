@@ -43,6 +43,27 @@ jobs:
           test "$USEFUL_POOL" -eq 350
           test "$CONTROL_RESERVE" -eq 10
 
+      - name: Enable canonical capacity workflow family
+        shell: bash
+        run: |
+          set -euo pipefail
+          workflows=(
+            cerebro-continuous-work-factory-v0.yml
+            cerebro-global-capacity-heartbeat-v1.yml
+            cerebro-cloud-useful-continuous-worker-v1.yml
+            cerebro-portfolio-priority-sustained-v1.yml
+            cerebro-neuronal-superparallel-v1.yml
+          )
+          for workflow in "${workflows[@]}"; do
+            state="$(gh api "/repos/${GH_REPO}/actions/workflows/${workflow}" --jq '.state')"
+            if [ "$state" != active ]; then
+              gh api --method PUT "/repos/${GH_REPO}/actions/workflows/${workflow}/enable"
+            fi
+            final_state="$(gh api "/repos/${GH_REPO}/actions/workflows/${workflow}" --jq '.state')"
+            test "$final_state" = active
+            echo "${workflow}=active" >> "$GITHUB_STEP_SUMMARY"
+          done
+
       - name: Rearm canonical controller and heartbeat only when absent
         shell: bash
         run: |
