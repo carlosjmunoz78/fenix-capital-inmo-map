@@ -10,6 +10,7 @@ on:
       - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
       - 'cerebro/governance/identity-session-lifecycle.mjs'
       - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - 'docs/cerebro/EXTERNAL_BROWSER_MINPRIV_STATE_2026-11-01.md'
       - '.github/workflows/cerebro-external-browser-minpriv-preprod-v0.yml'
   workflow_dispatch:
 
