@@ -1,0 +1,49 @@
+name: CEREBRO External Browser MinPriv PREPROD V0
+
+on:
+  push:
+    branches:
+      - cerebro/preprod-external-browser-minpriv-20261101
+    paths:
+      - 'cerebro/runtime/external-browser-worker-minpriv-v0.mjs'
+      - 'cerebro/tests/external-browser-worker-minpriv-v0.test.mjs'
+      - 'cerebro/runtime/authorized-execution-device-profile-v1.mjs'
+      - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/runtime/continuous-improvement-contract.mjs'
+      - '.github/workflows/cerebro-external-browser-minpriv-preprod-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-external-browser-minpriv-preprod-v0-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  minimum-privilege-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Baseline authorized execution tests
+        run: node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs
+      - name: External worker minimum privilege tests
+        run: node --test cerebro/tests/external-browser-worker-minpriv-v0.test.mjs
+      - name: Static fail-closed assertions
+        shell: bash
+        run: |
+          set -euo pipefail
+          file='cerebro/runtime/external-browser-worker-minpriv-v0.mjs'
+          grep -q "'CLAIM_BROWSER_JOB'" "$file"
+          grep -q "'RENEW_BROWSER_JOB_LEASE'" "$file"
+          grep -q "'ACK_BROWSER_JOB'" "$file"
+          grep -q "'FAIL_BROWSER_JOB'" "$file"
+          grep -q "'ENQUEUE_BROWSER_JOB'" "$file"
+          grep -q "'ADMIN_BROWSER_QUEUE'" "$file"
+          grep -q "execution_authorized:false" "$file"
+          grep -q "existing_github_worker_replaced:false" "$file"
+          echo 'PREPROD candidate remains fail-closed and parallel to the existing GitHub worker.'
