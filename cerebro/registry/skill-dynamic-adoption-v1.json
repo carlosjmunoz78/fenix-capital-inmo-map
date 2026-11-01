@@ -16508,7 +16508,8 @@
   "adoption_skips": [],
   "summary": {
     "total": 163,
-    "promoted": 6,
+    "inserted": 0,
+    "updated": 0,
     "skipped": 0,
     "pending_canary": 0,
     "prod_readonly": 163
