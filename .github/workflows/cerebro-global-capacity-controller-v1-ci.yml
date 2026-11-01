@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   validate:
-    runs-on: macos-latest
+    runs-on: windows-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
@@ -31,6 +31,7 @@ jobs:
           node-version: '24'
 
       - name: Syntax and topology tests
+        shell: bash
         run: |
           node --check cerebro/runtime/continuous-useful-work-factory-v0.mjs
           node --check cerebro/runtime/mission-derived-useful-work-v1.mjs
@@ -40,7 +41,7 @@ jobs:
           node --test cerebro/tests/portfolio-priority-sustained-v1.test.mjs
           if [ -f cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs ]; then node --test cerebro/tests/neuronal-superparallel-4cpu-workflow-v1.test.mjs; fi
 
-      - name: macOS loan-lane runtime smoke
+      - name: Loan-lane runtime smoke on Windows control plane
         shell: bash
         env:
           CEREBRO_SUPERVISOR_ENV: PREPROD
@@ -85,21 +86,37 @@ jobs:
           grep -q 'test $((total_useful_target + CONTROL_RESERVE)) -eq "$ENTERPRISE_CAP"' "$controller"
           grep -q "capacity_mode='RAMP350_TOTAL'" "$controller"
           grep -q 'cancelled_neuronal_return_loans' "$controller"
-          grep -q 'api_snapshot_calls_max=21' "$controller"
+          grep -q 'api_snapshot_calls_base=21' "$controller"
           grep -q 'worker_pressure_reads=0' "$controller"
+          grep -Fq 'sleep "$((attempt * 2))"' "$controller"
           grep -q 'controller_self_rearmed=false' "$controller"
           grep -q 'controller_reconcile_cadence=5m_schedule_plus_push_plus_manual' "$controller"
           ! grep -q 'actions/workflows/cerebro-continuous-work-factory-v0.yml/dispatches' "$controller"
 
-          # CONTROL_PRESSURE must consume the pre-reserved 10 control slots first.
-          # It may trim only the excess over that reserve and never drain the whole queue.
-          grep -q 'if \[ "$critical_queued_count" -gt "$CONTROL_RESERVE" \]' "$controller"
-          grep -q 'pressure_cancel_budget=$((critical_queued_count - CONTROL_RESERVE))' "$controller"
+          # CONTROL_PRESSURE must count queued jobs, not just parent workflow runs.
+          grep -q 'critical_runs_tmp=' "$controller"
+          grep -q 'critical_queued_run_count=' "$controller"
+          grep -q 'critical_queued_jobs_count=0' "$controller"
+          grep -q 'critical_job_probe_status=' "$controller"
+          grep -q 'actions/runs/${critical_run_id}/jobs?per_page=100' "$controller"
+          grep -q '.jobs\[\].*status == "queued"' "$controller"
+          grep -q 'if \[ "$run_queued_jobs" -lt 1 \]; then run_queued_jobs=1; fi' "$controller"
+          grep -q 'if \[ "$critical_job_probe_failures" -gt 0 \]' "$controller"
+          grep -q 'elif \[ "$critical_queued_jobs_count" -gt "$CONTROL_RESERVE" \]' "$controller"
+          grep -q 'pressure_cancel_budget=$((critical_queued_jobs_count - CONTROL_RESERVE))' "$controller"
           grep -q "capacity_mode='CONTROL_PRESSURE_BOUNDED'" "$controller"
           grep -q '\[ "$cancelled_background_queue_runs" -lt "$pressure_cancel_budget" \] || break' "$controller"
+          grep -q 'critical_queued_jobs_count=$critical_queued_jobs_count' "$controller"
+          grep -q 'critical_job_probe_failures=$critical_job_probe_failures' "$controller"
           grep -q 'pressure_cancel_budget=$pressure_cancel_budget' "$controller"
-          grep -q 'control_pressure_policy=reserve10_then_cancel_excess_only' "$controller"
+          grep -q 'control_pressure_policy=job_aware_reserve10_then_cancel_excess_only' "$controller"
+          ! grep -q 'if \[ "$critical_queued_count" -gt "$CONTROL_RESERVE" \]' "$controller"
           ! grep -q 'if \[ "$critical_queued_count" -gt 0 \]; then critical_pressure=true' "$controller"
+
+          # Deterministic fixture: queued/waiting count; in_progress/completed do not.
+          fixture='{"jobs":[{"status":"queued"},{"status":"in_progress"},{"status":"waiting"},{"status":"completed"}]}'
+          fixture_count="$(printf '%s' "$fixture" | jq '[.jobs[] | select(.status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length')"
+          test "$fixture_count" -eq 2
 
           grep -q 'name: CEREBRO Global Capacity Heartbeat V1' "$heartbeat"
           grep -q 'runs-on: macos-latest' "$heartbeat"
@@ -177,10 +194,11 @@ jobs:
           echo 'maintenance lanes=68'
           echo 'priority max lanes=282 (182 base + 100 loan)'
           echo 'priority macOS overflow=50 loan lanes 232..281; same 350 useful total'
-          echo 'control pressure=10 reserved slots first; cancel only overflow beyond reserve'
+          echo 'control pressure=job-aware; 10 reserved slots first; cancel queued background only above reserve'
+          echo 'critical matrix fanout=queued jobs counted individually; probe failure is bounded fail-closed'
           echo 'worker critical-pressure API scans=0'
           echo 'transient dispatch retry=HTTP 500/502/503/504 max4 only'
           echo 'controller reconciliation=heartbeat 240s plus schedule/push/manual backup'
           echo 'heartbeat runner=macos control slot; self-rearm deduplicated and fail-closed'
-          echo 'critical capacity CI runner=macos control plane'
+          echo 'critical capacity CI runner=windows control plane'
           echo 'additional cost=0 EUR'
