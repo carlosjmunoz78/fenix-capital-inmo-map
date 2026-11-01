@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 
 const HERE=path.dirname(fileURLToPath(import.meta.url));
 const ROOT=path.resolve(HERE,'../..');
-const workflow=fs.readFileSync(path.join(ROOT,'.github/workflows/cerebro-neuronal-superparallel-v1.yml'),'utf8');
+const workflow=fs.readFileSync(path.join(ROOT,'.github/workflows/cerebro-neuronal-superparallel-v1.yml'),'utf8').replace(/\r\n/g,'\n');
 
 test('NEURONAL preserves 100 logical units while bounding physical fanout to 25 runners',()=>{
   assert.match(workflow,/CEREBRO_NEURONAL_INNER_PARALLELISM: '4'/);
