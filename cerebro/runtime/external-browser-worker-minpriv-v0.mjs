@@ -74,14 +74,16 @@ export function externalBrowserWorkerManifest(){
     fresh_browser_attestation_required:true,
     execution_mode:'PARALLEL_CANDIDATE',
     existing_github_worker_replaced:false,
+    policy_eligible_does_not_equal_execution_authority:true,
     physical_operation_status:'POR_AUDITAR_REAL_PROFILE_SESSION_BINDING',
+    next_gate:'REAL_PROFILE_SESSION_BINDING_VERIFIER',
     rollback:'delete_or_disable_candidate_branch_without_touching_main_or_existing_worker'
   });
 }
 
 export function planExternalBrowserWorkerOperation(input={},options={}){
   const forbidden=secretPath(input);
-  if(forbidden) return safe({decision:'DENY_SECRET_MATERIAL',reason:`raw_secret_material_forbidden:${forbidden}`,execution_authorized:false});
+  if(forbidden) return safe({decision:'DENY_SECRET_MATERIAL',reason:`raw_secret_material_forbidden:${forbidden}`,policy_eligible:false,execution_authorized:false});
 
   const context={
     company_id:input.company_id,
@@ -96,14 +98,14 @@ export function planExternalBrowserWorkerOperation(input={},options={}){
   if(input.prod_write===true||input.prod_write_requested===true)blockers.push('prod_write_not_authorized');
   if(input.enqueue===true||input.enqueue_requested===true)blockers.push('enqueue_not_authorized');
   if(input.admin===true||input.admin_requested===true)blockers.push('admin_not_authorized');
-  if(blockers.length)return safe({...context,decision:'HOLD',blockers:[...new Set(blockers)],execution_authorized:false});
+  if(blockers.length)return safe({...context,decision:'HOLD',blockers:[...new Set(blockers)],policy_eligible:false,execution_authorized:false});
 
   const action=String(input.action??'').toUpperCase();
   if(EXTERNAL_BROWSER_WORKER_FORBIDDEN_ACTIONS.includes(action)){
-    return safe({...context,action,decision:'DENY_FORBIDDEN_ACTION',execution_authorized:false});
+    return safe({...context,action,decision:'DENY_FORBIDDEN_ACTION',policy_eligible:false,execution_authorized:false});
   }
   if(!EXTERNAL_BROWSER_WORKER_ACTIONS.includes(action)){
-    return safe({...context,action,decision:'HOLD_ACTION_OUTSIDE_MINIMUM_SCOPE',execution_authorized:false});
+    return safe({...context,action,decision:'HOLD_ACTION_OUTSIDE_MINIMUM_SCOPE',policy_eligible:false,execution_authorized:false});
   }
 
   const binding=input.binding??{};
@@ -112,31 +114,33 @@ export function planExternalBrowserWorkerOperation(input={},options={}){
     if(!nonEmpty(binding[key]))missing.push(key);
   }
   if(missing.length){
-    return safe({...context,action,decision:'HOLD_REAL_PROFILE_SESSION_BINDING_REQUIRED',missing_binding_refs:missing,execution_authorized:false});
+    return safe({...context,action,decision:'HOLD_REAL_PROFILE_SESSION_BINDING_REQUIRED',missing_binding_refs:missing,policy_eligible:false,execution_authorized:false});
   }
 
   const attestation=evaluateBrowserAttestation(input.browser_attestation??null,{now:options.now??new Date().toISOString()});
   if(attestation.status!=='BROWSER_SESSION_BINDING_HEALTHY'){
-    return safe({...context,action,decision:'HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT',browser_binding_status:attestation.status,execution_authorized:false});
+    return safe({...context,action,decision:'HOLD_BROWSER_REAL_IDENTITY_BINDING_AUDIT',browser_binding_status:attestation.status,policy_eligible:false,execution_authorized:false});
   }
 
   const evidenceRef=String(input.binding_evidence_ref??'');
   if(!nonEmpty(evidenceRef)){
-    return safe({...context,action,decision:'HOLD_BINDING_EVIDENCE_REQUIRED',browser_binding_status:attestation.status,execution_authorized:false});
+    return safe({...context,action,decision:'HOLD_BINDING_EVIDENCE_REQUIRED',browser_binding_status:attestation.status,policy_eligible:false,execution_authorized:false});
   }
 
   const plan={
     ...context,
     action,
-    decision:'ALLOW_MINIMUM_PRIVILEGE_OPERATION',
+    decision:'READY_FOR_VERIFIED_BINDING_EXECUTOR',
     browser_binding_status:attestation.status,
     identity_ref_hash:hash(binding.identity_ref),
     account_ref_hash:hash(binding.account_ref),
     session_ref_hash:hash(binding.session_ref),
     browser_profile_ref_hash:hash(binding.browser_profile_ref),
     binding_evidence_ref:evidenceRef,
-    execution_authorized:true,
+    policy_eligible:true,
+    execution_authorized:false,
     authority_scope:'CLAIM_RENEW_ACK_FAIL_ONLY',
+    next_gate:'REAL_PROFILE_SESSION_BINDING_VERIFIER',
     existing_github_worker_replaced:false
   };
   return safe({...plan,plan_id:stableIdempotencyKey(plan)});
