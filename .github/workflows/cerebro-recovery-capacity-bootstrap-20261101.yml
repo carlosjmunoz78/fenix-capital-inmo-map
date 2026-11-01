@@ -1,0 +1,84 @@
+name: CEREBRO Recovery Capacity Bootstrap 2026-11-01
+run-name: CEREBRO RECOVERY · REARM 350+10 · PREPROD
+
+on:
+  push:
+    branches:
+      - 'cerebro/recovery-capacity-350-20261101'
+    paths:
+      - '.github/workflows/cerebro-recovery-capacity-bootstrap-20261101.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: cerebro-recovery-capacity-bootstrap-20261101
+  cancel-in-progress: false
+
+jobs:
+  rearm:
+    name: Rearm canonical capacity controller and heartbeat
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_PAID_AI: 'false'
+      CEREBRO_TRADING: 'false'
+      USEFUL_POOL: '350'
+      CONTROL_RESERVE: '10'
+    steps:
+      - name: Guard recovery authority
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ENVIRONMENT" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_PAID_AI" = false
+          test "$CEREBRO_TRADING" = false
+          test "$USEFUL_POOL" -eq 350
+          test "$CONTROL_RESERVE" -eq 10
+
+      - name: Rearm canonical controller and heartbeat only when absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          controller='cerebro-continuous-work-factory-v0.yml'
+          heartbeat='cerebro-global-capacity-heartbeat-v1.yml'
+
+          active_count() {
+            local workflow="$1"
+            gh api "/repos/${GH_REPO}/actions/workflows/${workflow}/runs?per_page=30" \
+              --jq '[.workflow_runs[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting" or .status == "requested")] | length'
+          }
+
+          controller_active="$(active_count "$controller")"
+          heartbeat_active="$(active_count "$heartbeat")"
+          controller_dispatched=false
+          heartbeat_dispatched=false
+
+          if [ "$controller_active" -eq 0 ]; then
+            gh api --method POST "/repos/${GH_REPO}/actions/workflows/${controller}/dispatches" -f ref=main
+            controller_dispatched=true
+          fi
+
+          if [ "$heartbeat_active" -eq 0 ]; then
+            gh api --method POST "/repos/${GH_REPO}/actions/workflows/${heartbeat}/dispatches" \
+              -f ref=main -f 'inputs[generation]=0'
+            heartbeat_dispatched=true
+          fi
+
+          echo "controller_active_before=$controller_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "heartbeat_active_before=$heartbeat_active" >> "$GITHUB_STEP_SUMMARY"
+          echo "controller_dispatched=$controller_dispatched" >> "$GITHUB_STEP_SUMMARY"
+          echo "heartbeat_dispatched=$heartbeat_dispatched" >> "$GITHUB_STEP_SUMMARY"
+          echo 'target=350_useful_plus_10_control' >> "$GITHUB_STEP_SUMMARY"
+          echo 'environment=PREPROD' >> "$GITHUB_STEP_SUMMARY"
+          echo 'prod_write=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'paid_ai=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'trading=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'additional_cost_eur=0' >> "$GITHUB_STEP_SUMMARY"
