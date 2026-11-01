@@ -1,0 +1,1 @@
+Emergency fork activation pulse. No runtime logic change. Purpose: trigger the existing governed Browser 1 V2 Live Worker workflow from the personal fallback repository during the fenix-cerebro organization incident.
