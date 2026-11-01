@@ -12,6 +12,8 @@ test('global fanout contract is PREPROD and reuses existing control plane',()=>{
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.second_daemon,false);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.self_refill,true);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.offset_aware,true);
+  assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.repository_binding_from_policy,true);
+  assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.repository_binding_fail_closed,true);
   assert.ok(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.total_mission_work_units>360);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.prod_authorized,false);
   assert.equal(ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT.trading_access,false);
@@ -33,6 +35,39 @@ test('verified Enterprise cap is 360 and queue buffer is bounded by documented 5
   const a=new Set([...first.matrix_a,...first.matrix_b].map(x=>x.work_unit_id));
   const b=new Set([...second.matrix_a,...second.matrix_b].map(x=>x.work_unit_id));
   assert.equal([...b].some(id=>a.has(id)),false);
+});
+
+test('canonical repository binding is portable but fails closed on the wrong repository',()=>{
+  const canonical=policy.entitlement_gate.canonical_repository;
+  const bound=planEnterpriseGlobalFanoutV1({policy,requested_units:20,current_repository:canonical});
+  assert.equal(bound.repository_binding_verified,true);
+  assert.equal(bound.current_repository,canonical);
+  assert.equal(bound.canonical_repository,canonical);
+  assert.throws(
+    ()=>planEnterpriseGlobalFanoutV1({policy,requested_units:20,current_repository:'carlosjmunoz78/fenix-capital-inmo-map'}),
+    /CURRENT_REPOSITORY_MISMATCH/,
+  );
+
+  const moved=structuredClone(policy);
+  moved.entitlement_gate.canonical_repository='cerebro-os-runtime/fenix-capital-inmo-map';
+  moved.entitlement_gate.organization='cerebro-os-runtime';
+  const movedPlan=planEnterpriseGlobalFanoutV1({
+    policy:moved,
+    requested_units:20,
+    current_repository:'cerebro-os-runtime/fenix-capital-inmo-map',
+  });
+  assert.equal(movedPlan.repository_binding_verified,true);
+  assert.equal(movedPlan.canonical_repository,'cerebro-os-runtime/fenix-capital-inmo-map');
+});
+
+test('invalid canonical repository configuration fails closed',()=>{
+  const invalid=structuredClone(policy);
+  invalid.entitlement_gate.canonical_repository='not-a-canonical-repository';
+  assert.throws(()=>planEnterpriseGlobalFanoutV1({policy:invalid,requested_units:20}),/CANONICAL_REPOSITORY_INVALID/);
+
+  const mismatchedOwner=structuredClone(policy);
+  mismatchedOwner.entitlement_gate.organization='some-other-owner';
+  assert.throws(()=>planEnterpriseGlobalFanoutV1({policy:mismatchedOwner,requested_units:20}),/CANONICAL_ORGANIZATION_MISMATCH/);
 });
 
 test('final buffered wave shrinks to remaining useful work and stops',()=>{
