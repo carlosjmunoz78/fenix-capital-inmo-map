@@ -31,6 +31,7 @@ jobs:
           node-version: '24'
 
       - name: Syntax and topology tests
+        shell: bash
         run: |
           node --check cerebro/runtime/continuous-useful-work-factory-v0.mjs
           node --check cerebro/runtime/mission-derived-useful-work-v1.mjs
