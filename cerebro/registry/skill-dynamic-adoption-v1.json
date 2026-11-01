@@ -170,11 +170,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_ACCESSIBILITY_AUDITOR_AA3A92A9_PROD_READONLY_CANARY",
       "observed_at": "2026-11-01T17:45:54.958Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -188,7 +188,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "65534d947d930c7cf873aafc0b08bd6a4d1c4dfee82ad5e1ecd2a14dc6696b14"
+      "capability_hash": "65534d947d930c7cf873aafc0b08bd6a4d1c4dfee82ad5e1ecd2a14dc6696b14",
+      "canary": {
+        "status": "GREEN_DYNAMIC_ACCESSIBILITY_AUDITOR_AA3A92A9_PROD_READONLY_CANARY",
+        "candidate_id": "repo:7db334a5e19c06753c7d600032f5",
+        "technical_name": "accessibility-auditor",
+        "head_sha": "fb76dbe6194a9b154663f230a3d39ab0ce4e66c3",
+        "run_id": 41333140993,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-01T18:33:31.877Z"
+      },
+      "promoted_at": "2026-11-01T18:33:31.877Z"
     },
     {
       "candidate_id": "repo:c656eeefe7b75f2ad53f082b68b8",
@@ -16578,10 +16608,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 164,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 163
+    "pending_canary": 0,
+    "prod_readonly": 164
   }
 }
