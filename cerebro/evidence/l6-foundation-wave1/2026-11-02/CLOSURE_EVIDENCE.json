@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1",
+  "wave": "L6_FOUNDATION",
+  "status": "GREEN",
+  "environment": "LAB_PREPROD",
+  "validated_source_sha": "035d0fd36bf532f6cc73b06392152255d8e34a94",
+  "durable_evidence_head_before_closure": "b49b6dadc99434a3ec6802f92813d1b339333d24",
+  "workflow_run_id": 41445683684,
+  "workflow_job_id": 125278239641,
+  "workflow_conclusion": "success",
+  "registry_total": 179,
+  "l6": {
+    "total": 25,
+    "physical_before": 15,
+    "physical_after": 25,
+    "new_runtime_count": 10,
+    "preserved_existing_count": 15
+  },
+  "priority_wave": {
+    "layers": ["L0", "L1", "L2", "L6"],
+    "total": 67,
+    "physical_before_l6": 57,
+    "physical_after_l6": 67,
+    "scaffold_only_after": 0
+  },
+  "new_runtime_engine_ids": ["API-001","ARCH-001","DEBT-001","FF-001","CAN-001","LOCAL-001","AIBUD-001","DOCS-001","INT-001","STOROFF-001"],
+  "preserved_existing_engine_ids": ["APP-001","CRM-001","DATA-001","EVT-001","JOB-001","DEP-001","MIG-001","ROUTE-001","OPT-001","AUTO-001","AUD-001","WEB-001","RUNTIME-001","DBOFF-001","FREE-001"],
+  "focused_tests": {"total": 11, "passed": 11, "failed": 0},
+  "regression": {
+    "total": 2622,
+    "passed": 2612,
+    "failed": 0,
+    "skipped": 10,
+    "intentional_exclusions": [
+      "continuous-worker-entitlement-drain-canary-v1.test.mjs",
+      "continuous-worker-job001-control-plane-binding-v1.test.mjs"
+    ],
+    "exclusion_reason": "Current main intentionally pauses the sustained continuous worker; this mission preserved that baseline and did not reactivate or rewrite it."
+  },
+  "connection_analyzer": {
+    "assertions": 381,
+    "failed": 0,
+    "raw_verified_runtime_edges": 20,
+    "effective_dependency_edges": 15,
+    "cycle_guard_rejected_edges": 5,
+    "candidate_edges": 504
+  },
+  "rebuild": "GREEN",
+  "additional_cost_eur": 0,
+  "prod_touched": false,
+  "trading_touched": false,
+  "registry_mutated": false,
+  "factory_mutated": false,
+  "human_required": false,
+  "p23": "POR_AUDITAR",
+  "artifact": {
+    "id": 13142581825,
+    "name": "cerebro-l6-foundation-wave1-41445683684-1",
+    "github_artifact_sha256": "1da0ba69339be14a88269d3f7dfbafc74b21d4053e94082558d50be5542064f0",
+    "internal_continuity_zip_sha256": "29b45893c806e144f9436f1168033492ec9a509254e9faa028945759a39fab86",
+    "retention_expires": "2026-12-02"
+  },
+  "next_wave": "L3_L4_L5_FOUNDATION",
+  "qualification": "67/67 means physical foundation runtime or preserved physical implementation is evidenced for the priority engines. It does not mean all business logic is production-autonomous or PROD-promoted."
+}
