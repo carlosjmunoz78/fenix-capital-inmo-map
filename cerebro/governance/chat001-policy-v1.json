@@ -1,0 +1,8 @@
+{
+  "schema_version":"1.0.0","engine_id":"CHAT-001","policy":"CONVERSATIONAL_GATEWAY_PREPROD_FAIL_CLOSED","environment":"LAB_PREPROD",
+  "allow":["NORMALIZE_TEXT","NORMALIZE_ATTACHMENT_METADATA","NORMALIZE_VOICE_TRANSCRIPT","DELEGATE_TO_CMD"],
+  "deny":["DIRECT_MODEL_ACCESS","EXECUTE_ACTION","PROD_WRITE","CROSS_COMPANY","MISSING_IDENTITY","TRADING_ACCESS","PAID_MODEL_REQUIRED"],
+  "permission":"CONVERSATIONAL_NORMALIZE_AND_ROUTE_ONLY","fail_closed":true,"prod_execution_authorized":false,"prod_write_authorized":false,"trading_access":false,"additional_cost_eur":0,
+  "human_required":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "invariant":"CHAT-001 preserves user/company/context/permissions and routes through CMD-001; it never executes actions or talks directly to a model"
+}
