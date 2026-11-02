@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_P23_PROD_PROMOTION_READY_V1",
+  "status": "AUTHORIZED",
+  "target": "CEREBRO_PROD_CONTROL_PLANE",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "v1",
+  "engine_count": 179,
+  "p23_live": true,
+  "execution_mode": "FAIL_CLOSED",
+  "prod_execution_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "secret_values": false,
+  "additional_cost_eur": 0,
+  "preprod_gate": {
+    "workflow": "cerebro-p23-autonomy-prod-readiness-gate-v1.yml",
+    "validated_source_sha": "423ebdd438bedf686654031538ab8989e436119d",
+    "workflow_run_id": 41457999602,
+    "conclusion": "success"
+  },
+  "promotion": {
+    "carrier": "EXACT_HEAD_PULL_REQUEST",
+    "base": "main",
+    "require_candidate_sha_gate_green": true,
+    "require_cerebro_only_diff": true,
+    "require_post_merge_p23_live_receipt": true,
+    "app_deploy_marker_forbidden": true
+  },
+  "authorization_scope": "REGISTER_ALL_179_ENGINES_IN_PROD_CONTROL_PLANE_FAIL_CLOSED_AND_ACTIVATE_P23_LIVE_AUDIT; DO_NOT_ENABLE_AUTONOMOUS_PROD_EXECUTION_OR_WRITES"
+}
