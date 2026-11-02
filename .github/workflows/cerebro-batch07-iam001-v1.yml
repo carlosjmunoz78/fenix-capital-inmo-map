@@ -5,8 +5,10 @@ on:
     branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
     paths:
       - 'cerebro/missions/close-batch07-iam001-v1.mjs'
+      - 'cerebro/missions/close-orch-hex-autonomy-v1.mjs'
       - 'cerebro/governance/identity-credential-broker.mjs'
       - 'cerebro/governance/identity-session-lifecycle.mjs'
+      - 'cerebro/governance/contracts/orch-001-contract-v1.json'
       - 'cerebro/tests/identity-credential-broker-v0.test.mjs'
       - 'cerebro/tests/identity-session-lifecycle-v0.test.mjs'
       - '.github/workflows/cerebro-batch07-iam001-v1.yml'
@@ -38,6 +40,10 @@ jobs:
           cd cerebro
           npm run validate
           node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Rebuild already-certified ORCH-001 and HEX-001 evidence deterministically
+        run: |
+          set -euo pipefail
+          node cerebro/missions/close-orch-hex-autonomy-v1.mjs
       - name: Execute IAM-001 closure mission
         run: |
           set -euo pipefail
@@ -50,13 +56,15 @@ jobs:
           const fs=require('fs');
           const report=JSON.parse(fs.readFileSync(process.env.OUT+'/AUTONOMY_READINESS_BASELINE.json','utf8'));
           const s=JSON.parse(fs.readFileSync(process.env.OUT+'/SUMMARY.json','utf8'));
-          const iam=report.engines.find(x=>x.engine_id==='IAM-001');
-          if(!iam) throw new Error('IAM-001 missing');
-          fs.writeFileSync(process.env.OUT+'/IAM001_DIAGNOSTIC.json',JSON.stringify({engine:iam,summary:s},null,2)+'\n');
-          if(iam.gate_count!==12||iam.gate_total!==12||iam.autonomous_prod_ready!==true) throw new Error(`IAM-001 closure failed ${iam.gate_count}/${iam.gate_total}: ${(iam.readiness_blockers||[]).join(',')}`);
+          const selected=['ORCH-001','HEX-001','IAM-001'].map(id=>report.engines.find(x=>x.engine_id===id));
+          if(selected.some(x=>!x)) throw new Error('Selected engine missing');
+          fs.writeFileSync(process.env.OUT+'/BATCH07_DIAGNOSTIC.json',JSON.stringify({engines:selected,summary:s},null,2)+'\n');
+          for(const e of selected){
+            if(e.gate_count!==12||e.gate_total!==12||e.autonomous_prod_ready!==true) throw new Error(`${e.engine_id} closure failed ${e.gate_count}/${e.gate_total}: ${(e.readiness_blockers||[]).join(',')}`);
+          }
           if(s.autonomous_prod_ready<28) throw new Error(`Expected at least 28/179, got ${s.autonomous_prod_ready}`);
           if(s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0) throw new Error('safety/cost isolation drift');
-          console.log(JSON.stringify({iam_gate_count:iam.gate_count,iam_ready:iam.autonomous_prod_ready,autonomous_prod_ready:s.autonomous_prod_ready,registry_total:s.registry_total}));
+          console.log(JSON.stringify({selected:selected.map(x=>({engine_id:x.engine_id,gates:x.gate_count,ready:x.autonomous_prod_ready})),autonomous_prod_ready:s.autonomous_prod_ready,registry_total:s.registry_total}));
           NODE
       - name: Upload Batch07 IAM evidence
         if: always()
@@ -65,6 +73,7 @@ jobs:
           name: cerebro-batch07-iam001-${{ github.run_id }}
           path: |
             /tmp/cerebro-batch07-iam001/
+            cerebro/evidence/orch-hex-autonomy-closure/2026-11-02/
             cerebro/evidence/batch07-iam001-autonomy-closure/2026-11-02/
           if-no-files-found: error
           retention-days: 30
