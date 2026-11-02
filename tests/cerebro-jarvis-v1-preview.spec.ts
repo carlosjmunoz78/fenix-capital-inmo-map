@@ -9,55 +9,87 @@ function qaSession(){const now=Math.floor(Date.now()/1000);const metadata={actor
 async function installIsolatedPreprod(page:Page){
  const session=qaSession();
  await page.addInitScript(value=>{localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(value));sessionStorage.setItem('fenix-session-active','1')},session);
- await page.route(`${SUPABASE_PREPROD}/functions/v1/**`,async route=>{const url=new URL(route.request().url());if(url.pathname.endsWith('/fenix-app-gateway-test/session/context')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'CARLOS-ADMIN',role:'Dirección',context_source:'qa-preprod-fixture'})});return}if(url.pathname.endsWith('/fenix-app-gateway-test/navigation')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{route:'/inicio',label:'Inicio'}]})});return}await route.fulfill({status:200,contentType:'application/json',body:'{}'})});
+ await page.route(`${SUPABASE_PREPROD}/functions/v1/**`,async route=>{const url=new URL(route.request().url());if(url.pathname.endsWith('/fenix-app-gateway-test/session/context')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({actor_code:'CARLOS-ADMIN',role:'Dirección',context_source:'qa-preprod-fixture'})});return}if(url.pathname.endsWith('/fenix-app-gateway-test/navigation')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({items:[{route:'/inicio',label:'Inicio'}]})});return}if(url.pathname.endsWith('/jarvis-work-gateway-v1-preprod/projects')){await route.fulfill({status:404,contentType:'application/json',body:JSON.stringify({status:'CLOSED'})});return}if(url.pathname.includes('/cerebro-browser-interactive-v3-preprod/owner/companies')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,companies:[{company_id:'fenix',company_label:'Fénix Capital',allowed:true,profile_id:'Default',start_url:'https://fenixcapital.es'}]})});return}if(url.pathname.includes('/cerebro-browser-interactive-v3-preprod/owner/status')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({ok:true,session:{company_id:'fenix',session_id:'qa-browser',state:'CEREBRO_CONTROL',control_owner:'CEREBRO',worker_alive:true,current_url:'https://fenixcapital.es',current_title:'Fénix Capital',human_required:false,reason_code:null}})});return}await route.fulfill({status:200,contentType:'application/json',body:'{}'})});
  await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-gateway-v0/**`,async route=>{const url=new URL(route.request().url());if(url.pathname.endsWith('/health')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',service:'CEREBRO Console Gateway',environment:'PREPROD_QA',version:'jarvis-v1-preview',authenticated_transport:true,direct_model_access:false,prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'DETERMINISTIC_READ_ONLY'})});return}if(url.pathname.endsWith('/preferences')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',preferences:{tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'}})});return}if(url.pathname.endsWith('/chat')){await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',intent:'qa_preview',message:'Respuesta aislada PREPROD.',executed:false,context_applied:true})});return}await route.fulfill({status:404,contentType:'application/json',body:JSON.stringify({status:'error'})})});
  await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-activity-v0/**`,async route=>{await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',observed_at:new Date().toISOString(),source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',runs:[{run_id:1,workflow_name:'QA',workflow_alias:'Workspace QA',workflow_path:'qa.yml',status:'completed',conclusion:'success',event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions',created_at:new Date().toISOString(),run_started_at:new Date().toISOString(),updated_at:new Date().toISOString(),engine_id:'QA-001',company_id:'fenix',environment:'PREPROD',version:'v1',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,progress_provenance:'TERMINAL_STATUS',jobs_provenance:'UNAVAILABLE'}],physical_totals:{running_observed:0,queued_observed:0,active_observed:0,provenance:'GITHUB_ACTION_RUN_TOTALS',semantics:'LOWER_BOUND_PHYSICAL_JOBS'}})})});
 }
 
 async function expectPrimaryNavigation(page:Page){for(const label of ['Inicio','Jarvis','Operativa','Neuronal','Navegador'])await expect(page.getByRole('button',{name:label,exact:true})).toBeVisible()}
 async function expectNoHorizontalOverflow(page:Page){const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);expect(overflow).toBeLessThanOrEqual(1)}
+async function expectNoLegacyBrand(page:Page){await expect.poll(async()=>page.evaluate(()=>/\bCEREBRO\b/i.test(document.body.innerText))).toBe(false)}
+async function fontSize(page:Page,selector:string){return page.locator(selector).first().evaluate(el=>Number.parseFloat(getComputedStyle(el).fontSize))}
+
 async function expectJarvisContract(page:Page){
  await expect(page.getByText('JARVIS',{exact:true}).first()).toBeVisible();
  await expectPrimaryNavigation(page);
  await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toBeVisible();
  await expect(page.getByText('01 · Auditoría Total',{exact:true})).toBeVisible();
  await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toBeVisible();
+ await expect(page.getByTitle('Restaurar distribución')).toBeVisible();
+ await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
+ await expect(page.getByTitle('Minimizar conversación')).toBeVisible();
+ await expect(page.getByPlaceholder('Pide, escribe o habla…')).toBeVisible();
  await expect(page.getByRole('button',{name:'Añadir archivo'})).toBeVisible();
- await expect(page.getByRole('button',{name:'Activar voz'})).toBeVisible();
- await expect(page.getByRole('combobox',{name:'Empresa',exact:true})).toHaveValue('Fénix · sesión autenticada');
- await expect(page.getByRole('combobox',{name:'Contexto',exact:true})).toHaveValue('GENERAL');
- await expect(page.locator('.jarvis-evidence-state').getByText('Actividad conectada',{exact:true})).toBeVisible();
- await expect(page.getByText('HUMAN_REQUIRED',{exact:true})).toHaveCount(0);
- await expect(page.getByText('FÉNIX · GENERAL',{exact:true})).toHaveCount(0);
+ await expect(page.getByRole('button',{name:'Dictar'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
+ await expectNoLegacyBrand(page);
  await expectNoHorizontalOverflow(page);
+ expect(await fontSize(page,'.operativa-composer-form textarea')).toBeGreaterThanOrEqual(14);
+ expect(await fontSize(page,'.jarvis-workspace-brand strong')).toBeGreaterThanOrEqual(15);
+ expect(await fontSize(page,'.jarvis-center-project strong')).toBeGreaterThanOrEqual(13);
 }
 
-test('Jarvis Workspace PREPROD · projects + chat + evidence + narrow viewport + Operativa regression',async({page})=>{
+test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regression',async({page})=>{
+ await page.setViewportSize({width:1440,height:695});
  await installIsolatedPreprod(page);
  await page.goto('/cerebro?section=jarvis');
  await expectJarvisContract(page);
- const composer=page.getByPlaceholder('También puedes escribir a CEREBRO…');
+
+ const maximizeConversation=page.getByTitle('Maximizar conversación');
+ await maximizeConversation.click();
+ await expect(page.getByTitle('Restaurar tamaño')).toBeVisible();
+ await page.getByTitle('Restaurar tamaño').click();
+ await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
+
+ const composer=page.getByPlaceholder('Pide, escribe o habla…');
  await expect(composer).toBeEnabled();
  await composer.fill('Prueba aislada PREPROD');
  await page.getByRole('button',{name:'Enviar'}).click();
  await expect(page.getByText('Prueba aislada PREPROD',{exact:true})).toBeVisible();
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
- const assistantLabel=page.locator('.cerebro-chat-cerebro strong').last();
- await expect(assistantLabel).toBeVisible();
- const pseudoContent=await assistantLabel.evaluate(el=>getComputedStyle(el,'::after').content);expect(pseudoContent).toContain('JARVIS');
- await page.getByRole('button',{name:'Evidencia'}).click();
- await expect(page.getByText('FUENTE CANÓNICA',{exact:true})).toBeVisible();
+ await expectNoLegacyBrand(page);
+
  await page.getByRole('button',{name:'Herramientas'}).click();
- const executionPanel=page.getByRole('complementary',{name:'Ejecución y evidencias'});
- for(const tool of ['Archivos','Código','Terminal','Navegador','Tests','Evidencias'])await expect(executionPanel.getByRole('button').filter({hasText:tool})).toBeVisible();
- await page.screenshot({path:'test-results/jarvis-workspace-desktop.png',fullPage:true});
+ await expect(page.getByRole('button',{name:'Código'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Git'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Navegador'}).last()).toBeVisible();
+ await page.getByRole('button',{name:'Git'}).click();
+ for(const name of ['Estado','Diff','CI','vs main'])await expect(page.getByRole('button',{name,exact:true})).toBeVisible();
+ await expect(page.getByText('main y emergency-pages bloqueadas',{exact:true})).toBeVisible();
+ await page.getByRole('button',{name:'Navegador'}).last().click();
+ await expect(page.getByRole('button',{name:/Abrir navegador interactivo/})).toBeVisible();
+ await expect(page.getByText('JARVIS EN CONTROL',{exact:true})).toBeVisible();
+ await expectNoLegacyBrand(page);
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:'test-results/jarvis-workspace-1440x695.png',fullPage:true});
+
  await page.setViewportSize({width:695,height:900});
  await expect(page.getByText('JARVIS',{exact:true}).first()).toBeVisible();
- await expectPrimaryNavigation(page);await expectNoHorizontalOverflow(page);
+ await expectPrimaryNavigation(page);
+ await expectNoLegacyBrand(page);
+ await expectNoHorizontalOverflow(page);
  await page.screenshot({path:'test-results/jarvis-workspace-narrow-695.png',fullPage:true});
- await page.setViewportSize({width:1440,height:900});
+
+ await page.setViewportSize({width:1440,height:695});
  await page.getByRole('button',{name:'Operativa',exact:true}).click();
  await expect(page.locator('main.operativa-premium[aria-label="Operativa"]')).toBeVisible();
- await expectPrimaryNavigation(page);await expectNoHorizontalOverflow(page);
- await page.screenshot({path:'test-results/operativa-v4-regression.png',fullPage:true});
+ await expectPrimaryNavigation(page);
+ await expectNoLegacyBrand(page);
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:'test-results/operativa-v4-regression-1440x695.png',fullPage:true});
+
+ await page.getByRole('button',{name:'Navegador',exact:true}).first().click();
+ await expectNoLegacyBrand(page);
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:'test-results/navegador-branding-1440x695.png',fullPage:true});
 });

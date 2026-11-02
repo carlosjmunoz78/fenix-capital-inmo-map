@@ -15,7 +15,7 @@ env:
 jobs:
   contract-build:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -72,3 +72,19 @@ jobs:
           grep -q "const ENV='PREPROD'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
           grep -q "prod_authorized:false" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
           echo "Branch isolated; PREPROD only; no PROD/main/emergency-pages write in this gate."
+      - name: Install Chromium for visual acceptance
+        run: npx playwright install --with-deps chromium
+      - name: Visual acceptance 1440x695
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium
+      - name: Upload visual QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-visual-qa-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7
