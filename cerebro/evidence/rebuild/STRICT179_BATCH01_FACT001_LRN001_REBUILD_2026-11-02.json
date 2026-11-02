@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "STRICT179_BATCH01_REBUILD_EVIDENCE",
+  "status": "GREEN",
+  "tested": true,
+  "environment": "PREPROD",
+  "run_observed_at": "2026-11-02T15:00:06.3853395Z",
+  "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
+  "source_commit_sha": "2d4d94b7c5dab40c75b6080a4d524755a179ff16",
+  "github_run_id": 41467239860,
+  "github_job_id": 125351260472,
+  "artifact": {
+    "name": "strict179-batch01-recovery-41467239860-1",
+    "id": 13154240349,
+    "zip_sha256": "161dedecbe01bbaad3bd00e48ef456849f18cee5eae4d36f1b1b59b2cddba9be"
+  },
+  "gate": "rebuild",
+  "engine_ids": ["FACT-001", "LRN-001"],
+  "engines": {
+    "FACT-001": {
+      "tested": true,
+      "status": "GREEN",
+      "deterministic": true,
+      "bundle_sha256": "e55c45943dba3cf084c0f657cc1cb529a3a23e5b293e2549b2b51ffb36675b74",
+      "idempotency_key": "fact001:9d7a6ad8651866e85f7199b3cfdf38928a09a302fa29cf2e6a962853dfac6427",
+      "generated_file_count": 18
+    },
+    "LRN-001": {
+      "tested": true,
+      "status": "GREEN",
+      "deterministic": true,
+      "restored_preprod_iteration": {
+        "status": "GREEN",
+        "remote_outbox": "REMOTE_OUTBOX_DISABLED",
+        "learning": "GREEN",
+        "candidates": "CANDIDATES_GREEN",
+        "orchestration": "ORCHESTRATOR_GREEN",
+        "horizons": "HORIZON_EXECUTORS_GREEN",
+        "meta_observability": "META_METRICS_GREEN",
+        "additional_cost_eur": 0,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false
+      }
+    }
+  },
+  "evidence_hash": "8c782095e4810159bf8d745d4d8f3e0d872cc16efc1d7f9c50b578fbe035edb0",
+  "safety": {
+    "additional_cost_eur": 0,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "secrets_read": false,
+    "external_writes": false
+  }
+}
