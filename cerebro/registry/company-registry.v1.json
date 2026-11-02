@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "COMP-REG-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "source_of_truth": "GIT_JSON",
+  "cross_company_access": "deny_by_default",
+  "prod_execution_enabled": false,
+  "prod_write_authorized": false,
+  "supabase_writes": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "companies": [
+    {
+      "company_id": "fenix",
+      "name": "Fénix",
+      "brands": ["Fénix Capital", "Fénix Inmobiliaria"],
+      "domains": ["fenixcapital.es", "app.fenixcapital.es"],
+      "sector": "real_estate_and_mortgage_advisory",
+      "country": "ES",
+      "owner_ref": "CARLOS",
+      "permissions": ["CEREBRO_PREPROD"],
+      "environments": ["LAB", "PREPROD", "PROD"],
+      "stack": ["GitHub", "Supabase", "WordPress"],
+      "status": "PREPROD_REGISTERED",
+      "active_engines": []
+    }
+  ]
+}
