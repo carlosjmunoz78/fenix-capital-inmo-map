@@ -84,7 +84,16 @@ jobs:
         run: |
           set -euo pipefail
           rm -rf "$OUT"
-          node cerebro/missions/connect-existing-engines-v1.mjs --out "$OUT" | tee "$OUT.runner.log"
+          node cerebro/missions/connect-existing-engines-v1.mjs --out "$OUT" 2>&1 | tee /tmp/CEREBRO_CONNECT_RUNNER_LOG.txt
+
+      - name: Upload runner diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-connect-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/CEREBRO_CONNECT_RUNNER_LOG.txt
+          if-no-files-found: warn
+          retention-days: 7
 
       - name: Verify mission reports
         shell: bash
@@ -116,7 +125,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          cp "$OUT.runner.log" "$OUT/RUNNER_LOG.txt"
+          cp /tmp/CEREBRO_CONNECT_RUNNER_LOG.txt "$OUT/RUNNER_LOG.txt"
           printf '%s\n' "$EXACT_SOURCE_SHA" > "$OUT/SOURCE_SHA.txt"
           (cd /tmp && zip -qr CEREBRO_CONNECT_EXISTING_ENGINES_2026-11-02.zip "$(basename "$OUT")")
           sha256sum /tmp/CEREBRO_CONNECT_EXISTING_ENGINES_2026-11-02.zip | tee "$OUT/CONTINUITY_PACKAGE_SHA256.txt"
