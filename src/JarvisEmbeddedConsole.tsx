@@ -1,5 +1,6 @@
 import {useEffect,useRef} from 'react';
 import CerebroConsoleShell from './CerebroConsoleShell';
+import JarvisWorkbenchPortal from './JarvisWorkbenchPortal';
 
 const VISIBLE_REPLACEMENTS:[RegExp,string][]=[
   [/CEREBRO OS\s*·\s*CONSOLE V0/gi,'JARVIS'],
@@ -44,5 +45,5 @@ export default function JarvisEmbeddedConsole(){
     observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     return()=>{observer.disconnect();if(scheduled)window.cancelAnimationFrame(scheduled)};
   },[]);
-  return <div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell/></div>;
+  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell/></div><JarvisWorkbenchPortal/></>;
 }
