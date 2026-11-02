@@ -1,12 +1,7 @@
 name: CEREBRO Continuous Useful Worker V1
-run-name: CEREBRO SUSTAINED PAUSE · USER PRIORITY
+run-name: CEREBRO SUSTAINED ${{ inputs.lane }} · C${{ inputs.cycle }} · PAUSED
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - .github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml
   workflow_dispatch:
     inputs:
       lane:
@@ -23,7 +18,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-continuous-useful-worker-v1-49
+  group: cerebro-continuous-useful-worker-v1-${{ inputs.lane }}
   cancel-in-progress: true
 
 jobs:
@@ -31,4 +26,4 @@ jobs:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo 'Sustained background work temporarily paused for user-priority Operativa PROD deployment.'
+      - run: echo 'Sustained background work temporarily paused for user-priority work.'
