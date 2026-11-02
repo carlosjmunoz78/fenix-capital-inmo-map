@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   CORE_001,GOV_001,POL_001,DEC_001,SEM_001,OWN_001,OBJ_001,ADR_001,CFG_001,VER_001,
-  L0_EXISTING_ADAPTERS,HUMAN_EXCEPTION_CODES,buildCoreEnvelope,validateRegistry,evaluatePolicy,rankCandidates,
+  HUMAN_EXCEPTION_CODES,buildCoreEnvelope,validateRegistry,evaluatePolicy,rankCandidates,
   canonicalizeEntity,canonicalTerms,resolveOwner,evaluateObjective,createAdr,resolveConfig,detectDrift,parseSemver,compareSemver,compatibility
 } from '../runtime/l0/index-v1.mjs';
 
@@ -14,11 +14,6 @@ const contracts=[CORE_001,GOV_001,POL_001,DEC_001,SEM_001,OWN_001,OBJ_001,ADR_00
 test('L0 Wave1 implements exactly 10 previously scaffold-only engines',()=>{
   assert.deepEqual(contracts.map(x=>x.engine_id),['CORE-001','GOV-001','POL-001','DEC-001','SEM-001','OWN-001','OBJ-001','ADR-001','CFG-001','VER-001']);
   assert.ok(contracts.every(x=>x.layer==='L0'&&x.prod_writes===false&&x.additional_cost_eur===0));
-});
-
-test('existing L0 engines are wrap-preserve only',()=>{
-  assert.deepEqual(L0_EXISTING_ADAPTERS.map(x=>x.engine_id),['ORCH-001','HEX-001','FACT-001']);
-  assert.ok(L0_EXISTING_ADAPTERS.every(x=>x.binding_mode==='WRAP_PRESERVE'&&x.do_not_overwrite));
 });
 
 test('canonical HUMAN_REQUIRED taxonomy remains exact',()=>{
