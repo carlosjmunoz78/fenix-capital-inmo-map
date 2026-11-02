@@ -56,6 +56,9 @@ jobs:
           git worktree add -B emergency-pages-deploy /tmp/fenix-emergency-pages origin/emergency-pages
           find /tmp/fenix-emergency-pages -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
           cp -a dist/. /tmp/fenix-emergency-pages/
+          cp dist/index.html /tmp/fenix-emergency-pages/404.html
+          printf 'app.fenixcapital.es\n' > /tmp/fenix-emergency-pages/CNAME
+          printf '%s\n' "$GITHUB_SHA" > /tmp/fenix-emergency-pages/PROD_SOURCE_SHA.txt
           touch /tmp/fenix-emergency-pages/.nojekyll
           cd /tmp/fenix-emergency-pages
           git add -A
