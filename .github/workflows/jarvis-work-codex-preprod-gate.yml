@@ -11,6 +11,9 @@ permissions:
 
 env:
   CI: 'true'
+  VITE_FENIX_ENV: 'preprod'
+  VITE_SUPABASE_URL: 'https://hnqlnvakzaywtafeiybt.supabase.co'
+  VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw'
 
 jobs:
   contract-build:
