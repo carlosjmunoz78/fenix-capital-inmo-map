@@ -82,6 +82,6 @@ jobs:
         run: |
           set -euo pipefail
           ! grep -R --line-number -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' cerebro/runtime/l7 cerebro/tests/l7-foundation-wave1.test.mjs
-          ! grep -R --line-number -E 'environment\s*[:=]\s*["'"']PROD["'"']|prod_writes\s*[:=]\s*true|trading_access\s*[:=]\s*true' cerebro/runtime/l7
+          ! grep -R --line-number -E "environment[[:space:]]*[:=][[:space:]]*['\"]PROD['\"]|prod_writes[[:space:]]*[:=][[:space:]]*true|trading_access[[:space:]]*[:=][[:space:]]*true" cerebro/runtime/l7
           for f in IMPLEMENTATION_MANIFEST.json PRIORITY_PHYSICAL_BASELINE.json CLOSURE_EVIDENCE.json AUTONOMY_STATE.json RUNBOOK.md CHANGELOG.md; do test -f "cerebro/evidence/l7-foundation-wave1/2026-11-02/$f"; done
           echo 'L7 FOUNDATION GREEN: 15/15 physical; PROD untouched; Trading untouched; cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
