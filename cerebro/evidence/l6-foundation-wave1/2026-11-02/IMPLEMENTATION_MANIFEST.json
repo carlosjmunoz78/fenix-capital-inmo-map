@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1",
+  "wave": "L6_FOUNDATION",
+  "environment": "LAB_PREPROD",
+  "l6_total": 25,
+  "physical_before": 15,
+  "new_runtime_engine_ids": ["API-001","ARCH-001","DEBT-001","FF-001","CAN-001","LOCAL-001","AIBUD-001","DOCS-001","INT-001","STOROFF-001"],
+  "preserved_existing_engine_ids": ["APP-001","CRM-001","DATA-001","EVT-001","JOB-001","DEP-001","MIG-001","ROUTE-001","OPT-001","AUTO-001","AUD-001","WEB-001","RUNTIME-001","DBOFF-001","FREE-001"],
+  "implementation_rule": "Add deterministic foundation runtime only for previously scaffold-only engines; wrap and preserve existing physical implementations.",
+  "network_execution": false,
+  "prod_writes": false,
+  "trading_access": false,
+  "credential_values": false,
+  "additional_cost_eur": 0,
+  "do_not_overwrite_existing": true,
+  "promotion_authorized": false
+}
