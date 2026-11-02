@@ -97,6 +97,17 @@ jobs:
           rm -rf "$OUT"
           node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connection" | tee "$OUT.runner.log"
 
+      - name: Upload L0 analyzer diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l0-wave1-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/cerebro-l0-foundation-wave1/connection
+            /tmp/cerebro-l0-foundation-wave1.runner.log
+          if-no-files-found: warn
+          retention-days: 7
+
       - name: Verify 13 of 13 L0 physical and OLD vs NEW
         shell: bash
         run: |
@@ -111,7 +122,8 @@ jobs:
           const l0=['CORE-001','GOV-001','ORCH-001','POL-001','HEX-001','DEC-001','SEM-001','OWN-001','OBJ-001','ADR-001','CFG-001','VER-001','FACT-001'];
           const newly=['CORE-001','GOV-001','POL-001','DEC-001','SEM-001','OWN-001','OBJ-001','ADR-001','CFG-001','VER-001'];
           const preserved=['ORCH-001','HEX-001','FACT-001'];
-          if(base.physically_connected_count!==34) throw new Error('unexpected OLD physical baseline');
+          console.log('L0_DIAGNOSTICS='+JSON.stringify({base_physical:base.physically_connected_count,current_physical:current.physically_connected_count,current_physical_ids:current.physically_connected_engine_ids,l0:l0.map(id=>({id,mode:bindings.engines[id]?.binding_mode,evidence:bindings.engines[id]?.physical_evidence?.map(e=>e.path)||[]}))}));
+          if(base.physically_connected_count!==34) throw new Error(`unexpected OLD physical baseline: ${base.physically_connected_count}`);
           if(current.physically_connected_count!==44) throw new Error(`expected 44 physical priority engines, got ${current.physically_connected_count}`);
           for(const id of l0){const b=bindings.engines[id];if(!b||b.binding_mode!=='WRAP_PRESERVE'||!b.physical_evidence.length||b.do_not_overwrite!==true)throw new Error(`L0 physical binding missing: ${id}`);}
           for(const id of newly){if(!bindings.engines[id].physical_evidence.some(e=>e.path.startsWith('cerebro/runtime/l0/')))throw new Error(`new L0 runtime evidence missing: ${id}`);}
