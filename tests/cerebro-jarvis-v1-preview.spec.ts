@@ -30,6 +30,7 @@ async function installIsolatedPreprod(page:Page){
  const session=qaSession();
  await page.addInitScript(value=>{
   localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(value));
+  sessionStorage.setItem('fenix-session-active','1');
  },session);
 
  await page.route(`${SUPABASE_PREPROD}/functions/v1/**`,async route=>{
