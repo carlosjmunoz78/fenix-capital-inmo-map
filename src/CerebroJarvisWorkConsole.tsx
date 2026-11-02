@@ -1,142 +1,162 @@
 import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
-import {Activity,ChevronDown,ChevronRight,Code2,Columns3,ExternalLink,FileText,FlaskConical,Folder,FolderOpen,Globe2,GripVertical,Maximize2,Minus,Paperclip,Radio,Search,Sparkles,Terminal} from 'lucide-react';
-import CerebroConsoleShell from './CerebroConsoleShell';
+import {Activity,Check,ChevronDown,ChevronRight,Code2,Columns3,ExternalLink,FileText,FlaskConical,Folder,FolderOpen,Globe2,GripVertical,Maximize2,Minus,Paperclip,Pencil,Plus,Radio,RotateCcw,Search,Terminal,Upload,X} from 'lucide-react';
+import JarvisEmbeddedConsole from './JarvisEmbeddedConsole';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
+import {createJarvisProject,fetchJarvisProjects,importJarvisProject,renameJarvisProject,type JarvisProject} from './jarvisWorkApi';
 import projectRegistryJson from '../cerebro/registry/jarvis-project-registry.v1.json';
 import auditIndexJson from '../cerebro/audit/jarvis-audit-index.v1.json';
 import './cerebro-jarvis-work.css';
+import './jarvis-work-v2.css';
 
 type SurfaceName='JARVIS'|'OPERATIVA';
 type Props={surface?:SurfaceName};
 type ProjectStatus='HECHO'|'EXISTENTE'|'PARCIAL'|'DEFINIDO'|'PLANIFICADO'|'POR_AUDITAR'|string;
-type ProjectRecord={project_id:string;order:number;title:string;status:ProjectStatus;owner:string;editors:string[];autonomy_state:string;objective:string;subprojects:string[];dependencies:string[];audit_refs:string[];last_reconciled_at:string|null;source:string};
+type ProjectRecord=JarvisProject&{status:ProjectStatus};
 type ProjectRegistry={schema_version:string;company_id:string;engine_id:string;environment:string;version:string;editors:string[];projects:ProjectRecord[]};
 type AuditCategory={audit_id:string;title:string;current_state:string;evidence_refs:string[]};
 type AuditEvidence={evidence_id:string;recorded_at:string;source:string;summary:string};
 type AuditIndex={audit_project_id:string;current_summary:{revision:number;updated_at:string;updated_by:string;text:string};categories:AuditCategory[];immutable_evidence:AuditEvidence[]};
 type RightTab='activity'|'evidence'|'tools';
-type LayoutState={left:number;right:number;leftOpen:boolean;rightOpen:boolean;maxCenter:boolean};
+type FocusPane='left'|'center'|'right'|null;
+type LayoutState={left:number;right:number;leftOpen:boolean;centerOpen:boolean;rightOpen:boolean;focus:FocusPane};
+type ProjectDialog='create'|'rename'|null;
 
 const registry=projectRegistryJson as unknown as ProjectRegistry;
 const auditIndex=auditIndexJson as unknown as AuditIndex;
 const ACTIVE_STATUSES=new Set(['in_progress','queued','waiting','requested','pending']);
-const LAYOUT_KEY='cerebro_jarvis_workspace_layout_v1';
-const DEFAULT_LAYOUT:LayoutState={left:286,right:330,leftOpen:true,rightOpen:true,maxCenter:false};
+const LAYOUT_KEY='jarvis_work_layout_v2';
+const DEFAULT_LAYOUT:LayoutState={left:286,right:340,leftOpen:true,centerOpen:true,rightOpen:true,focus:null};
+const fallbackProjects=[...registry.projects].sort((a,b)=>a.order-b.order);
 
 function clamp(value:number,min:number,max:number){return Math.min(max,Math.max(min,value))}
-function displayProjectTitle(project:ProjectRecord){return project.project_id===auditIndex.audit_project_id?'Auditoría Total':project.title}
-function activityLabel(run:CerebroActivityRun){return run.workflow_alias||run.engine_id||run.workflow_name.replace(/\bCEREBRO\b|\bPREPROD\b|\bPROD\b|\bLIVE\b/gi,'').replace(/[^A-Za-z0-9áéíóúüñÁÉÍÓÚÜÑ]+/g,' ').trim().slice(0,44)||'Actividad CEREBRO'}
+function visible(value:unknown){return String(value??'').replace(/\bCEREBRO OS\b/gi,'JARVIS').replace(/\bCEREBRO\b/gi,'JARVIS')}
+function displayProjectTitle(project:ProjectRecord){return project.project_id===auditIndex.audit_project_id?'Auditoría Total':visible(project.title)}
+function activityLabel(run:CerebroActivityRun){return visible(run.workflow_alias||run.engine_id||run.workflow_name.replace(/\bPREPROD\b|\bPROD\b|\bLIVE\b/gi,'').replace(/[^A-Za-z0-9áéíóúüñÁÉÍÓÚÜÑ]+/g,' ').trim().slice(0,44)||'Actividad')}
 function activityState(run:CerebroActivityRun){if(run.jobs_provenance==='REAL_GITHUB_JOBS'&&Number(run.running_jobs||0)>0)return'EN CURSO';if(run.jobs_provenance==='REAL_GITHUB_JOBS'&&Number(run.queued_jobs||0)>0)return'EN COLA';if(run.status==='completed')return run.conclusion==='success'?'COMPLETADO':'INCIDENCIA';if(run.status==='in_progress')return'EN CURSO';if(ACTIVE_STATUSES.has(run.status))return'EN COLA';return run.status.toUpperCase()}
-function loadLayout(){if(typeof window==='undefined')return DEFAULT_LAYOUT;try{const parsed=JSON.parse(window.localStorage.getItem(LAYOUT_KEY)||'') as Partial<LayoutState>;return{left:clamp(Number(parsed.left)||DEFAULT_LAYOUT.left,228,430),right:clamp(Number(parsed.right)||DEFAULT_LAYOUT.right,270,460),leftOpen:parsed.leftOpen!==false,rightOpen:parsed.rightOpen!==false,maxCenter:parsed.maxCenter===true}}catch{return DEFAULT_LAYOUT}}
+function loadLayout(){if(typeof window==='undefined')return DEFAULT_LAYOUT;try{const parsed=JSON.parse(window.localStorage.getItem(LAYOUT_KEY)||'') as Partial<LayoutState>;return{left:clamp(Number(parsed.left)||DEFAULT_LAYOUT.left,228,520),right:clamp(Number(parsed.right)||DEFAULT_LAYOUT.right,270,560),leftOpen:parsed.leftOpen!==false,centerOpen:parsed.centerOpen!==false,rightOpen:parsed.rightOpen!==false,focus:['left','center','right'].includes(String(parsed.focus))?parsed.focus as FocusPane:null}}catch{return DEFAULT_LAYOUT}}
 function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){const descriptor=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');descriptor?.set?.call(textarea,value);textarea.dispatchEvent(new Event('input',{bubbles:true}));textarea.dispatchEvent(new Event('change',{bubbles:true}))}
+function gridColumns(layout:LayoutState){
+ if(layout.focus)return'minmax(0,1fr)';
+ const open=[layout.leftOpen,layout.centerOpen,layout.rightOpen].filter(Boolean).length;
+ if(open<=1)return'minmax(0,1fr)';
+ if(layout.leftOpen&&layout.centerOpen&&layout.rightOpen)return`${layout.left}px 5px minmax(0,1fr) 5px ${layout.right}px`;
+ if(layout.leftOpen&&layout.centerOpen)return`${layout.left}px 5px minmax(0,1fr)`;
+ if(layout.centerOpen&&layout.rightOpen)return`minmax(0,1fr) 5px ${layout.right}px`;
+ return'minmax(0,1fr) 5px minmax(0,1fr)';
+}
 
 export default function CerebroJarvisWorkConsole({surface='JARVIS'}:Props){
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
  const[source,setSource]=useState<'LIVE'|'CACHED'|'UNAVAILABLE'>('UNAVAILABLE');
  const[observedAt,setObservedAt]=useState('');
  const[query,setQuery]=useState('');
+ const[projects,setProjects]=useState<ProjectRecord[]>(fallbackProjects);
+ const[projectSource,setProjectSource]=useState<'GATEWAY'|'FALLBACK'|'UNAVAILABLE'>('FALLBACK');
  const[selectedProjectId,setSelectedProjectId]=useState(auditIndex.audit_project_id);
  const[selectedSubproject,setSelectedSubproject]=useState<string|null>(auditIndex.categories[0]?.audit_id||null);
  const[expanded,setExpanded]=useState<Set<string>>(()=>new Set([auditIndex.audit_project_id]));
  const[rightTab,setRightTab]=useState<RightTab>('activity');
  const[layout,setLayout]=useState<LayoutState>(loadLayout);
+ const[dialog,setDialog]=useState<ProjectDialog>(null);
+ const[projectTitle,setProjectTitle]=useState('');
+ const[projectObjective,setProjectObjective]=useState('');
+ const[actionBusy,setActionBusy]=useState(false);
+ const[actionError,setActionError]=useState('');
  const dragRef=useRef<{side:'left'|'right';startX:number;startWidth:number}|null>(null);
+ const importInputRef=useRef<HTMLInputElement>(null);
 
- useEffect(()=>{try{window.localStorage.setItem(LAYOUT_KEY,JSON.stringify(layout))}catch{/* layout persistence is optional */}},[layout]);
+ useEffect(()=>{try{window.localStorage.setItem(LAYOUT_KEY,JSON.stringify(layout))}catch{/* optional */}},[layout]);
  useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else setSource('UNAVAILABLE')};void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)}},[]);
- useEffect(()=>{const move=(event:PointerEvent)=>{const drag=dragRef.current;if(!drag)return;if(drag.side==='left')setLayout(current=>({...current,left:clamp(drag.startWidth+(event.clientX-drag.startX),228,430)}));else setLayout(current=>({...current,right:clamp(drag.startWidth-(event.clientX-drag.startX),270,460)}))};const stop=()=>{dragRef.current=null;document.body.classList.remove('jarvis-resizing')};window.addEventListener('pointermove',move);window.addEventListener('pointerup',stop);return()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',stop)}},[]);
+ useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchJarvisProjects();if(cancelled)return;if(status===200&&Array.isArray(data?.projects)&&data.projects.length){setProjects([...data.projects].sort((a,b)=>a.order-b.order) as ProjectRecord[]);setProjectSource('GATEWAY')}else setProjectSource(status===404?'FALLBACK':'UNAVAILABLE')};void refresh();return()=>{cancelled=true}},[]);
+ useEffect(()=>{const move=(event:PointerEvent)=>{const drag=dragRef.current;if(!drag)return;if(drag.side==='left')setLayout(current=>({...current,left:clamp(drag.startWidth+(event.clientX-drag.startX),228,520)}));else setLayout(current=>({...current,right:clamp(drag.startWidth-(event.clientX-drag.startX),270,560)}))};const stop=()=>{dragRef.current=null;document.body.classList.remove('jarvis-resizing')};window.addEventListener('pointermove',move);window.addEventListener('pointerup',stop);return()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',stop)}},[]);
 
- const projects=useMemo(()=>[...registry.projects].sort((a,b)=>a.order-b.order),[]);
- const filteredProjects=useMemo(()=>{const term=query.trim().toLocaleLowerCase('es');if(!term)return projects;return projects.filter(project=>`${displayProjectTitle(project)} ${project.title} ${project.objective} ${project.subprojects.join(' ')}`.toLocaleLowerCase('es').includes(term))},[projects,query]);
+ const filteredProjects=useMemo(()=>{const term=query.trim().toLocaleLowerCase('es');if(!term)return projects;return projects.filter(project=>`${displayProjectTitle(project)} ${visible(project.objective)} ${project.subprojects.map(visible).join(' ')}`.toLocaleLowerCase('es').includes(term))},[projects,query]);
  const selectedProject=projects.find(project=>project.project_id===selectedProjectId)||projects[0];
- const auditCategory=selectedProject.project_id===auditIndex.audit_project_id?auditIndex.categories.find(item=>item.audit_id===selectedSubproject)||null:null;
- const selectedSubTitle=auditCategory?.title||selectedSubproject;
+ const auditCategory=selectedProject?.project_id===auditIndex.audit_project_id?auditIndex.categories.find(item=>item.audit_id===selectedSubproject)||null:null;
+ const selectedSubTitle=visible(auditCategory?.title||selectedSubproject||'');
  const activeCount=useMemo(()=>runs.filter(run=>ACTIVE_STATUSES.has(run.status)||Number(run.running_jobs||0)>0||Number(run.queued_jobs||0)>0).length,[runs]);
  const recentRuns=useMemo(()=>runs.slice(0,8),[runs]);
  const sourceLabel=source==='LIVE'?'Actividad conectada':source==='CACHED'?'Última actividad disponible':'Actividad no disponible';
- const selectedEvidenceRefs=useMemo(()=>auditCategory?.evidence_refs||selectedProject.audit_refs||[],[auditCategory,selectedProject]);
+ const selectedEvidenceRefs=useMemo(()=>auditCategory?.evidence_refs||selectedProject?.audit_refs||[],[auditCategory,selectedProject]);
  const matchedEvidence=useMemo(()=>auditIndex.immutable_evidence.filter(item=>selectedEvidenceRefs.includes(item.evidence_id)),[selectedEvidenceRefs]);
- const workspaceStyle={'--jarvis-left-width':`${layout.left}px`,'--jarvis-right-width':`${layout.right}px`} as CSSProperties;
- const subprojects=selectedProject.project_id===auditIndex.audit_project_id?auditIndex.categories.map(item=>({id:item.audit_id,title:item.title,state:item.current_state})):selectedProject.subprojects.map(item=>({id:item,title:item,state:null}));
+ const workspaceStyle={'--jarvis-left-width':`${layout.left}px`,'--jarvis-right-width':`${layout.right}px`,gridTemplateColumns:gridColumns(layout)} as CSSProperties;
+ const showLeft=Boolean(selectedProject&&layout.leftOpen&&(!layout.focus||layout.focus==='left'));
+ const showCenter=Boolean(selectedProject&&layout.centerOpen&&(!layout.focus||layout.focus==='center'));
+ const showRight=Boolean(selectedProject&&layout.rightOpen&&(!layout.focus||layout.focus==='right'));
 
  function toggleProject(projectId:string){setExpanded(current=>{const next=new Set(current);if(next.has(projectId))next.delete(projectId);else next.add(projectId);return next})}
  function chooseProject(project:ProjectRecord){setSelectedProjectId(project.project_id);setExpanded(current=>new Set(current).add(project.project_id));if(project.project_id===auditIndex.audit_project_id)setSelectedSubproject(auditIndex.categories[0]?.audit_id||null);else setSelectedSubproject(project.subprojects[0]||null)}
  function beginResize(side:'left'|'right',event:React.PointerEvent){dragRef.current={side,startX:event.clientX,startWidth:side==='left'?layout.left:layout.right};document.body.classList.add('jarvis-resizing');event.currentTarget.setPointerCapture?.(event.pointerId)}
+ function focusPane(pane:Exclude<FocusPane,null>){setLayout(current=>({...current,focus:current.focus===pane?null:pane,[pane==='left'?'leftOpen':pane==='center'?'centerOpen':'rightOpen']:true}))}
+ function togglePane(pane:'leftOpen'|'centerOpen'|'rightOpen'){setLayout(current=>{const next={...current,[pane]:!current[pane],focus:null};if(!next.leftOpen&&!next.centerOpen&&!next.rightOpen)next.centerOpen=true;return next})}
  function primeJarvisCommand(text:string,submit=false){const textarea=document.querySelector<HTMLTextAreaElement>('.jarvis-conversation .cerebro-chat-form textarea');if(!textarea)return;setReactTextareaValue(textarea,text);textarea.focus();if(submit){const form=textarea.closest('form');window.setTimeout(()=>form?.requestSubmit(),0)}}
- function editCurrentProject(){const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Quiero actualizar el proyecto ${displayProjectTitle(selectedProject)}${scope}. Usa el Project Hub canónico, conserva evidencia e historial y limita el cambio a metadatos gobernados. Propón el cambio y ejecútalo solo si la política vigente lo permite.`)}
- function reconcileCurrentProject(){const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Reconciliación de ${displayProjectTitle(selectedProject)}${scope}: compara el estado canónico con la evidencia viva disponible, actualiza únicamente metadatos permitidos en Project Hub, conserva historial append-only y devuelve HECHO / EXISTENTE / PARCIAL / DEFINIDO / PLANIFICADO / POR AUDITAR con evidencias.`,true)}
+ function editCurrentProject(){const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Quiero actualizar el proyecto ${displayProjectTitle(selectedProject)}${scope}. Usa el Project Hub canónico, conserva evidencia e historial y limita el cambio a metadatos gobernados.`)}
+ function reconcileCurrentProject(){const scope=selectedSubTitle?` / ${selectedSubTitle}`:'';primeJarvisCommand(`Reconciliación de ${displayProjectTitle(selectedProject)}${scope}: compara el estado canónico con la evidencia viva disponible y devuelve HECHO / EXISTENTE / PARCIAL / DEFINIDO / PLANIFICADO / POR AUDITAR con evidencias.`,true)}
  function triggerVoice(){document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main')?.click()}
  function openBrowser(){window.location.assign('/cerebro?section=browser')}
+ function openCreate(){setProjectTitle('');setProjectObjective('');setActionError('');setDialog('create')}
+ function openRename(){setProjectTitle(displayProjectTitle(selectedProject));setProjectObjective('');setActionError('');setDialog('rename')}
+ async function submitProject(){
+  const title=projectTitle.trim();if(!title){setActionError('Escribe un nombre para el proyecto.');return}
+  setActionBusy(true);setActionError('');
+  const result=dialog==='rename'?await renameJarvisProject(selectedProject.project_id,title):await createJarvisProject({title,objective:projectObjective.trim()||undefined});
+  setActionBusy(false);
+  if(result.status>=200&&result.status<300&&result.data?.project){const project=result.data.project as ProjectRecord;setProjects(current=>dialog==='rename'?current.map(item=>item.project_id===project.project_id?project:item):[...current,project].sort((a,b)=>a.order-b.order));setSelectedProjectId(project.project_id);setProjectSource('GATEWAY');setDialog(null);return}
+  setActionError(result.status===404?'Project Hub aún no está publicado en el Gateway. No se ha guardado ningún cambio.':'No se pudo guardar el proyecto. No se ha simulado ningún cambio.');
+ }
+ async function importProjectFile(file:File){
+  setActionError('');
+  try{
+   const raw=(await file.text()).trim();let input:{title:string;objective?:string;subprojects?:string[];dependencies?:string[];source?:string};
+   if(file.name.toLowerCase().endsWith('.json')){const parsed=JSON.parse(raw);input={title:String(parsed.title||parsed.name||file.name.replace(/\.json$/i,'')),objective:typeof parsed.objective==='string'?parsed.objective:undefined,subprojects:Array.isArray(parsed.subprojects)?parsed.subprojects.map(String):undefined,dependencies:Array.isArray(parsed.dependencies)?parsed.dependencies.map(String):undefined,source:'IMPORTED_LOCAL_JSON'}}
+   else input={title:file.name.replace(/\.(md|txt)$/i,''),objective:raw.slice(0,4000)||'Proyecto importado desde archivo local.',source:'IMPORTED_LOCAL_TEXT'};
+   const result=await importJarvisProject(input);
+   if(result.status>=200&&result.status<300&&result.data?.project){const project=result.data.project as ProjectRecord;setProjects(current=>[...current,project].sort((a,b)=>a.order-b.order));setSelectedProjectId(project.project_id);setProjectSource('GATEWAY')}else setActionError('No se pudo importar. No se ha creado un proyecto local ficticio.');
+  }catch{setActionError('El archivo no contiene un proyecto importable válido.')}
+  finally{if(importInputRef.current)importInputRef.current.value=''}
+ }
 
- return <main className={`jarvis-work is-${surface.toLowerCase()}${layout.maxCenter?' is-max-center':''}`} aria-label={`CEREBRO ${surface}`}>
+ if(!selectedProject)return null;
+ return <main className={`jarvis-work jarvis-work-v2 is-${surface.toLowerCase()}${layout.focus?` is-focus-${layout.focus}`:''}`} aria-label="JARVIS Work">
   <header className="jarvis-workspace-header">
-   <div className="jarvis-workspace-brand"><span className="jarvis-energy-core" aria-hidden="true"><Sparkles size={17}/></span><div><small>CEREBRO OS</small><strong>JARVIS</strong></div></div>
+   <div className="jarvis-workspace-brand"><span className="jarvis-energy-core" aria-hidden="true"><Columns3 size={17}/></span><div><small>WORKSPACE</small><strong>JARVIS</strong></div></div>
    <div className="jarvis-workspace-context"><span>{registry.company_id.toUpperCase()}</span><i>/</i><b>{displayProjectTitle(selectedProject)}</b>{selectedSubTitle?<><i>/</i><em>{selectedSubTitle}</em></>:null}</div>
-   <div className={`jarvis-evidence-state is-${source.toLowerCase()}`} title={observedAt?`Observado ${new Date(observedAt).toLocaleString('es-ES')}`:sourceLabel}><Radio size={12}/><span>{sourceLabel}</span>{activeCount>0?<b>{activeCount}</b>:null}</div>
+   <div className="jarvis-global-controls" aria-label="Paneles"><button type="button" className={layout.leftOpen?'is-on':''} onClick={()=>togglePane('leftOpen')} title="Mostrar u ocultar proyectos">P</button><button type="button" className={layout.centerOpen?'is-on':''} onClick={()=>togglePane('centerOpen')} title="Mostrar u ocultar conversación">C</button><button type="button" className={layout.rightOpen?'is-on':''} onClick={()=>togglePane('rightOpen')} title="Mostrar u ocultar ejecución">E</button><button type="button" onClick={()=>setLayout(DEFAULT_LAYOUT)} title="Restaurar distribución"><RotateCcw size={13}/></button></div>
   </header>
 
   <section className="jarvis-workspace" style={workspaceStyle}>
-   {layout.leftOpen&&!layout.maxCenter?<aside className="jarvis-projects-pane" aria-label="Proyectos y subproyectos">
-    <div className="jarvis-pane-heading"><div><small>PROYECTOS</small><strong>{projects.length} canónicos</strong></div><button type="button" onClick={()=>setLayout(current=>({...current,leftOpen:false}))} aria-label="Ocultar proyectos"><Minus size={15}/></button></div>
+   {showLeft?<aside className="jarvis-projects-pane" aria-label="Proyectos y subproyectos">
+    <div className="jarvis-pane-heading"><div><small>PROYECTOS</small><strong>{projects.length} · {projectSource==='GATEWAY'?'sincronizados':'base local'}</strong></div><div className="jarvis-pane-controls"><button type="button" onClick={()=>focusPane('left')} title={layout.focus==='left'?'Restaurar tamaño':'Maximizar proyectos'}>{layout.focus==='left'?<Columns3 size={14}/>:<Maximize2 size={14}/>}</button><button type="button" onClick={()=>togglePane('leftOpen')} title="Minimizar proyectos"><Minus size={14}/></button></div></div>
+    <div className="jarvis-project-actions"><button type="button" onClick={openCreate}><Plus size={13}/> Nuevo</button><button type="button" onClick={()=>importInputRef.current?.click()}><Upload size={13}/> Importar</button><button type="button" onClick={openRename}><Pencil size={12}/> Renombrar</button><input ref={importInputRef} type="file" accept=".json,.md,.txt,application/json,text/plain,text/markdown" hidden onChange={event=>{const file=event.target.files?.[0];if(file)void importProjectFile(file)}}/></div>
+    {actionError?<div className="jarvis-inline-error">{actionError}</div>:null}
     <label className="jarvis-project-search"><Search size={14}/><input value={query} onChange={event=>setQuery(event.target.value)} placeholder="Buscar proyecto…" aria-label="Buscar proyectos"/></label>
     <nav className="jarvis-project-tree" aria-label="Árbol de proyectos">
-     {filteredProjects.map((project,index)=>{const open=expanded.has(project.project_id);const active=project.project_id===selectedProject.project_id;const children=project.project_id===auditIndex.audit_project_id?auditIndex.categories.map(item=>({id:item.audit_id,title:item.title,state:item.current_state})):project.subprojects.map(item=>({id:item,title:item,state:null}));return <div className={`jarvis-project-node${active?' is-active':''}`} key={project.project_id}>
-      <div className="jarvis-project-row">
-       <button type="button" className="jarvis-tree-toggle" onClick={()=>toggleProject(project.project_id)} aria-label={open?'Contraer subproyectos':'Expandir subproyectos'}>{open?<ChevronDown size={14}/>:<ChevronRight size={14}/>}</button>
-       <button type="button" className="jarvis-project-select" onClick={()=>chooseProject(project)} title={project.objective}>{open?<FolderOpen size={15}/>:<Folder size={15}/>}<span><strong>{index===0?'01 · ':''}{displayProjectTitle(project)}</strong><small>{project.status.replaceAll('_',' ')}</small></span></button>
-      </div>
+     {filteredProjects.map((project,index)=>{const open=expanded.has(project.project_id);const active=project.project_id===selectedProject.project_id;const children=project.project_id===auditIndex.audit_project_id?auditIndex.categories.map(item=>({id:item.audit_id,title:visible(item.title),state:item.current_state})):project.subprojects.map(item=>({id:item,title:visible(item),state:null}));return <div className={`jarvis-project-node${active?' is-active':''}`} key={project.project_id}>
+      <div className="jarvis-project-row"><button type="button" className="jarvis-tree-toggle" onClick={()=>toggleProject(project.project_id)} aria-label={open?'Contraer subproyectos':'Expandir subproyectos'}>{open?<ChevronDown size={14}/>:<ChevronRight size={14}/>}</button><button type="button" className="jarvis-project-select" onClick={()=>chooseProject(project)} title={visible(project.objective)}>{open?<FolderOpen size={15}/>:<Folder size={15}/>}<span><strong>{index===0?'01 · ':''}{displayProjectTitle(project)}</strong><small>{project.status.replaceAll('_',' ')}</small></span></button></div>
       {open?<div className="jarvis-subproject-list">{children.map(child=><button key={child.id} type="button" className={active&&selectedSubproject===child.id?'is-selected':''} onClick={()=>{chooseProject(project);setSelectedSubproject(child.id)}}><span>{child.title}</span>{child.state?<small>{child.state.replaceAll('_',' ')}</small>:null}</button>)}</div>:null}
      </div>})}
     </nav>
    </aside>:null}
+   {showLeft&&!layout.focus&&(showCenter||showRight)?<button type="button" className="jarvis-resize-handle is-left" onPointerDown={event=>beginResize('left',event)} aria-label="Redimensionar panel de proyectos"><GripVertical size={14}/></button>:null}
 
-   {layout.leftOpen&&!layout.maxCenter?<button type="button" className="jarvis-resize-handle is-left" onPointerDown={event=>beginResize('left',event)} aria-label="Redimensionar panel de proyectos"><GripVertical size={14}/></button>:null}
+   {showCenter?<section className="jarvis-center-pane">
+    <div className="jarvis-center-topbar"><div className="jarvis-center-project"><small>{selectedProject.project_id===auditIndex.audit_project_id?'PROYECTO 1':'PROYECTO'}</small><strong>{displayProjectTitle(selectedProject)}</strong>{selectedSubTitle?<span>› {selectedSubTitle}</span>:null}</div><div className="jarvis-center-actions"><button type="button" onClick={openRename} title="Renombrar proyecto"><Pencil size={13}/></button><button type="button" onClick={()=>focusPane('center')} title={layout.focus==='center'?'Restaurar tamaño':'Maximizar conversación'}>{layout.focus==='center'?<Columns3 size={15}/>:<Maximize2 size={15}/>}</button><button type="button" onClick={()=>togglePane('centerOpen')} title="Minimizar conversación"><Minus size={15}/></button></div></div>
+    <div className="jarvis-project-brief"><div><span className={`jarvis-status-pill is-${selectedProject.status.toLowerCase().replaceAll('_','-')}`}>{selectedProject.status.replaceAll('_',' ')}</span><p>{visible(selectedProject.objective)}</p></div><div className="jarvis-project-brief-actions"><button type="button" onClick={editCurrentProject}>Editar con Jarvis</button><button type="button" onClick={reconcileCurrentProject}>Reconciliar</button></div></div>
+    {selectedProject.project_id===auditIndex.audit_project_id?<details className="jarvis-audit-summary"><summary>Resumen vivo de Auditoría Total · revisión {auditIndex.current_summary.revision}</summary><p>{visible(auditIndex.current_summary.text)}</p><small>Actualizado por {visible(auditIndex.current_summary.updated_by)} · {new Date(auditIndex.current_summary.updated_at).toLocaleString('es-ES')}</small></details>:null}
+    <section className="jarvis-conversation" aria-label="Conversación con JARVIS"><JarvisEmbeddedConsole/></section>
+    <div className="jarvis-input-tools operativa-jarvis-composer" aria-label="Herramientas de entrada"><button type="button" aria-label="Añadir archivo"><Paperclip size={15}/> Adjuntar</button><button type="button" onClick={triggerVoice} aria-label="Activar voz"><Radio size={14}/> Voz / dictado</button><span>Archivos privados · voz del navegador · ejecución gobernada por Gateway</span></div>
+   </section>:null}
 
-   <section className="jarvis-center-pane">
-    <div className="jarvis-center-topbar">
-     <div className="jarvis-center-project"><small>{selectedProject.project_id===auditIndex.audit_project_id?'PROYECTO 1':'PROYECTO'}</small><strong>{displayProjectTitle(selectedProject)}</strong>{selectedSubTitle?<span>› {selectedSubTitle}</span>:null}</div>
-     <div className="jarvis-center-actions">
-      {!layout.leftOpen&&!layout.maxCenter?<button type="button" onClick={()=>setLayout(current=>({...current,leftOpen:true}))}>Proyectos</button>:null}
-      {!layout.rightOpen&&!layout.maxCenter?<button type="button" onClick={()=>setLayout(current=>({...current,rightOpen:true}))}>Ejecución</button>:null}
-      <button type="button" onClick={()=>setLayout(current=>({...current,maxCenter:!current.maxCenter}))} title={layout.maxCenter?'Restaurar paneles':'Maximizar conversación'} aria-label={layout.maxCenter?'Restaurar paneles':'Maximizar conversación'}>{layout.maxCenter?<Columns3 size={15}/>:<Maximize2 size={15}/>}</button>
-     </div>
-    </div>
-    <div className="jarvis-project-brief">
-     <div><span className={`jarvis-status-pill is-${selectedProject.status.toLowerCase().replaceAll('_','-')}`}>{selectedProject.status.replaceAll('_',' ')}</span><p>{selectedProject.objective}</p></div>
-     <div className="jarvis-project-brief-actions"><button type="button" onClick={editCurrentProject}>Editar con Jarvis</button><button type="button" onClick={reconcileCurrentProject}>Reconciliar</button></div>
-    </div>
-    {selectedProject.project_id===auditIndex.audit_project_id?<details className="jarvis-audit-summary"><summary>Resumen vivo de Auditoría Total · revisión {auditIndex.current_summary.revision}</summary><p>{auditIndex.current_summary.text}</p><small>Actualizado por {auditIndex.current_summary.updated_by} · {new Date(auditIndex.current_summary.updated_at).toLocaleString('es-ES')}</small></details>:null}
-    <section className="jarvis-conversation" aria-label="Conversación con JARVIS"><CerebroConsoleShell/></section>
-    <div className="jarvis-input-tools operativa-jarvis-composer" aria-label="Herramientas de entrada">
-     <button type="button" aria-label="Añadir archivo"><Paperclip size={15}/> Adjuntar</button>
-     <button type="button" onClick={triggerVoice} aria-label="Activar voz"><Radio size={14}/> Voz / dictado</button>
-     <span>Archivos locales y privados · voz del navegador · envío por Gateway gobernado</span>
-    </div>
-   </section>
-
-   {layout.rightOpen&&!layout.maxCenter?<button type="button" className="jarvis-resize-handle is-right" onPointerDown={event=>beginResize('right',event)} aria-label="Redimensionar panel de ejecución"><GripVertical size={14}/></button>:null}
-
-   {layout.rightOpen&&!layout.maxCenter?<aside className="jarvis-execution-pane" aria-label="Ejecución y evidencias">
-    <div className="jarvis-pane-heading"><div><small>EJECUCIÓN</small><strong>Evidencia y herramientas</strong></div><button type="button" onClick={()=>setLayout(current=>({...current,rightOpen:false}))} aria-label="Ocultar ejecución"><Minus size={15}/></button></div>
-    <div className="jarvis-right-tabs" role="tablist">
-     <button type="button" className={rightTab==='activity'?'is-active':''} onClick={()=>setRightTab('activity')}><Activity size={13}/> Actividad</button>
-     <button type="button" className={rightTab==='evidence'?'is-active':''} onClick={()=>setRightTab('evidence')}><FileText size={13}/> Evidencia</button>
-     <button type="button" className={rightTab==='tools'?'is-active':''} onClick={()=>setRightTab('tools')}><Code2 size={13}/> Herramientas</button>
-    </div>
-
-    {rightTab==='activity'?<div className="jarvis-right-scroll"><div className="jarvis-right-meta"><span>{sourceLabel}</span>{observedAt?<small>{new Date(observedAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</small>:null}</div>{recentRuns.length?recentRuns.map(run=><article key={run.run_id} className="jarvis-run-card"><div><strong>{activityLabel(run)}</strong><span>{run.engine_id||'Capacidad no publicada'} · {run.environment}</span></div><b>{activityState(run)}</b><a href={run.html_url} target="_blank" rel="noreferrer"><ExternalLink size={12}/> Evidencia</a></article>):<div className="jarvis-empty-state">No hay actividad publicable en este momento. No se inventan ejecuciones.</div>}</div>:null}
-
-    {rightTab==='evidence'?<div className="jarvis-right-scroll"><div className="jarvis-evidence-project"><small>FUENTE CANÓNICA</small><strong>{displayProjectTitle(selectedProject)}</strong><span>{selectedSubTitle||selectedProject.project_id}</span></div>{selectedEvidenceRefs.length?<div className="jarvis-evidence-ref-list">{selectedEvidenceRefs.map(ref=><span key={ref}>{ref}</span>)}</div>:<div className="jarvis-empty-state">Sin referencias de evidencia publicadas para esta selección.</div>}{matchedEvidence.map(item=><article className="jarvis-evidence-card" key={item.evidence_id}><strong>{item.evidence_id}</strong><p>{item.summary}</p><small>{item.source} · {new Date(item.recorded_at).toLocaleString('es-ES')}</small></article>)}</div>:null}
-
-    {rightTab==='tools'?<div className="jarvis-right-scroll jarvis-tool-grid">
-     <button type="button" onClick={()=>document.querySelector<HTMLButtonElement>('.jarvis-input-tools button[aria-label="Añadir archivo"]')?.click()}><Paperclip size={16}/><span><strong>Archivos</strong><small>CONECTADO · extracción local</small></span></button>
-     <button type="button" onClick={()=>primeJarvisCommand(`Trabaja con código para ${displayProjectTitle(selectedProject)}. Usa el runtime/repo disponible, muestra OLD vs NEW, tests y evidencia antes de cualquier promoción.`)}><Code2 size={16}/><span><strong>Código</strong><small>VÍA JARVIS · gobernado</small></span></button>
-     <button type="button" onClick={()=>primeJarvisCommand(`Necesito una operación de terminal para ${displayProjectTitle(selectedProject)}. Usa únicamente un runtime permitido, registra comando, salida, tests y rollback; no inventes ejecución si no existe terminal conectada.`)}><Terminal size={16}/><span><strong>Terminal</strong><small>VÍA RUNTIME · evidencia obligatoria</small></span></button>
-     <button type="button" onClick={openBrowser}><Globe2 size={16}/><span><strong>Navegador</strong><small>CONECTADO · superficie propia</small></span></button>
-     <button type="button" onClick={()=>setRightTab('activity')}><FlaskConical size={16}/><span><strong>Tests</strong><small>CONECTADO · actividad real</small></span></button>
-     <button type="button" onClick={()=>setRightTab('evidence')}><FileText size={16}/><span><strong>Evidencias</strong><small>CONECTADO · fuentes canónicas</small></span></button>
-    </div>:null}
+   {showRight&&!layout.focus&&showCenter?<button type="button" className="jarvis-resize-handle is-right" onPointerDown={event=>beginResize('right',event)} aria-label="Redimensionar panel de ejecución"><GripVertical size={14}/></button>:null}
+   {showRight?<aside className="jarvis-execution-pane" aria-label="Ejecución y evidencias">
+    <div className="jarvis-pane-heading"><div><small>EJECUCIÓN</small><strong>Evidencia y herramientas</strong></div><div className="jarvis-pane-controls"><button type="button" onClick={()=>focusPane('right')} title={layout.focus==='right'?'Restaurar tamaño':'Maximizar ejecución'}>{layout.focus==='right'?<Columns3 size={14}/>:<Maximize2 size={14}/>}</button><button type="button" onClick={()=>togglePane('rightOpen')} title="Minimizar ejecución"><Minus size={14}/></button></div></div>
+    <div className="jarvis-right-tabs" role="tablist"><button type="button" className={rightTab==='activity'?'is-active':''} onClick={()=>setRightTab('activity')}><Activity size={13}/> Actividad</button><button type="button" className={rightTab==='evidence'?'is-active':''} onClick={()=>setRightTab('evidence')}><FileText size={13}/> Evidencia</button><button type="button" className={rightTab==='tools'?'is-active':''} onClick={()=>setRightTab('tools')}><Code2 size={13}/> Herramientas</button></div>
+    {rightTab==='activity'?<div className="jarvis-right-scroll"><div className="jarvis-right-meta"><span>{sourceLabel}</span>{observedAt?<small>{new Date(observedAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'})}</small>:null}</div>{recentRuns.length?recentRuns.map(run=><article key={run.run_id} className="jarvis-run-card"><div><strong>{activityLabel(run)}</strong><span>{visible(run.engine_id||'Capacidad no publicada')} · {run.environment}</span></div><b>{activityState(run)}</b><a href={run.html_url} target="_blank" rel="noreferrer"><ExternalLink size={12}/> Evidencia</a></article>):<div className="jarvis-empty-state">No hay actividad publicable en este momento. No se inventan ejecuciones.</div>}</div>:null}
+    {rightTab==='evidence'?<div className="jarvis-right-scroll"><div className="jarvis-evidence-project"><small>FUENTE CANÓNICA</small><strong>{displayProjectTitle(selectedProject)}</strong><span>{selectedSubTitle||selectedProject.project_id}</span></div>{selectedEvidenceRefs.length?<div className="jarvis-evidence-ref-list">{selectedEvidenceRefs.map(ref=><span key={ref}>{visible(ref)}</span>)}</div>:<div className="jarvis-empty-state">Sin referencias de evidencia publicadas para esta selección.</div>}{matchedEvidence.map(item=><article className="jarvis-evidence-card" key={item.evidence_id}><strong>{visible(item.evidence_id)}</strong><p>{visible(item.summary)}</p><small>{visible(item.source)} · {new Date(item.recorded_at).toLocaleString('es-ES')}</small></article>)}</div>:null}
+    {rightTab==='tools'?<div className="jarvis-right-scroll jarvis-tool-grid"><button type="button" onClick={()=>document.querySelector<HTMLButtonElement>('.jarvis-input-tools button[aria-label="Añadir archivo"]')?.click()}><Paperclip size={16}/><span><strong>Archivos</strong><small>Conectado · extracción local</small></span></button><button type="button" onClick={()=>primeJarvisCommand(`Trabaja con código para ${displayProjectTitle(selectedProject)}. Usa el runtime/repo disponible, muestra OLD vs NEW, tests y evidencia antes de cualquier promoción.`)}><Code2 size={16}/><span><strong>Código</strong><small>Gobernado</small></span></button><button type="button" onClick={()=>primeJarvisCommand(`Necesito una operación de terminal para ${displayProjectTitle(selectedProject)}. Usa únicamente un runtime permitido, registra comando, salida, tests y rollback.`)}><Terminal size={16}/><span><strong>Terminal</strong><small>Runtime · evidencia obligatoria</small></span></button><button type="button" onClick={openBrowser}><Globe2 size={16}/><span><strong>Navegador</strong><small>Superficie conectada</small></span></button><button type="button" onClick={()=>setRightTab('activity')}><FlaskConical size={16}/><span><strong>Tests</strong><small>Actividad real</small></span></button><button type="button" onClick={()=>setRightTab('evidence')}><FileText size={16}/><span><strong>Evidencias</strong><small>Fuentes canónicas</small></span></button></div>:null}
    </aside>:null}
   </section>
+
+  {dialog?<div className="jarvis-project-modal" role="dialog" aria-modal="true" aria-label={dialog==='rename'?'Renombrar proyecto':'Crear proyecto'}><form onSubmit={event=>{event.preventDefault();void submitProject()}}><div className="jarvis-modal-head"><strong>{dialog==='rename'?'Renombrar proyecto':'Nuevo proyecto'}</strong><button type="button" onClick={()=>setDialog(null)} aria-label="Cerrar"><X size={15}/></button></div><label>Nombre<input autoFocus value={projectTitle} onChange={event=>setProjectTitle(event.target.value)} maxLength={120}/></label>{dialog==='create'?<label>Objetivo<textarea value={projectObjective} onChange={event=>setProjectObjective(event.target.value)} rows={4} maxLength={1200}/></label>:null}{actionError?<p className="jarvis-modal-error">{actionError}</p>:null}<div className="jarvis-modal-actions"><button type="button" onClick={()=>setDialog(null)}>Cancelar</button><button type="submit" disabled={actionBusy||!projectTitle.trim()}><Check size={14}/>{actionBusy?'Guardando…':'Guardar'}</button></div></form></div>:null}
  </main>;
 }
