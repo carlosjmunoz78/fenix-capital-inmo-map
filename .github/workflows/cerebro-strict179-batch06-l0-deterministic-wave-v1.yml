@@ -1,0 +1,57 @@
+name: CEREBRO Strict179 Batch06 L0 Deterministic Wave V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+    paths:
+      - 'cerebro/missions/strict179-batch06-l0-deterministic-wave-v1.mjs'
+      - '.github/workflows/cerebro-strict179-batch06-l0-deterministic-wave-v1.yml'
+      - 'cerebro/evidence/contracts-permissions-tests-evaluation-tribunal-observability-backup-rollback-rebuild-policy/STRICT179_BATCH06_L0_DETERMINISTIC_2026-11-02.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-strict179-batch06-l0-deterministic-wave-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-l0-deterministic-wave:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute Batch06 physical PREPROD verification
+        run: |
+          set -euo pipefail
+          node cerebro/missions/strict179-batch06-l0-deterministic-wave-v1.mjs --out /tmp/strict179-batch06
+          jq -e '.status=="GREEN" and .verified_count==10 and .safety.additional_cost_eur==0 and .safety.prod_authorized==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.external_writes==false' /tmp/strict179-batch06/SUMMARY.json >/dev/null
+          jq -e '.engines | to_entries | all(.value.status=="GREEN" and (.value.gates|to_entries|all(.value=="GREEN")) and .value.safety.prod_write_authorized==false and .value.safety.additional_cost_eur==0)' /tmp/strict179-batch06/SUMMARY.json >/dev/null
+          cat /tmp/strict179-batch06/SUMMARY.json
+      - name: Re-run strict 179x12 readiness audit
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/strict179-readiness
+          cat /tmp/strict179-readiness/SUMMARY.json
+      - name: Assert branch-only and clean repository
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "cerebro/close-179-per-engine-autonomy-v1-20261102"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'GREEN: branch isolated; physical deterministic L0 runtimes exercised in PREPROD/local scratch only; no PROD, Trading, secrets, network writes, external writes or paid fallback.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strict179-batch06-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/strict179-batch06/
+            /tmp/strict179-readiness/SUMMARY.json
+            /tmp/strict179-readiness/AUTONOMY_READINESS_BASELINE.json
+          if-no-files-found: error
+          retention-days: 30
