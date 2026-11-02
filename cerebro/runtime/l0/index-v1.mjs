@@ -9,4 +9,3 @@ export * from './obj001-v1.mjs';
 export * from './adr001-v1.mjs';
 export * from './cfg001-v1.mjs';
 export * from './ver001-v1.mjs';
-export * from './existing-adapters-v1.mjs';
