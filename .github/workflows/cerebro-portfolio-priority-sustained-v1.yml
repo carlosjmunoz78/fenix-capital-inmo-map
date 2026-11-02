@@ -1,5 +1,5 @@
 name: CEREBRO Priority Portfolio Sustained V1
-run-name: CEREBRO PRIORITY ${{ inputs.lane }} · C${{ inputs.cycle }} · PREPROD
+run-name: CEREBRO PRIORITY ${{ inputs.lane }} · C${{ inputs.cycle }} · PAUSED
 
 on:
   workflow_dispatch:
@@ -15,157 +15,15 @@ on:
         type: string
 
 permissions:
-  actions: write
   contents: read
 
 concurrency:
   group: cerebro-priority-portfolio-sustained-v1-${{ inputs.lane }}
-  cancel-in-progress: false
-
-env:
-  CEREBRO_SUPERVISOR_ENV: PREPROD
-  CEREBRO_ALLOW_PAID_FANOUT: 'NO'
-  CEREBRO_PROD_WRITE: 'false'
-  CEREBRO_TRADING_ACCESS: 'false'
-  CEREBRO_PORTFOLIO_BASE_LANES: '182'
-  CEREBRO_PORTFOLIO_MAX_LANES: '282'
-  CEREBRO_PORTFOLIO_WINDOWS_BASE_START: '132'
-  CEREBRO_PORTFOLIO_WINDOWS_BASE_END: '181'
-  CEREBRO_PORTFOLIO_MACOS_LOAN_START: '232'
-  CEREBRO_PORTFOLIO_INNER_PARALLELISM: '4'
-  CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE: rolling
-  CEREBRO_PORTFOLIO_SUSTAINED_OUT_DIR: artifacts/portfolio-priority-sustained-v1
+  cancel-in-progress: true
 
 jobs:
-  priority-useful-work:
-    name: PRIORITY-${{ inputs.lane }}-C${{ inputs.cycle }}
-    runs-on: ${{ fromJSON(inputs.lane) >= 232 && 'macos-latest' || (fromJSON(inputs.lane) >= 132 && fromJSON(inputs.lane) < 182) && 'windows-latest' || 'ubuntu-latest' }}
-    timeout-minutes: 11
+  paused-for-user-priority:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '24'
-      - name: Guard PREPROD and capacity topology
-        shell: bash
-        run: |
-          set -euo pipefail
-          test "${{ github.repository_visibility }}" = public
-          test "$CEREBRO_SUPERVISOR_ENV" = PREPROD
-          test "$CEREBRO_ALLOW_PAID_FANOUT" = NO
-          test "$CEREBRO_PROD_WRITE" = false
-          test "$CEREBRO_TRADING_ACCESS" = false
-          test "$CEREBRO_PORTFOLIO_INNER_PARALLELISM" -eq 4
-          test "$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" = rolling
-          test "$CEREBRO_PORTFOLIO_BASE_LANES" -eq 182
-          test "$CEREBRO_PORTFOLIO_WINDOWS_BASE_START" -eq 132
-          test "$CEREBRO_PORTFOLIO_WINDOWS_BASE_END" -eq 181
-          test $((CEREBRO_PORTFOLIO_WINDOWS_BASE_END - CEREBRO_PORTFOLIO_WINDOWS_BASE_START + 1)) -eq 50
-          test "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" -eq 232
-          test $((CEREBRO_PORTFOLIO_MAX_LANES - CEREBRO_PORTFOLIO_MACOS_LOAN_START)) -eq 50
-          case '${{ inputs.lane }}' in ''|*[!0-9]*) exit 2 ;; esac
-          case '${{ inputs.cycle }}' in ''|*[!0-9]*) exit 2 ;; esac
-          test '${{ inputs.lane }}' -ge 0 && test '${{ inputs.lane }}' -le 281
-          test '${{ inputs.cycle }}' -ge 0 && test '${{ inputs.cycle }}' -le 999999
-      - name: Execute sustained prioritized useful lease
-        id: lease
-        shell: bash
-        run: |
-          set -euo pipefail
-          lane='${{ inputs.lane }}'
-          current='${{ inputs.cycle }}'
-          parallelism="$CEREBRO_PORTFOLIO_INNER_PARALLELISM"
-          if [ "$lane" -lt 182 ]; then lease_seconds=420; max_units=8192; else lease_seconds=240; max_units=4096; fi
-          start="$(date +%s)"
-          deadline=$((start + lease_seconds))
-          units=0
-          batches=0
-          while [ "$(date +%s)" -lt "$deadline" ] && [ "$units" -lt "$max_units" ]; do
-            pids=''
-            for slot in $(seq 0 $((parallelism - 1))); do
-              cycle=$(( (current + slot) % 1000000 ))
-              node cerebro/runtime/portfolio-priority-sustained-v1.mjs \
-                --lane="$lane" \
-                --cycle="$cycle" \
-                --slot="$slot" &
-              pids="$pids $!"
-            done
-            for pid in $pids; do wait "$pid"; done
-            units=$((units + parallelism))
-            batches=$((batches + 1))
-            current=$(( (current + parallelism) % 1000000 ))
-          done
-          elapsed=$(( $(date +%s) - start ))
-          echo "next_cycle=$current" >> "$GITHUB_OUTPUT"
-          echo "units_completed=$units" >> "$GITHUB_OUTPUT"
-          echo "batches_completed=$batches" >> "$GITHUB_OUTPUT"
-          echo "elapsed_seconds=$elapsed" >> "$GITHUB_OUTPUT"
-          echo "inner_parallelism=$parallelism" >> "$GITHUB_OUTPUT"
-          echo "lane=$lane" >> "$GITHUB_OUTPUT"
-          echo "loan_lane=$([ "$lane" -ge 182 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
-          if [ "$lane" -ge "$CEREBRO_PORTFOLIO_MACOS_LOAN_START" ]; then
-            runner_pool=macos
-          elif [ "$lane" -ge "$CEREBRO_PORTFOLIO_WINDOWS_BASE_START" ] && [ "$lane" -le "$CEREBRO_PORTFOLIO_WINDOWS_BASE_END" ]; then
-            runner_pool=windows
-          else
-            runner_pool=ubuntu
-          fi
-          echo "portfolio_priority_lane=$lane" >> "$GITHUB_STEP_SUMMARY"
-          echo "units_completed=$units" >> "$GITHUB_STEP_SUMMARY"
-          echo "batches_completed=$batches" >> "$GITHUB_STEP_SUMMARY"
-          echo "elapsed_seconds=$elapsed" >> "$GITHUB_STEP_SUMMARY"
-          echo "inner_parallelism=$parallelism" >> "$GITHUB_STEP_SUMMARY"
-          echo "evidence_write_mode=$CEREBRO_PORTFOLIO_SUSTAINED_WRITE_MODE" >> "$GITHUB_STEP_SUMMARY"
-          echo "base_lane=$([ "$lane" -lt 182 ] && echo true || echo false)" >> "$GITHUB_STEP_SUMMARY"
-          echo "runner_pool=$runner_pool" >> "$GITHUB_STEP_SUMMARY"
-          echo "paid_ai=false" >> "$GITHUB_STEP_SUMMARY"
-          echo "additional_cost_eur=0" >> "$GITHUB_STEP_SUMMARY"
-          echo "prod_write=false" >> "$GITHUB_STEP_SUMMARY"
-          echo "trading=false" >> "$GITHUB_STEP_SUMMARY"
-      - name: Publish useful-work evidence
-        if: steps.lease.outputs.units_completed != '0'
-        uses: actions/upload-artifact@v4
-        with:
-          name: priority-portfolio-${{ inputs.lane }}-${{ github.run_id }}
-          path: artifacts/portfolio-priority-sustained-v1/lane-*/
-          if-no-files-found: error
-          retention-days: 1
-      - name: Self-refill base lanes only
-        if: ${{ false }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          dispatch_with_transient_retry() {
-            local endpoint="$1"; shift
-            local attempt output
-            for attempt in 1 2 3 4; do
-              if output="$(gh api --method POST "$endpoint" "$@" 2>&1)"; then
-                [ -n "$output" ] && printf '%s\n' "$output"
-                return 0
-              fi
-              printf '%s\n' "$output" >&2
-              case "$output" in
-                *'HTTP 500'*|*'HTTP 502'*|*'HTTP 503'*|*'HTTP 504'*)
-                  if [ "$attempt" -lt 4 ]; then sleep $((attempt * 2)); continue; fi
-                  ;;
-                *) return 1 ;;
-              esac
-              return 1
-            done
-          }
-          # No leading slash keeps gh api portable under Git Bash on Windows.
-          # Critical-pressure admission remains owned centrally by the Global Capacity Controller.
-          dispatch_with_transient_retry "repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-portfolio-priority-sustained-v1.yml/dispatches" \
-            -f ref=main \
-            -f "inputs[lane]=${{ inputs.lane }}" \
-            -f "inputs[cycle]=${{ steps.lease.outputs.next_cycle }}"
-          echo 'self_refill=true' >> "$GITHUB_STEP_SUMMARY"
-          echo 'critical_gate_priority=central_controller' >> "$GITHUB_STEP_SUMMARY"
-          echo 'pressure_reads_per_worker=0' >> "$GITHUB_STEP_SUMMARY"
-          echo 'gh_api_endpoint_style=no_leading_slash' >> "$GITHUB_STEP_SUMMARY"
-          echo 'dispatch_transient_retry=500,502,503,504:max4' >> "$GITHUB_STEP_SUMMARY"
-      - name: Loan lanes return authority to global controller
-        if: success() && fromJSON(inputs.lane) >= 182
-        run: echo 'self_refill=false; loan lane must be re-authorized by global capacity controller' >> "$GITHUB_STEP_SUMMARY"
+      - run: echo 'Priority portfolio background work temporarily paused for user-priority Operativa PROD deployment.'
