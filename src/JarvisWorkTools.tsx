@@ -4,12 +4,19 @@ import JarvisRepoWorkbench from './JarvisRepoWorkbench';
 import JarvisGitAdvancedPanel from './JarvisGitAdvancedPanel';
 import {fetchBrowserInteractiveApi,type BrowserCompanyV3,type BrowserSessionV3} from './cerebroBrowserInteractive';
 import './jarvis-work-tools.css';
+import './jarvis-final-fixes.css';
 
 type ToolTab='workbench'|'git'|'browser';
 type CompaniesResponse={ok:boolean;companies?:BrowserCompanyV3[];error?:string};
 type StatusResponse={ok:boolean;session?:BrowserSessionV3|null;error?:string};
 
-function cleanState(value:string|undefined){return String(value||'SIN SESIÓN').replaceAll('_',' ').replace(/CEREBRO/gi,'JARVIS');}
+function cleanState(value:string|undefined){
+ const raw=String(value||'SIN SESIÓN').trim().toUpperCase();
+ if(raw==='CEREBRO_CONTROL')return'JARVIS EN CONTROL';
+ if(raw==='HUMAN_CONTROL')return'HUMANO EN CONTROL';
+ if(raw==='HUMAN_REQUIRED')return'INTERVENCIÓN HUMANA';
+ return raw.replaceAll('_',' ').replace(/CEREBRO/g,'JARVIS');
+}
 
 function BrowserHandoff(){
  const[company,setCompany]=useState('');
