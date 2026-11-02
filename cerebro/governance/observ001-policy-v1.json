@@ -6,6 +6,7 @@
   "allow": ["READ_SCOPED_OBSERVABILITY", "INGEST_ALLOWLISTED_SOURCE_WITH_CORRELATION_ID"],
   "deny": ["CROSS_COMPANY_READ", "MISSING_CORRELATION_ID", "UNKNOWN_SOURCE", "PROD_WRITE", "TRADING_ACCESS", "SECRET_PERSISTENCE"],
   "fail_closed": true,
+  "source_of_truth_must_not_be_duplicated": true,
   "prod_execution_authorized": false,
   "prod_write_authorized": false,
   "trading_access": false,
