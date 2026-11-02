@@ -10,7 +10,6 @@ import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-route-isolation-v2.css';
-import './cerebro-jarvis-status.css';
 
 type CerebroView=CerebroPrimaryView|'V0';
 type OwnerAccess='checking'|'allowed'|'denied';
