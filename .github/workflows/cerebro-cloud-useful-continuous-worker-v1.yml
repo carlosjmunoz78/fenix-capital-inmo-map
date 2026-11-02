@@ -218,7 +218,7 @@ jobs:
           retention-days: 1
 
       - name: Self-refill sustained lane while a useful source is available
-        if: success()
+        if: ${{ false }}
         shell: bash
         run: |
           set -euo pipefail
