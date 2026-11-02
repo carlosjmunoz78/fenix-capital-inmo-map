@@ -1,0 +1,86 @@
+name: CEREBRO L3 Foundation Baseline
+
+on:
+  push:
+    branches:
+      - cerebro-implement-l3-l4-l5-foundation-20261102
+    paths:
+      - 'cerebro/missions/audit-priority-l345-v1.mjs'
+      - '.github/workflows/cerebro-l3-foundation-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-l3-foundation-baseline-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  OUT: /tmp/cerebro-l3-foundation-baseline
+
+jobs:
+  audit-l3-old:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 120
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Registry Factory syntax and canonical validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check cerebro/missions/audit-priority-l345-v1.mjs
+          node --check cerebro/missions/connect-existing-engines-v3.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Re-run existing physical connection analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority" | tee "$OUT.existing.log"
+      - name: Audit L3 OLD physical baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L3 --out "$OUT/l3" | tee "$OUT.l3.log"
+          node <<'NODE'
+          const fs=require('fs');
+          const p='/tmp/cerebro-l3-foundation-baseline/l3/PRIORITY_PHYSICAL_BASELINE.json';
+          const b=JSON.parse(fs.readFileSync(p));
+          if(b.status!=='GREEN'||b.layer!=='L3'||b.total!==16) throw new Error('L3 baseline invalid');
+          if(b.registry_total!==179||b.registry_unique!==179) throw new Error('Registry count/uniqueness invalid');
+          const sum=Object.values(b.classification_counts).reduce((a,x)=>a+x,0);
+          if(sum!==16) throw new Error('Classification count mismatch');
+          if(b.prod_touched||b.trading_touched||b.additional_cost_eur!==0) throw new Error('Boundary violation');
+          console.log('L3_BASELINE='+JSON.stringify({physical_before:b.physical_before,classification_counts:b.classification_counts,physical_engine_ids:b.physical_engine_ids}));
+          NODE
+      - name: Upload durable-source baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l3-foundation-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/cerebro-l3-foundation-baseline
+            /tmp/cerebro-l3-foundation-baseline.existing.log
+            /tmp/cerebro-l3-foundation-baseline.l3.log
+          if-no-files-found: error
+          retention-days: 14
+      - name: Mission boundary
+        run: |
+          echo 'Audit only. No L3 runtime modified.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Registry/Factory validated at 179 unique engines; PROD/Trading untouched.' >> "$GITHUB_STEP_SUMMARY"
