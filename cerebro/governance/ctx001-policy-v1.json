@@ -1,0 +1,8 @@
+{
+  "schema_version":"1.0.0","engine_id":"CTX-001","policy":"CONTEXT_LOADER_READ_ONLY_PREPROD_FAIL_CLOSED","environment":"LAB_PREPROD",
+  "allow":["LOAD_SESSION_CONTEXT","NORMALIZE_CONTEXT_IDS","BOUND_HISTORY","PRESERVE_PERMISSIONS"],
+  "deny":["PROD_WRITE","CROSS_COMPANY_CONTEXT","MUTATE_SOURCE_DATA","UNBOUNDED_HISTORY","TRADING_ACCESS","PAID_MODEL_REQUIRED"],
+  "permission":"CONTEXT_READ_ONLY","fail_closed":true,"prod_execution_authorized":false,"prod_write_authorized":false,"trading_access":false,"additional_cost_eur":0,
+  "human_required":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "invariant":"CTX-001 builds a bounded read-only context package from authorized existing session data and never mutates sources"
+}
