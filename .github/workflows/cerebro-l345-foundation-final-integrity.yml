@@ -1,0 +1,108 @@
+name: CEREBRO L3-L5 Foundation Final Integrity
+
+on:
+  push:
+    branches: [cerebro-implement-l3-l4-l5-foundation-20261102]
+    paths: ['.github/workflows/cerebro-l345-foundation-final-integrity.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_L6_SHA: a523074b559c3267974ac05854d2285739e4f4ee
+  OUT: /tmp/cerebro-l345-final-integrity
+
+jobs:
+  final-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 240
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert ancestry isolation and allowed mission paths only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git merge-base --is-ancestor "$BASE_L6_SHA" HEAD
+          git diff --name-only "$BASE_L6_SHA" HEAD > /tmp/changed.txt
+          while IFS= read -r p; do
+            case "$p" in
+              .github/workflows/cerebro-l3-*|.github/workflows/cerebro-l4-*|.github/workflows/cerebro-l5-*|.github/workflows/cerebro-l345-foundation-final-integrity.yml|cerebro/missions/audit-priority-l345-v1.mjs|cerebro/runtime/l3/*|cerebro/runtime/l4/*|cerebro/runtime/l5/*|cerebro/tests/l3-foundation-wave1.test.mjs|cerebro/tests/l4-foundation-wave1.test.mjs|cerebro/tests/l5-foundation-wave1.test.mjs|cerebro/evidence/l3-foundation-wave1/*|cerebro/evidence/l4-foundation-wave1/*|cerebro/evidence/l5-foundation-wave1/*) ;;
+              *) echo "Unexpected mission path: $p"; exit 1;;
+            esac
+          done < /tmp/changed.txt
+          ! grep -Ei '(^|/)(trading|lab-trd)(/|$)' /tmp/changed.txt
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Validate Registry Factory syntax and exact counts
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('registry/engine-registry.v1.json'));const ids=r.engine_ids||[];if(r.count!==179||ids.length!==179||new Set(ids).size!==179)throw new Error(`Registry mismatch count=${r.count} ids=${ids.length} unique=${new Set(ids).size}`);console.log('REGISTRY_179_UNIQUE_GREEN');
+          NODE
+          cd ..
+          git diff --exit-code "$BASE_L6_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+      - name: L3 L4 L5 focused tests
+        working-directory: cerebro
+        run: node --test tests/l3-foundation-wave1.test.mjs tests/l4-foundation-wave1.test.mjs tests/l5-foundation-wave1.test.mjs
+      - name: Full regression with only known paused-worker exclusions
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_L6_SHA" -- .github/workflows/cerebro-continuous-useful-worker-v1.yml tests/continuous-worker-entitlement-drain-canary-v1.test.mjs tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Existing analyzer plus deterministic L3 L4 L5 rebuilds
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority"
+          for L in L3 L4 L5; do
+            node cerebro/missions/audit-priority-l345-v1.mjs --layer "$L" --out "$OUT/${L}a"
+            node cerebro/missions/audit-priority-l345-v1.mjs --layer "$L" --out "$OUT/${L}b"
+            cmp "$OUT/${L}a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/${L}b/PRIORITY_PHYSICAL_BASELINE.json"
+          done
+      - name: Verify 63 of 63 physical and durable evidence consistency
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),out=process.env.OUT;
+          const expected={L3:16,L4:27,L5:20};
+          for(const [layer,total] of Object.entries(expected)){const a=JSON.parse(fs.readFileSync(path.join(out,layer+'a','PRIORITY_PHYSICAL_BASELINE.json')));if(a.total!==total||a.physical_before!==total||a.classification_counts.PHYSICAL_EXISTING!==total||a.classification_counts.PHYSICAL_PARTIAL!==0||a.classification_counts.SCAFFOLD_ONLY!==0||a.classification_counts.DOCUMENTED_ONLY!==0)throw new Error(`${layer} not fully physical`);}
+          const req=['IMPLEMENTATION_MANIFEST.json','PRIORITY_PHYSICAL_BASELINE.json','CLOSURE_EVIDENCE.json','AUTONOMY_STATE.json','RUNBOOK.md','CHANGELOG.md'];
+          for(const layer of ['l3','l4','l5'])for(const f of req){const p=`cerebro/evidence/${layer}-foundation-wave1/2026-11-02/${f}`;if(!fs.existsSync(p))throw new Error(`Missing evidence ${p}`);}
+          const cp='cerebro/evidence/l5-foundation-wave1/2026-11-02/CONTINUITY_STATE.json';if(!fs.existsSync(cp))throw new Error('Missing CONTINUITY_STATE');const c=JSON.parse(fs.readFileSync(cp));
+          if(c.status!=='GREEN'||c.mission_total.engines!==63||c.mission_total.physical_before!==22||c.mission_total.physical_after!==63||c.mission_total.new_runtime_count!==41||c.mission_total.preserved_existing_count!==22||c.mission_total.scaffold_only_after!==0)throw new Error('Continuity totals inconsistent');
+          if(c.registry.count!==179||c.registry.unique_ids!==179||c.registry.mutated||c.factory.mutated||c.additional_cost_eur!==0||c.prod_touched||c.trading_touched||c.p23!=='POR_AUDITAR'||c.promotion_to_prod_authorized!==false)throw new Error('Continuity boundary inconsistent');
+          console.log('MISSION_TOTAL_GREEN='+JSON.stringify(c.mission_total));
+          NODE
+      - name: Least privilege zero secrets zero PROD Trading scan
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' cerebro/runtime/l3 cerebro/runtime/l4 cerebro/runtime/l5 cerebro/tests/l3-foundation-wave1.test.mjs cerebro/tests/l4-foundation-wave1.test.mjs cerebro/tests/l5-foundation-wave1.test.mjs
+          node <<'NODE'
+          const fs=require('fs');for(const d of ['l3','l4','l5']){for(const f of fs.readdirSync(`cerebro/runtime/${d}`)){if(!f.endsWith('.mjs'))continue;const s=fs.readFileSync(`cerebro/runtime/${d}/${f}`,'utf8');if(/environment\s*[:=]\s*['\"]PROD['\"]/i.test(s)||/prod_writes\s*[:=]\s*true/i.test(s)||/trading_access\s*[:=]\s*true/i.test(s))throw new Error(`Unsafe boundary in ${d}/${f}`);}}console.log('BOUNDARY_SCAN_GREEN');
+          NODE
+      - name: Final integrity summary
+        run: |
+          echo "Validated durable HEAD: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo 'L3 16/16, L4 27/27, L5 20/20 = 63/63 physical foundations.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Registry 179 unique; Factory unchanged; regression GREEN; deterministic rebuild GREEN.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PROD untouched; Trading untouched; cost 0 EUR; P23 POR_AUDITAR; no PROD promotion.' >> "$GITHUB_STEP_SUMMARY"
