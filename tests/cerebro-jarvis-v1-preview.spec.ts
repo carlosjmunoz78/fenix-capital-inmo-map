@@ -26,7 +26,7 @@ async function expectJarvisContract(page:Page){
  await expect(page.getByRole('button',{name:'Activar voz'})).toBeVisible();
  await expect(page.getByRole('combobox',{name:'Empresa',exact:true})).toHaveValue('Fénix · sesión autenticada');
  await expect(page.getByRole('combobox',{name:'Contexto',exact:true})).toHaveValue('GENERAL');
- await expect(page.getByText('Transporte autenticado verificado')).toBeVisible();
+ await expect(page.getByText('Actividad conectada',{exact:true})).toBeVisible();
  await expect(page.getByText('HUMAN_REQUIRED',{exact:true})).toHaveCount(0);
  await expect(page.getByText('FÉNIX · GENERAL',{exact:true})).toHaveCount(0);
  await expectNoHorizontalOverflow(page);
