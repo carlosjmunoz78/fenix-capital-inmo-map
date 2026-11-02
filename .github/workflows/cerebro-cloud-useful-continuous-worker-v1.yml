@@ -1,7 +1,12 @@
 name: CEREBRO Continuous Useful Worker V1
-run-name: CEREBRO SUSTAINED ${{ inputs.lane }} · C${{ inputs.cycle }} · PAUSED
+run-name: CEREBRO SUSTAINED PAUSE · USER PRIORITY
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml
   workflow_dispatch:
     inputs:
       lane:
@@ -18,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-continuous-useful-worker-v1-${{ inputs.lane }}
+  group: cerebro-continuous-useful-worker-v1-46
   cancel-in-progress: true
 
 jobs:
