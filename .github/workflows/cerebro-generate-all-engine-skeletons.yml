@@ -31,7 +31,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ env.EXACT_SOURCE_SHA }}
-          fetch-depth: 1
+          fetch-depth: 2
 
       - uses: actions/setup-node@v4
         with:
@@ -72,7 +72,7 @@ jobs:
           git diff --exit-code HEAD^ -- \
             .github/workflows/cerebro-continuous-useful-worker-v1.yml \
             cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs \
-            cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs || true
+            cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
           printf '%s\n' 'KNOWN_BASELINE_DEFERRED: continuous worker remains intentionally paused; mission made no change to it.'
 
       - name: Generate all 179 canonical engine skeletons through existing FACT-001 V1
