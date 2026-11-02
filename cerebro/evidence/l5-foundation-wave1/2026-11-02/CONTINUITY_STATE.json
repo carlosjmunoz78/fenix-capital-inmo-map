@@ -3,50 +3,16 @@
   "mission": "IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION",
   "status": "GREEN",
   "branch": "cerebro-implement-l3-l4-l5-foundation-20261102",
-  "validated_source_sha": "42cd9c3ed082c2700700d444abdc3e3ae31d3df5",
-  "workflow_run_id": 41450136755,
+  "validated_source_sha": "bca728d4b5168193d7eba43047a25ddba50279f1",
+  "workflow_run_id": 41450515315,
   "layers": {
-    "L3": {
-      "physical_before": 13,
-      "physical_after": 16,
-      "new_runtime_count": 3,
-      "preserved_existing_count": 13,
-      "validated_source_sha": "e613e5c8e09bd3754749d8c470dad36a62ef74ca",
-      "workflow_run_id": 41448799544
-    },
-    "L4": {
-      "physical_before": 8,
-      "physical_after": 27,
-      "new_runtime_count": 19,
-      "preserved_existing_count": 8,
-      "validated_source_sha": "894a5b22f8e38b6b5e7784ae8a480013f4f2662b",
-      "workflow_run_id": 41449598397
-    },
-    "L5": {
-      "physical_before": 1,
-      "physical_after": 20,
-      "new_runtime_count": 19,
-      "preserved_existing_count": 1,
-      "validated_source_sha": "42cd9c3ed082c2700700d444abdc3e3ae31d3df5",
-      "workflow_run_id": 41450136755
-    }
+    "L3": {"physical_before":13,"physical_after":16,"new_runtime_count":3,"preserved_existing_count":13,"workflow_run_id":41448799544},
+    "L4": {"physical_before":8,"physical_after":27,"new_runtime_count":19,"preserved_existing_count":8,"workflow_run_id":41449598397},
+    "L5": {"physical_before":1,"physical_after":20,"new_runtime_count":19,"preserved_existing_count":1,"workflow_run_id":41450136755}
   },
-  "mission_total": {
-    "engines": 63,
-    "physical_before": 22,
-    "physical_after": 63,
-    "new_runtime_count": 41,
-    "preserved_existing_count": 22,
-    "scaffold_only_after": 0
-  },
-  "registry": {
-    "count": 179,
-    "unique_ids": 179,
-    "mutated": false
-  },
-  "factory": {
-    "mutated": false
-  },
+  "mission_total": {"engines":63,"physical_before":22,"physical_after":63,"new_runtime_count":41,"preserved_existing_count":22,"scaffold_only_after":0},
+  "registry": {"count":179,"unique_ids":179,"mutated":false},
+  "factory": {"mutated":false},
   "regression": "GREEN_NO_NEW_FAILURES",
   "analyzer": "GREEN",
   "dependency_graph": "AUDITED_PER_LAYER_WITH_CYCLE_GUARD",
@@ -60,6 +26,6 @@
   "p23": "POR_AUDITAR",
   "continuous_worker": "INTENTIONALLY_PAUSED_BASELINE_PRESERVED",
   "promotion_to_prod_authorized": false,
-  "next_block": "L7_FOUNDATION_AUDIT_THEN_L8_THEN_L9_UNLESS_GRAPH_PROVES_PRIOR_DEPENDENCY",
-  "note": "Evidence commits after validated_source_sha are durable documentation commits and are not claimed as having passed the same workflow unless separately validated."
+  "final_integrity": {"validated_head_sha":"bca728d4b5168193d7eba43047a25ddba50279f1","workflow_run_id":41450515315,"conclusion":"success"},
+  "next_block": "L7_FOUNDATION_AUDIT_THEN_L8_THEN_L9_UNLESS_GRAPH_PROVES_PRIOR_DEPENDENCY"
 }
