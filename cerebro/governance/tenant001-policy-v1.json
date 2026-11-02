@@ -1,0 +1,20 @@
+{
+  "engine_id": "TENANT-001",
+  "version": "1.0.0",
+  "environment": "PREPROD",
+  "fail_closed": true,
+  "permission": "TENANT_SCOPE_GUARD_ONLY",
+  "company_id_required": true,
+  "cross_company_access": "DENY_BY_DEFAULT",
+  "resource_classes": ["data", "knowledge", "permissions", "logs", "jobs", "storage", "models", "backups"],
+  "database_boundary": "POSTGRESQL_RLS_SERVICE_ROLE_PREPROD",
+  "abac_rule": "request_company_id == target_company_id",
+  "namespace_strategy": "company/<company_id>/<resource_class>/<resource_id>",
+  "deny": ["CROSS_COMPANY_ACCESS", "MISSING_COMPANY_ID", "NAMESPACE_MISMATCH", "PROD_WRITE", "SUPABASE_PROD_WRITE", "TRADING"],
+  "human_required_allowed": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "prod_execution_enabled": false,
+  "prod_write_authorized": false,
+  "supabase_prod_write_authorized": false,
+  "trading_allowed": false,
+  "additional_cost_eur": 0
+}
