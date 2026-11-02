@@ -16,9 +16,10 @@ on:
 permissions:
   contents: read
   id-token: write
+  actions: write
 
 concurrency:
-  group: jarvis-work-codex-preprod-worker-${{ github.ref_name }}
+  group: jarvis-work-codex-preprod-consumer-${{ github.ref_name }}
   cancel-in-progress: false
 
 env:
@@ -26,7 +27,68 @@ env:
   JARVIS_WORK_OIDC_AUDIENCE: jarvis-work-worker-v1
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Verify governed runtime syntax
+        run: |
+          node --check cerebro/runtime/jarvis-work-job-runner-v1.mjs
+          node --check cerebro/runtime/repo-sandbox-job-handler-v1.mjs
+          node --check cerebro/runtime/universal-repo-sandbox-executor-v0.mjs
+
+  watch:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    outputs:
+      pending: ${{ steps.watch.outputs.pending }}
+    steps:
+      - id: watch
+        name: Wait for one governed JARVIS Work job
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const endpoint=process.env.JARVIS_WORK_DISPATCH_URL;
+          const audience=process.env.JARVIS_WORK_OIDC_AUDIENCE;
+          const deadline=Date.now()+45*60_000;
+          let pending=0;
+          async function oidc(){
+            const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            u.searchParams.set('audience',audience);
+            const r=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`},redirect:'error'});
+            if(!r.ok)throw new Error(`OIDC_TOKEN_FAILED:${r.status}`);
+            const body=await r.json();
+            if(!body?.value)throw new Error('OIDC_TOKEN_MISSING');
+            return body.value;
+          }
+          while(Date.now()<deadline){
+            const token=await oidc();
+            const r=await fetch(`${endpoint}/status-v1`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}',redirect:'error'});
+            const body=await r.json().catch(()=>null);
+            if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${r.status}:${body?.error||'UNKNOWN'}`);
+            const states=body.states||{};
+            pending=Number(states.QUEUED||0)+Number(states.RETRY_WAIT||0);
+            if(pending>0)break;
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\n`);
+          console.log(JSON.stringify({pending,environment:'PREPROD',jarvis_work:true,secret_material_logged:false}));
+          NODE
+
   governed-worker:
+    needs: watch
+    if: needs.watch.outputs.pending != '0'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -38,11 +100,6 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Verify runtime syntax
-        run: |
-          node --check cerebro/runtime/jarvis-work-job-runner-v1.mjs
-          node --check cerebro/runtime/repo-sandbox-job-handler-v1.mjs
-          node --check cerebro/runtime/universal-repo-sandbox-executor-v0.mjs
       - name: Resolve immutable sandbox image
         shell: bash
         run: |
@@ -62,3 +119,22 @@ jobs:
           test "$GITHUB_REF_NAME" = "cerebro/jarvis-work-codex-complete-20261102"
           test -z "$(git status --porcelain)"
           echo "No host/repository write was produced by the sandbox worker."
+
+  rearm:
+    needs: [validate, watch, governed-worker]
+    if: always() && needs.validate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch next bounded JARVIS Work cycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          const url=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/jarvis-work-codex-preprod-worker.yml/dispatches`;
+          const r=await fetch(url,{method:'POST',headers:{authorization:`Bearer ${process.env.GH_TOKEN}`,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:process.env.REF_NAME}),redirect:'error'});
+          if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
+          console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,jarvis_work:true,static_secret_added:false}));
+          NODE
