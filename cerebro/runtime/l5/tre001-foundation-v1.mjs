@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'TRE-001',name:'Tesorería · Foundation',mode:'TREASURY_GATED'});export const manifest=engine.manifest;export const run=engine.run;

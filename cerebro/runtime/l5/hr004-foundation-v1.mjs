@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'HR-004',name:'Skills & Certification Engine · Foundation',mode:'ADVISORY_ONLY'});export const manifest=engine.manifest;export const run=engine.run;

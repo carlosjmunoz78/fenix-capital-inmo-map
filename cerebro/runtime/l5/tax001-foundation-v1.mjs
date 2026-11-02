@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'TAX-001',name:'Fiscal Engine · Foundation',mode:'TAX_GATED'});export const manifest=engine.manifest;export const run=engine.run;

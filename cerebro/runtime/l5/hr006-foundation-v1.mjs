@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'HR-006',name:'Workforce / Reparto de Expedientes · Foundation',mode:'WORKFORCE'});export const manifest=engine.manifest;export const run=engine.run;

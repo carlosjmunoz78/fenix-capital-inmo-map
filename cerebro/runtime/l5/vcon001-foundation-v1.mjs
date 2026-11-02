@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'VCON-001',name:'Contratos de Proveedores · Foundation',mode:'SIGNATURE_GATED'});export const manifest=engine.manifest;export const run=engine.run;
