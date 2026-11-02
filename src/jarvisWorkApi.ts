@@ -6,6 +6,7 @@ export type JarvisProject={
   autonomy_state:string;objective:string;subprojects:string[];dependencies:string[];audit_refs:string[];
   last_reconciled_at:string|null;source:string;
 };
+export type JarvisProjectOverlay=Partial<JarvisProject>&{project_id:string;is_user_created?:boolean;updated_at?:string};
 
 type ApiResult<T>={status:number;data:T|null};
 
@@ -27,17 +28,17 @@ async function call<T>(path:string,method:'GET'|'POST'|'PATCH',body?:unknown):Pr
 }
 
 export async function fetchJarvisProjects(){
-  return call<{status?:string;projects?:JarvisProject[]}>('projects','GET');
+  return call<{status?:string;projects?:JarvisProjectOverlay[]}>('projects','GET');
 }
 
 export async function createJarvisProject(input:{title:string;objective?:string;subprojects?:string[]}){
-  return call<{status?:string;project?:JarvisProject;reason?:string}>('projects','POST',{project:input});
+  return call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>('projects','POST',{project:input});
 }
 
 export async function renameJarvisProject(projectId:string,title:string){
-  return call<{status?:string;project?:JarvisProject;reason?:string}>(`projects/${encodeURIComponent(projectId)}`,'PATCH',{patch:{title}});
+  return call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>(`projects/${encodeURIComponent(projectId)}`,'PATCH',{patch:{title}});
 }
 
 export async function importJarvisProject(input:{title:string;objective?:string;subprojects?:string[];dependencies?:string[];source?:string}){
-  return call<{status?:string;project?:JarvisProject;reason?:string}>('projects/import','POST',{project:input});
+  return call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>('projects/import','POST',{project:input});
 }
