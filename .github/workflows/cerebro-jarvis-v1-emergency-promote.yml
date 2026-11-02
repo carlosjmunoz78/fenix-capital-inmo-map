@@ -1,9 +1,9 @@
-name: CEREBRO Jarvis V1 Emergency Promote
+name: JARVIS Work Final PROD Promote
 
 on:
   push:
     branches:
-      - cerebro/jarvis-interface-v1-20261102
+      - cerebro/jarvis-work-codex-complete-20261102
     paths:
       - '.github/workflows/cerebro-jarvis-v1-emergency-promote.yml'
 
@@ -11,28 +11,32 @@ permissions:
   contents: write
 
 concurrency:
-  group: cerebro-jarvis-v1-emergency-promote
+  group: jarvis-work-final-prod-promote
   cancel-in-progress: false
 
 jobs:
   verify-build-promote:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       VITE_FENIX_ENV: prod
-      EXPECTED_PROD_SHA: aa15ea28e0d005b3552f04011bd51ee6579a91ec
-      EXPECTED_PROD_SOURCE_SHA: 4470865ac30387d5bb34e7ecfe58ba736fe0b0e4
-      ROLLBACK_BRANCH: backup/emergency-pages-jarvis-v1-pre-input-tools-20261102
+      EXPECTED_PROD_SHA: f4d2783d969108a1c7080ce421d2dbe5426c2dd0
+      EXPECTED_PROD_SOURCE_SHA: 0a8d971c4009f508d7a37eac7a11b72651d627e0
+      EXPECTED_MAIN_SHA: 71ef399d41a6a22ef717e242eca5485a38e08577
+      MAIN_FRONTEND_BASE_SHA: 476ce30152554c944a94282f39ddc5ec368b7879
+      ROLLBACK_BRANCH: backup/emergency-pages-jarvis-work-final-20261102
     steps:
-      - name: Checkout isolated Jarvis source
+      - name: Checkout isolated final Jarvis Work source
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Verify accepted PROD baseline and rollback branch
+      - name: Verify current PROD, current main and rollback snapshot
+        shell: bash
         run: |
           set -euo pipefail
-          git fetch origin emergency-pages "$ROLLBACK_BRANCH"
+          git fetch origin main emergency-pages "$ROLLBACK_BRANCH"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_MAIN_SHA"
           test "$(git rev-parse origin/emergency-pages)" = "$EXPECTED_PROD_SHA"
           test "$(git rev-parse "origin/$ROLLBACK_BRANCH")" = "$EXPECTED_PROD_SHA"
           test "$(git show origin/emergency-pages:CNAME | tr -d '\r\n')" = 'app.fenixcapital.es'
@@ -46,7 +50,21 @@ jobs:
           git cat-file -e "origin/$ROLLBACK_BRANCH:browser-ergonomics-v1.css"
           git cat-file -e "origin/$ROLLBACK_BRANCH:browser-ergonomics-v1.js"
 
+      - name: Verify main has no newer frontend delta to preserve
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main
+          changed="$(git diff --name-only "$MAIN_FRONTEND_BASE_SHA" origin/main -- src public package.json package-lock.json index.html vite.config.ts tsconfig.json playwright.config.ts 2>/dev/null || true)"
+          if [ -n "$changed" ]; then
+            echo 'MAIN_FRONTEND_DELTA_DETECTED'
+            echo "$changed"
+            exit 1
+          fi
+          echo 'MAIN_FRONTEND_DELTA_NONE'
+
       - name: Rollback rehearsal without touching PROD
+        shell: bash
         run: |
           set -euo pipefail
           rm -rf /tmp/jarvis-rollback-rehearsal
@@ -72,10 +90,24 @@ jobs:
       - name: Re-run Jarvis contract gate
         run: node scripts/cerebro-jarvis-v1-contract.mjs
 
+      - name: Install Chromium for physical QA
+        run: npx playwright install --with-deps chromium
+
+      - name: Re-run final visual acceptance before PROD
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+          PLAYWRIGHT_SKIP_BUILD: '0'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium
+
       - name: Build production bundle
+        env:
+          VITE_FENIX_ENV: prod
         run: npm run build
 
       - name: Verify deployable output and inherited ergonomics
+        shell: bash
         run: |
           set -euo pipefail
           test -f dist/index.html
@@ -86,7 +118,8 @@ jobs:
           cmp public/browser-ergonomics-v1.css dist/browser-ergonomics-v1.css
           cmp public/browser-ergonomics-v1.js dist/browser-ergonomics-v1.js
 
-      - name: Promote Jarvis build to emergency-pages only
+      - name: Promote final Jarvis Work build to PROD snapshot
+        shell: bash
         run: |
           set -euo pipefail
           git config user.name 'github-actions[bot]'
@@ -109,11 +142,12 @@ jobs:
           cmp public/browser-ergonomics-v1.js /tmp/fenix-emergency-pages/browser-ergonomics-v1.js
           cd /tmp/fenix-emergency-pages
           git add -A
-          git commit -m 'deploy(prod): Jarvis Interface V1 emergency snapshot'
+          git commit -m 'deploy(prod): final Jarvis Work premium snapshot'
           git push origin HEAD:emergency-pages
           echo "PROD_DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: Verify remote PROD postcondition
+        shell: bash
         run: |
           set -euo pipefail
           git fetch origin emergency-pages "$ROLLBACK_BRANCH"
@@ -124,6 +158,7 @@ jobs:
           git cat-file -e origin/emergency-pages:.nojekyll
           git cat-file -e origin/emergency-pages:browser-ergonomics-v1.css
           git cat-file -e origin/emergency-pages:browser-ergonomics-v1.js
+          test "$(git rev-parse origin/emergency-pages)" != "$EXPECTED_PROD_SHA"
           echo "SOURCE_SHA=$GITHUB_SHA"
           echo "PROD_SHA=$(git rev-parse origin/emergency-pages)"
-          echo 'JARVIS_V1_PROD_PROMOTION_GREEN'
+          echo 'JARVIS_WORK_FINAL_PROD_PROMOTION_GREEN'
