@@ -1,0 +1,22 @@
+name: Reclaim Sustained Lane 49 For Pages
+
+on:
+  push:
+    branches:
+      - ops/reclaim-runner-for-pages-20261102
+    paths:
+      - .github/workflows/reclaim-sustained-lane-49-for-pages.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-continuous-useful-worker-v1-49
+  cancel-in-progress: true
+
+jobs:
+  noop:
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo noop
