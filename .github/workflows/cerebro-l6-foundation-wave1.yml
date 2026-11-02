@@ -118,7 +118,7 @@ jobs:
           const current=JSON.parse(fs.readFileSync(path.join(out,'connection','ENGINE_CONNECTION_BASELINE.json')));
           const bindings=JSON.parse(fs.readFileSync(path.join(out,'connection','engine-implementation-bindings.v1.json')));
           const tests=JSON.parse(fs.readFileSync(path.join(out,'connection','TEST_REPORT.json')));
-          const rebuild=JSON.parse(fs.readFileSync(path.join(out,'connection','REBUILD_PROOF.json'));
+          const rebuild=JSON.parse(fs.readFileSync(path.join(out,'connection','REBUILD_PROOF.json')));
           const l6=['APP-001','CRM-001','DATA-001','EVT-001','JOB-001','API-001','DEP-001','ARCH-001','DEBT-001','MIG-001','FF-001','CAN-001','ROUTE-001','LOCAL-001','AIBUD-001','OPT-001','AUTO-001','DOCS-001','AUD-001','WEB-001','INT-001','RUNTIME-001','DBOFF-001','STOROFF-001','FREE-001'];
           const newly=['API-001','ARCH-001','DEBT-001','FF-001','CAN-001','LOCAL-001','AIBUD-001','DOCS-001','INT-001','STOROFF-001'];
           const preserved=['APP-001','CRM-001','DATA-001','EVT-001','JOB-001','DEP-001','MIG-001','ROUTE-001','OPT-001','AUTO-001','AUD-001','WEB-001','RUNTIME-001','DBOFF-001','FREE-001'];
