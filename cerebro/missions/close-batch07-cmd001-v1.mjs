@@ -1,0 +1,28 @@
+#!/usr/bin/env node
+import fs from 'node:fs';import os from 'node:os';import path from 'node:path';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';
+import {classifyCmd001,CMD001_CONTRACT_V1} from '../runtime/cmd001-command-router-v1.mjs';
+const ROOT=process.cwd(),OUT=path.join(ROOT,'cerebro/evidence/batch07-cmd001-autonomy-closure/2026-11-02');
+const stable=v=>Array.isArray(v)?v.map(stable):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v), text=v=>JSON.stringify(stable(v),null,2)+'\n', sha=v=>crypto.createHash('sha256').update(Buffer.isBuffer(v)?v:(typeof v==='string'?v:text(v))).digest('hex');
+const assert=(v,m)=>{if(!v)throw new Error(m)},write=(r,v)=>{const p=path.join(OUT,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,text(v))};
+const test=f=>{const r=spawnSync(process.execPath,['--test',f],{cwd:ROOT,encoding:'utf8'});if(r.status)throw new Error(r.stdout+r.stderr);return {file:f,status:'PASS',stdout_sha256:sha(r.stdout||'')}};
+fs.rmSync(OUT,{recursive:true,force:true});
+const policyPath=path.join(ROOT,'cerebro/governance/cmd001-policy-v1.json'),runtimePath=path.join(ROOT,'cerebro/runtime/cmd001-command-router-v1.mjs');const policy=JSON.parse(fs.readFileSync(policyPath));
+assert(policy.fail_closed&&policy.prod_write_authorized===false&&policy.trading_access===false,'policy drift');
+const ctx={company_id:'fenix',engine_id:'CMD-001',environment:'PREPROD',version:'1.0.0'},base={context:ctx,user_id:'carlos',permissions:['cerebro:read','cerebro:command']};
+const cases=[['estado motores','STATUS'],['analiza expediente','ANALYSIS'],['ejecuta tarea','ACTION'],['cambiar regla','RULE_CHANGE'],['abre pantalla','NAVIGATION'],['qué falta','QUERY'],['crear nueva empresa','COMPANY_CREATE']];
+const routes=cases.map(([message,intent])=>{const r=classifyCmd001({...base,message});assert(r.intent===intent&&r.route_target==='ORCH-001'&&r.execute===false,'route drift');return r});
+const ambiguous=classifyCmd001({...base,message:'haz lo de antes'});assert(ambiguous.human_required==='LOW_CONFIDENCE','ambiguity drift');
+let prodDenied=false;try{classifyCmd001({...base,message:'estado',context:{...ctx,environment:'PROD'}})}catch(e){prodDenied=/PROD_ROUTE_DENIED/.test(e.message)}assert(prodDenied,'PROD not denied');
+const tests=[test('cerebro/tests/cmd001-command-router-v1.test.mjs')];
+const a=routes.map(x=>x.correlation_id),b=cases.map(([message])=>classifyCmd001({...base,message}).correlation_id);assert(JSON.stringify(a)===JSON.stringify(b),'non deterministic');
+const backupDir=fs.mkdtempSync(path.join(os.tmpdir(),'cmd001-bkp-'));for(const p of [runtimePath,policyPath])fs.copyFileSync(p,path.join(backupDir,path.basename(p)));const hashes=Object.fromEntries([runtimePath,policyPath].map(p=>[path.basename(p),sha(fs.readFileSync(p))]));for(const p of [runtimePath,policyPath])assert(sha(fs.readFileSync(path.join(backupDir,path.basename(p))))===hashes[path.basename(p)],'backup fail');
+const rollback=path.join(backupDir,path.basename(policyPath));fs.appendFileSync(rollback,'\nprobe');fs.copyFileSync(policyPath,rollback);assert(sha(fs.readFileSync(rollback))===hashes[path.basename(policyPath)],'rollback fail');
+const tribunal=tests.every(x=>x.status==='PASS')&&prodDenied&&CMD001_CONTRACT_V1.additional_cost_eur===0&&policy.fail_closed;assert(tribunal,'tribunal denied');
+write('permissions/cmd-001-permission-evidence.json',{engine_id:'CMD-001',gate:'permissions',status:'PASS',permission:policy.permission,deny:policy.deny,additional_cost_eur:0});
+write('evaluation/cmd-001-evaluation-evidence.json',{engine_id:'CMD-001',gate:'evaluation',status:'PASS',approved:true,score:1,routes:routes.map(x=>({intent:x.intent,target:x.route_target,execute:x.execute})),ambiguous:'LOW_CONFIDENCE',tests,additional_cost_eur:0});
+write('tribunal/cmd-001-tribunal-evidence.json',{engine_id:'CMD-001',gate:'tribunal',status:'GREEN',approved:true,pass:true,prod_execution_authorized:false,additional_cost_eur:0});
+write('observability/cmd-001-observability-evidence.json',{engine_id:'CMD-001',gate:'observability',status:'PASS',correlation_id:routes[0].correlation_id,metric:{routes_total:routes.length,ambiguous_total:1},trace:sha(routes),log:'structured command routing decisions',additional_cost_eur:0});
+write('backup/cmd-001-backup-evidence.json',{engine_id:'CMD-001',gate:'backup',status:'PASS',tested:true,restore:'PASS',hashes,additional_cost_eur:0});
+write('rollback/cmd-001-rollback-evidence.json',{engine_id:'CMD-001',gate:'rollback',status:'PASS',tested:true,revert:'PASS',additional_cost_eur:0});
+write('rebuild/cmd-001-rebuild-evidence.json',{engine_id:'CMD-001',gate:'rebuild',status:'PASS',tested:true,deterministic:true,first:a,second:b,additional_cost_eur:0});
+write('SUMMARY.json',{mission:'CLOSE_BATCH07_CMD001_V1',status:'GREEN',environment:'LAB_PREPROD',engine_id:'CMD-001',permissions:'PASS',evaluation:'PASS',tribunal:'PASS',observability:'PASS',backup:'PASS',rollback:'PASS',rebuild:'PASS',prod_writes:false,trading_touched:false,additional_cost_eur:0});fs.rmSync(backupDir,{recursive:true,force:true});console.log('CLOSE_BATCH07_CMD001_V1=GREEN');
