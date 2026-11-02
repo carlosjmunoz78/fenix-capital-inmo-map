@@ -11,6 +11,8 @@ const VISIBLE_REPLACEMENTS:[RegExp,string][]=[
   [/CEREBRO/gi,'JARVIS'],
 ];
 
+type Props={workspaceKey?:string};
+
 function rewriteVisibleText(root:HTMLElement){
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
   const nodes:Text[]=[];
@@ -27,6 +29,10 @@ function rewriteVisibleText(root:HTMLElement){
     for(const attribute of ['placeholder','title','aria-label']){
       const value=el.getAttribute(attribute);
       if(!value)continue;
+      if(attribute==='placeholder'&&el.matches('.cerebro-chat-form textarea')){
+        el.setAttribute('placeholder','');
+        continue;
+      }
       let next=value;
       for(const [pattern,replacement] of VISIBLE_REPLACEMENTS)next=next.replace(pattern,replacement);
       if(next!==value)el.setAttribute(attribute,next);
@@ -34,7 +40,7 @@ function rewriteVisibleText(root:HTMLElement){
   }
 }
 
-export default function JarvisEmbeddedConsole(){
+export default function JarvisEmbeddedConsole({workspaceKey}:Props){
   const rootRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
     const root=rootRef.current;
@@ -47,5 +53,5 @@ export default function JarvisEmbeddedConsole(){
     observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     return()=>{observer.disconnect();if(scheduled)window.cancelAnimationFrame(scheduled)};
   },[]);
-  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell/></div><JarvisWorkbenchPortal/><JarvisOperativaComposerPortal/></>;
+  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell workspaceKey={workspaceKey}/></div><JarvisWorkbenchPortal/><JarvisOperativaComposerPortal/></>;
 }
