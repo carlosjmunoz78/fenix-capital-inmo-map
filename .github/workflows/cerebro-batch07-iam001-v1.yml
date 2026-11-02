@@ -52,12 +52,14 @@ jobs:
           const s=JSON.parse(fs.readFileSync(process.env.OUT+'/SUMMARY.json','utf8'));
           const iam=report.engines.find(x=>x.engine_id==='IAM-001');
           if(!iam) throw new Error('IAM-001 missing');
+          fs.writeFileSync(process.env.OUT+'/IAM001_DIAGNOSTIC.json',JSON.stringify({engine:iam,summary:s},null,2)+'\n');
           if(iam.gate_count!==12||iam.gate_total!==12||iam.autonomous_prod_ready!==true) throw new Error(`IAM-001 closure failed ${iam.gate_count}/${iam.gate_total}: ${(iam.readiness_blockers||[]).join(',')}`);
           if(s.autonomous_prod_ready<28) throw new Error(`Expected at least 28/179, got ${s.autonomous_prod_ready}`);
           if(s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0) throw new Error('safety/cost isolation drift');
           console.log(JSON.stringify({iam_gate_count:iam.gate_count,iam_ready:iam.autonomous_prod_ready,autonomous_prod_ready:s.autonomous_prod_ready,registry_total:s.registry_total}));
           NODE
       - name: Upload Batch07 IAM evidence
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-batch07-iam001-${{ github.run_id }}
