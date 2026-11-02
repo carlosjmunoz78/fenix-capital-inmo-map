@@ -21,10 +21,12 @@ const INTENTS=new Set([
   'BROWSER_STATUS','BROWSER_PROFILES','BROWSER_HANDOFF'
 ]);
 const MUTATING_INTENTS=new Set(['SAVE_FILE','ROLLBACK_COMMIT','WORK_CANCEL']);
+const MAX_CONTENT_BYTES=2_000_000;
 
 function headers(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin'};if(origin&&ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
 function out(req:Request,status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:headers(req.headers.get('origin'))});}
 function clean(v:unknown,label:string,max=4000){if(typeof v!=='string'||!v.trim())throw new Error(`${label}_REQUIRED`);const s=v.trim();if(s.length>max||s.includes('\0'))throw new Error(`${label}_INVALID`);return s;}
+function fileContent(v:unknown){if(typeof v!=='string'||v.length===0)throw new Error('CONTENT_REQUIRED');if(v.includes('\0')||new TextEncoder().encode(v).byteLength>MAX_CONTENT_BYTES)throw new Error('CONTENT_INVALID');return v;}
 function safePath(v:unknown){const p=clean(v,'PATH',500).replace(/\\/g,'/').replace(/^\.\//,'');if(p.startsWith('/')||p.split('/').includes('..')||p.startsWith('.git/')||p==='.git')throw new Error('UNSAFE_REPOSITORY_PATH');return p;}
 function sha(v:unknown,label='SHA'){const s=clean(v,label,64).toLowerCase();if(!/^[a-f0-9]{40}$/.test(s))throw new Error(`${label}_INVALID`);return s;}
 function authHeader(req:Request){const h=req.headers.get('authorization')??'';if(!h.toLowerCase().startsWith('bearer '))throw new Error('OWNER_TOKEN_REQUIRED');return h;}
@@ -65,7 +67,7 @@ Deno.serve(async req=>{
     else if(intent==='GIT_STATUS'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/inspect','POST',req,{operation:'STATUS',expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA')});}
     else if(intent==='GIT_DIFF'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/inspect','POST',req,{operation:'DIFF',expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA'),staged:args.staged===true});}
     else if(intent==='GIT_COMPARE'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/inspect','POST',req,{operation:'COMPARE',expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA'),base:typeof args.base==='string'?args.base:'main',head:SAFE_BRANCH});}
-    else if(intent==='SAVE_FILE'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/save','POST',req,{path:safePath(args.path),content:clean(args.content,'CONTENT',2_000_000),message:typeof args.message==='string'?args.message.slice(0,240):undefined,expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA')});}
+    else if(intent==='SAVE_FILE'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/save','POST',req,{path:safePath(args.path),content:fileContent(args.content),message:typeof args.message==='string'?args.message.slice(0,240):undefined,expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA')});}
     else if(intent==='ROLLBACK_COMMIT'){delegated=GIT_GATEWAY;r=await upstream(GIT_GATEWAY,'/rollback','POST',req,{commit_sha:sha(args.commit_sha,'COMMIT_SHA'),expected_head_sha:sha(args.expected_head_sha,'EXPECTED_HEAD_SHA')});}
     else if(intent==='BROWSER_HANDOFF')return out(req,200,{status:'OK',result:{route:'/cerebro?section=browser&from=jarvis-work',execution:false},evidence:evidence(intent,'UI_HANDOFF',correlation_id,null),human_required:null});
     else if(intent==='BROWSER_STATUS'){
