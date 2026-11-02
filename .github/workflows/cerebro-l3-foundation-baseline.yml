@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: cerebro-l3-foundation-baseline-${{ github.ref }}
@@ -70,7 +70,23 @@ jobs:
           if(b.prod_touched||b.trading_touched||b.additional_cost_eur!==0) throw new Error('Boundary violation');
           console.log('L3_BASELINE='+JSON.stringify({physical_before:b.physical_before,classification_counts:b.classification_counts,physical_engine_ids:b.physical_engine_ids}));
           NODE
-      - name: Upload durable-source baseline artifact
+      - name: Persist durable OLD baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST='cerebro/evidence/l3-foundation-wave1/2026-11-02'
+          mkdir -p "$DEST"
+          cp "$OUT/l3/PRIORITY_PHYSICAL_BASELINE.json" "$DEST/PRIORITY_PHYSICAL_BASELINE.json"
+          cp "$OUT/l3/AUDIT_REPORT.json" "$DEST/BASELINE_AUDIT_REPORT.json"
+          printf '%s\n' "$GITHUB_SHA" > "$DEST/BASELINE_SOURCE_SHA.txt"
+          git config user.name 'CEREBRO Foundation Evidence'
+          git config user.email 'cerebro-foundation@users.noreply.github.com'
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m 'evidence(cerebro): persist L3 OLD baseline [skip ci]'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Upload baseline artifact
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-l3-foundation-baseline-${{ github.run_id }}-${{ github.run_attempt }}
