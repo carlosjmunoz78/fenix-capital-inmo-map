@@ -1,0 +1,64 @@
+name: CEREBRO Strict179 Batch04 L1 Safe Runtimes V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+    paths:
+      - 'cerebro/missions/strict179-batch04-l1-safe-runtimes-v1.mjs'
+      - '.github/workflows/cerebro-strict179-batch04-l1-safe-runtimes-v1.yml'
+      - 'cerebro/evidence/contracts/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/permissions/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/tests/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/evaluation/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/tribunal/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/observability/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/backup/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/rollback/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/rebuild/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/governance/policy/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-strict179-batch04-l1-safe-runtimes-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-l1-safe-runtimes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Execute Batch04 physical PREPROD verification
+        run: |
+          set -euo pipefail
+          node cerebro/missions/strict179-batch04-l1-safe-runtimes-v1.mjs --out /tmp/strict179-batch04
+          cat /tmp/strict179-batch04/SUMMARY.json
+      - name: Re-run strict 179x12 readiness audit
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/strict179-readiness
+          cat /tmp/strict179-readiness/SUMMARY.json
+      - name: Assert branch-only and no repository mutation
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "cerebro/close-179-per-engine-autonomy-v1-20261102"
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'GREEN: PREPROD/LAB only; no PROD writes, Trading, secrets, network writes or paid fallback.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strict179-batch04-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/strict179-batch04/
+            /tmp/strict179-readiness/SUMMARY.json
+            /tmp/strict179-readiness/AUTONOMY_READINESS_BASELINE.json
+          if-no-files-found: error
+          retention-days: 30
