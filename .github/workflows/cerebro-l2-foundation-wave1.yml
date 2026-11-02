@@ -1,0 +1,179 @@
+name: CEREBRO L2 Foundation Wave1
+
+on:
+  push:
+    branches:
+      - cerebro-implement-l2-foundation-wave1-20261102
+    paths:
+      - 'cerebro/runtime/l2/**'
+      - 'cerebro/tests/l2-foundation-wave1.test.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/factory-v1.mjs'
+      - '.github/workflows/cerebro-l2-foundation-wave1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-l2-foundation-wave1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+  BASE_L1_SHA: 99d0873d8aa5b7719b16345c3f5d02771c3f3db6
+  OUT: /tmp/cerebro-l2-foundation-wave1
+
+jobs:
+  validate-l2-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 60
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l2-foundation-wave1-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git cat-file -e "$BASE_L1_SHA^{commit}"
+
+      - name: Install repository-declared dependencies only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+
+      - name: Syntax Factory Registry and L2 gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do node --check "$f"; done < <(find cerebro/runtime/l2 -maxdepth 1 -name '*.mjs' -print | sort)
+          node --check cerebro/tests/l2-foundation-wave1.test.mjs
+          node --check cerebro/missions/connect-existing-engines-v3.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+
+      - name: L2 Wave1 focused acceptance
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/l2-foundation-wave1.test.mjs
+
+      - name: Full CEREBRO regression preserving intentional paused-worker baseline
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' \
+            ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' \
+            ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' \
+            -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_L1_SHA" -- \
+            .github/workflows/cerebro-continuous-useful-worker-v1.yml \
+            cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs \
+            cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+
+      - name: Re-audit physical bindings and dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT"
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connection" | tee "$OUT.runner.log"
+
+      - name: Upload L2 analyzer diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l2-wave1-diagnostics-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/cerebro-l2-foundation-wave1/connection
+            /tmp/cerebro-l2-foundation-wave1.runner.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Verify 15 of 15 L2 physical and OLD vs NEW
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),out=process.env.OUT;
+          const base=JSON.parse(fs.readFileSync('cerebro/evidence/l1-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json'));
+          const current=JSON.parse(fs.readFileSync(path.join(out,'connection','ENGINE_CONNECTION_BASELINE.json')));
+          const bindings=JSON.parse(fs.readFileSync(path.join(out,'connection','engine-implementation-bindings.v1.json')));
+          const tests=JSON.parse(fs.readFileSync(path.join(out,'connection','TEST_REPORT.json')));
+          const rebuild=JSON.parse(fs.readFileSync(path.join(out,'connection','REBUILD_PROOF.json')));
+          const l2=['SUP-001','OBSERV-001','INC-001','SELF-001','SEC-001','IAM-001','SEC-002','RED-001','QA-001','QAB-001','REG-001','DR-001','RBLD-001','BCP-001','CRS-001'];
+          const newly=['SUP-001','INC-001','SEC-002','RED-001','QAB-001','REG-001','DR-001','BCP-001','CRS-001'];
+          const preserved=['OBSERV-001','SELF-001','SEC-001','IAM-001','QA-001','RBLD-001'];
+          if(base.physically_connected_count!==48||base.scaffold_only_count!==19) throw new Error('unexpected L1 closure baseline');
+          const expected=[...new Set([...base.physically_connected_engine_ids,...newly])].sort();
+          const actual=[...current.physically_connected_engine_ids].sort();
+          if(JSON.stringify(actual)!==JSON.stringify(expected)) throw new Error(`physical set mismatch expected=${JSON.stringify(expected)} actual=${JSON.stringify(actual)}`);
+          if(current.physically_connected_count!==57||current.scaffold_only_count!==10) throw new Error(`expected 57 physical / 10 scaffold-only, got ${current.physically_connected_count}/${current.scaffold_only_count}`);
+          for(const id of l2){const b=bindings.engines[id];if(!b||b.binding_mode!=='WRAP_PRESERVE'||!b.physical_evidence.length||b.do_not_overwrite!==true)throw new Error(`L2 physical binding missing: ${id}`);}
+          for(const id of newly){if(!bindings.engines[id].physical_evidence.some(e=>e.path.startsWith('cerebro/runtime/l2/')))throw new Error(`new L2 runtime evidence missing: ${id}`);}
+          for(const id of preserved){if(bindings.engines[id].physical_evidence.every(e=>e.path.startsWith('cerebro/runtime/l2/')))throw new Error(`existing L2 preservation evidence lost: ${id}`);}
+          if(bindings.engines['CAN-001'].binding_mode!=='SCAFFOLD_ONLY') throw new Error('SCAN-001 path collision regression detected for CAN-001');
+          if(!bindings.engines['DR-001'].physical_evidence.some(e=>e.path==='cerebro/runtime/l2/dr001-v1.mjs')) throw new Error('DR-001 real runtime evidence missing');
+          if(tests.status!=='GREEN'||tests.failed!==0||!tests.all_checks_passed)throw new Error('connection analyzer tests not green');
+          if(rebuild.status!=='GREEN'||rebuild.all_hashes_equal!==true)throw new Error('rebuild not deterministic');
+          const summary={mission:'IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1',wave:'L2_FOUNDATION',status:'GREEN',environment:'LAB_PREPROD',registry_total:179,l2_total:15,l2_physical_before:6,l2_physical_after:15,priority_physical_before:48,priority_physical_after:57,new_runtime_engines:newly,preserved_existing_engines:preserved,scaffold_only_priority_after:10,connection_test_assertions:tests.total_assertions,rebuild:'GREEN',additional_cost_eur:0,prod_touched:false,trading_touched:false,registry_mutated:false,factory_mutated:false,next_wave:'L6_FOUNDATION'};
+          fs.writeFileSync(path.join(out,'L2_WAVE1_SUMMARY.json'),JSON.stringify(summary,null,2)+'\n');
+          fs.writeFileSync(path.join(out,'BACKUP_ROLLBACK.json'),JSON.stringify({status:'GREEN',base_l1_sha:process.env.BASE_L1_SHA,rollback:'Remove additive cerebro/runtime/l2 modules, focused test and this workflow; existing L2 implementations remain untouched.',rebuild:'Re-run focused tests plus token-boundary analyzer from Registry and repository evidence.'},null,2)+'\n');
+          fs.writeFileSync(path.join(out,'CONTINUITY_STATE.json'),JSON.stringify({status:'GREEN',closed_wave:'L2_FOUNDATION',next_wave:'L6_FOUNDATION',guardrails:['PRESERVE_EXISTING','LAB_PREPROD_ONLY','NO_PROD','NO_TRADING','ZERO_ADDITIONAL_COST_BY_DEFAULT'],human_required:false},null,2)+'\n');
+          console.log('L2_WAVE1_METRICS='+JSON.stringify(summary));
+          NODE
+
+      - name: Prove canonical sources unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_L1_SHA" -- \
+            cerebro/registry/engine-registry.v1.json \
+            cerebro/factory.mjs \
+            cerebro/factory-v1.mjs
+
+      - name: Build continuity package
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$EXACT_SOURCE_SHA" > "$OUT/SOURCE_SHA.txt"
+          printf '%s\n' "$BASE_L1_SHA" > "$OUT/BASE_L1_SHA.txt"
+          (cd /tmp && zip -qr CEREBRO_L2_FOUNDATION_WAVE1_2026-11-02.zip "$(basename "$OUT")")
+          sha256sum /tmp/CEREBRO_L2_FOUNDATION_WAVE1_2026-11-02.zip | tee "$OUT/CONTINUITY_PACKAGE_SHA256.txt"
+
+      - name: Upload L2 Wave1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l2-foundation-wave1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/cerebro-l2-foundation-wave1
+            /tmp/CEREBRO_L2_FOUNDATION_WAVE1_2026-11-02.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Mission boundary
+        shell: bash
+        run: |
+          echo 'L2 foundation: 15/15 engines physically evidenced.' >> "$GITHUB_STEP_SUMMARY"
+          echo '9 formerly scaffold-only L2 engines now have safe non-destructive foundation runtime.' >> "$GITHUB_STEP_SUMMARY"
+          echo '6 pre-existing L2 implementations preserved; no overwrite.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'SEC-002 accepts metadata only; RED-001 is synthetic PREPROD-only; DR-001 executes no backup/restore.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical Registry/Factory unchanged. PROD and Trading untouched. Cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
