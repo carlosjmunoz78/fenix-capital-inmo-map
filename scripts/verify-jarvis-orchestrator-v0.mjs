@@ -11,6 +11,9 @@ const required=[
   "trading_access:false",
   "additional_cost_eur:0",
   "const SAFE_BRANCH='cerebro/jarvis-work-codex-complete-20261102'",
+  "function fileContent(v:unknown)",
+  "content:fileContent(args.content)",
+  "const MAX_CONTENT_BYTES=2_000_000",
   "'SAVE_FILE'",
   "'ROLLBACK_COMMIT'",
   "'RUN_READONLY_CHECK'",
@@ -29,6 +32,7 @@ for(const needle of required){
   if(!src.includes(needle))throw new Error(`ORCHESTRATOR_CONTRACT_MISSING:${needle}`);
 }
 const forbidden=[
+  "content:clean(args.content",
   "intent==='BROWSER_START'",
   "intent==='BROWSER_INPUT'",
   "intent==='TRADE'",
@@ -44,4 +48,4 @@ const humanReasons=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH
 for(const reason of humanReasons){
   if(!src.includes(reason))throw new Error(`HUMAN_REQUIRED_REASON_MISSING:${reason}`);
 }
-console.log(JSON.stringify({ok:true,contract:'JARVIS_ORCHESTRATOR_V0',deterministic:true,model_router:'PLANIFICADO',safe_branch_only:true,browser_mutation:false,trading_access:false,additional_cost_eur:0}));
+console.log(JSON.stringify({ok:true,contract:'JARVIS_ORCHESTRATOR_V0',deterministic:true,model_router:'PLANIFICADO',safe_branch_only:true,file_content_preserved:true,browser_mutation:false,trading_access:false,additional_cost_eur:0}));
