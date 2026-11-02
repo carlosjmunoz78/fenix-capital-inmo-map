@@ -114,7 +114,7 @@ export function createRepoSandboxJobHandlerV1({
       lastStatus = 'GREEN';
       lastFinishedAt = new Date().toISOString();
       const result = Object.freeze({
-        schema_version: '1.0.0',
+        schema_version: '1.1.0',
         state_type: 'CEREBRO_REPO_SANDBOX_DURABLE_JOB_RESULT_V1',
         status: 'PHYSICAL_PREPROD_GREEN',
         job_name: JOB_NAME,
@@ -128,6 +128,9 @@ export function createRepoSandboxJobHandlerV1({
         sandbox_status: execution.status,
         exit_code: execution.execution?.exit_code ?? null,
         timed_out: Boolean(execution.execution?.timed_out),
+        stdout: String(execution.execution?.stdout ?? ''),
+        stderr: String(execution.execution?.stderr ?? ''),
+        command_hash: execution.execution?.command_hash ?? null,
         evidence: Object.freeze({
           materialization_status: execution.materialization?.status ?? null,
           network: execution.execution?.network ?? null,
@@ -141,7 +144,7 @@ export function createRepoSandboxJobHandlerV1({
         completed_at: lastFinishedAt,
         ...authority(),
       });
-      if (typeof checkpoint === 'function') checkpoint({ stage: 'PHYSICAL_PREPROD_GREEN', at: lastFinishedAt });
+      if (typeof checkpoint === 'function') checkpoint({ stage: 'PHYSICAL_PREPROD_GREEN', at: lastFinishedAt, exit_code: result.exit_code, command_hash: result.command_hash });
       return result;
     } catch (error) {
       failures += 1;
@@ -152,7 +155,7 @@ export function createRepoSandboxJobHandlerV1({
   };
 
   handler.snapshot = () => Object.freeze({
-    schema_version: '1.0.0',
+    schema_version: '1.1.0',
     state_type: 'CEREBRO_REPO_SANDBOX_DURABLE_HANDLER_V1',
     status: lastStatus,
     job_name: JOB_NAME,
@@ -173,16 +176,17 @@ export const REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT = Object.freeze({
   capability: 'FACT-001/JOB-001/repo-sandbox-durable-handler-v1',
   job_name: JOB_NAME,
   environment: PREPROD,
-  queue: 'JOB-001/DurableJobRuntimeV1',
-  worker: 'JOB-001/DurableWorkerRunnerV1',
+  queue: 'JARVIS_WORK/POSTGRES_V1',
+  worker: 'JARVIS_WORK/GITHUB_ACTIONS_OIDC_V1',
   execution: 'FACT-001/universal-repo-sandbox-executor-v0',
   source: 'PUBLIC_GITHUB_EXACT_SHA',
   network: 'DENY',
   workspace: 'READ_ONLY',
   runtime_owned_image: true,
   runtime_owned_workspace_root: true,
-  retries_and_backoff: 'DurableJobRuntimeV1',
-  lease_and_heartbeat: 'DurableWorkerRunnerV1',
+  retries_and_backoff: 'jarvis_work_job_v1',
+  lease_and_heartbeat: 'jarvis_work_job_v1',
+  output_evidence: 'STDOUT_STDERR_EXIT_CODE_COMMAND_HASH',
   additional_cost_target_eur: 0,
   prod_authorized: false,
   prod_writes: false,
