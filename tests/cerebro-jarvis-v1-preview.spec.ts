@@ -48,7 +48,8 @@ test('Jarvis Workspace PREPROD · projects + chat + evidence + narrow viewport +
  await page.getByRole('button',{name:'Evidencia'}).click();
  await expect(page.getByText('FUENTE CANÓNICA',{exact:true})).toBeVisible();
  await page.getByRole('button',{name:'Herramientas'}).click();
- for(const tool of ['Archivos','Código','Terminal','Navegador','Tests','Evidencias'])await expect(page.getByRole('button').filter({hasText:tool})).toBeVisible();
+ const executionPanel=page.getByRole('complementary',{name:'Ejecución y evidencias'});
+ for(const tool of ['Archivos','Código','Terminal','Navegador','Tests','Evidencias'])await expect(executionPanel.getByRole('button').filter({hasText:tool})).toBeVisible();
  await page.screenshot({path:'test-results/jarvis-workspace-desktop.png',fullPage:true});
  await page.setViewportSize({width:695,height:900});
  await expect(page.getByText('JARVIS',{exact:true}).first()).toBeVisible();
