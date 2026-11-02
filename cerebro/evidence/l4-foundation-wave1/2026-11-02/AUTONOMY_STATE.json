@@ -1,0 +1,21 @@
+{
+  "status": "FOUNDATION_ONLY",
+  "layer": "L4",
+  "environment": "LAB_PREPROD",
+  "prod_autonomy": false,
+  "external_side_effects": false,
+  "sensitive_domains": [
+    "documents",
+    "KYC",
+    "AML",
+    "mortgage",
+    "banking",
+    "valuation",
+    "property",
+    "registry",
+    "cadastre",
+    "notarial",
+    "payments"
+  ],
+  "policy": "advisory/validation only; external regulated and high-risk acts fail closed"
+}
