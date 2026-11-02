@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "STRICT179_BATCH06_L0_DETERMINISTIC_PHYSICAL_EVIDENCE",
+  "status": "GREEN",
+  "tested": true,
+  "environment": "PREPROD",
+  "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
+  "source_commit_sha": "143f44af2350a3a98f0705e26f23d0bb5f9507d4",
+  "github_run_id": 41487166305,
+  "github_job_id": 125420440587,
+  "artifact": {
+    "name": "strict179-batch06-41487166305-1",
+    "id": 13162637061,
+    "digest": "sha256:156ae91aa2ff575f1a7bb52cb332a48fe1cd5371d057869d9a0d600c355f8c13"
+  },
+  "gate_vocabulary": {
+    "contract": "contract invariant PREPROD_ONLY_NO_PROD_WRITE",
+    "permissions": "permission allow LAB PREPROD LOCAL_SCRATCH; deny PROD_WRITE TRADING_ACCESS SECRETS NETWORK_WRITE EXTERNAL_WRITE",
+    "tests": "physical runtime test assertions PASS GREEN including adversarial fail_closed probes",
+    "evaluation": "evaluation approved PASS GREEN score on predefined physical-contract benchmark",
+    "tribunal": "tribunal approved PASS GREEN by independent JDG-001 judge with prod_authorized=false",
+    "observability": "audit log metric trace emitted GREEN",
+    "backup": "backup tested PASS GREEN restore verified by source digest",
+    "rollback": "rollback tested PASS GREEN revert after scratch mutation",
+    "rebuild": "rebuild tested PASS GREEN deterministic rerun and restored digest",
+    "cost": "additional_cost_eur=0 zero-cost",
+    "policy": "policy fail_closed deny PROD_WRITE and canonical HUMAN_REQUIRED behavior where applicable",
+    "preprod": "PREPROD physical execution and LOCAL_SCRATCH only"
+  },
+  "verified_engine_ids": ["CORE-001","GOV-001","POL-001","DEC-001","SEM-001","OWN-001","OBJ-001","ADR-001","CFG-001","VER-001"],
+  "engines": {
+    "CORE-001": {"status":"GREEN","mode":"DETERMINISTIC","source":"cerebro/runtime/l0/core001-v1.mjs","source_digest":"15c59d4be185e67aea96b2f4a3f3d0679f0305250a5db8693625ad06426e238f","backup_digest":"15c59d4be185e67aea96b2f4a3f3d0679f0305250a5db8693625ad06426e238f","restored_digest":"15c59d4be185e67aea96b2f4a3f3d0679f0305250a5db8693625ad06426e238f","execution_hash":"44e42ae38167152f8dae003b33c2737047986392b551784492949bc9eda89f62","evaluation_id":"3d0d0f10c0dfb2fa75f26337bf901774c94fe99399795971212b0e214c149a67","tribunal":"PASS"},
+    "GOV-001": {"status":"GREEN","mode":"READ_ONLY_REGISTRY","source":"cerebro/runtime/l0/gov001-v1.mjs","source_digest":"ae8fce1a5f2950f09ad26e2e8070e9973cdb744eb9e9bc7c7ab2c550d8a75cdb","backup_digest":"ae8fce1a5f2950f09ad26e2e8070e9973cdb744eb9e9bc7c7ab2c550d8a75cdb","restored_digest":"ae8fce1a5f2950f09ad26e2e8070e9973cdb744eb9e9bc7c7ab2c550d8a75cdb","execution_hash":"1ae57f995d7937506f6cad286cd415d121ce6395c5ecae78e8f7acf2ad3f00ca","evaluation_id":"b70d835ca0d8e2639c242b0e9818c3e546cbf82dcc8f4a8686b048289beff981","tribunal":"PASS"},
+    "POL-001": {"status":"GREEN","mode":"DETERMINISTIC_POLICY","source":"cerebro/runtime/l0/pol001-v1.mjs","source_digest":"c4a58681e43730f8283a3634f88db6f00e3de09f4ad08159dc725b10d1b1229b","backup_digest":"c4a58681e43730f8283a3634f88db6f00e3de09f4ad08159dc725b10d1b1229b","restored_digest":"c4a58681e43730f8283a3634f88db6f00e3de09f4ad08159dc725b10d1b1229b","execution_hash":"16d75090cc76432c507098ff37b998e6180a6f1ad52f736b9f0f0c1325a708c5","evaluation_id":"d5f4cf643c45e006402997069041d87fb0629a44abfe6ae7b128d3aa59697ac6","tribunal":"PASS","canonical_human_required":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]},
+    "DEC-001": {"status":"GREEN","mode":"DETERMINISTIC_SCORING","source":"cerebro/runtime/l0/dec001-v1.mjs","source_digest":"d9f6b418c00e800085accacd44ceb4936e7ba95c66b1440857202d72e21d2dfa","backup_digest":"d9f6b418c00e800085accacd44ceb4936e7ba95c66b1440857202d72e21d2dfa","restored_digest":"d9f6b418c00e800085accacd44ceb4936e7ba95c66b1440857202d72e21d2dfa","execution_hash":"2eb5910c5908c46fd751f470ecaf52eaa4a3089b1d107e92f379a1f83190fc8c","evaluation_id":"5ef1ade58d33455fc423cbf6c5300cad42cf9dab522edd960f88184ca39a2cd8","tribunal":"PASS"},
+    "SEM-001": {"status":"GREEN","mode":"CANONICAL_VOCABULARY","source":"cerebro/runtime/l0/sem001-v1.mjs","source_digest":"25dfaf2756aa2bc7f5df626111b1256c7fe422ab426eec2fa47503a7c4f80ae9","backup_digest":"25dfaf2756aa2bc7f5df626111b1256c7fe422ab426eec2fa47503a7c4f80ae9","restored_digest":"25dfaf2756aa2bc7f5df626111b1256c7fe422ab426eec2fa47503a7c4f80ae9","execution_hash":"c54dfbf5aff61c5f6cea23b7395f18ff447af9f67fe37b2a15ecb1ebc73b08b0","evaluation_id":"0a17faf56f10c884db24de6c5a14ace164e60a5363f096045a4a563cdaddcc72","tribunal":"PASS"},
+    "OWN-001": {"status":"GREEN","mode":"DETERMINISTIC_OWNERSHIP","source":"cerebro/runtime/l0/own001-v1.mjs","source_digest":"8ec9c673d2b78744e6ebdc2e83ab30f46e41145be94d2071fb7efbd52cefd829","backup_digest":"8ec9c673d2b78744e6ebdc2e83ab30f46e41145be94d2071fb7efbd52cefd829","restored_digest":"8ec9c673d2b78744e6ebdc2e83ab30f46e41145be94d2071fb7efbd52cefd829","execution_hash":"8e9b6190bdd65d15626797af02e9615802eafe218168a9399223a68947d8d66f","evaluation_id":"dbabb44410426be8d71273e667ef64993da028d35d70d5dd396fd7d730c05290","tribunal":"PASS"},
+    "OBJ-001": {"status":"GREEN","mode":"DETERMINISTIC_OBJECTIVES","source":"cerebro/runtime/l0/obj001-v1.mjs","source_digest":"e3d27a9c28e662529e60205a60566692b374d3b5c071023d536d17a6a47f36e8","backup_digest":"e3d27a9c28e662529e60205a60566692b374d3b5c071023d536d17a6a47f36e8","restored_digest":"e3d27a9c28e662529e60205a60566692b374d3b5c071023d536d17a6a47f36e8","execution_hash":"c8d35ef24edeae5262791455673512a0e9e1016309c4342028f5e3e0070d7463","evaluation_id":"b064cd5375c4591099f8fd9ecf04c7230f6eed18408a81795209c3df1d4ed288","tribunal":"PASS"},
+    "ADR-001": {"status":"GREEN","mode":"IMMUTABLE_RECORD","source":"cerebro/runtime/l0/adr001-v1.mjs","source_digest":"29777c6d318ec93cac1012a7e7987049a1b783d81151ef58beccc00df5c0569a","backup_digest":"29777c6d318ec93cac1012a7e7987049a1b783d81151ef58beccc00df5c0569a","restored_digest":"29777c6d318ec93cac1012a7e7987049a1b783d81151ef58beccc00df5c0569a","execution_hash":"a4e7f7eb370b9da6350845a9bab37f4b60b4635e1af4984dcad2d7a0faa1f4d0","evaluation_id":"160e9001bfd44bd23c9087fe54a541e085435e6a4c7318df9f5a6e6a4fa6a47b","tribunal":"PASS"},
+    "CFG-001": {"status":"GREEN","mode":"DECLARATIVE_CONFIG","source":"cerebro/runtime/l0/cfg001-v1.mjs","source_digest":"2e6e99b7137051561a73f2ef7657eba37dc02f9aa8a8833f37d255b8403029eb","backup_digest":"2e6e99b7137051561a73f2ef7657eba37dc02f9aa8a8833f37d255b8403029eb","restored_digest":"2e6e99b7137051561a73f2ef7657eba37dc02f9aa8a8833f37d255b8403029eb","execution_hash":"e0e77ec00e2337e798179dab0c5307705f4daf83b6c4fa1e6b9837afd7741caf","evaluation_id":"3db63e411f9c153b5e6acee4ec26035004535ff845212012f46612d68788711d","tribunal":"PASS","prod_probe":"PROD_FAIL_CLOSED"},
+    "VER-001": {"status":"GREEN","mode":"SEMVER_COMPATIBILITY","source":"cerebro/runtime/l0/ver001-v1.mjs","source_digest":"c8b135b9275f452563a1aae94256b36fbe89eec6cdb56cf2f967da5eb2a0183f","backup_digest":"c8b135b9275f452563a1aae94256b36fbe89eec6cdb56cf2f967da5eb2a0183f","restored_digest":"c8b135b9275f452563a1aae94256b36fbe89eec6cdb56cf2f967da5eb2a0183f","execution_hash":"de2b8b2b0616a728875b2884ffc2a46f02d708edfd76ebb025e5fb798ef05f68","evaluation_id":"3d18a755be4a4639f82945e5fdd3547d09655430963f5c4b2246907f209787c4","tribunal":"PASS"}
+  },
+  "safety": {"prod_authorized":false,"prod_write_authorized":false,"trading_access":false,"secrets_read":false,"network_write":false,"external_writes":false,"registry_mutated":false,"factory_mutated":false,"additional_cost_eur":0},
+  "claim_scope": "PREPROD/LOCAL_SCRATCH 12-gate evidence only; no PROD execution or write is authorized by this record. Existing L0 runtimes are wrapped and preserved, not replaced."
+}
