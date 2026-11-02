@@ -45,7 +45,14 @@ for(const [layer,p] of Object.entries(LAYER_MANIFESTS)){const m=readJson(p);cons
 if(owner.size!==179)throw new Error(`physical manifest union ${owner.size} != 179`);
 for(const id of ids)if(!owner.has(id))throw new Error(`Registry ID missing physical foundation manifest: ${id}`);
 const files=[];for(const p of walk(ROOT).sort()){const r=rel(p);if(!EXEC_EXT.has(path.extname(r).toLowerCase()))continue;let content='';try{content=fs.readFileSync(p,'utf8');}catch{continue;}files.push({path:r,content});}
-const p23=readJson(P23_INDEX);const p23Live=p23.live_integration?.status==='LIVE'||p23.live_integration?.status==='GREEN'||p23.status==='LIVE';
+const p23=readJson(P23_INDEX);
+const p23Integration=p23.p23_live_integration||p23.live_integration||{};
+const p23Live=['LIVE','GREEN','PROD_GREEN'].includes(p23Integration.status)
+  && p23Integration.target_engine==='FACT-001'
+  && p23Integration.audit_points===179
+  && p23Integration.prod_registered===179
+  && p23Integration.prod_execution_authorized===0
+  && p23Integration.prod_write_authorized===0;
 const rows=[];
 for(const id of ids){
   const evidence={
@@ -67,7 +74,7 @@ for(const id of ids){
   const autonomousProdReady=Object.values(gates).every(Boolean)&&p23Live;
   rows.push({company_id:'fenix',engine_id:id,layer:owner.get(id),version:registry.defaults?.version||'0.1.0',physical_foundation:true,p23_live:p23Live,gates,gate_count:gateCount,gate_total:Object.keys(gates).length,autonomous_prod_ready:autonomousProdReady,prod_registration_ready:true,prod_execution_authorized:false,human_required:autonomousProdReady?null:'POLICY_CONFLICT',human_required_allowed:HUMAN_REQUIRED,evidence});
 }
-const summary={schema_version:'1.0.0',mission:'AUDIT_179_AUTONOMY_P23_PREPROD_PROD_READINESS',status:'GREEN_AUDIT_COMPLETE',environment:'LAB_PREPROD',registry_total:179,physical_foundation:rows.filter(x=>x.physical_foundation).length,p23:{auditor:p23.auditor||'Jarvis (P23)',status:p23.status||null,live_integration_status:p23.live_integration?.status||null,live_verified:p23Live},prod_registration_ready:rows.filter(x=>x.prod_registration_ready).length,autonomous_prod_ready:rows.filter(x=>x.autonomous_prod_ready).length,foundation_only:rows.filter(x=>!x.autonomous_prod_ready).length,layer_counts:Object.fromEntries(Object.entries(layers).map(([k,v])=>[k,v.length])),strict_gate_counts:Object.fromEntries(Object.keys(rows[0].gates).map(g=>[g,rows.filter(x=>x.gates[g]).length])),additional_cost_eur:0,trading_touched:false,prod_writes:false,registry_mutated:false,factory_mutated:false,classification_rule:'EVIDENCE_FIRST_FAIL_CLOSED_NO_SCAFFOLD_OR_DOCUMENTATION_ASSUMPTIONS',next_action:p23Live?'BUILD_GOVERNED_PROD_REGISTRATION_SURFACE':'WIRE_P23_LIVE_TO_FACT_001_THEN_REAUDIT'};
+const summary={schema_version:'1.0.0',mission:'AUDIT_179_AUTONOMY_P23_PREPROD_PROD_READINESS',status:'GREEN_AUDIT_COMPLETE',environment:'LAB_PREPROD',registry_total:179,physical_foundation:rows.filter(x=>x.physical_foundation).length,p23:{auditor:p23.auditor||'Jarvis (P23)',status:p23.status||null,live_integration_status:p23Integration.status||null,live_verified:p23Live},prod_registration_ready:rows.filter(x=>x.prod_registration_ready).length,autonomous_prod_ready:rows.filter(x=>x.autonomous_prod_ready).length,foundation_only:rows.filter(x=>!x.autonomous_prod_ready).length,layer_counts:Object.fromEntries(Object.entries(layers).map(([k,v])=>[k,v.length])),strict_gate_counts:Object.fromEntries(Object.keys(rows[0].gates).map(g=>[g,rows.filter(x=>x.gates[g]).length])),additional_cost_eur:0,trading_touched:false,prod_writes:false,registry_mutated:false,factory_mutated:false,classification_rule:'EVIDENCE_FIRST_FAIL_CLOSED_NO_SCAFFOLD_OR_DOCUMENTATION_ASSUMPTIONS',next_action:p23Live?'BUILD_GOVERNED_PROD_REGISTRATION_SURFACE':'WIRE_P23_LIVE_TO_FACT_001_THEN_REAUDIT'};
 const report={...summary,engines:rows};
 fs.rmSync(OUT,{recursive:true,force:true});fs.mkdirSync(OUT,{recursive:true});fs.writeFileSync(path.join(OUT,'AUTONOMY_READINESS_BASELINE.json'),json(report));fs.writeFileSync(path.join(OUT,'SUMMARY.json'),json(summary));fs.writeFileSync(path.join(OUT,'REBUILD.sha256'),sha(report)+'\n');
 console.log('READINESS_BASELINE='+JSON.stringify(summary));
