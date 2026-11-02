@@ -7,16 +7,7 @@ on:
     paths:
       - 'cerebro/missions/strict179-batch04-l1-safe-runtimes-v1.mjs'
       - '.github/workflows/cerebro-strict179-batch04-l1-safe-runtimes-v1.yml'
-      - 'cerebro/evidence/contracts/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/permissions/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/tests/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/evaluation/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/tribunal/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/observability/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/backup/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/rollback/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/evidence/rebuild/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
-      - 'cerebro/governance/policy/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
+      - 'cerebro/evidence/contracts-permissions-tests-evaluation-tribunal-observability-backup-rollback-rebuild-policy/STRICT179_BATCH04_L1_SAFE_RUNTIMES_2026-11-02.json'
   workflow_dispatch:
 
 permissions:
