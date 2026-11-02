@@ -6,9 +6,11 @@ function mustNot(text,needle,label){if(text.includes(needle))throw new Error(`Fo
 
 const host=read('src/CerebroConsoleHost.tsx');
 const shell=read('src/CerebroConsoleShell.tsx');
-const work=read('src/CerebroJarvisWorkConsole.tsx');
-const workCss=read('src/cerebro-jarvis-work.css');
+const jarvis=read('src/CerebroJarvisWorkConsole.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
+const operativeCss=read('src/cerebro-operative-console.css');
+const isolationCss=read('src/cerebro-route-isolation-v2.css');
+const attachment=read('src/CerebroAttachmentBridge.tsx');
 const route=read('src/RouteAccessGuard.tsx');
 const hostCss=read('src/cerebro-console-host.css');
 const activityApi=read('src/cerebroActivityApi.ts');
@@ -16,48 +18,59 @@ const activityGateway=read('supabase/functions/cerebro-console-activity-v0/index
 
 must(route,"import CerebroConsoleHost from './CerebroConsoleHost';",'reversible host route');
 must(route,'return <CerebroConsoleHost/>;','host mount');
-must(host,"return'OPERATIVA'",'JARVIS Work default view');
-must(host,"import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';",'Work surface import');
-must(host,'<CerebroJarvisWorkConsole','Work surface mount');
-must(host,'hidden={browser}','Work stays mounted while Browser is visible');
-must(host,'className="cerebro-work-mount cerebro-host-v0"','Browser retains canonical V0 host contract around Work');
+must(host,"import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';",'Jarvis surface import');
+must(host,"import CerebroOperativeConsole from './CerebroOperativeConsole';",'Operativa surface import');
+must(host,"primaryView==='JARVIS'?",'Jarvis view routing');
+must(host,"primaryView==='OPERATIVA'?",'Operativa view routing');
+must(host,'<CerebroJarvisWorkConsole surface="JARVIS"/>','Jarvis dedicated mount');
+must(host,'<CerebroOperativeConsole/>','Operativa dedicated mount');
 must(host,"if(section==='legacy-v0')return'V0'",'legacy V0 rollback route');
 must(host,'<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>','legacy canonical V0 rollback');
-mustNot(host,'CerebroOperativeConsole','parallel Operativa console must not be mounted by host');
+must(host,"document.documentElement.dataset.cerebroConsole='1'",'route isolation marker');
 
-must(work,"import CerebroConsoleShell from './CerebroConsoleShell';",'canonical V0 core inside Work');
-must(work,'<CerebroConsoleShell/>','canonical V0 rendered directly in Work');
-must(work,'fetchCerebroActivity','real activity source consumed directly');
-must(work,"progress_provenance!=='REAL_GITHUB_JOBS'",'fail-closed numeric progress');
-must(work,"No se inventan trabajos ni estados.",'explicit no-fake-work empty state');
-must(work,'Abrir evidencia real','real evidence inspector');
-must(work,'HUMAN_REQUIRED','human exception surface');
-must(work,'Esta vista no fabrica alertas.','no fake human alerts');
-must(work,'Fábrica','Factory work filter');
-mustNot(work,'querySelector','Work must not proxy the canonical V0 through DOM selectors');
-mustNot(work,'MutationObserver','Work must not inspect hidden V0 DOM');
+// Jarvis remains intact and keeps the canonical core available on its own surface.
+must(jarvis,"import CerebroConsoleShell from './CerebroConsoleShell';",'canonical V0 core inside Jarvis');
+must(jarvis,'<CerebroConsoleShell/>','canonical V0 rendered in Jarvis');
+must(jarvis,'fetchCerebroActivity','real activity source retained in Jarvis');
 
-must(workCss,'--jw-bg:#020a10','blue Browser-compatible background token');
-must(workCss,'--jw-blue:#2c9cff','blue Browser-compatible action token');
-must(workCss,'--jw-cyan:#37d9ff','cyan Browser-compatible highlight token');
-must(workCss,'grid-template-columns:280px minmax(0,1fr) 330px','three-zone Work layout');
-must(workCss,'.jarvis-work-core-shell .cerebro-console','Work presentation wraps canonical V0 directly');
-must(workCss,'.jarvis-work-list','real work rail');
-must(workCss,'.jarvis-work-inspector','evidence inspector');
+// Operativa is now a dedicated executive surface but still consumes only real activity provenance.
+must(operative,'fetchCerebroActivity','real activity source consumed by Operativa');
+must(operative,"progress_provenance!=='REAL_GITHUB_JOBS'",'fail-closed numeric progress');
+must(operative,'No voy a inventar trabajos ni porcentajes.','explicit no-fake-work empty state');
+must(operative,'Fénix Capital','human company selector');
+must(operative,'CAPTACASA','multi-company selector');
+must(operative,"type PowerMode='Suave'|'Normal'|'Alto'|'Máximo'",'human power control');
+must(operative,'Mantén todas las protecciones, no generes gasto no autorizado','power policy guard');
+must(operative,'className="operativa-jarvis-composer"','global Jarvis composer');
+must(operative,'aria-label="Añadir archivo"','attachment control');
+must(operative,'aria-label="Mensaje para Jarvis"','empty Jarvis composer textarea');
+mustNot(operative,'placeholder=','Operativa composer must stay visually empty');
+must(operative,'createVoiceRecognition','dictation uses canonical voice helper');
+must(operative,"querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main')",'voice delegates to canonical voice session');
+must(operative,'<CerebroConsoleShell/>','canonical gateway and voice core preserved behind Operativa');
+must(operative,'Para ti','human decision surface');
+must(operative,'Lo siguiente','next-work surface');
+must(operative,'Resultado reciente','result surface');
 
-must(hostCss,"html[data-cerebro-console='1'] .ops-mobile-menu-button",'CEREBRO global App launcher isolation');
+must(operativeCss,'.operativa-command-deck','executive command deck');
+must(operativeCss,'.operativa-reactor','power reactor');
+must(operativeCss,'.operativa-work-row','clean work rows');
+must(operativeCss,'.operativa-jarvis-composer','floating Jarvis composer');
+must(operativeCss,'.operativa-inspector','progressive detail inspector');
+must(operativeCss,'@media(prefers-reduced-motion:reduce)','reduced-motion accessibility');
+mustNot(operativeCss,'grid-template-columns:280px minmax(0,1fr) 330px','old technical three-column layout removed from Operativa');
+
+must(isolationCss,"html[data-cerebro-console='1'] button[aria-label='Abrir chat interno']",'private chat launcher isolated on /cerebro');
 must(hostCss,"html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']",'competing global voice launcher suppressed');
-must(hostCss,'.cerebro-host-topbar{position:sticky','rollback console chrome');
+must(hostCss,"html[data-cerebro-console='1'] .calc-launcher",'global calculator launcher suppressed');
+
+must(attachment,".operativa-jarvis-composer",'attachment bridge targets Operativa');
+must(attachment,"textarea[aria-label=\"Mensaje para Jarvis\"]",'attachment bridge targets Jarvis composer');
+must(attachment,'extractCerebroAttachment','existing local/private extractor reused');
 
 must(shell,'postCerebroConsoleChat','canonical Gateway chat client');
 must(shell,'className="cerebro-voice-main"','canonical voice control');
-must(shell,'onClick={toggleVoiceSession}','direct V0 voice session control');
-must(shell,"voiceSessionActive?'Finalizar conversación':'Hablar con CEREBRO'",'continuous voice UI');
-must(shell,'Decisión humana por excepción','human-by-exception policy visible');
-
-// Historical Operativa remains reference/rollback code only; never visible JARVIS.
-must(operative,'fetchCerebroActivity','historical real activity implementation preserved');
-mustNot(host,'<CerebroOperativeConsole','historical proxy not mounted');
+must(shell,'onClick={toggleVoiceSession}','canonical continuous voice control');
 
 must(activityApi,'cerebro-console-activity-v0','activity gateway endpoint preserved');
 must(activityApi,"progress_provenance:CerebroProgressProvenance",'typed progress provenance');
@@ -67,4 +80,4 @@ must(activityGateway,'https://api.github.com/repos/','public zero-cost activity 
 must(activityGateway,'/jobs?per_page=100','GitHub jobs step projection');
 must(activityGateway,'REAL_GITHUB_JOBS','real step-level progress provenance');
 
-console.log('CEREBRO JARVIS Work blue contracts: OK');
+console.log('Operativa premium separation contracts: OK');
