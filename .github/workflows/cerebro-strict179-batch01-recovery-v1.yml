@@ -6,6 +6,7 @@ on:
       - 'cerebro/close-179-per-engine-autonomy-v1-20261102'
     paths:
       - 'cerebro/missions/strict179-batch01-recovery-gates-v1.mjs'
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
       - '.github/workflows/cerebro-strict179-batch01-recovery-v1.yml'
       - 'cerebro/evidence/backup/**'
       - 'cerebro/evidence/rollback/**'
