@@ -1,5 +1,5 @@
 name: CEREBRO Continuous Useful Worker V1
-run-name: CEREBRO SUSTAINED RECLAIM 43 · USER PRIORITY
+run-name: CEREBRO SUSTAINED RECLAIM 52 · USER PRIORITY
 
 on:
   push:
@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-continuous-useful-worker-v1-43
+  group: cerebro-continuous-useful-worker-v1-52
   cancel-in-progress: true
 
 jobs:
@@ -31,4 +31,4 @@ jobs:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo 'Lane 43 reclaimed for user-priority Operativa PROD deployment.'
+      - run: echo 'Lane 52 reclaimed for user-priority Operativa PROD deployment.'
