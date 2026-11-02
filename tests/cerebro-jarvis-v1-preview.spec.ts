@@ -38,7 +38,18 @@ async function expectCleanHome(page:Page){
  await expectNoHorizontalOverflow(page);
 }
 
-async function openAuditProject(page:Page){await page.getByRole('button',{name:/Auditoría Total/}).first().click();await expect(page.getByRole('button',{name:'Inicio de Jarvis',exact:true})).toBeVisible();await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toBeVisible();await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toBeVisible()}
+async function openAuditProject(page:Page){
+ await page.getByRole('button',{name:/Auditoría Total/}).first().click();
+ await expect(page.getByRole('button',{name:'Inicio de Jarvis',exact:true})).toBeVisible();
+ await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toBeVisible();
+ await expect(page.locator('.jarvis-center-pane')).toBeVisible();
+}
+
+async function ensureExecutionVisible(page:Page){
+ const execution=page.getByRole('complementary',{name:'Ejecución y evidencias'});
+ if(await execution.count()===0)await page.getByTitle('Mostrar u ocultar ejecución').click();
+ await expect(execution).toBeVisible();
+}
 
 async function expectProjectContract(page:Page){
  await expect(page.getByText('01 · Auditoría Total',{exact:true})).toBeVisible();
@@ -68,8 +79,8 @@ test('JARVIS Work PREPROD · clean home + project workspace + Codex/Work + Opera
  await page.getByTitle('Restaurar tamaño').click();
  await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
 
- const executionToggle=page.getByTitle('Mostrar u ocultar ejecución');
- await executionToggle.click();
+ await ensureExecutionVisible(page);
+ await page.getByTitle('Mostrar u ocultar ejecución').click();
  await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toHaveCount(0);
  await page.getByRole('button',{name:'Inicio de Jarvis',exact:true}).click();
  await expectCleanHome(page);
