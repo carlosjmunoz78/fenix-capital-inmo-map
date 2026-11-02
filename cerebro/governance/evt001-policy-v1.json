@@ -7,6 +7,7 @@
   "deny": ["PROD", "CROSS_COMPANY", "UNKNOWN_OPERATION", "UNBOUNDED_RETRY", "TRADING_ACCESS"],
   "permission": "SCOPED_CONTEXT_ONLY",
   "fail_closed": true,
+  "source_of_truth_must_not_be_duplicated": true,
   "prod_execution_authorized": false,
   "prod_write_authorized": false,
   "trading_access": false,
