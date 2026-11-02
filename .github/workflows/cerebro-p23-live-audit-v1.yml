@@ -1,0 +1,106 @@
+name: CEREBRO P23 Live Audit V1
+
+on:
+  schedule:
+    - cron: '17 2 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'cerebro/**'
+      - '.github/workflows/cerebro-p23-live-audit-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cerebro-p23-live-audit-v1
+  cancel-in-progress: false
+
+env:
+  P23_STATE_BRANCH: cerebro/p23-state-v1
+  OUT: /tmp/cerebro-p23-live
+
+jobs:
+  audit-179-and-persist:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert canonical PROD control-plane source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${GITHUB_SHA}"
+          test -f cerebro/registry/prod-engine-governance.v1.json
+          test -f cerebro/audit/p23-live-contract.v1.json
+          test -f cerebro/runtime/p23/fact001-audit-live-v1.mjs
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json'));
+          const g=JSON.parse(fs.readFileSync('cerebro/registry/prod-engine-governance.v1.json'));
+          const p=JSON.parse(fs.readFileSync('cerebro/audit/p23-live-contract.v1.json'));
+          if(r.count!==179||r.engine_ids.length!==179||new Set(r.engine_ids).size!==179)throw new Error('Registry mismatch');
+          if(g.coverage.expected_count!==179||g.default_policy.execution_mode!=='FAIL_CLOSED'||g.default_policy.prod_execution_authorized!==false||g.default_policy.prod_write_authorized!==false||g.default_policy.trading_access!==false)throw new Error('PROD governance unsafe');
+          if(p.status!=='LIVE'||p.target_engine!=='FACT-001'||p.cadence.maximum_interval_hours!==24||p.cadence.significant_change_trigger!==true)throw new Error('P23 live contract mismatch');
+          NODE
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Run P23 focused contract tests
+        working-directory: cerebro
+        run: node --test tests/p23-fact001-live-v1.test.mjs
+      - name: Generate live FACT-001 audit points for all 179 engines
+        shell: bash
+        run: |
+          set -euo pipefail
+          audited_at="$(date -u +'%Y-%m-%dT%H:%M:%S.000Z')"
+          node cerebro/runtime/p23/fact001-audit-live-v1.mjs \
+            --out "$OUT" \
+            --audited-at "$audited_at" \
+            --source-sha "$GITHUB_SHA" \
+            --environment PROD_CONTROL_PLANE \
+            --company-id fenix
+          jq -e '.status=="GREEN" and .p23_live==true and .registry_total==179 and .audit_points==179 and .prod_registered==179 and .prod_execution_authorized==0 and .prod_write_authorized==0 and .additional_cost_eur==0 and .trading_access==false' "$OUT/SUMMARY.json" >/dev/null
+          test "$(wc -l < "$OUT/AUDIT_POINTS.jsonl" | tr -d ' ')" -eq 179
+          ! grep -R -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' "$OUT"
+      - name: Persist live audit state on isolated zero-cost Git state branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'CEREBRO P23'
+          git config user.email 'cerebro-p23@users.noreply.github.com'
+          rm -rf /tmp/cerebro-p23-state-wt
+          if git fetch --no-tags origin "refs/heads/${P23_STATE_BRANCH}:refs/remotes/origin/${P23_STATE_BRANCH}" 2>/dev/null; then
+            git worktree add -B cerebro-p23-state-local /tmp/cerebro-p23-state-wt "refs/remotes/origin/${P23_STATE_BRANCH}"
+          else
+            git worktree add --detach /tmp/cerebro-p23-state-wt HEAD
+            cd /tmp/cerebro-p23-state-wt
+            git switch --orphan cerebro-p23-state-local
+            git rm -rf . >/dev/null 2>&1 || true
+            cd "$GITHUB_WORKSPACE"
+          fi
+          mkdir -p /tmp/cerebro-p23-state-wt/p23/history
+          cp "$OUT/LATEST.json" /tmp/cerebro-p23-state-wt/p23/LATEST.json
+          cp "$OUT/SUMMARY.json" /tmp/cerebro-p23-state-wt/p23/SUMMARY.json
+          cp "$OUT/AUDIT_POINTS.jsonl" /tmp/cerebro-p23-state-wt/p23/AUDIT_POINTS.jsonl
+          cp "$OUT/SUMMARY.json" "/tmp/cerebro-p23-state-wt/p23/history/${GITHUB_SHA}-${GITHUB_RUN_ID}.json"
+          cd /tmp/cerebro-p23-state-wt
+          git add p23
+          git commit -m "P23 audit: ${GITHUB_SHA} run ${GITHUB_RUN_ID}"
+          git push origin "HEAD:refs/heads/${P23_STATE_BRANCH}"
+      - name: Verify durable P23 state receipt
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          git fetch --no-tags --force origin "refs/heads/${P23_STATE_BRANCH}:refs/remotes/origin/${P23_STATE_BRANCH}"
+          git show "refs/remotes/origin/${P23_STATE_BRANCH}:p23/SUMMARY.json" > /tmp/p23-durable-summary.json
+          jq -e --arg sha "$GITHUB_SHA" '.status=="GREEN" and .p23_live==true and .source_sha==$sha and .audit_points==179 and .prod_registered==179 and .prod_execution_authorized==0 and .prod_write_authorized==0' /tmp/p23-durable-summary.json >/dev/null
+          echo "P23_LIVE_GREEN source_sha=${GITHUB_SHA} state_branch=${P23_STATE_BRANCH} audit_points=179" >> "$GITHUB_STEP_SUMMARY"

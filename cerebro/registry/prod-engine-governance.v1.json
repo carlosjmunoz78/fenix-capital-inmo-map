@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_PROD_ENGINE_GOVERNANCE_V1",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "v1",
+  "canonical_registry": "cerebro/registry/engine-registry.v1.json",
+  "coverage": {
+    "strategy": "ALL_CANONICAL_ENGINE_IDS",
+    "expected_count": 179,
+    "require_exact_unique_registry_match": true,
+    "cross_company_access": "DENY"
+  },
+  "default_policy": {
+    "prod_registered": true,
+    "prod_registration_authorized": true,
+    "prod_execution_authorized": false,
+    "prod_write_authorized": false,
+    "execution_mode": "FAIL_CLOSED",
+    "read_only_observability_authorized": true,
+    "p23_audit_authorized": true,
+    "network_execution_authorized": false,
+    "secret_value_access_authorized": false,
+    "trading_access": false,
+    "additional_cost_eur": 0,
+    "kill_switch_required_before_execution": true,
+    "explicit_per_engine_promotion_required_for_execution": true
+  },
+  "human_required_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "prohibited_by_default": [
+    "PROD_MUTATION",
+    "MONEY_MOVEMENT",
+    "LEGAL_ACT",
+    "SIGNATURE",
+    "BANK_EXECUTION",
+    "DESTRUCTIVE_OPERATION",
+    "TRADING_EXECUTION",
+    "CREDENTIAL_VALUE_READ"
+  ],
+  "promotion_semantics": "Registration in PROD control plane is not authorization for autonomous execution.",
+  "additional_subscription_eur": 0
+}

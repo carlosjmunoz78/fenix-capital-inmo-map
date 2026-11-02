@@ -1,0 +1,122 @@
+name: CEREBRO P23 Autonomy PROD Readiness Gate V1
+
+on:
+  push:
+    branches: [cerebro-p23-autonomy-prod-readiness-20261102]
+    paths:
+      - 'cerebro/registry/prod-engine-governance.v1.json'
+      - 'cerebro/audit/p23-live-contract.v1.json'
+      - 'cerebro/audit/jarvis-audit-index.v1.json'
+      - 'cerebro/runtime/p23/**'
+      - 'cerebro/tests/p23-fact001-live-v1.test.mjs'
+      - '.github/workflows/cerebro-p23-live-audit-v1.yml'
+      - '.github/workflows/cerebro-p23-autonomy-prod-readiness-gate-v1.yml'
+      - 'cerebro/evidence/p23-autonomy-prod-readiness/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-p23-autonomy-prod-readiness-gate-v1
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 4a79617debd319f29c10385036e326f924d2a70c
+  OUT: /tmp/cerebro-p23-readiness-gate
+
+jobs:
+  p23-prod-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 500
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated safe change surface
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-p23-autonomy-prod-readiness-20261102'
+          test "$GITHUB_REF_NAME" != main
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          git diff --exit-code "$BASE_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs src supabase public index.html package.json package-lock.json vite.config.ts
+          git diff --name-only "$BASE_SHA" HEAD > /tmp/changed.txt
+          ! grep -Ei '(^|/)(trading|lab-trd)(/|$)' /tmp/changed.txt
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Validate canonical Registry Factory and new runtime syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          cd ..
+          node --check cerebro/runtime/p23/fact001-audit-live-v1.mjs
+          node --check cerebro/missions/audit-179-autonomy-readiness-v1.mjs
+      - name: Prove PROD registration governance is exact 179 and fail-closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json'));
+          const g=JSON.parse(fs.readFileSync('cerebro/registry/prod-engine-governance.v1.json'));
+          const p=JSON.parse(fs.readFileSync('cerebro/audit/p23-live-contract.v1.json'));
+          if(r.count!==179||r.engine_ids.length!==179||new Set(r.engine_ids).size!==179)throw new Error('Registry !=179 unique');
+          if(g.state_type!=='CEREBRO_PROD_ENGINE_GOVERNANCE_V1'||g.coverage.strategy!=='ALL_CANONICAL_ENGINE_IDS'||g.coverage.expected_count!==179||g.coverage.require_exact_unique_registry_match!==true)throw new Error('179 PROD coverage invalid');
+          const d=g.default_policy;
+          if(d.prod_registered!==true||d.prod_registration_authorized!==true||d.prod_execution_authorized!==false||d.prod_write_authorized!==false||d.execution_mode!=='FAIL_CLOSED'||d.trading_access!==false||d.secret_value_access_authorized!==false||d.additional_cost_eur!==0)throw new Error('unsafe PROD default');
+          if(p.status!=='LIVE'||p.target_engine!=='FACT-001'||p.audit_scope!=='ALL_179_CANONICAL_ENGINES'||p.cadence.maximum_interval_hours!==24||p.cadence.significant_change_trigger!==true)throw new Error('P23 Live contract invalid');
+          console.log('PROD_CONTROL_PLANE_REGISTRATION_READY=179/179_FAIL_CLOSED');
+          NODE
+      - name: P23 focused tests
+        working-directory: cerebro
+        run: node --test tests/p23-fact001-live-v1.test.mjs
+      - name: Full regression with known paused-worker exclusions only
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+      - name: Prove physical foundation and deterministic P23 audit twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connections"
+          for layer in L7 L8 L9; do
+            node cerebro/missions/audit-priority-l789-v1.mjs --layer "$layer" --out "$OUT/${layer}"
+          done
+          fixed='2026-11-02T14:00:00.000Z'
+          node cerebro/runtime/p23/fact001-audit-live-v1.mjs --out "$OUT/p23a" --audited-at "$fixed" --source-sha "$GITHUB_SHA" --environment PREPROD --company-id fenix
+          node cerebro/runtime/p23/fact001-audit-live-v1.mjs --out "$OUT/p23b" --audited-at "$fixed" --source-sha "$GITHUB_SHA" --environment PREPROD --company-id fenix
+          cmp "$OUT/p23a/LATEST.json" "$OUT/p23b/LATEST.json"
+          cmp "$OUT/p23a/AUDIT_POINTS.jsonl" "$OUT/p23b/AUDIT_POINTS.jsonl"
+          jq -e '.status=="GREEN" and .p23_live==true and .registry_total==179 and .audit_points==179 and .prod_registered==179 and .prod_execution_authorized==0 and .prod_write_authorized==0 and .trading_access==false and .additional_cost_eur==0' "$OUT/p23a/SUMMARY.json" >/dev/null
+          test "$(wc -l < "$OUT/p23a/AUDIT_POINTS.jsonl" | tr -d ' ')" -eq 179
+      - name: Prove P23 daily plus significant-change live wiring
+        shell: bash
+        run: |
+          set -euo pipefail
+          f=.github/workflows/cerebro-p23-live-audit-v1.yml
+          grep -F "cron: '17 2 * * *'" "$f" >/dev/null
+          grep -F 'branches: [main]' "$f" >/dev/null
+          grep -F 'cerebro/**' "$f" >/dev/null
+          grep -F 'cerebro/p23-state-v1' "$f" >/dev/null
+          grep -F 'PROD_CONTROL_PLANE' "$f" >/dev/null
+          grep -F 'AUDIT_POINTS.jsonl' "$f" >/dev/null
+      - name: Security cost and isolation boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' cerebro/runtime/p23 cerebro/audit/p23-live-contract.v1.json cerebro/registry/prod-engine-governance.v1.json cerebro/tests/p23-fact001-live-v1.test.mjs
+          ! grep -R --line-number -E 'prod_execution_authorized[[:space:]]*[:=][[:space:]]*true|prod_write_authorized[[:space:]]*[:=][[:space:]]*true|trading_access[[:space:]]*[:=][[:space:]]*true|additional_cost_eur[[:space:]]*[:=][[:space:]]*[1-9]' cerebro/runtime/p23 cerebro/audit/p23-live-contract.v1.json cerebro/registry/prod-engine-governance.v1.json
+          echo 'P23 LIVE + 179/179 PROD CONTROL-PLANE REGISTRATION READY; execution/write remain fail-closed; cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
