@@ -1,7 +1,12 @@
 name: CEREBRO Priority Portfolio Sustained V1
-run-name: CEREBRO PRIORITY ${{ inputs.lane }} · C${{ inputs.cycle }} · PAUSED
+run-name: CEREBRO PRIORITY RECLAIM 241 · USER PRIORITY
 
 on:
+  push:
+    branches:
+      - ops/reclaim-runner-for-pages-20261102
+    paths:
+      - .github/workflows/cerebro-portfolio-priority-sustained-v1.yml
   workflow_dispatch:
     inputs:
       lane:
@@ -18,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-priority-portfolio-sustained-v1-${{ inputs.lane }}
+  group: cerebro-priority-portfolio-sustained-v1-241
   cancel-in-progress: true
 
 jobs:
@@ -26,4 +31,4 @@ jobs:
     if: ${{ false }}
     runs-on: ubuntu-latest
     steps:
-      - run: echo 'Priority portfolio background work temporarily paused for user-priority Operativa PROD deployment.'
+      - run: echo 'Priority lane 241 reclaimed for user-priority Operativa PROD deployment.'
