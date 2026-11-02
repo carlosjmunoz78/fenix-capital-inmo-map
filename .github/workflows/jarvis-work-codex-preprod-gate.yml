@@ -32,8 +32,16 @@ jobs:
         run: |
           set -euo pipefail
           test -f src/JarvisEmbeddedConsole.tsx
+          test -f src/JarvisWorkTools.tsx
+          test -f src/JarvisGitAdvancedPanel.tsx
+          test -f src/jarvisGitInspectApi.ts
+          test -f src/JarvisOperativaComposerPortal.tsx
+          test -f src/JarvisVisibleLanguageGuard.tsx
           test -f src/jarvisWorkApi.ts
           test -f src/jarvis-work-v2.css
+          test -f src/jarvis-work-premium-final.css
+          test -f src/jarvis-work-tools.css
+          test -f supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
           grep -q "createJarvisProject" src/CerebroJarvisWorkConsole.tsx
           grep -q "importJarvisProject" src/CerebroJarvisWorkConsole.tsx
           grep -q "renameJarvisProject" src/CerebroJarvisWorkConsole.tsx
@@ -41,8 +49,16 @@ jobs:
           grep -q "focusPane('center')" src/CerebroJarvisWorkConsole.tsx
           grep -q "focusPane('right')" src/CerebroJarvisWorkConsole.tsx
           grep -q "setLayout(DEFAULT_LAYOUT)" src/CerebroJarvisWorkConsole.tsx
+          grep -q "JarvisOperativaComposerPortal" src/JarvisEmbeddedConsole.tsx
+          grep -q "operativa-jarvis-composer" src/JarvisOperativaComposerPortal.tsx
+          grep -q "JarvisWorkTools" src/JarvisWorkbenchPortal.tsx
+          grep -q "JarvisGitAdvancedPanel" src/JarvisWorkTools.tsx
+          grep -q "BrowserHandoff" src/JarvisWorkTools.tsx
+          grep -q "JarvisVisibleLanguageGuard" src/CerebroConsoleHost.tsx
+          grep -q "INSPECT_OPS" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "'STATUS','DIFF','CI_READ','COMPARE'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
           if grep -n "CEREBRO" src/CerebroJarvisWorkConsole.tsx | grep -Ev "Cerebro|replace|fetchCerebro"; then
-            echo "Visible CEREBRO literal detected in Jarvis workspace"
+            echo "Visible legacy branding literal detected in Jarvis workspace"
             exit 1
           fi
           grep -q "JARVIS Work" src/CerebroJarvisWorkConsole.tsx
@@ -52,4 +68,7 @@ jobs:
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "cerebro/jarvis-work-codex-complete-20261102"
-          echo "Branch isolated; no PROD/main write in this gate."
+          ! grep -R "target_branch.*main\|target_branch.*emergency-pages" src/JarvisGitAdvancedPanel.tsx src/jarvisGitInspectApi.ts supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "const ENV='PREPROD'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "prod_authorized:false" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          echo "Branch isolated; PREPROD only; no PROD/main/emergency-pages write in this gate."
