@@ -3,7 +3,8 @@ import {spawn} from 'node:child_process';
 import {chmod, mkdtemp, readdir, lstat, realpath, rm} from 'node:fs/promises';
 import path from 'node:path';
 
-const PREPROD='PREPROD';
+const DEFAULT_ENVIRONMENT='PREPROD';
+const ALLOWED_ENVIRONMENTS=new Set(['PREPROD','PROD']);
 const MAX_OUTPUT_BYTES=1024*1024;
 const MAX_FILES=20_000;
 const MAX_BYTES=512*1024*1024;
@@ -18,7 +19,7 @@ function authority(){return Object.freeze({prod_authorized:false,prod_write_auth
 
 function validatePlan(plan){
   if(!plan||plan.state_type!=='CEREBRO_UNIVERSAL_REPO_SANDBOX_PLAN_V0'||plan.status!=='SANDBOX_PLAN_READY')throw new Error('SANDBOX_PLAN_READY required');
-  if(plan.environment!==PREPROD)throw new Error('PREPROD only');
+  if(!ALLOWED_ENVIRONMENTS.has(plan.environment))throw new Error('control-plane environment unsupported');
   if(plan.isolation?.mode!=='EPHEMERAL_SANDBOX'||plan.isolation?.network!=='DENY'||(plan.isolation?.network_allowlist?.length??0)!==0)throw new Error('V0 requires EPHEMERAL_SANDBOX with network DENY');
   if(plan.dependency_policy?.host_install!==false)throw new Error('host dependency install must be denied');
   if((plan.required_secrets?.length??0)!==0)throw new Error('V0 physical executor does not bind secrets');
@@ -59,7 +60,7 @@ export async function inspectUniversalRepoSandboxBackend({docker_bin='docker',gi
     runProcess(docker_bin,['version','--format','{{.Server.Version}}'],{timeoutMs:15_000}).catch(e=>({exit_code:127,stdout:'',stderr:e.message})),
     runProcess(git_bin,['--version'],{timeoutMs:10_000}).catch(e=>({exit_code:127,stdout:'',stderr:e.message}))
   ]);
-  return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_UNIVERSAL_REPO_SANDBOX_BACKEND_V0',status:docker.exit_code===0&&git.exit_code===0?'BACKEND_READY':'BACKEND_UNAVAILABLE',backend:'DOCKER_CLI_OCI',docker_available:docker.exit_code===0,git_available:git.exit_code===0,docker_version:docker.exit_code===0?docker.stdout.trim():null,git_version:git.exit_code===0?git.stdout.trim():null,...authority()});
+  return Object.freeze({schema_version:'1.1.0',state_type:'CEREBRO_UNIVERSAL_REPO_SANDBOX_BACKEND_V0',status:docker.exit_code===0&&git.exit_code===0?'BACKEND_READY':'BACKEND_UNAVAILABLE',backend:'DOCKER_CLI_OCI',docker_available:docker.exit_code===0,git_available:git.exit_code===0,docker_version:docker.exit_code===0?docker.stdout.trim():null,git_version:git.exit_code===0?git.stdout.trim():null,...authority()});
 }
 
 async function assertRealWorkspaceWithin(root,target){
@@ -74,7 +75,7 @@ export async function executeUniversalRepoSandbox({plan,workspace_path,trusted_w
   try{run=await runProcess(docker_bin,args,{timeoutMs,signal});}
   finally{await runProcess(docker_bin,['rm','-f',name],{timeoutMs:10_000}).catch(()=>null);}
   const green=run.exit_code===0&&!run.timed_out;
-  return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_UNIVERSAL_REPO_SANDBOX_EXECUTION_V0',status:green?'SANDBOX_EXECUTION_GREEN':'SANDBOX_EXECUTION_FAILED',isolation:'EPHEMERAL_SANDBOX',backend:'DOCKER_CLI_OCI',image_ref:validateImageRef(image_ref),network:'DENY',filesystem:'READ_ONLY_ROOT_PLUS_TMPFS',capabilities_dropped:'ALL',no_new_privileges:true,sandbox_user:SANDBOX_USER,pids_limit:Number(plan.resource_limits?.processes??32),memory_mb:Number(plan.resource_limits?.memory_mb??512),workspace_mount:'READ_ONLY',secrets_bound:false,host_mutated:false,prod_touched:false,customer_data_used:false,trading_touched:false,exit_code:run.exit_code,timed_out:run.timed_out,health_green:green,stdout:run.stdout,stderr:run.stderr,command_hash:hash(validateCommand(command)),...authority()});
+  return Object.freeze({schema_version:'1.1.0',state_type:'CEREBRO_UNIVERSAL_REPO_SANDBOX_EXECUTION_V0',status:green?'SANDBOX_EXECUTION_GREEN':'SANDBOX_EXECUTION_FAILED',environment:plan.environment,isolation:'EPHEMERAL_SANDBOX',backend:'DOCKER_CLI_OCI',image_ref:validateImageRef(image_ref),network:'DENY',filesystem:'READ_ONLY_ROOT_PLUS_TMPFS',capabilities_dropped:'ALL',no_new_privileges:true,sandbox_user:SANDBOX_USER,pids_limit:Number(plan.resource_limits?.processes??32),memory_mb:Number(plan.resource_limits?.memory_mb??512),workspace_mount:'READ_ONLY',secrets_bound:false,host_mutated:false,prod_touched:false,customer_data_used:false,trading_touched:false,exit_code:run.exit_code,timed_out:run.timed_out,health_green:green,stdout:run.stdout,stderr:run.stderr,command_hash:hash(validateCommand(command)),...authority()});
 }
 
 async function scanWorkspace(root){
@@ -107,7 +108,7 @@ export async function materializePinnedPublicGitHubRepository({repository_url,pi
     const scanned=await scanWorkspace(target);
     await rm(path.join(target,'.git'),{recursive:true,force:true});
     await normalizePublicWorkspaceForSandbox(target);
-    return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_PINNED_REPOSITORY_MATERIALIZATION_V0',status:'MATERIALIZED_EXACT_SHA',repository_url:url,pinned_sha:sha,workspace_path:target,file_count:scanned.files,total_bytes:scanned.bytes,git_metadata_removed:true,public_readonly_projection:true,submodules_fetched:false,lfs_fetched:false,cleanup_required:true,...authority()});
+    return Object.freeze({schema_version:'1.1.0',state_type:'CEREBRO_PINNED_REPOSITORY_MATERIALIZATION_V0',status:'MATERIALIZED_EXACT_SHA',repository_url:url,pinned_sha:sha,workspace_path:target,file_count:scanned.files,total_bytes:scanned.bytes,git_metadata_removed:true,public_readonly_projection:true,submodules_fetched:false,lfs_fetched:false,cleanup_required:true,...authority()});
   }catch(error){await rm(target,{recursive:true,force:true});throw error;}
 }
 
@@ -115,8 +116,9 @@ export async function executePinnedPublicRepositorySandbox({plan,repository_url,
   validatePlan(plan);const materialized=await materializePinnedPublicGitHubRepository({repository_url,pinned_sha:plan.pinned_sha,workspace_root,git_bin,signal});
   try{
     const execution=await executeUniversalRepoSandbox({plan,workspace_path:materialized.workspace_path,trusted_workspace_root:workspace_root,image_ref,command,docker_bin,signal});
-    return Object.freeze({schema_version:'1.0.0',state_type:'CEREBRO_PINNED_REPOSITORY_SANDBOX_E2E_V0',status:execution.health_green?'PHYSICAL_PREPROD_GREEN':'PHYSICAL_PREPROD_FAILED',company_id:plan.company_id,engine_id:plan.engine_id,environment:PREPROD,repository_url,pinned_sha:plan.pinned_sha,materialization:Object.freeze({status:materialized.status,file_count:materialized.file_count,total_bytes:materialized.total_bytes,git_metadata_removed:materialized.git_metadata_removed,public_readonly_projection:materialized.public_readonly_projection,submodules_fetched:false,lfs_fetched:false}),execution,...authority()});
+    const status=execution.health_green?`PHYSICAL_${plan.environment}_GREEN`:`PHYSICAL_${plan.environment}_FAILED`;
+    return Object.freeze({schema_version:'1.1.0',state_type:'CEREBRO_PINNED_REPOSITORY_SANDBOX_E2E_V0',status,company_id:plan.company_id,engine_id:plan.engine_id,environment:plan.environment,repository_url,pinned_sha:plan.pinned_sha,materialization:Object.freeze({status:materialized.status,file_count:materialized.file_count,total_bytes:materialized.total_bytes,git_metadata_removed:materialized.git_metadata_removed,public_readonly_projection:materialized.public_readonly_projection,submodules_fetched:false,lfs_fetched:false}),execution,...authority()});
   }finally{await rm(materialized.workspace_path,{recursive:true,force:true});}
 }
 
-export const UNIVERSAL_REPO_SANDBOX_EXECUTOR_V0_CONTRACT=Object.freeze({capability:'FACT-001/universal-repo-sandbox-executor-v0',backend:'DOCKER_CLI_OCI',environment:PREPROD,source:'PUBLIC_GITHUB_EXACT_SHA',image:'IMMUTABLE_DIGEST_REQUIRED',network_default:'DENY',filesystem_root:'READ_ONLY',workspace:'READ_ONLY_BIND',sandbox_user:SANDBOX_USER,tmp:'BOUNDED_TMPFS',capabilities:'DROP_ALL',no_new_privileges:true,secrets_default:'DENY',host_installs:false,host_code_execution:false,cleanup_required:true,worker_contract:'JOB-001/durable-worker-runner-v1',additional_cost_target_eur:0});
+export const UNIVERSAL_REPO_SANDBOX_EXECUTOR_V0_CONTRACT=Object.freeze({capability:'FACT-001/universal-repo-sandbox-executor-v0',backend:'DOCKER_CLI_OCI',environment:DEFAULT_ENVIRONMENT,supported_environments:[...ALLOWED_ENVIRONMENTS],source:'PUBLIC_GITHUB_EXACT_SHA',image:'IMMUTABLE_DIGEST_REQUIRED',network_default:'DENY',filesystem_root:'READ_ONLY',workspace:'READ_ONLY_BIND',sandbox_user:SANDBOX_USER,tmp:'BOUNDED_TMPFS',capabilities:'DROP_ALL',no_new_privileges:true,secrets_default:'DENY',host_installs:false,host_code_execution:false,cleanup_required:true,worker_contract:'JOB-001/durable-worker-runner-v1',prod_mutation:false,trading_access:false,additional_cost_target_eur:0});
