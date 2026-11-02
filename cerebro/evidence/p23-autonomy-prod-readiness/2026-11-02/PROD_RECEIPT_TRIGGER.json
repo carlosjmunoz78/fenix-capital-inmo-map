@@ -1,15 +1,18 @@
 {
   "schema_version": "1.0.0",
   "state_type": "P23_PROD_RECEIPT_TRIGGER_V1",
-  "status": "PENDING_LIVE_RECEIPT",
+  "status": "RECEIPT_GREEN",
   "company_id": "fenix",
   "engine_id": "FACT-001",
   "environment": "PROD_CONTROL_PLANE",
-  "expected_registry_total": 179,
-  "expected_prod_registered": 179,
-  "expected_prod_execution_authorized": 0,
-  "expected_prod_write_authorized": 0,
-  "expected_trading_access": false,
-  "expected_additional_cost_eur": 0,
-  "purpose": "Trigger P23 Live from main after the workflow became available on the default branch. This file is evidence-only and grants no execution authority."
+  "receipt_source_sha": "b8ab831a36bef85c8e02f110470c9166d6089e18",
+  "receipt_workflow_run_id": 41459378691,
+  "receipt_state_branch_sha": "a1cd6a2cd6ecc2494b6e21643bcdcba1a354261a",
+  "registry_total": 179,
+  "prod_registered": 179,
+  "prod_execution_authorized": 0,
+  "prod_write_authorized": 0,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "purpose": "Durable marker that the first P23 Live PROD receipt was obtained. The enclosing evidence commit must itself receive a subsequent P23 Live receipt."
 }

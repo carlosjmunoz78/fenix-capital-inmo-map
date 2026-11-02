@@ -1,0 +1,43 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "AUDIT_179_AUTONOMY_P23_PREPROD_PROD_READINESS",
+  "status": "PROD_GREEN_CONTROL_PLANE",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "v1",
+  "registry_total": 179,
+  "physical_foundation_total": 179,
+  "prod_registered_total": 179,
+  "prod_execution_authorized_total": 0,
+  "prod_write_authorized_total": 0,
+  "p23_live": true,
+  "p23_max_interval_hours": 24,
+  "p23_significant_change_trigger": true,
+  "preprod_gate": {
+    "source_sha": "9a7be2411c01af81edbdf5dcb355ab6bd034edf7",
+    "workflow_run_id": 41458735942,
+    "conclusion": "success"
+  },
+  "prod_promotion": {
+    "pr": 3,
+    "main_sha": "3420327fec1c77b44319f28cea30d9382bb6fa7b",
+    "app_deploy": "SKIPPED"
+  },
+  "prod_receipt": {
+    "source_sha": "b8ab831a36bef85c8e02f110470c9166d6089e18",
+    "workflow_run_id": 41459378691,
+    "state_branch": "cerebro/p23-state-v1",
+    "state_branch_sha": "a1cd6a2cd6ecc2494b6e21643bcdcba1a354261a",
+    "status": "GREEN"
+  },
+  "safety": {
+    "execution_mode": "FAIL_CLOSED",
+    "trading_access": false,
+    "secret_values": false,
+    "additional_cost_eur": 0,
+    "autonomous_execution_authorized": false
+  },
+  "known_separate_blocker": "APP PROD Runtime Smoke requires repository Actions secrets not available to that workflow; this is tracked separately and was not bypassed.",
+  "next_block": "PER_ENGINE_AUTONOMY_EVIDENCE_CLOSURE_AND_GOVERNED_EXECUTION_PROMOTION"
+}

@@ -3,23 +3,30 @@
   "audit_project_id": "PRJ-AUDITORIAS",
   "company_id": "fenix",
   "engine_id": "PROJECT-001",
-  "environment": "PREPROD",
+  "environment": "PROD_CONTROL_PLANE",
   "version": "v1",
   "current_summary": {
-    "revision": 2,
-    "updated_at": "2026-11-02T14:01:05Z",
+    "revision": 3,
+    "updated_at": "2026-11-02T14:10:48Z",
     "updated_by": "JARVIS",
-    "text": "Índice canónico reconciliado. El catálogo CEREBRO tiene 179/179 foundations físicas verificadas. P23 Auditoría Viva está implementado y validado GREEN en PREPROD con 179 puntos deterministas por ejecución, cadencia máxima 24 h y trigger por cambio significativo. Los 179 motores están preparados para registro en PROD control plane con política fail-closed; ejecución y escritura PROD siguen denegadas por defecto. El estado PROD real solo se considera cerrado cuando exista recibo Live desde main en cerebro/p23-state-v1."
+    "text": "P23 Auditoría Viva está operativa en PROD control plane. Existe recibo durable desde main para 179/179 motores canónicos: 179 registrados en modo fail-closed, 0 con autorización de ejecución PROD, 0 con autorización de escritura PROD, Trading bloqueado, secretos bloqueados y coste adicional 0 EUR. La foundation física 179/179 permanece verificada. La autonomía de negocio por motor sigue requiriendo promoción gobernada individual y evidencia estricta; estar registrado en PROD no equivale a ejecución autónoma."
   },
   "p23_live_integration": {
     "auditor": "Jarvis (P23)",
     "target_engine": "FACT-001",
-    "status": "PREPROD_GREEN_PENDING_PROD_RECEIPT",
+    "status": "PROD_GREEN",
     "runtime": "cerebro/runtime/p23/fact001-audit-live-v1.mjs",
     "contract": "cerebro/audit/p23-live-contract.v1.json",
-    "preprod_validated_source_sha": "423ebdd438bedf686654031538ab8989e436119d",
-    "preprod_workflow_run_id": 41457999602,
+    "preprod_validated_source_sha": "9a7be2411c01af81edbdf5dcb355ab6bd034edf7",
+    "preprod_workflow_run_id": 41458735942,
+    "prod_promoted_main_sha": "3420327fec1c77b44319f28cea30d9382bb6fa7b",
+    "prod_receipt_source_sha": "b8ab831a36bef85c8e02f110470c9166d6089e18",
+    "prod_receipt_workflow_run_id": 41459378691,
+    "prod_state_branch_sha": "a1cd6a2cd6ecc2494b6e21643bcdcba1a354261a",
     "audit_points": 179,
+    "prod_registered": 179,
+    "prod_execution_authorized": 0,
+    "prod_write_authorized": 0,
     "max_interval_hours": 24,
     "significant_change_trigger": true,
     "prod_receipt_source": "cerebro/p23-state-v1:p23/SUMMARY.json"
@@ -29,60 +36,29 @@
     {"audit_id":"AUD-SEO","title":"SEO","current_state":"PARCIAL","evidence_refs":[]},
     {"audit_id":"AUD-KNOWLEDGE","title":"Conocimiento / RAG / memoria","current_state":"PARCIAL","evidence_refs":["PR-962"]},
     {"audit_id":"AUD-RUNTIME","title":"Runtime / supervisor / daemon","current_state":"PARCIAL","evidence_refs":["PHYSICAL-WINDOWS-2026-10-27"]},
-    {"audit_id":"AUD-APP-CRM","title":"App / CRM","current_state":"POR_AUDITAR","evidence_refs":[]},
+    {"audit_id":"AUD-APP-CRM","title":"App / CRM","current_state":"POR_AUDITAR","evidence_refs":["APP-PROD-SMOKE-41459098184-BLOCKED-SECRETS"]},
     {"audit_id":"AUD-BROWSER-PC","title":"Browser / PC control","current_state":"PARCIAL","evidence_refs":["BROWSER-BRIDGE-GREEN-2026-10-27","PHYSICAL-WINDOWS-2026-10-27"]},
     {"audit_id":"AUD-DEEPSEEK","title":"DeepSeek / Model Router","current_state":"HECHO_INTEGRACION","evidence_refs":["PR-960"]},
     {"audit_id":"AUD-QA-TRIBUNAL","title":"QA / Tribunal","current_state":"PARCIAL","evidence_refs":[]},
-    {"audit_id":"AUD-PROD-PROMOTION","title":"Promoción PROD","current_state":"PREPROD_GREEN_PENDING_PROD_RECEIPT","evidence_refs":["MAIN-d75052f55fc62111feb250e93bba382c83f0ca48","P23-PREPROD-41457999602"]},
+    {"audit_id":"AUD-PROD-PROMOTION","title":"Promoción PROD control plane","current_state":"PROD_GREEN","evidence_refs":["PR-3","MAIN-3420327fec1c77b44319f28cea30d9382bb6fa7b","P23-PROD-41459378691"]},
     {"audit_id":"AUD-FINOPS","title":"FINOPS / coste","current_state":"PARCIAL","evidence_refs":[]},
     {"audit_id":"AUD-BACKUP-ROLLBACK","title":"Backup / rollback / rebuild","current_state":"PARCIAL","evidence_refs":[]},
     {"audit_id":"AUD-DEPENDENCIES","title":"Dependencias / Tech Adoption","current_state":"PARCIAL","evidence_refs":["PR-963"]},
-    {"audit_id":"AUD-P23-LIVE","title":"P23 Auditoría Viva / FACT-001","current_state":"PREPROD_GREEN_PENDING_PROD_RECEIPT","evidence_refs":["P23-PREPROD-41457999602"]}
+    {"audit_id":"AUD-P23-LIVE","title":"P23 Auditoría Viva / FACT-001","current_state":"PROD_GREEN","evidence_refs":["P23-PREPROD-41458735942","P23-PROD-41459378691"]}
   ],
   "immutable_evidence": [
-    {
-      "evidence_id": "PHYSICAL-WINDOWS-2026-10-27",
-      "recorded_at": "2026-10-27T14:31:42+01:00",
-      "source": "OWNER_PHYSICAL_ACCEPTANCE",
-      "summary": "CEREBRO-Supervisor-PREPROD Running; heartbeat GREEN; environment PREPROD; prod_authorized false; trading_access false; journal durable present; restart/recovery Windows GREEN."
-    },
-    {
-      "evidence_id": "PR-960",
-      "recorded_at": "2026-10-27T14:04:09+01:00",
-      "source": "GITHUB",
-      "summary": "BOOST-001/DeepSeek autonomous supervisor runtime merged to main with governed gates."
-    },
-    {
-      "evidence_id": "PR-962",
-      "recorded_at": "2026-10-27T15:25:47+01:00",
-      "source": "GITHUB",
-      "summary": "Knowledge 100 multichannel live-evidence fix merged to main."
-    },
-    {
-      "evidence_id": "MAIN-d75052f55fc62111feb250e93bba382c83f0ca48",
-      "recorded_at": "2026-10-27T15:39:26+01:00",
-      "source": "GITHUB",
-      "summary": "FACT-001 promoted dynamic capability registry to 152/152 governed PROD read-only; no PROD mutation authority."
-    },
-    {
-      "evidence_id": "P23-PREPROD-41457999602",
-      "recorded_at": "2026-11-02T14:01:05Z",
-      "source": "GITHUB_ACTIONS",
-      "summary": "P23 Live runtime and 179-engine PROD control-plane governance passed focused tests, full regression, deterministic rebuild, schedule/change wiring, security/isolation and zero-cost gates in PREPROD. This is not a PROD receipt."
-    }
+    {"evidence_id":"PHYSICAL-WINDOWS-2026-10-27","recorded_at":"2026-10-27T14:31:42+01:00","source":"OWNER_PHYSICAL_ACCEPTANCE","summary":"CEREBRO-Supervisor-PREPROD Running; heartbeat GREEN; environment PREPROD; prod_authorized false; trading_access false; journal durable present; restart/recovery Windows GREEN."},
+    {"evidence_id":"PR-960","recorded_at":"2026-10-27T14:04:09+01:00","source":"GITHUB","summary":"BOOST-001/DeepSeek autonomous supervisor runtime merged to main with governed gates."},
+    {"evidence_id":"PR-962","recorded_at":"2026-10-27T15:25:47+01:00","source":"GITHUB","summary":"Knowledge 100 multichannel live-evidence fix merged to main."},
+    {"evidence_id":"MAIN-d75052f55fc62111feb250e93bba382c83f0ca48","recorded_at":"2026-10-27T15:39:26+01:00","source":"GITHUB","summary":"FACT-001 promoted dynamic capability registry to 152/152 governed PROD read-only; no PROD mutation authority."},
+    {"evidence_id":"P23-PREPROD-41458735942","recorded_at":"2026-11-02T14:05:59Z","source":"GITHUB_ACTIONS","summary":"Exact-head P23 + 179-engine PROD-control-plane gate GREEN on 9a7be2411c01af81edbdf5dcb355ab6bd034edf7."},
+    {"evidence_id":"PR-3","recorded_at":"2026-11-02T14:08:18Z","source":"GITHUB","summary":"Exact-head PR #3 merged governed 179-engine PROD control plane and P23 Live to main; no autonomous execution/write authority."},
+    {"evidence_id":"P23-PROD-41459378691","recorded_at":"2026-11-02T14:10:48Z","source":"GITHUB_ACTIONS","summary":"P23 Live PROD receipt GREEN for source b8ab831a36bef85c8e02f110470c9166d6089e18: 179 audit points, 179 registered, 0 execution-authorized, 0 write-authorized, Trading false, secrets false, cost 0 EUR."},
+    {"evidence_id":"APP-PROD-SMOKE-41459098184-BLOCKED-SECRETS","recorded_at":"2026-11-02T14:08:30Z","source":"GITHUB_ACTIONS","summary":"App PROD Runtime Smoke stopped fail-closed before build because repository Actions secrets PROD_SUPABASE_PUBLISHABLE_KEY, VITE_SUPABASE_PUBLISHABLE_KEY and LEGACY_ANON_JWT were unavailable. This is outside P23 control-plane scope and no secret value was invented or copied."}
   ],
   "summary_revisions": [
-    {
-      "revision": 1,
-      "updated_at": "2026-10-27T15:30:00+01:00",
-      "updated_by": "JARVIS",
-      "reason": "OWNER_REQUEST_CANONICAL_AUDIT_PROJECT_CREATED"
-    },
-    {
-      "revision": 2,
-      "updated_at": "2026-11-02T14:01:05Z",
-      "updated_by": "JARVIS",
-      "reason": "P23_LIVE_PREPROD_GREEN_179_PROD_REGISTRATION_READY_FAIL_CLOSED"
-    }
+    {"revision":1,"updated_at":"2026-10-27T15:30:00+01:00","updated_by":"JARVIS","reason":"OWNER_REQUEST_CANONICAL_AUDIT_PROJECT_CREATED"},
+    {"revision":2,"updated_at":"2026-11-02T14:01:05Z","updated_by":"JARVIS","reason":"P23_LIVE_PREPROD_GREEN_179_PROD_REGISTRATION_READY_FAIL_CLOSED"},
+    {"revision":3,"updated_at":"2026-11-02T14:10:48Z","updated_by":"JARVIS","reason":"P23_LIVE_PROD_RECEIPT_GREEN_179_REGISTERED_FAIL_CLOSED"}
   ]
 }
