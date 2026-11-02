@@ -1,0 +1,14 @@
+{
+  "status": "GREEN",
+  "historical_evidence_preserved": true,
+  "historical_recorded_physical_count": 34,
+  "corrected_physical_count": 33,
+  "false_positive_engine_ids": ["CAN-001"],
+  "root_cause": "The earlier analyzer treated engine IDs as arbitrary path substrings, so CAN-001 matched SCAN-001 filenames.",
+  "fix": "Path identity now requires non-alphanumeric token boundaries around the canonical or normalized engine ID.",
+  "regression_guards": [
+    {"engine_id": "CAN-001", "must_not_match": "SCAN-001 filenames"},
+    {"engine_id": "DR-001", "must_not_match": "ADR-001 filenames"}
+  ],
+  "corrected_analyzer": "cerebro/missions/connect-existing-engines-v3.mjs"
+}
