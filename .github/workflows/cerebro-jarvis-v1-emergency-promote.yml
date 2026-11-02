@@ -20,9 +20,9 @@ jobs:
     timeout-minutes: 15
     env:
       VITE_FENIX_ENV: prod
-      EXPECTED_PROD_SHA: 8a096952245c597e2f1ebca2c3c1053b449dc2e3
-      EXPECTED_PROD_SOURCE_SHA: 0e0f843cecdd80c261cc5164b3daeef9d9d81b78
-      ROLLBACK_BRANCH: backup/emergency-pages-operativa-v4-accepted-20261102
+      EXPECTED_PROD_SHA: aa15ea28e0d005b3552f04011bd51ee6579a91ec
+      EXPECTED_PROD_SOURCE_SHA: 4470865ac30387d5bb34e7ecfe58ba736fe0b0e4
+      ROLLBACK_BRANCH: backup/emergency-pages-jarvis-v1-pre-input-tools-20261102
     steps:
       - name: Checkout isolated Jarvis source
         uses: actions/checkout@v4
