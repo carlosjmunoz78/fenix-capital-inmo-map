@@ -28,12 +28,10 @@ must(host,"if(section==='legacy-v0')return'V0'",'legacy V0 rollback route');
 must(host,'<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>','legacy canonical V0 rollback');
 must(host,"document.documentElement.dataset.cerebroConsole='1'",'route isolation marker');
 
-// Jarvis remains intact and keeps the canonical core available on its own surface.
 must(jarvis,"import CerebroConsoleShell from './CerebroConsoleShell';",'canonical V0 core inside Jarvis');
 must(jarvis,'<CerebroConsoleShell/>','canonical V0 rendered in Jarvis');
 must(jarvis,'fetchCerebroActivity','real activity source retained in Jarvis');
 
-// Operativa is now a dedicated executive surface but still consumes only real activity provenance.
 must(operative,'fetchCerebroActivity','real activity source consumed by Operativa');
 must(operative,"progress_provenance!=='REAL_GITHUB_JOBS'",'fail-closed numeric progress');
 must(operative,'No voy a inventar trabajos ni porcentajes.','explicit no-fake-work empty state');
@@ -46,8 +44,10 @@ must(operative,'aria-label="Añadir archivo"','attachment control');
 must(operative,'aria-label="Mensaje para Jarvis"','empty Jarvis composer textarea');
 mustNot(operative,'placeholder=','Operativa composer must stay visually empty');
 must(operative,'createVoiceRecognition','dictation uses canonical voice helper');
-must(operative,"querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main')",'voice delegates to canonical voice session');
+must(operative,"querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main')",'voice delegates to canonical voice session');
 must(operative,'<CerebroConsoleShell/>','canonical gateway and voice core preserved behind Operativa');
+must(operative,'humanStep(run.current_step','technical current step translated');
+must(operative,'humanStep(selectedRun.next_step','technical next step translated');
 must(operative,'Para ti','human decision surface');
 must(operative,'Lo siguiente','next-work surface');
 must(operative,'Resultado reciente','result surface');
