@@ -1,10 +1,11 @@
 import crypto from 'node:crypto';
 
-export const GH_SAFE_NATIVE_VERSION='1.2.0';
+export const GH_SAFE_NATIVE_VERSION='1.2.1';
 export const GH_SAFE_NATIVE_ROUTE='capability://GH-SAFE-NATIVE/v1/execute';
 export const GH_SAFE_OPERATIONS=Object.freeze(['INVENTORY','STATUS','LIST_FILES','SEARCH_CODE','READ_FILE','WRITE_FILE','DISCARD_FILE','DIFF','BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','CI_READ','REVIEW_READ','COMPARE','MERGE','ROLLBACK_REVERT','REVERT']);
 const WRITE_OPS=new Set(['WRITE_FILE','DISCARD_FILE','BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','MERGE','ROLLBACK_REVERT','REVERT']);
 const PROTECTED_DIRECT_WRITE_BRANCHES=new Set(['main','master','emergency-pages','cerebro/jarvis-interface-v1-20261102']);
+const ALLOWED_CONTROL_PLANE_ENVIRONMENTS=new Set(['PREPROD','PROD']);
 const WORK_BRANCH_RE=/^(?:cerebro|qa|feat|fix|test)\/[A-Za-z0-9._\/-]{1,180}$/;
 
 function text(v,label){if(typeof v!=='string'||!v.trim()) throw new Error(`${label} required`);return v.trim();}
@@ -21,7 +22,7 @@ export function authorizeGitHubSafeAction(raw={}){
   const version=raw.version??GH_SAFE_NATIVE_VERSION;
   const operation=text(raw.operation,'operation');
   if(!GH_SAFE_OPERATIONS.includes(operation)) throw new Error('UNSUPPORTED_GITHUB_OPERATION');
-  if(environment!=='PREPROD') throw new Error('PREPROD_ONLY');
+  if(!ALLOWED_CONTROL_PLANE_ENVIRONMENTS.has(environment)) throw new Error('CONTROL_PLANE_ENVIRONMENT_UNSUPPORTED');
   if(scanSecrets(raw)) throw new Error('SECRET_MATERIAL_FORBIDDEN');
   if(raw.force===true||raw.bypass_checks===true||raw.bypass_review===true) throw new Error('BYPASS_FORBIDDEN');
 
@@ -53,7 +54,7 @@ export function authorizeGitHubSafeAction(raw={}){
   if(raw.prod_deploy===true||raw.prod_mutation===true){authorized=false;reasons.push('PROD_MUTATION_OUT_OF_SCOPE');}
 
   const action_id=`ghsafe:${hash({company_id,repo,operation,target_branch,source_branch,expected_head_sha:raw.expected_head_sha??null,paths,payload:raw.payload??null}).slice(0,28)}`;
-  return Object.freeze({schema_version:'1.2.0',state_type:'CEREBRO_GH_SAFE_NATIVE_AUTHORIZATION',capability_id:'GH-SAFE-NATIVE',company_id,engine_id,environment,version,repo,operation,target_branch,source_branch,paths,action_id,idempotency_key:hash({action_id,version}),authorized,reasons:Object.freeze(reasons),requires_write:isWrite,checks_green:raw.checks_green===true,review_gate_green:raw.review_gate_green===true,expected_head_sha:raw.expected_head_sha??null,rollback_ready:raw.rollback_ready===true,evidence_required:true,prod_deploy_authorized:false,prod_mutation_authorized:false,force_authorized:false,bypass_authorized:false,additional_cost_eur:0});
+  return Object.freeze({schema_version:'1.2.1',state_type:'CEREBRO_GH_SAFE_NATIVE_AUTHORIZATION',capability_id:'GH-SAFE-NATIVE',company_id,engine_id,environment,version,repo,operation,target_branch,source_branch,paths,action_id,idempotency_key:hash({action_id,version}),authorized,reasons:Object.freeze(reasons),requires_write:isWrite,checks_green:raw.checks_green===true,review_gate_green:raw.review_gate_green===true,expected_head_sha:raw.expected_head_sha??null,rollback_ready:raw.rollback_ready===true,evidence_required:true,prod_deploy_authorized:false,prod_mutation_authorized:false,force_authorized:false,bypass_authorized:false,additional_cost_eur:0});
 }
 
 export async function executeGitHubSafeAction(raw={},adapter={}){
@@ -62,10 +63,10 @@ export async function executeGitHubSafeAction(raw={},adapter={}){
   const fn=adapter[auth.operation];
   if(typeof fn!=='function') return Object.freeze({...auth,status:'ROUTE_READY',executed:false,next_gate:'AUTHORIZED_GITHUB_CONNECTOR_ADAPTER'});
   const result=await fn(Object.freeze({...raw,authorization:auth}));
-  return Object.freeze({...auth,status:'EXECUTED_PREPROD_CONTROL_PLANE',executed:true,result,receipt_hash:hash({auth,result})});
+  return Object.freeze({...auth,status:`EXECUTED_${auth.environment}_CONTROL_PLANE`,executed:true,result,receipt_hash:hash({auth,result})});
 }
 
 export const GH_SAFE_NATIVE_CONTRACT=Object.freeze({
-  version:GH_SAFE_NATIVE_VERSION,environment:'PREPROD',operations:GH_SAFE_OPERATIONS,protected_direct_write_branches:[...PROTECTED_DIRECT_WRITE_BRANCHES],work_branch_pattern:String(WORK_BRANCH_RE),
+  version:GH_SAFE_NATIVE_VERSION,environment:'PREPROD',supported_environments:[...ALLOWED_CONTROL_PLANE_ENVIRONMENTS],operations:GH_SAFE_OPERATIONS,protected_direct_write_branches:[...PROTECTED_DIRECT_WRITE_BRANCHES],work_branch_pattern:String(WORK_BRANCH_RE),
   repo_explorer:true,code_search:true,editor_dirty_save_discard_policy:true,status_diff_stage_unstage:true,commit_push:true,pr_checks_review:true,revert:true,merge_policy:true,secrets_in_payload:false,force:false,bypass:false,prod_mutation:false,additional_cost_eur:0
 });
