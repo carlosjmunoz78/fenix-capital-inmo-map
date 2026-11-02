@@ -58,7 +58,12 @@ jobs:
           node cerebro/missions/audit-priority-l789-v1.mjs --layer L7 --out "$OUT/a"
           node cerebro/missions/audit-priority-l789-v1.mjs --layer L7 --out "$OUT/b"
           cmp "$OUT/a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/b/PRIORITY_PHYSICAL_BASELINE.json"
-          node -e "const x=require(process.env.OUT+'/a/AUDIT_REPORT.json');console.log('L7_AUDIT_REPORT='+JSON.stringify(x))"
+          node <<'NODE'
+          const fs=require('fs');const p=process.env.OUT+'/a/PRIORITY_PHYSICAL_BASELINE.json';const x=JSON.parse(fs.readFileSync(p));
+          const details={};for(const [id,e] of Object.entries(x.engines)){if(e.classification!=='PHYSICAL_EXISTING')details[id]={classification:e.classification,runtime_references:e.runtime_references,physical_evidence:e.physical_evidence};}
+          console.log('L7_NONPHYSICAL_DETAILS='+JSON.stringify(details));
+          console.log('L7_AUDIT_REPORT='+JSON.stringify(JSON.parse(fs.readFileSync(process.env.OUT+'/a/AUDIT_REPORT.json'))));
+          NODE
       - name: Boundary scan
         shell: bash
         run: |
