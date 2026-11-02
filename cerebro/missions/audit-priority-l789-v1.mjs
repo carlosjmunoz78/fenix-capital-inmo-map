@@ -25,7 +25,8 @@ const text=v=>JSON.stringify(stable(v),null,2)+'\n';
 function walk(d,a=[]){for(const e of fs.readdirSync(d,{withFileTypes:true})){if(SKIP_DIR.has(e.name))continue;const p=path.join(d,e.name);if(e.isDirectory())walk(p,a);else if(e.isFile()&&fs.statSync(p).size<1500000)a.push(p);}return a;}
 function isDoc(r){return /(^|\/)(docs?|evidence|reports?|handover|continuity|runbooks?)(\/|$)/i.test(r)||/\.(md|txt)$/i.test(r);}
 function isScaffold(r){return /(^|\/)(generated|scaffolds?|templates?)(\/|$)/i.test(r)||/(^|\/)factory\/generated(\/|$)/i.test(r);}
-function isSupport(r){return /(^|\/)(tests?|fixtures?|mocks?|missions?|registry)(\/|$)/i.test(r)||r.startsWith('.github/')||isDoc(r);}
+function isFactorySupport(r){return /^cerebro\/factory(?:-v1)?\.mjs$/i.test(r)||/(^|\/)factory\/(?!generated\/)/i.test(r);}
+function isSupport(r){return /(^|\/)(tests?|fixtures?|mocks?|missions?|registry)(\/|$)/i.test(r)||r.startsWith('.github/')||isDoc(r)||isFactorySupport(r);}
 function isRuntime(r){return EXEC_EXT.has(path.extname(r).toLowerCase())&&!isSupport(r)&&!isScaffold(r);}
 function pathIdentity(r,id){const low=r.toLowerCase(),a=id.toLowerCase(),forms=[a,a.replaceAll('-',''),a.replaceAll('-','_')];return forms.some(f=>new RegExp(`(?:^|[^a-z0-9])${esc(f)}(?:[^a-z0-9]|$)`,'i').test(low));}
 function explicitIdentity(c,id){return new RegExp(`(?:engine_id|engineId|ENGINE_ID)\\s*[=:]\\s*[\\"']${esc(id)}[\\"']|[\\"']engine_id[\\"']\\s*:\\s*[\\"']${esc(id)}[\\"']`,'i').test(c);}
