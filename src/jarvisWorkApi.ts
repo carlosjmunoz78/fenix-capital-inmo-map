@@ -1,5 +1,4 @@
-import {SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
-import {cerebroConsoleEndpoint} from './cerebroConsoleAccess';
+import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 import projectRegistryJson from '../cerebro/registry/jarvis-project-registry.v1.json';
 
 export type JarvisProject={
@@ -8,6 +7,7 @@ export type JarvisProject={
   last_reconciled_at:string|null;source:string;
 };
 export type JarvisProjectOverlay=Partial<JarvisProject>&{project_id:string;is_user_created?:boolean;updated_at?:string;sort_order?:number};
+export type JarvisWorkJob={job_id:string;name:string;status:string;attempts:number;max_attempts:number;checkpoint?:unknown;result_summary?:unknown;error_code?:string|null;error_detail?:string|null;cancel_reason?:string|null;created_at:string;started_at?:string|null;completed_at?:string|null;updated_at:string};
 
 type ApiResult<T>={status:number;data:T|null};
 type ProjectResponse={status?:string;projects?:JarvisProject[];project?:JarvisProject;reason?:string};
@@ -15,6 +15,7 @@ type ProjectResponse={status?:string;projects?:JarvisProject[];project?:JarvisPr
 const canonicalProjects=((projectRegistryJson as {projects?:JarvisProject[]}).projects||[]).map(project=>({...project}));
 const canonicalById=new Map(canonicalProjects.map(project=>[project.project_id,project]));
 const canonicalMaxOrder=canonicalProjects.reduce((max,project)=>Math.max(max,Number(project.order)||0),0);
+const WORK_GATEWAY=IS_PRODUCTION?'jarvis-work-gateway-v1':'jarvis-work-gateway-v1-preprod';
 
 function normalizeOverlay(overlay:JarvisProjectOverlay,index=0):JarvisProject{
   const base=canonicalById.get(overlay.project_id);
@@ -49,9 +50,9 @@ async function headers(){
 }
 
 async function call<T>(path:string,method:'GET'|'POST'|'PATCH',body?:unknown):Promise<ApiResult<T>>{
-  const endpoint=cerebroConsoleEndpoint(path);
   const auth=await headers();
-  if(!endpoint||!auth)return{status:endpoint?401:0,data:null};
+  if(!auth)return{status:401,data:null};
+  const endpoint=`${SUPABASE_URL}/functions/v1/${WORK_GATEWAY}/${path.replace(/^\/+/, '')}`;
   try{
     const response=await fetch(endpoint,{method,headers:auth,body:body===undefined?undefined:JSON.stringify(body),cache:'no-store'});
     let data:T|null=null;try{data=await response.json() as T}catch{data=null}
@@ -72,13 +73,43 @@ export async function createJarvisProject(input:{title:string;objective?:string;
 }
 
 export async function renameJarvisProject(projectId:string,title:string):Promise<ApiResult<ProjectResponse>>{
-  const result=await call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>(`projects/${encodeURIComponent(projectId)}`,'PATCH',{patch:{title}});
+  return updateJarvisProject(projectId,{title});
+}
+
+export async function updateJarvisProject(projectId:string,patch:Partial<Pick<JarvisProject,'title'|'objective'|'status'|'subprojects'|'dependencies'|'audit_refs'>>):Promise<ApiResult<ProjectResponse>>{
+  const result=await call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>(`projects/${encodeURIComponent(projectId)}`,'PATCH',{patch});
   if(!result.data?.project)return{status:result.status,data:result.data as ProjectResponse|null};
   return{status:result.status,data:{...result.data,project:normalizeOverlay(result.data.project)}};
+}
+
+export async function createJarvisSubproject(project:JarvisProject,title:string):Promise<ApiResult<ProjectResponse>>{
+  const clean=title.trim();
+  if(!clean)return{status:400,data:{status:'INVALID',reason:'SUBPROJECT_TITLE_REQUIRED'}};
+  if(project.subprojects.some(item=>item.localeCompare(clean,'es',{sensitivity:'accent'})===0))return{status:409,data:{status:'INVALID',reason:'SUBPROJECT_ALREADY_EXISTS'}};
+  return updateJarvisProject(project.project_id,{subprojects:[...project.subprojects,clean]});
+}
+
+export async function renameJarvisSubproject(project:JarvisProject,currentTitle:string,nextTitle:string):Promise<ApiResult<ProjectResponse>>{
+  const clean=nextTitle.trim();
+  if(!clean)return{status:400,data:{status:'INVALID',reason:'SUBPROJECT_TITLE_REQUIRED'}};
+  const index=project.subprojects.findIndex(item=>item===currentTitle);
+  if(index<0)return{status:404,data:{status:'NOT_FOUND',reason:'SUBPROJECT_NOT_FOUND'}};
+  const next=[...project.subprojects];next[index]=clean;
+  return updateJarvisProject(project.project_id,{subprojects:next});
 }
 
 export async function importJarvisProject(input:{title:string;objective?:string;subprojects?:string[];dependencies?:string[];source?:string}):Promise<ApiResult<ProjectResponse>>{
   const result=await call<{status?:string;project?:JarvisProjectOverlay;reason?:string}>('projects/import','POST',{project:input});
   if(!result.data?.project)return{status:result.status,data:result.data as ProjectResponse|null};
   return{status:result.status,data:{...result.data,project:normalizeOverlay(result.data.project)}};
+}
+
+export async function enqueueJarvisWork(input:{name:string;payload?:Record<string,unknown>;idempotency_key?:string;timeout_ms?:number}):Promise<ApiResult<{status?:string;job?:JarvisWorkJob;reason?:string}>>{
+  return call('work/enqueue','POST',input);
+}
+export async function fetchJarvisWorkJob(jobId:string):Promise<ApiResult<{status?:string;job?:JarvisWorkJob}>>{
+  return call(`work/${encodeURIComponent(jobId)}`,'GET');
+}
+export async function cancelJarvisWorkJob(jobId:string):Promise<ApiResult<{status?:string;job?:JarvisWorkJob}>>{
+  return call(`work/${encodeURIComponent(jobId)}/cancel`,'POST',{});
 }
