@@ -1,0 +1,37 @@
+name: Personal Capacity Drain V1
+
+on:
+  push:
+    branches:
+      - ops/personal-capacity-drain-20261102
+    paths:
+      - .github/workflows/personal-capacity-drain-v1.yml
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_PROD_WRITE: 'false'
+  CEREBRO_TRADING_ACCESS: 'false'
+
+jobs:
+  drain-sustained-lanes:
+    name: Drain sustained lane ${{ matrix.lane }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        lane: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67]
+    concurrency:
+      group: cerebro-continuous-useful-worker-v1-${{ matrix.lane }}
+      cancel-in-progress: true
+    steps:
+      - name: Free lane without doing background work
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_PROD_WRITE" = "false"
+          test "$CEREBRO_TRADING_ACCESS" = "false"
+          echo "lane=${{ matrix.lane }} drained for user-priority work"
