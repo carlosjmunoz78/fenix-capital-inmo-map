@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: cerebro-continuous-useful-worker-v1-46
+  group: cerebro-continuous-useful-worker-v1-49
   cancel-in-progress: true
 
 jobs:
