@@ -19,31 +19,48 @@ async function expectNoHorizontalOverflow(page:Page){const overflow=await page.e
 async function expectNoLegacyBrand(page:Page){await expect.poll(async()=>page.evaluate(()=>/\bCEREBRO\b/i.test(document.body.innerText))).toBe(false)}
 async function fontSize(page:Page,selector:string){return page.locator(selector).first().evaluate(el=>Number.parseFloat(getComputedStyle(el).fontSize))}
 
-async function expectJarvisContract(page:Page){
- await expect(page.getByText('JARVIS',{exact:true}).first()).toBeVisible();
+async function expectCleanHome(page:Page){
  await expectPrimaryNavigation(page);
- await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toBeVisible();
- await expect(page.getByText('01 · Auditoría Total',{exact:true})).toBeVisible();
- await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toBeVisible();
- await expect(page.getByTitle('Restaurar distribución')).toBeVisible();
- await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
- await expect(page.getByTitle('Minimizar conversación')).toBeVisible();
- await expect(page.getByPlaceholder('Pide, escribe o habla…')).toBeVisible();
+ await expect(page.getByRole('region',{name:'Inicio de Jarvis'})).toBeVisible();
+ await expect(page.getByRole('navigation',{name:'Proyectos'})).toBeVisible();
+ await expect(page.getByText('Auditoría Total',{exact:true}).first()).toBeVisible();
+ await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toHaveCount(0);
+ await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toHaveCount(0);
+ await expect(page.getByText('WORKSPACE',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('FÉNIX',{exact:true})).toHaveCount(0);
+ const composer=page.locator('.operativa-composer-form textarea').first();
+ await expect(composer).toBeVisible();
+ await expect(composer).toHaveAttribute('placeholder','');
  await expect(page.getByRole('button',{name:'Añadir archivo'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
  await expectNoLegacyBrand(page);
  await expectNoHorizontalOverflow(page);
+}
+
+async function openAuditProject(page:Page){await page.getByRole('button',{name:/Auditoría Total/}).first().click();await expect(page.getByRole('button',{name:'Inicio de Jarvis',exact:true})).toBeVisible();await expect(page.getByRole('complementary',{name:'Proyectos y subproyectos'})).toBeVisible();await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toBeVisible()}
+
+async function expectProjectContract(page:Page){
+ await expect(page.getByText('01 · Auditoría Total',{exact:true})).toBeVisible();
+ await expect(page.getByTitle('Restaurar distribución')).toBeVisible();
+ await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
+ await expect(page.getByTitle('Minimizar conversación')).toBeVisible();
+ const composer=page.locator('.operativa-composer-form textarea').first();
+ await expect(composer).toBeVisible();
+ await expect(composer).toHaveAttribute('placeholder','');
+ await expectNoLegacyBrand(page);
+ await expectNoHorizontalOverflow(page);
  expect(await fontSize(page,'.operativa-composer-form textarea')).toBeGreaterThanOrEqual(14);
- expect(await fontSize(page,'.jarvis-workspace-brand strong')).toBeGreaterThanOrEqual(15);
  expect(await fontSize(page,'.jarvis-center-project strong')).toBeGreaterThanOrEqual(13);
 }
 
-test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regression',async({page})=>{
+test('JARVIS Work PREPROD · clean home + project workspace + Codex/Work + Operativa regression',async({page})=>{
  await page.setViewportSize({width:1440,height:695});
  await installIsolatedPreprod(page);
  await page.goto('/cerebro?section=jarvis');
- await expectJarvisContract(page);
+ await expectCleanHome(page);
+ await openAuditProject(page);
+ await expectProjectContract(page);
 
  const maximizeConversation=page.getByTitle('Maximizar conversación');
  await maximizeConversation.click();
@@ -51,7 +68,17 @@ test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regressio
  await page.getByTitle('Restaurar tamaño').click();
  await expect(page.getByTitle('Maximizar conversación')).toBeVisible();
 
- const composer=page.getByPlaceholder('Pide, escribe o habla…');
+ const executionToggle=page.getByTitle('Mostrar u ocultar ejecución');
+ await executionToggle.click();
+ await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toHaveCount(0);
+ await page.getByRole('button',{name:'Inicio de Jarvis',exact:true}).click();
+ await expectCleanHome(page);
+ await openAuditProject(page);
+ await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toHaveCount(0);
+ await page.getByTitle('Mostrar u ocultar ejecución').click();
+ await expect(page.getByRole('complementary',{name:'Ejecución y evidencias'})).toBeVisible();
+
+ const composer=page.locator('.operativa-composer-form textarea').first();
  await expect(composer).toBeEnabled();
  await composer.fill('Prueba aislada PREPROD');
  await page.locator('.operativa-send').click();
@@ -71,14 +98,13 @@ test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regressio
  await expect(page.getByText('JARVIS EN CONTROL',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
  await expectNoHorizontalOverflow(page);
- await page.screenshot({path:'test-results/jarvis-workspace-1440x695.png',fullPage:true});
+ await page.screenshot({path:'test-results/jarvis-project-workspace-1440x695.png',fullPage:true});
 
+ await page.getByRole('button',{name:'Inicio de Jarvis',exact:true}).click();
+ await page.screenshot({path:'test-results/jarvis-clean-home-1440x695.png',fullPage:true});
  await page.setViewportSize({width:695,height:900});
- await expect(page.getByText('JARVIS',{exact:true}).first()).toBeVisible();
- await expectPrimaryNavigation(page);
- await expectNoLegacyBrand(page);
- await expectNoHorizontalOverflow(page);
- await page.screenshot({path:'test-results/jarvis-workspace-narrow-695.png',fullPage:true});
+ await expectCleanHome(page);
+ await page.screenshot({path:'test-results/jarvis-clean-home-narrow-695.png',fullPage:true});
 
  await page.setViewportSize({width:1440,height:695});
  await page.getByRole('button',{name:'Operativa',exact:true}).click();
