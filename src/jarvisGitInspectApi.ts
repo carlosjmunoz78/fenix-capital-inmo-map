@@ -1,4 +1,4 @@
-import {SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
+import {IS_PRODUCTION,SUPABASE_PUBLISHABLE_KEY,SUPABASE_URL,supabase} from './supabase';
 import {fetchJarvisWorkJob,type JarvisRepoHead,type JarvisWorkJob} from './jarvisWorkApi';
 
 export type JarvisGitInspectOperation='STATUS'|'DIFF'|'CI_READ'|'COMPARE';
@@ -6,7 +6,7 @@ export type JarvisGitActionResult={operation?:string;status?:string;executed?:bo
 export type JarvisGitInspectJob=JarvisWorkJob;
 
 type ApiResult<T>={status:number;data:T|null};
-const GATEWAY='jarvis-git-gateway-v1-preprod';
+const GATEWAY=IS_PRODUCTION?'jarvis-git-gateway-v1':'jarvis-git-gateway-v1-preprod';
 
 async function call<T>(path:string,body:unknown):Promise<ApiResult<T>>{
  const{data:{session}}=await supabase.auth.getSession();
