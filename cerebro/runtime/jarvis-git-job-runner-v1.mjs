@@ -4,6 +4,8 @@ import {createGitHubActionsSafeAdapterV1} from './github-actions-safe-adapter-v1
 
 const DEFAULT_ENDPOINT=process.env.JARVIS_GIT_DISPATCH_URL||'';
 const DEFAULT_AUDIENCE='jarvis-git-worker-v1';
+const EXPECTED_ENVIRONMENT=process.env.JARVIS_EXPECTED_ENVIRONMENT||'PREPROD';
+const ALLOWED_ENVIRONMENTS=new Set(['PREPROD','PROD']);
 const MAX_ACTIONS=40;
 
 function required(value,label,max=4096){if(typeof value!=='string'||!value.trim())throw new Error(`MISSING_${label}`);const out=value.trim();if(out.length>max||out.includes('\0'))throw new Error(`INVALID_${label}`);return out}
@@ -13,13 +15,14 @@ function compactResult(result){const data=result?.result??{};const compact={oper
 
 export async function runOneJarvisGitJobV1({endpoint=DEFAULT_ENDPOINT,cwd=process.cwd(),fetch_impl=fetch}={}){
  required(endpoint,'JARVIS_GIT_DISPATCH_URL');
+ if(!ALLOWED_ENVIRONMENTS.has(EXPECTED_ENVIRONMENT))throw new Error('UNSUPPORTED_EXPECTED_ENVIRONMENT');
  const lease=await dispatch(endpoint,'lease-v1',{lease_seconds:600},fetch_impl);const job=lease?.job;if(!job)return Object.freeze({ok:true,status:'NO_JOB'});
- if(job.environment!=='PREPROD'||job.name!=='git.safe.v1')throw new Error('UNSUPPORTED_GIT_JOB');
+ if(job.environment!==EXPECTED_ENVIRONMENT||job.name!=='git.safe.v1')throw new Error(`UNSUPPORTED_GIT_JOB:${job.environment}:${job.name}`);
  const actions=job.payload?.actions;if(!Array.isArray(actions)||actions.length===0||actions.length>MAX_ACTIONS)throw new Error('ACTIONS_REQUIRED');
  const adapter=createGitHubActionsSafeAdapterV1({cwd});let heartbeatTimer=null;let lastCommitSha=null;const results=[];
  try{
   heartbeatTimer=setInterval(()=>{void dispatch(endpoint,'heartbeat-v1',{job_id:job.job_id,lease_id:job.lease_id,extend_seconds:600},fetch_impl).catch(()=>null)},45_000);heartbeatTimer.unref?.();
-  await dispatch(endpoint,'checkpoint-v1',{job_id:job.job_id,lease_id:job.lease_id,checkpoint:{stage:'GIT_WORKER_ACCEPTED',action_count:actions.length,at:new Date().toISOString(),worker_id:lease.worker_id}},fetch_impl);
+  await dispatch(endpoint,'checkpoint-v1',{job_id:job.job_id,lease_id:job.lease_id,checkpoint:{stage:'GIT_WORKER_ACCEPTED',action_count:actions.length,at:new Date().toISOString(),worker_id:lease.worker_id,environment:EXPECTED_ENVIRONMENT}},fetch_impl);
   for(let index=0;index<actions.length;index+=1){
    const current=await adapter.STATUS({});
    const raw={...actions[index]};
@@ -32,14 +35,14 @@ export async function runOneJarvisGitJobV1({endpoint=DEFAULT_ENDPOINT,cwd=proces
    await dispatch(endpoint,'checkpoint-v1',{job_id:job.job_id,lease_id:job.lease_id,checkpoint:{stage:'GIT_ACTION_COMPLETE',index,operation:raw.operation,receipt_hash:result.receipt_hash,branch:compact.branch??null,head_sha:compact.head_sha??null,at:new Date().toISOString()}},fetch_impl);
   }
   const finalStatus=await adapter.STATUS({});
-  const summary={status:'GIT_SAFE_PREPROD_GREEN',actions:results,final_branch:finalStatus.branch,final_head_sha:finalStatus.head_sha,final_porcelain:finalStatus.porcelain,secret_material_logged:false,prod_touched:false,trading_touched:false,additional_cost_eur:0};
+  const summary={status:EXPECTED_ENVIRONMENT==='PROD'?'GIT_SAFE_PROD_CONTROL_GREEN':'GIT_SAFE_PREPROD_GREEN',actions:results,final_branch:finalStatus.branch,final_head_sha:finalStatus.head_sha,final_porcelain:finalStatus.porcelain,control_plane_environment:EXPECTED_ENVIRONMENT,secret_material_logged:false,prod_touched:false,trading_touched:false,additional_cost_eur:0};
   const completion=await dispatch(endpoint,'complete-v1',{job_id:job.job_id,lease_id:job.lease_id,result_summary:summary},fetch_impl);
   return Object.freeze({ok:true,status:completion?.job?.status||'SUCCEEDED',job_id:job.job_id,final_branch:finalStatus.branch,final_head_sha:finalStatus.head_sha,actions:results.length});
  }catch(error){await dispatch(endpoint,'fail-v1',{job_id:job.job_id,lease_id:job.lease_id,error_code:'GIT_SAFE_WORKER_FAILED',error_detail:String(error?.message||error).slice(0,3000),retryable:false},fetch_impl).catch(()=>null);throw error}
  finally{if(heartbeatTimer)clearInterval(heartbeatTimer)}
 }
 
-async function main(){const result=await runOneJarvisGitJobV1();console.log(JSON.stringify({ok:result.ok,status:result.status,job_id:result.job_id||null,final_branch:result.final_branch||null,final_head_sha:result.final_head_sha||null,actions:result.actions??0,secret_material_logged:false}));if(result.ok!==true&&result.status!=='NO_JOB')process.exitCode=1}
+async function main(){const result=await runOneJarvisGitJobV1();console.log(JSON.stringify({ok:result.ok,status:result.status,job_id:result.job_id||null,final_branch:result.final_branch||null,final_head_sha:result.final_head_sha||null,actions:result.actions??0,environment:EXPECTED_ENVIRONMENT,secret_material_logged:false}));if(result.ok!==true&&result.status!=='NO_JOB')process.exitCode=1}
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const JARVIS_GIT_JOB_RUNNER_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',environment:'PREPROD',authentication:'GITHUB_ACTIONS_OIDC',credential:'EPHEMERAL_GITHUB_TOKEN',queue:'jarvis_work_job_v1/name=git.safe.v1',max_actions:MAX_ACTIONS,protected_branches:['main','master','emergency-pages','cerebro/jarvis-interface-v1-20261102'],prod_authorized:false,trading_access:false,additional_cost_eur:0});
+export const JARVIS_GIT_JOB_RUNNER_V1_CONTRACT=Object.freeze({schema_version:'1.1.0',environment:EXPECTED_ENVIRONMENT,supported_environments:['PREPROD','PROD'],authentication:'GITHUB_ACTIONS_OIDC',credential:'EPHEMERAL_GITHUB_TOKEN',queue:'jarvis_work_job_v1/name=git.safe.v1',max_actions:MAX_ACTIONS,protected_branches:['main','master','emergency-pages','cerebro/jarvis-interface-v1-20261102'],prod_mutation:false,trading_access:false,additional_cost_eur:0});
