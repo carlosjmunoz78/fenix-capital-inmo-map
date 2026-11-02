@@ -6,6 +6,7 @@ on:
       - 'cerebro/close-179-per-engine-autonomy-v1-20261102'
     paths:
       - 'cerebro/missions/strict179-batch06-l0-deterministic-wave-v1.mjs'
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
       - '.github/workflows/cerebro-strict179-batch06-l0-deterministic-wave-v1.yml'
       - 'cerebro/evidence/contracts-permissions-tests-evaluation-tribunal-observability-backup-rollback-rebuild-policy/STRICT179_BATCH06_L0_DETERMINISTIC_2026-11-02.json'
   workflow_dispatch:
@@ -34,18 +35,20 @@ jobs:
           node cerebro/missions/strict179-batch06-l0-deterministic-wave-v1.mjs --out /tmp/strict179-batch06
           jq -e '.status=="GREEN" and .verified_count==10 and .safety.additional_cost_eur==0 and .safety.prod_authorized==false and .safety.prod_write_authorized==false and .safety.trading_access==false and .safety.external_writes==false' /tmp/strict179-batch06/SUMMARY.json >/dev/null
           jq -e '.engines | to_entries | all(.value.status=="GREEN" and (.value.gates|to_entries|all(.value=="GREEN")) and .value.safety.prod_write_authorized==false and .value.safety.additional_cost_eur==0)' /tmp/strict179-batch06/SUMMARY.json >/dev/null
-          cat /tmp/strict179-batch06/SUMMARY.json
-      - name: Re-run strict 179x12 readiness audit
+      - name: Re-run exact-ID strict 179x12 readiness audit
         run: |
           set -euo pipefail
           node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/strict179-readiness
+          jq -e '.classification_rule=="EVIDENCE_FIRST_FAIL_CLOSED_EXACT_ENGINE_ID_NO_SUBSTRING_COLLISIONS"' /tmp/strict179-readiness/SUMMARY.json >/dev/null
+          jq -e '[.engines[] | select(.engine_id=="CORE-001" or .engine_id=="GOV-001" or .engine_id=="POL-001" or .engine_id=="DEC-001" or .engine_id=="SEM-001" or .engine_id=="OWN-001" or .engine_id=="OBJ-001" or .engine_id=="ADR-001" or .engine_id=="CFG-001" or .engine_id=="VER-001") | select(.gate_count==12 and .autonomous_prod_ready==true and .prod_execution_authorized==false)] | length==10' /tmp/strict179-readiness/AUTONOMY_READINESS_BASELINE.json >/dev/null
+          jq -e '.engines[] | select(.engine_id=="DR-001") | .autonomous_prod_ready==false' /tmp/strict179-readiness/AUTONOMY_READINESS_BASELINE.json >/dev/null
           cat /tmp/strict179-readiness/SUMMARY.json
       - name: Assert branch-only and clean repository
         run: |
           set -euo pipefail
           test "${GITHUB_REF_NAME}" = "cerebro/close-179-per-engine-autonomy-v1-20261102"
           test -z "$(git status --porcelain --untracked-files=all)"
-          echo 'GREEN: branch isolated; physical deterministic L0 runtimes exercised in PREPROD/local scratch only; no PROD, Trading, secrets, network writes, external writes or paid fallback.'
+          echo 'GREEN: exact-ID audit; branch isolated; PREPROD/local scratch only; no PROD, Trading, secrets, network writes, external writes or paid fallback.'
       - uses: actions/upload-artifact@v4
         with:
           name: strict179-batch06-${{ github.run_id }}-${{ github.run_attempt }}
