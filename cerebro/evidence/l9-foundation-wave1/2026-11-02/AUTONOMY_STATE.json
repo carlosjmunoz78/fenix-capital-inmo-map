@@ -1,0 +1,3 @@
+{
+  "schema_version":"1.0.0","layer":"L9","state":"FOUNDATION_LAB_PREPROD_ONLY","autonomous_prod":false,"ui_foundation_only":true,"external_actions":false,"network_execution":false,"cross_company_access":"DENY_BY_DEFAULT","microphone_capture":false,"recording":false,"paid_ai_required":false,"human_required_codes":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],"promotion_authorized":false
+}
