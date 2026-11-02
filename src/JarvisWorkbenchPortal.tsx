@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
-import JarvisRepoWorkbench from './JarvisRepoWorkbench';
+import JarvisWorkTools from './JarvisWorkTools';
 import './jarvis-workbench-portal.css';
 import './jarvis-repo-git.css';
 
@@ -22,5 +22,5 @@ export default function JarvisWorkbenchPortal(){
   return()=>{observer.disconnect();if(current)current.classList.remove('is-repo-workbench')};
  },[]);
  if(!target)return null;
- return createPortal(<div className="jarvis-repo-workbench-host"><JarvisRepoWorkbench/></div>,target);
+ return createPortal(<div className="jarvis-repo-workbench-host"><JarvisWorkTools/></div>,target);
 }

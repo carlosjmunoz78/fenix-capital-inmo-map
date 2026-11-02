@@ -7,6 +7,7 @@ const REPO='carlosjmunoz78/fenix-capital-inmo-map';
 const BRANCH='cerebro/jarvis-work-codex-complete-20261102';
 const POLICY_VERSION='1.2.0';
 const MAX_CONTENT_BYTES=2_000_000;
+const INSPECT_OPS=new Set(['STATUS','DIFF','CI_READ','COMPARE']);
 
 function cors(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin'};if(origin&&ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
 function out(req:Request,status:number,body:unknown){return new Response(JSON.stringify(body),{status,headers:cors(req.headers.get('origin'))});}
@@ -19,7 +20,13 @@ async function enqueue(actor:string,actions:unknown[],kind:string){const row={co
 function base(operation:string,expected_head_sha:string){return{company_id:COMPANY,engine_id:ENGINE,environment:ENV,version:POLICY_VERSION,operation,repo:REPO,target_branch:BRANCH,expected_head_sha,rollback_ready:true};}
 
 Deno.serve(async req=>{const origin=req.headers.get('origin');if(req.method==='OPTIONS'){if(!origin||!ORIGINS.has(origin))return new Response(null,{status:403});return new Response(null,{status:204,headers:{...cors(origin),'access-control-allow-methods':'GET,POST,OPTIONS','access-control-allow-headers':'authorization,apikey,content-type','access-control-max-age':'600'}});}const authz=await owner(req);if(!authz.ok)return out(req,403,{status:'FORBIDDEN',reason:'OWNER_ONLY'});const parts=new URL(req.url).pathname.split('/').filter(Boolean),i=parts.lastIndexOf('jarvis-git-gateway-v1-preprod'),route=i>=0?parts.slice(i+1):[];try{
- if(req.method==='GET'&&(route.length===0||route[0]==='health'))return out(req,200,{status:'ok',service:'jarvis-git-gateway-v1-preprod',environment:ENV,repository:REPO,branch:BRANCH,save:true,rollback:true,prod_authorized:false,trading_access:false,additional_cost_target_eur:0});
+ if(req.method==='GET'&&(route.length===0||route[0]==='health'))return out(req,200,{status:'ok',service:'jarvis-git-gateway-v1-preprod',environment:ENV,repository:REPO,branch:BRANCH,save:true,rollback:true,inspect:['STATUS','DIFF','CI_READ','COMPARE'],prod_authorized:false,trading_access:false,additional_cost_target_eur:0});
+ if(req.method==='POST'&&route[0]==='inspect'){
+  const body:any=await req.json();const operation=clean(body.operation,'OPERATION',32).toUpperCase();if(!INSPECT_OPS.has(operation))throw new Error('INSPECT_OPERATION_DENIED');const expected=sha(body.expected_head_sha,'EXPECTED_HEAD_SHA');let action:any=base(operation,expected);
+  if(operation==='DIFF')action={...action,payload:{staged:body.staged===true}};
+  if(operation==='COMPARE'){const compareBase=clean(body.base||'main','COMPARE_BASE',220),compareHead=clean(body.head||BRANCH,'COMPARE_HEAD',220);action={...action,payload:{base:compareBase,head:compareHead}};}
+  return out(req,202,{status:'QUEUED',job:await enqueue(authz.actor,[action],`inspect-${operation.toLowerCase()}`),repository:REPO,branch:BRANCH,operation});
+ }
  if(req.method==='POST'&&route[0]==='save'){
   const body:any=await req.json();const path=safePath(body.path),content=String(body.content??'');if(!content.length)throw new Error('CONTENT_REQUIRED');if(new TextEncoder().encode(content).byteLength>MAX_CONTENT_BYTES)throw new Error('CONTENT_TOO_LARGE');const expected=sha(body.expected_head_sha,'EXPECTED_HEAD_SHA');const message=typeof body.message==='string'&&body.message.trim()?clean(body.message,'MESSAGE',240):`chore(jarvis): update ${path}`;
   const actions=[{...base('COMMIT_FILE',expected),path,paths:[path],payload:{content,message}},{...base('PUSH','$CURRENT_HEAD')}];
