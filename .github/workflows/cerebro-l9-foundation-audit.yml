@@ -5,6 +5,7 @@ on:
     branches: [cerebro-implement-l7-l8-l9-foundation-20261102]
     paths:
       - '.github/workflows/cerebro-l9-foundation-audit.yml'
+      - 'cerebro/missions/audit-priority-l789-v1.mjs'
   workflow_dispatch:
 
 permissions:
@@ -34,8 +35,9 @@ jobs:
           test "$GITHUB_REF_NAME" = 'cerebro-implement-l7-l8-l9-foundation-20261102'
           git merge-base --is-ancestor "$L8_DURABLE_SHA" HEAD
           git diff --name-only "$L8_DURABLE_SHA" HEAD > /tmp/changed.txt
-          test "$(wc -l < /tmp/changed.txt)" -eq 1
+          test "$(wc -l < /tmp/changed.txt)" -eq 2
           grep -Fx '.github/workflows/cerebro-l9-foundation-audit.yml' /tmp/changed.txt
+          grep -Fx 'cerebro/missions/audit-priority-l789-v1.mjs' /tmp/changed.txt
           git diff --exit-code "$L8_DURABLE_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
       - name: Install repository dependencies
         run: npm ci --ignore-scripts
@@ -57,7 +59,7 @@ jobs:
           cmp "$OUT/a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/b/PRIORITY_PHYSICAL_BASELINE.json"
           node <<'NODE'
           const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.OUT+'/a/PRIORITY_PHYSICAL_BASELINE.json'));
-          const details={};for(const [id,e] of Object.entries(x.engines)){if(e.classification!=='PHYSICAL_EXISTING')details[id]={classification:e.classification,runtime_references:e.runtime_references,physical_evidence:e.physical_evidence};}
+          const details={};for(const [id,e] of Object.entries(x.engines)){if(e.classification!=='PHYSICAL_EXISTING')details[id]={classification:e.classification,runtime_references:e.runtime_references,physical_evidence:e.physical_evidence,support_references:e.support_references};}
           console.log('L9_BASELINE='+JSON.stringify({total:x.total,counts:x.classification_counts,physical_before:x.physical_before,physical_engine_ids:x.physical_engine_ids,nonphysical_engine_ids:x.nonphysical_engine_ids,effective_dependency_edges:x.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:x.dependency_graph.cycle_guard_rejected_edges.length}));
           console.log('L9_NONPHYSICAL_DETAILS='+JSON.stringify(details));
           NODE
@@ -66,4 +68,4 @@ jobs:
         run: |
           set -euo pipefail
           git diff --exit-code "$L8_DURABLE_SHA" -- cerebro/runtime cerebro/tests cerebro/evidence
-          echo 'L9 OLD baseline audit GREEN; runtime/tests/evidence untouched.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'L9 corrected OLD baseline audit GREEN; Factory excluded from physical evidence.' >> "$GITHUB_STEP_SUMMARY"
