@@ -1,0 +1,16 @@
+{
+  "engine_id": "SUP-001",
+  "version": "1.0.0",
+  "environment": "LAB_PREPROD",
+  "fail_closed": true,
+  "company_scope": "MULTI_COMPANY_DENY_CROSS_COMPANY_BY_DEFAULT",
+  "permission": "SUPERVISE_AND_PLAN_ONLY",
+  "deny": ["PROD_WRITE", "TRADING", "SECRET_READ", "UNAPPROVED_RECOVERY", "CROSS_COMPANY"],
+  "watchdog": {"max_heartbeat_age_ms": 60000},
+  "allowed_recovery_playbooks": ["RETRY_TRANSIENT", "CIRCUIT_BREAKER", "THROTTLE", "WORKER_RESTART", "NON_DESTRUCTIVE_RESTORE"],
+  "human_required_allowed": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "recovery_execution": false,
+  "prod_write_authorized": false,
+  "trading_allowed": false,
+  "additional_cost_eur": 0
+}
