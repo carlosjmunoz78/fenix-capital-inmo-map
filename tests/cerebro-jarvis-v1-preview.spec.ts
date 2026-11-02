@@ -59,14 +59,14 @@ test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regressio
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
 
- await page.getByRole('button',{name:'Herramientas'}).click();
- await expect(page.getByRole('button',{name:'Código'})).toBeVisible();
- await expect(page.getByRole('button',{name:'Git'})).toBeVisible();
- await expect(page.getByRole('button',{name:'Navegador'}).last()).toBeVisible();
- await page.getByRole('button',{name:'Git'}).click();
+ await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+ await expect(page.getByRole('button',{name:'Código',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Git',exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Navegador',exact:true}).last()).toBeVisible();
+ await page.getByRole('button',{name:'Git',exact:true}).click();
  for(const name of ['Estado','Diff','CI','vs main'])await expect(page.getByRole('button',{name,exact:true})).toBeVisible();
  await expect(page.getByText('main y emergency-pages bloqueadas',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Navegador'}).last().click();
+ await page.getByRole('button',{name:'Navegador',exact:true}).last().click();
  await expect(page.getByRole('button',{name:/Abrir navegador interactivo/})).toBeVisible();
  await expect(page.getByText('JARVIS EN CONTROL',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
