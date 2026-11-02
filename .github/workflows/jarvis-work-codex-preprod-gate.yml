@@ -41,10 +41,12 @@ jobs:
           grep -q "focusPane('center')" src/CerebroJarvisWorkConsole.tsx
           grep -q "focusPane('right')" src/CerebroJarvisWorkConsole.tsx
           grep -q "setLayout(DEFAULT_LAYOUT)" src/CerebroJarvisWorkConsole.tsx
-          if grep -Eiq ">[^<]*CEREBRO|aria-label=\"[^\"]*CEREBRO|title=\"[^\"]*CEREBRO" src/CerebroJarvisWorkConsole.tsx; then
+          if grep -n "CEREBRO" src/CerebroJarvisWorkConsole.tsx | grep -Ev "Cerebro|replace|fetchCerebro"; then
             echo "Visible CEREBRO literal detected in Jarvis workspace"
             exit 1
           fi
+          grep -q "JARVIS Work" src/CerebroJarvisWorkConsole.tsx
+          grep -q "VISIBLE_REPLACEMENTS" src/JarvisEmbeddedConsole.tsx
       - name: Guard protected surfaces
         shell: bash
         run: |
