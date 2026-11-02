@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Operativa Premium V4 · QA visual</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/carlosjmunoz78/fenix-capital-inmo-map@d8ce3e2e9ac897ce5a513a0a4dad0f57301689d4/src/cerebro-operative-console.css" />
+<style>
+html,body{margin:0;background:#020b10;color:#e9f7ff;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.qa-topbar{height:62px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;border-bottom:1px solid rgba(102,220,255,.13);background:#020b10;position:relative;z-index:5}.qa-brand{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.15em}.qa-mark{width:34px;height:34px;border-radius:50%;border:1px solid #61dcff;display:grid;place-items:center;color:#61dcff}.qa-nav{display:flex;gap:6px}.qa-nav button{border:0;background:transparent;color:#668894;padding:9px 12px;border-radius:10px;font:700 11px/1 system-ui;letter-spacing:.06em}.qa-nav button.active{background:rgba(97,220,255,.12);color:#e9f7ff}.qa-note{font-size:10px;color:#547481;letter-spacing:.08em}.operativa-premium{min-height:calc(100vh - 62px)}
+@media(max-width:760px){.qa-topbar{padding:0 12px}.qa-nav button{padding:8px 7px}.qa-note{display:none}}
+</style>
+</head>
+<body>
+<header class="qa-topbar">
+  <div class="qa-brand"><span class="qa-mark">✦</span><span>CEREBRO</span></div>
+  <nav class="qa-nav" aria-label="Interfaces"><button>INICIO</button><button>JARVIS</button><button class="active">OPERATIVA</button><button>NEURONAL</button><button>NAVEGADOR</button></nav>
+  <span class="qa-note">QA VISUAL · RAMA AISLADA</span>
+</header>
+<main class="operativa-premium" aria-label="Operativa">
+  <div class="operativa-hud-grid" aria-hidden="true"></div>
+  <section class="operativa-contextbar">
+    <div class="operativa-context-selectors"><label><span class="sr-only">Empresa</span><select aria-label="Empresa"><option>Fénix Capital</option><option>AION</option><option>CAPTACASA</option><option>Todas las empresas</option></select></label><span>/</span><button class="operativa-project">General</button></div>
+    <div class="operativa-live-state is-live"><i></i>Conectado<small>01:00</small></div>
+  </section>
+
+  <section class="operativa-command-deck">
+    <div class="operativa-deck-main">
+      <div class="operativa-eyebrow-row"><span>Ahora</span><nav aria-label="Vistas rápidas"><button class="is-active">Ahora</button><button>Hoy</button><button>Esta noche</button><button>Próximamente</button><button>Terminado</button></nav></div>
+      <h1>Todo bajo control.</h1>
+      <div class="operativa-summary"><span class="is-active"></span><div><strong>3 trabajos avanzando</strong><p>Operativa prioriza lo importante y conserva las protecciones.</p></div></div>
+      <div class="operativa-modes"><button>Concentración</button><button>Esta noche</button><button class="is-danger">Emergencia</button></div>
+    </div>
+    <div class="operativa-reactor">
+      <span>Potencia</span>
+      <div class="operativa-reactor-shell power-normal"><i></i><b></b><em></em></div>
+      <div class="operativa-power-options"><button>Suave</button><button class="is-active">Normal</button><button>Alto</button><button>Máximo</button></div>
+    </div>
+  </section>
+
+  <section class="operativa-stage">
+    <div>
+      <div class="operativa-section-head"><div><span>Trabajo</span><h2>En marcha</h2></div><small>DATOS DE QA VISUAL</small></div>
+      <div class="operativa-work-stack">
+        <article class="operativa-work-row is-live">
+          <button class="operativa-work-main"><span class="operativa-work-signal is-live"></span><span class="operativa-work-copy"><strong>Mejorar Operativa</strong><small>Preparando estructura y reglas</small></span><span class="operativa-work-state">Trabajando ahora</span><span>⌄</span></button>
+          <div class="operativa-work-progress"><i style="width:68%"></i><span>68%</span></div><div class="operativa-work-meta"><span>1 trabajando</span><span>0 esperando</span><span>18m 22s</span></div>
+        </article>
+        <article class="operativa-work-row is-wait">
+          <button class="operativa-work-main"><span class="operativa-work-signal is-wait"></span><span class="operativa-work-copy"><strong>Revisar voz y conversación</strong><small>Esperando una ventana libre para comprobar la conversación continua.</small></span><span class="operativa-work-state">Esperando turno</span><span>⌄</span></button>
+          <div class="operativa-work-meta"><span>0 trabajando</span><span>1 esperando</span><span>En cola</span></div>
+        </article>
+        <article class="operativa-work-row is-done">
+          <button class="operativa-work-main"><span class="operativa-work-signal is-done"></span><span class="operativa-work-copy"><strong>Comprobar acceso y sesión</strong><small>Identidad y permisos verificados.</small></span><span class="operativa-work-state">Terminado</span><span>⌄</span></button>
+        </article>
+      </div>
+    </div>
+
+    <aside class="operativa-side-signal">
+      <section><div class="operativa-side-title"><span>Para ti</span><b>0</b></div><h3>No necesitas intervenir</h3><p>Solo aparecerá algo aquí cuando exista una excepción humana real.</p></section>
+      <section><div class="operativa-side-title"><span>Lo siguiente</span><b>01</b></div><h3>Validar la nueva Operativa</h3><p>CI → preview → comparación OLD vs NEW → PREPROD.</p></section>
+      <section><div class="operativa-side-title"><span>Resultado reciente</span><b>✓</b></div><h3>Jarvis y Operativa separados</h3><p>La nueva superficie conserva Gateway, voz y actividad real por debajo.</p><a href="#">Ver evidencia →</a></section>
+    </aside>
+  </section>
+
+  <div class="operativa-jarvis-composer">
+    <button class="operativa-attach" aria-label="Añadir archivo">＋</button>
+    <form class="operativa-composer-form"><textarea aria-label="Mensaje para Jarvis" rows="1"></textarea><button class="operativa-dictate" type="button" aria-label="Dictar">⌁</button><button class="operativa-voice" type="button" aria-label="Hablar con Jarvis">◉</button><button class="operativa-send" type="button" aria-label="Enviar">➤</button></form>
+  </div>
+</main>
+</body>
+</html>
