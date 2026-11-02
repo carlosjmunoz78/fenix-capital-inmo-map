@@ -5,7 +5,7 @@ on:
     branches:
       - cerebro-connect-existing-engines-20261102
     paths:
-      - 'cerebro/missions/connect-existing-engines-v2.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
       - 'cerebro/registry/dependency-overlay-policy.v1.json'
       - '.github/workflows/cerebro-connect-existing-engines.yml'
       - 'cerebro/factory.mjs'
@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          node --check cerebro/missions/connect-existing-engines-v2.mjs
+          node --check cerebro/missions/connect-existing-engines-v3.mjs
           cd cerebro
           npm run validate
           node factory-v1.mjs validate --registry registry/engine-registry.v1.json
@@ -79,12 +79,12 @@ jobs:
             cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
           printf '%s\n' 'KNOWN_BASELINE_DEFERRED: continuous worker remains intentionally paused and untouched.'
 
-      - name: Build cycle-safe evidence-gated connection overlay for L0 L1 L2 L6
+      - name: Build noise-bounded cycle-safe connection overlay for L0 L1 L2 L6
         shell: bash
         run: |
           set -euo pipefail
           rm -rf "$OUT"
-          node cerebro/missions/connect-existing-engines-v2.mjs --out "$OUT" 2>&1 | tee /tmp/CEREBRO_CONNECT_RUNNER_LOG.txt
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT" 2>&1 | tee /tmp/CEREBRO_CONNECT_RUNNER_LOG.txt
 
       - name: Upload runner diagnostics
         if: always()
@@ -107,6 +107,7 @@ jobs:
           const r=JSON.parse(fs.readFileSync(`${p}/REBUILD_PROOF.json`));
           if(s.status!=='GREEN'||s.registry_total!==179||s.priority_engines!==67||s.blocked!==0||s.additional_cost_eur!==0||s.prod_touched!==false||s.trading_touched!==false) throw new Error('mission summary gate failed');
           if(b.layer_counts.L0!==13||b.layer_counts.L1!==14||b.layer_counts.L2!==15||b.layer_counts.L6!==25||b.registry_mutated!==false||b.factory_mutated!==false) throw new Error('baseline gate failed');
+          if(s.inferred_candidate_edges>=2000) throw new Error('candidate noise gate failed');
           if(t.status!=='GREEN'||t.failed!==0||t.all_checks_passed!==true) throw new Error('tests not green');
           if(r.status!=='GREEN'||r.priority_engine_count!==67||r.all_hashes_equal!==true) throw new Error('rebuild not deterministic');
           console.log('MISSION_METRICS='+JSON.stringify({registry:s.registry_total,priority:s.priority_engines,layers:s.layers,physically_connected:s.physically_connected,scaffold_only:s.scaffold_only,raw_verified_runtime_edges:s.raw_verified_runtime_edges,verified_runtime_dependency_edges:s.verified_runtime_dependency_edges,cycle_guard_rejected_edges:s.cycle_guard_rejected_edges,inferred_candidate_edges:s.inferred_candidate_edges,blocked:s.blocked,test_assertions:s.test_assertions,rebuild:s.rebuild,cost_eur:s.additional_cost_eur,p23:s.p23}));
@@ -145,6 +146,7 @@ jobs:
         run: |
           echo 'Canonical Registry remains 179 and immutable.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Priority wave is 67 engines: L0=13, L1=14, L2=15, L6=25.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Effective graph is evidence-backed and cycle-safe; cycle-forming relations remain auditable candidates.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Tests, Registry, missions and workflow files cannot establish physical implementation bindings.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Effective graph is evidence-backed and cycle-safe; candidate set is noise-bounded.' >> "$GITHUB_STEP_SUMMARY"
           echo 'Overlay is advisory only and not runtime-enforced.' >> "$GITHUB_STEP_SUMMARY"
           echo 'PROD and Trading LAB untouched; additional cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
