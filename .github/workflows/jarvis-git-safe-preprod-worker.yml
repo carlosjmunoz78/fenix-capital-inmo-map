@@ -1,0 +1,67 @@
+name: JARVIS Git Safe PREPROD Worker
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+    paths:
+      - '.github/workflows/jarvis-git-safe-preprod-worker.yml'
+      - 'cerebro/runtime/github-safe-native-v1.mjs'
+      - 'cerebro/runtime/github-actions-safe-adapter-v1.mjs'
+      - 'cerebro/runtime/jarvis-git-job-runner-v1.mjs'
+      - 'supabase/functions/jarvis-git-dispatch-v1-preprod/**'
+      - 'supabase/migrations/20261102145000_jarvis_work_named_lease_preprod_v1.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  id-token: write
+
+concurrency:
+  group: jarvis-git-safe-preprod-worker-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  JARVIS_GIT_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-git-dispatch-v1-preprod
+  JARVIS_GIT_OIDC_AUDIENCE: jarvis-git-worker-v1
+
+jobs:
+  governed-git:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Configure bounded Git identity
+        run: |
+          git config user.name "JARVIS PREPROD"
+          git config user.email "130542695+carlosjmunoz78@users.noreply.github.com"
+      - name: Verify Git runtime syntax
+        run: |
+          node --check cerebro/runtime/github-safe-native-v1.mjs
+          node --check cerebro/runtime/github-actions-safe-adapter-v1.mjs
+          node --check cerebro/runtime/jarvis-git-job-runner-v1.mjs
+      - name: Execute at most one governed PREPROD Git job
+        run: node cerebro/runtime/jarvis-git-job-runner-v1.mjs
+      - name: Protected branch guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH="$(git branch --show-current)"
+          case "$BRANCH" in
+            main|master|emergency-pages|cerebro/jarvis-interface-v1-20261102)
+              echo "Protected branch checkout detected after Git worker"
+              exit 1
+              ;;
+          esac
+          echo "Git worker finished on permitted branch: $BRANCH"
