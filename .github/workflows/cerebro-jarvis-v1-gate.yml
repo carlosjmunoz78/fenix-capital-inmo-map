@@ -1,0 +1,69 @@
+name: CEREBRO Jarvis Interface V1 Gate
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-interface-v1-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-jarvis-interface-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  jarvis-v1-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout Jarvis isolated branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Protect accepted Operativa contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE='0e0f843cecdd80c261cc5164b3daeef9d9d81b78'
+          protected=(
+            src/CerebroConsoleHost.tsx
+            src/CerebroInterfaceBar.tsx
+            src/CerebroOperativeConsole.tsx
+            src/cerebro-operative-console.css
+            src/cerebro-route-isolation-v2.css
+            src/CerebroConsoleShell.tsx
+            src/cerebroConsoleApi.ts
+          )
+          for file in "${protected[@]}"; do
+            if ! git diff --quiet "$BASE" HEAD -- "$file"; then
+              echo "Protected contract changed: $file" >&2
+              exit 1
+            fi
+          done
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Jarvis contract gate
+        run: node scripts/cerebro-jarvis-v1-contract.mjs
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
+        run: npm run build
+
+      - name: Gate summary
+        run: |
+          echo 'JARVIS_V1_GATE=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'OPERATIVA_PROTECTED=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo "SOURCE_SHA=${GITHUB_SHA}" >> "$GITHUB_STEP_SUMMARY"
