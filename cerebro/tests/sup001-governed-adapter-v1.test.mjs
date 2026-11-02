@@ -1,0 +1,11 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import { evaluateSupervisorCycle } from '../supervisor/sup001-governed-adapter-v1.mjs';
+const policy=JSON.parse(fs.readFileSync(new URL('../governance/sup001-policy-v1.json',import.meta.url),'utf8'));
+const context={company_id:'fenix',environment:'PREPROD',version:'0.1.0'};
+const base={context,expected_company_id:'fenix',heartbeat_at:'2026-11-02T12:00:00.000Z',now:'2026-11-02T12:00:30.000Z'};
+test('SUP-001 healthy watchdog remains zero-cost and non-writing',()=>{const r=evaluateSupervisorCycle({...base,checks:[{id:'api',status:'GREEN',severity:'LOW',known:true}]},policy);assert.equal(r.status,'HEALTHY');assert.equal(r.watchdog_status,'GREEN');assert.equal(r.recovery_execution,false);assert.equal(r.prod_write,false);assert.equal(r.additional_cost_eur,0);});
+test('SUP-001 produces only allowlisted recovery candidates',()=>{const r=evaluateSupervisorCycle({...base,checks:[{id:'worker',status:'RED',severity:'MEDIUM',known:true,recovery_playbook_id:'WORKER_RESTART'}]},policy);assert.equal(r.status,'RECOVERY_CANDIDATE');assert.deepEqual(r.recovery_candidates,[{check_id:'worker',playbook_id:'WORKER_RESTART',authorized:true,execution:false}]);});
+test('SUP-001 fails closed on stale heartbeat, cross-company and unapproved recovery',()=>{assert.equal(evaluateSupervisorCycle({...base,now:'2026-11-02T12:02:00.000Z',checks:[{id:'api',status:'GREEN',severity:'LOW',known:true}]},policy).human_exception_code,'LOW_CONFIDENCE');assert.equal(evaluateSupervisorCycle({...base,expected_company_id:'other',checks:[{id:'api',status:'GREEN',severity:'LOW',known:true}]},policy).human_exception_code,'POLICY_CONFLICT');assert.equal(evaluateSupervisorCycle({...base,checks:[{id:'worker',status:'RED',severity:'MEDIUM',known:true,recovery_playbook_id:'SHELL_EXEC'}]},policy).human_exception_code,'POLICY_CONFLICT');});
+test('SUP-001 escalates critical and security checks canonically',()=>{assert.equal(evaluateSupervisorCycle({...base,checks:[{id:'core',status:'RED',severity:'CRITICAL',known:false}]},policy).human_exception_code,'HIGH_RISK');assert.equal(evaluateSupervisorCycle({...base,checks:[{id:'iam',status:'RED',severity:'HIGH',known:false,security_incident:true}]},policy).human_exception_code,'SECURITY_INCIDENT');});
