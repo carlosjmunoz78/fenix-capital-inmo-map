@@ -54,7 +54,7 @@ test('JARVIS Work PREPROD · 1440x695 · cableado + visual + Operativa regressio
  const composer=page.getByPlaceholder('Pide, escribe o habla…');
  await expect(composer).toBeEnabled();
  await composer.fill('Prueba aislada PREPROD');
- await page.getByRole('button',{name:'Enviar'}).click();
+ await page.locator('.operativa-send').click();
  await expect(page.getByText('Prueba aislada PREPROD',{exact:true})).toBeVisible();
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
