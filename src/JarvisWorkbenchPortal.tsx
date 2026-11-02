@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
 import {createPortal} from 'react-dom';
 import JarvisRepoWorkbench from './JarvisRepoWorkbench';
+import './jarvis-workbench-portal.css';
 
 export default function JarvisWorkbenchPortal(){
  const[target,setTarget]=useState<HTMLElement|null>(null);
