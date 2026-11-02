@@ -1,0 +1,16 @@
+{
+  "schema_version":"1.0.0",
+  "engine_id":"CMD-001",
+  "policy":"COMMAND_ROUTER_RULES_FIRST_FAIL_CLOSED",
+  "environment":"LAB_PREPROD",
+  "allow":["CLASSIFY_INTENT","DELEGATE_TO_ORCH","EMIT_LOW_CONFIDENCE"],
+  "deny":["EXECUTE_ACTION","PROD_ROUTE","BYPASS_ORCH","BYPASS_POLICY_CHECK","TRADING_ACCESS","PAID_MODEL_REQUIRED"],
+  "permission":"CONSOLE_COMMAND_CLASSIFY_ONLY",
+  "fail_closed":true,
+  "prod_execution_authorized":false,
+  "prod_write_authorized":false,
+  "trading_access":false,
+  "additional_cost_eur":0,
+  "human_required":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "invariant":"CMD-001 classifies by deterministic rules first and delegates to ORCH-001; it never executes the action itself"
+}
