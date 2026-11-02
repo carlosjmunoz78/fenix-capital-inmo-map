@@ -87,8 +87,41 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Re-run Jarvis contract gate
-        run: node scripts/cerebro-jarvis-v1-contract.mjs
+      - name: Re-run final Jarvis Work contract gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f src/JarvisEmbeddedConsole.tsx
+          test -f src/JarvisWorkTools.tsx
+          test -f src/JarvisGitAdvancedPanel.tsx
+          test -f src/jarvisGitInspectApi.ts
+          test -f src/JarvisOperativaComposerPortal.tsx
+          test -f src/JarvisVisibleLanguageGuard.tsx
+          test -f src/jarvisWorkApi.ts
+          test -f src/jarvis-work-v2.css
+          test -f src/jarvis-work-premium-final.css
+          test -f src/jarvis-work-tools.css
+          test -f supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "JarvisEmbeddedConsole" src/CerebroJarvisWorkConsole.tsx
+          grep -q "CerebroConsoleShell" src/JarvisEmbeddedConsole.tsx
+          grep -q "createJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "importJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "renameJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('left')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('center')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('right')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "setLayout(DEFAULT_LAYOUT)" src/CerebroJarvisWorkConsole.tsx
+          grep -q "JarvisOperativaComposerPortal" src/JarvisEmbeddedConsole.tsx
+          grep -q "operativa-jarvis-composer" src/JarvisOperativaComposerPortal.tsx
+          grep -q "JarvisWorkTools" src/JarvisWorkbenchPortal.tsx
+          grep -q "JarvisGitAdvancedPanel" src/JarvisWorkTools.tsx
+          grep -q "BrowserHandoff" src/JarvisWorkTools.tsx
+          grep -q "JarvisVisibleLanguageGuard" src/CerebroConsoleHost.tsx
+          grep -q "INSPECT_OPS" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "'STATUS','DIFF','CI_READ','COMPARE'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "JARVIS Work" src/CerebroJarvisWorkConsole.tsx
+          grep -q "VISIBLE_REPLACEMENTS" src/JarvisEmbeddedConsole.tsx
+          echo 'JARVIS_WORK_FINAL_CONTRACT_GREEN'
 
       - name: Install Chromium for physical QA
         run: npx playwright install --with-deps chromium
