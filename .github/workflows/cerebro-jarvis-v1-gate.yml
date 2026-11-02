@@ -16,7 +16,14 @@ concurrency:
 jobs:
   jarvis-v1-gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
     steps:
       - name: Checkout Jarvis isolated branch
         uses: actions/checkout@v4
@@ -43,6 +50,9 @@ jobs:
               exit 1
             fi
           done
+          test "$CEREBRO_ENVIRONMENT" = PREPROD
+          test "$CEREBRO_PROD_WRITE" = false
+          test "$CEREBRO_TRADING_ACCESS" = false
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -56,11 +66,34 @@ jobs:
       - name: Jarvis contract gate
         run: node scripts/cerebro-jarvis-v1-contract.mjs
 
-      - name: Build (TypeScript + Vite)
+      - name: Build PREPROD candidate (TypeScript + Vite)
         run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install chromium
+        timeout-minutes: 5
+
+      - name: Jarvis PREPROD physical preview · desktop + 695px
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium
+
+      - name: Upload PREPROD preview evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-jarvis-v1-preprod-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 30
 
       - name: Gate summary
         run: |
           echo 'JARVIS_V1_GATE=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'JARVIS_PREPROD_PHYSICAL_PREVIEW=GREEN' >> "$GITHUB_STEP_SUMMARY"
           echo 'OPERATIVA_PROTECTED=GREEN' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PREPROD_WRITE=false' >> "$GITHUB_STEP_SUMMARY"
+          echo 'VIEWPORTS=desktop,695x900' >> "$GITHUB_STEP_SUMMARY"
           echo "SOURCE_SHA=${GITHUB_SHA}" >> "$GITHUB_STEP_SUMMARY"
