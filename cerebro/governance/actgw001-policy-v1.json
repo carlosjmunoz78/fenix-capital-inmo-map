@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "ACTGW-001",
+  "policy": "ACTION_EXECUTION_GATEWAY_PREPROD_FAIL_CLOSED",
+  "environment": "PREPROD",
+  "allow": [
+    "REGISTERED_CAPABILITY_EXECUTION",
+    "IDEMPOTENT_REPLAY",
+    "AUDIT_RECEIPT",
+    "LOW_OR_MEDIUM_RISK_ZERO_COST_PREPROD"
+  ],
+  "deny": [
+    "UNREGISTERED_CAPABILITY",
+    "MISSING_AUTHORIZATION",
+    "PROD_WRITE",
+    "AUTONOMOUS_PROD",
+    "TRADING_ACCESS",
+    "HIGH_RISK",
+    "SIGNATURE_BYPASS",
+    "POSITIVE_ADDITIONAL_COST",
+    "IDEMPOTENCY_KEY_REUSE_WITH_DIFFERENT_ACTION",
+    "DIRECT_MODEL_EXECUTION"
+  ],
+  "permission": "REGISTERED_CAPABILITY_SCOPED_PREPROD_ONLY",
+  "fail_closed": true,
+  "prod_execution_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "invariant": "ACTGW-001 executes only explicitly authorized registered capabilities in PREPROD, is idempotent and auditable, and never grants itself PROD, trading or paid authority"
+}
