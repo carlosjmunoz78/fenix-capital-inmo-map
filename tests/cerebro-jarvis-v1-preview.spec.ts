@@ -70,8 +70,8 @@ async function installIsolatedPreprod(page:Page){
 async function expectJarvisContract(page:Page){
  await expect(page.getByRole('heading',{name:'JARVIS'})).toBeVisible();
  for(const label of ['Inicio','Jarvis','Operativa','Neuronal','Navegador'])await expect(page.getByText(label,{exact:true}).first()).toBeVisible();
- await expect(page.getByLabel('Empresa')).toHaveValue('Fénix · sesión autenticada');
- await expect(page.getByLabel('Contexto')).toHaveValue('GENERAL');
+ await expect(page.getByLabel('Empresa',{exact:true})).toHaveValue('Fénix · sesión autenticada');
+ await expect(page.getByLabel('Contexto',{exact:true})).toHaveValue('GENERAL');
  await expect(page.getByText('Transporte autenticado verificado')).toBeVisible();
  await expect(page.getByText('HUMAN_REQUIRED',{exact:true})).toHaveCount(0);
  await expect(page.getByText('Procesos reales',{exact:true})).toHaveCount(0);
