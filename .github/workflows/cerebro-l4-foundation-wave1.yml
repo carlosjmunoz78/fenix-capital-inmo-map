@@ -1,0 +1,113 @@
+name: CEREBRO L4 Foundation Wave1
+
+on:
+  push:
+    branches: [cerebro-implement-l3-l4-l5-foundation-20261102]
+    paths:
+      - 'cerebro/runtime/l4/**'
+      - 'cerebro/tests/l4-foundation-wave1.test.mjs'
+      - '.github/workflows/cerebro-l4-foundation-wave1.yml'
+      - 'cerebro/missions/audit-priority-l345-v1.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/factory-v1.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  BASE_L3_SHA: 6627fb5edf187e1c2a391f3bb1a0afe84a77a1d9
+  OUT: /tmp/cerebro-l4-foundation-wave1
+
+jobs:
+  validate-l4-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 170
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git cat-file -e "$BASE_L3_SHA^{commit}"
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Syntax Registry Factory and L4
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do node --check "$f"; done < <(find cerebro/runtime/l4 -maxdepth 1 -name '*.mjs' -print | sort)
+          node --check cerebro/tests/l4-foundation-wave1.test.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: L4 focused acceptance
+        working-directory: cerebro
+        run: node --test tests/l4-foundation-wave1.test.mjs
+      - name: Full CEREBRO regression preserving paused worker baseline
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print | sort)
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_L3_SHA" -- .github/workflows/cerebro-continuous-useful-worker-v1.yml cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Existing connection analyzer and deterministic L4 audit rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority"
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L4 --out "$OUT/l4a"
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L4 --out "$OUT/l4b"
+          cmp "$OUT/l4a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/l4b/PRIORITY_PHYSICAL_BASELINE.json"
+      - name: Verify OLD vs NEW 27 of 27
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const d='cerebro/evidence/l4-foundation-wave1/2026-11-02';const old=JSON.parse(fs.readFileSync(path.join(d,'PRIORITY_PHYSICAL_BASELINE.json')));const s=JSON.parse(fs.readFileSync(path.join(d,'BASELINE_CLASSIFICATION_SUMMARY.json')));const cur=JSON.parse(fs.readFileSync(path.join(process.env.OUT,'l4a','PRIORITY_PHYSICAL_BASELINE.json')));
+          const added=[...(s.groups.PHYSICAL_PARTIAL||[]),...(s.groups.DOCUMENTED_ONLY||[])].sort();const preserved=(s.groups.PHYSICAL_EXISTING||[]).sort();
+          if(old.physical_before!==8||added.length!==19||preserved.length!==8)throw new Error('Unexpected L4 OLD baseline');
+          if(cur.physical_before!==27||cur.classification_counts.PHYSICAL_EXISTING!==27)throw new Error(`Expected 27/27 physical got ${cur.physical_before}`);
+          for(const id of added){if(!cur.engines[id].physical_evidence.some(x=>x.path.startsWith('cerebro/runtime/l4/')))throw new Error(`Missing L4 foundation: ${id}`);}
+          for(const id of preserved){if(cur.engines[id].physical_evidence.every(x=>x.path.startsWith('cerebro/runtime/l4/')))throw new Error(`Existing implementation replaced: ${id}`);}
+          console.log(JSON.stringify({physical_before:8,physical_after:27,added,preserved,effective_edges:cur.dependency_graph.effective_edges.length,cycle_rejected:cur.dependency_graph.cycle_guard_rejected_edges.length}));
+          NODE
+      - name: Prove canonical sources and safety boundaries unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_L3_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+          ! grep -R --line-number -E 'LAB-TRD|trading[_-]?secret|SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY' cerebro/runtime/l4 cerebro/tests/l4-foundation-wave1.test.mjs
+      - name: Persist L4 durable closure evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');const d='cerebro/evidence/l4-foundation-wave1/2026-11-02';const s=JSON.parse(fs.readFileSync(path.join(d,'BASELINE_CLASSIFICATION_SUMMARY.json')));const cur=JSON.parse(fs.readFileSync(path.join(process.env.OUT,'l4a','PRIORITY_PHYSICAL_BASELINE.json')));const created=[...(s.groups.PHYSICAL_PARTIAL||[]),...(s.groups.DOCUMENTED_ONLY||[])].sort();const preserved=(s.groups.PHYSICAL_EXISTING||[]).sort();const common={schema_version:'1.0.0',mission:'IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION',wave:'L4_FOUNDATION',status:'GREEN',environment:'LAB_PREPROD',validated_source_sha:process.env.GITHUB_SHA,workflow_run_id:Number(process.env.GITHUB_RUN_ID),registry_total:179,l4:{total:27,physical_before:8,physical_after:27,new_runtime_count:19,preserved_existing_count:8,scaffold_only_after:0},new_runtime_engine_ids:created,preserved_existing_engine_ids:preserved,dependency_graph:{effective_edges:cur.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:cur.dependency_graph.cycle_guard_rejected_edges.length},rebuild:'GREEN',additional_cost_eur:0,prod_touched:false,trading_touched:false,registry_mutated:false,factory_mutated:false,human_required:false,p23:'POR_AUDITAR',qualification:'27/27 means physical foundation runtime or preserved physical implementation; it does not authorize legal, financial, banking, AML, KYC, notarial, registry, valuation or payment decisions in PROD.'};
+          fs.writeFileSync(path.join(d,'IMPLEMENTATION_MANIFEST.json'),JSON.stringify({...common,implementation_rule:'WRAP_PRESERVE for 5 partial engines; deterministic fail-closed foundation for 14 documented-only engines; preserve 8 existing physical engines.',network_execution:false,prod_writes:false,promotion_authorized:false},null,2)+'\n');fs.writeFileSync(path.join(d,'CLOSURE_EVIDENCE.json'),JSON.stringify(common,null,2)+'\n');fs.writeFileSync(path.join(d,'AUTONOMY_STATE.json'),JSON.stringify({status:'FOUNDATION_ONLY',layer:'L4',environment:'LAB_PREPROD',prod_autonomy:false,external_side_effects:false,sensitive_domains:['documents','KYC','AML','mortgage','banking','valuation','property','registry','cadastre','notarial','payments'],policy:'advisory/validation only; external regulated and high-risk acts fail closed'},null,2)+'\n');fs.writeFileSync(path.join(d,'RUNBOOK.md'),`# CEREBRO L4 Foundation Wave1\n\n## Estado\nL4 27/27 físico en LAB/PREPROD. OLD 8 físicos + 5 parciales + 14 documentados. Se preservan 8; los 5 parciales se envuelven; 14 reciben foundation determinista.\n\n## Límites\nNo inventa reglas bancarias, KYC, AML, fiscales, registrales, notariales ni legales. No ejecuta pagos ni decisiones financieras finales. Acciones reguladas o de riesgo escalan mediante HUMAN_REQUIRED.\n\n## Rollback\nEliminar solo cerebro/runtime/l4/, test y workflow L4; implementaciones anteriores permanecen.\n\n## Promoción\nNo autorizada. PROD y Trading permanecen intactos.\n`);fs.writeFileSync(path.join(d,'CHANGELOG.md'),`# Changelog L4 Foundation Wave1\n\n- Baseline OLD: 8/27 físicos; 5 parciales; 14 documentados.\n- Preservados: ${preserved.join(', ')}.\n- Foundation/wrappers: ${created.join(', ')}.\n- Resultado gate: 27/27 físicos; coste adicional 0 €.\n`);
+          NODE
+          git config user.name 'CEREBRO Foundation Evidence';git config user.email 'cerebro-foundation@users.noreply.github.com';git add cerebro/evidence/l4-foundation-wave1/2026-11-02;git commit -m 'evidence(cerebro): close L4 foundation wave1 [skip ci]';git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload L4 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l4-foundation-wave1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-l4-foundation-wave1
+          if-no-files-found: error
+          retention-days: 30
+      - name: Mission boundary
+        run: |
+          echo 'L4 foundation 27/27 physical.' >> "$GITHUB_STEP_SUMMARY"
+          echo '8 physical preserved; 19 additive foundation/wrappers; PROD/Trading untouched; cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
