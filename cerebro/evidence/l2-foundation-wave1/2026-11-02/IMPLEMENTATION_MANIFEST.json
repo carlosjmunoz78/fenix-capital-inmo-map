@@ -1,0 +1,30 @@
+{
+  "wave":"L2_FOUNDATION",
+  "environment":"LAB_PREPROD",
+  "new_runtime_engines":{
+    "SUP-001":"cerebro/runtime/l2/sup001-v1.mjs",
+    "INC-001":"cerebro/runtime/l2/inc001-v1.mjs",
+    "SEC-002":"cerebro/runtime/l2/sec002-v1.mjs",
+    "RED-001":"cerebro/runtime/l2/red001-v1.mjs",
+    "QAB-001":"cerebro/runtime/l2/qab001-v1.mjs",
+    "REG-001":"cerebro/runtime/l2/reg001-v1.mjs",
+    "DR-001":"cerebro/runtime/l2/dr001-v1.mjs",
+    "BCP-001":"cerebro/runtime/l2/bcp001-v1.mjs",
+    "CRS-001":"cerebro/runtime/l2/crs001-v1.mjs"
+  },
+  "preserved_existing_engines":["OBSERV-001","SELF-001","SEC-001","IAM-001","QA-001","RBLD-001"],
+  "foundation_limits":{
+    "SUP-001":"plans recovery; does not execute recovery",
+    "INC-001":"classifies/records incident; containment execution disabled",
+    "SEC-002":"secret metadata only; secret values forbidden",
+    "RED-001":"synthetic LAB/PREPROD cases only; destructive execution disabled",
+    "REG-001":"promotion candidate only; promotion execution disabled",
+    "DR-001":"backup/restore evidence only; backup and restore execution disabled",
+    "BCP-001":"selects continuity plan; execution disabled",
+    "CRS-001":"classifies crisis; communications execution disabled"
+  },
+  "do_not_overwrite":true,
+  "prod_writes":false,
+  "trading_access":false,
+  "additional_cost_eur":0
+}
