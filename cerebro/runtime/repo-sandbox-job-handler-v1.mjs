@@ -3,7 +3,8 @@ import {
   inspectUniversalRepoSandboxBackend,
 } from './universal-repo-sandbox-executor-v0.mjs';
 
-const PREPROD = 'PREPROD';
+const DEFAULT_ENVIRONMENT = 'PREPROD';
+const ALLOWED_ENVIRONMENTS = new Set(['PREPROD','PROD']);
 const JOB_NAME = 'repo.sandbox.public.readonly.v0';
 
 function nonEmpty(value, label, max = 4096) {
@@ -26,7 +27,7 @@ function safeContext(value) {
     environment: nonEmpty(value.environment, 'context.environment', 32),
     version: nonEmpty(value.version, 'context.version', 128),
   });
-  if (out.environment !== PREPROD) throw new Error('repo sandbox durable handler is PREPROD-only');
+  if (!ALLOWED_ENVIRONMENTS.has(out.environment)) throw new Error('repo sandbox control-plane environment unsupported');
   return out;
 }
 
@@ -81,10 +82,13 @@ export function createRepoSandboxJobHandlerV1({
   let failures = 0;
   let lastStatus = 'READY';
   let lastFinishedAt = null;
+  let lastEnvironment = DEFAULT_ENVIRONMENT;
 
   const handler = async ({ context: rawContext, payload, signal, heartbeat, checkpoint } = {}) => {
     const context = safeContext(rawContext);
     const input = safePayload(payload, context);
+    const expectedGreen = `PHYSICAL_${context.environment}_GREEN`;
+    lastEnvironment = context.environment;
     executions += 1;
     lastStatus = 'RUNNING';
 
@@ -106,7 +110,7 @@ export function createRepoSandboxJobHandlerV1({
         git_bin,
         signal,
       });
-      if (!execution || execution.status !== 'PHYSICAL_PREPROD_GREEN') {
+      if (!execution || execution.status !== expectedGreen) {
         throw new Error(`REPO_SANDBOX_EXECUTION_FAILED:${execution?.status ?? 'NO_RESULT'}`);
       }
 
@@ -114,13 +118,13 @@ export function createRepoSandboxJobHandlerV1({
       lastStatus = 'GREEN';
       lastFinishedAt = new Date().toISOString();
       const result = Object.freeze({
-        schema_version: '1.1.0',
+        schema_version: '1.2.0',
         state_type: 'CEREBRO_REPO_SANDBOX_DURABLE_JOB_RESULT_V1',
-        status: 'PHYSICAL_PREPROD_GREEN',
+        status: expectedGreen,
         job_name: JOB_NAME,
         company_id: context.company_id,
         engine_id: context.engine_id,
-        environment: PREPROD,
+        environment: context.environment,
         version: context.version,
         repository_url: input.repository_url,
         pinned_sha: input.plan.pinned_sha,
@@ -144,7 +148,7 @@ export function createRepoSandboxJobHandlerV1({
         completed_at: lastFinishedAt,
         ...authority(),
       });
-      if (typeof checkpoint === 'function') checkpoint({ stage: 'PHYSICAL_PREPROD_GREEN', at: lastFinishedAt, exit_code: result.exit_code, command_hash: result.command_hash });
+      if (typeof checkpoint === 'function') checkpoint({ stage: expectedGreen, at: lastFinishedAt, exit_code: result.exit_code, command_hash: result.command_hash });
       return result;
     } catch (error) {
       failures += 1;
@@ -155,11 +159,12 @@ export function createRepoSandboxJobHandlerV1({
   };
 
   handler.snapshot = () => Object.freeze({
-    schema_version: '1.1.0',
+    schema_version: '1.2.0',
     state_type: 'CEREBRO_REPO_SANDBOX_DURABLE_HANDLER_V1',
     status: lastStatus,
     job_name: JOB_NAME,
-    environment: PREPROD,
+    environment: lastEnvironment,
+    supported_environments: [...ALLOWED_ENVIRONMENTS],
     backend: 'DOCKER_CLI_OCI',
     execution_mode: 'PUBLIC_GITHUB_EXACT_SHA_READONLY',
     executions,
@@ -175,7 +180,8 @@ export function createRepoSandboxJobHandlerV1({
 export const REPO_SANDBOX_JOB_HANDLER_V1_CONTRACT = Object.freeze({
   capability: 'FACT-001/JOB-001/repo-sandbox-durable-handler-v1',
   job_name: JOB_NAME,
-  environment: PREPROD,
+  environment: DEFAULT_ENVIRONMENT,
+  supported_environments: [...ALLOWED_ENVIRONMENTS],
   queue: 'JARVIS_WORK/POSTGRES_V1',
   worker: 'JARVIS_WORK/GITHUB_ACTIONS_OIDC_V1',
   execution: 'FACT-001/universal-repo-sandbox-executor-v0',
