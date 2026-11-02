@@ -1,0 +1,64 @@
+name: JARVIS Work Codex PREPROD Worker
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+    paths:
+      - '.github/workflows/jarvis-work-codex-preprod-worker.yml'
+      - 'cerebro/runtime/jarvis-work-job-runner-v1.mjs'
+      - 'cerebro/runtime/repo-sandbox-job-handler-v1.mjs'
+      - 'cerebro/runtime/universal-repo-sandbox-executor-v0.mjs'
+      - 'supabase/functions/jarvis-work-dispatch-v1-preprod/**'
+      - 'supabase/migrations/20261102143500_jarvis_project_work_preprod_v1.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: jarvis-work-codex-preprod-worker-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  JARVIS_WORK_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-work-dispatch-v1-preprod
+  JARVIS_WORK_OIDC_AUDIENCE: jarvis-work-worker-v1
+
+jobs:
+  governed-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Verify runtime syntax
+        run: |
+          node --check cerebro/runtime/jarvis-work-job-runner-v1.mjs
+          node --check cerebro/runtime/repo-sandbox-job-handler-v1.mjs
+          node --check cerebro/runtime/universal-repo-sandbox-executor-v0.mjs
+      - name: Resolve immutable sandbox image
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull node:24-bookworm-slim >/dev/null
+          IMAGE_REF="$(docker image inspect node:24-bookworm-slim --format '{{index .RepoDigests 0}}')"
+          test -n "$IMAGE_REF"
+          case "$IMAGE_REF" in *@sha256:*) ;; *) echo "Image is not digest-pinned"; exit 1;; esac
+          echo "JARVIS_SANDBOX_IMAGE_REF=$IMAGE_REF" >> "$GITHUB_ENV"
+          echo "Resolved immutable sandbox image digest without logging credentials."
+      - name: Execute at most one governed PREPROD work job
+        run: node cerebro/runtime/jarvis-work-job-runner-v1.mjs
+      - name: Assert protected surfaces untouched
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "cerebro/jarvis-work-codex-complete-20261102"
+          test -z "$(git status --porcelain)"
+          echo "No host/repository write was produced by the sandbox worker."
