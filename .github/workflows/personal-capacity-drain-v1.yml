@@ -13,6 +13,7 @@ permissions:
 env:
   CEREBRO_PROD_WRITE: 'false'
   CEREBRO_TRADING_ACCESS: 'false'
+  CEREBRO_PRIORITY_REASON: 'OPERATIVA_PROD_PAGES_20261102'
 
 jobs:
   drain-sustained-lanes:
@@ -35,3 +36,4 @@ jobs:
           test "$CEREBRO_PROD_WRITE" = "false"
           test "$CEREBRO_TRADING_ACCESS" = "false"
           echo "lane=${{ matrix.lane }} drained for user-priority work"
+          echo "priority_reason=$CEREBRO_PRIORITY_REASON"
