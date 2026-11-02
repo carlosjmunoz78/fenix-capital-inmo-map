@@ -131,7 +131,7 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Self-refill base lanes only
-        if: success() && fromJSON(inputs.lane) < 182
+        if: ${{ false }}
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
