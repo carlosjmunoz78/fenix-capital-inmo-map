@@ -11,7 +11,7 @@ export const CMD001_CONTRACT_V1 = Object.freeze({
 const RULES = [
   ['COMPANY_CREATE', /\b(nueva empresa|crear empresa|alta empresa|onboard(?:ing)? company|new company)\b/i, 0.99],
   ['RULE_CHANGE', /\b(cambia(?:r)? regla|modifica(?:r)? pol[ií]tica|policy change|nueva regla|permiso permanente)\b/i, 0.98],
-  ['STATUS', /\b(estado|status|health|c[oó]mo va|progreso|gates?|motores?)\b/i, 0.96],
+  ['STATUS', /\b(estado|status|health|c[oó]mo va|progreso|gates?)\b/i, 0.96],
   ['NAVIGATION', /\b(abre|ve a|navega|mostrar pantalla|ir a|open page|navigate)\b/i, 0.95],
   ['ANALYSIS', /\b(analiza|compara|audita|diagn[oó]stica|eval[uú]a|investiga|review|compare|audit)\b/i, 0.94],
   ['ACTION', /\b(ejecuta|crea|actualiza|publica|env[ií]a|borra|elimina|despliega|run|execute|deploy|send|publish)\b/i, 0.93],
