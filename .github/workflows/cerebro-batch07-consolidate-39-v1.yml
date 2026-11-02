@@ -1,3 +1,4 @@
+# Reproducible consolidation: AUD-001 + SELF-001 must coexist in one Strict179 runner.
 name: CEREBRO Batch07 Consolidate 39 V1
 
 on:
