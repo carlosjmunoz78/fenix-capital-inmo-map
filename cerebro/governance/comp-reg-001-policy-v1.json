@@ -1,0 +1,17 @@
+{
+  "engine_id": "COMP-REG-001",
+  "version": "1.0.0",
+  "environment": "PREPROD",
+  "fail_closed": true,
+  "source_of_truth": "GIT_JSON",
+  "permission": "COMPANY_REGISTRY_PREPROD_ONLY",
+  "company_scope": "MULTI_COMPANY_DENY_CROSS_COMPANY_BY_DEFAULT",
+  "required_company_fields": ["company_id", "name", "brands", "domains", "sector", "country", "owner_ref", "permissions", "environments", "stack", "status", "active_engines"],
+  "deny": ["PROD_WRITE", "SUPABASE_WRITE", "TRADING", "CROSS_COMPANY_READ", "SECRET_FIELD", "DUPLICATE_SOURCE_OF_TRUTH"],
+  "human_required_allowed": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "prod_execution_enabled": false,
+  "prod_write_authorized": false,
+  "supabase_write_authorized": false,
+  "trading_allowed": false,
+  "additional_cost_eur": 0
+}
