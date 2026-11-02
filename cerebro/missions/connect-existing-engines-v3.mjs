@@ -14,7 +14,7 @@ function walk(d,a=[]){for(const e of fs.readdirSync(d,{withFileTypes:true})){if(
 const doc=r=>/(^|\/)(docs?|evidence|reports?|handover|continuity)(\/|$)/i.test(r)||/\.(md|txt)$/i.test(r);
 const support=r=>/(^|\/)(tests?|fixtures?|mocks?|missions?|registry)(\/|$)/i.test(r)||r.startsWith('.github/');
 const runtime=r=>!doc(r)&&!support(r)&&!['.md','.txt'].includes(path.extname(r).toLowerCase());
-const pathId=(r,id)=>{r=r.toLowerCase();const a=id.toLowerCase();return r.includes(a)||r.includes(a.replaceAll('-',''))||r.includes(a.replaceAll('-','_'));};
+const pathId=(r,id)=>{r=r.toLowerCase();const a=id.toLowerCase(),forms=[a,a.replaceAll('-',''),a.replaceAll('-','_')];return forms.some(form=>new RegExp(`(?:^|[^a-z0-9])${esc(form)}(?:[^a-z0-9]|$)`,'i').test(r));};
 const identity=(c,id)=>new RegExp(`(?:engine_id|engineId|ENGINE_ID)\\s*[=:]\\s*[\\"']${esc(id)}[\\"']|[\\"']engine_id[\\"']\\s*:\\s*[\\"']${esc(id)}[\\"']`,'i').test(c);
 const relation=(c,id)=>[new RegExp(`(?:dependencies|depends_on|dependsOn|requires_engines?|upstream_engines?|downstream_engines?)\\s*[=:][\\s\\S]{0,240}${esc(id)}`,'i'),new RegExp(`(?:invokeEngine|callEngine|dispatchEngine|target_engine|targetEngine)\\s*\\(?\\s*[=:,]?\\s*[\\"']${esc(id)}[\\"']`,'i')].some(r=>r.test(c));
 function pairs(a){const m=new Map();for(const e of a){const k=e.source+'|'+e.target;if(!m.has(k))m.set(k,{source:e.source,target:e.target,evidence_paths:[],evidence_types:[]});m.get(k).evidence_paths.push(e.evidence_path);if(e.evidence_type)m.get(k).evidence_types.push(e.evidence_type);}return [...m.values()].map(e=>({...e,evidence_paths:[...new Set(e.evidence_paths)].sort(),evidence_types:[...new Set(e.evidence_types)].sort()}));}
