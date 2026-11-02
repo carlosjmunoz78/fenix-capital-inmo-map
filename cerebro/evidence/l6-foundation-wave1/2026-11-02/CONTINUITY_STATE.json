@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "status": "GREEN",
+  "closed_mission": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1",
+  "closed_wave": "L6_FOUNDATION",
+  "priority_wave_complete": true,
+  "priority_physical": "67/67",
+  "environment": "LAB_PREPROD",
+  "runtime_promotion": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "human_required": false,
+  "p23": "POR_AUDITAR",
+  "next_wave": "L3_L4_L5_FOUNDATION",
+  "subsequent_order": ["L3", "L4", "L5", "L7", "L8", "L9"],
+  "guardrails": [
+    "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR",
+    "PRESERVE_EXISTING",
+    "LAB_PREPROD_ONLY",
+    "NO_PROD",
+    "NO_TRADING",
+    "NO_SECRET_VALUES",
+    "ZERO_ADDITIONAL_COST_BY_DEFAULT",
+    "CANONICAL_HUMAN_EXCEPTION_CODES_ONLY"
+  ],
+  "next_action": "Inventory L3/L4/L5 physical maturity from live repository evidence, implement only missing deterministic foundation runtimes, preserve existing implementations, then repeat focused tests + full regression + connection analyzer + rebuild proof."
+}
