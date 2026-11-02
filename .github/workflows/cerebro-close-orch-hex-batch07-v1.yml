@@ -1,0 +1,96 @@
+name: CEREBRO Close ORCH HEX Batch07 V1
+
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
+      - 'cerebro/tests/audit-179-human-required-semantics-v1.test.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/evidence/l0-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json'
+      - '.github/workflows/cerebro-close-orch-hex-batch07-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-close-orch-hex-batch07-v1
+  cancel-in-progress: false
+
+env:
+  OUT: /tmp/cerebro-close-orch-hex-batch07
+
+jobs:
+  strict179-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Verify isolated closure branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate canonical Registry and Factory
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Prove ORCH-001 and HEX-001 are registered and physically connected
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const registry=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json','utf8'));
+          const physical=JSON.parse(fs.readFileSync('cerebro/evidence/l0-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json','utf8'));
+          for (const id of ['ORCH-001','HEX-001']) {
+            if (!registry.engine_ids.includes(id)) throw new Error(`${id}: missing from canonical registry`);
+            if (!physical.physically_connected_engine_ids.includes(id)) throw new Error(`${id}: missing from physical baseline`);
+          }
+          if (registry.count!==179 || registry.engine_ids.length!==179) throw new Error('Strict179 registry mismatch');
+          console.log('PASS ORCH-001 + HEX-001 registration/physical baseline');
+          NODE
+      - name: Guard HUMAN_REQUIRED canonical semantics
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/audit-179-human-required-semantics-v1.test.mjs
+      - name: Run strict readiness audit twice and prove deterministic rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT/a"
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT/b"
+          cmp "$OUT/a/AUTONOMY_READINESS_BASELINE.json" "$OUT/b/AUTONOMY_READINESS_BASELINE.json"
+          cmp "$OUT/a/REBUILD.sha256" "$OUT/b/REBUILD.sha256"
+          node <<'NODE'
+          const fs=require('fs');
+          const s=JSON.parse(fs.readFileSync(process.env.OUT+'/a/SUMMARY.json','utf8'));
+          if (s.registry_total!==179 || s.physical_foundation!==179 || s.prod_registration_ready!==179) throw new Error('Strict179 baseline mismatch');
+          if (s.additional_cost_eur!==0 || s.trading_touched!==false || s.prod_writes!==false) throw new Error('Safety/cost isolation mismatch');
+          if (s.human_required_semantics!=='UNREADINESS_IS_NOT_HUMAN_REQUIRED; HUMAN_REQUIRED IS_RESERVED_FOR_EXPLICIT_CANONICAL_EXCEPTION_CAUSES') throw new Error('HUMAN_REQUIRED semantics mismatch');
+          console.log('STRICT179='+JSON.stringify(s));
+          NODE
+      - name: Upload inspectable closure evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-close-orch-hex-batch07-${{ github.run_id }}
+          path: /tmp/cerebro-close-orch-hex-batch07/a/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Summary
+        shell: bash
+        run: |
+          echo 'ORCH-001 and HEX-001 closure validation executed on isolated branch.' >> "$GITHUB_STEP_SUMMARY"
+          cat "$OUT/a/SUMMARY.json" >> "$GITHUB_STEP_SUMMARY"
+          echo 'No PROD write; no trading touch; no automatic autonomy claim beyond generated evidence.' >> "$GITHUB_STEP_SUMMARY"
