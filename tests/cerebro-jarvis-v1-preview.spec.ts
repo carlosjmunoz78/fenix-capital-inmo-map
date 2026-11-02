@@ -68,20 +68,28 @@ async function installIsolatedPreprod(page:Page){
  });
 }
 
-async function expectJarvisContract(page:Page){
- await expect(page.getByRole('heading',{name:'JARVIS'})).toBeVisible();
- for(const label of ['Inicio','Jarvis','Operativa','Neuronal','Navegador'])await expect(page.getByText(label,{exact:true}).first()).toBeVisible();
- await expect(page.getByLabel('Empresa',{exact:true})).toHaveValue('Fénix · sesión autenticada');
- await expect(page.getByLabel('Contexto',{exact:true})).toHaveValue('GENERAL');
- await expect(page.getByText('Transporte autenticado verificado')).toBeVisible();
- await expect(page.getByText('HUMAN_REQUIRED',{exact:true})).toHaveCount(0);
- await expect(page.getByText('Procesos reales',{exact:true})).toHaveCount(0);
- await expect(page.getByText('FÉNIX · GENERAL',{exact:true})).toHaveCount(0);
+async function expectPrimaryNavigation(page:Page){
+ for(const label of ['Inicio','Jarvis','Operativa','Neuronal','Navegador'])await expect(page.getByRole('button',{name:label,exact:true})).toBeVisible();
+}
+
+async function expectNoHorizontalOverflow(page:Page){
  const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
  expect(overflow).toBeLessThanOrEqual(1);
 }
 
-test('Jarvis V1 PREPROD real React surface · desktop + chat + narrow viewport',async({page})=>{
+async function expectJarvisContract(page:Page){
+ await expect(page.getByRole('heading',{name:'JARVIS'})).toBeVisible();
+ await expectPrimaryNavigation(page);
+ await expect(page.getByRole('combobox',{name:'Empresa',exact:true})).toHaveValue('Fénix · sesión autenticada');
+ await expect(page.getByRole('combobox',{name:'Contexto',exact:true})).toHaveValue('GENERAL');
+ await expect(page.getByText('Transporte autenticado verificado')).toBeVisible();
+ await expect(page.getByText('HUMAN_REQUIRED',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('Procesos reales',{exact:true})).toHaveCount(0);
+ await expect(page.getByText('FÉNIX · GENERAL',{exact:true})).toHaveCount(0);
+ await expectNoHorizontalOverflow(page);
+}
+
+test('Jarvis V1 PREPROD real React surface · desktop + chat + narrow viewport + Operativa regression',async({page})=>{
  await installIsolatedPreprod(page);
  await page.goto('/cerebro?section=jarvis');
  await expectJarvisContract(page);
@@ -96,12 +104,17 @@ test('Jarvis V1 PREPROD real React surface · desktop + chat + narrow viewport',
  await expect(assistantLabel).toBeVisible();
  const pseudoContent=await assistantLabel.evaluate(el=>getComputedStyle(el,'::after').content);
  expect(pseudoContent).toContain('JARVIS');
-
  await page.screenshot({path:'test-results/jarvis-v1-desktop.png',fullPage:true});
 
  await page.setViewportSize({width:695,height:900});
  await expectJarvisContract(page);
- const narrowOverflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
- expect(narrowOverflow).toBeLessThanOrEqual(1);
+ await expectNoHorizontalOverflow(page);
  await page.screenshot({path:'test-results/jarvis-v1-narrow-695.png',fullPage:true});
+
+ await page.setViewportSize({width:1440,height:900});
+ await page.getByRole('button',{name:'Operativa',exact:true}).click();
+ await expect(page.locator('main.operativa-premium[aria-label="Operativa"]')).toBeVisible();
+ await expectPrimaryNavigation(page);
+ await expectNoHorizontalOverflow(page);
+ await page.screenshot({path:'test-results/operativa-v4-regression.png',fullPage:true});
 });
