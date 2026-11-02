@@ -7,10 +7,10 @@ on:
     paths:
       - 'cerebro/missions/strict179-batch02-seo-jdg-recovery-observability-v1.mjs'
       - '.github/workflows/cerebro-strict179-batch02-seo-jdg-v1.yml'
-      - 'cerebro/evidence/backup/**'
-      - 'cerebro/evidence/rollback/**'
-      - 'cerebro/evidence/rebuild/**'
-      - 'cerebro/evidence/observability/**'
+      - 'cerebro/evidence/backup/STRICT179_BATCH02_SEO001_JDG001_BACKUP_2026-11-02.json'
+      - 'cerebro/evidence/rollback/STRICT179_BATCH02_SEO001_JDG001_ROLLBACK_2026-11-02.json'
+      - 'cerebro/evidence/rebuild/STRICT179_BATCH02_SEO001_JDG001_REBUILD_2026-11-02.json'
+      - 'cerebro/evidence/observability/STRICT179_BATCH02_JDG001_OBSERVABILITY_2026-11-02.json'
   workflow_dispatch:
 
 permissions:
