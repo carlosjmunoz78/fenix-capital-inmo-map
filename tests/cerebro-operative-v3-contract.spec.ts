@@ -23,15 +23,17 @@ test('Operativa consumes real activity and never invents numeric progress',async
  expect(source).toContain('Sin porcentaje fiable');
 });
 
-test('Operativa uses human Spanish instead of technical control-plane labels',async()=>{
+test('Operativa translates technical names and steps to human Spanish',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
  expect(source).toContain('Trabajando ahora');
  expect(source).toContain('Esperando turno');
  expect(source).toContain('Necesita revisión');
  expect(source).toContain('Comprobar acceso y sesión');
  expect(source).toContain('Preparar una integración segura');
- expect(source).toContain('Resultado reciente');
- expect(source).toContain('Para ti');
+ expect(source).toContain('Preparando estructura y reglas');
+ expect(source).toContain('Revisión independiente');
+ expect(source).toContain('humanStep(run.current_step');
+ expect(source).toContain('humanStep(selectedRun.next_step');
 });
 
 test('Operativa exposes current multi-company scope and protected power modes',async()=>{
@@ -49,7 +51,7 @@ test('Jarvis composer is empty, separates dictation and voice, and reuses canoni
  expect(source).toContain('aria-label="Mensaje para Jarvis"');
  expect(source).not.toContain('placeholder=');
  expect(source).toContain('createVoiceRecognition');
- expect(source).toContain("querySelector<HTMLButtonElement>('.cerebro-host-v0 .cerebro-voice-main')");
+ expect(source).toContain("querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main')");
  expect(source).toContain("dictating?'Detener dictado':'Dictar'");
  expect(source).toContain("snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'");
 });
@@ -97,6 +99,7 @@ test('canonical Gateway and voice core remain the execution path',async()=>{
  const operative=read('src/CerebroOperativeConsole.tsx');
  const shell=read('src/CerebroConsoleShell.tsx');
  expect(operative).toContain('<CerebroConsoleShell/>');
+ expect(operative).toContain(".operativa-core-bridge .cerebro-console");
  expect(shell).toContain('postCerebroConsoleChat');
  expect(shell).toContain('createVoiceRecognition');
  expect(shell).toContain('window.speechSynthesis.speak');
