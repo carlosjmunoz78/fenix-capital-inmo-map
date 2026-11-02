@@ -1,4 +1,4 @@
-name: JARVIS Orchestrator PREPROD Smoke
+name: JARVIS Orchestrator PREPROD + PROD Smoke
 
 on:
   push:
@@ -12,11 +12,11 @@ permissions:
   contents: read
 
 jobs:
-  smoke:
+  preprod-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Health is deterministic and safe
+      - name: PREPROD health is deterministic and safe
         shell: bash
         run: |
           set -euo pipefail
@@ -38,7 +38,7 @@ jobs:
             .additional_cost_eur == 0
           ' health.json
 
-      - name: Anonymous execution fails closed
+      - name: PREPROD anonymous execution fails closed
         shell: bash
         run: |
           set -euo pipefail
@@ -49,7 +49,7 @@ jobs:
           test "$code" = '403'
           jq -e '.status == "FORBIDDEN" and .reason == "OWNER_TOKEN_REQUIRED"' denied.json
 
-      - name: Untrusted browser origin is denied
+      - name: PREPROD untrusted browser origin is denied
         shell: bash
         run: |
           set -euo pipefail
@@ -58,7 +58,51 @@ jobs:
             -X OPTIONS -H 'Origin: https://evil.example' "$base/execute")"
           test "$code" = '403'
 
-      - name: Report
-        run: echo 'JARVIS_ORCHESTRATOR_PREPROD_SMOKE=GREEN'
+  prod-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: PROD health is deterministic and safe
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0'
+          code="$(curl --silent --show-error --output health.json --write-out '%{http_code}' "$base/health")"
+          test "$code" = '200'
+          jq -e '
+            .ok == true and
+            .environment == "PROD" and
+            .mode == "DETERMINISTIC" and
+            .model_router == "PLANIFICADO" and
+            .natural_language_planning == false and
+            .safe_branch == "cerebro/jarvis-work-codex-complete-20261102" and
+            (.protected_branches | index("main") != null) and
+            (.protected_branches | index("emergency-pages") != null) and
+            .browser_mutation == false and
+            .prod_branch_mutation == false and
+            .trading_access == false and
+            .additional_cost_eur == 0
+          ' health.json
 
-# trigger: 2026-11-02 preprod physical smoke
+      - name: PROD anonymous execution fails closed
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0'
+          code="$(curl --silent --show-error --output denied.json --write-out '%{http_code}' \
+            -X POST -H 'content-type: application/json' \
+            --data '{"intent":"REPO_HEAD","args":{}}' "$base/execute")"
+          test "$code" = '403'
+          jq -e '.status == "FORBIDDEN" and .reason == "OWNER_TOKEN_REQUIRED"' denied.json
+
+      - name: PROD untrusted browser origin is denied
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0'
+          code="$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
+            -X OPTIONS -H 'Origin: https://evil.example' "$base/execute")"
+          test "$code" = '403'
+
+      - name: Report
+        run: echo 'JARVIS_ORCHESTRATOR_PREPROD_AND_PROD_SMOKE=GREEN'
