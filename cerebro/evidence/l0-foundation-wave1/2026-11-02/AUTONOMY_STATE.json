@@ -1,0 +1,23 @@
+{
+  "wave": "L0_FOUNDATION",
+  "status": "GREEN",
+  "environment": "LAB_PREPROD",
+  "autonomy": "DETERMINISTIC_NON_PROD",
+  "prod_autonomy": false,
+  "runtime_external_actions": false,
+  "network_access": false,
+  "secrets_access": false,
+  "trading_access": false,
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "promotion_state": "NOT_PROD_PROMOTED",
+  "next_required_gate": "L1_FOUNDATION"
+}
