@@ -1,0 +1,32 @@
+name: CEREBRO L4 Baseline Classification Summary
+on:
+  push:
+    branches: [cerebro-implement-l3-l4-l5-foundation-20261102]
+    paths: ['.github/workflows/cerebro-l4-baseline-summary.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+      - name: Persist compact classification
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),p='cerebro/evidence/l4-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json';
+          const b=JSON.parse(fs.readFileSync(p));
+          const groups={}; for(const [id,e] of Object.entries(b.engines)){(groups[e.classification]??=[]).push(id)}
+          for(const a of Object.values(groups)) a.sort();
+          fs.writeFileSync('cerebro/evidence/l4-foundation-wave1/2026-11-02/BASELINE_CLASSIFICATION_SUMMARY.json',JSON.stringify({status:'GREEN',layer:'L4',physical_before:b.physical_before,classification_counts:b.classification_counts,groups},null,2)+'\n');
+          console.log(JSON.stringify(groups));
+          NODE
+          git config user.name 'CEREBRO Foundation Evidence'
+          git config user.email 'cerebro-foundation@users.noreply.github.com'
+          git add cerebro/evidence/l4-foundation-wave1/2026-11-02/BASELINE_CLASSIFICATION_SUMMARY.json
+          git commit -m 'evidence(cerebro): summarize L4 baseline classifications [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
