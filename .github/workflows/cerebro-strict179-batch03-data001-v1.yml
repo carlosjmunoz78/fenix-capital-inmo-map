@@ -1,0 +1,62 @@
+name: CEREBRO Strict179 Batch03 DATA001 V1
+
+on:
+  push:
+    branches:
+      - 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+    paths:
+      - 'cerebro/missions/strict179-batch03-data001-readonly-recovery-tribunal-v1.mjs'
+      - '.github/workflows/cerebro-strict179-batch03-data001-v1.yml'
+      - 'cerebro/evidence/backup/**'
+      - 'cerebro/evidence/rollback/**'
+      - 'cerebro/evidence/rebuild/**'
+      - 'cerebro/evidence/observability/**'
+      - 'cerebro/evidence/tribunal/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-strict179-batch03-data001-v1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify-data001:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Test DATA-001 recovery observability and Tribunal
+        run: |
+          set -euo pipefail
+          node cerebro/missions/strict179-batch03-data001-readonly-recovery-tribunal-v1.mjs --out /tmp/strict179-batch03
+          cat /tmp/strict179-batch03/SUMMARY.json
+          cat /tmp/strict179-batch03/DATA001_OBSERVABILITY.json
+          cat /tmp/strict179-batch03/DATA001_TRIBUNAL.json
+      - name: Re-run strict 179x12 readiness audit
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/strict179-readiness
+          cat /tmp/strict179-readiness/SUMMARY.json
+      - name: Assert no repository mutation
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain --untracked-files=all)"
+          echo 'GREEN: DATA-001 read-only PREPROD verification; no PROD writes, Trading, secrets or paid fallback.'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: strict179-batch03-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/strict179-batch03/SUMMARY.json
+            /tmp/strict179-batch03/DATA001_OBSERVABILITY.json
+            /tmp/strict179-batch03/DATA001_TRIBUNAL.json
+            /tmp/strict179-readiness/SUMMARY.json
+            /tmp/strict179-readiness/AUTONOMY_READINESS_BASELINE.json
+          if-no-files-found: error
+          retention-days: 30
