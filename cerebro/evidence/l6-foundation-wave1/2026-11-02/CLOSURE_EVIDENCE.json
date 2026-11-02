@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "mission": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1",
   "wave": "L6_FOUNDATION",
   "status": "GREEN",
@@ -25,7 +25,7 @@
     "scaffold_only_after": 0
   },
   "new_runtime_engine_ids": ["API-001","ARCH-001","DEBT-001","FF-001","CAN-001","LOCAL-001","AIBUD-001","DOCS-001","INT-001","STOROFF-001"],
-  "preserved_existing_engine_ids": ["APP-001","CRM-001","DATA-001","EVT-001","JOB-001","DEP-001","MIG-001","ROUTE-001","OPT-001","AUTO-001","AUD-001","WEB-001","RUNTIME-001","DBOFF-001","FREE-001"],
+  "preserved_existing_engine_ids": ["APP-001","CRM-001","DATA-001","EVT-001","JOB-001","DEP-001","MIG-001","ROUTE-001","OPT-001","AUTO-001","AUD-001","WEB-001","INT-001","RUNTIME-001","DBOFF-001","FREE-001"],
   "focused_tests": {"total": 11, "passed": 11, "failed": 0},
   "regression": {
     "total": 2622,
@@ -58,7 +58,8 @@
     "id": 13142581825,
     "name": "cerebro-l6-foundation-wave1-41445683684-1",
     "github_artifact_sha256": "1da0ba69339be14a88269d3f7dfbafc74b21d4053e94082558d50be5542064f0",
-    "internal_continuity_zip_sha256": "29b45893c806e144f9436f1168033492ec9a509254e9faa028945759a39fab86",
+    "internal_continuity_zip_sha256": "f1920818794dca7083456b6ac3a8e2084fb0ccdf99ef7b7b04e37ad31e9fa9f2",
+    "internal_hash_verified_from_downloaded_file": true,
     "retention_expires": "2026-12-02"
   },
   "next_wave": "L3_L4_L5_FOUNDATION",
