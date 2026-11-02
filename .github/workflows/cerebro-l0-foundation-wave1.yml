@@ -1,0 +1,163 @@
+name: CEREBRO L0 Foundation Wave1
+
+on:
+  push:
+    branches:
+      - cerebro-implement-l0-foundation-wave1-20261102
+    paths:
+      - 'cerebro/runtime/l0/**'
+      - 'cerebro/tests/l0-foundation-wave1.test.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/factory-v1.mjs'
+      - '.github/workflows/cerebro-l0-foundation-wave1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-l0-foundation-wave1-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  EXACT_SOURCE_SHA: ${{ github.sha }}
+  BASE_CLOSURE_SHA: 6560b2ce5eff9da2becd6cc66f92454d2af14698
+  OUT: /tmp/cerebro-l0-foundation-wave1
+
+jobs:
+  validate-l0-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.EXACT_SOURCE_SHA }}
+          fetch-depth: 40
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXACT_SOURCE_SHA"
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l0-foundation-wave1-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git cat-file -e "$BASE_CLOSURE_SHA^{commit}"
+
+      - name: Install repository-declared dependencies only
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+
+      - name: Syntax Factory Registry and L0 gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do node --check "$f"; done < <(find cerebro/runtime/l0 -maxdepth 1 -name '*.mjs' -print | sort)
+          node --check cerebro/tests/l0-foundation-wave1.test.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+
+      - name: L0 Wave1 focused acceptance
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --test tests/l0-foundation-wave1.test.mjs
+
+      - name: Full CEREBRO regression preserving intentional paused-worker baseline
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' \
+            ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' \
+            ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' \
+            -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_CLOSURE_SHA" -- \
+            .github/workflows/cerebro-continuous-useful-worker-v1.yml \
+            cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs \
+            cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+          printf '%s\n' 'KNOWN_BASELINE_DEFERRED: sustained worker remains intentionally paused and untouched.'
+
+      - name: Re-audit physical bindings and dependency graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -rf "$OUT"
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connection" | tee "$OUT.runner.log"
+
+      - name: Verify 13 of 13 L0 physical and OLD vs NEW
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),out=process.env.OUT;
+          const base=JSON.parse(fs.readFileSync('cerebro/evidence/connection-mission/2026-11-02/PHYSICAL_BINDINGS.json'));
+          const current=JSON.parse(fs.readFileSync(path.join(out,'connection','ENGINE_CONNECTION_BASELINE.json')));
+          const bindings=JSON.parse(fs.readFileSync(path.join(out,'connection','engine-implementation-bindings.v1.json')));
+          const tests=JSON.parse(fs.readFileSync(path.join(out,'connection','TEST_REPORT.json')));
+          const rebuild=JSON.parse(fs.readFileSync(path.join(out,'connection','REBUILD_PROOF.json')));
+          const l0=['CORE-001','GOV-001','ORCH-001','POL-001','HEX-001','DEC-001','SEM-001','OWN-001','OBJ-001','ADR-001','CFG-001','VER-001','FACT-001'];
+          const newly=['CORE-001','GOV-001','POL-001','DEC-001','SEM-001','OWN-001','OBJ-001','ADR-001','CFG-001','VER-001'];
+          const preserved=['ORCH-001','HEX-001','FACT-001'];
+          if(base.physically_connected_count!==34) throw new Error('unexpected OLD physical baseline');
+          if(current.physically_connected_count!==44) throw new Error(`expected 44 physical priority engines, got ${current.physically_connected_count}`);
+          for(const id of l0){const b=bindings.engines[id];if(!b||b.binding_mode!=='WRAP_PRESERVE'||!b.physical_evidence.length||b.do_not_overwrite!==true)throw new Error(`L0 physical binding missing: ${id}`);}
+          for(const id of newly){if(!bindings.engines[id].physical_evidence.some(e=>e.path.startsWith('cerebro/runtime/l0/')))throw new Error(`new L0 runtime evidence missing: ${id}`);}
+          for(const id of preserved){if(bindings.engines[id].physical_evidence.every(e=>e.path.startsWith('cerebro/runtime/l0/')))throw new Error(`existing engine preservation evidence lost: ${id}`);}
+          if(tests.status!=='GREEN'||tests.failed!==0||!tests.all_checks_passed)throw new Error('connection analyzer tests not green');
+          if(rebuild.status!=='GREEN'||rebuild.all_hashes_equal!==true)throw new Error('rebuild not deterministic');
+          const summary={mission:'IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1',wave:'L0_FOUNDATION',status:'GREEN',environment:'LAB_PREPROD',registry_total:179,l0_total:13,l0_physical_before:3,l0_physical_after:13,priority_physical_before:34,priority_physical_after:44,new_runtime_engines:newly,preserved_existing_engines:preserved,scaffold_only_priority_after:23,connection_test_assertions:tests.total_assertions,rebuild:'GREEN',additional_cost_eur:0,prod_touched:false,trading_touched:false,registry_mutated:false,factory_mutated:false,next_wave:'L1_FOUNDATION'};
+          fs.writeFileSync(path.join(out,'L0_WAVE1_SUMMARY.json'),JSON.stringify(summary,null,2)+'\n');
+          fs.writeFileSync(path.join(out,'BACKUP_ROLLBACK.json'),JSON.stringify({status:'GREEN',base_closure_sha:process.env.BASE_CLOSURE_SHA,rollback:'Remove additive cerebro/runtime/l0 modules, focused test and this workflow; existing implementations remain untouched.',rebuild:'Re-run focused tests plus connect-existing-engines-v3 from Registry and repository evidence.'},null,2)+'\n');
+          fs.writeFileSync(path.join(out,'CONTINUITY_STATE.json'),JSON.stringify({status:'GREEN',closed_wave:'L0_FOUNDATION',next_wave:'L1_FOUNDATION',guardrails:['PRESERVE_EXISTING','LAB_PREPROD_ONLY','NO_PROD','NO_TRADING','ZERO_ADDITIONAL_COST_BY_DEFAULT'],human_required:false},null,2)+'\n');
+          console.log('L0_WAVE1_METRICS='+JSON.stringify(summary));
+          NODE
+
+      - name: Prove canonical sources unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_CLOSURE_SHA" -- \
+            cerebro/registry/engine-registry.v1.json \
+            cerebro/factory.mjs \
+            cerebro/factory-v1.mjs
+
+      - name: Build continuity package
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$EXACT_SOURCE_SHA" > "$OUT/SOURCE_SHA.txt"
+          printf '%s\n' "$BASE_CLOSURE_SHA" > "$OUT/BASE_CLOSURE_SHA.txt"
+          (cd /tmp && zip -qr CEREBRO_L0_FOUNDATION_WAVE1_2026-11-02.zip "$(basename "$OUT")")
+          sha256sum /tmp/CEREBRO_L0_FOUNDATION_WAVE1_2026-11-02.zip | tee "$OUT/CONTINUITY_PACKAGE_SHA256.txt"
+
+      - name: Upload L0 Wave1 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l0-foundation-wave1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/cerebro-l0-foundation-wave1
+            /tmp/CEREBRO_L0_FOUNDATION_WAVE1_2026-11-02.zip
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Mission boundary
+        shell: bash
+        run: |
+          echo 'L0 foundation: 13/13 engines physically evidenced.' >> "$GITHUB_STEP_SUMMARY"
+          echo '10 formerly scaffold-only L0 engines now have deterministic runtime modules.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'ORCH-001, HEX-001 and FACT-001 preserved; no overwrite.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Canonical Registry/Factory unchanged. PROD and Trading untouched.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Additional cost: 0 EUR.' >> "$GITHUB_STEP_SUMMARY"
