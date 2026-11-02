@@ -1,0 +1,59 @@
+.jarvis-work-v2{--jw-bg:#0b0b0c;--jw-panel:#101112;--jw-panel-2:#151617;--jw-line:rgba(255,255,255,.08);--jw-line-strong:rgba(255,255,255,.14);--jw-text:#f4f4f5;--jw-muted:#8e8e93;--jw-blue:#3b82f6;--jw-cyan:#8ab4f8;background:#0b0b0c;color:#f4f4f5}
+.jarvis-work-v2 .jarvis-workspace-header{background:#0f1011;border-bottom-color:rgba(255,255,255,.08);height:52px;gap:14px}
+.jarvis-work-v2 .jarvis-energy-core{border:0;border-radius:9px;background:#1f2022;box-shadow:none;color:#e8e8ea}
+.jarvis-work-v2 .jarvis-workspace-brand small{color:#777;font-size:8px;letter-spacing:.12em}
+.jarvis-work-v2 .jarvis-workspace-brand strong{letter-spacing:.04em;font-size:14px}
+.jarvis-work-v2 .jarvis-workspace-context{color:#777;font-size:11px}
+.jarvis-work-v2 .jarvis-workspace-context b,.jarvis-work-v2 .jarvis-workspace-context em{color:#c7c7ca;font-weight:650}
+.jarvis-work-v2 .jarvis-workspace{height:calc(100dvh - 110px);background:#0b0b0c;min-width:0}
+.jarvis-work-v2 .jarvis-projects-pane,.jarvis-work-v2 .jarvis-execution-pane,.jarvis-work-v2 .jarvis-center-pane{background:#101112;border-color:rgba(255,255,255,.08)}
+.jarvis-work-v2 .jarvis-center-pane{background:#0b0b0c}
+.jarvis-work-v2 .jarvis-pane-heading,.jarvis-work-v2 .jarvis-center-topbar{border-bottom-color:rgba(255,255,255,.07);background:#101112}
+.jarvis-work-v2 .jarvis-pane-heading small,.jarvis-work-v2 .jarvis-center-project small{color:#6f7074}
+.jarvis-work-v2 .jarvis-pane-heading strong,.jarvis-work-v2 .jarvis-center-project strong{color:#e4e4e7}
+.jarvis-pane-controls,.jarvis-global-controls{display:flex;align-items:center;gap:5px}
+.jarvis-pane-controls button,.jarvis-global-controls button{width:28px;height:28px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#17181a;color:#929297;cursor:pointer}
+.jarvis-pane-controls button:hover,.jarvis-global-controls button:hover,.jarvis-global-controls button.is-on{color:#f5f5f5;background:#202124;border-color:rgba(255,255,255,.14)}
+.jarvis-global-controls button{font-size:9px;font-weight:850}
+.jarvis-project-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:8px 9px 2px}
+.jarvis-project-actions button{min-width:0;height:31px;display:flex;align-items:center;justify-content:center;gap:5px;border:1px solid rgba(255,255,255,.08);border-radius:8px;background:#17181a;color:#b6b6ba;font-size:8px;font-weight:750;cursor:pointer}
+.jarvis-project-actions button:hover{background:#202124;color:white}
+.jarvis-inline-error{margin:6px 9px 0;padding:7px 8px;border:1px solid rgba(248,113,113,.2);border-radius:7px;background:rgba(127,29,29,.12);color:#e8a1a1;font-size:8px;line-height:1.4}
+.jarvis-work-v2 .jarvis-project-search{background:#151617;border-color:rgba(255,255,255,.08);color:#777}
+.jarvis-work-v2 .jarvis-project-search input{color:#e5e5e7}
+.jarvis-work-v2 .jarvis-project-node.is-active>.jarvis-project-row{background:#1c1d1f;box-shadow:inset 2px 0 #d8d8da}
+.jarvis-work-v2 .jarvis-project-select strong{color:#d6d6d9}
+.jarvis-work-v2 .jarvis-project-node.is-active .jarvis-project-select{color:#f0f0f1}
+.jarvis-work-v2 .jarvis-subproject-list{border-left-color:rgba(255,255,255,.08)}
+.jarvis-work-v2 .jarvis-subproject-list button:hover,.jarvis-work-v2 .jarvis-subproject-list button.is-selected{background:#1b1c1e;color:#efeff1}
+.jarvis-work-v2 .jarvis-resize-handle{background:#0b0b0c;color:#555}
+.jarvis-work-v2 .jarvis-resize-handle:hover{background:#202124;color:#aaa}
+.jarvis-work-v2 .jarvis-project-brief{background:#111214;border-color:rgba(255,255,255,.08)}
+.jarvis-work-v2 .jarvis-project-brief p{color:#939398}
+.jarvis-work-v2 .jarvis-status-pill{background:#17181a;border-color:rgba(255,255,255,.1);color:#b7b7bb}
+.jarvis-work-v2 .jarvis-project-brief-actions button,.jarvis-work-v2 .jarvis-input-tools button{background:#17181a;border-color:rgba(255,255,255,.09);color:#bcbcc0}
+.jarvis-work-v2 .jarvis-project-brief-actions button:last-child{background:#f1f1f2;color:#151515;border-color:#f1f1f2}
+.jarvis-work-v2 .jarvis-audit-summary{background:#101112;border-color:rgba(255,255,255,.06)}
+.jarvis-work-v2 .jarvis-conversation{background:#0f1011;border-color:rgba(255,255,255,.08);border-radius:12px}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-log{background:#0d0e0f!important;border-color:rgba(255,255,255,.06)!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-user{background:#202124!important;border-color:rgba(255,255,255,.08)!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-cerebro{background:#151617!important;border-color:rgba(255,255,255,.06)!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-line strong{color:#bfc0c4!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-cerebro strong:after{content:"JARVIS";color:#f1f1f2}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-form{background:#17181a!important;border-color:rgba(255,255,255,.09)!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-chat-form button{background:#f1f1f2!important;color:#111!important;border-color:#f1f1f2!important}
+.jarvis-work-v2 .jarvis-conversation .cerebro-fields select{background:#151617!important;border-color:rgba(255,255,255,.07)!important;color:#c7c7cb!important}
+.jarvis-work-v2 .jarvis-right-tabs button{color:#86868b}
+.jarvis-work-v2 .jarvis-right-tabs button.is-active{color:#f1f1f2;background:#1b1c1e}
+.jarvis-work-v2 .jarvis-run-card,.jarvis-work-v2 .jarvis-evidence-card,.jarvis-work-v2 .jarvis-evidence-project,.jarvis-work-v2 .jarvis-tool-grid button{background:#151617;border-color:rgba(255,255,255,.07)}
+.jarvis-work-v2 .jarvis-tool-grid button:hover{background:#1d1e20;border-color:rgba(255,255,255,.12)}
+.jarvis-console-presentation{height:100%;min-height:0}
+.jarvis-console-presentation .cerebro-panel>button:last-child{display:none!important}
+.jarvis-project-modal{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:22px;background:rgba(0,0,0,.68);backdrop-filter:blur(8px)}
+.jarvis-project-modal form{width:min(470px,100%);display:grid;gap:13px;padding:17px;border:1px solid rgba(255,255,255,.1);border-radius:14px;background:#141516;box-shadow:0 20px 70px rgba(0,0,0,.48)}
+.jarvis-modal-head{display:flex;align-items:center;justify-content:space-between}.jarvis-modal-head strong{font-size:14px}.jarvis-modal-head button{width:28px;height:28px;display:grid;place-items:center;border:0;border-radius:8px;background:#202124;color:#aaa;cursor:pointer}
+.jarvis-project-modal label{display:grid;gap:6px;color:#98989d;font-size:9px;font-weight:750}.jarvis-project-modal input,.jarvis-project-modal textarea{width:100%;border:1px solid rgba(255,255,255,.09);border-radius:9px;outline:0;background:#0e0f10;color:#f1f1f2;padding:9px 10px;font-size:11px}.jarvis-project-modal input:focus,.jarvis-project-modal textarea:focus{border-color:rgba(255,255,255,.22)}
+.jarvis-modal-actions{display:flex;justify-content:flex-end;gap:7px}.jarvis-modal-actions button{height:34px;display:flex;align-items:center;gap:5px;padding:0 12px;border:1px solid rgba(255,255,255,.09);border-radius:8px;background:#1b1c1e;color:#c8c8cc;font-size:9px;font-weight:800;cursor:pointer}.jarvis-modal-actions button[type="submit"]{background:#f0f0f1;color:#151515;border-color:#f0f0f1}.jarvis-modal-actions button:disabled{opacity:.5;cursor:not-allowed}.jarvis-modal-error{margin:0;color:#efaaaa;font-size:9px}
+.jarvis-work.is-focus-left .jarvis-projects-pane,.jarvis-work.is-focus-right .jarvis-execution-pane,.jarvis-work.is-focus-center .jarvis-center-pane{width:100%;height:100%}
+.jarvis-resizing{user-select:none!important;cursor:col-resize!important}
+@media(max-width:900px){.jarvis-work-v2 .jarvis-workspace{display:flex!important;overflow:auto}.jarvis-work-v2 .jarvis-projects-pane,.jarvis-work-v2 .jarvis-center-pane,.jarvis-work-v2 .jarvis-execution-pane{flex:0 0 min(92vw,560px);height:100%}.jarvis-work-v2 .jarvis-resize-handle{display:none}.jarvis-work-v2 .jarvis-workspace-context{display:none}.jarvis-project-actions{grid-template-columns:1fr}.jarvis-project-actions button{justify-content:flex-start;padding:0 10px}}
