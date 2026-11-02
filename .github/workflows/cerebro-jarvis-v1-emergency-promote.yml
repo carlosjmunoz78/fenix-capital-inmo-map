@@ -20,11 +20,11 @@ jobs:
     timeout-minutes: 25
     env:
       VITE_FENIX_ENV: prod
-      EXPECTED_PROD_SHA: f4d2783d969108a1c7080ce421d2dbe5426c2dd0
-      EXPECTED_PROD_SOURCE_SHA: 0a8d971c4009f508d7a37eac7a11b72651d627e0
+      EXPECTED_PROD_SHA: 415ba61e692403cc8413c48b30698d6019a4594d
+      EXPECTED_PROD_SOURCE_SHA: e9cc7e2134b7cce75e0b6391360c317999eab4d8
       EXPECTED_MAIN_SHA: 71ef399d41a6a22ef717e242eca5485a38e08577
       MAIN_FRONTEND_BASE_SHA: 476ce30152554c944a94282f39ddc5ec368b7879
-      ROLLBACK_BRANCH: backup/emergency-pages-jarvis-work-final-20261102
+      ROLLBACK_BRANCH: backup/emergency-pages-jarvis-clean-home-before-20261102
     steps:
       - name: Checkout isolated final Jarvis Work source
         uses: actions/checkout@v4
@@ -111,6 +111,9 @@ jobs:
           grep -q "focusPane('center')" src/CerebroJarvisWorkConsole.tsx
           grep -q "focusPane('right')" src/CerebroJarvisWorkConsole.tsx
           grep -q "setLayout(DEFAULT_LAYOUT)" src/CerebroJarvisWorkConsole.tsx
+          grep -q "jarvis-home-shell" src/CerebroJarvisWorkConsole.tsx
+          grep -q "Inicio de Jarvis" src/CerebroJarvisWorkConsole.tsx
+          grep -q "storageKey(LAYOUT_KEY,selectedProjectId)" src/CerebroJarvisWorkConsole.tsx
           grep -q "JarvisOperativaComposerPortal" src/JarvisEmbeddedConsole.tsx
           grep -q "operativa-jarvis-composer" src/JarvisOperativaComposerPortal.tsx
           grep -q "JarvisWorkTools" src/JarvisWorkbenchPortal.tsx
@@ -175,7 +178,7 @@ jobs:
           cmp public/browser-ergonomics-v1.js /tmp/fenix-emergency-pages/browser-ergonomics-v1.js
           cd /tmp/fenix-emergency-pages
           git add -A
-          git commit -m 'deploy(prod): final Jarvis Work premium snapshot'
+          git commit -m 'deploy(prod): final Jarvis clean-home workspace snapshot'
           git push origin HEAD:emergency-pages
           echo "PROD_DEPLOY_SHA=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
