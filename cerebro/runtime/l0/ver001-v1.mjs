@@ -1,0 +1,5 @@
+import { assertNonEmptyString, deepFreeze, result } from './shared-v1.mjs';
+export const VER_001 = deepFreeze({ engine_id:'VER-001', version:'0.1.0', layer:'L0', mode:'SEMVER_COMPATIBILITY', prod_writes:false, additional_cost_eur:0 });
+export function parseSemver(v){const raw=assertNonEmptyString(v,'version');const m=/^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Za-z.-]+))?$/.exec(raw);if(!m) throw new TypeError('invalid semver');return deepFreeze({raw,major:+m[1],minor:+m[2],patch:+m[3],prerelease:m[4]??null});}
+export function compareSemver(a,b){a=parseSemver(a);b=parseSemver(b);for(const k of ['major','minor','patch']){if(a[k]!==b[k]) return a[k]>b[k]?1:-1;}if(a.prerelease===b.prerelease)return 0;if(a.prerelease==null)return 1;if(b.prerelease==null)return -1;return a.prerelease.localeCompare(b.prerelease);}
+export function compatibility({from,to}){const a=parseSemver(from),b=parseSemver(to);const change=b.major!==a.major?'MAJOR':b.minor!==a.minor?'MINOR':b.patch!==a.patch?'PATCH':'NONE';const compatible=b.major===a.major&&compareSemver(to,from)>=0;return result('VER-001',{from:a.raw,to:b.raw,change,backward_compatible:compatible});}
