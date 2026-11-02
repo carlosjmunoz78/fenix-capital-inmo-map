@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0.0",
+  "engine_id":"SELF-001",
+  "policy":"SELF_HEALING_PLAN_ONLY_PREPROD_FAIL_CLOSED",
+  "environment":"PREPROD_CONTROL_PLANE",
+  "allow":["PLAN_REVERSIBLE_HEALING","PREPARE_OWNER_PATCH","BIND_REGRESSION_TEST","RUN_OLD_VS_NEW","REQUEST_TRIBUNAL","PREPARE_ROLLBACK"],
+  "deny":["CODE_MUTATION","AUTO_MERGE","PROD_WRITE","PROD_PROMOTION","TRADING_ACCESS","CUSTOMER_DATA","POSITIVE_ADDITIONAL_COST","UNKNOWN_HEALING_ACTION"],
+  "permission":"PLAN_ONLY_NO_EXECUTION_AUTHORITY",
+  "fail_closed":true,
+  "prod_execution_authorized":false,
+  "prod_write_authorized":false,
+  "code_mutation_authorized":false,
+  "trading_access":false,
+  "additional_cost_eur":0,
+  "human_required":["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "invariant":"SELF-001 may autonomously produce reversible PREPROD healing plans but never executes patches, merges, promotions or PROD writes"
+}
