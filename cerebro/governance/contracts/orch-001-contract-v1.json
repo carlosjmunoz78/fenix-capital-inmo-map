@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "ORCH-001-CONTRACT-V1",
+  "engine_id": "ORCH-001",
+  "name": "Orquestador Maestro",
+  "company_scope": "GLOBAL_OR_SCOPED",
+  "environment_scope": ["LAB", "PREPROD"],
+  "objective": "Route governed work into deterministic dependency-aware mission DAGs without granting PROD authority.",
+  "inputs": ["mission_scope", "company_id", "environment", "dependencies", "acceptance_criteria"],
+  "outputs": ["mission_dag", "ready_queue", "evidence_requirements", "promotion_gate_packet"],
+  "invariants": [
+    "PROD generation is denied by default",
+    "paid AI is not required for deterministic orchestration",
+    "trading access is always false",
+    "every work unit has an idempotency key",
+    "dependency cycles are rejected",
+    "canonical scope hydration fails closed",
+    "HUMAN_REQUIRED is reserved for canonical exception causes and is not fabricated from readiness gaps"
+  ],
+  "dependencies": ["POL-001", "HEX-001", "EVT-001", "JOB-001", "EVA-001", "JDG-001", "OBSERV-001"],
+  "permissions": {
+    "prod_write": false,
+    "trading_access": false,
+    "paid_ai": false
+  },
+  "cost": {
+    "additional_cost_eur": 0
+  },
+  "promotion": {
+    "automatic_prod_execution": false,
+    "requires_all_readiness_gates": true
+  }
+}
