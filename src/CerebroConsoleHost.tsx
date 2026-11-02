@@ -7,6 +7,7 @@ import CerebroOperativeConsole from './CerebroOperativeConsole';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
+import JarvisVisibleLanguageGuard from './JarvisVisibleLanguageGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 import './cerebro-route-isolation-v2.css';
@@ -43,11 +44,12 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath)return;try{window.sessionStorage.setItem(VIEW_STORAGE_KEY,view)}catch{/* optional */}},[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
- if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
- if(view==='V0')return <div className="cerebro-console-host view-v0"><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
+ if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
+ if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
+  <JarvisVisibleLanguageGuard/>
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
