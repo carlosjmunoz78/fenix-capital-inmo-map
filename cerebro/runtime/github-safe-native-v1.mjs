@@ -1,9 +1,9 @@
 import crypto from 'node:crypto';
 
-export const GH_SAFE_NATIVE_VERSION='1.1.0';
+export const GH_SAFE_NATIVE_VERSION='1.2.0';
 export const GH_SAFE_NATIVE_ROUTE='capability://GH-SAFE-NATIVE/v1/execute';
-export const GH_SAFE_OPERATIONS=Object.freeze(['INVENTORY','STATUS','DIFF','BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','CI_READ','REVIEW_READ','COMPARE','MERGE','ROLLBACK_REVERT','REVERT']);
-const WRITE_OPS=new Set(['BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','MERGE','ROLLBACK_REVERT','REVERT']);
+export const GH_SAFE_OPERATIONS=Object.freeze(['INVENTORY','STATUS','LIST_FILES','SEARCH_CODE','READ_FILE','WRITE_FILE','DISCARD_FILE','DIFF','BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','CI_READ','REVIEW_READ','COMPARE','MERGE','ROLLBACK_REVERT','REVERT']);
+const WRITE_OPS=new Set(['WRITE_FILE','DISCARD_FILE','BRANCH_CREATE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT','PUSH','PR_CREATE','MERGE','ROLLBACK_REVERT','REVERT']);
 const PROTECTED_DIRECT_WRITE_BRANCHES=new Set(['main','master','emergency-pages','cerebro/jarvis-interface-v1-20261102']);
 const WORK_BRANCH_RE=/^(?:cerebro|qa|feat|fix|test)\/[A-Za-z0-9._\/-]{1,180}$/;
 
@@ -36,10 +36,11 @@ export function authorizeGitHubSafeAction(raw={}){
   if(isWrite&&raw.rollback_ready!==true){authorized=false;reasons.push('ROLLBACK_REQUIRED');}
   if(isWrite&&operation!=='MERGE'&&target_branch&&PROTECTED_DIRECT_WRITE_BRANCHES.has(target_branch)){authorized=false;reasons.push('PROTECTED_BRANCH_DIRECT_WRITE_DENIED');}
   if(isWrite&&operation!=='MERGE'&&target_branch&&!WORK_BRANCH_RE.test(target_branch)){authorized=false;reasons.push('WORK_BRANCH_PATTERN_REQUIRED');}
-  if(['COMMIT_FILE','COMMIT','PUSH','REVERT','ROLLBACK_REVERT'].includes(operation)&&!raw.expected_head_sha){authorized=false;reasons.push('EXPECTED_HEAD_SHA_REQUIRED');}
-  if(['STAGE','UNSTAGE','COMMIT_FILE','COMMIT'].includes(operation)&&paths.length===0){authorized=false;reasons.push('PATHS_REQUIRED');}
+  if(['WRITE_FILE','DISCARD_FILE','COMMIT_FILE','COMMIT','PUSH','REVERT','ROLLBACK_REVERT'].includes(operation)&&!raw.expected_head_sha){authorized=false;reasons.push('EXPECTED_HEAD_SHA_REQUIRED');}
+  if(['READ_FILE','WRITE_FILE','DISCARD_FILE','STAGE','UNSTAGE','COMMIT_FILE','COMMIT'].includes(operation)&&paths.length===0){authorized=false;reasons.push('PATHS_REQUIRED');}
   if(paths.some(p=>p==='.git'||p.startsWith('.git/'))){authorized=false;reasons.push('GIT_INTERNAL_PATH_DENIED');}
   if(paths.some(p=>p.startsWith('.github/workflows/'))&&raw.workflow_write_authorized!==true){authorized=false;reasons.push('WORKFLOW_WRITE_REQUIRES_SEPARATE_POLICY');}
+  if(operation==='SEARCH_CODE'&&(!raw.payload||typeof raw.payload.query!=='string'||!raw.payload.query.trim())){authorized=false;reasons.push('SEARCH_QUERY_REQUIRED');}
   if(operation==='PR_CREATE'&&(!source_branch||!target_branch)){authorized=false;reasons.push('PR_BRANCHES_REQUIRED');}
   if(operation==='MERGE'){
     if(raw.pr_number==null){authorized=false;reasons.push('PR_REQUIRED');}
@@ -52,7 +53,7 @@ export function authorizeGitHubSafeAction(raw={}){
   if(raw.prod_deploy===true||raw.prod_mutation===true){authorized=false;reasons.push('PROD_MUTATION_OUT_OF_SCOPE');}
 
   const action_id=`ghsafe:${hash({company_id,repo,operation,target_branch,source_branch,expected_head_sha:raw.expected_head_sha??null,paths,payload:raw.payload??null}).slice(0,28)}`;
-  return Object.freeze({schema_version:'1.1.0',state_type:'CEREBRO_GH_SAFE_NATIVE_AUTHORIZATION',capability_id:'GH-SAFE-NATIVE',company_id,engine_id,environment,version,repo,operation,target_branch,source_branch,paths,action_id,idempotency_key:hash({action_id,version}),authorized,reasons:Object.freeze(reasons),requires_write:isWrite,checks_green:raw.checks_green===true,review_gate_green:raw.review_gate_green===true,expected_head_sha:raw.expected_head_sha??null,rollback_ready:raw.rollback_ready===true,evidence_required:true,prod_deploy_authorized:false,prod_mutation_authorized:false,force_authorized:false,bypass_authorized:false,additional_cost_eur:0});
+  return Object.freeze({schema_version:'1.2.0',state_type:'CEREBRO_GH_SAFE_NATIVE_AUTHORIZATION',capability_id:'GH-SAFE-NATIVE',company_id,engine_id,environment,version,repo,operation,target_branch,source_branch,paths,action_id,idempotency_key:hash({action_id,version}),authorized,reasons:Object.freeze(reasons),requires_write:isWrite,checks_green:raw.checks_green===true,review_gate_green:raw.review_gate_green===true,expected_head_sha:raw.expected_head_sha??null,rollback_ready:raw.rollback_ready===true,evidence_required:true,prod_deploy_authorized:false,prod_mutation_authorized:false,force_authorized:false,bypass_authorized:false,additional_cost_eur:0});
 }
 
 export async function executeGitHubSafeAction(raw={},adapter={}){
@@ -66,5 +67,5 @@ export async function executeGitHubSafeAction(raw={},adapter={}){
 
 export const GH_SAFE_NATIVE_CONTRACT=Object.freeze({
   version:GH_SAFE_NATIVE_VERSION,environment:'PREPROD',operations:GH_SAFE_OPERATIONS,protected_direct_write_branches:[...PROTECTED_DIRECT_WRITE_BRANCHES],work_branch_pattern:String(WORK_BRANCH_RE),
-  status_diff_stage_unstage:true,commit_push:true,pr_checks_review:true,revert:true,merge_policy:true,secrets_in_payload:false,force:false,bypass:false,prod_mutation:false,additional_cost_eur:0
+  repo_explorer:true,code_search:true,editor_dirty_save_discard_policy:true,status_diff_stage_unstage:true,commit_push:true,pr_checks_review:true,revert:true,merge_policy:true,secrets_in_payload:false,force:false,bypass:false,prod_mutation:false,additional_cost_eur:0
 });
