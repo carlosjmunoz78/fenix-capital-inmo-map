@@ -1,0 +1,70 @@
+name: CEREBRO L5 Foundation Baseline
+
+on:
+  push:
+    branches: [cerebro-implement-l3-l4-l5-foundation-20261102]
+    paths: ['.github/workflows/cerebro-l5-foundation-baseline.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  OUT: /tmp/cerebro-l5-foundation-baseline
+
+jobs:
+  audit-l5-old:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 180
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert L4 closed and isolated branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          test -f cerebro/evidence/l4-foundation-wave1/2026-11-02/CLOSURE_EVIDENCE.json
+          node -e "const x=require('./cerebro/evidence/l4-foundation-wave1/2026-11-02/CLOSURE_EVIDENCE.json'); if(x.status!=='GREEN'||x.l4?.physical_after!==27) process.exit(1)"
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Registry Factory analyzer validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check cerebro/missions/audit-priority-l345-v1.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          cd ..
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority"
+      - name: Audit L5 OLD physical baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L5 --out "$OUT/l5"
+          node <<'NODE'
+          const fs=require('fs');const b=JSON.parse(fs.readFileSync('/tmp/cerebro-l5-foundation-baseline/l5/PRIORITY_PHYSICAL_BASELINE.json'));if(b.status!=='GREEN'||b.layer!=='L5'||b.total!==20)throw new Error('L5 baseline invalid');if(b.registry_total!==179||b.registry_unique!==179)throw new Error('Registry invalid');if(Object.values(b.classification_counts).reduce((a,x)=>a+x,0)!==20)throw new Error('classification count mismatch');if(b.prod_touched||b.trading_touched||b.additional_cost_eur!==0)throw new Error('boundary violation');console.log(JSON.stringify({physical_before:b.physical_before,classification_counts:b.classification_counts,nonphysical:b.nonphysical_engine_ids}));
+          NODE
+      - name: Persist durable OLD baseline and compact classification
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST='cerebro/evidence/l5-foundation-wave1/2026-11-02';mkdir -p "$DEST";cp "$OUT/l5/PRIORITY_PHYSICAL_BASELINE.json" "$DEST/PRIORITY_PHYSICAL_BASELINE.json";cp "$OUT/l5/AUDIT_REPORT.json" "$DEST/BASELINE_AUDIT_REPORT.json";printf '%s\n' "$GITHUB_SHA" > "$DEST/BASELINE_SOURCE_SHA.txt"
+          node <<'NODE'
+          const fs=require('fs'),p='cerebro/evidence/l5-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json';const b=JSON.parse(fs.readFileSync(p));const groups={};for(const [id,e] of Object.entries(b.engines))(groups[e.classification]??=[]).push(id);for(const a of Object.values(groups))a.sort();fs.writeFileSync('cerebro/evidence/l5-foundation-wave1/2026-11-02/BASELINE_CLASSIFICATION_SUMMARY.json',JSON.stringify({status:'GREEN',layer:'L5',physical_before:b.physical_before,classification_counts:b.classification_counts,groups},null,2)+'\n');
+          NODE
+          git config user.name 'CEREBRO Foundation Evidence';git config user.email 'cerebro-foundation@users.noreply.github.com';git add "$DEST";git commit -m 'evidence(cerebro): persist L5 OLD baseline [skip ci]';git push origin "HEAD:${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l5-foundation-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-l5-foundation-baseline
+          if-no-files-found: error
+          retention-days: 14
