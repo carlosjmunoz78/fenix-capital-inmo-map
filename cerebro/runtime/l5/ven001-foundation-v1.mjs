@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'VEN-001',name:'Vendor / Proveedores · Foundation',mode:'VENDOR'});export const manifest=engine.manifest;export const run=engine.run;

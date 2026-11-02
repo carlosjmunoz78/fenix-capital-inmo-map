@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_DEPENDENCY_OVERLAY_POLICY_V1",
+  "mission": "CONNECT_EXISTING_ENGINES_AND_ENRICH_CANONICAL_DEPENDENCIES",
+  "environment": "LAB_PREPROD",
+  "canonical_registry": "cerebro/registry/engine-registry.v1.json",
+  "canonical_registry_mutation_allowed": false,
+  "effective_dependency_classes": ["verified_runtime"],
+  "excluded_from_effective_graph": ["documentation_candidate", "unbound_candidate"],
+  "rules": {
+    "preserve_existing_implementations": true,
+    "do_not_overwrite_business_logic": true,
+    "weak_inference_promoted": false,
+    "dependency_target_must_exist_in_registry": true,
+    "self_dependency_forbidden": true,
+    "new_unreviewed_cycles_forbidden": true,
+    "prod_writes_forbidden": true,
+    "trading_lab_access_forbidden": true,
+    "additional_cost_eur": 0
+  },
+  "priority_wave": {
+    "L0": 13,
+    "L1": 14,
+    "L2": 15,
+    "L6": 25,
+    "total": 67,
+    "source": "FENIX_CEREBRO_MASTER_MOTORES_LENGUAJE_IA_V2_2026-09-07.md"
+  },
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}

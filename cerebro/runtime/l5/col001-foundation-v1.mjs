@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'COL-001',name:'Cobros / Accounts Receivable · Foundation',mode:'COLLECTION_GATED'});export const manifest=engine.manifest;export const run=engine.run;

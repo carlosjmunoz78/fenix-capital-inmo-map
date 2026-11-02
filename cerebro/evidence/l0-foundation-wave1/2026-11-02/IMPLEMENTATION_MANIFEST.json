@@ -1,0 +1,25 @@
+{
+  "wave": "L0_FOUNDATION",
+  "environment": "LAB_PREPROD",
+  "new_runtime_engines": {
+    "CORE-001": "cerebro/runtime/l0/core001-v1.mjs",
+    "GOV-001": "cerebro/runtime/l0/gov001-v1.mjs",
+    "POL-001": "cerebro/runtime/l0/pol001-v1.mjs",
+    "DEC-001": "cerebro/runtime/l0/dec001-v1.mjs",
+    "SEM-001": "cerebro/runtime/l0/sem001-v1.mjs",
+    "OWN-001": "cerebro/runtime/l0/own001-v1.mjs",
+    "OBJ-001": "cerebro/runtime/l0/obj001-v1.mjs",
+    "ADR-001": "cerebro/runtime/l0/adr001-v1.mjs",
+    "CFG-001": "cerebro/runtime/l0/cfg001-v1.mjs",
+    "VER-001": "cerebro/runtime/l0/ver001-v1.mjs"
+  },
+  "shared_runtime": "cerebro/runtime/l0/shared-v1.mjs",
+  "index": "cerebro/runtime/l0/index-v1.mjs",
+  "preserved_existing_engines": ["ORCH-001", "HEX-001", "FACT-001"],
+  "preservation_mode": "WRAP_PRESERVE",
+  "do_not_overwrite": true,
+  "prod_writes": false,
+  "network_required": false,
+  "secrets_required": false,
+  "additional_cost_eur": 0
+}

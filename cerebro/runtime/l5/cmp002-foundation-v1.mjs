@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'CMP-002',name:'Compliance Engine · Foundation Wrapper',mode:'LEGAL_GATED',preserve_existing:true});export const manifest=engine.manifest;export const run=engine.run;

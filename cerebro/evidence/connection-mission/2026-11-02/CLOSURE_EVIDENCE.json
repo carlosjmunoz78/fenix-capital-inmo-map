@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "CONNECT_EXISTING_ENGINES_AND_ENRICH_CANONICAL_DEPENDENCIES",
+  "status": "GREEN",
+  "environment": "LAB_PREPROD",
+  "source_commit": "b87d92bb3e019b64b53b74b3e9a9837cbcefb34e",
+  "workflow_run_id": 41432673202,
+  "workflow_job_id": 125234835721,
+  "workflow_conclusion": "success",
+  "artifact_id": 13135216529,
+  "artifact_digest": "sha256:827ce12da2f1f0ccfdca2cfeffa66d79b67a8d8078303e58b5a731d41934f872",
+  "continuity_zip_sha256": "e00a6e6371779647b7add766f408cd76e8d5527ce3e79e3769cf8a3bf79eeca8",
+  "registry_total": 179,
+  "priority_engines": 67,
+  "layers": {"L0": 13, "L1": 14, "L2": 15, "L6": 25},
+  "physically_connected": 34,
+  "scaffold_only": 33,
+  "raw_verified_runtime_edges": 15,
+  "verified_runtime_dependency_edges": 14,
+  "cycle_guard_rejected_edges": 1,
+  "inferred_candidate_edges": 515,
+  "test_assertions": {"total": 381, "passed": 381, "failed": 0},
+  "rebuild": {
+    "status": "GREEN",
+    "all_hashes_equal": true,
+    "hash": "95a4345319182459707a979c42cf17c01ce4eede2e66af2d4dd2f6a2f259dc88"
+  },
+  "source_hashes": {
+    "registry": "a7dde61d3ee4e46ccc5cf697bc44867ac1e22a6a391dac55fea20b95c1b89f2f",
+    "factory": "a10801a5be61dd754d1c88cf3925244aeadfa09f84b5bb36ed9dedc43407df73",
+    "factory_v1": "0720f8d29a04d80403be654b929caf234a80a0f64c877a9e5c39f09780ce7c5b"
+  },
+  "registry_mutated": false,
+  "factory_mutated": false,
+  "prod_touched": false,
+  "trading_touched": false,
+  "additional_cost_eur": 0,
+  "p23": "POR_AUDITAR",
+  "overlay_mode": "ADVISORY_ONLY",
+  "runtime_enforcement": false,
+  "next_mission": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1"
+}

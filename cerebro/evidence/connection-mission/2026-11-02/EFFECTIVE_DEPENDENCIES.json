@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_EFFECTIVE_DEPENDENCIES_EVIDENCE",
+  "source_commit": "b87d92bb3e019b64b53b74b3e9a9837cbcefb34e",
+  "environment": "LAB_PREPROD",
+  "advisory_only": true,
+  "runtime_enforcement": false,
+  "effective_edges": [
+    {"source":"EVA-001","target":"COM-001","evidence_path":"cerebro/runtime/customer-journey-real-adoption-v1.mjs"},
+    {"source":"FREE-001","target":"CAP-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"CRM-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"EXP-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"FINOPS-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"LRN-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"MKT-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"FREE-001","target":"OBSERV-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"CAP-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"CRM-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"EXP-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"FINOPS-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"MKT-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"},
+    {"source":"LRN-001","target":"OBSERV-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs"}
+  ],
+  "cycle_guard_rejected": [
+    {"source":"LRN-001","target":"FREE-001","evidence_path":"cerebro/economics/phase12-economic-learning-runtime-v0.mjs","reason":"would_create_cycle"}
+  ],
+  "effective_edge_count": 14,
+  "cycle_guard_rejected_count": 1,
+  "candidate_edge_count": 515
+}

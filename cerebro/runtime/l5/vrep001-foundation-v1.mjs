@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'VREP-001',name:'Sustitución de Proveedores · Foundation',mode:'VENDOR'});export const manifest=engine.manifest;export const run=engine.run;

@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "P23_AUDIT_LIVE_INTEGRATION_V1",
+  "auditor": "Jarvis (P23)",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "PROD_CONTROL_PLANE",
+  "version": "v1",
+  "status": "LIVE",
+  "target_engine": "FACT-001",
+  "runtime": "cerebro/runtime/p23/fact001-audit-live-v1.mjs",
+  "write_mode": "FACT_001_AUDIT_POINTS",
+  "schema_ref": "P23.AUDIT.INTEGRATION.V1",
+  "audit_scope": "ALL_179_CANONICAL_ENGINES",
+  "cadence": {
+    "maximum_interval_hours": 24,
+    "significant_change_trigger": true,
+    "workflow": ".github/workflows/cerebro-p23-live-audit-v1.yml"
+  },
+  "required_fields": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "status",
+    "score",
+    "criticidad",
+    "fallos",
+    "plan_de_mejora",
+    "fecha"
+  ],
+  "storage": {
+    "backend": "GIT_STATE_BRANCH",
+    "branch": "cerebro/p23-state-v1",
+    "latest": "p23/LATEST.json",
+    "summary": "p23/SUMMARY.json",
+    "points": "p23/AUDIT_POINTS.jsonl"
+  },
+  "validation": {
+    "mode": "EVIDENCE_FIRST_FAIL_CLOSED",
+    "no_scaffold_as_operational_evidence": true,
+    "no_documentation_as_live_evidence": true,
+    "exact_registry_count": 179
+  },
+  "safety": {
+    "prod_mutation_authorized": false,
+    "prod_execution_authorized": false,
+    "trading_scope": "FORBIDDEN",
+    "secret_values": "FORBIDDEN",
+    "additional_cost_eur": 0
+  }
+}

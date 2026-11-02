@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0.0",
+  "source_workflow_run_id": 41445683684,
+  "priority_engine_count": 67,
+  "physically_connected_count": 67,
+  "scaffold_only_count": 0,
+  "layer_counts": {"L0": 13, "L1": 14, "L2": 15, "L6": 25},
+  "physical_by_layer": {"L0": 13, "L1": 14, "L2": 15, "L6": 25},
+  "physically_connected_engine_ids": [
+    "CORE-001","GOV-001","ORCH-001","POL-001","HEX-001","DEC-001","SEM-001","OWN-001","OBJ-001","ADR-001","CFG-001","VER-001","FACT-001",
+    "KNW-001","PRV-001","LRN-001","TRN-001","EVA-001","JDG-001","RSH-001","UPD-001","OBS-001","RAG-001","CON-001","CACHE-001","SIM-001","TWIN-001",
+    "SUP-001","OBSERV-001","INC-001","SELF-001","SEC-001","IAM-001","SEC-002","RED-001","QA-001","QAB-001","REG-001","DR-001","RBLD-001","BCP-001","CRS-001",
+    "APP-001","CRM-001","DATA-001","EVT-001","JOB-001","API-001","DEP-001","ARCH-001","DEBT-001","MIG-001","FF-001","CAN-001","ROUTE-001","LOCAL-001","AIBUD-001","OPT-001","AUTO-001","DOCS-001","AUD-001","WEB-001","INT-001","RUNTIME-001","DBOFF-001","STOROFF-001","FREE-001"
+  ],
+  "binding_rule": "Physical evidence requires runtime implementation identity/path evidence. Tests, Registry, missions, workflows and documentation alone do not establish a physical binding.",
+  "do_not_overwrite_existing": true,
+  "prod_promotion": false
+}

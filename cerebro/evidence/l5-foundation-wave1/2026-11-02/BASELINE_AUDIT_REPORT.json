@@ -1,0 +1,20 @@
+{
+  "classification_counts": {
+    "DOCUMENTED_ONLY": 15,
+    "PHYSICAL_EXISTING": 1,
+    "PHYSICAL_PARTIAL": 4,
+    "SCAFFOLD_ONLY": 0
+  },
+  "cycle_guard_rejected_edges": 0,
+  "effective_dependency_edges": 0,
+  "layer": "L5",
+  "physical_before": 1,
+  "rebuild": "GREEN",
+  "source_hashes": {
+    "factory": "a10801a5be61dd754d1c88cf3925244aeadfa09f84b5bb36ed9dedc43407df73",
+    "factory_v1": "0720f8d29a04d80403be654b929caf234a80a0f64c877a9e5c39f09780ce7c5b",
+    "registry": "a7dde61d3ee4e46ccc5cf697bc44867ac1e22a6a391dac55fea20b95c1b89f2f"
+  },
+  "status": "GREEN",
+  "total": 20
+}

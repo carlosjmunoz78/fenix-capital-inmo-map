@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'ACC-001',name:'Contabilidad Preparatoria · Foundation Wrapper',mode:'PREPARATORY_ACCOUNTING',preserve_existing:true});export const manifest=engine.manifest;export const run=engine.run;

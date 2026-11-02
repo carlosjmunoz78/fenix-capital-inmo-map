@@ -1,0 +1,81 @@
+name: CEREBRO 179 Autonomy Readiness Audit V1
+
+on:
+  push:
+    branches: [cerebro-p23-autonomy-prod-readiness-20261102]
+    paths:
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
+      - '.github/workflows/cerebro-179-autonomy-readiness-audit-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-179-autonomy-readiness-audit-v1
+  cancel-in-progress: false
+
+env:
+  BASE_SHA: 4a79617debd319f29c10385036e326f924d2a70c
+  OUT: /tmp/cerebro-179-readiness
+
+jobs:
+  audit-readiness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 450
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Prove audit-only mutation and preserved canonical sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-p23-autonomy-prod-readiness-20261102'
+          git merge-base --is-ancestor "$BASE_SHA" HEAD
+          git diff --name-only "$BASE_SHA" HEAD > /tmp/changed.txt
+          test "$(wc -l < /tmp/changed.txt | tr -d ' ')" -eq 2
+          grep -Fx 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs' /tmp/changed.txt
+          grep -Fx '.github/workflows/cerebro-179-autonomy-readiness-audit-v1.yml' /tmp/changed.txt
+          git diff --exit-code "$BASE_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs src supabase
+      - name: Validate canonical Registry and Factory
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Run strict readiness baseline twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT/a"
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT/b"
+          cmp "$OUT/a/AUTONOMY_READINESS_BASELINE.json" "$OUT/b/AUTONOMY_READINESS_BASELINE.json"
+          cmp "$OUT/a/REBUILD.sha256" "$OUT/b/REBUILD.sha256"
+          node <<'NODE'
+          const fs=require('fs');
+          const s=JSON.parse(fs.readFileSync(process.env.OUT+'/a/SUMMARY.json'));
+          if(s.registry_total!==179||s.physical_foundation!==179||s.prod_registration_ready!==179)throw new Error('179 physical/registration baseline mismatch');
+          if(s.p23.live_verified!==false)throw new Error('Current P23 Live must remain unverified before implementation');
+          if(s.p23.live_integration_status!==null && s.p23.live_integration_status!=='PENDING')throw new Error('Unexpected current P23 Live state');
+          if(s.autonomous_prod_ready!==0)throw new Error('No engine may be claimed autonomous PROD while P23 live is unverified');
+          if(s.additional_cost_eur!==0||s.trading_touched!==false||s.prod_writes!==false)throw new Error('Safety baseline mismatch');
+          console.log('STRICT_BASELINE='+JSON.stringify(s));
+          NODE
+      - name: Upload inspectable audit baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-179-autonomy-readiness-${{ github.run_id }}
+          path: /tmp/cerebro-179-readiness/a/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Summary
+        shell: bash
+        run: |
+          cat "$OUT/a/SUMMARY.json" >> "$GITHUB_STEP_SUMMARY"
+          echo 'Audit-only baseline complete; no PROD write and no P23 Live claim.' >> "$GITHUB_STEP_SUMMARY"

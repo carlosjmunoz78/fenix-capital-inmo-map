@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "CONNECT_EXISTING_ENGINES_AND_ENRICH_CANONICAL_DEPENDENCIES",
+  "status": "GREEN",
+  "environment": "LAB_PREPROD",
+  "autonomy_state": "ADVISORY_ONLY",
+  "runtime_enforcement": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "promotion_gate": "NOT_REQUESTED",
+  "next_required_stage": "IMPLEMENT_PRIORITY_ENGINES_L0_L1_L2_L6_WAVE_1"
+}

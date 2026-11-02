@@ -1,0 +1,649 @@
+{
+  "additional_cost_eur": 0,
+  "classification_counts": {
+    "DOCUMENTED_ONLY": 14,
+    "PHYSICAL_EXISTING": 8,
+    "PHYSICAL_PARTIAL": 5,
+    "SCAFFOLD_ONLY": 0
+  },
+  "dependency_graph": {
+    "cycle_guard_rejected_edges": [],
+    "effective_edges": []
+  },
+  "engines": {
+    "3RD-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "AGD-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs"
+      ]
+    },
+    "AML-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "BLK-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "BNK-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "BNK-002": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "BNK-003": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "BNK-004": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "BNK-005": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "BNK-006": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "CAT-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "COH-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json"
+      ]
+    },
+    "DOC-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/README.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/CURRENT_STATE.md",
+        "cerebro/docs/DEPENDENCY_MAP.md",
+        "cerebro/evidence/phase2-existing-bindings-audit.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/missions/generate-all-engine-skeletons-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/existing-engine-bindings.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/phase2-evidence-audit.test.mjs",
+        "cerebro/tests/runtime.test.mjs",
+        "tests/app-real-five-flows.spec.ts",
+        "tests/document-physical-regressions.spec.ts",
+        "tests/visual-expediente-detail.spec.ts"
+      ]
+    },
+    "DOC-002": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "tests/app-real-five-flows.spec.ts"
+      ]
+    },
+    "DOC-003": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "DOC-004": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json"
+      ]
+    },
+    "KYC-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "NBA-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_SALES_EXECUTION_AGENT_INBOX_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/LEAD_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/revenue/lead-nba-v1.mjs",
+        "cerebro/revenue/sale-action-v1.mjs",
+        "cerebro/revenue/sales-execution-agent-inbox-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-revenue-lead-nba-v1.yml",
+        ".github/workflows/cerebro-sale-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/tests/lead-nba-v1.test.mjs",
+        "cerebro/tests/lead-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs",
+        "cerebro/tests/sale-real-consumer-adoption-v1.test.mjs"
+      ]
+    },
+    "NOT-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "OFR-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    },
+    "PAY-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v3.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs",
+        "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs"
+      ]
+    },
+    "PROP-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json"
+      ]
+    },
+    "REC-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "REGP-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "SLA-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "TAS-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "tests/expediente-belen-financial-context.spec.ts",
+        "tests/visual-expediente-detail.spec.ts"
+      ]
+    },
+    "VIA-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/MORTGAGE_OPERATIONS_STRICT_V1_RUNBOOK.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/mortgage/mortgage-operations-native-v1.mjs",
+        "cerebro/roles/knowledge-context-composer-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/tests/knowledge-context-composer-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-native-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs"
+      ]
+    }
+  },
+  "environment": "LAB_PREPROD",
+  "factory_mutated": false,
+  "layer": "L4",
+  "mission": "IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION",
+  "nonphysical_engine_ids": [
+    "DOC-001",
+    "DOC-002",
+    "DOC-003",
+    "DOC-004",
+    "KYC-001",
+    "AML-001",
+    "COH-001",
+    "REC-001",
+    "TAS-001",
+    "PROP-001",
+    "REGP-001",
+    "CAT-001",
+    "NOT-001",
+    "PAY-001",
+    "SLA-001",
+    "BLK-001",
+    "NBA-001",
+    "AGD-001",
+    "3RD-001"
+  ],
+  "p23": "POR_AUDITAR",
+  "phase": "L4_BASELINE_OLD",
+  "physical_before": 8,
+  "physical_engine_ids": [
+    "VIA-001",
+    "BNK-001",
+    "BNK-002",
+    "BNK-003",
+    "BNK-004",
+    "BNK-005",
+    "BNK-006",
+    "OFR-001"
+  ],
+  "prod_touched": false,
+  "registry_mutated": false,
+  "registry_total": 179,
+  "registry_unique": 179,
+  "schema_version": "1.0.0",
+  "source_hashes": {
+    "factory": "a10801a5be61dd754d1c88cf3925244aeadfa09f84b5bb36ed9dedc43407df73",
+    "factory_v1": "0720f8d29a04d80403be654b929caf234a80a0f64c877a9e5c39f09780ce7c5b",
+    "registry": "a7dde61d3ee4e46ccc5cf697bc44867ac1e22a6a391dac55fea20b95c1b89f2f"
+  },
+  "status": "GREEN",
+  "total": 27,
+  "trading_touched": false
+}

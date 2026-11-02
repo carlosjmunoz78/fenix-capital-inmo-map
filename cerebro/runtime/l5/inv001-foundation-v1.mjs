@@ -1,0 +1,1 @@
+import {createFoundationEngine} from './foundation-runtime-v1.mjs'; export const engine=createFoundationEngine({engine_id:'INV-001',name:'Facturación · Foundation Wrapper',mode:'INVOICE_PREVIEW',preserve_existing:true});export const manifest=engine.manifest;export const run=engine.run;

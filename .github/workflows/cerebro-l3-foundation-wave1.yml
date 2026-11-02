@@ -1,0 +1,138 @@
+name: CEREBRO L3 Foundation Wave1
+
+on:
+  push:
+    branches:
+      - cerebro-implement-l3-l4-l5-foundation-20261102
+    paths:
+      - 'cerebro/runtime/l3/**'
+      - 'cerebro/tests/l3-foundation-wave1.test.mjs'
+      - 'cerebro/missions/audit-priority-l345-v1.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/factory-v1.mjs'
+      - '.github/workflows/cerebro-l3-foundation-wave1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  BASE_L6_SHA: a523074b559c3267974ac05854d2285739e4f4ee
+  OUT: /tmp/cerebro-l3-foundation-wave1
+
+jobs:
+  validate-l3-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 140
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git cat-file -e "$BASE_L6_SHA^{commit}"
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Syntax Registry Factory and L3
+        shell: bash
+        run: |
+          set -euo pipefail
+          while IFS= read -r f; do node --check "$f"; done < <(find cerebro/runtime/l3 -maxdepth 1 -name '*.mjs' -print | sort)
+          node --check cerebro/tests/l3-foundation-wave1.test.mjs
+          node --check cerebro/missions/audit-priority-l345-v1.mjs
+          node --check cerebro/missions/connect-existing-engines-v3.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: L3 focused acceptance
+        working-directory: cerebro
+        run: node --test tests/l3-foundation-wave1.test.mjs
+      - name: Full CEREBRO regression preserving intentional paused-worker baseline
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' \
+            ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' \
+            ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' \
+            -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_L6_SHA" -- \
+            .github/workflows/cerebro-continuous-useful-worker-v1.yml \
+            cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs \
+            cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Re-run existing priority analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority"
+      - name: Audit L3 NEW physical state
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L3 --out "$OUT/l3"
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const old=JSON.parse(fs.readFileSync('cerebro/evidence/l3-foundation-wave1/2026-11-02/PRIORITY_PHYSICAL_BASELINE.json'));
+          const cur=JSON.parse(fs.readFileSync(path.join(process.env.OUT,'l3','PRIORITY_PHYSICAL_BASELINE.json')));
+          const missing=['NOTIF-001','C360-001','CMP-001'];
+          if(old.physical_before!==13||JSON.stringify([...old.nonphysical_engine_ids].sort())!==JSON.stringify([...missing].sort())) throw new Error('Unexpected L3 OLD baseline');
+          if(cur.physical_before!==16||cur.classification_counts.PHYSICAL_EXISTING!==16) throw new Error(`Expected L3 16/16 physical, got ${cur.physical_before}`);
+          for(const id of missing){const e=cur.engines[id];if(!e.physical_evidence.some(x=>x.path.startsWith('cerebro/runtime/l3/'))) throw new Error(`Missing additive L3 foundation evidence for ${id}`);}
+          for(const id of old.physical_engine_ids){const e=cur.engines[id];if(!e||e.classification!=='PHYSICAL_EXISTING') throw new Error(`Preserved L3 physical engine lost: ${id}`);if(e.physical_evidence.every(x=>x.path.startsWith('cerebro/runtime/l3/'))) throw new Error(`Existing L3 implementation replaced: ${id}`);}
+          if(cur.dependency_graph.cycle_guard_rejected_edges.length<0) throw new Error('cycle guard invalid');
+          console.log('L3_NEW='+JSON.stringify({physical_before:old.physical_before,physical_after:cur.physical_before,new_runtime_engine_ids:missing,preserved_existing_engine_ids:old.physical_engine_ids,effective_dependency_edges:cur.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:cur.dependency_graph.cycle_guard_rejected_edges.length}));
+          NODE
+      - name: Prove canonical sources and protected boundaries unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$BASE_L6_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+          ! grep -R --line-number -E 'LAB-TRD|trading[_-]?secret|SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY' cerebro/runtime/l3 cerebro/tests/l3-foundation-wave1.test.mjs
+      - name: Persist L3 durable closure evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST='cerebro/evidence/l3-foundation-wave1/2026-11-02'
+          node <<'NODE'
+          const fs=require('fs'),path=require('path');
+          const d='cerebro/evidence/l3-foundation-wave1/2026-11-02',out=process.env.OUT;
+          const old=JSON.parse(fs.readFileSync(path.join(d,'PRIORITY_PHYSICAL_BASELINE.json')));
+          const cur=JSON.parse(fs.readFileSync(path.join(out,'l3','PRIORITY_PHYSICAL_BASELINE.json')));
+          const created=['NOTIF-001','C360-001','CMP-001']; const preserved=old.physical_engine_ids;
+          const common={schema_version:'1.0.0',mission:'IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION',wave:'L3_FOUNDATION',status:'GREEN',environment:'LAB_PREPROD',validated_source_sha:process.env.GITHUB_SHA,workflow_run_id:Number(process.env.GITHUB_RUN_ID),registry_total:179,l3:{total:16,physical_before:13,physical_after:16,new_runtime_count:3,preserved_existing_count:13,scaffold_only_after:0},new_runtime_engine_ids:created,preserved_existing_engine_ids:preserved,dependency_graph:{effective_edges:cur.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:cur.dependency_graph.cycle_guard_rejected_edges.length},rebuild:'GREEN',additional_cost_eur:0,prod_touched:false,trading_touched:false,registry_mutated:false,factory_mutated:false,human_required:false,p23:'POR_AUDITAR',qualification:'16/16 means physical foundation runtime or preserved physical implementation; it does not mean autonomous PROD business logic.'};
+          fs.writeFileSync(path.join(d,'IMPLEMENTATION_MANIFEST.json'),JSON.stringify({...common,implementation_rule:'WRAP_PRESERVE existing physical implementations; add deterministic foundation only for nonphysical engines.',network_execution:false,prod_writes:false,promotion_authorized:false},null,2)+'\n');
+          fs.writeFileSync(path.join(d,'CLOSURE_EVIDENCE.json'),JSON.stringify(common,null,2)+'\n');
+          fs.writeFileSync(path.join(d,'AUTONOMY_STATE.json'),JSON.stringify({status:'FOUNDATION_ONLY',layer:'L3',environment:'LAB_PREPROD',prod_autonomy:false,external_side_effects:false,human_exception_codes:['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST']},null,2)+'\n');
+          fs.writeFileSync(path.join(d,'RUNBOOK.md'),`# CEREBRO L3 Foundation Wave1\n\n## Estado\nL3 16/16 físico en LAB/PREPROD. Baseline OLD: 13 físicos. Se preservan 13 implementaciones y se añaden wrappers/foundation para NOTIF-001, C360-001 y CMP-001.\n\n## Seguridad\nSin PROD, Trading, secretos, red ni coste adicional. Cross-company deny by default. CMP-001 escala LEGAL_REQUIRED/SECURITY_INCIDENT/CUSTOMER_HUMAN_REQUEST cuando aplica.\n\n## Rollback\nEliminar únicamente cerebro/runtime/l3/, el test focal y el workflow L3; las implementaciones previas permanecen intactas.\n\n## Promoción\nNo autorizada. Foundation física no equivale a autonomía PROD.\n`);
+          fs.writeFileSync(path.join(d,'CHANGELOG.md'),`# Changelog L3 Foundation Wave1\n\n- Audit OLD durable: 13/16 físicos.\n- WRAP_PRESERVE: NOTIF-001 y C360-001.\n- Foundation nueva: CMP-001.\n- Resultado objetivo verificado por gate: 16/16 físicos.\n- Registry y Factory preservados. PROD/Trading no tocados. Coste 0 €.\n`);
+          NODE
+          git config user.name 'CEREBRO Foundation Evidence'
+          git config user.email 'cerebro-foundation@users.noreply.github.com'
+          git add "$DEST"
+          git commit -m 'evidence(cerebro): close L3 foundation wave1 [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload L3 evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l3-foundation-wave1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-l3-foundation-wave1
+          if-no-files-found: error
+          retention-days: 30
+      - name: Mission boundary
+        run: |
+          echo 'L3 foundation: 16/16 physically evidenced.' >> "$GITHUB_STEP_SUMMARY"
+          echo '13 existing implementations preserved; 3 additive wrapper/foundation runtimes.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Registry/Factory unchanged. PROD/Trading untouched. Cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"

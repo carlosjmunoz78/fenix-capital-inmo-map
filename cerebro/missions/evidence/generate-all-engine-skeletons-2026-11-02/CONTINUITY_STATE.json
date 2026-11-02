@@ -1,0 +1,24 @@
+{
+  "mission": "GENERATE_ALL_ENGINE_SKELETONS",
+  "state": "HECHO",
+  "branch": "cerebro-generate-all-engine-skeletons-20261102",
+  "last_verified_workflow_run": 41428877591,
+  "last_verified_source_sha": "5a6bee78f8e36f3f20f177015bf9fc15a820d4e8",
+  "registry_total": 179,
+  "factory": "FACT-001 V1",
+  "factory_preserved": true,
+  "rebuild_all_from_registry": "GREEN",
+  "mission_assertions": {"passed": 7349, "failed": 0},
+  "blocked": 0,
+  "human_required": 0,
+  "prod_touched": false,
+  "additional_cost_eur": 0,
+  "p23_live_audit": "POR_AUDITAR",
+  "next_mission": "CONNECT_EXISTING_ENGINES_AND_ENRICH_CANONICAL_DEPENDENCIES",
+  "priority_order": ["L0", "L1", "L2", "L6", "L3", "L4", "L5", "L7", "L8", "L9"],
+  "do_not_claim": [
+    "Do not claim all 179 engines are fully implemented.",
+    "Do not claim P23 Live Audit write is GREEN without a physical integration/evidence path.",
+    "Do not promote to PROD from this mission."
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "status": "FOUNDATION_ONLY",
+  "layer": "L3",
+  "environment": "LAB_PREPROD",
+  "prod_autonomy": false,
+  "external_side_effects": false,
+  "human_exception_codes": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}

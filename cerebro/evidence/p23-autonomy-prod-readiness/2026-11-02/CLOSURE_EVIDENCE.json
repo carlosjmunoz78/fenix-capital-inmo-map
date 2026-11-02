@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "AUDIT_179_AUTONOMY_P23_PREPROD_PROD_READINESS",
+  "status": "PREPROD_GREEN_READY_FOR_GOVERNED_PROD_REGISTRATION",
+  "validated_source_sha": "423ebdd438bedf686654031538ab8989e436119d",
+  "workflow_run_id": 41457999602,
+  "evidence": {
+    "registry_179_unique": true,
+    "physical_foundation_179": true,
+    "p23_runtime_live_contract": true,
+    "p23_179_points_deterministic": true,
+    "p23_daily_max_24h": true,
+    "p23_significant_change_trigger": true,
+    "prod_registration_179_fail_closed": true,
+    "full_regression_green": true,
+    "rebuild_green": true,
+    "cycle_guards_preserved": true,
+    "app_unchanged": true,
+    "supabase_unchanged": true,
+    "factory_preserved": true,
+    "registry_preserved": true,
+    "trading_forbidden": true,
+    "secret_values_forbidden": true,
+    "additional_cost_eur": 0
+  },
+  "prod_semantics": {
+    "registered_engines": 179,
+    "execution_authorized_engines": 0,
+    "write_authorized_engines": 0,
+    "mode": "FAIL_CLOSED",
+    "autonomous_execution_requires_separate_per_engine_promotion": true
+  },
+  "next_gate": "EXACT_HEAD_PR_PROMOTION_THEN_MAIN_P23_LIVE_RECEIPT"
+}

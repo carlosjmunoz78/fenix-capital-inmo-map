@@ -1,0 +1,22 @@
+{
+  "status": "FOUNDATION_ONLY",
+  "layer": "L5",
+  "environment": "LAB_PREPROD",
+  "prod_autonomy": false,
+  "external_side_effects": false,
+  "sensitive_domains": [
+    "HR",
+    "legal",
+    "tax",
+    "compliance",
+    "privacy",
+    "consent",
+    "invoicing",
+    "collections",
+    "treasury",
+    "accounting",
+    "procurement",
+    "vendor_contracts"
+  ],
+  "policy": "preview/advisory/preparatory only; binding or high-risk actions fail closed"
+}

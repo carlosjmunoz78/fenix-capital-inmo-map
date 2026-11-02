@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "mission": "AUDIT_179_AUTONOMY_P23_PREPROD_PROD_READINESS",
+  "phase": "OLD_BASELINE",
+  "status": "GREEN_AUDIT_COMPLETE",
+  "validated_source_sha": "69fd0976acee90244c97d053078f1211e0ad630e",
+  "workflow_run_id": 41457468652,
+  "registry_total": 179,
+  "physical_foundation": 179,
+  "prod_registration_ready": 179,
+  "autonomous_prod_ready": 0,
+  "foundation_only": 179,
+  "p23_live_verified": false,
+  "strict_gate_counts": {
+    "contracts": 16,
+    "permissions": 18,
+    "tests": 179,
+    "evaluation": 8,
+    "tribunal": 10,
+    "observability": 21,
+    "backup": 0,
+    "rollback": 0,
+    "rebuild": 0,
+    "cost": 179,
+    "policy": 22,
+    "preprod": 179
+  },
+  "classification_rule": "EVIDENCE_FIRST_FAIL_CLOSED_NO_SCAFFOLD_OR_DOCUMENTATION_ASSUMPTIONS",
+  "additional_cost_eur": 0,
+  "trading_touched": false,
+  "prod_writes": false
+}

@@ -1,0 +1,19 @@
+{
+  "wave":"L2_FOUNDATION",
+  "status":"GREEN",
+  "environment":"LAB_PREPROD",
+  "autonomy":"SAFE_NON_DESTRUCTIVE_FOUNDATION",
+  "prod_autonomy":false,
+  "recovery_execution":false,
+  "containment_execution":false,
+  "secret_value_access":false,
+  "red_team_destructive_execution":false,
+  "promotion_execution":false,
+  "backup_execution":false,
+  "restore_execution":false,
+  "continuity_execution":false,
+  "crisis_communications_execution":false,
+  "trading_access":false,
+  "promotion_state":"NOT_PROD_PROMOTED",
+  "next_required_gate":"L6_FOUNDATION"
+}

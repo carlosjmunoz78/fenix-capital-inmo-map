@@ -1,0 +1,24 @@
+{
+  "wave": "L1_FOUNDATION",
+  "environment": "LAB_PREPROD",
+  "new_runtime_engines": {
+    "UPD-001": "cerebro/runtime/l1/upd001-v1.mjs",
+    "OBS-001": "cerebro/runtime/l1/obs001-v1.mjs",
+    "CON-001": "cerebro/runtime/l1/con001-v1.mjs",
+    "CACHE-001": "cerebro/runtime/l1/cache001-v1.mjs",
+    "TWIN-001": "cerebro/runtime/l1/twin001-v1.mjs"
+  },
+  "index": "cerebro/runtime/l1/index-v1.mjs",
+  "preserved_existing_engines": ["KNW-001","PRV-001","LRN-001","TRN-001","EVA-001","JDG-001","RSH-001","RAG-001","SIM-001"],
+  "preservation_mode": "WRAP_PRESERVE",
+  "foundation_limits": {
+    "CON-001": "Structured-ingestion only; semantic extraction is not claimed.",
+    "CACHE-001": "Deterministic cache key/TTL foundation; persistent store not bound.",
+    "TWIN-001": "Simulation-only; synthetic, anonymized or approved fixture inputs; no PROD writes."
+  },
+  "do_not_overwrite": true,
+  "prod_writes": false,
+  "network_required": false,
+  "secrets_required": false,
+  "additional_cost_eur": 0
+}

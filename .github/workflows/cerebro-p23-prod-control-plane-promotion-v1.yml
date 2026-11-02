@@ -1,0 +1,166 @@
+name: CEREBRO P23 PROD Control Plane Promotion V1
+
+on:
+  push:
+    branches: [cerebro-p23-autonomy-prod-readiness-20261102]
+    paths:
+      - 'cerebro/evidence/p23-autonomy-prod-readiness/2026-11-02/PROD_PROMOTION_READY.json'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: cerebro-p23-prod-control-plane-promotion-v1
+  cancel-in-progress: false
+
+env:
+  CANDIDATE_BRANCH: cerebro-p23-autonomy-prod-readiness-20261102
+  GATE_WORKFLOW: cerebro-p23-autonomy-prod-readiness-gate-v1.yml
+  P23_WORKFLOW: cerebro-p23-live-audit-v1.yml
+  P23_STATE_BRANCH: cerebro/p23-state-v1
+  READY_FILE: cerebro/evidence/p23-autonomy-prod-readiness/2026-11-02/PROD_PROMOTION_READY.json
+
+jobs:
+  promote-governed-control-plane:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Require explicit bounded promotion contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "$CANDIDATE_BRANCH"
+          jq -e '.state_type=="CEREBRO_P23_PROD_PROMOTION_READY_V1" and .status=="AUTHORIZED" and .target=="CEREBRO_PROD_CONTROL_PLANE" and .engine_count==179 and .p23_live==true and .execution_mode=="FAIL_CLOSED" and .prod_execution_authorized==false and .prod_write_authorized==false and .trading_access==false and .additional_cost_eur==0' "$READY_FILE" >/dev/null
+      - name: Prove current main is exact ancestor and diff is CEREBRO-only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --force origin main
+          main_sha="$(git rev-parse origin/main)"
+          git merge-base --is-ancestor "$main_sha" HEAD
+          test "$(git merge-base "$main_sha" HEAD)" = "$main_sha"
+          git diff --name-only "$main_sha" HEAD > /tmp/prod-candidate-paths.txt
+          test -s /tmp/prod-candidate-paths.txt
+          bad="$(grep -Ev '^(cerebro/|\.github/workflows/)' /tmp/prod-candidate-paths.txt || true)"
+          if [ -n "$bad" ]; then echo "Disallowed PROD candidate paths:" >&2; printf '%s\n' "$bad" >&2; exit 1; fi
+          ! grep -E '^(src/|supabase/|public/|index\.html$|package(-lock)?\.json$|vite\.config)' /tmp/prod-candidate-paths.txt
+      - name: Wait for exact-head PREPROD gate GREEN
+        shell: bash
+        run: |
+          set -euo pipefail
+          run_id=''
+          for _ in $(seq 1 120); do
+            data="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/${GATE_WORKFLOW}/runs?head_sha=${GITHUB_SHA}&event=push&per_page=10")"
+            run_id="$(jq -r '.workflow_runs[0].id // empty' <<<"$data")"
+            status="$(jq -r '.workflow_runs[0].status // empty' <<<"$data")"
+            conclusion="$(jq -r '.workflow_runs[0].conclusion // empty' <<<"$data")"
+            if [ "$status" = completed ]; then test "$conclusion" = success; break; fi
+            sleep 5
+          done
+          test -n "$run_id"
+          test "$status" = completed
+          test "$conclusion" = success
+          printf '%s\n' "$run_id" > /tmp/preprod-gate-run-id.txt
+      - name: Re-prove focused P23 safety before PR
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts
+          cd cerebro
+          node --test tests/p23-fact001-live-v1.test.mjs
+          cd ..
+          node <<'NODE'
+          const fs=require('fs');const g=JSON.parse(fs.readFileSync('cerebro/registry/prod-engine-governance.v1.json'));const p=JSON.parse(fs.readFileSync('cerebro/audit/p23-live-contract.v1.json'));
+          if(g.coverage.expected_count!==179||g.default_policy.execution_mode!=='FAIL_CLOSED'||g.default_policy.prod_execution_authorized!==false||g.default_policy.prod_write_authorized!==false||g.default_policy.trading_access!==false)throw new Error('unsafe governance');
+          if(p.status!=='LIVE'||p.target_engine!=='FACT-001'||p.safety.prod_mutation_authorized!==false||p.safety.prod_execution_authorized!==false)throw new Error('unsafe P23 contract');
+          NODE
+      - name: Create or resolve exact-head PR carrier
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$CANDIDATE_BRANCH" --base main --state open --json number,headRefOid,isDraft --limit 1)"
+          if [ "$(jq 'length' <<<"$existing")" -eq 0 ]; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --head "$CANDIDATE_BRANCH" --base main \
+              --title 'CEREBRO: 179-engine governed PROD control plane + P23 Live' \
+              --body 'Exact-head promotion. 179/179 registered fail-closed; no PROD execution/write authority; P23 live audit; Trading forbidden; 0 EUR additional cost.'
+            existing="$(gh pr list --repo "$GITHUB_REPOSITORY" --head "$CANDIDATE_BRANCH" --base main --state open --json number,headRefOid,isDraft --limit 1)"
+          fi
+          test "$(jq 'length' <<<"$existing")" -eq 1
+          test "$(jq -r '.[0].headRefOid' <<<"$existing")" = "$GITHUB_SHA"
+          test "$(jq -r '.[0].isDraft' <<<"$existing")" = false
+          jq -r '.[0].number' <<<"$existing" > /tmp/pr-number.txt
+      - name: Exact-head governed merge to main without App deploy marker
+        shell: bash
+        run: |
+          set -euo pipefail
+          pr="$(cat /tmp/pr-number.txt)"
+          gh pr merge "$pr" --repo "$GITHUB_REPOSITORY" --squash --match-head-commit "$GITHUB_SHA" \
+            --subject 'CEREBRO: promote 179-engine governed control plane and P23 Live' \
+            --body 'PREPROD gates green. Registration only; execution/write remain fail-closed. P23 live receipt required after merge.'
+          merged="$(gh api "/repos/${GITHUB_REPOSITORY}/pulls/${pr}")"
+          test "$(jq -r '.merged' <<<"$merged")" = true
+          main_sha="$(jq -r '.merge_commit_sha' <<<"$merged")"
+          printf '%s' "$main_sha" | grep -Eq '^[0-9a-fA-F]{40}$'
+          current="$(gh api "/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq '.object.sha')"
+          test "$current" = "$main_sha"
+          printf '%s\n' "$main_sha" > /tmp/prod-main-sha.txt
+      - name: Require P23 Live run GREEN on promoted main SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(cat /tmp/prod-main-sha.txt)"
+          run_id=''
+          status=''
+          conclusion=''
+          for _ in $(seq 1 180); do
+            data="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/${P23_WORKFLOW}/runs?head_sha=${main_sha}&event=push&per_page=10")"
+            run_id="$(jq -r '.workflow_runs[0].id // empty' <<<"$data")"
+            status="$(jq -r '.workflow_runs[0].status // empty' <<<"$data")"
+            conclusion="$(jq -r '.workflow_runs[0].conclusion // empty' <<<"$data")"
+            if [ "$status" = completed ]; then test "$conclusion" = success; break; fi
+            sleep 5
+          done
+          test -n "$run_id"
+          test "$status" = completed
+          test "$conclusion" = success
+          printf '%s\n' "$run_id" > /tmp/p23-prod-run-id.txt
+      - name: Verify durable P23 PROD receipt and App deployment isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          main_sha="$(cat /tmp/prod-main-sha.txt)"
+          git fetch --no-tags --force origin "refs/heads/${P23_STATE_BRANCH}:refs/remotes/origin/${P23_STATE_BRANCH}"
+          git show "refs/remotes/origin/${P23_STATE_BRANCH}:p23/SUMMARY.json" > /tmp/p23-prod-summary.json
+          jq -e --arg sha "$main_sha" '.status=="GREEN" and .p23_live==true and .environment=="PROD_CONTROL_PLANE" and .source_sha==$sha and .registry_total==179 and .audit_points==179 and .prod_registered==179 and .prod_execution_authorized==0 and .prod_write_authorized==0 and .trading_access==false and .additional_cost_eur==0' /tmp/p23-prod-summary.json >/dev/null
+          deploy="$(gh api "/repos/${GITHUB_REPOSITORY}/actions/workflows/prod-live-deploy.yml/runs?head_sha=${main_sha}&event=push&per_page=10" || true)"
+          if [ -n "$deploy" ] && [ "$(jq '.total_count // 0' <<<"$deploy")" -gt 0 ]; then
+            conclusion="$(jq -r '.workflow_runs[0].conclusion // empty' <<<"$deploy")"
+            test "$conclusion" = skipped
+          fi
+          echo "PROD_GREEN main_sha=${main_sha} engines=179 mode=FAIL_CLOSED p23_run=$(cat /tmp/p23-prod-run-id.txt)" >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload promotion receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-p23-prod-promotion-${{ github.run_id }}
+          path: |
+            /tmp/preprod-gate-run-id.txt
+            /tmp/pr-number.txt
+            /tmp/prod-main-sha.txt
+            /tmp/p23-prod-run-id.txt
+            /tmp/p23-prod-summary.json
+            /tmp/prod-candidate-paths.txt
+          if-no-files-found: error
+          retention-days: 30

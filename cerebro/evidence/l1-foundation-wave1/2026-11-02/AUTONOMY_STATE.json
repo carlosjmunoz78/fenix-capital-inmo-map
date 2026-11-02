@@ -1,0 +1,16 @@
+{
+  "wave":"L1_FOUNDATION",
+  "status":"GREEN",
+  "environment":"LAB_PREPROD",
+  "autonomy":"FOUNDATION_NON_PROD",
+  "prod_autonomy":false,
+  "runtime_external_actions":false,
+  "network_access":false,
+  "secrets_access":false,
+  "trading_access":false,
+  "knowledge_publication_direct":false,
+  "conversation_semantic_extraction_claimed":false,
+  "digital_twin_prod_write":false,
+  "promotion_state":"NOT_PROD_PROMOTED",
+  "next_required_gate":"L2_FOUNDATION"
+}

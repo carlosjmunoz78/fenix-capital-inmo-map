@@ -1,0 +1,71 @@
+name: CEREBRO L9 Foundation Audit
+
+on:
+  push:
+    branches: [cerebro-implement-l7-l8-l9-foundation-20261102]
+    paths:
+      - '.github/workflows/cerebro-l9-foundation-audit.yml'
+      - 'cerebro/missions/audit-priority-l789-v1.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  L8_DURABLE_SHA: 43797c512ac1adf49f5e5410618e4b25c8285e6f
+  OUT: /tmp/cerebro-l9-audit
+
+jobs:
+  audit-l9:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 340
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert L8 closed and audit-only mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l7-l8-l9-foundation-20261102'
+          git merge-base --is-ancestor "$L8_DURABLE_SHA" HEAD
+          git diff --name-only "$L8_DURABLE_SHA" HEAD > /tmp/changed.txt
+          test "$(wc -l < /tmp/changed.txt)" -eq 2
+          grep -Fx '.github/workflows/cerebro-l9-foundation-audit.yml' /tmp/changed.txt
+          grep -Fx 'cerebro/missions/audit-priority-l789-v1.mjs' /tmp/changed.txt
+          git diff --exit-code "$L8_DURABLE_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+      - name: Install repository dependencies
+        run: npm ci --ignore-scripts
+      - name: Registry Factory and existing analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          cd ..
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connections"
+      - name: Audit L9 OLD baseline twice
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-priority-l789-v1.mjs --layer L9 --out "$OUT/a"
+          node cerebro/missions/audit-priority-l789-v1.mjs --layer L9 --out "$OUT/b"
+          cmp "$OUT/a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/b/PRIORITY_PHYSICAL_BASELINE.json"
+          node <<'NODE'
+          const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.OUT+'/a/PRIORITY_PHYSICAL_BASELINE.json'));
+          const details={};for(const [id,e] of Object.entries(x.engines)){if(e.classification!=='PHYSICAL_EXISTING')details[id]={classification:e.classification,runtime_references:e.runtime_references,physical_evidence:e.physical_evidence,support_references:e.support_references};}
+          console.log('L9_BASELINE='+JSON.stringify({total:x.total,counts:x.classification_counts,physical_before:x.physical_before,physical_engine_ids:x.physical_engine_ids,nonphysical_engine_ids:x.nonphysical_engine_ids,effective_dependency_edges:x.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:x.dependency_graph.cycle_guard_rejected_edges.length}));
+          console.log('L9_NONPHYSICAL_DETAILS='+JSON.stringify(details));
+          NODE
+      - name: Audit boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --exit-code "$L8_DURABLE_SHA" -- cerebro/runtime cerebro/tests cerebro/evidence
+          echo 'L9 corrected OLD baseline audit GREEN; Factory excluded from physical evidence.' >> "$GITHUB_STEP_SUMMARY"

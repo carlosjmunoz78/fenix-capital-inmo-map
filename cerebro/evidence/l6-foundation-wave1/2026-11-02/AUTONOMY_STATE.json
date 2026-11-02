@@ -1,0 +1,21 @@
+{
+  "schema_version": "1.0.0",
+  "wave": "L6_FOUNDATION",
+  "state": "LAB_PREPROD_FOUNDATION",
+  "runtime_enforcement": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "external_side_effects": false,
+  "paid_ai_required": false,
+  "additional_cost_eur": 0,
+  "human_exception_codes": ["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK","POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"],
+  "promotion_gate_required": true,
+  "notes": [
+    "Foundation functions are deterministic planning/evaluation primitives.",
+    "API-001 builds request plans but performs no network request.",
+    "CAN-001 evaluates promotion/rollback candidates but executes neither.",
+    "INT-001 stores credential references only; secret values are forbidden.",
+    "STOROFF-001 plans placement but performs no storage movement."
+  ]
+}

@@ -1,0 +1,90 @@
+name: CEREBRO L4 Foundation Baseline
+
+on:
+  push:
+    branches:
+      - cerebro-implement-l3-l4-l5-foundation-20261102
+    paths:
+      - '.github/workflows/cerebro-l4-foundation-baseline.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  OUT: /tmp/cerebro-l4-foundation-baseline
+
+jobs:
+  audit-l4-old:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 150
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated LAB PREPROD branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Registry Factory syntax and canonical validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check cerebro/missions/audit-priority-l345-v1.mjs
+          node --check cerebro/missions/connect-existing-engines-v3.mjs
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Re-run existing physical connection analyzer
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority"
+      - name: Audit L4 OLD physical baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-priority-l345-v1.mjs --layer L4 --out "$OUT/l4"
+          node <<'NODE'
+          const fs=require('fs');
+          const b=JSON.parse(fs.readFileSync('/tmp/cerebro-l4-foundation-baseline/l4/PRIORITY_PHYSICAL_BASELINE.json'));
+          if(b.status!=='GREEN'||b.layer!=='L4'||b.total!==27) throw new Error('L4 baseline invalid');
+          if(b.registry_total!==179||b.registry_unique!==179) throw new Error('Registry invalid');
+          if(Object.values(b.classification_counts).reduce((a,x)=>a+x,0)!==27) throw new Error('classification count mismatch');
+          if(b.prod_touched||b.trading_touched||b.additional_cost_eur!==0) throw new Error('boundary violation');
+          console.log('L4_BASELINE='+JSON.stringify({physical_before:b.physical_before,classification_counts:b.classification_counts,nonphysical_engine_ids:b.nonphysical_engine_ids}));
+          NODE
+      - name: Persist durable OLD baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          DEST='cerebro/evidence/l4-foundation-wave1/2026-11-02'
+          mkdir -p "$DEST"
+          cp "$OUT/l4/PRIORITY_PHYSICAL_BASELINE.json" "$DEST/PRIORITY_PHYSICAL_BASELINE.json"
+          cp "$OUT/l4/AUDIT_REPORT.json" "$DEST/BASELINE_AUDIT_REPORT.json"
+          printf '%s\n' "$GITHUB_SHA" > "$DEST/BASELINE_SOURCE_SHA.txt"
+          git config user.name 'CEREBRO Foundation Evidence'
+          git config user.email 'cerebro-foundation@users.noreply.github.com'
+          git add "$DEST"
+          git commit -m 'evidence(cerebro): persist L4 OLD baseline [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Upload L4 baseline artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l4-foundation-baseline-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-l4-foundation-baseline
+          if-no-files-found: error
+          retention-days: 14
+      - name: Mission boundary
+        run: |
+          echo 'L4 audit only; no L4 runtime modified.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Registry/Factory validated; PROD/Trading untouched.' >> "$GITHUB_STEP_SUMMARY"

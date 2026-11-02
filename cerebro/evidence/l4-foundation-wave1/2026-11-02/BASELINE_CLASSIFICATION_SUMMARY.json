@@ -1,0 +1,46 @@
+{
+  "status": "GREEN",
+  "layer": "L4",
+  "physical_before": 8,
+  "classification_counts": {
+    "DOCUMENTED_ONLY": 14,
+    "PHYSICAL_EXISTING": 8,
+    "PHYSICAL_PARTIAL": 5,
+    "SCAFFOLD_ONLY": 0
+  },
+  "groups": {
+    "DOCUMENTED_ONLY": [
+      "3RD-001",
+      "AML-001",
+      "BLK-001",
+      "CAT-001",
+      "COH-001",
+      "DOC-002",
+      "DOC-003",
+      "DOC-004",
+      "KYC-001",
+      "NOT-001",
+      "REC-001",
+      "REGP-001",
+      "SLA-001",
+      "TAS-001"
+    ],
+    "PHYSICAL_PARTIAL": [
+      "AGD-001",
+      "DOC-001",
+      "NBA-001",
+      "PAY-001",
+      "PROP-001"
+    ],
+    "PHYSICAL_EXISTING": [
+      "BNK-001",
+      "BNK-002",
+      "BNK-003",
+      "BNK-004",
+      "BNK-005",
+      "BNK-006",
+      "OFR-001",
+      "VIA-001"
+    ]
+  }
+}

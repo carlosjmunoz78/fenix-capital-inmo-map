@@ -1,0 +1,87 @@
+name: CEREBRO L7 Foundation Wave1
+
+on:
+  push:
+    branches: [cerebro-implement-l7-l8-l9-foundation-20261102]
+    paths:
+      - '.github/workflows/cerebro-l7-foundation-wave1.yml'
+      - 'cerebro/runtime/l7/**'
+      - 'cerebro/tests/l7-foundation-wave1.test.mjs'
+      - 'cerebro/evidence/l7-foundation-wave1/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_VALIDATED_SHA: bca728d4b5168193d7eba43047a25ddba50279f1
+  PRE_L7_SHA: fafdeac4adbed5dfc5febbd11ffac25fcddb1951
+  OUT: /tmp/cerebro-l7-wave1
+
+jobs:
+  l7-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 280
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolation and allowed paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l7-l8-l9-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git merge-base --is-ancestor "$BASE_VALIDATED_SHA" HEAD
+          git diff --exit-code "$BASE_VALIDATED_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+          git diff --name-only "$PRE_L7_SHA" HEAD > /tmp/l7changed.txt
+          while IFS= read -r p; do case "$p" in .github/workflows/cerebro-l7-foundation-wave1.yml|cerebro/runtime/l7/*|cerebro/tests/l7-foundation-wave1.test.mjs|cerebro/evidence/l7-foundation-wave1/*) ;; *) echo "Unexpected L7 path: $p"; exit 1;; esac; done < /tmp/l7changed.txt
+          ! grep -Ei '(^|/)(trading|lab-trd)(/|$)' /tmp/l7changed.txt
+      - name: Install repository dependencies
+        run: npm ci --ignore-scripts
+      - name: Registry Factory syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('registry/engine-registry.v1.json'));const ids=r.engine_ids||[];if(r.count!==179||ids.length!==179||new Set(ids).size!==179)throw new Error('Registry mismatch');console.log('REGISTRY_179_UNIQUE_GREEN');
+          NODE
+      - name: L7 focused tests
+        working-directory: cerebro
+        run: node --test tests/l7-foundation-wave1.test.mjs
+      - name: Full regression with known paused-worker exclusions only
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+          git diff --exit-code "$BASE_VALIDATED_SHA" -- .github/workflows/cerebro-continuous-useful-worker-v1.yml tests/continuous-worker-entitlement-drain-canary-v1.test.mjs tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Analyzer and deterministic rebuild
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connections"
+          node cerebro/missions/audit-priority-l789-v1.mjs --layer L7 --out "$OUT/a"
+          node cerebro/missions/audit-priority-l789-v1.mjs --layer L7 --out "$OUT/b"
+          cmp "$OUT/a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/b/PRIORITY_PHYSICAL_BASELINE.json"
+          node <<'NODE'
+          const fs=require('fs');const x=JSON.parse(fs.readFileSync(process.env.OUT+'/a/PRIORITY_PHYSICAL_BASELINE.json'));if(x.total!==15||x.physical_before!==15||x.classification_counts.PHYSICAL_EXISTING!==15||x.classification_counts.PHYSICAL_PARTIAL!==0||x.classification_counts.SCAFFOLD_ONLY!==0||x.classification_counts.DOCUMENTED_ONLY!==0)throw new Error('L7 not 15/15 physical after implementation');console.log('L7_PHYSICAL_GREEN=15/15');
+          NODE
+      - name: Boundary and evidence checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' cerebro/runtime/l7 cerebro/tests/l7-foundation-wave1.test.mjs
+          ! grep -R --line-number -E "environment[[:space:]]*[:=][[:space:]]*['\"]PROD['\"]|prod_writes[[:space:]]*[:=][[:space:]]*true|trading_access[[:space:]]*[:=][[:space:]]*true" cerebro/runtime/l7
+          for f in IMPLEMENTATION_MANIFEST.json PRIORITY_PHYSICAL_BASELINE.json CLOSURE_EVIDENCE.json AUTONOMY_STATE.json RUNBOOK.md CHANGELOG.md; do test -f "cerebro/evidence/l7-foundation-wave1/2026-11-02/$f"; done
+          echo 'L7 FOUNDATION GREEN: 15/15 physical; PROD untouched; Trading untouched; cost 0 EUR.' >> "$GITHUB_STEP_SUMMARY"

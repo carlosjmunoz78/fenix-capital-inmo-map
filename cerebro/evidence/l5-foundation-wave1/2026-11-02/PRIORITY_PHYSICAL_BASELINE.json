@@ -1,0 +1,554 @@
+{
+  "additional_cost_eur": 0,
+  "classification_counts": {
+    "DOCUMENTED_ONLY": 15,
+    "PHYSICAL_EXISTING": 1,
+    "PHYSICAL_PARTIAL": 4,
+    "SCAFFOLD_ONLY": 0
+  },
+  "dependency_graph": {
+    "cycle_guard_rejected_edges": [],
+    "effective_edges": []
+  },
+  "engines": {
+    "ACC-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/skill-dynamic-adoption-v1.test.mjs"
+      ]
+    },
+    "BUY-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "CMP-002": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_ENGINEERING_SPECIALIZATIONS_FULL_SWEEP_V1.md"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/runtime/cerebro-technical-specialists-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-dynamic-adoption-v1.json",
+        "cerebro/registry/skill-operational-wrapper-registry-v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "COL-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "CONS-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE13_MARKETING_SEO_BLOCKS_152_161_V0_2026-10-14.md"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "DPO-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_ENGINEERING_SPECIALIZATIONS_FULL_SWEEP_V1.md"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/runtime/cerebro-technical-specialists-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-dynamic-adoption-v1.json",
+        "cerebro/registry/skill-operational-wrapper-registry-v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "FINOPS-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/README.md",
+        "cerebro/docs/AUTONOMY_BACKUP_REBUILD.md",
+        "cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CEREBRO_ENGINEERING_SPECIALIZATIONS_FULL_SWEEP_V1.md",
+        "cerebro/docs/CEREBRO_PHASE12_ECONOMIC_LEARNING_BLOCKS_143_151_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE14_MULTIMEDIA_FACTORY_BLOCKS_162_175_V0_2026-10-14.md",
+        "cerebro/docs/COMPET_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CURRENT_STATE.md",
+        "cerebro/docs/DB_SAFE_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/DB_SAFE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/DEPENDENCY_MAP.md",
+        "cerebro/docs/FACT_SKILL_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/FACT_SKILL_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/GH_SAFE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/LEAD_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/OBSERVABILITY_AUDIT_FINOPS_V0.md",
+        "cerebro/docs/RSI_RECOVERY_001_AUDIT_2026-10-08.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/SKILL_SUPPLY_CHAIN_DEPENDENCY_MAP_V0.md",
+        "cerebro/docs/TECH_CAP_SCOUT_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/TECH_CAP_SCOUT_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/connection-mission/2026-11-02/EFFECTIVE_DEPENDENCIES.json",
+        "cerebro/evidence/observability-audit-finops-inventory-v0.json",
+        "cerebro/evidence/observability-audit-finops-persistent-v0.json",
+        "cerebro/evidence/phase12-economic-learning-blocks-143-151-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/customer-journey-real-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/db-safe-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/evt-all-engines-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/gh-safe-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/technology-capability-scout-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/universal-skill-real-binding-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/skills/skill-real-engine-binding-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/digital-build/multimedia-factory-runtime-v0.mjs",
+        "cerebro/economics/phase12-economic-learning-runtime-v0.mjs",
+        "cerebro/jarvis/boost-001/super-audit-a00-a04.mjs",
+        "cerebro/jarvis/boost-001/super-audit-a01-a03-a04-r3.mjs",
+        "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/cerebro-engineering-specializations-evidence-sweep-v1.mjs",
+        "cerebro/runtime/cerebro-fast-evolution-planner-v1.mjs",
+        "cerebro/runtime/cerebro-math-solver-profile-v1.mjs",
+        "cerebro/runtime/cerebro-technical-specialists-v1.mjs",
+        "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs",
+        "cerebro/runtime/db-safe-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/evt-all-engines-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/fact-skill-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/gh-safe-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+        "cerebro/runtime/mortgage-operations-real-adoption-v1.mjs",
+        "cerebro/runtime/native-capability-operational-loop-v1.mjs",
+        "cerebro/runtime/observability-audit-finops.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/technology-capability-scout-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/universal-skill-real-binding-v1.mjs",
+        "cerebro/skills/skill-real-engine-binding-v1.mjs",
+        "supabase/functions/cerebro-console-gateway-v0/knowledge.ts"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-cap-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-compet-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-db-safe-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-fact-skill-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-gh-safe-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-mortgage-operations-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-sale-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-tech-scout-full-e2e-real-v1.yml",
+        "cerebro/jarvis/boost-001/audit-queue.v1.json",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
+        "cerebro/registry/capability-cap-native.v1.json",
+        "cerebro/registry/capability-compet-native.v1.json",
+        "cerebro/registry/capability-db-safe-native.v1.json",
+        "cerebro/registry/capability-evt001-native.v1.json",
+        "cerebro/registry/capability-fact-skill-native.v1.json",
+        "cerebro/registry/capability-lead-native.v1.json",
+        "cerebro/registry/capability-tech-cap-scout-native.v1.json",
+        "cerebro/registry/cerebro-compounding-evolution-policy.v1.json",
+        "cerebro/registry/cerebro-fast-evolution-execution.v1.json",
+        "cerebro/registry/compet-real-consumer-adoption-v1.json",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/db-safe-real-consumer-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/evt-all-engines-real-consumer-adoption-v1.json",
+        "cerebro/registry/execution-model-router-policy.v0.json",
+        "cerebro/registry/fact-skill-real-consumer-adoption-v1.json",
+        "cerebro/registry/gh-safe-real-consumer-adoption-v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/multimedia-factory-profile.v0.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/phase12-economic-learning-profile.v0.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/skill-supply-chain-v0.json",
+        "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json",
+        "cerebro/registry/zero-cost-platform.json",
+        "cerebro/skills/cerebro-184-items-1-24-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-143-151-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-162-175-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-51-61-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-69-73-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-74-82-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-83-92-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/skills/skill-supply-chain.v0.json",
+        "cerebro/tests/cerebro-math-solver-profile-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/db-safe-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/fact-skill-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/gh-safe-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs",
+        "cerebro/tests/mortgage-operations-real-adoption-v1.test.mjs",
+        "cerebro/tests/multimedia-factory-runtime-v0.test.mjs",
+        "cerebro/tests/observability-audit-finops-inventory.test.mjs",
+        "cerebro/tests/observability-audit-finops-persistent.test.mjs",
+        "cerebro/tests/phase12-economic-learning-runtime-v0.test.mjs",
+        "cerebro/tests/runtime-builtins-money.test.mjs",
+        "cerebro/tests/runtime-final-hardening.test.mjs",
+        "cerebro/tests/runtime-final-review-48df.test.mjs",
+        "cerebro/tests/runtime.test.mjs",
+        "cerebro/tests/sale-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/skill-dynamic-adoption-v1.test.mjs",
+        "cerebro/tests/skill-prod-capability-fastlane-v1.test.mjs",
+        "cerebro/tests/skill-prod-real-consumer-v1.test.mjs",
+        "cerebro/tests/universal-skill-auto-engineering-v1.test.mjs"
+      ]
+    },
+    "HR-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "HR-002": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "HR-003": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "HR-004": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "HR-005": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "HR-006": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "INV-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v3.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs"
+      ]
+    },
+    "LEG-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "TAX-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "TRE-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "VCON-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json"
+      ]
+    },
+    "VEN-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    },
+    "VREP-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json"
+      ]
+    }
+  },
+  "environment": "LAB_PREPROD",
+  "factory_mutated": false,
+  "layer": "L5",
+  "mission": "IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION",
+  "nonphysical_engine_ids": [
+    "HR-001",
+    "HR-002",
+    "HR-003",
+    "HR-004",
+    "HR-005",
+    "HR-006",
+    "LEG-001",
+    "TAX-001",
+    "CMP-002",
+    "DPO-001",
+    "CONS-001",
+    "INV-001",
+    "COL-001",
+    "TRE-001",
+    "ACC-001",
+    "VEN-001",
+    "BUY-001",
+    "VREP-001",
+    "VCON-001"
+  ],
+  "p23": "POR_AUDITAR",
+  "phase": "L5_BASELINE_OLD",
+  "physical_before": 1,
+  "physical_engine_ids": [
+    "FINOPS-001"
+  ],
+  "prod_touched": false,
+  "registry_mutated": false,
+  "registry_total": 179,
+  "registry_unique": 179,
+  "schema_version": "1.0.0",
+  "source_hashes": {
+    "factory": "a10801a5be61dd754d1c88cf3925244aeadfa09f84b5bb36ed9dedc43407df73",
+    "factory_v1": "0720f8d29a04d80403be654b929caf234a80a0f64c877a9e5c39f09780ce7c5b",
+    "registry": "a7dde61d3ee4e46ccc5cf697bc44867ac1e22a6a391dac55fea20b95c1b89f2f"
+  },
+  "status": "GREEN",
+  "total": 20,
+  "trading_touched": false
+}

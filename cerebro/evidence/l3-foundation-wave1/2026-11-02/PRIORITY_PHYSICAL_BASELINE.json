@@ -1,0 +1,1518 @@
+{
+  "additional_cost_eur": 0,
+  "classification_counts": {
+    "DOCUMENTED_ONLY": 1,
+    "PHYSICAL_EXISTING": 13,
+    "PHYSICAL_PARTIAL": 2,
+    "SCAFFOLD_ONLY": 0
+  },
+  "dependency_graph": {
+    "cycle_guard_rejected_edges": [
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "CX-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "CX-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "POST-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "CX-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "POST-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "REF-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "CX-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "POST-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "REF-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "REP-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/revenue/sales-execution-agent-inbox-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "SALE-001",
+        "target": "LEAD-001"
+      }
+    ],
+    "effective_edges": [
+      {
+        "evidence_paths": [
+          "cerebro/revenue/sale-action-v1.mjs",
+          "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+          "cerebro/revenue/sales-execution-agent-inbox-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "SALE-001",
+        "target": "COM-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/economics/phase12-economic-learning-runtime-v0.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CAP-001",
+        "target": "MKT-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CX-001",
+        "target": "POST-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CX-001",
+        "target": "REF-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CX-001",
+        "target": "REP-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CX-001",
+        "target": "RET-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "CX-001",
+        "target": "SALE-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/revenue/lead-nba-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "LEAD-001",
+        "target": "SALE-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "COM-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "REF-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "REP-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "RET-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "POST-001",
+        "target": "SALE-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/ret-ref-rep-runtime-v0.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "COM-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "REP-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "RET-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REF-001",
+        "target": "SALE-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/ret-ref-rep-runtime-v0.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "COM-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "RET-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "REP-001",
+        "target": "SALE-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/ret-ref-rep-runtime-v0.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "COM-001"
+      },
+      {
+        "evidence_paths": [
+          "cerebro/customer/customer-journey-native-v1.mjs"
+        ],
+        "evidence_types": [
+          "verified_runtime"
+        ],
+        "source": "RET-001",
+        "target": "SALE-001"
+      }
+    ]
+  },
+  "engines": {
+    "C360-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/LEAD_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/LOTE3_COM_NOTIF_C360_V1_RUNBOOK.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/lote3-decision-gate-2026-10-17.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/customer/c360-native-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-sale-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/lead-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-v1.test.mjs",
+        "cerebro/tests/sale-real-consumer-adoption-v1.test.mjs"
+      ]
+    },
+    "CAP-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CAP_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/CEREBRO_COMPANY_INTENT_RESOLUTION_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_ENGINEERS_SKILLS_CURRENT_EVIDENCE_2026-10-18.md",
+        "cerebro/docs/CEREBRO_FIRST_PARTY_ACCOUNT_SIGNALS_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_LEAD_DISCOVERY_ENRICHMENT_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE12_ECONOMIC_LEARNING_BLOCKS_143_151_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE13_MARKETING_SEO_BLOCKS_152_161_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_WEB_ACQUISITION_INTELLIGENCE_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/LEAD_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/cap-native-v1-preprod.json",
+        "cerebro/evidence/connection-mission/2026-11-02/EFFECTIVE_DEPENDENCIES.json",
+        "cerebro/evidence/phase12-economic-learning-blocks-143-151-v0.json",
+        "cerebro/evidence/phase13-marketing-seo-blocks-152-161-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/economics/phase12-economic-learning-runtime-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/economics/phase12-economic-learning-runtime-v0.mjs",
+        "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+        "cerebro/runtime/cap-ieca-cordoba-v0.mjs",
+        "cerebro/runtime/cap-native-v1.mjs",
+        "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/company-intent-resolution-profile-v1.mjs",
+        "cerebro/runtime/fact001-gap-capabilities-v0.mjs",
+        "cerebro/runtime/fact001-remote-source-bindings-57-62-v0.mjs",
+        "cerebro/runtime/fact001-six-gap-physical-e2e-v0.mjs",
+        "cerebro/runtime/first-party-account-signals-profile-v1.mjs",
+        "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs",
+        "cerebro/runtime/native-capability-operational-loop-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-cap-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-cap-native-v1.yml",
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cap-ieca-cordoba.v0.json",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
+        "cerebro/registry/capability-cap-native.v1.json",
+        "cerebro/registry/capability-lead-native.v1.json",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/fact001-gap-capabilities.v0.json",
+        "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
+        "cerebro/registry/fact001-remote-source-bindings-57-62.v0.json",
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
+        "cerebro/registry/lead-discovery-enrichment-profile.v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/legacy184-current-evidence-overlay.v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/phase12-economic-learning-profile.v0.json",
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/web-acquisition-intelligence-profile.v1.json",
+        "cerebro/skills/cerebro-184-fact001-gap-routing.v1.json",
+        "cerebro/skills/cerebro-184-items-143-151-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-62-68-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-69-73-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-live-convergence.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/cap-native-v1.test.mjs",
+        "cerebro/tests/cerebro-184-items-62-92-live-reconciliation-v2.test.mjs",
+        "cerebro/tests/fact001-gap-capabilities-v0.test.mjs",
+        "cerebro/tests/lead-discovery-enrichment-profile-v1.test.mjs",
+        "cerebro/tests/lead-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/phase12-economic-learning-runtime-v0.test.mjs",
+        "cerebro/tests/phase13-marketing-seo-feedback-runtime-v0.test.mjs"
+      ]
+    },
+    "CMP-001": {
+      "classification": "DOCUMENTED_ONLY",
+      "do_not_overwrite": false,
+      "documentation_references": [],
+      "physical_evidence": [],
+      "runtime_references": [],
+      "scaffold_references": [],
+      "support_references": [
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json"
+      ]
+    },
+    "COM-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_SALES_EXECUTION_AGENT_INBOX_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/HCI001_MOTION001_HUMAN_EXPERIENCE_V0.md",
+        "cerebro/docs/LOTE3_COM_NOTIF_C360_V1_RUNBOOK.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/VOICE_EXPERIENCE_LAB_V0_2026-10-10.md",
+        "cerebro/evidence/connection-mission/2026-11-02/EFFECTIVE_DEPENDENCIES.json",
+        "cerebro/evidence/lote3-decision-gate-2026-10-17.json",
+        "cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json",
+        "cerebro/human-intelligence/README.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/communication/com-delivery-router-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/communication/com-delivery-router-v1.mjs",
+        "cerebro/communication/notif-native-v1.mjs",
+        "cerebro/customer/c360-native-v1.mjs",
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/revenue/sale-action-v1.mjs",
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+        "cerebro/revenue/sales-execution-agent-inbox-v1.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-com-delivery-router-v1.yml",
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-human-language-synthetic-lab-v1.yml",
+        ".github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-sale-full-e2e-real-v1.yml",
+        "cerebro/human-intelligence/contracts/human-interaction-contracts.v1.json",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/hci-motion-engine-contracts.v0.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/physical-adapter-audit-v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v3.json",
+        "cerebro/skills/cerebro-184-items-93-104-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs",
+        "cerebro/tests/com-delivery-router-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-v1.test.mjs",
+        "cerebro/tests/p0-operational-capability-pack-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs",
+        "cerebro/tests/sale-action-v1.test.mjs",
+        "cerebro/tests/sale-native-v1.test.mjs",
+        "cerebro/tests/sale-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs",
+        "cerebro/tests/sales-execution-agent-inbox-v1.test.mjs",
+        "cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs",
+        "cerebro/tests/voice001-outreach-runtime-v0.test.mjs"
+      ]
+    },
+    "COMPET-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_ENGINEERS_SKILLS_CURRENT_EVIDENCE_2026-10-18.md",
+        "cerebro/docs/CEREBRO_PHASE13_MARKETING_SEO_BLOCKS_152_161_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_WEB_ACQUISITION_INTELLIGENCE_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/COMPET_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/TECH_CAP_SCOUT_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/compet-native-v1-preprod.json",
+        "cerebro/evidence/phase13-marketing-seo-blocks-152-161-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/compet-real-targets-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+        "cerebro/runtime/cerebro-fast-evolution-planner-v1.mjs",
+        "cerebro/runtime/compet-native-v1.mjs",
+        "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/compet-real-targets-resilient-v1.mjs",
+        "cerebro/runtime/compet-real-targets-v0.mjs",
+        "cerebro/runtime/fact001-gap-capabilities-v0.mjs",
+        "cerebro/runtime/fact001-remote-source-bindings-57-62-v0.mjs",
+        "cerebro/runtime/fact001-six-gap-physical-e2e-v0.mjs",
+        "cerebro/runtime/native-capability-operational-loop-v1.mjs",
+        "cerebro/runtime/technology-capability-scout-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/web-acquisition-intelligence-profile-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-compet-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-compet-native-v1.yml",
+        ".github/workflows/cerebro-tech-scout-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/capability-compet-native.v1.json",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/compet-real-consumer-adoption-v1.json",
+        "cerebro/registry/compet-real-targets-acceptance.v1.json",
+        "cerebro/registry/compet-real-targets.v0.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/fact001-gap-capabilities.v0.json",
+        "cerebro/registry/fact001-real-source-rollout-57-62.v0.json",
+        "cerebro/registry/fact001-remote-source-bindings-57-62.v0.json",
+        "cerebro/registry/fact001-six-gap-physical-e2e.v0.json",
+        "cerebro/registry/legacy184-current-evidence-overlay.v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json",
+        "cerebro/registry/web-acquisition-intelligence-profile.v1.json",
+        "cerebro/skills/cerebro-184-fact001-gap-routing.v1.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-51-61-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-live-convergence.v2.json",
+        "cerebro/tests/browser-transversal-autonomy-v1.test.mjs",
+        "cerebro/tests/cerebro-184-items-51-61-live-reconciliation-v2.test.mjs",
+        "cerebro/tests/compet-native-v1.test.mjs",
+        "cerebro/tests/compet-real-targets-resilient-v1.test.mjs",
+        "cerebro/tests/compet-real-targets-v0.test.mjs",
+        "cerebro/tests/fact001-gap-capabilities-v0.test.mjs",
+        "cerebro/tests/phase13-marketing-seo-feedback-runtime-v0.test.mjs",
+        "cerebro/tests/technology-capability-scout-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/web-acquisition-intelligence-profile-v1.test.mjs"
+      ]
+    },
+    "CX-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/VOICE_EXPERIENCE_LAB_V0_2026-10-10.md",
+        "cerebro/human-intelligence/README.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/customer/customer-journey-native-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        "cerebro/human-intelligence/contracts/human-interaction-contracts.v1.json",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs"
+      ]
+    },
+    "LEAD-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CEREBRO_COMPANY_INTENT_RESOLUTION_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_FIRST_PARTY_ACCOUNT_SIGNALS_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_LEAD_DISCOVERY_ENRICHMENT_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_LEAD_SCORING_CONTACT_CONFIDENCE_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_SALES_EXECUTION_AGENT_INBOX_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/LEAD_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/lead-native-v1-preprod.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/revenue/lead-nba-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/company-intent-resolution-profile-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/c360-native-v1.mjs",
+        "cerebro/revenue/lead-nba-v1.mjs",
+        "cerebro/revenue/sale-action-v1.mjs",
+        "cerebro/revenue/sales-execution-agent-inbox-v1.mjs",
+        "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/company-intent-resolution-profile-v1.mjs",
+        "cerebro/runtime/first-party-account-signals-profile-v1.mjs",
+        "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
+        "cerebro/runtime/lead-native-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs",
+        "cerebro/runtime/native-capability-operational-loop-v1.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-cap-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lead-native-v1.yml",
+        ".github/workflows/cerebro-revenue-lead-nba-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
+        "cerebro/registry/capability-cap-native.v1.json",
+        "cerebro/registry/capability-lead-native.v1.json",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/company-intent-resolution-profile.v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/first-party-account-signals-profile.v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/lead-scoring-contact-confidence-profile.v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-62-68-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-69-73-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-74-82-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-83-92-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/cap-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/com-delivery-router-v1.test.mjs",
+        "cerebro/tests/company-intent-resolution-profile-v1.test.mjs",
+        "cerebro/tests/first-party-event-capture-core-v0.test.mjs",
+        "cerebro/tests/lead-discovery-enrichment-profile-v1.test.mjs",
+        "cerebro/tests/lead-native-v1.test.mjs",
+        "cerebro/tests/lead-nba-v1.test.mjs",
+        "cerebro/tests/lead-scoring-contact-confidence-profile-v1.test.mjs",
+        "cerebro/tests/rsi-domain-policy-registry.test.mjs",
+        "cerebro/tests/sale-action-v1.test.mjs",
+        "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs"
+      ]
+    },
+    "MKT-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CAP_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CEREBRO_LEAD_DISCOVERY_ENRICHMENT_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_OWNER_EXECUTOR_CAPABILITY_AUDIT_V0_2026-10-11.md",
+        "cerebro/docs/CEREBRO_PHASE12_ECONOMIC_LEARNING_BLOCKS_143_151_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE13_MARKETING_SEO_BLOCKS_152_161_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_QA_AUTONOMOUS_REMEDIATION_V1_2026-10-11.md",
+        "cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md",
+        "cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md",
+        "cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md",
+        "cerebro/docs/COMPET_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/TECH_CAP_SCOUT_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/connection-mission/2026-11-02/EFFECTIVE_DEPENDENCIES.json",
+        "cerebro/evidence/phase12-economic-learning-blocks-143-151-v0.json",
+        "cerebro/evidence/phase13-marketing-seo-blocks-152-161-v0.json",
+        "docs/CEREBRO_CANVA001_RUNBOOK_V1_2026-10-24.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/economics/phase12-economic-learning-runtime-v0.mjs",
+        "cerebro/integrations/canva/canva-capability-router-v1.mjs",
+        "cerebro/integrations/canva/canva-capability-router-v1.test.mjs",
+        "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+        "cerebro/multicompany/marketing-crm-bootstrap-v1.mjs",
+        "cerebro/qa/improvement-scout.mjs",
+        "cerebro/qa/source-mapping-bridge-v0.mjs",
+        "cerebro/runtime/cap-native-v1.mjs",
+        "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lead-discovery-enrichment-profile-v1.mjs",
+        "cerebro/runtime/step6-domain-promotion-closure.mjs",
+        "cerebro/runtime/technology-capability-scout-real-consumer-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-cap-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-compet-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-first-real-domain-auto001-v0.yml",
+        ".github/workflows/cerebro-tech-scout-full-e2e-real-v1.yml",
+        "cerebro/contracts/creative-output-pipeline-v1.contract.json",
+        "cerebro/integrations/canva/canva-capability-bindings.v1.json",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
+        "cerebro/registry/capability-cap-native.v1.json",
+        "cerebro/registry/capability-compet-native.v1.json",
+        "cerebro/registry/compet-real-consumer-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/phase12-economic-learning-profile.v0.json",
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/registry/rsi-domain-autonomy-policies.v0.json",
+        "cerebro/registry/rsi-domain-evidence-sources.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/step6-domain-promotion-dispositions.v0.json",
+        "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json",
+        "cerebro/runtime/owner-executor-capability-registry.v0.json",
+        "cerebro/skills/cerebro-184-items-143-151-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs",
+        "cerebro/tests/browser-transversal-autonomy-v1.test.mjs",
+        "cerebro/tests/cap-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/compet-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/phase12-economic-learning-runtime-v0.test.mjs",
+        "cerebro/tests/phase13-marketing-seo-feedback-runtime-v0.test.mjs",
+        "cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs",
+        "cerebro/tests/skill-capability-evolution-bridge.test.mjs",
+        "cerebro/tests/skill-capability-evolution.test.mjs",
+        "cerebro/tests/technology-capability-scout-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/universal-skill-readonly-semantic-evidence-v1.test.mjs"
+      ]
+    },
+    "NOTIF-001": {
+      "classification": "PHYSICAL_PARTIAL",
+      "do_not_overwrite": false,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md",
+        "cerebro/docs/LOTE3_COM_NOTIF_C360_V1_RUNBOOK.md",
+        "cerebro/evidence/lote3-decision-gate-2026-10-17.json"
+      ],
+      "physical_evidence": [],
+      "runtime_references": [
+        "cerebro/communication/com-delivery-router-v1.mjs",
+        "cerebro/communication/notif-native-v1.mjs",
+        "cerebro/customer/c360-native-v1.mjs",
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-lote3-com-notif-c360-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs"
+      ]
+    },
+    "POST-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/customer/customer-journey-native-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/customer-journey-real-adoption-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs"
+      ]
+    },
+    "REF-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/customer/customer-journey-native-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs"
+      ]
+    },
+    "REP-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/customer/customer-journey-native-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-human-language-synthetic-lab-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/p0-operational-capability-pack-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs"
+      ]
+    },
+    "RET-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/evidence/phase11-ret-ref-rep-blocks-132-142-v0.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/customer/customer-journey-native-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs"
+      ]
+    },
+    "SALE-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_LEAD_SCORING_CONTACT_CONFIDENCE_PROFILE_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE11_RET_REF_REP_BLOCKS_132_142_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_PHASE15_BRAND_COMMERCE_APPFACTORY_BLOCKS_176_184_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_REVENUE_COM_DELIVERY_ROUTER_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_LEAD_NBA_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_REVENUE_SALE_V1_2026-10-13.md",
+        "cerebro/docs/CEREBRO_SALE001_BLOCKS_118_131_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_SALES_EXECUTION_AGENT_INBOX_V1_2026-10-14.md",
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/LEAD_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/SALE_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/lote3-decision-gate-2026-10-17.json",
+        "cerebro/evidence/phase15-brand-commerce-appfactory-blocks-176-184-v0.json",
+        "cerebro/evidence/sale001-blocks-118-131-v0.json"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/revenue/sale-action-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/revenue/sales-execution-agent-inbox-v1.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/communication/com-delivery-router-v1.mjs",
+        "cerebro/communication/notif-native-v1.mjs",
+        "cerebro/customer/c360-native-v1.mjs",
+        "cerebro/customer/customer-journey-native-v1.mjs",
+        "cerebro/customer/ret-ref-rep-runtime-v0.mjs",
+        "cerebro/digital-build/brand-commerce-appfactory-runtime-v0.mjs",
+        "cerebro/revenue/lead-nba-v1.mjs",
+        "cerebro/revenue/sale-action-v1.mjs",
+        "cerebro/revenue/sale001-agenda-commerce-runtime-v0.mjs",
+        "cerebro/revenue/sales-execution-agent-inbox-v1.mjs",
+        "cerebro/runtime/customer-journey-real-adoption-v1.mjs",
+        "cerebro/runtime/lead-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/lead-scoring-contact-confidence-profile-v1.mjs",
+        "cerebro/runtime/lote3-com-notif-c360-real-v1.mjs",
+        "cerebro/runtime/sale-native-v1.mjs",
+        "cerebro/runtime/sale-real-consumer-adoption-v1.mjs",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-customer-journey-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-lead-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-revenue-sale-v1.yml",
+        ".github/workflows/cerebro-sale-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-sale001-agenda-commerce-v0.yml",
+        ".github/workflows/cerebro-sales-execution-agent-inbox-v1.yml",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/registry/brand-commerce-appfactory-profile.v0.json",
+        "cerebro/registry/capability-lead-native.v1.json",
+        "cerebro/registry/cerebro-global-operational-convergence-v4.json",
+        "cerebro/registry/customer-journey-real-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/lead-real-consumer-adoption-v1.json",
+        "cerebro/registry/lead-scoring-contact-confidence-profile.v1.json",
+        "cerebro/registry/lote3-com-notif-c360-real-v1.json",
+        "cerebro/registry/mortgage-operations-real-adoption-v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/ret-ref-rep-profile.v0.json",
+        "cerebro/registry/revenue-engine-autonomy-state.v1.json",
+        "cerebro/registry/role-agent-registry.v1.json",
+        "cerebro/registry/sale-real-consumer-adoption-v1.json",
+        "cerebro/registry/sale001-agenda-commerce-profile.v0.json",
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-118-131-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-132-142-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-176-184-live-reconciliation.v3.json",
+        "cerebro/skills/cerebro-184-items-83-92-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-93-104-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-live-convergence.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/brand-commerce-appfactory-runtime-v0.test.mjs",
+        "cerebro/tests/com-delivery-router-v1.test.mjs",
+        "cerebro/tests/customer-journey-native-v1.test.mjs",
+        "cerebro/tests/customer-journey-real-adoption-v1.test.mjs",
+        "cerebro/tests/lead-nba-v1.test.mjs",
+        "cerebro/tests/lead-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/lote3-com-notif-c360-v1.test.mjs",
+        "cerebro/tests/ret-ref-rep-runtime-v0.test.mjs",
+        "cerebro/tests/role-learning-adapter-v1.test.mjs",
+        "cerebro/tests/sale-action-v1.test.mjs",
+        "cerebro/tests/sale-native-v1.test.mjs",
+        "cerebro/tests/sale001-agenda-commerce-runtime-v0.test.mjs",
+        "cerebro/tests/sales-execution-agent-inbox-v1.test.mjs",
+        "cerebro/tests/voice001-outreach-runtime-v0.test.mjs"
+      ]
+    },
+    "SEO-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "28_MACROFRENTES.md",
+        "cerebro/README.md",
+        "cerebro/changes/2026-10-29/SEO001_B2C_AUDIT_TRAFFIC_DECISION.md",
+        "cerebro/changes/2026-10-29/SEO001_PREPROD_STATE_AWARE_DISPATCH_V1.md",
+        "cerebro/docs/ACTGW_SEO001_PREPROD_BINDING_V1.md",
+        "cerebro/docs/CAP_NATIVE_V1_RUNBOOK.md",
+        "cerebro/docs/CAP_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CEREBRO_FIRST_REAL_LOW_RISK_DOMAIN_AUTO001_V0_2026-10-09.md",
+        "cerebro/docs/CEREBRO_OWNER_EXECUTOR_CAPABILITY_AUDIT_V0_2026-10-11.md",
+        "cerebro/docs/CEREBRO_PHASE13_MARKETING_SEO_BLOCKS_152_161_V0_2026-10-14.md",
+        "cerebro/docs/CEREBRO_QA_AUTONOMOUS_REMEDIATION_V1_2026-10-11.md",
+        "cerebro/docs/CEREBRO_RSI_DOMAIN_POLICY_REGISTRY_V0_2026-10-09.md",
+        "cerebro/docs/CEREBRO_RSI_REAL_DOMAIN_EVIDENCE_WIRING_V0_2026-10-09.md",
+        "cerebro/docs/CEREBRO_STEP6_DOMAIN_PROMOTION_CLOSURE_V0_2026-10-09.md",
+        "cerebro/docs/CHANGELOG.md",
+        "cerebro/docs/COMPET_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/docs/CONSOLE_OWNER_DECISION_BY_EXCEPTION_V1.md",
+        "cerebro/docs/CURRENT_STATE.md",
+        "cerebro/docs/DEPENDENCY_MAP.md",
+        "cerebro/docs/PHYSICAL_ADAPTER_AUDIT_V1_RUNBOOK.md",
+        "cerebro/docs/SKILL_SUPPLY_CHAIN_V0.md",
+        "cerebro/docs/TECH_CAP_SCOUT_REAL_CONSUMER_ADOPTION_V1_RUNBOOK.md",
+        "cerebro/evidence/SKILL_AUTONOMY_PHYSICAL_BRANCH_ACCEPTANCE_V1_2026-10-14.json",
+        "cerebro/evidence/phase13-marketing-seo-blocks-152-161-v0.json",
+        "cerebro/evidence/phase2-existing-bindings-audit.json",
+        "docs/CEREBRO_CANVA001_RUNBOOK_V1_2026-10-24.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/changes/2026-10-29/seo001_dispatch_infrastructure_autopilot_preprod_state_aware_v1.sql",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/integrations/canva/canva-capability-router-v1.test.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "supabase/functions/cerebro-actgw-seo001-preprod/index.ts",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "supabase/functions/cerebro-console-gateway-v0/index.ts",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "supabase/migrations/20260930111700_seo001_preprod_activation_prerequisites.sql",
+          "reason": "path_identity"
+        },
+        {
+          "path": "supabase/migrations/20260930111800_cerebro_actgw_seo001_province_activation_v1.sql",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/changes/2026-10-29/seo001_dispatch_infrastructure_autopilot_preprod_state_aware_v1.sql",
+        "cerebro/integrations/canva/canva-capability-router-v1.mjs",
+        "cerebro/integrations/canva/canva-capability-router-v1.test.mjs",
+        "cerebro/marketing/phase13-marketing-seo-feedback-runtime-v0.mjs",
+        "cerebro/qa/improvement-scout.mjs",
+        "cerebro/qa/quality-delta.mjs",
+        "cerebro/qa/source-mapping-bridge-v0.mjs",
+        "cerebro/runtime/cap-native-v1.mjs",
+        "cerebro/runtime/cap-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/compet-real-consumer-adoption-v1.mjs",
+        "cerebro/runtime/step6-domain-promotion-closure.mjs",
+        "cerebro/runtime/technology-capability-scout-real-consumer-adoption-v1.mjs",
+        "supabase/functions/cerebro-actgw-seo001-preprod/index.ts",
+        "supabase/functions/cerebro-console-gateway-v0/index.ts",
+        "supabase/migrations/20260930111700_seo001_preprod_activation_prerequisites.sql",
+        "supabase/migrations/20260930111800_cerebro_actgw_seo001_province_activation_v1.sql",
+        "supabase/migrations/20260930124000_cerebro_actgw_preprod_security.sql"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/app-restoration-build.yml",
+        ".github/workflows/cerebro-cap-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-compet-full-e2e-real-v1.yml",
+        ".github/workflows/cerebro-first-real-domain-auto001-v0.yml",
+        ".github/workflows/cerebro-rsi-domain-policy-registry-v0.yml",
+        ".github/workflows/cerebro-rsi-real-domain-evidence-wiring-v0.yml",
+        ".github/workflows/cerebro-skill-autonomy-physical-branch-acceptance-v1.yml",
+        ".github/workflows/cerebro-tech-scout-full-e2e-real-v1.yml",
+        "cerebro/contracts/creative-output-pipeline-v1.contract.json",
+        "cerebro/host/windows/Test-CerebroLrn001Host.ps1",
+        "cerebro/integrations/canva/canva-capability-bindings.v1.json",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/missions/generate-all-engine-skeletons-v1.mjs",
+        "cerebro/qa/continuous-human-qa.contract.v0.json",
+        "cerebro/registry/cap-real-consumer-adoption-v1.json",
+        "cerebro/registry/capability-cap-native.v1.json",
+        "cerebro/registry/capability-compet-native.v1.json",
+        "cerebro/registry/compet-real-consumer-adoption-v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/existing-engine-bindings.json",
+        "cerebro/registry/legacy184-current-evidence-overlay.v1.json",
+        "cerebro/registry/native-capability-operational-adoption-v1.json",
+        "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+        "cerebro/registry/physical-adapter-audit-v1.json",
+        "cerebro/registry/rsi-domain-autonomy-policies.v0.json",
+        "cerebro/registry/rsi-domain-evidence-sources.v0.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/step6-domain-promotion-dispositions.v0.json",
+        "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json",
+        "cerebro/runtime/fixtures/universal-learning-signal-selfcheck.v0.json",
+        "cerebro/runtime/owner-executor-capability-registry.v0.json",
+        "cerebro/skills/cerebro-184-items-152-161-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-live-convergence.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/browser-transversal-autonomy-v1.test.mjs",
+        "cerebro/tests/browser1-action-gateway-binding-v1.test.mjs",
+        "cerebro/tests/browser1-prod-observe-canary-v1.test.mjs",
+        "cerebro/tests/cap-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/cerebro-184-items-132-184-live-reconciliation-v2.test.mjs",
+        "cerebro/tests/compet-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/creative-output-pipeline-v1.test.mjs",
+        "cerebro/tests/evaluation-tribunal.test.mjs",
+        "cerebro/tests/evt001-native-v1.test.mjs",
+        "cerebro/tests/experiment-pipeline.test.mjs",
+        "cerebro/tests/factory-supervisor-improvement.test.mjs",
+        "cerebro/tests/improvement-candidate-factory.test.mjs",
+        "cerebro/tests/knowledge-obsolescence.test.mjs",
+        "cerebro/tests/learning-pipeline.test.mjs",
+        "cerebro/tests/lrn001-autonomous-continuation-v1.test.mjs",
+        "cerebro/tests/multi-company-learning.test.mjs",
+        "cerebro/tests/observability-audit-finops-persistent.test.mjs",
+        "cerebro/tests/phase13-marketing-seo-feedback-runtime-v0.test.mjs",
+        "cerebro/tests/phase2-evidence-audit.test.mjs",
+        "cerebro/tests/promotion-pipeline.test.mjs",
+        "cerebro/tests/qa-improvement-scout-v0.test.mjs",
+        "cerebro/tests/role-learning-adapter-v1.test.mjs",
+        "cerebro/tests/rsi-continuous-evolution-end-to-end-certification.test.mjs",
+        "cerebro/tests/rsi-domain-autonomy-policy.test.mjs",
+        "cerebro/tests/rsi-domain-policy-registry.test.mjs",
+        "cerebro/tests/rsi-event-outbox.test.mjs",
+        "cerebro/tests/rsi-learning-auto-host.test.mjs",
+        "cerebro/tests/rsi-learning-host.test.mjs",
+        "cerebro/tests/rsi-learning-worker.test.mjs",
+        "cerebro/tests/rsi-old-new-evaluation-tribunal-gate.test.mjs",
+        "cerebro/tests/rsi-preprod-adoption-monitoring-loop.test.mjs",
+        "cerebro/tests/rsi-real-domain-evidence-wiring.test.mjs",
+        "cerebro/tests/rsi-recovery-e2e.test.mjs",
+        "cerebro/tests/runtime.test.mjs",
+        "cerebro/tests/skill-autoloop-autonomy-decision.test.mjs",
+        "cerebro/tests/skill-autoloop-safe-handler.test.mjs",
+        "cerebro/tests/skill-autonomy-action-application-v1.test.mjs",
+        "cerebro/tests/skill-autonomy-safe-action-worker-v1.test.mjs",
+        "cerebro/tests/skill-capability-autonomy-closure-v1.test.mjs",
+        "cerebro/tests/skill-capability-evolution-bridge.test.mjs",
+        "cerebro/tests/skill-overlap-analyzer.test.mjs",
+        "cerebro/tests/step6-domain-promotion-closure-v0.test.mjs",
+        "cerebro/tests/technology-capability-scout-real-consumer-adoption-v1.test.mjs",
+        "cerebro/tests/universal-skill-activation-planner-v1.test.mjs",
+        "cerebro/tests/universal-skill-semantic-contracts-v1.test.mjs",
+        "tests/cerebro-operativa-e2e.spec.ts"
+      ]
+    },
+    "VOICE-001": {
+      "classification": "PHYSICAL_EXISTING",
+      "do_not_overwrite": true,
+      "documentation_references": [
+        "cerebro/docs/CEREBRO_VOICE001_BLOCKS_105_117_V0_2026-10-14.md",
+        "cerebro/docs/CONSOLE_CHANGELOG.md",
+        "cerebro/docs/CURRENT_STATE.md",
+        "cerebro/docs/DEPENDENCY_MAP.md",
+        "cerebro/docs/HCI001_MOTION001_HUMAN_EXPERIENCE_V0.md",
+        "cerebro/docs/VOICE_EXPERIENCE_LAB_V0_2026-10-10.md",
+        "cerebro/evidence/lote3-decision-gate-2026-10-17.json",
+        "cerebro/evidence/voice001-blocks-105-117-v0.json",
+        "cerebro/human-intelligence/CEREBRO_KNOWLEDGE_CONVERGENCE_V1_2026-10-14.md",
+        "cerebro/human-intelligence/FULL_OWNER_100_V1.md",
+        "cerebro/human-intelligence/PROD_GRADUAL_PROMOTION_AUTHORIZATION_2026-10-13.md",
+        "cerebro/human-intelligence/README.md",
+        "cerebro/voice/README.md",
+        "cerebro/voice/REFERENCE_CAPTURE_AND_QA_ES_ES_V0.md",
+        "cerebro/voice/VOICE_CLONING_CONSENT_POLICY_V0.md",
+        "cerebro/voice/VOICE_UI_PROD_RUNBOOK_V1.md",
+        "cerebro/voice/capture/README.md",
+        "cerebro/voice/runtime/PHYSICAL_LAB_V0.md",
+        "cerebro/voice/runtime/RUNBOOK.md",
+        "docs/CEREBRO_EXPLICIT_LEARNING_V1_IMPLEMENTATION_2026-10-01.md",
+        "docs/CEREBRO_VOICE_001_DEPLOY_V1_1_2026-10-01.md",
+        "docs/CEREBRO_VOICE_001_RELEASE_2026-10-01.md",
+        "docs/CEREBRO_VOICE_CHARACTER_EXPLICIT_LEARNING_V1_2026-10-01.md"
+      ],
+      "physical_evidence": [
+        {
+          "path": "cerebro/voice/runtime/app.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/backend_model_smoke.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/model_weight_smoke.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/physical_lab_benchmark.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/physical_lab_probe.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/register_voice_reference.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/validate_reference_audio.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/runtime/verify_backend_provenance.py",
+          "reason": "engine_identity"
+        },
+        {
+          "path": "cerebro/voice/voice001-outreach-runtime-v0.mjs",
+          "reason": "engine_identity"
+        }
+      ],
+      "runtime_references": [
+        "cerebro/human-intelligence/integration/conversation-learning-convergence-v1.mjs",
+        "cerebro/voice/runtime/app.py",
+        "cerebro/voice/runtime/backend_model_smoke.py",
+        "cerebro/voice/runtime/model_weight_smoke.py",
+        "cerebro/voice/runtime/physical_lab_benchmark.py",
+        "cerebro/voice/runtime/physical_lab_probe.py",
+        "cerebro/voice/runtime/register_voice_reference.py",
+        "cerebro/voice/runtime/validate_reference_audio.py",
+        "cerebro/voice/runtime/verify_backend_provenance.py",
+        "cerebro/voice/voice001-outreach-runtime-v0.mjs",
+        "src/AnaVoiceQueryBlock.tsx",
+        "supabase/functions/_shared/cerebro-channel-access-policy-v1.ts",
+        "supabase/functions/_shared/cerebro-conversation-policy-v1.ts",
+        "supabase/functions/cerebro-telegram-voice-v1/index.ts"
+      ],
+      "scaffold_references": [],
+      "support_references": [
+        ".github/workflows/cerebro-human-language-synthetic-lab-v1.yml",
+        ".github/workflows/cerebro-multichannel-conversation-unification-v1.yml",
+        ".github/workflows/cerebro-owned-voice-preprod.yml",
+        ".github/workflows/cerebro-voice-model-weight-smoke.yml",
+        ".github/workflows/cerebro-voice-physical-lab-preprod.yml",
+        ".github/workflows/cerebro-voice-reference-capture-preprod.yml",
+        ".github/workflows/cerebro-voice-v3-model-smoke.yml",
+        ".github/workflows/cerebro-voice-windows-install-smoke.yml",
+        ".github/workflows/cerebro-voice001-outreach-v0.yml",
+        "cerebro/factory/requests/voice001-quality-lab.v0.json",
+        "cerebro/human-intelligence/contracts/human-interaction-contracts.v1.json",
+        "cerebro/human-intelligence/knowledge/knowledge-surface-map.v1.json",
+        "cerebro/jarvis/boost-001/audit-queue.v1.json",
+        "cerebro/jarvis/boost-001/boost-manifest.v1.json",
+        "cerebro/media-studio/v2/tests/physical-benchmark-harness.test.mjs",
+        "cerebro/missions/audit-priority-l345-v1.mjs",
+        "cerebro/multichannel/channel-registry.v1.json",
+        "cerebro/registry/cerebro-compounding-evolution-policy.v1.json",
+        "cerebro/registry/engine-registry.seed.json",
+        "cerebro/registry/engine-registry.v1.json",
+        "cerebro/registry/hci-motion-engine-contracts.v0.json",
+        "cerebro/registry/legacy184-current-evidence-overlay.v1.json",
+        "cerebro/registry/physical-adapter-audit-v1.json",
+        "cerebro/registry/skill-priority-portfolio-v1.json",
+        "cerebro/registry/voice001-outreach-profile.v0.json",
+        "cerebro/skills/cerebro-184-items-105-117-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-items-93-104-live-reconciliation.v2.json",
+        "cerebro/skills/cerebro-184-live-convergence.v2.json",
+        "cerebro/skills/internal-capability-signals.v0.json",
+        "cerebro/tests/multichannel-conversation-policy-v1.test.mjs",
+        "cerebro/tests/owned-voice-v0.test.mjs",
+        "cerebro/tests/p0-operational-capability-pack-v1.test.mjs",
+        "cerebro/tests/skill-priority-human-language-digital-build-v1.test.mjs",
+        "cerebro/tests/voice-v3-backend-v0.test.mjs",
+        "cerebro/tests/voice001-outreach-runtime-v0.test.mjs",
+        "cerebro/voice/capture/voice-capture.html",
+        "cerebro/voice/channel-registry.v1.json",
+        "cerebro/voice/runtime/windows/Install-VoiceLab.ps1",
+        "cerebro/voice/runtime/windows/Open-VoiceCapture.ps1",
+        "cerebro/voice/runtime/windows/Register-And-Benchmark-Voice.ps1",
+        "cerebro/voice/runtime/windows/Start-VoiceLab.ps1",
+        "cerebro/voice/voice-bank.v0.json",
+        "tests/voice-ui-ana-console.spec.ts"
+      ]
+    }
+  },
+  "environment": "LAB_PREPROD",
+  "factory_mutated": false,
+  "layer": "L3",
+  "mission": "IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION",
+  "nonphysical_engine_ids": [
+    "NOTIF-001",
+    "C360-001",
+    "CMP-001"
+  ],
+  "p23": "POR_AUDITAR",
+  "phase": "L3_BASELINE_OLD",
+  "physical_before": 13,
+  "physical_engine_ids": [
+    "MKT-001",
+    "SEO-001",
+    "CAP-001",
+    "LEAD-001",
+    "SALE-001",
+    "COM-001",
+    "VOICE-001",
+    "CX-001",
+    "RET-001",
+    "POST-001",
+    "REF-001",
+    "REP-001",
+    "COMPET-001"
+  ],
+  "prod_touched": false,
+  "registry_mutated": false,
+  "registry_total": 179,
+  "registry_unique": 179,
+  "schema_version": "1.0.0",
+  "source_hashes": {
+    "factory": "a10801a5be61dd754d1c88cf3925244aeadfa09f84b5bb36ed9dedc43407df73",
+    "factory_v1": "0720f8d29a04d80403be654b929caf234a80a0f64c877a9e5c39f09780ce7c5b",
+    "registry": "a7dde61d3ee4e46ccc5cf697bc44867ac1e22a6a391dac55fea20b95c1b89f2f"
+  },
+  "status": "GREEN",
+  "total": 16,
+  "trading_touched": false
+}

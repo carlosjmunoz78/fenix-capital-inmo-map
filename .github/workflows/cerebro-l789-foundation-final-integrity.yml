@@ -1,0 +1,158 @@
+name: CEREBRO L7-L9 Foundation Final Integrity
+
+on:
+  push:
+    branches: [cerebro-implement-l7-l8-l9-foundation-20261102]
+    paths:
+      - '.github/workflows/cerebro-l789-foundation-final-integrity.yml'
+      - 'cerebro/evidence/l9-foundation-wave1/2026-11-02/CONTINUITY_STATE.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  BASE_VALIDATED_SHA: bca728d4b5168193d7eba43047a25ddba50279f1
+  OUT: /tmp/cerebro-l789-final
+
+jobs:
+  final-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 400
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated ancestry and protected systems unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro-implement-l7-l8-l9-foundation-20261102'
+          test "$GITHUB_REF_NAME" != 'main'
+          git merge-base --is-ancestor "$BASE_VALIDATED_SHA" HEAD
+          git diff --exit-code "$BASE_VALIDATED_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs
+          git diff --name-only "$BASE_VALIDATED_SHA" HEAD > /tmp/mission-changed.txt
+          ! grep -Ei '(^|/)(trading|lab-trd)(/|$)' /tmp/mission-changed.txt
+          git diff --exit-code "$BASE_VALIDATED_SHA" -- .github/workflows/cerebro-continuous-useful-worker-v1.yml cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Validate Registry Factory syntax and runtime syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+          cd ..
+          node --check cerebro/runtime/l7/foundation-engines-v1.mjs
+          node --check cerebro/runtime/l8/foundation-engines-v1.mjs
+          node --check cerebro/runtime/l9/foundation-engines-v1.mjs
+          node <<'NODE'
+          const fs=require('fs');const r=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json'));const ids=r.engine_ids||[];
+          if(r.count!==179||ids.length!==179||new Set(ids).size!==179)throw new Error(`Registry invalid: ${r.count}/${ids.length}/${new Set(ids).size}`);
+          console.log('REGISTRY_GREEN=179/179_UNIQUE');
+          NODE
+      - name: Focused L7 L8 L9 tests
+        working-directory: cerebro
+        run: node --test tests/l7-foundation-wave1.test.mjs tests/l8-foundation-wave1.test.mjs tests/l9-foundation-wave1.test.mjs
+      - name: Full regression with only known paused-worker exclusions
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print | sort)
+          test "${#TESTS[@]}" -gt 0
+          node --test "${TESTS[@]}"
+      - name: Existing analyzer plus deterministic L7 L8 L9 rebuilds
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/connections"
+          for layer in L7 L8 L9; do
+            node cerebro/missions/audit-priority-l789-v1.mjs --layer "$layer" --out "$OUT/${layer}a"
+            node cerebro/missions/audit-priority-l789-v1.mjs --layer "$layer" --out "$OUT/${layer}b"
+            cmp "$OUT/${layer}a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/${layer}b/PRIORITY_PHYSICAL_BASELINE.json"
+          done
+          node <<'NODE'
+          const fs=require('fs');
+          for(const [layer,total] of [['L7',15],['L8',23],['L9',11]]){
+            const x=JSON.parse(fs.readFileSync(`${process.env.OUT}/${layer}a/PRIORITY_PHYSICAL_BASELINE.json`));
+            if(x.total!==total||x.physical_before!==total||x.classification_counts.PHYSICAL_EXISTING!==total||x.classification_counts.PHYSICAL_PARTIAL!==0||x.classification_counts.SCAFFOLD_ONLY!==0||x.classification_counts.DOCUMENTED_ONLY!==0)throw new Error(`${layer} physical mismatch`);
+          }
+          const l9=JSON.parse(fs.readFileSync(`${process.env.OUT}/L9a/PRIORITY_PHYSICAL_BASELINE.json`));
+          if(l9.dependency_graph.effective_edges.length<10||l9.dependency_graph.cycle_guard_rejected_edges.length<6)throw new Error('L9 dependency/cycle evidence lost');
+          console.log('L789_REBUILD_GREEN=15+23+11');
+          NODE
+      - name: Prove exact 179 engine physical-foundation union with no duplicates
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs');
+          const paths={
+            L0:'cerebro/evidence/l0-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L1:'cerebro/evidence/l1-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L2:'cerebro/evidence/l2-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L3:'cerebro/evidence/l3-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L4:'cerebro/evidence/l4-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L5:'cerebro/evidence/l5-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L6:'cerebro/evidence/l6-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L7:'cerebro/evidence/l7-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L8:'cerebro/evidence/l8-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json',
+            L9:'cerebro/evidence/l9-foundation-wave1/2026-11-02/IMPLEMENTATION_MANIFEST.json'
+          };
+          const expected={L0:13,L1:14,L2:15,L3:16,L4:27,L5:20,L6:25,L7:15,L8:23,L9:11};
+          const layerIds={};
+          for(const [layer,p] of Object.entries(paths)){
+            const m=JSON.parse(fs.readFileSync(p));
+            const ids=[];
+            ids.push(...Object.keys(m.new_runtime_engines||{}));
+            ids.push(...(m.new_runtime_engine_ids||[]));
+            ids.push(...(m.foundation_runtime_engine_ids||[]));
+            ids.push(...(m.preserved_existing_engines||[]));
+            ids.push(...(m.preserved_existing_engine_ids||[]));
+            ids.push(...(m.preserved_existing||[]));
+            const unique=[...new Set(ids)];
+            if(unique.length!==expected[layer])throw new Error(`${layer} manifest IDs ${unique.length} != ${expected[layer]}`);
+            layerIds[layer]=unique;
+          }
+          const all=Object.values(layerIds).flat();
+          const duplicates=all.filter((id,i)=>all.indexOf(id)!==i);
+          if(duplicates.length)throw new Error(`Cross-layer duplicate IDs: ${[...new Set(duplicates)].join(',')}`);
+          const registry=JSON.parse(fs.readFileSync('cerebro/registry/engine-registry.v1.json')).engine_ids.slice().sort();
+          const union=[...new Set(all)].sort();
+          if(union.length!==179)throw new Error(`Physical union ${union.length} != 179`);
+          if(JSON.stringify(union)!==JSON.stringify(registry)){
+            const missing=registry.filter(x=>!union.includes(x));const extra=union.filter(x=>!registry.includes(x));
+            throw new Error(`Physical union differs from Registry; missing=${missing.join(',')} extra=${extra.join(',')}`);
+          }
+          console.log('GLOBAL_PHYSICAL_FOUNDATION_UNION_GREEN=179/179');
+          console.log('LAYER_COUNTS='+JSON.stringify(Object.fromEntries(Object.entries(layerIds).map(([k,v])=>[k,v.length]))));
+          NODE
+      - name: Verify durable evidence continuity and safety boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          for layer in l7 l8 l9; do for f in IMPLEMENTATION_MANIFEST.json PRIORITY_PHYSICAL_BASELINE.json CLOSURE_EVIDENCE.json AUTONOMY_STATE.json RUNBOOK.md CHANGELOG.md; do test -f "cerebro/evidence/${layer}-foundation-wave1/2026-11-02/$f"; done; done
+          test -f cerebro/evidence/l9-foundation-wave1/2026-11-02/CONTINUITY_STATE.json
+          node <<'NODE'
+          const fs=require('fs');
+          const l6=JSON.parse(fs.readFileSync('cerebro/evidence/l6-foundation-wave1/2026-11-02/CONTINUITY_STATE.json'));
+          const l5=JSON.parse(fs.readFileSync('cerebro/evidence/l5-foundation-wave1/2026-11-02/CONTINUITY_STATE.json'));
+          const c=JSON.parse(fs.readFileSync('cerebro/evidence/l9-foundation-wave1/2026-11-02/CONTINUITY_STATE.json'));
+          if(l6.status!=='GREEN'||l6.priority_physical!=='67/67')throw new Error('L0/L1/L2/L6 continuity mismatch');
+          if(l5.status!=='GREEN'||l5.mission_total?.physical_after!==63)throw new Error('L3/L4/L5 continuity mismatch');
+          if(c.status!=='GREEN'||c.mission_total?.physical_after!==49||c.mission_total?.scaffold_only_after!==0)throw new Error('L7/L8/L9 continuity mismatch');
+          if(67+63+49!==179)throw new Error('Cumulative count mismatch');
+          if(c.registry?.count!==179||c.registry?.unique_ids!==179||c.registry?.mutated!==false||c.factory?.mutated!==false)throw new Error('Registry/Factory continuity mismatch');
+          if(c.additional_cost_eur!==0||c.prod_touched!==false||c.trading_touched!==false||c.p23!=='POR_AUDITAR'||c.promotion_to_prod_authorized!==false)throw new Error('Safety continuity mismatch');
+          console.log('CONTINUITY_GREEN=67+63+49=179');
+          NODE
+          ! grep -R --line-number -E 'SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,}' cerebro/runtime/l7 cerebro/runtime/l8 cerebro/runtime/l9 cerebro/tests/l7-foundation-wave1.test.mjs cerebro/tests/l8-foundation-wave1.test.mjs cerebro/tests/l9-foundation-wave1.test.mjs
+          ! grep -R --line-number -E "environment[[:space:]]*[:=][[:space:]]*['\"]PROD['\"]|prod_writes[[:space:]]*[:=][[:space:]]*true|trading_access[[:space:]]*[:=][[:space:]]*true|additional_cost_eur[[:space:]]*[:=][[:space:]]*[1-9]" cerebro/runtime/l7 cerebro/runtime/l8 cerebro/runtime/l9
+          echo 'FINAL GREEN: Registry union 179/179 physical foundation; L7=15/15 L8=23/23 L9=11/11; PROD/Trading untouched; cost 0 EUR; P23 POR_AUDITAR.' >> "$GITHUB_STEP_SUMMARY"

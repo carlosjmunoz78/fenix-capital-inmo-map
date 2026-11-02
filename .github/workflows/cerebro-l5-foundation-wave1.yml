@@ -1,0 +1,87 @@
+name: CEREBRO L5 Foundation Wave1
+
+on:
+  push:
+    branches: [cerebro-implement-l3-l4-l5-foundation-20261102]
+    paths:
+      - 'cerebro/runtime/l5/**'
+      - 'cerebro/tests/l5-foundation-wave1.test.mjs'
+      - '.github/workflows/cerebro-l5-foundation-wave1.yml'
+      - 'cerebro/missions/audit-priority-l345-v1.mjs'
+      - 'cerebro/missions/connect-existing-engines-v3.mjs'
+      - 'cerebro/registry/engine-registry.v1.json'
+      - 'cerebro/factory.mjs'
+      - 'cerebro/factory-v1.mjs'
+  workflow_dispatch:
+permissions:
+  contents: write
+env:
+  BASE_L4_SHA: 57d220724c1b71250fd1474a22b6c51d08789363
+  OUT: /tmp/cerebro-l5-foundation-wave1
+jobs:
+  validate-l5-foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 200
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert isolated LAB PREPROD branch and L4 closure
+        shell: bash
+        run: |
+          set -euo pipefail;test "$GITHUB_REF_NAME" = 'cerebro-implement-l3-l4-l5-foundation-20261102';test "$GITHUB_REF_NAME" != 'main';git cat-file -e "$BASE_L4_SHA^{commit}";node -e "const x=require('./cerebro/evidence/l4-foundation-wave1/2026-11-02/CLOSURE_EVIDENCE.json');if(x.status!=='GREEN'||x.l4?.physical_after!==27)process.exit(1)"
+      - name: Install repository-declared dependencies only
+        run: npm ci --ignore-scripts
+      - name: Syntax Registry Factory and L5
+        shell: bash
+        run: |
+          set -euo pipefail;while IFS= read -r f;do node --check "$f";done < <(find cerebro/runtime/l5 -maxdepth 1 -name '*.mjs' -print|sort);node --check cerebro/tests/l5-foundation-wave1.test.mjs;cd cerebro;npm run validate;node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: L5 focused acceptance
+        working-directory: cerebro
+        run: node --test tests/l5-foundation-wave1.test.mjs
+      - name: Full CEREBRO regression preserving paused worker baseline
+        working-directory: cerebro
+        shell: bash
+        run: |
+          set -euo pipefail;mapfile -t TESTS < <(find tests -maxdepth 1 -name '*.test.mjs' ! -name 'continuous-worker-entitlement-drain-canary-v1.test.mjs' ! -name 'continuous-worker-job001-control-plane-binding-v1.test.mjs' -print|sort);node --test "${TESTS[@]}";git diff --exit-code "$BASE_L4_SHA" -- .github/workflows/cerebro-continuous-useful-worker-v1.yml cerebro/tests/continuous-worker-entitlement-drain-canary-v1.test.mjs cerebro/tests/continuous-worker-job001-control-plane-binding-v1.test.mjs
+      - name: Analyzer and deterministic L5 rebuild
+        shell: bash
+        run: |
+          set -euo pipefail;node cerebro/missions/connect-existing-engines-v3.mjs --out "$OUT/existing-priority";node cerebro/missions/audit-priority-l345-v1.mjs --layer L5 --out "$OUT/l5a";node cerebro/missions/audit-priority-l345-v1.mjs --layer L5 --out "$OUT/l5b";cmp "$OUT/l5a/PRIORITY_PHYSICAL_BASELINE.json" "$OUT/l5b/PRIORITY_PHYSICAL_BASELINE.json"
+      - name: Verify OLD vs NEW 20 of 20
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),d='cerebro/evidence/l5-foundation-wave1/2026-11-02';const old=JSON.parse(fs.readFileSync(path.join(d,'PRIORITY_PHYSICAL_BASELINE.json'))),s=JSON.parse(fs.readFileSync(path.join(d,'BASELINE_CLASSIFICATION_SUMMARY.json'))),cur=JSON.parse(fs.readFileSync(path.join(process.env.OUT,'l5a','PRIORITY_PHYSICAL_BASELINE.json')));const added=[...(s.groups.PHYSICAL_PARTIAL||[]),...(s.groups.DOCUMENTED_ONLY||[])].sort(),preserved=(s.groups.PHYSICAL_EXISTING||[]).sort();if(old.physical_before!==1||added.length!==19||preserved.length!==1)throw new Error('Unexpected L5 OLD baseline');if(cur.physical_before!==20||cur.classification_counts.PHYSICAL_EXISTING!==20)throw new Error(`Expected L5 20/20, got ${cur.physical_before}`);for(const id of added)if(!cur.engines[id].physical_evidence.some(x=>x.path.startsWith('cerebro/runtime/l5/')))throw new Error(`Missing L5 foundation ${id}`);for(const id of preserved)if(cur.engines[id].physical_evidence.every(x=>x.path.startsWith('cerebro/runtime/l5/')))throw new Error(`Existing L5 implementation replaced ${id}`);console.log(JSON.stringify({physical_before:1,physical_after:20,added,preserved,effective_edges:cur.dependency_graph.effective_edges.length,cycle_rejected:cur.dependency_graph.cycle_guard_rejected_edges.length}));
+          NODE
+      - name: Prove Registry Factory PROD Trading boundaries unchanged
+        shell: bash
+        run: |
+          set -euo pipefail;git diff --exit-code "$BASE_L4_SHA" -- cerebro/registry/engine-registry.v1.json cerebro/factory.mjs cerebro/factory-v1.mjs;! grep -R --line-number -E 'LAB-TRD|trading[_-]?secret|SUPABASE_SERVICE_ROLE_KEY|BEGIN (RSA|OPENSSH) PRIVATE KEY' cerebro/runtime/l5 cerebro/tests/l5-foundation-wave1.test.mjs
+      - name: Persist L5 closure and global continuity
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('fs'),path=require('path'),d='cerebro/evidence/l5-foundation-wave1/2026-11-02',s=JSON.parse(fs.readFileSync(path.join(d,'BASELINE_CLASSIFICATION_SUMMARY.json'))),cur=JSON.parse(fs.readFileSync(path.join(process.env.OUT,'l5a','PRIORITY_PHYSICAL_BASELINE.json')), 'utf8');
+          const created=[...(s.groups.PHYSICAL_PARTIAL||[]),...(s.groups.DOCUMENTED_ONLY||[])].sort(),preserved=(s.groups.PHYSICAL_EXISTING||[]).sort();const common={schema_version:'1.0.0',mission:'IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION',wave:'L5_FOUNDATION',status:'GREEN',environment:'LAB_PREPROD',validated_source_sha:process.env.GITHUB_SHA,workflow_run_id:Number(process.env.GITHUB_RUN_ID),registry_total:179,l5:{total:20,physical_before:1,physical_after:20,new_runtime_count:19,preserved_existing_count:1,scaffold_only_after:0},new_runtime_engine_ids:created,preserved_existing_engine_ids:preserved,dependency_graph:{effective_edges:cur.dependency_graph.effective_edges.length,cycle_guard_rejected_edges:cur.dependency_graph.cycle_guard_rejected_edges.length},rebuild:'GREEN',additional_cost_eur:0,prod_touched:false,trading_touched:false,registry_mutated:false,factory_mutated:false,human_required:false,p23:'POR_AUDITAR',qualification:'20/20 means physical foundation runtime or preserved physical implementation; it does not authorize hiring/firing, legal acts, tax filing, signatures, invoice issuance, collections, treasury movements, accounting posting or purchases in PROD.'};
+          fs.writeFileSync(path.join(d,'IMPLEMENTATION_MANIFEST.json'),JSON.stringify({...common,implementation_rule:'Preserve FINOPS-001; WRAP_PRESERVE four partial engines; deterministic fail-closed foundation for fifteen documented-only engines.',network_execution:false,prod_writes:false,promotion_authorized:false},null,2)+'\n');fs.writeFileSync(path.join(d,'CLOSURE_EVIDENCE.json'),JSON.stringify(common,null,2)+'\n');fs.writeFileSync(path.join(d,'AUTONOMY_STATE.json'),JSON.stringify({status:'FOUNDATION_ONLY',layer:'L5',environment:'LAB_PREPROD',prod_autonomy:false,external_side_effects:false,sensitive_domains:['HR','legal','tax','compliance','privacy','consent','invoicing','collections','treasury','accounting','procurement','vendor_contracts'],policy:'preview/advisory/preparatory only; binding or high-risk actions fail closed'},null,2)+'\n');fs.writeFileSync(path.join(d,'RUNBOOK.md'),`# CEREBRO L5 Foundation Wave1\n\n## Estado\nL5 20/20 físico en LAB/PREPROD. OLD 1 físico + 4 parciales + 15 documentados. FINOPS-001 se conserva intacto; 4 parciales se envuelven; 15 reciben foundation.\n\n## Límites\nNo contrata/despide, firma, presenta impuestos, emite facturas reales, ejecuta cobros/pagos/transferencias, contabiliza en libros ni compra. Esas acciones fallan cerradas mediante HUMAN_REQUIRED.\n\n## Rollback\nEliminar solo cerebro/runtime/l5/, test y workflow L5. FINOPS-001 y cualquier runtime previo permanecen.\n\n## Promoción\nNo autorizada. PROD y Trading intactos.\n`);fs.writeFileSync(path.join(d,'CHANGELOG.md'),`# Changelog L5 Foundation Wave1\n\n- Baseline OLD: 1/20 físico; 4 parciales; 15 documentados.\n- Preservado: ${preserved.join(', ')}.\n- Foundation/wrappers: ${created.join(', ')}.\n- Resultado gate: 20/20 físicos; coste adicional 0 €.\n`);
+          const l3=JSON.parse(fs.readFileSync('cerebro/evidence/l3-foundation-wave1/2026-11-02/CLOSURE_EVIDENCE.json')),l4=JSON.parse(fs.readFileSync('cerebro/evidence/l4-foundation-wave1/2026-11-02/CLOSURE_EVIDENCE.json'));
+          const continuity={schema_version:'1.0.0',mission:'IMPLEMENT_PRIORITY_ENGINES_L3_L4_L5_FOUNDATION',status:'GREEN',branch:'cerebro-implement-l3-l4-l5-foundation-20261102',validated_source_sha:process.env.GITHUB_SHA,workflow_run_id:Number(process.env.GITHUB_RUN_ID),layers:{L3:{physical_before:l3.l3.physical_before,physical_after:l3.l3.physical_after,new_runtime_count:l3.l3.new_runtime_count,preserved_existing_count:l3.l3.preserved_existing_count,validated_source_sha:l3.validated_source_sha,workflow_run_id:l3.workflow_run_id},L4:{physical_before:l4.l4.physical_before,physical_after:l4.l4.physical_after,new_runtime_count:l4.l4.new_runtime_count,preserved_existing_count:l4.l4.preserved_existing_count,validated_source_sha:l4.validated_source_sha,workflow_run_id:l4.workflow_run_id},L5:{physical_before:1,physical_after:20,new_runtime_count:19,preserved_existing_count:1,validated_source_sha:process.env.GITHUB_SHA,workflow_run_id:Number(process.env.GITHUB_RUN_ID)}},mission_total:{engines:63,physical_before:l3.l3.physical_before+l4.l4.physical_before+1,physical_after:63,new_runtime_count:l3.l3.new_runtime_count+l4.l4.new_runtime_count+19,preserved_existing_count:l3.l3.preserved_existing_count+l4.l4.preserved_existing_count+1,scaffold_only_after:0},registry:{count:179,unique_ids:179,mutated:false},factory:{mutated:false},regression:'GREEN_NO_NEW_FAILURES',analyzer:'GREEN',dependency_graph:'AUDITED_PER_LAYER_WITH_CYCLE_GUARD',rebuild:'GREEN',backup:'DURABLE_GIT_BASELINES_AND_EVIDENCE',rollback:'DOCUMENTED_PER_LAYER',additional_cost_eur:0,prod_touched:false,trading_touched:false,human_required:false,p23:'POR_AUDITAR',continuous_worker:'INTENTIONALLY_PAUSED_BASELINE_PRESERVED',promotion_to_prod_authorized:false,next_block:'L7_FOUNDATION_AUDIT_THEN_L8_THEN_L9_UNLESS_GRAPH_PROVES_PRIOR_DEPENDENCY',note:'Evidence commits after validated_source_sha are durable documentation commits and are not claimed as having passed the same workflow unless separately validated.'};fs.writeFileSync(path.join(d,'CONTINUITY_STATE.json'),JSON.stringify(continuity,null,2)+'\n');
+          NODE
+          git config user.name 'CEREBRO Foundation Evidence';git config user.email 'cerebro-foundation@users.noreply.github.com';git add cerebro/evidence/l5-foundation-wave1/2026-11-02;git commit -m 'evidence(cerebro): close L5 and L3-L5 foundation mission [skip ci]';git push origin "HEAD:${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-l5-foundation-wave1-${{ github.run_id }}-${{ github.run_attempt }}
+          path: /tmp/cerebro-l5-foundation-wave1
+          if-no-files-found: error
+          retention-days: 30
+      - name: Mission boundary
+        run: |
+          echo 'L5 foundation 20/20 physical; global L3-L5 foundation 63/63 physical.' >> "$GITHUB_STEP_SUMMARY";echo 'Registry 179 preserved; Factory preserved; PROD/Trading untouched; cost 0 EUR; P23 POR_AUDITAR.' >> "$GITHUB_STEP_SUMMARY"
