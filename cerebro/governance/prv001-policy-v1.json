@@ -1,0 +1,18 @@
+{
+  "engine_id": "PRV-001",
+  "version": "1.0.0",
+  "environment": "LAB_PREPROD",
+  "fail_closed": true,
+  "permission": "PROVENANCE_BUILD_VALIDATE_AND_ENVELOPE_ONLY",
+  "company_scope": "GLOBAL_OR_SCOPED_DENY_CROSS_COMPANY_BY_DEFAULT",
+  "required_fields": ["provenance_id", "source_type", "source_uri", "observed_at", "validated_by", "confidence", "evidence_hash"],
+  "allowed_source_types": ["DOCUMENT", "WEB", "SYSTEM", "HUMAN", "DATASET", "API", "EVENT", "OTHER"],
+  "low_confidence_threshold": 0.5,
+  "knowledge_ingress_requires_provenance": true,
+  "deny": ["PROD_WRITE", "SUPABASE_WRITE", "TRADING", "CROSS_COMPANY", "SECRET_IN_SOURCE_URI", "KNOWLEDGE_WITHOUT_PROVENANCE"],
+  "human_required_allowed": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "prod_write_authorized": false,
+  "supabase_write_authorized": false,
+  "trading_allowed": false,
+  "additional_cost_eur": 0
+}
