@@ -1,0 +1,8 @@
+/* /cerebro owns the full Jarvis surface. Keep App Fénix global launchers outside this route. */
+html[data-cerebro-console='1'] button[aria-label='Abrir chat interno'],
+html[data-cerebro-console='1'] button[aria-label='Chat interno'],
+html[data-cerebro-console='1'] [title='Chat interno']{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
