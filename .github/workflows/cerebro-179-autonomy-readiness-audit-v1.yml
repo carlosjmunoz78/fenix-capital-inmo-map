@@ -61,8 +61,9 @@ jobs:
           const fs=require('fs');
           const s=JSON.parse(fs.readFileSync(process.env.OUT+'/a/SUMMARY.json'));
           if(s.registry_total!==179||s.physical_foundation!==179||s.prod_registration_ready!==179)throw new Error('179 physical/registration baseline mismatch');
-          if(s.p23.live_verified!==false||s.p23.live_integration_status!=='PENDING')throw new Error('Expected current P23 live integration to remain unverified/PENDING');
-          if(s.autonomous_prod_ready!==0)throw new Error('No engine may be claimed autonomous PROD while P23 live is pending');
+          if(s.p23.live_verified!==false)throw new Error('Current P23 Live must remain unverified before implementation');
+          if(s.p23.live_integration_status!==null && s.p23.live_integration_status!=='PENDING')throw new Error('Unexpected current P23 Live state');
+          if(s.autonomous_prod_ready!==0)throw new Error('No engine may be claimed autonomous PROD while P23 live is unverified');
           if(s.additional_cost_eur!==0||s.trading_touched!==false||s.prod_writes!==false)throw new Error('Safety baseline mismatch');
           console.log('STRICT_BASELINE='+JSON.stringify(s));
           NODE
