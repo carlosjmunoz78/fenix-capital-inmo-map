@@ -1,0 +1,17 @@
+{
+  "schema_version":"1.0.0",
+  "state_type":"STRICT179_BATCH02_JDG001_OBSERVABILITY_EVIDENCE",
+  "status":"GREEN",
+  "tested":true,
+  "environment":"PREPROD",
+  "source_branch":"cerebro/close-179-per-engine-autonomy-v1-20261102",
+  "source_commit_sha":"3e81db27a4e97e424473b551224dd4bba82779f9",
+  "github_run_id":41472941987,
+  "github_job_id":125370995263,
+  "artifact":{"name":"strict179-batch02-41472941987-1","id":13155618095,"zip_sha256":"caca6e5211a3a219183e7a99b1f4367fb7a96f9c2d0693be6f82d1e3279bc26a"},
+  "gate":"observability",
+  "engine_id":"JDG-001",
+  "audit":{"tested":true,"status":"GREEN","audit_emitted":true,"trace_emitted":true,"metric_emitted":true,"event_type":"JDG001_TRIBUNAL_DECISION_AUDIT","metric_name":"tribunal_decision","metric_value":"PASS","evaluation_id":"cf3c1b7b10448a19caa4afe6d7fc10f88ead1c9af28ae0f65748d21f0d0a3001","decision":"PASS","reason":"predefined_metric_improved","trace_id":"6e39dee6d26ed4655b1e975b50445278"},
+  "evidence_hash":"8b1e4fe9ed97d8766abc513fb32c1ea5e2521ceb00265a3144c34579156ea577",
+  "safety":{"additional_cost_eur":0,"prod_authorized":false,"prod_write_authorized":false,"trading_access":false,"secrets_read":false,"external_writes":false,"raw_pii_persisted":false}
+}
