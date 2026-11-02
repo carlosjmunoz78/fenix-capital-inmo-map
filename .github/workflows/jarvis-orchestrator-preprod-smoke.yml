@@ -60,3 +60,5 @@ jobs:
 
       - name: Report
         run: echo 'JARVIS_ORCHESTRATOR_PREPROD_SMOKE=GREEN'
+
+# trigger: 2026-11-02 preprod physical smoke
