@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.12.0",
+  "schema_version": "1.13.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -373,7 +373,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Technical blockers remain actual permanent isolated CEREBRO host, protected PROD smoke secret references, real document/cost/data bindings and independently verified 12 per-engine gates. Safe CI green is not PROD. Continue without touching existing App/CRM or Trading.",
+  "next_block": "CONFIRMED PROD smoke credential references missing in repository UI and Production environment empty; get source keys via approved vault/admin and set in GitHub secure UI under proper scope. Continue independent PREPROD integrations, no production changes or fake keys.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -428,7 +428,7 @@
     "installation_attempted": false
   },
   "prod_live_smoke_gate": {
-    "state": "FAIL_CLOSED_REF_PROBE_VERIFIED",
+    "state": "CONFIRMED_MISSING_SECRET_REFERENCES_VISIBLE_GITHUB_UI",
     "workflow_run": 41684134057,
     "workflow": "PROD Runtime Smoke",
     "failed_step": "Assert required secret references are available",
@@ -449,6 +449,19 @@
     },
     "secret_values_exposed": false,
     "secret_values_mutated": false,
-    "diagnosis_limit": "Failure proves absence/invalid shape within this branch workflow context, not global non-existence. Could be repository/environment-scoping restrictions."
+    "diagnosis_limit": "Failure proves absence/invalid shape within this branch workflow context, not global non-existence. Could be repository/environment-scoping restrictions.",
+    "github_repository_secrets_ui_inspected": true,
+    "repository_visible_secret_names": [
+      "CEREBRO_E2E_USER_JWT"
+    ],
+    "production_environment_exists": true,
+    "production_environment_secrets_ui": "This environment has no secrets.",
+    "missing_reference_names": [
+      "PROD_SUPABASE_PUBLISHABLE_KEY",
+      "PROD_SUPABASE_LEGACY_ANON_JWT"
+    ],
+    "accessed_secret_values": false,
+    "created_or_mutated_secrets": false,
+    "required_action": "Provision verified public publishable key and legacy anonymous key only from existing Supabase secure admin, each to their intended GitHub environment/repository scope, then rerun canonical PROD smoke in authorized environment. Do not substitute user JWT or invent keys."
   }
 }
