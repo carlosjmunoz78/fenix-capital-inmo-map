@@ -11,3 +11,8 @@
 
 ## Before production activation
 Implement an encrypted server-side durable store with atomic unique `(ownerId, companyId, idempotencyKey)` constraints and CAS / leases; integrate authenticated session provider and permissions from ZEUS; map deterministic read-only capabilities to audited CEREBRO gateway; execute real cross-device and restart tests; add evidence and rollback; require security review. **Do not deploy/enable from this scaffold.**
+
+## B2 lab durability increment
+`jarvis-sqlite-store.mjs` adds an optional **local-only SQLite test adapter** based on Node 22 `node:sqlite` (currently experimental); it persists across process restart and enforces an atomic unique idempotency key for initial inserts. It **does not** establish safe cross-process concurrent CAS updates, multi-host HA, production durability, or server-authenticated cross-device sessions. Use this only in isolated LAB. The real ZEUS deployment needs a transactional persistent service and concurrency protocol.
+
+Run all tests: `node --test core/*.test.mjs`.
