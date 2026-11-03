@@ -32,3 +32,13 @@ Run all tests: `node --test core/*.test.mjs`.
 `jarvis-gateway-handler.mjs` provides a **framework-neutral Request -> Response** contract for `/v1/missions`, `/v1/missions/:id`, `/v1/missions/:id/execute` and `/v1/health`. All mission actions require bearer authentication through injected `JarvisUniversalCore`; no client sees service-role credentials. Health reports `ready:false` until a real provider and durable store are configured. Its tests exercise simulated mobile/desktop sessions, denial paths and replay.
 
 Not exposed on the internet. Before public access: trusted issuer and session verification, rate limits, body size checks beyond create endpoints, permitted origins/CORS, audit retention, scrubbed free-text payloads (V0 only redacts by sensitive *field names*), secure observability, lock/lease recovery and system integration tests.
+
+## B2 security increment 2026-11-03: ZEUS global principal
+
+`jarvis-global-identity.mjs` resolves a single global owner identity **from trusted server-bound channel issuers**. All identity mappings must come from a ZEUS registry controlled server-side (`registry.resolve`); never trust a user-supplied `ownerId`, company or role. A company's authority is the **intersection** of the channel entitlement and ZEUS binding. A revoked binding denies access. Local unit tests demonstrate the *contract* only: no live real issuer or production registry is configured.
+
+`createJarvisGatewayHandler({core,trustedAuthChannel:'fenix'})` binds the actual authentication provider from the trusted endpoint configuration, not the `channel` field in the UI payload (that field is a display/provenance label). A second device can read the same mission only if its provider authenticates an identity that ZEUS has independently bound to the same global owner.
+
+`jarvis-concurrency.test.mjs` proves an optimistic revision-aware store permits at most one competing read-only executor to start. The losing request reports a revision conflict (409 through the Gateway); retries may re-read terminal status. The existing in-memory and SQLite adapters are **LAB-only** and DO NOT offer this distributed concurrency guarantee.
+
+**Remaining mandatory gates**: real ZEUS identity binding registry and signed session validation, atomic durable store with row revision/lease and backup, authenticated cross-device E2E, crash-recovery for in-flight `AUTHORIZED` missions, explicit safe capability routing via CEREBRO, rollback test, security review. Never serve the LAB handler openly. No migration has been executed; no traffic has been switched from the current frontend/orchestrator.
