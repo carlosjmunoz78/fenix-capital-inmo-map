@@ -1,0 +1,59 @@
+name: CEREBRO Final 179 Classification V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/governance/final-179-classification-2026-11-03.json'
+      - '.github/workflows/cerebro-final-179-classification-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env: {OUT: /tmp/cerebro-final-179-classification}
+jobs:
+  final-179-classification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate registry and factory without mutation
+        run: cd cerebro && npm run validate && node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Rebuild all 169 readiness-certified engines
+        run: |
+          set -euo pipefail
+          for m in close-orch-hex-autonomy-v1 close-batch07-iam001-v1 close-batch07-job-route-v1 close-batch07-observ001-v1 close-batch07-evt001-v1 close-batch07-qa001-v1 close-batch07-cmd001-v1 close-batch07-chat001-v1 close-batch07-ctx001-v1 close-batch07-actgw001-v1 close-batch07-self001-v1 close-batch07-aud001-v1 close-batch07-reg001-v1 close-batch07-red001-v1 close-batch08-sup001-v1 close-batch08-lead001-v1 close-batch08-prv001-v1 close-batch08-comp-reg001-v1 close-batch08-tenant001-v1 close-batch08-comp-onb001-v1 close-batch08-trnboot001-v1 close-batch08-autboot001-v1 close-batch08-engact001-v1 close-batch08-appboot001-v1 close-batch08-crmboot001-v1 close-batch08-mktboot001-v1 close-batch08-kboot001-v1 close-batch08-seoboot001-v1 close-batch08-socboot001-v1 close-batch08-scan001-v1 close-batch08-kw001-v1 close-batch08-waud001-v1 close-batch08-socaud001-v1 close-batch08-localp001-v1 close-batch08-app001-v1 close-batch08-crm001-v1 close-batch08-sale001-v1 close-batch09-voice001-v1 close-batch09-com001-v1 close-batch09-notif001-v1 close-batch09-c360001-v1 close-batch09-ret001-v1 close-batch09-nba001-v1 close-batch09-customer-lifecycle-group-v1 close-batch10-l2-resilience-group-v1 close-batch11-cmp001-v1 close-batch12-ops-group-v1 close-batch13-l6-tech-governance-v1 close-batch14-l7-strategy-labs-v1 close-batch15-l8-l9-company-console-v1 close-batch16-platform-security-zero-cost-v1 close-batch17-hr-vendor-governance-v1 close-batch18-mortgage-operations-v1 close-batch19-business-compliance-web-v1; do node "cerebro/missions/$m.mjs"; done
+      - name: Strict179 and exact final classification
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT"
+          node <<'NODE'
+          const fs=require('fs');
+          const expected=['KNW-001','TRN-001','DOC-001','DOC-002','DOC-003','DOC-004','FINOPS-001','RUNTIME-001','LAB-TRD','HCI-001'].sort();
+          const baseline=JSON.parse(fs.readFileSync(process.env.OUT+'/AUTONOMY_READINESS_BASELINE.json'));
+          const summary=JSON.parse(fs.readFileSync(process.env.OUT+'/SUMMARY.json'));
+          const cls=JSON.parse(fs.readFileSync('cerebro/governance/final-179-classification-2026-11-03.json'));
+          const remaining=baseline.engines.filter(e=>!e.autonomous_prod_ready).map(e=>e.engine_id).sort();
+          if(summary.registry_total!==179||summary.autonomous_prod_ready!==169||summary.foundation_only!==10) throw new Error('Expected exact 169/179 readiness state');
+          if(JSON.stringify(remaining)!==JSON.stringify(expected)) throw new Error('Unexpected remaining engines: '+remaining.join(','));
+          const holdIds=Object.keys(cls.engine_specific_structural_holds).sort();
+          if(JSON.stringify(holdIds)!==JSON.stringify(expected)) throw new Error('Classification hold list drift');
+          for(const id of expected){const e=baseline.engines.find(x=>x.engine_id===id),h=cls.engine_specific_structural_holds[id];if(!e||e.autonomous_prod_ready)throw new Error(id+' unexpectedly ready');if(h.state!=='STRUCTURAL_HOLD'||!h.dependency||!h.why||!h.exit_path)throw new Error(id+' incomplete hold');if(e.prod_execution_authorized!==false)throw new Error(id+' authority drift');}
+          const certified=baseline.engines.filter(e=>e.autonomous_prod_ready);
+          if(certified.length!==169)throw new Error('certified count drift');
+          for(const e of certified){if(e.gate_count!==12||e.gate_total!==12||(e.readiness_blockers||[]).length||e.prod_execution_authorized!==false)throw new Error(e.engine_id+' certified evidence drift');}
+          if(cls.shared_prod_activation_hold.state!=='STRUCTURAL_HOLD'||cls.shared_prod_activation_hold.human_required!==false)throw new Error('shared PROD hold drift');
+          if(summary.prod_writes!==false||summary.trading_touched!==false||summary.additional_cost_eur!==0||summary.factory_mutated!==false||summary.registry_mutated!==false)throw new Error('safety drift');
+          const final={mission:'FINAL_179_PHYSICAL_CLASSIFICATION_V1',status:'GREEN',registry_total:179,readiness_certified:169,engine_specific_structural_holds:10,prod_active_verified:0,prod_ready_except_external_dependency:0,human_required:0,shared_prod_activation_state:'STRUCTURAL_HOLD',shared_prod_activation_dependency:cls.shared_prod_activation_hold.dependency,remaining_engine_ids:remaining,prod_writes:false,trading_touched:false,additional_cost_eur:0,head_sha:process.env.GITHUB_SHA};
+          fs.writeFileSync(process.env.OUT+'/FINAL_179_CLASSIFICATION.json',JSON.stringify(final,null,2)+'\n');
+          fs.copyFileSync('cerebro/governance/final-179-classification-2026-11-03.json',process.env.OUT+'/FINAL_179_HOLD_CONTRACT.json');
+          NODE
+      - name: Upload final 179 classification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-final-179-classification-${{ github.run_id }}
+          path: /tmp/cerebro-final-179-classification/
+          if-no-files-found: error
+          retention-days: 30
