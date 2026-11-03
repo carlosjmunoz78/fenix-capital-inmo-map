@@ -37,6 +37,8 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
    const paid=models.filter(m=>m.healthy&&m.provider!=='LOCAL'&&m.capabilities.includes(capability));
    if(!paid.length)return denied('NO_PROVIDER_AVAILABLE',companyId,capability);
    const chosen=paid.sort((a,b)=>a.estimatedEuroPerCall-b.estimatedEuroPerCall||a.id.localeCompare(b.id))[0];
+   // Only DeepSeek prepaid credit was authorized; other paid providers require a separate mandate.
+   if(chosen.provider!=='DEEPSEEK')return denied('EXTERNAL_PROVIDER_NOT_AUTHORIZED',companyId,capability);
    // Credit is not proof of an actual usable authorization or a spendable balance.
    if(!balanceProof?.verified||balanceProof.currency!=='EUR'||!validMoney(balanceProof.availableEuro)
       ||!balanceProof.checkedAt||!Number.isFinite(Date.parse(balanceProof.checkedAt)))
