@@ -29,6 +29,7 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
    const local=models.filter(m=>m.healthy&&m.provider==='LOCAL'&&m.capabilities.includes(capability));
    if(local.length){
     const selected=local.sort((a,b)=>a.estimatedEuroPerCall-b.estimatedEuroPerCall||a.id.localeCompare(b.id))[0];
+    if(selected.estimatedEuroPerCall!==0)return denied('LOCAL_COST_NOT_ZERO_VERIFIED',companyId,capability);
     return snapshot({state:'ADAPTER_CANDIDATE',modelId:selected.id,provider:'LOCAL',companyId,environment,
       capability,privacy,estimatedEuro:selected.estimatedEuroPerCall,
       executionRequiresB3Authorization:true,executed:false,spentEuro:0});
@@ -45,15 +46,18 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
    // Only DeepSeek prepaid credit was authorized; other paid providers require a separate mandate.
    if(chosen.provider!=='DEEPSEEK')return denied('EXTERNAL_PROVIDER_NOT_AUTHORIZED',companyId,capability);
    // Credit is not proof of an actual usable authorization or a spendable balance.
+   const proofAgeMs=Date.now()-Date.parse(balanceProof?.checkedAt);
    if(!balanceProof?.verified||balanceProof.currency!=='EUR'||!validMoney(balanceProof.availableEuro)
-      ||!balanceProof.checkedAt||!Number.isFinite(Date.parse(balanceProof.checkedAt)))
+      ||balanceProof.companyId!==companyId||balanceProof.environment!==environment
+      ||!Number.isFinite(proofAgeMs)||proofAgeMs<0||proofAgeMs>15*60*1000)
     return denied('BALANCE_NOT_VERIFIED',companyId,capability);
    if(!budgetStore||typeof budgetStore.getVerifiedSpend!=='function'
       ||typeof budgetStore.reserveAtomically!=='function')
     return denied('ATOMIC_SPEND_GUARD_MISSING',companyId,capability);
    let spent;
    try{const r=await budgetStore.getVerifiedSpend({companyId,environment});
-    if(r?.verified!==true||!validMoney(r.spentEuro))return denied('SPEND_NOT_VERIFIED',companyId,capability);
+    if(r?.verified!==true||!validMoney(r.spentEuro)||r.companyId!==companyId||r.environment!==environment)
+      return denied('SPEND_NOT_VERIFIED',companyId,capability);
     spent=r.spentEuro;
    }catch{return denied('SPEND_READ_UNAVAILABLE',companyId,capability);}
    const cap=Math.min(hardCeilingEuro,balanceProof.availableEuro);
