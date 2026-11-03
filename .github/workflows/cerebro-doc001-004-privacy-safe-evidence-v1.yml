@@ -1,0 +1,40 @@
+name: CEREBRO DOC001-004 Privacy Safe Evidence V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/document/doc001_004_privacy_safe_evidence_v1.py'
+      - 'cerebro/document/test_doc001_004_privacy_safe_evidence_v1.py'
+      - '.github/workflows/cerebro-doc001-004-privacy-safe-evidence-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env:
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+jobs:
+  doc-privacy-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install minimal already-used open source document stack
+        run: python -m pip install --disable-pip-version-check pillow opencv-python-headless pypdf
+      - name: Verify redaction and no raw customer data
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          cd cerebro/document
+          python test_doc001_004_privacy_safe_evidence_v1.py
+      - name: Upload sanitized evidence only
+        run: |
+          mkdir -p /tmp/cerebro-doc-privacy
+          echo '{"status":"PRIVACY_TEST_GREEN","raw_customer_data_uploaded":false,"prod_writes":false,"trading_access":false}' > /tmp/cerebro-doc-privacy/SUMMARY.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-doc-privacy-safe-${{ github.run_id }}
+          path: /tmp/cerebro-doc-privacy/SUMMARY.json
+          if-no-files-found: error
