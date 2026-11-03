@@ -1,6 +1,5 @@
 import {useEffect,useRef} from 'react';
 import CerebroConsoleShell from './CerebroConsoleShell';
-import JarvisWorkbenchPortal from './JarvisWorkbenchPortal';
 import JarvisOperativaComposerPortal from './JarvisOperativaComposerPortal';
 import './jarvis-work-premium-final.css';
 
@@ -53,5 +52,5 @@ export default function JarvisEmbeddedConsole({workspaceKey}:Props){
     observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     return()=>{observer.disconnect();if(scheduled)window.cancelAnimationFrame(scheduled)};
   },[]);
-  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell key={workspaceKey||'jarvis-default'}/></div><JarvisWorkbenchPortal/><JarvisOperativaComposerPortal/></>;
+  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell key={workspaceKey||'jarvis-default'}/></div><JarvisOperativaComposerPortal/></>;
 }
