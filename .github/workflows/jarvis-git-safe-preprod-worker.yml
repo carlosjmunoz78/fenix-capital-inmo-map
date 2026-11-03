@@ -1,0 +1,159 @@
+name: JARVIS Git Safe PREPROD + PROD Worker
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+    paths:
+      - '.github/workflows/jarvis-git-safe-preprod-worker.yml'
+      - 'cerebro/runtime/github-safe-native-v1.mjs'
+      - 'cerebro/runtime/github-actions-safe-adapter-v1.mjs'
+      - 'cerebro/runtime/jarvis-git-job-runner-v1.mjs'
+      - 'supabase/functions/jarvis-git-dispatch-v1-preprod/**'
+      - 'supabase/functions/jarvis-git-dispatch-v1/**'
+      - 'supabase/migrations/20261102145000_jarvis_work_named_lease_preprod_v1.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+  id-token: write
+
+concurrency:
+  group: jarvis-git-safe-consumer-${{ github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  JARVIS_GIT_PREPROD_DISPATCH_URL: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-git-dispatch-v1-preprod
+  JARVIS_GIT_PROD_DISPATCH_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-git-dispatch-v1
+  JARVIS_GIT_OIDC_AUDIENCE: jarvis-git-worker-v1
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Verify Git runtime syntax and policy
+        run: |
+          node --check cerebro/runtime/github-safe-native-v1.mjs
+          node --check cerebro/runtime/github-actions-safe-adapter-v1.mjs
+          node --check cerebro/runtime/jarvis-git-job-runner-v1.mjs
+
+  watch:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 48
+    outputs:
+      pending: ${{ steps.watch.outputs.pending }}
+      environment: ${{ steps.watch.outputs.environment }}
+      endpoint: ${{ steps.watch.outputs.endpoint }}
+    steps:
+      - id: watch
+        name: Wait for one governed Git job in PROD or PREPROD
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const audience=process.env.JARVIS_GIT_OIDC_AUDIENCE;
+          const endpoints=[
+            {environment:'PROD',endpoint:process.env.JARVIS_GIT_PROD_DISPATCH_URL},
+            {environment:'PREPROD',endpoint:process.env.JARVIS_GIT_PREPROD_DISPATCH_URL},
+          ];
+          const deadline=Date.now()+45*60_000;
+          let pending=0;
+          let selected=endpoints[1];
+          async function oidc(){
+            const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+            u.searchParams.set('audience',audience);
+            const r=await fetch(u,{headers:{authorization:`Bearer ${process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN}`},redirect:'error'});
+            if(!r.ok)throw new Error(`OIDC_TOKEN_FAILED:${r.status}`);
+            const body=await r.json();
+            if(!body?.value)throw new Error('OIDC_TOKEN_MISSING');
+            return body.value;
+          }
+          while(Date.now()<deadline){
+            const token=await oidc();
+            for(const candidate of endpoints){
+              const r=await fetch(`${candidate.endpoint}/status-v1`,{method:'POST',headers:{authorization:`Bearer ${token}`,'content-type':'application/json'},body:'{}',redirect:'error'});
+              const body=await r.json().catch(()=>null);
+              if(!r.ok||body?.ok!==true)throw new Error(`STATUS_FAILED:${candidate.environment}:${r.status}:${body?.error||'UNKNOWN'}`);
+              const states=body.states||{};
+              const count=Number(states.QUEUED||0)+Number(states.RETRY_WAIT||0);
+              if(count>0){pending=count;selected=candidate;break;}
+            }
+            if(pending>0)break;
+            await new Promise(resolve=>setTimeout(resolve,5000));
+          }
+          fs.appendFileSync(process.env.GITHUB_OUTPUT,`pending=${pending}\nenvironment=${selected.environment}\nendpoint=${selected.endpoint}\n`);
+          console.log(JSON.stringify({pending,environment:selected.environment,git_safe:true,secret_material_logged:false}));
+          NODE
+
+  governed-git:
+    needs: watch
+    if: needs.watch.outputs.pending != '0'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      JARVIS_GIT_DISPATCH_URL: ${{ needs.watch.outputs.endpoint }}
+      JARVIS_EXPECTED_ENVIRONMENT: ${{ needs.watch.outputs.environment }}
+      JARVIS_GIT_OIDC_AUDIENCE: jarvis-git-worker-v1
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Configure bounded Git identity
+        run: |
+          git config user.name "JARVIS ${JARVIS_EXPECTED_ENVIRONMENT}"
+          git config user.email "130542695+carlosjmunoz78@users.noreply.github.com"
+      - name: Execute at most one governed Git job
+        run: node cerebro/runtime/jarvis-git-job-runner-v1.mjs
+      - name: Protected branch and clean worktree guard
+        shell: bash
+        run: |
+          set -euo pipefail
+          BRANCH="$(git branch --show-current)"
+          case "$BRANCH" in
+            main|master|emergency-pages|cerebro/jarvis-interface-v1-20261102)
+              echo "Protected branch checkout detected after Git worker"
+              exit 1
+              ;;
+          esac
+          case "$JARVIS_EXPECTED_ENVIRONMENT" in PREPROD|PROD) ;; *) exit 1;; esac
+          test -z "$(git status --porcelain)"
+          echo "Git worker finished clean on permitted branch: $BRANCH"
+
+  rearm:
+    needs: [validate, watch, governed-git]
+    if: always() && needs.validate.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Dispatch next bounded Git consumer cycle
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          node --input-type=module <<'NODE'
+          const url=`https://api.github.com/repos/${process.env.REPO}/actions/workflows/jarvis-git-safe-preprod-worker.yml/dispatches`;
+          const r=await fetch(url,{method:'POST',headers:{authorization:`Bearer ${process.env.GH_TOKEN}`,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','content-type':'application/json'},body:JSON.stringify({ref:process.env.REF_NAME}),redirect:'error'});
+          if(r.status!==204)throw new Error(`WORKFLOW_REARM_FAILED:${r.status}`);
+          console.log(JSON.stringify({ok:true,rearmed:true,ref:process.env.REF_NAME,git_safe:true,static_secret_added:false}));
+          NODE

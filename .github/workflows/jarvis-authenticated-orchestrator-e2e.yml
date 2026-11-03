@@ -1,0 +1,119 @@
+name: JARVIS Authenticated Orchestrator E2E
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+    paths:
+      - '.github/workflows/jarvis-authenticated-orchestrator-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  authenticated-readonly-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      JARVIS_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0
+      SAFE_BRANCH: cerebro/jarvis-work-codex-complete-20261102
+    steps:
+      - name: Verify authenticated secret is configured without exposing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${JARVIS_E2E_JWT:-}" ]; then
+            echo 'JARVIS_AUTH_E2E_SECRET=MISSING'
+            exit 31
+          fi
+          echo 'JARVIS_AUTH_E2E_SECRET=PRESENT'
+
+      - name: Authenticated readonly orchestration chain
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+
+          call_intent() {
+            local intent="$1"
+            local args="$2"
+            local outfile="$3"
+            local payload code
+            payload="$(jq -cn --arg intent "$intent" --argjson args "$args" '{intent:$intent,args:$args}')"
+            code="$(curl --silent --show-error --output "$outfile" --write-out '%{http_code}' \
+              -X POST \
+              -H "authorization: Bearer ${JARVIS_E2E_JWT}" \
+              -H 'content-type: application/json' \
+              --data "$payload" \
+              "${BASE}/execute")"
+            if [ "$code" -lt 200 ] || [ "$code" -ge 300 ]; then
+              echo "JARVIS_E2E_HTTP_FAILURE intent=${intent} code=${code}"
+              jq -c '{status,reason,correlation_id,evidence}' "$outfile" 2>/dev/null || true
+              exit 32
+            fi
+            jq -e --arg branch "$SAFE_BRANCH" '
+              .evidence.branch == $branch and
+              .evidence.prod_branch_mutation == false and
+              .evidence.trading_access == false and
+              .evidence.additional_cost_eur == 0 and
+              .human_required == null
+            ' "$outfile" >/dev/null
+          }
+
+          call_intent 'REPO_HEAD' '{}' head.json
+          jq -e --arg branch "$SAFE_BRANCH" '
+            .status == "OK" and
+            .result.status == "OK" and
+            .result.branch == $branch and
+            (.result.head_sha | test("^[0-9a-f]{40}$"))
+          ' head.json >/dev/null
+          HEAD_SHA="$(jq -r '.result.head_sha' head.json)"
+          echo "REPO_HEAD=GREEN sha=${HEAD_SHA}"
+
+          call_intent 'REPO_FILE' '{"path":"supabase/functions/jarvis-orchestrator-v0/index.ts"}' file.json
+          jq -e --arg branch "$SAFE_BRANCH" --arg head "$HEAD_SHA" '
+            .status == "OK" and
+            .result.status == "OK" and
+            .result.file.path == "supabase/functions/jarvis-orchestrator-v0/index.ts" and
+            .result.file.branch == $branch and
+            .result.file.head_sha == $head and
+            (.result.file.content | contains("SAFE_BRANCH"))
+          ' file.json >/dev/null
+          echo 'REPO_FILE=GREEN'
+
+          call_intent 'SEARCH_CODE' '{"query":"SAFE_BRANCH"}' search.json
+          jq -e --arg branch "$SAFE_BRANCH" '
+            .status == "QUEUED" and
+            .result.status == "QUEUED" and
+            (.result.job.job_id | type == "string" and length > 0) and
+            .evidence.branch == $branch
+          ' search.json >/dev/null
+          SEARCH_JOB="$(jq -r '.result.job.job_id' search.json)"
+          call_intent 'WORK_STATUS' "$(jq -cn --arg id "$SEARCH_JOB" '{job_id:$id}')" search-status.json
+          jq -e '.status == "OK" and .result.status == "OK" and (.result.job.status | type == "string" and length > 0)' search-status.json >/dev/null
+          echo "SEARCH_CODE=GREEN job=${SEARCH_JOB} status=$(jq -r '.result.job.status' search-status.json)"
+
+          call_intent 'GIT_STATUS' "$(jq -cn --arg head "$HEAD_SHA" '{expected_head_sha:$head}')" git.json
+          jq -e --arg branch "$SAFE_BRANCH" '
+            .status == "QUEUED" and
+            .result.status == "QUEUED" and
+            .result.operation == "STATUS" and
+            .result.branch == $branch and
+            (.result.job.job_id | type == "string" and length > 0)
+          ' git.json >/dev/null
+          GIT_JOB="$(jq -r '.result.job.job_id' git.json)"
+          call_intent 'WORK_STATUS' "$(jq -cn --arg id "$GIT_JOB" '{job_id:$id}')" git-status.json
+          jq -e '.status == "OK" and .result.status == "OK" and (.result.job.status | type == "string" and length > 0)' git-status.json >/dev/null
+          echo "GIT_STATUS=GREEN job=${GIT_JOB} status=$(jq -r '.result.job.status' git-status.json)"
+
+          call_intent 'BROWSER_STATUS' '{"list":true}' browser.json
+          jq -e '
+            (.status == "OK" or .status == "QUEUED") and
+            .evidence.delegated_to == "cerebro-browser-work-total-owner-v1-prod" and
+            .result != null
+          ' browser.json >/dev/null
+          echo 'BROWSER_STATUS=GREEN'
+
+          echo 'JARVIS_AUTHENTICATED_ORCHESTRATOR_READONLY_E2E=GREEN'

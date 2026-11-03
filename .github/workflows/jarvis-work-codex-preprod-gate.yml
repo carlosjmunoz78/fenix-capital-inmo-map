@@ -1,0 +1,93 @@
+name: JARVIS Work Codex PREPROD Gate
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CI: 'true'
+  VITE_FENIX_ENV: 'preprod'
+  VITE_SUPABASE_URL: 'https://hnqlnvakzaywtafeiybt.supabase.co'
+  VITE_SUPABASE_PUBLISHABLE_KEY: 'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw'
+
+jobs:
+  contract-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: TypeScript and Vite build
+        run: npm run build
+      - name: Jarvis workspace contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f src/JarvisEmbeddedConsole.tsx
+          test -f src/JarvisWorkTools.tsx
+          test -f src/JarvisGitAdvancedPanel.tsx
+          test -f src/jarvisGitInspectApi.ts
+          test -f src/JarvisOperativaComposerPortal.tsx
+          test -f src/JarvisVisibleLanguageGuard.tsx
+          test -f src/jarvisWorkApi.ts
+          test -f src/jarvis-work-v2.css
+          test -f src/jarvis-work-premium-final.css
+          test -f src/jarvis-work-tools.css
+          test -f supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "createJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "importJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "renameJarvisProject" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('left')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('center')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "focusPane('right')" src/CerebroJarvisWorkConsole.tsx
+          grep -q "setLayout(DEFAULT_LAYOUT)" src/CerebroJarvisWorkConsole.tsx
+          grep -q "JarvisOperativaComposerPortal" src/JarvisEmbeddedConsole.tsx
+          grep -q "operativa-jarvis-composer" src/JarvisOperativaComposerPortal.tsx
+          grep -q "JarvisWorkTools" src/JarvisWorkbenchPortal.tsx
+          grep -q "JarvisGitAdvancedPanel" src/JarvisWorkTools.tsx
+          grep -q "BrowserHandoff" src/JarvisWorkTools.tsx
+          grep -q "JarvisVisibleLanguageGuard" src/CerebroConsoleHost.tsx
+          grep -q "INSPECT_OPS" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "'STATUS','DIFF','CI_READ','COMPARE'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          if grep -n "CEREBRO" src/CerebroJarvisWorkConsole.tsx | grep -Ev "Cerebro|replace|fetchCerebro"; then
+            echo "Visible legacy branding literal detected in Jarvis workspace"
+            exit 1
+          fi
+          grep -q "JARVIS Work" src/CerebroJarvisWorkConsole.tsx
+          grep -q "VISIBLE_REPLACEMENTS" src/JarvisEmbeddedConsole.tsx
+      - name: Guard protected surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "cerebro/jarvis-work-codex-complete-20261102"
+          ! grep -R "target_branch.*main\|target_branch.*emergency-pages" src/JarvisGitAdvancedPanel.tsx src/jarvisGitInspectApi.ts supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "const ENV='PREPROD'" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          grep -q "prod_authorized:false" supabase/functions/jarvis-git-gateway-v1-preprod/index.ts
+          echo "Branch isolated; PREPROD only; no PROD/main/emergency-pages write in this gate."
+      - name: Install Chromium for visual acceptance
+        run: npx playwright install --with-deps chromium
+      - name: Visual acceptance 1440x695
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium
+      - name: Upload visual QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-visual-qa-${{ github.sha }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 7

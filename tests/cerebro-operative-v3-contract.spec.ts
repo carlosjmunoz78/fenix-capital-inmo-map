@@ -5,39 +5,87 @@ import path from 'node:path';
 const root=process.cwd();
 const read=(file:string)=>fs.readFileSync(path.join(root,file),'utf8');
 
-test('historical Operativa keeps one horizontal live process rail without fixed timelines as rollback reference',async()=>{
+test('Jarvis and Operativa are physically separated while sharing canonical state infrastructure',async()=>{
+ const host=read('src/CerebroConsoleHost.tsx');
+ expect(host).toContain("import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';");
+ expect(host).toContain("import CerebroOperativeConsole from './CerebroOperativeConsole';");
+ expect(host).toContain('<CerebroJarvisWorkConsole surface="JARVIS"/>');
+ expect(host).toContain('<CerebroOperativeConsole/>');
+ expect(host).toContain("primaryView==='JARVIS'?");
+ expect(host).toContain("primaryView==='OPERATIVA'?");
+});
+
+test('Operativa consumes real activity and never invents numeric progress',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
- const css=read('src/cerebro-operative-console-v2.css');
- expect(source).toContain('cerebro-process-strip');
- expect(source).toContain('cerebro-live-progress');
- expect(source).not.toContain('cerebro-process-route');
- expect(css).toContain('overflow-x:auto');
- expect(css).toContain('flex:0 0 268px');
-});
-
-test('JARVIS Work shows aliases and never invents a numeric progress value',async()=>{
- const source=read('src/CerebroJarvisWorkConsole.tsx');
- expect(source).toContain('compactAlias(run)');
+ expect(source).toContain('fetchCerebroActivity');
  expect(source).toContain("run.progress_provenance!=='REAL_GITHUB_JOBS'");
- expect(source).toContain("run.status==='in_progress'?'LIVE':'—'");
- expect(source).toContain('No se inventan trabajos ni estados.');
+ expect(source).toContain('No voy a inventar trabajos ni porcentajes.');
+ expect(source).toContain('Sin porcentaje fiable');
 });
 
-test('shared JARVIS/OPERATIVA work inspector explains real work and links its evidence',async()=>{
- const source=read('src/CerebroJarvisWorkConsole.tsx');
- const css=read('src/cerebro-jarvis-work.css');
- expect(source).toContain('function processPurpose(run:CerebroActivityRun,surface:SurfaceName)');
- expect(source).toContain("type SurfaceName='JARVIS'|'OPERATIVA'");
- expect(source).toContain("surface==='OPERATIVA'?'OPERATIVA · CONTROL':'JARVIS · WORK'");
- expect(source).toContain('QUÉ ESTÁ HACIENDO');
- expect(source).toContain('PASO ACTUAL');
- expect(source).toContain('SIGUIENTE');
- expect(source).toContain('Abrir evidencia real');
- expect(css).toContain('.jarvis-work-inspector');
- expect(css).toContain('.jarvis-work-big-progress');
+test('Operativa translates technical names and steps to human Spanish',async()=>{
+ const source=read('src/CerebroOperativeConsole.tsx');
+ expect(source).toContain('Trabajando ahora');
+ expect(source).toContain('Esperando turno');
+ expect(source).toContain('Necesita revisión');
+ expect(source).toContain('Comprobar acceso y sesión');
+ expect(source).toContain('Preparar una integración segura');
+ expect(source).toContain('Preparando estructura y reglas');
+ expect(source).toContain('Revisión independiente');
+ expect(source).toContain('humanStep(run.current_step');
+ expect(source).toContain('humanStep(selectedRun.next_step');
 });
 
-test('activity projection still exposes real GitHub job-step progress when authenticated',async()=>{
+test('Operativa exposes current multi-company scope and protected power modes',async()=>{
+ const source=read('src/CerebroOperativeConsole.tsx');
+ expect(source).toContain("fenix:'Fénix Capital'");
+ expect(source).toContain("aion:'AION'");
+ expect(source).toContain("captacasa:'CAPTACASA'");
+ expect(source).toContain("type PowerMode='Suave'|'Normal'|'Alto'|'Máximo'");
+ expect(source).toContain('Mantén todas las protecciones, no generes gasto no autorizado');
+});
+
+test('Jarvis composer is empty, separates dictation and voice, and reuses canonical voice session',async()=>{
+ const source=read('src/CerebroOperativeConsole.tsx');
+ expect(source).toContain('className="operativa-jarvis-composer"');
+ expect(source).toContain('aria-label="Mensaje para Jarvis"');
+ expect(source).not.toContain('placeholder=');
+ expect(source).toContain('createVoiceRecognition');
+ expect(source).toContain("querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main')");
+ expect(source).toContain("dictating?'Detener dictado':'Dictar'");
+ expect(source).toContain("snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'");
+});
+
+test('attachment bridge reuses existing local extractor from Operativa',async()=>{
+ const source=read('src/CerebroAttachmentBridge.tsx');
+ expect(source).toContain('.operativa-jarvis-composer');
+ expect(source).toContain('extractCerebroAttachment');
+ expect(source).toContain('Local · contexto acotado');
+ expect(source).toContain('Selector de archivos para Jarvis');
+});
+
+test('premium layout removes old rigid three-column Operativa while retaining progressive detail',async()=>{
+ const css=read('src/cerebro-operative-console.css');
+ expect(css).toContain('.operativa-command-deck');
+ expect(css).toContain('.operativa-reactor');
+ expect(css).toContain('.operativa-work-row');
+ expect(css).toContain('.operativa-inspector');
+ expect(css).toContain('@media(prefers-reduced-motion:reduce)');
+ expect(css).not.toContain('grid-template-columns:280px minmax(0,1fr) 330px');
+});
+
+test('/cerebro isolates global launchers and retains rollback route',async()=>{
+ const isolation=read('src/cerebro-route-isolation-v2.css');
+ const hostCss=read('src/cerebro-console-host.css');
+ const host=read('src/CerebroConsoleHost.tsx');
+ expect(isolation).toContain("button[aria-label='Abrir chat interno']");
+ expect(hostCss).toContain("html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']");
+ expect(host).toContain("document.documentElement.dataset.cerebroConsole='1'");
+ expect(host).toContain("if(section==='legacy-v0')return'V0'");
+ expect(host).toContain('<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>');
+});
+
+test('activity projection still exposes real GitHub job-step progress',async()=>{
  const edge=read('supabase/functions/cerebro-console-activity-v0/index.ts');
  const api=read('src/cerebroActivityApi.ts');
  expect(edge).toContain('/jobs?per_page=100');
@@ -47,60 +95,12 @@ test('activity projection still exposes real GitHub job-step progress when authe
  expect(api).toContain("progress_provenance:CerebroProgressProvenance");
 });
 
-test('/cerebro suppresses global launchers from the retained host stylesheet even before owner session is ready',async()=>{
- const css=read('src/cerebro-console-host.css');
- const host=read('src/CerebroConsoleHost.tsx');
- expect(css).toContain("html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']");
- expect(css).toContain("html[data-cerebro-console='1'] .calc-launcher");
- expect(css).toContain("html[data-cerebro-console='1'] .f-offcanvas-trigger");
- expect(host).toContain("document.documentElement.dataset.cerebroConsole='1'");
- expect(host).toContain("if(ownerAccess!=='allowed')return <CerebroConsoleShell/>");
-});
-
-test('JARVIS Work mounts canonical V0 directly and stays mounted while Browser is visible',async()=>{
- const host=read('src/CerebroConsoleHost.tsx');
- const work=read('src/CerebroJarvisWorkConsole.tsx');
+test('canonical Gateway and voice core remain the execution path',async()=>{
+ const operative=read('src/CerebroOperativeConsole.tsx');
  const shell=read('src/CerebroConsoleShell.tsx');
- const css=read('src/cerebro-jarvis-work.css');
- expect(host).toContain("import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';");
- expect(host).toContain('hidden={browser}');
- expect(host).toContain('className="cerebro-work-mount cerebro-host-v0"');
- expect(host).toContain('<CerebroJarvisWorkConsole');
- expect(host).not.toContain('CerebroOperativeConsole');
- expect(work).toContain("import CerebroConsoleShell from './CerebroConsoleShell';");
- expect(work).toContain('<CerebroConsoleShell/>');
- expect(work).not.toContain('querySelector');
- expect(work).not.toContain('MutationObserver');
- expect(shell).toContain('className="cerebro-voice-main"');
+ expect(operative).toContain('<CerebroConsoleShell/>');
+ expect(operative).toContain(".operativa-core-bridge .cerebro-console");
  expect(shell).toContain('postCerebroConsoleChat');
- expect(css).toContain('--jw-blue:#2c9cff');
- expect(css).toContain('--jw-cyan:#37d9ff');
- expect(css).toContain('grid-template-columns:280px minmax(0,1fr) 330px');
-});
-
-test('JARVIS Work exposes active history Factory and HUMAN_REQUIRED without fabricated alerts',async()=>{
- const source=read('src/CerebroJarvisWorkConsole.tsx');
- expect(source).toContain("type WorkFilter='ACTIVE'|'HISTORY'|'FACTORY'");
- expect(source).toContain('Activo');
- expect(source).toContain('Historial');
- expect(source).toContain('Fábrica');
- expect(source).toContain('HUMAN_REQUIRED');
- expect(source).toContain('Esta vista no fabrica alertas.');
-});
-
-test('canonical voice remains the only conversational voice implementation',async()=>{
- const work=read('src/CerebroJarvisWorkConsole.tsx');
- const shell=read('src/CerebroConsoleShell.tsx');
- expect(work).not.toContain('SpeechRecognition');
- expect(work).not.toContain('speechSynthesis');
  expect(shell).toContain('createVoiceRecognition');
  expect(shell).toContain('window.speechSynthesis.speak');
-});
-
-test('historical Operativa remains preserved as reference but is not mounted',async()=>{
- const source=read('src/CerebroOperativeConsole.tsx');
- const host=read('src/CerebroConsoleHost.tsx');
- expect(source).toContain('aria-label="Adjuntar archivo"');
- expect(source).toContain('window.setInterval(()=>{void refresh()},30_000)');
- expect(host).not.toContain('<CerebroOperativeConsole');
 });

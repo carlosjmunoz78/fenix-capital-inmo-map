@@ -5,9 +5,23 @@ import { JOB001_LEDGER_CONTROL_PLANE_V1_CONTRACT } from '../runtime/job001-ledge
 import { CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT } from '../runtime/cerebro-supervisor-entrypoint-v1.mjs';
 
 const workflow = fs.readFileSync(new URL('../../.github/workflows/cerebro-cloud-useful-continuous-worker-v1.yml', import.meta.url), 'utf8');
+const explicitlyPaused = /run-name:.*PAUSED/.test(workflow) && workflow.includes('paused-for-user-priority:');
 
 function expectLine(fragment) {
   assert.ok(workflow.includes(fragment), `missing sustained-worker contract fragment: ${fragment}`);
+}
+
+function assertExplicitPausedFailClosed() {
+  expectLine('paused-for-user-priority:');
+  expectLine('if: ${{ false }}');
+  expectLine('contents: read');
+  expectLine('Sustained background work temporarily paused for user-priority work.');
+  assert.ok(/run-name:.*PAUSED/.test(workflow));
+  assert.ok(!workflow.includes('contents: write'));
+  assert.ok(!workflow.includes("CEREBRO_PROD_WRITE: 'true'"));
+  assert.ok(!workflow.includes("CEREBRO_TRADING_ACCESS: 'true'"));
+  assert.ok(!workflow.includes('gh api --method POST'));
+  assert.ok(!workflow.includes('git push'));
 }
 
 test('canonical JOB-001 control and physical entrypoint agree on verified 360/360/360', () => {
@@ -32,8 +46,9 @@ test('canonical JOB-001 control and physical entrypoint agree on verified 360/36
   assert.equal(CEREBRO_SUPERVISOR_ENTRYPOINT_V1_CONTRACT.second_scheduler, false);
 });
 
-test('sustained GitHub worker uses all 68 lanes under the canonical 360-cap contract', () => {
+test('sustained GitHub worker uses all 68 lanes under the canonical 360-cap contract when active, or is explicitly fail-closed when paused', () => {
   expectLine("description: 'Sustained useful-work lane 0..67'");
+  if (explicitlyPaused) return assertExplicitPausedFailClosed();
   expectLine("CEREBRO_INITIAL_CONCURRENCY: '360'");
   expectLine("CEREBRO_MAX_CONCURRENCY: '360'");
   expectLine("CEREBRO_MAX_PER_COMPANY: '360'");
@@ -44,7 +59,8 @@ test('sustained GitHub worker uses all 68 lanes under the canonical 360-cap cont
   expectLine("CEREBRO_ENTERPRISE_ENTITLEMENT_VERIFIED: 'true'");
 });
 
-test('sustained worker executes canonical control plane then falls through to continuous useful work after Mission DAG exhaustion', () => {
+test('sustained worker executes canonical control plane before useful fallback when active; paused mode executes nothing', () => {
+  if (explicitlyPaused) return assertExplicitPausedFailClosed();
   const contractGate = workflow.indexOf('Enforce canonical JOB-001 Control Plane capacity contract');
   const missionExecution = workflow.indexOf('Execute sustained mission lease with continuous useful fallback');
   assert.ok(contractGate >= 0, 'canonical JOB-001 contract gate missing');
@@ -61,7 +77,8 @@ test('sustained worker executes canonical control plane then falls through to co
   assert.ok(!workflow.includes('UNIQUE_MISSION_BACKLOG_EXHAUSTED'));
 });
 
-test('transition remains PREPROD zero-paid no-PROD no-Trading', () => {
+test('transition remains PREPROD zero-paid no-PROD no-Trading, including explicit paused state', () => {
+  if (explicitlyPaused) return assertExplicitPausedFailClosed();
   expectLine('CEREBRO_SUPERVISOR_ENV: PREPROD');
   expectLine("CEREBRO_ALLOW_PAID_FANOUT: 'NO'");
   expectLine("CEREBRO_PROD_WRITE: 'false'");
