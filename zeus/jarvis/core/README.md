@@ -51,3 +51,5 @@ Not exposed on the internet. Before public access: trusted issuer and session ve
 - Local Node 22 execution: **33 tests passed** (`node --test zeus/jarvis/core/*.test.mjs`). This includes mocked storage and identity; NOT cross-device authenticated PROD E2E.
 
 **Explicit NO-GO for B2 operational closure:** independent ZEUS registry not provisioned or seeded with validated owner binding; mission table not migrated; no real owner JWT E2E, persistent service endpoint or restart/device test. Do not enable the runtime or mark B2 `CONFIRMED_OPERATIONAL` without these proofs and observed rollback. All work remains on PR #13, draft, with NO changes to App or CRM routes.
+
+`jarvis-cross-channel-sqlite-e2e.test.mjs` proves two separately authenticated **mock** channel adapters can create/read the same mission after physically closing/reopening a SQLite file; 34/34 tests now pass. Not real mobile/PC owner JWT E2E, does not grant a PROD go-live.
