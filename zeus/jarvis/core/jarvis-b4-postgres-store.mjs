@@ -27,3 +27,31 @@ export function createJarvisB4PostgresStore({query}={}){
   }
  });
 }
+
+/**
+ * Read-only dual gate for the existing B3 authority and B4 memory runtime.
+ * Must be provided by an authenticated, server-only PostgreSQL connection.
+ * B4 cannot turn itself on while the upstream B3 authority is disabled.
+ * Absence of either row / a database error fails closed.
+ */
+export function createJarvisB4GuardedControlStore({query}={}) {
+ if(typeof query!=='function')throw Error('TRUSTED_POSTGRES_QUERY_REQUIRED');
+ return Object.freeze({
+  async get({companyId,environment}={}) {
+   must(companyId,'COMPANY_ID');
+   if(!['LAB','PREPROD','PROD'].includes(environment))throw Error('ENVIRONMENT_INVALID');
+   const sql = `SELECT b4.enabled AS memory_enabled,b4.kill_switch AS memory_kill_switch,
+     b3.enabled AS authority_enabled,b3.kill_switch AS authority_kill_switch
+     FROM zeus_jarvis.b4_memory_control AS b4
+     INNER JOIN zeus_jarvis.b3_runtime_control AS b3
+       ON b3.company_id=b4.company_id AND b3.environment=b4.environment
+     WHERE b4.company_id=$1 AND b4.environment=$2`;
+   const result=await query(sql,[companyId,environment]);
+   const row=result?.rows?.[0];
+   return Object.freeze({
+    enabled:row?.memory_enabled===true && row?.authority_enabled===true,
+    killSwitch:row?.memory_kill_switch!==false || row?.authority_kill_switch!==false
+   });
+  }
+ });
+}
