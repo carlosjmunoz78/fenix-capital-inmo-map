@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.8.0",
+  "schema_version": "1.9.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -56,10 +56,10 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "bind approved persistent governed runtime target",
-        "prove cross-host restart with durable storage and heartbeat/lease recovery",
-        "verify same-artifact rollback/rebuild and observability on permanent target",
-        "complete canonical promotion gates before PROD"
+        "bind persistent governed runtime host (not the Trading LAB or App/CRM PROD) and durable storage",
+        "prove host reboot recovery, heartbeat and lease expiry under real operations",
+        "backups, rollback and rebuild on selected permanent target with observability",
+        "obtain all 12 gates and promote only after physical evidence"
       ],
       "durable_job001_physical_acceptance": {
         "status": "GREEN_GITHUB_RUNNER_FILESYSTEM_ONLY",
@@ -84,6 +84,18 @@
         "prod_denied": true,
         "trading_denied": true,
         "permanent_host_verified": false
+      },
+      "cross_runner_artifact_recovery": {
+        "state": "GREEN_CROSS_RUNNER_DURABLE_ARTIFACT",
+        "ci_run": 41684949660,
+        "two_independent_runners": true,
+        "artifact_sha256_integrity": true,
+        "same_job_reopened": true,
+        "idempotency_after_restore": true,
+        "corrupted_state_rejected": true,
+        "tenant_isolation": true,
+        "prod_denied": true,
+        "actual_persistent_external_host": false
       }
     },
     "KNW-001": {
@@ -351,7 +363,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "HOST_AND_LIVE_BINDINGS_FIRST; PROD promotion remains blocked. On permanent isolated target require backup/rollback, smoke, monitoring, tribunal, per-engine 12 gates, side-by-side OLD NEW, gradual promotion. Never repurpose protected App/CRM or Trading.",
+  "next_block": "NO_PREMATURE_PROD. Integrated runner and two-runner durable tests GREEN; permanently deployed non-invasive target, real dataset/docs/provider bindings and each engine's canonical promotion remain required.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
