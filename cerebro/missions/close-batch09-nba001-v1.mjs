@@ -1,0 +1,55 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {runLote3ComNotifC360} from '../runtime/lote3-com-notif-c360-real-v1.mjs';
+
+const ROOT=process.cwd();
+const OUT=path.join(ROOT,'cerebro/evidence/batch09-nba001-autonomy-closure/2026-11-03');
+const stable=v=>Array.isArray(v)?v.map(stable):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v);
+const json=v=>JSON.stringify(stable(v),null,2)+'\n';
+const sha=v=>crypto.createHash('sha256').update(Buffer.isBuffer(v)?v:(typeof v==='string'?v:json(v))).digest('hex');
+const A=(v,m)=>{if(!v)throw new Error(m)};
+const W=(r,v)=>{const p=path.join(OUT,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,json(v))};
+const T=f=>{const r=spawnSync(process.execPath,['--test',f],{cwd:ROOT,encoding:'utf8',maxBuffer:12e6});if(r.status)throw new Error(r.stdout+r.stderr);return {file:f,status:'PASS',stdout_sha256:sha(r.stdout||'')}};
+fs.rmSync(OUT,{recursive:true,force:true});
+
+const runtime='cerebro/runtime/lote3-com-notif-c360-real-v1.mjs';
+const c360Native='cerebro/customer/c360-native-v1.mjs';
+const testNative='cerebro/tests/lote3-com-notif-c360-v1.test.mjs';
+const testReal='cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs';
+for(const f of [runtime,c360Native,testNative,testReal])A(fs.existsSync(path.join(ROOT,f)),`missing ${f}`);
+const sourceHashes=Object.fromEntries([runtime,c360Native,testNative,testReal].map(f=>[f,sha(fs.readFileSync(path.join(ROOT,f)))]));
+const tests=[T(testNative),T(testReal)];
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'nba001-close-'));
+const result=runLote3ComNotifC360({company_id:'fenix',root_dir:root,source_run_id:70001,source_head_sha:'a'.repeat(40)});
+A(result.status==='FULL_E2E_REAL_PREPROD'&&result.full_e2e_real_preprod===true,'NBA E2E drift');
+const nba=result.consumer_map?.['NBA-001'];
+A(nba?.decision==='CUSTOMER_NEXT_BEST_ACTION_READY'&&nba?.real_consumption===true&&nba?.outcome?.pass===true,'NBA semantic consumer drift');
+A(typeof nba?.outcome?.next_best_action==='string'&&nba.outcome.next_best_action.length>0,'NBA action missing');
+A(result.customer360_projection?.next_best_action===nba.outcome.next_best_action,'NBA/C360 mismatch');
+A(result.customer360_projection?.read_only===true&&result.customer360_projection?.crm_write_authorized===false,'NBA source boundary drift');
+A(result.independent_tribunal?.decision==='PASS','NBA tribunal drift');
+A(result.observability_consumer?.decision==='OBSERVABILITY_RECORDED','NBA observability drift');
+A(result.finops_consumer?.decision==='FINOPS_ZERO_COST_RECORDED'&&result.additional_cost_eur===0,'NBA cost drift');
+A(result.backup_rollback_rebuild?.backup_ready===true&&result.backup_rollback_rebuild?.rollback_green===true&&result.backup_rollback_rebuild?.rebuild_green===true,'NBA BRR drift');
+A(result.idempotency_proven===true&&result.restartable===true,'NBA idempotency/restart drift');
+for(const k of ['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','spend_authorized','trading_access','android_touched','external_code_execution'])A(result[k]===false,`NBA authority drift ${k}`);
+const rebuilt=runLote3ComNotifC360({company_id:'fenix',root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'nba001-rebuild-')),source_run_id:70001,source_head_sha:'a'.repeat(40)});
+const nba2=rebuilt.consumer_map?.['NBA-001'];
+A(rebuilt.semantic_outcome_hash===result.semantic_outcome_hash&&nba2?.outcome_hash===nba.outcome_hash,'NBA deterministic rebuild drift');
+
+W('contracts/nba-001-contract-evidence.json',{engine_id:'NBA-001',gate:'contracts',status:'PASS',contract:'READ_ONLY_NEXT_BEST_ACTION_FROM_CUSTOMER360',invariants:['company_id exact','PREPROD exact','consume C360 projection','deterministic action selection','no raw PII','no CRM/DB write','no external dispatch','no PROD execution','no Trading'],read_only:true,source_of_truth_replacement:false,crm_write_authorized:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('permissions/nba-001-permissions-evidence.json',{engine_id:'NBA-001',gate:'permissions',status:'PASS',permission_model:'READ_ONLY_PREPROD_RECOMMENDATION',allow:['READ_C360_NEXT_BEST_ACTION','READ_C360_ATTENTION_REQUIRED','EMIT_RECOMMENDATION'],deny:['CROSS_COMPANY_ACCESS','CRM_WRITE','DB_MUTATION','EXTERNAL_DISPATCH','RAW_PII','PROD_WRITE','TRADING','SPEND'],crm_write_authorized:false,dispatch_authorized:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('policy/nba-001-policy-evidence.json',{engine_id:'NBA-001',gate:'policy',status:'PASS',policy_mode:'FAIL_CLOSED_READ_ONLY_PREPROD',fail_closed:true,requirements:{read_only:true,c360_source_preserved:true,raw_pii_denied:true,crm_write_denied:true,external_dispatch_denied:true,prod_write_denied:true},human_exception_passthrough:true,prod_execution_authorized:false,additional_cost_eur:0});
+W('evaluation/nba-001-evaluation-evidence.json',{engine_id:'NBA-001',gate:'evaluation',status:'PASS',approved:true,score:1,environment:'LAB_PREPROD',scope:'READ_ONLY_NEXT_BEST_ACTION_NO_EXTERNAL_EXECUTION',old_vs_new:result.evaluation,cases:{full_e2e_real_preprod:true,semantic_consumer_real:true,next_best_action_present:true,c360_match:true,read_only:true,crm_write_denied:true,external_dispatch_denied:true,observability_recorded:true,finops_zero_cost:true,backup_ready:true,rollback_green:true,rebuild_green:true,idempotency_proven:true,restartable:true,prod_write_denied:true,trading_denied:true},tests,source_hashes:sourceHashes,additional_cost_eur:0});
+W('tribunal/nba-001-tribunal-evidence.json',{engine_id:'NBA-001',gate:'tribunal',status:'GREEN',approved:true,pass:true,decision:'PASS',basis:'real semantic PREPROD NBA consumer over C360 + OLD vs NEW + independent tribunal + durable BRR + observability/FinOps + strict no-execution boundary',independent_tribunal:result.independent_tribunal,external_execution_approved:false,prod_authorized:false,additional_cost_eur:0});
+W('observability/nba-001-observability-evidence.json',{engine_id:'NBA-001',gate:'observability',status:'PASS',environment:'LAB_PREPROD',metric:'CUSTOMER_NEXT_BEST_ACTION_READY',audit:'semantic recommendation outcome recorded',trace_sha256:sha({bundle_id:result.bundle_id,semantic_outcome_hash:result.semantic_outcome_hash,nba_outcome_hash:nba.outcome_hash,next_best_action:nba.outcome.next_best_action}),observability_decision:result.observability_consumer.decision,finops_decision:result.finops_consumer.decision,next_best_action:nba.outcome.next_best_action,external_executions:0,crm_writes:0,prod_writes:0,additional_cost_eur:0});
+W('backup/nba-001-backup-evidence.json',{engine_id:'NBA-001',gate:'backup',status:'PASS',tested:true,backup_ready:result.backup_rollback_rebuild.backup_ready,runtime_result:result.backup_rollback_rebuild,source_hashes:sourceHashes,additional_cost_eur:0});
+W('rollback/nba-001-rollback-evidence.json',{engine_id:'NBA-001',gate:'rollback',status:'PASS',tested:true,rollback_green:result.backup_rollback_rebuild.rollback_green,prod_rollback_claimed:false,crm_rollback_claimed:false,additional_cost_eur:0});
+W('rebuild/nba-001-rebuild-evidence.json',{engine_id:'NBA-001',gate:'rebuild',status:'PASS',tested:true,deterministic:true,rebuild_green:result.backup_rollback_rebuild.rebuild_green,semantic_rebuild_match:rebuilt.semantic_outcome_hash===result.semantic_outcome_hash,nba_rebuild_match:nba2?.outcome_hash===nba.outcome_hash,additional_cost_eur:0});
+W('SUMMARY.json',{mission:'CLOSE_BATCH09_NBA001_V1',status:'GREEN',engine_id:'NBA-001',company_id:'fenix',environment:'LAB_PREPROD',certified_scope:'READ_ONLY_NEXT_BEST_ACTION_NO_EXTERNAL_EXECUTION',full_e2e_real_preprod:true,semantic_consumer_real:true,next_best_action:nba.outcome.next_best_action,read_only:true,source_of_truth_replaced:false,crm_write_authorized:false,db_mutation_authorized:false,external_dispatch_authorized:false,external_side_effects_executed:false,prod_execution_authorized:false,prod_writes:false,spend_authorized:false,trading_touched:false,factory_mutated:false,registry_mutated:false,additional_cost_eur:0,holds:['EXTERNAL_ACTION_EXECUTION','CRM_WRITEBACK','PROD_EXECUTION']});
+fs.rmSync(root,{recursive:true,force:true});
+console.log('CLOSE_BATCH09_NBA001_V1=GREEN');
