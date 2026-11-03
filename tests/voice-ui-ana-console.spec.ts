@@ -4,7 +4,7 @@ const fakeSession={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJ
 
 async function boot(page:any){
  await page.addInitScript(session=>{
-  localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));
+  localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(session));sessionStorage.setItem('fenix-session-active','1');
   localStorage.setItem('fenix-remember-device','true');
   let recognitionStarts=0;
   class FakeRecognition{lang='';continuous=false;interimResults=false;maxAlternatives=1;phrases:any[]=[];onstart:any=null;onresult:any=null;onerror:any=null;onend:any=null;start(){recognitionStarts+=1;this.onstart?.({});setTimeout(()=>{if(recognitionStarts===1)this.onresult?.({results:{length:1,0:{length:1,isFinal:true,0:{transcript:'consulta hablada exacta',confidence:.99}}}});this.onend?.({});},5)}stop(){this.onend?.({})}abort(){}}
