@@ -1,0 +1,29 @@
+name: CEREBRO TRN001 Multifamily Synthetic Acceptance V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/trn001-multifamily-synthetic-acceptance-v1.mjs'
+      - '.github/workflows/cerebro-trn001-multifamily-synthetic-acceptance-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  multifamily-evaluation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify deterministic training and hard stop on automatic promotion
+        env: {CEREBRO_TRN_EVIDENCE_OUT: /tmp/cerebro-trn-multifamily}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/missions/trn001-multifamily-synthetic-acceptance-v1.mjs
+          node cerebro/tests/foundation-holds-v1.test.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-trn001-multifamily-synthetic-${{ github.run_id }}
+          path: /tmp/cerebro-trn-multifamily/SUMMARY.json
+          if-no-files-found: error
