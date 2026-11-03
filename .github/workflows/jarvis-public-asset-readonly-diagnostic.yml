@@ -61,3 +61,36 @@ jobs:
             echo "URL $url"
             curl -sSL --max-time 10 -o /dev/null -D - "$url" | grep -Ei '^(HTTP/|server:|via:|x-github|x-vercel|cf-|cache-control:|location:|age:)' | head -n 16 || true
           done
+
+      - name: Probe Vercel custom-domain origin without changing public DNS
+        shell: bash
+        run: |
+          set -euo pipefail
+          HOST='app.fenixcapital.es'
+          ORIGIN_IP='76.76.21.21'
+          echo 'VERCEL_ORIGIN_READ_ONLY=true'
+          status="$(curl --compressed -sS --max-time 20 --resolve "${HOST}:443:${ORIGIN_IP}" -H 'Cache-Control: no-cache' -o /tmp/jarvis-vercel-html -D /tmp/jarvis-vercel-headers -w '%{http_code}' "https://${HOST}/cerebro?section=jarvis")" || status='CURL_ERROR'
+          echo "VERCEL_ORIGIN_HTML_STATUS=$status"
+          grep -Ei '^(server:|content-type:|cache-control:|x-vercel-id:|x-vercel-error:|location:)' /tmp/jarvis-vercel-headers || true
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          data=Path('/tmp/jarvis-vercel-html').read_text(errors='replace')
+          assets=list(dict.fromkeys(re.findall(r'["\'](/assets/[^"\']+\.(?:js|css))["\']',data)))
+          Path('/tmp/jarvis-vercel-assets.txt').write_text('\n'.join(assets[:12]))
+          print('VERCEL_ORIGIN_HTML_IS_APP', '<div id="root"' in data)
+          print('VERCEL_ORIGIN_ASSET_PATHS',assets[:12])
+          PY
+          while IFS= read -r path; do
+            [ -n "$path" ] || continue
+            case "$path" in *.js) ;; *) continue ;; esac
+            code="$(curl --compressed -sS --max-time 20 --resolve "${HOST}:443:${ORIGIN_IP}" -o /tmp/jarvis-vercel-asset -w '%{http_code}' "https://${HOST}${path}")" || code='CURL_ERROR'
+            echo "VERCEL_JS_STATUS=$code PATH=$path"
+            python3 - <<'PY'
+          from pathlib import Path
+          body=Path('/tmp/jarvis-vercel-asset').read_bytes()
+          print('JARVIS_FONTS_BUNDLED',b'jarvis_home_font_scale_v1' in body)
+          print('VOICE_PERMISSION_DIAGNOSTICS_BUNDLED',b'Chrome no tiene permiso para usar el micr' in body)
+          print('PROD_SUPABASE_REFERENCE_BUNDLED',b'cluhljgonannaafpmblx.supabase.co' in body)
+          PY
+          done < /tmp/jarvis-vercel-assets.txt
