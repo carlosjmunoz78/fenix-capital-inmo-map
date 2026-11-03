@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.16.0",
+  "schema_version": "1.17.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -417,7 +417,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "New canonical actual evidence: only 25/179 meet strict 12-gate repository readiness; 154 foundation-only. DO NOT confuse historical 169 certified with 25 strict nor claim live PROD. Resolve host/credentials and missing gate evidence individually.",
+  "next_block": "Prioritize physical persistent host and secure GitHub secrets; only then complete independent real integrations, rollback/rebuild tests and 12 physical gates. Strict static audit 25/179, eight individually 4–6/12. No production writes.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -583,5 +583,110 @@
     "prod_writes": false,
     "trading_touched": false,
     "additional_cost_eur": 0
+  },
+  "eight_strict_repository_gate_breakdown": {
+    "status": "VERIFIED_CANONICAL_AUDITOR",
+    "ci_run": 41688776877,
+    "scope": "REPOSITORY_FILE_AND_ENGINE_ID_HEURISTIC_NOT_PHYSICAL_PROD",
+    "engines": {
+      "RUNTIME-001": {
+        "passed": 5,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "KNW-001": {
+        "passed": 6,
+        "missing": [
+          "contracts",
+          "permissions",
+          "observability",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "TRN-001": {
+        "passed": 6,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "FINOPS-001": {
+        "passed": 5,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "DOC-001": {
+        "passed": 5,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "DOC-002": {
+        "passed": 4,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "observability",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "DOC-003": {
+        "passed": 4,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "observability",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      },
+      "DOC-004": {
+        "passed": 4,
+        "missing": [
+          "contracts",
+          "permissions",
+          "evaluation",
+          "tribunal",
+          "observability",
+          "backup",
+          "rollback",
+          "rebuild"
+        ]
+      }
+    },
+    "note": "Heuristic gates are NOT independent proof of real backend integration, permanent host, rollback on target, or PROD rights. Never generate empty artifacts to inflate counts."
   }
 }
