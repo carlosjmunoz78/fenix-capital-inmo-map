@@ -52,6 +52,16 @@ export class JarvisUniversalCore {
   async inspect({token,missionId}){const p=await this.#principal(token);const m=await this.store.get(requiredString(missionId,'MISSION_ID'));if(!m||m.ownerId!==p.ownerId)throw new Error('MISSION_NOT_FOUND');this.#checkCompany(p,m.companyId);return m;}
   async execute({token,missionId}){
     const p=await this.#principal(token);let m=await this.inspect({token,missionId});
+    // An interrupted read-only execution is never silently retried. Reconcile only
+    // after the expiry threshold, using the durable revision CAS to exclude races.
+    if(m.status==='AUTHORIZED'){
+      const now=Date.parse(this.clock()),last=Date.parse(m.updatedAt);
+      if(!Number.isFinite(now)||!Number.isFinite(last)||now-last<300000)return{mission:m,replayed:true};
+      if(!Number.isSafeInteger(m.revision)||!this.store.createIfAbsent)throw new Error('RECOVERY_REQUIRES_DURABLE_CAS');
+      m.status='FAILED';m.errorCode='EXECUTION_INTERRUPTED';m.updatedAt=this.clock();
+      m.events.push({type:'FAILED',at:m.updatedAt,reason:'EXECUTION_INTERRUPTED'});
+      m=await this.store.put(m);return{mission:m,replayed:false};
+    }
     if(m.status!=='RECEIVED')return{mission:m,replayed:true};
     const capability=this.capabilities.get(m.intent);
     let state='HUMAN_REQUIRED',reason='POLICY_CONFLICT';
