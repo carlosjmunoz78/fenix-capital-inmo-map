@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+from doc001_004_privacy_safe_evidence_v1 import privacy_safe_evidence
 from doc001_004_pipeline_v1 import (
     Doc001Pipeline, Doc002PendingLifecycle, Doc003QualityGate,
     Doc004AnomalyEngine, sha256_file,
@@ -66,6 +67,14 @@ def run() -> dict:
         check(high_score["risk_level"] == "HIGH", "DOC004_HIGH_RISK_MISSING")
         check(high_score["human_exception"] == "HIGH_RISK", "DOC004_HUMAN_EXCEPTION")
         check(high_score["accusation"] is False and high_score["evidence_only"] is True, "DOC004_AUTO_ACCUSATION")
+        # Privacy boundary must stay safe during the real synthetic image pipeline,
+        # not only in isolated mock tests.
+        normal_safe = privacy_safe_evidence(normal_result)
+        high_safe = privacy_safe_evidence(blurry_result, known_hashes={original_hash[blurry.name]})
+        check(normal_safe["raw_text_included"] is False, "DOC_PRIVACY_RAW_TEXT")
+        check("text" not in high_safe and "filename" not in high_safe, "DOC_PRIVACY_UNSAFE_KEYS")
+        check(high_safe["anomaly"]["human_exception"] == "HIGH_RISK", "DOC_PRIVACY_HUMAN_ESCALATION")
+        check(high_safe["source_modified"] is False, "DOC_PRIVACY_SOURCE_MODIFIED")
         check(all(sha256_file(p) == original_hash[p.name] for p in [normal, blurry]), "DOC_FIXTURE_MODIFIED")
         try:
             pipeline.process(normal, {**meta, "environment": "PROD"})
@@ -91,6 +100,8 @@ def run() -> dict:
                 "tenant_scope": True,
                 "prod_write_rejected": True,
                 "source_nondestructive": True,
+                "privacy_safe_evidence_boundary": True,
+                "raw_text_excluded": True,
             },
             "limits": {
                 "documents_synthetic_only": True,
