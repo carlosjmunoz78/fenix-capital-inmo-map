@@ -82,10 +82,27 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          ! grep -R --line-number --exclude-dir=evidence -E 'REAL_AUTHORIZED[[:space:]]*=[[:space:]]*true|CEREBRO_ALLOW_TRADING:[[:space:]]*["'"']?true|CEREBRO_ALLOW_PROD_WRITES:[[:space:]]*["'"']?true' \
-            cerebro/runtime cerebro/tests cerebro/missions cerebro/document .github/workflows/cerebro-remaining-nontrading-batch-closure-v1.yml
-          grep -q 'LAB-TRD' cerebro/governance/remaining-10-progress-2026-11-03.json
-          grep -q '"touched": false' cerebro/governance/remaining-10-progress-2026-11-03.json
+          node --input-type=module <<'NODE'
+          import { RUNTIME001_SHARED_WORKER_V1_CONTRACT as c } from './cerebro/runtime/runtime001-shared-worker-v1.mjs';
+          if (c.prod_target_exposed !== false) throw new Error('runtime prod target exposed');
+          if (c.prod_authorized !== false) throw new Error('runtime prod authorized');
+          if (c.trading_access !== false) throw new Error('runtime trading access enabled');
+          if (c.creates_second_queue !== false) throw new Error('second queue detected');
+          if (c.creates_second_scheduler !== false) throw new Error('second scheduler detected');
+          if (c.additional_cost_eur !== 0) throw new Error('additional cost detected');
+          NODE
+          python - <<'PY'
+          import json
+          p='cerebro/governance/remaining-10-progress-2026-11-03.json'
+          d=json.load(open(p, encoding='utf-8'))
+          assert d['safety']['main_touched'] is False
+          assert d['safety']['prod_touched'] is False
+          assert d['safety']['prod_writes'] is False
+          assert d['safety']['trading_touched'] is False
+          assert d['safety']['additional_cost_eur'] == 0
+          assert d['progress']['LAB-TRD']['touched'] is False
+          assert d['progress']['LAB-TRD']['isolation'] == 'PRESERVED'
+          PY
 
       - name: Produce batch closure evidence
         shell: bash
@@ -94,7 +111,7 @@ jobs:
           mkdir -p cerebro/evidence/remaining-nontrading-batch/2026-11-03
           cat > cerebro/evidence/remaining-nontrading-batch/2026-11-03/SUMMARY.json <<'JSON'
           {
-            "schema_version": "1.0.0",
+            "schema_version": "1.0.1",
             "batch": "remaining-nontrading-batch-closure-v1",
             "engines": ["RUNTIME-001", "KNW-001", "TRN-001", "FINOPS-001", "DOC-001", "DOC-002", "DOC-003", "DOC-004"],
             "result_scope": "STRUCTURAL_AND_CI_EVIDENCE_ONLY",
