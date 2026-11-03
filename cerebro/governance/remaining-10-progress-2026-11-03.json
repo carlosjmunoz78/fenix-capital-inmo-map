@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.1",
+  "schema_version": "1.0.2",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -69,8 +69,16 @@
       "remaining": ["trading-specific empirical gates", "explicit REAL authorization remains separate"]
     },
     "HCI-001": {
-      "state": "STRUCTURAL_HOLD",
-      "remaining": ["authorized physical device/runtime acceptance", "semantic remote result", "persistence/restart", "rollback evidence"]
+      "state": "PARCIAL",
+      "physical_probe": {
+        "browser_connector": "Opera authorized installation",
+        "new_tab_navigation": "PASS",
+        "semantic_accessibility_read": "PASS",
+        "test_target": "https://example.com/",
+        "external_write": false,
+        "close_tab": "PERMISSION_DISABLED"
+      },
+      "remaining": ["complete input/action circuit", "persistence/restart", "rollback/cleanup evidence", "rerun all 12 gates"]
     }
   },
   "safety": {
