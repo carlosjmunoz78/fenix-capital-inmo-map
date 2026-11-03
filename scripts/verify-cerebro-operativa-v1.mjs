@@ -7,6 +7,7 @@ function mustNot(text,needle,label){if(text.includes(needle))throw new Error(`Fo
 const host=read('src/CerebroConsoleHost.tsx');
 const shell=read('src/CerebroConsoleShell.tsx');
 const jarvis=read('src/CerebroJarvisWorkConsole.tsx');
+const jarvisEmbedded=read('src/JarvisEmbeddedConsole.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
 const operativeCss=read('src/cerebro-operative-console.css');
 const isolationCss=read('src/cerebro-route-isolation-v2.css');
@@ -28,8 +29,10 @@ must(host,"if(section==='legacy-v0')return'V0'",'legacy V0 rollback route');
 must(host,'<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>','legacy canonical V0 rollback');
 must(host,"document.documentElement.dataset.cerebroConsole='1'",'route isolation marker');
 
-must(jarvis,"import CerebroConsoleShell from './CerebroConsoleShell';",'canonical V0 core inside Jarvis');
-must(jarvis,'<CerebroConsoleShell/>','canonical V0 rendered in Jarvis');
+must(jarvis,"import JarvisEmbeddedConsole from './JarvisEmbeddedConsole';",'canonical Jarvis embedded core import');
+must(jarvis,'<JarvisEmbeddedConsole','canonical Jarvis embedded core rendered');
+must(jarvisEmbedded,"import CerebroConsoleShell from './CerebroConsoleShell';",'canonical V0 core inside Jarvis embedded console');
+must(jarvisEmbedded,'<CerebroConsoleShell','canonical V0 rendered inside Jarvis embedded console');
 must(jarvis,'fetchCerebroActivity','real activity source retained in Jarvis');
 
 must(operative,'fetchCerebroActivity','real activity source consumed by Operativa');
