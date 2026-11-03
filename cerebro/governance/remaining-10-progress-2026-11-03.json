@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.2",
+  "schema_version": "1.1.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -9,76 +9,99 @@
     "prod_active_verified": 0,
     "human_required": 0
   },
+  "batch_closure": {
+    "name": "remaining-nontrading-batch-closure-v1",
+    "ci_run": 41664200060,
+    "conclusion": "SUCCESS",
+    "classification": "GREEN_STRUCTURAL_BATCH_VERIFIED",
+    "engines": ["RUNTIME-001", "KNW-001", "TRN-001", "FINOPS-001", "DOC-001", "DOC-002", "DOC-003", "DOC-004"],
+    "prod_promotion": false,
+    "prod_writes": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
+  },
   "progress": {
     "RUNTIME-001": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658249386,
-      "remaining": ["physical PREPROD target", "generic governed PROD adapter", "live semantic smoke", "same-artifact rollback/rebuild"]
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
+      "remaining": ["persistent governed runtime target if one is formally selected", "live semantic smoke on that target", "same-artifact rollback/rebuild proof for that target"]
     },
     "KNW-001": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658502825,
-      "remaining": ["bind live Notion/document/Git adapters", "prove freshness/conflict lifecycle on live sources"]
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
+      "remaining": ["bind approved live Notion/document/Git sources", "prove freshness/conflict lifecycle on live sources"]
     },
     "TRN-001": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658502825,
-      "remaining": ["bind reproducible real datasets/runs across engine families", "tribunal integration without self-promotion"]
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
+      "remaining": ["bind representative real datasets/runs across engine families", "prove tribunal integration without self-promotion"]
     },
     "FINOPS-001": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658502825,
-      "remaining": ["instrument live providers/API/AI/storage call sites", "prove live budgets and hard-stop attribution"]
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
+      "remaining": ["instrument approved live provider/API/AI/storage call sites", "prove live budgets and hard-stop attribution"]
     },
     "DOC-001": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658716466,
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
       "proven": ["local-first extraction", "deterministic classification", "family schema", "safe OCR fallback", "source non-destructive"],
-      "remaining": ["bind live document intake/storage and canonical metadata"]
+      "remaining": ["bind approved live document intake/storage and canonical metadata"]
     },
     "DOC-002": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658716466,
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
       "proven": ["missing/request/receive/classify/validate/close lifecycle"],
-      "remaining": ["bind live communications/reminders and receipt events"]
+      "remaining": ["bind approved live communications/reminders and receipt events"]
     },
     "DOC-003": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658716466,
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
       "proven": ["Pillow", "OpenCV", "OCRmyPDF", "Tesseract", "quality gate", "non-destructive recovery"],
-      "remaining": ["expand fixture corpus to representative real document families before production activation"]
+      "remaining": ["validate representative real document families before production activation"]
     },
     "DOC-004": {
       "state": "PARCIAL",
       "structural_contract": "GREEN",
-      "ci_run": 41658716466,
+      "batch_verified": true,
+      "batch_ci_run": 41664200060,
       "proven": ["duplicate/anomaly evidence scoring", "HIGH_RISK escalation", "automatic accusation forbidden"],
-      "remaining": ["bind normalized live evidence and calibrate thresholds on validated fixtures"]
+      "remaining": ["bind normalized live evidence", "calibrate thresholds on validated real fixtures"]
     },
     "LAB-TRD": {
       "state": "STRUCTURAL_HOLD",
       "isolation": "PRESERVED",
       "touched": false,
+      "real_authorization": false,
       "remaining": ["trading-specific empirical gates", "explicit REAL authorization remains separate"]
     },
     "HCI-001": {
       "state": "PARCIAL",
       "physical_probe": {
         "browser_connector": "Opera authorized installation",
+        "browser_connection": "PASS",
         "new_tab_navigation": "PASS",
         "semantic_accessibility_read": "PASS",
+        "browser_session_detected_again_2026_11_03": true,
         "test_target": "https://example.com/",
         "external_write": false,
+        "input_action_capability": "NOT_EXPOSED_BY_CURRENT_CONNECTOR",
         "close_tab": "PERMISSION_DISABLED"
       },
-      "remaining": ["complete input/action circuit", "persistence/restart", "rollback/cleanup evidence", "rerun all 12 gates"]
+      "remaining": ["input/action circuit through an authorized capability that exposes it", "persistence/restart acceptance", "rollback/cleanup evidence", "rerun all 12 HCI gates"]
     }
   },
   "safety": {
@@ -89,5 +112,5 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "physical/integration closure in dependency order RUNTIME -> KNW/TRN/FINOPS/DOC -> HCI; LAB-TRD remains isolated and separately governed"
+  "next_block": "Only live-integration/physical acceptance remains for the 8 batch-verified non-trading engines plus HCI-001; LAB-TRD remains isolated and separately governed. No engine is declared PROD from CI alone."
 }
