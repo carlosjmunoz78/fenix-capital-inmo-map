@@ -69,3 +69,14 @@ test('B5 provider unavailable returns denial; model ID is never invented',async(
  const r=await make({catalog:[{...local,healthy:false}]}).choose({...qa});
  assert.equal(r.state,'DENY');
 });
+
+test('B5 never accidentally selects cheap unapproved provider ahead of DeepSeek',async()=>{
+ const ext={id:'unapproved',provider:'EXTERNAL',capabilities:['LANGUAGE'],estimatedEuroPerCall:0,healthy:true};
+ const router=make({catalog:[ext,deepseek],balanceProof:proof,budgetStore:store});
+ const r=await router.choose({...qa,allowPaid:true,maxCallEuro:1});
+ assert.equal(r.provider,'DEEPSEEK');assert.equal(r.modelId,'deepseek-fixture');assert.equal(r.executed,false);
+});
+test('B5 DeepSeek is never misrepresented as a native speech-to-text or text-to-speech engine',()=>{
+ assert.throws(()=>make({catalog:[{...deepseek,capabilities:['VOICE_TTS']}]}),/DEEPSEEK_SPEECH_UNSUPPORTED/);
+ assert.throws(()=>make({catalog:[{...deepseek,capabilities:['VOICE_STT']}]}),/DEEPSEEK_SPEECH_UNSUPPORTED/);
+});
