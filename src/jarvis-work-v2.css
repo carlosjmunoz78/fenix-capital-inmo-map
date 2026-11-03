@@ -103,3 +103,16 @@
   .jarvis-work-v2 .jarvis-home-project-copy strong{font-size:15px}
   .jarvis-work-v2 .jarvis-home-project-copy p{font-size:13.5px}
 }
+
+
+/* UX-LEGIBILITY-002: visible desktop change even when previous styles are cached. */
+.jarvis-work-v2 .jarvis-home-projects{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.jarvis-work-v2 .jarvis-home-project-card{min-height:176px;padding:18px 20px;gap:14px}
+.jarvis-work-v2 .jarvis-home-project-copy strong{line-height:1.4}
+.jarvis-work-v2 .jarvis-home-project-copy small{color:#c5c5ce;line-height:1.4;margin-top:6px}
+.jarvis-work-v2 .jarvis-home-project-copy p{line-height:1.55;color:#c2c3cb;margin-top:10px}
+.jarvis-work-v2 .jarvis-home-text-controls{display:flex;align-items:center;gap:4px;padding:3px;border:1px solid rgba(255,255,255,.18);border-radius:10px}
+.jarvis-work-v2 .jarvis-home-text-controls button{font-size:15px!important;min-width:38px;min-height:38px;padding:0 6px!important;color:#fff;background:#23262a;border-radius:7px}
+.jarvis-work-v2 .jarvis-home-text-controls button:disabled{opacity:.4;cursor:not-allowed}
+@media(min-width:1500px){.jarvis-work-v2 .jarvis-home-projects{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:680px){.jarvis-work-v2 .jarvis-home-projects{grid-template-columns:1fr}.jarvis-work-v2 .jarvis-home-project-card{min-height:156px;padding:14px}.jarvis-work-v2 .jarvis-home-actions{flex-wrap:wrap}.jarvis-work-v2 .jarvis-home-text-controls{width:100%;justify-content:center}}

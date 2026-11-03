@@ -149,3 +149,25 @@ test('JARVIS UX · physical typography remains legible on desktop and mobile',as
     await expectNoHorizontalOverflow(page);
   }
 });
+
+
+test('JARVIS UX · font controls persist readable size and two-column desktop layout',async({page})=>{
+ await page.setViewportSize({width:1024,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await expectCleanHome(page);
+ const title=page.locator('.jarvis-home-project-copy strong').first();
+ const body=page.locator('.jarvis-home-project-copy p').first();
+ expect(await fontSize(page,'.jarvis-home-project-copy strong')).toBeGreaterThanOrEqual(18);
+ expect(await fontSize(page,'.jarvis-home-project-copy p')).toBeGreaterThanOrEqual(16);
+ const columns=await page.locator('.jarvis-home-projects').evaluate(el=>getComputedStyle(el).gridTemplateColumns.split(' ').length);
+ expect(columns).toBe(2);
+ await page.getByRole('button',{name:'Aumentar letra'}).click();
+ expect(await title.evaluate(el=>Number.parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(20);
+ expect(await body.evaluate(el=>Number.parseFloat(getComputedStyle(el).fontSize))).toBeGreaterThanOrEqual(18);
+ await page.reload();
+ await expectCleanHome(page);
+ expect(await fontSize(page,'.jarvis-home-project-copy strong')).toBeGreaterThanOrEqual(20);
+ await page.getByRole('button',{name:'Reducir letra'}).click();
+ expect(await fontSize(page,'.jarvis-home-project-copy strong')).toBe(18);
+});
