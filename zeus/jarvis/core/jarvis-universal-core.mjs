@@ -1,4 +1,5 @@
 /** ZEUS/JARVIS universal core V0. Standalone, no network calls, no credentials. */
+import {validateMissionMetadata} from './jarvis-mission-metadata-guard.mjs';
 export const CORE_ID='ZEUS:JARVIS:OWNER_ROOT';
 export const CORE_VERSION='0.1.0';
 export const HUMAN_REASONS=Object.freeze(['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST']);
@@ -36,7 +37,7 @@ export class JarvisUniversalCore {
     const p=await this.#principal(token);const company=requiredString(companyId,'COMPANY_ID',100);this.#checkCompany(p,company);
     const key=requiredString(idempotencyKey,'IDEMPOTENCY_KEY',180),action=requiredString(intent,'INTENT',100);
     const project=requiredString(projectId,'PROJECT_ID',150),ch=requiredString(channel,'CHANNEL',50);
-    if(payload==null||typeof payload!=='object'||Array.isArray(payload))throw new TypeError('PAYLOAD_INVALID');
+    validateMissionMetadata(payload,{environment:this.environment});
     const scope=`${p.ownerId}:${company}`;const prior=await this.store.findByIdempotency(scope,key);
     if(prior){if(prior.intent!==action||prior.projectId!==project||stableJson(prior.request)!==stableJson(redact(payload)))throw new Error('IDEMPOTENCY_CONFLICT');return {mission:prior,replayed:true};}
     const at=this.clock();const mission={id:this.ids(),coreId:CORE_ID,coreVersion:CORE_VERSION,ownerId:p.ownerId,companyId:company,projectId:project,intent:action,idempotencyKey:key,request:redact(payload),channel:ch,status:'RECEIVED',events:[{type:'RECEIVED',at,channel:ch}],createdAt:at,updatedAt:at,environment:this.environment,engineId:'JARVIS-CORE-001'};
