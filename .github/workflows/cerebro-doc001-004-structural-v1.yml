@@ -1,0 +1,50 @@
+name: CEREBRO DOC-001..004 Structural V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/document/doc001_004_pipeline_v1.py'
+      - 'cerebro/document/test_doc001_004_pipeline_v1.py'
+      - '.github/workflows/cerebro-doc001-004-structural-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  docs-local-first:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Install zero-cost local document stack
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ghostscript qpdf tesseract-ocr unpaper
+          python -m pip install --disable-pip-version-check pillow opencv-python-headless ocrmypdf pypdf
+      - name: Verify required local tools
+        run: |
+          python - <<'PY'
+          import cv2, PIL, pypdf
+          print('opencv',cv2.__version__)
+          print('pillow',PIL.__version__)
+          print('pypdf',pypdf.__version__)
+          PY
+          ocrmypdf --version
+          tesseract --version | head -1
+      - name: Run DOC-001..004 governed fixtures
+        working-directory: cerebro/document
+        run: python -m unittest -v test_doc001_004_pipeline_v1.py
+      - name: Safety invariants
+        working-directory: cerebro/document
+        run: |
+          python - <<'PY'
+          from doc001_004_pipeline_v1 import CONTRACT
+          assert CONTRACT['prod_write_authorized'] is False
+          assert CONTRACT['trading_access'] is False
+          assert CONTRACT['additional_cost_eur']==0
+          assert CONTRACT['DOC-004']['automatic_accusation'] is False
+          print('DOC001_004_STRUCTURAL=GREEN')
+          PY
