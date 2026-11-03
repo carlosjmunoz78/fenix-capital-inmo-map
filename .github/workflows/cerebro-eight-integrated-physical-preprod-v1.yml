@@ -1,0 +1,103 @@
+name: CEREBRO Eight Engines Integrated Physical PREPROD V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - '.github/workflows/cerebro-eight-integrated-physical-preprod-v1.yml'
+      - 'cerebro/missions/eight-prod-physical-preflight-v1.mjs'
+      - 'cerebro/governance/remaining-10-progress-2026-11-03.json'
+  workflow_dispatch:
+permissions: {contents: read}
+concurrency:
+  group: cerebro-eight-integrated-physical-preprod-v1
+  cancel-in-progress: false
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+jobs:
+  eight-engine-integrated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}',fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install already-used free document libraries
+        run: python -m pip install --disable-pip-version-check pillow opencv-python-headless pypdf
+      - name: Global context and canonical registry safety
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          test "$CEREBRO_ALLOW_TRADING" = false
+          cd cerebro && npm run validate && node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: RUNTIME existing JOB001 execution durable restore and tenant isolation
+        env: {CEREBRO_RUNTIME001_TEST_DIR: /tmp/cerebro-eight-integration/runtime}
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/runtime001-scoped-job001-recovery-v1.test.mjs cerebro/tests/durable-job-runtime-v1.test.mjs cerebro/tests/durable-worker-runner-v1.test.mjs cerebro/tests/runtime001-shared-worker-v1.test.mjs
+          node cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs
+      - name: KNW real Git source provenance and protected Notion reference policy
+        env: {CEREBRO_EVIDENCE_OUT: /tmp/cerebro-eight-integration/knowledge}
+        run: |
+          set -euo pipefail
+          node cerebro/missions/knw001-git-live-readonly-acceptance-v1.mjs
+          node --test cerebro/tests/knw001-external-source-rights-v1.test.mjs
+      - name: TRN multisector synthetic datasets and existing EVA JDG tribunal
+        env: {CEREBRO_TRN_EVIDENCE_OUT: /tmp/cerebro-eight-integration/training}
+        run: |
+          set -euo pipefail
+          node cerebro/missions/trn001-multifamily-synthetic-acceptance-v1.mjs
+          node --test cerebro/tests/trn001-existing-eva-jdg-bridge-v1.test.mjs
+      - name: FINOPS one real authenticated read-only provider with zero-cost pre-call gate
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CEREBRO_FINOPS_EVIDENCE_OUT: /tmp/cerebro-eight-integration/finops
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/finops001-zero-cost-outbound-guard-v1.test.mjs
+          node cerebro/missions/finops001-github-live-readonly-acceptance-v1.mjs
+      - name: DOC 001 to 004 physical synthetic full lifecycle, quality and anomaly escalation
+        env: {CEREBRO_DOC_EVIDENCE_OUT: /tmp/cerebro-eight-integration/documents}
+        run: |
+          set -euo pipefail
+          python cerebro/document/doc001_004_physical_e2e_preprod_v1.py
+      - name: Apply strict PROD preflight and record actual blockers
+        env: {CEREBRO_EVIDENCE_OUT: /tmp/cerebro-eight-integration/preflight}
+        run: |
+          set -euo pipefail
+          node cerebro/missions/eight-prod-physical-preflight-v1.mjs
+          node <<'NODE'
+          const fs=require('node:fs'),crypto=require('node:crypto');
+          const dir='/tmp/cerebro-eight-integration';
+          const paths=['runtime','knowledge','training','finops','documents','preflight'];
+          const files=paths.map(p=>({part:p,report:JSON.parse(fs.readFileSync(dir+'/'+p+'/SUMMARY.json'))}));
+          if(files[0].report.status!=='GREEN_RUNNER_FILESYSTEM_ACCEPTANCE')throw Error('RUNTIME NOT VERIFIED');
+          if(files[1].report.status!=='GREEN_GIT_LIVE_READONLY_SCOPE')throw Error('KNW NOT VERIFIED');
+          if(files[2].report.status!=='GREEN_MULTIFAMILY_SYNTHETIC_EVALUATION')throw Error('TRN NOT VERIFIED');
+          if(files[3].report.status!=='GREEN_LIVE_GITHUB_READONLY_PROVIDER_CALL')throw Error('FINOPS NOT VERIFIED');
+          if(files[4].report.status!=='GREEN_SYNTHETIC_PHYSICAL_E2E')throw Error('DOC NOT VERIFIED');
+          if(files[5].report.status!=='BLOCKED_SAFE')throw Error('UNEXPECTED_PROD_PREFLIGHT: '+files[5].report.status);
+          const result={schema_version:'1.0.0',batch:'8_INTEGRATED_PHYSICAL_PREPROD',status:'GREEN_INTEGRATED_PREPROD_ONLY',
+            engine_ids:['RUNTIME-001','KNW-001','TRN-001','FINOPS-001','DOC-001','DOC-002','DOC-003','DOC-004'],
+            independent_evidence:files.map(({part,report})=>({part,status:report.status,
+              sha256:crypto.createHash('sha256').update(JSON.stringify(report)).digest('hex')})),
+            permanent_host_proven:false,notion_persistent_source_bound:false,
+            customer_document_intake_bound:false,real_training_runs_verified:false,
+            all_live_providers_metered:false,prod_preflight_status:files[5].report.status,
+            prod_promotion_authorized:false,prod_writes:false,trading_access:false,
+            additional_subscription_eur:0,requires_governed_per_engine_promotion:true};
+          fs.writeFileSync(dir+'/EIGHT_INTEGRATED_RESULT.json',JSON.stringify(result,null,2)+'\n');
+          console.log('EIGHT_INTEGRATED='+JSON.stringify(result));
+          NODE
+      - name: Upload inspectable source-to-outcome acceptance
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-eight-integrated-preprod-${{ github.run_id }}
+          path: /tmp/cerebro-eight-integration/
+          if-no-files-found: error
+          retention-days: 30
