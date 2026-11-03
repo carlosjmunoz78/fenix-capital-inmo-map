@@ -42,3 +42,12 @@ Not exposed on the internet. Before public access: trusted issuer and session ve
 `jarvis-concurrency.test.mjs` proves an optimistic revision-aware store permits at most one competing read-only executor to start. The losing request reports a revision conflict (409 through the Gateway); retries may re-read terminal status. The existing in-memory and SQLite adapters are **LAB-only** and DO NOT offer this distributed concurrency guarantee.
 
 **Remaining mandatory gates**: real ZEUS identity binding registry and signed session validation, atomic durable store with row revision/lease and backup, authenticated cross-device E2E, crash-recovery for in-flight `AUTHORIZED` missions, explicit safe capability routing via CEREBRO, rollback test, security review. Never serve the LAB handler openly. No migration has been executed; no traffic has been switched from the current frontend/orchestrator.
+
+## B2 corte 05 — identity registry and recovery (LAB, not live)
+
+- `jarvis-zeus-binding-registry.mjs`: server-side ZEUS identity-binding lookup. The service uses keyed HMAC-SHA256 of `(trusted_channel, verified_subject)`, never a raw subject or bearer token in the binding table. The signing key **must** live in the server-side vault, not in source, database, app or browser. Revoked and missing records fail closed.
+- `../gates/20261103_jarvis_zeus_identity_binding_v0.sql`: DDL proposal for a default-inactive, service-role-only identity registry. Not applied in PROD; owner binding must **not** be implicitly granted based on an email, a client-side claim, or being logged in to Fénix.
+- `jarvis-recovery.test.mjs`: fail-closed on stale `AUTHORIZED` missions. At 5 minutes the mission is marked `FAILED` with `EXECUTION_INTERRUPTED` under CAS; no replay or automatic money/mutation/external side effects. No distributed lease/scheduler implemented yet; dedicated worker crash remains an operational gate.
+- Local Node 22 execution: **33 tests passed** (`node --test zeus/jarvis/core/*.test.mjs`). This includes mocked storage and identity; NOT cross-device authenticated PROD E2E.
+
+**Explicit NO-GO for B2 operational closure:** independent ZEUS registry not provisioned or seeded with validated owner binding; mission table not migrated; no real owner JWT E2E, persistent service endpoint or restart/device test. Do not enable the runtime or mark B2 `CONFIRMED_OPERATIONAL` without these proofs and observed rollback. All work remains on PR #13, draft, with NO changes to App or CRM routes.
