@@ -186,7 +186,8 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
    stop(){this.onend?.();}
    abort(){this.onend?.();}
   }
-  (window as Window&{webkitSpeechRecognition?:unknown}).webkitSpeechRecognition=SpeechRecognitionMock;
+  Object.defineProperty(window,'SpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
+  Object.defineProperty(window,'webkitSpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
  });
  await installIsolatedPreprod(page);
  await page.goto('/cerebro?section=jarvis');
