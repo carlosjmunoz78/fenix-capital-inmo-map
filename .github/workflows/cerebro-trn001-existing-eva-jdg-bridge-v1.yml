@@ -1,0 +1,24 @@
+name: CEREBRO TRN001 Existing EVA JDG Tribunal Integration V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/trn001-existing-eva-jdg-bridge-v1.mjs'
+      - 'cerebro/tests/trn001-existing-eva-jdg-bridge-v1.test.mjs'
+      - '.github/workflows/cerebro-trn001-existing-eva-jdg-bridge-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  old-new-judge-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Test TRN bridge against existing EVA JDG and historical training
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node --test cerebro/tests/trn001-existing-eva-jdg-bridge-v1.test.mjs cerebro/tests/foundation-holds-v1.test.mjs
