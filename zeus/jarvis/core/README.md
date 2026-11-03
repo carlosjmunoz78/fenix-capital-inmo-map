@@ -16,3 +16,13 @@ Implement an encrypted server-side durable store with atomic unique `(ownerId, c
 `jarvis-sqlite-store.mjs` adds an optional **local-only SQLite test adapter** based on Node 22 `node:sqlite` (currently experimental); it persists across process restart and enforces an atomic unique idempotency key for initial inserts. It **does not** establish safe cross-process concurrent CAS updates, multi-host HA, production durability, or server-authenticated cross-device sessions. Use this only in isolated LAB. The real ZEUS deployment needs a transactional persistent service and concurrency protocol.
 
 Run all tests: `node --test core/*.test.mjs`.
+
+## B2 corte 02 — bridge de identidad y store central (código preparado, NO desplegado)
+
+- `jarvis-fenix-channel-identity.mjs`: **adaptador de un canal** autenticado mediante Supabase `getUser` + claims verificadas y el RPC `fenix_prod_actor_context_by_auth_server`. Rechaza `user_metadata` como autoridad. El `resolveCompanies` debe inyectarse desde un registro de ZEUS fiable y sujeto a autorización del propietario. **No es la identidad global ni ejecuta el login**.
+- `jarvis-postgres-mission-store.mjs`: adaptador exclusivo de servidor; propone `createIfAbsent()` y actualizaciones CAS por revisión. **Nunca enviar service_role al navegador**. Solo metadatos de misión, no payloads pesados ni credenciales; cada llamada necesita validación de propietario en el Gateway.
+- `../gates/20261103_jarvis_universal_mission_metadata_v0.sql`: propuesta aislada de tabla con RLS y sin grants anon/auth. **No aplicar automáticamente a PROD**. Revisar exposición de Data API, backups y políticas antes de habilitar.
+- Núcleo: consume la inserción atómica si el store la ofrece; propaga la revisión devuelta por el store en cada transición para detectar escrituras concurrentes.
+- `node --test core/*.test.mjs` en Node.js 22: 17 pruebas sin fallos.
+
+**Gates pendientes:** integración con firma de sesión real y compañía autorizada desde ZEUS, revisión de seguridad (Auth/RLS/CAS, estados atascados/leases), migración versionada con rollback seguro, pruebas E2E multi-dispositivo, observabilidad y política de retención. No fusionar o desplegar como servicio autónomo sin estos gates. La persistencia central todavía no está activada.
