@@ -1,0 +1,40 @@
+name: CEREBRO DOC001-004 Physical Synthetic E2E V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/document/doc001_004_physical_e2e_preprod_v1.py'
+      - 'cerebro/document/doc001_004_pipeline_v1.py'
+      - '.github/workflows/cerebro-doc001-004-physical-synthetic-e2e-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_DOC_EVIDENCE_OUT: /tmp/cerebro-doc-physical-e2e
+jobs:
+  doc-physical-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install existing free document libraries needed by synthetic image path
+        run: python -m pip install --disable-pip-version-check pillow opencv-python-headless pypdf
+      - name: Validate four engines as one physical synthetic pipeline
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          test "$CEREBRO_ALLOW_TRADING" = false
+          python cerebro/document/doc001_004_physical_e2e_preprod_v1.py
+      - name: Upload proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-doc-physical-synthetic-e2e-${{ github.run_id }}
+          path: /tmp/cerebro-doc-physical-e2e/SUMMARY.json
+          if-no-files-found: error
+          retention-days: 30
