@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.11.0",
+  "schema_version": "1.12.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -104,10 +104,9 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "bind persistent authenticated READONLY Notion/document connectors with freshness checks",
-        "verify license and permission rights for each candidate",
-        "prove ingestion and contradiction handling on multiple live revisions",
-        "deploy approved target with rollback and governed 12 gates"
+        "bind persistent authenticated read-only Notion/document sources with rights and freshness",
+        "prove cross-provider conflicts and provenance on approved sources",
+        "physical smoke, backup/rollback and 12-gate promotion on permanent host"
       ],
       "live_git_acceptance": {
         "status": "GREEN_GIT_LIVE_READONLY_SCOPE",
@@ -135,6 +134,17 @@
         "staleness_gate": true,
         "no_auto_canonical_promotion": true,
         "prod_writes": false
+      },
+      "actual_two_git_revisions": {
+        "status": "GREEN_REAL_REVISION_HISTORY",
+        "ci_run": 41686499848,
+        "source_path": "cerebro/governance/remaining-10-progress-2026-11-03.json",
+        "two_real_commits": true,
+        "sha256_provenance": true,
+        "versioned_supersession": true,
+        "tenant_isolation": true,
+        "prod_denied": true,
+        "real_notion_connector_persistent": false
       }
     },
     "TRN-001": {
@@ -363,7 +373,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Use secure established GitHub environment/secret administrator to distinguish missing values from environment-scoped access; DO NOT expose secret values; verify PROD smoke only in its authorized workflow and branch. Continue 8-engine physical host/live integration on safe isolated branch. PROD remains blocked.",
+  "next_block": "Technical blockers remain actual permanent isolated CEREBRO host, protected PROD smoke secret references, real document/cost/data bindings and independently verified 12 per-engine gates. Safe CI green is not PROD. Continue without touching existing App/CRM or Trading.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
