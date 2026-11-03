@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {Knw001KnowledgeStoreV1} from '../runtime/foundation-holds-v1.mjs';
+import {classifyExternalKnowledgeReferenceV1 as classify,putGovernedExternalKnowledgeV1 as put,KNW001_EXTERNAL_SOURCES_CONTRACT_V1 as contract} from '../runtime/knw001-external-source-rights-v1.mjs';
+const base={company_id:'fenix',engine_id:'KNW-001',environment:'PREPROD',version:'v1',source_type:'NOTION_PAGE_READONLY',
+source_ref:'https://app.notion.com/p/3f781b1a756d81ad8a1dcc9c33fff720',source_snapshot_at:'2026-10-12T01:33:47.389Z',observed_at:'2026-11-03T17:03:00Z',confidence:0.8};
+const observed=classify({...base,rights_status:'REFERENCE_ONLY',content:'private text not imported'});
+assert.equal(observed.reference_only,true);
+assert.equal(observed.stale,true);
+assert.equal(observed.fulltext_ingestion_allowed,false);
+assert.equal(observed.canonical_promotion_allowed,false);
+assert.throws(()=>put(new Knw001KnowledgeStoreV1(),observed,{}),/INGEST_DENIED/);
+assert.equal(classify({...base,rights_status:'UNKNOWN',license_evidence:'',content:'x'}).status,'HOLD_RIGHTS');
+assert.equal(classify({...base,rights_status:'BLOCKED',license_evidence:'',content:'x'}).status,'HOLD_RIGHTS');
+assert.throws(()=>classify({...base,environment:'PROD',rights_status:'FULLTEXT_ALLOWED',license_evidence:'a',content:'text'}),/FAIL_CLOSED_SCOPE/);
+const permitted=classify({...base,source_snapshot_at:'2026-11-03T17:00:00Z',rights_status:'FULLTEXT_ALLOWED',license_evidence:'licensed-source-verified',content:'synthetic permitted case',content_status:'CANDIDATE'});
+assert.equal(permitted.fulltext_ingestion_allowed,true);
+const store=new Knw001KnowledgeStoreV1();
+const rec=put(store,permitted,{knowledge_id:'synthetic-test',subject:'quality',value:'not canonical',confidence:.5,created_at:'2026-11-03T17:03:00Z'});
+assert.equal(rec.lifecycle,'UNCERTAIN');
+assert.equal(store.query({company_id:'other-company',include_uncertain:true}).length,0);
+assert.equal(contract.prod_writes,false);
+console.log(JSON.stringify({result:'GREEN_GOVERNED_SOURCE_TESTS',notion_probe:'REFERENCE_ONLY_STALE_SNAPSHOT_NO_INGEST',prod_write:false,trading:false}));
