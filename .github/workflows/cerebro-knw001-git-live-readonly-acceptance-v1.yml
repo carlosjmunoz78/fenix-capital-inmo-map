@@ -1,0 +1,35 @@
+name: CEREBRO KNW001 Live Git Readonly Acceptance V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/knw001-git-live-readonly-acceptance-v1.mjs'
+      - '.github/workflows/cerebro-knw001-git-live-readonly-acceptance-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  knw-live-git:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Execute actual Git-backed KNW-001 acceptance without external writes
+        env:
+          CEREBRO_EVIDENCE_OUT: /tmp/cerebro-knw001-live-git
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/missions/knw001-git-live-readonly-acceptance-v1.mjs
+      - name: Upload proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knw001-git-live-${{ github.run_id }}
+          path: /tmp/cerebro-knw001-live-git/
+          if-no-files-found: error
+          retention-days: 30
