@@ -9,7 +9,7 @@ const PREPROD_REF='hnqlnvakzaywtafeiybt';
 const ENV=U.includes(PROD_REF)?'PROD':U.includes(PREPROD_REF)?'PREPROD':'UNKNOWN';
 const COMPANY='fenix',ENGINE='CONSOLE-001',VERSION='v0';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
-const SAFE_BRANCH='cerebro/jarvis-work-codex-complete-20261102';
+const SAFE_BRANCH='cerebro/jarvis-core-prod-candidate-20261103';
 const WORK_GATEWAY=ENV==='PROD'?'jarvis-work-gateway-v1':'jarvis-work-gateway-v1-preprod';
 const GIT_GATEWAY=ENV==='PROD'?'jarvis-git-gateway-v1':'jarvis-git-gateway-v1-preprod';
 const BROWSER_GATEWAY=ENV==='PROD'?'cerebro-browser-work-total-owner-v1-prod':null;
