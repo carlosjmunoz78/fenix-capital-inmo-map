@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.14.0",
+  "schema_version": "1.15.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -417,7 +417,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Independent PROD smoke blocked on real GitHub secret reference provisioning; remaining 8 require persistent host and real source/provider integration. DOC 001..004 privacy boundary and integrated synthetic E2E now GREEN, no autonomous promotion.",
+  "next_block": "Physical host live proof is still missing (JOB001 telemetry 0), GitHub prod smoke secrets are not provisioned despite two enabled public keys at Supabase. Preserve App/CRM, do not auto-promote to PROD. Work on secure credential provisioning with authorized admin interface and persistent worker heartbeat.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -519,6 +519,41 @@
     ],
     "values_accessed": false,
     "values_mutated": false,
-    "corrective_action": "Approved secure provisioning of actual Supabase public browser key and legacy anonymous JWT using existing secret manager; never replace with user access token; then rerun PROD smoke"
+    "corrective_action": "Approved secure provisioning of actual Supabase public browser key and legacy anonymous JWT using existing secret manager; never replace with user access token; then rerun PROD smoke",
+    "supabase_prod_public_keys_verified": true,
+    "source_keys_exist_but_github_refs_missing": true,
+    "secure_github_secrets_write_connector_available": false,
+    "safe_next_step": "Provision repo/environment GitHub Actions secrets through authenticated UI or appropriately scoped GitHub secrets API using source values from Supabase admin; no plaintext values in code or chat."
+  },
+  "supabase_readonly_live_inventory": {
+    "state": "READONLY_VERIFIED",
+    "checked_project_id": "cluhljgonannaafpmblx",
+    "prod_project_status": "ACTIVE_HEALTHY",
+    "alternate_project_id": "hnqlnvakzaywtafeiybt",
+    "alternate_project_status": "ACTIVE_HEALTHY",
+    "prod_publishable_key": {
+      "exists": true,
+      "enabled": true,
+      "value_exported": false
+    },
+    "prod_legacy_anon_key": {
+      "exists": true,
+      "enabled": true,
+      "value_exported": false
+    },
+    "tables": {
+      "cerebro_job001_telemetry_preprod": 0,
+      "cerebro_company_engine_state_preprod": 0,
+      "cerebro_lrn001_continuation_preprod": 0,
+      "cerebro_browser_job_v2": 75,
+      "cerebro_browser_worker_metric_v2": 70,
+      "cerebro_credential_binding_v1": 1
+    },
+    "browser_metrics_last_at": "2026-11-01T10:54:55Z",
+    "permanent_runtime001_host_physically_verified": false,
+    "prod_autonomous_active_verified": false,
+    "read_only": true,
+    "prod_writes": false,
+    "service_key_exposed": false
   }
 }
