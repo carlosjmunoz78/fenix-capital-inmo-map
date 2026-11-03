@@ -1,0 +1,57 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {runLote3ComNotifC360} from '../runtime/lote3-com-notif-c360-real-v1.mjs';
+
+const ROOT=process.cwd();
+const OUT=path.join(ROOT,'cerebro/evidence/batch09-c360001-autonomy-closure/2026-11-03');
+const stable=v=>Array.isArray(v)?v.map(stable):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v);
+const json=v=>JSON.stringify(stable(v),null,2)+'\n';
+const sha=v=>crypto.createHash('sha256').update(Buffer.isBuffer(v)?v:(typeof v==='string'?v:json(v))).digest('hex');
+const A=(v,m)=>{if(!v)throw new Error(m)};
+const W=(r,v)=>{const p=path.join(OUT,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,json(v))};
+const T=f=>{const r=spawnSync(process.execPath,['--test',f],{cwd:ROOT,encoding:'utf8',maxBuffer:12e6});if(r.status)throw new Error(r.stdout+r.stderr);return {file:f,status:'PASS',stdout_sha256:sha(r.stdout||'')}};
+fs.rmSync(OUT,{recursive:true,force:true});
+
+const runtime='cerebro/runtime/lote3-com-notif-c360-real-v1.mjs';
+const native='cerebro/customer/c360-native-v1.mjs';
+const testNative='cerebro/tests/lote3-com-notif-c360-v1.test.mjs';
+const testLote3='cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs';
+for(const f of [runtime,native,testNative,testLote3])A(fs.existsSync(path.join(ROOT,f)),`missing ${f}`);
+const sourceHashes=Object.fromEntries([runtime,native,testNative,testLote3].map(f=>[f,sha(fs.readFileSync(path.join(ROOT,f)))]));
+const tests=[T(testNative),T(testLote3)];
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'c360001-close-'));
+const result=runLote3ComNotifC360({company_id:'fenix',root_dir:root,source_run_id:68001,source_head_sha:'8'.repeat(40)});
+A(result.status==='FULL_E2E_REAL_PREPROD'&&result.full_e2e_real_preprod===true,'C360 E2E drift');
+A(result.consumer_coverage===1&&result.functional_consumer_coverage===1&&result.missing_consumers.length===0&&result.failed_consumers.length===0,'C360 consumer coverage drift');
+const c360=result.consumer_map?.['C360-001'];
+A(c360?.decision==='CUSTOMER360_PROJECTION_READY'&&c360?.real_consumption===true&&c360?.outcome?.pass===true,'C360 semantic consumer drift');
+const p=result.customer360_projection;
+A(p?.read_only===true&&p?.source_of_truth_replaced===false,'C360 read-only/source-of-truth drift');
+A(p?.crm_write_authorized===false&&p?.db_mutation_authorized===false&&p?.external_side_effect_executed===false,'C360 write authority drift');
+A(p?.raw_pii_present===false&&p?.prod_authorized===false&&p?.prod_write_authorized===false&&p?.trading_access===false,'C360 privacy/authority drift');
+A(typeof p?.projection_id==='string'&&p?.next_best_action&&p?.lifecycle_stage,'C360 projection completeness drift');
+A(result.independent_tribunal?.decision==='PASS','C360 tribunal drift');
+A(result.observability_consumer?.decision==='OBSERVABILITY_RECORDED','C360 observability drift');
+A(result.finops_consumer?.decision==='FINOPS_ZERO_COST_RECORDED'&&result.additional_cost_eur===0,'C360 cost drift');
+A(result.backup_rollback_rebuild?.backup_ready===true&&result.backup_rollback_rebuild?.rollback_green===true&&result.backup_rollback_rebuild?.rebuild_green===true,'C360 BRR drift');
+A(result.idempotency_proven===true&&result.restartable===true,'C360 idempotency/restart drift');
+for(const k of ['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','spend_authorized','trading_access','android_touched','external_code_execution'])A(result[k]===false,`C360 authority drift ${k}`);
+const rebuilt=runLote3ComNotifC360({company_id:'fenix',root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'c360001-rebuild-')),source_run_id:68001,source_head_sha:'8'.repeat(40)});
+A(rebuilt.semantic_outcome_hash===result.semantic_outcome_hash&&rebuilt.customer360_projection?.projection_id===p.projection_id,'C360 deterministic rebuild drift');
+
+W('contracts/c360-001-contract-evidence.json',{engine_id:'C360-001',gate:'contracts',status:'PASS',contract:'READ_ONLY_CUSTOMER360_PROJECTION',invariants:['company_id exact','PREPROD exact','wrap existing sources','source of truth not replaced','raw PII denied','CRM writes denied','DB mutation denied','external side effects denied','prod writes denied','trading denied'],read_only:true,source_of_truth_replacement:false,crm_write_authorized:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('permissions/c360-001-permissions-evidence.json',{engine_id:'C360-001',gate:'permissions',status:'PASS',permission_model:'READ_ONLY_PREPROD_PROJECTION',allow:['READ_NORMALIZED_LEAD_SIGNAL','READ_NORMALIZED_SALE_SIGNAL','READ_NORMALIZED_COM_SIGNAL','READ_NORMALIZED_NOTIFICATION_SIGNAL','BUILD_PROJECTION','DERIVE_NEXT_BEST_ACTION'],deny:['CRM_WRITE','DB_MUTATION','SOURCE_OF_TRUTH_REPLACEMENT','RAW_PII','PROD_WRITE','TRADING','EXTERNAL_SIDE_EFFECT'],crm_write_authorized:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('policy/c360-001-policy-evidence.json',{engine_id:'C360-001',gate:'policy',status:'PASS',policy_mode:'FAIL_CLOSED_READ_ONLY_PREPROD',fail_closed:true,requirements:{read_only:true,source_of_truth_replacement:false,raw_pii_denied:true,crm_write_denied:true,db_mutation_denied:true,external_side_effects_denied:true},prod_execution_authorized:false,additional_cost_eur:0});
+W('evaluation/c360-001-evaluation-evidence.json',{engine_id:'C360-001',gate:'evaluation',status:'PASS',approved:true,score:1,environment:'LAB_PREPROD',scope:'READ_ONLY_CUSTOMER360_PROJECTION_NO_CRM_WRITE',old_vs_new:result.evaluation,cases:{full_e2e_real_preprod:true,semantic_consumer_real:true,consumer_coverage_1:true,functional_coverage_1:true,projection_ready:true,read_only:true,source_of_truth_preserved:true,crm_write_denied:true,db_mutation_denied:true,raw_pii_denied:true,observability_recorded:true,finops_zero_cost:true,backup_ready:true,rollback_green:true,rebuild_green:true,idempotency_proven:true,restartable:true,prod_write_denied:true,trading_denied:true},tests,source_hashes:sourceHashes,additional_cost_eur:0});
+W('tribunal/c360-001-tribunal-evidence.json',{engine_id:'C360-001',gate:'tribunal',status:'GREEN',approved:true,pass:true,decision:'PASS',basis:'real semantic PREPROD Customer360 projection + OLD vs NEW + independent tribunal + durable BRR + observability/FinOps + strict read-only/no-CRM-write boundary',independent_tribunal:result.independent_tribunal,crm_write_approved:false,prod_authorized:false,additional_cost_eur:0});
+W('observability/c360-001-observability-evidence.json',{engine_id:'C360-001',gate:'observability',status:'PASS',environment:'LAB_PREPROD',metric:'CUSTOMER360_PROJECTION_READY',audit:'semantic projection outcome recorded',trace_sha256:sha({bundle_id:result.bundle_id,semantic_outcome_hash:result.semantic_outcome_hash,c360_outcome_hash:c360.outcome_hash,projection_id:p.projection_id}),observability_decision:result.observability_consumer.decision,finops_decision:result.finops_consumer.decision,lifecycle_stage:p.lifecycle_stage,next_best_action:p.next_best_action,read_only:true,crm_writes:0,prod_writes:0,additional_cost_eur:0});
+W('backup/c360-001-backup-evidence.json',{engine_id:'C360-001',gate:'backup',status:'PASS',tested:true,backup_ready:result.backup_rollback_rebuild.backup_ready,runtime_result:result.backup_rollback_rebuild,source_hashes:sourceHashes,additional_cost_eur:0});
+W('rollback/c360-001-rollback-evidence.json',{engine_id:'C360-001',gate:'rollback',status:'PASS',tested:true,rollback_green:result.backup_rollback_rebuild.rollback_green,prod_rollback_claimed:false,crm_rollback_claimed:false,additional_cost_eur:0});
+W('rebuild/c360-001-rebuild-evidence.json',{engine_id:'C360-001',gate:'rebuild',status:'PASS',tested:true,rebuild_green:result.backup_rollback_rebuild.rebuild_green,semantic_rebuild_match:rebuilt.semantic_outcome_hash===result.semantic_outcome_hash,projection_rebuild_match:rebuilt.customer360_projection?.projection_id===p.projection_id,additional_cost_eur:0});
+W('SUMMARY.json',{mission:'CLOSE_BATCH09_C360001_V1',status:'GREEN',engine_id:'C360-001',company_id:'fenix',environment:'LAB_PREPROD',certified_scope:'READ_ONLY_CUSTOMER360_PROJECTION_NO_CRM_WRITE',full_e2e_real_preprod:true,semantic_consumer_real:true,read_only:true,source_of_truth_replaced:false,crm_write_authorized:false,db_mutation_authorized:false,external_side_effects_executed:false,prod_execution_authorized:false,prod_writes:false,provider_writes:false,spend_authorized:false,trading_touched:false,factory_mutated:false,registry_mutated:false,additional_cost_eur:0,holds:['CRM_WRITEBACK','SOURCE_OF_TRUTH_REPLACEMENT','PROD_EXECUTION']});
+fs.rmSync(root,{recursive:true,force:true});
+console.log('CLOSE_BATCH09_C360001_V1=GREEN');
