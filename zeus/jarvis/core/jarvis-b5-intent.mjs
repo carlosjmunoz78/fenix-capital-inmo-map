@@ -8,7 +8,7 @@ const STOP=/^(?:para|detente|c[aá]llate|interrumpe|silencio|stop|corta|basta)(?
 const UNSAFE=/\b(?:borr(?:a|ar|ado|ando)|elimin(?:a|ar|ado|ando)|destruy(?:e|a)|destru(?:ir|ye)|formatea(?:r)?|transfiere|transferir|paga(?:r)?|compr(?:a|ar)|firma(?:r)?|contrata(?:r)?|env[ií]a dinero)\b/i;
 const verbs=[
  ['STATUS',/^(?:estado|c[oó]mo va|como va|qu[eé] falta|dime el estado|revisa el estado|qu[eé] tenemos)\b/i],
- ['QUESTION',/^(?:[¿¡]?\s*(?:qu[eé]|qui[eé]n|cu[aá]ndo|d[oó]nde|c[oó]mo|por qu[eé]|para qu[eé]|cu[aá]l|cu[aá]nto|puedes explicar|me puedes explicar)\b|expl[ií]came\b)/i],
+ ['QUESTION',/^(?:[¿¡]?\s*(?:qu[eé]|qui[eé]n|cu[aá]ndo|d[oó]nde|c[oó]mo|por qu[eé]|para qu[eé]|cu[aá]l|cu[aá]nto|puedes explicar|me puedes explicar)(?=\s|$|[!?.,;])|expl[ií]came(?=\s|$|[!?.,;]))/i],
  ['CONTINUE',/^(?:contin[uú]a|sigue|prosigue|procede|vamos con)\b/i],
  ['FIND',/^(?:busca|encuentra|recupera|localiza|consulta|investiga)\b/i],
  ['DRAFT',/^(?:redacta|escribe|prepara|crea un (?:texto|art[ií]culo|borrador|email|correo)|haz un borrador)\b/i],
