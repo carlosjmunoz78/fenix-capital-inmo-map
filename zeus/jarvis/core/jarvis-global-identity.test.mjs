@@ -32,13 +32,13 @@ test('unknown channel and revoked owner bindings fail closed',async()=>{
 });
 test('malformed trusted channel scopes are denied even if ZEUS binding is valid',async()=>{
  const registry={resolve:async()=>({ownerId:'zeus-root-001',role:'OWNER_ROOT',active:true,authorizedCompanies:['fenix']})};
- for (const companies of [['fenix','*'],['fenix',null],['fenix','bad\\ntenant'],[]]) {
+ for (const companies of [['fenix','*'],['fenix',null],['fenix','bad\ntenant'],[]]) {
   const identity=new ZeusGlobalIdentityProvider({channels:new Map([['fenix',{verify:async()=>({subject:'uid',sessionId:'session',authorizedCompanies:companies})}]]),registry});
   await assert.rejects(identity.verify({channel:'fenix',accessToken:'token'}),/AUTH_DENIED/);
  }
 });
 test('malformed ZEUS registry scopes fail closed before tenant intersection',async()=>{
- for (const companies of [['fenix','*'],['fenix',null],['fenix','bad\\ntenant'],[]]) {
+ for (const companies of [['fenix','*'],['fenix',null],['fenix','bad\ntenant'],[]]) {
   const identity=new ZeusGlobalIdentityProvider({channels:new Map([['fenix',{verify:async()=>({subject:'uid',sessionId:'session',authorizedCompanies:['fenix']})}]]),registry:{resolve:async()=>({ownerId:'zeus-root-001',role:'OWNER_ROOT',active:true,authorizedCompanies:companies})}});
   await assert.rejects(identity.verify({channel:'fenix',accessToken:'token'}),/OWNER_ROOT_REQUIRED/);
  }
