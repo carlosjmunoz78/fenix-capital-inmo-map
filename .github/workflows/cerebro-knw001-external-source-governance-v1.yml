@@ -1,0 +1,32 @@
+name: CEREBRO KNW001 External Source Governance V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/knw001-external-source-rights-v1.mjs'
+      - 'cerebro/tests/knw001-external-source-rights-v1.test.mjs'
+      - '.github/workflows/cerebro-knw001-external-source-governance-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  knowledge-source-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify fail-closed source rights and freshness
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/tests/knw001-external-source-rights-v1.test.mjs
+          node cerebro/tests/foundation-holds-v1.test.mjs
+      - name: Evidence
+        run: |
+          mkdir -p /tmp/cerebro-knw-source
+          node -e "require('fs').writeFileSync('/tmp/cerebro-knw-source/SUMMARY.json',JSON.stringify({engine_id:'KNW-001',scope:'SOURCE_GOVERNANCE_NOT_PERSISTENT_NOTION_CONNECTOR',rights_gate:true,freshness_gate:true,notion_source:'REFERENCE_ONLY',prod_writes:false,additional_cost_eur:0},null,2)+'\\n')"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knw-source-governance-${{ github.run_id }}
+          path: /tmp/cerebro-knw-source/
+          if-no-files-found: error
