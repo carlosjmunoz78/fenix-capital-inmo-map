@@ -1,0 +1,30 @@
+{
+  "engine_id": "COMP-ONB-001",
+  "version": "1.0.0",
+  "environment": "PREPROD",
+  "fail_closed": true,
+  "command": "NEW_COMPANY",
+  "permission": "ONBOARDING_ORCHESTRATION_EVIDENCE_GATED_ONLY",
+  "states": ["NEW_COMPANY", "REGISTERED", "DISCOVERING", "BUILDING", "VALIDATING", "ACTIVE", "HUMAN_REQUIRED", "FAILED"],
+  "phase_requirements": {
+    "REGISTERED": ["COMP-REG-001", "TENANT-001"],
+    "DISCOVERING": ["SCAN-001"],
+    "BUILDING": ["KW-001", "WAUD-001", "SOCAUD-001", "LOCALP-001", "KBOOT-001", "SEOBOOT-001", "SOCBOOT-001", "MKTBOOT-001", "CRMBOOT-001", "APPBOOT-001", "AUTBOOT-001", "TRNBOOT-001"],
+    "VALIDATING": ["ENGACT-001"],
+    "ACTIVE": []
+  },
+  "idempotent_retry": true,
+  "per_engine_advancement": true,
+  "local_preprod_persistence": true,
+  "deny": ["CROSS_COMPANY_EVIDENCE", "PROD_EVIDENCE", "UPSTREAM_WRITE_AUTHORITY", "PUBLISH", "DEPLOY", "CRM_WRITE", "SPEND", "SUPABASE_PROD_WRITE", "TRADING"],
+  "human_required_allowed": ["LEGAL_REQUIRED", "SIGNATURE_REQUIRED", "LOW_CONFIDENCE", "HIGH_RISK", "POLICY_CONFLICT", "SECURITY_INCIDENT", "MONEY_LIMIT", "CUSTOMER_HUMAN_REQUEST"],
+  "prod_execution_authorized": false,
+  "prod_write_authorized": false,
+  "supabase_prod_write_authorized": false,
+  "publish_authorized": false,
+  "deploy_authorized": false,
+  "crm_write_authorized": false,
+  "spend_authorized": false,
+  "trading_allowed": false,
+  "additional_cost_eur": 0
+}
