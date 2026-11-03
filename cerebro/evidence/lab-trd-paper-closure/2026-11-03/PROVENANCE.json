@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "LAB-TRD",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "version": "v1",
+  "classification": "PAPER_ONLY_PROVENANCE",
+  "source_branch": "cerebro-alpaca-paper-connector-v0-20260911",
+  "source_commit": "2f03b2983996f0431cc0a2c748b9e08babd022e2",
+  "source_evidence_path": "cerebro/evidence/alpaca-paper-live-probe-2026-09-11.json",
+  "source_probe": {
+    "status": "GREEN",
+    "mode": "ALPACA_PAPER_ONLY",
+    "paper_only": true,
+    "live_endpoint_blocked": true,
+    "account_status": "ACTIVE",
+    "real_money_execution": false,
+    "prod_write": false,
+    "secrets_in_repo": false,
+    "credential_payload_logged": false,
+    "scope": "read_only_connectivity_evidence"
+  },
+  "current_isolation_contract": {
+    "trading_execution": false,
+    "credential_access": false,
+    "shared_prod_resources": false,
+    "network_execution": false,
+    "promotion_authorized": false
+  },
+  "real_authorized": false,
+  "additional_cost_eur": 0,
+  "note": "Sanitized provenance only. No credential, account identifier, API key, token, live-money permission or execution capability is copied into this branch."
+}
