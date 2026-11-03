@@ -1,0 +1,120 @@
+name: CEREBRO Remaining Non-Trading Batch Closure V1
+
+on:
+  push:
+    branches:
+      - cerebro/close-179-per-engine-autonomy-v1-20261102
+    paths:
+      - '.github/workflows/cerebro-remaining-nontrading-batch-closure-v1.yml'
+      - 'cerebro/runtime/**'
+      - 'cerebro/tests/**'
+      - 'cerebro/missions/**'
+      - 'cerebro/document/**'
+      - 'cerebro/governance/remaining-10-progress-2026-11-03.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+
+jobs:
+  governed-batch-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Safety gate before execution
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${CEREBRO_ALLOW_PROD_WRITES}" = "false"
+          test "${CEREBRO_ALLOW_TRADING}" = "false"
+          grep -q '"trading_touched": false' cerebro/governance/remaining-10-progress-2026-11-03.json
+          grep -q '"prod_touched": false' cerebro/governance/remaining-10-progress-2026-11-03.json
+          grep -q '"prod_writes": false' cerebro/governance/remaining-10-progress-2026-11-03.json
+
+      - name: RUNTIME-001 contract and mission
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/runtime001-shared-worker-v1.test.mjs
+          node cerebro/missions/close-runtime001-structural-v1.mjs
+
+      - name: KNW-001 TRN-001 FINOPS-001 contracts and mission
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/tests/foundation-holds-v1.test.mjs
+          node cerebro/missions/close-foundation-holds-v1.mjs
+
+      - name: Install zero-cost document stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y ghostscript qpdf tesseract-ocr unpaper
+          python -m pip install --disable-pip-version-check pillow opencv-python-headless ocrmypdf pypdf
+
+      - name: DOC-001..004 governed contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/document/test_doc001_004_pipeline_v1.py
+          command -v tesseract
+          command -v ocrmypdf
+          tesseract --version | head -n 1
+          ocrmypdf --version
+
+      - name: Cross-engine safety invariants
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R --line-number --exclude-dir=evidence -E 'REAL_AUTHORIZED[[:space:]]*=[[:space:]]*true|CEREBRO_ALLOW_TRADING:[[:space:]]*["'"']?true|CEREBRO_ALLOW_PROD_WRITES:[[:space:]]*["'"']?true' \
+            cerebro/runtime cerebro/tests cerebro/missions cerebro/document .github/workflows/cerebro-remaining-nontrading-batch-closure-v1.yml
+          grep -q 'LAB-TRD' cerebro/governance/remaining-10-progress-2026-11-03.json
+          grep -q '"touched": false' cerebro/governance/remaining-10-progress-2026-11-03.json
+
+      - name: Produce batch closure evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p cerebro/evidence/remaining-nontrading-batch/2026-11-03
+          cat > cerebro/evidence/remaining-nontrading-batch/2026-11-03/SUMMARY.json <<'JSON'
+          {
+            "schema_version": "1.0.0",
+            "batch": "remaining-nontrading-batch-closure-v1",
+            "engines": ["RUNTIME-001", "KNW-001", "TRN-001", "FINOPS-001", "DOC-001", "DOC-002", "DOC-003", "DOC-004"],
+            "result_scope": "STRUCTURAL_AND_CI_EVIDENCE_ONLY",
+            "prod_promotion": false,
+            "prod_writes": false,
+            "trading_access": false,
+            "lab_trd_touched": false,
+            "additional_cost_eur": 0,
+            "hci_physical_acceptance_in_ci": false,
+            "note": "HCI-001 requires real-browser evidence and is intentionally not promoted by CI. Structural green does not equal PROD."
+          }
+          JSON
+
+      - name: Upload evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-remaining-nontrading-batch-closure-v1
+          path: |
+            cerebro/evidence/runtime001-structural-closure/2026-11-03/**
+            cerebro/evidence/foundation-holds-structural-closure/2026-11-03/**
+            cerebro/evidence/remaining-nontrading-batch/2026-11-03/**
+          if-no-files-found: error
+          retention-days: 30
