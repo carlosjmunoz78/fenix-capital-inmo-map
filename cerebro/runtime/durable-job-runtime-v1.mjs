@@ -281,10 +281,12 @@ export class DurableJobRuntimeV1 {
     return clone(this.#jobs.get(id));
   }
 
-  watchdog({ now_ms = Date.now() } = {}) {
+  watchdog({ now_ms = Date.now(), context: scopedContext = null } = {}) {
     const safeNow = integer(now_ms, 'now_ms');
+    // Optional backward-compatible scope; absent scope preserves legacy global watchdog.
+    const safeScope = scopedContext === null ? null : context(scopedContext);
     const expired = [...this.#jobs.values()]
-      .filter(job => job.status === 'RUNNING' && job.lease_expires_at_ms !== null && job.lease_expires_at_ms <= safeNow)
+      .filter(job => (!safeScope || sameContext(job.context, safeScope)) && job.status === 'RUNNING' && job.lease_expires_at_ms !== null && job.lease_expires_at_ms <= safeNow)
       .sort((a, b) => a.job_id.localeCompare(b.job_id));
     const repaired = [];
     for (const job of expired) {
