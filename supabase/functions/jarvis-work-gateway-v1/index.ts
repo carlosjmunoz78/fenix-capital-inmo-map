@@ -4,7 +4,7 @@ import {createClient} from "npm:@supabase/supabase-js@2";
 const ORIGINS=new Set(["https://app.fenixcapital.es","https://www.app.fenixcapital.es"]);
 const ENV='PROD',COMPANY='fenix',VERSION='v1',ENGINE='CONSOLE-001';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
-const BRANCH='cerebro/jarvis-work-codex-complete-20261102';
+const BRANCH='cerebro/jarvis-core-prod-candidate-20261103';
 const REPOSITORY_URL=`https://github.com/${REPO}`;
 const STATUSES=new Set(['HECHO','EXISTENTE','PARCIAL','DEFINIDO','PLANIFICADO','POR_AUDITAR']);
 const MAX_FILE_BYTES=768_000;
