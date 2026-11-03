@@ -1,0 +1,33 @@
+name: CEREBRO KNW001 Two Real Git Revisions V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/knw001-two-real-git-revisions-v1.mjs'
+      - '.github/workflows/cerebro-knw001-two-real-git-revisions-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-source-revisions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Inspect two committed revisions and fail closed on invalid provenance
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CEREBRO_KNW_REVISION_OUT: /tmp/cerebro-knw-git-revisions
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/missions/knw001-two-real-git-revisions-v1.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-knw001-two-real-revisions-${{ github.run_id }}
+          path: /tmp/cerebro-knw-git-revisions/SUMMARY.json
+          if-no-files-found: error
+          retention-days: 30
