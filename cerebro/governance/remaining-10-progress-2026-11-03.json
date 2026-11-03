@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.2.2",
+  "schema_version": "1.2.3",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -102,7 +102,8 @@
       "state": "GREEN_LAB_PAPER_ONLY",
       "structural_contract": "GREEN",
       "final_ci_run": 41666221636,
-      "isolation": "PRESERVED_AND_TESTED",
+      "isolation": "PRESERVED",
+      "isolation_tested": true,
       "touched": false,
       "paper_connectivity_provenance": "GREEN",
       "paper_account_status_at_probe": "ACTIVE",
