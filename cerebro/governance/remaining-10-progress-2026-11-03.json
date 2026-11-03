@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.7.0",
+  "schema_version": "1.8.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -351,7 +351,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Integrated 8-engine physical PREPROD acceptance then target inventory and actual connector bindings; preserve no PROD before evidence-based gates and rollback.",
+  "next_block": "HOST_AND_LIVE_BINDINGS_FIRST; PROD promotion remains blocked. On permanent isolated target require backup/rollback, smoke, monitoring, tribunal, per-engine 12 gates, side-by-side OLD NEW, gradual promotion. Never repurpose protected App/CRM or Trading.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -359,5 +359,38 @@
     "registry_179_verified": true,
     "readiness_counter_update_authorized": false,
     "note": "Audit artifact contains actual dynamic counts. Do not infer 179 certified from successful CI."
+  },
+  "integrated_eight_preprod": {
+    "status": "GREEN_INTEGRATED_PREPROD_ONLY",
+    "ci_run": 41684591209,
+    "engines": [
+      "RUNTIME-001",
+      "KNW-001",
+      "TRN-001",
+      "FINOPS-001",
+      "DOC-001",
+      "DOC-002",
+      "DOC-003",
+      "DOC-004"
+    ],
+    "physical_runner_acceptance": true,
+    "prod_preflight": "BLOCKED_SAFE",
+    "prod_promotion_authorized": false,
+    "evidence_path": "GitHub Actions artifact cerebro-eight-integrated-preprod-41684591209",
+    "proven": [
+      "durable JOB001 execution and rollback in runner",
+      "KNW Git real source provenance and Notion rights rules",
+      "TRN synthetic datasets and existing EVA/JDG bridge",
+      "FINOPS one authenticated GitHub read provider call",
+      "DOC four-engine physical synthetic E2E and risk escalation"
+    ],
+    "missing": [
+      "approved persistent host with restart and rollback",
+      "persistent Notion/document ingestion with rights and freshness",
+      "real training dataset and independent judge evidence",
+      "complete provider cost attribution and actual billing reconciliation",
+      "approved real document ingestion and domain calibration",
+      "per-engine canonical 12-gate PROD promotion"
+    ]
   }
 }
