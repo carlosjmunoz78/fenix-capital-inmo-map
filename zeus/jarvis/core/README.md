@@ -26,3 +26,9 @@ Run all tests: `node --test core/*.test.mjs`.
 - `node --test core/*.test.mjs` en Node.js 22: 17 pruebas sin fallos.
 
 **Gates pendientes:** integración con firma de sesión real y compañía autorizada desde ZEUS, revisión de seguridad (Auth/RLS/CAS, estados atascados/leases), migración versionada con rollback seguro, pruebas E2E multi-dispositivo, observabilidad y política de retención. No fusionar o desplegar como servicio autónomo sin estos gates. La persistencia central todavía no está activada.
+
+## B2 corte 03 — HTTP Gateway V0 (LAB)
+
+`jarvis-gateway-handler.mjs` provides a **framework-neutral Request -> Response** contract for `/v1/missions`, `/v1/missions/:id`, `/v1/missions/:id/execute` and `/v1/health`. All mission actions require bearer authentication through injected `JarvisUniversalCore`; no client sees service-role credentials. Health reports `ready:false` until a real provider and durable store are configured. Its tests exercise simulated mobile/desktop sessions, denial paths and replay.
+
+Not exposed on the internet. Before public access: trusted issuer and session verification, rate limits, body size checks beyond create endpoints, permitted origins/CORS, audit retention, scrubbed free-text payloads (V0 only redacts by sensitive *field names*), secure observability, lock/lease recovery and system integration tests.
