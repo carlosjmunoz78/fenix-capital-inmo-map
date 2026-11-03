@@ -1,0 +1,41 @@
+/* /cerebro owns the full Jarvis surface. Keep App Fénix global launchers outside this route. */
+html[data-cerebro-console='1'] button[aria-label='Abrir chat interno'],
+html[data-cerebro-console='1'] button[aria-label='Chat interno'],
+html[data-cerebro-console='1'] [title='Chat interno']{
+  display:none!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
+
+/* Operativa V4 must keep the real Power control available on narrow desktop/tablet
+   viewports. The base console CSS collapses the command deck below 720px; keep the
+   reactor functional instead of removing it from the interface. */
+@media(max-width:720px){
+  .operativa-premium .operativa-reactor{
+    display:grid!important;
+    grid-template-columns:92px minmax(0,1fr);
+    grid-template-areas:'label options' 'core options';
+    align-items:center!important;
+    justify-content:start;
+    column-gap:16px;
+    row-gap:6px;
+    margin-top:4px;
+  }
+  .operativa-premium .operativa-reactor>span{
+    grid-area:label;
+    align-self:end;
+  }
+  .operativa-premium .operativa-reactor-shell{
+    grid-area:core;
+    width:84px;
+    height:84px;
+  }
+  .operativa-premium .operativa-reactor-shell i{inset:15px}
+  .operativa-premium .operativa-reactor-shell b{inset:24px}
+  .operativa-premium .operativa-reactor-shell em{inset:34px}
+  .operativa-premium .operativa-power-options{
+    grid-area:options;
+    width:min(100%,260px);
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
