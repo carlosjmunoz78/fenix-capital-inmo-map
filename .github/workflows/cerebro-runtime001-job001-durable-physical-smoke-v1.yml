@@ -1,0 +1,36 @@
+name: CEREBRO Runtime001 Durable JOB001 Physical Smoke V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/runtime001-durable-job001-adapter-v1.mjs'
+      - 'cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs'
+      - '.github/workflows/cerebro-runtime001-job001-durable-physical-smoke-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env:
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+jobs:
+  physical-preprod-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Verify existing JOB001 durable adapter and fail-closed scope
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          test "$CEREBRO_ALLOW_TRADING" = false
+          node cerebro/tests/runtime001-shared-worker-v1.test.mjs
+          node cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs
+      - name: Upload physical evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-runtime001-durable-smoke-${{ github.run_id }}
+          path: /tmp/runtime001-physical-evidence/SUMMARY.json
+          if-no-files-found: warn
+          retention-days: 30
