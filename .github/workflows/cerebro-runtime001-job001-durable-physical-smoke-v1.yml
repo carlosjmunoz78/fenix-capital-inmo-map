@@ -26,11 +26,11 @@ jobs:
           test "$CEREBRO_ALLOW_PROD_WRITES" = false
           test "$CEREBRO_ALLOW_TRADING" = false
           node cerebro/tests/runtime001-shared-worker-v1.test.mjs
-          node cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs
+          CEREBRO_RUNTIME001_TEST_DIR=/tmp/runtime001-physical-evidence node cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs
       - name: Upload physical evidence
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-runtime001-durable-smoke-${{ github.run_id }}
           path: /tmp/runtime001-physical-evidence/SUMMARY.json
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
