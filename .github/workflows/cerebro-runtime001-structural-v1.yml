@@ -1,0 +1,45 @@
+name: CEREBRO RUNTIME-001 Structural Closure V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/runtime001-shared-worker-v1.mjs'
+      - 'cerebro/tests/runtime001-shared-worker-v1.test.mjs'
+      - 'cerebro/missions/close-runtime001-structural-v1.mjs'
+      - '.github/workflows/cerebro-runtime001-structural-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  runtime001-structural:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate canonical registry/factory
+        run: cd cerebro && npm run validate && node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: RUNTIME-001 unit/integration tests
+        run: node --test cerebro/tests/runtime001-shared-worker-v1.test.mjs
+      - name: Build governed structural evidence
+        run: node cerebro/missions/close-runtime001-structural-v1.mjs
+      - name: Safety invariants
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='cerebro/evidence/runtime001-structural-closure/2026-11-03/SUMMARY.json';
+          const s=JSON.parse(fs.readFileSync(p));
+          if(s.status!=='GREEN_STRUCTURAL_ONLY') throw new Error('structural closure not green');
+          if(s.prod_execution_authorized!==false||s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0) throw new Error('safety drift');
+          if(s.physical_preprod_deployment!=='PENDING'||s.generic_prod_target_adapter!=='PENDING'||s.live_semantic_smoke!=='PENDING') throw new Error('must not fake physical closure');
+          NODE
+      - name: Upload RUNTIME-001 structural evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-runtime001-structural-${{ github.run_id }}
+          path: cerebro/evidence/runtime001-structural-closure/2026-11-03/
+          if-no-files-found: error
+          retention-days: 30
