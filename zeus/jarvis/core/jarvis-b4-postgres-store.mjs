@@ -10,9 +10,11 @@ export function createJarvisB4PostgresStore({query}={}){
   async appendUnique(e){
    for(const k of ['ownerId','companyId','environment','projectId','idempotencyKey'])must(e?.[k],k);
    const params=[e.id,e.ownerId,e.companyId,e.environment,e.projectId,e.idempotencyKey,e.fingerprint,JSON.stringify(e)];
-   const added=await query(`INSERT INTO zeus_jarvis.b4_memory_event(id,owner_id,company_id,environment,project_id,idempotency_key,fingerprint,event)
+   let added;
+   try { added=await query(`INSERT INTO zeus_jarvis.b4_memory_event(id,owner_id,company_id,environment,project_id,idempotency_key,fingerprint,event)
     VALUES ($1::uuid,$2,$3,$4,$5,$6,$7,$8::jsonb) ON CONFLICT (owner_id,company_id,environment,project_id,idempotency_key) DO NOTHING
-    RETURNING seq,event`,params);
+    RETURNING seq,event`,params); }
+   catch(error) { if(error?.code==='23505')throw Error('B4_CONCURRENT_STATE_CONFLICT');throw error; }
    if(added.rows?.[0])return {event:{...copied(added.rows[0].event),sequence:Number(added.rows[0].seq)},replayed:false};
    const old=await query(`SELECT seq,event,fingerprint FROM zeus_jarvis.b4_memory_event
     WHERE owner_id=$1 AND company_id=$2 AND environment=$3 AND project_id=$4 AND idempotency_key=$5`,[e.ownerId,e.companyId,e.environment,e.projectId,e.idempotencyKey]);
