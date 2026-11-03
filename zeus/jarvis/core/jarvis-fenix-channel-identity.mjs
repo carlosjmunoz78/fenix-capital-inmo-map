@@ -18,6 +18,6 @@ export class FenixOwnerChannelIdentityProvider {
     if(contextError||ctx?.ok!==true||ctx?.actor_code!==OWNER_ACTOR)throw new Error('OWNER_ROOT_REQUIRED');
     const companies=await this.resolveCompanies({authUserId:user.id,actorCode:OWNER_ACTOR});
     if(!Array.isArray(companies)||!companies.length||companies.some(x=>!nonempty(x)||x==='*'))throw new Error('COMPANY_SCOPE_DENIED');
-    return Object.freeze({ownerId:`zeus-owner:${user.id}`,sessionId:claims.session_id,roles:['OWNER_ROOT'],authorizedCompanies:[...new Set(companies)]});
+    return Object.freeze({subject:user.id,ownerId:`zeus-owner:${user.id}`,sessionId:claims.session_id,roles:['OWNER_ROOT'],authorizedCompanies:[...new Set(companies)]});
   }
 }
