@@ -1,0 +1,95 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-11-03",
+  "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
+  "classification_model": {
+    "readiness_state": ["AUTONOMOUS_PROD_READY", "FOUNDATION_ONLY"],
+    "final_prod_state": ["PROD_ACTIVE_VERIFIED", "PROD_READY_EXCEPT_EXTERNAL_DEPENDENCY", "HUMAN_REQUIRED", "STRUCTURAL_HOLD"]
+  },
+  "shared_prod_activation_hold": {
+    "state": "STRUCTURAL_HOLD",
+    "code": "GENERIC_LOGICAL_ENGINE_PROD_TARGET_MISSING",
+    "dependency": "RUNTIME-001 + governed promotion target adapter + physical live verifier for logical engines",
+    "evidence": "Existing governed promotion executor is real but target-specific; no generic logical-engine target is available on this certification branch.",
+    "exit_path": [
+      "close RUNTIME-001 shared worker/runtime contract",
+      "add governed logical-engine PROD target adapter without bypassing Policy/IAM/Audit",
+      "prove exact-head deployment to real runtime",
+      "run live semantic smoke with company_id/engine_id/environment/version",
+      "prove rollback and rebuild on same deployed artifact",
+      "only then set prod_execution_authorized and classify eligible engine PROD_ACTIVE_VERIFIED"
+    ],
+    "human_required": false,
+    "additional_cost_eur": 0
+  },
+  "engine_specific_structural_holds": {
+    "KNW-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "canonical cross-source knowledge store and conflict/freshness lifecycle",
+      "why": "Missing CURRENT/SUPERSEDED/UNCERTAIN/VALIDATED lifecycle, conflict resolution and transversal access over Notion/documents/Git rules.",
+      "exit_path": "Implement versioned knowledge_items contract, source/confidence/review lifecycle, cross-company isolation, then rerun all 12 gates."
+    },
+    "TRN-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "unified training contract separated from evaluation and promotion",
+      "why": "Existing LAB training is operational but lacks one reproducible dataset/run/champion-challenger contract across engines.",
+      "exit_path": "Unify dataset versioning, run_id, metrics, tribunal and reproducibility; keep LAB unable to self-promote; rerun all 12 gates."
+    },
+    "DOC-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "complete local-first document pipeline",
+      "why": "Classification/extraction/QA/metadata/family contracts/fallback are not closed end-to-end.",
+      "exit_path": "Close OCR/parsing/classification/QA/family schemas with safe fallback and rollback; rerun all 12 gates."
+    },
+    "DOC-002": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "DOC-001 + communication/request/receive loop",
+      "why": "Pending-document lifecycle detect/request/remind/receive/classify/validate/close is incomplete.",
+      "exit_path": "After DOC-001, connect deterministic missing-document rules to communication and receipt validation; rerun all 12 gates."
+    },
+    "DOC-003": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "DOC-001 quality pipeline",
+      "why": "Legibility/pages/validity/signature/coherence/safe recovery are not physically proven.",
+      "exit_path": "Implement OpenCV/Pillow/OCRmyPDF quality gates with non-destructive recovery and reproducible fixtures; rerun all 12 gates."
+    },
+    "DOC-004": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "DOC-001 normalized evidence + antifraud heuristics",
+      "why": "Formal antifraud engine does not yet prove metadata/anomaly/duplicate/alteration scoring without automatic accusation.",
+      "exit_path": "Implement deterministic anomaly checks and evidence scoring with HIGH_RISK escalation, never accusation; rerun all 12 gates."
+    },
+    "FINOPS-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "live cost_events instrumentation across engines/providers/storage",
+      "why": "Zero-cost policy exists, but per-engine/task/API/AI/storage cost and savings are not yet instrumented as one live engine.",
+      "exit_path": "Implement cost_events ingestion, budgets/alerts and provider attribution; prove zero-cost and rollback; rerun all 12 gates."
+    },
+    "RUNTIME-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "shared worker runtime and durable queue on an existing/free host",
+      "why": "No formal shared worker loads engine_id/company_id/config/permissions/job/context and exposes a governed physical PROD target.",
+      "exit_path": "Build 1-3 shared Python/TypeScript workers plus PostgreSQL-compatible queue, deploy first to LAB/PREPROD, prove recovery/rollback, then expose governed PROD adapter."
+    },
+    "LAB-TRD": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "trading-specific empirical gates",
+      "why": "PAPER remains isolated; pending judges/shadow/cost guard/self-funding and explicit REAL authorization. Training/LAB must never self-promote to REAL.",
+      "exit_path": "Complete empirical trading gates in isolated infrastructure; REAL remains separately governed and is not part of ordinary CEREBRO PROD promotion."
+    },
+    "HCI-001": {
+      "state": "STRUCTURAL_HOLD",
+      "dependency": "physical HCI/browser/computer-use acceptance surface",
+      "why": "Strict179 still lacks contracts/permissions/evaluation/tribunal/backup/rollback/rebuild evidence; physical human-computer interaction cannot be inferred from CI alone.",
+      "exit_path": "Prove the physical HCI circuit end-to-end on the authorized device/runtime with semantic result, evidence, persistence and rollback, then rerun all 12 gates."
+    }
+  },
+  "rules": {
+    "do_not_mark_readiness_as_prod": true,
+    "prod_execution_authorized_default": false,
+    "trading_isolated": true,
+    "prod_writes": false,
+    "additional_cost_eur": 0,
+    "human_required": []
+  }
+}
