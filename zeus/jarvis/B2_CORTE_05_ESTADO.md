@@ -5,8 +5,9 @@
 ## HECHO
 - Inspección de PR #13 y separación superagente ZEUS / interfaz Jarvis.
 - Registro de identidad ZEUS server-only mediante HMAC para subject externo; denegación de registros revocados y scoping por canal/empresa.
+- Prueba integrada de dos canales simulados, una base SQLite real y reinicio del almacenamiento (no implica sesiones físicas reales).
 - Recuperación segura de misión `AUTHORIZED` interrumpida mediante CAS y estado `FAILED`, sin doble ejecución.
-- CI de GitHub previa en verde (28 pruebas anteriores) y nueva batería local Node 22: **33/33 PASS**.
+- CI de GitHub previa en verde (28 pruebas anteriores) y nueva batería local Node 22: **34/34 PASS**.
 - Nuevos SQL versionados como *propuestas*, sin ejecución en ningún proyecto.
 - Ninguna modificación App/CRM/Trading/DNS, sin credenciales ni consumo DeepSeek.
 
