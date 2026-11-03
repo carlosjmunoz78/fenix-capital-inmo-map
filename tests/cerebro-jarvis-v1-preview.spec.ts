@@ -196,4 +196,6 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
  await expect(dictate).toBeEnabled();
  await dictate.click();
  await expect(page.getByRole('alert')).toContainText('Chrome no tiene permiso para usar el micrófono');
+ await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
 });
