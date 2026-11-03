@@ -1,5 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { after } from 'node:test';
 import { ensureNeuronalSourceV1 } from '../runtime/neuronal-source-integrity-v1.mjs';
 import {
   buildNeuronalSubmissionsV1,
@@ -9,10 +13,16 @@ import {
   NEURONAL_SUPERPARALLEL_SOURCE_V1_CONTRACT,
 } from '../runtime/neuronal-superparallel-source-v1.mjs';
 
-// Global sharded CI may run this test directly before a campaign-specific prepare step.
-// Rebuild and checksum the canonical source from the eight immutable parts so the
-// same test is deterministic in GitHub, the installed Windows runtime and local PREPROD.
-ensureNeuronalSourceV1();
+// Reconstruct and verify the canonical source from immutable parts in a temp directory.
+// Tests must never rewrite the tracked source in the repository.
+const testDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cerebro-neuronal-source-'));
+const sourceFile = path.join(testDir, 'neuronal-superparallel-v1.json.gz.b64');
+ensureNeuronalSourceV1({target: sourceFile});
+process.env.CEREBRO_NEURONAL_SOURCE_FILE = sourceFile;
+after(() => {
+  delete process.env.CEREBRO_NEURONAL_SOURCE_FILE;
+  fs.rmSync(testDir, {recursive:true,force:true});
+});
 
 test('canonical neuronal campaign reconstructs exactly 6,449 unique acyclic submissions',()=>{
   const submissions=buildNeuronalSubmissionsV1();
