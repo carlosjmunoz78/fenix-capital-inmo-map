@@ -29,7 +29,7 @@ export class JarvisUniversalCore {
     if(!identityProvider?.verify||!store?.get||!store?.put||!store?.findByIdempotency)throw new TypeError('SECURE_ADAPTERS_REQUIRED');
     this.identityProvider=identityProvider;this.store=store;this.capabilities=capabilities??new Map();this.dispatcher=dispatcher;this.policy={...DEFAULT_POLICY,...policy};this.clock=clock;this.ids=ids;
   }
-  async #principal(token){if(typeof token!=='string'||!token)throw new Error('AUTH_REQUIRED');const p=await this.identityProvider.verify(token);if(!p?.ownerId||!p.sessionId||!Array.isArray(p.authorizedCompanies))throw new Error('AUTH_DENIED');if(!p.roles?.includes('OWNER_ROOT'))throw new Error('OWNER_ROOT_REQUIRED');return p;}
+  async #principal(token){if(token==null||(typeof token==='string'&&!token))throw new Error('AUTH_REQUIRED');const p=await this.identityProvider.verify(token);if(!p?.ownerId||!p.sessionId||!Array.isArray(p.authorizedCompanies))throw new Error('AUTH_DENIED');if(!p.roles?.includes('OWNER_ROOT'))throw new Error('OWNER_ROOT_REQUIRED');return p;}
   #checkCompany(principal,companyId){if(!principal.authorizedCompanies.includes(companyId))throw new Error('COMPANY_SCOPE_DENIED');}
   async submit({token,companyId,projectId,intent,idempotencyKey,channel='unknown',payload={}}){
     const p=await this.#principal(token);const company=requiredString(companyId,'COMPANY_ID',100);this.#checkCompany(p,company);
