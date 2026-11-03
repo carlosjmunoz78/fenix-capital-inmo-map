@@ -1,0 +1,42 @@
+name: JARVIS Public Asset Read-Only Diagnostic
+on:
+  push:
+    branches: [diagnostics/jarvis-asset-probe-20261103]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Compare public SPA HTML and compiled asset fingerprints
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import urllib.request,urllib.error,re,hashlib,json
+          origins=[
+            'https://app.fenixcapital.es',
+            'https://fenix-capital-preprod-khf9jk4vl.vercel.app',
+          ]
+          for origin in origins:
+            print('ORIGIN',origin)
+            url=origin+'/cerebro?section=jarvis&diag=20261103'
+            try:
+              req=urllib.request.Request(url,headers={'User-Agent':'JARVIS-read-only-asset-probe/1.0','Cache-Control':'no-cache'})
+              with urllib.request.urlopen(req,timeout=15) as resp:
+                raw=resp.read(200000)
+                html=raw.decode('utf8','replace')
+                print('HTML',json.dumps({'status':resp.status,'final':resp.url,'sha256':hashlib.sha256(raw).hexdigest()[:16],'cache_control':resp.headers.get('cache-control'),'cf_cache_status':resp.headers.get('cf-cache-status'),'age':resp.headers.get('age'),'x_vercel_cache':resp.headers.get('x-vercel-cache'),'content_type':resp.headers.get('content-type')}))
+                assets=list(dict.fromkeys(re.findall(r'["\'](/assets/[^"\']+\\.(?:js|css))["\']',html)))
+                print('ASSETS',assets[:16])
+              for path in assets[:12]:
+                try:
+                  with urllib.request.urlopen(urllib.request.Request(origin+path,headers={'User-Agent':'JARVIS-read-only-asset-probe/1.0'}),timeout=15) as asset:
+                    body=asset.read(5000000)
+                    print('ASSET',json.dumps({'path':path,'status':asset.status,'sha256':hashlib.sha256(body).hexdigest()[:16],'bytes':len(body),'has_font_control_key':b'jarvis_home_font_scale_v1' in body,'has_font_control_label':b'Aumentar letra' in body,'cache_control':asset.headers.get('cache-control'),'cf_cache_status':asset.headers.get('cf-cache-status')}))
+                except Exception as e:
+                  print('ASSET_ERROR',path,type(e).__name__,str(e)[:160])
+            except Exception as e:
+              print('HTML_ERROR',type(e).__name__,str(e)[:180])
+          PY
