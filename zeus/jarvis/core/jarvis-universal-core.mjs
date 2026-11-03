@@ -25,9 +25,10 @@ export class MemoryEventStore {
  * dispatcher.execute({mission,capability}) => {status,evidence}; only trusted, governed dispatcher allowed.
  */
 export class JarvisUniversalCore {
-  constructor({identityProvider,store,capabilities,dispatcher,policy=DEFAULT_POLICY,clock=()=>new Date().toISOString(),ids=()=>crypto.randomUUID()}){
+  constructor({identityProvider,store,capabilities,dispatcher,policy=DEFAULT_POLICY,clock=()=>new Date().toISOString(),ids=()=>crypto.randomUUID(),environment='LAB'}){
     if(!identityProvider?.verify||!store?.get||!store?.put||!store?.findByIdempotency)throw new TypeError('SECURE_ADAPTERS_REQUIRED');
-    this.identityProvider=identityProvider;this.store=store;this.capabilities=capabilities??new Map();this.dispatcher=dispatcher;this.policy={...DEFAULT_POLICY,...policy};this.clock=clock;this.ids=ids;
+    if(!['LAB','PREPROD','PROD'].includes(environment))throw new TypeError('ENVIRONMENT_INVALID');
+    this.identityProvider=identityProvider;this.store=store;this.capabilities=capabilities??new Map();this.dispatcher=dispatcher;this.policy={...DEFAULT_POLICY,...policy};this.clock=clock;this.ids=ids;this.environment=environment;
   }
   async #principal(token){if(token==null||(typeof token==='string'&&!token))throw new Error('AUTH_REQUIRED');const p=await this.identityProvider.verify(token);if(!p?.ownerId||!p.sessionId||!Array.isArray(p.authorizedCompanies))throw new Error('AUTH_DENIED');if(!p.roles?.includes('OWNER_ROOT'))throw new Error('OWNER_ROOT_REQUIRED');return p;}
   #checkCompany(principal,companyId){if(!principal.authorizedCompanies.includes(companyId))throw new Error('COMPANY_SCOPE_DENIED');}
@@ -38,7 +39,7 @@ export class JarvisUniversalCore {
     if(payload==null||typeof payload!=='object'||Array.isArray(payload))throw new TypeError('PAYLOAD_INVALID');
     const scope=`${p.ownerId}:${company}`;const prior=await this.store.findByIdempotency(scope,key);
     if(prior){if(prior.intent!==action||prior.projectId!==project||stableJson(prior.request)!==stableJson(redact(payload)))throw new Error('IDEMPOTENCY_CONFLICT');return {mission:prior,replayed:true};}
-    const at=this.clock();const mission={id:this.ids(),coreId:CORE_ID,coreVersion:CORE_VERSION,ownerId:p.ownerId,companyId:company,projectId:project,intent:action,idempotencyKey:key,request:redact(payload),channel:ch,status:'RECEIVED',events:[{type:'RECEIVED',at,channel:ch}],createdAt:at,updatedAt:at,environment:'PROD',engineId:'JARVIS-CORE-001'};
+    const at=this.clock();const mission={id:this.ids(),coreId:CORE_ID,coreVersion:CORE_VERSION,ownerId:p.ownerId,companyId:company,projectId:project,intent:action,idempotencyKey:key,request:redact(payload),channel:ch,status:'RECEIVED',events:[{type:'RECEIVED',at,channel:ch}],createdAt:at,updatedAt:at,environment:this.environment,engineId:'JARVIS-CORE-001'};
     if(typeof this.store.createIfAbsent==='function'){
       const persisted=await this.store.createIfAbsent(mission);
       if(persisted.id!==mission.id){
