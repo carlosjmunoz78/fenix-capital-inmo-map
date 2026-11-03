@@ -1,0 +1,40 @@
+name: CEREBRO Foundation Holds Structural V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/foundation-holds-v1.mjs'
+      - 'cerebro/tests/foundation-holds-v1.test.mjs'
+      - 'cerebro/missions/close-foundation-holds-v1.mjs'
+      - '.github/workflows/cerebro-foundation-holds-structural-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  foundation-holds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate Registry/Factory
+        run: cd cerebro && npm run validate && node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Run structural tests
+        run: node --test cerebro/tests/foundation-holds-v1.test.mjs
+      - name: Produce governed evidence
+        run: node cerebro/missions/close-foundation-holds-v1.mjs
+      - name: Enforce no fake PROD
+        run: |
+          node <<'NODE'
+          const fs=require('fs');const s=JSON.parse(fs.readFileSync('cerebro/evidence/foundation-holds-closure/2026-11-03/SUMMARY.json'));
+          if(s.status!=='GREEN_STRUCTURAL_ONLY'||s.prod_execution_authorized!==false||s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0)throw new Error('safety/status drift');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-foundation-holds-${{ github.run_id }}
+          path: cerebro/evidence/foundation-holds-closure/2026-11-03/
+          if-no-files-found: error
+          retention-days: 30
