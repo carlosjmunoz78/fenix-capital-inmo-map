@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import {Knw001KnowledgeStoreV1} from '../runtime/foundation-holds-v1.mjs';
 
 const repo='carlosjmunoz78/fenix-capital-inmo-map';
-const tracked='cerebro/registry/engine-registry.v1.json';
+const tracked='cerebro/governance/remaining-10-progress-2026-11-03.json';
 const token=process.env.GITHUB_TOKEN;
 assert.ok(typeof token==='string'&&token.length>10,'GITHUB_REPO_READ_TOKEN_REQUIRED');
 assert.equal(process.env.GITHUB_REPOSITORY,repo,'REPO_IDENTITY_MISMATCH');
@@ -16,7 +16,7 @@ async function api(url){
  return response.json();
 }
 const pathQ=encodeURIComponent(tracked),prefix='https://api.github.com/repos/'+repo;
-const commits=await api(prefix+'/commits?path='+pathQ+'&per_page=3');
+const commits=await api(prefix+'/commits?path='+pathQ+'&per_page=3&sha='+encodeURIComponent(process.env.GITHUB_REF_NAME));
 assert.ok(Array.isArray(commits)&&commits.length>=2,'KNW001_TWO_REAL_REVISIONS_REQUIRED');
 const revisions=[];
 for(const c of commits.slice(0,2).reverse()){
@@ -25,12 +25,12 @@ for(const c of commits.slice(0,2).reverse()){
  assert.equal(data.encoding,'base64');assert.equal(data.path,tracked);
  const bytes=Buffer.from(String(data.content).replace(/\s+/g,''),'base64');
  const parsed=JSON.parse(bytes.toString('utf8'));
- assert.ok(Array.isArray(parsed.engine_ids),'KNW001_REGISTRY_SHAPE_MISMATCH');
+ assert.equal(parsed.baseline?.registry_total,179,'KNW001_PROGRESS_SOURCE_SHAPE_MISMATCH');
  const checksum=crypto.createHash('sha256').update(bytes).digest('hex');
- revisions.push({commit_sha:c.sha,file_sha256:checksum,count:parsed.count,source_commit_time:c.commit?.committer?.date??null});
+ revisions.push({commit_sha:c.sha,file_sha256:checksum,count:parsed.baseline.registry_total,source_commit_time:c.commit?.committer?.date??null});
 }
 const store=new Knw001KnowledgeStoreV1();
-const context={company_id:'fenix',engine_id:'KNW-001',environment:'PREPROD',version:'v1',subject:'registry-canonic-count'};
+const context={company_id:'fenix',engine_id:'KNW-001',environment:'PREPROD',version:'v1',subject:'versioned-progress-registry-count'};
 for(const [index,rev] of revisions.entries()){
  const id='git-revision-'+index;
  store.put({...context,knowledge_id:id,value:{count:rev.count,sha256:rev.file_sha256},
