@@ -18,7 +18,9 @@ export function createJarvisB3PostgresAdapters({query}={}){
    allowMutations:row.allow_mutations===true,active:row.active===true,revoked:row.revoked===true};
  }};
  const inventoryStore={async get({companyId,environment,connectorId,actionName}){
-  const row=await one(query,'SELECT company_id,connector_id,status,vault_secret_id,allowed_actions FROM zeus_jarvis.b3_secret_inventory WHERE company_id=$1 AND environment=$2 AND connector_id=$3 AND $4=ANY(allowed_actions) LIMIT 1',[companyId,environment,connectorId,actionName]);
+  // V0 inventory has no environment column: reject every non-PROD lookup until a dedicated migration is approved.
+  if(environment!=='PROD')return null;
+  const row=await one(query,'SELECT company_id,connector_id,status,vault_secret_id,allowed_actions FROM zeus_jarvis.b3_secret_inventory WHERE company_id=$1 AND connector_id=$2 AND $3=ANY(allowed_actions) LIMIT 1',[companyId,connectorId,actionName]);
   return row?{companyId:row.company_id,connectorId:row.connector_id,status:row.status,
     reference:row.vault_secret_id,allowedActions:row.allowed_actions}:null;
  }};
