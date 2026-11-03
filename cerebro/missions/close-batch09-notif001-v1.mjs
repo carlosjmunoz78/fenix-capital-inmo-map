@@ -1,0 +1,56 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {spawnSync} from 'node:child_process';
+import {runLote3ComNotifC360} from '../runtime/lote3-com-notif-c360-real-v1.mjs';
+
+const ROOT=process.cwd();
+const OUT=path.join(ROOT,'cerebro/evidence/batch09-notif001-autonomy-closure/2026-11-03');
+const stable=v=>Array.isArray(v)?v.map(stable):(v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().map(k=>[k,stable(v[k])])):v);
+const json=v=>JSON.stringify(stable(v),null,2)+'\n';
+const sha=v=>crypto.createHash('sha256').update(Buffer.isBuffer(v)?v:(typeof v==='string'?v:json(v))).digest('hex');
+const A=(v,m)=>{if(!v)throw new Error(m)};
+const W=(r,v)=>{const p=path.join(OUT,r);fs.mkdirSync(path.dirname(p),{recursive:true});fs.writeFileSync(p,json(v))};
+const T=f=>{const r=spawnSync(process.execPath,['--test',f],{cwd:ROOT,encoding:'utf8',maxBuffer:12e6});if(r.status)throw new Error(r.stdout+r.stderr);return {file:f,status:'PASS',stdout_sha256:sha(r.stdout||'')}};
+fs.rmSync(OUT,{recursive:true,force:true});
+
+const runtime='cerebro/runtime/lote3-com-notif-c360-real-v1.mjs';
+const native='cerebro/communication/notif-native-v1.mjs';
+const testNative='cerebro/tests/lote3-com-notif-c360-v1.test.mjs';
+const testLote3='cerebro/tests/lote3-com-notif-c360-real-v1.test.mjs';
+for(const f of [runtime,native,testNative,testLote3])A(fs.existsSync(path.join(ROOT,f)),`missing ${f}`);
+const sourceHashes=Object.fromEntries([runtime,native,testNative,testLote3].map(f=>[f,sha(fs.readFileSync(path.join(ROOT,f)))]));
+const tests=[T(testNative),T(testLote3)];
+const root=fs.mkdtempSync(path.join(os.tmpdir(),'notif001-close-'));
+const result=runLote3ComNotifC360({company_id:'fenix',root_dir:root,source_run_id:67001,source_head_sha:'7'.repeat(40)});
+A(result.status==='FULL_E2E_REAL_PREPROD'&&result.full_e2e_real_preprod===true,'NOTIF E2E drift');
+A(result.consumer_coverage===1&&result.functional_consumer_coverage===1&&result.missing_consumers.length===0&&result.failed_consumers.length===0,'NOTIF consumer coverage drift');
+const notif=result.consumer_map?.['NOTIF-001'];
+A(notif?.decision==='NOTIFICATION_PLAN_READY'&&notif?.real_consumption===true&&notif?.outcome?.pass===true,'NOTIF semantic consumer drift');
+A(result.notification_plan?.decisions?.length===1,'NOTIF decision count drift');
+A(result.notification_plan?.dispatch_authorized===false&&result.notification_plan?.external_side_effect_executed===false,'NOTIF dispatch authority drift');
+A(result.notification_plan?.raw_pii_present===false&&result.notification_plan?.raw_message_text_present===false,'NOTIF privacy drift');
+A(result.notification_plan?.prod_authorized===false&&result.notification_plan?.prod_write_authorized===false&&result.notification_plan?.trading_access===false,'NOTIF authority drift');
+A(result.independent_tribunal?.decision==='PASS','NOTIF tribunal drift');
+A(result.observability_consumer?.decision==='OBSERVABILITY_RECORDED','NOTIF observability drift');
+A(result.finops_consumer?.decision==='FINOPS_ZERO_COST_RECORDED'&&result.additional_cost_eur===0,'NOTIF cost drift');
+A(result.backup_rollback_rebuild?.backup_ready===true&&result.backup_rollback_rebuild?.rollback_green===true&&result.backup_rollback_rebuild?.rebuild_green===true,'NOTIF BRR drift');
+A(result.idempotency_proven===true&&result.restartable===true,'NOTIF idempotency/restart drift');
+for(const k of ['prod_authorized','prod_write_authorized','db_mutation_authorized','provider_write_authorized','crm_write_authorized','dispatch_authorized','spend_authorized','trading_access','android_touched','external_code_execution'])A(result[k]===false,`NOTIF authority drift ${k}`);
+const rebuilt=runLote3ComNotifC360({company_id:'fenix',root_dir:fs.mkdtempSync(path.join(os.tmpdir(),'notif001-rebuild-')),source_run_id:67001,source_head_sha:'7'.repeat(40)});
+A(rebuilt.semantic_outcome_hash===result.semantic_outcome_hash&&rebuilt.full_e2e_real_preprod===true,'NOTIF deterministic rebuild drift');
+
+W('contracts/notif-001-contract-evidence.json',{engine_id:'NOTIF-001',gate:'contracts',status:'PASS',contract:'DETERMINISTIC_PREPROD_NOTIFICATION_PLANNER',invariants:['company_id exact','PREPROD exact','priority/digest/quiet-hours/dedupe','canonical human exception escalation','raw PII/message/secrets denied','direct dispatch denied','prod writes denied','trading denied'],direct_dispatch_authorized:false,external_notification_delivery_evidence:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('permissions/notif-001-permissions-evidence.json',{engine_id:'NOTIF-001',gate:'permissions',status:'PASS',permission_model:'PLAN_ONLY_PREPROD',allow:['PREPROD_NOTIFICATION_PLANNING','OPERATOR_INTERRUPT_PLAN','DIGEST_PLAN','QUIET_HOURS_DEFER','DUPLICATE_SUPPRESSION'],deny:['DIRECT_NOTIFICATION_DISPATCH','RAW_PII','RAW_MESSAGE_TEXT','RAW_SECRETS','CROSS_COMPANY_NOTIFICATION','PROD_WRITE','PROVIDER_WRITE','SPEND','TRADING'],dispatch_authorized:false,prod_execution_authorized:false,additional_cost_eur:0});
+W('policy/notif-001-policy-evidence.json',{engine_id:'NOTIF-001',gate:'policy',status:'PASS',policy_mode:'FAIL_CLOSED_PREPROD',fail_closed:true,requirements:{canonical_human_required_only:true,quiet_hours:true,dedupe:true,nonurgent_grouping:true,cross_company_denied:true,external_side_effects_denied:true},human_required:['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'],prod_execution_authorized:false,additional_cost_eur:0});
+W('evaluation/notif-001-evaluation-evidence.json',{engine_id:'NOTIF-001',gate:'evaluation',status:'PASS',approved:true,score:1,environment:'LAB_PREPROD',scope:'NOTIFICATION_PLANNING_NO_EXTERNAL_DISPATCH',old_vs_new:result.evaluation,cases:{full_e2e_real_preprod:true,semantic_consumer_real:true,consumer_coverage_1:true,functional_coverage_1:true,notification_plan_ready:true,dispatch_denied:true,raw_pii_denied:true,observability_recorded:true,finops_zero_cost:true,backup_ready:true,rollback_green:true,rebuild_green:true,idempotency_proven:true,restartable:true,prod_write_denied:true,trading_denied:true},tests,source_hashes:sourceHashes,external_notification_delivery_evidence:false,additional_cost_eur:0});
+W('tribunal/notif-001-tribunal-evidence.json',{engine_id:'NOTIF-001',gate:'tribunal',status:'GREEN',approved:true,pass:true,decision:'PASS',basis:'real semantic PREPROD notification planning + OLD vs NEW + independent tribunal + durable BRR + observability/FinOps + strict dispatch denial',independent_tribunal:result.independent_tribunal,external_delivery_approved:false,prod_authorized:false,additional_cost_eur:0});
+W('observability/notif-001-observability-evidence.json',{engine_id:'NOTIF-001',gate:'observability',status:'PASS',environment:'LAB_PREPROD',metric:'NOTIFICATION_PLAN_READY',audit:'semantic notification outcome recorded',trace_sha256:sha({bundle_id:result.bundle_id,semantic_outcome_hash:result.semantic_outcome_hash,notif_outcome_hash:notif.outcome_hash}),observability_decision:result.observability_consumer.decision,finops_decision:result.finops_consumer.decision,notification_mode:result.notification_plan.decisions[0]?.mode??null,dispatch_authorized:false,external_dispatches:0,prod_writes:0,additional_cost_eur:0});
+W('backup/notif-001-backup-evidence.json',{engine_id:'NOTIF-001',gate:'backup',status:'PASS',tested:true,backup_ready:result.backup_rollback_rebuild.backup_ready,runtime_result:result.backup_rollback_rebuild,source_hashes:sourceHashes,additional_cost_eur:0});
+W('rollback/notif-001-rollback-evidence.json',{engine_id:'NOTIF-001',gate:'rollback',status:'PASS',tested:true,rollback_green:result.backup_rollback_rebuild.rollback_green,prod_rollback_claimed:false,external_delivery_rollback_claimed:false,additional_cost_eur:0});
+W('rebuild/notif-001-rebuild-evidence.json',{engine_id:'NOTIF-001',gate:'rebuild',status:'PASS',tested:true,rebuild_green:result.backup_rollback_rebuild.rebuild_green,semantic_rebuild_match:rebuilt.semantic_outcome_hash===result.semantic_outcome_hash,additional_cost_eur:0});
+W('SUMMARY.json',{mission:'CLOSE_BATCH09_NOTIF001_V1',status:'GREEN',engine_id:'NOTIF-001',company_id:'fenix',environment:'LAB_PREPROD',certified_scope:'NOTIFICATION_PLANNING_NO_EXTERNAL_DISPATCH',full_e2e_real_preprod:true,semantic_consumer_real:true,dispatch_authorized:false,external_notification_delivery_evidence:false,external_side_effects_executed:false,prod_execution_authorized:false,prod_writes:false,provider_writes:false,crm_writes:false,spend_authorized:false,trading_touched:false,factory_mutated:false,registry_mutated:false,additional_cost_eur:0,holds:['REAL_NOTIFICATION_DISPATCH','EMAIL_REAL_SEND','WHATSAPP_REAL_SEND','PUSH_REAL_SEND','PROD_EXECUTION']});
+fs.rmSync(root,{recursive:true,force:true});
+console.log('CLOSE_BATCH09_NOTIF001_V1=GREEN');
