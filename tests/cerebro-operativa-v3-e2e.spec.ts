@@ -31,7 +31,7 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByRole('radio',{name:'Normal'})).toHaveAttribute('aria-checked','true');
  await expect(operative.getByRole('button',{name:'Añadir archivo'})).toBeVisible();
  const composer=operative.getByRole('textbox',{name:'Mensaje para Jarvis'});
- await expect(composer).toHaveAttribute('placeholder',null);
+ expect(await composer.getAttribute('placeholder')).toBeNull();
  await expect(operative.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(operative.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
 
