@@ -9,7 +9,7 @@ const ROOT=path.resolve(process.cwd());
 const read=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
 
 test('P23 governance covers exact 179 engines and stays fail-closed',()=>{
-  const proof=validateGovernance(read('registry/engine-registry.v1.json'),read('registry/prod-engine-governance.v1.json'),read('audit/p23-live-contract.v1.json'));
+  const proof=validateGovernance(read('cerebro/registry/engine-registry.v1.json'),read('cerebro/registry/prod-engine-governance.v1.json'),read('cerebro/audit/p23-live-contract.v1.json'));
   assert.equal(proof.registry_total,179);
   assert.equal(proof.prod_registered,179);
   assert.equal(proof.execution_authorized,0);
