@@ -39,3 +39,13 @@ html[data-cerebro-console='1'] [title='Chat interno']{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
 }
+
+/* The App master topbar lives at z-index 7600. Operativa inspectors are modal
+   surfaces and must stay above it so their controls remain clickable. */
+html[data-cerebro-console='1'] .operativa-inspector-backdrop{
+  z-index:7700!important;
+}
+html[data-cerebro-console='1'] .operativa-inspector{
+  position:relative;
+  z-index:7701;
+}
