@@ -18,6 +18,7 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
   if(!PROVIDERS.has(c.provider)||!Array.isArray(c.capabilities)||!c.capabilities.length
      ||c.capabilities.some(s=>!CAPABILITIES.has(s))
      ||!validMoney(c.estimatedEuroPerCall)||typeof c.healthy!=='boolean')throw Error('CATALOG_PROVIDER_INVALID');
+  if(c.provider==='DEEPSEEK'&&c.capabilities.some(v=>v==='VOICE_STT'||v==='VOICE_TTS'))throw Error('DEEPSEEK_SPEECH_UNSUPPORTED');
   ids.add(c.id);return snapshot({id:c.id,provider:c.provider,capabilities:[...c.capabilities],estimatedEuroPerCall:c.estimatedEuroPerCall,healthy:c.healthy});
  });
  return Object.freeze({
@@ -34,8 +35,12 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
    }
    if(privacy==='CONFIDENTIAL'||privacy==='RESTRICTED')return denied('NO_PRIVATE_PROVIDER',companyId,capability);
    if(!allowPaid)return denied('PAID_MODEL_OPT_IN_REQUIRED',companyId,capability);
-   const paid=models.filter(m=>m.healthy&&m.provider!=='LOCAL'&&m.capabilities.includes(capability));
-   if(!paid.length)return denied('NO_PROVIDER_AVAILABLE',companyId,capability);
+   const paid=models.filter(m=>m.healthy&&m.provider==='DEEPSEEK'&&m.capabilities.includes(capability));
+   if(!paid.length){
+    if(models.some(m=>m.healthy&&m.provider==='EXTERNAL'&&m.capabilities.includes(capability)))
+      return denied('EXTERNAL_PROVIDER_NOT_AUTHORIZED',companyId,capability);
+    return denied('NO_PROVIDER_AVAILABLE',companyId,capability);
+   }
    const chosen=paid.sort((a,b)=>a.estimatedEuroPerCall-b.estimatedEuroPerCall||a.id.localeCompare(b.id))[0];
    // Only DeepSeek prepaid credit was authorized; other paid providers require a separate mandate.
    if(chosen.provider!=='DEEPSEEK')return denied('EXTERNAL_PROVIDER_NOT_AUTHORIZED',companyId,capability);
