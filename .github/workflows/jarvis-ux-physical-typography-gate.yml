@@ -42,7 +42,7 @@ jobs:
       - name: Verify JARVIS desktop and mobile computed font sizes
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --reporter=line
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --reporter=line --grep 'physical typography remains legible'
       - name: Upload isolated visual evidence
         if: always()
         uses: actions/upload-artifact@v4
