@@ -77,3 +77,17 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   const profile=fs.readFileSync('src/ProfileShell.tsx','utf8');
   expect(profile).toContain("label:'CEREBRO',route:'/cerebro'");
 });
+
+test('JARVIS HTML navigation uses no-store while versioned asset caching remains untouched',()=>{
+  const vercel=JSON.parse(fs.readFileSync('vercel.json','utf8'));
+  expect(vercel.buildCommand).toBe('npm run build');
+  expect(vercel.outputDirectory).toBe('dist');
+  expect(vercel.rewrites).toEqual([{source:'/(.*)',destination:'/index.html'}]);
+  for(const source of ['/','/index.html','/cerebro']){
+    const rule=vercel.headers.find((item:{source:string})=>item.source===source);
+    expect(rule).toBeTruthy();
+    const cache=rule.headers.find((header:{key:string})=>header.key==='Cache-Control');
+    expect(cache?.value).toContain('no-store');
+  }
+  expect(vercel.headers.some((item:{source:string})=>item.source.startsWith('/assets/'))).toBe(false);
+});
