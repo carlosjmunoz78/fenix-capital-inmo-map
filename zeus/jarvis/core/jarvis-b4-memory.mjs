@@ -18,8 +18,24 @@ function validateLinks(links,companyId){if(!Array.isArray(links)||links.length>2
 
 /** LAB-only storage. Shared durable storage must implement appendUnique + list atomically. */
 export class B4MemoryLabStore {
- constructor(){this.entries=[];this.dedupe=new Map();}
- async appendUnique(e){const k=[e.ownerId,e.companyId,e.environment,e.projectId,e.idempotencyKey].join('|');const old=this.dedupe.get(k);if(old){if(old.fingerprint!==e.fingerprint)throw Error('IDEMPOTENCY_CONFLICT');return {event:clone(old),replayed:true};}const item=clone({...e,sequence:this.entries.length+1});this.entries.push(item);this.dedupe.set(k,item);return {event:clone(item),replayed:false};}
+ constructor(){this.entries=[];this.dedupe=new Map();this.resolvedTargets=new Set();this.checkpointSequences=new Set();}
+ async appendUnique(e){
+  const base=[e.ownerId,e.companyId,e.environment,e.projectId].join('|');
+  const idempotencyKey=base+'|'+e.idempotencyKey;
+  const old=this.dedupe.get(idempotencyKey);
+  if(old){if(old.fingerprint!==e.fingerprint)throw Error('IDEMPOTENCY_CONFLICT');return {event:clone(old),replayed:true};}
+  // This synchronous critical section has no await. Persistent backends MUST provide equivalent
+  // SQL UNIQUE constraints: a pre-insert snapshot check alone is unsafe under concurrency.
+  const targetKey=['CORRECTION','REVOCATION'].includes(e.kind)?base+'|TARGET|'+e.targetId:null;
+  const cpKey=e.kind==='CHECKPOINT'?base+'|CHECKPOINT|'+e.missionId+'|'+e.checkpoint.sequence:null;
+  if(targetKey&&this.resolvedTargets.has(targetKey))throw Error('TARGET_ALREADY_RESOLVED');
+  if(cpKey&&this.checkpointSequences.has(cpKey))throw Error('CHECKPOINT_SEQUENCE_CONFLICT');
+  const item=clone({...e,sequence:this.entries.length+1});
+  this.entries.push(item);this.dedupe.set(idempotencyKey,item);
+  if(targetKey)this.resolvedTargets.add(targetKey);
+  if(cpKey)this.checkpointSequences.add(cpKey);
+  return {event:clone(item),replayed:false};
+ }
  async list(s){return this.entries.filter(x=>sameScope(x,s)).map(clone);}
 }
 
