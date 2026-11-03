@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-03T18:05:05.582Z",
+  "updated_at": "2026-11-03T18:16:19.589Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -505,8 +505,7 @@
     "github-wide-skills:bad56edb1cea3473e75b",
     "github-wide-skills:f42dc0d6d41f22b7d718",
     "github-wide-skills:14bdd1407f72d7203ff8",
-    "github-wide-skills:ea8bb2c7a18258486f32",
-    "github-wide-skills:04119a0ac13141a7eeb6"
+    "github-wide-skills:ea8bb2c7a18258486f32"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -709,75 +708,6 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 41611550491,
       "checkpointed_at": "2026-11-03T09:30:44.845Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:ea8bb2c7a18258486f32": {
-      "candidate_id": "github-wide-skills:ea8bb2c7a18258486f32",
-      "name": "postgres-migrations-engineer",
-      "human_alias": "Postgres Migrations Engineer",
-      "wrapper_id": "skillwrap:c905425e3d5d41b56ced",
-      "domain": "data-database-supabase",
-      "engine_bindings": [
-        "DATA-001",
-        "DBOFF-001",
-        "STOROFF-001",
-        "API-001",
-        "CRM-001"
-      ],
-      "value_score": 91.16,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "bentoms-dev/skills",
-        "upstream_head_commit": "c23f80ee16ab191ad288bc0e7cf6d355b8df7537",
-        "manifest_sha256": "3c8f4caa7512b52228840b4e14099cedfd3549eec8c89946f72313bdc3b18270",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 41688208238,
-      "checkpointed_at": "2026-11-03T17:52:03.869Z",
-      "human_required": null,
-      "external_skill_code_execution": false,
-      "customer_data_used": false,
-      "prod_write": false,
-      "trading_access": false,
-      "paid_fallback": false,
-      "additional_cost_eur": 0
-    },
-    "github-wide-skills:04119a0ac13141a7eeb6": {
-      "candidate_id": "github-wide-skills:04119a0ac13141a7eeb6",
-      "name": "bug-hunt",
-      "human_alias": "Bug Hunt",
-      "wrapper_id": "skillwrap:ab2ffd172d4ca1a37855",
-      "domain": "software-engineering-devops",
-      "engine_bindings": [
-        "FACT-001",
-        "ARCH-001",
-        "API-001",
-        "DEP-001",
-        "MIG-001",
-        "QA-001",
-        "REG-001",
-        "DOCS-001"
-      ],
-      "value_score": 90.5,
-      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
-      "evidence_refs": {
-        "upstream_full_name": "escoffier-labs/skillet",
-        "upstream_head_commit": "c75eae7625b59cf45d4b8d13701e4af8f6ad0e94",
-        "manifest_sha256": "f58d399dbe98401f16f38726bfd1ef5498ef08ddb65bd88afedac04a2a2093cb",
-        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
-      },
-      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
-      "status": "WAITING_SAFE_HANDLER",
-      "source_discovery_run_id": 41690224226,
-      "checkpointed_at": "2026-11-03T18:05:05.582Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -28060,6 +27990,54 @@
       "action_type": "REJECT_CAPABILITY",
       "action_status": "APPLIED_METADATA_ONLY",
       "next_gate": "CONTINUE_DISCOVERY"
+    },
+    "github-wide-skills:ea8bb2c7a18258486f32": {
+      "candidate_id": "github-wide-skills:ea8bb2c7a18258486f32",
+      "name": "postgres-migrations-engineer",
+      "human_alias": "Postgres Migrations Engineer",
+      "wrapper_id": "skillwrap:c905425e3d5d41b56ced",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 91.16,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "bentoms-dev/skills",
+        "upstream_head_commit": "c23f80ee16ab191ad288bc0e7cf6d355b8df7537",
+        "manifest_sha256": "3c8f4caa7512b52228840b4e14099cedfd3549eec8c89946f72313bdc3b18270",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "SKILL_AUTONOMY_DECISION_RECORDED",
+      "status": "COMPLETED",
+      "source_discovery_run_id": 41688208238,
+      "checkpointed_at": "2026-11-03T17:52:03.869Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0,
+      "disposition": "DESCARTAR",
+      "evidence": {
+        "reason": "UNTRUSTED_SOURCE_OR_SUPPLY_CHAIN",
+        "decision_id": "skill-autonomy:07ef78fdc0c906e62b72f060",
+        "decision": "DESCARTAR",
+        "human_required": null,
+        "source": "CEREBRO Skill AutoLoop Safe Handler V0"
+      },
+      "updated_at": "2026-11-03T18:16:19.589Z",
+      "prod_authorized": false,
+      "autonomous_promotion_authorized": false,
+      "action_id": "skill-action:19963a6693b393b86d2bfb80",
+      "action_type": "REJECT_CAPABILITY",
+      "action_status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY"
     }
   },
   "terminal_hold": {
@@ -31586,7 +31564,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
+  "last_action": "APPLY_REJECT_CAPABILITY_CONTINUE_DISCOVERY",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -31599,7 +31577,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 41690224226,
+  "last_discovery_run_id": 41688208238,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
@@ -48770,6 +48748,44 @@
       "external_skill_code_execution_authorized": false,
       "additional_cost_eur": 0,
       "recorded_at": "2026-11-02T12:40:15.015Z"
+    },
+    "github-wide-skills:ea8bb2c7a18258486f32": {
+      "schema_version": "1.0.0",
+      "state_type": "CEREBRO_SKILL_AUTONOMY_ACTION_RECEIPT",
+      "action_id": "skill-action:19963a6693b393b86d2bfb80",
+      "decision_id": "skill-autonomy:07ef78fdc0c906e62b72f060",
+      "company_id": "GLOBAL",
+      "engine_id": "SKILL-AUTONOMY-ACTION",
+      "environment": "PREPROD",
+      "version": "1.0.0",
+      "skill_id": "github-wide-skills:ea8bb2c7a18258486f32",
+      "skill_version": "skillwrap:c905425e3d5d41b56ced",
+      "decision": "DESCARTAR",
+      "action_type": "REJECT_CAPABILITY",
+      "status": "APPLIED_METADATA_ONLY",
+      "next_gate": "CONTINUE_DISCOVERY",
+      "target_engine_ids": [
+        "API-001",
+        "CRM-001",
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001"
+      ],
+      "observed_at": null,
+      "human_required": null,
+      "queueable_safe_work": false,
+      "terminal_metadata_only": true,
+      "mutation_authorized": false,
+      "internal_wrapper_shadow_authorized": false,
+      "fact001_gap_candidate_authorized": false,
+      "fact001_create_authorized": false,
+      "paid_activation_authorized": false,
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "trading_access": false,
+      "external_skill_code_execution_authorized": false,
+      "additional_cost_eur": 0,
+      "recorded_at": "2026-11-03T18:16:19.589Z"
     }
   },
   "autonomy_action_queue": {},
