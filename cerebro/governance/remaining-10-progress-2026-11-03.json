@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.0.1",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -34,10 +34,34 @@
       "ci_run": 41658502825,
       "remaining": ["instrument live providers/API/AI/storage call sites", "prove live budgets and hard-stop attribution"]
     },
-    "DOC-001": {"state": "PARCIAL", "structural_contract": "CI_RUNNING", "ci_run": 41658716466},
-    "DOC-002": {"state": "PARCIAL", "structural_contract": "CI_RUNNING", "ci_run": 41658716466},
-    "DOC-003": {"state": "PARCIAL", "structural_contract": "CI_RUNNING", "ci_run": 41658716466},
-    "DOC-004": {"state": "PARCIAL", "structural_contract": "CI_RUNNING", "ci_run": 41658716466},
+    "DOC-001": {
+      "state": "PARCIAL",
+      "structural_contract": "GREEN",
+      "ci_run": 41658716466,
+      "proven": ["local-first extraction", "deterministic classification", "family schema", "safe OCR fallback", "source non-destructive"],
+      "remaining": ["bind live document intake/storage and canonical metadata"]
+    },
+    "DOC-002": {
+      "state": "PARCIAL",
+      "structural_contract": "GREEN",
+      "ci_run": 41658716466,
+      "proven": ["missing/request/receive/classify/validate/close lifecycle"],
+      "remaining": ["bind live communications/reminders and receipt events"]
+    },
+    "DOC-003": {
+      "state": "PARCIAL",
+      "structural_contract": "GREEN",
+      "ci_run": 41658716466,
+      "proven": ["Pillow", "OpenCV", "OCRmyPDF", "Tesseract", "quality gate", "non-destructive recovery"],
+      "remaining": ["expand fixture corpus to representative real document families before production activation"]
+    },
+    "DOC-004": {
+      "state": "PARCIAL",
+      "structural_contract": "GREEN",
+      "ci_run": 41658716466,
+      "proven": ["duplicate/anomaly evidence scoring", "HIGH_RISK escalation", "automatic accusation forbidden"],
+      "remaining": ["bind normalized live evidence and calibrate thresholds on validated fixtures"]
+    },
     "LAB-TRD": {
       "state": "STRUCTURAL_HOLD",
       "isolation": "PRESERVED",
@@ -57,5 +81,5 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "finish DOC-001..004 CI; then physical/integration closure in dependency order RUNTIME -> KNW/TRN/FINOPS/DOC -> HCI; LAB-TRD remains isolated and separate"
+  "next_block": "physical/integration closure in dependency order RUNTIME -> KNW/TRN/FINOPS/DOC -> HCI; LAB-TRD remains isolated and separately governed"
 }
