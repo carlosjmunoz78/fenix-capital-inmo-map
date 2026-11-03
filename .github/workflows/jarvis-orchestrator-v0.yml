@@ -1,0 +1,41 @@
+name: JARVIS Orchestrator V0 Contract
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-work-codex-complete-20261102
+    paths:
+      - 'supabase/functions/jarvis-orchestrator-v0/**'
+      - 'scripts/verify-jarvis-orchestrator-v0.mjs'
+      - '.github/workflows/jarvis-orchestrator-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-work-codex-complete-20261102
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify deterministic safety contract
+        run: node scripts/verify-jarvis-orchestrator-v0.mjs
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check Edge Function
+        run: deno check --node-modules-dir=auto supabase/functions/jarvis-orchestrator-v0/index.ts
+      - name: Assert protected branches remain external to orchestrator
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F "const SAFE_BRANCH='cerebro/jarvis-work-codex-complete-20261102'" supabase/functions/jarvis-orchestrator-v0/index.ts
+          grep -F "protected_branches:['main','emergency-pages']" supabase/functions/jarvis-orchestrator-v0/index.ts
+          ! grep -F "target_branch:'main'" supabase/functions/jarvis-orchestrator-v0/index.ts
+          ! grep -F "target_branch:'emergency-pages'" supabase/functions/jarvis-orchestrator-v0/index.ts

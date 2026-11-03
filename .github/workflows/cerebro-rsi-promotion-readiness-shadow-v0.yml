@@ -133,7 +133,9 @@ jobs:
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
           phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts)$'
-          unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" || true)"
+          # JARVIS Core paths explicitly governed by the integration PR; unrelated App drift remains blocked.
+          jarvis_app='^(index\.html|scripts/(cerebro-jarvis-v1-contract|verify-cerebro-operativa-v1|verify-jarvis-orchestrator-v0)\.mjs|src/(CerebroAttachmentBridge|CerebroConsoleHost|CerebroInterfaceBar|CerebroJarvisWorkConsole|CerebroOperativeConsole|JarvisEmbeddedConsole|JarvisOperativaComposerPortal|JarvisVisibleLanguageGuard)\.tsx|src/(cerebro-jarvis-status|cerebro-jarvis-work|cerebro-operative-console|cerebro-route-isolation-v2|jarvis-final-fixes|jarvis-work-premium-final|jarvis-work-v2)\.css|src/jarvisWorkApi\.ts|tests/(cerebro-jarvis-v1-preview|cerebro-operativa-v3-e2e|cerebro-operative-v3-contract|cerebro-operative-voice-contract|cerebro-spa-auth-route|visual-direction)\.spec\.ts)$'
+          unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" | grep -Ev "$jarvis_app" || true)"
           if [ -n "$unexpected_app" ]; then
             echo 'RSI bounded scope invalidated: unrelated App/UI/test/build/deploy surface changed.' >&2
             printf '%s\n' "$unexpected_app" >&2
@@ -147,7 +149,9 @@ jobs:
             done
           fi
           allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3|cerebro-creative-dispatch-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024103000_cerebro_creative_job_v1|20261024103100_cerebro_creative_job_v1_scope_hardening|20261024103200_cerebro_creative_job_v1_explicit_deny_policy|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/(20261024103000_cerebro_creative_job_v1|20261024230000_cerebro_browser_phase3_interactive_v0)\.rollback\.sql$)'
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
+          # Exact JARVIS integration artifacts; this gate never runs Supabase migrations.
+          jarvis_supabase='^(supabase/functions/(jarvis-git-gateway-v1|jarvis-orchestrator-v0|jarvis-work-dispatch-v1-preprod|jarvis-work-dispatch-v1|jarvis-work-gateway-v1-preprod|jarvis-work-gateway-v1)/index\.ts|supabase/migrations/(20261102143500_jarvis_project_work_preprod_v1|20261102144500_jarvis_project_hub_rpc_preprod_v1|20261102145000_jarvis_work_named_lease_preprod_v1)\.sql)$'
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" | grep -Ev "$jarvis_supabase" || true)"
           if [ -n "$unexpected_supabase" ]; then
             echo 'Unapproved Supabase surface changed:' >&2
             printf '%s\n' "$unexpected_supabase" >&2
@@ -208,14 +212,18 @@ jobs:
           changed="$(git diff --name-only "$base" HEAD)"
           protected='^(src/|tests/|public/|scripts/|index\.html$|package(-lock)?\.json$|playwright\.config\.(ts|js)$|vite\.config\.(ts|js)$|tsconfig[^/]*\.json$|\.env|\.github/workflows/(preprod-build|app-restoration-build|prod-[^/]+)\.yml$)'
           phase3_app='^(src/CerebroBrowserConsole\.tsx|src/cerebroBrowserInteractive\.ts)$'
-          unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" || true)"
+          # JARVIS Core paths explicitly governed by the integration PR; unrelated App drift remains blocked.
+          jarvis_app='^(index\.html|scripts/(cerebro-jarvis-v1-contract|verify-cerebro-operativa-v1|verify-jarvis-orchestrator-v0)\.mjs|src/(CerebroAttachmentBridge|CerebroConsoleHost|CerebroInterfaceBar|CerebroJarvisWorkConsole|CerebroOperativeConsole|JarvisEmbeddedConsole|JarvisOperativaComposerPortal|JarvisVisibleLanguageGuard)\.tsx|src/(cerebro-jarvis-status|cerebro-jarvis-work|cerebro-operative-console|cerebro-route-isolation-v2|jarvis-final-fixes|jarvis-work-premium-final|jarvis-work-v2)\.css|src/jarvisWorkApi\.ts|tests/(cerebro-jarvis-v1-preview|cerebro-operativa-v3-e2e|cerebro-operative-v3-contract|cerebro-operative-voice-contract|cerebro-spa-auth-route|visual-direction)\.spec\.ts)$'
+          unexpected_app="$(printf '%s\n' "$changed" | grep -E "$protected" | grep -Ev "$phase3_app" | grep -Ev "$jarvis_app" || true)"
           if [ -n "$unexpected_app" ]; then
             echo 'Unexpected App/application/test/production surface changed.' >&2
             printf '%s\n' "$unexpected_app" >&2
             exit 1
           fi
           allowed='^(supabase/functions/(cerebro-human-old-actor-preprod-v0|cerebro-human-new-actor-preprod-v1|cerebro-human-route-control-preprod-v1|cerebro-console-gateway-human-v1-canary|cerebro-console-human-router-zero-v1|cerebro-telegram-gateway-v0|cerebro-telegram-voice-v1|cerebro-browser-dispatch-v2|cerebro-browser-dispatch-v2-prod|cerebro-browser-interactive-v3|cerebro-creative-dispatch-v1)/|supabase/functions/cerebro-browser-dispatch-v1/index\.ts$|supabase/functions/_shared/cerebro-(conversation|channel-access)-policy-v1\.ts$|supabase/migrations/(20261012132000_cerebro_human_route_control_preprod_v1|20261013010500_cerebro_multichannel_ana_overlay_v1|20261013042000_cerebro_channel_access_profiles_v1|20261013075000_cerebro_company_registry_preprod_persistence_v1|20261013083000_cerebro_company_onboarding_preprod_persistence_v1|20261013093000_cerebro_scan001_preprod_persistence_v1|20261013101500_cerebro_post_scan_parallel_preprod_v1|20261023093000_cerebro_browser_dispatch_v1|20261023093100_cerebro_browser_credential_broker_v1|20261023180000_cerebro_browser_orchestrator_v2|20261023194500_cerebro_browser_credential_broker_v2|20261023195500_cerebro_browser_credential_broker_v2_scope_fix|20261023201500_cerebro_browser_barrier_v2_table|20261023201600_cerebro_browser_barrier_v2_acl|20261023201700_cerebro_browser_barrier_v2_functions|20261023201800_cerebro_browser_lease_benchmark_v2|20261024103000_cerebro_creative_job_v1|20261024103100_cerebro_creative_job_v1_scope_hardening|20261024103200_cerebro_creative_job_v1_explicit_deny_policy|20261024230000_cerebro_browser_phase3_interactive_v0)\.sql$|supabase/migrations/rollback/(20261024103000_cerebro_creative_job_v1|20261024230000_cerebro_browser_phase3_interactive_v0)\.rollback\.sql$)'
-          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" || true)"
+          # Exact JARVIS integration artifacts; this gate never runs Supabase migrations.
+          jarvis_supabase='^(supabase/functions/(jarvis-git-gateway-v1|jarvis-orchestrator-v0|jarvis-work-dispatch-v1-preprod|jarvis-work-dispatch-v1|jarvis-work-gateway-v1-preprod|jarvis-work-gateway-v1)/index\.ts|supabase/migrations/(20261102143500_jarvis_project_work_preprod_v1|20261102144500_jarvis_project_hub_rpc_preprod_v1|20261102145000_jarvis_work_named_lease_preprod_v1)\.sql)$'
+          unexpected_supabase="$(printf '%s\n' "$changed" | grep '^supabase/' | grep -Ev "$allowed" | grep -Ev "$jarvis_supabase" || true)"
           test -z "$unexpected_supabase" || { printf '%s\n' "$unexpected_supabase" >&2; exit 1; }
       - name: Creative Pipeline bounded-authority contract
         shell: bash
@@ -357,7 +365,8 @@ jobs:
           grep -F 'CREDENTIAL_ORIGIN_DENIED' "$broker"
           grep -F 'CREDENTIAL_CAPABILITY_DENIED' "$broker"
           grep -F 'const GITHUB_AUDIENCE="cerebro-browser-worker-v1"' "$edge"
-          grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
+          grep -F '"carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
+          grep -F 'if(!GITHUB_REPOSITORIES.has(repository))' "$edge"
           grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-browser-job-runner-v1.yml"' "$edge"
           grep -F 'else if(ref!=="refs/heads/main")' "$edge"
           grep -F 'if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"})' "$edge"

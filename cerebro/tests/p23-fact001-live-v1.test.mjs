@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { runP23Audit, validateGovernance, buildAuditPoint } from '../runtime/p23/fact001-audit-live-v1.mjs';
 
-const ROOT=path.resolve(process.cwd());
-const read=p=>JSON.parse(fs.readFileSync(path.join(ROOT,p),'utf8'));
+const CEREBRO_ROOT=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const read=p=>JSON.parse(fs.readFileSync(path.join(CEREBRO_ROOT,p),'utf8'));
 
 test('P23 governance covers exact 179 engines and stays fail-closed',()=>{
   const proof=validateGovernance(read('registry/engine-registry.v1.json'),read('registry/prod-engine-governance.v1.json'),read('audit/p23-live-contract.v1.json'));
