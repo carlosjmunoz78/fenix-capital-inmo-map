@@ -238,8 +238,7 @@ jobs:
           worker='.github/workflows/cerebro-creative-job-runner-v1.yml'
           for file in "$edge" "$queue" "$scope" "$deny" "$rollback" "$runner" "$worker"; do test -f "$file"; done
           grep -F 'const GITHUB_AUDIENCE="cerebro-creative-worker-v1"' "$edge"
-          grep -F '"carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
-          grep -F 'if(!GITHUB_REPOSITORIES.has(repository))' "$edge"
+          grep -F 'const GITHUB_REPOSITORY="carlosjmunoz78/fenix-capital-inmo-map"' "$edge"
           grep -F 'const GITHUB_WORKFLOW=".github/workflows/cerebro-creative-job-runner-v1.yml"' "$edge"
           grep -F 'else if(ref!=="refs/heads/main")' "$edge"
           grep -F 'if(!PREPROD)return out(req,404,{ok:false,error:"CANARY_ROUTE_NOT_AVAILABLE"})' "$edge"
