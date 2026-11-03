@@ -9,15 +9,16 @@ function toHttp(error){const message=String(error?.message||'INTERNAL_ERROR');
  if(message.endsWith('_INVALID'))return 400;
  return 500;
 }
-export function createJarvisGatewayHandler({core}){
+export function createJarvisGatewayHandler({core, trustedAuthChannel=null}){
  if(!core?.submit||!core?.inspect||!core?.execute)throw new TypeError('CORE_REQUIRED');
+ if(trustedAuthChannel!==null && (typeof trustedAuthChannel!=='string'||! /^[a-z0-9-]{2,80}$/.test(trustedAuthChannel)))throw new TypeError('TRUSTED_CHANNEL_INVALID');
  return async function handler(request){
   if(!(request instanceof Request))return response(400,{status:'ERROR',reason:'REQUEST_REQUIRED'});
   const pathname=new URL(request.url).pathname;
   if(request.method==='GET'&&pathname==='/v1/health')return response(200,{status:'LAB_ONLY',service:'jarvis-universal-gateway',ready:false});
   const bearer=request.headers.get('authorization')??'';
   if(!/^Bearer \S+$/i.test(bearer))return response(401,{status:'DENIED',reason:'AUTH_REQUIRED'});
-  const token=bearer.slice(7);
+  const token=trustedAuthChannel===null?bearer.slice(7):Object.freeze({channel:trustedAuthChannel,accessToken:bearer.slice(7)});
   const matched=pathname.match(/^\/v1\/missions\/([a-zA-Z0-9_-]{1,200})(\/execute)?$/);
   if(!((request.method==='POST'&&pathname==='/v1/missions')||(matched&&((request.method==='GET'&&!matched[2])||(request.method==='POST'&&matched[2])))))return response(404,{status:'CLOSED',reason:'ROUTE_NOT_FOUND'});
   try{
