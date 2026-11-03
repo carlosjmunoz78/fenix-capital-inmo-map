@@ -19,6 +19,11 @@ jobs:
             'https://app.fenixcapital.es',
             'https://fenix-capital-preprod-kkluxplcu.vercel.app',
           ]
+          import socket
+          print('DNS_RECORDS')
+          for host in ['app.fenixcapital.es','fenix-capital-preprod-kkluxplcu.vercel.app']:
+            try:print('HOST',host,[tuple(x[4]) for x in socket.getaddrinfo(host,443,proto=socket.IPPROTO_TCP)])
+            except Exception as e:print('DNS_ERROR',host,str(e))
           for origin in origins:
             print('ORIGIN',origin)
             url=origin+'/cerebro?section=jarvis&diag=20261103'
@@ -38,7 +43,21 @@ jobs:
                 except Exception as e:
                   print('ASSET_ERROR',path,type(e).__name__,str(e)[:160])
             except urllib.error.HTTPError as e:
-              print('HTML_HTTP_ERROR',json.dumps({'status':e.code,'url':e.url,'headers':{k:v for k,v in e.headers.items() if k.lower() in ('server','cf-ray','cf-cache-status','cache-control','content-type','x-vercel-error','x-vercel-id','location','age')},'body_start':e.read(250).decode('utf8','replace')}))
+              print('HTML_HTTP_ERROR',json.dumps({'status':e.code,'url':e.url,'headers':{k:v for k,v in e.headers.items() if k.lower() in ('server','cf-ray','cf-cache-status','cache-control','content-type','x-vercel-error','x-vercel-id','location','age')},'body_start':(body:=e.read(150000)).decode('utf8','replace')[:320],'assets':list(dict.fromkeys(re.findall(r'/assets/[^"\\s]+?\\.(?:js|css)',body.decode('utf8','replace'))))[:12]}))
             except Exception as e:
               print('HTML_ERROR',type(e).__name__,str(e)[:180])
           PY
+
+      - name: Check DNS and origin-specific response headers without modifying them
+        shell: bash
+        run: |
+          echo 'DNS CNAME:'
+          dig +short CNAME app.fenixcapital.es
+          echo 'DNS A:'
+          dig +short A app.fenixcapital.es
+          echo 'DNS AAAA:'
+          dig +short AAAA app.fenixcapital.es
+          for url in https://app.fenixcapital.es/ https://app.fenixcapital.es/cerebro https://app.fenixcapital.es/cerebro?section=jarvis; do
+            echo "URL $url"
+            curl -sSL --max-time 10 -o /dev/null -D - "$url" | grep -Ei '^(HTTP/|server:|via:|x-github|x-vercel|cf-|cache-control:|location:|age:)' | head -n 16 || true
+          done
