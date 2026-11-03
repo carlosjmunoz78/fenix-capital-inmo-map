@@ -21,5 +21,5 @@ jobs:
         run: |
           set -euo pipefail
           test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
-          node --test cerebro/tests/runtime001-scoped-job001-recovery-v1.test.mjs cerebro/tests/runtime001-shared-worker-v1.test.mjs
+          node --test cerebro/tests/runtime001-scoped-job001-recovery-v1.test.mjs cerebro/tests/runtime001-shared-worker-v1.test.mjs cerebro/tests/durable-job-runtime-v1.test.mjs cerebro/tests/durable-worker-runner-v1.test.mjs
           node cerebro/missions/runtime001-job001-durable-physical-smoke-v1.mjs
