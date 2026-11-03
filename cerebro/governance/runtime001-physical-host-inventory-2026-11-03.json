@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_RUNTIME001_PHYSICAL_HOST_INVENTORY",
+  "company_id": "fenix",
+  "engine_id": "RUNTIME-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "observations": [
+    {
+      "component": "CEREBRO Browser Agent Host",
+      "target": "User-connected Opera browser local loopback",
+      "endpoint": "http://127.0.0.1:8765/health",
+      "observed_status": "OK",
+      "service_version": "0.3.0",
+      "durable_queue_reported": true,
+      "profile_count_reported": 7,
+      "prod_allowed": false,
+      "physical_local_readonly_probe": true,
+      "proves_runtime001_supervisor_running": false
+    },
+    {
+      "component": "JOB-001 remote sanitized telemetry",
+      "target": "Supabase project hnqlnvakzaywtafeiybt",
+      "table": "public.cerebro_job001_telemetry_preprod",
+      "rows": 0,
+      "unexpired_rows": 0,
+      "host_running_proven": false
+    },
+    {
+      "component": "JOB-001 remote sanitized telemetry",
+      "target": "Supabase project cluhljgonannaafpmblx",
+      "table": "public.cerebro_job001_telemetry_preprod",
+      "rows": 0,
+      "unexpired_rows": 0,
+      "host_running_proven": false
+    },
+    {
+      "component": "Windows supervisor heartbeat file",
+      "target": "%LOCALAPPDATA%/CEREBRO/SupervisorRuntime/heartbeat.json",
+      "observed_status": "NOT_OBSERVABLE_THROUGH_BROWSER_CONNECTOR",
+      "limitation": "Local file:// navigation explicitly denied; file was not read or changed"
+    },
+    {
+      "component": "GitHub PROD Runtime Smoke",
+      "run_id": 41691118228,
+      "observed_status": "SUCCESS",
+      "branch": "main",
+      "proves_runtime001_host_running": false
+    },
+    {
+      "component": "Windows host read-only acceptance script",
+      "path": "cerebro/scripts/get-runtime001-windows-host-evidence-readonly-v1.ps1",
+      "contract_ci_run": 41692571229,
+      "contract_ci_status": "SUCCESS",
+      "executed_on_actual_user_windows_host": false
+    }
+  ],
+  "acceptance": {
+    "persistent_runtime001_host_live_verified": false,
+    "permanent_job001_journal_verified": false,
+    "local_heartbeat_fresh_verified": false,
+    "remote_telemetry_bound_verified": false,
+    "backup_restore_on_permanent_host_verified": false,
+    "prod_promotion_authorized": false
+  },
+  "remaining_safe_next_steps": [
+    "Run existing read-only Windows diagnostic on actual approved CEREBRO host, never on trading machine",
+    "Inspect and if necessary repair existing Windows scheduled supervisor task only after backup and side-by-side OLD/NEW",
+    "Use existing dedicated PREPROD Supabase telemetry and minimum-scoped credentials; never reuse App/CRM core PROD for heavy runtime",
+    "Verify fresh local heartbeat, remote sanitized heartbeat, durable journal, restart recovery, rollback and 12 real per-engine gates before any PROD promotion"
+  ],
+  "policies": {
+    "prod_writes": false,
+    "trading_access": false,
+    "additional_subscription_eur": 0,
+    "secrets_accessed": false,
+    "remote_shell_executed": false,
+    "existing_app_crm_changed": false
+  }
+}
