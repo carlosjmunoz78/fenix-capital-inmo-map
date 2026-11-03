@@ -1,0 +1,34 @@
+name: CEREBRO Runtime001 Windows Host Readonly Probe Contract V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/scripts/get-runtime001-windows-host-evidence-readonly-v1.ps1'
+      - '.github/workflows/cerebro-runtime001-host-readonly-contract-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  host-probe-fail-closed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - name: Probe missing host on isolated runner (must NOT claim physical host running)
+        shell: pwsh
+        run: |
+          $ErrorActionPreference='Stop'
+          $root=Join-Path $env:RUNNER_TEMP 'cerebro-host-readonly-fixture'
+          New-Item -Path $root -ItemType Directory -Force | Out-Null
+          $script='cerebro/scripts/get-runtime001-windows-host-evidence-readonly-v1.ps1'
+          $result=(& $script -TaskName 'CEREBRO-NOT-ON-GITHUB-RUNNER' -StateRoot $root | ConvertFrom-Json)
+          if($result.status -ne 'BLOCKED_LOCAL_HOST_ACCEPTANCE') {throw 'FALSE_HOST_GREEN'}
+          if($result.filesystem_mutated -or $result.remote_request_performed -or $result.secrets_inspected -or $result.prod_write_authorized -or $result.trading_access) {throw 'SAFETY_INVARIANT_FAILED'}
+          if($result.job001_journal_exists -or $result.heartbeat_file_exists -or $result.task_running) {throw 'FALSE_PHYSICAL_EVIDENCE'}
+          $result | ConvertTo-Json -Depth 6 | Set-Content -Path (Join-Path $env:RUNNER_TEMP 'runtime001-host-readonly-contract-result.json') -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime001-host-readonly-contract-${{ github.run_id }}
+          path: ${{ runner.temp }}/runtime001-host-readonly-contract-result.json
+          if-no-files-found: error
+          retention-days: 14
