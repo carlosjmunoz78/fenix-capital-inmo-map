@@ -130,3 +130,22 @@ test('JARVIS Work PREPROD · clean home + project workspace + Codex/Work + Opera
  await expectNoHorizontalOverflow(page);
  await page.screenshot({path:'test-results/navegador-branding-1440x695.png',fullPage:true});
 });
+
+
+test('JARVIS UX · physical typography remains legible on desktop and mobile',async({page})=>{
+  for(const width of [1440,1024,695]){
+    await page.setViewportSize({width,height:900});
+    await installIsolatedPreprod(page);
+    await page.goto('/cerebro?section=jarvis');
+    await expectCleanHome(page);
+    await expect(page.locator('.jarvis-home-project-card').first()).toBeVisible();
+    expect(await fontSize(page,'.jarvis-home-project-copy strong')).toBeGreaterThanOrEqual(width<=480?15:16);
+    expect(await fontSize(page,'.jarvis-home-project-copy p')).toBeGreaterThanOrEqual(14);
+    expect(await fontSize(page,'.jarvis-home-project-copy small')).toBeGreaterThanOrEqual(12);
+    expect(await fontSize(page,'.jarvis-home-search input')).toBeGreaterThanOrEqual(15);
+    expect(await fontSize(page,'.jarvis-home-actions button')).toBeGreaterThanOrEqual(13);
+    const cardHeight=await page.locator('.jarvis-home-project-card').first().evaluate(el=>Number.parseFloat(getComputedStyle(el).minHeight));
+    expect(cardHeight).toBeGreaterThanOrEqual(width<=900?138:150);
+    await expectNoHorizontalOverflow(page);
+  }
+});
