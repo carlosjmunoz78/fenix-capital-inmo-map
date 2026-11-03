@@ -1,4 +1,5 @@
 name: JARVIS Authenticated Orchestrator E2E
+# Revalidation trigger after PROD gateway safe-branch alignment.
 
 on:
   push:
