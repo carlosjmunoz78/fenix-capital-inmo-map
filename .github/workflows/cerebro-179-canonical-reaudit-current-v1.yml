@@ -1,0 +1,74 @@
+name: CEREBRO 179 Canonical Reaudit Current V1
+on:
+  workflow_dispatch:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - '.github/workflows/cerebro-179-canonical-reaudit-current-v1.yml'
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
+      - 'cerebro/runtime/**'
+      - 'cerebro/document/**'
+      - 'cerebro/governance/remaining-10-progress-2026-11-03.json'
+permissions:
+  contents: read
+env:
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+jobs:
+  canonical-reaudit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Protect environment and branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = 'false'
+          test "$CEREBRO_ALLOW_TRADING" = 'false'
+      - name: Validate canonical registry and factory without mutation
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Run strict canonical auditor twice and compare deterministic results
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/cerebro-current-reaudit
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/cerebro-current-reaudit/a
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/cerebro-current-reaudit/b
+          cmp /tmp/cerebro-current-reaudit/a/AUTONOMY_READINESS_BASELINE.json /tmp/cerebro-current-reaudit/b/AUTONOMY_READINESS_BASELINE.json
+          cmp /tmp/cerebro-current-reaudit/a/REBUILD.sha256 /tmp/cerebro-current-reaudit/b/REBUILD.sha256
+      - name: Verify evidence and print actual readiness (no forced 169 or 179)
+        shell: bash
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs=require('node:fs');
+          const dir='/tmp/cerebro-current-reaudit/a';
+          const baseline=JSON.parse(fs.readFileSync(dir+'/AUTONOMY_READINESS_BASELINE.json','utf8'));
+          const summary=JSON.parse(fs.readFileSync(dir+'/SUMMARY.json','utf8'));
+          if(summary.registry_total!==179||summary.physical_foundation!==179||baseline.engines.length!==179)throw Error('Canonical population drift');
+          if(summary.prod_writes!==false||summary.trading_touched!==false||summary.additional_cost_eur!==0)throw Error('Safety drift');
+          if(baseline.engines.some(x=>x.prod_execution_authorized!==false))throw Error('Unexpected PROD execution authorization');
+          const row={...summary,remaining_engine_ids:baseline.engines.filter(x=>!x.autonomous_prod_ready).map(x=>x.engine_id)};
+          fs.writeFileSync(dir+'/CURRENT_REAUDIT_SUMMARY.json',JSON.stringify(row,null,2)+'\n');
+          console.log('CANONICAL_ACTUAL='+JSON.stringify(row));
+          NODE
+      - name: Upload evidence; no PROD mutation
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-179-canonical-current-${{ github.run_id }}
+          path: /tmp/cerebro-current-reaudit/a/
+          if-no-files-found: error
+          retention-days: 30
