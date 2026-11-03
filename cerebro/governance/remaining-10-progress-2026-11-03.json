@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.1",
+  "schema_version": "1.4.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -56,10 +56,24 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "persistent governed runtime target if one is formally selected",
-        "live semantic smoke on that target",
-        "same-artifact rollback/rebuild proof for that target"
-      ]
+        "bind approved persistent governed runtime target",
+        "prove cross-host restart with durable storage and heartbeat/lease recovery",
+        "verify same-artifact rollback/rebuild and observability on permanent target",
+        "complete canonical promotion gates before PROD"
+      ],
+      "durable_job001_physical_acceptance": {
+        "status": "GREEN_GITHUB_RUNNER_FILESYSTEM_ONLY",
+        "ci_run": 41682397493,
+        "existing_job001_ledger": true,
+        "worker_executes": true,
+        "process_restart": true,
+        "idempotency": true,
+        "tenant_isolation": true,
+        "same_artifact_backup_rollback": true,
+        "prod_denied": true,
+        "trading_denied": true,
+        "permanent_host_verified": false
+      }
     },
     "KNW-001": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -234,7 +248,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Close persistent authorized source integrations and semantic live acceptance for all eight motors. Canonical re-audit artifact must be ingested before any certified count update. Prod continues deny by default.",
+  "next_block": "PROD BLOCKED until RUNTIME001 permanent host and remaining 7 live integrations accepted with physical evidence and explicit governance.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
