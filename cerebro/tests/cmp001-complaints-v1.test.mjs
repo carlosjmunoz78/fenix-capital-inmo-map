@@ -1,0 +1,10 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {assessComplaint} from '../runtime/cmp001-complaints-v1.mjs';
+const base={company_id:'fenix',environment:'PREPROD',complaint_id:'cmp:test',category:'SERVICE',severity:'LOW',confidence:.95};
+test('ordinary complaint produces internal plan with no side effects',()=>{const r=assessComplaint(base);assert.equal(r.status,'COMPLAINT_PLAN_READY');assert.equal(r.human_required,false);for(const k of ['external_dispatch_authorized','legal_admission_authorized','refund_authorized','crm_write_authorized','prod_write_authorized','spend_authorized','trading_access'])assert.equal(r[k],false);assert.equal(r.additional_cost_eur,0)});
+test('legal complaint escalates canonically',()=>{const r=assessComplaint({...base,legal:true});assert.equal(r.human_exception_code,'LEGAL_REQUIRED');assert.equal(r.status,'HUMAN_REQUIRED')});
+test('high risk escalates',()=>assert.equal(assessComplaint({...base,severity:'HIGH'}).human_exception_code,'HIGH_RISK'));
+test('low confidence escalates',()=>assert.equal(assessComplaint({...base,confidence:.4}).human_exception_code,'LOW_CONFIDENCE'));
+test('security wins fail closed',()=>assert.equal(assessComplaint({...base,security:true,legal:true}).human_exception_code,'SECURITY_INCIDENT'));
+test('customer human request escalates',()=>assert.equal(assessComplaint({...base,customer_human_request:true}).human_exception_code,'CUSTOMER_HUMAN_REQUEST'));
+test('company scope is mandatory',()=>assert.throws(()=>assessComplaint({...base,company_id:''}),/company_id/));
+test('cross company inputs remain explicitly scoped',()=>{const a=assessComplaint(base),b=assessComplaint({...base,company_id:'aion'});assert.equal(a.company_id,'fenix');assert.equal(b.company_id,'aion');assert.notEqual(a.company_id,b.company_id)});
