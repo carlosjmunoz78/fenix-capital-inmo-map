@@ -1,0 +1,40 @@
+name: CEREBRO FINOPS001 Live GitHub Readonly Provider Acceptance V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/finops001-github-live-readonly-acceptance-v1.mjs'
+      - '.github/workflows/cerebro-finops001-github-live-readonly-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  CEREBRO_ENVIRONMENT: PREPROD
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_FINOPS_EVIDENCE_OUT: /tmp/cerebro-finops-github-live
+jobs:
+  live-github-provider-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Authorize and attribute one real read-only GitHub REST request
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          test "$CEREBRO_ALLOW_TRADING" = false
+          node cerebro/missions/finops001-github-live-readonly-acceptance-v1.mjs
+      - name: Upload sanitized proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-finops001-github-live-readonly-${{ github.run_id }}
+          path: /tmp/cerebro-finops-github-live/SUMMARY.json
+          if-no-files-found: error
+          retention-days: 30
