@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "engine_id": "HCI-001",
+  "company_id": "fenix",
+  "environment": "PREPROD",
+  "version": "v1",
+  "foundation_manifest": "GREEN_PRESERVED_EXISTING",
+  "platform_evidence": {
+    "source": "cerebro/evidence/NAVEGADOR_PROD_PROMOTION_2026-10-24.md",
+    "preprod_physical_e2e": "GREEN",
+    "governed_main_integration": "GREEN",
+    "continuous_human_qa": "GREEN",
+    "prod_browser_gateway_health": "GREEN",
+    "rollback_preserved": true,
+    "incremental_cost_eur": 0,
+    "trading_access": false
+  },
+  "current_chat_probe": {
+    "opera_connector_authorized": true,
+    "browser_session_detected": true,
+    "new_tab_navigation": "PASS",
+    "semantic_accessibility_read": "PASS",
+    "test_target": "https://example.com/",
+    "external_write": false,
+    "input_or_click_tool_exposed_in_current_chat": false,
+    "close_tab": "PERMISSION_DISABLED"
+  },
+  "classification": "ENGINE_PLATFORM_VERIFIED_CURRENT_CHANNEL_CONTROL_RESTRICTED",
+  "human_required": null,
+  "prod_write_authorized": false,
+  "trading_access": false,
+  "additional_cost_eur": 0,
+  "note": "The engine/platform has prior physical E2E evidence. This chat channel cannot re-prove input/click because those controls are not exposed; close-tab is explicitly permission-disabled. This is a channel capability restriction, not a new HUMAN_REQUIRED reason."
+}
