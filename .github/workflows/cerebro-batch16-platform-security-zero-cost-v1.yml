@@ -1,0 +1,57 @@
+name: CEREBRO Batch16 Platform Security Zero Cost V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/runtime/batch16-platform-security-zero-cost-v1.mjs'
+      - 'cerebro/tests/batch16-platform-security-zero-cost-v1.test.mjs'
+      - 'cerebro/missions/close-batch16-platform-security-zero-cost-v1.mjs'
+      - '.github/workflows/cerebro-batch16-platform-security-zero-cost-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env: {OUT: /tmp/cerebro-batch16-platform-security-zero-cost}
+jobs:
+  batch16-autonomy-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate registry and factory without mutation
+        run: |
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Rebuild complete prior certified chain 123/179
+        run: |
+          set -euo pipefail
+          for m in close-orch-hex-autonomy-v1 close-batch07-iam001-v1 close-batch07-job-route-v1 close-batch07-observ001-v1 close-batch07-evt001-v1 close-batch07-qa001-v1 close-batch07-cmd001-v1 close-batch07-chat001-v1 close-batch07-ctx001-v1 close-batch07-actgw001-v1 close-batch07-self001-v1 close-batch07-aud001-v1 close-batch07-reg001-v1 close-batch07-red001-v1 close-batch08-sup001-v1 close-batch08-lead001-v1 close-batch08-prv001-v1 close-batch08-comp-reg001-v1 close-batch08-tenant001-v1 close-batch08-comp-onb001-v1 close-batch08-trnboot001-v1 close-batch08-autboot001-v1 close-batch08-engact001-v1 close-batch08-appboot001-v1 close-batch08-crmboot001-v1 close-batch08-mktboot001-v1 close-batch08-kboot001-v1 close-batch08-seoboot001-v1 close-batch08-socboot001-v1 close-batch08-scan001-v1 close-batch08-kw001-v1 close-batch08-waud001-v1 close-batch08-socaud001-v1 close-batch08-localp001-v1 close-batch08-app001-v1 close-batch08-crm001-v1 close-batch08-sale001-v1 close-batch09-voice001-v1 close-batch09-com001-v1 close-batch09-notif001-v1 close-batch09-c360001-v1 close-batch09-ret001-v1 close-batch09-nba001-v1 close-batch09-customer-lifecycle-group-v1 close-batch10-l2-resilience-group-v1 close-batch11-cmp001-v1 close-batch12-ops-group-v1 close-batch13-l6-tech-governance-v1 close-batch14-l7-strategy-labs-v1 close-batch15-l8-l9-company-console-v1; do node "cerebro/missions/$m.mjs"; done
+      - name: Execute Batch16 semantic closure
+        run: node cerebro/missions/close-batch16-platform-security-zero-cost-v1.mjs
+      - name: Strict179 requires 132 of 179 and Batch16 individual 12/12
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT"
+          node <<'NODE'
+          const fs=require('fs'),ids=['SEC-001','RBLD-001','AIBUD-001','OPT-001','DOCS-001','INT-001','DBOFF-001','STOROFF-001','FREE-001'];
+          const r=JSON.parse(fs.readFileSync(process.env.OUT+'/AUTONOMY_READINESS_BASELINE.json')),s=JSON.parse(fs.readFileSync(process.env.OUT+'/SUMMARY.json'));
+          for(const id of ids){const x=r.engines.find(e=>e.engine_id===id);if(!x||x.gate_count!==12||x.gate_total!==12||!x.autonomous_prod_ready||(x.readiness_blockers||[]).length||x.prod_execution_authorized!==false)throw new Error(id+' not 12/12');}
+          if(s.autonomous_prod_ready<132)throw new Error('Expected 132/179, got '+s.autonomous_prod_ready);
+          if(s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0||s.factory_mutated!==false||s.registry_mutated!==false)throw new Error('safety drift');
+          const q=JSON.parse(fs.readFileSync('cerebro/evidence/batch16-platform-security-zero-cost-autonomy-closure/2026-11-03/GROUP_SUMMARY.json'));if(q.status!=='GREEN'||q.certified_count!==9||q.prod_execution_authorized!==false)throw new Error('Batch16 scope overclaim');
+          fs.writeFileSync(process.env.OUT+'/BATCH16_PLATFORM_SECURITY_ZERO_COST_DIAGNOSTIC.json',JSON.stringify({engines:ids.map(id=>r.engines.find(e=>e.engine_id===id)),summary:s,scope:q},null,2)+'\n');
+          NODE
+      - name: Upload Batch16 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-batch16-platform-security-zero-cost-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-batch16-platform-security-zero-cost/
+            cerebro/evidence/batch16-platform-security-zero-cost-autonomy-closure/
+          if-no-files-found: error
+          retention-days: 30
