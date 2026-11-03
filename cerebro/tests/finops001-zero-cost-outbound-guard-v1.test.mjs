@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {Finops001CostLedgerV1} from '../runtime/foundation-holds-v1.mjs';
+import {authorizeFinops001OutboundV1 as gate} from '../runtime/finops001-zero-cost-outbound-guard-v1.mjs';
+const ledger=new Finops001CostLedgerV1(),context={company_id:'fenix',engine_id:'KNW-001',environment:'PREPROD',version:'v1'};
+ledger.setBudget({...context,budget_eur:0,hard_stop:true});
+const base={ledger,context,provider:'local',resource_type:'read_only',budget_eur:0};
+assert.equal(gate({...base,expected_cost_eur:0}).authorized,true);
+assert.equal(gate({...base,expected_cost_eur:0.01}).authorized,false);
+assert.equal(gate({...base,context:{...context,environment:'PROD'}}).authorized,false);
+assert.equal(gate({...base,context:{...context,engine_id:'LAB-TRD'}}).authorized,false);
+assert.equal(gate({...base,context:{...context,company_id:'other-company'}}).spent_eur,0);
+assert.throws(()=>gate({...base,expected_cost_eur:-1}),/COST_INVALID/);
+console.log('FINOPS001_PRE_CALL_ZERO_COST_GUARD_GREEN');
