@@ -36,7 +36,7 @@ test.describe('Fénix PRE-PROD · contrato visual Inicio Dirección',()=>{
       return route.fulfill({status:404,contentType:'application/json',body:'{}'});
     });
     await page.route('**/functions/v1/fenix-notion-runtime-test/firmas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'f1',estado:'Programada',fecha_hora_firma:currentMonthIso(25,10)},{id:'f2',estado:'Firmada',fecha_hora_firma:currentMonthIso(20,12)}]})}));
-    await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(22).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true}]})}));
+    await page.route('**/functions/v1/fenix-notion-runtime-test/tareas',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({source:'notion_canonical',items:[{id:'t1',tarea:'Revisar expediente prioritario',estado:'Pendiente',fecha_limite:currentMonthIso(new Date().getDate()).slice(0,10),completada:false},{id:'t2',tarea:'Tarea ya cerrada',estado:'Completada',fecha_limite:currentMonthIso(21).slice(0,10),completada:true}]})}));
     await page.goto('/inicio');
     await expect(page.locator('.dir-shell')).toBeVisible();
     await expect(page.getByRole('button',{name:'Inicio Fénix Capital'})).toBeVisible();
