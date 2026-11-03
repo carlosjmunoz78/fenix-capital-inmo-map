@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.1",
+  "schema_version": "1.5.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -120,9 +120,27 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "bind representative real datasets/runs across engine families",
-        "prove tribunal integration without self-promotion"
-      ]
+        "bind representative approved real datasets and runs across engine families",
+        "connect existing JDG/EVA tribunal for physical acceptance",
+        "verify champion/challenger governance without self-promotion on real evidence"
+      ],
+      "multifamily_synthetic_acceptance": {
+        "state": "GREEN_SYNTHETIC_EVALUATION",
+        "ci_run": 41683549209,
+        "engine_families": [
+          "KNW-001",
+          "RUNTIME-001",
+          "FINOPS-001",
+          "DOC-001"
+        ],
+        "dataset_hashes_verified": true,
+        "deterministic_comparison": true,
+        "tribunal_required": true,
+        "no_self_promotion": true,
+        "real_training_data": false,
+        "real_tribunal_connector": false,
+        "prod_writes": false
+      }
     },
     "FINOPS-001": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -158,7 +176,17 @@
       ],
       "remaining": [
         "bind approved live document intake/storage and canonical metadata"
-      ]
+      ],
+      "synthetic_physical_e2e": {
+        "state": "GREEN_SYNTHETIC_PHYSICAL_E2E",
+        "ci_run": 41683423737,
+        "integrated_pipeline": true,
+        "synthetic_only": true,
+        "source_integrity": true,
+        "prod_write_denied": true,
+        "real_customer_source": false,
+        "prod_promotion_authorized": false
+      }
     },
     "DOC-002": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -170,7 +198,17 @@
       ],
       "remaining": [
         "bind approved live communications/reminders and receipt events"
-      ]
+      ],
+      "synthetic_physical_e2e": {
+        "state": "GREEN_SYNTHETIC_PHYSICAL_E2E",
+        "ci_run": 41683423737,
+        "integrated_pipeline": true,
+        "synthetic_only": true,
+        "source_integrity": true,
+        "prod_write_denied": true,
+        "real_customer_source": false,
+        "prod_promotion_authorized": false
+      }
     },
     "DOC-003": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -187,7 +225,17 @@
       ],
       "remaining": [
         "validate representative real document families before production activation"
-      ]
+      ],
+      "synthetic_physical_e2e": {
+        "state": "GREEN_SYNTHETIC_PHYSICAL_E2E",
+        "ci_run": 41683423737,
+        "integrated_pipeline": true,
+        "synthetic_only": true,
+        "source_integrity": true,
+        "prod_write_denied": true,
+        "real_customer_source": false,
+        "prod_promotion_authorized": false
+      }
     },
     "DOC-004": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -202,7 +250,17 @@
       "remaining": [
         "bind normalized live evidence",
         "calibrate thresholds on validated real fixtures"
-      ]
+      ],
+      "synthetic_physical_e2e": {
+        "state": "GREEN_SYNTHETIC_PHYSICAL_E2E",
+        "ci_run": 41683423737,
+        "integrated_pipeline": true,
+        "synthetic_only": true,
+        "source_integrity": true,
+        "prod_write_denied": true,
+        "real_customer_source": false,
+        "prod_promotion_authorized": false
+      }
     },
     "LAB-TRD": {
       "state": "GREEN_LAB_PAPER_ONLY",
@@ -258,7 +316,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Finish physical provider bindings and permanent runtime hosting in PREPROD; all eight require 12-gate physical acceptance before PROD. No autonomous PROD activation from passing CI.",
+  "next_block": "Bind approved real but non-invasive sources for all eight, prove permanent PREPROD host and rollback, calibrate DOC with validated real fixtures, connect provider call-site FINOPS and JDG tribunal, then require individual PROD gates. No unauthorized promotion.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
