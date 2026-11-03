@@ -1,0 +1,52 @@
+name: CEREBRO Eight Strict Gate Evidence Breakdown V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - '.github/workflows/cerebro-eight-strict-gate-evidence-breakdown-v1.yml'
+      - 'cerebro/missions/audit-179-autonomy-readiness-v1.mjs'
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  inspect-existing-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Run unmodified canonical auditor and expose ONLY gate booleans and repository evidence paths
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out /tmp/cerebro-eight-strict-gates
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const file='/tmp/cerebro-eight-strict-gates/AUTONOMY_READINESS_BASELINE.json';
+          const report=JSON.parse(fs.readFileSync(file,'utf8'));
+          const ids=['RUNTIME-001','KNW-001','TRN-001','FINOPS-001','DOC-001','DOC-002','DOC-003','DOC-004'];
+          const rows=ids.map(engine_id=>{
+            const engine=report.engines.find(x=>x.engine_id===engine_id);
+            if(!engine)throw Error('UNKNOWN_ENGINE:'+engine_id);
+            const evidence=Object.fromEntries(Object.entries(engine.evidence).map(([gate,paths])=>[gate,paths.slice(0,5)]));
+            return {engine_id,gates:engine.gates,gate_count:engine.gate_count,gate_total:12,
+              readiness_blockers:engine.readiness_blockers,evidence,
+              repo_strict_criteria_met:engine.autonomous_prod_ready,
+              prod_execution_authorized:false,physical_prod_host_verified:false};
+          });
+          if(report.registry_total!==179||report.prod_writes!==false||report.trading_touched!==false)throw Error('SAFETY_DRIFT');
+          const result={schema_version:'1.0.0',scope:'STATIC_REPOSITORY_PATH_EVIDENCE_NOT_PHYSICAL_PROD_ACCEPTANCE',
+            registry_total:179,repo_strict_ready:report.autonomous_prod_ready,foundation_only:report.foundation_only,
+            engine_gate_results:rows,prod_authorized:false,additional_cost_eur:0};
+          fs.writeFileSync('/tmp/cerebro-eight-strict-gates/EIGHT_GATES.json',JSON.stringify(result,null,2)+'\n');
+          console.log('EIGHT_GATE_COUNTS='+JSON.stringify(rows.map(x=>({engine_id:x.engine_id,
+            gate_count:x.gate_count,missing:x.readiness_blockers}))));
+          console.log('CANONICAL_GATE_TOTALS='+JSON.stringify({repo_strict_ready:result.repo_strict_ready,foundation_only:result.foundation_only}));
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-eight-gates-repository-evidence-${{ github.run_id }}
+          path: /tmp/cerebro-eight-strict-gates/
+          if-no-files-found: error
+          retention-days: 30
