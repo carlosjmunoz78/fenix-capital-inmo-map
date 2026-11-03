@@ -3,7 +3,7 @@ name: JARVIS Authenticated Orchestrator E2E
 on:
   push:
     branches:
-      - cerebro/jarvis-work-codex-complete-20261102
+      - cerebro/jarvis-core-prod-candidate-20261103
     paths:
       - '.github/workflows/jarvis-authenticated-orchestrator-e2e.yml'
   workflow_dispatch:
@@ -18,7 +18,8 @@ jobs:
     env:
       JARVIS_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
       BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0
-      SAFE_BRANCH: cerebro/jarvis-work-codex-complete-20261102
+      SAFE_BRANCH: cerebro/jarvis-core-prod-candidate-20261103
+      EXPECTED_SHA: ${{ github.sha }}
     steps:
       - name: Verify authenticated secret is configured without exposing it
         shell: bash
@@ -63,10 +64,11 @@ jobs:
           }
 
           call_intent 'REPO_HEAD' '{}' head.json
-          jq -e --arg branch "$SAFE_BRANCH" '
+          jq -e --arg branch "$SAFE_BRANCH" --arg expected "$EXPECTED_SHA" '
             .status == "OK" and
             .result.status == "OK" and
             .result.branch == $branch and
+            .result.head_sha == $expected and
             (.result.head_sha | test("^[0-9a-f]{40}$"))
           ' head.json >/dev/null
           HEAD_SHA="$(jq -r '.result.head_sha' head.json)"
