@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.5.0",
+  "schema_version": "1.6.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -148,9 +148,10 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "instrument approved live provider/API/AI/storage call sites with verified cost expectations",
-        "prove live budget hard-stop enforcement at actual provider boundary",
-        "measure attributable actual usage and savings without new subscriptions"
+        "instrument real non-invasive call sites for remaining approved providers/API/AI/storage",
+        "prove budget hard-stop at each real provider boundary including paid-call prevention",
+        "obtain actual provider billing/usage reconciliation; GitHub Actions runtime cost not independently verified",
+        "complete permanently deployed observed integration and 12-gate acceptance before PROD"
       ],
       "pre_call_zero_cost_guard": {
         "status": "GREEN_CI_SCOPE",
@@ -160,6 +161,19 @@
         "prod_denied": true,
         "trading_denied": true,
         "live_provider_instrumentation": false
+      },
+      "live_github_provider_acceptance": {
+        "state": "GREEN_LIVE_PROVIDER_READONLY",
+        "ci_run": 41683764275,
+        "provider": "GITHUB_REST_READONLY",
+        "authenticated_read": true,
+        "pre_call_policy": true,
+        "attribution": true,
+        "deduplicated": true,
+        "estimated_api_cost_eur": 0,
+        "actual_billing_verified": false,
+        "other_providers_instrumented": false,
+        "prod_write_denied": true
       }
     },
     "DOC-001": {
@@ -316,7 +330,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Bind approved real but non-invasive sources for all eight, prove permanent PREPROD host and rollback, calibrate DOC with validated real fixtures, connect provider call-site FINOPS and JDG tribunal, then require individual PROD gates. No unauthorized promotion.",
+  "next_block": "Finish permanent target and per-engine physical real acceptance; 8 motors not PROD-promotable from runner CI alone. Current confirmed live bindings KNW Git read, Notion reference only, FINOPS GitHub read. DOC/TRN synthetic acceptance.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
