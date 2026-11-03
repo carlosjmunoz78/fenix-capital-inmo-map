@@ -124,3 +124,36 @@ test('B4 does not treat an invalid B3 audit/decision result as authorization',as
  const {app}=setup({environment:'PROD',b3PolicyService:{authorize:async()=>({decision:'AUDIT_UNAVAILABLE'})}});
  await assert.rejects(app.append(mk()),/B3_POLICY_DENIED/);
 });
+
+
+test('B4 competing distinct corrections of same target resolve at most once',async()=>{
+ const {app,store}=setup();const original=(await app.append(mk())).event;
+ const results=await Promise.allSettled([
+  app.append(mk({kind:'CORRECTION',idempotencyKey:'fix-concurrent-a',value:'fixed-a',targetId:original.id})),
+  app.append(mk({kind:'CORRECTION',idempotencyKey:'fix-concurrent-b',value:'fixed-b',targetId:original.id}))
+ ]);
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+ assert.equal(results.filter(r=>r.status==='rejected').length,1);
+ assert.equal(store.entries.length,2);
+ assert.equal((await app.readContext({token:'good',companyId:'fenix',projectId:'PRJ-SUPERAGENT-001'})).memory.length,1);
+});
+test('B4 correction and revocation compete for same target without double acceptance',async()=>{
+ const {app,store}=setup();const original=(await app.append(mk())).event;
+ const results=await Promise.allSettled([
+  app.append(mk({kind:'CORRECTION',idempotencyKey:'fix-race',value:'revised',targetId:original.id})),
+  app.append(mk({kind:'REVOCATION',idempotencyKey:'revoke-race',value:'',targetId:original.id}))
+ ]);
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+ assert.equal(store.entries.length,2);
+});
+test('B4 concurrent checkpoint writes cannot claim the same sequence twice',async()=>{
+ const {app,store}=setup();
+ const results=await Promise.allSettled([
+  app.append(mk({kind:'CHECKPOINT',missionId:'mission-race',subjectKey:'checkpoint',
+   idempotencyKey:'checkpoint-race-a',checkpoint:{sequence:1,stage:'RUNNING',executionReceiptRef:'REC:A'}})),
+  app.append(mk({kind:'CHECKPOINT',missionId:'mission-race',subjectKey:'checkpoint',
+   idempotencyKey:'checkpoint-race-b',checkpoint:{sequence:1,stage:'RUNNING',executionReceiptRef:'REC:B'}}))
+ ]);
+ assert.equal(results.filter(r=>r.status==='fulfilled').length,1);
+ assert.equal(store.entries.length,1);
+});
