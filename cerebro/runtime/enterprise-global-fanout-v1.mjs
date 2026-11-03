@@ -17,14 +17,24 @@ function integer(value, label, min, max) {
   return n;
 }
 
-function assertBasePolicy(policy) {
+function canonicalRepositoryFromPolicy(entitlement) {
+  const canonicalRepository = String(entitlement.canonical_repository || '').trim();
+  const parts = canonicalRepository.split('/');
+  if (parts.length !== 2 || !parts[0] || parts[1] !== 'fenix-capital-inmo-map') {
+    throw new Error('CANONICAL_REPOSITORY_INVALID');
+  }
+  if (entitlement.organization !== parts[0]) throw new Error('CANONICAL_ORGANIZATION_MISMATCH');
+  return canonicalRepository;
+}
+
+function assertBasePolicy(policy, currentRepository = null) {
   if (!policy || typeof policy !== 'object' || Array.isArray(policy)) throw new TypeError('policy required');
   const limits = policy.verified_platform_limits || {};
   const entitlement = policy.entitlement_gate || {};
   const parallelism = policy.parallelism || {};
   const workflow = policy.workflow_policy || {};
-  if (entitlement.enterprise_organization_verified_for_canonical_repo !== true) throw new Error('ENTERPRISE_ORGANIZATION_REQUIRED');
-  if (entitlement.canonical_repository !== 'fenix-cerebro/fenix-capital-inmo-map') throw new Error('CANONICAL_REPOSITORY_MISMATCH');
+  const canonicalRepository = canonicalRepositoryFromPolicy(entitlement);
+  if (currentRepository != null && currentRepository !== canonicalRepository) throw new Error('CURRENT_REPOSITORY_MISMATCH');
   if (entitlement.enterprise_slug !== 'cerebro-os') throw new Error('ENTERPRISE_SLUG_MISMATCH');
   if (limits.standard_runner_concurrent_jobs_baseline_without_enterprise_increase !== STANDARD_FALLBACK_CAP) throw new Error('STANDARD_BASELINE_MISMATCH');
   if (limits.paid_enterprise_standard_runner_documented_ceiling !== DOCUMENTED_ENTERPRISE_GLOBAL_CEILING) throw new Error('DOCUMENTED_ENTERPRISE_GLOBAL_CEILING_MISMATCH');
@@ -94,10 +104,11 @@ export function buildPaidEnterpriseTopologyV1(requested_units = DOCUMENTED_ENTER
   });
 }
 
-export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset = 0 } = {}) {
-  const liveLimit = assertBasePolicy(policy);
+export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset = 0, current_repository = null } = {}) {
+  const liveLimit = assertBasePolicy(policy, current_repository);
   const entitlement = policy.entitlement_gate || {};
-  const paidConcurrencyVerified = entitlement.enterprise_account_state === 'PAID'
+  const paidConcurrencyVerified = entitlement.enterprise_organization_verified_for_canonical_repo === true
+    && entitlement.enterprise_account_state === 'PAID'
     && entitlement.enterprise_actions_concurrency_entitlement_verified === true
     && entitlement.global_fanout_enabled === true;
   const global500Enabled = paidConcurrencyVerified
@@ -114,9 +125,12 @@ export function planEnterpriseGlobalFanoutV1({ policy, requested_units, offset =
   const topology = buildPaidEnterpriseTopologyV1(requested, start);
 
   return Object.freeze({
-    schema_version: '1.4.0',
+    schema_version: '1.5.0',
     state_type: 'CEREBRO_ENTERPRISE_GLOBAL_FANOUT_V1',
     environment: PREPROD,
+    canonical_repository: entitlement.canonical_repository,
+    current_repository: current_repository || null,
+    repository_binding_verified: current_repository == null ? null : true,
     enterprise_account_state: entitlement.enterprise_account_state || 'UNKNOWN',
     enterprise_actions_concurrency_entitlement_verified: paidConcurrencyVerified,
     global_500_fanout_enabled: global500Enabled,
@@ -168,6 +182,8 @@ export const ENTERPRISE_GLOBAL_FANOUT_V1_CONTRACT = Object.freeze({
   paid_500_topology_prepared: true,
   physical_execution_uses_live_runner_limit: true,
   paid_500_physical_execution_requires_live_limit_500: true,
+  repository_binding_from_policy: true,
+  repository_binding_fail_closed: true,
   work_source: 'MISSION_DAG_V1',
   executor: 'mission-derived-useful-work-v1',
   total_mission_work_units: TOTAL_MISSION_UNITS,
