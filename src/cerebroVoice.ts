@@ -626,3 +626,23 @@ export function speechSegments(text:string,maxChars=440,preferences:Record<strin
  });
 }
 
+
+/** Browser speech errors are user-facing diagnostics, never permission bypasses. */
+export function voiceRecognitionProblem(error:string):string {
+ switch(String(error||'').toLowerCase()){
+  case 'not-allowed':case 'service-not-allowed':
+   return 'Chrome no tiene permiso para usar el micrófono. Pulsa el icono de ajustes junto a la dirección de JARVIS, permite Micrófono y vuelve a intentarlo.';
+  case 'audio-capture':
+   return 'Chrome no encuentra un micrófono disponible. Comprueba que está conectado y seleccionado en Configuración > Privacidad y seguridad > Configuración de sitios > Micrófono.';
+  case 'network':
+   return 'El servicio de reconocimiento de voz del navegador no responde. Comprueba la conexión y prueba otra vez; el chat escrito sigue disponible.';
+  case 'no-speech':
+   return 'No he detectado tu voz. Acerca el micrófono y vuelve a dictar.';
+  case 'language-not-supported':
+   return 'El reconocimiento de voz en español no está disponible en este navegador.';
+  case 'aborted':
+   return 'El dictado se ha detenido.';
+  default:
+   return 'No he podido transcribir el audio. Comprueba el permiso del micrófono e inténtalo de nuevo.';
+ }
+}

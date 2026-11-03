@@ -4,7 +4,7 @@ const fakeSession={access_token:'eyJhbGciOiJub25lIiwidHlwIjoiSldUIn0.eyJhdWQiOiJ
 
 async function boot(page:any){
  await page.addInitScript(session=>{
-  localStorage.setItem('fenix-preprod-auth',JSON.stringify(session));
+  localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(session));sessionStorage.setItem('fenix-session-active','1');
   localStorage.setItem('fenix-remember-device','true');
   let recognitionStarts=0;
   class FakeRecognition{lang='';continuous=false;interimResults=false;maxAlternatives=1;phrases:any[]=[];onstart:any=null;onresult:any=null;onerror:any=null;onend:any=null;start(){recognitionStarts+=1;this.onstart?.({});setTimeout(()=>{if(recognitionStarts===1)this.onresult?.({results:{length:1,0:{length:1,isFinal:true,0:{transcript:'consulta hablada exacta',confidence:.99}}}});this.onend?.({});},5)}stop(){this.onend?.({})}abort(){}}
@@ -35,12 +35,12 @@ test.describe('VOICE-001 · Ana + Console canónica',()=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
   await boot(page);const bodies:any[]=[];
   await page.route('**/functions/v1/cerebro-console-gateway-v0/chat',async r=>{bodies.push(r.request().postDataJSON());return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',message:'respuesta de CEREBRO por el contrato textual',executed:false})})});
-  await page.goto('/cerebro');const ui=page.locator('main.cerebro-console');await expect(ui).toBeVisible();const talk=ui.getByRole('button',{name:'Hablar con CEREBRO'});await expect(talk).toBeEnabled();await talk.click();await expect(ui).toContainText('respuesta de CEREBRO por el contrato textual');await ui.getByRole('button',{name:'Finalizar conversación'}).click();expect(bodies.length).toBeGreaterThanOrEqual(1);expect(bodies[0].message).toBe('consulta hablada exacta');expect(bodies[0].conversation_context).toEqual([]);
+  await page.goto('/cerebro?section=jarvis');const ui=page.locator('main.cerebro-console');await expect(ui).toBeVisible();const talk=page.getByRole('button',{name:'Conversación por voz',exact:true});await expect(talk).toBeEnabled();await talk.click();await expect(ui).toContainText('respuesta de JARVIS por el contrato textual');await page.getByRole('button',{name:'Finalizar conversación por voz'}).click();expect(bodies.length).toBeGreaterThanOrEqual(1);expect(bodies[0].message).toBe('consulta hablada exacta');expect(bodies[0].conversation_context).toEqual([]);
  });
  test('sin dictado el texto sigue operativo en ambos canales',async({page},testInfo)=>{
   if(!testInfo.project.name.includes('desktop'))test.skip();
-  await boot(page);await page.addInitScript(()=>{delete (window as any).SpeechRecognition;delete (window as any).webkitSpeechRecognition});
-  await page.goto('/cerebro');const ui=page.locator('main.cerebro-console');await expect(ui.getByRole('button',{name:'Hablar con CEREBRO'})).toBeDisabled();const consoleText=ui.getByPlaceholder('También puedes escribir a CEREBRO…');await consoleText.fill('consulta escrita exacta');await ui.getByRole('button',{name:'Enviar'}).click();await expect(ui).toContainText('respuesta de CEREBRO por el contrato textual');
+  await boot(page);await page.addInitScript(()=>{Object.defineProperty(window,'SpeechRecognition',{value:undefined,configurable:true});Object.defineProperty(window,'webkitSpeechRecognition',{value:undefined,configurable:true});});
+  await page.goto('/cerebro?section=jarvis');const ui=page.locator('main.cerebro-console');const dictate=page.getByRole('button',{name:'Dictar',exact:true});await dictate.click();await expect(page.getByRole('alert')).toContainText('no ofrece reconocimiento de voz');const consoleText=page.getByRole('textbox',{name:'Mensaje para Jarvis'});await consoleText.fill('consulta escrita exacta');await page.getByRole('button',{name:'Enviar',exact:true}).last().click();await expect(ui).toContainText('respuesta de JARVIS por el contrato textual');
   await page.goto('/ana');const ana=page.getByTestId('ana-voice-query');await expect(ana.getByRole('button',{name:'Hablar'})).toBeDisabled();await ana.getByLabel('Consulta a Ana').fill('consulta escrita intacta');await expect(ana.getByRole('button',{name:'Enviar'})).toBeEnabled();
  });
 });

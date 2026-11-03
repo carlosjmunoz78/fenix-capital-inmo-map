@@ -171,3 +171,31 @@ test('JARVIS UX · font controls persist readable size and two-column desktop la
  await page.getByRole('button',{name:'Reducir letra'}).click();
  expect(await fontSize(page,'.jarvis-home-project-copy strong')).toBe(18);
 });
+
+
+test('JARVIS dictation diagnostic explains Chrome microphone permission denial',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await page.addInitScript(()=>{
+  class SpeechRecognitionMock {
+   lang='es-ES'; continuous=false; interimResults=false; maxAlternatives=1;
+   onstart:(()=>void)|null=null;
+   onresult:((event:unknown)=>void)|null=null;
+   onerror:((event:{error:string})=>void)|null=null;
+   onend:(()=>void)|null=null;
+   start(){this.onstart?.();this.onerror?.({error:'not-allowed'});this.onend?.();}
+   stop(){this.onend?.();}
+   abort(){this.onend?.();}
+  }
+  Object.defineProperty(window,'SpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
+  Object.defineProperty(window,'webkitSpeechRecognition',{value:SpeechRecognitionMock,configurable:true,writable:true});
+ });
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await expectCleanHome(page);
+ const dictate=page.getByRole('button',{name:'Dictar',exact:true});
+ await expect(dictate).toBeEnabled();
+ await dictate.click();
+ await expect(page.getByRole('alert')).toContainText('Chrome no tiene permiso para usar el micrófono');
+ await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
+ await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
+});
