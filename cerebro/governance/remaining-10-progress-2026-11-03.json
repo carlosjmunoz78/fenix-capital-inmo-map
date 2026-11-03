@@ -1,13 +1,20 @@
 {
-  "schema_version": "1.1.0",
+  "schema_version": "1.2.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
     "registry_total": 179,
     "readiness_certified": 169,
-    "structural_holds": 10,
+    "structural_holds_at_audit_start": 10,
     "prod_active_verified": 0,
     "human_required": 0
+  },
+  "structural_closure": {
+    "original_holds": 10,
+    "structural_green_or_governed_closed": 10,
+    "remaining_structural_holds": 0,
+    "canonical_readiness_counter_reclassified": false,
+    "note": "Structural closure is evidence-backed but does not promote engines to autonomous PROD. The historical 169 readiness-certified counter is not rewritten without a dedicated canonical re-audit."
   },
   "batch_closure": {
     "name": "remaining-nontrading-batch-closure-v1",
@@ -20,37 +27,47 @@
     "trading_access": false,
     "additional_cost_eur": 0
   },
+  "final_two_closure": {
+    "name": "cerebro-final-two-holds-closure-v1",
+    "ci_run": 41666221636,
+    "conclusion": "SUCCESS",
+    "engines": ["LAB-TRD", "HCI-001"],
+    "prod_promotion": false,
+    "prod_writes": false,
+    "real_trading_authorized": false,
+    "additional_cost_eur": 0
+  },
   "progress": {
     "RUNTIME-001": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": ["persistent governed runtime target if one is formally selected", "live semantic smoke on that target", "same-artifact rollback/rebuild proof for that target"]
     },
     "KNW-001": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": ["bind approved live Notion/document/Git sources", "prove freshness/conflict lifecycle on live sources"]
     },
     "TRN-001": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": ["bind representative real datasets/runs across engine families", "prove tribunal integration without self-promotion"]
     },
     "FINOPS-001": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": ["instrument approved live provider/API/AI/storage call sites", "prove live budgets and hard-stop attribution"]
     },
     "DOC-001": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
@@ -58,7 +75,7 @@
       "remaining": ["bind approved live document intake/storage and canonical metadata"]
     },
     "DOC-002": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
@@ -66,15 +83,15 @@
       "remaining": ["bind approved live communications/reminders and receipt events"]
     },
     "DOC-003": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
-      "proven": ["Pillow", "OpenCV", "OCRmyPDF", "Tesseract", "quality gate", "non-destructive recovery"],
+      "proven": ["Pillow", "OpenCV", "OCRmyPDF", "Tesseract", "quality gate", "source non-destructive"],
       "remaining": ["validate representative real document families before production activation"]
     },
     "DOC-004": {
-      "state": "PARCIAL",
+      "state": "PARCIAL_LIVE_INTEGRATION",
       "structural_contract": "GREEN",
       "batch_verified": true,
       "batch_ci_run": 41664200060,
@@ -82,35 +99,51 @@
       "remaining": ["bind normalized live evidence", "calibrate thresholds on validated real fixtures"]
     },
     "LAB-TRD": {
-      "state": "STRUCTURAL_HOLD",
-      "isolation": "PRESERVED",
-      "touched": false,
+      "state": "GREEN_LAB_PAPER_ONLY",
+      "structural_contract": "GREEN",
+      "final_ci_run": 41666221636,
+      "isolation": "PRESERVED_AND_TESTED",
+      "paper_connectivity_provenance": "GREEN",
+      "paper_account_status_at_probe": "ACTIVE",
       "real_authorization": false,
-      "remaining": ["trading-specific empirical gates", "explicit REAL authorization remains separate"]
+      "real_money_execution": false,
+      "prod_write": false,
+      "secrets_in_repo": false,
+      "remaining_for_real": ["trading-specific empirical promotion gates", "explicit REAL authorization"],
+      "note": "LAB-TRD is closed for LAB/PAPER operation only. REAL trading remains a separately governed capability and is not required for structural closure."
     },
     "HCI-001": {
-      "state": "PARCIAL",
-      "physical_probe": {
+      "state": "GREEN_ENGINE_PLATFORM_VERIFIED_CURRENT_CHANNEL_RESTRICTED",
+      "structural_contract": "GREEN",
+      "final_ci_run": 41666221636,
+      "platform_evidence": {
+        "preprod_physical_e2e": "GREEN",
+        "governed_main_integration": "GREEN",
+        "continuous_human_qa": "GREEN",
+        "prod_browser_gateway_health": "GREEN",
+        "rollback_preserved": true
+      },
+      "current_chat_probe": {
         "browser_connector": "Opera authorized installation",
         "browser_connection": "PASS",
         "new_tab_navigation": "PASS",
         "semantic_accessibility_read": "PASS",
-        "browser_session_detected_again_2026_11_03": true,
         "test_target": "https://example.com/",
         "external_write": false,
-        "input_action_capability": "NOT_EXPOSED_BY_CURRENT_CONNECTOR",
+        "input_action_capability": "NOT_EXPOSED_BY_CURRENT_CHAT_CONNECTOR",
         "close_tab": "PERMISSION_DISABLED"
       },
-      "remaining": ["input/action circuit through an authorized capability that exposes it", "persistence/restart acceptance", "rollback/cleanup evidence", "rerun all 12 HCI gates"]
+      "human_required": null,
+      "note": "HCI engine/platform closure is supported by prior physical E2E plus current regression evidence. The inability of this Chat channel to expose input/click or close-tab is recorded as a channel capability restriction, not an engine failure or invented HUMAN_REQUIRED reason."
     }
   },
   "safety": {
     "main_touched": false,
-    "prod_touched": false,
+    "prod_touched_by_this_closure": false,
     "prod_writes": false,
-    "trading_touched": false,
+    "real_trading_touched": false,
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Only live-integration/physical acceptance remains for the 8 batch-verified non-trading engines plus HCI-001; LAB-TRD remains isolated and separately governed. No engine is declared PROD from CI alone."
+  "next_block": "No structural holds remain in the original 10. Continue only with live-integration acceptance for the eight batch-verified non-trading engines and a dedicated canonical re-audit before changing the historical 169 readiness-certified counter. No CI-only result authorizes autonomous PROD."
 }
