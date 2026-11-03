@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.6.0",
+  "schema_version": "1.7.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -73,6 +73,17 @@
         "prod_denied": true,
         "trading_denied": true,
         "permanent_host_verified": false
+      },
+      "scoped_multi_company_recovery": {
+        "status": "GREEN",
+        "ci_run": 41684185744,
+        "legacy_runtime_regression": true,
+        "scoped_watchdog": true,
+        "other_company_unmodified": true,
+        "other_engine_unmodified": true,
+        "prod_denied": true,
+        "trading_denied": true,
+        "permanent_host_verified": false
       }
     },
     "KNW-001": {
@@ -120,9 +131,9 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "bind representative approved real datasets and runs across engine families",
-        "connect existing JDG/EVA tribunal for physical acceptance",
-        "verify champion/challenger governance without self-promotion on real evidence"
+        "validate real representative approved datasets across engine families",
+        "physically verify independent judge identity and real holdout evidence for actual runs",
+        "prove governed promotion with canary and rollback on permanent target, no self-promotion"
       ],
       "multifamily_synthetic_acceptance": {
         "state": "GREEN_SYNTHETIC_EVALUATION",
@@ -140,6 +151,16 @@
         "real_training_data": false,
         "real_tribunal_connector": false,
         "prod_writes": false
+      },
+      "existing_eva_jdg_integration": {
+        "status": "GREEN_SYNTHETIC_BRIDGE",
+        "ci_run": 41684380201,
+        "existing_module": "cerebro/runtime/evaluation-tribunal.mjs",
+        "candidate_same_as_judge_denied": true,
+        "holdout_leakage_denied": true,
+        "goodhart_detection": true,
+        "prod_promotion_authorized": false,
+        "real_judge_identity_verified": false
       }
     },
     "FINOPS-001": {
@@ -330,7 +351,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Finish permanent target and per-engine physical real acceptance; 8 motors not PROD-promotable from runner CI alone. Current confirmed live bindings KNW Git read, Notion reference only, FINOPS GitHub read. DOC/TRN synthetic acceptance.",
+  "next_block": "Integrated 8-engine physical PREPROD acceptance then target inventory and actual connector bindings; preserve no PROD before evidence-based gates and rollback.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
