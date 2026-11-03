@@ -3,10 +3,10 @@ import {B4MemoryLabStore,createJarvisB4Memory} from './jarvis-b4-memory.mjs';
 const source={kind:'OWNER_STATEMENT',id:'chat-1',evidenceRefs:['LIBRARY:chat-1']};
 const mk=(overrides={})=>({token:'good',companyId:'fenix',projectId:'PRJ-SUPERAGENT-001',idempotencyKey:'write-1',kind:'FACT',subjectKey:'goal',value:'cost-0',source,confidence:0.99,...overrides});
 let t='2026-11-03T22:40:00.000Z';
-const setup=({enabled=true,store=new B4MemoryLabStore(),environment='LAB',provenanceVerifier=async()=>true}={})=>{
+const setup=({enabled=true,store=new B4MemoryLabStore(),environment='LAB',provenanceVerifier=async()=>true,b3PolicyService=null}={})=>{
  const identityProvider={verify:async token=>token==='good'?{ownerId:'owner-1',sessionId:'ses-1',roles:['OWNER_ROOT'],authorizedCompanies:['fenix']}:token==='other'?{ownerId:'owner-2',sessionId:'ses-2',roles:['OWNER_ROOT'],authorizedCompanies:['otra']}:token==='no-role'?{ownerId:'owner-1',sessionId:'ses-3',roles:['VIEWER'],authorizedCompanies:['fenix']}:null};
  const controlStore={get:async()=>({enabled,killSwitch:!enabled})};
- const app=createJarvisB4Memory({identityProvider,store,controlStore,provenanceVerifier,environment,clock:()=>t});return{app,store,identityProvider,controlStore};
+ const app=createJarvisB4Memory({identityProvider,store,controlStore,provenanceVerifier,b3PolicyService,environment,clock:()=>t});return{app,store,identityProvider,controlStore};
 };
 test('B4 defaults fail closed and requires trusted adapters',async()=>{
  assert.throws(()=>createJarvisB4Memory(),/B4_TRUSTED_ADAPTERS_REQUIRED/);
@@ -93,4 +93,34 @@ test('B4 duplicate correction retry remains idempotent and does not mutate histo
  const correction=mk({idempotencyKey:'correct-2',kind:'CORRECTION',targetId:first.id,value:'fixed'});
  const a=await app.append(correction);const b=await app.append(correction);
  assert.equal(a.event.id,b.event.id);assert.equal(b.replayed,true);assert.equal(store.entries.length,2);
+});
+
+test('B4 PROD rejects memory writes without audited B3 policy service even when feature is enabled',async()=>{
+ const {app,store}=setup({environment:'PROD'});
+ await assert.rejects(app.append(mk()),/B3_POLICY_REQUIRED/);
+ assert.equal(store.entries.length,0);
+ await assert.rejects(app.readContext({token:'good',companyId:'fenix',projectId:'PRJ-SUPERAGENT-001'}),/B3_POLICY_REQUIRED/);
+});
+test('B4 PROD policy decision DENY prevents memory writes and reads',async()=>{
+ const decisions=[];
+ const {app,store}=setup({environment:'PROD',b3PolicyService:{
+  authorize:async req=>{decisions.push(req);return {decision:'DENY',reason:'GRANT_MISSING'};}
+ }});
+ await assert.rejects(app.append(mk()),/B3_POLICY_DENIED/);
+ await assert.rejects(app.readContext({token:'good',companyId:'fenix',projectId:'PRJ-SUPERAGENT-001'}),/B3_POLICY_DENIED/);
+ assert.deepEqual(decisions.map(x=>x.actionName),['JARVIS_MEMORY_APPEND','JARVIS_MEMORY_READ']);
+ assert.equal(store.entries.length,0);
+});
+test('B4 PROD policy adapter requires explicit per-action grants for memory access',async()=>{
+ const decisions=[];
+ const {app}=setup({environment:'PROD',b3PolicyService:{
+  authorize:async req=>{decisions.push(req);return req.actionName==='JARVIS_MEMORY_APPEND'?{decision:'ALLOW'}:{decision:'DENY'};}
+ }});
+ await app.append(mk());
+ await assert.rejects(app.readContext({token:'good',companyId:'fenix',projectId:'PRJ-SUPERAGENT-001'}),/B3_POLICY_DENIED/);
+ assert.deepEqual(decisions.map(x=>x.actionName),['JARVIS_MEMORY_APPEND','JARVIS_MEMORY_READ']);
+});
+test('B4 does not treat an invalid B3 audit/decision result as authorization',async()=>{
+ const {app}=setup({environment:'PROD',b3PolicyService:{authorize:async()=>({decision:'AUDIT_UNAVAILABLE'})}});
+ await assert.rejects(app.append(mk()),/B3_POLICY_DENIED/);
 });
