@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.15.0",
+  "schema_version": "1.16.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -417,7 +417,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "Physical host live proof is still missing (JOB001 telemetry 0), GitHub prod smoke secrets are not provisioned despite two enabled public keys at Supabase. Preserve App/CRM, do not auto-promote to PROD. Work on secure credential provisioning with authorized admin interface and persistent worker heartbeat.",
+  "next_block": "New canonical actual evidence: only 25/179 meet strict 12-gate repository readiness; 154 foundation-only. DO NOT confuse historical 169 certified with 25 strict nor claim live PROD. Resolve host/credentials and missing gate evidence individually.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -555,5 +555,33 @@
     "read_only": true,
     "prod_writes": false,
     "service_key_exposed": false
+  },
+  "canonical_strict_reaudit_ingested": {
+    "source_run": 41686607637,
+    "source_job": 126093902232,
+    "source": "GitHub Actions CANONICAL_ACTUAL job log",
+    "registry_total": 179,
+    "strict_gate_ready": 25,
+    "foundation_only": 154,
+    "classification_scope": "REPOSITORY_EVIDENCE_12_GATES_LAB_PREPROD_NOT_LIVE_PROD",
+    "historical_readiness_certified_169_is_distinct": true,
+    "strict_gate_counts": {
+      "backup": 25,
+      "contracts": 36,
+      "cost": 179,
+      "evaluation": 27,
+      "observability": 45,
+      "permissions": 63,
+      "policy": 90,
+      "preprod": 179,
+      "rebuild": 25,
+      "rollback": 25,
+      "tests": 179,
+      "tribunal": 29
+    },
+    "prod_promotion_authorized": false,
+    "prod_writes": false,
+    "trading_touched": false,
+    "additional_cost_eur": 0
   }
 }
