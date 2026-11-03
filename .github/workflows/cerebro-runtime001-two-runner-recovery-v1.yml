@@ -1,0 +1,57 @@
+name: CEREBRO Runtime001 Two Runner Durable Recovery V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/runtime001-cross-runner-durable-artifact-v1.mjs'
+      - '.github/workflows/cerebro-runtime001-two-runner-recovery-v1.yml'
+  workflow_dispatch:
+permissions: {contents: read}
+env:
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+  CEREBRO_ALLOW_TRADING: 'false'
+  CEREBRO_CROSS_HOST_DIR: /tmp/cerebro-runtime001-cross-host
+jobs:
+  prepare-on-runner-a:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Prepare synthetic durable JOB001 artifact on first isolated runner
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          test "$CEREBRO_ALLOW_PROD_WRITES" = false
+          node cerebro/missions/runtime001-cross-runner-durable-artifact-v1.mjs prepare
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime001-durable-cross-runner-state-${{ github.run_id }}
+          path: /tmp/cerebro-runtime001-cross-host/
+          if-no-files-found: error
+          retention-days: 1
+  verify-on-runner-b:
+    runs-on: ubuntu-latest
+    needs: prepare-on-runner-a
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - uses: actions/download-artifact@v4
+        with:
+          name: runtime001-durable-cross-runner-state-${{ github.run_id }}
+          path: /tmp/cerebro-runtime001-cross-host/
+      - name: Verify restored same artifact checksum idempotency tampering and context
+        run: |
+          set -euo pipefail
+          node cerebro/missions/runtime001-cross-runner-durable-artifact-v1.mjs verify
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime001-cross-runner-verification-${{ github.run_id }}
+          path: /tmp/cerebro-runtime001-cross-host/CROSS_RUNNER_VERIFICATION.json
+          if-no-files-found: error
+          retention-days: 30
