@@ -1,0 +1,33 @@
+name: CEREBRO Eight Physical PROD Preflight V1
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/eight-prod-physical-preflight-v1.mjs'
+      - 'cerebro/governance/remaining-10-progress-2026-11-03.json'
+      - '.github/workflows/cerebro-eight-physical-prod-preflight-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-first-preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '24'}
+      - name: Check eight physical acceptance gates without PROD writes
+        env:
+          CEREBRO_EVIDENCE_OUT: /tmp/cerebro-eight-prod-preflight
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+          node cerebro/missions/eight-prod-physical-preflight-v1.mjs
+      - name: Upload inspectable blockers
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-eight-physical-prod-preflight-${{ github.run_id }}
+          path: /tmp/cerebro-eight-prod-preflight/
+          if-no-files-found: error
+          retention-days: 30
