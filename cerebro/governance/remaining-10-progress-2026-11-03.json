@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.4.0",
+  "schema_version": "1.4.1",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -130,9 +130,19 @@
       "batch_verified": true,
       "batch_ci_run": 41664200060,
       "remaining": [
-        "instrument approved live provider/API/AI/storage call sites",
-        "prove live budgets and hard-stop attribution"
-      ]
+        "instrument approved live provider/API/AI/storage call sites with verified cost expectations",
+        "prove live budget hard-stop enforcement at actual provider boundary",
+        "measure attributable actual usage and savings without new subscriptions"
+      ],
+      "pre_call_zero_cost_guard": {
+        "status": "GREEN_CI_SCOPE",
+        "ci_run": 41682646516,
+        "zero_cost_policy": true,
+        "positive_spend_denied": true,
+        "prod_denied": true,
+        "trading_denied": true,
+        "live_provider_instrumentation": false
+      }
     },
     "DOC-001": {
       "state": "PARCIAL_LIVE_INTEGRATION",
@@ -248,7 +258,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "PROD BLOCKED until RUNTIME001 permanent host and remaining 7 live integrations accepted with physical evidence and explicit governance.",
+  "next_block": "Finish physical provider bindings and permanent runtime hosting in PREPROD; all eight require 12-gate physical acceptance before PROD. No autonomous PROD activation from passing CI.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
