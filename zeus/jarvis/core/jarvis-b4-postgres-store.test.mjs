@@ -60,3 +60,9 @@ test('B4 SQL control failure denies access instead of falling back to an unlocke
  const control=createJarvisB4GuardedControlStore({query:async()=>{throw new Error('DB_UNAVAILABLE')}});
  await assert.rejects(control.get({companyId:'fenix',environment:'PROD'}),/DB_UNAVAILABLE/);
 });
+
+
+test('B4 Postgres fails closed on a concurrent correction/checkpoint unique-index violation',async()=>{
+ const store=createJarvisB4PostgresStore({query:async()=>{const e=Error('unique conflict');e.code='23505';throw e;}});
+ await assert.rejects(store.appendUnique(base),/B4_CONCURRENT_STATE_CONFLICT/);
+});
