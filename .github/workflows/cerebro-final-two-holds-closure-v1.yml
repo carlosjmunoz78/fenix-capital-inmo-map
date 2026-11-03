@@ -1,0 +1,58 @@
+name: CEREBRO Final Two Holds Closure V1
+
+on:
+  push:
+    branches:
+      - cerebro/close-179-per-engine-autonomy-v1-20261102
+    paths:
+      - '.github/workflows/cerebro-final-two-holds-closure-v1.yml'
+      - 'cerebro/tests/final-holds-labtrd-hci-v1.test.mjs'
+      - 'cerebro/evidence/lab-trd-paper-closure/**'
+      - 'cerebro/evidence/hci001-physical-acceptance/**'
+      - 'cerebro/governance/remaining-10-progress-2026-11-03.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CEREBRO_ALLOW_REAL_TRADING: 'false'
+  CEREBRO_ALLOW_PROD_WRITES: 'false'
+
+jobs:
+  final-two-governed-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Safety gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_ALLOW_REAL_TRADING" = "false"
+          test "$CEREBRO_ALLOW_PROD_WRITES" = "false"
+      - name: Existing L7 isolation regression
+        run: node --test cerebro/tests/l7-foundation-wave1.test.mjs
+      - name: Existing authorized execution profile regression
+        run: node --test cerebro/tests/authorized-execution-device-profile-v1.test.mjs
+      - name: Final two governed closure tests
+        run: node --test cerebro/tests/final-holds-labtrd-hci-v1.test.mjs
+      - name: Evidence integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q '"real_authorized": false' cerebro/evidence/lab-trd-paper-closure/2026-11-03/PROVENANCE.json
+          grep -q '"input_or_click_tool_exposed_in_current_chat": false' cerebro/evidence/hci001-physical-acceptance/2026-11-03/CURRENT_CHANNEL.json
+          grep -q '"human_required": null' cerebro/evidence/hci001-physical-acceptance/2026-11-03/CURRENT_CHANNEL.json
+      - name: Upload final evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-final-two-holds-closure-v1
+          path: |
+            cerebro/evidence/lab-trd-paper-closure/2026-11-03/**
+            cerebro/evidence/hci001-physical-acceptance/2026-11-03/**
+          if-no-files-found: error
+          retention-days: 30
