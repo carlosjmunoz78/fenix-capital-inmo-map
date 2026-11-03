@@ -1,0 +1,108 @@
+name: CEREBRO Batch08 APPBOOT001 V1
+
+on:
+  push:
+    branches: [cerebro/close-179-per-engine-autonomy-v1-20261102]
+    paths:
+      - 'cerebro/missions/close-batch08-appboot001-v1.mjs'
+      - '.github/workflows/cerebro-batch08-appboot001-v1.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+env:
+  OUT: /tmp/cerebro-batch08-appboot001
+jobs:
+  appboot001-autonomy-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: '${{ github.sha }}', fetch-depth: 1}
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Verify isolated branch
+        run: test "$GITHUB_REF_NAME" = 'cerebro/close-179-per-engine-autonomy-v1-20261102'
+      - name: Validate registry and factory
+        run: |
+          set -euo pipefail
+          cd cerebro
+          npm run validate
+          node factory-v1.mjs validate --registry registry/engine-registry.v1.json
+      - name: Rebuild complete prior certified chain 50/179
+        run: |
+          set -euo pipefail
+          node cerebro/missions/close-orch-hex-autonomy-v1.mjs
+          node cerebro/missions/close-batch07-iam001-v1.mjs
+          node cerebro/missions/close-batch07-job-route-v1.mjs
+          node cerebro/missions/close-batch07-observ001-v1.mjs
+          node cerebro/missions/close-batch07-evt001-v1.mjs
+          node cerebro/missions/close-batch07-qa001-v1.mjs
+          node cerebro/missions/close-batch07-cmd001-v1.mjs
+          node cerebro/missions/close-batch07-chat001-v1.mjs
+          node cerebro/missions/close-batch07-ctx001-v1.mjs
+          node cerebro/missions/close-batch07-actgw001-v1.mjs
+          node cerebro/missions/close-batch07-self001-v1.mjs
+          node cerebro/missions/close-batch07-aud001-v1.mjs
+          node cerebro/missions/close-batch07-reg001-v1.mjs
+          node cerebro/missions/close-batch07-red001-v1.mjs
+          node cerebro/missions/close-batch08-sup001-v1.mjs
+          node cerebro/missions/close-batch08-lead001-v1.mjs
+          node cerebro/missions/close-batch08-prv001-v1.mjs
+          node cerebro/missions/close-batch08-comp-reg001-v1.mjs
+          node cerebro/missions/close-batch08-tenant001-v1.mjs
+          node cerebro/missions/close-batch08-comp-onb001-v1.mjs
+          node cerebro/missions/close-batch08-trnboot001-v1.mjs
+          node cerebro/missions/close-batch08-autboot001-v1.mjs
+          node cerebro/missions/close-batch08-engact001-v1.mjs
+      - name: Execute APPBOOT-001 closure mission
+        run: node cerebro/missions/close-batch08-appboot001-v1.mjs
+      - name: Strict179 requires 51 of 179
+        run: |
+          set -euo pipefail
+          node cerebro/missions/audit-179-autonomy-readiness-v1.mjs --out "$OUT"
+          node <<'NODE'
+          const fs=require('fs');
+          const r=JSON.parse(fs.readFileSync(process.env.OUT+'/AUTONOMY_READINESS_BASELINE.json'));
+          const s=JSON.parse(fs.readFileSync(process.env.OUT+'/SUMMARY.json'));
+          const x=r.engines.find(e=>e.engine_id==='APPBOOT-001');
+          if(!x)throw new Error('APPBOOT-001 missing');
+          if(x.gate_count!==12||x.gate_total!==12||!x.autonomous_prod_ready)throw new Error(`APPBOOT-001 ${x.gate_count}/12 ${(x.readiness_blockers||[]).join(',')}`);
+          if((x.readiness_blockers||[]).length!==0)throw new Error('APPBOOT blockers remain');
+          if(x.prod_execution_authorized!==false)throw new Error('APPBOOT PROD authority drift');
+          if(s.autonomous_prod_ready<51)throw new Error(`Expected 51/179, got ${s.autonomous_prod_ready}`);
+          if(s.prod_writes!==false||s.trading_touched!==false||s.additional_cost_eur!==0||s.factory_mutated!==false||s.registry_mutated!==false)throw new Error('safety drift');
+          fs.writeFileSync(process.env.OUT+'/BATCH08_APPBOOT001_DIAGNOSTIC.json',JSON.stringify({engine:x,summary:s},null,2)+'\n');
+          NODE
+      - name: Upload APPBOOT evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-batch08-appboot001-${{ github.run_id }}
+          path: |
+            /tmp/cerebro-batch08-appboot001/
+            cerebro/evidence/orch-hex-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-iam001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-job-route-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-observ001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-evt001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-qa001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-cmd001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-chat001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-ctx001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-actgw001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-self001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-aud001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-reg001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch07-red001-autonomy-closure/2026-11-02/
+            cerebro/evidence/batch08-sup001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-lead001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-prv001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-comp-reg001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-tenant001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-comp-onb001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-trnboot001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-autboot001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-engact001-autonomy-closure/2026-11-03/
+            cerebro/evidence/batch08-appboot001-autonomy-closure/2026-11-03/
+          if-no-files-found: error
+          retention-days: 30
