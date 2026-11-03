@@ -23,15 +23,21 @@ export class B4MemoryLabStore {
  async list(s){return this.entries.filter(x=>sameScope(x,s)).map(clone);}
 }
 
-export function createJarvisB4Memory({identityProvider,store,controlStore,provenanceVerifier=null,environment='LAB',clock=()=>new Date().toISOString(),ids=randomUUID}={}){
+export function createJarvisB4Memory({identityProvider,store,controlStore,provenanceVerifier=null,b3PolicyService=null,environment='LAB',clock=()=>new Date().toISOString(),ids=randomUUID}={}){
  if(!identityProvider?.verify||!store?.appendUnique||!store?.list||!controlStore?.get)throw Error('B4_TRUSTED_ADAPTERS_REQUIRED');
  if(!['LAB','PREPROD','PROD'].includes(environment))throw Error('ENVIRONMENT_INVALID');
  async function principal(token,companyId){if(!token)throw Error('AUTH_REQUIRED');const p=await identityProvider.verify(token);if(!p?.ownerId||!p.sessionId||!p.roles?.includes('OWNER_ROOT')||!Array.isArray(p.authorizedCompanies))throw Error('OWNER_ROOT_REQUIRED');if(!p.authorizedCompanies.includes(companyId))throw Error('COMPANY_SCOPE_DENIED');return p;}
- async function authorizeWrite(companyId){const c=await controlStore.get({companyId,environment});if(c?.enabled!==true||c?.killSwitch!==false)throw Error('B4_LOCKED');}
+ async function checkB3Policy(token,companyId,actionName){
+  if(environment!=='PROD')return;
+  if(typeof b3PolicyService?.authorize!=='function')throw Error('B3_POLICY_REQUIRED');
+  const decision=await b3PolicyService.authorize({token,companyId,environment,actionName});
+  if(decision?.decision!=='ALLOW')throw Error('B3_POLICY_DENIED');
+ }
+ async function authorizeWrite(token,companyId){const c=await controlStore.get({companyId,environment});if(c?.enabled!==true||c?.killSwitch!==false)throw Error('B4_LOCKED');await checkB3Policy(token,companyId,'JARVIS_MEMORY_APPEND');}
  async function readScoped(token,companyId,projectId){key(companyId,'COMPANY_ID');key(projectId,'PROJECT_ID');const p=await principal(token,companyId);const s=scope({ownerId:p.ownerId,companyId,environment,projectId});return {s,events:await store.list(s)};}
  async function append({token,companyId,projectId,missionId=null,idempotencyKey,kind,subjectKey,value='',source,confidence,ttlSeconds=2592000,consent=null,targetId=null,links=[],checkpoint=null,neverAskAgain=false}){
   const {s,events}=await readScoped(token,companyId,projectId);
-  await authorizeWrite(companyId);
+  await authorizeWrite(token,companyId);
   key(idempotencyKey,'IDEMPOTENCY_KEY');key(subjectKey,'SUBJECT_KEY');
   if(!B4_KINDS.includes(kind))throw Error('MEMORY_KIND_INVALID');
   if(missionId!==null)key(missionId,'MISSION_ID');
@@ -69,7 +75,7 @@ export function createJarvisB4Memory({identityProvider,store,controlStore,proven
   return store.appendUnique(event);
  }
  async function readContext({token,companyId,projectId,missionId=null}){
-  const {events}=await readScoped(token,companyId,projectId);const now=Date.parse(date(clock(),'CLOCK'));
+  const {events}=await readScoped(token,companyId,projectId);await checkB3Policy(token,companyId,'JARVIS_MEMORY_READ');const now=Date.parse(date(clock(),'CLOCK'));
   const live=events.filter(e=>Date.parse(e.expiresAt)>now);
   const removed=new Set(live.filter(e=>e.kind==='REVOCATION'||e.kind==='CORRECTION').map(e=>e.targetId));
   const grouped=new Map();const checkpoints=[];
