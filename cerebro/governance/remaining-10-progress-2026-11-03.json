@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.9.0",
+  "schema_version": "1.10.0",
   "date": "2026-11-03",
   "branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline": {
@@ -363,7 +363,7 @@
     "additional_cost_eur": 0,
     "human_required": []
   },
-  "next_block": "NO_PREMATURE_PROD. Integrated runner and two-runner durable tests GREEN; permanently deployed non-invasive target, real dataset/docs/provider bindings and each engine's canonical promotion remain required.",
+  "next_block": "PREPROD physical integration is GREEN but PROD promotion remains BLOCKED: persistent CEREBRO host not live verified, real 8-engine connectors not fully bound, and independent existing PROD Runtime Smoke secret-reference gate FAILS. Never modify App/CRM prod or secret values from this batch.",
   "canonical_reaudit": {
     "status": "CI_SUCCESS_ACTUAL_ARTIFACT_NOT_INGESTED",
     "workflow_run": 41680762069,
@@ -404,5 +404,32 @@
       "approved real document ingestion and domain calibration",
       "per-engine canonical 12-gate PROD promotion"
     ]
+  },
+  "persistent_host_inventory": {
+    "state": "EXISTING_CODE_ONLY_LIVE_INSTALLATION_UNVERIFIED",
+    "candidate": "cerebro/host/windows/Install-CerebroLrn001Host.ps1",
+    "engine": "LRN-001",
+    "existing_outbox_branch": "cerebro-rsi-learning-outbox-v0",
+    "outbox_batches_observed": 983,
+    "last_observed_source_run": 41684134057,
+    "host_running_verified": false,
+    "host_heartbeat_verified": false,
+    "can_reuse_for_runtime001_without_impact": false,
+    "installation_attempted": false
+  },
+  "prod_live_smoke_gate": {
+    "state": "FAIL_CLOSED",
+    "workflow_run": 41684134057,
+    "workflow": "PROD Runtime Smoke",
+    "failed_step": "Assert required secret references are available",
+    "secret_values_accessed": false,
+    "exact_missing_secret_unverified": true,
+    "required_secret_reference_names": [
+      "PROD_SUPABASE_PUBLISHABLE_KEY",
+      "PROD_SUPABASE_LEGACY_ANON_JWT"
+    ],
+    "prod_secrets_mutated": false,
+    "prod_promotion_authorized": false,
+    "note": "Existing main/prod-preparation production smoke has its own missing/invalid required secret check; this is separate from the isolated eight-engine test and must be fixed via secure established credential management, not by exposing secrets."
   }
 }
