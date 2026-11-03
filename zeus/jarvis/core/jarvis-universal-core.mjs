@@ -16,6 +16,7 @@ export class MemoryEventStore {
   async findByIdempotency(scope,key){return clone(this.byIdempotency.get(`${scope}:${key}`)??null);}
   async get(id){return clone(this.byMission.get(id)??null);}
   async put(mission){const m=clone(mission);this.byMission.set(m.id,m);this.byIdempotency.set(`${m.ownerId}:${m.companyId}:${m.idempotencyKey}`,m);return clone(m);}
+  async createIfAbsent(m){const previous=await this.findByIdempotency(`${m.ownerId}:${m.companyId}`,m.idempotencyKey);return previous??this.put(m);}
   async list(ownerId){return [...this.byMission.values()].filter(m=>m.ownerId===ownerId).map(clone);}
 }
 
@@ -38,6 +39,14 @@ export class JarvisUniversalCore {
     const scope=`${p.ownerId}:${company}`;const prior=await this.store.findByIdempotency(scope,key);
     if(prior){if(prior.intent!==action||prior.projectId!==project||stableJson(prior.request)!==stableJson(redact(payload)))throw new Error('IDEMPOTENCY_CONFLICT');return {mission:prior,replayed:true};}
     const at=this.clock();const mission={id:this.ids(),coreId:CORE_ID,coreVersion:CORE_VERSION,ownerId:p.ownerId,companyId:company,projectId:project,intent:action,idempotencyKey:key,request:redact(payload),channel:ch,status:'RECEIVED',events:[{type:'RECEIVED',at,channel:ch}],createdAt:at,updatedAt:at,environment:'PROD',engineId:'JARVIS-CORE-001'};
+    if(typeof this.store.createIfAbsent==='function'){
+      const persisted=await this.store.createIfAbsent(mission);
+      if(persisted.id!==mission.id){
+        if(persisted.intent!==action||persisted.projectId!==project||stableJson(persisted.request)!==stableJson(redact(payload)))throw new Error('IDEMPOTENCY_CONFLICT');
+        return {mission:persisted,replayed:true};
+      }
+      return {mission:persisted,replayed:false};
+    }
     await this.store.put(mission);return{mission,replayed:false};
   }
   async inspect({token,missionId}){const p=await this.#principal(token);const m=await this.store.get(requiredString(missionId,'MISSION_ID'));if(!m||m.ownerId!==p.ownerId)throw new Error('MISSION_NOT_FOUND');this.#checkCompany(p,m.companyId);return m;}
@@ -52,12 +61,12 @@ export class JarvisUniversalCore {
     else if(capability.requiresHuman)reason=HUMAN_REASONS.includes(capability.requiresHuman)?capability.requiresHuman:'HIGH_RISK';
     else if(capability.mutating&&!this.dispatcher?.execute)reason='HIGH_RISK';
     else{state='AUTHORIZED';reason=null;}
-    const at=this.clock();m.status=state;m.updatedAt=at;m.events.push({type:state,at,...(reason?{reason}:{})});await this.store.put(m);
+    const at=this.clock();m.status=state;m.updatedAt=at;m.events.push({type:state,at,...(reason?{reason}:{})});m=await this.store.put(m);
     if(state==='HUMAN_REQUIRED')return{mission:m,replayed:false};
     // V0: verified deterministic read-only capabilities only. No generic natural-language model invocations.
-    if(capability.mutating){m.status='HUMAN_REQUIRED';m.events.push({type:'HUMAN_REQUIRED',at:this.clock(),reason:'HIGH_RISK'});await this.store.put(m);return{mission:m,replayed:false};}
+    if(capability.mutating){m.status='HUMAN_REQUIRED';m.events.push({type:'HUMAN_REQUIRED',at:this.clock(),reason:'HIGH_RISK'});m=await this.store.put(m);return{mission:m,replayed:false};}
     try{const result=await capability.run({companyId:m.companyId,projectId:m.projectId,ownerId:p.ownerId,request:clone(m.request)});m.status='SUCCEEDED';m.result=redact(result);m.events.push({type:'SUCCEEDED',at:this.clock()});}
     catch(e){m.status='FAILED';m.errorCode='CAPABILITY_EXECUTION_FAILED';m.events.push({type:'FAILED',at:this.clock()});}
-    m.updatedAt=this.clock();await this.store.put(m);return{mission:m,replayed:false};
+    m.updatedAt=this.clock();m=await this.store.put(m);return{mission:m,replayed:false};
   }
 }
