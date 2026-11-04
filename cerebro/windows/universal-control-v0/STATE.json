@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "SAFE_PHYSICAL_INVESTIGATION_8765_PERSISTENCE_AND_8766_VBS_AND_8768_FLAGS_THEN_GATEWAY_BINDING; PRESERVE_FOUR_CHANNEL_SEPARATION",
+  "next_block": "PHYSICAL_PC_V03_READONLY_REPORT_THEN_SAFE_EXACT_HASH_REPAIR_8766_8768_AND_8765_PERSISTENCE_GATEWAY_PAIRING_E2E",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -158,5 +158,32 @@
   },
   "legacy_8765_recovery": "ONE_SHOT_HEALTH_PASS_PERSISTENCE_PENDING",
   "legacy_8766": "PENDING_VBS_AUDIT",
-  "legacy_8768": "BLOCKED_UNKNOWN_FLAGS_FAIL_CLOSED"
+  "legacy_8768": "BLOCKED_UNKNOWN_FLAGS_FAIL_CLOSED",
+  "pc_closure_precheck": {
+    "version": "0.3.0",
+    "status": "LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "mode": "READ_ONLY_ONE_CLICK_GUI",
+    "sha256": "386543bdc41eedaa22551ced8f281626e675d88582969b20996b0b33784ed7bc",
+    "report": "CEREBRO_PC_CIERRE_ESTADO.txt",
+    "zip_library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_CIERRE_PRECHECK_V0_3_PREPROD.zip",
+    "sources": "inside ZIP",
+    "checks": [
+      "8765_8766_8767_8768_live_health_and_owner",
+      "HKCU_Run_exact_known_binary_hash",
+      "Controller_8768_flag_names_only_no_values",
+      "VBS_8766_static_risk_indicators_no_script_content",
+      "CEREBRO_processes_startup_task_events",
+      "camera_audio_device_counts_only"
+    ],
+    "unit_tests": "PASS",
+    "go_vet_linux": "PASS",
+    "go_vet_windows": "PASS",
+    "windows_amd64_gui_crossbuild": "PASS",
+    "deterministic_rebuild": "PASS",
+    "windows_physical": "PENDING",
+    "no_system_mutations": true,
+    "remote_commands_enabled": false,
+    "camera_mic_capture": false,
+    "additional_cost_eur": 0
+  }
 }
