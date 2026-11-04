@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "WINDOWS_TRAY_STATUS_DIALOG_CONFIRMED_LOCAL_PARTIAL_GATEWAY_OFF",
+  "status": "LOCAL_4_OF_4_HEALTH_VERIFIED_GATEWAY_AUTH_E2E_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -28,14 +28,16 @@
     "windows_runtime": "PARTIAL_USER_OBSERVED_STATUS_DIALOG",
     "listeners": "8767_PASS_OTHERS_FAIL",
     "reboot_persistence": "PENDING",
-    "camera_microphone": "NOT_TESTED_NO_RUNTIME_CAPABILITY_IN_V0"
+    "camera_microphone": "NOT_TESTED_NO_RUNTIME_CAPABILITY_IN_V0",
+    "pc001_device_lifecycle": "11_OF_11_PASS_NODE_LOCAL",
+    "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RESTORE_AUTHENTICATED_GATEWAY_TRANSPORT_PC001; AUDIT_PC_HW_WOL_READONLY; WOL_RELAY_EXISTING_ROUTER_OR_ONLINE_NODE; SUSPEND_WAKE_REAL_E2E; UNIFIED_WINDOWS_EXE_AFTER_BACKUP_OLD_NEW_ROLLBACK",
+  "next_block": "FIRST_VERIFY_EXISTING_SCOPED_LOCAL_DPAPI_GATEWAY_CREDENTIAL_AND_OUTBOUND_PC_RUNNER_NO_SECRET_EXPORT; IF_UNAVAILABLE_PAIR_PC_WITH_FRESH_ONE_TIME_PREPROD_CODE; TEST_AUTH_RECONNECT_NONCE_REPLAY_POLL_SYNTHETIC_RESULT; RUN_READONLY_WINDOWS_POWER_PREFLIGHT; IDENTIFY_EXISTING_ALWAYS_ON_WOL_RELAY; NO_SLEEP_BEFORE_VERIFIED_WAKE; UNIFY_ACCESSBOOT_ONLY_AFTER_PHYSICAL_GATES",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -494,5 +496,38 @@
     "code_sha256": "See GitHub source; stable PC identity and power action policy only",
     "source_archive_zip_sha256": "319f7730f8e0dfdc7a8e70ea39441591fac0d8bd6c04581bb2a0a20e5ff31db4",
     "source_archive_library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_NOMBRE_SUSPENDER_DESPERTAR_V1_CODIGO_Y_PRUEBAS.zip"
+  },
+  "pc001_gateway_transport_audit_20261104": {
+    "status": "PARCIAL_AUTH_TRANSPORT_NOT_ATTESTED",
+    "source": "Supabase PREPROD live read-only + connected Opera local HTTP health",
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "edge_function": "cerebro-device-gateway-preprod",
+    "edge_version": 9,
+    "edge_status": "ACTIVE",
+    "gateway_health": "READY_PREPROD_NO_PC_AUTH_PROOF",
+    "agents_seen_last_hour": 0,
+    "last_lab_heartbeat_utc": "2026-11-03T07:35:51.927Z",
+    "last_preprod_heartbeat_utc": "2026-10-30T09:03:26.528Z",
+    "valid_unused_pair_codes": 0,
+    "existing_token_material": "NOT_READ_OR_EXPOSED",
+    "first_blocker": "NO_VERIFIED_LOCAL_PC_TRANSPORT_AUTH_OR_VALID_PAIRING; CHECK_EXISTING_DPAPI_CREDENTIAL_REFERENCE_AND_CLIENT_RUNNER_BEFORE_CREATING_PAIRING",
+    "local_four_ports": "8765_8766_8767_8768_OK_BY_OPERA_WITH_EXISTING_8768_PHYSICAL_RECEIPT",
+    "e2e_command_result": "NOT_PERFORMED",
+    "database_changes": false
+  },
+  "pc001_wol_readonly_preflight_20261104": {
+    "status": "SOURCE_COMMITTED_NODE_STATIC_TESTS_GREEN_WINDOWS_NOT_EXECUTED",
+    "script": "cerebro/windows/pc-001/pc001-readonly-preflight-v1.ps1",
+    "tests": "cerebro/windows/pc-001/pc001-readonly-preflight-v1.test.mjs",
+    "static_tests": "5_OF_5_PASS_LOCAL",
+    "windows_hardware_inventory": "PENDING_ON_AUTHORIZED_WINDOWS_HOST",
+    "verified_always_on_relay": false,
+    "wake_physical_e2e": false,
+    "suspend_pc": "NOT_EXECUTED",
+    "cost_additional_eur": 0,
+    "source_commits": [
+      "7442748b1787be170ba98b7463da8de252b9e133",
+      "2bff3ac83e3cfee639b23e47db2bdfffa7ccbdbe"
+    ]
   }
 }
