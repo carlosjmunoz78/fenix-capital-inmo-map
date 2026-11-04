@@ -1,0 +1,58 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "block": "B7",
+  "cut": "CUT01",
+  "status": "PARCIAL_LAB_SOURCE_COMMITTED_CI_PENDING_PROD_LOCKED",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b7-multiagent-supervisor-v0-20261104",
+  "baseline_sha": "115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb",
+  "depends_on_pr": 16,
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "registry_count": 179,
+  "registry_modified": false,
+  "tests": {
+    "separate_local_prototype": {
+      "passed": 26,
+      "failed": 0
+    },
+    "github_head": "PENDING"
+  },
+  "b3_prod": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "b4_prod": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "new_servers": 0,
+  "additional_subscriptions": 0,
+  "paid_ai_calls": 0,
+  "external_mutations_prod": 0,
+  "implementation": [
+    "DAG scheduling",
+    "bounded parallelism",
+    "B3 policy per delegation",
+    "B6 controlled read",
+    "B6 idempotency delegated",
+    "Supervisor stop",
+    "independent tribunal",
+    "company isolation",
+    "audit",
+    "zero cost"
+  ],
+  "limitations": [
+    "mission-level durable PostgreSQL journal B7 pending",
+    "real B3 delegated credentials pending",
+    "factory external Gateway projection pending",
+    "in-flight read abort pending",
+    "PROD disabled"
+  ],
+  "rollback": "close/revert B7 PR only; keep B6 PR16/main/App/CRM intact",
+  "next_block": "B7_CUT02_DURABLE_MISSION_JOURNAL_AND_REAL_SUPERVISOR_INTEGRATION"
+}

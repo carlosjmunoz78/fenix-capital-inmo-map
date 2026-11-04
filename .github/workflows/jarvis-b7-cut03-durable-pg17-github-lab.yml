@@ -1,0 +1,53 @@
+name: ZEUS JARVIS B7 Cut03 Durable Mission PG17 GitHub LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/core/jarvis-b7-durable-envelope.mjs'
+      - 'zeus/jarvis/core/jarvis-b7-durable-envelope.test.mjs'
+      - 'zeus/jarvis/gates/b7-cut03-durable-pg17-github-lab.mjs'
+      - '.github/workflows/jarvis-b7-cut03-durable-pg17-github-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  mission-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: jarvis_ci
+          POSTGRES_PASSWORD: ephemeral_only_b7_cut03
+          POSTGRES_DB: jarvis_b7_cut03
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jarvis_ci -d jarvis_b7_cut03"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: jarvis_ci
+      PGPASSWORD: ephemeral_only_b7_cut03
+      PGDATABASE: jarvis_b7_cut03
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install disposable PostgreSQL client
+        run: command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Reuse B6 existing journal schema (only CI ephemeral database)
+        run: psql -X -v ON_ERROR_STOP=1 -f zeus/jarvis/gates/b6-pg17-idempotency-journal-candidate.sql
+      - name: Verify durable mission with live GitHub READ and PG17
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JARVIS_B7_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node zeus/jarvis/gates/b7-cut03-durable-pg17-github-lab.mjs
+      - name: Snapshot synthetic mission journal for rebuild rehearsal
+        run: pg_dump -Fc -n zeus_jarvis_b6_lab -f /tmp/jarvis-b7-cut03-journal.dump
+      - name: Verify rollback restoration in disposable schema
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -c 'DROP SCHEMA zeus_jarvis_b6_lab CASCADE;'
+          pg_restore --no-owner --no-privileges -d "$PGDATABASE" /tmp/jarvis-b7-cut03-journal.dump
+          psql -X -v ON_ERROR_STOP=1 -c "SELECT CASE WHEN COUNT(*) >= 6 THEN 'RESTORE_GREEN' ELSE 'RESTORE_RED' END FROM zeus_jarvis_b6_lab.execution_claim;"

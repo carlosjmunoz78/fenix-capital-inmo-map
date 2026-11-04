@@ -1,0 +1,26 @@
+name: ZEUS JARVIS B7 Logical Multiagent LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/core/**'
+      - 'zeus/jarvis/B7_*'
+      - 'zeus/jarvis/STATE_B7_*'
+      - '.github/workflows/jarvis-b7-multiagent-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  node-b1-to-b7:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Regress B1-B6 and certify B7 in LAB
+        run: node --test zeus/jarvis/core/*.test.mjs
+      - name: Static candidate gate (zero cost, PROD OFF, factory preserved)
+        run: |
+          node --check zeus/jarvis/core/jarvis-b7-orchestrator.mjs
+          node -e "const x=require('./zeus/jarvis/B7_ENGINE_MANIFEST_V0_2026-11-04.json');if(x.prod_authorized!==false||x.additional_cost_eur!==0||x.registry_mutated!==false)process.exit(1)"

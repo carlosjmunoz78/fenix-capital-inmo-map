@@ -1,0 +1,135 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "ORCH-001",
+  "capability_id": "JARVIS-B7-LOGICAL-DELEGATION-001",
+  "version": "0.1.0",
+  "environment": "LAB",
+  "block": "B7",
+  "cut": "CUT03",
+  "status": "PARCIAL_LAB_GREEN_PROD_LOCKED",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b7-multiagent-supervisor-v0-20261104",
+  "pr_number": 17,
+  "pr_state": "OPEN_DRAFT_NOT_MERGED",
+  "base_pr": 16,
+  "base_sha": "115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb",
+  "code_sha_tested": "d844e2b9425c9611b3e1dddf4c672b187b36e350",
+  "original_registry_count": 179,
+  "registry_changed": false,
+  "factory_duplicate_created": false,
+  "runtime_workers_created": 0,
+  "supabase_prod_modified": false,
+  "app_crm_prod_modified": false,
+  "paid_models_used": false,
+  "new_subscriptions": 0,
+  "additional_cost_eur_reported": 0,
+  "checks": {
+    "node_suite": {
+      "run_id": 41756003358,
+      "status": "success",
+      "passed": 357,
+      "failed": 0
+    },
+    "real_b7_pg17_github_dag": {
+      "run_id": 41756003351,
+      "status": "success",
+      "environment": "isolated_github_ci_postgresql17"
+    },
+    "real_b7_pg17_durable_mission": {
+      "run_id": 41756003289,
+      "status": "success",
+      "unique_mission_claim": true,
+      "two_tasks_real_github_reads": true,
+      "restart_replay_without_task_get": true,
+      "incomplete_commit_no_autoretry": true,
+      "supervisor_kill": true,
+      "backup_restore": "RESTORE_GREEN"
+    },
+    "universal_core": {
+      "run_id": 41756003299,
+      "status": "success"
+    },
+    "b4_pg17_regression": {
+      "run_id": 41756003440,
+      "status": "success"
+    },
+    "governed_integration": {
+      "run_id": 41756003337,
+      "status": "success",
+      "prod_deploy": "NOT_EXECUTED"
+    },
+    "old_vs_new_existing_components": {
+      "status": "success",
+      "run_id": 41756003358,
+      "cases": 5,
+      "legacy_dag": "cerebro/runtime/dynamic-dag-planner-v1.mjs",
+      "legacy_specialists": "cerebro/runtime/cerebro-technical-specialists-v1.mjs",
+      "legacy_supervisor": "cerebro/runtime/cerebro-continuous-supervisor-v0.mjs",
+      "legacy_job": "cerebro/runtime/durable-job-runtime-v1.mjs",
+      "legacy_tribunal": "cerebro/runtime/evaluation-tribunal.mjs",
+      "scope": "SYNTHETIC_OLD_VS_NEW_PREPROD_VS_LAB_NO_RUNTIME_ACTIVATION"
+    }
+  },
+  "controls_live_read_only": {
+    "supabase_project": "cluhljgonannaafpmblx",
+    "project_status": "ACTIVE_HEALTHY",
+    "b3_prod": {
+      "company_id": "fenix",
+      "enabled": false,
+      "kill_switch": true
+    },
+    "b4_prod": {
+      "company_id": "fenix",
+      "enabled": false,
+      "kill_switch": true
+    }
+  },
+  "supported_capabilities_lab": [
+    "deterministic_mission_dag",
+    "parallelism_bounded",
+    "trusted_logical_specialist_binding",
+    "B3_delegation_check_synthetic",
+    "B6_task_journal_reused",
+    "B7_whole_mission_journal_reused",
+    "mission_claim_atomic_postgres17",
+    "cross_instance_receipt_recovery",
+    "strict_no_auto_retry_after_uncertain_commit",
+    "supervisor_kill_and_revocation",
+    "independent_verifier_port",
+    "append_only_audit_port",
+    "multi_company_validation",
+    "zero_spend_lock",
+    "synthetic_pg_dump_restore"
+  ],
+  "open_gates": [
+    "B2_REAL_OWNER_ROOT_E2E",
+    "B3_REAL_DELEGATION_GRANTS_VAULT_AND_REVOCATION",
+    "FACT001_GATEWAY_REGISTRY_PROJECTION",
+    "SUPERVISOR_TRIBUNAL_REAL_INTEGRATION",
+    "SHARED_RUNTIME_PERSISTENT_HOST_DEPLOYMENT",
+    "CRASH_RECONCILIATION_BEFORE_SAFE_RESTART",
+    "INFLIGHT_ABORTABLE_CONNECTOR_AND_WORKER_WATCHDOG",
+    "TRUE_MULTI_COMPANY_LIVE_AUTHORIZATION",
+    "OBSERVABILITY_COST_QUOTA_PROOF",
+    "PREPROD_EQUIVALENT_GATES",
+    "PROD_ROLLOUT_APPROVAL"
+  ],
+  "real_prod_execution": 0,
+  "real_prod_credentials_used": false,
+  "rollback": "close/revert PR #17 only; do not merge; preserve B6 PR16, B3/B4, 179-engine registry, main and CRM",
+  "next_block": "B7_CUT04_REAL_OWNER_GRANTS_SUPERVISOR_TRIBUNAL_GATEWAY_AND_SAFE_INFLIGHT_CANCELLATION",
+  "physical_pc_required_for_b7_core": false,
+  "later_physical_validation": [
+    "Browser Bridge device session/Computer Use E2E if delegation includes PC",
+    "microphone/voice E2E when certifying voice surface"
+  ],
+  "limitations": [
+    "A CI green result is not a real human-grant or PROD operational proof",
+    "Whole-mission journal is used in synthetic PostgreSQL CI, not installed in PROD",
+    "During an uncertain commit B7 stops instead of auto-resuming; manual reconciliation is still pending",
+    "In-flight GET is not forcibly aborted by logical Supervisor stop; later results denied"
+  ]
+}
