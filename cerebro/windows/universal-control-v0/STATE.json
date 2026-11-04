@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "WINDOWS_V02_LOCAL_PHYSICAL_INSTALL_SMOKE_TXT_AND_Z_THEN_LEGACY_REPAIR_AUDIT",
+  "next_block": "PHYSICAL_ONE_SHOT_RECOVERY_RECEIPT_8765_8768_AND_SAFE_8766_SCRIPT_AUDIT_GATEWAY_STILL_PENDING",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -98,7 +98,7 @@
   "browser_universal_rule": "Shared browser core with browser-specific adapters. ChatGPT's Opera connector is NOT a CEREBRO-owned integration",
   "next_release_candidate": {
     "version": "0.2.0",
-    "status": "LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "status": "WINDOWS_PHYSICAL_V02_TXT_CONFIRMED_LOCAL_PARTIAL",
     "ui": "Z azul tray, no alert-style default icon; Windows custom DIB icon with safe fallback",
     "reports": {
       "button": "Comprobar estado",
@@ -122,7 +122,9 @@
       "win_gui_crossbuild": "PASS",
       "win_test_compile": "PASS",
       "deterministic_rebuild": "PASS BEFORE_FINAL_HARDENING",
-      "windows_live": "PENDING"
+      "windows_live": "PASS_OBSERVED_USER_PROVIDED_TXT_2026_11_04_10_57_32_CET",
+      "desktop_txt": "PASS_OBSERVED",
+      "listeners": "8765_FAIL_8766_FAIL_8767_PASS_8768_FAIL"
     },
     "constraints": {
       "legacy_services_modified": false,
@@ -132,5 +134,17 @@
       "additional_cost_eur": 0
     },
     "repo_source_sync": "PENDING_VALIDATED_SOURCE_UPLOAD_FROM_LOCAL_PACKAGE"
+  },
+  "recovery_candidate": {
+    "artifact": "CEREBRO_RECUPERACION_CONTROLADA_V0_1.exe",
+    "sha256": "1681e4dd9fb703f2aae899e14fdfa576ab92e46924d4ca1d08a25867dd16346f",
+    "status": "PREPROD_LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "role": "One-shot exact-hash guarded startup of existing 8765 Browser Agent and 8768 Controller if not running",
+    "excludes": "8766 VBS until content audited; 8767 existing working process; App/CRM/PROD/Trading untouched",
+    "diagnostics": "Creates CEREBRO_RECUPERACION_CONTROLADA.txt on Desktop, no secrets",
+    "safety": "Current PREPROD V0.2 status gate; 8767 health gate; DPAPI encrypted backup of original Run values; exact SHA256; local CEREBRO path; duplicate process guard; no persistent startup or process termination",
+    "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_RECUPERACION_CONTROLADA_V0_1_PREPROD.zip",
+    "tests": "go unit and vet Linux/Windows PASS; Windows amd64 GUI build/rebuild PASS; physical PENDING",
+    "zero_additional_cost": true
   }
 }
