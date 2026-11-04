@@ -1,0 +1,94 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "block": "B9",
+  "cut": "CUT04",
+  "company_id": "LAB_SYNTHETIC_SCOPED",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b9-resilience-adversarial-v0-20261104",
+  "pr_number": 19,
+  "pr_draft": true,
+  "pr_base_branch": "cerebro/jarvis-b8-executive-multicompany-v0-20261104",
+  "base_b8_head": "b2a3f9ba03fe0b3d539eb4f3101bff6b9e27ae51",
+  "code_sha_tested": "e59c13d0151a52fe27d65f301cb12a606cf4961c",
+  "status": "PARCIAL_LAB_GREEN_PROD_LOCKED",
+  "tests": {
+    "node": {
+      "run_id": 41794601700,
+      "passed": 462,
+      "failed": 0,
+      "skipped": 0,
+      "conclusion": "success"
+    },
+    "b7_regression": {
+      "run_id": 41794601734,
+      "conclusion": "success"
+    },
+    "b4_real_pg17_regression": {
+      "run_id": 41794601689,
+      "conclusion": "success"
+    },
+    "governed_main_integration": {
+      "run_id": 41794601696,
+      "conclusion": "success",
+      "prod_deployment": false
+    },
+    "b9_pg17_new_recovery": {
+      "conclusion": "NOT_EXECUTED",
+      "reason": "WORKFLOW_CREATION_BLOCKED_BY_TOOL_SECURITY",
+      "script_path": "zeus/jarvis/gates/b9-cut02-pg17-recovery-lab.mjs"
+    },
+    "physical_file_rollback": {
+      "classification": "LOCAL_LAB_TEST",
+      "result": "PASS",
+      "scope": "disposable_OS_temp_file_ONLY"
+    },
+    "tenant_and_policy_adversarial": {
+      "classification": "SYNTHETIC_TEST",
+      "result": "PASS"
+    },
+    "legacy_old_new_promotion": {
+      "classification": "LOCAL_LAB_TEST",
+      "result": "PASS",
+      "old_module_environment": "PREPROD",
+      "no_prod_activation": true
+    }
+  },
+  "registry_count": 179,
+  "registry_mutated": false,
+  "main_mutated": false,
+  "app_crm_modified": false,
+  "supabase_prod_modified": false,
+  "live_supabase_controls": {
+    "b3": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "b4": {
+      "enabled": false,
+      "kill_switch": true
+    }
+  },
+  "added_servers": 0,
+  "new_subscriptions": 0,
+  "paid_model_calls": 0,
+  "github_actions_effective_charge": "NOT_VERIFIED",
+  "human_pc_needed_for_current_remote_work": false,
+  "real_backend_promotion": false,
+  "rollback": "CLOSE_B9_DRAFT_PR19_NO_MERGE",
+  "next": "B9_CUT05_ISOLATED_PG17_RECONCILIATION_AND_LIVE_SUPERVISOR_TRIBUNAL_PORTS",
+  "open_gates": [
+    "B2_OWNER_ROOT_REAL",
+    "B3_REAL_GRANTS_AND_REVOCATION",
+    "REAL_SUPERVISOR_TRIBUNAL_GATEWAY",
+    "PG17_B9_LIVE_LAB_E2E_NOT_RUN",
+    "EXTERNAL_WATCHDOG_AND_FINOPS_EVIDENCE",
+    "PREPROD_OLD_NEW_ISOLATED_GATE",
+    "DR_BACKUP_RESTORE_OF_PERSISTENT_B9",
+    "PROD_PROMOTION_AUDIT"
+  ]
+}

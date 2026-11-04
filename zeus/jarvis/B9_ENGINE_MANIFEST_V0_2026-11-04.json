@@ -1,0 +1,107 @@
+{
+  "schema": "cerebro.engine.compatibility-candidate.v0",
+  "date": "2026-11-04",
+  "engine_id": "ORCH-001",
+  "capability_id": "JARVIS-B9-GOVERNED-RESILIENCE-REVIEW-001",
+  "company_id": "LAB_SYNTHETIC_SCOPED",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "PARCIAL_LAB",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "factory_id": "FACT-001",
+  "factory_duplication": false,
+  "registry_id": "GOV-001",
+  "registry_count_unchanged": 179,
+  "dependencies": [
+    "B2",
+    "B3",
+    "B4",
+    "B6",
+    "B7",
+    "B8",
+    "ORCH-001",
+    "SUP-001",
+    "POL-001",
+    "JDG-001",
+    "JOB-001",
+    "AUD-001",
+    "FINOPS-001",
+    "P23",
+    "FACT-001"
+  ],
+  "runtime": "INJECT_EXISTING_SHARED_RUNTIME",
+  "new_servers": 0,
+  "new_tables_prod": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "inputs": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "owner_id",
+    "mission_id",
+    "idempotency_key",
+    "baseline_ref",
+    "candidate_ref",
+    "test_report_ref",
+    "failure_family"
+  ],
+  "outputs": [
+    "LAB_RECOVERY_CANDIDATE_VERIFIED",
+    "ALREADY_REVIEWED_VERIFIED",
+    "DENY",
+    "HUMAN_REQUIRED"
+  ],
+  "permissions": [
+    "JARVIS_B9_RECOVERY_REVIEW_READ"
+  ],
+  "policies": {
+    "zero_cost": true,
+    "hard_prod_deny": true,
+    "no_mutation": true,
+    "default_deny": true,
+    "no_self_judging": true,
+    "no_autoretry_on_ambiguous_claim": true,
+    "at_most_two_retry_candidate_failures": true,
+    "no_auto_promotion": true
+  },
+  "ports": [
+    "identityProvider.verify",
+    "policy.authorize",
+    "supervisor.inspect",
+    "evidenceProvider.readVerifiedComparison",
+    "tribunal.verify",
+    "journal.claim",
+    "journal.complete",
+    "journal.fail",
+    "audit.append"
+  ],
+  "events": [
+    "B9_RECOVERY_CANDIDATE_REVIEW",
+    "B9_RECOVERY_CANDIDATE_VERIFIED"
+  ],
+  "jobs": "REUSE_EXISTING_B6_JOURNAL_ADAPTER_NO_NEW_QUEUE; B9 specific PG17 workflow not executed",
+  "evaluation": "Independent tribunal adapter + existing PREPROD evaluation-tribunal OLDvsNEW and Goodhart compatibility tests",
+  "observability": "metadata only tenant, mission, SHA evidence; P23 external physical connection pending",
+  "finops": {
+    "new_subscription_eur": 0,
+    "paid_models": false,
+    "estimated_additional_runtime_eur": 0,
+    "github_actions_charge": "UNKNOWN"
+  },
+  "backup": "Git B8 baseline; disposable test temp-file byte-identical restore PASS; no B9 PG restore executed",
+  "rollback": "Close/revert B9 DRAFT PR19 only; do not touch B8 PR18, B7 PR17, B6 PR16 or main",
+  "rebuild": "Checkout B9 PR HEAD and run Node 24: node --test zeus/jarvis/core/*.test.mjs",
+  "training_hooks": "candidate-only, independent verification required; no writing company data or auto-promotion",
+  "human_exceptions": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
