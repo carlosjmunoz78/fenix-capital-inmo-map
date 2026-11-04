@@ -1,0 +1,20 @@
+name: CEREBRO SEO Enterprise Architecture Contract V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v1/**'
+      - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate SEO architecture and fail-closed STAGING to PROD contract
+        run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs
