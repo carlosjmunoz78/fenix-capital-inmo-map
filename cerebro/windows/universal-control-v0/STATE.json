@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RESTORE_EXISTING_8765_8766_8768_ONLY_AFTER_PHYSICAL_PROCESS_DEPENDENCY_AUDIT_AND_BACKUP; AUDIT_CHROME_EXTENSION_AND_OPERA_GAP",
+  "next_block": "WINDOWS_V02_LOCAL_PHYSICAL_INSTALL_SMOKE_TXT_AND_Z_THEN_LEGACY_REPAIR_AUDIT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -95,5 +95,42 @@
     "edge": "NOT_AUDITED",
     "firefox": "NOT_AUDITED"
   },
-  "browser_universal_rule": "Shared browser core with browser-specific adapters. ChatGPT's Opera connector is NOT a CEREBRO-owned integration"
+  "browser_universal_rule": "Shared browser core with browser-specific adapters. ChatGPT's Opera connector is NOT a CEREBRO-owned integration",
+  "next_release_candidate": {
+    "version": "0.2.0",
+    "status": "LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "ui": "Z azul tray, no alert-style default icon; Windows custom DIB icon with safe fallback",
+    "reports": {
+      "button": "Comprobar estado",
+      "filename": "CEREBRO_ESTADO_ACTUAL.txt",
+      "location": "Desktop via Windows shell path; fallback %LOCALAPPDATA%\\CEREBRO\\UniversalControlV0",
+      "other_actions": [
+        "Reiniciar comprobación",
+        "Pausar monitor local",
+        "Activar monitor local"
+      ],
+      "mode": "single overwritten TXT, no creds, no raw device ID"
+    },
+    "exe": "CEREBRO_ControlUniversal_V0_2_0.exe",
+    "sha256": "705e978d1684dcbfa525ebf478c0883c19af45d49d9e7781db19114ac8540c6b",
+    "binary_artifact": "sandbox:/mnt/data/CEREBRO_CONTROL_UNIVERSAL_V0_2_0/CEREBRO_ControlUniversal_V0_2_0.exe",
+    "source_bundle": "sandbox:/mnt/data/CEREBRO_CONTROL_UNIVERSAL_V0_2_0_PREPROD.zip",
+    "tests": {
+      "go_unit": "PASS 7",
+      "linux_vet": "PASS",
+      "windows_vet": "PASS",
+      "win_gui_crossbuild": "PASS",
+      "win_test_compile": "PASS",
+      "deterministic_rebuild": "PASS BEFORE_FINAL_HARDENING",
+      "windows_live": "PENDING"
+    },
+    "constraints": {
+      "legacy_services_modified": false,
+      "gateway_connected": false,
+      "remote_commands_enabled": false,
+      "trading_access": false,
+      "additional_cost_eur": 0
+    },
+    "repo_source_sync": "PENDING_VALIDATED_SOURCE_UPLOAD_FROM_LOCAL_PACKAGE"
+  }
 }
