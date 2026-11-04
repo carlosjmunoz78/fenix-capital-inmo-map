@@ -38,7 +38,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "FIRST_VERIFY_EXISTING_SCOPED_LOCAL_DPAPI_GATEWAY_CREDENTIAL_AND_OUTBOUND_PC_RUNNER_NO_SECRET_EXPORT; IF_UNAVAILABLE_PAIR_PC_WITH_FRESH_ONE_TIME_PREPROD_CODE; TEST_AUTH_RECONNECT_NONCE_REPLAY_POLL_SYNTHETIC_RESULT; RUN_READONLY_WINDOWS_POWER_PREFLIGHT; IDENTIFY_EXISTING_ALWAYS_ON_WOL_RELAY; NO_SLEEP_BEFORE_VERIFIED_WAKE; UNIFY_ACCESSBOOT_ONLY_AFTER_PHYSICAL_GATES",
+  "next_block": "AUTHENTICATED_GATEWAY_PC001_E2E_PREPROD_FIRST; HOLD_REMOTE_SLEEP_WAKE_NO_VERIFIED_ALWAYS_ON_RELAY; DO_NOT_BUY_DEVICE; DO_NOT_REPLACE_EXISTING_WINDOWS_AGENTS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -569,5 +569,22 @@
     "new_installation": false,
     "secret_values_logged": false,
     "cost_eur": 0
+  },
+  "pc001_wol_infrastructure_20261104": {
+    "reported_by": "user",
+    "always_on_relay_available": false,
+    "router_wol_capability_verified": false,
+    "network_wol_activation": "HOLD_NO_VERIFIED_RELAY",
+    "remote_sleep": "NOT_AUTHORIZED_UNTIL_WAKE_RECOVERY_VERIFIED",
+    "safe_operating_mode": "KEEP_HOST_AWAKE_ALLOW_DISPLAY_OFF_WITHOUT_SYSTEM_SLEEP",
+    "fallback": "MANUAL_PHYSICAL_WAKE_OR_VERIFIED_HARDWARE_SCHEDULE_IF_SUPPORTED",
+    "additional_cost_eur": 0,
+    "unaffected": [
+      "App PROD",
+      "CRM PROD",
+      "Supabase PROD",
+      "Trading"
+    ],
+    "next_priority": "VERIFY_EXISTING_HOST_SCOPED_TRANSPORT_CREDENTIAL_PRESENCE_AND_EXECUTOR_THEN_AUTH_GATEWAY_E2E_PREPROD"
   }
 }
