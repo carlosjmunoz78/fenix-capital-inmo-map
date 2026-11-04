@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "V06_PHYSICAL_ONE_SHOT_TEST_ONLY_IF_NO_EXISTING_AGENT; THEN_INVESTIGATE_8768_CLI_AND_GATEWAY; NO_V05_RETRY",
+  "next_block": "AUDIT_EXISTING_8766_UNIVERSAL_VBS_FULL_BEHAVIOR_READONLY; DO_NOT_RUN_LEGACY_INSTALLER_BINARY_AGAIN; RESOLVE_8768_ARG_CONTRACT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -247,20 +247,23 @@
     "process_changes": "ONLY_EXACT_HASH_VETTED_LEGACY_SERVICE_STARTS_NO_AUTOSTART_CHANGES"
   },
   "incident_winerror32_20261104": {
-    "source": "user_report_after_physically_executing_v05",
-    "time_local": "2026-11-04T11:42:36+01:00",
-    "symptom": "Windows ERROR_SHARING_VIOLATION / WinError 32 file in use by another process; lock owner and file UNKNOWN",
-    "v05_report": {
-      "port_8765": "HEALTH_OK",
-      "port_8767": "HEALTH_OK",
-      "port_8766": "old_device_agent_started_pid_11252_but_no_health",
-      "port_8768": "UNKNOWN_FLAGS_FAIL_CLOSED",
-      "new_process_count": 1
+    "status": "REPRODUCED_ON_PC_V05_AND_V06_LEGACY_BINARY_QUARANTINED_FOR_FUTURE_RELEASES",
+    "evidence": "User-provided CEREBRO_PC_RECUPERACION_V06.txt 11:58:15 + CEREBRO_ESTADO_ACTUAL(2).txt 11:59:15 + user reports dialog title 'Error al instalar CEREBRO'",
+    "before": {
+      "8765": "HEALTH_OK",
+      "8766": "NO_HEALTH",
+      "8767": "HEALTH_OK",
+      "8768": "NO_HEALTH"
     },
-    "v05_code_review": "V0.5 does not replace/delete existing legacy binaries or alter Run; starts only pre-existing hashed Device Agent once and may write its own backup and TXT",
-    "cause": "UNCONFIRMED; temporal link to launched legacy agent possible",
-    "safety_gate": "FREEZE_REPEAT_LEGACY_AGENT_LAUNCH; DO_NOT_KILL_OR_OVERWRITE_RUNNING_PROCESSES; PRESERVE_V02_AND_8765_8767; identify exact dialog title + locked filename and owner; verify process health and rollback before further changes",
-    "physical_fix_verified": false
+    "launched_process": "CEREBRO-Device-Agent.exe PID 12476 with --agent (one-shot); 8766 still offline",
+    "root_cause": "UNCONFIRMED; legacy agent invoked and install-error dialog contemporaneous; could be inside legacy binary or secondary updater; exact locked file/owner unknown",
+    "corrected_design": "BAN_DIRECT_LAUNCH_OF_CEREBRO-DEVICE-AGENT_EXE_IN_ALL_MODES_IN_FUTURE_RECOVERIES",
+    "code": "cerebro/windows/pc-001/legacy-start-policy-v1.mjs",
+    "tests": "cerebro/windows/pc-001/legacy-start-policy-v1.test.mjs",
+    "code_status": "ISOLATED_BRANCH_NOT_WIRED_TO_INSTALLED_V06_OR_ANY_RUNTIME",
+    "next_gate": "AUDIT_FULL_6_LINE_UNIVERSAL_VBS_TARGET_AND_DEPENDENCIES_OR_IDENTIFY_EXISTING_STABLE_RUNTIME_WITHOUT_EXECUTING_INSTALLER; THEN_E2E_AND_ROLLBACK",
+    "safety": "NO_MORE_V05_V06_RUNS_NO_KILL_NO_REINSTALL_KEEP_8765_8767_V02",
+    "cost_eur": 0
   },
   "winerror32_v06_guard": {
     "status": "LAB_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
