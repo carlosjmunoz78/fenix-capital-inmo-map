@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'cerebro/seo-enterprise/v1/**'
+      - 'cerebro/seo-enterprise/v2/**'
       - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
   workflow_dispatch:
 
@@ -17,4 +18,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate SEO architecture and fail-closed STAGING to PROD contract
-        run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs
+        run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
