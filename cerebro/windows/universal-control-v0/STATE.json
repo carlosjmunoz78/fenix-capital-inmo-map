@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_ORDERED_STARTUP_REBOOT_NOT_ACCEPTED_OWNER_8MIN_TIMING_PATCH_CANDIDATE_READY",
+  "status": "PC001_180S_WORKER_STILL_ACTIVE_480S_PATCH_V3_READY_FULL_DESKTOP_CONTROL_DEFINED_NOT_YET_IMPLEMENTED",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -52,14 +52,17 @@
     "pc001_ordered_autostart_post_reboot": "PENDING",
     "pc001_ordered_startup_after_reboot": "FAIL_8765_8766_8768_DOWN_AT_466S_AND_WORKER_WARMUP_AFTER_HEALTH_DROP",
     "pc001_8min_policy_patch_static": "39_OF_39_PASS_ZIP_CRC_SHA256_VERIFIED",
-    "pc001_8min_policy_patch_physical": "PENDING"
+    "pc001_8min_policy_patch_physical": "PENDING",
+    "pc001_8min_v2_windows": "FAIL_ATOMIC_UPDATE_ORIGINAL_HASH_RETAINED",
+    "pc001_8min_v3_static": "51_OF_51_PASS",
+    "pc001_8min_v3_windows": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "USER_EXTRACTS_8MIN_PATCH_AND_RUNS_ACTIVAR_ESPERA_8_MIN_PC001_CMD_ON_ALREADY_INSTALLED_PC; UPLOAD_JSON; ONLY_THEN_WAIT_8MIN_FOR_AUTOMATED_RECOVERY_AND_RETEST_4_OF_4; GATEWAY_FRESHNESS_AND_REBOOT_GATE",
+  "next_block": "OWNER_RUN_V3_PATCH_UNDER_SAME_WINDOWS_USER_UPLOAD_REPORT_VALIDATE_NEW_WORKER_SHA; THEN_AFTER_480S_VERIFY_AUTORECOVERY_4_OF_4_AND_GATEWAY_HEARTBEAT; ONLY_THEN_TEST_FULL_PC_INTERACTION_ADAPTERS_AND_MULTI_PC_INSTALLER",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1106,5 +1109,33 @@
     "applies_current_pc": false,
     "physical_post_reboot_tested": false,
     "no_new_subscriptions": true
+  },
+  "pc001_owner_intent": "FULL_INTERACTIVE_WINDOWS_COMPUTER_CONTROL_INCLUDING_BROWSER_APPS_FILES_MOUSE_KEYBOARD_DESKTOP_AND_PERIPHERALS_AFTER_BOOT_REPAIR",
+  "pc001_owner_intent_doc": "cerebro/windows/pc-001/PC001_CONTROL_TOTAL_WINDOWS_OBJETIVO_Y_GATES_V1_20261104.md",
+  "pc001_8min_physical_attempt_20261104": {
+    "status": "HOLD_FAIL_CLOSED_ATOMIC_UPDATE_OLD_180S_WORKER_RESTARTED",
+    "report_utc": "2026-11-04T18:19:06.0193166Z",
+    "expected_sha256": "ee93ce1ddf1a0e802747a64af61db9690c5834665420ae3421155c79bc39044c",
+    "actual_sha256": "e1bbfac1dbe4d5592ed5083b1e604698597a6d24cfc16e387d65af4e51531165",
+    "code_swapped": false,
+    "old_worker_restarted": true,
+    "backup_exists": true,
+    "registry_untouched": true,
+    "services_untouched": true,
+    "prod_modified": false
+  },
+  "pc001_8min_corrective_candidate_v3_20261104": {
+    "status": "STATIC_51_OF_51_PASS_NOT_WINDOWS_PHYSICALLY_TESTED",
+    "artifact": "CEREBRO_PC001_ESPERA_8_MIN_CORRECCION_V3_PREPROD.zip",
+    "zip_sha256": "1411c6aba7d306ccd971e4a566dc50ce838a84987de45a4bd9cae49d8c640425",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_ESPERA_8_MIN_CORRECCION_V3_PREPROD.zip",
+    "entrypoint": "ACTIVAR_ESPERA_8_MIN_PC001_V3.cmd",
+    "expected_report": "CEREBRO_PC001_ESPERA_8_MIN_RESULTADO.json",
+    "new_worker_sha256": "ee93ce1ddf1a0e802747a64af61db9690c5834665420ae3421155c79bc39044c",
+    "old_backup_reuse_only_exact_sha": true,
+    "atomic_change": "MOVEFILEEXW_REPLACE_EXISTING_WRITE_THROUGH",
+    "rollback": "REVERTIR_ESPERA_8_MIN_PC001_V3.cmd",
+    "physical_applied": false,
+    "no_prod_changes": true
   }
 }
