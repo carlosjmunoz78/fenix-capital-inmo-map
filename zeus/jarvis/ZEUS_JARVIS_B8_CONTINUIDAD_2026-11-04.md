@@ -30,3 +30,12 @@ Nada requiere el PC para continuar los adapters remotos; E2E físico de Browser 
 ## Próximo corte
 `B8_CUT04_REAL_REGISTRY_JOB001_PERSISTENCE_SUPERVISOR_AND_PREPROD_GATE`.
 Conservar gates B2/B3/B4 y PR B6/B7 sin fusionar.
+
+## CUT04 · Integración REAL de PostgreSQL 17 aislado (posterior al CUT03)
+Código probado en HEAD `2027f91694630ec83bb5d22076b34e0a7a031640`.
+Nueva prueba integradora `zeus/jarvis/gates/b8-cut04-pg17-commitments-lab.mjs` con workflow `jarvis-b8-cut04-pg17-commitments-lab.yml` y schema SQL `b8-cut04-pg17-commitments-fixture.sql` **solo CI efímero**.
+- GitHub Actions `41786409397` **SUCCESS**: PostgreSQL 17 físico (contenedor efímero), dos compañías sintéticas con filas separadas, protección concurrente real por clave única, replay tras proceso nuevo, cross-company DENY, compromiso económico DENY, `pg_dump` y `pg_restore` con verificación post-restore. No se creó esquema en Supabase PROD.
+- GitHub Actions sobre ese mismo HEAD: Node `41786409345` **413/413 PASS**; B7 `41786409404` SUCCESS; B4 PG17 `41786409344` SUCCESS; integración gobernada `41786409313` SUCCESS (sin deploy).
+- Tipo de prueba B8 persistencia = **REAL_LAB_INTEGRATION**, pero Policy/B2/B3/Company Registry/Supervisor y datos son fixtures sintéticos. **Todavía no es el adaptador JOB-001 real ni prueba de dos empresas autorizadas en producción.**
+- Rollback real probado **solo** contra el esquema de compromiso CI desechable, NO PROD.
+- Estado actualizado: `PARCIAL_LAB_GREEN_REAL_PG17_PROD_LOCKED`. Siguiente: `B8_CUT05_REAL_COMPANY_REGISTRY_JOB001_CONTRACT_GATE_AND_SUPERVISOR_INTEGRATION`.

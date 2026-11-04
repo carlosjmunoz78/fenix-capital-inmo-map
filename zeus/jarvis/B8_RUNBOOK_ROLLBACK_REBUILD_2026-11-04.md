@@ -15,3 +15,8 @@ No B8 database migration was applied; therefore there is no B8 database rollback
 Cross-company result, forged identity, audit outage, unverified evidence, B3 deny, supervisor kill, unknown source or economic commitment -> **DENY/STOP** without external work. On ambiguous durable commit, do not auto-retry; reconcile with journal/evidence first.
 ## Criteria to promote
 Real Company Registry, OWNER_ROOT, bounded B3, durable JOB-001 adapter, P23 verified metrics, independent Tribunal, backup/restore in isolated PostgreSQL, OLD vs NEW, FinOps, PREPROD, separate production authorization. None fulfilled by LAB CI alone.
+
+## CUT04 · PostgreSQL 17 LAB verificado
+Workflow: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41786409397
+Esquema efímero `zeus_jarvis_b8_lab` sólo en GitHub Actions. Steps: construir esquema; escribir 2 compromisos sintéticos en 2 compañías; comprobar idempotencia en paralelo; otro proceso Node reconstruye adapters y verifica replays sin duplicado; `pg_dump -Fc`; `DROP SCHEMA`; `pg_restore --no-owner --no-privileges`; verificar dos compromisos de nuevo.
+Todo SUCCESS en CI, sin restauración de Supabase ni escritura en App/CRM. Este ensayo **no es** despliegue de JOB-001: hay que mapear la tabla/contrato real existente antes de promover adaptador.

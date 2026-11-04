@@ -1,0 +1,87 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "block": "B8",
+  "cut": "CUT04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "LAB_SYNTHETIC_SCOPED",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "PARCIAL_LAB_GREEN_REAL_PG17_PROD_LOCKED",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b8-executive-multicompany-v0-20261104",
+  "pr_number": 18,
+  "base_pr": 17,
+  "base_sha": "657d4ad961f80e63c9c6d767a7a3a11aa17ba71b",
+  "code_sha_tested": "2027f91694630ec83bb5d22076b34e0a7a031640",
+  "registry_original_count": 179,
+  "registry_changed": false,
+  "new_production_tables": 0,
+  "main_changed": false,
+  "prod_modified": false,
+  "checks": {
+    "node": {
+      "run_id": 41786409345,
+      "passed": 413,
+      "failed": 0,
+      "skipped": 0,
+      "conclusion": "success"
+    },
+    "b8_real_pg17": {
+      "run_id": 41786409397,
+      "conclusion": "success",
+      "classification": "REAL_LAB_INTEGRATION",
+      "environment": "ISOLATED_GITHUB_ACTIONS_POSTGRES17",
+      "real_postgresql": true,
+      "synthetic_companies": 2,
+      "concurrent_idempotency_verified": true,
+      "restart_replay_verified": true,
+      "company_scope_verified": true,
+      "financial_commitment_denied": true,
+      "pg_dump_restore_verified": true,
+      "b2_b3_registry_real": false,
+      "job001_real_adapter": false,
+      "prod": false
+    },
+    "b7_regression": {
+      "run_id": 41786409404,
+      "conclusion": "success"
+    },
+    "b4_postgres": {
+      "run_id": 41786409344,
+      "conclusion": "success"
+    },
+    "governed_integration": {
+      "run_id": 41786409313,
+      "conclusion": "success",
+      "production_deploy": false
+    }
+  },
+  "prod_b3": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "prod_b4": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "company_registry_preprod_rows_observed": 0,
+  "actual_b8_business_companies_connected": 0,
+  "paid_ai_calls": 0,
+  "new_subscriptions": 0,
+  "actual_github_actions_billing": "NOT_VERIFIED",
+  "backup_restore": "VERIFIED_ISOLATED_LAB_ONLY",
+  "rollback": "CLOSE_B8_DRAFT_PR18_NO_MERGE",
+  "next_block": "B8_CUT05_REAL_COMPANY_REGISTRY_JOB001_CONTRACT_GATE_AND_SUPERVISOR_INTEGRATION",
+  "gates_open": [
+    "REAL_B2_B3_REGISTRY_AUTHORIZATION",
+    "JOB001_REAL_COMMITMENTS_STORE",
+    "P23_LIVE_READ",
+    "REAL_SUPERVISOR_TRIBUNAL",
+    "COMMUNICATION_AUTH_AND_CONSENT",
+    "ONBOARDING_FULL_LAB",
+    "PREPROD_OLD_VS_NEW",
+    "PROD_CERTIFICATION"
+  ]
+}
