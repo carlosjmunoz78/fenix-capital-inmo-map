@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-04T12:56:44.017Z",
+  "updated_at": "2026-11-04T14:39:03.442Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -507,7 +507,8 @@
     "github-wide-skills:14bdd1407f72d7203ff8",
     "github-wide-skills:ea8bb2c7a18258486f32",
     "github-wide-skills:04119a0ac13141a7eeb6",
-    "github-wide-skills:66ba77320f540d073f82"
+    "github-wide-skills:66ba77320f540d073f82",
+    "github-wide-skills:18ce6b01560baf9a31eb"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -710,6 +711,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 41611550491,
       "checkpointed_at": "2026-11-03T09:30:44.845Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:18ce6b01560baf9a31eb": {
+      "candidate_id": "github-wide-skills:18ce6b01560baf9a31eb",
+      "name": "cpp-fuzz-testing",
+      "human_alias": "Cpp Fuzz Testing",
+      "wrapper_id": "skillwrap:8a7f9f91c111c965b53b",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 87.13,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "sentenz/skills",
+        "upstream_head_commit": "ead8ae21a149d3845cfb8f387e7a908933eeb3ab",
+        "manifest_sha256": "5ca99741b79f7d032a9d82e2ee1e58fcb9bfd1b86e0ab51bedb5a7ee0c77a5e0",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 41849551685,
+      "checkpointed_at": "2026-11-04T14:39:03.442Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -31659,7 +31696,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -31672,7 +31709,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 41833577201,
+  "last_discovery_run_id": 41849551685,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
