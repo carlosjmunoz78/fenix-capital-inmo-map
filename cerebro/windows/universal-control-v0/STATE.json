@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "REVIEW_8768_BINARY_AND_RUN_POSITIONAL_WITH_STATIC_ANALYSIS_NO_AUTO_LAUNCH; IMPLEMENT_SCOPED_GATEWAY_E2E; VALIDATE_REBOOT_AND_ROLLBACK_PHYSICALLY; RETAIN_SEPARATE_PC_CHANNEL.",
+  "next_block": "USER_RUNS_ONCE_READONLY_8768_INSPECTION; INSPECT_CONTROLLER_BINARY_AND_ACTUAL_ARG_SHAPE; THEN_REPAIR_8768_AND_GATEWAY; AUDIT_STARTUP_FOLDER_BEFORE_REBOOT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -354,5 +354,31 @@
     "remote_e2e": "PENDING",
     "physical_rollback": "PENDING",
     "user_visible_report_contains_secrets": false
+  },
+  "pc_8768_readonly_audit": {
+    "status": "LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "artifact": "CEREBRO_PC_8768_INSPECCION_V0_1.exe",
+    "exe_sha256": "9fb5821d9d2997014b488d1404a8cbeed0d0ea4f65e3d2de2bb14ef126e3c2d4",
+    "zip_sha256": "e15281ff9b1cf5868b996c75c13146f6b9006e0fa9af1638389d4db758666676",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_8768_INSPECCION_V0_1_PREPROD.zip",
+    "purpose": "INSPECT_EXISTING_8768_BINARY_EXACT_HASH_AND_SANITIZED_RUN_SHAPE_ONLY",
+    "expected_bin_sha256": "78733cce3f2473205f8cf7bb50ee9a73901dd58dcaf2df10ac2748eb6a0aa8ef",
+    "physical_report": "CEREBRO_PC_8768_RESULTADO.txt",
+    "optional_zip_from_pc": "CEREBRO_PC_8768_ANALISIS.zip",
+    "static_tests": "Go test PASS; Linux and Windows vet PASS; Win64 GUI build PASS; cross test compile PASS; reproducible rebuild PASS",
+    "forbidden": "NO_EXECUTE_NO_WRITE_RUN_NO_NETWORK_NO_CREDENTIAL_READ",
+    "physical_execution": "PENDING",
+    "additional_cost_eur": 0
+  },
+  "latest_physical_verified_state": {
+    "8765": "previously healthy",
+    "8766": "HEALTH_OK_V07_SIDE_BY_SIDE_AUTORUN",
+    "8767": "previously healthy and included as guard in V07",
+    "8768": "NO_HEALTH_PREVIOUS",
+    "observed_at_local": "2026-11-04T12:57:45+01:00",
+    "gateway": "NOT_CONNECTED",
+    "control_remote": "NOT_VERIFIED",
+    "reboot": "NOT_TESTED",
+    "physical_rollback": "NOT_TESTED"
   }
 }
