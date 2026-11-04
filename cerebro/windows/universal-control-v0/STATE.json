@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "USER_RUNS_ONCE_READONLY_8768_INSPECTION; INSPECT_CONTROLLER_BINARY_AND_ACTUAL_ARG_SHAPE; THEN_REPAIR_8768_AND_GATEWAY; AUDIT_STARTUP_FOLDER_BEFORE_REBOOT",
+  "next_block": "RUN_ONCE_V02_ONLY_ON_PHYSICAL_PC_AND_REPORT_TXT; IF_HEALTH_OK_VERIFY_GATEWAY_EXACT_SCOPE_COMMAND_ROUNDTRIP; THEN_REBOOT_PERSISTENCE_AND_ROLLBACK; DO_NOT_TOUCH_MOBILE_TABLET_EXTENSION_CHANNELS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -334,10 +334,10 @@
     "health_gate": "version=0.2.0 status=OK host=127.0.0.1 port=8766 durable_queue=true prod_allowed=false; stable second readback; if prior listener healthy then do NOT change Run"
   },
   "latest_service_state": {
-    "8765": "HEALTH_OK_PREVIOUS_PHYSICAL",
-    "8766": "HEALTH_OK_ONCE_PHYSICAL_V07",
-    "8767": "HEALTH_OK_PREVIOUS_PHYSICAL_AND_V07_PRECHECK",
-    "8768": "NO_HEALTH_LAST_PHYSICAL"
+    "8765": "PHYSICAL_HEALTH_OK_LAST_KNOWN",
+    "8766": "PHYSICAL_HEALTH_OK_V07",
+    "8767": "PHYSICAL_HEALTH_OK_LAST_KNOWN",
+    "8768": "NOT_LISTENING_BEFORE_CANDIDATE_V02"
   },
   "pc_8766_v07_physical_acceptance": {
     "file": "CEREBRO_PC_8766_CORRECCION_V07.txt",
@@ -380,5 +380,35 @@
     "control_remote": "NOT_VERIFIED",
     "reboot": "NOT_TESTED",
     "physical_rollback": "NOT_TESTED"
+  },
+  "controller8768_static_forensics_20261104": {
+    "uploaded_user_zip": "CEREBRO_PC_8768_ANALISIS.zip",
+    "exe_sha256": "78733cce3f2473205f8cf7bb50ee9a73901dd58dcaf2df10ac2748eb6a0aa8ef",
+    "exe_size_bytes": 6143488,
+    "format": "Windows AMD64 Go 1.23.2 module cerebro_accessboot_v040",
+    "run_argument_recovered": "host",
+    "run_argument_sha8": "4740ae63",
+    "static_main_dispatch": "argv[1]=='host' -> main.serveHost; else -> main.installAndPrepare",
+    "main_va": "0x6bab20",
+    "serve_host_va": "0x6b8aa0",
+    "install_va": "0x6b9a80",
+    "static_verification": "HECHO",
+    "current_physical_8768_health": "NOT_VERIFIED_YET",
+    "gateway_connected": false,
+    "no_executable_uploaded_by_user_run_in_sandbox": true
+  },
+  "controller8768_activation_candidate_v02": {
+    "status": "LAB_BUILD_GREEN_PHYSICAL_WINDOWS_PENDING",
+    "artifact": "CEREBRO_PC_8768_ACTIVACION_V0_2/CEREBRO_PC_8768_ACTIVACION_V02.exe",
+    "exe_sha256": "a0c209f548a4246a51a444abb55eb20dab10c4c4aeced558946e10f7d89d6bb3",
+    "archive": "CEREBRO_PC_8768_ACTIVACION_V0_2_PREPROD.zip",
+    "archive_sha256": "c40652beeb64f6c95c62d816a84dee663a235e5704eb5e4219c15052097f01a9",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_8768_ACTIVACION_V0_2_PREPROD.zip",
+    "tests": "Go unit/vet Linux/vet Windows/Windows GUI compile/Windows test compile/reproducible build/ZIP integrity PASS",
+    "preflight": "PREPROD + local 8765,8766,8767 health; existing Run exact host; original PE SHA256; process inventory; DPAPI backup; one-shot marker",
+    "behavior": "may launch ONLY existing verified 8768 EXE with host; no Run modifications, no installer, no extra subscriptions",
+    "physical_report": "CEREBRO_PC_8768_ACTIVACION_V02.txt",
+    "physical_acceptance": "PENDING",
+    "gate_after": "AUTH_GATEWAY_E2E_REBOOT_ROLLBACK_PENDING"
   }
 }
