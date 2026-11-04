@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PHYSICAL_PC_V04_RECOVERY_REPORT_THEN_8766_FULL_VBS_AUDIT_8768_RUNTIME_SNAPSHOT_GATEWAY_SCOPED_E2E_REBOOT_ROLLBACK",
+  "next_block": "RUN_SINGLE_V05_PC_PHYSICAL_ONCE_AND_READ_TXT; THEN_GATEWAY_PAIRING_AUTH_E2E_REBOOT_AND_ROLLBACK_WITHOUT_REPEAT_DIAGNOSTICS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -223,5 +223,27 @@
     "no_new_autostart": true,
     "no_prod_mutations": true,
     "additional_cost_eur": 0
+  },
+  "last_physical_v04_receipt": {
+    "date_local": "2026-11-04T11:30:59+01:00",
+    "ports": {
+      "8765": "HEALTH_OK",
+      "8766": "NO_HEALTH",
+      "8767": "HEALTH_OK",
+      "8768": "NO_HEALTH"
+    },
+    "controller_error": "UNKNOWN_FLAGS_FAIL_CLOSED_POSITIONAL_COUNT_1",
+    "vbs": "HASH_KNOWN_NO_EXECUTION",
+    "run_key_backup": "DPAPI_PRESENT",
+    "gateway": false
+  },
+  "next_pc_recovery": {
+    "version": "0.5.0",
+    "status": "BUILT_UNIT_TESTED_WINDOWS_PHYSICAL_PENDING",
+    "sha256": "4f8478e7cdeb9377d659aa706638b252a297851e9ffc783039ab4ba17e399d89",
+    "doc": "cerebro/docs/CEREBRO_PC_RECUPERACION_V05_CANDIDATO_PREPROD_2026-11-04.md",
+    "report": "CEREBRO_PC_RECUPERACION_V05.txt",
+    "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_RECUPERACION_V0_5_PREPROD.zip",
+    "process_changes": "ONLY_EXACT_HASH_VETTED_LEGACY_SERVICE_STARTS_NO_AUTOSTART_CHANGES"
   }
 }
