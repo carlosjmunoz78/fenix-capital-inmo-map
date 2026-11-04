@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_ORDERED_BOOT_PHYSICAL_INSTALLED_PREPROD_GATEWAY_HEARTBEAT_FRESH_LOCAL_CHECK_PENDING",
+  "status": "PC001_ORDERED_STARTUP_REBOOT_NOT_ACCEPTED_OWNER_8MIN_TIMING_PATCH_CANDIDATE_READY",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -49,14 +49,17 @@
     "pc001_ordered_autostart_windows": "PENDING",
     "pc001_ordered_autostart_windows_install": "PASS_REPORT_DPAPI_BACKED_UP_3_OLD_RUNS_1_NEW_RUN",
     "pc001_ordered_autostart_windows_supervisor": "PENDING_CHECK_JSON",
-    "pc001_ordered_autostart_post_reboot": "PENDING"
+    "pc001_ordered_autostart_post_reboot": "PENDING",
+    "pc001_ordered_startup_after_reboot": "FAIL_8765_8766_8768_DOWN_AT_466S_AND_WORKER_WARMUP_AFTER_HEALTH_DROP",
+    "pc001_8min_policy_patch_static": "39_OF_39_PASS_ZIP_CRC_SHA256_VERIFIED",
+    "pc001_8min_policy_patch_physical": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_FROM_EXTRACTED_ZIP_SEND_JSON; VERIFY_SUPERVISOR_4_OF_4_AND_GATEWAY; THEN_REBOOT_AFTER_OWNER_POLICY_180S_AND_AUDIT_WINDOWS_ERRORS",
+  "next_block": "USER_EXTRACTS_8MIN_PATCH_AND_RUNS_ACTIVAR_ESPERA_8_MIN_PC001_CMD_ON_ALREADY_INSTALLED_PC; UPLOAD_JSON; ONLY_THEN_WAIT_8MIN_FOR_AUTOMATED_RECOVERY_AND_RETEST_4_OF_4; GATEWAY_FRESHNESS_AND_REBOOT_GATE",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -814,16 +817,16 @@
     "status": "PHYSICAL_CURRENT_SESSION_AUTOSTART_AND_CONTINUOUS_AUTH_GREEN_REBOOT_PENDING"
   },
   "pc001_low_power_pc_timing_policy_20261104": {
-    "source": "explicit_owner_instruction_2026-11-04",
-    "scope": "PC-001_WINDOWS_PHYSICAL_SLEEP_WAKE_RESTART_TESTS",
-    "status": "DEFINED_AND_RECORDED_NOT_AUTO_APPLIED_TO_EXISTING_SCRIPTS",
-    "after_suspend_before_attempting_wake_seconds": 180,
-    "after_wake_before_service_and_gateway_checks_seconds": 180,
-    "after_full_reboot_and_user_login_before_acceptance_checks_seconds": 180,
-    "rule": "On low-powered computers wait at least 3 minutes once suspended before waking, and at least 3 minutes after wake before evaluating 8765/8766/8767/8768 and authenticated Gateway; for reboot tests wait 3 minutes after Windows login before assessment. Do not falsely mark startup as failed during warm-up.",
-    "applies_to_future_installers_and_test_procedures": true,
-    "no_windows_state_changed": true,
-    "no_prod_changes": true
+    "source": "explicit_owner_instruction_2026-11-04_3_MINUTES_CHANGED_TO_8_MINUTES",
+    "scope": "PC-001_CURRENT_AND_FUTURE_WINDOWS_PC_STARTUP_SLEEP_WAKE",
+    "status": "DEFINED_RECORDED_ACTIVE_PC_PATCH_PREPARED_BUT_NOT_APPLIED",
+    "before_remote_wake_after_suspend_seconds": 480,
+    "after_wake_before_service_and_gateway_checks_seconds": 480,
+    "after_user_login_before_first_repair_seconds": 480,
+    "after_subsequent_health_drop_before_repair_seconds": 480,
+    "avoids_stacking_boot_480_and_health_drop_480": true,
+    "remote_wake_relay_status": "HOLD_NOT_VERIFIED",
+    "note": "Do not mark startup failed before 8-minute warmup; manual testing only after 8m. Owner requested increase from 3 to 8 on 2026-11-04. Old already-installed worker still 180s until physical patch."
   },
   "pc001_post_reboot_incident_20261104": {
     "source": "owner_photos_WinError10013_plus_CEREBRO_PC001_CONTINUIDAD_ESTADO(1).json",
@@ -1085,5 +1088,23 @@
     "rollback_physically_verified": false,
     "next": "RUN_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_AND_UPLOAD_CEREBRO_PC001_ARRANQUE_ESTADO_JSON",
     "status": "INSTALL_APPLIED_GATEWAY_FRESH_READONLY_SUPERVISOR_CHECK_PENDING"
+  },
+  "pc001_ordered_autostart_8min_patch_v2": {
+    "status": "CANDIDATE_STATIC_PASS_39_OF_39_PENDING_PHYSICAL_PATCH",
+    "artifact": "CEREBRO_PC001_ESPERA_8_MIN_PREPROD_V2.zip",
+    "zip_sha256": "1b28f0b32c1ababfc4c9d0498d5887e9b54b02c12a7775b3e83f00a7f8a4f2c2",
+    "new_worker_sha256": "ee93ce1ddf1a0e802747a64af61db9690c5834665420ae3421155c79bc39044c",
+    "expected_old_worker_sha256": "e1bbfac1dbe4d5592ed5083b1e604698597a6d24cfc16e387d65af4e51531165",
+    "entrypoint": "ACTIVAR_ESPERA_8_MIN_PC001.cmd",
+    "result": "CEREBRO_PC001_ESPERA_8_MIN_RESULTADO.json",
+    "rollback": "REVERTIR_SOLO_ESPERA_8_MIN_PC001.cmd",
+    "changes": "OWN_USER_SESSION_WORKER_SCRIPT_ONLY_ATOMIC_HASH_PINNED",
+    "preserves": "3_OLD_RUN_KEYS_SUPPRESSED_AND_DPAPI_BACKUP_AND_8765_8766_8767_8768_AND_GATEWAY_VAULT_AND_PROD",
+    "no_initial_double_grace": true,
+    "delay_initial_seconds": 480,
+    "delay_after_later_health_drop_seconds": 480,
+    "applies_current_pc": false,
+    "physical_post_reboot_tested": false,
+    "no_new_subscriptions": true
   }
 }
