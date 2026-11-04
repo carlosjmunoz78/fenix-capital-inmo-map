@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_PHYSICAL_CLEANUP_SELECTIVE_PASS_BUT_ONLY_8767_HEALTHY_1_OF_4_GATEWAY_STALE_DIAG_V2_READY",
+  "status": "PC001_DIAG_V2_PHYSICAL_1_OF_4_SEQUENTIAL_RECOVERY_PREPROD_CANDIDATE_READY",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -40,14 +40,17 @@
     "pc001_continuity_rollback": "PENDING",
     "pc001_post_reboot_persistence": "FAIL_8766_OFF_AND_WORKER_BACKOFF",
     "pc001_safe_cleanup_static": "39_OF_39_PASS",
-    "pc001_safe_cleanup_physical": "PENDING"
+    "pc001_safe_cleanup_physical": "PENDING",
+    "pc001_reboot_readonly_diagnostic_v2": "PHYSICAL_PASS",
+    "pc001_sequential_recovery_v1_static": "48_OF_48_PASS_ZIP_VERIFIED",
+    "pc001_sequential_recovery_v1_physical": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "ONE_CLICK_READONLY_DIAG_V2_THEN_DIAGNOSE_8765_8768_STARTUP_PROCESSES_AND_PORT_CONFLICTS; RECOVER_8766_ONLY_WHEN_3_OTHER_SERVICES_HEALTHY; REBOOT_LATER; DO_NOT_TOUCH_PROD",
+  "next_block": "RUN_ONE_SHOT_VERIFIED_SEQUENTIAL_8765_8768_8766_RECOVERY_ON_PC001_ONCE; VERIFY_REPORT; IF_4_OF_4_THEN_FIX_STARTUP_PERSISTENCE_BEFORE_REBOOT; IF_HOLD_ANALYZE_SAFE_CODES_NO_RETRY_LOOP",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -914,5 +917,66 @@
     "windows_tested": false,
     "new_windows_changes": false,
     "next": "DETERMINE_RUNNING_PROCESS_AND_HASHED_CONFIG_FOR_FAILED_8765_8766_8768"
+  },
+  "pc001_reboot_diag_v2_physical_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_DIAGNOSTICO_REINICIO_V2.json",
+    "checked_at_utc": "2026-11-04T17:28:03.9425580Z",
+    "boot_at_utc": "2026-11-04T16:51:26.500Z",
+    "age_since_boot_seconds": 2198,
+    "device_identity_matches": true,
+    "ports_health": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "live_listener": "8767_ONLY_PID_3964",
+    "running_core_processes": [
+      "CEREBRO_DEVICE_ACCESSBOOT_UNIVERSAL.exe",
+      "CEREBRO_ControlUniversal.exe"
+    ],
+    "source_8765": {
+      "run": "CEREBROBrowserAgentHost",
+      "name": "CEREBRO-Browser-Agent-Host.exe",
+      "sha256": "91c044544d160d89c33221bfcb6fae7771b5d073b8a32c051d506262daa2a946",
+      "args": ""
+    },
+    "source_8768": {
+      "run": "CEREBROUniversalDeviceControllerV2",
+      "name": "CEREBRO-Universal-Controller-V2.exe",
+      "sha256": "78733cce3f2473205f8cf7bb50ee9a73901dd58dcaf2df10ac2748eb6a0aa8ef",
+      "args": "host"
+    },
+    "source_8766": {
+      "run": "CEREBRODeviceAgentUniversalV023",
+      "name": "CEREBRO-PC-8766-Launcher-V07.exe",
+      "sha256": "74d9c61249d6cd526c77b2950aaec793d14309c7989df769c4b6485797b51bbd",
+      "args": "--startup"
+    },
+    "excluded_relevant_ports": [],
+    "gateway_worker": "HOLD_RETRY_BACKOFF",
+    "status": "PHYSICAL_1_OF_4_HEALTH_THREE_HASH_VERIFIED_LAUNCHERS_ABSENT",
+    "no_changes_during_diagnostic": true
+  },
+  "pc001_sequential_recovery_candidate_v1_20261104": {
+    "status": "CANDIDATE_STATIC_PASS_48_OF_48_WINDOWS_EXECUTION_PENDING",
+    "artifact": "CEREBRO_PC001_RECUPERACION_SECUENCIAL_PREPROD_V1.zip",
+    "artifact_sha256": "28d853c99bfa52035ee417ee5fe0f42f588ea3fcda05647f984406774fd1171a",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_RECUPERACION_SECUENCIAL_PREPROD_V1.zip",
+    "documentation": "cerebro/windows/pc-001/PC001_SEQUENTIAL_RECOVERY_V1_20261104.md",
+    "user_action": "RECUPERAR_PC001_3_SERVICIOS.cmd",
+    "receipt": "CEREBRO_PC001_RECUPERACION_RESULTADO.json",
+    "order": [
+      "8765_BROWSER_HOST_NO_ARGS",
+      "8768_CONTROLLER_HOST_LITERAL",
+      "8766_EXISTING_V07_STARTUP_ONLY"
+    ],
+    "preservation": "no HKCU Run, Startup, services, tasks, binaries, DPAPI, PROD, or runtime process termination",
+    "time_guard": 180,
+    "max_attempts_per_component": 1,
+    "tests_static_passed": 48,
+    "physically_applied": false,
+    "result_verified": false,
+    "next": "RUN_ONCE_AND_UPLOAD_SANITIZED_RESULT_THEN_VERIFY_4_OF_4_AND_CURRENT_GATEWAY_HEARTBEAT"
   }
 }
