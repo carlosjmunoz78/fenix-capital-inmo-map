@@ -1,0 +1,91 @@
+{
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-CORE-001",
+  "environment": "PROD",
+  "date": "2026-11-04",
+  "cut": "B5_CUT_03_REMOTE",
+  "status": "PARCIAL_CI_GREEN_PROD_LOCKED",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 15,
+  "pr_draft": true,
+  "pr_base": "cerebro/jarvis-b4-memory-v0-20261103",
+  "last_verified_code_sha": "8725eff93c159693116b506330e02e7721ef7b32",
+  "last_ci": {
+    "tests_run_id": 41743864577,
+    "passed": 229,
+    "failed": 0,
+    "conclusion": "success",
+    "integration_run_id": 41743864470,
+    "integration_conclusion": "success"
+  },
+  "b2": "PARCIAL_OWNER_ROOT_CROSS_DEVICE_UNVERIFIED",
+  "b3_prod": {
+    "enabled": false,
+    "kill_switch": true,
+    "verified_read_only": true
+  },
+  "b4_prod": {
+    "enabled": false,
+    "kill_switch": true,
+    "memory_events": 0,
+    "verified_read_only": true
+  },
+  "b5": {
+    "guarded_preview": "LAB_GREEN_NOT_WIRED",
+    "model_router": "LAB_GREEN_PAID_DISABLED",
+    "real_audio": "UNVERIFIED",
+    "gateway": "NOT_CONNECTED",
+    "prod_operational": false
+  },
+  "b6": {
+    "capability_preflight": "LAB_GREEN_NOT_EXECUTING",
+    "prod_operational": false
+  },
+  "b7": {
+    "status": "DEFINED_FACTORY_REUSE_PENDING_AUDIT"
+  },
+  "b8": {
+    "status": "PARTIAL_TENANT_TESTS_ONLY"
+  },
+  "b9": {
+    "status": "PARTIAL_ANTI_LOOP_HELPER_TESTED"
+  },
+  "b10": {
+    "status": "PLAN_ONLY_NOT_CERTIFIED"
+  },
+  "consent_physical_microphone": false,
+  "deepseek_credit_verified": false,
+  "deepseek_api_calls": 0,
+  "new_subscriptions": 0,
+  "spend_policy": "min(50 EUR, provider_verified_real_remaining); no_auto_recharge; atomic reservation required before live execution",
+  "next_block": "B5_CUT04_REAL_VOICE_AND_GATEWAY_BUDGET_NO_GO__B4_PROD_BACKUP_RESTORE_PENDING__OFFICE_PC_AUTH_MIC",
+  "human_required_later": [
+    "OWNER_ROOT_MFA_IF_NEEDED",
+    "OFFICE_PC_MOBILE_E2E",
+    "MICROPHONE_BROWSER_CONSENT",
+    "DEVICE_RECOVERY"
+  ],
+  "remote_gates_still_open": [
+    "B3_GRANTS_VAULT",
+    "B4_REAL_POSTGRES_BACKUP_RESTORE",
+    "B5_REAL_STT_TTS_BENCHMARK",
+    "DEEPSEEK_BALANCE_AND_ATOMIC_LEDGER",
+    "GATEWAY_OBSERVABILITY_SECURITY_REVIEW"
+  ],
+  "rollback": "revert branch-only changes after 95097b7944f1ff72f428f5b7d3725c84667b6c5a; do not delete PROD B3/B4 tables",
+  "evidence_doc": "zeus/jarvis/B5_CORTE_03_REMOTE_INCREMENT_2026-11-04.md",
+  "b4_lab_pg17": {
+    "status": "HECHO_LAB_ONLY",
+    "prod_major_version": "17.6",
+    "real_postgres_synthetic": true,
+    "concurrency_race_tests": true,
+    "tenant_isolation_fixture": true,
+    "pg_dump_restore": true,
+    "index_rollback": true,
+    "workflow_id": 41745013028,
+    "conclusion": "success",
+    "prod_backup_restore": "NOT_TESTED",
+    "prod_indexes_applied": false
+  }
+}

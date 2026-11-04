@@ -1,0 +1,22 @@
+name: JARVIS B5 Open Source Spanish TTS LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/audio-lab/**'
+      - '.github/workflows/jarvis-b5-open-source-tts-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tts-es-fixture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install open-source Spanish synthesis
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends espeak-ng
+          espeak-ng --version
+      - name: Generate and inspect disposable synthetic Spanish WAV
+        run: bash zeus/jarvis/audio-lab/b5-espeak-tts-smoke.sh
