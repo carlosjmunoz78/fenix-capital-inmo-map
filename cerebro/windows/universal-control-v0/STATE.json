@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_8MIN_PATCH_VERIFIED_CURRENT_SESSION_4_OF_4_AUTH_GATEWAY_GREEN_POST_PATCH_REBOOT_PENDING",
+  "status": "PC001_8MIN_REBOOT_CHECK_PRE_WARMUP_NO_ACCEPTANCE_STALE_GATEWAY_4_OF_4_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -65,7 +65,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "NORMAL_WINDOWS_REBOOT_NO_RECOVERY_CMD; USER_LOGIN_WAIT_480_SECONDS; RUN_COMPROBAR_ARRANQUE_PC001_CMD_ONLY; UPLOAD_FRESH_JSON_WITH_WINDOWS_BOOT_UTC_LATER_THAN_2026_11_04T18_30_20Z; VERIFY_AUTO_RECOVERED_4_OF_4_AUTH_GATEWAY_AND_NO_UNWANTED_WINDOWS_BEFORE_MULTI_PC_DESKTOP_CONTROL",
+  "next_block": "AFTER_2026_11_04T18_43_10Z_RUN_EXISTING_COMPROBAR_ARRANQUE_PC001_CMD_ONE_TIME_WITH_NEW_JSON_AND_VERIFY_4_OF_4_AND_FRESH_GATEWAY; DO_NOT_REBOOT_OR_RUN_REPAIR_TOOLS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1193,5 +1193,32 @@
     "auto_recovered_after_new_reboot_verified": false,
     "full_remote_windows_control_verified": false,
     "status": "4_OF_4_GREEN_AFTER_PATCH_WITH_AUTHENTICATED_GATEWAY_POSTPATCH_REBOOT_PENDING"
+  },
+  "pc001_eight_min_post_reboot_first_observation_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_ARRANQUE_ESTADO(4).json",
+    "checked_utc": "2026-11-04T18:40:36.3741837Z",
+    "boot_utc": "2026-11-04T18:33:10.5000000Z",
+    "boot_age_seconds": 454,
+    "required_warmup_seconds": 480,
+    "seconds_before_required_warmup": 26,
+    "status": "PREMATURE_CHECK_WARMUP_ACTIVE_NOT_PASS_NOT_FAIL",
+    "startup_own_valid": true,
+    "legacy_three_suppressed": true,
+    "worker_status": "WAIT_BOOT_WARMUP_480S",
+    "health_at_pre_warmup": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "gateway_worker_status_at_pc": "HOLD_RETRY_BACKOFF",
+    "backend_checked_at_utc": "2026-11-04T18:41:41.645Z",
+    "backend_last_seen_at_utc": "2026-11-04T18:29:30.751Z",
+    "backend_heartbeat_age_seconds": 731,
+    "backend_last_seen_before_current_boot": true,
+    "gateway_current_rejoin_verified": false,
+    "reboot_auto_recovery_verified": false,
+    "prod_modified": false,
+    "next": "NO_REBOOT_NO_REINSTALL_WAIT_THROUGH_480S_PLUS_SERVICE_START_MARGIN_THEN_READONLY_RECHECK"
   }
 }
