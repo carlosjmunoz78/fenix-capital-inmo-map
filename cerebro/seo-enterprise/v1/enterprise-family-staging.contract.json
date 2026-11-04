@@ -5,7 +5,7 @@
   "company_id": "GLOBAL",
   "version": "1.0.0",
   "environment": "LAB",
-  "status": "DEFINED_CANDIDATE_NON_PROD",
+  "status": "SUPERSEDED_PROVISIONAL_ARCHITECTURE_DO_NOT_MATERIALIZE_WITHOUT_V2_RECONCILIATION",
   "intent": "Preserve the already-built WordPress website; professionalize one shared SEO organization, three sector families and a fail-closed STAGING-to-PROD release process.",
   "source_of_truth": [
     "cerebro/registry/engine-registry.v1.json",
@@ -436,7 +436,7 @@
       "current_state": "DEFINED_NOT_RUNTIME_BOUND"
     },
     "family_workforce_plan": {
-      "status": "DEFINED_TARGET_NOT_MATERIALIZED",
+      "status": "OBSOLETE_UNVALIDATED_HEADCOUNT",
       "counting_policy": "Per family: 14 department-level lead agents, each with five specialized logical subagents. Shared central director, supervisor, independent judges and guardians are not included in these family counts.",
       "agents_per_family": 14,
       "subagents_per_agent": 5,
@@ -587,5 +587,6 @@
     "NO_STAGING_TO_PROD_RELEASE_EXECUTOR",
     "NO_CURRENT_BACKUP_RESTORE_DRILL",
     "WORDPRESS_STAGING_AND_PROD_SEPARATION_NOT_PROVEN_AT_DB_INFRA_LEVEL"
-  ]
+  ],
+  "superseded_by": "cerebro/seo-enterprise/v2/organization.manifest.json"
 }
