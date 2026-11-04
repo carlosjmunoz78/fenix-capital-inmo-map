@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_LOCAL_4_OF_4_PHYSICAL_RECOVERED_GATEWAY_HEARTBEAT_STALE_ORDERED_AUTOBOOT_PENDING",
+  "status": "PC001_4_OF_4_PHYSICAL_AND_GATEWAY_FRESH_PASS_ORDERED_USER_LOGON_AUTOSTART_CANDIDATE_PENDING_INSTALL",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -44,14 +44,16 @@
     "pc001_reboot_readonly_diagnostic_v2": "PHYSICAL_PASS",
     "pc001_sequential_recovery_v1_static": "48_OF_48_PASS_ZIP_VERIFIED",
     "pc001_sequential_recovery_v1_physical": "PASS_4_OF_4",
-    "pc001_gateway_current_rejoin": "PENDING"
+    "pc001_gateway_current_rejoin": "PASS_FRESH_HEARTBEAT_173S_2026_11_04_17_57_UTC",
+    "pc001_ordered_autostart_static": "65_OF_65_PASS_ZIP_CHECKSUMS_PASS",
+    "pc001_ordered_autostart_windows": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PRESERVE_GREEN_NOW; BUILD_VERIFIED_USER_LOGON_DELAYED_ORDERED_HOST_SUPERVISOR_WITH_DPAPI_BACKUP_AND_ATOMIC_RUN_MIGRATION; PHYSICAL_REBOOT_TEST; GATEWAY_HEARTBEAT_FRESHNESS; ROLLBACK",
+  "next_block": "USER_CLICK_INSTALL_ORDERED_PC001_ONCE; SEND_INSTALL_JSON; THEN_READONLY_BOOT_CHECK_JSON_BEFORE_RESTART; AFTER_GATES_REAL_REBOOT_PLUS_180S_AND_GATEWAY_NEW_HEARTBEAT; ROLLBACK_GATE",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1005,7 +1007,7 @@
     "gateway_worker_status_at_pc_receipt": "HOLD_RETRY_BACKOFF",
     "backend_last_heartbeat_at_utc": "2026-11-04T16:47:47.105Z",
     "backend_heartbeat_age_at_query_seconds": 3750,
-    "gateway_verified_rejoined": false,
+    "gateway_verified_rejoined": true,
     "registry_changed": false,
     "windows_services_changed": false,
     "tasks_changed": false,
@@ -1013,6 +1015,50 @@
     "processes_terminated": false,
     "prod_modified": false,
     "reboot_persistence_verified": false,
-    "status": "PHYSICAL_LOCAL_4_OF_4_PASS_GATEWAY_REJOIN_PENDING"
+    "status": "PHYSICAL_4_OF_4_AND_AUTH_GATEWAY_REJOIN_PASS_AT_CUT",
+    "backend_fresh_last_seen_utc": "2026-11-04T17:54:14.514Z",
+    "backend_verified_at_utc": "2026-11-04T17:57:07.968Z",
+    "backend_fresh_heartbeat_age_seconds": 173
+  },
+  "pc001_ordered_autostart_candidate_v1_20261104": {
+    "status": "CANDIDATE_STATIC_PASS_65_OF_65_WINDOWS_EXECUTION_PENDING",
+    "scope": "fenix/PC-001/PREPROD/pc001-windows-v1",
+    "artifact": "CEREBRO_PC001_ARRANQUE_ORDENADO_PREPROD_V1.zip",
+    "artifact_sha256": "de411dc426c6053c39205dc0709ee45f06a8cb5c10b88cf65875435d59f97612",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_ARRANQUE_ORDENADO_PREPROD_V1.zip",
+    "repository_document": "cerebro/windows/pc-001/PC001_ORDERED_USER_LOGON_RECOVERY_V1_20261104.md",
+    "scripts": [
+      "PC001-Ordered-Installer.ps1",
+      "PC001-Ordered-Worker.ps1",
+      "PC001-Ordered-Recover.ps1",
+      "PC001-Ordered-Rollback.ps1",
+      "PC001-Ordered-Check.ps1"
+    ],
+    "install_command": "INSTALAR_ARRANQUE_ORDENADO_PC001.cmd",
+    "install_report": "CEREBRO_PC001_ARRANQUE_INSTALACION.json",
+    "check_command": "COMPROBAR_ARRANQUE_PC001.cmd",
+    "check_report": "CEREBRO_PC001_ARRANQUE_ESTADO.json",
+    "own_rollback_command": "REVERTIR_SOLO_ARRANQUE_ORDENADO.cmd",
+    "old_run_keys_dpapi_encrypted_before_removal": true,
+    "old_run_keys": [
+      "CEREBROBrowserAgentHost",
+      "CEREBROUniversalDeviceControllerV2",
+      "CEREBRODeviceAgentUniversalV023"
+    ],
+    "new_own_run_key": "CEREBROPC001OrderedStartupV1",
+    "preserves": "EXISTING_EVIDENCE_8767_AND_ALL_OTHER_STARTUPS_RUNNING_SERVICES_PROD_TRADING",
+    "after_user_logon_warmup_seconds": 180,
+    "after_resume_or_failure_grace_seconds": 180,
+    "max_recovery_attempts_per_hour": 2,
+    "min_minutes_between_attempts": 15,
+    "existing_device_agent_installer_not_invoked": true,
+    "cost_new_subscriptions_eur": 0,
+    "code_static_checks_passed": 65,
+    "static_checks_not_physical_evidence": true,
+    "physical_installed": false,
+    "post_reboot_autostart_tested": false,
+    "rollback_physically_tested": false,
+    "full_remote_control_enabled": false,
+    "other_pc_installation_denied": true
   }
 }
