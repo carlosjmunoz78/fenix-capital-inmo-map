@@ -21,7 +21,10 @@ export function assignInitialPcName({canonical_device_id, windows_hostname}) {
   const deviceId = checkId(canonical_device_id);
   // Label is NOT an authorization, hostname, device id or Windows computer name.
   let label;
-  try { label = checkName(`PC · ${windows_hostname}`); }
+  try {
+    if (typeof windows_hostname !== 'string' || !windows_hostname.trim()) throw new PcActionError('HOSTNAME_NOT_FOUND');
+    label = checkName(`PC · ${windows_hostname}`);
+  }
   catch { label = checkName(`PC CEREBRO ${deviceId.slice(-6)}`); }
   return Object.freeze({channel_id: CHANNEL, canonical_device_id:deviceId, display_name:label,
     display_name_revision:1, name_origin:'AUTO_LOCAL_HOSTNAME', cloud_enrollment:'REQUIRES_SCOPED_AUTH',
