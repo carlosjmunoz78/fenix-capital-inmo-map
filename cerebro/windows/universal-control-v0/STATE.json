@@ -44,7 +44,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PHYSICAL_WINDOWS_REBOOT_AND_USER_LOGIN; RUN_EXISTING_READONLY_COMPROBAR_CEREBRO_PC001_UN_CLIC_CMD; VERIFY_NEW_BOOT_TIME_AUTHENTICATED_WORKER_4_OF_4_AND_BACKEND_HEARTBEAT; THEN_OWN_RUN_KEY_ROLLBACK",
+  "next_block": "USER_PHYSICAL_REBOOT: ALLOW_THREE_MINUTES_AFTER_WINDOWS_LOGIN_BEFORE_RUNNING_READONLY_DIAGNOSTIC; PRESERVE_FOUR_SERVICES; VERIFY_AUTHENTICATED_WORKER_AFTER_WARMUP; FOR_S3_WAIT_180S_ASLEEP_AND_180S_AFTER_WAKE; REBOOT_ROLLBACK_PENDING",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -800,5 +800,17 @@
     "credentials_read": false,
     "additional_subscription_eur": 0,
     "status": "PHYSICAL_CURRENT_SESSION_AUTOSTART_AND_CONTINUOUS_AUTH_GREEN_REBOOT_PENDING"
+  },
+  "pc001_low_power_pc_timing_policy_20261104": {
+    "source": "explicit_owner_instruction_2026-11-04",
+    "scope": "PC-001_WINDOWS_PHYSICAL_SLEEP_WAKE_RESTART_TESTS",
+    "status": "DEFINED_AND_RECORDED_NOT_AUTO_APPLIED_TO_EXISTING_SCRIPTS",
+    "after_suspend_before_attempting_wake_seconds": 180,
+    "after_wake_before_service_and_gateway_checks_seconds": 180,
+    "after_full_reboot_and_user_login_before_acceptance_checks_seconds": 180,
+    "rule": "On low-powered computers wait at least 3 minutes once suspended before waking, and at least 3 minutes after wake before evaluating 8765/8766/8767/8768 and authenticated Gateway; for reboot tests wait 3 minutes after Windows login before assessment. Do not falsely mark startup as failed during warm-up.",
+    "applies_to_future_installers_and_test_procedures": true,
+    "no_windows_state_changed": true,
+    "no_prod_changes": true
   }
 }
