@@ -22,6 +22,7 @@ export function adaptJarvisB5BrowserVoice({transcript,confidence=null,isFinal=tr
  if(pendingAction&&isConfirmation)
   return output('CONFIRMATION_REQUIRED',
     confidence===null||confidence<CONFIRM_MIN?'LOW_STT_CONFIDENCE':'B3_MANDATORY_APPROVAL',intent);
+ if(confidence===null)return output('CLARIFY','NO_STT_CONFIDENCE',intent);
  if(confidence!==null&&confidence<QUERY_MIN)return output('CLARIFY','LOW_STT_CONFIDENCE',intent);
  if(intent.needsClarification)return output('CLARIFY',intent.clarification,intent);
  return output('INTENT_READY','REQUIRES_SERVER_AUTH_AND_EXECUTION_GATE',intent);
