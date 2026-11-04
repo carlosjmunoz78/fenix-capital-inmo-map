@@ -4,7 +4,7 @@ import {createJarvisB5ModelRouter} from './jarvis-b5-model-router.mjs';
 const local=(cost=0)=>({id:'local-fixture',provider:'LOCAL',capabilities:['LANGUAGE'],estimatedEuroPerCall:cost,healthy:true});
 const deepseek={id:'deepseek-fixture',provider:'DEEPSEEK',capabilities:['LANGUAGE'],estimatedEuroPerCall:.01,healthy:true};
 const request={companyId:'fenix',environment:'LAB',capability:'LANGUAGE',maxCallEuro:.5,allowPaid:true};
-const proof={verified:true,currency:'EUR',availableEuro:4,companyId:'fenix',environment:'LAB',checkedAt:new Date().toISOString()};
+const proof={verified:true,provider:'DEEPSEEK',currency:'EUR',availableEuro:4,companyId:'fenix',environment:'LAB',checkedAt:new Date().toISOString()};
 const budgetStore={getVerifiedSpend:async()=>({verified:true,spentEuro:.25,companyId:'fenix',environment:'LAB'}),reserveAtomically:async()=>{throw Error('NO_RESERVE_IN_PREVIEW');}};
 test('B5 CUT03 nonzero local marginal cost is not a free provider',async()=>{
  const x=await createJarvisB5ModelRouter({catalog:[local(.01)]}).choose({...request,maxCallEuro:0});
