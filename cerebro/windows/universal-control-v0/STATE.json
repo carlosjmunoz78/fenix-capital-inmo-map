@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PRESERVE_STABLE_480S_ORDERED_BOOT; AUDIT_EXISTING_BROWSER_BRIDGE_ACCESSBOOT_CONTROLLER_CAPABILITIES; IMPLEMENT_IN_PARALLEL_EXACT_SCOPED_VISIBLE_INTERACTIVE_PC_CONTROL_MOUSE_KEYBOARD_BROWSER_FILES_SANDBOX_WITH_KILL_SWITCH_AND_ROLLBACK; THEN_PHYSICAL_E2E_AND_MULTIPC_PACKAGING",
+  "next_block": "RUN_V0_1_LOCAL_VISIBLE_FIXTURE_ON_PC001_AND_INSPECT_SANITIZED_JSON; FIX_PHYSICAL_ISSUES; THEN_REUSE_GATEWAY_ACCESSBOOT_EXACT_SCOPE_PERMISSIONS_TO_ENABLE_APPROVED_REMOTE_COMMAND_E2E; SECOND_PC_LATER",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1307,5 +1307,19 @@
     "physical_rollback_tested": false,
     "status": "PHYSICAL_POST_REBOOT_4_OF_4_AND_AUTH_GATEWAY_VERIFIED",
     "document": "cerebro/windows/pc-001/PC001_REBOOT_AUTORECOVERY_PHYSICAL_PASS_20261104.md"
+  },
+  "pc001_control_v0_candidate": {
+    "version": "0.1.0",
+    "status": "LAB_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "source_path": "cerebro/windows/pc-001/control-v0/",
+    "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_CONTROL_V0_1_PREPROD.zip",
+    "exe_sha256": "d150f09b0580311d005b40b74c2dabab3f0b7e2b4e34402444add65afb557758",
+    "tests": "3_GO_UNIT_PASS_LINUX_WINDOWS_VET_PASS_WIN_TEST_COMPILE_PASS_REPRODUCIBLE_SHA256",
+    "physical_windows": "PENDING",
+    "gateway_integration": "NOT_IMPLEMENTED",
+    "remote_commands_enabled": false,
+    "four_existing_services_modified": false,
+    "prod_modified": false,
+    "additional_cost_eur": 0
   }
 }
