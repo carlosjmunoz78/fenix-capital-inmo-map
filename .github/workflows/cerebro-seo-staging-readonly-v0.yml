@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate public snapshot inspector
-        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs
       - name: Single bounded HTTP GET for staging homepage, no redirects and no mutations
         shell: bash
         run: |
@@ -29,3 +29,4 @@ jobs:
             exit 2
           fi
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-readonly-inspector-v0.mjs" body.html headers.txt "$code"
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-transversal-readonly-v0.mjs" body.html headers.txt "$code"
