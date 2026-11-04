@@ -10,7 +10,7 @@ function rig(opt={}){
  const data=opt.data||new Map(),calls=[];
  const ports={
   identityProvider:{verify:async t=>{calls.push('identity');return t==='opaque'?
-   {ownerId:'owner-1',roles:opt.roles||['OWNER_ROOT'],authorizedCompanies:opt.companies||['fenix','aion']}:{}};},
+   {ownerId:'owner-1',roles:opt.roles||['OWNER_ROOT'],authorizedCompanies:opt.companies||['fenix','aion']}:{};}},
   companyRegistry:{resolve:async p=>{calls.push('company');
    return {companyId:opt.fakeRegistry?'other':p.companyId,environment:'LAB',status:'ACTIVE',verified:true};}},
   policy:{authorize:async ()=>{calls.push('policy');return {decision:opt.deny?'DENY':'ALLOW'};}},
