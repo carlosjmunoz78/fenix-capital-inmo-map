@@ -42,7 +42,8 @@ const journal={
   if(existing){
    if(existing.fingerprint!==r.fingerprint)return{state:'CONFLICT'};
    if(existing.status==='COMPLETED')return{state:'ALREADY_COMPLETED',fingerprint:r.fingerprint,
-    evidenceHash:existing.evidenceHash,ownerId:r.ownerId,companyId:r.companyId,environment:r.environment};
+    evidenceHash:existing.evidenceHash,ownerId:r.ownerId,companyId:r.companyId,environment:r.environment,
+    missionId:r.missionId,capability:r.capability,connectorId:r.connectorId,idempotencyKey:r.idempotencyKey};
    return{state:'IN_PROGRESS'};
   }
   journalRecords.set(key,{status:'CLAIMED',fingerprint:r.fingerprint});
