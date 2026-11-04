@@ -1,0 +1,624 @@
+{
+  "schema_version": "2.0.0",
+  "contract_id": "CEREBRO-SEO-ENTERPRISE-ORG-V2",
+  "version": "2.0.0",
+  "company_id": "GLOBAL",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "status": "DEFINED_ARCHITECTURE_NOT_EXECUTED",
+  "date": "2026-11-05",
+  "supersedes_as_target": "cerebro/seo-enterprise/v1/enterprise-family-staging.contract.json",
+  "preserve_original_engine": true,
+  "cost_additional_eur": 0,
+  "professional_family_count": 8,
+  "department_count": 32,
+  "professional_families": [
+    {
+      "family_id": "SEO-PF01",
+      "title": "Dirección estratégica SEO",
+      "department_ids": [
+        "SEO-D01",
+        "SEO-D02",
+        "SEO-D03",
+        "SEO-D04"
+      ]
+    },
+    {
+      "family_id": "SEO-PF02",
+      "title": "Investigación y posicionamiento",
+      "department_ids": [
+        "SEO-D05",
+        "SEO-D06",
+        "SEO-D07",
+        "SEO-D08"
+      ]
+    },
+    {
+      "family_id": "SEO-PF03",
+      "title": "Ingeniería SEO avanzada",
+      "department_ids": [
+        "SEO-D09",
+        "SEO-D10",
+        "SEO-D11",
+        "SEO-D12"
+      ]
+    },
+    {
+      "family_id": "SEO-PF04",
+      "title": "Copywriting y producción editorial",
+      "department_ids": [
+        "SEO-D13",
+        "SEO-D14",
+        "SEO-D15",
+        "SEO-D16"
+      ]
+    },
+    {
+      "family_id": "SEO-PF05",
+      "title": "SEO local y autoridad",
+      "department_ids": [
+        "SEO-D17",
+        "SEO-D18",
+        "SEO-D19",
+        "SEO-D20"
+      ]
+    },
+    {
+      "family_id": "SEO-PF06",
+      "title": "Experiencia web y conversión",
+      "department_ids": [
+        "SEO-D21",
+        "SEO-D22",
+        "SEO-D23",
+        "SEO-D24"
+      ]
+    },
+    {
+      "family_id": "SEO-PF07",
+      "title": "Nuevas superficies de búsqueda",
+      "department_ids": [
+        "SEO-D25",
+        "SEO-D26",
+        "SEO-D27",
+        "SEO-D28"
+      ]
+    },
+    {
+      "family_id": "SEO-PF08",
+      "title": "Datos, operaciones y mejora",
+      "department_ids": [
+        "SEO-D29",
+        "SEO-D30",
+        "SEO-D31",
+        "SEO-D32"
+      ]
+    }
+  ],
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "name": "Estrategia y dirección",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "name": "Inteligencia de mercado",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "name": "Investigación de clientes y buyer personas",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "name": "Crecimiento, priorización y rentabilidad",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "name": "Keyword research e intención",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "name": "Análisis SERP y formatos",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "name": "Competencia, gaps y oportunidades",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "name": "Arquitectura semántica, clusters y anticanibalización",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "name": "Rastreo, indexación y canonicals",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "name": "JavaScript, renderizado y SEO técnico avanzado",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "name": "Arquitectura web, taxonomías y enlazado interno",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "name": "Datos estructurados, entidades y búsqueda enriquecida",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "name": "SEO copywriting y contenido",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "name": "Copywriting persuasivo y de conversión",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "name": "UX writing y microcopy",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "name": "Investigación, edición, fact-checking y autoridad editorial",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "name": "Google Business Profile y SEO local",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "name": "Reputación, reseñas y NAP",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "name": "Digital PR, relaciones y enlaces legítimos",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "name": "SEO internacional, multilingüe y geográfico",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "name": "UX, diseño e información",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "name": "Desarrollo web, CMS, WordPress y Elementor",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "name": "Core Web Vitals, accesibilidad y seguridad web",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "name": "CRO, experimentación, formularios, embudos y CRM",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "name": "AEO/GEO y visibilidad en IA",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "name": "SEO de imágenes, vídeo y YouTube",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "name": "Ecommerce SEO: categorías, productos, facetas y Merchant",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "name": "Búsqueda social, distribución orgánica y descubrimiento",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "name": "Search Console, GA4, medición y fuentes",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "name": "Atribución comercial, analítica avanzada y pruebas",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "name": "QA, auditoría SEO, publicación y releases",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    },
+    {
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "name": "Aprendizaje, benchmarks, training y optimización",
+      "operational_status": "DEFINED_NOT_BOUND",
+      "head_agent_role": "TO_DISCOVER_OR_GENERATE",
+      "subagent_roles": "TO_SIZE_BY_COMPETENCY_EVIDENCE",
+      "work_owner": "CEREBRO_AGENTS_AND_SUBAGENTS",
+      "plugin_is_auxiliary": true,
+      "manifest_required": true,
+      "training_and_merit_required": true,
+      "independent_tests_required": true
+    }
+  ],
+  "sector_specializations": [
+    {
+      "id": "FIN_MORTGAGE",
+      "title": "Hipotecaria y financiera",
+      "priority": 1
+    },
+    {
+      "id": "REAL_ESTATE",
+      "title": "Inmobiliaria",
+      "priority": 1
+    },
+    {
+      "id": "ECOMMERCE",
+      "title": "Comercio electrónico",
+      "priority": 2
+    },
+    {
+      "id": "TECH_SAAS",
+      "title": "Tecnología y SaaS",
+      "priority": 3
+    }
+  ],
+  "headcount_policy": {
+    "fixed_agent_count_rejected": true,
+    "previous_42_agents_210_subagents_status": "OBSOLETE_UNVALIDATED_TARGET",
+    "how_to_size": "COMPETENCE_COVERAGE_AND_BENCHMARK",
+    "physical_count_report_only_after_bindings": true
+  },
+  "agent_tool_relationship": {
+    "work_owner": "CEREBRO_AGENT_SUBAGENT_RUNTIME",
+    "wordpress_plugin_role": "OPTIONAL_EXECUTION_ADAPTER",
+    "plugin_governs_strategy": false,
+    "plugin_governs_merit": false,
+    "plugin_auto_publishes": false
+  },
+  "merit_and_replacement": {
+    "applies_to": [
+      "AGENT",
+      "SUBAGENT",
+      "DIRECTOR",
+      "DEPARTMENT_HEAD",
+      "SUPERVISOR",
+      "JUDGE",
+      "TRIBUNAL",
+      "GUARDIAN",
+      "META_SUPERVISOR",
+      "QA_AGENT"
+    ],
+    "every_role_must_have": [
+      "EVIDENCE_BASED_SCORECARD",
+      "INDEPENDENT_EVALUATOR",
+      "MERIT_REWARDS",
+      "ROLE_SPECIFIC_TRAINING",
+      "REEXAMINATION",
+      "CONTROLLED_REPLACEMENT",
+      "ROLLBACK_PLAN",
+      "AUDIT_TRAIL"
+    ],
+    "rewards": [
+      "PRIORITY_TASK_ASSIGNMENT",
+      "VERIFIED_ACHIEVEMENT_BADGES",
+      "SPECIALIST_LEVEL",
+      "TRAINING_PRIORITY",
+      "MORE_DELEGATION_WITHIN_EXISTING_PERMISSIONS"
+    ],
+    "replacement_stages": [
+      "DETECT_PERFORMANCE_GAP",
+      "RETRAIN",
+      "REEVALUATE",
+      "OLD_VS_NEW",
+      "SHADOW",
+      "CANARY",
+      "ROLLBACK"
+    ],
+    "forbidden": [
+      "SELF_REWARD",
+      "SELF_CERTIFY",
+      "SELF_PROMOTE",
+      "SELF_GRANT_PERMISSIONS",
+      "UNAPPROVED_BUDGET",
+      "ERASE_HISTORY"
+    ],
+    "review_of_oversight_by_independent_peers": true
+  },
+  "staging_first": {
+    "site": "https://staging.fenixcapital.es",
+    "official_site": "https://fenixcapital.es",
+    "stage_mutation_allowed_by_this_document": false,
+    "prod_mutation_allowed_by_this_document": false,
+    "required": [
+      "INVENTORY",
+      "DEPENDENCY_MAP",
+      "SNAPSHOT",
+      "ISOLATION_PROOF",
+      "COMPETENCE_TESTS",
+      "SEO_YMYL_QA",
+      "FORM_CRM_CONSENT_E2E",
+      "INDEPENDENT_TRIBUNAL",
+      "OLD_VS_NEW",
+      "ROLLBACK_TEST",
+      "RELEASE_GATE",
+      "CANARY_MONITORING"
+    ]
+  },
+  "completion_rule": "A_ROLE_IS_NOT_OPERATIONAL_UNTIL_PHYSICAL_RUNTIME_BINDING_AND_VERIFIED_TASK_COMPLETION",
+  "documents": [
+    "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+    "cerebro/seo-enterprise/v2/PROMPT_CONTINUIDAD_EJECUCION_32_DEPARTAMENTOS.md"
+  ]
+}
