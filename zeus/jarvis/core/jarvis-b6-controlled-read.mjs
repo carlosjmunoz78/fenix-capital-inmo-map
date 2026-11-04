@@ -97,7 +97,8 @@ export function createJarvisB6ControlledRead({identityProvider,controlStore,pref
   if(claimed?.state!=='CLAIMED')return denied('JOURNAL_CLAIM_REJECTED');
   let invoked=false;
   async function abort(reason){
-   try{await journal.fail({...scope,fingerprint,reason});}
+   try{const recorded=await journal.fail({...scope,fingerprint,reason});
+    if(recorded!==true)return denied('JOURNAL_FAILURE_UNRECORDED',{adapterInvoked:invoked});}
    catch{return denied('JOURNAL_FAILURE_UNRECORDED',{adapterInvoked:invoked});}
    return denied(reason,{adapterInvoked:invoked});
   }
