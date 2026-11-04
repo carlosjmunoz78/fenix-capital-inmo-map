@@ -4,7 +4,7 @@ const local={id:'local-fixture',provider:'LOCAL',capabilities:['LANGUAGE','REASO
 const deepseek={id:'deepseek-fixture',provider:'DEEPSEEK',capabilities:['LANGUAGE','REASONING'],estimatedEuroPerCall:0.03,healthy:true};
 const qa={companyId:'fenix',environment:'LAB',capability:'LANGUAGE'};
 const proof={verified:true,provider:'DEEPSEEK',currency:'EUR',availableEuro:20,companyId:'fenix',environment:'LAB',checkedAt:new Date().toISOString()};
-const store={getVerifiedSpend:async()=>({verified:true,spentEuro:1,companyId:'fenix',environment:'LAB'}),reserveAtomically:async()=>{throw Error('MUST_NOT_RESERVE_IN_PREVIEW')}};
+const store={getVerifiedSpend:async()=>({verified:true,spentEuro:1,provider:'DEEPSEEK',companyId:'fenix',environment:'LAB'}),reserveAtomically:async()=>{throw Error('MUST_NOT_RESERVE_IN_PREVIEW')}};
 test('B5 deterministic router never invokes paid model if local capability is healthy',async()=>{
  const r=await make({catalog:[deepseek,local]}).choose({...qa,allowPaid:true,maxCallEuro:1});
  assert.equal(r.provider,'LOCAL');assert.equal(r.executed,false);assert.equal(r.spentEuro,0);
@@ -40,7 +40,7 @@ test('B5 certified balance and spend cannot exceed absolute owner ceiling 50 eur
  assert.throws(()=>make({catalog:[deepseek],hardCeilingEuro:50.01}),/HARD_CEILING_EXCEEDS_MANDATE/);
 });
 test('B5 hard-stop on per-call max and remaining verified spend limit',async()=>{
- const router=make({catalog:[deepseek],balanceProof:proof,budgetStore:{...store,getVerifiedSpend:async()=>({verified:true,spentEuro:19.99,companyId:'fenix',environment:'LAB'})}});
+ const router=make({catalog:[deepseek],balanceProof:proof,budgetStore:{...store,getVerifiedSpend:async()=>({verified:true,spentEuro:19.99,provider:'DEEPSEEK',companyId:'fenix',environment:'LAB'})}});
  assert.equal((await router.choose({...qa,allowPaid:true,maxCallEuro:1})).reason,'COST_HARD_STOP');
  assert.equal((await router.choose({...qa,allowPaid:true,maxCallEuro:0.001})).reason,'COST_HARD_STOP');
 });
@@ -49,7 +49,7 @@ test('B5 spend read unavailable fails closed and never falls back to spending',a
  assert.equal((await router.choose({...qa,allowPaid:true,maxCallEuro:1})).reason,'SPEND_READ_UNAVAILABLE');
 });
 test('B5 cannot infer safe spend from unverified ledger',async()=>{
- const router=make({catalog:[deepseek],balanceProof:proof,budgetStore:{...store,getVerifiedSpend:async()=>({verified:false,spentEuro:0,companyId:'fenix',environment:'LAB'})}});
+ const router=make({catalog:[deepseek],balanceProof:proof,budgetStore:{...store,getVerifiedSpend:async()=>({verified:false,spentEuro:0,provider:'DEEPSEEK',companyId:'fenix',environment:'LAB'})}});
  assert.equal((await router.choose({...qa,allowPaid:true,maxCallEuro:1})).reason,'SPEND_NOT_VERIFIED');
 });
 test('B5 unsupported external paid provider is denied even with verified DeepSeek balance',async()=>{
