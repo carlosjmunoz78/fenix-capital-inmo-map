@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PHYSICAL_V07_ONCE_AND_TXT; THEN_8768_KNOWN_COMMAND_REPAIR; GATEWAY_AUTH_E2E; REBOOT_PERSISTENCE; PHYSICAL_ROLLBACK; NO_PRIOR_DIAGNOSTICS.",
+  "next_block": "REVIEW_8768_BINARY_AND_RUN_POSITIONAL_WITH_STATIC_ANALYSIS_NO_AUTO_LAUNCH; IMPLEMENT_SCOPED_GATEWAY_E2E; VALIDATE_REBOOT_AND_ROLLBACK_PHYSICALLY; RETAIN_SEPARATE_PC_CHANNEL.",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -334,9 +334,25 @@
     "health_gate": "version=0.2.0 status=OK host=127.0.0.1 port=8766 durable_queue=true prod_allowed=false; stable second readback; if prior listener healthy then do NOT change Run"
   },
   "latest_service_state": {
-    "8765": "LOCAL_HEALTH_OK_LAST_PHYSICAL",
-    "8766": "NO_HEALTH_LAST_PHYSICAL_V07_NOT_RUN",
-    "8767": "LOCAL_HEALTH_OK_LAST_PHYSICAL",
-    "8768": "NO_HEALTH_LAST_PHYSICAL_GATE_STILL_BLOCKED"
+    "8765": "HEALTH_OK_PREVIOUS_PHYSICAL",
+    "8766": "HEALTH_OK_ONCE_PHYSICAL_V07",
+    "8767": "HEALTH_OK_PREVIOUS_PHYSICAL_AND_V07_PRECHECK",
+    "8768": "NO_HEALTH_LAST_PHYSICAL"
+  },
+  "pc_8766_v07_physical_acceptance": {
+    "file": "CEREBRO_PC_8766_CORRECCION_V07.txt",
+    "timestamp_local": "2026-11-04T12:57:45+01:00",
+    "outcome": "RECUPERADO_HEALTH_OK_PUERTO_CORRECTO",
+    "vbs_and_exe_hash_verified": true,
+    "dpapi_backup_and_readback": true,
+    "side_by_side_autostart_enabled_after_health": true,
+    "rollback_available": true,
+    "originals_preserved": true,
+    "status": "HECHO_LOCAL_ONCE_PHYSICAL_RECEIPT",
+    "reboot_persistence": "PENDING",
+    "gateway": "PENDING",
+    "remote_e2e": "PENDING",
+    "physical_rollback": "PENDING",
+    "user_visible_report_contains_secrets": false
   }
 }
