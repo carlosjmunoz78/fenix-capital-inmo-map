@@ -1,0 +1,11 @@
+# B10 · ADR 2026-11-04
+- ADR-001: Bloque 10 no es un nuevo superagente ni una segunda plataforma; solo **certifica** capacidades del JARVIS existente.
+- ADR-002: B10 PR20 se basa directamente en B9 PR19 sin merge; B1–B9 se conservan, no se autocertifican.
+- ADR-003: Las 7 fases siguen el plan maestro; prohibido saltar una por pruebas sintéticas.
+- ADR-004: No permitir que metadatos `verified:true` generados por un candidato sean autoridad. Incluso con metadata completa, el estado permanece NO_GO.
+- ADR-005: El gate B2 original de 13 evidencias es requisito de la fase de misión persistente y dos dispositivos; la prueba real requerirá OWNER_ROOT externo y dos sesiones.
+- ADR-006: Mantener B3/B4/APP/CRM/SEO/WordPress/Trading PROD sin cambios; SOLO lecturas de controles.
+- ADR-007: No usar una ejecución GitHub Actions sin autorización física como prueba LIVE; el Runtime Smoke existente se deja sin disparar, no se exponen secretos.
+- ADR-008: No duplicar Factory/Runtime/JOB-001/Tribunal; toda promoción desde autoridad externa existente, nunca por el evaluador.
+- ADR-009: No cargar nuevas suscripciones; coste efectivo Actions aún por medir.
+- ADR-010: Documentation GitHub `zeus/jarvis` y Biblioteca; B9 ya subido 9 archivos, B10 al terminar corte para archivo.

@@ -1,0 +1,41 @@
+{
+  "schema": "zeus.jarvis.b10.external-observations.v0",
+  "date": "2026-11-04",
+  "environment": "PROD",
+  "company_id": "fenix",
+  "classification": "REAL_EXTERNAL_READ",
+  "source_notice": "Observed by authenticated connectors, not a signed PROD operation receipt",
+  "supabase": {
+    "project_ref": "cluhljgonannaafpmblx",
+    "operations": "SELECT_ONLY",
+    "b3_runtime_control": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "b4_memory_control": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "company_registry_preprod_rows": 0
+  },
+  "github": {
+    "pr20": {
+      "draft": true,
+      "base_pr": 19
+    },
+    "pr19": {
+      "draft": true,
+      "base_pr": 18
+    },
+    "b10_code_sha": "e88ea6a5cc65bd602e6af8ee9afee68daac013ad",
+    "tests": 490,
+    "failures": 0
+  },
+  "app": {
+    "prod_source_sha": "NOT_VERIFIED",
+    "public_read_attempt": "INACCESSIBLE_VIA_WEB_TOOL"
+  },
+  "evidence_validated_for_prod_operation": 0,
+  "manual_controls_changes": 0,
+  "prod_mutations": 0
+}
