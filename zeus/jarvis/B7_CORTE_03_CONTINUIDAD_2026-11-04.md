@@ -4,7 +4,7 @@
 **Proyecto:** PRJ-SUPERAGENT-001 · **Empresa:** fenix · **Motor canónico reutilizado:** ORCH-001.
 
 ## 1. Procedencia y configuración canónica
-El plan real fue leído en Biblioteca: `/ZEUS/JARVIS/JARVIS_PLAN_EJECUCION_10_BLOQUES_V2_2026-11-03.md`. B6 último Corte 02: continuidad, STATE y ZIP recuperados desde `/ZEUS/JARVIS/BLOQUE_6/`. B6 PR #16 DRAFT, sin fusionar, con HEAD certificado `115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb` y pruebas históricas 315/315 PASS. B7 no se ha ejecutado sobre `main`: rama aislada `cerebro/jarvis-b7-multiagent-supervisor-v0-20261104`, PR **#17 DRAFT** con base B6 PR #16, sin merge. Código B7 testado en `f278bad2b49d4da4cc1467b77b6c51065300e4a2`.
+El plan real fue leído en Biblioteca: `/ZEUS/JARVIS/JARVIS_PLAN_EJECUCION_10_BLOQUES_V2_2026-11-03.md`. B6 último Corte 02: continuidad, STATE y ZIP recuperados desde `/ZEUS/JARVIS/BLOQUE_6/`. B6 PR #16 DRAFT, sin fusionar, con HEAD certificado `115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb` y pruebas históricas 315/315 PASS. B7 no se ha ejecutado sobre `main`: rama aislada `cerebro/jarvis-b7-multiagent-supervisor-v0-20261104`, PR **#17 DRAFT** con base B6 PR #16, sin merge. Código B7 testado en `d844e2b9425c9611b3e1dddf4c672b187b36e350`.
 
 **URL PR:** https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/17  
 **Registro real:** `cerebro/registry/engine-registry.v1.json` → 179 IDs originales, entre ellos FACT-001, ORCH-001, CAPA-001, SUP-001, JDG-001, JOB-001, GOV-001. No creado motor ni fábrica paralelos.
@@ -21,12 +21,12 @@ FACT-001-CLOSE en Biblioteca: cierre local con 40/40 pruebas y scaffold/registry
 Workflow integrado `jarvis-b7-cut03-durable-pg17-github-lab.yml`: dos coordinadores compiten por una misión; solo uno puede ejecutarla; dos lecturas GitHub reales por tarea; worker reconstruido devuelve recibo sin nueva lectura; fingerprint modificado denegado; crash de commit sintético deja claim IN_PROGRESS y no se auto-repite; stop de supervisor y PROD bloquean; `pg_dump` + `pg_restore` sobre PostgreSQL 17 efímero → **RESTORE_GREEN**.
 
 ## 3. Evidencias directas
-- **352/352 Node tests PASS, 0 FAIL:** https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41755006445
-- **B7 CUT02, GitHub real + PostgreSQL 17:** SUCCESS https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41755006434
-- **B7 CUT03, journal durable de misión y backup/restore:** SUCCESS https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41755006530
-- **B4 regresión PostgreSQL:** SUCCESS `41755006473`.
-- **Core JARVIS:** SUCCESS `41755006429`.
-- **Integración Gobernada:** SUCCESS `41755006448`. No prueba despliegue PROD; no se ha promovido nada.
+- **357/357 Node tests PASS, 0 FAIL:** https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41756003358
+- **B7 CUT02, GitHub real + PostgreSQL 17:** SUCCESS https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41756003351
+- **B7 CUT03, journal durable de misión y backup/restore:** SUCCESS https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41756003289
+- **B4 regresión PostgreSQL:** SUCCESS `41756003440`.
+- **Core JARVIS:** SUCCESS `41756003299`.
+- **Integración Gobernada:** SUCCESS `41756003337`. No prueba despliegue PROD; no se ha promovido nada.
 
 La infraestructura externa **realmente utilizada** en CI es API GitHub de lectura + PostgreSQL 17 efímero de Actions. Las autorizaciones, el supervisor y el tribunal en CI son componentes inyectados/sintéticos, **no grants reales ni supervisión productiva**.
 
@@ -53,3 +53,6 @@ Coste: **0 € de nuevas suscripciones y 0 llamadas IA de pago**. Uso de cuotas 
 Backup de código: Git BASE `115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb` y rama/PR aislada; DB backup de prueba `pg_dump` y restauración `RESTORE_GREEN` solo en base efímera. Rebuild: checkout B7 HEAD + Node 24 `node --test zeus/jarvis/core/*.test.mjs`; workflows de PostgreSQL. Rollback: **cerrar/revertir únicamente PR #17**, sin afectar PR #16 ni PROD; no fusionar.
 
 **Siguiente corte:** `B7_CUT04_REAL_OWNER_GRANTS_SUPERVISOR_TRIBUNAL_GATEWAY_AND_SAFE_INFLIGHT_CANCELLATION`. No declarar HECHO/PROD hasta cerrar permisos reales, recuperación y conexiones E2E.
+
+## 7. Reconciliación de dependencias EXISTENTES · OLD vs NEW
+Se ha leído el código del planificador DAG, JOB-001 durable, Supervisor continuo, registro de especialistas FACT-001 y Tribunal ya existentes en `cerebro/runtime/`. B7 no los sustituye: esos componentes tienen contratos PREPROD y la nueva capa de delegación está limitada a LAB. Cinco pruebas de equivalencia/compatibilidad pasan en la suite **357/357**. Ver `zeus/jarvis/B7_EXISTING_COMPONENT_COMPATIBILITY_2026-11-04.md`. Los adapters hacia el runtime real se consideran **PARCIALES / POR AUDITAR**, no activos.
