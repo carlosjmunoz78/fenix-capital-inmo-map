@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "GATEWAY_READONLY_E2E_GREEN_CONTINUOUS_RUN_KEY_CANDIDATE_READY_PHYSICAL_INSTALL_PENDING",
+  "status": "PC001_CONTINUOUS_AUTHENTICATED_PREPROD_WORKER_LIVE_AND_4_OF_4_HEALTH_REBOOT_ROLLBACK_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -35,7 +35,7 @@
     "pc001_physical_s3_sleep_resume": "PASS_4_OF_4_PHYSICAL_USER_BUTTON_WAKE_2026_11_04",
     "pc001_remote_authenticated_readonly_e2e": "PASS_PHYSICAL_CLIENT_AND_SERVER_COMPLETED_2026_11_04_16_02_UTC",
     "pc001_continuity_static": "30_OF_30_PASS",
-    "pc001_continuity_windows": "PENDING",
+    "pc001_continuity_windows": "PASS_CURRENT_USER_SESSION_HEALTH_AND_BACKEND_HEARTBEAT",
     "pc001_continuity_reboot": "PENDING",
     "pc001_continuity_rollback": "PENDING"
   },
@@ -44,7 +44,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "ONE_CLICK_PHYSICAL_SIDE_BY_SIDE_INSTALL_AND_WORKER_READBACK; THEN PHYSICAL_REBOOT_PERSISTENCE; THEN OWN_RUN_KEY_ROLLBACK_AND_ACCESSBOOT_CAPTURE; WOL_HOLD_NO_VERIFIED_RELAY",
+  "next_block": "PHYSICAL_WINDOWS_REBOOT_AND_USER_LOGIN; RUN_EXISTING_READONLY_COMPROBAR_CEREBRO_PC001_UN_CLIC_CMD; VERIFY_NEW_BOOT_TIME_AUTHENTICATED_WORKER_4_OF_4_AND_BACKEND_HEARTBEAT; THEN_OWN_RUN_KEY_ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -734,7 +734,7 @@
     "completed_at_utc": "2026-11-04T16:02:09.353Z"
   },
   "pc001_gateway_continuity_v1_20261104": {
-    "status": "CANDIDATE_STATIC_PASS_30_OF_30_WINDOWS_PHYSICAL_PENDING",
+    "status": "PHYSICAL_INSTALLED_AUTHENTICATED_WORKER_GREEN_REBOOT_PENDING",
     "scope": {
       "company_id": "fenix",
       "engine_id": "PC-001",
@@ -758,8 +758,8 @@
     "new_port_listener": false,
     "rollback": "own_run_key_only_dpapi_backup_and_marker",
     "static_checks": "30_OF_30_PASS",
-    "windows_installed": false,
-    "background_worker_executed": false,
+    "windows_installed": true,
+    "background_worker_executed": true,
     "post_reboot_continuity_verified": false,
     "rollback_physically_verified": false,
     "cost_eur_new_subscription": 0,
@@ -768,5 +768,37 @@
     "prod_write_authorized": false,
     "trading_access": false,
     "next_user_step": "UNZIP_ON_ALREADY_PAIRED_WINDOWS_AND_DOUBLE_CLICK_INSTALAR_CONTINUIDAD_PC001_CMD_THEN_COMPROBAR_CONTINUIDAD_PC001_CMD_SEND_JSONS"
+  },
+  "pc001_gateway_continuity_physical_acceptance_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_CONTINUIDAD_ESTADO.json_and_SUPABASE_AGENT_HEARTBEAT_QUERY",
+    "checked_at_utc": "2026-11-04T16:47:11.2338274Z",
+    "windows_boot_at_utc": "2026-11-03T07:37:02.4235050Z",
+    "startup_key_own_valid": true,
+    "worker_status": "ONLINE_AUTHENTICATED",
+    "worker_last_check_utc": "2026-11-04T16:44:44.5869264Z",
+    "worker_status_fresh": true,
+    "worker_status_age_minutes": 2.4,
+    "local_health": {
+      "8765": "PASS",
+      "8766": "PASS",
+      "8767": "PASS",
+      "8768": "PASS"
+    },
+    "dpapi_vault_exists": true,
+    "backend_agent_company_id": "fenix",
+    "backend_agent_environment": "PREPROD",
+    "backend_agent_version": "pc001-windows-v1",
+    "backend_agent_status": "ONLINE",
+    "backend_last_seen_at_utc": "2026-11-04T16:47:47.105Z",
+    "backend_heartbeat_age_seconds_at_query": 27,
+    "installed_current_user_autostart": true,
+    "physically_installed": true,
+    "authenticated_periodic_worker_verified": true,
+    "post_reboot_continuity_verified": false,
+    "rollback_physically_verified": false,
+    "prod_modified": false,
+    "credentials_read": false,
+    "additional_subscription_eur": 0,
+    "status": "PHYSICAL_CURRENT_SESSION_AUTOSTART_AND_CONTINUOUS_AUTH_GREEN_REBOOT_PENDING"
   }
 }
