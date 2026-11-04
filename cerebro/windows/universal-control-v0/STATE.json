@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_SINGLE_V05_PC_PHYSICAL_ONCE_AND_READ_TXT; THEN_GATEWAY_PAIRING_AUTH_E2E_REBOOT_AND_ROLLBACK_WITHOUT_REPEAT_DIAGNOSTICS",
+  "next_block": "IDENTIFY_WINERROR32_SOURCE_AND_LOCK_OWNER_BEFORE_ANOTHER_EXECUTABLE_OR_RESTART; AUDIT_8766_AGENT_ORIGINAL_LOGS_AND_8768_START_COMMAND",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -245,5 +245,21 @@
     "report": "CEREBRO_PC_RECUPERACION_V05.txt",
     "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_RECUPERACION_V0_5_PREPROD.zip",
     "process_changes": "ONLY_EXACT_HASH_VETTED_LEGACY_SERVICE_STARTS_NO_AUTOSTART_CHANGES"
+  },
+  "incident_winerror32_20261104": {
+    "source": "user_report_after_physically_executing_v05",
+    "time_local": "2026-11-04T11:42:36+01:00",
+    "symptom": "Windows ERROR_SHARING_VIOLATION / WinError 32 file in use by another process; lock owner and file UNKNOWN",
+    "v05_report": {
+      "port_8765": "HEALTH_OK",
+      "port_8767": "HEALTH_OK",
+      "port_8766": "old_device_agent_started_pid_11252_but_no_health",
+      "port_8768": "UNKNOWN_FLAGS_FAIL_CLOSED",
+      "new_process_count": 1
+    },
+    "v05_code_review": "V0.5 does not replace/delete existing legacy binaries or alter Run; starts only pre-existing hashed Device Agent once and may write its own backup and TXT",
+    "cause": "UNCONFIRMED; temporal link to launched legacy agent possible",
+    "safety_gate": "FREEZE_REPEAT_LEGACY_AGENT_LAUNCH; DO_NOT_KILL_OR_OVERWRITE_RUNNING_PROCESSES; PRESERVE_V02_AND_8765_8767; identify exact dialog title + locked filename and owner; verify process health and rollback before further changes",
+    "physical_fix_verified": false
   }
 }
