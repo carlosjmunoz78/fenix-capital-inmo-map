@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "LOCAL_4_OF_4_HEALTH_VERIFIED_GATEWAY_AUTH_E2E_PENDING",
+  "status": "PHYSICAL_READONLY_PREFLIGHT_PASS_AUTHENTICATED_GATEWAY_E2E_AND_WOL_RELAY_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -26,11 +26,12 @@
     "windows_amd64_gui_pe_build": "PASS",
     "reproducible_build": "PASS",
     "windows_runtime": "PARTIAL_USER_OBSERVED_STATUS_DIALOG",
-    "listeners": "8767_PASS_OTHERS_FAIL",
+    "listeners": "8765_8766_8767_8768_PASS_PHYSICAL_2026_11_04",
     "reboot_persistence": "PENDING",
     "camera_microphone": "NOT_TESTED_NO_RUNTIME_CAPABILITY_IN_V0",
     "pc001_device_lifecycle": "11_OF_11_PASS_NODE_LOCAL",
-    "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED"
+    "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED",
+    "pc001_power_readonly_windows": "PASS_PHYSICAL_2026_11_04_13_05_UTC"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
@@ -529,5 +530,44 @@
       "7442748b1787be170ba98b7463da8de252b9e133",
       "2bff3ac83e3cfee639b23e47db2bdfffa7ccbdbe"
     ]
+  },
+  "pc001_windows_physical_preflight_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_DIAGNOSTICO.json",
+    "recorded_at_utc": "2026-11-04T13:05:45.1560290Z",
+    "executed_on_real_windows": true,
+    "mode": "READ_ONLY",
+    "ports": {
+      "8765": "HEALTH_OK",
+      "8766": "HEALTH_OK",
+      "8767": "HEALTH_OK",
+      "8768": "HEALTH_OK"
+    },
+    "gateway": {
+      "health_ready": true,
+      "outbound_https_readonly": true,
+      "agent_authenticated": false,
+      "remote_command_e2e": false
+    },
+    "windows_power": {
+      "s3_available": true,
+      "hibernate_available": true,
+      "hybrid_sleep_available": true,
+      "nic": "Intel(R) 82579LM Gigabit Network Connection",
+      "nic_status": "Up",
+      "nic_wake_armed": true,
+      "wake_on_magic_packet": "UNKNOWN",
+      "wake_on_pattern": "UNKNOWN"
+    },
+    "physical": {
+      "wake_on_lan_packet_e2e": "PENDING",
+      "relay_verified": false,
+      "suspend_not_executed": true,
+      "reboot_persistence_verified": false
+    },
+    "conclusion": "PHYSICAL_READONLY_PREFLIGHT_PASS_4_OF_4_SERVICES_WOL_CAPABLE_BUT_REMOTE_AUTH_AND_RELAY_PENDING",
+    "prod_changed": false,
+    "new_installation": false,
+    "secret_values_logged": false,
+    "cost_eur": 0
   }
 }
