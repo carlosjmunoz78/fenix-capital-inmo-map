@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_REBOOT_3_OF_4_WINERROR10013_SAFE_LEGACY_CLEANUP_CANDIDATE_READY_NOT_PHYSICALLY_APPLIED",
+  "status": "PC001_PHYSICAL_CLEANUP_SELECTIVE_PASS_BUT_ONLY_8767_HEALTHY_1_OF_4_GATEWAY_STALE_DIAG_V2_READY",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -47,7 +47,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_ONE_CLICK_PC001_CLEANUP_PREPROD_AFTER_180S_BOOT_WARMUP; INSPECT_SANITIZED_JSON AND CHECK 8766; ONLY THEN REBOOT_AND_ROLLBACK_PHYSICAL; PRESERVE_AUTHENTICATED_GATEWAY_PROD_DENIED",
+  "next_block": "ONE_CLICK_READONLY_DIAG_V2_THEN_DIAGNOSE_8765_8768_STARTUP_PROCESSES_AND_PORT_CONFLICTS; RECOVER_8766_ONLY_WHEN_3_OTHER_SERVICES_HEALTHY; REBOOT_LATER; DO_NOT_TOUCH_PROD",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -832,7 +832,16 @@
     "incident": "WINERROR_10013_WSAEACCES_SOCKET_PERMISSION_DENIED_NOT_EQUAL_TO_WSAEADDRINUSE_10048",
     "cause_status": "NOT_CONFIRMED_CHECK_DUPLICATE_LEGACY_STARTUP_AND_PORT_EXCLUSIONS",
     "prod_modified": false,
-    "no_new_installations": true
+    "no_new_installations": true,
+    "services_later": {
+      "8765": "FAILED",
+      "8766": "FAILED",
+      "8767": "OK",
+      "8768": "FAILED"
+    },
+    "last_observed_utc": "2026-11-04T17:20:52.7591253Z",
+    "gateway_heartbeat_last_seen_utc": "2026-11-04T16:47:47.105Z",
+    "gateway_status_operational": "STALE_HEARTBEAT_NOT_ACTIVE"
   },
   "pc001_safe_legacy_cleanup_v1_20261104": {
     "status": "CANDIDATE_STATIC_PASS_PHYSICAL_PENDING",
@@ -859,5 +868,51 @@
     "boot_retest_pending": true,
     "other_windows_pc_distribution_authorized": false,
     "accessboot_universal_integrated": false
+  },
+  "pc001_safe_legacy_cleanup_physical_20261104": {
+    "status": "APPLIED_SELECTIVE_WITH_DPAPI_ROLLBACK_RECOVERY_HELD",
+    "observed_at_utc": "2026-11-04T17:20:52.7591253Z",
+    "boot_age_seconds": 1738,
+    "startup_cleanups": [
+      "VERIFIED_DUPLICATE_V07_RUN_REMOVED_BACKED_UP_DPAPI",
+      "OLD_UNSAFE_STARTUP_CMD_REMOVED_DPAPI_RESTORABLE"
+    ],
+    "services_before": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "services_after": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "v07_verified": true,
+    "remaining_v07_run_verified": true,
+    "old_agent_running_count": 0,
+    "excluded_ports": [],
+    "v07_recovery": "HOLD_CORE_HEALTH_OR_V07_SCOPE",
+    "old_files_not_deleted": true,
+    "existing_binaries_unmodified": true,
+    "existing_services_unmodified": true,
+    "existing_tasks_unmodified": true,
+    "prod_modified": false,
+    "physical_rollback_verified": false,
+    "next_priority": "READ_ONLY_TARGETED_DIAG_8765_AND_8768_BEFORE_REATTEMPTING_8766"
+  },
+  "pc001_readonly_reboot_diag_v2": {
+    "status": "ZIP_STATIC_PASS_WINDOWS_PHYSICAL_PENDING",
+    "zip_name": "CEREBRO_PC001_DIAGNOSTICO_REINICIO_V2_PREPROD.zip",
+    "zip_sha256": "5ef6ee8531f61c38d9564a08e85a98c618606d7af8298e10a4baf3675ec09764",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_DIAGNOSTICO_REINICIO_V2_PREPROD.zip",
+    "tool": "DIAGNOSTICAR_ARRANQUE_PC001.cmd",
+    "receipt": "CEREBRO_PC001_DIAGNOSTICO_REINICIO_V2.json",
+    "mode": "READ_ONLY",
+    "static_assertions_pass": 32,
+    "windows_tested": false,
+    "new_windows_changes": false,
+    "next": "DETERMINE_RUNNING_PROCESS_AND_HASHED_CONFIG_FOR_FAILED_8765_8766_8768"
   }
 }
