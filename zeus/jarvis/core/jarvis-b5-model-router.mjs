@@ -47,7 +47,7 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
    if(chosen.provider!=='DEEPSEEK')return denied('EXTERNAL_PROVIDER_NOT_AUTHORIZED',companyId,capability);
    // Credit is not proof of an actual usable authorization or a spendable balance.
    const proofAgeMs=Date.now()-Date.parse(balanceProof?.checkedAt);
-   if(!balanceProof?.verified||balanceProof.currency!=='EUR'||!validMoney(balanceProof.availableEuro)
+   if(!balanceProof?.verified||balanceProof.provider!=='DEEPSEEK'||balanceProof.currency!=='EUR'||!validMoney(balanceProof.availableEuro)
       ||balanceProof.companyId!==companyId||balanceProof.environment!==environment
       ||!Number.isFinite(proofAgeMs)||proofAgeMs<0||proofAgeMs>15*60*1000)
     return denied('BALANCE_NOT_VERIFIED',companyId,capability);
