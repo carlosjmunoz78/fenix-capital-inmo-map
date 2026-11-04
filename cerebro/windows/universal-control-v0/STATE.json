@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_CONTINUOUS_AUTHENTICATED_PREPROD_WORKER_LIVE_AND_4_OF_4_HEALTH_REBOOT_ROLLBACK_PENDING",
+  "status": "PC001_REBOOT_3_OF_4_WINERROR10013_SAFE_LEGACY_CLEANUP_CANDIDATE_READY_NOT_PHYSICALLY_APPLIED",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -37,14 +37,17 @@
     "pc001_continuity_static": "30_OF_30_PASS",
     "pc001_continuity_windows": "PASS_CURRENT_USER_SESSION_HEALTH_AND_BACKEND_HEARTBEAT",
     "pc001_continuity_reboot": "PENDING",
-    "pc001_continuity_rollback": "PENDING"
+    "pc001_continuity_rollback": "PENDING",
+    "pc001_post_reboot_persistence": "FAIL_8766_OFF_AND_WORKER_BACKOFF",
+    "pc001_safe_cleanup_static": "39_OF_39_PASS",
+    "pc001_safe_cleanup_physical": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "USER_PHYSICAL_REBOOT: ALLOW_THREE_MINUTES_AFTER_WINDOWS_LOGIN_BEFORE_RUNNING_READONLY_DIAGNOSTIC; PRESERVE_FOUR_SERVICES; VERIFY_AUTHENTICATED_WORKER_AFTER_WARMUP; FOR_S3_WAIT_180S_ASLEEP_AND_180S_AFTER_WAKE; REBOOT_ROLLBACK_PENDING",
+  "next_block": "RUN_ONE_CLICK_PC001_CLEANUP_PREPROD_AFTER_180S_BOOT_WARMUP; INSPECT_SANITIZED_JSON AND CHECK 8766; ONLY THEN REBOOT_AND_ROLLBACK_PHYSICAL; PRESERVE_AUTHENTICATED_GATEWAY_PROD_DENIED",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -812,5 +815,49 @@
     "applies_to_future_installers_and_test_procedures": true,
     "no_windows_state_changed": true,
     "no_prod_changes": true
+  },
+  "pc001_post_reboot_incident_20261104": {
+    "source": "owner_photos_WinError10013_plus_CEREBRO_PC001_CONTINUIDAD_ESTADO(1).json",
+    "checked_at_utc": "2026-11-04T17:00:53.7557302Z",
+    "windows_boot_at_utc": "2026-11-04T16:51:26.5000000Z",
+    "warmup_policy_seconds": 180,
+    "after_3_min_warmup": true,
+    "services_after_restart": {
+      "8765": "OK",
+      "8766": "FAILED",
+      "8767": "OK",
+      "8768": "OK"
+    },
+    "gateway_worker_status": "HOLD_RETRY_BACKOFF",
+    "incident": "WINERROR_10013_WSAEACCES_SOCKET_PERMISSION_DENIED_NOT_EQUAL_TO_WSAEADDRINUSE_10048",
+    "cause_status": "NOT_CONFIRMED_CHECK_DUPLICATE_LEGACY_STARTUP_AND_PORT_EXCLUSIONS",
+    "prod_modified": false,
+    "no_new_installations": true
+  },
+  "pc001_safe_legacy_cleanup_v1_20261104": {
+    "status": "CANDIDATE_STATIC_PASS_PHYSICAL_PENDING",
+    "artifact": "CEREBRO_PC001_LIMPIEZA_SEGURA_REINICIO_PREPROD_V1.zip",
+    "artifact_sha256": "7bbd2b51d0aa64659a6df370bfc017741a923fa13ddfc2f8d27770991883e73e",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_LIMPIEZA_SEGURA_REINICIO_PREPROD_V1.zip",
+    "repository_doc": "cerebro/windows/pc-001/PC001_LEGACY_STARTUP_SAFE_CLEANUP_V1_20261104.md",
+    "local_executable": "LIMPIAR_PC001_Y_RECUPERAR_8766.cmd",
+    "report": "CEREBRO_PC001_LIMPIEZA_RESULTADO.json",
+    "static_tests": "39_OF_39_PASS",
+    "zip_integrity": "PASS",
+    "actions": [
+      "VERIFY_EXISTING_WINDOWS_ID_AND_WAIT_BOOT_WARMUP_180S",
+      "INVENTORY_RUN_AND_PORT_OWNER_NO_SECRETS",
+      "DPAPI_QUARANTINE_VERIFIED_DUPLICATE_V07_RUN",
+      "DPAPI_QUARANTINE_PROVABLY_UNSAFE_LEGACY_STARTUP_CMD",
+      "SAFE_EXISTING_V07_STARTUP_RECOVERY_ONLY_IF_NO_AGENT_RUNNING"
+    ],
+    "no_broad_deletion": true,
+    "no_kill_existing_processes": true,
+    "no_prod_changes": true,
+    "physical_applied": false,
+    "physical_rollback_tested": false,
+    "boot_retest_pending": true,
+    "other_windows_pc_distribution_authorized": false,
+    "accessboot_universal_integrated": false
   }
 }
