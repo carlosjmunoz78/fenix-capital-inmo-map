@@ -52,3 +52,25 @@ test('Every release demands evidence, a tested rollback and no false SEO success
  assert.equal(contract.measurables.only_measure_verified_data,true);
  assert.ok(contract.open_gates.length>=5);
 });
+
+test('SEO agents and subagents own work; plugins are subordinate, replaceable tools',()=>{
+ const a=contract.architecture;
+ assert.equal(a.operating_principle,'AGENTS_AND_SUBAGENTS_DO_THE_ORDINARY_WORK;PLUGINS_ARE_NON_DECISION_MAKING_EXECUTION_ADAPTERS');
+ assert.equal(a.accountability.execution_owner,'CEREBRO_AGENT_AND_SUBAGENT_TEAMS');
+ assert.equal(a.accountability.plugin_autonomous_decision_making,false);
+ assert.equal(a.agent_workflow.current_state,'DEFINED_NOT_RUNTIME_BOUND');
+ assert.equal(a.agent_workflow.for_each_task[1],'DELEGATE_TO_SPECIALIST_SUBAGENTS');
+ assert.equal(a.plugin_contract.role,'AUXILIARY_WORDPRESS_TOOL_AND_PERMISSIONED_ADAPTER');
+ assert.equal(a.plugin_contract.work_ownership,'NONE');
+ assert.equal(a.plugin_contract.execution_without_agent_authorization,'DENY');
+ assert.equal(a.plugin_contract.requires_signed_mission_or_explicit_approved_job,true);
+ assert.equal(a.plugin_contract.new_plugin_subscription_required,false);
+ for (const forbidden of ['OWN_SEO_STRATEGY','WRITE_CONTENT_AS_THE_AUTHORITATIVE_AGENT','SUPERVISE_OR_REWARD_AGENTS','PROMOTE_STAGING_TO_PROD_WITHOUT_CEREBRO_APPROVAL']){
+  assert.ok(a.plugin_contract.must_not.includes(forbidden));
+ }
+ for (const department of a.functional_departments){
+  assert.equal(department.work_owner,'CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS');
+  assert.equal(department.plugin_role,'OPTIONAL_TOOL_ONLY');
+ }
+ assert.equal(contract.release.plugin_direct_promotion_forbidden,true);
+});
