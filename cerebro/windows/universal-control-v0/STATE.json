@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "USER_REPORTS_INSTALLED_LIVE_EVIDENCE_HOST_ONLY_NO_FULL_HOST_ATTESTATION",
+  "status": "WINDOWS_TRAY_STATUS_DIALOG_CONFIRMED_LOCAL_PARTIAL_GATEWAY_OFF",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -14,7 +14,7 @@
   "new_scheduler_created": false,
   "gateway_connected": false,
   "remote_control_enabled": false,
-  "physical_installed": false,
+  "physical_installed": true,
   "prod_authorized": false,
   "trading_access": false,
   "additional_cost_eur": 0,
@@ -25,14 +25,17 @@
     "go_vet_windows": "PASS",
     "windows_amd64_gui_pe_build": "PASS",
     "reproducible_build": "PASS",
-    "windows_runtime": "PENDING"
+    "windows_runtime": "PARTIAL_USER_OBSERVED_STATUS_DIALOG",
+    "listeners": "8767_PASS_OTHERS_FAIL",
+    "reboot_persistence": "PENDING",
+    "camera_microphone": "NOT_TESTED_NO_RUNTIME_CAPABILITY_IN_V0"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "ATTEST_DESKTOP_028M1HO_OWN_TRAY_STATUS_AND_RECOVER_EXISTING_8765_8766_8768_SAFELY_THEN_TEST_CAMERA_MIC_LOCAL_CONSENT_AND_GATEWAY",
+  "next_block": "READONLY_EXISTING_STARTUP_PROCESS_DEPENDENCY_INVENTORY_FOR_8765_8766_8768_THEN_RESTORE_OLD_CONTROLLERS_ONE_AT_A_TIME_WITH_ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -53,5 +56,25 @@
   "next_version_ui": {
     "tray_icon": "Large uppercase Z in blue, calm professional style, replace current warning/error-themed system icon",
     "no_behavior_changes_without_contract_and_tests": true
+  },
+  "physical_evidence": {
+    "method": "User supplied photograph of running CEREBRO OS status dialog on 2026-11-04; corroborated by connected Opera localhost checks",
+    "what_is_verified": [
+      "V0.1.0 status dialog renders on user PC",
+      "PREPROD local state LOCAL_PARTIAL",
+      "8767 Evidence Host accessible and healthy",
+      "8765/8766/8768 not answering local health",
+      "GatewayConnected=false, RemoteCommandsEnabled=false"
+    ],
+    "what_is_not_verified": [
+      "physical executable hash on host",
+      "runkey persistence after actual reboot",
+      "camera or microphone enumeration/permission/recording",
+      "actual mouse/keyboard/screen remote control",
+      "host OS identity matching screenshot ID",
+      "physical rollback",
+      "actual backend connectivity"
+    ],
+    "sensitive_device_id_in_public_registry": false
   }
 }
