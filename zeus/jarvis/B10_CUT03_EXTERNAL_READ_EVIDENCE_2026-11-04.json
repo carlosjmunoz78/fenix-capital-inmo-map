@@ -1,0 +1,186 @@
+{
+  "schema": "zeus.jarvis.b10.external-read.v1",
+  "recorded_date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "ORCH-001",
+  "version": "0.1.0",
+  "classification": "REAL_EXTERNAL_READ",
+  "source_security": "Observed through authenticated GitHub/Supabase read-only connector; this document is NOT signed/live transaction attestation.",
+  "observations": [
+    {
+      "id": "S1",
+      "source": "SUPABASE_CONTROL_PLANE",
+      "kind": "SUPABASE_PROJECT_STATUS",
+      "project_ref": "cluhljgonannaafpmblx",
+      "value": "ACTIVE_HEALTHY",
+      "meaning": "control plane status only"
+    },
+    {
+      "id": "S2",
+      "source": "SUPABASE_CONTROL_PLANE",
+      "kind": "EDGE_FUNCTION_DEPLOYED",
+      "count_total": 95,
+      "functions": {
+        "fenix-app-gateway": {
+          "status": "ACTIVE",
+          "version": 22
+        },
+        "cerebro-console-gateway-v0": {
+          "status": "ACTIVE",
+          "version": 33
+        },
+        "jarvis-work-dispatch-v1": {
+          "status": "ACTIVE",
+          "version": 1
+        },
+        "jarvis-git-dispatch-v1": {
+          "status": "ACTIVE",
+          "version": 1
+        },
+        "jarvis-work-gateway-v1": {
+          "status": "ACTIVE",
+          "version": 3
+        },
+        "jarvis-git-gateway-v1": {
+          "status": "ACTIVE",
+          "version": 2
+        },
+        "jarvis-orchestrator-v0": {
+          "status": "ACTIVE",
+          "version": 2
+        }
+      },
+      "meaning": "deployment status only: no successful endpoint auth or mission proof"
+    },
+    {
+      "id": "S3",
+      "source": "SUPABASE_SQL_READONLY",
+      "kind": "B3_PROD_CONTROL",
+      "value": {
+        "enabled": false,
+        "kill_switch": true
+      }
+    },
+    {
+      "id": "S4",
+      "source": "SUPABASE_SQL_READONLY",
+      "kind": "B4_PROD_CONTROL",
+      "value": {
+        "enabled": false,
+        "kill_switch": true
+      }
+    },
+    {
+      "id": "S5",
+      "source": "SUPABASE_SQL_READONLY",
+      "kind": "COMPANY_REGISTRY_PREPROD_COUNT",
+      "value": 0,
+      "scope": "public.cerebro_company_registry_preprod",
+      "meaning": "PREPROD table empty, not a global inventory of companies"
+    },
+    {
+      "id": "S6",
+      "source": "SUPABASE_SQL_READONLY",
+      "kind": "PROJECT_OVERLAY",
+      "project_id": "PRJ-SUPERAGENT-001",
+      "status": "PARCIAL",
+      "audit_ref_count": 70
+    },
+    {
+      "id": "G1",
+      "source": "GITHUB_READONLY",
+      "kind": "GITHUB_BRANCH_HEAD",
+      "branch": "main",
+      "sha": "3f06b8bbe92a12572329b05a27d1243335c2756f"
+    },
+    {
+      "id": "G2",
+      "source": "GITHUB_READONLY",
+      "kind": "GITHUB_BRANCH_HEAD",
+      "branch": "prod-preparation",
+      "sha": "b2d8347845850d26b51194cfaa8092b4cdf81ba1"
+    },
+    {
+      "id": "G3",
+      "source": "GITHUB_READONLY",
+      "kind": "GITHUB_BRANCH_HEAD",
+      "branch": "cerebro/jarvis-b10-prod-certification-v0-20261104",
+      "sha": "e7ebb25a7f83ace1557ba67123dd161fdf198be2",
+      "notes": "B10 code tested; final documentation commit appended later"
+    },
+    {
+      "id": "G4",
+      "source": "GITHUB_READONLY",
+      "kind": "SOURCE_MARKER_GIT_BRANCH",
+      "path": "PROD_SOURCE_SHA.txt",
+      "result": "NOT_FOUND_AT_REPO_ROOT_ON_MAIN_AND_PROD_PREPARATION",
+      "meaning": "does not prove deployed artifact missing"
+    },
+    {
+      "id": "H1",
+      "source": "PUBLIC_HTTP_READONLY",
+      "kind": "APP_LIVE_CHECK",
+      "targets": [
+        "https://app.fenixcapital.es/",
+        "https://app.fenixcapital.es/PROD_SOURCE_SHA.txt"
+      ],
+      "result": "NOT_ACCESSIBLE_FROM_CURRENT_TOOL_ENVIRONMENT",
+      "meaning": "cannot establish HTTP status or deployed SHA"
+    },
+    {
+      "id": "H2",
+      "source": "PUBLIC_HTTP_READONLY",
+      "kind": "GATEWAY_HEALTH",
+      "target": "https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/health",
+      "result": "NOT_ACCESSIBLE_FROM_CURRENT_TOOL_ENVIRONMENT",
+      "meaning": "function deployment status is not health proof"
+    },
+    {
+      "id": "D1",
+      "source": "USER_BROWSER_READONLY",
+      "kind": "CHROME_BROWSER_CONTEXT",
+      "result": "ORIGINATING_BROWSER_CONTEXT_REQUIRED"
+    },
+    {
+      "id": "D2",
+      "source": "USER_BROWSER_READONLY",
+      "kind": "OPERA_BROWSER_TABS",
+      "result": "TWO_INSTALLATIONS_NONRESPONSIVE_AFTER_30S",
+      "meaning": "not evidence that no other devices are available"
+    },
+    {
+      "id": "CI1",
+      "source": "GITHUB_ACTIONS",
+      "kind": "NODE_UNIT_INTEGRATION_CI",
+      "run": 41799171359,
+      "sha": "e7ebb25a7f83ace1557ba67123dd161fdf198be2",
+      "passed": 508,
+      "failed": 0,
+      "skipped": 0,
+      "classification": "LOCAL_LAB_TEST"
+    },
+    {
+      "id": "CI2",
+      "source": "GITHUB_ACTIONS",
+      "kind": "B7_LAB_REGRESSION",
+      "run": 41799171394,
+      "status": "SUCCESS",
+      "classification": "LOCAL_LAB_TEST"
+    },
+    {
+      "id": "CI3",
+      "source": "GITHUB_ACTIONS",
+      "kind": "GOVERNED_INTEGRATION_CI",
+      "run": 41799171383,
+      "status": "SUCCESS",
+      "classification": "LOCAL_LAB_TEST"
+    }
+  ],
+  "cross_device_owner_mission_proven": false,
+  "prod_operation_verified_count": 0,
+  "prod_write_performed": false,
+  "app_crm_modified": false,
+  "paid_subscription_added": false,
+  "warning": "These control-plane observations MUST NOT be converted into PROD_OPERATION_VERIFIED or authorization grants."
+}
