@@ -1,0 +1,55 @@
+name: ZEUS JARVIS B8 Cut04 PG17 Durable Commitments LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/core/jarvis-b8-commitments.mjs'
+      - 'zeus/jarvis/core/jarvis-b8-commitments.test.mjs'
+      - 'zeus/jarvis/gates/b8-cut04-*'
+      - '.github/workflows/jarvis-b8-cut04-pg17-commitments-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b8-real-pg17-commitment:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: jarvis_ci
+          POSTGRES_PASSWORD: ephemeral_only_b8_cut04
+          POSTGRES_DB: jarvis_b8_cut04
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jarvis_ci -d jarvis_b8_cut04"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: jarvis_ci
+      PGPASSWORD: ephemeral_only_b8_cut04
+      PGDATABASE: jarvis_b8_cut04
+      JARVIS_B8_LAB_ONLY: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify node and install disposable PostgreSQL client
+        run: |
+          node --version
+          command -v psql >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Build isolated B8 synthetic company commitment tables
+        run: psql -X -v ON_ERROR_STOP=1 -f zeus/jarvis/gates/b8-cut04-pg17-commitments-fixture.sql
+      - name: Two synthetic companies with true PG17 atomic claims
+        run: node zeus/jarvis/gates/b8-cut04-pg17-commitments-lab.mjs --phase=write
+      - name: Verify real process restart and idempotent receipts
+        run: node zeus/jarvis/gates/b8-cut04-pg17-commitments-lab.mjs --phase=read
+      - name: Snapshot disposable B8 LAB data
+        run: pg_dump -Fc -n zeus_jarvis_b8_lab -f /tmp/zeus-b8-cut04-synthetic.dump
+      - name: Restore complete B8 LAB schema and records without touching PROD
+        run: |
+          psql -X -v ON_ERROR_STOP=1 -c 'DROP SCHEMA zeus_jarvis_b8_lab CASCADE;'
+          pg_restore --no-owner --no-privileges -d "$PGDATABASE" /tmp/zeus-b8-cut04-synthetic.dump
+          node zeus/jarvis/gates/b8-cut04-pg17-commitments-lab.mjs --phase=read
