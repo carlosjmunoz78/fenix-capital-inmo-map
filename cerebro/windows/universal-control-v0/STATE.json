@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_GATEWAY_AUTHENTICATED_REMOTE_READONLY_COMMAND_QUEUED_E2E_RESULT_PENDING",
+  "status": "PC001_GATEWAY_AUTHENTICATED_READONLY_E2E_GREEN_4_OF_4_PHYSICAL_SLEEP_RESUME_GREEN",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -32,14 +32,15 @@
     "pc001_device_lifecycle": "11_OF_11_PASS_NODE_LOCAL",
     "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED",
     "pc001_power_readonly_windows": "PASS_PHYSICAL_2026_11_04_13_05_UTC",
-    "pc001_physical_s3_sleep_resume": "PASS_4_OF_4_PHYSICAL_USER_BUTTON_WAKE_2026_11_04"
+    "pc001_physical_s3_sleep_resume": "PASS_4_OF_4_PHYSICAL_USER_BUTTON_WAKE_2026_11_04",
+    "pc001_remote_authenticated_readonly_e2e": "PASS_PHYSICAL_CLIENT_AND_SERVER_COMPLETED_2026_11_04_16_02_UTC"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "WAIT_FOR_CLIENT_SECOND_POLL_RESULT; VERIFY_COMMAND_COMPLETED_AND_SANITIZED_SERVICE_HEALTH_RECEIPT; NO_ARBITRARY_REMOTE_COMMANDS",
+  "next_block": "PRESERVE_GREEN_4_PORTS_AND_SCOPED_AUTH; VERIFY_POST_REBOOT_PERSISTENCE_AND_ROLLBACK_NONDESTRUCTIVELY; ASSESS_EXISTING_ACCESSBOOT_INTEGRATION; REMOTE_MUTATIONS_AND_WAKE_ON_LAN_STILL_HOLD",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -675,8 +676,8 @@
     "new_subscription": false
   },
   "pc001_gateway_authenticated_receipt_20261104": {
-    "source": "user_uploaded_CEREBRO_PC001_GATEWAY_RESULTADO.json_and_SUPABASE_DEVICE_AGENT_DATABASE_READ",
-    "status": "AUTHENTICATED_POLL_EMPTY",
+    "source": "user_uploaded_CEREBRO_PC001_GATEWAY_RESULTADO(2).json_and_SUPABASE_CROSSCHECK",
+    "status": "PASS_AUTHENTICATED_E2E_HEALTH_4_OF_4",
     "device_scope": "fenix/PREPROD/pc001-windows-v1",
     "initial_client_report_utc": "2026-11-04T15:57:35.5101617Z",
     "backend_status": "ONLINE",
@@ -687,10 +688,27 @@
     "e2e_remote_command_execution_verified": false,
     "prod_modified": false,
     "secrets_exported": false,
-    "cost_eur": 0
+    "cost_eur": 0,
+    "client_receipt_utc": "2026-11-04T16:02:08.3667673Z",
+    "client_receipt_ack": "RESULT_STORED",
+    "client_semantic_verified": true,
+    "gateway_authenticated": true,
+    "all_four_local_services_healthy": true,
+    "server_verified_command_state": "COMPLETED",
+    "server_verified_delivery_attempt": 1,
+    "server_verified_command_action": "READ_HEALTH",
+    "server_verified_capability": "SERVICE_HEALTH",
+    "server_verified_semantic_verified": true,
+    "server_verified_delivered_at_utc": "2026-11-04T16:02:07.862Z",
+    "server_verified_result_at_utc": "2026-11-04T16:02:09.312971Z",
+    "server_verified_completed_at_utc": "2026-11-04T16:02:09.353Z",
+    "remote_readonly_e2e_verified": true,
+    "remote_mutations_verified": false,
+    "agent_installed": false,
+    "service_modified": false
   },
   "pc001_gateway_synthetic_command_20261104": {
-    "status": "QUEUED_WAITING_ON_SECOND_PHYSICAL_CLIENT_POLL",
+    "status": "COMPLETED",
     "command_id": "7d1cb9ae-983e-4472-97fd-79c0da13ce1b",
     "action": "READ_HEALTH",
     "capability": "SERVICE_HEALTH",
@@ -703,9 +721,12 @@
     "payload_scope": "EXACT_SINGLETON_ALLOWLISTS",
     "state_changing": false,
     "prod_authorized": false,
-    "result_verified": false,
+    "result_verified": true,
     "next": "RUN_EXISTING_VINCULAR_PC001_PREPROD_CMD_ON_PC_AND_UPLOAD_CEREBRO_PC001_GATEWAY_RESULTADO_JSON",
     "no_new_windows_installation": true,
-    "cost_eur": 0
+    "cost_eur": 0,
+    "delivery_attempt": 1,
+    "semantic_verified": true,
+    "completed_at_utc": "2026-11-04T16:02:09.353Z"
   }
 }
