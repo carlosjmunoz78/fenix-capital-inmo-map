@@ -6,6 +6,7 @@
 const ID=/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,179}$/;
 const sensitive=/\b(?:password|contrase(?:ñ|n)a|api[_ -]?key|bearer\s|access[_ -]?token|refresh[_ -]?token)\b/i;
 const safeId=(id,name)=>{if(typeof id!=='string'||!ID.test(id))throw Error(name+'_INVALID');return id;};
+const safeIdentity=id=>typeof id==='string'&&ID.test(id);
 export function createJarvisB5SpeechPort({identityProvider,consentStore,controlStore,b3PolicyService,auditStore,sttAdapter=null,ttsAdapter=null}={}){
  if(typeof identityProvider?.verify!=='function'||typeof consentStore?.check!=='function'
   ||typeof controlStore?.get!=='function'||typeof b3PolicyService?.authorize!=='function'
@@ -15,8 +16,10 @@ export function createJarvisB5SpeechPort({identityProvider,consentStore,controlS
   if(!['LAB','PREPROD','PROD'].includes(environment))throw Error('ENVIRONMENT_INVALID');
   if(!token)throw Error('AUTH_REQUIRED');
   const p=await identityProvider.verify(token);
-  if(!p?.ownerId||p.sessionId!==sessionId||!p.roles?.includes('OWNER_ROOT')
-    ||!p.authorizedCompanies?.includes(companyId))throw Error('OWNER_SCOPE_DENIED');
+  if(typeof p?.ownerId!=='string'||!safeIdentity(p.ownerId)||p.sessionId!==sessionId
+    ||!Array.isArray(p.roles)||!p.roles.includes('OWNER_ROOT')
+    ||!Array.isArray(p.authorizedCompanies)||!p.authorizedCompanies.includes(companyId))
+   throw Error('OWNER_SCOPE_DENIED');
   const c=await controlStore.get({companyId,environment});
   if(c?.enabled!==true||c?.killSwitch!==false)throw Error('B5_LOCKED');
   if(await consentStore.check({ownerId:p.ownerId,companyId,sessionId,consentRef,purpose:operation})!==true)
