@@ -74,3 +74,20 @@ test('SEO agents and subagents own work; plugins are subordinate, replaceable to
  }
  assert.equal(contract.release.plugin_direct_promotion_forbidden,true);
 });
+
+test('SEO workforce is precisely 14 agents and 70 subagents per sector family',()=>{
+ const plan=contract.architecture.family_workforce_plan;
+ assert.equal(plan.agents_per_family,14);
+ assert.equal(plan.subagents_per_agent,5);
+ assert.equal(plan.subagents_per_family,70);
+ assert.equal(plan.number_of_families,3);
+ assert.equal(plan.total_family_agents,42);
+ assert.equal(plan.total_family_subagents,210);
+ assert.equal(plan.total_family_execution_roles,252);
+ assert.equal(plan.execution_bindings_verified,false);
+ for(const family of contract.architecture.sector_families){
+  assert.equal(family.target_agents,14);
+  assert.equal(family.target_subagents,70);
+  assert.equal(family.staffing_status,'DEFINED_NOT_MATERIALIZED');
+ }
+});
