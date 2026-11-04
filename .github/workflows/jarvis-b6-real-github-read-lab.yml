@@ -1,0 +1,21 @@
+name: JARVIS B6 Real GitHub API Read LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/core/jarvis-b6-*'
+      - 'zeus/jarvis/gates/b6-real-github-read-lab.mjs'
+      - '.github/workflows/jarvis-b6-real-github-read-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-github-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read real pinned repository state without mutations
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JARVIS_B6_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node zeus/jarvis/gates/b6-real-github-read-lab.mjs
