@@ -9,7 +9,7 @@ export function auditKeywordAssignments({company_id,environment,version,source_k
  if(!['GSC_EXPORT','LAB_FIXTURE'].includes(source_kind)||typeof source_ref!=='string'||!source_ref.trim())throw Error('PROVENANCE_REQUIRED');
  if(!analyst_id||!qa_actor_id||analyst_id===qa_actor_id)throw Error('INDEPENDENT_QA_REQUIRED');
  if(!Array.isArray(rows)||rows.length>20000)throw Error('ROWS_LIMIT_DENIED');
- const urlAllowed=u=>{try{const p=new URL(u);return ['http:','https:'].includes(p.protocol)&&p.hostname.endsWith('fenixcapital.es')}catch{return false}};
+ const urlAllowed=u=>{try{const p=new URL(u);return ['http:','https:'].includes(p.protocol)&&(p.hostname==='fenixcapital.es'||p.hostname.endsWith('.fenixcapital.es'))}catch{return false}};
  // This first adapter is Fénix-specific and must not silently accept another company's URLs.
  if(company_id!=='fenix')throw Error('TENANT_ADAPTER_NOT_CONFIGURED');
  const clean=rows.map((r,i)=>{
