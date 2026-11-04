@@ -30,7 +30,7 @@ Fecha: 2026-11-04. Estado: CONTRATO Y LÓGICA DETERMINISTA DEFINIDOS Y PROBADOS;
 ## Evidencia de este cambio
 
 - Módulo lógico sin llamadas al sistema: `cerebro/windows/pc-001/device-lifecycle-v1.mjs`.
-- Pruebas: `cerebro/windows/pc-001/device-lifecycle-v1.test.mjs`: 10/10 PASS ejecutadas localmente con Node.js el 04-11-2026.
+- Pruebas: `cerebro/windows/pc-001/device-lifecycle-v1.test.mjs`: 11/11 PASS ejecutadas localmente con Node.js el 04-11-2026.
 - Estas pruebas son de la lógica y políticas, no pruebas físicas de Windows, Wake-on-LAN, enrolamiento o autoarranque.
 - No se ha suspendido ningún ordenador, cambiado el registro de Windows ni insertado/actualizado datos en Supabase.
 
