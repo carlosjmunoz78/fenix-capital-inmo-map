@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "READONLY_IDENTIFY_EXISTING_PC_TRANSPORT_PROFILE_AND_AUTH_REFERENCE; SCOPED_PREPROD_GATEWAY_ENROLL_RECONNECT_AND_SYNTHETIC_COMMAND_ROUNDTRIP; AUDIT_OLD_STARTUP_CMD; VERIFY_REBOOT_AND_PHYSICAL_ROLLBACK; NO_PROD_APP_CRM_CHANGES",
+  "next_block": "RESTORE_AUTHENTICATED_GATEWAY_TRANSPORT_PC001; AUDIT_PC_HW_WOL_READONLY; WOL_RELAY_EXISTING_ROUTER_OR_ONLINE_NODE; SUSPEND_WAKE_REAL_E2E; UNIFIED_WINDOWS_EXE_AFTER_BACKUP_OLD_NEW_ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -465,5 +465,31 @@
     "live_agent_connection": "NOT_VERIFIED",
     "changed_supabase_data": false,
     "next": "Existing device authentication and transport renewal or scoped PREPROD enrollment required, before end-to-end proof"
+  },
+  "pc_name_power_requirement_v1": {
+    "requirement_date": "2026-11-04",
+    "owner_corrected": "NO_PAUSE_CEREBRO_EVER_AS_USER_ACTION_ONLY_SUSPEND_AND_WAKE_PHYSICAL_PC",
+    "initial_label": "AUTOMATIC_PC_PLUS_WINDOWS_HOSTNAME",
+    "renaming": "UNLIMITED_AUTHORIZED_DISPLAY_NAME_RENAMES_WITHOUT_ID_CHANGE_OR_REENROLLMENT",
+    "immutable_identity": "CANONICAL_DEVICE_ID",
+    "actions": [
+      "RENAME_PC",
+      "SUSPEND_PC",
+      "WAKE_PC",
+      "STATUS_PC"
+    ],
+    "forbidden_user_action": "PAUSE_CEREBRO",
+    "suspension": "WINDOWS_NATIVE_SLEEP_ONLY_ON_EXPLICIT_INTENT_AND_VERIFIED_WAKE_PATH",
+    "wake": "EXTERNAL_ALWAYS_ON_AUTHORIZED_RELAY_OR_COMPATIBLE_POWER_CONTROLLER; REQUIRE_HARDWARE_ATTESTATION_PER_PC",
+    "gateway": "CENTRAL_CEREBRO_REMAINS_ACTIVE_WHILE_PC_SLEEPS",
+    "implementation": "cerebro/windows/pc-001/device-lifecycle-v1.mjs",
+    "tests": "cerebro/windows/pc-001/device-lifecycle-v1.test.mjs",
+    "tests_actual": "NODE_TEST_10_OF_10_PASS_LOCAL",
+    "doc": "cerebro/docs/CEREBRO_PC_001_NOMBRE_SUSPENDER_DESPERTAR_SIN_PAUSAR_CEREBRO_V1_2026-11-04.md",
+    "deployment": "NOT_DEPLOYED_NOT_WIRED_TO_WINDOWS_OR_GATEWAY",
+    "current_win_exe": "UNIVERSAL_SINGLE_WINDOWS_INSTALLER_PENDING",
+    "hardware_wake_e2e": "PENDING_PHYSICAL_TEST",
+    "app_crm_supabase_prod_changed": false,
+    "estimated_additional_subscription_eur": 0
   }
 }
