@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "ONCE_ONLY_UNIVERSAL023_READONLY_SNAPSHOT_FOR_STATIC_ANALYSIS; DO_NOT_REPEAT_V05_V06_OR_LEGACY_V041; then 8768 arg and Gateway E2E.",
+  "next_block": "PHYSICAL_V07_ONCE_AND_TXT; THEN_8768_KNOWN_COMMAND_REPAIR; GATEWAY_AUTH_E2E; REBOOT_PERSISTENCE; PHYSICAL_ROLLBACK; NO_PRIOR_DIAGNOSTICS.",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -297,5 +297,45 @@
     "input": "read original VBS by HKCU known run entry; verify SHA; copy only Universal 0.2.3 EXE in user-created ZIP",
     "output": "CEREBRO_PC_UNIVERSAL023_AUDITORIA.zip and CEREBRO_PC_UNIVERSAL023_RESULTADO.txt",
     "no_launch": true
+  },
+  "universal023_audit_20261104": {
+    "source": "User uploaded CEREBRO_PC_UNIVERSAL023_RESULTADO.txt",
+    "result": "UNIVERSAL_023_ES_BINARIO_LEGACY_V041_NO_COPIADO",
+    "binary_sha256": "0b8159b8211b2417a0cb8e8d9a3f94c2cf43fcecbd4b70f2328afdbeb7165b07",
+    "status": "HECHO_STATIC_EQUALITY_BUT_RUNTIME_RECOVERY_PENDING"
+  },
+  "root_cause_8766": {
+    "vbs": "KNOWN_HASH_SCRIPT_LAUNCHES_EXE_WITHOUT_--AGENT",
+    "python_static": "--agent_CALLS_RUN_EMBEDDED_AGENT; DEFAULT_INSTALL_CALLS_INSTALL_FILES; generic error title may occur in both",
+    "v06": "explicit --agent WITHOUT_CEREBRO_AGENT_PORT_8766; default 8765",
+    "winerror32_exact_owner": "UNKNOWN",
+    "runtime_conclusion": "PROBABLE_TWO_INDEPENDENT_STARTUP_CONFIG_ERRORS"
+  },
+  "candidate_pc_8766_v07": {
+    "status": "LOCAL_TESTED_BUILT_WINDOWS_PHYSICAL_NOT_EXECUTED",
+    "zip": "CEREBRO_PC_8766_CORRECCION_V0_7_PREPROD.zip",
+    "zip_sha256": "d89dee3a72a4be72d4ed1b74113654bd2210f9125e82a7033e3c5faf99604ce4",
+    "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_8766_CORRECCION_V0_7_PREPROD.zip",
+    "repair_sha256": "92765c3f402a5931c8de50f9b1e5c50bc067224216dceb8a616ea6d3429ff43b",
+    "rollback_sha256": "a330e9b4eb9925779a5ea2878e9b9e4fa687750ba681268ce61827d9e65ae837",
+    "modifies_only_after_live_health": "HKCU Run for CEREBRODeviceAgent and CEREBRODeviceAgentUniversalV023, after DPAPI backup+readback",
+    "preserves": [
+      "8765",
+      "8767",
+      "monitor_0.2",
+      "existing_vbs_and_legacy_binaries",
+      "APP_CRM_SUPABASE_PROD",
+      "TRADING_REAL"
+    ],
+    "uncertain": "Startup-folder CEREBRO-Device-Agent.cmd unaudited; reboot physical pending",
+    "tests": "unit PASS; go vet linux/windows PASS; win64 gui build PASS; deterministic rebuild PASS; zip integrity PASS",
+    "user_report": "CEREBRO_PC_8766_CORRECCION_V07.txt",
+    "cost_eur": 0
+  },
+  "latest_service_state": {
+    "8765": "LOCAL_HEALTH_OK_LAST_PHYSICAL",
+    "8766": "NO_HEALTH_LAST_PHYSICAL_V07_NOT_RUN",
+    "8767": "LOCAL_HEALTH_OK_LAST_PHYSICAL",
+    "8768": "NO_HEALTH_LAST_PHYSICAL_GATE_STILL_BLOCKED"
   }
 }
