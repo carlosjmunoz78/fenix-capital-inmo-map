@@ -4088,11 +4088,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_COMFYUI_87986DEB_PROD_READONLY_CANARY",
       "observed_at": "2026-11-04T07:22:21.769Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -4106,7 +4106,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "454a8181bed89a667aa56ee14c6a02d4a1c15e964d1b7f2e6ae016fa6ed48596"
+      "capability_hash": "454a8181bed89a667aa56ee14c6a02d4a1c15e964d1b7f2e6ae016fa6ed48596",
+      "canary": {
+        "status": "GREEN_DYNAMIC_COMFYUI_87986DEB_PROD_READONLY_CANARY",
+        "candidate_id": "repo:3a92a95d58b0f26a21406b0d19bd",
+        "technical_name": "comfyui",
+        "head_sha": "6a03eb57ec131859a53ca690d2b28487892e0d8b",
+        "run_id": 41791818586,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-04T07:22:37.835Z"
+      },
+      "promoted_at": "2026-11-04T07:22:37.835Z"
     },
     {
       "candidate_id": "repo:c58a78a6404f31c6a05cf4d1d938",
@@ -16878,10 +16908,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 167,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 166
+    "pending_canary": 0,
+    "prod_readonly": 167
   }
 }
