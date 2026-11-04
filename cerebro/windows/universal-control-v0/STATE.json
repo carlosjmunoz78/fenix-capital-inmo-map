@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_ONCE_V02_ONLY_ON_PHYSICAL_PC_AND_REPORT_TXT; IF_HEALTH_OK_VERIFY_GATEWAY_EXACT_SCOPE_COMMAND_ROUNDTRIP; THEN_REBOOT_PERSISTENCE_AND_ROLLBACK; DO_NOT_TOUCH_MOBILE_TABLET_EXTENSION_CHANNELS",
+  "next_block": "READONLY_IDENTIFY_EXISTING_PC_TRANSPORT_PROFILE_AND_AUTH_REFERENCE; SCOPED_PREPROD_GATEWAY_ENROLL_RECONNECT_AND_SYNTHETIC_COMMAND_ROUNDTRIP; AUDIT_OLD_STARTUP_CMD; VERIFY_REBOOT_AND_PHYSICAL_ROLLBACK; NO_PROD_APP_CRM_CHANGES",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -334,10 +334,11 @@
     "health_gate": "version=0.2.0 status=OK host=127.0.0.1 port=8766 durable_queue=true prod_allowed=false; stable second readback; if prior listener healthy then do NOT change Run"
   },
   "latest_service_state": {
-    "8765": "PHYSICAL_HEALTH_OK_LAST_KNOWN",
-    "8766": "PHYSICAL_HEALTH_OK_V07",
-    "8767": "PHYSICAL_HEALTH_OK_LAST_KNOWN",
-    "8768": "NOT_LISTENING_BEFORE_CANDIDATE_V02"
+    "8765": "PHYSICAL_HEALTH_OK_2026_11_04_13_19",
+    "8766": "PHYSICAL_HEALTH_OK_2026_11_04_13_19",
+    "8767": "PHYSICAL_HEALTH_OK_2026_11_04_13_19",
+    "8768": "PHYSICAL_HEALTH_OK_2026_11_04_13_19",
+    "central_gateway": "HEALTH_READY_VIA_OPERA_NOT_DEVICE_CONNECTED"
   },
   "pc_8766_v07_physical_acceptance": {
     "file": "CEREBRO_PC_8766_CORRECCION_V07.txt",
@@ -410,5 +411,59 @@
     "physical_report": "CEREBRO_PC_8768_ACTIVACION_V02.txt",
     "physical_acceptance": "PENDING",
     "gate_after": "AUTH_GATEWAY_E2E_REBOOT_ROLLBACK_PENDING"
+  },
+  "pc_8768_physical_acceptance": {
+    "source": "CEREBRO_PC_8768_ACTIVACION_V02.txt",
+    "timestamp_local": "2026-11-04T13:19:27+01:00",
+    "environment": "PREPROD",
+    "precheck": "PASS",
+    "binary_hash": "PASS",
+    "command": "host",
+    "controller_started_pid": 11928,
+    "health_8768": "OK_VERSION_0_4_0_PROD_DENIED",
+    "regression_8765": "PASS",
+    "regression_8766": "PASS",
+    "regression_8767": "PASS",
+    "backup": "DPAPI_OK_READBACK_OK",
+    "autostart_changes": "NONE",
+    "app_crm_supabase_prod_trading_changes": "NONE",
+    "result": "HECHO_LOCAL_4_OF_4_HEALTH_ONCE_PHYSICAL",
+    "reboot_persistence": "PENDING",
+    "gateway_auth": "PENDING",
+    "remote_control": "NOT_VERIFIED",
+    "physical_rollback": "PENDING"
+  },
+  "gateway_preprod_readonly_audit_20261104": {
+    "supabase_project_name": "fenix-capital-inmo-map",
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "distinct_from_prod_project_id": "cluhljgonannaafpmblx",
+    "edge_function": "cerebro-device-gateway-preprod",
+    "edge_status": "ACTIVE",
+    "edge_version": 9,
+    "health_checked_via": "CHATGPT_OPERA_CONNECTOR_NOT_PC_CEREBRO_TRANSPORT",
+    "health_result": "HTTP_READY_PREPROD",
+    "queue": true,
+    "bearer": true,
+    "nonce_guard": true,
+    "scoped_delivery": true,
+    "one_time_enrollment": true,
+    "prod_allowed": false,
+    "parked": false,
+    "required_tables_present": [
+      "cerebro_device_agents_preprod",
+      "cerebro_device_nonces_preprod",
+      "cerebro_device_commands_preprod",
+      "cerebro_device_results_preprod",
+      "cerebro_device_pairings_preprod"
+    ],
+    "checked_known_device_id_aliases": true,
+    "matched_record_environment": "LAB",
+    "matched_record_status": "ONLINE_STALE",
+    "last_known_heartbeat_utc": "2026-10-22T06:57:53Z",
+    "heartbeat_last_15_minutes": false,
+    "all_agent_records_recent_15m": 0,
+    "live_agent_connection": "NOT_VERIFIED",
+    "changed_supabase_data": false,
+    "next": "Existing device authentication and transport renewal or scoped PREPROD enrollment required, before end-to-end proof"
   }
 }
