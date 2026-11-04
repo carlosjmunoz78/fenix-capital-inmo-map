@@ -1,0 +1,101 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "block": "B6",
+  "cut": "CUT02",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-B6-CAPABILITY-EXECUTOR-001",
+  "environment": "PROD",
+  "status": "PARCIAL_LAB_INTEGRATED_PG17_GITHUB_B3_POLICY_PROD_LOCKED",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b6-capability-executor-v0-20261104",
+  "pr": 16,
+  "pr_draft": true,
+  "pr_merged": false,
+  "base_pr": 15,
+  "baseline_sha": "d8d0f344b834fe3eed373a580cd7fcf57ae87675",
+  "code_sha_tested": "0190b95275717f1e0138ba04adc1fcc8a99fe81e",
+  "evidence": {
+    "node_suite": {
+      "run_id": 41750925376,
+      "passed": 315,
+      "failed": 0,
+      "status": "success"
+    },
+    "integrated_real_pg17_github": {
+      "run_id": 41750925389,
+      "status": "success",
+      "remote_read_calls": 1,
+      "concurrent_executors": 2,
+      "restart_dedup": true,
+      "failure_terminal": true,
+      "privacy_conflict_denied": true,
+      "prod_off": true,
+      "b2_b3_principals": "SYNTHETIC_CI_ONLY"
+    },
+    "pg17_journal": {
+      "run_id": 41750925403,
+      "status": "success",
+      "scope_isolation": true,
+      "backup_restore_synthetic": true
+    },
+    "github_read_only": {
+      "run_id": 41750925716,
+      "status": "success"
+    },
+    "b4_pg17_regression": {
+      "run_id": 41750925479,
+      "status": "success"
+    },
+    "governed_integration": {
+      "run_id": 41750925423,
+      "status": "success",
+      "prod_deploy": "skipped"
+    }
+  },
+  "real_prod_read_only_audit": {
+    "project_ref": "cluhljgonannaafpmblx",
+    "b3_grants_fenix_prod": 0,
+    "b3_audits_fenix_prod": 0,
+    "b3_secret_inventory_fenix": 0,
+    "b3_runtime_enabled": false,
+    "b3_kill_switch": true,
+    "b4_runtime_enabled": false,
+    "b4_kill_switch": true,
+    "private_b3_tables_rls": true,
+    "direct_public_table_grants_observed": 0,
+    "prod_policies_installed": false,
+    "grants_created": false,
+    "secrets_read": false
+  },
+  "implementation": {
+    "executor": "LAB_ONLY_READ_NO_PROD",
+    "b3_policy": "EXISTING_B3_DECISION_SERVICE_TESTED_WITH_SYNTHETIC_GRANTS",
+    "journal": "PARAMETERIZED_PG17_CLAIM_COMPLETE_FAIL_INTEGRATED_IN_CI",
+    "real_adapter": "GITHUB_READ_ONLY_WITH_EPHEMERAL_CI_TOKEN",
+    "additional_connectors": "NOT_CERTIFIED",
+    "mutations": "SYNTHETIC_FILE_ROLLBACK_CUT01_ONLY",
+    "new_server_workers": 0,
+    "model_api_calls": 0,
+    "new_subscriptions": 0
+  },
+  "gates_still_open": [
+    "B2_REAL_OWNER_SESSION_CROSS_DEVICE",
+    "B3_REAL_GRANTS_AND_VAULT_WITH_REVOCATION",
+    "B4_PROD_BACKUP_RESTORE",
+    "CRASH_AFTER_READ_BEFORE_COMMIT_RECOVERY_POLICY",
+    "TRUSTED_MCP_CLI_BROWSER_AND_COMPUTER_USE_REAL_CONNECTORS",
+    "REAL_EXTERNAL_REVERSIBLE_MUTATION_APPROVAL",
+    "RUNTIME_SHARED_GATEWAY_DEPLOYMENT",
+    "INDEPENDENT_TRIBUNAL_AND_SECURITY_REVIEW"
+  ],
+  "human_required_later": [
+    "OWNER_MFA_IF_REQUIRED",
+    "MICROPHONE_AND_PC_MOBILE_E2E",
+    "SECURITY_OR_LEGAL_REQUIRED_APPROVAL"
+  ],
+  "rollback": "Close/revert only PR16 CUT02 changes after d8d0f344b834fe3eed373a580cd7fcf57ae87675",
+  "next_block": "B6_CUT03_APPROVAL_SCOPE_FAILOVER_AND_MORE_TRUSTED_CONNECTOR_PROOFS",
+  "evidence_doc": "zeus/jarvis/B6_CORTE_02_PG17_B3_POLICY_EVIDENCIAS_2026-11-04.md"
+}
