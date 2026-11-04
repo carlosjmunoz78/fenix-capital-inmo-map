@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_8_MIN_PATCH_V3_PHYSICAL_APPLIED_GATEWAY_FRESH_WAIT_4_PORT_READBACK_AND_POST_REBOOT",
+  "status": "PC001_8MIN_PATCH_VERIFIED_CURRENT_SESSION_4_OF_4_AUTH_GATEWAY_GREEN_POST_PATCH_REBOOT_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -56,14 +56,16 @@
     "pc001_8min_v2_windows": "FAIL_ATOMIC_UPDATE_ORIGINAL_HASH_RETAINED",
     "pc001_8min_v3_static": "51_OF_51_PASS",
     "pc001_8min_v3_windows": "PASS_HASH_MATCH_WORKER_RESTARTED_NO_ERROR",
-    "pc001_8min_v3_postreboot": "PENDING"
+    "pc001_8min_v3_postreboot": "PENDING",
+    "pc001_8min_patch_postapply_local_readback": "PASS_4_OF_4_AND_LIVE_PREPROD_BACKEND",
+    "pc001_8min_patch_postreboot": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "AFTER_8_MINUTES_FROM_PATCH_RESTART_RUN_ALREADY_INSTALLED_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_AND_UPLOAD_NEW_JSON; VERIFY_ALL_4_PORTS_AND_AUTH; THEN_NORMAL_WINDOWS_REBOOT_LOGIN_WAIT_8_MINUTES_AND_RECHECK; DO_NOT_REPEAT_INSTALLERS_OR_RECOVERERS",
+  "next_block": "NORMAL_WINDOWS_REBOOT_NO_RECOVERY_CMD; USER_LOGIN_WAIT_480_SECONDS; RUN_COMPROBAR_ARRANQUE_PC001_CMD_ONLY; UPLOAD_FRESH_JSON_WITH_WINDOWS_BOOT_UTC_LATER_THAN_2026_11_04T18_30_20Z; VERIFY_AUTO_RECOVERED_4_OF_4_AUTH_GATEWAY_AND_NO_UNWANTED_WINDOWS_BEFORE_MULTI_PC_DESKTOP_CONTROL",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1164,5 +1166,32 @@
     "services_4_of_4_after_patch_verified": false,
     "post_reboot_verified": false,
     "status": "PHYSICAL_PATCH_APPLIED_480S_GATEWAY_FRESH_LOCAL_4_PORTS_AND_REBOOT_PENDING"
+  },
+  "pc001_eight_min_followup_readback_20261104": {
+    "source": "uploaded_CEREBRO_PC001_ARRANQUE_ESTADO(3).json",
+    "checked_at_utc": "2026-11-04T18:30:20.3325924Z",
+    "windows_boot_at_utc": "2026-11-04T18:03:46.5000000Z",
+    "patch_applied_after_boot": true,
+    "new_ordered_autostart_key_valid": true,
+    "previous_three_startup_keys_suppressed": true,
+    "worker_status": "WAIT_BOOT_WARMUP_480S",
+    "worker_status_age_seconds": 0,
+    "local_health": {
+      "8765": true,
+      "8766": true,
+      "8767": true,
+      "8768": true
+    },
+    "local_4_of_4_green": true,
+    "local_gateway_worker_status": "ONLINE_AUTHENTICATED",
+    "supabase_checked_at_utc": "2026-11-04T18:31:07.312906Z",
+    "backend_last_seen_at_utc": "2026-11-04T18:29:30.751Z",
+    "backend_heartbeat_age_seconds": 97,
+    "backend_fresh_at_cut": true,
+    "dpapi_backup_exists": true,
+    "prod_modified": false,
+    "auto_recovered_after_new_reboot_verified": false,
+    "full_remote_windows_control_verified": false,
+    "status": "4_OF_4_GREEN_AFTER_PATCH_WITH_AUTHENTICATED_GATEWAY_POSTPATCH_REBOOT_PENDING"
   }
 }
