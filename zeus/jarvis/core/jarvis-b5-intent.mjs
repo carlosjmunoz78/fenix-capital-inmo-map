@@ -4,7 +4,7 @@
  */
 const SAFE_ID=/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,179}$/;
 const SECRET=/\b(?:password|contrase(?:ñ|n)a|clave privada|api[_ -]?key|access[_ -]?token|bearer\s+\S+|refresh[_ -]?token|otp|c[oó]digo\s+(?:de\s+)?verificaci[oó]n)\b/i;
-const STOP=/^(?:para|detente|c[aá]llate|interrumpe|silencio|stop|corta|basta)(?:\s+por favor)?\s*[.!?]*$/i;
+const STOP=/^(?:para(?: ya)?|detente|detenete|c[aá]llate|calla|interrumpe|silencio|stop|corta|basta)(?:\s+por favor)?\s*[.!?]*$/i;
 const UNSAFE=/\b(?:borr(?:a|ar|ado|ando)|elimin(?:a|ar|ado|ando)|destruy(?:e|a)|destru(?:ir|ye)|formatea(?:r)?|transfiere|transferir|paga(?:r)?|compr(?:a|ar)|firma(?:r)?|contrata(?:r)?|env[ií]a dinero)\b/i;
 const verbs=[
  ['STATUS',/^(?:estado|c[oó]mo va|como va|qu[eé] falta|dime el estado|revisa el estado|qu[eé] tenemos)\b/i],
