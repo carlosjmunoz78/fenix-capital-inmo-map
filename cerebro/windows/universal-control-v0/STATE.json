@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PHYSICAL_READONLY_PREFLIGHT_PASS_AUTHENTICATED_GATEWAY_E2E_AND_WOL_RELAY_PENDING",
+  "status": "PHYSICAL_S3_SLEEP_RESUME_PASS_4_OF_4_GATEWAY_AUTH_E2E_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -31,14 +31,15 @@
     "camera_microphone": "NOT_TESTED_NO_RUNTIME_CAPABILITY_IN_V0",
     "pc001_device_lifecycle": "11_OF_11_PASS_NODE_LOCAL",
     "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED",
-    "pc001_power_readonly_windows": "PASS_PHYSICAL_2026_11_04_13_05_UTC"
+    "pc001_power_readonly_windows": "PASS_PHYSICAL_2026_11_04_13_05_UTC",
+    "pc001_physical_s3_sleep_resume": "PASS_4_OF_4_PHYSICAL_USER_BUTTON_WAKE_2026_11_04"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "AUTHENTICATED_GATEWAY_PC001_E2E_PREPROD_FIRST; HOLD_REMOTE_SLEEP_WAKE_NO_VERIFIED_ALWAYS_ON_RELAY; DO_NOT_BUY_DEVICE; DO_NOT_REPLACE_EXISTING_WINDOWS_AGENTS",
+  "next_block": "VERIFY_EXISTING_SCOPED_DPAPI_GATEWAY_CREDENTIAL_AND_RUNNER_THEN_PREPROD_AUTHENTICATED_RECONNECT_POLL_NONCE_RESULT; REMOTE_WOL_REMAINS_ON_HOLD_NO_VERIFIED_RELAY; DO_NOT_REINSTALL_EXISTING_AGENT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -586,5 +587,42 @@
       "Trading"
     ],
     "next_priority": "VERIFY_EXISTING_HOST_SCOPED_TRANSPORT_CREDENTIAL_PRESENCE_AND_EXECUTOR_THEN_AUTH_GATEWAY_E2E_PREPROD"
+  },
+  "pc001_physical_suspend_resume_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_SUSPENSION_RESULTADO.json",
+    "recorded_window_utc": {
+      "start": "2026-11-04T13:21:36.6713969Z",
+      "end": "2026-11-04T13:22:58.9160637Z"
+    },
+    "environment": "PREPROD",
+    "report_status": "PASS_SLEEP_RESUME_SERVICES_4_OF_4",
+    "phase": "COMPLETED",
+    "sleep_attempted": true,
+    "sleep_call_returned_success": true,
+    "s3_confirmed": true,
+    "kernel_power_sleep_event": true,
+    "resume_event": true,
+    "wake_method": "USER_PHYSICAL_POWER_BUTTON",
+    "wake_event_verified": true,
+    "health_before": {
+      "8765": "HTTP_200_OK",
+      "8766": "HTTP_200_OK",
+      "8767": "HTTP_200_OK",
+      "8768": "HTTP_200_OK"
+    },
+    "health_after": {
+      "8765": "HTTP_200_OK",
+      "8766": "HTTP_200_OK",
+      "8767": "HTTP_200_OK",
+      "8768": "HTTP_200_OK"
+    },
+    "gateway_agent_authenticated": false,
+    "wake_on_lan_remote_verified": false,
+    "internet_remote_wake_verified": false,
+    "reboot_persistence_verified": false,
+    "prod_modified": false,
+    "install_or_service_modified": false,
+    "error_code": null,
+    "conclusion": "PASS_PHYSICAL_S3_SLEEP_USER_BUTTON_WAKE_ALL_FOUR_SERVICES_RECOVERED_NOT_REMOTE_AUTH"
   }
 }
