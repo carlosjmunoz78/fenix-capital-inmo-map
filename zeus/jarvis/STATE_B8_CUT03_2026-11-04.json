@@ -1,0 +1,93 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "block": "B8",
+  "cut": "CUT03",
+  "status": "PARCIAL_LAB_GREEN_PROD_LOCKED",
+  "company_id": "SYNTHETIC_SCOPED",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b8-executive-multicompany-v0-20261104",
+  "pr_number": 18,
+  "pr_state": "OPEN_DRAFT_NOT_MERGED",
+  "base_pr": 17,
+  "base_sha": "657d4ad961f80e63c9c6d767a7a3a11aa17ba71b",
+  "code_sha_tested": "80b6738bdd7cc71c50922a68e0fa50402ab9c61c",
+  "documentation_commit": "THIS_FILE_INTRODUCED_AFTER_CODE_SHA",
+  "checks": {
+    "node": {
+      "run_id": 41785220608,
+      "passed": 413,
+      "failed": 0,
+      "skipped": 0,
+      "status": "success"
+    },
+    "b7_logical": {
+      "run_id": 41785220607,
+      "status": "success"
+    },
+    "governed_integration": {
+      "run_id": 41785220568,
+      "status": "success",
+      "prod_deployment": "NOT_EXECUTED"
+    },
+    "two_company_missions": {
+      "classification": "SYNTHETIC_TEST",
+      "companies": [
+        "fenix",
+        "aion"
+      ],
+      "real_company_registry_verified": false
+    },
+    "portfolio_report": {
+      "classification": "LOCAL_LAB_TEST",
+      "source_adapter": "INJECTED_FIXTURE"
+    },
+    "commitment_storage": {
+      "classification": "SYNTHETIC_TEST",
+      "backend": "MAP_FIXTURE_NOT_REAL_JOB001"
+    }
+  },
+  "live_reads": {
+    "supabase_project": "cluhljgonannaafpmblx",
+    "b3_prod": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "b4_prod": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "company_registry_preprod_rows": 0,
+    "jarvis_project_exists": true,
+    "jarvis_project_status": "PARCIAL",
+    "jarvis_project_evidence_count_at_read": 70
+  },
+  "registry_count": 179,
+  "registry_mutated": false,
+  "prod_modified": false,
+  "new_servers": 0,
+  "new_tables": 0,
+  "paid_ai_calls": 0,
+  "new_subscriptions": 0,
+  "actual_actions_minutes_billing": "NOT_VERIFIED",
+  "backup_restore_B8": "NOT_PERFORMED",
+  "backup_restore_B7_pg17": "LAB_ONLY_HISTORICAL_VERIFIED",
+  "rollback": "CLOSE_B8_DRAFT_PR18_NO_MERGE",
+  "next_block": "B8_CUT04_REAL_REGISTRY_JOB001_PERSISTENCE_SUPERVISOR_AND_PREPROD_GATE",
+  "open_gates": [
+    "REAL_COMPANY_REGISTRY_ROWS_AND_AUTHORIZATION",
+    "B2_OWNER_ROOT_REAL",
+    "B3_GRANTS_AND_REVOCATION_REAL",
+    "JOB001_COMMITMENT_PERSISTENCE_REAL",
+    "P23_OBSERVABILITY_SOURCE",
+    "PORTFOLIO_REAL_DATA",
+    "INDEPENDENT_TRIBUNAL",
+    "BACKUP_RESTORE_B8_REAL_LAB",
+    "PREPROD_OLD_VS_NEW",
+    "PROD_GATES"
+  ]
+}
