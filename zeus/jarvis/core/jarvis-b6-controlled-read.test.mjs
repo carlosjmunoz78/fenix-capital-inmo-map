@@ -32,7 +32,8 @@ function rig({enabled=true,company='fenix',roles=['OWNER_ROOT'],companies=['feni
    const old=memory.get(key);
    if(old.fingerprint!==s.fingerprint)return{state:'CONFLICT'};
    if(old.state==='COMPLETE')return{state:'ALREADY_COMPLETED',fingerprint:s.fingerprint,
-    evidenceHash:old.evidenceHash,companyId:s.companyId,environment:s.environment,ownerId:s.ownerId};
+    evidenceHash:old.evidenceHash,companyId:s.companyId,environment:s.environment,ownerId:s.ownerId,
+    missionId:s.missionId,capability:s.capability,connectorId:s.connectorId,idempotencyKey:s.idempotencyKey};
    return{state:'IN_PROGRESS'};
   },
   complete:async s=>{calls.push('complete');if(!completionOk)return false;
