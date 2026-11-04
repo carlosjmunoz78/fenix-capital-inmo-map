@@ -85,7 +85,10 @@ export function createJarvisB6ControlledRead({identityProvider,controlStore,pref
   catch{return denied('IDEMPOTENCY_JOURNAL_UNAVAILABLE');}
   if(claimed?.state==='ALREADY_COMPLETED'&&claimed.fingerprint===fingerprint&&
     HASH.test(claimed.evidenceHash)&&claimed.companyId===companyId&&
-    claimed.environment===environment&&claimed.ownerId===principal.ownerId)
+    claimed.environment===environment&&claimed.ownerId===principal.ownerId&&
+    claimed.missionId===missionId&&claimed.capability===capability&&
+    claimed.connectorId===candidate.selectedCapabilityId&&
+    claimed.idempotencyKey===idempotencyKey)
    return Object.freeze({state:'ALREADY_COMPLETED_VERIFIED',companyId,environment,
     missionId,capability,evidenceHash:claimed.evidenceHash,
     executed:false,adapterInvoked:false,spentEuro:0});
