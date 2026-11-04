@@ -1,0 +1,99 @@
+{
+  "schema": "cerebro.engine.compatibility-candidate.v0",
+  "date": "2026-11-04",
+  "engine_id": "ORCH-001",
+  "capability_id": "JARVIS-B7-LOGICAL-DELEGATION-001",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "PARCIAL_LAB",
+  "prod_authorized": false,
+  "additional_cost_eur": 0,
+  "factory_id": "FACT-001",
+  "factory_policy": "REUSE_NO_SECOND_FACTORY",
+  "registry_id": "GOV-001",
+  "registry_mutated": false,
+  "runtime": "INJECT_EXISTING_SHARED_WORKER",
+  "new_servers": 0,
+  "inputs": [
+    "mission_id",
+    "owner_id",
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "tasks",
+    "token"
+  ],
+  "outputs": [
+    "LAB_ACCEPTED",
+    "LAB_PARTIAL",
+    "DENY",
+    "evidenceHash",
+    "tribunalVerdict"
+  ],
+  "permissions": [
+    "JARVIS_CAPABILITY_DELEGATE_READ",
+    "JARVIS_CAPABILITY_EXECUTE_READ"
+  ],
+  "limits": {
+    "maxTasks": 16,
+    "maxParallel": 3,
+    "maxDepth": 4,
+    "maxRuntimeMs": 30000,
+    "maxEuro": 0
+  },
+  "dependencies": [
+    "FACT-001",
+    "GOV-001",
+    "CAPA-001",
+    "ORCH-001",
+    "SUP-001",
+    "POL-001",
+    "JDG-001",
+    "JOB-001",
+    "AUD-001",
+    "FINOPS-001",
+    "B3",
+    "B6"
+  ],
+  "events": [
+    "B7_MISSION_STARTED",
+    "B7_TASK_DISPATCH",
+    "B7_TASK_ACCEPTED",
+    "B7_MISSION_ACCEPTED",
+    "B7_MISSION_PARTIAL"
+  ],
+  "jobs": "B6 owns task journal and idempotency; B7 mission DAG in-memory pending durability",
+  "api": "createJarvisB7Orchestrator shared-runtime export; no endpoint",
+  "tests": "node --test zeus/jarvis/core/*.test.mjs",
+  "evaluation": "independent tribunal port only, no self-validation",
+  "observability": "append-only mission/task-scoped audit port",
+  "cost_budget": {
+    "expected_eur": 0,
+    "max_eur": 0,
+    "paid_models": false
+  },
+  "backup": "Git baseline 115b7330f5ba2fd8fc1d6819d20e8e8f4bd37fbb",
+  "rollback": "close or revert B7 DRAFT PR only",
+  "rebuild": "checkout candidate SHA and Node 24 tests",
+  "training_hooks": "candidate verdict events; no automatic promotion",
+  "human_exceptions": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "limitations": [
+    "no B7 cross-process mission journal yet",
+    "B3 actual grants not tested",
+    "B4 PROD disabled",
+    "no live tribunal",
+    "no in-flight network abort",
+    "no physical PC E2E"
+  ]
+}
