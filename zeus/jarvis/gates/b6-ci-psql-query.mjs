@@ -17,8 +17,7 @@ export async function b6CiPsqlQuery(sql,params=[]){
   return `:'p${i}'`;
  });
  // Each psql connection is a separate PostgreSQL transaction; claims are real.
- const queryText='SELECT row_to_json(_b6_row)::text FROM ('+q+') _b6_row;
-';
+ const queryText='SELECT row_to_json(_b6_row)::text FROM ('+q+') _b6_row;'+String.fromCharCode(10);
  const args=['-X','-q','-A','-t','-v','ON_ERROR_STOP=1'];
  params.forEach((p,i)=>args.push('-v','p'+(i+1)+'='+p));
  args.push('-f','-');
@@ -32,8 +31,7 @@ export async function b6CiPsqlQuery(sql,params=[]){
   proc.on('error',()=>reject(Error('B6_CI_PSQL_TRANSPORT_UNAVAILABLE')));
   proc.on('close',c=>{
    if(c!==0)return reject(Error('B6_CI_PSQL_QUERY_FAILED'));
-   const lines=out.trim().split(/?
-/).filter(Boolean);
+   const lines=out.trim().split(String.fromCharCode(10)).map(x=>x.trim()).filter(Boolean);
    if(lines.length!==1)return reject(Error('B6_CI_PSQL_RESULT_INVALID'));
    try{
     const value=JSON.parse(lines[0]);
