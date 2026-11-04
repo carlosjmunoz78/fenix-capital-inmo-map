@@ -1,0 +1,88 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "block": "B6",
+  "cut": "CUT01",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-B6-CAPABILITY-EXECUTOR-001",
+  "environment": "PROD",
+  "status": "PARCIAL_LAB_READ_E2E_GREEN_PROD_OFF",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 16,
+  "pr_draft": true,
+  "base_pr": 15,
+  "base_sha": "b95d59b1305da2492dfa503164719b4b001e685b",
+  "last_verified_code_sha": "4410277dddf1a18cd76916786b4bdfa4c1163f75",
+  "contracts": {
+    "execution": "LAB_ONLY_READ",
+    "authorization": "B2_B3_SYNTHETIC_CI",
+    "routing": "TRUSTED_REGISTRY",
+    "real_adapter": "GITHUB_API_GET_WITH_EPHEMERAL_CI_TOKEN",
+    "mutation": "LAB_SANDBOX_ONLY",
+    "idempotency": "IN_MEMORY_E2E__PG17_SEPARATE_SYNTHETIC_DURABILITY_TESTED",
+    "retries": "NO_AUTO_RETRIES",
+    "audit": "PRE_POST_METADATA_AND_HASH",
+    "cost_euro": 0
+  },
+  "results": {
+    "universal_lab": {
+      "run_id": 41749233214,
+      "tests": 289,
+      "passed": 289,
+      "failed": 0,
+      "status": "success"
+    },
+    "github_api_real_read": {
+      "run_id": 41749233111,
+      "status": "success",
+      "live_api_call": true,
+      "read_calls": 1,
+      "duplicate_executions": 0,
+      "cross_company_denied": true,
+      "prod_denied": true
+    },
+    "pg17_durable_journal": {
+      "run_id": 41749233139,
+      "status": "success",
+      "concurrent_processes": 2,
+      "unique_claim": true,
+      "backup_restore": true,
+      "rollback_fixture": true
+    },
+    "physical_sandbox_compensation": {
+      "run_id": 41749233139,
+      "status": "success",
+      "temp_file_mutated": true,
+      "byte_identical_rollback": true,
+      "prod_mutation": false
+    },
+    "governed_integration": {
+      "run_id": 41749233140,
+      "status": "success",
+      "real_prod_deployment": "skipped"
+    }
+  },
+  "blockers": [
+    "B2_REAL_OWNER_SESSION_PC_MOBILE",
+    "B3_LIVE_GRANTS_VAULT_REVOCATION",
+    "B4_REAL_PROD_BACKUP_RESTORE",
+    "PERSISTENT_JOURNAL_NOT_WIRED_TO_EXECUTOR",
+    "MCP_CLI_BROWSER_COMPUTER_USE_PROVIDERS_NOT_CERTIFIED",
+    "REAL_REVERSIBLE_EXTERNAL_MUTATION_NOT_VERIFIED",
+    "SHARED_GATEWAY_WORKER_RUNTIME_NOT_DEPLOYED",
+    "INDEPENDENT_SECURITY_REVIEW_AND_TRIBUNAL_NOT_COMPLETE"
+  ],
+  "security": {
+    "prod_enabled": false,
+    "prod_kill_switch_unchanged": true,
+    "prod_operational": false,
+    "new_subscriptions": 0,
+    "new_paid_ai_calls": 0,
+    "secrets_in_logs": false,
+    "authorizes_live_mutations": false
+  },
+  "rollback": "Revert or close PR #16 only, keep B5 PR #15 and main unchanged.",
+  "evidence_doc": "zeus/jarvis/B6_CORTE_01_EJECUCION_REAL_READ_Y_ROLLBACK_LAB_2026-11-04.md",
+  "next_block": "B6_CUT02_TRUSTED_CONNECTORS_B3_REAL_POLICY_JOURNAL_WIRING_AND_CROSS_DEVICE_NO_GO"
+}
