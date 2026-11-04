@@ -1,0 +1,46 @@
+name: JARVIS B6 Cut02 Real PG17 plus GitHub API LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/core/jarvis-b6-pg-journal.mjs'
+      - 'zeus/jarvis/gates/b6-ci-psql-query.mjs'
+      - 'zeus/jarvis/gates/b6-cut02-pg17-github-integrated-lab.mjs'
+      - '.github/workflows/jarvis-b6-cut02-pg17-github-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integrated-read-journal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: jarvis_ci
+          POSTGRES_PASSWORD: ephemeral_only_b6_cut02_lab
+          POSTGRES_DB: jarvis_b6_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jarvis_ci -d jarvis_b6_lab"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: jarvis_ci
+      PGPASSWORD: ephemeral_only_b6_cut02_lab
+      PGDATABASE: jarvis_b6_lab
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check PostgreSQL 17 psql client
+        run: command -v pg_restore >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Install private temporary B6 journal only in synthetic lab DB
+        run: psql -X -v ON_ERROR_STOP=1 -f zeus/jarvis/gates/b6-pg17-idempotency-journal-candidate.sql
+      - name: Verify concurrent live GitHub READ with durable Postgres claims
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JARVIS_B6_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: node zeus/jarvis/gates/b6-cut02-pg17-github-integrated-lab.mjs
