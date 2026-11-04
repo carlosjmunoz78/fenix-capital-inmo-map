@@ -1,0 +1,31 @@
+name: CEREBRO SEO V2 STAGING Readonly Probe
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/**'
+      - '.github/workflows/cerebro-seo-staging-readonly-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate public snapshot inspector
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs
+      - name: Single bounded HTTP GET for staging homepage, no redirects and no mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-stage-readonly"
+          cd "$RUNNER_TEMP/seo-stage-readonly"
+          if ! code=$(curl --proto '=https' --tlsv1.2 --silent --show-error --max-time 15 --connect-timeout 5 --max-filesize 2000000 --max-redirs 0 -D headers.txt -o body.html -w '%{http_code}' 'https://staging.fenixcapital.es/'); then
+            echo 'STAGING_READ_BLOCKED: network/HTTP client failed; 0 external mutations'
+            exit 2
+          fi
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-readonly-inspector-v0.mjs" body.html headers.txt "$code"
