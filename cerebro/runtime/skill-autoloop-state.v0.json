@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-04T11:35:04.987Z",
+  "updated_at": "2026-11-04T11:37:24.022Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -506,7 +506,8 @@
     "github-wide-skills:f42dc0d6d41f22b7d718",
     "github-wide-skills:14bdd1407f72d7203ff8",
     "github-wide-skills:ea8bb2c7a18258486f32",
-    "github-wide-skills:04119a0ac13141a7eeb6"
+    "github-wide-skills:04119a0ac13141a7eeb6",
+    "github-wide-skills:66ba77320f540d073f82"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -709,6 +710,39 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 41611550491,
       "checkpointed_at": "2026-11-03T09:30:44.845Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:66ba77320f540d073f82": {
+      "candidate_id": "github-wide-skills:66ba77320f540d073f82",
+      "name": "iterm-diagnostics",
+      "human_alias": "Iterm Diagnostics",
+      "wrapper_id": "skillwrap:83645144e1cea869b2d2",
+      "domain": "browser-automation-scraping",
+      "engine_bindings": [
+        "AUTO-001",
+        "AUTBOOT-001",
+        "QA-001",
+        "WEB-001",
+        "SCAN-001"
+      ],
+      "value_score": 89.39,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "felhen-ai/iterm-ai-agents-bundle",
+        "upstream_head_commit": "2ce88513ed9632d617cb02d70b578f7881ce557e",
+        "manifest_sha256": "1f19035ff748d1d7c23b6daf3753b75b89e7821bc4e9bc7aaa6da404b7407416",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 41822328183,
+      "checkpointed_at": "2026-11-04T11:37:24.022Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -31616,7 +31650,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -31629,7 +31663,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 41784366364,
+  "last_discovery_run_id": 41822328183,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
