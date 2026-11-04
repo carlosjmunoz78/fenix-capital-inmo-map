@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_180S_WORKER_STILL_ACTIVE_480S_PATCH_V3_READY_FULL_DESKTOP_CONTROL_DEFINED_NOT_YET_IMPLEMENTED",
+  "status": "PC001_8_MIN_PATCH_V3_PHYSICAL_APPLIED_GATEWAY_FRESH_WAIT_4_PORT_READBACK_AND_POST_REBOOT",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -55,14 +55,15 @@
     "pc001_8min_policy_patch_physical": "PENDING",
     "pc001_8min_v2_windows": "FAIL_ATOMIC_UPDATE_ORIGINAL_HASH_RETAINED",
     "pc001_8min_v3_static": "51_OF_51_PASS",
-    "pc001_8min_v3_windows": "PENDING"
+    "pc001_8min_v3_windows": "PASS_HASH_MATCH_WORKER_RESTARTED_NO_ERROR",
+    "pc001_8min_v3_postreboot": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "OWNER_RUN_V3_PATCH_UNDER_SAME_WINDOWS_USER_UPLOAD_REPORT_VALIDATE_NEW_WORKER_SHA; THEN_AFTER_480S_VERIFY_AUTORECOVERY_4_OF_4_AND_GATEWAY_HEARTBEAT; ONLY_THEN_TEST_FULL_PC_INTERACTION_ADAPTERS_AND_MULTI_PC_INSTALLER",
+  "next_block": "AFTER_8_MINUTES_FROM_PATCH_RESTART_RUN_ALREADY_INSTALLED_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_AND_UPLOAD_NEW_JSON; VERIFY_ALL_4_PORTS_AND_AUTH; THEN_NORMAL_WINDOWS_REBOOT_LOGIN_WAIT_8_MINUTES_AND_RECHECK; DO_NOT_REPEAT_INSTALLERS_OR_RECOVERERS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -822,7 +823,7 @@
   "pc001_low_power_pc_timing_policy_20261104": {
     "source": "explicit_owner_instruction_2026-11-04_3_MINUTES_CHANGED_TO_8_MINUTES",
     "scope": "PC-001_CURRENT_AND_FUTURE_WINDOWS_PC_STARTUP_SLEEP_WAKE",
-    "status": "DEFINED_RECORDED_ACTIVE_PC_PATCH_PREPARED_BUT_NOT_APPLIED",
+    "status": "APPLIED_ON_PC001_AT_2026_11_04T18_25_15Z_AND_HASH_VERIFIED",
     "before_remote_wake_after_suspend_seconds": 480,
     "after_wake_before_service_and_gateway_checks_seconds": 480,
     "after_user_login_before_first_repair_seconds": 480,
@@ -1125,7 +1126,7 @@
     "prod_modified": false
   },
   "pc001_8min_corrective_candidate_v3_20261104": {
-    "status": "STATIC_51_OF_51_PASS_NOT_WINDOWS_PHYSICALLY_TESTED",
+    "status": "PHYSICAL_PASS_APPLIED_480S_NO_REBOOT_ACCEPTANCE_YET",
     "artifact": "CEREBRO_PC001_ESPERA_8_MIN_CORRECCION_V3_PREPROD.zip",
     "zip_sha256": "1411c6aba7d306ccd971e4a566dc50ce838a84987de45a4bd9cae49d8c640425",
     "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_ESPERA_8_MIN_CORRECCION_V3_PREPROD.zip",
@@ -1135,7 +1136,33 @@
     "old_backup_reuse_only_exact_sha": true,
     "atomic_change": "MOVEFILEEXW_REPLACE_EXISTING_WRITE_THROUGH",
     "rollback": "REVERTIR_ESPERA_8_MIN_PC001_V3.cmd",
-    "physical_applied": false,
+    "physical_applied": true,
     "no_prod_changes": true
+  },
+  "pc001_8min_patch_v3_physical_acceptance_20261104": {
+    "source": "owner_uploaded_CEREBRO_PC001_ESPERA_8_MIN_RESULTADO(1).json",
+    "timestamp_utc": "2026-11-04T18:25:15.6598737Z",
+    "report_status": "UPDATED_TO_8_MIN_RESTARTED_OWN_WORKER",
+    "phase": "RESTART_ONLY_OWN_WORKER",
+    "boot_warmup_seconds": 480,
+    "after_drop_grace_seconds": 480,
+    "no_stacked_initial_grace": true,
+    "expected_sha256": "ee93ce1ddf1a0e802747a64af61db9690c5834665420ae3421155c79bc39044c",
+    "actual_sha256": "ee93ce1ddf1a0e802747a64af61db9690c5834665420ae3421155c79bc39044c",
+    "new_worker_running": true,
+    "worker_status_readback": "WAIT_BOOT_WARMUP_480S",
+    "backup_exists": true,
+    "win32_error": 0,
+    "failure_class": "NONE",
+    "prod_modified": false,
+    "other_services_untouched": true,
+    "registry_unchanged": true,
+    "gateway_backend_checked_at_utc": "2026-11-04T18:26:07.797407Z",
+    "gateway_backend_last_seen_at_utc": "2026-11-04T18:23:24.010Z",
+    "gateway_backend_seen_age_seconds": 163,
+    "gateway_fresh_at_cut": true,
+    "services_4_of_4_after_patch_verified": false,
+    "post_reboot_verified": false,
+    "status": "PHYSICAL_PATCH_APPLIED_480S_GATEWAY_FRESH_LOCAL_4_PORTS_AND_REBOOT_PENDING"
   }
 }
