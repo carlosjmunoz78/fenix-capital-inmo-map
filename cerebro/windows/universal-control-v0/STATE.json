@@ -484,12 +484,15 @@
     "gateway": "CENTRAL_CEREBRO_REMAINS_ACTIVE_WHILE_PC_SLEEPS",
     "implementation": "cerebro/windows/pc-001/device-lifecycle-v1.mjs",
     "tests": "cerebro/windows/pc-001/device-lifecycle-v1.test.mjs",
-    "tests_actual": "NODE_TEST_10_OF_10_PASS_LOCAL",
+    "tests_actual": "NODE_TEST_11_OF_11_PASS_LOCAL",
     "doc": "cerebro/docs/CEREBRO_PC_001_NOMBRE_SUSPENDER_DESPERTAR_SIN_PAUSAR_CEREBRO_V1_2026-11-04.md",
     "deployment": "NOT_DEPLOYED_NOT_WIRED_TO_WINDOWS_OR_GATEWAY",
     "current_win_exe": "UNIVERSAL_SINGLE_WINDOWS_INSTALLER_PENDING",
     "hardware_wake_e2e": "PENDING_PHYSICAL_TEST",
     "app_crm_supabase_prod_changed": false,
-    "estimated_additional_subscription_eur": 0
+    "estimated_additional_subscription_eur": 0,
+    "code_sha256": "See GitHub source; stable PC identity and power action policy only",
+    "source_archive_zip_sha256": "319f7730f8e0dfdc7a8e70ea39441591fac0d8bd6c04581bb2a0a20e5ff31db4",
+    "source_archive_library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_NOMBRE_SUSPENDER_DESPERTAR_V1_CODIGO_Y_PRUEBAS.zip"
   }
 }
