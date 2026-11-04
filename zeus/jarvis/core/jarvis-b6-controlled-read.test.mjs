@@ -198,6 +198,6 @@ test('B6 audit contains only metadata, never bearer, raw connector content or cl
 test('B6 invalid company and idempotency payloads fail before trusted dependencies',async()=>{
  const {engine,calls}=rig();
  assert.equal((await engine.executeRead({...base,companyId:'*'})).reason,'REQUEST_INVALID');
- assert.equal((await engine.executeRead({...base,idempotencyKey:'../wrong'})).reason,'REQUEST_INVALID');
+ assert.equal((await engine.executeRead({...base,idempotencyKey:'invalid id with spaces'})).reason,'REQUEST_INVALID');
  assert.deepEqual(calls,[]);
 });
