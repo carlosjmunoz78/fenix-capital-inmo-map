@@ -1,0 +1,1187 @@
+{
+  "schema_version": "0.1.0",
+  "company_id": "GLOBAL",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "generated_from": "organization.manifest.json",
+  "fact001_reuse": "EXISTING_FACTORY_SCAFFOLD_AND_SHARED_RUNTIME",
+  "policy": "EVIDENCE_FIRST_NO_NEW_SERVERS",
+  "verification_timestamp": "2026-11-05",
+  "operational_declarations_prohibited_without_physical_evidence": true,
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "display_name": "Estrategia y dirección",
+      "required_competencies": [
+        "estrategia y objetivos",
+        "forecast y escenarios",
+        "presupuesto orgánico",
+        "gobierno multiempresa"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "display_name": "Inteligencia de mercado",
+      "required_competencies": [
+        "TAM/SAM/SOM",
+        "inteligencia territorial",
+        "demanda y estacionalidad",
+        "señales de mercado"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "display_name": "Investigación de clientes y buyer personas",
+      "required_competencies": [
+        "buyer persona B2C",
+        "buyer persona B2B",
+        "jobs-to-be-done",
+        "entrevista y consentimiento"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "display_name": "Crecimiento, priorización y rentabilidad",
+      "required_competencies": [
+        "priorización RICE/ICE",
+        "coste de oportunidad",
+        "ROI SEO",
+        "secuenciación"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "display_name": "Keyword research e intención",
+      "required_competencies": [
+        "keyword seeds",
+        "long-tail",
+        "búsqueda e intención",
+        "clustering por negocio",
+        "búsqueda local"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001",
+        "KW-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "display_name": "Análisis SERP y formatos",
+      "required_competencies": [
+        "features SERP",
+        "map pack",
+        "AI Overviews",
+        "People Also Ask",
+        "SERP histórica"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "display_name": "Competencia, gaps y oportunidades",
+      "required_competencies": [
+        "gap keywords",
+        "content gap",
+        "competidores locales",
+        "share of search"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "display_name": "Arquitectura semántica, clusters y anticanibalización",
+      "required_competencies": [
+        "entity graph",
+        "clusters",
+        "mapa keyword-URL",
+        "canibalización",
+        "redirección sin pérdida de URL"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "display_name": "Rastreo, indexación y canonicals",
+      "required_competencies": [
+        "robots y sitemap",
+        "rastreo y logs",
+        "canonical y noindex",
+        "indexación GSC",
+        "redirecciones 301/410"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "display_name": "JavaScript, renderizado y SEO técnico avanzado",
+      "required_competencies": [
+        "SSR/CSR/hidratación",
+        "renderizado Googlebot",
+        "JS lazy loading",
+        "crawl budget"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "display_name": "Arquitectura web, taxonomías y enlazado interno",
+      "required_competencies": [
+        "taxonomías",
+        "IA web",
+        "breadcrumbs",
+        "enlaces internos",
+        "orphan pages"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "display_name": "Datos estructurados, entidades y búsqueda enriquecida",
+      "required_competencies": [
+        "Schema.org JSON-LD",
+        "validación rich results",
+        "entidades sameAs",
+        "datos financieros sin engaños"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "display_name": "SEO copywriting y contenido",
+      "required_competencies": [
+        "copy SEO landing",
+        "artículos/pillar/FAQ",
+        "guías y descargables",
+        "metadatos y snippets"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "display_name": "Copywriting persuasivo y de conversión",
+      "required_competencies": [
+        "copy persuasivo B2B/B2C",
+        "ofertas hipotecarias YMYL",
+        "email captación",
+        "newsletter",
+        "guiones",
+        "comparativas"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "display_name": "UX writing y microcopy",
+      "required_competencies": [
+        "microcopy formularios",
+        "consentimiento claro",
+        "mensajes de error",
+        "CTA",
+        "copy accesible"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "display_name": "Investigación, edición, fact-checking y autoridad editorial",
+      "required_competencies": [
+        "fact-checking hipotecario",
+        "investigación editorial",
+        "revisión por pares",
+        "citas fuentes",
+        "tono de marca"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "display_name": "Google Business Profile y SEO local",
+      "required_competencies": [
+        "GBP categorías/servicios",
+        "SEO local Córdoba",
+        "map pack",
+        "citaciones locales"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001",
+        "LOCALP-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "display_name": "Reputación, reseñas y NAP",
+      "required_competencies": [
+        "reseñas legítimas",
+        "NAP",
+        "reputación",
+        "confianza y testimonios verificables"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "display_name": "Digital PR, relaciones y enlaces legítimos",
+      "required_competencies": [
+        "PR digital ética",
+        "menciones de marca",
+        "enlaces editoriales legítimos",
+        "prohibición spam de enlaces"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "display_name": "SEO internacional, multilingüe y geográfico",
+      "required_competencies": [
+        "hreflang",
+        "español multirregional",
+        "expansión geográfica",
+        "localización y legalidad"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "display_name": "UX, diseño e información",
+      "required_competencies": [
+        "arquitectura información",
+        "wireframes",
+        "responsive UX",
+        "accesibilidad de flujos"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "display_name": "Desarrollo web, CMS, WordPress y Elementor",
+      "required_competencies": [
+        "WordPress REST/Abilities",
+        "Elementor y Gutenberg",
+        "plugin propio",
+        "staging y snapshots",
+        "releases reversibles"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "display_name": "Core Web Vitals, accesibilidad y seguridad web",
+      "required_competencies": [
+        "LCP/INP/CLS",
+        "a11y WCAG",
+        "seguridad web",
+        "caché y Core Web Vitals"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "display_name": "CRO, experimentación, formularios, embudos y CRM",
+      "required_competencies": [
+        "CRO y formularios",
+        "prueba de consentimiento",
+        "lead magnets",
+        "CRM E2E",
+        "funnel B2B/B2C"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "display_name": "AEO/GEO y visibilidad en IA",
+      "required_competencies": [
+        "AEO/GEO",
+        "citaciones de IA",
+        "entidades semánticas",
+        "medición AI Search"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "display_name": "SEO de imágenes, vídeo y YouTube",
+      "required_competencies": [
+        "SEO imágenes/alt",
+        "video SEO",
+        "YouTube Discover",
+        "licencias multimedia"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "display_name": "Ecommerce SEO: categorías, productos, facetas y Merchant",
+      "required_competencies": [
+        "SEO categorías/productos",
+        "facetas y filtros",
+        "merchant feeds",
+        "variantes y stock"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "display_name": "Búsqueda social, distribución orgánica y descubrimiento",
+      "required_competencies": [
+        "búsqueda social",
+        "distribución orgánica",
+        "SEO redes",
+        "medición social"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "display_name": "Search Console, GA4, medición y fuentes",
+      "required_competencies": [
+        "GSC rendimiento/cobertura",
+        "GA4 eventos",
+        "calidad medición",
+        "anomalías"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "display_name": "Atribución comercial, analítica avanzada y pruebas",
+      "required_competencies": [
+        "atribución lead a firma",
+        "incrementalidad",
+        "experimentación",
+        "estadística y sesgo"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "display_name": "QA, auditoría SEO, publicación y releases",
+      "required_competencies": [
+        "QA SEO multidisciplinar",
+        "gates publicación",
+        "OLD vs NEW",
+        "rollback y backup",
+        "auditoría independiente"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001",
+        "QA-001",
+        "EVA-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    },
+    {
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "display_name": "Aprendizaje, benchmarks, training y optimización",
+      "required_competencies": [
+        "benchmarks",
+        "training hooks",
+        "evaluación de evaluadores",
+        "meritocracia independiente",
+        "shadow y sustituciones"
+      ],
+      "sector_variants": [
+        "FIN_MORTGAGE",
+        "REAL_ESTATE",
+        "ECOMMERCE",
+        "TECH_SAAS"
+      ],
+      "fenix_priority_segments": [
+        "FIN_MORTGAGE_B2C",
+        "FIN_MORTGAGE_B2B",
+        "REAL_ESTATE_B2C",
+        "REAL_ESTATE_B2B"
+      ],
+      "existing_engine_candidates": [
+        "SEO-001",
+        "LRN-001",
+        "TRN-001"
+      ],
+      "existing_binding_state": "POR_AUDITAR",
+      "department_status": "DEFINED_NOT_READY",
+      "verified_active_agents": 0,
+      "verified_active_subagents": 0,
+      "mission_practice_evidence": [],
+      "real_staging_e2e_passed": false,
+      "merit_independent_evidence": false,
+      "training_and_replacement_proven": false,
+      "rollback_physical_tested": false,
+      "ready": false
+    }
+  ]
+}
