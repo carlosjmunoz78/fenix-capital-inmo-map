@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "READONLY_EXISTING_STARTUP_PROCESS_DEPENDENCY_INVENTORY_FOR_8765_8766_8768_THEN_RESTORE_OLD_CONTROLLERS_ONE_AT_A_TIME_WITH_ROLLBACK",
+  "next_block": "RESTORE_EXISTING_8765_8766_8768_ONLY_AFTER_PHYSICAL_PROCESS_DEPENDENCY_AUDIT_AND_BACKUP; AUDIT_CHROME_EXTENSION_AND_OPERA_GAP",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -87,5 +87,13 @@
     "additional_cost_eur": 0,
     "source_host_verification": "PENDING",
     "next": "Run once on authorized PC and inspect local JSON; no live controller restart until dependencies/backup verified"
-  }
+  },
+  "browser_adapters": {
+    "chrome": "PARTIAL_EXISTING_BRIDGE_NOT_ATTESTED_LIVE",
+    "opera": "NOT_IMPLEMENTED_FOR_CEREBRO",
+    "chatgpt_opera_connector": "ASSISTANT_ONLY_NOT_CEREBRO",
+    "edge": "NOT_AUDITED",
+    "firefox": "NOT_AUDITED"
+  },
+  "browser_universal_rule": "Shared browser core with browser-specific adapters. ChatGPT's Opera connector is NOT a CEREBRO-owned integration"
 }
