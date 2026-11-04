@@ -4039,6 +4039,76 @@
       "promoted_at": "2026-10-26T01:41:26.749Z"
     },
     {
+      "candidate_id": "repo:3a92a95d58b0f26a21406b0d19bd",
+      "technical_name": "comfyui",
+      "source_locator": "github://TerminalSkills/skills@0abb852010feb21984fa40f0bf52352a440ae6d4/skills/comfyui",
+      "pinned_sha": "0abb852010feb21984fa40f0bf52352a440ae6d4",
+      "snapshot_sha256": "3a92a95d58b0f26a21406b0d19bdc2bc6d68b4b19e645da8c03ab0bd39fc7be7",
+      "manifest_sha256": "51a19d4854b4f029e3bafdcb055399957d8eb5fc99e6a8879bd811fd19ea0e95",
+      "outcome_hash": "461fbcf017fd64754a50783a615a51b7b643301d1b1c289ad3db92eb632229aa",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:3a92a95d58b0f26a:cap:1",
+          "technical_name": "comfyui",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-11-04T07:22:21.769Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "454a8181bed89a667aa56ee14c6a02d4a1c15e964d1b7f2e6ae016fa6ed48596"
+    },
+    {
       "candidate_id": "repo:c58a78a6404f31c6a05cf4d1d938",
       "technical_name": "contemporary",
       "source_locator": "github://bergside/awesome-design-skills@f631a09b4fcc0166f2e2c1a8c81906ef680c57e8/skills/contemporary",
@@ -16807,11 +16877,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 166,
-    "inserted": 0,
+    "total": 167,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 166
   }
 }
