@@ -56,7 +56,7 @@ export function createJarvisB5ModelRouter({catalog=[],balanceProof=null,budgetSt
     return denied('ATOMIC_SPEND_GUARD_MISSING',companyId,capability);
    let spent;
    try{const r=await budgetStore.getVerifiedSpend({companyId,environment});
-    if(r?.verified!==true||!validMoney(r.spentEuro)||r.companyId!==companyId||r.environment!==environment)
+    if(r?.verified!==true||!validMoney(r.spentEuro)||r.provider!=='DEEPSEEK'||r.companyId!==companyId||r.environment!==environment)
       return denied('SPEND_NOT_VERIFIED',companyId,capability);
     spent=r.spentEuro;
    }catch{return denied('SPEND_READ_UNAVAILABLE',companyId,capability);}
