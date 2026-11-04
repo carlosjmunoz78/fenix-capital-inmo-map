@@ -59,7 +59,7 @@
   "deepseek_api_calls": 0,
   "new_subscriptions": 0,
   "spend_policy": "min(50 EUR, provider_verified_real_remaining); no_auto_recharge; atomic reservation required before live execution",
-  "next_block": "B5_CUT04_REAL_PROVIDER_AND_BACKUP_GATES_UNDER_OFF__OFFICE_PC_E2E_WHEN_AUTHENTICATED",
+  "next_block": "B5_CUT04_REAL_VOICE_AND_GATEWAY_BUDGET_NO_GO__B4_PROD_BACKUP_RESTORE_PENDING__OFFICE_PC_AUTH_MIC",
   "human_required_later": [
     "OWNER_ROOT_MFA_IF_NEEDED",
     "OFFICE_PC_MOBILE_E2E",
@@ -74,5 +74,18 @@
     "GATEWAY_OBSERVABILITY_SECURITY_REVIEW"
   ],
   "rollback": "revert branch-only changes after 95097b7944f1ff72f428f5b7d3725c84667b6c5a; do not delete PROD B3/B4 tables",
-  "evidence_doc": "zeus/jarvis/B5_CORTE_03_REMOTE_INCREMENT_2026-11-04.md"
+  "evidence_doc": "zeus/jarvis/B5_CORTE_03_REMOTE_INCREMENT_2026-11-04.md",
+  "b4_lab_pg17": {
+    "status": "HECHO_LAB_ONLY",
+    "prod_major_version": "17.6",
+    "real_postgres_synthetic": true,
+    "concurrency_race_tests": true,
+    "tenant_isolation_fixture": true,
+    "pg_dump_restore": true,
+    "index_rollback": true,
+    "workflow_id": 41745013028,
+    "conclusion": "success",
+    "prod_backup_restore": "NOT_TESTED",
+    "prod_indexes_applied": false
+  }
 }
