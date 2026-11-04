@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_8MIN_REBOOT_CHECK_PRE_WARMUP_NO_ACCEPTANCE_STALE_GATEWAY_4_OF_4_PENDING",
+  "status": "PC001_AFTER_480S_REBOOT_LOCAL_1_OF_4_OLD_STATUS_AGE_BUG_SERVER_REJOIN_CONFIRMED_FORENSIC_DIAG_READY",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -58,14 +58,17 @@
     "pc001_8min_v3_windows": "PASS_HASH_MATCH_WORKER_RESTARTED_NO_ERROR",
     "pc001_8min_v3_postreboot": "PENDING",
     "pc001_8min_patch_postapply_local_readback": "PASS_4_OF_4_AND_LIVE_PREPROD_BACKEND",
-    "pc001_8min_patch_postreboot": "PENDING"
+    "pc001_8min_patch_postreboot": "PENDING",
+    "pc001_8min_after_reboot_first_physical_691s": "FAIL_LOCAL_1_OF_4_AT_691S",
+    "pc001_gateway_postreboot_rejoin_later": "PASS_SERVER_FRESH_HEARTBEAT_5_SECONDS_AFTER_PC_REPORT",
+    "pc001_new_forensic_checker_static": "20_OF_20_PASS_PHYSICAL_PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "AFTER_2026_11_04T18_43_10Z_RUN_EXISTING_COMPROBAR_ARRANQUE_PC001_CMD_ONE_TIME_WITH_NEW_JSON_AND_VERIFY_4_OF_4_AND_FRESH_GATEWAY; DO_NOT_REBOOT_OR_RUN_REPAIR_TOOLS",
+  "next_block": "RUN_ONCE_COMPROBAR_PC001_ESTADO_REAL_CMD_READONLY; CHECK_STATUS_AGE_AND_WORKER_STARTED_AGE_AND_PROCESS_PIDS_4_LOCAL_PORTS_GATEWAY; DIAGNOSE_STOPPED_PROCESS_OR_LATE_START_OR_FAILED_RECOVER_EXACTLY; DO_NOT_REBOOT_OR_INCREASE_WAIT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1220,5 +1223,44 @@
     "reboot_auto_recovery_verified": false,
     "prod_modified": false,
     "next": "NO_REBOOT_NO_REINSTALL_WAIT_THROUGH_480S_PLUS_SERVICE_START_MARGIN_THEN_READONLY_RECHECK"
+  },
+  "pc001_480s_reboot_second_observation_20261104": {
+    "source": "uploaded_CEREBRO_PC001_ARRANQUE_ESTADO(5).json",
+    "checked_at_utc": "2026-11-04T18:44:42.0047540Z",
+    "windows_boot_at_utc": "2026-11-04T18:33:10.5000000Z",
+    "boot_age_seconds": 691,
+    "owner_warmup_seconds": 480,
+    "four_services_after_boot": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "gateway_worker_reported_status": "HOLD_RETRY_BACKOFF",
+    "local_worker_reported_status": "WAIT_BOOT_WARMUP_480S",
+    "reported_state_age_seconds": 0,
+    "state_age_bug": "OLD_CHECKER_MIXES_DATETIME_UTCNOW_WITH_LOCAL_PARSED_DATETIME_AND_CLAMPS_NEGATIVE_TO_ZERO",
+    "server_checked_at_utc": "2026-11-04T18:46:36.333284Z",
+    "server_last_seen_at_utc": "2026-11-04T18:46:31.153Z",
+    "server_fresh_heartbeat_seconds": 5,
+    "server_rejoined_later_than_report": true,
+    "local_4_4_at_server_rejoin": "UNVERIFIED",
+    "precise_worker_started_at": "UNVERIFIED_MISSING_FROM_OLD_CHECK",
+    "auto_boot_acceptance": "NOT_PASS",
+    "prod_modified": false
+  },
+  "pc001_precise_reboot_diagnostic_v1": {
+    "artifact": "CEREBRO_PC001_DIAGNOSTICO_TIEMPO_REAL_V1.zip",
+    "sha256": "8e82ad3c7d3038b840a65b721e0f4e2830e37a50f719b45b01420cfa4920f8c0",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_DIAGNOSTICO_TIEMPO_REAL_V1.zip",
+    "repository_document": "cerebro/windows/pc-001/PC001_REBOOT_480S_REAL_CLOCK_DIAGNOSTIC_20261104.md",
+    "command": "COMPROBAR_PC001_ESTADO_REAL.cmd",
+    "output": "CEREBRO_PC001_ESTADO_REAL_POST_REINICIO.json",
+    "mode": "READ_ONLY",
+    "static_tests": "20_OF_20_PASS",
+    "physical_windows_tested": false,
+    "utc_local_clock_bug_corrected_in_new_checker": true,
+    "exact_process_and_start_age_inventory": true,
+    "installed_code_untouched": true
   }
 }
