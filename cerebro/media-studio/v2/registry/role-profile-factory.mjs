@@ -1,4 +1,10 @@
 import { loadSourceRegistry } from './role-registry.mjs';
+import { readFileSync } from 'node:fs';
+
+const MERIT_CHARTER = JSON.parse(readFileSync(new URL('../../../governance/universal-agent-excellence-charter.v1.json', import.meta.url), 'utf8'));
+if (MERIT_CHARTER.scope !== 'ALL_CEREBRO_ENGINES_FAMILIES_AGENTS_SUBAGENTS_DIRECTORS_SUPERVISORS_JUDGES_TRIBUNALS_GUARDIANS_REVIEWERS_LEARNING_EVALUATORS_ORCHESTRATORS_AND_FUTURE_ROLES') throw new Error('UMS_UNIVERSAL_MERIT_SCOPE_MISMATCH');
+if (!Array.isArray(MERIT_CHARTER.mandatory_instructions) || MERIT_CHARTER.mandatory_instructions.length < 9) throw new Error('UMS_UNIVERSAL_MERIT_MISSING_INSTRUCTIONS');
+
 
 const KNOWLEDGE_REQUIREMENTS=['professional_standards','canonical_workflows','tools_and_models','research_and_papers','case_studies','benchmarks','rights_and_licenses','failure_modes','quality_metrics','cost_latency_compute','interoperability','future_watch'];
 const AUTONOMY={HEAD:'ORCHESTRATE_WITH_GATES',SPECIALIST:'EXECUTE_WITHIN_CONTRACT',SUPERVISOR:'INDEPENDENT_REVIEW',JUDGE:'INDEPENDENT_JUDGMENT',GUARDIAN:'FAIL_CLOSED_POLICY',BRAIN:'ORCHESTRATE_WITH_GATES'};
@@ -9,6 +15,10 @@ function baseProfile({id,name,role_class,department_id=null,domain=null,parent_i
     company_scope:'MULTI_COMPANY',environment_scope:['LAB','PREPROD','PROD'],
     mission: role_class==='SPECIALIST'?`Perform ${name} work at professional studio quality within ${domain}.`:`Act as ${name} with independent, auditable responsibility.`,
     autonomy:AUTONOMY[role_class],
+    merit_charter_id:MERIT_CHARTER.policy_id,
+    mandatory_merit_instructions:[...MERIT_CHARTER.mandatory_instructions],
+    merit_assessment:{...MERIT_CHARTER.merit, role_specific_evidence_required:true, no_self_promotion:true},
+    accountability:{ultimate_human_authority:MERIT_CHARTER.accountability.ultimate_human_authority, internal_control_hierarchy:[...MERIT_CHARTER.accountability.internal_control_hierarchy], no_other_human_manager:true, legal_exceptions_preserved:true},
     knowledge_requirements:[...KNOWLEDGE_REQUIREMENTS],
     learning:{daily_inbox:true,horizons:['NOW','EMERGING','COMING','FRONTIER'],requires_old_vs_new:true,requires_benchmark_before_promotion:true},
     evidence:{sources_required:true,versioned:true,provenance_required:true},
