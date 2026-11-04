@@ -5,9 +5,9 @@
   "engine_id": "ROUTE-001",
   "environment": "PREPROD_CONTROL_PLANE",
   "version": "0.2.0",
-  "updated_at": "2026-11-04T06:55:35.000Z",
-  "source_run_id": 41788722202,
-  "source_head_sha": "b6c85731cfad444f8caa2e5d9d67095ee1a9a557",
+  "updated_at": "2026-11-04T19:58:52.000Z",
+  "source_run_id": 41902118377,
+  "source_head_sha": "63c379572566d32bb0fc29094f4a8ae8007aadbb",
   "repository_visibility": "public",
   "resources": [
     {
@@ -29,7 +29,7 @@
       "current_observation": true,
       "evidence_refs": [
         "runtime:node:v24.22.1",
-        "github-run:41788722202"
+        "github-run:41902118377"
       ],
       "reason": null
     },
@@ -51,7 +51,7 @@
       "current_observation": true,
       "evidence_refs": [
         "runtime:python:Python 3.12.15",
-        "github-run:41788722202"
+        "github-run:41902118377"
       ],
       "reason": null
     },
@@ -77,7 +77,7 @@
       "evidence_refs": [
         "repo:visibility:public",
         "runtime:gh:gh version 2.103.2 (2026-10-23)",
-        "github-run:41788722202"
+        "github-run:41902118377"
       ],
       "reason": null
     },
@@ -211,8 +211,8 @@
     "selected_resource_class": "DETERMINISTIC_LOCAL",
     "actual_runtime": "node",
     "execution_provenance": "NODE_IN_PROCESS_FIXED_FIXTURE",
-    "observed_at": "2026-11-04T06:55:35.000Z",
-    "duration_ms": 0.720866,
+    "observed_at": "2026-11-04T19:58:52.000Z",
+    "duration_ms": 0.467799,
     "learning_events": 3,
     "business_execution": false
   },
@@ -225,9 +225,8 @@
   "multicompany_continuation": false,
   "additional_cost_eur": 0,
   "repeatability": {
-    "consecutive_live_green_cycles": 78,
+    "consecutive_live_green_cycles": 79,
     "recent_live_green_run_ids": [
-      40594991047,
       40641168440,
       40695368868,
       41312636815,
@@ -236,10 +235,11 @@
       41532416095,
       41594551860,
       41706012282,
-      41788722202
+      41788722202,
+      41902118377
     ],
     "last_rehearsal_status": "REPEATABILITY_REHEARSAL_GREEN",
-    "last_rehearsal_observed_at": "2026-11-04T06:55:35.000Z",
+    "last_rehearsal_observed_at": "2026-11-04T19:58:52.000Z",
     "fallback_rehearsal_green": true,
     "restoration_green": true,
     "full_loss_hold_green": true,
