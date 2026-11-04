@@ -314,10 +314,10 @@
   "candidate_pc_8766_v07": {
     "status": "LOCAL_TESTED_BUILT_WINDOWS_PHYSICAL_NOT_EXECUTED",
     "zip": "CEREBRO_PC_8766_CORRECCION_V0_7_PREPROD.zip",
-    "zip_sha256": "d89dee3a72a4be72d4ed1b74113654bd2210f9125e82a7033e3c5faf99604ce4",
+    "zip_sha256": "3ac2d0ad62d502c6d8a0aa0d61712284d6926e55d27b6beadf47cb403c202ece",
     "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_8766_CORRECCION_V0_7_PREPROD.zip",
-    "repair_sha256": "92765c3f402a5931c8de50f9b1e5c50bc067224216dceb8a616ea6d3429ff43b",
-    "rollback_sha256": "a330e9b4eb9925779a5ea2878e9b9e4fa687750ba681268ce61827d9e65ae837",
+    "repair_sha256": "74d9c61249d6cd526c77b2950aaec793d14309c7989df769c4b6485797b51bbd",
+    "rollback_sha256": "730e6971c41bd43a882ae1974485b0f0f4d20bce18aa4e6675825261afeda8e2",
     "modifies_only_after_live_health": "HKCU Run for CEREBRODeviceAgent and CEREBRODeviceAgentUniversalV023, after DPAPI backup+readback",
     "preserves": [
       "8765",
@@ -330,7 +330,8 @@
     "uncertain": "Startup-folder CEREBRO-Device-Agent.cmd unaudited; reboot physical pending",
     "tests": "unit PASS; go vet linux/windows PASS; win64 gui build PASS; deterministic rebuild PASS; zip integrity PASS",
     "user_report": "CEREBRO_PC_8766_CORRECCION_V07.txt",
-    "cost_eur": 0
+    "cost_eur": 0,
+    "health_gate": "version=0.2.0 status=OK host=127.0.0.1 port=8766 durable_queue=true prod_allowed=false; stable second readback; if prior listener healthy then do NOT change Run"
   },
   "latest_service_state": {
     "8765": "LOCAL_HEALTH_OK_LAST_PHYSICAL",
