@@ -1,0 +1,81 @@
+{
+  "schema": "cerebro.engine.compatibility-candidate.v0",
+  "factory_id": "FACT-001",
+  "engine_id": "ORCH-001",
+  "capability_id": "JARVIS-B10-PROD-CERTIFICATION-ASSESSMENT-001",
+  "date": "2026-11-04",
+  "version": "0.1.0",
+  "environment": "LAB",
+  "target_environment": "PROD",
+  "company_id": "fenix",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "status": "PARCIAL_LAB_NO_GO",
+  "registry_mutated": false,
+  "new_engine": false,
+  "new_server": false,
+  "dependencies": [
+    "B2",
+    "B3",
+    "B4",
+    "B5",
+    "B6",
+    "B7",
+    "B8",
+    "B9",
+    "ORCH-001",
+    "FACT-001",
+    "SUP-001",
+    "JDG-001",
+    "JOB-001",
+    "P23",
+    "FINOPS-001",
+    "IAM-001",
+    "GOV-001",
+    "AUD-001"
+  ],
+  "phases": [
+    "READ_ONLY",
+    "SAFE_ACTIONS",
+    "PERSISTENT_MISSIONS",
+    "MULTICOMPANY",
+    "VOICE",
+    "DELEGATION",
+    "GOVERNED_IMPROVEMENT"
+  ],
+  "permissions": [
+    "CERTIFICATION_METADATA_READ_LAB_ONLY"
+  ],
+  "policies": {
+    "b3_b4_live_required": true,
+    "owner_two_devices_required": true,
+    "real_evidence_only": true,
+    "strict_company_scope": true,
+    "no_self_judging": true,
+    "zero_new_cost": true,
+    "never_activate_prod": true,
+    "no_prod_mutation": true,
+    "no_permission_elevation": true,
+    "no_trading_access": true,
+    "no_auto_promotion": true,
+    "default_deny": true
+  },
+  "ports": [
+    "assessJarvisB10Certification",
+    "evaluateJarvisB10OwnerCrossDeviceAcceptance",
+    "evaluateB2OperationalAcceptance(existing)"
+  ],
+  "events": [],
+  "jobs": "NONE; reuse existing JOB-001 when independently certified",
+  "evaluation": "CI Node tests, B2 acceptance contract, independent external authority pending",
+  "audit": "GitHub CI run refs; no real PROD writes",
+  "costs": {
+    "new_subscriptions_eur": 0,
+    "actual_github_actions": "UNVERIFIED"
+  },
+  "backup": "Git B9 base SHA; no production database backup required for read-only code",
+  "rollback": "Close PR20 only, no merge, restore Git B9 baseline for branch",
+  "rebuild": "Checkout B10 branch and run Node 24 node --test zeus/jarvis/core/*.test.mjs",
+  "training_hooks": "candidate-only metadata; cannot deploy self-modifying evaluator",
+  "prod_authorized": false,
+  "prod_write_authorized": false
+}

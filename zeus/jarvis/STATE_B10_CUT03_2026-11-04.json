@@ -1,0 +1,98 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "block": "B10",
+  "cut": "CUT03",
+  "company_id": "fenix",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "target_environment": "PROD",
+  "version": "0.1.0",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b10-prod-certification-v0-20261104",
+  "pr_number": 20,
+  "pr_draft": true,
+  "previous_cut": "CUT02",
+  "previous_cut_head": "bbf43f3cbf1fe056dd375b75b8bfcb7eef2131d0",
+  "code_sha_tested": "e7ebb25a7f83ace1557ba67123dd161fdf198be2",
+  "status": "PARCIAL_LAB_GREEN_PROD_NO_GO",
+  "tests": {
+    "node": {
+      "run_id": 41799171359,
+      "pass": 508,
+      "fail": 0,
+      "skip": 0,
+      "conclusion": "success"
+    },
+    "b7": {
+      "run_id": 41799171394,
+      "conclusion": "success"
+    },
+    "governed": {
+      "run_id": 41799171383,
+      "conclusion": "success",
+      "prod_deployment": false
+    }
+  },
+  "real_evidence": {
+    "supabase_project": "ACTIVE_HEALTHY",
+    "edge_functions_total": 95,
+    "active_gateway_functions": [
+      "fenix-app-gateway",
+      "cerebro-console-gateway-v0"
+    ],
+    "active_jarvis_functions": [
+      "jarvis-work-dispatch-v1",
+      "jarvis-git-dispatch-v1",
+      "jarvis-work-gateway-v1",
+      "jarvis-git-gateway-v1",
+      "jarvis-orchestrator-v0"
+    ],
+    "fenix_prod_b3": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "fenix_prod_b4": {
+      "enabled": false,
+      "kill_switch": true
+    },
+    "company_registry_preprod_rows": 0,
+    "project_overlay_status": "PARCIAL",
+    "project_overlay_audit_refs": 70,
+    "github_main_sha": "3f06b8bbe92a12572329b05a27d1243335c2756f",
+    "github_prod_preparation_sha": "b2d8347845850d26b51194cfaa8092b4cdf81ba1",
+    "app_live_sha": "NOT_VERIFIED",
+    "gateway_health_real": "NOT_VERIFIED",
+    "owner_two_device_e2e": "NOT_VERIFIED"
+  },
+  "real_prod_operational_evidence_count": 0,
+  "b10_certified": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "runtime_status": "PROD_CONTROL_PLANE_ACTIVE_NOT_B10_CERTIFIED",
+  "execution_policy": "NO_GO; not even with all metadata until independent external verification",
+  "new_servers": 0,
+  "new_subscriptions": 0,
+  "github_actions_actual_cost": "NOT_VERIFIED",
+  "app_crm_supabase_prod_modified": false,
+  "engine_registry_modified": false,
+  "engine_registry_prev_count": 179,
+  "browser_PC_access_required_for_physical_step": true,
+  "remote_work_supported_now": true,
+  "rollback": "CLOSE_PR20_DRAFT_WITHOUT_MERGE",
+  "next": "B10_CUT04_SAFE_PROD_READONLY_EXTERNAL_SOURCE_AND_OWNER_TWO_DEVICE_GATE_WHEN_AVAILABLE",
+  "open_gates": [
+    "PROD_SOURCE_SHA_NOT_PROVEN",
+    "GATEWAY_HEALTH_NOT_PROVEN",
+    "B3_B4_PROD_ENABLED_NOT_GRANTED",
+    "OWNER_ROOT_PROD_AUTH_NOT_E2E",
+    "B2_TWO_DEVICE_PHYSICAL_MISSION_NOT_VERIFIED",
+    "B8_B9_REAL_GATES_PENDING",
+    "TWO_REAL_COMPANIES_NOT_VERIFIED",
+    "JOB001_LIVE_DURABILITY_NOT_VERIFIED",
+    "INDEPENDENT_TRIBUNAL_AND_P23_NOT_VERIFIED",
+    "DISASTER_RESTORE_PROD_NOT_VERIFIED",
+    "INDEPENDENT_PROD_PROMOTION_AUTHORITY_REQUIRED"
+  ]
+}

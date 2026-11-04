@@ -1,0 +1,100 @@
+{
+  "schema": "zeus.jarvis.block.state.v1",
+  "date": "2026-11-04",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "block": "B10",
+  "cut": "CUT02",
+  "company_id": "fenix",
+  "engine_id": "ORCH-001",
+  "environment": "LAB",
+  "target_environment": "PROD",
+  "version": "0.1.0",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b10-prod-certification-v0-20261104",
+  "pr_number": 20,
+  "pr_draft": true,
+  "pr_open": true,
+  "parent_pr": 19,
+  "parent_head": "a81a539e98f905b5479c72973ae49a2abecaf393",
+  "code_sha_tested": "e88ea6a5cc65bd602e6af8ee9afee68daac013ad",
+  "status": "PARCIAL_LAB_GREEN_PROD_NO_GO",
+  "tests": {
+    "node": {
+      "run_id": 41796775749,
+      "pass": 490,
+      "fail": 0,
+      "skip": 0,
+      "conclusion": "success"
+    },
+    "b7": {
+      "run_id": 41796775690,
+      "conclusion": "success"
+    },
+    "governed": {
+      "run_id": 41796775807,
+      "conclusion": "success",
+      "prod_deployment": false
+    }
+  },
+  "stages": [
+    "READ_ONLY",
+    "SAFE_ACTIONS",
+    "PERSISTENT_MISSIONS",
+    "MULTICOMPANY",
+    "VOICE",
+    "DELEGATION",
+    "GOVERNED_IMPROVEMENT"
+  ],
+  "stages_real_prod_verified": 0,
+  "certified": false,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "b2_two_devices_real_verified": false,
+  "external_read_evidence": {
+    "supabase_fenix_prod_b3": {
+      "enabled": false,
+      "kill_switch": true,
+      "source": "SQL_READONLY"
+    },
+    "supabase_fenix_prod_b4": {
+      "enabled": false,
+      "kill_switch": true,
+      "source": "SQL_READONLY"
+    },
+    "company_registry_preprod_row_count": 0,
+    "app_live_sha": "NOT_VERIFIED",
+    "two_devices": "NOT_VERIFIED"
+  },
+  "data_classification": {
+    "tests": "SYNTHETIC_TEST",
+    "CI": "LOCAL_LAB_TEST",
+    "live_controls": "REAL_EXTERNAL_READ",
+    "prod_operation_verified": false
+  },
+  "registry_count_unchanged": 179,
+  "main_untouched": true,
+  "prod_modified": false,
+  "new_servers": 0,
+  "new_subscriptions_eur": 0,
+  "actual_actions_charge": "NOT_VERIFIED",
+  "browser_pc_required_for_current_remote_work": false,
+  "prod_auth_required": "CURRENT_INDEPENDENT_PROMOTION_AUTHORITY",
+  "rollback": "CLOSE_B10_DRAFT_PR20_NO_MERGE",
+  "next": "B10_CUT03_REAL_PROD_READONLY_EVIDENCE_COLLECTION_AND_GAP_RECONCILIATION",
+  "open_gates": [
+    "B8_B9_REAL_PROMOTION_DEPENDENCIES",
+    "B2_OWNER_ROOT_TWO_DEVICE_PHYSICAL",
+    "B3_PROD_SCOPED_GRANT_AND_REVOCATION",
+    "B4_CENTRAL_MEMORY_REAL",
+    "GATEWAY_PROD_SOURCE_SHA_AND_HEALTH",
+    "PROD_APP_CRM_REGRESSION",
+    "JOB001_DURABLE_LIVE",
+    "TWO_REAL_COMPANIES_VERIFIED",
+    "VOICE_OWNER_REAL",
+    "DELEGATION_SUPERVISOR_REAL",
+    "P23_FINOPS_TELEMETRY",
+    "TRIBUNAL_INDEPENDENT_REAL",
+    "DR_BACKUP_RESTORE",
+    "EXTERNAL_PROD_PROMOTION_AUTHORITY"
+  ]
+}
