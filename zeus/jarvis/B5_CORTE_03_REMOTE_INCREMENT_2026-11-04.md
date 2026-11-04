@@ -45,3 +45,14 @@ Rollback del código: revertir los commits exclusivos posteriores a `95097b7944f
 
 ## Siguiente acción
 Continuar la verificación REMOTA de contratos B2/B3/B4, hacer E2E de PostgreSQL/backup solamente en entorno aislado con copia restaurable y sin coste nuevo, y catalogar STT/TTS gratuitos. Reservar para PC/MFA las pruebas físicas de navegador, micro y dos dispositivos; no declarar B5/B6/B9 PROD.
+
+
+## Incremento adicional · B4 PostgreSQL 17 real, sintético y aislado
+- Consulta PROD de solo lectura: `SHOW server_version` devolvió **17.6**.
+- Se conservó el candidato de índices únicos B4 sin aplicarlo a PROD.
+- Primera ejecución de CI (`41744899156`) detectó incompatibilidad cliente/servidor en `pg_restore` porque el fixture usaba PostgreSQL 16; se corrigió una única variable causal: servicio de PostgreSQL 17 para igualar la versión mayor real de PROD.
+- Workflow nuevo: `.github/workflows/jarvis-b4-real-postgres-lab.yml` con PostgreSQL 17 efímero.
+- Script: `zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh`.
+- Ejecución **41745013028 SUCCESS**: dos procesos enfrentados por target de CORRECTION/REVOCATION, dos por checkpoint repetido, mismo target con empresa distinta, backup real de base sintética con `pg_dump`, restauración nueva con `pg_restore`, eliminación de los índices candidatos sobre base restaurada, integridad y recuento de eventos intactos.
+- Esta prueba **NO sustituye** backup/snapshot/restore del sistema físico de Supabase PROD, ni verifica todos los contratos RLS/OWNER_ROOT/B3. Mantener los flags B3/B4 OFF.
+- Coste: sin compra, suscripción ni gasto de API; usa GitHub Actions del repositorio.
