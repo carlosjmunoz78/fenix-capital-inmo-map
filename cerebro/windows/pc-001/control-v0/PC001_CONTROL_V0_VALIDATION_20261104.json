@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-11-04",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/windows-universal-control-v0-20261104",
+  "scope": "fenix/PREPROD/PC-001",
+  "component": "PC001-LOCAL-CONTROL-ACCEPTANCE-V0",
+  "tests": {"go_unit_linux": "PASS_3_OF_3", "go_vet_linux": "PASS", "go_vet_windows": "PASS", "go_windows_amd64_test_compile": "PASS", "go_windows_amd64_gui_build": "PASS", "reproducible_build": "PASS_IDENTICAL_SHA256", "windows_physical_e2e": "PENDING", "gateway_e2e": "PENDING", "browser_automation": "NOT_IMPLEMENTED", "second_pc": "PENDING"},
+  "exe_sha256": "d150f09b0580311d005b40b74c2dabab3f0b7e2b4e34402444add65afb557758",
+  "remote_enabled": false,
+  "user_consent_required": true,
+  "existing_services_touched": false,
+  "prod_touched": false,
+  "additional_cost_eur": 0,
+  "next_block": "RUN_PHYSICAL_LOCAL_FIXTURE_ON_PC001_AND_READ_REPORT; THEN WRAP_AUTHENTICATED_EXISTING_GATEWAY_HOST_FOR_EXACT_SCOPED_COMMANDS_WITH_LEDGER_AND_KILL_SWITCH"
+}
