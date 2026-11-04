@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PHYSICAL_S3_SLEEP_RESUME_PASS_4_OF_4_GATEWAY_AUTH_E2E_PENDING",
+  "status": "ONE_TIME_PREPROD_PAIRING_REGISTERED_WAIT_WINDOWS_ENROLLMENT_AUTH_E2E_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -39,7 +39,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "WAIT_FOR_SANITIZED_PHYSICAL_PAIRING_REQUEST_JSON; VALIDATE_DEVICE_SCOPE_AND_REGISTER_FRESH_ONE_TIME_PREPROD_PAIRING; RUN_SECOND_CLICK_LOCAL_AUTHENTICATED_RECONNECT_NONCE_POLL_RESULT; NO_PROD_CHANGES",
+  "next_block": "WAIT_FOR_SECOND_CLICK_LOCAL_WINDOWS_PAIRING; VERIFY_AUTH_RECONNECT_NONCE_NEGATIVE_POLL; QUEUE_SCOPED_READONLY_HEALTH_COMMAND_ONLY_AFTER_ENROLLMENT; REQUIRE_THIRD_POLL_FOR_RESULT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -650,5 +650,28 @@
     "trading_access": false,
     "installed_service": false,
     "additional_cost_eur": 0
+  },
+  "pc001_gateway_pairing_20261104": {
+    "status": "ONE_TIME_PAIRING_REGISTERED_PREPROD_WAITING_FOR_LOCAL_WINDOWS_ENROLLMENT",
+    "device_id_sha256_prefix": "f7656e249b9f07d8",
+    "requested_at_utc": "2026-11-04T15:53:49.2254419Z",
+    "authorized_environment": "PREPROD",
+    "company_id": "fenix",
+    "version": "pc001-windows-v1",
+    "backend": "EXISTING_cerebro_device_gateway_preprod_v9",
+    "server_row_inserted": true,
+    "server_row_readback_verified": true,
+    "expires_at_utc": "2026-11-04T16:16:12.229954Z",
+    "expires_at_europe_madrid": "2026-11-04T17:16:12.229954+01:00",
+    "one_time_pairing_unused_on_readback": true,
+    "enrolled_agent_rows_on_readback": 0,
+    "raw_pair_code_exposed": false,
+    "raw_bearer_token_exposed": false,
+    "client_vault": "DPAPI_CURRENT_USER_ONLY",
+    "next": "RUN_SAME_EXISTING_VINCULAR_PC001_PREPROD_CMD_AGAIN_AND_UPLOAD_SANITIZED_CEREBRO_PC001_GATEWAY_RESULTADO_JSON",
+    "authenticated_reconnect_verified": false,
+    "remote_command_e2e_verified": false,
+    "prod_modified": false,
+    "new_subscription": false
   }
 }
