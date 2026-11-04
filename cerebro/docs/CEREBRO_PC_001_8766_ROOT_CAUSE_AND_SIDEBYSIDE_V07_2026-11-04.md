@@ -10,15 +10,15 @@
 
 ## V0.7 repair design (inspectable inside ZIP)
 ZIP: `CEREBRO_PC_8766_CORRECCION_V0_7_PREPROD.zip`
-SHA256 ZIP: `d89dee3a72a4be72d4ed1b74113654bd2210f9125e82a7033e3c5faf99604ce4`
+SHA256 ZIP: `3ac2d0ad62d502c6d8a0aa0d61712284d6926e55d27b6beadf47cb403c202ece`
 Source: `src/*.go`, plus `LEER_PRIMERO.txt`, `ANALISIS_CAUSA.md`, `SHA256SUMS.txt`.
 Repository source individual files **not yet synchronized**; canonical source copy preserved in Library.
 
-- `CEREBRO_PC_8766_CORRECCION_V07.exe`: SHA256 `92765c3f402a5931c8de50f9b1e5c50bc067224216dceb8a616ea6d3429ff43b`.
-- `CEREBRO_PC_8766_ROLLBACK_V07.exe`: SHA256 `a330e9b4eb9925779a5ea2878e9b9e4fa687750ba681268ce61827d9e65ae837`.
+- `CEREBRO_PC_8766_CORRECCION_V07.exe`: SHA256 `74d9c61249d6cd526c77b2950aaec793d14309c7989df769c4b6485797b51bbd`.
+- `CEREBRO_PC_8766_ROLLBACK_V07.exe`: SHA256 `730e6971c41bd43a882ae1974485b0f0f4d20bce18aa4e6675825261afeda8e2`.
 - Verify existing monitor `V0.2.0 PREPROD`, 8765/8767 health, **original VBS exact hash**, existing EXE exact hash and paths within `%LOCALAPPDATA%/CEREBRO`, legacy Run path/hash and no existing duplicate process.
 - Snapshot **both** existing HKCU Run values encrypted with Windows DPAPI; round-trip restore in-memory prechecked; never print secrets or registry values.
-- Single attempt: existing executable `--agent` with `CEREBRO_AGENT_PORT=8766` and canonical existing state directory. Use Win32 mutex and one-shot guard. 8766 accepted only for HTTP 200 containing `status=OK`, `port=8766` and `prod_allowed=false`.
+- Single attempt: existing executable `--agent` with `CEREBRO_AGENT_PORT=8766` and canonical existing state directory. Use Win32 mutex and one-shot guard. 8766 accepted only for HTTP 200 containing `status=OK`, `port=8766`, `prod_allowed=false`, `durable_queue=true`, `host=127.0.0.1`, `version=0.2.0`; repeat health before changing Run. If 8766 was healthy before launch, no Run mutation without process ownership evidence.
 - **Only after live health evidence:** stage copy of the new launcher under user LocalAppData/CEREBRO/PC001/LauncherV07 without overwrite, point both known Run entries at it and verify exact readback. Old binaries/VBS remain intact. Run launcher uses `--startup`; on future boots it re-validates original source VBS from encrypted backup and avoids duplicate processes.
 - Rollback EXE accepts only currently V0.7-owned Run entries and restores both original values from DPAPI. It **does not** terminate processes or guarantee an immediate service rollback.
 - Any unknown hash/argument/process, locked file, port mismatch, failed backup, failed smoke or changed Run state **fails closed** without deliberately launching or modifying an unapproved component.
