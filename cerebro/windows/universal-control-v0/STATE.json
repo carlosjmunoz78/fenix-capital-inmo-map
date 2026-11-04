@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "AUDIT_EXISTING_8766_UNIVERSAL_VBS_FULL_BEHAVIOR_READONLY; DO_NOT_RUN_LEGACY_INSTALLER_BINARY_AGAIN; RESOLVE_8768_ARG_CONTRACT",
+  "next_block": "ONCE_ONLY_UNIVERSAL023_READONLY_SNAPSHOT_FOR_STATIC_ANALYSIS; DO_NOT_REPEAT_V05_V06_OR_LEGACY_V041; then 8768 arg and Gateway E2E.",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -278,5 +278,24 @@
     "gateway_connected": false,
     "trading_access": false,
     "additional_cost_eur": 0
+  },
+  "legacy_v041_forensics_20261104": {
+    "uploaded_exe_sha256": "0b8159b8211b2417a0cb8e8d9a3f94c2cf43fcecbd4b70f2328afdbeb7165b07",
+    "version_from_manifest": "0.4.1",
+    "format": "PYINSTALLER_ONEFILE_PYTHON_3_13_WIN64",
+    "static_analysis": "GENERIC_INSTALL_ERROR_TITLE_SAME_FOR_AGENT_AND_INSTALL_MODES",
+    "v06_defect": "MISSING_ENV_CEREBRO_AGENT_PORT_8766_WITH_LEGACY_DEFAULT_8765",
+    "v06_defect_evidence": "EXTRACTED_PYTHON_SOURCE_AND_GO_V06_MAIN",
+    "windows_root_cause": "PORT_COLLISION_PLAUSIBLE_EXACT_ERROR_UNCAPTURED",
+    "quarantine": "LEGACY_AGENT_V041_DO_NOT_LAUNCH"
+  },
+  "universal023_next_evidence": {
+    "file": "CEREBRO_PC_UNIVERSAL023_SOLO_LECTURA_V0_1_PREPROD.zip",
+    "exe_sha256": "9c1a4bc90cefcc9391296172459f2e54c85a80fb8cb4cce829dfeb7048b5a6c7",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_UNIVERSAL023_SOLO_LECTURA_V0_1_PREPROD.zip",
+    "status": "PREPROD_STATIC_SOURCE_BIN_VERIFIED_GO_TEST_VET_REPROBUILD_PASS_WIN_PHYSICAL_PENDING",
+    "input": "read original VBS by HKCU known run entry; verify SHA; copy only Universal 0.2.3 EXE in user-created ZIP",
+    "output": "CEREBRO_PC_UNIVERSAL023_AUDITORIA.zip and CEREBRO_PC_UNIVERSAL023_RESULTADO.txt",
+    "no_launch": true
   }
 }
