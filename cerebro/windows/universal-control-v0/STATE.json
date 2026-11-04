@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_GATEWAY_AUTHENTICATED_READONLY_E2E_GREEN_4_OF_4_PHYSICAL_SLEEP_RESUME_GREEN",
+  "status": "GATEWAY_READONLY_E2E_GREEN_CONTINUOUS_RUN_KEY_CANDIDATE_READY_PHYSICAL_INSTALL_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -33,14 +33,18 @@
     "pc001_power_readonly_static": "5_OF_5_PASS_NODE_LOCAL_WINDOWS_NOT_EXECUTED",
     "pc001_power_readonly_windows": "PASS_PHYSICAL_2026_11_04_13_05_UTC",
     "pc001_physical_s3_sleep_resume": "PASS_4_OF_4_PHYSICAL_USER_BUTTON_WAKE_2026_11_04",
-    "pc001_remote_authenticated_readonly_e2e": "PASS_PHYSICAL_CLIENT_AND_SERVER_COMPLETED_2026_11_04_16_02_UTC"
+    "pc001_remote_authenticated_readonly_e2e": "PASS_PHYSICAL_CLIENT_AND_SERVER_COMPLETED_2026_11_04_16_02_UTC",
+    "pc001_continuity_static": "30_OF_30_PASS",
+    "pc001_continuity_windows": "PENDING",
+    "pc001_continuity_reboot": "PENDING",
+    "pc001_continuity_rollback": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PRESERVE_GREEN_4_PORTS_AND_SCOPED_AUTH; VERIFY_POST_REBOOT_PERSISTENCE_AND_ROLLBACK_NONDESTRUCTIVELY; ASSESS_EXISTING_ACCESSBOOT_INTEGRATION; REMOTE_MUTATIONS_AND_WAKE_ON_LAN_STILL_HOLD",
+  "next_block": "ONE_CLICK_PHYSICAL_SIDE_BY_SIDE_INSTALL_AND_WORKER_READBACK; THEN PHYSICAL_REBOOT_PERSISTENCE; THEN OWN_RUN_KEY_ROLLBACK_AND_ACCESSBOOT_CAPTURE; WOL_HOLD_NO_VERIFIED_RELAY",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -728,5 +732,41 @@
     "delivery_attempt": 1,
     "semantic_verified": true,
     "completed_at_utc": "2026-11-04T16:02:09.353Z"
+  },
+  "pc001_gateway_continuity_v1_20261104": {
+    "status": "CANDIDATE_STATIC_PASS_30_OF_30_WINDOWS_PHYSICAL_PENDING",
+    "scope": {
+      "company_id": "fenix",
+      "engine_id": "PC-001",
+      "environment": "PREPROD",
+      "version": "pc001-windows-v1"
+    },
+    "artifact_name": "CEREBRO_PC001_CONTINUIDAD_AUTOARRANQUE_PREPROD_V1.zip",
+    "artifact_sha256": "30768678759137ccc2a58b815ebb158d9b9c5d60c7e1c589fd7e015c4738e5f2",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_CONTINUIDAD_AUTOARRANQUE_PREPROD_V1.zip",
+    "repository_documentation": "cerebro/windows/pc-001/PC001_GATEWAY_CONTINUIDAD_V1_20261104.md",
+    "original_physically_tested_client_sha256": "822f7241d7497b178767f456c5fcb30083370b8003307c264982dfb87902cf38",
+    "user_runkey_name": "CEREBROPC001GatewayPREPRODV1",
+    "new_tasks_created": 0,
+    "new_services_created": 0,
+    "preexisting_windows_runkeys_modified": 0,
+    "preserved": "existing 8765/8766/8767/8768 and DPAPI vault and immutable device ID",
+    "install_mode": "CURRENT_USER_SIDE_BY_SIDE_ONLY",
+    "poll_interval_seconds": 180,
+    "single_worker_mutex": true,
+    "token_in_cli": false,
+    "new_port_listener": false,
+    "rollback": "own_run_key_only_dpapi_backup_and_marker",
+    "static_checks": "30_OF_30_PASS",
+    "windows_installed": false,
+    "background_worker_executed": false,
+    "post_reboot_continuity_verified": false,
+    "rollback_physically_verified": false,
+    "cost_eur_new_subscription": 0,
+    "supabase_metered_consumption": "TO_MEASURE",
+    "accessboot_v0_5_portable_bundle": "PHYSICAL_CAPTURE_AND_SECOND_WINDOWS_PC_PENDING",
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "next_user_step": "UNZIP_ON_ALREADY_PAIRED_WINDOWS_AND_DOUBLE_CLICK_INSTALAR_CONTINUIDAD_PC001_CMD_THEN_COMPROBAR_CONTINUIDAD_PC001_CMD_SEND_JSONS"
   }
 }
