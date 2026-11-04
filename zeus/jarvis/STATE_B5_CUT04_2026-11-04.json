@@ -1,0 +1,93 @@
+{
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-CORE-001",
+  "environment": "PROD",
+  "date": "2026-11-04",
+  "cut": "B5_CUT_04_REMOTE",
+  "status": "PARCIAL_LAB_CI_GREEN_PROD_OFF",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b5-voice-router-v0-20261104",
+  "pr": 15,
+  "draft": true,
+  "base_pr": 14,
+  "base_pr_depends_on": 13,
+  "baseline_sha": "2d960fd0bde9d8b592da3d2e220ee7e0fbd1faaf",
+  "last_verified_code_sha": "45288d802c25acfdf0cb958dca9721e4ec0a3e31",
+  "workflows": {
+    "node_tests": {
+      "run_id": 41747051593,
+      "passed": 262,
+      "failed": 0,
+      "conclusion": "success"
+    },
+    "governed_integration": {
+      "run_id": 41747051536,
+      "conclusion": "success",
+      "prod_deploy": "skipped"
+    },
+    "tts_spanish_synthetic": {
+      "run_id": 41747051464,
+      "conclusion": "success",
+      "stt_tested": false,
+      "quality_certified": false
+    },
+    "finops_postgres_17": {
+      "run_id": 41747051440,
+      "conclusion": "success",
+      "db": "LAB_SYNTHETIC",
+      "atomic_reservations": true,
+      "backup_restore_rollback": true
+    },
+    "b4_postgres_17": {
+      "run_id": 41747051610,
+      "conclusion": "success",
+      "prod_backup_restored": false
+    }
+  },
+  "b3_prod": {
+    "enabled": false,
+    "kill_switch": true
+  },
+  "b4_prod": {
+    "enabled": false,
+    "kill_switch": true,
+    "live_restore_verified": false
+  },
+  "b5": {
+    "server_gateway": "LAB_CONTRACT_NOT_DEPLOYED",
+    "speech_port": "LAB_SECURITY_HARDENED",
+    "browser_compatibility": "LAB_PARITY_TESTED",
+    "tts": "OSS_SYNTHETIC_AUDIO_GREEN_NOT_CONNECTED",
+    "stt": "NOT_REAL_TESTED",
+    "model_router": "LAB_LOCAL_FIRST_PAID_DISABLED",
+    "deepseek_api_calls": 0,
+    "deepseek_balance_verified": false,
+    "finops": "PG17_SYNTHETIC_ATOMIC_GREEN_NOT_IN_PROD",
+    "prod_operational": false
+  },
+  "b6": "LAB_PREFLIGHT_OFF",
+  "b7": "DEFINED_NOT_RECHECKED",
+  "b8": "LAB_TENANT_TESTS_ONLY",
+  "b9": "LAB_ANTI_LOOP_OFF",
+  "b10": "NOT_CERTIFIED",
+  "new_subscriptions": 0,
+  "new_paid_model_calls": 0,
+  "no_main_merge": true,
+  "next_block": "B5_CUT05_AUTHENTICATED_GATEWAY_AND_PROVIDER_PREPROD_PROOFS_UNDER_OFF",
+  "gates_remote": [
+    "B2_B3_VERIFIED_SERVER_AUTH_AND_VAULT",
+    "B4_PROD_BACKUP_RESTORE",
+    "B5_REAL_GATEWAY_POLICY_AND_OBSERVABILITY",
+    "DEEPSEEK_LIVE_CREDIT_AND_SECURE_AUTH_AND_CREDIT_RECONCILIATION",
+    "REAL_STT_BENCHMARK"
+  ],
+  "gates_physical": [
+    "OWNER_ROOT_MFA_IF_REQUIRED",
+    "MIC_BROWSER_PERMISSION",
+    "PC_MOBILE_E2E",
+    "DEVICE_RECOVERY"
+  ],
+  "evidence_doc": "zeus/jarvis/B5_CORTE_04_GATEWAY_TTS_FINOPS_LAB_2026-11-04.md",
+  "rollback": "revert PR15-only commits after 2d960fd0bde9d8b592da3d2e220ee7e0fbd1faaf; do not alter PROD B3/B4"
+}
