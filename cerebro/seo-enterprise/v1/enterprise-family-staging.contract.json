@@ -282,7 +282,12 @@
           "NO_UNVERIFIED_FINANCIAL_PROMISES",
           "REAL_LOCAL_SERVICE_PROOF"
         ],
-        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION"
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
       },
       {
         "family_id": "SEO-ECOM",
@@ -301,7 +306,12 @@
           "STOCK_AND_PRICE_PROVENANCE",
           "CANONICAL_FILTER_VALIDATION"
         ],
-        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION"
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
       },
       {
         "family_id": "SEO-TECH",
@@ -320,7 +330,12 @@
           "VERSIONED_TECH_DOCS",
           "JAVASCRIPT_RENDER_AND_CANONICAL_QA"
         ],
-        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION"
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
       }
     ],
     "company_isolation": true,
@@ -419,6 +434,20 @@
       ],
       "system_requirement": "NOT_MERELY_PAPER_PROFILES;MUST_HAVE_TASK_WORKER_BINDING_OWNERSHIP_AUDIT_AND_OUTCOME_TEST_BEFORE_OPERATIONAL_CLAIM",
       "current_state": "DEFINED_NOT_RUNTIME_BOUND"
+    },
+    "family_workforce_plan": {
+      "status": "DEFINED_TARGET_NOT_MATERIALIZED",
+      "counting_policy": "Per family: 14 department-level lead agents, each with five specialized logical subagents. Shared central director, supervisor, independent judges and guardians are not included in these family counts.",
+      "agents_per_family": 14,
+      "subagents_per_agent": 5,
+      "subagents_per_family": 70,
+      "number_of_families": 3,
+      "total_family_agents": 42,
+      "total_family_subagents": 210,
+      "total_family_execution_roles": 252,
+      "shared_runtime": true,
+      "not_individual_servers": true,
+      "execution_bindings_verified": false
     }
   },
   "reuse": {
