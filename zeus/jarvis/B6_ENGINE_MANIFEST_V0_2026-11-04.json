@@ -1,0 +1,86 @@
+{
+  "schema": "zeus.jarvis.b6.engine_manifest.v0",
+  "engine_id": "JARVIS-B6-CAPABILITY-EXECUTOR-001",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "date": "2026-11-04",
+  "owner_engine": "JARVIS-CORE-001",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "factory_first": true,
+  "shared_runtime_required": true,
+  "new_server_count": 0,
+  "server_deployed": false,
+  "gateway_route": "B5_SERVER_ONLY_CONTRACT_NOT_DEPLOYED",
+  "capability_fabric": "EXISTING_TRUSTED_REGISTRY_ONLY",
+  "default_execution_enabled": false,
+  "kill_switch_expected": true,
+  "security": {
+    "principal": "B2_OWNER_ROOT_VERIFIED_SERVER_SIDE_PENDING",
+    "authorization": [
+      "JARVIS_CAPABILITY_DISCOVER",
+      "JARVIS_CAPABILITY_EXECUTE_READ"
+    ],
+    "audit": [
+      "B6_CAPABILITY_PLAN",
+      "B6_READ_STARTED",
+      "B6_READ_VERIFIED"
+    ],
+    "allow_mutations_in_prod": false,
+    "allow_paid_connectors": false,
+    "require_independent_verification": true,
+    "require_atomic_journal_before_prod": true,
+    "forbid_generic_url_or_shell_commands": true
+  },
+  "routes": {
+    "API": {
+      "status": "REAL_GITHUB_READ_VERIFIED_CI_LAB",
+      "provider": "GitHub",
+      "operation": "READ",
+      "estimatedEuro": 0
+    },
+    "MCP": {
+      "status": "PREFLIGHT_ONLY_NOT_EXECUTED"
+    },
+    "CLI": {
+      "status": "PREFLIGHT_ONLY_NOT_EXECUTED"
+    },
+    "BROWSER": {
+      "status": "PREFLIGHT_ONLY_NOT_EXECUTED"
+    },
+    "COMPUTER_USE": {
+      "status": "NOT_CONNECTED_REQUIRES_DEVICE_AUTH"
+    }
+  },
+  "evidence": {
+    "github_api_read": "41749233111",
+    "pg17_journal_and_sandbox_rollback": "41749233139",
+    "source_repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "pr": 16
+  },
+  "permissions": {
+    "prod_mutations": false,
+    "prod_reads": false,
+    "lab_reads_for_synthetic_ci_only": true
+  },
+  "data_contracts": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "mission_id",
+    "capability",
+    "idempotency_key",
+    "owner_id",
+    "connector_id",
+    "evidence_hash"
+  ],
+  "backup_restore": "PG17_SYNTHETIC_LAB_PASS_NOT_PROD",
+  "rollback": "PR16_ONLY_REVERT_AND_CLOSE",
+  "observability": "AUDIT_METADATA_ONLY_NO_SECRET_OR_RAW_RESPONSE",
+  "cost_limit_euro": 0,
+  "training_hooks": "REGISTER_ONLY_NOT_ACTIVE",
+  "evals": "REAL_READ_AND_SYNTHETIC_LAB_GATES",
+  "prod_promotion": "NO_GO",
+  "autonomy_state": "PARCIAL"
+}
