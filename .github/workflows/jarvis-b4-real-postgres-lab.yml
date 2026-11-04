@@ -1,0 +1,39 @@
+name: JARVIS B4 Real PostgreSQL Concurrency LAB
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/gates/**'
+      - '.github/workflows/jarvis-b4-real-postgres-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  postgres-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: jarvis_test
+          POSTGRES_PASSWORD: ephemeral_only_ci_pg16
+          POSTGRES_DB: jarvis_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jarvis_test -d jarvis_lab"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: jarvis_test
+      PGPASSWORD: ephemeral_only_ci_pg16
+      PGDATABASE: jarvis_lab
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL CLI if missing
+        run: command -v pg_restore >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+      - name: Execute isolated PostgreSQL concurrency, backup and restore gates
+        run: bash zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
