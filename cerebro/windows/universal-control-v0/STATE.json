@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PHYSICAL_ONE_SHOT_RECOVERY_RECEIPT_8765_8768_AND_SAFE_8766_SCRIPT_AUDIT_GATEWAY_STILL_PENDING",
+  "next_block": "SAFE_PHYSICAL_INVESTIGATION_8765_PERSISTENCE_AND_8766_VBS_AND_8768_FLAGS_THEN_GATEWAY_BINDING; PRESERVE_FOUR_CHANNEL_SEPARATION",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -146,5 +146,17 @@
     "library": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_RECUPERACION_CONTROLADA_V0_1_PREPROD.zip",
     "tests": "go unit and vet Linux/Windows PASS; Windows amd64 GUI build/rebuild PASS; physical PENDING",
     "zero_additional_cost": true
-  }
+  },
+  "architecture_contract": "cerebro/docs/CEREBRO_CUATRO_CANALES_INDEPENDIENTES_V1_2026-11-04.md",
+  "channel_separation": {
+    "PC_001": "PARTIAL_V02_LOCAL_TXT_VERIFIED",
+    "MOB_001": "PLANNED",
+    "TAB_001": "PLANNED",
+    "BRX_001": "CHROME_PARTIAL_OPERA_NOT_INTEGRATED_OTHER_BROWSERS_UNAUDITED",
+    "shared_gateway": "DEFINED_NOT_CONNECTED_TO_PC_MONITOR",
+    "independent_permissions_rollback": true
+  },
+  "legacy_8765_recovery": "ONE_SHOT_HEALTH_PASS_PERSISTENCE_PENDING",
+  "legacy_8766": "PENDING_VBS_AUDIT",
+  "legacy_8768": "BLOCKED_UNKNOWN_FLAGS_FAIL_CLOSED"
 }
