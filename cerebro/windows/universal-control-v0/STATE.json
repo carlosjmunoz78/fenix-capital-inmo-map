@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PHYSICAL_PC_V03_READONLY_REPORT_THEN_SAFE_EXACT_HASH_REPAIR_8766_8768_AND_8765_PERSISTENCE_GATEWAY_PAIRING_E2E",
+  "next_block": "PHYSICAL_PC_V04_RECOVERY_REPORT_THEN_8766_FULL_VBS_AUDIT_8768_RUNTIME_SNAPSHOT_GATEWAY_SCOPED_E2E_REBOOT_ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -184,6 +184,44 @@
     "no_system_mutations": true,
     "remote_commands_enabled": false,
     "camera_mic_capture": false,
+    "additional_cost_eur": 0
+  },
+  "last_physical_precheck_v03": {
+    "date_local": "2026-11-04T11:22:26+01:00",
+    "source": "User uploaded CEREBRO_PC_CIERRE_ESTADO.txt",
+    "status": "PHYSICAL_PASS_READONLY_WITH_HEALTH_PROBE_FALSE_NEGATIVE_SUSPECTED",
+    "monitor": "0.2.0 PREPROD LOCAL_PARTIAL GATEWAY_OFF",
+    "ports": {
+      "8765": "LISTENER_PRESENT_BROWSER_HOST_PID_4272_HEALTH_FALSE_V03_UNVERIFIED",
+      "8766": "NO_LISTENER",
+      "8767": "LISTENER_PRESENT_ACCESSBOOT_PID_5624_HEALTH_FALSE_V03_DISPROVED_BY_OPERA_GO_READONLY",
+      "8768": "NO_LISTENER"
+    },
+    "controller_8768": "RUNFILE_HASH_VALID_FLAG_NAMES_NONE_V03_BUT_V01_RECOVERY_UNKNOWN_FLAGS",
+    "agent_8766": "VBS_SIX_LINES_HASH_VALID_ONLY_STATIC_SIGNALS_NO_EXECUTION",
+    "hardware": "CAMERA_1_OF_1_AUDIOENDPOINT_2_OF_2",
+    "reboot": "PENDING",
+    "rollback": "PENDING"
+  },
+  "pc_recovery_v04": {
+    "status": "LOCAL_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "version": "0.4.0",
+    "artifact": "CEREBRO_PC_REPARACION_V0_4.exe",
+    "sha256": "052b013e2f9c8329df98e0fe9f289eb050256e89b30b7706c5176701095fde77",
+    "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_REPARACION_V0_4_PREPROD.zip",
+    "capabilities": [
+      "GO_NATIVE_LOCAL_HEALTH_NO_POWERSHELL_NET_ISSUE",
+      "DPAPI_BACKUP_RUN_KEYS",
+      "GUARDED_EXACT_HASH_EXISTING_8768_START_IF_ALL_FLAGS_ALLOWED",
+      "NO_DUPLICATE_PROCESS",
+      "8766_VBS_STATIC_AUDIT_ONLY",
+      "SANITIZED_ARG_OPTION_NAMES",
+      "DESKTOP_TXT"
+    ],
+    "physical_result": "PENDING",
+    "tests": "GO_6_TESTS_PASS_VET_LINUX_WINDOWS_PASS_WIN_GUI_BUILD_PASS_REPRODUCIBLE_PASS",
+    "no_new_autostart": true,
+    "no_prod_mutations": true,
     "additional_cost_eur": 0
   }
 }
