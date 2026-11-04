@@ -76,5 +76,16 @@
       "actual backend connectivity"
     ],
     "sensitive_device_id_in_public_registry": false
+  },
+  "readonly_diagnostic_v2": {
+    "state": "BUILT_CROSS_COMPILED_WINDOWS_PHYSICAL_PENDING",
+    "purpose": "Inventory process/startup metadata for 8765/8766/8768 failure and enumerate camera/microphone device counts; no process changes, no recording, no remote upload",
+    "artifact": "CEREBRO_WINDOWS_DIAGNOSTICO_V2_SOLO_LECTURA.exe",
+    "sha256": "c7c6c91ca0707023d991e43e93ad07e0dc76ab93eb7cedf03424d68987d8a402",
+    "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_WINDOWS_DIAGNOSTICO_V2_PREPROD.zip",
+    "tests": "GO_2_TESTS_PASS_WINDOWS_CROSS_BUILD_PASS_REPRODUCIBLE_BUILD_PASS",
+    "additional_cost_eur": 0,
+    "source_host_verification": "PENDING",
+    "next": "Run once on authorized PC and inspect local JSON; no live controller restart until dependencies/backup verified"
   }
 }
