@@ -35,7 +35,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "IDENTIFY_WINERROR32_SOURCE_AND_LOCK_OWNER_BEFORE_ANOTHER_EXECUTABLE_OR_RESTART; AUDIT_8766_AGENT_ORIGINAL_LOGS_AND_8768_START_COMMAND",
+  "next_block": "V06_PHYSICAL_ONE_SHOT_TEST_ONLY_IF_NO_EXISTING_AGENT; THEN_INVESTIGATE_8768_CLI_AND_GATEWAY; NO_V05_RETRY",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -261,5 +261,19 @@
     "cause": "UNCONFIRMED; temporal link to launched legacy agent possible",
     "safety_gate": "FREEZE_REPEAT_LEGACY_AGENT_LAUNCH; DO_NOT_KILL_OR_OVERWRITE_RUNNING_PROCESSES; PRESERVE_V02_AND_8765_8767; identify exact dialog title + locked filename and owner; verify process health and rollback before further changes",
     "physical_fix_verified": false
+  },
+  "winerror32_v06_guard": {
+    "status": "LAB_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "artifact": "CEREBRO_PC_RECUPERACION_V0_6.exe",
+    "sha256": "49372f6508f5ca3e3e780848bbb1daa139bcad88ffb30911589a888a01cff127",
+    "zip": "CEREBRO_PC_RECUPERACION_V0_6_PREPROD.zip",
+    "zip_sha256": "9a8cef21ce55cadcddabbc9e377850b4697f9ed24006f3167d63438622b42730",
+    "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC_RECUPERACION_V0_6_PREPROD.zip",
+    "implemented": "Legacy 8766 may only run --agent after exact hash, scope, duplicate and one-shot gates; never installer. VBS and 8768 not executed.",
+    "tests": "go unit PASS; vet linux/windows PASS; PE Windows build PASS; deterministic rebuild PASS",
+    "physical_result": "PENDING",
+    "gateway_connected": false,
+    "trading_access": false,
+    "additional_cost_eur": 0
   }
 }
