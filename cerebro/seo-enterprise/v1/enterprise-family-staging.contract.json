@@ -42,7 +42,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D02",
@@ -56,7 +58,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D03",
@@ -70,7 +74,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D04",
@@ -85,7 +91,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D05",
@@ -99,7 +107,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D06",
@@ -114,7 +124,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D07",
@@ -129,7 +141,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D08",
@@ -143,7 +157,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D09",
@@ -157,7 +173,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D10",
@@ -171,7 +189,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D11",
@@ -185,7 +205,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D12",
@@ -199,7 +221,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D13",
@@ -214,7 +238,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       },
       {
         "department_id": "SEO-D14",
@@ -230,7 +256,9 @@
         "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
         "cost_model": "SHARED_RUNTIME",
         "evaluation": "ROLE_SPECIFIC_EVIDENCE",
-        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED"
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
       }
     ],
     "sector_families": [
@@ -322,6 +350,75 @@
       "never_self_certify": true,
       "merit_policy_reference": "CEREBRO-UNIVERSAL-EXCELLENCE-MERIT-V1",
       "merit_policy_binding_status": "PENDING_CANONICAL_MERGE_AND_RUNTIME_VERIFICATION"
+    },
+    "operating_principle": "AGENTS_AND_SUBAGENTS_DO_THE_ORDINARY_WORK;PLUGINS_ARE_NON_DECISION_MAKING_EXECUTION_ADAPTERS",
+    "accountability": {
+      "execution_owner": "CEREBRO_AGENT_AND_SUBAGENT_TEAMS",
+      "planning_owner": "SEO_DIRECTOR_AND_SPECIALIST_AGENTS",
+      "research_owner": "RESEARCH_AND_SEO_SPECIALIST_AGENTS",
+      "content_creation_owner": "EDITORIAL_AND_SEO_SPECIALIST_AGENTS",
+      "site_qa_owner": "SEO_QA_AGENTS_AND_INDEPENDENT_SUPERVISION",
+      "orchestration_owner": "CEREBRO_GATEWAY_AND_SHARED_RUNTIME",
+      "ultimate_human_authority": "AUTHORIZED_OWNER",
+      "plugin_autonomous_decision_making": false
+    },
+    "plugin_contract": {
+      "role": "AUXILIARY_WORDPRESS_TOOL_AND_PERMISSIONED_ADAPTER",
+      "work_ownership": "NONE",
+      "may": [
+        "READ_AND_EXPOSE_WORDPRESS_STATE",
+        "EXECUTE_EXPLICIT_AUTHORIZED_OPERATIONS",
+        "RETURN_RECEIPTS_AND_HASHES",
+        "ENFORCE_LOCAL_TECHNICAL_SECURITY_GATES",
+        "ASSIST_BACKUP_AND_ROLLBACK_ON_AUTHORIZED_CHANGE"
+      ],
+      "must_not": [
+        "OWN_SEO_STRATEGY",
+        "INDEPENDENTLY_PRIORITIZE_BUSINESS_WORK",
+        "WRITE_CONTENT_AS_THE_AUTHORITATIVE_AGENT",
+        "SUPERVISE_OR_REWARD_AGENTS",
+        "SELF_SCHEDULE_UNREQUESTED_PUBLICATION",
+        "PROMOTE_STAGING_TO_PROD_WITHOUT_CEREBRO_APPROVAL",
+        "BECOME_SINGLE_POINT_OF_INTELLIGENCE"
+      ],
+      "alternatives": [
+        "EXISTING_WORDPRESS_PLUGIN_ADAPTER",
+        "DIRECT_OFFICIAL_WORDPRESS_REST_OR_ABILITIES",
+        "SUPPORTED_BROWSER_BRIDGE_OR_BROWSER_EXECUTOR",
+        "GIT_AND_ISOLATED_RUNNERS"
+      ],
+      "fallback_without_plugin": "USE_AUTHORIZED_ALTERNATIVE_ADAPTER_WITH_EQUIVALENT_POLICY_AND_EVIDENCE",
+      "requires_signed_mission_or_explicit_approved_job": true,
+      "execution_without_agent_authorization": "DENY",
+      "new_plugin_subscription_required": false
+    },
+    "agent_workflow": {
+      "mission_source": "CEREBRO_GATEWAY",
+      "work_units": [
+        "COMPETITIVE_RESEARCH",
+        "KEYWORD_INTELLIGENCE",
+        "SEO_TECHNICAL_AUDIT",
+        "PAGE_STRATEGY",
+        "EDITORIAL_RESEARCH_AND_WRITING",
+        "LOCAL_DIFFERENTIATION",
+        "MEDIA_PRODUCTION_BRIEF",
+        "INTERNAL_LINK_PLAN",
+        "QA_AND_EXPERIMENTS",
+        "RELEASE_PLAN",
+        "MONITORING",
+        "CONTINUOUS_LEARNING"
+      ],
+      "for_each_task": [
+        "ASSIGN_QUALIFIED_PARENT_AGENT",
+        "DELEGATE_TO_SPECIALIST_SUBAGENTS",
+        "CONSOLIDATE_OUTPUT_WITH_SOURCES_AND_EVIDENCE",
+        "INDEPENDENT_SUPERVISORY_AND_TRIBUNAL_GATES",
+        "ISSUE_MINIMAL_AUTHORIZED_ADAPTER_COMMAND_IF_NEEDED",
+        "VERIFY_RESULT",
+        "LEARN"
+      ],
+      "system_requirement": "NOT_MERELY_PAPER_PROFILES;MUST_HAVE_TASK_WORKER_BINDING_OWNERSHIP_AUDIT_AND_OUTCOME_TEST_BEFORE_OPERATIONAL_CLAIM",
+      "current_state": "DEFINED_NOT_RUNTIME_BOUND"
     }
   },
   "reuse": {
@@ -421,7 +518,10 @@
       "SECURITY_INCIDENT",
       "MONEY_LIMIT",
       "CUSTOMER_HUMAN_REQUEST"
-    ]
+    ],
+    "initiated_by": "CEREBRO_SEO_AGENT_RELEASE_PLAN",
+    "executed_by": "AUTHORISED_INTEGRATION_ADAPTER_ONLY_AFTER_GATES",
+    "plugin_direct_promotion_forbidden": true
   },
   "measurables": {
     "role": [
