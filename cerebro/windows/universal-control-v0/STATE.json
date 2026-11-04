@@ -39,7 +39,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "VERIFY_EXISTING_SCOPED_DPAPI_GATEWAY_CREDENTIAL_AND_RUNNER_THEN_PREPROD_AUTHENTICATED_RECONNECT_POLL_NONCE_RESULT; REMOTE_WOL_REMAINS_ON_HOLD_NO_VERIFIED_RELAY; DO_NOT_REINSTALL_EXISTING_AGENT",
+  "next_block": "WAIT_FOR_SANITIZED_PHYSICAL_PAIRING_REQUEST_JSON; VALIDATE_DEVICE_SCOPE_AND_REGISTER_FRESH_ONE_TIME_PREPROD_PAIRING; RUN_SECOND_CLICK_LOCAL_AUTHENTICATED_RECONNECT_NONCE_POLL_RESULT; NO_PROD_CHANGES",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -624,5 +624,31 @@
     "install_or_service_modified": false,
     "error_code": null,
     "conclusion": "PASS_PHYSICAL_S3_SLEEP_USER_BUTTON_WAKE_ALL_FOUR_SERVICES_RECOVERED_NOT_REMOTE_AUTH"
+  },
+  "pc001_gateway_enrollment_v1_20261104": {
+    "status": "CANDIDATE_PREPROD_SOURCE_IN_USER_ZIP_STATIC_TESTED_PHYSICAL_PAIRING_PENDING",
+    "next_user_input": "CEREBRO_PC001_VINCULACION_SOLICITUD.json_GENERATED_ON_WINDOWS",
+    "artifact": "CEREBRO_PC001_GATEWAY_VINCULACION_PREPROD.zip",
+    "artifact_sha256": "5dfd4e1605911baa52196caf73bedabb006fcc74be327c661f137aec013608c1",
+    "powershell_sha256": "822f7241d7497b178767f456c5fcb30083370b8003307c264982dfb87902cf38",
+    "documentation": "cerebro/windows/pc-001/PC001_GATEWAY_BOOTSTRAP_V1_README.md",
+    "existing_gateway": {
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "function_slug": "cerebro-device-gateway-preprod",
+      "version": 9,
+      "status": "ACTIVE"
+    },
+    "existing_windows_local_identity": "REUSED_FROM_UNIVERSALCONTROLV0_DEVICE_ID",
+    "existing_windows_services": "4_OF_4_PHYSICAL_PASS",
+    "windows_onboarding_executed": false,
+    "one_time_pairing_registered": false,
+    "authenticated_reconnect_verified": false,
+    "nonce_replay_verified": false,
+    "remote_synthetic_command_result_verified": false,
+    "secrets": "GENERATED_ONLY_ON_TARGET_WINDOWS_DPAPI_CURRENT_USER_RAW_VALUES_NOT_EXPORTABLE",
+    "prod_write_authorized": false,
+    "trading_access": false,
+    "installed_service": false,
+    "additional_cost_eur": 0
   }
 }
