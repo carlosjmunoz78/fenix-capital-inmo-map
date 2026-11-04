@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_4_OF_4_PHYSICAL_AND_GATEWAY_FRESH_PASS_ORDERED_USER_LOGON_AUTOSTART_CANDIDATE_PENDING_INSTALL",
+  "status": "PC001_ORDERED_BOOT_PHYSICAL_INSTALLED_PREPROD_GATEWAY_HEARTBEAT_FRESH_LOCAL_CHECK_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -46,14 +46,17 @@
     "pc001_sequential_recovery_v1_physical": "PASS_4_OF_4",
     "pc001_gateway_current_rejoin": "PASS_FRESH_HEARTBEAT_173S_2026_11_04_17_57_UTC",
     "pc001_ordered_autostart_static": "65_OF_65_PASS_ZIP_CHECKSUMS_PASS",
-    "pc001_ordered_autostart_windows": "PENDING"
+    "pc001_ordered_autostart_windows": "PENDING",
+    "pc001_ordered_autostart_windows_install": "PASS_REPORT_DPAPI_BACKED_UP_3_OLD_RUNS_1_NEW_RUN",
+    "pc001_ordered_autostart_windows_supervisor": "PENDING_CHECK_JSON",
+    "pc001_ordered_autostart_post_reboot": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "USER_CLICK_INSTALL_ORDERED_PC001_ONCE; SEND_INSTALL_JSON; THEN_READONLY_BOOT_CHECK_JSON_BEFORE_RESTART; AFTER_GATES_REAL_REBOOT_PLUS_180S_AND_GATEWAY_NEW_HEARTBEAT; ROLLBACK_GATE",
+  "next_block": "RUN_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_FROM_EXTRACTED_ZIP_SEND_JSON; VERIFY_SUPERVISOR_4_OF_4_AND_GATEWAY; THEN_REBOOT_AFTER_OWNER_POLICY_180S_AND_AUDIT_WINDOWS_ERRORS",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1021,7 +1024,7 @@
     "backend_fresh_heartbeat_age_seconds": 173
   },
   "pc001_ordered_autostart_candidate_v1_20261104": {
-    "status": "CANDIDATE_STATIC_PASS_65_OF_65_WINDOWS_EXECUTION_PENDING",
+    "status": "PHYSICAL_INSTALLED_CURRENT_USER_REBOOT_AND_LOCAL_CHECK_PENDING",
     "scope": "fenix/PC-001/PREPROD/pc001-windows-v1",
     "artifact": "CEREBRO_PC001_ARRANQUE_ORDENADO_PREPROD_V1.zip",
     "artifact_sha256": "de411dc426c6053c39205dc0709ee45f06a8cb5c10b88cf65875435d59f97612",
@@ -1055,10 +1058,32 @@
     "cost_new_subscriptions_eur": 0,
     "code_static_checks_passed": 65,
     "static_checks_not_physical_evidence": true,
-    "physical_installed": false,
+    "physical_installed": true,
     "post_reboot_autostart_tested": false,
     "rollback_physically_tested": false,
     "full_remote_control_enabled": false,
     "other_pc_installation_denied": true
+  },
+  "pc001_ordered_autostart_physical_installation_20261104": {
+    "source": "user_uploaded_CEREBRO_PC001_ARRANQUE_INSTALACION.json",
+    "checked_at_utc": "2026-11-04T17:58:50.3178265Z",
+    "environment": "PREPROD",
+    "report_status": "INSTALLED_ORDERED_BOOT_CURRENT_USER_REBOOT_PENDING",
+    "report_phase": "START_MONITOR_SIDEBYSIDE",
+    "new_user_run_key": "CEREBROPC001OrderedStartupV1",
+    "original_run_keys_removed_count": 3,
+    "dpapi_backup_exists": true,
+    "other_existing_services_terminated": false,
+    "prod_modified": false,
+    "additional_subscription_eur": 0,
+    "backend_checked_at_utc": "2026-11-04T18:00:25.661959Z",
+    "backend_last_seen_at_utc": "2026-11-04T18:00:21.957Z",
+    "backend_heartbeat_age_seconds": 4,
+    "backend_recent_reconnect_verified": true,
+    "supervisor_local_status_verified": false,
+    "physical_post_reboot_verified": false,
+    "rollback_physically_verified": false,
+    "next": "RUN_READONLY_COMPROBAR_ARRANQUE_PC001_CMD_AND_UPLOAD_CEREBRO_PC001_ARRANQUE_ESTADO_JSON",
+    "status": "INSTALL_APPLIED_GATEWAY_FRESH_READONLY_SUPERVISOR_CHECK_PENDING"
   }
 }
