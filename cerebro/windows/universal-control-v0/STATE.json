@@ -5,7 +5,7 @@
   "engine_id": "RUNTIME-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PC001_DIAG_V2_PHYSICAL_1_OF_4_SEQUENTIAL_RECOVERY_PREPROD_CANDIDATE_READY",
+  "status": "PC001_LOCAL_4_OF_4_PHYSICAL_RECOVERED_GATEWAY_HEARTBEAT_STALE_ORDERED_AUTOBOOT_PENDING",
   "repo": "carlosjmunoz78/fenix-capital-inmo-map",
   "source_branch": "cerebro/close-179-per-engine-autonomy-v1-20261102",
   "baseline_sha": "381b87935dd8f7533ff1c54d1e07ad20531f5cb1",
@@ -43,14 +43,15 @@
     "pc001_safe_cleanup_physical": "PENDING",
     "pc001_reboot_readonly_diagnostic_v2": "PHYSICAL_PASS",
     "pc001_sequential_recovery_v1_static": "48_OF_48_PASS_ZIP_VERIFIED",
-    "pc001_sequential_recovery_v1_physical": "PENDING"
+    "pc001_sequential_recovery_v1_physical": "PASS_4_OF_4",
+    "pc001_gateway_current_rejoin": "PENDING"
   },
   "rollback": {
     "code": "--rollback Restores own HKCU Run entry only",
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_ONE_SHOT_VERIFIED_SEQUENTIAL_8765_8768_8766_RECOVERY_ON_PC001_ONCE; VERIFY_REPORT; IF_4_OF_4_THEN_FIX_STARTUP_PERSISTENCE_BEFORE_REBOOT; IF_HOLD_ANALYZE_SAFE_CODES_NO_RETRY_LOOP",
+  "next_block": "PRESERVE_GREEN_NOW; BUILD_VERIFIED_USER_LOGON_DELAYED_ORDERED_HOST_SUPERVISOR_WITH_DPAPI_BACKUP_AND_ATOMIC_RUN_MIGRATION; PHYSICAL_REBOOT_TEST; GATEWAY_HEARTBEAT_FRESHNESS; ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -959,7 +960,7 @@
     "no_changes_during_diagnostic": true
   },
   "pc001_sequential_recovery_candidate_v1_20261104": {
-    "status": "CANDIDATE_STATIC_PASS_48_OF_48_WINDOWS_EXECUTION_PENDING",
+    "status": "PHYSICAL_LOCAL_4_OF_4_PASS_GATEWAY_REJOIN_AND_AUTOBOOT_STILL_PENDING",
     "artifact": "CEREBRO_PC001_RECUPERACION_SECUENCIAL_PREPROD_V1.zip",
     "artifact_sha256": "28d853c99bfa52035ee417ee5fe0f42f588ea3fcda05647f984406774fd1171a",
     "library_path": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_RECUPERACION_SECUENCIAL_PREPROD_V1.zip",
@@ -975,8 +976,43 @@
     "time_guard": 180,
     "max_attempts_per_component": 1,
     "tests_static_passed": 48,
-    "physically_applied": false,
-    "result_verified": false,
+    "physically_applied": true,
+    "result_verified": true,
     "next": "RUN_ONCE_AND_UPLOAD_SANITIZED_RESULT_THEN_VERIFY_4_OF_4_AND_CURRENT_GATEWAY_HEARTBEAT"
+  },
+  "pc001_sequential_recovery_physical_20261104": {
+    "source": "owner_uploaded_CEREBRO_PC001_RECUPERACION_RESULTADO.json",
+    "checked_at_utc": "2026-11-04T17:49:30.6049723Z",
+    "identity_matches": true,
+    "monitor_preprod_gate": true,
+    "health_before": {
+      "8765": false,
+      "8766": false,
+      "8767": true,
+      "8768": false
+    },
+    "health_after": {
+      "8765": true,
+      "8766": true,
+      "8767": true,
+      "8768": true
+    },
+    "recovery_order": [
+      "8765_RECOVERED_VERIFIED",
+      "8768_RECOVERED_VERIFIED",
+      "8766_RECOVERED_VERIFIED"
+    ],
+    "gateway_worker_status_at_pc_receipt": "HOLD_RETRY_BACKOFF",
+    "backend_last_heartbeat_at_utc": "2026-11-04T16:47:47.105Z",
+    "backend_heartbeat_age_at_query_seconds": 3750,
+    "gateway_verified_rejoined": false,
+    "registry_changed": false,
+    "windows_services_changed": false,
+    "tasks_changed": false,
+    "existing_executables_changed": false,
+    "processes_terminated": false,
+    "prod_modified": false,
+    "reboot_persistence_verified": false,
+    "status": "PHYSICAL_LOCAL_4_OF_4_PASS_GATEWAY_REJOIN_PENDING"
   }
 }
