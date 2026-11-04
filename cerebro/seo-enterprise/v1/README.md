@@ -13,6 +13,18 @@
 - WordPress `mosmcp__page-template-get` registra la plantilla Elementor ancho completo en la portada; `elementor.has_data=false` en esa lectura **no demuestra que sea seguro editarla como contenido clásico**.
 - La separación real de DB, filesystem, credenciales, cache y DNS con PROD está **por verificar**. Nunca usar un conector de PROD como sustituto de staging.
 
+## PRINCIPIO OPERATIVO V1.1 · LOS AGENTES HACEN EL TRABAJO
+
+**El SEO lo ejecutan los agentes y subagentes de CEREBRO, no el plugin WordPress.** El director SEO asigna misiones, los especialistas investigan/analizan/redactan/comparan y el equipo de QA supervisa; CEREBRO orquesta los trabajos y decide internamente qué acción corresponde según políticas y evidencias.
+
+El plugin propio **es un complemento**, un adaptador mínimo de WordPress: lee datos, expone capacidades, recibe operaciones autorizadas, aplica controles locales y devuelve resultados verificables. Puede ser sustituido por otras integraciones compatibles (REST oficial, Abilities, navegador o runner aislado) sin perder el trabajo ni los conocimientos de los agentes.
+
+El plugin no es propietario de estrategia, prioridades, contenido editorial, aprendizaje, evaluación de agentes, premios ni tribunal. No puede ejecutar trabajos por su cuenta sin una misión autorizada ni promocionar contenido STAGING → PROD por decisión propia.
+
+**Ruta de trabajo:** orden del propietario o evento permitido → CEREBRO Gateway → dirección SEO → subagentes especialistas → evidencias → supervisor/tribunal automatizado → instrucción concreta al adaptador autorizado → verificación → métricas → aprendizaje.
+
+**Estado honesto:** el contrato obliga a este flujo, pero todavía no demuestra trabajadores y subagentes físicamente conectados al runtime. Se exige binding, colas, trazabilidad y pruebas de trabajo efectivo antes de declarar el equipo operativo. Las autorizaciones y gates ya existentes permanecen intactos.
+
 ## Arquitectura
 **14 departamentos funcionales** comunes, **3 familias sectoriales**: Financiera/Inmobiliaria (hipotecas + B2B/B2C), Ecommerce, Tecnología/SaaS. No crear una familia por ciudad, keyword o canal. Los especialistas son roles lógicos y usan los runtimes compartidos existentes.
 
@@ -31,7 +43,7 @@ La web oficial **no recibe cambios** a partir de este documento, ni se activa un
 - Los contenidos financieros son YMYL: claims, promesas, datos y casos materiales necesitan fuente, vigencia y revisión aplicable.
 - Visibilidad en IA: fundamentar en contenido original, útil y técnicamente rastreable, no vender `llms.txt` o estructuras artificiales como garantía.
 - No marcar ciudad `COMPLETE` hasta todo `CITY_COMPLETE_V2`: landing, supporting, enlazado, lead magnet, consentimiento separado, entrega, CRM, newsletters, QA, indexación y medición.
-- Prohibidos gastos o nuevas suscripciones sin decisión explícita; preferencia plugin propio/WordPress nativo/Cowboy. No usar WPVibe; Make no es dependencia nueva.
+- Prohibidos gastos o nuevas suscripciones sin decisión explícita; los agentes mandan y reutilizan WordPress nativo, plugin propio, Abilities, REST o navegador exclusivamente como adaptadores auxiliares. No usar WPVibe; Make no es dependencia nueva.
 
 ## Alcance técnico real de esta entrega
 `enterprise-family-staging.contract.json` + tests: **estructura, criterio de aceptación y control anti-falsos-verdes**. No se ha fabricado todavía la ejecución de agentes SEO, el supervisor operativo especializado ni el release executor de PROD. El despliegue real deberá ser otro cambio con pruebas físicas y rollback. No prometer máxima posición en Google ni garantía de resultados.
