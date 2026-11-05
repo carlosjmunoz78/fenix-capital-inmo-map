@@ -1,0 +1,45 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_type": "PC001_CONTROL_V0_LOCAL_USER_SUPPLIED_REPORT",
+  "status": "LOCAL_UI_AND_FILES_PASS_REMOTE_PENDING",
+  "company_id": "fenix",
+  "engine_id": "PC-001",
+  "environment": "PREPROD",
+  "version": "pc001-control-v0.1.0",
+  "report_checked_utc": "2026-11-04T19:07:53Z",
+  "report_sha256": "7873089c3143db81607a3e45613bd2b17bfce2fb5fcadd9578ea29fea2a5f9a9",
+  "source_sha256": "4b40c1d4993503dcb3eb3d79cdb2d0f28ee1f79b1d085855cc8f2d8cfe9cd1a9",
+  "proofs": {
+    "consent_visible": true,
+    "mouse_input_local": true,
+    "keyboard_readback_local": true,
+    "screenshot_own_window_local": true,
+    "synthetic_file_ops": [
+      "CREATE_WRITE_READ",
+      "COPY_VERIFY",
+      "MOVE_VERIFY",
+      "RENAME_VERIFY",
+      "RECOVERABLE_DELETE_VERIFY"
+    ],
+    "recovery_file_exists_reported": true
+  },
+  "gate": {
+    "device_identity": "LOCAL_NON_ATTESTED",
+    "gateway_connected_by_this_exe": false,
+    "browser_remote_controlled": false,
+    "remote_listener": false,
+    "privileged_access": false,
+    "prod_changes_reported": false,
+    "paid_api_reported": false,
+    "physical_report_received": true,
+    "third_party_device_attestation": false
+  },
+  "separate_gateway_health_readonly": {
+    "project_ref": "hnqlnvakzaywtafeiybt",
+    "device_record": "ONLINE",
+    "last_heartbeat_utc": "2026-11-05T08:13:26.612Z",
+    "heartbeat_age_at_check_seconds": 64,
+    "meaning": "existing PC-001 Gateway transport alive; does NOT prove this V0.1 executable participates in remote execution"
+  },
+  "next_block": "PC001_GATEWAY_ANGULAR_ROUTING_AND_EXACT_SCOPE_REMOTE_COMMAND_ADAPTER_PENDING"
+}

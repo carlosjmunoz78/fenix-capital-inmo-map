@@ -1,0 +1,40 @@
+name: CEREBRO Universal Windows Tray V0 (manual CI)
+
+# Manual-only to avoid unexpected GitHub Actions minutes or bills.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: windows-2022
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: cerebro/windows/universal-control-v0/src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.x'
+          cache: false
+      - name: Go tests
+        run: go test -count=1 ./...
+      - name: Static analysis
+        run: go vet ./...
+      - name: Build Windows GUI (no console)
+        shell: pwsh
+        run: |
+          $env:CGO_ENABLED='0'
+          go build -trimpath -ldflags '-s -w -H windowsgui' -o "${{ runner.temp }}\CEREBRO_ControlUniversal_V0_1_0.exe" .
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          (Get-FileHash "${{ runner.temp }}\CEREBRO_ControlUniversal_V0_1_0.exe" -Algorithm SHA256).Hash
+      - name: Upload unsigned LAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CEREBRO_ControlUniversal_V0_1_0_UNSIGNED_LAB
+          path: ${{ runner.temp }}\CEREBRO_ControlUniversal_V0_1_0.exe
+          if-no-files-found: error
+          retention-days: 7

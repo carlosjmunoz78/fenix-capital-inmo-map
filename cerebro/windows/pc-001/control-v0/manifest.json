@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0.0",
+  "capability_id": "PC001-LOCAL-CONTROL-ACCEPTANCE-V0",
+  "company_id": "fenix",
+  "engine_id": "PC-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "LAB_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+  "transport": "LOCAL_USER_CONSENT_ONLY",
+  "remote_commands_enabled": false,
+  "gateway_connected": false,
+  "prod_allowed": false,
+  "trading_allowed": false,
+  "functions": ["synthetic_file_sandbox", "own_window_pointer_click", "own_window_keyboard_readback", "own_window_local_screenshot"],
+  "guards": ["explicit_local_consent", "own_foreground_window_only", "escape_key_stop", "no_remote_listener", "no_arbitrary_shell", "no_credential_capture", "no_paid_api", "sandbox_no_symlink", "fresh_run_directory"],
+  "physical_gate": "PENDING",
+  "cost_additional_eur": 0,
+  "supersedes_existing_services": false,
+  "gateway_contract_future": "cerebro/runtime/universal-device-command-envelope-v2.mjs"
+}
