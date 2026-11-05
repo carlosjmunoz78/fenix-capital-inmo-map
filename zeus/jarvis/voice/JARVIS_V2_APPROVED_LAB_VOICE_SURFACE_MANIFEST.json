@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "engine_id": "VOICE-001",
+  "component": "JARVIS_B5_VOICE_INTERFACE_ROUTING",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "state": "DEFINED_LAB_NOT_DEPLOYED",
+  "approved_preset": {
+    "profile": "JARVIS_V2_CLARA_1_10X",
+    "speed": 1.1,
+    "pitch_semitones": 0.6,
+    "master_v1_preserved": true,
+    "reference_location": "Google Drive/CEREBRO/VOICE-001 · JARVIS 1 · MASTER Y BACKUP"
+  },
+  "routing": {
+    "cerebro_surfaces": [
+      "JARVIS",
+      "OPERATIVA",
+      "NEURONAL",
+      "NAVEGADOR",
+      "LEGACY_V0"
+    ],
+    "default": "JARVIS_V2",
+    "fenix_application_other_routes": "ANA",
+    "unknown": "DENY"
+  },
+  "gates": {
+    "feature_flag_default": false,
+    "provider_runtime_connected": false,
+    "tts_live_verified": false,
+    "e2e_multidevice_verified": false,
+    "prod_authorized": false,
+    "prod_write_authorized": false,
+    "cost_auto_authorized": false,
+    "owner_auth_required": true
+  },
+  "preservation": {
+    "legacy_speech_synthesis_untouched": true,
+    "legacy_ana_untouched": true,
+    "app_crm_untouched": true,
+    "existing_prs_untouched": true
+  },
+  "provider": {
+    "v2_voice_type": "remote_clone",
+    "exportable_model_verified": false,
+    "credential_store": "server_vault_only",
+    "do_not_store_secrets_in_repo": true
+  }
+}
