@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "registry_id": "CREATIVE-OPENAI-SOC001-V0",
   "date": "2026-11-05",
   "company_id": "fenix-capital",
@@ -8,7 +8,7 @@
   "department_id": "PRODUCTORA_AUDIOVISUAL",
   "environment": "PREPROD",
   "version": "v0",
-  "status": "PARALLEL_IMPL_CI_GREEN_NOT_LIVE_AI_GENERATION",
+  "status": "PARALLEL_IMPL_CI_TO_VERIFY_MEDIA_PAID_POLICY_NO_LIVE_AI_GENERATION",
   "relations": {
     "existing_queue": "cerebro_creative_job_v1",
     "existing_dispatcher": "cerebro-creative-dispatch-v1",
@@ -67,12 +67,34 @@
     "provider_adapter": "cerebro/runtime/creative-openai-image-adapter-v0.mjs",
     "existing_worker_additive_adapter": "cerebro/runtime/creative-ai-job-v0.mjs",
     "compositor": "cerebro/runtime/creative-social-compositor-v0.mjs",
-    "provider": "OPENAI",
+    "provider": "OPENAI_INITIAL",
     "model": "gpt-image-2.5-flare",
     "style": "ORIGINAL_PHOTOGRAPHIC_BACKGROUND_ONLY",
     "branding": "REAL_OFFICIAL_TRANSPARENT_LOGO_APPLIED_POST_GENERATION",
     "headline_source": "CEREBRO_APPROVED_COPY",
-    "photo_implies_real_listing": false
+    "photo_implies_real_listing": false,
+    "provider_router": "cerebro/runtime/creative-media-provider-policy-v1.mjs",
+    "available_candidates": [
+      {
+        "id": "OPENAI",
+        "model": "gpt-image-2.5-flare",
+        "connection_status": "USER_CONFIRMS_API_IN_USE; NEED_LIVE_RUNTIME_PROOF",
+        "default_selection": "FIRST"
+      },
+      {
+        "id": "BFL",
+        "model": "flux-pro-1.1",
+        "connection_status": "PLANNED_NOT_CONNECTED",
+        "official_listed_price_usd_per_image": 0.04,
+        "pricing_reference": "https://help.bfl.ai/articles/7655484417-what-flux-models-are-available"
+      },
+      {
+        "id": "VIDEO_API",
+        "model": null,
+        "connection_status": "NOT_CONTRACTED",
+        "status": "FUTURE_PAID_VIDEO_ALLOWED"
+      }
+    ]
   },
   "brand_policy": {
     "orange_primary": "#FF5F00",
@@ -85,12 +107,24 @@
     "never_ai_generate_logo": true
   },
   "cost_policy": {
-    "default_eur": 0,
-    "paid_image_api_disabled_without_approval": true,
-    "approval_exception": "MONEY_LIMIT",
-    "max_provider_calls_per_approval": 1,
-    "approval_verified_on_server_required": true,
-    "actual_api_cost_needs_provider_reconciliation": true
+    "owner_policy_date": "2026-11-05",
+    "images_exempt_from_zero_additional_cost": true,
+    "videos_exempt_from_zero_additional_cost": true,
+    "ordinary_engines_zero_additional_cost_first": true,
+    "paid_images_permitted_now": true,
+    "initial_provider": "OPENAI",
+    "next_provider_candidate": "FLUX_1_1_PRO",
+    "paid_video_api_status": "NOT_CONTRACTED",
+    "provider_selection": "MINIMUM_COST_AMONG_INDEPENDENTLY_QUALITY_APPROVED_PROVIDERS",
+    "no_per_generation_human_confirmation_while_within_approved_budget": true,
+    "require_existing_authorized_budget_and_atomic_reservation_before_paid_api_call": true,
+    "allow_human_required_money_limit_only_if_budget_unavailable_or_exceeded": true,
+    "no_secret_exposure": true,
+    "no_new_subscription_required": true,
+    "evidence_price_quote_and_billing_reconciliation_required": true,
+    "existing_generic_creative_queue_still_zero_cost_only": true,
+    "paid_media_execution_path": "REQUIRES_SEPARATE_METERED_QUEUE_BEFORE_LIVE_EXECUTION",
+    "no_claim_of_live_costed_generation": true
   },
   "publication": {
     "autopublish_authorized": false,
@@ -119,13 +153,18 @@
     "SOC001_PRODUCTION_ONLY_URL_CHECK",
     "OLD_VS_NEW",
     "ROLLBACK_TEST",
-    "NATIVE_FACEBOOK_PROOF"
+    "NATIVE_FACEBOOK_PROOF",
+    "MEDIA_PROVIDER_SELECTION_CI_GREEN",
+    "CAPPED_AUTHORIZED_MEDIA_BUDGET_NOT_ZERO_EUR_RULE",
+    "BUDGET_RESERVATION_AND_COST_RECONCILIATION"
   ],
   "evidence": {
     "workflow": "CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend",
     "workflow_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42008055117",
     "CI": "SUCCESS_WITH_MOCK_PROVIDER_AND_PHYSICAL_BROWSER",
-    "paid_api_calls": "ZERO_BY_POLICY",
-    "live_image_from_cerebro": "NOT_YET"
+    "paid_api_calls": "NONE_VERIFIED_IN_THIS_NEW_BRIDGE",
+    "live_image_from_cerebro": "NOT_YET",
+    "video_paid_api": "NOT_CONTRACTED",
+    "image_provider_policy": "PAID_ALLOWED_BUDGET_GATED"
   }
 }
