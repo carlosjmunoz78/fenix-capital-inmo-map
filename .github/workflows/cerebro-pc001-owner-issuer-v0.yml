@@ -1,0 +1,26 @@
+name: CEREBRO PC001 Owner Issuer V0 - scoped PREPROD contract
+on:
+  push:
+    branches: ['cerebro/pc001-owner-issued-health-canary-v0-20261105']
+    paths:
+      - 'cerebro/windows/pc-001/issuer-v0/**'
+      - '.github/workflows/cerebro-pc001-owner-issuer-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pc001-owner-issuer-preprod-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  scoped-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check cerebro/windows/pc-001/issuer-v0/pc001-owner-issuer-v0.mjs
+      - name: Real repository owner gate and universal V2 contract regression
+        run: node --test cerebro/windows/pc-001/issuer-v0/pc001-owner-issuer-v0.test.mjs cerebro/tests/universal-device-command-envelope-v2.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs
