@@ -39,6 +39,12 @@ jobs:
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0002_jarvis_d1_session_lab.sql
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0003_jarvis_d1_b3_readonly_audit_lab.sql
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0004_jarvis_d1_gateway_denial_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0005_jarvis_d1_daily_denial_quota_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT26_QUOTA_HARD_CAP' AS result FROM jarvis_lab_denial_quota_v0 WHERE usage_day='2026-11-06' AND consumed=2 AND max_per_day=2;" | tee /tmp/jarvis-cut26-capped.txt
+          grep -q 'CUT26_QUOTA_HARD_CAP' /tmp/jarvis-cut26-capped.txt
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_gateway_denial_audit_v0(reason_class,http_status,created_at_ms) VALUES ('AUTH_REQUIRED',401,1893456000000);"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT25_DENIAL_RECORDED' AS result FROM jarvis_lab_gateway_denial_audit_v0 WHERE http_status=401;" | tee /tmp/jarvis-cut25-event.txt
           grep -q 'CUT25_DENIAL_RECORDED' /tmp/jarvis-cut25-event.txt
@@ -69,6 +75,9 @@ jobs:
           grep -q 'CUT24_AUDIT_RESTORED' /tmp/jarvis-cut24-restored.txt
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT25_DENIAL_RESTORED' AS result FROM jarvis_lab_gateway_denial_audit_v0 WHERE http_status=401;" | tee /tmp/jarvis-cut25-restored.txt
           grep -q 'CUT25_DENIAL_RESTORED' /tmp/jarvis-cut25-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT26_QUOTA_RESTORED' AS result FROM jarvis_lab_denial_quota_v0 WHERE usage_day='2026-11-06' AND consumed=2;" | tee /tmp/jarvis-cut26-restored.txt
+          grep -q 'CUT26_QUOTA_RESTORED' /tmp/jarvis-cut26-restored.txt
+          echo 'CUT26 strict daily D1 quota, overlimit denial and independent local restore: PASS'
           echo 'CUT25 Wrangler local minimal security audit immutable and independently restored: PASS'
           echo 'CUT24 Wrangler D1 local B3 audit immutable and independently restored: PASS'
           echo 'CUT22 D1 local B2 session revocation and independent restore: PASS'
