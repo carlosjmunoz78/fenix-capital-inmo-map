@@ -8,6 +8,9 @@ on:
       - 'cerebro/runtime/creative-social-compositor-v0.mjs'
       - 'cerebro/runtime/creative-ai-job-v0.mjs'
       - 'cerebro/runtime/creative-media-provider-policy-v1.mjs'
+      - 'cerebro/runtime/owner-command-control-v0.mjs'
+      - 'cerebro/tests/owner-command-control-v0.test.mjs'
+      - 'supabase/migrations/20261105_cerebro_owner_control_commands_v0.sql'
       - 'cerebro/registry/creative-openai-image-bridge-v0.registry.json'
       - 'cerebro/runtime/creative-job-runner-v1.mjs'
       - 'cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'
@@ -37,6 +40,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Independent FACT-001 audiovisual bridge tests (no provider charge)
         run: node --test cerebro/tests/creative-openai-social-bridge-v0.test.mjs
+      - name: Owner ChatGPT control contract (offline, no secrets, no paid calls)
+        run: node --test cerebro/tests/owner-command-control-v0.test.mjs
       - name: Verify actual existing factory runner tests stay green
         run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
       - name: Verify secure worker OpenAI credential presence (no request, no secret output)
