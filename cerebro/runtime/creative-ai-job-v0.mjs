@@ -1,7 +1,7 @@
 /**
  * FACT-001 parallel AI image lane for already-leased creative jobs.
- * Existing deterministic jobs remain unchanged. AI work stays HOLD unless a
- * separate authenticated finance gate authorizes a nonzero reservation.
+ * Existing deterministic jobs remain unchanged. Paid images and future videos are allowed.
+ * The legacy queue is still zero-cost-only, so use a metered media lane before paid execution.
  */
 import {createHash} from 'node:crypto';
 import fs from 'node:fs/promises';
