@@ -7,8 +7,10 @@ on:
       - 'cerebro/seo-enterprise/v2/**'
       - 'cerebro/governance/universal-excellence*'
       - 'cerebro/tests/universal-excellence-lab-v0.test.mjs'
-      - 'cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs'
+      - 'cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs cerebro/tests/universal-excellence-console-binding-v0.test.mjs'
       - 'cerebro/gateway/universal-excellence-owner-binding-v0.mjs'
+      - 'cerebro/console/universal-excellence-console-binding-v0.mjs'
+      - 'cerebro/tests/universal-excellence-console-binding-v0.test.mjs'
       - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
   workflow_dispatch:
 
