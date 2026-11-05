@@ -39,6 +39,17 @@ jobs:
         run: node --test cerebro/tests/creative-openai-social-bridge-v0.test.mjs
       - name: Verify actual existing factory runner tests stay green
         run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
+      - name: Verify secure worker OpenAI credential presence (no request, no secret output)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          OPENAI_IMAGE_KEY_AVAILABLE: ${{ secrets.OPENAI_API_KEY != '' }}
+        run: |
+          if [ "$OPENAI_IMAGE_KEY_AVAILABLE" = "true" ]; then
+            echo "FACT001_OPENAI_WORKER_CREDENTIAL=AVAILABLE_AT_GITHUB_ACTIONS"
+          else
+            echo "FACT001_OPENAI_WORKER_CREDENTIAL=NOT_PRESENT_IN_GITHUB_ACTIONS"
+          fi
+          echo "NO_API_CALL_NO_PAID_USAGE"
       - name: Record source-derived CEREBRO prompt and default blocked paid lane
         shell: bash
         run: |
