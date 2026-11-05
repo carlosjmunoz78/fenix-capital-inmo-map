@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate public snapshot inspector
-        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-merit-candidate-ledger-v0.test.mjs
       - name: Single bounded HTTP GET for staging homepage, no redirects and no mutations
         shell: bash
         run: |
@@ -35,6 +35,7 @@ jobs:
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-workunit-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-independent-review-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json independent-review.json
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-tribunal-v0.mjs" worker-receipt.json independent-review.json tribunal.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-merit-candidate-ledger-v0.mjs" worker-receipt.json independent-review.json tribunal.json merit-journal.v8 merit-receipt.json
       - name: Retain limited durable execution evidence (no public HTML)
         if: success()
         uses: actions/upload-artifact@v4
@@ -45,5 +46,7 @@ jobs:
             ${{ runner.temp }}/seo-stage-readonly/worker-receipt.json
             ${{ runner.temp }}/seo-stage-readonly/independent-review.json
             ${{ runner.temp }}/seo-stage-readonly/tribunal.json
+            ${{ runner.temp }}/seo-stage-readonly/merit-journal.v8
+            ${{ runner.temp }}/seo-stage-readonly/merit-receipt.json
           retention-days: 14
           if-no-files-found: error
