@@ -8,6 +8,7 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import {buildCerebroCreativeOrder} from './creative-social-prompt-v0.mjs';
+import {buildFacebookBriefFromExistingQueue} from './facebook-existing-queue-brief-v0.mjs';
 import {generateOpenAiScene,preflightOpenAiCost} from './creative-openai-image-adapter-v0.mjs';
 import {fetchFenixOfficialLogo,renderSocialImage} from './creative-social-compositor-v0.mjs';
 
@@ -18,7 +19,11 @@ export function assessAiCreativeJob(job,{env=process.env}={}){
    return {is_ai:false,status:'LEGACY_DETERMINISTIC_UNCHANGED'};
  if(job.environment!=='PREPROD'||job.company_id!=='fenix'||job.engine_id!=='FACT-001'||job.channel!=='FACEBOOK'||job.output_type!=='SQUARE_POST')
    return {is_ai:true,ready:false,status:'HOLD',reason:'SCOPE_DENIED'};
- const b=request.creative_payload?.brief;
+ const p=request.creative_payload;
+ let b=p?.brief;
+ if(!b&&p?.brief_source==='CEREBRO_SOC001_LIVE_EXISTING_QUEUE'){
+   try{b=buildFacebookBriefFromExistingQueue(p);}catch(e){return {is_ai:true,ready:false,status:'HOLD',reason:'BRIEF_NOT_READY',detail_code:e instanceof Error?e.message:'BRIEF_ERROR'};}
+ }
  let order;
  try{order=buildCerebroCreativeOrder(b);}catch{return {is_ai:true,ready:false,status:'HOLD',reason:'BRIEF_NOT_READY'};}
  if(order.company_id!==job.company_id||order.engine_id!=='SOC-001'||order.environment!==job.environment||
