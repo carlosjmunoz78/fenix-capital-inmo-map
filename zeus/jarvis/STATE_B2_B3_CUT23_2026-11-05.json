@@ -1,0 +1,93 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-05",
+  "cut": "CUT23",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT23",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "code_sha_certified": "74492a88e3a05596d4a8097b9d1d180d9df391ef",
+  "pr_draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "ci": {
+    "core": {
+      "run_id": 42124469023,
+      "total": 642,
+      "passed": 642,
+      "failed": 0,
+      "status": "SUCCESS"
+    },
+    "wrangler": {
+      "run_id": 42124469078,
+      "status": "SUCCESS",
+      "checks": [
+        "CUT23 EU OFF config",
+        "wrangler EU dry-run with UUID placeholder",
+        "CUT22 local D1 revocation",
+        "CUT21 local D1 export and independent restore"
+      ]
+    },
+    "b4": {
+      "run_id": 42124468994,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42124468936,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42124468952,
+      "status": "SUCCESS",
+      "production_promotion": "NOT_EXECUTED"
+    }
+  },
+  "cloudflare_readonly_inventory": {
+    "plan": "WORKERS_FREE",
+    "new_subscription_usd": 0,
+    "d1_count": 1,
+    "existing_lab_name": "cerebro-jarvis-lab-cut21",
+    "existing_lab_id": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+    "existing_lab_region": "EASTERN_EUROPE",
+    "existing_lab_jurisdiction": null,
+    "eu_database_name": "cerebro-jarvis-lab-eu",
+    "eu_database_exists": false,
+    "eu_database_uuid": null,
+    "worker_current_deployed": false,
+    "legacy_workers_untouched": true,
+    "cloudflare_secrets_present_in_repository": false
+  },
+  "completed_lab": [
+    "Cloudflare D1 EU metadata admission fail closed against mismatched UUID/name, region-only, wrong account, missing jurisdiction and unreviewed read replication",
+    "Cloudflare authenticated GET-only metadata verifier with secure injected fetch and secret sanitization, tested with synthetic fixtures, NOT executed against live API",
+    "EU isolated Wrangler OFF template with no routes and placeholder database ID, independently compiled with official Wrangler --dry-run",
+    "15 new tests; preserved CUT15-22 old certifications and tests"
+  ],
+  "blockers": [
+    "Cloudflare EU jurisdiction D1 not created: browser connector read/navigation only, no form-submission action",
+    "Scoped Cloudflare control-plane read token not provisioned via secure Vault, so CUT23 authenticated verification not run against remote",
+    "Remote database physical migration, backup and independent remote restore not validated",
+    "Authentic OWNER_ROOT B2, server Vault, scoped B3 grants, audit, two physical devices and B10 tribunal incomplete"
+  ],
+  "protections": {
+    "main_untouched": true,
+    "app_crm_untouched": true,
+    "cloudflare_existing_workers_untouched": true,
+    "cloudflare_existing_d1_untouched": true,
+    "dns_untouched": true,
+    "trading_untouched": true,
+    "supabase_untouched": true,
+    "secrets_not_logged": true,
+    "no_new_subscription": true,
+    "prod_promotion_disabled": true
+  },
+  "next_block": "Create SECOND D1 cerebro-jarvis-lab-eu with jurisdiction=eu explicitly; verify new UUID and free plan via authenticated read-only metadata; only then migrate synthetic schema, verify remote export/restoration, bind OFF Worker and Vault/B2/B3 before two-device and B10. No PROD by CI.",
+  "rollback": "Revert CUT23 commits only on PR25 DRAFT. No remote Cloudflare objects changed by CUT23.",
+  "references": [
+    "https://developers.cloudflare.com/d1/configuration/data-location/",
+    "https://developers.cloudflare.com/d1/platform/limits/"
+  ]
+}
