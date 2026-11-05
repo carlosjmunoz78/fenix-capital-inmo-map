@@ -22,7 +22,7 @@ type Deps={
  onState?:(state:JarvisV2PlaybackState)=>void
 };
 const validRef=(v:unknown)=>typeof v==='string'&&
- /^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,179}$/.test(v);
+ /^[A-Za-z][A-Za-z0-9_-]{2,127}$/.test(v);
 export function validateJarvisV2Ticket(raw:unknown):raw is JarvisV2AudioTicket{
  if(!raw||typeof raw!=='object'||Array.isArray(raw))return false;
  const r=raw as Record<string,unknown>;
