@@ -1,0 +1,39 @@
+name: JARVIS CUT21 Cloudflare D1 Local Acceptance
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/cloudflare-lab/**'
+      - '.github/workflows/jarvis-cut21-cloudflare-d1-local.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  d1-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    defaults:
+      run:
+        working-directory: zeus/jarvis/cloudflare-lab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Certify no public route, no live DB binding, no destructive migration
+        run: node verify-cut21-config.mjs
+      - name: CUT21 official Wrangler local D1 schema and durable restore
+        run: |
+          set -euo pipefail
+          WRANGLER="npx --yes wrangler@4.157.0"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0001_jarvis_d1_mission_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_mission_v0 (id,owner_id,company_id,engine_id,environment,version,project_id,idempotency_key,revision,mission_json,created_at,updated_at) VALUES ('synthetic-cut21','synthetic-owner','fenix','JARVIS','LAB','CUT21','PRJ','synthetic-once',0,'{}','2026-11-05T00:00:00Z','2026-11-05T00:00:00Z');"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT id FROM jarvis_lab_mission_v0 WHERE id='synthetic-cut21';" | tee /tmp/jarvis-cut21-query.txt
+          grep -q 'synthetic-cut21' /tmp/jarvis-cut21-query.txt
+          $WRANGLER d1 export cerebro-jarvis-lab-cut21 --local --output=/tmp/jarvis-cut21-backup.sql
+          test -s /tmp/jarvis-cut21-backup.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --file=/tmp/jarvis-cut21-backup.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT id FROM jarvis_lab_mission_v0 WHERE id='synthetic-cut21';" | tee /tmp/jarvis-cut21-restored.txt
+          grep -q 'synthetic-cut21' /tmp/jarvis-cut21-restored.txt
+          echo 'CUT21 official Wrangler local D1 create/read/backup/independent restore: PASS'
