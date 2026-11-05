@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "RUN_V0_1_LOCAL_VISIBLE_FIXTURE_ON_PC001_AND_INSPECT_SANITIZED_JSON; FIX_PHYSICAL_ISSUES; THEN_REUSE_GATEWAY_ACCESSBOOT_EXACT_SCOPE_PERMISSIONS_TO_ENABLE_APPROVED_REMOTE_COMMAND_E2E; SECOND_PC_LATER",
+  "next_block": "AUDIT_GATEWAY_HOST_DEVICE_COMMAND_DISPATCH_AND_PC001_V0_CONSENT_BOUND_INTEGRATION; BUILD_EXACT_SCOPE_BROKER_USING_EXISTING_V2_ENVELOPE; TEST_AUTH_IDEMPOTENCY_REPLAY_KILL_SWITCH; PHYSICAL_REMOTE_SANDBOX_E2E; THEN_BROWSER_FILES_APPS; DO_NOT_REPEAT_REBOOT",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1310,16 +1310,31 @@
   },
   "pc001_control_v0_candidate": {
     "version": "0.1.0",
-    "status": "LAB_BUILD_GREEN_WINDOWS_PHYSICAL_PENDING",
+    "status": "PHYSICAL_LOCAL_UI_FILES_PASS_REMOTE_PENDING",
     "source_path": "cerebro/windows/pc-001/control-v0/",
     "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/CEREBRO_PC001_CONTROL_V0_1_PREPROD.zip",
     "exe_sha256": "d150f09b0580311d005b40b74c2dabab3f0b7e2b4e34402444add65afb557758",
     "tests": "3_GO_UNIT_PASS_LINUX_WINDOWS_VET_PASS_WIN_TEST_COMPILE_PASS_REPRODUCIBLE_SHA256",
-    "physical_windows": "PENDING",
+    "physical_windows": "USER_SUPPLIED_LOCAL_REPORT_PASS_2026_11_04T19_07_53Z",
     "gateway_integration": "NOT_IMPLEMENTED",
     "remote_commands_enabled": false,
     "four_existing_services_modified": false,
     "prod_modified": false,
-    "additional_cost_eur": 0
+    "additional_cost_eur": 0,
+    "proof_ref": "cerebro/windows/pc-001/control-v0/PC001_CONTROL_LOCAL_PHYSICAL_REPORT_20261105.json",
+    "proof_report_sha256": "7873089c3143db81607a3e45613bd2b17bfce2fb5fcadd9578ea29fea2a5f9a9",
+    "physical_local_capabilities": [
+      "mouse_on_own_window",
+      "keyboard_own_window_readback",
+      "own_window_screenshot",
+      "sandbox_file_create_read_copy_move_rename_recoverable_delete"
+    ],
+    "canonical_device_id_attested": false,
+    "gateway_connected": false,
+    "browser_remote_controlled": false,
+    "physical_remote_e2e": "PENDING",
+    "existing_gateway_live_preprod": "AGENT_ONLINE_FRESH_HEARTBEAT_64S_2026_11_05T08_14_30Z",
+    "gateway_prior_e2e": "SERVICE_HEALTH_READ_HEALTH_COMPLETED_SEMANTIC_TRUE_2026_11_04T16_02Z",
+    "security": "NO_PROD_CHANGES_NO_NEW_REMOTE_LISTENER_NO_NEW_PAID_API_REPORTED"
   }
 }
