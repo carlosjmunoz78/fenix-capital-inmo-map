@@ -48,7 +48,7 @@ export function executeSeoJob001Staging({html,headers='',status=200,journal_path
  const summary=ledger.inspect({actor:{scopes:['cerebro:ledger:read']},context:CTX});
  return {
   schema_version:'0.1.0',state:'PHYSICAL_PREPROD_JOB001_LAB_WORK_UNIT_NOT_SEO_DEPARTMENT_READY',
-  context:CTX,job_id:completed.job_id,run_state:completed.status,
+  context:CTX,job_id:completed.job_id,worker_role_id:WORKER,run_state:completed.status,
   idempotency_key_sha256:hashlib(idempotency_key),duplicate:!enq.accepted,
   source_html_sha256:source_hash,source_url:'https://staging.fenixcapital.es/',
   findings_count:completed.result.findings_count,risk_count:completed.result.risk_count,
