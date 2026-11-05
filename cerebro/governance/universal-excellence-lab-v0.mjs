@@ -83,7 +83,8 @@ export function stateForRole({entries,context,subject_actor_id}){
   effective_reward_applied:false,prod_authorized:false};
  const incident=records.some(e=>e.incident_confirmed_in_lab_evidence);
  const three=records.slice(-3);
- const poor=three.length===3&&three.every(e=>e.score<55);
+ // Once LAB scheduling suspends a role, later assessments cannot reactivate it silently.
+ const poor=records.some((_,i)=>i>=2&&records.slice(i-2,i+1).every(e=>e.score<55));
  const excellence=three.length>=policy.excellence.minimum_missions&&three.every(e=>
    e.score>=policy.excellence.score_threshold &&
    e.metrics.quality>=policy.excellence.quality_floor &&
