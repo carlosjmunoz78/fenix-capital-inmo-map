@@ -111,7 +111,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: seo-corpus-tribunal-v1
-          path: ${{ runner.temp }}/seo-corpus/tribunal/verdict.json
+          path: |
+            ${{ runner.temp }}/seo-corpus/tribunal/verdict.json
+            ${{ runner.temp }}/seo-corpus/tribunal/identity.json
           retention-days: 14
           if-no-files-found: error
 
