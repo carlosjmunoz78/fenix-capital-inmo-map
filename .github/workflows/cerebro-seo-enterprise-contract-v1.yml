@@ -50,6 +50,21 @@ jobs:
           path: ${{ runner.temp }}/seo-org-contracts/index.json
           retention-days: 14
           if-no-files-found: error
+      - name: Prove read-only official WordPress ingress to ACTGW-001 and JOB-001 (synthetic provider)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-wp-draft-ingress"
+          node cerebro/seo-enterprise/v2/runtime/seo-official-wp-read-ingress-runner-v0.mjs \
+            "$RUNNER_TEMP/seo-wp-draft-ingress/queue.v8" \
+            "$RUNNER_TEMP/seo-wp-draft-ingress/receipt.json"
+      - name: Archive minimal read-only WordPress ingress proof
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-wp-read-ingress-lab-v0
+          path: ${{ runner.temp }}/seo-wp-draft-ingress/receipt.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Validate durable SEO WordPress draft review JOB-001 LAB queue
         shell: bash
         run: |

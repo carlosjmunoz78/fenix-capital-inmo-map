@@ -1371,6 +1371,14 @@
     "factory_organization_generator_real_agents_created": 0,
     "factory_organization_verified_roles_iAM": 0,
     "factory_organization_real_missions_covered": 0,
-    "factory_organization_promotion_authorized": false
+    "factory_organization_promotion_authorized": false,
+    "official_wp_draft_52656_real": true,
+    "official_wp_draft_52656_seo_meta_verified": true,
+    "official_wp_readonly_connector_verified": true,
+    "official_wp_draft_event_gateway_lifecycle": "PREPROD_ADAPTER_UNBOUND",
+    "official_wp_coreguard_prod_operations_locked": true,
+    "official_wp_draft_52656_owner_approval": false,
+    "official_wp_draft_52656_live_publication": false,
+    "official_wp_approval_count_for_autonomy": 0
   }
 }

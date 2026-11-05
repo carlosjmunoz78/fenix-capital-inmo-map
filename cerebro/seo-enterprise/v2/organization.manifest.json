@@ -643,5 +643,20 @@
     "official_prod_access_enabled_by_this_change": false,
     "existing_published_urls_preserved": true,
     "site_prod_write_credentials_bound": false
+  },
+  "draft_review_connector": {
+    "state": "PREPROD_ADAPTER_TESTED_NOT_LIVE",
+    "module": "cerebro/seo-enterprise/v2/runtime/seo-official-wp-read-ingress-lab-v0.mjs",
+    "official_wordpress": "https://fenixcapital.es",
+    "existing_verified_connector_read": true,
+    "connected_connector_bootstrap_mounted_in_real_gateway": false,
+    "real_event_webhook_hook_detected": false,
+    "real_github_poller_scheduled": false,
+    "existing_seo_release_route_on_staging": true,
+    "core_guard_prod_operations_locked": true,
+    "direct_publish_capability": false,
+    "owner_approval_count": 0,
+    "production_write_permission_granted": false,
+    "real_wordpress_rollback_tested": false
   }
 }
