@@ -124,7 +124,19 @@
     "evidence_price_quote_and_billing_reconciliation_required": true,
     "existing_generic_creative_queue_still_zero_cost_only": true,
     "paid_media_execution_path": "REQUIRES_SEPARATE_METERED_QUEUE_BEFORE_LIVE_EXECUTION",
-    "no_claim_of_live_costed_generation": true
+    "no_claim_of_live_costed_generation": true,
+    "initial_canary": {
+      "image_count": 1,
+      "estimated_upper_bound_eur": 1,
+      "approved_spend_status": "OWNER_PERMITTED_PAID_IMAGES_CATEGORY_BUT_SOFT_ESTIMATE_NOT_ATOMIC_HARD_CAP",
+      "provider": "OPENAI",
+      "model": "gpt-image-2.5-flare",
+      "quality": "high",
+      "retry_on_ambiguous_response": false,
+      "ledger_status": "NOT_INSTALLED",
+      "actual_cost_report": "PENDING_PROVIDER_USAGE",
+      "no_paid_call_until_binding": true
+    }
   },
   "publication": {
     "autopublish_authorized": false,
@@ -186,6 +198,7 @@
       "source_file": "cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json",
       "generated_prompt_not_manually_written_in_chat": true,
       "provider_called": false
-    }
+    },
+    "latest_workflow_credential_check": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42011070119"
   }
 }
