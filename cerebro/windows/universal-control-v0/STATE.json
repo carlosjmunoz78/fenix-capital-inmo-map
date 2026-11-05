@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PC001_AUTHORIZED_OWNER_ENQUEUE_AND_WORKER_HANDOFF_AUDIT",
+  "next_block": "PC001_IDENTIFY_REUSE_LEGITIMATE_ADMINISTRATIVE_COMMAND_ISSUER; THEN_ORIGINAL_WORKER_LEASE_HANDOFF_BACKUP_ROLLBACK; THEN_1_SYNTHETIC_PHYSICAL_E2E_PREPROD",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1368,6 +1368,14 @@
     "original_worker": "UNCHANGED_READ_HEALTH_ONLY",
     "supabase_mutations": false,
     "additional_subscriptions_eur": 0,
-    "gate_doc": "cerebro/windows/pc-001/PC001_REMOTE_POLICY_GATE_GREEN_20261105.md"
+    "gate_doc": "cerebro/windows/pc-001/PC001_REMOTE_POLICY_GATE_GREEN_20261105.md",
+    "owner_enqueue_audit": "READ_ONLY_COMPLETE_NO_AUTHENTICATED_OWNER_ISSUER_PROVEN",
+    "queue_table_rls": true,
+    "public_insert_grant_observed": false,
+    "owner_issuer_route": "POR_AUDITAR",
+    "physical_remote_control": "NOT_EXECUTED",
+    "issuer_audit_document": "cerebro/windows/pc-001/PC001_OWNER_ENQUEUE_READONLY_AUDIT_20261105.md",
+    "tests_real_v2": "15_OF_15_PASS_GITHUB_ACTIONS",
+    "outcome": "POLICY_GREEN_ISSUER_AND_PHYSICAL_HANDOFF_HOLD"
   }
 }
