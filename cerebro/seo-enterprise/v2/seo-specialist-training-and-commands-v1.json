@@ -1893,6 +1893,10 @@
     "archive_status": "VERIFIED_REFERENCE_STAGING_V4",
     "required_before_content_strategy": "JOIN_HISTORICAL_URL_COPY_IMAGES_LINKS_CTA_THEN_CONFIRM_TARGETED_CURRENT_PROD",
     "archive_loaded_in_job001": false,
-    "never_repeat_global_audit": true
+    "never_repeat_global_audit": true,
+    "historical_archive_physically_verified_in_ci": true,
+    "verified_existing_copy_counts": 204,
+    "verified_image_use_rows": 1534,
+    "targeted_existing_copy_lookup_mandatory_before_new_asset": true
   }
 }

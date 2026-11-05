@@ -245,6 +245,32 @@
     "source_must_be_compared_to_selected_url_in_prod_before_write": true,
     "no_global_audit_requested": true,
     "marketing_plan_preliminary_until_asset_reconciliation": true,
-    "town_color_redesign_one_at_a_time": true
+    "town_color_redesign_one_at_a_time": true,
+    "verification": {
+      "status": "READ_AND_VALIDATED_IN_ISOLATED_GITHUB_ACTIONS_LAB",
+      "verified_commit": "33203008d99d6b7a3339dce8b3d44db5af40bf3f",
+      "run_id": 42087026853,
+      "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42087026853",
+      "artifact_id": 13444185541,
+      "sha256_validated": true,
+      "url_rows": 204,
+      "copy_html_files": 204,
+      "copy_text_files": 204,
+      "copy_json_files": 204,
+      "images": 680,
+      "image_usage_rows": 1534,
+      "urls_with_image_usage": 204,
+      "customer_private_editor_source_coverage_unverified": true,
+      "original_archive_unchanged": true,
+      "historical_source_environment": "STAGING",
+      "current_prod_corpus_reconciled": false,
+      "wordPress_prod_writes": 0,
+      "job001_prod_mounted": false,
+      "cost_additional_eur": 0
+    },
+    "asset_preflight_required_for_every_new_marketing_plan": true,
+    "old_vs_new_for_targeted_url_before_edit": true,
+    "historical_zip_ref_is_pinned": true,
+    "live_website_reaudit_requested": false
   }
 }
