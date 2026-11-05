@@ -37,6 +37,13 @@ jobs:
           WRANGLER="npx --yes wrangler@4.157.0"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0001_jarvis_d1_mission_lab.sql
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0002_jarvis_d1_session_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0003_jarvis_d1_b3_readonly_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_b3_audit_v0 (event_code,action_name,company_id,engine_id,environment,grant_id,allowed,created_at_ms) VALUES ('DENY','MISSION_INSPECT','fenix','JARVIS','LAB',NULL,0,1893456000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT24_AUDIT_PRESENT' AS result FROM jarvis_lab_b3_audit_v0 WHERE event_code='DENY' AND company_id='fenix';" | tee /tmp/jarvis-cut24-audit.txt
+          grep -q 'CUT24_AUDIT_PRESENT' /tmp/jarvis-cut24-audit.txt
+          if $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="DELETE FROM jarvis_lab_b3_audit_v0;" >/dev/null 2>&1; then
+            echo 'CUT24 failed: immutable audit permitted DELETE' >&2; exit 1
+          fi
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_session_binding_v0 (owner_id,session_hmac,environment,channel,role,active,revoked,authorized_companies_json,expires_at_ms,issued_at_ms) VALUES ('synthetic-owner',lower(hex(zeroblob(32))),'LAB','fenix-app','OWNER_ROOT',1,0,json_array('fenix'),1893456000000,1793900000000);"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="UPDATE jarvis_lab_session_binding_v0 SET revoked=1 WHERE owner_id='synthetic-owner';"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT22_REVOKED' AS result FROM jarvis_lab_session_binding_v0 WHERE owner_id='synthetic-owner' AND revoked=1;" | tee /tmp/jarvis-cut22-revocation.txt
@@ -51,6 +58,9 @@ jobs:
           grep -q 'synthetic-cut21' /tmp/jarvis-cut21-restored.txt
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT22_SESSION_RESTORED' AS result FROM jarvis_lab_session_binding_v0 WHERE owner_id='synthetic-owner' AND revoked=1;" | tee /tmp/jarvis-cut22-restored.txt
           grep -q 'CUT22_SESSION_RESTORED' /tmp/jarvis-cut22-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT24_AUDIT_RESTORED' AS result FROM jarvis_lab_b3_audit_v0 WHERE event_code='DENY' AND company_id='fenix';" | tee /tmp/jarvis-cut24-restored.txt
+          grep -q 'CUT24_AUDIT_RESTORED' /tmp/jarvis-cut24-restored.txt
+          echo 'CUT24 Wrangler D1 local B3 audit immutable and independently restored: PASS'
           echo 'CUT22 D1 local B2 session revocation and independent restore: PASS'
           echo 'CUT21 official Wrangler local D1 create/read/backup/independent restore: PASS'
       - name: Offline Worker bundle verification (NO DEPLOY)
