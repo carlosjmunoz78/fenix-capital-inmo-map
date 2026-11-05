@@ -5,6 +5,7 @@ import {chromium} from '@playwright/test';
 import {buildCerebroCreativeOrder,validateProductionUrl,CEREBRO_IMAGE_BRIDGE_V0} from '../runtime/creative-social-prompt-v0.mjs';
 import {preflightOpenAiCost,generateOpenAiScene} from '../runtime/creative-openai-image-adapter-v0.mjs';
 import {renderSocialImage,renderImageHtml} from '../runtime/creative-social-compositor-v0.mjs';
+import {assessAiCreativeJob} from '../runtime/creative-ai-job-v0.mjs';
 
 const INPUT=JSON.parse(await fs.readFile(new URL('../fixtures/facebook-audiovisual-canary-20261105.brief.json',import.meta.url),'utf8'));
 const ORDER=buildCerebroCreativeOrder(INPUT);
@@ -98,3 +99,19 @@ async function makeSyntheticFixtureImage(){
    return {photo,logo};
  }finally{await browser.close();}
 }
+
+
+test('FACT-001 queue integration: all existing work remains legacy and AI cannot spend through original zero-cost enqueue',()=>{
+ const legacy={company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',
+   channel:'FACEBOOK',output_type:'SQUARE_POST',request:{creative_payload:{headline:'unchanged old job'}}};
+ assert.deepEqual(assessAiCreativeJob(legacy),{is_ai:false,status:'LEGACY_DETERMINISTIC_UNCHANGED'});
+ const base={...legacy,request:{creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},expected_cost_eur:0}};
+ const first=assessAiCreativeJob(base,{env:TEST_ENV});
+ assert.equal(first.is_ai,true);assert.equal(first.ready,false);assert.equal(first.reason,'MONEY_LIMIT');
+ const withCost=assessAiCreativeJob({...base,request:{...base.request,expected_cost_eur:0.30}},
+   {env:{OPENAI_IMAGE_PROVIDER_ENABLED:'false'}});
+ assert.equal(withCost.ready,false);assert.equal(withCost.reason,'MONEY_LIMIT');
+ const prod=assessAiCreativeJob({...base,environment:'PROD'},{env:TEST_ENV});
+ assert.equal(prod.reason,'SCOPE_DENIED');
+ assert.equal(prod.ready,false);
+});
