@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "AUDIT_GATEWAY_HOST_DEVICE_COMMAND_DISPATCH_AND_PC001_V0_CONSENT_BOUND_INTEGRATION; BUILD_EXACT_SCOPE_BROKER_USING_EXISTING_V2_ENVELOPE; TEST_AUTH_IDEMPOTENCY_REPLAY_KILL_SWITCH; PHYSICAL_REMOTE_SANDBOX_E2E; THEN_BROWSER_FILES_APPS; DO_NOT_REPEAT_REBOOT",
+  "next_block": "REVIEW_AND_APPROVE_OWNSCOPE_BROKER_RELEASE_GATE; VERIFY_REAL_V2_CI_AND_PS_WINDOWS_PARSER; AUTHORIZE_OWNER_QUEUE_ROUTE; RUN_PHYSICAL_CONTROLLED_CANARY; PRESERVE_ORIGINAL_WORKER_AND_ROLLBACK",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1336,5 +1336,25 @@
     "existing_gateway_live_preprod": "AGENT_ONLINE_FRESH_HEARTBEAT_64S_2026_11_05T08_14_30Z",
     "gateway_prior_e2e": "SERVICE_HEALTH_READ_HEALTH_COMPLETED_SEMANTIC_TRUE_2026_11_04T16_02Z",
     "security": "NO_PROD_CHANGES_NO_NEW_REMOTE_LISTENER_NO_NEW_PAID_API_REPORTED"
+  },
+  "pc001_remote_proof_adapter_v0": {
+    "version": "0.1.0",
+    "status": "PARCIAL_POLICY_SOURCE_COMMITTED_WINDOWS_BROKER_UNREVIEWED",
+    "source_branch": "cerebro/pc001-remote-proof-v0-20261105",
+    "committed_policy": "cerebro/windows/pc-001/remote-adapter-v0/pc001-remote-policy-v0.mjs",
+    "library_source": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/PC001_REMOTE_PROOF_V0_1_SRC/",
+    "policy_local_tests": "14_OF_14_PASS_WITH_V2_TEST_SHIM",
+    "powershell_static_tests": "20_OF_20_PASS",
+    "actual_v2_ci": "PENDING",
+    "powershell_parser_windows": "PENDING",
+    "windows_broker_source_upload": "BLOCKED_BY_TOOL_SECURITY",
+    "original_gateway_client": "UNCHANGED_READ_HEALTH_ONLY",
+    "real_owner_command_enqueue": "NOT_VERIFIED",
+    "remote_command_e2e": "NOT_EXECUTED",
+    "physical_windows": "NOT_EXECUTED",
+    "prod_modified": false,
+    "existing_services_modified": false,
+    "additional_cost_eur": 0,
+    "next_block": "REVIEW_AND_APPROVE_OWNSCOPE_BROKER_RELEASE_GATE; VERIFY_REAL_V2_CI_AND_PS_WINDOWS_PARSER; AUTHORIZE_OWNER_QUEUE_ROUTE; RUN_PHYSICAL_CONTROLLED_CANARY; PRESERVE_ORIGINAL_WORKER_AND_ROLLBACK"
   }
 }
