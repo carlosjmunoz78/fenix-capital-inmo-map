@@ -43,3 +43,42 @@ export function assessCloudflareD1EUResponse({
   jurisdiction:'eu'
  });
 }
+
+
+/**
+ * Read-only verification against Cloudflare's authenticated D1 control-plane API.
+ * Token remains in memory and is NEVER returned, serialized or logged.
+ * This is an operator-run LAB check only; it cannot create, migrate or deploy.
+ * Caller MUST supply a secret from an external protected vault/environment.
+ */
+export async function verifyCloudflareD1EUReadOnly({
+ fetchImpl,token,accountId,expectedDatabaseId,environment='LAB'
+}={}){
+ if(environment!=='LAB')return blocked('LAB_ONLY');
+ if(typeof accountId!=='string'||!ACCOUNT_ID.test(accountId)||
+    typeof expectedDatabaseId!=='string'||!UUID.test(expectedDatabaseId)||
+    expectedDatabaseId.toLowerCase()===EXISTING_SYNTHETIC_D1||
+    expectedDatabaseId==='00000000-0000-0000-0000-000000000000')
+  return blocked('REMOTE_TARGET_UNVERIFIED');
+ if(typeof fetchImpl!=='function'||typeof token!=='string'||
+    token.length<8||token.length>4096||/[\r\n]/.test(token))
+  return blocked('TRUSTED_FETCH_AND_SCOPED_TOKEN_REQUIRED');
+ let res,body;
+ try{
+  res=await fetchImpl('https://api.cloudflare.com/client/v4/accounts/'+accountId+
+     '/d1/database/'+expectedDatabaseId,{
+    method:'GET',redirect:'error',cache:'no-store',
+    headers:{accept:'application/json',authorization:'Bearer '+token}
+  });
+  if(!res||res.status!==200||res.ok!==true)
+    return blocked('CLOUDFLARE_READ_UNAVAILABLE');
+  const raw=await res.text();
+  if(typeof raw!=='string'||raw.length>32768)return blocked('CLOUDFLARE_RESPONSE_TOO_LARGE');
+  body=JSON.parse(raw);
+ }catch{
+  return blocked('CLOUDFLARE_READ_UNAVAILABLE');
+ }
+ return assessCloudflareD1EUResponse({
+  apiResponse:body,accountId,expectedDatabaseId,environment
+ });
+}
