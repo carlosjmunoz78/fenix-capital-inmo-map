@@ -1,0 +1,25 @@
+{
+  "schema_version": "1.0.0",
+  "state_type": "CEREBRO_LRN_HORIZON_RESULT",
+  "company_id": "fenix",
+  "engine_id": "LRN-001",
+  "environment": "PREPROD",
+  "version": "0.6.0",
+  "lock_key": "a31da1733b52352c4600be49d93d6b1632e2412a9a81ff137d89e8c2a2b698f1",
+  "horizon_bucket": "2026-11",
+  "cadence": "MONTHLY",
+  "task": "KNOWLEDGE_OBSOLESCENCE_AND_POLICY_REVIEW",
+  "status": "GREEN",
+  "completed_at": "2026-11-05T22:47:09.910Z",
+  "evidence": {
+    "weekly_reports_total": 4,
+    "knowledge_index_bound": false,
+    "policy_mutation_authorized": false
+  },
+  "knowledge_mutations": 0,
+  "reason": "KNOWLEDGE_INDEX_NOT_BOUND_NO_DESTRUCTIVE_ACTION",
+  "additional_cost_eur": 0,
+  "prod_authorized": false,
+  "prod_write_authorized": false,
+  "trading_access": false
+}
