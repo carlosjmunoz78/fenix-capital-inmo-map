@@ -7,6 +7,7 @@ import {preflightOpenAiCost,generateOpenAiScene} from '../runtime/creative-opena
 import {renderSocialImage,renderImageHtml} from '../runtime/creative-social-compositor-v0.mjs';
 import {assessAiCreativeJob,renderAiCreativeJob} from '../runtime/creative-ai-job-v0.mjs';
 import {runOneCreativeJob} from '../runtime/creative-job-runner-v1.mjs';
+import {MEDIA_SPEND_POLICY_V1,MEDIA_PROVIDER_REGISTRY_V1,chooseMediaProvider} from '../runtime/creative-media-provider-policy-v1.mjs';
 
 const INPUT=JSON.parse(await fs.readFile(new URL('../fixtures/facebook-audiovisual-canary-20261105.brief.json',import.meta.url),'utf8'));
 const ORDER=buildCerebroCreativeOrder(INPUT);
@@ -49,7 +50,7 @@ test('paid model never called without server-verified economic authority',async(
  let calls=0;
  const fetch_impl=async()=>{calls++;throw Error('MUST_NOT_BE_CALLED');};
  let result=await generateOpenAiScene({order:ORDER,fetch_impl,env:{}});
- assert.equal(result.allowed,false);assert.equal(result.reason,'MONEY_LIMIT');
+ assert.equal(result.allowed,false);assert.equal(result.reason,'IMAGE_PROVIDER_NOT_ENABLED');
  result=await generateOpenAiScene({order:ORDER,fetch_impl,env:TEST_ENV,approval:null});
  assert.equal(result.allowed,false);assert.equal(result.reason,'MONEY_LIMIT');
  result=await generateOpenAiScene({order:ORDER,fetch_impl,
@@ -111,7 +112,7 @@ test('FACT-001 queue integration: all existing work remains legacy and AI cannot
  assert.equal(first.is_ai,true);assert.equal(first.ready,false);assert.equal(first.reason,'MONEY_LIMIT');
  const withCost=assessAiCreativeJob({...base,request:{...base.request,expected_cost_eur:0.30}},
    {env:{OPENAI_IMAGE_PROVIDER_ENABLED:'false'}});
- assert.equal(withCost.ready,false);assert.equal(withCost.reason,'MONEY_LIMIT');
+ assert.equal(withCost.ready,false);assert.equal(withCost.reason,'IMAGE_PROVIDER_NOT_ENABLED');
  const prod=assessAiCreativeJob({...base,environment:'PROD'},{env:TEST_ENV});
  assert.equal(prod.reason,'SCOPE_DENIED');
  assert.equal(prod.ready,false);
@@ -182,4 +183,37 @@ test('real FACT-001 OIDC worker recognizes AI job but terminates in HOLD before 
    if(original.token===undefined)delete process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
    else process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN=original.token;
  }
+});
+
+test('Owner policy: images and future videos are explicitly exempt from 0 EUR limit',()=>{
+ assert.equal(MEDIA_SPEND_POLICY_V1.ordinary_engines_zero_additional_cost_first,true);
+ assert.equal(MEDIA_SPEND_POLICY_V1.images.paid_api_allowed,true);
+ assert.equal(MEDIA_SPEND_POLICY_V1.videos.paid_api_allowed,true);
+ assert.equal(MEDIA_SPEND_POLICY_V1.videos.provider_contracted,false);
+ assert.equal(MEDIA_SPEND_POLICY_V1.images.active_initial_provider,'OPENAI');
+ assert.equal(MEDIA_PROVIDER_REGISTRY_V1.find(x=>x.provider_id==='BFL').model_id,'flux-pro-1.1');
+ assert.equal(ORDER.policy.paid_media_allowed,true);
+ assert.equal(ORDER.policy.default_additional_cost_eur,null);
+ assert.equal(ORDER.policy.video_provider_status,'NOT_CONTRACTED');
+});
+test('Provider router: cheapest approved-quality offer, future FLUX excluded until connected',()=>{
+ const offers=[
+ {provider_id:'OPENAI',model_id:'gpt-image-2.5-flare',connection_verified:true,
+  independent_quality_qa_passed:true,quality_score:91,quote_verified:true,
+  estimated_total_cost_eur:0.24,quote_ref:'quote-verified-openai',grade_ref:'EVA001-approval'},
+ {provider_id:'BFL',model_id:'flux-pro-1.1',connection_verified:false,
+  independent_quality_qa_passed:true,quality_score:96,quote_verified:true,
+  estimated_total_cost_eur:0.04,quote_ref:'future-bfl',grade_ref:'future-eval'}
+ ];
+ const a=chooseMediaProvider({media_kind:'IMAGE',offers,min_quality_score:85,approved_max_eur_per_asset:0.30});
+ assert.equal(a.ok,true);assert.equal(a.provider_id,'OPENAI');
+ assert.equal(a.expected_cost_eur,0.24);
+ assert.equal(a.needs_atomic_budget_reservation,true);
+ assert.equal(a.publish_authorized,false);
+ const b=chooseMediaProvider({media_kind:'IMAGE',offers,min_quality_score:95,approved_max_eur_per_asset:0.30});
+ assert.equal(b.ok,false);assert.equal(b.status,'HOLD_NO_QUALIFIED_PROVIDER');
+ const c=chooseMediaProvider({media_kind:'VIDEO',offers:[],approved_max_eur_per_asset:1});
+ assert.equal(c.ok,false);assert.equal(c.status,'HOLD_VIDEO_PROVIDER_NOT_CONTRACTED');
+ const d=chooseMediaProvider({media_kind:'IMAGE',offers:[{...offers[0],quote_verified:false}],approved_max_eur_per_asset:0.30});
+ assert.equal(d.ok,false);assert.ok(d.reasons.includes('PRICE_NOT_VERIFIED_OPENAI'));
 });
