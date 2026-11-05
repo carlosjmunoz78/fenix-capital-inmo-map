@@ -114,3 +114,9 @@ Cada fase se ejecutó en un job de GitHub separado, con recibos ED25519 autofirm
 **POR AUDITAR:** si una identidad autónoma individual de cada agente está autenticada por IAM/PKI/OIDC. Un job de GitHub autenticado es una identidad de workload independiente en Actions, **no** una cuenta IAM autónoma o un subagente certificado. Tampoco se acreditan evaluación de SEO real con tres equipos, GSC, GA4, consentimientos, publicaciones, backup/rollback real de WordPress, ni coste GitHub Actions ilimitado. No se contratan suscripciones, pero los minutos consumidos por Actions dependen del plan existente.
 
 **Estado canónico sin inflación:** 15/32 PARCIAL, 17/32 DEFINIDO, **0/32 LISTO**, 0 agentes/subagentes IAM certificados. Ninguna promoción, autopremio, escritura WordPress ni despliegue PROD.
+
+## 2026-11-05 · FACT-001 extiende la organización SEO de manera no destructiva
+
+**HECHO:** extensión `cerebro/factory/seo-org-v0.mjs` y CLI `seo-org-cli-v0.mjs`. En Actions [42062356983](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42062356983) se generaron **74 JSON** derivados de 8 familias y 32 departamentos: 8 familias, 32 manifiestos, 32 contratos, 1 supervisión y 1 índice. Segunda ejecución idéntica: 0 archivos creados y 74 conservados. Pruebas específicas 5/5, SEO 66/66 y gobierno 22/22. La fábrica original de 177 motores quedó intacta.
+
+**No inflar autonomía:** esos documentos se generaron en el runner de CI, son contratos y modelos de puesto lógico, NO agentes IAM conectados ni departamentos LISTO. Permanecen 15 PARCIAL, 17 DEFINIDO, 0 LISTO. La verificación de sólo lectura del sitio STAGING reportó HTTP 503 en la misma secuencia de CI; no alterar ni esconder ese fallo. No cambiar PROD.

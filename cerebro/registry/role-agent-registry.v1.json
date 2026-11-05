@@ -36,7 +36,10 @@
     "lab_only_suspension_supported": true,
     "prod_suspension_operational": false,
     "real_api_access_auto_grant": false,
-    "actual_role_iam_binding_verified": false
+    "actual_role_iam_binding_verified": false,
+    "fact001_organization_extension": "cerebro/factory/seo-org-v0.mjs",
+    "fact001_org_templates_generated_without_agent_creation": true,
+    "seo_department_real_iam_instances_created": 0
   },
   "roles": [
     {

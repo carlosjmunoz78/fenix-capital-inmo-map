@@ -1359,6 +1359,18 @@
     "isolated_cross_job_job001_journal_replay_verified": true,
     "github_job_isolation_lab_fixture_only": true,
     "isolated_cross_job_staging_real_site_qa_verified": false,
-    "isolated_jobs_workflow_run_id": 41989528379
+    "isolated_jobs_workflow_run_id": 41989528379,
+    "factory_organization_overlay_verified": true,
+    "factory_organization_family_templates": 8,
+    "factory_organization_department_templates": 32,
+    "factory_organization_generated_files": 74,
+    "factory_organization_output_environment": "SCAFFOLD",
+    "factory_organization_generated_file_manifest_sha256_present": true,
+    "factory_organization_replay_idempotent": true,
+    "factory_organization_runner_verified_id": 42062356983,
+    "factory_organization_generator_real_agents_created": 0,
+    "factory_organization_verified_roles_iAM": 0,
+    "factory_organization_real_missions_covered": 0,
+    "factory_organization_promotion_authorized": false
   }
 }
