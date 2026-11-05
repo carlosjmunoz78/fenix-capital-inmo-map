@@ -127,15 +127,21 @@
     "no_claim_of_live_costed_generation": true,
     "initial_canary": {
       "image_count": 1,
-      "estimated_upper_bound_eur": 1,
-      "approved_spend_status": "OWNER_PERMITTED_PAID_IMAGES_CATEGORY_BUT_SOFT_ESTIMATE_NOT_ATOMIC_HARD_CAP",
-      "provider": "OPENAI",
-      "model": "gpt-image-2.5-flare",
-      "quality": "high",
-      "retry_on_ambiguous_response": false,
-      "ledger_status": "NOT_INSTALLED",
-      "actual_cost_report": "PENDING_PROVIDER_USAGE",
-      "no_paid_call_until_binding": true
+      "price_model": "PER_TOKEN_USAGE_NOT_FIXED_PRICE_PER_IMAGE",
+      "fixed_price_eur": null,
+      "not_one_euro_flat_fee": true,
+      "cost_estimate_requires_official_calculator": true,
+      "actual_usage_to_be_measured_after_generation": true
+    },
+    "owner_authorization": {
+      "status": "GRANTED_BY_OWNER_IN_CHAT_2026_11_05",
+      "scope": "PAID_IMAGE_API_CATEGORY",
+      "per_image_approval_required": false,
+      "remaining_blockers": [
+        "OPENAI_API_KEY_NOT_BOUND_TO_WORKER",
+        "MEDIA_BUDGET_LEDGER_NOT_READY"
+      ],
+      "reason_category": "BLOCKED_TECHNICAL_NOT_REQUIRING_FRESH_OWNER_CONSENT"
     }
   },
   "publication": {
@@ -199,6 +205,7 @@
       "generated_prompt_not_manually_written_in_chat": true,
       "provider_called": false
     },
-    "latest_workflow_credential_check": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42011070119"
+    "latest_workflow_credential_check": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42011070119",
+    "paid_image_reason": "OWNER_AUTHORIZED; WORKER_SECRET_AND_SPEND_LEDGER_PENDING"
   }
 }
