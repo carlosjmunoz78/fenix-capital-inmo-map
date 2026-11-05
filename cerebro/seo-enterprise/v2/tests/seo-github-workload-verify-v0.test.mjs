@@ -36,3 +36,21 @@ test('GitHub run mismatch or event mismatch never grants scope',async()=>{
  await assert.rejects(()=>verifyGithubWorkload({env,token,fetchImpl:build({...run,event:'workflow_dispatch'})}),/WORKLOAD_IDENTITY_RUN_CONTEXT_MISMATCH/);
  await assert.rejects(()=>verifyGithubWorkload({env,token,fetchImpl:build({...run,run_attempt:2})}),/WORKLOAD_IDENTITY_RUN_CONTEXT_MISMATCH/);
 });
+
+test('bounded provider API polling accepts delayed valid job but never authorizes queued/unverified job',async()=>{
+ let checks=0,pauses=0;
+ const queued={jobs:[{...jobs.jobs[0],status:'queued',conclusion:null}]};
+ const provider=async(url,opts)=>({
+  ok:true,json:async()=>url.includes('jobs?')?++checks<3?queued:jobs:run
+ });
+ const verified=await verifyGithubWorkload({env,token,fetchImpl:provider,
+  pause:async()=>{pauses++}});
+ assert.equal(verified.job_checks_attempted,3);
+ assert.equal(pauses,2);
+ assert.equal(verified.actor_role_credentials_verified,false);
+ assert.equal(verified.prod_write_authorized,false);
+ checks=0;
+ await assert.rejects(()=>verifyGithubWorkload({env,token,
+  fetchImpl:async(url)=>({ok:true,json:async()=>url.includes('jobs?')?queued:run}),
+  pause:async()=>{}}),/WORKLOAD_IDENTITY_JOB_IDENTITY_UNVERIFIED/);
+});
