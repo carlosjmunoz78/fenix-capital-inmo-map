@@ -7,6 +7,8 @@ on:
       - 'cerebro/runtime/creative-openai-image-adapter-v0.mjs'
       - 'cerebro/runtime/creative-social-compositor-v0.mjs'
       - 'cerebro/runtime/creative-ai-job-v0.mjs'
+      - 'cerebro/runtime/facebook-existing-queue-brief-v0.mjs'
+      - 'cerebro/tests/facebook-existing-queue-brief-v0.test.mjs'
       - 'cerebro/runtime/creative-media-provider-policy-v1.mjs'
       - 'cerebro/runtime/owner-command-control-v0.mjs'
       - 'cerebro/tests/owner-command-control-v0.test.mjs'
@@ -42,6 +44,8 @@ jobs:
         run: node --test cerebro/tests/creative-openai-social-bridge-v0.test.mjs
       - name: Owner ChatGPT control contract (offline, no secrets, no paid calls)
         run: node --test cerebro/tests/owner-command-control-v0.test.mjs
+      - name: Validate 10 real Facebook media-missing briefs and canonical company identity (no API call)
+        run: node --test cerebro/tests/facebook-existing-queue-brief-v0.test.mjs
       - name: Verify actual existing factory runner tests stay green
         run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
       - name: Verify secure worker OpenAI credential presence (no request, no secret output)
