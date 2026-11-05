@@ -22,7 +22,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-          cache: false
       - name: Parse policy
         run: node --check cerebro/windows/pc-001/remote-adapter-v0/pc001-remote-policy-v0.mjs
       - name: Real V2 contract plus fail-closed safety regressions
