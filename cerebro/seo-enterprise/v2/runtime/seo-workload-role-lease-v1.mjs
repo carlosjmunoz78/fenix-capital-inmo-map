@@ -41,9 +41,9 @@ export function issueSeoRoleProofs({host,role_work_receipts,corpus_digest,now_ms
  const all=[],ids=new Set();
  for(const evidence of role_work_receipts){
   if(!ROLE.test(evidence?.role_id)||typeof evidence?.department_id!=='string'||
-   !e.role_id.startsWith(e.department_id+':SPECIALIST:')||
-   evidence.source_snapshot_digest!==corpus_digest||ids.has(e.role_id))invalid('ROLE_SCOPE');
-  ids.add(e.role_id);
+   !evidence.role_id.startsWith(evidence.department_id+':SPECIALIST:')||
+   evidence.source_snapshot_digest!==corpus_digest||ids.has(evidence.role_id))invalid('ROLE_SCOPE');
+  ids.add(evidence.role_id);
   const payload=content(evidence,host,corpus_digest,now_ms,now_ms+600_000,crypto.randomBytes(16).toString('hex'));
   const signature=crypto.sign(null,Buffer.from(JSON.stringify(payload),'utf8'),privateKey).toString('base64url');
   all.push({payload,signature});
