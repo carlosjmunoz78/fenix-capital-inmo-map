@@ -1,5 +1,13 @@
 # SEO Enterprise V2 · Changelog
 
+## 2026-11-05 · Fase L0: acciones por URL y ejecución de formación determinista
+
+- Materializado el motor `runtime/seo-specialist-work-product-v1.mjs`: 141 propuestas especializadas ligadas al inventario aceptado y 200 acciones sobre URL existentes sin nuevo rastreo.
+- Añadido `runtime/seo-specialist-practice-attempt-v1.mjs`: 423 prácticas deterministas ejecutadas sin simular aprobaciones de agentes. QA y tribunal contrastan cada respuesta contra el contenido ya guardado.
+- `runtime/seo-corpus-job001-work-v1.mjs` integra ambos en ACTGW-001/JOB-001 y conserva el bloqueo de producción; 3 jobs OIDC y 142/142 tests SEO + suites complementarias GREEN.
+- Evidencias en `seo-operational-readonly-evidence-v1.json`; runbook en `cerebro/docs/CEREBRO_SEO_ENTERPRISE_V2_L0_ENTREGABLES_2026-11-05.md`.
+- Pendiente IAM individual, aprendizaje de agentes reales, host permanente y promoción gradual; cero cambios en WordPress/App/CRM/Supabase.
+
 ## 2026-11-05 · IAM efímero acotado y casos de formación
 
 - Se conserva el corpus actual fijado por el propietario sin repetir auditorías.
