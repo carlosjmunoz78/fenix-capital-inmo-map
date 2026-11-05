@@ -1,5 +1,14 @@
 # SEO Enterprise V2 · Changelog
 
+## 2026-11-05 · URL ownership, anticannibalización responsable, embudos y audiovisual
+
+- Contrato SEO `runtime/seo-owner-intent-funnel-v1.mjs`: 200 URL, 8 embudos, 24 parejas B2B/B2C preservadas, duplicidad Home/`inicio` por focus-keyphrase sin afirmar canibalización real.
+- `runtime/seo-audiovisual-brief-v1.mjs`: encargo visual completo con paleta y Montserrat del manual 2025, derechos y requisitos SEO.
+- `runtime/seo-owner-funnel-cli-v1.mjs` y workflow `cerebro-seo-owner-funnel-media-v1.yml`: ejecución física, QA y tribunal en [42119865699](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42119865699), 7/7 tests.
+- Productora real (cola existente): job `c4012f43-c12f-400b-9610-2e5f2e286000` **QUEUED** para una imagen SEO privada, sin publicar, coste adicional previsto 0 €.
+- Estado persistente: `seo-200-url-strategy-creative-order-v1.json` y `cerebro/docs/CEREBRO_SEO_ESTRATEGIA_200URL_EMBUDOS_PRODUCTORA_2026-11-05.md`. La verificación de calidad visual permanece pendiente.
+- Sin auditoría nueva, sin redirecciones, sin cambios en WordPress/App/CRM, PR DRAFT.
+
 ## 2026-11-05 · Puente Cowboy WordPress DRAFT_ONLY verificado por simulación
 
 - `wp_create_post` admite `status:'draft'` y `dry_run:true`; respuesta de simulación verificada sin crear entradas ni editar el sitio.
