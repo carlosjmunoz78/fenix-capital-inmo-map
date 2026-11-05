@@ -86,3 +86,17 @@ Auditar identidades y permisos efectivos de `cerebro/registry/role-agent-registr
 **Tablero ahora:** `14/32 PARCIAL`, `18/32 DEFINIDO`, `0/32 LISTO`. D32 gana evidencia parcial de shadow sintético. Los 3 roles son **ejecutores lógicos en procesos reales, sin identidad IAM autónoma autenticada**; la cifra de agentes/subagentes activos **certificados** sigue siendo cero. Reutilizar el runtime y registro existente, no declarar escalado a 32 sin misiones reales por competencia.
 
 **Bloque siguiente:** (1) IAM para identidad del actor y scopes por rol; (2) evidencias de supervisión universal independiente sobre juez y guardián; (3) formularios→consentimiento→CRM con snapshot STAGING y rollback físico probado; (4) D13/D14/D16 YMYL editorial, D29 GSC/GA4 por fuente gratuita autenticada si existe; (5) cerrar suites e integración sin afectar PROD. GSC Wizard requiere suscripción: **no contratar**. Ninguna promoción hasta superar gates de seguridad.
+
+## Continuación 2026-11-05 · Identidad de workload y control de rol
+
+Fuente física: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41982256299
+
+**VERIFICADO:** un trabajo de GitHub Actions con token existente de solo lectura consultó la API del proveedor y confirmó repositorio, rama, workflow, evento PR, run ID y job ID. El token no se persiste ni se imprime. Esta comprobación no verifica por separado la identidad de cada agente ni el alcance real del token.
+
+**EJECUTADO:** el pipeline habilita el gate de scopes por rol antes de ejecutar trabajador, QA y tribunal; se deniegan scope/empresa/entorno/rol no reconocidos. Tres procesos emitieron recibos firmados con ED25519. QA verifica la firma del trabajador y el tribunal verifica ambas. Las claves privadas son efímeras y no se guardan. Las firmas son autofirmadas por proceso en un mismo runner, **no credenciales IAM ni PKI externa**.
+
+**TESTS:** 60/60 generales y 31/31 STAGING, cero fallos. Acceso API de lectura, sin nuevas suscripciones, nuevos secretos, OIDC, permisos PROD ni cambios en WordPress, App, CRM, Supabase, DNS, producción o rama main.
+
+**GATES PENDIENTES:** cuentas/workloads diferenciados y verificación IAM fuerte por actor; evaluación independiente autenticada de juez, supervisor y metaevaluador; publicación WordPress STAGING con backup y rollback físico recuperable; GSC/GA4 de fuente autorizada; formulario/consentimiento/CRM E2E; promoción OLD vs NEW en sitio real; continuidad durable entre ejecuciones de GitHub (el archivo de evidencias del run dura 14 días).
+
+**ESTADO NO INFLADO:** 15/32 PARCIAL, 17/32 DEFINIDO y 0/32 LISTO, cero agentes/subagentes V2 certificados activos. Las seis observaciones hipotecarias de D16 son candidatos documentales; no son seis incumplimientos o afirmaciones falsas verificadas.
