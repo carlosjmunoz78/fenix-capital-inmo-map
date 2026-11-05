@@ -1,0 +1,66 @@
+name: CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/creative-social-prompt-v0.mjs'
+      - 'cerebro/runtime/creative-openai-image-adapter-v0.mjs'
+      - 'cerebro/runtime/creative-social-compositor-v0.mjs'
+      - 'cerebro/runtime/creative-job-runner-v1.mjs'
+      - 'cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'
+      - 'cerebro/tests/creative-openai-social-bridge-v0.test.mjs'
+      - '.github/workflows/cerebro-openai-image-bridge-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-physical-render-and-model-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OPENAI_IMAGE_PROVIDER_ENABLED: "false"
+      OPENAI_IMAGE_MAX_EUR_PER_REQUEST: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing pinned dependencies
+        run: npm ci
+      - name: Install existing Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Independent FACT-001 audiovisual bridge tests (no provider charge)
+        run: node --test cerebro/tests/creative-openai-social-bridge-v0.test.mjs
+      - name: Verify actual existing factory runner tests stay green
+        run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
+      - name: Record source-derived CEREBRO prompt and default blocked paid lane
+        shell: bash
+        run: |
+          mkdir -p /tmp/fact001-openai-photo
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {buildCerebroCreativeOrder} from './cerebro/runtime/creative-social-prompt-v0.mjs';
+          import {preflightOpenAiCost} from './cerebro/runtime/creative-openai-image-adapter-v0.mjs';
+          const b=JSON.parse(fs.readFileSync('cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'));
+          const o=buildCerebroCreativeOrder(b);
+          const g=preflightOpenAiCost({order:o,approval:null,env:process.env});
+          if(g.allowed||g.reason!=='MONEY_LIMIT'||o.policy.publish_authorized!==false)process.exit(1);
+          fs.writeFileSync('/tmp/fact001-openai-photo/prompt-cerebro.txt',o.ai_scene_request.prompt);
+          fs.writeFileSync('/tmp/fact001-openai-photo/evidence.json',JSON.stringify({
+            origin:'FACT-001_STRUCTURED_WORK_ORDER',prompt_sha256:o.prompt_sha256,
+            campaign:b.campaign,request_key:o.request_key,engine_id:o.engine_id,
+            provider_model:o.ai_scene_request.model,photo_only:true,
+            official_logo_compositor:'REQUIRED',api_was_called:false,paid_lane:g.reason,
+            publish_authorized:false,brand_quality_approved:false
+          },null,2));
+          console.log('PASS: prompt derived by FACT-001 from CEREBRO work order; API not called, no publish');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fact001-cerebro-ai-photo-prompt-evidence-v0
+          path: /tmp/fact001-openai-photo/
+          if-no-files-found: error
+          retention-days: 7
