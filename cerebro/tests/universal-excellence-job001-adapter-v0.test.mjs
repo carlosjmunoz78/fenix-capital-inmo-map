@@ -27,3 +27,19 @@ test('repeated failures block a durable JOB-001 task without modifying shared ru
  assert.throws(()=>guardedEnqueueLab({job_runtime:rt,merit_ledger_path:merit,
  actor_id:'AGENT_BAD',context:{...ctx,environment:'PROD'},task_name:'LAB_READONLY'}),/MERIT_JOB001_PREPROD_ONLY/);
 });
+
+test('excellence changes only LAB queue priority, never permissions',t=>{
+ const d=fs.mkdtempSync(path.join(os.tmpdir(),'merit-priority-'));t.after(()=>fs.rmSync(d,{recursive:true,force:true}));
+ const merit=path.join(d,'merit.v8'),jobs=path.join(d,'jobs.v8');
+ for(let n=1;n<=3;n++)recordUniversalAssessment({file_path:merit,evidence:{
+ ...ctx,environment:'LAB',subject_class:'AGENT',subject_actor_id:'GOOD_AGENT',
+ mission_id:'M_'+n,evaluator_actor_id:'EVAL_A',judge_actor_id:'JUDGE_B',meta_evaluator_actor_id:'META_C',
+ evidence_ref:'fixture:good_'+n,evidence_independently_checked:true,judge_independently_checked:true,
+ meta_evaluator_independently_checked:true,metrics:Object.fromEntries(Object.keys(m).map(k=>[k,99]))}});
+ const rt=new DurableJobRuntimeV1({file_path:jobs});
+ const result=guardedEnqueueLab({job_runtime:rt,merit_ledger_path:merit,context:ctx,
+ actor_id:'GOOD_AGENT',task_name:'LAB_AUDIT',payload:{synthetic:true}});
+ assert.equal(result.lab_priority_applied,50);
+ assert.equal(rt.get(result.job_id).priority,50);
+ assert.equal(result.prod_authorized,false);
+});
