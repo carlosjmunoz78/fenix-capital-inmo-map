@@ -1,0 +1,29 @@
+name: CEREBRO PC-001 Scoped Policy Regressions PREPROD
+on:
+  push:
+    branches:
+      - cerebro/pc001-remote-proof-v0-20261105
+    paths:
+      - 'cerebro/windows/pc-001/remote-adapter-v0/pc001-remote-policy-v0.mjs'
+      - 'cerebro/windows/pc-001/remote-adapter-v0/pc001-safety-regressions-v1.test.mjs'
+      - '.github/workflows/cerebro-pc001-policy-regressions-preprod.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: pc001-policy-regression-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  contract-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: false
+      - name: Parse policy
+        run: node --check cerebro/windows/pc-001/remote-adapter-v0/pc001-remote-policy-v0.mjs
+      - name: Real V2 contract plus fail-closed safety regressions
+        run: node --test cerebro/tests/universal-device-command-envelope-v2.test.mjs cerebro/windows/pc-001/remote-adapter-v0/pc001-safety-regressions-v1.test.mjs
