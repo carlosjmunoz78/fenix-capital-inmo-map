@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-const sourceDir=fileURLToPath(new URL('../',import.meta.url));
+const sourceDir=fileURLToPath(new URL('../seo-enterprise/v2/',import.meta.url));
 const roster=JSON.parse(fs.readFileSync(path.join(sourceDir,'seo-specialist-role-roster-v2.json'),'utf8'));
 const h=s=>crypto.createHash('sha256').update(s).digest('hex');
 const safeName=s=>{if(!/^SEO-D(?:0[1-9]|[12][0-9]|3[0-2]):SPECIALIST:\d{2}$/.test(s))throw Error('ROLE_ID_INVALID');return s.replaceAll(':','-')};
