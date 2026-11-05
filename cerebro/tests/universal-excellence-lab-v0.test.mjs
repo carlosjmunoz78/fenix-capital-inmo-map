@@ -63,6 +63,9 @@ test('repeated poor performance triggers suspension in LAB and blocks dispatch; 
  assert.equal(dispatchGate({file_path,context:ctx,subject_actor_id:actor}).decision,'BLOCK_LAB_DISPATCH');
  assert.equal(outs[2].state.required_next,'INDEPENDENT_REPLACEMENT_BENCHMARK');
  assert.equal(outs[2].assessment.prod_authorized,false);
+ const later=recordUniversalAssessment({file_path,evidence:mission('SUPERVISOR',actor,4,excellent)});
+ assert.equal(later.state.state,'SUSPENDED_LAB');
+ assert.equal(dispatchGate({file_path,context:ctx,subject_actor_id:actor}).decision,'BLOCK_LAB_DISPATCH');
 });
 test('independently reviewed security incident immediately quarantines LAB agent and requests human exception',t=>{
  const file_path=fresh(t);
