@@ -14,11 +14,11 @@ permissions:
 
 jobs:
   seo-corpus-worker:
-    if: \${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.event.pull_request.number == 22 }}
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.event.pull_request.number == 22 }}
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      GITHUB_TOKEN: \${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - name: Verify GitHub OIDC issuer signature and provider job identity
@@ -38,8 +38,8 @@ jobs:
         with:
           name: seo-corpus-worker-v1
           path: |
-            \${{ runner.temp }}/seo-worker/identity.json
-            \${{ runner.temp }}/seo-worker/report.json
+            ${{ runner.temp }}/seo-worker/identity.json
+            ${{ runner.temp }}/seo-worker/report.json
           retention-days: 14
           if-no-files-found: error
   seo-corpus-qa:
@@ -47,13 +47,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      GITHUB_TOKEN: \${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: seo-corpus-worker-v1
-          path: \${{ runner.temp }}/seo-corpus/worker
+          path: ${{ runner.temp }}/seo-corpus/worker
       - name: Verify independent GitHub OIDC workload and source job success
         run: |
           set -euo pipefail
@@ -72,8 +72,8 @@ jobs:
         with:
           name: seo-corpus-qa-v1
           path: |
-            \${{ runner.temp }}/seo-corpus/qa/identity.json
-            \${{ runner.temp }}/seo-corpus/qa/report.json
+            ${{ runner.temp }}/seo-corpus/qa/identity.json
+            ${{ runner.temp }}/seo-corpus/qa/report.json
           retention-days: 14
           if-no-files-found: error
   seo-corpus-tribunal:
@@ -81,17 +81,17 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 8
     env:
-      GITHUB_TOKEN: \${{ github.token }}
+      GITHUB_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: seo-corpus-worker-v1
-          path: \${{ runner.temp }}/seo-corpus/worker
+          path: ${{ runner.temp }}/seo-corpus/worker
       - uses: actions/download-artifact@v4
         with:
           name: seo-corpus-qa-v1
-          path: \${{ runner.temp }}/seo-corpus/qa
+          path: ${{ runner.temp }}/seo-corpus/qa
       - name: Verify third independent GitHub OIDC workload
         run: |
           set -euo pipefail
@@ -111,6 +111,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: seo-corpus-tribunal-v1
-          path: \${{ runner.temp }}/seo-corpus/tribunal/verdict.json
+          path: ${{ runner.temp }}/seo-corpus/tribunal/verdict.json
           retention-days: 14
           if-no-files-found: error
