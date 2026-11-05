@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PC-001 · Autorización PREPROD</title>
+<style>
+body{font:16px system-ui;max-width:42rem;margin:3rem auto;padding:0 1rem;color:#17212b}fieldset{margin:1rem 0;padding:1rem}label,input,button{display:block;width:100%;box-sizing:border-box;margin:.6rem 0;padding:.55rem;font:inherit}button{background:#ff5f00;color:#fff;border:0;border-radius:.3rem}button:disabled{opacity:.55}#mfa,#issue{display:none}#state{white-space:pre-wrap;background:#f5f5f5;padding:1rem;border-radius:.3rem}
+</style>
+<main>
+<h1>PC-001 · READ_HEALTH PREPROD</h1>
+<p>Esta página temporal permite una única autorización de lectura. No habilita control físico, PROD ni Trading.</p>
+<fieldset id="login"><legend>Identidad propietaria PREPROD</legend><label>Email<input id="email" type="email" autocomplete="username" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button id="loginButton">Iniciar sesión PREPROD</button></fieldset>
+<fieldset id="mfa"><legend>Verificación adicional</legend><label>Código MFA<input id="code" inputmode="numeric" autocomplete="one-time-code"></label><button id="mfaButton">Verificar MFA</button></fieldset>
+<fieldset id="issue"><legend>Consentimiento explícito</legend><p>Al confirmar se crea una autorización <strong>ONE_TIME</strong> con caducidad y se envía una sola orden <code>READ_HEALTH</code> al PC-001.</p><button id="issueButton">Autorizar y enviar una vez</button></fieldset>
+<output id="state" aria-live="polite">Esperando autenticación PREPROD.</output>
+</main>
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8';
+const cfg={url:'https://hnqlnvakzaywtafeiybt.supabase.co',key:'sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUVw',issuer:'https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-pc001-health-issuer-preprod-v1',device:'78ca78cf158b3cda329cf39e0270f0a5'};
+const sb=createClient(cfg.url,cfg.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});let session=null,factorId=null,challengeId=null;const $=id=>document.getElementById(id),say=text=>$('state').textContent=text;
+async function currentSession(){const {data}=await sb.auth.getSession();return data.session;}
+async function ready(){ $('login').style.display='none';$('mfa').style.display='none';$('issue').style.display='block';say('Identidad PREPROD validada. Confirma la orden de lectura una sola vez.'); }
+async function login(){try{$('loginButton').disabled=true;say('Validando identidad PREPROD…');const {data,error}=await sb.auth.signInWithPassword({email:$('email').value,password:$('password').value});if(error)throw error;session=data.session||await currentSession();const {data:aal}=await sb.auth.mfa.getAuthenticatorAssuranceLevel();if(aal?.nextLevel==='aal2'&&aal.currentLevel!=='aal2'){const {data:factors,error:factorError}=await sb.auth.mfa.listFactors();const factor=factors?.totp?.find(x=>x.status==='verified');if(factorError||!factor)throw new Error('MFA_REQUIRED');const {data:challenge,error:challengeError}=await sb.auth.mfa.challenge({factorId:factor.id});if(challengeError)throw challengeError;factorId=factor.id;challengeId=challenge.id;$('mfa').style.display='block';say('Introduce el código MFA PREPROD.');return;}await ready();}catch{say('Acceso no autorizado. Revisa la identidad PREPROD.');}finally{$('loginButton').disabled=false;}}
+async function verifyMfa(){try{$('mfaButton').disabled=true;const {error}=await sb.auth.mfa.verify({factorId,challengeId,code:$('code').value});if(error)throw error;session=await currentSession();if(!session)throw new Error('SESSION_REQUIRED');await ready();}catch{say('Código MFA no aceptado.');}finally{$('mfaButton').disabled=false;}}
+async function issuer(intent,body){const response=await fetch(cfg.issuer,{method:'POST',headers:{Authorization:'Bearer '+session.access_token,apikey:cfg.key,'Content-Type':'application/json','x-cerebro-owner-intent':intent},body:JSON.stringify(body)});const json=await response.json().catch(()=>({code:'INVALID_RESPONSE'}));if(!response.ok)throw new Error(json.code||'REQUEST_DENIED');return json;}
+async function issue(){try{$('issueButton').disabled=true;say('Creando autorización ONE_TIME exacta…');const grant=await issuer('PC001_OWNER_GRANT_CREATE_V1',{decision_request_id:crypto.randomUUID(),mode:'ONE_TIME'});if(!grant.grant_id)throw new Error('GRANT_NOT_CREATED');say('Enviando READ_HEALTH al Gateway PREPROD…');const result=await issuer('PC001_READ_HEALTH_GRANT_V1',{request_id:crypto.randomUUID(),grant_id:grant.grant_id,device_id:cfg.device,action:'READ_HEALTH'});say('Orden '+(result.command_id||'')+' en estado '+(result.command_state||'UNKNOWN')+'. El Gateway verificará el receipt semántico.');}catch(error){say('La orden no se emitió: '+String(error.message||error));}finally{$('issueButton').disabled=false;}}
+$('loginButton').addEventListener('click',login);$('mfaButton').addEventListener('click',verifyMfa);$('issueButton').addEventListener('click',issue);
+</script>
+</html>
+
