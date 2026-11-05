@@ -1,5 +1,11 @@
 # SEO Enterprise V2 · Changelog
 
+## 2026-11-05 · Puente Cowboy WordPress DRAFT_ONLY verificado por simulación
+
+- `wp_create_post` admite `status:'draft'` y `dry_run:true`; respuesta de simulación verificada sin crear entradas ni editar el sitio.
+- Añadido `runtime/seo-wordpress-draft-bridge-v1.mjs` y su contrato. Es preparación de escritura en CMS, NO permiso de publicación ni ejecución PROD.
+- Las escrituras reales continúan aisladas al archivo LAB; el piloto WordPress requiere IAM y backup/rollback físico.
+
 ## 2026-11-05 · WRITE-LAB real, cuatro jobs OIDC y 20 borradores editoriales
 
 - Añadido `runtime/seo-draft-writer-lab-v1.mjs`: modo WRITE acotado al filesystem temporal del runner GitHub, productor de 20 JSON editoriales + manifiesto, no WordPress.

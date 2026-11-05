@@ -38,3 +38,12 @@ Solo cuando esos contratos funcionen en el Gateway y se obtengan evidencias fís
 El inventario actual se reutilizó sin auditorías. STAGING sigue aparcado. La App, CRM, Supabase y WordPress se preservaron. La PR #22 sigue DRAFT. El rollback sobre WordPress **NO** se ha probado; no atribuir al canario LAB propiedades de restauración PROD.
 
 **Siguiente etapa técnica:** writer WordPress `DRAFT_ONLY` detrás de IAM/backup/QA/tribunal; no crear permisos de escritura globales ni transferir el token GitHub a WordPress.
+
+
+## Puente WordPress DRAFT_ONLY · Dry-run de conector oficial
+
+- Se ha descubierto en el plugin propietario `Cowboy_MCP_web` la herramienta `wp_create_post`, que admite explícitamente `status: "draft"` y `dry_run: true`.
+- Se ejecutó **una única llamada de simulación**, con título de prueba y `dry_run=true`, sobre el conector oficial. Respuesta: `{"dry_run":true,"tool":"wp_create_post","action":"create","resource":"post","description":"Would create post with the provided parameters."}`. **No se creó ninguna entrada.** Esta consulta no fue una auditoría de URL ni un recrawl.
+- Código `cerebro/seo-enterprise/v2/runtime/seo-wordpress-draft-bridge-v1.mjs`: construye parámetros a partir del borrador conservado para `status:"draft",dry_run:true` y bloquea publicar, editar páginas existentes o cambiar el modo a escritura real.
+- No convertir un `dry_run` en escritura real sin identidad IAM WordPress de mínimo privilegio, copias previas, restauración comprobada, revisión D16 de claims hipotecarios, D26 licencias, D31 QA y tribunal independiente.
+- **No hay habilitación automática de `wp_create_post` con `dry_run=false`** en esta fase. El piloto real de borrador WordPress queda pendiente.
