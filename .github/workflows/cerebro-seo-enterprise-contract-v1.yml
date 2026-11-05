@@ -66,6 +66,26 @@ jobs:
           path: ${{ runner.temp }}/seo-specialist-training/manifest.json
           retention-days: 14
           if-no-files-found: error
+      - name: Exercise 141 SEO specialist knowledge contracts with durable JOB-001 (NO AGENT IAM)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-workforce-141"
+          node cerebro/seo-enterprise/v2/runtime/seo-workforce-orientation-v2.mjs run \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/orientation.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-workforce-orientation-v2.mjs verify \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/verification.json"
+      - name: Archive 141 contract-orientation receipts, not agent certifications
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-141-subagent-contract-orientation-lab-v2
+          path: |
+            ${{ runner.temp }}/seo-workforce-141/orientation.json
+            ${{ runner.temp }}/seo-workforce-141/verification.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Checkout preserved V4 source archive from historical branch (read-only)
         uses: actions/checkout@v4
         with:
