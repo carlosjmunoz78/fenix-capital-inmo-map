@@ -2,7 +2,7 @@
  * Decision-only, no HTTP requests, no tokens, no WordPress writes and no PROD rollout.
  */
 import fs from 'node:fs';
-const policy=JSON.parse(fs.readFileSync(new URL('./seo-prod-draft-autopublish-policy-v0.json',import.meta.url),'utf8'));
+const policy=JSON.parse(fs.readFileSync(new URL('../seo-prod-draft-autopublish-policy-v0.json',import.meta.url),'utf8'));
 const category=x=>Object.hasOwn(policy.content_classes,x);
 const positive=x=>Number.isSafeInteger(x)&&x>=0;
 const denied=(reason)=>({status:'BLOCKED',reason,can_publish:false,can_create_draft:false,autopublish:false,production_write_executed:false});
