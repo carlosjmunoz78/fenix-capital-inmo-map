@@ -71,3 +71,18 @@ Todo cambio de esta PR es aditivo en \`cerebro/seo-enterprise/v2/\`; no desplieg
 ### Siguiente bloque operativo sin duplicar sistemas
 
 Auditar identidades y permisos efectivos de `cerebro/registry/role-agent-registry.v1.json`, el router de trabajo compartido y los bindings de FACT-001; conectar los ejecutores LAB a roles IAM verificables con auditoría durable y supervisión independiente real; después completar fuentes GSC/GA4 autorizadas y pruebas recuperables de STAGING. No subir estado `LISTO` por tests unitarios ni datos sintéticos. Antes de cualquier publicación, snapshot, aislamiento, OLD vs NEW, consentimientos, CRM E2E y rollback físico.
+
+
+## Continuación ejecutada · JOB-001 / méritos / shadow
+
+**Fuente física:** [GitHub Actions 41979543288](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41979543288) y [contrato 41979543158](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41979543158).
+
+1. **JOB-001 real reutilizado**: `seo-job001-workunit-v0.mjs` encola en `DurableJobRuntimeV1` (contexto exacto `fenix / SEO-001 / PREPROD / 0.1.0`), reclama, checkpoint, completa y reabre el journal. Se verifica idempotencia entre procesos. El HTML se conserva solo de forma efímera en runner; el journal almacena hashes y métricas.
+2. **Tres procesos Linux distintos ejecutados en GitHub Actions**: worker `SEO_D15_WORKER`, QA independiente `SEO_D31_QA`, juez `SEO_JUDGE_A`; verificación de PID distinto, huella de fuente, coherencia de informe y journal. Este aislamiento de proceso **no** equivale a autenticación IAM de cada rol.
+3. **Merit Ledger v0**: `AtomicV8Journal` persistente reutilizado para registrar **candidato** a mérito sobre evidencia de una misión real. Score 95/100 de *integridad operativa de esta misión*, no evaluación de SERP, conversiones o crecimiento. `awarded=false`, `permissions_added=[]`, `autonomy_changed=false`. QA, juez y meta-supervisión continúan pendientes de evaluación independiente autenticada.
+4. **Shadow OLD vs NEW y rollback**: tres procesos distintos ejecutan dos reglas deterministas sobre fixtures sintéticos públicos; la regla corregida mejora F1, el tribunal comparte lógica de `evaluation-tribunal.mjs`, y el runner vuelve a OLD para probar igualdad exacta. **No** es entrenamiento de modelo, ni reentrenamiento autónomo de agentes, ni rollback físico de WordPress, ni shadow sobre clientes reales.
+5. **CI** sobre SHA previo al registro final: `49/49` tests de arquitectura/contratos SEO y `20/20` tests del circuito STAGING, 0 fallos. El run completo `41979543288` archiva journal, recibos, mérito y shadow sin volcar el HTML completo.
+
+**Tablero ahora:** `14/32 PARCIAL`, `18/32 DEFINIDO`, `0/32 LISTO`. D32 gana evidencia parcial de shadow sintético. Los 3 roles son **ejecutores lógicos en procesos reales, sin identidad IAM autónoma autenticada**; la cifra de agentes/subagentes activos **certificados** sigue siendo cero. Reutilizar el runtime y registro existente, no declarar escalado a 32 sin misiones reales por competencia.
+
+**Bloque siguiente:** (1) IAM para identidad del actor y scopes por rol; (2) evidencias de supervisión universal independiente sobre juez y guardián; (3) formularios→consentimiento→CRM con snapshot STAGING y rollback físico probado; (4) D13/D14/D16 YMYL editorial, D29 GSC/GA4 por fuente gratuita autenticada si existe; (5) cerrar suites e integración sin afectar PROD. GSC Wizard requiere suscripción: **no contratar**. Ninguna promoción hasta superar gates de seguridad.
