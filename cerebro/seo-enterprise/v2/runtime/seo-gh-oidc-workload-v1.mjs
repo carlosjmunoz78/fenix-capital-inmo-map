@@ -40,11 +40,13 @@ export function verifyJwtSignedByGithub({jwt,jwks,env,nowSeconds=Math.floor(Date
  if(!Number.isInteger(payload.iat)||!Number.isInteger(payload.exp)||payload.exp<payload.iat||
    payload.exp-payload.iat>900||nowSeconds<payload.iat-60||nowSeconds>payload.exp+30)fail('JWT_EXPIRED');
  if(payload.nbf!==undefined&&(typeof payload.nbf!=='number'||nowSeconds<payload.nbf-60))fail('JWT_NOT_BEFORE');
- if(payload.repository!==REPO||payload.repository_owner!=='carlosjmunoz78'||payload.event_name!=='pull_request'||
-   payload.workflow!==NAME||payload.run_id!==env.GITHUB_RUN_ID||
-   String(payload.run_attempt)!==env.GITHUB_RUN_ATTEMPT||
-   payload.sha!==env.GITHUB_SHA||payload.ref!==env.GITHUB_REF||
-   payload.sub!=='repo:'+REPO+':pull_request')fail('JWT_CLAIMS');
+ const claims={repository:payload.repository===REPO,owner:payload.repository_owner==='carlosjmunoz78',
+  event:payload.event_name==='pull_request',workflow:payload.workflow===NAME,
+  run_id:String(payload.run_id)===env.GITHUB_RUN_ID,
+  run_attempt:String(payload.run_attempt)===env.GITHUB_RUN_ATTEMPT,
+  sha:payload.sha===env.GITHUB_SHA,ref:payload.ref===env.GITHUB_REF,
+  sub:payload.sub==='repo:'+REPO+':pull_request'};
+ for(const [key,ok] of Object.entries(claims))if(!ok)fail('JWT_CLAIM_'+key.toUpperCase());
  return {verified:true,issuer:ISSUER,subject:payload.sub,audience:AUD,
    sha256:crypto.createHash('sha256').update(jwt).digest('hex'),expires_at:payload.exp};
 }
