@@ -23,6 +23,14 @@ jobs:
           node-version: '22'
       - name: Certify no public route, no live DB binding, no destructive migration
         run: node verify-cut21-config.mjs
+      - name: CUT23 attest EU-only Worker configuration and default OFF
+        run: node verify-cut23-eu-config.mjs
+      - name: CUT23 EU OFF Worker package (dry-run only)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-eu.template.jsonc --dry-run --outdir=./cut23-eu-bundle
+          test -n "$(find ./cut23-eu-bundle -type f -print -quit)"
+          echo 'CUT23 EU OFF Worker dry run: PASS (no remote changes)'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
