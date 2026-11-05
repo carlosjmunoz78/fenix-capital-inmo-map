@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import {executeSeoJob001Staging} from '../runtime/seo-job001-workunit-v0.mjs';
-import {DurableJobRuntimeV1} from '../../../../runtime/durable-job-runtime-v1.mjs';
+import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 const html='<html><head><title>Fénix Capital</title><meta name="robots" content="noindex"></head><body><h1>Fénix Capital</h1><p>Mi furura cuota de hipoteca en Córdoba</p></body></html>';
 const context={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
 test('physical JOB-001 worker persists, reopens and deduplicates across restarts with no raw page data',t=>{
