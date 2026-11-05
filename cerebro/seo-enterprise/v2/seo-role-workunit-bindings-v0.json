@@ -4,7 +4,7 @@
   "engine_id": "SEO-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "LAB_PHYSICAL_WORKER_BINDING_NOT_IAM_AUTHENTICATED",
+  "status": "PHYSICAL_WORKLOAD_VERIFIED_ROLE_SCOPES_AND_SIGNED_PROCESSES_IAM_UNVERIFIED",
   "runtime_module": "cerebro/runtime/durable-job-runtime-v1.mjs",
   "runtime_engine_id": "JOB-001",
   "factory_engine_id": "FACT-001",
@@ -15,7 +15,18 @@
     "provenance": "cerebro/registry/identity-access-registry.v0.json",
     "workflow_permissions": "contents:read",
     "github_workload_identity_attested_in_agent_runtime": false,
-    "role_actor_credential_mapping_verified": false
+    "role_actor_credential_mapping_verified": false,
+    "github_workload_run_verified_by_provider_api": true,
+    "workflow_verification_event": "pull_request",
+    "workflow_id": 41982256299,
+    "verified_workload_provider": "GITHUB_ACTIONS_API",
+    "role_scope_gate_physically_exercised": true,
+    "process_ed25519_signatures_physically_verified": true,
+    "github_oidc_token_verified": false,
+    "role_signatures_signed_by_external_iam": false,
+    "github_actions_token_scope_provider_verified": false,
+    "process_receipt_key_trust_boundary": "EPHEMERAL_SELF_SIGNED_WITHIN_SAME_GITHUB_RUNNER",
+    "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41982256299"
   },
   "roles": [
     {
@@ -29,7 +40,9 @@
         "site:public:read",
         "mission:execute"
       ],
-      "identity_verified": false
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true
     },
     {
       "role_id": "SEO_D31_QA",
@@ -42,7 +55,9 @@
         "mission:evidence:read",
         "mission:evaluate"
       ],
-      "identity_verified": false
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true
     },
     {
       "role_id": "SEO_JUDGE_A",
@@ -54,7 +69,9 @@
       "scope": [
         "mission:verdict:read"
       ],
-      "identity_verified": false
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true
     }
   ],
   "governance": {
@@ -67,5 +84,5 @@
     "critical_permissions_granted": false,
     "agent_self_certification": false
   },
-  "operational_definition": "One executed JOB-001 work unit is not evidence that an autonomous SEO agent identity is authenticated or that a department is READY."
+  "operational_definition": "Signed independent OS processes and a verified GitHub Actions job are evidence of bounded execution, not individually authenticated CEREBRO agents. No department release and no live website publishing."
 }
