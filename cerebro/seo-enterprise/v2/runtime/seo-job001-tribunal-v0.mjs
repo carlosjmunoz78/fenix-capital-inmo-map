@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {enforceSeoRoleIfRequested} from './seo-role-access-gate-v0.mjs';
 import {sealProcessReceipt,verifyProcessReceipt} from './seo-process-signature-v0.mjs';
 export function tribunalReview({worker_receipt,independent_review,judge_role_id='SEO_JUDGE_A'}){
  const b=JSON.parse(fs.readFileSync(new URL('../seo-role-workunit-bindings-v0.json',import.meta.url),'utf8'));
@@ -36,6 +37,7 @@ export function tribunalReview({worker_receipt,independent_review,judge_role_id=
   ready:false,prod_authorized:false,external_writes:0,additional_eur:0}});
 }
 async function main(){
+ enforceSeoRoleIfRequested({role_id:'SEO_JUDGE_A',scope:'mission:verdict:read'});
  const [receiptFile,reviewFile,verdictFile]=process.argv.slice(2);
  if(![receiptFile,reviewFile,verdictFile].every(Boolean))throw Error('ARGS_REQUIRED');
  const result=tribunalReview({worker_receipt:JSON.parse(fs.readFileSync(receiptFile,'utf8')),
