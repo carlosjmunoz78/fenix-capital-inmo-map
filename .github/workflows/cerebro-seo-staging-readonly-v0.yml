@@ -12,6 +12,8 @@ permissions:
 
 jobs:
   readonly-staging:
+    # Paused at owner direction on 2026-11-05: no STAGING activity. Preserve historical job for later explicit re-authorization.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
