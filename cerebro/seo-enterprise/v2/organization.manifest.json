@@ -629,5 +629,19 @@
   "documents": [
     "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
     "cerebro/seo-enterprise/v2/PROMPT_CONTINUIDAD_EJECUCION_32_DEPARTAMENTOS.md"
-  ]
+  ],
+  "publication_policy": {
+    "policy_ref": "cerebro/seo-enterprise/v2/seo-prod-draft-autopublish-policy-v0.json",
+    "state": "DECISION_CONTRACT_ONLY_NOT_DEPLOYED",
+    "official_site": "https://fenixcapital.es",
+    "discovery_site": "OFFICIAL_PUBLIC_SITE",
+    "new_url_initial_wordpress_status": "draft",
+    "initial_publication_authority": "AUTHENTICATED_OWNER_APPROVAL",
+    "autonomy_graduation": "3_VERIFIED_OWNER_APPROVED_PUBLICATIONS_SAME_SCOPE_PLUS_MERIT_AND_IAM_AND_ROLLBACK_AND_OWNER_GRANT",
+    "financial_factcheck_required": true,
+    "real_wordpress_drafts_created_by_this_change": 0,
+    "official_prod_access_enabled_by_this_change": false,
+    "existing_published_urls_preserved": true,
+    "site_prod_write_credentials_bound": false
+  }
 }

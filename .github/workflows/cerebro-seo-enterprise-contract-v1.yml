@@ -32,6 +32,8 @@ jobs:
         run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
       - name: Prove universal owner-only excellence rewards suspension and replacement policy
         run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs cerebro/tests/universal-excellence-console-binding-v0.test.mjs cerebro/tests/supabase-owner-session-verifier-lab-v0.test.mjs
+      - name: Enforce official WordPress draft-first and scoped owner-approved autonomy policy
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-official-publication-decision-v0.test.mjs
       - name: Verify FACT-001 SEO organization overlay, preserve canonical 177-engine scaffold
         run: node --test cerebro/tests/seo-org-v0.test.mjs
       - name: Materialize 8 families and 32 departments as non-deployed organizational contracts

@@ -1,0 +1,92 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "SEO_PROD_FIRST_DRAFT_TO_AUTOPUBLISH_V0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "POLICY_LAB_NOT_ENFORCED",
+  "version": "0.1.0",
+  "state": "DEFINED_NOT_LIVE_CONNECTED",
+  "site": {
+    "official_origin": "https://fenixcapital.es",
+    "source_mode": "PUBLIC_READONLY_FIRST",
+    "wordpress_content_target": "OFFICIAL_WORDPRESS_EXISTING",
+    "unnecessary_staging_drafts": false,
+    "standalone_app_or_crm_prod_changes": false
+  },
+  "new_urls": {
+    "default_status": "draft",
+    "first_three_publications_owner_approval": true,
+    "require_authenticated_owner": true,
+    "allow_modify_existing_posts": false,
+    "require_unique_slug_and_url_conflict_check": true,
+    "require_previous_post_inventory": true,
+    "require_recoverable_revision_or_backup": true,
+    "copywriting_and_editorial_qa": true,
+    "no_external_publication_without_signed_decision": true
+  },
+  "graduation": {
+    "minimum_individually_owner_approved_successful_publications": 3,
+    "within_same_company_content_class_and_scope": true,
+    "independent_qa_each_time": true,
+    "owner_corrections_learnt": true,
+    "merit_policy_minimum_score": 90,
+    "safety_floor": 95,
+    "quality_floor": 90,
+    "requires_verified_IAM_for_owner_agent_and_evaluator": true,
+    "requires_owner_grant_for_scoped_automatic_publication": true,
+    "requires_backup_rollback_and_audit": true,
+    "applies_only_to_new_urls": true,
+    "revocable_on_error": true
+  },
+  "content_classes": {
+    "STANDARD_LOCAL_LANDING": {
+      "possible_auto_publish": true,
+      "claim_verification_required": true
+    },
+    "STANDARD_BLOG": {
+      "possible_auto_publish": true,
+      "claim_verification_required": true
+    },
+    "FINANCIAL_MORTGAGE": {
+      "possible_auto_publish": true,
+      "high_risk_requires_independent_fact_check": true,
+      "legal_review_when_required": true
+    },
+    "OTHER": {
+      "possible_auto_publish": false,
+      "needs_scope_definition": true
+    }
+  },
+  "hard_limits": {
+    "never_auto_change_existing_published_pages": true,
+    "never_auto_edit_legal_text": true,
+    "never_auto_edit_app_or_crm": true,
+    "never_auto_buy_services": true,
+    "never_override_incident_security_human_gate": true,
+    "never_publish_without_audit": true,
+    "never_auto_expand_scopes": true,
+    "missing_trusted_proof_fail_closed": true
+  },
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "priority_note": "Use official website read access and native draft workflow when safe; LAB/STAGING remain for tests that must not risk PROD.",
+  "physical_state": {
+    "real_website_write_authority_verified": false,
+    "real_wordpress_draft_created": false,
+    "real_owner_authenticated": false,
+    "real_auto_publish_enabled": false,
+    "real_rollback_verified": false
+  },
+  "cost": {
+    "additional_subscriptions_eur": 0,
+    "external_ai_api_calls": 0
+  }
+}
