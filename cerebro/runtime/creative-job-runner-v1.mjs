@@ -6,6 +6,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { pathToFileURL } from 'node:url';
+import {assessAiCreativeJob,renderAiCreativeJob} from './creative-ai-job-v0.mjs';
 
 const execFileAsync = promisify(execFile);
 const DEFAULT_AUDIENCE = 'cerebro-creative-worker-v1';
@@ -170,21 +171,42 @@ export async function runOneCreativeJob({endpoint=process.env.CEREBRO_CREATIVE_D
   if(!job)return Object.freeze({ok:true,status:'NO_JOB'});
   let rendered=null;
   try{
-    rendered=await renderCreativeJob(job,{browserFactory});
+    const aiAssessment=assessAiCreativeJob(job);
+    if(aiAssessment.is_ai&&!aiAssessment.ready){
+      await callDispatch(endpoint,'complete',token,{
+        job_id:job.job_id,lease_id:job.lease_id,status:'HOLD',
+        result_summary:{ok:false,reason:aiAssessment.reason,output_type:job.output_type,
+          provider:'OPENAI_IMAGE',cost_approved:false,provider_calls:0,publish_authorized:false},
+        artifact_manifest:null,error_code:aiAssessment.reason
+      },fetch_impl);
+      return Object.freeze({ok:true,status:'HOLD',reason:aiAssessment.reason,job_id:job.job_id});
+    }
+    rendered=aiAssessment.is_ai
+      ? await renderAiCreativeJob(job)
+      : await renderCreativeJob(job,{browserFactory});
+    if(rendered?.status==='HOLD'){
+      await callDispatch(endpoint,'complete',token,{
+        job_id:job.job_id,lease_id:job.lease_id,status:'HOLD',
+        result_summary:{ok:false,reason:rendered.reason,output_type:job.output_type,
+          provider:'OPENAI_IMAGE',cost_uncertain:rendered.cost_uncertain??false,publish_authorized:false},
+        artifact_manifest:null,error_code:rendered.reason
+      },fetch_impl);
+      return Object.freeze({ok:true,status:'HOLD',reason:rendered.reason,job_id:job.job_id});
+    }
     const manifest=await uploadArtifacts(endpoint,token,job,rendered,fetch_impl);
-    await callDispatch(endpoint,'complete',token,{job_id:job.job_id,lease_id:job.lease_id,status:'SUCCEEDED',result_summary:{ok:true,artifact_count:manifest.length,output_type:job.output_type,channel:job.channel,render_runtime:'PLAYWRIGHT_FFMPEG',additional_cost_eur:0,publish_authorized:false},artifact_manifest:{bucket:'cerebro-creative-assets',artifacts:manifest},error_code:null},fetch_impl);
-    return Object.freeze({ok:true,status:'SUCCEEDED',job_id:job.job_id,artifact_count:manifest.length,manifest});
+    await callDispatch(endpoint,'complete',token,{job_id:job.job_id,lease_id:job.lease_id,status:'SUCCEEDED',result_summary:{ok:true,artifact_count:manifest.length,output_type:job.output_type,channel:job.channel,render_runtime:aiAssessment.is_ai?'OPENAI_PHOTO_PLUS_OFFICIAL_BRAND_COMPOSITOR':'PLAYWRIGHT_FFMPEG',additional_cost_eur:aiAssessment.is_ai?null:0,cost_verified:!aiAssessment.is_ai,provider_approval_id:aiAssessment.is_ai?aiAssessment.approval?.approval_id:null,qa_status:aiAssessment.is_ai?'PENDING_INDEPENDENT':'LEGACY',publish_authorized:false},artifact_manifest:{bucket:'cerebro-creative-assets',artifacts:manifest},error_code:null},fetch_impl);
+    return Object.freeze({ok:true,status:'SUCCEEDED',job_id:job.job_id,artifact_count:manifest.length,manifest,provider_paid:aiAssessment.is_ai,cost_verified:!aiAssessment.is_ai});
   } catch(error){
-    await callDispatch(endpoint,'complete',token,{job_id:job.job_id,lease_id:job.lease_id,status:'FAILED',result_summary:{ok:false,additional_cost_eur:0,publish_authorized:false},artifact_manifest:null,error_code:String(error?.message||error).slice(0,240)},fetch_impl).catch(()=>null);
+    await callDispatch(endpoint,'complete',token,{job_id:job.job_id,lease_id:job.lease_id,status:'FAILED',result_summary:{ok:false,additional_cost_eur:null,provider_request_uncertain:job?.request?.creative_payload?.scene_provider==='OPENAI_IMAGE',publish_authorized:false},artifact_manifest:null,error_code:String(error?.message||error).slice(0,240)},fetch_impl).catch(()=>null);
     throw error;
   } finally {if(rendered?.temp)await fs.rm(rendered.temp,{recursive:true,force:true});}
 }
 
 async function main(){
   const result=await runOneCreativeJob();
-  console.log(JSON.stringify({ok:result.ok,status:result.status,job_id:result.job_id??null,artifact_count:result.artifact_count??0,artifacts:result.manifest?.map(a=>({path:a.path,mime:a.mime,bytes:a.bytes,sha256:a.sha256}))??[],additional_cost_eur:0,publish_authorized:false}));
+  console.log(JSON.stringify({ok:result.ok,status:result.status,job_id:result.job_id??null,artifact_count:result.artifact_count??0,artifacts:result.manifest?.map(a=>({path:a.path,mime:a.mime,bytes:a.bytes,sha256:a.sha256}))??[],additional_cost_eur:result.provider_paid?null:0,cost_verified:result.provider_paid?false:true,publish_authorized:false}));
   if(result.status!=='NO_JOB'&&result.ok!==true)process.exitCode=1;
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href)await main();
 
-export const CREATIVE_JOB_RUNNER_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',owner_engine:'FACT-001',authentication:'GITHUB_ACTIONS_OIDC',audience:DEFAULT_AUDIENCE,queue:'cerebro_creative_job_v1',artifact_bucket:'cerebro-creative-assets',heavy_render_outside_supabase:true,local_open_source_render:true,publish_authorized:false,additional_cost_eur:0});
+export const CREATIVE_JOB_RUNNER_V1_CONTRACT=Object.freeze({schema_version:'1.0.0',owner_engine:'FACT-001',authentication:'GITHUB_ACTIONS_OIDC',audience:DEFAULT_AUDIENCE,queue:'cerebro_creative_job_v1',artifact_bucket:'cerebro-creative-assets',heavy_render_outside_supabase:true,local_open_source_render:true,publish_authorized:false,additional_cost_eur:0,paid_ai_parallel_lane_excluded_from_zero_cost_baseline:true});

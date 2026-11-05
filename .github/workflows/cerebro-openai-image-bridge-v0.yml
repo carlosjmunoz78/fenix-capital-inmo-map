@@ -1,0 +1,90 @@
+name: CEREBRO FACT-001 · Paid Media Policy & OpenAI Bridge V0 · Safe Mock QA
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/runtime/creative-social-prompt-v0.mjs'
+      - 'cerebro/runtime/creative-openai-image-adapter-v0.mjs'
+      - 'cerebro/runtime/creative-social-compositor-v0.mjs'
+      - 'cerebro/runtime/creative-ai-job-v0.mjs'
+      - 'cerebro/runtime/facebook-existing-queue-brief-v0.mjs'
+      - 'cerebro/tests/facebook-existing-queue-brief-v0.test.mjs'
+      - 'cerebro/runtime/creative-media-provider-policy-v1.mjs'
+      - 'cerebro/runtime/owner-command-control-v0.mjs'
+      - 'cerebro/tests/owner-command-control-v0.test.mjs'
+      - 'supabase/migrations/20261105_cerebro_owner_control_commands_v0.sql'
+      - 'cerebro/registry/creative-openai-image-bridge-v0.registry.json'
+      - 'cerebro/runtime/creative-job-runner-v1.mjs'
+      - 'cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'
+      - 'cerebro/tests/creative-openai-social-bridge-v0.test.mjs'
+      - '.github/workflows/cerebro-openai-image-bridge-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-physical-render-and-model-mock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OPENAI_IMAGE_PROVIDER_ENABLED: "false"
+      OPENAI_IMAGE_MAX_EUR_PER_REQUEST: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing pinned dependencies
+        run: npm ci
+      - name: Install existing Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Independent FACT-001 audiovisual bridge tests (no provider charge)
+        run: node --test cerebro/tests/creative-openai-social-bridge-v0.test.mjs
+      - name: Owner ChatGPT control contract (offline, no secrets, no paid calls)
+        run: node --test cerebro/tests/owner-command-control-v0.test.mjs
+      - name: Validate 10 real Facebook media-missing briefs and canonical company identity (no API call)
+        run: node --test cerebro/tests/facebook-existing-queue-brief-v0.test.mjs
+      - name: Verify actual existing factory runner tests stay green
+        run: node --test cerebro/tests/creative-job-runner-v1.test.mjs
+      - name: Verify secure worker OpenAI credential presence (no request, no secret output)
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        env:
+          OPENAI_IMAGE_KEY_AVAILABLE: ${{ secrets.OPENAI_API_KEY != '' }}
+        run: |
+          if [ "$OPENAI_IMAGE_KEY_AVAILABLE" = "true" ]; then
+            echo "FACT001_OPENAI_WORKER_CREDENTIAL=AVAILABLE_AT_GITHUB_ACTIONS"
+          else
+            echo "FACT001_OPENAI_WORKER_CREDENTIAL=NOT_PRESENT_IN_GITHUB_ACTIONS"
+          fi
+          echo "NO_API_CALL_NO_PAID_USAGE"
+      - name: Record source-derived CEREBRO prompt and default blocked paid lane
+        shell: bash
+        run: |
+          mkdir -p /tmp/fact001-openai-photo
+          node --input-type=module - <<'NODE'
+          import fs from 'node:fs';
+          import {buildCerebroCreativeOrder} from './cerebro/runtime/creative-social-prompt-v0.mjs';
+          import {preflightOpenAiCost} from './cerebro/runtime/creative-openai-image-adapter-v0.mjs';
+          const b=JSON.parse(fs.readFileSync('cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'));
+          const o=buildCerebroCreativeOrder(b);
+          const g=preflightOpenAiCost({order:o,approval:null,env:process.env});
+          if(g.allowed||g.reason!=='IMAGE_PROVIDER_NOT_ENABLED'||o.policy.publish_authorized!==false||o.policy.paid_media_allowed!==true)process.exit(1);
+          fs.writeFileSync('/tmp/fact001-openai-photo/prompt-cerebro.txt',o.ai_scene_request.prompt);
+          fs.writeFileSync('/tmp/fact001-openai-photo/evidence.json',JSON.stringify({
+            origin:'FACT-001_STRUCTURED_WORK_ORDER',prompt_sha256:o.prompt_sha256,
+            campaign:b.campaign,request_key:o.request_key,engine_id:o.engine_id,
+            provider_model:o.ai_scene_request.model,photo_only:true,
+            official_logo_compositor:'REQUIRED',api_was_called:false,paid_lane:g.reason,
+            media_policy:'IMAGES_AND_VIDEOS_PAID_ALLOWED_WITH_AUTHORIZED_BUDGET',
+            publish_authorized:false,brand_quality_approved:false
+          },null,2));
+          console.log('PASS: paid media is POLICY-ALLOWED; this CI job is deliberately MOCK-ONLY; no spend/publish');
+          NODE
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fact001-cerebro-ai-photo-prompt-evidence-v0
+          path: /tmp/fact001-openai-photo/
+          if-no-files-found: error
+          retention-days: 7
