@@ -1,0 +1,39 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "SOC-001",
+  "environment": "PREPROD",
+  "version": "v0",
+  "content_key": "facebook-recovery-2026-11-09-fb-rcv-001",
+  "originating_specialist_roles": [
+    "FB-06",
+    "FB-09",
+    "FB-10",
+    "FB-11",
+    "FB-13",
+    "FB-14",
+    "FB-20",
+    "FB-30",
+    "FB-32"
+  ],
+  "creative_dept": "PRODUCTORA_AUDIOVISUAL",
+  "campaign": "soc001_fb_canary_20261105",
+  "audience": "particulares",
+  "funnel_stage": "TOFU",
+  "topic": "Antes de comprar vivienda en Cordoba, revisar gastos de comunidad y derramas",
+  "hook": "¿Has preguntado cuánto cuesta realmente mantener ese piso?",
+  "headline": "Antes de comprar, mira más allá",
+  "subtitle": "Comunidad · Derramas · Documentación",
+  "cta": "Descúbrelo en fenixcapital.es",
+  "photo_description": "A premium but believable Mediterranean apartment building with tasteful balconies, landscaped plants, warm late-afternoon Andalusian light, inviting real-estate setting and atmospheric composition, without depicting a recognisable address, signature monument or identifiable real listing.",
+  "destination_url": "https://fenixcapital.es/contacto/",
+  "qa_reviewer": "SUP-FB-FINANCIAL-REAL-ESTATE-V1",
+  "tribunal": "TRIBUNAL-FB-FINANCIAL-REAL-ESTATE-V1",
+  "policy": {
+    "system_source": "SOC001_AGENT_BRIEF",
+    "original_image_required": true,
+    "real_listing_claim": false,
+    "publish_allowed": false,
+    "staging_never_public": true,
+    "external_ai_spend_disabled_by_default": true
+  }
+}
