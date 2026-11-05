@@ -18,7 +18,9 @@
     "META_SUPERVISOR",
     "QA_AGENT",
     "INDEPENDENT_EVALUATOR",
-    "AUDITOR"
+    "AUDITOR",
+    "SPECIALIST_ROLE",
+    "AGENT_PROFILE_IMPLEMENTED_PLAN_ONLY"
   ],
   "authority": {
     "strategic_command_source": "SINGLE_AUTHENTICATED_COMPANY_OWNER",
@@ -146,5 +148,8 @@
     "role_registry": "cerebro/registry/role-agent-registry.v1.json",
     "original_seo_matrix": "cerebro/seo-enterprise/v2/organization.manifest.json",
     "historical_preserved": true
-  }
+  },
+  "coverage_rule": "ALL_REGISTERED_ROLES_PLUS_SUBAGENTS_AND_OVERSIGHT_MUST_INHERIT; UNKNOWN_CLASSES_FAIL_CLOSED",
+  "phase": "PHYSICALLY_TESTED_LAB_ONLY_NOT_ATTACHED_TO_REAL_GATEWAY_OR_SCHEDULER",
+  "physical_lab_evidence_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41993290514"
 }
