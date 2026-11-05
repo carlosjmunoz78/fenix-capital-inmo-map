@@ -1,5 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "npm:@supabase/supabase-js@2";
+import {Image} from "jsr:@matmen/imagescript@3.13.1";
 const U=Deno.env.get("SUPABASE_URL")??"";
 const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
 const MODEL="gpt-image-2.5-flare";
@@ -48,9 +49,74 @@ Deno.serve(async(req:Request)=>{
  if(!U.includes(PROJECT)||!S)return reply({ok:false,code:"SERVER_NOT_READY"},503);
  let body:any;try{body=await req.json()}catch{return reply({ok:false,code:"INVALID_JSON"},400)}
  if(!uuid.test(body?.job_id??"")||typeof body?.nonce!=="string"||
- !/^[a-f0-9]{48}$/i.test(body.nonce)||!["probe","generate","preview","preview_bytes"].includes(body?.action))
+ !/^[a-f0-9]{48}$/i.test(body.nonce)||!["probe","generate","preview","preview_bytes","compose"].includes(body?.action))
  return reply({ok:false,code:"INVALID_INVOCATION"},400);
  const db=createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}});
+ if(body.action==="compose"){
+   const {data:claim,error:ce}=await db.rpc("cerebro_media_claim_composite_v0",{
+     p_job_id:body.job_id,p_token:body.nonce});
+   if(ce||claim?.ok!==true)return reply({ok:false,code:"COMPOSITOR_AUTH_DENIED"},403);
+   try{
+     const {data:blob,error:se}=await db.storage.from(BUCKET).download(claim.source_path);
+     if(se||!blob)return reply({ok:false,code:"SOURCE_PHOTO_MISSING"},500);
+     const originalBytes=new Uint8Array(await blob.arrayBuffer());
+     if(!isPng(originalBytes)||await sha(originalBytes)!==claim.source_sha256)
+       return reply({ok:false,code:"SOURCE_PROVENANCE_FAILED"},500);
+     const LOGO_URL="https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png";
+     const FONT_URL="https://raw.githubusercontent.com/google/fonts/main/ofl/inter/Inter%5Bopsz%2Cwght%5D.ttf";
+     const [logoResponse,fontResponse]=await Promise.all([
+       fetch(LOGO_URL,{redirect:"error",signal:AbortSignal.timeout(18000)}),
+       fetch(FONT_URL,{redirect:"error",signal:AbortSignal.timeout(18000)})
+     ]);
+     if(!logoResponse.ok||!fontResponse.ok)
+       return reply({ok:false,code:"OFFICIAL_ASSETS_UNAVAILABLE",
+         logo_status:logoResponse.status,font_status:fontResponse.status},502);
+     const logoBytes=new Uint8Array(await logoResponse.arrayBuffer());
+     const fontBytes=new Uint8Array(await fontResponse.arrayBuffer());
+     if(logoBytes.length<1000||logoBytes.length>4000000||
+       fontBytes.length<50000||fontBytes.length>2000000)
+       return reply({ok:false,code:"BRAND_ASSET_INVALID"},500);
+     const photo=(await Image.decode(originalBytes)).cover(1080,1080);
+     const logo=(await Image.decode(logoBytes)).contain(355,110);
+     const white=Image.rgbaToColor(255,255,255,255);
+     const orange=Image.rgbaToColor(255,95,0,255);
+     const purple=Image.rgbaToColor(135,0,100,255);
+     photo.drawBox(0,0,1080,133,white);
+     photo.drawBox(0,708,1080,372,orange);
+     photo.drawBox(0,706,1080,5,purple);
+     photo.composite(logo,{x:50,y:Math.max(5,Math.round((133-logo.height)/2))});
+     const title=await Image.renderText(fontBytes,71,
+       "ANTES DE RESERVAR,\nHAZ NÚMEROS",{
+          color:white,style:{variations:{weight:800}}});
+     const subtitle=await Image.renderText(fontBytes,32,
+       "Una buena compra empieza antes de firmar",{color:white});
+     const cta=await Image.renderText(fontBytes,28,
+       "Solicita una revisión antes de comprometerte",{color:white});
+     if(title.width>970||subtitle.width>970||cta.width>970||
+       title.height>188)return reply({ok:false,code:"TEXT_SAFE_ZONE_OVERFLOW"},500);
+     photo.composite(title,{x:55,y:750});
+     photo.composite(subtitle,{x:55,y:945});
+     photo.composite(cta,{x:55,y:1019});
+     const branded=await photo.encode({compression:5});
+     if(!isPng(branded))return reply({ok:false,code:"COMPOSITOR_OUTPUT_INVALID"},500);
+     const brandedHash=await sha(branded);
+     const outPath="fact001/preprod/openai/"+body.job_id+"/branded.png";
+     const {error:uploadError}=await db.storage.from(BUCKET).upload(
+         outPath,branded,{contentType:"image/png",upsert:false,cacheControl:"0"});
+     if(uploadError)return reply({ok:false,code:"BRAND_STORAGE_FAILED"},500);
+     const {data:committed,error:commitError}=await db.rpc(
+       "cerebro_media_complete_composite_v0",{
+       p_job_id:body.job_id,p_hash:brandedHash,p_bytes:branded.length});
+     if(commitError||committed?.ok!==true)return reply({ok:false,code:"BRAND_MANIFEST_FAILED"},500);
+     return reply({ok:true,status:"VISUAL_QA_PENDING",
+       job_id:body.job_id,brand_compositor:"FACT001_IMAGESCRIPT_V0",
+       source:"VERIFIED_FACT001_OPENAI_IMAGE",official_logo:"REAL_FIRST_PARTY_PNG",
+       sha256:brandedHash,storage_bucket:BUCKET,storage_path:outPath,
+       bytes:branded.length,provider_calls:0,publish_authorized:false});
+   }catch{
+     return reply({ok:false,code:"COMPOSITOR_FAILED_NO_PROVIDER_RETRY"},500);
+   }
+ }
  if(body.action==="probe"){
    const {data,error}=await db.rpc("cerebro_media_claim_invocation_v0",{
     p_job_id:body.job_id,p_token:body.nonce,p_purpose:"PROBE"});
@@ -60,7 +126,9 @@ Deno.serve(async(req:Request)=>{
      service_storage_ready:true,api_called:false,cost_incurred:false,publish_authorized:false});
  }
  if(body.action==="preview"||body.action==="preview_bytes"){
-   const {data:claim,error}=await db.rpc("cerebro_media_claim_preview_v0",{
+   const previewRPC=(body.variant==="branded"&&body.action==="preview_bytes")?
+     "cerebro_media_claim_branded_preview_v0":"cerebro_media_claim_preview_v0";
+   const {data:claim,error}=await db.rpc(previewRPC,{
      p_job_id:body.job_id,p_token:body.nonce
    });
    if(error||claim?.ok!==true)return reply({ok:false,code:"PREVIEW_AUTH_DENIED"},403);
@@ -73,7 +141,8 @@ Deno.serve(async(req:Request)=>{
      let binary="";for(let i=0;i<bytes.length;i+=8192){
        binary+=String.fromCharCode(...bytes.subarray(i,i+8192));
      }
-     return reply({ok:true,status:"VERIFIED_REAL_FACT001_IMAGE",
+     return reply({ok:true,status:body.variant==="branded"?
+      "VERIFIED_REAL_FACT001_BRANDED_CANDIDATE":"VERIFIED_REAL_FACT001_IMAGE",
        job_id:body.job_id,model:MODEL,sha256:claim.sha256,
        filename:"cerebro_fact001_primera_imagen.png",
        mime:"image/png",bytes:bytes.length,
