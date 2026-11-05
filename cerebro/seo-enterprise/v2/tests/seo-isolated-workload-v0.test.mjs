@@ -39,3 +39,34 @@ test('GitHub provider failures, cross-run artifacts and preceding failed jobs ar
  await assert.rejects(()=>verifyIsolatedWorkload({env:base,token,fetchImpl:fetcher({...run,path:'other.yml'}),previous_jobs:[prev]}),/RUN_UNTRUSTED/);
  await assert.rejects(()=>verifyIsolatedWorkload({env:base,token,fetchImpl:async()=>{throw Error('secret-not-for-logs')},previous_jobs:[prev]}),/PROVIDER_UNAVAILABLE/);
 });
+
+test('bounded provider propagation delay does not falsely reject a valid running job',async()=>{
+ let checks=0,pauses=0;
+ const delayed=async(url,opts)=>{
+  assert.equal(opts.method,'GET');
+  if(!url.includes('/jobs?'))return {ok:true,json:async()=>run};
+  checks++;
+  const j=checks<3?{jobs:jobs.jobs.map(x=>x.name===base.GITHUB_JOB?
+   {...x,status:'queued',conclusion:null}:x)}:jobs;
+  return {ok:true,json:async()=>j};
+ };
+ const result=await verifyIsolatedWorkload({env:base,token,fetchImpl:delayed,
+  previous_jobs:[prev],pause:async()=>{pauses++}});
+ assert.equal(result.status,'SEPARATE_GITHUB_JOB_PROVIDER_VERIFIED');
+ assert.equal(result.job_checks_attempted,3);
+ assert.equal(pauses,2);
+ assert.equal(result.independent_agent_iam_credentials_verified,false);
+});
+test('persistently queued or ambiguous job never passes after bounded retries',async()=>{
+ let count=0;
+ const queued=async url=>({ok:true,json:async()=>url.includes('/jobs?')?(count++,{
+  jobs:jobs.jobs.map(x=>x.name===base.GITHUB_JOB?{...x,status:'queued',conclusion:null}:x)
+ }):run});
+ await assert.rejects(()=>verifyIsolatedWorkload({env:base,token,fetchImpl:queued,
+  previous_jobs:[prev],pause:async()=>{}}),/OWN_JOB_UNTRUSTED/);
+ assert.equal(count,5);
+ const ambiguous=async url=>({ok:true,json:async()=>url.includes('/jobs?')?
+  {jobs:[...jobs.jobs,jobs.jobs[1]]}:run});
+ await assert.rejects(()=>verifyIsolatedWorkload({env:base,token,fetchImpl:ambiguous,
+  previous_jobs:[prev],pause:async()=>{}}),/OWN_JOB_AMBIGUOUS/);
+});

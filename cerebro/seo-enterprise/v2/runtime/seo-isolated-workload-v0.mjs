@@ -13,7 +13,7 @@ export const JOB_ROLE=Object.freeze({
 const fail=code=>{throw Error('SEO_ISOLATED_WORKLOAD_'+code)};
 const number=s=>typeof s==='string'&&/^[1-9][0-9]{0,14}$/.test(s)?Number(s):NaN;
 function guardInt(n){return Number.isSafeInteger(n)&&n>0}
-export async function verifyIsolatedWorkload({env,token,fetchImpl=globalThis.fetch,previous_jobs=[]}={}){
+export async function verifyIsolatedWorkload({env,token,fetchImpl=globalThis.fetch,pause=ms=>new Promise(r=>setTimeout(r,ms)),previous_jobs=[]}={}){
  if(!env||env.GITHUB_ACTIONS!=='true'||env.GITHUB_REPOSITORY!==REPO||
     env.GITHUB_EVENT_NAME!=='pull_request'||env.GITHUB_HEAD_REF!==BRANCH)fail('CONTEXT_DENIED');
  if(!Object.hasOwn(JOB_ROLE,env.GITHUB_JOB))fail('ROLE_JOB_NOT_ALLOWED');
@@ -36,11 +36,21 @@ export async function verifyIsolatedWorkload({env,token,fetchImpl=globalThis.fet
    run.event!=='pull_request'||run.head_branch!==BRANCH||run.run_attempt!==attempt||
    !/^[0-9a-f]{40}$/.test(run.head_sha||''))fail('RUN_UNTRUSTED');
  if(env.SEO_EXPECTED_HEAD_SHA&&env.SEO_EXPECTED_HEAD_SHA!==run.head_sha)fail('HEAD_SHA_MISMATCH');
- const jobs=await ask('/actions/runs/'+runId+'/jobs?per_page=100');
- if(!Array.isArray(jobs.jobs))fail('JOB_LIST_INVALID');
- const own=jobs.jobs.filter(j=>j.name===env.GITHUB_JOB&&j.run_id===runId);
- if(own.length!==1||!guardInt(own[0].id)||!['in_progress','completed'].includes(own[0].status)||
-    (own[0].conclusion&&own[0].conclusion!=='success'))fail('OWN_JOB_UNTRUSTED');
+ let jobs=null,own=[],job_checks_attempted=0;
+ for(let i=0;i<5;i++){
+  jobs=await ask('/actions/runs/'+runId+'/jobs?per_page=100');
+  job_checks_attempted++;
+  if(!Array.isArray(jobs.jobs))fail('JOB_LIST_INVALID');
+  own=jobs.jobs.filter(j=>j.name===env.GITHUB_JOB&&j.run_id===runId);
+  if(own.length>1)fail('OWN_JOB_AMBIGUOUS');
+  if(own.length===1&&own[0].conclusion&&own[0].conclusion!=='success')
+   fail('OWN_JOB_PREVIOUS_FAILURE');
+  if(own.length===1&&guardInt(own[0].id)&&
+    ['in_progress','completed'].includes(own[0].status))break;
+  if(i<4)await pause(250*(i+1));
+ }
+ if(own.length!==1||!guardInt(own[0].id)||!['in_progress','completed'].includes(own[0].status))
+  fail('OWN_JOB_UNTRUSTED');
  const priorIds=new Set();
  for(const prev of previous_jobs){
   if(!Object.hasOwn(JOB_ROLE,prev.job_name)||prev.job_name===env.GITHUB_JOB||
@@ -56,7 +66,7 @@ export async function verifyIsolatedWorkload({env,token,fetchImpl=globalThis.fet
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
   repository:REPO,workflow:WORKFLOW,branch:BRANCH,head_sha:run.head_sha,
   run_id:runId,run_attempt:attempt,job_name:env.GITHUB_JOB,
-  github_job_id:own[0].id,role_id:role.role_id,role_scope:role.scope,
+  github_job_id:own[0].id,job_checks_attempted,role_id:role.role_id,role_scope:role.scope,
   verified_previous_job_count:priorIds.size,
   provider_authenticated_api_read:true,job_isolation_by_github_job_id:true,
   own_token_valid_for_provider_read:true,token_value_saved:false,
