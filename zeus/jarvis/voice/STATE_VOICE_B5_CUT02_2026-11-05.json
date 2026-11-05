@@ -1,0 +1,105 @@
+{
+  "schema": "zeus.jarvis.voice.b5.cut.state.v1",
+  "date": "2026-11-05",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "block": "B5",
+  "cut": "VOICE_INTERFACE_CUT02",
+  "status": "LAB_CONTRACT_AND_BROWSER_DELIVERY_TESTED_DRAFT_NO_DEPLOYMENT",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b10-voice-interface-lab-v0-20261105",
+  "pr": 24,
+  "pr_base": 20,
+  "branch_head_code_tested": "73129b3426b2d8373b2ae8fa0ed90b022aaecfd2",
+  "approved_voice": {
+    "model_provider": "vidIQ MCP",
+    "provider_voice_id": "cfkJwJs7cjrVgVLm3yvM",
+    "preset": "MAS_CLARA",
+    "rate": 1.1,
+    "pitch_semitones": 0.6,
+    "master_v1_preserved": true,
+    "original_audio_drive_backup": true,
+    "model_weights_exported": false
+  },
+  "legacy": {
+    "ana_app_preserved": true,
+    "cerebro_browser_speech_synthesis_untouched": true,
+    "app_crm_supabase_prod_modified": false,
+    "main_modified": false
+  },
+  "cuts": {
+    "CUT01": "LAB surface identity for Jarvis, Operativa, Neuronal, Navegador and Legacy V0",
+    "CUT02": "LAB contract server-only authenticated synthesize+getAudio, browser playback cancellation, route candidate; no deployed endpoint"
+  },
+  "new_modules": [
+    "zeus/jarvis/core/jarvis-b5-v2-tts-output-port.mjs",
+    "zeus/jarvis/core/jarvis-b5-v2-tts-output-port.test.mjs",
+    "src/jarvisV2AudioDeliveryLab.ts",
+    "zeus/jarvis/core/jarvis-b5-v2-browser-audio.test.mjs",
+    "zeus/jarvis/core/jarvis-b5-v2-voice-http-lab.mjs",
+    "zeus/jarvis/core/jarvis-b5-v2-voice-http-lab.test.mjs"
+  ],
+  "security_policy": [
+    "EXACT_OWNER_ROOT_SESSION_AND_TENANT",
+    "B3_AUTHORIZATION_REQUIRED",
+    "VOICE_CONSENT_REQUIRED",
+    "VOICE_V2_ENABLED_LAB_ONLY",
+    "PRIVATE_AUDIO_REF_NOT_URL",
+    "NO_SENSITIVE_TEXT",
+    "EXTERNAL_PRIVACY_CHECK",
+    "ATOMIC_VERIFIED_PREPAID_CREDITS_RESERVATION",
+    "AUDIT_BEFORE_PROVIDER",
+    "AUDIT_AND_ACCOUNTING_AFTER_PROVIDER",
+    "FAIL_CLOSED_WHEN_UNAVAILABLE"
+  ],
+  "verified_runs": [
+    {
+      "workflow": "JARVIS Universal Core LAB Tests",
+      "run_id": 42085148181,
+      "status": "success",
+      "tests_passed": 588,
+      "tests_failed": 0
+    },
+    {
+      "workflow": "ZEUS JARVIS B7 Logical Multiagent LAB",
+      "run_id": 42085147919,
+      "status": "success"
+    },
+    {
+      "workflow": "CEREBRO Governed Main Integration V0",
+      "run_id": 42085147860,
+      "status": "success",
+      "production_deployment": "SKIPPED"
+    }
+  ],
+  "infrastructure": {
+    "new_servers": 0,
+    "new_subscriptions": 0,
+    "provider_synthesis_calls_performed": 0,
+    "provider_credits_consumed_by_this_cut": 0,
+    "prod_functions_deployed": false,
+    "b3_b4_flags_changed": false
+  },
+  "gates_open": [
+    "VIDIQ_MCP_SERVER_KEY_VAULT_AND_B3_OWNER_BINDING",
+    "VERIFIED_VIDIQ_PROVIDER_ADAPTER_MCP_AND_CREDITS",
+    "AUDIO_TEMP_URL_FETCH_AND_SIGNED_PRIVATE_STORE",
+    "ACCURATE_1_10X_0_6SEMITONE_RENDERING",
+    "REAL_E2E_BROWSER_MIC_INTERRUPT_AND_PLAYBACK",
+    "AUTHORIZED_UI_GATEWAY_ENDPOINT_WIRING",
+    "COST_FINOPS_REAL_CONCILIATION",
+    "INDEPENDENT_B10_CERTIFICATION"
+  ],
+  "next_block": "B5_CUT03_PROVIDER_AND_GATEWAY_ACTUAL_LAB_E2E",
+  "rollback": "CLOSE_DRAFT_PR24_WITHOUT_MERGING; legacy voices and app remain intact",
+  "operating_status": {
+    "provider_adapter_connected": false,
+    "backend_deployed": false,
+    "frontend_audio_transport_wired": false,
+    "audio_generated_from_dynamic_text": false,
+    "voice_active_in_real_console": false,
+    "prod_authorized": false
+  }
+}
