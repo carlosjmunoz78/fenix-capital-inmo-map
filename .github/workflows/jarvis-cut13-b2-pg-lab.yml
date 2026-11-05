@@ -1,0 +1,28 @@
+name: JARVIS CUT13 B2 PostgreSQL LAB QA
+on:
+  push:
+    branches:
+      - cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105
+    paths:
+      - 'zeus/jarvis/core/jarvis-b2-hmac-registry*'
+      - 'zeus/jarvis/core/jarvis-b2-postgres-lookup*'
+      - '.github/workflows/jarvis-cut13-b2-pg-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  b2-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate syntax
+        run: |
+          node --check zeus/jarvis/core/jarvis-b2-hmac-registry.mjs
+          node --check zeus/jarvis/core/jarvis-b2-postgres-lookup.mjs
+      - name: Run LAB identity tests (mock PostgreSQL, no PROD connectivity)
+        run: |
+          node --test zeus/jarvis/core/jarvis-b2-hmac-registry.test.mjs zeus/jarvis/core/jarvis-b2-postgres-lookup.test.mjs
