@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4.157.0/config-schema.json",
+  "name": "cerebro-jarvis-lab-cut21",
+  "main": "./worker-off.mjs",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": false,
+  "routes": [],
+  "observability": {
+    "enabled": false
+  },
+  "d1_databases": [
+    {
+      "binding": "JARVIS_LAB_DB",
+      "database_name": "cerebro-jarvis-lab-cut21",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "preview_database_id": "jarvis-cut21-local"
+    }
+  ]
+}
