@@ -1,0 +1,87 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-06",
+  "cut": "CUT27",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT27",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "certified_code_sha": "0c078a51e6e84eb08f9899b6b41234d37c80ad50",
+  "ci": {
+    "core": {
+      "run_id": 42132847739,
+      "passed": 691,
+      "failed": 0,
+      "status": "SUCCESS"
+    },
+    "wrangler_local": {
+      "run_id": 42132847612,
+      "status": "SUCCESS",
+      "scope": "LOCAL_ONLY"
+    },
+    "b4": {
+      "run_id": 42132847610,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42132847642,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42132847633,
+      "status": "SUCCESS",
+      "promotion": "NOT_RUN"
+    }
+  },
+  "cloudflare_readonly": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "plan": "Workers Free, previously verified",
+    "databases_observed": 1,
+    "existing_db": {
+      "name": "cerebro-jarvis-lab-cut21",
+      "id": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+      "jurisdiction": null,
+      "mutated": false
+    },
+    "new_eu_db": {
+      "name": "cerebro-jarvis-lab-eu",
+      "created": false,
+      "jurisdiction_expected": "eu"
+    },
+    "existing_workers_untouched": true
+  },
+  "completed": [
+    "CUT27 Cloudflare official REST D1 operator: inspect GET-only default, create by explicit mode+confirmation only",
+    "Preflight rejects existing wrong jurisdiction/old UUID, wrong account, duplicates, missing Free capacity metadata",
+    "POST one attempt only with jurisdiction EU and read replication disabled; independent GET readback",
+    "No automatic retry/deletion if POST ambiguous; no secret/request body/errors returned",
+    "Protected cloud operator CLI without token on command line, requires secure short-lived token in environment",
+    "18 new Node tests, 691 total PASS, five workflows SUCCESS",
+    "Cloudflare D1 create form opened in authenticated Opera browser and Specify Jurisdiction option confirmed"
+  ],
+  "current_blocker": "No write-capable Cloudflare browser connector in this Chat mode, and no dedicated Cloudflare D1 token in an approved vault. Remote EU database has NOT been created.",
+  "pending": [
+    "Physical Cloudflare D1 EU creation",
+    "Cloudflare scoped token via secure store or Work browser control",
+    "New D1 authenticated readback, remote migration 0001..0005, export and independent EU restore",
+    "Real OWNER_ROOT, Vault, B3 grants, persistent 2-device B2 sessions and audit",
+    "Gateway live LAB with quotas and edge rate limit, OLD vs NEW, B10 independent"
+  ],
+  "safety": {
+    "main_prod_app_crm_dns_ana_trading_supabase_untouched": true,
+    "cloudflare_existing_d1_and_workers_untouched": true,
+    "no_deploy": true,
+    "subscription_cost_added_eur": 0,
+    "secret_values_exposed": false,
+    "ci_usage_cost": "NOT_VERIFIED"
+  },
+  "runbook": "zeus/jarvis/CUT27_EU_D1_OPERATOR_RUNBOOK_2026-11-06.md",
+  "rollback": "Revert CUT27 commits only in PR25 DRAFT; no remote Cloudflare mutation to roll back.",
+  "next_block": "Use Cloudflare account in Work mode for write-capable browser, create cerebro-jarvis-lab-eu specifying EU jurisdiction, or obtain a narrowly-scoped D1 Write token in approved secure cloud environment and run CUT27 one-time tool; verify independent readback before migrations."
+}
