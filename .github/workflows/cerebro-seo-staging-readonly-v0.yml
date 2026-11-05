@@ -73,6 +73,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - name: Verify worker job and execute durable synthetic LAB fixture
@@ -100,6 +101,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - name: Download successful worker evidence
@@ -133,6 +135,7 @@ jobs:
     timeout-minutes: 3
     permissions:
       contents: read
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - name: Download signed worker evidence
