@@ -8,7 +8,7 @@
   "department_id": "PRODUCTORA_AUDIOVISUAL",
   "environment": "PREPROD",
   "version": "v0",
-  "status": "PARALLEL_IMPL_CI_TO_VERIFY_MEDIA_PAID_POLICY_NO_LIVE_AI_GENERATION",
+  "status": "PREPROD_MOCK_CI_GREEN_LIVE_BLOCKED_WORKER_CREDENTIAL_NOT_CONNECTED",
   "relations": {
     "existing_queue": "cerebro_creative_job_v1",
     "existing_dispatcher": "cerebro-creative-dispatch-v1",
@@ -156,7 +156,10 @@
     "NATIVE_FACEBOOK_PROOF",
     "MEDIA_PROVIDER_SELECTION_CI_GREEN",
     "CAPPED_AUTHORIZED_MEDIA_BUDGET_NOT_ZERO_EUR_RULE",
-    "BUDGET_RESERVATION_AND_COST_RECONCILIATION"
+    "BUDGET_RESERVATION_AND_COST_RECONCILIATION",
+    "SECURE_OPENAI_WORKER_CREDENTIAL_BINDING",
+    "ATOMIC_MEDIA_BUDGET_LEDGER",
+    "ONE_REAL_PROVIDER_IMAGE_REQUEST"
   ],
   "evidence": {
     "workflow": "CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend",
@@ -165,6 +168,24 @@
     "paid_api_calls": "NONE_VERIFIED_IN_THIS_NEW_BRIDGE",
     "live_image_from_cerebro": "NOT_YET",
     "video_paid_api": "NOT_CONTRACTED",
-    "image_provider_policy": "PAID_ALLOWED_BUDGET_GATED"
+    "image_provider_policy": "PAID_ALLOWED_BUDGET_GATED",
+    "credential_presence_check": {
+      "checked_at": "2026-11-05",
+      "check_source": "GitHub Actions 42011070119 - verify OPENAI_API_KEY secret presence without value disclosure",
+      "in_git_worker": "NOT_PRESENT",
+      "in_supabase_vault": "NAME_PRESENT_ENCRYPTED_VALUE_NOT_READ",
+      "actual_api_request_from_fact001": "NOT_EXECUTED",
+      "action_required": "CONNECT_WORKER_TO_EXISTING_SECURE_OPENAI_CREDENTIAL_OR_RUN_APPROVED_EDGE_WORKER_WITH_SERVER_SIDE_BUDGET",
+      "known_password_values_exposed": false
+    },
+    "compiled_prompt_provenance": {
+      "workflow_run_id": 42011070119,
+      "prompt_sha256": "68d1a98f2f7a27f11f47a362fa18d48e63f93363b57eed7b7b5b09df6f110489",
+      "request_key": "facebook-recovery-2026-11-09-fb-rcv-001",
+      "origin": "FACT001_STRUCTURED_WORK_ORDER",
+      "source_file": "cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json",
+      "generated_prompt_not_manually_written_in_chat": true,
+      "provider_called": false
+    }
   }
 }
