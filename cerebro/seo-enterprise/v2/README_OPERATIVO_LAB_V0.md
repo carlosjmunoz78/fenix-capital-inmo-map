@@ -55,3 +55,19 @@ El contrato cubre autores, agentes, subagentes, responsables, supervisores, QA, 
 ## Rollback
 
 Todo cambio de esta PR es aditivo en \`cerebro/seo-enterprise/v2/\`; no despliega. Rollback de código: revertir los commits nuevos de la rama tras comprobar las referencias, sin borrar la historia ni modificar producción. Rollback físico WordPress no aplica porque no se ha realizado ninguna escritura.
+
+
+## Actualización de evidencia · 2026-11-05 · CI y STAGING
+
+- **CI validado**: 37 tests de contrato y lógica SEO v1/v2, 37 PASS / 0 FAIL (GitHub Actions `41938566584`, commit `9beca1387d63a36b6b0437201aee79b7948c7278`).
+- **STAGING físico**: lectura HTTP 200, `noindex` confirmado y 0 escrituras. Misión transversal D09 → D15 → D31 de solo lectura, 6/6 tests del workflow de inspección anterior: `41938001107`.
+- **Ocho observaciones adicionales de una única portada**: D11, D12, D17, D21, D23, D24, D25, D26. Fuente física `41938332022` (SUCCESS). No equivalen a departamentos desplegados ni a pruebas de GSC, GBP, PageSpeed, CRM, consentimiento, Core Web Vitals de campo o índice de Google.
+- **Métricas observadas en la portada STAGING**: 176 enlaces internos (ocurrencias, no URLs únicas), 12 H2, 1 bloque JSON-LD parseable (sin certificar tipos), mención de Córdoba, HTML 237226 bytes, 8 imágenes, 2 elementos `form` (método GET observado), 0 imágenes sin atributo alt y 1 con alt vacío (requiere valoración contextual). **No deducir una incidencia sin evaluación de contexto**.
+- **D05/D08**: cálculo de candidatas de anticanibalización en fixtures de LAB, nunca datos GSC verificados ni redirecciones efectuadas.
+- **Tablero actualizado**: `v2/competency-coverage-and-board-v0.json`: 13/32 con evidencia **PARCIAL**, 19/32 **DEFINIDO**, **0/32 LISTO**, y **0 identidades de agentes/subagentes V2 certificadas como activas**.
+- **Bloqueos de conectividad**: el conector WordPress de STAGING reporta error interno; Opera no responde en el plazo y GSC Wizard exige suscripción (NO CONTRATAR). El workflow CI propio permite lecturas públicas sin depender de esas rutas, pero no permite cambios autenticados en WordPress.
+- **Seguridad**: `main`, PROD WordPress, App, CRM, Supabase, datos de clientes, Trading y presupuesto siguen intactos. Toda la ejecución nueva se limita a la rama DRAFT de PR #22 y a HTTP GET públicos.
+
+### Siguiente bloque operativo sin duplicar sistemas
+
+Auditar identidades y permisos efectivos de `cerebro/registry/role-agent-registry.v1.json`, el router de trabajo compartido y los bindings de FACT-001; conectar los ejecutores LAB a roles IAM verificables con auditoría durable y supervisión independiente real; después completar fuentes GSC/GA4 autorizadas y pruebas recuperables de STAGING. No subir estado `LISTO` por tests unitarios ni datos sintéticos. Antes de cualquier publicación, snapshot, aislamiento, OLD vs NEW, consentimientos, CRM E2E y rollback físico.
