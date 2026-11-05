@@ -1,0 +1,17 @@
+{
+  "schema_version":"0.1.0",
+  "company_id":"fenix",
+  "engine_id":"PC-001",
+  "environment":"PREPROD",
+  "version":"pc001-owner-issuer-v0",
+  "capabilities":["SERVICE_HEALTH/READ_HEALTH"],
+  "issuer_mode":"TRUSTED_BACKEND_DEPENDENCIES_REQUIRED",
+  "source":"cerebro/windows/pc-001/issuer-v0/pc001-owner-issuer-v0.mjs",
+  "physical_pc_execution":"NOT_ENABLED",
+  "deployment":"NOT_DEPLOYED",
+  "queue_schema_changes":false,
+  "original_worker_changed":false,
+  "prod_modified":false,
+  "trading_access":false,
+  "additional_subscription_eur":0
+}
