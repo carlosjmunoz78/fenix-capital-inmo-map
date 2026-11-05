@@ -23,7 +23,8 @@ const fresh=t=>{const d=fs.mkdtempSync(path.join(os.tmpdir(),'cerebro-universal-
 test('universal rule covers all agents, subagents and leadership including judges, guardians and meta supervisors',()=>{
  const must=['AGENT','SUBAGENT','DIRECTOR','DEPARTMENT_HEAD','SUPERVISOR','JUDGE',
   'TRIBUNAL','GUARDIAN','META_SUPERVISOR','QA_AGENT','INDEPENDENT_EVALUATOR','AUDITOR'];
- assert.deepEqual([...policy.applies_to].sort(),[...must].sort());
+ const existing=JSON.parse(fs.readFileSync(new URL('../registry/role-agent-registry.v1.json',import.meta.url)));
+ for(const cls of new Set([...must,...existing.roles.map(x=>x.class)]))assert.ok(policy.applies_to.includes(cls),cls);
  for(const cls of must){
   const r=assessUniversalMission(mission(cls,'ROLE_'+cls,1));
   assert.equal(r.subject_class,cls);
