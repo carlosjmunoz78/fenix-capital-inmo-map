@@ -23,6 +23,7 @@ test('repeated failures block a durable JOB-001 task without modifying shared ru
  assert.equal(blocked.job_created,false);
  assert.equal(blocked.gate.state,'SUSPENDED_LAB');
  assert.equal(rt.listForContext(ctx).length,0);
+ assert.equal(blocked.prod_authorized,false);
  assert.throws(()=>guardedEnqueueLab({job_runtime:rt,merit_ledger_path:merit,
  actor_id:'AGENT_BAD',context:{...ctx,environment:'PROD'},task_name:'LAB_READONLY'}),/MERIT_JOB001_PREPROD_ONLY/);
 });
