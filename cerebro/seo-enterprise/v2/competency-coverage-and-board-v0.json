@@ -1351,6 +1351,14 @@
     "provider_oidc_credential_verified": false,
     "each_role_independent_iam_verified": false,
     "real_gsc_credentials_verified": false,
-    "signed_process_proof_run_id": 41982256299
+    "signed_process_proof_run_id": 41982256299,
+    "physically_distinct_github_jobs_verified": 3,
+    "per_role_github_job_ids_verified": true,
+    "upstream_jobs_reverified_by_github_provider": true,
+    "isolated_cross_job_signed_evidence_verified": true,
+    "isolated_cross_job_job001_journal_replay_verified": true,
+    "github_job_isolation_lab_fixture_only": true,
+    "isolated_cross_job_staging_real_site_qa_verified": false,
+    "isolated_jobs_workflow_run_id": 41989528379
   }
 }

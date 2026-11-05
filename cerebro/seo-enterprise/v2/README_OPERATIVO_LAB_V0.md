@@ -100,3 +100,17 @@ Fuente física: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions
 **GATES PENDIENTES:** cuentas/workloads diferenciados y verificación IAM fuerte por actor; evaluación independiente autenticada de juez, supervisor y metaevaluador; publicación WordPress STAGING con backup y rollback físico recuperable; GSC/GA4 de fuente autorizada; formulario/consentimiento/CRM E2E; promoción OLD vs NEW en sitio real; continuidad durable entre ejecuciones de GitHub (el archivo de evidencias del run dura 14 días).
 
 **ESTADO NO INFLADO:** 15/32 PARCIAL, 17/32 DEFINIDO y 0/32 LISTO, cero agentes/subagentes V2 certificados activos. Las seis observaciones hipotecarias de D16 son candidatos documentales; no son seis incumplimientos o afirmaciones falsas verificadas.
+
+## Continuación · 2026-11-05 · Tres trabajos GitHub realmente separados
+
+**HECHO y validado por GitHub:** [run 41989528379](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41989528379), commit `bce7e5b1...`.
+
+El workflow existente incorporó tres jobs aditivos con permisos GitHub `contents:read` + `actions:read`, sin permisos de escritura: `seo-worker-isolated` (job `127118165570`) → `seo-qa-isolated` (`127118220340`) → `seo-tribunal-isolated` (`127118306547`). GitHub confirmó los tres jobs SUCCESS. El revisor comprobó por API el SUCCESS del trabajador y el tribunal volvió a verificar por API los dos jobs predecesores; todos comparten la misma ejecución GitHub y commit y son IDs de job distintos.
+
+Cada fase se ejecutó en un job de GitHub separado, con recibos ED25519 autofirmados, control de procedencia y verificación de huellas. Worker guardó `JOB-001` (journal persistente) en artefacto temporal, QA lo reabrió y recalculó una muestra reproducible desde el mismo código; tribunal comprobó los dos recibos. No se transfirió HTML vivo, ni se accedió a WordPress/CRM/PROD. Los artefactos de Actions caducan a los 14 días; el manifiesto de evidencias se conserva en el repo.
+
+**Pruebas del commit físico:** 65/65 pruebas generales SEO y 36/36 de STAGING, sin fallos. El análisis HTTP real de portada STAGING permanece en el job heredado de solo lectura; el circuito de tres jobs se ha probado **únicamente con contenido sintético** para evitar almacenar datos públicos dinámicos o potenciales secretos.
+
+**POR AUDITAR:** si una identidad autónoma individual de cada agente está autenticada por IAM/PKI/OIDC. Un job de GitHub autenticado es una identidad de workload independiente en Actions, **no** una cuenta IAM autónoma o un subagente certificado. Tampoco se acreditan evaluación de SEO real con tres equipos, GSC, GA4, consentimientos, publicaciones, backup/rollback real de WordPress, ni coste GitHub Actions ilimitado. No se contratan suscripciones, pero los minutos consumidos por Actions dependen del plan existente.
+
+**Estado canónico sin inflación:** 15/32 PARCIAL, 17/32 DEFINIDO, **0/32 LISTO**, 0 agentes/subagentes IAM certificados. Ninguna promoción, autopremio, escritura WordPress ni despliegue PROD.

@@ -4,7 +4,7 @@
   "engine_id": "SEO-001",
   "environment": "PREPROD",
   "version": "0.1.0",
-  "status": "PHYSICAL_WORKLOAD_VERIFIED_ROLE_SCOPES_AND_SIGNED_PROCESSES_IAM_UNVERIFIED",
+  "status": "THREE_DISTINCT_PROVIDER_VERIFIED_GITHUB_JOBS_SIGNED_LAB_HANDOFFS_IAM_NOT_CERTIFIED",
   "runtime_module": "cerebro/runtime/durable-job-runtime-v1.mjs",
   "runtime_engine_id": "JOB-001",
   "factory_engine_id": "FACT-001",
@@ -26,7 +26,22 @@
     "role_signatures_signed_by_external_iam": false,
     "github_actions_token_scope_provider_verified": false,
     "process_receipt_key_trust_boundary": "EPHEMERAL_SELF_SIGNED_WITHIN_SAME_GITHUB_RUNNER",
-    "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41982256299"
+    "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41989528379",
+    "isolated_workflow_run_id": 41989528379,
+    "distinct_github_jobs_provider_verified": true,
+    "isolated_workflow_path": ".github/workflows/cerebro-seo-staging-readonly-v0.yml",
+    "isolated_fixture_source": "SYNTHETIC_LAB_NOT_PHYSICAL_STAGING",
+    "isolated_workload_job_ids": [
+      127118165570,
+      127118220340,
+      127118306547
+    ],
+    "prior_job_success_reverified_by_provider": true,
+    "individual_workload_github_job_id_verified": true,
+    "provider_oidc_verified": false,
+    "individual_agent_account_iam_verified": false,
+    "site_content_cross_job_review_verified": false,
+    "artifact_retention_days": 14
   },
   "roles": [
     {
@@ -42,7 +57,12 @@
       ],
       "identity_verified": false,
       "scope_enforced_on_physical_runner": true,
-      "ed25519_process_receipt_verified": true
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-worker-isolated",
+      "isolated_github_job_id": 127118165570,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
     },
     {
       "role_id": "SEO_D31_QA",
@@ -57,7 +77,12 @@
       ],
       "identity_verified": false,
       "scope_enforced_on_physical_runner": true,
-      "ed25519_process_receipt_verified": true
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-qa-isolated",
+      "isolated_github_job_id": 127118220340,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
     },
     {
       "role_id": "SEO_JUDGE_A",
@@ -71,7 +96,12 @@
       ],
       "identity_verified": false,
       "scope_enforced_on_physical_runner": true,
-      "ed25519_process_receipt_verified": true
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-tribunal-isolated",
+      "isolated_github_job_id": 127118306547,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
     }
   ],
   "governance": {
@@ -84,5 +114,5 @@
     "critical_permissions_granted": false,
     "agent_self_certification": false
   },
-  "operational_definition": "Signed independent OS processes and a verified GitHub Actions job are evidence of bounded execution, not individually authenticated CEREBRO agents. No department release and no live website publishing."
+  "operational_definition": "Three distinct Github Actions jobs and provider-checked read-only job IDs physically worked on one synthetic fixture; receipts were signed and reviewed across jobs. Not three independently provisioned IAM agents. No FULL_READY, WordPress publication, paid AI, or PROD writes."
 }
