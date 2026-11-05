@@ -66,6 +66,31 @@ jobs:
           path: ${{ runner.temp }}/seo-specialist-training/manifest.json
           retention-days: 14
           if-no-files-found: error
+      - name: Checkout preserved V4 source archive from historical branch (read-only)
+        uses: actions/checkout@v4
+        with:
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          ref: cerebro/seo001-staging-audit-v5-20261018
+          path: seo-historical-source
+          persist-credentials: false
+      - name: Join historical V4 URL-copy-image source in LAB without crawling
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-historical-v4"
+          python3 cerebro/seo-enterprise/v2/runtime/seo-historical-web-assets-reader-v1.py \
+            "seo-historical-source/docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip" \
+            "$RUNNER_TEMP/seo-historical-v4/url-image-usage-index.json" \
+            "$RUNNER_TEMP/seo-historical-v4/receipt.json"
+      - name: Retain verified historic URL-image map and receipt (not PROD)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-existing-web-assets-v4-lab
+          path: |
+            ${{ runner.temp }}/seo-historical-v4/url-image-usage-index.json
+            ${{ runner.temp }}/seo-historical-v4/receipt.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Prove read-only official WordPress ingress to ACTGW-001 and JOB-001 (synthetic provider)
         shell: bash
         run: |
