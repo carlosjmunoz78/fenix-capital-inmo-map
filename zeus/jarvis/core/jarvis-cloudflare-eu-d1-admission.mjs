@@ -5,6 +5,7 @@
  * Cloudflare's D1 database JSON uses result.uuid/name/jurisdiction.
  */
 const UUID=/^[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}$/i;
+const ACCOUNT_ID=/^[0-9a-f]{32}$/i;
 const EXISTING_SYNTHETIC_D1='a859fde1-126b-4c40-bc0d-aec2f8839f7b';
 const EXPECTED_NAME='cerebro-jarvis-lab-eu';
 export const CUT23_EU_D1=Object.freeze({
@@ -18,7 +19,7 @@ export function assessCloudflareD1EUResponse({
  apiResponse,accountId,expectedDatabaseId,environment='LAB'
 }={}){
  if(environment!=='LAB')return blocked('LAB_ONLY');
- if(typeof accountId!=='string'||!UUID.test(accountId))
+ if(typeof accountId!=='string'||!ACCOUNT_ID.test(accountId))
   return blocked('ACCOUNT_ID_UNVERIFIED');
  if(typeof expectedDatabaseId!=='string'||!UUID.test(expectedDatabaseId)||
     expectedDatabaseId.toLowerCase()==='00000000-0000-0000-0000-000000000000'||
