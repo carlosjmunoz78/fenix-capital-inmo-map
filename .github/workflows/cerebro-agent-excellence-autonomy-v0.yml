@@ -1,0 +1,27 @@
+name: CEREBRO Agent Excellence Autonomy Policy V0
+on:
+  push:
+    branches: [cerebro/agent-excellence-autonomy-v0-20261105]
+    paths:
+      - 'cerebro/runtime/agent-excellence-autonomy-v0.mjs'
+      - 'cerebro/tests/agent-excellence-autonomy-v0.test.mjs'
+      - '.github/workflows/cerebro-agent-excellence-autonomy-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-agent-excellence-v0-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  deterministic-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static syntax
+        run: node --check cerebro/runtime/agent-excellence-autonomy-v0.mjs
+      - name: Focused tests
+        run: node --test cerebro/tests/agent-excellence-autonomy-v0.test.mjs
