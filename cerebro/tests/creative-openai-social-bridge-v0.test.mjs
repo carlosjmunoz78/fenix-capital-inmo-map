@@ -125,7 +125,7 @@ test('physical AI creative job with injected mock provider generates brand-compo
  const {photo,logo}=await makeSyntheticFixtureImage();
  const approval=approved();
  const request={company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',
-  creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},
+  creative_payload:{scene_provider:'OPENAI_IMAGE',requester_engine_id:'SOC-001',brief:INPUT},
   expected_cost_eur:0.3,ai_spend_approval:approval};
  const job={job_id:'11111111-2222-4333-8444-555555555555',company_id:'fenix',
   engine_id:'FACT-001',environment:'PREPROD',channel:'FACEBOOK',output_type:'SQUARE_POST',request};
@@ -161,7 +161,7 @@ test('real FACT-001 OIDC worker recognizes AI job but terminates in HOLD before 
  try{
   const job={job_id:'11111111-2222-4333-8444-555555555555',lease_id:'11111111-2222-4333-8444-666666666666',
     company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',channel:'FACEBOOK',
-    output_type:'SQUARE_POST',request:{creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},expected_cost_eur:0}};
+    output_type:'SQUARE_POST',request:{creative_payload:{scene_provider:'OPENAI_IMAGE',requester_engine_id:'SOC-001',brief:INPUT},expected_cost_eur:0}};
   const requests=[];
   const r=await runOneCreativeJob({endpoint:'https://example.invalid/creative',
     fetch_impl:async(url,init)=>{
