@@ -1,0 +1,26 @@
+name: CEREBRO PC001 Owner Health PREPROD V1 Contract
+on:
+  push:
+    branches:
+      - cerebro/pc001-owner-issued-health-canary-v0-20261105
+    paths:
+      - 'supabase/functions/cerebro-pc001-health-issuer-preprod-v1/**'
+      - 'cerebro/tests/pc001-owner-atomic-contract-v1.test.mjs'
+      - 'cerebro/tests/pc001-owner-v2-repo-integration.test.mjs'
+      - '.github/workflows/cerebro-pc001-owner-health-v1-ci.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Safe syntax check
+        run: node --check supabase/functions/cerebro-pc001-health-issuer-preprod-v1/core.mjs
+      - name: Canonical V2 + health issuer regression
+        run: node --test cerebro/tests/universal-device-command-envelope-v2.test.mjs cerebro/tests/owner-approval-gate-v1.test.mjs cerebro/tests/pc001-owner-atomic-contract-v1.test.mjs cerebro/tests/pc001-owner-v2-repo-integration.test.mjs
