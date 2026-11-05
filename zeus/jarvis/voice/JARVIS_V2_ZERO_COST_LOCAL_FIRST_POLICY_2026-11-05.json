@@ -1,0 +1,65 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "version": "JARVIS_V2_OSS_LOCAL_FIRST_CANDIDATE",
+  "date": "2026-11-05",
+  "operative_goal": "NO_PER_UTTERANCE_FEES; JARVIS_V2_LOCAL_CLONE_WHERE_COMPUTE_VALIDATED",
+  "voice_profile": {
+    "name": "JARVIS V2 Más clara",
+    "rate": 1.1,
+    "pitch_semitones": 0.6,
+    "reference_audio": "JARVIS1_V2_CLARA_1_10X_MUESTRA_29S.mp3",
+    "reference_location": "CEREBRO / VOICE-001 · JARVIS 1 · MASTER Y BACKUP (Drive)",
+    "master_v1_preserved": true
+  },
+  "engine_candidate": {
+    "family": "ResembleAI/Chatterbox-Multilingual",
+    "model": "Chatterbox-Multilingual-es-es",
+    "language": "es-ES",
+    "license": "MIT",
+    "execution": "SELF_HOSTED_ON_EXISTING_APPROVED_HARDWARE",
+    "model_evaluation": "REQUIRED",
+    "commercial_use_of_voice": "REQUIRES_RIGHTS_CONFIRMATION",
+    "model_archived_unmaintained": "VERIFY_PINNED_VERSION_BEFORE_INSTALL",
+    "reference_audio_license": "USER_PROVIDED_ACTOR_PERMISSION_NOT_YET_DOCUMENTED"
+  },
+  "alternate_candidate": {
+    "family": "OpenVoice V2",
+    "license": "MIT",
+    "language": "es-ES",
+    "execution": "SELF_HOSTED",
+    "evaluation": "ONLY_IF_CHATTERBOX_FAILS"
+  },
+  "voice_provider_routes": {
+    "normal_conversation": [
+      "LOCAL_OSS_CHATTTERBOX_AFTER_TESTS"
+    ],
+    "vidiq": "REFERENCE_AUDIO_ONLY_NO_RUNTIME_SYNTHESIS",
+    "browser_tts": "FREE_FALLBACK_DISTINCT_VOICE_NOT_JARVIS_V2",
+    "unknown": "BLOCK"
+  },
+  "gates": {
+    "voice_reference_physical_backup": "HECHO",
+    "model_binary_downloaded": false,
+    "model_runtime_installed": false,
+    "existing_cpu_gpu_benchmark": false,
+    "voice_similarity_approved": false,
+    "latency_live_approved": false,
+    "b2_b3_auth_connected": false,
+    "console_e2e": false,
+    "prod_authorized": false,
+    "paid_provider_calls_authorized": false
+  },
+  "runtime_controls": {
+    "default_enabled": false,
+    "remote_paid_tts_enabled": false,
+    "allow_auto_topup": false,
+    "new_subscription_eur": 0,
+    "external_tts_calls": 0,
+    "app_ana_unchanged": true
+  },
+  "next_step": "BENCHMARK_LOCAL_OSS_CLONE_WITH_APPROVED_REFERENCE_THEN_GATEWAY_LAB",
+  "rollback": "Delete/revert only this proposed config change; preserve existing PR24, PROD, ANA, V1 master"
+}

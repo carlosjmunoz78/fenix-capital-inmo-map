@@ -1,0 +1,29 @@
+{
+  "schema_version": "1.0.0",
+  "date": "2026-11-05",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "status": "READY_FOR_WINDOWS_HARDWARE_PROBE_NOT_SYNTHESIZED",
+  "voice_target": "JARVIS V2 MAS_CLARA rate=1.10 pitch=+0.6",
+  "master_source_sha256": "2db9951a7b334e93a8bcc2bd80ba360b5560f89b1795e2adef77ee41674bed28",
+  "model": "ResembleAI/chatterbox Multilingual V3 general es; reference audio prompt; not vidIQ model; not dedicated es-es",
+  "model_downloaded": false,
+  "model_inference_performed": false,
+  "external_paid_synthesis_calls": 0,
+  "test_results": {
+    "offline_local_unit_tests": 6,
+    "pass": 6,
+    "fail": 0
+  },
+  "host_evaluation": {
+    "current_container_effective_ram_gib": 4.0,
+    "cuda_available": false,
+    "blocked_reason": "BELOW_RECOMMENDED_MEMORY_AND_NO_MODEL_NETWORK"
+  },
+  "running_on_user_pc": "NOT_VERIFIED",
+  "additional_subscription_eur": 0,
+  "no_repo_audio_upload": true,
+  "next": "Windows one-click hardware probe -> if sufficient, local install/download -> actual new sentence mp3 -> similarity and real-time-factor eval -> Gateway LAB",
+  "rollback": "delete pilot folder and .venv-jarvis-oss; App/ANA/PROD untouched"
+}
