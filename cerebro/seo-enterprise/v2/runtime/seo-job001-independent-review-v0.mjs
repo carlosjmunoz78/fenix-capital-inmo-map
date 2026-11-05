@@ -7,6 +7,7 @@ import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {runStagingReadonlyMission} from './staging-transversal-readonly-v0.mjs';
+import {sealProcessReceipt,verifyProcessReceipt} from './seo-process-signature-v0.mjs';
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 const CTX={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
 const registry=()=>JSON.parse(fs.readFileSync(new URL('../seo-role-workunit-bindings-v0.json',import.meta.url),'utf8'));
@@ -31,9 +32,10 @@ export function independentlyReviewJob({html,headers='',status=200,journal_path,
  if(expected!==job.result.evidence_hash||worker_receipt.findings_count!==replay.editorial.findings.length ||
   worker_receipt.risk_count!==replay.editorial.risk_flags.length)throw Error('EVIDENCE_MISMATCH');
  if(sha(fs.readFileSync(journal_path))!==worker_receipt.job001_journal_sha256)throw Error('JOURNAL_MUTATED_AFTER_WORKER');
+ verifyProcessReceipt({receipt:worker_receipt,expected_role:'SEO_D15_WORKER'});
  const reviewer=bindings.roles.find(x=>x.role_id===reviewer_role_id);
  if(!reviewer.scope.includes('mission:evaluate'))throw Error('QA_SCOPE_DENIED');
- return {status:'INDEPENDENT_QA_PROCESS_VERIFIED_READONLY',job_id:job.job_id,company_id:'fenix',engine_id:'SEO-001',
+ return sealProcessReceipt({role_id:reviewer_role_id,receipt:{status:'INDEPENDENT_QA_PROCESS_VERIFIED_READONLY',job_id:job.job_id,company_id:'fenix',engine_id:'SEO-001',
   environment:'PREPROD',version:'0.1.0',role_id:reviewer_role_id,worker_role_id:job.result.role_ids[0],
   worker_process_pid:worker_receipt.worker_process_pid,reviewer_process_pid:process.pid,
   separate_os_processes_checked:true,source_html_sha256:source_hash,evidence_hash:expected,
@@ -41,7 +43,7 @@ export function independentlyReviewJob({html,headers='',status=200,journal_path,
   observations_count:replay.editorial.findings.length,risk_flags_count:replay.editorial.risk_flags.length,
   content_published:false,identity_cryptographically_attested:false,
   review_status:replay.editorial.risk_flags.length?'RISK_REQUIRES_HUMAN':'EVIDENCE_MATCHED',
-  ready:false,prod_authorized:false,external_writes:0,cost_added_eur:0};
+  ready:false,prod_authorized:false,external_writes:0,cost_added_eur:0}});
 }
 async function main(){
  const [htmlFile,headersFile,statusRaw,journalFile,workerReceiptFile,reviewFile]=process.argv.slice(2);
