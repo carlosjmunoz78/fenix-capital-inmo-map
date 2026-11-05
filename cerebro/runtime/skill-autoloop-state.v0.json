@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-05T00:32:02.105Z",
+  "updated_at": "2026-11-05T00:33:45.660Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -510,7 +510,8 @@
     "github-wide-skills:66ba77320f540d073f82",
     "github-wide-skills:18ce6b01560baf9a31eb",
     "github-wide-skills:9cf4fb4cca34f4cbc1ae",
-    "github-wide-skills:06d0d234a5221f7618fb"
+    "github-wide-skills:06d0d234a5221f7618fb",
+    "github-wide-skills:d7d20ce0b59cc32ff59d"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -817,6 +818,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 41915020111,
       "checkpointed_at": "2026-11-04T21:20:04.363Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:d7d20ce0b59cc32ff59d": {
+      "candidate_id": "github-wide-skills:d7d20ce0b59cc32ff59d",
+      "name": "adversarial-iteration",
+      "human_alias": "Adversarial Iteration",
+      "wrapper_id": "skillwrap:2d6282f34ca93c6ae446",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.51,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "lpalbou/AbstractSkill",
+        "upstream_head_commit": "cbf4764488e0fca51810de2af4337cb5ddaec9b8",
+        "manifest_sha256": "ce6ad6ae97964fb59fa566ec8cc7254622ac7ae1b3b5ed4389f93f4e5f7a1421",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 41942172756,
+      "checkpointed_at": "2026-11-05T00:33:45.660Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -31766,7 +31801,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -31779,7 +31814,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 41926540858,
+  "last_discovery_run_id": 41942172756,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
