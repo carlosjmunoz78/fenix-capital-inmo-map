@@ -74,3 +74,18 @@ Esta sección actualiza expresamente el inventario anterior CUT20. No modifica e
 - Próximo bloqueo: completar creación de D1 `cerebro-jarvis-lab-cut21` con **jurisdicción EU** en el formulario abierto, obtener UUID, vincular únicamente el Worker LAB (OFF), verificar operaciones reales y costes, y sólo después autenticación/cutover B10.
 
 **Autonomía:** PARCIAL_LAB; PROD_NO_GO. Coste contratado adicional: **0**. Consumo de cuotas de GitHub Actions: no cuantificado.
+
+
+## CUT22 · D1 remota existente, jurisdicción y sesiones B2 (2026-11-05)
+
+**EXISTENTE, verificado en Cloudflare autenticado (solo lectura):** base `cerebro-jarvis-lab-cut21` UUID `a859fde1-126b-4c40-bc0d-aec2f8839f7b`, plan Workers Free, sin tablas ni consultas registradas en la observación; región **Europa oriental**, jurisdicción **Ninguno**. No confundir región física y jurisdicción contractual EU: Cloudflare no permite añadir/cambiar la jurisdicción después de crear la base. Por tanto, **NO cargar identidades reales, sesiones, datos personales ni claves en esa base**. Conservarla intacta para pruebas sintéticas; para los datos reales se requiere nueva D1 `cerebro-jarvis-lab-eu` con `jurisdiction=eu`, sin eliminar la existente.
+
+**HECHO / CÓDIGO LAB CUT22:** esquema aditivo `cloudflare-lab/0002_jarvis_d1_session_lab.sql`, solo HMAC session digest y metadatos LAB, sin registro OWNER_ROOT real; adaptador `core/jarvis-d1-session-store.mjs` con SQL parametrizado, comprobación owner/channel/expiry/active/revoked y fail-closed, integrado con el gate B2 de CUT16. Se añade `core/jarvis-cloud-b10-preflight.mjs` para impedir autoaprobar cloud PROD con evidencias incompletas o jurisdicción distinta de EU. D1 no aporta RLS PostgreSQL, exige perímetro B2/B3 real y binding privado.
+
+**CI comprobada** código SHA `2d570119d00546b43ef6579178a79c34fe60f138`: Core `42122529853` **627 PASS/0 FAIL**, Wrangler oficial `42122529826` migración 0002, revocación sintética, export/restauración **LOCAL**; B4 `42122530322`, B7 `42122529931`, Gobernada `42122529886` SUCCESS, sin despliegue ni promoción.
+
+**BLOQUEO real:** En secretos GitHub Actions se observan cuatro nombres y **NO** hay token Cloudflare, sin consultar valores; Opera conectado solo ofrece navegación/lectura. No se puede aplicar esquema o desplegar en Cloudflare desde los conectores actuales. La D1 creada sigue sin tablas. No generar un token en chat ni logs. Es necesario un flujo Cloudflare con capacidad de escritura/Work o credencial específica de LAB guardada en entorno seguro, nunca usar service_role PROD.
+
+**PENDIENTE:** nueva D1 con jurisdicción EU explícita, backup/restore remoto, Worker OFF y Gateway con verificación de sesión real, Vault, B3 permisos mínimos y auditoría, pruebas físicas dos dispositivos y Tribunal B10. **PROD NO_GO**. Sin suscripciones nuevas ni cambios en App/CRM/DNS/main/Trading/Supabase/Workers anteriores.
+
+Referencia Cloudflare oficial: https://developers.cloudflare.com/d1/configuration/data-location/

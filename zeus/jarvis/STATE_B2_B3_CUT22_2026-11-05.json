@@ -1,0 +1,108 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-05",
+  "cut": "CUT22",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT22",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "code_head_certified": "2d570119d00546b43ef6579178a79c34fe60f138",
+  "draft": true,
+  "merged": false,
+  "ci": {
+    "core": {
+      "run_id": 42122529853,
+      "tests": 627,
+      "passed": 627,
+      "failed": 0
+    },
+    "wrangler_official": {
+      "run_id": 42122529826,
+      "result": "SUCCESS",
+      "tests": [
+        "D1 local schema 0001",
+        "D1 session schema 0002",
+        "synthetic session revoked",
+        "independent local export restore verified",
+        "Worker OFF bundle dry-run"
+      ]
+    },
+    "b4": {
+      "run_id": 42122530322,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42122529931,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42122529886,
+      "status": "SUCCESS",
+      "promotion": "NOT_EXECUTED"
+    }
+  },
+  "cloudflare_remote_read_only": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "plan": "FREE",
+    "new_subscription_cost_usd": 0,
+    "d1_id": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+    "d1_name": "cerebro-jarvis-lab-cut21",
+    "d1_exists": true,
+    "region": "EASTERN_EUROPE",
+    "jurisdiction": null,
+    "region_is_not_jurisdiction": true,
+    "tables_at_observation": 0,
+    "storage_kb_at_observation": 0,
+    "schema_applied": false,
+    "remote_read_write_tested": false,
+    "existing_workers": [
+      "fenix-capital-inmo-maps",
+      "fenix-capital-inmo-map"
+    ],
+    "existing_workers_untouched": true
+  },
+  "github_secret_metadata_read_only": {
+    "CLOUDFLARE_TOKEN_JARVIS_PRESENT": false,
+    "repo_secret_names": [
+      "CEREBRO_E2E_USER_JWT",
+      "OPENAI_API_KEY",
+      "PROD_SUPABASE_LEGACY_ANON_JWT",
+      "PROD_SUPABASE_PUBLISHABLE_KEY"
+    ],
+    "note": "Names only. No secret values read, printed or reused."
+  },
+  "done_lab": [
+    "Additive D1 session registry schema, HMAC only, no identities enrolled",
+    "Server-only D1 session lookup for existing B2 revocation gate, owner/channel/LAB/expiry scoped",
+    "Independent B10 preflight blocks when D1 jurisdiction is not EU or real owner/Vault/grants/two devices/remote restore absent",
+    "14 new Node tests, 627/627 PASS and five workflows green",
+    "Wrangler local D1 0002 migration, synthetic revocation and independent restore verified"
+  ],
+  "hold": [
+    "Current D1 EU jurisdiction is NONE; region Eastern Europe is not EU legal jurisdiction guarantee",
+    "Cannot change existing D1 jurisdiction after creation (official Cloudflare docs)",
+    "Authentic owner enrollment, Vault/HMAC, B3 live grants, remote D1 restore, gateway and two-device physical E2E not proved",
+    "No Cloudflare scoped token configured for remote write; Opera connector read/navigation only"
+  ],
+  "next": {
+    "recommendation": "Create SECOND new dedicated D1 cerebro-jarvis-lab-eu with jurisdiction=eu, preserving existing D1 untouched as synthetic sandbox",
+    "blocked_by": "Cloudflare write-capable browser/tool or manual owner creation; Cloudflare scoped API token stored only in protected deploy environment needed for remote schema/tests",
+    "after": "Run remote inventory/schema/backup/independent restore, real OWNER_ROOT and server Vault, B3 MISSION_INSPECT, two devices, B10 tribunal"
+  },
+  "safety": {
+    "prod": "NO_GO",
+    "main_untouched": true,
+    "app_untouched": true,
+    "crm_untouched": true,
+    "supabase_untouched": true,
+    "existing_workers_untouched": true,
+    "dns_untouched": true,
+    "no_new_subscription": true,
+    "secret_values_handled": false,
+    "trading_untouched": true
+  },
+  "rollback": "Revert CUT22 additions in PR DRAFT; no Cloudflare remote schema/data/Worker modified."
+}
