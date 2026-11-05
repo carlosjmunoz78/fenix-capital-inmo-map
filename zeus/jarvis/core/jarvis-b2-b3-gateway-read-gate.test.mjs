@@ -6,6 +6,7 @@ import {createJarvisB3DecisionService} from './jarvis-b3-decision-service.mjs';
 import {createJarvisGatewayHandler} from './jarvis-gateway-handler.mjs';
 import {JarvisUniversalCore,MemoryEventStore} from './jarvis-universal-core.mjs';
 import {createJarvisB2B3GatewayReadGate} from './jarvis-b2-b3-gateway-read-gate.mjs';
+import {createJarvisGatewaySecurityGate} from './jarvis-gateway-security-gate.mjs';
 const URL='https://jarvis.lab.example.test/v1/missions/mission001';
 const mk=(token='signed-owner-session-A',url=URL,method='GET')=>new Request(url,{method,headers:{authorization:'Bearer '+token}});
 async function rig(opts={}){
@@ -125,4 +126,38 @@ test('private mission store failure cannot reach gateway',async()=>{
  store.get=async()=>{throw Error('DB_DOWN')};
  const response=await gate(mk());
  assert.notEqual(response.status,200);assert.equal(calls.handler,0);
+});
+
+test('physical gateway security policy + B2 + B3 + universal core compose in LAB',async()=>{
+ const{gate,calls}=await rig();
+ const perimeter=createJarvisGatewaySecurityGate({
+  handler:gate,enabled:true,
+  allowedOrigins:['https://app.fenixcapital.es'],
+  allowedHosts:['https://jarvis.lab.example.test'],
+  rateLimiter:async()=>true
+ });
+ const safe=new Request(URL,{method:'GET',headers:{
+  authorization:'Bearer signed-owner-session-B',origin:'https://app.fenixcapital.es'
+ }});
+ const ok=await perimeter(safe);
+ assert.equal(ok.status,200);
+ assert.equal((await ok.json()).mission.id,'mission001');
+ assert.equal(calls.handler,1);
+ const forged=new Request(URL,{method:'GET',headers:{
+  authorization:'Bearer signed-owner-session-B',origin:'https://attacker.example'
+ }});
+ assert.equal((await perimeter(forged)).status,403);
+ assert.equal(calls.handler,1);
+ const forgedHost=new Request('https://attacker.example/v1/missions/mission001',{
+  method:'GET',headers:{authorization:'Bearer signed-owner-session-B',
+   origin:'https://app.fenixcapital.es'}
+ });
+ assert.equal((await perimeter(forgedHost)).status,403);
+ assert.equal(calls.handler,1);
+});
+test('outer security gate OFF prohibits even authenticated B2/B3 reads',async()=>{
+ const{gate,calls}=await rig();
+ const perimeter=createJarvisGatewaySecurityGate({handler:gate});
+ assert.equal((await perimeter(mk())).status,503);
+ assert.equal(calls.handler,0);
 });
