@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-05T07:27:03.194Z",
+  "updated_at": "2026-11-05T10:51:42.509Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -512,7 +512,8 @@
     "github-wide-skills:9cf4fb4cca34f4cbc1ae",
     "github-wide-skills:06d0d234a5221f7618fb",
     "github-wide-skills:d7d20ce0b59cc32ff59d",
-    "github-wide-skills:b23dca5d4411bc87b5bf"
+    "github-wide-skills:b23dca5d4411bc87b5bf",
+    "github-wide-skills:c5ae14e5e8f8163bab8c"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -889,6 +890,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 41987250234,
       "checkpointed_at": "2026-11-05T07:27:03.194Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:c5ae14e5e8f8163bab8c": {
+      "candidate_id": "github-wide-skills:c5ae14e5e8f8163bab8c",
+      "name": "search-change-triage",
+      "human_alias": "Search Change Triage",
+      "wrapper_id": "skillwrap:eb09b222c1f19ac5d00e",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 84.91,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "TommyBez/agent-skills-pack-free",
+        "upstream_head_commit": "7d5c7f46563a201005983648f2227d48f9f7983f",
+        "manifest_sha256": "6f88700d59a70f0e5ee9ca823b322f1aec53f8c94f6f50dd4cc9567d46f04801",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42014129241,
+      "checkpointed_at": "2026-11-05T10:51:42.509Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -31851,7 +31886,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 41987250234,
+  "last_discovery_run_id": 42014129241,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
