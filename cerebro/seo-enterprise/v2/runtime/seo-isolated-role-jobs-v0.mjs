@@ -144,7 +144,7 @@ async function main(){
   previous_jobs:predecessors.map(x=>x.workload)});
  let result,output;
  if(stage==='worker'){
-  check(params.length===2,'WORKER_ARGS');
+  check(params.length===1,'WORKER_ARGS');
   output=params[0];fs.mkdirSync(output,{recursive:true});
   result=isolatedWorker({workload,journal_path:path.join(output,'job001.v8')});
   fs.writeFileSync(path.join(output,'worker.json'),JSON.stringify(result,null,2)+'\n');
