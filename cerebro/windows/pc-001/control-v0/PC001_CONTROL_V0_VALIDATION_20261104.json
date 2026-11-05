@@ -5,12 +5,28 @@
   "branch": "cerebro/windows-universal-control-v0-20261104",
   "scope": "fenix/PREPROD/PC-001",
   "component": "PC001-LOCAL-CONTROL-ACCEPTANCE-V0",
-  "tests": {"go_unit_linux": "PASS_3_OF_3", "go_vet_linux": "PASS", "go_vet_windows": "PASS", "go_windows_amd64_test_compile": "PASS", "go_windows_amd64_gui_build": "PASS", "reproducible_build": "PASS_IDENTICAL_SHA256", "windows_physical_e2e": "PENDING", "gateway_e2e": "PENDING", "browser_automation": "NOT_IMPLEMENTED", "second_pc": "PENDING"},
+  "tests": {
+    "go_unit_linux": "PASS_3_OF_3",
+    "go_vet_linux": "PASS",
+    "go_vet_windows": "PASS",
+    "go_windows_amd64_test_compile": "PASS",
+    "go_windows_amd64_gui_build": "PASS",
+    "reproducible_build": "PASS_IDENTICAL_SHA256",
+    "windows_physical_e2e": "PASS_LOCAL_VISIBLE_UI_AND_SYNTHETIC_FILES_FROM_USER_REPORT_2026_11_04_19_07_53Z",
+    "gateway_e2e": "PASS_PRIOR_READ_HEALTH_ONLY_NEW_CONTROL_NOT_CONNECTED",
+    "browser_automation": "PENDING",
+    "second_pc": "PENDING",
+    "remote_desktop_e2e": "PENDING",
+    "device_identity_attestation": "PENDING_LOCAL_NON_ATTESTED"
+  },
   "exe_sha256": "d150f09b0580311d005b40b74c2dabab3f0b7e2b4e34402444add65afb557758",
   "remote_enabled": false,
   "user_consent_required": true,
   "existing_services_touched": false,
   "prod_touched": false,
   "additional_cost_eur": 0,
-  "next_block": "RUN_PHYSICAL_LOCAL_FIXTURE_ON_PC001_AND_READ_REPORT; THEN WRAP_AUTHENTICATED_EXISTING_GATEWAY_HOST_FOR_EXACT_SCOPED_COMMANDS_WITH_LEDGER_AND_KILL_SWITCH"
+  "next_block": "REUSE_EXISTING_GATEWAY_ENVELOPE_V2_AND_POLL_RESULT_TRANSPORT; IMPLEMENT_SCOPED_LOCAL_ACTUATOR_ADAPTER_SIDE_BY_SIDE; PHYSICAL_REMOTE_SYNTHETIC_E2E; NO_PROD",
+  "user_report_sha256": "7873089c3143db81607a3e45613bd2b17bfce2fb5fcadd9578ea29fea2a5f9a9",
+  "physical_proof_path": "cerebro/windows/pc-001/control-v0/PC001_CONTROL_LOCAL_PHYSICAL_REPORT_20261105.json",
+  "status": "PHYSICAL_LOCAL_UI_FILES_PASS_REMOTE_PENDING"
 }
