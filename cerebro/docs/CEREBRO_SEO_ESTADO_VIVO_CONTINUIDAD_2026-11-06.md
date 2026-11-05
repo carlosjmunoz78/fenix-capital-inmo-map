@@ -66,3 +66,22 @@ No se han ejecutado mutaciones a web, App, CRM, Supabase, GSC ni PROD durante es
 - PDF final de trabajo generado y renderizado visualmente: `FENIX_CHECKLIST_VISITA_PISO_CORDOBA_BORRADOR_V1.pdf`, 2 páginas A4, 33 campos editables/interactivos, checksum SHA256 `59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6`. Está accesible como archivo descargable de la conversación, NO como archivo del repositorio o de WordPress.
 - Estado `DRAFT_CONTENT_RENDERED_PDF_NOT_PUBLISHED`. Tipografía de respaldo, revisión visual realizada; falta marca final (Montserrat oficial), QA editorial/legales independiente, permisos de almacenamiento, entrega por email, consentimiento, segmentación B2C y E2E, publicación autorizada.
 - No subirlo a la librería pública de medios ni colocarlo detrás de una captación aparente sin entrega real. No crear otro descargable duplicado.
+
+## CIERRE DEL BLOQUEO P0 FACT-001 · verificado físicamente 2026-11-06
+
+**PREVALECE sobre las menciones anteriores de estado QUEUED y «worker por localizar».**
+
+- Causa: GitHub Actions workflow original `cerebro-creative-job-runner-v1.yml` inactivo, `state=disabled_fork`, demostrado con un nuevo workflow de solo lectura (run **42131416618**, SUCCESS).
+- Ejecución puntal sin duplicar trabajo: workflow de reparación de privilegio limitado (run **42131964855**, SUCCESS) efectuó `enable → workflow_dispatch(ref=main) → disable`, todas respuestas API válidas, final `state=disabled_manually`, GitHub run producido **42131975709**.
+- Ejecución `main` **42131975709**, job 127610581932, terminada `SUCCESS`. Logs del paso `PROD queue worker`: `SUCCEEDED` job existente `c4012f43-c12f-400b-9610-2e5f2e286000`, seguido de `NO_JOB`.
+- Supabase transaccional comprobado: job `SUCCEEDED`, `attempt_count=1/1`, `completed_at=2026-11-05 23:47:47.439397+00`, coste adicional **0 €**, `publish_authorized=false`, artifact privado PNG 1200×630, 43 100 bytes, SHA256 `bb88f1f907d9e2a6a13f984c2ed20707c0c1b4c69cd05a2bdb25ce71b73aac0c`.
+- Archivo inspeccionado visualmente en sesión autenticada de Supabase Storage: texto legible; **HOLD QA de marca** porque el compositor existente declara Arial, no Montserrat, no se aprecia logotipo Fénix oficial y el resultado editorial es demasiado básico. Recepción, causas y ruta de mejora registradas en `cerebro/seo-enterprise/v2/evidence/SEO_MEDIA_PILOT_PRIVATE_QA_2026-11-06.md`, commit `5c8070d5b08e7a6dd1ebf50a4eceb5446c143cd5`.
+- WordPress post 960 sigue publicado sin modificación de su contenido, con imagen destacada anterior `_thumbnail_id=46273`; no adjuntamos PNG nuevo ni lo hacemos público.
+- **Hardening**: el workflow de reparación transitoria fue reemplazado por una versión **SOLO LECTURA** sin `actions:write`. Verificación de estado `disabled_manually` run **42132698062**, job **127612990763**, `SUCCESS` (commit `c26b29104cc16cc82ea466b89177ad7e2c2efd08`). No queda autorización de write en ese observador.
+- Se mantiene disuelto el bloqueo de ejecución **de este trabajo único**; **la autonomía recurrente continúa PENDIENTE**. No reactivar el cron legacy pesado cada 5 minutos sin un comprobador ligero de backlog, cuotas y QA, más PREPROD/OLD-vs-NEW/rollback.
+
+**Próximas acciones sin repetir nada**: (1) mejorar exclusivamente compositor de marca en rama paralela, manteniendo expediente histórico y derechos; (2) E2E de lead magnet 52656 + consentimientos + newsletter B2C; (3) resolver segmentación física B2B Montilla; (4) telemetría GSC Home vs `/inicio/` por ruta sin pago.
+
+**Análisis puntual de canónicos ya verificado**: Home `/` HTTP 200, canonical `/`; `/inicio/` HTTP 200, canonical `/` y metadatos Yoast duplicados. Respeta Home como preferida; mantener ambas sin 301/noindex hasta GSC.
+
+**Estado PR**: DRAFT, sin merge. Sin modificación de App/CRM, sin publicaciones nuevas y sin suscripciones nuevas.
