@@ -11,6 +11,8 @@ import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {ActionGatewayV1} from '../../../gateway/action-gateway-v1.mjs';
 import {getSeoDepartmentKnowledge,listSeoDepartments} from './seo-specialist-workforce-v2.mjs';
 import {verifyPriorSeoJob} from './seo-gh-oidc-workload-v1.mjs';
+import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from './seo-workload-role-lease-v1.mjs';
+import {createSeoCurriculumCases,verifySeoCurriculumCases} from './seo-specialist-exercise-engine-v1.mjs';
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 const ctx={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0'};
@@ -146,6 +148,12 @@ function requireHost(id,role){
 export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={}){
  requireHost(identity,'SEO_CORPUS_WORKER');
  const corpus=loadFrozenSeoCorpus(),expected=expectedSeoRoleEvidence(corpus);
+ // OIDC-verified host has a separate, cryptographically signed, read-only job scope for each competency.
+ // The signing key exists only in memory. These proofs are NOT independent IAM actor credentials.
+ const role_scope_bundle=issueSeoRoleProofs({
+  host:identity,role_work_receipts:expected,corpus_digest:corpus.corpus_digest,now_ms
+ });
+ const training_exercises=createSeoCurriculumCases({corpus,evidence:expected});
  const journal=new DurableJobRuntimeV1({file_path:journal_path});
  let created=0,duplicates=0;
  for(const evidence of expected){
@@ -164,6 +172,12 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
   const result=expected.find(x=>x.role_id===job.payload.role_id);
   if(!result||job.payload.source_snapshot_digest!==corpus.corpus_digest||job.payload.prod_write!==false)
    throw Error('JOB_PAYLOAD_UNTRUSTED');
+  // Require a valid role-specific, non-bearer Ed25519 proof before releasing the work unit.
+  const idx=expected.findIndex(x=>x.role_id===result.role_id);
+  const scope=verifyOneSeoRoleProof({proof:role_scope_bundle.role_proofs[idx],
+   public_key_pem:role_scope_bundle.public_key_pem,evidence:result,
+   host_identity:identity,corpus_digest:corpus.corpus_digest,now_ms:now_ms+i*3});
+  if(scope.decision!=='SIGNED_READONLY_WORK_UNIT_PERMITTED')throw Error('ROLE_SCOPE_DENIED');
   journal.complete({job_id:job.job_id,worker_id:'SEO_CORPUS_READER_VERIFIED_GITHUB_WORKLOAD',
    now_ms:now_ms+i*3+1,result});
   processed++;
@@ -175,6 +189,9 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
   from_frozen_website_inventory:true,new_crawl_performed:false,
   corpus_digest:corpus.corpus_digest,source_parts:corpus.parts,
   documents_considered:corpus.documents.length,role_work_receipts:expected,
+  role_scope_bundle,training_exercises,
+  scoped_role_proofs_verified_at_execution:141,
+  training_exercise_cases_prepared:423,training_exam_attempts_recorded:0,
   host_identity:{github_job_id:identity.github_job_id,github_run_id:identity.github_run_id,
    role:identity.role,job_name:identity.github_job_name,oidc_token_sha256:identity.oidc_token_sha256,
    provider_job_verified:identity.provider_job_verified},
@@ -215,6 +232,12 @@ export function reviewSeoCorpusWork({worker,identity}={}){
  const corpus=loadFrozenSeoCorpus(),expected=expectedSeoRoleEvidence(corpus);
  if(worker.corpus_digest!==corpus.corpus_digest||JSON.stringify(worker.role_work_receipts)!==JSON.stringify(expected))
   throw Error('INDEPENDENT_CORPUS_RECOMPUTE_MISMATCH');
+ const roleScope=verifySeoRoleProofs({bundle:worker.role_scope_bundle,
+  role_work_receipts:expected,corpus_digest:corpus.corpus_digest,host_identity:worker.host_identity});
+ const training=verifySeoCurriculumCases({prepared:worker.training_exercises,corpus,evidence:expected});
+ if(roleScope.verified_roles!==141||training.cases!==423||
+   worker.scoped_role_proofs_verified_at_execution!==141||worker.training_exam_attempts_recorded!==0)
+  throw Error('ROLE_SCOPES_AND_EXERCISES_INVALID');
  return {schema_version:'1.0.0',status:'SEPARATE_GITHUB_QA_RECOMPUTED_141_CORPUS_TASKS',
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0',
   role_count:expected.length,source_digest:corpus.corpus_digest,
@@ -223,6 +246,9 @@ export function reviewSeoCorpusWork({worker,identity}={}){
   worker_oidc_sha256:worker.host_identity.oidc_token_sha256,qa_oidc_sha256:identity.oidc_token_sha256,
   provider_job_identity_verified_for_both:worker.host_identity.provider_job_verified&&identity.provider_job_verified,
   rechecked_every_competency:true,independent_host_job:true,
+  signed_role_scopes_independently_verified:141,
+  practice_cases_independently_verified:423,
+  real_exam_attempts:0,training_passes:0,
   real_agent_iam_certified:false,independent_subject_matter_certification:false,
   site_mutations:0,prod_authorized:false};
 }
@@ -234,13 +260,22 @@ export function tribunalSeoCorpusWork({worker,qa,identity}={}){
   new Set([qa.worker_job_name,qa.qa_job_name,identity.github_job_name]).size!==3||
   new Set([qa.worker_oidc_sha256,qa.qa_oidc_sha256,identity.oidc_token_sha256]).size!==3||
   qa.real_agent_iam_certified!==false||worker.prod_authorized!==false||
-  qa.rechecked_every_competency!==true)throw Error('TRIBUNAL_IDENTITY_OR_EVIDENCE_INVALID');
+  qa.rechecked_every_competency!==true||
+  qa.signed_role_scopes_independently_verified!==141||
+  qa.practice_cases_independently_verified!==423||
+  qa.real_exam_attempts!==0)throw Error('TRIBUNAL_IDENTITY_OR_EVIDENCE_INVALID');
  const corpus=loadFrozenSeoCorpus();
  if(corpus.corpus_digest!==qa.source_digest||JSON.stringify(expectedSeoRoleEvidence(corpus))!==
   JSON.stringify(worker.role_work_receipts))throw Error('TRIBUNAL_SOURCE_DIVERGENCE');
+ verifySeoRoleProofs({bundle:worker.role_scope_bundle,
+  role_work_receipts:worker.role_work_receipts,corpus_digest:corpus.corpus_digest,
+  host_identity:worker.host_identity});
+ verifySeoCurriculumCases({prepared:worker.training_exercises,corpus,evidence:worker.role_work_receipts});
  return {schema_version:'1.0.0',status:'CORPUS_REAL_WORK_VERIFIED_NO_PROD_PROMOTION',
   environment:'PREPROD',company_id:'fenix',engine_id:'SEO-001',
   role_evidence_accepted:141,departments_with_evidence:32,
+  scope_proofs_signed_and_verified:141,training_exercises_prepared_and_verified:423,
+  training_actors_submitted_responses:0,actual_specialist_training_certified:0,
   source_snapshot_pinned:true,wordpress_reaudited:false,
   github_independent_host_job_names:[qa.worker_job_name,qa.qa_job_name,identity.github_job_name],
   github_oidc_host_jobs_verified:3,
@@ -258,21 +293,21 @@ async function main(){
  if(stage==='worker'){
   const [journal,identityFile,out]=args;
   const x=await executeSeoCorpusViaGateway({journal_path:journal,identity:read(identityFile)});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,work_receipts:141,snapshot_docs:200,external_writes:0})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,work_receipts:141,scope_proofs:141,training_cases:423,snapshot_docs:200,external_writes:0})+'\n');
  }else if(stage==='qa'){
   const [workerFile,workerId,qaId,out]=args;
   const env=process.env;
   const prior=read(workerId),own=read(qaId);
   await verifyPriorSeoJob({prior,env});
   const x=reviewSeoCorpusWork({worker:read(workerFile),identity:own});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,checked_roles:141,external_writes:0})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,checked_roles:141,scope_proofs:141,training_cases:423,external_writes:0})+'\n');
  }else if(stage==='tribunal'){
   const [workerFile,qaFile,workerId,qaId,tribunalId,out]=args;
   const env=process.env;
   const ids=[read(workerId),read(qaId)],own=read(tribunalId);
   for(const prior of ids)await verifyPriorSeoJob({prior,env});
   const x=tribunalSeoCorpusWork({worker:read(workerFile),qa:read(qaFile),identity:own});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,departments:32,receipts:141,prod_promotion:false})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,departments:32,receipts:141,training_cases:423,prod_promotion:false})+'\n');
  }else throw Error('INVALID_STAGE');
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))
