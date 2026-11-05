@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {assessCloudflareD1EUResponse,CUT23_EU_D1} from './jarvis-cloudflare-eu-d1-admission.mjs';
+import {assessCloudflareD1EUResponse,CUT23_EU_D1,verifyCloudflareD1EUReadOnly} from './jarvis-cloudflare-eu-d1-admission.mjs';
 const accountId='e39a57e1ac42650ca5a6d5307cf0ac8e';
 const uuid='11111111-2222-4333-8444-555555555555';
 const report=(overrides={})=>({success:true,errors:[],result:{
@@ -54,4 +54,70 @@ test('CUT23 never returns supplied extra fields including credentials',()=>{
  const response=report({secret:'dont-output',token:'dont-output',api_key:'dont-output'});
  const r=assess(response);
  assert.equal(JSON.stringify(r).includes('dont-output'),false);
+});
+
+
+test('CUT23 read-only verifier uses EXACT Cloudflare GET with no redirects or mutations',async()=>{
+ const calls=[];const secret='synthetic-secret-not-live';
+ const fetchImpl=async(url,options)=>{calls.push({url,options});return{
+  status:200,ok:true,text:async()=>JSON.stringify(report())
+ }};
+ const out=await verifyCloudflareD1EUReadOnly({
+  fetchImpl,token:secret,accountId,expectedDatabaseId:uuid
+ });
+ assert.equal(out.accepted,true);assert.equal(out.deployAllowed,false);
+ assert.deepEqual(calls.map(c=>c.url),[
+  'https://api.cloudflare.com/client/v4/accounts/'+accountId+'/d1/database/'+uuid
+ ]);
+ assert.equal(calls[0].options.method,'GET');
+ assert.equal(calls[0].options.redirect,'error');
+ assert.equal(calls[0].options.cache,'no-store');
+ assert.equal(calls[0].options.headers.authorization,'Bearer '+secret);
+ assert.equal(JSON.stringify(out).includes(secret),false);
+});
+test('CUT23 read-only verifier blocks old D1 before using token or network',async()=>{
+ let calls=0;
+ const out=await verifyCloudflareD1EUReadOnly({
+  fetchImpl:async()=>{calls++;throw Error('NEVER_REACH');},
+  token:'synthetic-secret',accountId,
+  expectedDatabaseId:'a859fde1-126b-4c40-bc0d-aec2f8839f7b'
+ });
+ assert.equal(out.accepted,false);assert.equal(calls,0);
+});
+test('CUT23 read-only verifier fails closed without a protected token',async()=>{
+ let calls=0;
+ const out=await verifyCloudflareD1EUReadOnly({
+  fetchImpl:async()=>{calls++;},accountId,expectedDatabaseId:uuid,token:''
+ });
+ assert.equal(out.reason,'TRUSTED_FETCH_AND_SCOPED_TOKEN_REQUIRED');
+ assert.equal(calls,0);
+});
+test('CUT23 read-only verifier never leaks sensitive API errors',async()=>{
+ const secret='synthetic-secret-private';
+ const out=await verifyCloudflareD1EUReadOnly({
+  fetchImpl:async()=>{throw Error('fail '+secret)},
+  token:secret,accountId,expectedDatabaseId:uuid
+ });
+ assert.equal(out.accepted,false);
+ assert.equal(out.reason,'CLOUDFLARE_READ_UNAVAILABLE');
+ assert.equal(JSON.stringify(out).includes(secret),false);
+});
+test('CUT23 authenticated Cloudflare GET must return EU not region-only',async()=>{
+ const out=await verifyCloudflareD1EUReadOnly({
+  fetchImpl:async()=>({status:200,ok:true,text:async()=>JSON.stringify(
+    report({jurisdiction:null,primary_location_hint:'eeur'})
+  )}),token:'synthetic-secret',accountId,expectedDatabaseId:uuid
+ });
+ assert.equal(out.reason,'EU_JURISDICTION_MISSING');
+});
+test('CUT23 verifier cannot run against PROD or follow Cloudflare redirect',async()=>{
+ let calls=0;
+ const fetchImpl=async()=>{calls++;return{status:302,ok:false}};
+ assert.equal((await verifyCloudflareD1EUReadOnly({fetchImpl,
+  token:'synthetic-secret',accountId,expectedDatabaseId:uuid,
+  environment:'PROD'})).reason,'LAB_ONLY');
+ assert.equal(calls,0);
+ assert.equal((await verifyCloudflareD1EUReadOnly({fetchImpl,
+  token:'synthetic-secret',accountId,expectedDatabaseId:uuid})).reason,
+  'CLOUDFLARE_READ_UNAVAILABLE');
 });
