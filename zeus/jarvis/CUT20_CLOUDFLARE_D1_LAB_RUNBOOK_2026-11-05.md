@@ -44,3 +44,33 @@ The candidate commits live only in PR #25 DRAFT. Revert CUT19/CUT20 branch commi
 Cloudflare official: https://developers.cloudflare.com/d1/worker-api/ ; https://developers.cloudflare.com/d1/platform/limits/ ; https://developers.cloudflare.com/d1/reference/time-travel/ ; https://developers.cloudflare.com/workers/platform/limits/
 
 **NEXT_BLOCK:** Cloudflare account authorization+inventory and isolated free plan LAB provisioning, real B2/B3+Vault/cloud E2E, B10. Preserve PROD and all existing systems.
+
+## CUT21 · Auditoría física Cloudflare FREE y prueba Wrangler oficial (2026-11-05)
+Esta sección actualiza expresamente el inventario anterior CUT20. No modifica el historial de lo ya certificado.
+
+**HECHO / EXISTENTE (lectura real de Cloudflare autenticado en Opera):**
+- Plan de **Workers actual: GRATUITO, 0 US$/mes** (no plan de pago nuevo).
+- **0 bases de datos D1 existentes**; límite publicado Free = 10 por cuenta, 500 MB por DB, 5 GB total.
+- **2 Workers preexistentes** `fenix-capital-inmo-maps` y `fenix-capital-inmo-map`. Ambos protegidos, no alterados.
+- Página de creación D1 autenticada inspeccionada. Aún no hay base remota creada. Cuenta Cloudflare accesible con navegación/lectura, pero el conector Opera en este chat **NO tiene operaciones de clic, escritura o envío de formularios**. No confundir con fallo de autenticación.
+- Jurisdicción aconsejada al crear base: **EU**; no se puede modificar después de la creación. Crear solo `cerebro-jarvis-lab-cut21` si se elige esa ubicación y se mantienen límites gratuitos.
+- Workers Free: 100.000 solicitudes/día y CPU por solicitud limitado; D1 Free: 5 millones de filas leídas/día, 100.000 escritas/día; Time Travel hasta 7 días. Sobrecarga/cuota debe denegar en vez de contratar.
+- Fuente: https://developers.cloudflare.com/d1/platform/limits/ ; https://developers.cloudflare.com/d1/platform/pricing/ ; https://developers.cloudflare.com/d1/configuration/data-location/ ; https://developers.cloudflare.com/workers/platform/pricing/
+
+**HECHO LAB / CERTIFICACIÓN OFICIAL:**
+- `cloudflare-lab/wrangler.jsonc`: configuración nueva con **workers_dev=false**, **routes=[]**, database UUID deliberadamente ficticio todo ceros, observabilidad OFF. No ruta pública ni referencia DB real.
+- `cloudflare-lab/worker-off.mjs`: respuesta 503 incondicional; no es la versión LIVE del superagente.
+- `cloudflare-lab/verify-cut21-config.mjs`: verifica aislamiento, configuración OFF y ausencia de esquema destructivo.
+- GitHub workflow `.github/workflows/jarvis-cut21-cloudflare-d1-local.yml` usa Wrangler 4.157.0 oficial, sin tokens Cloudflare; inicia base D1 **local** en GitHub Actions, crea tabla, escribe/lee registro sintético, exporta backup, restaura a una **segunda instancia local independiente** y verifica dato.
+- Workflow de prueba `42120560916` SUCCESS para SHA `4ea57288de4cd2071add53349266f8d439778efe`; Wrangler `deploy --dry-run` empaqueta la **implementación OFF** (NO despliega ni verifica aún la compilación del Gateway B2/B3 completo). Prueba D1 real en cloud **no ejecutada**.
+- Core `42120560865`: **613 PASS / 0 FAIL**; B4 `42120560863`, B7 `42120560913`, Governed `42120561109` SUCCESS, PROD promotion no ejecutada.
+
+**PROTECCIONES Y PENDIENTES:**
+- Cloudflare remote D1 provision: **PENDIENTE** por ausencia de operación de envío en el conector, no por coste ni recursos (cuenta verificada Free, 0 D1).
+- No se ha creado Worker nuevo, configurado ningún secreto, alterado DNS, tocado App/CRM/ANA/Trading/Supabase/SEO ni `main`.
+- Al obtener una D1 remota se requiere inventario/UUID, backup original, migración solo sobre nueva base, y restore separado. Identidad OWNER_ROOT física, B2 session/RLS-equivalent design, Vault, grants B3, Gateway real read-only, dos dispositivos físicos, auditoría y tribunal B10 siguen **SIN CERTIFICACIÓN**.
+- D1 es SQLite, **no aporta RLS PostgreSQL**. No promocionar por CI GREEN.
+- Rollback actual: revertir cambios CUT21 de la PR DRAFT; no existen cambios remotos que revertir.
+- Próximo bloqueo: completar creación de D1 `cerebro-jarvis-lab-cut21` con **jurisdicción EU** en el formulario abierto, obtener UUID, vincular únicamente el Worker LAB (OFF), verificar operaciones reales y costes, y sólo después autenticación/cutover B10.
+
+**Autonomía:** PARCIAL_LAB; PROD_NO_GO. Coste contratado adicional: **0**. Consumo de cuotas de GitHub Actions: no cuantificado.

@@ -1,0 +1,105 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "recorded_at": "2026-11-05",
+  "cut": "CUT21",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT21",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "open": true,
+  "draft": true,
+  "merged": false,
+  "validated_sha": "4ea57288de4cd2071add53349266f8d439778efe",
+  "ci": {
+    "core": {
+      "run_id": 42120560865,
+      "passed": 613,
+      "failed": 0,
+      "status": "SUCCESS"
+    },
+    "official_wrangler": {
+      "run_id": 42120560916,
+      "status": "SUCCESS",
+      "version": "4.157.0",
+      "scope": "LOCAL_ONLY",
+      "verified": [
+        "schema",
+        "insert",
+        "read",
+        "sql_export",
+        "restore_independent_local",
+        "worker_off_bundle_dry_run"
+      ]
+    },
+    "b4": {
+      "run_id": 42120560863,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42120560913,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42120561109,
+      "status": "SUCCESS",
+      "promotion": "NOT_RUN"
+    }
+  },
+  "cloudflare_account_readonly": {
+    "browser_session": "AUTHENTICATED",
+    "plan": "WORKERS_FREE",
+    "monthly_subscription_usd": 0,
+    "d1_existing": 0,
+    "d1_free_limit": 10,
+    "workers_existing": [
+      "fenix-capital-inmo-maps",
+      "fenix-capital-inmo-map"
+    ],
+    "both_workers_protected": true,
+    "create_form_accessible": true,
+    "connector_ui_writes_supported": false,
+    "d1_remote_created": false,
+    "worker_created": false,
+    "domain_modified": false
+  },
+  "proposed_resource": {
+    "name": "cerebro-jarvis-lab-cut21",
+    "jurisdiction": "eu",
+    "database_id": "NOT_ASSIGNED",
+    "worker": "cerebro-jarvis-lab-cut21",
+    "workers_dev": false,
+    "routes": [],
+    "worker_default_state": "OFF",
+    "cost_mode": "FREE_ONLY"
+  },
+  "reality_checks": {
+    "d1_local_wrangler": "HECHO",
+    "real_cloudflare_d1": "PENDIENTE",
+    "owner_root_live": "PENDIENTE",
+    "vault": "PENDIENTE",
+    "b3_real_grants": "PENDIENTE",
+    "cross_device_physical": "PENDIENTE",
+    "gateway_live": "PENDIENTE",
+    "b10_independent": "PENDIENTE",
+    "prod": "NO_GO"
+  },
+  "safety": {
+    "no_new_subscriptions": true,
+    "subscription_price_new_usd": 0,
+    "github_actions_consumption": "NOT_QUANTIFIED",
+    "trading_isolated": true,
+    "no_app_crm_prod_changes": true,
+    "no_cloudflare_existing_worker_changes": true,
+    "no_supabase_changes": true,
+    "no_main_changes": true
+  },
+  "next_block": "Create D1 remotely in authenticated Cloudflare UI choosing EU jurisdiction (not automatable via available read-only connector), then inspect UUID/resources and verify scoped remote migration/export/rebuild before B2/B3/Vault real, two-device E2E and B10. No automatic deployment.",
+  "rollback": "Revert isolated PR25 CUT21 commits, no cloud rollback needed before remote provisioning.",
+  "evidence_links": [
+    "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42120560916",
+    "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42120560865"
+  ]
+}
