@@ -33,9 +33,9 @@ test('owner claims from untrusted payload cannot call registered gateway capabil
  const bypass=await gateway.execute({context:ctx,authorized:true,
    capability:binding.capability,idempotency_key:'bypass-1',risk:'LOW',
    payload:{owner:true,owner_id:'OWNER',ticket:'fake-not-verified',request_digest:'arbitrary'}});
- assert.equal(bypass.result.status,'HUMAN_REQUIRED');
- assert.equal(bypass.result.executed,false);
- assert.equal(bypass.result.reason,'POLICY_CONFLICT');
+ assert.equal(bypass.status,'HUMAN_REQUIRED');
+ assert.equal(bypass.executed,false);
+ assert.equal(bypass.reason,'POLICY_CONFLICT');
 });
 test('owner without session or with fake identity, cross-company and failed verifier is denied',async()=>{
  const gateway=new ActionGatewayV1();
