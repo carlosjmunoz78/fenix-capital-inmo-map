@@ -5,6 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {enforceSeoRoleIfRequested} from './seo-role-access-gate-v0.mjs';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {runStagingReadonlyMission} from './staging-transversal-readonly-v0.mjs';
 import {sealProcessReceipt,verifyProcessReceipt} from './seo-process-signature-v0.mjs';
@@ -46,6 +47,7 @@ export function independentlyReviewJob({html,headers='',status=200,journal_path,
   ready:false,prod_authorized:false,external_writes:0,cost_added_eur:0}});
 }
 async function main(){
+ enforceSeoRoleIfRequested({role_id:'SEO_D31_QA',scope:'mission:evaluate'});
  const [htmlFile,headersFile,statusRaw,journalFile,workerReceiptFile,reviewFile]=process.argv.slice(2);
  if(![htmlFile,headersFile,statusRaw,journalFile,workerReceiptFile,reviewFile].every(Boolean))throw Error('ARGS_REQUIRED');
  const review=independentlyReviewJob({html:fs.readFileSync(htmlFile,'utf8'),headers:fs.readFileSync(headersFile,'utf8'),
