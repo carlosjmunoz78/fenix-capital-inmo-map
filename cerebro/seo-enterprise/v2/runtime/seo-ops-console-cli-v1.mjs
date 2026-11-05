@@ -8,6 +8,9 @@ import {seoTeamReadiness,SEO_ORDER_TYPES,planSeoDirectorOrder,queueSeoOrderInLab
 const load=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'));
 const training=load('seo-specialist-training-and-commands-v1.json');
 const marketing=load('seo-marketing-plan-for-owner-approval-v1.json');
+const prodKnowledge=load('seo-32-department-live-knowledge-playbooks-v1.json');
+const knowledgeByDepartment=new Map(prodKnowledge.departments.map(d=>[d.department_id,d]));
+if(knowledgeByDepartment.size!==32)throw Error('SEO_LIVE_KNOWLEDGE_COVERAGE_INVALID');
 const args=process.argv.slice(2),cmd=args[0];
 function value(flag,def){const i=args.indexOf(flag);return i<0?def:args[i+1]}
 const serialize=x=>JSON.stringify(x,null,2)+'\n';
@@ -16,12 +19,21 @@ function safeRelative(filename){if(!/^SEO-D\d{2}\.json$/.test(filename))throw Er
 export function buildSeoTrainingPacks(){
  const packets=new Map();
  for(const d of training.departments){
+  const live=knowledgeByDepartment.get(d.department_id);
+  if(!live||live.family_id!==d.family_id||live.controls.writes_to_prod!==false)throw Error('SEO_DEPARTMENT_LIVE_KNOWLEDGE_BINDING_REQUIRED');
   const p={
    schema_version:'1.0.0',company_id:training.company_id,engine_id:'SEO-001',
    environment:'LAB',version:'1.0.0',role_template:d.operator.role_template_id,
    family_director_template:d.operator.family_director_role_template_id,
    department_id:d.department_id,name:d.name,mission:d.mission,
-   learning_sources:d.training_unit.study_sources,evidence_sources:d.required_sources,
+   learning_sources:[...d.training_unit.study_sources,prodKnowledge.source_registry[0].path,prodKnowledge.source_registry[1].glob],evidence_sources:d.required_sources,
+   live_wordpress_source:{priority:'OFFICIAL_PROD_READ_ONLY',target_scope:'200_PUBLISHED_URLS',snapshot_only:true,refresh_before_decision:true},
+   specialist_instruction:live.work_item.specialist_action,
+   required_source_preflight:live.work_item.source_preflight,
+   acceptance_specific:live.work_item.acceptance_specific,
+   qa_department:live.training.independent_qa_department,
+   training_department:live.training.training_supervisor,
+   historical_stage_use_forbidden:true,
    practical_exam:d.training_unit.exercise,required_deliverable:d.training_unit.expected_artifact,
    evaluation:d.training_unit.evaluation,
    mandatory_steps:['RESEARCH_EXISTING_SOURCES','PRODUCE_REPRODUCIBLE_RESULT',
