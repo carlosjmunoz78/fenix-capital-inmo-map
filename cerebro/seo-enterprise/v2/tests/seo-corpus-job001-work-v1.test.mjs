@@ -226,6 +226,23 @@ test('real JOB-001 OIDC worker QA and tribunal include separate deterministic ex
  assert.equal(j.individual_agent_exams_completed,0);
 });
 
+test('LAB editorial writer respects keyword overlap hold and retains persona-specific funnel requirements',()=>{
+ const corpus=loadFrozenSeoCorpus(),evidence=expectedSeoRoleEvidence(corpus);
+ const all=createSeoSpecialistWorkProducts({corpus,evidence});
+ const bundle=createSeoEditorialWriteBundle({corpus,work_products:all});
+ assert.equal(bundle.drafts.length,20);
+ assert.equal(bundle.keyword_overlap_candidates_held,1);
+ assert.equal(bundle.funnel_blueprints_defined,8);
+ assert.equal(bundle.existing_urls_preserved,true);
+ assert.equal(bundle.drafts.every(d=>d.strategic_owner&&
+  d.strategic_owner.forms_and_magnet_not_proven_connected&&
+  d.keyword_exact_collision_blocked&&d.image_import_requires_verified_asset_qa&&
+  d.future_new_image_provider==='CREATIVE-PROGRAMMATIC-RENDER-V1'),true);
+ assert.equal(bundle.drafts.some(d=>d.existing_url==='https://fenixcapital.es/'),false);
+ assert.equal(bundle.drafts.some(d=>d.existing_url==='https://fenixcapital.es/inicio/'),false);
+ assert.equal(bundle.drafts.every(d=>d.can_publish===false),true);
+});
+
 test('safe LAB writer creates 20 real editorial files, idempotently replays and physically rolls back canary',async t=>{
  const w=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',901)});
  const q=reviewSeoCorpusWork({worker:w,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',902)});
