@@ -24,6 +24,8 @@ test('CEREBRO agent work order builds professional image prompt, always external
  assert.equal(CEREBRO_IMAGE_BRIDGE_V0.owner_engine,'FACT-001');
  assert.equal(CEREBRO_IMAGE_BRIDGE_V0.consumer_engine,'SOC-001');
  assert.equal(ORDER.source,'CEREBRO_FACT001_WORK_ORDER');
+ assert.equal(ORDER.company_id,'fenix');
+ assert.equal(ORDER.brand_company_alias,'fenix-capital');
  assert.equal(ORDER.channel,'FACEBOOK');
  assert.equal(ORDER.output_type,'SQUARE_POST');
  assert.equal(ORDER.ai_scene_request.model,'gpt-image-2.5-flare');
@@ -104,10 +106,10 @@ async function makeSyntheticFixtureImage(){
 
 
 test('FACT-001 queue integration: all existing work remains legacy and AI cannot spend through original zero-cost enqueue',()=>{
- const legacy={company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',
+ const legacy={company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',
    channel:'FACEBOOK',output_type:'SQUARE_POST',request:{creative_payload:{headline:'unchanged old job'}}};
  assert.deepEqual(assessAiCreativeJob(legacy),{is_ai:false,status:'LEGACY_DETERMINISTIC_UNCHANGED'});
- const base={...legacy,request:{creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},expected_cost_eur:0}};
+ const base={...legacy,request:{creative_payload:{scene_provider:'OPENAI_IMAGE',requester_engine_id:'SOC-001',brief:INPUT},expected_cost_eur:0}};
  const first=assessAiCreativeJob(base,{env:TEST_ENV});
  assert.equal(first.is_ai,true);assert.equal(first.ready,false);assert.equal(first.reason,'MONEY_LIMIT');
  const withCost=assessAiCreativeJob({...base,request:{...base.request,expected_cost_eur:0.30}},
@@ -122,13 +124,15 @@ test('FACT-001 queue integration: all existing work remains legacy and AI cannot
 test('physical AI creative job with injected mock provider generates brand-composited artifact, no publication',async()=>{
  const {photo,logo}=await makeSyntheticFixtureImage();
  const approval=approved();
- const request={company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',
+ const request={company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',
   creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},
   expected_cost_eur:0.3,ai_spend_approval:approval};
- const job={job_id:'11111111-2222-4333-8444-555555555555',company_id:'fenix-capital',
-  engine_id:'SOC-001',environment:'PREPROD',channel:'FACEBOOK',output_type:'SQUARE_POST',request};
+ const job={job_id:'11111111-2222-4333-8444-555555555555',company_id:'fenix',
+  engine_id:'FACT-001',environment:'PREPROD',channel:'FACEBOOK',output_type:'SQUARE_POST',request};
  const gate=assessAiCreativeJob(job,{env:TEST_ENV});
  assert.equal(gate.is_ai,true);assert.equal(gate.ready,true);
+ assert.equal(gate.order.company_id,'fenix');
+ assert.equal(gate.order.engine_id,'SOC-001');
  let calls=[];
  const result=await renderAiCreativeJob(job,{env:TEST_ENV,fetch_impl:async(url,init)=>{
    calls.push(url);
@@ -156,7 +160,7 @@ test('real FACT-001 OIDC worker recognizes AI job but terminates in HOLD before 
  process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN='TEST_ONLY_REQUEST_TOKEN';
  try{
   const job={job_id:'11111111-2222-4333-8444-555555555555',lease_id:'11111111-2222-4333-8444-666666666666',
-    company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',channel:'FACEBOOK',
+    company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',channel:'FACEBOOK',
     output_type:'SQUARE_POST',request:{creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},expected_cost_eur:0}};
   const requests=[];
   const r=await runOneCreativeJob({endpoint:'https://example.invalid/creative',
@@ -216,4 +220,14 @@ test('Provider router: cheapest approved-quality offer, future FLUX excluded unt
  assert.equal(c.ok,false);assert.equal(c.status,'HOLD_VIDEO_PROVIDER_NOT_CONTRACTED');
  const d=chooseMediaProvider({media_kind:'IMAGE',offers:[{...offers[0],quote_verified:false}],approved_max_eur_per_asset:0.30});
  assert.equal(d.ok,false);assert.ok(d.reasons.includes('PRICE_NOT_VERIFIED_OPENAI'));
+});
+
+
+test('Fénix alias compatibility does NOT accept another company or wrong engine',()=>{
+ const src={company_id:'fenix',engine_id:'FACT-001',environment:'PREPROD',channel:'FACEBOOK',output_type:'SQUARE_POST',
+ request:{creative_payload:{scene_provider:'OPENAI_IMAGE',requester_engine_id:'SOC-001',brief:INPUT},expected_cost_eur:0}};
+ assert.equal(assessAiCreativeJob(src,{env:TEST_ENV}).reason,'MONEY_LIMIT');
+ assert.equal(assessAiCreativeJob({...src,company_id:'other-company'},{env:TEST_ENV}).reason,'SCOPE_DENIED');
+ assert.equal(assessAiCreativeJob({...src,engine_id:'SOC-001'},{env:TEST_ENV}).reason,'SCOPE_DENIED');
+ assert.equal(assessAiCreativeJob({...src,request:{...src.request,creative_payload:{...src.request.creative_payload,requester_engine_id:'OTHER'}}},{env:TEST_ENV}).reason,'SCOPE_MISMATCH');
 });
