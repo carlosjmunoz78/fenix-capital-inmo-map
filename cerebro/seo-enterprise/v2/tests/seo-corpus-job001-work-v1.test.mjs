@@ -7,6 +7,8 @@ import crypto from 'node:crypto';
 import {verifyJwtSignedByGithub} from '../runtime/seo-gh-oidc-workload-v1.mjs';
 import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from '../runtime/seo-workload-role-lease-v1.mjs';
 import {createSeoCurriculumCases,verifySeoCurriculumCases} from '../runtime/seo-specialist-exercise-engine-v1.mjs';
+import {createSeoSpecialistWorkProducts,independentlyReviewSeoWorkProducts} from '../runtime/seo-specialist-work-product-v1.mjs';
+
 
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
 const makeIdentity=(role,id)=>({status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
@@ -143,4 +145,51 @@ test('corpus worker now supplies 141 signatures and 423 source-grounded exam fix
  assert.equal(judge.scope_proofs_signed_and_verified,141);
  assert.equal(judge.training_exercises_prepared_and_verified,423);
  assert.equal(judge.actual_specialist_training_certified,0);
+});
+
+test('all 141 specialties produce source-specific, scoped and reversible SEO proposals; 200 existing URL actions',()=>{
+ const corpus=loadFrozenSeoCorpus(),e=expectedSeoRoleEvidence(corpus);
+ const p=createSeoSpecialistWorkProducts({corpus,evidence:e});
+ assert.equal(p.status,'SEO_CORPUS_200_URL_ACTION_QUEUE_AND_141_SPECIALIZED_WORK_PRODUCTS');
+ assert.equal(p.url_action_queue.length,200);
+ assert.equal(p.role_products.length,141);
+ assert.equal(new Set(p.url_action_queue.map(x=>x.post_id)).size,200);
+ assert.equal(new Set(p.role_products.map(x=>x.role_id)).size,141);
+ assert.equal(new Set(p.role_products.map(x=>x.department_id)).size,32);
+ assert.equal(new Set(p.role_products.map(x=>x.action.mode)).size,32);
+ assert.equal(p.no_site_reaudit,true);assert.equal(p.site_mutations,0);
+ assert.equal(p.all_are_readonly_proposals,true);
+ for(const r of p.role_products){
+   assert.ok(r.evidence.copy_sha256.length===64);
+   assert.ok(r.action.requested_work.length>30);
+   assert.equal(r.action.publish,false);
+   assert.equal(r.user_approved_strategy,false);
+   assert.equal(r.complete_specialty_reasoning,false);
+   assert.equal(r.real_agent_execution_certified,false);
+   assert.ok(['EVIDENCE_DEPENDENCY_REQUIRED','REVIEWABLE_DETERMINISTIC_DRAFT'].includes(r.status));
+ }
+ assert.equal(independentlyReviewSeoWorkProducts({work_products:p,corpus,evidence:e}).role_products,141);
+});
+test('tampering, fabricated publication and changing source are independently rejected',()=>{
+ const corpus=loadFrozenSeoCorpus(),e=expectedSeoRoleEvidence(corpus);
+ const p=createSeoSpecialistWorkProducts({corpus,evidence:e});
+ const copy=structuredClone(p);copy.role_products[0].action.publish=true;
+ assert.throws(()=>independentlyReviewSeoWorkProducts({work_products:copy,corpus,evidence:e}),/INDEPENDENT_RECOMPUTE_MISMATCH/);
+ const changed=structuredClone(p);changed.url_action_queue[0].url='https://random.invalid/';
+ assert.throws(()=>independentlyReviewSeoWorkProducts({work_products:changed,corpus,evidence:e}),/INDEPENDENT_RECOMPUTE_MISMATCH/);
+ assert.throws(()=>createSeoSpecialistWorkProducts({corpus,evidence:e.slice(0,140)}),/CORPUS_REQUIRED/);
+});
+test('worker QA tribunal verify real 141 work products and 200 URL queue, without real autonomous certification',t=>{
+ const worker=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',801)});
+ assert.equal(worker.work_products.role_products.length,141);
+ assert.equal(worker.work_products.url_action_queue.length,200);
+ assert.equal(worker.specialized_work_products_prepared,141);
+ const qa=reviewSeoCorpusWork({worker,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',802)});
+ assert.equal(qa.specialist_work_products_independently_verified,141);
+ assert.equal(qa.existing_urls_in_prioritized_backlog,200);
+ const tribunal=tribunalSeoCorpusWork({worker,qa,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',803)});
+ assert.equal(tribunal.specialist_work_products_verified,141);
+ assert.equal(tribunal.existing_urls_prioritized,200);
+ assert.equal(tribunal.stored_only_strategy_drafts_not_published,true);
+ assert.equal(tribunal.certified_prod_departments,0);
 });
