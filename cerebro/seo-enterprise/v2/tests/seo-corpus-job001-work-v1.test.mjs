@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {verifyJwtSignedByGithub} from '../runtime/seo-gh-oidc-workload-v1.mjs';
-import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
+import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
 const makeIdentity=(role,id)=>({status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
  company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',role,
  github_job_name:({'SEO_CORPUS_WORKER':'seo-corpus-worker','SEO_CORPUS_INDEPENDENT_QA':'seo-corpus-qa','SEO_CORPUS_TRIBUNAL':'seo-corpus-tribunal'})[role],
@@ -73,4 +73,16 @@ test('JWT signed with valid asymmetric RSA key required; wrong audience/sha/sign
  assert.throws(()=>verifyJwtSignedByGithub({jwt:sign({...payload,sha:'b'.repeat(40)}),jwks,env,nowSeconds:now}),/JWT_CLAIMS/);
  const altered=good.slice(0,-3)+'aaa';
  assert.throws(()=>verifyJwtSignedByGithub({jwt:altered,jwks,env,nowSeconds:now}),/JWT_SIGNATURE/);
+});
+
+test('signed provider workload passes through existing ACTGW-001 to durable JOB-001, not merely a helper',async t=>{
+ const p=makeIdentity('SEO_CORPUS_WORKER',301);
+ p.github_run_id=42106140949;
+ const result=await executeSeoCorpusViaGateway({journal_path:tmp(t),identity:p});
+ assert.equal(result.gateway_receipt.gateway_id,'ACTGW-001');
+ assert.equal(result.gateway_receipt.status,'ACTION_EXECUTED');
+ assert.equal(result.gateway_receipt.audit_events,1);
+ assert.equal(result.completed_in_run,141);
+ assert.equal(result.web_mutations,0);
+ assert.equal(result.prod_authorized,false);
 });
