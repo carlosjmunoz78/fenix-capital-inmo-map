@@ -1344,6 +1344,13 @@
     "full_web_staging_e2e_passed": false,
     "new_subscriptions_eur": 0,
     "staging_claim_review_candidates": 6,
-    "financial_fact_check_verified": false
+    "financial_fact_check_verified": false,
+    "github_actions_workload_api_verified": true,
+    "signed_process_chain_work_unit_verified": true,
+    "scoped_per_role_dispatch_verified": true,
+    "provider_oidc_credential_verified": false,
+    "each_role_independent_iam_verified": false,
+    "real_gsc_credentials_verified": false,
+    "signed_process_proof_run_id": 41982256299
   }
 }
