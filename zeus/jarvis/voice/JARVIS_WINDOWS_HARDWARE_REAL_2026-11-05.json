@@ -1,0 +1,49 @@
+{
+  "schema": "zeus.jarvis.voice.hardware.probe.v1",
+  "date": "2026-11-05",
+  "environment": "LAB",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "source": "OWNER_EXECUTED_WINDOWS_DIAGNOSTIC",
+  "status": "CHATTTERBOX_GENERAL_HEAVY_PILOT_HOLD",
+  "measured": {
+    "ram_gib": 7.88,
+    "disk_free_gib": 6.79,
+    "gpu": [
+      "Intel(R) HD Graphics"
+    ],
+    "ffmpeg_rubberband_available": false,
+    "python_3_11_available": false,
+    "reference_valid": true,
+    "reference_bytes": 473590,
+    "paid_voice_api_calls": 0,
+    "model_downloaded": false
+  },
+  "interpretation": {
+    "ram_min12": "PILOT_RECOMMENDATION_NOT_MODEL_ABSOLUTE",
+    "disk_min8": "PILOT_RECOMMENDATION_NOT_MODEL_ABSOLUTE",
+    "python311": "CURRENT_ONE_CLICK_SCRIPT_REQUIREMENT_NOT_UNIVERSAL",
+    "rubberband": "PITCH_POSTPROCESS_OPTIONAL_WITH_ALTERNATIVE_FILTERS",
+    "no_discrete_gpu": "REALTIME_CLONING_UNLIKELY_WITHOUT_BENCHMARK"
+  },
+  "decision": {
+    "do_not_auto_install_chatterbox": true,
+    "do_not_touch_prod": true,
+    "do_not_pay_per_sentence": true,
+    "do_not_change_ana": true,
+    "retain_master_voice": true,
+    "do_not_delete_files_to_gain_space": true
+  },
+  "next_candidate": {
+    "name": "OpenVoice V2 + MeloTTS",
+    "language": "es",
+    "license": "MIT",
+    "cpu_execution": "COMMUNITY_DEMONSTRATED_NOT_VERIFIED_ON_OWNER_PC",
+    "result_similarity": "NOT_TESTED",
+    "realtime_latency": "NOT_TESTED",
+    "disk_requirement": "VERIFY_BEFORE_DOWNLOAD",
+    "install_status": "NOT_INSTALLED",
+    "single_best_next_proof": "OFFLINE_CPU_FIT_AND_REAL_SYNTHESIS_TRIAL_WHEN_SAFE_STORAGE_CONFIRMED"
+  },
+  "rollback": "No runtime or machine change; revert metadata commit only"
+}
