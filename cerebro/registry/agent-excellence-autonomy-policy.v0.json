@@ -1,0 +1,84 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "CEREBRO_AGENT_EXCELLENCE_AUTONOMY_V0",
+  "engine_id": "LRN-001",
+  "company_id": "GLOBAL_SCOPED_AT_EXECUTION",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "state": "CANDIDATE_ADDITIVE_NOT_LIVE_BOUND",
+  "principal": {
+    "type": "SINGLE_BUSINESS_OWNER",
+    "authority_ref": "OWNER_PRIVATE_IDENTITY_PROVIDER",
+    "other_business_principals": "DENY",
+    "owner_can_revoke": true,
+    "legal_compliance_and_security_controls_are_mandatory": true
+  },
+  "hierarchy": {
+    "business_owner": "OWNER_ONLY",
+    "supervisor": "CEREBRO_SUPERVISOR",
+    "agent": "SCOPE_REGISTERED_ROLE",
+    "subagent": "SCOPE_REGISTERED_ROLE",
+    "independent_tribunal": "JDGO1_INDEPENDENT_EVALUATOR_REQUIRED",
+    "supervisor_binding": "POR_AUDITAR_ROLE_AGENT_REGISTRY_REPORTS_TO_UNRESOLVED",
+    "agent_cannot_approve_own_grants": true,
+    "agent_cannot_score_self": true,
+    "supervisor_cannot_grant_new_owner_authority": true
+  },
+  "initiative": {
+    "allowed_sources": ["OWNER_ORDER", "AGENT_SELF_INITIATED", "SUPERVISOR_ASSIGNED", "EVENT_TRIGGER", "MEASURED_ANOMALY"],
+    "default_self_initiated_mode": "LOW_RISK_PREPROD_ONLY",
+    "registered_preprod_capabilities": ["READ_ONLY_AUDIT", "DRAFT_INTERNAL_CONTENT", "RUN_APPROVED_PREPROD_TESTS", "ANALYZE_SANITIZED_METRICS", "LEARN_SANDBOX", "PROPOSE_OPTIMIZATION"],
+    "route": "governed-execution-handoff-router-v1",
+    "self_initiated_execution_wired_live": false,
+    "physical_pc_control_wired_live": false,
+    "no_arbitrary_shell": true,
+    "no_direct_system_change": true,
+    "no_direct_prod_promotion": true,
+    "no_trading": true,
+    "needs_independent_executable_authority": true,
+    "requires_evidence_idempotency_rollback_semantic_readback": true
+  },
+  "excellence": {
+    "evidence_required": true,
+    "minimum_verified_samples": 30,
+    "minimum_reliability_to_reward": 0.97,
+    "minimum_quality_to_reward": 0.95,
+    "retrain_below_reliability": 0.9,
+    "review_replacement_below_reliability": 0.75,
+    "independent_tribunal_required": true,
+    "verified_security_incidents_for_reward": 0,
+    "verified_policy_violations_for_reward": 0,
+    "reward_candidates": ["ROLE_SPECIFIC_TRAINING", "ADDITIONAL_NON_SENSITIVE_FUNCTIONS", "PREAPPROVED_FREE_API_CAPABILITY", "BOUNDED_AUTONOMY_EXPANSION"],
+    "new_capabilities_require_separate_owner_approved_grant": true,
+    "never_auto_expose_credentials": true,
+    "replacement_requires_inventory_backup_parallel_old_new_preprod_rollback_gradual_promotion": true,
+    "incentives_measure_outcomes_not_volume_alone": true
+  },
+  "limits": {
+    "additional_subscription_eur": 0,
+    "prod_write": false,
+    "trading_access": false,
+    "self_permission_escalation": false,
+    "outside_customer_or_employer_access": false,
+    "legal_or_signature_required": "HUMAN_REQUIRED",
+    "high_risk": "HUMAN_REQUIRED",
+    "security_incident": "HUMAN_REQUIRED"
+  },
+  "preservation": {
+    "changes_existing_runtime": false,
+    "changes_existing_supervisor": false,
+    "changes_existing_registry": false,
+    "changes_existing_gateway": false,
+    "changes_prod": false,
+    "changes_trading": false,
+    "next_gate": "BIND_RUNTIME_VERIFIED_SUPERVISOR_AND_OWNER_GRANT_TO_EXISTING_GOVERNED_EXECUTOR_WITH_E2E"
+  },
+  "source_refs": [
+    "cerebro/registry/role-agent-registry.v1.json",
+    "cerebro/registry/proactive-specialist-evolution-policy.v1.json",
+    "cerebro/runtime/adaptive-hierarchical-agent-work-pump-v3.mjs",
+    "cerebro/runtime/governed-execution-handoff-router-v1.mjs",
+    "cerebro/runtime/evaluation-tribunal.mjs",
+    "cerebro/registry/governance-v0.json"
+  ]
+}
