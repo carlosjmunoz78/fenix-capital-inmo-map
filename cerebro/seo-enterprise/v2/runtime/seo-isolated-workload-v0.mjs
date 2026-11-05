@@ -28,7 +28,7 @@ export async function verifyIsolatedWorkload({env,token,fetchImpl=globalThis.fet
     Authorization:'Bearer '+token
    },signal:AbortSignal.timeout(8000)})}
   catch{fail('PROVIDER_UNAVAILABLE')}
-  if(!response?.ok)fail('PROVIDER_REJECTED');
+  if(!response?.ok)fail('PROVIDER_REJECTED_'+(path.includes('/jobs?')?'JOBS':'RUN')+'_'+String(response?.status||'UNKNOWN'));
   try{return await response.json()}catch{fail('PROVIDER_INVALID_RESPONSE')}
  };
  const run=await ask('/actions/runs/'+runId);
