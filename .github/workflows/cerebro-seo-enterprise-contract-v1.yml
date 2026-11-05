@@ -50,6 +50,21 @@ jobs:
           path: ${{ runner.temp }}/seo-org-contracts/index.json
           retention-days: 14
           if-no-files-found: error
+      - name: Validate durable SEO WordPress draft review JOB-001 LAB queue
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-draft-review"
+          node cerebro/seo-enterprise/v2/runtime/seo-draft-review-runner-v0.mjs \
+            "$RUNNER_TEMP/seo-draft-review/review-queue.v8" \
+            "$RUNNER_TEMP/seo-draft-review/review-evidence.json"
+      - name: Archive synthetic SEO review evidence without secrets
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-draft-review-lab-v0
+          path: ${{ runner.temp }}/seo-draft-review/review-evidence.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Physical synthetic LAB universal excellence proof (no IAM privilege applied)
         shell: bash
         run: |
