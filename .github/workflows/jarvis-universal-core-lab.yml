@@ -10,7 +10,19 @@ permissions:
 jobs:
   node-core-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: jarvis_cut13_synthetic_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -18,3 +30,9 @@ jobs:
           node-version: '22'
       - name: Execute independent superagent core tests
         run: node --test zeus/jarvis/core/*.test.mjs
+      - name: CUT13 isolated PostgreSQL permissions and restore
+        run: |
+          docker run --rm --network host -v "$PWD:/work:ro" -w /work \
+            -e PGHOST=127.0.0.1 \
+            -e PGPASSWORD=jarvis_cut13_synthetic_only \
+            postgres:17 bash zeus/jarvis/gates/cut13_lab_pg_acceptance.sh
