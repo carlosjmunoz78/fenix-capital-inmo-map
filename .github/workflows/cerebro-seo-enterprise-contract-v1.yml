@@ -7,6 +7,8 @@ on:
       - 'cerebro/seo-enterprise/v2/**'
       - 'cerebro/governance/universal-excellence*'
       - 'cerebro/tests/universal-excellence-lab-v0.test.mjs'
+      - 'cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs'
+      - 'cerebro/gateway/universal-excellence-owner-binding-v0.mjs'
       - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
   workflow_dispatch:
 
@@ -22,7 +24,7 @@ jobs:
       - name: Validate SEO architecture and fail-closed STAGING to PROD contract
         run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
       - name: Prove universal owner-only excellence rewards suspension and replacement policy
-        run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs
+        run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs
       - name: Physical synthetic LAB universal excellence proof (no IAM privilege applied)
         shell: bash
         run: |
