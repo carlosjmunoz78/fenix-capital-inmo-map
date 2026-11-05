@@ -57,6 +57,7 @@ export function executeSeoJob001Staging({html,headers='',status=200,journal_path
   ledger_done:summary.totals.done,ledger_total:summary.totals.total,
   recovery_reopened_verified:true,
   job001_journal_sha256:hashlib(fs.readFileSync(journal_path)),
+  worker_process_pid:process.pid,
   roles_declared_not_authenticated:true,role_identity_verified:false,independent_process_qa_verified:false,
   site_backup_verified:false,site_rollback_verified:false,
   no_customer_data_guarantee:false, // public snapshot is expected, not fully audited for sensitive payloads
