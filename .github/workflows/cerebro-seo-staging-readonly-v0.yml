@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate public snapshot inspector
-        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-merit-candidate-ledger-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-training-shadow-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-ymyl-claims-audit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-github-workload-verify-v0.test.mjs
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-merit-candidate-ledger-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-training-shadow-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-ymyl-claims-audit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-github-workload-verify-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-process-signature-v0.test.mjs
       - name: Verify this GitHub workload against provider API with existing read-only token
         env:
           GH_READONLY_TOKEN: ${{ github.token }}
