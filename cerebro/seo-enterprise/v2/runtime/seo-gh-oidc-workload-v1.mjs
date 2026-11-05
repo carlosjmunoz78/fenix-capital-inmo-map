@@ -45,9 +45,9 @@ export function verifyJwtSignedByGithub({jwt,jwks,env,nowSeconds=Math.floor(Date
   run_id:String(payload.run_id)===env.GITHUB_RUN_ID,
   run_attempt:String(payload.run_attempt)===env.GITHUB_RUN_ATTEMPT,
   sha:payload.sha===env.GITHUB_SHA,ref:payload.ref===env.GITHUB_REF,
-  sub:payload.sub==='repo:'+REPO+':pull_request'};
+  sub:typeof payload.sub==='string'&&payload.sub.length>=8&&payload.sub.length<=1024};
  for(const [key,ok] of Object.entries(claims))if(!ok)fail('JWT_CLAIM_'+key.toUpperCase());
- return {verified:true,issuer:ISSUER,subject:payload.sub,audience:AUD,
+ return {verified:true,issuer:ISSUER,subject_sha256:crypto.createHash('sha256').update(payload.sub).digest('hex'),audience:AUD,
    sha256:crypto.createHash('sha256').update(jwt).digest('hex'),expires_at:payload.exp};
 }
 export async function verifySeoGithubWorkload({env=process.env,fetchImpl=fetch,nowSeconds}={}){
@@ -87,7 +87,7 @@ export async function verifySeoGithubWorkload({env=process.env,fetchImpl=fetch,n
  return {schema_version:'1.0.0',status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0',
   repository:REPO,head_branch:BRANCH,workflow_path:WORKFLOW,workflow_name:NAME,
-  oidc_issuer:jwtProof.issuer,oidc_subject:jwtProof.subject,
+  oidc_issuer:jwtProof.issuer,oidc_subject_sha256:jwtProof.subject_sha256,
   oidc_token_sha256:jwtProof.sha256,oidc_expiration:jwtProof.expires_at,
   github_run_id:runId,github_run_attempt:runAttempt,github_job_id:own[0].id,
   github_job_name:env.GITHUB_JOB,github_sha:env.GITHUB_SHA,
