@@ -86,6 +86,20 @@ jobs:
             ${{ runner.temp }}/seo-workforce-141/verification.json
           retention-days: 14
           if-no-files-found: error
+      - name: Generate 141 SEO specialist FACT-001 scaffolds twice idempotently (no deployment)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-role-scaffolds"
+          node cerebro/factory/seo-skillpack-factory-v2.mjs generate "$RUNNER_TEMP/seo-role-scaffolds"
+          node cerebro/factory/seo-skillpack-factory-v2.mjs generate "$RUNNER_TEMP/seo-role-scaffolds"
+      - name: Archive specialist scaffold manifest only
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-141-specialist-fact001-scaffolds-lab-v2
+          path: ${{ runner.temp }}/seo-role-scaffolds/index.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Checkout preserved V4 source archive from historical branch (read-only)
         uses: actions/checkout@v4
         with:
