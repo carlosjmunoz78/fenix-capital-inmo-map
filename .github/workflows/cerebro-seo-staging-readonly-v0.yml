@@ -68,7 +68,7 @@ jobs:
   # Additive LAB: three separate GitHub jobs, all read-only and synthetic.
   seo-worker-isolated:
     name: seo-worker-isolated
-    if: \${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -78,25 +78,25 @@ jobs:
       - uses: actions/checkout@v4
       - name: Verify worker job and execute durable synthetic LAB fixture
         env:
-          GH_READONLY_TOKEN: \${{ github.token }}
-          SEO_EXPECTED_HEAD_SHA: \${{ github.event.pull_request.head.sha }}
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs worker "$RUNNER_TEMP/seo-isolated-worker"
       - name: Transfer only signed worker receipt and JOB-001 journal
         uses: actions/upload-artifact@v4
         with:
-          name: seo-v2-isolated-worker-\${{ github.run_id }}
+          name: seo-v2-isolated-worker-${{ github.run_id }}
           path: |
-            \${{ runner.temp }}/seo-isolated-worker/worker.json
-            \${{ runner.temp }}/seo-isolated-worker/job001.v8
+            ${{ runner.temp }}/seo-isolated-worker/worker.json
+            ${{ runner.temp }}/seo-isolated-worker/job001.v8
           retention-days: 14
           if-no-files-found: error
 
   seo-qa-isolated:
     name: seo-qa-isolated
     needs: seo-worker-isolated
-    if: \${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -107,12 +107,12 @@ jobs:
       - name: Download successful worker evidence
         uses: actions/download-artifact@v4
         with:
-          name: seo-v2-isolated-worker-\${{ github.run_id }}
-          path: \${{ runner.temp }}/seo-isolated-input-worker
+          name: seo-v2-isolated-worker-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-input-worker
       - name: Verify worker identity and independently recompute LAB fixture
         env:
-          GH_READONLY_TOKEN: \${{ github.token }}
-          SEO_EXPECTED_HEAD_SHA: \${{ github.event.pull_request.head.sha }}
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs qa \
@@ -122,15 +122,15 @@ jobs:
       - name: Transfer QA signed record only
         uses: actions/upload-artifact@v4
         with:
-          name: seo-v2-isolated-qa-\${{ github.run_id }}
-          path: \${{ runner.temp }}/seo-isolated-qa/review.json
+          name: seo-v2-isolated-qa-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-qa/review.json
           retention-days: 14
           if-no-files-found: error
 
   seo-tribunal-isolated:
     name: seo-tribunal-isolated
     needs: [seo-worker-isolated, seo-qa-isolated]
-    if: \${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -141,17 +141,17 @@ jobs:
       - name: Download signed worker evidence
         uses: actions/download-artifact@v4
         with:
-          name: seo-v2-isolated-worker-\${{ github.run_id }}
-          path: \${{ runner.temp }}/seo-isolated-tribunal-input-worker
+          name: seo-v2-isolated-worker-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal-input-worker
       - name: Download signed QA evidence
         uses: actions/download-artifact@v4
         with:
-          name: seo-v2-isolated-qa-\${{ github.run_id }}
-          path: \${{ runner.temp }}/seo-isolated-tribunal-input-qa
+          name: seo-v2-isolated-qa-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal-input-qa
       - name: Check independent job IDs, provider success and signed verdict
         env:
-          GH_READONLY_TOKEN: \${{ github.token }}
-          SEO_EXPECTED_HEAD_SHA: \${{ github.event.pull_request.head.sha }}
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs tribunal \
@@ -161,7 +161,7 @@ jobs:
       - name: Store signed tribunal record
         uses: actions/upload-artifact@v4
         with:
-          name: seo-v2-isolated-tribunal-\${{ github.run_id }}
-          path: \${{ runner.temp }}/seo-isolated-tribunal/tribunal.json
+          name: seo-v2-isolated-tribunal-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal/tribunal.json
           retention-days: 14
           if-no-files-found: error
