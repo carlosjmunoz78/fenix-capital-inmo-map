@@ -41,7 +41,7 @@ export function buildSeoOrg({company_id='fenix',organization,coverage,policy,see
    role_templates:slots.map(x=>slot(d.department_id,x)),headcount:'BY_EVIDENCE_NOT_FIXED',
    real_workers:0});
   put('departments/'+d.department_id+'/contract.json',{...c,default_permissions:'DENY',
-   granted_scopes:[],role_iam_verified:false,owner_iam_verified:false,
+   granted_scopes:[],role_iam_verified:false,agent_iam_verified:false,owner_iam_verified:false,
    source_is_not_authority:true,shared_runtime:['FACT-001','POL-001','IAM-001','JOB-001','QA-001','LRN-001'],
    merit_policy_ref:'cerebro/governance/universal-excellence-owner-authority.v0.json',
    excellence_after_missions:policy.excellence.minimum_missions,
