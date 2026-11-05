@@ -4,6 +4,7 @@ import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 const OFFICIAL='https://fenixcapital.es';
 const id=n=>Number.isSafeInteger(n)&&n>0;
 const hash=s=>createHash('sha256').update(s,'utf8').digest('hex');
+const reviewDigest=(content,seo)=>hash(JSON.stringify([content,seo?.seo_title??null,seo?.meta_description??null,seo?.focus_keyphrase??null]));
 const denial=reason=>({status:'BLOCKED',reason,can_publish:false,write_executed:false});
 export function buildSeoDraftReviewPacket({post,yoast,company_id='fenix'}={}){
  if(company_id!=='fenix')throw Error('DRAFT_WRONG_COMPANY');
@@ -25,7 +26,8 @@ export function buildSeoDraftReviewPacket({post,yoast,company_id='fenix'}={}){
   environment:'PREPROD',version:'0.1.0',site_origin:OFFICIAL,
   post_id:post.ID,post_type:'post',post_status:'draft',title:post.title,slug:post.slug,
   admin_edit_url:OFFICIAL+'/wp-admin/post.php?post='+post.ID+'&action=edit',
-  content_sha256:hash(post.content),content_length:post.content.length,
+  content_sha256:hash(post.content),review_revision_sha256:reviewDigest(post.content,yoast),
+  content_length:post.content.length,
   modified_at:post.modified??null,section_count_h2:(post.content.match(/<h2\b/gi)||[]).length,
   internal_links_count:internal.length,internal_links_live_http_verified:false,
   seo_metadata_present:seoReady,yoast_seo_title:yoast.seo_title??null,
@@ -40,7 +42,9 @@ export function buildSeoDraftReviewPacket({post,yoast,company_id='fenix'}={}){
 export function queueSeoDraftReviewLab({file_path,packet,now_ms=Date.now()}={}){
  if(!packet||packet.environment!=='PREPROD'||packet.company_id!=='fenix'||
    !id(packet.post_id)||packet.post_status!=='draft'||packet.site_origin!==OFFICIAL||
-   !/^[0-9a-f]{64}$/.test(packet.content_sha256)||!packet.seo_metadata_present)
+   !/^[0-9a-f]{64}$/.test(packet.content_sha256)||
+   (packet.review_revision_sha256!==undefined&&!/^[0-9a-f]{64}$/.test(packet.review_revision_sha256))||
+   !packet.seo_metadata_present)
   return denial('REVIEW_PACKET_VALIDATION_FAILED');
  if(packet.original_article_approved_by_owner!==false||
    packet.owner_approval_gateway_verified!==false||
@@ -48,11 +52,13 @@ export function queueSeoDraftReviewLab({file_path,packet,now_ms=Date.now()}={}){
   return denial('UNTRUSTED_APPROVAL_FLAG');
  if(!file_path||!Number.isSafeInteger(now_ms)||now_ms<=0)throw Error('REVIEW_JOB_ARGS');
  const runtime=new DurableJobRuntimeV1({file_path});
+ const versionDigest=packet.review_revision_sha256??packet.content_sha256;
  const context={company_id:packet.company_id,engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
  const job=runtime.enqueue({name:'SEO_DRAFT_REVIEW_ONLY_V0',context,
-  idempotency_key:'seo-review-'+packet.post_id+'-'+packet.content_sha256,
+  idempotency_key:'seo-review-'+packet.post_id+'-'+versionDigest,
   now_ms,priority:90,max_attempts:1,timeout_ms:12000,
   payload:{post_id:packet.post_id,slug:packet.slug,content_sha256:packet.content_sha256,
+   review_revision_sha256:versionDigest,
    seo_metadata_present:packet.seo_metadata_present,
    visual_review_required:true,independent_editorial_qa_required:true,
    owner_verified_approval_required:true,owner_approval_count_for_autonomy:0,
@@ -65,7 +71,7 @@ export function queueSeoDraftReviewLab({file_path,packet,now_ms=Date.now()}={}){
   actual_wordpress_write:false,actual_publication:false,prod_worker_enabled:false,
   additional_subscription_eur:0};
 }
-export function assessReviewApproval({packet,current_post,owner_claim={},independent_qa=false}={}){
+export function assessReviewApproval({packet,current_post,current_yoast=null,owner_claim={},independent_qa=false}={}){
  if(!packet||!current_post||current_post.ID!==packet.post_id||
    current_post.status!=='draft')return denial('DRAFT_NOT_CURRENT');
  if(hash(String(current_post.content??''))!==packet.content_sha256)
@@ -73,8 +79,14 @@ export function assessReviewApproval({packet,current_post,owner_claim={},indepen
  if(independent_qa!==true||packet.actual_visual_review_verified!==true)
   return denial('INDEPENDENT_QA_OR_VISUAL_PENDING');
  if(owner_claim?.authenticated_owner_via_gateway!==true||
-    owner_claim?.approved_exact_digest!==packet.content_sha256)
+    owner_claim?.approved_exact_digest!==(packet.review_revision_sha256??packet.content_sha256))
   return denial('OWNER_APPROVAL_NOT_VERIFIED');
+ if(packet.review_revision_sha256){
+  if(!current_yoast||current_yoast.post_id!==packet.post_id||current_yoast.post_status!=='draft')
+   return denial('SEO_REVISION_PROOF_REQUIRED');
+  if(reviewDigest(current_post.content,current_yoast)!==packet.review_revision_sha256)
+   return denial('SEO_REVISION_CHANGED_REQUIRES_REVIEW');
+ }
  return {status:'READY_FOR_FURTHER_RELEASE_GATES_LAB_ONLY',
   post_id:packet.post_id,can_publish:false,write_executed:false,
   real_owner_iam_bound:false,production_api_writes_allowed:false};

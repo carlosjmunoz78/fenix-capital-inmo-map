@@ -21,6 +21,7 @@ test('pilot read-only WordPress draft yields scoped evidence packet, zero owner 
  assert.equal(packet.post_id,52656);
  assert.equal(packet.post_status,'draft');
  assert.equal(packet.content_sha256.length,64);
+ assert.equal(packet.review_revision_sha256.length,64);
  assert.equal(packet.content_length,html.length);
  assert.equal(packet.internal_links_count,1);
  assert.equal(packet.section_count_h2,1);
@@ -47,6 +48,7 @@ test('LAB JOB-001 queue is persistent, idempotent and NEVER dispatches to WP',t=
  assert.equal(jobs[0].payload.desired_wordpress_status,'draft');
  assert.equal(jobs[0].payload.owner_approval_count_for_autonomy,0);
  assert.equal(jobs[0].payload.content_sha256,packet.content_sha256);
+ assert.equal(jobs[0].payload.review_revision_sha256,packet.review_revision_sha256);
  assert.equal(JSON.stringify(jobs[0]).includes(html),false);
 });
 test('changed content cannot reuse old approval and creates a new review version',t=>{
@@ -78,15 +80,41 @@ test('status, tenant, host, link provenance and missing metadata fail closed',t=
 });
 test('no owner-supplied flag can bypass independent visual/editorial review or publish',()=>{
  const packet=buildSeoDraftReviewPacket({post,yoast});
- const user={authenticated_owner_via_gateway:true,approved_exact_digest:packet.content_sha256};
+ const user={authenticated_owner_via_gateway:true,approved_exact_digest:packet.review_revision_sha256};
  const denied=assessReviewApproval({packet,current_post:post,independent_qa:true,owner_claim:user});
  assert.equal(denied.status,'BLOCKED');
  assert.equal(denied.reason,'INDEPENDENT_QA_OR_VISUAL_PENDING');
  const withVisual={...packet,actual_visual_review_verified:true};
  const stillNoOwner=assessReviewApproval({packet:withVisual,current_post:post,independent_qa:true,owner_claim:{}});
  assert.equal(stillNoOwner.reason,'OWNER_APPROVAL_NOT_VERIFIED');
- const eligible=assessReviewApproval({packet:withVisual,current_post:post,independent_qa:true,owner_claim:user});
+ const eligible=assessReviewApproval({packet:withVisual,current_post:post,current_yoast:yoast,independent_qa:true,owner_claim:user});
  assert.equal(eligible.status,'READY_FOR_FURTHER_RELEASE_GATES_LAB_ONLY');
  assert.equal(eligible.can_publish,false);
  assert.equal(eligible.production_api_writes_allowed,false);
+});
+
+test('SEO title or metadata revision makes new job and invalidates previous approval',t=>{
+ const file_path=tmp(t),p1=buildSeoDraftReviewPacket({post,yoast});
+ const changed={...yoast,seo_title:'Revised SEO title after editorial correction'};
+ const p2=buildSeoDraftReviewPacket({post,yoast:changed});
+ assert.equal(p1.content_sha256,p2.content_sha256);
+ assert.notEqual(p1.review_revision_sha256,p2.review_revision_sha256);
+ const first=queueSeoDraftReviewLab({file_path,packet:p1});
+ const second=queueSeoDraftReviewLab({file_path,packet:p2});
+ assert.equal(first.newly_queued,true);
+ assert.equal(second.newly_queued,true);
+ assert.notEqual(first.job_id,second.job_id);
+ const withVisual={...p1,actual_visual_review_verified:true};
+ const owner={authenticated_owner_via_gateway:true,approved_exact_digest:p1.review_revision_sha256};
+ const denied=assessReviewApproval({packet:withVisual,current_post:post,
+  current_yoast:changed,independent_qa:true,owner_claim:owner});
+ assert.equal(denied.reason,'SEO_REVISION_CHANGED_REQUIRES_REVIEW');
+ const noCurrentSeo=assessReviewApproval({packet:withVisual,current_post:post,
+  independent_qa:true,owner_claim:owner});
+ assert.equal(noCurrentSeo.reason,'SEO_REVISION_PROOF_REQUIRED');
+ const oldOwner=assessReviewApproval({packet:{...p2,actual_visual_review_verified:true},
+  current_post:post,current_yoast:changed,independent_qa:true,owner_claim:owner});
+ assert.equal(oldOwner.reason,'OWNER_APPROVAL_NOT_VERIFIED');
+ assert.equal(new DurableJobRuntimeV1({file_path}).listForContext({
+  company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'}).length,2);
 });
