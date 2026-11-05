@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {enforceSeoRoleIfRequested} from './seo-role-access-gate-v0.mjs';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {Job001LedgerControlPlaneV1} from '../../../runtime/job001-ledger-control-plane-v1.mjs';
 import {runStagingReadonlyMission} from './staging-transversal-readonly-v0.mjs';
@@ -67,6 +68,7 @@ export function executeSeoJob001Staging({html,headers='',status=200,journal_path
  }});
 }
 async function main(){
+ enforceSeoRoleIfRequested({role_id:WORKER,scope:'mission:execute'});
  const [htmlFile,headersFile,httpStatus,journalFile,receiptFile]=process.argv.slice(2);
  if(![htmlFile,headersFile,httpStatus,journalFile].every(Boolean))throw Error('USAGE_ARGS_MISSING');
  const r=executeSeoJob001Staging({html:fs.readFileSync(htmlFile,'utf8'),
