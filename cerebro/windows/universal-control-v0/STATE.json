@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PC001_IDENTIFY_REUSE_LEGITIMATE_ADMINISTRATIVE_COMMAND_ISSUER; THEN_ORIGINAL_WORKER_LEASE_HANDOFF_BACKUP_ROLLBACK; THEN_1_SYNTHETIC_PHYSICAL_E2E_PREPROD",
+  "next_block": "PC001_OWNER_ISSUER_BACKEND_AUTH_BINDING -> ATOMIC_EXACT_SCOPE_ENQUEUE -> ONE_REAL_READ_HEALTH_RECEIPT -> WORKER_HANDOFF -> CONSENTED_REMOTE_UI_FILE_PROOF",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1377,5 +1377,34 @@
     "issuer_audit_document": "cerebro/windows/pc-001/PC001_OWNER_ENQUEUE_READONLY_AUDIT_20261105.md",
     "tests_real_v2": "15_OF_15_PASS_GITHUB_ACTIONS",
     "outcome": "POLICY_GREEN_ISSUER_AND_PHYSICAL_HANDOFF_HOLD"
+  },
+  "pc001_owner_issuer_v0": {
+    "version": "0.1.0",
+    "status": "CODE_CI_GREEN_NOT_DEPLOYED",
+    "branch": "cerebro/pc001-owner-issued-health-canary-v0-20261105",
+    "source_path": "cerebro/windows/pc-001/issuer-v0/",
+    "company_id": "fenix",
+    "environment": "PREPROD",
+    "device_id": "78ca78cf158b3cda329cf39e0270f0a5",
+    "capability": "SERVICE_HEALTH",
+    "action": "READ_HEALTH",
+    "existing_worker_policy_id": "pc001-readonly-preprod-v1",
+    "existing_queue_unique_constraint": "company_id,environment,device_id,idempotency_key",
+    "existing_queue_schema_changed": false,
+    "owner_session_authenticated_backend": "REQUIRED_NOT_BOUND_LIVE",
+    "owner_auth_exact_scope": "CODE_VERIFIED",
+    "atomically_enqueued_remote_command": "NOT_EXECUTED",
+    "physical_remote_command_e2e": "PENDING",
+    "gh_actions_run_id": 42003062430,
+    "gh_actions_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42003062430",
+    "tests_ci": "43_PASS_0_FAIL_REAL_OWNER_GATE_AND_REAL_DEVICE_ENVELOPE_V2",
+    "local_tests": "25_PASS_WITH_STANDIN_DEPENDENCIES",
+    "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/PC001_OWNER_ISSUER_V0_2026_11_05/CEREBRO_PC001_OWNER_ISSUER_V0_PREPROD.zip",
+    "remote_desktop_control_enabled": false,
+    "existing_worker_modified": false,
+    "prod_modified": false,
+    "trading_access": false,
+    "additional_subscriptions_eur": 0,
+    "next_gate": "TRUSTED_BACKEND_OWNER_BINDING_AND_ATOMIC_INSERT_TEST_IN_PREPROD_THEN_EXISTING_WORKER_HEALTH_RECEIPT_E2E"
   }
 }
