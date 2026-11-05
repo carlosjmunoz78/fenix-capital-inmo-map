@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {evaluateSelfInitiatedWorkV0,evaluateAgentExcellenceV0,AGENT_EXCELLENCE_V0} from './agent-excellence-autonomy-v0.mjs';
+import {evaluateSelfInitiatedWorkV0,evaluateAgentExcellenceV0,AGENT_EXCELLENCE_V0} from '../runtime/agent-excellence-autonomy-v0.mjs';
 const NOW='2026-11-05T10:00:00Z';
 const agent = {agent_id:'SEO-DRAFT-01',supervisor_id:'CEREBRO-SUP-01',company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'1.0.0',enabled:true};
 const supervisor={supervisor_id:'CEREBRO-SUP-01',role:'CEREBRO_SUPERVISOR',active:true,attested_by_runtime:true,company_id:'fenix'};
