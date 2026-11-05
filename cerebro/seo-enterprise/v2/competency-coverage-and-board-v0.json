@@ -640,10 +640,21 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_READONLY_AUDIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS",
+          "run_id": 41980132770,
+          "status": "SUCCESS",
+          "scope": "PUBLIC_STAGING_HOMEPAGE_FINANCIAL_CLAIMS_REVIEW_QUEUE",
+          "observations": 6,
+          "claims_verified": false,
+          "site_changed": false,
+          "agent_authenticated": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -1314,8 +1325,8 @@
   "progress": {
     "department_count": 32,
     "fully_ready": 0,
-    "partial_with_evidence": 14,
-    "defined_only": 18,
+    "partial_with_evidence": 15,
+    "defined_only": 17,
     "staging_readonly_work_units": 3,
     "staging_readonly_observational_departments": 8,
     "lab_fixture_keyword_work_units": 2,
@@ -1331,6 +1342,8 @@
     "verified_active_agents": 0,
     "verified_active_subagents": 0,
     "full_web_staging_e2e_passed": false,
-    "new_subscriptions_eur": 0
+    "new_subscriptions_eur": 0,
+    "staging_claim_review_candidates": 6,
+    "financial_fact_check_verified": false
   }
 }
