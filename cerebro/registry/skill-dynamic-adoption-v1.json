@@ -4888,11 +4888,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_DESIGN_MD_BED5ADBA_PROD_READONLY_CANARY",
       "observed_at": "2026-11-05T01:49:58.089Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -4906,7 +4906,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "64bb99cd2eaef2e8aa40f6074896077750989bb8e2ca0e0e23030126c8f56cb3"
+      "capability_hash": "64bb99cd2eaef2e8aa40f6074896077750989bb8e2ca0e0e23030126c8f56cb3",
+      "canary": {
+        "status": "GREEN_DYNAMIC_DESIGN_MD_BED5ADBA_PROD_READONLY_CANARY",
+        "candidate_id": "repo:6702306d1a127c5b5e69056b38b1",
+        "technical_name": "design-md",
+        "head_sha": "dc43789b6defaf6e291f61052f9df4c8089a4d26",
+        "run_id": 41951171771,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-05T01:50:14.116Z"
+      },
+      "promoted_at": "2026-11-05T01:50:14.116Z"
     },
     {
       "candidate_id": "repo:d5f07ac47ece1a4573d3094e45d3",
@@ -16978,10 +17008,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 168,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 167
+    "pending_canary": 0,
+    "prod_readonly": 168
   }
 }
