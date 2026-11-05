@@ -60,3 +60,9 @@ No se han ejecutado mutaciones a web, App, CRM, Supabase, GSC ni PROD durante es
 - Prioridad de contrato: seguimiento distinto `PARTICULARES` vs `INMOBILIARIAS`, formulario contextual B2C/B2B y consentimientos individualizados; preservar plugin actual con backup/OLD vs NEW antes de cualquier cambio.
 
 **Conservación:** Sin nuevos jobs, sin llamada de imagen de pago, sin costes de proveedor, sin escrituras a WordPress publicado ni App/CRM, sin modificación de cola o cron, sin datos sintéticos de clientes. Este registro solo actualiza continuidad técnica de la PR DRAFT.
+
+### Descargable B2C real preparado · sin publicación
+- Fuente versionada en `cerebro/seo-enterprise/v2/assets/SEO_MAGNET_CHECKLIST_VISITA_CORDOBA_V1.md` (commit `1825628d099833f71d25f5b4155f4b20d9a3a555`).
+- PDF final de trabajo generado y renderizado visualmente: `FENIX_CHECKLIST_VISITA_PISO_CORDOBA_BORRADOR_V1.pdf`, 2 páginas A4, 33 campos editables/interactivos, checksum SHA256 `59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6`. Está accesible como archivo descargable de la conversación, NO como archivo del repositorio o de WordPress.
+- Estado `DRAFT_CONTENT_RENDERED_PDF_NOT_PUBLISHED`. Tipografía de respaldo, revisión visual realizada; falta marca final (Montserrat oficial), QA editorial/legales independiente, permisos de almacenamiento, entrega por email, consentimiento, segmentación B2C y E2E, publicación autorizada.
+- No subirlo a la librería pública de medios ni colocarlo detrás de una captación aparente sin entrega real. No crear otro descargable duplicado.
