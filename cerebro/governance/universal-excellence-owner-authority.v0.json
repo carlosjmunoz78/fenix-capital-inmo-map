@@ -142,7 +142,12 @@
       "SEO-001"
     ],
     "physical_identity_gate": "POR_AUDITAR",
-    "promotion_state": "DENIED_UNTIL_EVIDENCE"
+    "promotion_state": "DENIED_UNTIL_EVIDENCE",
+    "owner_supabase_auth_readonly_verifier_code_tested": true,
+    "owner_runtime_id_allowlist_configured": false,
+    "owner_api_secrets_issued": false,
+    "owner_console_actiongateway_lab_binding_tested": true,
+    "real_owner_session_live_tested": false
   },
   "docs": {
     "role_registry": "cerebro/registry/role-agent-registry.v1.json",

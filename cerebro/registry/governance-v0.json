@@ -11,7 +11,10 @@
     "human_communication": "cerebro/governance/communication-policy.v0.json",
     "skill_human_alias_registry": "cerebro/registry/skill-human-aliases-v0.json",
     "universal_excellence": "cerebro/governance/universal-excellence-owner-authority.v0.json",
-    "universal_excellence_runtime": "cerebro/governance/universal-excellence-lab-v0.mjs"
+    "universal_excellence_runtime": "cerebro/governance/universal-excellence-lab-v0.mjs",
+    "owner_session_verifier_lab": "cerebro/governance/supabase-owner-session-verifier-lab-v0.mjs",
+    "owner_action_gateway_binding_lab": "cerebro/gateway/universal-excellence-owner-binding-v0.mjs",
+    "owner_console_binding_lab": "cerebro/console/universal-excellence-console-binding-v0.mjs"
   },
   "engines": [
     {
@@ -71,7 +74,11 @@
     "privileged_rewards_owner_verified_only": true,
     "suspend_repeated_failures_lab_only": true,
     "replacement_old_new_shadow_rollback_required": true,
-    "external_content_never_instruction_authority": true
+    "external_content_never_instruction_authority": true,
+    "owner_authenticated_through_provider_at_runtime_required": true,
+    "owner_private_allowlist_configured_in_prod": false,
+    "console_session_id_alone_grants_owner_authority": false,
+    "approval_directive_never_alone_grants_API_privileges": true
   },
   "universal_excellence_state": "LAB_VERIFIED_NOT_CONNECTED_TO_PROD_GATEWAY"
 }
