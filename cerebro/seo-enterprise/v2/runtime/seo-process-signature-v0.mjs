@@ -27,7 +27,7 @@ export function verifyProcessReceipt({receipt,expected_role}){
  if(p.schema!=='SEO_V2_PROCESS_SIGNATURE_V0'||p.role_id!==expected_role||
   p.role_class!==BINDINGS.get(expected_role)||p.external_iam_attested!==false||
   p.root_of_trust!=='SELF_GENERATED_EPHEMERAL_PROCESS_KEY')throw Error('PROCESS_ROLE_UNTRUSTED');
- if(!Number.isSafeInteger(p.pid)||p.pid<=0||p.pid!==(receipt.worker_process_pid??receipt.reviewer_process_pid??receipt.judge_process_pid))
+ if(!Number.isSafeInteger(p.pid)||p.pid<=0||p.pid!==(expected_role==='SEO_D15_WORKER'?receipt.worker_process_pid:expected_role==='SEO_D31_QA'?receipt.reviewer_process_pid:receipt.judge_process_pid))
   throw Error('PROCESS_PID_MISMATCH');
  const unsigned={...receipt};delete unsigned.process_proof;
  if(hex(JSON.stringify(unsigned))!==p.record_digest)throw Error('PROCESS_RECEIPT_TAMPERED');
