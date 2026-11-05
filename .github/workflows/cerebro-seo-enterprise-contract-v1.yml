@@ -5,6 +5,8 @@ on:
     paths:
       - 'cerebro/seo-enterprise/v1/**'
       - 'cerebro/seo-enterprise/v2/**'
+      - 'cerebro/governance/universal-excellence*'
+      - 'cerebro/tests/universal-excellence-lab-v0.test.mjs'
       - '.github/workflows/cerebro-seo-enterprise-contract-v1.yml'
   workflow_dispatch:
 
@@ -19,3 +21,24 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate SEO architecture and fail-closed STAGING to PROD contract
         run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
+      - name: Prove universal owner-only excellence rewards suspension and replacement policy
+        run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs
+      - name: Physical synthetic LAB universal excellence proof (no IAM privilege applied)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/cerebro-excellence"
+          node cerebro/governance/universal-excellence-runner-v0.mjs \
+            "$RUNNER_TEMP/cerebro-excellence/excellence-ledger.v8" \
+            "$RUNNER_TEMP/cerebro-excellence/excellence-evidence.json"
+      - name: Keep minimal LAB proof (no raw customer data)
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: cerebro-universal-excellence-lab-v0
+          path: |
+            ${{ runner.temp }}/cerebro-excellence/excellence-ledger.v8
+            ${{ runner.temp }}/cerebro-excellence/excellence-evidence.json
+          retention-days: 14
+          if-no-files-found: error
+
