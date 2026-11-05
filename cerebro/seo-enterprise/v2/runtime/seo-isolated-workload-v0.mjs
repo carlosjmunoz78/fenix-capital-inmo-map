@@ -4,7 +4,7 @@
  */
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
 const BRANCH='cerebro/seo-enterprise-family-staging-contract-v1-20261105';
-const WORKFLOW='.github/workflows/cerebro-seo-isolated-roles-lab-v0.yml';
+const WORKFLOW='.github/workflows/cerebro-seo-staging-readonly-v0.yml';
 export const JOB_ROLE=Object.freeze({
  'seo-worker-isolated':{role_id:'SEO_D15_WORKER',scope:'mission:execute'},
  'seo-qa-isolated':{role_id:'SEO_D31_QA',scope:'mission:evaluate'},
