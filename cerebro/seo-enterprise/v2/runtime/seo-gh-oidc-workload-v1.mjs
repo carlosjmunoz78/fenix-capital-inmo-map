@@ -23,7 +23,7 @@ const dec=x=>JSON.parse(Buffer.from(x,'base64url').toString('utf8'));
 const asInt=x=>typeof x==='string'&&/^[1-9]\d{0,14}$/.test(x)?Number(x):NaN;
 const getJson=async (url,init={},fetchImpl=fetch)=>{
  const resp=await fetchImpl(url,{...init,redirect:'error',signal:AbortSignal.timeout(9000)});
- if(!resp?.ok)fail('HTTP_FAILED');return resp.json();
+ if(!resp?.ok)fail('HTTP_'+String(resp?.status||'UNKNOWN'));return resp.json();
 };
 export function verifyJwtSignedByGithub({jwt,jwks,env,nowSeconds=Math.floor(Date.now()/1000)}){
  if(typeof jwt!=='string'||jwt.length<200||jwt.length>18000)fail('JWT_FORMAT');
