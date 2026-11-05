@@ -1,0 +1,51 @@
+{
+  "schema": "zeus.jarvis.b3.cut.state.v1",
+  "date": "2026-11-05",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-B3-AUTH-001",
+  "environment": "LAB",
+  "cut": "B3_OWNER_AUTH_CUT10",
+  "pr_number": 25,
+  "parent_pr_number": 20,
+  "status": "PARCIAL_LAB_SECURITY_GREEN_PROD_DISABLED",
+  "tested_sha": "c7ac1fe499cb0ddc5c698d2fb1906ec13d61c7d0",
+  "prod_readonly": {
+    "project_id": "cluhljgonannaafpmblx",
+    "b3_enabled": false,
+    "b3_kill_switch": true,
+    "b4_enabled": false,
+    "b4_kill_switch": true,
+    "b3_grants": 0,
+    "b3_secrets_inventory": 0,
+    "b3_audits": 0,
+    "b4_events": 0,
+    "anon_grants": 0,
+    "authenticated_grants": 0,
+    "legacy_work_gateway_b3_wiring": false,
+    "legacy_orchestrator_b3_wiring": false
+  },
+  "security_code": "Owner and session identifiers validated; roles and companies arrays validated before grant lookup; B2 Fenix channel + global identity + B3 compositional LAB tests",
+  "ci": {
+    "node_run": 42093367474,
+    "pass": 535,
+    "fail": 0,
+    "b7_run": 42093367347,
+    "governed_run": 42093367330,
+    "prod_deployment": false
+  },
+  "blockers": [
+    "REAL_SIGNED_OWNER_SESSION_AND_REGISTRY",
+    "B2_B3_LIVE_GATEWAY_SERVER_ADAPTER",
+    "OWNER_GRANT_AND_REVOKE_UNDER_AUDIT",
+    "TWO_AUTHENTICATED_DEVICES",
+    "B3_B4_BACKUP_RESTORE_AND_SECURITY_REVIEW",
+    "B10_INDEPENDENT_PROD_CERTIFICATION"
+  ],
+  "new_subscriptions": 0,
+  "prod_writes": 0,
+  "grants_created": 0,
+  "flags_changed": 0,
+  "main_changed": false,
+  "next": "B2_OWNER_ROOT_LIVE_BINDING_TEST_HARNESS_AND_B3_GATEWAY_ADAPTER_IN_ISOLATED_RUNTIME",
+  "rollback": "CLOSE_PR25_DRAFT_NO_MERGE_KEEP_KILL_SWITCH_ON"
+}
