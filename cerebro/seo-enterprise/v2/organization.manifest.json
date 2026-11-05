@@ -594,7 +594,16 @@
       "UNAPPROVED_BUDGET",
       "ERASE_HISTORY"
     ],
-    "review_of_oversight_by_independent_peers": true
+    "review_of_oversight_by_independent_peers": true,
+    "universal_policy_ref": "cerebro/governance/universal-excellence-owner-authority.v0.json",
+    "extra_existing_api_access_reward_candidate": true,
+    "expanded_powers_reward_candidate": true,
+    "privileged_reward_requires_verified_owner_and_policy": true,
+    "repeated_failure_lab_suspension": true,
+    "security_incident_immediate_lab_quarantine": true,
+    "real_iam_reward_or_suspension_active": false,
+    "owner_only_strategy": true,
+    "all_existing_role_classes_included": true
   },
   "staging_first": {
     "site": "https://staging.fenixcapital.es",
