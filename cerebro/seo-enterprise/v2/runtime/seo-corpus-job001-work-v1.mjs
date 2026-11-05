@@ -8,6 +8,7 @@ import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
+import {ActionGatewayV1} from '../../../gateway/action-gateway-v1.mjs';
 import {getSeoDepartmentKnowledge,listSeoDepartments} from './seo-specialist-workforce-v2.mjs';
 import {verifyPriorSeoJob} from './seo-gh-oidc-workload-v1.mjs';
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
@@ -181,6 +182,30 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
   actual_iam_specialists:0,full_training_certifications:0,
   independent_qa_passed:false,prod_authorized:false,web_mutations:0,new_subscriptions_eur:0};
 }
+export async function executeSeoCorpusViaGateway({journal_path,identity,now_ms=Date.now()}={}){
+ requireHost(identity,'SEO_CORPUS_WORKER');
+ const gateway=new ActionGatewayV1({environment:'PREPROD'});
+ const capability='SEO_FROZEN_CORPUS_EVIDENCE_READONLY';
+ gateway.registerCapability(capability,async ({context,payload})=>{
+  if(context.company_id!=='fenix'||payload?.source!=='PINNED_CURRENT_CORPUS'||
+    payload?.no_recrawl!==true||payload?.role!=='SEO_CORPUS_WORKER')
+   throw Error('GATEWAY_PAYLOAD_SCOPE_INVALID');
+  return executeSeoCorpusWork({journal_path,identity,now_ms});
+ });
+ const action=await gateway.execute({
+  context:{company_id:'fenix',engine_id:'ACTGW-001',environment:'PREPROD',version:'2.1.0'},
+  capability,authorized:true,requires_prod_write:false,autonomous_prod:false,trading_access:false,
+  risk:'LOW',estimated_additional_cost_eur:0,
+  idempotency_key:'seo-corpus-oidc-'+identity.github_run_id+'-'+identity.github_job_name,
+  payload:{source:'PINNED_CURRENT_CORPUS',no_recrawl:true,role:'SEO_CORPUS_WORKER'}
+ });
+ if(action.status!=='ACTION_EXECUTED'||action.result?.status!=='READONLY_CORPUS_WORK_EXECUTED_HOST_AUTHENTICATED'||
+   action.executed!==true||gateway.auditLog().length!==1)throw Error('GATEWAY_EXECUTION_NOT_PROVEN');
+ return {...action.result,gateway_receipt:{status:action.status,capability:action.capability,
+  gateway_id:'ACTGW-001',audit_events:gateway.auditLog().length,untrusted_web_inputs_executed:false,
+  oidc_workload_identity_required:true,production_permissions_granted:false}};
+}
+
 export function reviewSeoCorpusWork({worker,identity}={}){
  requireHost(identity,'SEO_CORPUS_INDEPENDENT_QA');
  if(worker?.status!=='READONLY_CORPUS_WORK_EXECUTED_HOST_AUTHENTICATED'||worker.environment!=='PREPROD'||
@@ -232,7 +257,7 @@ async function main(){
  const write=(file,value)=>fs.writeFileSync(file,JSON.stringify(value,null,2)+'\n',{mode:0o600,flag:'wx'});
  if(stage==='worker'){
   const [journal,identityFile,out]=args;
-  const x=executeSeoCorpusWork({journal_path:journal,identity:read(identityFile)});
+  const x=await executeSeoCorpusViaGateway({journal_path:journal,identity:read(identityFile)});
   write(out,x);process.stdout.write(JSON.stringify({status:x.status,work_receipts:141,snapshot_docs:200,external_writes:0})+'\n');
  }else if(stage==='qa'){
   const [workerFile,workerId,qaId,out]=args;
