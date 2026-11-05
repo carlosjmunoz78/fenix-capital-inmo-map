@@ -1,0 +1,47 @@
+{
+  "cut": "CUT24",
+  "date": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT24",
+  "certified_sha": "790bde80d9f0d6269c42f31363cbbefebdd94106",
+  "pr": 25,
+  "draft": true,
+  "tests": {
+    "passed": 654,
+    "failed": 0
+  },
+  "ci_runs": {
+    "universal": 42128669923,
+    "wrangler_local": 42128669967,
+    "b4": 42128670127,
+    "b7": 42128670014,
+    "governed": 42128670181
+  },
+  "state": "PARTIAL",
+  "prod": "NO_GO",
+  "done": [
+    "B3 D1 read-only zero cost grants default deny",
+    "Append-only D1 audit with FAIL-CLOSED",
+    "Integrated B2 B3 Gateway synthetic two-session and revocation",
+    "Local independent restore"
+  ],
+  "pending": [
+    "New D1 with jurisdiction eu",
+    "Real OWNER_ROOT",
+    "Vault",
+    "Live B3 grants",
+    "Real two devices",
+    "Audit before B3",
+    "Remote restore",
+    "B10 independent"
+  ],
+  "existing_cloudflare_d1": {
+    "name": "cerebro-jarvis-lab-cut21",
+    "jurisdiction": null,
+    "mutated": false
+  },
+  "next": "EU D1 remote provisioning, secure scoped auth, remote restore, B2/B3/B10 with independent evidence",
+  "rollback": "Revert CUT24 in PR DRAFT; no remote schema/deployment changes"
+}
