@@ -665,5 +665,19 @@
     "legacy_draft_rewrite": false,
     "live_monitor_mode": "CHATGPT_CONNECTED_WORDPRESS_DAILY_READ_ONLY",
     "live_monitor_does_not_equal_job001_binding": true
+  },
+  "department_operating_scope": {
+    "state": "FULL_32_DEPARTMENT_LIFECYCLE_CHARTER_DEFINED_NOT_ALL_OPERATIONAL",
+    "governance_ref": "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+    "description": "Full SEO site, city, local, competitor, SERP, content, technical SEO, CRO, GSC, GA4 and continuous learning, not a draft-making department",
+    "draft_approval_gate_temporary": true,
+    "owner_defined_autonomy_ladder": "L0_TO_L4_SCOPE_CERTIFIED",
+    "first_external_source": "WORDPRESS_OFFICIAL",
+    "first_real_pilot_wp_post_id": 52656,
+    "all_32_real_agents_mounted": false,
+    "real_gsc_data_verified": false,
+    "jaen_mass_rollout_certified": false,
+    "action_priority": "FIX_EXISTING_RISKS_AND_MEASURE_OUTCOMES_BEFORE_MASS_NEW_URL_CREATION",
+    "protection": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR"
   }
 }
