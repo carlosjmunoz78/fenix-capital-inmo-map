@@ -16,12 +16,13 @@ export function assessAiCreativeJob(job,{env=process.env}={}){
  const request=job?.request??{};
  if(request.creative_payload?.scene_provider!=='OPENAI_IMAGE')
    return {is_ai:false,status:'LEGACY_DETERMINISTIC_UNCHANGED'};
- if(job.environment!=='PREPROD'||job.company_id!=='fenix-capital'||job.engine_id!=='SOC-001'||job.channel!=='FACEBOOK'||job.output_type!=='SQUARE_POST')
+ if(job.environment!=='PREPROD'||job.company_id!=='fenix'||job.engine_id!=='FACT-001'||job.channel!=='FACEBOOK'||job.output_type!=='SQUARE_POST')
    return {is_ai:true,ready:false,status:'HOLD',reason:'SCOPE_DENIED'};
  const b=request.creative_payload?.brief;
  let order;
  try{order=buildCerebroCreativeOrder(b);}catch{return {is_ai:true,ready:false,status:'HOLD',reason:'BRIEF_NOT_READY'};}
- if(order.company_id!==job.company_id||order.engine_id!==job.engine_id||order.environment!==job.environment)
+ if(order.company_id!==job.company_id||order.engine_id!=='SOC-001'||order.environment!==job.environment||
+    request.creative_payload?.requester_engine_id!=='SOC-001')
    return {is_ai:true,ready:false,status:'HOLD',reason:'SCOPE_MISMATCH'};
  if(!Number.isFinite(Number(request.expected_cost_eur))||Number(request.expected_cost_eur)<=0)
    return {is_ai:true,ready:false,status:'HOLD',reason:'MONEY_LIMIT'};
