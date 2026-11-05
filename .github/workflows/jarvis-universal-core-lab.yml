@@ -36,3 +36,9 @@ jobs:
             -e PGHOST=127.0.0.1 \
             -e PGPASSWORD=jarvis_cut13_synthetic_only \
             postgres:17 bash zeus/jarvis/gates/cut13_lab_pg_acceptance.sh
+      - name: CUT17 isolated PostgreSQL session revocation and restore
+        run: |
+          docker run --rm --network host -v "$PWD:/work:ro" -w /work \
+            -e PGHOST=127.0.0.1 \
+            -e PGPASSWORD=jarvis_cut13_synthetic_only \
+            postgres:17 bash zeus/jarvis/gates/cut17_lab_pg_session_acceptance.sh
