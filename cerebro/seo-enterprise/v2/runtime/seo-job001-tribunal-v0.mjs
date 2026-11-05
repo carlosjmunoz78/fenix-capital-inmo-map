@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {sealProcessReceipt,verifyProcessReceipt} from './seo-process-signature-v0.mjs';
 export function tribunalReview({worker_receipt,independent_review,judge_role_id='SEO_JUDGE_A'}){
  const b=JSON.parse(fs.readFileSync(new URL('../seo-role-workunit-bindings-v0.json',import.meta.url),'utf8'));
  const j=b.roles.find(x=>x.role_id===judge_role_id&&x.role_type==='JUDGE');
@@ -20,8 +21,10 @@ export function tribunalReview({worker_receipt,independent_review,judge_role_id=
     q.risk_flags_count!==w.risk_count)throw Error('QA_EVIDENCE_MISMATCH');
  if(w.run_state!=='SUCCEEDED'||w.ready!==false||w.prod_authorized!==false||
     q.identity_cryptographically_attested!==false)throw Error('WORKER_RELEASE_POLICY_DENIED');
+ verifyProcessReceipt({receipt:w,expected_role:'SEO_D15_WORKER'});
+ verifyProcessReceipt({receipt:q,expected_role:'SEO_D31_QA'});
  const decision=q.review_status==='EVIDENCE_MATCHED'?'LAB_EVIDENCE_ACCEPTED_NO_RELEASE':'HUMAN_REQUIRED_NO_RELEASE';
- return {schema_version:'0.1.0',company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
+ return sealProcessReceipt({role_id:judge_role_id,receipt:{schema_version:'0.1.0',company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
   job_id:w.job_id,worker_role_id:w.worker_role_id||'SEO_D15_WORKER',qa_role_id:q.role_id,judge_role_id,
   judge_process_pid:process.pid,physical_process_separation_verified:true,
   status:decision,verified_source_sha256:w.source_html_sha256,three_level_independence_logical:true,
@@ -30,7 +33,7 @@ export function tribunalReview({worker_receipt,independent_review,judge_role_id=
   judge_review_requires_independent_meta_evaluation:true,
   training_and_replacement_physically_verified:false,backup_website_verified:false,rollback_website_verified:false,
   website_publication_allowed:false,canary_prod_authorized:false,
-  ready:false,prod_authorized:false,external_writes:0,additional_eur:0};
+  ready:false,prod_authorized:false,external_writes:0,additional_eur:0}});
 }
 async function main(){
  const [receiptFile,reviewFile,verdictFile]=process.argv.slice(2);
