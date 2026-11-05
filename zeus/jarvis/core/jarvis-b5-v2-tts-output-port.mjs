@@ -42,7 +42,7 @@ export function createJarvisB5V2TtsOutputPort({
   }catch{return {error:'CONTROL_OR_POLICY_UNAVAILABLE'};}
  }
  async function synthesize(r={}){
-  if(typeof r.text!=='string'||!r.text.trim()||r.text.length>1200||SENSITIVE.test(r.text))
+  if(typeof r.text!=='string'||!r.text.trim()||r.text.length>900||SENSITIVE.test(r.text))
    return deny('TTS_TEXT_REJECTED');
   if(r.profileId!== 'JARVIS_V2_CLARA_ES_ES')return deny('PROFILE_NOT_APPROVED');
   const auth=await authorized(r,'TTS');
@@ -61,7 +61,7 @@ export function createJarvisB5V2TtsOutputPort({
   try{hold=await budgetLedger.reserve({companyId:r.companyId,environment:'LAB',requestId:r.requestId,
    provider:'VIDIQ',maxCredits:14,allowRecharge:false,requireVerifiedPrepaid:true});}
   catch{return deny('BUDGET_UNAVAILABLE');}
-  if(hold?.state!=='HELD'||!valid(hold.reservationId)||!Number.isInteger(hold.maxCredits)||
+  if(hold?.state!=='HELD'||hold.fresh!==true||hold.verifiedPrepaid!==true||!valid(hold.reservationId)||!Number.isInteger(hold.maxCredits)||
      hold.maxCredits<1||hold.maxCredits>14)return deny('PREPAID_CREDIT_NOT_RESERVED');
   let called=false;
   try{
