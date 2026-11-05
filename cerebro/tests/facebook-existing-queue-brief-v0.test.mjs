@@ -58,7 +58,7 @@ test('FACT-001 consumes current actual queue company/engine; paid work still blo
 });
 test('no creative work order if destination, caption provenance, buyer persona or company wrong',()=>{
  const x=p(CASES[0]);
- assert.throws(()=>buildFacebookBriefFromExistingQueue({...x,destination_url:'https://staging.fenixcapital.es/contacto/?utm_source=facebook'}),/PRODUCTION_HOST_ONLY/);
+ assert.throws(()=>compileQueueOrder({...x,destination_url:'https://staging.fenixcapital.es/contacto/?utm_source=facebook'}),/PRODUCTION_HOST_ONLY/);
  assert.throws(()=>buildFacebookBriefFromExistingQueue({...x,buyer_persona:'unknown-persona'}),/PERSONA_REQUIRES_HUMAN_EDITORIAL_REVIEW/);
  assert.throws(()=>buildFacebookBriefFromExistingQueue({...x,full_caption:'No coincide el texto'}),/HOOK_CAPTION_MISMATCH/);
  assert.throws(()=>buildFacebookBriefFromExistingQueue({...x,audience:'inmobiliarias'}),/B2B_REQUIRES_DIFFERENT_CONCEPT_POLICY/);
