@@ -9,6 +9,7 @@ import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from '../r
 import {createSeoCurriculumCases,verifySeoCurriculumCases} from '../runtime/seo-specialist-exercise-engine-v1.mjs';
 import {createSeoSpecialistWorkProducts,independentlyReviewSeoWorkProducts} from '../runtime/seo-specialist-work-product-v1.mjs';
 import {runSeoDeterministicPractice,validateSeoDeterministicPractice} from '../runtime/seo-specialist-practice-attempt-v1.mjs';
+import {createSeoEditorialWriteBundle,physicallyWriteSeoDrafts,proveSeoDraftRollback,executeSeoSandboxWrite} from '../runtime/seo-draft-writer-lab-v1.mjs';
 
 
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
@@ -222,4 +223,48 @@ test('real JOB-001 OIDC worker QA and tribunal include separate deterministic ex
  const j=tribunalSeoCorpusWork({worker:w,qa:q,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',853)});
  assert.equal(j.deterministic_practice_responses_verified,423);
  assert.equal(j.individual_agent_exams_completed,0);
+});
+
+test('safe LAB writer creates 20 real editorial files, idempotently replays and physically rolls back canary',async t=>{
+ const w=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',901)});
+ const q=reviewSeoCorpusWork({worker:w,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',902)});
+ const tri=tribunalSeoCorpusWork({worker:w,qa:q,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',903)});
+ const writer={...makeIdentity('SEO_CORPUS_WORKER',904),
+  role:'SEO_SANDBOX_DRAFT_WRITER',github_job_name:'seo-corpus-sandbox-writer'};
+ const root=fs.mkdtempSync(path.join(process.env.RUNNER_TEMP||os.tmpdir(),'seo-write-test-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const actual=await executeSeoSandboxWrite({worker:w,qa:q,tribunal:tri,identity:writer,output_root:root});
+ assert.equal(actual.status,'REAL_SANDBOX_DRAFT_WRITE_COMPLETED');
+ assert.equal(actual.editorial_drafts,20);
+ assert.equal(actual.file_count,21);
+ assert.equal(actual.wordpress_writes,0);assert.equal(actual.prod_authorized,false);
+ assert.equal(actual.rollback_canary_verified,true);
+ const bundle=createSeoEditorialWriteBundle({
+  corpus:loadFrozenSeoCorpus(),work_products:w.work_products});
+ assert.equal(bundle.drafts.every(x=>x.can_publish===false&&x.can_change_existing_url===false),true);
+ const again=physicallyWriteSeoDrafts({output_root:root,bundle});
+ assert.equal(again.state,'ALREADY_WRITTEN_IDEMPOTENT');
+ const files=fs.readdirSync(path.join(root,'seo-editorial-draft-bundle-v1'));
+ assert.equal(files.length,21);
+ assert.equal(proveSeoDraftRollback({output_root:root}).created_file_removed,true);
+ const first=path.join(root,'seo-editorial-draft-bundle-v1',files.find(x=>x.startsWith('draft-')));
+ fs.appendFileSync(first,'UNEXPECTED_MODIFICATION');
+ assert.throws(()=>physicallyWriteSeoDrafts({output_root:root,bundle}),/IDEMPOTENCY_CONTENT_CONFLICT/);
+});
+test('write IAM, QA, no-PROD and sandbox path guards fail closed',async t=>{
+ const w=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',951)});
+ const q=reviewSeoCorpusWork({worker:w,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',952)});
+ const tri=tribunalSeoCorpusWork({worker:w,qa:q,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',953)});
+ const writer={...makeIdentity('SEO_CORPUS_WORKER',954),role:'SEO_SANDBOX_DRAFT_WRITER',
+  github_job_name:'seo-corpus-sandbox-writer'};
+ const root=fs.mkdtempSync(path.join(process.env.RUNNER_TEMP||os.tmpdir(),'seo-write-deny-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ await assert.rejects(()=>executeSeoSandboxWrite({worker:w,qa:q,tribunal:tri,
+   identity:makeIdentity('SEO_CORPUS_WORKER',954),output_root:root}),/IAM_DENY/);
+ await assert.rejects(()=>executeSeoSandboxWrite({worker:w,qa:q,
+   tribunal:{...tri,decision:'ALLOW_PRODUCTION'},identity:writer,output_root:root}),/QA_TRIBUNAL_DENIED/);
+ const bundle=createSeoEditorialWriteBundle({corpus:loadFrozenSeoCorpus(),work_products:w.work_products});
+ assert.throws(()=>physicallyWriteSeoDrafts({output_root:'/home',bundle}),/OUTSIDE_TEMP/);
+ const changed=structuredClone(bundle);changed.wordpress_write_permission=true;
+ assert.throws(()=>physicallyWriteSeoDrafts({output_root:root,bundle:changed}),/SCOPE_DENIED/);
 });
