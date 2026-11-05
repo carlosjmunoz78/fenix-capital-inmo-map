@@ -8,6 +8,9 @@ import {verifyJwtSignedByGithub} from '../runtime/seo-gh-oidc-workload-v1.mjs';
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
 const makeIdentity=(role,id)=>({status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
  company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',role,
+ github_job_name:({'SEO_CORPUS_WORKER':'seo-corpus-worker','SEO_CORPUS_INDEPENDENT_QA':'seo-corpus-qa','SEO_CORPUS_TRIBUNAL':'seo-corpus-tribunal'})[role],
+ oidc_token_sha256:crypto.createHash('sha256').update(String(id)).digest('hex'),
+ oidc_subject_sha256:crypto.createHash('sha256').update('test-sub').digest('hex'),
  workload_oidc_verified:true,provider_job_verified:true,github_job_id:id,github_run_id:123,
  individual_agent_iam_verified:false,can_write_prod:false});
 const tmp=t=>{const dir=fs.mkdtempSync(path.join(os.tmpdir(),'seo-corpus-v1-'));
