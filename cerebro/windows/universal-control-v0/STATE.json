@@ -71,7 +71,7 @@
     "physical_test": "PENDING",
     "legacy_rollback": "NOT_REQUIRED_NO_LEGACY_MUTATION"
   },
-  "next_block": "PC001_OWNER_ISSUER_BACKEND_AUTH_BINDING -> ATOMIC_EXACT_SCOPE_ENQUEUE -> ONE_REAL_READ_HEALTH_RECEIPT -> WORKER_HANDOFF -> CONSENTED_REMOTE_UI_FILE_PROOF",
+  "next_block": "TRUSTED_OWNER_BACKEND_ATOMIC_GRANT_AND_COMMAND_INSERT -> PHYSICAL_READ_HEALTH -> WORKER_HANDOFF -> CONSENTED_UI_FS_E2E",
   "user_reported_installed": true,
   "last_remote_browser_probe": {
     "date": "2026-11-04",
@@ -1380,7 +1380,7 @@
   },
   "pc001_owner_issuer_v0": {
     "version": "0.1.0",
-    "status": "CODE_CI_GREEN_NOT_DEPLOYED",
+    "status": "PREPROD_CODE_CI_GREEN_NOT_DEPLOYED",
     "branch": "cerebro/pc001-owner-issued-health-canary-v0-20261105",
     "source_path": "cerebro/windows/pc-001/issuer-v0/",
     "company_id": "fenix",
@@ -1395,16 +1395,25 @@
     "owner_auth_exact_scope": "CODE_VERIFIED",
     "atomically_enqueued_remote_command": "NOT_EXECUTED",
     "physical_remote_command_e2e": "PENDING",
-    "gh_actions_run_id": 42003062430,
-    "gh_actions_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42003062430",
-    "tests_ci": "43_PASS_0_FAIL_REAL_OWNER_GATE_AND_REAL_DEVICE_ENVELOPE_V2",
-    "local_tests": "25_PASS_WITH_STANDIN_DEPENDENCIES",
+    "gh_actions_run_id": 42004220156,
+    "gh_actions_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42004220156",
+    "tests_ci": "46_PASS_0_FAIL_REAL_OWNER_GATE_AND_V2_WITH_GRANT_EXPIRY_REVOCATION_ATOMIC_CONSUMPTION",
+    "local_tests": "28_PASS_STANDIN_ONLY",
     "library_zip": "/CEREBRO_OS/WINDOWS_UNIVERSAL_V0_2026_11_04/PC001_OWNER_ISSUER_V0_2026_11_05/CEREBRO_PC001_OWNER_ISSUER_V0_PREPROD.zip",
     "remote_desktop_control_enabled": false,
     "existing_worker_modified": false,
     "prod_modified": false,
     "trading_access": false,
     "additional_subscriptions_eur": 0,
-    "next_gate": "TRUSTED_BACKEND_OWNER_BINDING_AND_ATOMIC_INSERT_TEST_IN_PREPROD_THEN_EXISTING_WORKER_HEALTH_RECEIPT_E2E"
+    "next_gate": "TRUSTED_OWNER_BACKEND_ATOMIC_GRANT_AND_COMMAND_INSERT -> PHYSICAL_READ_HEALTH -> WORKER_HANDOFF -> CONSENTED_UI_FS_E2E",
+    "existing_owner_auth_provider": "cerebro-owner-decision-gateway-v0_AUTH_GETUSER_AND_SERVER_ACTOR_RPC_VERIFIED_CODE",
+    "owner_auth_actor_requirement": "CARLOS-ADMIN_Direccion_ACTIVE",
+    "standing_grant_expiry_revocation_usage_checks": "CODE_VERIFIED",
+    "server_atomic_one_shot_consumption": "CONTRACT_ONLY_BACKEND_PENDING",
+    "actual_remote_health_command": "NOT_SENT",
+    "physical_remote_ui_fs": "PENDING",
+    "sha256s_file_on_branch": "STALE_AFTER_SOURCE_HARDENING_UPDATE_BLOCKED_BY_SECURITY_CONTROL",
+    "uploaded_library_zip_updated": true,
+    "original_worker_modified": false
   }
 }
