@@ -20,7 +20,7 @@ export async function fetchFenixOfficialLogo({fetch_impl=fetch}={}){
  return data;
 }
 export function renderImageHtml({order,photo_png,logo_png}){
- if(!order||order.company_id!=='fenix'||order.engine_id!=='SOC-001'||order.environment!=='PREPROD'
+ if(!order||order.company_id!=='fenix'||order.engine_id!=='SOC-001'||order.environment!=='PREPROD')
    throw Error('VISUAL_RENDER_SCOPE_DENIED');
  validPng(photo_png);validPng(logo_png);
  const t=order.copy??{};
