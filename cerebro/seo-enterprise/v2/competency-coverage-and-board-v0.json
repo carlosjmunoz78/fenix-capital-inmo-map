@@ -429,10 +429,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -465,10 +474,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -659,10 +677,19 @@
         "LOCALP-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -803,10 +830,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -876,10 +912,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -913,10 +958,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -949,10 +1003,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -985,10 +1048,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_HOME_OBSERVATION",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938332022",
+          "result": "SUCCESS",
+          "scope": "STAGING_PUBLIC_HOME_OBSERVATIONAL_ONLY",
+          "independent_iam_verified": false,
+          "limitations": "SINGLE_PAGE_OBSERVATION_NOT_DEPARTMENT_E2E"
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -1230,9 +1302,10 @@
   "progress": {
     "department_count": 32,
     "fully_ready": 0,
-    "partial_with_evidence": 5,
-    "defined_only": 27,
+    "partial_with_evidence": 13,
+    "defined_only": 19,
     "staging_readonly_work_units": 3,
+    "staging_readonly_observational_departments": 8,
     "lab_fixture_work_units": 2,
     "verified_active_agents": 0,
     "verified_active_subagents": 0,
