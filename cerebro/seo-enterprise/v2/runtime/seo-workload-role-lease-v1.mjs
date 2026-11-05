@@ -40,7 +40,7 @@ export function issueSeoRoleProofs({host,role_work_receipts,corpus_digest,now_ms
  const public_key_pem=publicKey.export({type:'spki',format:'pem'}).toString();
  const all=[],ids=new Set();
  for(const evidence of role_work_receipts){
-  if(!ROLE.test(e?.role_id)||typeof e?.department_id!=='string'||
+  if(!ROLE.test(evidence?.role_id)||typeof evidence?.department_id!=='string'||
    !e.role_id.startsWith(e.department_id+':SPECIALIST:')||
    evidence.source_snapshot_digest!==corpus_digest||ids.has(e.role_id))invalid('ROLE_SCOPE');
   ids.add(e.role_id);
