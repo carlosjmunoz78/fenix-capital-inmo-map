@@ -8,7 +8,7 @@
   "department_id": "PRODUCTORA_AUDIOVISUAL",
   "environment": "PREPROD",
   "version": "v0",
-  "status": "PREPROD_MOCK_CI_GREEN_LIVE_BLOCKED_WORKER_CREDENTIAL_NOT_CONNECTED",
+  "status": "PREPROD_FAC001_SOC001_TEN_MEDIA_JOBS_HOLD_MEDIA_BUDGET_LIVE_DEFAULT_OFF",
   "relations": {
     "existing_queue": "cerebro_creative_job_v1",
     "existing_dispatcher": "cerebro-creative-dispatch-v1",
@@ -142,6 +142,22 @@
         "MEDIA_BUDGET_LEDGER_NOT_READY"
       ],
       "reason_category": "BLOCKED_TECHNICAL_NOT_REQUIRING_FRESH_OWNER_CONSENT"
+    },
+    "media_budget_ledger": {
+      "schema": "cerebro_owner_control",
+      "table": "media_budget_v0",
+      "reservation_table": "media_spend_v0",
+      "reservation_rpc": "cerebro_owner_control.reserve_image_spend_v0",
+      "migration": "supabase/migrations/20261105_cerebro_media_budget_v0.sql",
+      "actual_state": "INSTALLED_PREPROD_OWNER_BUDGET_DISABLED_BY_DEFAULT",
+      "max_images": 1,
+      "max_eur_current": 0,
+      "spent_eur_current": 0,
+      "reserved_eur_current": 0,
+      "forced_guard_status": "SECURITY_INCIDENT",
+      "provider_image_calls": 0,
+      "remote_model_access_needs_rotated_secret": true,
+      "paid_worker_attached_to_private_rpc": false
     }
   },
   "publication": {
@@ -181,7 +197,11 @@
     "OWNER_CONTROL_GATEWAY_VERIFIED_AUTH",
     "OWNER_COMMAND_TO_WORKER_CONSUMPTION",
     "OWNER_PAUSE_RESUME_ROLLBACK_REGRESSION",
-    "BREAK_GLASS_RECOVERY_TEST"
+    "BREAK_GLASS_RECOVERY_TEST",
+    "TEN_FACEBOOK_BRIEFS_INDEPENDENT_QA",
+    "MEDIA_BUDGET_RPC_WORKER_WIRING",
+    "EXPOSED_API_KEY_ROTATION_EVIDENCE",
+    "BUFFER_FACEBOOK_NATIVE_CANARY_AFTER_EXTERNAL_SECURITY_RESOLUTION"
   ],
   "evidence": {
     "workflow": "CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend",
@@ -211,7 +231,11 @@
     },
     "latest_workflow_credential_check": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42011070119",
     "paid_image_reason": "OWNER_AUTHORIZED; WORKER_SECRET_AND_SPEND_LEDGER_PENDING",
-    "owner_control_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42025858822"
+    "owner_control_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42025858822",
+    "ten_briefs_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42029366621",
+    "buffer_dry_run_http": "200",
+    "queue_source": "cerebro_social_queue_preprod",
+    "image_generated_by_fact001": "NO"
   },
   "owner_control": {
     "contract_version": "v0",
@@ -240,5 +264,36 @@
     "no_production_writes": true,
     "no_image_generated": true,
     "no_social_post_created": true
+  },
+  "queue_recovery": {
+    "observed_at": "2026-11-05",
+    "consumer": "SOC-001",
+    "provider_for_prior_successful_posts": "BUFFER",
+    "existing_native_facebook_posts_preserved": true,
+    "last_verified_native_publication_date": "2026-10-24",
+    "latest_missing_media_records": 10,
+    "missing_media_date_range": "2026-11-16 through 2026-11-26",
+    "queue_unchanged": true,
+    "created_production_order_count": 10,
+    "production_orders_status": "HOLD",
+    "idempotency_prefix": "fact001-soc001-photo-facebook-cadence-2026-11",
+    "no_paid_provider_called": true,
+    "automatic_brief_compiler": "cerebro/runtime/facebook-existing-queue-brief-v0.mjs",
+    "test": "cerebro/tests/facebook-existing-queue-brief-v0.test.mjs",
+    "brand_alias_correction": {
+      "canonical_company_id": "fenix",
+      "brand_profile_alias": "fenix-capital",
+      "producer_engine_id": "FACT-001",
+      "requester_engine_id": "SOC-001"
+    },
+    "preprod_buffer_dry_run": {
+      "request_id": 198242,
+      "http_status": 200,
+      "provider_calls": 0,
+      "state": "SOCIAL_GOVERNED_DISPATCH_DRY_RUN",
+      "facebook_ready_count": 0
+    },
+    "publishing_blocked_for_security": true,
+    "native_post_id_new": null
   }
 }
