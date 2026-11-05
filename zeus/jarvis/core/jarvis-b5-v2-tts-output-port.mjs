@@ -8,6 +8,7 @@ const ID=/^[A-Za-z0-9][A-Za-z0-9_.:/-]{0,179}$/;
 const VOICE_ID='cfkJwJs7cjrVgVLm3yvM';
 const SENSITIVE=/\b(?:password|contraseña|contrasena|api[_ -]?key|bearer|access[_ -]?token|refresh[_ -]?token|secret|secreto)\b/i;
 const valid=x=>typeof x==='string'&&ID.test(x);
+const validAudioRef=x=>typeof x==='string'&&/^[A-Za-z][A-Za-z0-9_-]{2,127}$/.test(x);
 const deny=reason=>Object.freeze({state:'DENY',reason,providerCalled:false,audioRef:null,spentEuro:0});
 export const JARVIS_V2_OUTPUT=Object.freeze({voiceId:VOICE_ID,profile:'MAS_CLARA',rate:1.10,pitchSemitones:0.6,locale:'es-ES'});
 export function createJarvisB5V2TtsOutputPort({
@@ -78,7 +79,7 @@ export function createJarvisB5V2TtsOutputPort({
    const ref=await audioStore.put({bytes:audio.bytes,contentType:'audio/mpeg',
     ownerId:auth.principal.ownerId,companyId:r.companyId,environment:'LAB',
     sessionId:r.sessionId,requestId:r.requestId,ttlSeconds:600});
-   if(!valid(ref))throw Error('AUDIO_STORE_UNAVAILABLE');
+   if(!validAudioRef(ref))throw Error('AUDIO_STORE_UNAVAILABLE');
    const settled=await budgetLedger.settle({reservationId:hold.reservationId,
     creditsCharged:audio.creditsCharged,requestId:r.requestId});
    if(settled!==true)throw Error('BUDGET_SETTLEMENT_UNVERIFIED');
@@ -99,7 +100,7 @@ export function createJarvisB5V2TtsOutputPort({
  async function getAudio(r={}){
   const auth=await authorized(r,'AUDIO_READ');
   if(auth.error)return deny(auth.error);
-  if(!valid(r.audioRef))return deny('AUDIO_REF_INVALID');
+  if(!validAudioRef(r.audioRef))return deny('AUDIO_REF_INVALID');
   try{
    const audio=await audioStore.get({audioRef:r.audioRef,ownerId:auth.principal.ownerId,
     companyId:r.companyId,environment:'LAB',sessionId:r.sessionId});
