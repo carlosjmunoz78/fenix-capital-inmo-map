@@ -73,10 +73,10 @@ export async function verifySeoGithubWorkload({env=process.env,fetchImpl=fetch,n
  const base='https://api.github.com/repos/'+REPO;
  const headers={Authorization:'Bearer '+env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
  let run,jobList;
- try{
-  run=await getJson(base+'/actions/runs/'+runId,{headers},fetchImpl);
-  jobList=await getJson(base+'/actions/runs/'+runId+'/jobs?per_page=100',{headers},fetchImpl);
- }catch{fail('GITHUB_API')}
+ try{run=await getJson(base+'/actions/runs/'+runId,{headers},fetchImpl)}
+ catch(err){fail('GITHUB_API_RUN_'+String(err?.message||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64))}
+ try{jobList=await getJson(base+'/actions/runs/'+runId+'/jobs?per_page=100',{headers},fetchImpl)}
+ catch(err){fail('GITHUB_API_JOBS_'+String(err?.message||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64))}
  if(run.id!==runId||run.run_attempt!==runAttempt||run.repository?.full_name!==REPO||
    run.event!=='pull_request'||run.head_branch!==BRANCH||run.path!==WORKFLOW||
    !['in_progress','completed'].includes(run.status))fail('RUN_BINDING');
