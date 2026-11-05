@@ -5,6 +5,9 @@ on:
     paths:
       - 'cerebro/seo-enterprise/v1/**'
       - 'cerebro/seo-enterprise/v2/**'
+      - 'cerebro/factory/seo-org-v0.mjs'
+      - 'cerebro/factory/seo-org-cli-v0.mjs'
+      - 'cerebro/tests/seo-org-v0.test.mjs'
       - 'cerebro/governance/universal-excellence*'
       - 'cerebro/tests/universal-excellence-lab-v0.test.mjs'
       - 'cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs'
@@ -29,6 +32,22 @@ jobs:
         run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
       - name: Prove universal owner-only excellence rewards suspension and replacement policy
         run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs cerebro/tests/universal-excellence-console-binding-v0.test.mjs cerebro/tests/supabase-owner-session-verifier-lab-v0.test.mjs
+      - name: Verify FACT-001 SEO organization overlay, preserve canonical 177-engine scaffold
+        run: node --test cerebro/tests/seo-org-v0.test.mjs
+      - name: Materialize 8 families and 32 departments as non-deployed organizational contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/factory/seo-org-cli-v0.mjs validate
+          node cerebro/factory/seo-org-cli-v0.mjs generate --company-id fenix --out "$RUNNER_TEMP/seo-org-contracts"
+          node cerebro/factory/seo-org-cli-v0.mjs generate --company-id fenix --out "$RUNNER_TEMP/seo-org-contracts"
+      - name: Retain organizational index only (no secrets or user data)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-org-32-departments-v0
+          path: ${{ runner.temp }}/seo-org-contracts/index.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Physical synthetic LAB universal excellence proof (no IAM privilege applied)
         shell: bash
         run: |
