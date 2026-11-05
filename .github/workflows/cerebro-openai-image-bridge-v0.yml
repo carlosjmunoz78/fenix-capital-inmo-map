@@ -6,6 +6,7 @@ on:
       - 'cerebro/runtime/creative-social-prompt-v0.mjs'
       - 'cerebro/runtime/creative-openai-image-adapter-v0.mjs'
       - 'cerebro/runtime/creative-social-compositor-v0.mjs'
+      - 'cerebro/runtime/creative-ai-job-v0.mjs'
       - 'cerebro/runtime/creative-job-runner-v1.mjs'
       - 'cerebro/fixtures/facebook-audiovisual-canary-20261105.brief.json'
       - 'cerebro/tests/creative-openai-social-bridge-v0.test.mjs'
