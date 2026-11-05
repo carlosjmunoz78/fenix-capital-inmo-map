@@ -37,3 +37,9 @@ jobs:
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT id FROM jarvis_lab_mission_v0 WHERE id='synthetic-cut21';" | tee /tmp/jarvis-cut21-restored.txt
           grep -q 'synthetic-cut21' /tmp/jarvis-cut21-restored.txt
           echo 'CUT21 official Wrangler local D1 create/read/backup/independent restore: PASS'
+      - name: Offline Worker bundle verification (NO DEPLOY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --dry-run --outdir=./cut21-bundle
+          test -n "$(find ./cut21-bundle -type f -print -quit)"
+          echo 'CUT21 Wrangler Worker bundle dry run: PASS (no remote changes)'
