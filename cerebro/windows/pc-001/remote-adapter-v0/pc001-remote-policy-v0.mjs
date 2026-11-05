@@ -15,13 +15,18 @@ export const PC001_REMOTE_PROOF = Object.freeze({
 function exact(arr, value) {
   return Array.isArray(arr) && arr.length === 1 && arr[0] === value;
 }
+function plainRecord(value) {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
 function hold(code) {
   return Object.freeze({decision: 'HOLD', blockers: Object.freeze([code]), execution_authorized: false});
 }
 const ALLOWED_PAYLOAD_KEYS = new Set(['schema_version','request_id','idempotency_key','issued_at','expires_at','device_id','company_id','venture_id','engine_id','environment','version','capability','action','policy']);
 const ALLOWED_POLICY_KEYS = new Set(['policy_id','allowed_company_ids','allowed_venture_ids','allowed_engine_ids','allowed_environments','allowed_versions','allowed_capabilities','allowed_actions','state_changing','prod_allowed','trading_allowed','human_required']);
-function requestMatches(row, deviceId) {
-  if (!row || typeof row !== 'object' || !row.payload || typeof row.payload !== 'object') return false;
+export function requestMatches(row, deviceId) {
+  if (!plainRecord(row) || !plainRecord(row.payload) || !plainRecord(row.payload.policy)) return false;
   const p = row.payload, c = PC001_REMOTE_PROOF;
   return Object.keys(p).every(k=>ALLOWED_PAYLOAD_KEYS.has(k)) &&
     Object.keys(p.policy??{}).every(k=>ALLOWED_POLICY_KEYS.has(k)) &&
@@ -44,8 +49,7 @@ function requestMatches(row, deviceId) {
     exact(p.policy.allowed_versions, c.version) &&
     exact(p.policy.allowed_capabilities, c.capability) &&
     exact(p.policy.allowed_actions, c.action) &&
-    typeof row.command_id === 'string' && /^[a-zA-Z0-9_-]{8,100}$/.test(row.command_id) &&
-    (!p.parameters || (Object.keys(p.parameters).length === 0 && Object.getPrototypeOf(p.parameters) === Object.prototype));
+    typeof row.command_id === 'string' && /^[a-zA-Z0-9_-]{8,100}$/.test(row.command_id);
 }
 
 /**
@@ -55,6 +59,7 @@ function requestMatches(row, deviceId) {
  * session; a command row alone never constitutes authorization for UI input.
  */
 export function claimPc001VisibleProof({row, deviceIdentity, local, ledger = new Map(), now} = {}) {
+  if (!(ledger instanceof Map)) return hold('idempotency_ledger_invalid');
   const identity = deviceIdentity?.canonical_device_id;
   if (!identity || deviceIdentity?.enrolled !== true || deviceIdentity?.revoked === true)
     return hold('device_identity_not_attested');
