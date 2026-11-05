@@ -29,3 +29,26 @@ Módulo puro de reparación `runtime/seo-jaen-certificate-repair-planner-v0.mjs`
 **Prohibido:** borrar URLs válidas, convertir borradores a `publish` sin aprobación, instalar servicios de pago o afirmar certificación antes de evidencia real.
 
 Este cierre es técnico, no editorial ni legal. CEREBRO sigue trabajando todo el SEO, no solamente borradores.
+
+
+## 05-11-2026 · QA editorial preliminar y mejora real de los dos borradores de apoyo
+
+Se han **mejorado directamente** y leído de nuevo en el WordPress oficial, manteniendo `draft`, slugs y Yoast:
+
+| Artículo | Texto original | Texto actual | Palabras aprox. | H2 | Cambio reversible |
+| --- | ---: | ---: | ---: | ---: | --- |
+| #52247 · documentación hipotecaria | 1.723 caracteres | 4.480 caracteres | 555 | 7 | #1992 |
+| #52248 · cuándo preparar hipoteca | 1.516 caracteres | 4.589 caracteres | 575 | 8 | #1993 |
+
+- **Contenido añadido sin borrar lo anterior:** casos de compradores, privacidad en el envío de documentación, presupuesto completo, arras, plazos y preguntas prácticas. No se introducen garantías de concesión hipotecaria ni cifras financieras sin contrastar.
+- **Enlaces internos:** todos los destinos distintos comprobados con HTTP HEAD **200**: `/asesor-hipotecario-jaen/`, `/precio-maximo/`, `/gastos-compra/` y `/antes-de-reservar/`.
+- **SEO:** se conservaron títulos, descripciones, keywords y canonicals Yoast de cada borrador. Ningún slug cambió.
+- **Seguridad:** los snapshots anteriores #176 y #177 siguen identificados. Las actualizaciones #1992 y #1993 pueden consultarse en el diario; `wp_undo_change(dry_run:true)` devolvió simulaciones válidas. NO se ejecutó deshacer físicamente.
+- **No publicados:** URL limpias de ambos posts siguen HTTP **404** y no aparecen en el sitemap de entradas publicado. El estado `draft` fue reconfirmado.
+- **PENDIENTE:** revisión visual móvil/autenticada, imagen destacada o alternativa justificada, comprobación editorial/legal independiente, huella SHA-256 de la versión final y aprobación autenticada de cada uno por el propietario. El gate de publicación no está abierto. No se debe declarar CITY COMPLETE ni certificar el piloto por este cambio.
+
+**Enlaces de revisión en WordPress:**
+- [Borrador #52247](https://fenixcapital.es/wp-admin/post.php?post=52247&action=edit)
+- [Borrador #52248](https://fenixcapital.es/wp-admin/post.php?post=52248&action=edit)
+
+Cuando se autorice publicar versiones exactas, revisar el esquema de la landing #52200 a través del plan de parche controlado, verificar los cuatro recursos y certificar Jaén con el sistema oficial. La validación posterior de Linares es independiente.
