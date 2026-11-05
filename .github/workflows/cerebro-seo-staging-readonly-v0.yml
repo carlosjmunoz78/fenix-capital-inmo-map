@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Validate public snapshot inspector
-        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs
       - name: Single bounded HTTP GET for staging homepage, no redirects and no mutations
         shell: bash
         run: |
@@ -31,3 +31,19 @@ jobs:
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-readonly-inspector-v0.mjs" body.html headers.txt "$code"
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-transversal-readonly-v0.mjs" body.html headers.txt "$code"
           node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-multidepartment-readonly-v0.mjs" body.html headers.txt "$code"
+          # Separate real OS processes; existing JOB-001 durable journal is local to this CI run.
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-workunit-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-independent-review-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json independent-review.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-tribunal-v0.mjs" worker-receipt.json independent-review.json tribunal.json
+      - name: Retain limited durable execution evidence (no public HTML)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-v2-job001-readonly-evidence
+          path: |
+            ${{ runner.temp }}/seo-stage-readonly/job001.v8
+            ${{ runner.temp }}/seo-stage-readonly/worker-receipt.json
+            ${{ runner.temp }}/seo-stage-readonly/independent-review.json
+            ${{ runner.temp }}/seo-stage-readonly/tribunal.json
+          retention-days: 14
+          if-no-files-found: error
