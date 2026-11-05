@@ -1,4 +1,4 @@
-name: CEREBRO SEO · one-shot existing creative PROD queue worker V0
+name: CEREBRO SEO · creative single-dispatch CLOSED, read-only verification V0
 
 on:
   pull_request:
@@ -7,123 +7,28 @@ on:
 
 permissions:
   contents: read
-  actions: write
+  actions: read
 
 jobs:
-  guarded-one-shot:
+  verify-closed-state:
     if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 2
     steps:
-      - name: Single-use owner-approved existing workflow dispatch; restore DISABLED state
+      - name: Verify the existing creative worker remains disabled after one-shot
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
         shell: bash
         run: |
           set -euo pipefail
           node --input-type=module <<'NODE'
-          import fs from 'node:fs';
-          import path from 'node:path';
-          const repo='carlosjmunoz78/fenix-capital-inmo-map';
-          const wf='cerebro-creative-job-runner-v1.yml';
-          if(process.env.GITHUB_REPOSITORY!==repo)throw Error('REPOSITORY_NOT_AUTHORIZED');
-          const token=process.env.GITHUB_TOKEN;
-          if(!token)throw Error('MISSING_ACTIONS_TOKEN');
-          const base='https://api.github.com/repos/'+repo;
-          const url=base+'/actions/workflows/'+encodeURIComponent(wf);
-          const h={authorization:'Bearer '+token,accept:'application/vnd.github+json','x-github-api-version':'2022-11-28','user-agent':'cerebro-seo-creative-one-shot'};
-          const evidence={schema_version:'0.1.0',company_id:'fenix',engine_id:'SEO-001',
-             environment:'PROD_QUEUE_SINGLE_DISPATCH',at:new Date().toISOString(),
-             source_pr:22,target_workflow:wf,target_ref:'main',
-             paid_provider_called_from_this_job:false,website_published:false,
-             app_crm_mutations:false,supabase_sql_mutations:false,
-             original_job_id:'c4012f43-c12f-400b-9610-2e5f2e286000',
-             enable_ok:false,dispatch_accepted:false,disable_ok:false,final_workflow_state:null,
-             dispatched_run_id:null,verdict:'NOT_ATTEMPTED'};
-          const output=path.join(process.env.RUNNER_TEMP||'/tmp','cerebro-seo-creative-single-dispatch-v0.json');
-          const save=()=>fs.writeFileSync(output,JSON.stringify(evidence,null,2)+'\n',{mode:0o600});
-          async function api(endpoint,{method='GET',json=null}={}){
-            const response=await fetch(endpoint,{method,headers:{...h,...(json?{'content-type':'application/json'}:{})},...(json?{body:JSON.stringify(json)}:{}),signal:AbortSignal.timeout(15000)});
-            const data=response.status!==204?await response.json().catch(()=>null):null;
-            if(!response.ok)throw Error('GITHUB_'+method+'_HTTP_'+response.status);
-            return data;
-          }
-          let enabledByThisRun=false;
-          try{
-            const repository=await api(base);
-            if(repository.private||repository.visibility!=='public'||repository.default_branch!=='main')
-              throw Error('PUBLIC_MAIN_REPOSITORY_PRECONDITION_FAILED');
-            const current=await api(url);
-            evidence.initial_workflow_state=current.state;
-            if(current.state!=='disabled_fork'){
-               evidence.verdict='SKIPPED_STATE_CHANGED_NO_REPEAT';
-               save();
-               console.log(JSON.stringify({verdict:evidence.verdict,initial_state:current.state}));
-               process.exit(0);
-            }
-            const recent=await api(url+'/runs?event=workflow_dispatch&per_page=1');
-            if((recent.workflow_runs||[]).some(r=>r.status!=='completed')){
-               throw Error('EXISTING_MANUAL_RUN_IN_PROGRESS');
-            }
-            await api(url+'/enable',{method:'PUT'});
-            enabledByThisRun=true;evidence.enable_ok=true;
-            await api(url+'/dispatches',{method:'POST',json:{ref:'main'}});
-            evidence.dispatch_accepted=true;
-            evidence.verdict='SINGLE_DISPATCH_ACCEPTED';
-          } catch(e){
-            evidence.error_code=String(e?.message||e).slice(0,110);
-            evidence.verdict='ONE_SHOT_NOT_COMPLETED';
-            process.exitCode=1;
-          } finally {
-            if(enabledByThisRun){
-               try{
-                 await api(url+'/disable',{method:'PUT'});
-                 evidence.disable_ok=true;
-               }catch(e){
-                 evidence.disable_error_code=String(e?.message||e).slice(0,110);
-                 evidence.verdict='HUMAN_REQUIRED_RE_DISABLE_WORKFLOW';
-                 process.exitCode=1;
-               }
-            }
-            try{
-              const after=await api(url);
-              evidence.final_workflow_state=after.state;
-              if(enabledByThisRun&&after.state==='active'){
-                evidence.verdict='HUMAN_REQUIRED_WORKFLOW_STILL_ACTIVE';process.exitCode=1;
-              }
-            }catch(e){evidence.final_state_error=String(e?.message||e).slice(0,100);}
-            if(evidence.dispatch_accepted){
-              for(let attempt=0;attempt<3;attempt++){
-                try {
-                  await new Promise(resolve=>setTimeout(resolve,1500));
-                  const runs=await api(url+'/runs?event=workflow_dispatch&per_page=5');
-                  const begin=Date.parse(evidence.at)-15000;
-                  const candidate=(runs.workflow_runs||[]).find(r=>r.head_branch==='main'&&Date.parse(r.created_at)>=begin);
-                  if(candidate){
-                    evidence.dispatched_run_id=candidate.id;
-                    evidence.dispatched_run_status=candidate.status;
-                    break;
-                  }
-                }catch(e){evidence.run_lookup_error=String(e?.message||e).slice(0,100);}
-              }
-            }
-            save();
-            console.log(JSON.stringify({verdict:evidence.verdict,
-              initial_workflow_state:evidence.initial_workflow_state,
-              enable_ok:evidence.enable_ok,dispatch_accepted:evidence.dispatch_accepted,
-              disable_ok:evidence.disable_ok,final_workflow_state:evidence.final_workflow_state,
-              dispatched_run_id:evidence.dispatched_run_id,
-              error_code:evidence.error_code||null,
-              disable_error_code:evidence.disable_error_code||null,
-              paid_provider_called:false,public_website_changes:0}));
-          }
+          const url='https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/actions/workflows/cerebro-creative-job-runner-v1.yml';
+          const r=await fetch(url,{headers:{authorization:'Bearer '+process.env.GITHUB_TOKEN,accept:'application/vnd.github+json','x-github-api-version':'2022-11-28'},signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('WORKFLOW_READ_UNAVAILABLE:'+r.status);
+          const b=await r.json();
+          console.log(JSON.stringify({workflow:'cerebro-creative-job-runner-v1.yml',
+            state:b.state,expected:'disabled_manually',
+            diagnostic:'ONE_SHOT_CLOSED_PROD_SCHEDULE_OFF',site_changes:0,
+            actions_write_permission:false,paid_provider_called:false}));
+          if(b.state!=='disabled_manually')throw Error('HUMAN_REQUIRED_WORKFLOW_NOT_DISABLED');
           NODE
-      - name: Attach one-shot receipt (no credentials)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cerebro-seo-creative-single-dispatch-v0
-          path: ${{ runner.temp }}/cerebro-seo-creative-single-dispatch-v0.json
-          if-no-files-found: warn
-          retention-days: 7
