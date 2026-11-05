@@ -32,8 +32,10 @@ function exactSha256(s){return createHash('sha256').update(s).digest('hex');}
 
 export function buildCerebroCreativeOrder(input){
   if(!input||typeof input!=='object')throw Error('BRIEF_REQUIRED');
-  const companyId=field(input.company_id,'COMPANY',70);
-  if(companyId!=='fenix-capital')throw Error('BRAND_PROFILE_NOT_BOUND_FOR_COMPANY');
+  const companyAlias=field(input.company_id,'COMPANY',70);
+  if(companyAlias!=='fenix'&&companyAlias!=='fenix-capital')throw Error('BRAND_PROFILE_NOT_BOUND_FOR_COMPANY');
+  // Canonical key used by the EXISTING FACT-001 queue, not the marketing brand slug.
+  const companyId='fenix';
   const engineId=field(input.engine_id,'ENGINE',70);
   if(engineId!=='SOC-001')throw Error('SOCIAL_ENGINE_DENIED');
   const env=field(input.environment,'ENVIRONMENT',20).toUpperCase();
@@ -64,7 +66,7 @@ export function buildCerebroCreativeOrder(input){
   ].join('\n');
   const copyForGraphic={headline,subtitle,cta,brand_label:'FÉNIX CAPITAL',font_guide:FONT_GUIDE};
   const identity={
-    company_id:companyId,engine_id:engineId,environment:env,version:'v0',
+    company_id:companyId,brand_company_alias:'fenix-capital',engine_id:engineId,environment:env,version:'v0',
     source:'CEREBRO_FACT001_WORK_ORDER',
     request_key:key,channel:'FACEBOOK',output_type:'SQUARE_POST',
     visual_department:'PRODUCTORA_AUDIOVISUAL',
