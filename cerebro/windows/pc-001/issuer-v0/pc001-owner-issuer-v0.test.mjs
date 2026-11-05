@@ -10,7 +10,7 @@ const req={company_id:'fenix',device_id:PC001_ISSUER_V0.device_id,capability:'SE
  approval_id:'approval-001',event_id:'event-001',technical_id:'device-read-health-001',risk_class:'LOW',estimated_additional_cost_eur:0};
 const context={request:req,now,owner_identity:{authenticated:true,role:'OWNER',source:'TRUSTED_BACKEND',verified_at:now},
  device_record:{device_id:PC001_ISSUER_V0.device_id,company_id:'fenix',environment:'PREPROD',version:'pc001-windows-v1',status:'ONLINE',revoked_at:null,last_seen_at:now},
- owner_state:{authorized_actions:{'approval-001':{status:'AUTHORIZED_WAITING_EXECUTION',approval_id:'approval-001',scope_fingerprint:scope,technical_id:'device-read-health-001',stage:'PC001_HEALTH_READ_PREPROD'}}}};
+ owner_state:{authorized_actions:{'approval-001':{status:'AUTHORIZED_WAITING_EXECUTION',approval_id:'approval-001',scope_fingerprint:scope,technical_id:'device-read-health-001',stage:'PC001_HEALTH_READ_PREPROD',expires_at:'2026-11-05T10:00:00Z'}}}};
 const evaluate=(x={})=>preparePc001HealthCommandV0({...structuredClone(context),...x});
 const deny=(x,reason)=>{const r=evaluate(x); assert.equal(r.decision,'HOLD');assert.equal(r.reason,reason);assert.equal(r.enqueued,false);};
 
@@ -48,7 +48,8 @@ test('stale device heartbeat denied',()=>deny({device_record:{...context.device_
 test('missing standing or one-shot owner authorization denied',()=>deny({owner_state:{}},'OWNER_EXACT_AUTHORIZATION_MISSING'));
 test('one-shot exact approval mismatch denied',()=>deny({owner_state:{authorized_actions:{'approval-001':{...context.owner_state.authorized_actions['approval-001'],stage:'OTHER'}}}},'OWNER_EXACT_AUTHORIZATION_MISSING'));
 test('standing authorization exact scope plus executor is accepted',()=>{
- const r=evaluate({owner_state:{standing_authorizations:{[scope]:{status:'ACTIVE',exact_scope_only:true,execution_binding:'PC001_PREPROD_GATEWAY_V9',approval_id:'standing-001'}}}});
+ const r=evaluate({owner_state:{standing_authorizations:{[scope]:{status:'ACTIVE',exact_scope_only:true,execution_binding:'PC001_PREPROD_GATEWAY_V9',approval_id:'standing-001',
+    grant_id:'standing-001',policy_id:PC001_ISSUER_V0.policy_id,max_uses:100,usage_count:0,expires_at:'2026-11-05T10:00:00Z'}}}});
  assert.equal(r.decision,'PREPARED_FOR_TRUSTED_ISSUER');assert.equal(r.approval_source,'STANDING_AUTHORIZATION');
 });
 test('standing authorization different executor denied',()=>deny({owner_state:{standing_authorizations:{[scope]:{status:'ACTIVE',exact_scope_only:true,execution_binding:'OTHER'}}}},'OWNER_EXACT_AUTHORIZATION_MISSING'));
@@ -67,7 +68,7 @@ test('privileged transaction cannot forge created receipt',async()=>{
 });
 test('successful atomic insert returns only minimal receipt; no secrets',async()=>{
  let called=0;
- const r=await issuePc001HealthCommandV0({...context,enqueue_unique:async row=>{called++;assert.equal(row.payload.action,'READ_HEALTH');return{status:'CREATED',command_id:row.command_id,payload_sha256:row.payload_sha256};}});
+ const r=await issuePc001HealthCommandV0({...context,enqueue_unique:async row=>{called++;assert.equal(row.payload.action,'READ_HEALTH');return{status:'CREATED',command_id:row.command_id,payload_sha256:row.payload_sha256,owner_grant_commit:'ONE_SHOT_CONSUMED'};}});
  assert.equal(called,1);assert.equal(r.enqueued,true);assert.equal(r.requires_semantic_receipt,true);
  assert.equal(r.remote_desktop_control,false);assert.equal(r.prod_authorized,false);
  assert.equal(JSON.stringify(r).includes('bearer'),false);
@@ -83,7 +84,7 @@ test('trusted server composition only uses backend provider results',async()=>{
     authenticate_owner:async ref=>{assert.equal(ref,'private-owner-session');return context.owner_identity;},
     load_owner_state:async()=>context.owner_state,
     load_device_record:async()=>context.device_record,
-    enqueue_unique:async row=>{calls++;return{status:'CREATED',command_id:row.command_id,payload_sha256:row.payload_sha256};}
+    enqueue_unique:async row=>{calls++;return{status:'CREATED',command_id:row.command_id,payload_sha256:row.payload_sha256,owner_grant_commit:'ONE_SHOT_CONSUMED'};}
   });
   const r=await bound.issue({request:req,owner_session_ref:'private-owner-session',now});
   assert.equal(r.enqueued,true);assert.equal(calls,1);
@@ -114,4 +115,24 @@ test('command lifetime covers existing 180 second worker polling without exceedi
 });
 test('issuer policy ID matches existing PC001-Gateway-PREPROD worker contract exactly',()=>{
  assert.equal(PC001_ISSUER_V0.policy_id,'pc001-readonly-preprod-v1');
+});
+
+test('one-shot grant expiration and revocation reject before preparation',()=>{
+ const grant=context.owner_state.authorized_actions['approval-001'];
+ deny({owner_state:{authorized_actions:{'approval-001':{...grant,expires_at:'2026-11-05T08:00:00Z'}}}},'OWNER_GRANT_EXPIRED_OR_UNVERIFIED');
+ deny({owner_state:{authorized_actions:{'approval-001':{...grant,revoked:true}}}},'OWNER_GRANT_REVOKED_OR_CONSUMED');
+ deny({owner_state:{authorized_actions:{'approval-001':{...grant,consumed_at:now}}}},'OWNER_GRANT_REVOKED_OR_CONSUMED');
+});
+test('standing grant expiry, usage budget and policy scope reject',()=>{
+ const normal={status:'ACTIVE',exact_scope_only:true,execution_binding:'PC001_PREPROD_GATEWAY_V9',
+    grant_id:'standing-001',policy_id:PC001_ISSUER_V0.policy_id,max_uses:2,usage_count:0,expires_at:'2026-11-05T10:00:00Z'};
+ const build=(patch)=>({owner_state:{standing_authorizations:{[scope]:{...normal,...patch}}}});
+ deny(build({expires_at:'2026-11-05T08:50:00Z'}),'OWNER_GRANT_EXPIRED_OR_UNVERIFIED');
+ deny(build({revoked:true}),'OWNER_GRANT_REVOKED_OR_CONSUMED');
+ deny(build({usage_count:2}),'STANDING_GRANT_SCOPE_OR_BUDGET_DENIED');
+ deny(build({policy_id:'other'}),'STANDING_GRANT_SCOPE_OR_BUDGET_DENIED');
+});
+test('privileged insert must atomically report owner grant consumption',async()=>{
+ const r=await issuePc001HealthCommandV0({...context,enqueue_unique:async(row)=>({status:'CREATED',command_id:row.command_id,payload_sha256:row.payload_sha256})});
+ assert.equal(r.decision,'HOLD');assert.equal(r.reason,'QUEUE_COMMIT_NOT_ATTESTED');
 });
