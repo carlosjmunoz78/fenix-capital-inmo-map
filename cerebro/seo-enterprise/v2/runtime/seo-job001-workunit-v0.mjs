@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {Job001LedgerControlPlaneV1} from '../../../runtime/job001-ledger-control-plane-v1.mjs';
 import {runStagingReadonlyMission} from './staging-transversal-readonly-v0.mjs';
+import {sealProcessReceipt} from './seo-process-signature-v0.mjs';
 
 const CTX=Object.freeze({company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'});
 const WORKER='SEO_D15_WORKER';
@@ -46,7 +47,7 @@ export function executeSeoJob001Staging({html,headers='',status=200,journal_path
   throw Error('JOB001_REPLAY_INTEGRITY_FAILED');
  const ledger=new Job001LedgerControlPlaneV1({job_runtime:reload,contexts:[CTX]});
  const summary=ledger.inspect({actor:{scopes:['cerebro:ledger:read']},context:CTX});
- return {
+ return sealProcessReceipt({role_id:WORKER,receipt:{
   schema_version:'0.1.0',state:'PHYSICAL_PREPROD_JOB001_LAB_WORK_UNIT_NOT_SEO_DEPARTMENT_READY',
   context:CTX,job_id:completed.job_id,worker_role_id:WORKER,run_state:completed.status,
   idempotency_key_sha256:hashlib(idempotency_key),duplicate:!enq.accepted,
@@ -63,7 +64,7 @@ export function executeSeoJob001Staging({html,headers='',status=200,journal_path
   no_customer_data_guarantee:false, // public snapshot is expected, not fully audited for sensitive payloads
   ready:false,prod_authorized:false,web_write_authorized:false,
   external_writes:0,additional_cost_eur:0
- };
+ }});
 }
 async function main(){
  const [htmlFile,headersFile,httpStatus,journalFile,receiptFile]=process.argv.slice(2);
