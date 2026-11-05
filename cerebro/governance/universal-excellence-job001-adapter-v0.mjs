@@ -19,7 +19,8 @@ export function guardedEnqueueLab({job_runtime,merit_ledger_path,actor_id,
  const gate=dispatchGate({file_path:merit_ledger_path,context:meritContext,subject_actor_id:actor_id});
  if(gate.decision!=='LAB_TASK_ELIGIBLE')return {status:'DENIED_BY_UNIVERSAL_EXCELLENCE_LAB',
   actor_id,gate,job_id:null,job_created:false,prod_authorized:false};
- const result=job_runtime.enqueue({name:task_name,context,payload:{
+ const lab_priority=gate.state==='EXCELLENCE_REWARD_CANDIDATE_LAB'?50:100;
+ const result=job_runtime.enqueue({name:task_name,context,priority:lab_priority,payload:{
   ...payload,universal_merit_gate:{actor_id,policy:'CEREBRO_UNIVERSAL_EXCELLENCE_OWNER_AUTHORITY_V0',
    lab_decision:gate.decision,role_state:gate.state,iam_actor_authenticated:false,
    prod_authorized:false}
@@ -27,5 +28,6 @@ export function guardedEnqueueLab({job_runtime,merit_ledger_path,actor_id,
  max_attempts:1,timeout_ms:10000});
  return {status:'LAB_READONLY_JOB001_QUEUED_NOT_DISPATCHED_TO_EXTERNAL_SERVICE',
   actor_id,gate,job_id:result.job.job_id,job_created:result.accepted,
+  lab_priority_applied:lab_priority,experimental_reward:'IN_SCOPE_JOB_PRIORITY_ONLY_NO_ADDITIONAL_PRIVILEGES',
   prod_authorized:false,paid_ai_calls:0,external_writes:0};
 }
