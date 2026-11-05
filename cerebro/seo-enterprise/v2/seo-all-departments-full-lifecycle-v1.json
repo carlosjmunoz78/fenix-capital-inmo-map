@@ -830,7 +830,45 @@
       "reason": "Core Guard pilot certified status invalidated 2026-10-06 after live revalidation failure",
       "action": "DIAGNOSE_LIVE_READONLY_THEN_REPAIR_THROUGH_GATES",
       "state": "OPEN_NOT_RECERTIFIED",
-      "mass_rollout_allowed": false
+      "mass_rollout_allowed": false,
+      "live_2026_11_05": {
+        "landing_id": 52200,
+        "landing_http_status": 200,
+        "canonical_verified": true,
+        "live_verify_ok": false,
+        "missing_expected": [
+          "data-fenix-guard-schema=\"seo001\"",
+          "\"@type\":\"FAQPage\""
+        ],
+        "service_schema_present_in_page_content": true,
+        "faq_visible_questions": 5,
+        "support_posts": [
+          {
+            "id": 52247,
+            "status": "draft",
+            "public_http_status": 404,
+            "seo_meta_present": true
+          },
+          {
+            "id": 52248,
+            "status": "draft",
+            "public_http_status": 404,
+            "seo_meta_present": true
+          }
+        ],
+        "pdf_public_http_status": 200,
+        "logical_snapshots": {
+          "landing_52200": 175,
+          "support_52247": 176,
+          "support_52248": 177
+        },
+        "production_repair_applied": false,
+        "manual_url_publication_completed": false,
+        "rollback_physical_tested": false,
+        "certification_restored": false
+      },
+      "next_controlled_action": "OWNER_QA_SUPPORT_DRAFTS_PLUS_QA_SURGICAL_SCHEMA_PATCH_IN_LAB_THEN_WP_PROTECTED_RELEASE",
+      "evidence_ref": "cerebro/seo-enterprise/v2/jaen-p0-live-recovery-evidence-2026-11-05.json"
     },
     {
       "id": "SEO-P0-DATA",
@@ -909,6 +947,10 @@
     "autonomy_publication_verified": false,
     "current_real_draft_wp_id": 52656,
     "real_draft_published": false,
-    "notes": "Sampled public pages and WP read-only connectors; cannot infer Google indexation or traffic; no claim of a complete 200-URL crawl"
+    "notes": "Sampled public pages and WP read-only connectors; cannot infer Google indexation or traffic; no claim of a complete 200-URL crawl",
+    "jaen_p0_landing_live_verify_missing_two_markers": true,
+    "jaen_p0_support_urls_currently_404": true,
+    "jaen_p0_support_articles_wp_drafts": 2,
+    "jaen_p0_backup_snapshots_created": 3
   }
 }
