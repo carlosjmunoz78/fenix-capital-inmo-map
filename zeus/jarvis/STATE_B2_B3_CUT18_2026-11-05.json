@@ -1,0 +1,65 @@
+{
+  "schema": "zeus.jarvis.live_state.v1",
+  "date": "2026-11-05",
+  "block": "CUT18",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "certified_code_sha": "843b8b698dd83ca2315a26f16c3e88944ed166ee",
+  "ci": {
+    "universal_core": {
+      "run_id": 42115109816,
+      "tests": 598,
+      "passed": 598,
+      "failed": 0
+    },
+    "b4": {
+      "run_id": 42115109772,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42115109914,
+      "status": "SUCCESS"
+    },
+    "governed_main": {
+      "run_id": 42115109784,
+      "status": "SUCCESS",
+      "promotion": "SKIPPED"
+    },
+    "cut17_postgres_temp_rls_revocation_restore": "PASS"
+  },
+  "done_lab": [
+    "CUT16 B2 HMAC session verification, expiry/revocation, scope, fail-closed (OFF by default)",
+    "CUT17 server-only read-only PostgreSQL session adapter with bound parameters, private RLS schema, physical disposable Postgres expiry/revoke/restore",
+    "CUT18 composed B2 session guard + B3 MISSION_INSPECT + original Gateway GET mission + SQLite file reopen with two simulated sessions",
+    "Fixed existing SQLite LAB idempotency scope parser for namespaced owner IDs"
+  ],
+  "not_certified": [
+    "Real authenticated OWNER_ROOT session, session_id and enrollment",
+    "Persistent independently hosted PostgreSQL LAB with repeatable physical restore",
+    "Real server Vault HMAC key and B3 grants",
+    "Two independent physical device session reads of same live durable mission",
+    "Gateway deployed in parallel with OLD vs NEW and rollback",
+    "Tribunal B10 and production autonomy"
+  ],
+  "infrastructure_readonly": "PROD Supabase protected. Alternative hnqlnvakzaywtafeiybt contains dependencies (~591MB previous observed); not a disposable LAB. Trading resources excluded.",
+  "protected_untouched": [
+    "APP",
+    "CRM",
+    "SUPABASE_PROD",
+    "SUPABASE_ALTERNATIVE_DATA",
+    "MAIN",
+    "ANA",
+    "SEO",
+    "WORDPRESS",
+    "TRADING",
+    "DNS"
+  ],
+  "state": "PARCIAL_LAB_GREEN",
+  "prod": "NO_GO",
+  "pr_draft": true,
+  "incremental_subscription_cost_eur": 0,
+  "ci_usage_cost": "NOT_VERIFIED",
+  "next_block": "Identify zero-new-cost, independently controlled persistent LAB PostgreSQL host with backup/restore, dedicated role and server Vault. Only then bind trusted real OWNER_ROOT session and B3 MISSION_INSPECT, test real two-device mission continuity and revocation, OLD vs NEW, B10 independent tribunal.",
+  "rollback": "Revert only CUT17/CUT18 changes in PR25 DRAFT; no deployed service/database/credential/grant was changed."
+}
