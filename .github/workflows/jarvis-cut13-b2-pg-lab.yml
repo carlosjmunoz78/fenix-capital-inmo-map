@@ -6,6 +6,8 @@ on:
     paths:
       - 'zeus/jarvis/core/jarvis-b2-hmac-registry*'
       - 'zeus/jarvis/core/jarvis-b2-postgres-lookup*'
+      - 'zeus/jarvis/gates/cut13_lab_pg_acceptance.sh'
+      - 'zeus/jarvis/gates/20261105_cut13_b2_isolated_lab_schema.sql'
       - '.github/workflows/jarvis-cut13-b2-pg-lab.yml'
   workflow_dispatch:
 permissions:
@@ -13,7 +15,24 @@ permissions:
 jobs:
   b2-lab:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 8
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: jarvis_cut13_synthetic_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PGHOST: localhost
+      PGPORT: 5432
+      PGPASSWORD: jarvis_cut13_synthetic_only
+      PGUSER: postgres
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,3 +45,5 @@ jobs:
       - name: Run LAB identity tests (mock PostgreSQL, no PROD connectivity)
         run: |
           node --test zeus/jarvis/core/jarvis-b2-hmac-registry.test.mjs zeus/jarvis/core/jarvis-b2-postgres-lookup.test.mjs
+      - name: Verify isolated PostgreSQL RLS and restore
+        run: bash zeus/jarvis/gates/cut13_lab_pg_acceptance.sh
