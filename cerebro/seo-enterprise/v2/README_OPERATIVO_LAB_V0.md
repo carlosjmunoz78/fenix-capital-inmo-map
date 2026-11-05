@@ -120,3 +120,15 @@ Cada fase se ejecutó en un job de GitHub separado, con recibos ED25519 autofirm
 **HECHO:** extensión `cerebro/factory/seo-org-v0.mjs` y CLI `seo-org-cli-v0.mjs`. En Actions [42062356983](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42062356983) se generaron **74 JSON** derivados de 8 familias y 32 departamentos: 8 familias, 32 manifiestos, 32 contratos, 1 supervisión y 1 índice. Segunda ejecución idéntica: 0 archivos creados y 74 conservados. Pruebas específicas 5/5, SEO 66/66 y gobierno 22/22. La fábrica original de 177 motores quedó intacta.
 
 **No inflar autonomía:** esos documentos se generaron en el runner de CI, son contratos y modelos de puesto lógico, NO agentes IAM conectados ni departamentos LISTO. Permanecen 15 PARCIAL, 17 DEFINIDO, 0 LISTO. La verificación de sólo lectura del sitio STAGING reportó HTTP 503 en la misma secuencia de CI; no alterar ni esconder ese fallo. No cambiar PROD.
+
+## 05-11-2026 · Departamento integral preparado documentalmente para órdenes
+
+**El propietario no quiere volver a auditar toda la web**. Se trabaja desde inventarios guardados, cursos y backlog. Ficheros:
+- `seo-existing-content-assets-source-registry-v1.json`: V4 original con **204 URLs y sus copys**, **680 imágenes** y mapeo de enlaces, incluido ZIP verificado en la rama histórica `cerebro/seo001-staging-audit-v5-20261018` y Notion canónico. Solo referencia hasta montar físicamente los datos, nunca asumir equivalencia STAGING/PROD.
+- `seo-specialist-training-and-commands-v1.json`: 32 cursos de especialización, examen propio, evidencias y tribunal.
+- `seo-marketing-plan-for-owner-approval-v1.json`: propuesta de seis canales, cuatro públicos, calendario semanal, campañas por intención y embudos, pendiente de aprobación estratégica del dueño.
+- `runtime/seo-director-order-router-v1.mjs`: doce tipos de órdenes, dirección de familia y especialistas, revisión QA y tribunal. Las órdenes se guardan solamente en LAB, no ejecutan escrituras reales.
+- `runtime/seo-ops-console-cli-v1.mjs`: CLI de consulta, plan, entrenamiento y demostración de encolado. Se genera 32 currículos + índice; regenerar es idempotente y rechaza sobrescrituras.
+- Deuda visual de landings de pueblos moradas/rosas: backlog gradual **una URL por vez**, usando patrón de ciudades, no cambios en PROD ahora.
+
+**Diferenciar:** PREPARADO (32 módulos formativos y contrato operativo), NO ACREDITADO (32 especialistas reales formados, IAM individual, continuidad de worker, acceso real al ZIP en JOB-001), PENDIENTE APROBACIÓN (estrategia marketing), PENDIENTE PRODDUCCIÓN (autonomía con permisos). El corpus V4 preserva copy visitante, no markup crudo del editor.

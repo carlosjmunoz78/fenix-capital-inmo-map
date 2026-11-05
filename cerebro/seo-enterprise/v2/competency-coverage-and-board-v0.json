@@ -1395,6 +1395,19 @@
     "google_gsc_wizard_connector_requires_paid_subscription": true,
     "google_gsc_wizard_new_subscription_authorized": false,
     "google_search_console_actual_metrics_verified": false,
-    "seo_department_primary_focus_is_borradores": false
+    "seo_department_primary_focus_is_borradores": false,
+    "seo_32_specialist_curricula_prepared": true,
+    "seo_32_specialist_training_records_declared": 32,
+    "seo_32_specialist_actual_training_certified": 0,
+    "seo_owner_director_command_types_defined": 12,
+    "seo_owner_marketing_plan_proposed_for_approval": true,
+    "seo_marketing_plan_owner_approval_verified": false,
+    "seo_preexisting_staging_v4_web_baseline_archive_verified": true,
+    "seo_preexisting_staging_v4_captured_urls": 204,
+    "seo_preexisting_staging_v4_captured_images": 680,
+    "seo_preexisting_staging_v4_full_copy_and_images_runtime_mounted": false,
+    "seo_real_32_department_prod_workers_running": false,
+    "seo_new_sitewide_audit_requested": false,
+    "seo_town_visual_changes_deferred_one_at_a_time": true
   }
 }

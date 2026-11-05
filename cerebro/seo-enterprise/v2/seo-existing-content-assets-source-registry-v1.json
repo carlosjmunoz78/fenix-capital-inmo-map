@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "HISTORICAL_STAGING_REFERENCE",
+  "version": "1.0.0",
+  "priority": "REUSE_PREVIOUS_INVENTORIES_BEFORE_MARKETING_AND_SEO_ASSET_CREATION",
+  "canonical_snapshot": {
+    "status": "VERIFIED_GITHUB_ARCHIVE_AND_MANIFEST_NOT_JOB001_INGESTED",
+    "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "branch": "cerebro/seo001-staging-audit-v5-20261018",
+    "captured_at": "2026-10-18T01:27:55+00:00",
+    "scope": "STAGING",
+    "zip": "docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip",
+    "sha256": "59944be1aba38d15a29991e7aa27579941382fc6dae701ef6032adfeae2f2b04",
+    "manifest": "docs/web-baseline/2026-10-18-v4/manifest.json",
+    "pointer": "docs/web-baseline/2026-10-18-v4/ARTIFACT_POINTER.md",
+    "artifact_id": 12120333543,
+    "url_count": 204,
+    "image_count": 680,
+    "internal_links": 42073,
+    "archive_members": {
+      "urls": "urls.csv + urls.json",
+      "copy": "copy/*.html + copy/*.txt + copy/*.json",
+      "images": "images/images.csv + images/images.json + images/image_usage.csv",
+      "links": "tree/internal_links.csv",
+      "dependencies": "tree/dependencies.csv"
+    },
+    "earlier_unmodified_csv_root": "docs/web-baseline/2026-10-18/",
+    "earlier_csv_paths": [
+      "urls.csv",
+      "images.csv",
+      "image_usage.csv",
+      "internal_links.csv",
+      "dependencies.csv",
+      "wordpress_parent_tree.md"
+    ]
+  },
+  "notion": {
+    "inventory": "https://app.notion.com/p/3ad3ba78c8b9449986bbcddc06bff687",
+    "inventory_source": "collection://71c5ac0c-ea87-4cfe-8e9f-c68728240a06",
+    "as_is": "https://app.notion.com/p/3b481b1a756d81029a0cfa76a35cade3",
+    "audit_v4": "https://app.notion.com/p/3fd81b1a756d8119b558c4dc9c4f6548",
+    "legacy_url_subset_counts_not_current": true
+  },
+  "prod_today": {
+    "site": "https://fenixcapital.es",
+    "published_pages_last_seen": 166,
+    "published_posts_last_seen": 34,
+    "as_of": "2026-11-05",
+    "staging_not_prod": true
+  },
+  "mandatory_preflight": [
+    "EXISTING_URL",
+    "EXISTING_COPY",
+    "IMAGE_USAGE_AND_RIGHTS",
+    "INTERNAL_LINKS_AND_CANONICALS",
+    "CTA_AND_FUNNEL",
+    "BUYER_PERSONA",
+    "DELTA_ONLY_NO_DUPLICATE",
+    "TARGETED_LIVE_PROD_CHECK_BEFORE_WRITE",
+    "OWNER_APPROVAL"
+  ],
+  "constraints": {
+    "no_global_reaudit_now": true,
+    "archive_immutable": true,
+    "unknown_image_rights_must_not_be_invented": true,
+    "new_content_without_asset_preflight_blocked": true,
+    "no_mass_town_redesign": true
+  },
+  "real_state": {
+    "sources_verified": true,
+    "all_204_copy_payloads_loaded_in_job001": false,
+    "all_680_image_maps_joined_to_prod": false,
+    "production_write_authorized": false
+  }
+}

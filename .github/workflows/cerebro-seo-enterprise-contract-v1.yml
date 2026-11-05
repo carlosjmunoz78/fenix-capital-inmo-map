@@ -50,6 +50,22 @@ jobs:
           path: ${{ runner.temp }}/seo-org-contracts/index.json
           retention-days: 14
           if-no-files-found: error
+      - name: Generate 32 SEO specialist courseware manifests twice without overwrites
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs generate-training --out "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs generate-training --out "$RUNNER_TEMP/seo-specialist-training"
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs readiness
+          node cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs route --type MARKETING_PLAN --objective 'Preparar propuesta de marketing y SEO usando los inventarios existentes' --ref OWNER_MKT_PLAN_SEO_001
+      - name: Archive only training course index (no claim of actual training)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-training-32-courseware-v1
+          path: ${{ runner.temp }}/seo-specialist-training/manifest.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Prove read-only official WordPress ingress to ACTGW-001 and JOB-001 (synthetic provider)
         shell: bash
         run: |

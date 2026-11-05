@@ -678,6 +678,23 @@
     "real_gsc_data_verified": false,
     "jaen_mass_rollout_certified": false,
     "action_priority": "FIX_EXISTING_RISKS_AND_MEASURE_OUTCOMES_BEFORE_MASS_NEW_URL_CREATION",
-    "protection": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR"
+    "protection": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR",
+    "training_and_command_readiness": {
+      "status": "CURRICULUM_AND_COMMAND_ROUTER_READY_FOR_LAB_NOT_ALL_AGENTS_OPERATIONAL",
+      "training_catalog": "cerebro/seo-enterprise/v2/seo-specialist-training-and-commands-v1.json",
+      "director_orders_module": "cerebro/seo-enterprise/v2/runtime/seo-director-order-router-v1.mjs",
+      "command_cli": "cerebro/seo-enterprise/v2/runtime/seo-ops-console-cli-v1.mjs",
+      "owner_marketing_strategy_proposal": "cerebro/seo-enterprise/v2/seo-marketing-plan-for-owner-approval-v1.json",
+      "mandatory_historical_asset_inventory": "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+      "existing_web_baseline_branch": "cerebro/seo001-staging-audit-v5-20261018",
+      "existing_full_copy_and_image_archive_verified": true,
+      "training_modules_defined": 32,
+      "real_agent_training_sessions_verified": 0,
+      "independent_prod_iam_principals_verified": 0,
+      "marketing_plan_owner_approved": false,
+      "reference_only_planning_before_archive_ingestion": true,
+      "no_repeat_total_site_audit": true,
+      "no_auto_prod_work_granted": true
+    }
   }
 }
