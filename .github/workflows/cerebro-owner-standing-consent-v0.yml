@@ -1,0 +1,28 @@
+name: CEREBRO Owner Standing Consent V0
+on:
+  push:
+    branches:
+      - cerebro/owner-standing-consent-v0-20261105
+    paths:
+      - 'cerebro/governance/owner-standing-consent-v0.mjs'
+      - 'cerebro/tests/owner-standing-consent-v0.test.mjs'
+      - 'cerebro/contracts/console-owner-decision-v1-standing-consent-addon.json'
+      - '.github/workflows/cerebro-owner-standing-consent-v0.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  scoped-consent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Static parse
+        run: node --check cerebro/governance/owner-standing-consent-v0.mjs
+      - name: Owner consent exact-scope regressions
+        run: node --test cerebro/tests/owner-standing-consent-v0.test.mjs
+      - name: Contract validates as JSON
+        run: node -e "JSON.parse(require('node:fs').readFileSync('cerebro/contracts/console-owner-decision-v1-standing-consent-addon.json','utf8'))"
