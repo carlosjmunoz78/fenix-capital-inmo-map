@@ -1,0 +1,57 @@
+{
+  "schema": "zeus.jarvis.voice.local.state.v1",
+  "date": "2026-11-05",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "cut": "B5_OSS_LOCAL_CUT03",
+  "status": "LOCAL_PILOT_CODE_TESTED_NOT_EXECUTED_ON_TARGET_PC",
+  "voice": {
+    "approved": "JARVIS V2 Más clara",
+    "speed": 1.1,
+    "pitch_semitones": 0.6,
+    "master_reference_hash": "2db9951a7b334e93a8bcc2bd80ba360b5560f89b1795e2adef77ee41674bed28",
+    "original_recording_untouched": true
+  },
+  "runtime": {
+    "provider": "SELF_HOSTED_CHATTERBOX_MULTILINGUAL_V3_GENERAL",
+    "locale": "es",
+    "model_is_es_es_dedicated": false,
+    "model_downloaded_in_current_env": false,
+    "model_inference_success": false,
+    "provider_api_calls": 0,
+    "new_subscriptions": 0
+  },
+  "executed": {
+    "offline_unit_tests_pass": 6,
+    "offline_unit_tests_failed": 0,
+    "original_mp3_integrity_verified": true,
+    "ffmpeg_v2_preset_test_pass": true,
+    "local_container_effective_ram_gib": 4,
+    "local_container_gpu": false,
+    "local_container_model_download_network": false,
+    "github_ci_at_earlier_head": {
+      "run_id": 42088948929,
+      "pass": 588,
+      "fail": 0
+    }
+  },
+  "portable_pilot": {
+    "sha256_zip": "bce836dbc0f95d4e70cb7969be8365f7923d423933e487800148c08820031227",
+    "zip_size_bytes": 483689,
+    "drive_file_id": "1vpGjl0fJFNNIqxehk-so0-shokRDiCbz",
+    "user_action_required": "Run JARVIS_DIAGNOSTICO_1_CLIC.cmd from extracted ZIP and return output/JARVIS_DIAGNOSTICO_HARDWARE.json",
+    "no_private_audio_committed_to_git": true,
+    "hardware_windows_validation": "PENDING"
+  },
+  "prod": {
+    "voice_routing_deployed": false,
+    "gateway_tts_connected": false,
+    "ana_unchanged": true,
+    "app_crm_supabase_modified": false,
+    "main_modified": false
+  },
+  "next": "WINDOWS_HARDWARE_PROBE_THEN_REAL_LOCAL_SPEECH_RENDER_AND_LATENCY_CHECK",
+  "rollback": "Close draft PR24. Pilot delete folder. No PROD changes."
+}
