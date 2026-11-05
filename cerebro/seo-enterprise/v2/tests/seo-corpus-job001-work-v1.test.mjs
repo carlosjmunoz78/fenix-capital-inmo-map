@@ -70,7 +70,7 @@ test('JWT signed with valid asymmetric RSA key required; wrong audience/sha/sign
  const good=sign(payload),jwks={keys:[jwk]};
  assert.equal(verifyJwtSignedByGithub({jwt:good,jwks,env,nowSeconds:now}).verified,true);
  assert.throws(()=>verifyJwtSignedByGithub({jwt:sign({...payload,aud:'wrong'}),jwks,env,nowSeconds:now}),/JWT_ISSUER_AUDIENCE/);
- assert.throws(()=>verifyJwtSignedByGithub({jwt:sign({...payload,sha:'b'.repeat(40)}),jwks,env,nowSeconds:now}),/JWT_CLAIMS/);
+ assert.throws(()=>verifyJwtSignedByGithub({jwt:sign({...payload,sha:'b'.repeat(40)}),jwks,env,nowSeconds:now}),/JWT_CLAIM_SHA/);
  const altered=good.slice(0,-3)+'aaa';
  assert.throws(()=>verifyJwtSignedByGithub({jwt:altered,jwks,env,nowSeconds:now}),/JWT_SIGNATURE/);
 });
