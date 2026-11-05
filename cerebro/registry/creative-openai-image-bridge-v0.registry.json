@@ -1,0 +1,131 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CREATIVE-OPENAI-SOC001-V0",
+  "date": "2026-11-05",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "consumer_engine_id": "SOC-001",
+  "department_id": "PRODUCTORA_AUDIOVISUAL",
+  "environment": "PREPROD",
+  "version": "v0",
+  "status": "PARALLEL_IMPL_CI_GREEN_NOT_LIVE_AI_GENERATION",
+  "relations": {
+    "existing_queue": "cerebro_creative_job_v1",
+    "existing_dispatcher": "cerebro-creative-dispatch-v1",
+    "existing_worker": ".github/workflows/cerebro-creative-job-runner-v1.yml",
+    "existing_runner": "cerebro/runtime/creative-job-runner-v1.mjs",
+    "existing_artifact_storage": "cerebro-creative-assets",
+    "existing_publish_adapters": [
+      "BUFFER_EXISTING",
+      "MAKE_EXISTING",
+      "FACEBOOK_DIRECT_PROVIDER_WHEN_AUTHORIZED"
+    ],
+    "canonical_owner_engine": "FACT-001",
+    "requires_new_server": false
+  },
+  "roles": [
+    {
+      "role": "SOC001_FB_STRATEGIST",
+      "job": "Buyer persona, objective, funnel, SEO/marketing URL"
+    },
+    {
+      "role": "SOC001_FB_COPYWRITER",
+      "job": "Hook, persuasive body, CTA, hashtags, factual research"
+    },
+    {
+      "role": "AV_ART_DIRECTOR",
+      "job": "Professional concept, composition, scene selection, visual hierarchy, premium photographic brief"
+    },
+    {
+      "role": "AV_PROMPT_ENGINEER",
+      "job": "Assemble image model prompt from CEREBRO brief and approved brand profile"
+    },
+    {
+      "role": "AV_RENDERER",
+      "job": "OpenAI photo (optional paid) + original transparent Fénix logo + audited overlay"
+    },
+    {
+      "role": "AV_QA_SUPERVISOR",
+      "job": "Independent visual/brand/rights evaluation, no self approval"
+    },
+    {
+      "role": "SOC001_EVALUATOR",
+      "job": "Funnel QA, copy QA, live URL QA, measurement plan"
+    },
+    {
+      "role": "SOC001_PUBLISHER",
+      "job": "Only existing separately authorized provider dispatch, idempotency and verified native ID"
+    },
+    {
+      "role": "INDEPENDENT_TRIBUNAL",
+      "job": "Review overclaim, image quality, media licensing, cost safety and approval evidence"
+    }
+  ],
+  "generation": {
+    "prompt_origin": "CEREBRO_FACT001_STRUCTURED_WORK_ORDER_NOT_CHAT_ASSISTANT",
+    "prompt_compiler": "cerebro/runtime/creative-social-prompt-v0.mjs",
+    "provider_adapter": "cerebro/runtime/creative-openai-image-adapter-v0.mjs",
+    "existing_worker_additive_adapter": "cerebro/runtime/creative-ai-job-v0.mjs",
+    "compositor": "cerebro/runtime/creative-social-compositor-v0.mjs",
+    "provider": "OPENAI",
+    "model": "gpt-image-2.5-flare",
+    "style": "ORIGINAL_PHOTOGRAPHIC_BACKGROUND_ONLY",
+    "branding": "REAL_OFFICIAL_TRANSPARENT_LOGO_APPLIED_POST_GENERATION",
+    "headline_source": "CEREBRO_APPROVED_COPY",
+    "photo_implies_real_listing": false
+  },
+  "brand_policy": {
+    "orange_primary": "#FF5F00",
+    "yellow_secondary": "#FFB71B",
+    "dark": "#222222",
+    "white": "#FFFFFF",
+    "purple_microaccent": "#870064",
+    "logo_on_bright_surface": true,
+    "logo_source": "https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png",
+    "never_ai_generate_logo": true
+  },
+  "cost_policy": {
+    "default_eur": 0,
+    "paid_image_api_disabled_without_approval": true,
+    "approval_exception": "MONEY_LIMIT",
+    "max_provider_calls_per_approval": 1,
+    "approval_verified_on_server_required": true,
+    "actual_api_cost_needs_provider_reconciliation": true
+  },
+  "publication": {
+    "autopublish_authorized": false,
+    "publish_from_this_module": false,
+    "publish_host": "fenixcapital.es",
+    "never_staging_links": true,
+    "one_test_facebook_page": "Fénix Capital",
+    "canary_native_post_required": true,
+    "buffer_make_not_replaced": true
+  },
+  "training": {
+    "all_roles_include_supervisors_judges": true,
+    "evidence_based_rewards": true,
+    "competence_exams": true,
+    "controlled_replacement_with_rollback": true,
+    "self_award_forbidden": true
+  },
+  "promotion_required": [
+    "CURRENT_SYSTEM_INVENTORY",
+    "DEPENDENCY_MAP",
+    "BACKUP",
+    "CI_GATE",
+    "OPENAI_APPROVAL_AND_COST_RECORD",
+    "LIVE_IMAGE_GENERATED_BY_CEREBRO_WITH_PROVIDER_PROOF",
+    "BRAND_AND_VISUAL_INDEPENDENT_QA",
+    "SOC001_PRODUCTION_ONLY_URL_CHECK",
+    "OLD_VS_NEW",
+    "ROLLBACK_TEST",
+    "NATIVE_FACEBOOK_PROOF"
+  ],
+  "evidence": {
+    "workflow": "CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend",
+    "workflow_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42008055117",
+    "CI": "SUCCESS_WITH_MOCK_PROVIDER_AND_PHYSICAL_BROWSER",
+    "paid_api_calls": "ZERO_BY_POLICY",
+    "live_image_from_cerebro": "NOT_YET"
+  }
+}
