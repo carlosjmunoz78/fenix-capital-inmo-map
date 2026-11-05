@@ -1,11 +1,13 @@
 /**
  * FACT-001 provider adapter for OpenAI /images/generations.
- * It NEVER executes unless a finance-approved paid lane has explicitly been
- * enabled on the secure worker. No subscription, no publish authority,
- * no secrets in logs. Prompt comes from buildCerebroCreativeOrder().
+ * Paid image generations are PERMITTED by owner policy. Execute only inside
+ * a securely approved bounded media budget, with cost accounting; no per-image
+ * human intervention needed while a valid automated budget authority holds.
+ * No subscriptions required, no publish authority, no secrets in logs. Prompt comes from buildCerebroCreativeOrder().
  */
 import {createHash} from 'node:crypto';
 import {buildCerebroCreativeOrder} from './creative-social-prompt-v0.mjs';
+import {mediaCostPolicyFor} from './creative-media-provider-policy-v1.mjs';
 
 const URL='https://api.openai.com/v1/images/generations';
 const MODEL='gpt-image-2.5-flare';
@@ -13,9 +15,11 @@ const PNG_MAGIC=Buffer.from([137,80,78,71,13,10,26,10]);
 function hash(b){return createHash('sha256').update(b).digest('hex');}
 function isPosNumber(v){return typeof v==='number'&&Number.isFinite(v)&&v>0;}
 export function preflightOpenAiCost({order,approval=null,env={}}){
+ if(mediaCostPolicyFor('IMAGE').paid_api_allowed!==true)return {allowed:false,status:'BLOCKED',reason:'MEDIA_PAID_API_POLICY_DENIED'};
  if(!order||order.environment!=='PREPROD')return {allowed:false,status:'HUMAN_REQUIRED',reason:'POLICY_CONFLICT'};
  if(order.ai_scene_request?.model!==MODEL||order.ai_scene_request.n!==1)return {allowed:false,status:'BLOCKED',reason:'PROVIDER_MODEL_OR_COUNT_DENIED'};
- if(env.OPENAI_IMAGE_PROVIDER_ENABLED!=='true')return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
+ // A disabled provider is a technical readiness state, not a ban on paid images.
+ if(env.OPENAI_IMAGE_PROVIDER_ENABLED!=='true')return {allowed:false,status:'HOLD',reason:'IMAGE_PROVIDER_NOT_ENABLED'};
  if(!approval||approval.decision!=='APPROVED'||approval.approver!=='CARLOS-ADMIN'||typeof approval.approval_id!=='string'||!/^CREATIVE-AI-[A-Za-z0-9_-]{8,90}$/.test(approval.approval_id))
    return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
  const expires=Date.parse(approval.expires_at??'');
@@ -27,7 +31,8 @@ export function preflightOpenAiCost({order,approval=null,env={}}){
  const reservation=approval.estimated_max_eur;
  if(!isPosNumber(maxBudget)||!isPosNumber(confirmed)||!isPosNumber(reservation)||reservation>confirmed||reservation>maxBudget||approval.max_images!==1)
    return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
- // The environment approval must be backed by a server-side checked record.
+ // A reusable budget grant may be issued by the registered financial supervisor.
+ // The secure server must verify it for this work order and meter total spend.
  // A user-supplied approval object alone must never authorize spending.
  if(env.OPENAI_IMAGE_VERIFIED_APPROVAL_ID!==approval.approval_id)
    return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
@@ -76,6 +81,7 @@ export async function generateOpenAiScene({order,approval=null,env=process.env,f
 }
 export function prepareCerebroAiSocialJob(input){
  const order=buildCerebroCreativeOrder(input);
- return {order,execution:'HOLD_UNTIL_EXISTING_GATEWAY_BUDGET_APPROVED',model:MODEL,
+ return {order,execution:'HOLD_UNTIL_MEDIA_BUDGET_AUTHORITY_AND_LEDGER_READY',model:MODEL,
+         paid_image_api_permitted:true,ordinary_zero_euro_policy_not_applicable:true,
          publish_authorized:false,uses_existing_factory:'FACT-001',consumer:'SOC-001'};
 }
