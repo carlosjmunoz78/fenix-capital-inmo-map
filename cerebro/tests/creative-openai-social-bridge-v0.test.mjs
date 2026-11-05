@@ -52,11 +52,11 @@ test('paid model never called without server-verified economic authority',async(
  let result=await generateOpenAiScene({order:ORDER,fetch_impl,env:{}});
  assert.equal(result.allowed,false);assert.equal(result.reason,'IMAGE_PROVIDER_NOT_ENABLED');
  result=await generateOpenAiScene({order:ORDER,fetch_impl,env:TEST_ENV,approval:null});
- assert.equal(result.allowed,false);assert.equal(result.reason,'MONEY_LIMIT');
+ assert.equal(result.allowed,false);assert.equal(result.reason,'MEDIA_BUDGET_NOT_BOUND_TO_WORKER');
  result=await generateOpenAiScene({order:ORDER,fetch_impl,
    env:{...TEST_ENV,OPENAI_IMAGE_VERIFIED_APPROVAL_ID:'UNKNOWN'},
    approval:approved()});
- assert.equal(result.allowed,false);assert.equal(result.reason,'MONEY_LIMIT');
+ assert.equal(result.allowed,false);assert.equal(result.reason,'BUDGET_GRANT_NOT_SERVER_VERIFIED');
  assert.equal(calls,0);
 });
 test('test-only injected provider call uses official current image model and returns nonpublishable artifact',async()=>{
