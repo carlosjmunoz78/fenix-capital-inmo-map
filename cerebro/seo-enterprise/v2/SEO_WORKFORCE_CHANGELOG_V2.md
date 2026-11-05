@@ -1,5 +1,14 @@
 # SEO Enterprise V2 · Changelog
 
+## 2026-11-05 · WRITE-LAB real, cuatro jobs OIDC y 20 borradores editoriales
+
+- Añadido `runtime/seo-draft-writer-lab-v1.mjs`: modo WRITE acotado al filesystem temporal del runner GitHub, productor de 20 JSON editoriales + manifiesto, no WordPress.
+- Nuevo job `seo-corpus-sandbox-writer` con identidad OIDC distinta tras worker + QA + tribunal; tokens GitHub de solo lectura del repositorio.
+- Físico [42114713494](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42114713494): 4/4 SUCCESS, 20 borradores escritos y archivados, canario de rollback LAB verificado.
+- Test [42114713057](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42114713057): 144/144 SEO y suites 22/22 + 5/5 + 5/5 correctas.
+- Próximo gate: IAM WordPress mínimo, CREATE_DRAFT (sin publicar), backup/restore por objeto y QA editorial. NO actuar en WordPress/App/CRM/Supabase hasta cerrar.
+- Manifiesto `seo-isolated-write-evidence-v1.json` y runbook `cerebro/docs/CEREBRO_SEO_V2_ESCRITURA_CONTROLADA_LAB_2026-11-05.md`.
+
 ## 2026-11-05 · Fase L0: acciones por URL y ejecución de formación determinista
 
 - Materializado el motor `runtime/seo-specialist-work-product-v1.mjs`: 141 propuestas especializadas ligadas al inventario aceptado y 200 acciones sobre URL existentes sin nuevo rastreo.
