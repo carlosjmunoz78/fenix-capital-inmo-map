@@ -1,6 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {resolveCerebroVoiceSurface} from '../../../src/jarvisVoiceSurfacePolicy.ts';
+import {readFileSync} from 'node:fs';
+import {stripTypeScriptTypes} from 'node:module';
+const source=readFileSync(new URL('../../../src/jarvisVoiceSurfacePolicy.ts',import.meta.url),'utf8');
+const js=stripTypeScriptTypes(source,{mode:'strip'});
+const {resolveCerebroVoiceSurface}=await import('data:text/javascript,'+encodeURIComponent(js));
 
 for(const companyId of ['fenix','aion','captacasa'])for(const view of ['JARVIS','OPERATIVA','NEURONAL','NAVEGADOR','V0']){
   test('JARVIS V2 in '+companyId+' / '+view,()=>{
