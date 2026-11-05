@@ -12,6 +12,7 @@ import {ActionGatewayV1} from '../../../gateway/action-gateway-v1.mjs';
 import {loadFrozenSeoCorpus,expectedSeoRoleEvidence} from './seo-corpus-job001-work-v1.mjs';
 import {independentlyReviewSeoWorkProducts} from './seo-specialist-work-product-v1.mjs';
 import {verifyPriorSeoJob} from './seo-gh-oidc-workload-v1.mjs';
+import {buildSeoOwnerIntentFunnel} from './seo-owner-intent-funnel-v1.mjs';
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 const NAME='seo-editorial-draft-bundle-v1';
 const plain=s=>String(s||'').replace(/<[^>]*>/g,' ').replace(/[\u0000-\u001f\u007f]/g,' ').replace(/[{}\[\]$]/g,' ').replace(/\s+/g,' ').trim();
@@ -26,12 +27,23 @@ export function createSeoEditorialWriteBundle({corpus,work_products}={}){
  work_products?.url_action_queue?.length!==200||
  work_products.source_snapshot_digest!==corpus.corpus_digest||
  work_products.all_are_readonly_proposals!==true)throw Error('SEO_DRAFT_CORPUS_SCOPE');
+ const owner=buildSeoOwnerIntentFunnel({corpus});
  const byId=new Map(corpus.documents.map(x=>[x.post_id,x]));
+ const byOwnerId=new Map(owner.url_ownership.map(x=>[x.post_id,x]));
+ // Never draft from exact keyword collisions before an independent ownership decision.
+ const collisionUrls=new Set(owner.keyword_overlap_candidates.flatMap(x=>x.candidate_existing_urls.map(y=>y.url)));
+ const candidates=work_products.url_action_queue.filter(x=>
+   !collisionUrls.has(x.url)&&byOwnerId.get(x.post_id)?.family!=='INSTITUTIONAL' &&
+   byOwnerId.get(x.post_id)?.family!=='GENERAL').slice(0,20);
  const drafts=[];
- for(const c of work_products.url_action_queue.slice(0,20)){
+ for(const c of candidates){
   const d=byId.get(c.post_id);
   if(!d||c.copy_sha256!==sha(d.copy_text)||c.url!==d.url||
   !d.url.startsWith('https://fenixcapital.es/'))throw Error('SEO_DRAFT_SOURCE_CONFLICT');
+  const ownership=byOwnerId.get(c.post_id);
+  if(!ownership||ownership.url!==d.url||ownership.page_mutation_authorized||
+    ownership.form_implemented_verified||ownership.tracking_ga4_verified)
+    throw Error('SEO_DRAFT_OWNER_INTENT_QA_DENIED');
   const topic=(plain(d.title)||'tu operación inmobiliaria').slice(0,116);
   const candidate=topic+'. Revisa los puntos clave y solicita orientación con Fénix Capital.';
   const proposedMeta=candidate.length<=155?candidate:candidate.slice(0,152).replace(/\s+\S*$/,'')+'...';
@@ -46,6 +58,18 @@ export function createSeoEditorialWriteBundle({corpus,work_products}={}){
    existing_internal_links:d.internal_links.slice(0,3),
    source_images:d.images.slice(0,3).map(x=>({src:x.src,alt:x.alt||null})),
    source_keyword:d.yoast?.focus_keyword||null,
+   strategic_owner:{persona:ownership.persona,family:ownership.family,
+    funnel_stage:ownership.funnel_stage,conversion_goal:ownership.conversion_goal,
+    proposed_cta_contract:ownership.proposed_cta,
+    required_form_contract:ownership.form_contract,
+    lead_magnet_contract:ownership.downloadable,
+    newsletter_line:ownership.newsletter_line,
+    forms_and_magnet_not_proven_connected:true,
+    google_cannibalization_has_not_been_proven:true},
+   keyword_exact_collision_blocked:true,
+   future_new_image_provider:'CREATIVE-PROGRAMMATIC-RENDER-V1',
+   image_import_requires_verified_asset_qa:true,
+   media_queue_could_still_be_pending:true,
    review_required:['SEO-D13:EDITORIAL','SEO-D16:YMYL','SEO-D26:IMAGE_RIGHTS',
     'SEO-D31:INDEPENDENT_QA','TRIBUNAL','BACKUP_OLD_VS_NEW_ROLLBACK'],
    can_change_existing_url:false,can_publish:false,can_spend:false,
@@ -58,6 +82,9 @@ export function createSeoEditorialWriteBundle({corpus,work_products}={}){
   source_snapshot_digest:corpus.corpus_digest,source_documents:200,
   company_id:'fenix',engine_id:'SEO-001',environment:'LAB',
   draft_count:20,drafts,originals_unmodified:true,
+  keyword_overlap_candidates_held:owner.exact_keyword_duplicate_count,
+  funnel_blueprints_defined:owner.funnel_contracts.length,
+  existing_urls_preserved:true,
   wordpress_write_permission:false,external_write_permission:false,
   requires_independent_editorial_signoff:true};
 }
