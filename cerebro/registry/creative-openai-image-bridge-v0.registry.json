@@ -177,7 +177,11 @@
     "BUDGET_RESERVATION_AND_COST_RECONCILIATION",
     "SECURE_OPENAI_WORKER_CREDENTIAL_BINDING",
     "ATOMIC_MEDIA_BUDGET_LEDGER",
-    "ONE_REAL_PROVIDER_IMAGE_REQUEST"
+    "ONE_REAL_PROVIDER_IMAGE_REQUEST",
+    "OWNER_CONTROL_GATEWAY_VERIFIED_AUTH",
+    "OWNER_COMMAND_TO_WORKER_CONSUMPTION",
+    "OWNER_PAUSE_RESUME_ROLLBACK_REGRESSION",
+    "BREAK_GLASS_RECOVERY_TEST"
   ],
   "evidence": {
     "workflow": "CEREBRO FACT-001 · OpenAI Photo Bridge V0 · PREPROD No Spend",
@@ -206,6 +210,35 @@
       "provider_called": false
     },
     "latest_workflow_credential_check": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42011070119",
-    "paid_image_reason": "OWNER_AUTHORIZED; WORKER_SECRET_AND_SPEND_LEDGER_PENDING"
+    "paid_image_reason": "OWNER_AUTHORIZED; WORKER_SECRET_AND_SPEND_LEDGER_PENDING",
+    "owner_control_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42025858822"
+  },
+  "owner_control": {
+    "contract_version": "v0",
+    "status": "PREPROD_COMMAND_STORAGE_LIVE_AUDITED_WORKER_NOT_ATTACHED",
+    "entrypoint": "CHATGPT_CONNECTED_SUPABASE",
+    "architecture": "USER_CHATGPT -> CEREBRO_GATEWAY_OWNER_AUTH -> PRIVATE_COMMAND_STORE -> WORKER -> EVIDENCE -> CHATGPT",
+    "live_current_transport": "CHATGPT_SUPABASE_CONNECTOR_TO_PRIVATE_SQL_PREPROD",
+    "command_policy_module": "cerebro/runtime/owner-command-control-v0.mjs",
+    "private_db_schema": "cerebro_owner_control",
+    "private_command_table": "cerebro_owner_control.commands_v0",
+    "immutable_history": "cerebro_owner_control.audit_v0",
+    "canonical_company_id": "fenix",
+    "company_alias_for_brand": "fenix-capital",
+    "interface_preferred": "CHATGPT",
+    "human_by_exception": true,
+    "auto_work_without_chat_required": true,
+    "user_may_request_improvement_pause_resume_rollback": true,
+    "permanent_human_recovery_access_required": true,
+    "connector_only_controls_currently_available": true,
+    "account_admin_access_not_disabled": true,
+    "existing_creative_request_job_id": "99427de0-877c-4e2a-88c4-c9c26a6ccfae",
+    "control_command_id": "d62feb88-86ba-4c0e-971e-c4fae36c767e",
+    "command_status": "HOLD",
+    "command_reason": "SECURITY_INCIDENT",
+    "worker_consumption": "NOT_YET_IMPLEMENTED",
+    "no_production_writes": true,
+    "no_image_generated": true,
+    "no_social_post_created": true
   }
 }
