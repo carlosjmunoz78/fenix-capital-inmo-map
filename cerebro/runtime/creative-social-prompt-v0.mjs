@@ -82,7 +82,7 @@ export function buildCerebroCreativeOrder(input){
       publish_authorized:false,buffer_authorized:false,wordpress_prod_write:false,
       tool_is_not_director:true,independent_qa_required:true,
       third_party_media_forbidden:true,synthetic_property_not_actual_listing:true,
-      default_additional_cost_eur:0,paid_execution_requires_MONEY_LIMIT_clearance:true,
+      default_additional_cost_eur:null,paid_media_allowed:true,image_provider_initial:'OPENAI',\n      future_image_providers:['BFL_FLUX_1_1_PRO'],video_provider_status:'NOT_CONTRACTED',\n      production_budget_and_ledger_required:true,paid_execution_requires_MONEY_LIMIT_clearance_only_IF_BUDGET_EXCEEDED:true,
       never_publish_staging_url:true,never_generate_fake_logo:true
     },
     gates:['CREATIVE_PROMPT_REVIEW','OPENAI_IMAGE_GENERATION_COST_APPROVAL',
