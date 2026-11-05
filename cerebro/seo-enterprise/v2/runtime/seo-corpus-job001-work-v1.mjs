@@ -14,6 +14,7 @@ import {verifyPriorSeoJob} from './seo-gh-oidc-workload-v1.mjs';
 import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from './seo-workload-role-lease-v1.mjs';
 import {createSeoCurriculumCases,verifySeoCurriculumCases} from './seo-specialist-exercise-engine-v1.mjs';
 import {createSeoSpecialistWorkProducts,independentlyReviewSeoWorkProducts} from './seo-specialist-work-product-v1.mjs';
+import {runSeoDeterministicPractice,validateSeoDeterministicPractice} from './seo-specialist-practice-attempt-v1.mjs';
 const ROOT=fileURLToPath(new URL('../',import.meta.url));
 const sha=s=>crypto.createHash('sha256').update(s).digest('hex');
 const ctx={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0'};
@@ -156,6 +157,7 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
  });
  const training_exercises=createSeoCurriculumCases({corpus,evidence:expected});
  const work_products=createSeoSpecialistWorkProducts({corpus,evidence:expected});
+ const practice_responses=runSeoDeterministicPractice({corpus,casebook:training_exercises,work_products});
  const journal=new DurableJobRuntimeV1({file_path:journal_path});
  let created=0,duplicates=0;
  for(const evidence of expected){
@@ -194,7 +196,9 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
   from_frozen_website_inventory:true,new_crawl_performed:false,
   corpus_digest:corpus.corpus_digest,source_parts:corpus.parts,
   documents_considered:corpus.documents.length,role_work_receipts:expected,
-  role_scope_bundle,training_exercises,work_products,
+  role_scope_bundle,training_exercises,work_products,practice_responses,
+  deterministic_role_practice_responses_executed:423,
+  authenticated_individual_agent_exam_attempts:0,
   specialized_work_products_prepared:141,url_actions_prioritized:200,
   scoped_role_proofs_verified_at_execution:141,
   training_exercise_cases_prepared:423,training_exam_attempts_recorded:0,
@@ -242,7 +246,11 @@ export function reviewSeoCorpusWork({worker,identity}={}){
   role_work_receipts:expected,corpus_digest:corpus.corpus_digest,host_identity:worker.host_identity});
  const training=verifySeoCurriculumCases({prepared:worker.training_exercises,corpus,evidence:expected});
  const work=independentlyReviewSeoWorkProducts({work_products:worker.work_products,corpus,evidence:expected});
- if(work.role_products!==141||work.url_queue!==200||
+ const practice=validateSeoDeterministicPractice({submitted:worker.practice_responses,
+  corpus,casebook:worker.training_exercises,work_products:worker.work_products});
+ if(practice.cases!==423||worker.deterministic_role_practice_responses_executed!==423||
+   worker.authenticated_individual_agent_exam_attempts!==0||
+   work.role_products!==141||work.url_queue!==200||
    worker.specialized_work_products_prepared!==141||worker.url_actions_prioritized!==200||
    roleScope.verified_roles!==141||training.cases!==423||
    worker.scoped_role_proofs_verified_at_execution!==141||worker.training_exam_attempts_recorded!==0)
@@ -259,6 +267,8 @@ export function reviewSeoCorpusWork({worker,identity}={}){
   practice_cases_independently_verified:423,
   specialist_work_products_independently_verified:141,
   existing_urls_in_prioritized_backlog:200,
+  deterministic_practice_responses_independently_verified:423,
+  independently_verified_real_actor_exam_responses:0,
   real_exam_attempts:0,training_passes:0,
   real_agent_iam_certified:false,independent_subject_matter_certification:false,
   site_mutations:0,prod_authorized:false};
@@ -276,6 +286,8 @@ export function tribunalSeoCorpusWork({worker,qa,identity}={}){
   qa.practice_cases_independently_verified!==423||
   qa.specialist_work_products_independently_verified!==141||
   qa.existing_urls_in_prioritized_backlog!==200||
+  qa.deterministic_practice_responses_independently_verified!==423||
+  qa.independently_verified_real_actor_exam_responses!==0||
   qa.real_exam_attempts!==0)throw Error('TRIBUNAL_IDENTITY_OR_EVIDENCE_INVALID');
  const corpus=loadFrozenSeoCorpus();
  if(corpus.corpus_digest!==qa.source_digest||JSON.stringify(expectedSeoRoleEvidence(corpus))!==
@@ -286,11 +298,15 @@ export function tribunalSeoCorpusWork({worker,qa,identity}={}){
  verifySeoCurriculumCases({prepared:worker.training_exercises,corpus,evidence:worker.role_work_receipts});
  independentlyReviewSeoWorkProducts({work_products:worker.work_products,
   corpus,evidence:worker.role_work_receipts});
+ validateSeoDeterministicPractice({submitted:worker.practice_responses,
+  corpus,casebook:worker.training_exercises,work_products:worker.work_products});
  return {schema_version:'1.0.0',status:'CORPUS_REAL_WORK_VERIFIED_NO_PROD_PROMOTION',
   environment:'PREPROD',company_id:'fenix',engine_id:'SEO-001',
   role_evidence_accepted:141,departments_with_evidence:32,
   scope_proofs_signed_and_verified:141,training_exercises_prepared_and_verified:423,
   specialist_work_products_verified:141,existing_urls_prioritized:200,
+  deterministic_practice_responses_verified:423,
+  individual_agent_exams_completed:0,
   stored_only_strategy_drafts_not_published:true,
   training_actors_submitted_responses:0,actual_specialist_training_certified:0,
   source_snapshot_pinned:true,wordpress_reaudited:false,
@@ -310,21 +326,21 @@ async function main(){
  if(stage==='worker'){
   const [journal,identityFile,out]=args;
   const x=await executeSeoCorpusViaGateway({journal_path:journal,identity:read(identityFile)});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,work_receipts:141,scope_proofs:141,training_cases:423,work_products:141,url_work_queue:200,snapshot_docs:200,external_writes:0})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,work_receipts:141,scope_proofs:141,training_cases:423,work_products:141,url_work_queue:200,practice_simulations:423,snapshot_docs:200,external_writes:0})+'\n');
  }else if(stage==='qa'){
   const [workerFile,workerId,qaId,out]=args;
   const env=process.env;
   const prior=read(workerId),own=read(qaId);
   await verifyPriorSeoJob({prior,env});
   const x=reviewSeoCorpusWork({worker:read(workerFile),identity:own});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,checked_roles:141,scope_proofs:141,training_cases:423,work_products:141,url_work_queue:200,external_writes:0})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,checked_roles:141,scope_proofs:141,training_cases:423,work_products:141,url_work_queue:200,practice_simulations:423,external_writes:0})+'\n');
  }else if(stage==='tribunal'){
   const [workerFile,qaFile,workerId,qaId,tribunalId,out]=args;
   const env=process.env;
   const ids=[read(workerId),read(qaId)],own=read(tribunalId);
   for(const prior of ids)await verifyPriorSeoJob({prior,env});
   const x=tribunalSeoCorpusWork({worker:read(workerFile),qa:read(qaFile),identity:own});
-  write(out,x);process.stdout.write(JSON.stringify({status:x.status,departments:32,receipts:141,training_cases:423,work_products:141,url_work_queue:200,prod_promotion:false})+'\n');
+  write(out,x);process.stdout.write(JSON.stringify({status:x.status,departments:32,receipts:141,training_cases:423,work_products:141,url_work_queue:200,practice_simulations:423,prod_promotion:false})+'\n');
  }else throw Error('INVALID_STAGE');
 }
 if(process.argv[1]===fileURLToPath(import.meta.url))
