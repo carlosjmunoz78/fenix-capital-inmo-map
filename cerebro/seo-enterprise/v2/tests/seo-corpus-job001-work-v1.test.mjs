@@ -8,6 +8,7 @@ import {verifyJwtSignedByGithub} from '../runtime/seo-gh-oidc-workload-v1.mjs';
 import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from '../runtime/seo-workload-role-lease-v1.mjs';
 import {createSeoCurriculumCases,verifySeoCurriculumCases} from '../runtime/seo-specialist-exercise-engine-v1.mjs';
 import {createSeoSpecialistWorkProducts,independentlyReviewSeoWorkProducts} from '../runtime/seo-specialist-work-product-v1.mjs';
+import {runSeoDeterministicPractice,validateSeoDeterministicPractice} from '../runtime/seo-specialist-practice-attempt-v1.mjs';
 
 
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
@@ -192,4 +193,33 @@ test('worker QA tribunal verify real 141 work products and 200 URL queue, withou
  assert.equal(tribunal.existing_urls_prioritized,200);
  assert.equal(tribunal.stored_only_strategy_drafts_not_published,true);
  assert.equal(tribunal.certified_prod_departments,0);
+});
+
+test('423 deterministic specialist practice responses are actually executed against 3 URL cases per role and independently checked',()=>{
+ const corpus=loadFrozenSeoCorpus(),e=expectedSeoRoleEvidence(corpus);
+ const c=createSeoCurriculumCases({corpus,evidence:e});
+ const w=createSeoSpecialistWorkProducts({corpus,evidence:e});
+ const a=runSeoDeterministicPractice({corpus,casebook:c,work_products:w});
+ assert.equal(a.attempts.length,423);
+ assert.equal(a.machine_generated_practice_responses,423);
+ assert.equal(new Set(a.attempts.map(x=>x.role_id)).size,141);
+ assert.equal(a.authenticated_individual_agent_submissions,0);
+ assert.equal(a.professional_exams_passed,0);
+ assert.equal(a.role_certifications,0);
+ assert.equal(a.attempts.filter(x=>x.round_id==='EVIDENCE_GAP').length,141);
+ assert.equal(a.attempts.every(x=>x.grade===null&&!x.prod_permissions_granted&&x.source_copy_sha256.length===64),true);
+ assert.equal(validateSeoDeterministicPractice({submitted:a,corpus,casebook:c,work_products:w}).cases,423);
+ const modified=structuredClone(a);modified.attempts[0].source_observations.wordpress_title='FAKE';
+ assert.throws(()=>validateSeoDeterministicPractice({submitted:modified,corpus,casebook:c,work_products:w}),/INDEPENDENT_RECOMPUTE_FAILED/);
+});
+test('real JOB-001 OIDC worker QA and tribunal include separate deterministic exercises with no training claims',t=>{
+ const w=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',851)});
+ assert.equal(w.deterministic_role_practice_responses_executed,423);
+ assert.equal(w.practice_responses.attempts.length,423);
+ assert.equal(w.authenticated_individual_agent_exam_attempts,0);
+ const q=reviewSeoCorpusWork({worker:w,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',852)});
+ assert.equal(q.deterministic_practice_responses_independently_verified,423);
+ const j=tribunalSeoCorpusWork({worker:w,qa:q,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',853)});
+ assert.equal(j.deterministic_practice_responses_verified,423);
+ assert.equal(j.individual_agent_exams_completed,0);
 });
