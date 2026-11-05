@@ -5,7 +5,8 @@ import {chromium} from '@playwright/test';
 import {buildCerebroCreativeOrder,validateProductionUrl,CEREBRO_IMAGE_BRIDGE_V0} from '../runtime/creative-social-prompt-v0.mjs';
 import {preflightOpenAiCost,generateOpenAiScene} from '../runtime/creative-openai-image-adapter-v0.mjs';
 import {renderSocialImage,renderImageHtml} from '../runtime/creative-social-compositor-v0.mjs';
-import {assessAiCreativeJob} from '../runtime/creative-ai-job-v0.mjs';
+import {assessAiCreativeJob,renderAiCreativeJob} from '../runtime/creative-ai-job-v0.mjs';
+import {runOneCreativeJob} from '../runtime/creative-job-runner-v1.mjs';
 
 const INPUT=JSON.parse(await fs.readFile(new URL('../fixtures/facebook-audiovisual-canary-20261105.brief.json',import.meta.url),'utf8'));
 const ORDER=buildCerebroCreativeOrder(INPUT);
@@ -114,4 +115,71 @@ test('FACT-001 queue integration: all existing work remains legacy and AI cannot
  const prod=assessAiCreativeJob({...base,environment:'PROD'},{env:TEST_ENV});
  assert.equal(prod.reason,'SCOPE_DENIED');
  assert.equal(prod.ready,false);
+});
+
+
+test('physical AI creative job with injected mock provider generates brand-composited artifact, no publication',async()=>{
+ const {photo,logo}=await makeSyntheticFixtureImage();
+ const approval=approved();
+ const request={company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',
+  creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},
+  expected_cost_eur:0.3,ai_spend_approval:approval};
+ const job={job_id:'11111111-2222-4333-8444-555555555555',company_id:'fenix-capital',
+  engine_id:'SOC-001',environment:'PREPROD',channel:'FACEBOOK',output_type:'SQUARE_POST',request};
+ const gate=assessAiCreativeJob(job,{env:TEST_ENV});
+ assert.equal(gate.is_ai,true);assert.equal(gate.ready,true);
+ let calls=[];
+ const result=await renderAiCreativeJob(job,{env:TEST_ENV,fetch_impl:async(url,init)=>{
+   calls.push(url);
+   if(url==='https://api.openai.com/v1/images/generations'){
+     assert.equal(JSON.parse(init.body).model,'gpt-image-2.5-flare');
+     return {ok:true,headers:{get:()=>null},json:async()=>({data:[{b64_json:photo.toString('base64')}],usage:{image_output_tokens:1000}})};
+   }
+   assert.equal(url,'https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png');
+   return {ok:true,headers:{get:()=> 'image/png'},arrayBuffer:async()=>Uint8Array.from(logo).buffer};
+ }});
+ try{
+   assert.equal(calls.length,2);
+   assert.equal(result.status,'RENDERED_QA_PENDING');
+   assert.equal(result.artifacts.length,2);
+   assert.equal(result.evaluation.provenance.logo_alpha_verified,true);
+   assert.equal(result.publish_authorized,false);
+   assert.equal(result.evaluation.brand,'PENDING_INDEPENDENT');
+   assert.equal(result.cost.spent_eur_verified,false);
+   for(const asset of result.artifacts)assert.ok((await fs.stat(asset.local_path)).size>10000);
+ }finally{await fs.rm(result.temp,{recursive:true,force:true});}
+});
+test('real FACT-001 OIDC worker recognizes AI job but terminates in HOLD before charge',async()=>{
+ const original={url:process.env.ACTIONS_ID_TOKEN_REQUEST_URL,token:process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN};
+ process.env.ACTIONS_ID_TOKEN_REQUEST_URL='https://token.actions.githubusercontent.com/mock-request';
+ process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN='TEST_ONLY_REQUEST_TOKEN';
+ try{
+  const job={job_id:'11111111-2222-4333-8444-555555555555',lease_id:'11111111-2222-4333-8444-666666666666',
+    company_id:'fenix-capital',engine_id:'SOC-001',environment:'PREPROD',channel:'FACEBOOK',
+    output_type:'SQUARE_POST',request:{creative_payload:{scene_provider:'OPENAI_IMAGE',brief:INPUT},expected_cost_eur:0}};
+  const requests=[];
+  const r=await runOneCreativeJob({endpoint:'https://example.invalid/creative',
+    fetch_impl:async(url,init)=>{
+       requests.push({url:String(url),method:init?.method??'GET',body:init?.body??null});
+       if(String(url).startsWith('https://token.actions.githubusercontent.com/'))
+         return {ok:true,json:async()=>({value:'LOCAL_MOCK_OIDC_TOKEN'})};
+       if(String(url).endsWith('/lease'))return {ok:true,json:async()=>({job})};
+       if(String(url).endsWith('/complete')){
+         const b=JSON.parse(init.body);
+         assert.equal(b.status,'HOLD');assert.equal(b.error_code,'MONEY_LIMIT');
+         assert.equal(b.result_summary.provider_calls,0);
+         return {ok:true,json:async()=>({ok:true})};
+       }
+       throw Error('UNEXPECTED_SIDE_EFFECT:'+url);
+    }});
+  assert.equal(r.status,'HOLD');assert.equal(r.reason,'MONEY_LIMIT');
+  assert.equal(requests.length,3);
+  assert.equal(requests.some(x=>x.url.includes('api.openai.com')),false);
+  assert.equal(requests.some(x=>x.url.includes('artifact-ticket')),false);
+ }finally{
+   if(original.url===undefined)delete process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+   else process.env.ACTIONS_ID_TOKEN_REQUEST_URL=original.url;
+   if(original.token===undefined)delete process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+   else process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN=original.token;
+ }
 });
