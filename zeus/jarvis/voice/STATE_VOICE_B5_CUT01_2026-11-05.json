@@ -1,0 +1,111 @@
+{
+  "schema": "zeus.jarvis.voice.cut.state.v1",
+  "date": "2026-11-05",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "engine_id": "VOICE-001",
+  "current_block": "B5",
+  "current_cut": "VOICE_INTERFACE_CUT01",
+  "environment": "LAB",
+  "status": "PARCIAL_LAB_ROUTING_GREEN_DYNAMIC_TTS_PENDING",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b10-voice-interface-lab-v0-20261105",
+  "pr_number": 24,
+  "pr_draft": true,
+  "base_pr_number": 20,
+  "baseline_b10": {
+    "pr": 20,
+    "node_tests_pass": 508,
+    "prod": "NO_GO",
+    "previous_layers_merged": false
+  },
+  "voice": {
+    "approved_preset": "JARVIS_V2_CLARA_1_10X",
+    "rate": 1.1,
+    "pitch_semitones": 0.6,
+    "master_v1_unchanged": true,
+    "physical_samples_backed_up_in_drive": true,
+    "provider_model_exported": false,
+    "voice_synthesis_provider_connected_to_cerebro": false
+  },
+  "interface_policy": {
+    "cerebro_views": [
+      "JARVIS",
+      "OPERATIVA",
+      "NEURONAL",
+      "NAVEGADOR",
+      "V0"
+    ],
+    "cerebro_voice": "JARVIS_V2",
+    "app_fenix_other_routes": "ANA",
+    "unknown_surfaces": "DENY",
+    "lab_preview_only_when": "Vite DEV and VITE_CEREBRO_JARVIS_V2_LAB=1",
+    "lab_preview_default_on": false,
+    "dynamic_tts_connected": false
+  },
+  "implementation": {
+    "new_files": [
+      "src/jarvisVoiceSurfacePolicy.ts",
+      "src/CerebroJarvisVoiceLabStatus.tsx",
+      "zeus/jarvis/core/jarvis-voice-interface-policy.test.mjs",
+      "zeus/jarvis/voice/JARVIS_V2_APPROVED_LAB_VOICE_SURFACE_MANIFEST.json"
+    ],
+    "updated_files": [
+      "src/CerebroConsoleHost.tsx"
+    ],
+    "prod_changed": false,
+    "main_changed": false,
+    "ana_voice_changed": false,
+    "legacy_speech_synthesis_changed": false,
+    "new_subscriptions": 0,
+    "paid_voice_calls": 0
+  },
+  "evidence": {
+    "code_sha_tested": "cee773e821956496778f0a57cd94e023f62bfc1e",
+    "github_actions": [
+      {
+        "name": "JARVIS Universal Core LAB Tests",
+        "run_id": 42078798569,
+        "result": "SUCCESS",
+        "passed": 534,
+        "failed": 0
+      },
+      {
+        "name": "ZEUS JARVIS B7 Logical Multiagent LAB",
+        "run_id": 42078798660,
+        "result": "SUCCESS"
+      },
+      {
+        "name": "CEREBRO Governed Main Integration V0",
+        "run_id": 42078798602,
+        "result": "SUCCESS",
+        "prod_deploy": "SKIPPED"
+      }
+    ],
+    "tsc_full_app_build": "NOT_EXECUTED",
+    "physical_voice_e2e": "NOT_EXECUTED"
+  },
+  "blocks": {
+    "B1": "DOCUMENTARY_CLOSED_UI_PHYSICAL_GATE_PENDING",
+    "B2": "PARTIAL_TWO_REAL_DEVICES_NOT_VERIFIED",
+    "B3": "PARTIAL_PROD_INFRA_OFF_KILL_SWITCH_ON",
+    "B4": "PARTIAL_PROD_MEMORY_OFF_KILL_SWITCH_ON",
+    "B5": "PARTIAL_VOICE_ROUTING_LAB_GREEN_LIVE_TTS_PENDING",
+    "B6": "PARTIAL_LAB_READ_PG17_PROD_LOCKED",
+    "B7": "PARTIAL_LAB_GREEN_PROD_NO_GO",
+    "B8": "PARTIAL_LAB_GREEN_MULTI_COMPANY_REAL_NOT_VERIFIED",
+    "B9": "PARTIAL_LAB_GREEN_RECOVERY_PROD_NO_GO",
+    "B10": "PARTIAL_LAB_GREEN_PROD_NO_GO"
+  },
+  "gates_open": [
+    "B5_REAL_AUTHENTICATED_TTS_BACKEND",
+    "B5_PROVIDER_VOICE_MATCH_VALIDATION",
+    "B5_AUDIO_DELIVERY_REFERENCE_AUTH_AND_PROVENANCE",
+    "B5_MIC_AND_INTERRUPT_E2E",
+    "B5_COST_METERED_AND_LIMITED",
+    "B2_B3_OWNER_ROOT_REAL",
+    "B4_BACKUP_RESTORE",
+    "B10_INDEPENDENT_PROD_CERTIFICATION"
+  ],
+  "rollback": "close PR24 without merge, preserve PR20 and earlier, ANA, App, CRM, Supabase; dev feature default OFF",
+  "next_block": "B5_VOICE_INTERFACE_CUT02_AUTHENTICATED_DYNAMIC_TTS_OUTPUT_IN_LAB"
+}
