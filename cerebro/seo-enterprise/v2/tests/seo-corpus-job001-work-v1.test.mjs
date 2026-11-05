@@ -5,6 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {verifyJwtSignedByGithub} from '../runtime/seo-gh-oidc-workload-v1.mjs';
+import {issueSeoRoleProofs,verifySeoRoleProofs,verifyOneSeoRoleProof} from '../runtime/seo-workload-role-lease-v1.mjs';
+import {createSeoCurriculumCases,verifySeoCurriculumCases} from '../runtime/seo-specialist-exercise-engine-v1.mjs';
+
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
 const makeIdentity=(role,id)=>({status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
  company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',role,
@@ -85,4 +88,59 @@ test('signed provider workload passes through existing ACTGW-001 to durable JOB-
  assert.equal(result.completed_in_run,141);
  assert.equal(result.web_mutations,0);
  assert.equal(result.prod_authorized,false);
+});
+
+test('141 non-bearer Ed25519 read-only role proofs are individually scoped and tamper-resistant',()=>{
+ const c=loadFrozenSeoCorpus(), evidence=expectedSeoRoleEvidence(c),host=makeIdentity('SEO_CORPUS_WORKER',501);
+ const now=Date.now();
+ const issued=issueSeoRoleProofs({host,role_work_receipts:evidence,corpus_digest:c.corpus_digest,now_ms:now});
+ const report=verifySeoRoleProofs({bundle:issued,role_work_receipts:evidence,
+  corpus_digest:c.corpus_digest,host_identity:host,at_issue_time:true});
+ assert.equal(report.verified_roles,141);assert.equal(report.bearer_credentials_created,0);
+ assert.equal(issued.keys_persisted,false);
+ assert.equal(issued.role_proofs[0].payload.can_publish,false);
+ assert.equal(verifyOneSeoRoleProof({proof:issued.role_proofs[0],public_key_pem:issued.public_key_pem,
+  evidence:evidence[0],host_identity:host,corpus_digest:c.corpus_digest,now_ms:now}).decision,'SIGNED_READONLY_WORK_UNIT_PERMITTED');
+ const altered=structuredClone(issued);
+ altered.role_proofs[0].payload.can_write_prod=true;
+ assert.throws(()=>verifySeoRoleProofs({bundle:altered,role_work_receipts:evidence,
+   corpus_digest:c.corpus_digest,host_identity:host}),/SCOPE_OR_WORK_MISMATCH/);
+ assert.throws(()=>verifyOneSeoRoleProof({proof:issued.role_proofs[0],public_key_pem:issued.public_key_pem,
+  evidence:evidence[1],host_identity:host,corpus_digest:c.corpus_digest,now_ms:now}),/ROLE_CALL_DENIED/);
+ assert.throws(()=>verifyOneSeoRoleProof({proof:issued.role_proofs[0],public_key_pem:issued.public_key_pem,
+  evidence:evidence[0],host_identity:host,corpus_digest:c.corpus_digest,now_ms:now+601000}),/ROLE_CALL_DENIED/);
+ assert.throws(()=>issueSeoRoleProofs({host:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',502),
+  role_work_receipts:evidence,corpus_digest:c.corpus_digest}),/UNVERIFIED_HOST/);
+});
+test('423 individualized practical SEO exercises are grounded in 200 URLs, not fake training passes',()=>{
+ const corpus=loadFrozenSeoCorpus(),evidence=expectedSeoRoleEvidence(corpus);
+ const prepared=createSeoCurriculumCases({corpus,evidence});
+ assert.equal(prepared.cases.length,423);assert.equal(prepared.actual_exam_attempts,0);
+ assert.equal(prepared.prod_certifications,0);
+ assert.equal(prepared.cases.filter(x=>x.round_id==='SOURCE_APPLICATION').length,141);
+ assert.equal(prepared.cases.filter(x=>x.round_id==='EVIDENCE_GAP').length,141);
+ assert.equal(prepared.cases.filter(x=>x.round_id==='SAFE_OPTIMIZATION').length,141);
+ assert.equal(new Set(prepared.cases.map(x=>x.case_id)).size,423);
+ for(const e of evidence){
+  const ids=prepared.cases.filter(x=>x.role_id===e.role_id);
+  assert.equal(ids.length,3);assert.equal(new Set(ids.map(x=>x.required_evidence.document_id)).size,3);
+  assert.equal(ids.every(x=>x.actor_attempt_submitted===false&&x.real_training_certified===false),true);
+ }
+ assert.equal(verifySeoCurriculumCases({prepared,corpus,evidence}).cases,423);
+ const tampered=structuredClone(prepared);tampered.cases[0].required_evidence.title='PROMOCION FALSA';
+ assert.throws(()=>verifySeoCurriculumCases({prepared:tampered,corpus,evidence}),/INDEPENDENT_RECOMPUTE_FAILED/);
+});
+test('corpus worker now supplies 141 signatures and 423 source-grounded exam fixtures for independent QA',t=>{
+ const worker=executeSeoCorpusWork({journal_path:tmp(t),identity:makeIdentity('SEO_CORPUS_WORKER',701)});
+ assert.equal(worker.scoped_role_proofs_verified_at_execution,141);
+ assert.equal(worker.role_scope_bundle.role_proofs.length,141);
+ assert.equal(worker.training_exercises.cases.length,423);
+ assert.equal(worker.training_exam_attempts_recorded,0);
+ const qa=reviewSeoCorpusWork({worker,identity:makeIdentity('SEO_CORPUS_INDEPENDENT_QA',702)});
+ assert.equal(qa.signed_role_scopes_independently_verified,141);
+ assert.equal(qa.practice_cases_independently_verified,423);
+ const judge=tribunalSeoCorpusWork({worker,qa,identity:makeIdentity('SEO_CORPUS_TRIBUNAL',703)});
+ assert.equal(judge.scope_proofs_signed_and_verified,141);
+ assert.equal(judge.training_exercises_prepared_and_verified,423);
+ assert.equal(judge.actual_specialist_training_certified,0);
 });
