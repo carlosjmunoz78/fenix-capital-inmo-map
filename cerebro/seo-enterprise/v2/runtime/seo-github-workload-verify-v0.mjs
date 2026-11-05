@@ -11,7 +11,7 @@ const BRANCH='cerebro/seo-enterprise-family-staging-contract-v1-20261105';
 const jobName='readonly-staging';
 const exactInt=(x)=>typeof x==='string'&&/^[1-9][0-9]{0,14}$/.test(x)?Number(x):NaN;
 const blocked=code=>{throw Error('WORKLOAD_IDENTITY_'+code)};
-export async function verifyGithubWorkload({env,token,fetchImpl=globalThis.fetch}={}){
+export async function verifyGithubWorkload({env,token,fetchImpl=globalThis.fetch,pause=ms=>new Promise(resolve=>setTimeout(resolve,ms))}={}){
  if(!env||env.GITHUB_ACTIONS!=='true')blocked('NOT_ACTIONS');
  if(env.GITHUB_REPOSITORY!==REPO||env.GITHUB_EVENT_NAME!=='pull_request')blocked('REPO_EVENT');
  if(env.GITHUB_HEAD_REF!==BRANCH||env.GITHUB_JOB!==jobName)blocked('BRANCH_JOB');
@@ -32,14 +32,22 @@ export async function verifyGithubWorkload({env,token,fetchImpl=globalThis.fetch
  if(run.event!=='pull_request'||run.head_branch!==BRANCH||run.run_attempt!==attempt)blocked('RUN_CONTEXT_MISMATCH');
  if(!/^[a-f0-9]{40}$/.test(run.head_sha||''))blocked('COMMIT_MISSING');
  if(!['queued','in_progress','completed'].includes(run.status))blocked('RUN_STATUS');
- const jobs=await query('https://api.github.com/repos/'+REPO+'/actions/runs/'+run_id+'/jobs?per_page=100');
- const matched=(jobs.jobs||[]).filter(j=>j.name===jobName&&j.run_id===run_id);
+ let matched=[];let job_checks_attempted=0;
+ for(let i=0;i<5;i++){
+  const jobs=await query('https://api.github.com/repos/'+REPO+'/actions/runs/'+run_id+'/jobs?per_page=100');
+  job_checks_attempted++;
+  matched=(jobs.jobs||[]).filter(j=>j.name===jobName&&j.run_id===run_id);
+  if(matched.length>1)blocked('AMBIGUOUS_JOB_IDENTITY');
+  if(matched.length===1&&matched[0].conclusion&&matched[0].conclusion!=='success')blocked('JOB_PREVIOUSLY_FAILED');
+  if(matched.length===1&&['in_progress','completed'].includes(matched[0].status))break;
+  if(i<4)await pause(250*(i+1));
+ }
  if(matched.length!==1||!['in_progress','completed'].includes(matched[0].status))blocked('JOB_IDENTITY_UNVERIFIED');
  if(matched[0].conclusion&&matched[0].conclusion!=='success')blocked('JOB_PREVIOUSLY_FAILED');
  return {schema_version:'0.1.0',status:'GITHUB_API_WORKLOAD_RUN_VERIFIED_READONLY',
   provider:'github-actions',repository:REPO,workflow_path:WORKFLOW,
   event:run.event,head_branch:run.head_branch,head_sha:run.head_sha,
-  run_id,run_attempt:attempt,job_name:jobName,github_job_id:matched[0].id,
+  run_id,run_attempt:attempt,job_name:jobName,github_job_id:matched[0].id,job_checks_attempted,
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
   github_token_present_and_accepted:true,provider_api_read_completed:true,
   github_job_identity_observed:true,github_oidc_jwt_validated:false,
