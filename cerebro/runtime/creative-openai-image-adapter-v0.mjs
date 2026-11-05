@@ -20,22 +20,22 @@ export function preflightOpenAiCost({order,approval=null,env={}}){
  if(order.ai_scene_request?.model!==MODEL||order.ai_scene_request.n!==1)return {allowed:false,status:'BLOCKED',reason:'PROVIDER_MODEL_OR_COUNT_DENIED'};
  // A disabled provider is a technical readiness state, not a ban on paid images.
  if(env.OPENAI_IMAGE_PROVIDER_ENABLED!=='true')return {allowed:false,status:'HOLD',reason:'IMAGE_PROVIDER_NOT_ENABLED'};
- if(!approval||approval.decision!=='APPROVED'||approval.approver!=='CARLOS-ADMIN'||typeof approval.approval_id!=='string'||!/^CREATIVE-AI-[A-Za-z0-9_-]{8,90}$/.test(approval.approval_id))
-   return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
+ if(!approval||approval.decision!=='APPROVED'||!['CARLOS-ADMIN','CEREBRO_BUDGET_GOVERNOR'].includes(approval.approver)||typeof approval.approval_id!=='string'||!/^CREATIVE-AI-[A-Za-z0-9_-]{8,90}$/.test(approval.approval_id))
+   return {allowed:false,status:'HOLD',reason:'MEDIA_BUDGET_NOT_BOUND_TO_WORKER'};
  const expires=Date.parse(approval.expires_at??'');
- if(!Number.isFinite(expires)||expires<=Date.now()||expires>Date.now()+7*86400000)return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
+ if(!Number.isFinite(expires)||expires<=Date.now()||expires>Date.now()+7*86400000)return {allowed:false,status:'HOLD',reason:'MEDIA_BUDGET_GRANT_EXPIRED'};
  if(approval.company_id!==order.company_id||approval.engine_id!==order.engine_id||approval.request_key!==order.request_key||approval.work_order_sha256!==order.work_order_sha256)
    return {allowed:false,status:'HUMAN_REQUIRED',reason:'POLICY_CONFLICT'};
  const maxBudget=Number(env.OPENAI_IMAGE_MAX_EUR_PER_REQUEST);
  const confirmed=approval.max_eur;
  const reservation=approval.estimated_max_eur;
  if(!isPosNumber(maxBudget)||!isPosNumber(confirmed)||!isPosNumber(reservation)||reservation>confirmed||reservation>maxBudget||approval.max_images!==1)
-   return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
+   return {allowed:false,status:'HOLD',reason:'MEDIA_BUDGET_LIMIT_OR_RESERVATION_MISSING'};
  // A reusable budget grant may be issued by the registered financial supervisor.
  // The secure server must verify it for this work order and meter total spend.
  // A user-supplied approval object alone must never authorize spending.
  if(env.OPENAI_IMAGE_VERIFIED_APPROVAL_ID!==approval.approval_id)
-   return {allowed:false,status:'HUMAN_REQUIRED',reason:'MONEY_LIMIT'};
+   return {allowed:false,status:'HOLD',reason:'BUDGET_GRANT_NOT_SERVER_VERIFIED'};
  return {allowed:true,status:'COST_LANE_APPROVED_FOR_ONE_IMAGE',max_cost_eur:confirmed,reservation_eur:reservation,approved_record:approval.approval_id};
 }
 
@@ -43,7 +43,7 @@ export async function generateOpenAiScene({order,approval=null,env=process.env,f
  const gate=preflightOpenAiCost({order,approval,env});
  if(!gate.allowed)return {...gate,api_called:false,cost_incurred:false};
  const apiKey=env.OPENAI_API_KEY;
- if(!apiKey||typeof apiKey!=='string'||apiKey.length<15)return {allowed:false,status:'BLOCKED',reason:'OPENAI_API_KEY_MISSING',api_called:false,cost_incurred:false};
+ if(!apiKey||typeof apiKey!=='string'||apiKey.length<15)return {allowed:false,status:'HOLD',reason:'OPENAI_API_KEY_NOT_BOUND_TO_WORKER',api_called:false,cost_incurred:false};
  let response;
  try{
    response=await fetch_impl(URL,{
