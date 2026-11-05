@@ -152,14 +152,14 @@ async function main(){
   check(params.length===3,'QA_ARGS');
   output=params[2];fs.mkdirSync(output,{recursive:true});
   const jobpath=path.join(params[1],'job001.v8');
-  const worker=from(path.join(params[0],'worker.json'));
+  const worker=from(params[0]);
   result=isolatedQa({workload,worker,journal_path:jobpath});
   fs.writeFileSync(path.join(output,'review.json'),JSON.stringify(result,null,2)+'\n');
  }else{
   check(params.length===3,'TRIBUNAL_ARGS');
   output=params[2];fs.mkdirSync(output,{recursive:true});
-  const worker=from(path.join(params[0],'worker.json'));
-  const review=from(path.join(params[1],'review.json'));
+  const worker=from(params[0]);
+  const review=from(params[1]);
   result=isolatedTribunal({workload,worker,review});
   fs.writeFileSync(path.join(output,'tribunal.json'),JSON.stringify(result,null,2)+'\n');
  }
