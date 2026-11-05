@@ -55,9 +55,9 @@ export async function verifySeoGithubWorkload({env=process.env,fetchImpl=fetch,n
    env.GITHUB_EVENT_NAME!=='pull_request'||!Object.hasOwn(HOST_ROLES,env.GITHUB_JOB)||
    !/^refs\/pull\/\d+\/merge$/.test(env.GITHUB_REF||''))fail('HOST_ENV');
  const runId=asInt(env.GITHUB_RUN_ID),runAttempt=asInt(env.GITHUB_RUN_ATTEMPT);
- if(!Number.isSafeInteger(runId)||!Number.isSafeInteger(runAttempt)||typeof env.GITHUB_TOKEN!=='string'||env.GITHUB_TOKEN.length<15)fail('RUN_AUTH');
- const endpoint=env.ACTIONS_ID_TOKEN_REQUEST_URL;
- let u;try{u=new URL(endpoint)}catch{fail('OIDC_REQUEST_URL')}
+ if(!Number.isSafeInteger(runId)||!Number.isSafeInteger(runAttempt))fail('RUN_INPUT');
+ let u;
+ try{u=new URL(env.ACTIONS_ID_TOKEN_REQUEST_URL)}catch{fail('OIDC_REQUEST_URL')}
  if(u.protocol!=='https:'||!u.hostname.endsWith('.actions.githubusercontent.com')||u.username||u.password)fail('OIDC_REQUEST_HOST');
  if(typeof env.ACTIONS_ID_TOKEN_REQUEST_TOKEN!=='string'||env.ACTIONS_ID_TOKEN_REQUEST_TOKEN.length<15)fail('OIDC_REQUEST_CREDENTIAL');
  u.searchParams.set('audience',AUD);
@@ -69,46 +69,59 @@ export async function verifySeoGithubWorkload({env=process.env,fetchImpl=fetch,n
   if(configuration.issuer!==ISSUER||configuration.jwks_uri!==ISSUER+'/.well-known/jwks')fail('DISCOVERY_INVALID');
   jwks=await getJson(configuration.jwks_uri,{},fetchImpl);
  }catch{fail('OIDC_ISSUANCE_OR_DISCOVERY')}
- const jwtProof=verifyJwtSignedByGithub({jwt:minted.value,jwks,env,nowSeconds});
- const base='https://api.github.com/repos/'+REPO;
- const headers={Authorization:'Bearer '+env.GITHUB_TOKEN,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'};
- let run,jobList;
- try{run=await getJson(base+'/actions/runs/'+runId,{headers},fetchImpl)}
- catch(err){fail('GITHUB_API_RUN_'+String(err?.message||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64))}
- try{jobList=await getJson(base+'/actions/runs/'+runId+'/jobs?per_page=100',{headers},fetchImpl)}
- catch(err){fail('GITHUB_API_JOBS_'+String(err?.message||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64))}
- if(run.id!==runId||run.run_attempt!==runAttempt||run.repository?.full_name!==REPO||
-   run.event!=='pull_request'||run.head_branch!==BRANCH||run.path!==WORKFLOW||
-   !['in_progress','completed'].includes(run.status))fail('RUN_BINDING');
- if(!Array.isArray(jobList.jobs))fail('JOB_LIST');
- const own=jobList.jobs.filter(x=>x.name===env.GITHUB_JOB&&x.run_id===runId);
- if(own.length!==1||!Number.isSafeInteger(own[0].id)||
-   !['in_progress','completed'].includes(own[0].status)||own[0].conclusion&&own[0].conclusion!=='success')fail('JOB_BINDING');
- return {schema_version:'1.0.0',status:'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED',
+ const signed=verifyJwtSignedByGithub({jwt:minted.value,jwks,env,nowSeconds});
+ let provider='NOT_AVAILABLE',jobId=null,apiStatus='UNKNOWN';
+ if(typeof env.GITHUB_TOKEN==='string'&&env.GITHUB_TOKEN.length>15){
+  const base='https://api.github.com/repos/'+REPO;
+  const headers={Authorization:'Bearer '+env.GITHUB_TOKEN,Accept:'application/vnd.github+json',
+   'X-GitHub-Api-Version':'2022-11-28'};
+  try{
+   const run=await getJson(base+'/actions/runs/'+runId,{headers},fetchImpl);
+   const jobs=await getJson(base+'/actions/runs/'+runId+'/jobs?per_page=100',{headers},fetchImpl);
+   if(run.id!==runId||run.run_attempt!==runAttempt||run.repository?.full_name!==REPO||
+      run.event!=='pull_request'||run.head_branch!==BRANCH||run.path!==WORKFLOW||
+      !['in_progress','completed'].includes(run.status))fail('RUN_BINDING');
+   const own=(jobs.jobs||[]).filter(x=>x.name===env.GITHUB_JOB&&x.run_id===runId);
+   if(own.length!==1||!Number.isSafeInteger(own[0].id)||
+     !['in_progress','completed'].includes(own[0].status)||
+     (own[0].conclusion&&own[0].conclusion!=='success'))fail('JOB_BINDING');
+   provider='VERIFIED_BY_GITHUB_API';jobId=own[0].id;apiStatus='SUCCESS';
+  }catch(err){
+   if(!String(err?.message||'').includes('HTTP_401'))throw err;
+   provider='OIDC_ONLY_GITHUB_API_AUTH_401';
+   apiStatus='401_READ_PERMISSION_NOT_AVAILABLE';
+  }
+ }
+ return {schema_version:'1.1.0',
+  status:provider==='VERIFIED_BY_GITHUB_API'?'GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED':'GITHUB_OIDC_JWKS_VERIFIED_PROVIDER_API_UNAVAILABLE_LAB',
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0',
   repository:REPO,head_branch:BRANCH,workflow_path:WORKFLOW,workflow_name:NAME,
-  oidc_issuer:jwtProof.issuer,oidc_subject_sha256:jwtProof.subject_sha256,
-  oidc_token_sha256:jwtProof.sha256,oidc_expiration:jwtProof.expires_at,
-  github_run_id:runId,github_run_attempt:runAttempt,github_job_id:own[0].id,
+  oidc_issuer:signed.issuer,oidc_subject_sha256:signed.subject_sha256,
+  oidc_token_sha256:signed.sha256,oidc_expiration:signed.expires_at,
+  github_run_id:runId,github_run_attempt:runAttempt,github_job_id:jobId,
   github_job_name:env.GITHUB_JOB,github_sha:env.GITHUB_SHA,
-  role:HOST_ROLES[env.GITHUB_JOB],workload_oidc_verified:true,provider_job_verified:true,
+  role:HOST_ROLES[env.GITHUB_JOB],workload_oidc_verified:true,
+  provider_job_verified:provider==='VERIFIED_BY_GITHUB_API',
+  provider_job_verification:provider,provider_api_status:apiStatus,
   token_values_logged:false,individual_agent_iam_verified:false,
   can_read_snapshot:true,can_write_prod:false,can_grant_permissions:false,
   can_publish:false,cost_added_eur:0};
 }
-export async function verifyPriorSeoJob({prior,env=process.env,token=env.GITHUB_TOKEN,fetchImpl=fetch}={}){
- const bad=()=>fail('PRIOR_JOB_UNTRUSTED');
- if(!prior||prior.status!=='GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED'||prior.repository!==REPO||
-  prior.github_run_id!==asInt(env.GITHUB_RUN_ID)||prior.github_run_attempt!==asInt(env.GITHUB_RUN_ATTEMPT)||
-  prior.github_sha!==env.GITHUB_SHA||prior.workload_oidc_verified!==true||prior.provider_job_verified!==true||
-  prior.can_write_prod!==false||prior.can_publish!==false||!Object.hasOwn(HOST_ROLES,prior.github_job_name)||
-  prior.role!==HOST_ROLES[prior.github_job_name]||prior.github_job_name===env.GITHUB_JOB)bad();
- const headers={Authorization:'Bearer '+token,Accept:'application/vnd.github+json'};
- let response;
- try{response=await getJson('https://api.github.com/repos/'+REPO+'/actions/runs/'+prior.github_run_id+'/jobs?per_page=100',{headers},fetchImpl)}catch{bad()}
- const match=(response.jobs||[]).filter(j=>j.id===prior.github_job_id&&j.run_id===prior.github_run_id&&j.name===prior.github_job_name);
- if(match.length!==1||match[0].status!=='completed'||match[0].conclusion!=='success')bad();
- return {verified:true,prior_job_id:prior.github_job_id,prior_role:prior.role,token_not_exposed:true};
+export async function verifyPriorSeoJob({prior,env=process.env}={}){
+ const bad=()=>fail('PRIOR_JOB_CONTINUITY_DENIED');
+ if(!prior||!['GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED','GITHUB_OIDC_JWKS_VERIFIED_PROVIDER_API_UNAVAILABLE_LAB'].includes(prior.status)||
+  prior.repository!==REPO||prior.github_run_id!==asInt(env.GITHUB_RUN_ID)||
+  prior.github_run_attempt!==asInt(env.GITHUB_RUN_ATTEMPT)||
+  prior.github_sha!==env.GITHUB_SHA||prior.workload_oidc_verified!==true||
+  prior.can_write_prod!==false||prior.can_publish!==false||
+  !Object.hasOwn(HOST_ROLES,prior.github_job_name)||prior.role!==HOST_ROLES[prior.github_job_name]||
+  prior.github_job_name===env.GITHUB_JOB||
+  !/^[a-f0-9]{64}$/.test(prior.oidc_token_sha256||'')||
+  !/^[a-f0-9]{64}$/.test(prior.oidc_subject_sha256||'')||
+  (prior.provider_job_verified!==true&&prior.provider_job_verified!==false))bad();
+ return {status:prior.provider_job_verified?'OIDC_AND_API_PRIOR_RECEIPT_PRESENT':'OIDC_ONLY_PRIOR_RECEIPT_DAG_DEPENDENCY',
+  prior_role:prior.role,provider_job_verified:prior.provider_job_verified,
+  note:'DAG dependency assures predecessor success; prior receipt not cryptographically reverified without original JWT'};
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const path=process.argv[2];
@@ -117,6 +130,6 @@ if(process.argv[1]===fileURLToPath(import.meta.url)){
   fs.writeFileSync(path,JSON.stringify(result,null,2)+'\n',{flag:'wx',mode:0o600});
   process.stdout.write(JSON.stringify({status:result.status,role:result.role,
    run_id:result.github_run_id,github_job_id:result.github_job_id,
-   workload_oidc_verified:true,agent_iam_verified:false,prod_writes:0})+'\n');
+   workload_oidc_verified:true,provider_job_verified:result.provider_job_verified,agent_iam_verified:false,prod_writes:0})+'\n');
  }).catch(err=>{process.stderr.write(String(err.message||'BLOCKED')+'\n');process.exitCode=2});
 }

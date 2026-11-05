@@ -134,10 +134,12 @@ export function expectedSeoRoleEvidence(corpus){
  return out;
 }
 function requireHost(id,role){
- if(id?.status!=='GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED'||id?.role!==role||
-  id.workload_oidc_verified!==true||id.provider_job_verified!==true||
+ if(!['GITHUB_OIDC_JWKS_AND_API_JOB_VERIFIED','GITHUB_OIDC_JWKS_VERIFIED_PROVIDER_API_UNAVAILABLE_LAB'].includes(id?.status)||id?.role!==role||
+  id.workload_oidc_verified!==true||
   id.company_id!=='fenix'||id.engine_id!=='SEO-001'||id.can_write_prod!==false||
-  id.individual_agent_iam_verified!==false||!Number.isSafeInteger(id.github_job_id))
+  id.individual_agent_iam_verified!==false||
+  !/^[a-f0-9]{64}$/.test(id.oidc_token_sha256||'')||
+  (id.provider_job_verified!==true&&id.provider_job_verified!==false))
   throw Error('HOST_IDENTITY_NOT_VERIFIED');
 }
 export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={}){
@@ -172,7 +174,9 @@ export function executeSeoCorpusWork({journal_path,identity,now_ms=Date.now()}={
   from_frozen_website_inventory:true,new_crawl_performed:false,
   corpus_digest:corpus.corpus_digest,source_parts:corpus.parts,
   documents_considered:corpus.documents.length,role_work_receipts:expected,
-  host_identity:{github_job_id:identity.github_job_id,github_run_id:identity.github_run_id,role:identity.role},
+  host_identity:{github_job_id:identity.github_job_id,github_run_id:identity.github_run_id,
+   role:identity.role,job_name:identity.github_job_name,oidc_token_sha256:identity.oidc_token_sha256,
+   provider_job_verified:identity.provider_job_verified},
   newly_queued:created,duplicates,completed_in_run:processed,job001_persisted:true,
   actual_iam_specialists:0,full_training_certifications:0,
   independent_qa_passed:false,prod_authorized:false,web_mutations:0,new_subscriptions_eur:0};
@@ -181,7 +185,8 @@ export function reviewSeoCorpusWork({worker,identity}={}){
  requireHost(identity,'SEO_CORPUS_INDEPENDENT_QA');
  if(worker?.status!=='READONLY_CORPUS_WORK_EXECUTED_HOST_AUTHENTICATED'||worker.environment!=='PREPROD'||
    worker.web_mutations!==0||worker.prod_authorized!==false||worker.role_work_receipts?.length!==141||
-   identity.github_job_id===worker.host_identity?.github_job_id)throw Error('WORKER_CORPUS_RECEIPT_INVALID');
+   identity.github_job_name===worker.host_identity?.job_name||
+   identity.oidc_token_sha256===worker.host_identity?.oidc_token_sha256)throw Error('WORKER_CORPUS_RECEIPT_INVALID');
  const corpus=loadFrozenSeoCorpus(),expected=expectedSeoRoleEvidence(corpus);
  if(worker.corpus_digest!==corpus.corpus_digest||JSON.stringify(worker.role_work_receipts)!==JSON.stringify(expected))
   throw Error('INDEPENDENT_CORPUS_RECOMPUTE_MISMATCH');
@@ -189,6 +194,9 @@ export function reviewSeoCorpusWork({worker,identity}={}){
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.1.0',
   role_count:expected.length,source_digest:corpus.corpus_digest,
   worker_job_id:worker.host_identity.github_job_id,qa_job_id:identity.github_job_id,
+  worker_job_name:worker.host_identity.job_name,qa_job_name:identity.github_job_name,
+  worker_oidc_sha256:worker.host_identity.oidc_token_sha256,qa_oidc_sha256:identity.oidc_token_sha256,
+  provider_job_identity_verified_for_both:worker.host_identity.provider_job_verified&&identity.provider_job_verified,
   rechecked_every_competency:true,independent_host_job:true,
   real_agent_iam_certified:false,independent_subject_matter_certification:false,
   site_mutations:0,prod_authorized:false};
@@ -198,7 +206,8 @@ export function tribunalSeoCorpusWork({worker,qa,identity}={}){
  if(!worker||!qa||qa.status!=='SEPARATE_GITHUB_QA_RECOMPUTED_141_CORPUS_TASKS'||
   qa.source_digest!==worker.corpus_digest||qa.role_count!==141||
   qa.worker_job_id!==worker.host_identity?.github_job_id||
-  new Set([qa.worker_job_id,qa.qa_job_id,identity.github_job_id]).size!==3||
+  new Set([qa.worker_job_name,qa.qa_job_name,identity.github_job_name]).size!==3||
+  new Set([qa.worker_oidc_sha256,qa.qa_oidc_sha256,identity.oidc_token_sha256]).size!==3||
   qa.real_agent_iam_certified!==false||worker.prod_authorized!==false||
   qa.rechecked_every_competency!==true)throw Error('TRIBUNAL_IDENTITY_OR_EVIDENCE_INVALID');
  const corpus=loadFrozenSeoCorpus();
@@ -208,8 +217,11 @@ export function tribunalSeoCorpusWork({worker,qa,identity}={}){
   environment:'PREPROD',company_id:'fenix',engine_id:'SEO-001',
   role_evidence_accepted:141,departments_with_evidence:32,
   source_snapshot_pinned:true,wordpress_reaudited:false,
-  github_independent_host_jobs:[qa.worker_job_id,qa.qa_job_id,identity.github_job_id],
-  github_oidc_host_jobs_verified:3,individual_agent_iam_verified:0,
+  github_independent_host_job_names:[qa.worker_job_name,qa.qa_job_name,identity.github_job_name],
+  github_oidc_host_jobs_verified:3,
+  provider_job_ids_verified:qa.provider_job_identity_verified_for_both&&identity.provider_job_verified?3:0,
+  provider_job_verification_pending_external_check:!qa.provider_job_identity_verified_for_both||!identity.provider_job_verified,
+  individual_agent_iam_verified:0,
   completed_specialist_trainings:0,certified_prod_departments:0,
   autonomous_prod_publishing:false,additional_eur:0,external_writes:0,
   decision:'ACCEPT_SNAPSHOT_BASED_WORK_EVIDENCE_HOLD_PROD'};
