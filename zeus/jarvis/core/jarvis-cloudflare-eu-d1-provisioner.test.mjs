@@ -105,7 +105,7 @@ test('CUT27 duplicate or fuzzy database names stop without mutation',async()=>{
  }
 });
 test('CUT27 capacity exhausted or missing count prevents Free-tier creation',async()=>{
- for(const count of [10,100,undefined,-1]){
+ for(const count of [10,100,null,-1]){
   const r=rig({found:[],count});
   const result=await r.provisioner.run(authorized);
   assert.equal(result.state,'FREE_D1_CAPACITY_UNVERIFIED_NO_WRITE');
