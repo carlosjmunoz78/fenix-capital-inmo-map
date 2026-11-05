@@ -1379,6 +1379,12 @@
     "official_wp_coreguard_prod_operations_locked": true,
     "official_wp_draft_52656_owner_approval": false,
     "official_wp_draft_52656_live_publication": false,
-    "official_wp_approval_count_for_autonomy": 0
+    "official_wp_approval_count_for_autonomy": 0,
+    "official_wp_draft_poll_adapter_implemented_lab": true,
+    "official_wp_real_draft_inventory_posts": 11,
+    "official_wp_real_draft_inventory_pages": 14,
+    "official_wp_live_readonly_monitor_created": true,
+    "official_wp_real_job001_poller_mount_verified": false,
+    "official_wp_automatic_publish_granted": false
   }
 }

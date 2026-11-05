@@ -657,6 +657,13 @@
     "direct_publish_capability": false,
     "owner_approval_count": 0,
     "production_write_permission_granted": false,
-    "real_wordpress_rollback_tested": false
+    "real_wordpress_rollback_tested": false,
+    "polling_adapter": "cerebro/seo-enterprise/v2/runtime/seo-official-draft-poll-lab-v0.mjs",
+    "polling_scope": "FENIX_OFFICIAL_POSTS_DRAFT_ONLY",
+    "polling_batch_max": 20,
+    "polling_status": "LAB_ONLY_NOT_INSTALLED_IN_REAL_RUNTIME",
+    "legacy_draft_rewrite": false,
+    "live_monitor_mode": "CHATGPT_CONNECTED_WORDPRESS_DAILY_READ_ONLY",
+    "live_monitor_does_not_equal_job001_binding": true
   }
 }

@@ -23,3 +23,13 @@ La evidencia de borrador se convierte, sin persistir HTML, en un registro de rev
 - Sin nueva suscripción ni necesidad de IA de pago; solo revisión y pruebas con herramientas existentes.
 
 **No confundir preparado con operativo:** 0 webhooks desplegados, 0 runners enlazados a WordPress oficial, 0 publicaciones automáticas. La PR sigue DRAFT.
+
+## 05-11-2026 · Detector de borradores y vigilancia real sin escrituras
+
+- Inventario en WordPress PROD con conector autorizado y funciones GET: 11 entradas `post` en `draft` y 14 páginas `page` en `draft`. El borrador piloto `52656` aparece como entrada más reciente. Varios documentos antiguos contienen `archive`/`legacy` en el slug: nunca tratarlos automáticamente como contenido nuevo ni sobrescribirlos.
+- Adaptador aditivo `runtime/seo-official-draft-poll-lab-v0.mjs`: consulta **solo** `post` en `draft`, orden por modificación y máximo 20 por lectura. Comprueba completamente IDs y estado antes de encolar nada para evitar escrituras parciales ante respuestas fraudulentas; excluye los archivos históricos; deriva cada candidato a `ACTGW-001` y `JOB-001` mediante el adaptador ya probado. El runtime revalida el artículo y Yoast contra el conector autenticado y no confía en el listado.
+- Los borradores `page` anteriores permanecen sin procesar; el diseño de páginas requiere una ampliación separada con QA específico y protección frente a archivos legacy. Si hay más de 20 `post`, el resultado informa `truncated:true`; no declara cobertura completa.
+- **Operativo separadamente:** vigilancia diaria de solo lectura desde ChatGPT mediante conexión Cowboy MCP ya existente, configurada para comprobar cambios y avisar únicamente cuando existe novedad o aprobación requerida. **Esta vigilancia no constituye un worker JOB-001 conectado en PROD** y no crea jobs ni publica en WordPress.
+- **Pendiente:** montar el adaptador en el runtime compartido con identidad real verificada y scheduler específico. El operador universal ya instalado en WordPress tiene cola nativa, pero su código indica literalmente `PREPROD only; inspect_post ONLY` y requiere `manage_options`. No desbloquearla ni ejecutarla en PROD.
+- Cero plugins nuevos, cero contratos de IA de pago, cero cambios en la configuración Core Guard. `operations_locked=true` preservado.
+
