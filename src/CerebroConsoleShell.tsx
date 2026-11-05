@@ -4,7 +4,8 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {selectCerebroFreeBrowserVoice} from './cerebroFreeBrowserVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -281,7 +282,7 @@ export default function CerebroConsoleShell(){
   const plan=speechPlanRef.current;
   if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
   const token=++speechRunTokenRef.current;
-  const selected=preferredSpanishVoice(spanishVoices());
+  const selected=selectCerebroFreeBrowserVoice(spanishVoices());
   const speakSegment=(index:number,charIndex:number)=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
    if(index>=plan.length){
