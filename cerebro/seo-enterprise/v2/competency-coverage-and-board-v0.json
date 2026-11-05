@@ -182,10 +182,18 @@
         "KW-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_LAB_FIXTURE_WORK_UNIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938001095",
+          "result": "SUCCESS",
+          "scope": "SYNTHETIC_KEYWORD_URL_FIXTURE",
+          "source_live_gsc_verified": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -292,10 +300,18 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_LAB_FIXTURE_WORK_UNIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938001095",
+          "result": "SUCCESS",
+          "scope": "SYNTHETIC_KEYWORD_URL_FIXTURE",
+          "source_live_gsc_verified": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -331,10 +347,19 @@
         "WEB-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_READONLY_WORK_UNIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938001107",
+          "result": "SUCCESS",
+          "scope": "PUBLIC_HOME_STAGING_READONLY",
+          "identity_iam_verified": false,
+          "independent_processes_verified": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -551,10 +576,19 @@
         "SEO-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_READONLY_WORK_UNIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938001107",
+          "result": "SUCCESS",
+          "scope": "PUBLIC_HOME_STAGING_READONLY",
+          "identity_iam_verified": false,
+          "independent_processes_verified": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -1134,10 +1168,19 @@
         "EVA-001"
       ],
       "existing_binding_state": "POR_AUDITAR",
-      "department_status": "DEFINED_NOT_READY",
+      "department_status": "PARCIAL_STAGING_READONLY_WORK_UNIT",
       "verified_active_agents": 0,
       "verified_active_subagents": 0,
-      "mission_practice_evidence": [],
+      "mission_practice_evidence": [
+        {
+          "source": "GITHUB_ACTIONS_RUN",
+          "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41938001107",
+          "result": "SUCCESS",
+          "scope": "PUBLIC_HOME_STAGING_READONLY",
+          "identity_iam_verified": false,
+          "independent_processes_verified": false
+        }
+      ],
       "real_staging_e2e_passed": false,
       "merit_independent_evidence": false,
       "training_and_replacement_proven": false,
@@ -1183,5 +1226,17 @@
       "rollback_physical_tested": false,
       "ready": false
     }
-  ]
+  ],
+  "progress": {
+    "department_count": 32,
+    "fully_ready": 0,
+    "partial_with_evidence": 5,
+    "defined_only": 27,
+    "staging_readonly_work_units": 3,
+    "lab_fixture_work_units": 2,
+    "verified_active_agents": 0,
+    "verified_active_subagents": 0,
+    "full_web_staging_e2e_passed": false,
+    "new_subscriptions_eur": 0
+  }
 }
