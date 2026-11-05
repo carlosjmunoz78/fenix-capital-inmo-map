@@ -10,6 +10,7 @@ import {createSeoCurriculumCases,verifySeoCurriculumCases} from '../runtime/seo-
 import {createSeoSpecialistWorkProducts,independentlyReviewSeoWorkProducts} from '../runtime/seo-specialist-work-product-v1.mjs';
 import {runSeoDeterministicPractice,validateSeoDeterministicPractice} from '../runtime/seo-specialist-practice-attempt-v1.mjs';
 import {createSeoEditorialWriteBundle,physicallyWriteSeoDrafts,proveSeoDraftRollback,executeSeoSandboxWrite} from '../runtime/seo-draft-writer-lab-v1.mjs';
+import {planOfficialWordPressDraftDryRun,rejectUnauthorizedWordPressCommit,denyWordPressPublish,denyWordPressExistingPageUpdate} from '../runtime/seo-wordpress-draft-bridge-v1.mjs';
 
 
 import {loadFrozenSeoCorpus,calculateCorpusEvidence,expectedSeoRoleEvidence,executeSeoCorpusWork,executeSeoCorpusViaGateway,reviewSeoCorpusWork,tribunalSeoCorpusWork} from '../runtime/seo-corpus-job001-work-v1.mjs';
@@ -267,4 +268,39 @@ test('write IAM, QA, no-PROD and sandbox path guards fail closed',async t=>{
  assert.throws(()=>physicallyWriteSeoDrafts({output_root:'/home',bundle}),/OUTSIDE_TEMP/);
  const changed=structuredClone(bundle);changed.wordpress_write_permission=true;
  assert.throws(()=>physicallyWriteSeoDrafts({output_root:root,bundle:changed}),/SCOPE_DENIED/);
+});
+
+test('official Cowboy WordPress bridge only produces create_post draft dry-run and never publish',()=>{
+ const corpus=loadFrozenSeoCorpus(),evidence=expectedSeoRoleEvidence(corpus);
+ const work=createSeoSpecialistWorkProducts({corpus,evidence});
+ const bundle=createSeoEditorialWriteBundle({corpus,work_products:work});
+ const plan=planOfficialWordPressDraftDryRun({draft:bundle.drafts[0]});
+ assert.equal(plan.bridge_provider,'Cowboy_MCP_web');
+ assert.equal(plan.bridge_tool,'wp_create_post');
+ assert.equal(plan.tool_arguments.status,'draft');
+ assert.equal(plan.tool_arguments.post_type,'post');
+ assert.equal(plan.tool_arguments.dry_run,true);
+ assert.equal(plan.operation_mutates_wordpress,false);
+ assert.equal(plan.live_action_authorized,false);
+ assert.equal(plan.page_update_capability,false);
+ assert.equal(plan.publish_capability,false);
+ const block=rejectUnauthorizedWordPressCommit({plan,iam:{verified:false}});
+ assert.equal(block.status,'HUMAN_REQUIRED');
+ assert.equal(block.executed,false);
+ assert.equal(block.wordpress_posts_created,0);
+ assert.equal(rejectUnauthorizedWordPressCommit({
+   plan,iam:{verified:true},backup:{physical_restore_verified:true},
+   qa:{ymyl_editorial_approved:true},tribunal:{independent_approved:true}
+ }).executed,false);
+ assert.throws(()=>denyWordPressPublish(),/PUBLISH_IS_NOT_AUTHORIZED/);
+ assert.throws(()=>denyWordPressExistingPageUpdate(),/PAGE_UPDATE_IS_NOT_AUTHORIZED/);
+});
+test('WordPress bridge rejects forged draft scope and never accepts dry_run false',()=>{
+ const corpus=loadFrozenSeoCorpus(),work=createSeoSpecialistWorkProducts({
+  corpus,evidence:expectedSeoRoleEvidence(corpus)});
+ const draft=createSeoEditorialWriteBundle({corpus,work_products:work}).drafts[0];
+ assert.throws(()=>planOfficialWordPressDraftDryRun({draft:{...draft,can_publish:true}}),/UNAPPROVED_DRAFT/);
+ assert.throws(()=>rejectUnauthorizedWordPressCommit({plan:{
+  bridge_tool:'wp_create_post',tool_arguments:{status:'publish',dry_run:false},operation_mutates_wordpress:true
+ }}),/INVALID_PLAN/);
 });
