@@ -1,4 +1,5 @@
 /**
+ * Verified secret existence via GitHub owner UI 2026-11-06; rerun metadata-only probe.
  * SEO-D13 cloud provider metadata verification. Does not generate text.
  * Uses the registered Gemini Free LAB key only for one read-only model metadata
  * request, never in URLs/logs. Does not infer Google project billing state.
