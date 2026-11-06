@@ -1,0 +1,20 @@
+name: CEREBRO SEO · GitHub owner approval contract PREPROD V0
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-github-approval-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-owner-github-approval-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/SEO_OWNER_GITHUB_APPROVAL_RUNBOOK_V0.md'
+      - '.github/workflows/cerebro-seo-owner-approval-preprod-v0.yml'
+permissions:
+  contents: read
+jobs:
+  approval-contract:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check cerebro/seo-enterprise/v2/runtime/seo-owner-github-approval-v0.mjs
+      - run: node --test cerebro/seo-enterprise/v2/tests/seo-owner-github-approval-v0.test.mjs
+      - run: echo 'PREPROD_APPROVAL_CONTRACT_ONLY=YES WORDPRESS_MUTATIONS=ZERO PUBLISH=DENIED'
