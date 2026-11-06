@@ -50,3 +50,13 @@ GitHub schedule default branch: https://docs.github.com/en/actions/reference/wor
 - **POR HACER:** crear en GitHub Settings > Environments el entorno exclusivo `JARVIS_DEEPSEEK_LAB` (actualmente solo existen Production, Preview y github-pages). Dentro, registrar una clave NUEVA de DeepSeek como secreto de ese entorno `DEEPSEEK_API_KEY`. NO usar Repository Secrets, NO revelar la clave, no poner en ningún log.
 - **SIGUIENTE TEST DE PAGO:** solo después de configurar Environment, abrir workflow existente `CEREBRO DeepSeek BOOST-001 Tiny Canary`, seleccionar EXPRESAMENTE la rama `cerebro/jarvis-deepseek-weekend-lab-20261106` y ejecutar una vez. Nunca ejecutarlo desde main. La ejecución de hoy NO está realizada; cuenta no ha consumido nada en este corte.
 - El canario NO activa aprendizaje del fin de semana: eso sigue requiriendo scheduler remoto y persistencia del ledger de 50 EUR, además de posterior evaluación de propuestas. No confundir activación del API con aprendizaje ya operativo.
+
+## Verificación física adicional · 2026-11-06
+
+**HECHO:** GitHub `Settings > Environments > JARVIS_DEEPSEEK_LAB` (environment_id `26485940695`) existe y su selector muestra `Selected branches and tags` con `1 branch and 0 tags allowed`. La única regla visible es la rama exacta `cerebro/jarvis-deepseek-weekend-lab-20261106`, con el texto `Currently applies to 1 branch`. La restricción fue comprobada en la interfaz autenticada después del cambio del propietario.
+
+**BLOQUEADO:** El mismo panel dice `This environment has no secrets.`. Por ello no existe `DEEPSEEK_API_KEY` operativo en el environment. No se ha creado ni copiado ningún valor de clave, ni se ha realizado una petición pagada.
+
+**NO MODIFICADO:** `main`, PR #25, CUT30, App, CRM y sistemas de producción. Código del canario de pago permanece en rama aislada y sin lanzar.
+
+**Único paso de credencial:** generar una clave DeepSeek independiente en el panel autenticado y guardarla directamente en GitHub `JARVIS_DEEPSEEK_LAB > Add environment secret` bajo el nombre `DEEPSEEK_API_KEY`. Nunca compartir valor por chat ni colocarlo como Repository Secret (los workflows antiguos podrían usarlo). Tras ello ejecutar un único canario de coste mínimo con control de branch y saldo, sin habilitar todavía el programa repetitivo.
