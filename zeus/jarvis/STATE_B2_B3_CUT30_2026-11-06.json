@@ -1,0 +1,97 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-06",
+  "cut": "CUT30",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT30",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "pr_draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "code_sha": "e290963a312cca0d930573937c5c4c941fa125b9",
+  "ci": {
+    "node": {
+      "run_id": 42186776169,
+      "pass": 705,
+      "fail": 0,
+      "status": "SUCCESS"
+    },
+    "wrangler": {
+      "run_id": 42186776106,
+      "status": "SUCCESS",
+      "scope": "LOCAL_ONLY",
+      "cut30_bundle": "PASS"
+    },
+    "b4": {
+      "run_id": 42186776254,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42186776147,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42186776226,
+      "status": "SUCCESS",
+      "promotion": "NOT_EXECUTED"
+    }
+  },
+  "cloudflare_inventory": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "plan_workers": "FREE",
+    "access_free_plan": "PUBLIC_OFFER_NOT_ACCOUNT_ACTIVATION",
+    "zero_trust_dashboard_observation": "Account opened /one/ shows Welcome to Cloudflare Zero Trust and Begin onboarding, no Access app existence verified",
+    "source_d1": {
+      "name": "cerebro-jarvis-lab-eu",
+      "uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+      "jurisdiction": "eu"
+    },
+    "restore_d1": {
+      "name": "cerebro-jarvis-lab-eu-restore-cut29",
+      "uuid": "c446f17c-c26d-4c76-a3ea-f62c843d461b",
+      "jurisdiction": "eu"
+    },
+    "previous_d1": {
+      "name": "cerebro-jarvis-lab-cut21",
+      "uuid": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+      "jurisdiction": null
+    },
+    "workers_legacy_untouched": true,
+    "new_jarvis_worker_deployed": false,
+    "worker_access_policy_configured": false
+  },
+  "done_lab": [
+    "New independent Cloudflare Access owner-admission canary checks ctx.access, exact application audience, and server-only owner email",
+    "No trust of user-supplied headers, no JWT token echoed, no PII or D1 operations",
+    "Standalone Worker entrypoint with config workers_dev=false, routes=[], access probe OFF, Gateway OFF, B2/B3 OFF",
+    "Ten new Node tests with 705 PASS total and Wrangler official no-deploy bundle verified",
+    "Existing B5 dialogue/model-router and B2/B3 adapters inventoried and conserved"
+  ],
+  "human_required": "Initial Zero Trust Free onboarding if account permits without subscriptions, private Access application scoped only to NEW JARVIS Worker, owner exact identity selection and secret binding; verified live access probe with real login. Current Opera connector cannot click/submit.",
+  "not_done": [
+    "Zero Trust Free activation not verified",
+    "No JARVIS Worker deployed or route activated",
+    "No real Access login tested",
+    "No B2 OWNER_ROOT enrollment, signed session, HMAC/Vault or B3 real grant",
+    "No real multi-device missions, OLD vs NEW or B10"
+  ],
+  "risk_controls": [
+    "Do not enable all_workers Access policy; it could block existing Workers",
+    "Do not attach Access policy to old Workers",
+    "Never put owner email, token or Access AUD in git",
+    "Do not enable workers.dev route before protected Access policy is verified",
+    "No public mission routes",
+    "Cloudflare Access ctx.access is not forwarded through service bindings; avoid relying on it across Workers",
+    "No App/CRM/Supabase/main/DNS/Trading/ANA/SEO changes"
+  ],
+  "next_block": "One gated ChatGPT Work mission: inventory Cloudflare Zero Trust Free, create dedicated Access rule for JARVIS canary only, test authenticated owner on distinct LAB Worker URL and forbidden unauthorized, inspect logs, keep Gateway and D1 untouched; then B2/B3 real in next step.",
+  "rollback": "Disable route and Access canary (OFF); preserve D1; revert CUT30 commits in PR DRAFT; no remote changes by this cut.",
+  "sources": [
+    "https://developers.cloudflare.com/workers/configuration/cloudflare-access/",
+    "https://www.cloudflare.com/es-es/sase/products/access/"
+  ]
+}
