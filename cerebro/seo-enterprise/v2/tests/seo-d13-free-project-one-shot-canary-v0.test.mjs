@@ -12,7 +12,7 @@ test('one shot binds owner-verified Free project, excludes paid key, no automati
  assert.equal(p.project,'CEREBRO-GEMINI-FREE');
  assert.equal(p.max_requests,1);assert.equal(p.max_retries,0);
  assert.equal(p.runtime_billing_automatically_proven,false);
- assert.match(buildOneShotPrompt(),/EXACTAMENTE seis/);
+ assert.match(buildOneShotPrompt(),/exactamente seis/i);
  assert.match(buildOneShotPrompt(),/No uses además ni en conclusión/i);
  assert.match(buildOneShotPrompt(),/No escribas Primera visita piso Córdoba/i);
  assert.match(buildOneShotPrompt(),/No escribas Nunca debes firmar/i);

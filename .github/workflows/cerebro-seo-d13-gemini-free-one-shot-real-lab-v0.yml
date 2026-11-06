@@ -17,6 +17,9 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
       - name: Check exact no-cost IAM, one-call contract, QA and secret safety first
         run: |
           node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
@@ -25,6 +28,7 @@ jobs:
         id: gate
         run: |
           subject="$(git log -1 --format=%s)"
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
           if [ "$subject" = "seo(d13): ONE_SHOT_FREE_35_QUALITY_V2_20261106" ]; then
             echo "run_one_shot=true" >> "$GITHUB_OUTPUT"
           else
