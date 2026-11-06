@@ -94,7 +94,7 @@ export async function renderPremiumSeoCanary({order=PREMIUM_SEO_IMAGE_CONTRACT_V
   validateOrder(order);
   const brand=assets||await loadBrand();
   const markup=premiumMarkup(order,brand);
-  const launch=browserFactory||async()=>{const {chromium}=await import('@playwright/test');return chromium.launch({headless:true});};
+  const launch=browserFactory||(async()=>{const {chromium}=await import('@playwright/test');return chromium.launch({headless:true});});
   const browser=await launch();
   try{
     const page=await browser.newPage({viewport:{width:1200,height:630},deviceScaleFactor:1});
