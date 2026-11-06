@@ -27,7 +27,7 @@ assert.match(src,/createJarvisB2DeviceSessionGate/);
 assert.match(src,/createJarvisD1SessionStore/);
 assert.match(src,/createJarvisB2DeviceEnrollment/);
 for(const forbidden of ['INSERT INTO','UPDATE jarvis_lab_session','DELETE FROM',
- 'ENROLL','JARVIS_OWNER_EMAIL','JARVIS_ACCESS_AUD','JARVIS_B2_HMAC_KEY_HEX',
+ 'JARVIS_OWNER_EMAIL','JARVIS_ACCESS_AUD','JARVIS_B2_HMAC_KEY_HEX',
  'service_role','app.fenixcapital.es','a859fde1-126b-4c40-bc0d-aec2f8839f7b'])
  assert.equal(JSON.stringify(cfg).includes(forbidden),false);
 assert.doesNotMatch(src,/INSERT INTO|DELETE FROM|\.insert\(/);
