@@ -9,8 +9,8 @@ import {loadIdentityCredentialFoundation} from '../../../governance/identity-cre
 
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
 const MODEL='gemini-2.5-flash-lite';
-const CONNECTOR='connector:gemini-free-lab';
-const REF='credref:cerebro-gemini-api-key';
+const CONNECTOR='connector:seo-gemini-free-lab';
+const REF='credref:cerebro-gemini-free-api-key';
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
 function buildCloudEditorialPrompt(brief){
  if(!brief||brief.company_id!=='fenix'||brief.engine_id!=='SEO-001'||
@@ -148,7 +148,9 @@ export async function runSeoCloudWriter({
 export const SEO_D13_CLOUD_ONLY=Object.freeze({
  connector_id:CONNECTOR,cloud_only:true,local_pc_required:false,
  local_ollama_required:false,
- ai_endpoint:'GOOGLE_GEMINI_API_EXISTING_LAB',
+ ai_endpoint:'GOOGLE_GEMINI_FREE_PROJECT_LAB_ONLY',
+ free_secret_symbolic_name:'CEREBRO_GEMINI_FREE_API_KEY',
+ paid_project_key_forbidden:true,
  mandatory_billing:'FREE_TIER_BILLING_DISABLED',
  allow_paid_fallback:false,external_customer_data_allowed:false,
  release_authorized:false,wordpress_writes:false});
