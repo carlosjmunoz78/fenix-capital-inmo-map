@@ -1,0 +1,22 @@
+name: CEREBRO SEO · Checklist V2 isolated signed-event contract PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v2.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v2.test.mjs'
+      - 'cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-v2.manifest.json'
+      - 'cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-ledger-preprod-v2.sql'
+      - '.github/workflows/cerebro-seo-checklist-delivery-preprod-v2.yml'
+permissions:
+  contents: read
+jobs:
+  v2-contract:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v2.mjs
+      - run: node --test cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v2.test.mjs
+      - name: Confirm no live send, merge or upload in this job
+        run: echo 'SEO_V2=CONTRACT_ONLY; LIVE_BREVO=NO; STORAGE_UPLOAD=NO; WP_PROD=UNTOUCHED'
