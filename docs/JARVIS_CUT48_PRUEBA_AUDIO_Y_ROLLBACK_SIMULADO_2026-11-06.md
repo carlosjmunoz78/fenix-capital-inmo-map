@@ -47,4 +47,6 @@ Nuevo `src/JarvisPhysicalVoiceCheck.tsx`, enlazado desde Operativa/Jarvis y Dock
 - Ante autorización futura de PROD: inventario completo de integraciones, snapshot de configuración y fuente de Edge Function, evidencia de comportamiento OLD vs NEW, autenticación de propietario y denegación de anónimos, ensayo real aislado de restauración + validación de App, tribunal, coste, observabilidad y promoción gradual. No realizar sin gates.
 
 ## Evidencia
-Pruebas unitarias, Vite/TS y Playwright previstas para este corte; completar el número de ejecución y resultados cuando la CI termine. No interpretar «success» de Playwright como prueba de altavoces/micrófono físicos.
+**CI [#42301345097](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42301345097): SUCCESS.** `npm run build` PASS, **61 pruebas Node PASS / 0 FAIL**, **30 pruebas Playwright Chromium PASS / 0 FAIL** (escritorio y móvil), **restauración OLD y re-aplicación NEW de 2 archivos en directorio temporal PASS**. La batería incluyó un ensayo de sintetizador/reconocedor **simulados**, no hardware físico.
+El mismo job reportó `JARVIS_OWNER_JWT_FRESHNESS=EXPIRED_OR_NEAR_EXPIRY`; por tanto, la comprobación real de Gateway sigue BLOQUEADA y omitida.
+La rama del código probado fue `7fa9e35a181125cc4ce8f31606beec10fbf265ec`; los cambios posteriores son metadatos y documentación. No interpretar «success» de Playwright como prueba de altavoces/micrófono físicos.
