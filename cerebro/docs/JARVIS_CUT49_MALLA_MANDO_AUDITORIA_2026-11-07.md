@@ -37,6 +37,9 @@ Nuevo módulo `cerebro/console/jarvis-command-network-v0.mjs`.
 El test `CUT49 speaks through ACTGW to real existing ROUTE-001 deterministic budget function in PREPROD harness` conecta `CerebroGatewayV0.execute('jarvis.network.dispatch')` → `ACTGW-001.execute()` → **`budgetDecision` REAL** de `cerebro/router/execution-model-router.mjs`. No usa un controlador simulado para el cálculo: el resultado de `ROUTE-001` es `GREEN_ZERO_ADDITIONAL_COST`, `prod_authorized=false`, `execution_authorized=false` y `trading_access=false`.
 La identidad propietaria es una **fixture explícita de test**, NO una validación E2E con el propietario. El callback se pasa desde bootstrap confiable; no existe un enlace runtime desplegado. Este ensayo demuestra el recorrido funcional de un motor real, NO autoriza habilitar los restantes 178 ni los 11 perfiles.
 
+### Prueba de orden duradera a JOB-001 (motor real, test aislado)
+El test `CUT49 JARVIS command reaches REAL JOB-001 durable queue and completes isolated PREPROD work` utiliza código real de `DurableJobRuntimeV1` y `DurableWorkerRunnerV1`: JARVIS Console → `jarvis.network.dispatch` → `ActionGatewayV1` → `JOB-001.enqueue` → worker con handler **solo de test** → `SUCCEEDED` guardado en journal temporal → reconstrucción del journal → idempotencia. El callback de propietario es una **fixture** del test, no identidad en vivo. No hay segunda cola ni worker de producción, ni datos de clientes ni gastos, ni se modifica el motor.
+
 ## 4. Puertas antes de ampliar la ejecución
 1. Resolver la prueba de propietario mediante sesión de App ya existente sin copiar tokens a chat; JWT de CI no se considera válido.
 2. Inventariar cada `engine_id` con endpoint/handler existente, contrato, evidencia física, permisos, dependencias, colas, salud, reintentos, coste, PREPROD, auditoría, rollback y responsable.
