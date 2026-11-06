@@ -14,8 +14,7 @@ const no=x=>{throw Error('SEO_YMYL_'+x)};
 const visible=x=>x.replace(/<!--[\s\S]*?-->/g,' ')
  .replace(/<[^>]+>/g,' ').replace(/&(?:nbsp|amp|quot);/gi,' ')
  .replace(/\s+/g,' ').trim();
-export function loadDocumentaryRiskLedger({root=process.cwd()}={}){
- const ledger=JSON.parse(fs.readFileSync(path.resolve(root,FILE),'utf8'));
+function validateLedger(ledger){
  if(ledger.company_id!=='fenix'||ledger.engine_id!=='SEO-001'||
   ledger.environment!=='PREPROD'||ledger.publication_authorized!==false||
   ledger.independent_professional_legal_signoff!==false||
@@ -34,8 +33,11 @@ export function loadDocumentaryRiskLedger({root=process.cwd()}={}){
  }
  return ledger;
 }
+export function loadDocumentaryRiskLedger({root=process.cwd()}={}){
+ return validateLedger(JSON.parse(fs.readFileSync(path.resolve(root,FILE),'utf8')));
+}
 export function auditSeoV4DocumentaryRisk({work_id,html,ledger=null,root=process.cwd()}={}){
- const source=ledger??loadDocumentaryRiskLedger({root});
+ const source=ledger?validateLedger(ledger):loadDocumentaryRiskLedger({root});
  const item=source.articles.find(x=>x.work_id===work_id);
  if(!item||typeof html!=='string'||html.length<500)no('EXACT_ARTICLE_REQUIRED');
  const digest=sha(html);
