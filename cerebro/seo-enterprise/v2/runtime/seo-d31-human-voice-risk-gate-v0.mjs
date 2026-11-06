@@ -44,6 +44,16 @@ export function auditSeoHumanVoiceAndRisk({html,persona,content_type='ARTICLE'}=
  if(persona==='INMOBILIARIAS'&&
    /primer\s+hito\s+ocurre\s+tras\s+la\s+segunda\s+visita/i.test(joined))
    issues.push('UNSUPPORTED_FIXED_SECOND_VISIT_HITO');
+
+ if(persona==='INMOBILIARIAS'&&
+  /(?:conviene|debe|debemos|es\s+recomendable)\s+(?:presentar|derivar|conectar).{0,75}(?:tras|despu[eé]s\s+de)\s+la\s+segunda\s+visita/i.test(joined))
+  issues.push('ARBITRARY_B2B_SECOND_VISIT_RULE');
+ if(persona==='PARTICULARES'&&
+  /(?:nota\s+simple.{0,135}(?:superficie\s+exacta|confirmar\s+que\s+no\s+existen\s+cargas))/i.test(joined))
+  issues.push('REGISTER_INFORMATION_OVERCLAIM_REQUIRES_LEGAL_REVIEW');
+ if(persona==='PARTICULARES'&&
+  /el\s+primer\s+piso\s+destacaba.{0,150}el\s+segundo\s+ofrec[ií]a/i.test(joined))
+  issues.push('UNVERIFIED_CASE_DETAILS_PRESENTED_AS_OBSERVED');
  if(p.some(s=>s.split(/\s+/).length>55&&
   (s.match(/[,.!?;]/g)||[]).length<=1))
   issues.push('LONG_UNPUNCTUATED_PARAGRAPH');
