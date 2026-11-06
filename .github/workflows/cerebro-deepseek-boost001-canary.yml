@@ -1,48 +1,39 @@
 name: CEREBRO DeepSeek BOOST-001 Tiny Canary
 
+# CUT35: branch-scoped safe override only; main workflow is unchanged.
+# Run manually only with ref cerebro/jarvis-deepseek-weekend-lab-20261106.
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - cerebro/boost-001-reconciled-20261027
-    paths:
-      - '.github/workflows/cerebro-deepseek-boost001-canary.yml'
-      - 'cerebro/runtime/deepseek-*.mjs'
-      - 'cerebro/tests/deepseek-*.test.mjs'
-      - 'cerebro/jarvis/boost-001/**'
 
 permissions:
   contents: read
 
 concurrency:
-  group: cerebro-deepseek-boost001-canary-${{ github.ref }}
+  group: jarvis-cut35-isolated-smoke-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  tiny-canary:
+  one-shot-lab:
+    if: github.ref == 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    environment: JARVIS_DEEPSEEK_LAB
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      CEREBRO_ALLOW_PAID_CANARY: 'YES'
-      DEEPSEEK_CANARY_PROJECTED_EUR: '0.01'
+      JARVIS_LAB_SMOKE_APPROVED: 'YES'
     steps:
-      - name: Checkout current BOOST-001 candidate
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '24'
-
-      - name: Verify secret reference without exposing value
+          node-version: '22'
+      - name: Fail-closed authorization gate (no secrets printed)
         shell: bash
         run: |
-          test -n "$DEEPSEEK_API_KEY" || { echo "DEEPSEEK_API_KEY_MISSING"; exit 1; }
-          echo "DEEPSEEK_API_KEY_PRESENT=true"
-
-      - name: DeepSeek provider and cost guards
-        run: node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
-
-      - name: Paid tiny canary
-        run: node cerebro/jarvis/boost-001/canary.mjs
+          set -euo pipefail
+          test "$GITHUB_REF" = 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
+          test "$JARVIS_LAB_SMOKE_APPROVED" = 'YES'
+          test -n "$DEEPSEEK_API_KEY"
+      - name: Offline only LAB gate
+        run: node --test zeus/jarvis/training/*.test.mjs
+      - name: Single DeepSeek paid LAB canary (maximum 32 output tokens)
+        run: node zeus/jarvis/training/jarvis-deepseek-lab-canary.mjs
