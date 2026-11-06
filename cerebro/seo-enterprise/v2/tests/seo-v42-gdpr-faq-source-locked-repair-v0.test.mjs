@@ -60,6 +60,8 @@ test('output physically produces new and non-authorized files without overriding
   assert.equal(registry.owner_exact_digest_approved,false);
   assert.equal(registry.media_generated,false);
   assert.equal(registry.model_calls_this_revision,0);
+  assert.match(registry.aepd_reference,/aepd\.es/);
+  assert.equal(registry.independent_professional_legal_review_complete,false);
   assert.equal(registry.work.length,2);
   assert.throws(()=>persistSeoV42({results:makeSeoV42(),root}),/OUTPUT_ALREADY_EXISTS/);
  }finally{fs.rmSync(root,{recursive:true,force:true})}
