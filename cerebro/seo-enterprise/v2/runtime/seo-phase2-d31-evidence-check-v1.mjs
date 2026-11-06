@@ -16,7 +16,7 @@ const digest=x=>crypto.createHash('sha256').update(x).digest('hex');
 const assert=(ok,code)=>{if(!ok)throw Error('SEO_D31_EVIDENCE_'+code)};
 const ROLE='SEO-D05:SPECIALIST:01';
 const CASE=ROLE+':EXAM:01';
-const URL='https://fenixcapital.es/notario-espanol-vs-frances-ingles-compraventa/';
+const SOURCE_URL='https://fenixcapital.es/notario-espanol-vs-frances-ingles-compraventa/';
 
 export function checkSeoPhase2PilotEvidence({pilot_receipt,answer_text}={}){
  assert(pilot_receipt&&typeof pilot_receipt==='object'&&!Array.isArray(pilot_receipt),'RECEIPT_REQUIRED');
@@ -33,19 +33,19 @@ export function checkSeoPhase2PilotEvidence({pilot_receipt,answer_text}={}){
  assert(digest(answer)===pilot_receipt.answer_sha256,'ANSWER_DIGEST_MISMATCH');
  const challenge=getSeoTrainingChallenge({role_id:ROLE,case_id:CASE});
  assert(challenge.challenge_sha256===pilot_receipt.challenge_sha256&&
-   challenge.source_url===URL&&challenge.source_post_id===1098,'CHALLENGE_CHANGED');
+   challenge.source_url===SOURCE_URL&&challenge.source_post_id===1098,'CHALLENGE_CHANGED');
  const corpus=loadFrozenSeoCorpus();
  assert(corpus.corpus_digest===challenge.accepted_corpus_digest&&
    corpus.wordpress_reaudited===false&&corpus.documents.length===200,'CORPUS_CHANGED');
  const doc=corpus.documents.find(d=>d.post_id===1098);
- assert(doc?.url===URL&&doc.source==='WP_AUTHENTICATED_GET_POST','DOCUMENT_CHANGED');
+ assert(doc?.url===SOURCE_URL&&doc.source==='WP_AUTHENTICATED_GET_POST','DOCUMENT_CHANGED');
  const checks={
   cms_title:doc.title==='Notario en una compraventa de vivienda: qué revisa y quién paga'&&
     answer.includes('Notario en una compraventa de vivienda: qué revisa y quién paga'),
   cms_focus_keyword:doc.yoast?.focus_keyword==='notario compraventa vivienda'&&
     answer.includes('notario compraventa vivienda'),
-  cms_canonical:doc.yoast?.canonical===URL&&answer.includes(URL),
-  preserved_slug:URL.includes('notario-espanol-vs-frances-ingles-compraventa')&&
+  cms_canonical:doc.yoast?.canonical===SOURCE_URL&&answer.includes(URL),
+  preserved_slug:SOURCE_URL.includes('notario-espanol-vs-frances-ingles-compraventa')&&
     answer.includes('notario-espanol-vs-frances-ingles-compraventa'),
   observed_internal_links:doc.internal_links.length===1&&
     answer.includes('Referencias de enlaces internos extraídas: 1'),
@@ -67,7 +67,7 @@ export function checkSeoPhase2PilotEvidence({pilot_receipt,answer_text}={}){
   owner_policy:'AUTHENTICATED_OWNER_ONLY',
   role_id:ROLE,case_id:CASE,job_id:pilot_receipt.journal_job_id,
   approved_corpus_digest:corpus.corpus_digest,
-  source_url:URL,source_post_id:1098,
+  source_url:SOURCE_URL,source_post_id:1098,
   answer_sha256:pilot_receipt.answer_sha256,
   challenge_sha256:challenge.challenge_sha256,
   objective_checks:checks,objective_checks_passed:Object.keys(checks).length,
