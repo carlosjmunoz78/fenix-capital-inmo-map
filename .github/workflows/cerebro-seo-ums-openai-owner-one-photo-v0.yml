@@ -42,13 +42,23 @@ jobs:
           DEST: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}
         run: |
           node cerebro/seo-enterprise/v2/runtime/seo-ums-openai-single-photo-v0.mjs "$DEST"
+      - name: Persist original OpenAI bytes BEFORE optional FFmpeg conversion
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-ums-one-openai-original-preserved-before-conversion
+          path: |
+            ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}/single-original-provider.webp
+            ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}/api-image-receipt.json
+          if-no-files-found: error
+          retention-days: 14
       - name: Normalize actual WebP to 1200x630 in ephemeral cloud
         if: ${{ steps.permit.outputs.generate == 'true' }}
         env:
           DEST: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}
         run: |
-          sudo apt-get update -qq
-          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg >/dev/null
+          timeout 70s sudo apt-get update -qq
+          timeout 60s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg >/dev/null
           ffmpeg -hide_banner -loglevel error -i "$DEST/single-original-provider.webp" \
             -vf "scale=1200:630:force_original_aspect_ratio=increase,crop=1200:630" \
             -frames:v 1 -c:v libwebp -q:v 85 -y "$DEST/seo-original-cropped-1200x630.webp"
