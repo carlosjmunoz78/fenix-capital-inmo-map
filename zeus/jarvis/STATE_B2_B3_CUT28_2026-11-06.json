@@ -1,0 +1,88 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "recorded_date": "2026-11-06",
+  "cut": "CUT28",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT28",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "pr_state": "DRAFT",
+  "merged": false,
+  "production": "NO_GO",
+  "prior_certified_head": "9d3d4b0f8f30989a5062f63b33c490d31ef346b1",
+  "code_head_certified": "0efa1e8e39cfc9f1e92def2d3b5c99deac9d91fa",
+  "cloudflare": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "resource": "cerebro-jarvis-lab-eu",
+    "database_id": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+    "jurisdiction": "eu",
+    "replication": "disabled",
+    "verified_via": "Work report and authenticated Opera dashboard Settings read-only",
+    "plan": "Workers Free",
+    "no_new_subscription": true,
+    "schema_deployed": false,
+    "remote_migrations_applied": false,
+    "remote_backup_restore_verified": false,
+    "remote_worker_deployed": false,
+    "previous_database": {
+      "name": "cerebro-jarvis-lab-cut21",
+      "database_id": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+      "jurisdiction": null,
+      "protected": true
+    }
+  },
+  "code": {
+    "off_only_config": "zeus/jarvis/cloudflare-lab/wrangler-eu.lab.jsonc",
+    "safety_guard": "zeus/jarvis/cloudflare-lab/verify-cut28-eu-binding.mjs",
+    "previous_template_retained": "zeus/jarvis/cloudflare-lab/wrangler-eu.template.jsonc",
+    "gateway_enabled": false,
+    "worker_main": "./worker-off.mjs",
+    "workers_dev": false,
+    "routes": [],
+    "change_scope": "PR25_DRAFT_ONLY"
+  },
+  "validation": {
+    "core": {
+      "run": 42179124325,
+      "total": 695,
+      "pass": 695,
+      "fail": 0
+    },
+    "d1_local_and_offline_bundle": {
+      "run": 42179124337,
+      "status": "SUCCESS",
+      "cut28_offline_bundle": "PASS"
+    },
+    "b4": {
+      "run": 42179124547,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run": 42179124343,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run": 42179124372,
+      "status": "SUCCESS",
+      "promotion": "NOT_RUN"
+    }
+  },
+  "status": {
+    "physically_verified_cloudflare_d1": "HECHO",
+    "eu_lab_uuid_pin": "HECHO",
+    "ci_offline_wrangler_validation": "HECHO",
+    "remote_d1_schema": "PENDIENTE",
+    "remote_export_independent_restore": "PENDIENTE",
+    "vault_and_owner_root_b2": "PENDIENTE",
+    "b3_live_permissions": "PENDIENTE",
+    "physical_two_devices": "PENDIENTE",
+    "gateway_lab_live": "PENDIENTE",
+    "b10": "PENDIENTE"
+  },
+  "next_block": "Before remote migrations: take complete inventory and isolated D1 baseline; obtain explicitly authorized scoped Cloudflare Write access via secure UI/Vault, then 0001-0005 ONLY on new EU D1 with synthetic data, remote export and independent restore. Keep Gateway OFF and PROD NO_GO. Never use old DB.",
+  "rollback": "Revert CUT28 config/CI files in PR25 DRAFT. No remote Cloudflare/App/CRM changes made by CUT28.",
+  "notes": "Local/CI validation does not prove remote D1 migration or deployed Gateway; Work created EU D1 before CUT28."
+}
