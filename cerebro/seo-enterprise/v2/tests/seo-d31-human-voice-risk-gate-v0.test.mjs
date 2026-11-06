@@ -53,3 +53,25 @@ test('actual real Gemini Free 3.5 LAB output is preserved byte-for-byte and reje
  assert.ok(result.issues.includes('ABSOLUTE_FINANCIAL_OR_LEGAL_INSTRUCTION'));
  assert.equal(result.can_publish,false);
 });
+
+test('actual V4 B2C buyer-cost wording triggers professional tax allocation review',()=>{
+ const html='<h1>Comparar dos pisos</h1><h2>Gastos que debes revisar</h2>'+
+  '<p>Existen impuestos autonómicos y municipales como el impuesto sobre transmisiones patrimoniales o la plusvalía que varían según el caso.</p>';
+ const a=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES'});
+ assert.equal(a.deterministic_precheck_passed,false);
+ assert.ok(a.issues.includes('PLUSVALIA_BUYER_COST_TAX_ALLOCATION_REQUIRES_REVIEW'));
+ assert.equal(a.factual_claims_verified,false);
+});
+test('actual V4 B2B forced keyword, mandatory consent and second-visit deadline are HOLD',()=>{
+ const html='<h1>Derivar compradores</h1>'+
+ '<h2>Hitos clave en la derivación hipotecaria inmobiliarias Córdoba</h2>'+
+ '<p>Antes de compartir cualquier detalle con el experto hipotecario, el cliente firma una autorización específica para el tratamiento de su información.</p>'+
+ '<p>El primer hito ocurre tras la segunda visita a la vivienda, momento en el cual el comprador valora seriamente presentar una propuesta.</p>';
+ const a=auditSeoHumanVoiceAndRisk({html,persona:'INMOBILIARIAS'});
+ assert.equal(a.deterministic_precheck_passed,false);
+ for(const issue of ['B2B_KEYWORD_STUFFING_UNNATURAL_HEADING',
+  'GDPR_MANDATORY_CONSENT_ASSERTION_REQUIRES_LEGAL_CHECK',
+  'UNSUPPORTED_FIXED_SECOND_VISIT_HITO'])
+  assert.ok(a.issues.includes(issue),issue);
+ assert.equal(a.can_publish,false);
+});
