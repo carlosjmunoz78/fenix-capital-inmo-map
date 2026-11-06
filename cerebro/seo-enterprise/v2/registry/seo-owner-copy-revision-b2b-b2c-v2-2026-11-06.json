@@ -30,7 +30,7 @@
         52656,
         46982
       ],
-      "status": "OWNER_REWRITE_PENDING_QA_AND_APPROVAL",
+      "status": "OWNER_REWRITE_REQUIRES_INDEPENDENT_QA_AND_OWNER_APPROVAL",
       "image": {
         "subject": "Salón luminoso y realista de una vivienda en Córdoba con grandes ventanas, luz de mañana, mobiliario actual y detalles cálidos propios de un hogar habitado, sin carteles ni papeles legibles",
         "visual_intent": "Fotografía que transmita la emoción de elegir casa con calma, punto de vista ligeramente amplio desde el umbral, atmósfera acogedora y natural con textura auténtica, ninguna persona reconocible",
@@ -39,7 +39,9 @@
         "caption": "La luz y la distribución cuentan tanto como el precio al comparar viviendas",
         "description": "Imagen editorial de una vivienda luminosa que acompaña una guía para comparar pisos antes de decidir la compra en Córdoba",
         "filename": "fenix-comparar-pisos-cordoba-salon-luminoso.webp"
-      }
+      },
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba-v2.draft.html",
+      "consent_marketing_auto_enroll": false
     },
     {
       "id": "SEO001-FENIX-B2B-EDITORIAL-002",
@@ -54,7 +56,7 @@
         49073,
         49128
       ],
-      "status": "OWNER_REWRITE_PENDING_QA_AND_APPROVAL",
+      "status": "OWNER_REWRITE_REQUIRES_INDEPENDENT_QA_AND_OWNER_APPROVAL",
       "image": {
         "subject": "Agente de inmobiliaria profesional conversando con una pareja compradora en una oficina inmobiliaria de Córdoba bañada por luz natural, mesa despejada, manos y miradas espontáneas, sin pantallas legibles ni cartelería",
         "visual_intent": "Fotografía humana y creíble con enfoque cercano en la conversación y coordinación de la operación, composición horizontal totalmente distinta de la vivienda vacía del artículo para particulares, colores naturales luminosos, sin aspecto corporativo de banco",
@@ -63,7 +65,10 @@
         "caption": "Una buena coordinación financiera ayuda a trabajar con expectativas claras",
         "description": "Imagen editorial de una conversación entre una inmobiliaria y compradores para ilustrar la coordinación de una operación con financiación hipotecaria en Córdoba",
         "filename": "fenix-inmobiliaria-cordoba-reunion-compradores.webp"
-      }
+      },
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba-v2.draft.html",
+      "consent_marketing_auto_enroll": false
     }
-  ]
+  ],
+  "live_wp_writes": 0
 }
