@@ -12,7 +12,7 @@ import {validateEvaluatorChange} from '../../../runtime/evaluation-tribunal.mjs'
 import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder} from './seo-owner-editorial-visual-gate-v2.mjs';
 
 const PREFIX='cerebro/seo-enterprise/v2/';
-const REGISTRY=PREFIX+'registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json';
+const REGISTRY=PREFIX+'registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json';
 const APPROVAL=PREFIX+'evidence/SEO001_STRATEGY_OWNER_APPROVAL_GITHUB_6682124001_2026-11-06.json';
 const SHA40=/^[0-9a-f]{40}$/; const SHA64=/^[0-9a-f]{64}$/;
 const context={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
@@ -38,8 +38,8 @@ export function loadVerifiedWorkItem({root=process.cwd(),work_id}={}){
  const html=textRead(root,draft.content_path);
  if(html.length<2500||html.length>100000||!/BORRADOR INTERNO, NO PUBLICAR/.test(html))deny('SOURCE_INVALID');
  const blob=gitsha(html),digest=sha256(html);
- const expected={'SEO001-FENIX-B2C-EDITORIAL-001':'54f4a8d08607a4b193f47e67581f853e4c1b20c1',
-                 'SEO001-FENIX-B2B-EDITORIAL-002':'eeb98eb62a80c5aa75b63ffa3fd1abbc2a596d6d'};
+ const expected={'SEO001-FENIX-B2C-EDITORIAL-001':'08c7946e73fb65ef1163b86ff1bb5b02583094be',
+                 'SEO001-FENIX-B2B-EDITORIAL-002':'c62cde324c46ea9e6cee022f962a184768289b76'};
  if(blob!==expected[work_id]||!SHA40.test(blob))deny('GIT_BLOB_CHANGED_REVIEW_REQUIRED');
  return {work_id,html,blob,digest,draft,company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
   approval_comment_id:6682124001,approval_scope:'PREPARE_BRIEFS_AND_DRAFTS_ONLY'};
@@ -109,7 +109,7 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
  if(worker_receipt.typo_codes?.length)failures.push('COPY_TYPOS_REVIEW');
  if(worker_receipt.risk_codes?.length)failures.push('YMYL_CLAIM_REVIEW');
  if(!/https:\/\/fenixcapital\.es\/contacto\//.test(html))failures.push('CONTACT_CTA_MISSING');
- const ownerStyle=auditOwnerEditorialCopy({html,persona:item.draft.persona});
+ const ownerStyle=auditOwnerEditorialCopy({html,persona:item.draft.persona,content_type:item.draft.content_type});
  for(const issue of ownerStyle.issues)failures.push('OWNER_STYLE_'+issue);
  const producerOrder=buildSeoProducerImageOrder({company_id:'fenix',work_id:item.work_id,persona:item.draft.persona,
   source_content_sha256:item.digest,...item.draft.image});
