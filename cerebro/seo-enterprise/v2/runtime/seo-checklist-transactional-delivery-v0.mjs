@@ -43,8 +43,8 @@ export function validateServerVerifiedRequest(request){
   for(const key of ['company_id','engine_id','environment','version','asset_id','source_post_id','source_url','persona'])
     exactValue(request[key],key.toUpperCase(),CHECKLIST_DELIVERY_V0[key]);
   exactValue(request.origin,'ORIGIN','FENIX_WEB_LEAD_VERIFIED_EVENT');
-  exactValue(request.server_verified,true,'SERVER_VERIFIED');
-  exactValue(request.consent_privacy,true,'PRIVACY_CONSENT');
+  exactValue(request.server_verified,'SERVER_VERIFIED',true);
+  exactValue(request.consent_privacy,'PRIVACY_CONSENT',true);
   deny(typeof request.consent_marketing!=='boolean','MARKETING_CONSENT_BOOLEAN_REQUIRED');
   deny(!isUuid(request.lead_event_id)||!isUuid(request.request_id),'VERIFIED_EVENT_ID_REQUIRED');
   deny(!validTime(request.consent_privacy_at),'CONSENT_TIMESTAMP_REQUIRED');
