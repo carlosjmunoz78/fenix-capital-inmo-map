@@ -45,7 +45,7 @@ jobs:
       - name: Owner-scoped JARVIS UI and gateway contract tests
         run: node --test tests/jarvis-interface-lab.test.mjs
       - name: Install Playwright Chromium for physical UI tests
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
       - name: Check no dangerous source paths were touched
