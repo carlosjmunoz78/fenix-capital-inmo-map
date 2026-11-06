@@ -87,7 +87,7 @@ export async function executeStudy({env=process.env,fetchImpl=globalThis.fetch,n
  const cycle=Number(env.JARVIS_LAB_STUDY_CYCLE??0);
  if(!Number.isSafeInteger(cycle)||cycle<0||cycle>999999)throw Error('INVALID_CYCLE');
  const reportId=env.JARVIS_LAB_STUDY_REPORT_ID||env.GITHUB_RUN_ID;
- if(!/^\\d{1,32}$/.test(reportId))throw Error('INVALID_REPORT_ID');
+ if(!/^[0-9]{1,32}$/.test(reportId))throw Error('INVALID_REPORT_ID');
  const cases=Array.from({length:maxCases},(_,i)=>{
   const n=cycle*maxCases+i, seed=data.cases[n%data.cases.length];
   const domain=topics.domains[Math.floor(n/data.cases.length)%topics.domains.length];
