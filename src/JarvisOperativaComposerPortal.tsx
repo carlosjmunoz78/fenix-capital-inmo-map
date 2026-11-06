@@ -4,6 +4,7 @@ import {AudioLines,Mic,Plus,Send,Square} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisComposerPrimeDetail} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
+import JarvisOwnerDialogueCheck from './JarvisOwnerDialogueCheck';
 import {jarvisDictationProblem} from './jarvisVoicePolicy';
 import {getJarvisOmniState,JARVIS_OMNI_EVENT} from './jarvisOmniSession';
 import './cerebro-operative-console.css';
@@ -126,6 +127,7 @@ export default function JarvisOperativaComposerPortal(){
     El reconocimiento de voz no está disponible en este navegador; puedes escribir igualmente.
    </small>:null}
    <JarvisGatewayCapabilityPanel ready={snapshot.ready}/>
+   <JarvisOwnerDialogueCheck ready={snapshot.ready}/>
   </section>
  </div>,target);
 }

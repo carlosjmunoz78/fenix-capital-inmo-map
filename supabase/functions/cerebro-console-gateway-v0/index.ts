@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
+import {closeOwnerGreeting} from "./owner-greeting.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -47,10 +48,10 @@ type LearningCandidate = {
 };
 
 const DEFAULT_PREFERENCES:Record<string,string>={
-  tone:"warm_close_caring",
+  tone:"executive_formal",
   response_length:"concise",
-  speech_rate:"1.08",
-  speech_pitch:"1.04"
+  speech_rate:"1.10",
+  speech_pitch:"0.98"
 };
 
 const LEARNING_CATEGORIES=new Set([
@@ -193,24 +194,6 @@ function contextualizeMessage(message:string,context:ConversationTurn[]){
 
 function previousUserTurn(context:ConversationTurn[]){
   return [...context].reverse().find(turn=>turn.role==="user")?.text.trim()??"";
-}
-
-function closeOwnerGreeting(context:ConversationTurn[]=[]){
-  const variants=[
-    "Hola Carlos. ¿Qué tal guapo? Dime, ¿qué hacemos?",
-    "¡Buenas Carlos! Aquí estoy guapo. ¿Qué necesitas?",
-    "Hola guapo. Dime Carlos, ¿por dónde empezamos?",
-    "¡Muy buenas Carlos! ¿Cómo va guapo? Cuéntame.",
-    "Ey Carlos. ¿Qué tal guapo? Estoy aquí. ¿Qué vemos?",
-    "Hola Carlos guapo. Dime qué tienes entre manos.",
-    "Buenas guapo. Cuéntame, ¿qué miramos hoy?",
-    "Hola Carlos. Aquí estoy. ¿Por dónde tiramos?",
-    "Muy buenas guapo. Dime qué necesitas y vamos a ello.",
-    "Ey Carlos. Te escucho. ¿Qué quieres revisar?"
-  ];
-  const priorGreetings=context.filter(turn=>turn.role==="cerebro"&&/(hola carlos|hola guapo|buenas carlos|buenas guapo|ey carlos|muy buenas)/i.test(turn.text)).length;
-  const slot=(Math.floor(Date.now()/1000)+priorGreetings)%variants.length;
-  return variants[slot];
 }
 
 async function sha256(value:string){
