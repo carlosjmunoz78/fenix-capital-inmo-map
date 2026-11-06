@@ -1,9 +1,10 @@
+import {isApprovedJarvisB2LabOrigin} from './jarvis-b2-approved-lab-origins.mjs';
 /**
  * CUT32.1 · mobile-friendly B2 device enrollment page, LAB and Access only.
  * No cookie, identity or secret is embedded in client-side code.
  * Owner tap -> same-origin POST -> verification; B3/Gateway remain OFF.
  */
-const ORIGIN='https://cerebro-jarvis-lab-eu.carlosj-munozcabeza.workers.dev';
+
 const PAGE='/__jarvis/b2-device-setup',SCRIPT='/__jarvis/b2-device-setup.js';
 const AUD=/^[A-Za-z0-9_-]{15,128}$/;
 const EMAIL=/^[^\s@]{1,100}@[^\s@]{1,150}\.[^\s@]{2,24}$/;
@@ -33,7 +34,7 @@ export function createJarvisB2DeviceSetup({enabled=false,environment='LAB',
   if(request.method!=='GET')return error(405,'METHOD_NOT_ALLOWED');
   let url;
   try{url=new URL(request.url)}catch{return error(400,'INVALID_URL')}
-  if(url.origin!==ORIGIN||url.search||url.hash||
+  if(!isApprovedJarvisB2LabOrigin(url.origin)||url.search||url.hash||
     (url.pathname!==PAGE&&url.pathname!==SCRIPT))return error(404,'NOT_FOUND');
   let now;try{now=clock()}catch{return error(503,'CLOCK_UNAVAILABLE')}
   const until=Number(env?.JARVIS_B2_ENROLLMENT_UNTIL_MS);
