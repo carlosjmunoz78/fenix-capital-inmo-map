@@ -15,6 +15,11 @@ El usuario reporta que la App responde «hola guapo» y que JARVIS no mantiene e
 - `tests/jarvis-cut45-gateway-persona-lab.test.mjs`: caso de saludo correcto, continuidad determinista, no suplantación por turnos de usuario, ausencia de saludos informales en source, invariantes de identidad y acción.
 - CI dedicada Node 24, sin secrets ni llamadas al proveedor y sin deploy.
 
+## Verificación adicional del código desplegado y CI
+- Consulta **solo lectura** al Edge Function real `cerebro-console-gateway-v0` en Supabase `cluhljgonannaafpmblx`: la fuente obtenida incluye `closeOwnerGreeting` y el saludo literal «Hola Carlos. ¿Qué tal guapo?». Por tanto, el defecto está **confirmado también en el artefacto desplegado**, no solo en una rama GitHub. No se ha ejecutado ni modificado ese despliegue.
+- CI [run #42291191168](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42291191168): **SUCCESS**, 5 casos de regresión de saludo, rotación, turnos de usuario y seguridad. El runner no utilizó secretos, modelos IA ni desplegó código.
+- Resultado: `LAB_GREEN / DEPLOYED_OLD_UNCHANGED / PROD_NO_GO`.
+
 ## Estado y gobernanza
 **Solo GitHub LAB.** El Gateway REAL desplegado en Supabase no se ha modificado y puede seguir respondiendo como antes. Esta PR NO conecta el modelo DeepSeek y NO completa dictado físico, voz aprobada ni memoria universal. PR #28 (CUT43, entrenamiento de estilo) y PR #29 (CUT44, UI de micrófono) siguen separados; cualquier combinación requiere dependencias/OLD vs NEW y pruebas.
 
