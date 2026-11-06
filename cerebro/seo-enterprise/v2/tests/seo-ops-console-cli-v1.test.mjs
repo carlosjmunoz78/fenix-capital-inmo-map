@@ -26,6 +26,12 @@ test('FACT-001 logical specialist courseware physically generates 32 distinct tr
   assert.equal(p.actual_agent_iam_verified,false);
   assert.equal(p.prod_write,false);
   assert.equal(p.permission_grants.length,0);
+  assert.equal(p.source_policy,'OWNER_ACCEPTED_FROZEN_PROD_2026_11_05_NO_REAUDIT_NO_STAGING');
+  assert.equal(p.live_wordpress_source.refresh_before_decision,false);
+  assert.equal(p.live_wordpress_source.external_requests_authorized,false);
+  assert.ok(p.learning_sources.some(x=>x.endsWith('fenix-prod-wp-url-media-inventory-2026-11-05-v1.json')));
+  assert.ok(p.learning_sources.some(x=>x.includes('live-copy-chunk-')));
+  assert.equal(p.learning_sources.some(x=>x.includes('seo-existing-content-assets-source-registry')),false);
   assert.ok(p.practical_exam.length>30);
   assert.ok(p.required_deliverable.length>25);
   assert.ok(p.evidence_sources.length>0);
