@@ -39,6 +39,16 @@ class TestOfflinePreflight(unittest.TestCase):
   self.assertFalse(result['site_restore_executed'])
   self.assertFalse(result['publish_authorized'])
   self.assertEqual(stat.S_IMODE((self.root/'result'/'preflight.json').stat().st_mode),0o600)
+ def test_reject_tar_gzip_corrupt_crc_even_when_tar_headers_are_valid(self):
+  # GNU tar streaming iteration can stop at the end-of-archive markers and
+  # accept a gzip stream whose CRC trailer is corrupt. This is a physical
+  # integrity rejection test, not a real Hostinger snapshot or restore.
+  p=self.root/'corrupt-crc.tar.gz'
+  tampered=bytearray(self.archive.read_bytes())
+  tampered[-8]^=1
+  p.write_bytes(tampered)
+  with self.assertRaisesRegex(mod.UnsafeBackup,'TAR_INVALID'):
+   self.evaluate(files=p)
  def test_zip_archive_full_crc_read_without_unpacking(self):
   p=self.root/'website.zip'
   with zipfile.ZipFile(p,'w') as z:
