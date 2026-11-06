@@ -24,6 +24,6 @@ jobs:
         with:
           node-version: '22'
       - name: Run offline-only security tests (NO DeepSeek API)
-        run: node --test zeus/jarvis/training/deepseek-weekend-runner.test.mjs
+        run: node --test zeus/jarvis/training/*.test.mjs
       - name: Dry run with zero API requests
         run: node zeus/jarvis/training/deepseek-weekend-runner.mjs --dry-run
