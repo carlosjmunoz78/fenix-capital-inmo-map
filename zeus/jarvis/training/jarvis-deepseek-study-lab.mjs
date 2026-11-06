@@ -110,7 +110,7 @@ export async function executeStudy({env=process.env,fetchImpl=globalThis.fetch,n
    completed_scenarios:rows.length,max_cases:maxCases,max_calls:maxCalls,
    status:'PARTIAL_NOT_APPROVED',provider_billing_reconciled:false,
    prod_authorized:false,auto_promote:false,rows};
-  writeFileSync(path+'.pending',JSON.stringify(partial,null,2)+'\\n',{mode:0o600});
+  writeFileSync(path+'.pending',JSON.stringify(partial,null,2)+'\n',{mode:0o600});
   renameSync(path+'.pending',path);
  };
  persistPartial();
