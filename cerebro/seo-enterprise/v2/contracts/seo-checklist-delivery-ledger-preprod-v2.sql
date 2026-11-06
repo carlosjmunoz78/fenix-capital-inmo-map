@@ -25,5 +25,6 @@ create table if not exists public.cerebro_seo_checklist_delivery_v2 (
 );
 alter table public.cerebro_seo_checklist_delivery_v2 enable row level security;
 revoke all on public.cerebro_seo_checklist_delivery_v2 from PUBLIC,anon,authenticated;
+revoke all on public.cerebro_seo_checklist_delivery_v2 from service_role;
 grant select,insert,update on public.cerebro_seo_checklist_delivery_v2 to service_role;
 -- No anon/auth policies by design. No DELETE for service_role.
