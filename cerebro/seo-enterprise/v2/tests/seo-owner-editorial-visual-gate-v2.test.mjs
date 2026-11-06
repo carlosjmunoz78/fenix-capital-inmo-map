@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder,preflightReturnedSeoMediaAsset} from '../runtime/seo-owner-editorial-visual-gate-v2.mjs';
+import {auditOwnerEditorialCopy,auditSeoFaqContract,buildSeoProducerImageOrder,validateSeoProducerOrder,preflightReturnedSeoMediaAsset} from '../runtime/seo-owner-editorial-visual-gate-v2.mjs';
 const root='cerebro/seo-enterprise/v2/';
-const registry=JSON.parse(fs.readFileSync(root+'registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json','utf8'));
+const registry=JSON.parse(fs.readFileSync(root+'registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json','utf8'));
 const active=registry.new_drafts;
 const old=[
- fs.readFileSync(root+'drafts/2026-11-06-b2c-comparar-pisos-cordoba.draft.html','utf8'),
- fs.readFileSync(root+'drafts/2026-11-06-b2b-derivacion-comprador-cordoba.draft.html','utf8')];
+ fs.readFileSync(root+'drafts/2026-11-06-b2c-comparar-pisos-cordoba-v2.draft.html','utf8'),
+ fs.readFileSync(root+'drafts/2026-11-06-b2b-derivacion-comprador-cordoba-v2.draft.html','utf8')];
 test('new B2C and B2B owner copy QA obeys no colon, no numbered H2, no banned phrases',()=>{
  assert.equal(active.length,2);
  for(const item of active){
@@ -16,8 +16,10 @@ test('new B2C and B2B owner copy QA obeys no colon, no numbered H2, no banned ph
   assert.equal(result.deterministic_style_precheck_passed,true,JSON.stringify(result.issues));
   assert.equal(result.issues.length,0);
   assert.ok(result.h1[0].length<=65);
-  assert.equal(result.h2.length,5);
-  assert.ok(result.word_count>=240&&result.word_count<=650);
+  assert.equal(result.h2.length,6);
+  assert.equal(result.faq_count,6);
+  assert.equal(result.faq_required,6);
+  assert.ok(result.word_count>=240&&result.word_count<=710);
   assert.equal(result.copy_is_human_certified,false);
   assert.equal(result.ai_origin_detection_not_performed,true);
  }
@@ -26,7 +28,7 @@ test('old drafts are correctly rejected and preserved as history',()=>{
  for(let i=0;i<2;i++){
   const bad=auditOwnerEditorialCopy({html:old[i],persona:active[i].persona});
   assert.equal(bad.deterministic_style_precheck_passed,false);
-  assert.ok(bad.issues.includes('NUMBERED_H2'));
+  assert.ok(bad.issues.includes('FAQ_MINIMUM_NOT_REACHED'));
  }
  assert.equal(registry.old_reviews_superseded,true);
  assert.equal(registry.old_github_html_preserved,true);
@@ -96,4 +98,41 @@ test('returned original photo must be unique against full existing inventory, wi
  assert.equal(ok.image_ready_for_publish,false);
  assert.equal(ok.independent_no_text_visual_qa_verified,false);
  assert.equal(ok.visual_qa_and_composition_review_required,true);
+});
+
+test('six real buyer FAQ are mandatory in articles and five fail the owner gate',()=>{
+ for(const item of active){
+  const html=fs.readFileSync(item.draft_path,'utf8');
+  const complete=auditSeoFaqContract({html,content_type:'ARTICLE'});
+  assert.equal(complete.passed,true,JSON.stringify(complete.issues));
+  assert.equal(complete.minimum,6);
+  assert.equal(complete.count,6);
+  const missingOne=html.replace(/<div class="faq-item"><h3>[\s\S]*?<\/h3><p>[\s\S]*?<\/p><\/div>/,'');
+  const failed=auditSeoFaqContract({html:missingOne,content_type:'ARTICLE'});
+  assert.equal(failed.passed,false);
+  assert.ok(failed.issues.includes('MINIMUM_NOT_REACHED'));
+  assert.equal(auditOwnerEditorialCopy({html:missingOne,persona:item.persona}).deterministic_style_precheck_passed,false);
+ }
+});
+test('landings require at least eight unique helpful FAQ, seven fail',()=>{
+ const item=active[0],html=fs.readFileSync(item.draft_path,'utf8');
+ const extraA='<div class="faq-item"><h3>¿Puedo comparar pisos en barrios diferentes?</h3><p>Sí, siempre que tengas en cuenta los trayectos habituales, los servicios cercanos y cómo encaja cada zona con tu rutina.</p></div>';
+ const extraB='<div class="faq-item"><h3>¿Qué hago si uno de los pisos necesita reformas?</h3><p>Calcula el presupuesto de obras con profesionales y añade los imprevistos antes de comparar el coste real con el de la otra vivienda.</p></div>';
+ const seven=html.replace('</section>',extraA+'</section>');
+ const eight=html.replace('</section>',extraA+extraB+'</section>');
+ const rejected=auditSeoFaqContract({html:seven,content_type:'LANDING'});
+ const passed=auditSeoFaqContract({html:eight,content_type:'LANDING'});
+ assert.equal(rejected.count,7);assert.equal(rejected.minimum,8);assert.equal(rejected.passed,false);
+ assert.equal(passed.count,8);assert.equal(passed.minimum,8);
+ assert.equal(passed.passed,true,JSON.stringify(passed.issues));
+ assert.throws(()=>auditSeoFaqContract({html:eight,content_type:'UNKNOWN'}));
+});
+test('duplicate FAQ questions are rejected even when count is sufficient',()=>{
+ const item=active[0],html=fs.readFileSync(item.draft_path,'utf8');
+ const questions=[...html.matchAll(/<h3>([^<]+)<\/h3>/g)].map(x=>x[1]);
+ assert.equal(questions.length,6);
+ const duplicate=html.replace(questions[5],questions[0]);
+ const res=auditSeoFaqContract({html:duplicate,content_type:'ARTICLE'});
+ assert.equal(res.passed,false);
+ assert.ok(res.issues.includes('DUPLICATE_QUESTION'));
 });
