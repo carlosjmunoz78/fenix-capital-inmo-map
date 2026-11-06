@@ -57,7 +57,15 @@ export function makeSeoV42({root=process.cwd()}={}){
   const depth=auditSeoContentDepth({html:next,persona:x.persona,content_type:'ARTICLE'});
   const issues=[...voice.issues.map(y=>'VOICE_'+y),
    ...style.issues.map(y=>'STYLE_'+y),...depth.issues.map(y=>'DEPTH_'+y)];
-  if(issues.length)no('TECHNICAL_QA_FAILED_'+type+'_'+issues.join('_'));
+  // Preserve the exact historical V4.2 bytes, but never re-certify an archived
+  // candidate against a newer QA rubric. Only these two newly discovered
+  // B2B risks are permitted as a historical hold, not as a successful review.
+  const historicalHold=[
+   'VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE',
+   'VOICE_UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'
+  ];
+  if(issues.length&&(type!=='agencies'||issues.some(y=>!historicalHold.includes(y))))
+   no('UNEXPECTED_TECHNICAL_QA_FAILED_'+type+'_'+issues.join('_'));
   if(depth.total_visible_words<1000||depth.main_content_words_excluding_faq<750||
    depth.faq_count!==6)no('DEPTH_FAQ');
   const digest=sha(next);
@@ -69,7 +77,7 @@ export function makeSeoV42({root=process.cwd()}={}){
    source_kind:'HISTORICAL_GEMINI_FREE_WITH_SOURCE_GUIDED_DETERMINISTIC_EDITS',
    source_filename:x.filename,output_filename:x.filename.replace('v4-1','v4-2'),
    word_count:depth.total_visible_words,main_words_excluding_faq:depth.main_content_words_excluding_faq,
-   faq_count:depth.faq_count,technical_precheck_pass:true,technical_issues:issues,
+   faq_count:depth.faq_count,technical_precheck_pass:issues.length===0,technical_issues:issues,
    legal_content_human_verified:false,
    professional_ymyl_qa_verified:false,independent_seo_review_verified:false,
    image_original_generated:false,wordpress_writes:0,
