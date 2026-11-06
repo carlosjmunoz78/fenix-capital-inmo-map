@@ -86,6 +86,8 @@ export function inspectHistoricalSeoCircuit({root=process.cwd()}={}){
    circuit_state:'REQUIRE_NEW_V4_WITH_RESEARCH_AND_NEW_SHA',
    producer_brief_status:'PREPARED_NOT_DISPATCHED',
    image_order:handoff.image_order,wordpress_draft_plan:handoff.wordpress_plan,
+   image_only_photo_adapter_bound:false,
+   graphic_renderer_with_text_overlay_not_authorized_for_photos:true,
    wordpress_dry_run_invoked:false,
    stages:[
     {id:'SOURCE',state:'GIT_BLOB_VERIFIED'},
@@ -135,6 +137,8 @@ export function inspectCandidateSeoHandoff({
   content_sha256:d32.source_sha256||null,
   d32,depth_passed:d32.depth_precheck_passed===true,
   image_order:handoff?.image_order||null,
+  image_only_photo_adapter_bound:false,
+  graphic_renderer_with_text_overlay_not_authorized_for_photos:true,
   wordpress_dry_run_plan:handoff?.wordpress_plan||null,
   media_preflight_hash_only:media,
   next_action:passed?'REGISTER_V4_AND_PERFORM_INDEPENDENT_QA_MEDIA_AND_BACKUP':
