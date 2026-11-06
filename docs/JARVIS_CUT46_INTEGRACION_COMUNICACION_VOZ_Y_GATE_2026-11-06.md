@@ -48,4 +48,5 @@ En el archivo del Gateway `index.ts`, se compararon de forma no destructiva las 
 ## Evidencia y estados
 - CI inicial unificada: [42292665996](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42292665996) **SUCCESS**: 41 pruebas Node + 22 Playwright.
 - Tras agregar prueba propietaria, [42293248438](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42293248438): **47 Node PASS, 21/22 Playwright PASS**, detectó ventana de carrera de evento en una prueba, se corrigió con reconciliación al montaje.
-- **Estado actual:** LAB técnico; la repetición tras corrección debe verificarse. APP REAL NO MODIFICADA. PROD NO-GO.
+- CI final de código [42293538273](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42293538273): **SUCCESS** con 48/48 Node y 22/22 Playwright desktop+móvil, tras reconciliar estado de conexión al montaje. JWT propietario de Actions `EXPIRED_OR_NEAR_EXPIRY`; la prueba de Gateway real se omite correctamente.
+- **Estado final:** LAB GREEN / PROD NO-GO; integración unificada comprobada en CI, no certificada físicamente ni desplegada. APP REAL NO MODIFICADA.
