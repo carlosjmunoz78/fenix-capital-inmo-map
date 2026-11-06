@@ -5,7 +5,7 @@
  * The provider balance baseline is an account-wide conservative veto, NOT
  * a provider-side EUR50 cap or durable/atomic ledger.
  */
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,renameSync} from 'node:fs';
 import {dirname,join,resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {DeepSeekProviderV0} from '../../../cerebro/runtime/deepseek-provider-v0.mjs';
@@ -98,6 +98,22 @@ export async function executeStudy({env=process.env,fetchImpl=globalThis.fetch,n
  const provider=new DeepSeekProviderV0({apiKey:env.DEEPSEEK_API_KEY,fetchImpl:studyFetch});
  let actualUSD=0,reservedUSD=0,calls=0;
  const rows=[];
+ const persistPartial=()=>{
+  if(!env.JARVIS_LAB_STUDY_OUTPUT_DIR)return;
+  const dir=resolve(env.JARVIS_LAB_STUDY_OUTPUT_DIR);
+  mkdirSync(dir,{recursive:true,mode:0o700});
+  const path=join(dir,'partial-study-'+env.GITHUB_RUN_ID+'.json');
+  const partial={schema:'jarvis.deepseek.study.partial.v1',environment:'LAB',
+   company_id:'fenix',engine_id:'JARVIS',model,
+   calls,usd_peak_estimate:+actualUSD.toFixed(9),
+   usd_pre_call_reserved:+reservedUSD.toFixed(9),
+   completed_scenarios:rows.length,max_cases:maxCases,max_calls:maxCalls,
+   status:'PARTIAL_NOT_APPROVED',provider_billing_reconciled:false,
+   prod_authorized:false,auto_promote:false,rows};
+  writeFileSync(path+'.pending',JSON.stringify(partial,null,2)+'\\n',{mode:0o600});
+  renameSync(path+'.pending',path);
+ };
+ persistPartial();
  for(const scenario of cases){
   let candidate={invalid_json:true}, critique={invalid_json:true};
   for(let pass=0;pass<2;pass++){
@@ -113,17 +129,20 @@ export async function executeStudy({env=process.env,fetchImpl=globalThis.fetch,n
    await balance(fetchImpl,env.DEEPSEEK_API_KEY,Math.max(projected,0.01));
    // Reserve pessimistic request cost before any paid call; no retries.
    reservedUSD+=projected;
+   persistPartial();
    const response=await provider.respond({model,input:message,instructions:instr,
     maxOutputTokens},{requestId:'jarvis-study-'+env.GITHUB_RUN_ID+'-'+scenario.id+'-'+pass,
     signal:AbortSignal.timeout(90000)});
    calls++;
    const used=estimateActualCost(response.usage);
    actualUSD+=used;
+   persistPartial();
    if(actualUSD>maxRunUSD)throw Error('ACTUAL_SPEND_EXCEEDED_LIMIT');
    const result=parseModelJSON(response.output_text);
    if(isCritic)critique=result;else candidate=result;
   }
   rows.push(summarizeStudyRow(scenario,candidate,critique));
+  persistPartial();
  }
  const report={schema:'jarvis.deepseek.study.v1',company_id:'fenix',engine_id:'JARVIS',
   environment:'LAB',version:now,mode:'ONE_SHOT_MANUAL',
