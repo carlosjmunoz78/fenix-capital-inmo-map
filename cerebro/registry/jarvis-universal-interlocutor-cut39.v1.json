@@ -53,8 +53,8 @@
     {
       "source_id": "CONVERSATION_MEMORY",
       "path": "supabase/functions/cerebro-console-gateway-v0/index.ts",
-      "state": "EXISTING_OWNER_RPC_CODE_RUNTIME_NOT_YET_PHYSICALLY_VERIFIED",
-      "retrieval": "SERVER_AUTHORIZED_MEMORY_V2"
+      "state": "DEPLOYED_GATEWAY_V33_AND_MEMORY_RPCS_PRESENT_BUT_OWNER_E2E_NOT_TESTED",
+      "retrieval": "AUTHENTICATED_OWNER_GATEWAY_MEMORY_SEARCH_RPC"
     },
     {
       "source_id": "OWNER_DOCUMENT_HISTORY",
@@ -118,5 +118,62 @@
   "cost": {
     "additional_subscription_eur": 0,
     "provider_training_budget_separate": true
+  },
+  "live_readonly_audit_2026_11_06": {
+    "audit_mode": "CONNECTOR_READ_ONLY_NO_OWNER_JWT",
+    "supabase_project_ref": "cluhljgonannaafpmblx",
+    "gateway": {
+      "slug": "cerebro-console-gateway-v0",
+      "deployment_status": "ACTIVE",
+      "version": 33,
+      "verify_jwt_platform_flag": false,
+      "handler_code_user_auth": "WITH_SUPABASE_AUTH_USER",
+      "handler_code_owner_check": "AUTHORIZED_OWNER",
+      "successful_owner_e2e": false,
+      "last_reported_deployed_date": "2026-10-02",
+      "note": "platform verify_jwt=false does not imply public access, server has user auth + owner check; negative and positive live HTTP tests still required"
+    },
+    "memory_rpcs_present": [
+      "fenix_prod_cerebro_memory_forget_server",
+      "fenix_prod_cerebro_memory_observe_server",
+      "fenix_prod_cerebro_memory_observe_v2_server",
+      "fenix_prod_cerebro_memory_search_server",
+      "fenix_prod_cerebro_memory_supersede_server"
+    ],
+    "query_routes": {
+      "memory_search": "CODE_PATH_EXISTS_SERVER_RPC_NO_OWNER_E2E",
+      "notions": "DEPLOYED_KNOWLEDGE_TS_SEARCHES_CANONICAL_NOTION_PAGES_TOKEN_AVAILABILITY_UNVERIFIED",
+      "operational_data": "SOURCE_FUNCTIONS_EXIST_E2E_AUTH_UNKNOWN"
+    },
+    "notion_pages_discovered_metadata_only": [
+      {
+        "page_id": "3be81b1a-756d-81da-ad05-d6ab37855c2f",
+        "topic": "CEREBRO base estratégica"
+      },
+      {
+        "page_id": "3be81b1a-756d-81b6-a75f-cb6bbe842766",
+        "topic": "Motor financiero Belén"
+      },
+      {
+        "page_id": "3ba81b1a-756d-8118-8a48-eebf163b9f1c",
+        "topic": "Centro de decisión CEREBRO"
+      },
+      {
+        "page_id": "3eb81b1a-756d-8153-a1ef-f4c13e75519c",
+        "topic": "Owner Decision by Exception"
+      },
+      {
+        "page_id": "55e81b1a-756d-8303-8626-016963610cb6",
+        "topic": "JARVIS Fénix Capital"
+      },
+      {
+        "page_id": "43715ab6-031b-4f2b-b31a-883b6d081b82",
+        "topic": "Fénix Capital FAQ"
+      }
+    ],
+    "scope_warning": "Discovery of page metadata is not verified ingestion, currentness, retrieval, or full ChatGPT/CRM history.",
+    "independent_execution_authority": false,
+    "writes_performed": false,
+    "cost_additional_eur": 0
   }
 }
