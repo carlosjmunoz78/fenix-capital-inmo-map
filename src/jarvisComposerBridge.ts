@@ -12,3 +12,14 @@ export function sendJarvisComposerMessage(message:string):boolean{
  window.dispatchEvent(new CustomEvent<JarvisComposerSendDetail>(JARVIS_COMPOSER_SEND_EVENT,{detail}));
  return detail.accepted;
 }
+
+export const JARVIS_COMPOSER_PRIME_EVENT='fenix:jarvis-composer-prime';
+export type JarvisComposerPrimeDetail={message:string;accepted:boolean};
+export function primeJarvisComposerMessage(message:string):boolean{
+ if(typeof window==='undefined'||typeof CustomEvent==='undefined')return false;
+ const clean=message.trim();
+ if(!clean||clean.length>4000)return false;
+ const detail:JarvisComposerPrimeDetail={message:clean,accepted:false};
+ window.dispatchEvent(new CustomEvent<JarvisComposerPrimeDetail>(JARVIS_COMPOSER_PRIME_EVENT,{detail}));
+ return detail.accepted;
+}
