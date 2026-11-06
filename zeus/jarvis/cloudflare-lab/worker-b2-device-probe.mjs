@@ -8,8 +8,10 @@ import {createJarvisAccessOwnerCanary} from '../core/jarvis-access-owner-canary.
 import {createJarvisB2DeviceSessionGate} from '../core/jarvis-b2-device-session-gate.mjs';
 import {createJarvisD1SessionStore} from '../core/jarvis-d1-session-store.mjs';
 import {createJarvisB2DeviceEnrollment} from '../core/jarvis-b2-device-enrollment.mjs';
+import {createJarvisB2DeviceSetup} from '../core/jarvis-b2-device-setup.mjs';
 
 const canary=createJarvisAccessOwnerCanary({environment:'LAB',enabled:true});
+const deviceSetup=createJarvisB2DeviceSetup({environment:'LAB',enabled:true});
 const headers={'content-type':'application/json; charset=utf-8',
  'cache-control':'no-store','x-content-type-options':'nosniff',
  'x-frame-options':'DENY','referrer-policy':'no-referrer'};
@@ -20,6 +22,9 @@ export default {async fetch(request,env,ctx){
  if(!(request instanceof Request))return respond(400,'REQUEST_INVALID');
  let url;
  try{url=new URL(request.url)}catch{return respond(400,'REQUEST_INVALID')}
+ if(url.pathname==='/__jarvis/b2-device-setup'||
+    url.pathname==='/__jarvis/b2-device-setup.js')
+  return deviceSetup.fetch(request,env,ctx);
  if(url.pathname==='/__jarvis/b2-device-enroll'){
   if(env?.JARVIS_ENVIRONMENT!=='LAB'||
      env?.JARVIS_B2_ENROLLMENT_ENABLED!=='true'||
