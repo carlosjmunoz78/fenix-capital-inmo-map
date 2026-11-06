@@ -9,6 +9,7 @@ import {tmpdir} from 'node:os';
 import {openLifetimeBudget,reserveLifetimeBudget,closeLifetimeBudget,JARVIS_DEEPSEEK_BUDGET} from './deepseek-lifetime-budget.mjs';
 
 import {balanceAvailable,evaluate,reservedUSD} from './deepseek-weekend-runner.mjs';
+import {assessJarvisDialogue} from './jarvis-dialogue-quality-lab.mjs';
 
 const dir=dirname(fileURLToPath(import.meta.url));
 test('synthetic curriculum has 24 distinct LAB cases, no identifiers',()=>{
@@ -48,7 +49,7 @@ test('API balance must be verified, no empty account allowed',()=>{
  assert.equal(balanceAvailable({is_available:true,balance_infos:[]}),false);
 });
 test('even passing proposals NEVER auto-promote to CEREBRO knowledge',()=>{
- const result=evaluate({diagnostico:'lab',acciones:['test'],riesgos:['costo'],verificaciones:['source'],human_required:false},
+ const result=evaluate({respuesta:'Voy a revisar el estado LAB y no tocaré producción.',intencion:'verificar',diagnostico:'lab',acciones:['test'],riesgos:['costo'],verificaciones:['source'],human_required:false},
   {apto_para_revision:true,objeciones:[],motivo:'synthetic'});
  assert.equal(result.candidate_ok,true);
  assert.equal(result.critic_ok,true);
@@ -85,4 +86,22 @@ test('owner cap EUR50 and USD40 cumulative across offline sessions',()=>{
   assert.equal(reserveLifetimeBudget(guard,4),40);
   closeLifetimeBudget(guard);
  }finally{rmSync(dir,{recursive:true,force:true})}
+});
+
+test('conversation LAB quality checks real replies and does not promote',()=>{
+ const c={respuesta:'Entiendo. Revisaré la conexión sin tocar producción.',intencion:'verificar estado',verificaciones:['estado'],human_required:false};
+ const quality=assessJarvisDialogue({candidate:c,critique:{apto_para_revision:true,puntuacion:82},scenario:{id:'ES-13'}});
+ assert.equal(quality.reply_valid,true);
+ assert.equal(quality.intent_present,true);
+ assert.equal(quality.critic_reported_score_unverified,82);
+ assert.equal(quality.verified_improvement,false);
+ assert.equal(quality.knowledge_promoted,false);
+ assert.equal(quality.status,'CANDIDATE_ONLY');
+});
+test('empty answers, unsupported claims and critic rejection are flagged',()=>{
+ const invalid=assessJarvisDialogue({candidate:{respuesta:'',intencion:''},critique:{apto_para_revision:false},scenario:{id:'ES-18'}});
+ assert.ok(invalid.issues.includes('EMPTY_REPLY'));
+ assert.ok(invalid.issues.includes('CRITIC_REJECTED'));
+ const unsupported=assessJarvisDialogue({candidate:{respuesta:'Ya lo he desplegado en producción',intencion:'informar',verificaciones:[],human_required:false}});
+ assert.ok(unsupported.issues.includes('UNVERIFIED_EXECUTION_CLAIM'));
 });
