@@ -7,6 +7,8 @@ import CerebroOperativeConsole from './CerebroOperativeConsole';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
+import JarvisOmniDock from './JarvisOmniDock';
+import {setJarvisActiveInterface} from './jarvisOmniSession';
 import JarvisVisibleLanguageGuard from './JarvisVisibleLanguageGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
@@ -42,6 +44,7 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath)return;const ensure=()=>{if(document.documentElement.dataset.cerebroConsole!=='1')document.documentElement.dataset.cerebroConsole='1'};ensure();const observer=new MutationObserver(ensure);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-cerebro-console']});return()=>{observer.disconnect();delete document.documentElement.dataset.cerebroConsole}},[isCerebroPath]);
  useEffect(()=>{if(!isCerebroPath){setOwnerAccess('checking');return}let cancelled=false;const check=async()=>{const{data:{session}}=await supabase.auth.getSession();if(cancelled)return;if(!session){setOwnerAccess('checking');return}const{status,data}=await fetchAppApi<SessionContext>('/session/context');if(cancelled)return;setOwnerAccess(status===200&&data?.actor_code==='CARLOS-ADMIN'?'allowed':'denied')};void check();const{data:{subscription}}=supabase.auth.onAuthStateChange(()=>{void check()});return()=>{cancelled=true;subscription.unsubscribe()}},[isCerebroPath]);
  useEffect(()=>{if(!isCerebroPath)return;try{window.sessionStorage.setItem(VIEW_STORAGE_KEY,view)}catch{/* optional */}},[isCerebroPath,view]);
+ useEffect(()=>{if(isCerebroPath&&view!=='V0')setJarvisActiveInterface(view)},[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
  if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
@@ -53,10 +56,11 @@ export default function CerebroConsoleHost(){
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
-   {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
+   <div className="cerebro-work-mount cerebro-host-v0 jarvis-core-mounted" hidden={primaryView!=='JARVIS'}><CerebroJarvisWorkConsole surface="JARVIS"/></div>
    {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
+  {primaryView!=='JARVIS'?<JarvisOmniDock onOpenJarvis={()=>changeView('JARVIS')}/>:null}
  </div>;
 }
