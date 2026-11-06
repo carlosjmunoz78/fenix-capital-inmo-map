@@ -99,3 +99,18 @@ No se han ejecutado mutaciones a web, App, CRM, Supabase, GSC ni PROD durante es
 - Registry de capacidades y rollback: `cerebro/seo-enterprise/v2/registry/seo-creative-and-funnel-extension-v1.registry.json`; evidencia ampliada: `cerebro/seo-enterprise/v2/evidence/SEO_PREMIUM_IMAGE_AND_FUNNEL_GATES_2026-11-06.md`. Comparación OLD vs NEW documentada y OLD preservado.
 - `PR #22` sigue DRAFT sin merge. No hay modificaciones en App/CRM, WordPress publicado, funciones/migraciones Supabase, cron productivo, ni nuevas suscripciones.
 - **Siguiente trabajo**: QA visual independiente del PNG V2 y gate editorial; completar adaptador de entrega del checklist vía Brevo reutilizando el servicio existente, con opt-in marketing separado y destinatario de prueba seguro en PREPROD, trazabilidad e idempotencia, tribunal y rollback. No publicar ni habilitar cron recurrente hasta obtener prueba E2E.
+
+## SEO-001 · 2026-11-06 · Checklist Córdoba: envío transaccional con Brevo (PREPROD)
+
+**Estado NUEVO:** `CODE_AND_OFFLINE_MIME_PASS / BREVO_LIVE_DELIVERY_NOT_EXECUTED`.
+
+- PDF original de conversación `FENIX_CHECKLIST_VISITA_PISO_CORDOBA_BORRADOR_V1.pdf` **preservado**: 99.419 bytes, 2 páginas A4, 33 campos rellenables, SHA256 `59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6`. No reenviar un PDF con contenido modificado sin versionar y comprobar la nueva huella.
+- Existe en **Supabase PREPROD** (`hnqlnvakzaywtafeiybt`) el bucket privado `seo-preprod-assets`; comprobación SQL `storage.objects`: todavía no existe objeto con `checklist`, `visita` o `52656`. No se han subido bytes ni creado enlaces públicos.
+- Adaptador **nuevo aditivo** `cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs`: prepara PDF adjunto en correo transaccional Brevo (sin lista de marketing), valida SHA, firma y tamaño, requiere evento de origen desde servidor y consentimientos separados, destinatario de prueba allowlisted e interfaz de ledger duradero para impedir duplicados. **No desplegado**, con `DRY_RUN` predeterminado y sin tocar el pipeline de alertas internas.
+- CI [#42173071584](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42173071584) **SUCCESS**, 6/6 tests. Se corrigió un error de parámetros del validador sin reducir pruebas; pruebas previas arquitectónicas, embudos y compositor independientes se preservaron en verde.
+- Se ensambló `.eml` de prueba local con PDF **verdadero** adjunto, se releyó y cotejó SHA contra origen, destinatario ficticio `test-checklist@example.invalid`. Evidencia local: `/mnt/data/seo001_delivery_evidence/SEO001_CHECKLIST_PREPROD_CORREO_DE_PRUEBA_NO_ENVIADO.eml` y `SEO001_DELIVERY_MIME_QA.json`. Ningún correo salió a la red; pruebas GitHub usan fixture sintético para composición.
+- Brevo existente `fenix-web-lead-alert-worker` sigue destinado a avisos **internos** y no se ha modificado. No hay evidencia de lista comercial dual ni delivery E2E verificado.
+- Más detalles/gates: `cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md`.
+- **Bloqueos concretos reales**, no repetir auditorías: PDF sigue en borrador editorial; subida privada PREPROD pendiente; origen del evento y `ledger` duradero sin conectar; API key PREPROD y correo de prueba seguro no verificados; primer envío Brevo aceptado `201/messageId` e inbox no probado; embudo WP 52656 en `draft` y newsletter separados sin E2E.
+- **No habilitar envío real ni publicación** hasta verificar asset, receptor de pruebas, permisos, idempotencia duradera y QA. `App/CRM/WordPress/Supabase PROD` no modificados. `PR #22` continúa DRAFT y el rollback es no fusionar.
+
