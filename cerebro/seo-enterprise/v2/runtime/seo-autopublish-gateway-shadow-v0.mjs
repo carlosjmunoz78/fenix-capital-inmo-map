@@ -17,7 +17,7 @@ const HUMAN=new Set(['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE',
 const POLICY=JSON.parse(fs.readFileSync(new URL('../seo-prod-draft-autopublish-policy-v0.json',import.meta.url),'utf8'));
 const hash=v=>createHash('sha256').update(JSON.stringify(v)).digest('hex');
 function block(reason,code){
- if(!HUM.has(reason))throw Error('SEO_SHADOW_INVALID_EXCEPTION');
+ if(!HUMAN.has(reason))throw Error('SEO_SHADOW_INVALID_EXCEPTION');
  return {status:'HUMAN_REQUIRED',reason,code,executed:false,
   wordpress_writes:0,production_publish_authorized:false,
   simulated_only:true,additional_cost_eur:0};
