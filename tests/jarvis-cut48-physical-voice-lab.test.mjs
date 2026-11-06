@@ -57,3 +57,18 @@ test('CUT48 device checks do not cancel unrelated ANA or JARVIS audio while idle
  const occurrences=s.split('window.speechSynthesis.cancel()').length-1;
  assert.equal(occurrences,1,'All global cancellations must be guarded by utterance ownership');
 });
+
+test('CUT48 omnichannel and inline dictation halt on hide, voice switch, send and teardown',()=>{
+ const dock=read('src/JarvisOmniDock.tsx');
+ const portal=read('src/JarvisOperativaComposerPortal.tsx');
+ assert.match(dock,/if\(!open\|\|state\.voiceActive\|\|state\.sending\)cancelDictation\(\)/);
+ assert.match(dock,/recognition\.onresult=null/);
+ assert.match(dock,/if\(mic\.current!==recognition\)return/);
+ assert.match(dock,/recognition\.abort\(\)/);
+ assert.doesNotMatch(dock,/mic\.current\.stop\(\)/);
+ assert.match(portal,/if\(snapshot\.voiceActive\|\|snapshot\.sending\|\|!target\)abortPortalDictation\(\)/);
+ assert.match(portal,/recognition\.onresult=null/);
+ assert.match(portal,/if\(dictationRef\.current!==recognition\)return/);
+ assert.match(portal,/recognition\.abort\(\)/);
+ assert.doesNotMatch(portal,/dictationRef\.current\.stop\(\)/);
+});
