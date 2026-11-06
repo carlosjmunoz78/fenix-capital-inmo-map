@@ -83,6 +83,13 @@ jobs:
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0003_jarvis_d1_b3_readonly_audit_lab.sql
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0004_jarvis_d1_gateway_denial_audit_lab.sql
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0005_jarvis_d1_daily_denial_quota_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0006_jarvis_d1_b2_device_enrollment_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_b2_device_enrollment_audit_v0(owner_id,session_hmac,event_code,environment,issued_at_ms,expires_at_ms) VALUES ('synthetic-owner',lower(hex(zeroblob(32))),'ENROLLED','LAB',1793900000000,1893456000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT32_ENROLLMENT_AUDIT_PRESENT' AS result FROM jarvis_lab_b2_device_enrollment_audit_v0 WHERE owner_id='synthetic-owner';" | tee /tmp/jarvis-cut32-audit.txt
+          grep -q 'CUT32_ENROLLMENT_AUDIT_PRESENT' /tmp/jarvis-cut32-audit.txt
+          if $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="DELETE FROM jarvis_lab_b2_device_enrollment_audit_v0;" >/dev/null 2>&1; then
+            echo 'CUT32 failed: device enrollment audit allowed DELETE' >&2; exit 1
+          fi
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
@@ -120,6 +127,9 @@ jobs:
           grep -q 'CUT25_DENIAL_RESTORED' /tmp/jarvis-cut25-restored.txt
           $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT26_QUOTA_RESTORED' AS result FROM jarvis_lab_denial_quota_v0 WHERE usage_day='2026-11-06' AND consumed=2;" | tee /tmp/jarvis-cut26-restored.txt
           grep -q 'CUT26_QUOTA_RESTORED' /tmp/jarvis-cut26-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT32_ENROLLMENT_RESTORED' AS result FROM jarvis_lab_b2_device_enrollment_audit_v0 WHERE owner_id='synthetic-owner';" | tee /tmp/jarvis-cut32-restored.txt
+          grep -q 'CUT32_ENROLLMENT_RESTORED' /tmp/jarvis-cut32-restored.txt
+          echo 'CUT32 immutable device enrollment audit and independent LOCAL restore: PASS'
           echo 'CUT26 strict daily D1 quota, overlimit denial and independent local restore: PASS'
           echo 'CUT25 Wrangler local minimal security audit immutable and independently restored: PASS'
           echo 'CUT24 Wrangler D1 local B3 audit immutable and independently restored: PASS'
