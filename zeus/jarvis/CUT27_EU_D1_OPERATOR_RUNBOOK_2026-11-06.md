@@ -46,3 +46,15 @@ La alternativa para una sesión cloud con capacidad de ejecución es configurar 
 - Cloudflare D1 List API: https://developers.cloudflare.com/api/resources/d1/subresources/database/methods/list/
 - Cloudflare D1 location/jurisdiction: https://developers.cloudflare.com/d1/configuration/data-location/
 - GitHub PR #25: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/25
+
+
+## CUT27.1 · Revisión del contrato Cloudflare API y endurecimiento del readback (06-11-2026)
+La API oficial de listado D1 permite buscar por \`name\`, pero sus objetos de respuesta tienen nombre, jurisdicción, UUID, fecha y versión; **el modo de replicación puede no figurar**. Por tanto, el listado verifica únicamente nombre/UUID/jurisdicción y debe ir seguido de **GET-by-UUID** sobre la misma cuenta. Solo ese detalle puede certificar \`read_replication.mode === 'disabled'\`. No dar acceso real si la respuesta es incompleta, contradictoria, automática o no verificable.
+
+El POST oficial acepta \`name\`, \`jurisdiction:'eu'\` y \`read_replication:{mode:'disabled'}\` (sin añadir rutas públicas). No reintentar un POST con respuesta ambigua; volver a inventariar sin mutaciones y escalar si no se puede reconciliar.
+
+**HECHO en PR DRAFT:** corregido el verificador de CUT27 para separar el control de identidad del listado del control de replicación en GET detallado, pruebas negativas de replicación ausente/automática y pruebas positivas de listado con campos mínimos. **No se ha ejecutado API Cloudflare remota**.
+
+**Fuentes oficiales:** https://developers.cloudflare.com/api/resources/d1/subresources/database/methods/list/ y https://developers.cloudflare.com/api/resources/d1/subresources/database/methods/create/
+
+**Próximo bloqueo no modificado:** la D1 EU sigue sin existir; falta capacidad real de escritura en Cloudflare (Work con navegador controlable, o token temporal limitado almacenado en un vault seguro). No solicitar ni pegar secretos en el chat. Mantener PROD NO-GO.
