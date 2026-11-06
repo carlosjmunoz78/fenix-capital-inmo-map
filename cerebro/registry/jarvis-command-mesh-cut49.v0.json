@@ -1,0 +1,75 @@
+{
+  "schema": "cerebro.jarvis.command-mesh.v0",
+  "company_id": "GLOBAL",
+  "engine_id": "CONSOLE-001",
+  "environment": "LAB",
+  "version": "CUT49-2026-11-07",
+  "state": "CODE_TESTED_NOT_DEPLOYED",
+  "source_branch": "cerebro/jarvis-cut49-command-mesh-lab-20261107",
+  "source_pr": "DRAFT_PENDING",
+  "canonical_registry": "cerebro/registry/engine-registry.v1.json",
+  "catalogued_engines": 179,
+  "console_declared_engines": 5,
+  "legacy_engine_bindings_observed": 9,
+  "role_profiles_registered": 11,
+  "role_reporting_chains_verified": 0,
+  "live_connected_engines_verified": 0,
+  "live_connected_agents_verified": 0,
+  "preprod_in_process_engine_logic_tested": [
+    "ROUTE-001#budgetDecision"
+  ],
+  "runtime_reuse": [
+    "CerebroGatewayV0",
+    "ActionGatewayV1"
+  ],
+  "new_daemons": 0,
+  "new_servers": 0,
+  "new_schedulers": 0,
+  "available_commands": [
+    "jarvis.network.inspect",
+    "jarvis.network.dispatch"
+  ],
+  "trusted_targets_default": [],
+  "owner_session_verifier": "REQUIRED_BY_SERVER_NOT_SUPPLIED_FROM_CLIENT",
+  "authorization": "SIGNED_ACTOR_VERIFICATION_PENDING_REAL_E2E",
+  "cross_company": "DENY",
+  "scope": {
+    "prod_execution": false,
+    "prod_writes": false,
+    "trading_access": false,
+    "paid_model_calls": 0,
+    "additional_subscriptions_eur": 0,
+    "remote_audio_synthesis": false
+  },
+  "status_by_target": {
+    "catalogued": "NOT_LIVE_PROOF",
+    "bound": "TRUSTED_TARGET_ATTESTATION_REQUIRED",
+    "dispatched": "ONLY_REGISTERED_ACTGW_PREPROD_HANDLERS"
+  },
+  "release_gates": [
+    "LIVE_OWNER_AUTH_GATEWAY_E2E",
+    "EXACT_ENGINE_HANDLER_PHYSICAL_ATTESTATION",
+    "AGENT_REPORTS_TO_GRAPH_AND_SUPERVISOR_BINDINGS",
+    "ROLE_SCOPED_ALLOWLIST",
+    "OBSERVABILITY_AND_COST",
+    "BACKUP_AND_REAL_ROLLBACK",
+    "OLD_VS_NEW_AND_TRIBUNAL",
+    "GRADUAL_PROD_RELEASE"
+  ],
+  "backups": {
+    "source": "GIT_BRANCH_CUT48_OLD_PRESERVED",
+    "runtime": "NO_NEW_RUNTIME",
+    "real_restore_tested": false
+  },
+  "rollback": "Close CUT49 DRAFT PR and discard branch. No deploy was performed.",
+  "rebuild": "Recreate module and tests from CUT49 Git branch; verify inputs and run JARVIS CI",
+  "documentation": "cerebro/docs/JARVIS_CUT49_MALLA_MANDO_AUDITORIA_2026-11-07.md",
+  "runbook": "cerebro/runbooks/JARVIS_COMMAND_MESH_CUT49.md",
+  "training_hooks": "NONE_NEW; existing LRN-001 preserved, no learning automatically promoted",
+  "changelog": [
+    "Stable PROD_MAX CI test fixture; no worker runtime modified",
+    "Read-only audit of 179 engines, 11 roles and five console declarations",
+    "Explicit-only PREPROD control mesh via original ActionGateway",
+    "Unit integration of real ROUTE-001 budgetDecision; test owner fixture only"
+  ]
+}
