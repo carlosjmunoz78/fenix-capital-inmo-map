@@ -9,7 +9,15 @@ import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 const load=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'));
 const catalog=load('seo-specialist-training-and-commands-v1.json');
 const marketing=load('seo-marketing-plan-for-owner-approval-v1.json');
-const assets=load('seo-existing-content-assets-source-registry-v1.json');
+const assets=load('seo-existing-content-assets-source-registry-v1.json'); // archive metadata only
+const approved=load('seo-operational-readonly-evidence-v1.json');
+if(approved.company_id!=='fenix'||approved.engine_id!=='SEO-001'||
+   approved.baseline?.snapshot_date!=='2026-11-05'||
+   approved.baseline?.stored_urls!==200||approved.baseline?.media_library_images!==629||
+   approved.baseline?.published_wordpress_pages!==166||
+   approved.baseline?.published_wordpress_posts!==34||
+   approved.governance?.no_new_audit!==true||approved.governance?.staging_off!==true)
+  throw Error('SEO_APPROVED_PROD_CORPUS_REQUIRED');
 const valid=new Set(catalog.departments.map(d=>d.department_id));
 const TYPES=Object.freeze({
  SEO_STRATEGY:['SEO-D01','SEO-D02','SEO-D04','SEO-D29'],
@@ -58,14 +66,23 @@ export function planSeoDirectorOrder(order={}){
   required_gates:['REAL_TRUSTED_OWNER_GATEWAY','AGENT_ROLE_IAM','POLICY_SCOPE',
    'BACKUP_AND_ROLLBACK_IF_WRITE','INDEPENDENT_QA','TRIBUNAL','OBSERVABILITY','COST_MEASURED'],
   input_data_policy:'INTERNAL_EXISTING_ARTIFACTS_FIRST_NO_REAUDIT_BY_DEFAULT',
-  existing_asset_registry:'cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json',
+  existing_asset_registry:'cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json',
+  current_operational_corpus:'ACCEPTED_FROZEN_PROD_2026_11_05',
+  current_corpus_documents:approved.baseline.stored_urls,
+  current_corpus_images:approved.baseline.media_library_images,
+  current_corpus_fragment_glob:'cerebro/seo-enterprise/v2/data/live-copy-chunk-{01..10}.json',
+  operational_source_policy:'PROD_FROZEN_ONLY_NO_STAGING_NO_REAUDIT',
+  historical_archive_operational:false,
+  historical_reference_registry:'cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json',
   existing_asset_archive_status:assets.canonical_snapshot.status,
   historical_url_copy_image_snapshot_verified:assets.canonical_snapshot.url_count===204&&
    assets.canonical_snapshot.image_count===680&&assets.canonical_snapshot.internal_links===42073,
   historical_asset_payloads_mounted_in_job001:assets.real_state.all_204_copy_payloads_loaded_in_job001,
   full_production_url_copy_image_join_verified:assets.real_state.all_680_image_maps_joined_to_prod,
   proposed_asset_revision_requires_reconciliation:true,
-  content_or_marketing_activation_blocked_until_asset_join:true,
+  historical_asset_join_is_not_an_activation_gate:true,
+  content_or_marketing_activation_blocked_until_asset_join:false,
+  content_or_marketing_execution_blocked_until_iam_qa_and_owner_gates:true,
   draft_approval_is_temporary:true,full_seo_work_required:true,
   only_proposal:true,auto_publish:false,wordpress_production_writes_allowed:false,
   real_agent_allocated:false,marketing_plan_owner_approved:false,
