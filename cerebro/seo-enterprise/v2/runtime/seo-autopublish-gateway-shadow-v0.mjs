@@ -67,7 +67,7 @@ function validOwnerGrant(g,r,now_ms){
   g.site_origin===r.site_origin&&g.content_class===r.content_class&&
   ID.test(g.grant_id||'')&&
   typeof g.allowed_slug_prefix==='string'&&
-  SLUG.test(g.allowed_slug_prefix)&&
+  /^[a-z0-9]+(?:-[a-z0-9]+)*-?$/.test(g.allowed_slug_prefix)&&
   r.slug.startsWith(g.allowed_slug_prefix)&&
   Number.isSafeInteger(g.issued_at_ms)&&Number.isSafeInteger(g.expires_at_ms)&&
   g.issued_at_ms<=now_ms&&g.expires_at_ms>now_ms&&g.expires_at_ms>g.issued_at_ms;
