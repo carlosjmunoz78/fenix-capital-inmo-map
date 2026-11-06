@@ -67,6 +67,11 @@ test('UMS image briefs request TWO visually distinct photo concepts with all WP 
   assert.equal(order.actual_api_dispatch,false);
   assert.equal(order.wordpress_upload_authorized,false);
   assert.equal(order.producer_engine,'UMS-001');
+  assert.equal(order.existing_creative_capability,null);
+  assert.equal(order.photo_producer_binding_status,'HOLD_NO_CERTIFIED_TEXT_FREE_IMAGE_GENERATOR');
+  assert.equal(order.existing_graphic_text_overlay_renderer_forbidden,true);
+  assert.equal(order.provider_credentials_verified,false);
+  assert.equal(order.photo_provider_cost_ceiling_verified,false);
   assert.equal(order.publish_authorized,false);
   assert.throws(()=>validateSeoProducerOrder({order:{...order,brief:{...order.brief,visible_logo_allowed:true}}}));
   assert.throws(()=>validateSeoProducerOrder({order:{...order,api_spend_authorized:true}}));
