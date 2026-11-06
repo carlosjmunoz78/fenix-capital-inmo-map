@@ -18,6 +18,7 @@ test.beforeEach(async({page})=>{
  await expect(page.locator('.jarvis-omni-launch')).toBeVisible();
  await page.locator('.jarvis-omni-launch').click();
  await expect(page.getByRole('region',{name:'Conversación compartida'})).toBeVisible();
+ await expect(page.locator('.jarvis-omni-launch')).toContainText('Conectado');
 });
 test('CUT39 same transcript is shown in three sibling interfaces',async({page})=>{
  await expect(page.getByText('Te escucho en todas las interfaces')).toBeVisible();
