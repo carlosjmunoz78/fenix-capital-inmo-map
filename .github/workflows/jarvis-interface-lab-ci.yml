@@ -15,6 +15,7 @@ on:
       - 'cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'
       - 'src/JarvisOmniDock.tsx'
       - 'src/jarvisGatewayDiagnostics.ts'
+      - 'src/JarvisGatewayCapabilityPanel.tsx'
       - 'tests/jarvis-gateway-capability-lab.test.mjs'
       - 'src/jarvisOmniSession.ts'
       - 'src/jarvis-omni-dock.css'
