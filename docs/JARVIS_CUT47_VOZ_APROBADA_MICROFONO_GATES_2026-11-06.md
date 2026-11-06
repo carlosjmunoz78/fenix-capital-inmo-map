@@ -29,6 +29,16 @@ Fuentes confirmadas por lectura autorizada:
 - Acciones de negocios: Gateway actual, mismo contrato; **no nuevos permisos**.
 - Consentimiento del intérprete/licencia contractual para uso productivo: **SIN VERIFICACIÓN DOCUMENTAL**.
 
+## Snapshot real y rollback verificable antes de desplegar
+El **6 de noviembre de 2026** se efectuó una comparación de archivos **solo lectura** entre el Edge Function desplegado en Supabase y la fuente de GitHub preservada en PR #27. Resultado:
+- Función desplegada `cerebro-console-gateway-v0`, versión 33, `ACTIVE`.
+- `index.ts`: **igual byte a byte** al blob GitHub SHA `44241c6abc3cb89560500336e332f0628219d0fc` (67.932 caracteres).
+- `knowledge.ts`: **igual byte a byte** al blob SHA `e00bb09ba9a024772f26fbd81159a9e9a584cd42` (49.142 caracteres).
+- La configuración `verify_jwt=false` está presente en la función desplegada (la verificación individual de usuario/actor se aplica dentro del propio código). El próximo despliegue no debe relajar ese control, y debe validar anónimos, usuarios no propietarios y revocación.
+- La fuente anterior sigue recuperable desde la rama existente, **pero no se ha ejecutado una restauración real**. No equivale a rollback probado; `PROD_NO_GO` continúa.
+
+Registro estructurado: `cerebro/registry/jarvis-voice-cut47.v1.json`. No copiar valores de secretos ni tokens al repositorio.
+
 ## Seguridad, coste, Gate
 - Coste nuevo de este cambio: **0 € de suscripciones y 0 llamadas de generación** (el listado de voces no consume créditos).
 - No se tocan `main`, App/CRM, Supabase real, DNS, Cloudflare, ANA, CUT30 ni Trading. No se copia JWT.
