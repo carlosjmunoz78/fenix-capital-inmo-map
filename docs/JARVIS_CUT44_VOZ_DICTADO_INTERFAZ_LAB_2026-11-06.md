@@ -39,6 +39,9 @@ En la App real algunos controles muestran «Dictar» o «Hablar», pero no entre
 ## Rollback
 Cerrar PR CUT44 / descartar la rama. No requiere reversión de PROD ni migraciones porque no se ha tocado producción.
 
-## Resultado
-**HECHO en LAB:** cambios de UI y voz JARVIS implementados como candidato.
-**PENDIENTE:** CI sobre el HEAD final, Gateway real, TTS/STT físico, personalidad server-side, OLD vs NEW y promoción.
+## Resultado verificado
+**HECHO en LAB:** cambios de UI y voz JARVIS implementados como candidato. El simulador de navegador se corrigió para publicar el mismo evento de sesión autenticada del Gateway y se agregó una prueba negativa de DOM falsificado.
+
+**CI comprobada:** [run #42291552064](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42291552064) **SUCCESS** (commit `47dad93d6b03d37fbe7e615d1b22acbba980cc38`): Vite/TypeScript build OK, **32 tests Node PASS**, **22/22 Playwright Chromium desktop+móvil PASS**, incluyendo la regresión «borrador editable no significa Gateway autorizado» y falsificación del DOM sin acceso. La prueba de Gateway real fue omitida con `JARVIS_OWNER_JWT_FRESHNESS=EXPIRED_OR_NEAR_EXPIRY`; no es un E2E real satisfactorio.
+
+**PENDIENTE:** JWT renovado por sesión legítima del propietario, Gateway autenticado real, TTS/STT físicos, personalidad server-side CUT45, OLD vs NEW y promoción gobernada.
