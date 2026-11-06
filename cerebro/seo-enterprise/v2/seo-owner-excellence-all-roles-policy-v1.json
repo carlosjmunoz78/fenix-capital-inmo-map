@@ -109,5 +109,29 @@
     "no_reward_or_access_directly_from_score": true,
     "prod_departments_certified_by_policy": 0
   },
-  "intended_real_operation": "AFTER_IAM_GATEWAY_EXERCISES_D31_D32_TRIBUNAL_AND_APPROVED_SCOPE;_NOT_A_PERMANENT_SIMULATION"
+  "intended_real_operation": "AFTER_IAM_GATEWAY_EXERCISES_D31_D32_TRIBUNAL_AND_APPROVED_SCOPE;_NOT_A_PERMANENT_SIMULATION",
+  "owner_editorial_visual_training_v2": {
+    "source": "OWNER_DIRECT_CHAT_FEEDBACK_2026-11-06_NOT_GITHUB_IAM_VERIFIED",
+    "status": "PREPROD_RULES_ENFORCED_IN_SEO001_D15_D31_PIPELINE_NOT_PROD_ROLE_CERTIFICATION",
+    "contract_ref": "cerebro/seo-enterprise/v2/seo-owner-copy-visual-standard-v2-2026-11-06.json",
+    "revision_registry_ref": "cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json",
+    "apply_to_all_registered_seo_roles_via_shared_policy": true,
+    "work_roles": [
+      "SEO-D03_BUYER_PERSONA",
+      "SEO-D13_COPY",
+      "SEO-D14_CONVERSION",
+      "SEO-D15_COPY_INSPECTOR",
+      "SEO-D16_YMYL",
+      "SEO-D26_VISUAL",
+      "SEO-D31_INDEPENDENT_QA",
+      "SEO-D32_TRAINING"
+    ],
+    "creative_handoff": "SEO-001 -> EXISTING UMS-001 / CREATIVE-PROGRAMMATIC-RENDER-V1",
+    "no_text_logo_watermark_in_generated_image": true,
+    "article_metadata_outside_pixels": true,
+    "never_reuse_existing_images": true,
+    "professional_qa_and_images_not_yet_proven": true,
+    "no_new_API_spend_or_publish_permission": true,
+    "prohibit_false_claim_that_text_originated_from_CEREBRO": "AUTHOR_PROVENANCE_MUST_BE_TRACKED"
+  }
 }
