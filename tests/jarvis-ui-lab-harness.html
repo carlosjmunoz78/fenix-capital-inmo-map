@@ -2,7 +2,7 @@
 <html lang="es">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;background:#0c1015;color:#edf8fc">
- <main class="jarvis-work jarvis-work-v2" style="height:100dvh">
+ <main class="jarvis-work jarvis-work-v2 jarvis-core-mounted" style="height:100dvh">
   <section class="jarvis-center-pane" style="height:100%;display:flex;flex-direction:column">
    <section class="jarvis-conversation" style="min-height:160px;overflow:auto">
     <div class="cerebro-console">
@@ -18,13 +18,16 @@
    <div class="jarvis-input-tools" aria-label="Zona de entrada JARVIS"></div>
   </section>
  </main>
- <div id="root"></div>
+ <div id="root"></div><div id="omni-root"></div>
+ <nav aria-label="Controles sintéticos omnicanal" hidden><button id="simulate-offline">Offline</button><button id="simulate-online">Online</button><button id="switch-neuronal">Neuronal</button><button id="switch-browser">Navegador</button><button id="switch-operativa">Operativa</button></nav>
  <output id="accepted-message" aria-live="polite"></output>
  <output id="voice-toggles"></output>
  <script type="module">
   import React from 'react';
   import {createRoot} from 'react-dom/client';
   import Portal from '../src/JarvisOperativaComposerPortal.tsx';
+  import Dock from '../src/JarvisOmniDock.tsx';
+  import {publishJarvisOmniState,setJarvisActiveInterface} from '../src/jarvisOmniSession.ts';
   import {JARVIS_COMPOSER_SEND_EVENT} from '../src/jarvisComposerBridge.ts';
   import '../src/jarvis-work-premium-final.css';
   window.addEventListener(JARVIS_COMPOSER_SEND_EVENT,event=>{
@@ -38,7 +41,22 @@
    document.querySelector('.cerebro-voice-status').textContent=pressed
     ?'Pulsa para hablar.':'CEREBRO está escuchando…';
    document.querySelector('#voice-toggles').textContent=pressed?'off':'on';
+   publishJarvisOmniState({...state,voiceActive:!pressed});
   });
   createRoot(document.getElementById('root')).render(React.createElement(Portal));
+  const state={ready:true,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false,
+    turns:[{role:'user',text:'Hola desde Operativa'},{role:'cerebro',text:'Te escucho en todas las interfaces'}],observedAt:Date.now()};
+  if(new URLSearchParams(window.location.search).get('omni')==='1'){
+   setJarvisActiveInterface('OPERATIVA');
+   createRoot(document.getElementById('omni-root')).render(React.createElement(Dock,{onOpenJarvis:()=>document.body.dataset.openJarvis='YES'}));
+   setTimeout(()=>publishJarvisOmniState(state),100);
+  }
+  document.body.addEventListener('click',event=>{
+   if(event.target?.id==='simulate-offline')publishJarvisOmniState({...state,ready:false});
+   if(event.target?.id==='simulate-online')publishJarvisOmniState({...state,ready:true});
+   if(event.target?.id==='switch-neuronal')setJarvisActiveInterface('NEURONAL');
+   if(event.target?.id==='switch-browser')setJarvisActiveInterface('NAVEGADOR');
+   if(event.target?.id==='switch-operativa')setJarvisActiveInterface('OPERATIVA');
+  });
  </script>
 </body></html>

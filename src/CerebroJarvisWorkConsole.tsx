@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState,type CSSProperties} from 'react';
 import {Activity,Check,ChevronDown,ChevronRight,Code2,Columns3,ExternalLink,FileText,FlaskConical,Folder,FolderOpen,Globe2,GripVertical,Home,Maximize2,Minus,Paperclip,Pencil,Plus,Radio,RotateCcw,Search,Terminal,Upload,X} from 'lucide-react';
 import JarvisEmbeddedConsole from './JarvisEmbeddedConsole';
 import {primeJarvisComposerMessage,sendJarvisComposerMessage} from './jarvisComposerBridge';
+import {setJarvisActiveProject} from './jarvisOmniSession';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {createJarvisProject,createJarvisSubproject,fetchJarvisProjects,importJarvisProject,renameJarvisProject,renameJarvisSubproject,type JarvisProject} from './jarvisWorkApi';
 import projectRegistryJson from '../cerebro/registry/jarvis-project-registry.v1.json';
@@ -54,6 +55,7 @@ export default function CerebroJarvisWorkConsole({surface='JARVIS'}:Props){
  const[projects,setProjects]=useState<ProjectRecord[]>(fallbackProjects);
  const[projectSource,setProjectSource]=useState<'GATEWAY'|'FALLBACK'|'UNAVAILABLE'>('FALLBACK');
  const[selectedProjectId,setSelectedProjectId]=useState<string|null>(null);
+ useEffect(()=>{setJarvisActiveProject(selectedProjectId);return()=>setJarvisActiveProject(null)},[selectedProjectId]);
  const[selectedSubproject,setSelectedSubproject]=useState<string|null>(null);
  const[expanded,setExpanded]=useState<Set<string>>(()=>new Set());
  const[rightTab,setRightTab]=useState<RightTab>('activity');

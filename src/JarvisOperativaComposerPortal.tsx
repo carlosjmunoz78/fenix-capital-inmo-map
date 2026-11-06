@@ -3,6 +3,7 @@ import {createPortal} from 'react-dom';
 import {AudioLines,Mic,Plus,Send,Square} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,voiceRecognitionProblem,type CerebroSpeechRecognition} from './cerebroVoice';
 import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisComposerPrimeDetail} from './jarvisComposerBridge';
+import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import './cerebro-operative-console.css';
 import './jarvis-composer-presence.css';
 
@@ -53,7 +54,7 @@ export default function JarvisOperativaComposerPortal(){
   };
   inspect();
   const observer=new MutationObserver(inspect);
-  observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,
+  observer.observe(document.querySelector('.jarvis-core-mounted')||document.body,{subtree:true,childList:true,characterData:true,attributes:true,
    attributeFilter:['disabled','aria-pressed','class']});
   const interval=window.setInterval(inspect,4000);
   return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
@@ -120,6 +121,7 @@ export default function JarvisOperativaComposerPortal(){
    {!voiceRecognitionSupported()?<small className="operativa-dictation-error" role="status">
     El reconocimiento de voz no está disponible en este navegador; puedes escribir igualmente.
    </small>:null}
+   <JarvisGatewayCapabilityPanel ready={snapshot.ready}/>
   </section>
  </div>,target);
 }

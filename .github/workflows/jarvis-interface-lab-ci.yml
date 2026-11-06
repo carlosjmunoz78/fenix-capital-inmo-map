@@ -4,8 +4,23 @@ on:
   push:
     branches:
       - cerebro/jarvis-always-present-interface-lab-20261106
+      - cerebro/jarvis-omnichannel-interlocutor-lab-20261106
     paths:
       - 'src/CerebroConsoleShell.tsx'
+      - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs'
+      - 'scripts/jarvis-cut40-jwt-freshness.mjs'
+      - 'tests/jarvis-owner-gateway-readonly-e2e.test.mjs'
+      - 'cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'
+      - 'src/JarvisOmniDock.tsx'
+      - 'src/jarvisGatewayDiagnostics.ts'
+      - 'src/JarvisGatewayCapabilityPanel.tsx'
+      - 'tests/jarvis-gateway-capability-lab.test.mjs'
+      - 'src/jarvisOmniSession.ts'
+      - 'src/jarvis-omni-dock.css'
+      - 'tests/jarvis-omnichannel-core-lab.test.mjs'
+      - 'tests/jarvis-omnichannel-lab.spec.ts'
       - 'src/CerebroJarvisWorkConsole.tsx'
       - 'src/JarvisOperativaComposerPortal.tsx'
       - 'src/jarvisConversationMemory.ts'
@@ -43,11 +58,46 @@ jobs:
       - name: Compile and build unchanged existing App
         run: npm run build
       - name: Owner-scoped JARVIS UI and gateway contract tests
-        run: node --test tests/jarvis-interface-lab.test.mjs
+        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
+        env:
+          # Browser-harness-only fixtures. Not a real Supabase project.
+          VITE_FENIX_ENV: 'test'
+          VITE_SUPABASE_URL: https://supabase-jarvis-fixture.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_JARVIS_OFFLINE_FAKE_TEST_KEY
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
+      - name: Detect owner live-readonly E2E credential availability
+        id: owner_e2e
+        shell: bash
+        env:
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "${CEREBRO_E2E_USER_JWT}" ] && [ -n "${PROD_SUPABASE_PUBLISHABLE_KEY}" ]; then
+            echo "run_e2e=true" >> "${GITHUB_OUTPUT}"
+            echo "JARVIS_OWNER_READONLY_E2E_CREDENTIAL=AVAILABLE"
+          else
+            echo "run_e2e=false" >> "${GITHUB_OUTPUT}"
+            echo "JARVIS_OWNER_READONLY_E2E=BLOCKED_MISSING_SECURE_CREDENTIAL"
+          fi
+      - name: Inspect JWT freshness locally without printing secret or claims
+        id: jwt_freshness
+        if: steps.owner_e2e.outputs.run_e2e == 'true'
+        env:
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+        run: node scripts/jarvis-cut40-jwt-freshness.mjs
+      - name: Live owner+anonymous Gateway contract only READ-ONLY
+        if: steps.owner_e2e.outputs.run_e2e == 'true' && steps.jwt_freshness.outputs.run_live == 'true'
+        env:
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs
+      - name: Explicitly classify unavailable physical owner verification
+        if: steps.owner_e2e.outputs.run_e2e != 'true' || steps.jwt_freshness.outputs.run_live != 'true'
+        run: echo 'JARVIS_OWNER_GATEWAY_LIVE_E2E=BLOQUEADO_NO_CREDENTIAL_OR_JWT_STALE'
       - name: Check no dangerous source paths were touched
         run: |
           test -f src/CerebroConsoleShell.tsx
