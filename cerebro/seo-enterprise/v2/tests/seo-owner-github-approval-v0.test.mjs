@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {APPROVAL_CONTRACT_V0,parseOwnerApproval,verifyOwnerApprovalFromGitHub} from '../runtime/seo-owner-github-approval-v0.mjs';
+import {APPROVAL_CONTRACT_V0,parseOwnerApproval,verifyOwnerApprovalFromGitHub,matchEditorialApprovalToReviewedDraft} from '../runtime/seo-owner-github-approval-v0.mjs';
+import {loadVerifiedWorkItem} from '../runtime/seo-editorial-qa-job001-pipeline-v0.mjs';
 const PLAN=APPROVAL_CONTRACT_V0.strategy_plan_git_blob_sha;
 const token='test-github-token-example-only-123';
 const command='CEREBRO_SEO_APPROVE STRATEGY fenix '+PLAN;
@@ -44,4 +45,27 @@ test('missing auth and unauthorized read fail closed',async()=>{
  await assert.rejects(()=>verifyOwnerApprovalFromGitHub({comment_id:99881,github_token:'',fetch_impl:responder(comment)}));
  await assert.rejects(()=>verifyOwnerApprovalFromGitHub({comment_id:99881,github_token:token,
   fetch_impl:async()=>({status:403})}));
+});
+
+test('B2C/B2B editorial approval binds exactly to current content digest, not publishing',async()=>{
+ for(const work_id of ['SEO001-FENIX-B2C-EDITORIAL-001','SEO001-FENIX-B2B-EDITORIAL-002']){
+  const item=loadVerifiedWorkItem({work_id});
+  const body='CEREBRO_SEO_APPROVE EDITORIAL fenix '+work_id+' '+item.digest;
+  const parsed=parseOwnerApproval(body);
+  assert.equal(parsed.work_id,work_id);assert.equal(parsed.source_sha256,item.digest);
+  assert.equal(parsed.can_publish,false);assert.equal(parsed.wordpress_write_authorized,false);
+  const receipt=await verifyOwnerApprovalFromGitHub({comment_id:99881,github_token:token,
+    fetch_impl:responder({...comment,body})});
+  const matched=matchEditorialApprovalToReviewedDraft({provider_receipt:receipt,work_item:item});
+  assert.equal(matched.owner_verified,true);assert.equal(matched.release_authorized,false);
+  assert.equal(matched.wordpress_write_authorized,false);
+  assert.throws(()=>matchEditorialApprovalToReviewedDraft({provider_receipt:receipt,
+    work_item:{...item,digest:'0'.repeat(64)}}));
+  assert.throws(()=>matchEditorialApprovalToReviewedDraft({provider_receipt:{...receipt,provider:'FAKE'},work_item:item}));
+  assert.throws(()=>parseOwnerApproval(body.replace(item.digest,'0'.repeat(63))));
+ }
+});
+test('reject unknown company or unregistered draft in approval syntax',()=>{
+ assert.throws(()=>parseOwnerApproval('CEREBRO_SEO_APPROVE EDITORIAL other SEO001-FENIX-B2C-EDITORIAL-001 '+'a'.repeat(64)));
+ assert.throws(()=>parseOwnerApproval('CEREBRO_SEO_APPROVE EDITORIAL fenix SEO001-UNKNOWN '+'a'.repeat(64)));
 });
