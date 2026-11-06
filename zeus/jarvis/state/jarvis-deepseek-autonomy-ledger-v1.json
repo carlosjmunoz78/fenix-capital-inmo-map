@@ -4,7 +4,7 @@
   "engine_id": "JARVIS",
   "environment": "LAB",
   "version": "CUT37-2026-11-06",
-  "status": "ACTIVE",
+  "status": "RESERVED",
   "owner_permission_eur": 50,
   "lifetime_guard_usd": 40,
   "model": "deepseek-flash",
@@ -18,7 +18,13 @@
   "completed_batches": 8,
   "calls_completed": 708,
   "scenarios_completed": 354,
-  "pending": null,
+  "pending": {
+    "run_id": "42264855577",
+    "cursor": 58,
+    "cycles": 12,
+    "reserved_usd": 1.8,
+    "reason": "PREPAID_ENVELOPE_NO_REFUND_ON_FAILURE"
+  },
   "last_completed_run_id": "42263653926",
   "last_run_estimate_usd": 0.068299596,
   "halt_reason": null,
