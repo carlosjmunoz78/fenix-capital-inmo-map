@@ -4,6 +4,7 @@ import {AudioLines,Mic,Plus,Send,Square} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,voiceRecognitionProblem,type CerebroSpeechRecognition} from './cerebroVoice';
 import {sendJarvisComposerMessage} from './jarvisComposerBridge';
 import './cerebro-operative-console.css';
+import './jarvis-composer-presence.css';
 
 type Snapshot={ready:boolean;connecting:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean;voiceError:string};
 const EMPTY:Snapshot={ready:false,connecting:true,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false,voiceError:''};
