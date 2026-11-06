@@ -80,9 +80,9 @@ test('CUT48 live-negative gate accepts ONLY a signed server OWNER_ONLY denial, w
  assert.equal(seen[0].redirect,'error');
  assert.deepEqual(Object.keys(seen[0].headers).sort(),['accept','apikey']);
 });
-test('CUT48 generic 401, 403 without OWNER_ONLY, anonymous 200 and other errors fail closed',async()=>{
+test('CUT48 generic 403 without OWNER_ONLY, anonymous 200 and other errors fail closed',async()=>{
  for(const [status,body] of [
-  [401,{status:'UNAUTHORIZED'}],[403,{status:'FORBIDDEN',reason:'UNSPECIFIED'}],
+  [403,{status:'FORBIDDEN',reason:'UNSPECIFIED'}],
   [403,{status:'FORBIDDEN'}],[200,{status:'ok'}],[404,{message:'Not Found'}]
  ]){
   await assert.rejects(()=>inspectAnonymousGateway({publishableKey:env.publishableKey,
@@ -96,4 +96,17 @@ test('CUT48 missing public key never sends an unauthenticated request',async()=>
  await assert.rejects(()=>inspectAnonymousGateway({publishableKey:'',
   fetchImpl:async()=>{calls++;return {status:403}}}),/PUBLISHABLE_KEY_NOT_AVAILABLE/);
  assert.equal(calls,0);
+});
+
+test('CUT48 real-world anonymous HTTP 401 is EDGE denial only, never marks the owner policy verified',async()=>{
+ let calls=0;
+ const result=await inspectAnonymousGateway({publishableKey:env.publishableKey,
+  fetchImpl:async()=>{calls++;return{status:401,json:async()=>{throw Error('401 body not needed')}}}});
+ assert.equal(calls,1);
+ assert.equal(result.status,'ANONYMOUS_EDGE_HTTP_401_OWNER_POLICY_UNVERIFIED');
+ assert.equal(result.anonymous_http_rejected,true);
+ assert.equal(result.owner_policy_verified,false);
+ assert.equal(result.owner_authenticated,false);
+ assert.equal(result.owner_live_e2e_verified,false);
+ assert.equal(result.prod_writes,false);
 });
