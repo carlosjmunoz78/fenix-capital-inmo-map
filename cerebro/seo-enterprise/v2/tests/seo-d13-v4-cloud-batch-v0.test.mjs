@@ -32,6 +32,8 @@ test('two company-scoped V4 briefs reuse publicly verifiable WP sources and buye
   assert.equal(b.customer_data_present,false);
   assert.equal(b.paid_provider_requested,false);
  }
+ assert.match(buildSeoV4OwnerPrompt(a[0]),/NO incluir la plusvalía municipal entre los gastos ordinarios/);
+ assert.match(buildSeoV4OwnerPrompt(a[1]),/NO afirmar que todos los clientes deban firmar/);
  assert.throws(()=>validateSeoV4Brief({...a[0],company_id:'company_other'}));
  assert.throws(()=>validateSeoV4Brief({...a[0],sources:[]}));
  assert.throws(()=>validateSeoV4Brief({...a[1],persona:'PARTICULARES'}));
