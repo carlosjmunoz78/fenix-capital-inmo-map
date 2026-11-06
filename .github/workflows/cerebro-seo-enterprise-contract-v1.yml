@@ -77,13 +77,24 @@ jobs:
           node cerebro/seo-enterprise/v2/runtime/seo-workforce-orientation-v2.mjs verify \
             "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
             "$RUNNER_TEMP/seo-workforce-141/verification.json"
-      - name: Archive 141 contract-orientation receipts, not agent certifications
+      - name: Assemble 32 departments and 141 role bindings using the existing JOB-001 journal
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-v2-control-plane-assembly-v1.mjs assemble \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/assembly.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-v2-control-plane-assembly-v1.mjs verify \
+            "$RUNNER_TEMP/seo-workforce-141/queue.v8" \
+            "$RUNNER_TEMP/seo-workforce-141/assembly.json"
+      - name: Archive 141 contract-orientation receipts and 32/141 assembly manifest (not agent certifications)
         uses: actions/upload-artifact@v4
         with:
           name: cerebro-seo-141-subagent-contract-orientation-lab-v2
           path: |
             ${{ runner.temp }}/seo-workforce-141/orientation.json
             ${{ runner.temp }}/seo-workforce-141/verification.json
+            ${{ runner.temp }}/seo-workforce-141/assembly.json
           retention-days: 14
           if-no-files-found: error
       - name: Generate 141 SEO specialist FACT-001 scaffolds twice idempotently (no deployment)
