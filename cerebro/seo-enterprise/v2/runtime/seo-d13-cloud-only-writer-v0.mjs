@@ -8,6 +8,7 @@ import {routeWork} from '../../../router/execution-model-router.mjs';
 import {loadIdentityCredentialFoundation} from '../../../governance/identity-credential-broker.mjs';
 
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
+import {auditSeoContentDepth} from './seo-owner-content-depth-gate-v1.mjs';
 const MODEL='gemini-3.5-flash-lite';
 const CONNECTOR='connector:seo-gemini-free-lab';
 const REF='credref:cerebro-gemini-free-api-key';
@@ -38,12 +39,17 @@ function buildCloudEditorialPrompt(brief){
    throw Error('CLOUD_EDITORIAL_SOURCE_NOT_VERIFIED');
  }
  const min_faq=brief.content_type==='ARTICLE'?6:8;
+ const isArticle=brief.content_type==='ARTICLE';
+ const min_total_words=isArticle?1000:900;
+ const min_main_words=isArticle?750:600;
  const prompt=[
   'SEO-D13 CEREBRO FENIX. Escribe borrador HTML profesional en español de Córdoba SOLO para revisión.',
   'Persona '+brief.persona+' tema '+brief.topic+' problema '+brief.buyer_problem,
   'Intención '+brief.focus_keyword+' conversión '+brief.conversion_goal,
   'H1 corto. H2 atractivos sin numerar. Prosa cercana. Sin dos puntos visibles.',
   'Evita las expresiones además y en conclusión. Nada de párrafos de relleno.',
+  'Extensión mínima '+min_total_words+' palabras visibles, de ellas '+min_main_words+' de desarrollo útil fuera de las FAQ.',
+  'Objetivo orientativo '+(isArticle?'1200 a 1800':'1000 a 1600')+' palabras, sin hinchar el texto con repeticiones.',
   'Incluye al menos '+min_faq+' FAQ naturales visibles dentro de una section con clase faq.',
   'Cada pregunta en H3 dentro de div class faq-item y respuesta en p de 12 a 65 palabras.',
   'No inventes normativa ni concedas hipotecas. Todas las afirmaciones requieren revisión.',
@@ -53,7 +59,7 @@ function buildCloudEditorialPrompt(brief){
   }))),
   'Devuelve SOLO JSON con html y used_source_ids. Sin código de página ni formularios.'
  ].join('\n');
- return {prompt,min_faq};
+ return {prompt,min_faq,min_total_words,min_main_words};
 }
 
 const hold=(reason,fields={})=>Object.freeze({
@@ -85,6 +91,7 @@ export function evaluateSeoCloudWriter({
   model:MODEL,connector_id:CONNECTOR,credential_ref_id:REF,
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
   inference_environment:'LAB',prompt:p.prompt,min_faq:p.min_faq,
+  min_total_words:p.min_total_words,min_main_words:p.min_main_words,
   cloud_only:true,local_pc_required:false,paid_api_calls:0,
   wordpress_writes:0,additional_cost_eur:0,publish_authorized:false});
 }
@@ -135,7 +142,9 @@ export async function runSeoCloudWriter({
     /\s(?:onerror|onclick|onload|style)\s*=/i.test(x.html))
   return hold('CLOUD_ACTIVE_HTML_DENIED');
  const qa=auditOwnerEditorialCopy({html:x.html,persona:brief.persona,content_type:brief.content_type});
- if(!qa.deterministic_style_precheck_passed)return hold('CLOUD_STYLE_OR_FAQ_FAIL',{issues:qa.issues});
+ const depth=auditSeoContentDepth({html:x.html,persona:brief.persona,content_type:brief.content_type});
+ if(!qa.deterministic_style_precheck_passed||!depth.preliminary_depth_check_passed)
+  return hold('CLOUD_STYLE_FAQ_OR_DEPTH_FAIL',{issues:[...qa.issues,...depth.issues],total_words:depth.total_visible_words,main_words:depth.main_content_words_excluding_faq});
  return Object.freeze({status:'SEO_D13_CLOUD_DRAFT_CREATED_FOR_QA',
   company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
   inference_environment:'LAB',model:MODEL,

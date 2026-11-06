@@ -4,7 +4,7 @@
   "company_id": "fenix",
   "engine_id": "SEO-001",
   "environment": "PREPROD",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "state": "OWNER_FAQ_COUNTS_SPECIFIED_REQUIRES_QA",
   "source": "OWNER_DIRECT_FEEDBACK_2026-11-06",
   "precedence": "OWNER_EDITORIAL_DIRECTION_OVERRIDES_EARLIER_DRAFT_STYLE_NOT_LEGAL_OR_SECURITY_GATES",
@@ -22,10 +22,10 @@
       "en conclusión"
     ],
     "connector_words_case_sensitive": false,
-    "length_policy": "COMPACT_WITHOUT_FILLER_ALLOW_6_FAQ_ARTICLE_AND_8_FAQ_LANDING",
+    "length_policy": "BASIC_LEGACY_STYLE_ONLY_NEW_CANDIDATES_USE_INDEPENDENT_CONTENT_DEPTH_POLICY",
     "pilot_body_words_range": [
       240,
-      710
+      3000
     ],
     "tone": [
       "CERCANO",
@@ -64,7 +64,10 @@
       "visible_colons_forbidden": true,
       "no_automated_faq_rich_result_guarantee": true,
       "faq_rich_results_not_assumed": true
-    }
+    },
+    "content_depth_policy_ref": "cerebro/seo-enterprise/v2/seo-owner-content-depth-policy-v1-2026-11-06.json",
+    "new_content_depth_gate_mandatory": true,
+    "legacy_drafts_do_not_satisfy_new_depth_requirements": true
   },
   "media": {
     "source_engine": "SEO-001",

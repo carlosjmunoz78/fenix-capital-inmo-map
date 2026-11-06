@@ -14,6 +14,7 @@ import {loadIdentityCredentialFoundation,connectorAuthDecision,credentialReferen
 import {routeWork} from '../../../router/execution-model-router.mjs';
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
 import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
+import {auditSeoContentDepth} from './seo-owner-content-depth-gate-v1.mjs';
 
 const MODEL='gemini-3.5-flash-lite';
 const URL='https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent';
@@ -32,7 +33,7 @@ const OWNER_ATTESTATION=Object.freeze({
  paid_project_excluded:'fenix-capital-455809',
  authorization:'OWNER_EXPLICIT_VENGA_DALE_2026_11_06',
  max_real_inference_requests:1,max_retry_requests:0,
- max_output_tokens:3400,
+ max_output_tokens:4800,
  billing_change_allowed:false,paid_fallback:false
 });
 const BRIEF=Object.freeze({
@@ -85,7 +86,7 @@ export function buildOneShotPrompt(){
  'H1 de 35 a 60 caracteres que despierte curiosidad, con sentido natural en castellano y sin promesas exageradas.',
  'Tres o cuatro H2 específicos que hagan querer seguir leyendo, sin enumeraciones, sin repetir la palabra clave mecánicamente.',
  'Una idea útil por párrafo, preferiblemente 20 a 48 palabras, con comas y puntuación natural.',
- 'Redacta entre 350 y 570 palabras en total incluyendo seis FAQ. Evita introducciones vacías y consejos que cualquiera ya sabe.',
+ 'Redacta entre 1200 y 1550 palabras útiles para el artículo completo, incluyendo las seis FAQ. Al menos 750 palabras de desarrollo real deben estar FUERA de las FAQ. Rechaza párrafos vacíos o repetidos.',
  'Da detalles comprobables durante una visita como luz en otra franja horaria, ruidos, gastos de comunidad o posibles obras, sin afirmar que conoces un inmueble concreto.',
  'Ejemplo de buen H2 para este tema Qué mirar cuando se apaga el entusiasmo de la visita.',
  'Evita H2 genéricos como Da el siguiente paso con asesoramiento experto.',
@@ -152,8 +153,9 @@ export async function runOneShotFreeCanary({
    return hold('HTML_SECURITY_REJECTED',{real_inference_attempted:true,request_count:calls});
  const qa=auditOwnerEditorialCopy({html,persona:'PARTICULARES',content_type:'ARTICLE'});
  const voice=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES',content_type:'ARTICLE'});
+ const depth=auditSeoContentDepth({html,persona:'PARTICULARES',content_type:'ARTICLE'});
  const result={
-  status:(qa.deterministic_style_precheck_passed&&voice.deterministic_precheck_passed)?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD',
+  status:(qa.deterministic_style_precheck_passed&&voice.deterministic_precheck_passed&&depth.preliminary_depth_check_passed)?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD',
   company_id:'fenix',engine_id:'SEO-001',environment:'LAB',model:MODEL,
   provider:'GOOGLE_GEMINI_FREE_PROJECT',
   work_id:BRIEF.work_id,project_id:OWNER_ATTESTATION.project_id,
@@ -162,6 +164,11 @@ export async function runOneShotFreeCanary({
   style_issues:qa.issues,
   voice_issues:voice.issues,
   human_voice_precheck_passed:voice.deterministic_precheck_passed,
+  content_depth_precheck_passed:depth.preliminary_depth_check_passed,
+  content_depth_issues:depth.issues,
+  main_content_words_excluding_faq:depth.main_content_words_excluding_faq,
+  required_main_words:depth.required_main_words,
+  required_total_words:depth.required_total_words,
   semantic_buyer_persona_qa_independently_verified:false,
   real_inference_attempted:true,request_count:calls,retry_count:0,
   provider_usage:{input_tokens:Number(usage.promptTokenCount||0),

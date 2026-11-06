@@ -35,15 +35,21 @@ test('actual preserved Gemini Free first output is rejected by D31 with grounded
  assert.equal(e.human_voice_precheck_passed,false);
  assert.ok(e.copy_issues.includes('VOICE_HEADING_UNNATURAL_KEYWORD_SEQUENCE'));
  assert.ok(e.copy_issues.includes('VOICE_CANNED_MARKETING_PHRASE'));
+ assert.ok(e.copy_issues.includes('DEPTH_TOTAL_WORDS_BELOW_MINIMUM'));
+ assert.ok(e.copy_issues.includes('DEPTH_MAIN_WORDS_BELOW_MINIMUM'));
+ assert.equal(e.depth_precheck_passed,false);
  const training=buildSeoTrainingFeedback({evaluation:e});
  assert.equal(training.next_inference_call_authorized,false);
  assert.equal(training.training_handoff,'PROMPT_AND_TEST_REGRESSION_NO_OWN_MODEL_TRAINING_CLAIM');
  assert.equal(training.semantic_expert_approval_authorized,false);
 });
-test('safe historical V3 copy passes machine precheck yet remains on independent QA hold',()=>{
+test('old V3 owner copy preserved but now fails new depth release gate',()=>{
  const receipt={...head,status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',work_id:'SEO001-FENIX-B2C-EDITORIAL-001',source_sha256:h(clean)};
  const e=evaluateSeoCloudDraftReceipt({receipt,candidate_html:clean});
- assert.equal(e.code,'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD',JSON.stringify(e.copy_issues));
+ assert.equal(e.code,'EDITORIAL_REWRITE_REQUIRED',JSON.stringify(e.copy_issues));
+ assert.ok(e.copy_issues.includes('DEPTH_TOTAL_WORDS_BELOW_MINIMUM'));
+ assert.equal(e.depth_precheck_passed,false);
+ assert.equal(e.required_total_words,1000);
  assert.equal(e.faq_count,6);
  assert.equal(e.buyer_persona_expert_quality_verified,false);
  assert.equal(e.independent_expert_review_verified,false);

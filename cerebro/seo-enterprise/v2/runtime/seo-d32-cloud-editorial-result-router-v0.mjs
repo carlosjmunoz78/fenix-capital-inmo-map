@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
 import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
+import {auditSeoContentDepth} from './seo-owner-content-depth-gate-v1.mjs';
 
 const H=s=>crypto.createHash('sha256').update(s,'utf8').digest('hex');
 const DENY=code=>{throw Error('SEO_D32_'+code)};
@@ -54,12 +55,17 @@ export function evaluateSeoCloudDraftReceipt({receipt,candidate_html=null,person
   return fail('ACTIVE_CONTENT_REJECTED',{source_sha256:calculated});
  const style=auditOwnerEditorialCopy({html:candidate_html,persona,content_type});
  const voice=auditSeoHumanVoiceAndRisk({html:candidate_html,persona,content_type});
- const issues=[...style.issues.map(x=>'STYLE_'+x),...voice.issues.map(x=>'VOICE_'+x)];
+ const depth=auditSeoContentDepth({html:candidate_html,persona,content_type});
+ const issues=[...style.issues.map(x=>'STYLE_'+x),...voice.issues.map(x=>'VOICE_'+x),...depth.issues.map(x=>'DEPTH_'+x)];
  const clean=issues.length===0;
  return fail(clean?'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD':'EDITORIAL_REWRITE_REQUIRED',{
   work_id:receipt.work_id||null,source_sha256:calculated,
   faq_count:style.faq_count,faq_required:style.faq_required,
   word_count:style.word_count,
+  main_content_words_excluding_faq:depth.main_content_words_excluding_faq,
+  required_total_words:depth.required_total_words,
+  required_main_words:depth.required_main_words,
+  depth_precheck_passed:depth.preliminary_depth_check_passed,
   copy_issues:Object.freeze(issues),independent_expert_review_verified:false,
   source_factcheck_verified:false,owner_exact_content_approved:false,
   source_verified_by_model:false,decision:clean?'SEND_TO_INDEPENDENT_PROFESSIONAL_QA':

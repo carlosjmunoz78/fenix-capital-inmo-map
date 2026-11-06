@@ -11,6 +11,7 @@ import {runSeoEditorialMission} from './seo-workforce-lab-v0.mjs';
 import {validateEvaluatorChange} from '../../../runtime/evaluation-tribunal.mjs';
 import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder} from './seo-owner-editorial-visual-gate-v2.mjs';
 import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
+import {auditSeoContentDepth} from './seo-owner-content-depth-gate-v1.mjs';
 
 const PREFIX='cerebro/seo-enterprise/v2/';
 const REGISTRY=PREFIX+'registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json';
@@ -114,6 +115,9 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
  for(const issue of ownerStyle.issues)failures.push('OWNER_STYLE_'+issue);
  const voice=auditSeoHumanVoiceAndRisk({html,persona:item.draft.persona,content_type:item.draft.content_type});
  for(const issue of voice.issues)failures.push('VOICE_QA_'+issue);
+ const depth=auditSeoContentDepth({html,persona:item.draft.persona,content_type:item.draft.content_type});
+ // Legacy V3 draft technical checks remain comparable OLD vs NEW. Separate depth
+ // release gate records HOLD without rewriting the owner's approved-source hash.
  const producerOrder=buildSeoProducerImageOrder({company_id:'fenix',work_id:item.work_id,persona:item.draft.persona,
   source_content_sha256:item.digest,...item.draft.image});
  const producerPrecheck=validateSeoProducerOrder({order:producerOrder});
@@ -126,6 +130,13 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
   owner_style_precheck_passed:ownerStyle.deterministic_style_precheck_passed,
   human_voice_precheck_passed:voice.deterministic_precheck_passed,
   human_voice_semantic_review_required:true,
+  content_depth_precheck_passed:depth.preliminary_depth_check_passed,
+  content_depth_release_hold:!depth.preliminary_depth_check_passed,
+  content_depth_issues:depth.issues,
+  total_visible_words:depth.total_visible_words,
+  main_content_words_excluding_faq:depth.main_content_words_excluding_faq,
+  required_total_words:depth.required_total_words,
+  required_main_words:depth.required_main_words,
   image_brief_precheck_passed:producerPrecheck.metadata_complete,
   image_producer_engine:producerOrder.producer_engine,
   image_producer_dispatch_executed:false,
@@ -149,7 +160,8 @@ export function runEditorialTribunalHold({root=process.cwd(),work_id,worker_rece
   worker_job_id:worker_receipt.job_id,code_checks_passed:qa_receipt.code_checks_passed,
   failure_codes:qa_receipt.failures,
   decision:qa_receipt.code_checks_passed?'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD':'TECHNICAL_PRECHECK_FAIL_RELEASE_HOLD',
-  remaining_gates:['INDEPENDENT_PROFESSIONAL_QA','VISUAL_IMAGE_PRODUCER_DELIVERY_AND_NO_TEXT_LOGO_QA','VERIFIED_SEO_SOURCES_AND_YMYL_FACTCHECK',
+  remaining_gates:[...(qa_receipt.content_depth_release_hold?['OWNER_CONTENT_DEPTH_EXPANSION_REQUIRED']:[]),
+   'INDEPENDENT_PROFESSIONAL_QA','VISUAL_IMAGE_PRODUCER_DELIVERY_AND_NO_TEXT_LOGO_QA','VERIFIED_SEO_SOURCES_AND_YMYL_FACTCHECK',
    'WORDPRESS_SLUG_COLLISION_LIVE','OWNER_EXACT_CONTENT_APPROVAL','WORDPRESS_IAM',
    'CORE_GUARD_WRITES_GATE','PHYSICAL_BACKUP_RESTORE','SEPARATE_PUBLICATION_PERMISSION'],
   actual_independent_tribunal_iam:false,publish_authorized:false,wordpress_write_authorized:false,

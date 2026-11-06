@@ -28,12 +28,17 @@ test('real first-party drafts -> JOB001 persisted replay -> D31 QA -> tribunal h
    assert.equal(qa.code_checks_passed,true,JSON.stringify(qa.failures));
    assert.equal(qa.human_voice_precheck_passed,true);
    assert.equal(qa.human_voice_semantic_review_required,true);
+   assert.equal(qa.content_depth_release_hold,true);
+   assert.ok(qa.content_depth_issues.includes('TOTAL_WORDS_BELOW_MINIMUM'));
+   assert.equal(qa.required_total_words,1000);
    assert.equal(qa.actual_independent_professional_review,false);
    const tribunal=runEditorialTribunalHold({work_id,worker_receipt:work,qa_receipt:qa});
    assert.equal(tribunal.decision,'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD');
    assert.equal(tribunal.release_authorized,false);assert.equal(tribunal.wordpress_write_authorized,false);
    assert.equal(tribunal.actual_independent_tribunal_iam,false);
    assert.ok(tribunal.remaining_gates.includes('OWNER_EXACT_CONTENT_APPROVAL'));
+   assert.ok(tribunal.remaining_gates.includes('OWNER_CONTENT_DEPTH_EXPANSION_REQUIRED'));
+   assert.equal(tribunal.release_authorized,false);
    assert.ok(tribunal.remaining_gates.includes('PHYSICAL_BACKUP_RESTORE'));
   }
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
@@ -63,7 +68,7 @@ test('release never granted even after green technical prechecks',()=>{
   assert.equal(done.ymyl_manual_review_required,undefined);
   assert.equal(qa.ymyl_manual_review_required,true);
   assert.equal(qa.legal_privacy_review_required,true);
-  assert.equal(done.remaining_gates.length,9);
+  assert.equal(done.remaining_gates.length,10);
   assert.ok(done.remaining_gates.includes('VISUAL_IMAGE_PRODUCER_DELIVERY_AND_NO_TEXT_LOGO_QA'));
   assert.equal(qa.image_brief_precheck_passed,true);
   assert.equal(qa.image_visual_review_verified,false);

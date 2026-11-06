@@ -16,6 +16,8 @@ test('one shot binds owner-verified Free project, excludes paid key, no automati
  assert.match(buildOneShotPrompt(),/No uses además ni en conclusión/i);
  assert.match(buildOneShotPrompt(),/No escribas Primera visita piso Córdoba/i);
  assert.match(buildOneShotPrompt(),/No escribas Nunca debes firmar/i);
+ assert.match(buildOneShotPrompt(),/1200 y 1550 palabras útiles/);
+ assert.match(buildOneShotPrompt(),/750 palabras de desarrollo real/);
 });
 test('wrong key symbol, absent secret, or unverified project fail closed with zero network',async()=>{
  let calls=0;
@@ -43,14 +45,17 @@ test('mocked response exercises identical security QA without pretending live in
    assert.ok(!url.includes('fake-free-project-key'));
    const body=JSON.parse(args.body);
    assert.equal(body.generationConfig.responseMimeType,'application/json');
-   assert.equal(body.generationConfig.maxOutputTokens,3400);
+   assert.equal(body.generationConfig.maxOutputTokens,4800);
    return {ok:true,json:async()=>({candidates:[{content:{parts:[{text:JSON.stringify({
     html:fixture,used_source_ids:['fenix_gastos','fenix_contacto']
    })}]}}],usageMetadata:{promptTokenCount:150,candidatesTokenCount:600,totalTokenCount:750}})};
   }
  });
  assert.equal(calls,1);
- assert.equal(out.status,'REAL_CLOUD_DRAFT_REVIEW_ONLY');
+ assert.equal(out.status,'REAL_CLOUD_DRAFT_STYLE_HOLD');
+ assert.equal(out.content_depth_precheck_passed,false);
+ assert.ok(out.content_depth_issues.includes('TOTAL_WORDS_BELOW_MINIMUM'));
+ assert.equal(out.required_total_words,1000);
  assert.equal(out.real_inference_attempted,true);
  assert.equal(out.request_count,1);assert.equal(out.retry_count,0);
  assert.equal(out.faq_count,6);assert.equal(out.wordpress_writes,0);
