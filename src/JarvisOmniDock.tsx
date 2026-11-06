@@ -4,6 +4,7 @@ import {sendJarvisComposerMessage} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import JarvisOwnerDialogueCheck from './JarvisOwnerDialogueCheck';
 import JarvisAudioDeviceCheck from './JarvisAudioDeviceCheck';
+import JarvisPhysicalVoiceCheck from './JarvisPhysicalVoiceCheck';
 import {getJarvisOmniState,getJarvisActiveInterface,JARVIS_OMNI_EVENT,
  JARVIS_OMNI_INTERFACE_EVENT,type JarvisOmniState} from './jarvisOmniSession';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
@@ -83,6 +84,7 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
    <JarvisGatewayCapabilityPanel ready={state.ready}/>
    <JarvisOwnerDialogueCheck ready={state.ready}/>
    <JarvisAudioDeviceCheck disabled={state.voiceActive||state.sending||listening}/>
+   <JarvisPhysicalVoiceCheck disabled={state.voiceActive||state.sending||listening}/>
    <button type="button" className="jarvis-omni-open" onClick={onOpenJarvis}>Abrir JARVIS completo</button>
   </section>:null}
  </aside>;
