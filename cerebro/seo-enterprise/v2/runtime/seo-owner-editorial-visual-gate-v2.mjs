@@ -86,3 +86,37 @@ export function validateSeoProducerOrder({order,existing_assets=[]}={}){
   metadata_complete:true,baked_text_forbidden:true,logo_forbidden:true,
   approval:'QA_REQUIRED_AFTER_PRODUCER_OUTPUT',api_called:false,can_publish:false});
 }
+
+
+/** PREVIEW gate for returned assets. A producer's self-declared visual QA can
+ * NEVER certify that the pixels contain no writing or logo; independent media QA
+ * evidence and the full searchable inventory are required separately.
+ */
+const validHash=x=>typeof x==='string'&&/^[a-f0-9]{64}$/.test(x);
+const validPerceptual=x=>typeof x==='string'&&/^[a-f0-9]{16}$/.test(x);
+function hamming64(a,b){
+ let xor=BigInt('0x'+a)^BigInt('0x'+b),bits=0;
+ while(xor){bits+=Number(xor&1n);xor>>=1n;}
+ return bits;
+}
+export function preflightReturnedSeoMediaAsset({order,asset,existing_assets,inventory_verified=false}={}){
+ validateSeoProducerOrder({order});
+ if(!inventory_verified||!Array.isArray(existing_assets))deny('ASSET_INVENTORY_MISSING');
+ if(asset?.company_id!==order.company_id||asset?.work_id!==order.work_id||
+  asset?.request_id!==order.request_id||asset?.media_type!=='IMAGE'||
+  !validHash(asset.sha256)||!validPerceptual(asset.perceptual_hash)||
+  asset?.width!==order.width||asset?.height!==order.height||
+  asset?.format!=='webp')deny('DELIVERY_SCOPE');
+ if(!asset.rights_provenance_ref||asset.rights_status!=='VERIFIED_COMMERCIAL_REUSE')deny('IMAGE_RIGHTS_UNVERIFIED');
+ for(const previous of existing_assets){
+  if(previous?.sha256===asset.sha256)deny('IMAGE_EXACT_REUSE');
+  if(validPerceptual(previous?.perceptual_hash)&&
+    hamming64(previous.perceptual_hash,asset.perceptual_hash)<=8)deny('IMAGE_NEAR_DUPLICATE');
+ }
+ return Object.freeze({status:'IMAGE_DELIVERED_UNIQUE_HASH_PREFLIGHT_ONLY',company_id:order.company_id,
+  work_id:order.work_id,sha256:asset.sha256,
+  independent_no_text_visual_qa_verified:false,independent_no_logo_visual_qa_verified:false,
+  image_ready_for_publish:false,wordpress_upload_authorized:false,
+  visual_qa_and_composition_review_required:true,
+  no_existing_asset_inventory_silent_bypass:true});
+}
