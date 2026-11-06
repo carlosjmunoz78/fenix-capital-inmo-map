@@ -7,6 +7,9 @@ on:
       - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba.draft.html'
       - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba.draft.html'
       - 'cerebro/seo-enterprise/v2/registry/seo-editorial-first-batch-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v3-faq.draft.html'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-editorial-visual-gate-v2.mjs'
       - 'cerebro/seo-enterprise/v2/evidence/SEO001_STRATEGY_OWNER_APPROVAL_GITHUB_6682124001_2026-11-06.json'
       - '.github/workflows/cerebro-seo-editorial-job001-qa-tribunal-preprod-v0.yml'
 permissions:
