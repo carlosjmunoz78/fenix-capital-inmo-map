@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder} from '../runtime/seo-owner-editorial-visual-gate-v2.mjs';
+import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder,preflightReturnedSeoMediaAsset} from '../runtime/seo-owner-editorial-visual-gate-v2.mjs';
 const root='cerebro/seo-enterprise/v2/';
 const registry=JSON.parse(fs.readFileSync(root+'registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json','utf8'));
 const active=registry.new_drafts;
@@ -72,4 +72,28 @@ test('UMS image briefs request TWO visually distinct photo concepts with all WP 
    company_id:'fenix',work_id:order.work_id,asset_role:'HERO',approved:true
   }]}));
  }
+});
+
+test('returned original photo must be unique against full existing inventory, with rights proof',()=>{
+ const item=active[0],html=fs.readFileSync(item.draft_path,'utf8');
+ const order=buildSeoProducerImageOrder({
+ company_id:'fenix',work_id:item.id,persona:item.persona,
+ source_content_sha256:auditOwnerEditorialCopy({html,persona:item.persona}).sha256,...item.image});
+ const candidate={
+  company_id:'fenix',work_id:item.id,request_id:order.request_id,media_type:'IMAGE',
+  sha256:'b'.repeat(64),perceptual_hash:'aabbccddeeff0011',
+  width:1200,height:630,format:'webp',
+  rights_provenance_ref:'ums:provenance:image:synthetic-fixture',
+  rights_status:'VERIFIED_COMMERCIAL_REUSE'
+ };
+ assert.throws(()=>preflightReturnedSeoMediaAsset({order,asset:candidate,existing_assets:[],inventory_verified:false}));
+ assert.throws(()=>preflightReturnedSeoMediaAsset({order,asset:candidate,
+  existing_assets:[{company_id:'fenix',sha256:'b'.repeat(64),perceptual_hash:'ff'.repeat(8)}],inventory_verified:true}));
+ assert.throws(()=>preflightReturnedSeoMediaAsset({order,asset:candidate,
+  existing_assets:[{company_id:'other',sha256:'c'.repeat(64),perceptual_hash:'aabbccddeeff0010'}],inventory_verified:true}));
+ const ok=preflightReturnedSeoMediaAsset({order,asset:candidate,
+  existing_assets:[{company_id:'fenix',sha256:'c'.repeat(64),perceptual_hash:'123456789abcdef0'}],inventory_verified:true});
+ assert.equal(ok.image_ready_for_publish,false);
+ assert.equal(ok.independent_no_text_visual_qa_verified,false);
+ assert.equal(ok.visual_qa_and_composition_review_required,true);
 });
