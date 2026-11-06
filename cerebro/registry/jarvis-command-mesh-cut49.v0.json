@@ -6,7 +6,7 @@
   "version": "CUT49-2026-11-07",
   "state": "CODE_TESTED_NOT_DEPLOYED",
   "source_branch": "cerebro/jarvis-cut49-command-mesh-lab-20261107",
-  "source_pr": "DRAFT_PENDING",
+  "source_pr": 34,
   "canonical_registry": "cerebro/registry/engine-registry.v1.json",
   "catalogued_engines": 179,
   "console_declared_engines": 5,
@@ -71,5 +71,16 @@
     "Read-only audit of 179 engines, 11 roles and five console declarations",
     "Explicit-only PREPROD control mesh via original ActionGateway",
     "Unit integration of real ROUTE-001 budgetDecision; test owner fixture only"
-  ]
+  ],
+  "evidence": {
+    "jarvis_lab_ci_run": 42312354975,
+    "node_pass": 76,
+    "playwright_pass": 32,
+    "real_logic_invoked": "ROUTE-001#budgetDecision",
+    "owner_identity_mode": "TEST_FIXTURE_ONLY",
+    "prod_max_ci_run": 42311453182,
+    "enterprise_ci_run": 42311453189,
+    "enterprise_jobs_green": 24,
+    "actual_prod_engine_connections_verified": 0
+  }
 }
