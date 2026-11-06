@@ -1,0 +1,89 @@
+{
+  "schema": "cerebro.jarvis.voice.release-preflight.v1",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "version": "CUT47-2026-11-06",
+  "state": "LAB_GREEN__PROD_NO_GO",
+  "owner_auth_policy": "CARLOS-ADMIN_GATEWAY",
+  "voice": {
+    "id": "JARVIS_V2_CLARA_ES_ES",
+    "provider": "vidIQ",
+    "voice_id_from_owner_approved_drive": "cfkJwJs7cjrVgVLm3yvM",
+    "voice_custom_listed_live": true,
+    "voice_id_verified_live": true,
+    "preset": "MAS_CLARA_1_10X",
+    "speed_multiplier": 1.1,
+    "pitch_semitones": 0.6,
+    "owner_preset_approved": true,
+    "production_usage_authorized": false,
+    "dynamic_tts_provider_adapter": false,
+    "model_weights_export": false,
+    "master_v1_preserve": true,
+    "physical_samples_in_drive": true
+  },
+  "surface_policy": {
+    "in_cerebro": [
+      "JARVIS",
+      "OPERATIVA",
+      "NEURONAL",
+      "NAVEGADOR",
+      "V0"
+    ],
+    "other_app": "ANA_UNCHANGED",
+    "unknown": "DENY",
+    "multi_company": true,
+    "runtimeEnabled": false,
+    "indicator_lab_dev_flag": "VITE_CEREBRO_JARVIS_V2_LAB=1",
+    "indicator_off_by_default": true,
+    "browser_tts_fallback_is_cloned_voice": false
+  },
+  "device_probe": {
+    "requires_explicit_click": true,
+    "media_constraints": {
+      "audio": true,
+      "video": false
+    },
+    "tracks_stopped_immediately": true,
+    "no_recording": true,
+    "no_upload": true,
+    "no_paid_api": true,
+    "physical_stt_verified": false,
+    "audible_tts_verified": false
+  },
+  "gateway_rollback_snapshot": {
+    "project_id": "cluhljgonannaafpmblx",
+    "deployed_function": "cerebro-console-gateway-v0",
+    "observed_version": 33,
+    "observed_status": "ACTIVE",
+    "verify_jwt_at_platform_layer": false,
+    "custom_owner_bearer_check_in_source": true,
+    "source_reference_branch": "cerebro/jarvis-omnichannel-interlocutor-lab-20261106",
+    "index_blob_sha": "44241c6abc3cb89560500336e332f0628219d0fc",
+    "knowledge_blob_sha": "e00bb09ba9a024772f26fbd81159a9e9a584cd42",
+    "index_bytes_equal_deployed": true,
+    "knowledge_bytes_equal_deployed": true,
+    "rollback_restore_executed": false,
+    "production_deploy_executed": false
+  },
+  "release_gates": {
+    "production_status": "NO_GO",
+    "owner_live_e2e": "BLOCKED_JWT_STALE",
+    "physical_mic_two_devices": "PENDING",
+    "stt_tts_end_to_end": "PENDING",
+    "dynamic_cloned_voice": "PENDING",
+    "interpreter_rights_documentation": "PENDING",
+    "positive_cost_authorization": "NOT_GRANTED",
+    "independent_tribunal": "PENDING",
+    "rollback_tested": "PENDING",
+    "backup_source_verified": true,
+    "preserve_existing_ana": true
+  },
+  "cost": {
+    "new_subscription_eur": 0,
+    "paid_generation_calls_this_cut": 0,
+    "vidiq_voice_list_cost_credits": 0,
+    "billed_github_actions_not_reconciled": true
+  },
+  "notes": "Verified byte-for-byte existing Supabase Edge Function source equals immutable GitHub PR27 reference on 2026-11-06; such equality is a recoverable code reference, NOT a tested restore. No live production modifications."
+}
