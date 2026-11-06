@@ -151,3 +151,20 @@ test('CUT27 API call URLs are pinned to the authorized account (no redirects)',a
  assert.ok(r.calls.every(c=>c.redirect==='error'));
  assert.ok(r.calls.every(c=>c.headers.authorization==='Bearer '+token));
 });
+
+
+test('CUT27 refuses missing replication mode instead of assuming no replicas',async()=>{
+ for(const read_replication of [undefined,null,{}, {mode:'auto'}]){
+  const r=rig({found:[record({read_replication})]});
+  const result=await r.provisioner.run(authorized);
+  assert.equal(result.state,'EXISTING_DATABASE_NOT_EU_NO_WRITE');
+  assert.deepEqual(r.calls.map(c=>c.method),['GET']);
+ }
+});
+test('CUT27 refuses to certify a newly created D1 if replication state is not explicit',async()=>{
+ const r=rig({found:[],created:record({read_replication:undefined})});
+ const result=await r.provisioner.run(authorized);
+ assert.equal(result.state,'CREATED_METADATA_UNSAFE_HUMAN_REVIEW');
+ assert.deepEqual(r.calls.map(c=>c.method),['GET','POST']);
+ assert.equal(result.deployAllowed,false);
+});
