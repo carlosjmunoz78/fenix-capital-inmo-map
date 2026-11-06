@@ -102,3 +102,24 @@ test('CUT47 no provider API call or secret in local browser device check',()=>{
  assert.doesNotMatch(probe,/fetch\(|api\.deepseek\.com|service_role|api_key|MediaRecorder|localStorage/i);
  assert.doesNotMatch(ui,/MediaRecorder|fetch\(|vidIQ|api_key/);
 });
+
+test('CUT47 immutable documented voice approval and deployed OLD source are release gated',()=>{
+ const m=JSON.parse(read('cerebro/registry/jarvis-voice-cut47.v1.json'));
+ assert.equal(m.schema,'cerebro.jarvis.voice.release-preflight.v1');
+ assert.equal(m.engine_id,'VOICE-001');
+ assert.equal(m.environment,'LAB');
+ assert.equal(m.voice.preset,'MAS_CLARA_1_10X');
+ assert.equal(m.voice.pitch_semitones,0.6);
+ assert.equal(m.voice.speed_multiplier,1.10);
+ assert.equal(m.voice.production_usage_authorized,false);
+ assert.equal(m.voice.dynamic_tts_provider_adapter,false);
+ assert.equal(m.surface_policy.other_app,'ANA_UNCHANGED');
+ assert.equal(m.surface_policy.runtimeEnabled,false);
+ assert.equal(m.gateway_rollback_snapshot.observed_version,33);
+ assert.equal(m.gateway_rollback_snapshot.index_blob_sha,'44241c6abc3cb89560500336e332f0628219d0fc');
+ assert.equal(m.gateway_rollback_snapshot.knowledge_blob_sha,'e00bb09ba9a024772f26fbd81159a9e9a584cd42');
+ assert.equal(m.gateway_rollback_snapshot.production_deploy_executed,false);
+ assert.equal(m.gateway_rollback_snapshot.rollback_restore_executed,false);
+ assert.equal(m.release_gates.production_status,'NO_GO');
+ assert.equal(m.release_gates.rollback_tested,'PENDING');
+});
