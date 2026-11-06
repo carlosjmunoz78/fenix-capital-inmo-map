@@ -4,8 +4,8 @@
   "company_id": "fenix",
   "engine_id": "SEO-001",
   "environment": "PREPROD",
-  "version": "2.0.0",
-  "state": "OWNER_FEEDBACK_DEFINED_REQUIRES_CI_AND_REVIEW",
+  "version": "2.1.0",
+  "state": "OWNER_FAQ_COUNTS_SPECIFIED_REQUIRES_QA",
   "source": "OWNER_DIRECT_FEEDBACK_2026-11-06",
   "precedence": "OWNER_EDITORIAL_DIRECTION_OVERRIDES_EARLIER_DRAFT_STYLE_NOT_LEGAL_OR_SECURITY_GATES",
   "applies_to_all_future_fenix_seo_copy_roles": true,
@@ -22,10 +22,10 @@
       "en conclusión"
     ],
     "connector_words_case_sensitive": false,
-    "length_policy": "RIGHT_SIZED_TO_USER_INTENT_NO_FORCED_LENGTH_FOR_SEO",
+    "length_policy": "COMPACT_WITHOUT_FILLER_ALLOW_6_FAQ_ARTICLE_AND_8_FAQ_LANDING",
     "pilot_body_words_range": [
       240,
-      650
+      710
     ],
     "tone": [
       "CERCANO",
@@ -49,7 +49,22 @@
       "SEO-D32_LEARNING",
       "TRIBUNAL_BEFORE_RELEASE"
     ],
-    "automation_lint_is_not_human_quality_certification": true
+    "automation_lint_is_not_human_quality_certification": true,
+    "faq_rules": {
+      "min_article": 6,
+      "min_landing": 8,
+      "mandatory": true,
+      "by_page_type": true,
+      "only_real_buyer_questions": true,
+      "unique_questions": true,
+      "answers_short_and_useful": true,
+      "section_heading_h2_not_numbered": true,
+      "question_heading_h3_required": true,
+      "questions_never_numbered": true,
+      "visible_colons_forbidden": true,
+      "no_automated_faq_rich_result_guarantee": true,
+      "faq_rich_results_not_assumed": true
+    }
   },
   "media": {
     "source_engine": "SEO-001",
