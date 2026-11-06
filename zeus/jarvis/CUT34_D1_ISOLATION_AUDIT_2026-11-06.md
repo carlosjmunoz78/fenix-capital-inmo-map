@@ -58,3 +58,17 @@ Documentación oficial: https://developers.cloudflare.com/d1/platform/limits/ ; 
 ## Incidencia física 2026-11-06: EU ubicación ≠ EU jurisdicción
 
 Cloudflare mostró en la nueva DB `be037644-3da6-4a96-8cb7-9ee3af9ba196`: Región = Europa oriental, Jurisdicción = Ninguno, Read replication = Deshabilitado. Jurisdicción no puede modificarse tras creación (documentación oficial). No vincularla a CUT33 ni aplicar migraciones; preservar el recurso existente, sin borrar. Crear otra DB con nombre `cerebro-jarvis-cut33-lab-eu-jur`, marcar radio `Especificar jurisdicción` y seleccionar `Unión Europea`; **verificar el valor en la pantalla de Configuración después de crear antes de resolver el UUID**. El verificador ha de prohibir expresamente también la DB sin jurisdicción.
+
+## CUT34 · Actualización verificada en Cloudflare · 2026-11-06
+
+**HECHO FÍSICO:** D1 separada `cerebro-jarvis-cut33-lab-eu-jur` UUID `968e86d4-617c-4539-adde-541edc9ec215` creada. Cloudflare Configuración muestra **Jurisdicción = La Unión Europea**, región Europa oriental y replicación deshabilitada. Es la sexta D1 de la cuenta.
+
+**NO USAR:** D1 anterior sin jurisdicción `cerebro-jarvis-cut33-lab-eu`, UUID `be037644-3da6-4a96-8cb7-9ee3af9ba196`, preservada sin borrado ni binding.
+
+**HECHO GITHUB:** archivo `cloudflare-lab/wrangler-b2-parallel.cut34-isolated.staging.lab.jsonc` creado SOLO en rama CUT34 con binding `JARVIS_LAB_DB` a la nueva D1; `workers_dev=false`, `routes=[]`, 5 flags OFF y LAB. El gate `verify-cut34-d1-isolation.mjs` ahora exige UUID exacto `968e86d4-617c-4539-adde-541edc9ec215`, rechazando los cinco UUID de D1 anteriores. Plantilla sentinel sin cambios de rol.
+
+**NO ACREDITADO:** SQL Studio muestra `No resources match your filters` y filtros activos: NO constituye consulta exhaustiva que acredite cero tablas. Falta inventario SQL y export basal, migraciones 0001–0006 en nueva D1 y comprobación de recuperación. No existe binding remoto a la D1 nueva; el Worker nuevo remoto seguía unido a la fuente `988b11e1-21aa-4cf9-8b9d-110319df7ccc` en la última lectura. No hubo despliegue, ni ruta pública, ni B2/B3/Gateway.
+
+**PENDIENTE / BLOQUEO:** no hay acción Cloudflare de escritura D1 disponible en el conector Opera solo lectura. Las migraciones y cambio de binding deberán ejecutarse mediante una sesión de Work/Cloudflare con permisos, una vez verificadas precondiciones, export+rollback y tests. No ejecutar contra los cuatro recursos protegidos ni contra la base sin jurisdicción.
+
+**COSTE:** sin suscripción nueva observada; cuota gratuita sujeta a consumos medidos, no equivale a uso ilimitado.
