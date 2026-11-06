@@ -12,8 +12,14 @@
       "identity_id": "iam:github-actions-job",
       "provider": "github",
       "identity_type": "EPHEMERAL_WORKLOAD_IDENTITY",
-      "credential_ref_ids": ["credref:github-actions-token"],
-      "environments": ["LAB", "PREPROD", "PROD_CONTROL_PLANE"],
+      "credential_ref_ids": [
+        "credref:github-actions-token"
+      ],
+      "environments": [
+        "LAB",
+        "PREPROD",
+        "PROD_CONTROL_PLANE"
+      ],
       "scope_evidence": "PER_WORKFLOW_PERMISSIONS",
       "lifecycle": "EPHEMERAL_PER_JOB",
       "rotation_state": "PROVIDER_MANAGED",
@@ -28,8 +34,12 @@
       "identity_id": "iam:supabase-browser-public",
       "provider": "supabase",
       "identity_type": "PUBLIC_CLIENT_IDENTITY",
-      "credential_ref_ids": ["credref:prod-supabase-publishable-key"],
-      "environments": ["PROD"],
+      "credential_ref_ids": [
+        "credref:prod-supabase-publishable-key"
+      ],
+      "environments": [
+        "PROD"
+      ],
       "scope_evidence": "PUBLISHABLE_BROWSER_KEY_CLASS_ASSERTED",
       "lifecycle": "LONG_LIVED_REFERENCE",
       "rotation_state": "POR_AUDITAR",
@@ -45,8 +55,13 @@
       "identity_id": "iam:supabase-e2e-user",
       "provider": "supabase",
       "identity_type": "USER_SESSION_IDENTITY",
-      "credential_ref_ids": ["credref:cerebro-e2e-user-jwt", "credref:prod-supabase-publishable-key"],
-      "environments": ["PROD_READONLY_E2E"],
+      "credential_ref_ids": [
+        "credref:cerebro-e2e-user-jwt",
+        "credref:prod-supabase-publishable-key"
+      ],
+      "environments": [
+        "PROD_READONLY_E2E"
+      ],
       "scope_evidence": "AUTHENTICATED_READ_PARITY_ONLY",
       "lifecycle": "SESSION_TOKEN_REFERENCE",
       "rotation_state": "POR_AUDITAR_NO_AUTOMATED_REFRESH_EVIDENCED",
@@ -61,21 +76,31 @@
       "identity_id": "iam:notion-private-doc-reader",
       "provider": "notion",
       "identity_type": "SERVICE_INTEGRATION",
-      "credential_ref_ids": ["credref:notion-token"],
-      "environments": ["QA_PRIVATE_DOC_GATE"],
+      "credential_ref_ids": [
+        "credref:notion-token"
+      ],
+      "environments": [
+        "QA_PRIVATE_DOC_GATE"
+      ],
       "scope_evidence": "READONLY_USE_INTENT_EVIDENCED_SCOPE_NOT_VERIFIED",
       "lifecycle": "LONG_LIVED_REFERENCE",
       "rotation_state": "POR_AUDITAR",
       "revocation_state": "POR_AUDITAR",
-      "evidence_refs": [".github/workflows/private-physical-document-gate.yml"],
+      "evidence_refs": [
+        ".github/workflows/private-physical-document-gate.yml"
+      ],
       "audit_state": "PARCIAL_SCOPE_AND_LIFECYCLE_GAP"
     },
     {
       "identity_id": "iam:gemini-free-lab",
       "provider": "google-gemini-api",
       "identity_type": "SERVICE_API_IDENTITY",
-      "credential_ref_ids": ["credref:cerebro-gemini-api-key"],
-      "environments": ["LAB"],
+      "credential_ref_ids": [
+        "credref:cerebro-gemini-api-key"
+      ],
+      "environments": [
+        "LAB"
+      ],
       "scope_evidence": "SYNTHETIC_ONLY_NO_PROD_OR_CUSTOMER_DATA",
       "lifecycle": "LONG_LIVED_REFERENCE",
       "rotation_state": "POR_AUDITAR",
@@ -90,13 +115,21 @@
       "identity_id": "iam:owner-private-mailbox",
       "provider": "gmail-imap-smtp",
       "identity_type": "HUMAN_OWNER_MAILBOX_BRIDGE",
-      "credential_ref_ids": ["credref:cerebro-mail-username", "credref:cerebro-mail-password", "credref:cerebro-owner-email"],
-      "environments": ["PROD_CONTROL_PLANE"],
+      "credential_ref_ids": [
+        "credref:cerebro-mail-username",
+        "credref:cerebro-mail-password",
+        "credref:cerebro-owner-email"
+      ],
+      "environments": [
+        "PROD_CONTROL_PLANE"
+      ],
       "scope_evidence": "OWNER_HUMAN_COMMUNICATION_ONLY",
       "lifecycle": "LONG_LIVED_REFERENCE",
       "rotation_state": "POR_AUDITAR",
       "revocation_state": "POR_AUDITAR",
-      "evidence_refs": [".github/workflows/cerebro-human-communication-v1.yml"],
+      "evidence_refs": [
+        ".github/workflows/cerebro-human-communication-v1.yml"
+      ],
       "audit_state": "EXISTING_PARTIAL_LIFECYCLE"
     },
     {
@@ -104,13 +137,37 @@
       "provider": "local-browser-runtime",
       "identity_type": "INTERACTIVE_BROWSER_SESSION",
       "credential_ref_ids": [],
-      "environments": ["LAB", "PREPROD"],
+      "environments": [
+        "LAB",
+        "PREPROD"
+      ],
       "scope_evidence": "NO_REAL_REPO_BOUND_IDENTITY_EVIDENCE",
       "lifecycle": "POR_AUDITAR",
       "rotation_state": "NOT_APPLICABLE_SESSION_BASED",
       "revocation_state": "POR_AUDITAR",
-      "evidence_refs": [".github/workflows/cerebro-skill-agent-browser-behavioral-lab.yml"],
+      "evidence_refs": [
+        ".github/workflows/cerebro-skill-agent-browser-behavioral-lab.yml"
+      ],
       "audit_state": "POR_AUDITAR_REAL_SESSION_BINDING"
+    },
+    {
+      "identity_id": "iam:seo-gemini-free-lab",
+      "provider": "google-gemini-api",
+      "identity_type": "SERVICE_API_IDENTITY_ISOLATED_FREE_PROJECT",
+      "credential_ref_ids": [
+        "credref:cerebro-gemini-free-api-key"
+      ],
+      "environments": [
+        "LAB"
+      ],
+      "scope_evidence": "GOOGLE_AI_STUDIO_FREE_PROJECT_ONLY_PUBLIC_SEO_BRIEFS",
+      "lifecycle": "LONG_LIVED_REFERENCE_UNBOUND",
+      "rotation_state": "POR_AUDITAR",
+      "revocation_state": "POR_AUDITAR",
+      "evidence_refs": [
+        "cerebro/seo-enterprise/v2/evidence/SEO_D13_GEMINI_FREE_PROVIDER_OWNER_UI_2026-11-06.md"
+      ],
+      "audit_state": "PROVIDER_FREE_PROJECT_CONFIRMED_IAM_SECRET_UNBOUND"
     }
   ],
   "global_gaps": [
