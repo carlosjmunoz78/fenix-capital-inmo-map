@@ -59,3 +59,21 @@ export const JARVIS_OMNI_POLICY=Object.freeze({
  live_writes_without_policy:false,
  persistent_full_history_verified:false
 });
+
+let projectId:string|null=null;
+export function setJarvisActiveProject(value:string|null){
+ if(value===null){projectId=null;return}
+ if(typeof value!=='string'||value.length>128||!(/^[A-Za-z0-9_:.-]+$/).test(value)){
+  throw Error('INVALID_JARVIS_PROJECT_CONTEXT');
+ }
+ projectId=value;
+}
+export function getJarvisInterfaceHint(){
+ return Object.freeze({
+  surface:activeInterface,
+  project_id:activeInterface==='JARVIS'?projectId:null,
+  source:'UNTRUSTED_CLIENT_UI_HINT',
+  company_scope:'fenix',
+  version:'CUT39_V1'
+ });
+}
