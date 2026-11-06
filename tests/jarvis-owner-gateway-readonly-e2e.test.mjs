@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {inspectOwnerGateway} from '../scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs';
+import {inspectOwnerGateway,inspectAnonymousGateway} from '../scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs';
 import {inspectJwtFreshness} from '../scripts/jarvis-cut40-jwt-freshness.mjs';
 const env={jwt:'TEST_JWT_FOR_MOCK_ONLY_AAAAAA_BBBBBBBB_CCCCCCCC',
  publishableKey:'sb_publishable_FAKE_TEST_ONLY_NOT_VALID'};
@@ -61,4 +61,39 @@ test('CUT40 local JWT freshness gate never needs a signature or reveals claims',
  assert.equal(inspectJwtFreshness(jwt({exp:1793990000+120}),now),'POSSIBLY_FRESH_NOT_AUTHENTICATED');
  assert.equal(inspectJwtFreshness(jwt({exp:1793990000+1000,nbf:1793990000+300}),now),'NOT_YET_VALID');
  assert.equal(inspectJwtFreshness(jwt({other:'data'}),now),'MISSING_EXP');
+});
+
+test('CUT48 live-negative gate accepts ONLY a signed server OWNER_ONLY denial, without owner JWT',async()=>{
+ const seen=[];
+ const fake=async(url,opt)=>{
+  seen.push({url,method:opt.method,headers:opt.headers,cache:opt.cache,redirect:opt.redirect});
+  return {status:403,json:async()=>({status:'FORBIDDEN',reason:'OWNER_ONLY'})};
+ };
+ const result=await inspectAnonymousGateway({publishableKey:env.publishableKey,fetchImpl:fake});
+ assert.equal(result.status,'ANONYMOUS_OWNER_ONLY_DENIAL_VERIFIED');
+ assert.equal(result.owner_live_e2e_verified,false);
+ assert.equal(result.credentials_disclosed,false);
+ assert.equal(seen.length,1);
+ assert.match(seen[0].url,/\/health$/);
+ assert.equal(seen[0].method,'GET');
+ assert.equal(seen[0].cache,'no-store');
+ assert.equal(seen[0].redirect,'error');
+ assert.deepEqual(Object.keys(seen[0].headers).sort(),['accept','apikey']);
+});
+test('CUT48 generic 401, 403 without OWNER_ONLY, anonymous 200 and other errors fail closed',async()=>{
+ for(const [status,body] of [
+  [401,{status:'UNAUTHORIZED'}],[403,{status:'FORBIDDEN',reason:'UNSPECIFIED'}],
+  [403,{status:'FORBIDDEN'}],[200,{status:'ok'}],[404,{message:'Not Found'}]
+ ]){
+  await assert.rejects(()=>inspectAnonymousGateway({publishableKey:env.publishableKey,
+   fetchImpl:async()=>({status,json:async()=>body})}),/ANON_GATE_/);
+ }
+ await assert.rejects(()=>inspectAnonymousGateway({publishableKey:env.publishableKey,
+  fetchImpl:async()=>({status:403,json:async()=>{throw Error('no-json')}})}),/ANON_GATE_DENIAL_NOT_JSON/);
+});
+test('CUT48 missing public key never sends an unauthenticated request',async()=>{
+ let calls=0;
+ await assert.rejects(()=>inspectAnonymousGateway({publishableKey:'',
+  fetchImpl:async()=>{calls++;return {status:403}}}),/PUBLISHABLE_KEY_NOT_AVAILABLE/);
+ assert.equal(calls,0);
 });
