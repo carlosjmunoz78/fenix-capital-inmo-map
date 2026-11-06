@@ -7,6 +7,7 @@
 import {createJarvisAccessOwnerCanary} from '../core/jarvis-access-owner-canary.mjs';
 import {createJarvisB2DeviceSessionGate} from '../core/jarvis-b2-device-session-gate.mjs';
 import {createJarvisD1SessionStore} from '../core/jarvis-d1-session-store.mjs';
+import {createJarvisB2DeviceEnrollment} from '../core/jarvis-b2-device-enrollment.mjs';
 
 const canary=createJarvisAccessOwnerCanary({environment:'LAB',enabled:true});
 const headers={'content-type':'application/json; charset=utf-8',
@@ -19,6 +20,18 @@ export default {async fetch(request,env,ctx){
  if(!(request instanceof Request))return respond(400,'REQUEST_INVALID');
  let url;
  try{url=new URL(request.url)}catch{return respond(400,'REQUEST_INVALID')}
+ if(url.pathname==='/__jarvis/b2-device-enroll'){
+  if(env?.JARVIS_ENVIRONMENT!=='LAB'||
+     env?.JARVIS_B2_ENROLLMENT_ENABLED!=='true'||
+     env?.JARVIS_GATEWAY_ENABLED!=='false'||
+     env?.JARVIS_B2_B3_LIVE_ENABLED!=='false'||
+     typeof env?.JARVIS_LAB_DB?.batch!=='function')
+    return respond(503,'B2_ENROLLMENT_DISABLED');
+  const issuer=createJarvisB2DeviceEnrollment({
+   db:env.JARVIS_LAB_DB,environment:'LAB',enabled:true
+  });
+  return issuer.enroll({request,ctx,env});
+ }
  if(url.pathname!=='/__jarvis/b2-device-status')
   return canary.fetch(request,env,ctx);
  if(request.method!=='GET')return respond(405,'METHOD_DENIED');
