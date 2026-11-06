@@ -14,7 +14,15 @@ const evaluate=extra=>assessSeoPhysicalReleaseEvidence({
 test('real artifact bundle V4.1 + actual isolated MariaDB SQL dump + physical WebP receipt forms a HOLD verdict',()=>{
  const r=evaluate();
  assert.equal(r.article_count,2);
- assert.equal(r.core_article_prechecks_pass,true);
+ // Historic V4.1 receipts remain authentic, but the *current* D31 policy has
+ // flagged three specific issues. The cross-engine tribunal must report HOLD,
+ // not silently inherit a stale editorial green.
+ assert.equal(r.core_article_prechecks_pass,false);
+ assert.ok(r.articles.every(x=>x.content_machine_precheck_pass===false));
+ assert.ok(r.articles.some(x=>x.issues.includes('VOICE_PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED')));
+ assert.ok(r.articles.some(x=>x.issues.includes('VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE')));
+ assert.ok(r.articles.some(x=>x.issues.includes('VOICE_UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW')));
+ assert.ok(r.articles.every(x=>x.publication_authorized===false));
  assert.ok(r.articles.every(x=>x.faq_count===6));
  assert.ok(r.articles.every(x=>x.word_count>=1000&&x.body_words_excluding_faq>=750));
  assert.equal(r.wordpress.isolated_synthetic_mariadb_restore_pass,true);
