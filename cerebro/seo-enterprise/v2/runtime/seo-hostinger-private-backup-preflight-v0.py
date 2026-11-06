@@ -91,12 +91,21 @@ def examine_files(p):
     name=p.name.lower()
     if name.endswith(('.tar.gz','.tgz')):
         try:
-            with tarfile.open(p,mode='r|gz') as tar:
-                def entries():
-                    for x in tar:
-                        typ='file' if x.isfile() else 'dir' if x.isdir() else 'unsafe'
-                        yield x.name,x.size,typ,None
-                report=file_inventory(entries())
+            # tarfile's gzip streaming adapter may stop at TAR's end markers
+            # before checking the GZIP CRC/ISIZE trailer. Drain through the
+            # stdlib gzip reader to verify physical compressed-stream integrity.
+            with gzip.open(p,'rb') as stream:
+                with tarfile.open(fileobj=stream,mode='r|') as tar:
+                    def entries():
+                        for x in tar:
+                            typ='file' if x.isfile() else 'dir' if x.isdir() else 'unsafe'
+                            yield x.name,x.size,typ,None
+                    report=file_inventory(entries())
+                # Prevent a valid TAR with an enormous appended GZIP payload
+                # from bypassing the archive's declared expansion limits.
+                limit=MAX_BYTES+MAX_FILES*4096+128*1024**2
+                while stream.read(1024*1024):
+                    if stream.tell()>limit: fail('ARCHIVE_TRAILING_EXPANSION')
         except (tarfile.TarError,OSError,EOFError): fail('TAR_INVALID')
         fmt='tar.gz'
     elif name.endswith('.zip'):
