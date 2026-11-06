@@ -99,3 +99,10 @@ Una lectura del plugin de WordPress ha confirmado un checkpoint de base de datos
 5. Diseñar una cola durable y cron gobernados para autonomía habitual después de verificar presupuestos, límites de cuota, observabilidad y rollback. Hoy no se ha activado ningún scheduler nuevo.
 
 **Estado global:** `V4_CONTENT_2_OF_2_MACHINE_PRECHECK_GREEN`, `YMYL_MEDIA_AND_WP_RELEASE_HOLD`, `AUTONOMOUS_PROD_NOT_READY`, `PR22_DRAFT`. No cambiar main/App/CRM/PROD/DNS ni el Trading LAB.
+
+### Verificación adicional de rollback sin alterar WordPress
+
+Se invocó oficialmente `Cowboy_MCP_web/wp_restore_checkpoint` con el checkpoint histórico #70 y `dry_run=true`. Resultado literal de la herramienta `dry_run:true, action:restore, resource:checkpoint, description:Would restore checkpoint #70 with the provided parameters.`. **No se restauró ninguna tabla ni se modificó producción.** Este dry-run solo confirma contrato y disponibilidad de la herramienta, no prueba de recuperación real, consistencia post-restore ni preservación de cambios posteriores; la restauración física sigue requiriendo entorno aislado. Core Guard volvió a comprobarse como `production, operational_writes_allowed=false, production_override=false`.
+
+[Run 42234283595](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42234283595) validó además **5/5 pruebas** del orquestador tras dejar expresamente prohibido dirigir las fotografías sin textos/logos al renderizador creativo antiguo que superpone texto.
+
