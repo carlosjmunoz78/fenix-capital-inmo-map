@@ -16,6 +16,7 @@ const protectedIds=new Set([
  'be037644-3da6-4a96-8cb7-9ee3af9ba196'
 ]);
 const sentinel='CUT34_UNPROVISIONED_DO_NOT_DEPLOY';
+const verifiedEuJurisdictionD1='968e86d4-617c-4539-adde-541edc9ec215';
 function gate(cfg, isTemplate){
  assert.equal(cfg.name,'cerebro-jarvis-cut32-lab-eu');
  assert.equal(cfg.main,'./worker-b2-device-probe.mjs');
@@ -36,6 +37,7 @@ function gate(cfg, isTemplate){
  else {
   assert.match(db.database_id,/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/);
   assert.notEqual(db.database_id,'00000000-0000-0000-0000-000000000000');
+  assert.equal(db.database_id,verifiedEuJurisdictionD1,'ONLY_VERIFIED_EU_JURISDICTION_D1_ALLOWED');
  }
  const serialized=JSON.stringify(cfg);
  for(const forbidden of ['JARVIS_OWNER_EMAIL','JARVIS_B2_HMAC_KEY_HEX',
