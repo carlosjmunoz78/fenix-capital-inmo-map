@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CerebroGatewayV0 } from '../console/gateway.mjs';
 import { ActionGatewayV1 } from '../gateway/action-gateway-v1.mjs';
+import { budgetDecision } from '../router/execution-model-router.mjs';
 import {
  inspectJarvisCommandNetworkV0,bindJarvisCommandNetworkV0
 } from '../console/jarvis-command-network-v0.mjs';
@@ -135,4 +136,21 @@ test('CUT49 owner verification cannot be provided by the client payload',async()
  const r=await run(consoleGateway,'jarvis.network.dispatch',{target_id:'FACT-001',
   idempotency_key:'fake-owner',parameters:{},authorized:true,role:'CARLOS-ADMIN'});
  assert.equal(r.status,'AUTH_REQUIRED');assert.equal(r.executed,false);
+});
+
+test('CUT49 speaks through ACTGW to real existing ROUTE-001 deterministic budget function in PREPROD harness',async()=>{
+ const configuredTarget={...trusted,target_id:'ROUTE-001',
+  capability:'route001.budget-read',evidence_ref:'cerebro/router/execution-model-router.mjs#budgetDecision'};
+ const {consoleGateway,actionGateway}=setup({verified_targets:[configuredTarget],
+  // TEST-ONLY identity fixture. No external auth, no owner-session claim.
+  verifyOwner:async()=>true});
+ actionGateway.registerCapability('route001.budget-read',async({payload})=>
+  budgetDecision({estimated_incremental_cost_eur:payload.estimated_incremental_cost_eur??0}));
+ const r=await run(consoleGateway,'jarvis.network.dispatch',{target_id:'ROUTE-001',
+  idempotency_key:'route-real-001',parameters:{estimated_incremental_cost_eur:0}});
+ assert.equal(r.status,'ACTION_EXECUTED');
+ assert.equal(r.result.status,'GREEN_ZERO_ADDITIONAL_COST');
+ assert.equal(r.result.prod_authorized,false);
+ assert.equal(r.result.execution_authorized,false);
+ assert.equal(r.result.trading_access,false);
 });
