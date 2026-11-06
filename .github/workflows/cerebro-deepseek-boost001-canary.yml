@@ -1,7 +1,7 @@
 name: CEREBRO DeepSeek BOOST-001 Tiny Canary
 
-# CUT35: branch-scoped safe override only; main workflow is unchanged.
-# Run manually only with ref cerebro/jarvis-deepseek-weekend-lab-20261106.
+# CUT36: after successful single-call smoke, same LAB-only manual flow advances
+# to six synthetic conversation studies. Branch override only. MAIN UNCHANGED.
 on:
   workflow_dispatch:
 
@@ -9,31 +9,41 @@ permissions:
   contents: read
 
 concurrency:
-  group: jarvis-cut35-isolated-smoke-${{ github.ref }}
+  group: jarvis-cut36-isolated-dialogue-study-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  one-shot-lab:
+  dialogue-study:
     if: github.ref == 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     environment: JARVIS_DEEPSEEK_LAB
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      JARVIS_LAB_SMOKE_APPROVED: 'YES'
+      JARVIS_LAB_STUDY_APPROVED: 'YES'
+      JARVIS_LAB_STUDY_OUTPUT_DIR: ${{ runner.temp }}/jarvis-lab-dialogue
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Fail-closed authorization gate (no secrets printed)
+      - name: Verify dedicated branch and secret (never output value)
         shell: bash
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
-          test "$JARVIS_LAB_SMOKE_APPROVED" = 'YES'
+          test "$GITHUB_RUN_ATTEMPT" = '1'
           test -n "$DEEPSEEK_API_KEY"
-      - name: Offline only LAB gate
+          test "$JARVIS_LAB_STUDY_APPROVED" = 'YES'
+      - name: Required offline safety regression (zero API calls)
         run: node --test zeus/jarvis/training/*.test.mjs
-      - name: Single DeepSeek paid LAB canary (maximum 32 output tokens)
-        run: node zeus/jarvis/training/jarvis-deepseek-lab-canary.mjs
+      - name: Single bounded DeepSeek LAB dialogue study (max 12 paid calls, 0.15 USD)
+        run: node zeus/jarvis/training/jarvis-deepseek-study-lab.mjs --execute
+      - name: Upload synthetic-only review candidates
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut36-synthetic-dialogue-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-lab-dialogue/jarvis-study-${{ github.run_id }}.json
+          if-no-files-found: error
+          retention-days: 30
