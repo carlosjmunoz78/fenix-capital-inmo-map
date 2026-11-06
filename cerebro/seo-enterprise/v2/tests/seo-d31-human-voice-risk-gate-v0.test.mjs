@@ -141,3 +141,24 @@ test('V4.3 B2B preserves V4.2 and repairs only two owner-review claim risks',()=
  assert.equal(r.can_publish,false);
  console.log('SEO001_V43_B2B_CONTENT_SHA256='+crypto.createHash('sha256').update(updated).digest('hex'));
 });
+
+
+test('V4.3 B2B registry binds actual bytes and denies production authority',()=>{
+ const path='cerebro/seo-enterprise/v2/registry/seo001-v4-3-b2b-review-only-2026-11-06.json';
+ const registry=JSON.parse(fs.readFileSync(path,'utf8'));
+ const data=fs.readFileSync(registry.candidate_file);
+ const digest=crypto.createHash('sha256').update(data).digest('hex');
+ assert.equal(digest,registry.candidate_sha256);
+ assert.equal(registry.source_sha256,'3884b376c91516d28d3b3b82ec429964f134c32c164ec6e2649af01099b59a4c');
+ assert.equal(registry.proof.github_workflow_run,42288032135);
+ assert.equal(registry.machine_d31_precheck_pass,true);
+ for(const field of [
+  'professional_ymyl_review_verified','independent_seo_review_verified',
+  'legal_review_completed','owner_exact_digest_approved',
+  'core_guard_authorized_write','wordpress_restore_real_verified',
+  'ums_original_photo_ready','wordpress_drafts_created',
+  'publish_authorized','autonomous_production_ready'
+ ]) assert.equal(registry[field],false,field);
+ assert.equal(registry.wordpress_writes,0);
+ assert.equal(registry.paid_api_calls_this_revision,0);
+});
