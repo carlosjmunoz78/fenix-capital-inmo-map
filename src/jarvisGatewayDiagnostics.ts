@@ -3,7 +3,6 @@
  * Read-only existing Gateway GETs. No direct provider, owner secret, or action invocation.
  * A green connection means ONLY the listed read-only contract is proven.
  */
-import {fetchCerebroConsole} from './cerebroConsoleApi';
 
 export const JARVIS_GATEWAY_ENGINE_IDS=Object.freeze([
  'CONSOLE-001','CHAT-001','CTX-001','CMD-001','ACTGW-001'
@@ -22,7 +21,7 @@ export type JarvisGatewayDiagnostic={
  voice_device_verified:false;
  reason:string;
 };
-type RequestFn=<T>(path:string)=>Promise<{status:number;data:T|null}>;
+export type RequestFn=<T>(path:string)=>Promise<{status:number;data:T|null}>;
 type Health={status?:string;authenticated_transport?:boolean;direct_model_access?:boolean;prod_execution_enabled?:boolean;live_writes?:boolean;chat_available?:boolean};
 type Contract={gateway_required?:boolean;direct_model_access?:boolean;prod_execution_enabled?:boolean;trading_access?:boolean;live_writes?:boolean};
 type EngineRegistry={engines?:{engine_id?:string}[]};
@@ -33,7 +32,7 @@ const reject=(status:JarvisDiagnosticStatus,reason:string):JarvisGatewayDiagnost
  universal_execution_verified:false,voice_device_verified:false,reason
 });
 export async function inspectJarvisGateway(
- request:RequestFn=fetchCerebroConsole
+ request:RequestFn
 ):Promise<JarvisGatewayDiagnostic>{
  // This must run only after the App owner session exists. Even on successful HTTP,
  // a direct browser call cannot independently attest identity: the server checks JWT.
