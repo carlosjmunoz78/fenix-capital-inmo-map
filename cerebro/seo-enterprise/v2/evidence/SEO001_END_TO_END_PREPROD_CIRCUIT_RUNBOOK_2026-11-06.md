@@ -66,3 +66,36 @@ La antigua QA técnica sigue como prueba histórica, **no autoriza** liberar est
 **Invariantes:** `company_id,engine_id,environment,version`, cero dependencias en PCs locales, cero modelos de pago activados en este circuito, cero subscriptions nuevas, PR #22 DRAFT, branch `main` intacta, App/CRM/Supabase PROD/WordPress publicado no modificados, trading aislado.
 
 Esta evidencia no dice `TODO OPERATIVO`, dice `CIRCUITO DE PREPARACIÓN Y QA INTEGRADO CON BLOQUEOS REALES`. Mantener el principio CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
+
+## Actualización física del mismo día · V4 Free cloud y nuevas puertas
+
+**HECHO** el redactor real SEO-D13 ha ejecutado dos versiones B2C y B2B en Gemini Free desde GitHub Actions, siempre sin datos personales, sin proveedor pagado, sin reintentos automáticos ni escritor local.
+
+- [Run 42230677924](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42230677924) — primer piloto V4 cloud con **2 respuestas reales** y 6 FAQ cada una, pero **993 / 829 palabras**. Ambas `DEPTH_HOLD`, preservadas para aprendizaje.
+- [Run 42231912203](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42231912203) — segundo piloto, **2 respuestas reales** con **1629 / 1585 palabras**. B2C `H2_TOO_LONG`; B2B precontrol técnico anterior verde, pero QA posterior detectó recomendaciones que parecían hacer obligatoria la derivación tras la segunda visita y otras afirmaciones a matizar.
+- Nuevas barreras en `seo-d31-human-voice-risk-gate-v0.mjs` y tests: coste fiscal de plusvalía atribuido inadecuadamente, consentimiento RGPD como obligación universal, hitos fijos arbitrarios, palabras clave forzadas, exceso de certeza de una nota simple y ejemplos de viviendas inventados presentados como observados.
+- [Run **42233493715**](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42233493715) — reutilización **sin ninguna llamada IA adicional** de ambas muestras completas por SHA y reparación determinista, seguida de D31, longitud, D32 y generación de **planes UMS y WordPress** limitados a PREPROD. **2/2 `TECHNICAL_PRECHECK_PASS_RELEASE_HOLD`**; 6 FAQ por artículo.
+- El mecanismo `seo-d13-v4-canonical-deterministic-repair-v0.mjs` solo admite los SHA originales exactos y cambios específicos. Nunca reescribe borradores V3 ni aplica "arreglos" indiscriminados a textos no reconocidos.
+
+| Trabajo | SHA256 V4 revisada | Palabras visibles | Cuerpo excluidas FAQ | Media y WordPress |
+|---|---|---:|---:|---|
+| B2C Compradores | `875720fb5d22a3b325ab81eef39c10b9f4de71a4577a52c26a7e127c5625548b` | **1643** | **1432** | Brief UMS; WP dry-run plan, no ejecución |
+| B2B Inmobiliarias | `8342799e75d8ec1aca3afa9df362dffa8948d92473dde0a8953339833bfbd83f` | **1588** | **1434** | Brief UMS; WP dry-run plan, no ejecución |
+
+Registro de procedencia no aprobado `registry/seo001-v4-cloud-free-candidates-review-only-2026-11-06.json`, más artefacto GitHub `seo001-v4-source-locked-repair-review-only` ID `13509932634`. La vista maquetada de revisión se produjo como copia separada sin cambiar el texto fuente.
+
+### WordPress y rollback — comprobaciones sin riesgo
+
+Se había probado el conector `wp_create_post` en modo `dry_run=true,status=draft` con ambas V3 y devolvió confirmación de simulación. Para **las dos nuevas V4** existen planes técnicamente comprobados, **no se ha enviado su HTML a WordPress ni siquiera como nueva simulación oficial**. Es necesario no confundir un plan con un CMS post creado.
+
+Una lectura del plugin de WordPress ha confirmado un checkpoint de base de datos histórico del **05-11-2026**, y la operación `wp_create_checkpoint` fue verificada **solo en dry-run** hoy. El checkpoint histórico **no** constituye backup actualizado para estas versiones ni prueba de restauración; no se ejecutó `wp_restore_checkpoint` porque puede borrar modificaciones posteriores de toda la base de datos. El `fenix-core-guard/health` mantiene producción con `operational_writes_allowed=false`, `production_override=false`.
+
+### Próxima promoción segura
+
+1. Validar de forma independiente afirmaciones hipotecarias, fiscales, registrales y RGPD, revisión de enlaces reales, buyer persona, canibalización y SEO on-page. El resultado `PRECHECK_PASS` de D31 no demuestra revisión profesional.
+2. Enviar briefs de fotografía a **UMS-001** únicamente cuando haya identidad del adaptador fotográfico, coste y derechos acreditados. El renderizador gráfico existente NO sustituye a fotografía sin letras/logos. Esperar binarios con hashes, licencias, inventario de duplicados y QA de píxeles.
+3. Probar snapshot reciente y **restauración aislada** sin poner en riesgo cambios posteriores del WordPress de producción, luego IAM mínimo solo borradores y Core Guard habilitado bajo política.
+4. Aprobar individualmente **el SHA V4 exacto** y distinguir aprobación de contenido de autorización de publicación. Solo entonces ensayar promoción gradual.
+5. Diseñar una cola durable y cron gobernados para autonomía habitual después de verificar presupuestos, límites de cuota, observabilidad y rollback. Hoy no se ha activado ningún scheduler nuevo.
+
+**Estado global:** `V4_CONTENT_2_OF_2_MACHINE_PRECHECK_GREEN`, `YMYL_MEDIA_AND_WP_RELEASE_HOLD`, `AUTONOMOUS_PROD_NOT_READY`, `PR22_DRAFT`. No cambiar main/App/CRM/PROD/DNS ni el Trading LAB.
