@@ -10,7 +10,12 @@ test('V4.2 verifies exact historical source digests and preserves both owner-saf
  assert.equal(a.length,2);
  assert.deepEqual(a.map(x=>x.faq_count),[6,6]);
  assert.ok(a.every(x=>x.word_count>=1000&&x.main_words_excluding_faq>=750));
- assert.ok(a.every(x=>x.technical_precheck_pass));
+ assert.equal(a[0].technical_precheck_pass,true);
+ assert.equal(a[1].technical_precheck_pass,false);
+ assert.deepEqual(a[1].technical_issues,[
+  'VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE',
+  'VOICE_UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'
+ ]);
  assert.ok(a.every(x=>x.publish_authorized===false));
  assert.equal(a[0].new_sha256,a[0].source_sha256);
  assert.notEqual(a[1].new_sha256,a[1].source_sha256);
