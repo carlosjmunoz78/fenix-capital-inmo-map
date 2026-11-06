@@ -23,7 +23,7 @@ export async function inspectAnonymousGateway({publishableKey,fetchImpl=fetch}){
   headers:{apikey:publishableKey,accept:'application/json'},
   signal:AbortSignal.timeout(12000)
  });
- assert(response.status===403,'ANON_GATE_NOT_DENIED_BY_OWNER_POLICY');
+ assert(response.status===403,'ANON_GATE_UNEXPECTED_HTTP_'+String(response.status));
  let data;
  try{data=await response.json()}catch{throw Error('ANON_GATE_DENIAL_NOT_JSON')}
  assert(data&&data.status==='FORBIDDEN'&&data.reason==='OWNER_ONLY',
