@@ -91,3 +91,24 @@ test('CUT39 registry is explicit about missing production authority and historic
  assert.equal(registry.release_gates.can_change_prod,false);
  assert.deepEqual(registry.ui_surfaces.map(x=>x.id),['JARVIS','OPERATIVA','NEURONAL','NAVEGADOR']);
 });
+
+test('CUT40 Operativa has one shared core and no hidden duplicate conversation',()=>{
+ const operative=read('src/CerebroOperativeConsole.tsx');
+ const host=read('src/CerebroConsoleHost.tsx');
+ assert.equal((host.match(/<CerebroJarvisWorkConsole/g)||[]).length,1);
+ assert.doesNotMatch(operative,/<CerebroConsoleShell\s*\/>/);
+ assert.doesNotMatch(operative,/operativa-core-bridge/);
+ assert.doesNotMatch(operative,/requestSubmit\(/);
+ assert.ok(operative.includes('sendJarvisComposerMessage('));
+ assert.ok(operative.includes('.jarvis-core-mounted .cerebro-voice-main'));
+ assert.ok(operative.includes('Verifica permisos y empresa en el Gateway'));
+ assert.ok(operative.includes(".cerebro-chat-form textarea:not(:disabled)"));
+});
+test('CUT40 server authority is independent of UI company label or model state',()=>{
+ const policy=JSON.parse(read('cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'));
+ assert.equal(policy.authority_model,'EXISTING_CEREBRO_GATEWAY_ONLY');
+ assert.equal(policy.action_authority.unrestricted_execution,false);
+ const operative=read('src/CerebroOperativeConsole.tsx');
+ assert.ok(!operative.includes('DEEPSEEK_API_KEY'));
+ assert.ok(!operative.includes('SUPABASE_SERVICE_ROLE_KEY'));
+});
