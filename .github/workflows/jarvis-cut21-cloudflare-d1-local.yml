@@ -66,6 +66,14 @@ jobs:
           npx --yes wrangler@4.157.0 deploy --config wrangler-b2-read-probe.candidate.lab.jsonc --dry-run --outdir=./cut31-b2-candidate
           test -n "$(find ./cut31-b2-candidate -type f -print -quit)"
           echo 'CUT31 Cloudflare B2 canary build only: PASS'
+      - name: CUT32 independent device B2 status OFF-only binding guard
+        run: node verify-cut32-device-binding.mjs
+      - name: CUT32 compile private per-device B2 Worker (NO DEPLOY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-b2-device.candidate.lab.jsonc --dry-run --outdir=./cut32-device-bundle
+          test -n "$(find ./cut32-device-bundle -type f -print -quit)"
+          echo 'CUT32 per-device candidate compiled, no remote mutation: PASS'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
