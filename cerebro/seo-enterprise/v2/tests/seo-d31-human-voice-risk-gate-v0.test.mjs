@@ -92,3 +92,24 @@ test('later real B2C FAQ overclaims note-simple area and invents observations',(
  assert.ok(r.issues.includes('UNVERIFIED_CASE_DETAILS_PRESENTED_AS_OBSERVED'));
  assert.equal(r.can_publish,false);
 });
+
+
+test('immutable V4.2 B2B copy is blocked for mortgage promises and premature dismissal',()=>{
+ const file='cerebro/seo-enterprise/v2/drafts/v4-2-review-only/inmobiliarias-v4-2-review-only.html';
+ const html=fs.readFileSync(file,'utf8');
+ const blob=crypto.createHash('sha1').update('blob '+Buffer.byteLength(html)+'\0').update(html).digest('hex');
+ assert.equal(blob,'019ca268df22adb7e995a39771446a3774740398');
+ const r=auditSeoHumanVoiceAndRisk({html,persona:'INMOBILIARIAS'});
+ assert.equal(r.deterministic_precheck_passed,false);
+ assert.ok(r.issues.includes('UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE'));
+ assert.ok(r.issues.includes('UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'));
+ assert.equal(r.independent_professional_qa_verified,false);
+ assert.equal(r.can_publish,false);
+});
+test('conditional wording does not trigger a false mortgage success promise',()=>{
+ const html='<h1>Financiación prudente</h1><h2>Plazos realistas</h2><p>La coordinación facilita el seguimiento, pero no garantiza la aprobación de la hipoteca. Si el banco la deniega, las partes revisan sus opciones y compromisos.</p>';
+ const r=auditSeoHumanVoiceAndRisk({html,persona:'INMOBILIARIAS'});
+ assert.ok(!r.issues.includes('UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE'));
+ assert.ok(!r.issues.includes('UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'));
+ assert.equal(r.can_publish,false);
+});
