@@ -6,6 +6,7 @@ import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisCompose
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import JarvisOwnerDialogueCheck from './JarvisOwnerDialogueCheck';
 import JarvisAudioDeviceCheck from './JarvisAudioDeviceCheck';
+import JarvisPhysicalVoiceCheck from './JarvisPhysicalVoiceCheck';
 import {jarvisDictationProblem} from './jarvisVoicePolicy';
 import {getJarvisOmniState,JARVIS_OMNI_EVENT} from './jarvisOmniSession';
 import './cerebro-operative-console.css';
@@ -130,6 +131,7 @@ export default function JarvisOperativaComposerPortal(){
    <JarvisGatewayCapabilityPanel ready={snapshot.ready}/>
    <JarvisOwnerDialogueCheck ready={snapshot.ready}/>
    <JarvisAudioDeviceCheck disabled={snapshot.voiceActive||snapshot.sending||dictating}/>
+   <JarvisPhysicalVoiceCheck disabled={snapshot.voiceActive||snapshot.sending||dictating}/>
   </section>
  </div>,target);
 }
