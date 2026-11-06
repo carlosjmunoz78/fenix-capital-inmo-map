@@ -1,0 +1,93 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "consumer_engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "CONNECTOR_DISCOVERY_DONE_NO_AUTOMATED_PHOTOGRAPHIC_PROVIDER_ATTESTED",
+  "evaluated_at": "2026-11-06",
+  "requirement": "Two genuinely different, photo-realistic, text-free and logo-free Córdoba-related commercial images; 1200x630 WebP; license, SHA256, pHash, inventory and visual QA; delivered through CEREBRO Gateway.",
+  "zero_additional_subscription_first": true,
+  "credit_balance_known": false,
+  "credit_spend_not_permitted_by_this_file": true,
+  "candidates": [
+    {
+      "provider": "CANVA",
+      "path": "CONNECTED_CHATGPT_CANVA_GENERATE_IMAGE",
+      "priority": 1,
+      "evidence_url": "https://www.canva.com/es_es/help/ai-access-variantb/",
+      "evidence": "Canva Free monthly AI quota up to 20 standard-or-premium uses, paid Canva standard image-generation allowances vary.",
+      "available_in_chat": true,
+      "available_as_cerebro_gateway_connector": false,
+      "api_credential_ref": null,
+      "account_plan_verified": false,
+      "remaining_quota_verified": false,
+      "new_subscription_required": null,
+      "requires_user_direct_generation_not_autonomous_pipeline": true,
+      "dispatch_authorized": false,
+      "technical_status": "CHAT_APP_AVAILABLE_NOT_GATEWAY_INTEGRATED"
+    },
+    {
+      "provider": "ADOBE_FIREFLY",
+      "path": "CONNECTED_CHATGPT_ADOBE_IMAGE_GENERATE",
+      "priority": 2,
+      "evidence_url": "https://helpx.adobe.com/creative-cloud/apps/generative-ai/generative-credits-faq.html",
+      "evidence": "Free accounts receive limited daily generations on selected Adobe models; images consume available credits depending on feature.",
+      "available_in_chat": true,
+      "available_as_cerebro_gateway_connector": false,
+      "api_credential_ref": null,
+      "account_plan_verified": false,
+      "remaining_quota_verified": false,
+      "new_subscription_required": null,
+      "dispatch_authorized": false,
+      "technical_status": "CHAT_APP_AVAILABLE_CREDITS_UNKNOWN_NOT_GATEWAY_INTEGRATED"
+    },
+    {
+      "provider": "OPENAI_IMAGE_API",
+      "path": "NEW_IMAGE_API_KEY_SEPARATE_FROM_TEXT_GENERATION",
+      "priority": 3,
+      "evidence_url": "https://developers.openai.com/api/docs/guides/image-generation",
+      "pricing_url": "https://developers.openai.com/api/docs/pricing",
+      "evidence": "Current official docs specify gpt-image-2.5-flare and sunburst for image generation; priced per output/input tokens, not a free tier.",
+      "candidate_models": [
+        "gpt-image-2.5-flare",
+        "gpt-image-2.5-sunburst"
+      ],
+      "retired_disallowed_models": [
+        "gpt-image-1"
+      ],
+      "retired_model_note": "gpt-image-1 shut down 2026-10-23 according to official model documentation.",
+      "available_in_chat": false,
+      "available_as_cerebro_gateway_connector": false,
+      "api_credential_ref": null,
+      "account_plan_verified": false,
+      "remaining_quota_verified": false,
+      "new_subscription_required": false,
+      "paid_api_request": true,
+      "dispatch_authorized": false,
+      "technical_status": "PAID_BY_TOKEN_HOLD_NO_BOUNDED_COST_AND_GATEWAY_PROVIDER"
+    }
+  ],
+  "gates_before_any_dispatch": [
+    "VERIFY_EXISTING_ACCOUNT_PLAN_AND_FREE_GENERATIVE_QUOTA_OR_OBTAIN_EXPLICIT_FIXED_BUDGET",
+    "CREATE_SYMBOLIC_PROVIDER_CREDENTIAL_REF_IN_VAULT_FOR_CEREBRO_GATEWAY",
+    "PROVE_PROVIDER_EXECUTION_PATH_CLOUD_ONLY_NO_USER_PC",
+    "ENFORCE_ONE_IMAGE_PER_WORK_NO_AUTOMATIC_RETRIES_NO_PAID_FALLBACK",
+    "STORE_ORIGINAL_IMAGE_BYTES_AND_PROVIDER_RECEIPT",
+    "VERIFY_LICENSE_RIGHTS_AND_IMAGE_OUTPUT_SHA256",
+    "CHECK_GLOBAL_MEDIA_INVENTORY_AND_PERCEPTUAL_NEAR_DUPLICATES",
+    "INDEPENDENT_VISUAL_QA_NO_TEXT_LOGO_WATERMARK",
+    "LOAD_TEST_AND_ROLLBACK_IN_PREPROD",
+    "NO_WORDPRESS_MEDIA_UPLOAD_BEFORE_APPROVAL"
+  ],
+  "image_api_requests_executed": 0,
+  "canva_generations_executed": 0,
+  "adobe_generations_executed": 0,
+  "paid_api_requests_executed": 0,
+  "independent_provider_receipt_verified": false,
+  "production_photographic_pipeline_ready": false,
+  "manual_chat_generation_not_equal_to_autonomous_gateway_integration": true,
+  "wordpress_upload_authorized": false,
+  "publish_authorized": false
+}
