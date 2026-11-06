@@ -121,6 +121,76 @@
       "promoted_at": "2026-10-28T01:58:20.500Z"
     },
     {
+      "candidate_id": "repo:4d39e070d1910d7d5bd778ef90dc",
+      "technical_name": "accessibility-auditor",
+      "source_locator": "github://TerminalSkills/skills@0abb852010feb21984fa40f0bf52352a440ae6d4/skills/accessibility-auditor",
+      "pinned_sha": "0abb852010feb21984fa40f0bf52352a440ae6d4",
+      "snapshot_sha256": "4d39e070d1910d7d5bd778ef90dcc7b77735b450b9a3b1207c543dfdd4772a37",
+      "manifest_sha256": "5fa580b697010d6d930cbb83dc6a391c65c335abbebb2b3223e47f01e213696d",
+      "outcome_hash": "8782b7ba40eb488fa0d1ad1126129629d62311b23562918b248452c8199d2541",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:4d39e070d1910d7d:cap:1",
+          "technical_name": "accessibility-auditor",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-11-06T23:16:30.693Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "dacdfae2ff0e48e234cb7ed118745daebf7daae3034857fe11fcbcb74069f6df"
+    },
+    {
       "candidate_id": "repo:7db334a5e19c06753c7d600032f5",
       "technical_name": "accessibility-auditor",
       "source_locator": "github://TerminalSkills/skills@8a9852d489f274538be9bf1c9121aeb403750b1c/skills/accessibility-auditor",
@@ -17107,11 +17177,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 169,
-    "inserted": 0,
+    "total": 170,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 169
   }
 }
