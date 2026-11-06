@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4.157.0/config-schema.json",
+  "name": "cerebro-jarvis-lab-eu",
+  "main": "./worker-off.mjs",
+  "compatibility_date": "2026-11-05",
+  "workers_dev": false,
+  "routes": [],
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "JARVIS_ENVIRONMENT": "LAB",
+    "JARVIS_GATEWAY_ENABLED": "false",
+    "JARVIS_B2_B3_LIVE_ENABLED": "false"
+  },
+  "d1_databases": [
+    {
+      "binding": "JARVIS_LAB_DB",
+      "database_name": "cerebro-jarvis-lab-eu",
+      "database_id": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+      "preview_database_id": "jarvis-cut28-eu-local"
+    }
+  ]
+}
