@@ -45,7 +45,7 @@ export function validatePrivateWordpressRestoreReceipt({
   'database_post_and_page_counts_reconciled','private_http_smoke_passed',
   'rollback_to_original_isolated_state_tested','network_egress_blocked',
   'outbound_email_blocked','external_cron_blocked','admin_access_private_only']);
- if(Object.values(payload.restore).slice(1).some(x=>x!==true))
+ if(Object.entries(payload.restore).some(([k,v])=>k!=='finished_at'&&v!==true))
   reject('INCOMPLETE_PRIVATE_RESTORE');
  exact(payload.evidence,['backup_files_checksum_matches',
   'database_checksum_matches','private_runner_identity','run_id',
