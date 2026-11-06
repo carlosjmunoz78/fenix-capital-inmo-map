@@ -46,9 +46,11 @@
   createRoot(document.getElementById('root')).render(React.createElement(Portal));
   const state={ready:true,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false,
     turns:[{role:'user',text:'Hola desde Operativa'},{role:'cerebro',text:'Te escucho en todas las interfaces'}],observedAt:Date.now()};
-  setJarvisActiveInterface('OPERATIVA');
-  createRoot(document.getElementById('omni-root')).render(React.createElement(Dock,{onOpenJarvis:()=>document.body.dataset.openJarvis='YES'}));
-  setTimeout(()=>publishJarvisOmniState(state),100);
+  if(new URLSearchParams(window.location.search).get('omni')==='1'){
+   setJarvisActiveInterface('OPERATIVA');
+   createRoot(document.getElementById('omni-root')).render(React.createElement(Dock,{onOpenJarvis:()=>document.body.dataset.openJarvis='YES'}));
+   setTimeout(()=>publishJarvisOmniState(state),100);
+  }
   document.body.addEventListener('click',event=>{
    if(event.target?.id==='simulate-offline')publishJarvisOmniState({...state,ready:false});
    if(event.target?.id==='simulate-online')publishJarvisOmniState({...state,ready:true});
