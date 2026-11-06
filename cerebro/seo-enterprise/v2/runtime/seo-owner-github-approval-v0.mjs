@@ -24,6 +24,13 @@ export function parseOwnerApproval(text){
   return Object.freeze({kind:'STRATEGY',company_id:'fenix',plan_blob_sha:strategy[1],
     grant:'PREPARE_BRIEFS_AND_DRAFTS_ONLY',can_publish:false});
  }
+ const editorial=/^CEREBRO_SEO_APPROVE EDITORIAL fenix (SEO001-FENIX-B2C-EDITORIAL-001|SEO001-FENIX-B2B-EDITORIAL-002) ([0-9a-f]{64})$/.exec(text);
+ if(editorial){
+  if(!SHA256.test(editorial[2]))fail('INVALID_EDITORIAL_DIGEST');
+  return Object.freeze({kind:'EDITORIAL',company_id:'fenix',work_id:editorial[1],
+   source_sha256:editorial[2],grant:'EDITORIAL_CONTENT_REVIEW_ONLY',
+   can_publish:false,wordpress_write_authorized:false});
+ }
  const draft=/^CEREBRO_SEO_APPROVE DRAFT fenix ([1-9][0-9]{0,9}) ([0-9a-f]{64})$/.exec(text);
  if(draft){
   if(!SHA256.test(draft[2]))fail('INVALID_DRAFT_DIGEST');
@@ -58,4 +65,25 @@ export async function verifyOwnerApprovalFromGitHub({
   environment:'PREPROD',...p,owner_approval_verified:true,can_publish:false,
   wordpress_write_authorized:false,release_gate_status:'NOT_EXECUTED'
  });
+}
+
+/** Bind a fresh provider-authorized editorial comment to a verified immutable draft.
+ * Both inputs must be independently verified by GitHub API / locked repository content.
+ * This is NOT an executor and never opens WordPress permissions.
+ */
+export function matchEditorialApprovalToReviewedDraft({provider_receipt,work_item}={}){
+ if(provider_receipt?.status!=='GITHUB_OWNER_COMMENT_VERIFIED_PREPROD_NOT_PUBLISHED'||
+    provider_receipt?.owner_approval_verified!==true||provider_receipt?.provider!=='GITHUB_REST'||
+    provider_receipt?.kind!=='EDITORIAL'||provider_receipt?.company_id!=='fenix'||
+    provider_receipt?.work_id!==work_item?.work_id||
+    provider_receipt?.source_sha256!==work_item?.digest||
+    provider_receipt?.wordpress_write_authorized!==false||
+    work_item?.company_id!=='fenix'||work_item?.environment!=='PREPROD'||
+    !SHA256.test(work_item?.digest??'')||!SHA1.test(work_item?.blob??''))fail('EDITORIAL_SOURCE_MISMATCH');
+ return Object.freeze({status:'EDITORIAL_OWNER_CONTENT_ACCEPTED_NEXT_QA_ONLY',
+  company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
+  work_id:work_item.work_id,source_sha256:work_item.digest,
+  github_comment_id:provider_receipt.provider_comment_id,
+  owner_verified:true,professional_qa_verified:false,
+  wordpress_write_authorized:false,can_publish:false,release_authorized:false});
 }
