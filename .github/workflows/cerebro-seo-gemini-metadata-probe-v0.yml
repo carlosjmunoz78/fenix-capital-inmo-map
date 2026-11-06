@@ -18,10 +18,25 @@ jobs:
         run: |
           node --check cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs
-      - name: Probe one metadata endpoint with GitHub secret when present
+      - name: Authenticate FREE project key against one read-only model metadata request
         env:
           CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
         run: |
-          node cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
+          node --input-type=module <<'NODE'
+          import {probeGeminiModelMetadata} from './cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs';
+          const state=await probeGeminiModelMetadata({key:process.env.CEREBRO_GEMINI_FREE_API_KEY||null});
+          const receipt={
+            status:state.status,reason:state.reason,key_present:state.key_present,
+            model_available:state.model_available,connection_verified:state.connection_verified===true,
+            billing_tier_verified:state.billing_tier_verified,
+            inference_calls:state.inference_calls,wordpress_writes:state.wordpress_writes,
+            additional_cost_eur:state.additional_cost_eur,can_publish:state.can_publish
+          };
+          process.stdout.write(JSON.stringify(receipt)+'\n');
+          if(state.status!=='METADATA_ONLY_VERIFIED'||state.connection_verified!==true){
+            process.stderr.write('BLOCKED: FREE Gemini connection has not passed read-only authentication.\n');
+            process.exitCode=2;
+          }
+          NODE
       - name: Zero-inference verification
         run: echo 'READONLY_METADATA_ONLY=YES GEMINI_GENERATIONS=0 BILLING_TIER=UNVERIFIED PAID_FALLBACK=NO'
