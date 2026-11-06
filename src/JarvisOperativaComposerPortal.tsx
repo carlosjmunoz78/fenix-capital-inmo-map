@@ -53,7 +53,7 @@ export default function JarvisOperativaComposerPortal(){
   };
   inspect();
   const observer=new MutationObserver(inspect);
-  observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,
+  observer.observe(document.querySelector('.jarvis-core-mounted')||document.body,{subtree:true,childList:true,characterData:true,attributes:true,
    attributeFilter:['disabled','aria-pressed','class']});
   const interval=window.setInterval(inspect,4000);
   return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
