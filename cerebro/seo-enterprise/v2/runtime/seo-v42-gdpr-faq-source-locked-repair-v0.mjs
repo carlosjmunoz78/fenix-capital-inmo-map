@@ -60,11 +60,11 @@ export function makeSeoV42({root=process.cwd()}={}){
   // Preserve the exact historical V4.2 bytes, but never re-certify an archived
   // candidate against a newer QA rubric. Only these two newly discovered
   // B2B risks are permitted as a historical hold, not as a successful review.
-  const historicalHold=[
+  const historicalHold=type==='agencies'?[
    'VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE',
    'VOICE_UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'
-  ];
-  if(issues.length&&(type!=='agencies'||issues.some(y=>!historicalHold.includes(y))))
+  ]:['VOICE_PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED'];
+  if(issues.length&&issues.some(y=>!historicalHold.includes(y)))
    no('UNEXPECTED_TECHNICAL_QA_FAILED_'+type+'_'+issues.join('_'));
   if(depth.total_visible_words<1000||depth.main_content_words_excluding_faq<750||
    depth.faq_count!==6)no('DEPTH_FAQ');
