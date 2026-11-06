@@ -85,6 +85,11 @@ export function receiveSeoTrainingAnswer({file_path,job_id,role_id,case_id,answe
   job.payload.external_write===false&&job.payload.publish===false,
   'CHALLENGE_BINDING');
  deny(job.status==='QUEUED','NOT_QUEUED_OR_REPLAY');
+ // Current intake is intentionally serialized; never claim another role's queued job.
+ // A competing/earlier queued challenge must be processed by its own caller.
+ const competing=journal.listForContext(ctx).filter(x=>
+   (x.status==='QUEUED'||x.status==='RETRY_WAIT')&&x.job_id!==job_id);
+ deny(competing.length===0,'MULTIPLE_PENDING_JOBS_REQUIRE_ORDERED_INTAKE');
  const claimed=journal.claim({context:ctx,worker_id:'SEO_PHASE2_INTAKE_UNAUTHENTICATED',now_ms,lease_ms:30000});
  deny(claimed?.job_id===job_id,'ISOLATION_OR_CLAIM_CONFLICT');
  const result={
