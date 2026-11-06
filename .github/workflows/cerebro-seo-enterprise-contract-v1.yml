@@ -215,4 +215,69 @@ jobs:
             ${{ runner.temp }}/cerebro-excellence/excellence-evidence.json
           retention-days: 14
           if-no-files-found: error
+  seo-pilot-d31-evidence:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' }}
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download the original noncertifying JOB-001 pilot receipt from this workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2/pilot
+      - name: Independently recompute source facts from frozen PROD corpus (D31 objective QA only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2/d31"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-d31-evidence-check-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2/pilot/pilot-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d31/d31-receipt.json"
+      - name: Preserve D31 non-professional source-integrity report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-d31-source-integrity-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d31/d31-receipt.json
+          retention-days: 14
+          if-no-files-found: error
+
+  seo-pilot-d32-feedback:
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' }}
+    needs: seo-pilot-d31-evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download pinned pilot receipt from the same workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2/pilot
+      - name: Download independent D31 source-integrity evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: cerebro-seo-v2-d31-source-integrity-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d31
+      - name: D32 verifies D31 report and prepares remaining two role-specific exercises
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2/d32"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-d32-training-feedback-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2/pilot/pilot-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d31/d31-receipt.json" \
+            "$RUNNER_TEMP/seo-phase2/d32/d32-feedback.json"
+      - name: Preserve D32 learning and remediation plan (not training or privileges)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-d32-remediation-plan-no-certification
+          path: ${{ runner.temp }}/seo-phase2/d32/d32-feedback.json
+          retention-days: 14
+          if-no-files-found: error
 
