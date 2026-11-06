@@ -1,0 +1,46 @@
+name: CEREBRO SEO · V4.2 source-locked GDPR FAQ and editorial review
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v42-gdpr-faq-source-locked-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v42-gdpr-faq-source-locked-repair-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-v42-gdpr-faq-review-v0.yml'
+permissions:
+  contents: write
+concurrency:
+  group: seo001-v42-gdpr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  isolated-review:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: true
+      - name: Validate original hashes, new precise FAQ language and unchanged original
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v42-gdpr-faq-source-locked-repair-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v42-gdpr-faq-source-locked-repair-v0.test.mjs
+      - name: Allow permanent review-only registration solely on dedicated one-shot commit
+        id: gate
+        run: |
+          if [ "$(git log -1 --format='%s')" = "ci(seo): verify and preserve V4.2 legal FAQ" ]; then
+            echo 'persist=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'persist=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Generate and store V4.2 immutable review files without model calls
+        if: ${{ steps.gate.outputs.persist == 'true' }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-v42-gdpr-faq-source-locked-repair-v0.mjs
+          git add --            cerebro/seo-enterprise/v2/drafts/v4-2-review-only/compradores-v4-2-review-only.html            cerebro/seo-enterprise/v2/drafts/v4-2-review-only/inmobiliarias-v4-2-review-only.html            cerebro/seo-enterprise/v2/registry/seo001-v4-2-source-locked-review-only-2026-11-06.json
+          test "$(git diff --cached --name-only | wc -l)" -eq 3
+          git config user.name 'cerebro-seo-review-bot'
+          git config user.email 'cerebro-seo-review-bot@users.noreply.github.com'
+          git commit -m 'seo(ymyl): preserve V4.2 source-locked GDPR correction review only'
+          git push origin "HEAD:refs/heads/cerebro/seo-enterprise-family-staging-contract-v1-20261105"
+      - name: Retain release prohibition
+        run: echo 'V4_2_REVIEW_ONLY=TRUE PAID_MODEL_CALLS=0 IMAGE_API_CALLS=0 WORDPRESS_WRITES=0 PUBLISH=NO'
