@@ -107,6 +107,11 @@ test('CUT47 microphone permission denied reports clearly without enabling gatewa
 test('CUT48 browser speech can be played only after click and owner confirms audibility',async({page})=>{
  await page.evaluate(()=>{
   window.__jarvisSpoken=[];
+  // The voice fixture must be paired with an inert utterance constructor;
+  // Chromium's native SpeechSynthesisUtterance rejects non-native voice objects.
+  Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,writable:true,value:class MockUtterance{
+   constructor(text){this.text=text;this.rate=1;this.pitch=1;this.volume=1;this.lang='es-ES';this.voice=null;this.onend=null;this.onerror=null}
+  }});
   Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
    cancel:()=>{},
    getVoices:()=>[{name:'Microsoft Pablo',lang:'es-ES',localService:true}],
