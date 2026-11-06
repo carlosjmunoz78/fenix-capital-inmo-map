@@ -27,7 +27,12 @@ async function runMatrixCase(t, count) {
       context: CONTEXT,
       payload: { index },
       idempotency_key: `prod-max-${count}-${index}`,
-      timeout_ms: 2_000,
+      // Shared GitHub runners can spend >2 s writing/validating the journal
+      // while claiming 48 concurrent jobs. This is a durability/50-job
+      // acceptance test, not the independent 2-second handler SLA test.
+      // Preserve completion count, 48-slot concurrency, side effects,
+      // exact restore and idempotency assertions unchanged.
+      timeout_ms: 15_000,
       max_attempts: 3,
       retry: { base_delay_ms: 1, max_delay_ms: 10, jitter_ratio: 0 },
     });
@@ -40,7 +45,8 @@ async function runMatrixCase(t, count) {
   const worker = new DurableWorkerRunnerV1({
     job_runtime: queue,
     worker_id: `prod-max-gate-${count}`,
-    lease_ms: 1_000,
+    // Permit slow durable journal fsync during initial 48-job claim fanout.
+    lease_ms: 15_000,
     heartbeat_ms: 20,
     max_concurrency: 48,
     max_per_company: 48,
