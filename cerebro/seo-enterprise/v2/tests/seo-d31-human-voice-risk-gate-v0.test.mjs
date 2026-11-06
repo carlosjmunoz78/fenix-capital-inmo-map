@@ -238,11 +238,11 @@ test('V4.4 source-locked legal review only preserves exact V4.3 bytes and reject
  for(const entry of reg.candidates){
   const original=fs.readFileSync(entry.source_file,'utf8');
   const candidate=fs.readFileSync(entry.candidate_file,'utf8');
-  const gitSha=crypto.createHash('sha1').update('blob '+Buffer.byteLength(original)+'\\0').update(original).digest('hex');
+  const gitSha=crypto.createHash('sha1').update('blob '+Buffer.byteLength(original)+'\0').update(original).digest('hex');
   assert.equal(gitSha,entry.source_git_blob);
   assert.equal(lockedPatch(original,entry),candidate,'NO_UNTRACKED_TEXT_EDITS');
   assert.equal(crypto.createHash('sha256').update(candidate).digest('hex'),entry.candidate_sha256);
-  assert.throws(()=>lockedPatch(original+'\\n<!-- tamper -->',entry),/SOURCE_SHA_MISMATCH/);
+  assert.throws(()=>lockedPatch(original+'\n<!-- tamper -->',entry),/SOURCE_SHA_MISMATCH/);
   assert.equal(entry.professional_legal_review_verified,false);
   const audit=auditSeoHumanVoiceAndRisk({html:candidate,persona:entry.persona,content_type:'ARTICLE'});
   assert.deepEqual(audit.issues,[],JSON.stringify(audit.issues));
@@ -263,12 +263,12 @@ test('V4.4 source-locked legal review only preserves exact V4.3 bytes and reject
 test('V4.4 explicit source-specific legal facts; no generalized consent or administrator-only certificate',()=>{
  const b2c=fs.readFileSync('cerebro/seo-enterprise/v2/drafts/v4-4-review-only/compradores-v4-4-review-only.html','utf8');
  assert.doesNotMatch(b2c,/certificado de estar al corriente.{0,100}emitido por el administrador/i);
- assert.match(b2c,/artículo 9\\.1\\.e de la Ley de Propiedad Horizontal/);
+ assert.match(b2c,/artículo 9\.1\.e de la Ley de Propiedad Horizontal/);
  assert.match(b2c,/funciones de secretario, con el visto bueno del presidente/);
  assert.match(b2c,/comprador exonere expresamente al vendedor/);
  assert.match(b2c,/las últimas actas de la comunidad/);
  const b2b=fs.readFileSync('cerebro/seo-enterprise/v2/drafts/v4-4-review-only/inmobiliarias-v4-4-review-only.html','utf8');
- assert.doesNotMatch(b2b,/¿Hace falta consentimiento para derivar al comprador\\?<\\/h3><p>No necesariamente/);
+ assert.doesNotMatch(b2b,/¿Hace falta consentimiento para derivar al comprador\?<\/h3><p>No necesariamente/);
  assert.match(b2b,/identificar y documentar la base jurídica aplicable/);
  assert.match(b2b,/consentimiento, este debe ser libre, informado e inequívoco/);
  assert.match(b2b,/cesión a terceros puede requerir una manifestación diferenciada/);
