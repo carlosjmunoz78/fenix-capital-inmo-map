@@ -3,6 +3,11 @@ import assert from 'node:assert/strict';
 import { CerebroGatewayV0 } from '../console/gateway.mjs';
 import { ActionGatewayV1 } from '../gateway/action-gateway-v1.mjs';
 import { budgetDecision } from '../router/execution-model-router.mjs';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { DurableJobRuntimeV1 } from '../runtime/durable-job-runtime-v1.mjs';
+import { DurableWorkerRunnerV1 } from '../runtime/durable-worker-runner-v1.mjs';
 import {
  inspectJarvisCommandNetworkV0,bindJarvisCommandNetworkV0
 } from '../console/jarvis-command-network-v0.mjs';
@@ -153,4 +158,43 @@ test('CUT49 speaks through ACTGW to real existing ROUTE-001 deterministic budget
  assert.equal(r.result.prod_authorized,false);
  assert.equal(r.result.execution_authorized,false);
  assert.equal(r.result.trading_access,false);
+});
+
+test('CUT49 JARVIS command reaches REAL JOB-001 durable queue and completes isolated PREPROD work',async t=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'jarvis-cut49-job001-'));
+ t.after(()=>fs.rmSync(root,{recursive:true,force:true}));
+ const context={company_id:'fenix',engine_id:'JOB-001',environment:'PREPROD',version:'cut49'};
+ const runtime=new DurableJobRuntimeV1({file_path:path.join(root,'jobs.v8journal')});
+ let sideEffects=0;
+ const worker=new DurableWorkerRunnerV1({job_runtime:runtime,worker_id:'cut49-local-test',
+  lease_ms:5000,heartbeat_ms:100,max_concurrency:2,max_per_company:2})
+  .register({name:'jarvis.job001.test-only',handler:async({payload})=>{
+   sideEffects++;return {received:payload.value};
+  }});
+ const configured={...trusted,target_id:'JOB-001',capability:'job001.enqueue-one',
+  evidence_ref:'cerebro/runtime/durable-job-runtime-v1.mjs#enqueue'};
+ const {consoleGateway,actionGateway}=setup({verified_targets:[configured],
+  // TEST FIXTURE, not a real authenticated owner session.
+  verifyOwner:async()=>true});
+ actionGateway.registerCapability('job001.enqueue-one',async({payload})=>{
+  const receipt=runtime.enqueue({name:'jarvis.job001.test-only',
+   context,payload,timeout_ms:5000,idempotency_key:'job001-cut49-'+payload.value});
+  const outcomes=await worker.runSaturatedRound({contexts:[context],completion_budget:1});
+  return {queued:receipt.accepted,
+   terminal_status:outcomes[0]?.status,
+   persisted_status:runtime.listForContext(context)[0]?.status};
+ });
+ const cmd={target_id:'JOB-001',idempotency_key:'mesh-job001-1',parameters:{value:'accepted'}};
+ const result=await run(consoleGateway,'jarvis.network.dispatch',cmd);
+ assert.equal(result.status,'ACTION_EXECUTED');
+ assert.equal(result.result.queued,true);
+ assert.equal(result.result.terminal_status,'SUCCEEDED');
+ assert.equal(result.result.persisted_status,'SUCCEEDED');
+ assert.equal(sideEffects,1);
+ const replay=await run(consoleGateway,'jarvis.network.dispatch',cmd);
+ assert.equal(replay.status,'ACTION_EXECUTED');
+ assert.equal(sideEffects,1);
+ const recovered=new DurableJobRuntimeV1({file_path:path.join(root,'jobs.v8journal')});
+ assert.equal(recovered.listForContext(context).length,1);
+ assert.equal(recovered.listForContext(context)[0].status,'SUCCEEDED');
 });
