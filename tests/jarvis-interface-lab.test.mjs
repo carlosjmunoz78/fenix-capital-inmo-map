@@ -5,7 +5,7 @@ import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {rememberJarvisConversation,recallJarvisConversation,clearJarvisConversation,
  isJarvisConversationAvailable,JARVIS_UI_MEMORY_POLICY} from '../src/jarvisConversationMemory.ts';
-import {sendJarvisComposerMessage,JARVIS_COMPOSER_SEND_EVENT} from '../src/jarvisComposerBridge.ts';
+import {sendJarvisComposerMessage,JARVIS_COMPOSER_SEND_EVENT,primeJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT} from '../src/jarvisComposerBridge.ts';
 
 const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 const ownerA='aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa';
@@ -43,13 +43,15 @@ test('JARVIS composer bridge cannot send blank, oversized or unacknowledged mess
  const observed=[];
  class FauxEvent{constructor(type,options){this.type=type;this.detail=options.detail}}
  globalThis.CustomEvent=FauxEvent;
- globalThis.window={dispatchEvent(ev){observed.push(ev);if(ev.type===JARVIS_COMPOSER_SEND_EVENT)ev.detail.accepted=true;}};
+ globalThis.window={dispatchEvent(ev){observed.push(ev);if([JARVIS_COMPOSER_SEND_EVENT,JARVIS_COMPOSER_PRIME_EVENT].includes(ev.type))ev.detail.accepted=true;}};
  try{
   assert.equal(sendJarvisComposerMessage('   '),false);
   assert.equal(sendJarvisComposerMessage('x'.repeat(4001)),false);
   assert.equal(sendJarvisComposerMessage('  Hola JARVIS  '),true);
   assert.equal(observed.length,1);
   assert.equal(observed[0].detail.message,'Hola JARVIS');
+  assert.equal(primeJarvisComposerMessage('  revisa proyecto  '),true);
+  assert.equal(observed[1].detail.message,'revisa proyecto');
  }finally{
   if(oldWindow===undefined)delete globalThis.window;else globalThis.window=oldWindow;
   if(oldCustomEvent===undefined)delete globalThis.CustomEvent;else globalThis.CustomEvent=oldCustomEvent;
@@ -82,4 +84,13 @@ test('CUT38 Gateway policy remains owner-only and fail closed',()=>{
  assert.ok(core.includes('data.prod_execution_enabled===false'));
  assert.ok(core.includes('data.live_writes===false'));
  assert.ok(core.includes('!chatReadyRef.current||sendingRef.current'));
+});
+
+test('JARVIS project tools prime the visible composer, not just the hidden legacy form',()=>{
+ const work=source('src/CerebroJarvisWorkConsole.tsx');
+ const portal=source('src/JarvisOperativaComposerPortal.tsx');
+ assert.ok(work.includes('primeJarvisComposerMessage(text)'));
+ assert.ok(work.includes('sendJarvisComposerMessage(text)'));
+ assert.ok(portal.includes('JARVIS_COMPOSER_PRIME_EVENT'));
+ assert.ok(portal.includes('setComposer(detail.message)'));
 });
