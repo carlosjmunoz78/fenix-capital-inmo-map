@@ -7,11 +7,11 @@ import {readFileSync} from 'node:fs';
 import {balanceAvailable,evaluate,reservedUSD} from './deepseek-weekend-runner.mjs';
 
 const dir=dirname(fileURLToPath(import.meta.url));
-test('synthetic curriculum has eight distinct LAB cases, no identifiers',()=>{
+test('synthetic curriculum has 24 distinct LAB cases, no identifiers',()=>{
  const curr=JSON.parse(readFileSync(join(dir,'deepseek-weekend-20261107-08.curriculum.json'),'utf8'));
  assert.equal(curr.environment,'LAB');
  assert.equal(curr.dataset,'SYNTHETIC_PUBLIC_ONLY');
- assert.equal(curr.cases.length,8);
+ assert.equal(curr.cases.length,24);
  assert.equal(new Set(curr.cases.map(x=>x.id)).size,8);
  for(const x of curr.cases){
   assert.match(x.id,/^ES-\d{2}$/);
