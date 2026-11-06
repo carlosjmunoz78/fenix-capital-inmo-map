@@ -6,6 +6,7 @@ on:
       - cerebro/jarvis-always-present-interface-lab-20261106
     paths:
       - 'src/CerebroConsoleShell.tsx'
+      - 'src/CerebroJarvisWorkConsole.tsx'
       - 'src/JarvisOperativaComposerPortal.tsx'
       - 'src/jarvisConversationMemory.ts'
       - 'src/jarvisComposerBridge.ts'
