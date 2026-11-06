@@ -10,7 +10,7 @@ export const STYLE_POLICY_PATH='cerebro/seo-enterprise/v2/seo-owner-copy-visual-
 const plain=s=>String(s||'').replace(/<!--[\s\S]*?-->/g,' ').replace(/<[^>]*>/g,' ')
  .replace(/&nbsp;|&#160;/g,' ').replace(/&amp;/g,'&').replace(/\s+/g,' ').trim();
 const between=(html,tag)=>[...String(html).matchAll(new RegExp('<'+tag+'(?:\\s[^>]*)?>([\\s\\S]*?)<\\/'+tag+'>','gi'))].map(x=>plain(x[1]));
-export function auditOwnerEditorialCopy({html,persona,policy=null}={}){
+export function auditOwnerEditorialCopy({html,persona,content_type='ARTICLE',policy=null}={}){
  const p=policy||JSON.parse(fs.readFileSync(STYLE_POLICY_PATH,'utf8'));
  if(!['PARTICULARES','INMOBILIARIAS'].includes(persona))deny('PERSONA_SCOPE');
  if(p.company_id!=='fenix'||p.engine_id!=='SEO-001'||p.editorial?.colons_in_visible_text_forbidden!==true)deny('POLICY_SCOPE');
@@ -29,8 +29,10 @@ export function auditOwnerEditorialCopy({html,persona,policy=null}={}){
  if(body.length<p.editorial.pilot_body_words_range[0])issues.push('INSUFFICIENT_SUBSTANCE');
  if(/<script\b|<iframe\b|<form\b/i.test(html))issues.push('UNAPPROVED_EMBED');
  if(!html.includes('https://fenixcapital.es/contacto/'))issues.push('NO_CONTACT_CTA');
+ const faq=auditSeoFaqContract({html,content_type,policy:p});
+ issues.push(...faq.issues.map(x=>'FAQ_'+x));
  return Object.freeze({company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'2.0.0',
-  persona,word_count:body.length,h1,h2,sha256:h(html),issues,
+  persona,content_type,word_count:body.length,h1,h2,faq_count:faq.count,faq_required:faq.minimum,sha256:h(html),issues,
   deterministic_style_precheck_passed:issues.length===0,copy_is_human_certified:false,
   customer_approved:false,prod_publish_authorized:false,
   buyer_persona_relevance_requires_editorial_review:true,
@@ -119,4 +121,42 @@ export function preflightReturnedSeoMediaAsset({order,asset,existing_assets,inve
   image_ready_for_publish:false,wordpress_upload_authorized:false,
   visual_qa_and_composition_review_required:true,
   no_existing_asset_inventory_silent_bypass:true});
+}
+
+
+/** Mandatory buyer-persona FAQ gate. Designed for copy validation, not ranking guarantees.
+ * A generated FAQ must answer genuine user questions and still needs source checks.
+ */
+export function auditSeoFaqContract({html,content_type='ARTICLE',policy=null}={}){
+ const p=policy||JSON.parse(fs.readFileSync(STYLE_POLICY_PATH,'utf8'));
+ const r=p?.editorial?.faq_rules;
+ if(r?.mandatory!==true||r.min_article!==6||r.min_landing!==8)deny('FAQ_POLICY_INVALID');
+ if(!['ARTICLE','LANDING'].includes(content_type))deny('CONTENT_TYPE_REQUIRED');
+ if(typeof html!=='string')deny('FAQ_HTML_REQUIRED');
+ const minimum=content_type==='ARTICLE'?r.min_article:r.min_landing;
+ const sections=[...html.matchAll(/<section\b[^>]*class=["'][^"']*\bfaq\b[^"']*["'][^>]*>([\s\S]*?)<\/section>/gi)];
+ const issues=[];
+ if(sections.length!==1)issues.push('SECTION_REQUIRED_EXACTLY_ONE');
+ const section=sections[0]?.[1]||'';
+ const questions=[...section.matchAll(/<div\s+class=["']faq-item["']>\s*<h3>([\s\S]*?)<\/h3>\s*<p>([\s\S]*?)<\/p>\s*<\/div>/gi)]
+ .map(m=>({q:plain(m[1]),a:plain(m[2])}));
+ const h3Count=(section.match(/<h3\b/gi)||[]).length;
+ if(questions.length<minimum)issues.push('MINIMUM_NOT_REACHED');
+ if(h3Count!==questions.length)issues.push('UNSTRUCTURED_QUESTION');
+ if(between(section,'h2').length!==1)issues.push('SECTION_H2_REQUIRED');
+ const normalize=q=>q.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ if(new Set(questions.map(x=>normalize(x.q))).size!==questions.length)issues.push('DUPLICATE_QUESTION');
+ for(const {q,a} of questions){
+  const wc=a.split(/\s+/).filter(Boolean).length;
+  if(!q.startsWith('¿')||!q.endsWith('?'))issues.push('QUESTION_MUST_BE_NATURAL');
+  if(/^¿?\s*(?:[0-9]+[.\s)-]+|primero|segundo|tercero)/i.test(q))issues.push('QUESTION_NUMBERING');
+  if(q.length>105||q.length<15)issues.push('QUESTION_LENGTH');
+  if(wc<12||wc>65)issues.push('ANSWER_USEFUL_BUT_COMPACT');
+  if((q+' '+a).includes(':')||/\bademás\b|\ben conclusión\b/i.test(q+' '+a))
+   issues.push('OWNER_LANGUAGE_RULE');
+ }
+ return Object.freeze({company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
+  content_type,minimum,count:questions.length,issues,
+  passed:issues.length===0,faq_editorial_relevance_verified:false,
+  faq_snippet_appearance_guaranteed:false,publish_authorized:false});
 }
