@@ -1,55 +1,86 @@
 name: CEREBRO DeepSeek BOOST-001 Tiny Canary
 
-# CUT36: after successful single-call smoke, same LAB-only manual flow advances
-# to six synthetic conversation studies. Branch override only. MAIN UNCHANGED.
-# One-time code-trigger path, NOT a scheduler; manually replaying is forbidden.
+# CUT37 governed continuous learning, LAB only. MAIN remains unchanged.
+# Bootstrap once by GitHub App push on the exact trigger file.
+# Future iterations dispatch this EXISTING workflow with the ephemeral GITHUB_TOKEN.
+# Fail-closed: no paid requests unless budget reservation was committed to LAB branch.
 on:
   workflow_dispatch:
   push:
     branches:
       - cerebro/jarvis-deepseek-weekend-lab-20261106
     paths:
-      - 'zeus/jarvis/triggers/CUT36_ONE_SHOT_LAB_20261106.txt'
+      - 'zeus/jarvis/triggers/CUT37_AUTONOMY_START_20261106.txt'
 
 permissions:
-  contents: read
+  contents: write
+  actions: write
 
 concurrency:
-  group: jarvis-cut36-isolated-dialogue-study-${{ github.ref }}
+  group: jarvis-cut37-deepseek-learning-lab-serial
   cancel-in-progress: false
 
 jobs:
-  dialogue-study:
+  autonomy-lab:
     if: github.ref == 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 90
     environment: JARVIS_DEEPSEEK_LAB
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       JARVIS_LAB_STUDY_APPROVED: 'YES'
+      JARVIS_LAB_CONTINUOUS_MODE: 'YES'
+      JARVIS_LAB_AUTONOMY_ENABLE: 'YES'
       JARVIS_LAB_STUDY_OUTPUT_DIR: /tmp/jarvis-lab-dialogue
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 1
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify dedicated branch and secret (never output value)
+      - name: Verify dedicated branch and secret without revealing them
         shell: bash
         run: |
           set -euo pipefail
           test "$GITHUB_REF" = 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
           test "$GITHUB_RUN_ATTEMPT" = '1'
           test -n "$DEEPSEEK_API_KEY"
-          test "$JARVIS_LAB_STUDY_APPROVED" = 'YES'
-      - name: Required offline safety regression (zero API calls)
+          test "$JARVIS_LAB_AUTONOMY_ENABLE" = 'YES'
+      - name: Offline regression, mandatory before billing
         run: node --test zeus/jarvis/training/*.test.mjs
-      - name: Single bounded DeepSeek LAB dialogue study (max 12 paid calls, 0.15 USD)
-        run: node zeus/jarvis/training/jarvis-deepseek-study-lab.mjs --execute
-      - name: Upload synthetic-only review candidates and partial budget ledger
+      - name: Verify source budget journal and dry-run
+        run: node zeus/jarvis/training/jarvis-deepseek-autonomy-v1.mjs --dry-run
+      - name: Atomically reserve USD envelope on dedicated LAB branch
+        run: node zeus/jarvis/training/jarvis-deepseek-autonomy-v1.mjs --reserve
+      - name: Generate, critique and evaluate bounded synthetic dialogue batches
+        run: node zeus/jarvis/training/jarvis-deepseek-autonomy-v1.mjs --execute
+      - name: Reconcile usage and commit durable cumulative ledger
+        id: settle
+        run: node zeus/jarvis/training/jarvis-deepseek-autonomy-v1.mjs --settle
+      - name: Upload LAB-only candidate reports and partial usage evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: jarvis-cut36-synthetic-dialogue-${{ github.run_id }}
+          name: jarvis-cut37-lab-dialogue-${{ github.run_id }}
           path: /tmp/jarvis-lab-dialogue/*.json
           if-no-files-found: warn
           retention-days: 30
+      - name: Dispatch next bounded cycle only after durable settle succeeded
+        if: success() && steps.settle.outputs.continue_next == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          test -n "$GH_TOKEN"
+          test "$GITHUB_REF" = 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106'
+          curl --fail --silent --show-error --max-time 30 \
+            -X POST \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/workflows/cerebro-deepseek-boost001-canary.yml/dispatches" \
+            --data '{"ref":"cerebro/jarvis-deepseek-weekend-lab-20261106"}'
+          echo "JARVIS_NEXT_BOUNDED_LAB_RUN_DISPATCHED"
