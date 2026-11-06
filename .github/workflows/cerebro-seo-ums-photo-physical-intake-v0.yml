@@ -17,7 +17,11 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
-      - name: Validate existing free FFmpeg and ffprobe, plus physical synthetic WebP tests
+      - name: Install FFmpeg from Ubuntu open-source repositories on ephemeral runner only
+        run: |
+          sudo apt-get update -qq
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg >/dev/null
+      - name: Validate free FFmpeg and ffprobe, plus physical synthetic WebP tests
         run: |
           command -v ffmpeg
           command -v ffprobe
