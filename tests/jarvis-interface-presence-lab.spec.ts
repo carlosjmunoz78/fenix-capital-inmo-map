@@ -23,6 +23,8 @@ test.beforeEach(async({page})=>{
  });
  await page.goto('/tests/jarvis-ui-lab-harness.html');
  await expect(page.getByRole('region',{name:'Hablar con Jarvis'})).toBeVisible();
+ // Wait for the synthetic authenticated Gateway event, never infer it from DOM form state.
+ await expect(page.locator('[data-jarvis-state="ready"]')).toBeVisible();
 });
 test('JARVIS is always visibly present and sends typed messages via authenticated UI bridge',async({page})=>{
  await expect(page.locator('[data-jarvis-state="ready"]')).toBeVisible();
@@ -36,11 +38,7 @@ test('JARVIS is always visibly present and sends typed messages via authenticate
  await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeEnabled();
 });
 test('offline draft remains editable, cannot be sent or start voice until connected',async({page})=>{
- await page.evaluate(()=>{
-  const textarea=document.querySelector('.cerebro-chat-form textarea');
-  textarea.disabled=true;
-  document.querySelector('.cerebro-panel h2').textContent='Superficie preparada, conexión cerrada';
- });
+ await page.locator('#simulate-offline').evaluate(el=>el.click());
  await expect(page.locator('[data-jarvis-state="offline"]')).toBeVisible();
  const input=page.getByRole('textbox',{name:'Mensaje para Jarvis'});
  await expect(input).toBeEnabled();
@@ -48,11 +46,7 @@ test('offline draft remains editable, cannot be sent or start voice until connec
  await expect(page.locator('.jarvis-operativa-composer-host .operativa-send')).toBeDisabled();
  await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeDisabled();
  await expect(page.getByRole('button',{name:'Dictar'})).toBeEnabled();
- await page.evaluate(()=>{
-  const textarea=document.querySelector('.cerebro-chat-form textarea');
-  textarea.disabled=false;
-  document.querySelector('.cerebro-panel h2').textContent='Transporte autenticado verificado';
- });
+ await page.locator('#simulate-online').evaluate(el=>el.click());
  await expect(page.locator('[data-jarvis-state="ready"]')).toBeVisible();
  await expect(input).toHaveValue('Mensaje pendiente');
  await page.locator('.jarvis-operativa-composer-host .operativa-send').click();
@@ -90,5 +84,20 @@ test('project edit actions populate the real visible composer instead of an offs
  expect(accepted).toBe(true);
  await expect(page.getByRole('textbox',{name:'Mensaje para Jarvis'}))
   .toHaveValue('Revisa este proyecto con pruebas');
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
+
+test('CUT44 a spoofed enabled textarea and title never marks the owner Gateway as authenticated',async({page})=>{
+ await page.locator('#simulate-offline').evaluate(el=>el.click());
+ await expect(page.locator('[data-jarvis-state="offline"]')).toBeVisible();
+ await page.evaluate(()=>{
+   const textarea=document.querySelector('.cerebro-chat-form textarea');
+   textarea.disabled=false;
+   document.querySelector('.cerebro-panel h2').textContent='Transporte autenticado verificado';
+ });
+ await expect(page.locator('[data-jarvis-state="offline"]')).toBeVisible();
+ const input=page.getByRole('textbox',{name:'Mensaje para Jarvis'});
+ await input.fill('Nunca enviar con autenticación simulada solo por DOM');
+ await expect(page.locator('.jarvis-operativa-composer-host .operativa-send')).toBeDisabled();
  await expect(page.locator('#accepted-message')).toHaveText('');
 });
