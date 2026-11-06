@@ -71,7 +71,8 @@ async function main(){
  if(!apiKey||apiKey.length<16)return safeError('DEEPSEEK_API_KEY_MISSING');
  const balance=await request('/user/balance','GET',apiKey);
  if(balance.error||!balanceAvailable(balance.value))return safeError('BALANCE_UNVERIFIED_OR_INSUFFICIENT');
- const outDir=resolve(process.env.JARVIS_WEEKEND_OUTPUT_DIR||'.jarvis-weekend-private');
+ if(!process.env.JARVIS_WEEKEND_OUTPUT_DIR)return safeError('PERSISTENT_LEDGER_DIR_REQUIRED');
+ const outDir=resolve(process.env.JARVIS_WEEKEND_OUTPUT_DIR);
  mkdirSync(outDir,{recursive:true,mode:0o700});
  // One start per calendar day, atomically: no paid duplicate on reboot/retry.
  // Keep this private directory persistent across runs. Do not share the same API key
