@@ -29,6 +29,31 @@
       "workflow": ".github/workflows/cerebro-seo-funnel-segmentation-preprod-v0.yml",
       "ci_run_id": 42134348772,
       "publish_authorized": false
+    },
+    {
+      "id": "SEO_CHECKLIST_TRANSACTIONAL_DELIVERY_V0",
+      "owner_engine": "SEO-001",
+      "provider": "BREVO_EXISTING_TRANSACTIONAL",
+      "status": "PREPROD_CODE_GREEN_OFFLINE_MIME_VERIFIED_LIVE_SEND_BLOCKED",
+      "source_post_id": 52656,
+      "asset_id": "SEO-MAGNET-52656-CHECKLIST-V1",
+      "pdf_sha256": "59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6",
+      "path": "cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs",
+      "tests": "cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs",
+      "workflow": ".github/workflows/cerebro-seo-checklist-delivery-preprod-v0.yml",
+      "ci_run_id": 42173071584,
+      "test_passed": 6,
+      "pdf_pages": 2,
+      "pdf_form_fields": 33,
+      "storage_bucket": "seo-preprod-assets",
+      "storage_upload_verified": false,
+      "server_origin_verified_in_live": false,
+      "durable_ledger_connected": false,
+      "brevo_live_send_verified": false,
+      "physical_inbox_received": false,
+      "marketing_autosubscribe": false,
+      "publish_authorized": false,
+      "additional_eur": 0
     }
   ],
   "existing_dependencies_preserved": [
@@ -72,7 +97,13 @@
     "wordpress_import": false,
     "crm_segmentation_e2e": false,
     "newsletter_double_optin_e2e": false,
-    "rollback_proven_by_no_prod_change": true
+    "rollback_proven_by_no_prod_change": true,
+    "checklist_mime_local_verified": true,
+    "checklist_contract_unit_tests_green": true,
+    "checklist_physical_brevo_delivery_e2e": false,
+    "checklist_durable_ledger": false,
+    "checklist_asset_uploaded_preprod": false,
+    "checklist_brand_final_approved": false
   },
   "rollback": {
     "trigger": "ANY_VISUAL_COMPLIANCE_SEPARATION_OR_COST_FAILURE",
@@ -81,8 +112,9 @@
   },
   "docs": [
     "cerebro/seo-enterprise/v2/evidence/SEO_PREMIUM_IMAGE_AND_FUNNEL_GATES_2026-11-06.md",
-    "cerebro/docs/CEREBRO_SEO_ESTADO_VIVO_CONTINUIDAD_2026-11-06.md"
+    "cerebro/docs/CEREBRO_SEO_ESTADO_VIVO_CONTINUIDAD_2026-11-06.md",
+    "cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md"
   ],
   "autonomous_prod_status": "DENIED",
-  "notes": "PREPROD test success is not a production certification. Existing system remains original."
+  "notes": "PREPROD transactional email adapter CI 6/6 and original PDF attached in local eml mock; Brevo 201/inbox, ledger, asset upload and WordPress form remain PENDING. No live send or production certification."
 }
