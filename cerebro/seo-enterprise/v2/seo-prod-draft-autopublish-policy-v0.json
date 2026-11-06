@@ -77,7 +77,7 @@
     "MONEY_LIMIT",
     "CUSTOMER_HUMAN_REQUEST"
   ],
-  "priority_note": "Use official website read access and native draft workflow when safe; LAB/STAGING remain for tests that must not risk PROD.",
+  "priority_note": "Drafts are temporary preparation, not a permanent restriction. Start with three exact-digest owner-supervised publications; graduate to scoped human-by-exception autopublishing once real backup, IAM, QA, media, tribunal and a revocable owner grant are verified. This JSON is defined-only, not live enforcement.",
   "physical_state": {
     "real_website_write_authority_verified": false,
     "real_wordpress_draft_created": false,
@@ -88,5 +88,77 @@
   "cost": {
     "additional_subscriptions_eur": 0,
     "external_ai_api_calls": 0
+  },
+  "lifecycle": {
+    "target": "HUMAN_BY_EXCEPTION_SCOPED_AUTONOMOUS_NEW_URL_PUBLICATION",
+    "drafts_role": "TEMPORARY_STAGING_AND_QA_GATE_NOT_PERMANENT_OPERATING_MODE",
+    "supervised_period_goal_days": 3,
+    "calendar_time_alone_must_never_approve": true,
+    "no_forced_calendar_wait_after_verified_gates": true,
+    "supervised_initial_publications": 3,
+    "initial_publication_approval": "EXACT_CONTENT_DIGEST_OWNER_APPROVAL_PER_PUBLICATION",
+    "phases": [
+      {
+        "id": "DRAFT_PREPARATION",
+        "mode": "REVIEW_ONLY",
+        "description": "Prepare draft material, validate exact SHA, sources, media and no publishing. Remain here until backup, IAM and other safety gates are real and verified.",
+        "allows_live_publication": false,
+        "requires_owner_each_publication": true
+      },
+      {
+        "id": "SUPERVISED_PUBLICATION",
+        "mode": "OWNER_APPROVES_FIRST_THREE",
+        "description": "After all physical gates, first three newly created URLs are published only after owner approves exact digest and independent QA for each.",
+        "allows_live_publication": true,
+        "requires_owner_each_publication": true
+      },
+      {
+        "id": "SCOPED_AUTOPUBLISH",
+        "mode": "AUTOMATIC_ROUTINE_NEW_URLS",
+        "description": "After 3 successful individually approved releases and an explicit scoped, revocable owner grant, publish routine new URLs through the gateway. Per-item independent QA, factual checks and audit continue; trigger human only on genuine exceptions.",
+        "allows_live_publication": true,
+        "requires_owner_each_publication": false
+      },
+      {
+        "id": "PAUSED_OR_ROLLBACK",
+        "mode": "KILL_SWITCH",
+        "description": "Any evidence expiry, policy drift or high-risk event disables publication and invokes exception/rollback processes.",
+        "allows_live_publication": false,
+        "requires_owner_each_publication": true
+      }
+    ],
+    "final_promotion_requirements": [
+      "THREE_SUCCESSFUL_OWNER_APPROVED_PUBLISHED_NEW_URLS_SAME_CONTENT_SCOPE",
+      "REAL_HOSTINGER_PRIVATE_FULL_RESTORE_AND_ROLLBACK_PROOF",
+      "REAL_LEAST_PRIVILEGE_ACTOR_IAM_AND_PUBLISH_GATEWAY_BINDING",
+      "INDEPENDENT_EDIT_AND_LEGAL_QA_WHEN_APPLICABLE",
+      "ORIGINAL_IMAGE_RIGHTS_AND_VISUAL_QA",
+      "SIGNED_OWNER_GRANT_COMPANY_CONTENT_CLASS_CHANNEL",
+      "OBSERVABILITY_IDEMPOTENCY_BUDGET_AND_KILL_SWITCH",
+      "TRIBUNAL_AND_RELEASE_EVIDENCE"
+    ],
+    "actions_allowed_after_scoped_promotion": [
+      "CREATE_NEW_DRAFT",
+      "VERIFY_CONTENT_AND_MEDIA",
+      "PUBLISH_NEW_OWNER_GRANTED_SCOPE_URL",
+      "MONITOR",
+      "REPORT",
+      "PAUSE_ON_EXCEPTION"
+    ],
+    "actions_never_implicitly_granted": [
+      "MODIFY_EXISTING_PUBLISHED_POST",
+      "DELETE_POST",
+      "PUBLISH_LEGAL_TEXT",
+      "CHANGE_APP_CRM",
+      "BUY_SUBSCRIPTIONS",
+      "ESCALATE_SELF_PERMISSIONS"
+    ],
+    "publisher_identity": "SEPARATE_FROM_DRAFT_PREPARER_WITH_GATEWAY_SCOPED_AUTHORITY",
+    "auto_publish_without_new_owner_approval_after_graduation": true,
+    "per_item_independent_qa_still_required": true,
+    "current_operational_phase": "DRAFT_PREPARATION",
+    "current_operational_phase_verified": false,
+    "current_scoped_autopublish_grant_present": false,
+    "production_publisher_connected": false
   }
 }
