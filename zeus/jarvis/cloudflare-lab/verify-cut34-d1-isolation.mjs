@@ -12,7 +12,8 @@ const protectedIds=new Set([
  '988b11e1-21aa-4cf9-8b9d-110319df7ccc',
  '8f966fb3-32db-43a0-aa55-67f88616a522',
  'c446f17c-c26d-4c76-a3ea-f62c843d461b',
- 'a859fde1-126b-4c40-bc0d-aec2f8839f7b'
+ 'a859fde1-126b-4c40-bc0d-aec2f8839f7b',
+ 'be037644-3da6-4a96-8cb7-9ee3af9ba196'
 ]);
 const sentinel='CUT34_UNPROVISIONED_DO_NOT_DEPLOY';
 function gate(cfg, isTemplate){
@@ -28,7 +29,7 @@ function gate(cfg, isTemplate){
  assert.equal(cfg.d1_databases.length,1);
  const db=cfg.d1_databases[0];
  assert.equal(db.binding,'JARVIS_LAB_DB');
- assert.equal(db.database_name,'cerebro-jarvis-cut33-lab-eu');
+ assert.equal(db.database_name,'cerebro-jarvis-cut33-lab-eu-jur');
  assert.equal(db.preview_database_id,'jarvis-cut34-isolated-local');
  assert.equal(protectedIds.has(db.database_id),false,'PROTECTED_D1_ID_REUSE_BLOCKED');
  if(isTemplate) assert.equal(db.database_id,sentinel);
