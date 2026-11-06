@@ -2,7 +2,7 @@ import {useEffect,useRef,useState,type FormEvent,type KeyboardEvent} from 'react
 import {createPortal} from 'react-dom';
 import {AudioLines,Mic,Plus,Send,Square} from 'lucide-react';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,voiceRecognitionProblem,type CerebroSpeechRecognition} from './cerebroVoice';
-import {sendJarvisComposerMessage} from './jarvisComposerBridge';
+import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisComposerPrimeDetail} from './jarvisComposerBridge';
 import './cerebro-operative-console.css';
 import './jarvis-composer-presence.css';
 
@@ -59,6 +59,18 @@ export default function JarvisOperativaComposerPortal(){
   return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
  },[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
+ useEffect(()=>{
+  const onPrime=(event:Event)=>{
+   const detail=(event as CustomEvent<JarvisComposerPrimeDetail>).detail;
+   if(!detail||typeof detail.message!=='string'||detail.message.length>4000)return;
+   detail.accepted=true;
+   setComposer(detail.message);
+   window.requestAnimationFrame(()=>composerRef.current?.focus());
+  };
+  window.addEventListener(JARVIS_COMPOSER_PRIME_EVENT,onPrime);
+  return()=>window.removeEventListener(JARVIS_COMPOSER_PRIME_EVENT,onPrime);
+ },[]);
+
 
  function sendCommand(raw:string){const clean=raw.trim();if(!clean||!snapshot.ready||snapshot.sending)return false;return sendJarvisComposerMessage(clean);}
  function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('');}
