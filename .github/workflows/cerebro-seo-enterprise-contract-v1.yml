@@ -28,8 +28,30 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - name: Validate SEO architecture and fail-closed STAGING to PROD contract
-        run: node --test cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs
+      - name: Validate SEO unit contracts; physical-input suites run in their dedicated workflows
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The 5 listed suites require historical artifact downloads, external
+          # ffmpeg or private directories. Running them without those inputs
+          # creates false infrastructure failures, not a meaningful QA verdict.
+          # The dedicated workflows retain their REAL tests and release HOLD.
+          tests=(cerebro/seo-enterprise/v1/tests/*.test.mjs cerebro/seo-enterprise/v2/tests/*.test.mjs)
+          unit=()
+          for file in "${tests[@]}"; do
+            case "$file" in
+              */seo-physical-release-tribunal-v0.test.mjs|\
+              */seo-ums-photo-physical-intake-v0.test.mjs|\
+              */seo-v4-1-wordpress-draft-guard-v0.test.mjs|\
+              */seo-v4-documentary-risk-gate-v1.test.mjs|\
+              */seo-v4-official-source-repair-v1.test.mjs)
+                echo "REQUIRES_DEDICATED_PHYSICAL_CI: $file"
+                ;;
+              *) unit+=("$file") ;;
+            esac
+          done
+          test "${#unit[@]}" -ge 10
+          node --test "${unit[@]}"
       - name: Prove universal owner-only excellence rewards suspension and replacement policy
         run: node --test cerebro/tests/universal-excellence-lab-v0.test.mjs cerebro/tests/universal-excellence-governance-contract-v0.test.mjs cerebro/tests/universal-excellence-job001-adapter-v0.test.mjs cerebro/tests/universal-excellence-owner-gateway-v0.test.mjs cerebro/tests/universal-excellence-console-binding-v0.test.mjs cerebro/tests/supabase-owner-session-verifier-lab-v0.test.mjs
       - name: Enforce official WordPress draft-first and scoped owner-approved autonomy policy
