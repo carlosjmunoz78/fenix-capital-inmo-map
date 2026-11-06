@@ -47,6 +47,28 @@ function gate(cfg, isTemplate){
 assert.equal(old.name,'cerebro-jarvis-cut32-lab-eu');
 assert.equal(old.d1_databases[0].database_id,'988b11e1-21aa-4cf9-8b9d-110319df7ccc');
 gate(template,true);
+
+const bundle=readFileSync(path.join(dir,'CUT34_ONLY_NEW_EU_D1_0001_0006.sql'),'utf8');
+const migFiles=[
+ '0001_jarvis_d1_mission_lab.sql',
+ '0002_jarvis_d1_session_lab.sql',
+ '0003_jarvis_d1_b3_readonly_audit_lab.sql',
+ '0004_jarvis_d1_gateway_denial_audit_lab.sql',
+ '0005_jarvis_d1_daily_denial_quota_lab.sql',
+ '0006_jarvis_d1_b2_device_enrollment_audit_lab.sql'
+];
+for(const f of migFiles) {
+ const expected=readFileSync(path.join(dir,f),'utf8').trim();
+ assert.ok(bundle.includes(expected),'MIGRATION_MISMATCH: '+f);
+}
+const uncommented=bundle.replace(/--[^\n]*/g,'');
+const count=(re)=>(uncommented.match(re)||[]).length;
+assert.equal(count(/CREATE TABLE IF NOT EXISTS /gi),8,'EIGHT_LAB_TABLES');
+assert.equal(count(/CREATE INDEX IF NOT EXISTS /gi),6,'SIX_LAB_INDEXES');
+assert.equal(count(/CREATE TRIGGER IF NOT EXISTS /gi),6,'SIX_LAB_TRIGGERS');
+assert.doesNotMatch(uncommented,/\b(DROP|ALTER|DELETE FROM|INSERT INTO|ATTACH DATABASE|PRAGMA\s+writable_schema)\b/i,
+ 'DESTRUCTIVE_OR_DATA_MUTATION_BLOCKED');
+
 const args=process.argv.slice(2);
 if(args.length===1 && args[0]==='--template'){
  console.log('CUT34_TEMPLATE_SAFELY_UNPROVISIONED: PASS; no D1/deploy operation');
