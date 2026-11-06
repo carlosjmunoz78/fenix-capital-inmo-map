@@ -15,6 +15,7 @@ import {loadFrozenSeoCorpus} from './seo-corpus-job001-work-v1.mjs';
 import {listSeoDepartments,getSeoDepartmentKnowledge} from './seo-specialist-workforce-v2.mjs';
 import {verifySeoKnowledgeOrientation} from './seo-workforce-orientation-v2.mjs';
 import {buildSeoTrainingPacks} from './seo-ops-console-cli-v1.mjs';
+import {allSeoRolePolicyBindings,seoRoleOwnerPolicy} from './seo-owner-role-governance-v1.mjs';
 import {planSeoDirectorOrder,SEO_ORDER_TYPES} from './seo-director-order-router-v1.mjs';
 
 const ROOT=new URL('../',import.meta.url);
@@ -55,6 +56,10 @@ export function assembleSeoV2ControlPlane({orientation_journal}={}){
   'CORPUS_SNAPSHOT_MISMATCH');
  const courseware=buildSeoTrainingPacks();
  deny(courseware.size===33&&courseware.has('manifest.json'),'COURSEWARE_INCOMPLETE');
+ const governance=allSeoRolePolicyBindings();
+ deny(governance.role_count===191&&governance.roles.length===191&&
+  governance.roles.every(r=>r.policy_id===governance.policy_id&&
+   r.role_privileges_granted===false),'UNIVERSAL_GOVERNANCE_UNBOUND');
  const registered=new Map(org.departments.map(d=>[d.department_id,d]));
  const roster=new Map(roles.departments.map(d=>[d.department_id,d]));
  deny(registered.size===32&&roster.size===32,'DUPLICATE_DEPARTMENTS');
@@ -77,6 +82,7 @@ export function assembleSeoV2ControlPlane({orientation_journal}={}){
   departments.push({
    department_id:d.department_id,family_id:entry.family_id,
    director_role:entry.family_id+':DIRECTOR',department_head:r.head,
+   universal_owner_policy_id:seoRoleOwnerPolicy(r.head).policy_id,
    qa_department:'SEO-D31',training_department:'SEO-D32',
    tribunal:'SEO:GLOBAL:JUDGE',knowledge_pack:r.knowledge_pack,
    knowledge_sha256:hash(bytes),
@@ -112,12 +118,18 @@ export function assembleSeoV2ControlPlane({orientation_journal}={}){
    source_digest:corpus.corpus_digest,source_requests:0,
    source_name:'ACCEPTED_LOCAL_PROD_CORPUS',historical_staging_used:false},
   platform:{organization_families:8,departments:32,specialists:141,
+   all_seo_role_templates:191,owner_excellence_governance_roles:governance.role_count,
+   owner_excellence_governance_policy_id:governance.policy_id,
+   owner_excellence_governance_sha256:governance.policy_sha256,
    route_types:routes.length,existing_orientation_job_receipts:orientation.journal_jobs,
    courseware_packets:32,one_shared_job_runtime:true,additional_servers:0,
    gateway_persistent_host_proven:false,github_actions_runtime_ephemeral:true,
    authenticated_individual_agent_principals:0,certified_prod_departments:0,
    auto_publication_enabled:false,paid_model_invocations:0},
   controls:{identity:'IAM_001_NOT_PROVISIONED',
+   universal_owner_business_authority:'AUTHENTICATED_OWNER_ONLY',
+   owner_general_exception_precedents:'THREE_VERIFIED_IDENTICAL_SCOPE_DECISIONS_CANDIDATE_ONLY',
+   auto_promotion:false,
    qa:'D31_DEFINED_INDEPENDENT_REAL_MODEL_ASSESSMENT_PENDING',
    training:'D32_DEFINED_REAL_SUBJECT_MATTER_TRAINING_PENDING',
    tribunal:'NO_AUTONOMY_OR_REWARD_GRANTED',
