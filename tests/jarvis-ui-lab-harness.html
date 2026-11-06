@@ -49,8 +49,10 @@
   if(new URLSearchParams(window.location.search).get('omni')==='1'){
    setJarvisActiveInterface('OPERATIVA');
    createRoot(document.getElementById('omni-root')).render(React.createElement(Dock,{onOpenJarvis:()=>document.body.dataset.openJarvis='YES'}));
-   setTimeout(()=>publishJarvisOmniState(state),100);
   }
+  // This synthetic harness must publish the same verified owner-Gateway state
+  // as the real shared core. An editable DOM textarea cannot certify readiness.
+  setTimeout(()=>publishJarvisOmniState(state),100);
   document.body.addEventListener('click',event=>{
    if(event.target?.id==='simulate-offline')publishJarvisOmniState({...state,ready:false});
    if(event.target?.id==='simulate-online')publishJarvisOmniState({...state,ready:true});

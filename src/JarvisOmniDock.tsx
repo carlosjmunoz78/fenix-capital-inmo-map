@@ -4,7 +4,8 @@ import {sendJarvisComposerMessage} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import {getJarvisOmniState,getJarvisActiveInterface,JARVIS_OMNI_EVENT,
  JARVIS_OMNI_INTERFACE_EVENT,type JarvisOmniState} from './jarvisOmniSession';
-import {createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {jarvisDictationProblem} from './jarvisVoicePolicy';
 import './jarvis-omni-dock.css';
 
 export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
@@ -29,21 +30,21 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
  const voice=()=>{
   const control=document.querySelector<HTMLButtonElement>('.jarvis-core-mounted .cerebro-voice-main');
   if(control&&!control.disabled){control.click();setError('')}
-  else setError('No hay voz disponible hasta conectar el Gateway y permitir el micrófono.');
+  else setError(!voiceRecognitionSupported()?'El navegador no dispone de reconocimiento de voz. Puede utilizar el dictado del teclado o escribir.':'La conversación por voz requiere conexión autenticada con el Gateway y permiso de micrófono.');
  };
  const dictation=()=>{
   if(mic.current){try{mic.current.stop()}catch{/* no-op */}mic.current=null;setListening(false);return}
-  if(!voiceRecognitionSupported()){setError('Este navegador no admite dictado. Puedes escribir.');return}
-  const recognition=createVoiceRecognition();if(!recognition)return;
+  if(!voiceRecognitionSupported()){setError('Este navegador no dispone de reconocimiento de voz. Puede dictar con el teclado del dispositivo o escribir.');return}
+  const recognition=createVoiceRecognition();if(!recognition){setError('El motor de dictado no está disponible; puede escribir.');return}
   mic.current=recognition;recognition.lang='es-ES';recognition.continuous=false;
-  recognition.interimResults=false;recognition.maxAlternatives=3;
-  recognition.onstart=()=>setListening(true);
+  recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);
+  recognition.onstart=()=>{setListening(true);setError('')};
   recognition.onresult=event=>{const result=event.results[event.results.length-1];
    const phrase=String(result?.[0]?.transcript||'').trim();
    if(phrase)setText(prev=>prev+(prev.trim()?' ':'')+phrase)};
-  recognition.onerror=()=>setError('No se pudo completar el dictado.');
+  recognition.onerror=event=>setError(jarvisDictationProblem(String(event.error||'')));
   recognition.onend=()=>{mic.current=null;setListening(false)};
-  try{recognition.start()}catch{mic.current=null;setListening(false);setError('Micrófono no disponible.')}
+  try{recognition.start()}catch{mic.current=null;setListening(false);setError('No se ha podido iniciar el micrófono. Revise el permiso del sitio o utilice el teclado.')}
  };
  return <aside className="jarvis-omni-dock" data-jarvis-omni-interface={active}
   aria-label="JARVIS presente en todas las interfaces">

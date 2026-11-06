@@ -4,14 +4,15 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import {clearJarvisConversation,recallJarvisConversation,rememberJarvisConversation} from './jarvisConversationMemory';
 import {JARVIS_COMPOSER_SEND_EVENT,type JarvisComposerSendDetail} from './jarvisComposerBridge';
 import {publishJarvisOmniState,clearJarvisOmniState} from './jarvisOmniSession';
+import {JARVIS_BROWSER_VOICE_DEFAULTS,resolveJarvisVoicePreferences,preferredJarvisSpanishVoice,jarvisDictationProblem} from './jarvisVoicePolicy';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
-const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
+const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={...JARVIS_BROWSER_VOICE_DEFAULTS};
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -182,7 +183,7 @@ export default function CerebroConsoleShell(){
   if(!chatReady)return;
   fetchCerebroConsolePreferences().then(({status,data})=>{
    if(cancelled||status!==200||!data?.preferences)return;
-   setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   setVoicePreferences(resolveJarvisVoicePreferences(data.preferences));
   });
   return()=>{cancelled=true};
  },[chatReady]);
@@ -345,7 +346,7 @@ export default function CerebroConsoleShell(){
   const plan=speechPlanRef.current;
   if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
   const token=++speechRunTokenRef.current;
-  const selected=preferredSpanishVoice(spanishVoices());
+  const selected=preferredJarvisSpanishVoice(spanishVoices());
   const speakSegment=(index:number,charIndex:number)=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
    if(index>=plan.length){
@@ -531,7 +532,7 @@ export default function CerebroConsoleShell(){
     return;
    }
    if(voiceNeedsClarification(clean,voiceConfidence)){
-    const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+    const warning=`He entendido «${clean}», pero no estoy seguro de haberle oído bien, señor. ¿Podría repetirlo, por favor?`;
     setMessage('');
     setVoiceError(warning);
     setLines(current=>[...current,{role:'cerebro',text:warning}]);
@@ -541,7 +542,7 @@ export default function CerebroConsoleShell(){
    discardPausedSpeech();
   }
   if(fromVoice&&voiceNeedsClarification(clean,voiceConfidence)){
-   const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+   const warning=`He entendido «${clean}», pero no estoy seguro de haberle oído bien, señor. ¿Podría repetirlo, por favor?`;
    setMessage('');
    setVoiceError(warning);
    setLines(current=>[...current,{role:'cerebro',text:warning}]);
@@ -565,12 +566,12 @@ export default function CerebroConsoleShell(){
   try{
    const conversationContext:CerebroConversationTurn[]=lines.slice(-10).map(line=>({role:line.role,text:line.text.slice(0,1200)}));
    const {status,data}=await postCerebroConsoleChat(clean,pendingActionRef.current,readContextRef.current,learningCandidateRef.current,conversationContext);
-   const response=status>0&&data?.message?data.message:'No he podido contactar con CEREBRO Gateway.';
+   const response=status===401?'Señor, la sesión de Fénix no está autorizada o ha caducado. Inicie sesión de nuevo.':status===403?'Señor, el Gateway ha denegado esta operación por falta de permisos.':status>0&&data?.message?data.message:'Señor, no he podido obtener respuesta del Gateway. No afirmaré que se haya ejecutado nada.';
    if(data?.read_context){
     readContextRef.current=data.read_context;
     setReadContext(data.read_context);
    }
-   if(data?.preferences)setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   if(data?.preferences)setVoicePreferences(resolveJarvisVoicePreferences(data.preferences));
    if(Object.prototype.hasOwnProperty.call(data??{},'learning_candidate')){
     const next=data?.learning_candidate??null;
     learningCandidateRef.current=next;
@@ -589,7 +590,7 @@ export default function CerebroConsoleShell(){
    setSending(false);
    if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),{...(data??{}),source_question:clean});
   }catch{
-   const response='No he podido contactar con CEREBRO Gateway.';
+   const response='Señor, no he podido contactar con el Gateway. No confirmaré ninguna operación sin evidencia.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
    sendingRef.current=false;
    setSending(false);
@@ -661,10 +662,10 @@ export default function CerebroConsoleShell(){
    if(['not-allowed','service-not-allowed','audio-capture'].includes(reason)){
     voiceSessionRef.current=false;
     setVoiceSessionActive(false);
-    setVoiceError('No puedo mantener la conversación de voz porque el navegador no tiene acceso al micrófono. Revisa el permiso y vuelve a pulsar «Hablar con CEREBRO».');
+    setVoiceError(jarvisDictationProblem(reason));
     return;
    }
-   setVoiceError(reason?('Problema de voz: '+reason+'. Reintentaré automáticamente cuando sea posible.'):'No he podido transcribir el audio. Reintentaré automáticamente.');
+   setVoiceError(jarvisDictationProblem(reason));
   };
   recognition.onend=()=>{
    recognitionRef.current=null;
@@ -739,7 +740,7 @@ export default function CerebroConsoleShell(){
    <p>{detail}</p>
    <div className="cerebro-fields"><label>Empresa<select disabled><option>Fénix · sesión autenticada</option></select></label><label>Contexto<select disabled>{CONTEXTS.map(item=><option key={item}>{item}</option>)}</select></label></div>
    <div className="cerebro-chat-log" aria-live="polite">
-    {lines.length===0?<div className="cerebro-chat-empty">Hola, soy JARVIS. Estoy aquí para ayudarte. Puedes escribir, dictar o hablar conmigo. Las acciones reales continúan protegidas por el Gateway.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
+    {lines.length===0?<div className="cerebro-chat-empty">A su disposición, señor. Puede escribir, dictar o conversar cuando el navegador y el Gateway lo permitan. Las acciones reales requieren autorización.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
    </div>
    <div className={`cerebro-voice-session ${voiceSessionActive?'is-active':''} ${voiceListening?'is-listening':''} ${voiceSpeaking?'is-speaking':''}`}>
     <button type="button" className="cerebro-voice-main" onClick={toggleVoiceSession} disabled={!chatReady||!voiceSupport.stt} aria-pressed={voiceSessionActive}>
@@ -751,7 +752,7 @@ export default function CerebroConsoleShell(){
    </div>
    {voiceError?<div className="cerebro-voice-error" role="alert">{voiceError}</div>:null}
    <form className="cerebro-chat-form" onSubmit={submit}>
-    <textarea value={message} onChange={event=>{setMessage(event.target.value);setVoiceError('')}} disabled={!chatReady||sending} rows={3} placeholder={chatReady?'También puedes escribir a CEREBRO…':'Chat disponible cuando el Gateway confirme el modo seguro.'}/>
+    <textarea value={message} onChange={event=>{setMessage(event.target.value);setVoiceError('')}} disabled={sending} rows={3} placeholder={chatReady?'Escriba su mensaje a JARVIS…':'Puede preparar el borrador. El envío se habilitará cuando el Gateway confirme la conexión.'}/>
     <button type="submit" disabled={!chatReady||sending||!message.trim()}><Send size={17}/>{sending?'Enviando…':'Enviar'}</button>
    </form>
    <div className="cerebro-audit-note"><strong>Decisión humana por excepción</strong><span>La conversación de voz no amplía permisos. Las consultas fluyen sin confirmaciones innecesarias; una acción sensible mantiene propuesta exacta y un «sí» válido. Una transcripción de baja confianza nunca confirma por sí sola.</span></div>
