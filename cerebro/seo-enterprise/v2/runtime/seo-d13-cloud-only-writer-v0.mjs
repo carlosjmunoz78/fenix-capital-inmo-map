@@ -8,7 +8,7 @@ import {routeWork} from '../../../router/execution-model-router.mjs';
 import {loadIdentityCredentialFoundation} from '../../../governance/identity-credential-broker.mjs';
 
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
-const MODEL='gemini-2.5-flash-lite';
+const MODEL='gemini-3.5-flash-lite';
 const CONNECTOR='connector:seo-gemini-free-lab';
 const REF='credref:cerebro-gemini-free-api-key';
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
