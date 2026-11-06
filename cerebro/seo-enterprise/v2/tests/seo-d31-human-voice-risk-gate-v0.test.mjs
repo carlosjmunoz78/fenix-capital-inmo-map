@@ -113,3 +113,31 @@ test('conditional wording does not trigger a false mortgage success promise',()=
  assert.ok(!r.issues.includes('UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'));
  assert.equal(r.can_publish,false);
 });
+
+
+test('V4.3 B2B preserves V4.2 and repairs only two owner-review claim risks',()=>{
+ const parent='cerebro/seo-enterprise/v2/drafts/v4-2-review-only/inmobiliarias-v4-2-review-only.html';
+ const candidate='cerebro/seo-enterprise/v2/drafts/v4-3-review-only/inmobiliarias-v4-3-review-only.html';
+ const prior=fs.readFileSync(parent,'utf8');
+ const updated=fs.readFileSync(candidate,'utf8');
+ const blob=crypto.createHash('sha1').update('blob '+Buffer.byteLength(prior)+'\0').update(prior).digest('hex');
+ assert.equal(blob,'019ca268df22adb7e995a39771446a3774740398');
+ const changes=[
+  ['Si el análisis financiero desvela dificultades insalvables, la operación se desestima de forma limpia antes de firmar arras, protegiendo tanto los intereses del vendedor como la reputación de la agencia intermediaria.',
+   'Si el análisis financiero detecta obstáculos importantes, conviene revisar las alternativas y los compromisos ya asumidos antes de recomendar una decisión. La continuidad o cancelación de la operación depende de las partes y de lo pactado, con asesoramiento cuando proceda.'],
+  ['La paciencia y el rigor metodológico durante estas semanas de espera aseguran que la operación llegue a buen puerto con garantías sólidas para todas las partes.',
+   'Mantener información contrastada y expectativas realistas ayuda a coordinar a las partes, pero no garantiza que el banco apruebe la financiación ni que la compraventa llegue a firmarse.']
+ ];
+ let expected=prior;
+ for(const [before,after] of changes){
+  assert.equal(expected.split(before).length,2);
+  expected=expected.replace(before,after);
+ }
+ assert.equal(updated,expected,'Only the two approved safety proposals may differ from V4.2');
+ const r=auditSeoHumanVoiceAndRisk({html:updated,persona:'INMOBILIARIAS'});
+ assert.deepEqual(r.issues,[]);
+ assert.equal(r.deterministic_precheck_passed,true);
+ assert.equal(r.independent_professional_qa_verified,false);
+ assert.equal(r.can_publish,false);
+ console.log('SEO001_V43_B2B_CONTENT_SHA256='+crypto.createHash('sha256').update(updated).digest('hex'));
+});
