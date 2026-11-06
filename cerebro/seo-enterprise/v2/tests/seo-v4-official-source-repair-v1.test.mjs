@@ -16,7 +16,13 @@ test('real two immutable samples source-locked and patched only by exact safe ph
  assert.deepEqual(repaired.map(x=>x.exact_repairs_applied),[5,4]);
  assert.ok(repaired.every(x=>x.original_flagged_phrases_removed));
  assert.ok(repaired.every(x=>x.new_sha256!==x.source_sha256));
- assert.ok(repaired.every(x=>x.status==='TECHNICAL_QA_PASS_INDEPENDENT_REVIEW_HOLD'),JSON.stringify(repaired.map(x=>x.technical_qa_issues)));
+ // Historical output bytes remain preserved, but newer D31 gates must be evaluated.
+ assert.ok(repaired.every(x=>x.status==='TECHNICAL_QA_HOLD'));
+ assert.deepEqual(repaired[0].technical_qa_issues,['VOICE_PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED']);
+ assert.deepEqual(repaired[1].technical_qa_issues,[
+  'VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE',
+  'VOICE_UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW'
+ ]);
  assert.deepEqual(repaired.map(x=>x.faq_count),[6,6]);
  assert.ok(repaired.every(x=>x.words>1000&&x.main_words>750));
 });
