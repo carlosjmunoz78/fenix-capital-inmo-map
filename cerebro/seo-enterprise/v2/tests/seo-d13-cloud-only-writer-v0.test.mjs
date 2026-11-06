@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {generateSeoDraftWithLocalModel} from '../runtime/seo-d13-local-autonomous-writer-v0.mjs';
 import {loadIdentityCredentialFoundation} from '../../../governance/identity-credential-broker.mjs';
 import {evaluateSeoCloudWriter,runSeoCloudWriter,SEO_D13_CLOUD_ONLY} from '../runtime/seo-d13-cloud-only-writer-v0.mjs';
 const brief={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
@@ -79,4 +80,16 @@ test('cloud model cannot evade source or buyer persona QA and cannot write to PR
  const q=await runSeoCloudWriter({...args,fetch_impl:fake(htmlBad,['wp_gastos','wp_contacto'])});
  assert.equal(q.reason,'CLOUD_STYLE_OR_FAQ_FAIL');
  assert.throws(()=>evaluateSeoCloudWriter({...args,brief:{...brief,company_id:'other'}}),/CLOUD_EDITORIAL_SCOPE_INVALID/);
+});
+
+test('superseded Ollama adapter is hard-disabled despite a fake or real local server',async()=>{
+ let calls=0;
+ const out=await generateSeoDraftWithLocalModel({
+  brief,fetch_impl:async()=>{calls++;throw Error('SHOULD_NEVER_RUN')},simulation:true
+ });
+ assert.equal(out.status,'HOLD');
+ assert.equal(out.reason,'CLOUD_ONLY_POLICY_LOCAL_EXECUTION_DISABLED');
+ assert.equal(out.wordpress_writes,0);
+ assert.equal(out.paid_api_calls,0);
+ assert.equal(calls,0);
 });
