@@ -27,7 +27,7 @@ function apiOK(body){
 function safeRecord(d){
  return typeof d?.uuid==='string'&&UUID.test(d.uuid)&&d.uuid.toLowerCase()!==OLD_DB_ID
   &&d.name===DB_NAME&&d.jurisdiction==='eu'
-  &&d.read_replication?.mode!=='auto';
+  &&d.read_replication?.mode==='disabled';
 }
 export function createJarvisEuD1Provisioner({
  fetchImpl,apiToken,accountId=ACCOUNT_ID,environment='LAB',
