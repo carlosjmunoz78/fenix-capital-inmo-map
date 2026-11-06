@@ -124,3 +124,21 @@ No se han ejecutado mutaciones a web, App, CRM, Supabase, GSC ni PROD durante es
 - Advisor de Supabase informa `rls_enabled_no_policy` para nueva tabla, **esperado**: prohibición completa de roles cliente con permisos revocados, sin política permisiva.
 - Evidencia completa y gates actualizados: `cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md`.
 - Bloqueo real para E2E continúa: PDF final de marca + privado en bucket, evento servidor autenticado + binding de ledger/worker, prueba controlada de `201/messageId` con buzón autorizado y comprobación de recepción. Envío comercial y newsletters permanecen separados y desactivados.
+
+## 2026-11-06 · TRASPASO TOTAL MULTICHAT GUARDADO Y VERIFICADO
+
+**Este bloque prevalece como fuente de continuidad del corte final del chat.** El siguiente chat NO debe reabrir auditorías SEO ni reproducir el trabajo ya certificado. Se han incorporado tres archivos nuevos en esta PR DRAFT, en paralelo, sin tocar PROD:
+
+1. `cerebro/docs/CEREBRO_SEO_TRASPASO_TOTAL_2026-11-06.md` — alcance, relaciones App/CRM/WP/Brevo, cómo se trabajó, pruebas CI, fallos reparados, rollback y siguiente orden física exacta.
+2. `cerebro/seo-enterprise/v2/registry/CEREBRO_SEO_ESTADO_MAQUINA_2026-11-06.json` — estado máquina de motores/gates, SHA de recursos, identificadores proyecto y bloqueos.
+3. `cerebro/docs/PROMPT_CONTINUAR_CEREBRO_SEO_2026-11-06.md` — prompt listo para nuevo chat del proyecto. Incluye instrucciones de recuperación desde Biblioteca + GitHub.
+
+**Copia adicional verificada en Biblioteca de ChatGPT**, carpeta existente `/CEREBRO OS · ENGINE FACTORY & MULTIEMPRESA/SEO_ENTERPRISE_V2_2026-11-05/`: los tres archivos anteriores, `CEREBRO_SEO_TRASPASO_COMPLETO_2026-11-06.zip` (incluye PDF V1/V2 y evidencias MIME) y `FENIX_CHECKLIST_VISITA_CORDOBA_MARCA_V2_PREPROD.pdf`.
+
+**PDF de marca V2 físicamente comprobado en contenedor:** 113.703 bytes, 2 páginas A4, 33 campos AcroForm, SHA256 `82a96dc9b1c64bf8972e44358cd5bdc121182a09aa3832b71162efc7bea7e660`. El manual de identidad aportó el logo original; falta QA editorial. PDF V1 se conserva en ZIP: 99.419 bytes, SHA `59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6`.
+
+**Riesgo técnico esencial:** adaptador Brevo y ledger PREPROD actuales fijan V1, por lo que NO apuntar a V2 sin actualizar el contrato, crear/ensayar la versión paralela, proteger idempotencia y comprobar SHA. V2 **NO se ha subido al bucket**: comprobación live `storage.objects=0` para checklist; bucket `seo-preprod-assets` privado; tabla `public.cerebro_seo_checklist_delivery_v0` tiene **0 filas**. Ningún envío Brevo se ejecutó. El intento de explorar rutas de transferencia externas NO es evidencia de subida.
+
+**Siguiente misión sin aclaraciones reiteradas**: verificar QA V2 → transferir archivo binario a Storage privado PREPROD mediante acceso autorizado y comprobar hash → adaptar contrato de entrega V2 en paralelo → origen de evento firmado/validado en servidor → ledger transaccional → una prueba física de recepción en buzón controlado → tribunal/rollback → evaluar promoción; proteger URLs y páginas existentes. El proyecto App PREPROD está cancelado; no confundirlo con este Supabase PREPROD. Nada de contratos nuevos, WPVibe, Make ni envíos a clientes.
+
+**No declarar entrega real ni producción mientras estas pruebas sean pendientes.**
