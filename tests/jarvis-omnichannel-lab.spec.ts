@@ -103,3 +103,39 @@ test('CUT47 microphone permission denied reports clearly without enabling gatewa
  await expect(panel.getByText('El navegador ha denegado el acceso al micrófono.')).toBeVisible();
  await expect(page.locator('#accepted-message')).toHaveText('');
 });
+
+test('CUT48 browser speech can be played only after click and owner confirms audibility',async({page})=>{
+ await page.evaluate(()=>{
+  window.__jarvisSpoken=[];
+  Object.defineProperty(window,'speechSynthesis',{configurable:true,value:{
+   cancel:()=>{},
+   getVoices:()=>[{name:'Microsoft Pablo',lang:'es-ES',localService:true}],
+   speak:utterance=>{
+    window.__jarvisSpoken.push({text:utterance.text,rate:utterance.rate,pitch:utterance.pitch,voice:utterance.voice?.name});
+    setTimeout(()=>utterance.onend?.(),30);
+   }
+  }});
+ });
+ const panel=page.locator('.jarvis-omni-panel');
+ await expect(panel.getByRole('button',{name:'Probar voz de salida JARVIS'})).toBeVisible();
+ expect(await page.evaluate(()=>window.__jarvisSpoken.length)).toBe(0);
+ await panel.getByRole('button',{name:'Probar voz de salida JARVIS'}).click();
+ await expect(panel.getByText('El navegador terminó de sintetizar. ¿Ha oído claramente la frase?')).toBeVisible();
+ const played=await page.evaluate(()=>window.__jarvisSpoken);
+ expect(played).toHaveLength(1);
+ expect(played[0].text).toContain('señor');
+ expect(played[0].rate).toBe(1.1);
+ expect(played[0].voice).toBe('Microsoft Pablo');
+ await panel.getByRole('button',{name:'Sí, la he oído'}).click();
+ await expect(panel.getByText(/Audio confirmado por usted/)).toBeVisible();
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
+
+test('CUT48 browser speech recognition returns a visible draft only, never sends chat',async({page})=>{
+ const panel=page.locator('.jarvis-omni-panel');
+ await expect(panel.getByRole('button',{name:'Probar transcripción real JARVIS'})).toBeVisible();
+ await panel.getByRole('button',{name:'Probar transcripción real JARVIS'}).click();
+ await expect(panel.getByText(/Reconocimiento recibido, sin enviarlo/)).toBeVisible();
+ await expect(panel.getByText(/mensaje dictado omnicanal/)).toBeVisible();
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
