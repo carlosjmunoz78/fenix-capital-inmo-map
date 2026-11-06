@@ -44,6 +44,21 @@ class TestOfflinePreflight(unittest.TestCase):
   with zipfile.ZipFile(p,'w') as z:
    for name,body in FIXTURE.items():z.writestr(name,body)
   self.assertEqual(self.evaluate(files=p)['files']['format'],'zip')
+ def test_reject_duplicate_file_member_in_tar(self):
+  p=self.root/'duplicate.tar.gz'
+  with tarfile.open(p,'w:gz') as tar:
+   for name,body in list(FIXTURE.items())+[('public_html/wp-content/uploads/test.webp',b'different')]:
+    x=tarfile.TarInfo(name);x.size=len(body);tar.addfile(x,io.BytesIO(body))
+  with self.assertRaisesRegex(mod.UnsafeBackup,'ARCHIVE_DUPLICATE_FILE_PATH'):self.evaluate(files=p)
+ def test_reject_duplicate_file_member_in_zip(self):
+  p=self.root/'duplicate.zip'
+  import warnings
+  with warnings.catch_warnings():
+   warnings.simplefilter('ignore',UserWarning)
+   with zipfile.ZipFile(p,'w') as z:
+    for name,body in list(FIXTURE.items())+[('public_html/wp-content/uploads/test.webp',b'different')]:
+     z.writestr(name,body)
+  with self.assertRaisesRegex(mod.UnsafeBackup,'ARCHIVE_DUPLICATE_FILE_PATH'):self.evaluate(files=p)
  def test_reject_parent_traversal_in_tar(self):
   p=self.root/'unsafe.tar.gz'
   with tarfile.open(p,'w:gz') as t:
