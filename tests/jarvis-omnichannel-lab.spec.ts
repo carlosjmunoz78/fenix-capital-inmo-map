@@ -14,7 +14,7 @@ test.beforeEach(async({page})=>{
   }
   window.SpeechRecognition=MockSpeech;window.webkitSpeechRecognition=MockSpeech;
  });
- await page.goto('/tests/jarvis-ui-lab-harness.html');
+ await page.goto('/tests/jarvis-ui-lab-harness.html?omni=1');
  await expect(page.locator('.jarvis-omni-launch')).toBeVisible();
  await page.locator('.jarvis-omni-launch').click();
  await expect(page.getByRole('region',{name:'Conversación compartida'})).toBeVisible();
