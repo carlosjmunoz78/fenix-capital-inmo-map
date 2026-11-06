@@ -114,3 +114,13 @@ No se han ejecutado mutaciones a web, App, CRM, Supabase, GSC ni PROD durante es
 - **Bloqueos concretos reales**, no repetir auditorías: PDF sigue en borrador editorial; subida privada PREPROD pendiente; origen del evento y `ledger` duradero sin conectar; API key PREPROD y correo de prueba seguro no verificados; primer envío Brevo aceptado `201/messageId` e inbox no probado; embudo WP 52656 en `draft` y newsletter separados sin E2E.
 - **No habilitar envío real ni publicación** hasta verificar asset, receptor de pruebas, permisos, idempotencia duradera y QA. `App/CRM/WordPress/Supabase PROD` no modificados. `PR #22` continúa DRAFT y el rollback es no fusionar.
 
+### 2026-11-06 · Hito adicional ejecutado: ledger de entrega PREPROD instalado y probado
+
+- `public.cerebro_seo_checklist_delivery_v0` creado **solo** en Supabase PREPROD `hnqlnvakzaywtafeiybt`. No se toca `fenix-capital-prod`.
+- Antes de crear: `to_regclass` NULL. Después: RLS habilitado y grants `anon/authenticated SELECT/INSERT=false`, `service_role SELECT/INSERT/UPDATE=true`, `service_role DELETE=false`. Tabla sin emails/PII en claro y **0 filas**.
+- Prueba SQL física `BEGIN/ROLLBACK`: primera reserva, duplicado bloqueado por unique, transición a `ACCEPTED`, bloqueo de modificación a `UNKNOWN`; `count(*)=0` posterior.
+- Adaptador `seo-checklist-ledger-supabase-v0.mjs` incorporado a la PR DRAFT, que exige cliente backend vinculado a PREPROD. Contrato SQL: `seo-checklist-delivery-ledger-preprod-v0.sql`; no hay migración CLI promovida a PROD.
+- CI de checklist + ledger [#42174299373](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42174299373) `SUCCESS` **10/10**. No se llamó a Brevo, no se enviaron emails ni se generaron leads de prueba.
+- Advisor de Supabase informa `rls_enabled_no_policy` para nueva tabla, **esperado**: prohibición completa de roles cliente con permisos revocados, sin política permisiva.
+- Evidencia completa y gates actualizados: `cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md`.
+- Bloqueo real para E2E continúa: PDF final de marca + privado en bucket, evento servidor autenticado + binding de ledger/worker, prueba controlada de `201/messageId` con buzón autorizado y comprobación de recepción. Envío comercial y newsletters permanecen separados y desactivados.
