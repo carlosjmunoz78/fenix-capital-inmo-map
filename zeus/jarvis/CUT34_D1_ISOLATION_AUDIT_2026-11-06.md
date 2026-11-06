@@ -1,7 +1,7 @@
 # CEREBRO OS · JARVIS CUT34 · D1 aislada para CUT33
 
 **Fecha:** 2026-11-06 · **company_id:** fenix · **engine_id:** JARVIS · **environment:** LAB · **version:** CUT34_PREPARED.
-**Estado:** HECHO inventario, plantilla fail-closed y gate offline. PENDIENTE alta física de D1, snapshot/export, migraciones, binding remoto y tests E2E. PROD NO-GO.
+**Estado:** HECHO inventario y plantilla fail-closed. INCIDENCIA: primera D1 nueva `be037644-3da6-4a96-8cb7-9ee3af9ba196` carece de jurisdicción EU; permanece sin uso. Nueva D1 EU todavía pendiente. PENDIENTE alta física de D1, snapshot/export, migraciones, binding remoto y tests E2E. PROD NO-GO.
 
 ## Inventario Cloudflare físico (solo lectura)
 
@@ -13,6 +13,7 @@ Cuenta Cloudflare: e39a57e1ac42650ca5a6d5307cf0ac8e. Plan Zero Trust Free confir
 | cerebro-jarvis-lab-eu-restore-cut32 | 8f966fb3-32db-43a0-aa55-67f88616a522 | Restore CUT32: PROTEGIDA |
 | cerebro-jarvis-lab-eu-restore-cut29 | c446f17c-c26d-4c76-a3ea-f62c843d461b | Restore CUT29: PROTEGIDA |
 | cerebro-jarvis-lab-cut21 | a859fde1-126b-4c40-bc0d-aec2f8839f7b | Histórico: PROTEGIDO |
+| cerebro-jarvis-cut33-lab-eu (creada 2026-11-06) | be037644-3da6-4a96-8cb7-9ee3af9ba196 | NO USAR: región Europa oriental; jurisdicción NINGUNO, no apta para residencia EU estricta |
 
 Panel de Cloudflare: fuente y restore CUT32 con jurisdicción Unión Europea, replicación de lectura deshabilitada. Las copias previas deben conservarse; no están certificadas como restauración de sesiones reales de producción.
 
@@ -27,7 +28,7 @@ Panel de Cloudflare: fuente y restore CUT32 con jurisdicción Unión Europea, re
 
 ## Nuevo almacenamiento reservado (NO CREADO)
 
-**Nombre exacto:** cerebro-jarvis-cut33-lab-eu. **Jurisdicción:** eu (obligatoria al crear, no modificable después). **Read replication:** disabled. **Sin Worker vinculado inicialmente.** **Sin ruta pública.** Objetivo coste de nueva suscripción: 0 € dentro de Free, con consumos siempre medidos.
+**Nombre exacto:** cerebro-jarvis-cut33-lab-eu-jur. No confundir con la D1 sin jurisdicción `cerebro-jarvis-cut33-lab-eu`. **Jurisdicción:** eu (obligatoria al crear, no modificable después). **Read replication:** disabled. **Sin Worker vinculado inicialmente.** **Sin ruta pública.** Objetivo coste de nueva suscripción: 0 € dentro de Free, con consumos siempre medidos.
 
 Archivos añadidos SOLO en esta rama separada:
 
@@ -40,9 +41,9 @@ Tras crear y verificar la DB, hacer SOLO copia del template con UUID real nuevo,
 ## Gates requeridos antes de migración/despliegue
 
 1. Inventariar consumidores y esquema real; conservar la fuente, CUT29, CUT32 e histórico. Verificar export/restore independientes antes de cualquier cambio a un Worker.
-2. Crear **una sola quinta D1 nueva**, jurisdicción eu desde su creación y replicación disabled. Comprobar UUID distinto a los cuatro existentes; sin upgrade de plan.
+2. Crear **una sola quinta D1 nueva**, jurisdicción eu desde su creación y replicación disabled. Comprobar UUID distinto a los cinco existentes; sin upgrade de plan.
 3. Inspeccionar D1 recién creada: 0 tablas/sesiones, ninguna vinculación externa, no PII; hacer export basal y dejar rollback documentado.
-4. Aplicar SOLO sobre la quinta D1 las migraciones 0001 a 0006 bajo permiso y backup, con lectura post-migración y restauración verificada sin tocar los 4 orígenes protegidos. Esperado 8 tablas, 6 índices, 6 triggers (verificar, no asumir).
+4. Aplicar SOLO sobre la quinta D1 las migraciones 0001 a 0006 bajo permiso y backup, con lectura post-migración y restauración verificada sin tocar ninguna de las 5 bases existentes. Esperado 8 tablas, 6 índices, 6 triggers (verificar, no asumir).
 5. Materializar configuración resuelta exclusivamente con UUID nuevo y superar gate local; ejecutar tests con datos sintéticos y comparar OLD vs NEW. Nunca actualizar el Worker viejo ni PROD.
 6. Mantener Access propietario, URL OFF, B2/B3/Gateway OFF, PR25 DRAFT; no registrar dos dispositivos ni pasar a producción sin tribunal, rollback probado y permisos.
 
@@ -53,3 +54,7 @@ Tras crear y verificar la DB, hacer SOLO copia del template con UUID real nuevo,
 - Backups históricos y Time Travel no autorizan sobrescribir/restaurar sobre ninguna D1 protegida.
 
 Documentación oficial: https://developers.cloudflare.com/d1/platform/limits/ ; https://developers.cloudflare.com/d1/configuration/data-location/ ; https://developers.cloudflare.com/d1/reference/time-travel/
+
+## Incidencia física 2026-11-06: EU ubicación ≠ EU jurisdicción
+
+Cloudflare mostró en la nueva DB `be037644-3da6-4a96-8cb7-9ee3af9ba196`: Región = Europa oriental, Jurisdicción = Ninguno, Read replication = Deshabilitado. Jurisdicción no puede modificarse tras creación (documentación oficial). No vincularla a CUT33 ni aplicar migraciones; preservar el recurso existente, sin borrar. Crear otra DB con nombre `cerebro-jarvis-cut33-lab-eu-jur`, marcar radio `Especificar jurisdicción` y seleccionar `Unión Europea`; **verificar el valor en la pantalla de Configuración después de crear antes de resolver el UUID**. El verificador ha de prohibir expresamente también la DB sin jurisdicción.
