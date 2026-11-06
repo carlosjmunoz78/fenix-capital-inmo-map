@@ -68,7 +68,7 @@ export function validateSeoV4Brief(b){
   if(typeof b[key]!=='string'||b[key].length<15||b[key].length>450||
      /[<>{}\x00]/.test(b[key]))throw Error('SEO_V4_BRIEF_FIELD_'+key);
  }
- if(b.cta_url!=='https://fenixcapital.es/contact/')throw Error('SEO_V4_CTA_URL');
+ if(b.cta_url!=='https://fenixcapital.es/contacto/')throw Error('SEO_V4_CTA_URL');
  if(!Array.isArray(b.sources)||b.sources.length!==2)throw Error('SEO_V4_SOURCE_COUNT');
  const unique=new Set();
  for(const src of b.sources){
