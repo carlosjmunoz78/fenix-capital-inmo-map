@@ -60,3 +60,16 @@ GitHub schedule default branch: https://docs.github.com/en/actions/reference/wor
 **NO MODIFICADO:** `main`, PR #25, CUT30, App, CRM y sistemas de producción. Código del canario de pago permanece en rama aislada y sin lanzar.
 
 **Único paso de credencial:** generar una clave DeepSeek independiente en el panel autenticado y guardarla directamente en GitHub `JARVIS_DEEPSEEK_LAB > Add environment secret` bajo el nombre `DEEPSEEK_API_KEY`. Nunca compartir valor por chat ni colocarlo como Repository Secret (los workflows antiguos podrían usarlo). Tras ello ejecutar un único canario de coste mínimo con control de branch y saldo, sin habilitar todavía el programa repetitivo.
+
+
+## CUT36 · Estudio conversacional aislado · 2026-11-06
+
+**HECHO**: después de CANARY_PASS en la ejecución real #42245878611, creado jarvis-deepseek-study-lab.mjs con 6 casos sintéticos, máximo 12 llamadas pagadas y límite preventivo por ejecución USD 0.15. No es entrenamiento de pesos ni mejora conversacional demostrada: genera candidatos, crítica, riesgos, coste y estado de revisión.
+
+**HECHO**: el adaptador LAB usa el proveedor canónico cerebro/runtime/deepseek-provider-v0.mjs sin modificarlo. Envía DeepSeek Responses API en modo JSON y sin pensamiento prolongado. Verifica antes de cada llamada saldo y presupuesto, aplica comparador conservador de descenso de saldo compartido desde USD 98.23 inicial y subtope acumulado USD 40. No equivale a bloqueo global del proveedor ni a certificación cambiaria EUR/USD.
+
+**HECHO**: rama LAB conserva el mismo workflow ya probado cerebro-deepseek-boost001-canary.yml, ahora con ejecución de estudio de seis escenarios solo por workflow_dispatch manual, requiere secreto de entorno JARVIS_DEEPSEEK_LAB y exacta rama aislada. Envía artefactos sintéticos de revisión con checkpoints parciales de coste, retenidos 30 días. GitHub Actions offline Run 29 SUCCESS, sin nueva llamada real por estas modificaciones.
+
+**PENDIENTE**: un nuevo disparo manual del workflow https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/workflows/cerebro-deepseek-boost001-canary.yml, seleccionando exactamente cerebro/jarvis-deepseek-weekend-lab-20261106. El workflow histórico de main no ha cambiado y NO debe lanzarse. Una vez exista el lote real, revisar sus respuestas, errores y coste antes de decidir promoción o extender cohortes. No hay programación autónoma activa.
+
+**SIN TOCAR**: PR #25, main, CUT30, Cloudflare Worker, D1, App, CRM, DNS, PROD, Trading.
