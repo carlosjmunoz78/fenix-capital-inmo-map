@@ -62,6 +62,11 @@ jobs:
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
+        env:
+          # Browser-harness-only fixtures. Not a real Supabase project.
+          VITE_FENIX_ENV: 'test'
+          VITE_SUPABASE_URL: https://supabase-jarvis-fixture.invalid
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_JARVIS_OFFLINE_FAKE_TEST_KEY
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
       - name: Detect owner live-readonly E2E credential availability
         id: owner_e2e
