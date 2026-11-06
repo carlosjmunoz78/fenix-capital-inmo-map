@@ -49,7 +49,10 @@ export function buildSeoProducerImageOrder({
  const idempotency_key=h(company_id+'|'+work_id+'|'+source_content_sha256+'|IMAGE_HERO_V2');
  return Object.freeze({schema_version:'2.0.0',company_id,engine_id:'SEO-001',environment:'PREPROD',version:'2.0.0',
   work_id,persona,source_content_sha256,image_role:'HERO',width:1200,height:630,format:'webp',
-  producer_engine:'UMS-001',existing_creative_capability:'CREATIVE-PROGRAMMATIC-RENDER-V1',
+  producer_engine:'UMS-001',existing_creative_capability:null,
+  photo_producer_binding_status:'HOLD_NO_CERTIFIED_TEXT_FREE_IMAGE_GENERATOR',
+  existing_graphic_text_overlay_renderer_forbidden:true,
+  provider_credentials_verified:false,photo_provider_cost_ceiling_verified:false,
   request_id:'seo-image-'+idempotency_key.slice(0,24),idempotency_key,
   brief:{subject,visual_intent,visual_style:'HIGH_QUALITY_ORIGINAL_PHOTOGRAPH_CORDOBA',
    base_prompt:subject+'. '+visual_intent+'. Fotografía editorial original, clara, atractiva y natural, composición cuidada. Imagen sin letras, palabras, números, rótulos, textos en objetos, logotipos, firmas, marcas de agua ni sobreimpresiones. Sin documentos legibles ni interfaces de pantalla. Sin cartelas ni capas gráficas. No reutilizar composiciones ni imágenes de otros artículos.',
