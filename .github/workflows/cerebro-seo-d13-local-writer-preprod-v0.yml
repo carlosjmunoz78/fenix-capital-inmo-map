@@ -1,4 +1,4 @@
-name: CEREBRO SEO · D13 local autonomous writer zero-cost gate
+name: CEREBRO SEO · LEGACY local writer DISABLED cloud-only policy
 on:
   pull_request:
     paths:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 jobs:
   local-writer:
-    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ false }} # Historical runner disabled; owner confirmed all CEREBRO executes in the cloud via registered providers
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
