@@ -5,6 +5,7 @@ import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,
 import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisComposerPrimeDetail} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import {jarvisDictationProblem} from './jarvisVoicePolicy';
+import {getJarvisOmniState,JARVIS_OMNI_EVENT} from './jarvisOmniSession';
 import './cerebro-operative-console.css';
 import './jarvis-composer-presence.css';
 
@@ -32,14 +33,15 @@ export default function JarvisOperativaComposerPortal(){
    raf=requestAnimationFrame(()=>{
     const root=document.querySelector<HTMLElement>('.jarvis-conversation .cerebro-console');
     if(!root){setSnapshot(current=>current.ready||!current.connecting?EMPTY:current);return}
-    const textarea=root.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea');
+    // An editable offline draft is NOT evidence of Gateway authentication.
+    const shared=getJarvisOmniState();
     const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim().toLowerCase()||'';
     const send=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');
     const voice=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');
     const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';
     const sending=Boolean(send?.textContent?.includes('Enviando')||voiceStatus.includes('procesando'));
     const next:Snapshot={
-     ready:Boolean(textarea&&!textarea.disabled)||sending,
+     ready:shared.ready===true,
      connecting:title.includes('verificando'),
      sending,
      voiceActive:voice?.getAttribute('aria-pressed')==='true',
@@ -58,7 +60,8 @@ export default function JarvisOperativaComposerPortal(){
   observer.observe(document.querySelector('.jarvis-core-mounted')||document.body,{subtree:true,childList:true,characterData:true,attributes:true,
    attributeFilter:['disabled','aria-pressed','class']});
   const interval=window.setInterval(inspect,4000);
-  return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)};
+  window.addEventListener(JARVIS_OMNI_EVENT,inspect);
+  return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval);window.removeEventListener(JARVIS_OMNI_EVENT,inspect)};
  },[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  useEffect(()=>{
