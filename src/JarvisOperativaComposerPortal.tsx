@@ -6,6 +6,7 @@ import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisCompose
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import JarvisOwnerDialogueCheck from './JarvisOwnerDialogueCheck';
 import JarvisAudioDeviceCheck from './JarvisAudioDeviceCheck';
+import JarvisPhysicalVoiceCheck from './JarvisPhysicalVoiceCheck';
 import {jarvisDictationProblem} from './jarvisVoicePolicy';
 import {getJarvisOmniState,JARVIS_OMNI_EVENT} from './jarvisOmniSession';
 import './cerebro-operative-console.css';
@@ -22,6 +23,19 @@ export default function JarvisOperativaComposerPortal(){
  const[dictationError,setDictationError]=useState('');
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
+ const abortPortalDictation=()=>{
+  const recognition=dictationRef.current;
+  dictationRef.current=null;
+  if(recognition){
+   recognition.onstart=null;recognition.onresult=null;recognition.onerror=null;recognition.onend=null;
+   try{recognition.abort()}catch{/* already stopped */}
+  }
+  setDictating(false);
+ };
+ // Switching to voice conversation or submitting a message must never leave
+ // the inline STT engine listening invisibly in the background.
+ useEffect(()=>{if(snapshot.voiceActive||snapshot.sending||!target)abortPortalDictation()},
+  [snapshot.voiceActive,snapshot.sending,target]);
 
  useEffect(()=>{
   let current:HTMLElement|null=null;
@@ -65,7 +79,10 @@ export default function JarvisOperativaComposerPortal(){
   window.addEventListener(JARVIS_OMNI_EVENT,inspect);
   return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval);window.removeEventListener(JARVIS_OMNI_EVENT,inspect)};
  },[]);
- useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
+ useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){
+  recognition.onstart=null;recognition.onresult=null;recognition.onerror=null;recognition.onend=null;
+  try{recognition.abort()}catch{/* already stopped */}
+ }},[]);
  useEffect(()=>{
   const onPrime=(event:Event)=>{
    const detail=(event as CustomEvent<JarvisComposerPrimeDetail>).detail;
@@ -83,8 +100,43 @@ export default function JarvisOperativaComposerPortal(){
  function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('');}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit();}}
  function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main');if(button&&!button.disabled){setDictationError('');button.click();}else setDictationError(!voiceRecognitionSupported()?'Este navegador no ofrece reconocimiento de voz. Puede utilizar el dictado del teclado del dispositivo.':'La conversación por voz necesita un Gateway conectado y reconocimiento de voz disponible.');}
- function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false);}
- function toggleDictation(){if(dictating){stopDictation();return}if(snapshot.sending||snapshot.voiceActive)return;if(!voiceRecognitionSupported()){setDictationError('El navegador no dispone de reconocimiento de voz. Utilice el dictado del teclado o escriba normalmente.');return;}const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=event=>setDictationError(jarvisDictationProblem(String(event.error||'')));recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function stopDictation(){abortPortalDictation();}
+ function toggleDictation(){
+  if(dictating){stopDictation();return}
+  if(snapshot.sending||snapshot.voiceActive)return;
+  if(!voiceRecognitionSupported()){
+   setDictationError('El navegador no dispone de reconocimiento de voz. Utilice el dictado del teclado o escriba normalmente.');
+   return;
+  }
+  const recognition=createVoiceRecognition();
+  if(!recognition){setDictationError('El dictado no está disponible ahora.');return}
+  dictationRef.current=recognition;
+  recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;
+  recognition.maxAlternatives=3;applyVoiceContextHints(recognition);
+  recognition.onstart=()=>{
+   if(dictationRef.current!==recognition)return;
+   setDictating(true);setDictationError('');
+  };
+  recognition.onresult=event=>{
+   if(dictationRef.current!==recognition)return;
+   const result=event.results[event.results.length-1];
+   const transcript=String(result?.[0]?.transcript||'').trim();
+   if(transcript){
+    setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);
+    window.setTimeout(()=>composerRef.current?.focus(),0);
+   }
+  };
+  recognition.onerror=event=>{
+   if(dictationRef.current===recognition)setDictationError(jarvisDictationProblem(String(event.error||'')));
+  };
+  recognition.onend=()=>{
+   if(dictationRef.current!==recognition)return;
+   dictationRef.current=null;setDictating(false);
+  };
+  try{recognition.start()}catch{
+   dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.');
+  }
+ }
  function attach(){const input=document.querySelector<HTMLInputElement>('.jarvis-conversation input[type="file"]');if(input)input.click();else window.dispatchEvent(new CustomEvent('cerebro:attachment-request',{detail:{surface:'jarvis'}}));}
 
  if(!target)return null;
@@ -130,6 +182,7 @@ export default function JarvisOperativaComposerPortal(){
    <JarvisGatewayCapabilityPanel ready={snapshot.ready}/>
    <JarvisOwnerDialogueCheck ready={snapshot.ready}/>
    <JarvisAudioDeviceCheck disabled={snapshot.voiceActive||snapshot.sending||dictating}/>
+   <JarvisPhysicalVoiceCheck disabled={snapshot.voiceActive||snapshot.sending||dictating}/>
   </section>
  </div>,target);
 }

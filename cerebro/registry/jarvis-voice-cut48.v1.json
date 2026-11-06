@@ -1,0 +1,96 @@
+{
+  "schema": "cerebro.jarvis.voice.safety-gate.v1",
+  "company_id": "fenix",
+  "engine_id": "VOICE-001",
+  "environment": "LAB",
+  "version": "CUT48-2026-11-06",
+  "status": "LAB_CANDIDATE_NEVER_PUBLISHED",
+  "prod_authorized": false,
+  "source_branch": "cerebro/jarvis-cut48-physical-voice-rollback-lab-20261106",
+  "inherits": [
+    "CUT47",
+    "CUT46",
+    "CUT45",
+    "CUT44",
+    "CUT39"
+  ],
+  "voice": {
+    "approved_preset": "JARVIS1_V2_MAS_CLARA_1_10X",
+    "voice_clone_exists": true,
+    "remote_synthesis_connected": false,
+    "speaker_consent_document_verified": false,
+    "app_fenix_ana_untouched": true,
+    "default_browser_tts_is_approved_clone": false
+  },
+  "device_checks": {
+    "local_mic_probe": "OWNER_CLICK_ONLY",
+    "native_speech_output": "OWNER_CLICK_ONLY_BROWSER_FALLBACK",
+    "native_speech_input": "OWNER_CLICK_ONLY_BROWSER_VENDOR_MAY_PROCESS_AUDIO",
+    "spoken_text": "A su disposición, señor. Le escucho.",
+    "owner_audibility_confirmation": "REQUIRED_AND_LOCAL_ONLY",
+    "stt_result": "DISPLAY_ONLY_NO_CHAT_SEND",
+    "physical_device_e2e": "PENDING",
+    "two_devices": "PENDING"
+  },
+  "gateway_recovery": {
+    "deployed_version_observed": 33,
+    "original_source_branch": "cerebro/jarvis-omnichannel-interlocutor-lab-20261106",
+    "immutable_old_git_blobs": {
+      "index.ts": "44241c6abc3cb89560500336e332f0628219d0fc",
+      "knowledge.ts": "e00bb09ba9a024772f26fbd81159a9e9a584cd42"
+    },
+    "source_byte_equality_verified_against_deployed": true,
+    "restore_drill_scope": "TEMPORARY_CI_FILESYSTEM_ONLY",
+    "production_restore_executed": false,
+    "production_restore_tested": false
+  },
+  "jwt_e2e": {
+    "workflow_secret": "CEREBRO_E2E_USER_JWT",
+    "status": "EXPIRED_OR_NEAR_EXPIRY",
+    "never_log": true
+  },
+  "model_persona": {
+    "cut43": "SEPARATE_DRAFT_PR_28",
+    "deepseek_calls_this_cut": 0
+  },
+  "autonomy": {
+    "no_live_writes": true,
+    "actor_required": "CARLOS-ADMIN",
+    "gateway_required": true,
+    "exact_confirmation_preserved": true
+  },
+  "cost": {
+    "new_subscriptions_eur": 0,
+    "paid_tts_generations_this_cut": 0,
+    "github_actions_cost_unreconciled": true
+  },
+  "go_no_go": {
+    "production": "NO_GO",
+    "required": [
+      "owner_authenticated_live_E2E",
+      "browser_speech_on_real_devices",
+      "restore_in_isolated_target_runtime",
+      "provider_voice_consent_and_budget_gate",
+      "unified_cuts_persona_security_tribunal",
+      "promotion_gradual",
+      "prove owner authenticated via existing App in-session read-only diagnostic"
+    ]
+  },
+  "rollback": "Discard draft branch/PR while PROD untouched.",
+  "anonymous_live_gate": {
+    "method": "GET",
+    "path": "/functions/v1/cerebro-console-gateway-v0/health",
+    "authorization_header": "ABSENT",
+    "publishable_key": "EXISTING_GITHUB_ACTIONS_SECRET",
+    "last_observed_http_status": 401,
+    "transport_anonymous_denied": true,
+    "custom_owner_only_policy_verified": false,
+    "owner_live_authentication_verified": false,
+    "cost_external_tts_calls": 0,
+    "evidence_runs": [
+      42308625695,
+      42308868745
+    ],
+    "next_test": "APP_OWNER_SESSION_EXISTING_BUTTONS_OR_FRESH_SECURE_ACTIONS_USER_JWT"
+  }
+}

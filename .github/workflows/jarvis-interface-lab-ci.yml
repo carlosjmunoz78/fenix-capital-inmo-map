@@ -8,6 +8,7 @@ on:
       - cerebro/jarvis-cut44-voice-dictation-ux-lab-20261106
       - cerebro/jarvis-cut46-unified-comm-lab-20261106
       - cerebro/jarvis-cut47-approved-voice-device-gates-lab-20261106
+      - cerebro/jarvis-cut48-physical-voice-rollback-lab-20261106
     paths:
       - 'src/CerebroConsoleShell.tsx'
       - 'src/jarvisVoicePolicy.ts'
@@ -22,6 +23,9 @@ on:
       - 'src/jarvisAudioDeviceProbe.ts'
       - 'src/JarvisAudioDeviceCheck.tsx'
       - 'tests/jarvis-cut47-device-surface-lab.test.mjs'
+      - 'src/JarvisPhysicalVoiceCheck.tsx'
+      - 'tests/jarvis-cut48-physical-voice-lab.test.mjs'
+      - 'scripts/jarvis-cut48-offline-rollback.mjs'
       - 'cerebro/registry/jarvis-voice-cut47.v1.json'
       - 'supabase/functions/cerebro-console-gateway-v0/index.ts'
       - 'supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts'
@@ -76,7 +80,10 @@ jobs:
       - name: Compile and build unchanged existing App
         run: npm run build
       - name: Owner-scoped JARVIS UI and gateway contract tests
-        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs tests/jarvis-cut45-gateway-persona-lab.test.mjs tests/jarvis-cut46-unified-comm-lab.test.mjs tests/jarvis-cut46-owner-dialogue-probe-lab.test.mjs tests/jarvis-cut47-device-surface-lab.test.mjs
+        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs tests/jarvis-cut45-gateway-persona-lab.test.mjs tests/jarvis-cut46-unified-comm-lab.test.mjs tests/jarvis-cut46-owner-dialogue-probe-lab.test.mjs tests/jarvis-cut47-device-surface-lab.test.mjs tests/jarvis-cut48-physical-voice-lab.test.mjs
+      - name: CUT48 prove source-only rollback and reapply in disposable filesystem
+        # Restores neither deployed Edge Function nor App. Fetches preserved PR #27 Git tree.
+        run: node scripts/jarvis-cut48-offline-rollback.mjs
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
@@ -86,6 +93,20 @@ jobs:
           VITE_SUPABASE_URL: https://supabase-jarvis-fixture.invalid
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_JARVIS_OFFLINE_FAKE_TEST_KEY
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
+      - name: Check the live anonymous OWNER_ONLY denial independently of expired JWT
+        # One GET /health, never sends owner JWT, never writes or calls a model.
+        env:
+          JARVIS_ANON_ONLY: '1'
+          CEREBRO_E2E_USER_JWT: ''
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${PROD_SUPABASE_PUBLISHABLE_KEY}" ]; then
+            node scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs
+          else
+            echo 'JARVIS_ANON_GATE=BLOCKED_MISSING_PUBLISHABLE_KEY_NOT_VERIFIED'
+          fi
       - name: Detect owner live-readonly E2E credential availability
         id: owner_e2e
         shell: bash

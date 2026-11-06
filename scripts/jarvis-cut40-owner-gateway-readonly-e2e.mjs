@@ -8,6 +8,41 @@ import {resolve} from 'node:path';
 const BASE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0';
 const endpoints=['health','contract','engines'];
 function assert(condition,reason){if(!condition)throw Error(reason)}
+
+/**
+ * CUT48 · Real negative auth gate, independent of owner JWT freshness.
+ * Sends exactly one GET with the existing publishable key, no user token,
+ * no cookie, no conversation, no action and no provider model request.
+ * A generic 401/404 is NOT proof the custom OWNER_ONLY gate was reached:
+ * require 403 and the exact server-side denial reason.
+ */
+export async function inspectAnonymousGateway({publishableKey,fetchImpl=fetch}){
+ assert(typeof publishableKey==='string'&&publishableKey.startsWith('sb_publishable_'),'PUBLISHABLE_KEY_NOT_AVAILABLE');
+ const response=await fetchImpl(BASE+'/health',{
+  method:'GET',cache:'no-store',redirect:'error',
+  headers:{apikey:publishableKey,accept:'application/json'},
+  signal:AbortSignal.timeout(12000)
+ });
+ // A 401 from Supabase edge indicates an anonymous request was denied,
+ // but does NOT certify the custom Gateway owner policy was reached.
+ if(response.status===401)return{
+  status:'ANONYMOUS_EDGE_HTTP_401_OWNER_POLICY_UNVERIFIED',
+  route_count:1,anonymous_http_rejected:true,owner_policy_verified:false,
+  owner_authenticated:false,owner_live_e2e_verified:false,
+  prod_writes:false,provider_calls:0,credentials_disclosed:false
+ };
+ assert(response.status===403,'ANON_GATE_UNEXPECTED_HTTP_'+String(response.status));
+ let data;
+ try{data=await response.json()}catch{throw Error('ANON_GATE_DENIAL_NOT_JSON')}
+ assert(data&&data.status==='FORBIDDEN'&&data.reason==='OWNER_ONLY',
+  'ANON_GATE_DENIAL_NOT_OWNER_ONLY');
+ return {
+  status:'ANONYMOUS_OWNER_ONLY_DENIAL_VERIFIED',
+  route_count:1,anonymous_http_rejected:true,owner_policy_verified:true,
+  owner_authenticated:false,owner_live_e2e_verified:false,
+  prod_writes:false,provider_calls:0,credentials_disclosed:false
+ };
+}
 export async function inspectOwnerGateway({jwt,publishableKey,fetchImpl=fetch}){
  assert(typeof jwt==='string'&&jwt.length>32,'OWNER_JWT_NOT_AVAILABLE');
  assert(typeof publishableKey==='string'&&publishableKey.startsWith('sb_publishable_'),'PUBLISHABLE_KEY_NOT_AVAILABLE');
@@ -47,9 +82,13 @@ export async function inspectOwnerGateway({jwt,publishableKey,fetchImpl=fetch}){
   prod_writes:false,provider_calls:0,customer_records_read:0};
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
- inspectOwnerGateway({jwt:process.env.CEREBRO_E2E_USER_JWT,
-  publishableKey:process.env.PROD_SUPABASE_PUBLISHABLE_KEY})
+ const anonymousOnly=process.env.JARVIS_ANON_ONLY==='1';
+ const action=anonymousOnly
+  ?inspectAnonymousGateway({publishableKey:process.env.PROD_SUPABASE_PUBLISHABLE_KEY})
+  :inspectOwnerGateway({jwt:process.env.CEREBRO_E2E_USER_JWT,
+    publishableKey:process.env.PROD_SUPABASE_PUBLISHABLE_KEY});
+ action
   .then(result=>console.log('JARVIS_CUT40_'+JSON.stringify(result)))
-  .catch(error=>{console.error('JARVIS_CUT40_OWNER_GATE_BLOCKED '+error.message);
+  .catch(error=>{console.error((anonymousOnly?'JARVIS_ANON_GATE_BLOCKED ':'JARVIS_CUT40_OWNER_GATE_BLOCKED ')+error.message);
    process.exitCode=1});
 }
