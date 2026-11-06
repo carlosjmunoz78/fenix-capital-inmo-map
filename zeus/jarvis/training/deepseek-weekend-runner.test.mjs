@@ -16,7 +16,7 @@ test('synthetic curriculum has 24 distinct LAB cases, no identifiers',()=>{
  assert.equal(curr.environment,'LAB');
  assert.equal(curr.dataset,'SYNTHETIC_PUBLIC_ONLY');
  assert.equal(curr.cases.length,24);
- assert.equal(new Set(curr.cases.map(x=>x.id)).size,8);
+ assert.equal(new Set(curr.cases.map(x=>x.id)).size,24);
  for(const x of curr.cases){
   assert.match(x.id,/^ES-\d{2}$/);
   assert.ok(x.input.length<=600);
@@ -42,7 +42,7 @@ test('budget worst-case is small and nonnegative',()=>{
  assert.ok(reservedUSD('A'.repeat(10000))<1);
 });
 test('API balance must be verified, no empty account allowed',()=>{
- assert.equal(balanceAvailable({is_available:true,balance_infos:[{currency:'USD',total_balance:'2.00'}]}),true);
+ assert.equal(balanceAvailable({is_available:true,balance_infos:[{currency:'USD',total_balance:'6.00'}]}),true);
  assert.equal(balanceAvailable({is_available:false,balance_infos:[{currency:'USD',total_balance:'200'}]}),false);
  assert.equal(balanceAvailable({is_available:true,balance_infos:[{currency:'CNY',total_balance:'2'}]}),false);
  assert.equal(balanceAvailable({is_available:true,balance_infos:[]}),false);
