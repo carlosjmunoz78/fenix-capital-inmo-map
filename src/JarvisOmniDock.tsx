@@ -2,6 +2,7 @@ import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {AudioLines,Mic,Send,Square,MessageSquareText} from 'lucide-react';
 import {sendJarvisComposerMessage} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
+import JarvisOwnerDialogueCheck from './JarvisOwnerDialogueCheck';
 import {getJarvisOmniState,getJarvisActiveInterface,JARVIS_OMNI_EVENT,
  JARVIS_OMNI_INTERFACE_EVENT,type JarvisOmniState} from './jarvisOmniSession';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
@@ -76,6 +77,7 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
    {error?<p className="jarvis-omni-error" role="alert">{error}</p>:null}
    {!state.ready?<small className="jarvis-omni-error">Puedes escribir mientras se comprueba la conexión; el envío permanecerá bloqueado hasta entonces.</small>:null}
    <JarvisGatewayCapabilityPanel ready={state.ready}/>
+   <JarvisOwnerDialogueCheck ready={state.ready}/>
    <button type="button" className="jarvis-omni-open" onClick={onOpenJarvis}>Abrir JARVIS completo</button>
   </section>:null}
  </aside>;
