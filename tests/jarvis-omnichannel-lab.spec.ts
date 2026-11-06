@@ -67,3 +67,39 @@ test('CUT39 panel fits mobile viewport without hiding existing main route',async
  await expect(page.getByRole('button',{name:'Dictar a JARVIS'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Conversación por voz con JARVIS'})).toBeVisible();
 });
+
+test('CUT47 microphone check runs only on user click, never uploads audio and stops every track',async({page})=>{
+ await page.evaluate(()=>{
+  window.__jarvisAudioCalls=0;
+  window.__jarvisAudioStops=0;
+  Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{
+   getUserMedia:async constraints=>{
+    window.__jarvisAudioCalls+=1;
+    if(constraints.audio!==true||constraints.video!==false)throw Error('unsafe microphone constraints');
+    return {getTracks:()=>[{kind:'audio',stop:()=>{window.__jarvisAudioStops+=1}}]};
+   }
+  }});
+ });
+ const panel=page.locator('.jarvis-omni-panel');
+ await expect(panel.getByRole('button',{name:'Comprobar micrófono local de JARVIS'})).toBeVisible();
+ expect(await page.evaluate(()=>window.__jarvisAudioCalls)).toBe(0);
+ await panel.getByRole('button',{name:'Comprobar micrófono local de JARVIS'}).click();
+ await expect(panel.getByText('Entrada de audio disponible')).toBeVisible();
+ await expect(panel.getByText(/NO demuestra que JARVIS entienda dictados/)).toBeVisible();
+ expect(await page.evaluate(()=>window.__jarvisAudioCalls)).toBe(1);
+ expect(await page.evaluate(()=>window.__jarvisAudioStops)).toBe(1);
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
+
+test('CUT47 microphone permission denied reports clearly without enabling gateway writes',async({page})=>{
+ await page.evaluate(()=>{
+  Object.defineProperty(navigator,'mediaDevices',{configurable:true,value:{
+   getUserMedia:async()=>{throw new DOMException('Permission denied','NotAllowedError')}
+  }});
+ });
+ const panel=page.locator('.jarvis-omni-panel');
+ await panel.getByRole('button',{name:'Comprobar micrófono local de JARVIS'}).click();
+ await expect(panel.getByText('Micrófono sin validar')).toBeVisible();
+ await expect(panel.getByText('El navegador ha denegado el acceso al micrófono.')).toBeVisible();
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});

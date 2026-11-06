@@ -8,6 +8,7 @@ import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import JarvisOmniDock from './JarvisOmniDock';
+import CerebroJarvisVoiceLabStatus from './CerebroJarvisVoiceLabStatus';
 import {setJarvisActiveInterface} from './jarvisOmniSession';
 import JarvisVisibleLanguageGuard from './JarvisVisibleLanguageGuard';
 import {fetchAppApi,supabase} from './supabase';
@@ -48,13 +49,14 @@ export default function CerebroConsoleHost(){
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
  if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
- if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
+ if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><CerebroJarvisVoiceLabStatus view="V0"/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
   <JarvisVisibleLanguageGuard/>
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
+  <CerebroJarvisVoiceLabStatus view={primaryView}/>
   <div className="cerebro-interface-stage">
    <div className="cerebro-work-mount cerebro-host-v0 jarvis-core-mounted" hidden={primaryView!=='JARVIS'}><CerebroJarvisWorkConsole surface="JARVIS"/></div>
    {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}

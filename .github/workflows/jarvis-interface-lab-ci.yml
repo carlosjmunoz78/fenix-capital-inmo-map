@@ -7,6 +7,7 @@ on:
       - cerebro/jarvis-omnichannel-interlocutor-lab-20261106
       - cerebro/jarvis-cut44-voice-dictation-ux-lab-20261106
       - cerebro/jarvis-cut46-unified-comm-lab-20261106
+      - cerebro/jarvis-cut47-approved-voice-device-gates-lab-20261106
     paths:
       - 'src/CerebroConsoleShell.tsx'
       - 'src/jarvisVoicePolicy.ts'
@@ -16,6 +17,12 @@ on:
       - 'src/jarvisOwnerDialogueProbe.ts'
       - 'src/JarvisOwnerDialogueCheck.tsx'
       - 'tests/jarvis-cut46-owner-dialogue-probe-lab.test.mjs'
+      - 'src/jarvisVoiceSurfacePolicy.ts'
+      - 'src/CerebroJarvisVoiceLabStatus.tsx'
+      - 'src/jarvisAudioDeviceProbe.ts'
+      - 'src/JarvisAudioDeviceCheck.tsx'
+      - 'tests/jarvis-cut47-device-surface-lab.test.mjs'
+      - 'cerebro/registry/jarvis-voice-cut47.v1.json'
       - 'supabase/functions/cerebro-console-gateway-v0/index.ts'
       - 'supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts'
       - 'src/CerebroConsoleHost.tsx'
@@ -69,7 +76,7 @@ jobs:
       - name: Compile and build unchanged existing App
         run: npm run build
       - name: Owner-scoped JARVIS UI and gateway contract tests
-        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs tests/jarvis-cut45-gateway-persona-lab.test.mjs tests/jarvis-cut46-unified-comm-lab.test.mjs tests/jarvis-cut46-owner-dialogue-probe-lab.test.mjs
+        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs tests/jarvis-cut45-gateway-persona-lab.test.mjs tests/jarvis-cut46-unified-comm-lab.test.mjs tests/jarvis-cut46-owner-dialogue-probe-lab.test.mjs tests/jarvis-cut47-device-surface-lab.test.mjs
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
