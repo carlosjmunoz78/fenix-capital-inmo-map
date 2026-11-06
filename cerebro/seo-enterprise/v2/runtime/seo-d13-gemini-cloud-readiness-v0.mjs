@@ -43,7 +43,7 @@ export async function probeGeminiModelMetadata({
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  // The cloud job injects key securely. Never echo ENV, URLs containing a key or responses.
- const state=await probeGeminiModelMetadata({key:process.env.CEREBRO_GEMINI_API_KEY||null});
+ const state=await probeGeminiModelMetadata({key:process.env.CEREBRO_GEMINI_FREE_API_KEY||null});
  process.stdout.write(JSON.stringify(state)+'\n');
  // Metadata probing is diagnostic: no inference; unreadiness is HOLD, not CI red.
 }
