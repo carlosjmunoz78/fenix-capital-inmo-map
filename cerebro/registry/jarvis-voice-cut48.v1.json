@@ -72,8 +72,25 @@
       "restore_in_isolated_target_runtime",
       "provider_voice_consent_and_budget_gate",
       "unified_cuts_persona_security_tribunal",
-      "promotion_gradual"
+      "promotion_gradual",
+      "prove owner authenticated via existing App in-session read-only diagnostic"
     ]
   },
-  "rollback": "Discard draft branch/PR while PROD untouched."
+  "rollback": "Discard draft branch/PR while PROD untouched.",
+  "anonymous_live_gate": {
+    "method": "GET",
+    "path": "/functions/v1/cerebro-console-gateway-v0/health",
+    "authorization_header": "ABSENT",
+    "publishable_key": "EXISTING_GITHUB_ACTIONS_SECRET",
+    "last_observed_http_status": 401,
+    "transport_anonymous_denied": true,
+    "custom_owner_only_policy_verified": false,
+    "owner_live_authentication_verified": false,
+    "cost_external_tts_calls": 0,
+    "evidence_runs": [
+      42308625695,
+      42308868745
+    ],
+    "next_test": "APP_OWNER_SESSION_EXISTING_BUTTONS_OR_FRESH_SECURE_ACTIONS_USER_JWT"
+  }
 }
