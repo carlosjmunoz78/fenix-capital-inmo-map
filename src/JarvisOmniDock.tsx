@@ -1,8 +1,7 @@
 import {useEffect,useRef,useState,type FormEvent} from 'react';
 import {AudioLines,Mic,Send,Square,MessageSquareText} from 'lucide-react';
 import {sendJarvisComposerMessage} from './jarvisComposerBridge';
-import {inspectJarvisGateway,type JarvisGatewayDiagnostic} from './jarvisGatewayDiagnostics';
-import {fetchCerebroConsole} from './cerebroConsoleApi';
+import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
 import {getJarvisOmniState,getJarvisActiveInterface,JARVIS_OMNI_EVENT,
  JARVIS_OMNI_INTERFACE_EVENT,type JarvisOmniState} from './jarvisOmniSession';
 import {createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
@@ -15,9 +14,6 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
  const [text,setText]=useState('');
  const [listening,setListening]=useState(false);
  const [error,setError]=useState('');
- const [diagnostic,setDiagnostic]=useState<JarvisGatewayDiagnostic|null>(null);
- const [checkingDiagnostic,setCheckingDiagnostic]=useState(false);
- const diagnosticPendingRef=useRef(false);
  const mic=useRef<CerebroSpeechRecognition|null>(null);
  useEffect(()=>{
   const sync=()=>setState(getJarvisOmniState()),view=()=>setActive(getJarvisActiveInterface());
@@ -27,20 +23,6 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
    window.removeEventListener(JARVIS_OMNI_INTERFACE_EVENT,view)};
  },[]);
  useEffect(()=>()=>{try{mic.current?.abort()}catch{/* no-op */}},[]);
- useEffect(()=>{
-  if(!state.ready)setDiagnostic(null);
- },[state.ready]);
- const verifyCapabilities=async()=>{
-  if(diagnosticPendingRef.current||!state.ready)return;
-  diagnosticPendingRef.current=true;
-  setCheckingDiagnostic(true);
-  try{setDiagnostic(await inspectJarvisGateway(fetchCerebroConsole))}
-  finally{diagnosticPendingRef.current=false;setCheckingDiagnostic(false)}
- };
- useEffect(()=>{
-  if(open&&state.ready&&!diagnostic&&!diagnosticPendingRef.current)void verifyCapabilities();
- // verifyCapabilities is intentionally only invoked once per opening/readiness cycle.
- },[open,state.ready,diagnostic]);
  const send=(event:FormEvent)=>{event.preventDefault();if(!state.ready||state.sending||!text.trim())return;
   if(sendJarvisComposerMessage(text)){setText('');setError('')}
   else setError('No se pudo enviar al Gateway. Conservo el mensaje.')};
@@ -92,15 +74,7 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
    </form>
    {error?<p className="jarvis-omni-error" role="alert">{error}</p>:null}
    {!state.ready?<small className="jarvis-omni-error">Puedes escribir mientras se comprueba la conexión; el envío permanecerá bloqueado hasta entonces.</small>:null}
-   <div className="jarvis-omni-capabilities" aria-label="Capacidades verificadas de JARVIS">
-    <button type="button" onClick={()=>void verifyCapabilities()} disabled={!state.ready||checkingDiagnostic}
-     aria-label="Comprobar capacidades reales del Gateway">{checkingDiagnostic?'Comprobando…':'Comprobar capacidades reales'}</button>
-    {diagnostic?<div role="status" aria-live="polite">
-     <strong>{diagnostic.status==='VERIFIED_READONLY'?'Gateway de propietario verificado (solo lectura)':diagnostic.status==='AUTH_REQUIRED'?'Autenticación requerida':'Capacidades no verificadas'}</strong>
-     <p>{diagnostic.reason}</p>
-     {diagnostic.status==='VERIFIED_READONLY'?<p>Motores declarados por el Gateway: {diagnostic.total_declared_engines} ({diagnostic.declared_engines.join(', ')}). Esto no acredita todos los motores de CEREBRO, toda la historia, voz física ni ejecución universal.</p>:null}
-    </div>:null}
-   </div>
+   <JarvisGatewayCapabilityPanel ready={state.ready}/>
    <button type="button" className="jarvis-omni-open" onClick={onOpenJarvis}>Abrir JARVIS completo</button>
   </section>:null}
  </aside>;
