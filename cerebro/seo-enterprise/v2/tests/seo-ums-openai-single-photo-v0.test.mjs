@@ -13,6 +13,8 @@ test('original buyer photo prompt comes from registered Fénix persona and V4.2 
  assert.equal(b.quality,'medium');
  assert.equal(b.photo_count,1);
  assert.equal(b.max_estimated_usd,0.1);
+ assert.equal(b.photo_count,1);
+ assert.equal(b.paid_fallback_authorized,false);
  assert.ok(b.published_image_output_estimate_usd<b.max_estimated_usd);
  assert.equal(b.source_content_sha256,'96b340eba8d97d56fd9e2ce9644df9d2b8855759301180fbf0351630e351d88d');
  assert.match(b.prompt,/NO text, letters, words/);
