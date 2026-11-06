@@ -11,7 +11,7 @@
   "pr_draft": true,
   "merged": false,
   "certified_code_sha": "770936f79073fa04813460d20c60b55ffe7cfe74",
-  "code_status": "HECHO_LAB_NOT_DEPLOYED",
+  "code_status": "LAB_CERTIFIED_REMOTE_WORKER_EXISTS_DEPLOYED_CODE_UNVERIFIED",
   "ci": {
     "core": {
       "run_id": 42206336554,
@@ -54,9 +54,9 @@
       "726addb9"
     ],
     "parallel_worker_name": "cerebro-jarvis-cut32-lab-eu",
-    "parallel_worker_exists_remotely": false,
-    "parallel_worker_access_configured": false,
-    "parallel_worker_deployed": false,
+    "parallel_worker_exists_remotely": true,
+    "parallel_worker_access_configured": true,
+    "parallel_worker_deployed": true,
     "parallel_worker_config": "zeus/jarvis/cloudflare-lab/wrangler-b2-parallel.staging.lab.jsonc",
     "parallel_worker_route_enabled": false,
     "d1_eu_uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
@@ -67,7 +67,16 @@
     "cut30_other_identity": "PENDING",
     "b2_device_enrollment": "NOT_STARTED",
     "b3": "OFF",
-    "gateway": "OFF"
+    "gateway": "OFF",
+    "parallel_worker_code_certified": false,
+    "parallel_worker_version_id_prefix": "a0fda472",
+    "parallel_worker_access_policy": "JARVIS-CUT33-OWNER-ONLY",
+    "parallel_worker_access_policy_rule": "ALLOW_ONLY_carlosj.munozcabeza@gmail.com",
+    "parallel_worker_access_enforcement_verified": false,
+    "parallel_worker_public_url_checked": "https://cerebro-jarvis-cut32-lab-eu.carlosj-munozcabeza.workers.dev/",
+    "parallel_worker_public_url_result": "CLOUDFLARE_THERE_IS_NOTHING_HERE_YET",
+    "parallel_worker_access_destination_readback": "APP_LISTS_WORKER__EDITOR_PREVIEW_SAYS_NO_DESTINATIONS__REQUIRES_RECONCILIATION",
+    "cut33_other_d1_spotted_unverified": "cerebro-jarvis-cut33-lab-eu-jur"
   },
   "strategy": "Parallel new Worker staged no public route, separate Access owner-only before exposing workers.dev; original CUT30 never updated or downgraded.",
   "done": [
@@ -75,11 +84,12 @@
     "Verified actual Cloudflare dashboard 5 deployment rows, CUT30 25e98edd active at 100%, earlier history present, no menu invoked.",
     "Added exact LAB allowlist for original and parallel hostname to setup and enrollment with strict same-origin POST checks.",
     "New separate Worker config default OFF, workers_dev=false, routes=[], only EU D1 LAB binding and no secrets in repo.",
-    "Four new Node tests cover owner Access, negative origins, staging enrollment, no overwrite of CUT30; 750 tests PASS; five workflows green; Wrangler dry run PASS."
+    "Four new Node tests cover owner Access, negative origins, staging enrollment, no overwrite of CUT30; 750 tests PASS; five workflows green; Wrangler dry run PASS.",
+    "CUT33 remote readback on Nov 6: parallel Worker exists, version a0fda472 active, policy name JARVIS-CUT33-OWNER-ONLY with one owner email, workers.dev URL returns 'There is nothing here yet'; no public route activated; CUT30 not changed in this inspection."
   ],
   "pending": [
-    "Physical create of parallel Worker without public URL",
-    "Attach SINGLE WORKER scoped Cloudflare Access allow ONE owner email, no bypass/all_workers",
+    "Inspect deployed Worker code/version a0fda472 and compare hash and behavior with PR25 parallel candidate before enabling any route.",
+    "Reconcile Access destination: app list maps one Worker but app editor preview reports no destination; verify runtime enforcement (anonymous deny, owner allow) before any URL activation.",
     "Verify policy before enabling parallel workers.dev; set protected secrets without printing",
     "Verify CUT30 stays authorized and POST405; verify new unauthenticated/owner, no sessions",
     "Optional trusted B2 enrollment of two real devices plus revocation, one short window and rollback of parallel Worker if available",
@@ -90,5 +100,19 @@
   "subscription_added_eur": 0,
   "costs": "Cloudflare Workers Free 100 Workers max per docs; confirm specific account capacity and no payment before creation; no DeepSeek/voice charges.",
   "rollback": "Parallel Worker disable workers.dev or deactivate Access-only staging; original CUT30 remains independently active and unaffected. Worker lifecycle rollback not physically exercised.",
-  "next": "If Work used, ONE short mission only to create isolated OFF Worker, attach owner-only Access and secrets, validate protected activation; never edit CUT30 or grant B2/B3."
+  "next": "CUT33 remaining: verify Worker deployed source + resolve Access destination inconsistency, prove allow/deny under read-only safe test before any public route; keep B2/B3/Gateway OFF, CUT30 unchanged. If UI mutation required, use Work with browser write capability.",
+  "readback_2026_11_06": {
+    "source": "Opera authenticated Cloudflare UI + independent workers.dev GET",
+    "result": "PARTIAL_SAFE_PRIVATE",
+    "worker_version_prefix": "a0fda472",
+    "owner_policy_present": true,
+    "owner_policy_rule_count": 1,
+    "route_operational": false,
+    "code_verified": false,
+    "access_allow_deny_verified": false,
+    "app_access_destination_conflict": "Application index maps worker; edit preview says no destinations",
+    "no_public_activation_performed": true,
+    "original_worker_changed": false,
+    "prod_changed": false
+  }
 }
