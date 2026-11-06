@@ -18,6 +18,7 @@ test.beforeEach(async({page})=>{
    stop(){this.onend?.()}
    abort(){this.onend?.()}
   }
+  window.SpeechRecognition=SyntheticRecognition;
   window.webkitSpeechRecognition=SyntheticRecognition;
  });
  await page.goto('/tests/jarvis-ui-lab-harness.html');
@@ -44,7 +45,7 @@ test('offline draft remains editable, cannot be sent or start voice until connec
  const input=page.getByRole('textbox',{name:'Mensaje para Jarvis'});
  await expect(input).toBeEnabled();
  await input.fill('Mensaje pendiente');
- await expect(page.getByRole('button',{name:'Enviar'})).toBeDisabled();
+ await expect(page.locator('.jarvis-operativa-composer-host .operativa-send')).toBeDisabled();
  await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeDisabled();
  await expect(page.getByRole('button',{name:'Dictar'})).toBeEnabled();
  await page.evaluate(()=>{
@@ -54,7 +55,7 @@ test('offline draft remains editable, cannot be sent or start voice until connec
  });
  await expect(page.locator('[data-jarvis-state="ready"]')).toBeVisible();
  await expect(input).toHaveValue('Mensaje pendiente');
- await page.getByRole('button',{name:'Enviar'}).click();
+ await page.locator('.jarvis-operativa-composer-host .operativa-send').click();
  await expect(page.locator('#accepted-message')).toHaveText('Mensaje pendiente');
 });
 test('dictation fills draft without unauthorized automatic send and voice is user initiated',async({page})=>{
