@@ -53,14 +53,25 @@ def safe_entry(name,length,typ,packed):
 
 def file_inventory(rows):
     roots,n,total={},0,0
-    seen_files=set()
+    seen_files,seen_dirs=set(),set()
     for name,length,typ,packed in rows:
         parts=safe_entry(name,length,typ,packed)
-        if typ=='dir': continue
-        # Duplicate file members make later extraction ambiguous even when paths are safe.
-        # Check logical parts, not raw spelling (e.g. "./public_html/x").
+        if not parts: fail('ARCHIVE_UNSAFE_MEMBER')
+        # Never accept an archive where a path is both a file and a directory,
+        # or where a file is an ancestor of another entry. Extraction behavior differs.
+        if parts in seen_files and typ=='dir':
+            fail('ARCHIVE_FILE_DIRECTORY_CONFLICT')
+        if parts in seen_dirs and typ=='file':
+            fail('ARCHIVE_FILE_DIRECTORY_CONFLICT')
+        if any(parts[:i] in seen_files for i in range(1,len(parts))):
+            fail('ARCHIVE_FILE_DIRECTORY_CONFLICT')
+        if typ=='dir':
+            seen_dirs.add(parts)
+            continue
+        # Check canonical logical paths, not raw spelling.
         if parts in seen_files: fail('ARCHIVE_DUPLICATE_FILE_PATH')
         seen_files.add(parts)
+        for i in range(1,len(parts)): seen_dirs.add(parts[:i])
         n,total=n+1,total+length
         if n>MAX_FILES or total>MAX_BYTES: fail('ARCHIVE_TOTAL_LIMIT')
         for marker in ('wp-admin','wp-content','wp-includes'):
