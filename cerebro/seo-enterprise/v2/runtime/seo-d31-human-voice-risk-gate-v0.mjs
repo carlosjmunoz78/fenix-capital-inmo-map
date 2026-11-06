@@ -54,6 +54,13 @@ export function auditSeoHumanVoiceAndRisk({html,persona,content_type='ARTICLE'}=
  if(persona==='PARTICULARES'&&
   /el\s+primer\s+piso\s+destacaba.{0,150}el\s+segundo\s+ofrec[ií]a/i.test(joined))
   issues.push('UNVERIFIED_CASE_DETAILS_PRESENTED_AS_OBSERVED');
+ // Financial referrals cannot guarantee bank approval.
+ if(persona==='INMOBILIARIAS'&&
+  /\b(?:aseguran|garantizan)\s+que.{0,85}(?:operaci[oó]n|hipoteca|pr[eé]stamo).{0,95}(?:buen\s+puerto|con\s+[eé]xito|ser[aá]\s+aprobada)/i.test(joined))
+  issues.push('UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE');
+ if(persona==='INMOBILIARIAS'&&
+  /si\s+el\s+an[aá]lisis\s+financiero.{0,80}dificultades\s+insalvables.{0,100}la\s+operaci[oó]n\s+se\s+desestima/i.test(joined))
+  issues.push('UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW');
  if(p.some(s=>s.split(/\s+/).length>55&&
   (s.match(/[,.!?;]/g)||[]).length<=1))
   issues.push('LONG_UNPUNCTUATED_PARAGRAPH');
