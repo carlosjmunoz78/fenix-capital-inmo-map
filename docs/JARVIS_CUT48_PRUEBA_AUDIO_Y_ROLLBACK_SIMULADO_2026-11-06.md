@@ -46,6 +46,15 @@ Nuevo `src/JarvisPhysicalVoiceCheck.tsx`, enlazado desde Operativa/Jarvis y Dock
 - Restauración de este corte: cerrar PR CUT48 y descartar rama; no existe despliegue de estos cambios.
 - Ante autorización futura de PROD: inventario completo de integraciones, snapshot de configuración y fuente de Edge Function, evidencia de comportamiento OLD vs NEW, autenticación de propietario y denegación de anónimos, ensayo real aislado de restauración + validación de App, tribunal, coste, observabilidad y promoción gradual. No realizar sin gates.
 
+## Corrección de aislamiento de audio · revisión adicional
+En la revisión posterior a CUT48 se identificó un riesgo que afectaba a la experiencia original: el diagnóstico voluntario llamaba a `speechSynthesis.cancel()` durante el desmontaje y al deshabilitarse, **incluso si nunca había emitido audio propio**. Dado que la cola de síntesis Web Speech es compartida por la pestaña, esto podía interrumpir indebidamente una locución existente.
+
+Se ha corregido **dentro de la misma PR #33** con un `utteranceRef` de propiedad explícita. La cancelación solo se solicita cuando existe una locución de prueba pendiente perteneciente al diagnóstico; `onend` y `onerror` liberan esa propiedad. En el montaje no se borra ningún audio ajeno. Se añadió una prueba que detecta invocaciones adicionales a la cancelación global.
+
+**CI [#42306538406](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42306538406): SUCCESS** sobre commit `879dcfd92ff1810e05f54a99899edb7f60d65920`, **62 pruebas Node PASS / 0 FAIL, 30 Playwright PASS / 0 FAIL**, compilación Vite/TypeScript PASS y rollback OLD/NEW exclusivamente temporal PASS para 2 archivos. Repetición de sesión real: `EXPIRED_OR_NEAR_EXPIRY` del JWT de Actions; el Gateway vivo no se invocó con credenciales falsas.
+
+**Prueba externa de la App real en Opera (solo lectura):** el propietario tiene abierta `https://app.fenixcapital.es/cerebro` y el DOM muestra las vistas Jarvis/Operativa/Neuronal/Navegador y botones «Mensaje para Jarvis», «Dictar» y «Conversación por voz». Esto NO certifica sesión servidor para CUT48 ni su instalación: el candidato continúa en PR #33 DRAFT y no aparece en la App publicada.
+
 ## Evidencia
 **CI [#42301345097](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42301345097): SUCCESS.** `npm run build` PASS, **61 pruebas Node PASS / 0 FAIL**, **30 pruebas Playwright Chromium PASS / 0 FAIL** (escritorio y móvil), **restauración OLD y re-aplicación NEW de 2 archivos en directorio temporal PASS**. La batería incluyó un ensayo de sintetizador/reconocedor **simulados**, no hardware físico.
 El mismo job reportó `JARVIS_OWNER_JWT_FRESHNESS=EXPIRED_OR_NEAR_EXPIRY`; por tanto, la comprobación real de Gateway sigue BLOQUEADA y omitida.
