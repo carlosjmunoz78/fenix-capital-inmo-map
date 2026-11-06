@@ -51,6 +51,62 @@ const BRIEF=Object.freeze({
    note:'Página de contacto de Fénix Capital. No atribuir promesas ni plazos.'}
  ]
 });
+
+/** Strict company and source scope for V4 cloud LAB candidates. */
+export function validateSeoV4Brief(b){
+ const expected={
+  'SEO001-FENIX-B2C-EDITORIAL-001':'PARTICULARES',
+  'SEO001-FENIX-B2B-EDITORIAL-002':'INMOBILIARIAS'
+ };
+ if(!b||b.company_id!=='fenix'||b.engine_id!=='SEO-001'||b.environment!=='LAB'||
+    b.version!=='V4-CANDIDATE'||b.content_type!=='ARTICLE'||
+    expected[b.work_id]!==b.persona||b.customer_data_present!==false||
+    b.source_readonly!==true||b.wordpress_write_authorized!==false||
+    b.publish_authorized!==false||b.paid_provider_requested!==false)
+    throw Error('SEO_V4_SCOPE_NOT_ALLOWED');
+ for(const key of ['topic','buyer_problem','focus_keyword','search_intent','unique_angle','avoid_cannibalization']){
+  if(typeof b[key]!=='string'||b[key].length<15||b[key].length>450||
+     /[<>{}\x00]/.test(b[key]))throw Error('SEO_V4_BRIEF_FIELD_'+key);
+ }
+ if(b.cta_url!=='https://fenixcapital.es/contact/')throw Error('SEO_V4_CTA_URL');
+ if(!Array.isArray(b.sources)||b.sources.length!==2)throw Error('SEO_V4_SOURCE_COUNT');
+ const unique=new Set();
+ for(const src of b.sources){
+  if(typeof src.id!=='string'||!/^fenix_[a-z_]{4,40}$/.test(src.id)||
+   unique.has(src.id)||typeof src.url!=='string'||
+   !/^https:\/\/fenixcapital\.es\/[a-z0-9/-]+\/$/.test(src.url)||
+   typeof src.evidence_note!=='string'||src.evidence_note.length<45||
+   src.evidence_note.length>450)throw Error('SEO_V4_SOURCE_EVIDENCE');
+  unique.add(src.id);
+ }
+ return b;
+}
+export function buildSeoV4OwnerPrompt(brief){
+ const b=validateSeoV4Brief(brief);
+ return [
+  'CEREBRO SEO-D13 Fénix Capital. Esta es una prueba REAL en LAB, NO hay autorización de publicación.',
+  'Redacta en español de España un artículo ORIGINAL, útil, bien investigado dentro del corpus aportado y orientado a '+b.persona+'.',
+  'TEMA '+b.topic, 'BUYER PERSONA '+b.buyer_problem,
+  'INTENCIÓN DE BÚSQUEDA '+b.search_intent,
+  'ÁNGULO DIFERENCIADOR '+b.unique_angle,
+  'Evita canibalización y repetición de contenidos ya existentes '+b.avoid_cannibalization,
+  'PALABRA CLAVE '+b.focus_keyword+'; usarla de forma natural solo si encaja gramaticalmente.',
+  'Estructura EXACTA: un H1 breve de 35 a 65 caracteres que invite a leer; entre 4 y 7 H2 de 30 a 65 caracteres naturales y NO numerados; 10 a 18 párrafos de 25 a 75 palabras cada uno distribuidos bajo H2.',
+  'Extensión OBJETIVO 1250 a 1550 palabras visibles incluyendo FAQ. EXIGIDO al menos 1000 palabras totales y al menos 750 palabras de contenido principal EXCLUYENDO FAQ.',
+  'Escribe profundidad real y ejemplos prácticos SIN inventar casos de clientes ni duplicar párrafos. Cubre objeciones, decisiones, escenarios reales, requisitos y errores frecuentes.',
+  'En B2B habla a agentes y responsables de agencias, explica hitos y comunicaciones sin inventar acuerdos ni usar datos personales. En B2C habla a un comprador que ha visitado dos viviendas, no al público general.',
+  'Solo 6 FAQ, en sección final con <section class="faq"><h2>Preguntas frecuentes...</h2> y exactamente 6 <div class="faq-item"><h3>¿Pregunta natural?</h3><p>Respuesta útil de 20 a 50 palabras.</p></div>. No añadas otras FAQ en otra parte.',
+  'No uses dos puntos EN EL TEXTO visible; prohibidas las palabras además y en conclusión. Sin H2 numerados, sin clichés publicitarios, sin etiquetas de IA, sin relleno repetitivo.',
+  'No uses garantía, financiación asegurada, promesas bancarias o cifras no contrastadas. Evita consejos jurídicos imperativos como nunca debes firmar o siempre debes pagar.',
+  'No atribuyas a las fuentes afirmaciones que no están explícitamente verificadas. Si no hay datos suficientes, explica qué conviene comprobar antes de decidir.',
+  'Incluye enlaces internos solo a URLs de las fuentes y a '+b.cta_url+'. CTA concreta en un párrafo final cercano al buyer persona. Sin inventar teléfonos, direcciones ni testimonios.',
+  'Fuentes actuales verificadas en WordPress y contexto autorizado '+JSON.stringify(b.sources),
+  'Devuelve EXCLUSIVAMENTE JSON válido con claves html (fragmento HTML) y used_source_ids (exactamente '+JSON.stringify(b.sources.map(x=>x.id))+').',
+  'HTML solo h1,h2,h3,p,a,section,div; NO CSS, script, formularios, imágenes, testimonios ficticios ni texto publicitario en imagen.',
+  'Antes de devolver verifica voz natural, titulares atractivos, al menos 6 preguntas completas y la longitud mínima real. Una frase útil vale más que relleno.'
+ ].join('\n');
+}
+
 const hold=(code,extra={})=>Object.freeze({status:'HOLD',reason:code,
  company_id:'fenix',engine_id:'SEO-001',environment:'LAB',
  model:MODEL,wordpress_writes:0,external_data_writes:0,
@@ -107,8 +163,9 @@ export function buildOneShotPrompt(){
 }
 export async function runOneShotFreeCanary({
  api_key=null,fetch_impl=globalThis.fetch,expected_secret_name=FREE_SECRET,
- owner_verified_free_project=true,policy_only=false
+ owner_verified_free_project=true,policy_only=false,brief_override=null
 }={}){
+ const activeBrief=brief_override?validateSeoV4Brief(brief_override):BRIEF;
  const permit=validateOneShotFreePermit();
  if(permit.status!=='FREE_PROJECT_MANUAL_ONE_SHOT_PERMIT')return permit;
  if(expected_secret_name!==FREE_SECRET)return hold('PAID_OR_WRONG_SECRET_DENIED');
@@ -127,7 +184,7 @@ export async function runOneShotFreeCanary({
    headers:{'content-type':'application/json','x-goog-api-key':api_key},
    signal:AbortSignal.timeout(60000),
    body:JSON.stringify({
-    contents:[{role:'user',parts:[{text:buildOneShotPrompt()}]}],
+    contents:[{role:'user',parts:[{text:brief_override?buildSeoV4OwnerPrompt(activeBrief):buildOneShotPrompt()}]}],
     generationConfig:{responseMimeType:'application/json',
      temperature:0.55,maxOutputTokens:OWNER_ATTESTATION.max_output_tokens}
    })
@@ -144,21 +201,21 @@ export async function runOneShotFreeCanary({
  const html=parsed?.html;
  const sources=parsed?.used_source_ids;
  if(typeof html!=='string'||html.length<600||html.length>18000||
-  !Array.isArray(sources)||sources.length!==2||!BRIEF.allowed_source_ids.every(x=>sources.includes(x))||
-  sources.some(x=>!BRIEF.allowed_source_ids.includes(x)))
+  !Array.isArray(sources)||sources.length!==2||!(brief_override?activeBrief.sources.map(x=>x.id):BRIEF.allowed_source_ids).every(x=>sources.includes(x))||
+  sources.some(x=>!(brief_override?activeBrief.sources.map(x=>x.id):BRIEF.allowed_source_ids).includes(x)))
   return hold('MODEL_OUTPUT_CONTRACT_INVALID',{real_inference_attempted:true,request_count:calls});
  if(/<(?:script|iframe|style|svg|img|form|object|embed|base|link)\b/i.test(html)||
     /\s(?:style|onerror|onload|onclick|srcdoc)\s*=/i.test(html)||
     [...html.matchAll(/href="([^"]+)"/g)].some(x=>!/^https:\/\/fenixcapital\.es\/[a-z0-9/%._-]+$/i.test(x[1])))
    return hold('HTML_SECURITY_REJECTED',{real_inference_attempted:true,request_count:calls});
- const qa=auditOwnerEditorialCopy({html,persona:'PARTICULARES',content_type:'ARTICLE'});
- const voice=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES',content_type:'ARTICLE'});
- const depth=auditSeoContentDepth({html,persona:'PARTICULARES',content_type:'ARTICLE'});
+ const qa=auditOwnerEditorialCopy({html,persona:activeBrief.persona,content_type:'ARTICLE'});
+ const voice=auditSeoHumanVoiceAndRisk({html,persona:activeBrief.persona,content_type:'ARTICLE'});
+ const depth=auditSeoContentDepth({html,persona:activeBrief.persona,content_type:'ARTICLE'});
  const result={
   status:(qa.deterministic_style_precheck_passed&&voice.deterministic_precheck_passed&&depth.preliminary_depth_check_passed)?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD',
   company_id:'fenix',engine_id:'SEO-001',environment:'LAB',model:MODEL,
   provider:'GOOGLE_GEMINI_FREE_PROJECT',
-  work_id:BRIEF.work_id,project_id:OWNER_ATTESTATION.project_id,
+  work_id:activeBrief.work_id,project_id:OWNER_ATTESTATION.project_id,
   source_sha256:SHA(html),used_source_ids:sources,
   faq_count:qa.faq_count,word_count:qa.word_count,
   style_issues:qa.issues,
