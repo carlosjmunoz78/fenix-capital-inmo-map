@@ -91,7 +91,8 @@ test('CUT32.1 refuses POST to setup page, querystring and unauthorized route',as
  assert.equal((await live.fetch(req('/v1/missions/private'),env(),ctx())).status,404);
 });
 test('CUT32.1 integration is available only in candidate Worker, no D1 operations for GET page',async()=>{
- const settings=env({JARVIS_B2_DEVICE_ENABLED:'false'});
+ const settings=env({JARVIS_B2_DEVICE_ENABLED:'false',
+  JARVIS_B2_ENROLLMENT_UNTIL_MS:String(Date.now()+300000)});
  const page=await worker.fetch(req(),settings,ctx());
  assert.equal(page.status,200);
  assert.equal((await page.text()).includes('Autorizar este dispositivo'),true);
