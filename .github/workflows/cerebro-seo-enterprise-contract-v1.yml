@@ -82,6 +82,21 @@ jobs:
           path: ${{ runner.temp }}/seo-phase2-all-roles/role-curriculum.json
           retention-days: 14
           if-no-files-found: error
+      - name: Run first source-grounded ChatGPT professional pilot through isolated JOB-001
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2-pilot"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-pilot-runner-v1.mjs \
+            "$RUNNER_TEMP/seo-phase2-pilot/job001.v8" \
+            "$RUNNER_TEMP/seo-phase2-pilot/pilot-receipt.json"
+      - name: Archive anonymized pilot receipt only (not autonomous-agent training)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-first-professional-pilot-job001-readonly
+          path: ${{ runner.temp }}/seo-phase2-pilot/pilot-receipt.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Exercise 141 SEO specialist knowledge contracts with durable JOB-001 (NO AGENT IAM)
         shell: bash
         run: |
