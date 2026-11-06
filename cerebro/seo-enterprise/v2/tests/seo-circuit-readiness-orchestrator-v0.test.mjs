@@ -74,6 +74,8 @@ test('long synthetic future candidate moves to HANDOFF PLAN but never receives a
  assert.ok(x.d32.word_count>=1000);
  assert.equal(x.image_order.producer_engine,'UMS-001');
  assert.equal(x.image_order.brief.visible_pixel_text_allowed,false);
+ assert.equal(x.image_only_photo_adapter_bound,false);
+ assert.equal(x.graphic_renderer_with_text_overlay_not_authorized_for_photos,true);
  assert.equal(x.wordpress_dry_run_plan.arguments.status,'draft');
  assert.equal(x.wordpress_dry_run_plan.arguments.dry_run,true);
  assert.equal(x.wordpress_dry_run_plan.prepared_only,true);
