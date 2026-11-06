@@ -99,6 +99,11 @@ export async function runSeoCloudWriter({
  billing_disabled_confirmed=false,lifecycle_state=null,foundation=null,
  fetch_impl=globalThis.fetch
 }={}){
+ // Never infer actual project billing from boolean flags or an API key.
+ // A project-bound, provider-authenticated billing attestation is not yet integrated.
+ // Keep real inference egress disabled, even if callers pass 'true' to stale flags.
+ return hold('GEMINI_PROJECT_BILLING_ATTESTATION_NOT_AVAILABLE_NO_INFERENCE');
+ // Legacy implementation deliberately unreachable until independent provider-side proof is implemented.
  const gate=evaluateSeoCloudWriter({
   brief,has_secret:typeof api_key==='string'&&api_key.length>=16,
   provider_free_tier_confirmed,billing_disabled_confirmed,lifecycle_state,foundation
