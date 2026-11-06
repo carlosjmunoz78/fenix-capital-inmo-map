@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - cerebro/jarvis-deepseek-weekend-lab-20261106
+      - cerebro/jarvis-cut43-executive-persona-lab-20261106
     paths:
       - 'zeus/jarvis/training/**'
       - '.github/workflows/jarvis-deepseek-weekend-lab-ci.yml'
