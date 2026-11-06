@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {inspectOwnerGateway} from '../scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs';
+import {inspectJwtFreshness} from '../scripts/jarvis-cut40-jwt-freshness.mjs';
 const env={jwt:'TEST_JWT_FOR_MOCK_ONLY_AAAAAA_BBBBBBBB_CCCCCCCC',
  publishableKey:'sb_publishable_FAKE_TEST_ONLY_NOT_VALID'};
 
@@ -48,4 +49,16 @@ test('CUT40 fails if anonymous caller reaches the protected owner route',async()
 test('CUT40 fails if owner token is invalid or gateway is write-enabled',async()=>{
  await assert.rejects(()=>inspectOwnerGateway({...env,fetchImpl:setup({ownerStatus:401}).fetchImpl}),/GATEWAY_OWNER_HEALTH_HTTP_401/);
  await assert.rejects(()=>inspectOwnerGateway({...env,fetchImpl:setup({unsafe:true}).fetchImpl}),/UNSAFE_GATEWAY_HEALTH_CONTRACT/);
+});
+
+test('CUT40 local JWT freshness gate never needs a signature or reveals claims',()=>{
+ const encode=x=>Buffer.from(JSON.stringify(x)).toString('base64url');
+ const jwt=claims=>encode({alg:'none',typ:'JWT'})+'.'+encode(claims)+'.signature';
+ const now=1793990000000;
+ assert.equal(inspectJwtFreshness('',now),'MISSING');
+ assert.equal(inspectJwtFreshness('not-jwt-but-long-enough-to-check-structure',now),'MALFORMED');
+ assert.equal(inspectJwtFreshness(jwt({exp:1793990000-100}),now),'EXPIRED_OR_NEAR_EXPIRY');
+ assert.equal(inspectJwtFreshness(jwt({exp:1793990000+120}),now),'POSSIBLY_FRESH_NOT_AUTHENTICATED');
+ assert.equal(inspectJwtFreshness(jwt({exp:1793990000+1000,nbf:1793990000+300}),now),'NOT_YET_VALID');
+ assert.equal(inspectJwtFreshness(jwt({other:'data'}),now),'MISSING_EXP');
 });
