@@ -13,7 +13,8 @@
     "JARVIS_ACCESS_PROBE_ENABLED": "false",
     "JARVIS_B2_DEVICE_ENABLED": "false",
     "JARVIS_B2_B3_LIVE_ENABLED": "false",
-    "JARVIS_GATEWAY_ENABLED": "false"
+    "JARVIS_GATEWAY_ENABLED": "false",
+    "JARVIS_B2_ENROLLMENT_ENABLED": "false"
   },
   "d1_databases": [
     {
