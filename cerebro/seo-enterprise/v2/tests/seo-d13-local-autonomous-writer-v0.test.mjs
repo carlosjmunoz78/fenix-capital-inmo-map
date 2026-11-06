@@ -1,6 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import {buildAutonomousSeoPrompt,generateSeoDraftWithLocalModel} from '../runtime/seo-d13-local-autonomous-writer-v0.mjs';
 
 const b={
@@ -18,24 +17,10 @@ const b={
    quote_or_paraphrase:'Fénix Capital facilita un canal de contacto para consultas de clientes en Córdoba.'}
  ]
 };
-const model='qwen2.5:7b';
-const html=fs.readFileSync('cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba-v3-faq.draft.html','utf8');
-const fakeResponse=(text=html,sources=['wp_articles','wp_contact'])=>({
- model,done:true,response:JSON.stringify({html:text,used_source_ids:sources})
-});
-const fakeFetch=(status='healthy',text=html)=>async(url,opts)=>{
- if(url.endsWith('/api/tags'))return{ok:true,json:async()=>({models:status==='healthy'?[{name:model}]:[]})};
- if(url.endsWith('/api/generate')){
-  assert.equal(opts.method,'POST');
-  assert.equal(opts.headers['content-type'],'application/json');
-  const obj=JSON.parse(opts.body);
-  assert.equal(obj.model,model);assert.equal(obj.stream,false);assert.equal(obj.format,'json');
-  return {ok:true,json:async()=>fakeResponse(text)};
- }
- throw Error('UNEXPECTED_CALL');
-};
 
-test('prompt is sourced, zero-cost, has six FAQ and company-specific copy constraints',()=>{
+// Historical prompt contract is retained for comparative audit. The former
+// Ollama execution path is intentionally disabled by the owner CLOUD_ONLY policy.
+test('prompt contract remains source-grounded and non-publishing',()=>{
  const p=buildAutonomousSeoPrompt(b);
  assert.equal(p.min_faq,6);assert.equal(p.source_count,2);
  assert.match(p.prompt,/No uses dos puntos visibles/);
@@ -46,36 +31,45 @@ test('prompt is sourced, zero-cost, has six FAQ and company-specific copy constr
  assert.throws(()=>buildAutonomousSeoPrompt({...b,sources:[]}),/SOURCE_COUNT/);
  assert.throws(()=>buildAutonomousSeoPrompt({...b,company_id:'other'}),/CONTEXT/);
 });
-test('missing local model fails closed and never generates content or pays',async()=>{
- let n=0;
- const f=async(url,opts)=>{n++;return{ok:true,json:async()=>({models:[]})}};
- const r=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:f,simulation:true});
- assert.equal(r.status,'HOLD');assert.equal(r.reason,'LOCAL_MODEL_NOT_INSTALLED');assert.equal(n,1);
- assert.equal(r.wordpress_writes,0);assert.equal(r.paid_api_calls,0);
- const unavailable=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:async()=>{throw Error('UNAVAILABLE')},simulation:true});
- assert.equal(unavailable.reason,'LOCAL_OLLAMA_UNAVAILABLE');
+test('cloud-only policy rejects any local model without network or payment',async()=>{
+ let calls=0;
+ const forbiddenFetch=async()=>{calls++;throw Error('LOCAL_NETWORK_DENIED')};
+ for(const simulation of [true,false]){
+  const result=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:forbiddenFetch,simulation});
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.reason,'CLOUD_ONLY_POLICY_LOCAL_EXECUTION_DISABLED');
+  assert.equal(result.wordpress_writes,0);
+  assert.equal(result.paid_api_calls,0);
+  assert.equal(result.publish_authorized,false);
+ }
+ assert.equal(calls,0);
 });
-test('mocked local provider exercises real ROUTE-001 and existing QA, never publishes',async()=>{
- // Simulated transport: this test does NOT prove Ollama is installed or actually wrote prose.
- const r=await generateSeoDraftWithLocalModel({brief:b,model,fetch_impl:fakeFetch(),simulation:true});
- assert.equal(r.status,'SEO_D13_LOCAL_MODEL_DRAFT_CREATED_REVIEW_ONLY');
- assert.equal(r.provider,'OLLAMA_LOCAL_LOOPBACK');assert.equal(r.simulation,true);
- assert.equal(r.faq_count,6);assert.match(r.sha256,/^[a-f0-9]{64}$/);
- assert.equal(r.additional_cost_eur,0);assert.equal(r.paid_api_calls,0);
- assert.equal(r.wordpress_writes,0);assert.equal(r.can_publish,false);
- assert.equal(r.source_fact_check_verified,false);
- assert.equal(r.seo_independent_review_verified,false);
+test('even a healthy local Ollama response cannot reopen legacy execution',async()=>{
+ let calls=0;
+ const fakeFetch=async()=>{calls++;return{ok:true,json:async()=>({models:[{name:'qwen2.5:7b'}]})}};
+ const result=await generateSeoDraftWithLocalModel({
+  brief:b,model:'qwen2.5:7b',fetch_impl:fakeFetch,simulation:true
+ });
+ assert.equal(result.status,'HOLD');
+ assert.equal(result.reason,'CLOUD_ONLY_POLICY_LOCAL_EXECUTION_DISABLED');
+ assert.equal(result.external_writes,0);
+ assert.equal(result.wordpress_writes,0);
+ assert.equal(calls,0);
 });
-test('bad content and unknown source are blocked',async()=>{
- const bad=html.replace(/<div class="faq-item"><h3>[\s\S]*?<\/h3><p>[\s\S]*?<\/p><\/div>/,'');
- const r=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:fakeFetch('healthy',bad),simulation:true});
- assert.equal(r.status,'HOLD');assert.equal(r.reason,'OWNER_STYLE_OR_FAQ_QA_FAIL');
- assert.ok(r.issues.some(x=>x.includes('FAQ_MINIMUM')));
- const untrusted=async(url)=>{
-  if(url.endsWith('/api/tags'))return{ok:true,json:async()=>({models:[{name:model}]})};
-  return{ok:true,json:async()=>fakeResponse(html,['wp_articles','invented'])};
- };
- const r2=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:untrusted,simulation:true});
- assert.equal(r2.reason,'SOURCE_COVERAGE_NOT_PROVEN');
- await assert.rejects(()=>generateSeoDraftWithLocalModel({brief:b,endpoint:'https://external.com',fetch_impl:fakeFetch(),simulation:true}),/EXTERNAL_HOST/);
+test('forged endpoint or input cannot bypass owner prohibition',async()=>{
+ let calls=0;
+ const forbiddenFetch=async()=>{calls++;throw Error('SHOULD_NOT_EXECUTE')};
+ for(const changes of [
+  {endpoint:'https://external.example'},
+  {brief:{...b,sources:[]}},
+  {brief:{...b,paid_provider_requested:true}},
+  {model:'qwen2.5:7b',simulation:true}
+ ]){
+  const result=await generateSeoDraftWithLocalModel({brief:b,fetch_impl:forbiddenFetch,...changes});
+  assert.equal(result.status,'HOLD');
+  assert.equal(result.reason,'CLOUD_ONLY_POLICY_LOCAL_EXECUTION_DISABLED');
+  assert.equal(result.wordpress_writes,0);
+  assert.equal(result.paid_api_calls,0);
+ }
+ assert.equal(calls,0);
 });
