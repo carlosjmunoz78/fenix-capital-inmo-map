@@ -144,3 +144,29 @@ test('CUT48 browser speech recognition returns a visible draft only, never sends
  await expect(panel.getByText(/mensaje dictado omnicanal/)).toBeVisible();
  await expect(page.locator('#accepted-message')).toHaveText('');
 });
+
+test('CUT48 microphone dictation stops on closing panel, and late STT cannot change the draft',async({page})=>{
+ await page.evaluate(()=>{
+  window.__cut48AbortCount=0;
+  class DelayedSpeech{
+   lang='es-ES';continuous=false;interimResults=false;maxAlternatives=1;
+   onstart=null;onresult=null;onerror=null;onend=null;
+   start(){
+    this.onstart?.();
+    setTimeout(()=>this.onresult?.({results:[[{transcript:'texto que no debe llegar',confidence:1}]]}),180);
+   }
+   stop(){this.onend?.()}
+   abort(){window.__cut48AbortCount+=1;this.onend?.()}
+  }
+  window.SpeechRecognition=DelayedSpeech;
+  window.webkitSpeechRecognition=DelayedSpeech;
+ });
+ await page.getByRole('button',{name:'Dictar a JARVIS'}).click();
+ await page.getByRole('button',{name:'Cerrar conversación'}).click();
+ await expect(page.getByRole('region',{name:'Conversación compartida'})).toHaveCount(0);
+ await expect.poll(()=>page.evaluate(()=>window.__cut48AbortCount)).toBe(1);
+ await page.waitForTimeout(220);
+ await page.locator('.jarvis-omni-launch').click();
+ await expect(page.getByRole('textbox',{name:'Escribir a JARVIS'})).toHaveValue('');
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
