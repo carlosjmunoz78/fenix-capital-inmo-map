@@ -60,3 +60,13 @@
   width:38px;height:38px;flex:0 0 38px;
  }
 }
+
+/* CUT42: one minimal capability probe in the main composer and the omni dock */
+.jarvis-gateway-capability-panel{font:11px/1.45 system-ui,sans-serif;color:#b6ccda}
+.jarvis-operativa-composer-host .jarvis-gateway-capability-panel{grid-column:1/-1;min-width:0;margin:0 5px 2px}
+.jarvis-omni-dock .jarvis-gateway-capability-panel{margin:8px 0;padding:7px;border:1px solid #31566b;border-radius:10px;background:#10202b}
+.jarvis-gateway-capability-panel>button{font:11px system-ui,sans-serif;color:#c9e9ef;background:transparent;border:1px solid #365a71;border-radius:6px;padding:5px 9px;cursor:pointer}
+.jarvis-gateway-capability-panel>button:disabled{opacity:.6;cursor:default}
+.jarvis-gateway-capability-result{margin:5px 0 0;color:#d1e2e8;overflow-wrap:anywhere}
+.jarvis-gateway-capability-result strong{font-size:11px;color:#9ee2ca}
+.jarvis-gateway-capability-result p{margin:3px 0}
