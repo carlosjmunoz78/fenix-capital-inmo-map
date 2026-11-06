@@ -39,6 +39,17 @@ jobs:
           npx --yes wrangler@4.157.0 deploy --config wrangler-eu.lab.jsonc --dry-run --outdir=./cut28-eu-bundle
           test -n "$(find ./cut28-eu-bundle -type f -print -quit)"
           echo 'CUT28 pinned EU D1 OFF worker compiled without Cloudflare network deploy: PASS'
+      - name: CUT29 safe remote-migration operator plan (NO NETWORK / NO WRITES)
+        run: |
+          set -euo pipefail
+          node --check cut29-remote-eu-migrate.mjs
+          node cut29-remote-eu-migrate.mjs --plan > /tmp/jarvis-cut29-plan.json
+          grep -q '"LOCAL_PLAN_ONLY"' /tmp/jarvis-cut29-plan.json
+          grep -q '"remoteWrites": 0' /tmp/jarvis-cut29-plan.json
+          if env -u CLOUDFLARE_API_TOKEN -u JARVIS_CUT29_APPROVED node cut29-remote-eu-migrate.mjs --apply > /tmp/cut29-failure.txt 2>&1; then
+            echo 'CUT29 violated migration authorization gate'; exit 1
+          fi
+          echo 'CUT29 plan and authorization guard: PASS (offline)'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
