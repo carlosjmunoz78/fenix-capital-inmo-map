@@ -66,6 +66,22 @@ jobs:
           path: ${{ runner.temp }}/seo-specialist-training/manifest.json
           retention-days: 14
           if-no-files-found: error
+      - name: Build and independently verify all 191 role curricula and 573 drill templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-phase2-all-roles"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-all-roles-curriculum-v1.mjs build \
+            "$RUNNER_TEMP/seo-phase2-all-roles/role-curriculum.json"
+          node cerebro/seo-enterprise/v2/runtime/seo-phase2-all-roles-curriculum-v1.mjs verify \
+            "$RUNNER_TEMP/seo-phase2-all-roles/role-curriculum.json"
+      - name: Archive phase 2 role knowledge and drill bindings (not trained agents)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-v2-all-191-role-curricula-573-drills
+          path: ${{ runner.temp }}/seo-phase2-all-roles/role-curriculum.json
+          retention-days: 14
+          if-no-files-found: error
       - name: Exercise 141 SEO specialist knowledge contracts with durable JOB-001 (NO AGENT IAM)
         shell: bash
         run: |
