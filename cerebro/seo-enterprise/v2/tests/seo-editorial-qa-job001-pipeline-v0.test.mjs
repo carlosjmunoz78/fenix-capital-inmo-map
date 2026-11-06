@@ -61,7 +61,10 @@ test('release never granted even after green technical prechecks',()=>{
   assert.equal(done.ymyl_manual_review_required,undefined);
   assert.equal(qa.ymyl_manual_review_required,true);
   assert.equal(qa.legal_privacy_review_required,true);
-  assert.equal(done.remaining_gates.length,8);
+  assert.equal(done.remaining_gates.length,9);
+  assert.ok(done.remaining_gates.includes('VISUAL_IMAGE_PRODUCER_DELIVERY_AND_NO_TEXT_LOGO_QA'));
+  assert.equal(qa.image_brief_precheck_passed,true);
+  assert.equal(qa.image_visual_review_verified,false);
   assert.equal(done.wordpress_publishes,0);assert.equal(done.release_authorized,false);
  }finally{fs.rmSync(dir,{recursive:true,force:true})}
 });
