@@ -6,6 +6,8 @@ on:
       - 'cerebro/seo-enterprise/v2/tests/seo-owner-editorial-visual-gate-v2.test.mjs'
       - 'cerebro/seo-enterprise/v2/seo-owner-copy-visual-standard-v2-2026-11-06.json'
       - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v3-faq.draft.html'
       - 'cerebro/seo-enterprise/v2/drafts/*-v2.draft.html'
       - '.github/workflows/cerebro-seo-owner-copy-visual-standard-v2.yml'
 permissions:
