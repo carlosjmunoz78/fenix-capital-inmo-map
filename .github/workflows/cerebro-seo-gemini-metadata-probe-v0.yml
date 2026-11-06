@@ -20,7 +20,7 @@ jobs:
           node --test cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs
       - name: Probe one metadata endpoint with GitHub secret when present
         env:
-          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
         run: |
           node cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
       - name: Zero-inference verification
