@@ -19,6 +19,19 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
  const [listening,setListening]=useState(false);
  const [error,setError]=useState('');
  const mic=useRef<CerebroSpeechRecognition|null>(null);
+ const cancelDictation=()=>{
+  const recognition=mic.current;
+  mic.current=null;
+  if(recognition){
+   recognition.onstart=null;recognition.onresult=null;recognition.onerror=null;recognition.onend=null;
+   try{recognition.abort()}catch{/* already stopped */}
+  }
+  setListening(false);
+ };
+ // Closing the panel, sending a message or entering voice conversation MUST
+ // release speech recognition. No hidden background listening after close.
+ useEffect(()=>{if(!open||state.voiceActive||state.sending)cancelDictation()},
+  [open,state.voiceActive,state.sending]);
  useEffect(()=>{
   const sync=()=>setState(getJarvisOmniState()),view=()=>setActive(getJarvisActiveInterface());
   window.addEventListener(JARVIS_OMNI_EVENT,sync);
@@ -29,7 +42,10 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
   return()=>{window.removeEventListener(JARVIS_OMNI_EVENT,sync);
    window.removeEventListener(JARVIS_OMNI_INTERFACE_EVENT,view)};
  },[]);
- useEffect(()=>()=>{try{mic.current?.abort()}catch{/* no-op */}},[]);
+ useEffect(()=>()=>{const recognition=mic.current;mic.current=null;if(recognition){
+  recognition.onstart=null;recognition.onresult=null;recognition.onerror=null;recognition.onend=null;
+  try{recognition.abort()}catch{/* already stopped */}
+ }},[]);
  const send=(event:FormEvent)=>{event.preventDefault();if(!state.ready||state.sending||!text.trim())return;
   if(sendJarvisComposerMessage(text)){setText('');setError('')}
   else setError('No se pudo enviar al Gateway. Conservo el mensaje.')};
@@ -39,17 +55,17 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
   else setError(!voiceRecognitionSupported()?'El navegador no dispone de reconocimiento de voz. Puede utilizar el dictado del teclado o escribir.':'La conversación por voz requiere conexión autenticada con el Gateway y permiso de micrófono.');
  };
  const dictation=()=>{
-  if(mic.current){try{mic.current.stop()}catch{/* no-op */}mic.current=null;setListening(false);return}
+  if(mic.current){cancelDictation();return}
   if(!voiceRecognitionSupported()){setError('Este navegador no dispone de reconocimiento de voz. Puede dictar con el teclado del dispositivo o escribir.');return}
   const recognition=createVoiceRecognition();if(!recognition){setError('El motor de dictado no está disponible; puede escribir.');return}
   mic.current=recognition;recognition.lang='es-ES';recognition.continuous=false;
   recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);
-  recognition.onstart=()=>{setListening(true);setError('')};
-  recognition.onresult=event=>{const result=event.results[event.results.length-1];
+  recognition.onstart=()=>{if(mic.current!==recognition)return;setListening(true);setError('')};
+  recognition.onresult=event=>{if(mic.current!==recognition)return;const result=event.results[event.results.length-1];
    const phrase=String(result?.[0]?.transcript||'').trim();
    if(phrase)setText(prev=>prev+(prev.trim()?' ':'')+phrase)};
-  recognition.onerror=event=>setError(jarvisDictationProblem(String(event.error||'')));
-  recognition.onend=()=>{mic.current=null;setListening(false)};
+  recognition.onerror=event=>{if(mic.current===recognition)setError(jarvisDictationProblem(String(event.error||'')))};
+  recognition.onend=()=>{if(mic.current!==recognition)return;mic.current=null;setListening(false)};
   try{recognition.start()}catch{mic.current=null;setListening(false);setError('No se ha podido iniciar el micrófono. Revise el permiso del sitio o utilice el teclado.')}
  };
  return <aside className="jarvis-omni-dock" data-jarvis-omni-interface={active}
