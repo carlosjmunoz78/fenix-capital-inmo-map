@@ -5,7 +5,6 @@
  */
 import fs from 'node:fs/promises';
 import crypto from 'node:crypto';
-import {chromium} from '@playwright/test';
 import {pathToFileURL} from 'node:url';
 
 const LOGO='https://fenixcapital.es/wp-content/uploads/2026/10/Logo-Fenix-Capital-oficial-color-completo-scaled-1.png';
@@ -91,11 +90,12 @@ export function premiumMarkup(order,assets){
     '<div class="micro"></div></main></body></html>'
   ].join('');
 }
-export async function renderPremiumSeoCanary({order=PREMIUM_SEO_IMAGE_CONTRACT_V1,assets=null,outFile=null,browserFactory=()=>chromium.launch({headless:true})}={}){
+export async function renderPremiumSeoCanary({order=PREMIUM_SEO_IMAGE_CONTRACT_V1,assets=null,outFile=null,browserFactory=null}={}){
   validateOrder(order);
   const brand=assets||await loadBrand();
   const markup=premiumMarkup(order,brand);
-  const browser=await browserFactory();
+  const launch=browserFactory||async()=>{const {chromium}=await import('@playwright/test');return chromium.launch({headless:true});};
+  const browser=await launch();
   try{
     const page=await browser.newPage({viewport:{width:1200,height:630},deviceScaleFactor:1});
     try{
