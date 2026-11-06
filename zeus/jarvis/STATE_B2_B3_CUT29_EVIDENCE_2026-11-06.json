@@ -1,0 +1,81 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-06",
+  "cut": "CUT29_REMOTE_EVIDENCE_CONFIRMED",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT29",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "head_at_evidence": "1c3246c0c314593b23198c1005f275065477ddb6",
+  "draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "evidence": {
+    "source": "ChatGPT Work export in personal Library, plus ZIP SHA256 and Cloudflare Opera read-only cross-check",
+    "library_file_id": "libfile_69800515e3ec8191a8f079eabf4f5158",
+    "evidence_zip_sha256": "35447ab4e80f4cb6b2fb659bfdf42250c3a9e549616cd4706d5d3acbfae1264e",
+    "baseline_sha256": "d1b840c205c9fbebdcd8ce8bbbce1e30bacf9e5a29c9ada589d699697277f097",
+    "post_migration_sha256": "531d832b1872b6cbcea09d8a7dbb67538bcee0f81a5bac7505b4de346d540c36",
+    "source_schema_sha256": "13aa3dfc2d3167312fa537062447f0c03086d38eb49d2775ab00ec091271ef2d",
+    "restore_schema_sha256": "13aa3dfc2d3167312fa537062447f0c03086d38eb49d2775ab00ec091271ef2d",
+    "integrity": "ZIP valid; provided SHA256SUMS all match; parsed source-schema.json == restore-schema.json",
+    "migrations": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "schema": {
+      "tables": 7,
+      "indexes": 5,
+      "triggers": 4,
+      "user_rows": 0
+    },
+    "restore": {
+      "verified_by_work": true,
+      "cloudflare_ui_tables_observed": true,
+      "quick_check_report": "ok",
+      "independent_import_attempts": 1
+    }
+  },
+  "cloudflare": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "plan": "Workers Free",
+    "source": {
+      "name": "cerebro-jarvis-lab-eu",
+      "uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+      "jurisdiction": "eu",
+      "read_replication": "disabled"
+    },
+    "restore": {
+      "name": "cerebro-jarvis-lab-eu-restore-cut29",
+      "uuid": "c446f17c-c26d-4c76-a3ea-f62c843d461b",
+      "jurisdiction": "eu",
+      "read_replication": "disabled"
+    },
+    "old_synthetic_d1_uuid": "a859fde1-126b-4c40-bc0d-aec2f8839f7b",
+    "additional_subscription_cost_usd": 0,
+    "new_token_created": false
+  },
+  "distinctions": {
+    "db_remote_schema": "HECHO_LAB",
+    "remote_empty_schema_restore": "HECHO_LAB",
+    "remote_data_restore_with_real_sessions": "NOT_TESTED",
+    "worker_deployed": false,
+    "gateway_live": false,
+    "owner_root_live": false,
+    "vault_live": false,
+    "b2_live": false,
+    "b3_live": false,
+    "two_physical_devices_verified": false,
+    "old_new_parity": false,
+    "b10_certified": false,
+    "prod": "NO_GO"
+  },
+  "next_gate": "B2 OWNER_ROOT trusted registration + server-only secret vault + real scoped session, then B3 read-only grants, OFF gated Worker, two-device physical test and tribunal B10. No Prod/App modification before OLD/NEW.",
+  "deepseek_plan": "Knowledge/conversation improvement later via existing Model Router, only `deepseek-flash` and `deepseek-v4-pro` (2026-11 docs), prepaid ceiling €50, no auto top-up, iterative candidate/evaluator, no autonomous policy/code promotion or raw sensitive data.",
+  "rollback": "No new remote modification in this assistant turn; preserve two EU D1 resources and evidence; do not delete. PR25 remains DRAFT."
+}
