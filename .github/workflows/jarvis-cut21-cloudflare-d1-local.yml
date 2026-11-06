@@ -58,6 +58,14 @@ jobs:
           npx --yes wrangler@4.157.0 deploy --config wrangler-access-canary.lab.jsonc --dry-run --outdir=./cut30-access-bundle
           test -n "$(find ./cut30-access-bundle -type f -print -quit)"
           echo 'CUT30 private Cloudflare Access canary compiled, no routes, zero remote writes: PASS'
+      - name: CUT31 offline B2 Access to EU D1 binding guard
+        run: node verify-cut31-b2-binding.mjs
+      - name: CUT31 build B2 status candidate, NO DEPLOY
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-b2-read-probe.candidate.lab.jsonc --dry-run --outdir=./cut31-b2-candidate
+          test -n "$(find ./cut31-b2-candidate -type f -print -quit)"
+          echo 'CUT31 Cloudflare B2 canary build only: PASS'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
