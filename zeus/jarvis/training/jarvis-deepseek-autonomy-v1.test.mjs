@@ -24,7 +24,7 @@ test('CUT37 perpetual LAB ledger is explicit, EUR50 policy USD40 subcap',()=>{
  assert.ok(l.spent_estimate_usd>0&&l.spent_estimate_usd<40);
  if(l.status==='RESERVED'){
   assert.ok(l.pending&&typeof l.pending==='object'&&!Array.isArray(l.pending),'Missing durable reservation');
-  assert.match(String(l.pending.run_id),/^\\d{6,20}$/);
+  assert.match(String(l.pending.run_id),/^\d{6,20}$/);
   assert.equal(l.pending.cursor,l.cycle_cursor,'Reserved cursor mismatch');
   assert.ok(Number.isSafeInteger(l.pending.cycles)&&l.pending.cycles>=1&&l.pending.cycles<=12);
   assert.ok(Number.isFinite(l.pending.reserved_usd)&&l.pending.reserved_usd>0&&l.pending.reserved_usd<=1.8);
