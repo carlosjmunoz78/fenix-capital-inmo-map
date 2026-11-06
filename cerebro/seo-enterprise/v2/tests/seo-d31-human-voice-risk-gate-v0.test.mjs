@@ -75,3 +75,20 @@ test('actual V4 B2B forced keyword, mandatory consent and second-visit deadline 
   assert.ok(a.issues.includes(issue),issue);
  assert.equal(a.can_publish,false);
 });
+
+test('later real B2B FAQ cannot force second visit as mandatory referral milestone',()=>{
+ const h='<h1>Coordinación responsable</h1><h2>FAQ para agencias</h2>'+
+ '<p>Conviene presentar al asesor tras la segunda visita cuando el comprador muestra interés.</p>';
+ const r=auditSeoHumanVoiceAndRisk({html:h,persona:'INMOBILIARIAS'});
+ assert.ok(r.issues.includes('ARBITRARY_B2B_SECOND_VISIT_RULE'));
+ assert.equal(r.independent_professional_qa_verified,false);
+});
+test('later real B2C FAQ overclaims note-simple area and invents observations',()=>{
+ const h='<h1>Cómo elegir vivienda</h1><h2>La visita</h2>'+
+ '<p>Mientras que el primer piso destacaba por una cocina moderna reformada recientemente, el segundo ofrecía una terraza amplia.</p>'+
+ '<p>La nota simple permite verificar su superficie exacta y confirmar que no existen cargas.</p>';
+ const r=auditSeoHumanVoiceAndRisk({html:h,persona:'PARTICULARES'});
+ assert.ok(r.issues.includes('REGISTER_INFORMATION_OVERCLAIM_REQUIRES_LEGAL_REVIEW'));
+ assert.ok(r.issues.includes('UNVERIFIED_CASE_DETAILS_PRESENTED_AS_OBSERVED'));
+ assert.equal(r.can_publish,false);
+});
