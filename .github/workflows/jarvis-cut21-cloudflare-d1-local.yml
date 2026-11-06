@@ -31,6 +31,14 @@ jobs:
           npx --yes wrangler@4.157.0 deploy --config wrangler-eu.template.jsonc --dry-run --outdir=./cut23-eu-bundle
           test -n "$(find ./cut23-eu-bundle -type f -print -quit)"
           echo 'CUT23 EU OFF Worker dry run: PASS (no remote changes)'
+      - name: CUT28 bound EU D1 LAB offline safety attestation
+        run: node verify-cut28-eu-binding.mjs
+      - name: CUT28 bound EU D1 Worker OFF package (DRY RUN ONLY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-eu.lab.jsonc --dry-run --outdir=./cut28-eu-bundle
+          test -n "$(find ./cut28-eu-bundle -type f -print -quit)"
+          echo 'CUT28 pinned EU D1 OFF worker compiled without Cloudflare network deploy: PASS'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
