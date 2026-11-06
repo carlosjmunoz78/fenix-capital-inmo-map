@@ -197,3 +197,23 @@ test('V4.3 B2C fixes exact source-locked allocation and technical-safety wording
  assert.equal(newAudit.can_publish,false);
  console.log('SEO001_V43_B2C_CONTENT_SHA256='+crypto.createHash('sha256').update(after).digest('hex'));
 });
+
+
+test('V4.3 B2C registry binds exact content and stays permanently unpublished',()=>{
+ const path='cerebro/seo-enterprise/v2/registry/seo001-v4-3-b2c-review-only-2026-11-06.json';
+ const registry=JSON.parse(fs.readFileSync(path,'utf8'));
+ const bytes=fs.readFileSync(registry.candidate_file);
+ assert.equal(crypto.createHash('sha256').update(bytes).digest('hex'),registry.candidate_sha256);
+ assert.equal(registry.source_git_blob,'c7595cd49a1fc8d86dd41aa6db6bee24d4e531fa');
+ assert.equal(registry.proof.github_workflow_run,42288583619);
+ assert.equal(registry.machine_d31_precheck_pass,true);
+ for(const key of [
+  'professional_ymyl_review_verified','independent_seo_review_verified',
+  'legal_review_completed','owner_exact_digest_approved',
+  'core_guard_authorized_write','wordpress_restore_real_verified',
+  'ums_original_photo_ready','wordpress_drafts_created',
+  'publish_authorized','autonomous_production_ready'
+ ]) assert.equal(registry[key],false,key);
+ assert.equal(registry.wordpress_writes,0);
+ assert.equal(registry.paid_api_calls_this_revision,0);
+});
