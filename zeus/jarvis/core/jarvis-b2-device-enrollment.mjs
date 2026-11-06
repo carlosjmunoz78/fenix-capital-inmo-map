@@ -1,3 +1,4 @@
+import {isApprovedJarvisB2LabOrigin} from './jarvis-b2-approved-lab-origins.mjs';
 /**
  * CUT32 · B2 device session enrollment (LAB candidate; OFF default).
  * A HIGH_RISK administrative operation must first open a <=10-minute LAB
@@ -13,7 +14,7 @@ const AUD=/^[A-Za-z0-9_-]{15,128}$/;
 const EMAIL=/^[^\s@]{1,100}@[^\s@]{1,150}\.[^\s@]{2,24}$/;
 const UUID=/^[a-f0-9]{8}-(?:[a-f0-9]{4}-){3}[a-f0-9]{12}$/i;
 const OWNER=/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,99}$/;
-const ORIGIN='https://cerebro-jarvis-lab-eu.carlosj-munozcabeza.workers.dev';
+
 const TTL=1800_000;
 const COOKIE='__Host-jarvis_b2';
 const sqlSession=`INSERT INTO jarvis_lab_session_binding_v0
@@ -54,8 +55,8 @@ export function createJarvisB2DeviceEnrollment({
    return fail(405,'METHOD_DENIED');
   let url;
   try{url=new URL(request.url)}catch{return fail(400,'INVALID_REQUEST')}
-  if(url.origin!==ORIGIN||url.pathname!=='/__jarvis/b2-device-enroll'||
-    url.search||url.hash||request.headers.get('origin')!==ORIGIN||
+  if(!isApprovedJarvisB2LabOrigin(url.origin)||url.pathname!=='/__jarvis/b2-device-enroll'||
+    url.search||url.hash||request.headers.get('origin')!==url.origin||
     request.headers.get('sec-fetch-site')!=='same-origin'||
     request.headers.get('x-jarvis-enrollment')!=='1'||
     (request.headers.get('content-length')&&!['0'].includes(request.headers.get('content-length'))))
