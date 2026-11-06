@@ -82,7 +82,7 @@ export function repairSeoV4FromKnownOwnerFeedback({work_id,html,root=process.cwd
 export function persistSeoV4Repairs({results,output_dir}={}){
  if(!Array.isArray(results)||results.length!==2||typeof output_dir!=='string'||
   !path.isAbsolute(output_dir)||output_dir.includes('..'))denied('OUTPUT_SCOPE');
- const dir=path.resolve(output_dir),allowed=[os.tmpdir(),process.env.RUNNER_TEMP].filter(Boolean).map(path.resolve);
+ const dir=path.resolve(output_dir),allowed=[os.tmpdir(),process.env.RUNNER_TEMP].filter(Boolean).map(x=>path.resolve(x));
  if(!allowed.some(base=>dir.startsWith(base+path.sep)))denied('OUTSIDE_TEMP');
  if(fs.existsSync(dir))denied('OUTPUT_EXISTS');
  fs.mkdirSync(dir,{recursive:true,mode:0o700});
