@@ -17,6 +17,7 @@ En la App real algunos controles muestran «Dictar» o «Hablar», pero no entre
 3. `CerebroConsoleShell` (solo consola JARVIS): trato «señor», errores STT formales y precisos; texto editable aun con Gateway offline, botón Enviar permanece bloqueado hasta `chatReady`. Respuestas 401 y 403 se identifican sin exponer JWT.
 4. `JarvisOmniDock`: dictado con hints es-ES, errores comprensibles y alternativa del teclado cuando Web Speech no existe.
 5. `JarvisOperativaComposerPortal`: reemplaza mensajes que suponen Chrome por diagnósticos independientes del navegador y acuses formales.
+   - Gate corregido: ahora usa `getJarvisOmniState().ready` (Gateway real), NO `textarea.disabled`; un borrador editable offline no puede encender falsamente el indicador de conexión ni habilitar envíos. Actualización por evento de estado autenticado.
 6. Tests Node de política, voz, separación de ANA, permiso de micrófono, autenticación y borrador; CI TypeScript/Vite + Playwright desktop/mobile con fixtures.
 7. Lógica SOLO en LAB, sin API de pago, sin merge ni deploy.
 
