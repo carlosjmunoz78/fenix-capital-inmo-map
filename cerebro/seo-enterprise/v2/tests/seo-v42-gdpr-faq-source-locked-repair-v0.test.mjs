@@ -10,7 +10,8 @@ test('V4.2 verifies exact historical source digests and preserves both owner-saf
  assert.equal(a.length,2);
  assert.deepEqual(a.map(x=>x.faq_count),[6,6]);
  assert.ok(a.every(x=>x.word_count>=1000&&x.main_words_excluding_faq>=750));
- assert.equal(a[0].technical_precheck_pass,true);
+ assert.equal(a[0].technical_precheck_pass,false);
+ assert.deepEqual(a[0].technical_issues,['VOICE_PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED']);
  assert.equal(a[1].technical_precheck_pass,false);
  assert.deepEqual(a[1].technical_issues,[
   'VOICE_UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE',
