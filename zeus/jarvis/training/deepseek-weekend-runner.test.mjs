@@ -10,6 +10,7 @@ import {openLifetimeBudget,reserveLifetimeBudget,closeLifetimeBudget,JARVIS_DEEP
 
 import {balanceAvailable,evaluate,reservedUSD} from './deepseek-weekend-runner.mjs';
 import {assessJarvisDialogue} from './jarvis-dialogue-quality-lab.mjs';
+import {authorizeDeepSeekBalanceDelta} from './deepseek-balance-baseline-lab.mjs';
 
 const dir=dirname(fileURLToPath(import.meta.url));
 test('synthetic curriculum has 24 distinct LAB cases, no identifiers',()=>{
@@ -104,4 +105,18 @@ test('empty answers, unsupported claims and critic rejection are flagged',()=>{
  assert.ok(invalid.issues.includes('CRITIC_REJECTED'));
  const unsupported=assessJarvisDialogue({candidate:{respuesta:'Ya lo he desplegado en producción',intencion:'informar',verificaciones:[],human_required:false}});
  assert.ok(unsupported.issues.includes('UNVERIFIED_EXECUTION_CLAIM'));
+});
+
+test('owner account baseline USD 98.23 and cumulative delta USD 40 are fail-closed',()=>{
+ const bal=x=>({is_available:true,balance_infos:[{currency:'USD',total_balance:x}]});
+ assert.equal(authorizeDeepSeekBalanceDelta(bal('98.23'),{projected_usd:5}).allowed,true);
+ assert.equal(authorizeDeepSeekBalanceDelta(bal('58.24'),{projected_usd:0.005}).allowed,true);
+ const cap=authorizeDeepSeekBalanceDelta(bal('58.24'),{projected_usd:0.02});
+ assert.equal(cap.allowed,false);
+ assert.equal(cap.reason,'JARVIS_MONEY_LIMIT');
+ assert.equal(authorizeDeepSeekBalanceDelta(bal('100.00')).reason,'BALANCE_REBASE_REQUIRED');
+ assert.equal(authorizeDeepSeekBalanceDelta(bal('bad')).allowed,false);
+ assert.equal(authorizeDeepSeekBalanceDelta({is_available:false,balance_infos:[]}).allowed,false);
+ assert.equal(authorizeDeepSeekBalanceDelta({is_available:true,balance_infos:[]}).allowed,false);
+ assert.equal(authorizeDeepSeekBalanceDelta(bal('90.00'),{projected_usd:6}).allowed,false);
 });
