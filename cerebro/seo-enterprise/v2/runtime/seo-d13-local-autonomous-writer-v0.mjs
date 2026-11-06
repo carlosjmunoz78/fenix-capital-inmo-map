@@ -79,6 +79,9 @@ export function buildAutonomousSeoPrompt(brief){
 const json=async(r,label)=>{if(!r?.ok)return null;try{return await r.json()}catch{return null}};
 export async function generateSeoDraftWithLocalModel({brief,model='qwen2.5:7b',
  fetch_impl=globalThis.fetch,endpoint=LOCAL_ENDPOINT,timeout_ms=60000,simulation=false}={}){
+ // Historical isolated prototype retained for audit; hard-disabled by cloud-only owner architecture.
+ return reason('CLOUD_ONLY_POLICY_LOCAL_EXECUTION_DISABLED');
+ // Legacy implementation deliberately unreachable.
  const b=checkBrief(brief);
  const prompt=buildAutonomousSeoPrompt(b);
  if(endpoint!==LOCAL_ENDPOINT)denied('EXTERNAL_HOST_OR_SSRF');
