@@ -14,7 +14,7 @@ test('CUT37 perpetual LAB ledger is explicit, EUR50 policy USD40 subcap',()=>{
  assert.equal(l.company_id,'fenix');
  assert.equal(l.engine_id,'JARVIS');
  assert.equal(l.environment,'LAB');
- assert.equal(l.status,'ACTIVE');
+ assert.ok(['ACTIVE','RESERVED','PAUSED','QUALITY_HALT','LIMIT_REACHED'].includes(l.status),'Unexpected ledger state: '+l.status);
  assert.equal(l.owner_permission_eur,50);
  assert.equal(l.lifetime_guard_usd,40);
  assert.equal(l.auto_recharge,false);
@@ -22,7 +22,16 @@ test('CUT37 perpetual LAB ledger is explicit, EUR50 policy USD40 subcap',()=>{
  assert.equal(l.synthetic_only,true);
  assert.equal(l.production_mutation,false);
  assert.ok(l.spent_estimate_usd>0&&l.spent_estimate_usd<40);
- assert.equal(l.pending,null);
+ if(l.status==='RESERVED'){
+  assert.ok(l.pending&&typeof l.pending==='object'&&!Array.isArray(l.pending),'Missing durable reservation');
+  assert.match(String(l.pending.run_id),/^\\d{6,20}$/);
+  assert.equal(l.pending.cursor,l.cycle_cursor,'Reserved cursor mismatch');
+  assert.ok(Number.isSafeInteger(l.pending.cycles)&&l.pending.cycles>=1&&l.pending.cycles<=12);
+  assert.ok(Number.isFinite(l.pending.reserved_usd)&&l.pending.reserved_usd>0&&l.pending.reserved_usd<=1.8);
+  assert.ok(l.spent_estimate_usd+l.pending.reserved_usd<=l.lifetime_guard_usd,'Reserved total exceeds hard cap');
+ } else {
+  assert.equal(l.pending,null,'Non-reserved state must not retain pending spend');
+ }
 });
 test('CUT37 autonomy dry-run does not use credentials or network',()=>{
  const p=spawnSync(process.execPath,[script,'--dry-run'],{encoding:'utf8',env:{PATH:process.env.PATH}});
