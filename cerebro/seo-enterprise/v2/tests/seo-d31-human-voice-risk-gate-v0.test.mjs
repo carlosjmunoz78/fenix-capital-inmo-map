@@ -217,3 +217,60 @@ test('V4.3 B2C registry binds exact content and stays permanently unpublished',(
  assert.equal(registry.wordpress_writes,0);
  assert.equal(registry.paid_api_calls_this_revision,0);
 });
+
+test('V4.4 source-locked legal review only preserves exact V4.3 bytes and rejects untracked edits',()=>{
+ const reg=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/registry/seo001-v4-4-legal-source-locked-review-only-2026-11-06.json','utf8'));
+ assert.equal(reg.company_id,'fenix');
+ assert.equal(reg.engine_id,'SEO-001');
+ assert.equal(reg.environment,'PREPROD');
+ assert.equal(reg.version,'V4.4-REVIEW-ONLY');
+ assert.equal(reg.candidates.length,2);
+ const lockedPatch=(input,entry)=>{
+  const digest=crypto.createHash('sha256').update(input).digest('hex');
+  assert.equal(digest,entry.source_sha256,'SOURCE_SHA_MISMATCH');
+  let out=input;
+  for(const change of entry.changes){
+   assert.equal(out.split(change.from).length,2,'UNIQUE_SOURCE_TEXT_REQUIRED:'+change.risk);
+   out=out.replace(change.from,change.to);
+  }
+  return out;
+ };
+ for(const entry of reg.candidates){
+  const original=fs.readFileSync(entry.source_file,'utf8');
+  const candidate=fs.readFileSync(entry.candidate_file,'utf8');
+  const gitSha=crypto.createHash('sha1').update('blob '+Buffer.byteLength(original)+'\\0').update(original).digest('hex');
+  assert.equal(gitSha,entry.source_git_blob);
+  assert.equal(lockedPatch(original,entry),candidate,'NO_UNTRACKED_TEXT_EDITS');
+  assert.equal(crypto.createHash('sha256').update(candidate).digest('hex'),entry.candidate_sha256);
+  assert.throws(()=>lockedPatch(original+'\\n<!-- tamper -->',entry),/SOURCE_SHA_MISMATCH/);
+  assert.equal(entry.professional_legal_review_verified,false);
+  const audit=auditSeoHumanVoiceAndRisk({html:candidate,persona:entry.persona,content_type:'ARTICLE'});
+  assert.deepEqual(audit.issues,[],JSON.stringify(audit.issues));
+  assert.equal(audit.independent_professional_qa_verified,false);
+  assert.equal(audit.can_publish,false);
+  console.log('SEO001_V44_'+(entry.persona==='PARTICULARES'?'B2C':'B2B')+'_CONTENT_SHA256='+entry.candidate_sha256);
+ }
+ for(const key of [
+  'professional_ymyl_review_verified','independent_seo_review_verified','legal_review_completed',
+  'wordpress_restore_real_verified','core_guard_authorized_write','wordpress_draft_iam_verified',
+  'ums_original_photo_ready','owner_exact_digest_approved','wordpress_drafts_created',
+  'publish_authorized','autonomous_production_ready'
+ ])assert.equal(reg[key],false,'NO_AUTONOMOUS_RELEASE:'+key);
+ assert.equal(reg.wordpress_writes,0);
+ assert.equal(reg.paid_api_calls_this_revision,0);
+});
+
+test('V4.4 explicit source-specific legal facts; no generalized consent or administrator-only certificate',()=>{
+ const b2c=fs.readFileSync('cerebro/seo-enterprise/v2/drafts/v4-4-review-only/compradores-v4-4-review-only.html','utf8');
+ assert.doesNotMatch(b2c,/certificado de estar al corriente.{0,100}emitido por el administrador/i);
+ assert.match(b2c,/artículo 9\\.1\\.e de la Ley de Propiedad Horizontal/);
+ assert.match(b2c,/funciones de secretario, con el visto bueno del presidente/);
+ assert.match(b2c,/comprador exonere expresamente al vendedor/);
+ assert.match(b2c,/las últimas actas de la comunidad/);
+ const b2b=fs.readFileSync('cerebro/seo-enterprise/v2/drafts/v4-4-review-only/inmobiliarias-v4-4-review-only.html','utf8');
+ assert.doesNotMatch(b2b,/¿Hace falta consentimiento para derivar al comprador\\?<\\/h3><p>No necesariamente/);
+ assert.match(b2b,/identificar y documentar la base jurídica aplicable/);
+ assert.match(b2b,/consentimiento, este debe ser libre, informado e inequívoco/);
+ assert.match(b2b,/cesión a terceros puede requerir una manifestación diferenciada/);
+ assert.match(b2b,/los nuevos agentes que se incorporen al equipo/);
+});
