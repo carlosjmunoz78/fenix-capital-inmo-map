@@ -8,6 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {dirname,join,resolve} from 'node:path';
 import {openLifetimeBudget,reserveLifetimeBudget,closeLifetimeBudget,JARVIS_DEEPSEEK_BUDGET} from './deepseek-lifetime-budget.mjs';
 import {assessJarvisDialogue} from './jarvis-dialogue-quality-lab.mjs';
+import {authorizeDeepSeekBalanceDelta} from './deepseek-balance-baseline-lab.mjs';
 
 const root=dirname(fileURLToPath(import.meta.url));
 const endpoint='https://api.deepseek.com';
@@ -71,7 +72,9 @@ async function main(){
  const apiKey=process.env.DEEPSEEK_API_KEY;
  if(!apiKey||apiKey.length<16)return safeError('DEEPSEEK_API_KEY_MISSING');
  const balance=await request('/user/balance','GET',apiKey);
- if(balance.error||!balanceAvailable(balance.value))return safeError('BALANCE_UNVERIFIED_OR_INSUFFICIENT');
+ if(balance.error||!balanceAvailable(balance.value)||
+    !authorizeDeepSeekBalanceDelta(balance.value,{projected_usd:hardCapUSD}).allowed)
+  return safeError('BALANCE_BASELINE_NOT_VERIFIED_OR_MONEY_LIMIT');
  if(!process.env.JARVIS_WEEKEND_OUTPUT_DIR)return safeError('PERSISTENT_LEDGER_DIR_REQUIRED');
  const outDir=resolve(process.env.JARVIS_WEEKEND_OUTPUT_DIR);
  mkdirSync(outDir,{recursive:true,mode:0o700});
@@ -101,6 +104,9 @@ async function main(){
   if(calls+2>maxCalls||charged+reserve*2>hardCapUSD){persist();return safeError('PRECALL_BUDGET_CAP')}
   try{reserveLifetimeBudget(lifetimeBudget,Math.max(0.10,reserve*2))}
   catch{persist();return safeError('CUMULATIVE_BUDGET_STOP_BEFORE_FIRST_CALL')}
+  const firstBalance=await request('/user/balance','GET',apiKey);
+  if(firstBalance.error||!authorizeDeepSeekBalanceDelta(firstBalance.value,
+   {projected_usd:Math.max(0.10,reserve*2)}).allowed){persist();return safeError('BALANCE_DELTA_DENIED_BEFORE_CALL')}
   const first=await request('/chat/completions','POST',apiKey,payload);
   if(first.error){persist();return safeError(first.error)}
   calls++;
@@ -118,6 +124,9 @@ async function main(){
   if(charged+reservedUSD(jsonText(criticPayload))>hardCapUSD)return safeError('PRECRITIC_BUDGET_CAP');
   try{reserveLifetimeBudget(lifetimeBudget,Math.max(0.10,reservedUSD(jsonText(criticPayload))*2))}
   catch{persist();return safeError('CUMULATIVE_BUDGET_STOP_BEFORE_CRITIC_CALL')}
+  const criticBalance=await request('/user/balance','GET',apiKey);
+  if(criticBalance.error||!authorizeDeepSeekBalanceDelta(criticBalance.value,
+   {projected_usd:Math.max(0.10,reservedUSD(jsonText(criticPayload))*2)}).allowed){persist();return safeError('BALANCE_DELTA_DENIED_BEFORE_CRITIC')}
   const second=await request('/chat/completions','POST',apiKey,criticPayload);
   if(second.error)return safeError(second.error);
   calls++;
