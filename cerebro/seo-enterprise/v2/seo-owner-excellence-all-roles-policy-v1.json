@@ -133,5 +133,40 @@
     "professional_qa_and_images_not_yet_proven": true,
     "no_new_API_spend_or_publish_permission": true,
     "prohibit_false_claim_that_text_originated_from_CEREBRO": "AUTHOR_PROVENANCE_MUST_BE_TRACKED"
+  },
+  "owner_content_depth_v1": {
+    "status": "PREPROD_GATES_TESTED_NO_PROD_PUBLICATION",
+    "policy_ref": "cerebro/seo-enterprise/v2/seo-owner-content-depth-policy-v1-2026-11-06.json",
+    "applies_to_roles": [
+      "SEO-D03_BUYER_PERSONA",
+      "SEO-D05_INTENT",
+      "SEO-D13_COPY",
+      "SEO-D14_CONVERSION",
+      "SEO-D15_INSPECTOR",
+      "SEO-D16_YMYL",
+      "SEO-D31_INDEPENDENT_QA",
+      "SEO-D32_TRAINING",
+      "SEO_JUDGE_A"
+    ],
+    "hard_minimum_article_total_words": 1000,
+    "hard_minimum_article_core_words_excluding_faq": 750,
+    "hard_minimum_landing_total_words": 900,
+    "hard_minimum_landing_core_words_excluding_faq": 600,
+    "target_article_words": [
+      1200,
+      1800
+    ],
+    "target_landing_words": [
+      1000,
+      1600
+    ],
+    "faq_article_minimum": 6,
+    "faq_landing_minimum": 8,
+    "no_padding_or_duplicate_paragraphs": true,
+    "google_has_no_magic_word_count": true,
+    "source_factcheck_and_buyer_persona_semantic_review_required": true,
+    "old_articles_archived_for_safe_rewrite": true,
+    "publishing_permission_added": false,
+    "new_paid_model_usage_authorized": false
   }
 }
