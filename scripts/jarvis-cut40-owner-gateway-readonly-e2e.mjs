@@ -23,6 +23,14 @@ export async function inspectAnonymousGateway({publishableKey,fetchImpl=fetch}){
   headers:{apikey:publishableKey,accept:'application/json'},
   signal:AbortSignal.timeout(12000)
  });
+ // A 401 from Supabase edge indicates an anonymous request was denied,
+ // but does NOT certify the custom Gateway owner policy was reached.
+ if(response.status===401)return{
+  status:'ANONYMOUS_EDGE_HTTP_401_OWNER_POLICY_UNVERIFIED',
+  route_count:1,anonymous_http_rejected:true,owner_policy_verified:false,
+  owner_authenticated:false,owner_live_e2e_verified:false,
+  prod_writes:false,provider_calls:0,credentials_disclosed:false
+ };
  assert(response.status===403,'ANON_GATE_UNEXPECTED_HTTP_'+String(response.status));
  let data;
  try{data=await response.json()}catch{throw Error('ANON_GATE_DENIAL_NOT_JSON')}
@@ -30,7 +38,8 @@ export async function inspectAnonymousGateway({publishableKey,fetchImpl=fetch}){
   'ANON_GATE_DENIAL_NOT_OWNER_ONLY');
  return {
   status:'ANONYMOUS_OWNER_ONLY_DENIAL_VERIFIED',
-  route_count:1,owner_authenticated:false,owner_live_e2e_verified:false,
+  route_count:1,anonymous_http_rejected:true,owner_policy_verified:true,
+  owner_authenticated:false,owner_live_e2e_verified:false,
   prod_writes:false,provider_calls:0,credentials_disclosed:false
  };
 }
