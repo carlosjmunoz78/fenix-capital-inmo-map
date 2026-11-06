@@ -17,7 +17,7 @@ test('real model-metadata protocol is GET with header only, no generation & no r
   assert.equal(args.headers['x-goog-api-key'],secret);
   assert.equal(args.redirect,'error');
   assert.equal(args.body,undefined);
-  return {ok:true,json:async()=>({name:'models/gemini-2.5-flash-lite',
+  return {ok:true,json:async()=>({name:'models/gemini-3.5-flash-lite',
    supportedGenerationMethods:['countTokens','generateContent']})};
  }});
  assert.equal(n,1);assert.equal(r.status,'METADATA_ONLY_VERIFIED');
