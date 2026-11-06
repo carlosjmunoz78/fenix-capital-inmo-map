@@ -36,7 +36,7 @@ test('mocked response exercises identical security QA without pretending live in
   api_key:'fake-free-project-key-for-tests-only',
   fetch_impl:async(url,args)=>{
    calls++;
-   assert.match(url,/generativelanguage.googleapis.com\/v1beta\/models\/gemini-2.5-flash-lite:generateContent$/);
+   assert.match(url,/generativelanguage.googleapis.com\/v1beta\/models\/gemini-3.5-flash-lite:generateContent$/);
    assert.equal(args.method,'POST');assert.equal(args.redirect,'error');
    assert.ok(!url.includes('fake-free-project-key'));
    const body=JSON.parse(args.body);
