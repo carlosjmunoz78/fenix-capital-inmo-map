@@ -39,11 +39,11 @@ jobs:
         run: node --test zeus/jarvis/training/*.test.mjs
       - name: Single bounded DeepSeek LAB dialogue study (max 12 paid calls, 0.15 USD)
         run: node zeus/jarvis/training/jarvis-deepseek-study-lab.mjs --execute
-      - name: Upload synthetic-only review candidates
-        if: success()
+      - name: Upload synthetic-only review candidates and partial budget ledger
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: jarvis-cut36-synthetic-dialogue-${{ github.run_id }}
-          path: ${{ runner.temp }}/jarvis-lab-dialogue/jarvis-study-${{ github.run_id }}.json
-          if-no-files-found: error
+          path: ${{ runner.temp }}/jarvis-lab-dialogue/*.json
+          if-no-files-found: warn
           retention-days: 30
