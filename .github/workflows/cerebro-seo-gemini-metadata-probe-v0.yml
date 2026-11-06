@@ -1,0 +1,27 @@
+name: CEREBRO SEO · Gemini provider metadata probe zero inference PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-gemini-metadata-probe-v0.yml'
+permissions:
+  contents: read
+jobs:
+  provider-metadata:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test zero-cost metadata preflight and secret redaction rules
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-gemini-cloud-readiness-v0.test.mjs
+      - name: Probe one metadata endpoint with GitHub secret when present
+        env:
+          CEREBRO_GEMINI_API_KEY: ${{ secrets.CEREBRO_GEMINI_API_KEY }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-d13-gemini-cloud-readiness-v0.mjs
+      - name: Zero-inference verification
+        run: echo 'READONLY_METADATA_ONLY=YES GEMINI_GENERATIONS=0 BILLING_TIER=UNVERIFIED PAID_FALLBACK=NO'
