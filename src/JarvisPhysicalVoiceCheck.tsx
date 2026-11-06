@@ -25,16 +25,25 @@ export default function JarvisPhysicalVoiceCheck({disabled=false}:{disabled?:boo
  const [error,setError]=useState('');
  const active=useRef(true);
  const mic=useRef<CerebroSpeechRecognition|null>(null);
+ const utteranceRef=useRef<SpeechSynthesisUtterance|null>(null);
  const generation=useRef(0);
 
- useEffect(()=>()=>{active.current=false;generation.current++;
-  try{mic.current?.abort()}catch{/* no-op */}
+ // Web Speech synthesis is a shared browser-wide queue. Never cancel it
+ // unless this component actually owns an unfinished test utterance.
+ function cancelOwnedPlayback(){
+  if(!utteranceRef.current)return;
+  utteranceRef.current=null;
   if(speechSynthesisSupported())try{window.speechSynthesis.cancel()}catch{/* no-op */}
- },[]);
+ }
+
+ useEffect(()=>{active.current=true;return()=>{active.current=false;generation.current++;
+  try{mic.current?.abort()}catch{/* no-op */}
+  cancelOwnedPlayback();
+ }},[]);
  useEffect(()=>{if(!disabled)return;generation.current++;
   try{mic.current?.abort()}catch{/* no-op */}
   mic.current=null;
-  if(speechSynthesisSupported())try{window.speechSynthesis.cancel()}catch{/* no-op */}
+  cancelOwnedPlayback();
   setPlayback(value=>value==='SPEAKING'?'NOT_RUN':value);
   setRecognitionState(value=>value==='LISTENING'?'NOT_RUN':value);
  },[disabled]);
@@ -49,7 +58,7 @@ export default function JarvisPhysicalVoiceCheck({disabled=false}:{disabled?:boo
   }
   const attempt=++generation.current;
   try{
-   window.speechSynthesis.cancel();
+   cancelOwnedPlayback();
    const utterance=new SpeechSynthesisUtterance(TEST_GREETING);
    const chosen=preferredJarvisSpanishVoice(spanishVoices());
    utterance.lang=chosen?.lang||'es-ES';
@@ -58,17 +67,21 @@ export default function JarvisPhysicalVoiceCheck({disabled=false}:{disabled?:boo
    utterance.pitch=0.98; // Provisional native TTS; NOT approved cloned +0.6 semitones.
    utterance.volume=1;
    utterance.onend=()=>{
+    if(utteranceRef.current===utterance)utteranceRef.current=null;
     if(active.current&&generation.current===attempt)setPlayback('BROWSER_FINISHED');
    };
    utterance.onerror=()=>{
+    if(utteranceRef.current===utterance)utteranceRef.current=null;
     if(active.current&&generation.current===attempt){
      setPlayback('BROWSER_ERROR');
      setError('El navegador no ha podido completar la prueba de voz.');
     }
    };
+   utteranceRef.current=utterance;
    setPlayback('SPEAKING');
    window.speechSynthesis.speak(utterance);
   }catch{
+   utteranceRef.current=null;
    setPlayback('BROWSER_ERROR');
    setError('No ha sido posible activar la síntesis de voz.');
   }
@@ -76,7 +89,7 @@ export default function JarvisPhysicalVoiceCheck({disabled=false}:{disabled?:boo
 
  function stopPlayback(){
   generation.current++;
-  if(speechSynthesisSupported())try{window.speechSynthesis.cancel()}catch{/* no-op */}
+  cancelOwnedPlayback();
   setPlayback('NOT_RUN');setHeard('UNCONFIRMED');
  }
 
