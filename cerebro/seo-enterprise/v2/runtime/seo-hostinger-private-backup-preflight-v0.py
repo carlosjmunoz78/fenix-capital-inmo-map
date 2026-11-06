@@ -53,9 +53,14 @@ def safe_entry(name,length,typ,packed):
 
 def file_inventory(rows):
     roots,n,total={},0,0
+    seen_files=set()
     for name,length,typ,packed in rows:
         parts=safe_entry(name,length,typ,packed)
         if typ=='dir': continue
+        # Duplicate file members make later extraction ambiguous even when paths are safe.
+        # Check logical parts, not raw spelling (e.g. "./public_html/x").
+        if parts in seen_files: fail('ARCHIVE_DUPLICATE_FILE_PATH')
+        seen_files.add(parts)
         n,total=n+1,total+length
         if n>MAX_FILES or total>MAX_BYTES: fail('ARCHIVE_TOTAL_LIMIT')
         for marker in ('wp-admin','wp-content','wp-includes'):
