@@ -22,7 +22,7 @@ export const RULESET=Object.freeze({
    ['Primeras impresiones frente a los datos reales tras salir del portal',
     'Lo que recuerdas de cada piso al llegar a casa'],
    ['Mientras que el primer piso destacaba por una cocina moderna reformada recientemente, el segundo ofrecía una terraza amplia que compensaba un salón algo más reducido.',
-    'Por ejemplo, una vivienda puede tener una cocina reformada y la otra una terraza amplia, aunque con un salón más pequeño. No es un caso concreto, sino una comparación que puedes adaptar a tus visitas.'],
+    'Por ejemplo, una vivienda puede tener una cocina reformada y la otra una terraza amplia, aunque con un salón más pequeño. Esa diferencia no pesa igual si pasas más tiempo cocinando que recibiendo visitas.'],
    ['La nota simple permite verificar la titularidad real del inmueble, comprobar su superficie exacta y confirmar que no existen cargas, embargos u otras limitaciones jurídicas ocultas.',
     'La nota simple ofrece información registral sobre la titularidad, la descripción y las cargas que constan en el Registro. Conviene contrastarla con la documentación disponible y consultar a un profesional cuando existan dudas.']
   ]
