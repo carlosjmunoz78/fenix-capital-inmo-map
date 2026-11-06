@@ -80,3 +80,26 @@ Gobierno:
 ## 6. Registro de continuidad y rollback
 
 `registry=seo-creative-and-funnel-extension-v1.registry.json`. Evidencia adicional del compositor y embudos `SEO_PREMIUM_IMAGE_AND_FUNNEL_GATES_2026-11-06.md`. La PR sigue en **DRAFT**. Para volver a OLD basta con no fusionar estos archivos aditivos. **No activar envíos reales hasta certificar receptor, asset, ledger y política de datos.**
+
+## 7. Continuación · Ledger SQL instalado en Supabase PREPROD (no CRM/PROD)
+
+**Esta sección sustituye únicamente el estado anterior «ledger pendiente».**
+
+- Proyecto **exclusivo de PREPROD**: `hnqlnvakzaywtafeiybt`. La consulta `to_regclass` antes de aplicar devolvió NULL: no existía una tabla previa que migrar. Snapshot estructural base: objeto inexistente, `storage.objects` del bucket SEO sin PDF.
+- Contrato SQL versionado `cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-ledger-preprod-v0.sql`, aplicado **directamente en PREPROD** (no en producción) mediante herramienta de SQL. Es una tabla nueva `public.cerebro_seo_checklist_delivery_v0`; todavía no se ha generado historial de migración CLI, tarea pendiente antes de promoción.
+- Campos: hashes del destinatario y adjunto, UUID de evento y petición, consentimientos, estado RESERVADO/ACEPTADO/DESCONOCIDO, hashes del identificador de Brevo y timestamps. **No guarda email, nombre, teléfono ni PDF en claro**.
+- Comprobación SQL de acceso: `relrowsecurity=true`, `anon_select=false`, `anon_insert=false`, `authenticated_select=false`, `authenticated_insert=false`; `service_select/insert/update=true`, `service_delete=false`. Solo backend con service role, nunca un navegador.
+- Prueba SQL real en `BEGIN/ROLLBACK`: primera reserva INSERT=1, reentrada `ON CONFLICT DO NOTHING` INSERT=0, cierre de entrega de RESERVED a ACCEPTED=1 y bloqueo de sobrescritura a UNKNOWN=0. Posterior `SELECT count(*)` = **0 filas**. No hay clientes, ni contactos, ni correos creados.
+- Supabase Security Advisors: el lint informativo `rls_enabled_no_policy` aparece para esta tabla. No indica exposición de la tabla: ausencia de políticas es **intencionada** con grants revocados de anon/authenticated. Referencia: https://supabase.com/docs/guides/database/database-linter?lint=0008_rls_enabled_no_policy
+- Nuevo adaptador del ledger `cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs`; requiere explícitamente cliente servidor PREPROD autenticado y expone reserve/complete/markUnknown con actualización condicional. El adaptador de Brevo le transmite los campos de procedencia/consentimiento sin guardar destinatario en claro.
+- Pruebas separadas `seo-checklist-ledger-supabase-v0.test.mjs`, con doble reserva, transición a ACCEPTED, UNKNOWN y denegación de otro proyecto.
+- **CI consolidado [#42174299373](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42174299373): SUCCESS · 10/10 tests**; incluye entrega PDF y ledger. No contiene claves ni hace llamadas a Brevo.
+- Rollback potencial: al estar la tabla todavía vacía y sin workers desplegados, su retirada solo requeriría `DROP TABLE` después de inventario y verificación `count(*)=0`. **No se ha ejecutado ningún DROP**.
+
+### Estado REAL siguiente
+
+**HITOS CERRADOS:** PDF íntegro, correo MIME local, plantilla transaccional y gates, código adaptador, tabla de ledger privada de PREPROD, pruebas de idempotencia DB y CI 10/10.
+
+**PENDIENTE:** QA del PDF final de marca, carga privada del PDF real en `seo-preprod-assets`, autenticación de evento servidor `fenix-web-lead` para recurso 52656, conexión física del servicio de entrega con cliente service-role exclusivo PREPROD, buzón de ensayo autorizado, prueba `201/messageId` de Brevo con recepción de bandeja y política de reintentos/reconciliación. El WordPress post 52656 sigue en draft y no se ha enviado ningún email.
+
+No afirmar `LIVE_DELIVERY_READY` ni ejecutar send de Brevo hasta que estos gates estén verdes. No tocar App/CRM/PROD ni listas newsletter.
