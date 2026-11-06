@@ -9,6 +9,9 @@ on:
       - 'src/CerebroConsoleShell.tsx'
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
+      - 'scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs'
+      - 'tests/jarvis-owner-gateway-readonly-e2e.test.mjs'
+      - 'cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'
       - 'src/JarvisOmniDock.tsx'
       - 'src/jarvisOmniSession.ts'
       - 'src/jarvis-omni-dock.css'
@@ -51,11 +54,32 @@ jobs:
       - name: Compile and build unchanged existing App
         run: npm run build
       - name: Owner-scoped JARVIS UI and gateway contract tests
-        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs
+        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
+      - name: Detect owner live-readonly E2E credential availability
+        id: owner_e2e
+        shell: bash
+        env:
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "${CEREBRO_E2E_USER_JWT}" ] && [ -n "${PROD_SUPABASE_PUBLISHABLE_KEY}" ]; then
+            echo "run_e2e=true" >> "${GITHUB_OUTPUT}"
+            echo "JARVIS_OWNER_READONLY_E2E_CREDENTIAL=AVAILABLE"
+          else
+            echo "run_e2e=false" >> "${GITHUB_OUTPUT}"
+            echo "JARVIS_OWNER_READONLY_E2E=BLOCKED_MISSING_SECURE_CREDENTIAL"
+          fi
+      - name: Live owner+anonymous Gateway contract only READ-ONLY
+        if: steps.owner_e2e.outputs.run_e2e == 'true'
+        env:
+          CEREBRO_E2E_USER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: node scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs
       - name: Check no dangerous source paths were touched
         run: |
           test -f src/CerebroConsoleShell.tsx
