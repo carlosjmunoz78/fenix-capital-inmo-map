@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {dirname,join} from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {publishJarvisOmniState,clearJarvisOmniState,getJarvisOmniState,
- setJarvisActiveInterface,getJarvisActiveInterface,JARVIS_OMNI_POLICY} from '../src/jarvisOmniSession.ts';
+ setJarvisActiveInterface,getJarvisActiveInterface,JARVIS_OMNI_POLICY,setJarvisActiveProject,getJarvisInterfaceHint} from '../src/jarvisOmniSession.ts';
 
 const root=join(dirname(fileURLToPath(import.meta.url)),'..');
 const read=path=>readFileSync(join(root,path),'utf8');
@@ -64,4 +64,30 @@ test('CUT39 assistant uses the same authenticated core with no direct model or p
  assert.ok(dock.includes("disabled={!state.ready||state.sending||!text.trim()}"));
  assert.ok(!dock.includes('api.deepseek.com'));
  assert.ok(!dock.includes('OPENAI_API_KEY'));
+});
+
+test('CUT39 UI context never grants actions or impersonates verified server identity',()=>{
+ setJarvisActiveInterface('JARVIS');
+ setJarvisActiveProject('PROJECT-123');
+ let hint=getJarvisInterfaceHint();
+ assert.equal(hint.project_id,'PROJECT-123');
+ assert.equal(hint.source,'UNTRUSTED_CLIENT_UI_HINT');
+ assert.equal(hint.company_scope,'fenix');
+ assert.throws(()=>setJarvisActiveProject('../../.env'));
+ setJarvisActiveInterface('NAVEGADOR');
+ hint=getJarvisInterfaceHint();
+ assert.equal(hint.surface,'NAVEGADOR');
+ assert.equal(hint.project_id,null);
+ setJarvisActiveProject(null);
+});
+test('CUT39 registry is explicit about missing production authority and historical completeness',()=>{
+ const registry=JSON.parse(read('cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'));
+ assert.equal(registry.state,'CODE_TESTED_NOT_PUBLISHED');
+ assert.equal(registry.authority_model,'EXISTING_CEREBRO_GATEWAY_ONLY');
+ assert.equal(registry.knowledge_sources.find(x=>x.source_id==='ENGINE_REGISTRY').registered_engines,179);
+ assert.equal(registry.knowledge_sources.find(x=>x.source_id==='DEEPSEEK_STUDY').state,'ISOLATED_LAB_CANDIDATES_ONLY_NOT_APPLIED_TO_RUNTIME');
+ assert.equal(registry.conversation.longitudinal_memory,'SERVER_MEMORY_RPC_CODE_EXISTS_NOT_ALL_HISTORY_VERIFIED');
+ assert.equal(registry.action_authority.unrestricted_execution,false);
+ assert.equal(registry.release_gates.can_change_prod,false);
+ assert.deepEqual(registry.ui_surfaces.map(x=>x.id),['JARVIS','OPERATIVA','NEURONAL','NAVEGADOR']);
 });
