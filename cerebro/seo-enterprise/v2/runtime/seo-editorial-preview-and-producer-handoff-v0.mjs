@@ -109,8 +109,9 @@ export function physicallyWriteSeoReviewPackage({package_data,output_dir}={}){
   package_data?.entries?.length!==2||package_data.production_release_authorized!==false||
   package_data.image_api_calls!==0||package_data.wordpress_mutations!==0)fail('WRITE_SCOPE');
  if(typeof output_dir!=='string'||!path.isAbsolute(output_dir)||output_dir.includes('..'))fail('PATH_REQUIRED');
- const target=path.resolve(output_dir),base=path.resolve(process.env.RUNNER_TEMP||os.tmpdir());
- if(!(target===base||target.startsWith(base+path.sep)))fail('OUTSIDE_TEMP');
+ const target=path.resolve(output_dir);
+ const allowedBases=[os.tmpdir(),process.env.RUNNER_TEMP].filter(Boolean).map(x=>path.resolve(x));
+ if(!allowedBases.some(base=>target===base||target.startsWith(base+path.sep)))fail('OUTSIDE_TEMP');
  if(fs.existsSync(target))fail('OUTPUT_ALREADY_EXISTS');
  fs.mkdirSync(target,{recursive:true,mode:0o700});
  const files={'index.html':package_data.index};
