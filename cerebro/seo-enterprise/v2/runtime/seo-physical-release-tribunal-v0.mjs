@@ -82,7 +82,7 @@ export function assessSeoPhysicalReleaseEvidence({
   core_article_prechecks_pass:articles.every(x=>x.content_machine_precheck_pass),
   model_cloud_real_generation_historical:true,
   source_semantics_independent_qa_pass:false,
-  source_yml_legal_qa_pass:false,
+  source_ymyl_legal_qa_pass:false,
   media:{physical_webp_test_pass:media.physical_image_verified===true,
    tested_source_kind:media.origin,original_ums_photo_delivered:false,
    license_rights_verified:false,global_duplicate_inventory_verified:false,
