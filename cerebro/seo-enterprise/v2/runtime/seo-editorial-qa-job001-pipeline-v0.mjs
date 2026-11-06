@@ -10,6 +10,7 @@ import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {runSeoEditorialMission} from './seo-workforce-lab-v0.mjs';
 import {validateEvaluatorChange} from '../../../runtime/evaluation-tribunal.mjs';
 import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder} from './seo-owner-editorial-visual-gate-v2.mjs';
+import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
 
 const PREFIX='cerebro/seo-enterprise/v2/';
 const REGISTRY=PREFIX+'registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json';
@@ -111,6 +112,8 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
  if(!/https:\/\/fenixcapital\.es\/contacto\//.test(html))failures.push('CONTACT_CTA_MISSING');
  const ownerStyle=auditOwnerEditorialCopy({html,persona:item.draft.persona,content_type:item.draft.content_type});
  for(const issue of ownerStyle.issues)failures.push('OWNER_STYLE_'+issue);
+ const voice=auditSeoHumanVoiceAndRisk({html,persona:item.draft.persona,content_type:item.draft.content_type});
+ for(const issue of voice.issues)failures.push('VOICE_QA_'+issue);
  const producerOrder=buildSeoProducerImageOrder({company_id:'fenix',work_id:item.work_id,persona:item.draft.persona,
   source_content_sha256:item.digest,...item.draft.image});
  const producerPrecheck=validateSeoProducerOrder({order:producerOrder});
@@ -121,6 +124,8 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
   code_checks_passed:failures.length===0,failures,counts,
   actual_independent_professional_review:false,
   owner_style_precheck_passed:ownerStyle.deterministic_style_precheck_passed,
+  human_voice_precheck_passed:voice.deterministic_precheck_passed,
+  human_voice_semantic_review_required:true,
   image_brief_precheck_passed:producerPrecheck.metadata_complete,
   image_producer_engine:producerOrder.producer_engine,
   image_producer_dispatch_executed:false,
