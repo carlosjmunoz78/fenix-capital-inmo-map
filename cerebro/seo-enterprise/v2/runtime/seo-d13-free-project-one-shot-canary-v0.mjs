@@ -14,7 +14,7 @@ import {loadIdentityCredentialFoundation,connectorAuthDecision,credentialReferen
 import {routeWork} from '../../../router/execution-model-router.mjs';
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
 
-const MODEL='gemini-2.5-flash-lite';
+const MODEL='gemini-3.5-flash-lite';
 const URL='https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent';
 const FREE_SECRET='CEREBRO_GEMINI_FREE_API_KEY';
 const CONNECTOR='connector:seo-gemini-free-lab';
