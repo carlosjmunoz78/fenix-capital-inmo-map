@@ -148,7 +148,8 @@
       "id": "ES-24",
       "area": "mejora-con-evidencia",
       "input": "Quiero que me hables mejor, no solo que apuntes respuestas bonitas.",
-      "expected": "Evaluar naturalidad, comprensión, precisión, consistencia y pruebas A/B; no equiparar prompts a fine-tuning o TTS."
+      "expected": "Evaluar naturalidad, comprensión, precisión, consistencia y pruebas A/B; no equiparar prompts a fine-tuning o TTS. Protocolo JARVIS: tratamiento formal 'señor' en el acuse, tono ejecutivo sobrio, sin familiaridades ni promesas infundadas; medirlo con rúbrica de estilo, sin atribuir entrenamiento de pesos.",
+      "persona_check": true
     }
   ],
   "scope": "Conversation and Spanish comprehension; not acoustic voice/TTS cloning"
