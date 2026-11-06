@@ -52,7 +52,7 @@ const basic=(item)=>({
  independent_actor_iam_verified:false,expert_ymyl_qa_verified:false
 });
 const realMission=(item)=>runSeoEditorialMission({
- mission_id:item.work_id,company_id:'fenix',environment:'PREPROD',version:'0.1.0',
+ mission_id:item.work_id,company_id:'fenix',environment:'PREPROD',version:'v0_1_0',
  author_actor_id:'SEO_D15_WORKER',reviewer_actor_id:'SEO_D31_QA',judge_actor_id:'SEO_JUDGE_A',
  budget_eur:0,allow_writes:false,allow_paid_ai:false,
  text:item.html,sources:['https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/seo-enterprise-family-staging-contract-v1-20261105/'+item.draft.content_path]
