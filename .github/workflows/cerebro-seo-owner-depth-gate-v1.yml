@@ -1,0 +1,26 @@
+name: CEREBRO SEO · Owner substantive depth gate PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/seo-owner-content-depth-policy-v1-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-content-depth-gate-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-owner-content-depth-gate-v1.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d32-cloud-editorial-result-router-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs'
+      - '.github/workflows/cerebro-seo-owner-depth-gate-v1.yml'
+permissions:
+  contents: read
+jobs:
+  content-depth:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Distinguish substantive body from FAQ padding and archive historical short drafts
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-owner-content-depth-gate-v1.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-owner-content-depth-gate-v1.test.mjs
+      - name: Independent editorial QA and WordPress stay blocked
+        run: echo 'GOOGLE_RANKING_MAGIC_COUNT=FALSE DEPTH_GUARD=MANDATORY_FOR_NEW_OUTPUT INDEPENDENT_REVIEW=REQUIRED WP_WRITES=0'
