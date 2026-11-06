@@ -54,6 +54,10 @@ export function auditSeoHumanVoiceAndRisk({html,persona,content_type='ARTICLE'}=
  if(persona==='PARTICULARES'&&
   /el\s+primer\s+piso\s+destacaba.{0,150}el\s+segundo\s+ofrec[ií]a/i.test(joined))
   issues.push('UNVERIFIED_CASE_DETAILS_PRESENTED_AS_OBSERVED');
+ // Prevent unqualified grouping of property purchase fees with mortgage expenses.
+ if(persona==='PARTICULARES'&&
+  /impuestos auton[oó]micos y locales.{0,120}honorarios notariales.{0,90}inscripci[oó]n registral.{0,110}gastos de gestor[ií]a/i.test(joined))
+  issues.push('PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED');
  // Financial referrals cannot guarantee bank approval.
  if(persona==='INMOBILIARIAS'&&
   /\b(?:aseguran|garantizan)\s+que.{0,85}(?:operaci[oó]n|hipoteca|pr[eé]stamo).{0,95}(?:buen\s+puerto|con\s+[eé]xito|ser[aá]\s+aprobada)/i.test(joined))
