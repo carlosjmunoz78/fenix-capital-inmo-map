@@ -4,6 +4,10 @@ import {spawnSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {dirname,join} from 'node:path';
 import {readFileSync} from 'node:fs';
+import {mkdtempSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {openLifetimeBudget,reserveLifetimeBudget,closeLifetimeBudget,JARVIS_DEEPSEEK_BUDGET} from './deepseek-lifetime-budget.mjs';
+
 import {balanceAvailable,evaluate,reservedUSD} from './deepseek-weekend-runner.mjs';
 
 const dir=dirname(fileURLToPath(import.meta.url));
@@ -56,4 +60,29 @@ test('malformed JSON-shaped results remain unverified',()=>{
  assert.equal(result.candidate_ok,false);
  assert.equal(result.critic_ok,false);
  assert.equal(result.auto_promote,false);
+});
+
+test('owner cap EUR50 and USD40 cumulative across offline sessions',()=>{
+ assert.equal(JARVIS_DEEPSEEK_BUDGET.authorized_eur,50);
+ assert.equal(JARVIS_DEEPSEEK_BUDGET.conservative_runtime_cap_usd,40);
+ assert.equal(JARVIS_DEEPSEEK_BUDGET.per_run_cap_usd,5);
+ assert.equal(JARVIS_DEEPSEEK_BUDGET.auto_recharge,false);
+ const dir=mkdtempSync(join(tmpdir(),'jarvis-budget-test-'));
+ try{
+  let guard=openLifetimeBudget(dir);
+  assert.equal(reserveLifetimeBudget(guard,1),1);
+  closeLifetimeBudget(guard);
+  guard=openLifetimeBudget(dir);
+  assert.equal(guard.record.reserved_usd,1);
+  assert.throws(()=>openLifetimeBudget(dir));
+  for(let i=0;i<7;i++)reserveLifetimeBudget(guard,5);
+  assert.equal(guard.record.reserved_usd,36);
+  assert.throws(()=>reserveLifetimeBudget(guard,5),/CUMULATIVE_50_EUR_POLICY_STOP/);
+  closeLifetimeBudget(guard);
+  guard=openLifetimeBudget(dir);
+  assert.equal(guard.record.reserved_usd,36);
+  assert.throws(()=>reserveLifetimeBudget(guard,-1));
+  assert.equal(reserveLifetimeBudget(guard,4),40);
+  closeLifetimeBudget(guard);
+ }finally{rmSync(dir,{recursive:true,force:true})}
 });
