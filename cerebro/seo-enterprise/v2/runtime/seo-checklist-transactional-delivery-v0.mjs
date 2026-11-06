@@ -127,8 +127,12 @@ export async function sendChecklistPreprodTest({
     typeof ledger.markUnknown!=='function','DURABLE_DELIVERY_LEDGER_REQUIRED');
   // Caller ledger must atomically reject replay, even after Brevo's 30 minute TTL.
   const claim=await ledger.reserve(x.receipt.idempotency_key,{
-    request_id:request.request_id,recipient_sha256:x.receipt.recipient_sha256,
-    asset_sha256:x.receipt.attachment_sha256});
+    request_id:request.request_id,lead_event_id:request.lead_event_id,
+    recipient_sha256:x.receipt.recipient_sha256,
+    attachment_sha256:x.receipt.attachment_sha256,
+    consent_privacy_at:request.consent_privacy_at,
+    privacy_notice_version:request.privacy_notice_version,
+    consent_marketing:request.consent_marketing});
   if(claim!==true)return {...x.receipt,status:'ALREADY_RESERVED_NO_EMAIL_SENT'};
   try{
     const response=await fetch_impl('https://api.brevo.com/v3/smtp/email',{
