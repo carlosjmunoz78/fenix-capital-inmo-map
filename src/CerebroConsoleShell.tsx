@@ -7,6 +7,7 @@ import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroCons
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import {clearJarvisConversation,recallJarvisConversation,rememberJarvisConversation} from './jarvisConversationMemory';
 import {JARVIS_COMPOSER_SEND_EVENT,type JarvisComposerSendDetail} from './jarvisComposerBridge';
+import {publishJarvisOmniState,clearJarvisOmniState} from './jarvisOmniSession';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -164,6 +165,17 @@ export default function CerebroConsoleShell(){
  const ready=gatewayState==='ready';
  const chatReady=Boolean(ready&&health?.chat_available&&['DETERMINISTIC_READ_ONLY','OWNER_DECISION_BY_EXCEPTION_V1'].includes(health?.chat_mode||''));
  chatReadyRef.current=chatReady;
+ useEffect(()=>{
+  if(ownerAccess!=='allowed'||!isCerebroPath||!conversationOwner){
+   clearJarvisOmniState();
+   return;
+  }
+  publishJarvisOmniState({
+   ready:chatReady,sending,voiceActive:voiceSessionActive,
+   voiceListening,voiceSpeaking,turns:lines,observedAt:Date.now()
+  });
+ },[ownerAccess,isCerebroPath,conversationOwner,chatReady,sending,voiceSessionActive,
+  voiceListening,voiceSpeaking,lines]);
 
  useEffect(()=>{
   let cancelled=false;
