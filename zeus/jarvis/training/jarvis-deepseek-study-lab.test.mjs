@@ -91,6 +91,10 @@ test('one-shot six real-shaped scenarios, twelve mocked paid requests, saved onl
   assert.ok(summary.usd_peak_estimate<0.15);
   const report=JSON.parse(readFileSync(join(dir,'jarvis-study-123456789.json'),'utf8'));
   assert.equal(report.rows.length,6);
+  const partial=JSON.parse(readFileSync(join(dir,'partial-study-123456789.json'),'utf8'));
+  assert.equal(partial.calls,12);
+  assert.equal(partial.completed_scenarios,6);
+  assert.equal(partial.auto_promote,false);
   assert.equal(report.auto_promote,false);
   assert.equal(report.independent_human_review_done,false);
   assert.equal(report.model_weights_modified,false);
