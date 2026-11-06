@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/CerebroConsoleShell.tsx'
       - 'src/CerebroConsoleHost.tsx'
+      - 'src/CerebroOperativeConsole.tsx'
       - 'src/JarvisOmniDock.tsx'
       - 'src/jarvisOmniSession.ts'
       - 'src/jarvis-omni-dock.css'
