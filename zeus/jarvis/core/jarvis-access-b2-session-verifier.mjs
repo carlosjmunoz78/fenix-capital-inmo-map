@@ -45,7 +45,7 @@ export function createJarvisAccessB2SessionVerifier({
   const ownerId=env?.JARVIS_OWNER_ID;
   if(typeof aud!=='string'||!AUD.test(aud)||
     typeof email!=='string'||!EMAIL.test(email)||email!==email.toLowerCase()||
-    !ID.test(ownerId)||ownerId==='*'||typeof env?.JARVIS_B2_HMAC_KEY_HEX!=='string')invalid();
+    (typeof ownerId!=='string'||!ID.test(ownerId))||ownerId==='*'||typeof env?.JARVIS_B2_HMAC_KEY_HEX!=='string')invalid();
   if(!ctx?.access||typeof ctx.access.getIdentity!=='function'||
     typeof ctx.access.aud!=='string'||!same(ctx.access.aud,aud))invalid();
   let identity;
