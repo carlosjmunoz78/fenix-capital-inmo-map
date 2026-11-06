@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "JARVIS_UNIVERSAL_INTERLOCUTOR_CUT39",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT39-2026-11-06",
+  "state": "CODE_TESTED_NOT_PUBLISHED",
+  "authority_model": "EXISTING_CEREBRO_GATEWAY_ONLY",
+  "goal": "One owner-authorized interlocutor for Jarvis, Operativa, Neuronal and Browser without duplicating agent identity",
+  "ui_surfaces": [
+    {
+      "id": "JARVIS",
+      "source": "src/CerebroJarvisWorkConsole.tsx",
+      "state": "EXISTENTE_FRONTEND_PLUS_LAB_IMPROVEMENT"
+    },
+    {
+      "id": "OPERATIVA",
+      "source": "src/CerebroOperativeConsole.tsx",
+      "state": "OMNI_DOCK_LAB_TESTED"
+    },
+    {
+      "id": "NEURONAL",
+      "source": "src/CerebroNeuralView.tsx",
+      "state": "OMNI_DOCK_LAB_TESTED"
+    },
+    {
+      "id": "NAVEGADOR",
+      "source": "src/CerebroBrowserConsole.tsx",
+      "state": "OMNI_DOCK_LAB_TESTED_WITHOUT_BROWSER_ACTION_AUTHORITY"
+    }
+  ],
+  "knowledge_sources": [
+    {
+      "source_id": "ENGINE_REGISTRY",
+      "path": "cerebro/registry/engine-registry.v1.json",
+      "registered_engines": 179,
+      "state": "REGISTERED_NOT_ALL_LIVE",
+      "retrieval": "REGISTRY_DOC_ONLY"
+    },
+    {
+      "source_id": "DOMAIN_KNOWLEDGE",
+      "path": "cerebro/registry/company-domain-knowledge-packs.v1.json",
+      "state": "PREPROD_SOURCE_BACKED_LIVE_RETRIEVAL_NOT_VERIFIED",
+      "retrieval": "REQUIRES_GOVERNED_GATEWAY_ADAPTER"
+    },
+    {
+      "source_id": "APP_CRM",
+      "path": "cerebro/registry/fenix-app-crm-knowledge-pack.v1.json",
+      "state": "SOURCE_BACKED_CURRENT_BINDING_REFERENCES_NOT_FULL_ACCESS",
+      "retrieval": "ONLY_EXISTING_AUTHORIZED_RPCS"
+    },
+    {
+      "source_id": "CONVERSATION_MEMORY",
+      "path": "supabase/functions/cerebro-console-gateway-v0/index.ts",
+      "state": "EXISTING_OWNER_RPC_CODE_RUNTIME_NOT_YET_PHYSICALLY_VERIFIED",
+      "retrieval": "SERVER_AUTHORIZED_MEMORY_V2"
+    },
+    {
+      "source_id": "OWNER_DOCUMENT_HISTORY",
+      "path": "cerebro/registry/jarvis-project-registry.v1.json",
+      "state": "PROJECT_REGISTRY_EXISTS_FULL_HISTORY_NOT_INGESTED",
+      "retrieval": "NEEDS_PROVENANCE_FRESHNESS_AND_OWNER_SCOPE"
+    },
+    {
+      "source_id": "DEEPSEEK_STUDY",
+      "path": "zeus/jarvis/training/CUT37_GOVERNED_CONTINUOUS_LAB_RUNBOOK_2026-11-06.md",
+      "branch": "cerebro/jarvis-deepseek-weekend-lab-20261106",
+      "state": "ISOLATED_LAB_CANDIDATES_ONLY_NOT_APPLIED_TO_RUNTIME",
+      "retrieval": "NO_DIRECT_CONSUMPTION_BY_OWNER_PROD_GATEWAY"
+    }
+  ],
+  "conversation": {
+    "ui_transport": "EXISTING_AUTHENTICATED_CEREBRO_GATEWAY",
+    "voice_input": "BROWSER_SPEECH_RECOGNITION_WHEN_AVAILABLE",
+    "voice_output": "BROWSER_SPEECH_SYNTHESIS_WHEN_AVAILABLE",
+    "continuity": "ONE_MOUNTED_CORE_PER_OWNER_TAB_AND_LAST_24_TURNS_UI",
+    "longitudinal_memory": "SERVER_MEMORY_RPC_CODE_EXISTS_NOT_ALL_HISTORY_VERIFIED",
+    "privacy": "NO_UI_LOCAL_OR_SESSION_STORAGE_OF_FULL_TRANSCRIPT",
+    "owner_role": "CARLOS-ADMIN",
+    "transcript_copies_to_third_party_models": false
+  },
+  "action_authority": {
+    "read": "REGISTERED_SERVER_READ_ROUTES_SUBJECT_TO_RLS_AND_JWT",
+    "write": "EXACT_ACTION_PROPOSAL_WITH_EXISTING_GATEWAY_POLICY",
+    "protected_environments": [
+      "APP_PROD",
+      "CRM_PROD",
+      "SUPABASE_PROD",
+      "TRADING"
+    ],
+    "unrestricted_execution": false,
+    "direct_provider_credentials_in_client": false,
+    "auto_promotion": false,
+    "human_required_reasons": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "release_gates": {
+    "typecheck_required": true,
+    "isolated_browser_e2e_required": true,
+    "owner_live_gateway_e2e_required": true,
+    "real_microphone_and_tts_required": true,
+    "source_contracts_required": true,
+    "backup_required": true,
+    "rollback_proven_required": true,
+    "old_vs_new_required": true,
+    "gradual_promotion_required": true,
+    "can_change_prod": false
+  },
+  "cost": {
+    "additional_subscription_eur": 0,
+    "provider_training_budget_separate": true
+  }
+}
