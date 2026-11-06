@@ -13,7 +13,9 @@ test('one shot binds owner-verified Free project, excludes paid key, no automati
  assert.equal(p.max_requests,1);assert.equal(p.max_retries,0);
  assert.equal(p.runtime_billing_automatically_proven,false);
  assert.match(buildOneShotPrompt(),/EXACTAMENTE seis/);
- assert.match(buildOneShotPrompt(),/sin las expresiones además ni en conclusión/i);
+ assert.match(buildOneShotPrompt(),/No uses además ni en conclusión/i);
+ assert.match(buildOneShotPrompt(),/No escribas Primera visita piso Córdoba/i);
+ assert.match(buildOneShotPrompt(),/No escribas Nunca debes firmar/i);
 });
 test('wrong key symbol, absent secret, or unverified project fail closed with zero network',async()=>{
  let calls=0;
@@ -52,6 +54,8 @@ test('mocked response exercises identical security QA without pretending live in
  assert.equal(out.real_inference_attempted,true);
  assert.equal(out.request_count,1);assert.equal(out.retry_count,0);
  assert.equal(out.faq_count,6);assert.equal(out.wordpress_writes,0);
+ assert.equal(out.human_voice_precheck_passed,true);
+ assert.deepEqual(out.voice_issues,[]);
  assert.equal(out.can_publish,false);assert.equal(out.automatic_billing_monitor_installed,false);
  assert.equal(out.provider_usage.total_tokens,750);
  assert.equal(JSON.stringify(out).includes('fake-free-project-key'),false);
@@ -88,4 +92,26 @@ test('physical receipt is review-only and constrained to temp, not repository or
   assert.throws(()=>storeOneShotEvidence({out,output_dir:dest}),/OUTPUT_ALREADY_EXISTS/);
   assert.throws(()=>storeOneShotEvidence({out,output_dir:'/etc/seo-one-shot-denied'}),/OUTPUT_OUTSIDE_TEMP_DENIED/);
  }finally{fs.rmSync(tmp,{recursive:true,force:true})}
+});
+
+test('exact first Gemini output is now rejected by voice gate even if basic style checks pass',async()=>{
+ const rejected=fs.readFileSync('cerebro/seo-enterprise/v2/training-pilots/SEO_D13_GEMINI_35_FREE_REAL_LAB_003_UNAPPROVED.html','utf8');
+ let calls=0;
+ const out=await runOneShotFreeCanary({
+  api_key:'fake-free-project-key-for-tests-only',
+  fetch_impl:async()=>{
+   calls++;
+   return{ok:true,json:async()=>({candidates:[{content:{parts:[{
+    text:JSON.stringify({html:rejected,used_source_ids:['fenix_gastos','fenix_contacto']})
+   }]}}],usageMetadata:{promptTokenCount:100,candidatesTokenCount:510,totalTokenCount:610}})}
+  }
+ });
+ assert.equal(calls,1);
+ assert.equal(out.status,'REAL_CLOUD_DRAFT_STYLE_HOLD');
+ assert.equal(out.faq_count,6);
+ assert.equal(out.human_voice_precheck_passed,false);
+ assert.ok(out.voice_issues.includes('HEADING_UNNATURAL_KEYWORD_SEQUENCE'));
+ assert.ok(out.voice_issues.includes('H2_GENERIC_CTA_SCAFFOLDING'));
+ assert.equal(out.can_publish,false);
+ assert.equal(out.request_count,1);
 });

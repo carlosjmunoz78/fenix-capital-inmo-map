@@ -13,6 +13,7 @@ import {fileURLToPath} from 'node:url';
 import {loadIdentityCredentialFoundation,connectorAuthDecision,credentialReferenceDecision} from '../../../governance/identity-credential-broker.mjs';
 import {routeWork} from '../../../router/execution-model-router.mjs';
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
+import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
 
 const MODEL='gemini-3.5-flash-lite';
 const URL='https://generativelanguage.googleapis.com/v1beta/models/'+MODEL+':generateContent';
@@ -76,24 +77,31 @@ export function validateOneShotFreePermit(){
 }
 export function buildOneShotPrompt(){
  return [
- 'Eres el redactor SEO-D13 de CEREBRO OS, empresa Fénix Capital, Córdoba, España.',
- 'Misión de prueba REAL en LAB, NO publicar. Redacta un borrador ORIGINAL, natural, útil y cercano para particulares.',
- 'Tema '+BRIEF.topic+'. Buyer persona '+BRIEF.buyer_problem+'. Palabra clave '+BRIEF.focus_keyword+'.',
- 'Redacta entre 340 y 580 palabras en total, contando preguntas y respuestas.',
- 'Usa UN H1 menor de 65 caracteres, 3 o 4 H2 naturales, cortos, atractivos y sin numerar.',
- 'El artículo debe cerrar con la sección <section class="faq"><h2>...</h2> y EXACTAMENTE seis',
- 'parejas <div class="faq-item"><h3>¿Pregunta real?</h3><p>Respuesta útil de 12 a 45 palabras.</p></div></section>.',
- 'Sin dos puntos visibles en el texto ni en los títulos, sin las expresiones además ni en conclusión.',
- 'No inventes estadísticas, testimonios, tasaciones, legislación, promesas de aprobación bancaria ni garantías.',
- 'La revisión documental, los gastos y la financiación dependen de cada inmueble y persona.',
- 'Incluye una invitación final sencilla a consultar con Fénix Capital usando un enlace',
- '<a href="https://fenixcapital.es/contacto/">contacta con Fénix Capital</a>.',
- 'Puedes enlazar a https://fenixcapital.es/gastos-compra/ sin inventar su contenido.',
- 'Responde SOLO JSON válido sin markdown con claves html y used_source_ids.',
- 'used_source_ids debe ser el array ["fenix_gastos","fenix_contacto"].',
- 'HTML como fragmento seguro con H1,H2,H3,p,section,div y a. Sin scripts, estilos ni imágenes.',
- 'Las fuentes declaradas son solo enlaces públicos propios. El texto final pasará fact-check humano o independiente.',
- 'No incluyas datos personales ni supuestas experiencias reales.'
+ 'Eres SEO-D13 de CEREBRO OS. Escribes para una persona real que busca comprar su primer piso en Córdoba, no para un algoritmo.',
+ 'Misión LAB aislada para evaluar calidad, nunca publicar. Escribe un texto nuevo sobre '+BRIEF.topic+'.',
+ 'Buyer persona concreto '+BRIEF.buyer_problem+'. Duda principal '+BRIEF.focus_keyword+'.',
+ 'Prioriza hablar al lector en segunda persona, frases breves y ejemplos prácticos situados en la vida cotidiana de Córdoba.',
+ 'Nunca fuerces una cadena de palabras clave. No escribas Primera visita piso Córdoba. Sí puedes usar Primera visita a un piso en Córdoba.',
+ 'H1 de 35 a 60 caracteres que despierte curiosidad, con sentido natural en castellano y sin promesas exageradas.',
+ 'Tres o cuatro H2 específicos que hagan querer seguir leyendo, sin enumeraciones, sin repetir la palabra clave mecánicamente.',
+ 'Una idea útil por párrafo, preferiblemente 20 a 48 palabras, con comas y puntuación natural.',
+ 'Redacta entre 350 y 570 palabras en total incluyendo seis FAQ. Evita introducciones vacías y consejos que cualquiera ya sabe.',
+ 'Da detalles comprobables durante una visita como luz en otra franja horaria, ruidos, gastos de comunidad o posibles obras, sin afirmar que conoces un inmueble concreto.',
+ 'Ejemplo de buen H2 para este tema Qué mirar cuando se apaga el entusiasmo de la visita.',
+ 'Evita H2 genéricos como Da el siguiente paso con asesoramiento experto.',
+ 'No utilices clichés como marca la diferencia entre el acierto y el error, ni con total realismo y evitar sorpresas financieras desagradables.',
+ 'No uses además ni en conclusión. No pongas dos puntos visibles en ningún titular o párrafo.',
+ 'No escribas Nunca debes firmar, Siempre debes pagar ni instrucciones jurídicas absolutas. Sugiere revisar documentos y compromisos con un profesional cuando haga falta.',
+ 'No prometas hipotecas, tasaciones, resultados bancarios ni plazos. Evita cifras o normas sin fuentes directas.',
+ 'Termina con una CTA sobria, específica para alguien que está comparando pisos, vinculada a https://fenixcapital.es/contacto/.',
+ 'Puedes enlazar a https://fenixcapital.es/gastos-compra/ solo como recurso de orientación, sin atribuirle cifras o contenido no comprobado.',
+ 'Incluye un bloque FAQ visible al final usando <section class="faq"><h2>...</h2> y exactamente seis parejas <div class="faq-item"><h3>¿Pregunta real?</h3><p>Respuesta de 12 a 45 palabras.</p></div></section>.',
+ 'Las FAQ deben resolver seis dudas distintas del comprador y no repetir párrafos previos.',
+ 'Responde solo JSON válido con las claves html y used_source_ids, sin markdown ni explicaciones. used_source_ids es ["fenix_gastos","fenix_contacto"].',
+ 'HTML fragmento seguro con h1, h2, h3, p, section, div y a. Sin imágenes, scripts, estilos ni formularios.',
+ 'Fuentes son enlaces públicos, no prueban por sí solos afirmaciones nuevas. Todas las afirmaciones requerirán control documental.',
+ 'Antes de devolver comprueba que el H1 suena natural, que no hay palabras clave forzadas, que hay seis FAQ útiles, que no hay dos puntos y que las frases tienen puntuación legible.',
+ 'No incluyas datos personales ni supuestas experiencias reales. Solo un artículo en revisión interna.'
  ].join('\n');
 }
 export async function runOneShotFreeCanary({
@@ -143,14 +151,18 @@ export async function runOneShotFreeCanary({
     [...html.matchAll(/href="([^"]+)"/g)].some(x=>!/^https:\/\/fenixcapital\.es\/[a-z0-9/%._-]+$/i.test(x[1])))
    return hold('HTML_SECURITY_REJECTED',{real_inference_attempted:true,request_count:calls});
  const qa=auditOwnerEditorialCopy({html,persona:'PARTICULARES',content_type:'ARTICLE'});
+ const voice=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES',content_type:'ARTICLE'});
  const result={
-  status:qa.deterministic_style_precheck_passed?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD',
+  status:(qa.deterministic_style_precheck_passed&&voice.deterministic_precheck_passed)?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD',
   company_id:'fenix',engine_id:'SEO-001',environment:'LAB',model:MODEL,
   provider:'GOOGLE_GEMINI_FREE_PROJECT',
   work_id:BRIEF.work_id,project_id:OWNER_ATTESTATION.project_id,
   source_sha256:SHA(html),used_source_ids:sources,
   faq_count:qa.faq_count,word_count:qa.word_count,
   style_issues:qa.issues,
+  voice_issues:voice.issues,
+  human_voice_precheck_passed:voice.deterministic_precheck_passed,
+  semantic_buyer_persona_qa_independently_verified:false,
   real_inference_attempted:true,request_count:calls,retry_count:0,
   provider_usage:{input_tokens:Number(usage.promptTokenCount||0),
    output_tokens:Number(usage.candidatesTokenCount||0),
