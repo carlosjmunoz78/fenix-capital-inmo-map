@@ -1,9 +1,10 @@
 import {useEffect,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {createPortal} from 'react-dom';
 import {AudioLines,Mic,Plus,Send,Square} from 'lucide-react';
-import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,voiceRecognitionProblem,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import {sendJarvisComposerMessage,JARVIS_COMPOSER_PRIME_EVENT,type JarvisComposerPrimeDetail} from './jarvisComposerBridge';
 import JarvisGatewayCapabilityPanel from './JarvisGatewayCapabilityPanel';
+import {jarvisDictationProblem} from './jarvisVoicePolicy';
 import './cerebro-operative-console.css';
 import './jarvis-composer-presence.css';
 
@@ -76,18 +77,18 @@ export default function JarvisOperativaComposerPortal(){
  function sendCommand(raw:string){const clean=raw.trim();if(!clean||!snapshot.ready||snapshot.sending)return false;return sendJarvisComposerMessage(clean);}
  function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('');}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit();}}
- function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main');if(button&&!button.disabled){setDictationError('');button.click();}else setDictationError(!voiceRecognitionSupported()?'Chrome no ofrece reconocimiento de voz. Comprueba el micrófono y los permisos de este sitio.':'La conversación por voz necesita un Gateway conectado y reconocimiento de voz disponible.');}
+ function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main');if(button&&!button.disabled){setDictationError('');button.click();}else setDictationError(!voiceRecognitionSupported()?'Este navegador no ofrece reconocimiento de voz. Puede utilizar el dictado del teclado del dispositivo.':'La conversación por voz necesita un Gateway conectado y reconocimiento de voz disponible.');}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false);}
- function toggleDictation(){if(dictating){stopDictation();return}if(snapshot.sending||snapshot.voiceActive)return;if(!voiceRecognitionSupported()){setDictationError('El navegador no ofrece reconocimiento de voz. Comprueba que usas Chrome actualizado y que el micrófono está permitido para esta página.');return;}const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=event=>setDictationError(voiceRecognitionProblem(String(event.error||'')));recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function toggleDictation(){if(dictating){stopDictation();return}if(snapshot.sending||snapshot.voiceActive)return;if(!voiceRecognitionSupported()){setDictationError('El navegador no dispone de reconocimiento de voz. Utilice el dictado del teclado o escriba normalmente.');return;}const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=event=>setDictationError(jarvisDictationProblem(String(event.error||'')));recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function attach(){const input=document.querySelector<HTMLInputElement>('.jarvis-conversation input[type="file"]');if(input)input.click();else window.dispatchEvent(new CustomEvent('cerebro:attachment-request',{detail:{surface:'jarvis'}}));}
 
  if(!target)return null;
  const currentState=snapshot.ready?'ready':snapshot.connecting?'connecting':'offline';
  const presence=snapshot.ready
-  ?'Estoy aquí. Escríbeme, dicta tu mensaje o pulsa hablar.'
+  ?'A su disposición, señor. Puede escribir, dictar o conversar.'
   :snapshot.connecting
-   ?'Estoy aquí. Comprobando la conexión con el Gateway.'
-   :'Estoy aquí, pero el Gateway no responde. Puedes preparar tu mensaje y enviarlo cuando vuelva la conexión.';
+   ?'Señor, estoy comprobando la conexión con el Gateway.'
+   :'Señor, el Gateway no responde. Puede dejar el mensaje preparado; el envío permanecerá bloqueado hasta recuperar la conexión.';
  return createPortal(<div className="jarvis-operativa-composer-host" data-jarvis-state={currentState}>
   <section className="operativa-jarvis-composer" aria-label="Hablar con Jarvis">
    <div className="jarvis-composer-presence" role="status" aria-live="polite">
