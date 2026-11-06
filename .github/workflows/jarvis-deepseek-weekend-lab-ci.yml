@@ -1,0 +1,29 @@
+name: JARVIS DeepSeek Weekend LAB Offline Gate
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - 'zeus/jarvis/training/**'
+      - '.github/workflows/jarvis-deepseek-weekend-lab-ci.yml'
+permissions:
+  contents: read
+concurrency:
+  group: jarvis-weekend-offline-lab
+  cancel-in-progress: true
+jobs:
+  offline-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      DEEPSEEK_API_KEY: ''
+      JARVIS_WEEKEND_ENABLE: '0'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Run offline-only security tests (NO DeepSeek API)
+        run: node --test zeus/jarvis/training/deepseek-weekend-runner.test.mjs
+      - name: Dry run with zero API requests
+        run: node zeus/jarvis/training/deepseek-weekend-runner.mjs --dry-run
