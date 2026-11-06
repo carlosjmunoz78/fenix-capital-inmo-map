@@ -6,7 +6,7 @@
  */
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
-export const GEMINI_MODEL_METADATA_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite';
+export const GEMINI_MODEL_METADATA_URL='https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite';
 export const STATUS_FIELDS=Object.freeze(['status','reason','model_available','cloud_only','additional_cost_eur','inference_calls','can_publish','billing_tier_verified','key_present']);
 const safety=Object.freeze({cloud_only:true,local_pc_required:false,inference_calls:0,additional_cost_eur:0,
  can_publish:false,billing_tier_verified:false,wordpress_writes:0});
@@ -32,13 +32,13 @@ export async function probeGeminiModelMetadata({
  try{metadata=await reply.json()}catch{
   return result('HOLD','MODEL_METADATA_PARSE_FAILURE',{key_present:true,model_available:false})
  }
- const available=metadata?.name==='models/gemini-2.5-flash-lite'&&
+ const available=metadata?.name==='models/gemini-3.5-flash-lite'&&
    Array.isArray(metadata.supportedGenerationMethods)&&
    metadata.supportedGenerationMethods.includes('generateContent');
  if(!available)return result('HOLD','MODEL_GENERATION_NOT_ADVERTISED',{key_present:true,model_available:false});
  return result('METADATA_ONLY_VERIFIED','BILLING_TIER_UNVERIFIED',{
   key_present:true,model_available:true,
-  provider:'GOOGLE_GEMINI_EXISTING_LAB',model:'gemini-2.5-flash-lite',
+  provider:'GOOGLE_GEMINI_EXISTING_LAB',model:'gemini-3.5-flash-lite',
   credential_value_logged:false,connection_verified:true
  });
 }
