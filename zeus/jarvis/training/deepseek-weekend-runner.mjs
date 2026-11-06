@@ -11,7 +11,7 @@ const root=dirname(fileURLToPath(import.meta.url));
 const endpoint='https://api.deepseek.com';
 const curriculumPath=join(root,'deepseek-weekend-20261107-08.curriculum.json');
 const maxCalls=8, maxCases=4, outputLimit=800;
-const hardCapUSD=1.00; // Cumulative cap for ONE run; no auto recharges.
+const hardCapUSD=1.00; // One run per each of 2 weekend days; <= $2 runner exposure; no auto recharges.
 const peakInputPricePerM=0.30,peakOutputPricePerM=1.20;
 const model='deepseek-flash';
 const dates=new Set(['2026-11-07','2026-11-08']);
@@ -71,6 +71,11 @@ async function main(){
  if(balance.error||!balanceAvailable(balance.value))return safeError('BALANCE_UNVERIFIED_OR_INSUFFICIENT');
  const outDir=resolve(process.env.JARVIS_WEEKEND_OUTPUT_DIR||'.jarvis-weekend-private');
  mkdirSync(outDir,{recursive:true,mode:0o700});
+ // One start per calendar day, atomically: no paid duplicate on reboot/retry.
+ // Keep this private directory persistent across runs. Do not share the same API key
+ // with another autonomous consumer unless account-wide billing is capped there.
+ try{writeFileSync(join(outDir,'started-'+today()+'.lock'),'CUT34_WEEKEND_SINGLE_RUN\n',
+  {flag:'wx',mode:0o600})}catch{return safeError('DAY_ALREADY_STARTED_OR_LOCK_UNAVAILABLE')}
  let charged=0,calls=0;
  const rows=[], runDate=today();
  const persist=()=>writeFileSync(join(outDir,'candidates-'+runDate+'.json'),JSON.stringify({
