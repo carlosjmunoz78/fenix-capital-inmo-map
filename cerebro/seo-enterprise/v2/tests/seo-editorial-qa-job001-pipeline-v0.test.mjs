@@ -26,6 +26,8 @@ test('real first-party drafts -> JOB001 persisted replay -> D31 QA -> tribunal h
    assert.equal(same.idempotent_duplicate,true);assert.equal(same.job_id,work.job_id);
    const qa=runEditorialTechnicalQA({work_id,worker_receipt:work});
    assert.equal(qa.code_checks_passed,true,JSON.stringify(qa.failures));
+   assert.equal(qa.human_voice_precheck_passed,true);
+   assert.equal(qa.human_voice_semantic_review_required,true);
    assert.equal(qa.actual_independent_professional_review,false);
    const tribunal=runEditorialTribunalHold({work_id,worker_receipt:work,qa_receipt:qa});
    assert.equal(tribunal.decision,'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD');
