@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {auditSeoHumanVoiceAndRisk} from '../runtime/seo-d31-human-voice-risk-gate-v0.mjs';
+const base='cerebro/seo-enterprise/v2/drafts/';
+test('owner-accepted V3 style remains green for both buyer personas',()=>{
+ const pairs=[
+  ['PARTICULARES','2026-11-06-b2c-comparar-pisos-cordoba-v3-faq.draft.html'],
+  ['INMOBILIARIAS','2026-11-06-b2b-derivacion-comprador-cordoba-v3-faq.draft.html']
+ ];
+ for(const [persona,name] of pairs){
+  const html=fs.readFileSync(base+name,'utf8');
+  const a=auditSeoHumanVoiceAndRisk({html,persona,content_type:'ARTICLE'});
+  assert.equal(a.deterministic_precheck_passed,true,JSON.stringify(a.issues));
+  assert.equal(a.independent_professional_qa_verified,false);
+  assert.equal(a.ai_origin_detection_performed,false);
+  assert.equal(a.can_publish,false);
+ }
+});
+test('real Gemini 3.5 pilot defective headline and boilerplate are rejected',()=>{
+ const html=[
+  '<h1>Primera visita piso Córdoba</h1>',
+  '<h2>Prepara tu primera visita piso Córdoba con calma</h2>',
+  '<p>Afrontar esta etapa con un respaldo profesional marca la diferencia entre el acierto y el error.</p>',
+  '<h2>Da el siguiente paso con asesoramiento experto</h2>',
+  '<p>Nunca debes firmar ni entregar dinero en señal durante la primera visita sin reflexionar antes.</p>'
+ ].join('\n');
+ const a=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES'});
+ assert.equal(a.deterministic_precheck_passed,false);
+ for(const code of ['HEADING_UNNATURAL_KEYWORD_SEQUENCE','CANNED_MARKETING_PHRASE',
+  'H2_GENERIC_CTA_SCAFFOLDING','ABSOLUTE_FINANCIAL_OR_LEGAL_INSTRUCTION'])
+  assert.ok(a.issues.includes(code),code);
+ assert.equal(a.can_publish,false);
+});
+test('long paragraph without punctuation is rejected, and scope remains exact',()=>{
+ const text=Array.from({length:65},(_,i)=>i===0?'Te':'ayudamos').join(' ')+' aquí.';
+ const a=auditSeoHumanVoiceAndRisk({html:'<h1>Una casa</h1><h2>Qué saber</h2><p>'+text+'</p>',persona:'PARTICULARES'});
+ assert.ok(a.issues.includes('LONG_UNPUNCTUATED_PARAGRAPH'));
+ assert.throws(()=>auditSeoHumanVoiceAndRisk({html:'<p>Hola</p>',persona:'OTRA_EMPRESA'}));
+});
