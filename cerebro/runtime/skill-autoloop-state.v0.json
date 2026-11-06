@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-06T18:28:20.208Z",
+  "updated_at": "2026-11-06T18:30:54.012Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -514,7 +514,8 @@
     "github-wide-skills:d7d20ce0b59cc32ff59d",
     "github-wide-skills:b23dca5d4411bc87b5bf",
     "github-wide-skills:c5ae14e5e8f8163bab8c",
-    "github-wide-skills:92df76506ab367148173"
+    "github-wide-skills:92df76506ab367148173",
+    "github-wide-skills:6b67fa0e7b57bd9c6113"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -889,6 +890,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42014129241,
       "checkpointed_at": "2026-11-05T10:51:42.509Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:6b67fa0e7b57bd9c6113": {
+      "candidate_id": "github-wide-skills:6b67fa0e7b57bd9c6113",
+      "name": "exec-cpo",
+      "human_alias": "Exec Cpo",
+      "wrapper_id": "skillwrap:ffaa1c41fdc8f08370b6",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.14,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "PerDiemInc/gantrix",
+        "upstream_head_commit": "36ae60a92ee0c3e7711ab7b86e425da96104d9d3",
+        "manifest_sha256": "8d4d8e94da70118fe588106ef8dc90ee34e028b20f0911aa80cbff664ab53024",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42271307689,
+      "checkpointed_at": "2026-11-06T18:30:54.012Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -31934,7 +31969,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -31947,7 +31982,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42238975799,
+  "last_discovery_run_id": 42271307689,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
