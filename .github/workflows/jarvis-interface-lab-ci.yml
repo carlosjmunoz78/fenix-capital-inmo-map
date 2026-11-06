@@ -22,6 +22,7 @@ on:
       - 'src/jarvisAudioDeviceProbe.ts'
       - 'src/JarvisAudioDeviceCheck.tsx'
       - 'tests/jarvis-cut47-device-surface-lab.test.mjs'
+      - 'cerebro/registry/jarvis-voice-cut47.v1.json'
       - 'supabase/functions/cerebro-console-gateway-v0/index.ts'
       - 'supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts'
       - 'src/CerebroConsoleHost.tsx'
