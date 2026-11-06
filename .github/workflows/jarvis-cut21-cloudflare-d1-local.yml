@@ -50,6 +50,14 @@ jobs:
             echo 'CUT29 violated migration authorization gate'; exit 1
           fi
           echo 'CUT29 plan and authorization guard: PASS (offline)'
+      - name: CUT30 Cloudflare Access canary configuration OFF and no D1
+        run: node verify-cut30-access-canary.mjs
+      - name: CUT30 compile private Access canary without deploying
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-access-canary.lab.jsonc --dry-run --outdir=./cut30-access-bundle
+          test -n "$(find ./cut30-access-bundle -type f -print -quit)"
+          echo 'CUT30 private Cloudflare Access canary compiled, no routes, zero remote writes: PASS'
       - name: CUT21 official Wrangler local D1 schema and durable restore
         run: |
           set -euo pipefail
