@@ -2,8 +2,14 @@ name: CEREBRO DeepSeek BOOST-001 Tiny Canary
 
 # CUT36: after successful single-call smoke, same LAB-only manual flow advances
 # to six synthetic conversation studies. Branch override only. MAIN UNCHANGED.
+# One-time code-trigger path, NOT a scheduler; manually replaying is forbidden.
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - 'zeus/jarvis/triggers/CUT36_ONE_SHOT_LAB_20261106.txt'
 
 permissions:
   contents: read
