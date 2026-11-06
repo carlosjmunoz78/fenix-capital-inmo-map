@@ -79,3 +79,15 @@ test('mobile composer remains within viewport and buttons are reachable',async({
  await expect(page.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
  await expect(page.getByRole('textbox',{name:'Mensaje para Jarvis'})).toBeVisible();
 });
+
+test('project edit actions populate the real visible composer instead of an offscreen form',async({page})=>{
+ const accepted=await page.evaluate(()=>{
+  const detail={message:'Revisa este proyecto con pruebas',accepted:false};
+  window.dispatchEvent(new CustomEvent('fenix:jarvis-composer-prime',{detail}));
+  return detail.accepted;
+ });
+ expect(accepted).toBe(true);
+ await expect(page.getByRole('textbox',{name:'Mensaje para Jarvis'}))
+  .toHaveValue('Revisa este proyecto con pruebas');
+ await expect(page.locator('#accepted-message')).toHaveText('');
+});
