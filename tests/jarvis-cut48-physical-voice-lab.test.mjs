@@ -46,3 +46,14 @@ test('CUT48 isolated rollback drill never executes deployment, uses exact OLD bl
  assert.match(s,/JARVIS_CUT48_PROD_RESTORE_TESTED=FALSE/);
  assert.doesNotMatch(s,/supabase deploy|functions\.deploy|mcp__Supabase|https:\/\/.*supabase\.co|npm run deploy/i);
 });
+
+test('CUT48 device checks do not cancel unrelated ANA or JARVIS audio while idle',()=>{
+ const s=read('src/JarvisPhysicalVoiceCheck.tsx');
+ assert.match(s,/const utteranceRef=useRef<SpeechSynthesisUtterance\|null>\(null\)/);
+ assert.match(s,/function cancelOwnedPlayback\(\)\{\s*if\(!utteranceRef\.current\)return;/);
+ assert.match(s,/utteranceRef\.current=utterance;/);
+ assert.match(s,/utteranceRef\.current===utterance/);
+ assert.match(s,/if\(speechSynthesisSupported\(\)\)try\{window\.speechSynthesis\.cancel\(\)\}/);
+ const occurrences=s.split('window.speechSynthesis.cancel()').length-1;
+ assert.equal(occurrences,1,'All global cancellations must be guarded by utterance ownership');
+});
