@@ -125,3 +125,14 @@ test('CUT40 live owner-memory capability is catalogued as deployed but not end-t
  assert.ok(audit.notion_pages_discovered_metadata_only.length>=5);
  assert.equal(audit.cost_additional_eur,0);
 });
+
+test('CUT46 dock reconciles already-published Gateway state after React mount',()=>{
+ const dock=read('src/JarvisOmniDock.tsx');
+ assert.match(dock,/window\.addEventListener\(JARVIS_OMNI_EVENT,sync\)/);
+ assert.match(dock,/sync\(\);view\(\);/);
+ assert.match(dock,/window\.removeEventListener\(JARVIS_OMNI_EVENT,sync\)/);
+ const policy=JSON.parse(read('cerebro/registry/jarvis-communication-cut46.v1.json'));
+ assert.equal(policy.environment,'LAB');
+ assert.equal(policy.autonomy_state,'NO_GO_PROD');
+ assert.equal(policy.policies.no_prod_deploy,true);
+});
