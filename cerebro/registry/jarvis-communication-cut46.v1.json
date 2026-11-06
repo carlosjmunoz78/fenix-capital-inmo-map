@@ -1,0 +1,71 @@
+{
+  "schema": "cerebro.jarvis.communication.release-gate.v1",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT46-2026-11-06",
+  "state": "CODE_INTEGRATED_LAB_ONLY",
+  "autonomy_state": "NO_GO_PROD",
+  "canonical_base": "cerebro/jarvis-cut44-voice-dictation-ux-lab-20261106",
+  "modules": [
+    {
+      "cut": "CUT43",
+      "source": "PR28",
+      "state": "DEPENDENCY_SEPARATE_NOT_INTEGRATED",
+      "reason": "Training and independent evaluation not production-approved"
+    },
+    {
+      "cut": "CUT44",
+      "source": "PR29",
+      "state": "INCLUDED",
+      "component": "four-interface voice/dictation UX"
+    },
+    {
+      "cut": "CUT45",
+      "source": "PR30",
+      "state": "INCLUDED",
+      "component": "owner Gateway deterministic executive greeting"
+    },
+    {
+      "cut": "CUT46",
+      "source": "CURRENT",
+      "state": "INCLUDED",
+      "component": "integrated tests, click-only owner smoke probe"
+    }
+  ],
+  "transports": [
+    "existing_fenix_app_authenticated_supabase_session",
+    "existing_cerebro_console_gateway_v0"
+  ],
+  "policies": {
+    "no_direct_model_access": true,
+    "no_prod_deploy": true,
+    "no_secrets_in_repo": true,
+    "no_trading_access": true,
+    "exact_action_confirmation_preserved": true,
+    "owner_identity_source": "GATEWAY_CARLOS_ADMIN",
+    "no_automatic_greeting_probe": true,
+    "greeting_probe_payload": "hola",
+    "voice_device_verified": false,
+    "existing_ana_untouched": true,
+    "cost_additional_eur": 0
+  },
+  "dependencies": {
+    "before_promotion": [
+      "owner_signed_session_physical_E2E",
+      "stt_tts_real_devices",
+      "CUT43_persona_gateway_review",
+      "old_vs_new_comparison",
+      "snapshot_backup",
+      "rollback_tested",
+      "tribunal_approval",
+      "gradual_promotion"
+    ],
+    "jwt_actions_credential": "EXPIRED_OR_NEAR_EXPIRY",
+    "base_edge_function": "cerebro-console-gateway-v0",
+    "baseline_index_blob_sha": "44241c6abc3cb89560500336e332f0628219d0fc",
+    "rollback": "Do not merge or deploy; discard DRAFT PR. If future deployed, restore validated prior Edge Function snapshot and App asset."
+  },
+  "scope": "owner-only Fenix app interfaces JARVIS/OPERATIVA/NEURONAL/NAVEGADOR",
+  "notes": "No source-code-only test or simulated browser test proves real microphone, hardware voice, or owner live E2E."
+}
