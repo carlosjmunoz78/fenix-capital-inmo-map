@@ -21,10 +21,11 @@ test('two company-scoped V4 briefs reuse publicly verifiable WP sources and buye
  for(const b of a){
   assert.equal(validateSeoV4Brief(b),b);
   const prompt=buildSeoV4OwnerPrompt(b);
-  assert.match(prompt,/1250 a 1550 palabras/);
-  assert.match(prompt,/750 palabras de contenido principal/);
+  assert.match(prompt,/mínimo 1150 palabras/);
+  assert.match(prompt,/mínimo 950 fuera de FAQ/);
+  assert.match(prompt,/EXACTAMENTE SEIS H2 de contenido principal/);
   assert.match(prompt,/NO numerados/);
-  assert.match(prompt,/sin H2 numerados/i);
+  assert.match(prompt,/NO numerados/);
   assert.match(prompt,/used_source_ids/);
   assert.equal(b.publish_authorized,false);
   assert.equal(b.wordpress_write_authorized,false);
