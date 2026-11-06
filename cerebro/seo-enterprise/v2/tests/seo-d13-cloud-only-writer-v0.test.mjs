@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {generateSeoDraftWithLocalModel} from '../runtime/seo-d13-local-autonomous-writer-v0.mjs';
-import {loadIdentityCredentialFoundation} from '../../../governance/identity-credential-broker.mjs';
+import {loadIdentityCredentialFoundation,credentialReferenceDecision,connectorAuthDecision} from '../../../governance/identity-credential-broker.mjs';
 import {evaluateSeoCloudWriter,runSeoCloudWriter,SEO_D13_CLOUD_ONLY} from '../runtime/seo-d13-cloud-only-writer-v0.mjs';
 const brief={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
  version:'0.1.0',work_id:'SEO001-FENIX-D13-LAB-003',
@@ -28,7 +28,7 @@ test('cloud-only route reuses EXISTING IAM connector, never a local runtime',()=
  assert.equal(SEO_D13_CLOUD_ONLY.local_pc_required,false);
  assert.equal(SEO_D13_CLOUD_ONLY.local_ollama_required,false);
  assert.equal(SEO_D13_CLOUD_ONLY.allow_paid_fallback,false);
- const conn=foundation.connectors.connectors.find(x=>x.connector_id==='connector:gemini-free-lab');
+ const conn=foundation.connectors.connectors.find(x=>x.connector_id==='connector:seo-gemini-free-lab');
  assert.equal(conn.environments.includes('LAB'),true);
  assert.equal(conn.environments.includes('PROD'),false);
 });
@@ -73,4 +73,28 @@ test('superseded Ollama adapter is hard-disabled despite a fake or real local se
  assert.equal(out.wordpress_writes,0);
  assert.equal(out.paid_api_calls,0);
  assert.equal(calls,0);
+});
+
+test('FREE and PAID Gemini keys remain strictly isolated in IAM without any secret material',()=>{
+ const f=loadIdentityCredentialFoundation();
+ const free=f.credentials.references.find(x=>x.credential_ref_id==='credref:cerebro-gemini-free-api-key');
+ const previous=f.credentials.references.find(x=>x.credential_ref_id==='credref:cerebro-gemini-api-key');
+ const conn=f.connectors.connectors.find(x=>x.connector_id==='connector:seo-gemini-free-lab');
+ assert.equal(free.symbolic_name,'CEREBRO_GEMINI_FREE_API_KEY');
+ assert.equal(previous.symbolic_name,'CEREBRO_GEMINI_API_KEY');
+ assert.equal(free.allowed_environments.includes('PROD'),false);
+ assert.equal(free.allowed_consumers.includes('seo-d13-cloud-only-writer'),true);
+ assert.deepEqual(conn.credential_ref_ids,['credref:cerebro-gemini-free-api-key']);
+ assert.equal(conn.real_execution_state,'REGISTERED_UNBOUND_NO_GENERATION');
+ assert.equal(conn.identity_id,'iam:seo-gemini-free-lab');
+ assert.equal(SEO_D13_CLOUD_ONLY.connector_id,conn.connector_id);
+ assert.equal(SEO_D13_CLOUD_ONLY.free_secret_symbolic_name,free.symbolic_name);
+ assert.equal(SEO_D13_CLOUD_ONLY.paid_project_key_forbidden,true);
+ assert.equal(credentialReferenceDecision({
+  credential_ref_id:'credref:cerebro-gemini-free-api-key',
+  consumer:'seo-d13-cloud-only-writer',environment:'LAB',foundation:f}).ok,true);
+ assert.equal(credentialReferenceDecision({
+  credential_ref_id:'credref:cerebro-gemini-free-api-key',
+  consumer:'prod-runtime-smoke',environment:'PROD',foundation:f}).ok,false);
+ assert.equal(connectorAuthDecision({connector_id:conn.connector_id,environment:'PROD',foundation:f}).ok,false);
 });
