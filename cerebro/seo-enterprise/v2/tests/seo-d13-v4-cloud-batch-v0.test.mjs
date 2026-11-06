@@ -48,7 +48,7 @@ test('real D13 canary function reused for both mocked copies, D32 blocks short c
   assert.equal(opts.headers['x-goog-api-key'],fakeKey);
   const prompt=JSON.parse(opts.body).contents[0].parts[0].text;
   assert.match(prompt,/SEO-D13/);
-  assert.match(prompt,/1000 palabras totales/);
+  assert.match(prompt,/mínimo 1150 palabras/);
   const b=briefs[count-1];
   return sample(count===1?b2c:b2b,b.sources.map(s=>s.id));
  };
