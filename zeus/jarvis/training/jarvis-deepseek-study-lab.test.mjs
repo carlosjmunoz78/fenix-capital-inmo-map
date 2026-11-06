@@ -126,7 +126,7 @@ test('CUT36 workflow uses only allowed job-level expression contexts and one bra
  assert.match(yml,/workflow_dispatch:/);
  assert.doesNotMatch(yml,/^\s+schedule:/m);
  assert.match(yml,/^  push:\s*$/m);
- assert.match(yml,/- 'zeus\/jarvis\/triggers\/CUT36_ONE_SHOT_LAB_20261106\.txt'/);
+ assert.match(yml,/CUT37_AUTONOMY_START_20261106/);
  assert.match(yml,/- cerebro\/jarvis-deepseek-weekend-lab-20261106/);
  assert.doesNotMatch(yml,/^\s+schedule:/m);
 });
