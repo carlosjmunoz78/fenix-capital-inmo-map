@@ -33,6 +33,7 @@ export type JarvisAudioProbeEnvironment={
 
 export function browserJarvisAudioEnvironment():JarvisAudioProbeEnvironment {
  const nav=typeof navigator!=='undefined'?navigator:null;
+ const media=nav?.mediaDevices;
  const win=typeof window!=='undefined'?window:null;
  const speech=win as (Window&{SpeechRecognition?:unknown;webkitSpeechRecognition?:unknown})|null;
  const synth=Boolean(win&&'speechSynthesis' in win&&typeof SpeechSynthesisUtterance!=='undefined');
@@ -43,8 +44,8 @@ export function browserJarvisAudioEnvironment():JarvisAudioProbeEnvironment {
  }
  return {
   secureContext:Boolean(win?.isSecureContext),
-  getUserMedia:nav?.mediaDevices?.getUserMedia
-   ? constraints=>nav.mediaDevices.getUserMedia(constraints)
+  getUserMedia:media?.getUserMedia
+   ? constraints=>media.getUserMedia(constraints)
    : null,
   speechRecognitionSupported:Boolean(speech?.SpeechRecognition||speech?.webkitSpeechRecognition),
   speechSynthesisSupported:synth,
