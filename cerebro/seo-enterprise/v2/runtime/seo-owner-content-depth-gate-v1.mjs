@@ -52,7 +52,8 @@ export function auditSeoContentDepth({html,persona,content_type='ARTICLE',policy
  if(mainCount<bounds.main_content_words_excluding_faq)issues.push('MAIN_WORDS_BELOW_MINIMUM');
  if(bodyParas.length<bounds.main_paragraphs)issues.push('MAIN_PARAGRAPHS_BELOW_MINIMUM');
  if(mainHeadings.length<4)issues.push('MAIN_SECTION_COVERAGE_TOO_THIN');
- if(bodyParas.some(x=>words(x).length<18))issues.push('MAIN_PARAGRAPH_TOO_THIN');
+ if(bodyParas.filter(x=>words(x).length<12).length>Math.max(2,Math.floor(bodyParas.length*0.3)))
+  issues.push('TOO_MANY_MEANINGLESS_SHORT_PARAGRAPHS');
  const duplicateSet=new Set();
  for(let i=0;i<bodyParas.length;i++)for(let j=i+1;j<bodyParas.length;j++){
   if((words(bodyParas[i]).length>=22&&words(bodyParas[j]).length>=22&&
