@@ -41,3 +41,12 @@ Workflow old main: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob
 Precios DeepSeek 2026-11-06: https://api-docs.deepseek.com/quick_start/pricing/
 API saldo DeepSeek: https://api-docs.deepseek.com/api/get-user-balance/
 GitHub schedule default branch: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax/
+
+## CUT35 · Canario físico seguro preparado · 6 noviembre 2026
+
+- **HECHO en GitHub:** `zeus/jarvis/training/jarvis-deepseek-lab-canary.mjs` utiliza el proveedor canónico `cerebro/runtime/deepseek-provider-v0.mjs` y sus costes canónicos. Solo una petición sintética, respuesta máxima 32 tokens; comprueba previamente el saldo DeepSeek frente al nivel USD 98.23 observado y el sublímite conservador USD 40. No ejecuta la aplicación, no escribe en PROD, ni toca D1.
+- **HECHO:** override solo en la rama LAB, mismo path histórico `.github/workflows/cerebro-deepseek-boost001-canary.yml` para permitir `workflow_dispatch` con rama seleccionada. El archivo y SHA de **main siguen intactos**. El job exige `github.ref == refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106` y `environment: JARVIS_DEEPSEEK_LAB` con su secreto exclusivo; no usa repository secrets.
+- **HECHO:** pruebas sin red incluidas en workflow `jarvis-deepseek-weekend-lab-ci.yml`, ejecutadas en GitHub Actions con clave explícitamente vacía. Última ejecución observada `Run 20`, SUCCESS tras corregir el mock del proveedor.
+- **POR HACER:** crear en GitHub Settings > Environments el entorno exclusivo `JARVIS_DEEPSEEK_LAB` (actualmente solo existen Production, Preview y github-pages). Dentro, registrar una clave NUEVA de DeepSeek como secreto de ese entorno `DEEPSEEK_API_KEY`. NO usar Repository Secrets, NO revelar la clave, no poner en ningún log.
+- **SIGUIENTE TEST DE PAGO:** solo después de configurar Environment, abrir workflow existente `CEREBRO DeepSeek BOOST-001 Tiny Canary`, seleccionar EXPRESAMENTE la rama `cerebro/jarvis-deepseek-weekend-lab-20261106` y ejecutar una vez. Nunca ejecutarlo desde main. La ejecución de hoy NO está realizada; cuenta no ha consumido nada en este corte.
+- El canario NO activa aprendizaje del fin de semana: eso sigue requiriendo scheduler remoto y persistencia del ledger de 50 EUR, además de posterior evaluación de propuestas. No confundir activación del API con aprendizaje ya operativo.
