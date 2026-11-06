@@ -6,12 +6,56 @@
 import crypto from 'node:crypto';
 import {routeWork} from '../../../router/execution-model-router.mjs';
 import {loadIdentityCredentialFoundation} from '../../../governance/identity-credential-broker.mjs';
-import {buildAutonomousSeoPrompt} from './seo-d13-local-autonomous-writer-v0.mjs';
+
 import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
 const MODEL='gemini-2.5-flash-lite';
 const CONNECTOR='connector:gemini-free-lab';
 const REF='credref:cerebro-gemini-api-key';
 const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+function buildCloudEditorialPrompt(brief){
+ if(!brief||brief.company_id!=='fenix'||brief.engine_id!=='SEO-001'||
+  brief.environment!=='PREPROD'||brief.version!=='0.1.0'||
+  !['ARTICLE','LANDING'].includes(brief.content_type)||
+  !['PARTICULARES','INMOBILIARIAS'].includes(brief.persona)||
+  typeof brief.work_id!=='string'||!/^SEO001-FENIX-[A-Z0-9-]{8,80}$/.test(brief.work_id)||
+  brief.customer_data_present!==false||brief.source_readonly!==true||
+  brief.financial_claims_preverified!==false||
+  brief.wordpress_write_authorized!==false||brief.publish_authorized!==false||
+  brief.paid_provider_requested!==false)throw Error('CLOUD_EDITORIAL_SCOPE_INVALID');
+ for(const key of ['topic','buyer_problem','conversion_goal','focus_keyword']){
+  if(typeof brief[key]!=='string'||brief[key].length<5||brief[key].length>200||
+   /[<>{}]/.test(brief[key]))throw Error('CLOUD_EDITORIAL_BRIEF_'+key);
+ }
+ if(!/^https:\/\/fenixcapital\.es\/[a-z0-9/%._-]+$/i.test(brief.cta_url||''))
+  throw Error('CLOUD_EDITORIAL_CTA');
+ if(!Array.isArray(brief.sources)||brief.sources.length<2||brief.sources.length>8)
+  throw Error('CLOUD_EDITORIAL_SOURCES');
+ for(const source of brief.sources){
+  if(!source||source.corpus_evidence_verified!==true||
+   !/^[A-Za-z0-9_-]{3,60}$/.test(source.id||'')||
+   !/^https:\/\/(?:fenixcapital\.es|www\.boe\.es|www\.bde\.es|www\.juntadeandalucia\.es)\/[a-zA-Z0-9/%._?=#&-]+$/.test(source.url||'')||
+   typeof source.quote_or_paraphrase!=='string'||source.quote_or_paraphrase.length<25)
+   throw Error('CLOUD_EDITORIAL_SOURCE_NOT_VERIFIED');
+ }
+ const min_faq=brief.content_type==='ARTICLE'?6:8;
+ const prompt=[
+  'SEO-D13 CEREBRO FENIX. Escribe borrador HTML profesional en español de Córdoba SOLO para revisión.',
+  'Persona '+brief.persona+' tema '+brief.topic+' problema '+brief.buyer_problem,
+  'Intención '+brief.focus_keyword+' conversión '+brief.conversion_goal,
+  'H1 corto. H2 atractivos sin numerar. Prosa cercana. Sin dos puntos visibles.',
+  'Evita las expresiones además y en conclusión. Nada de párrafos de relleno.',
+  'Incluye al menos '+min_faq+' FAQ naturales visibles dentro de una section con clase faq.',
+  'Cada pregunta en H3 dentro de div class faq-item y respuesta en p de 12 a 65 palabras.',
+  'No inventes normativa ni concedas hipotecas. Todas las afirmaciones requieren revisión.',
+  'Incluye CTA con '+brief.cta_url,
+  'Usa solo las fuentes documentadas '+JSON.stringify(brief.sources.map(x=>({
+   id:x.id,url:x.url,verified_text:x.quote_or_paraphrase
+  }))),
+  'Devuelve SOLO JSON con html y used_source_ids. Sin código de página ni formularios.'
+ ].join('\n');
+ return {prompt,min_faq};
+}
+
 const hold=(reason,fields={})=>Object.freeze({
  status:'HOLD',reason,company_id:'fenix',engine_id:'SEO-001',
  environment:'PREPROD',inference_environment:'LAB',
@@ -22,7 +66,7 @@ export function evaluateSeoCloudWriter({
  brief,has_secret=false,provider_free_tier_confirmed=false,
  billing_disabled_confirmed=false,lifecycle_state=null,foundation=null
 }={}){
- const p=buildAutonomousSeoPrompt(brief);
+ const p=buildCloudEditorialPrompt(brief);
  if(!has_secret)return hold('CLOUD_SECRET_NOT_AVAILABLE');
  if(!provider_free_tier_confirmed||!billing_disabled_confirmed)return hold('CLOUD_FREE_NO_BILLING_GATE');
  const result=routeWork({
