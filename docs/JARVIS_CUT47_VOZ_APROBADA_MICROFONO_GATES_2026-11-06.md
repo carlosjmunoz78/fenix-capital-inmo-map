@@ -36,6 +36,11 @@ Fuentes confirmadas por lectura autorizada:
 - Bajo **cero coste** se puede usar el navegador como fallback, siempre que aparezca correctamente identificado, con permiso explícito del usuario y sin confundirlo con la voz aprobada.
 - Política de retroceso: cerrar PR CUT47. Copia original PR #24 y ramas CUT46/CUT44/CUT45 intactas; ningún despliegue real que restaurar de este corte.
 
+## Evidencia de CI verificada
+- [Run #42299382971](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42299382971) **SUCCESS** en rama CUT47: compilación TypeScript/Vite correcta, **56 tests Node PASS / 0 FAIL**, **26 tests Playwright Chromium PASS / 0 FAIL** (desktop y móvil) y comprobación fail-closed de rutas e identidad.
+- **Bloqueo E2E físico persistente**: `JARVIS_OWNER_JWT_FRESHNESS=EXPIRED_OR_NEAR_EXPIRY`; la prueba del Gateway real en GitHub Actions queda omitida, no simulada como éxito. Micrófono hardware real sigue pendiente de usuario.
+- Último ensayo no reproduce el audio clonado dinámico ni confirma TTS del dispositivo. APP REAL y Gateway desplegado sin modificaciones.
+
 ## Dependencias siguientes
 1. Terminar CI de CUT47.
 2. Reparar/renovar de manera segura el JWT E2E **solo** mediante sesión legítima del propietario, sin mostrarlo ni persistirlo en chat.
