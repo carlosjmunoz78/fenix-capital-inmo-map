@@ -24,10 +24,14 @@ const no=(state,other={})=>Object.freeze({state,environment:'LAB',deployAllowed:
 function apiOK(body){
  return body?.success===true&&Array.isArray(body.errors)&&body.errors.length===0;
 }
-function safeRecord(d){
+// List D1 API returns only identity metadata. Only the GET-by-UUID readback
+// can certify read-replication policy. Do not reject list rows for omitting it.
+function safeIdentity(d){
  return typeof d?.uuid==='string'&&UUID.test(d.uuid)&&d.uuid.toLowerCase()!==OLD_DB_ID
-  &&d.name===DB_NAME&&d.jurisdiction==='eu'
-  &&d.read_replication?.mode==='disabled';
+  &&d.name===DB_NAME&&d.jurisdiction==='eu';
+}
+function safeRecord(d){
+ return safeIdentity(d)&&d.read_replication?.mode==='disabled';
 }
 export function createJarvisEuD1Provisioner({
  fetchImpl,apiToken,accountId=ACCOUNT_ID,environment='LAB',
@@ -74,7 +78,7 @@ export function createJarvisEuD1Provisioner({
    return no('AMBIGUOUS_DATABASE_NAME_NO_WRITE');
   if(list.result.length===1){
    const d=list.result[0];
-   if(!safeRecord(d))return no('EXISTING_DATABASE_NOT_EU_NO_WRITE');
+   if(!safeIdentity(d))return no('EXISTING_DATABASE_NOT_EU_NO_WRITE');
    if(!(await verify(d.uuid)))return no('EXISTING_EU_DATABASE_NOT_VERIFIED');
    return no('EXISTING_EU_VERIFIED_NO_WRITE',{databaseId:d.uuid});
   }
@@ -89,7 +93,7 @@ export function createJarvisEuD1Provisioner({
   });
   if(!body)return no('CREATE_OUTCOME_UNKNOWN_RECHECK_INVENTORY');
   const d=body.result;
-  if(!safeRecord(d))return no('CREATED_METADATA_UNSAFE_HUMAN_REVIEW',
+  if(!safeIdentity(d))return no('CREATED_METADATA_UNSAFE_HUMAN_REVIEW',
     {databaseId:typeof d?.uuid==='string'&&UUID.test(d.uuid)?d.uuid:null});
   if(!(await verify(d.uuid)))return no('CREATED_NEEDS_READBACK_HUMAN_REVIEW',{databaseId:d.uuid});
   return no('NEW_EU_D1_CREATED_UNMIGRATED',{databaseId:d.uuid,created:true});
