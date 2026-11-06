@@ -19,6 +19,12 @@ test('32 departments, 141 distinct specialists and 12 safe routes assemble from 
  assert.equal(ready.platform.organization_families,8);
  assert.equal(ready.platform.departments,32);
  assert.equal(ready.platform.specialists,141);
+ assert.equal(ready.platform.all_seo_role_templates,191);
+ assert.equal(ready.platform.owner_excellence_governance_roles,191);
+ assert.equal(ready.platform.owner_excellence_governance_policy_id,'SEO_V2_OWNER_EXCELLENCE_ALL_191_ROLES_V1');
+ assert.equal(ready.controls.universal_owner_business_authority,'AUTHENTICATED_OWNER_ONLY');
+ assert.equal(ready.controls.auto_promotion,false);
+ assert.equal(ready.departments.every(x=>x.universal_owner_policy_id==='SEO_V2_OWNER_EXCELLENCE_ALL_191_ROLES_V1'),true);
  assert.equal(ready.platform.route_types,12);
  assert.equal(ready.platform.existing_orientation_job_receipts,141);
  assert.equal(ready.platform.one_shared_job_runtime,true);
