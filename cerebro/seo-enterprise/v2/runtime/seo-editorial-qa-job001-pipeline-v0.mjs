@@ -9,9 +9,10 @@ import {fileURLToPath} from 'node:url';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
 import {runSeoEditorialMission} from './seo-workforce-lab-v0.mjs';
 import {validateEvaluatorChange} from '../../../runtime/evaluation-tribunal.mjs';
+import {auditOwnerEditorialCopy,buildSeoProducerImageOrder,validateSeoProducerOrder} from './seo-owner-editorial-visual-gate-v2.mjs';
 
 const PREFIX='cerebro/seo-enterprise/v2/';
-const REGISTRY=PREFIX+'registry/seo-editorial-first-batch-2026-11-06.json';
+const REGISTRY=PREFIX+'registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json';
 const APPROVAL=PREFIX+'evidence/SEO001_STRATEGY_OWNER_APPROVAL_GITHUB_6682124001_2026-11-06.json';
 const SHA40=/^[0-9a-f]{40}$/; const SHA64=/^[0-9a-f]{64}$/;
 const context={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
@@ -37,8 +38,8 @@ export function loadVerifiedWorkItem({root=process.cwd(),work_id}={}){
  const html=textRead(root,draft.content_path);
  if(html.length<2500||html.length>100000||!/BORRADOR INTERNO, NO PUBLICAR/.test(html))deny('SOURCE_INVALID');
  const blob=gitsha(html),digest=sha256(html);
- const expected={'SEO001-FENIX-B2C-EDITORIAL-001':'f2f27018db419e56efd52671722a7ff283bcb8b9',
-                 'SEO001-FENIX-B2B-EDITORIAL-002':'100394b4d4ef590fdfb2590b309828a93e28606b'};
+ const expected={'SEO001-FENIX-B2C-EDITORIAL-001':'54f4a8d08607a4b193f47e67581f853e4c1b20c1',
+                 'SEO001-FENIX-B2B-EDITORIAL-002':'eeb98eb62a80c5aa75b63ffa3fd1abbc2a596d6d'};
  if(blob!==expected[work_id]||!SHA40.test(blob))deny('GIT_BLOB_CHANGED_REVIEW_REQUIRED');
  return {work_id,html,blob,digest,draft,company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0',
   approval_comment_id:6682124001,approval_scope:'PREPARE_BRIEFS_AND_DRAFTS_ONLY'};
@@ -108,11 +109,22 @@ export function runEditorialTechnicalQA({root=process.cwd(),work_id,worker_recei
  if(worker_receipt.typo_codes?.length)failures.push('COPY_TYPOS_REVIEW');
  if(worker_receipt.risk_codes?.length)failures.push('YMYL_CLAIM_REVIEW');
  if(!/https:\/\/fenixcapital\.es\/contacto\//.test(html))failures.push('CONTACT_CTA_MISSING');
+ const ownerStyle=auditOwnerEditorialCopy({html,persona:item.draft.persona});
+ for(const issue of ownerStyle.issues)failures.push('OWNER_STYLE_'+issue);
+ const producerOrder=buildSeoProducerImageOrder({company_id:'fenix',work_id:item.work_id,persona:item.draft.persona,
+  source_content_sha256:item.digest,...item.draft.image});
+ const producerPrecheck=validateSeoProducerOrder({order:producerOrder});
+ if(!producerPrecheck.metadata_complete||producerPrecheck.api_called!==false)failures.push('MEDIA_PRODUCER_BRIEF_INVALID');
  // Synthetic rule checks don't verify legal claims, titles, visuals, rankings, or real links.
  return {...basic(item),stage:'D31_PRELIMINARY_TECHNICAL_QA',
   reviewer_actor_id:'SEO_D31_QA',worker_job_id:worker_receipt.job_id,
   code_checks_passed:failures.length===0,failures,counts,
   actual_independent_professional_review:false,
+  owner_style_precheck_passed:ownerStyle.deterministic_style_precheck_passed,
+  image_brief_precheck_passed:producerPrecheck.metadata_complete,
+  image_producer_engine:producerOrder.producer_engine,
+  image_producer_dispatch_executed:false,
+  image_visual_review_verified:false,
   legal_privacy_review_required:item.draft.persona==='INMOBILIARIAS',
   ymyl_manual_review_required:true,visual_review_required:true,
   live_link_verification_required:true};
@@ -132,7 +144,7 @@ export function runEditorialTribunalHold({root=process.cwd(),work_id,worker_rece
   worker_job_id:worker_receipt.job_id,code_checks_passed:qa_receipt.code_checks_passed,
   failure_codes:qa_receipt.failures,
   decision:qa_receipt.code_checks_passed?'TECHNICAL_PRECHECK_PASS_RELEASE_HOLD':'TECHNICAL_PRECHECK_FAIL_RELEASE_HOLD',
-  remaining_gates:['INDEPENDENT_PROFESSIONAL_QA','VERIFIED_SEO_SOURCES_AND_YMYL_FACTCHECK',
+  remaining_gates:['INDEPENDENT_PROFESSIONAL_QA','VISUAL_IMAGE_PRODUCER_DELIVERY_AND_NO_TEXT_LOGO_QA','VERIFIED_SEO_SOURCES_AND_YMYL_FACTCHECK',
    'WORDPRESS_SLUG_COLLISION_LIVE','OWNER_EXACT_CONTENT_APPROVAL','WORDPRESS_IAM',
    'CORE_GUARD_WRITES_GATE','PHYSICAL_BACKUP_RESTORE','SEPARATE_PUBLICATION_PERMISSION'],
   actual_independent_tribunal_iam:false,publish_authorized:false,wordpress_write_authorized:false,
