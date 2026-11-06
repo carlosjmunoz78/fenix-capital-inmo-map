@@ -139,8 +139,16 @@ test('marketing and all department courses reuse existing complete URL/copy/imag
  }
  const routed=planSeoDirectorOrder(base('CONTENT_AND_LANDINGS'));
  assert.equal(routed.historical_url_copy_image_snapshot_verified,true);
+ assert.equal(routed.historical_archive_operational,false);
  assert.equal(routed.historical_asset_payloads_mounted_in_job001,false);
- assert.equal(routed.content_or_marketing_activation_blocked_until_asset_join,true);
+ assert.equal(routed.current_operational_corpus,'ACCEPTED_FROZEN_PROD_2026_11_05');
+ assert.equal(routed.current_corpus_documents,200);
+ assert.equal(routed.current_corpus_images,629);
+ assert.equal(routed.operational_source_policy,'PROD_FROZEN_ONLY_NO_STAGING_NO_REAUDIT');
+ assert.ok(routed.existing_asset_registry.endsWith('fenix-prod-wp-url-media-inventory-2026-11-05-v1.json'));
+ assert.equal(routed.historical_asset_join_is_not_an_activation_gate,true);
+ assert.equal(routed.content_or_marketing_activation_blocked_until_asset_join,false);
+ assert.equal(routed.content_or_marketing_execution_blocked_until_iam_qa_and_owner_gates,true);
  assert.equal(routed.only_proposal,true);
  assert.equal(routed.auto_publish,false);
 });
