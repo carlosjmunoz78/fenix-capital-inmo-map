@@ -29,6 +29,7 @@ test('two company-scoped V4 briefs reuse publicly verifiable WP sources and buye
   assert.equal(b.publish_authorized,false);
   assert.equal(b.wordpress_write_authorized,false);
   assert.equal(b.customer_data_present,false);
+  assert.equal(b.paid_provider_requested,false);
  }
  assert.throws(()=>validateSeoV4Brief({...a[0],company_id:'company_other'}));
  assert.throws(()=>validateSeoV4Brief({...a[0],sources:[]}));
