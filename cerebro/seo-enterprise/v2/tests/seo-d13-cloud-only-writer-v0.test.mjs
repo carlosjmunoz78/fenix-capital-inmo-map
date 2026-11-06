@@ -44,44 +44,25 @@ test('zero-cost billing and IAM deny access before any cloud request',async()=>{
  assert.equal(x.status,'HOLD');assert.equal(calls,0);
  assert.equal(x.additional_cost_eur,0);
 });
-test('verified mock cloud transport runs ROUTE-001 then real owner QA, NOT actual provider evidence',async()=>{
+test('even forged true billing flags and synthetic IAM can never enable inference',async()=>{
  let calls=0;
- const fetch_impl=async(url,args)=>{
-  calls++;
-  assert.match(url,/^https:\/\/generativelanguage\.googleapis\.com\/v1beta\/models\/gemini-2.5-flash-lite:generateContent$/);
-  assert.equal(args.method,'POST');
-  const body=JSON.parse(args.body);
-  assert.equal(body.generationConfig.responseMimeType,'application/json');
-  return {ok:true,json:async()=>({candidates:[{content:{parts:[{
-   text:JSON.stringify({html:fakeHtml,used_source_ids:['wp_gastos','wp_contacto']})
-  }]}}]})};
- };
- const r=await runSeoCloudWriter({brief,api_key:'mock-not-a-real-api-secret',
- provider_free_tier_confirmed:true,billing_disabled_confirmed:true,
- lifecycle_state,foundation,fetch_impl});
- assert.equal(calls,1);
- assert.equal(r.status,'SEO_D13_CLOUD_DRAFT_CREATED_FOR_QA');
- assert.equal(r.generated_by_cerebro_cloud_model,true);
- assert.equal(r.faq_count,6);assert.equal(r.publish_authorized,false);
- assert.equal(r.wordpress_writes,0);assert.equal(r.additional_cost_eur,0);
- assert.equal(r.source_fact_check_verified,undefined);
- assert.equal(r.independent_fact_check_verified,false);
+ const fetch_impl=async()=>{calls++;throw Error('NETWORK MUST NOT BE CALLED')};
+ const x=await runSeoCloudWriter({brief,api_key:'synthetic-stub-not-a-real-key',
+  provider_free_tier_confirmed:true,billing_disabled_confirmed:true,
+  lifecycle_state,foundation,fetch_impl});
+ assert.equal(calls,0);
+ assert.equal(x.status,'HOLD');
+ assert.equal(x.reason,'GEMINI_PROJECT_BILLING_ATTESTATION_NOT_AVAILABLE_NO_INFERENCE');
+ assert.equal(x.wordpress_writes,0);
+ assert.equal(x.paid_api_calls,0);
+ assert.equal(x.publish_authorized,false);
 });
-test('cloud model cannot evade source or buyer persona QA and cannot write to PROD',async()=>{
- const fake=(html,ids)=>async()=>({ok:true,json:async()=>({
-  candidates:[{content:{parts:[{text:JSON.stringify({html,used_source_ids:ids})}]}}]
- })});
- const args={brief,api_key:'mock-not-a-real-api-secret',
- provider_free_tier_confirmed:true,billing_disabled_confirmed:true,
- lifecycle_state,foundation};
- const bad=await runSeoCloudWriter({...args,fetch_impl:fake(fakeHtml,['wp_gastos','invented'])});
- assert.equal(bad.reason,'CLOUD_UNSUPPORTED_SOURCES');
- const htmlBad=fakeHtml.replace(/<div class="faq-item"><h3>[\s\S]*?<\/h3><p>[\s\S]*?<\/p><\/div>/,'');
- const q=await runSeoCloudWriter({...args,fetch_impl:fake(htmlBad,['wp_gastos','wp_contacto'])});
- assert.equal(q.reason,'CLOUD_STYLE_OR_FAQ_FAIL');
- assert.throws(()=>evaluateSeoCloudWriter({...args,brief:{...brief,company_id:'other'}}),/CLOUD_EDITORIAL_SCOPE_INVALID/);
+test('invalid company or source still fails route preflight, and the direct writer remains closed',async()=>{
+ assert.throws(()=>evaluateSeoCloudWriter({brief:{...brief,company_id:'other'}}),/CLOUD_EDITORIAL_SCOPE_INVALID/);
+ assert.throws(()=>evaluateSeoCloudWriter({brief:{...brief,sources:[]}}),/CLOUD_EDITORIAL_SOURCES/);
+ const r=await runSeoCloudWriter({brief:{...brief,company_id:'other'},api_key:'synthetic-stub-not-a-real-key'});
+ assert.equal(r.reason,'GEMINI_PROJECT_BILLING_ATTESTATION_NOT_AVAILABLE_NO_INFERENCE');
 });
-
 test('superseded Ollama adapter is hard-disabled despite a fake or real local server',async()=>{
  let calls=0;
  const out=await generateSeoDraftWithLocalModel({
