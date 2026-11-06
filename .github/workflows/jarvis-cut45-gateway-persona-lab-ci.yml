@@ -1,0 +1,38 @@
+name: JARVIS CUT45 Gateway Owner Greeting LAB Offline Gate
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-cut45-gateway-persona-lab-20261106
+    paths:
+      - 'supabase/functions/cerebro-console-gateway-v0/index.ts'
+      - 'supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts'
+      - 'tests/jarvis-cut45-gateway-persona-lab.test.mjs'
+      - '.github/workflows/jarvis-cut45-gateway-persona-lab-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jarvis-cut45-owner-greeting-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  persona-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      DEEPSEEK_API_KEY: ''
+      SUPABASE_SERVICE_ROLE_KEY: ''
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Test deterministic owner Gateway personality and preserved auth contract
+        run: node --test tests/jarvis-cut45-gateway-persona-lab.test.mjs
+      - name: Verify no deployment or external inference occurred
+        run: |
+          echo 'JARVIS_CUT45_ONLY_OFFLINE_NODE_TESTS'
+          test -f supabase/functions/cerebro-console-gateway-v0/index.ts
+          test -f supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts
