@@ -9,7 +9,7 @@ import {join,resolve} from 'node:path';
 import {execFileSync} from 'node:child_process';
 import {fileURLToPath} from 'node:url';
 import {executeStudy} from './jarvis-deepseek-study-lab.mjs';
-const root=resolve(fileURLToPath(new URL('../../../..',import.meta.url)));
+const root=resolve(fileURLToPath(new URL('../../..',import.meta.url)));
 const ledgerPath='zeus/jarvis/state/jarvis-deepseek-autonomy-ledger-v1.json';
 const absoluteLedger=join(root,ledgerPath);
 const branch='cerebro/jarvis-deepseek-weekend-lab-20261106';
