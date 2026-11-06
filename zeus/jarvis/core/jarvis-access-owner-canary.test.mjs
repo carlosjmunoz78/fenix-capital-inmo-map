@@ -43,7 +43,7 @@ test('CUT30 denied on different Access application audience',async()=>{
  assert.equal(response.status,403);assert.equal(called,0);
 });
 test('CUT30 unauthorized identities and blank identity are forbidden',async()=>{
- for(const value of [undefined,{}, {email:'other@example.invalid'}, {email:'  '+email},
+ for(const value of [null,{}, {email:'other@example.invalid'}, {email:'  '+email},
   {email:'synthetic-owner@other.invalid'},{email:null}]){
   const result=await app.fetch(req(),env(),ctx(value));
   assert.equal(result.status,403);
