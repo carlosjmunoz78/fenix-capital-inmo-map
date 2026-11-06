@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import crypto from 'node:crypto';
 import {auditSeoHumanVoiceAndRisk} from '../runtime/seo-d31-human-voice-risk-gate-v0.mjs';
 const base='cerebro/seo-enterprise/v2/drafts/';
 test('owner-accepted V3 style remains green for both buyer personas',()=>{
@@ -37,4 +38,18 @@ test('long paragraph without punctuation is rejected, and scope remains exact',(
  const a=auditSeoHumanVoiceAndRisk({html:'<h1>Una casa</h1><h2>Qué saber</h2><p>'+text+'</p>',persona:'PARTICULARES'});
  assert.ok(a.issues.includes('LONG_UNPUNCTUATED_PARAGRAPH'));
  assert.throws(()=>auditSeoHumanVoiceAndRisk({html:'<p>Hola</p>',persona:'OTRA_EMPRESA'}));
+});
+
+test('actual real Gemini Free 3.5 LAB output is preserved byte-for-byte and rejected for human voice',()=>{
+ const file='cerebro/seo-enterprise/v2/training-pilots/SEO_D13_GEMINI_35_FREE_REAL_LAB_003_UNAPPROVED.html';
+ const html=fs.readFileSync(file,'utf8');
+ const sha=crypto.createHash('sha256').update(html,'utf8').digest('hex');
+ assert.equal(sha,'0306e2e5c126e6e34e8673dc7432188930f41406fce09ff4efb6d3c147e93a1c');
+ const result=auditSeoHumanVoiceAndRisk({html,persona:'PARTICULARES',content_type:'ARTICLE'});
+ assert.equal(result.deterministic_precheck_passed,false);
+ assert.ok(result.issues.includes('HEADING_UNNATURAL_KEYWORD_SEQUENCE'));
+ assert.ok(result.issues.includes('H2_GENERIC_CTA_SCAFFOLDING'));
+ assert.ok(result.issues.includes('CANNED_MARKETING_PHRASE'));
+ assert.ok(result.issues.includes('ABSOLUTE_FINANCIAL_OR_LEGAL_INSTRUCTION'));
+ assert.equal(result.can_publish,false);
 });
