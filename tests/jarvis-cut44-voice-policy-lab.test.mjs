@@ -64,5 +64,9 @@ test('CUT44 draft is editable offline, but submission stays gated by owner Gatew
 test('CUT44 Operativa reports mic problems without claiming Chrome support',()=>{
  const src=read('src/JarvisOperativaComposerPortal.tsx');
  assert.match(src,/jarvisDictationProblem/);
+ assert.match(src,/getJarvisOmniState\(\)/);
+ assert.match(src,/ready:shared\.ready===true/);
+ assert.match(src,/JARVIS_OMNI_EVENT,inspect/);
+ assert.doesNotMatch(src,/ready:Boolean\(textarea&&!textarea\.disabled\)/);
  assert.doesNotMatch(src,/Chrome no ofrece reconocimiento/);
 });
