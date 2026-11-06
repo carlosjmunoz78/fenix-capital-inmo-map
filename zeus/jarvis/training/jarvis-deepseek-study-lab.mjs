@@ -84,7 +84,18 @@ export async function executeStudy({env=process.env,fetchImpl=globalThis.fetch,n
   throw Error('CURRICULUM_INVALID');
  // Fixed synthetic cohort; never personal data, no tool invocation.
  const cases=data.cases.slice(0,maxCases);
- const provider=new DeepSeekProviderV0({apiKey:env.DEEPSEEK_API_KEY,fetchImpl});
+ // Compose on the existing CEREBRO provider without modifying its runtime contract:
+ // Responses API supports a non-thinking, JSON-only result to preserve output tokens.
+ const studyFetch=async(url,opts)=>{
+  if(!url.endsWith('/responses'))throw Error('LAB_PROVIDER_ENDPOINT_NOT_ALLOWED');
+  const payload=JSON.parse(opts.body);
+  if(payload.model!==model||payload.max_output_tokens!==maxOutputTokens||
+     Array.isArray(payload.tools)||!['string','object'].includes(typeof payload.input))
+   throw Error('LAB_PROVIDER_REQUEST_NOT_BOUNDED');
+  return fetchImpl(url,{...opts,body:JSON.stringify({...payload,
+   reasoning:{effort:'none'},text:{format:{type:'json_object'}},tool_choice:'none'})});
+ };
+ const provider=new DeepSeekProviderV0({apiKey:env.DEEPSEEK_API_KEY,fetchImpl:studyFetch});
  let actualUSD=0,reservedUSD=0,calls=0;
  const rows=[];
  for(const scenario of cases){
