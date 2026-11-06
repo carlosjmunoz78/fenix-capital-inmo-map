@@ -88,5 +88,47 @@
   "model_calls_during_v4_1_repair": 0,
   "additional_paid_api_calls": 0,
   "new_subscriptions": 0,
-  "note": "Correction of selected observed risks does not certify all facts or legal compliance. Never import old owner SHA approvals. Requires independent review and authenticated media and backup gates."
+  "note": "Correction of selected observed risks does not certify all facts or legal compliance. Never import old owner SHA approvals. Requires independent review and authenticated media and backup gates.",
+  "physical_evidence": {
+    "status": "CROSS_ENGINE_PREPROD_TRIBUNAL_GREEN_FOR_TESTS_RELEASE_HOLD",
+    "version": "0.1.0",
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "PREPROD",
+    "git_actions": {
+      "physical_wp_synthetic_restore": {
+        "run_id": 42247533380,
+        "artifact_id": 13518237189,
+        "succeeded": true,
+        "full_prod_restore_verified": false
+      },
+      "physical_photo_intake": {
+        "run_id": 42248337759,
+        "artifact_id": 13518628463,
+        "succeeded": true,
+        "original_photo_generated": false
+      },
+      "cross_engine_tribunal": {
+        "run_id": 42248914390,
+        "artifact_id": 13519123892,
+        "succeeded": true,
+        "report_sha256": "5aec40e9196955728960d3c1979e4ba5528f531573c9dd8dca46c597d1917da9",
+        "publish_authorized": false
+      }
+    },
+    "open_blockers": [
+      "INDEPENDENT_YMYL_SEO_EDITORIAL_APPROVAL",
+      "UMS_ORIGINAL_CLEAN_PHOTO_PROVIDER_RIGHTS",
+      "FULL_WP_PRODUCTION_SNAPSHOT_ISOLATED_RESTORE",
+      "WORDPRESS_DRAFT_ONLY_IAM_AND_IDEMPOTENCY",
+      "OWNER_EXACT_CONTENT_SHA_APPROVAL"
+    ],
+    "cost": {
+      "new_subscriptions": 0,
+      "paid_provider_calls": 0,
+      "github_actions_minutes_consumed": true,
+      "statement_of_account_checked": false
+    },
+    "publisher_status": "OFF_NO_PROD_WRITES"
+  }
 }
