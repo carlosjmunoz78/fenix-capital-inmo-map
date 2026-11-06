@@ -153,18 +153,33 @@ test('CUT27 API call URLs are pinned to the authorized account (no redirects)',a
 });
 
 
-test('CUT27 refuses missing replication mode instead of assuming no replicas',async()=>{
+test('CUT27 list API may omit replication; GET-by-UUID certifies it',async()=>{
+ const r=rig({found:[record({read_replication:undefined})],readback:record()});
+ const result=await r.provisioner.run(authorized);
+ assert.equal(result.state,'EXISTING_EU_VERIFIED_NO_WRITE');
+ assert.deepEqual(r.calls.map(c=>c.method),['GET','GET']);
+});
+test('CUT27 GET detail rejects unknown or automatic replication',async()=>{
  for(const read_replication of [undefined,null,{}, {mode:'auto'}]){
-  const r=rig({found:[record({read_replication})]});
+  const r=rig({found:[record({read_replication:undefined})],
+   readback:record({read_replication})});
   const result=await r.provisioner.run(authorized);
-  assert.equal(result.state,'EXISTING_DATABASE_NOT_EU_NO_WRITE');
-  assert.deepEqual(r.calls.map(c=>c.method),['GET']);
+  assert.equal(result.state,'EXISTING_EU_DATABASE_NOT_VERIFIED');
+  assert.deepEqual(r.calls.map(c=>c.method),['GET','GET']);
  }
 });
-test('CUT27 refuses to certify a newly created D1 if replication state is not explicit',async()=>{
- const r=rig({found:[],created:record({read_replication:undefined})});
+test('CUT27 POST may omit replication but fresh detail GET must prove disabled',async()=>{
+ const r=rig({found:[],created:record({read_replication:undefined}),readback:record()});
  const result=await r.provisioner.run(authorized);
- assert.equal(result.state,'CREATED_METADATA_UNSAFE_HUMAN_REVIEW');
- assert.deepEqual(r.calls.map(c=>c.method),['GET','POST']);
+ assert.equal(result.state,'NEW_EU_D1_CREATED_UNMIGRATED');
+ assert.deepEqual(r.calls.map(c=>c.method),['GET','POST','GET']);
+ assert.equal(result.deployAllowed,false);
+});
+test('CUT27 POST with missing replica metadata is never accepted without safe readback',async()=>{
+ const r=rig({found:[],created:record({read_replication:undefined}),
+  readback:record({read_replication:undefined})});
+ const result=await r.provisioner.run(authorized);
+ assert.equal(result.state,'CREATED_NEEDS_READBACK_HUMAN_REVIEW');
+ assert.deepEqual(r.calls.map(c=>c.method),['GET','POST','GET']);
  assert.equal(result.deployAllowed,false);
 });
