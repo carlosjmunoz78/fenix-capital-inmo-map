@@ -5,6 +5,9 @@ on:
     paths:
       - 'cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs'
       - 'cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-ledger-preprod-v0.sql'
       - '.github/workflows/cerebro-seo-checklist-delivery-preprod-v0.yml'
 
 permissions:
@@ -21,8 +24,10 @@ jobs:
         run: |
           node --check cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs
           node --check cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs
+          node --check cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs
       - name: Private PDF integrity, privacy & no marketing without opt-in
-        run: node --test cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs
       - name: Prove no remote email, CRM mutation, storage upload or newsletter subscription
         env:
           CEREBRO_SEO_DELIVERY_MODE: 'DRY_RUN'
