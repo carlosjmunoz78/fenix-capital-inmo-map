@@ -49,3 +49,23 @@ El contexto de la interfaz y el proyecto se registra como pista UI no confiable;
 ## Rollback
 
 No se han modificado main, gh-pages, App/CRM real, Supabase PROD, DNS, Trading, CUT30 ni los secretos. Para descartar esta mejora, cerrar la PR DRAFT o abandonar la rama; la instalación actual queda intacta. No hay efectos externos de esta fase LAB.
+
+
+## CUT40 · Auditoría de memoria y Gateway real · 2026-11-06
+
+**HECHO (solo lectura)**:
+- Supabase proyecto `cluhljgonannaafpmblx`: función `cerebro-console-gateway-v0` desplegada con estado `ACTIVE`, versión 33. Su código combina `withSupabase({auth:"user"})` y comprobación de propietario. El indicador administrativo `verify_jwt=false` no concede por sí mismo acceso público; la autorización debe comprobarse en los endpoints reales.
+- Las RPC `fenix_prod_cerebro_memory_search_server`, `fenix_prod_cerebro_memory_observe_v2_server`, `fenix_prod_cerebro_memory_supersede_server` y `fenix_prod_cerebro_memory_forget_server` existen. Su mera presencia no demuestra que todo el historial esté indexado.
+- El Gateway publicado contiene `knowledge.ts`: combina memoria conversacional autorizada, consultas operativas, fuentes documentales canónicas Notion y comprobaciones de vigencia. La presencia del código **no** confirma que el token Notion esté disponible ni que todos los documentos estén recuperables.
+- El conector Notion encontró metadatos de páginas Base Estratégica CEREBRO, Centro de Decisión, Belén Motor Financiero, JARVIS Fénix Capital y FAQ Fénix. No se importaron contenidos ni documentos privados en GitHub.
+- Detectado y eliminado en LAB el segundo montaje de `CerebroConsoleShell` en Operativa; desde CUT40, Operativa utiliza el núcleo JARVIS persistente mediante el mismo puente autenticado. Sin modificación de PROD.
+
+**VALIDACIÓN OFFLINE**:
+- Workflow GitHub Actions [42279112598](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42279112598) `SUCCESS`: compilación, contratos, tests offline de lectura segura y **20/20** Playwright sintéticos en escritorio y móvil.
+- El smoke físico propietario realiza exclusivamente GET en `health`, `contract` y `engines`, y prueba que la vía anónima esté denegada. Nunca POST, never Model API, no datos CRM.
+- El workflow revisa que el JWT cifrado de GitHub esté vigente **antes** de llamar a Supabase. Diagnóstico real `JARVIS_OWNER_JWT_FRESHNESS=EXPIRED_OR_NEAR_EXPIRY`. Por tanto la comprobación real con JWT está **BLOQUEADA/SKIPPED**, no verde. Un intento anterior [42278561640](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42278561640) recibió HTTP 401 y no efectuó cambios.
+- Prohibido actualizar la credencial desde una clave de servicio, modificar políticas, saltarse JWT, copiar claves en chat o afirmar E2E usuario mientras esté bloqueado.
+
+**PENDIENTE PARA PROMOCIÓN**: renovar de forma segura la prueba de sesión del propietario cuando haya mecanismo autorizado de sesión humana; ejecutar OLD vs NEW, micrófono y síntesis reales, comparar historial y ejecución mediante Gateway, comprobar backup/rollback físico y promover gradualmente si todo verde.
+
+**NO TOCADO**: main, PROD, App/CRM, DNS, Supabase esquema y datos, CUT30, Trading. Coste de suscripción adicional: 0 €.
