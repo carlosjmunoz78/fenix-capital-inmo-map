@@ -117,6 +117,8 @@ export async function sendChecklistPreprodTest({
   testRecipient,apiKey,explicitTestSend=false,
   assetVerifier=validateSourcePdf
 }={}){
+  // Fixture validators are safe only in dry runs. Live tests must verify the pinned original PDF.
+  deny(explicitTestSend&&assetVerifier!==validateSourcePdf,'LIVE_TEST_REQUIRES_CANONICAL_PDF_VERIFIER');
   const x=createTransactionalEmail({request,pdfBytes,assetVerifier});
   if(!explicitTestSend)return {...x.receipt,status:'DRY_RUN_ONLY_NO_EMAIL_SENT'};
   deny(!testRecipient||!apiKey||apiKey.length<12,'PREPROD_BREVO_KEY_OR_ALLOWLIST_MISSING');
