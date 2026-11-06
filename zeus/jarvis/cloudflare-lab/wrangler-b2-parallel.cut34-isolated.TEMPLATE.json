@@ -19,7 +19,7 @@
   "d1_databases": [
     {
       "binding": "JARVIS_LAB_DB",
-      "database_name": "cerebro-jarvis-cut33-lab-eu",
+      "database_name": "cerebro-jarvis-cut33-lab-eu-jur",
       "database_id": "CUT34_UNPROVISIONED_DO_NOT_DEPLOY",
       "preview_database_id": "jarvis-cut34-isolated-local"
     }
