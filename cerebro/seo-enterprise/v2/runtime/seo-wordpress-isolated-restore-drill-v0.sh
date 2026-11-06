@@ -13,16 +13,19 @@ OUTPUT="$RUNNER_TEMP/seo001-restore-drill-$GITHUB_RUN_ID"
 mkdir -m 700 -p "$OUTPUT"
 cleanup(){ docker rm -f "$NAME" >/dev/null 2>&1 || true; }
 trap cleanup EXIT
+STAGE='CONTAINER_BOOT'
+trap 'exitcode=$?; echo "ISOLATED_DRILL_FAILED_STAGE=$STAGE EXIT=$exitcode"; exit "$exitcode"' ERR
 
 docker run -d --rm --name "$NAME" --network none \
  -e MARIADB_ROOT_PASSWORD="$PASS" -e MARIADB_DATABASE="$DB" \
  --label "cerebro.environment=LAB" mariadb:11.8 >/dev/null
 READY=0
 for i in $(seq 1 60); do
- if docker exec "$NAME" mariadb-admin ping --silent -u root --password="$PASS" >/dev/null 2>&1; then READY=1; break; fi
+ if docker exec "$NAME" mariadb -N -B -u root --password="$PASS" "$DB" -e "SELECT 1" >/dev/null 2>&1; then READY=1; break; fi
  sleep 1
 done
-[[ "$READY" == 1 ]] || exit 3
+[[ "$READY" == 1 ]] || { echo "ISOLATED_DB_NOT_READY"; exit 3; }
+STAGE="CREATE_SYNTHETIC_WP_TABLES"
 cat > "$OUTPUT/fixture.sql" <<'SQL'
 CREATE TABLE wp_posts(
  ID BIGINT UNSIGNED PRIMARY KEY,
@@ -49,14 +52,17 @@ INSERT INTO wp_postmeta(post_id,meta_key,meta_value) VALUES
 (202,'_seo_sha256','ffc9d8d4f32dbc8e77ec9d9f4e7ba2bfb98a35141a91a85f1b420e27bed00583');
 SQL
 docker exec -i "$NAME" mariadb -u root --password="$PASS" "$DB" < "$OUTPUT/fixture.sql" 2>/dev/null
+STAGE="READ_FIRST_FIXTURE"
 read_rows(){ docker exec "$NAME" mariadb -N -B -u root --password="$PASS" "$DB" -e "SELECT ID,post_type,post_status,post_name,post_title FROM wp_posts ORDER BY ID" 2>/dev/null; }
 read_meta(){ docker exec "$NAME" mariadb -N -B -u root --password="$PASS" "$DB" -e "SELECT post_id,meta_key,meta_value FROM wp_postmeta ORDER BY post_id,meta_key" 2>/dev/null; }
 read_rows > "$OUTPUT/before.tsv"
 read_meta > "$OUTPUT/meta-before.tsv"
 [[ $(wc -l < "$OUTPUT/before.tsv") -eq 3 ]] || exit 4
+STAGE="CREATE_PHYSICAL_BACKUP"
 docker exec "$NAME" mariadb-dump -u root --password="$PASS" \
  --single-transaction --databases "$DB" > "$OUTPUT/fixture-backup.sql" 2>/dev/null
 [[ -s "$OUTPUT/fixture-backup.sql" ]] || exit 5
+STAGE="MUTATE_SYNTHETIC_FIXTURE"
 docker exec "$NAME" mariadb -u root --password="$PASS" "$DB" -e \
 "UPDATE wp_posts SET post_title='Unsafe overwritten draft' WHERE ID=201;
 DELETE FROM wp_posts WHERE ID=101;
@@ -64,11 +70,13 @@ UPDATE wp_postmeta SET meta_value='WRONG' WHERE post_id=202;
 INSERT INTO wp_posts VALUES (203,1,NOW(),'Rogue','Unintended','publish','rogue','post');" 2>/dev/null
 read_rows > "$OUTPUT/mutated.tsv"
 cmp -s "$OUTPUT/before.tsv" "$OUTPUT/mutated.tsv" && exit 6
+STAGE="FIRST_PHYSICAL_RESTORE"
 docker exec -i "$NAME" mariadb -u root --password="$PASS" < "$OUTPUT/fixture-backup.sql" 2>/dev/null
 read_rows > "$OUTPUT/after.tsv"
 read_meta > "$OUTPUT/meta-after.tsv"
 cmp -s "$OUTPUT/before.tsv" "$OUTPUT/after.tsv" || exit 7
 cmp -s "$OUTPUT/meta-before.tsv" "$OUTPUT/meta-after.tsv" || exit 8
+STAGE="SECOND_PHYSICAL_RESTORE"
 docker exec -i "$NAME" mariadb -u root --password="$PASS" < "$OUTPUT/fixture-backup.sql" 2>/dev/null
 read_rows > "$OUTPUT/after-again.tsv"
 cmp -s "$OUTPUT/before.tsv" "$OUTPUT/after-again.tsv" || exit 9
