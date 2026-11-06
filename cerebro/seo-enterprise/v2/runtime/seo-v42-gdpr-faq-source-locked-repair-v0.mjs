@@ -102,6 +102,7 @@ export function persistSeoV42({results,root=process.cwd()}={}){
   owner_exact_digest_approved:false,media_generated:false,
   wordpress_drafts_created:false,publish_authorized:false,
   paid_provider_calls:0,model_calls_this_revision:0,wordpress_writes:0};
+ fs.mkdirSync(path.dirname(path.resolve(root,registry)),{recursive:true});
  fs.writeFileSync(path.resolve(root,registry),JSON.stringify(manifest,null,2)+'\n',{flag:'wx',mode:0o600});
  return {status:manifest.status,work:work.map(x=>({work_id:x.work_id,
   sha256:x.new_sha256,words:x.word_count,faq:x.faq_count})),
