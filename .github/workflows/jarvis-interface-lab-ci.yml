@@ -6,10 +6,15 @@ on:
       - cerebro/jarvis-always-present-interface-lab-20261106
       - cerebro/jarvis-omnichannel-interlocutor-lab-20261106
       - cerebro/jarvis-cut44-voice-dictation-ux-lab-20261106
+      - cerebro/jarvis-cut46-unified-comm-lab-20261106
     paths:
       - 'src/CerebroConsoleShell.tsx'
       - 'src/jarvisVoicePolicy.ts'
       - 'tests/jarvis-cut44-voice-policy-lab.test.mjs'
+      - 'tests/jarvis-cut45-gateway-persona-lab.test.mjs'
+      - 'tests/jarvis-cut46-unified-comm-lab.test.mjs'
+      - 'supabase/functions/cerebro-console-gateway-v0/index.ts'
+      - 'supabase/functions/cerebro-console-gateway-v0/owner-greeting.ts'
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
       - 'scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs'
@@ -61,7 +66,7 @@ jobs:
       - name: Compile and build unchanged existing App
         run: npm run build
       - name: Owner-scoped JARVIS UI and gateway contract tests
-        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs
+        run: node --test tests/jarvis-interface-lab.test.mjs tests/jarvis-omnichannel-core-lab.test.mjs tests/jarvis-owner-gateway-readonly-e2e.test.mjs tests/jarvis-gateway-capability-lab.test.mjs tests/jarvis-cut44-voice-policy-lab.test.mjs tests/jarvis-cut45-gateway-persona-lab.test.mjs tests/jarvis-cut46-unified-comm-lab.test.mjs
       - name: Install Playwright Chromium for physical UI tests
         run: npx playwright install chromium --only-shell
       - name: Exercise the actual JARVIS bottom composer on desktop and mobile
