@@ -21,7 +21,7 @@ jobs:
     env:
       DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
       JARVIS_LAB_STUDY_APPROVED: 'YES'
-      JARVIS_LAB_STUDY_OUTPUT_DIR: ${{ runner.temp }}/jarvis-lab-dialogue
+      JARVIS_LAB_STUDY_OUTPUT_DIR: /tmp/jarvis-lab-dialogue
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +44,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jarvis-cut36-synthetic-dialogue-${{ github.run_id }}
-          path: ${{ runner.temp }}/jarvis-lab-dialogue/*.json
+          path: /tmp/jarvis-lab-dialogue/*.json
           if-no-files-found: warn
           retention-days: 30
