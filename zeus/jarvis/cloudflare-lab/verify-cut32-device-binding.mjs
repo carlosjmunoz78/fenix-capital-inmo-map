@@ -13,6 +13,7 @@ assert.deepEqual(cfg.vars,{
  JARVIS_ENVIRONMENT:'LAB',
  JARVIS_ACCESS_PROBE_ENABLED:'false',
  JARVIS_B2_DEVICE_ENABLED:'false',
+ JARVIS_B2_ENROLLMENT_ENABLED:'false',
  JARVIS_B2_B3_LIVE_ENABLED:'false',
  JARVIS_GATEWAY_ENABLED:'false'
 });
@@ -24,6 +25,7 @@ assert.deepEqual(cfg.d1_databases,[{
 const src=read('./worker-b2-device-probe.mjs');
 assert.match(src,/createJarvisB2DeviceSessionGate/);
 assert.match(src,/createJarvisD1SessionStore/);
+assert.match(src,/createJarvisB2DeviceEnrollment/);
 for(const forbidden of ['INSERT INTO','UPDATE jarvis_lab_session','DELETE FROM',
  'ENROLL','JARVIS_OWNER_EMAIL','JARVIS_ACCESS_AUD','JARVIS_B2_HMAC_KEY_HEX',
  'service_role','app.fenixcapital.es','a859fde1-126b-4c40-bc0d-aec2f8839f7b'])
