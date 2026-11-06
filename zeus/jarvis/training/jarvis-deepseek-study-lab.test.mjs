@@ -29,6 +29,9 @@ function mockProvider({balance='98.23',failAfter=null}={}){
    const payload=JSON.parse(opts.body);
    assert.equal(payload.model,'deepseek-flash');
    assert.ok(payload.max_output_tokens<=700);
+   assert.equal(payload.reasoning.effort,'none');
+   assert.equal(payload.text.format.type,'json_object');
+   assert.equal(payload.tool_choice,'none');
    const response=payload.instructions.includes('auditor independiente')?critic:candidate;
    return {ok:true,json:async()=>({model:'deepseek-flash',status:'completed',
      output_text:JSON.stringify(response),usage:{
