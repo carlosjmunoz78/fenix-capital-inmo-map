@@ -112,3 +112,16 @@ test('CUT40 server authority is independent of UI company label or model state',
  assert.ok(!operative.includes('DEEPSEEK_API_KEY'));
  assert.ok(!operative.includes('SUPABASE_SERVICE_ROLE_KEY'));
 });
+
+test('CUT40 live owner-memory capability is catalogued as deployed but not end-to-end',()=>{
+ const o=JSON.parse(read('cerebro/registry/jarvis-universal-interlocutor-cut39.v1.json'));
+ const audit=o.live_readonly_audit_2026_11_06;
+ assert.equal(audit.gateway.deployment_status,'ACTIVE');
+ assert.equal(audit.gateway.version,33);
+ assert.equal(audit.gateway.successful_owner_e2e,false);
+ assert.equal(audit.writes_performed,false);
+ assert.equal(audit.independent_execution_authority,false);
+ assert.ok(audit.memory_rpcs_present.includes('fenix_prod_cerebro_memory_search_server'));
+ assert.ok(audit.notion_pages_discovered_metadata_only.length>=5);
+ assert.equal(audit.cost_additional_eur,0);
+});
