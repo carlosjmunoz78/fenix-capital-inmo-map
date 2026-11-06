@@ -71,15 +71,15 @@ test('DRY_RUN never calls Brevo and never leaks recipient in sanitized receipt',
  assert.equal(a.newsletter_subscription_authorized,false);
  assert.ok(!JSON.stringify(a).includes(JOB.email));
 });
-test('live PREPROD requires a fixed mail allowlist, server key and DURABLE ledger before network',async()=>{
+test('live PREPROD rejects fixture verifier bypass and never contacts Brevo',async()=>{
  let calls=0;
  const stub=async()=>{calls++;throw Error('NO_CALLS_EXPECTED');};
  await assert.rejects(()=>sendChecklistPreprodTest({request:JOB,pdfBytes:fakePdf,
    assetVerifier:fixtureVerifier,explicitTestSend:true,fetch_impl:stub,
-   testRecipient:'other@example.net',apiKey:'12345678901234'}),/ALLOWLIST_DENIED/);
+   testRecipient:JOB.email,apiKey:'12345678901234'}),/LIVE_TEST_REQUIRES_CANONICAL_PDF_VERIFIER/);
  await assert.rejects(()=>sendChecklistPreprodTest({request:JOB,pdfBytes:fakePdf,
-   assetVerifier:fixtureVerifier,explicitTestSend:true,fetch_impl:stub,
-   testRecipient:JOB.email,apiKey:'12345678901234'}),/DURABLE_DELIVERY_LEDGER_REQUIRED/);
+   explicitTestSend:true,fetch_impl:stub,
+   testRecipient:JOB.email,apiKey:'12345678901234'}),/PDF_SHA256_MISMATCH/);
  assert.equal(calls,0);
 });
 test('no automatic marketing opt-in even for consent_marketing true',()=>{
