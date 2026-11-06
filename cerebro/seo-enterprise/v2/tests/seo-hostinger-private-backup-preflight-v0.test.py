@@ -59,6 +59,23 @@ class TestOfflinePreflight(unittest.TestCase):
     for name,body in list(FIXTURE.items())+[('public_html/wp-content/uploads/test.webp',b'different')]:
      z.writestr(name,body)
   with self.assertRaisesRegex(mod.UnsafeBackup,'ARCHIVE_DUPLICATE_FILE_PATH'):self.evaluate(files=p)
+ def test_reject_file_directory_conflict_in_tar(self):
+  p=self.root/'file-dir-conflict.tar.gz'
+  with tarfile.open(p,'w:gz') as archive:
+   for name,body in FIXTURE.items():
+    x=tarfile.TarInfo(name);x.size=len(body);archive.addfile(x,io.BytesIO(body))
+   x=tarfile.TarInfo('public_html/wp-content/uploads/test.webp/child')
+   x.size=6;archive.addfile(x,io.BytesIO(b'unsafe'))
+  with self.assertRaisesRegex(mod.UnsafeBackup,'ARCHIVE_FILE_DIRECTORY_CONFLICT'):
+   self.evaluate(files=p)
+ def test_reject_directory_file_conflict_in_zip(self):
+  p=self.root/'dir-file-conflict.zip'
+  with zipfile.ZipFile(p,'w') as archive:
+   for name,body in FIXTURE.items():archive.writestr(name,body)
+   archive.writestr('public_html/wp-content/uploads/',b'')
+   archive.writestr('public_html/wp-content/uploads/test.webp/',b'')
+  with self.assertRaisesRegex(mod.UnsafeBackup,'ARCHIVE_FILE_DIRECTORY_CONFLICT'):
+   self.evaluate(files=p)
  def test_reject_parent_traversal_in_tar(self):
   p=self.root/'unsafe.tar.gz'
   with tarfile.open(p,'w:gz') as t:
