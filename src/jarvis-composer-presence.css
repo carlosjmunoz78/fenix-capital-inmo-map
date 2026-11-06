@@ -1,0 +1,62 @@
+/* CUT38: JARVIS is present and identifiable whenever the composer mounts.
+ * Does not change routing, gateway authority, voice permissions or execution.
+ */
+.jarvis-operativa-composer-host .operativa-jarvis-composer{
+ display:grid!important;
+ grid-template-columns:42px minmax(0,1fr)!important;
+ grid-template-rows:auto auto;
+ column-gap:8px!important;
+ row-gap:4px!important;
+ align-items:center!important;
+}
+.jarvis-operativa-composer-host .jarvis-composer-presence{
+ grid-column:1/-1;grid-row:1;
+ display:flex;align-items:center;gap:8px;
+ min-width:0;padding:2px 6px 7px;
+ color:#a8bac7;font-size:11px;line-height:1.4;
+}
+.jarvis-operativa-composer-host .jarvis-composer-presence strong{
+ color:#eff7fb;font-weight:800;letter-spacing:.09em;font-size:11px;
+ flex:0 0 auto;
+}
+.jarvis-operativa-composer-host .jarvis-composer-presence>span:last-child{
+ overflow-wrap:anywhere;
+}
+.jarvis-operativa-composer-host .jarvis-presence-dot{
+ display:inline-block;flex:0 0 8px;width:8px;height:8px;border-radius:50%;
+ background:#73818a;
+}
+.jarvis-operativa-composer-host .jarvis-presence-dot.is-ready{
+ background:#64d8b3;box-shadow:0 0 8px rgba(100,216,179,.45);
+}
+.jarvis-operativa-composer-host .jarvis-presence-dot.is-connecting{
+ background:#e1b972;
+}
+.jarvis-operativa-composer-host .operativa-attach{
+ grid-column:1;grid-row:2;
+}
+.jarvis-operativa-composer-host .operativa-composer-form{
+ grid-column:2;grid-row:2;min-width:0;
+}
+.jarvis-operativa-composer-host .operativa-dictation-error{
+ position:static!important;grid-column:1/-1;
+ padding:4px 8px 1px;line-height:1.4;font-size:11px;
+}
+.jarvis-operativa-composer-host .operativa-composer-form textarea{
+ font-size:16px!important;
+}
+@media (max-width:600px){
+ .jarvis-operativa-composer-host .operativa-jarvis-composer{
+  grid-template-columns:36px minmax(0,1fr)!important;
+  padding:8px!important;column-gap:4px!important;
+ }
+ .jarvis-operativa-composer-host .jarvis-composer-presence{
+  font-size:11px;gap:6px;padding-bottom:6px;
+ }
+ .jarvis-operativa-composer-host .operativa-attach{width:36px;height:38px}
+ .jarvis-operativa-composer-host .operativa-dictate,
+ .jarvis-operativa-composer-host .operativa-voice,
+ .jarvis-operativa-composer-host .operativa-send{
+  width:38px;height:38px;flex:0 0 38px;
+ }
+}
