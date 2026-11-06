@@ -93,6 +93,20 @@ jobs:
           VITE_SUPABASE_URL: https://supabase-jarvis-fixture.invalid
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_JARVIS_OFFLINE_FAKE_TEST_KEY
         run: npx playwright test --config=playwright.jarvis-interface.config.ts
+      - name: Check the live anonymous OWNER_ONLY denial independently of expired JWT
+        # One GET /health, never sends owner JWT, never writes or calls a model.
+        env:
+          JARVIS_ANON_ONLY: '1'
+          CEREBRO_E2E_USER_JWT: ''
+          PROD_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${PROD_SUPABASE_PUBLISHABLE_KEY}" ]; then
+            node scripts/jarvis-cut40-owner-gateway-readonly-e2e.mjs
+          else
+            echo 'JARVIS_ANON_GATE=BLOCKED_MISSING_PUBLISHABLE_KEY_NOT_VERIFIED'
+          fi
       - name: Detect owner live-readonly E2E credential availability
         id: owner_e2e
         shell: bash
