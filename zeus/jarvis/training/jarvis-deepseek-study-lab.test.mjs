@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync,readFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join} from 'node:path';
+import {join,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
 import {canExecuteStudy,dryRun,projectedCallUSD,estimateActualCost,parseModelJSON,
  executeStudy,summarizeStudyRow} from './jarvis-deepseek-study-lab.mjs';
 
@@ -112,4 +113,17 @@ test('fail closed on unauthorized branch, no network made',async()=>{
  await assert.rejects(()=>executeStudy({env:{...env,GITHUB_REF:'refs/heads/main'},
   fetchImpl:provider.fetchImpl,now:'2026-11-06'}),/MANUAL_LAB_GATE_NOT_MET/);
  assert.equal(provider.stats.calls,0);
+});
+
+test('CUT36 workflow uses only allowed job-level expression contexts and one branch',()=>{
+ const here=dirname(fileURLToPath(import.meta.url));
+ const yml=readFileSync(join(here,'..','..','..','.github','workflows','cerebro-deepseek-boost001-canary.yml'),'utf8');
+ assert.match(yml,/environment: JARVIS_DEEPSEEK_LAB/);
+ assert.match(yml,/JARVIS_LAB_STUDY_OUTPUT_DIR: \/tmp\/jarvis-lab-dialogue/);
+ assert.match(yml,/path: \/tmp\/jarvis-lab-dialogue\/\*\.json/);
+ assert.doesNotMatch(yml,/\$\{\{\s*runner\.temp/);
+ assert.match(yml,/if: github\.ref == 'refs\/heads\/cerebro\/jarvis-deepseek-weekend-lab-20261106'/);
+ assert.match(yml,/workflow_dispatch:/);
+ assert.doesNotMatch(yml,/^\s+schedule:/m);
+ assert.doesNotMatch(yml,/^\s+push:/m);
 });
