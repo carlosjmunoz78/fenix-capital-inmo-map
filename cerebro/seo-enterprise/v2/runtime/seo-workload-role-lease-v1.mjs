@@ -97,18 +97,39 @@ export function verifySeoRoleProofs({bundle,role_work_receipts,corpus_digest,hos
    issuer_job_id:bundle.issuer_job_id};
 }
 export function verifyOneSeoRoleProof({proof,public_key_pem,evidence,host_identity,corpus_digest,now_ms=Date.now()}={}){
- if(!proof||!public_key_pem||!evidence||!host_identity||!validHash(corpus_digest))invalid('ROLE_CALL_CONTEXT');
+ // A valid signature is necessary but not sufficient: all receipt policy fields must be deny-by-default.
+ // This remains a non-bearer READONLY receipt; it is NOT an IAM credential or agent certification.
+ if(!proof||typeof public_key_pem!=='string'||public_key_pem.length>2000||
+    !evidence||!host_identity||!validHash(corpus_digest)||
+    !Number.isSafeInteger(now_ms)||now_ms<1)invalid('ROLE_CALL_CONTEXT');
  const p=proof.payload;
- if(p?.role_id!==evidence.role_id||p.department_id!==evidence.department_id||
+ if(!p||p.kind!=='SIGNED_NON_BEARER_ROLE_EVIDENCE_V1'||
+    p.company_id!=='fenix'||p.engine_id!=='SEO-001'||p.environment!=='PREPROD'||
+    p.version!=='2.1.0'||!ROLE.test(p.role_id||'')||
+    p.role_id!==evidence.role_id||p.department_id!==evidence.department_id||
+    !p.role_id.startsWith(p.department_id+':SPECIALIST:')||
     p.source_digest!==corpus_digest||p.work_digest!==sha(JSON.stringify(evidence))||
+    evidence.source_snapshot_digest!==corpus_digest||
     p.host_job_id!==host_identity.github_job_id||p.host_run_id!==host_identity.github_run_id||
     p.host_oidc_sha256!==host_identity.oidc_token_sha256||
-    p.scope!==NO_WRITE_SCOPE||p.can_write_prod!==false||p.can_publish!==false||
-    p.grant_is_bearer!==false||!Number.isSafeInteger(now_ms)||
+    !Number.isSafeInteger(p.host_job_id)||!Number.isSafeInteger(p.host_run_id)||
+    !validHash(p.host_oidc_sha256)||
+    p.scope!==NO_WRITE_SCOPE||p.data_access!=='VERSIONED_PUBLIC_WP_CORPUS_ONLY'||
+    p.grant_is_bearer!==false||p.can_impersonate_actor!==false||
+    p.can_write_prod!==false||p.can_publish!==false||p.can_spend!==false||
+    p.authentic_agent_iam_verified!==false||
+    !Number.isSafeInteger(p.issued_at_ms)||!Number.isSafeInteger(p.expires_at_ms)||
+    p.expires_at_ms-p.issued_at_ms!==600_000||
+    !/^[0-9a-f]{32}$/.test(p.nonce||'')||
     now_ms<p.issued_at_ms||now_ms>p.expires_at_ms)invalid('ROLE_CALL_DENIED');
  let ok=false;
- try{ok=crypto.verify(null,Buffer.from(JSON.stringify(p),'utf8'),
-  crypto.createPublicKey(public_key_pem),Buffer.from(proof.signature,'base64url'))}catch{invalid('ROLE_CALL_SIGNATURE')}
+ try{
+   const key=crypto.createPublicKey(public_key_pem);
+   if(key.asymmetricKeyType!=='ed25519')invalid('ROLE_CALL_KEY_TYPE');
+   if(typeof proof.signature!=='string'||!/^[A-Za-z0-9_-]{86}$/.test(proof.signature))invalid('ROLE_CALL_SIGNATURE');
+   ok=crypto.verify(null,Buffer.from(JSON.stringify(p),'utf8'),
+     key,Buffer.from(proof.signature,'base64url'));
+ }catch{invalid('ROLE_CALL_SIGNATURE')}
  if(!ok)invalid('ROLE_CALL_SIGNATURE');
  return {role_id:p.role_id,allowed_scope:NO_WRITE_SCOPE,decision:'SIGNED_READONLY_WORK_UNIT_PERMITTED',
   individual_agent_iam_identity_created:false,publishing_allowed:false};
