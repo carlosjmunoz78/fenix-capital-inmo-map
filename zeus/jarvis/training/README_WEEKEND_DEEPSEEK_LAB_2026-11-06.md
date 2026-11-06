@@ -44,3 +44,21 @@ Comprobaciones aisladas realizadas en el entorno del asistente: parser y 5 invar
 Documentación oficial: https://api-docs.deepseek.com/api/get-user-balance/ ; https://api-docs.deepseek.com/quick_start/pricing/ ; https://docs.github.com/actions/reference/events-that-trigger-workflows#schedule
 
 NO declarar ACTIVADO, APRENDIENDO ni PROD sin prueba real. CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
+
+## Autoridad presupuestaria y estado verificado el 6 de noviembre de 2026 (CUT35)
+
+**NUEVA AUTORIZACIÓN DEL PROPIETARIO: presupuesto máximo agregado de 50 EUR para el programa de mejora de conversación/comprensión JARVIS. NO es una orden de consumirlos íntegramente.**
+
+**HECHO en GitHub:** `deepseek-lifetime-budget.mjs` y su integración en `deepseek-weekend-runner.mjs`, con reserva persistente ANTES de la petición, límite monetario técnico adicional de 40 USD de presupuesto acumulado del ejecutor, máximo 5 USD por ejecución diaria, sin recargas automáticas ni promoción de resultados. Este segundo límite es deliberadamente más restrictivo; **no es un conversor EUR/USD garantizado ni un límite de facturación global del proveedor**. Requiere `JARVIS_WEEKEND_OUTPUT_DIR` privado y persistente; cambio de directorio, eliminación de archivos o un consumidor externo invalidaría una garantía global. Si no se verifica un directorio persistente único, NO iniciar pagos.
+
+**HECHO:** conjunto de casos sintéticos ampliado a 24, con 12 por día (7 y 8 noviembre), hasta 24 llamadas por día: corrección de errores de dictado, naturalidad, brevedad, frustración, seguridad, continuidad, multiempresa y límites. No es reentrenamiento de un LLM ni clonación TTS.
+
+**VERIFICADO EN PANEL AUTENTICADO DE DEEPSEEK (2026-11-06):** sesión iniciada, saldo recargado mostrado $98.23 USD, coste 30 días $1.76 USD, una fila de API key registrada. La clave existente solo se visualiza una vez al crearla; NO se ha leído ni recuperado el valor y NO está inyectada en el runner. En Usage se mostraba `Balance alert disabled`, que es una alerta, NO un techo duro de gasto. No hay evidencia de límite de 50 EUR establecido en la plataforma DeepSeek.
+
+**PLANIFICADO / BLOQUEADO PARA FIN DE SEMANA:** no se ha realizado inferencia DeepSeek real ni despliegue de CEREBRO. GitHub Workflow de esta rama es únicamente CI offline y sin secreto, no un cron de inferencia. ChatGPT Automations no permitió crear tarea sexta sin sustituir otra. No inventar trabajo futuro ni declarar a JARVIS aprendiendo.
+
+**Coste adicional observado de este corte:** 0 USD de inferencias nuevas; GitHub Actions offline consume cuota de ejecución ya disponible. No se modificaron CUT30, CUT33, D1, PR #25, main, App, CRM, PROD ni las cinco automatizaciones existentes.
+
+**CI:** consultar la última ejecución del workflow `jarvis-deepseek-weekend-lab-ci.yml` antes de marcar las pruebas VERDE; los cambios recientes de presupuesto amplían las comprobaciones de regresión.
+
+**Fuentes oficiales:** https://api-docs.deepseek.com/api/get-user-balance/ y https://api-docs.deepseek.com/quick_start/pricing/
