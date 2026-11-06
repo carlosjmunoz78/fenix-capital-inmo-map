@@ -29,6 +29,21 @@ export function auditSeoHumanVoiceAndRisk({html,persona,content_type='ARTICLE'}=
  if(/\bnunca\s+debes\s+(?:firmar|entregar\s+dinero|reservar|pagar)\b/i.test(joined)||
     /\bsiempre\s+debes\s+(?:firmar|entregar\s+dinero|reservar|pagar)\b/i.test(joined))
   issues.push('ABSOLUTE_FINANCIAL_OR_LEGAL_INSTRUCTION');
+
+ // Regression against factual/legal problems in a real Free-cloud V4 sample.
+ // These are risk flags requiring source review, not declarations of illegality.
+ if(persona==='PARTICULARES'&&
+   /(?:impuestos?.{0,105}(?:plusval[ií]a)|plusval[ií]a.{0,65}(?:comprador|pagar|gastos?))/i.test(joined))
+   issues.push('PLUSVALIA_BUYER_COST_TAX_ALLOCATION_REQUIRES_REVIEW');
+ if(persona==='INMOBILIARIAS'&&
+   /derivaci[oó]n hipotecaria inmobiliarias c[oó]rdoba/i.test([...h1,...h2].join(' ')))
+   issues.push('B2B_KEYWORD_STUFFING_UNNATURAL_HEADING');
+ if(persona==='INMOBILIARIAS'&&
+   /(?:cliente|comprador)\s+firma\s+una\s+autorizaci[oó]n\s+espec[ií]fica\s+para\s+el\s+tratamiento/i.test(joined))
+   issues.push('GDPR_MANDATORY_CONSENT_ASSERTION_REQUIRES_LEGAL_CHECK');
+ if(persona==='INMOBILIARIAS'&&
+   /primer\s+hito\s+ocurre\s+tras\s+la\s+segunda\s+visita/i.test(joined))
+   issues.push('UNSUPPORTED_FIXED_SECOND_VISIT_HITO');
  if(p.some(s=>s.split(/\s+/).length>55&&
   (s.match(/[,.!?;]/g)||[]).length<=1))
   issues.push('LONG_UNPUNCTUATED_PARAGRAPH');
