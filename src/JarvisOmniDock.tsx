@@ -21,6 +21,9 @@ export default function JarvisOmniDock({onOpenJarvis}:{onOpenJarvis:()=>void}){
   const sync=()=>setState(getJarvisOmniState()),view=()=>setActive(getJarvisActiveInterface());
   window.addEventListener(JARVIS_OMNI_EVENT,sync);
   window.addEventListener(JARVIS_OMNI_INTERFACE_EVENT,view);
+  // State may have been published before React attached listeners.
+  // Re-read the current authenticated projection on mount.
+  sync();view();
   return()=>{window.removeEventListener(JARVIS_OMNI_EVENT,sync);
    window.removeEventListener(JARVIS_OMNI_INTERFACE_EVENT,view)};
  },[]);
