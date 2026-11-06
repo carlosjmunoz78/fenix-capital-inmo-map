@@ -5,7 +5,7 @@ const env={JARVIS_LAB_SMOKE_APPROVED:'YES',
  GITHUB_REF:'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106',
  DEEPSEEK_API_KEY:'TEST_ONLY_NOT_A_REAL_DEEPSEEK_SECRET'};
 const stub=(balance='98.23',reply='JARVIS_LAB_CANARY_OK')=>async (url,options)=>{
- assert.equal(options.headers.Authorization,'Bearer '+env.DEEPSEEK_API_KEY);
+ assert.equal(options.headers.Authorization??options.headers.authorization,'Bearer '+env.DEEPSEEK_API_KEY);
  if(url.endsWith('/user/balance'))return {ok:true,json:async()=>({
    is_available:true,balance_infos:[{currency:'USD',total_balance:balance}]})};
  if(url.endsWith('/responses'))return {ok:true,json:async()=>({
