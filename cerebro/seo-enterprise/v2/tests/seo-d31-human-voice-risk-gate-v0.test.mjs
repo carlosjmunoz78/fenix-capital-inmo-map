@@ -162,3 +162,38 @@ test('V4.3 B2B registry binds actual bytes and denies production authority',()=>
  assert.equal(registry.wordpress_writes,0);
  assert.equal(registry.paid_api_calls_this_revision,0);
 });
+
+
+test('V4.3 B2C fixes exact source-locked allocation and technical-safety wording',()=>{
+ const src='cerebro/seo-enterprise/v2/drafts/v4-2-review-only/compradores-v4-2-review-only.html';
+ const dst='cerebro/seo-enterprise/v2/drafts/v4-3-review-only/compradores-v4-3-review-only.html';
+ const before=fs.readFileSync(src,'utf8');
+ const after=fs.readFileSync(dst,'utf8');
+ const blob=crypto.createHash('sha1').update('blob '+Buffer.byteLength(before)+'\0').update(before).digest('hex');
+ assert.equal(blob,'c7595cd49a1fc8d86dd41aa6db6bee24d4e531fa');
+ const changes=[
+  ['Los impuestos autonómicos y locales, los honorarios notariales, la inscripción registral y los gastos de gestoría incrementan de forma notable la cantidad inicial necesaria para formalizar la compraventa con total tranquilidad.',
+   'Separa los impuestos y gastos propios de la compraventa de los gastos de formalización de la hipoteca. En préstamos sujetos a la Ley 5/2019, el banco asume la notaría, el registro y la gestoría del préstamo, mientras la tasación corresponde al prestatario. Antes de calcular tus ahorros, revisa los costes concretos de la compra y de la financiación por separado.'],
+  ['Resolver estos problemas estructurales requiere presupuestos elevados que deben sumarse al coste total del inmueble antes de tomar ninguna determinación definitiva.',
+   'No todas las humedades tienen la misma causa ni el mismo coste de reparación. Si detectas indicios, solicita una valoración técnica y compárala con el presupuesto de reforma antes de decidir.'],
+  ['Comprueba también si el cuadro eléctrico cumple con la normativa vigente o si necesita una actualización completa para soportar los electrodomésticos actuales sin saltar constantemente.',
+   'Antes de dar por buena la instalación, solicita una revisión a un profesional habilitado y, si procede, un presupuesto para mejorar la seguridad eléctrica y adaptar el suministro a tus necesidades.'],
+  ['Contrastar diferentes escenarios de amortización te permite entender cómo afectarán las fluctuaciones del euríbor a tus cuotas mensuales en un horizonte temporal amplio y sostenible.',
+   'Si comparas hipotecas variables o con tramos variables, simular distintos escenarios de euríbor te ayudará a comprender cómo podrían cambiar las cuotas, sin dar por segura ninguna evolución futura.'],
+  ['Debes calcular los impuestos autonómicos, notariales, registrales, de gestoría y la cuota mensual de comunidad junto con posibles derramas aprobadas en el edificio.',
+   'Calcula los impuestos y gastos de compraventa que te correspondan, distinguiéndolos de los del préstamo hipotecario. Añade comunidad, IBI y posibles derramas al presupuesto de mantenimiento.']
+ ];
+ let expected=before;
+ for(const [from,to] of changes){
+  assert.equal(expected.split(from).length,2);
+  expected=expected.replace(from,to);
+ }
+ assert.equal(after,expected);
+ const oldAudit=auditSeoHumanVoiceAndRisk({html:before,persona:'PARTICULARES'});
+ assert.ok(oldAudit.issues.includes('PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED'));
+ const newAudit=auditSeoHumanVoiceAndRisk({html:after,persona:'PARTICULARES'});
+ assert.deepEqual(newAudit.issues,[]);
+ assert.equal(newAudit.independent_professional_qa_verified,false);
+ assert.equal(newAudit.can_publish,false);
+ console.log('SEO001_V43_B2C_CONTENT_SHA256='+crypto.createHash('sha256').update(after).digest('hex'));
+});
