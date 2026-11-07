@@ -4,7 +4,7 @@
   "engine_id": "JARVIS",
   "environment": "LAB",
   "version": "CUT37-2026-11-06",
-  "status": "RESERVED",
+  "status": "PAUSED",
   "owner_permission_eur": 50,
   "lifetime_guard_usd": 40,
   "model": "deepseek-flash",
@@ -12,21 +12,42 @@
   "production_mutation": false,
   "auto_recharge": false,
   "auto_promote": false,
-  "spent_estimate_usd": 1.899419652,
+  "spent_estimate_usd": 3.699419652,
   "estimated_previous_tests_usd": 0.005733768,
   "cycle_cursor": 322,
   "completed_batches": 30,
   "calls_completed": 3876,
   "scenarios_completed": 1938,
-  "pending": {
-    "run_id": "42290257959",
-    "cursor": 322,
-    "cycles": 12,
-    "reserved_usd": 1.8,
-    "reason": "PREPAID_ENVELOPE_NO_REFUND_ON_FAILURE"
-  },
+  "pending": null,
   "last_completed_run_id": "42289269210",
   "last_run_estimate_usd": 0.065142,
-  "halt_reason": null,
-  "last_run_structural_pass_rate": 0.972222222
+  "halt_reason": "CUT37_PROVIDER_HTTP_503_SETTLED_CONSERVATIVELY_PAUSED",
+  "last_run_structural_pass_rate": 0.972222222,
+  "budget_accounting_basis": "INCLUDES_FULL_UNSETTLED_RESERVATION_NOT_ACTUAL_BILLING",
+  "recovery": {
+    "recovery_version": "CUT37-conservative-v0.1.0",
+    "source_run_id": "42290257959",
+    "source_artifact_id": 13539581837,
+    "source_ledger_blob_sha": "0ece9d8f03293a8d4839fdb69c27291f65f1ea73",
+    "cause": "PROVIDER_HTTP_503_WITH_UNSETTLED_RESERVATION",
+    "original_pending": {
+      "run_id": "42290257959",
+      "cursor": 322,
+      "cycles": 12,
+      "reserved_usd": 1.8,
+      "reason": "PREPAID_ENVELOPE_NO_REFUND_ON_FAILURE"
+    },
+    "charged_conservative_usd": 1.8,
+    "observed_calls_not_counted_as_completed": 13,
+    "observed_peak_estimate_usd": 0.0059874,
+    "provider_billing_reconciled": false,
+    "auto_resume": false,
+    "human_or_gov_review_before_resume": true,
+    "artifact_hashes": {
+      "cut37-run-plan.json": "40a538798966b5b5bd75568dd7572874bafb1b7b05b75acce6c6727a98c64408",
+      "jarvis-study-4229025795900.json": "685e6c3a60048e784eeae4c3c9bfc97fc8d2e802ac1d4fc6de1d0a36eeb3c923",
+      "partial-study-4229025795900.json": "6c8d5664cfbd5535ef3121f1af7c0039ed1d2ae2a004276880b63a1db2897020",
+      "partial-study-4229025795901.json": "d15c89b5076c6a032e9075b871361567ca7a9a94dc4f4fdeb4d8b4ff7b9ec704"
+    }
+  }
 }
