@@ -51,3 +51,5 @@ jobs:
           path: ${{ runner.temp }}/cut63-physical-edge-backup-admission.json
           retention-days: 30
           if-no-files-found: error
+
+# Re-run after verifying observed source batch identifiers A–E.
