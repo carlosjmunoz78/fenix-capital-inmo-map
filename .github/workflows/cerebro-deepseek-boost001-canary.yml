@@ -1,4 +1,4 @@
-name: CEREBRO DeepSeek BOOST-001 Tiny Canary
+name: CEREBRO DeepSeek BOOST-001 Controlled Pilot CUT53
 
 on:
   workflow_dispatch:
@@ -19,30 +19,55 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  tiny-canary:
+  approved-one-shot-learning-pilot:
+    # Only this dedicated branch, one specific authorized push, first attempt.
+    # Workflow re-runs and manual dispatch do not consume API credits.
+    if: >-
+      github.event_name == 'push' &&
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/cerebro/boost-001-reconciled-20261027' &&
+      contains(github.event.head_commit.message, '[CUT53-PAID-PILOT-ONE-SHOT]')
+    environment: JARVIS_DEEPSEEK_LAB
     runs-on: ubuntu-latest
-    timeout-minutes: 5
-    env:
-      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-      CEREBRO_ALLOW_PAID_CANARY: 'YES'
-      DEEPSEEK_CANARY_PROJECTED_EUR: '0.01'
+    timeout-minutes: 8
     steps:
-      - name: Checkout current BOOST-001 candidate
+      - name: Checkout dedicated BOOST-001 LAB branch
         uses: actions/checkout@v4
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-
-      - name: Verify secret reference without exposing value
-        shell: bash
+      - name: Deterministic budget, quality and provider tests, NO API
         run: |
-          test -n "$DEEPSEEK_API_KEY" || { echo "DEEPSEEK_API_KEY_MISSING"; exit 1; }
-          echo "DEEPSEEK_API_KEY_PRESENT=true"
-
-      - name: DeepSeek provider and cost guards
-        run: node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
-
-      - name: Paid tiny canary
-        run: node cerebro/jarvis/boost-001/canary.mjs
+          node --test cerebro/jarvis/boost-001/learning-pilot-v0.test.mjs
+          node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+          node --check cerebro/jarvis/boost-001/learning-pilot-v0.mjs
+      - name: One provider canary using pre-existing LAB environment secret (maximum projected 0.01 EUR)
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          CEREBRO_ALLOW_PAID_CANARY: 'YES'
+          DEEPSEEK_APPROVED_BASELINE_USD: '100'
+          DEEPSEEK_CANARY_PROJECTED_USD: '0.01'
+          DEEPSEEK_CANARY_PROJECTED_EUR: '0.01'
+        run: |
+          if [ -z "$DEEPSEEK_API_KEY" ]; then
+            echo 'JARVIS_DEEPSEEK_LAB_SECRET_UNAVAILABLE'; exit 1;
+          fi
+          node cerebro/jarvis/boost-001/canary.mjs
+      - name: Five bounded learning candidates, PREPROD only, no memory auto-promotion
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          CEREBRO_ALLOW_PAID_CANARY: 'YES'
+          CEREBRO_JARVIS_LEARNING_BUDGET_EUR: '50'
+          CEREBRO_JARVIS_PILOT_MAX_EUR: '0.20'
+          CEREBRO_PROD_WRITE: 'false'
+          CEREBRO_TRADING_ACCESS: 'false'
+        run: node cerebro/jarvis/boost-001/learning-pilot-v0.mjs --live
+      - name: Store non-secret candidate-only learning evidence (14 days)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut53-candidate-learning-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-boost001-cut53-pilot-report.json
+          retention-days: 14
+          if-no-files-found: ignore
