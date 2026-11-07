@@ -1,0 +1,53 @@
+name: CEREBRO JARVIS CUT63 · 60 Edge Auth Static Reviews + Real Pro Backup No-Go
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut63-edge-auth-backup-admission.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut63-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 'Verify 60 unique deployed source snapshots + true backup UI proof against forgery'
+        run: |
+          set -euo pipefail
+          node --check cerebro/jarvis/boost-001/cut63-edge-auth-backup-admission-v0.mjs
+          node --test cerebro/jarvis/boost-001/cut63-edge-auth-backup-admission-v0.test.mjs
+      - name: 'Emit report: 95 deployments, 60 JWT-off source reviews, 8 backup entries, PROD NO-GO'
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut63-edge-auth-backup-admission-v0.mjs \
+            "$RUNNER_TEMP/cut63-physical-edge-backup-admission.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut63-physical-edge-backup-admission.json'));
+            if(r.verdict!=='NO_GO'||r.jwt_off_code_sources_read!==60||
+               r.deployed_total!==95||r.real_pro_physical_backup_entries_visible!==8||
+               r.real_prod_restore_to_isolated_target_verified!==false||
+               r.runtime_negative_auth_tests_executed!==0||
+               r.supabase_prod_write_authorized!==false)process.exit(1);
+          "
+      - name: Upload security audit report only, no source code or backup bytes
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut63-edge-auth-backup-admission-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut63-physical-edge-backup-admission.json
+          retention-days: 30
+          if-no-files-found: error
