@@ -63,5 +63,11 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
  await expect(talk).toBeEnabled();
  await talk.click();
  await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').first().last()).toContainText('Soy JARVIS');
+ console.log('JARVIS_LAB_SYNTH_STATUS',JSON.stringify(await page.evaluate(()=>({
+  availableVoices:window.speechSynthesis?.getVoices().map(v=>v.name).slice(0,7),
+  speechApiAvailable:typeof window.speechSynthesis!=='undefined',
+  voiceError:document.querySelector('.jarvis-conversation .cerebro-voice-error')?.textContent||'',
+  voiceStatus:document.querySelector('.jarvis-conversation .cerebro-voice-status')?.textContent||''
+ }))));
  await expect.poll(()=>page.evaluate(()=>(window as typeof window & {__jarvisAudio?:string[]}).__jarvisAudio?.join(' ')||''),{timeout:3500}).toContain('JARVIS');
 });
