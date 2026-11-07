@@ -320,13 +320,15 @@ export default function CerebroConsoleShell(){
    };
    window.speechSynthesis.speak(utterance);
   };
+  // On Android an optional microphone request may hang or delay TTS.
+  // Speech starts immediately; interruption detection is installed asynchronously.
+  voiceSpeakingRef.current=true;
+  setVoiceSpeaking(true);
+  bargeInSpeechStartedAtRef.current=performance.now();
+  speakSegment(startIndex,startCharIndex);
   void prepareVoiceActivityBargeIn().then(vadReady=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
-   voiceSpeakingRef.current=true;
-   setVoiceSpeaking(true);
-   bargeInSpeechStartedAtRef.current=performance.now();
    if(!vadReady)scheduleInterruptListening(120);
-   speakSegment(startIndex,startCharIndex);
   });
   return true;
  }
