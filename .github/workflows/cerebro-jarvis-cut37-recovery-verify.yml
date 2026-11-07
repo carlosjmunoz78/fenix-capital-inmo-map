@@ -1,0 +1,57 @@
+name: CEREBRO JARVIS CUT37 · Conservative Reservation Recovery VERIFY ONLY
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut37-recovery-verify.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  recovery-proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Unit tests and NO-API / no-mutation test
+        run: |
+          set -euo pipefail
+          node --test zeus/jarvis/training/cut37-conservative-recovery-v0.test.mjs
+      - name: Read only the exact failed-run evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: jarvis-cut37-lab-dialogue-42290257959
+          path: ${{ runner.temp }}/cut37-evidence
+          run-id: 42290257959
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+      - name: Generate safe successor JSON WITHOUT updating the ledger
+        run: |
+          set -euo pipefail
+          node zeus/jarvis/training/cut37-conservative-recovery-v0.mjs --preview             zeus/jarvis/state/jarvis-deepseek-autonomy-ledger-v1.json             "$RUNNER_TEMP/cut37-evidence"             "$RUNNER_TEMP/cut37-conservative-ledger-PREVIEW.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut37-conservative-ledger-PREVIEW.json'));
+            if(x.status!=='PAUSED'||x.pending!==null||x.recovery.charged_conservative_usd!==1.8||
+               x.recovery.auto_resume!==false||x.recovery.provider_billing_reconciled!==false||
+               x.spent_estimate_usd!==3.699419652||x.cycle_cursor!==322||x.calls_completed!==3876)
+              process.exit(1);
+          "
+      - name: Store proposed LAB ledger and verification evidence (never auto-apply)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut37-conservative-recovery-preview-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut37-conservative-ledger-PREVIEW.json
+          if-no-files-found: error
+          retention-days: 30
