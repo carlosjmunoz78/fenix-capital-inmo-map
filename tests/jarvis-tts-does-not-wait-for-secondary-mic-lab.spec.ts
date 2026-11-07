@@ -44,6 +44,17 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
    abort(){this.onend?.(new Event('end'))}
   }
   w.SpeechRecognition=Recognition;
+  // The browser native SpeechSynthesisUtterance rejects plain mock voice
+  // objects. Stub both sides of the Web Speech API contract in this LAB test.
+  class MockUtterance{
+   text:string;
+   rate=1;pitch=1;lang='';voice:SpeechSynthesisVoice|null=null;
+   onend:((event:SpeechSynthesisEvent)=>void)|null=null;
+   onerror:((event:SpeechSynthesisErrorEvent)=>void)|null=null;
+   onboundary:((event:SpeechSynthesisEvent)=>void)|null=null;
+   constructor(text:string){this.text=text}
+  }
+  Object.defineProperty(window,'SpeechSynthesisUtterance',{configurable:true,value:MockUtterance});
   const mockVoice={name:'Microsoft Jorge',lang:'es-ES',localService:true,voiceURI:'qa-male-es',default:false} as SpeechSynthesisVoice;
   window.speechSynthesis.getVoices=()=>[mockVoice];
   window.speechSynthesis.speak=(utterance:SpeechSynthesisUtterance)=>{
