@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "NOT_TRIGGERED",
+  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108",
   "briefs": [
     {
       "company_id": "fenix",
@@ -117,5 +117,7 @@
         }
       ]
     }
-  ]
+  ],
+  "requested_at": "2026-11-08",
+  "execution_rule": "EXACT_ONE_GITHUB_PR22_HEAD_COMMIT_MATCH; NO_RETRIES; ARTIFACTS_LAB_ONLY"
 }
