@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "audit_date": "2026-11-07",
+  "audit_type": "AUTHENTICATED_WORDPRESS_DRAFT_AND_SCREENSHOT_INSPECTION",
+  "source": "OWNER_SCREENSHOT_AND_WP_READ_ONLY_VERIFIED",
+  "wordpress_origin": "https://fenixcapital.es",
+  "draft_status": "FOUR_DRAFTS_PHYSICALLY_PRESENT",
+  "release_status": "HOLD_NOT_OWNER_APPROVED",
+  "real_image_api_batch_dispatch": "NOT_VERIFIED",
+  "image_provider": "UMS-001_OPENAI_API_REQUIRED_NOT_SUBSTITUTABLE_WITH_CHAT_RENDER",
+  "non_authorized_methods": [
+    "PRETEND_PRODUCTORA_IMAGES_EXIST",
+    "REUSE_MEDIA_FROM_PREVIOUS_URLS",
+    "ADD_GENERIC_PLACEHOLDER_AND_MARK_PREMIUM",
+    "MODIFY_GLOBAL_ASTRA_TEMPLATE",
+    "CREATE_DUPLICATE_DRAFTS",
+    "AUTO_PUBLISH"
+  ],
+  "required_gates": [
+    "REAL_PREVIEW_SHOWS_OWN_CONTENT_NOT_SINGLE_SERVICES",
+    "SINGLE_SEMANTIC_H1_IN_RENDERED_DOM",
+    "NO_THEME_BANNER_DUPLICATE",
+    "NO_UNWANTED_POST_SIDEBAR",
+    "SIGNED_UMS_OPENAI_ORIGIN_RECEIPT_FOR_EACH_REQUIRED_IMAGE",
+    "INDEPENDENT_PREMIUM_VISUAL_DESKTOP_MOBILE_PASS",
+    "MEDIA_OWNERSHIP_LICENSING_SHA256_PHASH_AND_ALT",
+    "SEO_YMYL_EDITORIAL_AND_LINK_QA",
+    "FULL_BACKUP_FILES_SQL_ISOLATED_RESTORE_ROLLBACK",
+    "FIRST_THREE_SUPERVISED_RELEASES_WITH_EXACT_OWNER_APPROVAL"
+  ],
+  "wordpress_publications_authorized": false,
+  "owner_approves_media": false,
+  "owner_approves_release": false,
+  "additional_new_subscription_eur": 0,
+  "live_site_writes_in_audit": [
+    "POST_52714_DRAFT_META_SCOPED_EXPERIMENT_AND_REVERSAL_TO_THEME_DEFAULTS"
+  ],
+  "real_preview_notes": "Owner screenshot of 52714 shows thematic content, FAQ and large theme title/sidebar. 52715 and 52716 previews show 'Single Services' and Lorem ipsum, not their saved drafts. Per-post Astra banner/title/meta settings on 52714 persisted in WP but did not change rendered preview. Reverted tested meta to empty theme defaults.",
+  "items": [
+    {
+      "id": 52713,
+      "type": "post",
+      "persona": "B2C_COMPRADOR_DERRAMA",
+      "intent": "INFORMATIONAL",
+      "headline": "¿El piso tiene una derrama aprobada? Antes de comprar, mira esto",
+      "faq_count": 6,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52713-HERO"
+    },
+    {
+      "id": 52714,
+      "type": "post",
+      "persona": "B2B_INMOBILIARIA_VENTA_ENCADENADA",
+      "intent": "INFORMATIONAL",
+      "headline": "¿Tu comprador tiene que vender primero? Evita que las fechas enfríen la operación",
+      "faq_count": 6,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52714-HERO"
+    },
+    {
+      "id": 52715,
+      "type": "page",
+      "persona": "B2C_COMPRADOR_DERRAMA",
+      "intent": "COMMERCIAL_CONSULTATION",
+      "headline": "¿Te gusta un piso con derrama? Comprueba cuánto te costará comprarlo",
+      "faq_count": 8,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "preview_demo": "SINGLE_SERVICES_LOREM",
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52715-HERO"
+    },
+    {
+      "id": 52716,
+      "type": "page",
+      "persona": "B2B_INMOBILIARIA_VENTA_ENCADENADA",
+      "intent": "COMMERCIAL_COLLABORATION",
+      "headline": "¿Tu comprador tiene que vender primero? Coordinamos las dos operaciones contigo",
+      "faq_count": 8,
+      "wordpress_status": "draft",
+      "image_state": "PENDING_UMS_OPENAI",
+      "rendered_template_certified": false,
+      "preview_demo": "SINGLE_SERVICES_LOREM",
+      "media_qa_certified": false,
+      "approval": false,
+      "brief_id": "SEO001-52716-HERO"
+    }
+  ]
+}
