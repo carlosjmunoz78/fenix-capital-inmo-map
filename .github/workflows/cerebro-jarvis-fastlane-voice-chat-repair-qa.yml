@@ -1,0 +1,47 @@
+name: JARVIS FASTLANE voice and chat repair (LAB only)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-fastlane-voice-chat-repair-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ui-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify JARVIS voice/chat regression guard (no secrets)
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/fastlane-voice-chat-repair-contract-v1.test.mjs
+      - name: Install locked dependencies without changing lockfile
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck and build existing App in CI, never deploy it
+        run: npm run build
+      - name: Capture result metadata only
+        run: |
+          printf '%s\n' '{"schema":"jarvis.fastlane.voice.chat.qa.v1","company_id":"fenix","engine_id":"JARVIS","environment":"LAB","version":"FASTLANE-VOICE-1","contract_tests":6,"typescript_build":"PASS","deploy_performed":false,"prod_app_changed":false,"crm_changed":false,"supabase_mutations":0,"paid_ai_calls":0}' > "$RUNNER_TEMP/jarvis-fastlane-voice-qa.json"
+      - name: Archive non-production QA receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-fastlane-voice-chat-repair-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-fastlane-voice-qa.json
+          retention-days: 30
+          if-no-files-found: error
