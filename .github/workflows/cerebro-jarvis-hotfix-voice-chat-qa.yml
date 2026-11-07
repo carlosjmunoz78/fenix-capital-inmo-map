@@ -32,5 +32,17 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: 'Typecheck and compile full existing App, do NOT deploy'
         run: npm run build
+      - name: 'Build exact owner100 production configuration WITHOUT publishing'
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          npx vite build --base=/ --outDir dist-prod-only-qa
+          grep -R -F 'cerebro-console-gateway-human-v1-owner100' dist-prod-only-qa >/dev/null
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-prod-only-qa
 
 # Recheck final Android nonblocking TTS and uncertain-timeout safety fix.
