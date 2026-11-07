@@ -1,0 +1,256 @@
+{
+  "schema": "cerebro.cut61.consumer.identity.readonly.observation.v1",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT61-v0.1",
+  "observed_date": "2026-11-07",
+  "source": "LIVE_SUPABASE_MCP_SQL_CATALOG_READONLY",
+  "target_project_ref": "cluhljgonannaafpmblx",
+  "source_repo_code_consumers_exhaustively_verified": false,
+  "direct_db_routine_consumers_total": 17,
+  "foreign_key_edges_total": 10,
+  "live_database_state": {
+    "functions": [
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_bootstrap_tier_record_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_bootstrap_tier_status_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_company_engine_states_get_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": false,
+        "routine": "cerebro_company_onboarding_get_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": true
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_company_onboarding_start_preprod",
+        "registry": true,
+        "marketing": false,
+        "onboarding": true
+      },
+      {
+        "lrn": false,
+        "engines": false,
+        "routine": "cerebro_company_register_preprod",
+        "registry": true,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": false,
+        "routine": "cerebro_company_registry_get_preprod",
+        "registry": true,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": false,
+        "routine": "cerebro_company_tenant_boundary_check_preprod",
+        "registry": true,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_final_onboarding_record_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_final_onboarding_status_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": true,
+        "engines": true,
+        "routine": "cerebro_lrn001_record_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": true,
+        "engines": true,
+        "routine": "cerebro_lrn001_status_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_marketing_crm_bootstrap_record_preprod",
+        "registry": false,
+        "marketing": true,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_marketing_crm_bootstrap_status_preprod",
+        "registry": false,
+        "marketing": true,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_post_scan_audit_record_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_post_scan_parallel_status_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      },
+      {
+        "lrn": false,
+        "engines": true,
+        "routine": "cerebro_scan001_record_success_preprod",
+        "registry": false,
+        "marketing": false,
+        "onboarding": false
+      }
+    ],
+    "b3_control": [
+      {
+        "enabled": false,
+        "engine_id": "JARVIS-B3-001",
+        "company_id": "fenix",
+        "environment": "PROD",
+        "kill_switch": true
+      }
+    ],
+    "foreign_keys": [
+      {
+        "name": "cerebro_bootstrap_tier_run_preprod_company_id_fkey",
+        "child": "cerebro_bootstrap_tier_run_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_company_engine_state_preprod_company_id_fkey",
+        "child": "cerebro_company_engine_state_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_company_onboarding_history_preprod_company_id_fkey",
+        "child": "cerebro_company_onboarding_history_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_company_onboarding_preprod_company_id_fkey",
+        "child": "cerebro_company_onboarding_preprod",
+        "parent": "cerebro_company_registry_preprod"
+      },
+      {
+        "name": "cerebro_company_registry_history_preprod_company_id_fkey",
+        "child": "cerebro_company_registry_history_preprod",
+        "parent": "cerebro_company_registry_preprod"
+      },
+      {
+        "name": "cerebro_final_onboarding_run_preprod_company_id_fkey",
+        "child": "cerebro_final_onboarding_run_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_lrn001_continuation_preprod_company_id_fkey",
+        "child": "cerebro_lrn001_continuation_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_marketing_crm_bootstrap_run_preprod_company_id_fkey",
+        "child": "cerebro_marketing_crm_bootstrap_run_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_post_scan_audit_run_preprod_company_id_fkey",
+        "child": "cerebro_post_scan_audit_run_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      },
+      {
+        "name": "cerebro_scan001_run_preprod_company_id_fkey",
+        "child": "cerebro_scan001_run_preprod",
+        "parent": "cerebro_company_onboarding_preprod"
+      }
+    ],
+    "onboarding_count": 0,
+    "protected_tables": [
+      {
+        "rls": true,
+        "name": "cerebro_company_engine_state_preprod",
+        "policy_count": 0
+      },
+      {
+        "rls": true,
+        "name": "cerebro_company_onboarding_preprod",
+        "policy_count": 0
+      },
+      {
+        "rls": true,
+        "name": "cerebro_company_registry_preprod",
+        "policy_count": 0
+      },
+      {
+        "rls": true,
+        "name": "cerebro_lrn001_continuation_preprod",
+        "policy_count": 0
+      },
+      {
+        "rls": true,
+        "name": "cerebro_marketing_crm_bootstrap_run_preprod",
+        "policy_count": 0
+      }
+    ],
+    "engine_rows_count": 0,
+    "b3_owner_grants_count": 0,
+    "company_registry_count": 0,
+    "learning_receipts_count": 0,
+    "marketing_receipts_count": 0
+  },
+  "backup_snapshot_retrieved": false,
+  "physical_restore_performed": false,
+  "owner_b2_b3_physical_e2e_passed": false,
+  "owner_current_browser_canary_authenticated": false,
+  "owner_current_browser_canary_note": "OPERA_GET_WORKER_OWNER_CHECK_REDIRECTED_TO_CLOUDFLARE_LOGIN_NO_VERIFIED_CURRENT_OWNER",
+  "cloudflare_cut30_changed": false,
+  "supabase_write_performed": false,
+  "app_crm_write_performed": false,
+  "production_authorized": false
+}
