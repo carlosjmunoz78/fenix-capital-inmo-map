@@ -48,3 +48,5 @@ jobs:
           path: ${{ runner.temp }}/jarvis-cut58-adversarial-review.json
           retention-days: 30
           if-no-files-found: error
+
+# Exact test failure diagnostic; do not downgrade gating.
