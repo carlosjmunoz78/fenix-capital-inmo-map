@@ -56,7 +56,9 @@ const BRIEF=Object.freeze({
 export function validateSeoV4Brief(b){
  const expected={
   'SEO001-FENIX-B2C-EDITORIAL-001':'PARTICULARES',
-  'SEO001-FENIX-B2B-EDITORIAL-002':'INMOBILIARIAS'
+  'SEO001-FENIX-B2B-EDITORIAL-002':'INMOBILIARIAS',
+  'SEO001-FENIX-LRN-20261108-B2C-001':'PARTICULARES',
+  'SEO001-FENIX-LRN-20261108-B2B-002':'INMOBILIARIAS'
  };
  if(!b||b.company_id!=='fenix'||b.engine_id!=='SEO-001'||b.environment!=='LAB'||
     b.version!=='V4-CANDIDATE'||b.content_type!=='ARTICLE'||
@@ -81,8 +83,49 @@ export function validateSeoV4Brief(b){
  }
  return b;
 }
+
+/* Next one-shot learning pilot only. Prior V4 prompts are unchanged. */
+function buildLearnedSeoPilotPrompt(b) {
+ const file='cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json';
+ const m=JSON.parse(fs.readFileSync(file,'utf8'));
+ const keys=['L01_CANONICAL_SEMANTIC_H1','L02_POST_HEADER','L03_PAGE_TEMPLATE','L04_BREADCRUMBS','L05_IMAGES','L06_PERSONA_FORMS','L07_PRIVACY','L08_EDITORIAL','L09_FULL_VISUAL','L10_RELEASE'];
+ if(m.company_id!=='fenix'||m.engine_id!=='SEO-001'||m.environment!=='LAB'||
+    m.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE'||m.learning_contract_id!=='SEO001_LEARNED_10_GATES_20261108'||
+    m.max_batch_runs!==1||m.max_real_model_calls!==2||m.max_calls_per_item!==1||m.allow_retries!==false||
+    m.allow_paid_fallback!==false||m.allow_wordpress_writes!==false||
+    m.allow_wordpress_publication!==false||m.allow_image_api_calls!==false||
+    !Array.isArray(m.briefs)||m.briefs.length!==2||
+    keys.some(k=>typeof m.lessons?.[k]!=='string'||m.lessons[k].length<75)||
+    Object.keys(m.lessons||{}).length!==keys.length)throw Error('SEO_LEARNED_PILOT_SCOPE_DENIED');
+ const expected=m.briefs.find(x=>x.work_id===b.work_id);
+ if(!expected||b.learning_contract_id!==m.learning_contract_id||
+    JSON.stringify(expected)!==JSON.stringify(b))throw Error('SEO_LEARNED_BRIEF_DRIFT');
+ return [
+ 'CEREBRO SEO-D13 · UNA SOLA PRUEBA EN LAB, DOS ARTÍCULOS, NO PUBLICAR NI CREAR IMÁGENES.',
+ 'Incorpora estas diez lecciones de errores físicos, sin afirmar que la publicación o el entrenamiento están certificados.',
+ ...keys.map(k=>k+' '+m.lessons[k]),
+ 'Redacta en español natural de España, específico de '+b.persona+'. TEMA '+b.topic,
+ 'Necesidad real '+b.buyer_problem,
+ 'Intención '+b.search_intent,
+ 'Ángulo propio '+b.unique_angle,
+ 'Evitar canibalización '+b.avoid_cannibalization,
+ 'Palabra clave '+b.focus_keyword+' de forma no forzada.',
+ 'Entrega SOLO texto HTML de borrador editorial; el montaje de Astra/Elementor, imagen de cabecera, formularios y QA visual se evalúa por separado, NUNCA se presupone aprobado.',
+ 'Exactamente un H1 corto y natural (35-65 caracteres), seis H2 de desarrollo no numerados con tres párrafos de entre 60 y 85 palabras cada uno, luego un H2 de FAQ con seis preguntas H3 y respuestas de 20-40 palabras.',
+ 'El cuerpo debe aportar al menos 950 palabras reales fuera de FAQ y un total de al menos 1150. No repetir, no inventar declaraciones de clientes, cifras de bancos ni obligaciones legales.',
+ b.persona==='INMOBILIARIAS'?
+  'Habla a responsables de agencias, describe un protocolo de mensajes con roles y estados verificables, sin plazos de tasación garantizados ni transferencia excesiva de datos. El formulario PARTNER solo lo inserta el plugin validado tras QA.':
+  'Habla a compradores sobre costes recurrentes DESPUÉS de la compra. Separa claramente gastos de compra y mantenimiento sin dar importes no contrastados ni garantías.',
+ 'Sin además, en conclusión, dos puntos visibles o frases de relleno. No dar consejo jurídico imperativo; verificar cualquier afirmación legal/financiera.',
+ 'Enlaza solo a las fuentes '+JSON.stringify(b.sources)+' y a '+b.cta_url+'.',
+ 'Devuelve EXCLUSIVAMENTE JSON válido con claves html y used_source_ids exactamente '+JSON.stringify(b.sources.map(x=>x.id))+'.',
+ 'HTML solo h1,h2,h3,p,section,div,a. SIN imágenes, scripts, CSS, formularios, logos o texto sobre fotografías. Una pasada; sin reintentos ni publicación.'
+ ].join('\n');
+}
+
 export function buildSeoV4OwnerPrompt(brief){
  const b=validateSeoV4Brief(brief);
+ if(b.learning_contract_id==='SEO001_LEARNED_10_GATES_20261108')return buildLearnedSeoPilotPrompt(b);
  return [
   'CEREBRO SEO-D13 Fénix Capital. Esta es una prueba REAL en LAB, NO hay autorización de publicación.',
   'Redacta en español de España un artículo ORIGINAL, útil, bien investigado dentro del corpus aportado y orientado a '+b.persona+'.',
