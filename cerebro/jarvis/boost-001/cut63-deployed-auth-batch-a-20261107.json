@@ -1,0 +1,253 @@
+{
+  "schema": "jarvis.cut63.static.auth.batch.v1",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "observed_date": "2026-11-07",
+  "project_ref": "cluhljgonannaafpmblx",
+  "batch": "A",
+  "no_source_export": true,
+  "live_endpoints_called": false,
+  "static_flags_not_auth_proof": true,
+  "rows": [
+    {
+      "slug": "fenix-app-gateway",
+      "status": "READ",
+      "version": 22,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 21113,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "fenix-whatsapp-webhook",
+      "status": "READ",
+      "version": 4,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 2047,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": true
+      }
+    },
+    {
+      "slug": "fenix-web-lead",
+      "status": "READ",
+      "version": 5,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 3379,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "social-lead-ingest",
+      "status": "READ",
+      "version": 5,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 1760,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-console-gateway-v0",
+      "status": "READ",
+      "version": 33,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 117075,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-internal-auth-probe-v0",
+      "status": "READ",
+      "version": 8,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 244,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-gateway-prod-governed-write-canary-v1",
+      "status": "READ",
+      "version": 6,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 945,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-governed-write-runtime-canary-v1",
+      "status": "READ",
+      "version": 2,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 4978,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "jarvis-work-gateway-v1",
+      "status": "READ",
+      "version": 3,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 13876,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "jarvis-work-dispatch-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 4699,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "jarvis-git-gateway-v1",
+      "status": "READ",
+      "version": 2,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6559,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "jarvis-orchestrator-v0",
+      "status": "READ",
+      "version": 2,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 11797,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    }
+  ]
+}
