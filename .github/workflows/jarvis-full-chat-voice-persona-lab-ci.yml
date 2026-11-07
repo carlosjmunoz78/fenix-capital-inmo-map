@@ -76,3 +76,5 @@ jobs:
           if-no-files-found: ignore
 
 # Rerun after one-utterance STT simulation correction; same strict no-PROD gates.
+
+# CI diagnostic: distinguish absent male voice vs suppressed browser speech in LAB.
