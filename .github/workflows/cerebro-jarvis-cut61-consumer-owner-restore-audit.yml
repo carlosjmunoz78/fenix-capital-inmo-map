@@ -1,0 +1,56 @@
+name: CEREBRO JARVIS CUT61 · Consumer FK + B3 Owner + Backup Restore Admission (OFFLINE)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut61-consumer-owner-restore-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  read-only-security-admission:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Negative safety QA on actual frozen Supabase metadata
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut61-consumer-identity-restore-gate-v0.test.mjs
+          node --check cerebro/jarvis/boost-001/cut61-consumer-identity-restore-gate-v0.mjs
+      - name: Evaluate read-only readiness; no fake restore and no B2/B3 owner auth
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut61-consumer-identity-restore-gate-v0.mjs \
+            cerebro/jarvis/boost-001/cut61-consumer-identity-observation-20261107.json \
+            "$RUNNER_TEMP/cut61-consumer-owner-restore-no-go.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut61-consumer-owner-restore-no-go.json'));
+            if(x.verified_database_dependencies!==27||x.db_functions_verified!==17||
+               x.foreign_keys_verified!==10||x.rls_tables_verified!==5||
+               x.b3_grants_found!==0||x.b3_enabled!==false||x.b3_kill_switch!==true||
+               x.backup_documented!==false||x.physical_restore_verified!==false||
+               x.readiness.write_authorized!==false||
+               x.readiness.code!=='NO_INDEPENDENT_PHYSICAL_ACCEPTANCE'||
+               x.mutating_db_requests!==0)process.exit(1);
+          "
+      - name: Archive evidence report (not a backup or production approval)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut61-consumer-owner-restore-no-go-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut61-consumer-owner-restore-no-go.json
+          retention-days: 30
+          if-no-files-found: error
