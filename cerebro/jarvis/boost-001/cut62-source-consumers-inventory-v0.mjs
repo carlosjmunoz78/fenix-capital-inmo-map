@@ -95,6 +95,8 @@ export function inventoryWorkingTree(){
   exact_contract_symbols:LEGACY_CONTRACT_SYMBOLS,
   direct_contract_reference_files:exact.map(x=>({path:x.path,scope:x.scope,symbols:x.direct_contract_symbols})),
   indirect_usage_references:results.filter(x=>x.generic_suspected_surfaces.length).map(x=>({path:x.path,scope:x.scope,flags:x.generic_suspected_surfaces})),
+  actual_api_call_surface_count:results.filter(x=>x.generic_suspected_surfaces.some(flag=>flag!=='TENANT_CONTEXT_SURFACE')).length,
+  tenant_context_surface_count:results.filter(x=>x.generic_suspected_surfaces.includes('TENANT_CONTEXT_SURFACE')).length,
   declaration_detection_only:true,
   repo_code_consumer_inventory_completed_for_tracked_source:true,
   compiled_app_deployment_parity_verified:false,
@@ -116,5 +118,8 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
   indirect_files:r.indirect_usage_references.length,
   src:r.source_class_summary.FRONTEND_SRC,
   edge:r.source_class_summary.EDGE_REPO_SOURCE,
+  actual_api_call_surface_count:r.actual_api_call_surface_count,
+  tenant_context_surface_count:r.tenant_context_surface_count,
+  exact_paths:r.direct_contract_reference_files.map(x=>({path:x.path,symbols:x.symbols})),
   prod_authorized:false,no_credentials:true}));
 }
