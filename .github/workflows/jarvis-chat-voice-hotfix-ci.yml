@@ -43,21 +43,23 @@ jobs:
           const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
           const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
           const must=[
-            [shell, "window.addEventListener('jarvis:direct-chat-submit-v1'"],
-            [shell, "directChatSubmitRef.current(payload.message)"],
-            [shell, 'interimResults=true'],
-            [shell, 'finalSent=true'],
-            [composer, "new CustomEvent('jarvis:direct-chat-submit-v1'"],
+            [shell, 'function toggleVoiceSession()'],
+            [shell, 'postCerebroConsoleChat'],
             [composer, 'interimResults=true'],
-            [composer, 'JARVIS no ha aceptado el mensaje'],
+            [composer, 'waitForUI('],
+            [composer, 'setReactTextareaValue(textarea,clean)'],
+            [composer, 'form.requestSubmit()'],
+            [composer, 'previousUserMessages'],
+            [composer, 'No puedo confirmar que JARVIS haya recibido el mensaje'],
             [api, 'new AbortController()'],
             [api, 'signal:controller.signal'],
             [api, 'clearTimeout(timeout)']
           ];
           for(const [source,token] of must)
             if(!source.includes(token))throw Error('Required safeguard missing: '+token);
-          if(composer.includes('form.requestSubmit()')||composer.includes('setReactTextareaValue('))
-            throw Error('Stale DOM-submit workaround remains');
+          if(composer.includes('window.setTimeout(()=>form?.requestSubmit(),0)') ||
+             composer.includes('jarvis:direct-chat-submit-v1'))
+            throw Error('Unreliable blind submit or unauthorized canonical override remains');
           if(!api.includes('20000'))throw Error('Chat timeout not bounded');
           console.log('HOTFIX_GUARDS_PASS');
           NODE
