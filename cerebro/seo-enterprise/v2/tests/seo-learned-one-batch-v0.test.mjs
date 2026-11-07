@@ -1,0 +1,91 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {preflightLearnedBatch,classifyLearnedCandidate,executeOneLearnedBatch,persistOneLearnedBatch,EXPECTED_IDS,LEARNING_GATES} from '../runtime/seo-learned-one-batch-runner-v0.mjs';
+import {buildSeoV4OwnerPrompt,validateSeoV4Brief} from '../runtime/seo-d13-free-project-one-shot-canary-v0.mjs';
+const dir='cerebro/seo-enterprise/v2/registry/';
+const manifest=JSON.parse(fs.readFileSync(dir+'seo001-learned-one-batch-pilot-2026-11-08.json','utf8'));
+test('learning is truly consumed by writer prompts before inference',()=>{
+ assert.equal(LEARNING_GATES.length,10);
+ assert.equal(EXPECTED_IDS.length,2);
+ const prior=preflightLearnedBatch();
+ assert.equal(prior.learning_gates_loaded,10);
+ assert.equal(prior.prior_release,'HOLD_NOT_OWNER_APPROVED');
+ manifest.briefs.forEach((brief,i)=>{
+  assert.equal(brief.work_id,EXPECTED_IDS[i]);
+  assert.equal(validateSeoV4Brief(brief),brief);
+  const prompt=buildSeoV4OwnerPrompt(brief);
+  LEARNING_GATES.forEach(k=>assert.ok(prompt.includes(k+' '+manifest.lessons[k]),k));
+  assert.match(prompt,/SIN imágenes, scripts, CSS, formularios/i);
+  assert.match(prompt,/NO PUBLICAR/i);
+ });
+});
+test('legacy writer remains accepted, while new scope requires exact IDs',()=>{
+ const b={...manifest.briefs[0],work_id:'SEO001-FENIX-LRN-20261108-UNKNOWN'};
+ assert.throws(()=>validateSeoV4Brief(b),/SEO_V4_SCOPE_NOT_ALLOWED/);
+});
+test('missing one learned gate fails before any model call',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'seo001-learning-test-'));
+ try{
+  fs.mkdirSync(path.join(root,dir),{recursive:true});
+  fs.copyFileSync(dir+'seo001-batch2-wordpress-physical-qa-2026-11-07.json',path.join(root,dir,'seo001-batch2-wordpress-physical-qa-2026-11-07.json'));
+  const bad=JSON.parse(JSON.stringify(manifest));
+  delete bad.lessons.L07_PRIVACY;
+  bad.workflow_trigger_nonce='TRIGGER_ONCE_20261108';
+  fs.writeFileSync(path.join(root,dir,'seo001-learned-one-batch-pilot-2026-11-08.json'),JSON.stringify(bad));
+  assert.throws(()=>preflightLearnedBatch({root}),/SEO001_LEARNED_BATCH_LEARNING_GATES_UNWIRED/);
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('no trigger nonce, over-limit or publication permission cannot start',()=>{
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'seo001-learning-scope-'));
+ try{
+  fs.mkdirSync(path.join(root,dir),{recursive:true});
+  fs.copyFileSync(dir+'seo001-batch2-wordpress-physical-qa-2026-11-07.json',path.join(root,dir,'seo001-batch2-wordpress-physical-qa-2026-11-07.json'));
+  for(const change of [m=>m.allow_wordpress_publication=true,m=>m.max_real_model_calls=3,m=>m.workflow_trigger_nonce='NO_TRIGGER']){
+   const bad=JSON.parse(JSON.stringify(manifest));
+   bad.workflow_trigger_nonce='TRIGGER_ONCE_20261108';change(bad);
+   fs.writeFileSync(path.join(root,dir,'seo001-learned-one-batch-pilot-2026-11-08.json'),JSON.stringify(bad));
+   assert.throws(()=>preflightLearnedBatch({root}),/SEO001_LEARNED_BATCH_AUTHORIZATION_OR_CEILING/);
+  }
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('text-only candidate is never certified as physical media + mobile QA',()=>{
+ const b=manifest.briefs[1];
+ const w={work_id:b.work_id,status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',faq_count:6,content_depth_precheck_passed:true,html:'<h1>Agencia inmobiliaria de Córdoba</h1><h2>Protocolo</h2>'};
+ const r=classifyLearnedCandidate({brief:b,writer:w});
+ assert.equal(r.technical_copy_precheck,'PASS');
+ assert.equal(r.full_quality_certified,false);
+ assert.equal(r.publish_allowed,false);
+ assert.ok(r.physical_gates_pending.includes('ORIGINAL_HERO_MEDIA_WITH_PROVENANCE'));
+ assert.equal(r.cms_plan.form,'fenix_seo001_partner_form');
+ assert.equal(r.cms_plan.rendered_h1_owner,'ASTRA_NATIVE');
+});
+test('unsafe image embedded or absent FAQ cannot pass',()=>{
+ const b=manifest.briefs[0];
+ const w={status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',faq_count:0,content_depth_precheck_passed:true,html:'<h1>Título</h1><img src="evil">'};
+ const r=classifyLearnedCandidate({brief:b,writer:w});
+ assert.equal(r.technical_copy_precheck,'HOLD');
+ assert.ok(r.copy_issues.includes('IMAGE_OR_FORM_WRONGLY_EMBEDDED_IN_MODEL_HTML'));
+ assert.equal(r.cms_plan.form,'fenix_seo001_city_form');
+});
+test('no secret available returns HOLD, never WordPress writes or retries',async()=>{
+ const pre=preflightLearnedBatch();
+ assert.equal(pre.learning_gates_loaded,10);
+ const batch=await executeOneLearnedBatch({api_key:null,fetch_impl:async()=>{throw Error('must not call network')}});
+ assert.equal(batch.provider_calls,0);
+ assert.equal(batch.auto_retry_count,0);
+ assert.equal(batch.wordpress_writes,0);
+ assert.equal(batch.can_publish,false);
+ assert.equal(batch.items.length,2);
+ assert.equal(batch.status,'LEARNED_BATCH_INCOMPLETE_HOLD');
+ const dest=path.join(os.tmpdir(),'seo001-learned-test-'+process.pid);
+ try{
+  if(fs.existsSync(dest))fs.rmSync(dest,{recursive:true,force:true});
+  const receipt=persistOneLearnedBatch({batch,output_dir:dest});
+  assert.equal(receipt.wordpress_writes,0);
+  assert.equal(receipt.publication,false);
+  assert.ok(fs.existsSync(path.join(dest,'manifest.json')));
+ }finally{fs.rmSync(dest,{recursive:true,force:true});}
+});
