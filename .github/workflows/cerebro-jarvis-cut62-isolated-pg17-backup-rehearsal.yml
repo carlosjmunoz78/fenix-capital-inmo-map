@@ -39,7 +39,7 @@ jobs:
       CEREBRO_ALLOW_PAID_CANARY: 'NO'
     steps:
       - uses: actions/checkout@v4
-      - name: Confirm command source pinned: existing PG17 script, do not rewrite
+      - name: 'Confirm existing PG17 script pinned without modification'
         run: |
           set -euo pipefail
           test -f zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
