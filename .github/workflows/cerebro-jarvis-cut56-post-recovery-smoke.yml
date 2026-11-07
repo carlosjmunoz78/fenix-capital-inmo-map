@@ -1,0 +1,46 @@
+name: CEREBRO JARVIS CUT56 · Post-Recovery Offline Acceptance
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut56-post-recovery-smoke.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  final-offline-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      JARVIS_LAB_AUTONOMY_ENABLE: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Source ledger must be PAUSED; no reserved money / no auto promotion
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync('zeus/jarvis/state/jarvis-deepseek-autonomy-ledger-v1.json'));
+            if(x.status!=='PAUSED' || x.pending!==null || x.auto_promote!==false ||
+               x.auto_recharge!==false || x.production_mutation!==false ||
+               x.recovery.charged_conservative_usd!==1.8 || x.recovery.auto_resume!==false)
+              process.exit(1);
+          "
+      - name: CUT37 historical training regression and recovery guards, NO API
+        run: |
+          set -euo pipefail
+          node --test zeus/jarvis/training/*.test.mjs
+          node zeus/jarvis/training/jarvis-deepseek-autonomy-v1.mjs --dry-run | grep -F '"state":"PAUSED","cycles_next":0'
+      - name: CUT55 and CUT56 quality, budget and handoff regression, NO API
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/learning-pilot-v0.test.mjs             cerebro/jarvis/boost-001/cut56-semantic-tribunal-v0.test.mjs             cerebro/jarvis/boost-001/cut56-lrn-safe-handoff-v0.test.mjs             cerebro/tests/deepseek-budget-guard-v0.test.mjs             cerebro/tests/deepseek-provider-v0.test.mjs
