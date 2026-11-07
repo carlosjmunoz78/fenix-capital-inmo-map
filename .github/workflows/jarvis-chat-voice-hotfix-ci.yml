@@ -48,7 +48,7 @@ jobs:
           VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
           VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'clean home' --reporter=line
+        run: npx playwright test tests/jarvis-chat-hotfix-smoke.spec.ts --project=desktop-chromium --reporter=line
       - name: Check chat sends via one event, voice previews interim text and timeout is bounded
         run: |
           set -euo pipefail
