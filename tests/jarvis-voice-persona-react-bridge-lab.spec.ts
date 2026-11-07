@@ -104,6 +104,8 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
    abort(){this.onend?.(new Event('end'))}
   }
   global.SpeechRecognition=StubRecognition;
+  const mockVoice={name:'Microsoft Jorge',lang:'es-ES',localService:true,voiceURI:'qa-male-es',default:false} as SpeechSynthesisVoice;
+  window.speechSynthesis.getVoices=()=>[mockVoice];
   const synth=window.speechSynthesis;
   synth.speak=(utterance:SpeechSynthesisUtterance)=>{
    global.__jarvisSpoken?.push(utterance.text);
