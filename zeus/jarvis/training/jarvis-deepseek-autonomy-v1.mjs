@@ -61,6 +61,8 @@ function loadPlan(){
  return p;
 }
 function chooseCycles(s){
+ // A PAUSED / RESERVED / failed-state ledger must never advertise runnable cycles.
+ if(s.status!=='ACTIVE')return 0;
  const remain=round(cap-s.spent_estimate_usd);
  if(remain<cycleEnvelope)return 0;
  const ramp=s.completed_batches===0?1:s.completed_batches<4?3:12;
