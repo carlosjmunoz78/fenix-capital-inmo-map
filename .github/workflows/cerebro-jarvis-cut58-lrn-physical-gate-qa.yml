@@ -1,0 +1,44 @@
+name: CEREBRO JARVIS CUT58 · Existing LRN Physical Gate Offline QA
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut58-lrn-physical-gate-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lrn-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    env:
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify guarded existing LRN contract and physical status policy without network
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut58-lrn-physical-gate-v0.test.mjs
+          node cerebro/jarvis/boost-001/cut58-lrn-physical-gate-v0.mjs > "$RUNNER_TEMP/jarvis-cut58-lrn-physical-gate.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/jarvis-cut58-lrn-physical-gate.json'));
+            if(x.state.code!=='COMPANY_NOT_REGISTERED'||x.state.write_authorized!==false||
+               x.safe_write_requests_issued!==0||x.prod_mutations!==0||
+               x.observed.source_project_comparison.green!==11)process.exit(1);
+          "
+      - name: Persist read-only observation snapshot, no secrets
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut58-lrn-readonly-gate-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-cut58-lrn-physical-gate.json
+          retention-days: 30
+          if-no-files-found: error
