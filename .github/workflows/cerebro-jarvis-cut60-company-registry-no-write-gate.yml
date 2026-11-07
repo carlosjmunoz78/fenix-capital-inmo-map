@@ -1,0 +1,49 @@
+name: CEREBRO JARVIS CUT60 · Registry and Onboarding Admission Gate
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut60-company-registry-no-write-gate.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut60-registry-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Seven current-tenant gate tests, including simulated all-green denial
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut60-company-onboarding-readiness-v0.test.mjs
+      - name: Render admission and dependency gate from observed schema snapshot
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut60-company-onboarding-readiness-v0.mjs "$RUNNER_TEMP/cut60-registry-onboarding-gate.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut60-registry-onboarding-gate.json'));
+            if(r.gate.verdict!=='NO_GO'||r.mutating_rpc_calls!==0||
+               r.initial_scaffold_green_count!==3||
+               r.initial_green_are_runtime_certified!==false||
+               r.ready_to_ingest_lrn!==false||r.supabase_writes!==0)process.exit(1);
+          "
+      - name: Store non-executable authority-gate report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut60-registry-admission-no-go-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut60-registry-onboarding-gate.json
+          retention-days: 30
+          if-no-files-found: error
