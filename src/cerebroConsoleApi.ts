@@ -140,7 +140,7 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
     try{data=await response.json() as CerebroConsoleChatResponse}catch{data=null}
     return{status:response.status,data};
   }catch{
-    if(controller.signal.aborted)return{status:504,data:{status:'TIMEOUT',message:'JARVIS tarda demasiado en responder. Prueba otra vez; no se ha confirmado ninguna acción.',executed:false}};
+    if(controller.signal.aborted)return{status:504,data:{status:'TIMEOUT',message:'JARVIS ha tardado más de 20 segundos. No puedo confirmar si se ha procesado. Revisa el historial antes de reintentar una acción.',executed:false}};
     return{status:0,data:null};
   }finally{clearTimeout(timeout)}
 }
