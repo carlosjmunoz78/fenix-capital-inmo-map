@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT63_DEPLOYED_EDGE_AUTH_AND_BACKUP_PROOF_B2B3_OWNER_E2E",
+  "next_block": "CUT64_NEGATIVE_EDGE_OWNER_ACCESS_E2E_AND_ISOLATED_PROD_BACKUP_RESTORE",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -357,5 +357,76 @@
     "prod_authorized": false,
     "next_block": "CUT63_DEPLOYED_EDGE_AUTH_AND_BACKUP_PROOF_B2B3_OWNER_E2E",
     "documentation": "cerebro/jarvis/boost-001/CUT62_REAL_CONSUMERS_DEPLOYED_EDGE_ISOLATED_RESTORE_2026-11-07.md"
+  },
+  "cut63": {
+    "version": "CUT63-v0.1",
+    "observed_date": "2026-11-07",
+    "status": "REAL_PRO_PHYSICAL_BACKUPS_VISIBLE_60_DEPLOYED_JWT_OFF_REVIEWED_NO_PHYSICAL_AUTH_RELEASE",
+    "target_supabase_project_ref": "cluhljgonannaafpmblx",
+    "organization_plan": "pro",
+    "real_backup": {
+      "source": "SUPABASE_PRO_DASHBOARD_DATED_PHYSICAL_ENTRIES",
+      "type": "PHYSICAL",
+      "entries_visible": 8,
+      "latest_visible_utc": "2026-11-07T02:59:58Z",
+      "backup_success_status_independently_verified": false,
+      "real_restore_to_isolated_project_pass": false,
+      "storage_objects_restored": false,
+      "change_to_prod_restore": false,
+      "original_file": "cerebro/jarvis/boost-001/cut63-prod-backup-ui-observation-20261107.json"
+    },
+    "deployed_auth": {
+      "active_edge_deployments": 95,
+      "platform_jwt_on": 35,
+      "platform_jwt_off": 60,
+      "static_source_read_for_all_jwt_off": 60,
+      "static_authorization_marker_count": 37,
+      "static_cryptographic_marker_count": 35,
+      "static_server_secret_reference_count": 42,
+      "no_examined_auth_marker_count": 13,
+      "actual_bypass_discovered": false,
+      "physical_anonymous_vs_owner_e2e_pass": false,
+      "source_published": false,
+      "source_snapshot_batches": [
+        "cerebro/jarvis/boost-001/cut63-deployed-auth-batch-a-20261107.json",
+        "cerebro/jarvis/boost-001/cut63-deployed-auth-batch-b-20261107.json",
+        "cerebro/jarvis/boost-001/cut63-deployed-auth-batch-c-20261107.json",
+        "cerebro/jarvis/boost-001/cut63-deployed-auth-batch-d-20261107.json",
+        "cerebro/jarvis/boost-001/cut63-deployed-auth-batch-e-20261107.json"
+      ],
+      "deployment_listing": "cerebro/jarvis/boost-001/cut63-edge-listing-20261107.json"
+    },
+    "github_ci": {
+      "first_run_id": 42392707683,
+      "first_run_conclusion": "failure",
+      "final_run_id": 42392781259,
+      "final_run_conclusion": "success",
+      "tests_pass": 7,
+      "tests_fail": 0,
+      "artifact_id": 13581214794,
+      "artifact_sha256": "d3d643f51677bb620cf34aa377234c8002d82af842450bf349147a1c6b10eeaf"
+    },
+    "backend_current_state": {
+      "fenix_company_registry_rows": 0,
+      "fenix_onboarding_rows": 0,
+      "fenix_engine_rows": 0,
+      "fenix_marketing_crm_receipts": 0,
+      "fenix_lrn_receipts": 0,
+      "b3_owner_grants": 0,
+      "b3_enabled": false,
+      "b3_kill_switch": true
+    },
+    "security": {
+      "new_paid_deepseek_calls": 0,
+      "additional_new_subscriptions": 0,
+      "app_crm_modifications": 0,
+      "supabase_prod_writes": 0,
+      "cloudflare_cut30_modifications": 0,
+      "main_modifications": 0,
+      "prod_write_authorized": false,
+      "production_ready": false
+    },
+    "next_block": "CUT64_NEGATIVE_EDGE_OWNER_ACCESS_E2E_AND_ISOLATED_PROD_BACKUP_RESTORE",
+    "documentation": "cerebro/jarvis/boost-001/CUT63_EDGE_AUTH_60_OF_60_REAL_BACKUPS_PROD_GATE_2026-11-07.md"
   }
 }
