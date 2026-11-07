@@ -6,7 +6,7 @@ import path from 'node:path';
 export const CAMPAIGN=Object.freeze({
  schema_version:'1.0.0',
  campaign_id:'JARVIS-BOOST-001-LEARNING-50EUR-V0',
- company_id:'fenix',engine_id:'JARVIS-BOOST-001',environment:'PREPROD',version:'CUT54',
+ company_id:'fenix',engine_id:'JARVIS-BOOST-001',environment:'PREPROD',version:'CUT55',
  user_budget_envelope_eur:50,
  pilot_max_reserved_eur:0.20,
  per_request_max_reserved_eur:0.04,
@@ -73,7 +73,7 @@ const INSTRUCTIONS=`Eres un analista candidato del motor JARVIS de CEREBRO OS, N
 function atomicJson(file,obj){fs.mkdirSync(path.dirname(file),{recursive:true});const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(obj,null,2)+'\n',{mode:0o600});fs.renameSync(tmp,file);}
 export async function runLive({env=process.env,createProvider,createBalanceGuard}={}){
  preflight({env});
- const safePath=path.resolve(env.RUNNER_TEMP||'/tmp','jarvis-boost001-cut53-pilot-report.json');
+ const safePath=path.resolve(env.RUNNER_TEMP||'/tmp','jarvis-boost001-cut55-pilot-report.json');
  const report={schema_version:'1.0.0',campaign:CAMPAIGN,generated_at:new Date().toISOString(),
  status:'CANDIDATE_ONLY',projected_reservation_eur:0,
  confirmed_actual_cost_eur:null,ledger_scope:'THIS_RUN_ONLY',accepted_preliminary:0,
@@ -91,7 +91,7 @@ export async function runLive({env=process.env,createProvider,createBalanceGuard
   if(report.projected_reservation_eur+CAMPAIGN.per_request_max_reserved_eur>CAMPAIGN.pilot_max_reserved_eur+1e-9)break;
   report.projected_reservation_eur=Math.round((report.projected_reservation_eur+CAMPAIGN.per_request_max_reserved_eur)*100)/100;
   write();
-  const requestId='jarvis-cut53-'+t.id+'-'+sha(env.GITHUB_RUN_ID||'manual').slice(0,10);
+  const requestId='jarvis-cut55-'+t.id+'-'+sha(env.GITHUB_RUN_ID||'manual').slice(0,10);
   const input='DOMINIO '+t.domain+'\nEVIDENCIA AUTORIZADA '+t.evidence_refs.join(',')+'\nCASO '+t.input;
   try{
    const response=await prov.respond({model:CAMPAIGN.model,instructions:INSTRUCTIONS.replace('<dominio exacto>',t.domain),input,maxOutputTokens:CAMPAIGN.max_output_tokens,reasoning:{effort:'none'},text:{format:{type:'json_object'}}},
