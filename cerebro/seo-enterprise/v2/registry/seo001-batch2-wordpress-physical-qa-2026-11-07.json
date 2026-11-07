@@ -172,5 +172,78 @@
       "WP_CLI_SHELL_EXEC_DISABLED"
     ],
     "all_draft_no_auto_publish": true
+  },
+  "media_recovery_2026_11_07": {
+    "verified_in": "LIVE_WORDPRESS_COWBOY_MCP_7_NOV_2026",
+    "status": "MEDIA_ATTACHED_IN_DRAFTS_QA_PENDING",
+    "images": [
+      {
+        "post_id": 52713,
+        "attachment_id": 52718,
+        "filename": "fenix-seo001-52713-derrama-comunidad-piso-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52714,
+        "attachment_id": 52719,
+        "filename": "fenix-seo001-52714-vender-antes-comprar-agencia-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52715,
+        "attachment_id": 52720,
+        "filename": "fenix-seo001-52715-revisar-gastos-derrama-compra-cordoba-hero-original.jpg"
+      },
+      {
+        "post_id": 52716,
+        "attachment_id": 52721,
+        "filename": "fenix-seo001-52716-compraventas-encadenadas-agencias-cordoba-hero-original.jpg"
+      }
+    ],
+    "all_expected_photo_dimensions": "1536x1024",
+    "media_attachment_alt_caption_metadata": "PRESENT_4_OF_4",
+    "source_provenance": "WP_MEDIA_DESCRIPTION_STATES_GENERATED_WITH_OPENAI;_ORIGINAL_RECEIPT_NOT_INDEPENDENTLY_VERIFIED",
+    "reused_existing_wp_uploads": true,
+    "new_paid_generation_this_step": 0,
+    "new_subscriptions": 0,
+    "wordpress_featured_media_mapped": "4_OF_4",
+    "body_img_inserted": "4_OF_4",
+    "img_alt_inserted": "4_OF_4",
+    "img_caption_inserted": "4_OF_4",
+    "wp_post_status_after": "DRAFT_4_OF_4",
+    "wp_thumbnail_verified_after": "52713:52718,52714:52719,52715:52720,52716:52721",
+    "wp_body_qa_state": "MEDIA_ATTACHED_QA_PENDING",
+    "coreguard_snapshots": [
+      191,
+      192,
+      193,
+      194
+    ],
+    "undo_journal_body_image_changes": [
+      2159,
+      2160,
+      2161,
+      2162
+    ],
+    "undo_journal_state_changes": [
+      2163,
+      2164,
+      2165,
+      2166
+    ],
+    "undo_journal_comment_changes": [
+      2167,
+      2168,
+      2169,
+      2170
+    ],
+    "authenticated_opera_previews": {
+      "52713": "PREVIEW_OPENED_AUTHENTICATED_BUT_AX_VISUAL_RECHECK_INCOMPLETE",
+      "52714": "TITLE_HEADINGS_BREADCRUMBS_CORRECT_NO_404_ACCESSIBILITY",
+      "52715": "HEADINGS_CORRECT_NO_404_NO_DEMO_ACCESSIBILITY",
+      "52716": "HEADINGS_CORRECT_NO_404_NO_DEMO_ACCESSIBILITY"
+    },
+    "visual_screenshot_status": "BLOCKED_OPERA_SCREENSHOT_TIMEOUT_AFTER_30S_REPEATED",
+    "physical_release_qa": "HOLD_SCREENSHOT_RESPONSIVE_AND_IMAGE_VISUAL_NOT_VERIFIED",
+    "publication": "OFF",
+    "next_gate": "RESTORE_OPERA_SCREENSHOT_OR_APPROVED_SCREENSHOT_PATH; DESKTOP_MOBILE_VISUAL + IMAGE_LICENSE_PROVENANCE + LINKS + YMYL + FIRST_3_TUTORED_PUBLICATIONS"
   }
 }
