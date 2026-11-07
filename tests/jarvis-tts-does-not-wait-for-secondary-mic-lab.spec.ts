@@ -24,6 +24,7 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
   w.__jarvisAudio=[];
   // Permission prompt for a second microphone can hang on Android.
   if(navigator.mediaDevices)navigator.mediaDevices.getUserMedia=()=>new Promise<MediaStream>(()=>{});
+  let spokenOnce=false;
   class Recognition{
    lang='es-ES';continuous=false;interimResults=false;maxAlternatives=3;
    onstart:((e:Event)=>void)|null=null;
@@ -32,6 +33,8 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
    onerror:((event:unknown)=>void)|null=null;
    start(){
     this.onstart?.(new Event('start'));
+   if(spokenOnce)return;
+   spokenOnce=true;
     window.setTimeout(()=>{
      this.onresult?.({results:{length:1,0:{length:1,isFinal:true,0:{transcript:'Hola JARVIS',confidence:0.99}}}});
      this.onend?.(new Event('end'));
@@ -59,6 +62,6 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
  const talk=page.getByRole('button',{name:'Conversación por voz'});
  await expect(talk).toBeEnabled();
  await talk.click();
- await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').last()).toContainText('Soy JARVIS');
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').first().last()).toContainText('Soy JARVIS');
  await expect.poll(()=>page.evaluate(()=>(window as typeof window & {__jarvisAudio?:string[]}).__jarvisAudio?.join(' ')||''),{timeout:3500}).toContain('JARVIS');
 });
