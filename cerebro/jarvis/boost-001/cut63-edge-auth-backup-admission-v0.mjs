@@ -62,7 +62,7 @@ export function inspectCut63({listing,batches,backup}){
  for(const [i,b] of batches.entries()){
   if(b.schema!=='jarvis.cut63.static.auth.batch.v1'||b.company_id!=='fenix'||
     b.project_ref!==scope.project_ref||b.environment!=='LAB'||
-    b.observed_date!==scope.observed_date||b.batch!=='ABCDE'[i]||
+    b.observed_date!==scope.observed_date||b.batch!=='abcde'[i]||
     b.no_source_export!==true||b.live_endpoints_called!==false||
     b.static_flags_not_auth_proof!==true||
     !Array.isArray(b.rows)||b.rows.length!==12)
