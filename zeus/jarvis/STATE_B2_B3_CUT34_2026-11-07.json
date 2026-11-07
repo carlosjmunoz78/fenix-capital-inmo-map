@@ -1,0 +1,92 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-07",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT34_OWNER_DEVICE_B3_READ_BRIDGE",
+  "source_pr": 25,
+  "draft": true,
+  "merged": false,
+  "source_branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "real_owner_canary": {
+    "worker": "cerebro-jarvis-lab-eu",
+    "status": "ACCESS_OWNER_VERIFIED",
+    "interface": "Opera authenticated original LAB worker",
+    "method": "GET /__jarvis/owner-check",
+    "b2_enrollment": "NOT_STARTED",
+    "gateway": "OFF",
+    "permissions": "NONE",
+    "production": "NO_GO",
+    "anonymous_denial_independently_verified": false,
+    "second_real_identity_verified": false
+  },
+  "parallel_cut32_worker": {
+    "exists": true,
+    "workers_dev_enabled": false,
+    "routes_enabled": false,
+    "access_app_listed": true,
+    "access_owner_policy_listed": true,
+    "enforcement_verified": false,
+    "deployed_code_verified": false,
+    "original_cut30_modified": false
+  },
+  "lab_bridge": {
+    "security_gate_forwards_cloudflare_ctx": true,
+    "device_gate_optional": true,
+    "device_hmac_store_verified_in_test": true,
+    "b3_scoped_grant_checked": true,
+    "mission_inspect_get_verified_in_test": true,
+    "post_deny_verified": true,
+    "revoked_device_deny_verified_in_test": true,
+    "prod_mutations": false,
+    "live_owner_device_mission_e2e": false,
+    "two_physical_devices_verified": false,
+    "cross_branch_cut49_exec_integrated": false
+  },
+  "legacy_cut18_fixture": {
+    "problem": "STATIC_B3_TEST_GRANT_EXPIRED_ON_2026_11_06",
+    "fix": "RELATIVE_EXPIRY_IN_TEST_ONLY",
+    "b3_runtime_expiry_policy_changed": false
+  },
+  "evidence": {
+    "core_run_id": 42318395454,
+    "core_tests_pass": 752,
+    "core_fail": 0,
+    "b7_run_id": 42318395386,
+    "b7_status": "SUCCESS",
+    "b4_run_id": 42318395374,
+    "b4_status": "SUCCESS",
+    "d1_local_run_id": 42318395379,
+    "d1_status": "SUCCESS",
+    "governed_run_id": 42318395376,
+    "governed_status": "SUCCESS",
+    "production_promotion": "SKIPPED"
+  },
+  "artifacts": {
+    "code": [
+      "zeus/jarvis/core/jarvis-gateway-security-gate.mjs",
+      "zeus/jarvis/core/jarvis-b2-b3-gateway-read-gate.mjs",
+      "zeus/jarvis/core/jarvis-b2-b3-gateway-read-gate.test.mjs",
+      "zeus/jarvis/core/jarvis-b2-b3-cut18-sqlite-gateway.test.mjs"
+    ],
+    "document": "zeus/jarvis/CUT34_OWNER_CANARY_B2_B3_MISSION_INSPECT_BRIDGE_2026-11-07.md"
+  },
+  "obligations": {
+    "prod_authorized": false,
+    "main_modified": false,
+    "app_modified": false,
+    "crm_modified": false,
+    "supabase_modified": false,
+    "ana_modified": false,
+    "cut30_modified": false,
+    "cut32_public_url_enabled": false,
+    "trading_access": false,
+    "paid_model_calls": 0,
+    "new_subscriptions_eur": 0,
+    "actions_cost_meters": "NOT_VERIFIED"
+  },
+  "next": "Verify Access protection of CUT32 isolated Worker and deployed code before any route; B2 device enroll owner PC+mobile with independent revocation; scoped B3 MISSION_INSPECT; real Gateway mission GET; later secure CUT49 bridge and tribunal.",
+  "dependency": "No global dispatch authority is granted by this CUT34 read-only bridge; CUT49 PR #34 remains DRAFT and separate.",
+  "rollback": "Revert CUT34 changes on DRAFT PR #25; no deployed changes or physical Cloudflare mutation."
+}

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/wrangler@4.157.0/config-schema.json",
+  "name": "cerebro-jarvis-lab-eu",
+  "main": "./worker-access-probe.mjs",
+  "compatibility_date": "2026-11-06",
+  "workers_dev": false,
+  "routes": [],
+  "observability": {
+    "enabled": false
+  },
+  "vars": {
+    "JARVIS_ENVIRONMENT": "LAB",
+    "JARVIS_ACCESS_PROBE_ENABLED": "false",
+    "JARVIS_GATEWAY_ENABLED": "false",
+    "JARVIS_B2_B3_LIVE_ENABLED": "false"
+  }
+}

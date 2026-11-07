@@ -1,0 +1,103 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-05",
+  "scope": "CUT16_B2_SESSION_REVOCATION_LAB",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "validated_code_head": "8842c11e045b263980b5f066a39e4506bbe2b12d",
+  "validation": {
+    "node": {
+      "run_id": 42112346465,
+      "job_id": 127542874270,
+      "passed": 589,
+      "failed": 0,
+      "postgres_temporal_rls_revoke_restore": "PASS"
+    },
+    "b4_pg": {
+      "run_id": 42112346684,
+      "result": "SUCCESS"
+    },
+    "b7_multiagent": {
+      "run_id": 42112346422,
+      "result": "SUCCESS"
+    },
+    "governed_integration": {
+      "run_id": 42112346554,
+      "result": "SUCCESS",
+      "promotion": "SKIPPED"
+    }
+  },
+  "existing_certification": {
+    "cut15_tests_pass": 572,
+    "cut15_run_id": 42109118073,
+    "verified_only_in": "POSTGRES_TEMPORAL_LAB"
+  },
+  "cut16": {
+    "state": "HECHO_LAB_CODE_ONLY",
+    "files": [
+      "zeus/jarvis/core/jarvis-b2-session-revocation-gate.mjs",
+      "zeus/jarvis/core/jarvis-b2-session-revocation-gate.test.mjs"
+    ],
+    "new_tests": 17,
+    "local_results": "17 PASS 0 FAIL",
+    "protections": [
+      "OFF_BY_DEFAULT",
+      "LAB_ONLY",
+      "HMAC_SESSION_HASH",
+      "NO_RAW_SESSION_STORED",
+      "EXPIRE_REVOKE_FAIL_CLOSED",
+      "COMPANY_SCOPE_NARROWED"
+    ],
+    "deployed": false,
+    "session_store_real": false,
+    "vault_real": false,
+    "enrolled_owner_root_real": false,
+    "b3_grants_real": false
+  },
+  "infrastructure_readonly": {
+    "supabase_accessible_projects": [
+      {
+        "id": "cluhljgonannaafpmblx",
+        "role": "PROD_PROTECTED_NOT_ELIGIBLE"
+      },
+      {
+        "id": "hnqlnvakzaywtafeiybt",
+        "role": "ACTIVE_MULTISYSTEM_NOT_EMPTY_NOT_ELIGIBLE_WITHOUT_FULL_DEPENDENCY_BACKUP"
+      }
+    ],
+    "alternative_project_observed": {
+      "database_size": "591 MB",
+      "active_connections_at_snapshot": 12,
+      "public_tables_observed": 146,
+      "preprod_test_tables": 32,
+      "owner_control_tables": 7,
+      "dedicated_jarvis_schemas": 0
+    },
+    "candidate_dedicated_lab_verified": false
+  },
+  "browser": {
+    "connected": "OPERA_INSTALLATION_5171b7ce",
+    "tab_read": "app.fenixcapital.es/cerebro",
+    "verified_owner_root_auth": false,
+    "second_physical_device_verified": false
+  },
+  "status": "PARCIAL",
+  "prod": "NO_GO",
+  "company": "fenix",
+  "additional_subscriptions": 0,
+  "protected_untouched": [
+    "APP_REAL",
+    "CRM_REAL",
+    "MAIN",
+    "PROD",
+    "DNS",
+    "ANA",
+    "TRADING",
+    "WORDPRESS",
+    "SEO",
+    "SUPABASE_DATA"
+  ],
+  "next_block": "Find authorized persistent isolated PostgreSQL LAB with independently verified backup, role, host/Vault; wire CUT16 sessionStore server-side and run real auth/revocation/2-device E2E, B3 minimum permissions, Gateway under OFF flag, B10 independent tribunal.",
+  "rollback": "Close draft PR #25 or revert only CUT16 commits; no runtime deployment, schema modification, role grant or PROD impact."
+}

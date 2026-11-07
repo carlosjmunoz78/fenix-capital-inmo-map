@@ -1,0 +1,118 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT33_PARALLEL",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "pr_number": 25,
+  "pr_draft": true,
+  "merged": false,
+  "certified_code_sha": "770936f79073fa04813460d20c60b55ffe7cfe74",
+  "code_status": "LAB_CERTIFIED_REMOTE_WORKER_EXISTS_DEPLOYED_CODE_UNVERIFIED",
+  "ci": {
+    "core": {
+      "run_id": 42206336554,
+      "passed": 750,
+      "failed": 0,
+      "result": "SUCCESS"
+    },
+    "wrangler_offline": {
+      "run_id": 42206336731,
+      "result": "SUCCESS",
+      "scope": "DRY_RUN_ONLY"
+    },
+    "b4": {
+      "run_id": 42206336471,
+      "result": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42206336526,
+      "result": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42206336650,
+      "result": "SUCCESS",
+      "promotion": "NOT_EXECUTED"
+    }
+  },
+  "cloudflare": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "current_worker": "cerebro-jarvis-lab-eu",
+    "current_cut30_version_id": "25e98edd-55a8-4222-b834-92f9d5b4bc21",
+    "current_worker_url": "https://cerebro-jarvis-lab-eu.carlosj-munozcabeza.workers.dev/__jarvis/owner-check",
+    "current_worker_unchanged": true,
+    "current_worker_access_preserved": true,
+    "current_worker_rollback_exercised": false,
+    "worker_deployments_dashboard": "https://dash.cloudflare.com/e39a57e1ac42650ca5a6d5307cf0ac8e/workers/services/view/cerebro-jarvis-lab-eu/production/deployments",
+    "old_versions_visible": [
+      "e0964441",
+      "696ab34b",
+      "afeb9af8",
+      "726addb9"
+    ],
+    "parallel_worker_name": "cerebro-jarvis-cut32-lab-eu",
+    "parallel_worker_exists_remotely": true,
+    "parallel_worker_access_configured": true,
+    "parallel_worker_deployed": true,
+    "parallel_worker_config": "zeus/jarvis/cloudflare-lab/wrangler-b2-parallel.staging.lab.jsonc",
+    "parallel_worker_route_enabled": false,
+    "d1_eu_uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+    "cut32_migration_0006": "HECHO_EU_REMOTE_PREVIOUS_WORK",
+    "backup_d1_independent_uuid": "8f966fb3-32db-43a0-aa55-67f88616a522",
+    "cut30_owner_get": "PASS",
+    "cut30_authenticated_post_405": "PASS",
+    "cut30_other_identity": "PENDING",
+    "b2_device_enrollment": "NOT_STARTED",
+    "b3": "OFF",
+    "gateway": "OFF",
+    "parallel_worker_code_certified": false,
+    "parallel_worker_version_id_prefix": "a0fda472",
+    "parallel_worker_access_policy": "JARVIS-CUT33-OWNER-ONLY",
+    "parallel_worker_access_policy_rule": "ALLOW_ONLY_carlosj.munozcabeza@gmail.com",
+    "parallel_worker_access_enforcement_verified": false,
+    "parallel_worker_public_url_checked": "https://cerebro-jarvis-cut32-lab-eu.carlosj-munozcabeza.workers.dev/",
+    "parallel_worker_public_url_result": "CLOUDFLARE_THERE_IS_NOTHING_HERE_YET",
+    "parallel_worker_access_destination_readback": "APP_LISTS_WORKER__EDITOR_PREVIEW_SAYS_NO_DESTINATIONS__REQUIRES_RECONCILIATION",
+    "cut33_other_d1_spotted_unverified": "cerebro-jarvis-cut33-lab-eu-jur"
+  },
+  "strategy": "Parallel new Worker staged no public route, separate Access owner-only before exposing workers.dev; original CUT30 never updated or downgraded.",
+  "done": [
+    "Confirmed Cloudflare official dashboard Rollback under Deployments > version's More options, and Wrangler rollback version mechanism; active CUT30 version preserved, actual rollback NOT exercised.",
+    "Verified actual Cloudflare dashboard 5 deployment rows, CUT30 25e98edd active at 100%, earlier history present, no menu invoked.",
+    "Added exact LAB allowlist for original and parallel hostname to setup and enrollment with strict same-origin POST checks.",
+    "New separate Worker config default OFF, workers_dev=false, routes=[], only EU D1 LAB binding and no secrets in repo.",
+    "Four new Node tests cover owner Access, negative origins, staging enrollment, no overwrite of CUT30; 750 tests PASS; five workflows green; Wrangler dry run PASS.",
+    "CUT33 remote readback on Nov 6: parallel Worker exists, version a0fda472 active, policy name JARVIS-CUT33-OWNER-ONLY with one owner email, workers.dev URL returns 'There is nothing here yet'; no public route activated; CUT30 not changed in this inspection."
+  ],
+  "pending": [
+    "Inspect deployed Worker code/version a0fda472 and compare hash and behavior with PR25 parallel candidate before enabling any route.",
+    "Reconcile Access destination: app list maps one Worker but app editor preview reports no destination; verify runtime enforcement (anonymous deny, owner allow) before any URL activation.",
+    "Verify policy before enabling parallel workers.dev; set protected secrets without printing",
+    "Verify CUT30 stays authorized and POST405; verify new unauthenticated/owner, no sessions",
+    "Optional trusted B2 enrollment of two real devices plus revocation, one short window and rollback of parallel Worker if available",
+    "Second real nonowner identity and B10 tribunal, B3 and Gateway"
+  ],
+  "risk": "Do NOT deploy original wrangler-b2-device.candidate.lab.jsonc or switch CUT30 to CUT32 without tested rollback; do NOT publish new parallel Worker before Access owner policy.",
+  "production": "NO_GO",
+  "subscription_added_eur": 0,
+  "costs": "Cloudflare Workers Free 100 Workers max per docs; confirm specific account capacity and no payment before creation; no DeepSeek/voice charges.",
+  "rollback": "Parallel Worker disable workers.dev or deactivate Access-only staging; original CUT30 remains independently active and unaffected. Worker lifecycle rollback not physically exercised.",
+  "next": "CUT33 remaining: verify Worker deployed source + resolve Access destination inconsistency, prove allow/deny under read-only safe test before any public route; keep B2/B3/Gateway OFF, CUT30 unchanged. If UI mutation required, use Work with browser write capability.",
+  "readback_2026_11_06": {
+    "source": "Opera authenticated Cloudflare UI + independent workers.dev GET",
+    "result": "PARTIAL_SAFE_PRIVATE",
+    "worker_version_prefix": "a0fda472",
+    "owner_policy_present": true,
+    "owner_policy_rule_count": 1,
+    "route_operational": false,
+    "code_verified": false,
+    "access_allow_deny_verified": false,
+    "app_access_destination_conflict": "Application index maps worker; edit preview says no destinations",
+    "no_public_activation_performed": true,
+    "original_worker_changed": false,
+    "prod_changed": false
+  }
+}

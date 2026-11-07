@@ -1,0 +1,27 @@
+/** CUT21 safety checks: no Cloudflare credentials, remote DB or routable Worker. */
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import assert from 'node:assert/strict';
+const root=new URL('./',import.meta.url);
+const read=name=>readFileSync(fileURLToPath(new URL(name,root)),'utf8');
+const c=JSON.parse(read('wrangler.jsonc'));
+assert.equal(c.name,'cerebro-jarvis-lab-cut21');
+assert.equal(c.workers_dev,false);
+assert.deepEqual(c.routes,[]);
+assert.equal(c.main,'./worker-off.mjs');
+assert.equal(c.observability?.enabled,false);
+assert.equal(c.d1_databases.length,1);
+assert.equal(c.d1_databases[0].binding,'JARVIS_LAB_DB');
+assert.equal(c.d1_databases[0].database_name,'cerebro-jarvis-lab-cut21');
+assert.equal(c.d1_databases[0].database_id,'00000000-0000-0000-0000-000000000000');
+assert.equal(c.d1_databases[0].preview_database_id,'jarvis-cut21-local');
+const worker=read('worker-off.mjs');
+assert.match(worker,/JARVIS_LAB_NOT_AUTHORIZED/);
+assert.match(worker,/503/);
+assert.doesNotMatch(worker,/service_role|serviceRole|Bearer\s|CLOUDFLARE_API_TOKEN|DATABASE_URL/);
+const migration=read('0001_jarvis_d1_mission_lab.sql');
+assert.match(migration,/jarvis_lab_mission_v0/);
+assert.match(migration,/CHECK\(environment = 'LAB'\)/);
+assert.match(migration,/UNIQUE\(owner_id,company_id,environment,idempotency_key\)/);
+assert.doesNotMatch(migration,/^\s*(DROP|TRUNCATE|DELETE)\s+/im);
+console.log('CUT21 private Cloudflare D1 config, default OFF, no routes, scope and additive SQL: PASS');

@@ -1,0 +1,71 @@
+{
+  "schema": "zeus.jarvis.b2b3.gateway.cut.state.v1",
+  "date": "2026-11-05",
+  "project_id": "PRJ-SUPERAGENT-001",
+  "company_id": "fenix",
+  "engine_id": "JARVIS-B2-B3-GATEWAY-001",
+  "version": "CUT11",
+  "environment": "LAB",
+  "status": "LAB_READ_GATE_GREEN_B2_PROD_BINDING_ABSENT",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "pr_number": 25,
+  "parent_pr_number": 20,
+  "code_sha_tested": "824c116a2a0c261d5a233a4c52e78df01df4809f",
+  "evidence": {
+    "github_node": {
+      "run_id": 42094753655,
+      "pass": 551,
+      "fail": 0
+    },
+    "github_b7": {
+      "run_id": 42094753711,
+      "conclusion": "success"
+    },
+    "github_governed": {
+      "run_id": 42094753739,
+      "conclusion": "success",
+      "prod_deploy": false
+    },
+    "prod_schema_readonly": {
+      "b2_binding_table_exists": false,
+      "b3_runtime_control_table_exists": true,
+      "b3_owner_grants_table_exists": true,
+      "prod_enabled": false,
+      "prod_kill_switch": true,
+      "grants": 0
+    },
+    "browser": {
+      "surface": "https://app.fenixcapital.es/cerebro",
+      "connected_browser": "Opera",
+      "jarvis_work_rendered": true,
+      "operativa_nav_rendered": true,
+      "navegador_nav_rendered": true,
+      "owner_root_jwt_verified": false,
+      "two_device_mission_test": false
+    }
+  },
+  "installed_code": {
+    "new_gate": "zeus/jarvis/core/jarvis-b2-b3-gateway-read-gate.mjs",
+    "test": "zeus/jarvis/core/jarvis-b2-b3-gateway-read-gate.test.mjs",
+    "default_enabled": false,
+    "lab_only": true,
+    "allowed_route": "GET /v1/missions/:id",
+    "denied_routes": [
+      "POST /v1/missions",
+      "POST /v1/missions/:id/execute",
+      "all unknown"
+    ],
+    "identity": "existing FenixOwnerChannelIdentityProvider + ZeusGlobalIdentityProvider",
+    "permission": "existing B3DecisionService MISSION_INSPECT",
+    "perimeter": "existing JarvisGatewaySecurityGate exact origin/host + limiter",
+    "deployment_status": "NOT_DEPLOYED_NO_ENDPOINT"
+  },
+  "existing_spec_not_executed": "zeus/jarvis/gates/20261103_jarvis_zeus_identity_binding_v0.sql",
+  "next_gate": "B2_SIGNED_OWNER_PROOF_AND_ISOLATED_SCHEMA_BACKUP_RESTORE_BEFORE_REGISTRY_ENROLLMENT",
+  "prod_changes": 0,
+  "grants_created": 0,
+  "secret_values_read": 0,
+  "new_subscriptions": 0,
+  "rollback": "CLOSE_DRAFT_PR25; PROD B3/B4 OFF; preserve main and protected App/CRM/ANA"
+}

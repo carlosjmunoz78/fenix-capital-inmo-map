@@ -1,0 +1,100 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "date": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT31",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr_number": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "draft": true,
+  "merged": false,
+  "code_sha_certified": "fbb2c41bb3161f03ec7fddc2c119ef9b7d518343",
+  "prod": "NO_GO",
+  "ci": {
+    "core": {
+      "run_id": 42195229797,
+      "total": 721,
+      "passed": 721,
+      "failed": 0,
+      "status": "SUCCESS"
+    },
+    "wrangler_local": {
+      "run_id": 42195230008,
+      "status": "SUCCESS",
+      "cut31_b2_worker_bundle": "OFFLINE_BUILD_ONLY"
+    },
+    "b4": {
+      "run_id": 42195229795,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42195229791,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42195229782,
+      "status": "SUCCESS",
+      "prod_promotion": "NOT_RUN"
+    }
+  },
+  "cut30_remote_verified": {
+    "evidence_library_id": "libfile_c35628e1db1481918e10b976ec740b6b",
+    "zero_trust_plan": "FREE",
+    "cost_usd_month": 0,
+    "worker": "cerebro-jarvis-lab-eu",
+    "owner_check_url": "https://cerebro-jarvis-lab-eu.carlosj-munozcabeza.workers.dev/__jarvis/owner-check",
+    "owner_get": "PASS",
+    "unauthenticated_request": "DENIED",
+    "forbidden_get_route": "DENIED",
+    "authenticated_post": "PENDING_REAL_TEST",
+    "second_real_identity": "PENDING_REAL_TEST",
+    "rollback": "DOCUMENTED_NOT_EXERCISED",
+    "live_b2": false,
+    "live_b3": false,
+    "live_gateway": false,
+    "access_application_id": "c3fc44df-9c3f-4e00-ba31-72c620985206",
+    "worker_access_policy_id": "4bd83b75-ecad-4371-b197-4157d9f009e8",
+    "scope": "SINGLE_WORKER_ONLY"
+  },
+  "eu_d1": {
+    "source": "cerebro-jarvis-lab-eu",
+    "uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+    "jurisdiction": "eu",
+    "independent_restore_uuid": "c446f17c-c26d-4c76-a3ea-f62c843d461b",
+    "schema": "CUT29_EMPTY_7_TABLES",
+    "owner_sessions_enrolled": 0,
+    "b3_real_grants": 0
+  },
+  "cut31_lab": {
+    "new_components": [
+      "zeus/jarvis/core/jarvis-access-b2-session-verifier.mjs",
+      "zeus/jarvis/core/jarvis-access-b2-session-verifier.test.mjs",
+      "zeus/jarvis/cloudflare-lab/worker-b2-read-probe.mjs",
+      "zeus/jarvis/cloudflare-lab/wrangler-b2-read-probe.candidate.lab.jsonc",
+      "zeus/jarvis/cloudflare-lab/verify-cut31-b2-binding.mjs",
+      "zeus/jarvis/core/jarvis-cut31-worker-b2-read-probe.test.mjs"
+    ],
+    "behavior": "Verified direct Cloudflare ctx.access + AUD+owner email + user UUID+iat; server WebCrypto HMAC matches PRE-EXISTING active non-revoked LAB D1 session. Never grants if row missing. No creation/enrollment/Worker deploy.",
+    "default_enabled": false,
+    "live_deployed": false,
+    "d1_reads_if_enabled": true,
+    "d1_writes": false,
+    "b3_grants": false,
+    "gateway_enabled": false,
+    "session_identifier_caveat": "Access user_uuid plus iat is a candidate session derivation. Unique physical per-device identity not yet verified. Do not claim physical session revocation."
+  },
+  "next_physical_gate": "Within one narrowly scoped Work mission after reviewed CUT31: finish CUT30 authenticated POST and foreign real identity denial if possible, validate actual Cloudflare identity user_uuid/iat without exposing values, obtain secure one-time B2 HMAC key and distinct sessions; enroll only after explicit approval and independent backup, then deploy same Worker guarded B2-status OFF initially. Maintain B3 OFF until real identity and revocation proven. No PROD.",
+  "safety": {
+    "no_main_merge": true,
+    "no_app_crm_changes": true,
+    "no_cloudflare_remote_writes_in_this_turn": true,
+    "no_dns_or_legacy_workers_changes": true,
+    "no_secrets_exposed": true,
+    "no_deepseek_api_spend": true,
+    "no_voice_deployment": true,
+    "new_subscription_cost_eur": 0
+  },
+  "rollback": "Revert CUT31 commits in PR25 DRAFT; no remote changes to revert. Existing CUT30 Worker untouched."
+}

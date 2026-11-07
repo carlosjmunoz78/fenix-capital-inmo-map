@@ -8,7 +8,9 @@ export function createJarvisGatewaySecurityGate({handler,enabled=false,allowedOr
  if(allowedOrigins.some(o=>typeof o!=='string'||!validOrigin(o)))throw new TypeError('ORIGIN_INVALID');
  if(allowedHosts.some(h=>typeof h!=='string'||!validOrigin(h)))throw new TypeError('HOST_INVALID');
  const originSet=new Set(allowedOrigins),hostSet=new Set(allowedHosts);
- return async function gated(request){
+ // Preserve platform-provided env and ctx to the authenticated downstream
+ // handler; never derive trusted ctx.access from headers, bodies or query.
+ return async function gated(request,env,ctx){
   if(!(request instanceof Request))return reply(400,'REQUEST_INVALID');
   if(!enabled)return reply(503,'JARVIS_GATEWAY_DISABLED');
   let uri;try{uri=new URL(request.url);}catch{return reply(400,'URL_INVALID');}
@@ -20,6 +22,6 @@ export function createJarvisGatewaySecurityGate({handler,enabled=false,allowedOr
   let permitted=false;
   try{permitted=await rateLimiter({method:request.method,path:uri.pathname,origin:origin??null})===true;}catch{return reply(503,'RATE_LIMIT_UNAVAILABLE');}
   if(!permitted)return reply(429,'RATE_LIMIT_EXCEEDED');
-  return handler(request);
+  return handler(request,env,ctx);
  };
 }

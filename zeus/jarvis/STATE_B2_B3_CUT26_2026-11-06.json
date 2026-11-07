@@ -1,0 +1,78 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "recorded_on": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT26",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "certified_code_head": "1431a16067893e5235b09a474680c4554eae9df1",
+  "ci": {
+    "core": {
+      "run_id": 42131429937,
+      "status": "SUCCESS",
+      "passed": 673,
+      "failed": 0
+    },
+    "wrangler_local": {
+      "run_id": 42131429933,
+      "status": "SUCCESS",
+      "checks": [
+        "D1 migration 0005 local",
+        "atomic quota hard cap=2 over three attempted reservations",
+        "backup SQL export and separate LOCAL restore of quota row",
+        "prior CUT21-25 restorations"
+      ]
+    },
+    "b4": {
+      "run_id": 42131429843,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42131429844,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42131429891,
+      "status": "SUCCESS",
+      "prod_promotion": "NOT_EXECUTED"
+    }
+  },
+  "completed_lab": [
+    "Atomic D1 UPSERT RETURNING daily quota for denied Gateway audit, default 500/day, max 1000/day",
+    "Quota UTC-day, one global counter per dedicated LAB DB, no owner/IP/JWT/session data",
+    "CUT25 audit wrapper + CUT26 guard integration, disabled by default; fail closed on quota exhaustion or storage outage",
+    "Quota persists after SQLite reopen and independent Wrangler local export/restore",
+    "9 extra Node tests (664 to 673), no prior certified behavior removed"
+  ],
+  "not_proven": [
+    "No Worker runtime deployment, Cloudflare D1 remote load, remote quota/cost measurement or global account cap",
+    "One global hard cap applies ONLY to CUT25 denial-audit row reservations on a SINGLE dedicated D1; it does not limit B3 audits, mission writes or other systems",
+    "Rate-limiting Cloudflare Worker binding approximate and cross-location risk; not used as proof of strict account-wide resource protection",
+    "No new EU-jurisdiction D1 yet; existing D1 remains jurisdiction NONE and synthetic-only",
+    "No real OWNER_ROOT, Vault, B3 grants, actual two devices, remote rollback or B10 tribunal"
+  ],
+  "cloudflare": {
+    "plan": "Workers Free (verified previously)",
+    "old_d1": "cerebro-jarvis-lab-cut21",
+    "old_d1_jurisdiction": null,
+    "old_d1_unchanged": true,
+    "eu_d1_name": "cerebro-jarvis-lab-eu",
+    "eu_d1_verified_created": false,
+    "workers_existing_untouched": true
+  },
+  "next_block": "Secure Cloudflare EU D1 provisioning via write-capable UI or short-lived narrowly-scoped secret in Vault; verify jurisdiction eu and backup/restore remotely. Then enable trusted B2/B3/denial audit with quota, real sessions, 2-device E2E and B10. No PROD by CI.",
+  "protections": {
+    "app_crm_prod_main_dns_ana_trading_supabase_untouched": true,
+    "cloudflare_remote_untouched": true,
+    "secrets_not_accessed": true,
+    "new_subscriptions": false,
+    "github_actions_usage_cost": "NOT_QUANTIFIED"
+  },
+  "rollback": "Revert CUT26 code and workflow commits only in DRAFT PR25; no remote Cloudflare mutation."
+}

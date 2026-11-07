@@ -14,7 +14,7 @@ export class SqliteMissionStore {
   }
   close(){this.db.close();}
   async get(id){const row=this.db.prepare('SELECT payload FROM missions WHERE id=?').get(clean(id));return row?JSON.parse(row.payload):null;}
-  async findByIdempotency(scope,key){const p=clean(scope).split(':');if(p.length!==2)throw new Error('INVALID_SCOPE');const row=this.db.prepare('SELECT payload FROM missions WHERE owner_id=? AND company_id=? AND idempotency_key=?').get(p[0],p[1],clean(key));return row?JSON.parse(row.payload):null;}
+  async findByIdempotency(scope,key){const value=clean(scope),i=value.lastIndexOf(':');if(i<=0||i===value.length-1)throw new Error('INVALID_SCOPE');const row=this.db.prepare('SELECT payload FROM missions WHERE owner_id=? AND company_id=? AND idempotency_key=?').get(value.slice(0,i),value.slice(i+1),clean(key));return row?JSON.parse(row.payload):null;}
   async put(m){if(!m?.id||!m?.ownerId||!m?.companyId||!m?.idempotencyKey)throw new Error('INVALID_MISSION');
     const before=this.db.prepare('SELECT payload FROM missions WHERE id=?').get(clean(m.id));
     if(!before){ // atomic unique key prevents duplicate mission writes across independent processes

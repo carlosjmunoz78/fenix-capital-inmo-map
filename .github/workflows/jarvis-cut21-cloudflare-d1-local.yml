@@ -1,0 +1,150 @@
+name: JARVIS CUT21 Cloudflare D1 Local Acceptance
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/cloudflare-lab/**'
+      - '.github/workflows/jarvis-cut21-cloudflare-d1-local.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  d1-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      WRANGLER_SEND_METRICS: 'false'
+    defaults:
+      run:
+        working-directory: zeus/jarvis/cloudflare-lab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Certify no public route, no live DB binding, no destructive migration
+        run: node verify-cut21-config.mjs
+      - name: CUT23 attest EU-only Worker configuration and default OFF
+        run: node verify-cut23-eu-config.mjs
+      - name: CUT23 EU OFF Worker package (dry-run only)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-eu.template.jsonc --dry-run --outdir=./cut23-eu-bundle
+          test -n "$(find ./cut23-eu-bundle -type f -print -quit)"
+          echo 'CUT23 EU OFF Worker dry run: PASS (no remote changes)'
+      - name: CUT28 bound EU D1 LAB offline safety attestation
+        run: node verify-cut28-eu-binding.mjs
+      - name: CUT28 bound EU D1 Worker OFF package (DRY RUN ONLY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-eu.lab.jsonc --dry-run --outdir=./cut28-eu-bundle
+          test -n "$(find ./cut28-eu-bundle -type f -print -quit)"
+          echo 'CUT28 pinned EU D1 OFF worker compiled without Cloudflare network deploy: PASS'
+      - name: CUT29 safe remote-migration operator plan (NO NETWORK / NO WRITES)
+        run: |
+          set -euo pipefail
+          node --check cut29-remote-eu-migrate.mjs
+          node cut29-remote-eu-migrate.mjs --plan > /tmp/jarvis-cut29-plan.json
+          grep -q '"LOCAL_PLAN_ONLY"' /tmp/jarvis-cut29-plan.json
+          grep -q '"remoteWrites": 0' /tmp/jarvis-cut29-plan.json
+          if env -u CLOUDFLARE_API_TOKEN -u JARVIS_CUT29_APPROVED node cut29-remote-eu-migrate.mjs --apply > /tmp/cut29-failure.txt 2>&1; then
+            echo 'CUT29 violated migration authorization gate'; exit 1
+          fi
+          echo 'CUT29 plan and authorization guard: PASS (offline)'
+      - name: CUT30 Cloudflare Access canary configuration OFF and no D1
+        run: node verify-cut30-access-canary.mjs
+      - name: CUT30 compile private Access canary without deploying
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-access-canary.lab.jsonc --dry-run --outdir=./cut30-access-bundle
+          test -n "$(find ./cut30-access-bundle -type f -print -quit)"
+          echo 'CUT30 private Cloudflare Access canary compiled, no routes, zero remote writes: PASS'
+      - name: CUT31 offline B2 Access to EU D1 binding guard
+        run: node verify-cut31-b2-binding.mjs
+      - name: CUT31 build B2 status candidate, NO DEPLOY
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-b2-read-probe.candidate.lab.jsonc --dry-run --outdir=./cut31-b2-candidate
+          test -n "$(find ./cut31-b2-candidate -type f -print -quit)"
+          echo 'CUT31 Cloudflare B2 canary build only: PASS'
+      - name: CUT32 independent device B2 status OFF-only binding guard
+        run: node verify-cut32-device-binding.mjs
+      - name: CUT32 compile private per-device B2 Worker (NO DEPLOY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --config wrangler-b2-device.candidate.lab.jsonc --dry-run --outdir=./cut32-device-bundle
+          test -n "$(find ./cut32-device-bundle -type f -print -quit)"
+          echo 'CUT32 per-device candidate compiled, no remote mutation: PASS'
+      - name: CUT33 compile isolated Access-protected LAB Worker (NO DEPLOY)
+        run: |
+          set -euo pipefail
+          node --test ../core/jarvis-cut33-parallel-stage.test.mjs
+          npx --yes wrangler@4.157.0 deploy --config wrangler-b2-parallel.staging.lab.jsonc --dry-run --outdir=./cut33-isolated-bundle
+          test -n "$(find ./cut33-isolated-bundle -type f -print -quit)"
+          echo 'CUT33 parallel Worker bundle compiled, original CUT30 untouched: PASS'
+      - name: CUT21 official Wrangler local D1 schema and durable restore
+        run: |
+          set -euo pipefail
+          WRANGLER="npx --yes wrangler@4.157.0"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0001_jarvis_d1_mission_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0002_jarvis_d1_session_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0003_jarvis_d1_b3_readonly_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0004_jarvis_d1_gateway_denial_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0005_jarvis_d1_daily_denial_quota_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --file=0006_jarvis_d1_b2_device_enrollment_audit_lab.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_b2_device_enrollment_audit_v0(owner_id,session_hmac,event_code,environment,issued_at_ms,expires_at_ms) VALUES ('synthetic-owner',lower(hex(zeroblob(32))),'ENROLLED','LAB',1793900000000,1893456000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT32_ENROLLMENT_AUDIT_PRESENT' AS result FROM jarvis_lab_b2_device_enrollment_audit_v0 WHERE owner_id='synthetic-owner';" | tee /tmp/jarvis-cut32-audit.txt
+          grep -q 'CUT32_ENROLLMENT_AUDIT_PRESENT' /tmp/jarvis-cut32-audit.txt
+          if $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="DELETE FROM jarvis_lab_b2_device_enrollment_audit_v0;" >/dev/null 2>&1; then
+            echo 'CUT32 failed: device enrollment audit allowed DELETE' >&2; exit 1
+          fi
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_denial_quota_v0 (usage_day,environment,quota_name,consumed,max_per_day) VALUES ('2026-11-06','LAB','GATEWAY_DENIAL',1,2) ON CONFLICT(usage_day,environment,quota_name) DO UPDATE SET consumed=consumed+1 WHERE consumed < max_per_day AND max_per_day=excluded.max_per_day RETURNING consumed;"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT26_QUOTA_HARD_CAP' AS result FROM jarvis_lab_denial_quota_v0 WHERE usage_day='2026-11-06' AND consumed=2 AND max_per_day=2;" | tee /tmp/jarvis-cut26-capped.txt
+          grep -q 'CUT26_QUOTA_HARD_CAP' /tmp/jarvis-cut26-capped.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_gateway_denial_audit_v0(reason_class,http_status,created_at_ms) VALUES ('AUTH_REQUIRED',401,1893456000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT25_DENIAL_RECORDED' AS result FROM jarvis_lab_gateway_denial_audit_v0 WHERE http_status=401;" | tee /tmp/jarvis-cut25-event.txt
+          grep -q 'CUT25_DENIAL_RECORDED' /tmp/jarvis-cut25-event.txt
+          if $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="DELETE FROM jarvis_lab_gateway_denial_audit_v0;" >/dev/null 2>&1; then
+            echo 'CUT25 failed: security audit allowed DELETE' >&2; exit 1
+          fi
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_b3_audit_v0 (event_code,action_name,company_id,engine_id,environment,grant_id,allowed,created_at_ms) VALUES ('DENY','MISSION_INSPECT','fenix','JARVIS','LAB',NULL,0,1893456000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT24_AUDIT_PRESENT' AS result FROM jarvis_lab_b3_audit_v0 WHERE event_code='DENY' AND company_id='fenix';" | tee /tmp/jarvis-cut24-audit.txt
+          grep -q 'CUT24_AUDIT_PRESENT' /tmp/jarvis-cut24-audit.txt
+          if $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="DELETE FROM jarvis_lab_b3_audit_v0;" >/dev/null 2>&1; then
+            echo 'CUT24 failed: immutable audit permitted DELETE' >&2; exit 1
+          fi
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_session_binding_v0 (owner_id,session_hmac,environment,channel,role,active,revoked,authorized_companies_json,expires_at_ms,issued_at_ms) VALUES ('synthetic-owner',lower(hex(zeroblob(32))),'LAB','fenix-app','OWNER_ROOT',1,0,json_array('fenix'),1893456000000,1793900000000);"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="UPDATE jarvis_lab_session_binding_v0 SET revoked=1 WHERE owner_id='synthetic-owner';"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT 'CUT22_REVOKED' AS result FROM jarvis_lab_session_binding_v0 WHERE owner_id='synthetic-owner' AND revoked=1;" | tee /tmp/jarvis-cut22-revocation.txt
+          grep -q 'CUT22_REVOKED' /tmp/jarvis-cut22-revocation.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="INSERT INTO jarvis_lab_mission_v0 (id,owner_id,company_id,engine_id,environment,version,project_id,idempotency_key,revision,mission_json,created_at,updated_at) VALUES ('synthetic-cut21','synthetic-owner','fenix','JARVIS','LAB','CUT21','PRJ','synthetic-once',0,'{}','2026-11-05T00:00:00Z','2026-11-05T00:00:00Z');"
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --command="SELECT id FROM jarvis_lab_mission_v0 WHERE id='synthetic-cut21';" | tee /tmp/jarvis-cut21-query.txt
+          grep -q 'synthetic-cut21' /tmp/jarvis-cut21-query.txt
+          $WRANGLER d1 export cerebro-jarvis-lab-cut21 --local --output=/tmp/jarvis-cut21-backup.sql
+          test -s /tmp/jarvis-cut21-backup.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --file=/tmp/jarvis-cut21-backup.sql
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT id FROM jarvis_lab_mission_v0 WHERE id='synthetic-cut21';" | tee /tmp/jarvis-cut21-restored.txt
+          grep -q 'synthetic-cut21' /tmp/jarvis-cut21-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT22_SESSION_RESTORED' AS result FROM jarvis_lab_session_binding_v0 WHERE owner_id='synthetic-owner' AND revoked=1;" | tee /tmp/jarvis-cut22-restored.txt
+          grep -q 'CUT22_SESSION_RESTORED' /tmp/jarvis-cut22-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT24_AUDIT_RESTORED' AS result FROM jarvis_lab_b3_audit_v0 WHERE event_code='DENY' AND company_id='fenix';" | tee /tmp/jarvis-cut24-restored.txt
+          grep -q 'CUT24_AUDIT_RESTORED' /tmp/jarvis-cut24-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT25_DENIAL_RESTORED' AS result FROM jarvis_lab_gateway_denial_audit_v0 WHERE http_status=401;" | tee /tmp/jarvis-cut25-restored.txt
+          grep -q 'CUT25_DENIAL_RESTORED' /tmp/jarvis-cut25-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT26_QUOTA_RESTORED' AS result FROM jarvis_lab_denial_quota_v0 WHERE usage_day='2026-11-06' AND consumed=2;" | tee /tmp/jarvis-cut26-restored.txt
+          grep -q 'CUT26_QUOTA_RESTORED' /tmp/jarvis-cut26-restored.txt
+          $WRANGLER d1 execute cerebro-jarvis-lab-cut21 --local --persist-to=./cut21-independent-restore --command="SELECT 'CUT32_ENROLLMENT_RESTORED' AS result FROM jarvis_lab_b2_device_enrollment_audit_v0 WHERE owner_id='synthetic-owner';" | tee /tmp/jarvis-cut32-restored.txt
+          grep -q 'CUT32_ENROLLMENT_RESTORED' /tmp/jarvis-cut32-restored.txt
+          echo 'CUT32 immutable device enrollment audit and independent LOCAL restore: PASS'
+          echo 'CUT26 strict daily D1 quota, overlimit denial and independent local restore: PASS'
+          echo 'CUT25 Wrangler local minimal security audit immutable and independently restored: PASS'
+          echo 'CUT24 Wrangler D1 local B3 audit immutable and independently restored: PASS'
+          echo 'CUT22 D1 local B2 session revocation and independent restore: PASS'
+          echo 'CUT21 official Wrangler local D1 create/read/backup/independent restore: PASS'
+      - name: Offline Worker bundle verification (NO DEPLOY)
+        run: |
+          set -euo pipefail
+          npx --yes wrangler@4.157.0 deploy --dry-run --outdir=./cut21-bundle
+          test -n "$(find ./cut21-bundle -type f -print -quit)"
+          echo 'CUT21 Wrangler Worker bundle dry run: PASS (no remote changes)'

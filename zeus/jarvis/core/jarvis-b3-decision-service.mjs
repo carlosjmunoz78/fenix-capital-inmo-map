@@ -7,14 +7,15 @@ export function createJarvisB3DecisionService({identityProvider,controlStore,gra
    typeof grantStore?.find!=='function'||typeof actionCatalog?.get!=='function'||
    typeof auditStore?.append!=='function')throw new TypeError('SERVER_ADAPTERS_REQUIRED');
  return Object.freeze({async authorize({token,companyId,environment,actionName}={}){
-  if(token==null||!textId(companyId)||!['LAB','PREPROD','PROD'].includes(environment)||!textId(actionName))
+  if(typeof token!=='string'||!token.trim()||token.length>8192||!textId(companyId)||!['LAB','PREPROD','PROD'].includes(environment)||!textId(actionName))
    return denied('REQUEST_INVALID');
   let result=denied('AUTHORIZATION_UNAVAILABLE'),principal,control;
   try{
    principal=await identityProvider.verify(token);
-   if(!principal?.ownerId||!principal?.sessionId||!principal.roles?.includes('OWNER_ROOT'))
+   if(!textId(principal?.ownerId)||!textId(principal?.sessionId)||
+      !Array.isArray(principal.roles)||!principal.roles.includes('OWNER_ROOT'))
      result=denied('AUTH_DENIED');
-   else if(!principal.authorizedCompanies?.includes(companyId))
+   else if(!Array.isArray(principal.authorizedCompanies)||!principal.authorizedCompanies.includes(companyId))
      result=denied('COMPANY_SCOPE_DENIED');
    else{
     control=await controlStore.get({companyId,environment});

@@ -1,0 +1,97 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "cut": "CUT32",
+  "date": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT32",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 25,
+  "draft": true,
+  "merged": false,
+  "prod": "NO_GO",
+  "code_sha_certified": "976d5b0d16b209f062e03a7056da3d3cb660af25",
+  "ci": {
+    "core": {
+      "run_id": 42198389955,
+      "passed": 739,
+      "failed": 0,
+      "status": "SUCCESS"
+    },
+    "d1_local": {
+      "run_id": 42198389759,
+      "status": "SUCCESS",
+      "migration_0006": "LOCAL_ONLY",
+      "audit_immutable": "PASS",
+      "independent_restore": "PASS",
+      "offline_worker_bundle": "PASS"
+    },
+    "b4": {
+      "run_id": 42198389752,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42198389881,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42198389981,
+      "status": "SUCCESS",
+      "promotion": "NOT_RUN"
+    }
+  },
+  "existing_cloud": {
+    "cut30_worker": "cerebro-jarvis-lab-eu",
+    "owner_check_url": "https://cerebro-jarvis-lab-eu.carlosj-munozcabeza.workers.dev/__jarvis/owner-check",
+    "zero_trust": "FREE",
+    "cut30_real_owner": "VERIFIED",
+    "cut30_other_real_identity": "NOT_TESTED",
+    "cut30_authenticated_post": "NOT_TESTED",
+    "cut30_rollback_test": "NOT_EXECUTED",
+    "new_code_deployed": false,
+    "b2_device_sessions_enrolled": false,
+    "b3_granted": false,
+    "gateway_running": false
+  },
+  "d1": {
+    "source_uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc",
+    "jurisdiction": "eu",
+    "remote_schema": "0001-0005 ONLY 7 TABLES, no 0006 yet",
+    "remote_backup_proven": "EMPTY SCHEMA SQL LOGICAL",
+    "restore_uuid": "c446f17c-c26d-4c76-a3ea-f62c843d461b",
+    "old_synthetic_uuid": "a859fde1-126b-4c40-bc0d-aec2f8839f7b"
+  },
+  "delivered_lab": [
+    "CUT32 B2 per-device random opaque __Host cookie HMAC verifier: Access owner+aud+user_uuid still required, independent browser token and D1 active not revoked",
+    "CUT32 temporary approved per-device enrollment: one short <=10 minute operator window, max two active sessions, 30 minute TTL, no auto enrolment from GET",
+    "D1 session+append-only enrollment audit are atomically batched; no Set-Cookie unless both statements confirm, HttpOnly Secure SameSite=Strict",
+    "New additive SQL 0006 immutable enrollment audit, migrated and restored only to OFFLINE Wrangler D1",
+    "Candidate Worker combines existing CUT30 owner-check and device status/enrollment routes, all defaults OFF, no public routes or deployment",
+    "Proof via synthetic independent cookie A/B that revoking one retains the other",
+    "Voice JARVIS V2 own/no per phrase, App ANA protected; DeepSeek exit future and EUR 50 temporary spend guard retained"
+  ],
+  "not_yet_proven": [
+    "Actual physical browser sessions distinct and independently revoked",
+    "Authenticated owner enrollment in remote D1",
+    "Real user identity second-account denial and authenticated POST response CUT30",
+    "Rollback exercised on live Worker",
+    "Remote migration 0006 after backup and import verification",
+    "B3 read-only grants and Gateway in cloud",
+    "B10 tribunal and PROD readiness"
+  ],
+  "next_gate": "One tightly scoped Work operation: inventory/backup existing Access Worker and EU D1; validate CUT30 negatives; secure isolated remote migration 0006 and independent restore; stage CUT32 same Access-protected worker preserving workers.dev and existing policy, enable <=10min enrollment for verified owner on PC and mobile, prove independently revoked one, then disable enrollment. Keep B3/Gateway OFF and preserve rollback. Never expose tokens or owner email.",
+  "caveats": [
+    "Do NOT deploy candidate Wrangler config verbatim (workers_dev=false): it would disable the currently working Access URL. Cloud change must preserve existing protected hostname and current Access policy.",
+    "Access user_uuid is an identity, not a per-device session. CUT31 user_uuid+iat identity-derived sessions must NOT be promoted as selective device revocation.",
+    "D1 is SQLite with no PostgreSQL RLS; Worker binding remains private and scoped.",
+    "All production App/CRM/Supabase, DNS, Trading, ANA, SEO, existing Workers and main branch untouched."
+  ],
+  "cost": {
+    "new_subscription_eur": 0,
+    "cloudflare": "Workers Free/Access Free",
+    "deepseek_spend_eur": 0,
+    "github_actions_usage": "NOT_METERED"
+  },
+  "rollback": "Revert CUT32 in PR25 DRAFT. Since code/migration were only tested locally, there is no new remote operation to roll back."
+}

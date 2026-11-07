@@ -1,0 +1,70 @@
+{
+  "schema": "zeus.jarvis.superagent.live_state.v1",
+  "observed_date": "2026-11-06",
+  "cut": "CUT25",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT25",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr_number": 25,
+  "branch": "cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105",
+  "draft": true,
+  "merged": false,
+  "certified_code_sha": "0642a39ab2d598d6d776cfcd3c2ecfbe3b812bfd",
+  "ci": {
+    "core": {
+      "run_id": 42130273800,
+      "pass": 664,
+      "fail": 0
+    },
+    "wrangler_local": {
+      "run_id": 42130273818,
+      "status": "SUCCESS",
+      "restored_security_events": true
+    },
+    "b4": {
+      "run_id": 42130273954,
+      "status": "SUCCESS"
+    },
+    "b7": {
+      "run_id": 42130273764,
+      "status": "SUCCESS"
+    },
+    "governed": {
+      "run_id": 42130273783,
+      "status": "SUCCESS",
+      "promotion": "NOT_RUN"
+    }
+  },
+  "done_lab": [
+    "CUT25 additive minimal D1 gateway security denial audit schema 0004, append-only triggers",
+    "Server-only denial auditor persists only status/reason class/time; no token/IP/URL/owner/session/company",
+    "Disabled-by-default gateway decorator wraps existing perimeter→B2→B3, records rejected responses including B2 reject pre-B3",
+    "Fail-closed audit storage outage; quotaGuard mandatory to mitigate Free tier unbounded writes",
+    "Wrangler official LOCAL D1 0004 write/reject-delete/export/independent restore; Node suite 664 PASS"
+  ],
+  "limitations": [
+    "CUT25 wrapper is a separate LAB candidate, NOT deployed or wired into an active Worker",
+    "QuotaGuard is injection point only; no actual remote distributed cost limiter proven",
+    "Quota guard denies are not themselves persisted, by design to avoid exceeding quota",
+    "Current Cloudflare D1 cerebro-jarvis-lab-cut21 (a859fde1-126b-4c40-bc0d-aec2f8839f7b) has jurisdiction NONE; synthetic-only",
+    "EU-jurisdiction D1 cerebro-jarvis-lab-eu not created",
+    "Remote D1 migrations/backup/restore, real OWNER_ROOT B2, Vault, B3 grants, two devices, independent B10 not verified",
+    "D1 lacks PostgreSQL RLS, no equivalent DB-native role isolation"
+  ],
+  "next_block": "Create dedicated EU-jurisdiction D1 using write-capable admin (Opera connector cannot submit forms). Verify source account, UUID and jurisdiction, remote backup/restore. Then server Vault + authentic B2, scoped B3, quotaGuard + security audit full E2E across two physical devices, old/new parity and independent B10.",
+  "protections": {
+    "app_crm_prod_untouched": true,
+    "main_untouched": true,
+    "dns_untouched": true,
+    "ana_trading_supabase_untouched": true,
+    "existing_workers_untouched": true,
+    "remote_d1_untouched": true,
+    "token_values_not_accessed": true,
+    "subscription_added_eur": 0,
+    "ci_usage_cost": "NOT_VERIFIED",
+    "prod": "NO_GO"
+  },
+  "rollback": "Revert CUT25 branch commits in PR DRAFT. No deployment or DB mutation to undo."
+}
