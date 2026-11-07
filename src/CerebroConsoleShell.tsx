@@ -4,8 +4,9 @@ import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucid
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
-import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
 import {JarvisConversationBridgeContext,type JarvisConversationDriver} from './jarvisConversationBridge';
+import {preferredJarvisMaleBrowserVoice} from './jarvisMaleBrowserVoice';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
@@ -289,7 +290,11 @@ export default function CerebroConsoleShell(){
   const plan=speechPlanRef.current;
   if(!voiceSessionRef.current||!voiceSupport.tts||!plan.length)return false;
   const token=++speechRunTokenRef.current;
-  const selected=preferredSpanishVoice(spanishVoices());
+  const selected=preferredJarvisMaleBrowserVoice(spanishVoices());
+  if(!selected){
+   setVoiceError('No hay una voz masculina española identificable en este dispositivo. La voz oficial JARVIS V2 aún necesita conexión; el texto sigue disponible.');
+   return false;
+  }
   const speakSegment=(index:number,charIndex:number)=>{
    if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
    if(index>=plan.length){
@@ -308,8 +313,8 @@ export default function CerebroConsoleShell(){
    const utterance=new SpeechSynthesisUtterance(remaining);
    utterance.rate=segment.rate;
    utterance.pitch=segment.pitch;
-   if(selected){utterance.voice=selected;utterance.lang=selected.lang}
-   else utterance.lang='es-ES';
+   utterance.voice=selected;
+   utterance.lang=selected.lang;
    utterance.onboundary=event=>{
     if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
     const localIndex=typeof event.charIndex==='number'&&Number.isFinite(event.charIndex)?event.charIndex:0;
@@ -382,7 +387,7 @@ export default function CerebroConsoleShell(){
   speechCursorRef.current={segmentIndex:0,charIndex:0};
   voicePausedRef.current=false;
   setVoicePaused(false);
-  playSpeechPlan(0,0);
+  if(!playSpeechPlan(0,0))scheduleListening(150);
  }
 
  function pauseSpeech(){
