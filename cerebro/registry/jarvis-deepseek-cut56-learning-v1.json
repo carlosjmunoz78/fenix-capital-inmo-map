@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT59_COMPANY_REGISTRY_AND_17_ENGINE_EVIDENCE_RECONCILIATION_READ_ONLY",
+  "next_block": "CUT60_PHYSICAL_MARKETING_CRM_QA_PLUS_BACKUP_OLD_NEW_AND_REGISTRY_ACCEPTANCE",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -113,5 +113,50 @@
     "additional_ai_calls": 0,
     "paid_ai_budget_status": "PAUSED_PENDING_BILLING_RECONCILIATION",
     "required_docs": "cerebro/jarvis/boost-001/CUT58_ADVERSARIAL_LRN001_PHYSICAL_GATE_2026-11-07.md"
+  },
+  "cut59": {
+    "version": "CUT59-v0.1",
+    "status": "READONLY_TWO_SUPABASE_RECONCILED_MKT_CRM_PHYSICAL_PROOF_MISSING",
+    "observation_source_file": "cerebro/jarvis/boost-001/cut59-legacy-to-prod-observation-20261107.json",
+    "observation_source_sha256": "044ac122f2283f5c78c12eeb093edcdf46b073447d9f15ac603ef175eb1ced56",
+    "ci_run_id": 42386287743,
+    "ci_result": "success",
+    "unit_tests_pass": 7,
+    "unit_tests_fail": 0,
+    "ci_artifact_id": 13579402788,
+    "legacy_project_ref": "hnqlnvakzaywtafeiybt",
+    "target_project_ref": "cluhljgonannaafpmblx",
+    "legacy_counts": {
+      "green": 11,
+      "ready": 2,
+      "blocked": 4,
+      "green_with_hash": 8
+    },
+    "legacy_state_as_of": "2026-10-13",
+    "priority_order": [
+      "MKTBOOT-001",
+      "CRMBOOT-001",
+      "APPBOOT-001",
+      "AUTBOOT-001",
+      "TRNBOOT-001",
+      "ENGACT-001"
+    ],
+    "target_db": {
+      "fenix_registry_rows": 0,
+      "fenix_onboarding_rows": 0,
+      "fenix_engine_rows": 0,
+      "marketing_crm_receipts": 0,
+      "lrn_receipts": 0
+    },
+    "marketing_crm_rpc": "public.cerebro_marketing_crm_bootstrap_record_preprod",
+    "marketing_crm_rpc_has_independent_evidence_byte_verification": false,
+    "rpc_called": false,
+    "supabase_mutations": 0,
+    "prod_mutations": 0,
+    "learning_rules_applied": 0,
+    "current_physical_motors_verified": 0,
+    "production_ready": false,
+    "next_block": "CUT60_PHYSICAL_MARKETING_CRM_QA_PLUS_BACKUP_OLD_NEW_AND_REGISTRY_ACCEPTANCE",
+    "documentation": "cerebro/jarvis/boost-001/CUT59_RECONCILIACION_MOTORES_Y_DESBLOQUEO_REAL_LRN001_2026-11-07.md"
   }
 }
