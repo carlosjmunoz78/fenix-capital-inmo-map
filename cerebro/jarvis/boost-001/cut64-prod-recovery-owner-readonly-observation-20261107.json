@@ -73,11 +73,11 @@
     "app_crm_writes": 0,
     "cloudflare_policy_changes": 0,
     "cut30_original_worker_changes": 0,
-    "worker_cut32_public_enabled": false,
     "paid_deepseek_api_calls": 0,
     "new_subscriptions": 0,
     "owner_e2e_owner_authenticated": false,
     "prod_authorized": false,
-    "physical_production_release_verified": false
+    "physical_production_release_verified": false,
+    "worker_cut32_current_public_exposure_revalidated_in_this_cut": false
   }
 }
