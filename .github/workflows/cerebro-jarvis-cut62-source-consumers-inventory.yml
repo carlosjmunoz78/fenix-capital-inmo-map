@@ -51,3 +51,5 @@ jobs:
           path: ${{ runner.temp }}/cerebro-cut62-source-consumers.json
           retention-days: 30
           if-no-files-found: error
+
+# CUT62 audit categorization: dynamic API call versus tenant-context text; print path-only matches.
