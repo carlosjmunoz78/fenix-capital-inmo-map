@@ -1,3 +1,5 @@
+import {webcrypto} from 'node:crypto';
+import {createJarvisB2DeviceSessionGate} from './jarvis-b2-device-session-gate.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {FenixOwnerChannelIdentityProvider} from './jarvis-fenix-channel-identity.mjs';
@@ -52,6 +54,7 @@ async function rig(opts={}){
  const gate=createJarvisB2B3GatewayReadGate({handler,
   identityProvider,b3DecisionService,missionStore:store,
   rateLimiter:async()=>{calls.limit++;return opts.limit!==false},
+  deviceSessionGate:opts.deviceSessionGate??null,
   enabled:true,environment:'LAB',trustedChannel:'fenix-app'});
  return {gate,calls,store};
 }
@@ -160,4 +163,72 @@ test('outer security gate OFF prohibits even authenticated B2/B3 reads',async()=
  const perimeter=createJarvisGatewaySecurityGate({handler:gate});
  assert.equal((await perimeter(mk())).status,503);
  assert.equal(calls.handler,0);
+});
+
+test('CUT34 trusted Worker env/ctx reaches real B2 per-device D1-HMAC check then B3 grant and original mission GET only',async()=>{
+ const now=Date.parse('2026-11-07T12:00:00Z');
+ const ownerId='zeus-owner-1',userUuid='11111111-2222-4333-8444-555555555555';
+ const ownerEmail='synthetic.owner@example.invalid',aud='abcdef0123456789abcdef0123456789';
+ const token='signed-owner-session-A',cookie='A'.repeat(43),keyHex='a4'.repeat(32);
+ const key=await webcrypto.subtle.importKey('raw',Uint8Array.from(keyHex.match(/../g),h=>parseInt(h,16)),
+  {name:'HMAC',hash:'SHA-256'},false,['sign']);
+ const hmac=Array.from(new Uint8Array(await webcrypto.subtle.sign('HMAC',key,
+  new TextEncoder().encode('jarvis-b2-device-v1\0'+ownerId+'\0'+userUuid+'\0'+cookie))))
+  .map(x=>x.toString(16).padStart(2,'0')).join('');
+ let revoked=false,reads=0;
+ const sessionStore={get:async args=>{
+  reads++;
+  if(args.ownerId!==ownerId||args.sessionHmac!==hmac||args.environment!=='LAB')return null;
+  return {ownerId,sessionHmac:hmac,environment:'LAB',role:'OWNER_ROOT',
+   active:true,revoked,expiresAt:now+60000,authorizedCompanies:['fenix']};
+ }};
+ const deviceSessionGate=createJarvisB2DeviceSessionGate({
+  sessionStore,environment:'LAB',enabled:true,cryptoImpl:webcrypto,clock:()=>now
+ });
+ const env={JARVIS_B2_DEVICE_ENABLED:'true',JARVIS_ACCESS_AUD:aud,
+  JARVIS_OWNER_EMAIL:ownerEmail,JARVIS_OWNER_ID:ownerId,JARVIS_B2_HMAC_KEY_HEX:keyHex};
+ const ctx={access:{aud,getIdentity:async()=>({email:ownerEmail,user_uuid:userUuid})}};
+ const {gate,calls}=await rig({deviceSessionGate});
+ const perimeter=createJarvisGatewaySecurityGate({handler:gate,enabled:true,
+  allowedOrigins:['https://app.fenixcapital.es'],
+  allowedHosts:['https://jarvis.lab.example.test'],rateLimiter:async()=>true});
+ const req=(c=cookie,method='GET')=>new Request(URL,{method,headers:{
+  authorization:'Bearer '+token,cookie:'__Host-jarvis_b2='+c,
+  origin:'https://app.fenixcapital.es'
+ }});
+ const response=await perimeter(req(),env,ctx);
+ assert.equal(response.status,200);
+ const data=await response.json();
+ assert.equal(data.status,'OK');assert.equal(data.mission.id,'mission001');
+ assert.equal(calls.handler,1);assert.equal(calls.b3,1);assert.equal(calls.grant,1);
+ assert.equal(reads,1);assert.equal(JSON.stringify(data).includes(cookie),false);
+ assert.equal((await perimeter(req('B'.repeat(43)),env,ctx)).status,403);
+ assert.equal((await perimeter(req(),env,{})).status,403);
+ assert.equal((await perimeter(req(),'not valid',ctx)).status,403);
+ assert.equal((await perimeter(req(cookie,'POST'),env,ctx)).status,405);
+ assert.equal(calls.handler,1);
+ revoked=true;
+ assert.equal((await perimeter(req(),env,ctx)).status,403);
+ assert.equal(calls.handler,1);
+});
+test('CUT34 B2 device owner mismatch, session scope mismatch and fake client identity never bypass B3 owner check',async()=>{
+ const {gate,calls}=await rig({deviceSessionGate:{
+  verify:async()=>({ownerId:'other-owner',roles:['OWNER_ROOT'],
+   authorizedCompanies:['fenix'],environment:'LAB',b3Granted:false,
+   verifiedBy:'ACCESS_AND_PER_DEVICE_D1_SESSION'})
+ }});
+ const reply=await gate(mk(),'server-env',{access:{}});
+ assert.equal(reply.status,403);assert.equal(calls.b3,0);assert.equal(calls.handler,0);
+ const other=await rig({deviceSessionGate:{
+  verify:async()=>({ownerId:'zeus-owner-1',
+   authorizedCompanies:['otra_empresa'],environment:'LAB',b3Granted:false,
+   verifiedBy:'ACCESS_AND_PER_DEVICE_D1_SESSION'})
+ }});
+ assert.equal((await other.gate(mk(),{},{})).status,403);
+ assert.equal(other.calls.handler,0);
+ const forged=await rig({deviceSessionGate:{verify:async()=>({
+  ownerId:'zeus-owner-1',authorizedCompanies:['fenix'],environment:'LAB',
+  b3Granted:true,verifiedBy:'CLIENT_ASSERTION'})}});
+ assert.equal((await forged.gate(mk(),{},{})).status,403);
+ assert.equal(forged.calls.handler,0);
 });
