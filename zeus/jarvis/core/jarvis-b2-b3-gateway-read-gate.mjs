@@ -13,19 +13,23 @@ const CHANNEL=/^[a-z][a-z0-9-]{1,79}$/;
 const id=(s)=>typeof s==='string'&&/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,199}$/.test(s);
 export function createJarvisB2B3GatewayReadGate({
  handler,identityProvider,b3DecisionService,missionStore,rateLimiter,
- enabled=false,environment='LAB',trustedChannel='fenix-app'
+ deviceSessionGate=null,enabled=false,environment='LAB',trustedChannel='fenix-app'
 }={}){
  if(typeof handler!=='function')throw TypeError('TRUSTED_HANDLER_REQUIRED');
  if(enabled!==true&&enabled!==false)throw TypeError('ENABLED_MUST_BE_BOOLEAN');
  if(environment!=='LAB'&&enabled)throw TypeError('PROD_OR_PREPROD_READ_GATE_NOT_CERTIFIED');
  if(!CHANNEL.test(trustedChannel))throw TypeError('TRUSTED_CHANNEL_INVALID');
+ if(deviceSessionGate!==null&&typeof deviceSessionGate?.verify!=='function')
+  throw TypeError('B2_DEVICE_GATE_INVALID');
  if(enabled&&(
   typeof identityProvider?.verify!=='function'||
   typeof b3DecisionService?.authorize!=='function'||
   typeof missionStore?.get!=='function'||
   typeof rateLimiter!=='function'
  ))throw TypeError('SERVER_AUTHORIZATION_ADAPTERS_REQUIRED');
- return async function readGate(request){
+ // env and ctx must originate from the Cloudflare Worker runtime.
+ // Never allow user JSON or headers to supply a trusted ctx.access.
+ return async function readGate(request,env,ctx){
   if(!enabled)return reply(503,'B2_B3_LAB_GATE_DISABLED');
   if(!(request instanceof Request))return reply(400,'REQUEST_INVALID');
   let url;try{url=new URL(request.url)}catch{return reply(400,'URL_INVALID')}
@@ -36,6 +40,15 @@ export function createJarvisB2B3GatewayReadGate({
   if(!/^Bearer\s+[^\s]+$/.test(bearer)||bearer.length>8200)
    return reply(401,'BEARER_REQUIRED');
   const token=bearer.replace(/^Bearer\s+/,'');
+  let deviceProof=null;
+  if(deviceSessionGate){
+   try{deviceProof=await deviceSessionGate.verify({request,env,ctx})}
+   catch{return reply(403,'B2_DEVICE_SESSION_REQUIRED')}
+   if(deviceProof?.environment!=='LAB'||deviceProof?.verifiedBy!=='ACCESS_AND_PER_DEVICE_D1_SESSION'||
+     deviceProof?.b3Granted!==false||!id(deviceProof?.ownerId)||
+     !Array.isArray(deviceProof?.authorizedCompanies))
+    return reply(403,'B2_DEVICE_PROOF_INVALID');
+  }
   let principal,mission;
   try{
    principal=await identityProvider.verify(Object.freeze({
@@ -45,8 +58,12 @@ export function createJarvisB2B3GatewayReadGate({
      !Array.isArray(principal?.roles)||!principal.roles.includes('OWNER_ROOT')||
      !Array.isArray(principal?.authorizedCompanies)||!principal.authorizedCompanies.length)
      return reply(403,'OWNER_AUTH_REQUIRED');
+   if(deviceProof&&(deviceProof.ownerId!==principal.ownerId||
+       !principal.authorizedCompanies.every(company=>deviceProof.authorizedCompanies.includes(company))))
+    return reply(403,'B2_DEVICE_OWNER_SCOPE_DENIED');
    mission=await missionStore.get(m[1]);
    if(!mission||mission.id!==m[1]||mission.ownerId!==principal.ownerId||
+     (deviceProof&&!deviceProof.authorizedCompanies.includes(mission.companyId))||
      mission.environment!=='LAB'||!id(mission.companyId)||
      !principal.authorizedCompanies.includes(mission.companyId))
     return reply(404,'MISSION_NOT_FOUND');
