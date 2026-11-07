@@ -1,0 +1,53 @@
+name: CEREBRO JARVIS CUT62 · App CRM Edge consumers source inventory (OFFLINE)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut62-source-consumers-inventory.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-consumers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_CRM_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Bounded source scanner QA including credential redaction
+        run: |
+          set -euo pipefail
+          node --check cerebro/jarvis/boost-001/cut62-source-consumers-inventory-v0.mjs
+          node --test cerebro/jarvis/boost-001/cut62-source-consumers-inventory-v0.test.mjs
+      - name: Scan checkout including app frontend / Supabase functions / runtimes
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut62-source-consumers-inventory-v0.mjs \
+            "$RUNNER_TEMP/cerebro-cut62-source-consumers.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-cut62-source-consumers.json'));
+            if(r.repositories_scanned!==1||r.tracked_code_files_considered<100||
+               r.credentials_logged!==false||r.source_snippets_logged!==false||
+               r.compiled_app_deployment_parity_verified!==false||
+               r.deployed_edge_code_fully_scanned!==false||
+               r.prod_authorized!==false||r.physical_prod_backup_verified!==false)
+              process.exit(1);
+          "
+      - name: Upload safe path-only consumers report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut62-app-crm-edge-consumers-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-cut62-source-consumers.json
+          retention-days: 30
+          if-no-files-found: error
