@@ -28,7 +28,7 @@ const payloads = Object.freeze({
   summary_es:'Planificar la landing con inventario, dependencias, backup, pruebas en entorno aislado y comparación OLD vs NEW antes de valorar el despliegue gobernado.',
   when:'Se propone lanzar una landing o automatización y existen App, CRM o WordPress PROD protegidos',
   then:'Inventariar consumidores y contratos, preparar backup, construir aislado, ejecutar pruebas de seguridad, SEO y regresión, evaluar OLD vs NEW y comprobar rollback antes de promoción gradual.',
-  guard:'Ninguna modificación en PROD sin gates, permisos y pruebas físicas. HUMAN_REQUIRED solo por LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT o CUSTOMER_HUMAN_REQUEST.'
+  guard:'Ninguna modificación en PROD sin gates, permisos, pruebas físicas, auditoría y evidencias verificables. HUMAN_REQUIRED solo por LEGAL_REQUIRED, SIGNATURE_REQUIRED, LOW_CONFIDENCE, HIGH_RISK, POLICY_CONFLICT, SECURITY_INCIDENT, MONEY_LIMIT o CUSTOMER_HUMAN_REQUEST.'
  },
  'persona-01':{
   action:'PLAN',
