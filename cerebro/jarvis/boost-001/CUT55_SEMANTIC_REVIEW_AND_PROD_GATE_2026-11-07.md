@@ -40,3 +40,13 @@ Estas conclusiones son una revisión semántica técnica de los outputs, NO un t
 App/CRM/ANA/Supabase PROD/Cloudflare/CUT30/main/Trading/voz de producción; no merge ni deploy ni activación de permisos. Sin credenciales visibles.
 
 `next_block = CUT56_SEMANTIC_TRIBUNAL_AND_LRN_SAFE_INTEGRATION`.
+
+## Investigación adicional CUT37 · bloqueo del ciclo continuo (evidencia física)
+- Ledger canónico en la rama autorizada: `zeus/jarvis/state/jarvis-deepseek-autonomy-ledger-v1.json`.
+- Estado leído: `RESERVED`, `pending.run_id=42290257959`, reserva USD 1.80, `spent_estimate_usd=1.899419652`, `calls_completed=3876`, `scenarios_completed=1938`, `cycle_cursor=322`. Tope acumulativo conservador USD 40 dentro del permiso 50 EUR; recarga automática NO.
+- Fallo real del workflow https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42290257959 : un primer ciclo completó 6 escenarios/12 llamadas, estimación de coste pico USD 0.0055887; un segundo ciclo registró 1 llamada (estimación USD 0.0003987) y después DeepSeek devolvió HTTP 503. La conciliación quedó SKIPPED y el siguiente despacho SKIPPED.
+- Artefacto preservado: `jarvis-cut37-lab-dialogue-42290257959` ID `13539581837`, con plan, resultado completo del primer ciclo y parciales del segundo.
+- Coste pico atribuible a los parciales observados: aproximadamente USD 0.0059874, **NO facturación verificada**.
+- No modificar de forma silenciosa el ledger, no refund de la reserva en caso de fallo, no reactivar automáticamente CUT37 mientras persista `pending`; primero diseñar conciliación fail-closed basada en artefactos + reserva íntegra si no existe prueba suficiente, y testear la recuperación con un ledger de fixture.
+- HTTP 503 es fallo del servicio externo, no causa demostrada de fallo de formato ni de credencial. No parchear a ciegas ni repetir llamadas de pago para conseguir verde.
+- `next_block` ampliado: `CUT56_SEMANTIC_TRIBUNAL_AND_LRN_SAFE_INTEGRATION` + `CUT37_FAILED_RESERVATION_RECOVERY_GUARDED`; PROD sigue NO-GO.
