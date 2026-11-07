@@ -419,5 +419,103 @@
     "legal_financial_editorial_gate": "PENDING",
     "publication": "OFF",
     "next_batch": "BLOCKED_UNTIL_ALL_PRODUCTION_GATES_PASS"
+  },
+  "partner_form_v0_2026_11_07": {
+    "component": "cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "plugin_version": "0.1.1",
+    "wordpress_status": "ACTIVE_SCOPED_TO_FOUR_EXISTING_B2B_IDS",
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.1.1",
+    "ids": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "contract": "EXISTING_WP_REST_fenix-cerebro/v1/lead -> FENIX_CEREBRO_LEADS_PROD -> SUPABASE_fenix-web-lead -> fn_fenix_prod_web_lead_ingest_server",
+    "backend_source_note": "WP handler intentionally forces source=web; partner segment preserved in source_payload.funnel=PARTNER, asset=partner_cordoba, resource=partner_cordoba, agency appended into message",
+    "form_fields": [
+      "agency_required",
+      "contact_name_required",
+      "email_or_phone_required",
+      "operation_type",
+      "message_optional",
+      "consent_privacy_required",
+      "consent_marketing_optional",
+      "honeypot"
+    ],
+    "anti_duplicate": "ROLE_FORM_SECTION_NOT_NATIVE_FORM_AND_BUTTON_TYPE_BUTTON_CLICKS_ONLY; AVOIDS_EXISTING_GLOBAL_SUBMIT_CAPTURE_IN_FENIX_CEREBRO_LEADS",
+    "checks": {
+      "php_lint": "PASS",
+      "plugin_active": "VERIFIED",
+      "wordPress_saved_content": "4_OF_4",
+      "authenticated_opera_accessibility": "PARTNER_FORM_FIELDS_PRESENT_4_OF_4",
+      "published_privacy_page": "47569",
+      "seo_issues_eight_existing_drafts": "0_OF_8",
+      "fragment_anchors": "8_OF_8_NO_MISSING",
+      "created_real_leads": 0,
+      "real_lead_delivery_e2e": "NOT_EXECUTED",
+      "mobile_visual": "PENDING",
+      "full_page_screenshots": "PENDING_INTERMITTENT_OPERA_TIMEOUT",
+      "financial_legal_review": "PENDING"
+    },
+    "backup": {
+      "full_wp_db_checkpoint_id": 72,
+      "post_snapshots": [
+        {
+          "post_id": 52661,
+          "id": 210
+        },
+        {
+          "post_id": 52663,
+          "id": 211
+        },
+        {
+          "post_id": 52714,
+          "id": 212
+        },
+        {
+          "post_id": 52716,
+          "id": 213
+        }
+      ],
+      "pre_visible_bottom_snapshots": [
+        214,
+        215
+      ]
+    },
+    "change_journal": {
+      "plugin_create": 2220,
+      "plugin_activate": 2221,
+      "shortcode_updates": [
+        2222,
+        2223,
+        2224,
+        2225
+      ],
+      "visible_bottom": [
+        2227,
+        2229
+      ],
+      "anchors": [
+        2230,
+        2231,
+        2232,
+        2233
+      ],
+      "hero_cta_to_form": [
+        2234,
+        2235
+      ],
+      "plugin_accessibility_update": 2236
+    },
+    "rollback": "RESTORE_FOUR_DRAFT_CONTENTS_OR_CHANGE_JOURNAL_BEFORE_DEACTIVATING_OR_DELETING_SCOPED_PLUGIN; NEVER DEACTIVATE_WHILE_SHORTCODE_REFERENCES_REMAIN",
+    "cost_eur_new_subscription": 0,
+    "external_paid_ai_calls": 0,
+    "wordpress_published": 0,
+    "release": "HOLD_NOT_OWNER_APPROVED",
+    "next_gate": "VALIDATE_REAL_MOBILE_VISUAL_AND_LEAD_E2E_WITH_APPROVED_NON-PROD_FIXTURE_OR TUTORED_SINGLE_REAL_LEAD; CHECK_PROD_CRM_ROUTING_AND_COPY_LEGAL_SIGNOFF"
   }
 }
