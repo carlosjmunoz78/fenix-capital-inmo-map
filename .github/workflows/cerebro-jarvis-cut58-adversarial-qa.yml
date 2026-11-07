@@ -1,0 +1,50 @@
+name: CEREBRO JARVIS CUT58 · Independent-Code Adversarial Policy QA
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut58-adversarial-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut58-adversarial-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_PROD_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Negative adversarial tests - no provider calls
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut58-adversarial-review-v0.test.mjs
+          node --test cerebro/jarvis/boost-001/cut57-policy-candidates-v0.test.mjs
+      - name: Produce attestable second-path report but NOT independent approval
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut58-adversarial-review-v0.mjs "$RUNNER_TEMP/jarvis-cut58-adversarial-review.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const v=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/jarvis-cut58-adversarial-review.json'));
+            if(v.evaluated!==5||v.second_path_pass!==5||
+               v.independent_external_tribunal_pass!==false||
+               v.lrn_write_authorized!==false||v.prod_write_authorized!==false||
+               v.memory_adopted!==0||v.release_count!==0) process.exit(1);
+          "
+      - name: Upload QA evidence, no credentials
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut58-adversarial-policy-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-cut58-adversarial-review.json
+          retention-days: 30
+          if-no-files-found: error
