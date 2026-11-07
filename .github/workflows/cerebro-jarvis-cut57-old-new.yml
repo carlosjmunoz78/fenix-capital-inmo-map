@@ -1,0 +1,55 @@
+name: CEREBRO JARVIS CUT57 · Policy Curated OLD vs NEW Offline
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut57-old-new.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  evaluate-old-new:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Retrieve immutable source for a reproducible A/B, no paid API
+        uses: actions/download-artifact@v4
+        with:
+          name: jarvis-cut55-bounded-learning-42381208836
+          path: ${{ runner.temp }}/cut55
+          run-id: 42381208836
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+      - name: Validate corrected rules and actual OLD vs NEW
+        env:
+          JARVIS_CUT55_REPORT: ${{ runner.temp }}/cut55/jarvis-boost001-cut55-pilot-report.json
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut57-policy-candidates-v0.test.mjs
+          node cerebro/jarvis/boost-001/cut57-policy-candidates-v0.mjs "$JARVIS_CUT55_REPORT" "$RUNNER_TEMP/cut57-old-new.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut57-old-new.json'));
+            if(x.before.semantic_rejected!==5||x.after.heuristic_pass!==5||
+               x.after.independent_review_pass!==0||x.after.release_authorized!==0||
+               x.prod_authorized!==false||x.memory_applied!==false)process.exit(1);
+          "
+      - name: Preserve non-promoted A/B candidate QA report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut57-old-new-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut57-old-new.json
+          retention-days: 30
+          if-no-files-found: error
