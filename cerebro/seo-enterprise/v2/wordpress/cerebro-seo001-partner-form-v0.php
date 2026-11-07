@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CEREBRO SEO001 · Partner Form Scoped V0
  * Description: Formulario B2B aislado para cuatro contenidos SEO001; no altera CRM, Supabase ni formularios existentes.
- * Version: 0.1.2
+ * Version: 0.2.0
  */
 if (!defined('ABSPATH')) exit;
 function seo001_partner_allowed_v0(): bool {
@@ -45,10 +45,10 @@ add_action('wp_enqueue_scripts',static function() {
     $p=get_queried_object();
     if (!$p instanceof WP_Post || !has_shortcode((string)$p->post_content,'fenix_seo001_partner_form')) return;
     $s='seo001-partner-v0-style';
-    wp_register_style($s,false,array(),'0.1.2');wp_enqueue_style($s);
+    wp_register_style($s,false,array(),'0.2.0');wp_enqueue_style($s);
     wp_add_inline_style($s,'.seo001-partner-card,.seo001-partner-card *{box-sizing:border-box}.seo001-partner-card{max-width:760px;margin:24px auto;background:#fff;border:1px solid #eccbb4;border-radius:18px;padding:clamp(20px,3vw,32px);color:#222;box-shadow:0 14px 40px rgba(0,0,0,.07)}.seo001-partner-card h3{color:#222;font-size:clamp(24px,3vw,32px);margin:0 0 8px}.seo001-partner-card p{color:#454545;line-height:1.55}.seo001-partner-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.seo001-partner-fields label{display:flex;flex-direction:column;gap:7px;font-size:15px;font-weight:650;color:#222}.seo001-partner-fields input:not([type=checkbox]),.seo001-partner-fields textarea,.seo001-partner-fields select{width:100%;min-width:0;background:white;border:1px solid #aaa;border-radius:9px;padding:11px;color:#222;font:inherit}.seo001-partner-fields input:focus,.seo001-partner-fields textarea:focus,.seo001-partner-fields select:focus{outline:3px solid rgba(255,95,0,.23)}.seo001-partner-wide{grid-column:1/-1}.seo001-partner-check{flex-direction:row!important;align-items:start;gap:9px!important;font-weight:400!important;line-height:1.45}.seo001-partner-check input{flex:0 0 auto;margin:4px 0 0}.seo001-partner-card a{color:#a84300;text-decoration:underline}.seo001-partner-send{background:#ff5f00;color:#222;border:0;border-radius:8px;min-height:48px;padding:12px 24px;font-weight:800;cursor:pointer;margin-top:18px}.seo001-partner-send:disabled{opacity:.6}.seo001-partner-status{min-height:22px;margin:12px 0 0}.seo001-partner-status[data-kind=error]{color:#9c1d1d}.seo001-partner-status[data-kind=ok]{color:#176b32}.seo001-partner-hp{position:absolute!important;left:-9999px!important;opacity:0!important}@media(max-width:640px){.seo001-partner-fields{grid-template-columns:minmax(0,1fr)}.seo001-partner-card{padding:18px 14px}.seo001-partner-wide{grid-column:1}}');
-    $h='seo001-partner-v0-js';wp_register_script($h,false,array(),'0.1.2',true);wp_enqueue_script($h);
-    wp_localize_script($h,'SEO001PartnerV0',array('endpoint'=>esc_url_raw(rest_url('fenix-cerebro/v1/lead'))));
+    $h='seo001-partner-v0-js';wp_register_script($h,false,array(),'0.2.0',true);wp_enqueue_script($h);
+    wp_localize_script($h,'SEO001PartnerV0',array('endpoint'=>esc_url_raw(rest_url('cerebro-seo001/v0/partner-lead'))));
     $js=<<<'JS'
 (function(){'use strict';
 function value(root,name){var el=root.querySelector('[name="'+name+'"]');return el?String(el.value||'').trim():''}
@@ -64,7 +64,7 @@ if(email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){feedback(root,'Corrige el c
 var digits=phone.replace(/\D/g,'');if(phone&&(digits.length<7||digits.length>15)){feedback(root,'Revisa el teléfono.','error');return}
 if(!check(root,'consent_privacy')){feedback(root,'Debes aceptar la información de privacidad.','error');return}
 var city=root.dataset.seo001PartnerCity||'Córdoba';var slug=city.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-var params=new URLSearchParams(location.search);var body={agency:agency,partner_need:value(root,'partner_need'),name:name,email:email,phone:phone,source:'web',city:city,funnel:'PARTNER',asset:'partner_'+slug,resource:'partner_'+slug,message:'Agencia: '+agency+'\nNecesidad: '+value(root,'partner_need')+'\nConsulta: '+value(root,'message'),landing_url:location.href.split('#')[0],landing_id:Number(root.dataset.seo001PartnerId||0),utm_source:params.get('utm_source')||'',utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',consent_privacy:true,consent_marketing:check(root,'consent_marketing'),website:value(root,'website')};
+var params=new URLSearchParams(location.search);var body={agency:agency,partner_need:value(root,'partner_need'),name:name,email:email,phone:phone,source:'web_agency_partner',city:city,funnel:'PARTNER',asset:'partner_'+slug,resource:'partner_'+slug,message:'Agencia: '+agency+'\nNecesidad: '+value(root,'partner_need')+'\nConsulta: '+value(root,'message'),landing_url:location.href.split('#')[0],landing_id:Number(root.dataset.seo001PartnerId||0),utm_source:params.get('utm_source')||'',utm_medium:params.get('utm_medium')||'',utm_campaign:params.get('utm_campaign')||'',consent_privacy:true,consent_marketing:check(root,'consent_marketing'),website:value(root,'website')};
 root.dataset.busy='1';btn.disabled=true;feedback(root,'Enviando…','');var idem='seo001-partner-'+(crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(16).slice(2));
 try{var r=await fetch((window.SEO001PartnerV0||{}).endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json','x-fenix-idempotency-key':idem},body:JSON.stringify(body)});
 var j=await r.json().catch(function(){return null});if(!r.ok||!j||!j.ok)throw Error('send_failed');
@@ -96,3 +96,64 @@ add_filter('rest_pre_dispatch',static function($pre,$server,$req) {
     if ($agency==='' || $name==='') return new WP_Error('seo001_partner_identity_required','Identifica la agencia y persona de contacto.',array('status'=>422));
     return $pre;
 },9,3);
+
+
+/* Dedicated B2B API: preserves structured agency/need and explicit source.
+ * Reuses the existing PROD lead guard and rate limits without touching it.
+ * No effects from rejected requests; published non-SEO pages remain unchanged. */
+add_action('rest_api_init',static function() {
+    register_rest_route('cerebro-seo001/v0','/partner-lead',array(
+        'methods'=>'POST',
+        'permission_callback'=>'__return_true',
+        'callback'=>static function(WP_REST_Request $req) {
+            if (strtolower((string)wp_parse_url(home_url('/'),PHP_URL_HOST))!=='fenixcapital.es') {
+                return new WP_Error('seo001_partner_host_invalid','Host no permitido.',array('status'=>403));
+            }
+            $raw=$req->get_json_params();
+            if (!is_array($raw) || strlen((string)wp_json_encode($raw))>10000) {
+                return new WP_Error('seo001_partner_payload_invalid','Solicitud no válida.',array('status'=>413));
+            }
+            $allowed=array(52661,52663,52714,52716);
+            $landing=absint($raw['landing_id']??0);
+            if (!in_array($landing,$allowed,true) || strtoupper((string)($raw['funnel']??''))!=='PARTNER') {
+                return new WP_Error('seo001_partner_landing_invalid','Solicitud fuera del circuito profesional.',array('status'=>422));
+            }
+            if (!empty($raw['website'])) {
+                return new WP_REST_Response(array('ok'=>true,'accepted'=>true,'honeypot'=>true),202);
+            }
+            $consent=filter_var($raw['consent_privacy']??false,FILTER_VALIDATE_BOOLEAN);
+            if (!$consent) {
+                return new WP_Error('seo001_partner_privacy_required','Se requiere la aceptación de privacidad.',array('status'=>422));
+            }
+            $agency=sanitize_text_field((string)($raw['agency']??''));
+            $name=sanitize_text_field((string)($raw['name']??''));
+            if ($agency==='' || $name==='' || strlen($agency)>130 || strlen($name)>140) {
+                return new WP_Error('seo001_partner_identity_required','Agencia y contacto obligatorios.',array('status'=>422));
+            }
+            $allowedNeeds=array(
+                'Seguimiento hipotecario de compradores',
+                'Coordinar compraventas encadenadas',
+                'Estudio financiero de una operación',
+                'Colaboración general con la inmobiliaria'
+            );
+            $need=sanitize_text_field((string)($raw['partner_need']??''));
+            if (!in_array($need,$allowedNeeds,true)) {
+                return new WP_Error('seo001_partner_need_invalid','Selecciona un tipo de colaboración válido.',array('status'=>422));
+            }
+            if (!function_exists('fenix_cerebro_lead_payload') || !function_exists('fenix_cerebro_forward_lead')) {
+                return new WP_Error('seo001_partner_bridge_unavailable','Captación temporalmente no disponible.',array('status'=>503));
+            }
+            $payload=fenix_cerebro_lead_payload($raw);
+            $payload['source']='web_agency_partner';
+            $payload['funnel']='PARTNER';
+            $payload['agency']=$agency;
+            $payload['partner_need']=$need;
+            $payload['consent_privacy']=true;
+            $payload['consent_marketing']=filter_var($raw['consent_marketing']??false,FILTER_VALIDATE_BOOLEAN);
+            $idem=sanitize_text_field((string)$req->get_header('x-fenix-idempotency-key'));
+            $result=fenix_cerebro_forward_lead($payload,$idem);
+            if (is_wp_error($result)) return $result;
+            return new WP_REST_Response($result,!empty($result['lead_created'])?201:200);
+        }
+    ));
+});
