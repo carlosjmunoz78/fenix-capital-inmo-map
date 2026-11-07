@@ -99,5 +99,78 @@
       "approval": false,
       "brief_id": "SEO001-52716-HERO"
     }
-  ]
+  ],
+  "followup_2026_11_07": {
+    "verified_source": "WORDPRESS_COWBOY_LIVE_DRAFT_AND_WPWRITER_SECOND_OPINION",
+    "scope": "FOUR_EXISTING_DRAFTS_ONLY",
+    "post_status_verified": "DRAFT_4_OF_4",
+    "visual_release_gate": "HOLD",
+    "template_52715_52716": "BLOCKED_META_NOT_PERSISTENT_RENDERS_SINGLE_SERVICES",
+    "producer_generation": "PENDING_UMS_OPENAI_PROVENANCE",
+    "media_assets_generated_in_this_cycle": 0,
+    "wordpress_publications": 0,
+    "paid_api_calls": 0,
+    "new_subscriptions": 0,
+    "improvements": [
+      {
+        "id": 52713,
+        "snapshot_id": 182,
+        "change_id": 2128,
+        "action": "ADDED_FOUR_STEP_BUYER_CHECKLIST",
+        "wpwriter_seo_before": 73,
+        "wpwriter_seo_after": 80
+      },
+      {
+        "id": 52714,
+        "snapshot_id": 183,
+        "change_id": 2129,
+        "action": "ADDED_FIVE_FIELD_B2B_COORDINATION_CHECKLIST",
+        "wpwriter_seo_before": 75,
+        "wpwriter_seo_after": 82
+      },
+      {
+        "id": 52715,
+        "snapshot_id": 184,
+        "change_id": 2132,
+        "action": "ADDED_FOUR_ITEM_BUYER_DOCUMENT_CHECKLIST",
+        "wpwriter_seo_before": 80,
+        "wpwriter_seo_after": 87
+      },
+      {
+        "id": 52716,
+        "snapshot_id": 185,
+        "change_id": 2133,
+        "action": "ADDED_FOUR_ITEM_B2B_MILESTONE_CHECKLIST",
+        "wpwriter_seo_before": 80,
+        "wpwriter_seo_after": 87
+      }
+    ],
+    "previous_verified_changes": [
+      {
+        "id": 52715,
+        "snapshot_id": 180,
+        "change_id": 2123,
+        "action": "CONTEXTUAL_LINK_TO_PUBLISHED_PRECIOMAXIMO"
+      },
+      {
+        "id": 52716,
+        "snapshot_id": 181,
+        "change_id": 2124,
+        "action": "CONTEXTUAL_LINK_TO_PUBLISHED_ARRAS_TASACION_BANCO"
+      },
+      {
+        "id": 52716,
+        "change_id": 2125,
+        "action": "YOAST_SEO_TITLE_SHORTENED"
+      }
+    ],
+    "seo_post_body_score_note": "WPWriter own heuristic on stored HTML, not live rendered page; does not certify SEO ranking or YMYL",
+    "provider_access_note": "OPENAI_API_KEY_NAME_VISIBLE_IN_GITHUB_ACTIONS_SECRETS_UI; secret value not read; no batch2 dispatcher or provider image receipt confirmed",
+    "next_block": "VISUAL_AUTHENTICATED_EDITOR_PER_PAGE_TEMPLATE_AND_PREVIEW_THEN_UMS_ONE_PHOTO_PER_WORK_COST_GATED_AND_MEDIA_QA",
+    "blocked_methods_do_not_repeat": [
+      "WP_UPDATE_POST_META_TEMPLATE_DID_NOT_PERSIST",
+      "WP_CLI_SHELL_EXEC_DISABLED"
+    ],
+    "all_draft_no_auto_publish": true
+  }
 }
