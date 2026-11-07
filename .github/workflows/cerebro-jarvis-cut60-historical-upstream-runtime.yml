@@ -1,0 +1,56 @@
+name: CEREBRO JARVIS CUT60 · Existing Runtime + Historical Receipt Lineage
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut60-historical-upstream-runtime.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut60:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify original Marketing/CRM module byte-for-byte unchanged
+        run: |
+          set -euo pipefail
+          test "$(git hash-object cerebro/multicompany/marketing-crm-bootstrap-v1.mjs)" = "03c9048deec79f6b354f89b8abaf09bc0b4a63d1"
+      - name: Run existing code regressions and CUT60 provenance/tampering tests, NO API
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/marketing-crm-bootstrap-v1.test.mjs
+          node --test cerebro/jarvis/boost-001/cut60-historical-receipts-runtime-v0.test.mjs
+      - name: Run real existing Marketing/CRM functions using historical receipt refs
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut60-historical-receipts-runtime-v0.mjs             cerebro/jarvis/boost-001/cut60-upstream-historical-receipts-20261107.json             "$RUNNER_TEMP/cut60-historical-lineage-no-write.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut60-historical-lineage-no-write.json'));
+            if(r.upstream_db_receipts_matched!==3||r.output_count!==2||
+               r.actual_upstream_payloads_read!==0||r.official_engine_state_changes!==0||
+               r.backend_record_rpc_calls!==0||r.writer_authorized!==false||
+               r.prod_authorized!==false||r.outputs.some(x=>x.safe_to_send_to_record_preprod!==false))
+              process.exit(1);
+          "
+      - name: Persist content-addressed lineage report, NO production receipts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut60-historical-bootstrap-lineage-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut60-historical-lineage-no-write.json
+          retention-days: 30
+          if-no-files-found: error
