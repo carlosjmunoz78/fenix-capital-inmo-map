@@ -313,8 +313,14 @@ export default function CerebroConsoleShell(){
    const utterance=new SpeechSynthesisUtterance(remaining);
    utterance.rate=segment.rate;
    utterance.pitch=segment.pitch;
-   utterance.voice=selected;
-   utterance.lang=selected.lang;
+   try{
+    utterance.voice=selected;
+    utterance.lang=selected.lang;
+   }catch{
+    setVoiceError('El navegador no acepta la voz seleccionada. La respuesta está disponible por escrito.');
+    finishSpeechPlan(token);
+    return;
+   }
    utterance.onboundary=event=>{
     if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
     const localIndex=typeof event.charIndex==='number'&&Number.isFinite(event.charIndex)?event.charIndex:0;
@@ -336,7 +342,12 @@ export default function CerebroConsoleShell(){
     speechCursorRef.current={segmentIndex:index+1,charIndex:0};
     speakSegment(index+1,0);
    };
-   window.speechSynthesis.speak(utterance);
+   try{
+    window.speechSynthesis.speak(utterance);
+   }catch{
+    setVoiceError('El dispositivo no ha podido iniciar la reproducción de voz. La respuesta escrita sigue disponible.');
+    finishSpeechPlan(token);
+   }
   };
   // Start output without waiting for a second microphone permission.
   voiceSpeakingRef.current=true;
