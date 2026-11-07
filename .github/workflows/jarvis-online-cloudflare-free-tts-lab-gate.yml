@@ -28,12 +28,13 @@ jobs:
         with:
           node-version: '24'
       - name: Free-only Voice Gate unit and privacy tests (no Cloudflare AI calls)
-        run: node --test zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-tts-port-v0.test.mjs
+        run: node --test zeus/jarvis/voice/online-cloudflare-lab/*.test.mjs
       - name: Assert no mutation of Cloudflare original, public routes or canonical JARVIS clone
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
           const code=readFileSync('zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-tts-port-v0.mjs','utf8');
+          const http=readFileSync('zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-voice-http-v0.mjs','utf8');
           const must=[
             'environment:"LAB"', 'defaultEnabled:false', 'autoTopup:false',
             'allowPaidOverage:false', 'productionAuthorized:false',
@@ -48,5 +49,11 @@ jobs:
             throw Error('CLOUDFLARE_ORIGINAL_RUNTIME_MUTATION_RISK');
           if(!code.includes('GENERIC_SPANISH_MALE_NOT_JARVIS_V2'))
             throw Error('CANNOT_CONFLATE_GENERIC_TTS_AND_APPROVED_V2');
+          if(!http.includes('accessVerified')||
+             !http.includes('GENERIC_NOT_JARVIS_V2')||
+             !http.includes('CLIENT_PRIVILEGE_CLAIMS_FORBIDDEN')||
+             !http.includes('cache-control')){
+            throw Error('VOICE_HTTP_ACCESS_AND_PRIVACY_GATE_MISSING');
+          }
           console.log('VOICE_FREE_ONLINE_LAB_SAFE_NO_PROD_NO_EXTERNAL_AI_CALLS');
           NODE
