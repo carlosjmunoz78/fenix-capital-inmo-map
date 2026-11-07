@@ -54,3 +54,5 @@ jobs:
           path: ${{ runner.temp }}/cut61-consumer-owner-restore-no-go.json
           retention-days: 30
           if-no-files-found: error
+
+# Rerun CUT61 after explicit all-path production_promotion denial.
