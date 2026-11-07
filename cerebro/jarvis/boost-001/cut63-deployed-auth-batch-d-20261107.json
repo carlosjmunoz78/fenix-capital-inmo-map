@@ -1,0 +1,253 @@
+{
+  "schema": "jarvis.cut63.static.auth.batch.v1",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "observed_date": "2026-11-07",
+  "project_ref": "cluhljgonannaafpmblx",
+  "batch": "D",
+  "no_source_export": true,
+  "live_endpoints_called": false,
+  "static_flags_not_auth_proof": true,
+  "rows": [
+    {
+      "slug": "fenix-brevo-inventory-once",
+      "status": "READ",
+      "version": 9,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 157,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "fenix-brevo-probe-once",
+      "status": "READ",
+      "version": 6,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 157,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "fenix-web-lead-alert-worker",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6799,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v25",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 75369,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-telegram-voice-ui-v0",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6776,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-voice-preview-v0",
+      "status": "READ",
+      "version": 8,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 1466,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-voice-lab-feedback-v0",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6249,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-visual-state-v0-canary",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6507,
+      "flags": {
+        "auth_header": true,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": false,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": false,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-telegram-gateway-voice-samples-canary-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 27320,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v24",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 74902,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v23",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 73547,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v22",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 2,
+      "source_bytes": 73385,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    }
+  ]
+}
