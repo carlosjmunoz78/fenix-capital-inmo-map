@@ -6,12 +6,12 @@ import path from 'node:path';
 export const CAMPAIGN=Object.freeze({
  schema_version:'1.0.0',
  campaign_id:'JARVIS-BOOST-001-LEARNING-50EUR-V0',
- company_id:'fenix',engine_id:'JARVIS-BOOST-001',environment:'PREPROD',version:'CUT53',
+ company_id:'fenix',engine_id:'JARVIS-BOOST-001',environment:'PREPROD',version:'CUT54',
  user_budget_envelope_eur:50,
  pilot_max_reserved_eur:0.20,
  per_request_max_reserved_eur:0.04,
  planned_api_calls:5,
- model:'deepseek-flash',max_output_tokens:700,
+ model:'deepseek-flash',max_output_tokens:1200,
  automatic_retry:false,auto_recharge:false,
  prod_authorized:false,prod_write_authorized:false,trading_access:false,
  persistent_rule_promotion:false
@@ -94,7 +94,7 @@ export async function runLive({env=process.env,createProvider,createBalanceGuard
   const requestId='jarvis-cut53-'+t.id+'-'+sha(env.GITHUB_RUN_ID||'manual').slice(0,10);
   const input='DOMINIO '+t.domain+'\nEVIDENCIA AUTORIZADA '+t.evidence_refs.join(',')+'\nCASO '+t.input;
   try{
-   const response=await prov.respond({model:CAMPAIGN.model,instructions:INSTRUCTIONS.replace('<dominio exacto>',t.domain),input,maxOutputTokens:CAMPAIGN.max_output_tokens},
+   const response=await prov.respond({model:CAMPAIGN.model,instructions:INSTRUCTIONS.replace('<dominio exacto>',t.domain),input,maxOutputTokens:CAMPAIGN.max_output_tokens,reasoning:{effort:'none'},text:{format:{type:'json_object'}}},
     {requestId,signal:AbortSignal.timeout(45_000)});
    const check=evaluateCandidate(t,response.output_text||'');
    const candidate=check.candidate?{
@@ -116,6 +116,14 @@ export async function runLive({env=process.env,createProvider,createBalanceGuard
   }
  }
  report.status=report.results.length===PILOT_TASKS.length?'PILOT_COMPLETE_CANDIDATES_ONLY':'PILOT_INCOMPLETE';
+ // Provider balance is eventually consistent and can contain other traffic: measure only an observed delta.
+ try {
+  const afterBalance=await guard.read({apiKey:env.DEEPSEEK_API_KEY});
+  report.balance_before_usd=available.current_balance_usd;
+  report.balance_after_usd=afterBalance.total_balance_usd;
+  report.observed_balance_delta_usd=Math.max(0,Math.round((available.current_balance_usd-afterBalance.total_balance_usd)*1e6)/1e6);
+  report.balance_delta_is_exact_run_cost=false;
+ } catch {report.balance_reconciliation='UNAVAILABLE_NOT_AN_EXACT_COST';}
  write();
  return {artifact:safePath,summary:{campaign:CAMPAIGN.campaign_id,completed:report.results.length,
   accepted_preliminary:report.accepted_preliminary,actual_cost_eur:'NOT_RECONCILED',
