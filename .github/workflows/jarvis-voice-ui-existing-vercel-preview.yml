@@ -6,6 +6,7 @@ on:
       - fix/jarvis-chat-voice-responsive-20261107
     paths:
       - '.github/workflows/jarvis-voice-ui-existing-vercel-preview.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
