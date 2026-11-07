@@ -78,3 +78,5 @@ jobs:
 # Rerun after one-utterance STT simulation correction; same strict no-PROD gates.
 
 # CI diagnostic: distinguish absent male voice vs suppressed browser speech in LAB.
+
+# Rebuild with coherent Web Speech mock utterance+voice and caught native errors.
