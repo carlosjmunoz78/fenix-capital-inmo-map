@@ -1,0 +1,73 @@
+name: JARVIS Exact Live Source Chat+Dictation Hotfix Gate
+
+on:
+  push:
+    branches:
+      - fix/jarvis-voicechat-prod-exact-live-20261107
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck and build current App with isolated browser fixture variables
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+        run: npm run build
+      - name: Install isolated Playwright Chromium (existing test harness)
+        run: npx playwright install chromium
+      - name: 'Real browser: composer submits text and receives mocked Gateway reply'
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-chat-hotfix-smoke.spec.ts --project=desktop-chromium --reporter=line
+      - name: Check chat sends via one event, voice previews interim text and timeout is bounded
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+          const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
+          const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
+          const must=[
+            [shell, 'function toggleVoiceSession()'],
+            [shell, 'postCerebroConsoleChat'],
+            [composer, 'interimResults=true'],
+            [composer, 'waitForUI('],
+            [composer, 'setReactTextareaValue(textarea,clean)'],
+            [composer, 'form.requestSubmit()'],
+            [composer, 'previousUserMessages'],
+            [composer, 'No puedo confirmar que JARVIS haya recibido el mensaje'],
+            [api, 'new AbortController()'],
+            [api, 'signal:controller.signal'],
+            [api, 'clearTimeout(timeout)']
+          ];
+          for(const [source,token] of must)
+            if(!source.includes(token))throw Error('Required safeguard missing: '+token);
+          if(composer.includes('window.setTimeout(()=>form?.requestSubmit(),0)') ||
+             composer.includes('jarvis:direct-chat-submit-v1'))
+            throw Error('Unreliable blind submit or unauthorized canonical override remains');
+          if(!api.includes('20000'))throw Error('Chat timeout not bounded');
+          console.log('HOTFIX_GUARDS_PASS');
+          NODE
