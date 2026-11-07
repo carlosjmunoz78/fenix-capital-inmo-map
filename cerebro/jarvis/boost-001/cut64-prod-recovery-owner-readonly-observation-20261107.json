@@ -1,0 +1,83 @@
+{
+  "schema": "jarvis.cut64.prod.recovery.owner.readonly.observation.v1",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT64-v0.1",
+  "observed_date": "2026-11-07",
+  "source_independent_actions": {
+    "anonymous_get_run_id": 42397967804,
+    "conclusion": "success",
+    "unit_tests_pass": 6,
+    "anonymous_get_origin": "GITHUB_ACTIONS_NO_COOKIES_NO_AUTH_HEADERS",
+    "endpoints": [
+      {
+        "id": "JARVIS_WORK_OWNER_HEALTH",
+        "status": 403,
+        "conclusion": "ANONYMOUS_REQUEST_DENIED_BY_SOME_LAYER"
+      },
+      {
+        "id": "JARVIS_GIT_OWNER_HEALTH",
+        "status": 403,
+        "conclusion": "ANONYMOUS_REQUEST_DENIED_BY_SOME_LAYER"
+      },
+      {
+        "id": "CUT30_EXISTING_ACCESS_OWNER_CHECK_READONLY",
+        "status": 302,
+        "conclusion": "CLOUDFLARE_ACCESS_LOGIN_CHALLENGE_PRESENT"
+      }
+    ],
+    "authenticated_owner_e2e_verified": false,
+    "b2_device_enrollment_verified": false,
+    "b3_owner_grant_verified": false
+  },
+  "supabase_live": {
+    "project_ref": "cluhljgonannaafpmblx",
+    "backend_project_name": "fenix-capital-prod",
+    "database_bytes": 49769619,
+    "public_tables": 38,
+    "public_functions": 259,
+    "user_triggers": 37,
+    "extnames": [
+      "pg_cron",
+      "pg_net"
+    ],
+    "pg_cron_jobs_total": 2,
+    "pg_cron_jobs_active": 2,
+    "pg_cron_jobs_inactive": 0,
+    "storage_bucket_count": 3,
+    "fenix_company_registry_rows": 0,
+    "fenix_onboarding_rows": 0,
+    "fenix_engine_rows": 0,
+    "b3_owner_grants_rows": 0,
+    "b3_enabled": false,
+    "b3_kill_switch": true,
+    "sql_method": "SELECT_ONLY",
+    "sql_writes": 0
+  },
+  "backup": {
+    "dashboard_provider": "SUPABASE_PRO",
+    "physical_entries_visible": 8,
+    "latest_visible_utc": "2026-11-07T02:59:58Z",
+    "existing_backup_bytes_independently_inspected": false,
+    "complete_db_storage_backup_verified": false,
+    "source_prod_restore_independent_target_tested": false,
+    "new_project_technical_clone_unstarted": true,
+    "clone_has_potential_extra_compute_cost": true,
+    "clone_may_restart_external_cron_net_jobs": true,
+    "cloning_cost_eur_measured": false,
+    "side_effect_inventory_complete": false
+  },
+  "security": {
+    "prod_db_writes": 0,
+    "app_crm_writes": 0,
+    "cloudflare_policy_changes": 0,
+    "cut30_original_worker_changes": 0,
+    "worker_cut32_public_enabled": false,
+    "paid_deepseek_api_calls": 0,
+    "new_subscriptions": 0,
+    "owner_e2e_owner_authenticated": false,
+    "prod_authorized": false,
+    "physical_production_release_verified": false
+  }
+}
