@@ -358,7 +358,8 @@ export default function CerebroConsoleShell(){
  function speakAndResume(text:string,fullDetail=false,meta:CerebroSpokenMeta={}){
   if(!voiceSessionRef.current)return;
   const maxChars=fullDetail?560:(voicePreferencesRef.current.response_length==='concise'?420:560);
-  const segments=speechSegments(text,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal',meta);
+  const spokenText=text.replace(/\bCEREBRO(?: OS)?\b/gi,'JARVIS');
+  const segments=speechSegments(spokenText,maxChars,voicePreferencesRef.current,fullDetail?'action':'normal',meta);
   if(!segments.length){scheduleListening();return}
   stopRecognition();
   if(!voiceSupport.tts){
@@ -475,7 +476,7 @@ export default function CerebroConsoleShell(){
     return true;
    }
    if(voiceNeedsClarification(clean,voiceConfidence)){
-    const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+    const warning=`He entendido «${clean}», pero no tengo suficiente certeza de haberlo oído bien. Repítemelo, por favor.`;
     setMessage('');
     setVoiceError(warning);
     setLines(current=>[...current,{role:'cerebro',text:warning}]);
@@ -485,7 +486,7 @@ export default function CerebroConsoleShell(){
    discardPausedSpeech();
   }
   if(fromVoice&&voiceNeedsClarification(clean,voiceConfidence)){
-   const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
+   const warning=`He entendido «${clean}», pero no tengo suficiente certeza de haberlo oído bien. Repítemelo, por favor.`;
    setMessage('');
    setVoiceError(warning);
    setLines(current=>[...current,{role:'cerebro',text:warning}]);
