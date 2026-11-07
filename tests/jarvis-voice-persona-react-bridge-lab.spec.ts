@@ -147,3 +147,25 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
  }))));
  await expect.poll(()=>page.evaluate(()=>(window as typeof window & {__jarvisSpoken?:string[]}).__jarvisSpoken?.join(' ')||'')).toContain('JARVIS');
 });
+
+test('JARVIS 390px mobile can send once and display the actual chat reply',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await installIsolatedPreprod(page);
+ let requests=0;
+ await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-gateway-v0/chat`,async route=>{
+  requests++;
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+   status:'OK',intent:'qa',message:'JARVIS confirma recepción móvil.',executed:false
+  })});
+ });
+ await page.goto('/cerebro?section=jarvis');
+ const box=page.getByRole('textbox',{name:'Mensaje para Jarvis'});
+ await expect(box).toBeVisible();
+ await expect(box).toBeEnabled();
+ await box.fill('Comprobar móvil');
+ await page.getByRole('button',{name:'Enviar',exact:true}).last().click();
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-user').last()).toContainText('Comprobar móvil');
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').last()).toContainText('JARVIS confirma recepción móvil.');
+ await expect(box).toHaveValue('');
+ expect(requests).toBe(1);
+});
