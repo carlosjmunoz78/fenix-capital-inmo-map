@@ -6,7 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {RECOVERY, conservativelyRecover, validateEvidence} from './cut37-conservative-recovery-v0.mjs';
 
 const here=path.dirname(fileURLToPath(import.meta.url));
-const original=JSON.parse(fs.readFileSync(path.join(here,'../state/jarvis-deepseek-autonomy-ledger-v1.json'),'utf8'));
+const original=JSON.parse(fs.readFileSync(path.join(here,'fixtures/cut37-ledger-before-recovery.json'),'utf8'));
 const proof={trusted_hash_count:4,observed_calls:13,completed_full_cycles:1,billing_verified:false,observed_peak_estimate_usd:0.0059874};
 test('conservative recovery counts full 1.80 USD without claiming actual invoicing',()=>{
  const recovered=conservativelyRecover(original,proof);
