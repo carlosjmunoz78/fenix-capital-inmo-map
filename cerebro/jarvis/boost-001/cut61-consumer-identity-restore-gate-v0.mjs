@@ -44,7 +44,7 @@ const block=(code,details={})=>Object.freeze({
  status:'BLOCKED',code,
  owner_approval_needed:true,write_authorized:false,
  company_onboarding_authorized:false,
- learning_ingest_authorized:false,prod_authorized:false,
+ learning_ingest_authorized:false,production_promotion:false,prod_authorized:false,
  physical_restore_verified:false,...details
 });
 export function validateLiveCatalogSnapshot(s){
