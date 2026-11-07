@@ -36,6 +36,7 @@ const SENSITIVE=/(password|contrase[nñ]a|\btoken\b|bearer|api[_ -]?key|secreto|
 const allowedSurfaces=new Set(["JARVIS","OPERATIVA","NEURONAL","NAVEGADOR","LEGACY_V0"]);
 const deny=(reason)=>Object.freeze({state:"DENY",reason,providerCalled:false,spentEuro:0,canonicalJarvisV2:false});
 const t=(x)=>typeof x==="string"&&x.length>0&&x.length<=180;
+const validJwt=(x)=>typeof x==="string"&&x.length>=20&&x.length<=8192;
 const isByteArray=(x)=>x instanceof Uint8Array&&x.byteLength>=100&&x.byteLength<=5_000_000;
 
 /** Never load an unlimited remote stream into Worker RAM. */
@@ -90,7 +91,7 @@ export function createJarvisOnlineFreeTtsPort({
       request.allowPaid!==undefined||request.model!==undefined)return deny("PRIVILEGED_FIELDS_DENIED");
     const {jwt,company_id,engine_id,surface,session_id,request_id,text,consent_ref}=request;
     if(company_id!=="fenix"||engine_id!=="VOICE-001"||
-       !allowedSurfaces.has(surface)||!t(jwt)||!t(session_id)||!t(request_id)||!t(consent_ref)||
+       !allowedSurfaces.has(surface)||!validJwt(jwt)||!t(session_id)||!t(request_id)||!t(consent_ref)||
        typeof text!=="string"||!text.trim()||text.length>400)return deny("INVALID_SCOPE_OR_TEXT");
     if(SENSITIVE.test(text))return deny("SENSITIVE_TEXT_DENIED");
     // Never trust the browser-selected voice name to infer a cloned model.
@@ -102,7 +103,8 @@ export function createJarvisOnlineFreeTtsPort({
         return deny("OWNER_SCOPE_DENIED");
       settings=await control.read({company_id,engine_id,environment:"LAB"});
       if(settings?.enabled!==true||settings?.kill_switch!==false||
-         settings?.generic_fallback_opt_in!==true||settings?.allowPaid===true)
+         settings?.generic_fallback_opt_in!==true||settings?.allowPaid===true||
+         settings?.cloudflare_account_plan!=='FREE')
         return deny("GENERIC_FALLBACK_OFF");
       if(await consent.check({owner_id:owner.owner_id,company_id,session_id,consent_ref,purpose:"GENERIC_TTS"})!==true)
         return deny("VOICE_CONSENT_REQUIRED");
@@ -125,8 +127,10 @@ export function createJarvisOnlineFreeTtsPort({
       });
       if(hold?.state!=="HELD"||hold?.fresh!==true||
          hold?.accountWideFreeBudgetVerified!==true||hold?.paidOverflowAllowed!==false||
-         !t(hold?.reservation_id)||hold?.reservedNeurons!==maxNeurons)
+         !t(hold?.reservation_id)||hold?.reservedNeurons!==maxNeurons){
+        if(t(hold?.reservation_id))await quota.release(hold.reservation_id);
         return deny("UNVERIFIED_SHARED_FREE_QUOTA");
+      }
       const ok=await audit.record({event:"GENERIC_TTS_FREE_ATTEMPT",company_id,engine_id,environment:"LAB",request_id,canonical:false});
       if(ok!==true){await quota.release(hold.reservation_id);return deny("AUDIT_UNAVAILABLE")}
       providerCalled=true;
@@ -136,7 +140,8 @@ export function createJarvisOnlineFreeTtsPort({
       const bytes=await boundedMp3(output);
       const committed=await quota.commit({reservation_id:hold.reservation_id,request_id,maxNeurons});
       if(committed!==true)throw Error("BUDGET_COMMIT_UNVERIFIED");
-      await audit.record({event:"GENERIC_TTS_FREE_READY",company_id,environment:"LAB",request_id,canonical:false});
+      const logged=await audit.record({event:"GENERIC_TTS_FREE_READY",company_id,environment:"LAB",request_id,canonical:false});
+      if(logged!==true)throw Error("READY_AUDIT_UNAVAILABLE");
       return Object.freeze({
         state:"AUDIO_BYTES_READY",providerCalled:true,spentEuro:0,
         bytes,contentType:"audio/mpeg",cacheControl:"private, no-store",
