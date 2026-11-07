@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT60_PHYSICAL_ACCEPTANCE_EVIDENCE_AND_CONTROLLED_TENANT_ONBOARDING",
+  "next_block": "CUT61_COMPANY_REGISTRY_CONSUMERS_BACKUP_RESTORE_AND_OWNER_E2E",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -181,5 +181,55 @@
       "prod_authorized": false,
       "new_paid_api_calls": 0
     }
+  },
+  "cut60": {
+    "version": "CUT60-v0.1.0",
+    "status": "HISTORICAL_RECEIPT_LINEAGE_EXECUTED_LAB_TENANT_REGISTRATION_NO_GO",
+    "source_project_ref": "hnqlnvakzaywtafeiybt",
+    "target_project_ref": "cluhljgonannaafpmblx",
+    "historical_receipt_engines": [
+      "KBOOT-001",
+      "SEOBOOT-001",
+      "SOCBOOT-001"
+    ],
+    "historical_receipt_date": "2026-10-13",
+    "underlying_source_payloads_verified": false,
+    "existing_runtime_module_blob_sha": "03c9048deec79f6b354f89b8abaf09bc0b4a63d1",
+    "execution": {
+      "run_id": 42387742454,
+      "tests_pass": 11,
+      "tests_fail": 0,
+      "artifact_id": 13580345970,
+      "mkt_crm_functions_executed": 2,
+      "input_kind": "HISTORICAL_RECEIPT_HASHES_MOCK_PLAN",
+      "backend_receipts_created": 0
+    },
+    "tenant": {
+      "run_id": 42388217199,
+      "tests_pass": 7,
+      "tests_fail": 0,
+      "artifact_id": 13580845466,
+      "registry_rows": 0,
+      "onboarding_rows": 0,
+      "engine_rows": 0,
+      "marketing_crm_receipts": 0,
+      "lrn_receipts": 0,
+      "initial_onboarding_scaffold_green_unverified": 3,
+      "current_physical_green_verified": 0,
+      "outcome": "NO_GO",
+      "reason": "BACKUP_RESTORE_DEPENDENCY_IDENTITY_GATES_PENDING"
+    },
+    "security": {
+      "new_supabase_writes": 0,
+      "app_crm_changes": 0,
+      "publishing": 0,
+      "new_prod_permissions": 0,
+      "paid_ai_calls": 0,
+      "owner_b2b3_e2e_verified": false,
+      "backup_restore_physically_tested": false,
+      "prod_authorized": false
+    },
+    "docs": "cerebro/jarvis/boost-001/CUT60_HISTORICAL_LINEAGE_TENANT_ONBOARDING_GATE_2026-11-07.md",
+    "next_block": "CUT61_COMPANY_REGISTRY_CONSUMERS_BACKUP_RESTORE_AND_OWNER_E2E"
   }
 }
