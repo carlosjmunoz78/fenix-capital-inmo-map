@@ -17,6 +17,8 @@ export function buildDeepSeekResponseRequest({
   input,
   instructions,
   maxOutputTokens = 256,
+  reasoning,
+  text,
 }) {
   validateDeepSeekModel(model);
   if (typeof input !== 'string' && !Array.isArray(input)) {
@@ -31,6 +33,15 @@ export function buildDeepSeekResponseRequest({
     max_output_tokens: maxOutputTokens,
   };
   if (instructions) body.instructions = String(instructions);
+  // Optional structured output for a guarded LAB request only; legacy requests stay byte-for-byte equivalent.
+  if (reasoning !== undefined) {
+    if (!reasoning || !['none', 'low', 'high', 'max'].includes(reasoning.effort) || Object.keys(reasoning).some(k => k !== 'effort')) throw new Error('Unsupported reasoning config');
+    body.reasoning = { effort: reasoning.effort };
+  }
+  if (text !== undefined) {
+    if (!text || text.format?.type !== 'json_object' || Object.keys(text).some(k => k !== 'format') || Object.keys(text.format).some(k => k !== 'type')) throw new Error('Unsupported text format');
+    body.text = { format: { type: 'json_object' } };
+  }
   return body;
 }
 
