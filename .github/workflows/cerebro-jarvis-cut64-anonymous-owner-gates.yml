@@ -1,0 +1,44 @@
+name: CEREBRO JARVIS CUT64 Anonymous Read Only Owner Gate E2E
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut64-anonymous-owner-gates.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut64-owner-gate-anonymous:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 'Check allowlisted GET-only probe contract and mocked denial cases'
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut64-anonymous-owner-readonly-probe-v0.test.mjs
+      - name: 'Send 3 anonymous GETs to health and Access canary without headers or cookies'
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut64-anonymous-owner-readonly-probe-v0.mjs \
+            "$RUNNER_TEMP/cut64-anonymous-owner-gates-report.json"
+      - name: 'Archive status-only report, even if a sensitive GET unexpectedly accepts anonymous'
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut64-anonymous-owner-denial-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut64-anonymous-owner-gates-report.json
+          retention-days: 30
+          if-no-files-found: warn
