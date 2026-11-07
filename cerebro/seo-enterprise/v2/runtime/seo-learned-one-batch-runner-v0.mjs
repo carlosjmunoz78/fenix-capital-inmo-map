@@ -108,7 +108,7 @@ export function persistOneLearnedBatch({batch,output_dir}={}) {
  if(!batch||batch.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE'||batch.provider_calls>2||
     batch.wordpress_writes!==0||batch.can_publish!==false)stop('WRITE_SCOPE');
  if(typeof output_dir!=='string'||!path.isAbsolute(output_dir)||output_dir.includes('..'))stop('OUTPUT_PATH');
- const dest=path.resolve(output_dir),temp=[os.tmpdir(),process.env.RUNNER_TEMP].filter(Boolean).map(path.resolve);
+ const dest=path.resolve(output_dir),temp=[os.tmpdir(),process.env.RUNNER_TEMP].filter(Boolean).map(p=>path.resolve(p));
  if(!temp.some(p=>dest.startsWith(p+path.sep))||fs.existsSync(dest))stop('OUTSIDE_TEMP_OR_DUPLICATE');
  fs.mkdirSync(dest,{recursive:true,mode:0o700});
  const evidence=[];
