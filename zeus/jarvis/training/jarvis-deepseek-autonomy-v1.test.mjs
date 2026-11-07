@@ -8,13 +8,17 @@ const here=dirname(fileURLToPath(import.meta.url));
 const root=join(here,'..','..','..');
 const script=join(here,'jarvis-deepseek-autonomy-v1.mjs');
 const state=join(root,'zeus','jarvis','state','jarvis-deepseek-autonomy-ledger-v1.json');
-test('CUT37 perpetual LAB ledger is explicit, EUR50 policy USD40 subcap',()=>{
+test('CUT37 current LAB ledger remains safe while PAUSED, EUR50 policy USD40 subcap',()=>{
  const l=JSON.parse(readFileSync(state,'utf8'));
  assert.equal(l.schema,'jarvis.deepseek.autonomy.ledger.v1');
  assert.equal(l.company_id,'fenix');
  assert.equal(l.engine_id,'JARVIS');
  assert.equal(l.environment,'LAB');
- assert.equal(l.status,'ACTIVE');
+ assert.equal(l.status,'PAUSED');
+ assert.equal(l.halt_reason,'CUT37_PROVIDER_HTTP_503_SETTLED_CONSERVATIVELY_PAUSED');
+ assert.equal(l.recovery.auto_resume,false);
+ assert.equal(l.recovery.charged_conservative_usd,1.8);
+ assert.equal(l.recovery.provider_billing_reconciled,false);
  assert.equal(l.owner_permission_eur,50);
  assert.equal(l.lifetime_guard_usd,40);
  assert.equal(l.auto_recharge,false);
@@ -29,6 +33,7 @@ test('CUT37 autonomy dry-run does not use credentials or network',()=>{
  assert.equal(p.status,0,p.stderr);
  assert.match(p.stdout,/JARVIS_AUTONOMY_DRY_RUN/);
  assert.match(p.stdout,/"only_lab":true/);
+ assert.match(p.stdout,/"state":"PAUSED","cycles_next":0/);
 });
 test('CUT37 cannot spend without branch, owner-enabled LAB and environment secret',()=>{
  const p=spawnSync(process.execPath,[script,'--reserve'],{encoding:'utf8',
