@@ -1,0 +1,69 @@
+name: CEREBRO JARVIS CUT62 · Reuse existing isolated PG17 backup restore script (NO PROD)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut62-isolated-pg17-backup-rehearsal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pg17-backup-restore-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: jarvis_test
+          POSTGRES_PASSWORD: ephemeral_only_ci_pg17
+          POSTGRES_DB: jarvis_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U jarvis_test -d jarvis_lab"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: '5432'
+      PGUSER: jarvis_test
+      PGPASSWORD: ephemeral_only_ci_pg17
+      PGDATABASE: jarvis_lab
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm command source pinned: existing PG17 script, do not rewrite
+        run: |
+          set -euo pipefail
+          test -f zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
+          grep -q 'pg_dump --format=custom' zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
+          grep -q 'pg_restore --no-owner' zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
+          grep -q 'Isolated PostgreSQL service; synthetic fixtures only; NEVER PROD' zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
+      - name: PostgreSQL client (existing runner or package)
+        run: |
+          command -v pg_restore >/dev/null || (sudo apt-get update -qq && sudo apt-get install -y postgresql-client)
+          pg_dump --version
+          pg_restore --version
+      - name: Real PG17 synthetic concurrent tests + physical dump/restore + rollback
+        run: |
+          set -euo pipefail
+          bash zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh
+          test "$(psql -d jarvis_lab_restore -Atqc 'SELECT count(*) FROM zeus_jarvis.b4_memory_event')" = '3'
+      - name: Write proof scoped to temporary PostgreSQL ONLY
+        run: |
+          set -euo pipefail
+          printf '%s\n'             '{"schema":"jarvis.cut62.isolated.pg17.backup.restore.evidence.v1","company_id":"fenix","engine_id":"JARVIS","environment":"LAB","version":"CUT62-v0.1","test_target":"GITHUB_ACTIONS_EPHEMERAL_POSTGRES_17","existing_script_reused":"zeus/jarvis/gates/b4-real-postgres-concurrency-restore-lab.sh","synthetic_records":3,"dump_restore_executed":true,"synthetic_index_rollback_executed":true,"prod_database_backup_executed":false,"prod_restore_proven":false,"app_crm_prod_modified":false,"prod_promoted":false,"new_paid_ai_calls":0}'             > "$RUNNER_TEMP/cut62-isolated-pg17-rehearsal.json"
+      - name: Archive ONLY rehearsal metadata, not database dump
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut62-isolated-pg17-backup-restore-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut62-isolated-pg17-rehearsal.json
+          retention-days: 30
+          if-no-files-found: error
