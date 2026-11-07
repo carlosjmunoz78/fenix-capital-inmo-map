@@ -63,7 +63,7 @@ jobs:
       - name: Install Chromium for browser acceptance
         run: npx playwright install chromium
       - name: Owner-session fixture browser QA - chat, interim dictation and TTS adapter
-        run: npx playwright test tests/jarvis-voice-persona-react-bridge-lab.spec.ts --project=desktop-chromium --reporter=line
+        run: npx playwright test tests/jarvis-voice-persona-react-bridge-lab.spec.ts tests/jarvis-tts-does-not-wait-for-secondary-mic-lab.spec.ts --project=desktop-chromium --reporter=line
       - name: Archive failure-only screenshots and traces (synthetic data only)
         if: failure()
         uses: actions/upload-artifact@v4
