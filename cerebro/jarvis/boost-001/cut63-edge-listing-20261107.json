@@ -1,0 +1,684 @@
+{
+  "schema": "jarvis.cut63.deployed.edge.listing.readonly.v1",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "CUT63-v0.1",
+  "observed_date": "2026-11-07",
+  "project_ref": "cluhljgonannaafpmblx",
+  "source": "LIVE_SUPABASE_MCP_EDGE_FUNCTIONS_LIST",
+  "physical_status": "DEPLOYMENT_METADATA_ONLY",
+  "total": 95,
+  "verify_jwt_false": 60,
+  "verify_jwt_true": 35,
+  "functions": [
+    {
+      "slug": "fenix-app-gateway",
+      "status": "ACTIVE",
+      "version": 22,
+      "verify_jwt": false,
+      "ezbr_sha256": "6f4ac3e434313131c0f109e1f40b34b032ab4e00b82a2cef4cbf2bf99f21b3c2"
+    },
+    {
+      "slug": "fenix-ana-canonical",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "dc9c251a248c0151efbfe87f3a53b072c6650ea97592e5825c493d6ea999d5da"
+    },
+    {
+      "slug": "fenix-memory-api",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "e96ec1aeb63be03028a9c342453969058c1144d664bcf25f080542e010f96c18"
+    },
+    {
+      "slug": "fenix-b2b-actions",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "057dc41b86de5a3dcc059f58249dde16424e1b19937ead891f2bfebf5e610884"
+    },
+    {
+      "slug": "fenix-evidence-api",
+      "status": "ACTIVE",
+      "version": 14,
+      "verify_jwt": true,
+      "ezbr_sha256": "e60f373ac261bff2ffda161397f67bfcaa5b4a93797a42f8e19bcc02ebe8675d"
+    },
+    {
+      "slug": "fenix-ana-api",
+      "status": "ACTIVE",
+      "version": 11,
+      "verify_jwt": true,
+      "ezbr_sha256": "b657f7336fb7baac4fce236f2158c778ccd896a742c87d378ece44c744ce0cc5"
+    },
+    {
+      "slug": "fenix-ana-knowledge",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "970beb8876a3ad657124fc28038cb040a42d3fa8ffd9f2ee2bcc07ce6ec66ce2"
+    },
+    {
+      "slug": "fenix-directory-sync-once",
+      "status": "ACTIVE",
+      "version": 12,
+      "verify_jwt": true,
+      "ezbr_sha256": "9602d806499a165b38e0a0281dd18de99c83e715547a787bbd2bc3125c2f682d"
+    },
+    {
+      "slug": "fenix-directory-sync-trigger-once",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "711925f1c5da90012cece6d136e0aab3393f301a370f4d117069393cd3e26f5f"
+    },
+    {
+      "slug": "fenix-crm-sync-once",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "864afcbfd3e3b7037b6282f7f2c0b90c31a1f4a37a7a030de01b988fdfcc0618"
+    },
+    {
+      "slug": "fenix-crm-sync-trigger-once",
+      "status": "ACTIVE",
+      "version": 10,
+      "verify_jwt": true,
+      "ezbr_sha256": "e31cfd4e9021326f6d057850e813c085e314c659fb951ddb7833d45464199d4c"
+    },
+    {
+      "slug": "fenix-prod-data-sync-once",
+      "status": "ACTIVE",
+      "version": 12,
+      "verify_jwt": true,
+      "ezbr_sha256": "2b6503f6a69b9ab640e6a32357327895d9a70d4341453b21caad0a4bdbbea0aa"
+    },
+    {
+      "slug": "fenix-directory-api",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": true,
+      "ezbr_sha256": "17264a96a26b5248166040691f8c100c04cbb6dc4b19a38c7b8ec92f14f86441"
+    },
+    {
+      "slug": "fenix-economia-api",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "ec870585123bc823fad3f31976bb8c2c7eb94fd044e727f9b4cc66422ae67c86"
+    },
+    {
+      "slug": "fenix-task-api",
+      "status": "ACTIVE",
+      "version": 12,
+      "verify_jwt": true,
+      "ezbr_sha256": "171d610eae03aa1774a5e7297b43d0985332dc46f89b16e1a0c977df40f7b0a5"
+    },
+    {
+      "slug": "fenix-bank-api",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "f193eea969b1950da5b8dbb8733f2b20d6d4c36af8e2ce522f84271a0f8968d7"
+    },
+    {
+      "slug": "fenix-legacy-doc-migration-once",
+      "status": "ACTIVE",
+      "version": 12,
+      "verify_jwt": true,
+      "ezbr_sha256": "e42c7efd359d4e3f759f70648d395cc90851d5d15155e9c17f080a601b0bd10e"
+    },
+    {
+      "slug": "fenix-reports-api",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "5c6e523a215c356a1ea624f440a5a7cecec96f29b9230b6f7f994b681551f582"
+    },
+    {
+      "slug": "fenix-directory-actions",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "a27910d3910c7433e819aa9897b8c71da81b38073e2afed32d80bf32a4994254"
+    },
+    {
+      "slug": "fenix-special-cases-api",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": true,
+      "ezbr_sha256": "85d9dbc3f4d9227d509f9e1873847de6da8c05aebce157b1b13317b5c2abd917"
+    },
+    {
+      "slug": "fenix-document-actions",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": true,
+      "ezbr_sha256": "fab30c5f30523ddbacf691a8e482de71f94bc6850e117de7c77ad5efe69dcc4b"
+    },
+    {
+      "slug": "fenix-expediente-stage",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "b7ce317ac67918340b62ef9f5340b1b43f78d1ccf013b0ce68eb1d50c265e120"
+    },
+    {
+      "slug": "fenix-document-intelligence-test",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": true,
+      "ezbr_sha256": "d8f1945b692225c139155765e866c66fed740e94b6775f6148fa3a6ee6cae5ae"
+    },
+    {
+      "slug": "fenix-document-intelligence",
+      "status": "ACTIVE",
+      "version": 13,
+      "verify_jwt": true,
+      "ezbr_sha256": "9f3c9042711d64fe071dd8c5ddd76867c51652c773a0b1158538270457872947"
+    },
+    {
+      "slug": "fenix-document-extract",
+      "status": "ACTIVE",
+      "version": 13,
+      "verify_jwt": true,
+      "ezbr_sha256": "29000645966a35e2553cc575d4ec0e8221ec811cbc9226389921fa4c9a542a3f"
+    },
+    {
+      "slug": "fenix-communications-gateway",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": true,
+      "ezbr_sha256": "a4a24b8218c37bd19e929db852f28c99f75765769918e17d99e4964025a23942"
+    },
+    {
+      "slug": "fenix-whatsapp-webhook",
+      "status": "ACTIVE",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "6fbc700a7d7607dabc874e6d4c12950a820f129ae0b416d5977e242ff66b3026"
+    },
+    {
+      "slug": "fenix-web-lead",
+      "status": "ACTIVE",
+      "version": 5,
+      "verify_jwt": false,
+      "ezbr_sha256": "792772f26973669f9691815ca2b3fa5291555660c712a9f920fe1c004b2b3165"
+    },
+    {
+      "slug": "fenix-brevo-lead-webhook",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": true,
+      "ezbr_sha256": "bff7f2b69b89e16c5ace192857c2c2e21c28e89163dc6102b52a447ba086501b"
+    },
+    {
+      "slug": "social-lead-ingest",
+      "status": "ACTIVE",
+      "version": 5,
+      "verify_jwt": false,
+      "ezbr_sha256": "690bef880d4feb93129ace2cba7b2296e359a62287d2ca1b5ccd85a7f9d39675"
+    },
+    {
+      "slug": "fenix-brevo-inventory-once",
+      "status": "ACTIVE",
+      "version": 9,
+      "verify_jwt": false,
+      "ezbr_sha256": "e7ee7f8333480e03ad491df448cc77f82837546df50ba6df029ad6ced68f5a87"
+    },
+    {
+      "slug": "fenix-brevo-probe-once",
+      "status": "ACTIVE",
+      "version": 6,
+      "verify_jwt": false,
+      "ezbr_sha256": "982034200da4da9cef4c246d711ec6d62b65d99b935095c809c11cc212414445"
+    },
+    {
+      "slug": "fenix-document-reread",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": true,
+      "ezbr_sha256": "25770f17e07b51c9c574e8f69e3062396ba91e6b8900f655cb835fc588042d4a"
+    },
+    {
+      "slug": "fenix-expediente-people",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": true,
+      "ezbr_sha256": "72f62f3d04dff27ebdb4c1e177d9383449c62f22454e47ea9cc1bae74f7e8d49"
+    },
+    {
+      "slug": "fenix-document-auto-ingest",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": true,
+      "ezbr_sha256": "50af0b9cb947b46c467d699559d0b123541214e936ed4bf4437fddb2f4ab7a2e"
+    },
+    {
+      "slug": "fenix-document-existing-backfill",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": true,
+      "ezbr_sha256": "cfe78207a52d5edaab2a02c1938394d55cd8e28aeef0c1acea2edcfc907de810"
+    },
+    {
+      "slug": "fenix-user-admin",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": true,
+      "ezbr_sha256": "d8f486ba3ef411a25a386adfe37e9668545e9089fa65f8bb6319a50f84adc94c"
+    },
+    {
+      "slug": "fenix-profile-api",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": true,
+      "ezbr_sha256": "77509070e15deb5992e7ad3f78832083513b7a189634ce3aca9140962524e276"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0",
+      "status": "ACTIVE",
+      "version": 33,
+      "verify_jwt": false,
+      "ezbr_sha256": "a32fc26e4b328d0477bc53f0ae9085c0d5d280703779db5ac8593fd9b718553a"
+    },
+    {
+      "slug": "fenix-task-actions",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": true,
+      "ezbr_sha256": "97d6ccd8925191e5b70555b1d7f597d9841bd55b0b4e3cbdb13b0b90dccf4764"
+    },
+    {
+      "slug": "fenix-expediente-actions",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": true,
+      "ezbr_sha256": "9b2f6195a8776c6874a42e05bd35f1db31cfcc91afce94ec612f827aff41c19a"
+    },
+    {
+      "slug": "fenix-app-gateway-v2-canary",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "68194e48aeefbb1a0310a858ab7b48bc7a36f8a8bf4c18cc33ea4b058783b110"
+    },
+    {
+      "slug": "cerebro-actgw-signer-key-v0",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "9fc01567ddcf6509cc73a31c948831a5e5311586e6c018f095090a3c622b7b6a"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v11",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "f90714ade0a319ba7c7ec0c7d27d24dfa39e323dcf069dcfd7ac271d1de713e2"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v12",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "acfa227954ea69034306e0542feec0bb98c9785744e595ad59d79ab423f7d450"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v13",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "7b65a715d7a7e2059349dae9d83d0bb27189c0f97e289f78cf1c6a189bbfa1b7"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v14",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "ea7710fe1d95632227cbcfd43d535306534c59572abbc61806ed79480952d1ff"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v16",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "73df3b9d9ea8c0f52fb1aafaab405b71363fe0f12ef27a494b3f72d565d0a1ce"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v17",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "9788911fb717f1981f9f650006f36553cfcef31e9dea9472eddfd59e48e85d53"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v18",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "b3054b2afcaf9282f40588032dbfe8fb751afb7e8fb59b43edfc31122e304de0"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v19",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "465cff3b83af2ca7836d22a08c990d8698627e25fff5908e7fbe2802dae7fb5b"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v20",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "4be0583ef8adf081f2dd8efde7900368b5528bf3a9c62576b616280c20ec654e"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v21",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "a00d3c637b950f587ad25b860dc4bf77f2b0450b43148c06b83bb76be836c471"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v22",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "a465c2b572d4a74f6b901902ca2eae4900245845d5695a4879e8aa685fa59e49"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v23",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "98d7aafff367f40a2d7949805614ebd90afc5c3ece8b6b22db0ec92e9f5eae6f"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v24",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "70e8447b38cfeabf5c40246da9b0787798c71f0417fdd1aacb2b3b69c83bd3d4"
+    },
+    {
+      "slug": "cerebro-console-gateway-v0-canary-v25",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "4078b2ac9bd8b8a83a05767026574436d2c7e6376b006f4437c8c32513e21699"
+    },
+    {
+      "slug": "cerebro-telegram-gateway-v0",
+      "status": "ACTIVE",
+      "version": 7,
+      "verify_jwt": false,
+      "ezbr_sha256": "29cd3c8b1e4b9a80a0d3a3ea13b55922c764533b502f6c1a50d45febe31feafe"
+    },
+    {
+      "slug": "cerebro-telegram-voice-v0",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "1638cbabcbefc8c9f12805cd71e20e5cacff35c99251934ba41f4c95d7a6aa27"
+    },
+    {
+      "slug": "cerebro-telegram-voice-ui-v0",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "3f7bfb5f2d190b2e8b59acc690a9965a342de99ba7b493821ec827de4911211d"
+    },
+    {
+      "slug": "cerebro-internal-auth-probe-v0",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": false,
+      "ezbr_sha256": "94796ea09e04b2257c1fbc00a9135abda46e3fdad1bb2917e2b65867d6b89f73"
+    },
+    {
+      "slug": "cerebro-telegram-voice-v1",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "2c4307d7f41aec04a1aa89562860466316cae7101de30fffaa030fd7cee97c14"
+    },
+    {
+      "slug": "cerebro-voice-lab-feedback-v0",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "28ad209e0b91d633f6355587c02c002cac9ed82cb7ede7ca3f1fbd6e544d8137"
+    },
+    {
+      "slug": "cerebro-voice-preview-v0",
+      "status": "ACTIVE",
+      "version": 8,
+      "verify_jwt": false,
+      "ezbr_sha256": "5592072c2f2c6e392bd201b02e95da963d07dc9c347449d6dc122c9018df1974"
+    },
+    {
+      "slug": "cerebro-console-gateway-human-v1-canary",
+      "status": "ACTIVE",
+      "version": 5,
+      "verify_jwt": false,
+      "ezbr_sha256": "77dd2f4ecd4abb28e244a3ccd759cf3d0fafb0f51ce5e87d3fcbcb436e158a60"
+    },
+    {
+      "slug": "cerebro-visual-state-v0-canary",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "0ede07c6970560be777cc642de3ae55868caf2bddc7cf824ed051351ee6ca6d2"
+    },
+    {
+      "slug": "cerebro-console-human-router-zero-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "697d6b3ce66ce22e5e36dae250b0df9497b8a707dfda65476cb42f1752f406ae"
+    },
+    {
+      "slug": "cerebro-console-gateway-human-v1-live5",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "57efb37e3210155bf1e70f9254c7e736f8d349e975a7a5c488eb6b7a6ed28f2e"
+    },
+    {
+      "slug": "cerebro-console-gateway-human-v1-owner100",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "a82744ff4729dd7ffd0da9b4442b31c671c9e96f3c411f635cc40608e771c95f"
+    },
+    {
+      "slug": "cerebro-telegram-gateway-voice-samples-canary-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "4d6bbac401c36d72ef606abbeb25bff30d4119fc5a20448501d538801a18f619"
+    },
+    {
+      "slug": "cerebro-governed-write-runtime-canary-v1",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "693c49fd3391b02588883c8385c9211264118937c393e2f16ae389376650170f"
+    },
+    {
+      "slug": "cerebro-gateway-prod-governed-write-canary-v1",
+      "status": "ACTIVE",
+      "version": 6,
+      "verify_jwt": false,
+      "ezbr_sha256": "90bef3754639354d5a201fcceb439886b41058768153e286caa13148b6c69248"
+    },
+    {
+      "slug": "cerebro-console-activity-v0",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": true,
+      "ezbr_sha256": "f8a45a1d94ad3fa63c52d4e8de56e10a8e8a09faf4fe33d0578e4793963ec66f"
+    },
+    {
+      "slug": "fenix-web-lead-alert-worker",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "f6624f6ffdbb941fb0bbd188975869be4543857a1846ea456d02338c48278985"
+    },
+    {
+      "slug": "cerebro-browser-dispatch-v1",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "89d6ed01754fc3f0001cc9d9d403636e316005c6b66f4e79f1d66aa65c5211e6"
+    },
+    {
+      "slug": "cerebro-actgw-social-signer-key-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "2c11e52fc0b03715c26f690bb32abfec399e5dc6ca789d005c868d5cc13ff111"
+    },
+    {
+      "slug": "cerebro-social-authorizer-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "06ddf029304af726734408cdb4d66e5f27d5cbc4f48771e41dec1aab2c6514cf"
+    },
+    {
+      "slug": "cerebro-browser-dispatch-v2",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "5f4bc7c0f261c83c7df9e943bec8dba34c94d8b65663534232a571fb217a7f49"
+    },
+    {
+      "slug": "cerebro-actgw-browser-signer-key-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "c4615754df1554af6e2ea8b168102fe7a63a91e45e9dab10a92972411ddcf638"
+    },
+    {
+      "slug": "cerebro-actgw-browser-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "4b29a10e2697f5d674fb5749d644fa38df300cdd337f5217b5be996bc0053013"
+    },
+    {
+      "slug": "cerebro-browser-interactive-v3",
+      "status": "ACTIVE",
+      "version": 6,
+      "verify_jwt": false,
+      "ezbr_sha256": "0e5a275a846c9cd33c2d9cc0e5659553e96ee3d53a2c4fb825dc22b993d96e12"
+    },
+    {
+      "slug": "cerebro-browser-gateway-v1",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "4e382d96ace8e508bca712af33a62061a012fe1d36173abb84e70f8ab5804c7b"
+    },
+    {
+      "slug": "cerebro-creative-dispatch-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "8b297de0e7d943e94faf38b1e9182c4aa90576339523d8f33d14243921358edb"
+    },
+    {
+      "slug": "cerebro-browser-physical-e2e-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "b79b3bb0748773d59f4c9f082d4b166524b32eb14511c8fd566d95397347373e"
+    },
+    {
+      "slug": "cerebro-browser-work-total-dispatch-v1-prod",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "2c8611940011e6cc3cbaae0b82a63ced02c2cadf48396df10358d7c426a886f0"
+    },
+    {
+      "slug": "cerebro-browser-work-total-worker-v1-prod",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "9e6f0c28bcad015fec6c3de2d20f9892662a8f33101e917e984eb6ab2fed21ee"
+    },
+    {
+      "slug": "cerebro-browser-work-total-v1-prod",
+      "status": "ACTIVE",
+      "version": 4,
+      "verify_jwt": false,
+      "ezbr_sha256": "47fb27a57768b6197b746ad71e7e6c8eee282936ea1be8651f905623aaa01d2c"
+    },
+    {
+      "slug": "cerebro-browser-work-total-worker-v2-prod",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "90421b9e890c2739f391f593aea139ce03b086379164dd43657befc0f622ed93"
+    },
+    {
+      "slug": "cerebro-browser-work-total-owner-v1-prod",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "13ecca7182eacc0d3856ee7fc11ff9994c42113e2e6b338e21d407e2a11f0959"
+    },
+    {
+      "slug": "cerebro-browser-work-total-autologin-v1-prod",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "705ff4fcac5de08221923f695988ad1548d60120df9148385854a481648da738"
+    },
+    {
+      "slug": "jarvis-work-dispatch-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "687a4af380a004f0076ad01f21ac3ba45ea6aef831f67a0d3347173d6cb1a105"
+    },
+    {
+      "slug": "jarvis-git-dispatch-v1",
+      "status": "ACTIVE",
+      "version": 1,
+      "verify_jwt": false,
+      "ezbr_sha256": "33b0859385658b0086166072a3e96356ba35107f165b1a0403bf2399336133ec"
+    },
+    {
+      "slug": "jarvis-git-gateway-v1",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "bb5373170800d8ec24355256ddd8ef78117e0b48deeeda75881a2cae731358ab"
+    },
+    {
+      "slug": "jarvis-work-gateway-v1",
+      "status": "ACTIVE",
+      "version": 3,
+      "verify_jwt": false,
+      "ezbr_sha256": "f3717ab5624760e1861416eed968c7a813a610cb150eb03b58ba97bec32ddebd"
+    },
+    {
+      "slug": "jarvis-orchestrator-v0",
+      "status": "ACTIVE",
+      "version": 2,
+      "verify_jwt": false,
+      "ezbr_sha256": "47ec13e391c36ad2155b48ee5003cfc0130f7ee379f1763e539fbebd275e750b"
+    }
+  ],
+  "backups_independent_of_edge": false,
+  "app_prod_modified": false,
+  "supabase_prod_modified": false
+}
