@@ -64,7 +64,8 @@ test('tampering with any of the three true receipt hashes fails closed',()=>{
 });
 test('receipt idempotency, count, state, time, cost, and grant tampering rejected',()=>{
  rejects(x=>{x.receipts.pop();},'BAD_RECEIPT_COUNT');
- rejects(x=>{x.receipts[0].engine_id=x.receipts[1].engine_id;},'UNEXPECTED_OR_DUPLICATE_ENGINE');
+ rejects(x=>{x.receipts[0].engine_id=x.receipts[1].engine_id;},'RECEIPT_MISMATCH');
+ rejects(x=>{x.receipts[1]={...x.receipts[0]};},'UNEXPECTED_OR_DUPLICATE_ENGINE');
  rejects(x=>{x.receipts[1].item_count=0;},'RECEIPT_MISMATCH');
  rejects(x=>{x.receipts[1].state='READY';},'RECEIPT_MISMATCH');
  rejects(x=>{x.receipts[1].cost='5.00';},'RECEIPT_MISMATCH');
