@@ -1,0 +1,55 @@
+name: CEREBRO JARVIS CUT59 · Actual MKT+CRM runtime synthetic canary, NO API
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut59-existing-mkt-crm-runtime-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  existing-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      CEREBRO_CRM_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Pin EXACT existing JS engine source (no substitution, no rewrite)
+        run: |
+          set -euo pipefail
+          actual="$(git hash-object cerebro/multicompany/marketing-crm-bootstrap-v1.mjs)"
+          test "$actual" = '03c9048deec79f6b354f89b8abaf09bc0b4a63d1'
+      - name: Existing engine regressions and new synthetic negative gates
+        run: |
+          set -euo pipefail
+          node --test cerebro/tests/marketing-crm-bootstrap-v1.test.mjs
+          node --test cerebro/jarvis/boost-001/cut59-marketing-crm-synthetic-canary-v0.test.mjs
+      - name: Execute existing real MKTBOOT+CRMBOOT functions in-process with dummy data
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut59-marketing-crm-synthetic-canary-v0.mjs             "$RUNNER_TEMP/cut59-mkt-crm-real-code-synthetic-only.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const a=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut59-mkt-crm-real-code-synthetic-only.json'));
+            if(a.runtime_success_count!==2||a.supabase_rpc_called!==false||
+               a.actual_crm_write!==false||a.actual_marketing_publication!==false||
+               a.stage_green_evidence!==false||a.production_ready!==false||
+               a.source_historical_proofs_reused!==false)process.exit(1);
+          "
+      - name: Store real JS runtime-only evidence (NOT physical PROD evidence)
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut59-marketing-crm-synthetic-runtime-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut59-mkt-crm-real-code-synthetic-only.json
+          retention-days: 30
+          if-no-files-found: error
