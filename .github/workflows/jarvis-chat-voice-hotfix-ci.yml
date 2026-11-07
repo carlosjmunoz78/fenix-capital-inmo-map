@@ -1,0 +1,63 @@
+name: JARVIS Voice Chat Hotfix - Safe Build QA
+
+on:
+  push:
+    branches:
+      - fix/jarvis-chat-voice-responsive-20261107
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'src/JarvisOperativaComposerPortal.tsx'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/cerebroConsoleApi.ts'
+      - '.github/workflows/jarvis-chat-voice-hotfix-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-and-guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck and build current App with only three-file UI patch
+        run: npm run build
+      - name: Check chat sends via one event, voice previews interim text and timeout is bounded
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+          const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
+          const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
+          const must=[
+            [shell, "window.addEventListener('jarvis:direct-chat-submit-v1'"],
+            [shell, "directChatSubmitRef.current(payload.message)"],
+            [shell, 'interimResults=true'],
+            [shell, 'finalSent=true'],
+            [composer, "new CustomEvent('jarvis:direct-chat-submit-v1'"],
+            [composer, 'interimResults=true'],
+            [composer, 'JARVIS no ha aceptado el mensaje'],
+            [api, 'new AbortController()'],
+            [api, 'signal:controller.signal'],
+            [api, 'clearTimeout(timeout)']
+          ];
+          for(const [source,token] of must)
+            if(!source.includes(token))throw Error('Required safeguard missing: '+token);
+          if(composer.includes('form.requestSubmit()')||composer.includes('setReactTextareaValue('))
+            throw Error('Stale DOM-submit workaround remains');
+          if(!api.includes('20000'))throw Error('Chat timeout not bounded');
+          console.log('HOTFIX_GUARDS_PASS');
+          NODE
