@@ -517,5 +517,68 @@
     "wordpress_published": 0,
     "release": "HOLD_NOT_OWNER_APPROVED",
     "next_gate": "VALIDATE_REAL_MOBILE_VISUAL_AND_LEAD_E2E_WITH_APPROVED_NON-PROD_FIXTURE_OR TUTORED_SINGLE_REAL_LEAD; CHECK_PROD_CRM_ROUTING_AND_COPY_LEGAL_SIGNOFF"
+  },
+  "partner_form_backend_guard_2026_11_08": {
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.1.2",
+    "wp_plugin": "cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "source_of_truth_snapshot": "cerebro/seo-enterprise/v2/wordpress/cerebro-seo001-partner-form-v0.php",
+    "deterministic_tests": "cerebro/seo-enterprise/v2/tests/seo001-partner-contract.test.mjs",
+    "wordpress_file_change_id": 2237,
+    "wp_plugin_scope": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "rest_filter": "rest_pre_dispatch",
+    "rest_filter_scope": "POST /fenix-cerebro/v1/lead ONLY WHEN FUNNEL PARTNER AND landing_id IN FOUR_IDS",
+    "scope_confined_to_existing_plugin": true,
+    "backend_data_contract": "FENIX_WP_LEAD_BRIDGE_FORCES_SOURCE_WEB; FUNNEL_PARTNER,AGENCY,PARTNER_NEED,LANDING_ID,PRESERVED_IN_SOURCE_PAYLOAD",
+    "negative_http_tests": [
+      {
+        "case": "partner_missing_privacy_no_identity",
+        "status": 422,
+        "code": "seo001_partner_privacy_required"
+      },
+      {
+        "case": "generic_no_identity",
+        "status": 422,
+        "code": "identifier_required"
+      },
+      {
+        "case": "partner_missing_privacy_with_dummy_identifier",
+        "status": 422,
+        "code": "seo001_partner_privacy_required"
+      },
+      {
+        "case": "partner_missing_agency_with_dummy_identifier",
+        "status": 422,
+        "code": "seo001_partner_identity_required"
+      },
+      {
+        "case": "partner_privacy_and_agency_valid_but_no_contact",
+        "status": 422,
+        "code": "identifier_required"
+      }
+    ],
+    "negative_probes_created_leads": "NO_EXPECTED_ALL_422_NO_VALID_CONTACT",
+    "crm_partner_aggregate_at_test": 0,
+    "happy_path_e2e": "NOT_RUN_PROD_NO_FAKE_LEADS",
+    "wp_plugin_php_lint": "PASS",
+    "offline_contract_assertions": "8_OF_8_PASS_IN_TOOL",
+    "node_ci_tests": "NOT_RUN_COMMIT_SKIP_CI",
+    "visual_evidence": "OPERA_DESKTOP_FORM_52716_SCREENSHOT_SEEN",
+    "mobile_visual": "NOT_VERIFIED",
+    "accessibility": "DESKTOP_PREVIEW_FIELDS_VERIFIED_ALL_4",
+    "crm_routing_truth": "GENERIC_WEB_CHANNEL, BELEN-DIR_GENERIC_FOLLOWUP; PARTNER FIELDS IN SOURCE_PAYLOAD ONLY",
+    "security_residual": "EXISTING_GENERIC_LEAD_ENDPOINT_OUTSIDE_FOUR_IDS_NOT_COVERED_BY_SCOPED_GUARD; NO_CHANGE_TO_PROD_CORE",
+    "next_gate": "SUPERVISED_REAL_HAPPY_PATH_LEAD_OR_NON_PROD_FIXTURE, CHECK_CRM_PARTNER_ROUTING_AND_MOBILE_DEVICE; LEGAL_EDITORIAL_SIGNOFF",
+    "publication": "OFF",
+    "automated_next_batch": "BLOCKED",
+    "additional_subscription_cost_eur": 0,
+    "new_paid_ai_call_count": 0
   }
 }
