@@ -54,3 +54,5 @@ jobs:
           path: ${{ runner.temp }}/cut60-historical-lineage-no-write.json
           retention-days: 30
           if-no-files-found: error
+
+# Replay CUT60 after distinguishing true duplicate vs altered receipt.
