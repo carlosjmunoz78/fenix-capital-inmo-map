@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT65_OWNER_CLOUDFLARE_INTERACTIVE_E2E_AND_SAFE_RESTORE_ISOLATION",
+  "next_block": "FASTLANE_USER_OWNER_CHAT_AND_MIC_E2E_THEN_INCREMENTAL_SAFE_CAPABILITIES",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -492,5 +492,43 @@
     "snapshot_path": "cerebro/jarvis/boost-001/cut64-prod-recovery-owner-readonly-observation-20261107.json",
     "docs": "cerebro/jarvis/boost-001/CUT64_ANON_OWNER_DENIAL_BACKUP_CLONE_PREFLIGHT_2026-11-07.md",
     "next_block": "CUT65_OWNER_CLOUDFLARE_INTERACTIVE_E2E_AND_SAFE_RESTORE_ISOLATION"
+  },
+  "fastlane_mvp": {
+    "schema": "cerebro.jarvis.fastlane.existing.chat.v1",
+    "company_id": "fenix",
+    "engine_id": "JARVIS",
+    "ui_environment": "PROD",
+    "gateway_declared_environment": "LAB",
+    "version": "FASTLANE-v0.1",
+    "state": "EXISTING_UI_RENDERED_GATEWAY_RESPONDING_HTTP_OWNER_E2E_PENDING",
+    "page": "https://app.fenixcapital.es/cerebro",
+    "deployed_gateway": "cerebro-console-gateway-v0",
+    "deployed_gateway_version": 33,
+    "ui_present": true,
+    "text_field_present": true,
+    "dictation_button_present": true,
+    "voice_button_present": true,
+    "gateway_24h_observed": {
+      "get_health_http200": 9,
+      "get_preferences_http200": 7,
+      "post_chat_http200": 2,
+      "observation_method": "READ_ONLY_SUPABASE_AGGREGATED_LOGS",
+      "response_body_semantic_quality_verified": false,
+      "authenticated_owner_e2e_self_tested": false
+    },
+    "available_to_user_now": true,
+    "browser_microphone_e2e_verified": false,
+    "voice_conversation_e2e_verified": false,
+    "llm_api_deepseek_autoresume": false,
+    "advanced_b2b3_granted": false,
+    "lrn_physical_ingest_enabled": false,
+    "requires_new_project": false,
+    "requires_new_subscriptions": false,
+    "app_crm_code_changed": false,
+    "supabase_prod_mutation": false,
+    "advanced_autonomous_prod_release_authorized": false,
+    "release_strategy": "SHIP_EXISTING_BASIC_CHAT_NOW_EXPAND_NON_DESTRUCTIVELY_AFTER_TESTS",
+    "next_user_action": "OPEN_EXISTING_APP_CEREBRO_AND_SEND_SIMPLE_MESSAGE",
+    "doc": "cerebro/jarvis/boost-001/JARVIS_FASTLANE_CHAT_V0_EXISTENTE_USO_INMEDIATO_2026-11-07.md"
   }
 }
