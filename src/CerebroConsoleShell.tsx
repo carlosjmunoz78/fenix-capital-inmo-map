@@ -320,20 +320,30 @@ export default function CerebroConsoleShell(){
     speechCursorRef.current={segmentIndex:index+1,charIndex:0};
     speakSegment(index+1,0);
    };
-   utterance.onerror=()=>{
+   utterance.onerror=event=>{
     if(token!==speechRunTokenRef.current||voicePausedRef.current)return;
+    const error=String(event.error||'');
+    if(error==='not-allowed'||error==='audio-busy'||error==='synthesis-unavailable'){
+     setVoiceError('El navegador ha bloqueado la reproducción de voz. Comprueba el volumen y pulsa otra vez Conversación por voz; el texto sigue visible.');
+     finishSpeechPlan(token);
+     return;
+    }
     speechCursorRef.current={segmentIndex:index+1,charIndex:0};
     speakSegment(index+1,0);
    };
    window.speechSynthesis.speak(utterance);
   };
+  // Start output without waiting for a second microphone permission.
+  voiceSpeakingRef.current=true;
+  setVoiceSpeaking(true);
+  bargeInSpeechStartedAtRef.current=performance.now();
+  speakSegment(startIndex,startCharIndex);
   void prepareVoiceActivityBargeIn().then(vadReady=>{
-   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current)return;
-   voiceSpeakingRef.current=true;
-   setVoiceSpeaking(true);
-   bargeInSpeechStartedAtRef.current=performance.now();
+   if(token!==speechRunTokenRef.current||voicePausedRef.current||!voiceSessionRef.current||!voiceSpeakingRef.current)return;
    if(!vadReady)scheduleInterruptListening(120);
-   speakSegment(startIndex,startCharIndex);
+  }).catch(()=>{
+   if(token!==speechRunTokenRef.current||!voiceSessionRef.current||!voiceSpeakingRef.current)return;
+   scheduleInterruptListening(120);
   });
   return true;
  }
