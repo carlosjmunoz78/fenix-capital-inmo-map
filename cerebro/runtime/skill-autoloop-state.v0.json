@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-07T16:38:52.837Z",
+  "updated_at": "2026-11-07T18:46:40.159Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -519,7 +519,8 @@
     "github-wide-skills:fd8fe8e750559e0907cd",
     "github-wide-skills:bc4c85945c09ff38df97",
     "github-wide-skills:f72c010b9e0a4c59fa8e",
-    "github-wide-skills:d0195a4c01129a1e3eda"
+    "github-wide-skills:d0195a4c01129a1e3eda",
+    "github-wide-skills:cfde3077e68db556230d"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1067,6 +1068,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42379434746,
       "checkpointed_at": "2026-11-07T13:59:44.662Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:cfde3077e68db556230d": {
+      "candidate_id": "github-wide-skills:cfde3077e68db556230d",
+      "name": "refine-document",
+      "human_alias": "Refine Document",
+      "wrapper_id": "skillwrap:91bcaf35726964df80d5",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.85,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "Ephasme/agent-skills",
+        "upstream_head_commit": "2f79df9e6bf1a28449aae5002e3e1c0db079783a",
+        "manifest_sha256": "d59c5244a4fe17b07c9edfdaf3c5f1f48a5a37afd350db972a1bbc923968614b",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42402909314,
+      "checkpointed_at": "2026-11-07T18:46:40.159Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32112,7 +32147,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32125,7 +32160,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42392302679,
+  "last_discovery_run_id": 42402909314,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
