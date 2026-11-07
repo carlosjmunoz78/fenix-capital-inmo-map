@@ -72,5 +72,18 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT57_CORRECTED_CANDIDATES_INDEPENDENT_EVAL_AND_LRN_REAL_INGEST"
+  "next_block": "CUT58_INDEPENDENT_ADVERSARIAL_EVAL_AND_LRN_REAL_INGEST",
+  "cut57": {
+    "version": "CUT57-v0.1",
+    "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
+    "old_semantic_rejected": 5,
+    "new_heuristic_pass": 5,
+    "independent_tribunal_pass": 0,
+    "production_release": false,
+    "runtime_memory_adopted": false,
+    "deepseek_fine_tuned": false,
+    "test_run_id": 42384480964,
+    "artifact_id": 13579077487,
+    "next_block": "CUT58_INDEPENDENT_ADVERSARIAL_EVAL_AND_LRN_REAL_INGEST"
+  }
 }
