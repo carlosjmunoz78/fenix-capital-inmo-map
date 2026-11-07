@@ -32,7 +32,12 @@ jobs:
           cache: npm
       - name: Install existing locked dependencies
         run: npm ci --no-audit --no-fund
-      - name: Typecheck and build current App with only three-file UI patch
+      - name: Typecheck and build current App with isolated browser fixture variables
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
         run: npm run build
       - name: Install isolated Playwright Chromium (existing test harness)
         run: npx playwright install chromium
