@@ -9,8 +9,8 @@
  * B3 separately verifies an exact action grant per skill and company.
  */
 import { randomUUID } from 'node:crypto';
-import {CerebroGatewayV0} from '../../cerebro/console/gateway.mjs';
-import {bindJarvisCapabilityDelegationV0} from '../../cerebro/console/jarvis-capability-delegation-v0.mjs';
+import {CerebroGatewayV0} from '../../../cerebro/console/gateway.mjs';
+import {bindJarvisCapabilityDelegationV0} from '../../../cerebro/console/jarvis-capability-delegation-v0.mjs';
 
 const MAX_BODY_BYTES=16_384;
 const ID=/^[A-Za-z0-9][A-Za-z0-9_.:-]{0,89}$/;
