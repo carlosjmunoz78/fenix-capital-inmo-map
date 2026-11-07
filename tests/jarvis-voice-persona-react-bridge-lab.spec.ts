@@ -128,5 +128,11 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
  await button.click();
  await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-user')).toContainText('Hola JARVIS');
  await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').first()).toContainText('Soy JARVIS');
+ console.log('JARVIS_LAB_SYNTH_STATUS',JSON.stringify(await page.evaluate(()=>({
+  availableVoices:window.speechSynthesis?.getVoices().map(v=>v.name).slice(0,7),
+  speechApiAvailable:typeof window.speechSynthesis!=='undefined',
+  voiceError:document.querySelector('.jarvis-conversation .cerebro-voice-error')?.textContent||'',
+  voiceStatus:document.querySelector('.jarvis-conversation .cerebro-voice-status')?.textContent||''
+ }))));
  await expect.poll(()=>page.evaluate(()=>(window as typeof window & {__jarvisSpoken?:string[]}).__jarvisSpoken?.join(' ')||'')).toContain('JARVIS');
 });
