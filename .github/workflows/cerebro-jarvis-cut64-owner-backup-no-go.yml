@@ -1,0 +1,36 @@
+name: CEREBRO JARVIS CUT64 Owner and Backup Restore Fail Closed Gates
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut64-owner-backup-no-go.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut64-no-go:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: 'Verify six independent owner, cron, pg_net, backup clone veto tests'
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut64-prod-recovery-readiness-v0.test.mjs
+      - name: 'Require fail closed release without authentic owner or independent PROD restore'
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut64-prod-recovery-readiness-v0.mjs \
+            cerebro/jarvis/boost-001/cut64-prod-recovery-owner-readonly-observation-20261107.json
