@@ -7,12 +7,27 @@ import {preflightLearnedBatch,classifyLearnedCandidate,executeOneLearnedBatch,pe
 import {buildSeoV4OwnerPrompt,validateSeoV4Brief} from '../runtime/seo-d13-free-project-one-shot-canary-v0.mjs';
 const dir='cerebro/seo-enterprise/v2/registry/';
 const manifest=JSON.parse(fs.readFileSync(dir+'seo001-learned-one-batch-pilot-2026-11-08.json','utf8'));
+
+function makePreparedFixture(){
+ const root=fs.mkdtempSync(path.join(os.tmpdir(),'seo001-prepared-fixture-'));
+ fs.mkdirSync(path.join(root,dir),{recursive:true});
+ fs.copyFileSync(dir+'seo001-batch2-wordpress-physical-qa-2026-11-07.json',
+    path.join(root,dir,'seo001-batch2-wordpress-physical-qa-2026-11-07.json'));
+ const prepared=JSON.parse(JSON.stringify(manifest));
+ prepared.status='PREPARED_NOT_EXECUTED';
+ prepared.workflow_trigger_nonce='TRIGGER_ONCE_20261108';
+ fs.writeFileSync(path.join(root,dir,'seo001-learned-one-batch-pilot-2026-11-08.json'),JSON.stringify(prepared));
+ return root;
+}
+
 test('learning is truly consumed by writer prompts before inference',()=>{
  assert.equal(LEARNING_GATES.length,10);
  assert.equal(EXPECTED_IDS.length,2);
- const prior=preflightLearnedBatch();
+ const root=makePreparedFixture();
+ try{const prior=preflightLearnedBatch({root});
  assert.equal(prior.learning_gates_loaded,10);
- assert.equal(prior.prior_release,'HOLD_NOT_OWNER_APPROVED');
+ assert.equal(prior.prior_release,'HOLD_NOT_OWNER_APPROVED');}
+ finally{fs.rmSync(root,{recursive:true,force:true});}
  manifest.briefs.forEach((brief,i)=>{
   assert.equal(brief.work_id,EXPECTED_IDS[i]);
   assert.equal(validateSeoV4Brief(brief),brief);
@@ -33,6 +48,7 @@ test('missing one learned gate fails before any model call',()=>{
   fs.copyFileSync(dir+'seo001-batch2-wordpress-physical-qa-2026-11-07.json',path.join(root,dir,'seo001-batch2-wordpress-physical-qa-2026-11-07.json'));
   const bad=JSON.parse(JSON.stringify(manifest));
   delete bad.lessons.L07_PRIVACY;
+  bad.status='PREPARED_NOT_EXECUTED';
   bad.workflow_trigger_nonce='TRIGGER_ONCE_20261108';
   fs.writeFileSync(path.join(root,dir,'seo001-learned-one-batch-pilot-2026-11-08.json'),JSON.stringify(bad));
   assert.throws(()=>preflightLearnedBatch({root}),/SEO001_LEARNED_BATCH_LEARNING_GATES_UNWIRED/);
@@ -45,7 +61,7 @@ test('no trigger nonce, over-limit or publication permission cannot start',()=>{
   fs.copyFileSync(dir+'seo001-batch2-wordpress-physical-qa-2026-11-07.json',path.join(root,dir,'seo001-batch2-wordpress-physical-qa-2026-11-07.json'));
   for(const change of [m=>m.allow_wordpress_publication=true,m=>m.max_real_model_calls=3,m=>m.workflow_trigger_nonce='NO_TRIGGER']){
    const bad=JSON.parse(JSON.stringify(manifest));
-   bad.workflow_trigger_nonce='TRIGGER_ONCE_20261108';change(bad);
+   bad.status='PREPARED_NOT_EXECUTED';bad.workflow_trigger_nonce='TRIGGER_ONCE_20261108';change(bad);
    fs.writeFileSync(path.join(root,dir,'seo001-learned-one-batch-pilot-2026-11-08.json'),JSON.stringify(bad));
    assert.throws(()=>preflightLearnedBatch({root}),/SEO001_LEARNED_BATCH_AUTHORIZATION_OR_CEILING/);
   }
@@ -55,7 +71,9 @@ test('text-only candidate is never certified as physical media + mobile QA',()=>
  const b=manifest.briefs[1];
  const w={work_id:b.work_id,status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',faq_count:6,content_depth_precheck_passed:true,html:'<h1>Agencia inmobiliaria de Córdoba</h1><h2>Protocolo</h2>'};
  const r=classifyLearnedCandidate({brief:b,writer:w});
- assert.equal(r.technical_copy_precheck,'PASS');
+ assert.equal(r.technical_copy_precheck,'HOLD');
+ assert.ok(r.copy_issues.includes('EXACT_FAQ_DOM_WRAPPER_REQUIRED'));
+ assert.ok(r.copy_issues.includes('SIX_MAIN_H2_REQUIRED'));
  assert.equal(r.full_quality_certified,false);
  assert.equal(r.publish_allowed,false);
  assert.ok(r.physical_gates_pending.includes('ORIGINAL_HERO_MEDIA_WITH_PROVENANCE'));
@@ -71,9 +89,11 @@ test('unsafe image embedded or absent FAQ cannot pass',()=>{
  assert.equal(r.cms_plan.form,'fenix_seo001_city_form');
 });
 test('no secret available returns HOLD, never WordPress writes or retries',async()=>{
- const pre=preflightLearnedBatch();
+ const root=makePreparedFixture();
+ try{
+ const pre=preflightLearnedBatch({root});
  assert.equal(pre.learning_gates_loaded,10);
- const batch=await executeOneLearnedBatch({api_key:null,fetch_impl:async()=>{throw Error('must not call network')}});
+ const batch=await executeOneLearnedBatch({root,api_key:null,fetch_impl:async()=>{throw Error('must not call network')}});
  assert.equal(batch.provider_calls,0);
  assert.equal(batch.auto_retry_count,0);
  assert.equal(batch.wordpress_writes,0);
@@ -88,4 +108,23 @@ test('no secret available returns HOLD, never WordPress writes or retries',async
   assert.equal(receipt.publication,false);
   assert.ok(fs.existsSync(path.join(dest,'manifest.json')));
  }finally{fs.rmSync(dest,{recursive:true,force:true});}
+ }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+
+test('sealed pilot cannot be regenerated using current repository manifest',()=>{
+ assert.equal(manifest.status,'COMPLETED_HOLD');
+ assert.match(manifest.workflow_trigger_nonce,/^CONSUMED_/);
+ assert.throws(()=>preflightLearnedBatch(),/SEO001_LEARNED_BATCH_AUTHORIZATION_OR_CEILING/);
+});
+test('real D32 feedback gates enter next prompt and unsafe legal absolutes are blocked',()=>{
+ const feedback=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/training-pilots/SEO_D32_LEARNED_ONE_BATCH_20261108_FEEDBACK.json','utf8'));
+ assert.equal(feedback.learning_delta.length,6);
+ const brief=manifest.briefs[0],prompt=buildSeoV4OwnerPrompt(brief);
+ for(const v of feedback.learning_delta)assert.ok(prompt.includes(v.id+' '+v.hard_requirement));
+ assert.match(prompt,/<section class="faq">/);
+ const w={status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',faq_count:6,content_depth_precheck_passed:true,
+ html:'<h1>Gastos de un piso en Córdoba</h1><p>El vendedor debe abonar las derramas aprobadas antes de la firma.</p>'};
+ const r=classifyLearnedCandidate({brief,writer:w});
+ assert.equal(r.publish_allowed,false);
+ assert.ok(r.copy_issues.includes('YMYL_UNQUALIFIED_LEGAL_OR_EXCLUSIVE_CAUSE_CLAIM'));
 });
