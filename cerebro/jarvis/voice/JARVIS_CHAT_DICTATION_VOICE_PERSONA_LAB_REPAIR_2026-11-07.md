@@ -73,3 +73,39 @@ Se definió previamente un JARVIS **masculino en castellano de España**, profun
 **BLOQUEADO:** voz propia JARVIS V2 dinámica, 0 créditos por frase, motor disponible para móvil/PC/tablet, propietario real y micrófono físico en Android, autorización de derechos, backup/modelo y despliegue progresivo.
 
 **NO-GO PROD:** aunque la QA sea verde, NO fusionar ni desplegar a `app.fenixcapital.es` ni a Supabase PROD sin pruebas humanas reales y gate de rollback. La App actual sigue `dpl_7H3FJvWR1u3pmL29UUwa69ZrgDeH`.
+
+## ONLINE VOICE · Cloudflare gratuito · Corte seguro 2026-11-07
+
+**Objetivo corregido por el propietario:** JARVIS debe sintetizar respuestas online, directamente para las interfaces CEREBRO (móvil/tablet/PC), incluso con el ordenador de oficina apagado. No utilizar su PC como servidor, no instalar software local como condición de uso, no crear otra App ni contratar servicios.
+
+### Descubrimiento verificable
+
+- Cloudflare Workers AI dispone de TTS español `@cf/deepgram/aura-2-es`, speakers `javier`, `alvaro`, etc. **NO permite seleccionar el voice ID de clon vidIQ** `cfkJwJs7cjrVgVLm3yvM`. Una respuesta de Aura-2-es es **voz genérica**, no JARVIS V2.
+- Según [Cloudflare Workers AI pricing](https://developers.cloudflare.com/workers-ai/platform/pricing/) (2026-10-01), el Free cuenta con **10.000 neuronas/día** compartidas, y este modelo se calcula en **2.727,27 neuronas por 1.000 caracteres**. Es un cupo limitado; superarlo provoca errores. La asignación disponible real de la cuenta existente NO se ha leído y puede consumirse por otros motores.
+- Se verificó en el dashboard autenticado de Cloudflare que **ya existe** `cerebro-jarvis-cut32-lab-eu` con **«No hay rutas activas»**. También existe `cerebro-jarvis-lab-eu` con URL `workers.dev`. **No modificar** el Worker original ni poner en público el nuevo; Cloudflare Access B2/B3 autenticado y aprobación real de propietario siguen pendientes.
+- [Hugging Face Spaces](https://huggingface.co/docs/hub/spaces-overview) CPU Basic dispone de 16 GiB pero **duerme si está inactivo**, por lo que tampoco demuestra el objetivo de voz siempre disponible. [Google Cloud Run](https://cloud.google.com/run/pricing) tiene free tier por consumo, **no coste garantizado de 0 €**, y no se ha acreditado hardware/latencia para Chatterbox; no activar recursos nuevos.
+- La voz canónica vidIQ V2 disponible por conector es de pago por generación (**28 créditos/1.000 caracteres**) y no está enlazada al runtime de CEREBRO. No se han consumido créditos. No tiene sentido cambiar una voz genérica por otra y llamarla «la voz exacta de JARVIS».
+
+### Código listo, sin infraestructura nueva
+
+**Se ha fabricado** el puerto de audio de servidor `zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-tts-port-v0.mjs`:
+- `company_id=fenix`, `engine_id=VOICE-001`, `environment=LAB`, versión explícita.
+- Motor `@cf/deepgram/aura-2-es`, speaker `javier`, audio MP3; etiquetado inequívoco `GENERIC_SPANISH_MALE_NOT_JARVIS_V2`, `canonicalJarvisV2:false`.
+- Reserva atómica y **verificada para toda la cuenta** de máximo 3 neuronas por carácter, con tope 10.000 neuronas/día compartido; **solo plan Free comprobado**, sin recarga, sin acceso a métodos de pago. El proveedor no se invoca si faltan evidencias de cuota/plan.
+- Requiere B2 Owner JWT válido, B3 `ALLOW`, consentimiento, privacidad `PUBLIC`, auditoría y kill switch explícitamente OFF. Si falla cualquier comprobación devuelve `DENY`; no expone datos de otros motores ni escribe el CRM.
+- No realiza llamadas reales a Workers AI al cargar el módulo: instancia de `env.AI` solo en runtime futuro autorizado.
+
+**Se ha fabricado** el adaptador HTTP `zeus/jarvis/voice/online-cloudflare-lab/jarvis-online-free-voice-http-v0.mjs`:
+- Solo `POST /voice/lab/generic-synthesize`; origen permitido explícito, **Cloudflare Access verificado** antes de invocar la IA, JWT necesario, sin claims de privilegio cliente.
+- MP3 solo en respuesta privada al autorizado, nunca como URL abierta y nunca etiquetado como clon canónico. Sin CORS comodín. No toca App/ANA/Gateway/Worker original.
+- No se ha conectado todavía a un Worker desplegado ni a una consola publicada.
+
+**CI física del código:** [GitHub Actions #42419296678](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42419296678) **28/28 PASS**, 15 pruebas del núcleo, 13 de HTTP y guardas estáticas. **No hay inferencia online real ni tráfico MP3 de usuario**.
+
+### Estado de promoción real
+
+`ONLINE_GENERIC_LAB_ADAPTER_TESTED__ROUTE_OFF__QUOTA_AND_ACCESS_UNVERIFIED__CANONICAL_VOICE_NOT_CONNECTED`.
+
+**NO-GO PROD por tres elementos:** (1) Access B2/B3 Owner en la URL del Worker y en el Gateway; (2) cuota Workers AI **Free** y disponibilidad real de la cuenta confirmadas, con reserva atómica account-wide; (3) aceptación de que el fallback genérico NO sustituye la voz aprobada, y la voz aprobada sigue pendiente de un backend cloud viable/licitud de uso.
+
+La App real sigue en su deployment previo. No se han creado Cloudflare Workers, proyectos, buckets, rutas, DNS, suscripciones, ni hecho llamadas de síntesis o gastos nuevos. La publicación y evaluación con la sesión real de dos dispositivos requieren autorización y pruebas de seguridad adicionales.
