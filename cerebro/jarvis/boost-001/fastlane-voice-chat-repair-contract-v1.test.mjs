@@ -29,6 +29,7 @@ test('voice conversation displays interim text, submits final once, never interi
  assert.match(s,/if\(result\.isFinal!==false\)/);
  assert.match(s,/if\(preview\)setMessage\(preview\)/);
  assert.match(s,/if\(transcript&&!finalSent\)/);
+ assert.match(s,/speakSegment\(startIndex,startCharIndex\);\s*void prepareVoiceActivityBargeIn\(\)\.then/);
  assert.match(s,/finalSent=true/);
 });
 test('dictation shows provisional text but does not auto-confirm or send dangerous orders',()=>{
@@ -46,7 +47,7 @@ test('a hung network chat request has a finite timeout with visible error',()=>{
  assert.match(s,/setTimeout\(\(\)=>controller\.abort\(\),20000\)/);
  assert.match(s,/signal:controller\.signal/);
  assert.match(s,/finally\{clearTimeout\(timeout\)\}/);
- assert.match(s,/status:'TIMEOUT',message:'JARVIS tarda demasiado en responder/);
+ assert.match(s,/status:'TIMEOUT',message:'JARVIS ha tardado más de 20 segundos/);
 });
 test('no server-side permissions, CRM APIs or active production autonomy added in UI repair',()=>{
  const p=portal(),s=shell(),a=api();
