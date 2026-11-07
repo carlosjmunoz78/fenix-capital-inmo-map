@@ -1,0 +1,59 @@
+name: CEREBRO JARVIS CUT56 · Offline Semantic Veto and Artifact QA
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut56-semantic-tribunal.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: cerebro-jarvis-cut56-offline-qa
+  cancel-in-progress: false
+
+jobs:
+  cut56-offline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Pure semantic and existing pilot regressions - NO API
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut56-semantic-tribunal-v0.test.mjs cerebro/jarvis/boost-001/learning-pilot-v0.test.mjs
+          node --check cerebro/jarvis/boost-001/cut56-semantic-tribunal-v0.mjs
+      - name: Download only the verified 2026-11-07 source artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: jarvis-cut55-bounded-learning-42381208836
+          path: ${{ runner.temp }}/jarvis-cut55-source
+          run-id: 42381208836
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+      - name: Verify SHA and classify five candidate rules (no promotion)
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut56-semantic-tribunal-v0.mjs "$RUNNER_TEMP/jarvis-cut55-source/jarvis-boost001-cut55-pilot-report.json" "$RUNNER_TEMP/jarvis-cut56-semantic-verdict.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const v=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/jarvis-cut56-semantic-verdict.json'));
+            if(v.evaluated!==5 || v.structural_pass!==5 || v.memory_rules_applied!==0 || v.release_authorized!==false || v.semantic_rejected<4) process.exit(1);
+          "
+      - name: Preserve the deterministic veto report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut56-offline-semantic-review-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-cut56-semantic-verdict.json
+          retention-days: 30
+          if-no-files-found: error
