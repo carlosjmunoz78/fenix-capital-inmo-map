@@ -96,3 +96,17 @@ test('provider errors never echo the API secret', async () => {
     }
   }, /invalid_api_key/);
 });
+
+test('CUT54 optional JSON and reasoning none stay opt-in; unknown configs fail closed', () => {
+  const legacy = buildDeepSeekResponseRequest({input:'case',maxOutputTokens:400});
+  assert.equal(legacy.text,undefined);
+  assert.equal(legacy.reasoning,undefined);
+  const structured=buildDeepSeekResponseRequest({
+    input:'case',maxOutputTokens:1200,
+    reasoning:{effort:'none'},text:{format:{type:'json_object'}}
+  });
+  assert.equal(structured.reasoning.effort,'none');
+  assert.deepEqual(structured.text,{format:{type:'json_object'}});
+  assert.throws(()=>buildDeepSeekResponseRequest({input:'x',reasoning:{effort:'invalid'}}),/Unsupported reasoning/);
+  assert.throws(()=>buildDeepSeekResponseRequest({input:'x',text:{format:{type:'html'}}}),/Unsupported text/);
+});
