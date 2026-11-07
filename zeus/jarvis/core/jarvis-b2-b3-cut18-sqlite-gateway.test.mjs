@@ -47,7 +47,9 @@ function wiring(store,revoke){
   controlStore:{get:async()=>({enabled:true,killSwitch:false})},
   grantStore:{find:async()=>({grantId:'synthetic-grant',ownerId:owner,companyId:'fenix',
    environment:'LAB',actions:['MISSION_INSPECT'],active:true,revoked:false,
-   expiresAt:expires,maxCost:0,allowMutations:false})},
+   // B3 uses the real clock; do not expire the synthetic grant on a past date.
+   // B2 device/session uses its separate fixed clock to test exact revocation.
+   expiresAt:Date.now()+60_000,maxCost:0,allowMutations:false})},
   actionCatalog:{get:async()=>({name:'MISSION_INSPECT',mutating:false,estimatedCost:0})},
   auditStore:{append:async()=>true}
  });
