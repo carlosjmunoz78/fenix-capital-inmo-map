@@ -1,0 +1,48 @@
+name: CEREBRO SEO · V4 exact digest repair and independent QA hold
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-v4-canonical-deterministic-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-v4-canonical-deterministic-repair-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-v4-source-locked-repair-v0.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  repair-and-qa:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Verify exact-digest repair contract and no model calls
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-v4-canonical-deterministic-repair-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-v4-canonical-deterministic-repair-v0.test.mjs
+      - name: Retrieve verified original Gemini Free V4 samples from previous run
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-b2c-b2b-free-cloud-candidates-unapproved
+          run-id: 42231912203
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo-v4-original-source
+      - name: Apply specific owner-feedback corrections, rerun entire D31 D32 depth circuit
+        env:
+          SOURCE_DIR: ${{ runner.temp }}/seo-v4-original-source
+          REVIEW_DIR: ${{ runner.temp }}/seo-v4-exact-repair-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-d13-v4-canonical-deterministic-repair-v0.mjs "$SOURCE_DIR" "$REVIEW_DIR"
+      - name: Archive new content SHA and UMS/WP PREPROD plans only
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v4-source-locked-repair-review-only
+          path: ${{ runner.temp }}/seo-v4-exact-repair-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Safety guarantees
+        if: ${{ always() }}
+        run: echo 'GEMINI_NEW_CALLS=0 MEDIA_API_CALLS=0 WORDPRESS_WRITES=0 NEW_CONTENT_SHA_REQUIRED=TRUE OWNER_AND_YMYL_APPROVAL=HOLD'

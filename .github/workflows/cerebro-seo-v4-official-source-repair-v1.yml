@@ -1,0 +1,49 @@
+name: CEREBRO SEO · Source-guided factual repair V4.1 no paid API PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v4-official-source-repair-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v4-official-source-repair-v1.test.mjs'
+      - '.github/workflows/cerebro-seo-v4-official-source-repair-v1.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-guided-v4-1:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Retrieve unchanged Gemini Free V4 source with known content hashes
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-source-locked-repair-review-only
+          run-id: 42233493715
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo-v4-source
+      - name: Validate source hashes and exact factual corrections on real articles
+        env:
+          SEO_V4_QA_INPUT_DIR: ${{ runner.temp }}/seo-v4-source
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v4-official-source-repair-v1.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v4-official-source-repair-v1.test.mjs
+      - name: Produce V4.1 new hashes and review-only HTML
+        env:
+          SOURCE: ${{ runner.temp }}/seo-v4-source
+          DEST: ${{ runner.temp }}/seo-v4-1-official-source-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-v4-official-source-repair-v1.mjs "$SOURCE" "$DEST"
+      - name: Store bounded PREPROD evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v4-1-official-sources-corrections-release-hold
+          path: ${{ runner.temp }}/seo-v4-1-official-source-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Release safety
+        run: echo 'V4_1_INDEPENDENT_LEGAL_QA=NOT_YET VERIFIED_SOURCE_CORRECTIONS=PARTIAL PROVIDER_CALLS=0 WP_WRITES=0'

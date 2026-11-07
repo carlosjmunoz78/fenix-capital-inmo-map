@@ -1,0 +1,69 @@
+name: CEREBRO SEO · Physical cross-engine release tribunal PREPROD V0
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-physical-release-tribunal-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-physical-release-tribunal-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-physical-release-tribunal-v0.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  cross-engine-tribunal:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Fetch two V4.1 physical original copy artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-1-official-sources-corrections-release-hold
+          run-id: 42242988793
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-tribunal-v41
+      - name: Fetch SQL backup that was physically restored twice in networkless LAB
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-isolated-wordpress-fixture-restore-no-prod-snapshot
+          run-id: 42247533380
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-tribunal-wp-fixture
+      - name: Fetch actual WebP pixel intake receipt from existing WP asset
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-ums-physical-photo-intake-existing-asset-hold
+          run-id: 42248337759
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-tribunal-media
+      - name: Validate all original bytes, receipts and release constraints
+        env:
+          SEO_TRIBUNAL_ARTICLES_DIR: ${{ runner.temp }}/seo001-tribunal-v41
+          SEO_TRIBUNAL_WP_DIR: ${{ runner.temp }}/seo001-tribunal-wp-fixture
+          SEO_TRIBUNAL_MEDIA_DIR: ${{ runner.temp }}/seo001-tribunal-media
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-physical-release-tribunal-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-physical-release-tribunal-v0.test.mjs
+      - name: Write inspectable verdict with exact sha256 and outstanding HUMAN/technical gates
+        env:
+          ARTICLES: ${{ runner.temp }}/seo001-tribunal-v41
+          WP: ${{ runner.temp }}/seo001-tribunal-wp-fixture
+          MEDIA: ${{ runner.temp }}/seo001-tribunal-media
+          OUT: ${{ runner.temp }}/seo001-tribunal-verdict-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-physical-release-tribunal-v0.mjs "$ARTICLES" "$WP" "$MEDIA" "$OUT"
+      - name: Archive full cross-engine PREPROD evidence with no publish permission
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-cross-engine-physical-tribunal-release-hold
+          path: ${{ runner.temp }}/seo001-tribunal-verdict-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Never infer PROD autonomy from fixture restores or existing-site photos
+        run: echo 'V4_1_PHYSICAL_SHA=CHECKED PHOTOGRAPH_NEW_UMS=NO WP_REAL_BACKUP_RESTORED=NO TRIBUNAL=HOLD NO_MODEL_CALLS=YES WP_WRITES=0'

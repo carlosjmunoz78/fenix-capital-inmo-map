@@ -1,0 +1,140 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2.2.0",
+  "status": "SIGNED_141_ROLE_SCOPE_PROOFS_AND_423_EXERCISES_VERIFIED_NO_REAL_AGENT_TRAINING",
+  "baseline": {
+    "owner_instruction": "CURRENT_INVENTORY_ACCEPTED_NO_REAUDIT",
+    "corpus_document_count": 200,
+    "images_in_wordpress_media_library": 629,
+    "captured_date": "2026-11-05",
+    "repeated_web_audit": false
+  },
+  "specialists": {
+    "families": 8,
+    "departments": 32,
+    "specialty_roles": 141,
+    "independent_agent_iam_accounts": 0,
+    "github_workload_identities_verified": 3
+  },
+  "scoped_role_proof": {
+    "algorithm": "Ed25519",
+    "issued_by": "ONE_GITHUB_ACTIONS_WORKER_WITH_SIGNED_OIDC",
+    "count": 141,
+    "scope": "seo:existing-corpus:evidence:read",
+    "per_work_unit_signature_verified": true,
+    "verifier_independent_github_job": true,
+    "signing_private_key_persisted": false,
+    "proof_category": "SIGNED_NON_BEARER_EVIDENCE_RESTRICTED_TO_READ_ONLY",
+    "real_agent_login_credential": false,
+    "can_publish": false,
+    "can_write_prod": false,
+    "can_spend": false,
+    "module": "cerebro/seo-enterprise/v2/runtime/seo-workload-role-lease-v1.mjs"
+  },
+  "learning": {
+    "case_count": 423,
+    "exercises_per_specialist": 3,
+    "source": "FROZEN_200_URL_CORPUS",
+    "modules": [
+      "SOURCE_APPLICATION",
+      "EVIDENCE_GAP",
+      "SAFE_OPTIMIZATION"
+    ],
+    "independent_case_recompute_in_qa": true,
+    "subject_matter_exam_attempts_submitted": 0,
+    "passed_actual_training_exams": 0,
+    "real_trained_individual_agents": 0,
+    "department_certifications": 0,
+    "module": "cerebro/seo-enterprise/v2/runtime/seo-specialist-exercise-engine-v1.mjs"
+  },
+  "executor": {
+    "factory_id": "FACT-001",
+    "gateway_id": "ACTGW-001",
+    "job_id": "JOB-001",
+    "host": "GITHUB_ACTIONS_WORKFLOW_PER_PULL_REQUEST_CHANGE",
+    "workflow": ".github/workflows/cerebro-seo-corpus-workload-v1.yml",
+    "active_continuous_host_deployed": false,
+    "write_apis_connected": false,
+    "scope": "READ_STORED_CORPUS_ONLY",
+    "runtime_environment": "PREPROD",
+    "privileged_api_writes": false
+  },
+  "evidence": {
+    "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "pr": 22,
+    "verified_sha": "1c7a2406b174064ada576a35682b848958582b71",
+    "physical_run_id": 42110095814,
+    "physical_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42110095814",
+    "physical_conclusion": "success",
+    "job_ids": {
+      "worker": 127535062572,
+      "independent_qa": 127535176297,
+      "tribunal": 127535288204
+    },
+    "artifact_ids": {
+      "worker": 13454205526,
+      "independent_qa": 13453870941,
+      "tribunal": 13454135682
+    },
+    "architecture_run_id": 42110095874,
+    "architecture_run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42110095874",
+    "architecture_conclusion": "success",
+    "test_suites": {
+      "seo": {
+        "tests": 137,
+        "passed": 137,
+        "failed": 0
+      },
+      "other1": {
+        "tests": 22,
+        "passed": 22,
+        "failed": 0
+      },
+      "other2": {
+        "tests": 5,
+        "passed": 5,
+        "failed": 0
+      },
+      "other3": {
+        "tests": 5,
+        "passed": 5,
+        "failed": 0
+      }
+    },
+    "qa_separate_job_verified": true,
+    "tribunal_separate_job_verified": true,
+    "new_wordpress_requests": 0,
+    "external_writes": 0,
+    "new_subscriptions_eur": 0
+  },
+  "readiness": {
+    "knowledge_and_playbooks": "HECHO",
+    "scoped_role_lease": "VERIFIED_EPHEMERAL_SIGNED_NON_BEARER",
+    "training_case_preparation": "HECHO",
+    "training_actual_knowledge_and_competence": "NOT_VERIFIED",
+    "independent_human_agent_IAM": "NOT_VERIFIED",
+    "specialist_autonomous_prod_count": 0,
+    "strategy_approval": "NOT_VERIFIED",
+    "continuous_host": "NOT_DEPLOYED",
+    "promotion_allowed": false
+  },
+  "next_gates": [
+    "TRUSTED_REAL_AGENT_IDENTITY_OR_HARD_ISOLATED_DELEGATION_BOUND_TO_HOST",
+    "REVIEW_423_PRACTICE_CASES_VIA_REAL_AUTHENTICATED_ACTOR_RESPONSES",
+    "COMPETENCY_SPECIFIC_GRADE_WITH_INDEPENDENT_QA_AND_TRIBUNAL",
+    "GATEWAY_EXTERNAL_READONLY_TOOL_CONNECTORS_WITH_PROVIDER_SCOPES",
+    "CONTINUOUS_EVENT_DRIVEN_RUNTIME_DEPLOYMENT_WHEN_ALLOWED",
+    "OLD_VS_NEW_SHADOW_AND_ROLLBACK_BEFORE_PROD_WRITE",
+    "STRATEGY_OWNER_AUTHORIZATION_FOR_ANY_PUBLICATION"
+  ],
+  "preservation": {
+    "no_existing_system_modified": true,
+    "no_new_audit": true,
+    "staging_not_used": true,
+    "app_crm_supabase_untouched": true,
+    "pr_draft": true
+  }
+}

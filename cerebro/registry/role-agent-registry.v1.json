@@ -28,7 +28,18 @@
       "SECURITY_INCIDENT",
       "MONEY_LIMIT",
       "CUSTOMER_HUMAN_REQUEST"
-    ]
+    ],
+    "universal_excellence_policy_ref": "cerebro/governance/universal-excellence-owner-authority.v0.json",
+    "all_current_and_future_roles_subject_to_excellence": true,
+    "owner_strategic_authority_only": true,
+    "owner_identity_verified_for_real_role_grants": false,
+    "lab_only_suspension_supported": true,
+    "prod_suspension_operational": false,
+    "real_api_access_auto_grant": false,
+    "actual_role_iam_binding_verified": false,
+    "fact001_organization_extension": "cerebro/factory/seo-org-v0.mjs",
+    "fact001_org_templates_generated_without_agent_creation": true,
+    "seo_department_real_iam_instances_created": 0
   },
   "roles": [
     {
@@ -42,8 +53,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-ARCHITECT-V1"
     },
     {
@@ -57,8 +77,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-CODE-V1"
     },
     {
@@ -72,8 +101,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-SYSTEMS-V1"
     },
     {
@@ -87,8 +125,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-MATH-V1"
     },
     {
@@ -102,8 +149,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-DATA-V1"
     },
     {
@@ -117,8 +173,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-SECURITY-V1"
     },
     {
@@ -132,8 +197,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-QA-V1"
     },
     {
@@ -147,8 +221,17 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-INTEGRATOR-V1"
     },
     {
@@ -162,8 +245,19 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001", "RSH-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json", "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001",
+        "RSH-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json",
+        "cerebro/registry/technology-capability-scout-real-consumer-adoption-v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-TECH-SCOUT-V1"
     },
     {
@@ -177,8 +271,19 @@
       "state": "FULL_SAFE_PREPROD",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["FACT-001", "AUTO-001", "QA-001", "LRN-001", "RUNTIME-001", "OBSERV-001", "FINOPS-001"],
-      "source_profiles": ["cerebro/registry/engineering-specializations-full-sweep.v1.json", "cerebro/registry/safe-engineering-profile.v1.json"],
+      "engines": [
+        "FACT-001",
+        "AUTO-001",
+        "QA-001",
+        "LRN-001",
+        "RUNTIME-001",
+        "OBSERV-001",
+        "FINOPS-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/engineering-specializations-full-sweep.v1.json",
+        "cerebro/registry/safe-engineering-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-ENG-PERFORMANCE-V1"
     },
     {
@@ -192,8 +297,18 @@
       "state": "PLAN_ONLY",
       "reports_to": null,
       "reports_to_state": "UNRESOLVED",
-      "engines": ["SALE-001", "LEAD-001", "NBA-001", "COM-001", "CRM-001", "C360-001", "CTX-001"],
-      "source_profiles": ["cerebro/registry/sales-execution-agent-inbox-profile.v1.json"],
+      "engines": [
+        "SALE-001",
+        "LEAD-001",
+        "NBA-001",
+        "COM-001",
+        "CRM-001",
+        "C360-001",
+        "CTX-001"
+      ],
+      "source_profiles": [
+        "cerebro/registry/sales-execution-agent-inbox-profile.v1.json"
+      ],
       "knowledge_pack_id": "KP-AGT-SALES-EXECUTIVE-V1"
     }
   ],

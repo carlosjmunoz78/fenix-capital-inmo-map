@@ -1,0 +1,81 @@
+name: CEREBRO SEO · UMS physical WebP ingestion PREPROD no photo publication
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-ums-photo-physical-intake-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-ums-photo-physical-intake-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-ums-photo-physical-intake-v0.yml'
+permissions:
+  contents: read
+jobs:
+  verify-physical-photo-intake:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Require FFmpeg; avoid unnecessary apt and cap installation time
+        shell: bash
+        run: |
+          set -euo pipefail
+          if command -v ffmpeg >/dev/null 2>&1 && command -v ffprobe >/dev/null 2>&1; then
+            echo 'FFMPEG_PREINSTALLED=YES'
+          else
+            echo 'FFMPEG_PREINSTALLED=NO INSTALL_FALLBACK_BOUNDED=YES'
+            export DEBIAN_FRONTEND=noninteractive
+            timeout --signal=TERM --kill-after=5s 75s sudo apt-get update -qq
+            timeout --signal=TERM --kill-after=5s 75s sudo apt-get install -y -qq ffmpeg >/dev/null
+            command -v ffmpeg >/dev/null
+            command -v ffprobe >/dev/null
+          fi
+      - name: Validate free FFmpeg and ffprobe, plus physical synthetic WebP tests
+        run: |
+          command -v ffmpeg
+          command -v ffprobe
+          node --check cerebro/seo-enterprise/v2/runtime/seo-ums-photo-physical-intake-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-ums-photo-physical-intake-v0.test.mjs
+      - name: Download one publicly available pre-existing image from own WordPress, READ ONLY
+        env:
+          OUT: ${{ runner.temp }}/seo001-wp-existing-asset-reference-${{ github.run_id }}
+        run: |
+          mkdir -m 700 "$OUT"
+          curl --fail --silent --show-error --location --retry 0 --max-time 30 \
+            'https://fenixcapital.es/wp-content/uploads/2025/11/obra-nueva-cordoba-card-cerebro.webp' \
+            --output "$OUT/known-existing.webp"
+          test -s "$OUT/known-existing.webp"
+          ffmpeg -hide_banner -loglevel error -i "$OUT/known-existing.webp" \
+            -vf 'scale=1200:630:force_original_aspect_ratio=increase,crop=1200:630' \
+            -frames:v 1 -c:v libwebp -q:v 80 -y "$OUT/derived-test-1200x630.webp"
+      - name: Ingest actual bytes into UMS physical fingerprint and FALSE rights/originality
+        env:
+          OUT: ${{ runner.temp }}/seo001-wp-existing-asset-reference-${{ github.run_id }}
+          RECEIPT: ${{ runner.temp }}/seo001-ums-photo-intake-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-ums-photo-physical-intake-v0.mjs \
+            "$OUT/derived-test-1200x630.webp" "$RECEIPT"
+          node --input-type=module - "$RECEIPT" <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const r=JSON.parse(fs.readFileSync(path.join(process.argv[2],'receipt.json')));
+          if(r.physical_image_verified!==true||r.width!==1200||r.height!==630||
+            r.original_image_generated_by_ums_verified!==false||
+            r.independent_visual_no_text_logo_watermark_verified!==false||
+            r.producer_receipt_and_license_verified!==false||
+            r.global_inventory_complete!==false||
+            r.publish_authorized!==false||r.wordpress_writes!==0)throw Error('UNSAFE_MEDIA_RELEASE');
+          console.log(JSON.stringify({physical_webp:true,phash_valid:r.perceptual_hash.length===16,
+            actual_origin:'DERIVED_EXISTING_MEDIA_NOT_A_NEW_PHOTO',originality_hold:true,
+            rights_hold:true,visual_qa_hold:true,wordpress_writes:0}));
+          NODE
+      - name: Archive only technical receipt, not source image for republication
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-ums-physical-photo-intake-existing-asset-hold
+          path: ${{ runner.temp }}/seo001-ums-photo-intake-${{ github.run_id }}/receipt.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Protect production and no provider charges
+        run: echo 'EXISTING_WORDPRESS_PHOTO_READONLY=YES NEW_UMS_IMAGE_CREATED=NO NEW_PROVIDER_PURCHASE=NO WP_UPLOADS=0'

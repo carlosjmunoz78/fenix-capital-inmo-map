@@ -1,0 +1,57 @@
+name: CEREBRO SEO · JOB001 editorial QA and tribunal PREPROD V0
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-editorial-qa-job001-pipeline-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba.draft.html'
+      - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba.draft.html'
+      - 'cerebro/seo-enterprise/v2/registry/seo-editorial-first-batch-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v3-faq.draft.html'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-editorial-visual-gate-v2.mjs'
+      - 'cerebro/seo-enterprise/v2/evidence/SEO001_STRATEGY_OWNER_APPROVAL_GITHUB_6682124001_2026-11-06.json'
+      - '.github/workflows/cerebro-seo-editorial-job001-qa-tribunal-preprod-v0.yml'
+permissions:
+  contents: read
+  issues: read
+jobs:
+  editorial:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check code and real-draft negative tests
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-editorial-qa-job001-pipeline-v0.test.mjs
+      - name: Verify owner approval directly against GitHub (no secrets emitted)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {verifyOwnerApprovalFromGitHub} from './cerebro/seo-enterprise/v2/runtime/seo-owner-github-approval-v0.mjs';
+          const receipt=await verifyOwnerApprovalFromGitHub({comment_id:6682124001,github_token:process.env.GITHUB_TOKEN});
+          if(receipt.kind!=='STRATEGY'||!receipt.owner_approval_verified||receipt.can_publish!==false)throw Error('OWNER_STRATEGY_GATE');
+          process.stdout.write(JSON.stringify({strategy_approved:true,provider:'GITHUB_REST',comment_id:receipt.provider_comment_id,publish_granted:false})+'\n');
+          NODE
+      - name: Process real approved-brief drafts through JOB001 D15 / D31 / tribunal
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/seo_editorial_receipts"
+          for id in SEO001-FENIX-B2C-EDITORIAL-001 SEO001-FENIX-B2B-EDITORIAL-002; do
+            node cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs worker "$id" "$RUNNER_TEMP/seo_editorial_receipts/$id.journal" "$RUNNER_TEMP/seo_editorial_receipts/$id.worker.json"
+            node cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs qa "$id" "$RUNNER_TEMP/seo_editorial_receipts/$id.worker.json" "$RUNNER_TEMP/seo_editorial_receipts/$id.qa.json"
+            node cerebro/seo-enterprise/v2/runtime/seo-editorial-qa-job001-pipeline-v0.mjs judge "$id" "$RUNNER_TEMP/seo_editorial_receipts/$id.worker.json" "$RUNNER_TEMP/seo_editorial_receipts/$id.qa.json" "$RUNNER_TEMP/seo_editorial_receipts/$id.judge.json"
+          done
+          rm -f "$RUNNER_TEMP/seo_editorial_receipts/"*.journal
+      - name: Save versioned receipts only, never article text
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-editorial-preprod-review-evidence-v0
+          path: ${{ runner.temp }}/seo_editorial_receipts/*.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Release remains closed
+        run: echo 'WORDPRESS_POSTS_CREATED=0 PUBLISHED=0 INDEPENDENT_IAM=NOT_VERIFIED TRIBUNAL_RELEASE=HOLD'

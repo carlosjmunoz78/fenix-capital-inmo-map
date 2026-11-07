@@ -1,0 +1,43 @@
+name: CEREBRO SEO · End-to-end circuit PREPROD verification
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-circuit-readiness-orchestrator-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-circuit-readiness-orchestrator-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-content-depth-gate-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d32-cloud-editorial-result-router-v0.mjs'
+      - '.github/workflows/cerebro-seo-end-to-end-readiness-preprod-v0.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-preprod-readiness-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  safe-integration:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Checkout PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Verify orchestrator and real subsystem integrations
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-circuit-readiness-orchestrator-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-circuit-readiness-orchestrator-v0.test.mjs
+      - name: Generate physically inspectable zero-write handoff and holds
+        env:
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-circuit-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-circuit-readiness-orchestrator-v0.mjs "$OUTPUT_DIR"
+      - name: Archive PREPROD report with image briefs and WordPress draft dry-run plans
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-end-to-end-preprod-readiness-release-hold
+          path: ${{ runner.temp }}/seo001-circuit-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Prevent false production status
+        run: echo 'D13_LIVE_GENERATION=NOT_RUN CORE_GUARD=NOT_CHANGED UMS_DISPATCH=NO WORDPRESS_WRITES=0 PAID_AI_CALLS=0 PUBLISH=NO'

@@ -1,0 +1,24 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+const read=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'));
+test('global policy, all real registry classes and 32 SEO departments inherit excellence policy without PROD authority',()=>{
+ const global=read('registry/governance-v0.json');
+ const roles=read('registry/role-agent-registry.v1.json');
+ const seo=read('seo-enterprise/v2/organization.manifest.json');
+ const policy=read('governance/universal-excellence-owner-authority.v0.json');
+ assert.equal(global.policy_refs.universal_excellence,roles.governance.universal_excellence_policy_ref);
+ assert.equal(global.policy_refs.universal_excellence,seo.merit_and_replacement.universal_policy_ref);
+ for(const role of roles.roles)assert.ok(policy.applies_to.includes(role.class),role.role_id);
+ for(const cls of seo.merit_and_replacement.applies_to)assert.ok(policy.applies_to.includes(cls),cls);
+ assert.equal(seo.departments.length,32);
+ assert.equal(global.canonical_rules.owner_only_strategic_authority,true);
+ assert.equal(roles.governance.owner_identity_verified_for_real_role_grants,false);
+ assert.equal(global.prod_execution_enabled,false);
+ assert.equal(roles.governance.real_api_access_auto_grant,false);
+ assert.equal(seo.merit_and_replacement.real_iam_reward_or_suspension_active,false);
+ assert.equal(policy.rewards.real_access_changes_require.includes('AUTHENTICATED_OWNER_DECISION'),true);
+ assert.equal(policy.rewards.never_auto_grant.includes('API_SECRETS'),true);
+ assert.equal(policy.corrective_actions.no_auto_erase_knowledge,true);
+ assert.equal(policy.boundaries.additional_subscriptions_eur,0);
+});

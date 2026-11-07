@@ -1,0 +1,169 @@
+name: CEREBRO SEO Corpus Workforce Identity V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/**'
+      - 'cerebro/factory/seo-skillpack-factory-v2.mjs'
+      - '.github/workflows/cerebro-seo-corpus-workload-v1.yml'
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  seo-corpus-worker:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.event.pull_request.number == 22 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify GitHub OIDC issuer signature and provider job identity
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-worker"
+          node cerebro/seo-enterprise/v2/runtime/seo-gh-oidc-workload-v1.mjs \
+            "$RUNNER_TEMP/seo-worker/identity.json"
+      - name: Execute 141 competence tasks on existing frozen WordPress corpus, no live fetches
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-corpus-job001-work-v1.mjs worker \
+            "$RUNNER_TEMP/seo-worker/job001.v8" \
+            "$RUNNER_TEMP/seo-worker/identity.json" \
+            "$RUNNER_TEMP/seo-worker/report.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-corpus-worker-v1
+          path: |
+            ${{ runner.temp }}/seo-worker/identity.json
+            ${{ runner.temp }}/seo-worker/report.json
+          retention-days: 14
+          if-no-files-found: error
+  seo-corpus-qa:
+    needs: seo-corpus-worker
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-worker-v1
+          path: ${{ runner.temp }}/seo-corpus/worker
+      - name: Verify independent GitHub OIDC workload and source job success
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-corpus/qa"
+          node cerebro/seo-enterprise/v2/runtime/seo-gh-oidc-workload-v1.mjs \
+            "$RUNNER_TEMP/seo-corpus/qa/identity.json"
+      - name: Recompute all 141 role outputs against same frozen corpus
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-corpus-job001-work-v1.mjs qa \
+            "$RUNNER_TEMP/seo-corpus/worker/report.json" \
+            "$RUNNER_TEMP/seo-corpus/worker/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/report.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-corpus-qa-v1
+          path: |
+            ${{ runner.temp }}/seo-corpus/qa/identity.json
+            ${{ runner.temp }}/seo-corpus/qa/report.json
+          retention-days: 14
+          if-no-files-found: error
+  seo-corpus-tribunal:
+    needs: [seo-corpus-worker, seo-corpus-qa]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-worker-v1
+          path: ${{ runner.temp }}/seo-corpus/worker
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-qa-v1
+          path: ${{ runner.temp }}/seo-corpus/qa
+      - name: Verify third independent GitHub OIDC workload
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-corpus/tribunal"
+          node cerebro/seo-enterprise/v2/runtime/seo-gh-oidc-workload-v1.mjs \
+            "$RUNNER_TEMP/seo-corpus/tribunal/identity.json"
+      - name: Verify independent prior job identities and decide NO PROD release
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-corpus-job001-work-v1.mjs tribunal \
+            "$RUNNER_TEMP/seo-corpus/worker/report.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/report.json" \
+            "$RUNNER_TEMP/seo-corpus/worker/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/tribunal/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/tribunal/verdict.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-corpus-tribunal-v1
+          path: |
+            ${{ runner.temp }}/seo-corpus/tribunal/verdict.json
+            ${{ runner.temp }}/seo-corpus/tribunal/identity.json
+          retention-days: 14
+          if-no-files-found: error
+
+  seo-corpus-sandbox-writer:
+    needs: [seo-corpus-worker, seo-corpus-qa, seo-corpus-tribunal]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-worker-v1
+          path: ${{ runner.temp }}/seo-corpus/worker
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-qa-v1
+          path: ${{ runner.temp }}/seo-corpus/qa
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-corpus-tribunal-v1
+          path: ${{ runner.temp }}/seo-corpus/tribunal
+      - name: Authenticate fourth scoped GitHub OIDC job
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-write-lab"
+          node cerebro/seo-enterprise/v2/runtime/seo-gh-oidc-workload-v1.mjs \
+            "$RUNNER_TEMP/seo-write-lab/identity.json"
+      - name: Actually write editorial proposal files to isolated runner with backup/rollback canary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-draft-writer-lab-v1.mjs write \
+            "$RUNNER_TEMP/seo-corpus/worker/report.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/report.json" \
+            "$RUNNER_TEMP/seo-corpus/tribunal/verdict.json" \
+            "$RUNNER_TEMP/seo-corpus/worker/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/qa/identity.json" \
+            "$RUNNER_TEMP/seo-corpus/tribunal/identity.json" \
+            "$RUNNER_TEMP/seo-write-lab/identity.json" \
+            "$RUNNER_TEMP/seo-write-lab/output" \
+            "$RUNNER_TEMP/seo-write-lab/receipt.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-editorial-write-lab-v1
+          path: |
+            ${{ runner.temp }}/seo-write-lab/output/seo-editorial-draft-bundle-v1
+            ${{ runner.temp }}/seo-write-lab/receipt.json
+          retention-days: 14
+          if-no-files-found: error
+

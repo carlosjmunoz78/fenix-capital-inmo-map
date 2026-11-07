@@ -1,0 +1,2959 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB_DOCUMENTED_READ_ONLY",
+  "version": "1.0.0",
+  "created_on": "2026-11-05",
+  "directive": "Complete knowledge and operational instructions for all 8 families/32 SEO departments; STAGING DEFERRED; protect current official WordPress, App/CRM and production",
+  "source_registry": [
+    {
+      "priority": 1,
+      "id": "WP_PROD_URL_MEDIA",
+      "path": "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+      "state": "AUTHENTICATED_READ_ONLY_LIST_200_URLS_629_LIBRARY_MEDIA"
+    },
+    {
+      "priority": 2,
+      "id": "WP_PROD_COPY_01_TO_10",
+      "glob": "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json",
+      "state": "AUTHENTICATED_READ_ONLY_SOURCE_COPY_200_DOCS"
+    },
+    {
+      "priority": 3,
+      "id": "WP_PROD_ON_DEMAND",
+      "adapter": "Cowboy MCP web official",
+      "state": "RECHECK_POST_ID_MODIFIED_AND_CURRENT_RENDER_BEFORE_RECOMMENDATION"
+    },
+    {
+      "priority": 4,
+      "id": "NOTION_AND_HISTORICAL",
+      "path": "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+      "state": "HISTORICAL_REFERENCE_ONLY_NOT_STAGING_EXECUTION"
+    },
+    {
+      "priority": 5,
+      "id": "GSC_GA4_MARKET",
+      "adapter": "AUTHORIZED_CONNECTED_SOURCES_ONLY",
+      "state": "UNVERIFIED_USE_NULL_NOT_ESTIMATES"
+    }
+  ],
+  "site_baseline": {
+    "published_pages": 166,
+    "published_posts": 34,
+    "total_published_urls": 200,
+    "media_images_in_library": 629,
+    "rendering_check_pending": true,
+    "gsc_ga4_current_metrics_verified": false
+  },
+  "global_instructions": {
+    "order": "INVENTORY→SOURCE_PRECHECK→RESEARCH→PROPOSE_DELTA→INDEPENDENT_QA→TRIBUNAL→OWNER_SCOPE_GATE→SHADOW_TEST→BACKUP_ROLLBACK→MUTATE_ONLY_IF_AUTHORIZED→MEASURE→LRN",
+    "strategy_authority": "OWNER_IAM_AUTHENTICATED_NOT_AGENTS",
+    "runtime": "SHARED_JOB001_ACTGW001_NOT_32_SERVERS",
+    "single_source_of_truth": "OFFICIAL_WP_PROD_LIVE_AND_GITHUB_VERSIONED_CORPUS",
+    "no_stage_work": true,
+    "no_secret_exposure": true,
+    "no_delete_or_redirection_without_E2E": true,
+    "limits": "READ_ONLY_UNTIL_EXPLICIT_PERMISSIONS_AND_RELEASE_GATES",
+    "no_new_subscription": true,
+    "free_measurement_alternatives": "Use existing connected sources or mark unknown; do not fabricate GSC/GA4 data",
+    "source_refresh": "BROWSE_SPECIFIC_URL_BEFORE_ANY_DECISION_AND_RECORD_TIMESTAMP",
+    "rendering": "Stored WP HTML, CSS images and Gutenberg blocks require independent rendered check",
+    "media_rights": "Unknown licensing is unresolved, never assume permission",
+    "lead_forms": "No invasive changes to forms, consent, CRM, newsletter or auto-publication",
+    "self_certification_forbidden": true
+  },
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "name": "Estrategia y dirección",
+      "mission": "Definir estrategia SEO y prioridades por negocio",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D01:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Argumentar la prioridad de cada cambio con demanda, conversión, riesgo y dependencias; sin iniciar proyectos duplicados",
+        "expected_artifact": "Mapa estratégico aprobado con criterios explícitos de coste y riesgo",
+        "acceptance_specific": "Mapa de decisión firmado por autoridad autenticada"
+      },
+      "training": {
+        "exercise": "Priorizar diez iniciativas con objetivo, dependencia, dueño y política de no destrucción",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "name": "Inteligencia de mercado",
+      "mission": "Vigilar demanda, zonas y tendencias del mercado",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D02:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Separar tendencias verificadas de hipótesis y respetar fecha/ámbito regional",
+        "expected_artifact": "Ficha de oportunidad con procedencia, límites de confianza y cambio sugerido",
+        "acceptance_specific": "Fuente pública fechada y comparación geográfica reproducible"
+      },
+      "training": {
+        "exercise": "Contrastar una hipótesis de demanda provincial con fuentes y fechas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "name": "Investigación de clientes y buyer personas",
+      "mission": "Auditar perfiles de comprador B2C/B2B y lenguaje de búsqueda",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D03:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Separar buyer personas particulares, compradores, vendedores e inmobiliarias; no procesar PII sin base legal",
+        "expected_artifact": "Mapa de intención y buyer persona con consentimiento y preguntas reales",
+        "acceptance_specific": "Mapa de intención B2C/B2B trazable"
+      },
+      "training": {
+        "exercise": "Diferenciar comprador, propietario e inmobiliaria asociada sin usar datos personales",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "name": "Crecimiento, priorización y rentabilidad",
+      "mission": "Priorizar mejoras por impacto y coste medido",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D04:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Ordenar por beneficio esperado, coste, velocidad y reversibilidad; no inventar ROI",
+        "expected_artifact": "Matriz coste-impacto-reversibilidad sin ROI inventado",
+        "acceptance_specific": "Matriz oportunidad/coste con incertidumbre"
+      },
+      "training": {
+        "exercise": "Ordenar trabajo por valor esperado, dificultad, riesgo y presupuesto cero",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "name": "Keyword research e intención",
+      "mission": "Investigar keywords e intenciones de búsqueda",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D05:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Clasificar keyword por intención, localidad, servicio y URL existente antes de proponer nuevas URLs",
+        "expected_artifact": "Mapa de keywords con evidencia y sin cifras no verificadas",
+        "acceptance_specific": "Keyword→URL con evidencias de fuente y cero cifras ficticias"
+      },
+      "training": {
+        "exercise": "Agrupar términos hipotecarios locales por intención y fuente",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "name": "Análisis SERP y formatos",
+      "mission": "Comparar resultados de búsqueda, SERP y formatos",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D06:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Revisar resultados de búsqueda actuales por intención y fecha; registrar formatos sin copiar a competidores",
+        "expected_artifact": "Comparativa SERP reproducible con fecha y enlaces",
+        "acceptance_specific": "Comparación SERP y diferenciación útil"
+      },
+      "training": {
+        "exercise": "Clasificar tipologías SERP de una muestra pública de búsquedas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "name": "Competencia, gaps y oportunidades",
+      "mission": "Analizar webs competidoras, brechas y oportunidades",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D07:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Analizar competidores verificables por servicios, UX, autoridad y funnels; no trasladar contenido ajeno",
+        "expected_artifact": "Diferenciadores documentados y oportunidad sin duplicación",
+        "acceptance_specific": "Gap de negocio demostrado por fuente"
+      },
+      "training": {
+        "exercise": "Contrastar propuestas y vacíos de competidores sin copiar contenido",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "name": "Arquitectura semántica, clusters y anticanibalización",
+      "mission": "Detectar canibalización, clusters y consolidación sin borrar URLs",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D08:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Cruzar intención+copy+canonical+enlaces para detectar posibles canibalizaciones; no borrar páginas válidas",
+        "expected_artifact": "Matriz de canibalización y decisión canonical/enlace, pendiente de métricas",
+        "acceptance_specific": "Mapa de clusters y colisiones con recomendación reversible"
+      },
+      "training": {
+        "exercise": "Detectar dos páginas que compiten semánticamente y proponer solución sin borrar URLs",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "name": "Rastreo, indexación y canonicals",
+      "mission": "Auditar robots, sitemaps, indexabilidad y canónicos",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D09:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Distinguir HTTP 200, canonical, sitemap e indexación confirmada por GSC; no inferir indexación de publicación",
+        "expected_artifact": "Informe de indexabilidad con causa, pruebas y rollback",
+        "acceptance_specific": "Diagnóstico crawl/index específico con pruebas"
+      },
+      "training": {
+        "exercise": "Interpretar un caso 404/canonical/sitemap sin alterar URL válida",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "name": "JavaScript, renderizado y SEO técnico avanzado",
+      "mission": "Auditar renderizado JS y compatibilidad de indexación",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D10:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Comparar DOM renderizado frente a contenido fuente cuando existan JS/Elementor/shortcodes; no dar por revisado HTML almacenado",
+        "expected_artifact": "Diagnóstico de indexación JS con evidencia de navegador",
+        "acceptance_specific": "Evidencia de render y visibilidad para buscadores"
+      },
+      "training": {
+        "exercise": "Separar HTML fuente de renderizado JS en un caso sintetizado",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "name": "Arquitectura web, taxonomías y enlazado interno",
+      "mission": "Auditar arquitectura web y enlazado interno",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D11:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Construir grafo de enlaces de contenidos y destinos, evitar enlaces rotos y anchors repetidos sin contexto",
+        "expected_artifact": "Mapa de arquitectura y enlaces internos con anticanibalización",
+        "acceptance_specific": "Grafo URL interna con cambios OLD vs NEW"
+      },
+      "training": {
+        "exercise": "Diseñar cluster de ciudad y pueblos preservando enlaces existentes",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "name": "Datos estructurados, entidades y búsqueda enriquecida",
+      "mission": "Validar Schema Service, FAQ y entidades",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D12:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Validar Schema por contenido realmente visible; nunca inventar FAQs, valoraciones ni rich results",
+        "expected_artifact": "Checklist Schema y prueba de rechazo de claims inventados",
+        "acceptance_specific": "Prueba de datos estructurados y provenance"
+      },
+      "training": {
+        "exercise": "Validar un Service y un FAQPage contra texto realmente visible",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "name": "SEO copywriting y contenido",
+      "mission": "Planificar y crear contenido útil de alta calidad",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D13:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Reutilizar activos existentes, mejorar utilidad real, E-E-A-T y claridad financiera antes de nuevos borradores",
+        "expected_artifact": "Borrador listo para QA, nunca publicación sin permisos",
+        "acceptance_specific": "Borrador con brief/claim-evidence/CTA y QA"
+      },
+      "training": {
+        "exercise": "Redactar landing local útil con intención, enlaces y control de originalidad",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "name": "Copywriting persuasivo y de conversión",
+      "mission": "Optimizar copy persuasivo sin falsas promesas",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D14:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Evaluar promesas comerciales, claridad de CTA y fricción; no afirmar resultados hipotecarios garantizados",
+        "expected_artifact": "Copy para conversión con riesgos y alternativa",
+        "acceptance_specific": "Hipótesis CRO con alternativas verificables"
+      },
+      "training": {
+        "exercise": "Proponer tres CTAs claros sin garantías hipotecarias no verificadas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "name": "UX writing y microcopy",
+      "mission": "Mejorar microcopy, accesibilidad y claridad",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D15:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Mejorar microcopy de formularios con accesibilidad, consentimiento y prevención de confusión",
+        "expected_artifact": "Comparativa OLD/NEW con controles de legibilidad",
+        "acceptance_specific": "OLD vs NEW de interfaz con lectura comprensible"
+      },
+      "training": {
+        "exercise": "Corregir microcopy en móvil sin perder significado o accesibilidad",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "name": "Investigación, edición, fact-checking y autoridad editorial",
+      "mission": "Verificar hechos, fuentes y afirmaciones hipotecarias",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D16:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Verificar toda afirmación YMYL hipotecaria por condiciones vigentes y políticas de bancos; escalar incertidumbre",
+        "expected_artifact": "Informe de fact-checking y bloqueo cuando proceda",
+        "acceptance_specific": "Fact-check con citas, fecha y bloqueo de claims no probados"
+      },
+      "training": {
+        "exercise": "Detectar claims hipotecarios YMYL y exigir fuente/profesional",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "name": "Google Business Profile y SEO local",
+      "mission": "Auditar Google Business Profile y visibilidad local",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D17:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Revisar GBP, categorías, cobertura, ubicación real y enlaces a páginas locales; no crear ubicaciones ficticias",
+        "expected_artifact": "Registro GBP/NAP y acciones solo de lectura",
+        "acceptance_specific": "Ficha GBP/NAP y priorización local"
+      },
+      "training": {
+        "exercise": "Preparar ficha de SEO local con GBP verificado sin crear duplicados",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "name": "Reputación, reseñas y NAP",
+      "mission": "Auditar reseñas, datos NAP y reputación",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D18:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Verificar consistencia NAP y reseñas sin incentivo ni manipulación",
+        "expected_artifact": "Plan de reputación sin incentivos por valoración",
+        "acceptance_specific": "Plan legítimo de reputación con rastros"
+      },
+      "training": {
+        "exercise": "Revisar procedimiento ético de reseñas y consistencia NAP",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "name": "Digital PR, relaciones y enlaces legítimos",
+      "mission": "Prospectar enlaces editoriales legítimos y digital PR",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D19:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Priorizar prensa/enlaces editorialmente relevantes; descartar compra masiva y esquemas de enlaces",
+        "expected_artifact": "Ficha PR con pertinencia y ausencia de spam",
+        "acceptance_specific": "Propuesta PR por autoridad y riesgo"
+      },
+      "training": {
+        "exercise": "Evaluar oportunidad de prensa/enlace relevante y legítimo",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "name": "SEO internacional, multilingüe y geográfico",
+      "mission": "Verificar ciudades, provincias, contenido y fichas geográficas",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D20:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Definir CITY COMPLETE por landing+blog+captación+descargables+newsletter+enlaces+medición+legal",
+        "expected_artifact": "Checklist CITY COMPLETE con fallo cerrado si falta captación",
+        "acceptance_specific": "Checklist territorial con todos los gates"
+      },
+      "training": {
+        "exercise": "Preparar ciudad y provincia con contenidos, descargables, CTAs y enlaces",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "name": "UX, diseño e información",
+      "mission": "Auditar experiencia de usuario y arquitectura de información",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D21:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Revisar jerarquía visual, responsive y contraste en fuentes renderizadas, no solo en HTML",
+        "expected_artifact": "Especificación de diseño OLD/NEW con contraste y mobile QA",
+        "acceptance_specific": "Plan visual verificable de mejora incremental"
+      },
+      "training": {
+        "exercise": "Comparar landings de pueblos moradas/rosas con patrón de ciudades SIN cambiarlas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "name": "Desarrollo web, CMS, WordPress y Elementor",
+      "mission": "Diagnosticar WordPress, Elementor y módulos existentes sin modificar",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D22:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Identificar si el activo usa WordPress, Elementor, bloques reutilizables o plugin propio y respetar contratos",
+        "expected_artifact": "Propuesta técnica con snapshot, pruebas y rollback",
+        "acceptance_specific": "Plan técnico con rollback y sin tocar APP/CRM"
+      },
+      "training": {
+        "exercise": "Diseñar parche aditivo Astra/Elementor evitando tocar plantilla PROD",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "name": "Core Web Vitals, accesibilidad y seguridad web",
+      "mission": "Medir CWV, accesibilidad y seguridad",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D23:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Medir CWV/LCP/INP/CLS con herramienta identificada, fecha, dispositivo y muestra; no extrapolar",
+        "expected_artifact": "Ficha performance con fuente y límites de medición",
+        "acceptance_specific": "Ficha de rendimiento y accesibilidad con mediciones"
+      },
+      "training": {
+        "exercise": "Evaluar CWV/accesibilidad con métricas verificadas o declarar sin datos",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "name": "CRO, experimentación, formularios, embudos y CRM",
+      "mission": "Auditar CTAs, formularios, embudos y captación",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D24:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Mapear formularios por buyer persona, consentimiento, entrega de lead magnet, doble confirmación y trazabilidad del funnel",
+        "expected_artifact": "Mapa de embudo, eventos y riesgos RGPD",
+        "acceptance_specific": "Embudo y eventos verificables sin exponer CRM"
+      },
+      "training": {
+        "exercise": "Revisar funnel específico B2C/B2B, formulario, CTA, newsletter y consentimiento",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "name": "AEO/GEO y visibilidad en IA",
+      "mission": "Auditar citabilidad, estructura AEO y presencia IA",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D25:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Optimizar respuesta útil para búsqueda IA sin prometer visibilidad ni citas; fundamentar entidades y veracidad",
+        "expected_artifact": "Plan de AEO/GEO con criterios comprobables",
+        "acceptance_specific": "AEO/GEO factual con validación"
+      },
+      "training": {
+        "exercise": "Evaluar citabilidad y claridad semántica sin prometer posición en IA",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "name": "SEO de imágenes, vídeo y YouTube",
+      "mission": "Auditar imágenes, alt, vídeos y YouTube",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D26:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Cruzar las 629 imágenes de biblioteca con uso real por URL, ALT descriptivo, licencias y peso; revisar vídeos",
+        "expected_artifact": "Checklist de imágenes/vídeos y procedencia",
+        "acceptance_specific": "Registro multimedia contextual y derechos verificados"
+      },
+      "training": {
+        "exercise": "Crear briefing multimedia con ALT, vídeo, peso y licencia",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "name": "Ecommerce SEO: categorías, productos, facetas y Merchant",
+      "mission": "Auditar productos, categorías y facetas si existe ecommerce",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D27:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Confirmar si ecommerce aplica a la empresa; si no, declarar NOT_APPLICABLE en vez de generar contenido artificial",
+        "expected_artifact": "Decisión de aplicabilidad con evidencia; no generar trabajo vacío",
+        "acceptance_specific": "Decisión de aplicabilidad respaldada"
+      },
+      "training": {
+        "exercise": "Determinar si existe ecommerce real; no activar Merchant si no existe",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "name": "Búsqueda social, distribución orgánica y descubrimiento",
+      "mission": "Auditar búsqueda social y distribución orgánica",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D28:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Coordinación orgánica con social, enfoque auténtico, no publicación social sin credenciales ni autorización",
+        "expected_artifact": "Plan social orgánico sin publicar ni usar datos privados",
+        "acceptance_specific": "Plan de distribución medible y consentido"
+      },
+      "training": {
+        "exercise": "Diseñar distribución blog-social segmentada por canal y audiencia",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "name": "Search Console, GA4, medición y fuentes",
+      "mission": "Medir indexación, clics, posición y GA4 con cuentas gratuitas oficiales",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D29:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Usar GSC/GA4 solo con conexión autenticada; conservar nulls cuando no hay datos",
+        "expected_artifact": "Panel de KPIs con valores nulos si no hay fuente",
+        "acceptance_specific": "Dashboard con procedencia y cobertura temporal"
+      },
+      "training": {
+        "exercise": "Construir reporte GSC/GA4 únicamente con lecturas gratuitas verificadas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "name": "Atribución comercial, analítica avanzada y pruebas",
+      "mission": "Atribuir captación y experimentos con datos agregados",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D30:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Definir modelo de atribución agregado con consentimiento, eventos y límites estadísticos",
+        "expected_artifact": "Funnel agregado, muestra y límites de atribución",
+        "acceptance_specific": "Informe de atribución sin inventar conversiones"
+      },
+      "training": {
+        "exercise": "Diseñar atribución desde CTA a contacto sin datos personales",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "name": "QA, auditoría SEO, publicación y releases",
+      "mission": "Ejecutar QA independiente, tribunal, versiones y rollback",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D31:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Auditar independientemente fuente, rendering, SEO, riesgos, pruebas, backup y rollback; no juzgar trabajo propio",
+        "expected_artifact": "Tribunal con decisión, evidencias y posibilidad de restauración",
+        "acceptance_specific": "Dictamen reproducible PASA/BLOQUEA con pruebas"
+      },
+      "training": {
+        "exercise": "Rechazar una publicación sin IAM, QA, propietario, backup y rollback",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    },
+    {
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "name": "Aprendizaje, benchmarks, training y optimización",
+      "mission": "Aprender de resultados, corregir y certificar competencias",
+      "phase": "INSTRUCTION_READY_AGENTS_NOT_CERTIFIED",
+      "actor_identity": {
+        "role": "SEO-D32:AGENT",
+        "iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "work_item": {
+        "trigger": "OWNER_DIRECTIVE_OR_APPROVED_READ_ONLY_SCHEDULED_JOB",
+        "source": "OFFICIAL_WP_PROD_CORPUS",
+        "min_fields": [
+          "company_id",
+          "engine_id",
+          "environment",
+          "version",
+          "post_id_or_scope",
+          "source_timestamp",
+          "task_type",
+          "read_scope",
+          "budget_eur",
+          "correlation_id"
+        ],
+        "source_preflight": [
+          "IDENTIFY_EXISTING_URL",
+          "READ_CURRENT_COPY_AND_SEO",
+          "CHECK_IMAGES_AND_RIGHTS",
+          "CHECK_LINKS_AND_INTENT",
+          "CHECK_FORM_CTA_FUNNEL",
+          "NEVER_USE_HISTORICAL_STAGING_AS_CURRENT_PROD",
+          "RECORD_UNKNOWN_MEASUREMENTS_AS_NULL"
+        ],
+        "specialist_action": "Reentrenar con correcciones y outcomes reales; exigir evaluación independiente y no autopromocionar agentes",
+        "expected_artifact": "Ficha LRN-001 con feedback, prueba y no promoción automática",
+        "acceptance_specific": "Plan de aprendizaje/reexamen y comparación OLD vs NEW"
+      },
+      "training": {
+        "exercise": "Comparar OLD/NEW de un ejemplo sintético, proponer formación sin autopremio",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+          "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+          "cerebro/seo-enterprise/v2/data/live-copy-chunk-*.json"
+        ],
+        "minimum_distinct_missions": 3,
+        "real_passed_missions": 0,
+        "score_threshold": 90,
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor": "SEO-D32",
+        "tribunal_required": true
+      },
+      "controls": {
+        "writes_to_prod": false,
+        "publish": false,
+        "modify_crm": false,
+        "manage_money": false,
+        "allow_work_on_existing_assets_only": "READ_AND_RECOMMEND",
+        "review_required": [
+          "EVIDENCE_AND_SOURCE",
+          "OLD_VS_NEW",
+          "NO_PII",
+          "NO_WRONG_COMPANY",
+          "RISK_AND_LEGAL",
+          "NON_DESTRUCTIVE",
+          "ROLLBACK_IF_MUTATION",
+          "COST_0"
+        ]
+      },
+      "output_contract": [
+        "report_id",
+        "department_id",
+        "company_id",
+        "target_urls",
+        "source_records",
+        "finding",
+        "confidence",
+        "proposed_delta",
+        "expected_impact_with_uncertainty",
+        "risks",
+        "qa_state",
+        "tribunal_state",
+        "next_action"
+      ],
+      "promotion_state": "BLOCKED_UNTIL_REAL_IAM_QA_TRIBUNAL_TRAINING_BACKUP_AND_AUTHORIZED_GATE"
+    }
+  ],
+  "progress": {
+    "department_count": 32,
+    "curricula_with_instructions": 32,
+    "live_iam_principals_certified_by_this_action": 0,
+    "real_training_exams_passed_by_this_action": 0,
+    "prod_write_authorizations_granted": 0,
+    "prod_mutations_by_this_action": 0,
+    "site_inventory_read_only": 200,
+    "read_only_program_status": "ARTIFACT_READY_NOT_RUNTIME_DEPLOYED",
+    "next_block": "BIND_REAL_IAM_AND_SCHEDULED_READ_ONLY_JOBS_THEN_RUN_32_INDEPENDENT_EXAMS_AND_REVIEW"
+  }
+}

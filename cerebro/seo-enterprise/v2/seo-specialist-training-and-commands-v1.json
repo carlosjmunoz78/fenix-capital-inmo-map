@@ -1,0 +1,1902 @@
+{
+  "schema_version": "1.0.0",
+  "plan_id": "SEO_OPERATIONAL_TRAINING_32_20261105",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "scope": "TRAIN_32_SPECIALTIES_AND_ROUTE_OWNER_ORDERS_NOT_REAUDIT_WEBSITE",
+  "purpose": "Prepare full SEO and marketing department to receive instructions, coordinate by exception and progressively operate autonomously",
+  "now_baseline": "EXISTING_AUDITS_ALREADY_DONE_DO_NOT_REPEAT",
+  "family_count": 8,
+  "department_count": 32,
+  "role_instances_materialized_in_prod": 0,
+  "paid_api_calls_required": 0,
+  "coordination": {
+    "strategy_owner": "AUTHENTICATED_COMPANY_OWNER",
+    "family_director_role": "SEO-PFxx:DIRECTOR",
+    "department_head_role": "SEO-Dxx:DEPARTMENT_HEAD",
+    "qa": "SEO-D31_INDEPENDENT",
+    "training": "SEO-D32_LRN-001",
+    "releases": "SEO-D31_TRIBUNAL_IAM_POL-001",
+    "single_shared_runtime": "JOB-001_ACTGW-001_FACTORY-001",
+    "one_server_per_department": false,
+    "owner_not_needed_for_routine_readonly": "AFTER_IAM_AND_POLICY_ENABLED",
+    "owner_decisions": [
+      "INITIAL_MARKETING_STRATEGY_APPROVAL",
+      "UNSCOPED_SPEND",
+      "FIRST_NEW_URL_PUBLICATIONS",
+      "NEW_PROD_PERMISSIONS",
+      "LEGAL_OR_SIGNATURE",
+      "HIGH_RISK"
+    ]
+  },
+  "training_policy": {
+    "prerequisites": [
+      "READ_CANONICAL_SOURCES",
+      "PASS_SPECIFIC_EXERCISE",
+      "3_RECORDED_DISTINCT_MISSIONS",
+      "INDEPENDENT_QA",
+      "TRIBUNAL",
+      "SHADOW_OLD_VS_NEW",
+      "BACKUP_AND_ROLLBACK_ON_MUTATIONS",
+      "COST_MEASURED"
+    ],
+    "ongoing_learning": "LRN-001_PROPOSAL_ONLY_WITH_EVIDENCE",
+    "failed_exercise": "RETRAIN_THEN_REEXAM",
+    "promotions_never_self_issued": true,
+    "real_identity_required": true,
+    "result": "CURRICULA_DEFINED_NOT_REAL_AGENTS_TRAINED"
+  },
+  "instructions": {
+    "command_types": [
+      "SEO_STRATEGY",
+      "KEYWORDS_AND_SERP",
+      "COMPETITOR_RESEARCH",
+      "TECHNICAL_SEO",
+      "CONTENT_AND_LANDINGS",
+      "LOCAL_SEO",
+      "TOWN_TEMPLATE_NORMALIZATION",
+      "CRO_AND_FORMS",
+      "MEDIA_AND_AEO",
+      "METRICS_AND_GSC",
+      "MARKETING_PLAN",
+      "TRAIN_AND_SUPERVISE"
+    ],
+    "all_commands_must_route_to": "COMPETENCE_OWNER_AND_SEPARATE_QA_AND_JUDGE",
+    "new_content_created_in": "WORDPRESS_OFFICIAL_DRAFT_AFTER_WRITE_GATE",
+    "approved_marketing_plan_must_not_automatically_grant_spend_or_publish": true
+  },
+  "backlog": {
+    "NOW_AFTER_OWNER_APPROVAL": [
+      "MARKETING_STRATEGY_APPROVAL",
+      "ROLE_SPECIFIC_TRAINING_LAB",
+      "ASSIGN_INITIAL_LOW_RISK_OPERATIONS"
+    ],
+    "LATER_GRADUALLY": [
+      "NORMALIZE_VILLAGE_LANDINGS_PURPLE_PINK_TO_CITY_STYLE",
+      "CONTENT_CLUSTERS_CITIES_PROVINCES",
+      "SOCIAL_AND_NEWSLETTER_FUNNELS",
+      "MEASURE_AND_IMPROVE"
+    ],
+    "village_design_debt": {
+      "description": "Landings de pueblos con tonos morados/rosas y estructura que debe armonizarse con las landings de ciudades",
+      "state": "KNOWN_OWNER_OBSERVATION_NOT_SITE_REAUDITED",
+      "treatment": "ONE_URL_AT_A_TIME_AFTER_OWNER_PRIORITY",
+      "no_mass_template_changes": true,
+      "preserve_existing_urls_slugs_and_content": true,
+      "visual_reference": "CURRENT_CITY_LANDING_STYLE",
+      "backup_oldnew_visual_mobile_rollback_required": true
+    },
+    "existing_jaen_pilot": {
+      "state": "P0_OPEN_EVIDENCE_PREVIOUS_WORK",
+      "do_not_restart_full_audit": true,
+      "remain_protected": true,
+      "not_mass_publish": true
+    }
+  },
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "family_id": "SEO-PF01",
+      "name": "Estrategia y dirección",
+      "mission": "Definir estrategia SEO y prioridades por negocio",
+      "required_sources": [
+        "WP_READ",
+        "PERFORMANCE",
+        "OWNER_GOALS"
+      ],
+      "training_unit": {
+        "exercise": "Priorizar diez iniciativas con objetivo, dependencia, dueño y política de no destrucción",
+        "expected_artifact": "Mapa estratégico aprobado con criterios explícitos de coste y riesgo",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D01:AGENT",
+        "lead_role_template_id": "SEO-D01:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF01:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF01:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D02",
+      "family_id": "SEO-PF01",
+      "name": "Inteligencia de mercado",
+      "mission": "Vigilar demanda, zonas y tendencias del mercado",
+      "required_sources": [
+        "PUBLIC_SEARCH",
+        "OFFICIAL_MARKET_DATA"
+      ],
+      "training_unit": {
+        "exercise": "Contrastar una hipótesis de demanda provincial con fuentes y fechas",
+        "expected_artifact": "Ficha de oportunidad con procedencia, límites de confianza y cambio sugerido",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D02:AGENT",
+        "lead_role_template_id": "SEO-D02:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF01:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF01:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D03",
+      "family_id": "SEO-PF01",
+      "name": "Investigación de clientes y buyer personas",
+      "mission": "Auditar perfiles de comprador B2C/B2B y lenguaje de búsqueda",
+      "required_sources": [
+        "WP_READ",
+        "CONSENTED_RESEARCH"
+      ],
+      "training_unit": {
+        "exercise": "Diferenciar comprador, propietario e inmobiliaria asociada sin usar datos personales",
+        "expected_artifact": "Mapa de intención y buyer persona con consentimiento y preguntas reales",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D03:AGENT",
+        "lead_role_template_id": "SEO-D03:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF01:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF01:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D04",
+      "family_id": "SEO-PF01",
+      "name": "Crecimiento, priorización y rentabilidad",
+      "mission": "Priorizar mejoras por impacto y coste medido",
+      "required_sources": [
+        "WP_READ",
+        "MEASURED_ANALYTICS"
+      ],
+      "training_unit": {
+        "exercise": "Ordenar trabajo por valor esperado, dificultad, riesgo y presupuesto cero",
+        "expected_artifact": "Matriz coste-impacto-reversibilidad sin ROI inventado",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D04:AGENT",
+        "lead_role_template_id": "SEO-D04:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF01:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF01:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D05",
+      "family_id": "SEO-PF02",
+      "name": "Keyword research e intención",
+      "mission": "Investigar keywords e intenciones de búsqueda",
+      "required_sources": [
+        "PUBLIC_SEARCH",
+        "GSC_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Agrupar términos hipotecarios locales por intención y fuente",
+        "expected_artifact": "Mapa de keywords con evidencia y sin cifras no verificadas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D05:AGENT",
+        "lead_role_template_id": "SEO-D05:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF02:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF02:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D06",
+      "family_id": "SEO-PF02",
+      "name": "Análisis SERP y formatos",
+      "mission": "Comparar resultados de búsqueda, SERP y formatos",
+      "required_sources": [
+        "PUBLIC_SEARCH"
+      ],
+      "training_unit": {
+        "exercise": "Clasificar tipologías SERP de una muestra pública de búsquedas",
+        "expected_artifact": "Comparativa SERP reproducible con fecha y enlaces",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D06:AGENT",
+        "lead_role_template_id": "SEO-D06:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF02:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF02:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D07",
+      "family_id": "SEO-PF02",
+      "name": "Competencia, gaps y oportunidades",
+      "mission": "Analizar webs competidoras, brechas y oportunidades",
+      "required_sources": [
+        "PUBLIC_COMPETITOR_READ"
+      ],
+      "training_unit": {
+        "exercise": "Contrastar propuestas y vacíos de competidores sin copiar contenido",
+        "expected_artifact": "Diferenciadores documentados y oportunidad sin duplicación",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D07:AGENT",
+        "lead_role_template_id": "SEO-D07:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF02:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF02:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D08",
+      "family_id": "SEO-PF02",
+      "name": "Arquitectura semántica, clusters y anticanibalización",
+      "mission": "Detectar canibalización, clusters y consolidación sin borrar URLs",
+      "required_sources": [
+        "WP_READ",
+        "GSC_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Detectar dos páginas que compiten semánticamente y proponer solución sin borrar URLs",
+        "expected_artifact": "Matriz de canibalización y decisión canonical/enlace, pendiente de métricas",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D08:AGENT",
+        "lead_role_template_id": "SEO-D08:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF02:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF02:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D09",
+      "family_id": "SEO-PF03",
+      "name": "Rastreo, indexación y canonicals",
+      "mission": "Auditar robots, sitemaps, indexabilidad y canónicos",
+      "required_sources": [
+        "WP_READ",
+        "PUBLIC_HTTP",
+        "GSC_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Interpretar un caso 404/canonical/sitemap sin alterar URL válida",
+        "expected_artifact": "Informe de indexabilidad con causa, pruebas y rollback",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D09:AGENT",
+        "lead_role_template_id": "SEO-D09:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF03:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF03:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D10",
+      "family_id": "SEO-PF03",
+      "name": "JavaScript, renderizado y SEO técnico avanzado",
+      "mission": "Auditar renderizado JS y compatibilidad de indexación",
+      "required_sources": [
+        "PUBLIC_HTTP",
+        "BROWSER_QA"
+      ],
+      "training_unit": {
+        "exercise": "Separar HTML fuente de renderizado JS en un caso sintetizado",
+        "expected_artifact": "Diagnóstico de indexación JS con evidencia de navegador",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D10:AGENT",
+        "lead_role_template_id": "SEO-D10:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF03:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF03:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D11",
+      "family_id": "SEO-PF03",
+      "name": "Arquitectura web, taxonomías y enlazado interno",
+      "mission": "Auditar arquitectura web y enlazado interno",
+      "required_sources": [
+        "WP_READ",
+        "PUBLIC_HTTP"
+      ],
+      "training_unit": {
+        "exercise": "Diseñar cluster de ciudad y pueblos preservando enlaces existentes",
+        "expected_artifact": "Mapa de arquitectura y enlaces internos con anticanibalización",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D11:AGENT",
+        "lead_role_template_id": "SEO-D11:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF03:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF03:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D12",
+      "family_id": "SEO-PF03",
+      "name": "Datos estructurados, entidades y búsqueda enriquecida",
+      "mission": "Validar Schema Service, FAQ y entidades",
+      "required_sources": [
+        "PUBLIC_HTTP",
+        "WP_READ"
+      ],
+      "training_unit": {
+        "exercise": "Validar un Service y un FAQPage contra texto realmente visible",
+        "expected_artifact": "Checklist Schema y prueba de rechazo de claims inventados",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D12:AGENT",
+        "lead_role_template_id": "SEO-D12:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF03:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF03:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D13",
+      "family_id": "SEO-PF04",
+      "name": "SEO copywriting y contenido",
+      "mission": "Planificar y crear contenido útil de alta calidad",
+      "required_sources": [
+        "WP_READ",
+        "EDITORIAL_FACTS"
+      ],
+      "training_unit": {
+        "exercise": "Redactar landing local útil con intención, enlaces y control de originalidad",
+        "expected_artifact": "Borrador listo para QA, nunca publicación sin permisos",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D13:AGENT",
+        "lead_role_template_id": "SEO-D13:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF04:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF04:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D14",
+      "family_id": "SEO-PF04",
+      "name": "Copywriting persuasivo y de conversión",
+      "mission": "Optimizar copy persuasivo sin falsas promesas",
+      "required_sources": [
+        "WP_READ",
+        "LEGAL_FACTS"
+      ],
+      "training_unit": {
+        "exercise": "Proponer tres CTAs claros sin garantías hipotecarias no verificadas",
+        "expected_artifact": "Copy para conversión con riesgos y alternativa",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D14:AGENT",
+        "lead_role_template_id": "SEO-D14:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF04:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF04:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D15",
+      "family_id": "SEO-PF04",
+      "name": "UX writing y microcopy",
+      "mission": "Mejorar microcopy, accesibilidad y claridad",
+      "required_sources": [
+        "WP_READ",
+        "BROWSER_QA"
+      ],
+      "training_unit": {
+        "exercise": "Corregir microcopy en móvil sin perder significado o accesibilidad",
+        "expected_artifact": "Comparativa OLD/NEW con controles de legibilidad",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D15:AGENT",
+        "lead_role_template_id": "SEO-D15:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF04:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF04:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D16",
+      "family_id": "SEO-PF04",
+      "name": "Investigación, edición, fact-checking y autoridad editorial",
+      "mission": "Verificar hechos, fuentes y afirmaciones hipotecarias",
+      "required_sources": [
+        "OFFICIAL_LEGAL_SOURCES",
+        "EDITORIAL_FACTS"
+      ],
+      "training_unit": {
+        "exercise": "Detectar claims hipotecarios YMYL y exigir fuente/profesional",
+        "expected_artifact": "Informe de fact-checking y bloqueo cuando proceda",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D16:AGENT",
+        "lead_role_template_id": "SEO-D16:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF04:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF04:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D17",
+      "family_id": "SEO-PF05",
+      "name": "Google Business Profile y SEO local",
+      "mission": "Auditar Google Business Profile y visibilidad local",
+      "required_sources": [
+        "GBP_OWNER_FREE_READ",
+        "PUBLIC_LOCAL_SEARCH"
+      ],
+      "training_unit": {
+        "exercise": "Preparar ficha de SEO local con GBP verificado sin crear duplicados",
+        "expected_artifact": "Registro GBP/NAP y acciones solo de lectura",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D17:AGENT",
+        "lead_role_template_id": "SEO-D17:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF05:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF05:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D18",
+      "family_id": "SEO-PF05",
+      "name": "Reputación, reseñas y NAP",
+      "mission": "Auditar reseñas, datos NAP y reputación",
+      "required_sources": [
+        "PUBLIC_LOCAL_SEARCH",
+        "GBP_OWNER_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Revisar procedimiento ético de reseñas y consistencia NAP",
+        "expected_artifact": "Plan de reputación sin incentivos por valoración",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D18:AGENT",
+        "lead_role_template_id": "SEO-D18:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF05:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF05:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D19",
+      "family_id": "SEO-PF05",
+      "name": "Digital PR, relaciones y enlaces legítimos",
+      "mission": "Prospectar enlaces editoriales legítimos y digital PR",
+      "required_sources": [
+        "PUBLIC_LINK_RESEARCH"
+      ],
+      "training_unit": {
+        "exercise": "Evaluar oportunidad de prensa/enlace relevante y legítimo",
+        "expected_artifact": "Ficha PR con pertinencia y ausencia de spam",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D19:AGENT",
+        "lead_role_template_id": "SEO-D19:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF05:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF05:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D20",
+      "family_id": "SEO-PF05",
+      "name": "SEO internacional, multilingüe y geográfico",
+      "mission": "Verificar ciudades, provincias, contenido y fichas geográficas",
+      "required_sources": [
+        "WP_READ",
+        "PUBLIC_LOCAL_SEARCH"
+      ],
+      "training_unit": {
+        "exercise": "Preparar ciudad y provincia con contenidos, descargables, CTAs y enlaces",
+        "expected_artifact": "Checklist CITY COMPLETE con fallo cerrado si falta captación",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D20:AGENT",
+        "lead_role_template_id": "SEO-D20:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF05:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF05:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D21",
+      "family_id": "SEO-PF06",
+      "name": "UX, diseño e información",
+      "mission": "Auditar experiencia de usuario y arquitectura de información",
+      "required_sources": [
+        "BROWSER_QA",
+        "WP_READ"
+      ],
+      "training_unit": {
+        "exercise": "Comparar landings de pueblos moradas/rosas con patrón de ciudades SIN cambiarlas",
+        "expected_artifact": "Especificación de diseño OLD/NEW con contraste y mobile QA",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D21:AGENT",
+        "lead_role_template_id": "SEO-D21:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF06:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF06:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D22",
+      "family_id": "SEO-PF06",
+      "name": "Desarrollo web, CMS, WordPress y Elementor",
+      "mission": "Diagnosticar WordPress, Elementor y módulos existentes sin modificar",
+      "required_sources": [
+        "WP_READ",
+        "EXISTING_PLUGIN_STATUS"
+      ],
+      "training_unit": {
+        "exercise": "Diseñar parche aditivo Astra/Elementor evitando tocar plantilla PROD",
+        "expected_artifact": "Propuesta técnica con snapshot, pruebas y rollback",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D22:AGENT",
+        "lead_role_template_id": "SEO-D22:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF06:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF06:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D23",
+      "family_id": "SEO-PF06",
+      "name": "Core Web Vitals, accesibilidad y seguridad web",
+      "mission": "Medir CWV, accesibilidad y seguridad",
+      "required_sources": [
+        "FREE_PERFORMANCE_READ",
+        "PUBLIC_HTTP"
+      ],
+      "training_unit": {
+        "exercise": "Evaluar CWV/accesibilidad con métricas verificadas o declarar sin datos",
+        "expected_artifact": "Ficha performance con fuente y límites de medición",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D23:AGENT",
+        "lead_role_template_id": "SEO-D23:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF06:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF06:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D24",
+      "family_id": "SEO-PF06",
+      "name": "CRO, experimentación, formularios, embudos y CRM",
+      "mission": "Auditar CTAs, formularios, embudos y captación",
+      "required_sources": [
+        "BROWSER_QA",
+        "CONSENTED_AGGREGATE_FUNNEL"
+      ],
+      "training_unit": {
+        "exercise": "Revisar funnel específico B2C/B2B, formulario, CTA, newsletter y consentimiento",
+        "expected_artifact": "Mapa de embudo, eventos y riesgos RGPD",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D24:AGENT",
+        "lead_role_template_id": "SEO-D24:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF06:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF06:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D25",
+      "family_id": "SEO-PF07",
+      "name": "AEO/GEO y visibilidad en IA",
+      "mission": "Auditar citabilidad, estructura AEO y presencia IA",
+      "required_sources": [
+        "PUBLIC_SEARCH",
+        "WP_READ"
+      ],
+      "training_unit": {
+        "exercise": "Evaluar citabilidad y claridad semántica sin prometer posición en IA",
+        "expected_artifact": "Plan de AEO/GEO con criterios comprobables",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D25:AGENT",
+        "lead_role_template_id": "SEO-D25:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF07:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF07:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D26",
+      "family_id": "SEO-PF07",
+      "name": "SEO de imágenes, vídeo y YouTube",
+      "mission": "Auditar imágenes, alt, vídeos y YouTube",
+      "required_sources": [
+        "WP_READ",
+        "PUBLIC_MEDIA_READ"
+      ],
+      "training_unit": {
+        "exercise": "Crear briefing multimedia con ALT, vídeo, peso y licencia",
+        "expected_artifact": "Checklist de imágenes/vídeos y procedencia",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D26:AGENT",
+        "lead_role_template_id": "SEO-D26:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF07:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF07:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D27",
+      "family_id": "SEO-PF07",
+      "name": "Ecommerce SEO: categorías, productos, facetas y Merchant",
+      "mission": "Auditar productos, categorías y facetas si existe ecommerce",
+      "required_sources": [
+        "PUBLIC_HTTP",
+        "ACTIVATION_GATE"
+      ],
+      "training_unit": {
+        "exercise": "Determinar si existe ecommerce real; no activar Merchant si no existe",
+        "expected_artifact": "Decisión de aplicabilidad con evidencia; no generar trabajo vacío",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D27:AGENT",
+        "lead_role_template_id": "SEO-D27:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF07:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF07:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D28",
+      "family_id": "SEO-PF07",
+      "name": "Búsqueda social, distribución orgánica y descubrimiento",
+      "mission": "Auditar búsqueda social y distribución orgánica",
+      "required_sources": [
+        "PUBLIC_SOCIAL_READ"
+      ],
+      "training_unit": {
+        "exercise": "Diseñar distribución blog-social segmentada por canal y audiencia",
+        "expected_artifact": "Plan social orgánico sin publicar ni usar datos privados",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D28:AGENT",
+        "lead_role_template_id": "SEO-D28:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF07:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF07:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D29",
+      "family_id": "SEO-PF08",
+      "name": "Search Console, GA4, medición y fuentes",
+      "mission": "Medir indexación, clics, posición y GA4 con cuentas gratuitas oficiales",
+      "required_sources": [
+        "GSC_FREE_READ",
+        "GA4_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Construir reporte GSC/GA4 únicamente con lecturas gratuitas verificadas",
+        "expected_artifact": "Panel de KPIs con valores nulos si no hay fuente",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D29:AGENT",
+        "lead_role_template_id": "SEO-D29:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF08:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF08:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D30",
+      "family_id": "SEO-PF08",
+      "name": "Atribución comercial, analítica avanzada y pruebas",
+      "mission": "Atribuir captación y experimentos con datos agregados",
+      "required_sources": [
+        "CONSENTED_AGGREGATE_FUNNEL",
+        "GA4_FREE_READ"
+      ],
+      "training_unit": {
+        "exercise": "Diseñar atribución desde CTA a contacto sin datos personales",
+        "expected_artifact": "Funnel agregado, muestra y límites de atribución",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D30:AGENT",
+        "lead_role_template_id": "SEO-D30:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF08:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF08:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D31",
+      "family_id": "SEO-PF08",
+      "name": "QA, auditoría SEO, publicación y releases",
+      "mission": "Ejecutar QA independiente, tribunal, versiones y rollback",
+      "required_sources": [
+        "WP_READ",
+        "QA_LEDGER",
+        "BACKUP"
+      ],
+      "training_unit": {
+        "exercise": "Rechazar una publicación sin IAM, QA, propietario, backup y rollback",
+        "expected_artifact": "Tribunal con decisión, evidencias y posibilidad de restauración",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D31:AGENT",
+        "lead_role_template_id": "SEO-D31:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF08:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF08:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    },
+    {
+      "department_id": "SEO-D32",
+      "family_id": "SEO-PF08",
+      "name": "Aprendizaje, benchmarks, training y optimización",
+      "mission": "Aprender de resultados, corregir y certificar competencias",
+      "required_sources": [
+        "MERIT_LEDGER",
+        "TRAINING_EVIDENCE"
+      ],
+      "training_unit": {
+        "exercise": "Comparar OLD/NEW de un ejemplo sintético, proponer formación sin autopremio",
+        "expected_artifact": "Ficha LRN-001 con feedback, prueba y no promoción automática",
+        "study_sources": [
+          "cerebro/seo-enterprise/v2/SEO_ENTERPRISE_MATRIZ_MAESTRA_V2.md",
+          "cerebro/seo-enterprise/v2/seo-all-departments-full-lifecycle-v1.json",
+          "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+          "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json"
+        ],
+        "evaluation": {
+          "rubric": [
+            "TECHNICAL_CORRECTNESS",
+            "SOURCE_PROVENANCE",
+            "SAFETY_POLICY",
+            "PRACTICAL_IMPACT",
+            "REPRODUCIBILITY",
+            "COST_DISCIPLINE"
+          ],
+          "minimum_missions": 3,
+          "score_threshold": 90,
+          "quality_floor": 90,
+          "safety_floor": 95,
+          "independent_qa_required": true,
+          "tribunal_required": true,
+          "real_exercises_passed": 0
+        }
+      },
+      "operator": {
+        "role_template_id": "SEO-D32:AGENT",
+        "lead_role_template_id": "SEO-D32:DEPARTMENT_HEAD",
+        "family_director_role_template_id": "SEO-PF08:DIRECTOR",
+        "family_supervisor_role_template_id": "SEO-PF08:SUPERVISOR",
+        "independent_qa_department": "SEO-D31",
+        "training_supervisor_department": "SEO-D32",
+        "actual_iam_principal_id": null,
+        "real_agent_active": false
+      },
+      "deployment": {
+        "training_curriculum_defined": true,
+        "training_completed": false,
+        "real_exam_passed": false,
+        "skill_activated_prod": false,
+        "real_clients_processed": false,
+        "real_writes_authorized": false,
+        "status": "DEFINED_READY_FOR_LAB_TRAINING_NOT_PROD_AGENT"
+      }
+    }
+  ],
+  "asset_inventory_preflight": {
+    "source_registry": "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+    "archive_status": "VERIFIED_REFERENCE_STAGING_V4",
+    "required_before_content_strategy": "JOIN_HISTORICAL_URL_COPY_IMAGES_LINKS_CTA_THEN_CONFIRM_TARGETED_CURRENT_PROD",
+    "archive_loaded_in_job001": false,
+    "never_repeat_global_audit": true,
+    "historical_archive_physically_verified_in_ci": true,
+    "verified_existing_copy_counts": 204,
+    "verified_image_use_rows": 1534,
+    "targeted_existing_copy_lookup_mandatory_before_new_asset": true
+  }
+}

@@ -1,0 +1,112 @@
+{
+  "schema_version": "1.0.0",
+  "handoff_date": "2026-11-06",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "handoff-2026-11-06",
+  "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "pr": 22,
+  "branch": "cerebro/seo-enterprise-family-staging-contract-v1-20261105",
+  "pr_status_before_handoff": "OPEN_DRAFT_UNMERGED",
+  "pr_head_before_handoff": "6dd8c9d05acb01538bc5fa60999aa6726caf2f67",
+  "prod_supabase_ref": "cluhljgonannaafpmblx",
+  "preprod_supabase_ref": "hnqlnvakzaywtafeiybt",
+  "app_preprod_exists": false,
+  "seo_baseline": {
+    "pages": 166,
+    "posts": 34,
+    "media": 629,
+    "strategy_urls": 200,
+    "funnels": 8,
+    "b2b_b2c_pairs": 24,
+    "focus_keyword_unset": 7,
+    "seo_departments_defined": 32,
+    "seo_departments_autonomous_prod": 0,
+    "baseline_tests_passed_at_prior_sha": 154
+  },
+  "wordpress": {
+    "checklist_draft_post_id": 52656,
+    "mortgage_autonomos_published_post_id": 960,
+    "montilla_b2c_post_id": 49114,
+    "montilla_b2b_post_id": 49128,
+    "production_changed_in_recent_handoff": false
+  },
+  "creative": {
+    "legacy_job_id": "c4012f43-c12f-400b-9610-2e5f2e286000",
+    "legacy_job_status": "SUCCEEDED",
+    "schedule_state": "disabled_manually",
+    "premium_preprod_render_run_id": 42134348550,
+    "premium_sha256": "2f042f9a5833560e6f693a76768d0a73eb22ef8267ddf07f0c24578bd5aa72a8",
+    "visual_tribunal_approved": false
+  },
+  "pdfs": {
+    "v1": {
+      "name": "FENIX_CHECKLIST_VISITA_PISO_CORDOBA_BORRADOR_V1.pdf",
+      "sha256": "59e6fb100d82eb1bf90193d9bfabb0bdc581382f60c5996c4c29d30e04a372f6",
+      "size_bytes": 99419,
+      "pages": 2,
+      "acroform_fields": 33
+    },
+    "v2": {
+      "name": "FENIX_CHECKLIST_VISITA_CORDOBA_MARCA_V2_PREPROD.pdf",
+      "sha256": "82a96dc9b1c64bf8972e44358cd5bdc121182a09aa3832b71162efc7bea7e660",
+      "size_bytes": 113703,
+      "pages": 2,
+      "acroform_fields": 33,
+      "editorial_approved": false,
+      "published": false
+    }
+  },
+  "delivery": {
+    "brevo_production_internal_alerts_existing": true,
+    "checklist_brevo_live_sends": 0,
+    "e2e_verified": false,
+    "code_pins_pdf_version": "v1",
+    "email_mock_verified": true,
+    "email_mock_sent": false,
+    "dry_run_tests_passed": 10,
+    "ci_run_id": 42174299373,
+    "mail_ledger_runner_bound": false
+  },
+  "storage": {
+    "bucket": "seo-preprod-assets",
+    "bucket_public": false,
+    "checklist_objects": 0,
+    "ledger_table": "public.cerebro_seo_checklist_delivery_v0",
+    "ledger_rows": 0,
+    "rls_enabled": true,
+    "anon_access": false,
+    "authenticated_access": false,
+    "service_role_select_insert_update": true,
+    "service_role_delete": false,
+    "pdf_uploaded": false
+  },
+  "gates": {
+    "premium_brand_visual_qa": false,
+    "pdf_v2_editorial_qa": false,
+    "pdf_v2_contract_pinned": false,
+    "pdf_v2_preprod_private_upload": false,
+    "server_origin_cryptographically_verified": false,
+    "mail_ledger_bound": false,
+    "brevo_test_mailbox_verified": false,
+    "physical_test_email_received": false,
+    "b2b_b2c_real_crm_e2e": false,
+    "newsletter_double_optin_e2e": false,
+    "wordpress_publication": false
+  },
+  "next_priority": "Final PDF V2 QA → private upload with hash in Supabase PREPROD → versioned V2 delivery contract → server verified event and ledger binding → one Brevo test inbox E2E → tribunal → gradual activation.",
+  "evidence_repo_paths": [
+    "cerebro/docs/CEREBRO_SEO_ESTADO_VIVO_CONTINUIDAD_2026-11-06.md",
+    "cerebro/seo-enterprise/v2/evidence/SEO_CHECKLIST_BREVO_DELIVERY_PREPROD_GATE_2026-11-06.md",
+    "cerebro/seo-enterprise/v2/evidence/SEO_PREMIUM_IMAGE_AND_FUNNEL_GATES_2026-11-06.md",
+    "cerebro/seo-enterprise/v2/registry/seo-creative-and-funnel-extension-v1.registry.json"
+  ],
+  "security": {
+    "no_live_credentials_in_artifacts": true,
+    "no_production_changes_now": true,
+    "no_client_mail_sent": true,
+    "no_new_subscription": true,
+    "no_merge": true
+  }
+}

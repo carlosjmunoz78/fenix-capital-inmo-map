@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "SEO001_OWNER_COPY_IMAGE_STYLE_V2_20261106",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2.2.0",
+  "state": "OWNER_FAQ_COUNTS_SPECIFIED_REQUIRES_QA",
+  "source": "OWNER_DIRECT_FEEDBACK_2026-11-06",
+  "precedence": "OWNER_EDITORIAL_DIRECTION_OVERRIDES_EARLIER_DRAFT_STYLE_NOT_LEGAL_OR_SECURITY_GATES",
+  "applies_to_all_future_fenix_seo_copy_roles": true,
+  "editorial": {
+    "buyer_persona_first": true,
+    "headline_h1": "SHORT_SPECIFIC_ATTRACTIVE_HUMAN",
+    "h1_max_visible_characters": 65,
+    "h2": "UNNUMBERED_SHORT_INTERESTING_KEYWORD_NATURAL",
+    "h2_max_visible_characters": 64,
+    "h2_leading_number_forbidden": true,
+    "colons_in_visible_text_forbidden": true,
+    "forbidden_visible_words": [
+      "además",
+      "en conclusión"
+    ],
+    "connector_words_case_sensitive": false,
+    "length_policy": "BASIC_LEGACY_STYLE_ONLY_NEW_CANDIDATES_USE_INDEPENDENT_CONTENT_DEPTH_POLICY",
+    "pilot_body_words_range": [
+      240,
+      3000
+    ],
+    "tone": [
+      "CERCANO",
+      "NATURAL",
+      "ESPECIFICO_A_BUYER_PERSONA",
+      "CONVERSACIONAL",
+      "COMERCIAL_SIN_EXAGERAR"
+    ],
+    "anti_templating": [
+      "NO_GENERIC_INTRO",
+      "NO_REPEATED_STRUCTURE_BETWEEN_PERSONAS",
+      "NO_FILLER_PARAGRAPHS",
+      "NO_REPETITIVE_AI_SCAFFOLDING"
+    ],
+    "claims": "VERIFIABLE_FINANCIAL_CLAIMS_NO_GUARANTEES",
+    "reviewer_requirements": [
+      "SEO-D13_COPY",
+      "SEO-D15_CORRECTION_LINT",
+      "SEO-D16_FINANCIAL_FACT_CHECK",
+      "SEO-D31_INDEPENDENT_QA",
+      "SEO-D32_LEARNING",
+      "TRIBUNAL_BEFORE_RELEASE"
+    ],
+    "automation_lint_is_not_human_quality_certification": true,
+    "faq_rules": {
+      "min_article": 6,
+      "min_landing": 8,
+      "mandatory": true,
+      "by_page_type": true,
+      "only_real_buyer_questions": true,
+      "unique_questions": true,
+      "answers_short_and_useful": true,
+      "section_heading_h2_not_numbered": true,
+      "question_heading_h3_required": true,
+      "questions_never_numbered": true,
+      "visible_colons_forbidden": true,
+      "no_automated_faq_rich_result_guarantee": true,
+      "faq_rich_results_not_assumed": true
+    },
+    "content_depth_policy_ref": "cerebro/seo-enterprise/v2/seo-owner-content-depth-policy-v1-2026-11-06.json",
+    "new_content_depth_gate_mandatory": true,
+    "legacy_drafts_do_not_satisfy_new_depth_requirements": true
+  },
+  "media": {
+    "source_engine": "SEO-001",
+    "producer_engine": "UMS-001",
+    "producer_adapter": "CREATIVE-PROGRAMMATIC-RENDER-V1_OR_AUTHORIZED_IMAGE_API_WITHIN_EXISTING_PRODUCER",
+    "own_studio_no_duplicate": true,
+    "dispatch": "SEO_BRIEF_TO_EXISTING_PRODUCER_THEN_REVIEW_THEN_ATTACH_TO_ARTICLE",
+    "output_visual_requirements": [
+      "IMAGE_ONLY",
+      "NO_TEXT_ANYWHERE",
+      "NO_LOGO",
+      "NO_WATERMARK",
+      "NO_GRAPHIC_OVERLAY",
+      "VISUALLY_ATTRACTIVE",
+      "CLEAR_COMPOSITION",
+      "BUYER_PERSONA_RELEVANT",
+      "ORIGINAL_AND_DIFFERENT"
+    ],
+    "no_text_baked_in_pixels": true,
+    "no_brand_logo_on_pixels": true,
+    "no_watermarks_on_pixels": true,
+    "per_article_unique_visual": true,
+    "repeat_or_near_duplicate_rejected": true,
+    "image_qa": [
+      "CHECK_ORIGINALITY",
+      "VISUAL_NO_TEXT_NO_LOGO_MANUAL_OR_VERIFIED",
+      "CHECK_PIXELS_COMPOSITION",
+      "SHA256_AND_PERCEPTUAL_SIMILARITY",
+      "RIGHTS_AND_ORIGINAL_PROMPT",
+      "NO_PRIVATE_EXIF",
+      "ALT_CONTEXT_AND_ACCESSIBILITY"
+    ],
+    "wordpress_attachment_metadata_outside_image": [
+      "title",
+      "alt",
+      "caption",
+      "description",
+      "filename",
+      "credit",
+      "rights",
+      "license_reference",
+      "source_brief_id",
+      "sha256",
+      "dimensions",
+      "format"
+    ],
+    "image_metadata_not_drawn_on_image": true,
+    "wordPress_upload_authorized": false,
+    "paid_image_api_new_spend_authorized": false,
+    "new_subscription_authorized": false,
+    "publish_authorized": false
+  },
+  "producer_status": "INTEGRATION_CONTRACT_ONLY_NO_API_IMAGE_GENERATED",
+  "next_step": "REWRITE_PREVIOUS_DRAFTS_AND_RETEST_WITH_REVISED_OWNER_RULES",
+  "historical_qa": "SUPERSEDED_FOR_COPY_QUALITY_FOR_PREVIOUS_B2C_B2B_DRAFT_REVISIONS",
+  "owner_content_approval_for_old_sha": "INVALID_AFTER_DRAFT_CONTENT_CHANGE",
+  "preserve_old_files_and_qa_as_historical_evidence": true
+}

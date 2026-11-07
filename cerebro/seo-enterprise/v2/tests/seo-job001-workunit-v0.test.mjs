@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import {executeSeoJob001Staging} from '../runtime/seo-job001-workunit-v0.mjs';
+import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
+const html='<html><head><title>Fénix Capital</title><meta name="robots" content="noindex"></head><body><h1>Fénix Capital</h1><p>Mi furura cuota de hipoteca en Córdoba</p></body></html>';
+const context={company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',version:'0.1.0'};
+test('physical JOB-001 worker persists, reopens and deduplicates across restarts with no raw page data',t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'seo-job001-lab-'));
+ t.after(()=>fs.rmSync(dir,{force:true,recursive:true}));
+ const journal_path=path.join(dir,'ledger.v8');
+ const first=executeSeoJob001Staging({html,journal_path,now_ms:1771000000000});
+ assert.equal(first.run_state,'SUCCEEDED');assert.equal(first.duplicate,false);
+ assert.equal(first.ledger_done,1);assert.equal(first.findings_count,1);
+ assert.equal(first.recovery_reopened_verified,true);
+ const second=executeSeoJob001Staging({html,journal_path,now_ms:1771000000001});
+ assert.equal(second.duplicate,true);assert.equal(second.ledger_total,1);assert.equal(second.job_id,first.job_id);
+ assert.equal(second.job001_journal_sha256,first.job001_journal_sha256);
+ const reopened=new DurableJobRuntimeV1({file_path:journal_path});
+ const job=reopened.get(first.job_id);assert.equal(job.status,'SUCCEEDED');
+ assert.equal(JSON.stringify(job).includes('furura'),false);
+ assert.equal(job.result.role_identity_verified,false);
+});
+test('read-only JOB-001 refuses indexable STAGING or invalid environment before enqueue',t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'seo-job001-deny-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const journal_path=path.join(dir,'ledger.v8');
+ assert.throws(()=>executeSeoJob001Staging({html:html.replace('noindex','index'),journal_path}),/STAGING_TECHNICAL_GATE_FAILED/);
+ assert.equal(fs.existsSync(journal_path),false);
+ assert.throws(()=>executeSeoJob001Staging({html,journal_path,now_ms:-1}),/CLOCK_INVALID/);
+});
+test('journal backup restores same completed state into isolated LAB path',t=>{
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'seo-job001-restore-'));t.after(()=>fs.rmSync(dir,{recursive:true,force:true}));
+ const journal_path=path.join(dir,'ledger.v8'),backup=path.join(dir,'snapshot.v8');
+ const a=executeSeoJob001Staging({html,journal_path,now_ms:1771000000000});
+ fs.copyFileSync(journal_path,backup);
+ const restored=new DurableJobRuntimeV1({file_path:backup});
+ assert.equal(restored.get(a.job_id).result.source_html_sha256,a.source_html_sha256);
+ assert.equal(restored.listForContext(context).length,1);
+});

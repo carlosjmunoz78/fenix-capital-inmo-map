@@ -1,0 +1,186 @@
+{
+  "schema_version": "0.1.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PROD_READONLY_EVIDENCE",
+  "version": "0.1.0",
+  "date": "2026-11-05",
+  "site_origin": "https://fenixcapital.es",
+  "sources": [
+    "Cowboy_MCP_web/fenix-core-guard/live-verify-page",
+    "Cowboy_MCP_web/wp_get_post",
+    "Cowboy_MCP_web/yoast-seo/get-post-seo-data",
+    "Cowboy_MCP_web/wp_http_request_HEAD",
+    "Cowboy_MCP_web/fenix-core-guard/city-growth-rollout-status",
+    "Cowboy_MCP_web/wp_read_file"
+  ],
+  "status": "P0_GENUINE_LIVE_FAILURE_NOT_FIXED",
+  "landing": {
+    "post_id": 52200,
+    "status": "publish",
+    "slug": "asesor-hipotecario-jaen",
+    "http_status": 200,
+    "canonical": "https://fenixcapital.es/asesor-hipotecario-jaen/",
+    "coreguard_live_verify_ok": false,
+    "coreguard_missing_expected": [
+      "data-fenix-guard-schema=\"seo001\"",
+      "\"@type\":\"FAQPage\""
+    ],
+    "has_visible_faq_count": 5,
+    "has_inline_service_schema": true,
+    "coreguard_snapshot_id": 175,
+    "rollback_tested": false
+  },
+  "support": [
+    {
+      "post_id": 52247,
+      "slug": "documentacion-estudiar-hipoteca-jaen",
+      "status": "draft",
+      "public_http_status": 404,
+      "yoast_meta_present": true,
+      "coreguard_snapshot_id": 176,
+      "editorial_updated_in_draft": true,
+      "word_count_after": 555,
+      "last_verified_modified": "2026-11-05 18:59:40"
+    },
+    {
+      "post_id": 52248,
+      "slug": "cuando-preparar-hipoteca-compra-jaen",
+      "status": "draft",
+      "public_http_status": 404,
+      "yoast_meta_present": true,
+      "coreguard_snapshot_id": 177,
+      "editorial_updated_in_draft": true,
+      "word_count_after": 575,
+      "last_verified_modified": "2026-11-05 19:00:35"
+    }
+  ],
+  "downloadable": {
+    "public_url": "https://fenixcapital.es/wp-content/uploads/2026/09/FENIX_CHECKLIST_DOCUMENTAL_HIPOTECA_JAEN_V1.pdf",
+    "http_status": 200
+  },
+  "pilot_certification": {
+    "certified": false,
+    "mass_rollout_allowed": false,
+    "last_invalidated_at_gmt": "2026-10-06T17:39:50+00:00",
+    "last_stored_invalidation_code": "CERT_SHAPE_MISSING_CERTIFIED",
+    "source_revalidation_rule": "Current source requires certified true and matching live 200/markers; PHP autonomous autocert scheduled but current cert not valid",
+    "validation_city_separate": "Linares",
+    "validation_certified": false
+  },
+  "fix_planner": {
+    "source": "cerebro/seo-enterprise/v2/runtime/seo-jaen-certificate-repair-planner-v0.mjs",
+    "state": "PURE_LAB_CANDIDATE_NOT_EXECUTED",
+    "insertion_strategy": "CURRENT_VISIBLE_FAQ_TO_JSONLD_PLUS_REQUIRED_CERT_MARKER",
+    "website_write_executed": false,
+    "require_before_apply": [
+      "INVENTORY",
+      "SOURCE_SHA256_MATCH",
+      "FULL_BACKUP",
+      "INDEPENDENT_QA",
+      "VALIDATE_WP_RENDERS_SCRIPT",
+      "TEST_ROLLBACK_IN_ISOLATION",
+      "OWNER_PROTECTED_RELEASE",
+      "OLD_VS_NEW"
+    ]
+  },
+  "manual_owner_review": {
+    "new_public_urls_or_republished_drafts_need_explicit_approval": true,
+    "approved_support_posts": 0,
+    "approved_live_publications_for_autonomy": 0
+  },
+  "certainty": {
+    "source_page_audited": true,
+    "support_links_verified": true,
+    "google_search_console_rankings_unknown": true,
+    "ga4_real_conversions_unknown": true
+  },
+  "additional_subscription_eur": 0,
+  "changed_published_content": false,
+  "production_coreguard_gates_modified": false,
+  "editorial_support_pre_approval": {
+    "evidence_date": "2026-11-05",
+    "action_status": "TWO_REAL_WORDPRESS_DRAFTS_UPDATED_WITH_PRESERVED_ORIGINAL_TEXT",
+    "wordpress_production_published_changed": false,
+    "cms_approval_state": "DRAFTS_NOT_APPROVED",
+    "owner_explicit_approval_recorded": false,
+    "visual_browser_preview_verified": false,
+    "featured_images_verified": false,
+    "independent_legal_factual_review_complete": false,
+    "wordpress_live_render_for_drafts_verified": false,
+    "content_rechecked_from_wordpress_after_write": true,
+    "live_internal_link_http_status": 200,
+    "public_clean_slug_urls_status": 404,
+    "both_excluded_from_post_sitemap": true,
+    "available_owner_review_urls": [
+      "https://fenixcapital.es/wp-admin/post.php?post=52247&action=edit",
+      "https://fenixcapital.es/wp-admin/post.php?post=52248&action=edit"
+    ],
+    "drafts": [
+      {
+        "post_id": 52247,
+        "slug": "documentacion-estudiar-hipoteca-jaen",
+        "status": "draft",
+        "modified_at": "2026-11-05 18:59:40",
+        "content_chars_before": 1723,
+        "content_chars_after": 4480,
+        "approx_word_count": 555,
+        "headings_h2": 7,
+        "links_total": 4,
+        "unique_internal_links": 3,
+        "internal_links_verified_http200": true,
+        "yoast_title_description_keyphrase_canonical_verified": true,
+        "original_html_prefix_preserved": true,
+        "editorial_insertion_marker": "data-seo001-jaen-editorial-pass=\"v1\"",
+        "previous_snapshot_id": 176,
+        "undo_journal_change_id": 1992,
+        "undo_dry_run": true,
+        "undo_physical_execution": false,
+        "readback_content_exact_match": true,
+        "content_sha256_for_authenticated_owner_approval": null
+      },
+      {
+        "post_id": 52248,
+        "slug": "cuando-preparar-hipoteca-compra-jaen",
+        "status": "draft",
+        "modified_at": "2026-11-05 19:00:35",
+        "content_chars_before": 1516,
+        "content_chars_after": 4589,
+        "approx_word_count": 575,
+        "headings_h2": 8,
+        "links_total": 5,
+        "unique_internal_links": 4,
+        "internal_links_verified_http200": true,
+        "yoast_title_description_keyphrase_canonical_verified": true,
+        "original_html_prefix_preserved": true,
+        "editorial_insertion_marker": "data-seo001-jaen-editorial-pass=\"v1\"",
+        "previous_snapshot_id": 177,
+        "undo_journal_change_id": 1993,
+        "undo_dry_run": true,
+        "undo_physical_execution": false,
+        "readback_content_exact_match": true,
+        "content_sha256_for_authenticated_owner_approval": null
+      }
+    ],
+    "content_qa": {
+      "result": "PRELIMINARY_TECHNICAL_AND_EDITORIAL_PASS_NOT_READY_TO_PUBLISH",
+      "financial_guarantees_inserted": false,
+      "document_privacy_handling_guidance_added": true,
+      "costs_and_arras_checks_added": true,
+      "internal_links_to_existing_published_urls_added": true,
+      "human_professional_fact_check_pending": true,
+      "visual_qa_pending": true,
+      "approval_gated": "OWNER_EXACT_VERSION_AND_INDEPENDENT_QA_REQUIRED",
+      "launch_release_authorized": false
+    },
+    "publication_gate": {
+      "owner_version_digest_required": true,
+      "independent_qa_required": true,
+      "visual_qa_required": true,
+      "backup_and_rollback_required": true,
+      "publish_or_mass_without_approval": false,
+      "real_publications_counted_for_autonomy": 0,
+      "city_certification_restored": false
+    }
+  }
+}

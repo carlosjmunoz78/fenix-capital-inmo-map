@@ -1,0 +1,107 @@
+name: CEREBRO SEO · FACT-001 creative worker schedule observer V0
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-seo-creative-worker-observer-v0.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  inspect-existing-scheduled-worker:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Inspect the existing FACT-001 runner via read-only GitHub API
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          const repo=process.env.GITHUB_REPOSITORY;
+          if(repo!=='carlosjmunoz78/fenix-capital-inmo-map') throw Error('REPOSITORY_DENIED');
+          const token=process.env.GITHUB_TOKEN;
+          if(!token) throw Error('ACTIONS_READ_TOKEN_UNAVAILABLE');
+          const wf='cerebro-creative-job-runner-v1.yml';
+          const base='https://api.github.com/repos/'+repo+'/actions/workflows/'+encodeURIComponent(wf);
+          const headers={'authorization':'Bearer '+token,'accept':'application/vnd.github+json','x-github-api-version':'2022-11-28','user-agent':'cerebro-seo-readonly-creative-observer'};
+          async function request(url,authenticated=true){
+            const response=await fetch(url,{method:'GET',headers:authenticated?headers:{'accept':'application/json','user-agent':'cerebro-seo-readonly-creative-observer'},signal:AbortSignal.timeout(20000)});
+            if(!response.ok)return {ok:false,http_status:response.status,reason:'REMOTE_READ_FAILED'};
+            const body=await response.json().catch(()=>null);
+            return body?{ok:true,data:body}:{ok:false,http_status:response.status,reason:'INVALID_JSON'};
+          }
+          const [meta,schedules,recent,health]=await Promise.all([
+            request(base),
+            request(base+'/runs?event=schedule&per_page=5'),
+            request(base+'/runs?per_page=5'),
+            request('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-creative-dispatch-v1/health',false)
+          ]);
+          const cleanRun=r=>({id:r?.id??null,event:r?.event??null,status:r?.status??null,conclusion:r?.conclusion??null,created_at:r?.created_at??null,updated_at:r?.updated_at??null,html_url:r?.html_url??null});
+          const latestSchedule=schedules.ok?schedules.data.workflow_runs?.[0]:null;
+          const latestRun=recent.ok?recent.data.workflow_runs?.[0]:null;
+          const jobs=latestSchedule?await request('https://api.github.com/repos/'+repo+'/actions/runs/'+latestSchedule.id+'/jobs?per_page=30'):null;
+          const cleanJobs=jobs?.ok?(jobs.data.jobs||[]).map(j=>({
+             name:j.name,status:j.status,conclusion:j.conclusion,
+             steps:(j.steps||[]).filter(s=>s.conclusion==='failure'||s.conclusion==='cancelled').map(s=>({name:s.name,conclusion:s.conclusion}))
+          })):[];
+          const workflowState=meta.ok?meta.data.state:null;
+          let verdict='UNDETERMINED';
+          if(!meta.ok||!schedules.ok||!recent.ok)verdict='ACTION_HISTORY_READ_BLOCKED';
+          else if(workflowState!=='active')verdict='WORKFLOW_NOT_ACTIVE';
+          else if(!latestSchedule)verdict='NO_SCHEDULE_RUNS_VISIBLE';
+          else if(latestSchedule.conclusion==='failure'||latestSchedule.conclusion==='cancelled')verdict='LAST_SCHEDULE_RUN_NOT_SUCCESS';
+          else if(latestSchedule.status!=='completed')verdict='SCHEDULE_RUN_IN_PROGRESS';
+          else verdict='SCHEDULED_RUN_COMPLETED__QUEUE_LEASE_NOT_ESTABLISHED';
+          const report={
+            schema_version:'0.1.0',company_id:'fenix',engine_id:'SEO-001',
+            environment:'READ_ONLY_DIAGNOSTIC',source:'GITHUB_ACTIONS_API_PLUS_PUBLIC_DISPATCH_HEALTH',
+            parent_pr:22,run_id:process.env.GITHUB_RUN_ID,checked_at:new Date().toISOString(),
+            target_workflow:wf,workflow_state:workflowState,
+            workflow_meta_http_status:meta.ok?200:meta.http_status,
+            schedules_http_status:schedules.ok?200:schedules.http_status,
+            recent_runs_http_status:recent.ok?200:recent.http_status,
+            latest_scheduled_run:cleanRun(latestSchedule),
+            latest_any_run:cleanRun(latestRun),
+            scheduled_run_count_returned:schedules.ok?(schedules.data.workflow_runs||[]).length:null,
+            last_scheduled_jobs_failed_steps:cleanJobs,
+            dispatcher_health:{
+              http_status:health.ok?200:health.http_status,
+              service:health.ok?health.data.service:null,
+              environment:health.ok?health.data.environment:null,
+              ok:health.ok?health.data.ok===true:false
+            },
+            verdict,
+            queue_job_id:'c4012f43-c12f-400b-9610-2e5f2e286000',
+            queue_status_not_queried:true,
+            job_leased:false,
+            paid_provider_called:false,
+            secrets_logged:false,
+            site_changes:0,
+            notes:['GitHub run status does not prove that the queued SEO image was leased.',
+              'If workflow is disabled, check Actions settings and owner controls without bypassing governance.',
+              'If scheduled runner succeeded yet queue remains pending, inspect exact OIDC/lease steps before retrying.']
+          };
+          const location=path.join(process.env.RUNNER_TEMP||'/tmp','cerebro-creative-observer-v0.json');
+          fs.writeFileSync(location,JSON.stringify(report,null,2)+'\n',{mode:0o600});
+          console.log(JSON.stringify({verdict,workflow_state:workflowState,
+            latest_scheduled_run:report.latest_scheduled_run,
+            failed_steps:cleanJobs,dispatcher_health:report.dispatcher_health,
+            artifact:location,site_changes:0,paid_provider_called:false}));
+          NODE
+      - name: Preserve sanitized diagnostic receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-creative-worker-observer-v0
+          path: ${{ runner.temp }}/cerebro-creative-observer-v0.json
+          if-no-files-found: warn
+          retention-days: 7

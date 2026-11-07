@@ -1,0 +1,164 @@
+{
+  "schema_version": "0.1.0",
+  "policy_id": "SEO_PROD_FIRST_DRAFT_TO_AUTOPUBLISH_V0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "POLICY_LAB_NOT_ENFORCED",
+  "version": "0.1.0",
+  "state": "DEFINED_NOT_LIVE_CONNECTED",
+  "site": {
+    "official_origin": "https://fenixcapital.es",
+    "source_mode": "PUBLIC_READONLY_FIRST",
+    "wordpress_content_target": "OFFICIAL_WORDPRESS_EXISTING",
+    "unnecessary_staging_drafts": false,
+    "standalone_app_or_crm_prod_changes": false
+  },
+  "new_urls": {
+    "default_status": "draft",
+    "first_three_publications_owner_approval": true,
+    "require_authenticated_owner": true,
+    "allow_modify_existing_posts": false,
+    "require_unique_slug_and_url_conflict_check": true,
+    "require_previous_post_inventory": true,
+    "require_recoverable_revision_or_backup": true,
+    "copywriting_and_editorial_qa": true,
+    "no_external_publication_without_signed_decision": true
+  },
+  "graduation": {
+    "minimum_individually_owner_approved_successful_publications": 3,
+    "within_same_company_content_class_and_scope": true,
+    "independent_qa_each_time": true,
+    "owner_corrections_learnt": true,
+    "merit_policy_minimum_score": 90,
+    "safety_floor": 95,
+    "quality_floor": 90,
+    "requires_verified_IAM_for_owner_agent_and_evaluator": true,
+    "requires_owner_grant_for_scoped_automatic_publication": true,
+    "requires_backup_rollback_and_audit": true,
+    "applies_only_to_new_urls": true,
+    "revocable_on_error": true
+  },
+  "content_classes": {
+    "STANDARD_LOCAL_LANDING": {
+      "possible_auto_publish": true,
+      "claim_verification_required": true
+    },
+    "STANDARD_BLOG": {
+      "possible_auto_publish": true,
+      "claim_verification_required": true
+    },
+    "FINANCIAL_MORTGAGE": {
+      "possible_auto_publish": true,
+      "high_risk_requires_independent_fact_check": true,
+      "legal_review_when_required": true
+    },
+    "OTHER": {
+      "possible_auto_publish": false,
+      "needs_scope_definition": true
+    }
+  },
+  "hard_limits": {
+    "never_auto_change_existing_published_pages": true,
+    "never_auto_edit_legal_text": true,
+    "never_auto_edit_app_or_crm": true,
+    "never_auto_buy_services": true,
+    "never_override_incident_security_human_gate": true,
+    "never_publish_without_audit": true,
+    "never_auto_expand_scopes": true,
+    "missing_trusted_proof_fail_closed": true
+  },
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "priority_note": "Drafts are temporary preparation, not a permanent restriction. Start with three exact-digest owner-supervised publications; graduate to scoped human-by-exception autopublishing once real backup, IAM, QA, media, tribunal and a revocable owner grant are verified. This JSON is defined-only, not live enforcement.",
+  "physical_state": {
+    "real_website_write_authority_verified": false,
+    "real_wordpress_draft_created": false,
+    "real_owner_authenticated": false,
+    "real_auto_publish_enabled": false,
+    "real_rollback_verified": false
+  },
+  "cost": {
+    "additional_subscriptions_eur": 0,
+    "external_ai_api_calls": 0
+  },
+  "lifecycle": {
+    "target": "HUMAN_BY_EXCEPTION_SCOPED_AUTONOMOUS_NEW_URL_PUBLICATION",
+    "drafts_role": "TEMPORARY_STAGING_AND_QA_GATE_NOT_PERMANENT_OPERATING_MODE",
+    "supervised_period_goal_days": 3,
+    "calendar_time_alone_must_never_approve": true,
+    "no_forced_calendar_wait_after_verified_gates": true,
+    "supervised_initial_publications": 3,
+    "initial_publication_approval": "EXACT_CONTENT_DIGEST_OWNER_APPROVAL_PER_PUBLICATION",
+    "phases": [
+      {
+        "id": "DRAFT_PREPARATION",
+        "mode": "REVIEW_ONLY",
+        "description": "Prepare draft material, validate exact SHA, sources, media and no publishing. Remain here until backup, IAM and other safety gates are real and verified.",
+        "allows_live_publication": false,
+        "requires_owner_each_publication": true
+      },
+      {
+        "id": "SUPERVISED_PUBLICATION",
+        "mode": "OWNER_APPROVES_FIRST_THREE",
+        "description": "After all physical gates, first three newly created URLs are published only after owner approves exact digest and independent QA for each.",
+        "allows_live_publication": true,
+        "requires_owner_each_publication": true
+      },
+      {
+        "id": "SCOPED_AUTOPUBLISH",
+        "mode": "AUTOMATIC_ROUTINE_NEW_URLS",
+        "description": "After 3 successful individually approved releases and an explicit scoped, revocable owner grant, publish routine new URLs through the gateway. Per-item independent QA, factual checks and audit continue; trigger human only on genuine exceptions.",
+        "allows_live_publication": true,
+        "requires_owner_each_publication": false
+      },
+      {
+        "id": "PAUSED_OR_ROLLBACK",
+        "mode": "KILL_SWITCH",
+        "description": "Any evidence expiry, policy drift or high-risk event disables publication and invokes exception/rollback processes.",
+        "allows_live_publication": false,
+        "requires_owner_each_publication": true
+      }
+    ],
+    "final_promotion_requirements": [
+      "THREE_SUCCESSFUL_OWNER_APPROVED_PUBLISHED_NEW_URLS_SAME_CONTENT_SCOPE",
+      "REAL_HOSTINGER_PRIVATE_FULL_RESTORE_AND_ROLLBACK_PROOF",
+      "REAL_LEAST_PRIVILEGE_ACTOR_IAM_AND_PUBLISH_GATEWAY_BINDING",
+      "INDEPENDENT_EDIT_AND_LEGAL_QA_WHEN_APPLICABLE",
+      "ORIGINAL_IMAGE_RIGHTS_AND_VISUAL_QA",
+      "SIGNED_OWNER_GRANT_COMPANY_CONTENT_CLASS_CHANNEL",
+      "OBSERVABILITY_IDEMPOTENCY_BUDGET_AND_KILL_SWITCH",
+      "TRIBUNAL_AND_RELEASE_EVIDENCE"
+    ],
+    "actions_allowed_after_scoped_promotion": [
+      "CREATE_NEW_DRAFT",
+      "VERIFY_CONTENT_AND_MEDIA",
+      "PUBLISH_NEW_OWNER_GRANTED_SCOPE_URL",
+      "MONITOR",
+      "REPORT",
+      "PAUSE_ON_EXCEPTION"
+    ],
+    "actions_never_implicitly_granted": [
+      "MODIFY_EXISTING_PUBLISHED_POST",
+      "DELETE_POST",
+      "PUBLISH_LEGAL_TEXT",
+      "CHANGE_APP_CRM",
+      "BUY_SUBSCRIPTIONS",
+      "ESCALATE_SELF_PERMISSIONS"
+    ],
+    "publisher_identity": "SEPARATE_FROM_DRAFT_PREPARER_WITH_GATEWAY_SCOPED_AUTHORITY",
+    "auto_publish_without_new_owner_approval_after_graduation": true,
+    "per_item_independent_qa_still_required": true,
+    "current_operational_phase": "DRAFT_PREPARATION",
+    "current_operational_phase_verified": false,
+    "current_scoped_autopublish_grant_present": false,
+    "production_publisher_connected": false
+  }
+}

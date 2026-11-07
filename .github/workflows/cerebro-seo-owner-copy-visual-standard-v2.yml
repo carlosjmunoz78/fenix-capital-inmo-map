@@ -1,0 +1,24 @@
+name: CEREBRO SEO · Owner copy and text-free UMS images V2
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-editorial-visual-gate-v2.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-owner-editorial-visual-gate-v2.test.mjs'
+      - 'cerebro/seo-enterprise/v2/seo-owner-copy-visual-standard-v2-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v3-faq-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v3-faq.draft.html'
+      - 'cerebro/seo-enterprise/v2/drafts/*-v2.draft.html'
+      - '.github/workflows/cerebro-seo-owner-copy-visual-standard-v2.yml'
+permissions:
+  contents: read
+jobs:
+  copy-image-contract:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check cerebro/seo-enterprise/v2/runtime/seo-owner-editorial-visual-gate-v2.mjs
+      - run: node --test cerebro/seo-enterprise/v2/tests/seo-owner-editorial-visual-gate-v2.test.mjs
+      - run: echo 'OLD_QA=SUPERSEDED IMAGE_API_CALLS=ZERO LOGOS_BAKED_IN=FORBIDDEN TEXT_BAKED_IN=FORBIDDEN WORDPRESS_WRITES=ZERO'

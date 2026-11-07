@@ -1,0 +1,61 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "FENIX_SEO_OWNER_CONTENT_DEPTH_V1_20261106",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "1.0.0",
+  "status": "OWNER_NEW_REQUIREMENT_FUTURE_CANDIDATES",
+  "owner_feedback": "NO_ARTICLES_OR_LANDINGS_THIN_OR_UNDERDEVELOPED",
+  "reason": "Business quality floor, not a Google ranking factor or arbitrary keyword count",
+  "applies_to": [
+    "ARTICLE",
+    "LANDING"
+  ],
+  "minimums": {
+    "ARTICLE": {
+      "total_visible_words": 1000,
+      "main_content_words_excluding_faq": 750,
+      "main_paragraphs": 7,
+      "faq_items": 6,
+      "preferred_total_words": [
+        1200,
+        1800
+      ]
+    },
+    "LANDING": {
+      "total_visible_words": 900,
+      "main_content_words_excluding_faq": 600,
+      "main_paragraphs": 6,
+      "faq_items": 8,
+      "preferred_total_words": [
+        1000,
+        1600
+      ]
+    }
+  },
+  "hard_maximum_words": null,
+  "content_coverage_requirements": [
+    "MATCH_EXACT_BUYER_PERSONA_AND_INTENT",
+    "ADDRESS_KEY_BUYER_QUESTIONS_WITHOUT_REPEATING",
+    "EXPLAIN_PRACTICAL_CONTEXT_SPECIFIC_TO_TOPIC_AND_CORDOBA_IF_RELEVANT",
+    "EXPLAIN_COSTS_OR_PROCESS_STEPS_ONLY_WHEN_FACTUALLY_JUSTIFIED",
+    "SHOW_OBJECTIONS_AND_CONDITIONS_NOT_FALSE_PROMISES",
+    "CTA_RELEVANT_TO_INTENT",
+    "CITABLE_FACTCHECK_WHEN_YMYL",
+    "NO_DUPLICATE_PARAGRAPHS_OR_PADDING",
+    "AVOID_KEYWORD_STUFFING"
+  ],
+  "faq_separate_from_body_count": true,
+  "main_body_must_not_be_replaced_by_faq": true,
+  "no_padding_to_reach_minimum": true,
+  "independent_expert_editorial_review_required": true,
+  "word_count_never_guarantees_rankings": true,
+  "legacy_v3_b2b_b2c": "PRESERVE_AS_HISTORICAL_DRAFTS_REQUIRE_EXPANSION_BEFORE_ANY_RELEASE",
+  "no_legacy_draft_rewrite_without_NEW_VERSION_AND_NEW_HASH": true,
+  "new_cloud_inference_authorized_by_this_policy": false,
+  "no_extra_api_spend": true,
+  "publish_authorized": false,
+  "wordpress_writes_authorized": false,
+  "source": "OWNER_DIRECT_FEEDBACK_2026-11-06"
+}

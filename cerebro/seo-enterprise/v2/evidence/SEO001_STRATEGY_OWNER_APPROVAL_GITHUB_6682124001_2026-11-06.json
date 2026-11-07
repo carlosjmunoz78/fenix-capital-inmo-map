@@ -1,0 +1,42 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "2026-11-06",
+  "decision": "STRATEGY_APPROVED",
+  "scope": "PREPARE_BRIEFS_AND_DRAFTS_ONLY",
+  "strategy_document": "cerebro/seo-enterprise/v2/SEO_ESTRATEGIA_EJECUTIVA_FENIX_APROBACION_2026-11-06.md",
+  "strategy_git_blob_sha": "1c0e4897ca9bd44efd1b1965e7ad60af76207bef",
+  "source_provider": "github",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "source_pr": 22,
+  "comment_id": 6682124001,
+  "source_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/22#issuecomment-6682124001",
+  "owner_login": "carlosjmunoz78",
+  "owner_provider_numeric_id": 130542695,
+  "github_author_association": "OWNER",
+  "provider_created_at": "2026-11-06T09:54:51Z",
+  "provider_updated_at": "2026-11-06T09:54:51Z",
+  "comment_verified_exact": true,
+  "document_blob_verified": true,
+  "pr_draft_unmerged_at_verification": true,
+  "permitted_actions": [
+    "PREPARE_EDITORIAL_BRIEFS",
+    "QUEUE_EDITORIAL_QA",
+    "PREPARE_DRAFTS_WITHOUT_PUBLICATION"
+  ],
+  "prohibited_actions": [
+    "PUBLISH_WORDPRESS",
+    "CHANGE_PUBLISHED_URLS",
+    "OVERRIDE_CORE_GUARD",
+    "MERGE_PR",
+    "SPEND_PAID_API",
+    "ENROLL_NEWSLETTER"
+  ],
+  "allow_wordpress_write": false,
+  "allow_publish": false,
+  "allow_merging": false,
+  "approval_reusable_across_companies": false,
+  "note": "Provider-authenticated strategic direction only; draft release requires separately verified current content digest and independent QA."
+}

@@ -1,0 +1,27 @@
+name: CEREBRO SEO · B2B/B2C first editorial batch LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba.draft.html'
+      - 'cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba.draft.html'
+      - 'cerebro/seo-enterprise/v2/registry/seo-editorial-first-batch-2026-11-06.json'
+      - 'cerebro/seo-enterprise/v2/tests/seo-editorial-first-batch-2026-11-06.test.mjs'
+      - '.github/workflows/cerebro-seo-editorial-first-batch-preprod-v0.yml'
+permissions:
+  contents: read
+jobs:
+  editorial-contract:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: No external APIs or paid subscriptions
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-editorial-first-batch-2026-11-06.test.mjs
+      - name: Fail closed on publication or unapproved writes
+        run: |
+          echo 'EDITORIAL_BATCH=TESTED_LAB_ONLY'
+          echo 'WORDPRESS_POSTS_CREATED=0'
+          echo 'WORDPRESS_PUBLISHED=0'
+          echo 'OWNER_STRATEGY_GATE=REQUIRES_AUTHENTICATED_APPROVAL'
+          echo 'NO_WPVIBE=TRUE'

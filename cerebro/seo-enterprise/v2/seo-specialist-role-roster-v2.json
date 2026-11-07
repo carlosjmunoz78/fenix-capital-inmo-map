@@ -1,0 +1,764 @@
+{
+  "schema_version": "2.1.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "status": "COMPLETE_ROLE_TEMPLATES_NOT_ACTIVE_AGENTS",
+  "families": [
+    {
+      "family_id": "SEO-PF01",
+      "director": "SEO-PF01:DIRECTOR",
+      "supervisor": "SEO-PF01:SUPERVISOR",
+      "departments": [
+        "SEO-D01",
+        "SEO-D02",
+        "SEO-D03",
+        "SEO-D04"
+      ]
+    },
+    {
+      "family_id": "SEO-PF02",
+      "director": "SEO-PF02:DIRECTOR",
+      "supervisor": "SEO-PF02:SUPERVISOR",
+      "departments": [
+        "SEO-D05",
+        "SEO-D06",
+        "SEO-D07",
+        "SEO-D08"
+      ]
+    },
+    {
+      "family_id": "SEO-PF03",
+      "director": "SEO-PF03:DIRECTOR",
+      "supervisor": "SEO-PF03:SUPERVISOR",
+      "departments": [
+        "SEO-D09",
+        "SEO-D10",
+        "SEO-D11",
+        "SEO-D12"
+      ]
+    },
+    {
+      "family_id": "SEO-PF04",
+      "director": "SEO-PF04:DIRECTOR",
+      "supervisor": "SEO-PF04:SUPERVISOR",
+      "departments": [
+        "SEO-D13",
+        "SEO-D14",
+        "SEO-D15",
+        "SEO-D16"
+      ]
+    },
+    {
+      "family_id": "SEO-PF05",
+      "director": "SEO-PF05:DIRECTOR",
+      "supervisor": "SEO-PF05:SUPERVISOR",
+      "departments": [
+        "SEO-D17",
+        "SEO-D18",
+        "SEO-D19",
+        "SEO-D20"
+      ]
+    },
+    {
+      "family_id": "SEO-PF06",
+      "director": "SEO-PF06:DIRECTOR",
+      "supervisor": "SEO-PF06:SUPERVISOR",
+      "departments": [
+        "SEO-D21",
+        "SEO-D22",
+        "SEO-D23",
+        "SEO-D24"
+      ]
+    },
+    {
+      "family_id": "SEO-PF07",
+      "director": "SEO-PF07:DIRECTOR",
+      "supervisor": "SEO-PF07:SUPERVISOR",
+      "departments": [
+        "SEO-D25",
+        "SEO-D26",
+        "SEO-D27",
+        "SEO-D28"
+      ]
+    },
+    {
+      "family_id": "SEO-PF08",
+      "director": "SEO-PF08:DIRECTOR",
+      "supervisor": "SEO-PF08:SUPERVISOR",
+      "departments": [
+        "SEO-D29",
+        "SEO-D30",
+        "SEO-D31",
+        "SEO-D32"
+      ]
+    }
+  ],
+  "departments": [
+    {
+      "department_id": "SEO-D01",
+      "head": "SEO-D01:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D01:SPECIALIST:01",
+        "SEO-D01:SPECIALIST:02",
+        "SEO-D01:SPECIALIST:03",
+        "SEO-D01:SPECIALIST:04"
+      ],
+      "specializations": [
+        "estrategia y objetivos",
+        "forecast y escenarios",
+        "presupuesto orgánico",
+        "gobierno multiempresa"
+      ],
+      "knowledge_pack": "knowledge/SEO-D01.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D02",
+      "head": "SEO-D02:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D02:SPECIALIST:01",
+        "SEO-D02:SPECIALIST:02",
+        "SEO-D02:SPECIALIST:03",
+        "SEO-D02:SPECIALIST:04"
+      ],
+      "specializations": [
+        "TAM/SAM/SOM",
+        "inteligencia territorial",
+        "demanda y estacionalidad",
+        "señales de mercado"
+      ],
+      "knowledge_pack": "knowledge/SEO-D02.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D03",
+      "head": "SEO-D03:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D03:SPECIALIST:01",
+        "SEO-D03:SPECIALIST:02",
+        "SEO-D03:SPECIALIST:03",
+        "SEO-D03:SPECIALIST:04"
+      ],
+      "specializations": [
+        "buyer persona B2C",
+        "buyer persona B2B",
+        "jobs-to-be-done",
+        "entrevista y consentimiento"
+      ],
+      "knowledge_pack": "knowledge/SEO-D03.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D04",
+      "head": "SEO-D04:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D04:SPECIALIST:01",
+        "SEO-D04:SPECIALIST:02",
+        "SEO-D04:SPECIALIST:03",
+        "SEO-D04:SPECIALIST:04"
+      ],
+      "specializations": [
+        "priorización RICE/ICE",
+        "coste de oportunidad",
+        "ROI SEO",
+        "secuenciación"
+      ],
+      "knowledge_pack": "knowledge/SEO-D04.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D05",
+      "head": "SEO-D05:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D05:SPECIALIST:01",
+        "SEO-D05:SPECIALIST:02",
+        "SEO-D05:SPECIALIST:03",
+        "SEO-D05:SPECIALIST:04",
+        "SEO-D05:SPECIALIST:05"
+      ],
+      "specializations": [
+        "keyword seeds",
+        "long-tail",
+        "búsqueda e intención",
+        "clustering por negocio",
+        "búsqueda local"
+      ],
+      "knowledge_pack": "knowledge/SEO-D05.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D06",
+      "head": "SEO-D06:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D06:SPECIALIST:01",
+        "SEO-D06:SPECIALIST:02",
+        "SEO-D06:SPECIALIST:03",
+        "SEO-D06:SPECIALIST:04",
+        "SEO-D06:SPECIALIST:05"
+      ],
+      "specializations": [
+        "features SERP",
+        "map pack",
+        "AI Overviews",
+        "People Also Ask",
+        "SERP histórica"
+      ],
+      "knowledge_pack": "knowledge/SEO-D06.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D07",
+      "head": "SEO-D07:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D07:SPECIALIST:01",
+        "SEO-D07:SPECIALIST:02",
+        "SEO-D07:SPECIALIST:03",
+        "SEO-D07:SPECIALIST:04"
+      ],
+      "specializations": [
+        "gap keywords",
+        "content gap",
+        "competidores locales",
+        "share of search"
+      ],
+      "knowledge_pack": "knowledge/SEO-D07.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D08",
+      "head": "SEO-D08:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D08:SPECIALIST:01",
+        "SEO-D08:SPECIALIST:02",
+        "SEO-D08:SPECIALIST:03",
+        "SEO-D08:SPECIALIST:04",
+        "SEO-D08:SPECIALIST:05"
+      ],
+      "specializations": [
+        "entity graph",
+        "clusters",
+        "mapa keyword-URL",
+        "canibalización",
+        "redirección sin pérdida de URL"
+      ],
+      "knowledge_pack": "knowledge/SEO-D08.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D09",
+      "head": "SEO-D09:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D09:SPECIALIST:01",
+        "SEO-D09:SPECIALIST:02",
+        "SEO-D09:SPECIALIST:03",
+        "SEO-D09:SPECIALIST:04",
+        "SEO-D09:SPECIALIST:05"
+      ],
+      "specializations": [
+        "robots y sitemap",
+        "rastreo y logs",
+        "canonical y noindex",
+        "indexación GSC",
+        "redirecciones 301/410"
+      ],
+      "knowledge_pack": "knowledge/SEO-D09.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D10",
+      "head": "SEO-D10:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D10:SPECIALIST:01",
+        "SEO-D10:SPECIALIST:02",
+        "SEO-D10:SPECIALIST:03",
+        "SEO-D10:SPECIALIST:04"
+      ],
+      "specializations": [
+        "SSR/CSR/hidratación",
+        "renderizado Googlebot",
+        "JS lazy loading",
+        "crawl budget"
+      ],
+      "knowledge_pack": "knowledge/SEO-D10.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D11",
+      "head": "SEO-D11:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D11:SPECIALIST:01",
+        "SEO-D11:SPECIALIST:02",
+        "SEO-D11:SPECIALIST:03",
+        "SEO-D11:SPECIALIST:04",
+        "SEO-D11:SPECIALIST:05"
+      ],
+      "specializations": [
+        "taxonomías",
+        "IA web",
+        "breadcrumbs",
+        "enlaces internos",
+        "orphan pages"
+      ],
+      "knowledge_pack": "knowledge/SEO-D11.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D12",
+      "head": "SEO-D12:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D12:SPECIALIST:01",
+        "SEO-D12:SPECIALIST:02",
+        "SEO-D12:SPECIALIST:03",
+        "SEO-D12:SPECIALIST:04"
+      ],
+      "specializations": [
+        "Schema.org JSON-LD",
+        "validación rich results",
+        "entidades sameAs",
+        "datos financieros sin engaños"
+      ],
+      "knowledge_pack": "knowledge/SEO-D12.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D13",
+      "head": "SEO-D13:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D13:SPECIALIST:01",
+        "SEO-D13:SPECIALIST:02",
+        "SEO-D13:SPECIALIST:03",
+        "SEO-D13:SPECIALIST:04"
+      ],
+      "specializations": [
+        "copy SEO landing",
+        "artículos/pillar/FAQ",
+        "guías y descargables",
+        "metadatos y snippets"
+      ],
+      "knowledge_pack": "knowledge/SEO-D13.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D14",
+      "head": "SEO-D14:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D14:SPECIALIST:01",
+        "SEO-D14:SPECIALIST:02",
+        "SEO-D14:SPECIALIST:03",
+        "SEO-D14:SPECIALIST:04",
+        "SEO-D14:SPECIALIST:05",
+        "SEO-D14:SPECIALIST:06"
+      ],
+      "specializations": [
+        "copy persuasivo B2B/B2C",
+        "ofertas hipotecarias YMYL",
+        "email captación",
+        "newsletter",
+        "guiones",
+        "comparativas"
+      ],
+      "knowledge_pack": "knowledge/SEO-D14.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D15",
+      "head": "SEO-D15:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D15:SPECIALIST:01",
+        "SEO-D15:SPECIALIST:02",
+        "SEO-D15:SPECIALIST:03",
+        "SEO-D15:SPECIALIST:04",
+        "SEO-D15:SPECIALIST:05"
+      ],
+      "specializations": [
+        "microcopy formularios",
+        "consentimiento claro",
+        "mensajes de error",
+        "CTA",
+        "copy accesible"
+      ],
+      "knowledge_pack": "knowledge/SEO-D15.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D16",
+      "head": "SEO-D16:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D16:SPECIALIST:01",
+        "SEO-D16:SPECIALIST:02",
+        "SEO-D16:SPECIALIST:03",
+        "SEO-D16:SPECIALIST:04",
+        "SEO-D16:SPECIALIST:05"
+      ],
+      "specializations": [
+        "fact-checking hipotecario",
+        "investigación editorial",
+        "revisión por pares",
+        "citas fuentes",
+        "tono de marca"
+      ],
+      "knowledge_pack": "knowledge/SEO-D16.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D17",
+      "head": "SEO-D17:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D17:SPECIALIST:01",
+        "SEO-D17:SPECIALIST:02",
+        "SEO-D17:SPECIALIST:03",
+        "SEO-D17:SPECIALIST:04"
+      ],
+      "specializations": [
+        "GBP categorías/servicios",
+        "SEO local Córdoba",
+        "map pack",
+        "citaciones locales"
+      ],
+      "knowledge_pack": "knowledge/SEO-D17.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D18",
+      "head": "SEO-D18:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D18:SPECIALIST:01",
+        "SEO-D18:SPECIALIST:02",
+        "SEO-D18:SPECIALIST:03",
+        "SEO-D18:SPECIALIST:04"
+      ],
+      "specializations": [
+        "reseñas legítimas",
+        "NAP",
+        "reputación",
+        "confianza y testimonios verificables"
+      ],
+      "knowledge_pack": "knowledge/SEO-D18.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D19",
+      "head": "SEO-D19:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D19:SPECIALIST:01",
+        "SEO-D19:SPECIALIST:02",
+        "SEO-D19:SPECIALIST:03",
+        "SEO-D19:SPECIALIST:04"
+      ],
+      "specializations": [
+        "PR digital ética",
+        "menciones de marca",
+        "enlaces editoriales legítimos",
+        "prohibición spam de enlaces"
+      ],
+      "knowledge_pack": "knowledge/SEO-D19.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D20",
+      "head": "SEO-D20:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D20:SPECIALIST:01",
+        "SEO-D20:SPECIALIST:02",
+        "SEO-D20:SPECIALIST:03",
+        "SEO-D20:SPECIALIST:04"
+      ],
+      "specializations": [
+        "hreflang",
+        "español multirregional",
+        "expansión geográfica",
+        "localización y legalidad"
+      ],
+      "knowledge_pack": "knowledge/SEO-D20.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D21",
+      "head": "SEO-D21:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D21:SPECIALIST:01",
+        "SEO-D21:SPECIALIST:02",
+        "SEO-D21:SPECIALIST:03",
+        "SEO-D21:SPECIALIST:04"
+      ],
+      "specializations": [
+        "arquitectura información",
+        "wireframes",
+        "responsive UX",
+        "accesibilidad de flujos"
+      ],
+      "knowledge_pack": "knowledge/SEO-D21.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D22",
+      "head": "SEO-D22:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D22:SPECIALIST:01",
+        "SEO-D22:SPECIALIST:02",
+        "SEO-D22:SPECIALIST:03",
+        "SEO-D22:SPECIALIST:04",
+        "SEO-D22:SPECIALIST:05"
+      ],
+      "specializations": [
+        "WordPress REST/Abilities",
+        "Elementor y Gutenberg",
+        "plugin propio",
+        "staging y snapshots",
+        "releases reversibles"
+      ],
+      "knowledge_pack": "knowledge/SEO-D22.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D23",
+      "head": "SEO-D23:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D23:SPECIALIST:01",
+        "SEO-D23:SPECIALIST:02",
+        "SEO-D23:SPECIALIST:03",
+        "SEO-D23:SPECIALIST:04"
+      ],
+      "specializations": [
+        "LCP/INP/CLS",
+        "a11y WCAG",
+        "seguridad web",
+        "caché y Core Web Vitals"
+      ],
+      "knowledge_pack": "knowledge/SEO-D23.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D24",
+      "head": "SEO-D24:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D24:SPECIALIST:01",
+        "SEO-D24:SPECIALIST:02",
+        "SEO-D24:SPECIALIST:03",
+        "SEO-D24:SPECIALIST:04",
+        "SEO-D24:SPECIALIST:05"
+      ],
+      "specializations": [
+        "CRO y formularios",
+        "prueba de consentimiento",
+        "lead magnets",
+        "CRM E2E",
+        "funnel B2B/B2C"
+      ],
+      "knowledge_pack": "knowledge/SEO-D24.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D25",
+      "head": "SEO-D25:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D25:SPECIALIST:01",
+        "SEO-D25:SPECIALIST:02",
+        "SEO-D25:SPECIALIST:03",
+        "SEO-D25:SPECIALIST:04"
+      ],
+      "specializations": [
+        "AEO/GEO",
+        "citaciones de IA",
+        "entidades semánticas",
+        "medición AI Search"
+      ],
+      "knowledge_pack": "knowledge/SEO-D25.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D26",
+      "head": "SEO-D26:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D26:SPECIALIST:01",
+        "SEO-D26:SPECIALIST:02",
+        "SEO-D26:SPECIALIST:03",
+        "SEO-D26:SPECIALIST:04"
+      ],
+      "specializations": [
+        "SEO imágenes/alt",
+        "video SEO",
+        "YouTube Discover",
+        "licencias multimedia"
+      ],
+      "knowledge_pack": "knowledge/SEO-D26.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D27",
+      "head": "SEO-D27:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D27:SPECIALIST:01",
+        "SEO-D27:SPECIALIST:02",
+        "SEO-D27:SPECIALIST:03",
+        "SEO-D27:SPECIALIST:04"
+      ],
+      "specializations": [
+        "SEO categorías/productos",
+        "facetas y filtros",
+        "merchant feeds",
+        "variantes y stock"
+      ],
+      "knowledge_pack": "knowledge/SEO-D27.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D28",
+      "head": "SEO-D28:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D28:SPECIALIST:01",
+        "SEO-D28:SPECIALIST:02",
+        "SEO-D28:SPECIALIST:03",
+        "SEO-D28:SPECIALIST:04"
+      ],
+      "specializations": [
+        "búsqueda social",
+        "distribución orgánica",
+        "SEO redes",
+        "medición social"
+      ],
+      "knowledge_pack": "knowledge/SEO-D28.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D29",
+      "head": "SEO-D29:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D29:SPECIALIST:01",
+        "SEO-D29:SPECIALIST:02",
+        "SEO-D29:SPECIALIST:03",
+        "SEO-D29:SPECIALIST:04"
+      ],
+      "specializations": [
+        "GSC rendimiento/cobertura",
+        "GA4 eventos",
+        "calidad medición",
+        "anomalías"
+      ],
+      "knowledge_pack": "knowledge/SEO-D29.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D30",
+      "head": "SEO-D30:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D30:SPECIALIST:01",
+        "SEO-D30:SPECIALIST:02",
+        "SEO-D30:SPECIALIST:03",
+        "SEO-D30:SPECIALIST:04"
+      ],
+      "specializations": [
+        "atribución lead a firma",
+        "incrementalidad",
+        "experimentación",
+        "estadística y sesgo"
+      ],
+      "knowledge_pack": "knowledge/SEO-D30.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D31",
+      "head": "SEO-D31:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D31:SPECIALIST:01",
+        "SEO-D31:SPECIALIST:02",
+        "SEO-D31:SPECIALIST:03",
+        "SEO-D31:SPECIALIST:04",
+        "SEO-D31:SPECIALIST:05"
+      ],
+      "specializations": [
+        "QA SEO multidisciplinar",
+        "gates publicación",
+        "OLD vs NEW",
+        "rollback y backup",
+        "auditoría independiente"
+      ],
+      "knowledge_pack": "knowledge/SEO-D31.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    },
+    {
+      "department_id": "SEO-D32",
+      "head": "SEO-D32:DEPARTMENT_HEAD",
+      "subagents": [
+        "SEO-D32:SPECIALIST:01",
+        "SEO-D32:SPECIALIST:02",
+        "SEO-D32:SPECIALIST:03",
+        "SEO-D32:SPECIALIST:04",
+        "SEO-D32:SPECIALIST:05"
+      ],
+      "specializations": [
+        "benchmarks",
+        "training hooks",
+        "evaluación de evaluadores",
+        "meritocracia independiente",
+        "shadow y sustituciones"
+      ],
+      "knowledge_pack": "knowledge/SEO-D32.json",
+      "qa_department": "SEO-D31",
+      "training_department": "SEO-D32"
+    }
+  ],
+  "governance": {
+    "judge": "SEO:GLOBAL:JUDGE",
+    "guardian": "SEO:GLOBAL:GUARDIAN",
+    "qa": "SEO-D31",
+    "trainer": "SEO-D32",
+    "all_need_separate_iam_if_operational": true,
+    "no_self_promotion": true,
+    "no_autonomy_without_tribunal": true
+  },
+  "counts": {
+    "families": 8,
+    "departments": 32,
+    "department_heads": 32,
+    "specialist_subagent_templates": 141,
+    "family_directors": 8,
+    "family_supervisors": 8,
+    "central_judge": 1,
+    "central_guardian": 1,
+    "total_role_templates": 191,
+    "independently_iam_verified": 0
+  },
+  "execution_policy": {
+    "runtime_shared": true,
+    "no_32_servers": true,
+    "no_141_llm_instances": true,
+    "no_prod_write_permissions": true,
+    "no_new_paid_api": true,
+    "identity_mappings_pending": true,
+    "prod_autonomy": "NOT_ACTIVE"
+  },
+  "knowledge_status": "FULL_INSTRUCTIONS_PREPARED_NOT_LIVE_TRAINED"
+}
