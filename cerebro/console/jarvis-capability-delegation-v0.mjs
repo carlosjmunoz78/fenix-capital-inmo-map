@@ -167,8 +167,13 @@ export function bindJarvisCapabilityDelegationV0({
   if(result?.status==='HUMAN_REQUIRED'&&!HUMAN_REASONS.has(result.reason))
    throw Error('INVALID_HUMAN_GATE_FROM_ACTION_GATEWAY');
   return Object.freeze({
-   status:result.status,delegated:result.status==='ACTION_EXECUTED',
-   executed:result.executed===true,capability_id:selected.capability_id,
+   status:result.status,
+   // Console V0 validates the *top-level* HUMAN_REQUIRED reason.
+   ...(result.status==='HUMAN_REQUIRED'?{reason:result.reason}:{}),
+   delegated:result.status==='ACTION_EXECUTED',
+   // Successful dispatch is not proof the downstream job has finished.
+   executed:result.executed===true,downstream_work_completed_verified:false,
+   capability_id:selected.capability_id,
    target_id:selected.target_id,action_result:result,
    prod_authorized:false,trading_access:false
   });
