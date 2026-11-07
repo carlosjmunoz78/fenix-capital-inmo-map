@@ -45,3 +45,31 @@ Se definió previamente un JARVIS **masculino en castellano de España**, profun
 - [ ] Autorización expresa adicional de publicación: la actual permite **preparar y probar, no desplegar a PROD**.
 
 **ESTADO:** CORRECCIÓN DE LAB PREPARADA · CI VERDE · E2E FÍSICO DE VOZ Y OWNER PENDIENTE · VOICE-001 CANÓNICA NO ACREDITADA COMO SINTETIZABLE · PROD INTACTO.
+
+## Ampliación de pruebas y realidad del proveedor de voz · cierre 2026-11-07
+
+### Nueva evidencia
+
+- [GitHub Actions #42412391753](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42412391753): **SUCCESS · 5/5 pruebas de navegador**; compilación TypeScript+Vite completa. El quinto test muestra envío y respuesta de texto en una pantalla de 390×844 px.
+- [Actions #42412217632](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42412217632): 4/4, incluye un segundo permiso de micrófono que queda eternamente pendiente **sin silenciar la síntesis**. Se detectó y corrigió además una excepción de asignación de voz nativa; los fallos TTS ahora se identifican como errores de audio, no como falsa caída del Gateway.
+- Los tests E2E de voz usan sustitutos coherentes de SpeechRecognition y SpeechSynthesisUtterance; **no** prueban el micrófono real, voces nativas de Android, altavoz ni el modelo VOICE-001 clonado.
+- El selector provisional está aislado en `src/jarvisMaleBrowserVoice.ts`, no en `src/cerebroVoice.ts`; **se preserva la voz actual de ANA**. Rechaza voces claramente femeninas o sin etiqueta reconocible de voz masculina y ofrece diagnóstico si no puede hablar, sin suplantar al clon.
+
+### Perfil canónico y conexión real
+
+- La búsqueda de inventario mediante vidIQ con coste **0 créditos** localizó la voz propia `cfkJwJs7cjrVgVLm3yvM`, registrada como JARVIS 1 (Victor Iturrioz), en las 23 voces disponibles, junto a otro clon custom `QGH6KSAXelJsYC43E5xG`.
+- El endpoint de generación `vidiq_voiceover_generate` **cuesta 28 créditos por cada 1.000 caracteres, redondeados al alza**. No es sostenible como síntesis ilimitada a coste por conversación 0. No se ha invocado y **no se han gastado créditos**.
+- La conexión vidIQ disponible en ChatGPT **no está expuesta como un motor TTS de la App Fénix**, ni se ha verificado un contrato de API usable por CEREBRO. No confundir disponibilidad del clon con Gateway conectado.
+- El perfil aprobado JARVIS V2 «Más clara», **1,10× y +0,6 semitonos**, se conserva; no sustituir por voz de navegador. La política preexistente VOICE-001 requiere diferenciar superficies: **JARVIS para consolas CEREBRO, ANA exclusivamente para App Fénix**.
+- Fuente de contrato en Drive: `VOICE001_JARVIS1_VOICE_SURFACE_POLICY_2026-11-04.md`; `VOICE001_JARVIS1_BACKUP_ROLLBACK_RUNBOOK_2026-11-04.md`; `ZEUS_JARVIS_B5_VOZ_CUT02_ESTADO_2026-11-05.md`.
+- Existe el piloto open-source Chatterbox Multilingual V3 (PR #24 LAB), **no desplegado**. El primer arranque descarga varios GB, requiere ensayos locales y recomienda **12 GiB RAM**; en evidencias previas el PC tenía unos 7,88 GiB. No afirmar factibilidad o baja latencia sin medición física.
+- ZIP existente para diagnosticar el PC, **sin crear proyecto**: `JARVIS_V2_MOTOR_GRATIS_WINDOWS_LAB_2026-11-05.zip`, Drive ID `1vpGjl0fJFNNIqxehk-so0-shokRDiCbz`, 483.689 bytes, incluye `JARVIS_DIAGNOSTICO_1_CLIC.cmd`. Descargar y ejecutar desde PC es `HUMAN_REQUIRED` por control físico; no introducir contraseñas ni audios sensibles.
+- La referencia de voz es privada y los derechos/licencia del intérprete no se han acreditado documentalmente para explotación pública; mantener `LEGAL_REQUIRED` antes de producción del clon.
+
+### Criterio honesto de cierre
+
+**HECHO:** reparar código del chat y dictado, política de saludo de Gateway (solo Git LAB), selector provisional de voz masculino aislado, watchdog de 20 s, reacción correcta al fallo de síntesis, pruebas E2E mocks 5/5.
+
+**BLOQUEADO:** voz propia JARVIS V2 dinámica, 0 créditos por frase, motor disponible para móvil/PC/tablet, propietario real y micrófono físico en Android, autorización de derechos, backup/modelo y despliegue progresivo.
+
+**NO-GO PROD:** aunque la QA sea verde, NO fusionar ni desplegar a `app.fenixcapital.es` ni a Supabase PROD sin pruebas humanas reales y gate de rollback. La App actual sigue `dpl_7H3FJvWR1u3pmL29UUwa69ZrgDeH`.
