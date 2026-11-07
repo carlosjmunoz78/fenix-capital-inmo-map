@@ -1,0 +1,51 @@
+name: CEREBRO JARVIS CUT59 · Two-Supabase Engine Dependency Reconciliation (OFFLINE)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut59-engine-reconciliation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cut59-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_ALLOW_PAID_CANARY: 'NO'
+      JARVIS_LAB_AUTONOMY_ENABLE: 'NO'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify historic metadata AND reject fabricated readiness / graph corruption
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut59-engine-reconciliation-v0.test.mjs
+          node --check cerebro/jarvis/boost-001/cut59-engine-reconciliation-v0.mjs
+      - name: Generate CUT59 report without contacting Supabase or the App
+        run: |
+          set -euo pipefail
+          node cerebro/jarvis/boost-001/cut59-engine-reconciliation-v0.mjs             cerebro/jarvis/boost-001/cut59-legacy-to-prod-observation-20261107.json             "$RUNNER_TEMP/cerebro-cut59-engine-reconciliation.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const r=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cerebro-cut59-engine-reconciliation.json'));
+            if(r.source_record_count!==17||r.target_record_count!==0||
+               r.priority_pivots.join(',')!=='CRMBOOT-001,MKTBOOT-001'||
+               r.source_summary.stale!==17||r.current_physical_green_proofs!==0||
+               r.lrn_ingest_authorized!==false||r.prod_authorized!==false||
+               r.preprod_app_restored!==false) process.exit(1);
+          "
+      - name: Upload immutable snapshot reconciliation (non-production artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-jarvis-cut59-engine-reconciliation-${{ github.run_id }}
+          path: ${{ runner.temp }}/cerebro-cut59-engine-reconciliation.json
+          if-no-files-found: error
+          retention-days: 30
