@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT64_NEGATIVE_EDGE_OWNER_ACCESS_E2E_AND_ISOLATED_PROD_BACKUP_RESTORE",
+  "next_block": "CUT65_OWNER_CLOUDFLARE_INTERACTIVE_E2E_AND_SAFE_RESTORE_ISOLATION",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -428,5 +428,69 @@
     },
     "next_block": "CUT64_NEGATIVE_EDGE_OWNER_ACCESS_E2E_AND_ISOLATED_PROD_BACKUP_RESTORE",
     "documentation": "cerebro/jarvis/boost-001/CUT63_EDGE_AUTH_60_OF_60_REAL_BACKUPS_PROD_GATE_2026-11-07.md"
+  },
+  "cut64": {
+    "version": "CUT64-v0.1",
+    "date": "2026-11-07",
+    "state": "OWNER_ANONYMOUS_GET_DENIAL_REAL_AND_PROD_BACKUP_CRON_PREFLIGHT_VERIFIED_PROD_NO_GO",
+    "anonymous_readonly_probes": {
+      "github_run_id": 42397967804,
+      "tests_pass": 6,
+      "tests_fail": 0,
+      "artifact_id": 13583943286,
+      "gate_jarvis_work_get_health_http_status": 403,
+      "gate_jarvis_git_get_health_http_status": 403,
+      "cloudflare_original_cut30_owner_check_http_status": 302,
+      "cloudflare_access_redirect_to_login": true,
+      "requests_get_only": true,
+      "no_authorization_headers": true,
+      "no_body_read": true,
+      "authenticated_owner_b2_b3_e2e_completed": false
+    },
+    "real_prod_backend": {
+      "project_ref": "cluhljgonannaafpmblx",
+      "db_bytes": 49769619,
+      "public_table_count": 38,
+      "public_function_count": 259,
+      "non_internal_trigger_count": 37,
+      "pg_cron_installed": true,
+      "active_pg_cron_jobs": 2,
+      "pg_net_installed": true,
+      "storage_bucket_count": 3,
+      "fenix_registry_rows": 0,
+      "fenix_onboarding_rows": 0,
+      "fenix_engine_rows": 0,
+      "fenix_learning_rows": 0,
+      "b3_grants": 0,
+      "b3_enabled": false,
+      "b3_kill_switch": true,
+      "physical_backup_visible_count": 8,
+      "latest_visible_utc": "2026-11-07T02:59:58Z",
+      "full_backup_restored_in_isolated_instance": false,
+      "clone_financial_cost_approved": false,
+      "cron_net_side_effects_isolated": false,
+      "storage_objects_restoration_verified": false
+    },
+    "safety_gate": {
+      "github_run_id": 42398400704,
+      "tests_pass": 6,
+      "tests_fail": 0,
+      "verdict": "NO_GO_PHYSICAL_OWNER_AND_ISOLATED_BACKUP_RESTORE_PENDING",
+      "independent_owner_auth_verified": false,
+      "b2_two_devices_verified": false,
+      "b3_grant_verified": false,
+      "independent_external_tribunal_pass": false,
+      "allowed_prod_mutations": 0,
+      "app_crm_changes": 0,
+      "cloudflare_original_cut30_mutations": 0,
+      "supabase_mutations": 0,
+      "clone_created": false,
+      "new_subscription_created": false,
+      "deepseek_paid_calls": 0,
+      "prod_authorized": false
+    },
+    "snapshot_path": "cerebro/jarvis/boost-001/cut64-prod-recovery-owner-readonly-observation-20261107.json",
+    "docs": "cerebro/jarvis/boost-001/CUT64_ANON_OWNER_DENIAL_BACKUP_CLONE_PREFLIGHT_2026-11-07.md",
+    "next_block": "CUT65_OWNER_CLOUDFLARE_INTERACTIVE_E2E_AND_SAFE_RESTORE_ISOLATION"
   }
 }
