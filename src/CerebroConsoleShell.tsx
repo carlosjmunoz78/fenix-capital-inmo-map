@@ -62,7 +62,6 @@ export default function CerebroConsoleShell(){
  const interruptRestartTimerRef=useRef<number|null>(null);
  const startListeningRef=useRef<()=>void>(()=>{});
  const sendVoiceTextRef=useRef<(text:string,confidence:number|null)=>void>(()=>{});
- const directChatSubmitRef=useRef<(text:string)=>boolean>(()=>false);
 
  useEffect(()=>{pendingActionRef.current=pendingAction},[pendingAction]);
  useEffect(()=>{readContextRef.current=readContext},[readContext]);
@@ -544,14 +543,12 @@ export default function CerebroConsoleShell(){
   }
   recognition.lang='es-ES';
   recognition.continuous=false;
-  recognition.interimResults=true;
+  recognition.interimResults=false;
   recognition.maxAlternatives=5;
   applyVoiceContextHints(recognition);
   recognition.onstart=()=>setVoiceListening(true);
-  let finalSent=false;
   recognition.onresult=event=>{
    const chunks:string[]=[];
-   const finalChunks:string[]=[];
    const segmentConfidences:Array<number|null>=[];
    for(let index=0;index<event.results.length;index+=1){
     const result=event.results[index];
@@ -567,19 +564,13 @@ export default function CerebroConsoleShell(){
     const piece=best?.transcript?.trim();
     if(!piece)continue;
     chunks.push(piece);
-    if(result.isFinal!==false){
-     finalChunks.push(piece);
-     segmentConfidences.push(typeof best.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:null);
-    }
+    segmentConfidences.push(typeof best.confidence==='number'&&Number.isFinite(best.confidence)?best.confidence:null);
    }
-   const preview=chunks.join(' ').replace(/\s+/g,' ').trim();
-   if(preview)setMessage(preview);
-   const transcript=finalChunks.join(' ').replace(/\s+/g,' ').trim();
+   const transcript=chunks.join(' ').replace(/\s+/g,' ').trim();
    const confidence=segmentConfidences.length>0&&segmentConfidences.every(value=>value!==null)
     ?Math.min(...segmentConfidences as number[])
     :null;
-   if(transcript&&!finalSent){
-    finalSent=true;
+   if(transcript){
     setMessage(transcript);
     setVoiceError('');
     sendVoiceTextRef.current(transcript,confidence);
@@ -610,11 +601,6 @@ export default function CerebroConsoleShell(){
  }
  startListeningRef.current=startListening;
  sendVoiceTextRef.current=(text,confidence)=>{void sendText(text,confidence,true)};
- directChatSubmitRef.current=(text:string)=>{
-  if(!text.trim()||!chatReady||sendingRef.current)return false;
-  void sendText(text,null,false);
-  return true;
- };
 
  function toggleVoiceSession(){
   if(voiceSessionRef.current){endVoiceSession();return}
@@ -632,16 +618,6 @@ export default function CerebroConsoleShell(){
   event.preventDefault();
   await sendText(message,null,false);
  }
-
- useEffect(()=>{
-  const onDirectSubmit=(event:Event)=>{
-   const payload=(event as CustomEvent<{message?:unknown;accepted?:boolean}>).detail;
-   if(!payload||typeof payload.message!=='string')return;
-   payload.accepted=directChatSubmitRef.current(payload.message);
-  };
-  window.addEventListener('jarvis:direct-chat-submit-v1',onDirectSubmit);
-  return()=>window.removeEventListener('jarvis:direct-chat-submit-v1',onDirectSubmit);
- },[]);
 
  useEffect(()=>{
   return()=>{
