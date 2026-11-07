@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0",
+  "entry_id": "JARVIS-BOOST-001-CUT56-LEARNING",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "capability_id": "JARVIS-BOOST-001-CUT56",
+  "environment": "LAB",
+  "version": "CUT56-v0.1.0",
+  "status": "LAB_HEURISTIC_QA_PASS_CANDIDATES_QUARANTINED",
+  "authority": "CANDIDATE_ONLY",
+  "lrn_target": "LRN-001",
+  "learning_writer_physically_connected": false,
+  "training_weights_modified": false,
+  "inputs": {
+    "source_run_id": 42381208836,
+    "candidate_artifact_id": 13577667987,
+    "tribunal_run_id": 42383414151,
+    "tribunal_artifact_id": 13578457472
+  },
+  "evaluation": {
+    "candidate_count": 5,
+    "structurally_valid": 5,
+    "semantic_rejected": 5,
+    "released": 0,
+    "independent_tribunal_passed": false,
+    "partial_verdict_hash": "975c1c49904acea2a12e1c61d538d305bebe9b6956bf7c00e4939bf3156677d2"
+  },
+  "qa": {
+    "recovery_run_id": 42383629696,
+    "handoff_run_id": 42383989422,
+    "final_regression_run_id": 42384197014,
+    "final_regression_tests_pass": 57,
+    "final_regression_tests_fail": 0
+  },
+  "policy": {
+    "prod_authorized": false,
+    "prod_write": false,
+    "trading_access": false,
+    "automatic_release": false,
+    "memory_write": false,
+    "autonomous_paid_calls": false,
+    "auto_recharge": false,
+    "default_new_monthly_cost_eur": 0
+  },
+  "cost": {
+    "owner_budget_envelope_eur": 50,
+    "previous_reservation_accounted_worst_case_usd": 1.8,
+    "lab_ledger_estimate_usd": 3.699419652,
+    "provider_actual_billing_reconciled": false,
+    "github_actions_minutes_reconciled": false
+  },
+  "backup": {
+    "git_baseline_sha": "0ece9d8f03293a8d4839fdb69c27291f65f1ea73",
+    "restore": "git revert LAB-only audited commits after reviewing dependent artifact state"
+  },
+  "rollback": {
+    "tested_preview_recovery": true,
+    "physical_prod_rollback_tested": false
+  },
+  "rebuild": {
+    "data_source": "GitHub verified artifacts",
+    "deterministic_semantic_gate": true,
+    "reproducible_ci": true
+  },
+  "deps": [
+    "LRN-001",
+    "FACT-001",
+    "GOV-001",
+    "ACTGW-001",
+    "JARVIS B2/B3 identity"
+  ],
+  "docs": [
+    "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
+  ],
+  "next_block": "CUT57_CORRECTED_CANDIDATES_INDEPENDENT_EVAL_AND_LRN_REAL_INGEST"
+}
