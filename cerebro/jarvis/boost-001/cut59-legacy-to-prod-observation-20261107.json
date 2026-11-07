@@ -1,0 +1,359 @@
+{
+  "schema": "cerebro.cut59.readonly.supabase.observation.v1",
+  "observed_at_utc_date": "2026-11-07",
+  "observation_provenance": "READ_ONLY_SUPABASE_MCP_SELECT_DATABASE_METADATA",
+  "consistency": "SINGLE_QUERY_PER_PROJECT_NOT_GLOBAL_SNAPSHOT",
+  "scope": {
+    "company_id": "fenix",
+    "environment": "PREPROD",
+    "version": "CUT59"
+  },
+  "source": {
+    "project_ref": "hnqlnvakzaywtafeiybt",
+    "project_name": "fenix-capital-inmo-map",
+    "purpose": "HISTORICAL_ENGINE_METADATA_NOT_E2E_ACCEPTANCE",
+    "legacy_app_preprod_cancelled": true,
+    "records": [
+      {
+        "stage": 0,
+        "engine_id": "TENANT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "COMP-REG-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 1,
+        "engine_id": "COMP-REG-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 2,
+        "engine_id": "COMP-ONB-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "COMP-REG-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 3,
+        "engine_id": "SCAN-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "COMP-ONB-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:11:52.058373+00"
+      },
+      {
+        "stage": 4,
+        "engine_id": "KW-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "SCAN-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:14:19.753925+00"
+      },
+      {
+        "stage": 5,
+        "engine_id": "WAUD-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "SCAN-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:14:28.689324+00"
+      },
+      {
+        "stage": 6,
+        "engine_id": "SOCAUD-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "SCAN-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:14:39.993099+00"
+      },
+      {
+        "stage": 7,
+        "engine_id": "LOCALP-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "SCAN-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:14:49.728143+00"
+      },
+      {
+        "stage": 8,
+        "engine_id": "KBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "KW-001",
+          "WAUD-001",
+          "SOCAUD-001",
+          "LOCALP-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:15:35.496541+00"
+      },
+      {
+        "stage": 9,
+        "engine_id": "SEOBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "KW-001",
+          "WAUD-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:15:44.643513+00"
+      },
+      {
+        "stage": 10,
+        "engine_id": "SOCBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "GREEN",
+        "dependencies": [
+          "SOCAUD-001"
+        ],
+        "has_evidence_hash": true,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:15:55.22126+00"
+      },
+      {
+        "stage": 11,
+        "engine_id": "MKTBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "READY",
+        "dependencies": [
+          "KBOOT-001",
+          "SEOBOOT-001",
+          "SOCBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:15:55.22126+00"
+      },
+      {
+        "stage": 12,
+        "engine_id": "CRMBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "READY",
+        "dependencies": [
+          "KBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 14:15:35.496541+00"
+      },
+      {
+        "stage": 13,
+        "engine_id": "APPBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "BLOCKED",
+        "dependencies": [
+          "KBOOT-001",
+          "CRMBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 14,
+        "engine_id": "AUTBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "BLOCKED",
+        "dependencies": [
+          "CRMBOOT-001",
+          "APPBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 15,
+        "engine_id": "TRNBOOT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "BLOCKED",
+        "dependencies": [
+          "KBOOT-001",
+          "AUTBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      },
+      {
+        "stage": 16,
+        "engine_id": "ENGACT-001",
+        "company_id": "fenix",
+        "environment": "PREPROD",
+        "version": "1.0.0",
+        "state": "BLOCKED",
+        "dependencies": [
+          "TENANT-001",
+          "SEOBOOT-001",
+          "SOCBOOT-001",
+          "MKTBOOT-001",
+          "CRMBOOT-001",
+          "APPBOOT-001",
+          "AUTBOOT-001",
+          "TRNBOOT-001"
+        ],
+        "has_evidence_hash": false,
+        "human_required_reason": null,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": "0.00",
+        "updated_at": "2026-10-13 12:52:01.184176+00"
+      }
+    ]
+  },
+  "target": {
+    "project_ref": "cluhljgonannaafpmblx",
+    "project_name": "fenix-capital-prod",
+    "registered_company_count": 0,
+    "engine_state_rows": 0,
+    "lrn_continuation_rows": 0,
+    "lrn_rpc_present": true
+  },
+  "summary": {
+    "count": 17,
+    "green": 11,
+    "ready": 2,
+    "blocked": 4,
+    "green_with_hash": 8,
+    "green_without_hash": 3,
+    "pending_without_hash": 6
+  },
+  "independent_current_execution_proof": false,
+  "company_transfer_authorized": false,
+  "prod_write_authorized": false
+}
