@@ -63,7 +63,22 @@ export function classifyLearnedCandidate({brief,writer}={}) {
  if(h1!==1)errors.push('LAB_CANDIDATE_REQUIRES_EXACTLY_ONE_H1');
  if(imgs>0||inlineForms)errors.push('IMAGE_OR_FORM_WRONGLY_EMBEDDED_IN_MODEL_HTML');
  if(writer.faq_count!==6)errors.push('SIX_FAQ_REQUIRED');
+ const coreH2=(text.match(/<h2\b/gi)||[]).length-1;
+ if(coreH2!==6)errors.push('SIX_MAIN_H2_REQUIRED');
+ const faqSection=[...text.matchAll(/<section\b[^>]*class=["']faq["'][^>]*>[\s\S]*?<\/section>/gi)];
+ const faqBlocks=faqSection.length===1?
+   [...faqSection[0][0].matchAll(/<div\b[^>]*class=["']faq-item["'][^>]*>([\s\S]*?)<\/div>/gi)]:[];
+ if(faqSection.length!==1||faqBlocks.length!==6)errors.push('EXACT_FAQ_DOM_WRAPPER_REQUIRED');
+ for(const b of faqBlocks){
+   if((b[1].match(/<h3\b/gi)||[]).length!==1||(b[1].match(/<p\b/gi)||[]).length!==1)
+      errors.push('FAQ_ITEM_HEADING_AND_PARAGRAPH_REQUIRED');
+   const answer=b[1].match(/<p\b[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'';
+   const words=answer.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().split(/\s+/).filter(Boolean).length;
+   if(words<20||words>40)errors.push('FAQ_ANSWER_WORD_RANGE');
+ }
  if(writer.content_depth_precheck_passed!==true)errors.push('CONTENT_DEPTH_MISSING');
+ if(/el vendedor debe abonar las derramas|(?:la )?demora depende exclusivamente|el retraso(?: administrativo)? no invalida el acuerdo/i.test(text))
+   errors.push('YMYL_UNQUALIFIED_LEGAL_OR_EXCLUSIVE_CAUSE_CLAIM');
  if(brief.persona==='INMOBILIARIAS'&&!/inmobiliaria|agencia/i.test(text))errors.push('B2B_PERSONA_MISSING');
  // No image, license, real CMS rendering, real form success, or mobile screenshot
  // can be asserted from a text-only provider response.
