@@ -1,0 +1,74 @@
+name: JARVIS Full Chat Voice Persona LAB - Build and Browser Acceptance
+
+on:
+  push:
+    branches:
+      - fix/jarvis-full-chat-dictation-voice-persona-lab-20261107
+    paths:
+      - '.github/workflows/jarvis-full-chat-voice-persona-lab-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies without adding packages
+        run: npm ci --no-audit --no-fund
+      - name: Build and full TypeScript contract
+        run: npm run build
+      - name: Static fail-closed persona and interface guards
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
+          const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+          const source=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
+          const voice=fs.readFileSync('src/cerebroVoice.ts','utf8');
+          const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
+          const embedded=fs.readFileSync('src/JarvisEmbeddedConsole.tsx','utf8');
+          if(composer.includes('form.requestSubmit()')||composer.includes('setReactTextareaValue(')||
+             !composer.includes('driver.sendText(clean)')||!shell.includes('jarvisDriverRef.current=driver')||
+             !embedded.includes('JarvisConversationBridgeContext.Provider')||
+             !composer.includes('recognition.interimResults=true')||
+             !api.includes('signal:controller.signal')||
+             !api.includes('window.clearTimeout(timeout)')||
+             !voice.includes('masculineHints'))
+            throw new Error('BROKEN_CHAT_OR_VOICE_ADAPTER');
+          const greet=source.slice(source.indexOf('function closeOwnerGreeting('),source.indexOf('async function sha256('));
+          if(/guapo|hola carlos guapo|cariñoso/i.test(greet)||
+             !greet.includes('Soy JARVIS')||!source.includes('tone:"professional_direct"')||
+             !shell.includes("tone:'professional_direct'"))
+            throw new Error('JARVIS_PERSONA_POLICY_FAIL');
+          console.log('JARVIS_PERSONA_CHAT_VOICE_STATIC_PASS');
+          NODE
+      - name: Install Chromium for browser acceptance
+        run: npx playwright install chromium
+      - name: Owner-session fixture browser QA - chat, interim dictation and TTS adapter
+        run: npx playwright test tests/jarvis-voice-persona-react-bridge-lab.spec.ts --project=desktop-chromium --reporter=line
+      - name: Archive failure-only screenshots and traces (synthetic data only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-voice-lab-browser-failure-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
