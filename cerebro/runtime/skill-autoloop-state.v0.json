@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-06T23:32:35.384Z",
+  "updated_at": "2026-11-07T00:55:50.175Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -516,7 +516,8 @@
     "github-wide-skills:c5ae14e5e8f8163bab8c",
     "github-wide-skills:92df76506ab367148173",
     "github-wide-skills:6b67fa0e7b57bd9c6113",
-    "github-wide-skills:fd8fe8e750559e0907cd"
+    "github-wide-skills:fd8fe8e750559e0907cd",
+    "github-wide-skills:bc4c85945c09ff38df97"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -958,6 +959,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42292050665,
       "checkpointed_at": "2026-11-06T20:53:26.941Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:bc4c85945c09ff38df97": {
+      "candidate_id": "github-wide-skills:bc4c85945c09ff38df97",
+      "name": "devartslab-contact-vetting",
+      "human_alias": "Devartslab Contact Vetting",
+      "wrapper_id": "skillwrap:80e7b0353cf596b2095d",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.6,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "DevArtsLab/agent-skills",
+        "upstream_head_commit": "b1fc02388367b76e2ba71da2fba6e4f624b5401e",
+        "manifest_sha256": "a71c326e0f749f3e3e92ee041084cf367e26da17ef4ae4cbeaa6789b34e1cf8d",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42321111692,
+      "checkpointed_at": "2026-11-07T00:55:50.175Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32003,7 +32038,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32016,7 +32051,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42312524470,
+  "last_discovery_run_id": 42321111692,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
