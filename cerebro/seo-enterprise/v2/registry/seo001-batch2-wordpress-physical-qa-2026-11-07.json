@@ -245,5 +245,98 @@
     "physical_release_qa": "HOLD_SCREENSHOT_RESPONSIVE_AND_IMAGE_VISUAL_NOT_VERIFIED",
     "publication": "OFF",
     "next_gate": "RESTORE_OPERA_SCREENSHOT_OR_APPROVED_SCREENSHOT_PATH; DESKTOP_MOBILE_VISUAL + IMAGE_LICENSE_PROVENANCE + LINKS + YMYL + FIRST_3_TUTORED_PUBLICATIONS"
+  },
+  "hero_image_fix_2026_11_07": {
+    "source": "LIVE_WORDPRESS_COWBOY_AND_AUTHENTICATED_OPERA_DESKTOP_SCREENSHOTS",
+    "outcome": "SIX_MISSING_HTML_HERO_IMAGES_INSERTED_AND_VERIFIED",
+    "new_hero_images_for_existing_drafts": [
+      52660,
+      52661,
+      52713,
+      52714,
+      52715,
+      52716
+    ],
+    "existing_hero_images_unchanged": [
+      52662,
+      52663
+    ],
+    "all_eight_verified_html_header_image_count": 1,
+    "image_source": "EXISTING_OWN_WORDPRESS_MEDIA_FEATURED_ATTACHMENTS",
+    "new_image_generation_this_step": 0,
+    "new_api_cost_eur": 0,
+    "new_subscription_eur": 0,
+    "content_changed_scope": "INDIVIDUAL_WORDPRESS_DRAFTS_ONLY",
+    "snapshots": [
+      195,
+      196,
+      197,
+      198,
+      199,
+      200
+    ],
+    "hero_change_journal": [
+      2177,
+      2178,
+      2179,
+      2180,
+      2181,
+      2182
+    ],
+    "typography_changes": [
+      {
+        "post_id": 52715,
+        "change_id": 2187,
+        "h1_max_px": 42
+      },
+      {
+        "post_id": 52716,
+        "change_id": 2188,
+        "h1_max_px": 40
+      }
+    ],
+    "physical_opera_desktop": [
+      {
+        "id": 52715,
+        "photo_hero": "VISIBLE",
+        "headline": "VISIBLE",
+        "cta": "VISIBLE",
+        "format": "TWO_COLUMN",
+        "overall_visual": "HEADER_PASS"
+      },
+      {
+        "id": 52716,
+        "photo_hero": "VISIBLE",
+        "headline": "VISIBLE",
+        "cta": "VISIBLE",
+        "format": "TWO_COLUMN",
+        "overall_visual": "HEADER_PASS"
+      },
+      {
+        "id": 52713,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52714,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52660,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      },
+      {
+        "id": 52661,
+        "astra_featured_banner": "VISIBLE",
+        "body_split_hero": "NOT_FULLY_VISUALLY_REVIEWED"
+      }
+    ],
+    "theme_banner_pilot_52713": "NOT_EFFECTIVE_IN_PREVIEW; EXTRA_H1_AND_BREADCRUMB_REVERTED; PLUGIN_V0.0.4_RESTORED; NO_GLOBAL_THEME_CHANGE",
+    "wp_status_eight": "DRAFT_8_OF_8",
+    "outstanding": "RESPONSIVE_MOBILE_AND_FULL_PAGE_QA_AND_THEME_BANNER_DUPLICATION_FOR_ARTICLES_BEFORE_PUBLICATION",
+    "release_status": "HOLD_NOT_OWNER_APPROVED",
+    "publication_count": 0
   }
 }
