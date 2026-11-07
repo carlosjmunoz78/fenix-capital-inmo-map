@@ -100,8 +100,16 @@ function buildLearnedSeoPilotPrompt(b) {
  const expected=m.briefs.find(x=>x.work_id===b.work_id);
  if(!expected||b.learning_contract_id!==m.learning_contract_id||
     JSON.stringify(expected)!==JSON.stringify(b))throw Error('SEO_LEARNED_BRIEF_DRIFT');
+ const feedback=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/training-pilots/SEO_D32_LEARNED_ONE_BATCH_20261108_FEEDBACK.json','utf8'));
+ if(feedback.company_id!=='fenix'||feedback.engine_id!=='SEO-001'||
+    feedback.batch_id!==m.batch_id||feedback.eval_status!=='TWO_GENERATED_CANDIDATES_HELD_NO_RELEASE'||
+    !Array.isArray(feedback.learning_delta)||feedback.learning_delta.length!==6||
+    feedback.provider_requests_actual!==2||feedback.published_count!==0)
+    throw Error('SEO_LEARNED_D32_FEEDBACK_INVALID');
  return [
  'CEREBRO SEO-D13 · UNA SOLA PRUEBA EN LAB, DOS ARTÍCULOS, NO PUBLICAR NI CREAR IMÁGENES.',
+ 'Corrige expresamente los seis fallos observados en el lote 2026-11-08 sin solicitar nueva generación automática.',
+ ...feedback.learning_delta.map(x=>x.id+' '+x.hard_requirement),
  'Incorpora estas diez lecciones de errores físicos, sin afirmar que la publicación o el entrenamiento están certificados.',
  ...keys.map(k=>k+' '+m.lessons[k]),
  'Redacta en español natural de España, específico de '+b.persona+'. TEMA '+b.topic,
@@ -111,7 +119,9 @@ function buildLearnedSeoPilotPrompt(b) {
  'Evitar canibalización '+b.avoid_cannibalization,
  'Palabra clave '+b.focus_keyword+' de forma no forzada.',
  'Entrega SOLO texto HTML de borrador editorial; el montaje de Astra/Elementor, imagen de cabecera, formularios y QA visual se evalúa por separado, NUNCA se presupone aprobado.',
- 'Exactamente un H1 corto y natural (35-65 caracteres), seis H2 de desarrollo no numerados con tres párrafos de entre 60 y 85 palabras cada uno, luego un H2 de FAQ con seis preguntas H3 y respuestas de 20-40 palabras.',
+ 'Exactamente un H1 corto y natural (35-65 caracteres), SEIS H2 PRINCIPALES (no cinco) con TRES párrafos de 60-85 palabras cada uno y después UN H2 de FAQ.',
+ 'FAQ HTML OBLIGATORIO. Una sola <section class="faq"><h2>Preguntas frecuentes...</h2> con exactamente SEIS <div class="faq-item"><h3>¿Pregunta?</h3><p>Respuesta entre 20 y 40 palabras</p></div> y cierre </section>. No usar <section> sin class ni <div> sin class.',
+ 'No afirmar que una derrama corresponde siempre al vendedor, que un retraso depende exclusivamente de una entidad, ni que un contrato es válido o inválido sin comprobar hechos, normas y cláusulas del caso.',
  'El cuerpo debe aportar al menos 950 palabras reales fuera de FAQ y un total de al menos 1150. No repetir, no inventar declaraciones de clientes, cifras de bancos ni obligaciones legales.',
  b.persona==='INMOBILIARIAS'?
   'Habla a responsables de agencias, describe un protocolo de mensajes con roles y estados verificables, sin plazos de tasación garantizados ni transferencia excesiva de datos. El formulario PARTNER solo lo inserta el plugin validado tras QA.':
