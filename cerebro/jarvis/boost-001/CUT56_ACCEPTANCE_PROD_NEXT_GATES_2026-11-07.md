@@ -65,3 +65,16 @@ Todos 5/5 semánticamente RECHAZADOS. Esta heurística no sustituye tribunal ind
 5. Prueba física con sesión real del propietario (voz, dictado, diálogo, motores y rollback). Solo después, promoción gradual **REAL a PROD** con backup previo, pruebas E2E, OLD vs NEW, tribunal, observabilidad y autorización específica que corresponda.
 
 Regla: ninguna salida LAB equivale a funcionalidad instalada en App. No pedir al propietario intervención salvo HUMAN_REQUIRED verdadero.
+
+## ADENDA CUT57 · CANDIDATOS CORREGIDOS Y A/B, SIN PROMOCIÓN
+
+- Fuente de reglas nuevas: políticas canónicas del propietario reinterpretadas como candidatos revisables. **No son pesos reentrenados por DeepSeek.**
+- Commit de código y workflow: `7730d121af33760ef736099d982e1bae3c3a5731`.
+- Prueba viva: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42384480964 **SUCCESS**; 3/3 tests, 0 fallos.
+- Artifact A/B: `jarvis-cut57-old-new-42384480964`, ID `13579077487`, retención 30 días.
+- Comparación fiable contra CUT55 hash verificado: OLD = 5 rechazados semánticamente; NEW = 5/5 pasan heurística CUT56.
+- Independent tribunal PASS = 0; memory release = 0; integrated LRN live writer = 0; PROD enabled = false.
+- La recuperación económica CUT37 permanece PAUSED; no reactivar para conseguir más muestras pagadas sin conciliación FinOps.
+- Regresión después de recovery: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42384197014 **SUCCESS** (57/57 pruebas), después de corregir la fixture histórica y conservar el fallo anterior trazado.
+
+**NEXT BLOCK:** `CUT58_INDEPENDENT_ADVERSARIAL_EVAL_AND_LRN_REAL_INGEST` → B2/B3 OWNER E2E → App/voz/evaluación física → promoción PROD gobernada con rollback.
