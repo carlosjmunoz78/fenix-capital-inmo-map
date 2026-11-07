@@ -8,6 +8,23 @@ type Snapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:
 const EMPTY:Snapshot={ready:false,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false,voiceError:''};
 
 
+function setReactTextareaValue(textarea:HTMLTextAreaElement,value:string){
+ const nativeSetter=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')?.set;
+ if(!nativeSetter)return false;
+ nativeSetter.call(textarea,value);
+ textarea.dispatchEvent(new Event('input',{bubbles:true}));
+ return true;
+}
+
+async function waitForUI(check:()=>boolean,timeoutMs=2600){
+ const start=performance.now();
+ while(performance.now()-start<timeoutMs){
+  if(check())return true;
+  await new Promise<void>(resolve=>window.requestAnimationFrame(()=>resolve()));
+ }
+ return check();
+}
+
 export default function JarvisOperativaComposerPortal(){
  const[target,setTarget]=useState<HTMLElement|null>(null);
  const[composer,setComposer]=useState('');
@@ -17,6 +34,7 @@ export default function JarvisOperativaComposerPortal(){
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
  const dictationBaseRef=useRef('');
+ const submittingRef=useRef(false);
 
  useEffect(()=>{
   let current:HTMLElement|null=null;
@@ -29,8 +47,48 @@ export default function JarvisOperativaComposerPortal(){
  },[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
 
- function sendCommand(raw:string){const clean=raw.trim();if(!clean||!snapshot.ready||snapshot.sending)return false;const detail:{message:string;accepted:boolean}={message:clean,accepted:false};window.dispatchEvent(new CustomEvent('jarvis:direct-chat-submit-v1',{detail}));if(!detail.accepted){setDictationError('JARVIS no ha aceptado el mensaje. Revisa la conexión; el texto sigue aquí para reintentarlo.');return false}setDictationError('');return true;}
- function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('');}
+ async function sendCommand(raw:string){
+  const clean=raw.trim();
+  if(!clean||!snapshot.ready||snapshot.sending||submittingRef.current)return false;
+  const root=document.querySelector<HTMLElement>('.jarvis-conversation .cerebro-console');
+  const textarea=root?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea');
+  const form=root?.querySelector<HTMLFormElement>('.cerebro-chat-form');
+  const sendButton=form?.querySelector<HTMLButtonElement>('button[type="submit"]');
+  if(!root||!textarea||!form||!sendButton){
+   setDictationError('No encuentro el chat de JARVIS. Tu mensaje se conserva para reintentarlo.');
+   return false;
+  }
+  submittingRef.current=true;
+  const previousUserMessages=root.querySelectorAll('.cerebro-chat-line.cerebro-chat-user').length;
+  try{
+   if(!setReactTextareaValue(textarea,clean)){
+    setDictationError('No puedo preparar el mensaje en el chat. Tu texto se conserva.');
+    return false;
+   }
+   // Wait until React has accepted the value, rather than submitting on a blind timer.
+   const ready=await waitForUI(()=>!textarea.disabled&&!sendButton.disabled&&textarea.value===clean);
+   if(!ready){
+    setDictationError('El chat no ha preparado el envío. Tu mensaje sigue aquí; vuelve a intentarlo.');
+    return false;
+   }
+   form.requestSubmit();
+   // Clear only when the canonical chat itself displays the submitted user message.
+   const delivered=await waitForUI(()=>root.querySelectorAll('.cerebro-chat-line.cerebro-chat-user').length>previousUserMessages);
+   if(!delivered){
+    setDictationError('No puedo confirmar que JARVIS haya recibido el mensaje. Lo conservo para reintentarlo.');
+    return false;
+   }
+   setDictationError('');
+   return true;
+  }finally{submittingRef.current=false;}
+ }
+ function submit(event?:FormEvent){
+  event?.preventDefault();
+  const draft=composer;
+  void sendCommand(draft).then(accepted=>{
+   if(accepted)setComposer(current=>current===draft?'':current);
+  });
+ }
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit();}}
  function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main');if(button&&!button.disabled){setDictationError('');button.click();}else setDictationError(!voiceRecognitionSupported()?'Chrome no ofrece reconocimiento de voz. Comprueba el micrófono y los permisos de este sitio.':'La conversación por voz necesita un Gateway conectado y reconocimiento de voz disponible.');}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false);}
@@ -38,5 +96,5 @@ export default function JarvisOperativaComposerPortal(){
  function attach(){const input=document.querySelector<HTMLInputElement>('.jarvis-conversation input[type="file"]');if(input)input.click();else window.dispatchEvent(new CustomEvent('cerebro:attachment-request',{detail:{surface:'jarvis'}}));}
 
  if(!target)return null;
- return createPortal(<div className="jarvis-operativa-composer-host"><section className="operativa-jarvis-composer" aria-label="Hablar con Jarvis"><button type="button" className="operativa-attach" onClick={attach} aria-label="Añadir archivo" title="Añadir archivo"><Plus size={18}/></button><form onSubmit={submit} className="operativa-composer-form"><textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} aria-label="Mensaje para Jarvis" placeholder=""/><button type="button" className={`operativa-dictate ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive} aria-label={dictating?'Detener dictado':'Dictar (solo transcribe; después pulsa Enviar)'} title="Dictado: escribe mientras hablas; pulsa Enviar para recibir respuesta">{dictating?<Square size={17}/>:<Mic size={19}/>}</button><button type="button" className={`operativa-voice ${snapshot.voiceActive?'is-active':''} ${snapshot.voiceListening?'is-listening':''} ${snapshot.voiceSpeaking?'is-speaking':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating} aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz (envía y responde)'} title="Conversación por voz: JARVIS escucha, envía y responde"><AudioLines size={20}/><span/><span/><span/></button>{composer.trim()?<button type="submit" className="operativa-send" disabled={!snapshot.ready||snapshot.sending} aria-label="Enviar" title="Enviar"><Send size={18}/></button>:null}</form>{dictationError?<small className="operativa-dictation-error" role="alert">{dictationError}</small>:null}{snapshot.voiceError&&!dictationError?<small className="operativa-dictation-error" role="alert">{snapshot.voiceError}</small>:null}{!voiceRecognitionSupported()?<small className="operativa-dictation-error" role="status">El reconocimiento de voz no está disponible en este navegador; el chat escrito sigue funcionando.</small>:null}</section></div>,target);
+ return createPortal(<div className="jarvis-operativa-composer-host"><section className="operativa-jarvis-composer" aria-label="Hablar con Jarvis"><button type="button" className="operativa-attach" onClick={attach} aria-label="Añadir archivo" title="Añadir archivo"><Plus size={18}/></button><form onSubmit={submit} className="operativa-composer-form"><textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} aria-label="Mensaje para Jarvis" placeholder=""/><button type="button" className={`operativa-dictate ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive} aria-label={dictating?'Detener dictado':'Dictar'} title="Dictado: escribe mientras hablas; pulsa Enviar para recibir respuesta">{dictating?<Square size={17}/>:<Mic size={19}/>}</button><button type="button" className={`operativa-voice ${snapshot.voiceActive?'is-active':''} ${snapshot.voiceListening?'is-listening':''} ${snapshot.voiceSpeaking?'is-speaking':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating} aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'} title="Conversación por voz: JARVIS escucha, envía y responde"><AudioLines size={20}/><span/><span/><span/></button>{composer.trim()?<button type="submit" className="operativa-send" disabled={!snapshot.ready||snapshot.sending} aria-label="Enviar" title="Enviar"><Send size={18}/></button>:null}</form>{dictationError?<small className="operativa-dictation-error" role="alert">{dictationError}</small>:null}{snapshot.voiceError&&!dictationError?<small className="operativa-dictation-error" role="alert">{snapshot.voiceError}</small>:null}{!voiceRecognitionSupported()?<small className="operativa-dictation-error" role="status">El reconocimiento de voz no está disponible en este navegador; el chat escrito sigue funcionando.</small>:null}</section></div>,target);
 }
