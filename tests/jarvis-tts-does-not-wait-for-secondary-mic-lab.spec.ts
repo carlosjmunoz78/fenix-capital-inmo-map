@@ -41,6 +41,8 @@ test('JARVIS speaks even while secondary getUserMedia permission never resolves'
    abort(){this.onend?.(new Event('end'))}
   }
   w.SpeechRecognition=Recognition;
+  const mockVoice={name:'Microsoft Jorge',lang:'es-ES',localService:true,voiceURI:'qa-male-es',default:false} as SpeechSynthesisVoice;
+  window.speechSynthesis.getVoices=()=>[mockVoice];
   window.speechSynthesis.speak=(utterance:SpeechSynthesisUtterance)=>{
    w.__jarvisAudio?.push(utterance.text);
    window.setTimeout(()=>utterance.onend?.(new Event('end') as SpeechSynthesisEvent),100);
