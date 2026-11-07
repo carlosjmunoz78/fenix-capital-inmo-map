@@ -13,3 +13,22 @@
 
 ## Changelog
 - 2026-11-07: añadido inventario de conectividad y puente de órdenes PREPROD reutilizando ACTGW; pruebas con motor ROUTE-001 real solo en proceso de test, sin nuevas suscripciones.
+
+## Continuidad de capacidades aprendidas · JARVIS director, CEREBRO ejecutor
+
+- El backend de CEREBRO, no el LLM ni el navegador, debe construir `readCanonicalCatalogue` con `createJarvisCerebroRegistryReaderV0()`. La lectura usa **cada vez** los registros maestros en disco; no duplicar los 179 motores ni la base de conocimientos en JARVIS.
+- El mismo backend suministra `readReleaseManifests` desde un **registro independiente de capacidades realmente certificadas**. No se ha conectado aún a ningún manifest vivo; el default seguro en el LAB es `[]`. Un JSON de un modelo o una declaración del cliente nunca es un origen confiable.
+- Vincular `bindJarvisCapabilityDelegationV0` al **mismo** `CerebroGatewayV0` y `ActionGatewayV1`, con `verifyOwner` servidor, sin nuevos servidores/procesos. Comandos: `jarvis.capabilities` para descubrir y `jarvis.delegate` para ordenar.
+- Ante aprendizaje CEREBRO/FACT/LRN/Skill: (a) registrar como `TESTED_NOT_RELEASED` o `LEARNED_CANDIDATE`; (b) publicar en fuente canónica; (c) evaluar contrato, permisos, tests, tribunal, observabilidad, backup, rollback, rebuild, coste y política; (d) aprobar un manifest confiable del backend; (e) ofrecer a JARVIS el nombre de la capacidad; (f) JARVIS delega a ACTGW / JOB001 tras verificar propietario y riesgo. **No saltar pasos**.
+- Al quitar un manifest, la capacidad deja de ser invocable en la siguiente consulta. Si el catálogo deja de ser legible, mantener estado `CATALOGUE_UNAVAILABLE` sin ejecutar nada. No usar caché de un catálogo viejo como permiso.
+- JARVIS comunica `delegated` al aceptar el trabajo; para anunciar **completado**, debe consultar el estado terminal real de `JOB-001`, supervisor y comprobación de resultado. El acuse de `enqueue` por sí solo no certifica un trabajo terminado.
+- La versión existente de FACT-001 valida el registro maestro de **exactamente 179** motores: su propia evolución y la certificación de extensiones siguen pendientes, sin adulterar pruebas ni forzar un número 180 en el catálogo real.
+- La prueba local de 180 registros se realiza en un directorio temporal de test. No se modifica la fuente original ni producción.
+- El conocimiento de negocio y conversación continúa en las fuentes CEREBRO existentes y su Gateway; este enlace se ocupa de **capacidades operativas**, no de copiar toda la base de conocimiento. Comprobar aparte la paridad de retrieval y los permisos por empresa.
+- Estado actual: 8 capacidades nativas y 2 skills leídas de los registros reales, **0 nuevos permisos activados**; identidad física del propietario no acreditada en LAB/PROD y las 11 cadenas de supervisión de roles siguen sin resolverse.
+
+### Prueba concreta
+`node --test cerebro/tests/jarvis-capability-delegation-v0.test.mjs cerebro/tests/jarvis-cerebro-registry-reader-v0.test.mjs`
+
+### Seguridad
+No publicar estas funciones como API pública antes de integrar el Gateway, la autenticación, las capacidades firmadas en backend, la evaluación, tribunal, replay, rollback y el paso gradual a producción.
