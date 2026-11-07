@@ -44,3 +44,5 @@ jobs:
         run: |
           set -euo pipefail
           node --test cerebro/jarvis/boost-001/learning-pilot-v0.test.mjs             cerebro/jarvis/boost-001/cut56-semantic-tribunal-v0.test.mjs             cerebro/jarvis/boost-001/cut56-lrn-safe-handoff-v0.test.mjs             cerebro/tests/deepseek-budget-guard-v0.test.mjs             cerebro/tests/deepseek-provider-v0.test.mjs
+
+# Rerun after CUT37 historical fixture freeze: old RESERVED fixture is separate from current PAUSED ledger.
