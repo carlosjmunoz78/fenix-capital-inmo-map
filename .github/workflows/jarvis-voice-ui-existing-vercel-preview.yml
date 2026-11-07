@@ -1,0 +1,57 @@
+name: JARVIS · Existing Vercel Project Preview Only (No PROD Alias)
+
+on:
+  push:
+    branches:
+      - fix/jarvis-chat-voice-responsive-20261107
+    paths:
+      - '.github/workflows/jarvis-voice-ui-existing-vercel-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  safe-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERCEL_TEAM_SLUG: carlosjmunozcabeza-2582s-projects
+      CEREBRO_PROD_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify existing CI authorization without printing any secret
+        id: authorization
+        run: |
+          set -euo pipefail
+          if [ -n "${VERCEL_TOKEN:-}" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+            echo "EXISTING_VERCEL_TOKEN_PRESENT"
+          else
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            echo "BLOCKED: Existing GitHub VERCEL_TOKEN secret unavailable. No deployment attempted."
+          fi
+      - uses: actions/setup-node@v4
+        if: steps.authorization.outputs.available == 'true'
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Existing App full build (no backend changes)
+        if: steps.authorization.outputs.available == 'true'
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Link existing Vercel project only, without creating a new project
+        if: steps.authorization.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p .vercel
+          printf '%s\n' '{"projectId":"prj_4ElVl8e2KzrHS7r5yvBGBban1DXV","orgId":"team_qnh6u1Ofy2WPp0MGEKlyMA50"}' > .vercel/project.json
+      - name: Preview deploy ONLY (no --prod, no alias, no DNS, no new subscriptions)
+        if: steps.authorization.outputs.available == 'true'
+        run: |
+          set -euo pipefail
+          npx --yes vercel@latest deploy --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_TEAM_SLUG"
