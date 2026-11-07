@@ -34,6 +34,16 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Typecheck and build current App with only three-file UI patch
         run: npm run build
+      - name: Install isolated Playwright Chromium (existing test harness)
+        run: npx playwright install chromium
+      - name: 'Real browser: composer submits text and receives mocked Gateway reply'
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'clean home' --reporter=line
       - name: Check chat sends via one event, voice previews interim text and timeout is bounded
         run: |
           set -euo pipefail
