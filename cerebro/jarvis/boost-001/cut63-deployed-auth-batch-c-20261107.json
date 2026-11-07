@@ -1,0 +1,253 @@
+{
+  "schema": "jarvis.cut63.static.auth.batch.v1",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "observed_date": "2026-11-07",
+  "project_ref": "cluhljgonannaafpmblx",
+  "batch": "C",
+  "no_source_export": true,
+  "live_endpoints_called": false,
+  "static_flags_not_auth_proof": true,
+  "rows": [
+    {
+      "slug": "cerebro-browser-work-total-v1-prod",
+      "status": "READ",
+      "version": 4,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 15449,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-browser-work-total-worker-v1-prod",
+      "status": "READ",
+      "version": 2,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 12053,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-browser-work-total-worker-v2-prod",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 4303,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-browser-physical-e2e-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 7009,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-browser-dispatch-v1",
+      "status": "READ",
+      "version": 2,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 8654,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-actgw-browser-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6404,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": false,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-actgw-browser-signer-key-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 1167,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-social-authorizer-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 6088,
+      "flags": {
+        "auth_header": true,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-actgw-social-signer-key-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 1132,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-creative-dispatch-v1",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 10273,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": true,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": true,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-actgw-signer-key-v0",
+      "status": "READ",
+      "version": 1,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 971,
+      "flags": {
+        "auth_header": false,
+        "bearer": false,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": false,
+        "webhook_signature": false
+      }
+    },
+    {
+      "slug": "cerebro-telegram-voice-v0",
+      "status": "READ",
+      "version": 3,
+      "verify_jwt": false,
+      "files": 1,
+      "source_bytes": 19483,
+      "flags": {
+        "auth_header": true,
+        "bearer": true,
+        "user_lookup": false,
+        "crypto": true,
+        "server_secret": true,
+        "owner_scope": false,
+        "company_scope": false,
+        "privileged": true,
+        "rpc": true,
+        "webhook_signature": false
+      }
+    }
+  ]
+}
