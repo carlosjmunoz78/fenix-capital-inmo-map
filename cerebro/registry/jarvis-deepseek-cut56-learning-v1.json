@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT60_PHYSICAL_MARKETING_CRM_QA_PLUS_BACKUP_OLD_NEW_AND_REGISTRY_ACCEPTANCE",
+  "next_block": "CUT60_PHYSICAL_ACCEPTANCE_EVIDENCE_AND_CONTROLLED_TENANT_ONBOARDING",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -156,7 +156,30 @@
     "learning_rules_applied": 0,
     "current_physical_motors_verified": 0,
     "production_ready": false,
-    "next_block": "CUT60_PHYSICAL_MARKETING_CRM_QA_PLUS_BACKUP_OLD_NEW_AND_REGISTRY_ACCEPTANCE",
-    "documentation": "cerebro/jarvis/boost-001/CUT59_RECONCILIACION_MOTORES_Y_DESBLOQUEO_REAL_LRN001_2026-11-07.md"
+    "next_block": "CUT60_PHYSICAL_ACCEPTANCE_EVIDENCE_AND_CONTROLLED_TENANT_ONBOARDING",
+    "documentation": "cerebro/jarvis/boost-001/CUT59_RECONCILIACION_MOTORES_Y_DESBLOQUEO_REAL_LRN001_2026-11-07.md",
+    "marketing_crm_existing_runtime": {
+      "status": "ACTUAL_EXISTING_JS_CODE_EXECUTED_LAB_SYNTHETIC_ONLY",
+      "source_path": "cerebro/multicompany/marketing-crm-bootstrap-v1.mjs",
+      "original_blob_sha": "03c9048deec79f6b354f89b8abaf09bc0b4a63d1",
+      "ci_run_id": 42386900157,
+      "ci_tests_pass": 9,
+      "ci_tests_fail": 0,
+      "artifact_id": 13579393984,
+      "engine_functions_executed": [
+        "MKTBOOT-001",
+        "CRMBOOT-001"
+      ],
+      "input_kind": "SYNTHETIC_ONLY",
+      "actual_app_crm_access": false,
+      "actual_customer_data": false,
+      "real_campaign_publication": false,
+      "supabase_rpc_call": false,
+      "actual_db_receipt": false,
+      "official_green_promotion": false,
+      "lrn_real_integration": false,
+      "prod_authorized": false,
+      "new_paid_api_calls": 0
+    }
   }
 }
