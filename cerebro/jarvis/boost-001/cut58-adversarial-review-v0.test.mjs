@@ -12,7 +12,7 @@ const rejects=(id,fn,code)=>{
 test('separate CUT58 rubric approves five curated candidate baselines, but zero releases',()=>{
  const r=reviewCuratedCandidates();
  assert.equal(r.evaluated,5);
- assert.equal(r.second_path_pass,5);
+ assert.equal(r.second_path_pass,5,JSON.stringify(r.results));
  assert.equal(r.independent_external_tribunal_pass,false);
  assert.equal(r.model_behavior_tested,false);
  assert.equal(r.lrn_write_authorized,false);
