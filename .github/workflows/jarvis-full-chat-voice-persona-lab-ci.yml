@@ -42,7 +42,8 @@ jobs:
           const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
           const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
           const source=fs.readFileSync('supabase/functions/cerebro-console-gateway-v0/index.ts','utf8');
-          const voice=fs.readFileSync('src/cerebroVoice.ts','utf8');
+          const voice=fs.readFileSync('src/jarvisMaleBrowserVoice.ts','utf8');
+          const coreVoice=fs.readFileSync('src/cerebroVoice.ts','utf8');
           const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
           const embedded=fs.readFileSync('src/JarvisEmbeddedConsole.tsx','utf8');
           if(composer.includes('form.requestSubmit()')||composer.includes('setReactTextareaValue(')||
@@ -51,7 +52,8 @@ jobs:
              !composer.includes('recognition.interimResults=true')||
              !api.includes('signal:controller.signal')||
              !api.includes('window.clearTimeout(timeout)')||
-             !voice.includes('masculineHints'))
+             !voice.includes('MALE_HINTS')||!voice.includes('FEMININE_HINTS')||
+             !shell.includes('preferredJarvisMaleBrowserVoice')||!coreVoice.includes('preferredSpanishVoice'))
             throw new Error('BROKEN_CHAT_OR_VOICE_ADAPTER');
           const greet=source.slice(source.indexOf('function closeOwnerGreeting('),source.indexOf('async function sha256('));
           if(/guapo|hola carlos guapo|cariñoso/i.test(greet)||
