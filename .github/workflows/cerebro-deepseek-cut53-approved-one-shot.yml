@@ -1,0 +1,60 @@
+name: CEREBRO JARVIS DeepSeek CUT53 · one-shot five-case learning pilot
+
+# Separate from CUT37 continuous-learning workflow; does not change its job or triggers.
+# Runs only once for the explicit tagged push on the sole pre-authorized LAB branch.
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-deepseek-cut53-approved-one-shot.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-deepseek-cut53-exact-one-shot
+  cancel-in-progress: false
+
+jobs:
+  verified-five-case-learning:
+    if: >-
+      github.event_name == 'push' &&
+      github.run_attempt == 1 &&
+      github.ref == 'refs/heads/cerebro/jarvis-deepseek-weekend-lab-20261106' &&
+      contains(github.event.head_commit.message, '[CUT53-PAID-PILOT-ONE-SHOT]')
+    environment: JARVIS_DEEPSEEK_LAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Preflight offline - budget/persona/isolated learning
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/learning-pilot-v0.test.mjs
+          node --test cerebro/tests/deepseek-budget-guard-v0.test.mjs cerebro/tests/deepseek-cost-v0.test.mjs cerebro/tests/deepseek-provider-v0.test.mjs
+          node --check cerebro/jarvis/boost-001/learning-pilot-v0.mjs
+      - name: Five strictly bounded real DeepSeek candidates (no retries, no promotion)
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          CEREBRO_ALLOW_PAID_CANARY: 'YES'
+          CEREBRO_JARVIS_LEARNING_BUDGET_EUR: '50'
+          CEREBRO_JARVIS_PILOT_MAX_EUR: '0.20'
+          CEREBRO_PROD_WRITE: 'false'
+          CEREBRO_TRADING_ACCESS: 'false'
+        run: |
+          set -euo pipefail
+          test -n "$DEEPSEEK_API_KEY" || { echo "LAB_SECRET_UNAVAILABLE"; exit 1; }
+          node cerebro/jarvis/boost-001/learning-pilot-v0.mjs --live
+      - name: Evidence candidate-only (private workflow artifact, 14 days)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut53-bounded-learning-${{ github.run_id }}
+          path: ${{ runner.temp }}/jarvis-boost001-cut53-pilot-report.json
+          retention-days: 14
+          if-no-files-found: ignore
