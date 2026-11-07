@@ -95,6 +95,7 @@ export function spanishVoices(){
 
 export function preferredSpanishVoice(voices:SpeechSynthesisVoice[]){
  if(!voices.length)return undefined;
+ const masculineHints=['pablo','jorge','alvaro','álvaro','diego','miguel','raul','raúl','enrique','antonio','felipe','español hombre','spanish male','male'];
  const feminineHints=['elvira','helena','laura','lucia','lucía','monica','mónica','paulina','sabina','sofia','sofía','carmen','marisol','paloma'];
  return [...voices]
   .map((voice,index)=>{
@@ -103,7 +104,9 @@ export function preferredSpanishVoice(voices:SpeechSynthesisVoice[]){
    let score=0;
    if(lang==='es-es')score+=6;
    else if(lang.startsWith('es'))score+=2;
-   if(feminineHints.some(hint=>name.includes(hint)))score+=5;
+   // Best-effort masculine Spanish browser voice: no proprietary TTS or new cost.
+   if(masculineHints.some(hint=>name.includes(hint)))score+=10;
+   if(feminineHints.some(hint=>name.includes(hint)))score-=10;
    if(/natural|premium|enhanced|online/.test(name))score+=2;
    if(voice.localService)score+=0.25;
    return{voice,index,score};
