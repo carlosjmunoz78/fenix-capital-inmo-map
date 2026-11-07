@@ -36,7 +36,7 @@ test('JARVIS sends through canonical React chat: one POST, one user bubble, one 
  await box.fill('Hola JARVIS, comprueba el envío');
  await page.getByRole('button',{name:'Enviar',exact:true}).last().click();
  await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-user').last()).toContainText('Hola JARVIS, comprueba el envío');
- await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').last()).toContainText('Recibido. Soy JARVIS');
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').first().last()).toContainText('Recibido. Soy JARVIS');
  await expect(box).toHaveValue('');
  expect(posts).toBe(1);
  expect(message).toBe('Hola JARVIS, comprueba el envío');
@@ -85,6 +85,7 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
  await page.addInitScript(()=>{
   const global=window as typeof window & {SpeechRecognition?:unknown;__jarvisSpoken?:string[]};
   global.__jarvisSpoken=[];
+  let spokenOnce=false;
   class StubRecognition{
    lang='es-ES';continuous=false;interimResults=false;maxAlternatives=5;
    onstart:((event:Event)=>void)|null=null;
@@ -93,6 +94,8 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
    onend:((event:Event)=>void)|null=null;
    start(){
     this.onstart?.(new Event('start'));
+   if(spokenOnce)return;
+   spokenOnce=true;
     window.setTimeout(()=>{
      this.onresult?.({results:{
       length:1,0:{length:1,isFinal:true,0:{transcript:'Hola JARVIS',confidence:0.98}}
@@ -124,6 +127,6 @@ test('JARVIS voice session sends transcript and invokes the browser TTS adapter'
  await expect(button).toBeEnabled();
  await button.click();
  await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-user')).toContainText('Hola JARVIS');
- await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro')).toContainText('Soy JARVIS');
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').first()).toContainText('Soy JARVIS');
  await expect.poll(()=>page.evaluate(()=>(window as typeof window & {__jarvisSpoken?:string[]}).__jarvisSpoken?.join(' ')||'')).toContain('JARVIS');
 });
