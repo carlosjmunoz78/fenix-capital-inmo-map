@@ -72,7 +72,7 @@
   "docs": [
     "cerebro/jarvis/boost-001/CUT56_ACCEPTANCE_PROD_NEXT_GATES_2026-11-07.md"
   ],
-  "next_block": "CUT58_INDEPENDENT_ADVERSARIAL_EVAL_AND_LRN_REAL_INGEST",
+  "next_block": "CUT59_COMPANY_REGISTRY_AND_17_ENGINE_EVIDENCE_RECONCILIATION_READ_ONLY",
   "cut57": {
     "version": "CUT57-v0.1",
     "type": "OWNER_POLICY_CURATED_CANDIDATE_ONLY",
@@ -85,5 +85,33 @@
     "test_run_id": 42384480964,
     "artifact_id": 13579077487,
     "next_block": "CUT58_INDEPENDENT_ADVERSARIAL_EVAL_AND_LRN_REAL_INGEST"
+  },
+  "cut58": {
+    "version": "CUT58-v0.1",
+    "status": "LAB_ADVERSARIAL_QA_PASS_PHYSICAL_LRN_BLOCKED",
+    "second_path_method": "INDEPENDENT_CODE_DETERMINISTIC_HEURISTIC_NOT_EXTERNAL_TRIBUNAL",
+    "adversarial_run_id": 42385297978,
+    "adversarial_tests_pass": 11,
+    "adversarial_artifact_id": 13579725200,
+    "candidate_count": 5,
+    "second_path_pass": 5,
+    "independent_external_tribunal_pass": false,
+    "physical_lrn_gate_run_id": 42385581474,
+    "physical_lrn_tests_pass": 7,
+    "physical_lrn_artifact_id": 13579670837,
+    "lrn_target_project_ref": "cluhljgonannaafpmblx",
+    "lrn_target_company_registered": false,
+    "lrn_target_engine_green_count": 0,
+    "legacy_source_project_ref": "hnqlnvakzaywtafeiybt",
+    "legacy_engine_green_count": 11,
+    "legacy_engine_ready_count": 2,
+    "legacy_engine_blocked_count": 4,
+    "legacy_state_as_of": "2026-10-13",
+    "lrn_physical_ingest_done": false,
+    "lrn_memory_applied": 0,
+    "prod_authorized": false,
+    "additional_ai_calls": 0,
+    "paid_ai_budget_status": "PAUSED_PENDING_BILLING_RECONCILIATION",
+    "required_docs": "cerebro/jarvis/boost-001/CUT58_ADVERSARIAL_LRN001_PHYSICAL_GATE_2026-11-07.md"
   }
 }
