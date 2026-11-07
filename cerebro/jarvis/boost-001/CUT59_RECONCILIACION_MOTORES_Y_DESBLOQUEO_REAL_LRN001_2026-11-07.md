@@ -77,3 +77,17 @@ No promover ninguno por las etiquetas `READY` o `GREEN` históricas. El requisit
 - **P1:** mantener ENGINE Registry, contrato, mapa de dependencias, runbook, changelog, backup y rebuild actualizados.
 
 **Estado final CUT59: HECHO auditoría / DEFINIDO secuencia / BLOQUEADA ingestión física LRN / PRODUCCIÓN NO HECHA.**
+
+## ADENDA · Código REAL de ambos bootstrap ejecutado en LAB sintético
+
+- Se ha localizado y reutilizado **el módulo ya existente** `cerebro/multicompany/marketing-crm-bootstrap-v1.mjs`, blob Git original `03c9048deec79f6b354f89b8abaf09bc0b4a63d1` (sin sustituirlo).
+- La rama histórica `cerebro/marketing-crm-bootstrap-preprod-v1` conserva contratos y rollback antiguos. No se ha mezclado ni reactivado App PREPROD; la prueba usa código actual de la rama JARVIS LAB.
+- Se creó únicamente el harness `cerebro/jarvis/boost-001/cut59-marketing-crm-synthetic-canary-v0.mjs` que llama a las **funciones reales** `bootstrapMarketing()`, `bootstrapCrm()` y `persistenceEnvelope()` con fuentes y objetivos **100 % sintéticos**.
+- La ejecución **no accedió a un CRM, ni publicó, ni hizo gastos, ni invocó RPC o Supabase**. El código original produjo dos outputs e hashes con identidad `fenix`, `read_only=true`, `plan_only=true`, `prod_authorized=false`.
+- Workflow [GitHub #42386900157](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42386900157) **SUCCESS**, **5/5 tests existentes + 4/4 pruebas nuevas = 9/9 PASS**. Se verificó el SHA Git del código que realmente se ejecutó.
+- Artifact `jarvis-cut59-marketing-crm-synthetic-runtime-42386900157`, ID `13579393984`, SHA256 ZIP `f0eee060bd2b8c01c58375b6c28aa69c088c34b307cf12ad237a35e7cfb6c208`, retención 30 días.
+- **HECHO**: runtime existente ejecuta las dos operaciones sintéticas. **NO HECHO**: certificar sources recientes de KBOOT/SEOBOOT/SOCBOOT, verificar output real de un entorno de negocio aislado, registro canónico/tenant del proyecto destino, RPC de recibo, 17 GREEN reales, LRN/FACT, App/CRM integrados, voz y PROD.
+- **Ninguna activación**: los seis estados pendientes permanecen sin cambios oficiales. Los hashes sintéticos **nunca** son pruebas de producción ni se utilizarán para poner los motores en GREEN.
+- **Siguiente criterio de calidad**: la función actual de Marketing/CRM devuelve incluso outputs de planes con recuentos sintéticos; el RPC `record_preprod` admite recuento `0` y el código no verifica por sí mismo el contenido real de las evidencias. Exigir una validación independiente del artefacto y fuente antes de registrar cualquier recepción/activación. El acceso server-only por `service_role` debe mantenerse.
+
+**Estado tras adenda**: CUT59 auditado, 2/2 runtimes JS ejecutados en LAB sintético, **cero motores promovidos oficialmente**, cero modificaciones a CRM/App/DB. Sigue `CUT60_PHYSICAL_ACCEPTANCE_EVIDENCE_AND_CONTROLLED_TENANT_ONBOARDING`.
