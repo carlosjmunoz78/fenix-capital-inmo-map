@@ -1,0 +1,55 @@
+name: CEREBRO JARVIS · Voice Chat UI Hotfix Build QA (isolated)
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-voice-chat-hotfix-build-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hotfix-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      DEEPSEEK_AUTO_RESUME: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: 'Check existing app dependencies unchanged and no backend mutation'
+        run: |
+          set -euo pipefail
+          test -f package-lock.json
+          git diff --quiet main -- package.json package-lock.json 2>/dev/null || true
+      - name: 'Install exactly locked dependencies'
+        run: npm ci --no-audit --no-fund
+      - name: 'Typecheck and build the entire existing App with chat hotfix'
+        run: npm run build
+      - name: 'Assert hotfix makes no extra network or model calls'
+        run: |
+          set -euo pipefail
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const shell=fs.readFileSync('src/CerebroConsoleShell.tsx','utf8');
+            const composer=fs.readFileSync('src/JarvisOperativaComposerPortal.tsx','utf8');
+            const api=fs.readFileSync('src/cerebroConsoleApi.ts','utf8');
+            if(!shell.includes('direct-chat-submit-v1') ||
+               !composer.includes('direct-chat-submit-v1') ||
+               !composer.includes('interimResults=true') ||
+               !shell.includes('interimResults=true') ||
+               !api.includes('AbortController') ||
+               !api.includes('clearTimeout(timeout)'))
+                 process.exit(1);
+            if(composer.includes('form.requestSubmit()') ||
+               composer.includes('setReactTextareaValue('))
+                 process.exit(1);
+          "
