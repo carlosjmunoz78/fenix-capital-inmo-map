@@ -1,0 +1,51 @@
+name: CEREBRO JARVIS CUT56 · LRN Candidate Safe Handoff QA
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-weekend-lab-20261106
+    paths:
+      - '.github/workflows/cerebro-jarvis-cut56-lrn-handoff-qa.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  safe-handoff:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Retrieve immutable tribunal verdict, not raw customer data
+        uses: actions/download-artifact@v4
+        with:
+          name: jarvis-cut56-offline-semantic-review-42383414151
+          path: ${{ runner.temp }}/verified-verdict
+          run-id: 42383414151
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+      - name: Run guarded LRN handoff tests; no API, no PROD
+        env:
+          JARVIS_CUT56_VERDICT_FIXTURE: ${{ runner.temp }}/verified-verdict/jarvis-cut56-semantic-verdict.json
+        run: |
+          set -euo pipefail
+          node --test cerebro/jarvis/boost-001/cut56-lrn-safe-handoff-v0.test.mjs
+          node cerebro/jarvis/boost-001/cut56-lrn-safe-handoff-v0.mjs "$JARVIS_CUT56_VERDICT_FIXTURE" "$RUNNER_TEMP/cut56-lrn-safe-handoff.json"
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            const x=JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP+'/cut56-lrn-safe-handoff.json'));
+            if(x.total!==5||x.quarantined!==5||x.released!==0||
+               x.physical_lrn_ingest_verified!==false||x.production_ready!==false)process.exit(1);
+          "
+      - name: Store candidate quarantine events as auditable data only
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-cut56-lrn-quarantine-${{ github.run_id }}
+          path: ${{ runner.temp }}/cut56-lrn-safe-handoff.json
+          retention-days: 30
+          if-no-files-found: error
