@@ -5,7 +5,7 @@
   "engine_id": "SEO-001",
   "environment": "LAB",
   "version": "1.0.0",
-  "status": "PREPARED_NOT_EXECUTED",
+  "status": "COMPLETED_HOLD",
   "prior_artifact": "cerebro/seo-enterprise/v2/registry/seo001-batch2-wordpress-physical-qa-2026-11-07.json",
   "learning_contract_id": "SEO001_LEARNED_10_GATES_20261108",
   "lessons": {
@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108",
+  "workflow_trigger_nonce": "CONSUMED_SINGLE_BATCH_20261108",
   "briefs": [
     {
       "company_id": "fenix",
@@ -128,5 +128,13 @@
     "fix_commit": "7d7de2913a3c15718c1735204af7350b0ee841a4",
     "this_trigger": "PRECHECK_CORRECTION_ONLY_NOT_SECOND_BATCH",
     "no_model_retry": true
-  }
+  },
+  "executed_run_id": 42426883897,
+  "executed_artifact_id": 13596355315,
+  "model_calls_consumed": 2,
+  "model_calls_remaining_this_batch": 0,
+  "release_status": "NOT_PERFECT_DO_NOT_PUBLISH",
+  "result_path": "cerebro/seo-enterprise/v2/registry/seo001-one-batch-pilot-result-2026-11-08.json",
+  "feedback_path": "cerebro/seo-enterprise/v2/training-pilots/SEO_D32_LEARNED_ONE_BATCH_20261108_FEEDBACK.json",
+  "another_generation_requires_new_batch_manifest_and_owner_authorization": true
 }
