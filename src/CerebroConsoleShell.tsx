@@ -1,14 +1,21 @@
-import {useEffect,useRef,useState,type FormEvent} from 'react';
+import {useContext,useEffect,useRef,useState,type FormEvent} from 'react';
 import {useLocation,useNavigate} from 'react-router-dom';
 import {BrainCircuit,ChevronLeft,Mic,MicOff,Send,ShieldCheck,Square} from 'lucide-react';
 import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
+import {JarvisConversationBridgeContext,type JarvisConversationDriver} from './jarvisConversationBridge';
 import './cerebro-console.css';
 
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
-const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
+const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'professional_direct',response_length:'concise',speech_rate:'1.00',speech_pitch:'0.94'};
+function normalizeJarvisPreferences(source:CerebroPreferences={}):CerebroPreferences{
+ const result={...DEFAULT_VOICE_PREFERENCES,...source};
+ // Legacy overly affectionate preset cannot override the approved JARVIS persona.
+ if(result.tone==='warm_close_caring'){result.tone='professional_direct';result.speech_pitch='0.94';}
+ return result;
+}
 type GatewayState='closed'|'checking'|'ready'|'error';
 type ChatLine={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
 type OwnerAccess='checking'|'allowed'|'denied';
@@ -21,6 +28,7 @@ function renderMessage(text:string){
 
 export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
+ const jarvisDriverRef=useContext(JarvisConversationBridgeContext);
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
  const [ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
@@ -118,7 +126,7 @@ export default function CerebroConsoleShell(){
   if(!chatReady)return;
   fetchCerebroConsolePreferences().then(({status,data})=>{
    if(cancelled||status!==200||!data?.preferences)return;
-   setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   setVoicePreferences(normalizeJarvisPreferences(data.preferences));
   });
   return()=>{cancelled=true};
  },[chatReady]);
@@ -453,18 +461,18 @@ export default function CerebroConsoleShell(){
 
  async function sendText(text:string,voiceConfidence:number|null=null,fromVoice=false){
   const clean=text.trim();
-  if(!clean||!chatReady||sendingRef.current)return;
+  if(!clean||!chatReady||sendingRef.current)return false;
   if(fromVoice&&voicePausedRef.current){
    if(voiceResumeRequested(clean)){
     setMessage('');
     setVoiceError('');
     resumeSpeech();
-    return;
+    return true;
    }
    if(voiceInterruptRequested(clean)){
     setMessage('');
     setVoiceError('');
-    return;
+    return true;
    }
    if(voiceNeedsClarification(clean,voiceConfidence)){
     const warning=`He entendido «${clean}», pero no estoy segura de haberlo oído bien. Repítemelo, por favor.`;
@@ -472,7 +480,7 @@ export default function CerebroConsoleShell(){
     setVoiceError(warning);
     setLines(current=>[...current,{role:'cerebro',text:warning}]);
     speakAndResume(warning);
-    return;
+    return true;
    }
    discardPausedSpeech();
   }
@@ -482,7 +490,7 @@ export default function CerebroConsoleShell(){
    setVoiceError(warning);
    setLines(current=>[...current,{role:'cerebro',text:warning}]);
    speakAndResume(warning);
-   return;
+   return true;
   }
   if(fromVoice&&voiceNeedsManualConfirmation(clean,voiceConfidence,Boolean(pendingActionRef.current))){
    const warning='No voy a usar una transcripción de baja confianza para confirmar una acción. Di «sí» otra vez con claridad o escríbelo manualmente.';
@@ -490,7 +498,7 @@ export default function CerebroConsoleShell(){
    setLines(current=>[...current,{role:'user',text:clean},{role:'cerebro',text:warning}]);
    setMessage('');
    speakAndResume(warning);
-   return;
+   return true;
   }
   setVoiceError('');
   setLines(current=>[...current,{role:'user',text:clean}]);
@@ -506,7 +514,7 @@ export default function CerebroConsoleShell(){
     readContextRef.current=data.read_context;
     setReadContext(data.read_context);
    }
-   if(data?.preferences)setVoicePreferences({...DEFAULT_VOICE_PREFERENCES,...data.preferences});
+   if(data?.preferences)setVoicePreferences(normalizeJarvisPreferences(data.preferences));
    if(Object.prototype.hasOwnProperty.call(data??{},'learning_candidate')){
     const next=data?.learning_candidate??null;
     learningCandidateRef.current=next;
@@ -524,12 +532,14 @@ export default function CerebroConsoleShell(){
    sendingRef.current=false;
    setSending(false);
    if(voiceSessionRef.current)speakAndResume(response,Boolean(data?.status?.startsWith('ACTION_')),{...(data??{}),source_question:clean});
+   return status>=200&&status<300&&Boolean(data?.message);
   }catch{
    const response='No he podido contactar con CEREBRO Gateway.';
    setLines(current=>[...current,{role:'cerebro',text:response}]);
    sendingRef.current=false;
    setSending(false);
    if(voiceSessionRef.current)speakAndResume(response);
+   return false;
   }
  }
 
@@ -618,6 +628,17 @@ export default function CerebroConsoleShell(){
   event.preventDefault();
   await sendText(message,null,false);
  }
+ // A private React driver shares canonical send and voice logic with the
+ // visual composer. Neither synthetic input events nor DOM submit are used.
+ useEffect(()=>{
+  if(!jarvisDriverRef||!chatReady||ownerAccess!=='allowed')return;
+  const driver:JarvisConversationDriver={
+   sendText:(text)=>sendText(text,null,false),
+   toggleVoice:()=>toggleVoiceSession()
+  };
+  jarvisDriverRef.current=driver;
+  return()=>{if(jarvisDriverRef.current===driver)jarvisDriverRef.current=null};
+ });
 
  useEffect(()=>{
   return()=>{
