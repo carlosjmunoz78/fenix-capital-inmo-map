@@ -36,11 +36,11 @@ test('actual live B3 is OFF without grants, no restored backup evidence, no PROD
 test('rejects forged duplicate or missing SQL consumers',()=>{
  throws(x=>x.live_database_state.functions.pop(),'CONSUMER_GRAPH_CHANGED');
  throws(x=>x.live_database_state.functions[0].routine=x.live_database_state.functions[1].routine,'MISSING_OR_FABRICATED_RPC_CONSUMER');
- throws(x=>x.live_database_state.functions[0].registry=false||x.live_database_state.functions[0].onboarding===true,'MISSING_OR_FABRICATED_RPC_CONSUMER');
+ throws(x=>Object.assign(x.live_database_state.functions[0],{registry:false,onboarding:false,engines:false,marketing:false,lrn:false}),'MISSING_OR_FABRICATED_RPC_CONSUMER');
 });
 test('rejects missing FK dependency, new RLS consumer grant, changed data',()=>{
  throws(x=>x.live_database_state.foreign_keys.pop(),'CONSUMER_GRAPH_CHANGED');
- throws(x=>x.live_database_state.foreign_keys[0].child='unrelated','FOREIGN_KEY_CHAIN_UNVERIFIED');
+ throws(x=>x.live_database_state.foreign_keys.find(k=>k.child==='cerebro_lrn001_continuation_preprod').child='unrelated','FOREIGN_KEY_CHAIN_UNVERIFIED');
  throws(x=>x.live_database_state.protected_tables[0].rls=false,'TABLE_RLS_OR_ACCESS_POLICY_DRIFT');
  throws(x=>x.live_database_state.protected_tables[0].policy_count=1,'TABLE_RLS_OR_ACCESS_POLICY_DRIFT');
  throws(x=>x.live_database_state.engine_rows_count=17,'TARGET_STATE_CHANGED');
