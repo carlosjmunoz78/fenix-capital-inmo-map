@@ -125,17 +125,21 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
   if(!endpoint)return{status:0,data:null};
   const headers=await authHeaders();
   if(!headers)return{status:401,data:null};
+  const controller=new AbortController();
+  const timeout=window.setTimeout(()=>controller.abort(),20000);
   try{
     const response=await fetch(endpoint,{
       method:'POST',
       headers,
       body:JSON.stringify({message,pending_action,read_context,learning_candidate,conversation_context}),
-      cache:'no-store'
+      cache:'no-store',
+      signal:controller.signal
     });
     let data:CerebroConsoleChatResponse|null=null;
     try{data=await response.json() as CerebroConsoleChatResponse}catch{data=null}
     return{status:response.status,data};
   }catch{return{status:0,data:null}}
+  finally{window.clearTimeout(timeout)}
 }
 
 export function fetchCerebroConsoleHealth(){
