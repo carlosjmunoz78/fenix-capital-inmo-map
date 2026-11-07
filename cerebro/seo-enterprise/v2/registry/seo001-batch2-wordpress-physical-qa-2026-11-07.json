@@ -579,6 +579,84 @@
     "publication": "OFF",
     "automated_next_batch": "BLOCKED",
     "additional_subscription_cost_eur": 0,
-    "new_paid_ai_call_count": 0
+    "new_paid_ai_call_count": 0,
+    "superseded_by": "partner_form_dedicated_transport_2026_11_08"
+  },
+  "partner_form_dedicated_transport_2026_11_08": {
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "WORDPRESS_PROD_DRAFT_ONLY",
+    "version": "0.2.0",
+    "status": "NEGATIVE_CONTRACT_VERIFIED_POSITIVE_E2E_PENDING",
+    "wordpress_source": "plugins/cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "github_source": "cerebro/seo-enterprise/v2/wordpress/cerebro-seo001-partner-form-v0.php",
+    "github_tests": "cerebro/seo-enterprise/v2/tests/seo001-partner-contract.test.mjs",
+    "endpoint": "POST /wp-json/cerebro-seo001/v0/partner-lead",
+    "four_scoped_ids": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "reuses_existing": "fenix_cerebro_lead_payload + fenix_cerebro_forward_lead WITHOUT MODIFYING_EITHER",
+    "server_structured_payload": [
+      "agency",
+      "partner_need",
+      "funnel=PARTNER",
+      "source=web_agency_partner",
+      "landing_id",
+      "consent_privacy",
+      "consent_marketing"
+    ],
+    "source_routing": "WEB_AGENCY_PARTNER_PRESERVED_IN_SOURCE_PAYLOAD_ON_SUCCESS; CRM_TASK_ASSIGNMENT_STILL_GENERIC_BELEN_DIR_NOT_PARTNER_SPECIFIC",
+    "negative_http_tests": [
+      {
+        "test": "privacy_required",
+        "http": 422,
+        "code": "seo001_partner_privacy_required",
+        "pass": true
+      },
+      {
+        "test": "agency_required",
+        "http": 422,
+        "code": "seo001_partner_identity_required",
+        "pass": true
+      },
+      {
+        "test": "need_valid",
+        "http": 422,
+        "code": "seo001_partner_need_invalid",
+        "pass": true
+      },
+      {
+        "test": "landing_scoped",
+        "http": 422,
+        "code": "seo001_partner_landing_invalid",
+        "pass": true
+      },
+      {
+        "test": "contact_identifier_required",
+        "http": 422,
+        "code": "identifier_required",
+        "pass": true
+      }
+    ],
+    "client_checks": "10_OF_10_IN_MEMORY_PASS",
+    "php_lint": "PASS",
+    "rest_route_registered": true,
+    "nonprod_happy_path": "NOT_EXECUTED",
+    "no_test_lead_created": true,
+    "existing_crm_code_modified": false,
+    "existing_wp_lead_bridge_modified": false,
+    "supabase_modified": false,
+    "live_plugins_global_modified": false,
+    "physical_mobile_qa": "UNVERIFIED_NEEDS_REAL_MOBILE_VIEWPORT",
+    "desktop_form_capture": "SEEN_IN_AUTHENTICATED_OPERA_52716",
+    "legal_editorial_approval": "PENDING",
+    "release_gate": "HOLD",
+    "new_subscriptions_eur": 0,
+    "new_paid_ai_calls": 0,
+    "restore": "WordPress journal change 2243 or GitHub v0.1.2 snapshot commit 5329fa3c35d9db23d1ead94bd4b41fec262b5b14",
+    "next_gate": "HUMAN_SUPERVISED_REAL_B2B_LEAD_VERIFY_SOURCE_PAYLOAD_TASK_OWNER_NO_DUPLICATES_PLUS_REAL_MOBILE_QA_AND_APPROVAL"
   }
 }
