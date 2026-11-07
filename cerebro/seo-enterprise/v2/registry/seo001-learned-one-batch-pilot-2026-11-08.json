@@ -119,5 +119,14 @@
     }
   ],
   "requested_at": "2026-11-08",
-  "execution_rule": "EXACT_ONE_GITHUB_PR22_HEAD_COMMIT_MATCH; NO_RETRIES; ARTIFACTS_LAB_ONLY"
+  "execution_rule": "EXACT_ONE_GITHUB_PR22_HEAD_COMMIT_MATCH; NO_RETRIES; ARTIFACTS_LAB_ONLY",
+  "preflight_tooling_repair": {
+    "prior_workflow_run_id": 42426798547,
+    "model_requests_made": 0,
+    "prior_status": "FAILED_BEFORE_ANY_PROVIDER_STEP",
+    "failure": "TEMP_PATH_MAP_CALLBACK_SIGNATURE",
+    "fix_commit": "7d7de2913a3c15718c1735204af7350b0ee841a4",
+    "this_trigger": "PRECHECK_CORRECTION_ONLY_NOT_SECOND_BATCH",
+    "no_model_retry": true
+  }
 }
