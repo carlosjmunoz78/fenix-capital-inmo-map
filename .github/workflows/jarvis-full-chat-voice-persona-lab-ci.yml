@@ -64,7 +64,7 @@ jobs:
           NODE
       - name: Install Chromium for browser acceptance
         run: npx playwright install chromium
-      - name: Owner-session fixture browser QA - chat, interim dictation and TTS adapter
+      - name: Isolated desktop and mobile-responsive browser QA - chat, dictation and voice
         run: npx playwright test tests/jarvis-voice-persona-react-bridge-lab.spec.ts tests/jarvis-tts-does-not-wait-for-secondary-mic-lab.spec.ts --project=desktop-chromium --reporter=line
       - name: Archive failure-only screenshots and traces (synthetic data only)
         if: failure()
@@ -80,3 +80,5 @@ jobs:
 # CI diagnostic: distinguish absent male voice vs suppressed browser speech in LAB.
 
 # Rebuild with coherent Web Speech mock utterance+voice and caught native errors.
+
+# Regression: 390px Android-like viewport verifies text submission and response.
