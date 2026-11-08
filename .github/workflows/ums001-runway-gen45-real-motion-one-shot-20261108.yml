@@ -1,0 +1,43 @@
+name: CEREBRO UMS001 Runway Gen45 real motion physical one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-runway-gen45-realvideo-lab-20261108
+    paths:
+      - 'cerebro/media-studio/v2/orders/start-runway-real-motion-once-20261108.trigger'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-runway-real-motion-20261108
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event.head_commit.message == 'CEREBRO_RUNWAY_REAL_MOTION_ONESHOT_START_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 43
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      RUNWAY_PILOT_ONE_TIME: 'yes'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check JSON contract and estimated maximum of $1.80
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('cerebro/media-studio/v2/orders/runway-45-andalucia-real-motion-20261108.json'))
+          assert x['batch_max_usd']==1.80 and x['environment']=='LAB'
+          assert len(x['shots'])==3 and x['model']=='runwayml/gen-4.5'
+          assert not x['autopublish'] and not x['automatic_paid_retry'] and not x['auto_reload']
+          print('RUNWAY_PHYSICAL_BUDGET_CONTRACT_GREEN; 3x 5sec; $1.80 max estimate')
+          PY
+      - name: Generate THREE real moving video clips with Runway, persist immediately
+        run: python3 cerebro/media-studio/v2/runtime/ums001_runway_real_motion_once_20261108.py
+      - name: Preserve all output clips and status for user review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_RUNWAY_ANDALUCIA_REAL_MOTION_${{ github.run_id }}
+          path: /tmp/ums-runway-real-motion/
+          retention-days: 30
+          if-no-files-found: warn
