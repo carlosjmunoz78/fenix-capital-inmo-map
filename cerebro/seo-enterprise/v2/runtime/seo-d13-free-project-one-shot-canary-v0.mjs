@@ -60,7 +60,9 @@ export function validateSeoV4Brief(b){
   'SEO001-FENIX-LRN-20261108-B2C-001':'PARTICULARES',
   'SEO001-FENIX-LRN-20261108-B2B-002':'INMOBILIARIAS',
   'SEO001-FENIX-AR20261108-B2C-001':'PARTICULARES',
-  'SEO001-FENIX-AR20261108-B2B-002':'INMOBILIARIAS'
+  'SEO001-FENIX-AR20261108-B2B-002':'INMOBILIARIAS',
+  'SEO001-FENIX-AR20261108V2-B2C-001':'PARTICULARES',
+  'SEO001-FENIX-AR20261108V2-B2B-002':'INMOBILIARIAS'
  };
  if(!b||b.company_id!=='fenix'||b.engine_id!=='SEO-001'||b.environment!=='LAB'||
     b.version!=='V4-CANDIDATE'||b.content_type!=='ARTICLE'||
@@ -88,10 +90,11 @@ export function validateSeoV4Brief(b){
 
 /* Next one-shot learning pilot only. Prior V4 prompts are unchanged. */
 function buildLearnedSeoPilotPrompt(b) {
- const file=b.work_id.startsWith('SEO001-FENIX-AR20261108-')? 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-2026-11-08.json':'cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json';
+ const file=b.work_id.startsWith('SEO001-FENIX-AR20261108V2-')? 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-v2-2026-11-08.json':b.work_id.startsWith('SEO001-FENIX-AR20261108-')? 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-2026-11-08.json':'cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json';
  const m=JSON.parse(fs.readFileSync(file,'utf8'));
  const keys=['L01_CANONICAL_SEMANTIC_H1','L02_POST_HEADER','L03_PAGE_TEMPLATE','L04_BREADCRUMBS','L05_IMAGES','L06_PERSONA_FORMS','L07_PRIVACY','L08_EDITORIAL','L09_FULL_VISUAL','L10_RELEASE'];
- const newRepair=m.batch_id==='SEO001-AUTOREPAIR-PILOT-20261108-V1';
+ const v2Repair=m.batch_id==='SEO001-AUTOREPAIR-PILOT-20261108-V2';
+ const newRepair=v2Repair||m.batch_id==='SEO001-AUTOREPAIR-PILOT-20261108-V1';
  if(m.company_id!=='fenix'||m.engine_id!=='SEO-001'||m.environment!=='LAB'||
     (!newRepair&&m.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE')||m.learning_contract_id!=='SEO001_LEARNED_10_GATES_20261108'||
     m.max_batch_runs!==1||m.max_real_model_calls!==(newRepair?6:2)||m.max_calls_per_item!==(newRepair?3:1)||m.allow_retries!==newRepair||
@@ -104,7 +107,7 @@ function buildLearnedSeoPilotPrompt(b) {
  if(!expected||b.learning_contract_id!==m.learning_contract_id||
     JSON.stringify(expected)!==JSON.stringify(b)||
     (newRepair&&(m.status!=='PREPARED_NOT_EXECUTED'||
-      m.workflow_trigger_nonce!=='TRIGGER_ONCE_20261108_AUTOREPAIR_V1'||m.allow_new_subscriptions!==false||
+      m.workflow_trigger_nonce!==(v2Repair?'TRIGGER_ONCE_20261108_AUTOREPAIR_V2':'TRIGGER_ONCE_20261108_AUTOREPAIR_V1')||m.allow_new_subscriptions!==false||
       m.allow_wordpress_writes!==false||m.allow_wordpress_publication!==false||m.allow_image_api_calls!==false||
       m.owner_cost_ceiling_eur!==0)))
     throw Error('SEO_LEARNED_BRIEF_DRIFT');
