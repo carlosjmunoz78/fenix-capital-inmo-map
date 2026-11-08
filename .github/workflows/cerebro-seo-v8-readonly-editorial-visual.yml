@@ -8,6 +8,9 @@ on:
       - 'cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs'
       - 'cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs'
       - 'cerebro/seo-enterprise/v2/registry/seo001-v10-operational-readiness-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v11-evidence-gap-role-training.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v11-evidence-gap-role-training-2026-11-08.json'
 permissions:
   contents: read
 concurrency:
@@ -29,6 +32,11 @@ jobs:
           node --check cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs
           node cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs /tmp/seo001-v10-readiness
+      - name: V11 real evidence gap specialist knowledge routing and negative tests
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v11-evidence-gap-role-training.test.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs /tmp/seo001-v11-role-handoffs
       - name: Use existing Playwright dependencies
         run: npm ci --ignore-scripts
       - name: Independent responsive LAB screenshots with hard publication HOLD
@@ -87,6 +95,14 @@ jobs:
         with:
           name: seo001-v10-continuous-readiness-LAB-HOLD
           path: /tmp/seo001-v10-readiness/readiness.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Save V11 specialist evidence routing without private data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v11-evidence-role-handoffs-LAB-HOLD
+          path: /tmp/seo001-v11-role-handoffs/seo001-v11-handoffs.json
           retention-days: 7
           if-no-files-found: warn
       - name: Zero external effects
