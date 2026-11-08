@@ -24,3 +24,20 @@
 
 ## Next block único
 Recuperar las dos salidas de voz ya existentes en un runtime con descarga autorizada; auditar que sean castellano de España; montar voiceover con mezcla/ducking de banda original, sincronizar subtítulos y exportar MP4 V1 nuevos sin sobrescribir V0. Revisar físicamente audio y vídeo completos; solo tras QA etiquetar APPROVED y archivar en Notion.
+
+
+## CIERRE TÉCNICO LAB V2 · 2026-11-09 · actualiza el V0 anterior, NO elimina originales
+**HECHO:** recuperar sin regeneración los dos MP3 HeyGen es-ES, workflow https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42536725622 (SUCCESS) y artifact 13639955304. Runner no tenía ffprobe; un primer run falló solo por verificación; segundo run success y ffprobe local confirmó MP3 16.744/18.808 s.
+- Dos MP4 nuevos V1 voz+música+subtítulos exportados. Los V0 originales se conservaron.
+- Dos derivados V2 acortan el outro para retención con fundido audiovisual 0,22 s; los V1 originales se conservan.
+- **INSTAGRAM V2** (19,955 s), SHA256 206f16630d9258f944319d4ecf6309a170a79da65a90db9ae85a5f2c05a51fb8:
+  https://drive.google.com/file/d/18qQaGd3GHcANxkltCNCyqhxoXvMFKQd8/view
+- **FACEBOOK V2** (22,262 s), SHA256 52c5f1ea3e125c1f919764ff4003a1b667beba15708b0e9cafd107b1f53ebdd8:
+  https://drive.google.com/file/d/1XwjjfvyP6awkKAA_iwTCWVowayRLwcBF/view
+- Fuentes de voz recuperadas (archivadas en Drive):
+  IG https://drive.google.com/file/d/1mhHogUn8NHLnLwHk-YvXJdJqyxcPm0et/view
+  FB https://drive.google.com/file/d/10IBSnaVSTQsgcr_9d-A5JN06FfTVFjID/view
+- Registro QA y estado: https://drive.google.com/file/d/17kpRWzMhJBkA6xTQ472mt9Id5UPKjujJ/view
+- Manifest QA: https://drive.google.com/file/d/1EL52UpYEhNq1q2aDW_C8pw_vJlcL5GKz/view
+- Verificados códecs H264/AAC, 1080×1920, nivel máximo -2,1/-3,2 dBFS, ambas voces mezcladas (correlación de señal), primer fotograma con hook y logo en cierre. Margen de subtítulos 430 px del borde inferior. Nuevas generaciones de imagen/vídeo/voz en este bloque: 0.
+- **PENDIENTE**: escucha editorial para acreditar acento castellano y prosodia real (locale es-ES no prueba acento); QA visual completa en apps Instagram/Facebook; derechos y claims; casting y escenas sintéticas; CTA/medición real. `APPROVED=false`, `PUBLISH=false`. No tocar PROD, main, App/CRM, WordPress, SEO, DNS o Supabase.
