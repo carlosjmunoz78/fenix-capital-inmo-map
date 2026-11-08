@@ -47,8 +47,8 @@ export function buildSeoEvidenceHandoffs({root=process.cwd(),registry,readiness}
    const pack=read(root,ROOT+team.knowledge_pack);
    if(pack.department_id!==dept||pack.company_id!=='fenix'||pack.engine_id!=='SEO-001'||
       !pack.knowledge?.competencies?.includes(p.competency)||
-      pack.training?.real_exercises_passed!==0||
-      pack.training?.actual_passes!==0)fail('SPECIALIST_KNOWLEDGE_NOT_BOUND');
+      pack.training?.evaluation?.real_exercises_passed!==0||
+      pack.training?.evaluation?.actual_passes!==0)fail('SPECIALIST_KNOWLEDGE_NOT_BOUND');
    roles.push({gate:p.gate,owner_role:p.owner_role,knowledge_pack:team.knowledge_pack,
     required_proof:p.required_proof,missing_proof_type:p.category,
     next_safe_action:p.next_safe_action,failed_example:p.rejected_faux_proof,
