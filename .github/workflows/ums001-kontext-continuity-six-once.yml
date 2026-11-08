@@ -1,0 +1,57 @@
+name: CEREBRO UMS001 FLUX Kontext facial continuity 6 views LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-kontext-continuity-premium-lab-v0-20261108
+    paths:
+      - cerebro/media-studio/v2/characters/START_KONTEXT_PILOT_6_ONCE.trigger
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ums001-6-kontext-face-continuity-20261108
+  cancel-in-progress: false
+jobs:
+  pilot:
+    if: github.event.head_commit.message == 'UMS001_KONTEXT_6_PAID_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      CEREBRO_KONTEXT_ONE_SHOT: 'yes'
+      CEREBRO_CAST_REFERENCE_DIR: '/tmp/ums001-cast-originals'
+      CEREBRO_KONTEXT_OUTPUT_DIR: '/tmp/ums001-kontext-premium-6'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Retrieve 16 original image references from known same-repository LAB run
+        uses: actions/download-artifact@v4
+        with:
+          name: UMS001_FLUX_CASTING_16_ORIGINAL_42493007444
+          run-id: 42493007444
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/ums001-cast-originals
+      - name: Validate actor uniqueness, original SHA256 and max $0.24 before submission
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, hashlib
+          root=pathlib.Path('cerebro/media-studio/v2')
+          r=json.loads((root/'characters/actor-registry-unique-31-lab-v0.json').read_text())
+          p=json.loads((root/'characters/kontext-continuity-6-image-pilot-20261108.json').read_text())
+          assert len(r['actors'])==31 and len(set(x['actor_id'] for x in r['actors']))==31
+          assert p['environment']=='LAB' and len(p['pilots'])==3 and p['max_estimated_spend_usd']==0.24
+          assert not p['no_autopublish'] == False and p['no_paid_retry'] and p['autorenew']==False
+          for g in p['pilots']:
+            b=pathlib.Path('/tmp/ums001-cast-originals',g['id']+'.webp').read_bytes()
+            assert hashlib.sha256(b).hexdigest()==g['expected_sha256']
+          print('KONTEXT_CAST_REFERENCE_AND_BUDGET_GATE_GREEN')
+          PY
+      - name: Generate two different camera views of each original couple with FLUX Kontext Pro
+        run: python3 cerebro/media-studio/v2/runtime/ums001_kontext_continuity_6_once.py
+      - name: Preserve every output and status in private artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_KONTEXT_6_IDENTITY_CONTINUITY_${{ github.run_id }}
+          path: /tmp/ums001-kontext-premium-6/
+          retention-days: 30
+          if-no-files-found: warn
