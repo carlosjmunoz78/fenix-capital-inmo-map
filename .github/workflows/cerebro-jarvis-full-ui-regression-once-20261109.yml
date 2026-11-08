@@ -1,4 +1,4 @@
-name: CEREBRO JARVIS Full UI Regression Mocked ONE SHOT 20261109
+name: CEREBRO JARVIS V2 Full UI Regression Isolated Corrected ONE SHOT 20261109
 on:
   push:
     branches:
@@ -23,10 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+          ref: ${{ github.sha }}
           persist-credentials: false
       - name: Assert pinned NEW source
-        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+        run: |\n          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"\n          git fetch --depth=1 origin 862ee543036070bc2cbb3ccaffc6c81af6d6a225\n          git diff --quiet 862ee543036070bc2cbb3ccaffc6c81af6d6a225 "$GITHUB_SHA" -- src
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
