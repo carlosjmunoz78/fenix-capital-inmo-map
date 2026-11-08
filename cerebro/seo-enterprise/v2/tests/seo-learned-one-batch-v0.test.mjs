@@ -243,3 +243,17 @@ test('tasacion B2B must not drift into unrelated household costs and community f
     html:focused,faq_count:0,content_depth_precheck_passed:false}});
  assert.ok(!ok.copy_issues.includes('ARTICLE_TOPIC_DRIFT_TASACION_B2B'));
 });
+
+test('real V4 appreciation claim never receives publication confidence',()=>{
+ const brief=manifest.briefs[0];
+ const make=(txt)=>classifyLearnedCandidate({brief,writer:{
+   status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',
+   html:'<h1>Gastos de tener un piso en Córdoba</h1><p>'+txt+'</p>',
+   faq_count:0,content_depth_precheck_passed:false
+ }});
+ const incorrect=make('Un enfoque preventivo asegura la revalorización del inmueble y prolonga su vida útil.');
+ assert.ok(incorrect.copy_issues.includes('YMYL_UNSUPPORTED_GUARANTEED_PROPERTY_APPRECIATION'));
+ assert.equal(incorrect.publish_allowed,false);
+ const accurate=make('El mantenimiento preventivo puede ayudar a conservar el estado del inmueble, pero no garantiza la revalorización.');
+ assert.ok(!accurate.copy_issues.includes('YMYL_UNSUPPORTED_GUARANTEED_PROPERTY_APPRECIATION'));
+});
