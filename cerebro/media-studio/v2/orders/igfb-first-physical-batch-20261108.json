@@ -1,0 +1,128 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "batch_id": "UMS001-IGFB-001-20261108",
+  "owner_role": "CEREBRO_MARKETING_SUPERVISOR",
+  "status": "OWNER_ORDERED_LAB_ONLY",
+  "publication": "DISABLED",
+  "budget": {
+    "max_total_usd": 0.65,
+    "prepaid_initial_verified_from_opera_usd": 100,
+    "video_monthly_ceiling_eur": 40,
+    "autorenew": false,
+    "automatic_retry": false
+  },
+  "campaign": {
+    "id": "FENIX-IGFB-REEL-01",
+    "title": "La puerta que casi se cerró",
+    "target": "Córdoba compradores de vivienda",
+    "service": "Preestudio hipotecario",
+    "landing": "https://fenixcapital.es/",
+    "audience": "compradores reales, no seguidores vacíos",
+    "goal": "conversaciones y leads cualificados, no solo reproducciones"
+  },
+  "creative_briefs": [
+    {
+      "id": "FLUX_FOTOGRAMA_01",
+      "platforms": [
+        "INSTAGRAM",
+        "FACEBOOK"
+      ],
+      "type": "IMAGE",
+      "model": "black-forest-labs/flux-1.1-pro",
+      "estimated_cost_usd": 0.04,
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical premium cinematic film still, an authentic young adult Spanish couple in their late twenties in a realistic elegant but attainable apartment in Cordoba Andalusia, warm evening light through balcony shutters, the woman holds two brass house keys in her hand, both faces show wonder and uncertainty, subtle tension and tenderness, genuine documentary realism, meticulously coherent anatomy, 35mm anamorphic-style depth of field, powerful but believable teal and amber atmospheric grade, deep black shadows, authentic textures, luxury Hollywood film cinematography, natural facial features, high dynamic range, no text, no captions, no logos, no watermark, no hands close-up dominating frame."
+    },
+    {
+      "id": "FLUX_FOTOGRAMA_02",
+      "platforms": [
+        "INSTAGRAM",
+        "FACEBOOK"
+      ],
+      "type": "IMAGE",
+      "model": "black-forest-labs/flux-1.1-pro",
+      "estimated_cost_usd": 0.04,
+      "aspect_ratio": "9:16",
+      "prompt": "Vertical breathtaking cinematic establishing film still of Cordoba Spain at blue hour, subtle historic rooftops and an atmospheric elegant city apartment terrace, warm household windows glow against deep blue twilight, a young couple seen as a tasteful small silhouette looking toward a possible future home, compelling emotional storytelling, high-end theatrical movie photography, precise architectural realism, detailed natural material textures, deliberate leading lines, volumetric warm practical light, elegant restrained spectacle and composition, no fake neon, no fantasy skyline, no text, no logos, no watermark."
+    },
+    {
+      "id": "PRUNA_TOMA_HERO_01",
+      "platforms": [
+        "INSTAGRAM",
+        "FACEBOOK"
+      ],
+      "type": "VIDEO",
+      "model": "prunaai/p-video-2-pro",
+      "mode": "quality",
+      "resolution": "1080p",
+      "duration": 5,
+      "estimated_cost_usd": 0.475,
+      "reference_job": "FLUX_FOTOGRAMA_01",
+      "aspect_ratio": "9:16",
+      "prompt": "Animate the supplied initial film frame with natural high-end live-action cinematic performance: Spanish couple subtly exchange a meaningful look, subtle breathing and blink, woman slowly raises house keys, camera gently dollies forward with smooth professional steadicam, beautiful warm Cordoba dusk through windows, rich physically realistic light and shadows, consistent faces and hands, powerful quiet emotional suspense, no sudden morphing, no new people, no text or logos, no dramatic gestures, no talking, absolutely natural human movement. The scene must look like a high-budget original theatrical film shot, not an AI slideshow."
+    }
+  ],
+  "channel_requests": [
+    {
+      "network": "INSTAGRAM",
+      "order_id": "IG-UMS-01",
+      "priority": "P0",
+      "intro_policy": "OFF_FOR_REELS_DEFAULT",
+      "outro": "IG-OUTRO-CINEMA-01",
+      "cta": "Escribe ESTUDIO por mensaje privado o solicita tu preestudio desde el perfil",
+      "lead_event": "IG_DM_OR_FORM_SUBMITTED",
+      "output": "9:16 vertical, subtitulado, 20-35 s tras añadir más escenas aprobadas",
+      "approval": "QA_REQUIRED"
+    },
+    {
+      "network": "FACEBOOK",
+      "order_id": "FB-UMS-01",
+      "priority": "P0",
+      "intro_policy": "HOOK_FIRST_INTRO_OPTIONAL_AFTER_HOOK",
+      "outro": "FB-OUTRO-CINEMA-01",
+      "cta": "Cuéntanos tu caso y te indicamos el siguiente paso",
+      "lead_event": "FB_MESSAGE_OR_WEB_FORM_SUBMITTED",
+      "output": "9:16 vertical, subtitulado, 20-35 s tras añadir más escenas aprobadas",
+      "approval": "QA_REQUIRED"
+    }
+  ],
+  "post_production_orders": [
+    {
+      "id": "BRAND-IG-OUTRO-01",
+      "action": "FFMPEG_PROGRAMMATIC_MOTION_FROM_EXISTING_CANONICAL_LOGO",
+      "duration_sec": 1.1,
+      "style": "magenta/gold light sweep, deep black, atmospheric impact",
+      "status": "QUEUED_AWAITING_SHOT"
+    },
+    {
+      "id": "BRAND-FB-OUTRO-01",
+      "action": "FFMPEG_PROGRAMMATIC_MOTION_FROM_EXISTING_CANONICAL_LOGO",
+      "duration_sec": 1.4,
+      "style": "orange/gold cinematic reveal, deep black, clear CTA",
+      "status": "QUEUED_AWAITING_SHOT"
+    },
+    {
+      "id": "BRAND-IG-INTRO-OPTIONAL",
+      "action": "CINEMA_IDENT_MAX_0_8S_AFTER_INITIAL_HOOK",
+      "status": "LAB_ONLY"
+    },
+    {
+      "id": "BRAND-FB-INTRO-OPTIONAL",
+      "action": "CINEMA_IDENT_MAX_0_8S_AFTER_INITIAL_HOOK",
+      "status": "LAB_ONLY"
+    }
+  ],
+  "quality_gates": [
+    "VISUAL_IDENTITY_AND_LOGO_REVIEW",
+    "HAND_FACE_TEMPORAL_REALISM",
+    "QUALITY_OVER_CHEAP",
+    "FINANCIAL_CLAIMS_VERIFIED",
+    "RIGHTS_CLEAR",
+    "SUBTITLES_SAFE",
+    "LEADS_CTA_VERIFIED",
+    "NO_PUBLISH_WITHOUT_QA"
+  ]
+}
