@@ -256,6 +256,8 @@ export function buildSeoV4RevisionPrompt(brief,revision_feedback=null){
   '',
   'SEGUNDA VUELTA DE AUTOCORRECCIÓN EN LAB. REESCRIBE EL ARTÍCULO COMPLETO, SIN REUTILIZAR CONCLUSIONES INEXACTAS NI AÑADIR HECHOS NO VERIFICADOS.',
   'CORRIGE ESTOS FALLOS DEL VALIDADOR LOCAL: '+issues.join(', '),
+  'Los códigos SECTION_XX_PARAGRAPH_YY_WORDS_N_NEEDS_60_TO_85 señalan el número exacto de sección, párrafo y palabras observadas. Corrige ESOS párrafos concretos; SECTION_XX_TOTAL_N_WORDS_BELOW_180 exige aportar información útil en esa sección.',
+  'No alargues a base de frases vacías. Introduce ejemplos realistas sin cifras inventadas, preguntas documentales prácticas, decisiones condicionadas y hechos contrastables. Preserva la coherencia del argumento y las fuentes originales.',
   'Revisa de nuevo los 6 H2 principales, 3 párrafos por sección, 6 FAQ en section.faq y div.faq-item, enlaces y afirmaciones jurídico-financieras.',
   'NO inventes referencias legales ni te declares aprobado. Si el problema jurídico no puede resolverse con las fuentes oficiales, adopta lenguaje condicionado y marca la incertidumbre.',
   'La fotografía de cabecera, formulario, vista móvil y publicación NO están autorizados en esta fase.',
