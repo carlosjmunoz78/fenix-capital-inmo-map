@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "PREPARED_NOT_TRIGGERED",
+  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108_SURGICAL_V5",
   "briefs": [
     {
       "company_id": "fenix",
@@ -183,5 +183,8 @@
     "original_unmodified_section_count": 6,
     "no_additional_links": true,
     "forbidden_changes": "all paragraphs except two declared indices and all headings, FAQ, media, forms, CTA, links"
-  }
+  },
+  "preflight_ci_run_id": 42446013061,
+  "preflight_tests_passed": 49,
+  "auto_next_batch": false
 }
