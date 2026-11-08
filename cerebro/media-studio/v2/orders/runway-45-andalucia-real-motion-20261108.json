@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "engine_id": "UMS-001",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "mission": "REAL_MOTION_VIDEO_COMPARISON_NOT_SLIDESHOW",
+  "provider": "REPLICATE",
+  "model": "runwayml/gen-4.5",
+  "model_kind": "TEXT_TO_VIDEO",
+  "date": "2026-11-08",
+  "output_format": "9:16",
+  "duration_per_shot_sec": 5,
+  "per_shot_usd_max": 0.6,
+  "batch_max_usd": 1.8,
+  "save_to": "GITHUB_ACTIONS_PRIVATE_ARTIFACT_FIRST",
+  "drive_target_folder": "https://drive.google.com/drive/folders/1eYhTCWiPt4p5v7xVSxRU5T6oBvc48BBP",
+  "autopublish": false,
+  "auto_reload": false,
+  "automatic_paid_retry": false,
+  "qa": "MUST INSPECT REAL CAMERA MOTION AND HISTORIC_LANDMARK_ACCURACY_BEFORE_PROMOTION",
+  "shots": [
+    {
+      "id": "01_CORDOBA",
+      "seed": 120824,
+      "prompt": "One continuous breathtaking high-budget cinematic moving-camera shot, five seconds, vertical portrait composition: at blue hour in authentic Córdoba, Andalucía, Spain, camera sweeps low over dark reflective waters of the Guadalquivir, tracks toward the actual historic Roman Bridge and the Mosque-Cathedral bell tower, recognizable Andalusian limestone architecture and golden city lights, ultra-realistic dynamic parallax and river reflections, a sophisticated fine golden-and-magenta ribbon of phoenix light arcs gently through the physical scene without obscuring the landmarks, billowing volumetric clouds and realistic moving atmosphere, dramatic prestige feature film color grading, deep rich blacks, physically coherent camera motion, no cuts, no still frames, no title, no letters, no logo, no slash transitions, no people, no inaccurate fantasy landmarks."
+    },
+    {
+      "id": "02_SEVILLA",
+      "seed": 130824,
+      "prompt": "One continuous five-second actual cinematic moving-camera shot in vertical portrait framing. A sophisticated aerial crane orbit sweeps around the real Giralda bell tower in Seville, Andalucía, at dusk, with believable historic brick texture and the distinctive silhouette of the Giralda faithfully preserved. Rich golden sunset light grazes the tower, real clouds move and the skyline develops true optical parallax; a graceful subtle amber and magenta phoenix-energy ribbon flows in a wide elegant spiral high above the rooftops, never distorting the monument. Luxuriously cinematic wide-angle live-action realism, precision aerial photography, no cuts, not a still image, no slide motion, no slash effect, no text, no logos, no people, no false architecture."
+    },
+    {
+      "id": "03_GRANADA",
+      "seed": 140824,
+      "prompt": "One continuous breathtaking five-second premium cinema camera move at the real Alhambra palace complex in Granada, Andalucía, Spain. Start in a medium aerial view across authentic Moorish palace towers and reddish-stone ramparts at majestic blue hour, Sierra Nevada visible beyond in depth, and execute a physically believable smooth ascending dolly with real three-dimensional motion parallax. Golden-lit courtyards and historical architectural geometry stay coherent; a finely controlled luminous phoenix-like trail glides across the sky before vanishing into warm cloud light, glorious dramatic theatrical photography, realistic volumetric atmosphere, prestige cinematic color grade, not an animated photograph, no slash/cut transitions, no words, no logo, no fantasy towers, no watermarks."
+    }
+  ]
+}
