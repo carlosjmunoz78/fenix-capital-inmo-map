@@ -23,6 +23,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+      # QA-only commits must never call the provider; exact subject required.
       - name: All learned SEO and self-repair safety tests
         run: |
           node --version
