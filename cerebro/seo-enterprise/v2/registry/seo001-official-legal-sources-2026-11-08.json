@@ -1,0 +1,66 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "verified_date": "2026-11-08",
+  "status": "OFFICIAL_LEGISLATION_REFERENCE_FOR_EDITORIAL_DRAFT_NOT_PROFESSIONAL_SIGNOFF",
+  "sources": [
+    {
+      "id": "BOE_LPH_17_11",
+      "title": "Ley 49/1960 sobre propiedad horizontal",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1960-10906",
+      "article": "17.11",
+      "evidence": "Derramas destinadas a mejoras: referencia legal al propietario cuando el importe es exigible, no exclusivamente a la fecha de aprobación del acuerdo.",
+      "content_rule": "No atribuir sistemáticamente al vendedor todas las derramas aprobadas antes de la firma. Comprobar naturaleza de las obras, vencimientos y titularidad en cada fecha.",
+      "requires_professional_context_review": true
+    },
+    {
+      "id": "BOE_LPH_9_1_E",
+      "title": "Ley 49/1960 sobre propiedad horizontal",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1960-10906",
+      "article": "9.1.e",
+      "evidence": "El artículo regula contribución a gastos generales, afección real del inmueble por determinados importes y acreditación del estado de deudas en transmisiones.",
+      "content_rule": "Distinguir obligación frente a la comunidad, afección del inmueble, estado de deudas y eventuales pactos entre vendedor y comprador. No presentar certificación y exoneración como equivalentes.",
+      "requires_professional_context_review": true
+    },
+    {
+      "id": "BOE_CC_1255",
+      "title": "Código Civil",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763",
+      "article": "1255",
+      "evidence": "La libertad contractual tiene límites legales; las cláusulas y plazos concretos importan.",
+      "content_rule": "No resolver consecuencias de un retraso en tasación sin leer las cláusulas y comprobar hechos y normativa.",
+      "requires_professional_context_review": true
+    },
+    {
+      "id": "BOE_CC_1124",
+      "title": "Código Civil",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763",
+      "article": "1124",
+      "evidence": "El incumplimiento de obligaciones recíprocas puede abrir opciones de cumplimiento o resolución según las circunstancias.",
+      "content_rule": "No sostener que un retraso nunca invalida, resuelve o afecta a un contrato; distinguir plazo esencial, condiciones suspensivas y pactos.",
+      "requires_professional_context_review": true
+    },
+    {
+      "id": "BOE_CC_1454",
+      "title": "Código Civil",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763",
+      "article": "1454",
+      "evidence": "Regula un supuesto legal de arras con consecuencias particulares para las partes. No permite asumir que todas las cantidades entregadas como señal comparten exactamente el mismo régimen.",
+      "content_rule": "No generalizar las arras ni afirmar penalizaciones o inexistencia de resolución sin revisar tipo de arras y contrato.",
+      "requires_professional_context_review": true
+    }
+  ],
+  "user_text_supplement": "Las referencias a normas no bastan para validar su aplicación a una operación concreta. Exigir hechos, fecha de exigibilidad, documentos, cláusulas y validación profesional antes de publicar.",
+  "harmful_absolute_claims_block": [
+    "El vendedor debe abonar las derramas aprobadas antes de la firma",
+    "La demora depende exclusivamente de la sociedad tasadora o del banco",
+    "El retraso administrativo no invalida el contrato de arras",
+    "La agencia nunca puede asumir responsabilidad"
+  ],
+  "training_scope": "INJECT_AS_BOUNDED_SOURCE_FACTS_BEFORE_MODEL_GENERATION_NOT_AS_AUTOMATIC_LEGAL_ADVICE",
+  "release_status": "HOLD_REQUIRES_LEGAL_YMYL_SIGNOFF",
+  "allow_publish": false
+}
