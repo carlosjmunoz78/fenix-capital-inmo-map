@@ -25,7 +25,8 @@ jobs:
         run: |
           node --check cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-surgical-v6-offline-lab.test.mjs
-          node --test cerebro/seo-enterprise/v2/tests/seo-surgical-v5-one-batch-lab.test.mjs
+          # Historical V5 launch test expects a PREPARED nonce; V5 is sealed now.
+          # V6's own tests verify the immutable V5 COMPLETED manifest instead.
           node --test cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs
       - name: Download sealed V5 evidence
         uses: actions/download-artifact@v4
