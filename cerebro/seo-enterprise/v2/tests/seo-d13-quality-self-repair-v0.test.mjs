@@ -143,3 +143,28 @@ test('adapter forwards strict feedback on second call then refuses a third witho
  await assert.rejects(gen({brief:b,attempt:3,feedback}),/SEO_SELF_REPAIR_REVISION_SCOPE_OR_CALL_LIMIT/);
  assert.equal(sent.length,2);
 });
+
+test('style and voice rejection codes reach the exact next prompt without copying content',async()=>{
+ const b=brief('SEO001-SELF-EDITORIAL-REAL-ISSUES');
+ const html='<h1>Trabajo profesional en Córdoba</h1><p>'+Array(120).fill('explicación').join(' ')+'</p>';
+ let calls=0,observed=null;
+ const generate=async({attempt,feedback})=>{
+  calls++;
+  if(attempt===2){observed=feedback;return {status:'HOLD',request_count:1,reason:'NO_MODEL_CALL_IN_TEST'};}
+  return {status:'REAL_CLOUD_DRAFT_STYLE_HOLD',request_count:1,html,
+    style_issues:['H1_TOO_LONG','COLON_VISIBLE_TEXT'],
+    voice_issues:['CANNED_MARKETING_PHRASE'],
+    content_depth_issues:['MAIN_CONTENT_BELOW_MINIMUM']};
+ };
+ const out=await runSelfRepairItem({brief:b,generate,review:()=>({
+    technical_copy_precheck:'HOLD',copy_issues:['MAIN_PARAGRAPH_WORD_RANGE'],
+    publish_allowed:false,full_quality_certified:false
+ })});
+ assert.equal(calls,2);
+ assert.deepEqual(observed.error_codes,[
+  'MAIN_PARAGRAPH_WORD_RANGE','H1_TOO_LONG','COLON_VISIBLE_TEXT',
+  'CANNED_MARKETING_PHRASE','MAIN_CONTENT_BELOW_MINIMUM'
+ ]);
+ assert.equal(out.publish_allowed,false);
+ assert.equal(out.status,'SELF_REPAIR_EXHAUSTED_OR_PROVIDER_HOLD');
+});
