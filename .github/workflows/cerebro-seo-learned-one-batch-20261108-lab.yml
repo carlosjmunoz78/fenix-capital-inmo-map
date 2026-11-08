@@ -5,6 +5,8 @@ on:
       - 'cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json'
       - 'cerebro/seo-enterprise/v2/runtime/seo-learned-one-batch-runner-v0.mjs'
       - 'cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs'
       - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
       - '.github/workflows/cerebro-seo-learned-one-batch-20261108-lab.yml'
 permissions:
@@ -28,6 +30,8 @@ jobs:
           node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
           node --check cerebro/seo-enterprise/v2/runtime/seo-learned-one-batch-runner-v0.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
       - name: Exact owner one-shot batch commit gate
         id: permit
