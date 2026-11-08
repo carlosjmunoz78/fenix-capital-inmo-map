@@ -189,3 +189,22 @@ test('official BOE sources are pinned to the NEXT prompt without self-authorizin
  assert.ok(prompt.includes('No resolver consecuencias de un retraso en tasación sin leer las cláusulas'));
  assert.equal(manifest.status,'COMPLETED_HOLD');
 });
+
+test('real-world paragraph diagnostics identify exact section and paragraph without padding words',()=>{
+ const brief=manifest.briefs[0];
+ const groups=[[84,70,65],[81,72,74],[64,70,53],[68,67,59],[65,63,47],[74,52,47]];
+ const main=groups.map((counts,i)=>'<section><h2>Bloque '+(i+1)+'</h2>'+
+   counts.map(n=>'<p>'+Array(n).fill('contenido').join(' ')+'</p>').join('')+'</section>').join('');
+ const faq='<section class="faq"><h2>Preguntas frecuentes</h2>'+
+   Array.from({length:6},(_,n)=>'<div class="faq-item"><h3>¿Pregunta '+n+'?</h3><p>'+
+   Array(25).fill('respuesta').join(' ')+'</p></div>').join('')+'</section>';
+ const res=classifyLearnedCandidate({brief,writer:{work_id:brief.work_id,
+   status:'REAL_CLOUD_DRAFT_STYLE_HOLD',faq_count:6,content_depth_precheck_passed:true,
+   html:'<h1>Gastos recurrentes de vivir en Córdoba</h1>'+main+faq}});
+ assert.ok(res.copy_issues.includes('SECTION_03_PARAGRAPH_03_WORDS_53_NEEDS_60_TO_85'));
+ assert.ok(res.copy_issues.includes('SECTION_04_PARAGRAPH_03_WORDS_59_NEEDS_60_TO_85'));
+ assert.ok(res.copy_issues.includes('SECTION_05_PARAGRAPH_03_WORDS_47_NEEDS_60_TO_85'));
+ assert.ok(res.copy_issues.includes('SECTION_05_TOTAL_175_WORDS_BELOW_180'));
+ assert.ok(res.copy_issues.includes('SECTION_06_TOTAL_173_WORDS_BELOW_180'));
+ assert.equal(res.publish_allowed,false);
+});
