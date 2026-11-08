@@ -26,7 +26,10 @@ jobs:
           ref: ${{ github.sha }}
           persist-credentials: false
       - name: Assert pinned NEW source
-        run: |\n          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"\n          git fetch --depth=1 origin 862ee543036070bc2cbb3ccaffc6c81af6d6a225\n          git diff --quiet 862ee543036070bc2cbb3ccaffc6c81af6d6a225 "$GITHUB_SHA" -- src
+        run: |
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git fetch --depth=1 origin 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+          git diff --quiet 862ee543036070bc2cbb3ccaffc6c81af6d6a225 "$GITHUB_SHA" -- src
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
