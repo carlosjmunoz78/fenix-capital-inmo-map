@@ -5,6 +5,9 @@ on:
       - 'cerebro/seo-enterprise/v2/drafts/v7-semantic-review-only/**'
       - 'cerebro/seo-enterprise/v2/registry/seo001-semantic-v7-review-only-2026-11-08.json'
       - '.github/workflows/cerebro-seo-v8-readonly-editorial-visual.yml'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v10-operational-readiness-2026-11-08.json'
 permissions:
   contents: read
 concurrency:
@@ -21,6 +24,11 @@ jobs:
           persist-credentials: false
       - name: V7 regression and content quality guards
         run: node --test cerebro/seo-enterprise/v2/tests/seo-v7-semantic-review-only.test.mjs
+      - name: V10 reuse existing V7 V9 evidence and test no-release state machine
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v10-continuous-readiness.test.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v10-continuous-readiness.mjs /tmp/seo001-v10-readiness
       - name: Use existing Playwright dependencies
         run: npm ci --ignore-scripts
       - name: Independent responsive LAB screenshots with hard publication HOLD
@@ -71,6 +79,14 @@ jobs:
         with:
           name: seo001-v8-readonly-visual-20261108-LAB-UNAPPROVED
           path: /tmp/seo001-v8-readonly/*
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Save V10 decision manifest separately from V8 screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v10-continuous-readiness-LAB-HOLD
+          path: /tmp/seo001-v10-readiness/readiness.json
           retention-days: 7
           if-no-files-found: warn
       - name: Zero external effects
