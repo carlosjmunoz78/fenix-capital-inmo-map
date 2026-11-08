@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "source_batch_id": "SEO001-AUTOREPAIR-PILOT-20261108-V3",
+  "source_workflow_run_id": 42443875772,
+  "source_artifact_id": 13602568494,
+  "source_artifact_name": "seo001-autorepair-20261108-v3-LAB-UNAPPROVED",
+  "source_files": [
+    "buyer-qa.json",
+    "agency-qa.json"
+  ],
+  "audit_note": "Counts and leading hashes transcribed from actual three-attempt QA receipts. Replay reconstructs issue CATEGORY AND COUNT, not full HTML; no claim of new semantic or physical QA.",
+  "scoring_policy": "rankDraftForRepair 2026-11-08; section paragraph=4, section total=20, generic error=10, semantic drift=1000; lower wins, ties retain earlier.",
+  "attempts": {
+    "PARTICULARES": [
+      {
+        "attempt": 1,
+        "html_sha256_prefix": "22572b86f2c38d30",
+        "paragraph_issues": 17,
+        "section_total_issues": 6,
+        "generic_issues": [
+          "MODEL_OR_COPY_PRECHECK_NOT_PASSED",
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 208
+      },
+      {
+        "attempt": 2,
+        "html_sha256_prefix": "0a392f0a8df89b22",
+        "paragraph_issues": 16,
+        "section_total_issues": 5,
+        "generic_issues": [
+          "MODEL_OR_COPY_PRECHECK_NOT_PASSED",
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 184
+      },
+      {
+        "attempt": 3,
+        "html_sha256_prefix": "585c0dde11a4893e",
+        "paragraph_issues": 16,
+        "section_total_issues": 5,
+        "generic_issues": [
+          "MODEL_OR_COPY_PRECHECK_NOT_PASSED",
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 184
+      }
+    ],
+    "INMOBILIARIAS": [
+      {
+        "attempt": 1,
+        "html_sha256_prefix": "04e5b6599954deb3",
+        "paragraph_issues": 14,
+        "section_total_issues": 0,
+        "generic_issues": [
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 66
+      },
+      {
+        "attempt": 2,
+        "html_sha256_prefix": "7c18c54cba589a66",
+        "paragraph_issues": 17,
+        "section_total_issues": 6,
+        "generic_issues": [
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 198
+      },
+      {
+        "attempt": 3,
+        "html_sha256_prefix": "ac5d63a8c8d23b8c",
+        "paragraph_issues": 17,
+        "section_total_issues": 6,
+        "generic_issues": [
+          "MAIN_PARAGRAPH_WORD_RANGE"
+        ],
+        "expected_penalty": 198
+      }
+    ]
+  },
+  "expected_best_attempt": {
+    "PARTICULARES": 2,
+    "INMOBILIARIAS": 1
+  },
+  "released": false,
+  "wp_writes": 0,
+  "notes": "Legacy V3 actually archived last attempt; replay regression verifies new V4 selector would retain best historical score, not semantic excellence."
+}
