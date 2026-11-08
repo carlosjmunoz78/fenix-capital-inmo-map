@@ -1,0 +1,42 @@
+name: CEREBRO UMS001 Runway four extra Andalucia shots one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-runway-andalucia-full-intro-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/orders/start-runway-four-extra-shots-20261108.trigger'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-runway-four-extra-shots-20261108
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event.head_commit.message == 'CEREBRO_RUNWAY_FOUR_EXTRA_SHOTS_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      RUNWAY_PILOT_ONE_TIME: 'yes'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check four scenes and dollar limit before any API costs
+        run: |
+          python3 - <<'PY'
+          import json
+          m=json.load(open('cerebro/media-studio/v2/orders/runway-gen45-andalucia-extra-four-shots-20261108.json'))
+          assert m['environment']=='LAB' and m['batch_max_usd']==2.40 and m['per_shot_usd_max']==0.60
+          assert len(m['shots'])==4 and {x['id'] for x in m['shots']}=={'04_COSTA','05_CAMPO','06_CALLE_PISOS_MALAGA','07_CALLE_PISOS_SEVILLA'}
+          assert not m['autopublish'] and not m['automatic_paid_retry'] and not m['auto_reload']
+          print("CEREBRO_FOUR_EXTRA_SHOTS_GATE_GREEN; NO_RETRIES; COST_CAP_USD_2.40")
+          PY
+      - name: Generate four genuine moving Runway shots; preserve all media
+        run: python3 cerebro/media-studio/v2/runtime/ums001_runway_extra_four_shots_once_20261108.py
+      - name: Retain video originals in private Actions artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_RUNWAY_ANDALUCIA_FOUR_EXTRA_SHOTS_${{ github.run_id }}
+          path: /tmp/ums-runway-andalucia-full-intro/
+          retention-days: 30
+          if-no-files-found: warn
