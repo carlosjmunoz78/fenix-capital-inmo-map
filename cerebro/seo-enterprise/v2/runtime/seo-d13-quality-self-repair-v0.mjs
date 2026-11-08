@@ -7,6 +7,9 @@
 import crypto from 'node:crypto';
 import {classifyLearnedCandidate} from './seo-learned-one-batch-runner-v0.mjs';
 import {runOneShotFreeCanary} from './seo-d13-free-project-one-shot-canary-v0.mjs';
+import {auditOwnerEditorialCopy} from './seo-owner-editorial-visual-gate-v2.mjs';
+import {auditSeoHumanVoiceAndRisk} from './seo-d31-human-voice-risk-gate-v0.mjs';
+import {auditSeoContentDepth} from './seo-owner-content-depth-gate-v1.mjs';
 
 const sha=s=>crypto.createHash('sha256').update(s,'utf8').digest('hex');
 const fail=code=>{throw Error('SEO_SELF_REPAIR_'+code)};
@@ -79,10 +82,25 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
    break;
   }
   const fix=normalizeFaqMarkup(model.html);
-  const candidate={...model,html:fix.html};
+  let candidate={...model,html:fix.html},auditTrace=null;
+  // A deterministic HTML repair MUST re-run all original provider QA checks.
+  // Otherwise the original FAQ=0/style HOLD persists after a valid wrapper fix.
+  if(fix.changed&&review===classifyLearnedCandidate){
+   try{
+    const q=auditOwnerEditorialCopy({html:fix.html,persona:brief.persona});
+    const voice=auditSeoHumanVoiceAndRisk({html:fix.html,persona:brief.persona});
+    const depth=auditSeoContentDepth({html:fix.html,persona:brief.persona});
+    candidate={...candidate,faq_count:q.faq_count,word_count:q.word_count,
+      content_depth_precheck_passed:depth.preliminary_depth_check_passed,
+      status:q.deterministic_style_precheck_passed&&voice.deterministic_precheck_passed&&depth.preliminary_depth_check_passed
+        ?'REAL_CLOUD_DRAFT_REVIEW_ONLY':'REAL_CLOUD_DRAFT_STYLE_HOLD'};
+    auditTrace={style_issues:q.issues,voice_issues:voice.issues,content_depth_issues:depth.issues};
+   }catch{candidate={...candidate,status:'REAL_CLOUD_DRAFT_STYLE_HOLD'};}
+  }
   // Existing full validator is the final precheck; neither structural repair
   // nor provider success can independently set it to PASS.
-  const gate=review({brief,writer:candidate});
+  const rawGate=review({brief,writer:candidate});
+  const gate=auditTrace?{...rawGate,...auditTrace}:rawGate;
   if(!gate||!Array.isArray(gate.copy_issues)||gate.publish_allowed!==false||
      gate.full_quality_certified!==false)fail('UNSAFE_OR_INVALID_QA_GATE');
   finalHtml=fix.html;finalReview=gate;
