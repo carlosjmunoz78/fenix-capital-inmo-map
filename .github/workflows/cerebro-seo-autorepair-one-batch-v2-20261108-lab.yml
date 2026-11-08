@@ -24,6 +24,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       # QA-only updates, including post-locked-batch regressions, never call provider.
+      # Regressions for typed previous-draft context and off-topic paragraph guards.
       - name: All learned SEO and self-repair safety tests
         run: |
           node --version
