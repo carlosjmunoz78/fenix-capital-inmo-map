@@ -97,16 +97,17 @@ test('JARVIS Work PREPROD · clean home + project workspace + Codex/Work + Opera
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
 
+ // Current V2 tools are governed prompts, not the legacy Git toolbar.
+ // Direct Git STATUS/DIFF/CI parity remains an explicit separate OLD vs NEW gap.
  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
- await expect(page.getByRole('button',{name:'Código',exact:true})).toBeVisible();
- await expect(page.getByRole('button',{name:'Git',exact:true})).toBeVisible();
- await expect(page.getByRole('button',{name:'Navegador',exact:true}).last()).toBeVisible();
- await page.getByRole('button',{name:'Git',exact:true}).click();
- for(const name of ['Estado','Diff','CI','vs main'])await expect(page.getByRole('button',{name,exact:true})).toBeVisible();
- await expect(page.getByText('main y emergency-pages bloqueadas',{exact:true})).toBeVisible();
- await page.getByRole('button',{name:'Navegador',exact:true}).last().click();
- await expect(page.getByRole('button',{name:/Abrir navegador interactivo/})).toBeVisible();
- await expect(page.getByText('JARVIS EN CONTROL',{exact:true})).toBeVisible();
+ await expect(page.getByRole('button',{name:/^Código Gobernado/})).toBeVisible();
+ await expect(page.getByRole('button',{name:/^Terminal Runtime/})).toBeVisible();
+ await expect(page.getByRole('button',{name:/^Navegador Superficie conectada/})).toBeVisible();
+ await expect(page.getByRole('button',{name:/^Tests Actividad real/})).toBeVisible();
+ await page.getByRole('button',{name:/^Código Gobernado/}).click();
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-form textarea')).toHaveValue(/Trabaja con código/);
+ await page.getByRole('button',{name:/^Terminal Runtime/}).click();
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-form textarea')).toHaveValue(/operación de terminal/);
  await expectNoLegacyBrand(page);
  await expectNoHorizontalOverflow(page);
  await page.screenshot({path:'test-results/jarvis-project-workspace-1440x695.png',fullPage:true});
