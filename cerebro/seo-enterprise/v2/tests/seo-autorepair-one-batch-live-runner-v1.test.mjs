@@ -18,17 +18,19 @@ function fixture(){
  }
  const m=JSON.parse(fs.readFileSync(path.join(root,PATH),'utf8'));
  m.workflow_trigger_nonce='TRIGGER_ONCE_20261108_AUTOREPAIR_V1';
+ m.status='PREPARED_NOT_EXECUTED';
  fs.writeFileSync(path.join(root,PATH),JSON.stringify(m));
  return {root,m};
 }
 test('new batch is distinct from consumed old batch; exact nonce controls admission',()=>{
  assert.equal(BATCH_ID,'SEO001-AUTOREPAIR-PILOT-20261108-V1');
  const m=JSON.parse(fs.readFileSync(PATH,'utf8'));
- if(m.workflow_trigger_nonce==='TRIGGER_ONCE_20261108_AUTOREPAIR_V1'){
+ if(m.status==='PREPARED_NOT_EXECUTED'&&m.workflow_trigger_nonce==='TRIGGER_ONCE_20261108_AUTOREPAIR_V1'){
    const v=verifyAutoRepairPilot();
    assert.equal(v.max_calls,6);
  }else{
-   assert.equal(m.workflow_trigger_nonce,'PREPARED_NOT_TRIGGERED');
+   assert.ok((m.status==='PREPARED_NOT_EXECUTED'&&m.workflow_trigger_nonce==='PREPARED_NOT_TRIGGERED')||
+     (m.status==='COMPLETED_HOLD'&&m.workflow_trigger_nonce==='CONSUMED_20261108_AUTOREPAIR_V1'));
    assert.throws(()=>verifyAutoRepairPilot(),/SEO001_AUTOREPAIR_V1_MANIFEST_RELEASE_OR_COST_GUARD/);
  }
 });
