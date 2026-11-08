@@ -17,12 +17,14 @@
   "campaign": {
     "id": "FENIX-IGFB-REEL-01",
     "title": "La puerta que casi se cerró",
-    "target": "Córdoba compradores de vivienda",
+    "target": "Compradores de vivienda de las 8 provincias de Andalucía",
     "service": "Preestudio hipotecario",
     "landing": "https://fenixcapital.es/",
     "audience": "compradores reales, no seguidores vacíos",
     "goal": "conversaciones y leads cualificados, no solo reproducciones",
-    "creative_direction": "Corporate multi-shot opening requested by owner: IG 10s/5 shots, FB 12s/6 shots. No 1-second intro. Keep logo exact, closing still separate."
+    "creative_direction": "Corporate multi-shot opening requested by owner: IG 10s/5 shots, FB 12s/6 shots. No 1-second intro. Keep logo exact, closing still separate. Estética y narración de marca para Andalucía entera, sin apariencia de agencia solo cordobesa.",
+    "geo_scope": "ANDALUCIA_ALL_8_PROVINCES",
+    "geo_variants": "MASTER_AUTONOMICO_PLUS_CITY_PROVINCE_DERIVATIVES"
   },
   "creative_briefs": [
     {
@@ -35,7 +37,7 @@
       "model": "black-forest-labs/flux-1.1-pro",
       "estimated_cost_usd": 0.04,
       "aspect_ratio": "9:16",
-      "prompt": "Vertical premium cinematic film still, an authentic young adult Spanish couple in their late twenties in a realistic elegant but attainable apartment in Cordoba Andalusia, warm evening light through balcony shutters, the woman holds two brass house keys in her hand, both faces show wonder and uncertainty, subtle tension and tenderness, genuine documentary realism, meticulously coherent anatomy, 35mm anamorphic-style depth of field, powerful but believable teal and amber atmospheric grade, deep black shadows, authentic textures, luxury Hollywood film cinematography, natural facial features, high dynamic range, no text, no captions, no logos, no watermark, no hands close-up dominating frame."
+      "prompt": "Vertical premium cinematic film still, an authentic young adult Andalusian couple in their late twenties in an elegant but attainable apartment in Andalusia Spain, warm Mediterranean evening light through balcony shutters, the woman holds two brass house keys in her hand, both faces show wonder and uncertainty, subtle tension and tenderness, genuine documentary realism, meticulously coherent anatomy, 35mm anamorphic-style depth of field, powerful but believable teal and amber atmospheric grade, deep black shadows, authentic textures, luxury Hollywood film cinematography, natural facial features, high dynamic range, no text, no captions, no logos, no watermark, no hands close-up dominating frame."
     },
     {
       "id": "FLUX_FOTOGRAMA_02",
@@ -47,7 +49,7 @@
       "model": "black-forest-labs/flux-1.1-pro",
       "estimated_cost_usd": 0.04,
       "aspect_ratio": "9:16",
-      "prompt": "Vertical breathtaking cinematic establishing film still of Cordoba Spain at blue hour, subtle historic rooftops and an atmospheric elegant city apartment terrace, warm household windows glow against deep blue twilight, a young couple seen as a tasteful small silhouette looking toward a possible future home, compelling emotional storytelling, high-end theatrical movie photography, precise architectural realism, detailed natural material textures, deliberate leading lines, volumetric warm practical light, elegant restrained spectacle and composition, no fake neon, no fantasy skyline, no text, no logos, no watermark."
+      "prompt": "Vertical premium cinematic establishing frame for a brand operating throughout Andalusia in southern Spain. A coherent breathtaking panorama transitioning from Atlantic to Mediterranean coastal light, Sierra Nevada mountain silhouette and endless olive hills, rich historic-city texture connecting cities across eight provinces. Original high-end cinematic photographic direction, physically believable geography without collaging false landmarks, natural architectural realism, luxurious lighting and atmospheric perspective, rich black and subtle magenta/gold signature energy; emotional sense of opportunity and home. No text, no brand marks, no invented monuments, no inaccurate provincial labels."
     },
     {
       "id": "PRUNA_TOMA_HERO_01",
@@ -63,7 +65,7 @@
       "estimated_cost_usd": 0.475,
       "reference_job": "FLUX_FOTOGRAMA_01",
       "aspect_ratio": "9:16",
-      "prompt": "Animate the supplied initial film frame with natural high-end live-action cinematic performance: Spanish couple subtly exchange a meaningful look, subtle breathing and blink, woman slowly raises house keys, camera gently dollies forward with smooth professional steadicam, beautiful warm Cordoba dusk through windows, rich physically realistic light and shadows, consistent faces and hands, powerful quiet emotional suspense, no sudden morphing, no new people, no text or logos, no dramatic gestures, no talking, absolutely natural human movement. The scene must look like a high-budget original theatrical film shot, not an AI slideshow."
+      "prompt": "Animate the supplied initial film frame with natural high-end live-action cinematic performance: Spanish couple subtly exchange a meaningful look, subtle breathing and blink, woman slowly raises house keys, camera gently dollies forward with smooth professional steadicam, beautiful warm Andalusian dusk through windows, rich physically realistic light and shadows, consistent faces and hands, powerful quiet emotional suspense, no sudden morphing, no new people, no text or logos, no dramatic gestures, no talking, absolutely natural human movement. The scene must look like a high-budget original theatrical film shot, not an AI slideshow."
     }
   ],
   "channel_requests": [
@@ -141,6 +143,8 @@
     "NO_PUBLISH_WITHOUT_QA",
     "LONG_INTRO_MULTISHOT_PHYSICAL_QA",
     "FIRST_SECOND_VIEWER_HOOK",
-    "CANONICAL_LOGO_NOT_REGENERATED"
+    "CANONICAL_LOGO_NOT_REGENERATED",
+    "MASTER_ANDALUCIA_NO_EXCLUSIVE_CORDOBA_CLAIM",
+    "ANDALUSIAN_EIGHT_PROVINCE_BRAND_DIVERSITY"
   ]
 }
