@@ -1,5 +1,8 @@
 import {useState} from 'react';
 import {fetchJarvisRepoHead, inspectJarvisGit, type JarvisGitInspectOperation} from './jarvisWorkApi';
+import {IS_PRODUCTION} from './supabase';
+const EXPECTED_BRANCH=IS_PRODUCTION?'cerebro/jarvis-core-prod-candidate-20261103':'cerebro/jarvis-work-codex-complete-20261102';
+const EXPECTED_ENVIRONMENT=IS_PRODUCTION?'PROD':'PREPROD';
 
 const ACTIONS:ReadonlyArray<{operation:JarvisGitInspectOperation;label:string}>=Object.freeze([
   {operation:'STATUS',label:'Estado Git'},
@@ -21,7 +24,7 @@ export default function JarvisGitReadonlyInspector(){
         setState({status:'failed',label:'No se pudo verificar la rama segura. No se ha enviado ninguna operación.'});
         return;
       }
-      if(head.data?.branch!=='cerebro/jarvis-core-prod-candidate-20261103'){
+      if(head.data?.branch!==EXPECTED_BRANCH||head.data?.environment!==EXPECTED_ENVIRONMENT){
         setState({status:'failed',label:'Rama distinta a la autorizada. Operación bloqueada.'});
         return;
       }
