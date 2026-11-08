@@ -1,0 +1,27 @@
+name: CEREBRO SEO V7 Editorial Static LAB No Publication
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/drafts/v7-semantic-review-only/**'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-semantic-v7-review-only-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v7-semantic-review-only.test.mjs'
+      - '.github/workflows/cerebro-seo-v7-semantic-review-only-lab.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-v7-editorial-static-lab-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  qa-only:
+    if: ${{ github.event.pull_request.number == 22 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact LAB editorial artifacts, source caveats and release guard
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-v7-semantic-review-only.test.mjs
+      - name: Keep site and release untouched
+        if: always()
+        run: echo 'V7 REVIEW ONLY, NO API CALLS, NO WORDPRESS CRM SUPABASE, NO PUBLISH'

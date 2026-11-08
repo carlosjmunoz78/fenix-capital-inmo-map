@@ -1,0 +1,75 @@
+{
+  "schema_version": "1.0.0",
+  "batch_id": "SEO001-SEMANTIC-EDITORIAL-V7-20261108",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "7.0.0",
+  "status": "SEMANTIC_REVIEW_ONLY_HOLD",
+  "source_references": {
+    "B2C": {
+      "batch": "SEO001-SURGICAL-PATCH-20261108-V5",
+      "artifact_id": 13603278337,
+      "run_id": 42446075036,
+      "source_sha256": "b4648b123f62a25064a80d67865f370d58a5ff0377621863e70fc59f19ede210"
+    },
+    "B2B": {
+      "batch": "SEO001-SURGICAL-DETERMINISTIC-20261108-V6",
+      "artifact_id": 13604675446,
+      "run_id": 42447534299,
+      "source_sha256": "6ba063271a61e49b0eaa821892670357b8d6229acc7a30dd86d8b57914e42728"
+    }
+  },
+  "reviews": {
+    "B2C": {
+      "file": "compradores-V7-REVIEW-ONLY.html",
+      "sha256": "c4d9ccbf5175884033edb7c0c350bcbf48f7202b36250c691ed9969172c69918",
+      "modified_main_paragraphs": 8,
+      "modified_faq_answers": 3,
+      "untouched_main_paragraphs": 10,
+      "unchanged_h1_h2_h3": true,
+      "unchanged_links": true
+    },
+    "B2B": {
+      "file": "inmobiliarias-V7-REVIEW-ONLY.html",
+      "sha256": "a01cd9e03baeb421c5565658197eb2a63ff2a63833066991b2183feb1156beec",
+      "modified_main_paragraphs": 10,
+      "modified_faq_answers": 3,
+      "untouched_main_paragraphs": 8,
+      "unchanged_h1_h2_h3": true,
+      "unchanged_links": true
+    }
+  },
+  "official_references": [
+    {
+      "source": "BOE LPH artículo 17.11 consolidado",
+      "url": "https://www.boe.es/eli/es/l/1960/07/21/49/con/20261003"
+    },
+    {
+      "source": "Banco de España seguros hipotecarios",
+      "url": "https://clientebancario.bde.es/pcb/es/blog/seguro-hipotecas.html"
+    },
+    {
+      "source": "BOE Código Civil artículo 1454",
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1889-4763"
+    }
+  ],
+  "limits": {
+    "model_calls": 0,
+    "new_paid_provider_calls": 0,
+    "allow_wordpress_writes": false,
+    "allow_crm_writes": false,
+    "allow_supabase_writes": false,
+    "allow_publish": false,
+    "allow_autopublish": false,
+    "allow_merge": false
+  },
+  "unverified": [
+    "INDEPENDENT_PROFESSIONAL_LEGAL_REVIEW",
+    "ORIGINAL_IMAGE_RIGHTS",
+    "ACTUAL_MOBILE_DESKTOP_QA",
+    "POSITIVE_B2B_FORM_CRM_E2E",
+    "BACKUP_ROLLBACK_OWNER_RELEASE_AUTH"
+  ],
+  "note": "SHA of sources and preservation delta verified offline on exported V5/V6 artifacts; V7 is a separately versioned LAB candidate, not a publication certificate."
+}
