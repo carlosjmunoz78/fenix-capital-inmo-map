@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "4.0.0",
+  "batch_id": "SEO001-AUTOREPAIR-PILOT-20261108-V4",
+  "run_id": 42445381306,
+  "job_id": 128623086987,
+  "artifact_id": 13603825279,
+  "artifact_name": "seo001-autorepair-20261108-v4-LAB-UNAPPROVED",
+  "status": "INCOMPLETE_HOLD",
+  "quality_result": "NOT_PERFECT_DO_NOT_PUBLISH",
+  "model": "gemini-3.5-flash-lite",
+  "provider": "GOOGLE_GEMINI_FREE_PROJECT",
+  "model_calls": 4,
+  "owner_cost_ceiling_eur": 0,
+  "provider_plan_checked_in_ai_studio": "Nivel gratuito",
+  "provider_project": "CEREBRO-GEMINI-FREE",
+  "actual_cost_eur": "NOT_INDEPENDENTLY_AUDITED",
+  "preflight_passed": 50,
+  "wp_writes": 0,
+  "crm_writes": 0,
+  "image_calls": 0,
+  "published": 0,
+  "next_batch_auto_authorized": false,
+  "items": [
+    {
+      "id": "SEO001-FENIX-AR20261108V4-B2C-001",
+      "attempts": 2,
+      "selected_best_attempt": 1,
+      "selected_quality_penalty": 18,
+      "word_count": 1445,
+      "remaining_paragraphs": [
+        {
+          "section": 1,
+          "paragraph": 1,
+          "words": 58
+        },
+        {
+          "section": 5,
+          "paragraph": 3,
+          "words": 58
+        }
+      ],
+      "additional_semantic_risk": "Generic unverified assurance that preventive maintenance ensures appreciation",
+      "copy_approved": false
+    },
+    {
+      "id": "SEO001-FENIX-AR20261108V4-B2B-002",
+      "attempts": 2,
+      "selected_best_attempt": 2,
+      "selected_quality_penalty": 18,
+      "word_count": 1631,
+      "remaining_paragraphs": [
+        {
+          "section": 2,
+          "paragraph": 1,
+          "words": 88
+        },
+        {
+          "section": 4,
+          "paragraph": 1,
+          "words": 89
+        }
+      ],
+      "additional_semantic_risk": "Check legal/contractual generalizations and any marginal IBI mentions",
+      "copy_approved": false
+    }
+  ],
+  "posterior_plan": "SURGICAL_TWO_PARAGRAPH_CORRECTION_PER_ITEM_WITHOUT_FULL_REWRITE_AND_INDEPENDENT_YMYL_GATE",
+  "physical_gates_pending": [
+    "ORIGINAL_IMAGE_PROVENANCE",
+    "DESKTOP_MOBILE_VISUAL_QA",
+    "POSITIVE_PARTNER_CRM_E2E",
+    "EDITORIAL_LEGAL_SIGNOFF"
+  ],
+  "original_assets_backup": "GitHub Actions artifact 13603825279",
+  "previous_batches": [
+    "SEO001-AUTONOMY-PILOT-20261108-ONE",
+    "SEO001-AUTOREPAIR-PILOT-20261108-V1",
+    "SEO001-AUTOREPAIR-PILOT-20261108-V2",
+    "SEO001-AUTOREPAIR-PILOT-20261108-V3"
+  ],
+  "publication_allowed": false
+}
