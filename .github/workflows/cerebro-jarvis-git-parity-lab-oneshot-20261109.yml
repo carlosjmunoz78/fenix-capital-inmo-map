@@ -1,0 +1,47 @@
+name: CEREBRO JARVIS Git Parity LAB One Shot 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-parity-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-git-parity-lab-oneshot-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  git-parity-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Lockfile install and TypeScript plus Vite build
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Isolated Chromium install
+        run: npx playwright install chromium
+      - name: Execute mocked Git readonly parity and fail-closed
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'JARVIS Git readonly lab' --reporter=line
+      - name: Keep QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-git-parity-lab-evidence-${{ github.run_id }}
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
