@@ -171,3 +171,21 @@ test('neither 2 body paragraphs nor thin 40-word paragraphs can be marked PASS',
  const thin={...w,html:w.html.replace('<p>'+p+'</p>','<p>'+Array(40).fill('dato').join(' ')+'</p>')};
  assert.ok(classifyLearnedCandidate({brief,writer:thin}).copy_issues.includes('MAIN_PARAGRAPH_WORD_RANGE'));
 });
+
+test('official BOE sources are pinned to the NEXT prompt without self-authorizing legal publishing',()=>{
+ const legal=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/registry/seo001-official-legal-sources-2026-11-08.json','utf8'));
+ assert.equal(legal.release_status,'HOLD_REQUIRES_LEGAL_YMYL_SIGNOFF');
+ assert.equal(legal.allow_publish,false);
+ assert.equal(legal.sources.length,5);
+ const prompt=buildSeoV4OwnerPrompt(manifest.briefs[0]);
+ for(const entry of legal.sources){
+   assert.ok(prompt.includes(entry.id),entry.id);
+   assert.ok(prompt.includes(entry.url),entry.url);
+   assert.ok(prompt.includes(entry.article),entry.article);
+   assert.ok(prompt.includes(entry.content_rule),entry.id);
+   assert.ok(entry.requires_professional_context_review);
+ }
+ assert.ok(prompt.includes('No atribuir sistemáticamente al vendedor todas las derramas aprobadas antes de la firma.'));
+ assert.ok(prompt.includes('No resolver consecuencias de un retraso en tasación sin leer las cláusulas'));
+ assert.equal(manifest.status,'COMPLETED_HOLD');
+});
