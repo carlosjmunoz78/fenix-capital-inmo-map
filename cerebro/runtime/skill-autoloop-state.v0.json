@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-08T02:23:09.618Z",
+  "updated_at": "2026-11-08T02:28:52.887Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -521,7 +521,8 @@
     "github-wide-skills:f72c010b9e0a4c59fa8e",
     "github-wide-skills:d0195a4c01129a1e3eda",
     "github-wide-skills:cfde3077e68db556230d",
-    "github-wide-skills:601efc4fc299d55ba3fe"
+    "github-wide-skills:601efc4fc299d55ba3fe",
+    "github-wide-skills:408c4188aaf766af1617"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1139,6 +1140,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42421954400,
       "checkpointed_at": "2026-11-07T22:43:59.727Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:408c4188aaf766af1617": {
+      "candidate_id": "github-wide-skills:408c4188aaf766af1617",
+      "name": "tdd",
+      "human_alias": "Tdd",
+      "wrapper_id": "skillwrap:25ab247d5952d572ec45",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.11,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "under71/skill-advisor",
+        "upstream_head_commit": "6899bbfd3fbdbf1e20cdad15630ee5331bb3beba",
+        "manifest_sha256": "24509bcf0ea8c488eb0f91b787e6ddee1a42f0ff0a6b957d335d39b762df8e26",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42438683739,
+      "checkpointed_at": "2026-11-08T02:28:52.887Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32184,7 +32219,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32197,7 +32232,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42438285724,
+  "last_discovery_run_id": 42438683739,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
