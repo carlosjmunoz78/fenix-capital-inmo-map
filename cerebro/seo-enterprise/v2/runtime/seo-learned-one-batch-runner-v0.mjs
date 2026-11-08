@@ -63,12 +63,27 @@ export function classifyLearnedCandidate({brief,writer}={}) {
  if(h1!==1)errors.push('LAB_CANDIDATE_REQUIRES_EXACTLY_ONE_H1');
  if(imgs>0||inlineForms)errors.push('IMAGE_OR_FORM_WRONGLY_EMBEDDED_IN_MODEL_HTML');
  if(writer.faq_count!==6)errors.push('SIX_FAQ_REQUIRED');
- const coreH2=(text.match(/<h2\b/gi)||[]).length-1;
- if(coreH2!==6)errors.push('SIX_MAIN_H2_REQUIRED');
  const faqSection=[...text.matchAll(/<section\b[^>]*class=["']faq["'][^>]*>[\s\S]*?<\/section>/gi)];
- const faqBlocks=faqSection.length===1?
-   [...faqSection[0][0].matchAll(/<div\b[^>]*class=["']faq-item["'][^>]*>([\s\S]*?)<\/div>/gi)]:[];
- if(faqSection.length!==1||faqBlocks.length!==6)errors.push('EXACT_FAQ_DOM_WRAPPER_REQUIRED');
+ const faqHtml=faqSection.length===1?faqSection[0][0]:'';
+ const mainHtml=faqHtml?text.replace(faqHtml,''):text;
+ const coreH2=(mainHtml.match(/<h2\b/gi)||[]).length;
+ if(coreH2!==6)errors.push('SIX_MAIN_H2_REQUIRED');
+ if(faqSection.length!==1||(faqHtml.match(/<h2\b/gi)||[]).length!==1||
+    (mainHtml.match(/<h3\b/gi)||[]).length!==0)errors.push('EXACT_FAQ_DOM_WRAPPER_REQUIRED');
+ const faqBlocks=faqHtml?
+   [...faqHtml.matchAll(/<div\b[^>]*class=["']faq-item["'][^>]*>([\s\S]*?)<\/div>/gi)]:[];
+ if(faqBlocks.length!==6)errors.push('EXACT_FAQ_DOM_WRAPPER_REQUIRED');
+ const coreSections=[...mainHtml.matchAll(/<h2\b[^>]*>[\s\S]*?<\/h2>([\s\S]*?)(?=<h2\b|$)/gi)];
+ if(coreSections.length===6){
+   for(const [,chunk] of coreSections){
+      const paragraphs=[...chunk.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)];
+      if(paragraphs.length!==3)errors.push('EXACTLY_THREE_PARAGRAPHS_PER_MAIN_SECTION');
+      for(const [,paragraph] of paragraphs){
+        const count=paragraph.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().split(/\s+/).filter(Boolean).length;
+        if(count<60||count>85)errors.push('MAIN_PARAGRAPH_WORD_RANGE');
+      }
+   }
+ }
  for(const b of faqBlocks){
    if((b[1].match(/<h3\b/gi)||[]).length!==1||(b[1].match(/<p\b/gi)||[]).length!==1)
       errors.push('FAQ_ITEM_HEADING_AND_PARAGRAPH_REQUIRED');
