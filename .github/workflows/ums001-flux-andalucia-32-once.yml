@@ -1,0 +1,46 @@
+name: CEREBRO UMS001 FLUX 32 Andalusia scenario assets LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-flux-andalucia-32-scenarios-lab-20261108
+    paths:
+      - cerebro/media-studio/v2/locations/START_FLUX_ANDALUCIA_32_ONCE.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-flux-andalucia-32-lab-20261108
+  cancel-in-progress: false
+jobs:
+  generate:
+    if: github.event.head_commit.message == 'CEREBRO_FLUX_ANDALUCIA_32_PAID_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 33
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      CEREBRO_GEO_ONE_SHOT: 'yes'
+      UMS_FLUX_GEO_OUTPUT: '/tmp/ums001-flux-andalucia-32'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm all provinces, 32 assets and estimated spending cap
+        run: |
+          python3 - <<'PY'
+          import json,collections
+          p='cerebro/media-studio/v2/locations/FLUX_ANDALUCIA_32_REUSABLE_SCENES_20261108.json'
+          x=json.load(open(p))
+          assert x['environment']=='LAB' and x['number_images']==32 and len(x['shots'])==32
+          assert x['max_estimated_spend_usd']==1.28
+          assert len(set(y['asset_id'] for y in x['shots']))==32
+          assert sorted(collections.Counter(y['province_key'] for y in x['shots']).values())==[4]*8
+          assert not x['autorenew'] and not x['autopublish'] and not x['automatic_paid_retry']
+          print('ANDALUCIA_8_PROVINCES_32_SCENES_PREPAID_QA_GATE_OK')
+          PY
+      - name: Create 32 genuine original FLUX 1.1 Pro provincial scene assets
+        run: python3 cerebro/media-studio/v2/runtime/ums001_flux_andalucia_32_once.py
+      - name: Preserve raw images, prompts and SHA256 in GitHub private lab artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_FLUX_ANDALUCIA_32_SCENES_${{ github.run_id }}
+          path: /tmp/ums001-flux-andalucia-32/
+          retention-days: 30
+          if-no-files-found: warn
