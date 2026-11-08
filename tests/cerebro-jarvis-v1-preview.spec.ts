@@ -199,3 +199,49 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
  await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
 });
+
+test('JARVIS Git readonly lab · status diff CI compare enqueue only, no write',async({page})=>{
+  const expectedSha='79d621b400c265adf744678aa7c64e79474b6946';
+  const operations:string[]=[];
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({status:'OK',repo:'carlosjmunoz78/fenix-capital-inmo-map',branch:'cerebro/jarvis-core-prod-candidate-20261103',head_sha:expectedSha,environment:'PREPROD'})
+  }));
+  await page.route('**/functions/v1/jarvis-git-gateway-v1-preprod/inspect',async route=>{
+    const body=route.request().postDataJSON() as {operation:string;expected_head_sha:string;base?:string};
+    operations.push(body.operation);
+    expect(body.expected_head_sha).toBe(expectedSha);
+    if(body.operation==='COMPARE')expect(body.base).toBe('main');
+    await route.fulfill({status:202,contentType:'application/json',body:JSON.stringify({status:'QUEUED',job:{job_id:'qa-only-'+body.operation,status:'QUEUED'}})});
+  });
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  for(const name of ['Estado Git','Diff Git','CI Git','vs main']){
+    await page.getByRole('button',{name,exact:true}).click();
+    await expect(page.getByRole('status')).toContainText('Solicitud de solo lectura en cola');
+  }
+  expect(operations).toEqual(['STATUS','DIFF','CI_READ','COMPARE']);
+  await expect(page.getByText('Trabajo: qa-only-COMPARE', {exact:false})).toBeVisible();
+});
+test('JARVIS Git readonly lab · wrong branch blocks all Git requests',async({page})=>{
+  let outbound=0;
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({status:'OK',branch:'main',head_sha:'862ee543036070bc2cbb3ccaffc6c81af6d6a225',environment:'PREPROD'})
+  }));
+  await page.route('**/functions/v1/jarvis-git-gateway-v1-preprod/inspect',async route=>{
+    outbound+=1;
+    await route.fulfill({status:500,contentType:'application/json',body:'{}'});
+  });
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado Git',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Rama distinta a la autorizada');
+  expect(outbound).toBe(0);
+});
