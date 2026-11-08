@@ -1,0 +1,75 @@
+name: CEREBRO JARVIS Rollback Rehearsal ONE SHOT 20261109
+
+on:
+  push:
+    branches:
+      - cerebro/jarvis-rollback-rehearsal-once-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-rollback-rehearsal-once-20261109.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  rehearse-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      ROLLBACK_MAIN_SHA: 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+      ROLLBACK_PAGES_SHA: 01650c6fb728aa9d41dc4877dd4bee243372be68
+    steps:
+      - name: Verify rollback refs unchanged before any build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git ls-remote https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git refs/heads/main | cut -f1)" = "$ROLLBACK_MAIN_SHA"
+          test "$(git ls-remote https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git refs/heads/gh-pages | cut -f1)" = "$ROLLBACK_PAGES_SHA"
+          test "$(git ls-remote https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git refs/heads/backup/20261108-jarvis-prod-cutover-main | cut -f1)" = "$ROLLBACK_MAIN_SHA"
+          test "$(git ls-remote https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git refs/heads/backup/20261108-jarvis-prod-cutover-gh-pages | cut -f1)" = "$ROLLBACK_PAGES_SHA"
+      - name: Verify publishable key reference exists without logging secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          case "$VITE_SUPABASE_PUBLISHABLE_KEY" in sb_publishable_*) ;; *) exit 1 ;; esac
+      - name: Checkout immutable rollback source without publishing
+        uses: actions/checkout@v4
+        with:
+          ref: 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Assert exact rollback source SHA
+        run: test "$(git rev-parse HEAD)" = "$ROLLBACK_MAIN_SHA"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install dependencies from lockfile
+        run: npm ci
+      - name: Build rollback candidate WITHOUT deployment
+        run: npx vite build --base=/ --outDir dist-rollback-rehearsal
+      - name: Assert PROD-only build and prepare offline rollback snapshot
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f dist-rollback-rehearsal/index.html
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-rollback-rehearsal
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-rollback-rehearsal >/dev/null
+          cp dist-rollback-rehearsal/index.html dist-rollback-rehearsal/404.html
+          touch dist-rollback-rehearsal/.nojekyll
+          printf '%s\n' "$ROLLBACK_MAIN_SHA" > dist-rollback-rehearsal/ROLLBACK_CANDIDATE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-rollback-rehearsal/CNAME
+          test "$(cat dist-rollback-rehearsal/ROLLBACK_CANDIDATE_SHA.txt)" = "$ROLLBACK_MAIN_SHA"
+          test "$(cat dist-rollback-rehearsal/CNAME)" = 'app.fenixcapital.es'
+          echo 'ROLLBACK_REHEARSAL_BUILT_OFFLINE=GREEN'
+      - name: Upload isolated rehearsal artifact ONLY - never deploy
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-rollback-once-862ee543036070bc2cbb3ccaffc6c81af6d6a225
+          path: dist-rollback-rehearsal
+          if-no-files-found: error
+          retention-days: 7
