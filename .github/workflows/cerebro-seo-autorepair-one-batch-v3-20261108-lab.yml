@@ -5,6 +5,8 @@ on:
       - 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-v3-2026-11-08.json'
       - 'cerebro/seo-enterprise/v2/runtime/seo-autorepair-one-batch-live-runner-v3.mjs'
       - 'cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v3-real-attempts-replay-ledger-2026-11-08.json'
       - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
       - 'cerebro/seo-enterprise/v2/tests/seo-autorepair-one-batch-live-runner-v3.test.mjs'
       - '.github/workflows/cerebro-seo-autorepair-one-batch-v3-20261108-lab.yml'
@@ -36,6 +38,7 @@ jobs:
           node --test cerebro/seo-enterprise/v2/tests/seo-autorepair-one-batch-live-runner-v3.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
       - name: Verify one-shot owner commit and zero-euro manifest
         id: permit
