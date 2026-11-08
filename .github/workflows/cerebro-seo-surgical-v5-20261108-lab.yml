@@ -23,6 +23,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+      # QA-only commit. Exact provider trigger subject is not present.
       - name: Offline regression tests before anything billable
         run: |
           node --version
