@@ -50,6 +50,21 @@ function wp_remote_post($url,$options){
  // Fail closed: NO real HTTP. Every path, including errors, is intercepted.
  if(!str_starts_with($url,'https://')||!str_contains($url,'.supabase.co/functions/v1/'))throw new RuntimeException('UNEXPECTED_NETWORK_TARGET');
  $GLOBALS['ctx']['http'][]=['url'=>$url,'options'=>$options];
+ if(!empty($GLOBALS['ctx']['use_local_sink'])){
+   $target=getenv('SEO001_V13_LOCAL_SINK');
+   if(!is_string($target)||!preg_match('~^http://127\.0\.0\.1:34381/ingest$~D',$target))
+     throw new RuntimeException('V13_LOOPBACK_ONLY');
+   $header="Content-Type: application/json\r\nx-fenix-idempotency-key: ".
+       $options['headers']['x-fenix-idempotency-key']."\r\n";
+   $context=stream_context_create(['http'=>[
+     'method'=>'POST','header'=>$header,'content'=>$options['body'],
+     'timeout'=>3,'ignore_errors'=>true,'follow_location'=>0]]);
+   $response=file_get_contents($target,false,$context);
+   if($response===false)throw new RuntimeException('V13_LOOPBACK_TRANSPORT_FAILED');
+   $line=$http_response_header[0]??'';
+   if(!preg_match('/^HTTP\/1\.[01] ([0-9]{3})/',$line,$m))throw new RuntimeException('V13_BAD_STATUS');
+   return ['response'=>['code'=>(int)$m[1]],'body'=>$response];
+ }
  return $GLOBALS['ctx']['reply'];
 }
 require __DIR__.'/../fixtures/seo001-v12-live-plugin-excerpts.php';
@@ -114,8 +129,20 @@ resetlab();for($i=0;$i<10;$i++)submit(baseinput());
 $before=count($GLOBALS['ctx']['http']);$r=submit(baseinput());
 check($r instanceof WP_Error&&$r->get_error_code()==='rate_limited','RATE_LIMIT');
 check(count($GLOBALS['ctx']['http'])===$before,'RATE_LIMIT_NO_EXTRA_FORWARD');
+if(getenv('SEO001_V13_LOCAL_SINK')){
+ resetlab();$GLOBALS['ctx']['use_local_sink']=true;
+ $b=baseinput();$header=['x-fenix-idempotency-key'=>'LAB-V13-FIXED-001'];
+ $r1=submit($b,$header);
+ check($r1 instanceof WP_REST_Response&&$r1->status===201,'LOCAL_SINK_FIRST');
+ check($r1->data['lead_id']==='LAB-LOCAL-ONLY','LOCAL_SINK_RECEIPT');
+ $r2=submit($b,$header);
+ check($r2 instanceof WP_REST_Response&&$r2->status===200,'LOCAL_SINK_DUPLICATE');
+ check($r2->data['lead_created']===false&&$r2->data['deduplicated']===true,'LOCAL_SINK_DEDUPE');
+ check(count($GLOBALS['ctx']['http'])===2,'LOCAL_SINK_TWO_CALLS');
+ $GLOBALS['ctx']['use_local_sink']=false;
+}
 echo json_encode(['status'=>'MOCKED_ORIGINAL_PHP_PATH_PASS_REAL_CRM_E2E_HOLD',
  'checks'=>$GLOBALS['ctx']['checks'],'real_http_requests'=>0,'live_crm_writes'=>0,
- 'simulated_forward_calls'=>$before,'production_publish_enabled'=>false,
+ 'simulated_forward_calls'=>$before,'loopback_http_requests'=>getenv('SEO001_V13_LOCAL_SINK')?2:0,'production_publish_enabled'=>false,
  'source'=>'exact_excerpt_of_two_active_wordpress_plugins_not_live_environment',
  'positive_real_crm_e2e_verified'=>false],JSON_UNESCAPED_UNICODE)."\n";

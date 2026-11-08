@@ -15,6 +15,8 @@ on:
       - 'cerebro/seo-enterprise/v2/fixtures/seo001-v12-live-plugin-excerpts.php'
       - 'cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php'
       - 'cerebro/seo-enterprise/v2/registry/seo001-v12-partner-offline-mock-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v13-local-sink-2026-11-08.json'
 permissions:
   contents: read
 concurrency:
@@ -47,6 +49,45 @@ jobs:
           php -l cerebro/seo-enterprise/v2/fixtures/seo001-v12-live-plugin-excerpts.php
           php -l cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
           php -d allow_url_fopen=0 -d disable_functions=curl_exec,curl_multi_exec,fsockopen,pfsockopen,stream_socket_client cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
+      - name: V13 local HTTP sink idempotency and rollback (never Supabase)
+        shell: bash
+        env:
+          SEO001_V13_DIR: ${{ runner.temp }}/seo001-v13-${{ github.run_id }}
+          SEO001_V13_LOCAL_SINK: http://127.0.0.1:34381/ingest
+        run: |
+          set -euo pipefail
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-v13-local-loopback-sink.mjs "$SEO001_V13_DIR" >/tmp/seo001-v13-http.log 2>&1 &
+          PID=$!
+          trap 'kill "$PID" 2>/dev/null || true' EXIT
+          for n in $(seq 1 30); do
+            if node --input-type=module -e "fetch('http://127.0.0.1:34381/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"; then break; fi
+            sleep 0.2
+          done
+          php -d allow_url_fopen=1 -d disable_functions=curl_exec,curl_multi_exec,fsockopen,pfsockopen cerebro/seo-enterprise/v2/tests/seo001-v12-partner-live-code-mock.test.php
+          node --input-type=module <<'NODE'
+          import assert from 'node:assert/strict';
+          const u='http://127.0.0.1:34381';
+          const before=await (await fetch(u+'/status')).json();
+          assert.equal(before.stored,1);
+          assert.equal(before.attempts,2);
+          assert.equal(before.duplicates,1);
+          const response=await fetch(u+'/rollback',{method:'POST'});
+          assert.equal(response.status,200);
+          assert.equal((await response.json()).rollback,true);
+          const after=await (await fetch(u+'/status')).json();
+          assert.equal(after.stored,0);
+          assert.equal(after.rolled_back,true);
+          console.log('SEO001_V13_LOCAL_HTTP_PERSISTENCE_AND_ROLLBACK_PASS_REAL_CRM_HOLD');
+          NODE
+      - name: Store V13 dummy-only rollback receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v13-dummy-local-http-LAB-HOLD
+          path: ${{ runner.temp }}/seo001-v13-${{ github.run_id }}/receipt.json
+          retention-days: 7
+          if-no-files-found: warn
       - name: Use existing Playwright dependencies
         run: npm ci --ignore-scripts
       - name: Independent responsive LAB screenshots with hard publication HOLD
