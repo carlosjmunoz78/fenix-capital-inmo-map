@@ -45,7 +45,9 @@ export function normalizeFaqMarkup(html){
 export function targetedRepairFeedback(review){
  const list=[...(review?.copy_issues||[]),...(review?.style_issues||[]),
    ...(review?.voice_issues||[]),...(review?.content_depth_issues||[])];
- const codes=[...new Set(list.map(x=>typeof x==='string'?x:null).filter(Boolean))].slice(0,16);
+ const raw=[...new Set(list.map(x=>typeof x==='string'?x:null).filter(Boolean))];
+ const codes=raw.filter(x=>/^[A-Z][A-Z0-9_]{2,79}$/.test(x)).slice(0,15);
+ if(raw.length!==codes.length)codes.push('EDITORIAL_REVIEW_REQUIRED');
  return Object.freeze({error_codes:codes,revision_kind:'REWRITE_ONLY_UNRESOLVED_ERRORS',
    no_invented_legal_facts:true,keep_grounded_sources:true,
    faq_dom_exact:true,no_image_or_form_in_model_html:true});
@@ -61,7 +63,7 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
     typeof generate!=='function'||typeof review!=='function'||
     !Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>3||
     !Number.isInteger(budget)||budget<0||budget>6)fail('INVALID_SCOPE_OR_BUDGET');
- const history=[];let feedback=null,previousHash=null,previousErrors=null,requests=0;
+ const history=[];let feedback=null,previousHash=null,requests=0;
  let finalHtml=null,finalReview=null;
  const allowed=Math.min(maxAttempts,budget);
  for(let attempt=1;attempt<=allowed;attempt++){
@@ -89,8 +91,8 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
    technical_copy_precheck:gate.technical_copy_precheck,copy_issues:gate.copy_issues,
    full_quality_certified:false,publish_allowed:false});
   if(gate.technical_copy_precheck==='PASS')break;
-  if(previousHash===h||JSON.stringify(previousErrors)===JSON.stringify(errors.error_codes))break;
-  previousHash=h;previousErrors=errors.error_codes;feedback=errors;
+  if(previousHash===h)break; // Text truly unchanged; same error code with new text can still improve.
+  previousHash=h;feedback=errors;
  }
  const passed=finalReview?.technical_copy_precheck==='PASS';
  return {work_id:brief.work_id,company_id:'fenix',engine_id:'SEO-001',environment:'LAB',
@@ -102,6 +104,41 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
    physical_gates_pending:['REAL_MEDIA_PROVENANCE','REAL_DESKTOP_MOBILE_QA',
      'VALIDATED_FORM_CRM_E2E','INDEPENDENT_YMYL_LEGAL_SIGNOFF']};
 }
+
+/** Connect real Gemini Free writer only under a NEW, owner-scoped single-batch manifest.
+ * This is a factory callback; defining it does not start a provider call.
+ * The prior 2026-11-08 sealed pilot cannot be reused here.
+ */
+export function makeGeminiFreeRepairGenerator({manifest,api_key,fetch_impl,
+   owner_verified_free_project=false,one_shot}={}){
+ if(!manifest||manifest.company_id!=='fenix'||manifest.engine_id!=='SEO-001'||
+    manifest.environment!=='LAB'||manifest.status!=='PREPARED_NOT_EXECUTED'||
+    manifest.batch_id==='SEO001-AUTONOMY-PILOT-20261108-ONE'||
+    manifest.allow_wordpress_writes!==false||
+    manifest.allow_wordpress_publication!==false||
+    manifest.allow_paid_fallback!==false||
+    manifest.allow_image_api_calls!==false||
+    manifest.max_real_model_calls<1||manifest.max_real_model_calls>6||
+    manifest.max_calls_per_item<1||manifest.max_calls_per_item>3||
+    !Array.isArray(manifest.briefs)||manifest.briefs.length<1||manifest.briefs.length>2||
+    typeof one_shot!=='function'||owner_verified_free_project!==true||
+    typeof api_key!=='string'||api_key.length<16)fail('REAL_WRITER_PRECONDITIONS');
+ const ids=new Set(manifest.briefs.map(x=>x.work_id));
+ if(ids.size!==manifest.briefs.length)fail('DUPLICATE_MANIFEST_WORK_ID');
+ let spent=0;const attempts=new Map();
+ return async({brief,attempt,feedback})=>{
+  if(!ids.has(brief?.work_id)||JSON.stringify(manifest.briefs.find(b=>b.work_id===brief.work_id))!==JSON.stringify(brief)||
+    !Number.isInteger(attempt)||attempt<1||attempt>manifest.max_calls_per_item||
+    attempt!==(attempts.get(brief.work_id)||0)+1||
+    spent>=manifest.max_real_model_calls||
+    (attempt===1&&feedback!==null)||(attempt>1&&!feedback))fail('REVISION_SCOPE_OR_CALL_LIMIT');
+  spent++;attempts.set(brief.work_id,attempt);
+  // Exactly one free-model call per invoked attempt. An exception never retries.
+  return await one_shot({api_key,fetch_impl,owner_verified_free_project:true,
+    brief_override:brief,revision_feedback:feedback});
+ };
+}
+
 export async function runSelfRepairBatch({batch_id,briefs,generate,review=classifyLearnedCandidate,
    maxRequests=SELF_REPAIR_POLICY.max_requests_per_batch,maxAttempts=SELF_REPAIR_POLICY.attempts_per_item}={}){
  if(typeof batch_id!=='string'||!/^SEO001-[A-Z0-9_-]{10,120}$/.test(batch_id)||
