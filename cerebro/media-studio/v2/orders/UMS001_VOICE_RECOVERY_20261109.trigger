@@ -5,3 +5,6 @@ one_shot=true
 purpose=existing_voice_mp3_recovery_only
 no_paid_generation=true
 no_publication=true
+
+validation=mp3_header_then_local_ffprobe
+attempt=2_new_push_not_rerun
