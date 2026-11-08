@@ -1,0 +1,55 @@
+name: CEREBRO JARVIS Orchestrator SHADOW Readonly ONE SHOT 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-rollback-rehearsal-once-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-shadow-readonly-once-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  shadow-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      PUB_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      BASE: https://cluhljgonannaafpmblx.supabase.co/functions/v1/jarvis-orchestrator-v0
+    steps:
+      - name: Assert read-only public key configured
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "$PUB_KEY" in sb_publishable_*) ;; *) exit 2 ;; esac
+      - name: Check PROD health without user identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --max-time 20 --output /tmp/health.json --write-out '%{http_code}' -H "apikey: $PUB_KEY" "$BASE/health")"
+          test "$code" = 200
+          node -e 'const x=JSON.parse(require("fs").readFileSync("/tmp/health.json","utf8"));if(x.ok!==true||x.service!=="jarvis-orchestrator-v0"||x.environment!=="PROD"||x.safe_branch!=="cerebro/jarvis-core-prod-candidate-20261103"||x.prod_branch_mutation!==false||x.trading_access!==false||x.model_router!=="PLANIFICADO")process.exit(2);console.log("SHADOW_HEALTH_AND_ISOLATION=GREEN")'
+      - name: Check absent user identity fails closed, without side effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --max-time 20 --output /tmp/denied.json --write-out '%{http_code}' -X POST -H "apikey: $PUB_KEY" -H 'content-type: application/json' --data '{"intent":"REPO_HEAD","args":{}}' "$BASE/execute")"
+          case "$code" in 401|403) ;; *) echo "DENIAL_FAILURE_HTTP=$code"; exit 2 ;; esac
+          echo "SHADOW_ANONYMOUS_DENIAL=GREEN code=$code"
+      - name: Check malformed bearer fails closed, without side effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --max-time 20 --output /tmp/invalid.json --write-out '%{http_code}' -X POST -H "apikey: $PUB_KEY" -H 'Authorization: Bearer invalid-test-token' -H 'content-type: application/json' --data '{"intent":"REPO_HEAD","args":{}}' "$BASE/execute")"
+          case "$code" in 401|403) ;; *) echo "DENIAL_FAILURE_HTTP=$code"; exit 2 ;; esac
+          echo "SHADOW_BAD_TOKEN_DENIAL=GREEN code=$code"
+      - name: Check CORS allows only App origin
+        shell: bash
+        run: |
+          set -euo pipefail
+          code="$(curl --silent --show-error --max-time 20 --output /tmp/cors-allow --dump-header /tmp/cors-headers --write-out '%{http_code}' -X OPTIONS -H 'Origin: https://app.fenixcapital.es' -H 'Access-Control-Request-Method: POST' -H 'Access-Control-Request-Headers: authorization,apikey,content-type' "$BASE/execute")"
+          test "$code" = 204
+          grep -qi '^access-control-allow-origin: https://app.fenixcapital.es' /tmp/cors-headers
+          code="$(curl --silent --show-error --max-time 20 --output /tmp/cors-deny --write-out '%{http_code}' -X OPTIONS -H 'Origin: https://example.com' -H 'Access-Control-Request-Method: POST' "$BASE/execute")"
+          test "$code" = 403
+          echo 'SHADOW_ORIGIN_ENFORCEMENT=GREEN'
+      - name: Safe shadow summary
+        run: echo 'JARVIS_SHADOW_READONLY_NEGATIVE_GATES=GREEN; authenticated comparison and live voice remain separate'
