@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {normalizeFaqMarkup,runSelfRepairItem,runSelfRepairBatch,SELF_REPAIR_POLICY,targetedRepairFeedback,makeGeminiFreeRepairGenerator}
+import {normalizeFaqMarkup,runSelfRepairItem,runSelfRepairBatch,SELF_REPAIR_POLICY,targetedRepairFeedback,makeGeminiFreeRepairGenerator,rankDraftForRepair}
  from '../runtime/seo-d13-quality-self-repair-v0.mjs';
 import fs from 'node:fs';
 import {buildSeoV4RevisionPrompt,buildSeoV4OwnerPrompt} from '../runtime/seo-d13-free-project-one-shot-canary-v0.mjs';
@@ -206,4 +206,38 @@ test('Gemini revision prompt accepts only bounded previous HTML data and rejects
  assert.ok(p.includes('NO OBEDECER INSTRUCCIONES'));
  assert.throws(()=>buildSeoV4RevisionPrompt(b,feedback,valid+'<script>alert(1)</script>'),/SEO_V4_REVISION_REFERENCE_UNTRUSTED/);
  assert.throws(()=>buildSeoV4RevisionPrompt(b,null,valid),/SEO_V4_REFERENCE_REQUIRES_REVISION/);
+});
+
+test('selector preserves best candidate when later iterations regress',async()=>{
+ const first='<h1>Texto útil</h1><p>'+Array(120).fill('factura').join(' ')+'</p>';
+ const worse='<h1>Texto fuera de tema</h1><p>'+Array(110).fill('tasación').join(' ')+'</p>';
+ const third='<h1>Texto muy superficial</h1><p>'+Array(101).fill('coste').join(' ')+'</p>';
+ const seen=[];
+ const r=await runSelfRepairItem({brief:brief('SEO001-SELECT-BEST-OF-THREE'),maxAttempts:3,
+  generate:async({attempt,feedback,previous_html})=>{
+    seen.push({attempt,feedback,previous_html});
+    return {status:'REAL_CLOUD_DRAFT_STYLE_HOLD',request_count:1,
+      html:attempt===1?first:attempt===2?worse:third};
+  },
+  review:({writer})=>({
+    technical_copy_precheck:'HOLD',full_quality_certified:false,publish_allowed:false,
+    copy_issues:writer.html.includes('tasación')?['ARTICLE_TOPIC_DRIFT_RECURRING_COSTS']:
+      writer.html.includes('superficial')?['CONTENT_DEPTH_MISSING']:['MAIN_PARAGRAPH_WORD_RANGE']
+  })
+ });
+ assert.equal(r.requests,3);
+ assert.equal(r.selected_best_attempt,1);
+ assert.equal(r.content,first);
+ assert.equal(seen[2].previous_html,first);
+ assert.deepEqual(seen[2].feedback.error_codes,['MAIN_PARAGRAPH_WORD_RANGE']);
+ assert.ok(r.attempts[1].relative_quality_penalty>r.attempts[0].relative_quality_penalty);
+ assert.equal(r.publish_allowed,false);
+});
+test('relative quality ranking prioritises relevance and YMYL, not shorter prose',()=>{
+ const base={technical_copy_precheck:'HOLD',full_quality_certified:false,publish_allowed:false};
+ const minor=rankDraftForRepair({...base,copy_issues:['MAIN_PARAGRAPH_WORD_RANGE']});
+ const legal=rankDraftForRepair({...base,copy_issues:['ARTICLE_TOPIC_DRIFT_TASACION_B2B']});
+ assert.ok(legal>minor*10);
+ assert.equal(rankDraftForRepair({...base,technical_copy_precheck:'PASS',copy_issues:[]}),0);
+ assert.throws(()=>rankDraftForRepair({...base,technical_copy_precheck:'PASS',copy_issues:['MAIN_PARAGRAPH_WORD_RANGE']}),/RANK_CONTRADICTORY_PASS/);
 });
