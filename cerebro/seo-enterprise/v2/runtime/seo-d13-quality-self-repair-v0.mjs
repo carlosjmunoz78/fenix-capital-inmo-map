@@ -73,7 +73,7 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
  for(let attempt=1;attempt<=allowed;attempt++){
   let model;
   try{model=await generate({brief,attempt,feedback});}
-  catch{history.push({attempt,provider_status:'EXCEPTION_HOLD',request_count:0});break;}
+  catch{requests++;history.push({attempt,provider_status:'EXCEPTION_HOLD',request_count:1,estimated_request:true});break;}
   const n=model?.request_count??0;
   if(!Number.isInteger(n)||n<0||n>1)fail('PROVIDER_REQUEST_COUNT_UNTRUSTED');
   requests+=n;
