@@ -4,7 +4,7 @@
   "engine_id": "UMS-001",
   "environment": "LAB",
   "batch_id": "UMS001_FLUX_ANDALUCIA_32_SCENES_20261108",
-  "status": "CEREBRO_ASSIGNED_PENDING_PHYSICAL_GENERATION",
+  "status": "DONE_32_PHYSICALLY_GENERATED_ARCHIVED_QA_PENDING",
   "model": "black-forest-labs/flux-1.1-pro",
   "number_images": 32,
   "max_estimated_spend_usd": 1.28,
@@ -538,5 +538,18 @@
       "reference_model": "black-forest-labs/flux-1.1-pro",
       "qa_status": "PENDING"
     }
-  ]
+  ],
+  "physical_evidence": {
+    "workflow_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42501885843",
+    "physical_output_files": 32,
+    "verified_sha256_checks": 32,
+    "stored_drive_files": 32,
+    "drive_folder": "https://drive.google.com/drive/folders/1Ro7-srJL9mqVHxTge3FJ_VSEz3MQLPbF",
+    "notion_catalog_new_entries": 32,
+    "notion_catalog": "https://app.notion.com/p/7b135ed0bf0542eba0f680a9be5bb6fd",
+    "visual_qa": "PENDING",
+    "commercial_publishing": "DISABLED",
+    "estimated_spend_usd": 1.28,
+    "actual_billing": "NOT_RECONCILED"
+  }
 }
