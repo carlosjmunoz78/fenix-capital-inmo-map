@@ -209,7 +209,7 @@ test('JARVIS Git readonly lab · status diff CI compare enqueue only, no write',
   await installIsolatedPreprod(page);
   await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
     status:200,contentType:'application/json',
-    body:JSON.stringify({status:'OK',repo:'carlosjmunoz78/fenix-capital-inmo-map',branch:'cerebro/jarvis-core-prod-candidate-20261103',head_sha:expectedSha,environment:'PREPROD'})
+    body:JSON.stringify({status:'OK',repo:'carlosjmunoz78/fenix-capital-inmo-map',branch:'cerebro/jarvis-work-codex-complete-20261102',head_sha:expectedSha,environment:'PREPROD'})
   }));
   await page.route('**/functions/v1/jarvis-git-gateway-v1-preprod/inspect',async route=>{
     const body=route.request().postDataJSON() as {operation:string;expected_head_sha:string;base?:string};
