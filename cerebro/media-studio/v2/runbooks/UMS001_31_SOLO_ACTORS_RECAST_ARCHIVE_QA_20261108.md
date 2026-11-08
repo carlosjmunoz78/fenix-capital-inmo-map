@@ -23,7 +23,7 @@ Se han verificado unicidad de IDs y de hashes de archivo, **NO equivalencia biom
 
 ## Costes y seguridad
 - 31 × 0,04 USD = **1,24 USD estimados**; importe real pendiente de conciliar con factura Replicate.
-- 5 ediciones Kontext Pro (dos Lucía, Hugo, Mateo, corrección de Marina) encargadas en [run 42522105360](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42522105360), **estado inicial en ejecución**, hasta 0,20 USD estimados, sin reintentos automáticos ni publicación. Actualizar estado con evidencia al finalizar.
+- 5 ediciones Kontext Pro (dos Lucía, Hugo, Mateo, corrección de Marina) encargadas en [run 42522105360](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42522105360), **HECHO físicamente, run SUCCESS**: cinco imágenes descargadas, SHA256 verificado, archivadas en [Drive · FLUX Kontext5](https://drive.google.com/drive/folders/1YjGGwcYTdPEFpDfqG6LwPiDba66ubkFu) y registradas en cinco fichas de Notion. Estimación **0,20 USD**, sin publicación. [Comparativa original vs derivados](https://drive.google.com/file/d/1onmOYMshWWWBmrTyCJNXsJbDi2Jkrg8Z/view?usp=drivesdk). La silla de ruedas de Marina se aprecia ahora en la variante; QA final de identidad facial y derechos todavía pendiente.
 - `company_id=fenix`, `engine_id=UMS-001`, `environment=LAB`, nuevos derivados requieren `actor_id+anchor_sha256`, no tocar App/CRM/Supabase/SEO/WordPress/PROD.
 
 ## Próximos gates
