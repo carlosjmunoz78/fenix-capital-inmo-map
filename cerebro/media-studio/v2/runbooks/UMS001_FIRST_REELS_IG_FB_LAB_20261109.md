@@ -41,3 +41,9 @@ Recuperar las dos salidas de voz ya existentes en un runtime con descarga autori
 - Manifest QA: https://drive.google.com/file/d/1EL52UpYEhNq1q2aDW_C8pw_vJlcL5GKz/view
 - Verificados códecs H264/AAC, 1080×1920, nivel máximo -2,1/-3,2 dBFS, ambas voces mezcladas (correlación de señal), primer fotograma con hook y logo en cierre. Margen de subtítulos 430 px del borde inferior. Nuevas generaciones de imagen/vídeo/voz en este bloque: 0.
 - **PENDIENTE**: escucha editorial para acreditar acento castellano y prosodia real (locale es-ES no prueba acento); QA visual completa en apps Instagram/Facebook; derechos y claims; casting y escenas sintéticas; CTA/medición real. `APPROVED=false`, `PUBLISH=false`. No tocar PROD, main, App/CRM, WordPress, SEO, DNS o Supabase.
+
+
+### Fichas Notion leídas de vuelta / Notion Assets · QA pendiente
+- Instagram: https://app.notion.com/p/41281b1a756d81579de0eca59e754b52 · AST-220 · Estado Pendiente QA / TEST / LAB.
+- Facebook: https://app.notion.com/p/41281b1a756d819999d1cc44d6357e33 · AST-221 · Estado Pendiente QA / TEST / LAB.
+Estas fichas NO equivalen a aprobación editorial o legal ni activan publicación.
