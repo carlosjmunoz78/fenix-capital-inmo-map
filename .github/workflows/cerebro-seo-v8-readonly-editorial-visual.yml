@@ -1,0 +1,78 @@
+name: CEREBRO SEO V8 - Readonly Automated Editorial and Visual LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/drafts/v7-semantic-review-only/**'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-semantic-v7-review-only-2026-11-08.json'
+      - '.github/workflows/cerebro-seo-v8-readonly-editorial-visual.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-v8-pr22
+  cancel-in-progress: true
+jobs:
+  readonly-lab:
+    if: github.event.pull_request.number == 22
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: V7 regression and content quality guards
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-v7-semantic-review-only.test.mjs
+      - name: Use existing Playwright dependencies
+        run: npm ci --ignore-scripts
+      - name: Independent responsive LAB screenshots with hard publication HOLD
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import {chromium} from '@playwright/test';
+          const hash=s=>crypto.createHash('sha256').update(s).digest('hex');
+          const src='cerebro/seo-enterprise/v2/';
+          const v7=JSON.parse(fs.readFileSync(src+'registry/seo001-semantic-v7-review-only-2026-11-08.json','utf8'));
+          if(v7.status!=='SEMANTIC_REVIEW_ONLY_HOLD'||v7.environment!=='LAB'||v7.limits?.allow_publish!==false)throw Error('RELEASE_GATE');
+          const dir='/tmp/seo001-v8-readonly';
+          fs.mkdirSync(dir,{recursive:false});
+          const css='*{box-sizing:border-box}body{margin:0;background:#f5f5f5;color:#222;font-family:Arial,sans-serif}article{max-width:990px;margin:30px auto;padding:40px;background:#fff;border-radius:12px}h1{font-size:clamp(28px,4vw,43px)}h2{font-size:clamp(23px,3vw,30px);margin-top:35px}p{line-height:1.7;font-size:17px}a{color:#9c430b;overflow-wrap:anywhere}.faq{border-top:2px solid #ff5f00;margin-top:36px;padding-top:15px}.faq-item{border-bottom:1px solid #ddd;padding:12px 0}@media(max-width:600px){body{background:#fff}article{margin:0;padding:18px;border-radius:0}}';
+          const browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});
+          const results=[];
+          try {
+            for(const [persona,file] of [['B2C','compradores-V7-REVIEW-ONLY.html'],['B2B','inmobiliarias-V7-REVIEW-ONLY.html']]){
+              const body=fs.readFileSync(src+'drafts/v7-semantic-review-only/'+file,'utf8');
+              const links=[...body.matchAll(/<a\b[^>]*href=["']([^"']+)["']/gi)].map(x=>x[1]);
+              if(hash(body)!==v7.reviews[persona].sha256||(body.match(/<h1\b/gi)||[]).length!==1||
+                 (body.match(/<h2\b/gi)||[]).length!==7||(body.match(/class=["']faq-item["']/gi)||[]).length!==6||
+                 links.length!==3||links.some(u=>!/^https:\/\/fenixcapital\.es\/[a-z0-9_-]+\/$/i.test(u))||
+                 /<(script|img|form|input|iframe|style)\b|single services|lorem ipsum/i.test(body))throw Error('V7_SHA_OR_CONTENT_DRIFT');
+              const document='<!doctype html><html lang="es"><head><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><style>'+css+'</style></head><body><article><p style="padding:16px;background:#fff2db;border-left:5px solid #ff5f00">CEREBRO SEO V8 · MAQUETA LOCAL. NO WORDPRESS, SIN FOTO, NO PUBLICADO.</p>'+body+'</article></body></html>';
+              for(const spec of [{device:'mobile',width:390,height:844},{device:'desktop',width:1440,height:900}]){
+                const page=await browser.newPage({viewport:{width:spec.width,height:spec.height},deviceScaleFactor:1});
+                await page.route('**/*',r=>r.abort());
+                await page.setContent(document,{waitUntil:'domcontentloaded'});
+                const q=await page.evaluate(()=>({w:document.documentElement.clientWidth,sw:document.documentElement.scrollWidth,h1:document.querySelectorAll('h1').length,faq:document.querySelectorAll('.faq-item').length}));
+                if(q.w!==spec.width||q.sw>spec.width||q.h1!==1||q.faq!==6)throw Error('VIEWPORT_OVERFLOW_OR_STRUCTURE');
+                const name=persona+'-'+spec.device+'-LAB.png';
+                await page.screenshot({path:path.join(dir,name),fullPage:true,animations:'disabled'});
+                results.push({persona,device:spec.device,width:spec.width,screenshot_sha256:hash(fs.readFileSync(path.join(dir,name))),horizontal_overflow:false});
+                await page.close();
+              }
+            }
+          }finally { await browser.close(); }
+          const report={batch:'SEO001-V8-READONLY-20261108',company_id:'fenix',engine_id:'SEO-001',environment:'LAB',status:'OFFLINE_RESPONSIVE_V7_PASS_RELEASE_HOLD',screenshots:results,wp_drafts_observed_previous_readonly:[52713,52714,52715,52716],media_observed_previous_readonly:[52718,52719,52720,52721],photo_provider_receipts_independently_certified:false,real_wordpress_mobile_verified:false,legal_editorial_approved:false,positive_b2b_form_crm_e2e:false,full_site_restore_rollback_verified:false,three_supervised_publications_passed:false,owner_exact_digest_approved:false,model_calls:0,image_calls:0,wordpress_writes:0,crm_writes:0,published:0,autopublish_allowed:false,release_certified:false};
+          fs.writeFileSync(path.join(dir,'manifest.json'),JSON.stringify(report,null,2)+'\n',{flag:'wx'});
+          console.log(JSON.stringify({status:report.status,screenshots:results.length,publish_allowed:false}));
+          NODE
+      - name: Preserve QA evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v8-readonly-visual-20261108-LAB-UNAPPROVED
+          path: /tmp/seo001-v8-readonly/*
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Zero external effects
+        if: always()
+        run: echo 'LAB OFFLINE HTML, not LIVE WordPress mobile proof. NO API, CRM, WP, MEDIA UPLOAD or AUTOPUBLISH.'
