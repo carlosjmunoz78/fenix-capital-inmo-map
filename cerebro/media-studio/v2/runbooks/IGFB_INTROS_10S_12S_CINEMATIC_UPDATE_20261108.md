@@ -31,3 +31,20 @@
 6. **10–12 s**: Logotipo auténtico de Fénix Capital revelado con impacto final
 
 CEREBRO Marketing encarga la película; UMS-001 genera el máster; especialistas de cada red deciden integración de CTA y examinan resultado; tribunal valida imagen, calidad, derechos, coste y publicación.
+
+
+## Revisión territorial vinculante · Andalucía, ocho provincias · 2026-11-08
+
+**Punto de partida corregido por propietario:** la identidad del estudio Fénix Capital es autonómica (toda Andalucía), no una productora cuya intro presente Córdoba como el único ámbito. Córdoba puede aparecer entre las provincias, pero nunca como encabezado o plano territorial exclusivo del master corporativo.
+
+Provincias a representar en la biblioteca visual y variantes locales: **Almería, Cádiz, Córdoba, Granada, Huelva, Jaén, Málaga y Sevilla**. No hace falta forzar ocho rótulos turísticos en 10 segundos: se agrupan paisajes/arquitectura/escenas humanas en un flujo épico que atraviesa la región y concluye con el logotipo original, sin deformarlo con IA.
+
+**Nueva secuencia Instagram 10 s / 5 planos:** (0–2) costa atlántica y mediterránea; (2–4) Sierra Nevada y olivares; (4–6) vivienda/arquitectura andaluza Córdoba-Sevilla; (6–8) estela de luz integradora de los ocho territorios; (8–10) Fénix Capital — Andalucía, sobreimpresión de claim independiente del logo.
+
+**Nueva secuencia Facebook 12 s / 6 planos:** (0–2) Huelva/Cádiz; (2–4) Málaga/Almería; (4–6) Granada/Jaén; (6–8) Córdoba/Sevilla; (8–10) experiencia humana de vivienda y transformación luminosa; (10–12) símbolo Fénix y logotipo canónico con cierre de confianza.
+
+La intro corporativa es una pieza de marca regional. **Piezas captación/SEO se localizan posteriormente por ciudad/provincia según el servicio real** y medición de leads. No afirmar oficinas físicas en todas las capitales si no están acreditadas. No utilizar el animatic anterior centrado en Córdoba como master definitivo ni declararlo entregado/persistido.
+
+El estado sigue siendo **ENCARGADO / DEFINIDO / PENDIENTE DE PRODUCCIÓN CINEMATOGRÁFICA FINAL**, sin aumentar gastos de prueba, sin publicar, sin cambios en producción. Contratos fuente actualizados:
+- `cerebro/media-studio/v2/orders/igfb-long-multishot-corporate-intros-20261108.json`
+- `cerebro/media-studio/v2/orders/igfb-first-physical-batch-20261108.json`
