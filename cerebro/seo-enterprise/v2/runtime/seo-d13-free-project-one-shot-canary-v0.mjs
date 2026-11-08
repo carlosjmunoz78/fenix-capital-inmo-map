@@ -226,9 +226,38 @@ export function buildOneShotPrompt(){
  'No incluyas datos personales ni supuestas experiencias reales. Solo un artículo en revisión interna.'
  ].join('\n');
 }
+/** Feedback for a NEXT LAB-only model attempt, based only on local QA issue codes.
+ * No previous HTML, customer data, URLs or tool output are trusted as instructions.
+ * The first prompt remains identical when feedback is absent.
+ */
+export function buildSeoV4RevisionPrompt(brief,revision_feedback=null){
+ const b=validateSeoV4Brief(brief);
+ const base=buildSeoV4OwnerPrompt(b);
+ if(revision_feedback===null)return base;
+ if(b.learning_contract_id!=='SEO001_LEARNED_10_GATES_20261108'||
+    !revision_feedback||revision_feedback.revision_kind!=='REWRITE_ONLY_UNRESOLVED_ERRORS'||
+    revision_feedback.keep_grounded_sources!==true||
+    revision_feedback.no_invented_legal_facts!==true||
+    !Array.isArray(revision_feedback.error_codes)||
+    revision_feedback.error_codes.length<1||revision_feedback.error_codes.length>16)
+    throw Error('SEO_V4_REVISION_FEEDBACK_SCOPE_DENIED');
+ const issues=[...new Set(revision_feedback.error_codes)];
+ if(issues.some(x=>typeof x!=='string'||!/^([A-Z][A-Z0-9_]{2,79})$/.test(x)))
+    throw Error('SEO_V4_REVISION_FEEDBACK_UNTRUSTED');
+ return base+[
+  '',
+  'SEGUNDA VUELTA DE AUTOCORRECCIÓN EN LAB. REESCRIBE EL ARTÍCULO COMPLETO, SIN REUTILIZAR CONCLUSIONES INEXACTAS NI AÑADIR HECHOS NO VERIFICADOS.',
+  'CORRIGE ESTOS FALLOS DEL VALIDADOR LOCAL: '+issues.join(', '),
+  'Revisa de nuevo los 6 H2 principales, 3 párrafos por sección, 6 FAQ en section.faq y div.faq-item, enlaces y afirmaciones jurídico-financieras.',
+  'NO inventes referencias legales ni te declares aprobado. Si el problema jurídico no puede resolverse con las fuentes oficiales, adopta lenguaje condicionado y marca la incertidumbre.',
+  'La fotografía de cabecera, formulario, vista móvil y publicación NO están autorizados en esta fase.',
+  'Devuelve JSON válido con el mismo contrato. Es un intento nuevo dentro de un límite estricto y sin fallback de pago.'
+ ].join('\n');
+}
+
 export async function runOneShotFreeCanary({
  api_key=null,fetch_impl=globalThis.fetch,expected_secret_name=FREE_SECRET,
- owner_verified_free_project=true,policy_only=false,brief_override=null
+ owner_verified_free_project=true,policy_only=false,brief_override=null,revision_feedback=null
 }={}){
  const activeBrief=brief_override?validateSeoV4Brief(brief_override):BRIEF;
  const permit=validateOneShotFreePermit();
@@ -239,6 +268,10 @@ export async function runOneShotFreeCanary({
  if(owner_verified_free_project!==true)return hold('FREE_PROJECT_OWNER_UI_UNVERIFIED');
  if(policy_only)return Object.freeze({status:'ONE_SHOT_POLICY_CHECK_PASS',secret_value_read:false,
   external_requests:0,billing_automatically_proven:false,max_requests:1,can_publish:false});
+ if(revision_feedback!==null){
+   if(!brief_override)throw Error('SEO_V4_REVISION_REQUIRES_LEARNED_BRIEF');
+   buildSeoV4RevisionPrompt(activeBrief,revision_feedback);
+ }
  if(typeof api_key!=='string'||api_key.length<16)return hold('FREE_SECRET_NOT_AVAILABLE');
  if(typeof fetch_impl!=='function')return hold('FETCH_TRANSPORT_UNAVAILABLE');
  let calls=0,resp;
@@ -249,7 +282,7 @@ export async function runOneShotFreeCanary({
    headers:{'content-type':'application/json','x-goog-api-key':api_key},
    signal:AbortSignal.timeout(60000),
    body:JSON.stringify({
-    contents:[{role:'user',parts:[{text:brief_override?buildSeoV4OwnerPrompt(activeBrief):buildOneShotPrompt()}]}],
+    contents:[{role:'user',parts:[{text:brief_override?buildSeoV4RevisionPrompt(activeBrief,revision_feedback):buildOneShotPrompt()}]}],
     generationConfig:{responseMimeType:'application/json',
      temperature:0.55,maxOutputTokens:OWNER_ATTESTATION.max_output_tokens}
    })
