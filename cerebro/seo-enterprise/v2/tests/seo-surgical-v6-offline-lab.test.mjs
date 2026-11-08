@@ -26,7 +26,7 @@ test('fail closed on drift, duplicates, wrong length and unapproved positions',(
  const r=m.targets[0];
  assert.throws(()=>rewriteParagraph(r.original_text+' otro',r),/SOURCE_PARAGRAPH_HASH_DRIFT/);
  assert.throws(()=>rewriteParagraph(r.original_text,{...r,after_words:84}),/REWRITE_RANGE/);
- assert.throws(()=>rewriteParagraph(r.original_text,{...r,rewrite_pairs:[['Para ello,','Para ello,'],['Para ello,','Para ello,']]}),/REWRITE_NON_UNIQUE/);
+ assert.throws(()=>rewriteParagraph(r.original_text,{...r,rewrite_pairs:[['de la','por'],['de la','por']]}),/REWRITE_NON_UNIQUE/);
  assert.throws(()=>repairParagraphs('<h1>No</h1>',[m.targets[0]]),/UNAUTHORIZED_INDICES/);
  assert.throws(()=>repairParagraphs('<h1>No</h1>',m.targets),/HTML_UNSAFE_OR_SIZE/);
 });
