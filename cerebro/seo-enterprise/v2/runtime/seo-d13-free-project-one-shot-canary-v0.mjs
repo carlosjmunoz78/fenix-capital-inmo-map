@@ -141,6 +141,9 @@ function buildLearnedSeoPilotPrompt(b) {
  'FAQ HTML OBLIGATORIO. Una sola <section class="faq"><h2>Preguntas frecuentes...</h2> con exactamente SEIS <div class="faq-item"><h3>¿Pregunta?</h3><p>Respuesta entre 20 y 40 palabras</p></div> y cierre </section>. No usar <section> sin class ni <div> sin class.',
  'No afirmar que una derrama corresponde siempre al vendedor, que un retraso depende exclusivamente de una entidad, ni que un contrato es válido o inválido sin comprobar hechos, normas y cláusulas del caso.',
  'El cuerpo debe aportar al menos 950 palabras reales fuera de FAQ y un total de al menos 1150. No repetir, no inventar declaraciones de clientes, cifras de bancos ni obligaciones legales.',
+ 'ANTI RELLENO. Cada uno de los dieciocho párrafos debe aportar información NUEVA, directamente vinculada a la intención de búsqueda. No rellenar para cumplir palabras con leyes, tasaciones, arras, contratos, advertencias repetidas ni recomendaciones genéricas. Las fuentes jurídicas del BOE son únicamente un filtro de veracidad, NO un temario obligatorio.',
+ 'CONTROL DE FOCO. Para compradores: costes periódicos de mantener la vivienda, comunidad, IBI como coste anual, seguros, suministros, conservación, contingencias y presupuesto posterior a comprar. No introducir retrasos de tasación, arras, subrogación contractual, legitimación de contratos ni conflictos jurídicos que no respondan a esa intención.',
+ 'Para inmobiliarias: explicar una demora de tasación desde la comunicación profesional y la gestión de expectativas; evitar fórmulas jurídicas absolutas y datos personales de clientes.',
  b.persona==='INMOBILIARIAS'?
   'Habla a responsables de agencias, describe un protocolo de mensajes con roles y estados verificables, sin plazos de tasación garantizados ni transferencia excesiva de datos. El formulario PARTNER solo lo inserta el plugin validado tras QA.':
   'Habla a compradores sobre costes recurrentes DESPUÉS de la compra. Separa claramente gastos de compra y mantenimiento sin dar importes no contrastados ni garantías.',
@@ -257,7 +260,8 @@ export function buildSeoV4RevisionPrompt(brief,revision_feedback=null){
   'SEGUNDA VUELTA DE AUTOCORRECCIÓN EN LAB. REESCRIBE EL ARTÍCULO COMPLETO, SIN REUTILIZAR CONCLUSIONES INEXACTAS NI AÑADIR HECHOS NO VERIFICADOS.',
   'CORRIGE ESTOS FALLOS DEL VALIDADOR LOCAL: '+issues.join(', '),
   'Los códigos SECTION_XX_PARAGRAPH_YY_WORDS_N_NEEDS_60_TO_85 señalan el número exacto de sección, párrafo y palabras observadas. Corrige ESOS párrafos concretos; SECTION_XX_TOTAL_N_WORDS_BELOW_180 exige aportar información útil en esa sección.',
-  'No alargues a base de frases vacías. Introduce ejemplos realistas sin cifras inventadas, preguntas documentales prácticas, decisiones condicionadas y hechos contrastables. Preserva la coherencia del argumento y las fuentes originales.',
+  'Si aparecen ARTICLE_TOPIC_DRIFT_RECURRING_COSTS o ARTICLE_LEGAL_PADDING_WITHOUT_USER_VALUE, ELIMINA párrafos jurídicos tangenciales y sustitúyelos por explicaciones directamente útiles del coste recurrente: factura mensual, cuota comunitaria, suministros, mantenimiento e imprevistos. No infles párrafos.',
+ 'No alargues a base de frases vacías. Introduce ejemplos realistas sin cifras inventadas, preguntas documentales prácticas, decisiones condicionadas y hechos contrastables. Preserva la coherencia del argumento y las fuentes originales.',
   'Revisa de nuevo los 6 H2 principales, 3 párrafos por sección, 6 FAQ en section.faq y div.faq-item, enlaces y afirmaciones jurídico-financieras.',
   'NO inventes referencias legales ni te declares aprobado. Si el problema jurídico no puede resolverse con las fuentes oficiales, adopta lenguaje condicionado y marca la incertidumbre.',
   'La fotografía de cabecera, formulario, vista móvil y publicación NO están autorizados en esta fase.',
