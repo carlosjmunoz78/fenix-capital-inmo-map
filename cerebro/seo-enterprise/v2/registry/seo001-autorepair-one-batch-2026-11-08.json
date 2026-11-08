@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "PREPARED_NOT_TRIGGERED",
+  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108_AUTOREPAIR_V1",
   "briefs": [
     {
       "company_id": "fenix",
@@ -128,5 +128,12 @@
   "learning_rehearsal_evidence_run_id": 42440481732,
   "media_qa_passed": false,
   "reference_legal_file": "cerebro/seo-enterprise/v2/registry/seo001-official-legal-sources-2026-11-08.json",
-  "regression_rule": "FAIL_CLOSED_ZERO_PUBLISH_ALL_ATTEMPTS_LOGGED"
+  "regression_rule": "FAIL_CLOSED_ZERO_PUBLISH_ALL_ATTEMPTS_LOGGED",
+  "launch_scope": "ONE_REAL_FENIX_LAB_BATCH_NO_FURTHER_BATCHES",
+  "launch_gate_tests": {
+    "workflow_run_id": 42441841051,
+    "passed": 35,
+    "total": 35,
+    "generation_skipped": true
+  }
 }
