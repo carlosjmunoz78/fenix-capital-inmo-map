@@ -123,6 +123,10 @@ export function classifyLearnedCandidate({brief,writer}={}) {
     const offTopic=mainHtml.match(/\b(?:Impuesto sobre Bienes Inmuebles|IBI|suministros b[aá]sicos|derramas extraordinarias|costes de mantenimiento|cuota mensual de comunidad|facturas de agua|primas de seguros)\b/gi)||[];
     if(offTopic.length>=3)errors.push('ARTICLE_TOPIC_DRIFT_TASACION_B2B');
  }
+ // Observed in V4 B2C: preventive maintenance may help preserve condition,
+ // but it does not GUARANTEE asset appreciation. Treat that as YMYL risk.
+ if(/\b(?:asegura|garantiza)(?:\s+[a-záéíóúñ]+){0,5}\s+(?:la\s+)?revalorizaci[oó]n\b/i.test(text))
+    errors.push('YMYL_UNSUPPORTED_GUARANTEED_PROPERTY_APPRECIATION');
  if(brief.persona==='INMOBILIARIAS'&&!/inmobiliaria|agencia/i.test(text))errors.push('B2B_PERSONA_MISSING');
  // No image, license, real CMS rendering, real form success, or mobile screenshot
  // can be asserted from a text-only provider response.
