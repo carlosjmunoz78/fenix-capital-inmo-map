@@ -1,0 +1,92 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "5.0.0",
+  "batch_id": "SEO001-SURGICAL-PATCH-20261108-V5",
+  "run_id": 42446075036,
+  "job_id": 128625161842,
+  "artifact_id": 13603278337,
+  "artifact_name": "seo001-surgical-v5-20261108-LAB-UNAPPROVED",
+  "preflight_tests_passed": 49,
+  "model_calls": 2,
+  "provider": "Gemini 3.5 Flash Lite",
+  "verified_google_ai_studio_project_free": "CEREBRO-GEMINI-FREE",
+  "actual_provider_cost": "NOT_AUDITED_IN_BILLING",
+  "status": "INCOMPLETE_HOLD",
+  "two_articles": [
+    {
+      "persona": "PARTICULARES",
+      "work_id": "SEO001-FENIX-AR20261108V5-B2C-001",
+      "selected": "SURGICAL_V5",
+      "patched_paragraphs": [
+        [
+          1,
+          1
+        ],
+        [
+          5,
+          3
+        ]
+      ],
+      "before_words": [
+        58,
+        58
+      ],
+      "after_words": [
+        64,
+        60
+      ],
+      "copy_issues": [],
+      "old_penalty": 1018,
+      "new_penalty": 0,
+      "full_quality_certified": false,
+      "publish_allowed": false
+    },
+    {
+      "persona": "INMOBILIARIAS",
+      "work_id": "SEO001-FENIX-AR20261108V5-B2B-002",
+      "selected": "SOURCE_V4",
+      "patched_paragraphs": [],
+      "remaining_bad_paragraphs": [
+        [
+          2,
+          1,
+          88
+        ],
+        [
+          4,
+          1,
+          89
+        ]
+      ],
+      "copy_issues": [
+        "MAIN_PARAGRAPH_WORD_RANGE",
+        "SECTION_02_PARAGRAPH_01_WORDS_88_NEEDS_60_TO_85",
+        "SECTION_04_PARAGRAPH_01_WORDS_89_NEEDS_60_TO_85"
+      ],
+      "old_penalty": 18,
+      "new_penalty": null,
+      "reason_exact": "UNOBSERVED_PATCH_REJECTION_CODE_IN_V5_IMPLEMENTATION",
+      "full_quality_certified": false,
+      "publish_allowed": false
+    }
+  ],
+  "safety": {
+    "paid_fallback": 0,
+    "wordpress_writes": 0,
+    "crm_writes": 0,
+    "image_generation_calls": 0,
+    "published": 0,
+    "next_batch_authorized": false
+  },
+  "remaining_physical_gates": [
+    "ORIGINAL_HERO_MEDIA_RIGHTS",
+    "REAL_DESKTOP_MOBILE_VISUAL_QA",
+    "REAL_B2B_LEAD_POSITIVE_CRM_E2E",
+    "PROFESSIONAL_LEGAL_YMYL_SIGNOFF"
+  ],
+  "next_step": "LOG_NON_SENSITIVE_PATCH_REJECTION_CODE_THEN_RETRY_AGENCY_ONLY_NEW_MANIFEST_AND_FREE_TIER_CHECK",
+  "quality_truth": "B2C_STRUCTURAL_COPY_PASS_ONLY_NOT_EDITORIAL_JURIDICAL_APPROVAL"
+}
