@@ -64,7 +64,7 @@
     },
     {
       "id": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
-      "expected_sha256": "d062f9a51596a93201edb180ebff5db194fb3d0e44eb53c1addb3cda1bdcda1a",
+      "expected_sha256": "d062f9a51596a93201edb180ebff5db194fb3d0e44eb53c1addb3cda7bdcda1a",
       "roles": [
         "C05_01_MATEO",
         "C05_02_ALVARO"
@@ -82,5 +82,13 @@
         }
       ]
     }
-  ]
+  ],
+  "preflight_correction": {
+    "reason": "EXACT_SHA256_TRANSCRIPTION_ERROR_ONLY",
+    "old": "d062f9a51596a93201edb180ebff5db194fb3d0e44eb53c1addb3cda1bdcda1a",
+    "new": "d062f9a51596a93201edb180ebff5db194fb3d0e44eb53c1addb3cda7bdcda1a",
+    "original_run_id": 42500671462,
+    "prior_paid_submissions": 0,
+    "prior_failure_stage": "VALIDATE_SHA256_BEFORE_ANY_PAID_PREDICTION"
+  }
 }
