@@ -1,0 +1,52 @@
+name: UMS001 Kontext five premium individual face-continuity images once
+on:
+  push:
+    branches:
+      - cerebro/ums001-casting-31-premium-flux-lab-20261108
+    paths:
+      - cerebro/media-studio/v2/characters/START_KONTEXT5_20261108.trigger
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ums001-kontext5-premium-20261108
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event.head_commit.message == 'UMS001_KONTEXT5_PAID_START_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      CEREBRO_KONTEXT5_ONCE: 'yes'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download 31 original source images with same repo Actions token
+        uses: actions/download-artifact@v4
+        with:
+          name: UMS001_FLUX31_SOLO_CANONICAL_CANDIDATES_42519089192
+          run-id: 42519089192
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: /tmp/cerebro-flux-cast-originals31
+      - name: Verify all five anchor references physically before any paid request
+        run: |
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          p=json.load(open('cerebro/media-studio/v2/characters/FLUX31_KONTEXT_CONTINUITY_AND_MARINA_FIX_PILOT_20261108.json'))
+          assert len(p['jobs'])==5 and p['total_images']==5 and p['max_estimated_cost_usd']==0.20
+          assert p['environment']=='LAB' and not p['autopublish'] and p['no_paid_retry']
+          for x in p['jobs']:
+            b=pathlib.Path('/tmp/cerebro-flux-cast-originals31',x['source_file']).read_bytes()
+            assert hashlib.sha256(b).hexdigest()==x['sha']
+          print('KONTEXT5_SOURCE_SHA256_AND_BUDGET_GREEN')
+          PY
+      - name: Real FLUX Kontext Pro five-image one-shot test
+        run: python3 cerebro/media-studio/v2/runtime/ums001_kontext5_continuity_and_marina_once.py
+      - name: Preserve all outputs and statuses for review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_KONTEXT5_FACE_QA_${{ github.run_id }}
+          path: /tmp/cerebro-flux-kontext5-20261108/
+          retention-days: 30
+          if-no-files-found: warn
