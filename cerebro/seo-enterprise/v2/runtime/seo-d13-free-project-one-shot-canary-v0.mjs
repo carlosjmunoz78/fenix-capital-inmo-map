@@ -280,6 +280,13 @@ export function buildSeoV4RevisionPrompt(brief,revision_feedback=null,revision_r
   '',
   'SEGUNDA VUELTA DE AUTOCORRECCIÓN EN LAB. Si existe un borrador anterior adjunto, conserva los apartados correctos y corrige únicamente lo señalado. No reutilices conclusiones inexactas ni añadas hechos no verificados.',
   'CORRIGE ESTOS FALLOS DEL VALIDADOR LOCAL: '+issues.join(', '),
+  ...(b.work_id.startsWith('SEO001-FENIX-AR20261108V5-')?[
+   'V5 REPARACIÓN QUIRÚRGICA. Mantén EXACTAMENTE los mismos seis H2, dieciocho párrafos, seis FAQ y enlaces del documento anterior. No toques nada excepto dos párrafos señalados.',
+   b.persona==='PARTICULARES'?
+    'Edita SOLO la sección 1 párrafo 1 y sección 5 párrafo 3, hoy con 58 palabras cada uno. Cada párrafo revisado debe tener 60-85 palabras. El párrafo 5.3 afirma incorrectamente que el mantenimiento asegura la revalorización; elimina esa promesa.':
+    'Edita SOLO la sección 2 párrafo 1 y sección 4 párrafo 1, hoy con 88 y 89 palabras. Cada párrafo revisado debe tener 60-85 palabras. Conserva el sentido y evita prometer consecuencias contractuales.',
+   'El resto del documento debe permanecer literalmente igual. Entrega el HTML COMPLETO como parte del JSON existente, pero solo se aplicarán las dos sustituciones autorizadas.'
+  ]:[]),
   'Los códigos SECTION_XX_PARAGRAPH_YY_WORDS_N_NEEDS_60_TO_85 señalan el número exacto de sección, párrafo y palabras observadas. Corrige ESOS párrafos concretos; SECTION_XX_TOTAL_N_WORDS_BELOW_180 exige aportar información útil en esa sección.',
   'Si aparecen ARTICLE_TOPIC_DRIFT_RECURRING_COSTS o ARTICLE_LEGAL_PADDING_WITHOUT_USER_VALUE, reemplaza divagaciones jurídicas por gastos de mantenimiento útiles. Si aparece ARTICLE_TOPIC_DRIFT_TASACION_B2B, elimina párrafos sobre IBI, derramas y costes de mantenimiento y céntrate en comunicar hitos de tasación. No añadas relleno.',
  'No alargues a base de frases vacías. Introduce ejemplos realistas sin cifras inventadas, preguntas documentales prácticas, decisiones condicionadas y hechos contrastables. Preserva la coherencia del argumento y las fuentes originales.',
