@@ -7,7 +7,7 @@ permissions:
   contents: read
 jobs:
   replicate-identity-get-only:
-    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    if: false # one authenticated GET-only canary already started, never rerun on PR edits
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
