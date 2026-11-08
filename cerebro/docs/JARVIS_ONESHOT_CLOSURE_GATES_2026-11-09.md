@@ -27,7 +27,7 @@ Estado: **PARCIAL / NO PROMOVER A PROD**. Auditoría operativa realizada sin mod
 
 ## Causa raíz corregida
 
-La búsqueda original en la cola tenía una expresión regular JavaScript sintácticamente inválida: `f.replace(/^.//`. La única corrección en el payload de **ese trabajo** fue escapar la barra: `f.replace(/^.\\//` (representación textual; en JavaScript es una barra escapada en la regex).
+La búsqueda original en la cola tenía una expresión regular JavaScript sintácticamente inválida: `f.replace(/^.//`. La única corrección en el payload de **ese trabajo** fue escapar la barra: `f.replace(/^.\//` (se modificó exclusivamente un carácter de escape).
 
 - Previamente: `RETRY_WAIT`, 1/2 intentos, `WORKER_FAILED:PHYSICAL_PROD_FAILED`.
 - Diagnóstico aislado: run `42535021309`, salida 0 y 18 coincidencias, sin red ni escritura.
