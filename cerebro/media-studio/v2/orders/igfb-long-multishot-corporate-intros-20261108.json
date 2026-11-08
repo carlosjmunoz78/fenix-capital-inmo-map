@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "v1",
+  "created_date": "2026-11-08",
+  "kind": "UMS001_CORPORATE_MULTISHOT_INTROS",
+  "status": "COMMISSIONED_AND_LOCAL_ANIMATICS_RENDERED_NOT_GENERATIVE_CINEMA_FINAL",
+  "source_branch": "cerebro/ums001-igfb-first-physical-batch-20261108",
+  "reference_owner_feedback": "Intro más larga, más planos, más cosas chulas; no un segundo.",
+  "channels": [
+    "INSTAGRAM",
+    "FACEBOOK"
+  ],
+  "logo_policy": "ORIGINAL_FENIX_LOGO_ONLY_NON_GENERATIVE",
+  "image_provider": "FLUX",
+  "video_model_policy": "BEST_VISUAL_QUALITY_PER_APPROVED_SHOT_WITH_COST_GATES",
+  "brand_colors": [
+    "#870064",
+    "#FFB71B",
+    "#FF5F00",
+    "#141414"
+  ],
+  "format_final": "1080x1920_9:16_H264_AAC",
+  "intro_variants": {
+    "INSTAGRAM": {
+      "duration_sec": 10,
+      "shot_count": 5,
+      "shots": [
+        {
+          "timecode": "0–2",
+          "action": "Córdoba al atardecer, travelling épico de apertura; gancho desde fotograma 0"
+        },
+        {
+          "timecode": "2–4",
+          "action": "Macro de llaves, emoción y destello cinematográfico"
+        },
+        {
+          "timecode": "4–6",
+          "action": "Puerta monumental con luz dorada, travelling hacia delante"
+        },
+        {
+          "timecode": "6–8",
+          "action": "Corriente de luz con partículas originales y símbolo del renacer"
+        },
+        {
+          "timecode": "8–10",
+          "action": "Revelación final logotipo original Fénix Capital, golpe musical"
+        }
+      ],
+      "lab_preview_mp4": "FENIX_UMS001_INSTAGRAM_INTRO_MULTIPLANO_10S_LAB_PREVISUAL.mp4",
+      "lab_preview_rendered_locally": true,
+      "lab_preview_at_google_drive": false,
+      "premium_generations_submitted_for_this_intro": false,
+      "default_use": "CORPORATE_HERO_INTRO_FULL; STORYTELLING_FIRST_SECOND_HOOK",
+      "asset_target_drive_folder": "https://drive.google.com/drive/folders/1RtFNXTiFeWiVBS-OZPJO6Sj6UbG9SylL",
+      "qa_target_drive_folder": "https://drive.google.com/drive/folders/1eYhTCWiPt4p5v7xVSxRU5T6oBvc48BBP",
+      "notion_asset_registry": "https://app.notion.com/p/7b135ed0bf0542eba0f680a9be5bb6fd"
+    },
+    "FACEBOOK": {
+      "duration_sec": 12,
+      "shot_count": 6,
+      "shots": [
+        {
+          "timecode": "0–2",
+          "action": "Córdoba crepuscular, gran plano introductorio"
+        },
+        {
+          "timecode": "2–4",
+          "action": "Llaves, casa, expectativa del comprador"
+        },
+        {
+          "timecode": "4–6",
+          "action": "Preestudio/documentación sin avales ni promesas comerciales"
+        },
+        {
+          "timecode": "6–8",
+          "action": "Puerta abierta con luz realista"
+        },
+        {
+          "timecode": "8–10",
+          "action": "Estela luminosa, ritmo musical creciente"
+        },
+        {
+          "timecode": "10–12",
+          "action": "Logotipo auténtico de Fénix Capital revelado con impacto final"
+        }
+      ],
+      "lab_preview_mp4": "FENIX_UMS001_FACEBOOK_INTRO_MULTIPLANO_12S_LAB_PREVISUAL.mp4",
+      "lab_preview_rendered_locally": true,
+      "lab_preview_at_google_drive": false,
+      "premium_generations_submitted_for_this_intro": false,
+      "default_use": "CORPORATE_HERO_INTRO_FULL; STORYTELLING_FIRST_SECOND_HOOK",
+      "asset_target_drive_folder": "https://drive.google.com/drive/folders/1RtFNXTiFeWiVBS-OZPJO6Sj6UbG9SylL",
+      "qa_target_drive_folder": "https://drive.google.com/drive/folders/1eYhTCWiPt4p5v7xVSxRU5T6oBvc48BBP",
+      "notion_asset_registry": "https://app.notion.com/p/7b135ed0bf0542eba0f680a9be5bb6fd"
+    }
+  },
+  "outros": "KEEP_EXISTING_IG_AND_FB_OUTROS_SEPARATE",
+  "cost_policy": {
+    "video_budget_ceiling_eur_month": 40,
+    "paid_execution_authorized_only_after_gate": true,
+    "autorenew": false
+  },
+  "publication": "DISABLED",
+  "checks": [
+    "LOGO_ACCURATE",
+    "CINEMATIC_REALISM",
+    "AT_LEAST_FIVE_SHOTS",
+    "MUSIC_AND_SFX_RIGHTS",
+    "FIRST_SECOND_HOOK",
+    "DRIVE_ARCHIVE",
+    "NOTION_CATALOG",
+    "NO_AUTOPUBLISH"
+  ]
+}
