@@ -1,0 +1,7 @@
+company_id=fenix
+engine_id=UMS-001
+environment=LAB
+one_shot=true
+purpose=existing_voice_mp3_recovery_only
+no_paid_generation=true
+no_publication=true
