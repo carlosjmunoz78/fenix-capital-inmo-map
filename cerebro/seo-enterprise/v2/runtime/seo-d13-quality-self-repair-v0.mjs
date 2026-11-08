@@ -68,6 +68,28 @@ export function targetedRepairFeedback(review){
  * per invocation. External side effects are forbidden within this coordinator.
  * No content text is printed; each attempt records an evidence hash and issues.
  */
+/** Relative draft ranking only; NEVER a publication or truth certificate. */
+export function rankDraftForRepair(review){
+ if(!review||!Array.isArray(review.copy_issues)||review.publish_allowed!==false||
+    review.full_quality_certified!==false)fail('RANK_UNSAFE_REVIEW');
+ const arr=[...new Set([...(review.copy_issues||[]),
+    ...(review.style_issues||[]),...(review.voice_issues||[]),
+    ...(review.content_depth_issues||[])].filter(x=>typeof x==='string'))];
+ if(review.technical_copy_precheck==='PASS'&&arr.length!==0)
+    fail('RANK_CONTRADICTORY_PASS');
+ if(review.technical_copy_precheck==='PASS')return 0;
+ let score=0;
+ for(const issue of arr){
+   if(/^ARTICLE_TOPIC_DRIFT|^ARTICLE_LEGAL_PADDING|^YMYL_|^ABSOLUTE_|^UNWARRANTED_/.test(issue))score+=1000;
+   else if(/CONTENT_DEPTH_MISSING|MAIN_WORDS_BELOW|TOTAL_WORDS_BELOW/.test(issue))score+=100;
+   else if(/^SECTION_[0-9]{2}_TOTAL_/.test(issue))score+=20;
+   else if(/^SECTION_[0-9]{2}_PARAGRAPH_/.test(issue))score+=4;
+   else if(/^H2_TOO_LONG$|OWNER_BANNED_|COLON_VISIBLE_TEXT/.test(issue))score+=8;
+   else score+=10;
+ }
+ return score;
+}
+
 export async function runSelfRepairItem({brief,generate,review=classifyLearnedCandidate,
     maxAttempts=SELF_REPAIR_POLICY.attempts_per_item,budget=SELF_REPAIR_POLICY.attempts_per_item}={}){
  if(!brief||brief.company_id!=='fenix'||brief.engine_id!=='SEO-001'||
@@ -76,7 +98,7 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
     !Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>3||
     !Number.isInteger(budget)||budget<0||budget>6)fail('INVALID_SCOPE_OR_BUDGET');
  const history=[];let feedback=null,previousHash=null,previousHtml=null,requests=0;
- let finalHtml=null,finalReview=null;
+ let best=null;
  const allowed=Math.min(maxAttempts,budget);
  for(let attempt=1;attempt<=allowed;attempt++){
   let model;
@@ -116,22 +138,25 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
    content_depth_issues:auditTrace?.content_depth_issues??model.content_depth_issues??[]};
   if(!gate||!Array.isArray(gate.copy_issues)||gate.publish_allowed!==false||
      gate.full_quality_certified!==false)fail('UNSAFE_OR_INVALID_QA_GATE');
-  finalHtml=fix.html;finalReview=gate;
-  const h=sha(fix.html),errors=targetedRepairFeedback(gate);
+  const h=sha(fix.html),score=rankDraftForRepair(gate);
+  if(!best||score<best.score)best={html:fix.html,review:gate,score,attempt};
   history.push({attempt,provider_status:model.status,request_count:n,
    html_sha256:h,deterministic_repair:fix.changed?fix.reason:'NONE',
    technical_copy_precheck:gate.technical_copy_precheck,copy_issues:gate.copy_issues,
+   relative_quality_penalty:score,selected_best_attempt:best.attempt,
    full_quality_certified:false,publish_allowed:false});
   if(gate.technical_copy_precheck==='PASS')break;
   if(previousHash===h)break; // Text truly unchanged; same error code with new text can still improve.
-  previousHash=h;feedback=errors;previousHtml=fix.html;
+  previousHash=h;feedback=targetedRepairFeedback(best.review);previousHtml=best.html;
  }
+ const finalHtml=best?.html||null,finalReview=best?.review||null;
  const passed=finalReview?.technical_copy_precheck==='PASS';
  return {work_id:brief.work_id,company_id:'fenix',engine_id:'SEO-001',environment:'LAB',
    status:passed?'COPY_PRECHECK_PASS_PHYSICAL_HOLD':'SELF_REPAIR_EXHAUSTED_OR_PROVIDER_HOLD',
    review:finalReview||{technical_copy_precheck:'HOLD',copy_issues:['NO_VALID_DRAFT'],
       full_quality_certified:false,publish_allowed:false},
    attempts:history,requests,content:finalHtml,
+   selected_best_attempt:best?.attempt||null,selected_relative_quality_penalty:best?.score??null,
    full_quality_certified:false,publish_allowed:false,
    physical_gates_pending:['REAL_MEDIA_PROVENANCE','REAL_DESKTOP_MOBILE_QA',
      'VALIDATED_FORM_CRM_E2E','INDEPENDENT_YMYL_LEGAL_SIGNOFF']};
