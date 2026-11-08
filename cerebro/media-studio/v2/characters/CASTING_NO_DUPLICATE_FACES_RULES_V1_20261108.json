@@ -3,7 +3,7 @@
   "engine_id": "UMS-001",
   "environment": "LAB",
   "policy_id": "CASTING_NO_DUPLICATE_FACES_V1",
-  "status": "ENFORCED_FOR_FUTURE_APPROVAL_WORKFLOW",
+  "status": "DEFINED_AND_REGISTERED_NOT_YET_CONNECTED_TO_AUTOMATIC_VISUAL_DUPLICATE_DETECTOR",
   "owner_feedback": "No puede repetirse el mismo personaje en una pareja homosexual y una pareja heterosexual; tampoco entre ningún otro grupo.",
   "prevention": {
     "version": "v1",
