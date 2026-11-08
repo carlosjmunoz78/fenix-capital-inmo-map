@@ -6,7 +6,7 @@
   "version": "0.1.0",
   "feature": "AUTONOMOUS_EDITORIAL_SELF_REPAIR",
   "owner_mission": "AUTOCORRECT_QUALITY_FAILURES_UNTIL_TESTED_PASS_WITHIN_SAFE_RESOURCES",
-  "state": "IMPLEMENTED_AND_TESTED_LAB_REVISIONS_NOT_YET_LIVE_NEW_BATCH",
+  "state": "REAL_SELF_REPAIR_V1_EXECUTED_HOLD_3_ATTEMPTS_EACH",
   "source_code": [
     "cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs",
     "cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs"
@@ -42,7 +42,7 @@
     "publish": false,
     "automatic_next_batch": false
   },
-  "real_model_revision_adapter": "CONNECTED_NOT_USED_WITH_FRESH_BATCH",
+  "real_model_revision_adapter": "ACTUALLY_EXECUTED_6_GEMINI_REQUESTS",
   "free_project_reverification_required": true,
   "previous_batch_id": "SEO001-AUTONOMY-PILOT-20261108-ONE",
   "previous_batch_state": "COMPLETED_HOLD",
@@ -60,15 +60,24 @@
   "status_indicators": {
     "architecture": "HECHO",
     "code": "HECHO",
-    "qa_ci": "VERIFICADO",
-    "real_model_retry": "POR_PROBAR",
+    "qa_ci": "VERIFICADO_37_TESTS",
+    "real_model_retry": "HECHO_3_ITERACIONES_CADA_UNO",
     "physical_quality": "POR_AUDITAR",
     "autonomous_publication": "BLOQUEADO"
   },
-  "next_action": "ONE_NEW_UNIQUE_LAB_BATCH_WITH_APPROVED_FREE_TIER_AND_BOUNDED_ATTEMPTS_THEN_PHYSICAL_QA_BEFORE_PUBLISH",
+  "next_action": "NEW_UNIQUE_OWNER_GATED_FREE_ONLY_PILOT_AFTER_TARGETED_DIAGNOSTIC_FIX; THEN MEDIA AND MOBILE QA; NEVER REOPEN CONSUMED_BUDGET",
   "cost": {
     "new_subscription_eur": 0,
-    "paid_model_calls_this_change": 0,
-    "gitHub_workflow_minutes_actual_not_audited": true
-  }
+    "model_calls_real_v1": 6,
+    "provider_billing_actual": "NOT_INDEPENDENTLY_AUDITED",
+    "model_calls_regression": 0
+  },
+  "real_live_revision_run_id": 42441908078,
+  "regression_verified_run_id": 42442349298,
+  "regression_total_tests_passed": 37,
+  "real_outcome": "2_OF_2_CONTENT_ITEMS_HOLD; FAQ_AND_H2_STRUCTURE_IMPROVED; PARAGRAPH_DETAILS_MISSING_BEFORE_FIX",
+  "feedback_record": "cerebro/seo-enterprise/v2/training-pilots/SEO_D32_AUTOREPAIR_V1_FEEDBACK_20261108.json",
+  "latest_actual_media_qa": false,
+  "autonomous_editorial_excellence_proven": false,
+  "next_batch_auto_allowed": false
 }
