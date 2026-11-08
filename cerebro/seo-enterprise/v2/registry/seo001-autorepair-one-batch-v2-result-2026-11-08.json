@@ -1,0 +1,143 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "2.0.0",
+  "batch_id": "SEO001-AUTOREPAIR-PILOT-20261108-V2",
+  "workflow_run_id": 42443135690,
+  "workflow_job_id": 128616403031,
+  "workflow_success": true,
+  "qa_pass_before_inference": 38,
+  "artifact_id": 13602208262,
+  "artifact_name": "seo001-autorepair-20261108-v2-LAB-UNAPPROVED",
+  "artifact_sha256": "e562df4bd8e1c0c998c917807a72bb0f6a5e5e209c3087e8bc04a8645e0315d1",
+  "model_calls": 6,
+  "batch_attempts": 6,
+  "model": "gemini-3.5-flash-lite",
+  "provider": "GOOGLE_GEMINI_FREE_PROJECT",
+  "provider_cost_eur": "NOT_INDEPENDENTLY_VERIFIED",
+  "status": "INCOMPLETE_HOLD",
+  "release_status": "NOT_PERFECT_DO_NOT_PUBLISH",
+  "published": 0,
+  "wordpress_writes": 0,
+  "crm_writes": 0,
+  "paid_fallback_calls": 0,
+  "image_calls": 0,
+  "auto_next_batch_allowed": false,
+  "items": [
+    {
+      "work_id": "SEO001-FENIX-AR20261108V2-B2C-001",
+      "persona": "PARTICULARES",
+      "attempts": 3,
+      "status": "HOLD",
+      "h2_main": 6,
+      "faq_items": 6,
+      "body_paragraphs": 18,
+      "paragraph_words_by_section": [
+        [
+          35,
+          33,
+          33
+        ],
+        [
+          33,
+          37,
+          26
+        ],
+        [
+          37,
+          34,
+          34
+        ],
+        [
+          30,
+          35,
+          33
+        ],
+        [
+          34,
+          33,
+          30
+        ],
+        [
+          34,
+          33,
+          29
+        ]
+      ],
+      "out_of_range_paragraphs": 18,
+      "body_depth": "FAIL",
+      "semantic_relevance": "FOCUS_BETTER_NO_LEGAL_TANGENTS_BUT_INSUFFICIENT_SUBSTANCE",
+      "technical_copy_pass": false
+    },
+    {
+      "work_id": "SEO001-FENIX-AR20261108V2-B2B-002",
+      "persona": "INMOBILIARIAS",
+      "attempts": 3,
+      "status": "HOLD",
+      "h2_main": 6,
+      "faq_items": 6,
+      "body_paragraphs": 18,
+      "paragraph_words_by_section": [
+        [
+          78,
+          79,
+          77
+        ],
+        [
+          81,
+          82,
+          74
+        ],
+        [
+          78,
+          79,
+          74
+        ],
+        [
+          77,
+          76,
+          80
+        ],
+        [
+          81,
+          81,
+          85
+        ],
+        [
+          90,
+          83,
+          91
+        ]
+      ],
+      "out_of_range_paragraphs": 2,
+      "style_issues": [
+        "H2_TOO_LONG"
+      ],
+      "semantic_drift": "SECTION_6_DISCUSSING_IBI_UTILITIES_DERRAMAS_IS_NOT_ON_TOPIC_FOR_TASACION_COMMUNICATION",
+      "technical_copy_pass": false
+    }
+  ],
+  "lessons": [
+    "LEGACY_FAQ_AND_HEADING_COUNTS_IMPROVED_BUT_NOT_EDITORIAL_EXCELLENCE",
+    "GLOBAL_REWRITE_FLUCTUATES_AND_CAN_MAKE_GOOD_SECTIONS_WORSE",
+    "RETAIN_PREVIOUS_DRAFT_AS_UNTRUSTED_DATA_TO_SUPPORT_SURGICAL_REVISION",
+    "PRIORITIZE_SEMANTIC_TOPIC_DRIFT_IN_FEEDBACK",
+    "NEVER_REQUIRE_LEGAL_SIDE_TOPICS_JUST_BECAUSE_OFFICIAL_SOURCES_ARE_AVAILABLE",
+    "DO_NOT_PAD_SHORT_CONTENT_OR_DECLARE_PASS_ON_WORDCOUNT_ALONE"
+  ],
+  "next_v3_prereqs": [
+    "PREVIOUS_DRAFT_REVISION_FEEDBACK_VALIDATED",
+    "REAL_MODEL_FREE_QUOTA_RECONFIRMED",
+    "REGRESSION_CI_PASSES",
+    "NEW_MANIFEST_NONCE_AND_NO_PROD_WRITES",
+    "INDEPENDENT_EDITORIAL_YMYL_GATE"
+  ],
+  "physical_gates": [
+    "ORIGINAL_MEDIA_RIGHTS",
+    "REAL_DESKTOP_MOBILE_QA",
+    "B2B_FORM_CRM_POSITIVE_E2E",
+    "LEGAL_YMYL_SIGNOFF"
+  ]
+}
