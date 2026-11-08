@@ -194,3 +194,10 @@ Additional recurring cost introduced: `0 €`
 - Foundation rollback anchor remains `cerebro/ums-v2-safety-rollback-20261025`.
 - This block is additive and isolated under `cerebro/media-studio/v2/**` plus dedicated UMS workflows.
 - Rebuild sources are the versioned role factories, contracts, registries, knowledge packs, workflows, runbook and evidence snapshots; transient media artifacts are evidence/assets, not control-plane source of truth.
+
+
+### 2026-11-09 · UMS001 Reels IG/FB V2 locución española / LAB
+- HECHO: recuperadas 2 locuciones HeyGen ya sintetizadas (0 regeneraciones), GitHub run 42536725622 SUCCESS; export V1 y V2 con voces integradas, música con ducking, subtítulos elevados y outro corto; originales V0/V1 preservados.
+- Entrega física V2: IG https://drive.google.com/file/d/18qQaGd3GHcANxkltCNCyqhxoXvMFKQd8/view (19,955 s) y FB https://drive.google.com/file/d/1XwjjfvyP6awkKAA_iwTCWVowayRLwcBF/view (22,262 s).
+- Evidencia QA: https://drive.google.com/file/d/17kpRWzMhJBkA6xTQ472mt9Id5UPKjujJ/view . Gasto de nuevas generaciones 0, no publicación.
+- PENDIENTE: escucha de acento es-ES, QA editorial/video en red real, derechos, QA casting y CTA medible. PROD/main intactos.
