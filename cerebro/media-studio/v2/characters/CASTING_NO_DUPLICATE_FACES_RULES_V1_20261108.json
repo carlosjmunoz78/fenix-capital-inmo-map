@@ -1,0 +1,189 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "policy_id": "CASTING_NO_DUPLICATE_FACES_V1",
+  "status": "ENFORCED_FOR_FUTURE_APPROVAL_WORKFLOW",
+  "owner_feedback": "No puede repetirse el mismo personaje en una pareja homosexual y una pareja heterosexual; tampoco entre ningún otro grupo.",
+  "prevention": {
+    "version": "v1",
+    "scope": "ALL_FICTIONAL_CHARACTERS_ALL_BUYER_PERSONA_STORIES",
+    "rule": "Each fictional face/person is unique globally: NO person appears in two unrelated cast families/couples/personas, regardless of the orientation of the couple. Only deliberate same-character continuity within the same story is permitted.",
+    "identity_lock": "character_id + approved_reference_file_sha256 + immutable_character_bible + consistent appearance reference for each shot",
+    "visual_qa_required": true,
+    "duplicate_faces_gate": "CROSS_CHARACTER_SIMILARITY_CHECK_REQUIRED_BEFORE_ANY_PUBLICATION",
+    "when_collision": "MARK_BOTH_AMBIGUOUS_SAMPLES_AS_REJECTED_FOR_CASTING; KEEP ORIGINAL RAW ARCHIVE; CREATE_SEPARATE_NEW_ANCHOR_FOR_THE_INCORRECT_CHARACTER; REVIEW_MULTIPLE_ANGLES_BEFORE_APPROVAL",
+    "continuity_rule": "Same character in 10 images/shot set must preserve face and other stable physical traits, varying only camera pose, clothing, light, emotion or scene.",
+    "guardrails": "No reuse across heterosexual/same-sex couples, singles, age groups or families unless explicitly declared as a recurring storyworld character. Never infer real client sexual orientation or other sensitive characteristics."
+  },
+  "identities": [
+    {
+      "character_id": "C01_PRIMERA_COMPRA_LUCIA",
+      "original_manifest_character_id": "C01_PRIMERA_COMPRA_LUCIA",
+      "all_future_generated_shots_must_reference_character_id": "C01_PRIMERA_COMPRA_LUCIA",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "young single first home buyer",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C02_PRIMERA_COMPRA_DANIEL",
+      "original_manifest_character_id": "C02_PRIMERA_COMPRA_DANIEL",
+      "all_future_generated_shots_must_reference_character_id": "C02_PRIMERA_COMPRA_DANIEL",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "young single first home buyer",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C03_PAREJA_ELENA_HUGO",
+      "original_manifest_character_id": "C03_PAREJA_ELENA_HUGO",
+      "all_future_generated_shots_must_reference_character_id": "C03_PAREJA_ELENA_HUGO",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "mixed-gender couple buying first family home",
+      "distinctive_features_correction": "Hugo must be distinctly different from Mateo: Spanish olive-medium skin, dark straight closely cropped hair, clean-shaven, dark brown eyes, narrow jaw, average build; NO auburn/red hair or full beard. Elena: straight long jet-black hair tied low, amber eyes, oval face, no resemblance to Sara from C04."
+    },
+    {
+      "character_id": "C04_PAREJA_MUJERES_ROCIO_SARA",
+      "original_manifest_character_id": "C04_PAREJA_MUJERES_ROCIO_SARA",
+      "all_future_generated_shots_must_reference_character_id": "C04_PAREJA_MUJERES_ROCIO_SARA",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "two women as established couple looking for family home",
+      "distinctive_features_correction": "Rocío: short blonde bob, clear pale blue eyes, high cheekbones; Sara: dark chestnut straight chin-length hair with bangs, brown eyes; distinct from Elena C03 and other single-women characters."
+    },
+    {
+      "character_id": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
+      "original_manifest_character_id": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
+      "all_future_generated_shots_must_reference_character_id": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "two men as established couple seeking family home",
+      "distinctive_features_correction": "Mateo: natural copper/auburn wavy hair, full auburn beard, green-gray eyes, fair freckled skin, broad face; definitely NOT Hugo from C03. Álvaro: very short silver-streaked curly hair, medium olive skin, dark eyes, round nose; different from anyone else."
+    },
+    {
+      "character_id": "C06_MADRE_MONOPARENTAL_CARMEN",
+      "original_manifest_character_id": "C06_MADRE_MONOPARENTAL_CARMEN",
+      "all_future_generated_shots_must_reference_character_id": "C06_MADRE_MONOPARENTAL_CARMEN",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "single mother with school-aged son",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C07_PADRE_MONOPARENTAL_PABLO",
+      "original_manifest_character_id": "C07_PADRE_MONOPARENTAL_PABLO",
+      "all_future_generated_shots_must_reference_character_id": "C07_PADRE_MONOPARENTAL_PABLO",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "single father with daughter",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C08_FAMILIA_DOS_HIJOS_SILVIA_IVAN",
+      "original_manifest_character_id": "C08_FAMILIA_DOS_HIJOS_SILVIA_IVAN",
+      "all_future_generated_shots_must_reference_character_id": "C08_FAMILIA_DOS_HIJOS_SILVIA_IVAN",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "two-parent household with two children",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C09_RECOMENZAR_MARTA",
+      "original_manifest_character_id": "C09_RECOMENZAR_MARTA",
+      "all_future_generated_shots_must_reference_character_id": "C09_RECOMENZAR_MARTA",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "single woman seeking new home following life change",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C10_AUTONOMO_LEANDRO",
+      "original_manifest_character_id": "C10_AUTONOMO_LEANDRO",
+      "all_future_generated_shots_must_reference_character_id": "C10_AUTONOMO_LEANDRO",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "self-employed single buyer",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C11_PAREJA_MAYOR_JOSEFA_MANUEL",
+      "original_manifest_character_id": "C11_PAREJA_MAYOR_JOSEFA_MANUEL",
+      "all_future_generated_shots_must_reference_character_id": "C11_PAREJA_MAYOR_JOSEFA_MANUEL",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "older heterosexual couple downsizing",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C12_PAREJA_MAYOR_MUJERES_INES_PILAR",
+      "original_manifest_character_id": "C12_PAREJA_MAYOR_MUJERES_INES_PILAR",
+      "all_future_generated_shots_must_reference_character_id": "C12_PAREJA_MAYOR_MUJERES_INES_PILAR",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "older same-sex female couple downsizing",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C13_PAREJA_MAYOR_HOMBRES_JORGE_ANTONIO",
+      "original_manifest_character_id": "C13_PAREJA_MAYOR_HOMBRES_JORGE_ANTONIO",
+      "all_future_generated_shots_must_reference_character_id": "C13_PAREJA_MAYOR_HOMBRES_JORGE_ANTONIO",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "older same-sex male couple homebuyers",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C14_FAMILIA_RECONSTITUIDA_NEREA_DAVID",
+      "original_manifest_character_id": "C14_FAMILIA_RECONSTITUIDA_NEREA_DAVID",
+      "all_future_generated_shots_must_reference_character_id": "C14_FAMILIA_RECONSTITUIDA_NEREA_DAVID",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "blended family moving to a larger house",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C15_VIVIENDA_ACCESIBLE_MARINA",
+      "original_manifest_character_id": "C15_VIVIENDA_ACCESIBLE_MARINA",
+      "all_future_generated_shots_must_reference_character_id": "C15_VIVIENDA_ACCESIBLE_MARINA",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "buyer prioritizing accessible apartment",
+      "distinctive_features_correction": null
+    },
+    {
+      "character_id": "C16_INTERGENERACIONAL_PILAR_LAURA",
+      "original_manifest_character_id": "C16_INTERGENERACIONAL_PILAR_LAURA",
+      "all_future_generated_shots_must_reference_character_id": "C16_INTERGENERACIONAL_PILAR_LAURA",
+      "unique_facial_identity": true,
+      "face_reference_status": "AWAITING_INDEPENDENT_VISUAL_QA",
+      "relationship_cast_scope": "mother and adult daughter in shared household",
+      "distinctive_features_correction": null
+    }
+  ],
+  "flagged_concepts": [
+    {
+      "a": "C03_PAREJA_ELENA_HUGO",
+      "b": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
+      "reason": "New visual concept examples showed confusingly similar auburn-haired men in different couples; original FLUX RAW photos need separate cross-cast verification.",
+      "action": "DO_NOT_APPROVE_OR_MAKE_VIDEOS_FROM_THE_AMBIGUOUS_NEW_CONCEPTS. Before regenerating, cast distinct identities per descriptions."
+    },
+    {
+      "a": "C03_PAREJA_ELENA_HUGO",
+      "b": "C04_PAREJA_MUJERES_ROCIO_SARA",
+      "reason": "Risk of similar dark-haired female faces across unrelated couples.",
+      "action": "CHECK_QUEUED_VISUAL_ANCHORS; KEEP_UNIQUE_IDENTITIES."
+    }
+  ],
+  "approval_criteria": [
+    "ALL_CAST_MEMBERS_HAVE_GLOBALLY_UNIQUE_CHARACTER_ID",
+    "REFERENCE_IMAGE_APPROVED_BY_CASTING_QA",
+    "NO_UNINTENDED_SAME_FACE_BETWEEN_STORYWORLD_CHARACTERS",
+    "TEN_VIEWS_PER_CHARACTER_VISUALLY_STABLE",
+    "NO_DUPLICATE_FACE_IN_HETERO_SAME_SEX_SINGLE_FAMILY_VARIANTS",
+    "COST_GATE_AND_ASSET_SHA_RECORDED",
+    "NO_PUBLICATION_WITH_PENDING_QA"
+  ],
+  "preserve_existing": "Original 16 FLUX images, URLs, immutable generation manifest, assets and Notion records stay intact. This is a NONDESTRUCTIVE addendum, not a retroactive change to generated provenance."
+}
