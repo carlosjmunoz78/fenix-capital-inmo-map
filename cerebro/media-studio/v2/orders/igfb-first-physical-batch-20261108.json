@@ -21,7 +21,8 @@
     "service": "Preestudio hipotecario",
     "landing": "https://fenixcapital.es/",
     "audience": "compradores reales, no seguidores vacíos",
-    "goal": "conversaciones y leads cualificados, no solo reproducciones"
+    "goal": "conversaciones y leads cualificados, no solo reproducciones",
+    "creative_direction": "Corporate multi-shot opening requested by owner: IG 10s/5 shots, FB 12s/6 shots. No 1-second intro. Keep logo exact, closing still separate."
   },
   "creative_briefs": [
     {
@@ -70,23 +71,29 @@
       "network": "INSTAGRAM",
       "order_id": "IG-UMS-01",
       "priority": "P0",
-      "intro_policy": "OFF_FOR_REELS_DEFAULT",
+      "intro_policy": "LONG_CINEMATIC_OPENING_REQUIRED_10S_5_SHOTS_HOOK_IN_FIRST_SECOND",
       "outro": "IG-OUTRO-CINEMA-01",
       "cta": "Escribe ESTUDIO por mensaje privado o solicita tu preestudio desde el perfil",
       "lead_event": "IG_DM_OR_FORM_SUBMITTED",
       "output": "9:16 vertical, subtitulado, 20-35 s tras añadir más escenas aprobadas",
-      "approval": "QA_REQUIRED"
+      "approval": "QA_REQUIRED",
+      "intro": "BRAND-IG-CINEMA-INTRO-10S-V1",
+      "intro_duration_seconds": 10,
+      "intro_placement": "OPENING_NARRATIVE_WITH_HOOK; A_B_TEST_WITHOUT_BUMPER_IF_RETENTION_FALLS"
     },
     {
       "network": "FACEBOOK",
       "order_id": "FB-UMS-01",
       "priority": "P0",
-      "intro_policy": "HOOK_FIRST_INTRO_OPTIONAL_AFTER_HOOK",
+      "intro_policy": "LONG_CINEMATIC_OPENING_REQUIRED_12S_6_SHOTS_HOOK_IN_FIRST_SECOND",
       "outro": "FB-OUTRO-CINEMA-01",
       "cta": "Cuéntanos tu caso y te indicamos el siguiente paso",
       "lead_event": "FB_MESSAGE_OR_WEB_FORM_SUBMITTED",
       "output": "9:16 vertical, subtitulado, 20-35 s tras añadir más escenas aprobadas",
-      "approval": "QA_REQUIRED"
+      "approval": "QA_REQUIRED",
+      "intro": "BRAND-FB-CINEMA-INTRO-12S-V1",
+      "intro_duration_seconds": 12,
+      "intro_placement": "OPENING_NARRATIVE_WITH_HOOK; A_B_TEST_WITHOUT_BUMPER_IF_RETENTION_FALLS"
     }
   ],
   "post_production_orders": [
@@ -105,14 +112,22 @@
       "status": "QUEUED_AWAITING_SHOT"
     },
     {
-      "id": "BRAND-IG-INTRO-OPTIONAL",
-      "action": "CINEMA_IDENT_MAX_0_8S_AFTER_INITIAL_HOOK",
-      "status": "LAB_ONLY"
+      "id": "BRAND-IG-CINEMA-INTRO-10S-V1",
+      "action": "MULTISHOT_CINEMATIC_INTRO_FIVE_SHOTS",
+      "duration_sec": 10,
+      "shot_count": 5,
+      "delivery": "1080x1920_H264_AAC",
+      "style": "5 distinctive cinematic shots, epic original sound design, deep black magenta gold, actual canonical brand logo only at final reveal",
+      "status": "COMMISSIONED_NO_PHYSICAL_RENDER_YET"
     },
     {
-      "id": "BRAND-FB-INTRO-OPTIONAL",
-      "action": "CINEMA_IDENT_MAX_0_8S_AFTER_INITIAL_HOOK",
-      "status": "LAB_ONLY"
+      "id": "BRAND-FB-CINEMA-INTRO-12S-V1",
+      "action": "MULTISHOT_CINEMATIC_INTRO_SIX_SHOTS",
+      "duration_sec": 12,
+      "shot_count": 6,
+      "delivery": "1080x1920_H264_AAC",
+      "style": "6 distinctive cinematic shots, more human/trust/narrative beat, authentic brand logo final 2s, powerful original impact sound",
+      "status": "COMMISSIONED_NO_PHYSICAL_RENDER_YET"
     }
   ],
   "quality_gates": [
@@ -123,6 +138,9 @@
     "RIGHTS_CLEAR",
     "SUBTITLES_SAFE",
     "LEADS_CTA_VERIFIED",
-    "NO_PUBLISH_WITHOUT_QA"
+    "NO_PUBLISH_WITHOUT_QA",
+    "LONG_INTRO_MULTISHOT_PHYSICAL_QA",
+    "FIRST_SECOND_VIEWER_HOOK",
+    "CANONICAL_LOGO_NOT_REGENERATED"
   ]
 }
