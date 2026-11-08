@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "production_id": "FENIX_ANDALUCIA_PREMIUM_INTRO_20261108",
+  "model": "runwayml/gen-4.5",
+  "kind": "TEXT_TO_VIDEO",
+  "batch_max_usd": 2.4,
+  "per_shot_usd_max": 0.6,
+  "video_monthly_limit_eur": 40,
+  "autopublish": false,
+  "automatic_paid_retry": false,
+  "auto_reload": false,
+  "output": "9:16",
+  "shot_duration_seconds": 5,
+  "final_master_assembly": "LOCAL_FFMPEG_EDITORIAL_PLUS_ORIGINAL_MUSIC",
+  "shots": [
+    {
+      "id": "04_COSTA",
+      "seed": 401108,
+      "prompt": "A continuous five-second original feature-film quality aerial tracking shot along the southern Andalusian Mediterranean beach at warm golden sunset, dynamic ocean waves foam and sunlight reflections moving naturally; travel along the waterline at low altitude with substantial forward camera motion and pronounced depth parallax between wet sand, waves, and a believable distant rocky cape; ultra-detailed real Andalusian shoreline, premium 35mm cinema rendering, restrained highlights and great contrast. A very subtle thread of warm amber light is reflected on water to visually connect next scene; do not add overt fantasy characters, huge artificial stars, slashes, text, logo, people, watermarks, or fake tourism monuments. REAL VIDEO MOVEMENT, not a still picture."
+    },
+    {
+      "id": "05_CAMPO",
+      "seed": 501108,
+      "prompt": "One continuous five-second cinematic drone tracking shot flying just above an authentic Andalusian olive grove and undulating countryside at golden hour, forward glide with strong real 3D perspective motion between rows of aged olive trees, sunlight shafts through leaves, delicate dust moving in sunbeams, white rural cortijo on a distant hill with olive-covered horizon. Slight graceful banking motion as the camera emerges between trees, atmospheric mountains beyond, authentic beautiful Southern Spain rural landscape, physically coherent landscape, warm gold with deep indigo shadows, expensive breathtaking original feature film cinematography. Organic moving leaves, live-action realism, no stationary background or 2.5D slideshow, no words logos, no fast slashes."
+    },
+    {
+      "id": "06_CALLE_PISOS_MALAGA",
+      "seed": 601108,
+      "prompt": "One uninterrupted five-second smooth traveling steadicam / sophisticated stabilized dolly shot down a real contemporary residential pedestrian street in an Andalusian coastal city, e.g. Malaga, at warm early evening. Important: modern attractive four-to-six-story apartment buildings on both sides with authentic Spanish residential balconies, large glazed windows, whitewashed and sandstone facades, some potted plants, subtle bougainvillea; attractive walkable streetscape, gently moving trees, late light, realistic inhabitants only small distant silhouettes. Camera travels FORWARD decisively toward a welcoming residential doorway and rises slightly so that floors and apartment balconies become prominent, physically realistic geometry and strong parallax. Cinematic prestige real-estate film look; no iconic monuments, no fantasy architecture, no static-photo panning, no onscreen copy or logos."
+    },
+    {
+      "id": "07_CALLE_PISOS_SEVILLA",
+      "seed": 701108,
+      "prompt": "One uninterrupted five-second premium cinematic moving-camera sequence through a second DIFFERENT affluent yet attainable Andalusian residential street in Seville, Spain, with authentic mid-rise apartment buildings, ornate wrought-iron balconies, elegant modern brick-and-cream facades, orange trees moving lightly in the breeze, trees and distinct architectural foreground parallax. Golden twilight blue-hour sky and golden lamps switching on. Camera begins very low by light-reflecting stone pavement then ascends in a smooth crane reveal to reveal several floors of residential apartments, a beautiful home-lit balcony, genuine Andalusian urban life. Production quality of a luxury original film trailer, coherent structures, no tourist landmark focus, no zoom of still image, no cheesy flashy streak effects, no text, no logo, no watermark."
+    }
+  ]
+}
