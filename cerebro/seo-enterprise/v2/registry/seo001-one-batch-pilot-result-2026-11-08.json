@@ -63,5 +63,32 @@
   "one_batch_lock": "CONSUMED_NO_MORE_GENERATIONS_WITH_THIS_BATCH_ID",
   "result": "NOT_PERFECT_DO_NOT_PUBLISH",
   "no_new_subscription_eur": 0,
-  "actual_provider_billing_eur": "NOT_INDEPENDENTLY_VERIFIED"
+  "actual_provider_billing_eur": "NOT_INDEPENDENTLY_VERIFIED",
+  "post_run_regression_2026_11_08": {
+    "code_branch": "cerebro/seo-enterprise-family-staging-contract-v1-20261105",
+    "followup_run_id": 42439115066,
+    "legal_verified_run_id": 42439300348,
+    "verified_total_tests": 18,
+    "learned_suite_tests": 12,
+    "existing_writer_tests": 6,
+    "failures": 0,
+    "model_generation_step": "SKIPPED_NOT_AUTHORIZED",
+    "new_real_model_calls": 0,
+    "cms_writes": 0,
+    "publication": 0,
+    "new_legal_sources": 5,
+    "legal_source_registry": "cerebro/seo-enterprise/v2/registry/seo001-official-legal-sources-2026-11-08.json",
+    "new_gates": [
+      "FAQ_DOM_SECTION_AND_CLASS",
+      "SIX_MAIN_H2",
+      "THREE_PARAGRAPHS_PER_H2",
+      "MAIN_PARAGRAPH_60_85_WORDS",
+      "FAQ_ANSWER_20_40_WORDS",
+      "LEGAL_SOURCE_FACTS_BOUND"
+    ],
+    "previous_generated_text_quality": "FAIL_UNCHANGED",
+    "publication_status": "HOLD_NOT_PERFECT",
+    "next_generation": "NOT_AUTHORIZED",
+    "evidence_note": "GitHub Actions confirms deterministic regressions only. No proof of independent semantic QA, model weight training, images, mobile visual or CRM positive E2E."
+  }
 }
