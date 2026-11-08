@@ -1,0 +1,128 @@
+{
+  "handoff_id": "CEREBRO-UMS001-HANDOFF-REELS-CASTING-20261108-V1",
+  "as_of": "2026-11-08",
+  "timezone": "Europe/Madrid",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "handoff-v1",
+  "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+  "branch": "cerebro/ums001-casting-31-premium-flux-lab-20261108",
+  "status": {
+    "original_flux_cast_group_portraits": {
+      "count": 16,
+      "status": "EXISTING_QA_PENDING",
+      "known_blocked_groups": [
+        "C08",
+        "C14"
+      ]
+    },
+    "actor_registry": {
+      "unique_actor_ids": 31,
+      "status": "DEFINED_NOT_VISUALLY_APPROVED"
+    },
+    "flux_solo_candidates": {
+      "count": 31,
+      "drive_count": 31,
+      "notion_count": 31,
+      "qa": "PENDING",
+      "run_id": 42519089192,
+      "run_conclusion": "success",
+      "estimated_usd": 1.24
+    },
+    "flux_kontext_new": {
+      "count": 5,
+      "drive_count": 5,
+      "notion_count": 5,
+      "qa": "PENDING",
+      "run_id": 42522105360,
+      "run_conclusion": "success",
+      "estimated_usd": 0.2,
+      "marina_wheelchair_visible_in_variant": true
+    },
+    "flux_kontext_pairs_previous": {
+      "count": 6,
+      "run_id": 42500886133,
+      "run_conclusion": "success",
+      "estimated_usd": 0.24
+    },
+    "flux_andalucia_scenarios": {
+      "count": 32,
+      "drive_count": 32,
+      "notion_count": 32,
+      "run_id": 42501885843,
+      "run_conclusion": "success",
+      "estimated_usd": 1.28,
+      "qa": "PENDING",
+      "note": "SYNTHETIC_NOT_REAL_LISTING"
+    },
+    "chatgpt_reference_images": {
+      "unique": 65,
+      "alias_paths": 13,
+      "total_paths": 78,
+      "drive_count": 65,
+      "notion_count": 65,
+      "backup_zip_parts": 4
+    },
+    "runway_raw_clips": {
+      "count": 8,
+      "archived": true
+    },
+    "cinema_master_v2": {
+      "seconds": 44.0,
+      "resolution": "1080x1920_UPSCALED_FROM_720x1280",
+      "qa": "PENDING"
+    },
+    "cinema_short_master": {
+      "seconds": 17.917,
+      "resolution": "1080x1920_UPSCALED_FROM_720x1280",
+      "qa": "PENDING"
+    },
+    "instagram_short_outro": {
+      "seconds": 6.917,
+      "qa": "PENDING"
+    },
+    "facebook_short_outro": {
+      "seconds": 8.375,
+      "qa": "PENDING"
+    },
+    "actor_ten_angle_campaign": {
+      "target_total": 310,
+      "generated_confirmed_as_approved": 0,
+      "status": "PLANNED_GATED"
+    },
+    "reels_ig_fb_with_characters": {
+      "produced": 0,
+      "status": "NOT_YET_GENERATED"
+    }
+  },
+  "urls": {
+    "drive_root": "https://drive.google.com/drive/folders/1Wv8bBkwj-_mXXFd5UA8KBTZ58PtADykH",
+    "drive_cast31": "https://drive.google.com/drive/folders/1LPrgpu_6joV7-KMi3HSnmUWQbjsq6W6V",
+    "drive_cast31_kontext5": "https://drive.google.com/drive/folders/1YjGGwcYTdPEFpDfqG6LwPiDba66ubkFu",
+    "drive_scenarios32": "https://drive.google.com/drive/folders/1Ro7-srJL9mqVHxTge3FJ_VSEz3MQLPbF",
+    "drive_runway_raw8": "https://drive.google.com/drive/folders/1g3iB0lUzqbemDTTKnA9jsIfbk1n8BJCs",
+    "drive_chatgpt_backup": "https://drive.google.com/drive/folders/1K20-szrAmuW090OlAam1QY2SnQtVkV_a",
+    "notion_assets": "https://app.notion.com/p/7b135ed0bf0542eba0f680a9be5bb6fd",
+    "notion_manual": "https://app.notion.com/p/b52f0a2ce74d4d9daa41f46e4b332865",
+    "ig_outro_1080": "https://drive.google.com/file/d/1AOkTY2WX9QiciXg0r0kh2FOL799LrdPf/view",
+    "fb_outro_1080": "https://drive.google.com/file/d/1LPfVkQopyst3zIwkKQLJy4Xjq-TRwfSY/view",
+    "short_master_1080": "https://drive.google.com/file/d/1sN5RMiWIl0lInCeyRU8fxZuQHmMyiAB0/view",
+    "cinema_master_v2": "https://drive.google.com/file/d/1DSYypJDBuZO0oF2C-5wH38X-AGD8UZjm/view"
+  },
+  "next_actions": [
+    "retrieve_library_and_live_sources",
+    "audit_visual_cast_exclusivity",
+    "fix_group_C08_C14",
+    "validate_marina_wheelchair_and_face",
+    "approve_per_actor_anchor",
+    "test_three_to_four_angles_and_video_consistency",
+    "create_IG_and_FB_reel_pilots_using_existing_short_outros",
+    "QA_and_archive_every_asset",
+    "publish_off_until_gates"
+  ],
+  "no_production_writes": true,
+  "no_overwrite_raw": true,
+  "no_paid_autoretry": true,
+  "api_token_storage": "GitHub Actions REPLICATE_API_TOKEN - NEVER IN ARTIFACTS OR CHAT"
+}
