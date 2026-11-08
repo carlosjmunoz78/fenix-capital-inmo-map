@@ -1,0 +1,44 @@
+name: UMS001 FLUX 31 premium solo actor identity candidates one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-casting-31-premium-flux-lab-20261108
+    paths:
+      - cerebro/media-studio/v2/characters/START_FLUX_31_SOLO_ONCE.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-31-flux-individual-actors-20261108
+  cancel-in-progress: false
+jobs:
+  generate:
+    if: github.event.head_commit.message == 'UMS001_FLUX31_SOLO_PAID_RUN_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 36
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      UMS001_SOLO31_ONE_SHOT: 'yes'
+      CEREBRO_CAST31_OUT: '/tmp/cerebro-flux-cast-31-20261108'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Preflight 31 independent identities and 1.24 USD cap
+        run: |
+          python3 - <<'PY'
+          import json
+          x=json.load(open('cerebro/media-studio/v2/characters/FLUX_31_SOLO_CANONICAL_ANCHOR_CANDIDATES_20261108.json'))
+          assert x['model']=='black-forest-labs/flux-1.1-pro' and x['environment']=='LAB'
+          assert x['total_images']==31 and len(x['actors'])==31 and x['max_estimated_cost_usd']==1.24
+          assert len({a['actor_id'] for a in x['actors']})==31
+          assert x['auto_reload']==False and x['autopublish']==False and x['automatic_paid_retry']==False
+          print('UMS001_FLUX31_UNIQUE_ACTOR_AND_BUDGET_CONTRACT_GREEN')
+          PY
+      - name: Create 31 original individual actor anchor candidates using FLUX 1.1 Pro
+        run: python3 cerebro/media-studio/v2/runtime/ums001_flux31_solo_actors_once.py
+      - name: Persist originals and ledger even when partial
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_FLUX31_SOLO_CANONICAL_CANDIDATES_${{ github.run_id }}
+          path: /tmp/cerebro-flux-cast-31-20261108/
+          retention-days: 30
+          if-no-files-found: warn
