@@ -27,7 +27,7 @@ jobs:
           persist-credentials: false
       # QA-only updates, including post-locked-batch regressions, never call provider.
       # Regressions for typed previous-draft context and off-topic paragraph guards.
-      # V3 preflight does not match the exact inference commit subject.
+      # V4 preflight cannot authorize inference; owner subject required and tested.
       # Postpilot best-of-attempt regression only, provider launch stays disabled.
       - name: All learned SEO and self-repair safety tests
         run: |
