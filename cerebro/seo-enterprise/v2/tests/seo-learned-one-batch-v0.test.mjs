@@ -208,3 +208,24 @@ test('real-world paragraph diagnostics identify exact section and paragraph with
  assert.ok(res.copy_issues.includes('SECTION_06_TOTAL_173_WORDS_BELOW_180'));
  assert.equal(res.publish_allowed,false);
 });
+
+test('topic drift in the actual buyer persona is blocked instead of rewarded for padding',()=>{
+ const b=manifest.briefs[0];
+ const irrelevant=[
+ '<h1>Gastos de mantener una vivienda en Córdoba</h1>',
+ '<h2>Suministros</h2>',
+ '<p>El retraso de tasación y las condiciones suspensivas deben revisarse con asesores.</p>',
+ '<p>Las arras y el clausulado contractual condicionan la operación de financiación.</p>',
+ '<p>Una factura de electricidad y otra de agua reflejan costes posteriores.</p>',
+ ].join('');
+ const r=classifyLearnedCandidate({brief:b,writer:{
+  status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',html:irrelevant,
+  faq_count:0,content_depth_precheck_passed:false
+ }});
+ assert.ok(r.copy_issues.includes('ARTICLE_TOPIC_DRIFT_RECURRING_COSTS'));
+ assert.ok(r.copy_issues.includes('ARTICLE_LEGAL_PADDING_WITHOUT_USER_VALUE')===false);
+ const useful=irrelevant.replace('El retraso de tasación y las condiciones suspensivas deben revisarse con asesores.','Compara facturas mensuales de agua, luz y comunicaciones.')
+  .replace('Las arras y el clausulado contractual condicionan la operación de financiación.','Prepara un presupuesto anual para las cuotas comunitarias y pequeños arreglos.');
+ const ok=classifyLearnedCandidate({brief:b,writer:{status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',html:useful,faq_count:0,content_depth_precheck_passed:false}});
+ assert.ok(!ok.copy_issues.includes('ARTICLE_TOPIC_DRIFT_RECURRING_COSTS'));
+});
