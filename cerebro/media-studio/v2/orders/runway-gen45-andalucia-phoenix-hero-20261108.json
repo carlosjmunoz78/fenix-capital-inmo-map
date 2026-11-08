@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "model": "runwayml/gen-4.5",
+  "kind": "TEXT_TO_VIDEO",
+  "batch_max_usd": 0.6,
+  "per_shot_usd_max": 0.6,
+  "autopublish": false,
+  "automatic_paid_retry": false,
+  "auto_reload": false,
+  "shots": [
+    {
+      "id": "08_RENACER_FENIX",
+      "seed": 811080,
+      "prompt": "One continuous breathtaking five-second feature-film quality VFX shot, vertical 9:16, physically coherent and ultra-realistic: within luxurious midnight-black and deep indigo atmospheric space, tiny warm sparks on an elegant polished charcoal stone floor converge into controlled fine-gold and magenta luminous streams, rising slowly upward and coalescing into an ORIGINAL elegant phoenix-like bird formed from flowing molten light and thousands of microscopic embers, unfolding broad graceful wings, with believable translucent energetic feathers and exquisite volumetric ray lighting. The camera slowly dollies backward and tilts up to reveal its true majestic scale with luxurious cinematic motion blur and impeccable professional compositing. Epic sophisticated dramatic but never garish, high-end title-sequence VFX worthy of an original feature film, practical shadows, no harsh slash-wipes, no rapid jump cuts, no graphic stills or 2D slideshow, no labels, no text, no letterforms, NO LOGOS: official Fenix Capital logo will be composited cleanly in postproduction."
+    }
+  ]
+}
