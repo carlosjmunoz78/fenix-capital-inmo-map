@@ -58,7 +58,9 @@ export function validateSeoV4Brief(b){
   'SEO001-FENIX-B2C-EDITORIAL-001':'PARTICULARES',
   'SEO001-FENIX-B2B-EDITORIAL-002':'INMOBILIARIAS',
   'SEO001-FENIX-LRN-20261108-B2C-001':'PARTICULARES',
-  'SEO001-FENIX-LRN-20261108-B2B-002':'INMOBILIARIAS'
+  'SEO001-FENIX-LRN-20261108-B2B-002':'INMOBILIARIAS',
+  'SEO001-FENIX-AR20261108-B2C-001':'PARTICULARES',
+  'SEO001-FENIX-AR20261108-B2B-002':'INMOBILIARIAS'
  };
  if(!b||b.company_id!=='fenix'||b.engine_id!=='SEO-001'||b.environment!=='LAB'||
     b.version!=='V4-CANDIDATE'||b.content_type!=='ARTICLE'||
@@ -86,12 +88,13 @@ export function validateSeoV4Brief(b){
 
 /* Next one-shot learning pilot only. Prior V4 prompts are unchanged. */
 function buildLearnedSeoPilotPrompt(b) {
- const file='cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json';
+ const file=b.work_id.startsWith('SEO001-FENIX-AR20261108-')? 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-2026-11-08.json':'cerebro/seo-enterprise/v2/registry/seo001-learned-one-batch-pilot-2026-11-08.json';
  const m=JSON.parse(fs.readFileSync(file,'utf8'));
  const keys=['L01_CANONICAL_SEMANTIC_H1','L02_POST_HEADER','L03_PAGE_TEMPLATE','L04_BREADCRUMBS','L05_IMAGES','L06_PERSONA_FORMS','L07_PRIVACY','L08_EDITORIAL','L09_FULL_VISUAL','L10_RELEASE'];
+ const newRepair=m.batch_id==='SEO001-AUTOREPAIR-PILOT-20261108-V1';
  if(m.company_id!=='fenix'||m.engine_id!=='SEO-001'||m.environment!=='LAB'||
-    m.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE'||m.learning_contract_id!=='SEO001_LEARNED_10_GATES_20261108'||
-    m.max_batch_runs!==1||m.max_real_model_calls!==2||m.max_calls_per_item!==1||m.allow_retries!==false||
+    (!newRepair&&m.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE')||m.learning_contract_id!=='SEO001_LEARNED_10_GATES_20261108'||
+    m.max_batch_runs!==1||m.max_real_model_calls!==(newRepair?6:2)||m.max_calls_per_item!==(newRepair?3:1)||m.allow_retries!==newRepair||
     m.allow_paid_fallback!==false||m.allow_wordpress_writes!==false||
     m.allow_wordpress_publication!==false||m.allow_image_api_calls!==false||
     !Array.isArray(m.briefs)||m.briefs.length!==2||
@@ -99,10 +102,15 @@ function buildLearnedSeoPilotPrompt(b) {
     Object.keys(m.lessons||{}).length!==keys.length)throw Error('SEO_LEARNED_PILOT_SCOPE_DENIED');
  const expected=m.briefs.find(x=>x.work_id===b.work_id);
  if(!expected||b.learning_contract_id!==m.learning_contract_id||
-    JSON.stringify(expected)!==JSON.stringify(b))throw Error('SEO_LEARNED_BRIEF_DRIFT');
+    JSON.stringify(expected)!==JSON.stringify(b)||
+    (newRepair&&(m.status!=='PREPARED_NOT_EXECUTED'||
+      m.workflow_trigger_nonce!=='TRIGGER_ONCE_20261108_AUTOREPAIR_V1'||m.allow_new_subscriptions!==false||
+      m.allow_wordpress_writes!==false||m.allow_wordpress_publication!==false||m.allow_image_api_calls!==false||
+      m.owner_cost_ceiling_eur!==0)))
+    throw Error('SEO_LEARNED_BRIEF_DRIFT');
  const feedback=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/training-pilots/SEO_D32_LEARNED_ONE_BATCH_20261108_FEEDBACK.json','utf8'));
  if(feedback.company_id!=='fenix'||feedback.engine_id!=='SEO-001'||
-    feedback.batch_id!==m.batch_id||feedback.eval_status!=='TWO_GENERATED_CANDIDATES_HELD_NO_RELEASE'||
+    feedback.batch_id!=='SEO001-AUTONOMY-PILOT-20261108-ONE'||feedback.eval_status!=='TWO_GENERATED_CANDIDATES_HELD_NO_RELEASE'||
     !Array.isArray(feedback.learning_delta)||feedback.learning_delta.length!==6||
     feedback.provider_requests_actual!==2||feedback.published_count!==0)
     throw Error('SEO_LEARNED_D32_FEEDBACK_INVALID');
