@@ -66,3 +66,21 @@ El worker existente rearmaba ciclos de GitHub de hasta 45 minutos. Se modificó 
 6. Solo tras completar gates, decisión explícita sobre producción.
 
 **Regla:** conservar → entender → envolver → probar → mejorar → migrar. Nunca afirmar PROD promovido cuando solo han pasado pruebas de lectura.
+
+
+## Continuación · Comparación OLD vs NEW y UI aislada (09-11-2026)
+
+**Fuentes exactas**: OLD servido según `gh-pages/PROD_SOURCE_SHA.txt`: `10efb154840e32bde4f3cf527c88a417d4526d42`. NEW `main`: `862ee543036070bc2cbb3ccaffc6c81af6d6a225`. La comparación Git indica historias divergentes, por lo que publicar `main` sobre `gh-pages` no sería una promoción trivial.
+
+- Build offline del OLD, sin desplegar: **GREEN**, GitHub Actions run [42536210446](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42536210446), artefacto `jarvis-old-source-10efb154-offline`.
+- Build y dos pruebas de NEW con mocks, sin App PREPROD desplegada: **GREEN 2/2**, misma ejecución. Las pruebas acreditan tipografía responsive y explicación ante denegación de micrófono, no audio real.
+- Regresión funcional NEW con test histórico sin adaptar: **ROJO 3/4**, run [42536315122](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42536315122). Motivo: test esperaba botones directos `Código` y `Git`, pero la UI actual V2 dispone de `Código Gobernado`, `Terminal`, `Navegador`, `Tests` y `Evidencias`.
+- Se adaptó **solo** el test en esta rama aislada (sin modificar `src/` ni las ramas protegidas) para comprobar las operaciones reales V2: opciones visibles, prompts gobernados precargados, navegación de proyectos y Operativa, tipografía, controles y diagnóstico de permisos. Se mantuvo explícito el gap de Git OLD.
+- Regresión funcional V2: **GREEN 4/4**, GitHub Actions run [42536621548](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42536621548), artifact `jarvis-full-ui-regression-one-shot`. Compilación con interfaces de QA y respuestas simuladas; no ejecuta cambios en producción ni crea una App PREPROD.
+- Lectura física sin interacción: navegador Opera autenticado en `https://app.fenixcapital.es/cerebro` muestra JARVIS, proyectos, entrada de texto y botones Dictar / Conversación por voz. **No se ha demostrado** permiso real de micrófono, captura, reproducción, latencia ni diálogo bidireccional.
+- `CerebroConsoleShell.tsx` coincide exactamente entre OLD y NEW; otros componentes del frontend son distintos, por lo que la igualdad del núcleo no demuestra equivalencia funcional total.
+- `cerebro/communication/voice/jarvis/manifest.json` aún declara `prod_authorized=false`, `prod=BLOCKED`, referencia vocal parcial y puertas físicas pendientes. No promover el motor de voz.
+
+**Gates que siguen ROJOS/PENDIENTES**: equivalencia OLD vs NEW de acciones Git directas o alternativa plenamente acreditada; aceptación de micrófono/voz en el dispositivo; autenticación E2E duradera y renovación segura; ensayo de restauración reversible en una superficie segura sin afectar DNS ni App; evaluación integral de riesgo y promoción.
+
+**Estado final**: preparación técnica **PARCIAL**. La App, CRM, `main`, `gh-pages`, DNS y Trading permanecen intactos. No realizar promoción PROD ni afirmar autonomía completa.
