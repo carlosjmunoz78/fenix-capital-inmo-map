@@ -11,6 +11,7 @@ on:
       - 'cerebro/seo-enterprise/v2/runtime/seo-v11-evidence-gap-role-training.mjs'
       - 'cerebro/seo-enterprise/v2/tests/seo-v11-evidence-gap-role-training.test.mjs'
       - 'cerebro/seo-enterprise/v2/registry/seo001-v11-evidence-gap-role-training-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v11-b2b-live-form-static-readonly-2026-11-08.json'
 permissions:
   contents: read
 concurrency:

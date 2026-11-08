@@ -15,10 +15,19 @@ const ROSTER=ROOT+'seo-specialist-role-roster-v2.json';
 const hash=x=>crypto.createHash('sha256').update(x,'utf8').digest('hex');
 const fail=x=>{throw Error('SEO001_V11_'+x)};
 const read=(root,p)=>JSON.parse(fs.readFileSync(path.resolve(root,p),'utf8'));
-export function buildSeoEvidenceHandoffs({root=process.cwd(),registry,readiness}={}){
+export function buildSeoEvidenceHandoffs({root=process.cwd(),registry,readiness,routeAudit}={}){
  const reg=registry||read(root,SOURCE);
  const ready=readiness||evaluateV10({root});
  const roster=read(root,ROSTER);
+ const route=routeAudit||read(root,ROOT+'registry/seo001-v11-b2b-live-form-static-readonly-2026-11-08.json');
+ if(route.company_id!=='fenix'||route.engine_id!=='SEO-001'||route.environment!=='LAB'||
+    route.status!=='REAL_FORM_CODE_PATH_FOUND_POSITIVE_CRM_E2E_HOLD'||
+    route.route_contract?.backend_destination_mode!=='PRODUCTION_IF_WORDPRESS_HOST_FENIXCAPITAL_ES'||
+    route.route_contract?.positive_test_safe_on_live_site!==false||
+    route.observed_limitations?.crm_row_created_verified!==false||
+    route.observed_limitations?.production_requests_sent!==0||
+    route.cms_writes!==0||route.crm_writes!==0||route.published!==0)
+     fail('B2B_ROUTE_NOT_ISOLATED');
  if(reg.company_id!=='fenix'||reg.engine_id!=='SEO-001'||reg.environment!=='LAB'||
    reg.status!=='KNOWLEDGE_GAP_HANDFOFFS_PREPARED_NOT_EXECUTED'||
    reg.real_attestations_created!==0||reg.real_exams_passed!==0||
@@ -66,6 +75,8 @@ export function buildSeoEvidenceHandoffs({root=process.cwd(),registry,readiness}
    knowledge_binding_verified:roles.length===7,
    role_exams_proven_passed:0,authenticated_agents_in_this_roster:0,
    handoffs:roles,missing_physical_evidence_count:7,
+   b2b_live_form_preflight:{plugin_active:true,bridge_to_prod_host:true,positive_e2e_verified:false,
+    safe_live_submit_allowed:false,notes:'STATIC CODE ONLY; NO LEAD WAS SUBMITTED'},
    new_secrets:0,new_model_calls:0,new_subscriptions_eur:0,
    wordpress_writes:0,crm_writes:0,supabase_writes:0,
    independent_receipts_newly_created:0,release_authorized:false,

@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "11.1.0",
+  "audit_kind": "LIVE_AUTHENTICATED_WORDPRESS_PLUGIN_STATIC_READONLY",
+  "status": "REAL_FORM_CODE_PATH_FOUND_POSITIVE_CRM_E2E_HOLD",
+  "source": {
+    "site": "fenixcapital.es",
+    "observed_at": "2026-11-08",
+    "plugin_slug": "cerebro-seo001-partner-form-v0",
+    "plugin_version": "0.2.0",
+    "plugin_active": true,
+    "source_path": "plugins/cerebro-seo001-partner-form-v0/cerebro-seo001-partner-form-v0.php",
+    "lead_bridge_path": "plugins/fenix-cerebro-leads/fenix-cerebro-leads.php",
+    "lead_bridge_version": "1.3.6-preprod",
+    "lead_bridge_active": true
+  },
+  "route_contract": {
+    "shortcode": "fenix_seo001_partner_form",
+    "form_rest_path": "/cerebro-seo001/v0/partner-lead",
+    "method": "POST",
+    "allowed_draft_ids": [
+      52661,
+      52663,
+      52714,
+      52716
+    ],
+    "privacy_required": true,
+    "marketing_optional": true,
+    "agency_required": true,
+    "contact_name_required": true,
+    "email_or_phone_required": true,
+    "honeypot_present": true,
+    "idempotency_header": "x-fenix-idempotency-key",
+    "backend_forward_function": "fenix_cerebro_forward_lead",
+    "backend_destination_mode": "PRODUCTION_IF_WORDPRESS_HOST_FENIXCAPITAL_ES",
+    "positive_test_safe_on_live_site": false
+  },
+  "observed_limitations": {
+    "static_code_not_successful_delivery": true,
+    "crm_row_created_verified": false,
+    "safe_test_tenant_for_current_prod_route_verified": false,
+    "rollback_for_test_lead_verified": false,
+    "private_personal_data_collected": false,
+    "production_requests_sent": 0
+  },
+  "next_safe_action": "Read existing lead bridge and isolated test runner contracts, prepare nonproduction endpoint and reversible unique synthetic request, then verify positive CRM test only in isolated environment. Do not submit via live fenixcapital.es.",
+  "readiness_gate": "SAFE_B2B_CRM_E2E",
+  "state": "HOLD",
+  "cms_writes": 0,
+  "crm_writes": 0,
+  "published": 0,
+  "paid_calls": 0
+}
