@@ -128,3 +128,46 @@ test('real D32 feedback gates enter next prompt and unsafe legal absolutes are b
  assert.equal(r.publish_allowed,false);
  assert.ok(r.copy_issues.includes('YMYL_UNQUALIFIED_LEGAL_OR_EXCLUSIVE_CAUSE_CLAIM'));
 });
+
+test('structural FAQ regression passes only on true DOM with six full main sections',()=>{
+ const brief=manifest.briefs[1];
+ const para=Array(65).fill('dato').join(' ');
+ const answer=Array(24).fill('respuesta').join(' ');
+ const body=Array.from({length:6},(_,n)=>'<section><h2>Agencia y etapa '+(n+1)+'</h2>'+
+   Array.from({length:3},()=>'<p>'+para+'</p>').join('')+'</section>').join('');
+ const faq='<section class="faq"><h2>Preguntas frecuentes</h2>'+
+   Array.from({length:6},(_,n)=>'<div class="faq-item"><h3>¿Duda '+(n+1)+'?</h3><p>'+answer+'</p></div>').join('')+
+   '</section>';
+ const writer={work_id:brief.work_id,status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',
+    faq_count:6,content_depth_precheck_passed:true,
+    html:'<h1>Protocolo útil para agencias en Córdoba</h1>'+body+faq};
+ const ok=classifyLearnedCandidate({brief,writer});
+ assert.equal(ok.technical_copy_precheck,'PASS',JSON.stringify(ok.copy_issues));
+ assert.equal(ok.full_quality_certified,false);
+ assert.equal(ok.publish_allowed,false);
+ assert.ok(ok.physical_gates_pending.includes('REAL_B2B_FORM_CRM_E2E'));
+ const badFaq={...writer,html:writer.html.replace(
+    '<p>'+answer+'</p></div></section>',
+    '<p>'+Array(19).fill('respuesta').join(' ')+'</p></div></section>')};
+ const malformed=classifyLearnedCandidate({brief,writer:badFaq});
+ assert.equal(malformed.technical_copy_precheck,'HOLD');
+ assert.ok(malformed.copy_issues.includes('FAQ_ANSWER_WORD_RANGE'));
+ const fiveSections={...writer,html:writer.html.replace(body,body.replace('<section><h2>Agencia y etapa 1</h2>'+Array.from({length:3},()=>'<p>'+para+'</p>').join('')+'</section>',''))};
+ const five=classifyLearnedCandidate({brief,writer:fiveSections});
+ assert.ok(five.copy_issues.includes('SIX_MAIN_H2_REQUIRED'));
+});
+test('neither 2 body paragraphs nor thin 40-word paragraphs can be marked PASS',()=>{
+ const brief=manifest.briefs[0];
+ const p=Array(65).fill('prueba').join(' ');
+ const a=Array(23).fill('respuesta').join(' ');
+ const faq='<section class="faq"><h2>Preguntas frecuentes</h2>'+
+    Array.from({length:6},(_,n)=>'<div class="faq-item"><h3>¿Duda '+n+'?</h3><p>'+a+'</p></div>').join('')+'</section>';
+ const base=Array.from({length:6},(_,n)=>'<section><h2>Bloque '+n+'</h2>'+
+    Array.from({length:3},()=>'<p>'+p+'</p>').join('')+'</section>').join('');
+ const w={status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',faq_count:6,content_depth_precheck_passed:true,html:'<h1>Gastos recurrentes de tu vivienda en Córdoba</h1>'+base+faq};
+ assert.equal(classifyLearnedCandidate({brief,writer:w}).technical_copy_precheck,'PASS');
+ const twoParas={...w,html:w.html.replace('<p>'+p+'</p>','')};
+ assert.ok(classifyLearnedCandidate({brief,writer:twoParas}).copy_issues.includes('EXACTLY_THREE_PARAGRAPHS_PER_MAIN_SECTION'));
+ const thin={...w,html:w.html.replace('<p>'+p+'</p>','<p>'+Array(40).fill('dato').join(' ')+'</p>')};
+ assert.ok(classifyLearnedCandidate({brief,writer:thin}).copy_issues.includes('MAIN_PARAGRAPH_WORD_RANGE'));
+});
