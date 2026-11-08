@@ -125,7 +125,8 @@ export function classifyLearnedCandidate({brief,writer}={}) {
  }
  // Observed in V4 B2C: preventive maintenance may help preserve condition,
  // but it does not GUARANTEE asset appreciation. Treat that as YMYL risk.
- if(/\b(?:asegura|garantiza)(?:\s+[a-záéíóúñ]+){0,5}\s+(?:la\s+)?revalorizaci[oó]n\b/i.test(text))
+ const appreciationClaim=/\b(?:asegura|garantiza)\s+(?:la\s+)?revalorizaci[oó]n\b/gi;
+ if([...text.matchAll(appreciationClaim)].some(m=>!/(?:\bno|\bnunca)\s*$/.test(text.slice(Math.max(0,m.index-15),m.index))))
     errors.push('YMYL_UNSUPPORTED_GUARANTEED_PROPERTY_APPRECIATION');
  if(brief.persona==='INMOBILIARIAS'&&!/inmobiliaria|agencia/i.test(text))errors.push('B2B_PERSONA_MISSING');
  // No image, license, real CMS rendering, real form success, or mobile screenshot
