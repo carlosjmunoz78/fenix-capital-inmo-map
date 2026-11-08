@@ -21,9 +21,16 @@ function fixture(){
  fs.writeFileSync(path.join(root,PATH),JSON.stringify(m));
  return {root,m};
 }
-test('new batch is distinct from the consumed old batch; gated until exact nonce',()=>{
+test('new batch is distinct from consumed old batch; exact nonce controls admission',()=>{
  assert.equal(BATCH_ID,'SEO001-AUTOREPAIR-PILOT-20261108-V1');
- assert.throws(()=>verifyAutoRepairPilot(),/SEO001_AUTOREPAIR_V1_MANIFEST_RELEASE_OR_COST_GUARD/);
+ const m=JSON.parse(fs.readFileSync(PATH,'utf8'));
+ if(m.workflow_trigger_nonce==='TRIGGER_ONCE_20261108_AUTOREPAIR_V1'){
+   const v=verifyAutoRepairPilot();
+   assert.equal(v.max_calls,6);
+ }else{
+   assert.equal(m.workflow_trigger_nonce,'PREPARED_NOT_TRIGGERED');
+   assert.throws(()=>verifyAutoRepairPilot(),/SEO001_AUTOREPAIR_V1_MANIFEST_RELEASE_OR_COST_GUARD/);
+ }
 });
 test('10 old lessons and 2 original source-only topics survive in new brief with unique IDs',()=>{
  const {root}=fixture();
