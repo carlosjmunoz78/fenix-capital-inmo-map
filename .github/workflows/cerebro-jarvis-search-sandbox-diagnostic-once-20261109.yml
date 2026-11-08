@@ -1,0 +1,46 @@
+name: CEREBRO JARVIS Search Sandbox Diagnostic ONE SHOT 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-rollback-rehearsal-once-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-search-sandbox-diagnostic-once-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  sandbox-diagnostic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout public repository at pinned JARVIS candidate SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 79d621b400c265adf744678aa7c64e79474b6946
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Assert exact target commit
+        run: test "$(git rev-parse HEAD)" = '79d621b400c265adf744678aa7c64e79474b6946'
+      - name: Run identical source search in isolated readonly Docker
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker pull node:24-bookworm-slim >/dev/null
+          IMAGE_REF="$(docker image inspect node:24-bookworm-slim --format '{{index .RepoDigests 0}}')"
+          case "$IMAGE_REF" in *@sha256:*) ;; *) exit 3 ;; esac
+          CODE="$(cat <<'JS'
+const fs=require('fs'),p=require('path');const q=process.argv[1].toLowerCase();let out=[];function walk(d){if(out.length>=100)return;for(const n of fs.readdirSync(d,{withFileTypes:true})){if(['.git','node_modules','dist','coverage'].includes(n.name))continue;const f=p.join(d,n.name);if(n.isDirectory())walk(f);else if(n.isFile()){let s;try{s=fs.readFileSync(f,'utf8')}catch{continue}if(s.includes('\0'))continue;const ls=s.split(/\r?\n/);for(let i=0;i<ls.length&&out.length<100;i++)if(ls[i].toLowerCase().includes(q))out.push({path:f.replace(/^.\//,''),line:i+1,text:ls[i].slice(0,300)})}}}walk('.');console.log(JSON.stringify({query:process.argv[1],matches:out}));
+          JS
+          )"
+          set +e
+          docker run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --pids-limit 32 --memory 512m --cpus 1.0 --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777 --mount "type=bind,src=$PWD,dst=/workspace,readonly" --workdir /workspace --user 65532:65532 "$IMAGE_REF" node -e "$CODE" SAFE_BRANCH > "$RUNNER_TEMP/jarvis-search-out.json" 2> "$RUNNER_TEMP/jarvis-search-err.txt"
+          rc=$?
+          set -e
+          echo "DIAGNOSTIC_EXIT_CODE=$rc"
+          echo "DIAGNOSTIC_STDERR_BEGIN"
+          head -c 1800 "$RUNNER_TEMP/jarvis-search-err.txt"
+          echo
+          echo "DIAGNOSTIC_STDERR_END"
+          if [ "$rc" -eq 0 ]; then
+            node -e 'const fs=require("fs");const j=JSON.parse(fs.readFileSync(process.argv[1],"utf8"));console.log(JSON.stringify({status:"PHYSICAL_SANDBOX_READONLY_GREEN",query:j.query,match_count:j.matches.length}))' "$RUNNER_TEMP/jarvis-search-out.json"
+          fi
+          test "$rc" -eq 0
