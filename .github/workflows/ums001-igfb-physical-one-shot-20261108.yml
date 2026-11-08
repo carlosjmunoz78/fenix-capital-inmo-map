@@ -1,0 +1,36 @@
+name: UMS-001 IG+FB FLUX Pruna one-shot physical LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-igfb-first-physical-batch-20261108
+    paths:
+      - cerebro/media-studio/v2/orders/igfb-first-physical-batch-20261108.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-igfb-physical-one-shot-20261108
+  cancel-in-progress: false
+jobs:
+  physical:
+    if: github.event.head_commit.message == 'UMS001_START_PHYSICAL_BATCH_20261108_ONCE' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    env:
+      UMS_PILOT_ONE_SHOT: 'yes'
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ordered work and zero-side-effect tests
+        run: |
+          python3 cerebro/media-studio/v2/tests/igfb_physical_order_contract_test.py
+          node --test cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs cerebro/media-studio/v2/tests/cinematic-model-router-lab-v0.test.mjs
+      - name: Run exactly two FLUX stills and one quality Pruna clip, download and hash immediately
+        run: python3 cerebro/media-studio/v2/runtime/igfb_one_shot_physical_pilot.py
+      - name: Preserve the evidence privately as GitHub Actions artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igfb-physical-lab-20261108-${{ github.run_id }}
+          path: /tmp/ums001-igfb-physical-batch/
+          retention-days: 30
+          if-no-files-found: warn
