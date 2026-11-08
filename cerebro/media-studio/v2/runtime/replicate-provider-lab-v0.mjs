@@ -7,6 +7,10 @@ export const REPLICATE_MODELS = Object.freeze({
   FLUX_1_1_PRO: Object.freeze({id:'black-forest-labs/flux-1.1-pro',kind:'IMAGE',usd_per_output:0.04}),
   FLUX_1_1_ULTRA: Object.freeze({id:'black-forest-labs/flux-1.1-pro-ultra',kind:'IMAGE',usd_per_output:0.06}),
   FLUX_KONTEXT_PRO: Object.freeze({id:'black-forest-labs/flux-kontext-pro',kind:'IMAGE',usd_per_output:0.04}),
+  PRUNA_P_VIDEO_2_PRO_COST: Object.freeze({id:'prunaai/p-video-2-pro',kind:'VIDEO',usd_per_sec:0.045,mode:'cost',resolution:'1080p'}),
+  PRUNA_P_VIDEO_2_PRO_QUALITY: Object.freeze({id:'prunaai/p-video-2-pro',kind:'VIDEO',usd_per_sec:0.095,mode:'quality',resolution:'1080p'}),
+  SEEDANCE_1_5_PRO_SILENT: Object.freeze({id:'bytedance/seedance-1.5-pro',kind:'VIDEO',usd_per_sec:0.06,resolution:'1080p',generate_audio:false}),
+  VEO_3_1_FAST_SILENT: Object.freeze({id:'google/veo-3.1-fast',kind:'VIDEO',usd_per_sec:0.10,generate_audio:false}),
   RUNWAY_GEN_4_5: Object.freeze({id:'runwayml/gen-4.5',kind:'VIDEO',usd_per_sec:0.12})
 });
 const SAFE_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{2,119}$/;
@@ -33,12 +37,25 @@ export function planReplicateJob({company_id,request_id,environment='LAB',model_
       if(!payload.input_image.startsWith('https://'))fail('REPLICATE_IMAGE_URL_DENIED');
     }
   } else {
-    if(!Number.isInteger(input.duration)||![5,10].includes(input.duration))fail('REPLICATE_DURATION_DENIED');
+    if(!Number.isInteger(input.duration)||input.duration<5||input.duration>15)fail('REPLICATE_DURATION_DENIED');
+    if(model_key==='RUNWAY_GEN_4_5'&&![5,10].includes(input.duration))fail('REPLICATE_RUNWAY_DURATION_DENIED');
+    if(model_key==='VEO_3_1_FAST_SILENT'&&input.duration!==8)fail('REPLICATE_VEO_DURATION_DENIED');
+    if(model_key==='SEEDANCE_1_5_PRO_SILENT'&&input.duration>12)fail('REPLICATE_SEEDANCE_DURATION_DENIED');
     payload.duration=input.duration;
     if(input.aspect_ratio!==undefined)payload.aspect_ratio=nonempty(input.aspect_ratio,'ASPECT',8);
     if(input.image!==undefined){
       payload.image=nonempty(input.image,'IMAGE_URL',2048);
       if(!payload.image.startsWith('https://'))fail('REPLICATE_IMAGE_URL_DENIED');
+    }
+    if(model.mode){
+      payload.mode=model.mode;
+      payload.resolution=model.resolution;
+      payload.prompt_upsampler='turbo';
+    } else if(model_key==='SEEDANCE_1_5_PRO_SILENT'){
+      payload.resolution='1080p';
+      payload.generate_audio=false;
+    } else if(model_key==='VEO_3_1_FAST_SILENT'){
+      payload.generate_audio=false;
     }
   }
   const estimate_usd=model.kind==='IMAGE'?model.usd_per_output:model.usd_per_sec*payload.duration;
