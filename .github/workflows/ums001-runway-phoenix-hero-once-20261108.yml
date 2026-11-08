@@ -1,0 +1,41 @@
+name: UMS001 Runway premium phoenix hero 5s single-shot LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-runway-andalucia-full-intro-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/orders/start-runway-phoenix-hero-once-20261108.trigger'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-runway-phoenix-hero-lab-20261108
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event.head_commit.message == 'CEREBRO_RUNWAY_PHOENIX_HERO_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      RUNWAY_PILOT_ONE_TIME: 'yes'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify original phoenix scene and max 0.60 USD
+        run: |
+          python3 - <<'PY'
+          import json
+          m=json.load(open('cerebro/media-studio/v2/orders/runway-gen45-andalucia-phoenix-hero-20261108.json'))
+          assert m['environment']=='LAB' and len(m['shots'])==1 and m['batch_max_usd']==0.60
+          assert not m['autopublish'] and not m['automatic_paid_retry'] and not m['auto_reload']
+          print('SINGLE_VFX_SHOT_BUDGET_GATE_GREEN')
+          PY
+      - name: Generate and securely persist original phoenix hero video
+        run: python3 cerebro/media-studio/v2/runtime/ums001_runway_phoenix_hero_once_20261108.py
+      - name: Preserve originals with statuses
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_RUNWAY_FENIX_PHOENIX_HERO_${{ github.run_id }}
+          path: /tmp/ums-runway-phoenix-hero/
+          retention-days: 30
+          if-no-files-found: warn
