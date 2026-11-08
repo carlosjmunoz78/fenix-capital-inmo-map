@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "v0",
+  "status": "CANDIDATE_DISABLED",
+  "requested_on": "2026-11-08",
+  "old_provider": "EXISTING_PROGRAMMATIC_RENDER_UNCHANGED",
+  "preferred_image_provider_after_gates": "REPLICATE_FLUX",
+  "openai_image_fallback_allowed_after_promotion": false,
+  "video_budget_eur_per_month": 40,
+  "image_budget_eur_per_month": 20,
+  "image_budget_two_month_total_eur": 40,
+  "shared_balance": true,
+  "auto_reload_required_off": true,
+  "execute_enabled": false,
+  "publish_enabled": false,
+  "required_secrets": [
+    "REPLICATE_API_TOKEN"
+  ],
+  "requirements": [
+    "ATOMIC_FINOPS_RESERVATION",
+    "PROVIDER_SECRET_PRIVATE",
+    "VERIFIED_CALLBACK_SIGNATURE",
+    "ARTIFACT_PERSISTENCE",
+    "LICENSE_RIGHTS",
+    "QA",
+    "OLD_VS_NEW",
+    "ROLLBACK",
+    "PROD_PROMOTION_APPROVAL"
+  ],
+  "catalog_only_video": [
+    "PRUNA_P_VIDEO",
+    "OTHER_VIDEO_MODELS"
+  ],
+  "audit_note": "Draft policy only; no claim of payment, key installation, activation or asset generation."
+}
