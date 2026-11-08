@@ -106,8 +106,18 @@ function buildLearnedSeoPilotPrompt(b) {
     !Array.isArray(feedback.learning_delta)||feedback.learning_delta.length!==6||
     feedback.provider_requests_actual!==2||feedback.published_count!==0)
     throw Error('SEO_LEARNED_D32_FEEDBACK_INVALID');
+ const legal=JSON.parse(fs.readFileSync('cerebro/seo-enterprise/v2/registry/seo001-official-legal-sources-2026-11-08.json','utf8'));
+ const expectedLegalIds=['BOE_LPH_17_11','BOE_LPH_9_1_E','BOE_CC_1255','BOE_CC_1124','BOE_CC_1454'];
+ if(legal.company_id!=='fenix'||legal.engine_id!=='SEO-001'||legal.environment!=='LAB'||
+    legal.release_status!=='HOLD_REQUIRES_LEGAL_YMYL_SIGNOFF'||
+    legal.allow_publish!==false||!Array.isArray(legal.sources)||legal.sources.length!==5||
+    expectedLegalIds.some((id,i)=>legal.sources[i]?.id!==id||
+      legal.sources[i]?.requires_professional_context_review!==true||
+      !legal.sources[i]?.url?.startsWith('https://www.boe.es/buscar/act.php?id=')))
+   throw Error('SEO_LEARNED_LEGAL_SOURCES_UNVERIFIED');
  return [
  'CEREBRO SEO-D13 · UNA SOLA PRUEBA EN LAB, DOS ARTÍCULOS, NO PUBLICAR NI CREAR IMÁGENES.',
+ 'Fuentes oficiales de control jurídico para NO INVENTAR ni GENERALIZAR: '+JSON.stringify(legal.sources.map(x=>({id:x.id,articulo:x.article,url:x.url,regla:x.content_rule})))+'. Deben revisarse por profesional antes de publicar.',
  'Corrige expresamente los seis fallos observados en el lote 2026-11-08 sin solicitar nueva generación automática.',
  ...feedback.learning_delta.map(x=>x.id+' '+x.hard_requirement),
  'Incorpora estas diez lecciones de errores físicos, sin afirmar que la publicación o el entrenamiento están certificados.',
