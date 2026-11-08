@@ -6,6 +6,7 @@
  */
 import crypto from 'node:crypto';
 import {classifyLearnedCandidate} from './seo-learned-one-batch-runner-v0.mjs';
+import {runOneShotFreeCanary} from './seo-d13-free-project-one-shot-canary-v0.mjs';
 
 const sha=s=>crypto.createHash('sha256').update(s,'utf8').digest('hex');
 const fail=code=>{throw Error('SEO_SELF_REPAIR_'+code)};
@@ -110,15 +111,18 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
  * The prior 2026-11-08 sealed pilot cannot be reused here.
  */
 export function makeGeminiFreeRepairGenerator({manifest,api_key,fetch_impl,
-   owner_verified_free_project=false,one_shot}={}){
+   owner_verified_free_project=false,one_shot=runOneShotFreeCanary}={}){
  if(!manifest||manifest.company_id!=='fenix'||manifest.engine_id!=='SEO-001'||
     manifest.environment!=='LAB'||manifest.status!=='PREPARED_NOT_EXECUTED'||
+    !/^TRIGGER_ONCE_[A-Z0-9_]{8,60}$/.test(manifest.workflow_trigger_nonce||'')||
     manifest.batch_id==='SEO001-AUTONOMY-PILOT-20261108-ONE'||
     manifest.allow_wordpress_writes!==false||
     manifest.allow_wordpress_publication!==false||
     manifest.allow_paid_fallback!==false||
     manifest.allow_image_api_calls!==false||
+    !Number.isInteger(manifest.max_real_model_calls)||
     manifest.max_real_model_calls<1||manifest.max_real_model_calls>6||
+    !Number.isInteger(manifest.max_calls_per_item)||
     manifest.max_calls_per_item<1||manifest.max_calls_per_item>3||
     !Array.isArray(manifest.briefs)||manifest.briefs.length<1||manifest.briefs.length>2||
     typeof one_shot!=='function'||owner_verified_free_project!==true||
