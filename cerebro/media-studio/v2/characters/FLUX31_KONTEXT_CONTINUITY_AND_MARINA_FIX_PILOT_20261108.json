@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "batch_id": "FLUX31_FACIAL_CONTINUITY_4PLUS_MARINA_FIX_20261108",
+  "model": "black-forest-labs/flux-kontext-pro",
+  "root_original_run": 42519089192,
+  "source_artifact": "UMS001_FLUX31_SOLO_CANONICAL_CANDIDATES_42519089192",
+  "total_images": 5,
+  "estimated_per_image_usd": 0.04,
+  "max_estimated_cost_usd": 0.2,
+  "no_paid_retry": true,
+  "autopublish": false,
+  "auto_reload": false,
+  "qa": "REQUIRES_VISUAL_AFTER_GENERATION_NOT_AUTOMATIC_APPROVAL",
+  "jobs": [
+    {
+      "id": "C01_01_LUCIA",
+      "sha": "d6127a95f4c4e3275a39ee385580e89132492b0d6321079c0a8ac77806430fef",
+      "shot": "WIDE_WINDOW",
+      "seed": 31108101,
+      "prompt": "Using the provided image as the single non-negotiable identity reference, preserve this exact fictional Spanish woman Lucía: the SAME unique face shape, hazel eyes, age about 27, natural brunette waves, hairline and skin tone. Transform only pose and camera to a new wider waist-up three-quarter 35mm movie frame as she stands in a realistically modest Andalusian first-home apartment lit by sunset, holding a small plain keyring with ordinary keys. Distinct plausible 3D environment and natural skin texture; premium film-grade portrait, not glam commercial model. No new people, no face change, no text/logo.",
+      "source_file": "C01_01_LUCIA_FLUX11_PRO_SINGLE_CANONICAL_CANDIDATE.webp"
+    },
+    {
+      "id": "C01_01_LUCIA",
+      "sha": "d6127a95f4c4e3275a39ee385580e89132492b0d6321079c0a8ac77806430fef",
+      "shot": "DOOR_APPROACH",
+      "seed": 31108102,
+      "prompt": "Keep exactly the identity and recognizable human face of the same fictional woman in this input photo, same eyes, jaw, natural wavy dark hair, skin tone and age. Camera moves to a candid side three-quarter shot from slightly farther away, Lucía opening the door of an ordinary sunny Spanish apartment, subtle soft hopeful expression, chest and hands fully anatomically correct, strong realistic composition with believable doorway depth. Cinematic feature-film natural lighting, without making a new woman or stylistic painting, no second person, no text, no brands.",
+      "source_file": "C01_01_LUCIA_FLUX11_PRO_SINGLE_CANONICAL_CANDIDATE.webp"
+    },
+    {
+      "id": "C03_02_HUGO",
+      "sha": "5ea07610579b412b3c95e2863609b764ec0447516df402d674fd785cae945465",
+      "shot": "REAL_ESTATEDOOR",
+      "seed": 31108302,
+      "prompt": "Use the supplied portrait as the SAME fictional man's EXACT identity. Preserve Hugo's black dark short hair, clean shaven face, long straight nose, sharp angular jaw and dark brown eyes; do not make a new actor and do not add freckles, red hair or beard. Wide cinematic three-quarter camera scene with Hugo standing outside an ordinary apartment building entrance in Sevilla, Spain, early evening, cool blue and warm interior practical lighting, grounded film realism, good hand anatomy, natural clothing, chest to hips visible, eyes recognizable, no text.",
+      "source_file": "C03_02_HUGO_FLUX11_PRO_SINGLE_CANONICAL_CANDIDATE.webp"
+    },
+    {
+      "id": "C05_01_MATEO",
+      "sha": "f0201b8ddbfba6397e42940ba843058f27644bd24a523cf39007312d6e593b26",
+      "shot": "REAL_ESTATEDOOR",
+      "seed": 31108501,
+      "prompt": "Preserve this exact same fictional Spanish man's face from the source photo, Mateo with natural copper-red hair and red beard, light freckled skin and green-gray eyes. Never resemble the separately cast dark-haired clean-shaven Hugo. Move the camera to a different three-quarter medium frame in front of a residential Andalusian townhouse gate in soft sunset light. Emotion quiet confidence, warm prestigious original cinema photography, realistic hair and face texture, believable hands, natural depth, no other people, no text or brand.",
+      "source_file": "C05_01_MATEO_FLUX11_PRO_SINGLE_CANONICAL_CANDIDATE.webp"
+    },
+    {
+      "id": "C15_01_MARINA",
+      "sha": "5ab673a3673a756424f7c7015ec9b086424984b52c4d882f1d7f553aba1bce55",
+      "shot": "VISIBLE_WHEELCHAIR_REWORK",
+      "seed": 31108151,
+      "prompt": "Edit the provided portrait using it as the EXACT facial identity reference for Marina, the SAME fictional Spanish woman age 34 with natural auburn-red hair, freckles, green eyes and relaxed, confident face. Change composition to a very clear three-quarter seated full-body editorial photograph that unmistakeably shows Marina seated in a realistic everyday manual wheelchair, both large wheels, hand rims and seat physically plausible, hands relaxed on the wheels, ordinary comfortable modest contemporary accessible Spanish apartment living room with unobstructed wide doorway, bright filmic warm natural light, dignified independent presence, anatomically accurate limbs and wheelchair mechanics, no medical drama, no additional people, no captions or text.",
+      "source_file": "C15_01_MARINA_FLUX11_PRO_SINGLE_CANONICAL_CANDIDATE.webp"
+    }
+  ]
+}
