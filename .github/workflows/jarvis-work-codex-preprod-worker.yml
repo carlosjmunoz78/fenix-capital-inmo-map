@@ -17,7 +17,7 @@ on:
 permissions:
   contents: read
   id-token: write
-  actions: write
+  actions: read
 
 concurrency:
   group: jarvis-work-codex-consumer-${{ github.ref_name }}
@@ -50,7 +50,7 @@ jobs:
   watch:
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 48
+    timeout-minutes: 2
     outputs:
       pending: ${{ steps.watch.outputs.pending }}
       environment: ${{ steps.watch.outputs.environment }}
@@ -68,7 +68,7 @@ jobs:
             {environment:'PROD',endpoint:process.env.JARVIS_WORK_PROD_DISPATCH_URL},
             {environment:'PREPROD',endpoint:process.env.JARVIS_WORK_PREPROD_DISPATCH_URL},
           ];
-          const deadline=Date.now()+45*60_000;
+          const deadline=Date.now()+45_000;
           let pending=0;
           let selected=endpoints[1];
           async function oidc(){
@@ -138,7 +138,7 @@ jobs:
 
   rearm:
     needs: [validate, watch, governed-worker]
-    if: always() && needs.validate.result == 'success'
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
