@@ -1,0 +1,51 @@
+name: UMS001 voice recovery existing HeyGen MP3 LAB one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-voice-recovery-lab-v0-20261109
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_VOICE_RECOVERY_20261109.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-voice-existing-only-lab-20261109
+  cancel-in-progress: false
+jobs:
+  recover:
+    if: github.event.head_commit.message == 'UMS001_VOICE_RECOVERY_LAB_ONCE_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Download exactly two existing public speech outputs without API tokens or payment
+        shell: bash
+        env:
+          IG_SOURCE: 'https://resource2.heygen.ai/text_to_speech/8ccb865b63d04510a69788c4954d1bab/7e5eebc368ab477a9175b7d2a2c3317e/id=1d25a4ac-797d-45e8-9f97-cae282bcf059.mp3'
+          FB_SOURCE: 'https://resource2.heygen.ai/text_to_speech/8ccb865b63d04510a69788c4954d1bab/3daec88b3c1a49b7a5e10a211426fc81/id=aa33e8c1-e2b6-4d31-87a1-f10b10daf241.mp3'
+        run: |
+          set -Eeuo pipefail
+          mkdir -p /tmp/ums001_voice_recovery
+          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --retry 0 --connect-timeout 12 --max-time 70 "$IG_SOURCE" -o /tmp/ums001_voice_recovery/IG_LUCIA_ORTEGA_ES_ES.mp3
+          curl --proto '=https' --tlsv1.2 --fail --location --silent --show-error --retry 0 --connect-timeout 12 --max-time 70 "$FB_SOURCE" -o /tmp/ums001_voice_recovery/FB_FERNANDO_SANZ_ES_ES.mp3
+          python3 - <<'PY'
+          import hashlib, json, pathlib, subprocess
+          folder=pathlib.Path('/tmp/ums001_voice_recovery')
+          manifest={'company_id':'fenix','engine_id':'UMS-001','environment':'LAB','generation_calls':0,'publish':False,'results':[]}
+          for name,request_id in [('IG_LUCIA_ORTEGA_ES_ES.mp3','52b36c7c4fa44f2e9e1f8eaf027c18ac'),('FB_FERNANDO_SANZ_ES_ES.mp3','0c2c09d887e24f4a9fb757ee1ac4fa26')]:
+            p=folder/name
+            assert p.stat().st_size>40000, 'Audio too small: '+name
+            result=subprocess.run(['ffprobe','-v','error','-show_entries','format=duration:stream=codec_name','-of','json',str(p)],check=True,capture_output=True,text=True)
+            media=json.loads(result.stdout)
+            duration=float(media['format']['duration'])
+            assert 8<=duration<=40 and any(s['codec_name']=='mp3' for s in media.get('streams',[]))
+            manifest['results'].append({'name':name,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'bytes':p.stat().st_size,'duration_seconds':duration,'request_id':request_id})
+          (folder/'MANIFEST_AUDIO_VERIFIED.json').write_text(json.dumps(manifest,indent=2,ensure_ascii=False))
+          print('UMS001_EXISTING_TWO_VOICES_RECOVERED_VERIFIED_NO_PAID_CALLS')
+          PY
+      - name: Archive originals only for LAB voice mix
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_EXISTING_VOICE_AUDIO_LAB_${{ github.run_id }}
+          path: /tmp/ums001_voice_recovery/
+          retention-days: 7
+          if-no-files-found: error
