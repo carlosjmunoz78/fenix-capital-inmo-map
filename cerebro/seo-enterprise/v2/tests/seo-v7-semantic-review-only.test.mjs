@@ -30,7 +30,7 @@ for(const persona of ['B2C','B2B']){
   }
   assert.equal((f.tail.match(/class=["']faq-item["']/gi)||[]).length,6);
   assert.equal((f.tail.match(/<h3\b/gi)||[]).length,6);
-  assert.equal((s.match(/<a\b/gi)||[]).length,persona==='B2C'?2:3);
+  assert.equal((s.match(/<a\b/gi)||[]).length,3);
   assert.equal(/<(script|iframe|form|input|img)\b/i.test(s),false);
  });
 }
