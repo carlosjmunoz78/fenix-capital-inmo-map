@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "PREPARED_NOT_TRIGGERED",
+  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108_AUTOREPAIR_V2",
   "briefs": [
     {
       "company_id": "fenix",
@@ -135,5 +135,8 @@
   "quality_regression_sources": [
     "cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-result-2026-11-08.json",
     "cerebro/seo-enterprise/v2/training-pilots/SEO_D32_LEARNED_ONE_BATCH_20261108_FEEDBACK.json"
-  ]
+  ],
+  "preflight_qa_run": 42443080873,
+  "preflight_qa_passed": 38,
+  "auto_execute_next_batch": false
 }
