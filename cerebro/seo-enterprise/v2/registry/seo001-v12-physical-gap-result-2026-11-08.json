@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "12.0.0",
+  "status": "SOURCE_PHP_MOCK_E2E_PASS_SUPABASE_PREPROD_UNSAFE_TO_SUBMIT",
+  "github": {
+    "pr": 22,
+    "workflow_run_id": 42472665788,
+    "job_id": 128706888032,
+    "conclusion": "success",
+    "commit_sha": "44a83b5809507b36e935953a722ca3b0576e87b9"
+  },
+  "mock_php": {
+    "checks_passed": 45,
+    "checks_failed": 0,
+    "real_http_requests": 0,
+    "crm_writes": 0,
+    "wordpress_writes": 0,
+    "published": 0,
+    "simulated_forward_calls": 10,
+    "verified_components": [
+      "partner REST route PHP excerpt",
+      "existing leads bridge PHP excerpt",
+      "privacy and marketing opt-in separation",
+      "partner allowed landing IDs",
+      "honeypot",
+      "rate limit",
+      "idempotency header",
+      "positive mock response",
+      "negative invalid fields and upstream errors",
+      "staging host refused by partner plugin"
+    ],
+    "test_type": "ISOLATED_EXACT_SOURCE_EXCERPTS_MOCKED_TRANSPORT",
+    "real_CRM_positive_E2E": false
+  },
+  "supabase_readonly_observation": {
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "project_status": "ACTIVE_HEALTHY",
+    "function_slug": "fenix-web-lead-preprod",
+    "function_status": "ACTIVE",
+    "function_version": 14,
+    "verify_jwt": false,
+    "ingest_rpc": "preprod_web_lead_ingest_server",
+    "followup_paths_present": [
+      "enqueue_preprod_web_lead_alert_server",
+      "fenix-web-lead-alert-worker-preprod",
+      "fenix-newsletter-enroll-preprod",
+      "fenix-lead-response-preprod",
+      "web_lead_tasks_preprod"
+    ],
+    "no_authenticated_test_mode_verified": true,
+    "dry_run_field_is_not_a_top_level_safe_submission_switch": true,
+    "requests_sent_to_preprod": 0
+  },
+  "risk": {
+    "preprod_function_may_write_preprod_db": true,
+    "preprod_function_may_notify_or_enroll": true,
+    "preprod_separate_project_does_not_make_test_side_effect_free": true,
+    "do_not_submit_real_or_synthetic_lead_until_isolated_sink_verified": true
+  },
+  "next_safe_action": "Prepare an isolated local/ephemeral recipient with explicit outbound deny, dummy correlation, idempotent write-and-reversal receipt and no notifications; only then consider a separately authorized live E2E for preprod; never call fenixcapital.es PROD for QA.",
+  "release": {
+    "safe_b2b_crm_positive_e2e": false,
+    "real_wp_mobile": false,
+    "independent_rights": false,
+    "backup_restore": false,
+    "legal_review": false,
+    "owner_signed_release": false,
+    "publish_allowed": false,
+    "autopublish_allowed": false
+  },
+  "additional_ai_calls": 0,
+  "additional_paid_provider_calls": 0
+}
