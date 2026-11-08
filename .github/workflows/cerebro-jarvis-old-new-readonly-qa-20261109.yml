@@ -1,0 +1,91 @@
+name: CEREBRO JARVIS OLD NEW Offline Readonly QA ONE SHOT 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-rollback-rehearsal-once-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-old-new-readonly-qa-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  old-deployed-source-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      SOURCE_SHA: 10efb154840e32bde4f3cf527c88a417d4526d42
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 10efb154840e32bde4f3cf527c88a417d4526d42
+          persist-credentials: false
+      - name: Assert exact OLD source
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Build deployed OLD source offline
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          npm ci --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+          printf '%s\n' "$SOURCE_SHA" > dist/JARVIS_OLD_SOURCE_SHA.txt
+          echo 'JARVIS_OLD_OFFLINE_BUILD=GREEN'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-old-source-10efb154-offline
+          path: dist
+          if-no-files-found: error
+          retention-days: 7
+  new-ui-voice-mock-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      SOURCE_SHA: 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 862ee543036070bc2cbb3ccaffc6c81af6d6a225
+          persist-credentials: false
+      - name: Assert exact NEW source
+        run: test "$(git rev-parse HEAD)" = "$SOURCE_SHA"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install and build isolated QA, not an App PREPROD deployment
+        run: |
+          set -euo pipefail
+          npm ci --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+      - name: Install isolated browser
+        run: npx playwright install chromium
+      - name: Run typography and voice-permission diagnostics with mocked gateways
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: |
+          set -euo pipefail
+          npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --reporter=line --grep 'physical typography remains legible|dictation diagnostic explains'
+          echo 'JARVIS_NEW_UI_VOICE_MOCK_QA=GREEN'
+      - name: Keep screenshots and test traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-new-mocked-browser-qa
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
