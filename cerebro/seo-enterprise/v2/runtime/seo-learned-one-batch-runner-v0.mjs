@@ -75,14 +75,24 @@ export function classifyLearnedCandidate({brief,writer}={}) {
  if(faqBlocks.length!==6)errors.push('EXACT_FAQ_DOM_WRAPPER_REQUIRED');
  const coreSections=[...mainHtml.matchAll(/<h2\b[^>]*>[\s\S]*?<\/h2>([\s\S]*?)(?=<h2\b|$)/gi)];
  if(coreSections.length===6){
-   for(const [,chunk] of coreSections){
+   coreSections.forEach(([,chunk],sindex)=>{
       const paragraphs=[...chunk.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)];
-      if(paragraphs.length!==3)errors.push('EXACTLY_THREE_PARAGRAPHS_PER_MAIN_SECTION');
-      for(const [,paragraph] of paragraphs){
-        const count=paragraph.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().split(/\s+/).filter(Boolean).length;
-        if(count<60||count>85)errors.push('MAIN_PARAGRAPH_WORD_RANGE');
+      const section=String(sindex+1).padStart(2,'0');
+      if(paragraphs.length!==3){
+       errors.push('EXACTLY_THREE_PARAGRAPHS_PER_MAIN_SECTION');
+       errors.push('SECTION_'+section+'_PARAGRAPHS_'+paragraphs.length+'_EXPECTED_3');
       }
-   }
+      let total=0;
+      paragraphs.forEach(([,paragraph],pindex)=>{
+        const count=paragraph.replace(/<[^>]*>/g,' ').replace(/\s+/g,' ').trim().split(/\s+/).filter(Boolean).length;
+        total+=count;
+        if(count<60||count>85){
+         errors.push('MAIN_PARAGRAPH_WORD_RANGE');
+         errors.push('SECTION_'+section+'_PARAGRAPH_'+String(pindex+1).padStart(2,'0')+'_WORDS_'+count+'_NEEDS_60_TO_85');
+        }
+      });
+      if(total<180)errors.push('SECTION_'+section+'_TOTAL_'+total+'_WORDS_BELOW_180');
+   });
  }
  for(const b of faqBlocks){
    if((b[1].match(/<h3\b/gi)||[]).length!==1||(b[1].match(/<p\b/gi)||[]).length!==1)
