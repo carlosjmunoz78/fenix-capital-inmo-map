@@ -1,0 +1,43 @@
+name: UMS001 FLUX 1.1 Pro 16 fictional casting portraits LAB one shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-flux-casting-buyer-personas-lab-v0-20261108
+    paths:
+      - 'cerebro/media-studio/v2/characters/START_FLUX_CAST_16_ONCE.trigger'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-flux-cast-original-20261108
+  cancel-in-progress: false
+jobs:
+  create-casting-board:
+    if: github.event.head_commit.message == 'CEREBRO_FLUX_CAST_16_PHYSICAL_START_ONCE_20261108' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    env:
+      REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+      UMS_CAST_SINGLE_RUN: 'yes'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check original fictional characters and budget
+        run: |
+          python3 - <<'PY'
+          import json
+          m=json.load(open('cerebro/media-studio/v2/characters/flux-casting-16-personas-20261108.json'))
+          assert m['environment']=='LAB' and m['max_estimated_spend_usd']==0.64 and len(m['persons'])==16
+          assert len({p['character_id'] for p in m['persons']})==16
+          assert all(p['model']=='black-forest-labs/flux-1.1-pro' for p in m['persons'])
+          assert not m['autopublish'] and m['no_paid_retry'] and not m['auto_reload']
+          print('FLUX_CAST_FICTIONAL_CAST_CONTRACT_GREEN')
+          PY
+      - name: Execute ONE original FLUX image for each fictional buyer-persona role
+        run: python3 cerebro/media-studio/v2/runtime/ums001_flux_cast_16_once_20261108.py
+      - name: Save all outputs and source manifest in private action artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_FLUX_CASTING_16_ORIGINAL_${{ github.run_id }}
+          path: /tmp/ums001-flux-casting-16-20261108/
+          retention-days: 30
+          if-no-files-found: warn
