@@ -8,7 +8,7 @@
   "kind": "UMS001_CORPORATE_MULTISHOT_INTROS",
   "status": "COMMISSIONED_AND_LOCAL_ANIMATICS_RENDERED_NOT_GENERATIVE_CINEMA_FINAL",
   "source_branch": "cerebro/ums001-igfb-first-physical-batch-20261108",
-  "reference_owner_feedback": "Intro más larga, más planos, más cosas chulas; no un segundo.",
+  "reference_owner_feedback": "Intro más larga, más planos, más cosas chulas; no un segundo. Prioridad geográfica posterior: operamos en toda Andalucía, no presentar la marca como solo Córdoba.",
   "channels": [
     "INSTAGRAM",
     "FACEBOOK"
@@ -30,23 +30,23 @@
       "shots": [
         {
           "timecode": "0–2",
-          "action": "Córdoba al atardecer, travelling épico de apertura; gancho desde fotograma 0"
+          "action": "Apertura épica de Andalucía: transición aérea océano y costa atlántica Cádiz/Huelva hacia el Mediterráneo Málaga/Almería. Gancho desde el primer fotograma."
         },
         {
           "timecode": "2–4",
-          "action": "Macro de llaves, emoción y destello cinematográfico"
+          "action": "Movimiento de cámara que une cordillera de Granada y horizonte de olivares de Jaén; contraste de escala cinematográfica y naturaleza realista."
         },
         {
           "timecode": "4–6",
-          "action": "Puerta monumental con luz dorada, travelling hacia delante"
+          "action": "Arquitectura y hogar andaluz contemporáneo: puente visual entre patrimonio de Córdoba y ciudad de Sevilla, sin convertirlo en un anuncio turístico."
         },
         {
           "timecode": "6–8",
-          "action": "Corriente de luz con partículas originales y símbolo del renacer"
+          "action": "Una corriente de energía luminosa original enlaza los ocho territorios y converge en el concepto simbólico del fénix; sonido épico original y VFX realista."
         },
         {
           "timecode": "8–10",
-          "action": "Revelación final logotipo original Fénix Capital, golpe musical"
+          "action": "Revelación nítida de logotipo ORIGINAL Fénix Capital; Andalucía como claim independiente, tipografía precisa, final premium."
         }
       ],
       "lab_preview_mp4": "FENIX_UMS001_INSTAGRAM_INTRO_MULTIPLANO_10S_LAB_PREVISUAL.mp4",
@@ -64,27 +64,27 @@
       "shots": [
         {
           "timecode": "0–2",
-          "action": "Córdoba crepuscular, gran plano introductorio"
+          "action": "Apertura cinematográfica Andalucía atlántica: Cádiz y Huelva; grandes planos verosímiles, energía y ambición."
         },
         {
           "timecode": "2–4",
-          "action": "Llaves, casa, expectativa del comprador"
+          "action": "Transición cinematográfica al Mediterráneo: Málaga y Almería, luz y superficies arquitectónicas creíbles."
         },
         {
           "timecode": "4–6",
-          "action": "Preestudio/documentación sin avales ni promesas comerciales"
+          "action": "Montaña de Granada y mosaico de olivares de Jaén; continuidad visual fuerte y un solo movimiento narrativo."
         },
         {
           "timecode": "6–8",
-          "action": "Puerta abierta con luz realista"
+          "action": "Arquitectura urbana y vivienda en Córdoba y Sevilla; no mostrar Córdoba como marca geográfica exclusiva."
         },
         {
           "timecode": "8–10",
-          "action": "Estela luminosa, ritmo musical creciente"
+          "action": "Historia humana: llaves y futuro de una familia andaluza; vuelo de estela de luz hacia el símbolo del renacer, sin garantías hipotecarias."
         },
         {
           "timecode": "10–12",
-          "action": "Logotipo auténtico de Fénix Capital revelado con impacto final"
+          "action": "Logo Fénix Capital original, superpuesto sin alteraciones, con eslogan separado sobre cobertura Andalucía; música de cierre potente original."
         }
       ],
       "lab_preview_mp4": "FENIX_UMS001_FACEBOOK_INTRO_MULTIPLANO_12S_LAB_PREVISUAL.mp4",
@@ -112,6 +112,27 @@
     "FIRST_SECOND_HOOK",
     "DRIVE_ARCHIVE",
     "NOTION_CATALOG",
-    "NO_AUTOPUBLISH"
-  ]
+    "NO_AUTOPUBLISH",
+    "EIGHT_ANDALUSIAN_PROVINCES_COVERED_IN_CAMPAIGN_ASSET_LIBRARY",
+    "MASTER_NOT_CORDOBA_ONLY",
+    "NO_UNVERIFIED_PHYSICAL_OFFICE_CLAIMS"
+  ],
+  "territory_policy": {
+    "scope": "ANDALUCIA_ALL_8_PROVINCES",
+    "provinces": [
+      "Almería",
+      "Cádiz",
+      "Córdoba",
+      "Granada",
+      "Huelva",
+      "Jaén",
+      "Málaga",
+      "Sevilla"
+    ],
+    "master_brand_message": "Fénix Capital · Andalucía",
+    "no_single_city_hero_claim": true,
+    "rule": "La identidad corporativa representa Andalucía completa; Córdoba puede aparecer, nunca como ámbito exclusivo. Variantes comerciales locales por ciudad/provincia solo con datos reales y sin afirmar oficinas físicas no verificadas.",
+    "visual_direction": "Montaje cinematográfico premium de geografía y experiencia de vivienda, no collage turístico de monumentos. Conexión de territorios mediante una estela de luz / vuelo simbólico de fénix. Evitar mapas, monumentos o panoramas geográficamente falsos.",
+    "brand_integrity": "Logotipo auténtico superpuesto desde master; no generarlo ni rediseñarlo con IA; Andalucía como claim separado si se confirma legal/comercialmente."
+  }
 }
