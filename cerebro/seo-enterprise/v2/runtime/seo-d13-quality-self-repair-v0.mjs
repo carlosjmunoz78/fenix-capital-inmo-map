@@ -50,8 +50,16 @@ export function targetedRepairFeedback(review){
  const list=[...(review?.copy_issues||[]),...(review?.style_issues||[]),
    ...(review?.voice_issues||[]),...(review?.content_depth_issues||[])];
  const raw=[...new Set(list.map(x=>typeof x==='string'?x:null).filter(Boolean))];
- const codes=raw.filter(x=>/^[A-Z][A-Z0-9_]{2,79}$/.test(x)).slice(0,15);
- if(raw.length!==codes.length)codes.push('EDITORIAL_REVIEW_REQUIRED');
+ // Preserve actionable semantic risks and one summary per section before
+ // repetitive paragraph-range errors. Otherwise the first 15 errors may cover
+ // only sections 1 and 2 of an underdeveloped six-section article.
+ const priority=raw.filter(x=>/^ARTICLE_|^YMYL_|^H2_TOO_LONG$|^ABSOLUTE_/.test(x));
+ const summary=raw.filter(x=>/^SECTION_[0-9]{2}_TOTAL_/.test(x));
+ const detail=raw.filter(x=>/^SECTION_[0-9]{2}_PARAGRAPH_/.test(x))
+   .filter((x,i,arr)=>arr.findIndex(y=>y.slice(0,10)===x.slice(0,10))===i);
+ const ranked=[...new Set([...priority,...summary,...detail,...raw])];
+ const codes=ranked.filter(x=>/^[A-Z][A-Z0-9_]{2,79}$/.test(x)).slice(0,15);
+ if(raw.length!==codes.length&&codes.length<16)codes.push('EDITORIAL_REVIEW_REQUIRED');
  return Object.freeze({error_codes:codes,revision_kind:'REWRITE_ONLY_UNRESOLVED_ERRORS',
    no_invented_legal_facts:true,keep_grounded_sources:true,
    faq_dom_exact:true,no_image_or_form_in_model_html:true});
@@ -67,12 +75,12 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
     typeof generate!=='function'||typeof review!=='function'||
     !Number.isInteger(maxAttempts)||maxAttempts<1||maxAttempts>3||
     !Number.isInteger(budget)||budget<0||budget>6)fail('INVALID_SCOPE_OR_BUDGET');
- const history=[];let feedback=null,previousHash=null,requests=0;
+ const history=[];let feedback=null,previousHash=null,previousHtml=null,requests=0;
  let finalHtml=null,finalReview=null;
  const allowed=Math.min(maxAttempts,budget);
  for(let attempt=1;attempt<=allowed;attempt++){
   let model;
-  try{model=await generate({brief,attempt,feedback});}
+  try{model=await generate({brief,attempt,feedback,previous_html:previousHtml});}
   catch{requests++;history.push({attempt,provider_status:'EXCEPTION_HOLD',request_count:1,estimated_request:true});break;}
   const n=model?.request_count??0;
   if(!Number.isInteger(n)||n<0||n>1)fail('PROVIDER_REQUEST_COUNT_UNTRUSTED');
@@ -116,7 +124,7 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
    full_quality_certified:false,publish_allowed:false});
   if(gate.technical_copy_precheck==='PASS')break;
   if(previousHash===h)break; // Text truly unchanged; same error code with new text can still improve.
-  previousHash=h;feedback=errors;
+  previousHash=h;feedback=errors;previousHtml=fix.html;
  }
  const passed=finalReview?.technical_copy_precheck==='PASS';
  return {work_id:brief.work_id,company_id:'fenix',engine_id:'SEO-001',environment:'LAB',
@@ -153,7 +161,7 @@ export function makeGeminiFreeRepairGenerator({manifest,api_key,fetch_impl,
  const ids=new Set(manifest.briefs.map(x=>x.work_id));
  if(ids.size!==manifest.briefs.length)fail('DUPLICATE_MANIFEST_WORK_ID');
  let spent=0;const attempts=new Map();
- return async({brief,attempt,feedback})=>{
+ return async({brief,attempt,feedback,previous_html=null})=>{
   if(!ids.has(brief?.work_id)||JSON.stringify(manifest.briefs.find(b=>b.work_id===brief.work_id))!==JSON.stringify(brief)||
     !Number.isInteger(attempt)||attempt<1||attempt>manifest.max_calls_per_item||
     attempt!==(attempts.get(brief.work_id)||0)+1||
@@ -162,7 +170,7 @@ export function makeGeminiFreeRepairGenerator({manifest,api_key,fetch_impl,
   spent++;attempts.set(brief.work_id,attempt);
   // Exactly one free-model call per invoked attempt. An exception never retries.
   return await one_shot({api_key,fetch_impl,owner_verified_free_project:true,
-    brief_override:brief,revision_feedback:feedback});
+    brief_override:brief,revision_feedback:feedback,revision_reference_html:previous_html});
  };
 }
 
