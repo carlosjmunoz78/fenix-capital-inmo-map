@@ -100,7 +100,12 @@ export async function runSelfRepairItem({brief,generate,review=classifyLearnedCa
   // Existing full validator is the final precheck; neither structural repair
   // nor provider success can independently set it to PASS.
   const rawGate=review({brief,writer:candidate});
-  const gate=auditTrace?{...rawGate,...auditTrace}:rawGate;
+  // Carry the actual editorial/voice/depth failure codes to the next model
+  // attempt even when no deterministic HTML normalization took place.
+  const gate={...rawGate,
+   style_issues:auditTrace?.style_issues??model.style_issues??[],
+   voice_issues:auditTrace?.voice_issues??model.voice_issues??[],
+   content_depth_issues:auditTrace?.content_depth_issues??model.content_depth_issues??[]};
   if(!gate||!Array.isArray(gate.copy_issues)||gate.publish_allowed!==false||
      gate.full_quality_certified!==false)fail('UNSAFE_OR_INVALID_QA_GATE');
   finalHtml=fix.html;finalReview=gate;
