@@ -3788,11 +3788,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_CLASS_VARIANCE_AUTHORITY_DC77FEB4_PROD_READONLY_CANARY",
       "observed_at": "2026-11-08T20:42:03.164Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -3806,7 +3806,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "d63b55947806e676b97d2172c7afba7304e5e24f5da752fce6c845d7c04a6d4b"
+      "capability_hash": "d63b55947806e676b97d2172c7afba7304e5e24f5da752fce6c845d7c04a6d4b",
+      "canary": {
+        "status": "GREEN_DYNAMIC_CLASS_VARIANCE_AUTHORITY_DC77FEB4_PROD_READONLY_CANARY",
+        "candidate_id": "repo:2b98c0a094298e485b2ad8b3c7fb",
+        "technical_name": "class-variance-authority",
+        "head_sha": "55136cc35495524466f02d13a65fb6faf135e849",
+        "run_id": 42521458651,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-08T20:42:17.890Z"
+      },
+      "promoted_at": "2026-11-08T20:42:17.890Z"
     },
     {
       "candidate_id": "repo:4d676a38c2c612d9080ab5ca43f0",
@@ -17378,10 +17408,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 172,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 171
+    "pending_canary": 0,
+    "prod_readonly": 172
   }
 }
