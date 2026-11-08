@@ -229,3 +229,17 @@ test('topic drift in the actual buyer persona is blocked instead of rewarded for
  const ok=classifyLearnedCandidate({brief:b,writer:{status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',html:useful,faq_count:0,content_depth_precheck_passed:false}});
  assert.ok(!ok.copy_issues.includes('ARTICLE_TOPIC_DRIFT_RECURRING_COSTS'));
 });
+
+test('tasacion B2B must not drift into unrelated household costs and community fees',()=>{
+ const b=manifest.briefs[1];
+ const wrong='<h1>Comunicar el retraso de tasación en Córdoba</h1><h2>Obligaciones</h2>'+
+   '<p>El IBI, los suministros básicos, las derramas extraordinarias y los costes de mantenimiento merecen atención.</p>';
+ const r=classifyLearnedCandidate({brief:b,writer:{status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',
+    html:wrong,faq_count:0,content_depth_precheck_passed:false}});
+ assert.ok(r.copy_issues.includes('ARTICLE_TOPIC_DRIFT_TASACION_B2B'));
+ const focused=wrong.replace('El IBI, los suministros básicos, las derramas extraordinarias y los costes de mantenimiento merecen atención.',
+   'Explica al comprador el estado verificable del informe y comunica el siguiente hito sin inventar plazos.');
+ const ok=classifyLearnedCandidate({brief:b,writer:{status:'REAL_CLOUD_DRAFT_REVIEW_ONLY',
+    html:focused,faq_count:0,content_depth_precheck_passed:false}});
+ assert.ok(!ok.copy_issues.includes('ARTICLE_TOPIC_DRIFT_TASACION_B2B'));
+});
