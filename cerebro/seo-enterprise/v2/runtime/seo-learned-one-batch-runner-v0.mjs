@@ -104,6 +104,18 @@ export function classifyLearnedCandidate({brief,writer}={}) {
  if(writer.content_depth_precheck_passed!==true)errors.push('CONTENT_DEPTH_MISSING');
  if(/el vendedor debe abonar las derramas|(?:la )?demora depende exclusivamente|el retraso(?: administrativo)? no invalida el acuerdo/i.test(text))
    errors.push('YMYL_UNQUALIFIED_LEGAL_OR_EXCLUSIVE_CAUSE_CLAIM');
+ // Relevance is a first-class gate: this buyer article is about recurring
+ // ownership costs, not conveyancing/tasacion litigation. Too much tangential
+ // legal prose must fail even if every paragraph has exactly 60-85 words.
+ if(brief.persona==='PARTICULARES'&&
+    /gastos de mantener un piso/i.test(String(brief.focus_keyword||''))){
+   const driftTerms=mainHtml.match(/\b(?:tasaci[oó]n|arras|condiciones suspensivas|subrogaci[oó]n de contratos|resoluci[oó]n contractual|cl[aá]usulas de un contrato)\b/gi)||[];
+   if(driftTerms.length>=2)errors.push('ARTICLE_TOPIC_DRIFT_RECURRING_COSTS');
+   const legalPara=[...mainHtml.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)]
+    .filter(x=>/\b(?:contrato|clausulado|legislaci[oó]n|responsabilidad jur[ií]dica|compraventa|contratantes)\b/i.test(x[1])&&
+      !/\b(?:comunidad de propietarios|recibo|gasto mensual|suministro)\b/i.test(x[1])).length;
+   if(legalPara>=3)errors.push('ARTICLE_LEGAL_PADDING_WITHOUT_USER_VALUE');
+ }
  if(brief.persona==='INMOBILIARIAS'&&!/inmobiliaria|agencia/i.test(text))errors.push('B2B_PERSONA_MISSING');
  // No image, license, real CMS rendering, real form success, or mobile screenshot
  // can be asserted from a text-only provider response.
