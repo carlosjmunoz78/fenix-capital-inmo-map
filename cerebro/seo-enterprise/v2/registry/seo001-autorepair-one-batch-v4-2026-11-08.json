@@ -47,7 +47,7 @@
   "real_images_ready": false,
   "mobile_visual_qa_passed": false,
   "actual_release_authorized": false,
-  "workflow_trigger_nonce": "PREPARED_NOT_TRIGGERED",
+  "workflow_trigger_nonce": "TRIGGER_ONCE_20261108_AUTOREPAIR_V4",
   "briefs": [
     {
       "company_id": "fenix",
@@ -149,5 +149,7 @@
     "billing_configured": false,
     "api_key_project_binding_independently_verified": false,
     "account_future_billing_not_guaranteed": true
-  }
+  },
+  "preflight_qa_run_id": 42445256465,
+  "preflight_checks_passed": 50
 }
