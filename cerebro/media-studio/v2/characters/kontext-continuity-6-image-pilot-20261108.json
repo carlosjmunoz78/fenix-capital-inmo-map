@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "status": "PAID_PHYSICAL_ONE_SHOT_AUTHORIZED_QA_REQUIRED",
+  "reference_run_id": 42493007444,
+  "reference_artifact_name": "UMS001_FLUX_CASTING_16_ORIGINAL_42493007444",
+  "provider": "replicate",
+  "model": "black-forest-labs/flux-kontext-pro",
+  "estimated_per_output_usd": 0.04,
+  "total_output_images": 6,
+  "max_estimated_spend_usd": 0.24,
+  "no_paid_retry": true,
+  "no_autopublish": true,
+  "autorenew": false,
+  "output_format": "jpg",
+  "aspect_ratio": "match_input_image",
+  "image_source": "SAME_REPO_GITHUB_ACTIONS_EXISTING_ARTIFACT",
+  "model_input_policy": "DATA_URI_FROM_PRIVATE_LOCAL_SOURCE_PREVALIDATED_SHA256",
+  "reference_strategy": "EXACT_SAME_SOURCE_ANCHOR_FOR_BOTH_ANGLES_NOT_CHAINED_OUTPUT",
+  "destination_drive": "https://drive.google.com/drive/folders/1EX11J1nSCgL1MzS7ZuY_yq_VpRJZzaaG",
+  "progression_gate": "DO_NOT_GENERATE_310_MORE_IMAGES_UNTIL_QA_VALIDATES_GLOBAL_UNIQUENESS_AND_FACE_CONTINUITY",
+  "pilots": [
+    {
+      "id": "C03_PAREJA_ELENA_HUGO",
+      "expected_sha256": "b5ea004fb8a7ddd8bc2cd1e04aec588a43bc332554556081774ffc9ef931784a",
+      "roles": [
+        "C03_01_ELENA",
+        "C03_02_HUGO"
+      ],
+      "shots": [
+        {
+          "shot": "ANGLE_A",
+          "seed": 1808301,
+          "prompt": "Edit the supplied photograph. Preserve EXACTLY the same two fictional Spanish adults, their individual facial bone structure, eyes, nose, skin tone, hairline and distinctive hairstyles; DO NOT change identities, cast or number of people. Change only composition: elegant natural three-quarter medium shot of the SAME couple standing slightly apart together beside a sunlit apartment doorway in Andalucía, three-dimensional cinematic 35mm optics, crisp natural body anatomy and polished real light, discreet confident mood. Absolutely no replacement faces, extra people, typography, trademarks or logos."
+        },
+        {
+          "shot": "ANGLE_B",
+          "seed": 1808302,
+          "prompt": "Edit the supplied photograph. Keep EXACTLY these two fictional Spanish people with exactly the same recognizable faces, separate identities, hair, eyes, age and skin tones. Move the camera to an over-the-shoulder slightly wider viewpoint in a believable contemporary Spanish dining and living room with a window. Have the same pair quietly discussing their next home and looking toward the window. Authentic expressions, premium cinematic natural light, faces still partly facing camera. No third person, no changes of face, no added captions or logos."
+        }
+      ]
+    },
+    {
+      "id": "C04_PAREJA_MUJERES_ROCIO_SARA",
+      "expected_sha256": "b07eafba4ecd6e83687b1091c7162afd675a4c86a17d9c28b29f53beb5d3e459",
+      "roles": [
+        "C04_01_ROCIO",
+        "C04_02_SARA"
+      ],
+      "shots": [
+        {
+          "shot": "ANGLE_A",
+          "seed": 1808401,
+          "prompt": "Use the supplied portrait as a NON-NEGOTIABLE identity reference for BOTH women: preserve their two distinctive face shapes, eye color, hair colors, textures, hairlines and apparent age. Edit it into a beautiful but realistic three-quarter medium shot of these EXACT same women standing on a balcony of a modest Andalusian apartment in warm natural late-afternoon light, with believable residential architecture behind them. No replacement people, no extra faces, no mixing identities, no text, no logos. Clean editorial blockbuster-level color and natural anatomy."
+        },
+        {
+          "shot": "ANGLE_B",
+          "seed": 1808402,
+          "prompt": "Keep EXACTLY the same two women from the input image, the same recognizable individual faces and distinct hair, never reuse any face from another fictional couple. Change camera to medium-wide eye-level portrait in a natural Andalusian kitchen; both partners exchange a small smile while looking over a home floor plan with no legible text. Realistic warm skin textures, expressive but restrained acting, detailed cinema-style light and lens depth. Both people remain recognizable, no additional people, no morphing, no text or logos."
+        }
+      ]
+    },
+    {
+      "id": "C05_PAREJA_HOMBRES_MATEO_ALVARO",
+      "expected_sha256": "d062f9a51596a93201edb180ebff5db194fb3d0e44eb53c1addb3cda1bdcda1a",
+      "roles": [
+        "C05_01_MATEO",
+        "C05_02_ALVARO"
+      ],
+      "shots": [
+        {
+          "shot": "ANGLE_A",
+          "seed": 1808501,
+          "prompt": "Use the supplied photograph as the sole and exact character identity reference. Maintain EXACTLY the same two distinct fictional men, preserving identity-specific bone structure, eyes, skin tone, hair, facial hair, age and natural facial expressions; never borrow faces from the heterosexual couple or any other cast. Create a new three-quarter waist-up camera viewpoint of these SAME two men in the entrance to an ordinary sunlit Andalusian apartment, warm premium cinematic lighting with realistic strong spatial parallax. Do not add people or change faces, no typography, no logos."
+        },
+        {
+          "shot": "ANGLE_B",
+          "seed": 1808502,
+          "prompt": "Edit the supplied image to show the EXACT SAME two fictional adult men with unchanged separate faces, beard patterns, hair, eyes and apparent age, at a wider candid angle beside a bright Spanish apartment window, exchanging a relaxed look as they imagine a move. Natural believable body and hand anatomy, soft prestigious feature-film grade, documentary authenticity, recognizably the same two cast members, do not introduce additional people or copy another cast member's face. No text or logo."
+        }
+      ]
+    }
+  ]
+}
