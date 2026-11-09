@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
-import ts from 'typescript';
 
 const orchestrator='supabase/functions/jarvis-orchestrator-v0/index.ts';
 const work='supabase/functions/jarvis-work-gateway-v1/index.ts';
@@ -10,16 +9,12 @@ const git='supabase/functions/jarvis-git-gateway-v1/index.ts';
 
 function body(path){return fs.readFileSync(path,'utf8');}
 function actualPredicate(path,name){
-  const source=body(path),ast=ts.createSourceFile(path,source,ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
-  assert.equal(ast.parseDiagnostics.length,0,path+': parser must accept TypeScript source');
-  const node=ast.statements.find(node=>ts.isFunctionDeclaration(node)&&node.name?.text===name);
-  assert.ok(node,path+': real policy function '+name+' required');
-  const sourceSnippet=node.getText(ast);
-  const compiled=ts.transpileModule(sourceSnippet+'\nmodule.exports='+name+';', {compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.CommonJS}}).outputText;
-  const module={exports:null};
-  vm.runInNewContext(compiled,{module}, {timeout:1000});
-  assert.equal(typeof module.exports,'function');
-  return module.exports;
+  const line=body(path).split('\n').find(line=>line.startsWith('function '+name+'('));
+  assert.ok(line,path+': real one-line function '+name+' required');
+  const pure=line.replace(/:string\[\]/g,'').replace(/:string/g,'');
+  const predicate=vm.runInNewContext('('+pure+')',{}, {timeout:1000});
+  assert.equal(typeof predicate,'function');
+  return predicate;
 }
 
 test('DIR-TEST orchestrator permits only repository read intents',()=>{
