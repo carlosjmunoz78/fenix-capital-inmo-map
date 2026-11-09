@@ -199,3 +199,22 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
  await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
 });
+
+
+test('JARVIS Work PREPROD · history exposes real runs, search and evidence without voice',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Historial',exact:true}).click();
+ const history=page.getByLabel('Historial de ejecuciones');
+ await expect(history.getByText('Historial recibido · 1 ejecuciones')).toBeVisible();
+ await expect(history.getByText('Workspace QA')).toBeVisible();
+ await expect(history.getByRole('link',{name:'Evidencia'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions');
+ await history.getByRole('textbox',{name:'Filtrar historial'}).fill('sin coincidencias');
+ await expect(history.getByText('Ninguna ejecución coincide con la búsqueda.')).toBeVisible();
+ await history.getByRole('textbox',{name:'Filtrar historial'}).fill('QA-001');
+ await expect(history.getByText('Workspace QA')).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
