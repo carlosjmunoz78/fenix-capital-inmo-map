@@ -1,0 +1,9 @@
+company_id=fenix
+engine_id=UMS-001
+environment=LAB
+model=es_ES-sharvard-medium
+speaker_ids=0,1
+dataset_license=CC_BY_3_0_ATTRIBUTION_REQUIRED
+no_paid_api=true
+no_pub=true
+one_shot=true
