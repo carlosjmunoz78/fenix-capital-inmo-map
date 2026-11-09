@@ -65,7 +65,7 @@ jobs:
           console.log('FACT001_CEREBRO_DEPLOYED_SIDECAR_E2E=true');
           console.log('FACT001_KV_WRITE_VERIFIED='+run.result.write_verified);
           console.log('FACT001_KV_READ_VERIFIED='+run.result.read_verified);
-          console.log('FACT001_KV_ROLLBACK_VERIFIED='+run.result.rollback_verified');
+          console.log('FACT001_KV_ROLLBACK_VERIFIED='+run.result.rollback_verified);
           console.log('FACT001_EXISTING_APP_CRM_GATEWAY_MODIFIED=false');
           console.log('FACT001_SECRET_VALUES_LOGGED=0');
           NODE
