@@ -84,7 +84,7 @@ export default function JarvisGitReadonlyInspector(){
     }
     return()=>{cancelled=true;for(const t of timers)clearTimeout(t)};
   // Poll only for a new job, not after each status update. Exactly four bounded GETs.
-  },[state.jobId]);
+  },[state.jobId,state.status]);
 
   return <section aria-label="Git · consultas de solo lectura" style={{gridColumn:'1 / -1',display:'grid',gap:8,padding:'12px',border:'1px solid rgba(255,255,255,.14)',borderRadius:10}}>
     <strong>Git · solo lectura</strong>
