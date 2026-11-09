@@ -33,7 +33,7 @@ jobs:
       - name: Verify execution history and visible project composer
         env:
           PLAYWRIGHT_SKIP_BUILD: '1'
-        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'history exposes|project actions draft|engine panel distinguishes' --reporter=line
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'history exposes|project actions draft|engine panel distinguishes|tenant scope' --reporter=line
       - name: Keep failure evidence
         if: always()
         uses: actions/upload-artifact@v4
