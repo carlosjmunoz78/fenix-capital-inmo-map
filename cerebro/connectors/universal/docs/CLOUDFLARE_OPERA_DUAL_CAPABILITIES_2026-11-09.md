@@ -32,7 +32,7 @@ La interfaz solo elige origen; el actor, permisos, empresa, entorno y perfil de 
 - `src/opera.mjs`: proveedor tipado que necesita `toolkit` conectado y `resolveBrowserBinding` de confianza. Niega `browser_id` en argumentos del modelo, secretos, origen no autorizado, tab IDs inválidos y lecturas de historial excesivas. No abre ningún navegador por sí solo.
 - `src/core.mjs`: despacha por prefijo a `cloudflare` u `opera` usando el **mismo core** de IAM, contexto, controles de coste, auditoría e idempotencia. Mantiene el constructor Cloudflare anterior compatible.
 - `src/clients.mjs`: lista capacidades de cualquier proveedor sin describirlas todas como Cloudflare.
-- `tests/opera.test.mjs`: 8 pruebas simuladas (identidad cliente independiente, rechazo de origen/credenciales, denegación de clic no conectado, idempotencia, límites de historial y audit-safe). En este paquete parcial de pruebas se ejecutaron **18/18 GREEN** y la validación de catálogo mostró **45 capacidades registradas** (23 Cloudflare, 22 Opera). Estas pruebas **no son E2E físicos**.
+- `tests/opera.test.mjs`: 8 pruebas simuladas (identidad cliente independiente, rechazo de origen/credenciales, denegación de clic no conectado, idempotencia, límites de historial y audit-safe). Se ejecutaron **18/18 GREEN** en la prueba de compatibilidad inicial y después **38/38 GREEN** sobre la batería local completa integrada (núcleo, Cloudflare, MCP, D1, Opera); la validación de catálogo mostró **45 capacidades registradas** (23 Cloudflare, 22 Opera). Estas pruebas **no son E2E físicos**.
 
 ## Próximos gates de aceptación
 
