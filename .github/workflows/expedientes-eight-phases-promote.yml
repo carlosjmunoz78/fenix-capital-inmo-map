@@ -14,14 +14,14 @@ jobs:
     env:
       VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
       VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
-      VERIFIED_STAGED_ARTIFACT: https://fenix-capital-preprod-gl6wh7psx.vercel.app
-      PREVIOUS_KNOWN_GOOD: 7aC5UAcpbEj57KxE763kqTYxKDAE
+      VERIFIED_STAGED_ARTIFACT: https://fenix-capital-preprod-6xxwedyw1.vercel.app
+      PREVIOUS_KNOWN_GOOD: Cw6AbxvyhrT5sGmBy1XRrgMb2jJG
     steps:
       - name: Assert exact authorized staged target
         run: |
           test "${GITHUB_REF_NAME}" = "fix/expedientes-eight-phases-substeps-20261109"
           test "${VERCEL_PROJECT_ID}" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
-          test "${VERIFIED_STAGED_ARTIFACT}" = "https://fenix-capital-preprod-gl6wh7psx.vercel.app"
+          test "${VERIFIED_STAGED_ARTIFACT}" = "https://fenix-capital-preprod-6xxwedyw1.vercel.app"
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: 24
