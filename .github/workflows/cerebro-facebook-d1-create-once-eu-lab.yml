@@ -1,0 +1,38 @@
+name: FACT-001 Facebook D1 EU LAB - guarded create once
+
+# ONE activation only on this file's first push on the isolated branch.
+# NEVER execute on pull_request, schedule, or automatic deploy.
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/cerebro-facebook-d1-create-once-eu-lab.yml
+
+permissions:
+  contents: write  # Git ref immutable-intent ledger; not App/CRM/DNS source changes
+
+concurrency:
+  group: cerebro-fb-eu-d1-create-once
+  cancel-in-progress: false
+
+jobs:
+  facebook-d1-eu-one-shot:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.ref_name == 'cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+      GITHUB_TOKEN: ${{ github.token }}
+      CEREBRO_FACEBOOK_D1_WRITE_ARMED: YES_LAB_ONLY_2026_11_09
+    steps:
+      - name: Checkout isolated feature branch without persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify code in offline sandbox before external operations
+        run: |
+          node --test cerebro/connectors/universal/tests/facebook-create-once.test.mjs
+          node cerebro/connectors/universal/src/validate.mjs
+      - name: Exactly one Facebook D1 EU create with fail-closed ledger and cost guard
+        run: node cerebro/connectors/universal/bootstrap/facebook-create-once.mjs
