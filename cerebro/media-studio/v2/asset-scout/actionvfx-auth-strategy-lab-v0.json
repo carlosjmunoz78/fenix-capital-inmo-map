@@ -2,7 +2,7 @@
   "company_id": "fenix",
   "engine_id": "UMS-001",
   "environment": "LAB",
-  "version": "actionvfx-auth-v0.1",
+  "version": "actionvfx-auth-v0.2",
   "date": "2026-11-09",
   "provider": "ActionVFX",
   "provider_host": "www.actionvfx.com",
@@ -48,9 +48,10 @@
   "verified_account_gates": {
     "account_status": "ACTIVE_AUTHENTICATED",
     "company_field": "EMPTY",
-    "commercial_license": "MISSING_LICENSE",
-    "api_key": "GITHUB_SECRET_PRESENT_PROVIDER_KEY_VALUE_NOT_VERIFIED",
-    "free_effects_download": "WAITING_FOR_LICENSE_COMPLETION"
+    "commercial_license": "ACTIVE_INDIVIDUAL_NOT_APPROVED_FOR_FENIX_COMPANY_TEAM_USE",
+    "api_key": "GITHUB_SECRET_PRESENT_PROVIDER_USER_KEY_PRESENT_NO_PARTNER_API_ACCESS_PROVEN",
+    "free_effects_download": "WAITING_FOR_LICENSE_COMPLETION",
+    "company_profile": "FENIX_CAPITAL_FIELD_PRESENT_BUT_LICENSEE_PERSONAL"
   },
   "policy": {
     "source_of_truth_for_auth": "Provider and browser's secure session storage",
@@ -63,12 +64,13 @@
   "readiness": {
     "google_sso_preference": "RECORDED_NOT_AUTOMATION_PROVEN",
     "current_authenticated_browser": "VERIFIED",
-    "commercial_free_asset_use": "BLOCKED_LICENSE_PENDING",
+    "commercial_free_asset_use": "BLOCKED_LICENSE_TIER_MISMATCH",
     "autonomous_login": "NOT_DEPLOYED",
     "browser_bridge_integration": "PENDING",
-    "public_catalog_discovery_api": "DOCUMENTED_AVAILABLE_NO_USER_API_KEY_NEEDED",
-    "private_partner_api": "RESTRICTED_EXISTING_PARTNERS",
-    "asset_download_by_CEREBRO": "NOT_VERIFIED_OR_AUTHORIZED_VIA_API_KEY_ALONE"
+    "public_catalog_discovery_api": "CATEGORY_ENDPOINT_HTTP_200_VERIFIED_IN_OPERA",
+    "private_partner_api": "RESTRICTED_TO_APPROVED_PARTNERS",
+    "asset_download_by_CEREBRO": "BLOCKED_NOT_AUTHORIZED_VIA_KEY_ALONE",
+    "public_collections_api": "HTTP_500_VERIFIED_IN_OPERA"
   },
   "links": {
     "account_profile": "https://www.actionvfx.com/accounts/profile",
@@ -88,7 +90,10 @@
     "secret_value_never_exported": true,
     "branch_deployment_policy": "NO_RESTRICTION_OBSERVED_REVIEW_SECURITY",
     "workflow_binding": "NOT_VERIFIED",
-    "provider_auth_smoke_test": "NOT_RUN"
+    "provider_auth_smoke_test": "NOT_RUN",
+    "environment_branch_restriction": "NO_RESTRICTION_OBSERVED_NOT_FIXED"
   },
-  "notes": " Environment secret presence established via logged-in GitHub UI; API value deliberately unread. Official provider developer docs distinguish public catalog endpoints and partner-restricted private API: key alone is not sufficient evidence of autonomous downloads. Requires confirmed provider partner approval or supported bridge tool, license completion, and safe controlled job with environment restriction."
+  "notes": " Environment secret presence established via logged-in GitHub UI; API value deliberately unread. Official provider developer docs distinguish public catalog endpoints and partner-restricted private API: key alone is not sufficient evidence of autonomous downloads. Requires confirmed provider partner approval or supported bridge tool, license completion, and safe controlled job with environment restriction.",
+  "next_legal_step": "Select proper company tier Startup (<USD3m revenue/funding) or Enterprise (>=USD3m) based on real facts; verify licensee company and commercial eligibility; no purchasing or storing assets until verified.",
+  "safe_next_step": "Use public category API without user key, catalog only, LAB branch; do not call restricted partner API or print key."
 }
