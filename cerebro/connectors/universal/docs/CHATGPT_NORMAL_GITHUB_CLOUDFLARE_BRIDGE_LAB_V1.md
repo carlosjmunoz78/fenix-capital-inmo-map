@@ -32,3 +32,7 @@ From any normal ChatGPT conversation, use connected GitHub tools to update only 
 - GET statuses: TOKEN, ACCOUNT, D1, WORKERS, WORKERS_DOMAINS, WORKERS_SETTINGS, KV, PAGES, ACCESS, ZONES, DNS, ZONE_SETTINGS, WAF_RULESETS, WORKER_ROUTES: READ_OK; R2 and LOGPUSH: PERMISSION_BLOCKED. Missing permission does not prove absence of product.
 - Sanitized artifact fact001-cloudflare-chat-normal-readonly-receipt ID 13700537544, retention 3 days.
 - This is operational **single-capability LAB read-only** bridge, not full management, live CEREBRO Gateway or native ChatGPT custom MCP.
+
+## CEREBRO isolated parallel path proof
+
+Independently, the actual CEREBRO code stack completed physical GET-only Cloudflare reads in [#42680213195](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42680213195): 9/9 gateway, 77/77 Universal Factory tests, D1=8, Workers=6, 0 writes. Both client paths are supported in **isolated CI**, but direct CEREBRO deployed Gateway remains unbound.

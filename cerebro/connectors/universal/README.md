@@ -27,3 +27,5 @@ An alternative to native MCP is now **working**: ChatGPT authenticated GitHub co
 The bridge **only exposes** a fixed account_readonly_audit order. It does not enable arbitrary operations, administration, or changes to DNS/Workers. Production CEREBRO Gateway physical binding and ChatGPT native MCP remain NOT VERIFIED. For writes: separate least-privilege credentials, policy/IAM, contracts, dry runs, backup, rollback, audit and expense caps.
 
 See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
+
+**CEREBRO E2E LAB VERIFIED (2026-11-09):** physical Console V0 -> ACTGW-001 -> FACT-001 -> Cloudflare GET tested twice, including full 77/77 universal suite + 9/9 Gateway tests [run #42680213195](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42680213195). D1=8; Workers=6; 0 writes. Supabase deployed Gateway v33 **not connected or changed**; separate live integration still gated. R2/Logpush read scopes remain blocked.
