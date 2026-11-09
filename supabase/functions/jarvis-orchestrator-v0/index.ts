@@ -21,6 +21,8 @@ const INTENTS=new Set([
   'BROWSER_STATUS','BROWSER_PROFILES','BROWSER_HANDOFF'
 ]);
 const MUTATING_INTENTS=new Set(['SAVE_FILE','ROLLBACK_COMMIT','WORK_CANCEL']);
+// Independent test identity is strictly repository metadata READ-ONLY, even when actor context is valid.
+function testActorOrchestratorAllowed(intent:string){return intent==='REPO_HEAD'||intent==='REPO_LIST'||intent==='REPO_FILE';}
 const MAX_CONTENT_BYTES=2_000_000;
 
 function headers(origin:string|null){const h:Record<string,string>={'content-type':'application/json; charset=utf-8','cache-control':'no-store','vary':'origin'};if(origin&&ORIGINS.has(origin))h['access-control-allow-origin']=origin;return h;}
@@ -53,6 +55,7 @@ Deno.serve(async req=>{
   try{
     const intent=clean(body?.intent,'INTENT',64).toUpperCase();
     if(!INTENTS.has(intent))return out(req,400,{status:'UNSUPPORTED',reason:'INTENT_NOT_AVAILABLE',intent,correlation_id});
+    if(authz.actor==='DIR-TEST'&&!testActorOrchestratorAllowed(intent))return out(req,403,{status:'DENIED',reason:'TEST_ACTOR_READONLY',correlation_id});
     const args=body?.args&&typeof body.args==='object'&&!Array.isArray(body.args)?body.args:{};
     enforceScope(intent,args);
     let r:{ok:boolean,status:number,body:any}|null=null,delegated='NONE';
