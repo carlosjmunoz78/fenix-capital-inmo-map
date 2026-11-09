@@ -49,7 +49,7 @@
     "account_status": "ACTIVE_AUTHENTICATED",
     "company_field": "EMPTY",
     "commercial_license": "MISSING_LICENSE",
-    "api_key": "NO_API_KEY",
+    "api_key": "GITHUB_SECRET_PRESENT_PROVIDER_KEY_VALUE_NOT_VERIFIED",
     "free_effects_download": "WAITING_FOR_LICENSE_COMPLETION"
   },
   "policy": {
@@ -65,11 +65,30 @@
     "current_authenticated_browser": "VERIFIED",
     "commercial_free_asset_use": "BLOCKED_LICENSE_PENDING",
     "autonomous_login": "NOT_DEPLOYED",
-    "browser_bridge_integration": "PENDING"
+    "browser_bridge_integration": "PENDING",
+    "public_catalog_discovery_api": "DOCUMENTED_AVAILABLE_NO_USER_API_KEY_NEEDED",
+    "private_partner_api": "RESTRICTED_EXISTING_PARTNERS",
+    "asset_download_by_CEREBRO": "NOT_VERIFIED_OR_AUTHORIZED_VIA_API_KEY_ALONE"
   },
   "links": {
     "account_profile": "https://www.actionvfx.com/accounts/profile",
     "free_vfx": "https://www.actionvfx.com/collections/free-vfx/category",
-    "license": "https://www.actionvfx.com/license"
-  }
+    "license": "https://www.actionvfx.com/license",
+    "public_api": "https://www.actionvfx.com/developer/api/public",
+    "private_api": "https://www.actionvfx.com/developer/api"
+  },
+  "github_secrets": {
+    "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+    "environment": "UMS001-LAB",
+    "environment_id": "26700594543",
+    "secret_name": "ACTIONVFX_API_KEY",
+    "presence": "VERIFIED_IN_GITHUB_SETTINGS",
+    "verified_at": "2026-11-09",
+    "value_read": false,
+    "secret_value_never_exported": true,
+    "branch_deployment_policy": "NO_RESTRICTION_OBSERVED_REVIEW_SECURITY",
+    "workflow_binding": "NOT_VERIFIED",
+    "provider_auth_smoke_test": "NOT_RUN"
+  },
+  "notes": " Environment secret presence established via logged-in GitHub UI; API value deliberately unread. Official provider developer docs distinguish public catalog endpoints and partner-restricted private API: key alone is not sufficient evidence of autonomous downloads. Requires confirmed provider partner approval or supported bridge tool, license completion, and safe controlled job with environment restriction."
 }
