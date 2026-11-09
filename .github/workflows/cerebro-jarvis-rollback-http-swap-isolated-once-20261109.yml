@@ -1,0 +1,102 @@
+name: CEREBRO JARVIS Isolated HTTP Rollback Swap ONE SHOT 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-direct-readonly-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-rollback-http-swap-isolated-once-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  isolated-http-reversal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      OLD_GHPAGES_SHA: 01650c6fb728aa9d41dc4877dd4bee243372be68
+      NEW_MAIN_SHA: 3600942775fbc19b47560e6f798caca107cd7473
+      REPO: carlosjmunoz78/fenix-capital-inmo-map
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Assert immutable source and backup SHA without branch modifications
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO_URL="https://github.com/$REPO.git"
+          test "$(git ls-remote "$REPO_URL" refs/heads/gh-pages | cut -f1)" = "$OLD_GHPAGES_SHA"
+          test "$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)" = "$NEW_MAIN_SHA"
+          test "$(git ls-remote "$REPO_URL" refs/heads/backup/20261108-jarvis-prod-cutover-gh-pages | cut -f1)" = "$OLD_GHPAGES_SHA"
+          echo 'PROTECTED_REF_SNAPSHOTS_MATCH=GREEN'
+      - uses: actions/checkout@v4
+        with:
+          ref: 01650c6fb728aa9d41dc4877dd4bee243372be68
+          path: old-site
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          ref: 3600942775fbc19b47560e6f798caca107cd7473
+          path: candidate-source
+          persist-credentials: false
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: candidate-source/package-lock.json
+      - name: Compile NEW candidate without publishing, using existing PROD public build vars only
+        working-directory: candidate-source
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          npm ci --no-audit --no-fund
+          npx vite build --base=/ --outDir "$GITHUB_WORKSPACE/candidate-site"
+          test -s "$GITHUB_WORKSPACE/candidate-site/index.html"
+          test -s "$GITHUB_WORKSPACE/old-site/index.html"
+          test "$(git rev-parse HEAD)" = "$NEW_MAIN_SHA"
+          echo 'CANDIDATE_BUILD_OFFLINE=GREEN'
+      - name: Physical HTTP swap and rollback using localhost only
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
+          test "$(git -C old-site rev-parse HEAD)" = "$OLD_GHPAGES_SHA"
+          test "$(cat old-site/CNAME)" = "app.fenixcapital.es"
+          test ! -e site-current
+          ln -s "$GITHUB_WORKSPACE/old-site" site-current
+          python3 -m http.server 18761 --bind 127.0.0.1 --directory "$GITHUB_WORKSPACE/site-current" >/tmp/jarvis-http-swap.log 2>&1 &
+          HTTP_PID=$!
+          trap 'kill "$HTTP_PID" 2>/dev/null || true' EXIT
+          for n in $(seq 1 30); do
+            if curl -fsS --max-time 2 'http://127.0.0.1:18761/index.html' -o /tmp/old-http-index.html; then break; fi
+            sleep 0.25
+          done
+          cmp -s old-site/index.html /tmp/old-http-index.html
+          OLD_SHA="$(sha256sum old-site/index.html | cut -d' ' -f1)"
+          test "$OLD_SHA" = "$(sha256sum /tmp/old-http-index.html | cut -d' ' -f1)"
+          echo 'OLD_SITE_HTTP_BASELINE=GREEN'
+          ln -s "$GITHUB_WORKSPACE/candidate-site" site-next
+          mv -Tf site-next site-current
+          curl -fsS --max-time 5 'http://127.0.0.1:18761/index.html' -o /tmp/candidate-http-index.html
+          cmp -s candidate-site/index.html /tmp/candidate-http-index.html
+          NEW_SHA="$(sha256sum candidate-site/index.html | cut -d' ' -f1)"
+          test "$NEW_SHA" = "$(sha256sum /tmp/candidate-http-index.html | cut -d' ' -f1)"
+          echo 'NEW_CANDIDATE_HTTP_SERVING=GREEN'
+          ln -s "$GITHUB_WORKSPACE/old-site" site-next
+          mv -Tf site-next site-current
+          curl -fsS --max-time 5 'http://127.0.0.1:18761/index.html' -o /tmp/rollback-http-index.html
+          cmp -s old-site/index.html /tmp/rollback-http-index.html
+          test "$OLD_SHA" = "$(sha256sum /tmp/rollback-http-index.html | cut -d' ' -f1)"
+          test "$(cat site-current/CNAME)" = "app.fenixcapital.es"
+          echo "JARVIS_ISOLATED_HTTP_SWAP_AND_REVERSAL=GREEN old_sha256=$OLD_SHA candidate_sha256=$NEW_SHA"
+          echo 'PUBLIC_DOMAIN_DEPLOYED=NO DNS_MODIFIED=NO BRANCH_MODIFIED=NO'
+      - name: Reassert protected references remained unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO_URL="https://github.com/$REPO.git"
+          test "$(git ls-remote "$REPO_URL" refs/heads/gh-pages | cut -f1)" = "$OLD_GHPAGES_SHA"
+          test "$(git ls-remote "$REPO_URL" refs/heads/main | cut -f1)" = "$NEW_MAIN_SHA"
+          echo 'PUBLIC_REFS_INTACT_AFTER_ISOLATED_HTTP_ROLLBACK=GREEN'
