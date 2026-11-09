@@ -24,10 +24,13 @@ export function mainExpedientePhase(raw:string):ExpedienteMainPhase{
 export function expedientePhaseIndex(raw:string):number{return expedienteMainPhases.indexOf(mainExpedientePhase(raw));}
 export function currentExpedienteSubstep(row:Record<string,any>|null):string{
  if(!row)return '';
+ const rawStage=String(row.stage||row.fase||row.estado||'').trim();
+ const parent=mainExpedientePhase(rawStage);
  const persisted=row.payload_operacion?.cerebro_fases_v2?.subpaso;
- if(persisted==='Análisis'||persisted==='Oferta')return persisted;
- const raw=String(row.stage||row.fase||row.estado||'').trim().toLocaleLowerCase('es');
- if(raw==='análisis'||raw==='analisis')return 'Análisis';
- if(raw==='oferta')return 'Oferta';
+ if(persisted==='Análisis'&&parent==='Documentación')return persisted;
+ if(persisted==='Oferta'&&parent==='FEIN')return persisted;
+ const raw=rawStage.toLocaleLowerCase('es');
+ if((raw==='análisis'||raw==='analisis')&&parent==='Documentación')return 'Análisis';
+ if(raw==='oferta'&&parent==='FEIN')return 'Oferta';
  return '';
 }
