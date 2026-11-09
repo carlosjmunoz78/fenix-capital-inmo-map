@@ -16,16 +16,17 @@ export default function JarvisGitDirectReadonlyLab(){
     setState({phase:'checking',message:'Validando la sesión, entorno y SHA de la rama segura.'});
     try{
       const head=await fetchJarvisRepoHead();
+      const sha=head.data?.head_sha;
       if(head.status!==200||head.data?.environment!=='PREPROD'||head.data?.branch!==BRANCH||
-         !/^[0-9a-f]{40}$/.test(head.data?.head_sha||'')){
+         !sha||!/^[0-9a-f]{40}$/.test(sha)){
         setState({phase:'blocked',message:'Comprobación de rama y entorno fallida. No se ha solicitado la consulta.'});
         return;
       }
-      const live=await inspectJarvisGitDirectLab(operation,head.data.head_sha);
+      const live=await inspectJarvisGitDirectLab(operation,sha);
       const data=live.data;
       if(live.status===200&&data?.status==='OK'&&data.proof==='JARVIS_GIT_DIRECT_READONLY_LAB'&&
          data.operation===operation&&data.branch===BRANCH&&
-         data.head_sha===head.data.head_sha&&data.environment==='LAB'&&
+         data.head_sha===sha&&data.environment==='LAB'&&
          data.mode==='IMMEDIATE_READONLY'&&data.job_enqueued===false&&
          data.worker_required===false&&data.git_writes===0&&data.db_writes===0&&data.prod_touched===false){
         setState({phase:'done',message:'Consulta directa completada y verificada. Ningún trabajo fue encolado.',data});
