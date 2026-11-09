@@ -5,7 +5,7 @@
   "component_id": "JARVIS-GIT-DIRECT-READONLY-LAB-V0",
   "environment": "LAB",
   "version": "v0",
-  "status": "LAB_GREEN_USER_E2E_PENDING",
+  "status": "LAB_GREEN_AUTHZ_PATCHED_REAL_OWNER_E2E_PENDING",
   "prod_authorized": false,
   "branch": "cerebro/jarvis-git-direct-readonly-lab-20261109",
   "base_sha": "fd0e0c69e2c0f1b135dbed51b0f2efc12c10d30e",
@@ -39,7 +39,7 @@
   "deployed": {
     "project_id": "hnqlnvakzaywtafeiybt",
     "function_slug": "jarvis-git-direct-readonly-lab-v0",
-    "version": 1,
+    "version": 2,
     "region": "eu-north-1",
     "verify_jwt": false,
     "internal_supabase_user_verification": true
@@ -54,12 +54,12 @@
   },
   "tests": {
     "function_negative_http": {
-      "run_id": 42571587067,
+      "run_id": 42573836930,
       "passed": 7,
       "total": 7
     },
     "playwright_mocked_ui": {
-      "run_id": 42571587067,
+      "run_id": 42573836930,
       "passed": 4,
       "total": 4
     },
@@ -70,17 +70,32 @@
     },
     "total_verified": 19,
     "real_positive_user_session": "NOT_TESTED",
-    "old_new_service_parity": "PARTIAL"
+    "old_new_service_parity": "PARTIAL",
+    "authorization_db": {
+      "status": "GREEN_SQL_FUNCTION_BEHAVIOR",
+      "permission_enforced": true,
+      "admin_positive": true,
+      "other_actors_denied": true,
+      "real_user_http_positive": false
+    },
+    "isolated_http_reversal": {
+      "run_id": 42574105503,
+      "status": "GREEN_ISOLATED_HTTP_ONLY",
+      "public_domain_rollback": false
+    }
   },
   "dependencies": [
     "Supabase Auth preprod project",
     "public GitHub repository read-only API",
-    "existing fenix_prod_actor_context_by_auth_server RPC"
+    "existing fenix_prod_actor_context_by_auth_server RPC",
+    "public.jarvis_lab_actor_context_by_auth_server_v0(uuid) (service_role only, PREPROD)"
   ],
   "backup": {
     "before_branch": "backup/20261109-jarvis-git-parity-before-direct-lab",
     "source_git_branch": "cerebro/jarvis-git-direct-readonly-lab-20261109",
-    "backup_existing_gateway": "UNCHANGED"
+    "backup_existing_gateway": "UNCHANGED",
+    "previous_deployed_edge_blob_sha": "3c5976ec407c97a0882e2d3e7d52289fd3c0354f",
+    "migration": "supabase/migrations/20261109071500_jarvis_lab_actor_context_by_auth_server_v0.sql"
   },
   "rollback": {
     "action": "deploy fail-closed replacement for isolated function after snapshot and review, or disable lab flag",
@@ -103,10 +118,10 @@
   "promotion": {
     "status": "BLOCKED",
     "unmet": [
-      "REAL_USER_SESSION_E2E",
-      "FULL_OLD_NEW_PARITY",
-      "VOICE_PHYSICAL_TEST",
-      "RESTORE_REVERSAL_TEST",
+      "REAL_OWNER_AUTH_HTTP_POSITIVE",
+      "VOICE_PHYSICAL",
+      "PUBLIC_DOMAIN_RESTORE_REVERSAL",
+      "OLD_VS_NEW_FULL_PARITY",
       "TRIBUNAL"
     ]
   },
