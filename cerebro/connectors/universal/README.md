@@ -1,0 +1,19 @@
+# CEREBRO OS · FACT-001 Universal Connector Factory V0 · Cloudflare scope ALL
+
+**Status:** IMPLEMENTED LAB CORE / NOT DEPLOYED / NO REAL CLOUD API ATTESTATION / NOT CONNECTED TO CHATGPT OR CEREBRO.
+
+This is a **non-invasive additive extension** under `cerebro/connectors/universal`. Existing FACT-001, `ACTGW-001`, IAM-001, registry, app, CRM, DNS, and deployed workers are untouched. It extends *capabilities*, not the canonical engine ID count.
+
+Architecture: ChatGPT private MCP (auth client A) and CEREBRO Gateway (auth client B) => adapters => common `UniversalConnectorCore` => IAM/policy, FinOps and durable idempotency => official Cloudflare API/Wrangler => verification + audit. Both entry points must use the SAME core and catalog; no password, token, or session is shared between principals.
+
+Cloudflare account scope: all products in account `e39a57e1ac42650ca5a6d5307cf0ac8e`. Account-wide INVENTORY is the initial horizontal capability. D1/Workers/Pages/KV/R2/zones/DNS/WAF/Access/analytics are modular; not all write functions are implemented. Expand each product after a testable least-privilege contract. A tool appearing in `inventory()` is **not** proof that the account has permissions or that its plan supports it. Only `IMPLEMENTED_LAB` capabilities may be routed; live statuses depend on physical tests.
+
+FB proof target: `cerebro-facebook-autoqual-lab` D1 with `jurisdiction=eu`, non-public Worker disabled. D1 list/create is real official API code but unexecuted without an authorized Cloudflare token and verified Free quota. The original Facebook `wrangler.lab.jsonc` continues to hold a placeholder UUID. No writes to that file until real UUID and target are verified.
+
+The `makeChatGPTAdapter` and `makeCerebroAdapter` are transport-neutral adapters. They deliberately DO NOT expose an unauthenticated web server. Wiring MCP OAuth, safe hosting, client plugin registration, durable store and direct CEREBRO Gateway dispatch is still required before dual physical acceptance. Never call raw core from an LLM without trusted authenticated principal injection.
+
+Run: `npm test` (Node >=20; no external dependencies); `npm run validate`.
+
+Rollback: revert only the isolated additive commit(s)/branch. For eventual FB D1, leave OFF and snapshot/restore via approved procedure; **never delete existing D1** to simulate rollback. No routes, domain settings, training or public postings are changed here.
+
+New connector scaffold: add a catalog of allowed capabilities, an adapter implementing `perform`, two independently authenticated client adapters invoking shared `execute`, policy/FinOps gates, fake-HTTP tests, recovery documentation. Default status `PLANNED_NOT_ENABLED` until evidence supports promotion.
