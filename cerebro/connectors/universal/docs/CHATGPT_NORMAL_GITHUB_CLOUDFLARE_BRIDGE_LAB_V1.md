@@ -25,3 +25,10 @@ From any normal ChatGPT conversation, use connected GitHub tools to update only 
 - Test contract locally using `node --test cerebro/connectors/universal/tests/cloudflare-chat-normal-runner.test.mjs`.
 - Verify live workflow `FACT-001 Cloudflare ChatGPT Normal Bridge - READ ONLY LAB` and exact branch, logs, and `FACT001_WRITES=0`; a green test suite alone is not live API evidence.
 - To roll back, revert only bridge files on feature branch. All Cloudflare resources remain untouched.
+## Physical proof · 2026-11-09
+
+- [Verified LAB execution #42677693830](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42677693830): SUCCESS, full real remote path from normal ChatGPT through GitHub Actions to Cloudflare API and status return. Job ID 129363428032, order CFN-20261109-001.
+- Account-bound token and D1/Workers GET succeeded. D1 count **8**, Facebook LAB D1 exists, writes **0**.
+- GET statuses: TOKEN, ACCOUNT, D1, WORKERS, WORKERS_DOMAINS, WORKERS_SETTINGS, KV, PAGES, ACCESS, ZONES, DNS, ZONE_SETTINGS, WAF_RULESETS, WORKER_ROUTES: READ_OK; R2 and LOGPUSH: PERMISSION_BLOCKED. Missing permission does not prove absence of product.
+- Sanitized artifact fact001-cloudflare-chat-normal-readonly-receipt ID 13700537544, retention 3 days.
+- This is operational **single-capability LAB read-only** bridge, not full management, live CEREBRO Gateway or native ChatGPT custom MCP.
