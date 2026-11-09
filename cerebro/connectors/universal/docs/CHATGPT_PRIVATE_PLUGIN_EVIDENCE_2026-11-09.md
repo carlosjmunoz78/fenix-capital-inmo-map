@@ -64,3 +64,29 @@ Visible labels in the account at inspection:
 **No subscription action, charge, new resource, DNS update, database mutation, or Worker deployment occurred.**
 
 Remaining blocker for any Facebook D1 creation: a durable atomic idempotency mechanism and independently verified zero-additional-cost write gate must be wired; this read-only attestation is not a write approval on its own. Preserve PR #44 and FB PR #9 in DRAFT.
+
+## 2026-11-09 · REAL Facebook EU D1 created (write gate passed)
+
+- Official Cloudflare API D1 create-once executed from **public repo's isolated GitHub Actions feature branch** with encrypted repo secret; no ChatGPT Work and no new subscriptions.
+- One-shot GitHub run **42657317186**, successful: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42657317186
+- Source commit: `4dc9b9560b82d22223790c5b7e873d2fbfa5c6a1`.
+- New **D1**: `cerebro-facebook-autoqual-lab` in jurisdiction `eu`; UUID **`e8fe801d-4b01-4e34-ac12-26014b79adc1`**. Verified by API readback and physical Cloudflare dashboard lookup.
+- Durable GitHub ref `refs/heads/cerebro-ledger/facebook-d1-eu-create-v0` created and finished in `COMPLETE`. Repeated/uncertain requests fail-closed; no paid D1.
+- Facebook private PR #9 only changed Wrangler config UUID (commit `4168ac54561ed2125adff611211c1025307006c7`) and later README evidence; all OFF flags and route isolation preserved.
+- New offline tests `facebook-create-once.test.mjs`: **9/9 PASS**; combined universal factory Node tests **30/30 PASS** locally before deployment.
+- **Worker not deployed, Cron not enabled, SQL migrations not run, Groq OFF, no public routes.**
+
+### Separate private repository deployment attempt — BLOCKED by GitHub Actions billing
+- The source Facebook repository is **PRIVATE**. It independently has an encrypted `CLOUDFLARE_API_TOKEN` repository secret (name only verified via authenticated GitHub UI). The secret was not viewed.
+- OFF-only deployment workflow and gates added on FB DRAFT branch, source commit `8e5944a169066efc83fcbc8c17a10b25faa20999`.
+- Workflow run **42659352602**: FAILED **before any job steps**. GitHub UI states: *The job was not started because recent account payments have failed or your spending limit needs to be increased.* No Wrangler deployment took place.
+- The user has a **zero-additional-cost** policy; DO NOT increase any limit or enable billing, especially not to bypass this gate.
+- GitHub settings under social repository show **no self-hosted runners configured**. A free self-hosted runner on an existing authorized device is a potential future path if approved/available, not implemented.
+- This is not a Cloudflare API permission failure; the job never reached the token check.
+- Existing public factory PR #44 remains DRAFT, no merge; private FB PR #9 remains DRAFT; no App/CRM/DNS/PROD/Instagram/Buffer changes.
+
+### Current status distinctions
+- **HECHO:** Free plan UI observed, token read proven, EU Facebook D1 created and UUID committed, idempotency persisted.
+- **PARCIAL:** offline Worker test/gate source prepared, 4 local safety tests PASS.
+- **BLOQUEADO:** private GitHub Actions billing block prevents Worker job startup; no authenticated ChatGPT MCP production route or CEREBRO Gateway E2E yet.
+- **COST:** no additional paid services subscribed and no confirmed extra charge from these operations. Cloudflare Workers Free remained active.
