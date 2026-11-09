@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "CONSOLE-001",
+  "component_id": "JARVIS-GIT-DIRECT-READONLY-LAB-V0",
+  "environment": "LAB",
+  "version": "v0",
+  "status": "LAB_GREEN_USER_E2E_PENDING",
+  "prod_authorized": false,
+  "branch": "cerebro/jarvis-git-direct-readonly-lab-20261109",
+  "base_sha": "fd0e0c69e2c0f1b135dbed51b0f2efc12c10d30e",
+  "contract": {
+    "user_auth": "SUPABASE_GET_USER_AND_FENIX_ACTOR_CONTEXT",
+    "allowed_actor": [
+      "CARLOS-ADMIN"
+    ],
+    "external_origins": [
+      "http://127.0.0.1:4173",
+      "http://localhost:4173"
+    ],
+    "prohibited_origin": "https://app.fenixcapital.es",
+    "functions_route": "POST /inspect",
+    "allowed_operations": [
+      "STATUS",
+      "DIFF",
+      "CI_READ",
+      "COMPARE"
+    ],
+    "pinned_branch": "cerebro/jarvis-work-codex-complete-20261102",
+    "requires_expected_head_sha": true,
+    "operation_scope": "READ_ONLY_GITHUB_PUBLIC_API",
+    "outputs": "AGGREGATE_GIT_METADATA_ONLY",
+    "no_queue": true,
+    "no_worker": true,
+    "no_cron": true,
+    "no_repo_writes": true,
+    "no_db_writes": true
+  },
+  "deployed": {
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "function_slug": "jarvis-git-direct-readonly-lab-v0",
+    "version": 1,
+    "region": "eu-north-1",
+    "verify_jwt": false,
+    "internal_supabase_user_verification": true
+  },
+  "client": {
+    "component": "src/JarvisGitDirectReadonlyLab.tsx",
+    "gateway_wrapper": "src/jarvisWorkApi.ts",
+    "parent": "src/CerebroJarvisWorkConsole.tsx",
+    "feature_flag": "VITE_JARVIS_GIT_DIRECT_LAB",
+    "enabled_only_when": "flag true and IS_PRODUCTION=false",
+    "prod_default_enabled": false
+  },
+  "tests": {
+    "function_negative_http": {
+      "run_id": 42571587067,
+      "passed": 7,
+      "total": 7
+    },
+    "playwright_mocked_ui": {
+      "run_id": 42571587067,
+      "passed": 4,
+      "total": 4
+    },
+    "existing_ui_backcompat": {
+      "run_id": 42571752415,
+      "passed": 8,
+      "total": 8
+    },
+    "total_verified": 19,
+    "real_positive_user_session": "NOT_TESTED",
+    "old_new_service_parity": "PARTIAL"
+  },
+  "dependencies": [
+    "Supabase Auth preprod project",
+    "public GitHub repository read-only API",
+    "existing fenix_prod_actor_context_by_auth_server RPC"
+  ],
+  "backup": {
+    "before_branch": "backup/20261109-jarvis-git-parity-before-direct-lab",
+    "source_git_branch": "cerebro/jarvis-git-direct-readonly-lab-20261109",
+    "backup_existing_gateway": "UNCHANGED"
+  },
+  "rollback": {
+    "action": "deploy fail-closed replacement for isolated function after snapshot and review, or disable lab flag",
+    "no_prod_changes": true
+  },
+  "autonomy": {
+    "status": "LAB_READONLY_EXPLICIT_HUMAN_UI",
+    "human_exception": [
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT"
+    ]
+  },
+  "economics": {
+    "new_subscription_eur": 0,
+    "usage_marginal_eur": "UNMEASURED",
+    "new_paid_ai": false
+  },
+  "promotion": {
+    "status": "BLOCKED",
+    "unmet": [
+      "REAL_USER_SESSION_E2E",
+      "FULL_OLD_NEW_PARITY",
+      "VOICE_PHYSICAL_TEST",
+      "RESTORE_REVERSAL_TEST",
+      "TRIBUNAL"
+    ]
+  },
+  "docs": "cerebro/docs/JARVIS_DIRECT_GIT_READONLY_LAB_2026-11-09.md"
+}
