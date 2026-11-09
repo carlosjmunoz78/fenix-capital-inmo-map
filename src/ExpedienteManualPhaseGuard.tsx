@@ -45,11 +45,43 @@ export default function ExpedienteManualPhaseGuard(){
  useEffect(()=>{const journey=document.querySelector('[data-testid="expediente-phase-line"]');if(!journey)return;const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div'));cells.forEach((cell,i)=>cell.classList.toggle('manual-phase-selected',selected===visiblePhases[i]))},[selected]);
 
  function close(){setSelected('');setReason('');setMsg('')}
- async function commit(){if(!canEdit||!row||!selected||selected===current||!reason.trim()||busy)return;setBusy(true);setMsg('');
-  const fresh=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);const item=fresh.status===200?detailItem(fresh.data):null;if(!item){setBusy(false);setMsg('No se pudo verificar el expediente. No se ha guardado nada.');return}const latest=text(item,['stage','fase','estado'])||'Entrada';if(latest!==current){setBusy(false);setMsg('El expediente ha cambiado. Actualiza antes de guardar.');await reloadData();return}const version=Number(item.version);if(!Number.isInteger(version)||version<0){setBusy(false);setMsg('Versión del expediente no válida. No se ha guardado nada.');return}const oldNotes=text(item,['notas']);const actor=ctx?.display_name||ctx?.role||'Usuario';const stamp=new Date().toISOString();const audit=`[CAMBIO MANUAL DE FASE] ${current} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
-  let status=500;let data:any=null;
-  if(IS_PRODUCTION){const r=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});data=r.data;status=r.error?500:Number(r.data?.status||200)}else{const {data:{session}}=await supabase.auth.getSession();if(!session?.access_token){setBusy(false);setMsg('La sesión no permite guardar el cambio.');return}const r=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});status=r.status;try{data=await r.json()}catch{}}
-  setBusy(false);if(status===200&&data?.ok!==false){setRow({...item,stage:selected,fase:selected,estado:selected,notas:notes,version:version+1});setMsg(`Fase actualizada a ${selected}. Motivo registrado.`);setSelected('');setReason('');window.dispatchEvent(new CustomEvent('fenix:expediente-stage-updated',{detail:{code,stage:selected}}));await reloadData()}else if(status===409){setMsg('El expediente cambió mientras lo revisabas. Recarga y vuelve a intentarlo.')}else if(status===403){setMsg('Tu perfil no puede cambiar la fase.')}else setMsg(`No se pudo cambiar la fase (${data?.error||status}).`)
+ async function commit(){
+  if(!canEdit||!row||!selected||selected===current||!reason.trim()||busy)return;
+  setBusy(true);setMsg('');
+  try{
+   // No sobrescribir una fase ajena con el estado/vista anterior.
+   const fresh=await fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`);
+   const item=fresh.status===200?detailItem(fresh.data):null;
+   if(!item){setMsg('No se pudo verificar el expediente. No se ha guardado nada.');return;}
+   const latest=text(item,['stage','fase','estado'])||'Entrada';
+   if(latest!==current){setMsg('El expediente ha cambiado. Actualiza antes de guardar.');await reloadData();return;}
+   const version=Number(item.version);
+   if(!Number.isInteger(version)||version<0){setMsg('Versión del expediente no válida. No se ha guardado nada.');return;}
+   const oldNotes=text(item,['notas']);
+   const actor=ctx?.display_name||ctx?.role||'Usuario';
+   const stamp=new Date().toISOString();
+   const audit=`[CAMBIO MANUAL DE FASE] ${latest} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;
+   const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
+   let status=500;let data:any=null;
+   if(IS_PRODUCTION){
+    const result=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});
+    data=result.data;status=result.error?500:Number(result.data?.status||200);
+   }else{
+    const {data:{session}}=await supabase.auth.getSession();
+    if(!session?.access_token){setMsg('La sesión no permite guardar el cambio.');return;}
+    const result=await fetch(`${SUPABASE_URL}/functions/v1/fenix-notion-actions-test/expedientes/${encodeURIComponent(code)}/action`,{method:'POST',headers:{'content-type':'application/json',Authorization:`Bearer ${session.access_token}`},body:JSON.stringify({action:'update',changes:{stage:selected,notas:notes}})});
+    status=result.status;try{data=await result.json()}catch{}
+   }
+   if(status===200&&data?.ok!==false){
+    setRow({...item,stage:selected,fase:selected,estado:selected,notas:notes,version:version+1});
+    setSelected('');setReason('');setMsg(`Fase actualizada a ${selected}. Motivo registrado.`);
+    window.dispatchEvent(new CustomEvent('fenix:expediente-stage-updated',{detail:{code,stage:selected}}));
+    await reloadData();
+   }else if(status===409){setMsg('El expediente cambió mientras lo revisabas. Actualiza y vuelve a intentarlo.');await reloadData();}
+   else if(status===403)setMsg('Tu perfil no puede cambiar la fase.');
+   else setMsg(`No se pudo cambiar la fase (${data?.error||status}).`);
+  }catch{setMsg('Error al guardar o recuperar el expediente. Comprueba su estado antes de reintentar.');}
+  finally{setBusy(false);}
  }
  if(!host||!saveHost)return null;
  return <>
