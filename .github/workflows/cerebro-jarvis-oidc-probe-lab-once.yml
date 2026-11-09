@@ -1,4 +1,4 @@
-name: CEREBRO JARVIS Stateless GitHub OIDC Attestation LAB One Shot
+name: CEREBRO JARVIS Stateless GitHub OIDC Attestation LAB Final
 on:
   push:
     branches:
@@ -46,13 +46,6 @@ jobs:
           if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_TOKEN_MISSING');
           const attested=await probe('POST','Bearer '+jwt);
           const result=attested.body||{};
-          if(attested.http!==200){
-            const claims=JSON.parse(Buffer.from(jwt.split('.')[1],'base64url').toString('utf8'));
-            const ref=process.env.GITHUB_REF;
-            const repo=process.env.GITHUB_REPOSITORY;
-            const matches={issuer:claims.iss==='https://token.actions.githubusercontent.com',audience:claims.aud===audience,repository:claims.repository===repo,ref:claims.ref===ref,workflow_ref:claims.workflow_ref===repo+'/.github/workflows/cerebro-jarvis-oidc-probe-lab-once.yml@'+ref,event_name:claims.event_name==='push',subject:claims.sub==='repo:'+repo+':ref:'+ref,sha:claims.sha===process.env.GITHUB_SHA,run_id:claims.run_id===process.env.GITHUB_RUN_ID};
-            console.log('OIDC_NON_SECRET_SCOPE_FLAGS='+JSON.stringify(matches));
-          }
           if(attested.http!==200||result.status!=='OK'||result.proof!=='SIGNED_GITHUB_OIDC_READONLY'||
              result.run_id!==process.env.GITHUB_RUN_ID||result.source_sha!==process.env.GITHUB_SHA||
              result.environment!=='LAB'||result.company_id!=='fenix'||result.engine_id!=='CONSOLE-001'||
