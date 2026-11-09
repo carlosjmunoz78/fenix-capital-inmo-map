@@ -1,0 +1,94 @@
+name: EXPEDIENTES Targeted Live Release 20261109
+on:
+  push:
+    branches:
+      - release/expedientes-live-only-20261109
+    paths:
+      - 'src/DetailShell.tsx'
+      - 'src/ExpedienteManualPhaseGuard.tsx'
+      - 'src/detail-expediente.css'
+      - 'src/expediente-manual-phase.css'
+      - 'tests/expediente-manual-phase*.spec.ts'
+      - '.github/workflows/expedientes-targeted-release-20261109.yml'
+      - 'docs/expedientes/RELEASE-PUBLISH-20261109.md'
+permissions:
+  contents: write
+concurrency:
+  group: expediente-targeted-live-20261109
+  cancel-in-progress: false
+jobs:
+  verify-targeted:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout exact release branch
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install reproducible dependencies
+        run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify manual stage E2E isolated
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: isolated-test-not-a-real-key
+        run: npx playwright test tests/expediente-manual-phase.spec.ts --project=desktop-chromium --reporter=line
+      - name: Verify PROD-shaped gateway contract isolated
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: isolated-prod-not-a-real-key
+        run: npx playwright test tests/expediente-manual-phase-prod.spec.ts --project=desktop-chromium --reporter=line
+      - name: Build live app
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+        run: |
+          set -euo pipefail
+          test -n "${VITE_SUPABASE_PUBLISHABLE_KEY}"
+          npx tsc --noEmit
+          npx vite build --base=/ --outDir dist-live
+          test -f dist-live/index.html
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
+      - name: Prepare targeted static snapshot
+        run: |
+          set -euo pipefail
+          cp dist-live/index.html dist-live/404.html
+          touch dist-live/.nojekyll
+          printf '%s\n' "${GITHUB_SHA}" > dist-live/PROD_SOURCE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-live/CNAME
+          test "$(cat dist-live/CNAME)" = 'app.fenixcapital.es'
+      - name: Retain verified artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: expedientes-targeted-${{ github.sha }}
+          path: dist-live
+          retention-days: 7
+          if-no-files-found: error
+      - name: Publish ONLY when explicitly tagged and prior gh-pages unchanged
+        if: ${{ contains(github.event.head_commit.message, '[PUBLISH_EXPEDIENTES]') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EXPECTED_GH_PAGES_SHA: 01650c6fb728aa9d41dc4877dd4bee243372be68
+        run: |
+          set -euo pipefail
+          current=$(git ls-remote "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" refs/heads/gh-pages | cut -f1)
+          test "${current}" = "${EXPECTED_GH_PAGES_SHA}" || { echo 'FAIL_CLOSED: current site changed; no deployment'; exit 2; }
+          mkdir -p /tmp/expedientes-targeted-publish
+          cp -R dist-live/. /tmp/expedientes-targeted-publish/
+          cd /tmp/expedientes-targeted-publish
+          git init
+          git checkout -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "deploy: targeted Expedientes release ${GITHUB_SHA}"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push --force-with-lease=refs/heads/gh-pages:${EXPECTED_GH_PAGES_SHA} origin gh-pages
