@@ -48,3 +48,19 @@ La interfaz solo elige origen; el actor, permisos, empresa, entorno y perfil de 
 ## Reversión
 
 Revertir solamente los nuevos ficheros y modificaciones aisladas de `cerebro/connectors/universal/` dentro de PR #44. `BROWSER-1`, `ACTGW-001`, Opera oficina, App, CRM, DNS, Instagram y `main` permanecen sin cambios. No fusionar PR antes de pruebas físicas.
+
+## Requisito P0 del propietario · Operativa equivalente a humano (2026-11-09)
+
+**CONTRATO DE ACEPTACIÓN OBLIGATORIO**. La capacidad completa no queda acreditada por scaffolds, catálogo ni pruebas simuladas. Se considera operativa únicamente tras evidencia física por cada proveedor y **por cada cliente** (ChatGPT normal y CEREBRO), con autenticación de sesión real, trazas saneadas y rollback probado.
+
+**Cloudflare UNIVERSAL — toda la cuenta, no solo Facebook/Instagram.** Debe cubrir descubrimiento y gestión autorizada de todos los productos disponibles en la cuenta: cuenta, dominios, zonas, DNS, Workers, versiones, despliegues y variables, Workers Routes/Domains, D1, KV, R2, Pages, certificados/TLS, WAF, Access/Zero Trust, reglas, CDN/caché, red, logs, analítica, consumo, permisos administrativos y backups. Cubrir lectura, creación, edición, desactivación y eliminación **cuando la política de riesgo, permisos y rollback lo autorice**; publicar/mutar servicios existentes solo tras los gates de conservación. Probar tanto API oficial como navegación UI como respaldo humano cuando sea indispensable. No asumir que un token de LAB concede todos los permisos.
+
+**Opera — navegación y ordenador equivalentes al flujo humano.** Debe poder ver páginas y ventanas, abrir/cambiar/cerrar pestañas, navegar atrás/adelante/recargar, hacer clic/doble clic, mover/scroll, seleccionar, escribir, pegar, rellenar formularios, adjuntar/subir archivos, descargar/guardar, capturar pantallas, consultar estado, elegir perfiles y operar sesiones autenticadas y MFA con intervención humana cuando corresponda. Integrar con **BROWSER-1 ya existente**, sin reemplazarlo, y vincular la instancia real de Opera mediante un perfil y un binding frescos (la instancia «Opera oficina» no se infiere de otras ventanas). Permitir automatización paso a paso y control manual/handover; cada acción importante con confirmación de resultado real, no solo «comando enviado».
+
+**Acceso dual obligatorio.** Los dos proveedores usarán **un único núcleo FACT-001** con dos clientes y autenticaciones independientes (ChatGPT y CEREBRO Gateway), sin compartir sesiones o credenciales de cada cliente ni dar permisos implícitos. Escala multiempresa con `company_id`, `engine_id`, `environment`, `version`.
+
+**Human-by-exception.** Solo solicitar intervención del propietario ante `LEGAL_REQUIRED`, `SIGNATURE_REQUIRED`, `LOW_CONFIDENCE`, `HIGH_RISK`, `POLICY_CONFLICT`, `SECURITY_INCIDENT`, `MONEY_LIMIT`, `CUSTOMER_HUMAN_REQUEST` — incluidas autenticación MFA, CAPTCHA o consentimientos cuando resulten imprescindibles. Al producirse: comunicar la **acción exacta** que necesita, el enlace oficial y por qué; nunca exigir reautorizaciones repetidas para lo ya autorizado. No saltarse MFA/CAPTCHA ni duplicar credenciales en repositorios.
+
+**Coste e integridad:** 0 € adicionales, sin ChatGPT Work, sin nuevos servicios de pago, sin tocar App/CRM/DNS/PROD ni código existente sin inventario, backup, comparación OLD/NEW, reversión y promoción segura. Si se bloquea un ejecutor gratuito, reportar el bloqueo, no aumentar presupuesto en secreto.
+
+**Estado inicial al registrar este contrato:** Cloudflare GET real y creación D1 aislada FB verificados; Worker OFF no desplegado; Opera adaptador LAB y BROWSER-1 existentes en código; **NO existe aún la conexión MCP remota OAuth ni la certificación de control humano completo desde ChatGPT y CEREBRO**. Registrar por cada función `HECHO / EXISTENTE / PARCIAL / DEFINIDO / PLANIFICADO / POR AUDITAR`.
