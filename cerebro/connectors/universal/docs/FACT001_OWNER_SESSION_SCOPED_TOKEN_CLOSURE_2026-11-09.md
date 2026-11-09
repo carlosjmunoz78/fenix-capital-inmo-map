@@ -24,3 +24,12 @@ Store the one-time token via an authenticated secure secret-entry path to Supaba
 
 ## Recovery
 Current safe state: Console v33 unchanged and 4D Cloudflare LAB standalone services independent; owner route OFF, PR #44 DRAFT. No secret value included in this file.
+
+## Actualización posterior: propietario activo en App y cambio de token preparado
+
+- En la pestaña Opera `https://app.fenixcapital.es/cerebro` ahora es visible **JARVIS Work**. En la fuente de App `src/CerebroConsoleHost.tsx`, esta vista solo se representa tras `supabase.auth.getSession()` y una respuesta válida `GET /session/context` con `actor_code === 'CARLOS-ADMIN'`. Por tanto, la App aparenta contar con sesión de propietario **válida**; ya no corresponde pedir iniciar sesión de nuevo.
+- Consulta SQL agregada y sin identificadores: 1 actor activo `CARLOS-ADMIN`, 5 registros de sesión de propietario creados en últimas 24h, 1 actualizado en últimas 2h. La consulta no accedió a tokens ni contraseñas.
+- **Límite:** esto no sustituye el E2E positivo de `owner-health` / `owner-inventory` contra el servicio paralelo ni acredita que el token de navegador esté disponible para este asistente. No se ha copiado el JWT.
+- Token restringido `cerebro_fact001_cf_readonly_v1` todavía NO existe: `vault.secrets` count 0. La pantalla Cloudflare ofrece `Crear token`, pero el conector de API carece de permisos de gestión de credenciales (403). Por ello sigue siendo una acción HUMAN_REQUIRED que debe realizar el propietario en la interfaz autenticada.
+- Se ha preparado un cambio **exactamente reversible** para que el canario LAB v2 sustituya su única referencia a Vault por el nuevo secreto, sin fallback al token amplio: `cerebro/connectors/universal/console/owner-canary-v2-scoped-token-switch.mjs`. [Prueba #42709522476](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42709522476) SUCCESS, 10/10 y rollback byte-identico. **No desplegado:** el servicio actual y el secreto antiguo siguen intactos.
+- Próximo gate tras creación del token: comprobar permisos exactos del token nuevo y almacenamiento cifrado, aplicar el cambio SOLO al canario, validar owner JWT real / 401 anónimo / 403 actor ajeno / HTTP 429, verificar Cloudflare GET con token restringido, old vs new, rollback, entonces evaluar promoción de consola. No activar escrituras genéricas PROD.

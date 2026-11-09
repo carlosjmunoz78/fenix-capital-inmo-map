@@ -284,13 +284,22 @@
     "main_console_shadow_rollback_exact": true,
     "main_console_shadow_flag_enabled": false,
     "main_console_shadow_regression_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42707365667",
-    "owner_session_available_in_connected_opera": false,
-    "owner_session_observation": "Opera app.fenixcapital.es/cerebro displayed Acceso seguro and Entrar; 2026-11-09",
+    "owner_session_available_in_connected_opera": true,
+    "owner_session_observation": "Opera app.fenixcapital.es/cerebro now renders JARVIS Work (not login). App source conditionally renders this only after active Supabase getSession and actor_code CARLOS-ADMIN from /session/context. Backend count 1 active actor and 1 owner session updated last 2h. No raw JWT accessed. Positive owner→FACT001 canary still unverified.",
     "least_privilege_cloudflare_token_exists_verified": false,
     "cloudflare_token_management_api_status": "403; cannot issue scoped tokens via current connector",
     "requires_owner_user_actions": [
-      "SIGN_IN_APP_CEREBRO_TO_PROVE_CURRENT_SUPABASE_OWNER_SESSION",
-      "CREATE_SCOPED_READONLY_CLOUDFLARE_TOKEN_IN_DASHBOARD_AND_STORE_SECURELY_NOT_CHAT"
-    ]
+      "CREATE_SCOPED_CLOUDFLARE_TOKEN_READONLY_IN_DASHBOARD_AND_STORE_VIA_SUPABASE_VAULT_SECURE_UI"
+    ],
+    "owner_app_render_authorized_jARVIS_work": true,
+    "owner_app_render_authorized_source": "src/CerebroConsoleHost.tsx: allowed after auth.getSession + /session/context actor_code CARLOS-ADMIN",
+    "owner_actor_active_in_db": true,
+    "owner_actor_recent_auth_session_in_db": true,
+    "owner_app_session_verified_direct_to_canary": false,
+    "readonly_token_cutover_candidate_regression_green": true,
+    "readonly_token_cutover_candidate_test_count": 10,
+    "readonly_token_cutover_candidate_test_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42709522476",
+    "readonly_token_cutover_deployed": false,
+    "scoped_token_vault_count": 0
   }
 }
