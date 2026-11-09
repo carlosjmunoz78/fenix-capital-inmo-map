@@ -1,4 +1,4 @@
-name: CEREBRO JARVIS Git Direct Readonly LAB Verified 20261109
+name: CEREBRO JARVIS Git Direct Readonly LAB Auth Contract Verified 20261109
 on:
   push:
     branches:
@@ -29,6 +29,23 @@ jobs:
         with:
           node-version: '24'
           cache: npm
+      - name: Verify tested PREPROD authorization is in source, no PROD actor RPC
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          const fn=fs.readFileSync('supabase/functions/jarvis-git-direct-readonly-lab-v0/index.ts','utf8');
+          const sql=fs.readFileSync('supabase/migrations/20261109071500_jarvis_lab_actor_context_by_auth_server_v0.sql','utf8');
+          if(!fn.includes('svc.rpc("jarvis_lab_actor_context_by_auth_server_v0"')||
+             fn.includes('svc.rpc("fenix_prod_actor_context_by_auth_server"')||
+             !sql.includes("a.actor_code='CARLOS-ADMIN'")||
+             !sql.includes("a.role='Direccion'")||
+             !sql.includes("a.active IS TRUE")||
+             !sql.includes('TO service_role;')||
+             !sql.includes('FROM anon,authenticated;'))throw new Error('LAB_AUTHZ_CONTRACT_INCOMPLETE');
+          console.log('LAB_PREPROD_ACTOR_AUTHORIZATION_CONTRACT=GREEN');
+          JS
       - name: Real LAB Edge Function negative security gates, no personal auth
         shell: bash
         run: |
