@@ -75,5 +75,20 @@
     "instagram_mp4": "96b6706fcf4b25c1a4d4d7b4ca4e54d02633533bfd331f2a497bf4c5a3741a2a",
     "facebook_mp4": "0719afaa934f7a3e5ec969f076fea67f41047ed3c6ebb761a1351c98d8052a14",
     "package_zip": "fa4f2c852a0ded1704f700ff0c41730245d5aa6f84350423d7e39eb79f2ed934"
+  },
+  "qa_preflight_20261109": {
+    "status": "NO_GO",
+    "six_evidence_gates_pending": true,
+    "source": "cerebro/media-studio/v2/runbooks/UMS001_PREFLIGHT_AB_VOICE_FUNNEL_AND_GATES_20261109.md",
+    "zip": "https://drive.google.com/file/d/125u4XXJb7Q3sUf94F0w_cqVFLtCP13hD/view",
+    "notion": "https://app.notion.com/p/41381b1a756d813a9c83fa1cd5f2e032",
+    "voice_ab_ig": "https://drive.google.com/file/d/1eAz-9mXgS5-UjEbzENH-rWTX4aCJSxH8/view",
+    "voice_ab_fb": "https://drive.google.com/file/d/1QtuJBUtEUFbwZjQpYKEudvYw5uZCGPmm/view",
+    "meta_simulation_only": "https://drive.google.com/file/d/1KVfl5OV7pLEUPNIFqI6quoXXtjvwySnY/view",
+    "cta_wp_contact_id": 46037,
+    "cta_wp_preok_id": 49152,
+    "publish": false,
+    "gate_script_sha256": "20968a2bc22f379e44f92794a2f02766fbefdaa8a2c60612cec6a176cf0c0c09",
+    "tested_in_lab": true
   }
 }
