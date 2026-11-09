@@ -44,12 +44,12 @@ jobs:
       - name: Install pinned Vercel CLI
         run: npm install --global vercel@48.0.0
       - name: Pull Preview configuration only
-        run: vercel pull --yes --environment=preview --scope=carlosjmunozcabeza-2582s-projects
+        run: vercel pull --yes --environment=preview --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
       - name: Deploy Preview only (never production)
         shell: bash
         run: |
           set -euo pipefail
-          url="$(vercel deploy --yes --scope=carlosjmunozcabeza-2582s-projects)"
+          url="$(vercel deploy --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}")"
           case "${url}" in
             https://*.vercel.app) ;;
             *) echo "Unexpected preview URL (no output will be published)" >&2; exit 1 ;;
