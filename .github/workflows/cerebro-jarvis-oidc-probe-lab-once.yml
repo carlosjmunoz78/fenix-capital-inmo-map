@@ -1,0 +1,58 @@
+name: CEREBRO JARVIS Stateless GitHub OIDC Attestation LAB One Shot
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-parity-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-oidc-probe-lab-once.yml'
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  signed-identity-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      AUDIENCE: jarvis-oidc-probe-lab-v0
+      ENDPOINT: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-oidc-probe-lab-v0/attest
+    steps:
+      - name: Verify direct GitHub OIDC identity, no personal Supabase JWT
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          const audience=process.env.AUDIENCE;
+          const endpoint=process.env.ENDPOINT;
+          if(!process.env.ACTIONS_ID_TOKEN_REQUEST_URL||!process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN)throw Error('OIDC_NOT_AVAILABLE');
+          async function probe(method,authorization,path=endpoint){
+            const headers={'content-type':'application/json'};
+            if(authorization)headers.authorization=authorization;
+            const response=await fetch(path,{method,headers,body:method==='POST'?'{}':undefined,redirect:'error',signal:AbortSignal.timeout(15000)});
+            let body=null;try{body=await response.json()}catch{}
+            return {http:response.status,body};
+          }
+          const noAuth=await probe('POST',null);
+          if(noAuth.http!==403||noAuth.body?.status!=='DENIED')throw Error('NO_AUTH_FAIL_CLOSED_FAILED');
+          const badToken=await probe('POST','Bearer not-a-real-token');
+          if(badToken.http!==403||badToken.body?.status!=='DENIED')throw Error('BAD_TOKEN_FAIL_CLOSED_FAILED');
+          const wrongMethod=await probe('GET',null);
+          if(wrongMethod.http!==404)throw Error('ROUTE_FAIL_CLOSED_FAILED');
+          const oidcURL=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          oidcURL.searchParams.set('audience',audience);
+          const issued=await fetch(oidcURL,{headers:{authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'error',signal:AbortSignal.timeout(15000)});
+          if(!issued.ok)throw Error('OIDC_ISSUER_HTTP_'+issued.status);
+          const issuedBody=await issued.json();
+          const jwt=issuedBody?.value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_TOKEN_MISSING');
+          const attested=await probe('POST','Bearer '+jwt);
+          const result=attested.body||{};
+          if(attested.http!==200||result.status!=='OK'||result.proof!=='SIGNED_GITHUB_OIDC_READONLY'||
+             result.run_id!==process.env.GITHUB_RUN_ID||result.source_sha!==process.env.GITHUB_SHA||
+             result.environment!=='LAB'||result.company_id!=='fenix'||result.engine_id!=='CONSOLE-001'||
+             result.person_jwt_required!==false||result.new_secret_required!==false||
+             result.prod_mutation!==false||result.db_access!==false||result.trading_access!==false||
+             result.write_operations!==0){
+            throw Error('OIDC_ATTESTATION_FAILED_HTTP_'+attested.http+'_STATUS_'+String(result.status||'NONE'));
+          }
+          console.log(JSON.stringify({status:'JARVIS_GITHUB_OIDC_LAB=GREEN',checks:['no-auth-deny','invalid-token-deny','wrong-route-deny','signed-token-allow'],environment:result.environment,source_sha:result.source_sha,run_id:result.run_id,user_session_secret_used:false,supabase_db_access:false,prod_mutation:false,trading_access:false}));
+          JS
