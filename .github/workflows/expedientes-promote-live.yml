@@ -1,0 +1,48 @@
+name: Promote exact verified Expedientes production artifact
+
+on:
+  push:
+    branches:
+      - fix/expedientes-production-safe-active-order-20261109
+    paths:
+      - .github/workflows/expedientes-promote-live.yml
+
+permissions:
+  contents: read
+
+jobs:
+  promote-reviewed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERIFIED_ARTIFACT: https://fenix-capital-preprod-nkhawrk6t.vercel.app
+      PREVIOUS_KNOWN_GOOD_DEPLOYMENT: 2kPVaYpor8DXFPRoPdKcVSZXN7yD
+    steps:
+      - name: Assert exact production artifact and scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "fix/expedientes-production-safe-active-order-20261109"
+          test "${VERCEL_PROJECT_ID}" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          test "${VERIFIED_ARTIFACT}" = "https://fenix-capital-preprod-nkhawrk6t.vercel.app"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: Install reviewed Vercel CLI
+        run: npm install --global vercel@48.0.0
+      - name: Inspect exact artifact before promotion
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel inspect "${VERIFIED_ARTIFACT}" --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Promote exactly the already-verified production artifact
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote "${VERIFIED_ARTIFACT}" --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Record immutable rollback reference
+        shell: bash
+        run: |
+          printf '%s\n' 'New production artifact: https://fenix-capital-preprod-nkhawrk6t.vercel.app' >> "${GITHUB_STEP_SUMMARY}"
+          printf '%s\n' 'Prior known-good deployment ID: 2kPVaYpor8DXFPRoPdKcVSZXN7yD' >> "${GITHUB_STEP_SUMMARY}"
+          printf '%s\n' 'Changes: Expedientes counter and active-first closure sorting only; no database writes.' >> "${GITHUB_STEP_SUMMARY}"
