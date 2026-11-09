@@ -252,3 +252,25 @@ test('JARVIS Work PREPROD · engine panel distinguishes observed runs from PROD 
  await expect(panel.getByRole('link',{name:'Evidencia'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions');
  await expectNoHorizontalOverflow(page);
 });
+
+
+test('JARVIS tenant scope · only current-company activity is visible',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-activity-v0/**`,async route=>{
+  const now=new Date().toISOString();
+  const item=(id:number,company:string,engine:string)=>({run_id:id,workflow_name:'QA',workflow_alias:engine,workflow_path:'qa.yml',status:'completed',conclusion:'success',event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions',created_at:now,run_started_at:now,updated_at:now,engine_id:engine,company_id:company,environment:'PREPROD',version:'v1',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,progress_provenance:'TERMINAL_STATUS',jobs_provenance:'UNAVAILABLE'});
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',observed_at:now,source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'qa',runs:[item(1,'fenix','QA-001'),item(2,'demo','OTHER-001')]})});
+ });
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Motores',exact:true}).click();
+ const panel=page.getByLabel('Motores con actividad observada');
+ await expect(panel.getByText('QA-001',{exact:true})).toBeVisible();
+ await expect(panel.getByText('OTHER-001',{exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Historial',exact:true}).click();
+ const history=page.getByLabel('Historial de ejecuciones');
+ await expect(history.getByText('Historial recibido · 1 ejecuciones')).toBeVisible();
+ await expect(history.getByText('OTHER-001',{exact:true})).toHaveCount(0);
+});
