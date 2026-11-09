@@ -1,0 +1,41 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "budget-2026-11-v0",
+  "as_of_date": "2026-11-09",
+  "provider": "Replicate",
+  "wallet_usd_observed": 92,
+  "fx_ref": {
+    "provider": "ECB",
+    "date": "2026-11-06",
+    "eur_usd": 1.1165,
+    "informational_only": true
+  },
+  "current_period": {
+    "period": "2026-11",
+    "opening_current_balance_usd": 92,
+    "images_reserve_eur": 20,
+    "images_reserve_usd_equivalent": 22.33,
+    "videos_outros_pool_usd_equivalent": 69.67,
+    "videos_outros_pool_eur_equivalent": 62.4,
+    "images_spent_since_observation_usd": 0,
+    "videos_spent_since_observation_usd": 0
+  },
+  "policy": {
+    "images_refill_eur": 20,
+    "refill_only_manual": true,
+    "videos_manual_topup_from_2026_12_eur_per_month": 40,
+    "recurring_charge_authorized": false,
+    "provider_auto_reload_verified_off": true,
+    "provider_category_wallets_exist": false,
+    "client_spend_guard_only": true,
+    "max_concurrent_billable_jobs": 1,
+    "preflight_buffer_fraction": 0.2,
+    "stop_on_missing_current_balance": true,
+    "stop_on_unknown_model_price": true,
+    "no_paid_generation_in_this_task": true
+  },
+  "status": "DEFINIDO_LAB_NOT_PROVIDER_ENFORCED",
+  "notice": "Virtual envelopes only: Replicate has one USD wallet. Hard budget enforcement requires all billable model calls routed through single dispatcher plus live reconciled balance."
+}
