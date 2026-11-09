@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-08T23:11:27.850Z",
+  "updated_at": "2026-11-09T00:52:54.580Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -525,7 +525,8 @@
     "github-wide-skills:408c4188aaf766af1617",
     "github-wide-skills:0a5817277f7ae54c4d20",
     "github-wide-skills:8ecfe729426ccda86714",
-    "github-wide-skills:9f399c4bf55a1e652a48"
+    "github-wide-skills:9f399c4bf55a1e652a48",
+    "github-wide-skills:28ee40ed17b08db36716"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1279,6 +1280,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42533914969,
       "checkpointed_at": "2026-11-08T23:11:27.850Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:28ee40ed17b08db36716": {
+      "candidate_id": "github-wide-skills:28ee40ed17b08db36716",
+      "name": "agentic",
+      "human_alias": "Agentic",
+      "wrapper_id": "skillwrap:ba3be8dc8ee5d7994a1a",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.34,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "redmaplewww/awesome-design-skills",
+        "upstream_head_commit": "ef3df8e85491eedf32fa688f268a917f14a6d4ef",
+        "manifest_sha256": "0533b39444aaf29d9d844db0861c7e76a54d6c559cf0eeb738a0f55653c53a80",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42542525513,
+      "checkpointed_at": "2026-11-09T00:52:54.580Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32337,7 +32372,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42533914969,
+  "last_discovery_run_id": 42542525513,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
