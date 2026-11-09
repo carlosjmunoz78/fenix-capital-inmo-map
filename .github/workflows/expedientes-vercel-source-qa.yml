@@ -1,0 +1,37 @@
+name: Expedientes Vercel Source Isolated QA
+on:
+  push:
+    branches:
+      - release/expedientes-vercel-rollback-base-0ed8-20261109
+permissions:
+  contents: read
+jobs:
+  e2e-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Test manual phase in isolated test environment
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+        run: npx playwright test tests/expediente-manual-phase.spec.ts --project=desktop-chromium --reporter=line
+      - name: Test real production gateway shape with mocks
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+        run: npx playwright test tests/expediente-manual-phase-prod.spec.ts --project=desktop-chromium --reporter=line
+      - name: Production build without publishing
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
