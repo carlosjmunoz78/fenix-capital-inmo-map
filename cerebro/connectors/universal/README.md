@@ -45,3 +45,7 @@ ChatGPT normal Cloudflare MCP *directamente conectado y comprobado*: cuenta aute
 ### REAL Cloudflare CRUD E2E with CEREBRO and normal ChatGPT · 2026-11-09
 
 **HECHO LAB:** ChatGPT normal creó Workers KV EU nueva y probó PUT/GET/DELETE; CEREBRO creó función aislada `cerebro-fact001-cloudflare-kv-write-lab` v1, firmó órdenes GitHub OIDC, leyó Vault y superó dos pruebas físicas de escritura/lectura/rollback ([#42696938902](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42696938902), [#42697512937](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42697512937)); 21/21 tests cada vez. Cero keys residuales, cero cambios App/CRM/Gateway principal. **NO** declarar control universal de escrituras de PROD ni recursos anteriores. Matriz de permisos/estados y runbook en `docs/FACT001_CLOUDFLARE_FULL_CRUD_PHYSICAL_GATES_2026-11-09.md`.
+
+### D1 EU CRUD both clients LAB 2026-11-09
+
+**HECHO:** ChatGPT normal creó D1 europea efímera, hizo SQL CREATE TABLE / INSERT / SELECT y eliminó su base nueva. **HECHO:** CEREBRO nueva función aislada `cerebro-fact001-cloudflare-d1-write-lab` v1 hizo el mismo ciclo con OIDC firmado y Vault; 22/22 tests y [ejecución real #42700998048](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42700998048) SUCCESS. Cloudflare confirmó que quedan 8 D1 originales. Main CEREBRO Console v33 sigue sin enlace a estas funciones y PROD no admite escritura autónoma. Ver matriz `docs/FACT001_CLOUDFLARE_FULL_CRUD_PHYSICAL_GATES_2026-11-09.md`.
