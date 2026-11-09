@@ -48,7 +48,14 @@
       "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814",
       "normal_inventory_workflow_retransmits_cloudflare_token": false,
       "pairing_is_one_time": true,
-      "approved_order_path": "cerebro/connectors/universal/supabase/fact001-lab/requests/probe.v1.json"
+      "approved_order_path": "cerebro/connectors/universal/supabase/fact001-lab/requests/probe.v1.json",
+      "latest_real_get_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609031",
+      "latest_order_id": "CFD-20261109-003",
+      "verified_repeat_calls": 3,
+      "last_accepted_state": "LAB_REAL_GET_AUTHENTICATED_OIDC_VAULT_ZERO_TOKEN_RETRANSMISSION",
+      "owner_login_jwt_required": false,
+      "main_gateway_bound": false,
+      "zero_cloudflare_mutations": true
     }
   },
   "dependencies": [
@@ -85,6 +92,18 @@
     "records": 1,
     "cloudflare_admin_token_reused_for_lab_only": true,
     "no_plaintext_in_code_or_logs": true,
-    "require_dedicated_scoped_readonly_token_before_prod": true
+    "require_dedicated_scoped_readonly_token_before_prod": true,
+    "sensitive_credential_scope": "EXISTING_ADMIN_TOKEN_IN_VAULT_LAB_PILOT_ONLY; NO_AUTONOMOUS_WRITES"
+  },
+  "promotion_gates": {
+    "production_promoted": false,
+    "dedicated_readonly_token": false,
+    "live_main_console_binding": false,
+    "cloudflare_worker_public_url": false,
+    "cloudflare_worker_access_test": false,
+    "durable_rollback_for_writes": false,
+    "tests_12_of_12": true,
+    "physical_sidecar_readonly": true,
+    "zero_public_access_worker": true
   }
 }

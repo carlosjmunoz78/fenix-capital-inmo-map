@@ -46,3 +46,18 @@ Leave Cloudflare Worker OFF and Access protected. The new Edge Function may be d
 ## Post-provision hardening: no token retransmission
 
 After the first successful Vault pairing and verification, the normal GitHub OIDC inventory workflow stopped injecting `CEREBRO_CLOUDFLARE_API_TOKEN` and no longer calls the provisioning endpoint. It only sends the temporary signed OIDC identity to the deployed CEREBRO LAB sidecar, which retrieves the existing encrypted secret from Supabase Vault internally. A new approved order ID is required to retrigger via the allowlisted request JSON; all scope, account and operation fields are immutable. This reduces ongoing exposure of the existing administratively broad token. Future key rotation must be explicitly designed as a separate one-time secure workflow rather than allowing ordinary inventory calls to re-pair credentials.
+
+## Cierre de pruebas tras interrupción · 2026-11-09
+
+- **Tercera orden autónoma en ChatGPT normal:** `CFD-20261109-003`, ejecución [GitHub Actions #42690609031](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609031) **SUCCESS**. El código desplegado de CEREBRO LAB aceptó la identidad OIDC firmada (HTTP 200) y rechazó anónimo y JWT falso (ambos HTTP 401). **12/12 tests PASS**.
+- **Credencial no retransmitida:** `FACT001_VAULT_CREDENTIAL_REUSED_WITHOUT_RETRANSMISSION=true`; no se inyecta el token administrativo en el workflow habitual. Solo sale el OIDC efímero del runner; el propio servicio consulta la credencial en Vault. SQL read-only de control: exactamente **1** registro en `vault.secrets` por nombre. No se ha imprimido el secreto.
+- **Cloudflare real:** `FACT001_CEREBRO_CLOUDFLARE_INVENTORY_HTTP=200`, 8 D1, 7 Workers, escrituras 0. Los tests de seguridad paralelos [#42690609542](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609542) PASS.
+- **Sin alteración de gateways existentes:** Supabase `cerebro-console-gateway-v0` sigue ACTIVE v33 y `cerebro-fact001-cloudflare-lab` sigue ACTIVE v1. App, CRM, DNS y Workers previos no sustituidos.
+
+### Criterios de aceptación y límite real
+
+**ACEPTADO EN LAB:** ChatGPT normal puede dar una orden allowlist de lectura a GitHub; GitHub genera OIDC temporal y llama a la función CEREBRO LAB; esta autentica, lee Vault cifrado y consulta las APIs fijas de Cloudflare. Todo con dos o más pruebas reales y sin Work.
+
+**NO ACEPTADO EN PRODUCCIÓN AUTÓNOMA:** el Gateway/CEREBRO Console principal v33 **no envía órdenes directamente** a ese servicio; el nuevo Cloudflare Worker está OFF y no tiene rutas ni conexiones entrantes; el MCP directo desde ChatGPT sigue sin acceso. El token almacenado en Vault es administrativo amplio y no es un token dedicado de lectura. No habilitar escrituras de Cloudflare ni reutilizarlo para acciones autónomas; crear y validar una credencial nueva de permisos mínimos y los controles de rollback antes de promover.
+
+**Rollback actualmente disponible:** anular las órdenes del bridge de GitHub (sin tocar App ni CRM); dejar Worker privado apagado; el servicio nuevo es independiente. Desactivar o retirar el servicio nuevo o su credencial requiere inventario y contrato de reemplazo. No hay cambios en PROD que restaurar del Gateway principal.

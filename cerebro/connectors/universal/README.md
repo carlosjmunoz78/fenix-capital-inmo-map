@@ -33,3 +33,7 @@ See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
 ### CEREBRO deployed OIDC sidecar (2026-11-09)
 
 **REAL LAB READ-ONLY VERIFIED:** new Supabase Edge Function `cerebro-fact001-cloudflare-lab` v1 ACTIVE, GitHub short-lived signed OIDC, owner-deny-by-default (anonymous/forged 401), existing Supabase Vault encrypted credential (1 record), real Cloudflare GET D1=8 / Workers=7 / writes=0. [Physical proof #42688149814](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814). This is additive; Supabase `cerebro-console-gateway-v0` v33 is **NOT bound to it**, App/CRM unchanged. Scoped read-only token still needed before PROD autonomy. See `supabase/fact001-lab/README.md`.
+
+### After-interruption acceptance checkpoint · 2026-11-09
+
+[Physical command CFD-20261109-003](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609031) **SUCCESS**. Twelve OIDC/tenant security tests PASS. Anonymous and fake identity rejected (401), signed OIDC accepted (200); LAB deployed Supabase sidecar reused encrypted existing Vault credential without GitHub retransmitting Cloudflare API token; Cloudflare real GET returned D1=8, Workers=7, writes=0. Exactly one named Vault record; Supabase main CEREBRO Console v33 unchanged. **LAB read-only COMPLETE; main Console PROD connection and Cloudflare write administration NOT COMPLETE**. Full check and recovery procedure in `supabase/fact001-lab/README.md`.
