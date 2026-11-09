@@ -5,11 +5,11 @@
   "version": "free-shortlist-v1",
   "inspected_on": "2026-11-09",
   "provider": "ActionVFX",
-  "account_status": "AUTHENTICATED_IN_CONNECTED_OPERA_2026_11_09",
+  "account_status": "AUTHENTICATED_ACTIONVFX",
   "created_account": false,
   "purchase_authorized": false,
   "account_creation_required": false,
-  "registered_company_license_tier": "MISSING_LICENSE_ON_PROFILE_USER_ACTION_REQUIRED",
+  "registered_company_license_tier": "INDIVIDUAL_LICENSE_CURRENTLY_PERSONAL_NOT_COMPANY",
   "cost_eur": 0,
   "commercial_rights_qualification": "Permanently free assets are commercially licensed under qualifying company tier; no raw stock redistribution or AI training.",
   "license_url": "https://www.actionvfx.com/license",
@@ -24,7 +24,7 @@
       "url": "https://www.actionvfx.com/collections/free-portals-stock-footage",
       "source_quality": "2K free tier",
       "assets_count": 10,
-      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED_LICENSE_BLOCKED"
     },
     {
       "name": "Free Dust Waves",
@@ -32,7 +32,7 @@
       "url": "https://www.actionvfx.com/collections/free-dust-wave-stock-footage",
       "source_quality": "2K MP4",
       "assets_count": 10,
-      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED_LICENSE_BLOCKED"
     },
     {
       "name": "Free Blasters",
@@ -40,7 +40,7 @@
       "url": "https://www.actionvfx.com/collections/free-blasters-stock-footage",
       "source_quality": "2K ProRes",
       "assets_count": 6,
-      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED_LICENSE_BLOCKED"
     }
   ],
   "source_urls": [
@@ -71,12 +71,22 @@
     "NO_ML_TRAINING_WITH_LICENSED_STOCK",
     "PER_ASSET_PROVENANCE_AND_RIGHTS_GATE"
   ],
-  "company_profile_status": "NOT_FILLED",
-  "api_key_status": "NO_API_KEY",
-  "free_download_gate": "BLOCKED_LICENSE_MISSING",
+  "company_profile_status": "FENIX_CAPITAL_RECORDED",
+  "api_key_status": "GITHUB_UMS001_LAB_SECRET_PRESENT_NO_PROOF_OF_PRIVATE_PARTNER_ACCESS",
+  "free_download_gate": "BLOCKED_UNTIL_CORRECT_COMPANY_LICENSE_VERIFIED",
   "login_preference": "CONTINUE_WITH_GOOGLE",
   "login_preference_verified_on_site": false,
   "auth_strategy_path": "cerebro/media-studio/v2/asset-scout/actionvfx-auth-strategy-lab-v0.json",
   "last_checked": "2026-11-09",
-  "notes": "Signed-in user profile verified on official ActionVFX site. Do not transfer Opera cookies to CEREBRO. License completion needed before commercial usage. Provider-specific integrated API capability not verified."
+  "notes": "User license is active but tier Individual, with personal licensee; ActionVFX TOS explicitly disallows company team shared assets under Individual. No stock downloads permitted until license tier corrected. Public categories successfully returned 22 categories. Public collections returned HTTP 500; do not assume availability. Branch environment setting remains unrestricted and must be secured before any secrets run.",
+  "public_api": {
+    "categories_url": "https://backend.actionvfx.com/api/v1/categories?page=1&limit=10&library_id=1",
+    "observed_status": 200,
+    "total_categories": 22,
+    "observed_total_pages": 3,
+    "collections_endpoint_status": 500,
+    "cost_eur": 0,
+    "private_key_needed": false,
+    "metadata_only": true
+  }
 }
