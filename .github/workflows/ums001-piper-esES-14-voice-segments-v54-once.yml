@@ -1,0 +1,39 @@
+name: UMS001 Piper Spain es_ES 14 narrations LAB one-shot
+on:
+  push:
+    branches: [cerebro/ums001-piper-eses-v54-lab-20261109]
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_PIPER_ES_ES_14_SEGMENTS_ONCE.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-piper-eses-14-full-lab-20261109
+  cancel-in-progress: false
+jobs:
+  render:
+    if: github.event.head_commit.message == 'UMS001_PIPER_ES_ES_14_VOICE_SEGMENTS_ONE_SHOT_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install open-source TTS and obtain Spain es_ES Sharvard voice
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'piper-tts==1.8.0'
+          mkdir -p /tmp/ums001_esES_full_14
+          python -m piper.download_voices --download-dir /tmp/ums001_esES_full_14 es_ES-sharvard-medium
+      - name: Generate 14 ES voices with model-card license and no paid API
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/runtime/ums001_piper_esES_14_voice_segments_v54_once.py
+      - name: Save LAB narration source and QA (no model binaries)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_PIPER_ES_ES_14_SEGMENT_LAB_${{ github.run_id }}
+          path: /tmp/ums001_esES_full_14/
+          retention-days: 7
+          if-no-files-found: error
