@@ -239,3 +239,12 @@ Additional recurring cost introduced: `0 €`
 - GitHub Actions run 42573071257 SUCCESS: 2 nuevas muestras 6.467s y 6.351s, modelo Piper `es_ES-sharvard-medium` (speaker F=1, M=0), licencia dataset CC BY 3.0 con atribución, sin nuevas APIs de pago ni planes.
 - Google Drive femenino https://drive.google.com/file/d/1xa4MHKfc-CX1AQqXbqoGkPvjKdHFkoft/view · masculino https://drive.google.com/file/d/16XWyGMdjuKd858966_H-JSbz5DW38qHF/view · manifest https://drive.google.com/file/d/1YeLCPxZ8milS5APFpv19zQMWf1kDI4kg/view .
 - Las voces no están instaladas en los Reels V5.3. Aprobar por escucha real la pronunciación y calidad publicitaria antes de sustitución. Mantener `PUBLISH=false`, LAB; Runbook `cerebro/media-studio/v2/runbooks/UMS001_CASTILIAN_FEMALE_MALE_VOICE_AUDITION_20261109.md`.
+
+
+### 2026-11-09 · UMS-001 V5.4 reels voz España Piper y cierre safe Meta
+- LAB físico HECHO: dos vídeos V5.4 IG 19.955s y FB 22.262s con voz es_ES Piper-Sharvard (14 WAV, licencia de corpus CC BY 3.0 con atribución), banda Mixkit con permiso comercial y CTA recolocado dentro de safe-zone y=282..374. Hooks desde segundo 0 y ASS 7 frases con MarginV=800. Gasto por APIs de IA: 0 € adicional; GitHub Actions no conciliado.
+- GitHub run 42574112980 SUCCESS. No se ha aprobado por audición real acento/prosodia aunque el modelo diga España. No se publican piezas.
+- Drive V5.4 IG: https://drive.google.com/file/d/16MD3EPGc8Y7P_f1L29gSO-R7pdqmdyXh/view ; FB: https://drive.google.com/file/d/1tF1Ri4nJnh6T3FsRz12sNkNZwWRHRAq0/view .
+- ZIP backup 27 entradas (sin pistas Mixkit standalone): https://drive.google.com/file/d/1AtoWDeaXnI_PaoikLj4fl105b46nnaFQ/view ; QA https://drive.google.com/file/d/1QzCTf5bMVW0uQnett58814IlJF2bdmhb/view .
+- Notion IG https://app.notion.com/p/41381b1a756d8189aba0fbe512188144 y FB https://app.notion.com/p/41381b1a756d810691becef060e85e6e, ambos Bloqueado/TEST (LAB).
+- Runbook completo `cerebro/media-studio/v2/runbooks/UMS001_IG_FB_V54_PIPER_ES_ES_NATIVE_MUSIC_LICENSED_QA_20261109.md`. Ninguna modificación de main/PROD/App/CRM/Supabase/SEO/WordPress/DNS/Buffer; V0-V5.3 intactas; rollback por archivos antiguos.
