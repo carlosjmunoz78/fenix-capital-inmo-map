@@ -231,7 +231,7 @@ test('JARVIS Work PREPROD · project actions draft into visible composer, not hi
  await expect(composer).toHaveValue(/Quiero actualizar el proyecto Auditoría Total/);
  await ensureExecutionVisible(page);
  await page.getByRole('button',{name:'Herramientas',exact:true}).last().click();
- await page.getByRole('button',{name:'Código',exact:true}).last().click();
+ await page.locator('.jarvis-tool-grid button').filter({hasText:'Código'}).click();
  await expect(composer).toHaveValue(/Trabaja con código para Auditoría Total/);
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toHaveCount(0);
 });
