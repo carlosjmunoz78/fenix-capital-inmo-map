@@ -5,6 +5,7 @@ on:
       - cerebro/jarvis-git-parity-lab-20261109
     paths:
       - '.github/workflows/cerebro-jarvis-dir-test-readonly-contract-once.yml'
+      - 'tests/jarvis-dir-test-isolation.test.mjs'
 permissions:
   contents: read
 jobs:
