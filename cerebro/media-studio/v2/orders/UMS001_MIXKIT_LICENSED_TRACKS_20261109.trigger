@@ -1,0 +1,9 @@
+company_id=fenix
+engine_id=UMS-001
+environment=LAB
+license=Mixkit Stock Music Free License
+source=Mixkit_catalog_music_31_and_32
+paid_api_calls=0
+new_subscriptions=0
+no_publish=true
+one_shot=true
