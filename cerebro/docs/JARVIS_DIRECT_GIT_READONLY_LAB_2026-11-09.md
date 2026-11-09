@@ -105,3 +105,9 @@ Se ha creado **solo en PREPROD** la función nueva `public.jarvis_lab_actor_cont
 Persisten `REAL_OWNER_AUTH_HTTP_POSITIVE=PENDIENTE`, `PHYSICAL_VOICE=PENDIENTE`, `PUBLIC_DOMAIN_ROLLBACK=PENDIENTE`, `COMPLETE_OLD_NEW_PARITY=PENDIENTE`, `TRIBUNAL=PENDIENTE`.
 
 **Sin cambio a PROD.** No se han contratado planes nuevos; consumo de cuotas existentes sin medir.
+
+### Verificación de continuidad posterior
+
+Durante la comprobación final, `main` avanzó **por cambios independientes de este laboratorio** desde `3600942775fbc19b47560e6f798caca107cd7473` hasta `4cf90f47b56300ce70fa30d097713d1e199e5b30`. La comparación GitHub encontró únicamente cambios en `cerebro/registry/skill-dynamic-adoption-v1.json`, sin archivos de JARVIS o frontend. `gh-pages` permanece en `01650c6fb728aa9d41dc4877dd4bee243372be68` y el backup `backup/20261109-jarvis-git-parity-before-direct-lab` permanece en `fd0e0c69e2c0f1b135dbed51b0f2efc12c10d30e`. El ensayo HTTP reproducible sigue fijado a los SHA antiguos y **no demuestra la compilación del nuevo `main` posterior**; repetir gates contra el HEAD vigente antes de cualquier promoción.
+
+La inspección de sesiones de navegador mediante conectores no devolvió acceso utilizable; **no se verificó autorización HTTP positiva con token real**. No extraer ni trasladar tokens personales entre proyectos. El progreso físico se limita a SQL de permisos/roles, HTTP negativos y pruebas frontend simuladas.
