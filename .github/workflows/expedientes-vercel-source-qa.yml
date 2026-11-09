@@ -2,7 +2,7 @@ name: Expedientes Vercel Source Isolated QA
 on:
   push:
     branches:
-      - release/expedientes-vercel-rollback-base-0ed8-20261109
+      - fix/app-session-navigation-recovery-20261109
 permissions:
   contents: read
 jobs:
@@ -29,6 +29,12 @@ jobs:
           VITE_SUPABASE_URL: http://127.0.0.1:54321
           VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
         run: npx playwright test tests/expediente-manual-phase-prod.spec.ts --project=desktop-chromium --reporter=line
+      - name: Session and navigation regression with safe data
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+        run: npx playwright test tests/app-real-five-flows.spec.ts --project=desktop-chromium --reporter=line
       - name: Production build without publishing
         env:
           VITE_FENIX_ENV: prod
