@@ -3,18 +3,12 @@ import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizedCompanyScope, authorizedCompanies } from "./companyScope.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.fenixcapital.es",
   "https://www.app.fenixcapital.es",
 ]);
-
-const CONSOLE_COMPANY_ID = "fenix";
-
-// Additional tenants stay closed until authorization and data-isolation gates pass.
-function authorizedCompanyScope(value:unknown):boolean{
-  return value===undefined||value===CONSOLE_COMPANY_ID;
-}
 
 const ENGINES = [
   { engine_id: "CONSOLE-001", name: "CEREBRO Console", depends_on: ["ACTGW-001"] },
@@ -1191,7 +1185,7 @@ export default {
     });
     if(suffix==="contract")return json(req,200,CONTRACT);
     if(suffix==="engines")return json(req,200,{engines:ENGINES});
-    if(suffix==="companies")return json(req,200,{status:"OK",companies:[{company_id:CONSOLE_COMPANY_ID,label:"Fénix Capital",authorized:true}],multi_company_enabled:false});
+    if(suffix==="companies")return json(req,200,{status:"OK",companies:authorizedCompanies(),multi_company_enabled:false});
     if(suffix==="preferences"){
       const current=await loadPreferences(req);
       if(!current.ok)return json(req,503,{status:"ERROR",reason:"PREFERENCES_UNAVAILABLE",preferences:current.preferences});
