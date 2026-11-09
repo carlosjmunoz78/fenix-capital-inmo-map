@@ -6,6 +6,7 @@ import {normalizeNavigation,type NavItem} from './masterNavigation';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {runExpedienteBulkStage} from './expedienteActionsRuntime';
+import {isOpenDirectionExpediente} from './useDirectionLiveData';
 import {anaVertical} from './assets/visualAssets';
 import './operational.css';
 import './expedientes-polish.css';
@@ -20,7 +21,7 @@ type Focus='todos'|'revisar'|'firma'|'sin-accion';
 type CanonicalExp={expediente_code?:string;cliente_alias?:string;stage?:string;owner_actor_code?:string;version?:number};
 
 const fallbackNav:NavItem[]=[{label:'Inicio',route:'/inicio'}];
-const allowedStages=['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Tasación','Pre-OK + Tasación realizada','Tasación realizada','Notaría','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado'];
+const allowedStages=['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Banco','Tasación','Oferta','Pre-OK + Tasación realizada','Tasación realizada','FEIN','Notaría','Firma','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado'];
 const operationalColumnGroups:{label:string;keys:string[]}[]=[
  {label:'Expediente',keys:['expediente','codigo','code','expediente_code']},
  {label:'Cliente',keys:['cliente','cliente_alias','nombre_cliente','client_name']},
@@ -46,7 +47,7 @@ export default function ExpedientesSharedShell(){
  const[loading,setLoading]=useState(false),[status,setStatus]=useState<number|null>(null),[rows,setRows]=useState<AnyRow[]>([]),[message,setMessage]=useState('');
  const[canonical,setCanonical]=useState<CanonicalExp[]>([]),[canonicalStatus,setCanonicalStatus]=useState<number|null>(null);
  const[phase,setPhase]=useState(''),[risk,setRisk]=useState(''),[focus,setFocus]=useState<Focus>('todos'),[sortKey,setSortKey]=useState(''),[sortDir,setSortDir]=useState<SortDir>('asc');
- const[globalQuery,setGlobalQuery]=useState(''),[selected,setSelected]=useState<string[]>([]),[bulkStage,setBulkStage]=useState('Análisis'),[bulkComment,setBulkComment]=useState(''),[preview,setPreview]=useState(false),[saving,setSaving]=useState(false);
+ const[globalQuery,setGlobalQuery]=useState(''),[selected,setSelected]=useState<string[]>([]),[bulkStage,setBulkStage]=useState('Entrada'),[bulkComment,setBulkComment]=useState(''),[preview,setPreview]=useState(false),[saving,setSaving]=useState(false);
  useEffect(()=>{if(!active)return;let alive=true;supabase.auth.getSession().then(({data})=>{if(alive){setLogged(Boolean(data.session));setSessionReady(true)}});const{data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{setLogged(Boolean(session));setSessionReady(true)});return()=>{alive=false;subscription.unsubscribe()};},[active]);
  useEffect(()=>{if(!active)return;document.documentElement.dataset.theme=theme;sessionStorage.setItem('fenix-theme',theme);},[active,theme]);
  useEffect(()=>{if(!active||!logged)return;Promise.all([fetchAppApi<Ctx>('/session/context'),fetchAppApi<unknown>('/navigation')]).then(([c,n])=>{setCtx(c.status===200?c.data:null);setNav(n.status===200?normalizeNavigation(n.data):[]);});},[active,logged]);
@@ -60,7 +61,7 @@ export default function ExpedientesSharedShell(){
  const columns=useMemo<string[]>(()=>{const out:string[]=[];for(const group of operationalColumnGroups){const key=group.keys.find(candidate=>rows.some(row=>Object.prototype.hasOwnProperty.call(row,candidate)));if(key)out.push(key);}return out;},[rows]);
  const phaseRank=useMemo(()=>{const m=new Map<string,number>();rows.forEach(r=>{const x=firstString(r,['fase','phase'])||'Sin fase';m.set(x,(m.get(x)||0)+1)});return[...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6)},[rows]);
  const maxPhase=useMemo(()=>Math.max(1,...phaseRank.map(([,n])=>n)),[phaseRank]);
- const activeCount=useMemo(()=>rows.filter(r=>/activ|curso|estudio|banco|tasaci|fein|firma/i.test(firstString(r,['estado','status','fase','phase']))).length,[rows]);
+ const activeCount=useMemo(()=>rows.filter(isOpenDirectionExpediente).length,[rows]);
  const reviewCount=useMemo(()=>rows.filter(needsReview).length,[rows]);
  const signingCount=useMemo(()=>rows.filter(inSigning).length,[rows]);
  const noActionCount=useMemo(()=>rows.filter(r=>!nextAction(r)).length,[rows]);
