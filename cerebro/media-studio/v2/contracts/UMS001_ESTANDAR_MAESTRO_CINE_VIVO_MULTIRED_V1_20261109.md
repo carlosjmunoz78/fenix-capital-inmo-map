@@ -84,3 +84,21 @@ La **careta es SALIDA**, nunca la introducción principal ni la historia. Manten
 - Manual de marca Fénix Capital, edición 2025, suministrado por el propietario: colorimetría y mínimos de logo obligatorios.
 
 **IMPORTANTE:** tener este contrato documentado en LAB no demuestra todavía que todo el runtime/productor automático lo invoque. Debe conectarse a la FACTORY y a los gates de QA mediante implementación paralela, pruebas y promoción controlada.
+
+
+## 12. Adenda propietaria: marca naranja y Reels de 50 segundos — 2026-11-09
+
+- NARANJA FÉNIX CAPITAL #FF5F00 es DOMINANTE en todas las piezas; conservar logo canónico, contraste y resto de paleta oficial #222222 / #870064 / #FFB71B. Dominante no significa fondos monocromos.
+- Los Reels deben rondar los **50 segundos TOTALES**, incluyendo la historia, audio y careta final por red; flexible según retención y necesidad narrativa. Las V5.4 cortas son muestras previas, no nuevo canon.
+
+## 13. Adenda propietaria: imágenes y carruseles PREMIUM disruptivos — 2026-11-09
+
+- Un arte individual para redes debe detener el scroll mediante calidad cinematográfica, originalidad, tensión, provocación, surrealismo, humor, miedo, extrañeza, hiperrealismo o cyberpunk ocasional. Evitar la fotografía típica de vivienda con párrafos superpuestos.
+- Texto incrustado mínimo: **pregunta o frase breve**, idealmente 2-8 palabras si el concepto lo permite. Desarrollo informativo sobre financiación hipotecaria en el pie de publicación y landing. Una imagen premium debe invitar a leerla por sí misma, incluso en temas financieros aburridos.
+- Cada red requiere adaptación propia de encuadre, diseño y zonas seguras; la presencia reconocible del naranja corporativo es prioritaria. No imponer cyberpunk siempre ni convertir todo en escenas apocalípticas.
+- El carrusel cuenta una historia visual: portada/golpe de efecto, conflicto, sorpresa, transformación y remate/CTA contextual. Muy poco texto en cada lámina; cada imagen tiene potencia autónoma, pero la secuencia completa invita a deslizar. No es una presentación de diapositivas informativas.
+- Continuidad de actores y grupos entre diapositivas: mismas personas, parejas, familias o grupos, mismos rasgos y relaciones; evolución lógica de vestuario, entorno y objetos.
+- Diversidad creativa inicial y aprendizaje por canal, buyer persona y mensaje. Medir retención/deslizamiento cuando exista, guardados, compartidos, clics, leads cualificados y coste por lead; seleccionar 2-3 estilos ganadores con muestra suficiente, reservando renovación contra fatiga.
+- QA: si parece una imagen de inmobiliaria genérica, tiene texto largo, falta narrativa visual, identidad naranja, continuidad o veracidad financiera, NO se aprueba. Una imagen ESTÁTICA válida para una publicación nunca debe convertirse en falso vídeo de foto fija con zoom.
+- Ejemplos orientativos NO repetitivos: «¿Y SI EL BANCO DICE NO?» ante una calle realista fracturada por un NO gigante; «¿DÓNDE SE FUE TU CASA?» con llaves cruzando un universo de relojes. El espectáculo no implica afirmaciones hipotecarias inventadas.
+- Estado: DOCUMENTADO en LAB; integración del estándar en runtime/FACT-001 y tests reales de producción aún PENDIENTES. Sin alterar ni publicar activos previos.
