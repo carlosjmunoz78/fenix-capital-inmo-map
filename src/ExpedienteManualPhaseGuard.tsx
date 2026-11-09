@@ -11,6 +11,8 @@ type Row=Record<string,any>;
 type Ctx={role?:string;display_name?:string};
 const phases=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const visiblePhases=['Entrada','Documentación','Banco','Tasación','FEIN','Notaría','Firma','Cierre'];
+// Contrato confirmado en Supabase PROD (2026-11-09). No simular que el backend admite fases nuevas.
+const writableStages=new Set(['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Tasación','Pre-OK + Tasación realizada','Tasación realizada','Notaría','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado']);
 const aliases=[['entrada','nuevo','inicial'],['document','doc'],['análisis','analisis','estudio'],['banco','banc'],['tasación','tasacion'],['oferta','aprob'],['fein'],['notar'],['firma'],['cierre','cerrado','final']];
 function text(row:Row|null,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim()}return''}
 function phaseIndex(raw:string){const s=raw.toLowerCase();const i=aliases.findIndex(group=>group.some(x=>s.includes(x)));return i>=0?i:0}
@@ -24,7 +26,7 @@ export default function ExpedienteManualPhaseGuard(){
  const current=text(row,['stage','fase','estado'])||'Entrada';const currentIndex=phaseIndex(current);const selectedIndex=selected?phases.indexOf(selected):-1;
  const canEdit=ctx?.role==='Direccion'||ctx?.role==='Financiero';
  const movement=useMemo(()=>selectedIndex<0?'':selectedIndex<currentIndex?'retroceso':selectedIndex>currentIndex+1?'salto':'avance',[selectedIndex,currentIndex]);
- const canSave=canEdit&&Boolean(selected)&&selected!==current&&Boolean(reason.trim())&&!busy;
+ const canSave=canEdit&&Boolean(selected)&&writableStages.has(selected)&&selected!==current&&Boolean(reason.trim())&&!busy;
 
  async function reloadData(){const[c,r]=await Promise.all([fetchAppApi<Ctx>('/session/context'),fetchNotionRuntime<any>(`/expedientes/${encodeURIComponent(code)}`)]);setCtx(c.status===200?c.data:null);setRow(r.status===200?detailItem(r.data):null)}
  useEffect(()=>{if(!code)return;void reloadData()},[code]);
@@ -63,6 +65,7 @@ export default function ExpedienteManualPhaseGuard(){
    const audit=`[CAMBIO MANUAL DE FASE] ${latest} → ${selected} · Motivo: ${reason.trim()} · Usuario: ${actor} · Fecha: ${stamp}`;
    const notes=oldNotes?`${oldNotes}\n${audit}`:audit;
    let status=500;let data:any=null;
+   if(!writableStages.has(selected)){setMsg('La fase aún no está habilitada en el contrato de Supabase. No se ha cambiado el expediente.');return;}
    if(IS_PRODUCTION){
     const result=await gatewayRpc<any>('fenix_prod_exp_update',{p_code:code,p_expected_version:version,p_cliente_alias:null,p_stage:selected,p_inmobiliaria_code:null,p_notas:notes,p_proxima_accion:null});
     data=result.data;status=result.error?500:Number(result.data?.status||200);
@@ -90,6 +93,7 @@ export default function ExpedienteManualPhaseGuard(){
    <div className="manual-phase-header"><div><span>CONTROL MANUAL DE FASE</span><strong>{canEdit?'Puedes intervenir cuando lo necesites':'Tu perfil ve el recorrido en solo lectura'}</strong></div>{selected&&<button type="button" className="manual-phase-close" onClick={close} aria-label="Cerrar cambio manual"><X size={17}/></button>}</div>
    {!selected?<div className="manual-phase-hint">{canEdit?'Pulsa cualquier fase del recorrido para preparar un cambio manual. Nada cambia hasta que expliques el motivo y pulses Guardar cambio.':'Los cambios manuales están reservados a Dirección y Financiero.'}</div>:<>
     <div className="manual-phase-transition"><div><small>Fase actual</small><strong>{current}</strong></div><span>→</span><label><small>Nueva fase</small><select value={selected} onChange={e=>{setSelected(e.target.value);setMsg('')}}>{phases.map(p=><option key={p}>{p}</option>)}</select></label></div>
+    {!writableStages.has(selected)&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Este paso o subpaso aún no es un estado válido para el backend. Guardar está deshabilitado hasta adaptar y probar el contrato sin tocar los expedientes existentes.</div>}
     {selected===current&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Esa ya es la fase actual. Elige una fase distinta.</div>}
     {movement==='salto'&&<div className="manual-phase-warning"><ShieldAlert size={17}/> Estás saltando una o más fases. El motivo será obligatorio.</div>}
     {movement==='retroceso'&&<div className="manual-phase-warning"><RotateCcw size={17}/> Estás retrocediendo el expediente. El motivo será obligatorio.</div>}
