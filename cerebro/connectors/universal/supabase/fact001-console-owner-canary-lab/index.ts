@@ -79,6 +79,7 @@ Deno.serve(async(req:Request)=>{
   const v=String(e instanceof Error?e.message:'UNKNOWN');
   const allowed=new Set(['SCOPE_INVALID','SCOPE_FIELDS_DENIED','SCOPE_DENIED','PAIR_CREDENTIAL_DENIED','VAULT_CONNECTION_MISSING','VAULT_SECRET_ABSENT','REQUEST_TOO_LARGE','CLOUDFLARE_TOKEN_INVALID','CLOUDFLARE_TOKEN_INACTIVE','VAULT_STORAGE_UNVERIFIED','CF_UNTRUSTED_INVENTORY','CF_PAGINATION_UNTRUSTED']);
   const code=allowed.has(v)?v:v.startsWith('CLOUDFLARE_READ_HTTP_')?v:'BACKEND_ERROR';
+  if(code==='CLOUDFLARE_READ_HTTP_429')return reply(429,{status:'RATE_LIMITED',code:'CF_API_QUOTA',retry_automatically:false});
   return reply(code.startsWith('SCOPE_')||code==='PAIR_CREDENTIAL_DENIED'?400:503,{status:'BLOCKED',code});
  }
 });

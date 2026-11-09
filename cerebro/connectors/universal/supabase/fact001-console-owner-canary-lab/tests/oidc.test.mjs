@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto} from 'node:crypto';
-import {ACCOUNT_ID,REPO,BRANCH,WORKFLOW_REF,OIDC_AUDIENCE,SCOPE,assertScope,assertClaims,verifyGitHubOidc,validateInventory} from '../logic.mjs';
+import {ACCOUNT_ID,REPO,BRANCH,WORKFLOW_REF,OIDC_AUDIENCE,SCOPE,assertScope,assertClaims,verifyGitHubOidc,validateInventory,isCloudflareRateLimited} from '../logic.mjs';
 const time=Math.floor(Date.now()/1000);
 const baseClaims={iss:'https://token.actions.githubusercontent.com',aud:OIDC_AUDIENCE,repository:REPO,ref:BRANCH,workflow_ref:WORKFLOW_REF,event_name:'push',iat:time,exp:time+300};
 const b64=x=>Buffer.from(x).toString('base64url');
@@ -36,3 +36,5 @@ test('inventory accepts only exact shape and safe numeric summary',()=>{
  assert.throws(()=>validateInventory({...d,result_info:{total_count:'8'}},w),/CF_PAGINATION_UNTRUSTED/);
 });
 test('owner route remains LAB only',()=>assert.equal(SCOPE.environment,'LAB'));
+
+test('rate limit is not silently accepted',()=>{assert.equal(isCloudflareRateLimited('CLOUDFLARE_READ_HTTP_429'),true);assert.equal(isCloudflareRateLimited('CLOUDFLARE_READ_HTTP_403'),false);});

@@ -1,3 +1,7 @@
 # FACT001 · CEREBRO Console owner JWT Cloudflare canary LAB
 
 New parallel service cerebro-fact001-console-owner-canary-lab. No changes to main Console v33 or App/CRM/DNS. Owner route GET owner-health and POST owner-inventory validates actual Supabase signed user with getUser and server RPC role CARLOS-ADMIN (same role condition as main Console). Anonymous and fake JWT denied. Separate fixed GitHub signed OIDC health/inventory for physical service-to-service test, exact workflow/branch/audience. CORS permits only app.fenixcapital.es. Existing Vault credential, only Cloudflare D1+Workers GET. No arbitrary paths, no PROD writes, no token echoed. Before actual main Console integration, require a real authenticated owner session E2E and dedicated read-only token plus snapshots/rollback. PR DRAFT; rollback: leave isolated canary unused.
+
+## Rate-limit gate
+
+Physical canary OIDC GET passed once (run 42703668544). Repeated stricter auth/CORS checks also passed; the subsequent Cloudflare GET returned 429 from Cloudflare's shared API limit (run 42704193424), **not an auth error**. This canary explicitly returns 429 `CF_API_QUOTA` and does not automatically retry. Physical GET workflow now runs only for new approved request orders or manual dispatch, not every workflow/source change; unit tests run separately. Treat live read as RATE_LIMITED, never as stale successful data. No bypass or increase to paid plan.

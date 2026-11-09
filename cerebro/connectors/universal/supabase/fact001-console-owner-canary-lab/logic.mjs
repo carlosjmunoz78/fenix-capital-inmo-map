@@ -57,3 +57,4 @@ export function validateInventory(d1,workers){
  if(workers.result.length>1000)throw Error('CF_WORKERS_COUNT_UNTRUSTED');
  return Object.freeze({d1_count:count,workers_count:workers.result.length,cloudflare_writes:0,account_id:ACCOUNT_ID});
 }
+export function isCloudflareRateLimited(error){return error==='CLOUDFLARE_READ_HTTP_429';}
