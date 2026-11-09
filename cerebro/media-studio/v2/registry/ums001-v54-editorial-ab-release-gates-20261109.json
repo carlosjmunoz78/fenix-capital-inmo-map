@@ -1,0 +1,64 @@
+{
+  "schema_version": "UMS001_AB_RELEASE_GATES_V1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "V5.4",
+  "date": "2026-11-09",
+  "assets": {
+    "instagram": {
+      "final_video": "https://drive.google.com/file/d/16MD3EPGc8Y7P_f1L29gSO-R7pdqmdyXh/view",
+      "a_b_comparison": "https://drive.google.com/file/d/1KqsGP1tmHY6Lj1PpK8ZKCVv7ZaC51WeQ/view",
+      "sha256": "96b6706fcf4b25c1a4d4d7b4ca4e54d02633533bfd331f2a497bf4c5a3741a2a"
+    },
+    "facebook": {
+      "final_video": "https://drive.google.com/file/d/1tF1Ri4nJnh6T3FsRz12sNkNZwWRHRAq0/view",
+      "a_b_comparison": "https://drive.google.com/file/d/12RFaEogkJsj2oUZNoqZ0-vOZLeoqP2DG/view",
+      "sha256": "0719afaa934f7a3e5ec969f076fea67f41047ed3c6ebb761a1351c98d8052a14"
+    }
+  },
+  "evidence": {
+    "release_gate_json": "https://drive.google.com/file/d/1_V9tfVDJ09fl2dXJULjt-EjIaCs2DYR3/view",
+    "editorial_compliance_report": "https://drive.google.com/file/d/1167Ap3YRExxaQYh7b5ZA6xDVS-eQ9q4X/view",
+    "a_b_voice_manifest": "https://drive.google.com/file/d/1fHBLldThxDBCYbS6a8PQ7ZAyZUgCv63r/view",
+    "official_mixkit_license": "https://mixkit.co/license/modal/musicFree/",
+    "piper_es_es_model_card": "https://huggingface.co/rhasspy/piper-voices/blob/main/es/es_ES/sharvard/medium/MODEL_CARD",
+    "bde_circular_4_2020": "https://www.boe.es/buscar/doc.php?id=BOE-A-2020-7869",
+    "canonical_contact_page": "https://fenixcapital.es/contacto/"
+  },
+  "gates": {
+    "media_integrity": "PASS",
+    "audio_video_format": "PASS",
+    "captions_meta_safe_export": "PASS",
+    "music_licensed_online_commercial": "PASS_DOCUMENTED",
+    "es_ES_voice_model_identity": "PASS_DOCUMENTED",
+    "voice_naturalness_accent_by_ear": "PENDING",
+    "credit_sharvard_corpus_CC_BY3": "DRAFT_NOT_PUBLIC",
+    "rights_of_visual_assets": "PENDING",
+    "financial_advertising_and_intermediary_role": "PENDING",
+    "meta_live_preview": "PENDING_CONNECTION",
+    "form_delivery_utm_ga4_crm": "PENDING_E2E",
+    "explicit_commercial_approval": "NOT_GIVEN"
+  },
+  "computed_status": "RELEASE_BLOCKED",
+  "human_exception_codes": [
+    "LOW_CONFIDENCE",
+    "LEGAL_REQUIRED"
+  ],
+  "permission_publish": false,
+  "permission_schedule": false,
+  "do_not_touch": [
+    "main",
+    "PROD",
+    "app.fenixcapital.es",
+    "CRM",
+    "Supabase",
+    "WordPress",
+    "DNS",
+    "Buffer",
+    "SEO"
+  ],
+  "new_paid_ai_generation_eur": 0,
+  "external_billing_reconciled": false,
+  "rollback": "Original assets and V5.3/V5.4 Drive videos preserved"
+}
