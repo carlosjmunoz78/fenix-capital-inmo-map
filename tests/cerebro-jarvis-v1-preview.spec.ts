@@ -218,3 +218,20 @@ test('JARVIS Work PREPROD · history exposes real runs, search and evidence with
  await expect(history.getByText('Workspace QA')).toBeVisible();
  await expectNoHorizontalOverflow(page);
 });
+
+
+test('JARVIS Work PREPROD · project actions draft into visible composer, not hidden transport',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ const composer=page.locator('.jarvis-center-pane .operativa-composer-form textarea');
+ await expect(composer).toBeVisible();
+ await page.getByRole('button',{name:'Editar con Jarvis'}).click();
+ await expect(composer).toHaveValue(/Quiero actualizar el proyecto Auditoría Total/);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Herramientas',exact:true}).last().click();
+ await page.getByRole('button',{name:'Código',exact:true}).last().click();
+ await expect(composer).toHaveValue(/Trabaja con código para Auditoría Total/);
+ await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toHaveCount(0);
+});
