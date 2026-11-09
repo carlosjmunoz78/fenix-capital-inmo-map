@@ -1,0 +1,45 @@
+name: JARVIS Console Non-Voice Gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/CerebroJarvisWorkConsole.tsx'
+      - 'tests/cerebro-jarvis-v1-preview.spec.ts'
+      - '.github/workflows/jarvis-console-nonvoice-gate.yml'
+permissions:
+  contents: read
+jobs:
+  console-nonvoice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install chromium
+      - name: Verify execution history and visible project composer
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'history exposes|project actions draft' --reporter=line
+      - name: Keep failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-console-nonvoice-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
