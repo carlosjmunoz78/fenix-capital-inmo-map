@@ -1,0 +1,66 @@
+name: Expedientes eight phases · staged PRODUCTION (no domain)
+on:
+  push:
+    branches:
+      - fix/expedientes-eight-phases-substeps-20261109
+    paths:
+      - .github/workflows/expedientes-eight-phases-prod-stage.yml
+permissions:
+  contents: read
+jobs:
+  stage-production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Verify release ancestry and allowed changes only
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "fix/expedientes-eight-phases-substeps-20261109"
+          git merge-base --is-ancestor e3af0a5678ca660cb54d7be8eeac40fab0afea87 HEAD
+          while IFS= read -r file; do
+            case "${file}" in
+              src/DetailShell.tsx|src/ExpedienteManualPhaseGuard.tsx|src/ExpedientesSharedShell.tsx|src/detail-expediente.css|src/expediente-manual-phase.css|src/expedientePhaseModel.ts|tests/expedientes-eight-phases.spec.ts|docs/expedientes/20261109_eight_phases_data_migration.sql|docs/expedientes/20261109_eight_phases_data_rollback.sql|.github/workflows/expedientes-eight-phases-qa.yml|.github/workflows/expedientes-eight-phases-prod-stage.yml) ;;
+              *) echo "Unexpected file: ${file}" >&2; exit 1;;
+            esac
+          done < <(git diff --name-only e3af0a5678ca660cb54d7be8eeac40fab0afea87 HEAD)
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Regression QA · eight phases / counter / sorting / filters
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+        run: npx playwright test tests/expedientes-eight-phases.spec.ts tests/expedientes-active-order.spec.ts --project=desktop-chromium --reporter=line
+      - name: Production compile without release
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+      - name: Install reviewed CLI
+        run: npm install --global vercel@48.0.0
+      - name: Retrieve production env
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Stage immutable prod candidate without assigning domains
+        shell: bash
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}")"
+          case "${url}" in https://*.vercel.app) ;; *) exit 1;; esac
+          printf 'Staged candidate (not published): %s\n' "${url}" >> "${GITHUB_STEP_SUMMARY}"
