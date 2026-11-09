@@ -292,3 +292,96 @@ test('JARVIS Git readonly lab · completed without proof is not GREEN',async({pa
   await expect(page.getByRole('status')).toContainText('sin evidencia de control válida');
   await expect(page.getByRole('status')).not.toContainText('ejecutado y verificado');
 });
+
+
+test('JARVIS Direct Git readonly LAB · four immediate queries without enqueue',async({page})=>{
+  const sha='39bc098f322c6981d0d703c5813a7234a5742e8f';
+  const branch='cerebro/jarvis-work-codex-complete-20261102';
+  const operations:string[]=[];
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({status:'OK',environment:'PREPROD',branch,head_sha:sha})
+  }));
+  await page.route('**/functions/v1/jarvis-git-direct-readonly-lab-v0/inspect',async route=>{
+    const payload=route.request().postDataJSON() as {operation:string;expected_head_sha:string};
+    expect(payload.expected_head_sha).toBe(sha);
+    expect(Object.keys(payload).sort()).toEqual(['expected_head_sha','operation']);
+    operations.push(payload.operation);
+    expect(route.request().headers()['authorization']).toMatch(/^Bearer /);
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+      status:'OK',proof:'JARVIS_GIT_DIRECT_READONLY_LAB',operation:payload.operation,
+      branch,head_sha:sha,environment:'LAB',mode:'IMMEDIATE_READONLY',
+      job_enqueued:false,worker_required:false,git_writes:0,db_writes:0,prod_touched:false,
+      compare_status:payload.operation==='COMPARE'?'behind':undefined,
+      ahead_by:0,behind_by:1
+    })});
+  });
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  for(const label of ['Estado remoto','Diferencias','Comprobaciones CI','Comparar con main']){
+    await page.getByRole('button',{name:label,exact:true}).click();
+    await expect(page.getByRole('status')).toContainText('Consulta directa completada');
+    await expect(page.getByText('Trabajo en cola: NO · Escrituras Git: 0')).toBeVisible();
+  }
+  expect(operations).toEqual(['STATUS','DIFF','CI_READ','COMPARE']);
+  await expect(page.getByRole('button',{name:'Estado Git',exact:true})).toHaveCount(0);
+});
+test('JARVIS Direct Git readonly LAB · branch mismatch blocks all requests',async({page})=>{
+  let outbound=0;
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({
+      status:'OK',environment:'PREPROD',branch:'main',
+      head_sha:'3600942775fbc19b47560e6f798caca107cd7473'
+    })
+  }));
+  await page.route('**/functions/v1/jarvis-git-direct-readonly-lab-v0/inspect',route=>{outbound+=1;return route.fulfill({status:500,body:'{}'})});
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado remoto'}).click();
+  await expect(page.getByRole('status')).toContainText('Comprobación de rama y entorno fallida');
+  expect(outbound).toBe(0);
+});
+test('JARVIS Direct Git readonly LAB · queued response cannot claim success',async({page})=>{
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({
+      status:'OK',environment:'PREPROD',branch:'cerebro/jarvis-work-codex-complete-20261102',
+      head_sha:'39bc098f322c6981d0d703c5813a7234a5742e8f'
+    })
+  }));
+  await page.route('**/functions/v1/jarvis-git-direct-readonly-lab-v0/inspect',route=>route.fulfill({
+    status:202,contentType:'application/json',body:JSON.stringify({status:'QUEUED',job_enqueued:true})
+  }));
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado remoto'}).click();
+  await expect(page.getByRole('status')).toContainText('Respuesta sin evidencia válida');
+  await expect(page.getByText('Trabajo en cola: NO · Escrituras Git: 0')).toHaveCount(0);
+});
+test('JARVIS Direct Git readonly LAB · denied identity stays blocked',async({page})=>{
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({
+      status:'OK',environment:'PREPROD',branch:'cerebro/jarvis-work-codex-complete-20261102',
+      head_sha:'39bc098f322c6981d0d703c5813a7234a5742e8f'
+    })
+  }));
+  await page.route('**/functions/v1/jarvis-git-direct-readonly-lab-v0/inspect',route=>route.fulfill({
+    status:403,contentType:'application/json',body:JSON.stringify({status:'DENIED',reason:'OWNER_ONLY'})
+  }));
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado remoto'}).click();
+  await expect(page.getByRole('status')).toContainText('Acceso denegado');
+  await expect(page.getByText('Trabajo en cola: NO · Escrituras Git: 0')).toHaveCount(0);
+});
