@@ -1,0 +1,10 @@
+{
+  "request_id": "CFW-20261109-001",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "operation": "cloudflare.kv.lab.write_read_rollback"
+}
