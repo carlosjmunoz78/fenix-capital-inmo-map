@@ -46,13 +46,20 @@ jobs:
           if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_TOKEN_MISSING');
           const attested=await probe('POST','Bearer '+jwt);
           const result=attested.body||{};
+          if(attested.http!==200){
+            const claims=JSON.parse(Buffer.from(jwt.split('.')[1],'base64url').toString('utf8'));
+            const ref=process.env.GITHUB_REF;
+            const repo=process.env.GITHUB_REPOSITORY;
+            const matches={issuer:claims.iss==='https://token.actions.githubusercontent.com',audience:claims.aud===audience,repository:claims.repository===repo,ref:claims.ref===ref,workflow_ref:claims.workflow_ref===repo+'/.github/workflows/cerebro-jarvis-oidc-probe-lab-once.yml@'+ref,event_name:claims.event_name==='push',subject:claims.sub==='repo:'+repo+':ref:'+ref,sha:claims.sha===process.env.GITHUB_SHA,run_id:claims.run_id===process.env.GITHUB_RUN_ID};
+            console.log('OIDC_NON_SECRET_SCOPE_FLAGS='+JSON.stringify(matches));
+          }
           if(attested.http!==200||result.status!=='OK'||result.proof!=='SIGNED_GITHUB_OIDC_READONLY'||
              result.run_id!==process.env.GITHUB_RUN_ID||result.source_sha!==process.env.GITHUB_SHA||
              result.environment!=='LAB'||result.company_id!=='fenix'||result.engine_id!=='CONSOLE-001'||
              result.person_jwt_required!==false||result.new_secret_required!==false||
              result.prod_mutation!==false||result.db_access!==false||result.trading_access!==false||
              result.write_operations!==0){
-            throw Error('OIDC_ATTESTATION_FAILED_HTTP_'+attested.http+'_STATUS_'+String(result.status||'NONE'));
+            throw Error('OIDC_ATTESTATION_FAILED_HTTP_'+attested.http+'_REASON_'+String(result.reason||result.status||'NONE'));
           }
           console.log(JSON.stringify({status:'JARVIS_GITHUB_OIDC_LAB=GREEN',checks:['no-auth-deny','invalid-token-deny','wrong-route-deny','signed-token-allow'],environment:result.environment,source_sha:result.source_sha,run_id:result.run_id,user_session_secret_used:false,supabase_db_access:false,prod_mutation:false,trading_access:false}));
           JS
