@@ -1,0 +1,65 @@
+name: Expedientes safe live-base isolated QA and Preview
+
+on:
+  push:
+    branches:
+      - fix/expedientes-production-safe-active-order-20261109
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: expedientes-safe-live-base-preview
+  cancel-in-progress: false
+
+jobs:
+  test-and-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert exact safe hotfix branch
+        run: test "${GITHUB_REF_NAME}" = "fix/expedientes-production-safe-active-order-20261109"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Test active count and sorting with inert fixtures
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+        run: npx playwright test tests/expedientes-active-order.spec.ts --project=desktop-chromium --reporter=line
+      - name: Check real production build without releasing it
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+      - name: Check Vercel deployment token present
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: test -n "${VERCEL_TOKEN}"
+      - name: Install reviewed CLI version
+        run: npm install --global vercel@48.0.0
+      - name: Pull preview environment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel pull --yes --environment=preview --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Deploy safe hotfix as Preview, never production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}")"
+          case "${url}" in https://*.vercel.app) ;; *) exit 1;; esac
+          printf 'Validated live-base Preview: %s\n' "${url}" >> "${GITHUB_STEP_SUMMARY}"
