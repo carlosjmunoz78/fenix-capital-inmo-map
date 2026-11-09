@@ -201,3 +201,11 @@ Additional recurring cost introduced: `0 €`
 - Entrega física V2: IG https://drive.google.com/file/d/18qQaGd3GHcANxkltCNCyqhxoXvMFKQd8/view (19,955 s) y FB https://drive.google.com/file/d/1XwjjfvyP6awkKAA_iwTCWVowayRLwcBF/view (22,262 s).
 - Evidencia QA: https://drive.google.com/file/d/17kpRWzMhJBkA6xTQ472mt9Id5UPKjujJ/view . Gasto de nuevas generaciones 0, no publicación.
 - PENDIENTE: escucha de acento es-ES, QA editorial/video en red real, derechos, QA casting y CTA medible. PROD/main intactos.
+
+
+### 2026-11-09 · UMS-001 IG/FB V4 Meta safe-zone
+- HECHO LAB: 2 Reels 1080×1920 19.955/22.262s, voz castellano configurada es-ES (pendiente confirmación auditiva), música original, subtítulos movidos del margen 430px al 800px mediante render desde vídeos fuente sin subtítulos. CTA fenixcapital.es/contacto/ visible en outro con título.
+- GitHub runbook: `cerebro/media-studio/v2/runbooks/UMS001_IGFB_V4_META_SAFE_QA_AND_QUEUE_20261109.md`.
+- V4 Drive IG https://drive.google.com/file/d/1rZhqbX6T9sXXU47x2P6dnq1-khClP0Ae/view ; FB https://drive.google.com/file/d/1yxiEgFs3rMdkQgUQF8nxg7Wp_O7Ki-AU/view ; QA https://drive.google.com/file/d/1c3F6RF4Tw9_cVndkLWRYQoDdcS7fJbox/view .
+- Fichas Notion V4 creado, pendientes QA; ninguna OP antigua modificada. Fuentes y V0–V3 intactas. Sin nuevas llamadas a IA de pago, sin publicación.
+- Gate posterior: acento real, derechos, claims hipotecarios, prueba en dispositivos Meta y conversión; no se promociona a PROD.
