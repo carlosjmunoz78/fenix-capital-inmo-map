@@ -217,3 +217,11 @@ Additional recurring cost introduced: `0 €`
 - Drive IG https://drive.google.com/file/d/1ejOReqRCnq_bW6IxTaFHlgmSlzKaSYic/view · FB https://drive.google.com/file/d/1RWGqTOy9nmB_wshqnEBpq9mnbVuUz1ix/view · paquete https://drive.google.com/file/d/10Xr3OF-eHLEjC9KKwTnI7fSRrdcOuuwj/view · QA https://drive.google.com/file/d/1DKXdHjbA8HZvLEjqLgYtCTZuVoG49LQj/view.
 - Derechos: 4 activos V2/V4 HeyGen Free cambiados a Bloqueado en Notion, V5.1 nuevos también Bloqueados hasta verificar derechos de música/Runway, locuciones castellanas, sincronía y QA Meta. NO PUBLICAR.
 - Runbook: `cerebro/media-studio/v2/runbooks/UMS001_IG_FB_V5_1_APACHE_VOICE_20261109.md`. Sin App/CRM/Supabase/WordPress/SEO/main/PROD.
+
+
+### 2026-11-09 · UMS001 IG/FB V5.2 + audición es_ES de Piper
+- ENTREGADO LAB: dos nuevos MP4 V5.2 reconstruidos desde fuentes originales, 7 subtítulos temporizados con voz Kokoro y 0 solapamientos, 800px de margen inferior. El stream AAC de V5.1 se ha preservado exactamente; no nuevos créditos ni suscripciones.
+- Drive: Instagram https://drive.google.com/file/d/1xftL42cdrRpBEc84vF8yfox40UMirqoH/view, Facebook https://drive.google.com/file/d/1yBqtgKnQ7RobrZSG8StpKGZGyQkPplDs/view, ZIP QA+backups https://drive.google.com/file/d/1iFG5lFp2eAWdpje89aja0iKFtNbnuDF0/view.
+- Audición alternativa Piper `es_ES` (0€) GH Actions run 42542341098 SUCCESS: voz masculina davefx-medium 6.525s (candidata de escucha); voz femenina mls_9972-low 31.344s (descartada por duración y licencia con atribución). Las voces de los Reels NO se modificaron.
+- Notion: V5.2 IG https://app.notion.com/p/41381b1a756d810fa544e1813cf56a2d y FB https://app.notion.com/p/41381b1a756d81148ceddd39cccd0ccc; ambos Bloqueado/TEST (LAB lógico).
+- Incidencia MUSIC_RIGHTS=UNKNOWN para el WAV orquestal de 44s; derechos generales de Runway/Replicate contrastados pero no bastan para acreditar banda sonora y activos de entrada. Faltan acento es_ES auditivo, claims, dispositivos Meta, y CTA/GA4. NO PUBLICAR. Main/PROD/App/CRM/Supabase/DNS intactos.
