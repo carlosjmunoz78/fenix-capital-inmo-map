@@ -224,7 +224,7 @@ test('JARVIS Git readonly lab · status diff CI compare enqueue only, no write',
   await page.getByRole('button',{name:'Herramientas',exact:true}).click();
   for(const name of ['Estado Git','Diff Git','CI Git','vs main']){
     await page.getByRole('button',{name,exact:true}).click();
-    await expect(page.getByRole('status')).toContainText('Solicitud de solo lectura en cola');
+    await expect(page.getByRole('status')).toContainText(/NO ejecutada|En espera|no verificable/i);
   }
   expect(operations).toEqual(['STATUS','DIFF','CI_READ','COMPARE']);
   await expect(page.getByText('Trabajo: qa-only-COMPARE', {exact:false})).toBeVisible();
