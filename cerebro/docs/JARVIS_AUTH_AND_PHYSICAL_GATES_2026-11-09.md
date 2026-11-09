@@ -37,3 +37,34 @@ Proyecto: Fénix Capital; motor `CONSOLE-001`, versión laboratorio. La App púb
 ## Observación de rama principal al cerrar
 
 La rama `main` avanzó durante estas pruebas de `862ee543036070bc2cbb3ccaffc6c81af6d6a225` a `3600942775fbc19b47560e6f798caca107cd7473`, un commit posterior denominado `CEREBRO: register FULL_SAFE_PREPROD dynamic capabilities [skip ci]` que únicamente modifica `cerebro/registry/skill-dynamic-adoption-v1.json`. No lo realizó este laboratorio y **no afecta directamente a los archivos de JARVIS examinados**, pero toda promoción futura requerirá comparar el HEAD vigente y repetir los gates. `gh-pages` se verificó sin cambios en `01650c6fb728aa9d41dc4877dd4bee243372be68`. No se han alterado las ramas protegidas desde este laboratorio.
+
+
+## Continuación verificable · Git real y política de prueba (09-11-2026)
+
+### Observación Git real, solo lectura
+
+- GitHub Actions: [42539400145](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42539400145), `REAL_GIT_READONLY=GREEN`, run `completed/success`.
+- Rama candidata inspeccionada: `cerebro/jarvis-core-prod-candidate-20261103@79d621b400c265adf744678aa7c64e79474b6946`.
+- Validado por API GitHub **real**: HEAD exacto, árbol limpio, diff local limpio, historial comparado con `main`, consulta de check-runs y estado del commit.
+- CI observado: 33 comprobaciones, 20 completadas en la primera página; estado agregado de commit `success`. **NO se afirma que las 33 comprobaciones estuvieran todas completadas**.
+- Verificación al principio de la prueba: `main@3600942775fbc19b47560e6f798caca107cd7473`, `gh-pages@01650c6fb728aa9d41dc4877dd4bee243372be68`. Cero escrituras, sin despliegue ni `rearm`.
+- **Límite**: prueba real GitHub read-only, **no** prueba física `UI → Supabase Git Gateway → cola → OIDC worker` con sesión de la App.
+
+### Contrato DIR-TEST reforzado exclusivamente en rama LAB
+
+Las funciones de Supabase en GitHub (no desplegadas) incorporan rechazo anticipado para el futuro actor `DIR-TEST`:
+
+- `jarvis-orchestrator-v0`: permite solo `REPO_HEAD`, `REPO_LIST`, `REPO_FILE`; deniega `GIT_*`, búsquedas que encolan trabajo, cancelaciones, `SAVE_FILE`, `ROLLBACK_COMMIT`, navegador, acceso a proyectos y cualquier otro intent.
+- `jarvis-work-gateway-v1`: permite solamente `GET /repo/head`, `GET /repo/list` y `GET /repo/file`; no permite proyectos, terminal, cola, cancelación ni lectura de resultados ajenos.
+- `jarvis-git-gateway-v1`: deniega al actor de pruebas todas las solicitudes **antes de cualquier ruta de inspección, guardado o rollback**. La prueba Git real se ejecuta mediante token GitHub efímero con `contents/checks/statuses: read`, no mediante actor DIR-TEST.
+- La identidad `CARLOS-ADMIN` existente no cambia; `DIR-TEST` **no está creada ni vinculada**. El refuerzo debe comprobarse mediante despliegue paralelo y controles negativos antes de plantear cualquier alta de identidad.
+- Backup previo de esta rama: `backup/20261109-jarvis-git-parity-before-auth-guard@ff6ff5efa3e6f7d7f349ab7b946d7e891529dc58`.
+- Prueba de contrato sobre predicados reales de TypeScript: [42539862848](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42539862848), **4/4 GREEN**, no se usa token real ni se modifica Supabase.
+- La ejecución diagnóstica inicial [42539762050](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42539762050) falló por una dependencia de test no disponible; se corrigió el *harness* sin alterar las políticas y la ejecución siguiente pasó.
+- La prueba confirma restricciones de código en LAB; **no** equivale a una prueba HTTP autenticada con un actor DIR-TEST real.
+
+### Gate de promoción
+
+**NO PROMOVER**. Faltan identidad E2E renovable con contrato de mínimos permisos y pruebas negativas reales; E2E UI-Gateway-Git con consumidor finito sin auto-rearm; micrófono y diálogo bidireccional físicos; rollback de servicio realmente reversible en entorno seguro; OLD vs NEW completo; tribunal y observabilidad.
+
+Estado: `LAB GREEN / AUTH PROD BLOCKED / VOICE PHYSICAL PENDING / PROD NOT PROMOTED`.
