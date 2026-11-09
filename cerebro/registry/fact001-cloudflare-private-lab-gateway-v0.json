@@ -24,8 +24,23 @@
   },
   "clients": {
     "chatgpt_normal": {
-      "status": "VERIFIED_GITHUB_REST_GET_ONLY",
-      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42678166836"
+      "status": "VERIFIED_DIRECT_CLOUDFLARE_API_GET_IN_NORMAL_CHAT",
+      "client": "Cloudflare CEREBRO connected MCP tools",
+      "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+      "proof_type": "authenticated whoami; connected tool OpenAPI GET Workers D1 Access 2026-11-09",
+      "live_counts": {
+        "d1": 8,
+        "workers": 7,
+        "access_apps": 3
+      },
+      "physical_get_verified": true,
+      "cloudflare_writes_verified": false,
+      "cloudflare_writes_executed": 0,
+      "legacy_github_fallback": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42678166836",
+      "private_plugin": "plugins_6af1f05c0e348191a4afd20c4aa0cb79",
+      "private_plugin_version": "0.2.0",
+      "private_plugin_runtime_installation_attested": false,
+      "note": "Cloudflare CEREBRO direct connected tool is VERIFIED; private plugin package installed/active state cannot be inferred from its manifest or plugin page"
     },
     "cerebro_lab": {
       "status": "VERIFIED_ISOLATED_GITHUB_CI_GET_ONLY",
@@ -49,10 +64,10 @@
       "normal_inventory_workflow_retransmits_cloudflare_token": false,
       "pairing_is_one_time": true,
       "approved_order_path": "cerebro/connectors/universal/supabase/fact001-lab/requests/probe.v1.json",
-      "latest_real_get_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609031",
-      "latest_order_id": "CFD-20261109-003",
-      "verified_repeat_calls": 3,
-      "last_accepted_state": "LAB_REAL_GET_AUTHENTICATED_OIDC_VAULT_ZERO_TOKEN_RETRANSMISSION",
+      "latest_real_get_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42691707204",
+      "latest_order_id": "CFD-20261109-004",
+      "verified_repeat_calls": 4,
+      "last_accepted_state": "VERIFIED_SIGNED_OIDC_VAULT_REAL_GET_NO_SECRET_RETRANSMISSION",
       "owner_login_jwt_required": false,
       "main_gateway_bound": false,
       "zero_cloudflare_mutations": true
@@ -104,6 +119,17 @@
     "durable_rollback_for_writes": false,
     "tests_12_of_12": true,
     "physical_sidecar_readonly": true,
-    "zero_public_access_worker": true
+    "zero_public_access_worker": true,
+    "main_console_owner_jwt_e2e": false,
+    "cloudflare_account_token_management_read": false,
+    "cloudflare_user_token_management_read": false,
+    "chatgpt_direct_read_verified": true,
+    "cerebro_sidecar_real_cloudflare_get_verified": true,
+    "full_write_cloudflare_verified": false,
+    "blockers": [
+      "Cloudflare account and user API token-management GET return 403 code 9109 for connected OAuth identity; no scoped token creation available through this connector",
+      "Existing CEREBRO Console v33 remains unchanged and has no FACT-001 route; owner JWT E2E secret expired",
+      "Broad existing Cloudflare token stored encrypted for LAB only; do not promote to autonomous PROD or enable unrestricted writes"
+    ]
   }
 }

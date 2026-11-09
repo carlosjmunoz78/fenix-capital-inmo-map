@@ -37,3 +37,7 @@ See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
 ### After-interruption acceptance checkpoint · 2026-11-09
 
 [Physical command CFD-20261109-003](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42690609031) **SUCCESS**. Twelve OIDC/tenant security tests PASS. Anonymous and fake identity rejected (401), signed OIDC accepted (200); LAB deployed Supabase sidecar reused encrypted existing Vault credential without GitHub retransmitting Cloudflare API token; Cloudflare real GET returned D1=8, Workers=7, writes=0. Exactly one named Vault record; Supabase main CEREBRO Console v33 unchanged. **LAB read-only COMPLETE; main Console PROD connection and Cloudflare write administration NOT COMPLETE**. Full check and recovery procedure in `supabase/fact001-lab/README.md`.
+
+## Cierre: Cloudflare directo ChatGPT y CEREBRO LAB · 2026-11-09
+
+ChatGPT normal Cloudflare MCP *directamente conectado y comprobado*: cuenta autenticada, lectura real D1=8, Workers=7, Access apps=3 sin Work. CEREBRO servicio LAB desplegado: 4.ª orden OIDC/Vault GET verificada [#42691707204](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42691707204), 12/12 tests PASS, 0 writes. **NO** declarar integrada la Consola PROD ni administración autónoma total: OAuth Cloudflare rechaza gestión de tokens (403/9109), el JWT de pruebas owner caducó, falta token dedicado read-only. Informe completo `docs/FACT001_CLOUDFLARE_DUAL_REAL_ACCEPTANCE_2026-11-09.md`.
