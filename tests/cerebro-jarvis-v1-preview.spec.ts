@@ -235,3 +235,20 @@ test('JARVIS Work PREPROD · project actions draft into visible composer, not hi
  await expect(composer).toHaveValue(/Trabaja con código para Auditoría Total/);
  await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toHaveCount(0);
 });
+
+
+test('JARVIS Work PREPROD · engine panel distinguishes observed runs from PROD readiness',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Motores',exact:true}).click();
+ const panel=page.getByLabel('Motores con actividad observada');
+ await expect(panel.getByText('1 motores observados')).toBeVisible();
+ await expect(panel.getByText('QA-001',{exact:true})).toBeVisible();
+ await expect(panel.getByText('fenix · PREPROD · 1 ejecuciones observadas')).toBeVisible();
+ await expect(panel.getByText(/no certifica que el motor esté operativo en PROD/)).toBeVisible();
+ await expect(panel.getByRole('link',{name:'Evidencia'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions');
+ await expectNoHorizontalOverflow(page);
+});
