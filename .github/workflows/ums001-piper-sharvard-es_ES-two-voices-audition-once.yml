@@ -1,0 +1,42 @@
+name: UMS001 native es_ES Sharvard male female audition once LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-piper-sharvard-es-es-audition-lab-20261109
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_SHARVARD_ES_ES_AUDITION_20261109.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-es-es-sharvard-audition-once-20261109
+  cancel-in-progress: false
+jobs:
+  audition:
+    if: github.event.head_commit.message == 'UMS001_SHARVARD_ES_ES_VOICES_ONCE_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install only free Piper TTS and obtain documented two-speaker es_ES model
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'piper-tts==1.8.0'
+          mkdir -p /tmp/ums001_piper_sharvard_ES
+          python -m piper.download_voices --download-dir /tmp/ums001_piper_sharvard_ES es_ES-sharvard-medium
+      - name: Produce exactly 2 private female and male audition WAVs with attribution record
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/runtime/ums001_piper_sharvard_two_es_ES_voices_audition_once.py
+      - name: Store only sample audio and license record privately with seven-day retention
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_NATIVE_ES_ES_SHARVARD_FM_SAMPLES_${{ github.run_id }}
+          path: /tmp/ums001_piper_sharvard_ES/
+          retention-days: 7
+          if-no-files-found: error
