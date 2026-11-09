@@ -96,7 +96,7 @@ jobs:
           SEARCH_JOB="$(jq -r '.result.job.job_id' search.json)"
           call_intent 'WORK_STATUS' "$(jq -cn --arg id "$SEARCH_JOB" '{job_id:$id}')" search-status.json
           jq -e '.status == "OK" and .result.status == "OK" and (.result.job.status | type == "string" and length > 0)' search-status.json >/dev/null
-          echo "SEARCH_CODE=GREEN job=${SEARCH_JOB} status=$(jq -r '.result.job.status' search-status.json)"
+          echo "SEARCH_CODE_ACCEPTED=GREEN job=${SEARCH_JOB} status=$(jq -r '.result.job.status' search-status.json) (execution not asserted)"
 
           call_intent 'GIT_STATUS' "$(jq -cn --arg head "$HEAD_SHA" '{expected_head_sha:$head}')" git.json
           jq -e --arg branch "$SAFE_BRANCH" '
@@ -109,7 +109,7 @@ jobs:
           GIT_JOB="$(jq -r '.result.job.job_id' git.json)"
           call_intent 'WORK_STATUS' "$(jq -cn --arg id "$GIT_JOB" '{job_id:$id}')" git-status.json
           jq -e '.status == "OK" and .result.status == "OK" and (.result.job.status | type == "string" and length > 0)' git-status.json >/dev/null
-          echo "GIT_STATUS=GREEN job=${GIT_JOB} status=$(jq -r '.result.job.status' git-status.json)"
+          echo "GIT_STATUS_ACCEPTED=GREEN job=${GIT_JOB} status=$(jq -r '.result.job.status' git-status.json) (execution not asserted)"
 
           call_intent 'BROWSER_STATUS' '{"list":true}' browser.json
           jq -e '
@@ -119,4 +119,4 @@ jobs:
           ' browser.json >/dev/null
           echo 'BROWSER_STATUS=GREEN'
 
-          echo 'JARVIS_AUTHENTICATED_ORCHESTRATOR_READONLY_E2E=GREEN'
+          echo 'JARVIS_AUTHENTICATED_ORCHESTRATOR_ENQUEUE_E2E=GREEN; PHYSICAL_COMPLETION=NOT_ASSERTED'
