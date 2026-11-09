@@ -1,6 +1,7 @@
 import {SUPABASE_PUBLISHABLE_KEY,supabase} from './supabase';
 import {cerebroConsoleEndpoint} from './cerebroConsoleAccess';
 
+const CONSOLE_COMPANY_ID='fenix'; // Gateway accepts this tenant only; never infer another from browser state.
 const CEREBRO_SESSION_STORAGE_KEY='cerebro_console_session_id_v1';
 let cerebroSessionIdMemory:string|null=null;
 
@@ -129,7 +130,7 @@ export async function postCerebroConsoleChat(message:string,pending_action:Cereb
     const response=await fetch(endpoint,{
       method:'POST',
       headers,
-      body:JSON.stringify({message,pending_action,read_context,learning_candidate,conversation_context}),
+      body:JSON.stringify({company_id:CONSOLE_COMPANY_ID,message,pending_action,read_context,learning_candidate,conversation_context}),
       cache:'no-store'
     });
     let data:CerebroConsoleChatResponse|null=null;
