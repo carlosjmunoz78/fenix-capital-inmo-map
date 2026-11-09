@@ -41,7 +41,7 @@ Deno.serve(async req=>{
     const {data:user,error:userError}=await userClient.auth.getUser(auth.slice(7));
     if(userError||!user.user?.id)return deny(req,403,"SESSION_INVALID");
     const svc=createClient(url,service,{auth:{persistSession:false,autoRefreshToken:false}});
-    const {data:actor,error:actorError}=await svc.rpc("fenix_prod_actor_context_by_auth_server",{p_auth_user_id:user.user.id});
+    const {data:actor,error:actorError}=await svc.rpc("jarvis_lab_actor_context_by_auth_server_v0",{p_auth_user_id:user.user.id});
     if(actorError||actor?.ok!==true||actor?.actor_code!=="CARLOS-ADMIN")return deny(req,403,"OWNER_ONLY");
     let body:Record<string,unknown>={};
     try{body=await req.json()}catch{return respond(400,{status:"INVALID",reason:"JSON_REQUIRED"},origin)}
