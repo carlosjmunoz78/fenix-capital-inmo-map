@@ -66,19 +66,21 @@ export class CloudflareOfficialApi {
   }
   if(id==='cloudflare.d1.get')return this.#simple(action,identity,`/accounts/${this.accountId}/d1/database/${assertId(input.database_id,'database_id',UUID)}`);
   const workerName=input.worker_name===undefined? '':assertId(input.worker_name,'worker_name');
+  // Validate a zone ID only when supplied; unrelated account/Worker paths must not fail eagerly.
+  const zoneId=input.zone_id===undefined? '':assertId(input.zone_id,'zone_id');
   const paths={
    'cloudflare.workers.list':`/accounts/${this.accountId}/workers/scripts`,
    'cloudflare.workers.account-settings':`/accounts/${this.accountId}/workers/account-settings`,
    'cloudflare.workers.deployments':`/accounts/${this.accountId}/workers/scripts/${workerName}/deployments`,
-   'cloudflare.zone.ssl':`/zones/${assertId(input.zone_id,'zone_id')}/settings/ssl`,
-   'cloudflare.zone.worker-routes':`/zones/${assertId(input.zone_id,'zone_id')}/workers/routes`,
+   'cloudflare.zone.ssl':`/zones/${zoneId}/settings/ssl`,
+   'cloudflare.zone.worker-routes':`/zones/${zoneId}/workers/routes`,
    'cloudflare.workers.versions':`/accounts/${this.accountId}/workers/scripts/${workerName}/versions`,
    'cloudflare.workers.secrets':`/accounts/${this.accountId}/workers/scripts/${workerName}/secrets`,
    'cloudflare.workers.domains':`/accounts/${this.accountId}/workers/domains`,
    'cloudflare.kv.namespaces':`/accounts/${this.accountId}/storage/kv/namespaces`,
    'cloudflare.r2.buckets':`/accounts/${this.accountId}/r2/buckets`,
    'cloudflare.pages.projects':`/accounts/${this.accountId}/pages/projects`,
-   'cloudflare.rulesets.list':`/zones/${assertId(input.zone_id,'zone_id')}/rulesets`,
+   'cloudflare.rulesets.list':`/zones/${zoneId}/rulesets`,
    'cloudflare.access.apps':`/accounts/${this.accountId}/access/apps`
   };
   if(!Object.hasOwn(paths,id))throw new Error('UNSUPPORTED_CAPABILITY');
