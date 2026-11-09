@@ -211,7 +211,7 @@
     "POLICY_CONFLICT",
     "MONEY_LIMIT"
   ],
-  "acceptance": "CHATGPT_AND_CEREBRO_LAB_KV_D1_CRUD_VERIFIED; OWNER_CONSOLE_CANARY_LAB_OIDC_GET_VERIFIED; PROD_MAIN_CONSOLE_UNBOUND_AND_WRITES_GATED",
+  "acceptance": "REAL_CHATGPT_CRUD_LAB_AND_CEREBRO_E2E_LAB_VERIFIED; MAIN_GATEWAY_SHADOW_EXACT_ROLLBACK_TESTED_FLAG_OFF; OWNER_SESSION_AND_SCOPED_TOKEN_HUMAN_REQUIRED",
   "promoted": false,
   "additional_subscriptions": 0,
   "production_change": false,
@@ -278,6 +278,19 @@
     "owner_canary_negative_auth_and_cors_green": true,
     "owner_canary_429_fail_closed": true,
     "main_console_v33_unchanged_verified": true,
-    "owner_canary_main_console_route_bound": false
+    "owner_canary_main_console_route_bound": false,
+    "main_console_v33_shadow_patch_tested": true,
+    "main_console_shadow_source_identical_to_deployed": true,
+    "main_console_shadow_rollback_exact": true,
+    "main_console_shadow_flag_enabled": false,
+    "main_console_shadow_regression_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42707365667",
+    "owner_session_available_in_connected_opera": false,
+    "owner_session_observation": "Opera app.fenixcapital.es/cerebro displayed Acceso seguro and Entrar; 2026-11-09",
+    "least_privilege_cloudflare_token_exists_verified": false,
+    "cloudflare_token_management_api_status": "403; cannot issue scoped tokens via current connector",
+    "requires_owner_user_actions": [
+      "SIGN_IN_APP_CEREBRO_TO_PROVE_CURRENT_SUPABASE_OWNER_SESSION",
+      "CREATE_SCOPED_READONLY_CLOUDFLARE_TOKEN_IN_DASHBOARD_AND_STORE_SECURELY_NOT_CHAT"
+    ]
   }
 }
