@@ -1,0 +1,10 @@
+company_id=fenix
+engine_id=UMS-001
+environment=LAB
+version=V5.4_CANDIDATE
+speaker_ids=1,0
+locale=es_ES
+license=CC_BY_3.0_ATTRIBUTION
+auto_publish=false
+paid_calls=0
+one_shot=true
