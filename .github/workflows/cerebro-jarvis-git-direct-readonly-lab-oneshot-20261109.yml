@@ -1,0 +1,76 @@
+name: CEREBRO JARVIS Git Direct Readonly LAB One Shot 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-direct-readonly-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-git-direct-readonly-lab-oneshot-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  api-negative-and-ui-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_JARVIS_GIT_DIRECT_LAB: 'true'
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      PLAYWRIGHT_SKIP_BUILD: '1'
+      API: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-git-direct-readonly-lab-v0/inspect
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Real LAB Edge Function negative security gates, no personal auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          const url=process.env.API;
+          async function probe(method,origin,auth){
+            const headers={'content-type':'application/json'};
+            if(origin)headers.origin=origin;
+            if(auth)headers.authorization='Bearer '+auth;
+            const r=await fetch(url,{method,headers,redirect:'error',body:method==='POST'?'{"operation":"STATUS","expected_head_sha":"39bc098f322c6981d0d703c5813a7234a5742e8f"}':undefined,signal:AbortSignal.timeout(14000)});
+            return r.status;
+          }
+          const qa='http://127.0.0.1:4173',prod='https://app.fenixcapital.es';
+          const cases=[
+            ['no-session',await probe('POST',qa,null),403],
+            ['invalid-session',await probe('POST',qa,'invalid.jwt.token'),403],
+            ['prod-origin-blocked',await probe('POST',prod,null),403],
+            ['untrusted-origin-blocked',await probe('POST','https://example.com',null),403],
+            ['method-get-closed',await probe('GET',qa,null),404],
+            ['allowed-lab-preflight',await probe('OPTIONS',qa,null),204],
+            ['prod-preflight-denied',await probe('OPTIONS',prod,null),403]
+          ];
+          for(const [name,got,want]of cases)if(got!==want)throw Error(name+':HTTP_'+got+'_expected_'+want);
+          console.log(JSON.stringify({status:'JARVIS_DIRECT_GIT_LAB_HTTP_NEGATIVE=GREEN',checks:cases.length,prod_origin_denied:true,user_jwt_not_supplied:true,git_writes:0,db_writes:0}));
+          JS
+      - name: Install lockfile dependencies and build LAB UI only
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Install isolated Chromium
+        run: npx playwright install chromium
+      - name: Direct Git UI with mocked session positive and negative cases
+        run: |
+          npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep 'JARVIS Direct Git readonly LAB' --reporter=line
+      - name: Retain failed test traces only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-git-direct-readonly-lab-${{ github.run_id }}
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
