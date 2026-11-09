@@ -7,3 +7,4 @@ paid_api_calls=0
 new_subscriptions=0
 no_publish=true
 one_shot=true
+alternate_cdn_trial=1
