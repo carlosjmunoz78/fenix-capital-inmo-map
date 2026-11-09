@@ -47,4 +47,17 @@ test('PROD-shaped: PATCH canónico con versión, motivo e histórico, UI actuali
  await expect(panel).toContainText('Motivo registrado.');
  await expect(page.getByText('Fase actual: Banco')).toBeVisible();
  await expect(page).toHaveURL('/expedientes/'+id);
+ // El expediente persiste en el origen canónico y puede volver a cambiarse,
+ // incluso retrocediendo, sin que el frontend congele la primera edición.
+ await expect.poll(()=>item.stage).toBe('Banco');
+ await page.getByRole('button',{name:'Cambiar manualmente a fase Documentación'}).click();
+ await panel.getByPlaceholder('Explica el motivo operativo, excepción o evidencia que justifica el cambio…').fill('Volver a solicitar documentación actualizada');
+ await page.getByRole('button',{name:'Guardar cambio de fase'}).click();
+ await expect.poll(()=>requests).toBe(2);
+ expect(payload).toMatchObject({expected_version:8,stage:'Documentación'});
+ expect(String(payload?.notas)).toContain('Cliente listo para presentar a entidades');
+ expect(String(payload?.notas)).toContain('Volver a solicitar documentación actualizada');
+ await expect.poll(()=>item.stage).toBe('Documentación');
+ await page.reload();
+ await expect(page.getByText('Fase actual: Documentación')).toBeVisible();
 });
