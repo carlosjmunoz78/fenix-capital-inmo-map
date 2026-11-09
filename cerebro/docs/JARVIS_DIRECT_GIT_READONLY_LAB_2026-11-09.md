@@ -111,3 +111,29 @@ Persisten `REAL_OWNER_AUTH_HTTP_POSITIVE=PENDIENTE`, `PHYSICAL_VOICE=PENDIENTE`,
 Durante la comprobación final, `main` avanzó **por cambios independientes de este laboratorio** desde `3600942775fbc19b47560e6f798caca107cd7473` hasta `4cf90f47b56300ce70fa30d097713d1e199e5b30`. La comparación GitHub encontró únicamente cambios en `cerebro/registry/skill-dynamic-adoption-v1.json`, sin archivos de JARVIS o frontend. `gh-pages` permanece en `01650c6fb728aa9d41dc4877dd4bee243372be68` y el backup `backup/20261109-jarvis-git-parity-before-direct-lab` permanece en `fd0e0c69e2c0f1b135dbed51b0f2efc12c10d30e`. El ensayo HTTP reproducible sigue fijado a los SHA antiguos y **no demuestra la compilación del nuevo `main` posterior**; repetir gates contra el HEAD vigente antes de cualquier promoción.
 
 La inspección de sesiones de navegador mediante conectores no devolvió acceso utilizable; **no se verificó autorización HTTP positiva con token real**. No extraer ni trasladar tokens personales entre proyectos. El progreso físico se limita a SQL de permisos/roles, HTTP negativos y pruebas frontend simuladas.
+
+## Tribunal de continuidad · OLD vs NEW sin sesión · 9 noviembre 2026
+
+### Prueba física adicional: navegadores reales y recursos estáticos
+
+GitHub Actions [run 42589852196](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42589852196) completado **success**. Contiene manifiesto de evidencias y capturas del navegador Chromium sin credenciales (artefacto `jarvis-old-new-unauth-browser-42589852196`).
+
+- OLD: copia `gh-pages@01650c6fb728aa9d41dc4877dd4bee243372be68`.
+- NEW: compilación limpia de `main@4cf90f47b56300ce70fa30d097713d1e199e5b30`, usando exclusivamente configuración pública de build existente.
+- Dos servidores de `vite preview` enlazados exclusivamente a loopback, puertos 4185 y 4186. Sin acceso con sesión autenticada, sin despliegue y sin operaciones de negocio.
+- `GET /` y `GET /cerebro`: HTTP 200 en OLD y NEW.
+- Activos estáticos referenciados por la pantalla: **4/4 accesibles por HTTP 200** en ambas versiones; sin errores JavaScript de página.
+- Texto visible de la pantalla no autenticada: 178 caracteres en ambas versiones y SHA256 idéntico `ce840900dcda0feea91dc64b25d08bdc893d59a038eadcc4685c10a45e164760`.
+- Integridad de ramas `main` y `gh-pages` verificada antes y después.
+
+**Gate concreto `OLD_NEW_UNAUTHENTICATED_ROUTE_AND_ASSETS`: VERDE.** No equivale a comparación funcional con usuario autenticado, audio/micrófono, tiempos reales de trabajo, CRM ni a rollback de dominio público.
+
+### Riesgos y puertas abiertas
+
+- `REAL_OWNER_AUTH_HTTP_POSITIVE`: BLOQUEADO POR SESIÓN PERSONAL NO ACCESIBLE. El navegador conectado desde esta conversación no entrega pestañas autorizadas. No copiar JWT ni contraseña a los logs o al chat. No afirmar E2E de propietario ni implementar un bypass.
+- `VOICE_PHYSICAL`: PENDIENTE aceptación con micrófono/altavoces del dispositivo. El manifiesto `cerebro/communication/voice/jarvis/manifest.json` mantiene `prod_authorized=false`, corpus parcial y latencia/streaming/aislamiento pendientes.
+- `FULL_OLD_NEW_AUTHENTICATED`: PENDIENTE. Esta prueba solo cubre render público sin sesión.
+- `PUBLIC_DOMAIN_ROLLBACK`: PENDIENTE. La reversión verificada afecta únicamente a un servidor aislado, no a DNS/hosting en producción.
+- `TRIBUNAL_PROD`: BLOQUEADO mientras haya gates obligatorios anteriores sin evidencia.
+
+**No promover a PROD.** Coste en nuevas suscripciones: 0 €. Consumo marginal GitHub Actions/Supabase de las cuotas existentes sin cuantificar.
