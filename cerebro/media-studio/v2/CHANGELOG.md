@@ -233,3 +233,9 @@ Additional recurring cost introduced: `0 €`
 - HECHO: audio nuevo ~−15 LUFS y TP < -1.6dB, sin nuevas generaciones IA de pago ni suscripciones. Backup completo con alternativa de score local original y scripts https://drive.google.com/file/d/16F2lTs1i9U7FvbyCECm9s6pE0flgclVi/view .
 - Notion IG https://app.notion.com/p/41381b1a756d81b78ad6e23f1e2149bb / FB https://app.notion.com/p/41381b1a756d8199b9e3d6ef8ff548b8 · Bloqueado para publicación hasta QA voz acento España, marcas, claims hipotecarios, inputs visuales y preview Meta real.
 - Runbook `cerebro/media-studio/v2/runbooks/UMS001_V53_MIXKIT_MUSIC_COMMERCIAL_RIGHTS_AND_QA_20261109.md`; conserva todos RAW y V0–V5.2; sin main/PROD/App/CRM/Supabase/WordPress/SEO/DNS/Buffer.
+
+
+### 2026-11-09 · UMS-001 voces Piper nativas es_ES female/male LAB
+- GitHub Actions run 42573071257 SUCCESS: 2 nuevas muestras 6.467s y 6.351s, modelo Piper `es_ES-sharvard-medium` (speaker F=1, M=0), licencia dataset CC BY 3.0 con atribución, sin nuevas APIs de pago ni planes.
+- Google Drive femenino https://drive.google.com/file/d/1xa4MHKfc-CX1AQqXbqoGkPvjKdHFkoft/view · masculino https://drive.google.com/file/d/16XWyGMdjuKd858966_H-JSbz5DW38qHF/view · manifest https://drive.google.com/file/d/1YeLCPxZ8milS5APFpv19zQMWf1kDI4kg/view .
+- Las voces no están instaladas en los Reels V5.3. Aprobar por escucha real la pronunciación y calidad publicitaria antes de sustitución. Mantener `PUBLISH=false`, LAB; Runbook `cerebro/media-studio/v2/runbooks/UMS001_CASTILIAN_FEMALE_MALE_VOICE_AUDITION_20261109.md`.
