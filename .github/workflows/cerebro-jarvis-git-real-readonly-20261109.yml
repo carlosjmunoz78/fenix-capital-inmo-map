@@ -1,0 +1,73 @@
+name: CEREBRO JARVIS Git REAL READONLY - One Shot 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-parity-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-git-real-readonly-20261109.yml'
+permissions:
+  contents: read
+  checks: read
+  statuses: read
+jobs:
+  real-git-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ github.token }}
+      EXPECTED_REPO: carlosjmunoz78/fenix-capital-inmo-map
+      SAFE_BRANCH: cerebro/jarvis-core-prod-candidate-20261103
+      PROTECTED_PAGES_SHA: 01650c6fb728aa9d41dc4877dd4bee243372be68
+    steps:
+      - name: Checkout safe branch without persistent credentials
+        uses: actions/checkout@v4
+        with:
+          ref: cerebro/jarvis-core-prod-candidate-20261103
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Exercise REAL Git STATUS DIFF CI and COMPARE without writes
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -z "$(git status --porcelain)"
+          git diff --quiet
+          node --input-type=module <<'JS'
+          const repo=process.env.EXPECTED_REPO;
+          const safe=process.env.SAFE_BRANCH;
+          const token=process.env.GH_TOKEN;
+          if(!token||repo!=='carlosjmunoz78/fenix-capital-inmo-map'||!safe.startsWith('cerebro/'))throw Error('SCOPE_INVALID');
+          const sha=(await import('node:child_process')).execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();
+          if(!/^[0-9a-f]{40}$/.test(sha))throw Error('PIN_INVALID');
+          async function read(path){
+            const url='https://api.github.com/repos/'+repo+path;
+            const response=await fetch(url,{method:'GET',headers:{authorization:'Bearer '+token,accept:'application/vnd.github+json','x-github-api-version':'2022-11-28'},redirect:'error'});
+            if(!response.ok)throw Error('READ_FAILED:'+response.status+':'+path.split('/').slice(0,4).join('/'));
+            return await response.json();
+          }
+          const head=await read('/branches/'+encodeURIComponent(safe));
+          if(head.commit?.sha!==sha)throw Error('SAFE_BRANCH_HEAD_MISMATCH');
+          const pages=await read('/branches/gh-pages');
+          if(pages.commit?.sha!==process.env.PROTECTED_PAGES_SHA)throw Error('PAGES_BRANCH_CHANGED');
+          const current=await read('/branches/main');
+          if(!/^[0-9a-f]{40}$/.test(current.commit?.sha||''))throw Error('MAIN_READ_FAILED');
+          const compare=await read('/compare/main...'+encodeURIComponent(safe));
+          if(!['identical','ahead','behind','diverged'].includes(compare.status))throw Error('COMPARE_INVALID');
+          const checks=await read('/commits/'+sha+'/check-runs?per_page=20');
+          if(!Number.isInteger(checks.total_count))throw Error('CI_READ_INVALID');
+          const statuses=await read('/commits/'+sha+'/status');
+          if(!Array.isArray(statuses.statuses))throw Error('GIT_STATUS_READ_INVALID');
+          const evidence={
+            status:'REAL_GIT_READONLY=GREEN',
+            scope:repo,branch:safe,head_sha:sha,
+            worktree_status:'CLEAN',diff_worktree:'CLEAN',
+            main_sha:current.commit.sha,gh_pages_unchanged:true,
+            compare_status:compare.status,compare_total_commits:compare.total_commits,
+            ci_observed_count:checks.total_count,ci_complete:checks.check_runs?.filter(x=>x.status==='completed').length||0,
+            commit_status:statuses.state,commit_status_count:statuses.total_count,
+            write_operations:0,prod_touched:false,trading_touched:false,additional_subscriptions_eur:0
+          };
+          console.log(JSON.stringify(evidence));
+          JS
+          test -z "$(git status --porcelain)"
+      - name: No rearm and no deployment
+        run: echo 'JARVIS_REAL_READONLY_GIT_OBSERVATION=GREEN; UI_GW_OIDC_E2E=NOT_ASSERTED'
