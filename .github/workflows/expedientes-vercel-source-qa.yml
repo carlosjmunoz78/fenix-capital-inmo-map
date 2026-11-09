@@ -2,7 +2,7 @@ name: Expedientes Vercel Source Isolated QA
 on:
   push:
     branches:
-      - fix/app-session-navigation-recovery-20261109
+      - fix/expedientes-persistencia-subpasos-contadores-20261109
 permissions:
   contents: read
 jobs:
