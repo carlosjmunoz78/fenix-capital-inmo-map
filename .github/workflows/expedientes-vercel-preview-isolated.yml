@@ -1,0 +1,57 @@
+name: Expedientes isolated Vercel Preview (no production)
+
+on:
+  push:
+    branches:
+      - fix/expedientes-activos-orden-cierre-20261109
+    paths:
+      - .github/workflows/expedientes-vercel-preview-isolated.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: expedientes-vercel-preview-isolated
+  cancel-in-progress: false
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: preview
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - name: Checkout exact validated feature branch
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Assert isolated branch and Vercel target
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${GITHUB_REF_NAME}" = "fix/expedientes-activos-orden-cierre-20261109"
+          test "${VERCEL_ORG_ID}" = "team_qnh6u1Ofy2WPp0MGEKlyMA50"
+          test "${VERCEL_PROJECT_ID}" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          test -n "${VERCEL_TOKEN}"
+      - name: Prepare Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@48.0.0
+      - name: Pull Preview configuration only
+        run: vercel pull --yes --environment=preview --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Deploy Preview only (never production)
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}")"
+          case "${url}" in
+            https://*.vercel.app) ;;
+            *) echo "Unexpected preview URL (no output will be published)" >&2; exit 1 ;;
+          esac
+          printf 'Preview created: %s\n' "${url}" >> "${GITHUB_STEP_SUMMARY}"
