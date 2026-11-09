@@ -1,6 +1,6 @@
 # CEREBRO OS · FACT-001 Universal Connector Factory V0 · Cloudflare scope ALL
 
-**Status:** IMPLEMENTED LAB CORE / NOT DEPLOYED / NO REAL CLOUD API ATTESTATION / NOT CONNECTED TO CHATGPT OR CEREBRO.
+**Status:** CHATGPT NORMAL → GITHUB ACTIONS → CLOUDFLARE: LAB READ-ONLY PHYSICAL E2E VERIFIED (2026-11-09); native ChatGPT MCP & CEREBRO Gateway E2E NOT VERIFIED; NO PROD CHANGES.
 
 This is a **non-invasive additive extension** under `cerebro/connectors/universal`. Existing FACT-001, `ACTGW-001`, IAM-001, registry, app, CRM, DNS, and deployed workers are untouched. It extends *capabilities*, not the canonical engine ID count.
 
@@ -8,7 +8,7 @@ Architecture: ChatGPT private MCP (auth client A) and CEREBRO Gateway (auth clie
 
 Cloudflare account scope: all products in account `e39a57e1ac42650ca5a6d5307cf0ac8e`. Account-wide INVENTORY is the initial horizontal capability. D1/Workers/Pages/KV/R2/zones/DNS/WAF/Access/analytics are modular; not all write functions are implemented. Expand each product after a testable least-privilege contract. A tool appearing in `inventory()` is **not** proof that the account has permissions or that its plan supports it. Only `IMPLEMENTED_LAB` capabilities may be routed; live statuses depend on physical tests.
 
-FB proof target: `cerebro-facebook-autoqual-lab` D1 with `jurisdiction=eu`, non-public Worker disabled. D1 list/create is real official API code but unexecuted without an authorized Cloudflare token and verified Free quota. The original Facebook `wrangler.lab.jsonc` continues to hold a placeholder UUID. No writes to that file until real UUID and target are verified.
+FB proof target: `cerebro-facebook-autoqual-lab` D1 with `jurisdiction=eu`, non-public Worker disabled. D1 list/create is real official API code but unexecuted without an authorized Cloudflare token and verified Free quota. Facebook-only D1 exists in EU (UUID `e8fe801d-4b01-4e34-ac12-26014b79adc1`), validated with read-only inventory on 2026-11-09. The Facebook Worker is not deployed; Facebook source remains in private repo `fenix-capital-cerebro-social` PR #9 DRAFT. FACT-001 has not modified Facebook Worker or any production resources.
 
 The `makeChatGPTAdapter` and `makeCerebroAdapter` are transport-neutral adapters. They deliberately DO NOT expose an unauthenticated web server. Wiring MCP OAuth, safe hosting, client plugin registration, durable store and direct CEREBRO Gateway dispatch is still required before dual physical acceptance. Never call raw core from an LLM without trusted authenticated principal injection.
 
@@ -17,3 +17,13 @@ Run: `npm test` (Node >=20; no external dependencies); `npm run validate`.
 Rollback: revert only the isolated additive commit(s)/branch. For eventual FB D1, leave OFF and snapshot/restore via approved procedure; **never delete existing D1** to simulate rollback. No routes, domain settings, training or public postings are changed here.
 
 New connector scaffold: add a catalog of allowed capabilities, an adapter implementing `perform`, two independently authenticated client adapters invoking shared `execute`, policy/FinOps gates, fake-HTTP tests, recovery documentation. Default status `PLANNED_NOT_ENABLED` until evidence supports promotion.
+
+## ChatGPT normal without Work — physical read-only LAB route (2026-11-09)
+
+An alternative to native MCP is now **working**: ChatGPT authenticated GitHub connector → isolated PR #44 branch order JSON → GitHub Actions encrypted Cloudflare API token → fixed GET-only Cloudflare API calls → safe GitHub logs and redacted receipt → ChatGPT GitHub connector. This does **not** use Work.
+
+**E2E:** [GitHub Actions run #42677693830](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42677693830) passed. The live account had 8 D1 databases; Facebook D1 exists. Scopes READ_OK: token, account, D1, Workers, Worker Domains, Worker Settings, KV, Pages, Access, zones, DNS, zone settings, WAF Rulesets, Worker Routes. PERMISSION_BLOCKED: R2 and Logpush. Zero Cloudflare writes. Earlier official MCP handshake received 403.
+
+The bridge **only exposes** a fixed account_readonly_audit order. It does not enable arbitrary operations, administration, or changes to DNS/Workers. Production CEREBRO Gateway physical binding and ChatGPT native MCP remain NOT VERIFIED. For writes: separate least-privilege credentials, policy/IAM, contracts, dry runs, backup, rollback, audit and expense caps.
+
+See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
