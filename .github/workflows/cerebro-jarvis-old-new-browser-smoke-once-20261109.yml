@@ -1,0 +1,121 @@
+name: CEREBRO JARVIS OLD NEW Browser Smoke ONE SHOT 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-direct-readonly-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-old-new-browser-smoke-once-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  old-new-unauth-surface:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      OLD_PAGES_SHA: 01650c6fb728aa9d41dc4877dd4bee243372be68
+      NEW_MAIN_SHA: 4cf90f47b56300ce70fa30d097713d1e199e5b30
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Verify protected remote refs before checking out
+        run: |
+          set -euo pipefail
+          remote='https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git'
+          test "$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)" = "$OLD_PAGES_SHA"
+          test "$(git ls-remote "$remote" refs/heads/main | cut -f1)" = "$NEW_MAIN_SHA"
+      - uses: actions/checkout@v4
+        with:
+          ref: 01650c6fb728aa9d41dc4877dd4bee243372be68
+          path: old-published
+          persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          ref: 4cf90f47b56300ce70fa30d097713d1e199e5b30
+          path: new-main
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: new-main/package-lock.json
+      - name: Build candidate with existing publishable PROD public configuration, offline
+        working-directory: new-main
+        run: |
+          set -euo pipefail
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          npm ci --no-audit --no-fund
+          npm run build
+          test -s dist/index.html
+          test -s "$GITHUB_WORKSPACE/old-published/index.html"
+      - name: Install Chromium on ephemeral GitHub runner
+        working-directory: new-main
+        run: npx playwright install chromium
+      - name: Serve OLD and NEW simultaneously only on loopback and inspect browsers
+        working-directory: new-main
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx vite preview --host 127.0.0.1 --strictPort --port 4185 --outDir "$GITHUB_WORKSPACE/old-published" >/tmp/jarvis_old.log 2>&1 &
+          old_pid=$!
+          npx vite preview --host 127.0.0.1 --strictPort --port 4186 --outDir "$GITHUB_WORKSPACE/new-main/dist" >/tmp/jarvis_new.log 2>&1 &
+          new_pid=$!
+          trap 'kill "$old_pid" "$new_pid" 2>/dev/null || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS --max-time 2 http://127.0.0.1:4185/ -o /dev/null && curl -fsS --max-time 2 http://127.0.0.1:4186/ -o /dev/null; then break; fi
+            sleep 0.25
+          done
+          mkdir -p "$GITHUB_WORKSPACE/evidence"
+          node --input-type=module <<'JS'
+          import {chromium} from '@playwright/test';
+          import {createHash} from 'node:crypto';
+          import fs from 'node:fs';
+          const browser=await chromium.launch({headless:true});
+          const rows=[];
+          try{
+            for(const config of [{name:'OLD',port:4185},{name:'NEW',port:4186}]){
+              const base='http://127.0.0.1:'+config.port;
+              const ctx=await browser.newContext({viewport:{width:1440,height:900}});
+              const page=await ctx.newPage();
+              const fatal=[];
+              page.on('pageerror',err=>fatal.push(String(err.message).slice(0,130)));
+              const landing=await page.goto(base+'/',{waitUntil:'domcontentloaded',timeout:25000});
+              if(!landing||landing.status()!==200)throw Error(config.name+'_ROOT_NOT_200');
+              const loc=await page.goto(base+'/cerebro',{waitUntil:'domcontentloaded',timeout:25000});
+              if(!loc||loc.status()!==200)throw Error(config.name+'_CEREBRO_ROUTE_NOT_200');
+              await page.waitForTimeout(750);
+              const bodyText=(await page.locator('body').innerText()).trim();
+              if(bodyText.length<15)throw Error(config.name+'_EMPTY_UI');
+              const assets=await page.locator('script[src],link[rel="stylesheet"][href]').evaluateAll(nodes=>nodes.map(node=>node.getAttribute('src')||node.getAttribute('href')).filter(Boolean));
+              if(!assets.length)throw Error(config.name+'_NO_ASSET_LINKS');
+              for(const asset of assets){
+                const url=new URL(asset,base);
+                if(url.origin!==base)throw Error(config.name+'_NONLOCAL_APP_ASSET');
+                const resource=await fetch(url,{redirect:'error',signal:AbortSignal.timeout(8000)});
+                if(!resource.ok)throw Error(config.name+'_MISSING_ASSET_HTTP_'+resource.status);
+              }
+              await page.screenshot({path:process.env.GITHUB_WORKSPACE+'/evidence/jarvis-'+config.name.toLowerCase()+'-unauth.png',fullPage:true});
+              rows.push({version:config.name,root_http:landing.status(),cerebro_http:loc.status(),visible_text_chars:bodyText.length,
+                body_sha256:createHash('sha256').update(bodyText).digest('hex'),asset_count:assets.length,asset_status:'ALL_200',
+                browser_page_errors:fatal.length,scope:'UNAUTHENTICATED',side_effects:'NONE'});
+              await ctx.close();
+            }
+            if(rows.length!==2)throw Error('TWO_VERSIONS_NOT_TESTED');
+            const summary={status:'JARVIS_OLD_NEW_UNAUTHENTICATED_BROWSER_SMOKE=GREEN',proven:'BROWSER_RENDER_AND_ASSETS_ONLY',
+              full_session_parity:false,physical_microphone:false,public_deployment:false,rows};
+            fs.writeFileSync(process.env.GITHUB_WORKSPACE+'/evidence/manifest.json',JSON.stringify(summary,null,2));
+            console.log(JSON.stringify(summary));
+          }finally{await browser.close()}
+          JS
+          remote='https://github.com/carlosjmunoz78/fenix-capital-inmo-map.git'
+          test "$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)" = "$OLD_PAGES_SHA"
+          test "$(git ls-remote "$remote" refs/heads/main | cut -f1)" = "$NEW_MAIN_SHA"
+          echo 'PUBLIC_BRANCHES_STILL_UNCHANGED=GREEN'
+      - name: Retain uncredentialed browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-old-new-unauth-browser-${{ github.run_id }}
+          path: evidence
+          if-no-files-found: ignore
+          retention-days: 7
