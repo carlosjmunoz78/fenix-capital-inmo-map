@@ -1,0 +1,42 @@
+name: Expedientes eight phases · publish verified staged artifact
+on:
+  push:
+    branches:
+      - fix/expedientes-eight-phases-substeps-20261109
+    paths:
+      - .github/workflows/expedientes-eight-phases-promote.yml
+permissions:
+  contents: read
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERIFIED_STAGED_ARTIFACT: https://fenix-capital-preprod-gl6wh7psx.vercel.app
+      PREVIOUS_KNOWN_GOOD: 7aC5UAcpbEj57KxE763kqTYxKDAE
+    steps:
+      - name: Assert exact authorized staged target
+        run: |
+          test "${GITHUB_REF_NAME}" = "fix/expedientes-eight-phases-substeps-20261109"
+          test "${VERCEL_PROJECT_ID}" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          test "${VERIFIED_STAGED_ARTIFACT}" = "https://fenix-capital-preprod-gl6wh7psx.vercel.app"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+      - name: Install pinned Vercel CLI
+        run: npm install --global vercel@48.0.0
+      - name: Inspect ready production artifact
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel inspect "${VERIFIED_STAGED_ARTIFACT}" --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Promote exactly tested artifact without a rebuild
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: vercel promote "${VERIFIED_STAGED_ARTIFACT}" --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
+      - name: Record fallback
+        run: |
+          echo "Promoted: ${VERIFIED_STAGED_ARTIFACT}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Prior known-good deployment ID: ${PREVIOUS_KNOWN_GOOD}" >> "${GITHUB_STEP_SUMMARY}"
+          echo "Data rollback: docs/expedientes/20261109_eight_phases_data_rollback.sql (guarded)" >> "${GITHUB_STEP_SUMMARY}"
