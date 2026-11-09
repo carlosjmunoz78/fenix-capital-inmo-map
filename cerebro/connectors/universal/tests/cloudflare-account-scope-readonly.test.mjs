@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { auditCloudflareAccountScopes, ACCOUNT_ID, sanitizeResponseStatus } from './cloudflare-account-scope-readonly.mjs';
+import { auditCloudflareAccountScopes, ACCOUNT_ID, sanitizeResponseStatus } from '../preflight/cloudflare-account-scope-readonly.mjs';
 const zone='f'.repeat(32);
 function res(result, status=200){return {status,ok:status>=200&&status<300,json:async()=>({success:true,result})};}
 const endpoint=(url)=>new URL(url).pathname.replace(/^\/client\/v4/, '');
