@@ -28,12 +28,13 @@ export function inMemoryIdempotency(){
 export function blocked(reason, detail) {if(!HUMAN.has(reason)) throw new Error('invalid HUMAN_REQUIRED reason');return {status:'HUMAN_REQUIRED',reason,detail,executed:false};}
 
 export class UniversalConnectorCore {
-  constructor({cloudflare, authorize, idempotency, audit, costGuard}={}) {
+  constructor({cloudflare, opera, authorize, idempotency, audit, costGuard}={}) {
     if(typeof authorize!=='function') throw new Error('trusted authorize callback required');
     if(typeof audit!=='function') throw new Error('audit sink required');
     if(!idempotency || typeof idempotency.claim!=='function' || typeof idempotency.complete!=='function') throw new Error('atomic idempotency store required');
     if(typeof costGuard!=='function') throw new Error('cost guard required');
     this.cloudflare=cloudflare;
+    this.opera=opera;
     this.authorize=authorize;
     this.audit=audit;
     this.idempotency=idempotency;
@@ -52,7 +53,8 @@ export class UniversalConnectorCore {
     if(!action) return blocked('LOW_CONFIDENCE','Capability not registered');
     if(action.status!=='IMPLEMENTED_LAB') return blocked('LOW_CONFIDENCE',`Capability ${action.id} is ${action.status}`);
     if(context.environment==='PROD' && action.sideEffect) return blocked('HIGH_RISK','PROD write requires separate, reviewed promotion contract');
-    if(!this.cloudflare) return blocked('LOW_CONFIDENCE','Cloudflare adapter unavailable');
+    const provider=action.id.startsWith('cloudflare.')?this.cloudflare:action.id.startsWith('opera.')?this.opera:null;
+    if(!provider) return blocked('LOW_CONFIDENCE','Provider adapter unavailable');
     const identity = {client_id:trustedPrincipal.client_id, actor_id:nonempty(trustedPrincipal.actor_id,'actor_id'), identity_ref:nonempty(trustedPrincipal.identity_ref,'identity_ref')};
     const scope = {company_id:context.company_id,engine_id:context.engine_id,environment:context.environment,version:context.version};
     const attempt_id=randomUUID();
@@ -71,11 +73,11 @@ export class UniversalConnectorCore {
         if(lease.status==='CONFLICT'){makeAudit('REJECTED_CONFLICT');return blocked('POLICY_CONFLICT','Idempotency key collision');}
         if(lease.status==='REPLAY'){makeAudit('REPLAY');return lease.result;}
         if(lease.status==='PENDING'){makeAudit('PENDING');return blocked('LOW_CONFIDENCE','Mutation pending / unknown outcome; reconcile before retry');}
-        const output=await this.cloudflare.perform({action,scope,input,identity});
+        const output=await provider.perform({action,scope,input,identity});
         if(output.status==='COMPLETED' || output.status==='ALREADY_EXISTS_VERIFIED')await this.idempotency.complete(key,fingerprint,output);
         makeAudit(output.status);return output;
       }
-      const output=await this.cloudflare.perform({action,scope,input,identity});
+      const output=await provider.perform({action,scope,input,identity});
       makeAudit(output.status);return output;
     }catch(err){makeAudit('ERROR');return blocked('LOW_CONFIDENCE',`Execution or verification failed (${err.code??'UNSPECIFIED'})`);}
   }

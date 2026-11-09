@@ -3,7 +3,7 @@ import { blocked } from './core.mjs';
 export function makeChatGPTAdapter({core,authenticate}) {
  if(typeof authenticate!=='function')throw new Error('OAuth/MCP identity verifier required');
  return {
-  listTools(){return core.capabilities().filter(c=>c.status==='IMPLEMENTED_LAB').map(c=>({name:c.id,description:`Cloudflare ${c.id}; ${c.permission}; requires explicit scoped authorization`,inputSchema:{type:'object',properties:{company_id:{type:'string'},engine_id:{type:'string'},environment:{type:'string'},version:{type:'string'},idempotency_key:{type:'string'},input:{type:'object'}},required:['company_id','engine_id','environment','version']}}));},
+  listTools(){return core.capabilities().filter(c=>c.status==='IMPLEMENTED_LAB').map(c=>({name:c.id,description:`CEREBRO universal connector ${c.id}; ${c.permission}; requires explicit scoped authorization`,inputSchema:{type:'object',properties:{company_id:{type:'string'},engine_id:{type:'string'},environment:{type:'string'},version:{type:'string'},idempotency_key:{type:'string'},input:{type:'object'}},required:['company_id','engine_id','environment','version']}}));},
   async callTool({name,arguments:args={}},authContext){
    const principal=await authenticate(authContext);
    if(!principal)return blocked('POLICY_CONFLICT','ChatGPT OAuth session not verified');
