@@ -43,3 +43,9 @@ export function rollbackJarvisCommit(input:{commit_sha:string;expected_head_sha:
 export function enqueueJarvisWork(input:{name:string;payload?:Record<string,unknown>;idempotency_key?:string;timeout_ms?:number}){return call<{status?:string;job?:JarvisWorkJob;reason?:string}>('work/enqueue','POST',input);}
 export function fetchJarvisWorkJob(jobId:string){return call<{status?:string;job?:JarvisWorkJob}>(`work/${encodeURIComponent(jobId)}`,'GET');}
 export function cancelJarvisWorkJob(jobId:string){return call<{status?:string;job?:JarvisWorkJob}>(`work/${encodeURIComponent(jobId)}/cancel`,'POST',{});}
+
+export type JarvisDirectGitRead={status:string;proof?:string;operation:string;repository?:string;branch?:string;head_sha?:string;environment?:string;mode?:string;worker_required?:boolean;job_enqueued?:boolean;git_writes?:number;db_writes?:number;prod_touched?:boolean;reason?:string;compare_status?:string;ahead_by?:number;behind_by?:number;ci_total?:number;ci_completed_observed?:number;commit_status?:string;working_tree?:string};
+export const JARVIS_GIT_DIRECT_LAB_ENABLED=!IS_PRODUCTION&&import.meta.env.VITE_JARVIS_GIT_DIRECT_LAB==='true';
+export function inspectJarvisGitDirectLab(operation:JarvisGitInspectOperation,expected_head_sha:string){
+ return callGateway<JarvisDirectGitRead>('jarvis-git-direct-readonly-lab-v0','inspect','POST',{operation,expected_head_sha});
+}
