@@ -29,3 +29,7 @@ The bridge **only exposes** a fixed account_readonly_audit order. It does not en
 See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
 
 **CEREBRO E2E LAB VERIFIED (2026-11-09):** physical Console V0 -> ACTGW-001 -> FACT-001 -> Cloudflare GET tested twice, including full 77/77 universal suite + 9/9 Gateway tests [run #42680213195](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42680213195). D1=8; Workers=6; 0 writes. Supabase deployed Gateway v33 **not connected or changed**; separate live integration still gated. R2/Logpush read scopes remain blocked.
+
+### CEREBRO deployed OIDC sidecar (2026-11-09)
+
+**REAL LAB READ-ONLY VERIFIED:** new Supabase Edge Function `cerebro-fact001-cloudflare-lab` v1 ACTIVE, GitHub short-lived signed OIDC, owner-deny-by-default (anonymous/forged 401), existing Supabase Vault encrypted credential (1 record), real Cloudflare GET D1=8 / Workers=7 / writes=0. [Physical proof #42688149814](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814). This is additive; Supabase `cerebro-console-gateway-v0` v33 is **NOT bound to it**, App/CRM unchanged. Scoped read-only token still needed before PROD autonomy. See `supabase/fact001-lab/README.md`.

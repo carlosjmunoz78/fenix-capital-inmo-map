@@ -1,6 +1,6 @@
 # CEREBRO FACT-001 · Deployed-sidecar candidate · OIDC LAB only
 
-**State: candidate code, pending controlled deploy and physical verification.**
+**State: DEPLOYED LAB READ-ONLY, physical signed OIDC + Vault + Cloudflare GET VERIFIED. Existing CEREBRO Console PROD not integrated.**
 
 This is a **new** isolated Supabase Edge Function, not an update to the existing `cerebro-console-gateway-v0` (ACTIVE v33) or App/CRM/Auth. It does not implement a ChatGPT native MCP server. It exposes three strictly authenticated operations for the CEREBRO laboratory only: `GET /health` (no changes), `POST /provision` (one-time encrypted Vault secret only), and `POST /inventory` (exact Cloudflare account GET-only D1 and Worker counts). All other requests denied. No Cloudflare API mutation methods exist in code.
 
@@ -25,3 +25,20 @@ Supabase Edge Function uses an existing `SUPABASE_DB_URL` through a single bound
 ## Rollback / rebuild
 
 No existing service was modified. To disable, revoke the GitHub workflow's OIDC path by changing the exact `workflow_ref` allowlist or remove the isolated new Edge Function after dependencies, snapshot and explicit security review; never touch CEREBRO Console v33. A separate review may revoke the new dedicated Vault record (exact name only) after confirming no dependent workflow. Retain source in PR #44, no merge until safety gates green.
+## Physical E2E acceptance · 2026-11-09
+
+- New Supabase Edge Function `cerebro-fact001-cloudflare-lab` version 1 ACTIVE (new slug only, not replacing any existing function).
+- [Physical signed service-to-service E2E run #42688149814](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814): 12/12 negative and signature tests pass, anonymous 401, fake identity 401, signed GitHub OIDC health 200.
+- Same real run securely provisioned exactly **one** named LAB secret into existing Supabase Vault (`PAIRED`, SQL count=1) and then queried Cloudflare real D1 and Worker GET (`200`, 8 D1, 7 Workers, 0 Cloudflare mutations). No token value was emitted in logs or replies.
+- Existing `cerebro-console-gateway-v0` v33 ACTIVE remains unchanged. This **is a deployed CEREBRO LAB service**, but **NOT an integrated CEREBRO Console PROD route**.
+- Cloudflare Worker remains workers.dev=false, previews=false, zero routes/crons; owner-only Access app ID `34a3cd38-968a-41f8-a654-351e7c1e7964` attached to exact Worker immutable ID `862c28ba6b834d54ba3825161170bf68`. Cloudflare Worker itself remains OFF; deployed sidecar calls Cloudflare REST directly through Vault.
+- Legacy GitHub cloud admin token has a broader scope than strictly necessary. It is stored encrypted for this LAB pilot only. **Do not enable full account writes or production until a separately scoped READ-ONLY credential is provisioned and rotated**. Token management endpoints return 403 for existing administrator token.
+- Access app installer workflow was made manual-only after success, preventing accidental re-creation. Only one Vault record, no DB schema creation.
+
+## On-demand order from normal ChatGPT and future CEREBRO
+
+Update only the approved request ID in `requests/probe.v1.json`; GitHub Actions verifies the exact 4D contract and only permits `cloudflare.account.inventory`, then invokes the deployed CEREBRO LAB service using fresh GitHub signed OIDC. This is the shared zero-Work bridge. Existing CEREBRO Console v33 can be bound only through a separately reviewed authenticated routing change; never report it already functional.
+
+## Rollback
+
+Leave Cloudflare Worker OFF and Access protected. The new Edge Function may be disabled/retired independently after recorded dependency and rollback tests; never replace any old Gateway. Vault credential rotation/revocation requires independent review and new scoped token, never print or copy the old token.

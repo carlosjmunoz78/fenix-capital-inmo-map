@@ -30,6 +30,13 @@ jobs:
           const audience='cerebro-fact001-cloudflare-lab-20261109';
           const endpoint='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cloudflare-lab';
           const scope={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0'};
+          const fs=await import('node:fs');
+          const order=JSON.parse(fs.readFileSync('cerebro/connectors/universal/supabase/fact001-lab/requests/probe.v1.json','utf8'));
+          const allowed=['account_id','client_id','company_id','engine_id','environment','operation','request_id','version'].sort();
+          if(!order||typeof order!=='object'||Array.isArray(order)||JSON.stringify(Object.keys(order).sort())!==JSON.stringify(allowed))throw Error('ORDER_FIELDS_DENIED');
+          for(const [k,v] of Object.entries(scope))if(order[k]!==v)throw Error('ORDER_TENANT_DENIED');
+          if(order.account_id!=='e39a57e1ac42650ca5a6d5307cf0ac8e'||order.client_id!=='cerebro'||order.operation!=='cloudflare.account.inventory'||!/^(CFD-[0-9]{8}-[0-9]{3})$/.test(order.request_id))throw Error('ORDER_OPERATION_DENIED');
+          console.log('FACT001_COMMAND_ID='+order.request_id);
           const token=process.env.CF_TOKEN;
           if(!token)throw Error('CLOUDFLARE_SECRET_MISSING');
           const identityEndpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;

@@ -16,7 +16,11 @@
     "crons": [],
     "secrets": [],
     "bindings": [],
-    "exec_enabled": false
+    "exec_enabled": false,
+    "immutable_worker_id": "862c28ba6b834d54ba3825161170bf68",
+    "access_app_id": "34a3cd38-968a-41f8-a654-351e7c1e7964",
+    "access_policy": "SINGLE_VERIFIED_ACCOUNT_MEMBER_ALLOW; NO_PUBLIC_ROUTES",
+    "access_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42684889755"
   },
   "clients": {
     "chatgpt_normal": {
@@ -29,7 +33,19 @@
     },
     "cerebro_gateway_prod": {
       "status": "NOT_CONNECTED",
-      "reason": "LIVE_IDENTITY_AND_ROUTING_NOT_CERTIFIED"
+      "reason": "Existing Console deployed Supabase v33 never modified or bound to the new sidecar; LAB OIDC only"
+    },
+    "cerebro_deployed_sidecar_lab": {
+      "status": "DEPLOYED_ACTIVE_REAL_CF_READ_E2E_VERIFIED",
+      "slug": "cerebro-fact001-cloudflare-lab",
+      "version": 1,
+      "identity": "GITHUB_ACTIONS_OIDC_JWS_RS256_EXACT_WORKFLOW_BRANCH_AUDIENCE",
+      "vault_secret_count_verified": 1,
+      "cloudflare_readonly": true,
+      "cloudflare_writes": 0,
+      "auth_anonymous_denied": true,
+      "auth_forged_denied": true,
+      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814"
     }
   },
   "dependencies": [
@@ -54,10 +70,18 @@
     "POLICY_CONFLICT",
     "MONEY_LIMIT"
   ],
-  "acceptance": "LAB_PRIVATE_OFF_ONLY",
+  "acceptance": "LAB_REAL_READONLY_SIDECAR_AND_CHAT_NORMAL_BRIDGE_VERIFIED; LIVE_CONSOLE_NOT_BOUND",
   "promoted": false,
   "additional_subscriptions": 0,
   "production_change": false,
   "rollback": "Leave isolated Worker disabled with no public routes; destructive deletion only after explicit inventory and user authorization; revert additive draft PR if code rollback required.",
-  "rebuild": "Recreate solely from isolated source branch under a new versioned LAB name after preflight, never overwrite a Worker without snapshot and contractual checks."
+  "rebuild": "Recreate solely from isolated source branch under a new versioned LAB name after preflight, never overwrite a Worker without snapshot and contractual checks.",
+  "secret_boundary": {
+    "store": "existing Supabase Vault",
+    "name": "cerebro_fact001_cf_readonly_lab_20261109",
+    "records": 1,
+    "cloudflare_admin_token_reused_for_lab_only": true,
+    "no_plaintext_in_code_or_logs": true,
+    "require_dedicated_scoped_readonly_token_before_prod": true
+  }
 }
