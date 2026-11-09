@@ -64,12 +64,12 @@
   "readiness": {
     "google_sso_preference": "RECORDED_NOT_AUTOMATION_PROVEN",
     "current_authenticated_browser": "VERIFIED",
-    "commercial_free_asset_use": "BLOCKED_LICENSE_TIER_MISMATCH",
+    "commercial_free_asset_use": "METADATA_ONLY_PENDING_COMPANY_LICENSE_OR_PROVIDER_WRITTEN_EXCEPTION",
     "autonomous_login": "NOT_DEPLOYED",
     "browser_bridge_integration": "PENDING",
     "public_catalog_discovery_api": "CATEGORY_ENDPOINT_HTTP_200_VERIFIED_IN_OPERA",
     "private_partner_api": "RESTRICTED_TO_APPROVED_PARTNERS",
-    "asset_download_by_CEREBRO": "BLOCKED_NOT_AUTHORIZED_VIA_KEY_ALONE",
+    "asset_download_by_CEREBRO": "NOT_ALLOWED_AS_SHARED_COMPANY_WORKFLOW_WITH_CURRENT_INDIVIDUAL_LICENSE",
     "public_collections_api": "HTTP_500_VERIFIED_IN_OPERA"
   },
   "links": {
@@ -95,5 +95,35 @@
   },
   "notes": " Environment secret presence established via logged-in GitHub UI; API value deliberately unread. Official provider developer docs distinguish public catalog endpoints and partner-restricted private API: key alone is not sufficient evidence of autonomous downloads. Requires confirmed provider partner approval or supported bridge tool, license completion, and safe controlled job with environment restriction.",
   "next_legal_step": "Select proper company tier Startup (<USD3m revenue/funding) or Enterprise (>=USD3m) based on real facts; verify licensee company and commercial eligibility; no purchasing or storing assets until verified.",
-  "safe_next_step": "Use public category API without user key, catalog only, LAB branch; do not call restricted partner API or print key."
+  "safe_next_step": "Use public category API without user key, catalog only, LAB branch; do not call restricted partner API or print key.",
+  "owner_decision_2026_11_09": {
+    "decision": "KEEP_EXISTING_INDIVIDUAL_LICENSE_TEMPORARILY",
+    "user_intent": "CEREBRO should ultimately select and reuse VFX autonomously for Fénix, with license upgrade later",
+    "license_change_now": false,
+    "no_subscription_or_charge": true,
+    "future_license_upgrade_date": "UNSCHEDULED_OWNER_DECISION",
+    "source": "explicit owner instruction in current conversation",
+    "legal_interpretation": "Intent recorded, not license grant; Individual permits usage only by named licensee and is not sufficient for shared company/team or service resource library."
+  },
+  "current_runtime_policy": {
+    "authorized_now": [
+      "public metadata discovery",
+      "collect free asset links and commercial license terms",
+      "maintain VFX wish list as metadata only",
+      "create own sound/VFX effects from original or unrestricted materials"
+    ],
+    "gated_until_licensing_clear": [
+      "download ActionVFX stock into CEREBRO shared storage",
+      "multi-project autonomous reuse of ActionVFX stock within Fénix team and engines",
+      "AI creation of new media derived from ActionVFX stock",
+      "publication containing unlicensed ActionVFX raw assets"
+    ],
+    "human_required": "LEGAL_REQUIRED when source rights conflict with intended use; otherwise do not repeatedly ask for approval",
+    "publication": "OFF",
+    "paid_upgrade": "NOT_AUTHORIZED",
+    "reasons": [
+      "ActionVFX Individual license is limited to named licensee, under 200k USD revenue/funding, not a company library",
+      "Stock cannot be used for training or generating new media with AI models without express license permission"
+    ]
+  }
 }
