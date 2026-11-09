@@ -1,0 +1,75 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "actionvfx-auth-v0.1",
+  "date": "2026-11-09",
+  "provider": "ActionVFX",
+  "provider_host": "www.actionvfx.com",
+  "observed_session": {
+    "status": "AUTHENTICATED_IN_EXISTING_CONNECTED_OPERA",
+    "evidence": "Live read of authenticated /accounts/profile showing My Account, profile and license status",
+    "browser_profile": "existing user-authorized Opera session",
+    "session_portability": "NOT_ESTABLISHED_ACROSS_BROWSERS",
+    "logged_in_as_verified": true
+  },
+  "login_preference": {
+    "method": "GOOGLE_SSO_CONTINUE_WITH_GOOGLE",
+    "user_preference_confirmed": true,
+    "exact_ui_label_expected": "Continue with Google",
+    "ui_flow_confirmed": false,
+    "manual_google_session_required_if_not_available": true,
+    "entry_url": "https://www.actionvfx.com/collections/free-vfx/category"
+  },
+  "allowed_future_automation": {
+    "when_browser_bridge_available": "If ActionVFX is not signed in, enter normal Sign In flow and choose Continue with Google, select already authorized Google identity; inspect login success and correct business license without storing secrets.",
+    "allowed_browser_behaviour": [
+      "open provider login page",
+      "click Continue with Google when present",
+      "use existing authorized Google browser session when available",
+      "confirm profile login",
+      "continue to free asset library"
+    ],
+    "when_human_required": [
+      "Google asks to choose account and no already authorized default",
+      "Google requests password, MFA, CAPTCHA, consent or reauthentication",
+      "ActionVFX license information cannot be established without user business facts"
+    ],
+    "prohibited": [
+      "store password in files, repos, Notion or logs",
+      "copy or export cookies/session tokens",
+      "bypass MFA or CAPTCHA",
+      "store or reveal Google OAuth tokens",
+      "switch Google identity without user approval",
+      "purchase licenses, paid effects or subscription without permission",
+      "assume provider API supports asset downloads without docs"
+    ]
+  },
+  "verified_account_gates": {
+    "account_status": "ACTIVE_AUTHENTICATED",
+    "company_field": "EMPTY",
+    "commercial_license": "MISSING_LICENSE",
+    "api_key": "NO_API_KEY",
+    "free_effects_download": "WAITING_FOR_LICENSE_COMPLETION"
+  },
+  "policy": {
+    "source_of_truth_for_auth": "Provider and browser's secure session storage",
+    "credential_storage_location": "NONE_IN_CEREBRO_REPOS_OR_NOTION",
+    "api_key_vault_placement": "ONLY_ENCRYPTED_SECRET_STORE_IF_CREATED_AND_SUPPORTED",
+    "monthly_cost_eur": 0,
+    "unauthorized_spend_eur": 0,
+    "publish": false
+  },
+  "readiness": {
+    "google_sso_preference": "RECORDED_NOT_AUTOMATION_PROVEN",
+    "current_authenticated_browser": "VERIFIED",
+    "commercial_free_asset_use": "BLOCKED_LICENSE_PENDING",
+    "autonomous_login": "NOT_DEPLOYED",
+    "browser_bridge_integration": "PENDING"
+  },
+  "links": {
+    "account_profile": "https://www.actionvfx.com/accounts/profile",
+    "free_vfx": "https://www.actionvfx.com/collections/free-vfx/category",
+    "license": "https://www.actionvfx.com/license"
+  }
+}
