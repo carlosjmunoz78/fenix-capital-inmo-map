@@ -1,0 +1,10 @@
+company_id=fenix
+engine_id=UMS-001
+environment=LAB
+locale=es_ES
+model=piper-tts
+mode=voice_comparison_only
+no_subscription=true
+no_paid_api=true
+no_publish=true
+one_shot=true
