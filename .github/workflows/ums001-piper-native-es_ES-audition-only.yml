@@ -1,0 +1,39 @@
+name: UMS001 Compare two native es_ES free TTS voices isolated LAB
+on:
+  push:
+    branches:
+      - cerebro/ums001-es-es-voice-audition-lab-20261109
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_ES_ES_AUDITION_ONLY.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-es-es-piper-voice-test-20261109
+  cancel-in-progress: false
+jobs:
+  voice-audition:
+    if: github.event.head_commit.message == 'UMS001_NATIVE_ES_ES_VOICES_ONCE_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install open source Piper only and download official Spain models
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check 'piper-tts==1.8.0'
+          mkdir -p /tmp/ums001_es_ES_audition
+          python -m piper.download_voices --download-dir /tmp/ums001_es_ES_audition es_ES-davefx-medium es_ES-mls_9972-low
+      - name: Create 2 speech-only audition samples (NO video publishing)
+        run: python cerebro/media-studio/v2/runtime/ums001_piper_es_ES_audition_only.py
+      - name: Archive ONLY samples and QA as private Actions artifacts, no model binaries
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_PIPER_NATIVE_ES_ES_COMPARISON_${{ github.run_id }}
+          path: /tmp/ums001_es_ES_audition/
+          retention-days: 7
+          if-no-files-found: error
