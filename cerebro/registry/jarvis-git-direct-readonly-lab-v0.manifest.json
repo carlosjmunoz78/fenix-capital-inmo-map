@@ -82,6 +82,23 @@
       "run_id": 42574105503,
       "status": "GREEN_ISOLATED_HTTP_ONLY",
       "public_domain_rollback": false
+    },
+    "old_new_unauthenticated_browser": {
+      "status": "GREEN_PUBLIC_ROUTE_ONLY",
+      "run_id": 42589852196,
+      "old_sha": "01650c6fb728aa9d41dc4877dd4bee243372be68",
+      "new_sha": "4cf90f47b56300ce70fa30d097713d1e199e5b30",
+      "root_http_old": 200,
+      "root_http_new": 200,
+      "cerebro_http_old": 200,
+      "cerebro_http_new": 200,
+      "assets_old": 4,
+      "assets_new": 4,
+      "js_page_errors_old": 0,
+      "js_page_errors_new": 0,
+      "same_visible_unauthenticated_text": true,
+      "authenticated_old_new_parity": false,
+      "artifact": "jarvis-old-new-unauth-browser-42589852196"
     }
   },
   "dependencies": [
@@ -119,9 +136,9 @@
     "status": "BLOCKED",
     "unmet": [
       "REAL_OWNER_AUTH_HTTP_POSITIVE",
-      "VOICE_PHYSICAL",
-      "PUBLIC_DOMAIN_RESTORE_REVERSAL",
-      "OLD_VS_NEW_FULL_PARITY",
+      "AUTHENTICATED_OLD_VS_NEW_FULL_PARITY",
+      "VOICE_PHYSICAL_TEST",
+      "PUBLIC_DOMAIN_ROLLBACK",
       "TRIBUNAL"
     ]
   },
