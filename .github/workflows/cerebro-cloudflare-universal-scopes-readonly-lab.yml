@@ -6,6 +6,7 @@ on:
       - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
     paths:
       - .github/workflows/cerebro-cloudflare-universal-scopes-readonly-lab.yml
+      - cerebro/connectors/universal/tests/cloudflare-account-scope-readonly.test.mjs
   workflow_dispatch:
 permissions:
   contents: read
