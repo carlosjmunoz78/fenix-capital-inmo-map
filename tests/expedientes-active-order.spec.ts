@@ -33,7 +33,7 @@ test('Expedientes muestra activos primero, inactivos por finalización descenden
  const ids=()=>page.locator('table.ops-sortable-table tbody tr').allTextContents();
  expect((await ids()).map(v=>v.match(/(?:A-NEW|A-OLD|C-RECENT|C-FALLBACK|C-OLD)/)?.[0])).toEqual(['A-NEW','A-OLD','C-RECENT','C-FALLBACK','C-OLD']);
  // Filtering is authoritative: a Finalizado filter must not reinsert active records.
- await page.getByLabel('FASE').selectOption('Finalizado');
+ await page.locator('[data-testid="expedientes-preset-search"]').getByLabel('FASE',{exact:true}).selectOption('Finalizado');
  expect((await ids()).map(v=>v.match(/C-RECENT|C-OLD/)?.[0])).toEqual(['C-RECENT','C-OLD']);
  await page.getByRole('button',{name:'Limpiar'}).click();
  expect((await ids()).map(v=>v.match(/(?:A-NEW|A-OLD|C-RECENT|C-FALLBACK|C-OLD)/)?.[0])).toEqual(['A-NEW','A-OLD','C-RECENT','C-FALLBACK','C-OLD']);
