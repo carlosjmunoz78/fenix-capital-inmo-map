@@ -42,3 +42,7 @@ Update only the approved request ID in `requests/probe.v1.json`; GitHub Actions 
 ## Rollback
 
 Leave Cloudflare Worker OFF and Access protected. The new Edge Function may be disabled/retired independently after recorded dependency and rollback tests; never replace any old Gateway. Vault credential rotation/revocation requires independent review and new scoped token, never print or copy the old token.
+
+## Post-provision hardening: no token retransmission
+
+After the first successful Vault pairing and verification, the normal GitHub OIDC inventory workflow stopped injecting `CEREBRO_CLOUDFLARE_API_TOKEN` and no longer calls the provisioning endpoint. It only sends the temporary signed OIDC identity to the deployed CEREBRO LAB sidecar, which retrieves the existing encrypted secret from Supabase Vault internally. A new approved order ID is required to retrigger via the allowlisted request JSON; all scope, account and operation fields are immutable. This reduces ongoing exposure of the existing administratively broad token. Future key rotation must be explicitly designed as a separate one-time secure workflow rather than allowing ordinary inventory calls to re-pair credentials.

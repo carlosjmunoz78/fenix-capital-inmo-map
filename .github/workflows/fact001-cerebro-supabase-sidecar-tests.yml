@@ -32,5 +32,8 @@ jobs:
           console.log('FACT001_OIDC_AUTH_REQUIRED=true');
           console.log('FACT001_FIXED_GET_ONLY=true');
           console.log('FACT001_VAULT_ENCRYPTION=true');
+          const wf=fs.readFileSync('.github/workflows/fact001-cerebro-supabase-physical-e2e-lab.yml','utf8');
+          if(wf.includes('CF_TOKEN')||wf.includes("call('provision'"))throw Error('CREDENTIAL_RETRANSMISSION_FORBIDDEN');
+          console.log('FACT001_ROUTINE_GITHUB_NO_CF_ADMIN_TOKEN=true');
           console.log('FACT001_MUTATIONS_CLOUDFLARE=0');
           NODE

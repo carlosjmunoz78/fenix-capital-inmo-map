@@ -45,7 +45,10 @@
       "cloudflare_writes": 0,
       "auth_anonymous_denied": true,
       "auth_forged_denied": true,
-      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814"
+      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42688149814",
+      "normal_inventory_workflow_retransmits_cloudflare_token": false,
+      "pairing_is_one_time": true,
+      "approved_order_path": "cerebro/connectors/universal/supabase/fact001-lab/requests/probe.v1.json"
     }
   },
   "dependencies": [

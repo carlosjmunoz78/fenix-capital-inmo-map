@@ -15,8 +15,6 @@ jobs:
   physical-oidc-vault-get-only:
     runs-on: ubuntu-latest
     timeout-minutes: 6
-    env:
-      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
     steps:
       - name: Checkout exact LAB branch without persisted credentials
         uses: actions/checkout@v4
@@ -37,8 +35,6 @@ jobs:
           for(const [k,v] of Object.entries(scope))if(order[k]!==v)throw Error('ORDER_TENANT_DENIED');
           if(order.account_id!=='e39a57e1ac42650ca5a6d5307cf0ac8e'||order.client_id!=='cerebro'||order.operation!=='cloudflare.account.inventory'||!/^(CFD-[0-9]{8}-[0-9]{3})$/.test(order.request_id))throw Error('ORDER_OPERATION_DENIED');
           console.log('FACT001_COMMAND_ID='+order.request_id);
-          const token=process.env.CF_TOKEN;
-          if(!token)throw Error('CLOUDFLARE_SECRET_MISSING');
           const identityEndpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
           const oidcGrant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
           if(!identityEndpoint||!oidcGrant)throw Error('OIDC_RUNNER_IDENTITY_MISSING');
@@ -62,11 +58,7 @@ jobs:
           console.log('FACT001_SIGNED_OIDC_HEALTH_HTTP='+good.http);
           if(good.http!==200||good.result?.status!=='AUTHENTICATED')throw Error('OIDC_SIGNATURE_GATE_FAILED');
           console.log('FACT001_OIDC_E2E=true');
-          const paired=await call('provision',{method:'POST',authorization:identity,body:{...scope,api_token:token}});
-          console.log('FACT001_VAULT_PAIR_HTTP='+paired.http);
-          console.log('FACT001_VAULT_PAIR_STATUS='+String(paired.result?.status||'UNKNOWN').replace(/[^A-Z_]/g,'').slice(0,48));
-          if(paired.http!==200||!['PAIRED','ALREADY_PAIRED'].includes(paired.result?.status))throw Error('VAULT_PAIR_GATE_FAILED');
-          if(paired.result?.credential_exposed!==false)throw Error('VAULT_LEAK_GUARD_FAILED');
+          console.log('FACT001_VAULT_CREDENTIAL_REUSED_WITHOUT_RETRANSMISSION=true');
           const run=await call('inventory',{method:'POST',authorization:identity,body:scope});
           console.log('FACT001_CEREBRO_CLOUDFLARE_INVENTORY_HTTP='+run.http);
           if(run.http!==200||run.result?.status!=='COMPLETED'||run.result?.company_id!=='fenix-capital'||run.result?.environment!=='LAB'||run.result?.cloudflare_writes!==0)throw Error('PHYSICAL_CLOUDFLARE_E2E_FAILED');
