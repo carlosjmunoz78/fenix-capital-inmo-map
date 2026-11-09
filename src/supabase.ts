@@ -155,12 +155,14 @@ export async function fetchUserAdminApi<T>(path='',init?:RequestInit):Promise<{s
 }
 
 export async function fetchAppApi<T>(path:string,init?:RequestInit):Promise<{status:number;data:T|null}>{
-  const result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,6000);
-  if(path==='/navigation'&&(result.status===0||result.status>=500))return{status:200,data:safeNavigationFallback() as T};
-  if(path==='/session/context'&&(result.status===0||result.status>=500)){
-    const {data:{session}}=await supabase.auth.getSession();
-    const fallback=authenticatedContextFallback(session);
-    if(fallback)return{status:200,data:fallback as T};
+  let result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,10000);
+  // An expired browser token can leave a local Supabase session without a valid backend identity.
+  // Refresh only on 401; retry a transient network failure once. No synthetic permissions.
+  if(result.status===401){
+    const refreshed=await supabase.auth.refreshSession();
+    if(!refreshed.error&&refreshed.data.session)result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,10000);
+  }else if(result.status===0||result.status===503){
+    result=await authenticatedEdgeFetch<T>('fenix-app-gateway',path,init,10000);
   }
   if(path==='/navigation'&&result.status===200&&result.data)return{status:200,data:normalizeNavigation(result.data) as T};
   if(path==='/session/context'&&result.status===200&&result.data)return{status:200,data:normalizeSessionContext(result.data) as T};
