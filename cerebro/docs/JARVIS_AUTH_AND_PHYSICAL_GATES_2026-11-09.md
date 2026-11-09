@@ -33,3 +33,7 @@ Proyecto: Fénix Capital; motor `CONSOLE-001`, versión laboratorio. La App púb
 `AUTH_LONG_LIVED_READONLY` → `GIT_UI_REAL_AUTH_E2E` → `PHYSICAL_MIC_VOICE` → `OLD_VS_NEW_SERVICE_PARITY` → `RESTORE_REVERSAL_TEST` → `TRIBUNAL` → `PROD`.
 
 **Regla:** No hay evidencia ⇒ No está hecho. Coste adicional contratado 0 € y ninguna modificación de las superficies PROD protegidas.
+
+## Observación de rama principal al cerrar
+
+La rama `main` avanzó durante estas pruebas de `862ee543036070bc2cbb3ccaffc6c81af6d6a225` a `3600942775fbc19b47560e6f798caca107cd7473`, un commit posterior denominado `CEREBRO: register FULL_SAFE_PREPROD dynamic capabilities [skip ci]` que únicamente modifica `cerebro/registry/skill-dynamic-adoption-v1.json`. No lo realizó este laboratorio y **no afecta directamente a los archivos de JARVIS examinados**, pero toda promoción futura requerirá comparar el HEAD vigente y repetir los gates. `gh-pages` se verificó sin cambios en `01650c6fb728aa9d41dc4877dd4bee243372be68`. No se han alterado las ramas protegidas desde este laboratorio.
