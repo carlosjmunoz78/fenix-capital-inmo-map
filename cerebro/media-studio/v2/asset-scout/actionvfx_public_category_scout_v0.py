@@ -25,7 +25,7 @@ KEYWORDS = (
 )
 
 def safe_text(value, limit=300):
-    return re.sub(r"[\\r\\n\\t]+", " ", str(value or ""))[:limit]
+    return re.sub(r"[\r\n\t]+", " ", str(value or ""))[:limit]
 
 def reduce_category(entry, parent=None):
     if not isinstance(entry, dict):
