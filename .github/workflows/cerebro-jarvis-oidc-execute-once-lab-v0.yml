@@ -1,0 +1,62 @@
+name: CEREBRO JARVIS OIDC ONE READONLY JOB LAB 20261109
+on:
+  push:
+    branches:
+      - cerebro/jarvis-oidc-execute-once-lab-v0-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-oidc-execute-once-lab-v0.yml'
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  one-readonly-job:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      AUD: jarvis-oidc-execute-once-lab-v0
+      API: https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/jarvis-oidc-execute-once-lab-v0/execute
+    steps:
+      - name: GitHub OIDC -> exactly one PREPROD queue task; reject replay
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'JS'
+          if(!process.env.ACTIONS_ID_TOKEN_REQUEST_URL||!process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN)throw Error('OIDC_MISSING');
+          async function call(jwt,method='POST'){
+            const headers={'content-type':'application/json'};
+            if(jwt)headers.authorization='Bearer '+jwt;
+            const r=await fetch(process.env.API,{method,headers,body:method==='POST'?'{}':undefined,redirect:'error',signal:AbortSignal.timeout(18000)});
+            let body={};try{body=await r.json()}catch{}
+            return{http:r.status,body};
+          }
+          async function mint(aud){
+            const u=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);u.searchParams.set('audience',aud);
+            const r=await fetch(u,{headers:{authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'error',signal:AbortSignal.timeout(15000)});
+            if(!r.ok)throw Error('MINT_FAILED');
+            const jwt=(await r.json()).value;
+            if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('JWT_INVALID');
+            return jwt;
+          }
+          if((await call(null)).http!==403)throw Error('NO_AUTH_DENIAL_FAILED');
+          if((await call(null,'GET')).http!==404)throw Error('METHOD_DENIAL_FAILED');
+          if((await call('not-a-jwt')).http!==403)throw Error('BAD_JWT_DENIAL_FAILED');
+          const jwt=await mint(process.env.AUD);
+          const wrong=await mint('jarvis-oidc-unapproved-audience');
+          if((await call(wrong)).http!==403)throw Error('AUD_DENIAL_FAILED');
+          const signature=jwt.split('.');
+          signature[2]=(signature[2][0]==='A'?'B':'A')+signature[2].slice(1);
+          if((await call(signature.join('.'))).http!==403)throw Error('SIGNATURE_DENIAL_FAILED');
+          const done=await call(jwt);
+          const x=done.body;
+          if(done.http!==200||x.status!=='SUCCEEDED'||x.proof!=='JARVIS_OIDC_ONESHOT_GIT_READ_LAB_GREEN'||
+             x.job_id!=='006df2c9-282f-48d0-8ce8-6af8d3d6b5ae'||
+             x.source_sha!=='39bc098f322c6981d0d703c5813a7234a5742e8f'||
+             x.attempts!==1||x.observed_environment!=='PREPROD'||
+             x.verified_signed_oidc!==true||x.prod_touched!==false||x.git_writes!==0)
+            throw Error('EXEC_FAILED_HTTP_'+done.http+'_REASON_'+String(x.reason||x.status||'NONE'));
+          const repeat=await call(jwt);
+          if(repeat.http!==409||repeat.body?.status!=='BLOCKED')throw Error('REPLAY_DENIAL_FAILED');
+          console.log(JSON.stringify({status:'JARVIS_OIDC_ONE_READONLY_JOB=GREEN',job_id:x.job_id,
+            source_sha:x.source_sha,attempts:1,auth:'GITHUB_OIDC',negative_checks:5,
+            replay_blocked:true,git_writes:0,prod_touched:false,preprod_one_job:true}));
+          JS
