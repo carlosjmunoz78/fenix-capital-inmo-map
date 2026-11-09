@@ -5,6 +5,8 @@ on:
       - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
     paths:
       - .github/workflows/cerebro-cloudflare-universal-regression-lab.yml
+      - cerebro/connectors/universal/src/cloudflare.mjs
+      - cerebro/connectors/universal/tests/cloudflare-universal-read-expansion.test.mjs
   workflow_dispatch:
 permissions:
   contents: read
