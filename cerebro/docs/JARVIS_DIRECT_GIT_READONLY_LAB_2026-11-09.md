@@ -65,3 +65,43 @@ Los 19 controles corresponden a **siete negativas HTTP reales y doce pruebas Pla
 `REAL_USER_SESSION_AUTH` → `APP_UI_REAL_E2E` → `OLD_VS_NEW_PARITY` → `PHYSICAL_VOICE` → `RESTORE_REVERSAL` → `TRIBUNAL` → `PROD`.
 
 **No se ha promovido JARVIS a PROD.** CONSERVAR → ENTENDER → ENVOLVER → PROBAR → MEJORAR → MIGRAR.
+
+## Cierre adicional · Contrato real de usuario y reversión HTTP (09-11-2026)
+
+### Diagnóstico real de identidad PREPROD
+
+Se ha detectado que el backend nuevo del LAB utilizaba por error `fenix_prod_actor_context_by_auth_server`, que **no existe en el proyecto Supabase PREPROD** `hnqlnvakzaywtafeiybt`. Por tanto las pruebas HTTP negativas de v1 eran válidas, pero la autorización **positiva** del usuario no era viable y las pruebas Playwright de éxito estaban simuladas.
+
+Inventario PREPROD, sin leer credenciales: `preprod_test.actors` contiene siete actores, seis vinculados a Supabase Auth. `CARLOS-ADMIN` está activo y vinculado; `DIR-TEST` también existe en **PREPROD**. Esto no contradice la ausencia de `DIR-TEST` previamente observada en PROD: son proyectos separados. Las funciones originales `preprod_test.current_actor_code` y `current_actor_role` leen `auth.uid()`, pero no pueden invocarse en el contexto del service role sin un usuario JWT propagado.
+
+Se ha creado **solo en PREPROD** la función nueva `public.jarvis_lab_actor_context_by_auth_server_v0(uuid)` mediante migración `supabase/migrations/20261109071500_jarvis_lab_actor_context_by_auth_server_v0.sql`, sin alterar tablas, usuarios ni RPC existentes. Contrato:
+- Invocación exclusiva `service_role`; permisos `anon=false`, `authenticated=false`, `service_role=true` verificados mediante `has_function_privilege`.
+- SECURITY DEFINER y `search_path=''`, SQL parametrizado, consulta únicamente `preprod_test.actors` por el UUID obtenido de `auth.getUser()` en Edge.
+- Permite solo actor activo `CARLOS-ADMIN` con rol `Direccion`. Deniega `DIR-TEST`, `FIN-A`, UUID nulo y demás perfiles. SELECT SQL verificó respuestas positivas/negativas; **NO es una prueba HTTP positiva de sesión**.
+- Edge `jarvis-git-direct-readonly-lab-v0` actualizada **solo esa función**, a versión **2**, para utilizar la nueva RPC del LAB. La versión anterior fue contrastada byte a byte con el fichero de GitHub antes de actualizar. Versión previa preservada en historial Git (blob `3c5976ec407c97a0882e2d3e7d52289fd3c0354f`).
+- La Edge v2 conserva `auth.getUser()`, restricción de origen y operaciones de Git exclusivamente GET, sin filas encoladas ni escrituras. `verify_jwt=false` solo en esta función con autenticación propia obligatoria.
+- Se ha repetido el CI después del cambio: [GitHub Actions run 42573836930](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42573836930), **completed/success**, gate de fuente de autorización VERDE, **7/7 negativas HTTP reales** y **4/4 pruebas de interfaz con identidad simulada**. El E2E positivo con token auténtico PREPROD de `CARLOS-ADMIN` sigue pendiente y NO se ha intentado extraer una sesión personal.
+
+### Reversión física de contenido HTTP aislado
+
+- Ejecución one-shot [GitHub Actions 42574105503](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42574105503): **GREEN**.
+- Baseline exacto público desplegado: `gh-pages@01650c6fb728aa9d41dc4877dd4bee243372be68`; candidate offline: `main@3600942775fbc19b47560e6f798caca107cd7473`.
+- Dos checkouts inmutables, `npm ci`, `vite build` de candidato, servidor `python -m http.server` exclusivamente en `127.0.0.1:18761`.
+- Switch por intercambio atómico de enlace simbólico `OLD → NEW → OLD`, comprobación real por `curl` y comparación exacta de hashes del contenido HTTP servido frente a disco. Hash OLD: `d9d316607bb947191b035165ee1960eb7ab456d533f43d2c536ebe71b8fead3b`; NEW: `42e9f499a8321c97d9a03c45e989dd33643bb208e995e2a615fe3a53f33ac2e5`.
+- Verificación de `CNAME=app.fenixcapital.es` en backup y SHA de refs antes y después. No se escribió en GitHub branch protegido, no se publicó ni cambió DNS.
+- **Acredita rollback físico aislado HTTP de los archivos, NO rollback real del dominio, sesión, API ni persistencia del CRM.** El gate de recuperación integral PROD continúa pendiente.
+
+### Runbook de reversión
+
+1. Para desactivar la nueva pantalla: dejar `VITE_JARVIS_GIT_DIRECT_LAB=false` en builds de LAB; `main` y `gh-pages` nunca han incorporado la pantalla.
+2. Para desactivar Edge v2: comprobar dependencias y snapshot del código desplegado, luego sustituir exclusivamente `jarvis-git-direct-readonly-lab-v0` por respuesta 403 fail-closed. No modificar otras funciones.
+3. Solo después de deshabilitar cualquier consumidor, revertir la RPC nueva exclusivamente en PREPROD si se determina que no la utiliza nadie (no se ha efectuado DROP).
+4. Rebuild: recuperar los ficheros de esta rama, recrear únicamente la función de autorización de LAB con permisos limitados, desplegar solo la Edge LAB y repetir HTTP negativos, pruebas visuales y el E2E positivo cuando exista una sesión de pruebas legítima.
+
+### Estado de promoción
+
+`LAB_AUTHZ_DB_CONTRACT=GREEN`; `LAB_EDGE_HTTP_NEGATIVES=GREEN`; `LAB_UI_MOCK=GREEN`; `ISOLATED_HTTP_REVERSAL=GREEN`.
+
+Persisten `REAL_OWNER_AUTH_HTTP_POSITIVE=PENDIENTE`, `PHYSICAL_VOICE=PENDIENTE`, `PUBLIC_DOMAIN_ROLLBACK=PENDIENTE`, `COMPLETE_OLD_NEW_PARITY=PENDIENTE`, `TRIBUNAL=PENDIENTE`.
+
+**Sin cambio a PROD.** No se han contratado planes nuevos; consumo de cuotas existentes sin medir.
