@@ -5,3 +5,7 @@ New parallel service cerebro-fact001-console-owner-canary-lab. No changes to mai
 ## Rate-limit gate
 
 Physical canary OIDC GET passed once (run 42703668544). Repeated stricter auth/CORS checks also passed; the subsequent Cloudflare GET returned 429 from Cloudflare's shared API limit (run 42704193424), **not an auth error**. This canary explicitly returns 429 `CF_API_QUOTA` and does not automatically retry. Physical GET workflow now runs only for new approved request orders or manual dispatch, not every workflow/source change; unit tests run separately. Treat live read as RATE_LIMITED, never as stale successful data. No bypass or increase to paid plan.
+
+## Canary v2 · limit and owner auth gates
+
+LAB v2 ACTIVE. 14/14 policy tests PASS. Signed service E2E GET succeeded once, follow-up HTTP 429 due shared API quota. Service now fails closed 429 without retry. Positive owner JWT required for promotion. Main Console v33 unchanged.

@@ -156,6 +156,37 @@
       "temporary_d1_leftover": 0,
       "main_console_bound": false,
       "production_promoted": false
+    },
+    "cerebro_console_owner_canary_lab": {
+      "status": "DEPLOYED_ACTIVE_OWNER_AUTH_POLICY_AND_SIGNED_OIDC_CLOUDFARE_GET_VERIFIED_IN_LAB",
+      "slug": "cerebro-fact001-console-owner-canary-lab",
+      "deployed_version": 2,
+      "company_id": "fenix-capital",
+      "engine_id": "FACT-001",
+      "environment": "LAB",
+      "version": "1.0.0",
+      "stable_main_console": {
+        "slug": "cerebro-console-gateway-v0",
+        "version": 33,
+        "unchanged": true,
+        "route_bound": false
+      },
+      "owner_auth_mode": "Supabase getUser + server RPC fénix_prod_actor_context_by_auth_server = CARLOS-ADMIN",
+      "owner_authenticated_positive_e2e_verified": false,
+      "anonymous_and_forged_401": true,
+      "signed_github_oidc_not_owner": true,
+      "cors_app_only_verified": true,
+      "safe_cloudflare_read": "D1_and_Workers_GET_only",
+      "vault_secret_reused": true,
+      "broad_token_replacement_gate": "dedicated least-privilege Cloudflare token needed before PROD",
+      "initial_physical_e2e_green": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42703668544",
+      "security_negative_e2e": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42704018268",
+      "rate_limit_diagnostic": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42704193424",
+      "unit_regression_green": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42704728200",
+      "unit_test_count": 14,
+      "cloudflare_429_handling": "fail_closed_429; no automatic retries; workflow runs only on explicit new order or manual trigger",
+      "writes_enabled": false,
+      "production_promoted": false
     }
   },
   "dependencies": [
@@ -180,7 +211,7 @@
     "POLICY_CONFLICT",
     "MONEY_LIMIT"
   ],
-  "acceptance": "CHATGPT_DIRECT_KV_AND_D1_CRUD_VERIFIED; CEREBRO_DEPLOYED_LAB_KV_AND_D1_CRUD_VERIFIED; PROD_MAIN_CONSOLE_UNBOUND",
+  "acceptance": "CHATGPT_AND_CEREBRO_LAB_KV_D1_CRUD_VERIFIED; OWNER_CONSOLE_CANARY_LAB_OIDC_GET_VERIFIED; PROD_MAIN_CONSOLE_UNBOUND_AND_WRITES_GATED",
   "promoted": false,
   "additional_subscriptions": 0,
   "production_change": false,
@@ -212,9 +243,10 @@
     "cerebro_sidecar_real_cloudflare_get_verified": true,
     "full_write_cloudflare_verified": false,
     "blockers": [
-      "Cloudflare account and user API token-management GET return 403 code 9109 for connected OAuth identity; no scoped token creation available through this connector",
-      "Existing CEREBRO Console v33 remains unchanged and has no FACT-001 route; owner JWT E2E secret expired",
-      "Broad existing Cloudflare token stored encrypted for LAB only; do not promote to autonomous PROD or enable unrestricted writes"
+      "Live owner Supabase session positive route on separate Console canary not verified; previous GitHub test JWT expired; no live main Console binding",
+      "Dedicated least-privilege Cloudflare API token not issued (OAuth token management 403 code 9109); LAB uses existing broad token encrypted in Vault, only allowlisted routes",
+      "Cloudflare API GET returned 429 shared per-user rate limit after initial success; canary v2 fail-closed no auto-retry; safe manual test after quota available",
+      "Existing production resource write contracts, backups, OLD-vs-NEW, canary and rollback not verified for broad Cloudflare account"
     ],
     "chatgpt_direct_write_kv_verified": true,
     "chatgpt_new_resource_create_kv_verified": true,
@@ -239,6 +271,13 @@
     "cerebro_deployed_d1_create_sql_read_rollback_verified": true,
     "cerebro_d1_write_22_tests_green": true,
     "cerebro_d1_existing_eight_restored": true,
-    "cerebro_d1_prod_write_verified": false
+    "cerebro_d1_prod_write_verified": false,
+    "main_console_owner_canary_deployed": true,
+    "owner_canary_signed_oidc_e2e": true,
+    "owner_canary_14_unit_tests_green": true,
+    "owner_canary_negative_auth_and_cors_green": true,
+    "owner_canary_429_fail_closed": true,
+    "main_console_v33_unchanged_verified": true,
+    "owner_canary_main_console_route_bound": false
   }
 }
