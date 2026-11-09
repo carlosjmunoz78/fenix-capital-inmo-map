@@ -73,6 +73,7 @@ jobs:
           console.log('FACT001_OWNER_CORS_ALLOWED_APP_ONLY=true');
           const run=await call('inventory',{method:'POST',authorization:identity,body:scope});
           console.log('FACT001_CEREBRO_CLOUDFLARE_INVENTORY_HTTP='+run.http);
+          console.log('FACT001_CANARY_ERROR_CATEGORY='+String(run.result?.code||run.result?.status||'UNKNOWN').replace(/[^A-Za-z0-9_]/g,'').slice(0,48));
           if(run.http!==200||run.result?.status!=='COMPLETED'||run.result?.company_id!=='fenix-capital'||run.result?.environment!=='LAB'||run.result?.cloudflare_writes!==0)throw Error('PHYSICAL_CLOUDFLARE_E2E_FAILED');
           console.log('FACT001_CEREBRO_DEPLOYED_SIDECAR_E2E=true');
           console.log('FACT001_D1_COUNT='+run.result.d1_count);
