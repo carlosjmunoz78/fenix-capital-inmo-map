@@ -274,3 +274,21 @@ test('JARVIS tenant scope · only current-company activity is visible',async({pa
  await expect(history.getByText('Historial recibido · 1 ejecuciones')).toBeVisible();
  await expect(history.getByText('OTHER-001',{exact:true})).toHaveCount(0);
 });
+
+
+test('JARVIS Work PREPROD · reconcile submits once through Gateway and displays reply',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ let calls=0;
+ await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-gateway-v0/chat`,async route=>{
+   calls+=1;
+   const body=route.request().postDataJSON() as {message?:string};
+   expect(body.message).toContain('Reconciliación de Auditoría Total');
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',message:'Resultado seguro de reconciliación',executed:false,context_applied:true})});
+ });
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await page.getByRole('button',{name:'Reconciliar',exact:true}).click();
+ await expect(page.getByText('Resultado seguro de reconciliación',{exact:true})).toBeVisible();
+ expect(calls).toBe(1);
+});
