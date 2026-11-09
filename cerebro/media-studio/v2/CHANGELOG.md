@@ -248,3 +248,11 @@ Additional recurring cost introduced: `0 €`
 - ZIP backup 27 entradas (sin pistas Mixkit standalone): https://drive.google.com/file/d/1AtoWDeaXnI_PaoikLj4fl105b46nnaFQ/view ; QA https://drive.google.com/file/d/1QzCTf5bMVW0uQnett58814IlJF2bdmhb/view .
 - Notion IG https://app.notion.com/p/41381b1a756d8189aba0fbe512188144 y FB https://app.notion.com/p/41381b1a756d810691becef060e85e6e, ambos Bloqueado/TEST (LAB).
 - Runbook completo `cerebro/media-studio/v2/runbooks/UMS001_IG_FB_V54_PIPER_ES_ES_NATIVE_MUSIC_LICENSED_QA_20261109.md`. Ninguna modificación de main/PROD/App/CRM/Supabase/SEO/WordPress/DNS/Buffer; V0-V5.3 intactas; rollback por archivos antiguos.
+
+
+### 2026-11-09 · UMS001 V5.4 voice A/B + release guard
+- LAB: dos vídeos A/B de 16.02 segundos físicamente entregados para comparación vocal Kokoro V5.3 frente a Piper es_ES V5.4, sin nuevas generaciones, Instagram https://drive.google.com/file/d/1KqsGP1tmHY6Lj1PpK8ZKCVv7ZaC51WeQ/view y Facebook https://drive.google.com/file/d/12RFaEogkJsj2oUZNoqZ0-vOZLeoqP2DG/view .
+- Comp. derechos/medición: Mixkit Free Music License vigente para anuncios online; Piper Sharvard es_ES corpus CC BY3 con atribución requerida; Circular 4/2020 Banco de España incluye intermediarios hipotecarios. Contacto canónico https://fenixcapital.es/contacto/ visible, GA4/UTM/CRM/Formulario E2E no probado.
+- Release-gate determinista local ejecutado con hash/fps/códecs correctos (PASS), simulación de publicación bloqueada por 7 gates abiertos (PASS_SAFE_BLOCK); evidencia https://drive.google.com/file/d/1_V9tfVDJ09fl2dXJULjt-EjIaCs2DYR3/view .
+- Nuevo runbook `cerebro/media-studio/v2/runbooks/UMS001_V54_AB_EDITORIAL_LEGAL_AND_RELEASE_GATES_20261109.md`; registro de gates `registry/ums001-v54-editorial-ab-release-gates-20261109.json`; pruebas unitarias definidas `tests/test_ums001_v54_editorial_release_gate.py`. No test CI ejecutado para la prueba de repo en esta iteración.
+- Notion V5.4 sin aprobar; A/B archivados como Pendiente QA. Acceso a navegador Opera/ChatGPT Browser no respondió, no se afirmó preview real Meta. Todos los originales intactos; ningún cambio main/PROD/App/CRM/Supabase/WordPress/SEO/DNS/Buffer; `PUBLISH=false`.
