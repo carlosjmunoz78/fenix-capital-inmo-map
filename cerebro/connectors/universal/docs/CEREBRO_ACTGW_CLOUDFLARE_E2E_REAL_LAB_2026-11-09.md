@@ -1,0 +1,9 @@
+# FACT-001 · CEREBRO Console → ACTGW-001 → Universal Core → Cloudflare E2E LAB
+
+**Scope:** original CEREBRO Gateway V0/ActionGateway V1 code, separate `cerebro` identity and Fénix Capital Cloudflare Account, GitHub Actions isolated branch. ADDITIVE: no change to production Console/Gateway/App/CRM, no Cloudflare mutation, cost increase 0 €.
+
+**Physical test:** dedicated GitHub Actions workflow `.github/workflows/cerebro-actgw-cloudflare-physical-readonly-lab.yml` runs code path `CerebroGatewayV0.execute → bindConsoleToActionGatewayV1 → ActionGatewayV1.execute → makeCerebroAdapter.execute → UniversalConnectorCore.execute → CloudflareOfficialApi.perform` with real Cloudflare credentials stored in GitHub Actions Secret, GET-only D1 and Workers. Identity supplied by CI runtime, no credentials in command/logs. Verify D1 count, Workers count, result, audit at all three layers, mutation count 0.
+
+**Important distinction:** The test physically executes **CEREBRO's control-plane code in isolated GitHub Actions**, not an online CEREBRO PROD Gateway deployment. Live PROD Gateway connection is **still not proven** and requires separate reviewed deployment and signed identity/permissions. Do not call CEREBRO PROD operational solely on success of this test.
+
+**Guardrails:** exact account, one company, LAB core and PREPROD ACTGW contracts; no user-provided URLs, paths, SQL, API endpoints, token or shell. Real requests all GET. Reject arbitrary/trusted-principal mismatches. This does not use the official MCP (403 on previous attempt) and needs no ChatGPT Work or paid services. Rollback: revert isolated files in PR #44, no remote Cloudflare resource to revert.
