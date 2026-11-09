@@ -75,6 +75,8 @@ export default function App(){
   const [nav,setNav]=useState<NavData|null>(null);
   const [authReady,setAuthReady]=useState(false);
   const [workspaceReady,setWorkspaceReady]=useState(false);
+  const [workspaceError,setWorkspaceError]=useState('');
+  const [workspaceRetry,setWorkspaceRetry]=useState(0);
   const [loginId,setLoginId]=useState('');
   const [password,setPassword]=useState('');
   const [showPassword,setShowPassword]=useState(false);
@@ -127,25 +129,43 @@ export default function App(){
   },[]);
 
   useEffect(()=>{
-    if(!session?.user?.id){setCtx(null);setNav(null);setWorkspaceReady(false);setCalc(defaultCalc);return;}
+    if(!session?.user?.id){setCtx(null);setNav(null);setWorkspaceReady(false);setWorkspaceError('');setCalc(defaultCalc);return;}
     if(passwordRecovery)return;
+    let alive=true;
     setWorkspaceReady(false);
-    suppressCalcPersistence.current = false;
+    setWorkspaceError('');
+    setCtx(null);
+    setNav(null);
+    suppressCalcPersistence.current=false;
     const key=`fenix-calc:${session.user.id}`;
     const saved=sessionStorage.getItem(key);
     if(saved){
       try{setCalc({...defaultCalc,...JSON.parse(saved),open:false,minimized:false})}
       catch{setCalc(defaultCalc)}
-    } else setCalc(defaultCalc);
-    Promise.all([
-      fetchAppApi<SessionContextPayload>('/session/context'),
-      fetchAppApi<NavData>('/navigation')
-    ]).then(([c,n])=>{
-      setCtx(c.status===200?unwrapSessionContext(c.data):null);
-      setNav(n.status===200?n.data:null);
-    }).finally(()=>setWorkspaceReady(true));
-  },[session?.user?.id,passwordRecovery]);
-
+    }else setCalc(defaultCalc);
+    (async()=>{
+      try{
+        const [c,n]=await Promise.all([
+          fetchAppApi<SessionContextPayload>('/session/context'),
+          fetchAppApi<NavData>('/navigation')
+        ]);
+        if(!alive)return;
+        const authorizedContext=c.status===200?unwrapSessionContext(c.data):null;
+        const authorizedMenu=n.status===200&&Array.isArray(n.data?.items)&&n.data.items.length>1?n.data:null;
+        if(!authorizedContext?.actor_code||!authorizedContext?.role||!authorizedMenu){
+          setWorkspaceError(c.status===401||n.status===401
+            ?'Tu sesión necesita validarse de nuevo. No se han modificado datos ni permisos.'
+            :`No se ha podido cargar tu perfil o el menú autorizado (contexto ${c.status}, navegación ${n.status}).`);
+          return;
+        }
+        setCtx(authorizedContext);
+        setNav(authorizedMenu);
+      }catch{
+        if(alive)setWorkspaceError('Error de conexión al verificar tu perfil y navegación.');
+      }finally{if(alive)setWorkspaceReady(true);}
+    })();
+    return()=>{alive=false;};
+  },[session?.user?.id,passwordRecovery,workspaceRetry]);
   useEffect(()=>{
     if(!session?.user?.id || suppressCalcPersistence.current || passwordRecovery)return;
     sessionStorage.setItem(`fenix-calc:${session.user.id}`,JSON.stringify(calc));
@@ -298,6 +318,17 @@ export default function App(){
       <button type="button" className="forgot-link" onClick={requestPasswordReset} disabled={loadingReset}>{loadingReset?'Solicitando…':'¿Has olvidado tu contraseña?'}</button>
     </form>
   </div>;
+
+  // Never substitute the empty generic home for a failed authorized session.
+  if(session&&!passwordRecovery&&(!ctx||!nav||workspaceError))return <main className="auth-shell" role="main">
+    <section className="auth-card" aria-label="Recuperar conexión de Fénix Capital">
+      <h1>Conexión de Fénix Capital</h1>
+      <p>{workspaceError||'Verificando tu perfil y permisos...'}</p>
+      <p>La aplicación y los expedientes se conservan. No se han cambiado tus permisos.</p>
+      <button className="primary" onClick={()=>setWorkspaceRetry(v=>v+1)}>Reintentar conexión</button>
+      <button type="button" onClick={logout}>Cerrar sesión e iniciar de nuevo</button>
+    </section>
+  </main>;
 
   const isDirection = (!IS_PRODUCTION && ctx?.actor_code==='DIR-TEST') || roleLabel.toLowerCase().includes('direccion') || roleLabel.toLowerCase().includes('dirección');
   if(isDirection && location.pathname==='/inicio'){
