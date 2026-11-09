@@ -1,0 +1,59 @@
+name: FACT-001 Cloudflare R2 MCP and deployed Gateway security diagnostics LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths: [.github/workflows/fact001-cloudflare-gateway-security-diagnostics-lab.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-cloudflare-gateway-diagnostics-lab
+  cancel-in-progress: false
+jobs:
+  inspect-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: e39a57e1ac42650ca5a6d5307cf0ac8e
+    steps:
+      - name: Check identity, R2 status, Logpush requirements and deployed Gateway anonymous denial
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account=process.env.CF_ACCOUNT,token=process.env.CF_TOKEN;
+          if(!token || account!=='e39a57e1ac42650ca5a6d5307cf0ac8e')throw Error('ACCOUNT_OR_TOKEN_MISSING');
+          const head={Authorization:'Bearer '+token,Accept:'application/json'};
+          const safeReq=async(url,init={})=>{
+            try {
+              const res=await fetch(url,{...init,redirect:'error',signal:AbortSignal.timeout(12000)});
+              let errorCodes=[];
+              if(!res.ok&&url.startsWith('https://api.cloudflare.com/client/v4/')){
+                try{const json=await res.json();errorCodes=Array.isArray(json?.errors)?json.errors.map(x=>x.code).filter(x=>Number.isSafeInteger(x)).slice(0,4):[];}catch{}
+              }
+              return {status:res.status,error_codes:errorCodes,auth_challenge_bearer:(res.headers.get('www-authenticate')||'').toLowerCase().includes('bearer')};
+            }catch{return {status:'NETWORK_ERROR',error_codes:[],auth_challenge_bearer:false}}
+          };
+          const prefix='https://api.cloudflare.com/client/v4';
+          const checks=[
+           ['TOKEN',prefix+'/user/tokens/verify',{headers:head}],
+           ['ACCOUNT_RESOURCES',prefix+'/accounts?per_page=1',{headers:head}],
+           ['R2_BUCKETS',prefix+'/accounts/'+account+'/r2/buckets',{headers:head}],
+           ['LOGPUSH_JOBS',prefix+'/accounts/'+account+'/logpush/jobs',{headers:head}],
+           ['DEPLOYED_GATEWAY_ANONYMOUS','https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/health',{headers:{Accept:'application/json'}}],
+           ['OFFICIAL_MCP_INITIALIZE','https://mcp.cloudflare.com/mcp',{method:'POST',headers:{...head,'Content-Type':'application/json','MCP-Protocol-Version':'2025-06-18',Accept:'application/json, text/event-stream'},body:JSON.stringify({jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'cerebro-fact001-ci-scope-diagnostic',version:'0.1.0'}}})}]
+          ];
+          const results={};
+          for(const [key,url,init] of checks){
+            const r=await safeReq(url,init);results[key]=r;
+            console.log('FACT001_'+key+'_HTTP='+r.status);
+            if(r.error_codes.length)console.log('FACT001_'+key+'_ERROR_CODES='+r.error_codes.join(','));
+            if(key==='OFFICIAL_MCP_INITIALIZE')console.log('FACT001_MCP_BEARER_CHALLENGE='+r.auth_challenge_bearer);
+          }
+          console.log('FACT001_CLOUDFLARE_REST_MUTATIONS=0');
+          console.log('FACT001_MCP_BUSINESS_TOOL_CALLS=0');
+          if(results.TOKEN.status!==200||results.ACCOUNT_RESOURCES.status!==200)throw Error('TOKEN_ACCESS_GATE_FAILED');
+          if(![401,403].includes(results.DEPLOYED_GATEWAY_ANONYMOUS.status))throw Error('DEPLOYED_GATEWAY_DENIAL_NOT_VERIFIED');
+          console.log('FACT001_GATEWAY_PUBLIC_ANONYMOUS_DENIED=true');
+          NODE
