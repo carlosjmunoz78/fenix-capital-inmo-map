@@ -41,3 +41,7 @@ See `docs/CHATGPT_NORMAL_GITHUB_CLOUDFLARE_BRIDGE_LAB_V1.md`.
 ## Cierre: Cloudflare directo ChatGPT y CEREBRO LAB · 2026-11-09
 
 ChatGPT normal Cloudflare MCP *directamente conectado y comprobado*: cuenta autenticada, lectura real D1=8, Workers=7, Access apps=3 sin Work. CEREBRO servicio LAB desplegado: 4.ª orden OIDC/Vault GET verificada [#42691707204](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42691707204), 12/12 tests PASS, 0 writes. **NO** declarar integrada la Consola PROD ni administración autónoma total: OAuth Cloudflare rechaza gestión de tokens (403/9109), el JWT de pruebas owner caducó, falta token dedicado read-only. Informe completo `docs/FACT001_CLOUDFLARE_DUAL_REAL_ACCEPTANCE_2026-11-09.md`.
+
+### REAL Cloudflare CRUD E2E with CEREBRO and normal ChatGPT · 2026-11-09
+
+**HECHO LAB:** ChatGPT normal creó Workers KV EU nueva y probó PUT/GET/DELETE; CEREBRO creó función aislada `cerebro-fact001-cloudflare-kv-write-lab` v1, firmó órdenes GitHub OIDC, leyó Vault y superó dos pruebas físicas de escritura/lectura/rollback ([#42696938902](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42696938902), [#42697512937](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42697512937)); 21/21 tests cada vez. Cero keys residuales, cero cambios App/CRM/Gateway principal. **NO** declarar control universal de escrituras de PROD ni recursos anteriores. Matriz de permisos/estados y runbook en `docs/FACT001_CLOUDFLARE_FULL_CRUD_PHYSICAL_GATES_2026-11-09.md`.

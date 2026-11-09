@@ -24,7 +24,7 @@
   },
   "clients": {
     "chatgpt_normal": {
-      "status": "VERIFIED_DIRECT_CLOUDFLARE_API_GET_IN_NORMAL_CHAT",
+      "status": "VERIFIED_DIRECT_CLOUDFLARE_API_READ_WRITE_CREATE_DELETE_KV_LAB",
       "client": "Cloudflare CEREBRO connected MCP tools",
       "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
       "proof_type": "authenticated whoami; connected tool OpenAPI GET Workers D1 Access 2026-11-09",
@@ -35,12 +35,31 @@
       },
       "physical_get_verified": true,
       "cloudflare_writes_verified": false,
-      "cloudflare_writes_executed": 0,
+      "cloudflare_writes_executed": 2,
       "legacy_github_fallback": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42678166836",
       "private_plugin": "plugins_6af1f05c0e348191a4afd20c4aa0cb79",
       "private_plugin_version": "0.2.0",
       "private_plugin_runtime_installation_attested": false,
-      "note": "Cloudflare CEREBRO direct connected tool is VERIFIED; private plugin package installed/active state cannot be inferred from its manifest or plugin page"
+      "note": "Cloudflare CEREBRO direct connected tool is VERIFIED; private plugin package installed/active state cannot be inferred from its manifest or plugin page",
+      "physical_write_verified": true,
+      "lab_kv_namespace_created": {
+        "title": "cerebro-fact001-write-e2e-eu-lab-20261109",
+        "id": "fbeb7be5bb81494a8316d8c4221d6a8e",
+        "jurisdiction": "eu",
+        "created_new": true,
+        "free_tier": true,
+        "production_existing_mutations": 0
+      },
+      "operations_physically_tested": [
+        "GET D1",
+        "GET Workers",
+        "GET Access",
+        "GET KV namespaces",
+        "POST create new EU KV namespace",
+        "PUT KV key",
+        "GET KV value",
+        "DELETE KV key"
+      ]
     },
     "cerebro_lab": {
       "status": "VERIFIED_ISOLATED_GITHUB_CI_GET_ONLY",
@@ -71,6 +90,30 @@
       "owner_login_jwt_required": false,
       "main_gateway_bound": false,
       "zero_cloudflare_mutations": true
+    },
+    "cerebro_kv_write_lab": {
+      "status": "DEPLOYED_ACTIVE_REAL_CF_WRITE_READ_ROLLBACK_VERIFIED",
+      "slug": "cerebro-fact001-cloudflare-kv-write-lab",
+      "version": 1,
+      "verified_signed_oidc": true,
+      "vault_reused": true,
+      "administrative_token_retransmitted_from_github": false,
+      "scope": "ONE_EU_LAB_KV_NAMESPACE_ONLY",
+      "namespace_id": "fbeb7be5bb81494a8316d8c4221d6a8e",
+      "runtime_operations": [
+        "PUT a server-generated temporary key with TTL 600 seconds",
+        "GET the same key and verify response",
+        "DELETE the same key as rollback"
+      ],
+      "unit_tests_passing": 21,
+      "physical_e2e_runs": [
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42696938902",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42697512937"
+      ],
+      "latest_order": "CFW-20261109-003",
+      "post_rollback_cloudflare_verified_no_test_keys": true,
+      "existing_resources_modified": 0,
+      "promoted": false
     }
   },
   "dependencies": [
@@ -130,6 +173,24 @@
       "Cloudflare account and user API token-management GET return 403 code 9109 for connected OAuth identity; no scoped token creation available through this connector",
       "Existing CEREBRO Console v33 remains unchanged and has no FACT-001 route; owner JWT E2E secret expired",
       "Broad existing Cloudflare token stored encrypted for LAB only; do not promote to autonomous PROD or enable unrestricted writes"
-    ]
+    ],
+    "chatgpt_direct_write_kv_verified": true,
+    "chatgpt_new_resource_create_kv_verified": true,
+    "cerebro_deployed_kv_write_rollback_verified": true,
+    "cerebro_kv_write_21_tests_green": true,
+    "cerebro_kv_rollback_keys_remaining": 0,
+    "cerebro_generic_create_resource_verified": false,
+    "cerebro_existing_resource_write_verified": false,
+    "api_count_observed_from_cloudflare_openapi": 3763,
+    "api_methods_observed": {
+      "GET": 1840,
+      "POST": 795,
+      "PUT": 366,
+      "PATCH": 274,
+      "DELETE": 488
+    },
+    "readonly_fact001_sidecar_unchanged": true,
+    "central_gateway_prod_unchanged": true,
+    "development_plan": "FACTORY_FIRST_CATALOG_OPERATION_CONTRACTS_IAM_BACKUP_DRYRUN_TESTS_CANARY_ROLLBACK"
   }
 }
