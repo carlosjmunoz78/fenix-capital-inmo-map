@@ -1,10 +1,7 @@
 name: FACT-001 CEREBRO private OFF LAB Worker isolated deployment
+# One-time resource already deployed and attested on 2026-11-09.
+# Keep manual only: guard preflight DENIES overwriting the existing Worker.
 on:
-  push:
-    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
-    paths:
-      - .github/workflows/fact001-cerebro-private-lab-worker-deploy.yml
-      - cerebro/connectors/universal/cloudflare/gateway-lab/**
   workflow_dispatch:
 permissions:
   contents: read
