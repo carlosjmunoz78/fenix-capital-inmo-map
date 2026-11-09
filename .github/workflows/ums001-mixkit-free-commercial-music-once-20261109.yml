@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: Retrieve only two explicitly catalogued free-commercial Mixkit tracks
         env:
-          IG_SOURCE: 'https://assets.mixkit.co/music/download/mixkit-dreaming-big-31.mp3'
-          FB_SOURCE: 'https://assets.mixkit.co/music/download/mixkit-driving-ambition-32.mp3'
+          IG_SOURCE: 'https://assets.mixkit.co/music/31/31.mp3'
+          FB_SOURCE: 'https://assets.mixkit.co/music/32/32.mp3'
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -30,8 +30,8 @@ jobs:
           import json,hashlib,pathlib
           d=pathlib.Path('/tmp/ums001_mixkit_music_lab')
           tracks=[
-            ('INSTAGRAM_DREAMING_BIG_AHJAY_STELINO.mp3','Dreaming Big','Ahjay Stelino','https://assets.mixkit.co/music/download/mixkit-dreaming-big-31.mp3'),
-            ('FACEBOOK_DRIVING_AMBITION_AHJAY_STELINO.mp3','Driving Ambition','Ahjay Stelino','https://assets.mixkit.co/music/download/mixkit-driving-ambition-32.mp3')
+            ('INSTAGRAM_DREAMING_BIG_AHJAY_STELINO.mp3','Dreaming Big','Ahjay Stelino','https://assets.mixkit.co/music/31/31.mp3'),
+            ('FACEBOOK_DRIVING_AMBITION_AHJAY_STELINO.mp3','Driving Ambition','Ahjay Stelino','https://assets.mixkit.co/music/32/32.mp3')
           ]
           data={'company_id':'fenix','engine_id':'UMS-001','environment':'LAB','publisher':'Mixkit','license_url':'https://mixkit.co/license/modal/musicFree/','license_type':'Mixkit Stock Music Free License - commercial social posts and online marketing ads permitted','download_date':'2026-11-09','no_redistribution_standalone':True,'no_claim_ownership_or_content_id':True,'new_subscriptions':0,'paid_ai_calls':0,'PUBLISH':False,'tracks':[]}
           for name,title,author,url in tracks:
