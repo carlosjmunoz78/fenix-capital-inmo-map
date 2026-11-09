@@ -1,0 +1,48 @@
+name: CEREBRO JARVIS Direct Git LAB OLD UI Regression ONE SHOT
+on:
+  push:
+    branches:
+      - cerebro/jarvis-git-direct-readonly-lab-20261109
+    paths:
+      - '.github/workflows/cerebro-jarvis-git-direct-backcompat-oneshot-20261109.yml'
+permissions:
+  contents: read
+jobs:
+  old-ui-preserved:
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    env:
+      VITE_FENIX_ENV: preprod
+      VITE_JARVIS_GIT_DIRECT_LAB: 'false'
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      CEREBRO_ENVIRONMENT: PREPROD
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_TRADING_ACCESS: 'false'
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Build current LAB branch with new feature flag OFF
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build
+      - name: Install Chromium isolated
+        run: npx playwright install chromium
+      - name: Ensure all existing JARVIS tests still pass with direct mode OFF
+        run: npx playwright test tests/cerebro-jarvis-v1-preview.spec.ts --project=desktop-chromium --grep-invert 'JARVIS Direct Git readonly LAB' --reporter=line
+      - name: Retain traces for audit if any
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-git-backcompat-${{ github.run_id }}
+          path: |
+            test-results
+            playwright-report
+          if-no-files-found: ignore
+          retention-days: 7
