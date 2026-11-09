@@ -47,8 +47,23 @@ export class CloudflareOfficialApi {
    return {status:'COMPLETED',data:result.result};
   }
   if(id==='cloudflare.account.read')return this.#simple(action,identity,`/accounts/${this.accountId}`);
-  if(id==='cloudflare.zones.list')return this.#simple(action,identity,'/zones', {account_id:this.accountId});
-  if(id==='cloudflare.dns.list')return this.#simple(action,identity,`/zones/${assertId(input.zone_id,'zone_id')}/dns_records`);
+  if(id==='cloudflare.zones.list'){
+   const zones=[];
+   for(let page=1;page<=1000;page++){
+    const output=await this.request('GET','/zones',{params:{'account.id':this.accountId,page,per_page:50},identity,permission:action.permission});
+    const chunk=output.result??[];
+    if(!Array.isArray(chunk)||chunk.some(x=>x.account?.id!==this.accountId))throw new Error('CROSS_ACCOUNT_ZONE_RESPONSE');
+    zones.push(...chunk);
+    if(page >= (output.result_info?.total_pages??Math.ceil((output.result_info?.total_count??zones.length)/50)) || chunk.length===0)
+      return {status:'COMPLETED',data:zones};
+   }
+   throw new Error('ZONE_PAGINATION_LIMIT');
+  }
+  if(id==='cloudflare.dns.list'){
+   const zoneId=assertId(input.zone_id,'zone_id');
+   await this.#assertZoneAccount(zoneId,identity);
+   return this.#simple(action,identity,`/zones/${zoneId}/dns_records`);
+  }
   if(id==='cloudflare.d1.get')return this.#simple(action,identity,`/accounts/${this.accountId}/d1/database/${assertId(input.database_id,'database_id',UUID)}`);
   const workerName=input.worker_name===undefined? '':assertId(input.worker_name,'worker_name');
   const paths={
@@ -63,7 +78,12 @@ export class CloudflareOfficialApi {
    'cloudflare.access.apps':`/accounts/${this.accountId}/access/apps`
   };
   if(!Object.hasOwn(paths,id))throw new Error('UNSUPPORTED_CAPABILITY');
+  if(id==='cloudflare.rulesets.list')await this.#assertZoneAccount(input.zone_id,identity);
   return this.#simple(action,identity,paths[id]);
+ }
+ async #assertZoneAccount(zoneId,identity){
+  const response=await this.request('GET',`/zones/${assertId(zoneId,'zone_id')}`,{identity,permission:'Zone Read'});
+  if(response.result?.account?.id!==this.accountId)throw new Error('CROSS_ACCOUNT_ZONE_DENIED');
  }
  async #simple(action,identity,path,params){const output=await this.request('GET',path,{params,identity,permission:action.permission});return {status:'COMPLETED',data:output.result};}
  async #createFacebookD1(identity,input,scope){
@@ -71,6 +91,7 @@ export class CloudflareOfficialApi {
   if(input.name!==FACEBOOK_D1||input.jurisdiction!=='eu'||input.confirm_isolated!==true)throw new Error('TARGET_DENIED');
   const old=(await this.listAllD1(identity)).filter(x=>x.name===FACEBOOK_D1);
   if(old.length){const d=old[0];if(old.length!==1||!UUID.test(d.uuid)||d.jurisdiction!=='eu')throw new Error('D1_COLLISION_OR_WRONG_JURISDICTION');return {status:'ALREADY_EXISTS_VERIFIED',uuid:d.uuid,name:d.name,jurisdiction:d.jurisdiction};}
+  if((await this.listAllD1(identity)).length>=10)throw new Error('D1_FREE_DATABASE_CAP_REACHED');
   const result=await this.request('POST',`/accounts/${this.accountId}/d1/database`,{body:{name:FACEBOOK_D1,jurisdiction:'eu',read_replication:{mode:'disabled'}},identity,permission:'D1 Write'});
   const uuid=result.result?.uuid;if(!UUID.test(uuid))throw new Error('CREATED_WITHOUT_UUID');
   const verified=(await this.listAllD1(identity)).filter(x=>x.name===FACEBOOK_D1);

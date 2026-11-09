@@ -10,6 +10,7 @@ export function digest(value){ return createHash('sha256').update(JSON.stringify
 export function inMemoryIdempotency(){
  const entries=new Map();
  return {
+  durable:false,
   async claim(key,fingerprint){
    const prior=entries.get(key);
    if(!prior){entries.set(key,{fingerprint,status:'IN_PROGRESS'});return {status:'CLAIMED'};}
@@ -60,6 +61,7 @@ export class UniversalConnectorCore {
       const permit = await this.authorize({identity,scope,action,input});
       if(permit!==true){makeAudit('DENIED');return blocked('POLICY_CONFLICT','Client permission denied');}
       if(action.sideEffect){
+        if(this.idempotency.durable!==true){makeAudit('DENIED');return blocked('POLICY_CONFLICT','Durable idempotency required for live mutations');}
         if(scope.environment!=='LAB') {makeAudit('DENIED');return blocked('HIGH_RISK','LAB-only mutation');}
         if(await this.costGuard({identity,scope,action,input})!==true){makeAudit('MONEY_LIMIT');return blocked('MONEY_LIMIT','Cost 0 € / Free quota not attested');}
         if(!idempotency_key || typeof idempotency_key!=='string'){makeAudit('DENIED');return blocked('POLICY_CONFLICT','Durable idempotency key required');}

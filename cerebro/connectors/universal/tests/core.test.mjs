@@ -11,7 +11,7 @@ const UUID='12345678-abcd-1234-abcd-123456789abc';
 const PRINCIPAL={actor_id:'owner',identity_ref:'iam:fenix-owner-lab'};
 function fixture({free=true,permit=labFacebookPolicy,http,cloudflare}={}) {
  const audit=createAuditSink();
- const core=new UniversalConnectorCore({cloudflare:cloudflare??new CloudflareOfficialApi({tokenProvider:async()=> 'SIMULATED_NEVER_REAL',http}),authorize:permit,idempotency:inMemoryIdempotency(),audit:audit.record,costGuard: free?async()=>true:cloudflareFreeCostGuard});
+ const core=new UniversalConnectorCore({cloudflare:cloudflare??new CloudflareOfficialApi({tokenProvider:async()=> 'SIMULATED_NEVER_REAL',http}),authorize:permit,idempotency:{...inMemoryIdempotency(),durable:true},audit:audit.record,costGuard: free?async()=>true:cloudflareFreeCostGuard});
  return {audit,core,chatgpt:makeChatGPTAdapter({core,authenticate:async()=>PRINCIPAL}),cerebro:makeCerebroAdapter({core,authenticate:async()=>PRINCIPAL})};
 }
 function cloudflareHttp(){const calls=[],databases=[];const impl=async(url,request)=>{
@@ -96,4 +96,34 @@ test('pending mutation is not retried after ambiguous API outcome', async()=>{
 test('audit excludes credential values, token never appears',async()=>{
  const api=cloudflareHttp(),f=fixture({http:api.http});await f.chatgpt.callTool(cargs(),{});
  const text=JSON.stringify(f.audit.list());assert.ok(!text.includes('SIMULATED_NEVER_REAL'));assert.ok(!text.includes('Bearer'));
+});
+
+test('cross-account DNS/zone response fail closed and D1 Free cap is enforced',async()=>{
+  const api=cloudflareHttp();
+  const strictHttp=async(url,request)=>{
+    const pathname=new URL(url).pathname;
+    if(pathname.endsWith('/zones'))return response([{id:'zone1',account:{id:'wrong-account'}}]);
+    if(pathname.endsWith('/zones/z-test'))return response({id:'z-test',account:{id:'wrong-account'}});
+    return api.http(url,request);
+  };
+  const f=fixture({http:strictHttp});
+  const zones=await f.chatgpt.callTool(cargs('cloudflare.zones.list',{},undefined),{});
+  assert.equal(zones.reason,'LOW_CONFIDENCE');
+  const dns=await f.chatgpt.callTool(cargs('cloudflare.dns.list',{zone_id:'z-test'},undefined),{});
+  assert.equal(dns.reason,'LOW_CONFIDENCE');
+  assert.equal(api.calls.filter(x=>x.pathname.includes('dns_records')).length,0);
+  const api2=cloudflareHttp();
+  for(let i=0;i<10;i++)api2.databases.push({name:`d1-${i}`,uuid:UUID,jurisdiction:'eu'});
+  const f2=fixture({http:api2.http});
+  const tooMany=await f2.chatgpt.callTool(cargs(),{});
+  assert.equal(tooMany.reason,'LOW_CONFIDENCE');
+  assert.equal(api2.calls.filter(x=>x.method==='POST').length,0);
+});
+test('ephemeral idempotency store is forbidden for any live mutation',async()=>{
+ const api=cloudflareHttp(),audit=createAuditSink();
+ const core=new UniversalConnectorCore({cloudflare:new CloudflareOfficialApi({tokenProvider:async()=> 'SIMULATED_NEVER_REAL',http:api.http}),authorize:labFacebookPolicy,idempotency:inMemoryIdempotency(),audit:audit.record,costGuard:async()=>true});
+ const adapter=makeChatGPTAdapter({core,authenticate:async()=>PRINCIPAL});
+ const result=await adapter.callTool(cargs(),{});
+ assert.equal(result.reason,'POLICY_CONFLICT');
+ assert.equal(api.calls.length,0);
 });
