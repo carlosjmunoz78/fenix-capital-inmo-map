@@ -245,6 +245,50 @@ test('JARVIS Git readonly lab · wrong branch blocks all Git requests',async({pa
   await ensureExecutionVisible(page);
   await page.getByRole('button',{name:'Herramientas',exact:true}).click();
   await page.getByRole('button',{name:'Estado Git',exact:true}).click();
-  await expect(page.getByRole('status')).toContainText('Rama distinta a la autorizada');
+  await expect(page.getByRole('status')).toContainText('Rama o entorno distinto al autorizado');
   expect(outbound).toBe(0);
+});
+
+test('JARVIS Git readonly lab · terminal proof required before GREEN',async({page})=>{
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({status:'OK',branch:'cerebro/jarvis-work-codex-complete-20261102',head_sha:'79d621b400c265adf744678aa7c64e79474b6946',environment:'PREPROD'})
+  }));
+  await page.route('**/functions/v1/jarvis-git-gateway-v1-preprod/inspect',route=>route.fulfill({
+    status:202,contentType:'application/json',body:JSON.stringify({status:'QUEUED',job:{job_id:'proof-job',status:'QUEUED'}})
+  }));
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/work/proof-job',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({status:'OK',job:{job_id:'proof-job',status:'SUCCEEDED',result_summary:{status:'GIT_SAFE_PREPROD_GREEN',prod_touched:false,trading_touched:false}}})
+  }));
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado Git',exact:true}).click();
+  await expect(page.getByRole('status')).toContainText('Aún NO ejecutada');
+  await page.getByRole('button',{name:'Comprobar resultado'}).click();
+  await expect(page.getByRole('status')).toContainText('ejecutado y verificado con evidencia');
+  await expect(page.getByRole('button',{name:'Comprobar resultado'})).toHaveCount(0);
+});
+test('JARVIS Git readonly lab · completed without proof is not GREEN',async({page})=>{
+  await installIsolatedPreprod(page);
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/repo/head',route=>route.fulfill({
+    status:200,contentType:'application/json',
+    body:JSON.stringify({status:'OK',branch:'cerebro/jarvis-work-codex-complete-20261102',head_sha:'79d621b400c265adf744678aa7c64e79474b6946',environment:'PREPROD'})
+  }));
+  await page.route('**/functions/v1/jarvis-git-gateway-v1-preprod/inspect',route=>route.fulfill({
+    status:202,contentType:'application/json',body:JSON.stringify({status:'QUEUED',job:{job_id:'unproved-job',status:'QUEUED'}})
+  }));
+  await page.route('**/functions/v1/jarvis-work-gateway-v1-preprod/work/unproved-job',route=>route.fulfill({
+    status:200,contentType:'application/json',body:JSON.stringify({status:'OK',job:{job_id:'unproved-job',status:'SUCCEEDED',result_summary:{status:'UNVERIFIED',prod_touched:false,trading_touched:false}}})
+  }));
+  await page.goto('/cerebro?section=jarvis');
+  await openAuditProject(page);
+  await ensureExecutionVisible(page);
+  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
+  await page.getByRole('button',{name:'Estado Git',exact:true}).click();
+  await page.getByRole('button',{name:'Comprobar resultado'}).click();
+  await expect(page.getByRole('status')).toContainText('sin evidencia de control válida');
+  await expect(page.getByRole('status')).not.toContainText('ejecutado y verificado');
 });
