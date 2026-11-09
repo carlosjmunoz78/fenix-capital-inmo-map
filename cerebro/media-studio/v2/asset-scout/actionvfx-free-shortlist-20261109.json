@@ -1,0 +1,74 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "free-shortlist-v1",
+  "inspected_on": "2026-11-09",
+  "provider": "ActionVFX",
+  "account_status": "NOT_AUTHENTICATED_IN_CONNECTED_OPERA",
+  "created_account": false,
+  "purchase_authorized": false,
+  "account_creation_required": true,
+  "registered_company_license_tier": "UNVERIFIED_USER_CHOICE_REQUIRED",
+  "cost_eur": 0,
+  "commercial_rights_qualification": "Permanently free assets are commercially licensed under qualifying company tier; no raw stock redistribution or AI training.",
+  "license_url": "https://www.actionvfx.com/license",
+  "faq_url": "https://www.actionvfx.com/faq",
+  "download_limit_free_per_day": 10,
+  "auto_download": "NOT_SUPPORTED_OR_AUTHORIZED_WITHOUT_VERIFIED_PROVIDER_API",
+  "download_policy": "Manual initial login plus use official permitted download workflow; no scraping, paywall bypass, or bot signup.",
+  "candidate_collections": [
+    {
+      "name": "Free Portals",
+      "purpose": "Paso a dimensión extraordinaria en escena realista; luz/partículas con integración física",
+      "url": "https://www.actionvfx.com/collections/free-portals-stock-footage",
+      "source_quality": "2K free tier",
+      "assets_count": 10,
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+    },
+    {
+      "name": "Free Dust Waves",
+      "purpose": "Colapso de calle, pasos, tormentas de polvo, choque con suelo, transformación",
+      "url": "https://www.actionvfx.com/collections/free-dust-wave-stock-footage",
+      "source_quality": "2K MP4",
+      "assets_count": 10,
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+    },
+    {
+      "name": "Free Blasters",
+      "purpose": "Ráfagas VFX y transiciones de energía, con moderación",
+      "url": "https://www.actionvfx.com/collections/free-blasters-stock-footage",
+      "source_quality": "2K ProRes",
+      "assets_count": 6,
+      "status": "LINK_VERIFIED_NOT_DOWNLOADED"
+    }
+  ],
+  "source_urls": [
+    "https://www.actionvfx.com/faq",
+    "https://www.actionvfx.com/collections/free-portals-stock-footage",
+    "https://www.actionvfx.com/collections/free-dust-wave-stock-footage",
+    "https://www.actionvfx.com/collections/free-blasters-stock-footage"
+  ],
+  "pexels_api_status": {
+    "new_issuance": "PAUSED",
+    "source_url": "https://help.pexels.com/hc/en-us/articles/900004904026-How-do-I-get-an-API-key",
+    "preexisting_key": "NOT_FOUND_IN_AVAILABLE_GMAIL_DRIVE_REPO_CONTEXT",
+    "site_account_status": "NOT_AUTHENTICATED_IN_CONNECTED_OPERA",
+    "alternatives": [
+      "Poly Haven CC0 API",
+      "ambientCG CC0",
+      "Wikimedia Commons per-file licenses"
+    ],
+    "no_new_key_to_request_now": true
+  },
+  "policies": [
+    "COST_0",
+    "LAB_ONLY",
+    "NO_PROD",
+    "NO_AUTO_PAYMENT",
+    "NO_MANUAL_CAPTCHA_BYPASS",
+    "NO_MASS_DOWNLOAD",
+    "NO_ML_TRAINING_WITH_LICENSED_STOCK",
+    "PER_ASSET_PROVENANCE_AND_RIGHTS_GATE"
+  ]
+}
