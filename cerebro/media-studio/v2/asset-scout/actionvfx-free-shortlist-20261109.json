@@ -5,11 +5,11 @@
   "version": "free-shortlist-v1",
   "inspected_on": "2026-11-09",
   "provider": "ActionVFX",
-  "account_status": "NOT_AUTHENTICATED_IN_CONNECTED_OPERA",
+  "account_status": "AUTHENTICATED_IN_CONNECTED_OPERA_2026_11_09",
   "created_account": false,
   "purchase_authorized": false,
-  "account_creation_required": true,
-  "registered_company_license_tier": "UNVERIFIED_USER_CHOICE_REQUIRED",
+  "account_creation_required": false,
+  "registered_company_license_tier": "MISSING_LICENSE_ON_PROFILE_USER_ACTION_REQUIRED",
   "cost_eur": 0,
   "commercial_rights_qualification": "Permanently free assets are commercially licensed under qualifying company tier; no raw stock redistribution or AI training.",
   "license_url": "https://www.actionvfx.com/license",
@@ -70,5 +70,13 @@
     "NO_MASS_DOWNLOAD",
     "NO_ML_TRAINING_WITH_LICENSED_STOCK",
     "PER_ASSET_PROVENANCE_AND_RIGHTS_GATE"
-  ]
+  ],
+  "company_profile_status": "NOT_FILLED",
+  "api_key_status": "NO_API_KEY",
+  "free_download_gate": "BLOCKED_LICENSE_MISSING",
+  "login_preference": "CONTINUE_WITH_GOOGLE",
+  "login_preference_verified_on_site": false,
+  "auth_strategy_path": "cerebro/media-studio/v2/asset-scout/actionvfx-auth-strategy-lab-v0.json",
+  "last_checked": "2026-11-09",
+  "notes": "Signed-in user profile verified on official ActionVFX site. Do not transfer Opera cookies to CEREBRO. License completion needed before commercial usage. Provider-specific integrated API capability not verified."
 }
