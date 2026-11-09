@@ -6,6 +6,7 @@ import {normalizeNavigation,type NavItem} from './masterNavigation';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchNotionRuntime} from './notionRuntime';
 import {runExpedienteBulkStage} from './expedienteActionsRuntime';
+import {isOpenDirectionExpediente} from './useDirectionLiveData';
 import {anaVertical} from './assets/visualAssets';
 import './operational.css';
 import './expedientes-polish.css';
@@ -40,6 +41,15 @@ function needsReview(r:AnyRow){return bool(r,['requiere_validacion','requiere_re
 function inSigning(r:AnyRow){return /firma/i.test(firstString(r,['fase','phase','estado','status']));}
 function nextAction(r:AnyRow){return firstString(r,['siguiente_accion','siguiente_acción','proxima_accion','próxima_acción','next_action']);}
 
+function dateStamp(row:AnyRow,keys:string[]){for(const key of keys){const v=row[key];if(typeof v==='string'&&v.trim()){const n=Date.parse(v);if(Number.isFinite(n))return n;}}return 0;}
+function compareDefaultExpedientes(a:AnyRow,b:AnyRow){
+ const activeA=isOpenDirectionExpediente(a),activeB=isOpenDirectionExpediente(b);
+ if(activeA!==activeB)return activeA?-1:1;
+ const keys=activeA?['updated_at','created_at']:['fecha_finalizacion','updated_at','created_at'];
+ const dateDiff=dateStamp(b,keys)-dateStamp(a,keys);
+ return dateDiff||codeOf(a).localeCompare(codeOf(b),'es',{numeric:true});
+}
+
 export default function ExpedientesSharedShell(){
  const location=useLocation(),navigate=useNavigate();const active=location.pathname==='/expedientes';
  const[sessionReady,setSessionReady]=useState(false),[logged,setLogged]=useState(false),[ctx,setCtx]=useState<Ctx|null>(null),[nav,setNav]=useState<NavItem[]>([]),[theme,setTheme]=useState<Theme>(()=>(sessionStorage.getItem('fenix-theme') as Theme)||'light');
@@ -56,11 +66,11 @@ export default function ExpedientesSharedShell(){
  const canonicalMap=useMemo(()=>new Map(canonical.filter(x=>x.expediente_code).map(x=>[String(x.expediente_code),x])),[canonical]);
  const phases=useMemo(()=>Array.from(new Set(rows.map(r=>firstString(r,['fase','phase'])).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'es')),[rows]);
  const risks=useMemo(()=>Array.from(new Set(rows.map(r=>firstString(r,['riesgo','risk'])).filter(Boolean))).sort((a,b)=>a.localeCompare(b,'es')),[rows]);
- const visibleRows=useMemo(()=>{const filtered=rows.filter(row=>{const rowPhase=firstString(row,['fase','phase']),rowRisk=firstString(row,['riesgo','risk']);const focusOk=focus==='todos'||(focus==='revisar'&&needsReview(row))||(focus==='firma'&&inSigning(row))||(focus==='sin-accion'&&!nextAction(row));return(!phase||rowPhase===phase)&&(!risk||rowRisk===risk)&&focusOk;});if(!sortKey)return filtered;const direction=sortDir==='asc'?1:-1;return[...filtered].sort((a,b)=>{const primary=compareUnknown(a[sortKey],b[sortKey]);if(primary!==0)return primary*direction;return compareUnknown(codeOf(a),codeOf(b))*direction;});},[rows,phase,risk,focus,sortKey,sortDir]);
+ const visibleRows=useMemo(()=>{const filtered=rows.filter(row=>{const rowPhase=firstString(row,['fase','phase']),rowRisk=firstString(row,['riesgo','risk']);const focusOk=focus==='todos'||(focus==='revisar'&&needsReview(row))||(focus==='firma'&&inSigning(row))||(focus==='sin-accion'&&!nextAction(row));return(!phase||rowPhase===phase)&&(!risk||rowRisk===risk)&&focusOk;});if(!sortKey)return[...filtered].sort(compareDefaultExpedientes);const direction=sortDir==='asc'?1:-1;return[...filtered].sort((a,b)=>{const activeA=isOpenDirectionExpediente(a),activeB=isOpenDirectionExpediente(b);if(activeA!==activeB)return activeA?-1:1;const primary=compareUnknown(a[sortKey],b[sortKey]);if(primary!==0)return primary*direction;return compareDefaultExpedientes(a,b);});},[rows,phase,risk,focus,sortKey,sortDir]);
  const columns=useMemo<string[]>(()=>{const out:string[]=[];for(const group of operationalColumnGroups){const key=group.keys.find(candidate=>rows.some(row=>Object.prototype.hasOwnProperty.call(row,candidate)));if(key)out.push(key);}return out;},[rows]);
  const phaseRank=useMemo(()=>{const m=new Map<string,number>();rows.forEach(r=>{const x=firstString(r,['fase','phase'])||'Sin fase';m.set(x,(m.get(x)||0)+1)});return[...m.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6)},[rows]);
  const maxPhase=useMemo(()=>Math.max(1,...phaseRank.map(([,n])=>n)),[phaseRank]);
- const activeCount=useMemo(()=>rows.filter(r=>/activ|curso|estudio|banco|tasaci|fein|firma/i.test(firstString(r,['estado','status','fase','phase']))).length,[rows]);
+ const activeCount=useMemo(()=>rows.filter(isOpenDirectionExpediente).length,[rows]);
  const reviewCount=useMemo(()=>rows.filter(needsReview).length,[rows]);
  const signingCount=useMemo(()=>rows.filter(inSigning).length,[rows]);
  const noActionCount=useMemo(()=>rows.filter(r=>!nextAction(r)).length,[rows]);
