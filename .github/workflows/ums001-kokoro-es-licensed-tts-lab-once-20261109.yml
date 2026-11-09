@@ -1,0 +1,42 @@
+name: UMS001 Kokoro Spanish Apache licensed TTS LAB one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-kokoro-es-lab-v0-20261109
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_KOKORO_ES_FREE_TTS_20261109.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-kokoro-es-licensed-one-shot-20261109
+  cancel-in-progress: false
+jobs:
+  tts:
+    if: github.event.head_commit.message == 'UMS001_KOKORO_ES_TTS_START_ONCE_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install open-source Spanish speech dependencies only
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng
+          python -m pip install --disable-pip-version-check 'kokoro==0.9.4' 'soundfile>=0.12,<1' 'numpy>=1.26,<3'
+      - name: Synthesize 14 sections with Apache-licensed Kokoro es, zero external paid generation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python cerebro/media-studio/v2/runtime/ums001_kokoro_es_licensed_segments_once.py
+      - name: Store LAB speech artifacts in private Actions artifact without publishing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_KOKORO_ES_APACHE2_LAB_${{ github.run_id }}
+          path: /tmp/ums001_kokoro_es_licensed/
+          retention-days: 7
+          if-no-files-found: warn
