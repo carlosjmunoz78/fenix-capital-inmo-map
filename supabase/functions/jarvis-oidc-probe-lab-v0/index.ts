@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createRemoteJWKSet,jwtVerify} from "npm:jose@5.10.0";
 
 // Isolated GitHub-issued identity attestation, not a Supabase user login or a worker.
+// Do not assume GitHub OIDC subject syntax: org-level customized sub claims exist. Verify signed repository/ref/workflow separately.
 // No database, privileged key, queue, Git writes, or downstream operations.
 const ISSUER='https://token.actions.githubusercontent.com';
 const AUDIENCE='jarvis-oidc-probe-lab-v0';
@@ -30,7 +31,7 @@ Deno.serve(async(req:Request)=>{
        payload.ref!==REF||
        payload.workflow_ref!==EXPECTED_WORKFLOW_REF||
        payload.event_name!=='push'||
-       payload.sub!=='repo:'+REPO+':ref:'+REF||
+       typeof payload.sub!=='string'||payload.sub.length===0||
        typeof payload.sha!=='string'||!/^[0-9a-f]{40}$/i.test(payload.sha)||
        typeof payload.run_id!=='string'||!/^[0-9]+$/.test(payload.run_id)||
        typeof payload.exp!=='number'||typeof payload.iat!=='number'||
