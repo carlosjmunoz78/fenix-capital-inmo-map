@@ -284,6 +284,7 @@ test('JARVIS Work PREPROD · reconcile submits once through Gateway and displays
    calls+=1;
    const body=route.request().postDataJSON() as {message?:string};
    expect(body.message).toContain('Reconciliación de Auditoría Total');
+   expect((body as {company_id?:string}).company_id).toBe('fenix');
    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',message:'Resultado seguro de reconciliación',executed:false,context_applied:true})});
  });
  await page.goto('/cerebro?section=jarvis');
