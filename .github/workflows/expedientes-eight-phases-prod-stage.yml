@@ -5,6 +5,7 @@ on:
       - fix/expedientes-eight-phases-substeps-20261109
     paths:
       - .github/workflows/expedientes-eight-phases-prod-stage.yml
+      - src/expedientePhaseModel.ts
 permissions:
   contents: read
 jobs:
