@@ -1,0 +1,53 @@
+name: UMS001 Mixkit licensed commercial music fetch LAB one-shot
+on:
+  push:
+    branches:
+      - cerebro/ums001-mixkit-licensed-music-lab-v0-20261109
+    paths:
+      - cerebro/media-studio/v2/orders/UMS001_MIXKIT_LICENSED_TRACKS_20261109.trigger
+permissions:
+  contents: read
+concurrency:
+  group: ums001-licensed-mixkit-20261109
+  cancel-in-progress: false
+jobs:
+  acquire:
+    if: github.event.head_commit.message == 'UMS001_MIXKIT_LICENSED_TRACKS_FETCH_ONCE_20261109' && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Retrieve only two explicitly catalogued free-commercial Mixkit tracks
+        env:
+          IG_SOURCE: 'https://assets.mixkit.co/music/download/mixkit-dreaming-big-31.mp3'
+          FB_SOURCE: 'https://assets.mixkit.co/music/download/mixkit-driving-ambition-32.mp3'
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p /tmp/ums001_mixkit_music_lab
+          curl --proto '=https' --tlsv1.2 -fLsS --retry 0 --max-time 70 "$IG_SOURCE" -o /tmp/ums001_mixkit_music_lab/INSTAGRAM_DREAMING_BIG_AHJAY_STELINO.mp3
+          curl --proto '=https' --tlsv1.2 -fLsS --retry 0 --max-time 70 "$FB_SOURCE" -o /tmp/ums001_mixkit_music_lab/FACEBOOK_DRIVING_AMBITION_AHJAY_STELINO.mp3
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          d=pathlib.Path('/tmp/ums001_mixkit_music_lab')
+          tracks=[
+            ('INSTAGRAM_DREAMING_BIG_AHJAY_STELINO.mp3','Dreaming Big','Ahjay Stelino','https://assets.mixkit.co/music/download/mixkit-dreaming-big-31.mp3'),
+            ('FACEBOOK_DRIVING_AMBITION_AHJAY_STELINO.mp3','Driving Ambition','Ahjay Stelino','https://assets.mixkit.co/music/download/mixkit-driving-ambition-32.mp3')
+          ]
+          data={'company_id':'fenix','engine_id':'UMS-001','environment':'LAB','publisher':'Mixkit','license_url':'https://mixkit.co/license/modal/musicFree/','license_type':'Mixkit Stock Music Free License - commercial social posts and online marketing ads permitted','download_date':'2026-11-09','no_redistribution_standalone':True,'no_claim_ownership_or_content_id':True,'new_subscriptions':0,'paid_ai_calls':0,'PUBLISH':False,'tracks':[]}
+          for name,title,author,url in tracks:
+            p=d/name
+            assert p.stat().st_size>1_000_000, f'Track too small: {name}'
+            head=p.read_bytes()[:4]
+            assert head[:3]==b'ID3' or (head[0]==255 and (head[1]&224)==224), f'Invalid MP3 {name}'
+            data['tracks'].append({'name':name,'title':title,'composer':author,'url':url,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+          (d/'MIXKIT_COMMERCIAL_LICENSE_AND_ASSET_LEDGER.json').write_text(json.dumps(data,indent=2,ensure_ascii=False))
+          print('UMS001_MIXKIT_LICENSE_CATALOGUED_MP3_DOWNLOADED_VALIDATED_2',flush=True)
+          PY
+      - name: Archive privately for authorized editing and not standalone redistribution
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: UMS001_MIXKIT_LAB_AUDIO_${{ github.run_id }}
+          path: /tmp/ums001_mixkit_music_lab/
+          retention-days: 7
+          if-no-files-found: error
