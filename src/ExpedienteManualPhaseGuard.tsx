@@ -11,8 +11,8 @@ type Row=Record<string,any>;
 type Ctx={role?:string;display_name?:string};
 const phases=['Entrada','Documentación','Análisis','Banco','Tasación','Oferta','FEIN','Notaría','Firma','Cierre'];
 const visiblePhases=['Entrada','Documentación','Banco','Tasación','FEIN','Notaría','Firma','Cierre'];
-// Contrato confirmado en Supabase PROD (2026-11-09). No simular que el backend admite fases nuevas.
-const writableStages=new Set(['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Tasación','Pre-OK + Tasación realizada','Tasación realizada','Notaría','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado']);
+// Contrato actualizado y comprobado en Supabase PROD (2026-11-09).
+const writableStages=new Set(['Entrada','Documentación','Documentación incompleta','Documentación completa','Análisis','Banco','Tasación','Oferta','Pre-OK + Tasación realizada','Tasación realizada','FEIN','Notaría','Firma','Cierre','Finalizado','Baja','Pausado','Perdido','Revisión legado']);
 const aliases=[['entrada','nuevo','inicial'],['document','doc'],['análisis','analisis','estudio'],['banco','banc'],['tasación','tasacion'],['oferta','aprob'],['fein'],['notar'],['firma'],['cierre','cerrado','final']];
 function text(row:Row|null,keys:string[]){if(!row)return'';for(const k of keys){const v=row[k];if(typeof v==='string'&&v.trim())return v.trim()}return''}
 function phaseIndex(raw:string){const s=raw.toLowerCase();const i=aliases.findIndex(group=>group.some(x=>s.includes(x)));return i>=0?i:0}
