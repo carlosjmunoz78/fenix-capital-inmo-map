@@ -1,0 +1,9 @@
+engine_id=UMS-001
+company_id=fenix
+environment=LAB
+voice_model=hexgrad/Kokoro-82M
+license=Apache-2.0
+pricing_additional_eur=0
+no_vendor_tokens=true
+no_pub=true
+one_shot=true
