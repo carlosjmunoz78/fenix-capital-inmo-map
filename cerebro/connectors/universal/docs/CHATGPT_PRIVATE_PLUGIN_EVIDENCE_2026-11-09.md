@@ -48,3 +48,19 @@ Cost new external spend: 0 EUR. No ChatGPT Work.
 - **Not verified:** account billing plan, quota headroom under current account plan, D1 create permission, Workers deploy/write permission, durable idempotency store, MCP server/OAuth live connection, CEREBRO Gateway physical routing, OAuth client identity separation, rollback in Cloudflare, or zero-cost autonomous mutations.
 - **Next gate:** verify Free-plan status & cost guard and persist idempotency before any D1/Worker mutation. Do not infer deployment safety from an active token.
 - Existing PR remains DRAFT; no App/CRM/PROD/DNS/Instagram/FB Worker changes.
+
+## 2026-11-09 · Cloudflare subscription UI physical read-only attestation
+
+The authenticated Opera Browser Connector navigated to the **Subscriptions** panel for exact account `e39a57e1ac42650ca5a6d5307cf0ac8e`:
+`https://dash.cloudflare.com/e39a57e1ac42650ca5a6d5307cf0ac8e/billing/subscriptions`.
+
+Visible labels in the account at inspection:
+- `Workers Free` — `Activo`
+- `fenixcapital.es` — `Free Plan` — `Activo`
+- `Teams Free Base` — subscribed.
+
+**This is browser/dashboard-attested plan state**, separate from the GitHub API job output `CF_PLAN_FREE_ATTESTED=false` (the job did not query billing and must not claim it did). Cloudflare's documented Free D1 limit is 10 databases per account. Combined with GET-only D1 inventory count=7, the observed current capacity is 3 additional D1 database slots, subject to quotas staying unchanged.
+
+**No subscription action, charge, new resource, DNS update, database mutation, or Worker deployment occurred.**
+
+Remaining blocker for any Facebook D1 creation: a durable atomic idempotency mechanism and independently verified zero-additional-cost write gate must be wired; this read-only attestation is not a write approval on its own. Preserve PR #44 and FB PR #9 in DRAFT.
