@@ -225,3 +225,11 @@ Additional recurring cost introduced: `0 €`
 - Audición alternativa Piper `es_ES` (0€) GH Actions run 42542341098 SUCCESS: voz masculina davefx-medium 6.525s (candidata de escucha); voz femenina mls_9972-low 31.344s (descartada por duración y licencia con atribución). Las voces de los Reels NO se modificaron.
 - Notion: V5.2 IG https://app.notion.com/p/41381b1a756d810fa544e1813cf56a2d y FB https://app.notion.com/p/41381b1a756d81148ceddd39cccd0ccc; ambos Bloqueado/TEST (LAB lógico).
 - Incidencia MUSIC_RIGHTS=UNKNOWN para el WAV orquestal de 44s; derechos generales de Runway/Replicate contrastados pero no bastan para acreditar banda sonora y activos de entrada. Faltan acento es_ES auditivo, claims, dispositivos Meta, y CTA/GA4. NO PUBLICAR. Main/PROD/App/CRM/Supabase/DNS intactos.
+
+
+### 2026-11-09 · UMS-001 V5.3 música comercial Mixkit licencia verificada
+- HECHO: segundo intento en GitHub Actions 42571395779 SUCCESS; recuperadas 2 pistas auténticas Mixkit (Ahjay Stelino, «Dreaming Big», «Driving Ambition») con licencia https://mixkit.co/license/modal/musicFree/ para posts comerciales y ads online; hashes SHA256 y autoría registrados. Sin MP3 standalone en archivos públicos.
+- HECHO: renderizado nuevo IG https://drive.google.com/file/d/1P5TSDX7063y-HLRdhmLa87ORovt03vPL/view (19.955 s) y FB https://drive.google.com/file/d/1MYvF5QZo6wyx0XhQYbGL1n-hFKCD89b4/view (22.262 s), vídeos H264 sin cambios vs V5.2, voces Kokoro Apache2, pista antigua de música 44s sin derechos eliminada de estos dos derivados.
+- HECHO: audio nuevo ~−15 LUFS y TP < -1.6dB, sin nuevas generaciones IA de pago ni suscripciones. Backup completo con alternativa de score local original y scripts https://drive.google.com/file/d/16F2lTs1i9U7FvbyCECm9s6pE0flgclVi/view .
+- Notion IG https://app.notion.com/p/41381b1a756d81b78ad6e23f1e2149bb / FB https://app.notion.com/p/41381b1a756d8199b9e3d6ef8ff548b8 · Bloqueado para publicación hasta QA voz acento España, marcas, claims hipotecarios, inputs visuales y preview Meta real.
+- Runbook `cerebro/media-studio/v2/runbooks/UMS001_V53_MIXKIT_MUSIC_COMMERCIAL_RIGHTS_AND_QA_20261109.md`; conserva todos RAW y V0–V5.2; sin main/PROD/App/CRM/Supabase/WordPress/SEO/DNS/Buffer.
