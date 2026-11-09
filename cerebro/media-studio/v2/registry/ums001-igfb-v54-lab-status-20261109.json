@@ -1,0 +1,79 @@
+{
+  "schema_version": "UMS001_LAB_RELEASE_STATUS_V1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "V5.4",
+  "created_date": "2026-11-09",
+  "production_state": "TECHNICAL_PASS_EDITORIAL_BLOCKED",
+  "autonomy": "LAB_RENDER_ONLY",
+  "PUBLISH": false,
+  "APPROVED": false,
+  "artifact_links": {
+    "instagram": "https://drive.google.com/file/d/16MD3EPGc8Y7P_f1L29gSO-R7pdqmdyXh/view",
+    "facebook": "https://drive.google.com/file/d/1tF1Ri4nJnh6T3FsRz12sNkNZwWRHRAq0/view",
+    "qa": "https://drive.google.com/file/d/1QzCTf5bMVW0uQnett58814IlJF2bdmhb/view",
+    "backup": "https://drive.google.com/file/d/1AtoWDeaXnI_PaoikLj4fl105b46nnaFQ/view",
+    "runbook": "cerebro/media-studio/v2/runbooks/UMS001_IG_FB_V54_PIPER_ES_ES_NATIVE_MUSIC_LICENSED_QA_20261109.md"
+  },
+  "model_router": {
+    "task": "speech synthesis",
+    "selected": "Piper es_ES-sharvard-medium",
+    "speaker_ids": {
+      "instagram": 1,
+      "facebook": 0
+    },
+    "license": "CC BY 3.0 corpus attribution mandatory",
+    "comparison_old": "Kokoro es generic V5.3",
+    "choice_final": "PENDING_LISTENING",
+    "new_paid_api_calls": 0
+  },
+  "music": {
+    "source": "Mixkit",
+    "license": "https://mixkit.co/license/modal/musicFree/",
+    "ig": "Dreaming Big — Ahjay Stelino",
+    "fb": "Driving Ambition — Ahjay Stelino",
+    "standalone_redistribution": false
+  },
+  "qa": {
+    "technical": "PASS",
+    "visual_safe_area": "PASS_IN_EXPORTED_MP4",
+    "audio_loudness": "PASS",
+    "captions": "PASS_SEVEN_EVENTS",
+    "caption_margins": "800px lower",
+    "cta_area": "x123..957,y282..374",
+    "brand_logo_visible": "PASS_IN_EXPORTED_MP4",
+    "accent_spain_naturalness": "PENDING_HUMAN_LISTENING",
+    "rights_of_visual_inputs": "PENDING",
+    "financial_claims": "PENDING",
+    "meta_device_preview": "PENDING",
+    "cta_event_tracking": "PENDING"
+  },
+  "release_gate": {
+    "promote_to_prod": false,
+    "schedule_to_meta": false,
+    "publish": false,
+    "reasons": [
+      "LOW_CONFIDENCE",
+      "LEGAL_REQUIRED",
+      "META_PREVIEW_PENDING",
+      "CONVERSION_TRACKING_PENDING"
+    ]
+  },
+  "cost": {
+    "new_ai_api_eur": 0,
+    "new_subscriptions_eur": 0,
+    "github_actions_billable_minutes": "UNKNOWN_NOT_RECONCILED",
+    "other_provider_historic": "UNKNOWN_NOT_RECONCILED"
+  },
+  "originals": {
+    "v0_to_v53": "PRESERVED",
+    "fallback": "V5.3",
+    "rollback": "restore previous Drive files, no auto-publish"
+  },
+  "qa_sha256": {
+    "instagram_mp4": "96b6706fcf4b25c1a4d4d7b4ca4e54d02633533bfd331f2a497bf4c5a3741a2a",
+    "facebook_mp4": "0719afaa934f7a3e5ec969f076fea67f41047ed3c6ebb761a1351c98d8052a14",
+    "package_zip": "fa4f2c852a0ded1704f700ff0c41730245d5aa6f84350423d7e39eb79f2ed934"
+  }
+}
