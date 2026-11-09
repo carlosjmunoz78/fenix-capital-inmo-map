@@ -12,16 +12,15 @@ const FUNCTION='jarvis-oidc-probe-lab-v0';
 const PREPROD='hnqlnvakzaywtafeiybt';
 const EXPECTED_WORKFLOW_REF=REPO+'/'+WORKFLOW+'@'+REF;
 const JWKS=createRemoteJWKSet(new URL(ISSUER+'/.well-known/jwks'));
-const exactPath='/functions/v1/'+FUNCTION+'/attest';
 
 function response(status:number,body:unknown){
   return new Response(JSON.stringify(body),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
 }
 Deno.serve(async(req:Request)=>{
   const url=new URL(req.url);
-  if(req.method!=='POST'||url.pathname!==exactPath)return response(404,{status:'NOT_AVAILABLE'});
+  if(req.method!=='POST'||!url.pathname.endsWith('/'+FUNCTION+'/attest'))return response(404,{status:'NOT_AVAILABLE'});
   const project=Deno.env.get('SUPABASE_URL')??'';
-  if(project!=='https://'+PREPROD+'.supabase.co')return response(403,{status:'DENIED',reason:'WRONG_ENVIRONMENT'});
+  if(!project||new URL(project).origin!=='https://'+PREPROD+'.supabase.co')return response(403,{status:'DENIED',reason:'WRONG_ENVIRONMENT'});
   const header=req.headers.get('authorization')??'';
   if(!header.startsWith('Bearer ')||header.length>8199)return response(403,{status:'DENIED',reason:'OIDC_REQUIRED'});
   try{
