@@ -1,0 +1,35 @@
+name: FACT001 owner auth existing deployed gateway GET only
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths: [.github/workflows/fact001-cerebro-owner-jwt-preflight.yml]
+permissions:
+  contents: read
+jobs:
+  owner-auth:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      OWNER_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+      PUBLISHABLE: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+    steps:
+      - name: Verify owner JWT expiry and deployed Console health without changing it
+        run: |
+          node --input-type=module <<'NODE'
+          const jwt=process.env.OWNER_JWT||'',key=process.env.PUBLISHABLE||'';
+          console.log('FACT001_JWT_PRESENT='+Boolean(jwt));
+          console.log('FACT001_PUBLISHABLE_PRESENT='+Boolean(key));
+          let valid=false;
+          try {
+            const parts=jwt.split('.');
+            const payload=JSON.parse(Buffer.from(parts[1]||'', 'base64url').toString('utf8'));
+            valid=Number.isSafeInteger(payload.exp)&&payload.exp*1000>Date.now()+60000;
+          }catch{}
+          console.log('FACT001_JWT_NOT_EXPIRED='+valid);
+          if(!valid)process.exit(0);
+          try{
+            const r=await fetch('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/health',{method:'GET',headers:{Authorization:'Bearer '+jwt,...(key?{'apikey':key}:{})},redirect:'error',signal:AbortSignal.timeout(14000)});
+            console.log('FACT001_EXISTING_OWNER_GATEWAY_HTTP='+r.status);
+          }catch{console.log('FACT001_EXISTING_OWNER_GATEWAY_HTTP=NETWORK');}
+          console.log('FACT001_MUTATIONS=0');
+          NODE
