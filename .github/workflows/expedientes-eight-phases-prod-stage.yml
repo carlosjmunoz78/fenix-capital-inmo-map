@@ -28,7 +28,7 @@ jobs:
           git merge-base --is-ancestor e3af0a5678ca660cb54d7be8eeac40fab0afea87 HEAD
           while IFS= read -r file; do
             case "${file}" in
-              src/DetailShell.tsx|src/ExpedienteManualPhaseGuard.tsx|src/ExpedientesSharedShell.tsx|src/detail-expediente.css|src/expediente-manual-phase.css|src/expedientePhaseModel.ts|tests/expedientes-eight-phases.spec.ts|docs/expedientes/20261109_eight_phases_data_migration.sql|docs/expedientes/20261109_eight_phases_data_rollback.sql|.github/workflows/expedientes-eight-phases-qa.yml|.github/workflows/expedientes-eight-phases-prod-stage.yml) ;;
+              src/DetailShell.tsx|src/ExpedienteManualPhaseGuard.tsx|src/ExpedientesSharedShell.tsx|src/detail-expediente.css|src/expediente-manual-phase.css|src/expedientePhaseModel.ts|tests/expedientes-eight-phases.spec.ts|docs/expedientes/20261109_eight_phases_data_migration.sql|docs/expedientes/20261109_eight_phases_data_rollback.sql|.github/workflows/expedientes-eight-phases-qa.yml|.github/workflows/expedientes-eight-phases-prod-stage.yml|.github/workflows/expedientes-eight-phases-promote.yml) ;;
               *) echo "Unexpected file: ${file}" >&2; exit 1;;
             esac
           done < <(git diff --name-only e3af0a5678ca660cb54d7be8eeac40fab0afea87 HEAD)
