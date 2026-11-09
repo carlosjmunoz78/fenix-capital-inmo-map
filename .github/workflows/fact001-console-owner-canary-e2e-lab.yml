@@ -59,6 +59,18 @@ jobs:
           if(good.http!==200||good.result?.status!=='AUTHENTICATED')throw Error('OIDC_SIGNATURE_GATE_FAILED');
           console.log('FACT001_OIDC_E2E=true');
           console.log('FACT001_VAULT_CREDENTIAL_REUSED_WITHOUT_RETRANSMISSION=true');
+          const ownerAnon=await call('owner-health');
+          if(ownerAnon.http!==401)throw Error('OWNER_UNAUTHENTICATED_ALLOWED');
+          const ownerForged=await call('owner-health',{authorization:'invalid-jwt'});
+          if(ownerForged.http!==401)throw Error('OWNER_FORGED_ALLOWED');
+          const ownerOidc=await call('owner-health',{authorization:identity});
+          if(ownerOidc.http!==401)throw Error('GITHUB_OIDC_IMPERSONATED_OWNER');
+          console.log('FACT001_OWNER_ONLY_JWT_NEGATIVE_GATES=true');
+          const ownerURL='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-console-owner-canary-lab/owner-health';
+          const goodCors=await fetch(ownerURL,{method:'OPTIONS',headers:{Origin:'https://app.fenixcapital.es','Access-Control-Request-Method':'GET'},redirect:'error',signal:AbortSignal.timeout(12000)});
+          const badCors=await fetch(ownerURL,{method:'OPTIONS',headers:{Origin:'https://malicious.example','Access-Control-Request-Method':'GET'},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(goodCors.status!==204||goodCors.headers.get('access-control-allow-origin')!=='https://app.fenixcapital.es'||badCors.status!==403)throw Error('OWNER_CORS_SECURITY_GATE');
+          console.log('FACT001_OWNER_CORS_ALLOWED_APP_ONLY=true');
           const run=await call('inventory',{method:'POST',authorization:identity,body:scope});
           console.log('FACT001_CEREBRO_CLOUDFLARE_INVENTORY_HTTP='+run.http);
           if(run.http!==200||run.result?.status!=='COMPLETED'||run.result?.company_id!=='fenix-capital'||run.result?.environment!=='LAB'||run.result?.cloudflare_writes!==0)throw Error('PHYSICAL_CLOUDFLARE_E2E_FAILED');
