@@ -1,0 +1,83 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "actionvfx-ready-queue-v0.1",
+  "recorded_at": "2026-11-09",
+  "owner_direction": {
+    "status": "AUTHORIZED_TO_PREPARE_AND_AUTOMATE_WITHIN_ACTUAL_LICENSE",
+    "keep_individual_temporary": true,
+    "owner_plans_change_within_hours": true,
+    "company_license_upgrade_actual_status": "NOT_YET_VERIFIED",
+    "no_repeat_authorization_for_free_safe_operations": true,
+    "no_additional_cost_eur": 0,
+    "preserve_existing_systems": true
+  },
+  "actionvfx_entitlement": {
+    "observed_license": "Individual",
+    "licensee_type": "named_person",
+    "eligible_personal_use": "Licensed individual may use source files commercially within published license conditions",
+    "shared_company_library": "NOT_GRANTED_WITH_CURRENT_LICENSE",
+    "ai_model_training": "PROHIBITED",
+    "ai_media_generation_using_raw_stock": "PROHIBITED_WITHOUT_SEPARATE_LICENSE",
+    "derived_final_works": "Substantial creative integration required; raw assets cannot be separately extractable",
+    "license_url": "https://www.actionvfx.com/license"
+  },
+  "current_worker_plan": {
+    "metadata_discovery": "ALLOW_NOW",
+    "curate_private_bookmarks": "ALLOW_NOW",
+    "generate_original_vfx_without_actionvfx_assets": "ALLOW_NOW",
+    "download_for_personal_licensee": "ONLY_WITH_CONFIRMED_OFFICIAL_METHOD_AND_OWNER_ONLY_NONSHARED_STORAGE",
+    "download_into_shared_enterprise_media_factory": "WAIT_FOR_COMPANY_LICENSE_OR_EXPLICIT_PROVIDER_GRANT",
+    "automated_reuse_by_multi_company_engines": "WAIT_FOR_COMPANY_LICENSE_OR_EXPLICIT_PROVIDER_GRANT",
+    "publish_commercial_fenix_production": "WAIT_FOR_ENTITLEMENT_REVIEW",
+    "payments": "OFF",
+    "credential_exposure": "OFF",
+    "public_routes": "OFF",
+    "production": "OFF"
+  },
+  "candidates": [
+    {
+      "id": "actionvfx-free-portals",
+      "title": "Free Portals",
+      "url": "https://www.actionvfx.com/collections/free-portals-stock-footage",
+      "category": "portals",
+      "priority": 1,
+      "selected_format": "FREE_2K_ONLY",
+      "asset_status": "DISCOVERED_QUEUED_NOT_DOWNLOADED",
+      "planned_use": "Transformaciones mágicas y transiciones dimensionales"
+    },
+    {
+      "id": "actionvfx-free-dust-waves",
+      "title": "Free Dust Waves",
+      "url": "https://www.actionvfx.com/collections/free-dust-wave-stock-footage",
+      "category": "dust",
+      "priority": 2,
+      "selected_format": "FREE_2K_ONLY",
+      "asset_status": "DISCOVERED_QUEUED_NOT_DOWNLOADED",
+      "planned_use": "Impacto físico, suelo y colapso realista"
+    },
+    {
+      "id": "actionvfx-free-blasters",
+      "title": "Free Blasters",
+      "url": "https://www.actionvfx.com/collections/free-blasters-stock-footage",
+      "category": "energy",
+      "priority": 3,
+      "selected_format": "FREE_2K_ONLY",
+      "asset_status": "DISCOVERED_QUEUED_NOT_DOWNLOADED",
+      "planned_use": "Destellos de energía y golpes cinematográficos"
+    }
+  ],
+  "readiness": {
+    "api_public_category_catalog": "VERIFIED_200",
+    "api_public_collections": "ERROR_500_LAST_CHECK",
+    "api_private_downloads": "NOT_VERIFIED_PARTNER_RESTRICTED",
+    "github_secret": "PRESENT_UMS001_LAB",
+    "browser_login": "VERIFIED_CURRENT_OPERA_SESSION",
+    "browser_agent": "NOT_INTEGRATED",
+    "backfill_job": "NOT_DEPLOYED",
+    "free_assets_downloaded": 0,
+    "requires_further_owner_authorization_to_catalog": false,
+    "restriction": "Do not claim this queue executes asynchronously; only a deployed and tested worker could do that."
+  }
+}
