@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-09T12:08:49.088Z",
+  "updated_at": "2026-11-09T12:11:14.753Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -526,7 +526,8 @@
     "github-wide-skills:0a5817277f7ae54c4d20",
     "github-wide-skills:8ecfe729426ccda86714",
     "github-wide-skills:9f399c4bf55a1e652a48",
-    "github-wide-skills:28ee40ed17b08db36716"
+    "github-wide-skills:28ee40ed17b08db36716",
+    "github-wide-skills:c6e1949c73576b7d8cf6"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1314,6 +1315,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42542525513,
       "checkpointed_at": "2026-11-09T00:52:54.580Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:c6e1949c73576b7d8cf6": {
+      "candidate_id": "github-wide-skills:c6e1949c73576b7d8cf6",
+      "name": "apify-local-business-audit",
+      "human_alias": "Apify Local Business Audit",
+      "wrapper_id": "skillwrap:dd8bfecb8ddcdf9e12ef",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.11,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "maxouf/sherwood-skills",
+        "upstream_head_commit": "ff1b7021d9ee0c8def7f9aee60ed1cdfbda734a8",
+        "manifest_sha256": "98a9a930a5d4f07b61492e6fcae113d3324870268a03131405b51ded0bdd039a",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42614829859,
+      "checkpointed_at": "2026-11-09T12:11:14.753Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32359,7 +32394,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32372,7 +32407,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42582535596,
+  "last_discovery_run_id": 42614829859,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
