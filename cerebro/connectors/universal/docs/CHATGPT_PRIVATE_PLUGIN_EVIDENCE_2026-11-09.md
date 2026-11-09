@@ -28,3 +28,23 @@ Version: 0.1.0
 ## Safety / rollback
 All changes are additive under `cerebro/connectors/universal/` on a DRAFT feature branch. Revert branch commits to undo code and skill integration; no Cloudflare resources have been created by this project step. GitHub Actions secret remains encrypted and is not automatically consumed by ChatGPT or Cloudflare.
 Cost new external spend: 0 EUR. No ChatGPT Work.
+
+## 2026-11-09 · Verified Cloudflare API read-only addendum (later than original audit)
+
+- **Real GitHub Actions run:** https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42654687202
+- **Commit verified:** `62493c9b8b7664915e319e62145550545d27d57b`; job `129289903328`; event `push`; GitHub conclusion **success**.
+- The GitHub job used repository secret `CEREBRO_CLOUDFLARE_API_TOKEN` in runner environment without disclosing its value. The script made only HTTP **GET** requests to Cloudflare official APIs.
+- Verified runner evidence from logs:
+  - `CF_TOKEN_ACTIVE=true`
+  - `CF_ACCOUNT_D1_READ=true`
+  - `CF_ACCOUNT_WORKERS_READ=true`
+  - `CF_D1_DATABASE_COUNT=7`
+  - `CF_FACEBOOK_D1_EXISTS=false`
+  - `CF_D1_FREE_REFERENCE_SLOTS=3`
+  - `CF_PLAN_FREE_ATTESTED=false`
+  - `CF_MUTATIONS=0`
+  - `CF_CODE_GET_ONLY=true`
+- The token/API credential and specific account read permissions are **verified for this run**; this supersedes earlier `NOT VERIFIED` status for those *read* gates only.
+- **Not verified:** account billing plan, quota headroom under current account plan, D1 create permission, Workers deploy/write permission, durable idempotency store, MCP server/OAuth live connection, CEREBRO Gateway physical routing, OAuth client identity separation, rollback in Cloudflare, or zero-cost autonomous mutations.
+- **Next gate:** verify Free-plan status & cost guard and persist idempotency before any D1/Worker mutation. Do not infer deployment safety from an active token.
+- Existing PR remains DRAFT; no App/CRM/PROD/DNS/Instagram/FB Worker changes.
