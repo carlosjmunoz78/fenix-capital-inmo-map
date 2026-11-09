@@ -35,3 +35,4 @@ jobs:
           console.log('MCP_SCOPE_DIAGNOSTIC_GET_ONLY=true');
           console.log('MCP_SCOPE_DIAGNOSTIC_MUTATIONS=0');
           NODE
+# RETEST_20261109_POST_GITHUB_ERROR: one safe GET-only retry after earlier GitHub infrastructure failure
