@@ -68,6 +68,10 @@ export class CloudflareOfficialApi {
   const workerName=input.worker_name===undefined? '':assertId(input.worker_name,'worker_name');
   const paths={
    'cloudflare.workers.list':`/accounts/${this.accountId}/workers/scripts`,
+   'cloudflare.workers.account-settings':`/accounts/${this.accountId}/workers/account-settings`,
+   'cloudflare.workers.deployments':`/accounts/${this.accountId}/workers/scripts/${workerName}/deployments`,
+   'cloudflare.zone.ssl':`/zones/${assertId(input.zone_id,'zone_id')}/settings/ssl`,
+   'cloudflare.zone.worker-routes':`/zones/${assertId(input.zone_id,'zone_id')}/workers/routes`,
    'cloudflare.workers.versions':`/accounts/${this.accountId}/workers/scripts/${workerName}/versions`,
    'cloudflare.workers.secrets':`/accounts/${this.accountId}/workers/scripts/${workerName}/secrets`,
    'cloudflare.workers.domains':`/accounts/${this.accountId}/workers/domains`,
@@ -78,7 +82,7 @@ export class CloudflareOfficialApi {
    'cloudflare.access.apps':`/accounts/${this.accountId}/access/apps`
   };
   if(!Object.hasOwn(paths,id))throw new Error('UNSUPPORTED_CAPABILITY');
-  if(id==='cloudflare.rulesets.list')await this.#assertZoneAccount(input.zone_id,identity);
+  if(['cloudflare.rulesets.list','cloudflare.zone.ssl','cloudflare.zone.worker-routes'].includes(id))await this.#assertZoneAccount(input.zone_id,identity);
   return this.#simple(action,identity,paths[id]);
  }
  async #assertZoneAccount(zoneId,identity){
