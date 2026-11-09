@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "company_id": "fenix",
+  "engine_id": "CONSOLE-001",
+  "component_id": "JARVIS-OIDC-JOB-OBSERVER-LAB-V0",
+  "environment": "LAB",
+  "observed_environment": "PREPROD",
+  "version": "v0",
+  "status": "ACTIVE_READONLY_LAB",
+  "prod_authorized": false,
+  "ownership": {
+    "user": "CARLOS-ADMIN",
+    "execution_identity": "GITHUB_ACTIONS_OIDC",
+    "no_persistent_user_credentials": true
+  },
+  "runtime": {
+    "type": "SUPABASE_EDGE_FUNCTION",
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "function_slug": "jarvis-oidc-job-observer-lab-v0",
+    "edge_version": 1,
+    "region": "eu-north-1",
+    "verify_jwt": false,
+    "custom_auth": "VERIFIED_GITHUB_OIDC_RS256",
+    "worker": false
+  },
+  "allowed": {
+    "methods": [
+      "POST"
+    ],
+    "route": "/status",
+    "operation": "AGGREGATE_STATUS_READ",
+    "job_names": [
+      "git.safe.v1",
+      "repo.sandbox.public.readonly.v0"
+    ],
+    "max_rows": 200
+  },
+  "denied": [
+    "DB_MUTATIONS",
+    "JOB_LEASE",
+    "JOB_ENQUEUE",
+    "JOB_CANCEL",
+    "GIT_WRITE",
+    "CRM",
+    "APP",
+    "PROD",
+    "TRADING",
+    "MODEL_PAID"
+  ],
+  "oidc": {
+    "issuer": "https://token.actions.githubusercontent.com",
+    "audience": "jarvis-oidc-job-observer-lab-v0",
+    "repository": "carlosjmunoz78/fenix-capital-inmo-map",
+    "ref": "refs/heads/cerebro/jarvis-oidc-job-observer-lab-v0-20261109",
+    "workflow": ".github/workflows/cerebro-jarvis-oidc-job-observer-lab-once.yml",
+    "algorithm": "RS256",
+    "claims": [
+      "repository",
+      "ref",
+      "workflow_ref",
+      "event_name",
+      "sha",
+      "run_id",
+      "exp",
+      "iat"
+    ]
+  },
+  "execution": {
+    "mode": "ONESHOT_PUSH_SELF_WORKFLOW_ONLY",
+    "rearm": false,
+    "scheduled": false,
+    "id_token_permissions": "write (mint only)",
+    "github_contents": "read",
+    "database_writes": 0
+  },
+  "tests": {
+    "run_id": 42541902387,
+    "status": "GREEN",
+    "real_data": true,
+    "denial_cases": 6,
+    "observed_total": 4,
+    "observed_successful": 3,
+    "observed_dead_letter": 1,
+    "observed_pending": 0
+  },
+  "risk_gates": {
+    "prod_promotion": "BLOCKED",
+    "ui_auth_e2e": "PENDING",
+    "job_execution_e2e": "PENDING",
+    "physical_voice": "PENDING",
+    "physical_rollback": "PENDING"
+  },
+  "cost": {
+    "new_subscription_eur": 0,
+    "usage_metered": "NOT_MEASURED",
+    "no_paid_ai": true
+  },
+  "backup": {
+    "git_branch": "cerebro/jarvis-oidc-job-observer-lab-v0-20261109",
+    "source_file": "supabase/functions/jarvis-oidc-job-observer-lab-v0/index.ts",
+    "require_snapshot_before_redeployment": true
+  },
+  "rollback": {
+    "method": "FAIL_CLOSED_NEW_VERSION_OR_REVIEWED_DELETE",
+    "automatic": false
+  },
+  "documentation": "cerebro/docs/JARVIS_OIDC_JOB_OBSERVER_LAB_2026-11-09.md"
+}
