@@ -54,7 +54,7 @@ jobs:
         working-directory: cerebro/connectors/universal/cloudflare/gateway-lab
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
-        run: npx --yes wrangler@4.48.0 deploy --config wrangler.lab.jsonc --log-level error
+        run: npx --yes wrangler@4.47.0 deploy --config wrangler.lab.jsonc
       - name: Verify real Worker existence, workers.dev disabled, previews disabled and no zone routes
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
