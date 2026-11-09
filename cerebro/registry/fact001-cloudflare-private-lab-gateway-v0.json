@@ -1,0 +1,63 @@
+{
+  "schema": "cerebro.fact001.cloudflare-gateway-lab.v1",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "worker": {
+    "name": "cerebro-fact001-gateway-lab-eu-20261109",
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "provider": "cloudflare-workers-free",
+    "status": "EXISTING_PRIVATE_OFF",
+    "deploy_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42682594574",
+    "workers_dev": false,
+    "preview_urls": false,
+    "routes": [],
+    "crons": [],
+    "secrets": [],
+    "bindings": [],
+    "exec_enabled": false
+  },
+  "clients": {
+    "chatgpt_normal": {
+      "status": "VERIFIED_GITHUB_REST_GET_ONLY",
+      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42678166836"
+    },
+    "cerebro_lab": {
+      "status": "VERIFIED_ISOLATED_GITHUB_CI_GET_ONLY",
+      "proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42680213195"
+    },
+    "cerebro_gateway_prod": {
+      "status": "NOT_CONNECTED",
+      "reason": "LIVE_IDENTITY_AND_ROUTING_NOT_CERTIFIED"
+    }
+  },
+  "dependencies": [
+    "GITHUB_ACTIONS_CEREBRO_CLOUDFLARE_API_TOKEN",
+    "CEREBRO_CONSOLE_GATEWAY_V0",
+    "ACTGW-001",
+    "IAM-001"
+  ],
+  "independence": {
+    "app": true,
+    "crm": true,
+    "dns": true,
+    "instagram": true,
+    "facebook": true,
+    "jarvis": true,
+    "main": true,
+    "trading": true
+  },
+  "human_exception_gates": [
+    "HIGH_RISK",
+    "SECURITY_INCIDENT",
+    "POLICY_CONFLICT",
+    "MONEY_LIMIT"
+  ],
+  "acceptance": "LAB_PRIVATE_OFF_ONLY",
+  "promoted": false,
+  "additional_subscriptions": 0,
+  "production_change": false,
+  "rollback": "Leave isolated Worker disabled with no public routes; destructive deletion only after explicit inventory and user authorization; revert additive draft PR if code rollback required.",
+  "rebuild": "Recreate solely from isolated source branch under a new versioned LAB name after preflight, never overwrite a Worker without snapshot and contractual checks."
+}
