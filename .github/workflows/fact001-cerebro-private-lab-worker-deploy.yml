@@ -1,0 +1,90 @@
+name: FACT-001 CEREBRO private OFF LAB Worker isolated deployment
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-cerebro-private-lab-worker-deploy.yml
+      - cerebro/connectors/universal/cloudflare/gateway-lab/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-cerebro-private-worker-lab-one-shot
+  cancel-in-progress: false
+jobs:
+  deploy-new-private-lab-only:
+    if: github.ref == 'refs/heads/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109'
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    env:
+      CLOUDFLARE_ACCOUNT_ID: e39a57e1ac42650ca5a6d5307cf0ac8e
+      WORKER_NAME: cerebro-fact001-gateway-lab-eu-20261109
+    steps:
+      - name: Checkout LAB branch without persisted GitHub credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify 4 local fail-closed tests and existing shared FACT-001 contract
+        run: |
+          node --test cerebro/connectors/universal/cloudflare/gateway-lab/tests/isolated-worker.test.mjs
+          node cerebro/connectors/universal/src/validate.mjs
+      - name: Refuse duplicate or unsupported Cloudflare account before deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const token=process.env.CLOUDFLARE_API_TOKEN,account=process.env.CLOUDFLARE_ACCOUNT_ID,name=process.env.WORKER_NAME;
+          if(!token||account!=='e39a57e1ac42650ca5a6d5307cf0ac8e'||name!=='cerebro-fact001-gateway-lab-eu-20261109')throw Error('LAB_SCOPE_DENIED');
+          const headers={Authorization:'Bearer '+token,Accept:'application/json'};
+          const req=async path=>{
+            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{method:'GET',headers,redirect:'error',signal:AbortSignal.timeout(15000)});
+            if(!r.ok)throw Error('CLOUDFLARE_PREFLIGHT_HTTP_'+r.status);
+            const body=await r.json();if(body?.success!==true)throw Error('CLOUDFLARE_PREFLIGHT_INVALID');return body.result;
+          };
+          const status=await req('/user/tokens/verify');if(status.status!=='active')throw Error('TOKEN_NOT_ACTIVE');
+          const list=await req('/accounts/'+account+'/workers/scripts');if(!Array.isArray(list))throw Error('WORKER_LIST_NOT_TRUSTED');
+          if(list.some(x=>x?.id===name||x?.name===name))throw Error('WORKER_ALREADY_EXISTS_NO_CHANGES_ALLOWED');
+          if(list.length>=90)throw Error('WORKER_QUOTA_SAFETY_MARGIN_DENIED');
+          console.log('FACT001_TARGET_WORKER_ABSENT=true');
+          console.log('FACT001_PREEXISTING_WORKERS='+list.length);
+          console.log('FACT001_WORKER_QUOTA_SAFETY_MARGIN=true');
+          NODE
+      - name: Deploy only the new OFF Worker with all public routes and cron disabled
+        working-directory: cerebro/connectors/universal/cloudflare/gateway-lab
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: npx --yes wrangler@4.48.0 deploy --config wrangler.lab.jsonc --log-level error
+      - name: Verify real Worker existence, workers.dev disabled, previews disabled and no zone routes
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account=process.env.CLOUDFLARE_ACCOUNT_ID,name=process.env.WORKER_NAME,token=process.env.CLOUDFLARE_API_TOKEN;
+          if(!token)throw Error('TOKEN_NOT_AVAILABLE');
+          const headers={Authorization:'Bearer '+token,Accept:'application/json'};
+          const get=async path=>{
+            const r=await fetch('https://api.cloudflare.com/client/v4'+path,{method:'GET',headers,redirect:'error',signal:AbortSignal.timeout(15000)});
+            if(!r.ok)throw Error('POSTDEPLOY_READ_FAILED_'+r.status);
+            const o=await r.json();if(o?.success!==true)throw Error('POSTDEPLOY_JSON_UNTRUSTED');return o.result;
+          };
+          const scripts=await get('/accounts/'+account+'/workers/scripts');
+          if(!Array.isArray(scripts)||scripts.filter(x=>x.id===name||x.name===name).length!==1)throw Error('NEW_WORKER_NOT_VERIFIED');
+          const sub=await get('/accounts/'+account+'/workers/scripts/'+name+'/subdomain');
+          if(sub?.enabled!==false||sub?.previews_enabled!==false)throw Error('WORKER_PUBLIC_ACCESS_MUST_BE_OFF');
+          const zones=await get('/zones?account.id='+account+'&per_page=50');
+          if(!Array.isArray(zones)||zones.some(x=>x.account?.id!==account))throw Error('ZONE_TENANT_MISMATCH');
+          for(const zone of zones){
+            const routes=await get('/zones/'+zone.id+'/workers/routes');
+            if(!Array.isArray(routes)||routes.some(x=>x.script===name||x.script_name===name))throw Error('UNEXPECTED_PUBLIC_ROUTE');
+          }
+          console.log('FACT001_WORKER_PRIVATE_OFF_VERIFIED=true');
+          console.log('FACT001_WORKER_WORKERS_DEV=false');
+          console.log('FACT001_WORKER_PREVIEW_URLS=false');
+          console.log('FACT001_WORKER_CUSTOM_ROUTES=0');
+          console.log('FACT001_WORKER_CRON_TRIGGERS=0');
+          console.log('FACT001_WORKER_SECRETS=0');
+          console.log('FACT001_WORKER_EXECUTIONS=0');
+          console.log('FACT001_EXISTING_PROD_MODIFICATIONS=0');
+          NODE
