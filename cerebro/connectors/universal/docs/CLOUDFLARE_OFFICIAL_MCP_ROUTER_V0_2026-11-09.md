@@ -24,3 +24,11 @@ Cloudflare operates **https://mcp.cloudflare.com/mcp**, an official OAuth-enable
 ## Rollback
 
 Revert files in the isolated branch; keep original core, CEREBRO Gateway, DNS, App/CRM and Workers unchanged. Plugin release has prior version 0.1.0 in Plugin Creator release history and can be restored through reviewed rollback. No Cloudflare runtime deployed by this change.
+
+## Physical backend MCP test & blocker · 2026-11-09
+
+- Official MCP protocol workflow run **42674163697**: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42674163697. 9/9 Node tests green; read-only allowlist green; official MCP backend handshake **failed with HTTP 403** on initial request. No mutations and no token leaked. Reason of denial NOT verified.
+- Follow-up GET-only scope diagnostic **42674465686**: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42674465686. GitHub reports **Internal server error**, with zero jobs/steps returned. **No Cloudflare token-permissions evidence** from this follow-up.
+- Cloudflare official README states an account API token needs **Account Resources: Read** for auto-detection; treat as a possible missing permission, not a proven root cause. https://github.com/cloudflare/mcp/blob/main/README.md
+- ChatGPT plugin v0.2.0 has MCP configuration; browser plugin page still shows **Instalar complemento**. OAuth login not completed or verified.
+- Current state: PARCIAL/BLOQUEADO for backend MCP authentication, no ChatGPT or Gateway dual E2E evidence. No paid activity, production changes or deployments.
