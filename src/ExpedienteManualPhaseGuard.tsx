@@ -36,10 +36,10 @@ export default function ExpedienteManualPhaseGuard(){
    if(!portal&&journey.parentElement){portal=document.createElement('div');portal.className='manual-phase-host';journey.insertAdjacentElement('afterend',portal)}
    if(portal)setHost(portal);
    const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div')) as HTMLElement[];
-   cells.forEach((cell,i)=>{cell.classList.add('manual-phase-cell');cell.setAttribute('role','button');cell.setAttribute('tabindex','0');cell.setAttribute('aria-label',`Cambiar manualmente a fase ${expedienteMainPhases[i]}`);cell.onclick=()=>{if(!canEdit)return;setSelected(phases[i]);setReason('');setMsg('')};cell.onkeydown=e=>{if(!canEdit)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelected(phases[i]);setReason('');setMsg('')}}});
+   cells.forEach((cell,i)=>{cell.classList.add('manual-phase-cell');cell.setAttribute('role','button');cell.setAttribute('tabindex','0');cell.setAttribute('aria-label',`Cambiar manualmente a fase ${expedienteMainPhases[i]}`);cell.onclick=()=>{if(!canEdit)return;setSelected(expedienteMainPhases[i]);setReason('');setMsg('')};cell.onkeydown=e=>{if(!canEdit)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();setSelected(expedienteMainPhases[i]);setReason('');setMsg('')}}});
   };wire();const obs=new MutationObserver(wire);obs.observe(document.body,{subtree:true,childList:true});return()=>{mounted=false;obs.disconnect();const journey=document.querySelector('[data-testid="expediente-phase-line"]') as HTMLElement|null;journey?.classList.remove('manual-phase-enabled');document.querySelectorAll('.manual-phase-save-host,.manual-phase-host').forEach(n=>n.remove())}
  },[code,canEdit]);
- useEffect(()=>{const journey=document.querySelector('[data-testid="expediente-phase-line"]');if(!journey)return;const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div'));cells.forEach((cell,i)=>cell.classList.toggle('manual-phase-selected',selected===phases[i]))},[selected]);
+ useEffect(()=>{const journey=document.querySelector('[data-testid="expediente-phase-line"]');if(!journey)return;const cells=Array.from(journey.querySelectorAll('.detail-phase-track > div'));cells.forEach((cell,i)=>cell.classList.toggle('manual-phase-selected',selected===expedienteMainPhases[i]))},[selected]);
 
  function close(){setSelected('');setReason('');setMsg('')}
  async function commit(){if(!canEdit||!row||!selected||selected===current||!reason.trim()||busy)return;setBusy(true);setMsg('');
