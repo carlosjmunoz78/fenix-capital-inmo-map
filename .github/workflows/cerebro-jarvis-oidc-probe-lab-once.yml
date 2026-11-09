@@ -1,4 +1,4 @@
-name: CEREBRO JARVIS Stateless GitHub OIDC Attestation LAB Final
+name: CEREBRO JARVIS Stateless GitHub OIDC Attestation LAB Security Final
 on:
   push:
     branches:
@@ -44,6 +44,18 @@ jobs:
           const issuedBody=await issued.json();
           const jwt=issuedBody?.value;
           if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_TOKEN_MISSING');
+          const forged=jwt.split('.');
+          forged[2]=(forged[2][0]==='A'?'B':'A')+forged[2].slice(1);
+          const modified=await probe('POST','Bearer '+forged.join('.'));
+          if(modified.http!==403||modified.body?.status!=='DENIED')throw Error('TAMPERED_SIGNATURE_NOT_DENIED');
+          const invalidAudienceURL=new URL(process.env.ACTIONS_ID_TOKEN_REQUEST_URL);
+          invalidAudienceURL.searchParams.set('audience','jarvis-oidc-unapproved-audience');
+          const wrongAudienceResponse=await fetch(invalidAudienceURL,{headers:{authorization:'Bearer '+process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN},redirect:'error',signal:AbortSignal.timeout(15000)});
+          if(!wrongAudienceResponse.ok)throw Error('ISSUER_SECOND_AUD_HTTP_'+wrongAudienceResponse.status);
+          const wrongAudienceJWT=(await wrongAudienceResponse.json()).value;
+          if(typeof wrongAudienceJWT!=='string')throw Error('SECOND_OIDC_TOKEN_MISSING');
+          const wrongAudience=await probe('POST','Bearer '+wrongAudienceJWT);
+          if(wrongAudience.http!==403||wrongAudience.body?.status!=='DENIED')throw Error('WRONG_AUDIENCE_NOT_DENIED');
           const attested=await probe('POST','Bearer '+jwt);
           const result=attested.body||{};
           if(attested.http!==200||result.status!=='OK'||result.proof!=='SIGNED_GITHUB_OIDC_READONLY'||
@@ -54,5 +66,5 @@ jobs:
              result.write_operations!==0){
             throw Error('OIDC_ATTESTATION_FAILED_HTTP_'+attested.http+'_REASON_'+String(result.reason||result.status||'NONE'));
           }
-          console.log(JSON.stringify({status:'JARVIS_GITHUB_OIDC_LAB=GREEN',checks:['no-auth-deny','invalid-token-deny','wrong-route-deny','signed-token-allow'],environment:result.environment,source_sha:result.source_sha,run_id:result.run_id,user_session_secret_used:false,supabase_db_access:false,prod_mutation:false,trading_access:false}));
+          console.log(JSON.stringify({status:'JARVIS_GITHUB_OIDC_LAB=GREEN',checks:['no-auth-deny','invalid-token-deny','wrong-route-deny','tampered-signature-deny','wrong-audience-deny','signed-token-allow'],environment:result.environment,source_sha:result.source_sha,run_id:result.run_id,user_session_secret_used:false,supabase_db_access:false,prod_mutation:false,trading_access:false}));
           JS
