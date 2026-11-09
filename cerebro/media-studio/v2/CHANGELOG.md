@@ -209,3 +209,11 @@ Additional recurring cost introduced: `0 €`
 - V4 Drive IG https://drive.google.com/file/d/1rZhqbX6T9sXXU47x2P6dnq1-khClP0Ae/view ; FB https://drive.google.com/file/d/1yxiEgFs3rMdkQgUQF8nxg7Wp_O7Ki-AU/view ; QA https://drive.google.com/file/d/1c3F6RF4Tw9_cVndkLWRYQoDdcS7fJbox/view .
 - Fichas Notion V4 creado, pendientes QA; ninguna OP antigua modificada. Fuentes y V0–V3 intactas. Sin nuevas llamadas a IA de pago, sin publicación.
 - Gate posterior: acento real, derechos, claims hipotecarios, prueba en dispositivos Meta y conversión; no se promociona a PROD.
+
+
+### 2026-11-09 · UMS-001 IG/FB V5.1 Kokoro Apache español
+- HECHO: GitHub run 42539851459 SUCCESS, Kokoro-82M Apache 2.0 en español, 14 WAV TTS generados en LAB sin tokens/servicios de pago. Auditar acento de España todavía.
+- HECHO: dos MP4 V5.1 (Instagram 19.955 s / Facebook 22.262 s) con voces Kokoro sustituyendo por completo la pista HeyGen Free, mezcla original V0, normalización −16.3 LUFS, vídeo bitstream V4 idéntico, subtítulos 800px elevados y CTA fenixcapital.es/contacto.
+- Drive IG https://drive.google.com/file/d/1ejOReqRCnq_bW6IxTaFHlgmSlzKaSYic/view · FB https://drive.google.com/file/d/1RWGqTOy9nmB_wshqnEBpq9mnbVuUz1ix/view · paquete https://drive.google.com/file/d/10Xr3OF-eHLEjC9KKwTnI7fSRrdcOuuwj/view · QA https://drive.google.com/file/d/1DKXdHjbA8HZvLEjqLgYtCTZuVoG49LQj/view.
+- Derechos: 4 activos V2/V4 HeyGen Free cambiados a Bloqueado en Notion, V5.1 nuevos también Bloqueados hasta verificar derechos de música/Runway, locuciones castellanas, sincronía y QA Meta. NO PUBLICAR.
+- Runbook: `cerebro/media-studio/v2/runbooks/UMS001_IG_FB_V5_1_APACHE_VOICE_20261109.md`. Sin App/CRM/Supabase/WordPress/SEO/main/PROD.
