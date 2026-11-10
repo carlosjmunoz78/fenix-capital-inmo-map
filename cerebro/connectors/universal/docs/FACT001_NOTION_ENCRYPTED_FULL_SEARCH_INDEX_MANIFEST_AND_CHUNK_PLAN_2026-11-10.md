@@ -26,3 +26,17 @@ Evidencia: 2026-11-10 · Rama `cerebro/fact001-cloudflare-universal-dual-lab-v0-
 5. Gobernanza de escritura OIDC + roles, D1 CAS, auditoría, coste, PREPROD, comparación y rollback. Cron/notion writes OFF hasta pasar estos gates.
 
 **Estado Notion global permanece 6/11 VERIFICADOS. El archivo de índice NO es un backup integral de contenido.**
+
+
+## FÍSICO · Primer lote real de 25 objetos derivado del manifiesto cifrado
+- Módulo `notion-content-batch-planner.mjs`: recibe exclusivamente un manifiesto autentificado AES-GCM y crea sobres cifrados de máximo 25 objetos, con `batch_ref` reproducible SHA-256 de `id_list_sha256:offset:next_offset`. Cursor determinista sin lista de IDs en texto claro.
+- CI TESTS SUCCESS [#42915511239](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42915511239): 52 objetos => lotes 25/25/2, reintentos con referencia estable y nonce distinto, índices incompletos/alterados rechazados.
+- Acciones [#42916209247](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42916209247) **SUCCESS**: descargó dentro del runner GitHub con token de acciones de lectura el ZIP de inventario `13808862248`, confirmó su hash exacto antes de abrirlo y envió solo el cifrado a la función LAB autorizada mediante JWT OIDC. `ANON_401=PASS`, `FORGED_401=PASS`, `PROD_403=PASS`.
+- Lote #1 `batch_ref=50fc9fc1d7d6fd985dc58e238604fe534d3b536af9b86ccc77ad52fe2a1ea1c7`: **25 páginas, 0 data sources**, offset `0`→`25`, `has_more=true`. Estructura e índice fueron reconstruidos correctamente mediante clave Vault. `BATCH_ROUNDTRIP=PASS`, `QUEUE_ACTIVATED=false`, `CONTENTS_BACKED_UP=false`, `PROVIDER_WRITES=0`.
+- Archivo JSON AES-GCM: 9387 bytes, SHA256 `daa4030cc8d9023d1c4369ca6c5afa2928b0f35e4f40f1466bb252b6f53d320a`; GitHub artifact ID **13808673839**, ZIP 7293 bytes, SHA256 `f041759233b1ad746466c3d3a1e275f5c49f286c2425429c7ae6fc840ed0d0b4`.
+- Archivo DRIVE [ZIP primer lote cifrado](https://drive.google.com/file/d/1X1uO7YZNG0G075tGYvs1G_GoSMFbQUJa/view?usp=drivesdk), ID `1X1uO7YZNG0G075tGYvs1G_GoSMFbQUJa`, en carpeta ya existente. Readback 7293 bytes, SHA256 **EXACT MATCH**.
+- Trigger de un solo uso, `actions: read` provisional, solicitud de orden y rutas `notion-index-plan-*` retiradas. Broker Supabase LAB **v33 ACTIVE** hash byte a byte original v31 `645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec`, sin escritor. PR #44 DRAFT.
+- **Siguiente paso:** trabajador del lote 0→25 que abra cuerpos de páginas y genere archivos cifrados con checkpoint, sin exponer IDs ni datos personales, y ensayos de recuperación/escrow. El lote actual es **PLAN**, no copia de contenidos ni ejecución automática.
+
+## No se promociona
+La cobertura física de contenido continúa limitada a Wiki (64 bloques) y fuente de marketing (esquema y 11 filas), previos a este ensayo; `backup_and_rollback` global y la autonomía permanecen pendientes. Nada de PROD.
