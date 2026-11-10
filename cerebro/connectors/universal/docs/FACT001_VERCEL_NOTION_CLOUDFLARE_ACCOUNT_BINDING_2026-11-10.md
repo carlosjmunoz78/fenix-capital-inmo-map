@@ -34,3 +34,10 @@ Dos vías independientes: **ChatGPT (conexión OAuth oficial)** y **CEREBRO Gate
 ## No declarar VERDE UNIVERSAL
 - ChatGPT MCP oficial: varias capacidades probadas; Notion y Vercel con gates de permisos específicos. CEREBRO Gateway: aún requiere service identity + broker para ejecutar por sí mismo. User consent y derechos legales no se reemplazan con tokens amplios.
 - PR #44 sigue DRAFT, main, APP, CRM, D1/Workers ajenos, DNS, WordPress, Notion páginas, planes y facturación no modificados por esta auditoría.
+
+## Vercel acceptance update · 10/11/2026 · consentimiento CEREBRO confirmado
+- Después de aprobar el enlace exclusivo de **CEREBRO · Vercel Universal**, el propio conector pasó de `HTTP 403` a `GET /v10/projects HTTP 200` y devuelve **2 proyectos**: `fenix-capital-preprod` (`prj_4ElVl8e2KzrHS7r5yvBGBban1DXV`) y `fenix-capital-preprod-app` (`prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc`). `get_project` para ambos respondió con nombre e ID correctos.
+- El mismo conector puede consultar `list_deployments` del equipo, con registros reales READY y referencias de GitHub; operación lectura únicamente. **PERMISO DE LECTURA DEL CONECTOR CEREBRO: VERIFICADO**.
+- El MCP oficial **ChatGPT → Vercel** sigue devolviendo 0 proyectos por defecto, con teamId explícito y slug, y `get_project` responde 404 incluso usando el ID verdadero. Ambas conexiones identifican el mismo usuario y equipo, pero esto demuestra **diferencia en el consentimiento/grant OAuth**, no ausencia de proyectos. **No etiquetar ChatGPT como OK hasta verificar listado de 2 proyectos**.
+- Ninguna de las anteriores pruebas demuestra que el **CEREBRO Gateway fuera de ChatGPT** tenga una identidad de servicio ni permiso autónomo; el plugin `CEREBRO · Vercel Universal` se invocó desde ChatGPT.
+- **No se hicieron despliegues, configuraciones de dominios, borrados ni escrituras en Vercel**; no tocar `app.fenixcapital.es`. Pendientes: grant del conector oficial ChatGPT, acceso service identity CEREBRO al Gateway, pruebas de escritura/rollback en proyecto exclusivamente LAB (nuevo solo si cabe coste 0 €) y backups.
