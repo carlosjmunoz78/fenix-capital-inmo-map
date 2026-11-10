@@ -56,6 +56,21 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}})},
  async scheduled(controller,env,ctx){
+  if(controller.cron==='* * * * *' && env.GATEWAY_ENABLED==='true' && env.SOURCE_SCOUT_ENABLED==='true'){
+    const key='meta/ums001-ambientcg-private-rpc-2026-11-10';
+    if(await env.LAB_KV.get(key))return;
+    await env.LAB_KV.put(key,JSON.stringify({status:'STARTED',at:new Date().toISOString()}));
+    ctx.waitUntil((async()=>{
+      try{
+        const result=await searchFreeMedia(env,{company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
+          provider:'ambientcg',kind:'textures',query:'wood'});
+        if(result.mode!=='METADATA_ONLY'||result.downloaded!==false||result.results.length<1)throw Error('EMPTY_OR_INVALID_METADATA');
+        await env.LAB_KV.put(key,JSON.stringify({status:'COMPLETED',at:new Date().toISOString(),provider:'ambientcg',
+          count:result.results.length,license_cc0_only:result.results.every(x=>x.license==='CC0-1.0'),
+          private_service_binding_verified:true,downloaded:false,production_approved:false,additional_cost_eur:0}));
+      }catch(e){await env.LAB_KV.put(key,JSON.stringify({status:'ERROR',at:new Date().toISOString(),reason:String(e?.message||e).slice(0,160)}));}
+    })());return;
+  }
   if(controller.cron==='* * * * *' && env.GATEWAY_ENABLED==='true'){
    ctx.waitUntil((async()=>{
     const key='meta/ums001-producer-read-fix-2026-11-10';
