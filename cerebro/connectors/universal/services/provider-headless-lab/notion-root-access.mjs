@@ -42,6 +42,8 @@ export async function probeNotionOpenedRoots({token,http=fetch,roots=NOTION_OPEN
  const results=[];
  // One request at a time to honor Notion rate limits; no automatic write or retry.
  for(const {name,id,type} of roots){
+  // Notion average request budget ~3/s. No delay in injected unit tests.
+  if(http===fetch && results.length>0)await new Promise(resolve=>setTimeout(resolve,380));
   const url='https://api.notion.com/v1/'+(type==='database'?'databases/':'pages/')+id;
   let response;
   try{response=await http(url,{method:'GET',headers:{Authorization:'Bearer '+token,'Notion-Version':'2026-03-11',Accept:'application/json'},
