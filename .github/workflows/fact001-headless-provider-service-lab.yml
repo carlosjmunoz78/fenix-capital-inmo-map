@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-workspace-index.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
@@ -201,4 +202,48 @@ jobs:
           console.log('FACT001_BATCH3_INCONCLUSIVE='+v.inconclusive);
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
+          NODE
+
+      - name: "FACT001 independent Notion paginated search-index metadata inventory, signed and read only"
+        if: github.event.head_commit.message == 'FACT001_NOTION_INDEX_INVENTORY_ONCE_20261110'
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-workspace-index.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.workspace.search_index_read',
+            request_id:'FACT001-NOTION-WORKSPACE-INDEX-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_INVENTORY_ORDER_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-search-index';
+          const call=async(jwt,body)=>{
+           const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+             ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(110000)});
+           let data={};try{data=await r.json()}catch{}
+           return {http:r.status,data};
+          };
+          const a=await call(null,order),b=await call('invalid',order);
+          if(a.http!==401||b.http!==401)throw Error('FACT001_INVENTORY_ANON_OR_FORGED_GATE_FAILED');
+          console.log('FACT001_NOTION_INDEX_ANON_401=PASS');
+          console.log('FACT001_NOTION_INDEX_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('FACT001_OIDC_MISSING');
+          const resp=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!resp.ok)throw Error('FACT001_IDENTITY_PROVIDER_DENIED');
+          const jwt=(await resp.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('FACT001_IDENTITY_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('FACT001_INVENTORY_PROD_GATE_FAILED_'+prod.http);
+          console.log('FACT001_NOTION_INDEX_PROD_403=PASS');
+          const result=await call(jwt,order),v=result.data;
+          if(result.http!==200||!['SEARCH_INDEX_INVENTORY_COMPLETE','PARTIAL_SEARCH_INDEX_LIMIT_REACHED'].includes(v.status)||
+            v.inventory?.previously_verified_root_ids!==58||
+            !Number.isSafeInteger(v.inventory.searchable_total)||v.inventory.searchable_total<58||
+            v.complete_workspace_backup!==false||v.eligible_for_prod_promotion!==false||
+            v.data_content_returned!==false||v.credentials_exposed!==false||v.external_writes!==0)
+             throw Error('FACT001_NOTION_INDEX_RESULT_UNVERIFIED_HTTP_'+result.http);
+          console.log('FACT001_NOTION_INDEX_STATUS='+v.status);
+          console.log('FACT001_NOTION_INDEX_AGGREGATES='+JSON.stringify(v.inventory));
+          console.log('FACT001_NOTION_INDEX_READ_ONLY=PASS');
           NODE
