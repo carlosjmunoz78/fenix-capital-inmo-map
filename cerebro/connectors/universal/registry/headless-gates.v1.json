@@ -171,7 +171,12 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42909468033",
         "FACT001 Notion Wiki AES256-GCM pilot root+3 immediate blocks; GitHub Actions encrypted artifact #13805893693; successful in-memory decrypt integrity, NOT physical Notion restore",
         "CEREBRO Google Drive encrypted ZIP file 1-UTxTWSBEKD3TcxneEOZteR_IULbctGO, readback 3555 bytes, ZIP SHA256 exact c0515a9fedee10932cebfb2e269157b6b97f13f3307d6deeb6396900ef05490f",
-        "Supabase Edge v26 ACTIVE exact original v24 bundle hash after one-time audit routes retired, no active Notion writer"
+        "Supabase Edge v26 ACTIVE exact original v24 bundle hash after one-time audit routes retired, no active Notion writer",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42911324722",
+        "Wiki root recursive AES backup: 64 blocks, 3 block API calls, zero queued descendants, encrypted artifact SHA256 verified from independent Drive readback",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42912667491",
+        "Marketing Notion data source AES backup: schema and 11 row properties, one query page, no more results, encrypted ZIP hash verified in Drive",
+        "Supabase FACT001 LAB broker v29 restored to exact v26 read-only bundle after retiring one-use routes; normal provider workflow gate restored"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -223,9 +228,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PARTIAL_D1_AND_AES_ENCRYPTED_WIKI_CHUNK; FULL_NOTION_WORKSPACE_BACKUP_NOT_YET_CAPTURED",
+        "full_backup_gate": "PARTIAL_ENCRYPTED_WIKI_64_BLOCKS_AND_ONE_DATA_SOURCE_11_ROWS; FULL_NOTION_WORKSPACE_EXPORT_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_RECURSIVE_CONTENT_BACKUP_CHUNKS_DRIVE_OFFSITE_ISOLATED_RESTORE",
+        "next_block": "FACT001_NOTION_BACKUP_FACTORY_V0_BATCHED_FULL_CONTENT_WITH_RESTORE_ESCROW_AND_WRITE_GATES",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -245,10 +250,10 @@
         "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
         "signed_cerebro_d1_read_run_id": 42873202783,
         "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
-        "service_version": 26,
+        "service_version": 29,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "FULL_NOTION_CONTENT_BACKUP_NESTED_ASSETS_ROWS_AND_EXTERNAL_KEY_ESCROW; RESTORE_IN_ISOLATED_NOTION; SIGNED_MUTATION_EXECUTOR_STILL_OFF",
+        "actual_blocker": "CHUNKED_FULL_WORKSPACE_CONTENT_BACKUP_AND_KEY_ESCROW; PHYSICAL_ISOLATED_NOTION_RESTORE; SIGNED_MUTATION_PIPELINE_OFF",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -269,7 +274,7 @@
           "queue_enabled": false,
           "external_provider_writes": 0
         },
-        "workspace_full_backup_gate": "PENDING_RECURSIVE_CONTENT_6446_PAGES_186_DATA_SOURCES_ATTACHMENTS_KEY_ESCROW_RESTORE",
+        "workspace_full_backup_gate": "PENDING_REMAINING_6446_PAGES_186_DATA_SOURCES_FULL_ASSETS_COMMENTS_RESTORE_AND_KEY_ESCROW",
         "promotion_tribunal": "CODE_CI_GREEN_NOT_LIVE",
         "signed_service_transport": {
           "status": "LOCAL_CI_GREEN_NOT_DEPLOYED",
@@ -400,7 +405,44 @@
           "full_workspace_backup": false,
           "additional_subscription_cost_eur": 0
         },
-        "last_cleanup": "SUPABASE_LAB_V26_ACTIVE_EXACT_PRE_PILOT_BUNDLE_SHA_645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec"
+        "last_cleanup": "SUPABASE_LAB_V29_ACTIVE_EXACT_V26_BUNDLE_SHA_645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec",
+        "recursive_wiki_backup_pilot": {
+          "status": "VERIFIED_PHYSICAL_AES256_GCM_RECURSIVE_ROOT_BLOCK_TREE",
+          "root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
+          "blocks": 64,
+          "block_api_requests": 3,
+          "encrypted_chunks": 3,
+          "deferred_tasks": 0,
+          "root_block_tree_complete": true,
+          "media_binary_backed_up": false,
+          "github_run_id": 42911324722,
+          "github_artifact_id": 13806529150,
+          "github_zip_sha256": "f4b219a7710fe9bd589e62a954e01dbc3a24f4f5c363e60893e3299313ba470e",
+          "encrypted_json_sha256": "d23e0b81cb21501ee789cf1d7d4d13c5856a9c1c1693dc583e13a1f3b36669fb",
+          "drive_file_id": "1PWCm9wKOSB-LtGAly9-RfDqVUiVW3aYF",
+          "drive_readback_sha256_exact": true,
+          "decrypt_roundtrip": true,
+          "physical_notion_restore": false,
+          "full_workspace_backup": false
+        },
+        "marketing_source_backup_pilot": {
+          "status": "VERIFIED_PHYSICAL_AES256_GCM_SOURCE_SCHEMA_AND_ROW_PROPERTIES",
+          "data_source_id": "38981b1a-756d-81e0-9936-000b6a8c430c",
+          "row_count": 11,
+          "query_pages": 1,
+          "has_more": false,
+          "row_page_blocks_included": false,
+          "files_downloaded": false,
+          "github_run_id": 42912667491,
+          "github_artifact_id": 13807872192,
+          "github_zip_sha256": "7a58c584274077bfab0b3c0193f9c184dbca6e3aedb9f0adc6ae382630bcf8c3",
+          "encrypted_json_sha256": "e66379d473b1e31c700dad2ef3434276babc1caf5da82e0e8fe470a7ec42e22a",
+          "drive_file_id": "1hQZmrLEgtxJJzOLjTfyYfW2pm3NXr-vn",
+          "drive_readback_sha256_exact": true,
+          "decrypt_roundtrip": true,
+          "physical_notion_restore": false,
+          "full_workspace_backup": false
+        }
       }
     },
     {
