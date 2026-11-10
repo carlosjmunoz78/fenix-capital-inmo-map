@@ -38,15 +38,11 @@ async function runOnce(){
    const child=made.result;
    if(typeof child?.id==='string'&&/^[a-f0-9]{32}$/.test(child.id))issuedId=child.id;
    if(!issuedId||typeof child?.value!=='string'||child.value.length<24)throw Error('TOKEN_ISSUE_INVALID');
-   let readOk=false;
-   for(let attempt=0;attempt<3;attempt++){
-    try{const inventory=await cloudflare('GET','/accounts/'+ACCOUNT_ID+'/d1/database?page=1&per_page=1',child.value);readOk=Array.isArray(inventory.result);if(readOk)break;}catch{}
-    if(attempt<2)await new Promise(r=>setTimeout(r,400*(attempt+1)));
-   }
-   if(!readOk)throw Error('CHILD_EFFECTIVE_READ_DENIED');
-   const stored=await tx`select vault.create_secret(${child.value},${NEW_VAULT_NAME},${'FACT001 LAB D1 Read only; expires 2026-11-17; no other privileges'}) as id`;
+   // Store once, atomically, before delayed validation: Cloudflare can propagate new credentials asynchronously.
+   // The returned status is deliberately NOT marked verified.
+   const stored=await tx`select vault.create_secret(${child.value},${NEW_VAULT_NAME},${'FACT001 LAB D1 Read pending physical verification; expires 2026-11-17'}) as id`;
    if(stored.length!==1||!stored[0].id)throw Error('VAULT_CREATE_FAILED');
-   return {status:'ISSUED_AND_VAULT_STORED',new_token:true,read_verified:true,expires_on:CHILD_EXPIRY};
+   return {status:'ISSUED_PENDING_VERIFICATION',new_token:true,read_verified:false,expires_on:CHILD_EXPIRY};
   }catch(error){
    // Only the newly created token ID may be revoked; errors must never log token values.
    if(issuedId){try{await cloudflare('DELETE','/accounts/'+ACCOUNT_ID+'/tokens/'+issuedId,issuer);}catch{}}
@@ -56,10 +52,25 @@ async function runOnce(){
   }
  }));
 }
+async function verifyChild(){
+ return await withDb(async sql=>{
+  const child=await oneSecret(sql,NEW_VAULT_NAME);
+  try{
+   const result=await cloudflare('GET','/accounts/'+ACCOUNT_ID+'/d1/database?page=1&per_page=1',child);
+   if(!Array.isArray(result.result))throw Error('CF_D1_UNTRUSTED');
+   return {status:'D1_READ_VERIFIED',read_verified:true,cloudflare_writes:0};
+  }catch(e){
+   const message=e instanceof Error?e.message:'';
+   const code=/^CF_HTTP_(401|403|429)$/.test(message)?message:'D1_READ_NOT_VERIFIED';
+   return {status:'PENDING_VERIFICATION',read_verified:false,reason:code};
+  }
+ });
+}
+
 Deno.serve(async(req:Request)=>{
  try{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1);
-  if(!['health','issue-d1-read-lab'].includes(route||''))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','issue-d1-read-lab','verify-d1-read-lab'].includes(route||''))return reply(404,{status:'NOT_FOUND'});
   try{await verifyGitHubOidc(bearer(req));}catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&req.method==='GET')return reply(200,{status:'AUTHENTICATED',service:'cf-token-issuer-lab',scope:SCOPE,cloudflare_writes_enabled:false});
   if(route==='issue-d1-read-lab'&&req.method==='POST'){
@@ -67,6 +78,11 @@ Deno.serve(async(req:Request)=>{
    let order;try{order=await req.json();assertIssueOrder(order);}catch{return reply(400,{status:'REQUEST_DENIED'});}
    const result=await runOnce();
    return reply(200,{...result,account_id:ACCOUNT_ID,request_id:TOKEN_REQUEST_ID,operation:TOKEN_OP,credential_exposed:false,prod_resources_modified:false});
+  }
+  if(route==='verify-d1-read-lab'&&req.method==='POST'){
+   let body;try{body=await req.json();assertIssueOrder(body);}catch{return reply(400,{status:'REQUEST_DENIED'});}
+   const result=await verifyChild();
+   return reply(result.read_verified?200:409,{...result,credential_exposed:false,account_id:ACCOUNT_ID});
   }
   return reply(405,{status:'METHOD_DENIED'});
  }catch(error){
