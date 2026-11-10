@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
   contents: read
@@ -156,4 +157,48 @@ jobs:
           console.log('FACT001_OPERA_INCONCLUSIVE='+v.inconclusive);
           for(const e of v.results)console.log('FACT001_OPERA_ROOT '+JSON.stringify({name:e.name,status:e.status}));
           console.log('FACT001_OPERA_READ_ONLY_AUDIT=PASS');
+          NODE
+
+      - name: "Verify 19 historical Notion private roots via CEREBRO signed identity"
+        if: startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH3_VERIFY_20261110')
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.opera_batch3.access_read',
+            request_id:'FACT001-NOTION-OPERA-BATCH3-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_BATCH3_ORDER_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-batch3-access';
+          const call=async(jwt,body)=>{
+            const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+             ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(65000)});
+            let data={};try{data=await r.json()}catch{}
+            return {http:r.status,data};
+          };
+          const [anon,fake]=await Promise.all([call(null,order),call('invalid',order)]);
+          if(anon.http!==401||fake.http!==401)throw Error('FACT001_BATCH3_AUTH_GATE_FAILED');
+          console.log('FACT001_BATCH3_ANON_401=PASS');
+          console.log('FACT001_BATCH3_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('FACT001_OIDC_MISSING');
+          const signed=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!signed.ok)throw Error('FACT001_OIDC_ISSUER_DENIED');
+          const jwt=(await signed.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('FACT001_OIDC_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('FACT001_BATCH3_PROD_NOT_REJECTED_'+prod.http);
+          console.log('FACT001_BATCH3_PROD_403=PASS');
+          const result=await call(jwt,order),v=result.data;
+          if(result.http!==200||v?.status!=='FACT001_NOTION_BATCH3_INDEPENDENT_READ'||v.checked!==19||
+           v.results?.length!==19||v.content_returned!==false||v.write_operations!==0||v.credential_exposed!==false)
+            throw Error('FACT001_BATCH3_RESPONSE_INVALID_HTTP_'+result.http);
+          console.log('FACT001_BATCH3_CHECKED='+v.checked);
+          console.log('FACT001_BATCH3_ACCESSIBLE='+v.accessible);
+          console.log('FACT001_BATCH3_DENIED='+v.denied);
+          console.log('FACT001_BATCH3_INCONCLUSIVE='+v.inconclusive);
+          for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
+          console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
           NODE
