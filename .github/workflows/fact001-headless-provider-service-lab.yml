@@ -1,0 +1,63 @@
+name: FACT001 Headless Service 3 Providers LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-headless-provider-read-lab
+  cancel-in-progress: false
+jobs:
+  owner-signed-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Verify fixed owner signature claims and read-only providers
+        run: |
+          node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
+      - name: "Signed CEREBRO service reads Cloudflare Vercel Supabase from Vault"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const request=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',source:'owner_order',operation:'provider.inventory.read',request_id:'FACT001-HEADLESS-PROVIDER-READ-20261110'};
+          if(JSON.stringify(Object.keys(request).sort())!==JSON.stringify(Object.keys(expected).sort())||Object.entries(expected).some(([k,v])=>request[k]!==v))throw Error('COMMAND_SCOPE_DENIED');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab';
+          async function call(route,jwt,method='GET',body){
+           const response=await fetch(base+'/'+route,{method,headers:{Accept:'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}) ,redirect:'error',signal:AbortSignal.timeout(25000)});
+           let data={};try{data=await response.json()}catch{}
+           return {http:response.status,data};
+          }
+          const anonymous=await call('health');
+          const fake=await call('health','not-a-signed-token');
+          if(anonymous.http!==401||fake.http!==401)throw Error('UNAUTHENTICATED_HTTP_ACCESS');
+          console.log('FACT001_HEADLESS_ANONYMOUS_401=true');
+          console.log('FACT001_HEADLESS_FORGED_401=true');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('SIGNED_IDENTITY_UNAVAILABLE');
+          const u=endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1');
+          const r=await fetch(u,{headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('OIDC_HTTP_'+r.status);
+          const jwt=(await r.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const health=await call('health',jwt);
+          if(health.http!==200||health.data?.status!=='SIGNED_HEADLESS_LAB_READY')throw Error('SIGNED_IDENTITY_DENIED');
+          console.log('FACT001_HEADLESS_SIGNED_SERVICE=VERIFIED');
+          let errors=0;
+          for(const provider of ['cloudflare','vercel','supabase']){
+           const response=await call('verify',jwt,'POST',{...request,provider});
+           const ok=response.http===200&&response.data?.status==='VERIFIED_READ'&&response.data?.provider===provider&&response.data?.writes===0&&response.data?.credentials_exposed===false;
+           console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'='+String(ok?'VERIFIED':'BLOCKED'));
+           console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_HTTP='+response.http);
+           if(ok)console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_OBJECTS='+response.data.object_count);
+           if(!ok){console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_ERROR='+String(response.data?.code||response.data?.status||'UNEXPECTED').replace(/[^A-Z0-9_]/g,'').slice(0,48));errors++;}
+          }
+          console.log('FACT001_HEADLESS_ADDITIONAL_PROVIDER_WRITES=0');
+          if(errors)throw Error('PROVIDER_READ_GATES_FAILED_'+errors);
+          console.log('FACT001_HEADLESS_PROVIDER_READ_ALL_3=PASS');
+          NODE
