@@ -147,13 +147,15 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42859689267",
         "FACT001 original D1 EU schema physical: 3 tables, 2 audit triggers, one LAB-only synthetic ownership row approved=0",
         "FACT001 isolated full logical D1 clone hash match (4 tables, 1 index; 1+1+1+98 rows), Time Travel rollback of mutation and later schema physically verified; temporary D1 deleted",
-        "Cloudflare official D1 SQL export API status=complete; signed URL retrieval blocked, durable independent SQL file not verified"
+        "Cloudflare official D1 SQL export API status=complete; signed URL retrieval blocked, durable independent SQL file not verified",
+        "Physical FACT001 standalone SQL backup: private Library ZIP, SHA256 verified, SQLite empty restore 7 tables/2 triggers/1 index counts+integrity pass; not whole Notion workspace",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42873202783"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
         "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
         "Governed Notion operator passes local CI; real D1 EU schema and synthetic ownership persist physically, isolated full clone/rollback verified; service-to-service executor and external retained backup archive still pending",
-        "Scheduled automation queue, backup/rebuild, and PROD promotion are still pending"
+        "Scheduled Notion write queue, restricted D1 Write credential, end-to-end signed write, complete Notion workspace backup/rebuild, security/cost audit and PROD promotion remain pending"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -199,9 +201,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PENDING_EXTERNAL_BACKUP_ARCHIVE_AND_RESTORE_REVIEW",
+        "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_SERVICE_EXECUTOR_IDENTITY_COST_OBSERVABILITY_LAB",
+        "next_block": "FACT001_MIN_PRIVILEGE_D1_WRITE_SERVICE_IDENTITY_THEN_SIGNED_LAB_MUTATION",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -209,7 +211,22 @@
         "recovery_clone_lab_uuid": "25f8e9f9-09b7-4381-b0d4-edc3db87abf1",
         "rollback_evidence": "TEMPORARY_EU_CLONE_RESTORED_TO_BEFORE_NOTION_MIGRATION_AND_DELETED",
         "old_worker_cron_retained": "*/5 * * * *",
-        "backup_export_status": "CLOUDFLARE_SQL_EXPORT_COMPLETE_URL_NOT_DOWNLOADED"
+        "backup_export_status": "CLOUDFLARE_SQL_EXPORT_COMPLETE_URL_NOT_DOWNLOADED",
+        "backup_archived": true,
+        "backup_archive_scope": "FACT001_D1_LOGICAL_SQL_7_TABLES_ONLY",
+        "backup_private_location": "ChatGPT Library /CEREBRO OS/Backups/FACT-001/FACT001_CEREBRO_RECOVERY_D1_EU_BACKUP_2026-11-10.zip",
+        "backup_sql_sha256": "4f16350fe1e709b2095b4658336ea6a7c0104a29ed02e7ccb58f8ab3476bbfeb",
+        "backup_sql_bytes": 18871,
+        "backup_restore_test": "SQLITE_EMPTY_DATABASE_PASS_7_TABLES_2_TRIGGERS_1_INDEX_COUNTS_MATCH",
+        "backup_d1_snapshot_bookmark": "00000067-00000000-0000511f-d8de0671ee263b30f5f8a48c3e065cc3",
+        "cloudflare_native_export": "API_COMPLETE_DOWNLOAD_BLOCKED_SEPARATE_LOGICAL_BACKUP_AVAILABLE",
+        "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
+        "signed_cerebro_d1_read_run_id": 42873202783,
+        "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
+        "service_version": 13,
+        "service_write_route_enabled": false,
+        "cloudflare_d1_write_service_token": false,
+        "actual_blocker": "D1_WRITE_SERVICE_CREDENTIAL_MISSING_AND_ACCOUNT_ISSUER_OVERPRIVILEGED"
       }
     },
     {
