@@ -57,7 +57,7 @@ test('authentication and provider failure are always fail-closed',async()=>{
 });
 test('scope and invalid tokens or max-pages rejected without network',async()=>{
  let calls=0;
- for(const args of [{token:'bad'},{token,maxPages:0},{token,maxPages:16}]){
+ for(const args of [{token:'bad'},{token,maxPages:0},{token,maxPages:71}]){
   await assert.rejects(()=>inventoryNotionSearchIndex({...args,http:async()=>{calls++;return{status:200};}}));
  }
  assert.equal(calls,0);
