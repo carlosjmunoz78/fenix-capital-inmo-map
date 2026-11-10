@@ -1,0 +1,18 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {validateProducerDemand,executeProducerDemand,consumeProducerDemandQueue} from '../cloudflare/ums001-private-gateway-lab/producer-demand-queue.mjs';
+const command={schema_version:1,actor_id:'ums001-producer-lab',company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'openverse',kind:'images',action:'SEARCH',request_id:'UMS001IMG20261110A',production_id:'UMS001LABTEST',mode:'METADATA_ONLY',query:'architecture'};
+const cache=new Map(),env={PRODUCER_DEMAND_QUEUE_ENABLED:'true',LAB_KV:{async get(k){return cache.has(k)?JSON.parse(cache.get(k)):null},async put(k,v){cache.set(k,v)}}};
+const mock={scout:async(_env,body)=>({company_id:'fenix',engine_id:'UMS-001',environment:'LAB',results:[{id:'img1',license:'CC0-1.0',production_approved:false,downloaded:false}]}),latest:async()=>({company_id:'fenix',engine_id:'UMS-001',environment:'LAB',refresh_status:'GREEN_METADATA',results:[]})};
+test('valid image request',()=>assert.deepEqual(validateProducerDemand(command),command));
+test('fail closed PROD',()=>assert.throws(()=>validateProducerDemand({...command,environment:'PROD'}),/INVALID_SCOPE/));
+test('fail closed alternative company',()=>assert.throws(()=>validateProducerDemand({...command,company_id:'other'}),/INVALID_SCOPE/));
+test('fail closed publication flag',()=>assert.throws(()=>validateProducerDemand({...command,publish_authorized:true}),/UNEXPECTED_FIELDS/));
+test('fail closed arbitrary provider',()=>assert.throws(()=>validateProducerDemand({...command,provider:'mixkit'}),/INVALID_SCOPE/));
+test('fail closed unsafe query',()=>assert.throws(()=>validateProducerDemand({...command,query:'a'}),/INVALID_QUERY/));
+test('fail closed unknown fields',()=>assert.throws(()=>validateProducerDemand({...command,private_token:'abcd'}),/UNEXPECTED_FIELDS/));
+test('search records CC0 only metadata',async()=>{const out=await executeProducerDemand(env,command,mock);assert.equal(out.status,'COMPLETED');assert.equal(out.count,1);assert.equal(out.publish_authorized,false)});
+test('repeat request deduplicated',async()=>{const out=await executeProducerDemand(env,command,mock);assert.equal(out.duplicate,true)});
+test('bad license error not GREEN',async()=>{const out=await executeProducerDemand(env,{...command,request_id:'UMS001IMG20261110B'},{...mock,scout:async()=>({...await mock.scout(),results:[{id:'notcc0',license:'CC-BY',production_approved:false,downloaded:false}]})});assert.equal(out.status,'ERROR')});
+test('latest mode allowed without query',async()=>{const {query,...item}=command;const out=await executeProducerDemand(env,{...item,action:'LATEST',request_id:'UMS001LATEST20261110C'},mock);assert.equal(out.status,'COMPLETED');assert.equal(out.source_status,'GREEN_METADATA')});
+test('disabled queue rejects',async()=>assert.rejects(executeProducerDemand({...env,PRODUCER_DEMAND_QUEUE_ENABLED:'false'},{...command,request_id:'UMS001IMG20261110Z'},mock),/DISABLED/));
+test('message queue consumes once and acknowledges',async()=>{let acked=0;await consumeProducerDemandQueue({queue:'cerebro-ums001-producer-demand-lab-eu',messages:[{body:{...command,request_id:'UMS001IMG20261110D'},ack(){acked++}}]},env,mock);assert.equal(acked,1)});
