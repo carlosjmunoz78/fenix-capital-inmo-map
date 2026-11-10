@@ -15,8 +15,8 @@ const digest=async text=>{
  const d=new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)));
  return Array.from(d,x=>x.toString(16).padStart(2,'0')).join('');
 };
-export async function inventoryNotionSearchIndex({token,http=fetch,maxPages=15}={}){
- if(!validToken(token)||!Number.isSafeInteger(maxPages)||maxPages<1||maxPages>15)
+export async function inventoryNotionSearchIndex({token,http=fetch,maxPages=70}={}){
+ if(!validToken(token)||!Number.isSafeInteger(maxPages)||maxPages<1||maxPages>70)
    throw Error('FACT001_NOTION_INVENTORY_INPUT_DENIED');
  const observed=new Set();
  const kinds={page:0,data_source:0,database:0};
