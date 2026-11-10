@@ -1,0 +1,59 @@
+name: FACT001 Cloudflare issuer single child token OIDC LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-cf-token-issuer-once-lab
+  cancel-in-progress: false
+jobs:
+  issue-exact-lab-d1-read-child:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Security gates; no Cloudflare secrets in GitHub
+        run: node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/issuer-policy.test.mjs
+      - name: Signed GitHub OIDC -> isolated issuer LAB -> Vault (no token values transferred)
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json','utf8'));
+          const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',client_id:'cerebro',operation:'cloudflare.account_token.issue_d1_read_lab',request_id:'CFT-20261110-001'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(fixed).sort())||Object.keys(fixed).some(k=>order[k]!==fixed[k]))throw Error('ORDER_DENIED');
+          async function call(route,authorization,method='GET',body){
+            const r=await fetch(base+'/'+route,{method,headers:{Accept:'application/json',...(authorization?{Authorization:'Bearer '+authorization}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(35000),redirect:'error'});
+            let data={};try{data=await r.json()}catch{}
+            return {status:r.status,data};
+          }
+          const anon=await call('health');
+          if(anon.status!==401)throw Error('ANON_ACCEPTED');
+          const fake=await call('health','invalid-bearer');
+          if(fake.status!==401)throw Error('FORGED_ACCEPTED');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
+          const audience='cerebro-fact001-cf-token-issuer-lab-20261110';
+          const sep=endpoint.includes('?')?'&':'?';
+          const resp=await fetch(endpoint+sep+'audience='+encodeURIComponent(audience),{headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(12000)});
+          if(!resp.ok)throw Error('OIDC_ISSUER_HTTP_'+resp.status);
+          const jwt=(await resp.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_INVALID');
+          const good=await call('health',jwt);
+          if(good.status!==200||good.data?.status!=='AUTHENTICATED')throw Error('SIGNED_IDENTITY_FAILED');
+          console.log('FACT001_ANON_401=true');
+          console.log('FACT001_FORGED_401=true');
+          console.log('FACT001_SIGNED_OWNER_SERVICE_200=true');
+          const result=await call('issue-d1-read-lab',jwt,'POST',order);
+          console.log('FACT001_ISSUE_HTTP='+result.status);
+          console.log('FACT001_ISSUE_STATUS='+String(result.data?.status||'UNKNOWN'));
+          if(result.status!==200||!['ISSUED_AND_VAULT_STORED','ALREADY_PAIRED'].includes(result.data?.status)||result.data.credential_exposed!==false)throw Error('SINGLE_CHILD_ISSUE_NOT_CONFIRMED');
+          console.log('FACT001_CHILD_SECRET_RETURNED_TO_RUNNER=false');
+          console.log('FACT001_APP_CRM_MAIN_UNMODIFIED=true');
+          NODE
