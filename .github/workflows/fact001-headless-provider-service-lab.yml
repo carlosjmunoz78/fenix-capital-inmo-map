@@ -4,7 +4,6 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
-      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-index-manifest.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
@@ -24,7 +23,6 @@ jobs:
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
       - name: "Signed CEREBRO service reads Cloudflare Vercel Supabase from Vault"
-        if: github.event.head_commit.message != 'FACT001_NOTION_INDEX_MANIFEST_ONCE_20261110'
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
@@ -204,80 +202,3 @@ jobs:
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
           NODE
-
-      - name: "FACT001 encrypted Notion full-search-index metadata snapshot with signed CEREBRO OIDC"
-        if: github.event.head_commit.message == 'FACT001_NOTION_INDEX_MANIFEST_ONCE_20261110'
-        run: |
-          node --input-type=module <<'NODE'
-          import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
-          import {createHash} from 'node:crypto';
-          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-index-manifest.v1.json','utf8'));
-          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
-           client_id:'cerebro',source:'owner_order',operation:'notion.lab.index_manifest.seal',
-           request_id:'FACT001-NOTION-INDEX-MANIFEST-20261110'};
-          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
-             Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('INDEX_OWNER_ORDER_DENIED');
-          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/';
-          async function call(route,jwt,body){
-           const r=await fetch(base+route,{method:'POST',
-            headers:{Accept:'application/json','Content-Type':'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{})},
-            body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(125000)});
-           let data={};try{data=await r.json()}catch{}
-           return {http:r.status,data};
-          }
-          const anonymous=await call('notion-index-manifest-seal',null,order);
-          const fake=await call('notion-index-manifest-seal','forged-token',order);
-          if(anonymous.http!==401||fake.http!==401)throw Error('INDEX_ANON_GATES_FAIL');
-          console.log('FACT001_INDEX_MANIFEST_ANON_401=PASS');
-          console.log('FACT001_INDEX_MANIFEST_FORGED_401=PASS');
-          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
-          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
-          const issue=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
-            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
-          if(!issue.ok)throw Error('OIDC_ISSUER_DENIED');
-          const jwt=(await issue.json()).value;
-          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
-          const prod=await call('notion-index-manifest-seal',jwt,{...order,environment:'PROD'});
-          if(prod.http!==403)throw Error('INDEX_PROD_GATE_FAILED');
-          console.log('FACT001_INDEX_MANIFEST_PROD_403=PASS');
-          const result=await call('notion-index-manifest-seal',jwt,order),a=result.data;
-          if(result.http!==200||a?.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||
-            a.algorithm!=='AES-256-GCM'||a.search_index_complete!==true||
-            a.contains_all_notions_contents!==false||a.physical_restore!==false||
-            a.write_operations!==0||a.raw_content_returned!==false||
-            !a?.envelope?.ciphertext_b64||!Number.isSafeInteger(a.object_count)||a.object_count<58||
-            !Number.isSafeInteger(a.search_api_requests)||a.search_api_requests>85)
-            throw Error('INDEX_SNAPSHOT_NOT_COMPLETE_OR_UNVERIFIED_HTTP_'+result.http);
-          const verify={...order,operation:'notion.lab.index_manifest.verify',
-           request_id:'FACT001-NOTION-INDEX-MANIFEST-VERIFY-20261110',artifact:a};
-          const reconstructed=await call('notion-index-manifest-verify',jwt,verify);
-          if(reconstructed.http!==200||reconstructed.data?.status!=='FACT001_NOTION_INDEX_MEMORY_REBUILD_VERIFIED'||
-            reconstructed.data.object_count!==a.object_count||
-            reconstructed.data.id_list_sha256!==a.id_list_sha256||
-            reconstructed.data.content_exposed!==false||reconstructed.data.physical_restore!==false)
-            throw Error('INDEX_REBUILD_FAIL_HTTP_'+reconstructed.http);
-          mkdirSync('fact001-manifest-encrypted',{recursive:true});
-          const bytes=Buffer.from(JSON.stringify(a)+'\n','utf8');
-          if(bytes.length>9000000)throw Error('INDEX_ARTIFACT_OVERSIZED');
-          writeFileSync('fact001-manifest-encrypted/notion-search-id-index-aes256gcm.json',bytes,{mode:0o600,flag:'wx'});
-          console.log('FACT001_INDEX_MANIFEST_CIPHERTEXT_FILE_SHA256='+createHash('sha256').update(bytes).digest('hex'));
-          console.log('FACT001_INDEX_MANIFEST_ENCRYPTED_BYTES='+bytes.length);
-          console.log('FACT001_INDEX_MANIFEST_OBJECTS='+a.object_count);
-          console.log('FACT001_INDEX_MANIFEST_PAGES='+a.page_count);
-          console.log('FACT001_INDEX_MANIFEST_DATA_SOURCES='+a.data_source_count);
-          console.log('FACT001_INDEX_MANIFEST_API_CALLS='+a.search_api_requests);
-          console.log('FACT001_INDEX_MANIFEST_ID_LIST_SHA256='+a.id_list_sha256);
-          console.log('FACT001_INDEX_MANIFEST_SEARCH_COMPLETE='+a.search_index_complete);
-          console.log('FACT001_INDEX_MANIFEST_RECONSTRUCTION=PASS');
-          console.log('FACT001_INDEX_MANIFEST_PROVIDER_WRITES=0');
-          console.log('FACT001_INDEX_MANIFEST_FULL_WORKSPACE_BACKUP=false');
-          NODE
-      - name: "Store encrypted-only Notion complete search-index metadata for backup seeding"
-        if: github.event.head_commit.message == 'FACT001_NOTION_INDEX_MANIFEST_ONCE_20261110'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: fact001-notion-index-id-manifest-aes256gcm-20261110
-          path: fact001-manifest-encrypted/notion-search-id-index-aes256gcm.json
-          if-no-files-found: error
-          retention-days: 90
-          compression-level: 9
