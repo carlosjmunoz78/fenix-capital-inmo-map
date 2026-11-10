@@ -1,0 +1,78 @@
+name: FACT001 GitHub autonomous file CRUD lab
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/github-crud.v1.json
+permissions:
+  contents: write
+concurrency:
+  group: fact001-github-headless-file-crud-lab
+  cancel-in-progress: false
+jobs:
+  signed-headless-file-crud:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: "Own GitHub Actions service identity creates updates and deletes only one disposable LAB file"
+        env:
+          GH_SCOPED_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/github-crud.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',operation:'github.file.crud.smoke',request_id:'FACT001-GITHUB-LAB-CRUD-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('SCOPE_DENIED');
+          const branch='cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109',repository='carlosjmunoz78/fenix-capital-inmo-map';
+          if(process.env.GITHUB_REPOSITORY!==repository||process.env.GITHUB_REF!=='refs/heads/'+branch||process.env.GITHUB_ACTOR!=='carlosjmunoz78')throw Error('UNTRUSTED_IDENTITY');
+          const token=process.env.GH_SCOPED_TOKEN;
+          if(typeof token!=='string'||token.length<20)throw Error('SERVICE_TOKEN_MISSING');
+          const path='cerebro/connectors/universal/services/provider-headless-lab/fixtures/probe-20261110.txt';
+          const url='https://api.github.com/repos/'+repository+'/contents/'+path;
+          async function call(method,body){
+            const r=await fetch(url+(method==='GET'?'?ref='+encodeURIComponent(branch):''),{
+             method,headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},
+             ...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(16000)});
+            let obj={};try{obj=await r.json()}catch{}
+            return {http:r.status,obj};
+          }
+          const before=await call('GET');
+          if(before.http!==404)throw Error('FIXTURE_PATH_NOT_EMPTY');
+          let sha=null,created=false,updated=false,deleted=false;
+          try{
+            const init=Buffer.from('FACT001 shared LAB fixture v1 no credentials\n').toString('base64');
+            const createdResponse=await call('PUT',{message:'test(fact001): temporary headless Github file create',content:init,branch});
+            if(createdResponse.http!==201||typeof createdResponse.obj?.content?.sha!=='string')throw Error('CREATE_NOT_CONFIRMED_'+createdResponse.http);
+            created=true;sha=createdResponse.obj.content.sha;
+            const read1=await call('GET');
+            if(read1.http!==200||read1.obj.sha!==sha)throw Error('READ_AFTER_CREATE_FAILED');
+            const revised=Buffer.from('FACT001 shared LAB fixture v2 no credentials\n').toString('base64');
+            const updatedResponse=await call('PUT',{message:'test(fact001): temporary headless Github file update',content:revised,sha,branch});
+            if(updatedResponse.http!==200||typeof updatedResponse.obj?.content?.sha!=='string')throw Error('UPDATE_NOT_CONFIRMED_'+updatedResponse.http);
+            updated=true;sha=updatedResponse.obj.content.sha;
+            const read2=await call('GET');
+            if(read2.http!==200||read2.obj.sha!==sha)throw Error('READ_AFTER_UPDATE_FAILED');
+          }finally{
+            // Only the identical fixed fixture path may be cleaned, never another repo/file.
+            const latest=await call('GET');
+            if(latest.http===200&&typeof latest.obj?.sha==='string'){
+              const content=typeof latest.obj?.content==='string'?Buffer.from(latest.obj.content.replace(/\s/g,''),'base64').toString('utf8'):'';
+              if(!content.startsWith('FACT001 shared LAB fixture v'))throw Error('UNRECOGNIZED_FIXTURE_NOT_DELETED');
+              const removed=await call('DELETE',{message:'chore(fact001): delete temporary headless Github file fixture',sha:latest.obj.sha,branch});
+              if(removed.http!==200&&removed.http!==204)throw Error('CLEANUP_FAILED_'+removed.http);
+              deleted=true;
+            }
+          }
+          const after=await call('GET');
+          if(after.http!==404)throw Error('FIXTURE_STILL_PRESENT');
+          console.log('FACT001_GITHUB_HEADLESS_CREATE='+created);
+          console.log('FACT001_GITHUB_HEADLESS_READ_AFTER_CREATE='+created);
+          console.log('FACT001_GITHUB_HEADLESS_UPDATE='+updated);
+          console.log('FACT001_GITHUB_HEADLESS_DELETE='+deleted);
+          console.log('FACT001_GITHUB_HEADLESS_CLEANUP_404=true');
+          if(!created||!updated||!deleted)throw Error('CRUD_NOT_COMPLETE');
+          console.log('FACT001_GITHUB_HEADLESS_CRUD_E2E=PASS');
+          NODE
