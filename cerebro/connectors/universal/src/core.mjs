@@ -28,7 +28,7 @@ export function inMemoryIdempotency(){
 export function blocked(reason, detail) {if(!HUMAN.has(reason)) throw new Error('invalid HUMAN_REQUIRED reason');return {status:'HUMAN_REQUIRED',reason,detail,executed:false};}
 
 export class UniversalConnectorCore {
-  constructor({cloudflare, opera, vercel, authorize, idempotency, audit, costGuard}={}) {
+  constructor({cloudflare, opera, vercel, supabaseAdmin, authorize, idempotency, audit, costGuard}={}) {
     if(typeof authorize!=='function') throw new Error('trusted authorize callback required');
     if(typeof audit!=='function') throw new Error('audit sink required');
     if(!idempotency || typeof idempotency.claim!=='function' || typeof idempotency.complete!=='function') throw new Error('atomic idempotency store required');
@@ -36,6 +36,7 @@ export class UniversalConnectorCore {
     this.cloudflare=cloudflare;
     this.opera=opera;
     this.vercel=vercel;
+    this.supabaseAdmin=supabaseAdmin;
     this.authorize=authorize;
     this.audit=audit;
     this.idempotency=idempotency;
@@ -54,7 +55,7 @@ export class UniversalConnectorCore {
     if(!action) return blocked('LOW_CONFIDENCE','Capability not registered');
     if(action.status!=='IMPLEMENTED_LAB') return blocked('LOW_CONFIDENCE',`Capability ${action.id} is ${action.status}`);
     if(context.environment==='PROD' && action.sideEffect) return blocked('HIGH_RISK','PROD write requires separate, reviewed promotion contract');
-    const provider=action.id.startsWith('cloudflare.')?this.cloudflare:action.id.startsWith('opera.')?this.opera:action.id.startsWith('vercel.')?this.vercel:null;
+    const provider=action.id.startsWith('cloudflare.')?this.cloudflare:action.id.startsWith('opera.')?this.opera:action.id.startsWith('vercel.')?this.vercel:action.id.startsWith('supabase-admin.')?this.supabaseAdmin:null;
     if(!provider) return blocked('LOW_CONFIDENCE','Provider adapter unavailable');
     const identity = {client_id:trustedPrincipal.client_id, actor_id:nonempty(trustedPrincipal.actor_id,'actor_id'), identity_ref:nonempty(trustedPrincipal.identity_ref,'identity_ref')};
     const scope = {company_id:context.company_id,engine_id:context.engine_id,environment:context.environment,version:context.version};
