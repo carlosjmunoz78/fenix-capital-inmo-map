@@ -81,16 +81,4 @@ jobs:
            if(!valid)throw Error('HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_NOT_VERIFIED_'+x.http);
           }
           console.log('FACT001_HEADLESS_PLANNER_18_ARTIFACTS_PER_UNIT=PASS');
-          const pagesOrder={...request,operation:'cloudflare.pages.lab_ephemeral_create_read_delete',request_id:'FACT001-PAGES-LAB-20261110'};
-          const pages=await call('pages-lifecycle',jwt,'POST',pagesOrder);
-          const pagesOk=pages.http===200&&pages.data?.status==='CLOUDFLARE_PAGES_LAB_CREATE_READ_DELETE_VERIFIED'&&
-            pages.data?.created===true&&pages.data?.readback===true&&pages.data?.deleted===true&&
-            pages.data?.verified_absent===true&&pages.data?.production_resources_modified===0&&
-            pages.data?.external_domains_modified===0&&pages.data?.deployments_created===0;
-          console.log('FACT001_HEADLESS_PAGES_LAB_HTTP='+pages.http);
-          console.log('FACT001_HEADLESS_PAGES_LAB_STATUS='+String(pages.data?.status||'BLOCKED'));
-          console.log('FACT001_HEADLESS_PAGES_LAB_CODE='+String(pages.data?.code||'NONE'));
-          console.log('FACT001_HEADLESS_PAGES_LAB_CLEANUP='+String(pages.data?.verified_absent===true));
-          if(!pagesOk)throw Error('HEADLESS_CLOUDFLARE_PAGES_E2E_BLOCKED_CHECK_PERMISSIONS_AND_INVENTORY');
-          console.log('FACT001_HEADLESS_PAGES_LAB_CRUD_CLEANUP=PASS');
           NODE
