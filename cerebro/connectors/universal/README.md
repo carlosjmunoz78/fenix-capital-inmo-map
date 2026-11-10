@@ -53,3 +53,12 @@ ChatGPT normal Cloudflare MCP *directamente conectado y comprobado*: cuenta aute
 ### CEREBRO Console owner canary v2 and rate-limit gate · 2026-11-09
 
 Nuevo adaptador LAB `cerebro-fact001-console-owner-canary-lab` ACTIVE v2 con idéntica validación owner mediante Supabase JWT y RPC `CARLOS-ADMIN`, pero Console principal v33 **no se modifica**. [Primera consulta GET E2E #42703668544](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42703668544) SUCCESS. Negativos JWT/CORS correctos, GET posterior devolvió 429 (límite Cloudflare compartido), [diagnóstico #42704193424](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42704193424). Política 429 fail closed, sin auto-reintentos; [pruebas 14/14 #42704728200](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42704728200) SUCCESS. Ruta propietario con sesión real aún sin prueba positiva. Guía completa `docs/FACT001_CONSOLE_CLOUDFLARE_OWNER_CANARY_LAB_ACCEPTANCE_2026-11-09.md`.
+
+
+## 10-11-2026 · Headless shared service deployed (LAB only, not PROD universal)
+- Signed GitHub OIDC independent CEREBRO service `cerebro-fact001-headless-provider-lab` **v6 ACTIVE**, reads Cloudflare/Vercel/Supabase credentials from Vault; **no console dependency, no ChatGPT OAuth**.
+- CEREBRO order `factory.plan_internal_unit` generated complete 18-file scaffolds for internal department and new website in physical E2E [#42837159597](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597).
+- Independent Cloudflare Pages project create/read/delete LAB E2E [#42838699207](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42838699207). Temporary project cleaned and verified; **one-off mutating endpoint retired in service v6**, no remaining deployment/dns tests.
+- Independent GitHub Actions scoped file CRUD [#42821755132](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132).
+- Five-provider capability status registry `registry/headless-gates.v1.json`; **none FULL GREEN** yet: Notion independent service token and GitHub admin identity unresolved, generic autonomous queue and physical full lifecycle tests still pending.
+- Full acceptance and exact blockers: `docs/FACT001_CEREBRO_HEADLESS_5_PROVIDERS_2026-11-10.md`. PR #44 still DRAFT, no main merge.
