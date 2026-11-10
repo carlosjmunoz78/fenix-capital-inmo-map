@@ -40,6 +40,17 @@ async function oidc(){
 async function run(){
  const plan=await downloadArtifact();const jwt=await oidc();
  const endpoint='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-notion-content-export-lab/export';
+ // Verify auth boundaries physically before any page is read.
+ const guarded=async(header,b)=>{
+  const r=await fetch(endpoint,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',...(header?{Authorization:header}:{})},body:JSON.stringify(b),redirect:'error',signal:AbortSignal.timeout(15000)});
+  return r.status;
+ };
+ if(await guarded(null,{...scope,item_index:0,plan_artifact:plan})!==401)throw Error('ANON_NOT_DENIED');
+ if(await guarded('Bearer definitely-invalid',{...scope,item_index:0,plan_artifact:plan})!==401)throw Error('FORGED_NOT_DENIED');
+ if(await guarded('Bearer '+jwt,{...scope,environment:'PROD',item_index:0,plan_artifact:plan})!==403)throw Error('PROD_NOT_DENIED');
+ console.log('FACT001_OIDC_ANON_401=PASS');
+ console.log('FACT001_OIDC_FORGED_401=PASS');
+ console.log('FACT001_OIDC_PROD_403=PASS');
  for(let i=0;i<25;i++){
   let response,body;
   try{
