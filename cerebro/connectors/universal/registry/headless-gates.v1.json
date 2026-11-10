@@ -76,7 +76,7 @@
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "VERIFIED",
         "isolated_lab_delete": "VERIFIED",
-        "backup_and_rollback": "VERIFIED",
+        "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
