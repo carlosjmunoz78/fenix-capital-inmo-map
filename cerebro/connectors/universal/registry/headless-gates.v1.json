@@ -143,11 +143,12 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849043493",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42852197701",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42853530709"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42853530709",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42859689267"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
-        "E2E child create/read/update/Trash succeeded with service token but full restore and permanent deletion not tested",
+        "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
         "One-off write route removed after clean-up; durable general-purpose write broker with policy + idempotency + rollback pending",
         "Scheduled automation queue, backup/rebuild, and PROD promotion are still pending"
       ],
@@ -159,13 +160,30 @@
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "VERIFIED",
         "isolated_lab_delete": "VERIFIED",
-        "backup_and_rollback": "PENDING",
+        "backup_and_rollback": "PARTIAL_LAB_TRASH_RESTORE_ONLY",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
       "service_identity_admin": "VERIFIED_LIMITED_WIKI_ONLY",
-      "service_identity_read": "VERIFIED"
+      "service_identity_read": "VERIFIED",
+      "scoped_restore_evidence": {
+        "status": "VERIFIED_LAB_ISOLATED_ONLY",
+        "run_id": 42859689267,
+        "test_page_id": "41481b1a-756d-8119-b1fa-c38a9d013a35",
+        "scope": "Wiki Fénix Capital, newly created empty test child only",
+        "created_and_trashed_by": "ChatGPT authorized Notion connector",
+        "restored_and_retrashed_by": "CEREBRO independent Notion service credential from Supabase Vault",
+        "anonymous_rejected": true,
+        "forged_oidc_rejected": true,
+        "foreign_page_rejected": true,
+        "actual_restore_http": 200,
+        "final_in_trash": true,
+        "service_restored_to": "v12 ACTIVE, binary sha256 same as original v10",
+        "post_test_write_route_enabled": false,
+        "production_verified": false,
+        "full_workspace_backup_verified": false
+      }
     },
     {
       "id": "github",
