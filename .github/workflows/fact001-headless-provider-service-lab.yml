@@ -110,25 +110,4 @@ jobs:
            console.log('FACT001_NOTION_WORKSPACE_VISIBLE_PAGES='+notionRead.data?.accessible_pages_returned);
           }
           if(!authorized)throw Error('NOTION_WORKSPACE_READ_REQUIRES_SCOPED_ACCESS');
-          // Execute one owner-authorized, child-only create/read/update/Trash probe;
-          // no retry on uncertain response (check Notion LAB cleanup manually).
-          if(notionRead.data?.has_accessible_objects!==true)throw Error('NOTION_ROOT_NOT_SHARED');
-          let notionCrud;
-          try{
-           notionCrud=await call('notion-lifecycle',jwt,'POST',{
-             ...request,operation:'notion.lab_create_update_trash_once',
-             request_id:'FACT001-NOTION-LAB-CRUD-20261110'
-           });
-          }catch{console.log('FACT001_NOTION_CRUD_RESPONSE=UNCERTAIN_NO_RETRY');throw Error('NOTION_CRUD_RECONCILIATION_REQUIRED');}
-          const pass=notionCrud.http===200&&
-            notionCrud.data?.status==='NOTION_LAB_CREATE_READ_UPDATE_TRASH_VERIFIED'&&
-            notionCrud.data?.existing_wiki_content_modified===false&&
-            notionCrud.data?.other_pages_modified===0&&
-            notionCrud.data?.verified_trash===true&&
-            notionCrud.data?.credentials_exposed===false;
-          console.log('FACT001_NOTION_LAB_CRUD_HTTP='+notionCrud.http);
-          console.log('FACT001_NOTION_LAB_CRUD_STATUS='+String(notionCrud.data?.status||notionCrud.data?.code||'BLOCKED'));
-          console.log('FACT001_NOTION_LAB_CRUD_TRASH_VERIFIED='+String(notionCrud.data?.verified_trash===true));
-          if(!pass)throw Error('NOTION_LAB_CRUD_NOT_GREEN_NO_AUTORETRY');
-          console.log('FACT001_NOTION_LAB_CHILD_CREATE_READ_UPDATE_TRASH=PASS');
           NODE
