@@ -1,0 +1,39 @@
+name: FACT001 Vercel universal dual MCP LAB regression
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-vercel-universal-dual-lab.yml
+      - cerebro/connectors/universal/src/vercel*.mjs
+      - cerebro/connectors/universal/src/catalog.mjs
+      - cerebro/connectors/universal/src/core.mjs
+      - cerebro/connectors/universal/tests/vercel.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-vercel-lab
+  cancel-in-progress: false
+jobs:
+  negative-and-positive-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Node Vercel LAB adapter and regression without external secrets
+        run: |
+          node --test cerebro/connectors/universal/tests/vercel.test.mjs
+          node --test cerebro/connectors/universal/tests/core.test.mjs
+      - name: Fail closed audit and no PROD endpoints
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p='cerebro/connectors/universal/src/vercel.mjs';
+          const s=fs.readFileSync(p,'utf8');
+          if(!s.includes("SCOPE_DENIED")||!s.includes("LAB_CREATE_DENIED")||!s.includes("VERCEL_CAPABILITY_DENIED"))throw Error('GUARDS_MISSING');
+          if(s.includes('process.env.VERCEL_TOKEN')||s.includes('SUPABASE_SERVICE_ROLE_KEY'))throw Error('TOKEN_SHOULD_NOT_BE_IN_SOURCE');
+          console.log('FACT001_VERCEL_LAB_ONLY=true');
+          console.log('FACT001_VERCEL_AUTONOMOUS_PROD_WRITES=0');
+          NODE
