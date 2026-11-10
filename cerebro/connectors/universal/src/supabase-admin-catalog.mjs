@@ -2,6 +2,7 @@
 export const SUPABASE_PROJECT_REF='cluhljgonannaafpmblx';
 export const DISPOSABLE_FUNCTION='cerebro-fact001-vercel-service-lab';
 export const DISPOSABLE_FUNCTION_ID='f004e7f1-4911-440d-8809-c656f5f89b38';
+export const DISPOSABLE_FUNCTION_SHA='eac20084ecf4ce5af0023d966956abc95f480dee26736f2046d92c209fc03154';
 const c=(id,method,path,permission,status='IMPLEMENTED_LAB',sideEffect=false)=>({id,method,path,permission,status,sideEffect});
 export const SUPABASE_ADMIN_CAPABILITIES=Object.freeze([
  c('supabase-admin.edge-functions.list','GET','/v1/projects/{ref}/functions','edge_functions_read'),
