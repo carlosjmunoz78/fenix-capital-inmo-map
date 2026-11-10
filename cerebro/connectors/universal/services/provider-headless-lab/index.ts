@@ -3,6 +3,7 @@
 import postgres from 'npm:postgres@3.4.7';
 import {verifyGitHubOidc,assertReadOrder,SCOPE} from './policy.mjs';
 import {providerSpecs,readProviderInventory} from './provider.mjs';
+import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
 const getBearer=(request:Request)=>{
@@ -19,14 +20,36 @@ async function getVaultToken(name:string):Promise<string>{
   return values[0].decrypted_secret;
  } finally{await sql.end({timeout:2}).catch(()=>{});}
 }
+
+function assertPlanOrder(body:unknown){
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('ORDER_INVALID');
+ const b=body as Record<string,unknown>;
+ const allowed=['company_id','engine_id','environment','version','client_id','source','operation','request_id','unit_type','unit_slug','required_resources'];
+ if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(allowed.sort()))throw Error('PLAN_FIELDS_DENIED');
+ if(b.company_id!=='fenix-capital'||b.engine_id!=='FACT-001'||b.environment!=='LAB'||b.version!=='1.0.0'||
+    b.client_id!=='cerebro'||b.source!=='owner_order'||b.operation!=='factory.plan_internal_unit'||
+    typeof b.request_id!=='string'||!/^FACT001-PLAN-[A-Z0-9-]{8,64}$/.test(b.request_id))throw Error('PLAN_SCOPE_DENIED');
+ return {company_id:b.company_id,engine_id:b.engine_id,environment:b.environment,version:b.version,
+   unit_type:b.unit_type,unit_slug:b.unit_slug,required_resources:b.required_resources};
+}
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&request.method==='GET')return reply(200,{status:'SIGNED_HEADLESS_LAB_READY',scope:SCOPE});
+  if(route==='plan'&&request.method==='POST'){
+   if(Number(request.headers.get('content-length')||'0')>2000)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
+   let plan;
+   try{plan=generateCloudflareFactoryScaffold(assertPlanOrder(await request.json()));}
+   catch{return reply(400,{status:'PLAN_DENIED'});}
+   return reply(200,{status:'FACT001_FACTORY_SCAFFOLD_GENERATED',
+      scope:plan.plan.scope,unit:plan.plan.unit,resource_count:plan.plan.resources.length,
+      files:plan.files,additional_cost_eur:0,provider_writes:0,
+      provider_writes_enabled:false,rollback_required:true});
+  }
   if(route==='verify'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>1600)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    let provider:string;
