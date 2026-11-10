@@ -1,5 +1,7 @@
 import {WorkerEntrypoint} from 'cloudflare:workers';
 import {acquireMetSelected,readMetSelected} from './met-selected-gateway-lab.mjs';
+import {latestFreeMedia} from './producer-source-catalog.mjs';
+import {consumeProducerDemandQueue} from './producer-demand-queue.mjs';
 const ENGINE='UMS-001',COMPANY='fenix',ENV='LAB';
 function assertRequest(input,permission){
   if(input?.company_id!==COMPANY||input.engine_id!==ENGINE||input.environment!==ENV)throw Error('SCOPE_DENIED');
@@ -37,8 +39,9 @@ async function searchFreeMedia(env,task){
  if(!task||task.company_id!==COMPANY||task.engine_id!==ENGINE||task.environment!==ENV||
  !((task.provider==='ambientcg'&&['textures','hdris','models','decals'].includes(task.kind))||
     (task.provider==='wikimedia_commons'&&env.COMMONS_ENABLED==='true'&&['images','audio','video'].includes(task.kind))||
-    (task.provider==='met'&&env.MET_ENABLED==='true'&&task.kind==='images'))||
- typeof task.query!=='string'||task.query.trim().length<3||task.query.length>(task.provider==='wikimedia_commons'||task.provider==='met'?80:120))throw Error('SCOUT_REQUEST_INVALID');
+    (task.provider==='met'&&env.MET_ENABLED==='true'&&task.kind==='images')||
+    (task.provider==='openverse'&&((task.kind==='audio'&&env.OPENVERSE_AUDIO_ENABLED==='true')||(task.kind==='images'&&env.OPENVERSE_IMAGES_ENABLED==='true'))))||
+ typeof task.query!=='string'||task.query.trim().length<3||task.query.length>(task.provider==='wikimedia_commons'||task.provider==='met'||task.provider==='openverse'?80:120))throw Error('SCOUT_REQUEST_INVALID');
  if(!env.SOURCE_SCOUT||typeof env.SOURCE_SCOUT.search!=='function'||
  typeof env.SOURCE_SCOUT_TOKEN!=='string'||env.SOURCE_SCOUT_TOKEN.length<32)throw Error('SCOUT_PRIVATE_BINDING_REQUIRED');
  const result=await env.SOURCE_SCOUT.search({...task,actor_id:'ums001-producer-lab',permission:'media.search',
@@ -57,10 +60,12 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
   async acquire(task){return acquire(this.env,task)}
   async read(task){return read(this.env,task)}
   async scout(task){return searchFreeMedia(this.env,task)}
+  async latest(task){return latestFreeMedia(this.env,task)}
   async select(task){return acquireMetSelected(this.env,task)}
   async readSelected(task){return readMetSelected(this.env,task)}
 }
-// Private RPC-only producer. No periodic job or public endpoint.
+// Private producer RPC plus Cloudflare EU Queue. No periodic job or public endpoint.
 export default {
+ async queue(batch,env){await consumeProducerDemandQueue(batch,env,{scout:searchFreeMedia,latest:latestFreeMedia,polyhaven:search});},
  async fetch() { return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}}); }
 };
