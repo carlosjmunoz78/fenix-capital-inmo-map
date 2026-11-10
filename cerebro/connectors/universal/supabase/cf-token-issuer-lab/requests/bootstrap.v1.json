@@ -1,10 +1,10 @@
 {
+  "request_id": "CFT-20261110-001",
+  "operation": "cloudflare.account_token.issue_d1_read_lab",
+  "client_id": "cerebro",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
   "company_id": "fenix-capital",
   "engine_id": "FACT-001",
   "environment": "LAB",
-  "version": "1.0.0",
-  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
-  "client_id": "cerebro",
-  "operation": "cloudflare.account_token.issue_d1_read_lab",
-  "request_id": "CFT-20261110-001"
+  "version": "1.0.0"
 }
