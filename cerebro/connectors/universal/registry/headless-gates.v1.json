@@ -149,13 +149,16 @@
         "FACT001 isolated full logical D1 clone hash match (4 tables, 1 index; 1+1+1+98 rows), Time Travel rollback of mutation and later schema physically verified; temporary D1 deleted",
         "Cloudflare official D1 SQL export API status=complete; signed URL retrieval blocked, durable independent SQL file not verified",
         "Physical FACT001 standalone SQL backup: private Library ZIP, SHA256 verified, SQLite empty restore 7 tables/2 triggers/1 index counts+integrity pass; not whole Notion workspace",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42873202783"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42873202783",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_QUEUE_PHYSICAL_CRON_LAB_2026-11-10.md",
+        "Cloudflare D1 Notion queue job completed with attempts=1 at 2026-11-10T19:53:27.944Z; independent private Worker exclusive D1 binding, Cron then removed and queue disabled",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42889919376"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
         "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
         "Governed Notion operator passes local CI; real D1 EU schema and synthetic ownership persist physically, isolated full clone/rollback verified; service-to-service executor and external retained backup archive still pending",
-        "Scheduled Notion write queue, restricted D1 Write credential, end-to-end signed write, complete Notion workspace backup/rebuild, security/cost audit and PROD promotion remain pending"
+        "Internal Cloudflare Cron D1-bound queue proved physically one-shot and turned OFF; actual signed Notion provider mutation pipeline, full workspace coverage/backup, cost+audit+promotion still pending"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -203,7 +206,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_MIN_PRIVILEGE_D1_WRITE_SERVICE_IDENTITY_THEN_SIGNED_LAB_MUTATION",
+        "next_block": "FACT001_NOTION_SIGNED_PROVIDER_MUTATION_LAB_AND_WORKSPACE_SHARE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -226,7 +229,29 @@
         "service_version": 13,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "D1_WRITE_SERVICE_CREDENTIAL_MISSING_AND_ACCOUNT_ISSUER_OVERPRIVILEGED"
+        "actual_blocker": "D1_WRITE_SERVICE_CREDENTIAL_MISSING_AND_ACCOUNT_ISSUER_OVERPRIVILEGED",
+        "d1_scoped_worker_write": {
+          "status": "VERIFIED_PHYSICAL_LAB",
+          "worker": "cerebro-fact001-notion-queue-lab",
+          "binding": "FACT001_D1",
+          "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+          "uses_account_wide_d1_write_token": false,
+          "public_url": false,
+          "preview_urls": false
+        },
+        "autonomous_queue_internal_probe": {
+          "status": "VERIFIED_PHYSICAL_LAB_SYNTHETIC_ONLY",
+          "operation": "notion.lab.queue.probe",
+          "job_id": "FACT001-NOTION-SYNTHETIC-QUEUE-LAB-20261110-01",
+          "state": "COMPLETED",
+          "attempts": 1,
+          "completed_at": "2026-11-10T19:53:27.944Z",
+          "cloudflare_cron_removed": true,
+          "queue_enabled": false,
+          "external_provider_writes": 0
+        },
+        "workspace_full_backup_gate": "BLOCKED_LIMITED_CEREBRO_NOTION_INTEGRATION_SCOPE",
+        "promotion_tribunal": "CODE_CI_GREEN_NOT_LIVE"
       }
     },
     {
