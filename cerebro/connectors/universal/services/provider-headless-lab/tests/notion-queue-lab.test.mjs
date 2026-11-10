@@ -68,3 +68,14 @@ test('HTTP fetch returns 404 unconditionally',async()=>{
 test('missing binding always fails closed',async()=>{
  assert.equal((await processNotionQueueTick({},1)).status,'BLOCKED');
 });
+
+test('expired queued-probe claim is RECONCILE, never retried or marked complete',async()=>{
+ const x=f();x.enqueue();x.enable();
+ x.db.exec("UPDATE fact001_notion_queue_jobs_v1 SET state='RUNNING',attempts=1,lease_until_ms=1234");
+ const r=await processNotionQueueTick(x.env,1235);
+ assert.equal(r.status,'EMPTY');
+ const row=x.db.prepare("SELECT state,attempts FROM fact001_notion_queue_jobs_v1").get();
+ assert.equal(row.state,'RECONCILE');assert.equal(row.attempts,1);
+ const again=await processNotionQueueTick(x.env,1236);
+ assert.equal(again.status,'EMPTY');
+});
