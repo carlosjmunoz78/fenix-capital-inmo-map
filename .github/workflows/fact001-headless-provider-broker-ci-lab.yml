@@ -33,8 +33,9 @@ jobs:
           if(!source.includes('verifyGitHubOidc(getBearer(request))')||!source.includes('assertReadOrder(await request.json())')||!source.includes('assertPlanOrder(await request.json())'))throw Error('NO_TRUSTED_IDENTITY');
           if(!provider.includes("method:'GET'")||provider.includes("method:'DELETE'")||provider.includes("method:'POST'"))throw Error('UPSTREAM_WRITE_FORBIDDEN');
           if(!source.includes('vault.decrypted_secrets')||!policy.includes('payload.actor!==OWNER'))throw Error('VAULT_OR_OWNER_GATE_MISSING');
-          if(!source.includes('assertPagesCommand(await request.json())')||!pages.includes('CLOUDFLARE_PAGES_ALREADY_EXISTS')||!pages.includes('CLOUDFLARE_PAGES_RESIDUAL_PROJECT')||!pages.includes('assertOwned(last)'))throw Error('PAGES_SAFE_CLEANUP_MISSING');
+          if(source.includes('pages-lifecycle')||source.includes('verifyPagesLifecycle'))throw Error('TEMPORARY_PAGES_WRITE_ROUTE_STILL_ACTIVE');
+          if(!pages.includes('CLOUDFLARE_PAGES_ALREADY_EXISTS')||!pages.includes('CLOUDFLARE_PAGES_RESIDUAL_PROJECT')||!pages.includes('assertOwned(last)'))throw Error('PAGES_TEST_CONTRACT_MISSING');
           console.log('FACT001_BROKER_PROVIDER_WRITE_COUNT=0');
-          console.log('FACT001_BROKER_CLOUDFLARE_PAGES_LIFECYCLE=ONLY_EXACT_LAB_PROJECT');
+          console.log('FACT001_BROKER_CLOUDFLARE_PAGES_LIFECYCLE=RETIRED_FROM_ACTIVE_SERVICE');
           console.log('FACT001_BROKER_PROD_RESOURCES_CHANGED=0');
           NODE
