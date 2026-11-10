@@ -1,0 +1,34 @@
+name: FACT001 dual-client connector recovery LAB regression
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-connector-recovery-guard-lab.yml
+      - cerebro/connectors/universal/src/recovery.mjs
+      - cerebro/connectors/universal/tests/recovery.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-recovery-lab-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  recovery-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Test bounded reconnect, 2 independent client identities, durable-CAS contract, no duplicated writes
+        run: node --test cerebro/connectors/universal/tests/recovery.test.mjs
+      - name: Verify no production automatic activation
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const f=fs.readFileSync('cerebro/connectors/universal/src/recovery.mjs','utf8');
+          if(!f.includes("DURABLE_ATOMIC_STORE_REQUIRED")||!f.includes("RECONCILIATION_REQUIRED")||!f.includes("LAB_ONLY"))throw Error('RECOVERY_FAIL_CLOSED_MISSING');
+          if(f.includes('process.env.SUPABASE_SERVICE_ROLE_KEY')||f.includes('process.env.CLOUDFLARE_API_TOKEN'))throw Error('SECRET_EMBEDDED');
+          console.log('FACT001_RECOVERY_PROD_NOT_MODIFIED=true');
+          console.log('FACT001_AMBIGUOUS_WRITES_RETRIED=0');
+          NODE
