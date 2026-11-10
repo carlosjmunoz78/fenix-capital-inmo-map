@@ -28,3 +28,13 @@ Fecha de evidencia: 2026-11-10. PR #44 DRAFT. Ámbito: fenix-capital / FACT-001 
 - Código de inventario de Notion y pruebas: CI SUCCESS #42905060286; físico SUCCESS #42905185981.
 - Parent creation gate existente + módulo nuevo `notion-connected-child-plan.mjs`: pruebas CI verdes #42905586717, **todavía no conectado a ruta de creación autónoma**. Nunca considerar código por sí solo una creación real ni permiso global.
 - Sin modificaciones en App/CRM, main, DNS, WordPress, otros Workers/D1; coste de contratación adicional 0 €. Mantener PR DRAFT.
+
+
+## CIERRE PRUEBA FÍSICA · Herencia de conexión para nuevas subpáginas
+- `notion-connected-child-plan.mjs` combina la allowlist versionada y el guard preexistente `notion-connected-parent-gate.mjs` con un GET actual a la Wiki bajo la credencial propia CEREBRO.
+- Permitido en este primer candidato SOLO como destino de futuras subpáginas: `Wiki Fénix Capital`, ID `1c481b1a-756d-8002-813d-f3efdd4ecd89`, siempre dentro de `fenix-capital/FACT-001/LAB/1.0.0` y con orden firmada; otras 57 raíces conocidas no se vuelven destinos de escritura implícitos.
+- Tests del planificador locales en CI **SUCCESS** [#42905586717](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42905586717).
+- Prueba física GitHub Actions [#42906293673](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42906293673) **SUCCESS**: `ANON_401=PASS`, `FORGED_401=PASS`, `PROD_403=PASS`, `OTHER_ROOT_403=PASS`, `PARENT_PLAN_VERIFIED=PASS`, `HTTP=200`. Consulta con Notion propia, página viva, respuesta `creation_executed=false`.
+- El usuario pidió que las nuevas páginas se creen con la conexión: esta prueba certifica el plan de herencia, pero NO una creación real mediante la cola autónoma. El wiring de escritura requiere token, control de permisos por operación, orden firmada, ownership, checkpoint, auditoría, readback y rollback.
+- Limpieza física: retirados ambos workflows/orders de un solo uso y las rutas LAB de inventario y plan; Edge Function `cerebro-fact001-headless-provider-lab` **v24 ACTIVE**, mismo hash byte-a-byte `645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec` que la v19 previa; `main`, CRM, App, PROD, DNS y otros proveedores intactos. No nueva suscripción.
+- GATES Notion **mantienen 6/11 globales VERIFIED**. No promover por un índice de búsqueda y una prueba de planificación.
