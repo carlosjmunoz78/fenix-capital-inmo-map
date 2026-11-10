@@ -1,0 +1,37 @@
+name: FACT001 Supabase management LAB contract guards
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-supabase-admin-lab-contract.yml
+      - cerebro/connectors/universal/src/supabase-admin*.mjs
+      - cerebro/connectors/universal/src/core.mjs
+      - cerebro/connectors/universal/src/catalog.mjs
+      - cerebro/connectors/universal/tests/supabase-admin.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Test exact Supabase admin operation, safeguards and regressions without secrets
+        run: |
+          node --test cerebro/connectors/universal/tests/supabase-admin.test.mjs
+          node --test cerebro/connectors/universal/tests/core.test.mjs
+          node --test cerebro/connectors/universal/tests/vercel.test.mjs
+      - name: Do not permit provider tokens, PROD deletes or arbitrary functions
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const s=fs.readFileSync('cerebro/connectors/universal/src/supabase-admin.mjs','utf8');
+          const policy=fs.readFileSync('cerebro/connectors/universal/src/supabase-admin-catalog.mjs','utf8');
+          if(!s.includes('DELETE_SCOPE_DENIED')||!s.includes('FUNCTION_NOT_VERIFIED_AS_RETIRED')||!s.includes('DELETE_NOT_VERIFIED'))throw Error('GUARDS_MISSING');
+          if(!policy.includes('DISPOSABLE_FUNCTION_SHA')||!policy.includes("'PLANNED_PROD_GATED'"))throw Error('PROD_ACTIONS_NOT_GATED');
+          if(s.includes('process.env.SUPABASE_ACCESS_TOKEN')||s.includes('SUPABASE_SERVICE_ROLE_KEY'))throw Error('CREDENTIAL_IN_SOURCE');
+          console.log('FACT001_SUPABASE_ADMIN_ONLY_KNOWN_RETIRED_LAB_FUNCTION=true');
+          console.log('FACT001_SUPABASE_ADMIN_REAL_REQUESTS=0');
+          NODE
