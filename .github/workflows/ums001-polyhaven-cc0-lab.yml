@@ -1,0 +1,55 @@
+name: UMS001 Poly Haven CC0 LAB ONLY
+on:
+  push:
+    branches:
+      - cerebro/ums001-assets-budget-scout-lab-v0-20261109
+    paths:
+      - '.github/workflows/ums001-polyhaven-cc0-lab.yml'
+      - 'cerebro/media-studio/v2/asset-scout/polyhaven_auto_lab_v0.py'
+      - 'cerebro/media-studio/v2/asset-scout/test_polyhaven_auto_lab_v0.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ums001-polyhaven-cc0-lab
+  cancel-in-progress: false
+jobs:
+  safe-cc0-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout LAB branch only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline unit tests
+        working-directory: cerebro/media-studio/v2/asset-scout
+        run: python -m unittest test_polyhaven_auto_lab_v0.py -v
+      - name: Restore LAB dedupe state
+        if: contains(github.event.head_commit.message, '[polyhaven-run]')
+        uses: actions/cache/restore@v4
+        with:
+          path: artifacts/polyhaven_cc0_lab/_state.json
+          key: polyhaven-ums001-state-${{ github.run_id }}
+          restore-keys: |
+            polyhaven-ums001-state-
+      - name: Download maximum two free CC0 assets under 20 MiB
+        if: contains(github.event.head_commit.message, '[polyhaven-run]')
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python cerebro/media-studio/v2/asset-scout/polyhaven_auto_lab_v0.py --live --asset-type textures --query "architecture urban courtyard brick floor" --output artifacts/polyhaven_cc0_lab --state artifacts/polyhaven_cc0_lab/_state.json
+      - name: Save LAB dedupe state
+        if: success() && contains(github.event.head_commit.message, '[polyhaven-run]')
+        uses: actions/cache/save@v4
+        with:
+          path: artifacts/polyhaven_cc0_lab/_state.json
+          key: polyhaven-ums001-state-${{ github.run_id }}
+      - name: Save temporary LAB download artifacts
+        if: always() && contains(github.event.head_commit.message, '[polyhaven-run]')
+        uses: actions/upload-artifact@v4
+        with:
+          name: polyhaven-ums001-lab-${{ github.run_number }}
+          path: artifacts/polyhaven_cc0_lab/
+          if-no-files-found: warn
+          retention-days: 3
