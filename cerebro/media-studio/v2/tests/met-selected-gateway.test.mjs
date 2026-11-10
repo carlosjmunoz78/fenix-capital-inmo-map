@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {acquireMetSelected,readMetSelected} from '../cloudflare/ums001-private-gateway-lab/met-selected-gateway-lab.mjs';
+const data=new Uint8Array(1200);data[0]=255;data[1]=216;data[1198]=255;data[1199]=217;
+const sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',data)),b=>b.toString(16).padStart(2,'0')).join('');
+const store=new Map();const kv={async get(k,opt){const v=store.get(k);if(v===undefined)return null;return opt?.type==='json'?JSON.parse(v):opt?.type==='arrayBuffer'?v.buffer.slice(v.byteOffset||0,(v.byteOffset||0)+(v.byteLength||v.length)):v},async put(k,value){store.set(k,value)}};
+const env={GATEWAY_ENABLED:'true',SOURCE_SCOUT_ENABLED:'true',MET_ENABLED:'true',MET_SELECT_ENABLED:'true',MET_ALLOW_ASSET_ID:'met:436524',
+ LAB_KV:kv,SOURCE_SCOUT_TOKEN:'s'.repeat(64),SOURCE_SCOUT:{async acquire(x){assert.equal(x.permission,'media.acquire');return {
+ company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'met',kind:'images',asset_id:'met:436524',source:'https://www.metmuseum.org/art/collection/search/436524',source_image:'https://images.metmuseum.org/CRDImages/ep/web-large/example.jpg',license:'CC0-1.0',requires_license_review:true,
+ mime:'image/jpeg',bytes:data,byte_length:data.length,sha256:sha,downloaded:true,production_approved:false}}}};
+const req={company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'met',kind:'images',production_id:'TEST-ONE',request_id:'TEST-SELECT-0001',selected_asset_id:'met:436524',explicit_selection:true};
+test('downloaded image persisted with sha256, no publication, and read checked',async()=>{const rec=await acquireMetSelected(env,req);assert.equal(rec.status,'STORED');assert.equal(rec.production_approved,false);const read=await readMetSelected(env,req);assert.equal(read.bytes.length,1200);assert.equal(read.sha256,sha);});
+test('repeat is idempotent and cannot switch production',async()=>{const rep=await acquireMetSelected(env,req);assert.equal(rep.idempotent_replay,true);await assert.rejects(acquireMetSelected(env,{...req,production_id:'OTHER-PRODUCTION'}),/ALREADY_RESERVED/)});
+test('wrong id, scope, explicit selection and OFF all denied',async()=>{for(const r of [{...req,selected_asset_id:'met:123'},{...req,environment:'PROD'},{...req,explicit_selection:false},{...req,publish_requested:true}])await assert.rejects(acquireMetSelected(env,r));await assert.rejects(acquireMetSelected({...env,MET_SELECT_ENABLED:'false'},req),/DISABLED/)});
+test('tampering existing blob blocks read',async()=>{const key='media/ums001-met-selected/436524/original.jpg';const original=store.get(key);store.set(key,new Uint8Array(1200));await assert.rejects(readMetSelected(env,req),/STORAGE_HASH_MISMATCH/);store.set(key,original)});
+test('do not mutate Poly Haven state key',()=>{assert.equal(store.has('meta/state-v0'),false);});

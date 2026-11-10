@@ -1,4 +1,5 @@
 import {WorkerEntrypoint} from 'cloudflare:workers';
+import {acquireMetSelected,readMetSelected} from './met-selected-gateway-lab.mjs';
 const ENGINE='UMS-001',COMPANY='fenix',ENV='LAB';
 function assertRequest(input,permission){
   if(input?.company_id!==COMPANY||input.engine_id!==ENGINE||input.environment!==ENV)throw Error('SCOPE_DENIED');
@@ -56,6 +57,8 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
   async acquire(task){return acquire(this.env,task)}
   async read(task){return read(this.env,task)}
   async scout(task){return searchFreeMedia(this.env,task)}
+  async select(task){return acquireMetSelected(this.env,task)}
+  async readSelected(task){return readMetSelected(this.env,task)}
 }
 // Private RPC-only producer. No periodic job or public endpoint.
 export default {

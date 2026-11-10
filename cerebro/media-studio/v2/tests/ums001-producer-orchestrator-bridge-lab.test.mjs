@@ -1,0 +1,17 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {routeMediaProductionResource as route} from '../runtime/ums001-producer-orchestrator-bridge-lab.mjs';
+const base={company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'met',kind:'images',production_id:'TEST-ONE',request_id:'TEST-SELECT-0001'};
+const identity={gateway_verified:true,company_id:'fenix',environment:'LAB',actor_id:'cerebro-orchestrator-lab',scopes:['media.search','media.acquire','media.read']};
+const bytes=new Uint8Array([255,216,1,2,255,217]);const sha=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),x=>x.toString(16).padStart(2,'0')).join('');
+const candidate={id:'met:436524',license:'CC0-1.0',downloaded:false,production_approved:false};
+const producerService={
+ async scout(r){return {company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:r.provider,kind:r.kind,results:[candidate],downloaded:false,production_approved:false}},
+ async select(r){return {status:'STORED',asset_id:r.selected_asset_id,production_id:r.production_id,sha256:sha,bytes:bytes.length,license:'CC0-1.0',production_approved:false,publish_authorized:false,additional_cost_eur:0}},
+ async readSelected(r){return {asset_id:r.selected_asset_id,bytes,sha256:sha,license:'CC0-1.0',production_approved:false,publish_authorized:false}}
+};
+const input=(r,ident=identity,service=producerService)=>({request:r,identity:ident,producerService:service});
+test('orchestrator can search private provider without publishing',async()=>{const r=await route(input({...base,action:'SEARCH',query:'sunflowers'}));assert.equal(r.candidates.length,1);assert.equal(r.publish_authorized,false);});
+test('explicit selection remains QA pending',async()=>{const r=await route(input({...base,action:'SELECT',selected_asset_id:'met:436524',explicit_selection:true}));assert.equal(r.status,'CANDIDATE_STORED_QA_PENDING');assert.equal(r.cost_eur,0);});
+test('verified read has immutable SHA and not approved for publish',async()=>{const r=await route(input({...base,action:'READ',selected_asset_id:'met:436524',explicit_selection:true}));assert.equal(r.sha256,sha);assert.equal(r.publish_authorized,false)});
+test('deny unauthorized caller, other tenant and PROD',async()=>{for(const o of [{identity:{...identity,gateway_verified:false}},{request:{...base,action:'SEARCH',query:'sunflowers',company_id:'alien'}},{request:{...base,action:'SEARCH',query:'sunflowers',environment:'PROD'}}])await assert.rejects(route(input(o.request||{...base,action:'SEARCH',query:'sunflowers'},o.identity||identity)),/DENIED/)});
+test('deny automatic publish, unknown provider, silent download',async()=>{for(const r of [{...base,action:'SEARCH',query:'sunflowers',publish_requested:true},{...base,action:'SELECT',selected_asset_id:'met:436524'},{...base,action:'SEARCH',provider:'openverse',query:'music'}])await assert.rejects(route(input(r)));});
+test('tampered read fails hash',async()=>await assert.rejects(route(input({...base,action:'READ',selected_asset_id:'met:436524',explicit_selection:true},identity,{...producerService,readSelected:async r=>({...await producerService.readSelected(r),bytes:new Uint8Array([1,2])})})),/HASH_MISMATCH/));

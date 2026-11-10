@@ -29,6 +29,8 @@
     "GATEWAY_ENABLED": "false",
     "SOURCE_SCOUT_ENABLED": "false",
     "COMMONS_ENABLED": "false",
-    "MET_ENABLED": "false"
+    "MET_ENABLED": "false",
+    "MET_SELECT_ENABLED": "false",
+    "MET_ALLOW_ASSET_ID": "met:436524"
   }
 }
