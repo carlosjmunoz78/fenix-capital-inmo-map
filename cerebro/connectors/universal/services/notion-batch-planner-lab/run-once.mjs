@@ -54,7 +54,12 @@ try{
  verified=true;
  console.log('FACT001_BATCH2_PLAN_SEALED=PASS');
  console.log('FACT001_BATCH2_ITEMS=25');console.log('FACT001_BATCH2_PAGES='+b.pages);console.log('FACT001_BATCH2_DATA_SOURCES='+b.data_sources);
-}catch(e){console.log('FACT001_BATCH2_PLAN=BLOCKED');process.exitCode=1;}
+}catch(e){
+ const raw=e instanceof Error?e.message:'UNEXPECTED';
+ const code=/^(CHECKPOINT_PARITY_DENIED|INDEX_[A-Z_0-9]+|OIDC_[A-Z_0-9]+|BATCH2_RESPONSE_DENIED_[0-9]+|ACTIONS_READ_TOKEN_MISSING|OWNER_ORDER_SCOPE_DENIED)$/.test(raw)?raw:'UNEXPECTED_NETWORK_OR_RUNTIME';
+ console.log('FACT001_BATCH2_FAILURE_CODE='+code);
+ console.log('FACT001_BATCH2_PLAN=BLOCKED');process.exitCode=1;
+}
 finally{
  const proof={status:verified?'SECOND_25_ENCRYPTED_PLAN_VERIFIED':'BATCH2_PLANNING_BLOCKED',index_artifact_verified:downloaded,encrypted_batch_plan_verified:verified,scope:'fenix-capital/FACT-001/LAB/1.0.0',...metrics,provider_writes:0,queue_activated:false,content_backed_up:false,checkpoint_committed:false};
  writeFileSync(dir+'/proof.json',JSON.stringify(proof,null,2),{flag:'wx',mode:0o600});
