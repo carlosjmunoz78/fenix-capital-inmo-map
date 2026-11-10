@@ -4,7 +4,6 @@ import postgres from 'npm:postgres@3.4.7';
 import {verifyGitHubOidc,assertReadOrder,SCOPE} from './policy.mjs';
 import {providerSpecs,readProviderInventory} from './provider.mjs';
 import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
-import {verifyPagesLifecycle} from './pages-lifecycle.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
 const getBearer=(request:Request)=>{
@@ -34,33 +33,14 @@ function assertPlanOrder(body:unknown){
    unit_type:b.unit_type,unit_slug:b.unit_slug,required_resources:b.required_resources};
 }
 
-function assertPagesCommand(body:unknown){
- if(!body||typeof body!=='object'||Array.isArray(body))throw Error('PAGES_ORDER_INVALID');
- const expected={...SCOPE,client_id:'cerebro',source:'owner_order',
-  operation:'cloudflare.pages.lab_ephemeral_create_read_delete',request_id:'FACT001-PAGES-LAB-20261110'};
- const b=body as Record<string,unknown>;
- if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(Object.keys(expected).sort())||
-   Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('PAGES_ORDER_SCOPE_DENIED');
- return true;
-}
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan','pages-lifecycle'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&request.method==='GET')return reply(200,{status:'SIGNED_HEADLESS_LAB_READY',scope:SCOPE});
-  if(route==='pages-lifecycle'&&request.method==='POST'){
-   if(Number(request.headers.get('content-length')||'0')>1200)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
-   try{assertPagesCommand(await request.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
-   let token='';
-   try{
-    token=await getVaultToken(providerSpecs.cloudflare.secret);
-    const result=await verifyPagesLifecycle({token});
-    return reply(200,result);
-   }finally{token='';}
-  }
   if(route==='plan'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>2000)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    let plan;
@@ -86,7 +66,7 @@ Deno.serve(async request=>{
   return reply(405,{status:'METHOD_NOT_ALLOWED'});
  }catch(e){
   const raw=e instanceof Error?e.message:'';
-  const code=/^(UPSTREAM_AUTH_(401|403)|UPSTREAM_RATE_LIMIT|SERVICE_VAULT_TOKEN_MISSING|VAULT_DATABASE_UNAVAILABLE|UPSTREAM_UNVERIFIED_LIST|UPSTREAM_UNEXPECTED_SHAPE|CLOUDFLARE_UNSUCCESSFUL|CLOUDFLARE_PAGES_HTTP_(400|401|403|404|429|500|502|503)|CLOUDFLARE_PAGES_ALREADY_EXISTS|CLOUDFLARE_PAGES_OWNERSHIP_UNVERIFIED|CLOUDFLARE_PAGES_CUSTOM_DOMAINS_PRESENT|CLOUDFLARE_PAGES_RESIDUAL_PROJECT|CLOUDFLARE_PAGES_DELETE_UNCONFIRMED)$/.test(raw)?raw:'BROKER_ERROR';
+  const code=/^(UPSTREAM_AUTH_(401|403)|UPSTREAM_RATE_LIMIT|SERVICE_VAULT_TOKEN_MISSING|VAULT_DATABASE_UNAVAILABLE|UPSTREAM_UNVERIFIED_LIST|UPSTREAM_UNEXPECTED_SHAPE|CLOUDFLARE_UNSUCCESSFUL)$/.test(raw)?raw:'BROKER_ERROR';
   // Never log JWT, bearer, Vault values, upstream response or request body.
   console.warn('FACT001_HEADLESS_BROKER='+code);
   return reply(503,{status:'BLOCKED',code,credentials_exposed:false});
