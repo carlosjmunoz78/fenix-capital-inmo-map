@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "verified_at": "2026-11-10T18:01:37.347Z",
+  "status": "MET_PRIVATE_E2E_PASS",
+  "provider": "met",
+  "e2e": {
+    "status": "COMPLETED",
+    "at": "2026-11-10T17:58:56.649Z",
+    "source": "met",
+    "count": 1,
+    "ids": [
+      "met:436524"
+    ],
+    "license_cc0_only": true,
+    "private_service_binding_verified": true,
+    "downloaded": false,
+    "production_approved": false,
+    "cost_eur": 0
+  },
+  "worker_state": {
+    "source": "cerebro-ums001-multisource-scout-lab-eu",
+    "source_version": "b28df730-2063-4703-851f-ef032455c3fb",
+    "source_crons": [],
+    "producer": "cerebro-ums001-producer-private-gateway-lab-eu",
+    "producer_version": "ae82ab76-ffed-4ab7-9514-bb6e518c1fa9",
+    "producer_crons": [],
+    "polyhaven": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+    "polyhaven_crons": [
+      "23 6 * * *"
+    ],
+    "public_urls": false,
+    "preview_urls": false,
+    "commons_enabled": false,
+    "met_enabled": true
+  },
+  "original_library": {
+    "assets": 3,
+    "bytes": 4361001
+  },
+  "extra_subscription_cost_eur": 0,
+  "additional_persistent_crons": 0,
+  "global_cerebro_supervisor_connected": false
+}
