@@ -19,7 +19,7 @@ jobs:
         with: {persist-credentials: false}
       - name: Verify signed IAM policy (no management credentials in GitHub)
         run: node --test cerebro/connectors/universal/supabase/supabase-admin-once/tests/policy.test.mjs
-      - name: One signed CEREBRO request: remove ONLY isolated retired Edge Function
+      - name: "One signed CEREBRO request: remove ONLY isolated retired Edge Function"
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
