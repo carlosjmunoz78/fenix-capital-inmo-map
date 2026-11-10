@@ -1,7 +1,7 @@
 {
   "additional_cost_eur": 0,
   "audit_points": 179,
-  "audited_at": "2026-11-09T09:49:38.000Z",
+  "audited_at": "2026-11-10T09:51:19.000Z",
   "auditor": "Jarvis (P23)",
   "company_id": "fenix",
   "engine_id": "FACT-001",
@@ -26,7 +26,7 @@
   "score_max": 87,
   "score_min": 62,
   "secret_values": false,
-  "source_sha": "4cf90f47b56300ce70fa30d097713d1e199e5b30",
+  "source_sha": "f61f02d8bc2903bb825ce605444a1e57db03a819",
   "state_type": "P23_LIVE_AUDIT_SNAPSHOT_V1",
   "status": "GREEN",
   "trading_access": false,
