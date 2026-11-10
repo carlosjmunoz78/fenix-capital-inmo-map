@@ -53,7 +53,8 @@
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
-      }
+      },
+      "service_identity_read": "VERIFIED"
     },
     {
       "id": "vercel",
@@ -88,7 +89,8 @@
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
-      }
+      },
+      "service_identity_read": "VERIFIED"
     },
     {
       "id": "supabase",
@@ -121,19 +123,22 @@
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
-      }
+      },
+      "service_identity_read": "VERIFIED"
     },
     {
       "id": "notion",
       "state": "PARTIAL",
       "verified": [],
       "evidence": [
-        "Cross-MCP CRUD on isolated page within ChatGPT verified; page moved to Trash"
+        "Cross-MCP CRUD on isolated page within ChatGPT verified; page moved to Trash",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351"
       ],
       "gaps": [
         "separate CEREBRO service integration identity not confirmed",
         "owner/automation headless real API read/create/update/delete",
-        "restore and conflict handling"
+        "restore and conflict handling",
+        "HUMAN_REQUIRED: Notion internal integration token cerebro_notion_service_token_v1 not configured in Vault; ChatGPT OAuth is a different identity"
       ],
       "verification": {
         "independent_service_identity": "PENDING",
@@ -147,7 +152,8 @@
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
-      }
+      },
+      "service_identity_admin": "HUMAN_REQUIRED"
     },
     {
       "id": "github",
@@ -162,12 +168,14 @@
       ],
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42819483887",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351"
       ],
       "gaps": [
         "Only single-repository file CRUD proved via GITHUB_TOKEN; global repository create/delete not authorized",
         "GitHub App installation with organization/repository administration scopes still required",
-        "No durable cross-repository automation queue or PROD promotion"
+        "No durable cross-repository automation queue or PROD promotion",
+        "HUMAN_REQUIRED: independent service admin credential cerebro_github_factory_pat_v1 missing from Vault; repo-scoped Actions token does not grant repository creation/deletion"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -181,7 +189,24 @@
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
-      }
+      },
+      "service_identity_admin": "HUMAN_REQUIRED"
     }
-  ]
+  ],
+  "headless_service": {
+    "slug": "cerebro-fact001-headless-provider-lab",
+    "version": 7,
+    "status": "ACTIVE_LAB",
+    "oidc_signed": true,
+    "provider_writes_active": 0,
+    "provider_reads_verified": [
+      "cloudflare",
+      "vercel",
+      "supabase"
+    ],
+    "factory_scaffold_verified": true,
+    "notion_identity": "HUMAN_REQUIRED",
+    "github_global_identity": "HUMAN_REQUIRED",
+    "evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351"
+  }
 }
