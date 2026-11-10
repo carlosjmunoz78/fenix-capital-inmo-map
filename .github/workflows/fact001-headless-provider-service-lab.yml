@@ -96,4 +96,18 @@ jobs:
            console.log('FACT001_SERVICE_IDENTITY_'+provider.toUpperCase()+'_REASON='+String(human?result.data?.reason:'NONE'));
           }
           console.log('FACT001_SERVICE_CREDENTIAL_VALUES_PRINTED=false');
+          const notionRead=await call('notion-workspace',jwt,'POST',{
+           ...request,operation:'notion.workspace.read',request_id:'FACT001-NOTION-WORKSPACE-20261110'
+          });
+          const authorized=notionRead.http===200&&notionRead.data?.status==='NOTION_INDEPENDENT_WORKSPACE_READ'&&
+           notionRead.data?.provider==='notion'&&notionRead.data?.write_operations===0&&
+           notionRead.data?.credentials_exposed===false&&notionRead.data?.content_returned===false;
+          console.log('FACT001_NOTION_WORKSPACE_READ='+String(authorized?'VERIFIED':'BLOCKED'));
+          console.log('FACT001_NOTION_WORKSPACE_HTTP='+notionRead.http);
+          console.log('FACT001_NOTION_WORKSPACE_CODE='+String(notionRead.data?.code||'NONE'));
+          if(authorized){
+           console.log('FACT001_NOTION_WORKSPACE_HAS_ACCESSIBLE_OBJECTS='+String(notionRead.data?.has_accessible_objects));
+           console.log('FACT001_NOTION_WORKSPACE_VISIBLE_PAGES='+notionRead.data?.accessible_pages_returned);
+          }
+          if(!authorized)throw Error('NOTION_WORKSPACE_READ_REQUIRES_SCOPED_ACCESS');
           NODE
