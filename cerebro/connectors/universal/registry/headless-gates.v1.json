@@ -157,7 +157,9 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42897260029",
         "27/27 previously opened Opera root pages and databases GET 200 using CEREBRO own Vault identity, OIDC signatures enforced; status-only, zero content retrieved, zero provider writes",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42899094633",
-        "12/12 second batch privately connected pages/databases GET 200 under GitHub OIDC -> CEREBRO Vault identity, 401 anon/forged, 403 PROD, 0 content/writes. Total 39 distinct root references verified"
+        "12/12 second batch privately connected pages/databases GET 200 under GitHub OIDC -> CEREBRO Vault identity, 401 anon/forged, 403 PROD, 0 content/writes. Total 39 distinct root references verified",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42902477443",
+        "Read-only pinned CEREBRO OIDC + own Notion Vault identity checked 19 historic Private pages: 18 HTTP 200, 1 HTTP 404 (page 1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b); total 57/58 tested roots verified; anonymous/forged 401 and PROD 403"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -211,7 +213,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_19_HISTORICAL_PRIVATE_ROOTS_SHARE_AND_VERIFY",
+        "next_block": "FACT001_NOTION_ONE_HISTORICAL_ROOT_SHARE_RECHECK",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -280,10 +282,10 @@
           "ci_run": 42894767890,
           "existing_verified_default_root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
           "policy": "New CEREBRO pages must use service-accessible owner-approved connected parent; never create unshared top-level roots",
-          "new_root_permissions_status": "39_DISTINCT_EXISTING_ROOTS_VERIFIED; 19_OTHER_PRIVATE_ROOTS_PENDING",
+          "new_root_permissions_status": "57_OF_58_TESTED_ROOTS_ACCESS_VERIFIED; 1_HISTORIC_IMPORT_LOG_ROOT_NOT_ACCESSIBLE",
           "no_new_oauth_scope": true
         },
-        "full_workspace_access_status": "PARTIAL_39_KNOWN_ROOTS_SERVICE_VERIFIED; 19_USER_PRIVATE_ROOTS_PENDING_AND_OTHER_WORKSPACE_SOURCES_UNAUDITED",
+        "full_workspace_access_status": "57/58_INVENTORIED_ROOTS_VERIFIED_ONE_HISTORIC_PRIVATE_ROOT_PENDING; OTHER_TEAMSPACES_UNAUDITED",
         "opera_connected_root_access": {
           "status": "VERIFIED_PHYSICAL_CEREBRO_INDEPENDENT_NOTION_SERVICE",
           "checked": 27,
@@ -304,13 +306,25 @@
             "run_id": 42899094633,
             "provider_writes": 0
           },
-          "verified_total_distinct": 39
+          "verified_total_distinct": 57,
+          "third_batch": {
+            "status": "PARTIAL_ONE_ROOT_NOT_ACCESSIBLE",
+            "checked": 19,
+            "accessible": 18,
+            "denied": 1,
+            "inconclusive": 0,
+            "run_id": 42902477443,
+            "blocked_page_id": "1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b",
+            "blocked_page_title": "Import Mar 27, 2025 Logs",
+            "provider_writes": 0
+          },
+          "total_tested_distinct": 58
         },
         "private_top_level_roots": {
           "scope": "Notion user's Private sidebar roots only; not full workspace",
           "known_private_count": 49,
-          "verified_among_private": 30,
-          "still_to_connect": 19,
+          "verified_among_private": 48,
+          "still_to_connect": 1,
           "verified_integration": "CEREBRO own Notion Vault credential"
         }
       }
