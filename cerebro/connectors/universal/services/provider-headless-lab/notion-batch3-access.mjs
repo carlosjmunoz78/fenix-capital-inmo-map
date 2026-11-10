@@ -24,7 +24,7 @@ export const NOTION_BATCH3_ROOTS=Object.freeze([
 ].map(([name,id,type])=>Object.freeze({name,id,type})));
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export async function probeNotionThirdBatch({token,http=fetch}={}){
- if(NOTION_BATCH3_ROOTS.length!==19||new Set(NOTION_BATCH3_ROOTS.map(x=>x.id)).size!==12||
+ if(NOTION_BATCH3_ROOTS.length!==19||new Set(NOTION_BATCH3_ROOTS.map(x=>x.id)).size!==19||
    NOTION_BATCH3_ROOTS.some(x=>!UUID.test(x.id)||!['page','database'].includes(x.type)))
   throw Error('NOTION_BATCH3_ALLOWLIST_DENIED');
  if(typeof token!=='string'||token.length<24||token.length>8192||/\s/.test(token))throw Error('NOTION_SERVICE_TOKEN_DENIED');
