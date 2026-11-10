@@ -60,4 +60,25 @@ jobs:
           console.log('FACT001_HEADLESS_ADDITIONAL_PROVIDER_WRITES=0');
           if(errors)throw Error('PROVIDER_READ_GATES_FAILED_'+errors);
           console.log('FACT001_HEADLESS_PROVIDER_READ_ALL_3=PASS');
+          for(const candidate of [
+           {type:'department',slug:'social-instagram',resources:['compute','relational','async_jobs']},
+           {type:'website',slug:'nueva-web',resources:['website','objects','private_access']}
+          ]){
+           const payload={...request,operation:'factory.plan_internal_unit',
+             request_id:'FACT001-PLAN-20261110-'+(candidate.type==='department'?'DEPARTMENT':'WEBSITE'),
+             unit_type:candidate.type,unit_slug:candidate.slug,required_resources:candidate.resources};
+           const x=await call('plan',jwt,'POST',payload);
+           const generated=x.data?.files||[];
+           const manifest=generated.find(f=>f.path.endsWith('/manifest.json'));
+           const config=generated.find(f=>f.path.endsWith('/config.json'));
+           const valid=x.http===200&&x.data?.status==='FACT001_FACTORY_SCAFFOLD_GENERATED'&&
+             generated.length===18&&x.data?.provider_writes===0&&x.data?.additional_cost_eur===0&&
+             x.data?.unit?.slug===candidate.slug&&
+             manifest?.content?.includes('"status": "DEFINED_NOT_DEPLOYED"')&&
+             config?.content?.includes('"deploy_enabled": false');
+           console.log('FACT001_HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'='+String(valid?'VERIFIED':'BLOCKED'));
+           console.log('FACT001_HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_FILES='+generated.length);
+           if(!valid)throw Error('HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_NOT_VERIFIED_'+x.http);
+          }
+          console.log('FACT001_HEADLESS_PLANNER_18_ARTIFACTS_PER_UNIT=PASS');
           NODE
