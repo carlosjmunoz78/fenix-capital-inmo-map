@@ -269,7 +269,17 @@
           "ci_run": 42889919376,
           "full_workspace_coverage": false,
           "export_restored": false
-        }
+        },
+        "future_pages_connected_parent_gate": {
+          "status": "CODE_CI_GREEN_NOT_DEPLOYED",
+          "implementation": "services/provider-headless-lab/notion-connected-parent-gate.mjs",
+          "ci_run": 42894767890,
+          "existing_verified_default_root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
+          "policy": "New CEREBRO pages must use service-accessible owner-approved connected parent; never create unshared top-level roots",
+          "new_root_permissions_status": "HUMAN_PER_PAGE_SETUP_IN_OPERA_IN_PROGRESS",
+          "no_new_oauth_scope": true
+        },
+        "full_workspace_access_status": "HUMAN_ROOT_SHARE_IN_PROGRESS; DO_NOT_CLAIM_VERIFIED"
       }
     },
     {
