@@ -19,7 +19,7 @@ test('no secret fails shut',async()=>assert.rejects(gateway({SOURCE_SCOUT_TOKEN:
 test('bad upstream rights are blocked',async()=>assert.rejects(gateway({SOURCE_SCOUT:{search:async()=>({...await upstream.search({...request,auth_token:secret,permission:'media.search',actor_id:'ums001-producer-lab'}),results:[{...asset,license:'CC-BY-NC'}]})}}).scout(request),/SCOUT_INVALID_RESPONSE/));
 
 const commonsRequest={...request,provider:'wikimedia_commons',kind:'images',query:'CC0'};
-const commonsAsset={id:'commons:23',title:'File:Demo.jpg',source:'https://commons.wikimedia.org/wiki/File:Demo.jpg',license:'CC0-1.0',
+const commonsAsset={id:'commons:23',provider:'wikimedia_commons',kind:'images',title:'File:Demo.jpg',source:'https://commons.wikimedia.org/wiki/File:Demo.jpg',license:'CC0-1.0',
  downloaded:false,production_approved:false,requires_license_review:true};
 const commonsService={async search(input){assert.equal(input.provider,'wikimedia_commons');assert.equal(input.permission,'media.search');assert.equal(input.auth_token,secret);
  return {company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:input.provider,kind:input.kind,mode:'METADATA_ONLY',
