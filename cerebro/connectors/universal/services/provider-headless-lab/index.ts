@@ -7,6 +7,7 @@ import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
 import {SERVICE_IDENTITIES,assertIdentityProbeOrder,probeServiceIdentity} from './service-identity.mjs';
 import {NOTION_SECRET,probeNotionWorkspace} from './notion-access.mjs';
 import {probeNotionOpenedRoots} from './notion-root-access.mjs';
+import {probeNotionSecondBatch} from './notion-batch2-access.mjs';
 import {NOTION_D1_READ_VAULT_NAME,probeNotionD1Lab} from './notion-d1-status.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
@@ -48,7 +49,7 @@ function assertNotionReadOrder(body:unknown){
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan','service-identity','notion-workspace','notion-d1-status','notion-root-access'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan','service-identity','notion-workspace','notion-d1-status','notion-root-access','notion-batch2-access'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
@@ -72,6 +73,23 @@ Deno.serve(async request=>{
    }finally{token='';}
   }
   // One-shot, read-only audit of the fixed Opera root inventory, using independent CEREBRO Vault identity.
+  // FACT-001 second batch: fixed read-only Notion roots verified by independent CEREBRO Vault service.
+  if(route==='notion-batch2-access'&&request.method==='POST'){
+   if(Number(request.headers.get('content-length')||'0')>1300)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
+   const expected={...SCOPE,client_id:'cerebro',source:'owner_order',
+    operation:'notion.opera_batch2.access_read',request_id:'FACT001-NOTION-OPERA-BATCH2-20261110'};
+   let order:Record<string,unknown>;
+   try{order=await request.json();}catch{return reply(400,{status:'ORDER_DENIED'});}
+   if(!order||typeof order!=='object'||Array.isArray(order)||
+     JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+     Object.entries(expected).some(([k,v])=>order[k]!==v))return reply(403,{status:'ORDER_DENIED'});
+   let token='';
+   try{
+    token=await getVaultToken(NOTION_SECRET);
+    const result=await probeNotionSecondBatch({token});
+    return reply(200,result);
+   }finally{token='';}
+  }
   if(route==='notion-root-access'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>1300)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    const expected={...SCOPE,client_id:'cerebro',source:'owner_order',
