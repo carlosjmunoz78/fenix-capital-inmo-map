@@ -37,7 +37,7 @@ test('runner handles exactly one CEREBRO scoped LAB heartbeat and persists compl
  const f=fixture();f.enqueue('job-1');f.setEnabled(true);
  assert.equal((await processRecoveryTick(f.env,1000000)).status,'COMPLETED');
  const job=f.db.prepare('SELECT state,attempts FROM fact001_runner_jobs_v1 WHERE id=?').get('job-1');
- assert.deepEqual(job,{state:'COMPLETED',attempts:1});
+ assert.equal(job.state,'COMPLETED');assert.equal(job.attempts,1);
  assert.equal(f.db.prepare("SELECT outcome FROM fact001_runner_ticks_v1").get().outcome,'COMPLETED');
 });
 test('same scheduledTime never executes twice',async()=>{
