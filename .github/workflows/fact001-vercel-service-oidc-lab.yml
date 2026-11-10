@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify-write.v1.json
 permissions:
   contents: read
   id-token: write
@@ -17,8 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with: {persist-credentials: false}
-      - name: Verify OIDC service scope before any network call
-        run: node --test cerebro/connectors/universal/supabase/vercel-service-lab/tests/policy.test.mjs
+      - name: Verify OIDC service scope and reversible LAB write before any network call
+        run: node --test cerebro/connectors/universal/supabase/vercel-service-lab/tests/*.test.mjs
       - name: Signed CEREBRO service -> Vault -> Vercel read-only project listing
         run: |
           node --input-type=module <<'NODE'
@@ -56,4 +57,14 @@ jobs:
           console.log('FACT001_VERCEL_WRITES=0');
           if(verify.status!==200||verify.data?.status!=='VERCEL_SERVICE_READ_VERIFIED'||verify.data?.credential_exposed!==false||verify.data?.vercel_writes!==0)throw Error('VERCEL_SERVICE_PROOF_NOT_VERIFIED');
           console.log('FACT001_VERCEL_AUTONOMOUS_READ_E2E=PASS');
+          const writeOrder=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify-write.v1.json','utf8'));
+          const writeExpected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',project_id:'prj_vvil5epQ99mngK29vpLVOWmlVRP1',operation:'vercel.project.lab_framework_change_and_restore',request_id:'FACT001-VERCEL-SERVICE-WRITE-20261110'};
+          if(JSON.stringify(Object.keys(writeOrder).sort())!==JSON.stringify(Object.keys(writeExpected).sort())||Object.keys(writeExpected).some(k=>writeOrder[k]!==writeExpected[k]))throw Error('VERCEL_WRITE_ORDER_DENIED');
+          const write=await call('verify-reversible-update',jwt,'POST',writeOrder);
+          console.log('FACT001_VERCEL_LAB_WRITE_HTTP='+write.status);
+          console.log('FACT001_VERCEL_LAB_WRITE_STATUS='+String(write.data?.status||'BLOCKED'));
+          console.log('FACT001_VERCEL_LAB_ROLLBACK_VERIFIED='+String(write.data?.rollback_verified===true));
+          console.log('FACT001_VERCEL_LAB_PROJECT_ID_CONFIRMED='+String(write.data?.project_id===writeExpected.project_id));
+          if(write.status!==200||write.data?.status!=='VERCEL_LAB_WRITE_AND_ROLLBACK_VERIFIED'||write.data?.rollback_verified!==true||write.data?.write_verified!==true||write.data?.project_id!==writeExpected.project_id)throw Error('VERCEL_LAB_WRITE_ROLLBACK_NOT_VERIFIED');
+          console.log('FACT001_VERCEL_AUTONOMOUS_WRITE_E2E=PASS');
           NODE
