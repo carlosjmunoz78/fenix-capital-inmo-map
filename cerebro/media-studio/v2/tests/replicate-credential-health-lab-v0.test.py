@@ -57,7 +57,8 @@ class ReplicateHealthTests(unittest.TestCase):
 
     def test_no_logging_secret_or_account_body(self):
         s = SCRIPT.read_text()
-        self.assertNotIn("predictions", s.lower().replace("zero_predictions","").replace("replicate_predictions_submitted",""))
+        self.assertIn('method="GET"', s)
+        self.assertNotIn('method="POST"', s)
         self.assertNotIn("print(token)", s)
         self.assertNotIn("print(account)", s)
 
