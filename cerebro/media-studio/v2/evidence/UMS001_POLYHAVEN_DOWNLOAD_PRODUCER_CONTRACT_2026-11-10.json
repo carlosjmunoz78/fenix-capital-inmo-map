@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "generated_at": "2026-11-10T13:25:10.886Z",
+  "engine_id": "UMS-001",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "provider": "Poly Haven",
+  "license": "CC0-1.0",
+  "verified_downloads": 2,
+  "verified_total_bytes": 2738262,
+  "additional_paid_api_cost_eur": 0,
+  "runtime": {
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "worker": "cerebro-ums001-polyhaven-autonomous-lab-eu",
+    "kv_namespace": "99c74b3059ec46baa1441bd0d170bf3f",
+    "cron": "23 6 * * *",
+    "workers_dev": false,
+    "preview_urls": false,
+    "rpc_deployed": true,
+    "rpc_enabled": false
+  },
+  "assets": [
+    {
+      "id": "sunset_jhbcentral",
+      "bytes": 1345757,
+      "sha256": "d05e42da7380c9317b507cee4ec1164602183202ba4d943836d71dcabb65b62e",
+      "file_key": "media/sunset_jhbcentral/e2e14a204ee0/sunset_jhbcentral_1k.exr",
+      "source": "https://polyhaven.com/a/sunset_jhbcentral",
+      "kv_binary_sha256_verified": true
+    },
+    {
+      "id": "highway_bridge_sunset",
+      "bytes": 1392505,
+      "sha256": "3c0eb0d58240bf1ae7c833aee026621d98ae0603c299ec55cda4d119fd13075e",
+      "file_key": "media/highway_bridge_sunset/56e9aab3fb61/highway_bridge_sunset_1k.hdr",
+      "source": "https://polyhaven.com/a/highway_bridge_sunset",
+      "kv_binary_sha256_verified": true
+    }
+  ],
+  "quality": {
+    "qa": "PENDING",
+    "rights_review": "PENDING",
+    "production_approved": false
+  },
+  "consumer": {
+    "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "branch": "cerebro/ums001-polyhaven-producer-binding-lab-20261110",
+    "tests_passed": 5,
+    "physical_rpc_e2e_verified": false,
+    "missing": "Trusted CEREBRO UMS-001 Gateway service binding, secret and single-writer budget gate"
+  }
+}
