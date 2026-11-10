@@ -68,5 +68,15 @@ export async function executeCommonsQueueSelection(env,body,handlers){
 }
 export async function consumeProducerDemandQueue(batch,env,handlers){
  if(batch?.queue!==DEMAND_QUEUE_NAME||env?.PRODUCER_DEMAND_QUEUE_ENABLED!=='true'||!Array.isArray(batch.messages)||batch.messages.length>1)throw Error('UMS_DEMAND_QUEUE_SCOPE_DENIED');
- for(const msg of batch.messages){try{if(msg.body?.action==='SELECT_COMMONS')await executeCommonsQueueSelection(env,msg.body,handlers);else await executeProducerDemand(env,msg.body,handlers)}catch(e){console.error('UMS_DEMAND_REJECTED',String(e?.message||'UNKNOWN').slice(0,110))}msg.ack()}
+ for(const msg of batch.messages){
+  try{if(msg.body?.action==='SELECT_COMMONS')await executeCommonsQueueSelection(env,msg.body,handlers);else await executeProducerDemand(env,msg.body,handlers)}
+  catch(e){
+   const error=String(e?.message||'UNKNOWN').slice(0,110);
+   if(msg.body?.action==='SELECT_COMMONS'&&KEY_PATTERN.test(msg.body.request_id||'')&&env.LAB_KV){
+    await env.LAB_KV.put(producerDemandKey(msg.body.request_id),JSON.stringify({status:'ERROR',action:'SELECT_COMMONS',request_id:msg.body.request_id,error_code:error,at:new Date().toISOString(),production_approved:false,publish_authorized:false,cost_eur:0}));
+   }
+   console.error('UMS_DEMAND_REJECTED',error);
+  }
+  msg.ack();
+ }
 }
