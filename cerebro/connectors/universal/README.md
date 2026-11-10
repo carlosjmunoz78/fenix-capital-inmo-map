@@ -62,3 +62,8 @@ Nuevo adaptador LAB `cerebro-fact001-console-owner-canary-lab` ACTIVE v2 con idÃ
 - Independent GitHub Actions scoped file CRUD [#42821755132](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132).
 - Five-provider capability status registry `registry/headless-gates.v1.json`; **none FULL GREEN** yet: Notion independent service token and GitHub admin identity unresolved, generic autonomous queue and physical full lifecycle tests still pending.
 - Full acceptance and exact blockers: `docs/FACT001_CEREBRO_HEADLESS_5_PROVIDERS_2026-11-10.md`. PR #44 still DRAFT, no main merge.
+
+
+### 10/11/2026 Â· GitHub/Notion independent identity preflight
+- Shared CEREBRO LAB function v7 has signed `/service-identity` for Notion service bot and fine-grained GitHub owner credential. Both are **HUMAN_REQUIRED** until least-privilege service credentials are provided in Vault. No arbitrary secrets or ChatGPT OAuth exports.
+- [Physical verification #42843856351](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351): three provider independent GET PASS, factory 18-file plans PASS, Notion/GitHub fail closed as expected; no writes. The Notion/GitHub read identity routes are not evidence of full administrative CRUD.
