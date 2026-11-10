@@ -12,7 +12,7 @@ const channels=new Set(['owner_order','automation']);
 const maxLength=128;
 const id=x=>typeof x==='string'&&x.length>0&&x.length<=maxLength&&/^[A-Za-z0-9_.:@/-]+$/.test(x);
 const tenantPart=v=>typeof v==='string'&&/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(v);
-const semver=v=>typeof v==='string'&&/^[0-9]+\\.[0-9]+\\.[0-9]+(?:-[A-Za-z0-9.-]+)?$/.test(v);
+const semver=v=>typeof v==='string'&&/^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?$/.test(v);
 function safeScope(s){
  return obj(s)&&tenantPart(s.company_id)&&tenantPart(s.engine_id)&&
   ['LAB','PREPROD','PROD'].includes(s.environment)&&semver(s.version);
