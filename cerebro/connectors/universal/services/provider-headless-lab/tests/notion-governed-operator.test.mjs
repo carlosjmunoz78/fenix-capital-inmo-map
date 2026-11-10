@@ -136,3 +136,12 @@ test('RENAME / TRASH do not touch Wiki and are constrained to registered LAB chi
  assert.equal((await trash.make().run(x,{})).status,'COMPLETED');
  assert.equal(trash.actions.filter(x=>x[0]==='PATCH')[0][2].in_trash,true);
 });
+
+test('two parallel signed calls for the same job cannot produce two writes in D1 CAS',async()=>{
+ const s=fixture();const controller=s.make();
+ const [a,b]=await Promise.all([controller.run(order(),{}),controller.run(order(),{})]);
+ assert.equal(s.getPatchCount(),1);
+ assert.equal([a.status,b.status].filter(x=>x==='COMPLETED').length,1);
+ assert.ok([a.status,b.status].every(x=>['COMPLETED','IN_PROGRESS','ALREADY_COMPLETED'].includes(x)));
+ assert.equal(s.db.prepare('SELECT COUNT(*) AS n FROM fact001_recovery_v1').get().n,1);
+});
