@@ -71,3 +71,12 @@ No hay cola duradera única de trabajos automatizados por empresa, no hay E2E de
 - Requisito inicial humano único GitHub: crear una credencial de servicio aprobada (GitHub App con permisos de repositorio suficientes, o PAT fine-grained temporal de administración + creación de repositorios para `carlosjmunoz78`), y guardar la credencial temporal en Vault como `cerebro_github_factory_pat_v1` (sin valor en el chat). GitHub App es la evolución deseada por rotación; no confundir `GITHUB_TOKEN` repo-scoped de Actions con permiso para administrar todos los repositorios.
 - Para Notion y GitHub, `GET identity = VERIFIED` no es `CRUD GREEN`: debe probarse creación/lectura/modificación/eliminación/restauración y rol limitado en LAB, con idempotencia duradera, auditoría y recuperación.
 - No se tocaron `main`, App, CRM ni DNS. No se generaron ni dejaron bases, webs, páginas o repositorios de test. No se contrató servicio de pago.
+
+
+## NOTION: TOKEN Y PÁGINAS · CIERRE 10/11/2026
+- Supabase Vault confirma secreto `cerebro_notion_service_token_v1` por metadata, sin revelar valor.
+- [#42849043493](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849043493): servicio CEREBRO independiente validó el bot Notion por su API, sin OAuth de ChatGPT.
+- Servicio headless v8 ACTIVE incorpora `notion-workspace`: búsqueda acotada de objetos accesibles con token de Notion Vault, sin exponer páginas, nombres ni secretos.
+- [#42849882515](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515): firma válida, búsqueda Notion HTTP 200, `NOTION_WORKSPACE_READ=VERIFIED`, pero **0 páginas visibles** para la integración.
+- HUMAN_REQUIRED: compartir una única página separada `CEREBRO OS · FACT-001 · LAB` en Notion mediante `••• > More > Connections > Add connections` y elegir el bot recién creado. No hace falta otro token.
+- PENDIENTE: verificar nueva página en lectura y permisos de crear/editar/archivar/recuperar subpágina de LAB, después dejar limpieza y rollback físicos. No marcar FULL GREEN por solo conectar.
