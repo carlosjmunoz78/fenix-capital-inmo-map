@@ -4,10 +4,12 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch-plan.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
   contents: read
+  actions: read
   id-token: write
 concurrency:
   group: fact001-headless-provider-read-lab
@@ -23,6 +25,7 @@ jobs:
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
       - name: "Signed CEREBRO service reads Cloudflare Vercel Supabase from Vault"
+        if: github.event.head_commit.message != 'FACT001_NOTION_FIRST_BATCH_PLAN_ONCE_20261110'
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
@@ -202,3 +205,99 @@ jobs:
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
           NODE
+
+      - name: "FACT001 verify real encrypted index and seal first 25 objects with signed OIDC"
+        if: github.event.head_commit.message == 'FACT001_NOTION_FIRST_BATCH_PLAN_ONCE_20261110'
+        env:
+          GH_ACTIONS_TOKEN: ${{ github.token }}
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          import {execFileSync} from 'node:child_process';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch-plan.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.lab.index_batch.plan',
+            request_id:'FACT001-NOTION-INDEX-BATCH-PLAN-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_BATCH_OWNER_SCOPE_DENIED');
+          // Original encrypted inventory artifact is downloaded within GitHub Actions; never print it.
+          const archive=await fetch('https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/actions/artifacts/13808862248/zip',{
+            headers:{Accept:'application/vnd.github+json',Authorization:'Bearer '+process.env.GH_ACTIONS_TOKEN,
+              'X-GitHub-Api-Version':'2022-11-28','User-Agent':'FACT001-Notion-Backup-LAB'},
+            redirect:'follow',signal:AbortSignal.timeout(40000)});
+          if(!archive.ok)throw Error('FACT001_BACKUP_MANIFEST_ARTIFACT_UNAVAILABLE_HTTP_'+archive.status);
+          const zip=Buffer.from(await archive.arrayBuffer());
+          if(zip.length>4000000||zip.length<100)throw Error('FACT001_BACKUP_MANIFEST_ZIP_SIZE_DENIED');
+          const zipSha=createHash('sha256').update(zip).digest('hex');
+          if(zipSha!=='9c2c31831683c89186d76e466ec19de74eaa0eb20d1a2676aea21e56dbe3a702')
+            throw Error('FACT001_BACKUP_MANIFEST_ZIP_INTEGRITY_DENIED');
+          writeFileSync('fact001-manifest-reference.zip',zip,{flag:'wx',mode:0o600});
+          const raw=execFileSync('unzip',['-p','fact001-manifest-reference.zip','notion-search-id-index-aes256gcm.json'],
+             {maxBuffer:5000000});
+          let index;try{index=JSON.parse(raw.toString('utf8'))}catch{throw Error('FACT001_CIPHER_MANIFEST_PARSE_DENIED')}
+          if(index.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||index.object_count!==6632||
+            index.id_list_sha256!=='205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca'||
+            index.search_index_complete!==true||!index.envelope?.ciphertext_b64)
+            throw Error('FACT001_INDEX_ARTIFACT_MISMATCH');
+          console.log('FACT001_BATCH_REAL_INDEX_ZIP_SHA256=PASS');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/';
+          async function call(route,jwt,body){
+           const res=await fetch(base+route,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+            ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),
+            redirect:'error',signal:AbortSignal.timeout(45000)});
+           let data={};try{data=await res.json()}catch{}
+           return {http:res.status,data};
+          }
+          const anon=await call('notion-index-plan-first',null,order);
+          const fake=await call('notion-index-plan-first','invalid-token',order);
+          if(anon.http!==401||fake.http!==401)throw Error('FACT001_BATCH_OIDC_NEGATIVE_FAILED');
+          console.log('FACT001_BATCH_ANON_401=PASS');
+          console.log('FACT001_BATCH_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('FACT001_BATCH_OIDC_UNAVAILABLE');
+          const issue=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!issue.ok)throw Error('FACT001_BATCH_ISSUER_DENIED');
+          const jwt=(await issue.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('FACT001_BATCH_OIDC_MALFORMED');
+          const prod=await call('notion-index-plan-first',jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('FACT001_BATCH_PROD_GATE_DENIED');
+          console.log('FACT001_BATCH_PROD_403=PASS');
+          const result=await call('notion-index-plan-first',jwt,{...order,index_artifact:index}),b=result.data;
+          if(result.http!==200||b?.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||
+           b.index_sha256!==index.id_list_sha256||b.offset!==0||b.next_offset!==25||
+           b.items!==25||b.provider_writes!==0||b.queue_activated!==false||
+           b.content_downloaded!==false||b.full_workspace_backup!==false||
+           !b.envelope?.ciphertext_b64)throw Error('FACT001_BATCH_NOT_PROVEN_HTTP_'+result.http);
+          const ver={...order,operation:'notion.lab.index_batch.verify',
+           request_id:'FACT001-NOTION-INDEX-BATCH-VERIFY-20261110',
+           index_sha256:index.id_list_sha256,artifact:b};
+          const verified=await call('notion-index-plan-verify',jwt,ver);
+          if(verified.http!==200||verified.data?.status!=='FACT001_NOTION_BATCH_PLAN_REBUILT'||
+            verified.data.item_count!==25||verified.data.next_offset!==25||
+            verified.data.provider_writes!==0||verified.data.contents_exposed!==false)
+             throw Error('FACT001_BATCH_REBUILD_NOT_VERIFIED_HTTP_'+verified.http);
+          mkdirSync('fact001-first-batch',{recursive:true});
+          const packet=Buffer.from(JSON.stringify(b)+'\n','utf8');
+          if(packet.length>100000)throw Error('FACT001_BATCH_PACKET_OVERSIZED');
+          writeFileSync('fact001-first-batch/first-25-notion-work-items-aes256gcm.json',packet,{flag:'wx',mode:0o600});
+          console.log('FACT001_BATCH_PACKET_SHA256='+createHash('sha256').update(packet).digest('hex'));
+          console.log('FACT001_BATCH_ITEMS='+b.items);
+          console.log('FACT001_BATCH_PAGES='+b.pages);
+          console.log('FACT001_BATCH_SOURCES='+b.data_sources);
+          console.log('FACT001_BATCH_NEXT_OFFSET='+b.next_offset);
+          console.log('FACT001_BATCH_REF='+b.batch_ref);
+          console.log('FACT001_BATCH_ROUNDTRIP=PASS');
+          console.log('FACT001_BATCH_CONTENTS_BACKED_UP=false');
+          console.log('FACT001_BATCH_PROVIDER_WRITES=0');
+          NODE
+      - name: "Archive encrypted-only first Notion index batch planning packet"
+        if: github.event.head_commit.message == 'FACT001_NOTION_FIRST_BATCH_PLAN_ONCE_20261110'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-first-25-batch-plan-aes256gcm-20261110
+          path: fact001-first-batch/first-25-notion-work-items-aes256gcm.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
