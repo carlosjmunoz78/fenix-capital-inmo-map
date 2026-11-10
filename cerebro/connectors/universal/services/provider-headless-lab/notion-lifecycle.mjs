@@ -9,7 +9,7 @@ const API='https://api.notion.com/v1';
 const matchesUUID=x=>typeof x==='string'&&/^[a-f\d]{8}-[a-f\d]{4}-[1-8][a-f\d]{3}-[89ab][a-f\d]{3}-[a-f\d]{12}$/i.test(x);
 const isObject=x=>x!==null&&typeof x==='object'&&!Array.isArray(x);
 const titleText=x=>x?.properties?.title?.title?.map(t=>t.plain_text??t.text?.content??'').join('')||'';
-const newTitle=title=>({title:[{text:{content:title}}]});
+const newTitle=title=>({title:{type:'title',title:[{type:'text',text:{content:title}}]}});
 async function api(http,token,method,url,body){
  if(!url.startsWith(API+'/pages')||!['GET','POST','PATCH'].includes(method))throw Error('NOTION_BOUNDARY');
  const r=await http(url,{method,headers:{Authorization:'Bearer '+token,'Notion-Version':'2026-03-11',Accept:'application/json',...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(14000)});
