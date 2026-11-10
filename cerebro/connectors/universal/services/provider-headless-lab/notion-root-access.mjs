@@ -16,7 +16,7 @@ export const NOTION_OPENED_ROOTS=Object.freeze([
  ['Habilidades IA','37681b1a-756d-819e-848e-e71ad5a45d95','page'],
  ['Buyer Personas Fénix','66e23000-789c-487f-8f63-2be8fb106b09','database'],
  ['Recursos Web y Landings','928566e1-317f-439f-8e45-95088eeb5bae','database'],
- ['Promos y Campañas','401e9011-1d79-4231-95a3-83f0e384876','database'],
+ ['Promos y Campañas','401e9011-1d79-4231-95a3-835f0e384876','database'],
  ['Estrategia Redes','67e2be51-a935-4676-a622-126feba520d5','database'],
  ['Calendario Editorial','236a3d97-024a-4a15-b445-c7b528b634af','database'],
  ['Fábrica de Contenido','72d1d1fe-5e0a-4b64-be3e-5e145b8a0bb4','database'],
