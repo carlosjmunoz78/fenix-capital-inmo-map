@@ -1,0 +1,92 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "polyhaven-adapter-v0.1",
+  "provider": "Poly Haven",
+  "project": "CEREBRO OS · Media Studio",
+  "last_checked": "2026-11-10",
+  "owner_policy": {
+    "additional_cost_eur_max": 0,
+    "production_change_allowed": false,
+    "paid_api_allowed": false,
+    "publish_without_QA": false
+  },
+  "runtime": {
+    "kind": "GitHub Actions / Python stdlib",
+    "reusable": true,
+    "workflow": ".github/workflows/ums001-polyhaven-cc0-lab.yml",
+    "repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "branch": "cerebro/ums001-assets-budget-scout-lab-v0-20261109",
+    "trigger": "push path filter with commit tag [polyhaven-run]",
+    "daily_schedule": "NOT_ACTIVE",
+    "github_scheduled_default_branch_gate": "cannot run schedule from LAB-only branch",
+    "chatgpt_automation": "NOT_CREATED_ACCOUNT_LIMIT_5_OF_5",
+    "permissions": [
+      "contents:read"
+    ],
+    "credentials_needed": false,
+    "token_in_chat": false
+  },
+  "provider_contract": {
+    "api": "https://api.polyhaven.com/assets",
+    "filetree": "https://api.polyhaven.com/files/{id}",
+    "license": "CC0-1.0",
+    "provider_terms": "https://polyhaven.com/our-api",
+    "user_agent_required": true,
+    "api_credit_required": "Powered by Poly Haven"
+  },
+  "resources": {
+    "script": "cerebro/media-studio/v2/asset-scout/polyhaven_auto_lab_v0.py",
+    "tests": "cerebro/media-studio/v2/asset-scout/test_polyhaven_auto_lab_v0.py",
+    "drive_folder_id": "1__pmqry_ICA0dgQELWZ4uKcgp5tG-xYl",
+    "drive_folder_url": "https://drive.google.com/drive/folders/1__pmqry_ICA0dgQELWZ4uKcgp5tG-xYl",
+    "download_artifacts_retention_days": 3,
+    "run_log": [
+      {
+        "run_id": 42797679685,
+        "state": "SUCCESS",
+        "action": "TESTS_7"
+      },
+      {
+        "run_id": 42797939269,
+        "state": "SUCCESS",
+        "action": "LIVE_TWO_ASSETS_652338_BYTES_7_TESTS",
+        "drive_file_id": "1dtLaSJ1BTBZQqlf93RJYqlWzkOBk-6cF"
+      },
+      {
+        "run_id": 42798486824,
+        "state": "SUCCESS",
+        "action": "LIVE_TWO_ASSETS_1482394_BYTES_8_TESTS",
+        "drive_file_id": "1ywMpCBD4SbPBKVlMcR4NU1dzrD6UDznp"
+      }
+    ]
+  },
+  "limits": {
+    "max_assets_per_run": 2,
+    "max_file_bytes": 15728640,
+    "max_batch_bytes": 20971520,
+    "max_runner_minutes": 8
+  },
+  "gates": {
+    "metadata_discovery": "VERIFIED",
+    "auth_key": "NOT_REQUIRED",
+    "offline_tests": "VERIFIED_EIGHT_PASS_IN_GITHUB",
+    "real_download": "VERIFIED_TWO_BATCHES",
+    "file_integrity": "MD5_SHA256_VERIFIED",
+    "artifact_archival": "VERIFIED_IN_DRIVE_TWO_ZIP_BUNDLES",
+    "cost_extra": "NO_NEW_SUBSCRIPTION; RUNNER_FREE_QUOTA_NOT_AUDITED",
+    "unattended_daily": "BLOCKED_NEEDS_ISOLATED_SCHEDULER_OR_CHATGPT_TASK_SLOT",
+    "continuous_drive_sync": "PARTIAL_MANUAL_CONNECTOR_HANDOFF",
+    "production": "OFF",
+    "backup": "ZIPS_COPIED_DRIVE",
+    "rollback": "DISABLE_WORKFLOW_OR_REVERT_LAB_COMMITS",
+    "rebuild": "RESTORE_PYTHON_SCRIPT_WORKFLOW_TESTS_FROM_LAB_BRANCH"
+  },
+  "further_actions": [
+    "Schedule via existing scheduler without touching App main, or ask user which of 5 ChatGPT tasks to replace; do not replace automatically",
+    "Automate safe Drive import from artifacts without sharing Google OAuth tokens",
+    "Review selected asset semantics; maps of displacement/AO are not cinematic overlay videos",
+    "Preserve parent CEREBRO OS and Mixkit work for later"
+  ]
+}
