@@ -188,7 +188,11 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42921160489",
         "FACT001 first 25 Notion page-body encrypted snapshot: GitHub artifact 13812640522, 25/25 exported, anonymous/forged 401 and PROD 403",
         "Google Drive readback private 1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p, 454715 bytes, SHA256 e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65 EXACT MATCH",
-        "Git evidence checkpoint 0→25 verified; D1 CAS not yet committed and no Notion physical restore"
+        "Git evidence checkpoint 0→25 verified; D1 CAS not yet committed and no Notion physical restore",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42926660411",
+        "Second 25 encrypted Notion content: 24 pages and 1 source (68 rows), 949 blocks, 25/25 authenticated ciphertext, 0 Notion writes, index identity SHA matches unchanged 6632 objects",
+        "Private Google Drive offsite second lot file 12UJyaeYukgOlFIHrLlebxLOgLTsdalcq, 1170629 bytes, ZIP SHA256 d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026 exact GitHub/Drive readback",
+        "Sequential evidence-only immutable Git checkpoints 0→25 and 25→50, D1 CAS not committed; 49 page bodies + 1 data source schema/68 row properties and blocks now backed up"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -241,9 +245,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PARTIAL_ENCRYPTED_WIKI_64_BLOCKS_AND_ONE_DATA_SOURCE_11_ROWS; FULL_NOTION_WORKSPACE_EXPORT_PENDING",
+        "full_backup_gate": "PARTIAL_49_PAGES_1_SOURCE_68_ROWS_WITH_OFFSITE_READBACK_FIRST_TWO_LOTS; FULL_WORKSPACE_CONTENT_BINARY_COMMENTS_ESCROW_RESTORE_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_CONTENT_BACKUP_WORKER_ENCRYPTED_FIRST_25_ACTUAL_BODIES_BOUNDED_AND_DRIVE_HASHED",
+        "next_block": "FACT001_NOTION_CHECKPOINT_D1_CAS_GATE_THEN_NEXT_50_75_MIXED_BATCH_AND_ISOLATED_RESTORE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -266,7 +270,7 @@
         "service_version": 33,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "ONLY_INDEX_AND_25_OBJECT_PLAN_SEALED; CONTENT_OF_6446_PAGES_AND_186_SOURCES_NOT_BACKED_UP; BINARY_ASSETS_ESCROW_PHYSICAL_RESTORE_PENDING",
+        "actual_blocker": "49/6446 pages + 1/186 data sources from first 50 manifest objects physically AES-256-GCM backed up offsite, 6397 pages and 185 sources remain in sequential content batches; binary assets, comments, independent key escrow, D1 CAS and isolated Notion restore pending.",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -500,6 +504,48 @@
           "google_drive_file_id": "1X1uO7YZNG0G075tGYvs1G_GoSMFbQUJa",
           "drive_sha256_readback_exact": true,
           "additional_subscription_cost_eur": 0
+        },
+        "first_50_encrypted_content": {
+          "status": "VERIFIED_PHYSICAL_FIRST_TWO_OFFSITE_CIPHERTEXT_BATCHES",
+          "company_id": "fenix-capital",
+          "engine_id": "FACT-001",
+          "environment": "LAB",
+          "version": "1.0.0",
+          "content_start_offset": 0,
+          "content_next_offset": 50,
+          "total_objects": 50,
+          "page_objects": 49,
+          "data_source_objects": 1,
+          "data_source_rows": 68,
+          "second_batch_block_count": 949,
+          "first_batch": {
+            "github_run_id": 42921160489,
+            "drive_file_id": "1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p",
+            "sha256": "e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65"
+          },
+          "second_batch": {
+            "github_run_id": 42926660411,
+            "github_artifact_id": 13814845995,
+            "drive_file_id": "12UJyaeYukgOlFIHrLlebxLOgLTsdalcq",
+            "sha256": "d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026",
+            "drive_hash_exact": true,
+            "source_rows": 68
+          },
+          "d1_cas_checkpoint_committed": false,
+          "full_workspace_backup": false,
+          "physical_notion_restore": false,
+          "key_escrow_independent": false,
+          "media_binaries": false,
+          "comments": false
+        },
+        "d1_content_checkpoint_cas": {
+          "status": "LOCAL_TEST_AND_GITHUB_CI_GREEN_NOT_APPLIED",
+          "tests": 6,
+          "d1_original_database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+          "d1_changes": 0,
+          "required_gate": "NATIVE_D1_EXPORT_INDEPENDENT_SQL_FILE_AND_ROLLBACK_NOT_YET_VERIFIED",
+          "git_recorded_content_next_offset": 50,
+          "d1_cas_content_next_offset_verified": false
         }
       }
     },
