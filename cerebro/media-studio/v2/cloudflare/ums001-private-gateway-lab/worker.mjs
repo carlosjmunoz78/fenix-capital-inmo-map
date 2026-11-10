@@ -31,10 +31,27 @@ async function read(env,task){const result=await env.MEDIA.read(intent(env,task,
   if(sha!==result.sha256)throw Error('MEDIA_HASH_MISMATCH');
   return {asset_id:result.asset_id,bytes:bytes.length,sha256:sha,rights_review:'PENDING',production_approved:false};
 }
+async function searchFreeMedia(env,task){
+ if(env.GATEWAY_ENABLED!=='true'||env.SOURCE_SCOUT_ENABLED!=='true')throw Error('SCOUT_GATEWAY_DISABLED');
+ if(!task||task.company_id!==COMPANY||task.engine_id!==ENGINE||task.environment!==ENV||
+ task.provider!=='ambientcg'||!['textures','hdris','models','decals'].includes(task.kind)||
+ typeof task.query!=='string'||task.query.length<3||task.query.length>120)throw Error('SCOUT_REQUEST_INVALID');
+ if(!env.SOURCE_SCOUT||typeof env.SOURCE_SCOUT.search!=='function'||
+ typeof env.SOURCE_SCOUT_TOKEN!=='string'||env.SOURCE_SCOUT_TOKEN.length<32)throw Error('SCOUT_PRIVATE_BINDING_REQUIRED');
+ const result=await env.SOURCE_SCOUT.search({...task,actor_id:'ums001-producer-lab',permission:'media.search',
+ auth_token:env.SOURCE_SCOUT_TOKEN});
+ if(result?.company_id!==COMPANY||result?.engine_id!==ENGINE||result?.environment!==ENV||
+ result?.provider!=='ambientcg'||result.mode!=='METADATA_ONLY'||result.downloaded!==false||
+ !Array.isArray(result.results)||result.results.length>8||result.results.some(x=>x.license!=='CC0-1.0'||x.downloaded!==false||x.production_approved!==false))
+ throw Error('SCOUT_INVALID_RESPONSE');
+ return {company_id:COMPANY,engine_id:ENGINE,environment:ENV,mode:'METADATA_ONLY',provider:'ambientcg',
+ results:result.results,downloaded:false,production_approved:false,additional_cost_eur:0};
+}
 export class ProducerLibraryLab extends WorkerEntrypoint {
   async search(task){return search(this.env,task)}
   async acquire(task){return acquire(this.env,task)}
   async read(task){return read(this.env,task)}
+  async scout(task){return searchFreeMedia(this.env,task)}
 }
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}})},

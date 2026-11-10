@@ -12,6 +12,11 @@
       "binding": "MEDIA",
       "service": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
       "entrypoint": "MediaDemandLab"
+    },
+    {
+      "binding": "SOURCE_SCOUT",
+      "service": "cerebro-ums001-multisource-scout-lab-eu",
+      "entrypoint": "MediaSourceScoutLab"
     }
   ],
   "kv_namespaces": [
@@ -21,6 +26,7 @@
     }
   ],
   "vars": {
-    "GATEWAY_ENABLED": "false"
+    "GATEWAY_ENABLED": "false",
+    "SOURCE_SCOUT_ENABLED": "false"
   }
 }
