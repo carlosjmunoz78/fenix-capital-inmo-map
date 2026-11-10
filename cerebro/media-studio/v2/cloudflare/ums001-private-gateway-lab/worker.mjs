@@ -34,17 +34,20 @@ async function read(env,task){const result=await env.MEDIA.read(intent(env,task,
 async function searchFreeMedia(env,task){
  if(env.GATEWAY_ENABLED!=='true'||env.SOURCE_SCOUT_ENABLED!=='true')throw Error('SCOUT_GATEWAY_DISABLED');
  if(!task||task.company_id!==COMPANY||task.engine_id!==ENGINE||task.environment!==ENV||
- task.provider!=='ambientcg'||!['textures','hdris','models','decals'].includes(task.kind)||
- typeof task.query!=='string'||task.query.length<3||task.query.length>120)throw Error('SCOUT_REQUEST_INVALID');
+ !((task.provider==='ambientcg'&&['textures','hdris','models','decals'].includes(task.kind))||
+    (task.provider==='wikimedia_commons'&&env.COMMONS_ENABLED==='true'&&['images','audio','video'].includes(task.kind)))||
+ typeof task.query!=='string'||task.query.trim().length<3||task.query.length>(task.provider==='wikimedia_commons'?80:120))throw Error('SCOUT_REQUEST_INVALID');
  if(!env.SOURCE_SCOUT||typeof env.SOURCE_SCOUT.search!=='function'||
  typeof env.SOURCE_SCOUT_TOKEN!=='string'||env.SOURCE_SCOUT_TOKEN.length<32)throw Error('SCOUT_PRIVATE_BINDING_REQUIRED');
  const result=await env.SOURCE_SCOUT.search({...task,actor_id:'ums001-producer-lab',permission:'media.search',
  auth_token:env.SOURCE_SCOUT_TOKEN});
  if(result?.company_id!==COMPANY||result?.engine_id!==ENGINE||result?.environment!==ENV||
- result?.provider!=='ambientcg'||result.mode!=='METADATA_ONLY'||result.downloaded!==false||
- !Array.isArray(result.results)||result.results.length>8||result.results.some(x=>x.license!=='CC0-1.0'||x.downloaded!==false||x.production_approved!==false))
+ result?.provider!==task.provider||result.kind!==task.kind||result.mode!=='METADATA_ONLY'||result.downloaded!==false||
+ !Array.isArray(result.results)||result.results.length>(task.provider==='wikimedia_commons'?5:8)||
+ result.results.some(x=>x.license!=='CC0-1.0'||x.downloaded!==false||x.production_approved!==false||
+   (task.provider==='wikimedia_commons'&&x.requires_license_review!==true)))
  throw Error('SCOUT_INVALID_RESPONSE');
- return {company_id:COMPANY,engine_id:ENGINE,environment:ENV,mode:'METADATA_ONLY',provider:'ambientcg',
+ return {company_id:COMPANY,engine_id:ENGINE,environment:ENV,mode:'METADATA_ONLY',provider:task.provider,kind:task.kind,
  results:result.results,downloaded:false,production_approved:false,additional_cost_eur:0};
 }
 export class ProducerLibraryLab extends WorkerEntrypoint {
