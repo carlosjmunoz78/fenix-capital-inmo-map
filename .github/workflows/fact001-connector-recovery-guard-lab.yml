@@ -6,6 +6,8 @@ on:
       - .github/workflows/fact001-connector-recovery-guard-lab.yml
       - cerebro/connectors/universal/src/recovery.mjs
       - cerebro/connectors/universal/tests/recovery.test.mjs
+      - cerebro/connectors/universal/tests/recovery-d1-ledger.test.mjs
+      - cerebro/connectors/universal/src/recovery-d1-ledger.mjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,7 +23,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Test bounded reconnect, 2 independent client identities, durable-CAS contract, no duplicated writes
-        run: node --test cerebro/connectors/universal/tests/recovery.test.mjs
+        run: node --test cerebro/connectors/universal/tests/recovery*.test.mjs
       - name: Verify no production automatic activation
         run: |
           node --input-type=module <<'NODE'
