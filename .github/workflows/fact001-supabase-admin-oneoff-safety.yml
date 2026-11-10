@@ -1,0 +1,33 @@
+name: FACT001 Supabase admin one-off cleanup safety tests
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-supabase-admin-oneoff-safety.yml
+      - cerebro/connectors/universal/supabase/supabase-admin-once/index.ts
+      - cerebro/connectors/universal/supabase/supabase-admin-once/policy.mjs
+      - cerebro/connectors/universal/supabase/supabase-admin-once/tests/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safeguard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/supabase/supabase-admin-once/tests/policy.test.mjs
+      - name: Verify self-delete scope and absence of generic control
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='cerebro/connectors/universal/supabase/supabase-admin-once/';
+          const s=fs.readFileSync(root+'index.ts','utf8'),p=fs.readFileSync(root+'policy.mjs','utf8');
+          if(!s.includes("verifyGitHubOidc(AUTH(req))")||!s.includes("await api(pat,'DELETE')")||!s.includes("TARGET_IDENTITY_OR_VERSION_MISMATCH"))throw Error('SECURITY_GATES_MISSING');
+          if(!s.includes("pat=''")||!s.includes("'SCOPED_PAT_MISSING'")||!s.includes("const API='https://api.supabase.com/v1/projects/'"))throw Error('VAULT_SCOPE_MISSING');
+          if(!p.includes("project_ref:SUPABASE_REF")||!p.includes("function_slug:TEST_FUNCTION"))throw Error('EXACT_TARGET_REQUIRED');
+          if(s.includes('console.log(pat)')||s.includes('SUPABASE_SERVICE_ROLE_KEY')||s.includes('api.supabase.com/v1/projects/other'))throw Error('UNSAFE_CODE');
+          console.log('SUPABASE_ADMIN_SELF_DELETE=ONLY_EXACT_RETIRED_FUNCTION');
+          console.log('SUPABASE_ADMIN_EXTERNAL_CALLS=0');
+          NODE
