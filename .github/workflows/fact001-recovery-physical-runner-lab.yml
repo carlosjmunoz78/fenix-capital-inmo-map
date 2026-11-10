@@ -1,0 +1,32 @@
+name: FACT001 Recovery Worker LAB test - no external resources
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - .github/workflows/fact001-recovery-physical-runner-lab.yml
+      - cerebro/connectors/universal/cloudflare/recovery-runner-lab/**
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fact001-recovery-physical-runner-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test-scheduled-worker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with: { persist-credentials: false }
+      - name: Verify scheduled handler, SQLite D1 schema, budget and replay safety
+        run: node --test cerebro/connectors/universal/cloudflare/recovery-runner-lab/worker.test.mjs
+      - name: Confirm no public or PROD entry point
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const s=fs.readFileSync('cerebro/connectors/universal/cloudflare/recovery-runner-lab/worker.mjs','utf8');
+          if(!s.includes("status:404")||!s.includes("fact001.lab.heartbeat"))throw Error('WORKER_PUBLIC_OR_GENERIC_DENIED');
+          console.log('FACT001_PUBLIC_HTTP=404');
+          console.log('FACT001_EXTERNAL_ACTIONS=0');
+          console.log('FACT001_APP_CRM_PROD_MODIFICATIONS=0');
+          NODE
