@@ -17,6 +17,7 @@ export const FACTORY_ARTIFACTS=Object.freeze([
  'documentation','training_hooks'
 ]);
 const goodSlug=v=>typeof v==='string'&&/^[a-z][a-z0-9-]{1,40}$/.test(v)&&!v.endsWith('-')&&!v.includes('--');
+const validEngineId=v=>typeof v==='string'&&/^[A-Za-z][A-Za-z0-9-]{1,40}$/.test(v)&&!v.endsWith('-')&& !v.includes('--');
 const validVersion=v=>typeof v==='string'&&/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?$/.test(v);
 const isPlain=v=>v!==null&&typeof v==='object'&&!Array.isArray(v)&&Object.getPrototypeOf(v)===Object.prototype;
 const sorted=x=>[...x].sort();
@@ -28,7 +29,7 @@ export function createCloudflareOnboardingPlan(request){
  const fields=['company_id','engine_id','environment','version','unit_type','unit_slug','required_resources'];
  if(!isPlain(request)||!same(Object.keys(request),fields))throw Error('INVALID_FACTORY_REQUEST');
  const {company_id,engine_id,environment,version,unit_type,unit_slug,required_resources}=request;
- if(!goodSlug(company_id)||!goodSlug(engine_id)||!goodSlug(unit_slug)||!ENVIRONMENTS.includes(environment)||!validVersion(version)||!TYPES.includes(unit_type))
+ if(!goodSlug(company_id)||!validEngineId(engine_id)||!goodSlug(unit_slug)||!ENVIRONMENTS.includes(environment)||!validVersion(version)||!TYPES.includes(unit_type))
   throw Error('INVALID_FACTORY_4D_SCOPE');
  if(!Array.isArray(required_resources)||required_resources.length<1||new Set(required_resources).size!==required_resources.length||
    required_resources.some(r=>!Object.prototype.hasOwnProperty.call(RESOURCES,r)))throw Error('INVALID_RESOURCE_REQUIREMENTS');
