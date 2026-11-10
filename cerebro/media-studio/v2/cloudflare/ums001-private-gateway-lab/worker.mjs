@@ -8,6 +8,7 @@ function assertRequest(input,permission){
   return true;
 }
 function intent(env,task,permission){
+  if(env.GATEWAY_ENABLED!=='true')throw Error('GATEWAY_DISABLED');
   assertRequest(task,permission);
   if(!env.MEDIA||typeof env.PRIVATE_MEDIA_TOKEN!=='string'||env.PRIVATE_MEDIA_TOKEN.length<32)throw Error('MEDIA_PRIVATE_BINDING_MISSING');
   return {...task,provider:'polyhaven',actor_id:'ums001-producer-lab',permissions:[permission],auth_token:env.PRIVATE_MEDIA_TOKEN};
@@ -38,7 +39,7 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}})},
  async scheduled(controller,env,ctx){
-  if(controller.cron!=='* * * * *')return;
+  if(controller.cron!=='* * * * *'||env.GATEWAY_ENABLED!=='true')return;
   ctx.waitUntil((async()=>{
    const key='meta/ums001-producer-binding-acceptance-2026-11-10';
    if(await env.LAB_KV.get(key))return;
