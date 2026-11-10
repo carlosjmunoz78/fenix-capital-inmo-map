@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-REPLICATE-HEALTH-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "requested_by": "CEREBRO",
+  "operation": "HEALTH_GET_ONLY",
+  "provider": "replicate",
+  "model": "black-forest-labs/flux-1.1-pro",
+  "paid_execution_enabled": false,
+  "allow_inference": false,
+  "publish": false,
+  "note": "Trigger-only request. Workflow is fixed to secret-safe GET health. No user-supplied shell, model inputs or output uploads."
+}
