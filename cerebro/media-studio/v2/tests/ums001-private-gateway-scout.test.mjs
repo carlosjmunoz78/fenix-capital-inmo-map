@@ -39,3 +39,25 @@ test('Commons rejects false license review and non-CC0',async()=>{
 test('Commons media result limit is five',async()=>assert.rejects(gateway({COMMONS_ENABLED:'true',SOURCE_SCOUT:{
  search:async input=>({...await commonsService.search(input),results:Array.from({length:6},(_,i)=>({...commonsAsset,id:'commons:'+i}))})
 }}).scout(commonsRequest),/SCOUT_INVALID_RESPONSE/));
+
+const metRequest={...request,provider:'met',kind:'images',query:'sunflowers'};
+const metAsset={id:'met:436524',provider:'met',kind:'images',title:'Sunflowers',source:'https://www.metmuseum.org/art/collection/search/436524',
+  preview:'https://images.metmuseum.org/CRDImages/ep/web-large/test.jpg',license:'CC0-1.0',requires_license_review:true,
+  downloaded:false,production_approved:false};
+const metService={async search(input){assert.equal(input.provider,'met');assert.equal(input.permission,'media.search');assert.equal(input.auth_token,secret);
+ return {company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'met',kind:'images',mode:'METADATA_ONLY',
+ downloaded:false,results:[metAsset]}}};
+test('Met stays OFF at producer without explicit flag',async()=>assert.rejects(gateway({SOURCE_SCOUT:metService}).scout(metRequest),/SCOUT_REQUEST_INVALID/));
+test('Met on scoped private gateway returns only CC0 image metadata',async()=>{
+ const res=await gateway({MET_ENABLED:'true',SOURCE_SCOUT:metService}).scout(metRequest);
+ assert.equal(res.provider,'met');assert.equal(res.results[0].id,metAsset.id);assert.equal(res.downloaded,false);assert.equal(res.production_approved,false);
+});
+test('Met producer rejects wrong types or defective license evidence',async()=>{
+ await assert.rejects(gateway({MET_ENABLED:'true',SOURCE_SCOUT:metService}).scout({...metRequest,kind:'video'}),/SCOUT_REQUEST_INVALID/);
+ const bad={search:async q=>({...await metService.search(q),results:[{...metAsset,requires_license_review:false}]})};
+ await assert.rejects(gateway({MET_ENABLED:'true',SOURCE_SCOUT:bad}).scout(metRequest),/SCOUT_INVALID_RESPONSE/);
+});
+test('Met search caps at three candidates',async()=>{
+ const large={search:async q=>({...await metService.search(q),results:Array.from({length:4},(_,i)=>({...metAsset,id:'met:'+i}))})};
+ await assert.rejects(gateway({MET_ENABLED:'true',SOURCE_SCOUT:large}).scout(metRequest),/SCOUT_INVALID_RESPONSE/);
+});
