@@ -152,7 +152,8 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42873202783",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_QUEUE_PHYSICAL_CRON_LAB_2026-11-10.md",
         "Cloudflare D1 Notion queue job completed with attempts=1 at 2026-11-10T19:53:27.944Z; independent private Worker exclusive D1 binding, Cron then removed and queue disabled",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42889919376"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42889919376",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42891142176"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -206,7 +207,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_SIGNED_PROVIDER_MUTATION_LAB_AND_WORKSPACE_SHARE",
+        "next_block": "FACT001_NOTION_WORKER_BROKER_AUTH_AND_SCOPED_WORKSPACE_EXPORT",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -229,7 +230,7 @@
         "service_version": 13,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "D1_WRITE_SERVICE_CREDENTIAL_MISSING_AND_ACCOUNT_ISSUER_OVERPRIVILEGED",
+        "actual_blocker": "SIGNED_WORKER_BROKER_CHANNEL_NOT_PROVISIONED; NOTION_WORKSPACE_ROOTS_NOT_SHARED_WITH_CEREBRO_SERVICE",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -251,7 +252,24 @@
           "external_provider_writes": 0
         },
         "workspace_full_backup_gate": "BLOCKED_LIMITED_CEREBRO_NOTION_INTEGRATION_SCOPE",
-        "promotion_tribunal": "CODE_CI_GREEN_NOT_LIVE"
+        "promotion_tribunal": "CODE_CI_GREEN_NOT_LIVE",
+        "signed_service_transport": {
+          "status": "LOCAL_CI_GREEN_NOT_DEPLOYED",
+          "implementation": "notion-service-signature.mjs",
+          "ci_run": 42891142176,
+          "replay_guard": "REQUIRES_DURABLE_NONCE_STORE",
+          "owner_order_guard": "REQUIRES_INDEPENDENT_SIGNED_OWNER_ATTESTATION",
+          "worker_secret": false,
+          "broker_secret": false,
+          "live_write": false
+        },
+        "full_workspace_promotion_policy": {
+          "status": "LOCAL_CI_GREEN_NOT_DEPLOYED",
+          "implementation": "notion-workspace-promotion-gate.mjs",
+          "ci_run": 42889919376,
+          "full_workspace_coverage": false,
+          "export_restored": false
+        }
       }
     },
     {
