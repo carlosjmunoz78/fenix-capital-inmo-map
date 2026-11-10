@@ -5,7 +5,9 @@ on:
     paths:
       - .github/workflows/fact001-cloudflare-factory-onboarding-lab.yml
       - cerebro/connectors/universal/src/cloudflare-onboarding.mjs
+      - cerebro/connectors/universal/src/cloudflare-scaffold.mjs
       - cerebro/connectors/universal/tests/cloudflare-onboarding.test.mjs
+      - cerebro/connectors/universal/tests/cloudflare-scaffold.test.mjs
   workflow_dispatch:
 permissions:
   contents: read
@@ -19,6 +21,7 @@ jobs:
       - name: Test internal departments social-instagram/linkedin, engines, websites and multi-company resource plans
         run: |
           node --test cerebro/connectors/universal/tests/cloudflare-onboarding.test.mjs
+          node --test cerebro/connectors/universal/tests/cloudflare-scaffold.test.mjs
           node --test cerebro/connectors/universal/tests/headless.test.mjs
           node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
       - name: Ensure every new unit requires inventory, owner, safe quota and promotion policy
