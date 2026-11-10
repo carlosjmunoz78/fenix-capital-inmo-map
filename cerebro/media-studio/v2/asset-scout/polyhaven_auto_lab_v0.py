@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """CEREBRO UMS-001 Poly Haven CC0 LAB. Safe opt-in batch, not PROD."""
+# LAB run trigger: 2026-11-10; no changes to download limits.
 import argparse, hashlib, json, os, re, sys, tempfile
 from datetime import datetime, timezone
 from pathlib import Path
