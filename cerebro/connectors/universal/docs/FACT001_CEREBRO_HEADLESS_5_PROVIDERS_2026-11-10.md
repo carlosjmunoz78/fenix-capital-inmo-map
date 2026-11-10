@@ -80,3 +80,11 @@ No hay cola duradera única de trabajos automatizados por empresa, no hay E2E de
 - [#42849882515](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515): firma válida, búsqueda Notion HTTP 200, `NOTION_WORKSPACE_READ=VERIFIED`, pero **0 páginas visibles** para la integración.
 - HUMAN_REQUIRED: compartir una única página separada `CEREBRO OS · FACT-001 · LAB` en Notion mediante `••• > More > Connections > Add connections` y elegir el bot recién creado. No hace falta otro token.
 - PENDIENTE: verificar nueva página en lectura y permisos de crear/editar/archivar/recuperar subpágina de LAB, después dejar limpieza y rollback físicos. No marcar FULL GREEN por solo conectar.
+
+
+## NOTION · E2E ESCRITURA INDEPENDIENTE Y LIMPIEZA · 10/11/2026
+- [E2E lectura Notion tras vincular Wiki #42852197701](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42852197701): el token de servicio propio de CEREBRO encontró 2 páginas accesibles (antes 0).
+- [E2E Notion child CRUD #42853530709](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42853530709): la propia credencial Notion Vault de CEREBRO creó una única subpágina temporal bajo Wiki Fénix Capital, la leyó, modificó su título, la envió a la papelera y verificó `in_trash`/archivo por GET de la misma página. **No modificó contenido de la Wiki** ni páginas previas. Notion conserva elementos temporalmente en su Trash por diseño; no se ha probado eliminación permanente.
+- Se probó el módulo aislado `notion-lifecycle.mjs` y las comprobaciones de error/identidad. La versión activa de `cerebro-fact001-headless-provider-lab` pasa de v8 a **v10**, sin la ruta de escritura temporal; el workflow de un solo uso deja de llamar `/notion-lifecycle`. Queda lectura/planificación e identidad protegidas con GitHub OIDC.
+- Estado de Notion en `registry/headless-gates.v1.json`: 6/11 gates verificados para el alcance aislado; **no** equivale a workspace completo, CRUD sin límites, autoschedules, restore validado ni políticas PROD. Toda nueva página raíz requiere permiso explícito de integración Notion o mecanismo admin permitido por el plan.
+- PR #44 DRAFT. Ningún merge a `main`, App/CRM/DNS conservados. No suscripciones ni costes adicionales.
