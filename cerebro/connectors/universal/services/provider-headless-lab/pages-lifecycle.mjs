@@ -27,22 +27,27 @@ function assertOwned(p){
 }
 export async function verifyPagesLifecycle({token,http=fetch}={}){
  if(typeof token!=='string'||token.length<20||token.length>8192)throw Error('CLOUDFLARE_PAGES_CREDENTIAL_UNAVAILABLE');
- let created=false,deleted=false,readback=false;
+ let created=false,deleted=false,readback=false,attempted=false;
  const existing=await request(http,token,'GET',PROJECT);
  if(!existing.absent)throw Error('CLOUDFLARE_PAGES_ALREADY_EXISTS');
  try{
+  attempted=true;
   const p=await request(http,token,'POST',API,{name:NAME,production_branch:'main'});
   assertOwned(p);
   created=true;
   const read=await request(http,token,'GET',PROJECT);
   assertOwned(read);readback=true;
  }finally{
-  if(created){
+  if(attempted){
+   // Reconcile an ambiguous POST response. Delete only the same known isolated project
+   // if provider readback proves project name, subdomain, no Git, no custom domains.
    const last=await request(http,token,'GET',PROJECT);
-   assertOwned(last);
-   const removal=await request(http,token,'DELETE',PROJECT);
-   if(removal.deleted!==true)throw Error('CLOUDFLARE_PAGES_DELETE_UNCONFIRMED');
-   deleted=true;
+   if(!last.absent){
+    assertOwned(last);
+    const removal=await request(http,token,'DELETE',PROJECT);
+    if(removal.deleted!==true)throw Error('CLOUDFLARE_PAGES_DELETE_UNCONFIRMED');
+    deleted=true;
+   }
   }
  }
  const final=await request(http,token,'GET',PROJECT);
