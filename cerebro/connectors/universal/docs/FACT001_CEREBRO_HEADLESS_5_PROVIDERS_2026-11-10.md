@@ -32,3 +32,31 @@ Prioridad: no contratar ni desplegar servidores duplicados, conservar `main`/App
 - OAuth concedido a ChatGPT no autoriza por sí solo acceso a la API por el proceso autónomo.
 - La consola incompleta **no** es bloqueo estructural: backend y trabajos pueden continuar sin ella.
 - El módulo `src/headless.mjs` es un **contrato probado y todavía no conectado a un broker** de producción. No publicarlo como operativa autónoma general.
+
+
+## ACTUALIZACIÓN FÍSICA · 10/11/2026 · 15:00 Europe/Madrid — PREVALECE SOBRE ESTADO ANTERIOR
+
+### HECHO — servicio único headless LAB v6
+- Supabase Edge Function nueva y aislada `cerebro-fact001-headless-provider-lab`, ID `25201bb2-4e03-49c8-ae33-0d92fa27f04c`, versión **6 ACTIVE**, autentica firmante GitHub OIDC RS256/JWKS con repo/rama/workflow/audience/actor/exp; `verify_jwt=false` de Supabase pero **custom OIDC obligatorio en todas las rutas**.
+- Trabaja sin consola ni OAuth de ChatGPT: lee credenciales únicamente desde Vault para Cloudflare, Vercel y Supabase; no expone valores al runner. Origen `owner_order`, company/engine/environment/version fijos para LAB.
+- [E2E de lectura independiente y planificación física #42837159597](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597) SUCCESS: firma válida, anon/falsa 401, Cloudflare 9 D1, Vercel 2 proyectos, Supabase 101 Edge Functions; genera **18 archivos reales** por orden para `social-instagram` (departamento INTERNO, NO API social) y `nueva-web`, sin ejecutar cambios en proveedores.
+- [E2E Cloudflare Pages #42838699207](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42838699207) SUCCESS: la identidad independiente de CEREBRO creó, leyó y eliminó un proyecto Pages LAB con dominio automático `pages.dev`. Inventario confirmado tras prueba: exactamente **un proyecto original** `fenix-capital-inmo-map`, cero proyectos temporales. **No se desplegó un sitio web completo ni se modificó DNS**.
+- La primera prueba Pages falló al confundir el dominio `pages.dev` propio con un dominio personalizado. El proyecto temporal se retiró después de comprobar nombre, fecha, origen sin Git ni deployment. Se corrigió el contrato, se pasó el test y la nueva prueba terminó verde.
+- Tras el éxito, el endpoint de escritura temporal `/pages-lifecycle` fue **RETIRADO** del servicio en v6, junto con su disparador en GitHub. Los tests de módulo se conservan en DRAFT. El servicio v6 ejecuta únicamente inventario de 3 proveedores y `/plan`. No queda Pages test residual.
+- [CI del broker #42839182943](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42839182943) SUCCESS; [CI núcleo 5 conectores #42839411018](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42839411018) SUCCESS. `main`, App, CRM, DNS y proyectos operativos sin cambios.
+- Estado por capacidad actualizado: `registry/headless-gates.v1.json`. Ningún proveedor está marcado `VERIFIED_FULL`; la evidencia es precisa y limitada.
+
+### CEREBRO / CHATGPT: estado honesto de 5 proveedores
+- **Cloudflare**: API ChatGPT Universal GET/write disponible según permiso; CEREBRO headless read/plan y LAB Pages create/read/delete físico; historial LAB D1 y KV; **falta** Workers/Pages deployment completo, mods arbitrarias, backup y rollback, cola automática, quota guard duradero y PROD.
+- **Vercel**: ChatGPT MCP reads/writes conocidas; CEREBRO signed service read, historial de reversión y eliminación LAB; proyecto temporal y antiguo servicio write eliminados; **falta** operador de escritura genérico persistente y despliegue seguro.
+- **Supabase**: ChatGPT MCP 36 operaciones, sin delete Edge Function nativo; CEREBRO ha ejecutado DELETE real vía PAT scoped y OIDC en test (y retiró su ejecutor temporal); actual headless GET; **falta** management API universal permanente + seguridad para DB/Auth/Storage y su rollback.
+- **GitHub**: CEREBRO repo-scoped GitHub Actions `GITHUB_TOKEN` [#42821755132](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132) creó/leyó/actualizó/eliminó fixture en rama LAB y comprobó 404; **NO** demuestra crear/borrar repositorios ni permisos cross-repo. GitHub universal ChatGPT tiene `create_repository`, pero no `delete_repository` expuesto; una comprobación anterior de creación devolvió 403.
+- **Notion**: CRUD de página aislada vía OAuth ChatGPT historicamente verificado, papelera limpia; **no hay credencial de servicio CEREBRO propia verificada**. Nunca utilizar OAuth exportado del cliente ChatGPT.
+
+### HUMAN_REQUIRED real para autorización inicial sin insistencia posterior
+- Notion: instalar/autorizar una **integración de servicio** con permisos limitados al espacio de trabajo requerido, registrar el token en Vault sin compartirlo en chats ni logs. La identidad OAuth ChatGPT NO equivale a identidad de CEREBRO.
+- GitHub: definir **GitHub App de servicio** o mecanismo equivalente con permisos administrativos de repositorios autorizados, credencial rotatoria y eliminación segura; el `GITHUB_TOKEN` de Actions solo opera sobre su propio repo, por diseño.
+- No permitir permisos universales destructivos sobre `main`/PROD de forma indiscriminada; promover por operaciones después de snapshots y pruebas. El hecho de que ChatGPT tenga "Allow all actions" no amplía los endpoints de los MCP ni los scopes reales.
+
+### Gates restantes
+No hay cola duradera única de trabajos automatizados por empresa, no hay E2E de `source=automation` en servicios reales, faltan gestión integral CRUD de varios productos, replay/idempotencia entre proveedores, backup/rollback/rebuild, medición de costes y promoción PROD. Los módulos de planificación y lógica NO significan que el sistema ya ejecute cualquier tarea. No contratar planes de pago ni duplicar motores.
