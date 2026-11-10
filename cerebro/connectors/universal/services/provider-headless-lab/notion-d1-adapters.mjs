@@ -43,7 +43,7 @@ CREATE TRIGGER IF NOT EXISTS fact001_notion_audit_block_delete BEFORE DELETE ON 
 const hash=x=>typeof x==='string'&&/^[0-9a-f]{64}$/.test(x);
 const uuid=x=>typeof x==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(x);
 const title=x=>typeof x==='string'&&x.length<=96&&/^FACT001 CEREBRO Notion LAB [A-Za-z0-9 _-]+$/.test(x);
-const scope=x=>x?.company_id==='fenix-capital'&&x?.engine_id==='FACT-001'&&x?.environment==='LAB';
+const scope=x=>x?.company_id==='fenix-capital'&&x?.engine_id==='FACT-001'&&x?.environment==='LAB'&&x?.version==='1.0.0';
 export function createNotionD1Adapters({query}={}){
  if(typeof query!=='function')throw Error('D1_SCOPED_QUERY_REQUIRED');
  async function run(sql,params){
@@ -58,7 +58,7 @@ export function createNotionD1Adapters({query}={}){
    return row?{...row,approved:Number(row.approved)===1,synthetic:Number(row.synthetic)===1}:null;
   }},
   snapshots:{durable:true,async save({key,scope:context,record}){
-   if(!hash(key)||!scope(context)||!uuid(record?.page_id)||record.parent_id!=='1c481b1a-756d-8002-813d-f3efdd4ecd89'||
+   if(!hash(key)||!scope(context)||!record||Object.keys(record).sort().join(',')!=='in_trash,last_edited_time,page_id,parent_id,title'||!uuid(record.page_id)||record.parent_id!=='1c481b1a-756d-8002-813d-f3efdd4ecd89'||
       !title(record.title)||typeof record.in_trash!=='boolean'||typeof record.last_edited_time!=='string')throw Error('SNAPSHOT_SCOPE_DENIED');
    const ref='notion-lab:'+key;
    const inserted=await run(`INSERT INTO fact001_notion_snapshots_v1(snapshot_ref,key_hash,page_id,title_before,in_trash_before,revision_before)
@@ -71,7 +71,7 @@ export function createNotionD1Adapters({query}={}){
    return run('SELECT page_id,title_before,in_trash_before,revision_before FROM fact001_notion_snapshots_v1 WHERE snapshot_ref=?1',[ref]);
   }},
   audit:{durable:true,async append(event){
-   if(!hash(event?.key)||!scope(event)||!uuid(event.page_id)||
+   if(!event||Object.keys(event).sort().join(',')!=='company_id,engine_id,environment,event,key,operation,page_id,snapshot_ref'||!hash(event.key)||!scope({...event,version:'1.0.0'})||!uuid(event.page_id)||
      !['NOTION_MUTATION_PREPARED','NOTION_MUTATION_VERIFIED'].includes(event.event)||
      !['notion.lab.child.restore','notion.lab.child.trash','notion.lab.child.rename'].includes(event.operation)||
      event.snapshot_ref!=='notion-lab:'+event.key)throw Error('AUDIT_SCOPE_DENIED');
