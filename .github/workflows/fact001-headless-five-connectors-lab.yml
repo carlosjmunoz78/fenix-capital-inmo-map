@@ -7,6 +7,8 @@ on:
       - .github/workflows/fact001-headless-five-connectors-lab.yml
       - cerebro/connectors/universal/src/headless.mjs
       - cerebro/connectors/universal/tests/headless.test.mjs
+      - cerebro/connectors/universal/tests/headless-registry.test.mjs
+      - cerebro/connectors/universal/registry/headless-gates.v1.json
       - cerebro/connectors/universal/src/core.mjs
       - cerebro/connectors/universal/src/catalog.mjs
   workflow_dispatch:
@@ -26,6 +28,7 @@ jobs:
       - name: Verify unattended and owner signed command gates in parallel-capable shared runtime
         run: |
           node --test cerebro/connectors/universal/tests/headless.test.mjs
+          node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
           node --test cerebro/connectors/universal/tests/core.test.mjs
           node --test cerebro/connectors/universal/tests/vercel.test.mjs
       - name: GitHub read through GitHub Actions service token without ChatGPT
