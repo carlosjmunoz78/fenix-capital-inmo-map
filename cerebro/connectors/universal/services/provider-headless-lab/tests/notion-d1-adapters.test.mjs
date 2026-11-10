@@ -20,8 +20,8 @@ function fixture(){
 }
 const snap={key,scope,record:{page_id:pageId,parent_id:NOTION_WIKI_LAB_ID,
  title:pageTitle,in_trash:true,last_edited_time:time}};
-function auditEvent(ref,key=key,event='NOTION_MUTATION_PREPARED'){
- return {event,key,company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',
+function auditEvent(ref,requestKey=key,event='NOTION_MUTATION_PREPARED'){
+ return {event,key:requestKey,company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',
   operation:'notion.lab.child.restore',page_id:pageId,snapshot_ref:ref};
 }
 test('additive schema has ownership, snapshots, append-only audit and no App/CRM tables',()=>{
@@ -56,7 +56,7 @@ test('append-only audit rejects update, delete, duplicates and secrets',async()=
  assert.throws(()=>f.db.exec("UPDATE fact001_notion_audit_v1 SET operation='notion.lab.child.trash'"),/AUDIT_IMMUTABLE/);
  assert.throws(()=>f.db.exec("DELETE FROM fact001_notion_audit_v1"),/AUDIT_IMMUTABLE/);
  await assert.rejects(()=>f.adapters.audit.append(auditEvent(s.ref,key,'NOTION_MUTATION_PREPARED')));
- await assert.rejects(()=>f.adapters.audit.append({...auditEvent(s.ref),authorization:'Bearer fake'}),/AUDIT_SCOPE_DENIED|AUDIT_APPEND_UNVERIFIED/).catch(()=>{});
+ await assert.rejects(()=>f.adapters.audit.append({...auditEvent(s.ref),authorization:'Bearer fake'}),/AUDIT_SCOPE_DENIED/);
 });
 test('invalid scope or page snapshot cannot reach DB write',async()=>{
  const f=fixture();
