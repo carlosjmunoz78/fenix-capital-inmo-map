@@ -18,7 +18,7 @@ function fixture({noParent=false,noInsert=false,foreign=false,canUpdate=true,can
    if(noInsert)return {status:403,json:async()=>({})};
    const body=JSON.parse(options.body);
    assert.equal(body.parent.page_id,WIKI_PAGE_ID);
-   assert.equal(body.properties.title[0].text.content,TEST_TITLE);
+   assert.equal(body.properties.title.title[0].text.content,TEST_TITLE);
    exists=true;
    return {status:200,json:async()=>pg(childId,current)};
   }
@@ -28,7 +28,7 @@ function fixture({noParent=false,noInsert=false,foreign=false,canUpdate=true,can
    const body=JSON.parse(options.body);
    if(body.properties){
     if(!canUpdate)return {status:403,json:async()=>({})};
-    current=body.properties.title[0].text.content;
+    current=body.properties.title.title[0].text.content;
    }
    if(body.in_trash===true){
     if(!canTrash)return {status:403,json:async()=>({})};
