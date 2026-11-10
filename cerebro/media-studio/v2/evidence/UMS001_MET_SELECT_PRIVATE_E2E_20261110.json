@@ -1,0 +1,62 @@
+{
+  "verified_at": "2026-11-10T18:29:47.755Z",
+  "proof": {
+    "status": "COMPLETED",
+    "at": "2026-11-10T18:25:36.869Z",
+    "provider": "met",
+    "asset_id": "met:436524",
+    "bytes": 208766,
+    "sha256": "e84f82f453c52151d3a28ef22a22faeefdd5dda51f656c4b089c4b88dab8b508",
+    "media_key": "media/ums001-met-selected/436524/original.jpg",
+    "private_gateway_to_source_rpc": true,
+    "stored_and_read_sha256_verified": true,
+    "downloaded": true,
+    "license_cc0": true,
+    "production_approved": false,
+    "publish_authorized": false,
+    "additional_cost_eur": 0
+  },
+  "receipt": {
+    "company_id": "fenix",
+    "engine_id": "UMS-001",
+    "environment": "LAB",
+    "provider": "met",
+    "kind": "images",
+    "production_id": "UMS001-LAB-TEST",
+    "request_id": "UMS001-SELECT-20261110-01",
+    "asset_id": "met:436524",
+    "status": "STORED",
+    "file_key": "media/ums001-met-selected/436524/original.jpg",
+    "bytes": 208766,
+    "sha256": "e84f82f453c52151d3a28ef22a22faeefdd5dda51f656c4b089c4b88dab8b508",
+    "mime": "image/jpeg",
+    "license": "CC0-1.0",
+    "source": "https://www.metmuseum.org/art/collection/search/436524",
+    "source_image": "https://images.metmuseum.org/CRDImages/ep/web-large/DP-41223-001.jpg",
+    "requires_license_review": true,
+    "rights_review": "PENDING",
+    "qa": "PENDING",
+    "downloaded": true,
+    "production_approved": false,
+    "publish_authorized": false,
+    "additional_cost_eur": 0
+  },
+  "original": {
+    "count": 3,
+    "bytes": 4361001
+  },
+  "workers": [
+    {
+      "name": "cerebro-ums001-multisource-scout-lab-eu",
+      "version": "f92feacc-c893-4161-84f6-090451feb232",
+      "crons": [],
+      "public": false
+    },
+    {
+      "name": "cerebro-ums001-producer-private-gateway-lab-eu",
+      "version": "452e95b1-e959-4a8b-8743-8d0f60a19fdd",
+      "crons": [],
+      "public": false
+    }
+  ]
+}
