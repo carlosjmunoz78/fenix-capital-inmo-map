@@ -9,7 +9,7 @@ export const NOTION_OPENED_ROOTS=Object.freeze([
  ['EXPEDIENTES','7155f2d6-a209-4e1d-b405-67bbf4bc54ef','page'],
  ['BANCOS','1c381b1a-756d-8059-ae8b-e20c7ada3d70','page'],
  ['INMOBILIARIAS','1c381b1a-756d-809f-9eae-cde51542fd3b','page'],
- ['Financieros','1c381b1a-756d-807f-b3d0-ebb04b4ff0ae','page'],
+ ['Financieros','1c381b1a-756d-807f-b3d0-ebb04b4ff0ae','database'],
  ['JARVIS Fénix Capital','55e81b1a-756d-8303-8626-016963610cb6','page'],
  ['SEO-001','3e981b1a-756d-81d2-ae7d-f638b31f6f1e','page'],
  ['Wiki Redes Sociales','38281b1a-756d-8041-9c17-daff1b0afde0','page'],
