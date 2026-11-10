@@ -54,3 +54,13 @@ export function assertOrder(b){
  for(const [k,v] of Object.entries(expected))if(b[k]!==v)throw Error('SCOPE_DENIED');
  return true;
 }
+
+export const WRITE_REQUEST_ID='FACT001-VERCEL-SERVICE-WRITE-20261110';
+export const WRITE_OPERATION='vercel.project.lab_framework_change_and_restore';
+export function assertWriteOrder(body){
+ const expected={...SCOPE,team_id:TEAM_ID,project_id:LAB_PROJECT_ID,client_id:'cerebro',operation:WRITE_OPERATION,request_id:WRITE_REQUEST_ID};
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('ORDER_INVALID');
+ if(JSON.stringify(Object.keys(body).sort())!==JSON.stringify(Object.keys(expected).sort()))throw Error('FIELDS_DENIED');
+ for(const [k,v] of Object.entries(expected))if(body[k]!==v)throw Error('SCOPE_DENIED');
+ return true;
+}
