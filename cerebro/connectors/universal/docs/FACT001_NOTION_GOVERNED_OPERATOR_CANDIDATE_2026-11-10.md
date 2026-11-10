@@ -36,3 +36,13 @@ HECHO EN CODIGO Y CI; NO DESPLEGADO EN CEREBRO. La prueba real de restauración 
 - Sin nuevas suscripciones (0 EUR). No se han tocado App, CRM, DNS, main, PROD ni Worker o D1 originales.
 - PR #44 permanece DRAFT.
 - NEXT_BLOCK: FACT001_NOTION_DURABLE_OWNERSHIP_SNAPSHOT_AUDIT_BINDING_LAB.
+
+
+## BLOQUE SIGUIENTE EJECUTADO · Contratos D1 completos (NO MIGRADOS)
+- Añadido services/provider-headless-lab/notion-d1-adapters.mjs: esquema aditivo de 3 tablas LAB, dos triggers de auditoría inmutable y adaptadores para propiedad de subpáginas, snapshots y eventos; sin SQL contra Cloudflare remoto. Tests del contrato y ensamblaje con Recovery D1 local y Notion mock: tests/notion-d1-adapters.test.mjs.
+- **CI REAL:** https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42862702505 — SUCCESS, **71/71 PASS**, 0 FAIL (54 broker + 5 registry + 8 onboarding + 4 scaffold). El mismo workflow mantiene el gate de no importar el candidato al servicio v12.
+- Inventario Cloudflare vivo, solamente lectura: D1 EU cerebro-fact001-recovery-lab-eu, Worker cerebro-fact001-recovery-runner-lab con un solo binding RECOVERY_DB a esa D1; Cron */5 * * * *; configuración enabled=1 y max_jobs_per_tick=1, único job tipo heartbeat COMPLETED. La cuenta sigue con 9 D1, no se crea ninguna.
+- Cloudflare D1 Time Travel GET bookmark devolvió SUCCESS para el snapshot actual. El bookmark no se guardó en GitHub ni se ejecutó Restore. **No equivale a export independiente ni rollback físicamente probado**; se requiere un gate adicional antes de aplicar el nuevo esquema.
+- Consulta remota a sqlite_master confirma: 0 tablas fact001_notion_% en D1 activa. El esquema nuevo está exclusivamente en Git, **NO EJECUTADO**.
+- Supabase cerebro-fact001-headless-provider-lab v12 y Notion ya configurado conservados; sin nuevos endpoints, tokens, tablas, rutas externas ni acciones provider. No se ha repetido la restauración E2E anterior.
+- **NEXT_BLOCK REAL:** checkpoint/export verificable de D1 + snapshot/rollback ensayado sin alterar heartbeat; después schema paralelo de propiedad/snapshots/audit en LAB, prueba comparativa OLD vs NEW, identidad segura Gateway → Notion service Vault, una única operación sintética física, y solo después estudiar automatización. La cola real actual no soporta Notion y queda sin cambios.
