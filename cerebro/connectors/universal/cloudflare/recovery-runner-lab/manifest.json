@@ -4,7 +4,7 @@
   "engine_id": "FACT-001/RECOVERY-RUNNER-001",
   "environment": "LAB",
   "version": "1.0.0",
-  "status": "LAB_DEPLOYED_CRON_PENDING_PHYSICAL_ACCEPTANCE",
+  "status": "LAB_CRON_D1_HEARTBEAT_PHYSICAL_VERIFIED",
   "autonomy": "INTERNAL_HEARTBEAT_ONLY",
   "owner": "CEREBRO-OS",
   "dependencies": [
@@ -25,6 +25,12 @@
       "type": "GitHub source branch",
       "ref": "cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109",
       "pr": 44
+    },
+    {
+      "type": "Recovery D1 Ledger",
+      "table": "fact001_recovery_v1",
+      "state": "COMPLETE",
+      "exclusive_new_d1": true
     }
   ],
   "contracts": {
@@ -51,7 +57,7 @@
     "additional_subscription_eur": 0,
     "max_jobs_per_tick": 1,
     "free_tier_guard_required": true,
-    "cron_current": "* * * * *",
+    "cron_current": "*/5 * * * *",
     "cron_target": "*/5 * * * *"
   },
   "security": {
@@ -65,7 +71,15 @@
   "observability": {
     "source": "D1 tick and recovery tables",
     "smoke_job": "FACT001-RUNNER-SMOKE-20261110-001",
-    "physical_e2e": "PENDING"
+    "physical_e2e": "VERIFIED_2026-11-10",
+    "last_smoke": {
+      "job_id": "FACT001-RUNNER-SMOKE-20261110-001",
+      "state": "COMPLETED",
+      "attempts": 1,
+      "tick": "lab-utc-1794305735273",
+      "durable_ledger": "COMPLETED",
+      "completed_at_utc": "2026-11-10T10:15:36.628Z"
+    }
   },
   "rollback": {
     "disable_cron": "PUT exclusively Worker schedules=[]",
