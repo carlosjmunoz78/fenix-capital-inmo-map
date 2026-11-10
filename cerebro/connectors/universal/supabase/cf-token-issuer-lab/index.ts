@@ -47,9 +47,11 @@ async function runOnce(){
    const stored=await tx`select vault.create_secret(${child.value},${NEW_VAULT_NAME},${'FACT001 LAB D1 Read only; expires 2026-11-17; no other privileges'}) as id`;
    if(stored.length!==1||!stored[0].id)throw Error('VAULT_CREATE_FAILED');
    return {status:'ISSUED_AND_VAULT_STORED',new_token:true,read_verified:true,expires_on:CHILD_EXPIRY};
-  }catch{
+  }catch(error){
    // Only the newly created token ID may be revoked; errors must never log token values.
    if(issuedId){try{await cloudflare('DELETE','/accounts/'+ACCOUNT_ID+'/tokens/'+issuedId,issuer);}catch{}}
+   const msg=error instanceof Error?error.message:'';
+   if(['TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED'].includes(msg)||/^CF_HTTP_(400|401|403|404|409|429|500|503)$/.test(msg))throw Error(msg);
    throw Error('LAB_ISSUE_FAILED');
   }
  }));
@@ -67,5 +69,10 @@ Deno.serve(async(req:Request)=>{
    return reply(200,{...result,account_id:ACCOUNT_ID,request_id:TOKEN_REQUEST_ID,operation:TOKEN_OP,credential_exposed:false,prod_resources_modified:false});
   }
   return reply(405,{status:'METHOD_DENIED'});
- }catch{return reply(503,{status:'BLOCKED',code:'CF_ISSUER_LAB_DENIED'});}
+ }catch(error){
+  const msg=error instanceof Error?error.message:'';
+  const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED']);
+  const code=allowed.has(msg)?msg:/^CF_HTTP_(400|401|403|404|409|429|500|503)$/.test(msg)?msg:'BACKEND_ERROR';
+  return reply(503,{status:'BLOCKED',code});
+ }
 });
