@@ -25,3 +25,9 @@ test('private asset retrieval yields real bytes for compositor but keeps QA pend
  assert.equal(r.bytes.length,1200);assert.equal(r.production_ready,false);
  await assert.rejects(loadStudioResourceBytes({asset_record,identity:permitted,mediaService:{read:async()=>({...await mediaService.read(),sha256:'0'.repeat(64)})}}),/HASH_MISMATCH/);
 });
+
+test('reuses existing library asset without a second download',async()=>{
+ const r=await acquireStudioResource({request:{...request,selected_asset_id:'sunset_jhbcentral'},identity,
+  mediaService:{acquire:async()=>({...await svc.acquire(),status:'ALREADY_STORED'})}});
+ assert.equal(r.downloaded,false);assert.equal(r.asset_record.metadata.external_provider,'polyhaven');
+});

@@ -32,7 +32,7 @@ export async function acquireStudioResource({request,identity,mediaService}){
  const q=checkRequest(request);checkIdentity(identity,'media.acquire');requireTransport(mediaService,'acquire');
  if(typeof q.selected_asset_id!=='string'||!/^[A-Za-z0-9_-]{1,120}$/.test(q.selected_asset_id))throw Error('UMS_EXPLICIT_SELECTION_REQUIRED');
  const result=await mediaService.acquire(intent(q,identity,'media.acquire'));
- if(result?.status!=='STORED'||result?.company_id!=='fenix'||result?.engine_id!=='UMS-001'||result?.environment!=='LAB'||
+ if(!['STORED','ALREADY_STORED'].includes(result?.status)||result?.company_id!=='fenix'||result?.engine_id!=='UMS-001'||result?.environment!=='LAB'||
  result.asset_id!==q.selected_asset_id||!/^media\//.test(result.file_key||'')||
  !/^[a-f0-9]{64}$/i.test(result.sha256||'')||result.license!=='CC0-1.0'||result.cost_eur!==0||
  result.production_approved!==false)throw Error('UMS_PROVIDER_RECEIPT_INVALID');
@@ -42,7 +42,7 @@ export async function acquireStudioResource({request,identity,mediaService}){
   provenance_ref:result.source,metadata:{external_provider:'polyhaven',download_sha256:result.sha256,
    media_key:result.file_key,rights_review:'PENDING',qa:'PENDING',production_approved:false,cost_eur:0}});
  return {producer_engine_id:'UMS-001',status:'CANDIDATE_REGISTERED_QA_PENDING',production_id:q.production_id,
-  request_id:q.request_id,asset_record:record,downloaded:true,production_ready:false,additional_cost_eur:0};
+  request_id:q.request_id,asset_record:record,downloaded:result.status==='STORED',production_ready:false,additional_cost_eur:0};
 }
 
 export async function loadStudioResourceBytes({asset_record,identity,mediaService}){
