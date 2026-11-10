@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-10T12:59:24.879Z",
+  "updated_at": "2026-11-10T13:01:55.814Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -529,7 +529,8 @@
     "github-wide-skills:28ee40ed17b08db36716",
     "github-wide-skills:c6e1949c73576b7d8cf6",
     "github-wide-skills:9fe2d82eaa01bd237a1d",
-    "github-wide-skills:11314cd8d02985089c28"
+    "github-wide-skills:11314cd8d02985089c28",
+    "github-wide-skills:c96c7a5f6eeac8767a8c"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1419,6 +1420,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 42755399594,
       "checkpointed_at": "2026-11-10T04:22:26.385Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:c96c7a5f6eeac8767a8c": {
+      "candidate_id": "github-wide-skills:c96c7a5f6eeac8767a8c",
+      "name": "fable-prompt",
+      "human_alias": "Fable Prompt",
+      "wrapper_id": "skillwrap:f2ada5f77a42b965f86c",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.52,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "jask-aran/skills",
+        "upstream_head_commit": "b0c5cbca85605a5830b0311ad3e26dae1324fcb0",
+        "manifest_sha256": "29a27ba737ffb7d5de07863755ba1a6c035ee2d90a4decad8f74e226c7d4335c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 42820754868,
+      "checkpointed_at": "2026-11-10T13:01:55.814Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32464,7 +32499,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32477,7 +32512,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 42793561339,
+  "last_discovery_run_id": 42820754868,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
