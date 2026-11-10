@@ -6,6 +6,7 @@ import {providerSpecs,readProviderInventory} from './provider.mjs';
 import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
 import {SERVICE_IDENTITIES,assertIdentityProbeOrder,probeServiceIdentity} from './service-identity.mjs';
 import {NOTION_SECRET,probeNotionWorkspace} from './notion-access.mjs';
+import {verifyNotionLifeCycle} from './notion-lifecycle.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
 const getBearer=(request:Request)=>{
@@ -43,14 +44,33 @@ function assertNotionReadOrder(body:unknown){
   Object.entries(expected).some(([k,v])=>x[k]!==v))throw Error('NOTION_ORDER_DENIED');
  return true;
 }
+function assertNotionLifeCycleOrder(body:unknown){
+ const exact={...SCOPE,client_id:'cerebro',source:'owner_order',
+  operation:'notion.lab_create_update_trash_once',request_id:'FACT001-NOTION-LAB-CRUD-20261110'};
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('NOTION_WRITE_ORDER_DENIED');
+ const o=body as Record<string,unknown>;
+ if(JSON.stringify(Object.keys(o).sort())!==JSON.stringify(Object.keys(exact).sort())||
+  Object.entries(exact).some(([k,v])=>o[k]!==v))throw Error('NOTION_WRITE_ORDER_DENIED');
+ return true;
+}
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan','service-identity','notion-workspace'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan','service-identity','notion-workspace','notion-lifecycle'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&request.method==='GET')return reply(200,{status:'SIGNED_HEADLESS_LAB_READY',scope:SCOPE});
+  if(route==='notion-lifecycle'&&request.method==='POST'){
+   if(Number(request.headers.get('content-length')||'0')>1200)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
+   try{assertNotionLifeCycleOrder(await request.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
+   let token='';
+   try{
+    token=await getVaultToken(NOTION_SECRET);
+    const result=await verifyNotionLifeCycle({token});
+    return reply(200,result);
+   }finally{token='';}
+  }
   if(route==='notion-workspace'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>1300)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    try{assertNotionReadOrder(await request.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
