@@ -1,5 +1,6 @@
 import { OPERA_CAPABILITIES } from './opera-catalog.mjs';
 import { VERCEL_CAPABILITIES } from './vercel-catalog.mjs';
+import { SUPABASE_ADMIN_CAPABILITIES } from './supabase-admin-catalog.mjs';
 // Declarative, versioned capability catalog. A capability listed as PLANNED is NEVER executable.
 export const CLOUDFLARE_ACCOUNT_ID = 'e39a57e1ac42650ca5a6d5307cf0ac8e';
 export const FACEBOOK_D1 = 'cerebro-facebook-autoqual-lab';
@@ -39,7 +40,8 @@ export const CAPABILITIES = Object.freeze([
   def('cloudflare.workers.rollback', 'POST', '/accounts/{account_id}/workers/scripts/{worker_name}/deployments', 'Workers Scripts Write', 'PLANNED_NOT_ENABLED', true),
   def('cloudflare.d1.backup', 'POST', '/accounts/{account_id}/d1/database/{database_id}/export', 'D1 Read', 'PLANNED_NOT_ENABLED'),
   ...OPERA_CAPABILITIES,
-  ...VERCEL_CAPABILITIES
+  ...VERCEL_CAPABILITIES,
+  ...SUPABASE_ADMIN_CAPABILITIES
 ]);
 export function getCapability(id) { return CAPABILITIES.find(cap=>cap.id===id) ?? null; }
 export function inventory() { return CAPABILITIES.map(({id,permission,status,sideEffect})=>({id,permission,status,side_effect:sideEffect})); }
