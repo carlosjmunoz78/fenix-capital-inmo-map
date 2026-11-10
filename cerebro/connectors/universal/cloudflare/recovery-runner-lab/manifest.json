@@ -1,0 +1,80 @@
+{
+  "schema_version": "cerebro.engine.manifest.v1",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001/RECOVERY-RUNNER-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "status": "LAB_DEPLOYED_CRON_PENDING_PHYSICAL_ACCEPTANCE",
+  "autonomy": "INTERNAL_HEARTBEAT_ONLY",
+  "owner": "CEREBRO-OS",
+  "dependencies": [
+    {
+      "type": "Cloudflare D1",
+      "name": "cerebro-fact001-recovery-lab-eu",
+      "uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+      "jurisdiction": "eu",
+      "owned_new": true
+    },
+    {
+      "type": "Cloudflare Worker",
+      "name": "cerebro-fact001-recovery-runner-lab",
+      "private": true,
+      "owned_new": true
+    },
+    {
+      "type": "GitHub source branch",
+      "ref": "cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109",
+      "pr": 44
+    }
+  ],
+  "contracts": {
+    "command_shape": "fixed 4D CEREBRO-only lab heartbeat",
+    "states": [
+      "QUEUED",
+      "RUNNING",
+      "COMPLETED",
+      "RECONCILE",
+      "BLOCKED"
+    ],
+    "idempotency": "SHA256 job + 4D + client; D1 unique key",
+    "database_tables": [
+      "fact001_runner_config_v1",
+      "fact001_runner_jobs_v1",
+      "fact001_runner_ticks_v1",
+      "fact001_recovery_v1"
+    ],
+    "http_public": false,
+    "chatgpt_identity": "MCP OAuth distinct; no enqueue route",
+    "cerebro_identity": "Cron fixed LAB only; main gateway not connected"
+  },
+  "budgets": {
+    "additional_subscription_eur": 0,
+    "max_jobs_per_tick": 1,
+    "free_tier_guard_required": true,
+    "cron_current": "* * * * *",
+    "cron_target": "*/5 * * * *"
+  },
+  "security": {
+    "secrets": 0,
+    "external_api_calls": 0,
+    "workers_dev": false,
+    "preview_urls": false,
+    "prod_mutations": false,
+    "requires_preprod_before_promotion": true
+  },
+  "observability": {
+    "source": "D1 tick and recovery tables",
+    "smoke_job": "FACT001-RUNNER-SMOKE-20261110-001",
+    "physical_e2e": "PENDING"
+  },
+  "rollback": {
+    "disable_cron": "PUT exclusively Worker schedules=[]",
+    "disable_processing": "UPDATE new D1 fact001_runner_config_v1 enabled=0",
+    "delete_resources": false,
+    "backup": "GitHub source and D1 Time Travel Free Tier 7 days"
+  },
+  "rebuild": {
+    "source": "worker.mjs + schema.sql + src/recovery-d1-ledger.mjs + wrangler.lab.jsonc",
+    "never_overwrite_existing_resources": true
+  }
+}
