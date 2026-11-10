@@ -6,7 +6,7 @@
   "version": "selective-met-v0.1",
   "status": "SELECTIVE_MET_PRIVATE_E2E_VERIFIED_LAB",
   "source_of_truth": "cerebro/media-studio/v2/runtime/ums001-producer-orchestrator-bridge-lab.mjs",
-  "orchestrator_binding": "DEFINED_TESTED_MOCK_NOT_ATTACHED_TO_GENERAL_CEREBRO",
+  "orchestrator_binding": "FACT001_LAB_SERVICE_BINDING_DEPLOYED_RUNTIME_NOT_VERIFIED",
   "allowed_providers": {
     "polyhaven": "EXISTING_PRESERVED",
     "ambientcg": "METADATA_ONLY_EXISTING_PRESERVED",
@@ -104,5 +104,30 @@
     "publish_authorized": false,
     "paid_cost_eur_reported": 0,
     "global_cerebro_orchestrator_connected": false
+  },
+  "fact001_gateway_binding": {
+    "status": "DEPLOYED_PRIVATE_RPC_PHYSICAL_E2E_NOT_OBSERVED",
+    "worker": "cerebro-fact001-gateway-lab-eu-20261109",
+    "worker_version": "16bb1a1a-e0a7-4fe8-b15c-8d249c28cfa4",
+    "service_binding": "UMS_PRODUCER",
+    "target_worker": "cerebro-ums001-producer-private-gateway-lab-eu",
+    "target_entrypoint": "ProducerLibraryLab",
+    "fact_entrypoint": "CEREBROFactUMS001Lab",
+    "method": "route",
+    "gateway_core_enabled": false,
+    "ums001_private_binding_enabled": true,
+    "secret_present": true,
+    "secret_value_logged": false,
+    "public_route": false,
+    "scheduled_events": 0,
+    "temporary_probe_removed": true,
+    "temporary_lab_kv_binding_removed": true,
+    "auth_contract_local_tests_passed": 15,
+    "runtime_proof_receipt_observed": false,
+    "console_connected": false,
+    "global_prod_supervisor_connected": false,
+    "publish_authorized": false,
+    "additional_cost_eur_reported": 0,
+    "rollback_previous_version": "7c6dc6f0-0584-4939-a8a1-e86ad320a8ef"
   }
 }
