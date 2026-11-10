@@ -73,6 +73,7 @@ Deno.serve(async(req:Request)=>{
   const msg=error instanceof Error?error.message:'';
   const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED']);
   const code=allowed.has(msg)?msg:/^CF_HTTP_(400|401|403|404|409|429|500|503)$/.test(msg)?msg:'BACKEND_ERROR';
+  console.warn('FACT001_LAB_ISSUER_DENIAL='+code);
   return reply(503,{status:'BLOCKED',code});
  }
 });
