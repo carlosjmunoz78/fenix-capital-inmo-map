@@ -1,6 +1,6 @@
 # FACT-001 · Recovery / dual client MCP and CEREBRO Gateway · LAB
 
-Fecha: 2026-11-10. Estado: **CÓDIGO Y TESTS HECHOS, INTEGRACIÓN NO DESPLEGADA**.
+Fecha: 2026-11-10. Estado: **RECOVERY RUNNER V0 DESPLEGADO Y E2E REMOTO LAB VERIFICADO; GATEWAY/EXTERNAL PROVIDERS NO CONECTADOS**.
 Objetivo: evitar que cortes temporales de Cloudflare/GitHub/Supabase/Notion/Vercel/Opera dupliquen operaciones, con mínimo coste y dos identidades independientes.
 
 ## Alcance existente, no sustituir
@@ -33,3 +33,13 @@ Huella independiente por `company_id`, `engine_id`, `environment`, `version`, `c
 
 ## Limitaciones explícitas
 Esto **no arregla** las desconexiones del transporte o la UI de ChatGPT por sí solo. No es un watchdog ejecutándose ni un agente autónomo ya desplegado. No renueva OAuth automáticamente sin permiso del proveedor. No se debe confiar en la bandera `durable` de un almacén falso; antes de PROD se necesita garantizar que el adaptador D1 se use realmente y cubrir amenazas de falsificación del store. El reinicio de procesos debe probarse en servicio físico separado. Los dos conectores de herramientas en ChatGPT **no equivalen** a la identidad de servicio del CEREBRO Console.
+
+## Actualización física FACT-001 · 10/11/2026
+
+- D1 exclusiva nueva `cerebro-fact001-recovery-lab-eu` (UUID `1305f791-7c44-47f9-946b-f330a09c88aa`, jurisdicción europea), creada con OAuth MCP oficial desde ChatGPT sin usar emisor de token privilegiado. Es la novena D1 de la cuenta (límite gratuito: 10). Esquema independiente, con `fact001_runner_config_v1`, `fact001_runner_jobs_v1`, `fact001_runner_ticks_v1` y `fact001_recovery_v1`.
+- Worker independiente `cerebro-fact001-recovery-runner-lab` desplegado por API oficial, ligado **únicamente** a dicha D1. Subdomain y previews FALSE, GET settings verificado. `fetch` devuelve 404; ejecutor único `scheduled`, cero APIs externas y solamente `fact001.lab.heartbeat` sobre `client_id=cerebro`/4D/LAB. Capacidad max_jobs_per_tick=1 y `enabled` OFF por defecto en schema.
+- Test Worker local por [GitHub Actions #42795875733](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42795875733) y versión con ledger por [#42797398734](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42797398734), 11 tests cada uno, SUCCESS.
+- **PHYSICAL E2E remoto:** Cron real se disparó y tarea de humo `FACT001-RUNNER-SMOKE-20261110-001` quedó `COMPLETED` con `attempts=1` y timestamp `2026-11-10T10:15:36.628Z`. D1 registró un tick `COMPLETED` y el siguiente `EMPTY`; `fact001_recovery_v1` tiene estado `COMPLETED`, attempt=1, sin cuerpo ni credenciales. Versión Worker activa `a9caa600-c26d-4368-b060-57275f983963` al comprobar.
+- Cron temporal 1 minuto reducido a **`*/5 * * * *`** tras prueba, verificado por API. Hasta 288 invocaciones por día contra el presupuesto Workers Free; no suscripciones nuevas. APP/CRM/PROD/main/DNS/no-scope Worker sin cambios por esta operación.
+- [Runbook, manifest y rollback](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/tree/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/cloudflare/recovery-runner-lab). Estos resultados sustituyen **solo** los anteriores `NO DESPLEGADO` y `PENDIENTE CRON` de este documento. El módulo `src/recovery.mjs` existe pero la ejecución actual utiliza una vía Worker/D1 exclusivamente LAB para heartbeat; aún no hay generalización de su API a los proveedores, autenticación de enqueue ni CEREBRO Console PROD.
+- **Siguiente gate:** autenticación service-to-service del Gateway y registro de tareas sin secretos, catálogo allowlist por proveedor, políticas/tribunal/budgets/rollback y pruebas de interrupción de conexión; no habilitar escrituras a terceros en producción. La cuenta Cloudflare aún tiene token emisor con permisos sobrantes que requiere rotación segura.
