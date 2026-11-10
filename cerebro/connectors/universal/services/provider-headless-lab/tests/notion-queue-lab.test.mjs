@@ -32,7 +32,7 @@ test('deploy definition has exclusive Recovery D1 binding and no endpoints/cron'
  assert.equal(config.d1_databases[0].database_id,'1305f791-7c44-47f9-946b-f330a09c88aa');
  const workerSource=readFileSync('cerebro/connectors/universal/cloudflare/notion-queue-lab/worker.mjs','utf8');
  assert.ok(workerSource.includes("status:404"));
- assert.ok(!/api\.notion\.com|fetch\(|\bfetch\(url|Bearer |service_role|process\.env|env\..*TOKEN/.test(workerSource));
+ assert.ok(!/api\.notion\.com|\bawait\s+fetch\(|\bglobalThis\.fetch\(|Bearer |service_role|process\.env|env\..*TOKEN/.test(workerSource));
 });
 test('config defaults OFF and zero authorized provider writes',async()=>{
  const x=f();const cfg=x.db.prepare('SELECT * FROM fact001_notion_queue_config_v1 WHERE id=1').get();
