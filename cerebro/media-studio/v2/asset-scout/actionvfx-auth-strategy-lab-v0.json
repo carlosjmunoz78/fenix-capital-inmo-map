@@ -47,11 +47,11 @@
   },
   "verified_account_gates": {
     "account_status": "ACTIVE_AUTHENTICATED",
-    "company_field": "EMPTY",
-    "commercial_license": "ACTIVE_INDIVIDUAL_NOT_APPROVED_FOR_FENIX_COMPANY_TEAM_USE",
+    "company_field": "FENIX_CAPITAL_USER_PROFILE_PREVIOUSLY_VERIFIED",
+    "commercial_license": "STARTUP_UPGRADED_AS_CONFIRMED_BY_VENDOR_EMAIL_PENDING_REVENUE_BAND_CONFIRMATION",
     "api_key": "GITHUB_SECRET_PRESENT_PROVIDER_USER_KEY_PRESENT_NO_PARTNER_API_ACCESS_PROVEN",
-    "free_effects_download": "WAITING_FOR_LICENSE_COMPLETION",
-    "company_profile": "FENIX_CAPITAL_FIELD_PRESENT_BUT_LICENSEE_PERSONAL"
+    "free_effects_download": "PROVIDER_CONFIRMED_STARTUP_PENDING_ELEGIBILITY_AND_SITE_DOWNLOAD_RULES",
+    "company_profile": "FENIX_CAPITAL_USER_PROFILE_PREVIOUSLY_VERIFIED"
   },
   "policy": {
     "source_of_truth_for_auth": "Provider and browser's secure session storage",
@@ -64,12 +64,12 @@
   "readiness": {
     "google_sso_preference": "RECORDED_NOT_AUTOMATION_PROVEN",
     "current_authenticated_browser": "VERIFIED",
-    "commercial_free_asset_use": "PERSONAL_NAMED_LICENSEE_ONLY_WHERE_TERMS_ALLOW; COMPANY_SHARED_REUSE_PENDING_LICENSE_UPGRADE",
+    "commercial_free_asset_use": "STARTUP_PROVIDER_UPGRADE_CONFIRMED_BY_EMAIL; REVENUE_BAND_AND_PERMITTED_DOWNLOAD_SHARING_NOT_VERIFIED",
     "autonomous_login": "NOT_DEPLOYED",
     "browser_bridge_integration": "PENDING",
     "public_catalog_discovery_api": "CATEGORY_ENDPOINT_HTTP_200_VERIFIED_IN_OPERA",
-    "private_partner_api": "RESTRICTED_TO_APPROVED_PARTNERS",
-    "asset_download_by_CEREBRO": "PREPARE_PERSONAL_LICENSEE_ACCESS_ONLY_IN_AUTHORIZED_NONSHARED_ENVIRONMENT; COMPANY_SHARED_PENDING_LICENSE",
+    "private_partner_api": "PROVIDER_CTO_CONFIRMED_API_NOT_AVAILABLE_FOR_FREE_PRODUCTS",
+    "asset_download_by_CEREBRO": "FREE_PRODUCT_API_UNAVAILABLE; AUTHENTICATED_UI_METHOD_UNCONFIRMED",
     "public_collections_api": "HTTP_500_VERIFIED_IN_OPERA"
   },
   "links": {
@@ -103,27 +103,28 @@
     "no_subscription_or_charge": true,
     "future_license_upgrade_date": "UNSCHEDULED_OWNER_DECISION",
     "source": "explicit owner instruction in current conversation",
-    "legal_interpretation": "Intent recorded, not license grant; Individual permits usage only by named licensee and is not sufficient for shared company/team or service resource library."
+    "legal_interpretation": "Intent recorded, not license grant; Individual permits usage only by named licensee and is not sufficient for shared company/team or service resource library.",
+    "historical_only": true
   },
   "current_runtime_policy": {
     "authorized_now": [
-      "Public ActionVFX category discovery and indexing",
-      "VFX creative planning, curation and bookmarked free collection queue",
-      "ActionVFX use by named personal licensee in nonshared context within the actual Individual license terms, without additional human approvals, where execution surface is technically supported",
-      "Original/CC0 media generation and reuse within CEREBRO"
+      "Public catalog/category discovery without use of private ActionVFX stock",
+      "Metadata-only selection and curation of free asset links",
+      "Original or CC0 media creation and reuse for Fénix"
     ],
     "gated_until_licensing_clear": [
-      "Giving ActionVFX raw stock to other team members or a shared company-wide asset library",
-      "Reusing source stock across Fénix companies or different licensees",
-      "Using ActionVFX stock as AI model training or to generate new stock media with AI tools",
-      "Any use not covered by the individual license"
+      "ActionVFX free-asset automated API downloads (provider explicitly says unavailable)",
+      "Unverified browser-assisted automated downloads pending vendor permission",
+      "AI model training on ActionVFX files, or AI generation of new media based on ActionVFX stock, without express license",
+      "Company-wide raw asset distribution beyond provider rights or until exact eligibility confirmed"
     ],
     "human_required": "LEGAL_REQUIRED when source rights conflict with intended use; otherwise do not repeatedly ask for approval",
     "publication": "OFF",
     "paid_upgrade": "NOT_AUTHORIZED",
     "reasons": [
-      "ActionVFX Individual license is limited to named licensee, under 200k USD revenue/funding, not a company library",
-      "Stock cannot be used for training or generating new media with AI models without express license permission"
+      "Vendor support confirms Startup license upgrade, but requests annual revenue tier confirmation",
+      "Vendor CTO confirms free products cannot be accessed via API",
+      "Permitted authenticated download workflow remains unconfirmed"
     ]
   },
   "owner_direction_revision_2026_11_09": {
@@ -134,7 +135,29 @@
     "license_terms_still_apply": true,
     "consent_includes_free_reversible_actions": true,
     "paid_service_or_key_leak": false,
-    "status": "RECORDED"
+    "status": "RECORDED",
+    "historical_only": true
   },
-  "media_asset_queue_path": "cerebro/media-studio/v2/asset-scout/actionvfx-ready-queue-v0.json"
+  "media_asset_queue_path": "cerebro/media-studio/v2/asset-scout/actionvfx-ready-queue-v0.json",
+  "provider_support_2026_11_09": {
+    "support_contact": "David Lugo / ActionVFX",
+    "support_email_thread_subject": "Re: Fénix Capital — Company license profile and free ActionVFX API integration clarification",
+    "license_upgrade": "PROVIDER_CONFIRMED_STARTUP_UPGRADE_PER_EMAIL",
+    "license_actual_site_post_change": "NOT_REVERIFIED",
+    "startup_eligibility": "REVENUE_TIER_NOT_CONFIRMED_BY_OWNER",
+    "revenue_bands_usd_annual": {
+      "Startup": "<3M",
+      "Enterprise1": "3M–20M",
+      "Enterprise2": "21M–49M",
+      "Enterprise3": "50M–99M",
+      "Enterprise4": ">=100M"
+    },
+    "api_free_assets": "OFFICIALLY_UNAVAILABLE_CONFIRMED_BY_PROVIDER_CTO",
+    "human_ui_download_policy": "QUESTION_SENT_TO_PROVIDER_AWAITING_REPLY",
+    "provider_reply_sent": "2026-11-10",
+    "reply_identity": "Fénix Capital / Fénix Inmobiliaria, Córdoba, Spain, https://fenixcapital.es",
+    "personal_tax_data_sent": false,
+    "annual_revenue_value_sent": false,
+    "paid_service_requested": false
+  }
 }
