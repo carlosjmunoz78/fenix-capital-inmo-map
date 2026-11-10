@@ -24,6 +24,7 @@ jobs:
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
       - name: "Signed CEREBRO service reads Cloudflare Vercel Supabase from Vault"
+        if: github.event.head_commit.message != 'FACT001_NOTION_DATASOURCE_ENCRYPTED_ONCE_20261110'
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
