@@ -39,6 +39,32 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}})},
  async scheduled(controller,env,ctx){
+  if(controller.cron==='*/2 * * * *' && env.GATEWAY_ENABLED==='true'){
+   ctx.waitUntil((async()=>{
+    const key='meta/ums001-producer-new-download-2026-11-10';
+    if(await env.LAB_KV.get(key))return;
+    await env.LAB_KV.put(key,JSON.stringify({status:'STARTED',at:new Date().toISOString()}));
+    const base={company_id:COMPANY,engine_id:ENGINE,environment:ENV,kind:'hdris',query:'sunset'};
+    try{
+     const results=await search(env,base);
+     let receipt=null,last='NO_CANDIDATE';
+     const candidates=results.results.filter(x=>x.known===false).slice(0,3);
+     for(let i=0;i<candidates.length;i++){
+      try{
+       receipt=await acquire(env,{...base,asset_id:candidates[i].id,request_id:'UMS001-NEW-20261110-'+i});
+       if(receipt.status==='STORED')break;
+      }catch(e){last=String(e?.message||e).slice(0,80);receipt=null;}
+     }
+     if(!receipt||receipt.status!=='STORED')throw Error('NO_NEW_SMALL_FILE:'+last);
+     const retrieved=await read(env,{...base,asset_id:receipt.asset_id});
+     if(receipt.sha256!==retrieved.sha256||receipt.bytes!==retrieved.bytes)throw Error('HANDOFF_SHA_MISMATCH');
+     await env.LAB_KV.put(key,JSON.stringify({status:'COMPLETED',at:new Date().toISOString(),asset_id:receipt.asset_id,
+      bytes:retrieved.bytes,sha256:retrieved.sha256,selected_by:'ums001-producer-lab',downloaded:true,
+      provider:'Poly Haven',license:'CC0-1.0',private_rpc:true,production_approved:false,paid_cost_eur:0}));
+    }catch(e){await env.LAB_KV.put(key,JSON.stringify({status:'ERROR',at:new Date().toISOString(),code:String(e?.message||e).slice(0,180)}));}
+   })());
+   return;
+  }
   if(controller.cron!=='* * * * *'||env.GATEWAY_ENABLED!=='true')return;
   ctx.waitUntil((async()=>{
    const key='meta/ums001-producer-binding-acceptance-2026-11-10';
