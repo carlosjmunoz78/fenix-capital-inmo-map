@@ -34,6 +34,7 @@ jobs:
           if(!provider.includes("method:'GET'")||provider.includes("method:'DELETE'")||provider.includes("method:'POST'"))throw Error('UPSTREAM_WRITE_FORBIDDEN');
           if(!source.includes('vault.decrypted_secrets')||!policy.includes('payload.actor!==OWNER'))throw Error('VAULT_OR_OWNER_GATE_MISSING');
           if(source.includes('pages-lifecycle')||source.includes('verifyPagesLifecycle'))throw Error('TEMPORARY_PAGES_WRITE_ROUTE_STILL_ACTIVE');
+          if(source.includes('notion-governed-operator')||source.includes('notion.lab.child.'))throw Error('NOTION_CANDIDATE_MUST_NOT_BE_ROUTED');
           if(!pages.includes('CLOUDFLARE_PAGES_ALREADY_EXISTS')||!pages.includes('CLOUDFLARE_PAGES_RESIDUAL_PROJECT')||!pages.includes('assertOwned(last)'))throw Error('PAGES_TEST_CONTRACT_MISSING');
           console.log('FACT001_BROKER_PROVIDER_WRITE_COUNT=0');
           console.log('FACT001_BROKER_CLOUDFLARE_PAGES_LIFECYCLE=RETIRED_FROM_ACTIVE_SERVICE');
