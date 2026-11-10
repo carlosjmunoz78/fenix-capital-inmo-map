@@ -40,16 +40,10 @@ export class CEREBROFactUMS001Lab extends WorkerEntrypoint {
 // Preserve the FACT-001 Worker’s exact existing public response and disabled behavior.
 export default {
  async queue(batch,env){
-  const key='meta/fact001-ums001-queue-trace/v1/PHYS20261110B';
-  const record=async(stage,extra={})=>{if(env.LAB_KV)await env.LAB_KV.put(key,JSON.stringify({stage,at:new Date().toISOString(),...extra}));};
-  await record('RECEIVED',{queue:batch?.queue??null,count:batch?.messages?.length??null,flag:env.UMS001_QUEUE_ENABLED??null});
-  if(batch.queue!=='cerebro-fact001-ums001-read-lab-eu'||env.UMS001_QUEUE_ENABLED!=='true'){await record('REJECTED_ROUTING',{queue:batch.queue,flag:env.UMS001_QUEUE_ENABLED});throw Error('FACT_UMS_QUEUE_WRONG_SOURCE_OR_DISABLED');}
+  if(batch.queue!=='cerebro-fact001-ums001-read-lab-eu'||env.UMS001_QUEUE_ENABLED!=='true')throw Error('FACT_UMS_QUEUE_WRONG_SOURCE_OR_DISABLED');
   for(const message of batch.messages){
-   const data=message.body;
-   const meta={message_type:typeof data,body_keys:data&&typeof data==='object'?Object.keys(data).slice(0,16):[],request_id:typeof data?.request_id==='string'?data.request_id.slice(0,65):null};
-   await record('HANDLING',meta);
-   try{const receipt=await consumeUMS001QueueCommand(data,env,executeFactUMS001Lab);await record('COMPLETED',{request_id:receipt.request_id,sha256_ok:!!receipt.sha256});message.ack();}
-   catch(error){const code=String(error?.message||'UNKNOWN').slice(0,120);await record('ERROR',{...meta,code});console.error('UMS001_QUEUE_REJECTED',code);message.ack();}
+   try{await consumeUMS001QueueCommand(message.body,env,executeFactUMS001Lab);message.ack();}
+   catch(error){console.error('UMS001_QUEUE_REJECTED',String(error?.message||'UNKNOWN').slice(0,120));message.ack();}
   }
  },
  async fetch(){return new Response(DENIED_RESPONSE,{status:403,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
