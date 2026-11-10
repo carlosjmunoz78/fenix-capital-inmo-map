@@ -149,7 +149,7 @@
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
         "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
-        "One-off write route removed after clean-up; durable general-purpose write broker with policy + idempotency + rollback pending",
+        "Governed Notion LAB candidate + SQLite D1 CAS, ownership, snapshots and append-only audit: 71/71 local CI; not deployed, no provider writes, physical D1 schema and scoped service binding pending",
         "Scheduled automation queue, backup/rebuild, and PROD promotion are still pending"
       ],
       "verification": {
@@ -183,6 +183,22 @@
         "post_test_write_route_enabled": false,
         "production_verified": false,
         "full_workspace_backup_verified": false
+      },
+      "candidate": {
+        "name": "FACT001_NOTION_GOVERNED_D1_ADAPTER_LAB",
+        "code_status": "LOCAL_CI_GREEN_NOT_DEPLOYED",
+        "external_writes_enabled": false,
+        "provider_live_e2e": false,
+        "recovery_d1": "cerebro-fact001-recovery-lab-eu",
+        "existing_runner": "cerebro-fact001-recovery-runner-lab",
+        "runner_allows_notions_jobs": false,
+        "d1_notion_schema_applied": false,
+        "latest_ci_run": 42862702505,
+        "local_ci_total": 71,
+        "local_ci_failed": 0,
+        "full_backup_gate": "PENDING",
+        "note": "D1 time-travel bookmark verified via authenticated Cloudflare API; complete export and tested rollback required before applying additive schema",
+        "next_block": "FACT001_NOTION_D1_BACKUP_AND_PARALLEL_E2E"
       }
     },
     {
