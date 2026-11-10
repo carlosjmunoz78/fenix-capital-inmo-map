@@ -153,7 +153,9 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_QUEUE_PHYSICAL_CRON_LAB_2026-11-10.md",
         "Cloudflare D1 Notion queue job completed with attempts=1 at 2026-11-10T19:53:27.944Z; independent private Worker exclusive D1 binding, Cron then removed and queue disabled",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42889919376",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42891142176"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42891142176",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42897260029",
+        "27/27 previously opened Opera root pages and databases GET 200 using CEREBRO own Vault identity, OIDC signatures enforced; status-only, zero content retrieved, zero provider writes"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -207,7 +209,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_WORKER_BROKER_AUTH_AND_SCOPED_WORKSPACE_EXPORT",
+        "next_block": "FACT001_NOTION_NEXT_12_ROOTS_SHARE_THEN_CHECK; EXISTING_27_PASS",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -227,10 +229,10 @@
         "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
         "signed_cerebro_d1_read_run_id": 42873202783,
         "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
-        "service_version": 13,
+        "service_version": 15,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "SIGNED_WORKER_BROKER_CHANNEL_NOT_PROVISIONED; NOTION_WORKSPACE_ROOTS_NOT_SHARED_WITH_CEREBRO_SERVICE",
+        "actual_blocker": "FULL_NOTION_WORKSPACE_COVERAGE_AND_BACKUP_NOT_VERIFIED; SIGNED_WORKER_TO_BROKER_WRITE_PIPELINE_NOT_PROVISIONED",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -276,10 +278,22 @@
           "ci_run": 42894767890,
           "existing_verified_default_root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
           "policy": "New CEREBRO pages must use service-accessible owner-approved connected parent; never create unshared top-level roots",
-          "new_root_permissions_status": "HUMAN_PER_PAGE_SETUP_IN_OPERA_IN_PROGRESS",
+          "new_root_permissions_status": "27_EXISTING_ROOTS_VERIFIED_INDEPENDENT_SERVICE; NEXT_12_OPERA_TABS_OPEN_FOR_HUMAN",
           "no_new_oauth_scope": true
         },
-        "full_workspace_access_status": "HUMAN_ROOT_SHARE_IN_PROGRESS; DO_NOT_CLAIM_VERIFIED"
+        "full_workspace_access_status": "PARTIAL_COVERAGE_CONFIRMED_27_ROOTS_FULL_WORKSPACE_INVENTORY_PENDING",
+        "opera_connected_root_access": {
+          "status": "VERIFIED_PHYSICAL_CEREBRO_INDEPENDENT_NOTION_SERVICE",
+          "checked": 27,
+          "accessible": 27,
+          "denied": 0,
+          "inconclusive": 0,
+          "proof_action_run": 42897260029,
+          "identity": "GitHub OIDC pinned workflow → LAB Edge Function → independent Vault credential",
+          "content_read": false,
+          "notion_writes": false,
+          "background_provider_writes": false
+        }
       }
     },
     {
