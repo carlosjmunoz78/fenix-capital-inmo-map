@@ -301,5 +301,48 @@
     "readonly_token_cutover_candidate_test_proof": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42709522476",
     "readonly_token_cutover_deployed": false,
     "scoped_token_vault_count": 0
+  },
+  "token_factory_v0": {
+    "status": "DESIGNED_NOT_DEPLOYED",
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "clients": [
+      "chatgpt_normal_connected_cloudflare",
+      "cerebro_gateway"
+    ],
+    "existing_user_token": "CEREBRO-OS-CLOUDFLARE-UNIVERSAL (59 permissions, no token management 403)",
+    "next_human_token": "CEREBRO-CLOUDFLARE-TOKEN-FACTORY-V1",
+    "next_vault_name": "cerebro_cf_account_token_issuer_v1",
+    "required_permission": "Account > Account API Tokens > Edit",
+    "oauth_alternative_scope": "account_api_tokens:create",
+    "account_token_creation_supported_by_official_api": true,
+    "user_token_creation_optional_separate_bootstrap": "User > API Tokens > Edit, via Create additional tokens template",
+    "number_of_additional_initial_manual_tokens_account_only": 1,
+    "expected_manual_tokens_total_account_only": 2,
+    "direct_cloudflare_chatgpt_token_issuer_verified": false,
+    "shared_broker_token_issuer_verified": false,
+    "autonomous_full_cloudflare_verified": false,
+    "prohibit_secret_return_to_clients": true,
+    "prohibit_auto_escalation": true,
+    "per_operation_controls": [
+      "4D contract",
+      "least privilege",
+      "explicit account and zone scope",
+      "risk and cost gate",
+      "token ttl",
+      "audit no secrets",
+      "idempotency",
+      "dry run",
+      "rollback/revocation"
+    ],
+    "human_required": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
   }
 }
