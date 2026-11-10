@@ -12,6 +12,10 @@ export async function processNotionQueueTick(env,scheduledTime=Date.now()){
  if(!cfg||Number(cfg.enabled)!==1)return {status:'DISABLED',provider_writes:0};
  if(Number(cfg.provider_writes_enabled)!==0||Number(cfg.max_jobs_per_tick)!==1||
     Number(cfg.max_additional_cost_eur)!==0)return {status:'BLOCKED',reason:'COST_OR_PROVIDER_POLICY'};
+ // Crash-safe: expired claims are irreversibly RECONCILE, never re-queued.
+ await db.prepare(`UPDATE fact001_notion_queue_jobs_v1 SET state='RECONCILE',
+    updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')
+    WHERE state='RUNNING' AND lease_until_ms<=?1`).bind(scheduledTime).run();
  // Only pre-existing synthetic probe rows can ever be processed in v0. Notion is not called.
  const claimed=await db.prepare(`UPDATE fact001_notion_queue_jobs_v1
    SET state='RUNNING',attempts=attempts+1,lease_until_ms=?1,
