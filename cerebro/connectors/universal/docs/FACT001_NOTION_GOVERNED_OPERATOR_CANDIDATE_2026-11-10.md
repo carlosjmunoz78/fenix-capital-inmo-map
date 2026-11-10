@@ -72,3 +72,26 @@ HECHO EN CODIGO Y CI; NO DESPLEGADO EN CEREBRO. La prueba real de restauración 
 - `backup_and_rollback` de Notion **sigue PENDING** en el registro integral porque falta archivo externo, pruebas completas de reconstrucción y rollback de servicio, no solo D1 LAB.
 - `autonomous_queue`, `cost_guard_verified`, `production_promotion_policy`, `observability_and_audit` globales siguen PENDING. No afirmar 11/11 ni autonomía Notion.
 - **NEXT_BLOCK:** enlazar identidad CEREBRO firmada con el broker y D1 persistente sin credenciales en Worker; registrar snapshot/audit y ejecutar un único comando LAB sintético sobre Notion, con lectura postacción, reconciliación, costes y rollback. Después certificar autonomía sin activar PROD prematuramente.
+
+
+## FACT001 · CIERRE BACKUP INDEPENDIENTE + CEREBRO D1 READ CANARY (10/11/2026)
+
+**HECHO: archivo de respaldo independiente real, ámbito únicamente FACT-001 D1.**
+- Se generó una copia SQL portátil a partir de la D1 real `cerebro-fact001-recovery-lab-eu`, con bookmark fijo de inicio/fin `00000067-00000000-0000511f-d8de0671ee263b30f5f8a48c3e065cc3`.
+- Snapshot: **7 tablas FACT001, 2 triggers y 1 índice**; 100 ticks y el resto de las filas originales. No incluye `_cf_KV`, secretos, credenciales, cuerpos Notion ni workspace completo.
+- Archivo SQL = 18.871 bytes, SHA-256 `4f16350fe1e709b2095b4658336ea6a7c0104a29ed02e7ccb58f8ab3476bbfeb`.
+- Copia restaurada en **SQLite nuevo y vacío** con `executescript`, `PRAGMA integrity_check = ok` y `foreign_key_check = 0 violations`; hashes y conteo coinciden. Archivo ZIP + manifiesto guardado en Biblioteca privada de ChatGPT: `/CEREBRO OS/Backups/FACT-001/FACT001_CEREBRO_RECOVERY_D1_EU_BACKUP_2026-11-10.zip`. No se subió a este repositorio público. Descarga también disponible como artefacto del chat.
+- El exportador SQL nativo de Cloudflare también devolvió `status=complete`, pero el URL temporal al SQL se bloqueó al descargar; la copia propia NO debe describirse como export SQL nativo byte a byte. Es un **respaldo lógico** con restauración comprobada localmente. Recuperación remota Cloudflare D1 por Time Travel sobre una copia aislada fue probada previamente, no se ha usado la función de Restore sobre la D1 original.
+
+**HECHO: conexión independiente firmada a D1 solo lectura, sin credenciales en frontend.**
+- Código `services/provider-headless-lab/notion-d1-status.mjs`: consulta D1 SQL constante en URL fija, toma token D1 Read desde `cerebro_cf_d1_read_lab_20261110` en Vault; retorna únicamente cuatro contadores sin datos privados, cero writes y sin aceptar SQL o D1 arbitraria.
+- Supabase LAB Edge function específica `cerebro-fact001-headless-provider-lab` desplegada v13 ACTIVE, conserva OIDC GitHub RS256, `verify_jwt=false` porque valida firma de servicio antes de Vault; cambio exclusivamente lectura sin nuevas rutas de escritura. Su versión anterior v12 es rollback conocido y conserva su bundle.
+- Evidencia física: [GitHub Actions #42873202783](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42873202783) SUCCESS. `FACT001_NOTION_D1_ANON_401=PASS`, `FORGED_401=PASS`, `WRONG_SCOPE_403=PASS`, `SIGNED_READ=PASS`, `HTTP=200`. Se retiraron disparador GitHub de un solo uso y petición sintética tras el ensayo. CI LAB del broker #42873548729 SUCCESS.
+- Se conservan límites 4D, `company_id=fenix-capital`, `engine_id=FACT-001`, `environment=LAB`, `version=1.0.0`. Sin acceso a App/CRM/WordPress, `main` ni cambios en la D1 por este read.
+
+**BLOQUEO VERIFICADO PARA ESCRITURA FULL (NO FABRICAR VERDE):**
+- Se inventariaron por API Cloudflare los **3 tokens de cuenta** activos, usando solo sus metadatos. El token LAB propio de CEREBRO tiene `D1 Read`, no `D1 Write`. Existe otro token temporal de Workers Admin y un token emisor de account que mantiene privilegios sobrantes, entre ellos Billing Write e Integration Write. No se utilizará este emisor para otorgar escrituras.
+- Para una escritura real gobernada CEREBRO se necesita un canal D1 Write de mínimo privilegio y credencial propia, política de alcance LAB y control de permisos, además del cost guard físico, ledger CAS, snapshot/audit y respuesta ambigua reconciliada. Esto está **pendiente**; no desplegar el operador de mutación ni admitir jobs `notion.*write` en el Worker actual.
+- El gate integral `backup_and_rollback` sigue PENDING para Notion completo (no es solo D1), al igual que `autonomous_queue`, `cost_guard_verified`, `production_promotion_policy` y `observability_and_audit`. Mantener el registro global Notion 6/11 y PR #44 DRAFT.
+
+**NEXT_BLOCK:** `FACT001_MIN_PRIVILEGE_D1_WRITE_SERVICE_IDENTITY_THEN_SIGNED_LAB_MUTATION`. No autorizar privilegios de facturación ni cambios a PROD para resolverlo.
