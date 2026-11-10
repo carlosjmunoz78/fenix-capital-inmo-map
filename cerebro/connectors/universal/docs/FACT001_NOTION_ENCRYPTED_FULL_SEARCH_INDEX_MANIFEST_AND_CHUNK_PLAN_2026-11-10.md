@@ -40,3 +40,10 @@ Evidencia: 2026-11-10 · Rama `cerebro/fact001-cloudflare-universal-dual-lab-v0-
 
 ## No se promociona
 La cobertura física de contenido continúa limitada a Wiki (64 bloques) y fuente de marketing (esquema y 11 filas), previos a este ensayo; `backup_and_rollback` global y la autonomía permanecen pendientes. Nada de PROD.
+
+## HECHO FÍSICO · 25 contenidos cifrados con readback externo
+- [Run #42921160489](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42921160489): **SUCCESS**, 25 páginas del lote 0→25 exportadas en modo read-only, 25 sobres AES-256-GCM autenticados, 0 fallos, autenticación ANON_401 / FORGED_401 / PROD_403 = PASS. GitHub Artifact `13812640522`.
+- Copia cifrada [Google Drive](https://drive.google.com/file/d/1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p/view?usp=drivesdk) privada, bytes recuperados **454715**, SHA256 ZIP **`e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65`**, igualdad exacta con GitHub y CRC PASS. 25/25 paquetes individuales válidos.
+- [Evidencia detallada](FACT001_NOTION_FIRST_25_CONTENT_PHYSICAL_BACKUP_VERIFIED_2026-11-10.md) y [checkpoint de respaldo offsite](../services/notion-content-export-lab/checkpoints/first-25-content-readback.v1.json), `content_next_offset=25`. Este checkpoint es **evidencia durable en GitHub**, NO checkpoint transaccional D1 CAS.
+- Nuevo servicio LAB **independiente** `cerebro-fact001-notion-content-export-lab` v1; broker original `cerebro-fact001-headless-provider-lab` **v33 ACTIVE sin cambios de hash**.
+- Sin modificaciones de contenido Notion, App, CRM o main, sin cron ni cola. No se declara backup integral: archivos binarios, comentarios, filas y restauración física quedan pendientes. Estado global **PARCIAL 6/11**.
