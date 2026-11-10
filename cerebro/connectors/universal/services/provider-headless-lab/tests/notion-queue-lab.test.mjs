@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
-import {NOTION_QUEUE_LAB_SCHEMA} from '../../cloudflare/notion-queue-lab/schema.mjs';
-import worker,{processNotionQueueTick} from '../../cloudflare/notion-queue-lab/worker.mjs';
+import {NOTION_QUEUE_LAB_SCHEMA} from '../../../cloudflare/notion-queue-lab/schema.mjs';
+import worker,{processNotionQueueTick} from '../../../cloudflare/notion-queue-lab/worker.mjs';
 import {readFileSync} from 'node:fs';
 const config=JSON.parse(readFileSync('cerebro/connectors/universal/cloudflare/notion-queue-lab/wrangler.lab.jsonc','utf8'));
 const FIXED='f'.repeat(64);
