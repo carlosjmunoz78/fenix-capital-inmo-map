@@ -7,7 +7,7 @@ function fixture({blockedCreate=false,ambiguousCreate=false,foreignDomain=false,
  let exists=existing, wasCreated=false;
  const response=(status,body)=>({ok:status>=200&&status<300,status,json:async()=>body});
  const json=result=>({success:true,errors:[],messages:[],result});
- const project=()=>({name:NAME,subdomain:NAME+'.pages.dev',source:null,domains:foreignDomain?['app.fenixcapital.es']:[]});
+ const project=()=>({name:NAME,subdomain:NAME+'.pages.dev',source:null,domains:foreignDomain?[NAME+'.pages.dev','app.fenixcapital.es']:[NAME+'.pages.dev'],latest_deployment:null});
  const http=async(url,options)=>{
   const path=new URL(url).pathname,method=options.method;calls.push({path,method});
   assert.equal(new URL(url).origin,'https://api.cloudflare.com');
