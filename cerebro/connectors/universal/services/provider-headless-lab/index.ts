@@ -6,6 +6,7 @@ import {providerSpecs,readProviderInventory} from './provider.mjs';
 import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
 import {SERVICE_IDENTITIES,assertIdentityProbeOrder,probeServiceIdentity} from './service-identity.mjs';
 import {NOTION_SECRET,probeNotionWorkspace} from './notion-access.mjs';
+import {NOTION_D1_READ_VAULT_NAME,probeNotionD1Lab} from './notion-d1-status.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
 const getBearer=(request:Request)=>{
@@ -46,11 +47,29 @@ function assertNotionReadOrder(body:unknown){
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan','service-identity','notion-workspace'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan','service-identity','notion-workspace','notion-d1-status'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&request.method==='GET')return reply(200,{status:'SIGNED_HEADLESS_LAB_READY',scope:SCOPE});
+  // Fixed read-only bridge to FACT-001 recovery D1. OIDC verified above, no user SQL.
+  if(route==='notion-d1-status'&&request.method==='POST'){
+   if(Number(request.headers.get('content-length')||'0')>1400)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
+   const expected={...SCOPE,client_id:'cerebro',source:'owner_order',
+    operation:'notion.d1.status.read',request_id:'FACT001-NOTION-D1-STATUS-20261110'};
+   let order:Record<string,unknown>;
+   try{order=await request.json();}
+   catch{return reply(400,{status:'ORDER_DENIED'});}
+   if(!order||typeof order!=='object'||Array.isArray(order)||
+      JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+      Object.entries(expected).some(([k,v])=>order[k]!==v))return reply(403,{status:'ORDER_DENIED'});
+   let token='';
+   try{
+    token=await getVaultToken(NOTION_D1_READ_VAULT_NAME);
+    const result=await probeNotionD1Lab({token});
+    return reply(200,result);
+   }finally{token='';}
+  }
   if(route==='notion-workspace'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>1300)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    try{assertNotionReadOrder(await request.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
