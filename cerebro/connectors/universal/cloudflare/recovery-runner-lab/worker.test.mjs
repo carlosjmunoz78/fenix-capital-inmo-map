@@ -7,11 +7,11 @@ import worker,{processRecoveryTick} from './worker.mjs';
 const SQL=readFileSync(new URL('./schema.sql',import.meta.url),'utf8');
 function fixture(){
  const db=new DatabaseSync(':memory:');db.exec(SQL);
- const RECOVERY_DB={prepare(sql){return {bind(...args){const statement=db.prepare(sql);return {
+ const RECOVERY_DB={prepare(sql){const statement=db.prepare(sql);const make=args=>({
   first:async()=>statement.get(...args)??null,
   run:async()=>statement.run(...args),
   all:async()=>statement.all(...args)
- };}}}};
+ });return {...make([]),bind:(...args)=>make(args)};}};
  const env={RECOVERY_DB};
  const setEnabled=flag=>db.prepare('UPDATE fact001_runner_config_v1 SET enabled=? WHERE id=1').run(flag?1:0);
  const enqueue=(id,opts={})=>{
