@@ -1,0 +1,59 @@
+name: FACT001 Vercel independent service proof via GitHub OIDC LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-vercel-service-read-lab
+  cancel-in-progress: false
+jobs:
+  signed-service-read:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Verify OIDC service scope before any network call
+        run: node --test cerebro/connectors/universal/supabase/vercel-service-lab/tests/policy.test.mjs
+      - name: Signed CEREBRO service -> Vault -> Vercel read-only project listing
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-vercel-service-lab';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',operation:'vercel.projects.list_lab',request_id:'FACT001-VERCEL-SERVICE-READ-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||Object.keys(expected).some(k=>order[k]!==expected[k]))throw Error('VERCEL_ORDER_DENIED');
+          async function call(route,jwt,method='GET',body){
+           const resp=await fetch(base+'/'+route,{method,headers:{Accept:'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(35000)});
+           let data={};try{data=await resp.json()}catch{}
+           return {status:resp.status,data};
+          }
+          const anon=await call('health');
+          const forged=await call('health','not-a-signed-github-jwt');
+          if(anon.status!==401||forged.status!==401)throw Error('UNAUTHENTICATED_ACCESS_ALLOWED');
+          console.log('FACT001_VERCEL_ANON_401=true');
+          console.log('FACT001_VERCEL_FORGED_401=true');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
+          const u=endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-vercel-service-lab-20261110');
+          const tokenResponse=await fetch(u,{headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!tokenResponse.ok)throw Error('OIDC_HTTP_'+tokenResponse.status);
+          const jwt=(await tokenResponse.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_INVALID');
+          const health=await call('health',jwt);
+          if(health.status!==200||health.data?.status!=='AUTHENTICATED')throw Error('SIGNED_SERVICE_DENIED');
+          console.log('FACT001_VERCEL_SIGNED_SERVICE_200=true');
+          const verify=await call('verify-projects',jwt,'POST',order);
+          console.log('FACT001_VERCEL_VAULT_TO_API_HTTP='+verify.status);
+          console.log('FACT001_VERCEL_READ_STATUS='+String(verify.data?.status||'BLOCKED'));
+          console.log('FACT001_VERCEL_AUTHORIZED_COUNT='+String(verify.data?.authorized_projects??0));
+          console.log('FACT001_VERCEL_EXPECTED_COUNT='+String(verify.data?.expected_projects??0));
+          console.log('FACT001_VERCEL_CREDENTIAL_IN_RUNNER=false');
+          console.log('FACT001_VERCEL_WRITES=0');
+          if(verify.status!==200||verify.data?.status!=='VERCEL_SERVICE_READ_VERIFIED'||verify.data?.credential_exposed!==false||verify.data?.vercel_writes!==0)throw Error('VERCEL_SERVICE_PROOF_NOT_VERIFIED');
+          console.log('FACT001_VERCEL_AUTONOMOUS_READ_E2E=PASS');
+          NODE
