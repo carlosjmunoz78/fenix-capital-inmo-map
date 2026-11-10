@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-final-root.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
@@ -201,4 +202,47 @@ jobs:
           console.log('FACT001_BATCH3_INCONCLUSIVE='+v.inconclusive);
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
+          NODE
+
+      - name: "Verify exactly one final Notion root with CEREBRO signed OIDC"
+        if: startsWith(github.event.head_commit.message, 'FACT001_FINAL_NOTION_ROOT_VERIFY_20261110')
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-final-root.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.final_root.access_read',
+            request_id:'FACT001-NOTION-FINAL-ROOT-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+              Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FINAL_ROOT_ORDER_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-final-root';
+          const call=async(jwt,body)=>{
+           const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+            ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(15000)});
+           let data={};try{data=await r.json()}catch{};
+           return {http:r.status,data};
+          };
+          const [anon,forged]=await Promise.all([call(null,order),call('fake',order)]);
+          if(anon.http!==401||forged.http!==401)throw Error('FINAL_ROOT_OIDC_GUARD_FAILED');
+          console.log('FACT001_FINAL_ROOT_ANON_401=PASS');
+          console.log('FACT001_FINAL_ROOT_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_NOT_AVAILABLE');
+          const r=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('OIDC_ISSUANCE_DENIED');
+          const jwt=(await r.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('PROD_MUST_BE_DENIED_'+prod.http);
+          console.log('FACT001_FINAL_ROOT_PROD_403=PASS');
+          const result=await call(jwt,order),data=result.data;
+          if(result.http!==200||data.root_id!=='1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b'||
+             data.checked!==1||data.content_returned!==false||data.write_operations!==0||
+             data.credentials_exposed!==false)throw Error('SINGLE_ROOT_GATE_RESPONSE_DENIED_'+result.http);
+          console.log('FACT001_FINAL_ROOT_ACCESSIBLE='+data.accessible);
+          console.log('FACT001_FINAL_ROOT_DENIED='+data.denied);
+          console.log('FACT001_FINAL_ROOT_INCONCLUSIVE='+data.inconclusive);
+          if(data.accessible!==1||data.denied!==0||data.inconclusive!==0)throw Error('NOTION_FINAL_ROOT_NOT_YET_CONNECTED');
+          console.log('FACT001_FINAL_ROOT_58_OF_58=PASS');
           NODE
