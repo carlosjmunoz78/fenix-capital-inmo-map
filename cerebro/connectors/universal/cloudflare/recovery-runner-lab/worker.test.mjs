@@ -3,10 +3,11 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import worker,{processRecoveryTick} from './worker.mjs';
+import {RECOVERY_D1_SCHEMA} from '../../src/recovery-d1-ledger.mjs';
 
 const SQL=readFileSync(new URL('./schema.sql',import.meta.url),'utf8');
 function fixture(){
- const db=new DatabaseSync(':memory:');db.exec(SQL);
+ const db=new DatabaseSync(':memory:');db.exec(SQL);db.exec(RECOVERY_D1_SCHEMA);
  const RECOVERY_DB={prepare(sql){const statement=db.prepare(sql);const make=args=>({
   first:async()=>statement.get(...args)??null,
   run:async()=>statement.run(...args),
@@ -39,6 +40,8 @@ test('runner handles exactly one CEREBRO scoped LAB heartbeat and persists compl
  const job=f.db.prepare('SELECT state,attempts FROM fact001_runner_jobs_v1 WHERE id=?').get('job-1');
  assert.equal(job.state,'COMPLETED');assert.equal(job.attempts,1);
  assert.equal(f.db.prepare("SELECT outcome FROM fact001_runner_ticks_v1").get().outcome,'COMPLETED');
+ const durable=f.db.prepare('SELECT state,retryable_read,attempt,length(key_hash) AS key_length FROM fact001_recovery_v1').get();
+ assert.equal(durable.state,'COMPLETED');assert.equal(durable.retryable_read,0);assert.equal(durable.attempt,1);assert.equal(durable.key_length,64);
 });
 test('same scheduledTime never executes twice',async()=>{
  const f=fixture();f.enqueue('job-1');f.enqueue('job-2');f.setEnabled(true);
