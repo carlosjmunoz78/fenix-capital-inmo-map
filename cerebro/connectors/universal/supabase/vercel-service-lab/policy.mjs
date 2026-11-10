@@ -64,3 +64,12 @@ export function assertWriteOrder(body){
  for(const [k,v] of Object.entries(expected))if(body[k]!==v)throw Error('SCOPE_DENIED');
  return true;
 }
+
+export const CLEANUP_REQUEST_ID='FACT001-CLEANUP-LAB-20261110-001';
+export function assertCleanupOrder(body){
+ const expected={...SCOPE,team_id:TEAM_ID,project_id:LAB_PROJECT_ID,client_id:'cerebro',operation:'vercel.project.cleanup_test_only',request_id:CLEANUP_REQUEST_ID};
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('CLEANUP_ORDER_INVALID');
+ if(JSON.stringify(Object.keys(body).sort())!==JSON.stringify(Object.keys(expected).sort()))throw Error('CLEANUP_FIELDS_DENIED');
+ for(const [k,v] of Object.entries(expected))if(body[k]!==v)throw Error('CLEANUP_SCOPE_DENIED');
+ return true;
+}
