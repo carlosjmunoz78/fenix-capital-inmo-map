@@ -129,22 +129,28 @@
     {
       "id": "notion",
       "state": "PARTIAL",
-      "verified": [],
+      "verified": [
+        "independent_service_identity",
+        "owner_order_headless",
+        "inventory_read"
+      ],
       "evidence": [
         "Cross-MCP CRUD on isolated page within ChatGPT verified; page moved to Trash",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849043493",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515"
       ],
       "gaps": [
-        "separate CEREBRO service integration identity not confirmed",
-        "owner/automation headless real API read/create/update/delete",
-        "restore and conflict handling",
-        "HUMAN_REQUIRED: Notion internal integration token cerebro_notion_service_token_v1 not configured in Vault; ChatGPT OAuth is a different identity"
+        "Owner must grant Notion internal integration access to an isolated FACT-001 LAB parent page via page three-dot menu > More > Add connections",
+        "Service identity and independent Notion /v1/search verified; result currently zero accessible pages, not an authentication failure",
+        "LAB create/read/update/archive/restore tests still pending after page access is granted",
+        "No autonomous queue, audited general Notion admin lifecycle, or production policy gate"
       ],
       "verification": {
-        "independent_service_identity": "PENDING",
-        "owner_order_headless": "PENDING",
+        "independent_service_identity": "VERIFIED",
+        "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
-        "inventory_read": "PENDING",
+        "inventory_read": "VERIFIED",
         "isolated_lab_create": "PENDING",
         "isolated_lab_update": "PENDING",
         "isolated_lab_delete": "PENDING",
@@ -153,7 +159,8 @@
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
-      "service_identity_admin": "HUMAN_REQUIRED"
+      "service_identity_admin": "PARTIAL_PAGE_ACCESS_NOT_YET_GRANTED",
+      "service_identity_read": "VERIFIED"
     },
     {
       "id": "github",
@@ -195,7 +202,7 @@
   ],
   "headless_service": {
     "slug": "cerebro-fact001-headless-provider-lab",
-    "version": 7,
+    "version": 8,
     "status": "ACTIVE_LAB",
     "oidc_signed": true,
     "provider_writes_active": 0,
@@ -205,8 +212,9 @@
       "supabase"
     ],
     "factory_scaffold_verified": true,
-    "notion_identity": "HUMAN_REQUIRED",
+    "notion_identity": "VERIFIED_INDEPENDENT",
     "github_global_identity": "HUMAN_REQUIRED",
-    "evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42843856351"
+    "evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515",
+    "notion_workspace_visibility": "VERIFIED_EMPTY_ZERO_PAGES"
   }
 }
