@@ -39,3 +39,14 @@ Las **19 páginas distintas** de la sección Private que faltaban se abrieron y 
 
 ## Seguridad y costes
 Sin nueva suscripción; cero permisos de escrituras autónomas concedidos. App/CRM, DNS, main y producción intactos. El único requisito humano ahora es conectar las 19 pestañas históricas.
+
+
+## CIERRE POSTERIOR · 58/58 autorizadas y verificadas
+- Propietario confirmó la conexión de las 19 páginas históricas abiertas en Opera.
+- Primera prueba física firmada 19 páginas: [#42902477443](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42902477443) SUCCESS, 18 HTTP 200 y una HTTP 404.
+- Única pendiente: `Import Mar 27, 2025 Logs`, ID `1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b`, reapertura verificada en Opera y reconexión confirmada por el propietario.
+- Reprueba **únicamente de esa página**, con identidad independiente de CEREBRO + GitHub Actions OIDC + Supabase Vault: [#42903411090](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42903411090) SUCCESS, `ACCESSIBLE=1`, `DENIED=0`, `INCONCLUSIVE=0`, `ANON_401=PASS`, `FORGED_401=PASS`, `PROD_403=PASS`.
+- Total de referencias distintas inventariadas y revisadas: **58/58 accesibles, 0 pendientes de compartir en este inventario**. La sección top-level Private conocida por ChatGPT incluye 49/49; otras 9 de las 58 referencias proceden de otras secciones. **Esto NO prueba todavía backup integral de workspace, bloques, databases, assets ni restauración total.**
+- Se retiró el disparador one-shot de Actions y el archivo de orden consumida, se revirtió `index.ts` en Git a su blob anterior `6881a4bcc350907289722ce84539b0bdf6c984f3`, y se redesplegó el broker LAB **v19 ACTIVE con hash exacto preprueba v17 `645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec`**. Sin ruta `notion-final-root` desplegada ni escritura Notion.
+- `notion-connected-parent-gate.mjs`: código/test verde pero aún sin cableado a generador de páginas. Las subpáginas futuras solo heredan conexión cuando su padre es uno de los recursos accesibles y se confirma su permiso en tiempo de creación.
+- Los gates integrales de autonomía Notion `backup_and_rollback`, `autonomous_queue`, `cost_guard_verified`, `observability_and_audit` y `production_promotion_policy` siguen PENDING. No promover a PROD.
