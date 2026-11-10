@@ -41,3 +41,13 @@ Team `carlosjmunozcabeza-2582s-projects` (`team_qnh6u1Ofy2WPp0MGEKlyMA50`). Usua
 
 ## Costes y restricción legal del plan
 Cuenta identifica **Hobby**, sin cambio de suscripción. Documentación oficial de Vercel (https://vercel.com/docs/plans/hobby) indica hasta **200 proyectos**, límites de cuota y que Hobby está restringido a uso personal y no comercial. El nuevo proyecto vacío/de prueba no aloja operaciones comerciales. **NO asumir que este plan permite alojar de manera comercial App Fénix ni CEREBRO PROD**; antes de uso comercial se requiere aclaración contractual con Vercel o utilizar un proveedor que lo permita, con coste adicional justificado. No comprar/elevar plan automáticamente.
+
+
+## ACTUALIZACIÓN E2E autónomo firmado · 2026-11-10 11:32 UTC
+Sustituye SOLO el estado `NO VERIFICADO` para **CEREBRO service LAB API read+write** en las secciones anteriores. No sustituye las salvaguardas restantes de Gateway/PROD.
+- **CEREBRO service independiente**: creado y desplegado `cerebro-fact001-vercel-service-lab` v2, Edge Function nueva y aislada, autentica GitHub OIDC firmado por JWT RSA/JWKS + repo/ref/workflow/aud/event + expiración antes de llamadas. No recibe OAuth de ChatGPT.
+- **Vault**: nombre `cerebro_vercel_service_token_v1` confirmado; sólo servicio lee el secreto cifrado y usa token en memoria para REST `api.vercel.com`. El runner de GitHub sólo recibe resultado redactado.
+- **E2E READ**: [run #42807524830](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42807524830) SUCCESS; anon 401, falso 401, firmado 200, Vercel GET 200, 3/3 proyectos.
+- **E2E WRITE+ROLLBACK**: [run #42808203559](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42808203559) SUCCESS; 8/8 test, framework LAB temporal `null→vite→null`, comprobación posterior mediante GET y proyecto exacto `prj_vvil5epQ99mngK29vpLVOWmlVRP1`, sin despliegues ni dominios ni otras escrituras.
+- **Estado actualizado**: `CEREBRO independent service read/write LAB: VERIFIED`; `CEREBRO Console Gateway v33/automatic job queue: NOT CONNECTED`; `Generalized Vercel production writes/autonomy: PENDING`.
+- **Runbook y rollback**: [cerebro/connectors/universal/supabase/vercel-service-lab/README.md](../supabase/vercel-service-lab/README.md).
