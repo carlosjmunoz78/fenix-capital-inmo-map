@@ -144,12 +144,15 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42849882515",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42852197701",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42853530709",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42859689267"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42859689267",
+        "FACT001 original D1 EU schema physical: 3 tables, 2 audit triggers, one LAB-only synthetic ownership row approved=0",
+        "FACT001 isolated full logical D1 clone hash match (4 tables, 1 index; 1+1+1+98 rows), Time Travel rollback of mutation and later schema physically verified; temporary D1 deleted",
+        "Cloudflare official D1 SQL export API status=complete; signed URL retrieval blocked, durable independent SQL file not verified"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
         "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
-        "Governed Notion LAB candidate + SQLite D1 CAS, ownership, snapshots and append-only audit: 71/71 local CI; not deployed, no provider writes, physical D1 schema and scoped service binding pending",
+        "Governed Notion operator passes local CI; real D1 EU schema and synthetic ownership persist physically, isolated full clone/rollback verified; service-to-service executor and external retained backup archive still pending",
         "Scheduled automation queue, backup/rebuild, and PROD promotion are still pending"
       ],
       "verification": {
@@ -192,13 +195,21 @@
         "recovery_d1": "cerebro-fact001-recovery-lab-eu",
         "existing_runner": "cerebro-fact001-recovery-runner-lab",
         "runner_allows_notions_jobs": false,
-        "d1_notion_schema_applied": false,
+        "d1_notion_schema_applied": true,
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PENDING",
-        "note": "D1 time-travel bookmark verified via authenticated Cloudflare API; complete export and tested rollback required before applying additive schema",
-        "next_block": "FACT001_NOTION_D1_BACKUP_AND_PARALLEL_E2E"
+        "full_backup_gate": "PENDING_EXTERNAL_BACKUP_ARCHIVE_AND_RESTORE_REVIEW",
+        "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
+        "next_block": "FACT001_NOTION_SERVICE_EXECUTOR_IDENTITY_COST_OBSERVABILITY_LAB",
+        "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
+        "d1_schema_objects": 5,
+        "owned_fixture_approved": false,
+        "recovery_db_original_uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "recovery_clone_lab_uuid": "25f8e9f9-09b7-4381-b0d4-edc3db87abf1",
+        "rollback_evidence": "TEMPORARY_EU_CLONE_RESTORED_TO_BEFORE_NOTION_MIGRATION_AND_DELETED",
+        "old_worker_cron_retained": "*/5 * * * *",
+        "backup_export_status": "CLOUDFLARE_SQL_EXPORT_COMPLETE_URL_NOT_DOWNLOADED"
       }
     },
     {
