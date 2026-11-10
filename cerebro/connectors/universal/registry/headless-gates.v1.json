@@ -1,0 +1,170 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "purpose": "CEREBRO headless service autonomy per provider, not ChatGPT MCP OAuth",
+  "updated_on": "2026-11-10",
+  "green_requires": [
+    "independent_service_identity",
+    "owner_order_headless",
+    "autonomous_queue",
+    "inventory_read",
+    "isolated_lab_create",
+    "isolated_lab_update",
+    "isolated_lab_delete",
+    "backup_and_rollback",
+    "cost_guard_verified",
+    "production_promotion_policy",
+    "observability_and_audit"
+  ],
+  "connectors": [
+    {
+      "id": "cloudflare",
+      "state": "PARTIAL",
+      "verified": [
+        "inventory_read"
+      ],
+      "evidence": [
+        "Cloudflare Universal OAuth works in ChatGPT",
+        "FACT-001 OIDC issuer and isolated D1 Read LAB credential historically verified"
+      ],
+      "gaps": [
+        "general CEREBRO headless broker/write policies",
+        "autonomous queues per capability",
+        "backup rollback PROD tests"
+      ],
+      "verification": {
+        "independent_service_identity": "PENDING",
+        "owner_order_headless": "PENDING",
+        "autonomous_queue": "PENDING",
+        "inventory_read": "VERIFIED",
+        "isolated_lab_create": "PENDING",
+        "isolated_lab_update": "PENDING",
+        "isolated_lab_delete": "PENDING",
+        "backup_and_rollback": "PENDING",
+        "cost_guard_verified": "PENDING",
+        "production_promotion_policy": "PENDING",
+        "observability_and_audit": "PENDING"
+      }
+    },
+    {
+      "id": "vercel",
+      "state": "PARTIAL",
+      "verified": [
+        "inventory_read",
+        "isolated_lab_create",
+        "isolated_lab_update",
+        "isolated_lab_delete",
+        "backup_and_rollback"
+      ],
+      "evidence": [
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42808203559",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42809634627"
+      ],
+      "gaps": [
+        "test project and one-off service were removed after cleanup",
+        "owner/automation headless jobs through stable runner",
+        "PROD safety, cost, rollback and autonomous deploy gates"
+      ],
+      "verification": {
+        "independent_service_identity": "PENDING",
+        "owner_order_headless": "PENDING",
+        "autonomous_queue": "PENDING",
+        "inventory_read": "VERIFIED",
+        "isolated_lab_create": "VERIFIED",
+        "isolated_lab_update": "VERIFIED",
+        "isolated_lab_delete": "VERIFIED",
+        "backup_and_rollback": "VERIFIED",
+        "cost_guard_verified": "PENDING",
+        "production_promotion_policy": "PENDING",
+        "observability_and_audit": "PENDING"
+      }
+    },
+    {
+      "id": "supabase",
+      "state": "PARTIAL",
+      "verified": [
+        "inventory_read",
+        "isolated_lab_delete"
+      ],
+      "evidence": [
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750",
+        "Scoped management PAT stored in Vault; test Edge Function deleted"
+      ],
+      "gaps": [
+        "permanent scoped management broker not yet deployed",
+        "independent create/update/backups tested without App/CRM mutation",
+        "owner/automation headless queue and PROD policy"
+      ],
+      "verification": {
+        "independent_service_identity": "PENDING",
+        "owner_order_headless": "PENDING",
+        "autonomous_queue": "PENDING",
+        "inventory_read": "VERIFIED",
+        "isolated_lab_create": "PENDING",
+        "isolated_lab_update": "PENDING",
+        "isolated_lab_delete": "VERIFIED",
+        "backup_and_rollback": "PENDING",
+        "cost_guard_verified": "PENDING",
+        "production_promotion_policy": "PENDING",
+        "observability_and_audit": "PENDING"
+      }
+    },
+    {
+      "id": "notion",
+      "state": "PARTIAL",
+      "verified": [],
+      "evidence": [
+        "Cross-MCP CRUD on isolated page within ChatGPT verified; page moved to Trash"
+      ],
+      "gaps": [
+        "separate CEREBRO service integration identity not confirmed",
+        "owner/automation headless real API read/create/update/delete",
+        "restore and conflict handling"
+      ],
+      "verification": {
+        "independent_service_identity": "PENDING",
+        "owner_order_headless": "PENDING",
+        "autonomous_queue": "PENDING",
+        "inventory_read": "PENDING",
+        "isolated_lab_create": "PENDING",
+        "isolated_lab_update": "PENDING",
+        "isolated_lab_delete": "PENDING",
+        "backup_and_rollback": "PENDING",
+        "cost_guard_verified": "PENDING",
+        "production_promotion_policy": "PENDING",
+        "observability_and_audit": "PENDING"
+      }
+    },
+    {
+      "id": "github",
+      "state": "PARTIAL",
+      "verified": [
+        "inventory_read"
+      ],
+      "evidence": [
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42819483887"
+      ],
+      "gaps": [
+        "GitHub Universal create_repository returned 403, do not claim create/delete repositories",
+        "independent scoped write service identity across repositories",
+        "isolated repo create/update/delete+recover tests without affecting main/PROD"
+      ],
+      "verification": {
+        "independent_service_identity": "PENDING",
+        "owner_order_headless": "PENDING",
+        "autonomous_queue": "PENDING",
+        "inventory_read": "VERIFIED",
+        "isolated_lab_create": "PENDING",
+        "isolated_lab_update": "PENDING",
+        "isolated_lab_delete": "PENDING",
+        "backup_and_rollback": "PENDING",
+        "cost_guard_verified": "PENDING",
+        "production_promotion_policy": "PENDING",
+        "observability_and_audit": "PENDING"
+      }
+    }
+  ]
+}
