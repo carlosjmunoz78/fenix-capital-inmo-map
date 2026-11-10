@@ -5,6 +5,7 @@ on:
     paths:
       - cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify.v1.json
       - cerebro/connectors/universal/supabase/vercel-service-lab/requests/verify-write.v1.json
+      - cerebro/connectors/universal/supabase/vercel-service-lab/requests/cleanup.v1.json
 permissions:
   contents: read
   id-token: write
@@ -67,4 +68,14 @@ jobs:
           console.log('FACT001_VERCEL_LAB_PROJECT_ID_CONFIRMED='+String(write.data?.project_id===writeExpected.project_id));
           if(write.status!==200||write.data?.status!=='VERCEL_LAB_WRITE_AND_ROLLBACK_VERIFIED'||write.data?.rollback_verified!==true||write.data?.write_verified!==true||write.data?.project_id!==writeExpected.project_id)throw Error('VERCEL_LAB_WRITE_ROLLBACK_NOT_VERIFIED');
           console.log('FACT001_VERCEL_AUTONOMOUS_WRITE_E2E=PASS');
+          const cleanup=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/vercel-service-lab/requests/cleanup.v1.json','utf8'));
+          const expectedCleanup={...writeExpected,operation:'vercel.project.cleanup_test_only',request_id:'FACT001-CLEANUP-LAB-20261110-001'};
+          if(JSON.stringify(Object.keys(cleanup).sort())!==JSON.stringify(Object.keys(expectedCleanup).sort())||Object.keys(expectedCleanup).some(k=>cleanup[k]!==expectedCleanup[k]))throw Error('CLEANUP_ORDER_DENIED');
+          const removed=await call('cleanup-vercel-lab',jwt,'POST',cleanup);
+          console.log('FACT001_CLEANUP_HTTP='+removed.status);
+          console.log('FACT001_CLEANUP_STATUS='+String(removed.data?.status||'BLOCKED'));
+          console.log('FACT001_CLEANUP_EXPECTED_PROJECT='+String(removed.data?.project_id===expectedCleanup.project_id));
+          console.log('FACT001_CLEANUP_OTHER_PROJECTS_DELETED='+String(removed.data?.other_projects_deleted??'N/A'));
+          if(removed.status!==200||removed.data?.status!=='VERCEL_TEST_PROJECT_DELETED'||removed.data?.project_id!==expectedCleanup.project_id||removed.data?.other_projects_deleted!==0||removed.data?.credential_exposed!==false)throw Error('CLEANUP_NOT_VERIFIED');
+          console.log('FACT001_CLEANUP_VERCEL_LAB=PASS');
           NODE
