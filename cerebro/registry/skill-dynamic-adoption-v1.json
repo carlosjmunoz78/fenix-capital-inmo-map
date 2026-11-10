@@ -5339,6 +5339,76 @@
       "promoted_at": "2026-11-05T01:50:14.116Z"
     },
     {
+      "candidate_id": "repo:96bce7ac5e31bb4333b4453d346d",
+      "technical_name": "design-md",
+      "source_locator": "github://TerminalSkills/skills@42289059901710441bfa8081c08c3a9f36b93f9c/skills/design-md",
+      "pinned_sha": "42289059901710441bfa8081c08c3a9f36b93f9c",
+      "snapshot_sha256": "96bce7ac5e31bb4333b4453d346d280155ddc475ce8e023769753ce7a6aef55c",
+      "manifest_sha256": "ae38cd6af053e419cb53dae574e7b45994c8572f82da0008249f84dd42a292da",
+      "outcome_hash": "4db0dee811180c3f4402ca224b7585e675fbadd1c7a775f542968be24da8f085",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:96bce7ac5e31bb43:cap:1",
+          "technical_name": "design-md",
+          "description": ">-",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-11-10T00:36:21.011Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "95a044967a0a9e555b4f6056922b8bb174d28d70967ceb2b1219e5905ab551af"
+    },
+    {
       "candidate_id": "repo:d5f07ac47ece1a4573d3094e45d3",
       "technical_name": "design-md",
       "source_locator": "github://TerminalSkills/skills@33b765f0904561257112a98d21df5383a6e77113/skills/design-md",
@@ -17507,11 +17577,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 173,
-    "inserted": 0,
+    "total": 174,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 173
   }
 }
