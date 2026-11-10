@@ -39,6 +39,23 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}})},
  async scheduled(controller,env,ctx){
+  if(controller.cron==='* * * * *' && env.GATEWAY_ENABLED==='true'){
+   ctx.waitUntil((async()=>{
+    const key='meta/ums001-producer-read-fix-2026-11-10';
+    if(await env.LAB_KV.get(key))return;
+    await env.LAB_KV.put(key,JSON.stringify({status:'STARTED',at:new Date().toISOString()}));
+    const task={company_id:COMPANY,engine_id:ENGINE,environment:ENV,kind:'hdris',asset_id:'bambanani_sunset',query:'sunset',request_id:'UMS001-READ-FIX-20261110-A'};
+    try{
+     const candidates=await search(env,task);
+     const rec=await acquire(env,task);
+     const file=await read(env,task);
+     if(rec.sha256!==file.sha256||rec.bytes!==file.bytes)throw Error('RECEIPT_MEDIA_MISMATCH');
+     await env.LAB_KV.put(key,JSON.stringify({status:'COMPLETED',at:new Date().toISOString(),asset_id:file.asset_id,
+      sha256:file.sha256,bytes:file.bytes,candidate_count:candidates.results.length,acquisition:rec.status,
+      private_rpc:true,original_sha256_verified:true,production_approved:false,cost_eur:0}));
+    }catch(e){await env.LAB_KV.put(key,JSON.stringify({status:'ERROR',at:new Date().toISOString(),code:String(e?.message||e).slice(0,180)}));}
+   })());return;
+  }
   if(controller.cron==='*/2 * * * *' && env.GATEWAY_ENABLED==='true'){
    ctx.waitUntil((async()=>{
     const key='meta/ums001-producer-new-download-2026-11-10';
