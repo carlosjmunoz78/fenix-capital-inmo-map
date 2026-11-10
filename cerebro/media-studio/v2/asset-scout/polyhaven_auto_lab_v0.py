@@ -52,7 +52,13 @@ def choose(tree,limit=MAX_FILE):
         elif isinstance(x,list):
             for v in x:walk(v)
     walk(tree)
-    return min(found,key=lambda x:(x["size"],x["url"])) if found else None
+    def useful_rank(x):
+        filename=x["url"].rsplit("/",1)[-1].lower()
+        is_color=any(token in filename for token in ("_diff_", "_col_", "_color_", "_albedo_", "_basecolor_"))
+        is_hdri=filename.endswith((".hdr",".exr"))
+        is_technical=any(token in filename for token in ("_disp_", "_nor_", "_rough_", "_arm_", "_ao_"))
+        return (0 if is_color else 1 if is_hdri else 3 if is_technical else 2,x["size"],x["url"])
+    return min(found,key=useful_rank) if found else None
 
 def download(ident,item,dest):
     if not re.fullmatch("[A-Za-z0-9_-]{1,120}",ident) or not safe_url(item["url"]):raise ValueError("FILE_URL_DENIED")

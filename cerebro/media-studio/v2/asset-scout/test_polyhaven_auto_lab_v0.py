@@ -57,4 +57,9 @@ class Tests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):p.download("abc",{"url":url,"size":1200,"md5":"0"*32},Path(d))
             self.assertEqual(list(Path(d).iterdir()),[])
 
+    def test_prioritizes_color_over_displacement(self):
+        color={"url":"https://dl.polyhaven.org/file/ph-assets/brick_diff_1k.jpg","size":8000,"md5":"a"*32}
+        displacement={"url":"https://dl.polyhaven.org/file/ph-assets/brick_disp_1k.jpg","size":1200,"md5":"b"*32}
+        self.assertEqual(p.choose({"disp":displacement,"diff":color}),color)
+
 if __name__=="__main__":unittest.main()
