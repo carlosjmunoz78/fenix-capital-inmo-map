@@ -6,7 +6,7 @@
   "version": "selective-met-v0.1",
   "status": "SELECTIVE_MET_PRIVATE_E2E_VERIFIED_LAB",
   "source_of_truth": "cerebro/media-studio/v2/runtime/ums001-producer-orchestrator-bridge-lab.mjs",
-  "orchestrator_binding": "FACT001_LAB_SERVICE_BINDING_DEPLOYED_RUNTIME_NOT_VERIFIED",
+  "orchestrator_binding": "FACT001_LAB_PRIVATE_QUEUE_E2E_VERIFIED",
   "allowed_providers": {
     "polyhaven": "EXISTING_PRESERVED",
     "ambientcg": "METADATA_ONLY_EXISTING_PRESERVED",
@@ -106,9 +106,9 @@
     "global_cerebro_orchestrator_connected": false
   },
   "fact001_gateway_binding": {
-    "status": "DEPLOYED_PRIVATE_RPC_PHYSICAL_E2E_NOT_OBSERVED",
+    "status": "FACT001_PRIVATE_QUEUE_PHYSICAL_E2E_VERIFIED",
     "worker": "cerebro-fact001-gateway-lab-eu-20261109",
-    "worker_version": "16bb1a1a-e0a7-4fe8-b15c-8d249c28cfa4",
+    "worker_version": "fbf9e7f0-59ed-433c-a25b-d02dcbfa3602",
     "service_binding": "UMS_PRODUCER",
     "target_worker": "cerebro-ums001-producer-private-gateway-lab-eu",
     "target_entrypoint": "ProducerLibraryLab",
@@ -123,11 +123,49 @@
     "temporary_probe_removed": true,
     "temporary_lab_kv_binding_removed": true,
     "auth_contract_local_tests_passed": 15,
-    "runtime_proof_receipt_observed": false,
+    "runtime_proof_receipt_observed": true,
     "console_connected": false,
     "global_prod_supervisor_connected": false,
     "publish_authorized": false,
     "additional_cost_eur_reported": 0,
-    "rollback_previous_version": "7c6dc6f0-0584-4939-a8a1-e86ad320a8ef"
+    "rollback_previous_version": "7c6dc6f0-0584-4939-a8a1-e86ad320a8ef",
+    "test_cron_removed": true,
+    "queue_binding": "EVENT_CONSUMER",
+    "queue_name": "cerebro-fact001-ums001-read-lab-eu",
+    "queue_id": "dbfb6b4bde2d448f88ca60ca9aa2cd5b",
+    "queue_jurisdiction": "eu"
+  },
+  "queue_channel": {
+    "name": "cerebro-fact001-ums001-read-lab-eu",
+    "queue_id": "dbfb6b4bde2d448f88ca60ca9aa2cd5b",
+    "jurisdiction": "eu",
+    "consumer_id": "54a8996624344930a34c07146cdeecea",
+    "consumer_worker": "cerebro-fact001-gateway-lab-eu-20261109",
+    "batch_size": 1,
+    "max_concurrency": 1,
+    "max_retries": 0,
+    "queue_feature_enabled": true,
+    "mode": "PINNED_MET_READ_ONLY",
+    "auth_source": "Cloudflare_Queue_authenticated_API",
+    "worker_secret": "UMS001_CALLER_TOKEN_IN_CLOUDFLARE_ONLY",
+    "real_e2e": {
+      "status": "COMPLETED",
+      "at": "2026-11-10T20:01:46.420Z",
+      "request_id": "UMS001-QUEUE-CLEAN20261110C",
+      "via": "FACT-001_PRIVATE_QUEUE_TO_SERVICE_BINDING",
+      "asset_id": "met:436524",
+      "bytes": 208766,
+      "sha256": "e84f82f453c52151d3a28ef22a22faeefdd5dda51f656c4b089c4b88dab8b508",
+      "downloaded_again": false,
+      "production_approved": false,
+      "publish_authorized": false,
+      "additional_cost_eur_reported": 0
+    },
+    "post_diagnostic_cleanup_verified": true,
+    "cloudflare_worker_version": "fbf9e7f0-59ed-433c-a25b-d02dcbfa3602",
+    "app_console_connected": false,
+    "prod_approved": false,
+    "no_new_cron": true,
+    "no_public_url": true
   }
 }
