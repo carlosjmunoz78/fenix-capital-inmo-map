@@ -27,7 +27,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Offline tests (no network or secrets)
-        run: python3 -m unittest discover -s cerebro/media-studio/v2/tests -p 'replicate-credential-health-lab-v0.test.py' -v
+        run: python3 cerebro/media-studio/v2/tests/replicate-credential-health-lab-v0.test.py
       - name: Replicate health (GET only; no predictions)
         env:
           REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
