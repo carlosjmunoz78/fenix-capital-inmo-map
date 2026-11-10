@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {webcrypto,createHash} from 'node:crypto';
-import {exportSealedNotionPage,verifySealedNotionPage} from './notion-content-page-export.mjs';
+import {exportSealedNotionPage,verifySealedNotionPage} from '../notion-content-page-export.mjs';
 const c=globalThis.crypto??webcrypto;
 const key='a'.repeat(64),PAGE='12345678-1234-4123-8123-123456789abc',CHILD='22345678-1234-4123-8123-123456789abc';
 const FORM='FACT001-NOTION-CONTENT-BATCH-PLAN-AES256GCM-V1';
