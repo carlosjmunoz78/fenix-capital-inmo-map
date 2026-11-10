@@ -19,6 +19,8 @@ jobs:
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
           node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
+          node --test cerebro/connectors/universal/tests/cloudflare-onboarding.test.mjs
+          node --test cerebro/connectors/universal/tests/cloudflare-scaffold.test.mjs
       - name: Strict read-only contract
         run: |
           node --input-type=module <<'NODE'
@@ -27,7 +29,7 @@ jobs:
           const source=fs.readFileSync(root+'index.ts','utf8');
           const provider=fs.readFileSync(root+'provider.mjs','utf8');
           const policy=fs.readFileSync(root+'policy.mjs','utf8');
-          if(!source.includes('verifyGitHubOidc(getBearer(request))')||!source.includes('assertReadOrder(await request.json())'))throw Error('NO_TRUSTED_IDENTITY');
+          if(!source.includes('verifyGitHubOidc(getBearer(request))')||!source.includes('assertReadOrder(await request.json())')||!source.includes('assertPlanOrder(await request.json())'))throw Error('NO_TRUSTED_IDENTITY');
           if(!provider.includes("method:'GET'")||provider.includes("method:'DELETE'")||provider.includes("method:'POST'"))throw Error('UPSTREAM_WRITE_FORBIDDEN');
           if(!source.includes('vault.decrypted_secrets')||!policy.includes('payload.actor!==OWNER'))throw Error('VAULT_OR_OWNER_GATE_MISSING');
           console.log('FACT001_BROKER_PROVIDER_WRITE_COUNT=0');
