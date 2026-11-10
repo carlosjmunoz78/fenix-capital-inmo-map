@@ -34,3 +34,15 @@
 ChatGPT conectado y con permisos amplios ≠ una herramienta de borrado expuesta; code adapter ≠ un servidor MCP instalado. El resultado solicitado de **create/read/update/delete para cualquier recurso y ejecución ordinaria autónoma** necesita un MCP administrativo específico y broker con tokens protegidos, catálogo tipado, IAM, entornos, idempotencia, backup y rollback, costes y observabilidad. Hasta entonces el poder administrativo se mantiene restringido a las operaciones probadas y autorizadas. No alterar Gateway v33 ni App/CRM.
 
 **Coste adicional asumido: 0 €.** No contratar planes, no crear proyectos nuevos de Supabase, no escribir datos de App/CRM.
+
+
+## CIERRE DE LA LIMPIEZA FÍSICA (10/11/2026 12:35 UTC) — PREVALECE SOBRE LOS PENDIENTES ANTERIORES
+
+- `cerebro_supabase_management_pat_v1`: nombre e ID de Vault confirmados sin leer el secreto; un token Scoped/PAT fue usado únicamente desde servidor.
+- La función temporal `cerebro-fact001-vercel-service-lab`, ID `f004e7f1-4911-440d-8809-c656f5f89b38`, se sustituyó temporalmente por versión 5 con verificación custom de OIDC GitHub; el workflow recibió token temporal firmado con audiencia, repo, ref y workflow exactos.
+- [GitHub Actions #42816960750](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750): 3/3 pruebas de políticas correctas, anónimo y token falso obtuvieron 401, identidad firmada obtuvo 200, llamada de DELETE administrativa devolvió 200 y `SUPABASE_TEST_FUNCTION_DELETED_AND_VERIFIED`.
+- Verificación independiente: `mcp__Supabase__list_edge_functions` confirmó **ausencia** de dicha función; listado total pasó de 101 a 100 funciones. **ELIMINACIÓN FÍSICA VERIFICADA.**
+- No se creó ninguna función adicional, no se tocaron App, CRM, otras Edge Functions, DNS, proyectos ni producción comercial. Se preservó el resto de 100 funciones.
+- Se eliminaron de la rama DRAFT los dos workflows temporales, el JSON de disparo, `supabase-admin-once/*`, las pruebas de borrado de un solo uso y el adaptador temporal acoplado al tombstone `supabase-admin*`; se revirtieron las inclusiones en `catalog.mjs` y `core.mjs`. **No queda una ruta de borrado de prueba activa**. El token Scoped se conserva en Vault como infraestructura para un conector futuro; auditar rotación/caducidad.
+- **Capacidad demostrada**: un servicio independiente de ChatGPT, autenticado por GitHub OIDC y Vault, ejecutó y verificó un borrado de Edge Function específico mediante Supabase Management API. **No equivale a MCP Supabase Universal completo para borrar/crear cualquier recurso** ni a un Gateway conectado. Los MCP oficial y CEREBRO de ChatGPT siguen sin herramienta nativa `delete_edge_function`. Requiere implementación administrativa permanente en FACT-001 antes de catalogar Supabase FULL.
+- Estado del trabajo de limpieza: **HECHO**. Estado de administración universal autónoma: **PARCIAL / PENDIENTE**. Coste adicional contratado: 0 €.
