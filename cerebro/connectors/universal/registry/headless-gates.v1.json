@@ -176,7 +176,11 @@
         "Wiki root recursive AES backup: 64 blocks, 3 block API calls, zero queued descendants, encrypted artifact SHA256 verified from independent Drive readback",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42912667491",
         "Marketing Notion data source AES backup: schema and 11 row properties, one query page, no more results, encrypted ZIP hash verified in Drive",
-        "Supabase FACT001 LAB broker v29 restored to exact v26 read-only bundle after retiring one-use routes; normal provider workflow gate restored"
+        "Supabase FACT001 LAB broker v29 restored to exact v26 read-only bundle after retiring one-use routes; normal provider workflow gate restored",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42914542679",
+        "Physical Notion searchable ID list encrypted AES256-GCM 6632 distinct objects, 67 searches, digest exactly matches previous index audit, no content bodies, anon/forged 401 and PROD 403",
+        "Drive encrypted inventory ZIP 1NtAmHbYda-JBTgI8DJdKRRM-Ey-J2F9J, 1614735 bytes, exact SHA256 9c2c31831683c89186d76e466ec19de74eaa0eb20d1a2676aea21e56dbe3a702",
+        "LAB Edge Function v31 restored exact original read-only code and single-use encrypted index routes removed"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -230,7 +234,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_ENCRYPTED_WIKI_64_BLOCKS_AND_ONE_DATA_SOURCE_11_ROWS; FULL_NOTION_WORKSPACE_EXPORT_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_BACKUP_FACTORY_V0_BATCHED_FULL_CONTENT_WITH_RESTORE_ESCROW_AND_WRITE_GATES",
+        "next_block": "FACT001_NOTION_CONTENT_BATCH_ENGINE_V0_ID_INDEX_TO_AES_CHUNKS_WITH_DURABLE_CURSOR",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -250,10 +254,10 @@
         "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
         "signed_cerebro_d1_read_run_id": 42873202783,
         "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
-        "service_version": 29,
+        "service_version": 31,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "CHUNKED_FULL_WORKSPACE_CONTENT_BACKUP_AND_KEY_ESCROW; PHYSICAL_ISOLATED_NOTION_RESTORE; SIGNED_MUTATION_PIPELINE_OFF",
+        "actual_blocker": "BATCHED_CONTENT_EXPORT_FROM_6632_ENCRYPTED_INDEX_PLUS_BINARY_FILES_AND_KEY_ESCROW_PLUS_PHYSICAL_ISOLATED_RESTORE_AND_WRITES_GATE",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -405,7 +409,7 @@
           "full_workspace_backup": false,
           "additional_subscription_cost_eur": 0
         },
-        "last_cleanup": "SUPABASE_LAB_V29_ACTIVE_EXACT_V26_BUNDLE_SHA_645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec",
+        "last_cleanup": "SUPABASE_LAB_V31_ACTIVE_EXACT_V29_READ_ONLY_SHA_645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec",
         "recursive_wiki_backup_pilot": {
           "status": "VERIFIED_PHYSICAL_AES256_GCM_RECURSIVE_ROOT_BLOCK_TREE",
           "root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
@@ -442,6 +446,30 @@
           "decrypt_roundtrip": true,
           "physical_notion_restore": false,
           "full_workspace_backup": false
+        },
+        "encrypted_index_manifest": {
+          "status": "VERIFIED_PHYSICAL_COMPLETE_SEARCH_INDEX_IDS_AES256_GCM_OFFSITE",
+          "scope": "ALL_6632_OBJECTS_ACCESSIBLE_TO_CEREBRO_NOTION_SEARCH_INDEX_ONLY",
+          "search_results": 6632,
+          "page_count": 6446,
+          "data_source_count": 186,
+          "search_pages": 67,
+          "id_list_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+          "id_list_sha256_matches_previous_search_probe": true,
+          "encrypted_json_bytes": 2143534,
+          "encrypted_json_sha256": "582d5bf5eab871c6f86fdb0256bb2bf2785b8f4a284b65f6ba50cb378f2b7957",
+          "github_run_id": 42914542679,
+          "github_artifact_id": 13808862248,
+          "github_zip_sha256": "9c2c31831683c89186d76e466ec19de74eaa0eb20d1a2676aea21e56dbe3a702",
+          "google_drive_folder_id": "1xQe5jd-AIQLDUlfZDktVod2qSJkS4M1E",
+          "google_drive_file_id": "1NtAmHbYda-JBTgI8DJdKRRM-Ey-J2F9J",
+          "drive_readback_exact_sha256": true,
+          "aes256_roundtrip_verified": true,
+          "contents_exported_by_this_manifest": false,
+          "full_workspace_backup": false,
+          "key_escrow_independent": false,
+          "production_promotion": false,
+          "no_additional_subscription": true
         }
       }
     },
