@@ -39,7 +39,7 @@ async function searchFreeMedia(env,task){
  !((task.provider==='ambientcg'&&['textures','hdris','models','decals'].includes(task.kind))||
     (task.provider==='wikimedia_commons'&&env.COMMONS_ENABLED==='true'&&['images','audio','video'].includes(task.kind))||
     (task.provider==='met'&&env.MET_ENABLED==='true'&&task.kind==='images')||
-    (task.provider==='openverse'&&env.OPENVERSE_AUDIO_ENABLED==='true'&&task.kind==='audio'))||
+    (task.provider==='openverse'&&((task.kind==='audio'&&env.OPENVERSE_AUDIO_ENABLED==='true')||(task.kind==='images'&&env.OPENVERSE_IMAGES_ENABLED==='true'))))||
  typeof task.query!=='string'||task.query.trim().length<3||task.query.length>(task.provider==='wikimedia_commons'||task.provider==='met'||task.provider==='openverse'?80:120))throw Error('SCOUT_REQUEST_INVALID');
  if(!env.SOURCE_SCOUT||typeof env.SOURCE_SCOUT.search!=='function'||
  typeof env.SOURCE_SCOUT_TOKEN!=='string'||env.SOURCE_SCOUT_TOKEN.length<32)throw Error('SCOUT_PRIVATE_BINDING_REQUIRED');
