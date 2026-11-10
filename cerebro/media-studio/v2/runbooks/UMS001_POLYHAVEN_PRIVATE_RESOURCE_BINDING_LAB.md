@@ -17,3 +17,5 @@ Release gates:
 - maintain additional expense 0 EUR and the original single daily Cron.
 
 Run: `node --test cerebro/media-studio/v2/tests/polyhaven-resource-provider-lab.test.mjs`.
+
+Private raw media retrieval: `loadStudioResourceBytes({asset_record,identity,mediaService})` reads the previously stored KV blob using RPC `media.read`, cross-checks SHA256 in Node and returns bytes to UMS compositor with QA pending. Never expose a public media URL.

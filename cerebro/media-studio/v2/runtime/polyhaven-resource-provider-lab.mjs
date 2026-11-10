@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import {createAssetRecord} from './asset-registry.mjs';
 const SCOPE={company_id:'fenix',engine_id:'UMS-001',environment:'LAB'};
 const KINDS=new Set(['textures','hdris']);
@@ -42,4 +43,21 @@ export async function acquireStudioResource({request,identity,mediaService}){
    media_key:result.file_key,rights_review:'PENDING',qa:'PENDING',production_approved:false,cost_eur:0}});
  return {producer_engine_id:'UMS-001',status:'CANDIDATE_REGISTERED_QA_PENDING',production_id:q.production_id,
   request_id:q.request_id,asset_record:record,downloaded:true,production_ready:false,additional_cost_eur:0};
+}
+
+export async function loadStudioResourceBytes({asset_record,identity,mediaService}){
+ checkIdentity(identity,'media.read');requireTransport(mediaService,'read');
+ if(!asset_record||asset_record.company_id!=='fenix'||asset_record.status!=='REGISTERED'||
+ asset_record.metadata?.external_provider!=='polyhaven'||!/^media\//.test(asset_record.metadata?.media_key||'')||
+ !/^[a-f0-9]{64}$/i.test(asset_record.metadata?.download_sha256||''))throw Error('UMS_ASSET_RECORD_INVALID');
+ const response=await mediaService.read({company_id:'fenix',engine_id:'UMS-001',environment:'LAB',actor_id:identity.actor_id,
+  permissions:['media.read'],auth_token:identity.private_service_token,kind:asset_record.asset_type==='IMAGE_HDRI'?'hdris':'textures',
+  asset_id:asset_record.name});
+ if(response?.company_id!=='fenix'||response?.engine_id!=='UMS-001'||response?.environment!=='LAB'||
+ response?.asset_id!==asset_record.name||response?.license!=='CC0-1.0'||response?.production_approved!==false||
+ !response.bytes||response.bytes.byteLength<1000||response.bytes.byteLength>2200000)throw Error('UMS_MEDIA_READ_BAD_RESPONSE');
+ const actual=crypto.createHash('sha256').update(Buffer.from(response.bytes)).digest('hex');
+ if(actual!==response.sha256||actual!==asset_record.metadata.download_sha256)throw Error('UMS_MEDIA_READ_HASH_MISMATCH');
+ return {asset_id:asset_record.asset_id,bytes:Buffer.from(response.bytes),sha256:actual,
+  rights_review:'PENDING',production_ready:false,additional_cost_eur:0};
 }
