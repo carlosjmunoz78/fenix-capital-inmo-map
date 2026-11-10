@@ -23,7 +23,8 @@ async function request(http,token,method,url,payload){
 }
 function assertOwned(p){
  if(!p||p.name!==NAME||!p.subdomain?.startsWith(NAME+'.')||p.source)throw Error('CLOUDFLARE_PAGES_OWNERSHIP_UNVERIFIED');
- if(p.domains&&(!Array.isArray(p.domains)||p.domains.length))throw Error('CLOUDFLARE_PAGES_CUSTOM_DOMAINS_PRESENT');
+ if(!Array.isArray(p.domains)||p.domains.some(d=>d!==NAME+'.pages.dev'))throw Error('CLOUDFLARE_PAGES_CUSTOM_DOMAINS_PRESENT');
+ if(p.latest_deployment)throw Error('CLOUDFLARE_PAGES_HAS_DEPLOYMENTS');
 }
 export async function verifyPagesLifecycle({token,http=fetch}={}){
  if(typeof token!=='string'||token.length<20||token.length>8192)throw Error('CLOUDFLARE_PAGES_CREDENTIAL_UNAVAILABLE');
