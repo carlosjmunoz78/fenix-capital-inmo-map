@@ -1,0 +1,10 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "source": "owner_order",
+  "operation": "notion.lab.snapshot.seal",
+  "request_id": "FACT001-NOTION-PILOT-SNAPSHOT-20261110"
+}
