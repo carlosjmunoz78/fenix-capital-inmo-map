@@ -50,7 +50,7 @@ jobs:
           // Mutate once only; if network is interrupted during self-delete, do not retry!
           let response;
           try{response=await call('delete-once',jwt,'POST',order)}
-          catch{console.log('FACT001_SB_DELETE_RESPONSE=UNCERTAIN_CHECK_MCP_LIST_NO_RETRY');exitCode=1;}
+          catch{console.log('FACT001_SB_DELETE_RESPONSE=UNCERTAIN_CHECK_MCP_LIST_NO_RETRY');process.exitCode=1;}
           if(response){
            console.log('FACT001_SB_DELETE_HTTP='+response.status);
            console.log('FACT001_SB_DELETE_STATUS='+String(response.data?.status||'NO_STATUS'));
