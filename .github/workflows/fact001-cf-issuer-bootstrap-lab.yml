@@ -53,7 +53,18 @@ jobs:
           const result=await call('issue-d1-read-lab',jwt,'POST',order);
           console.log('FACT001_ISSUE_HTTP='+result.status);
           console.log('FACT001_ISSUE_STATUS='+String(result.data?.status||'UNKNOWN'));
-          if(result.status!==200||!['ISSUED_AND_VAULT_STORED','ALREADY_PAIRED'].includes(result.data?.status)||result.data.credential_exposed!==false)throw Error('SINGLE_CHILD_ISSUE_NOT_CONFIRMED');
+          if(result.status!==200||!['ISSUED_PENDING_VERIFICATION','ALREADY_PAIRED'].includes(result.data?.status)||result.data.credential_exposed!==false)throw Error('SINGLE_CHILD_STORAGE_NOT_CONFIRMED');
           console.log('FACT001_CHILD_SECRET_RETURNED_TO_RUNNER=false');
+          console.log('FACT001_CHILD_PHASE=ISSUED_PENDING_VERIFICATION');
+          let verified=false;
+          for(let i=0;i<2;i++){
+            await new Promise(resolve=>setTimeout(resolve,i===0?5000:10000));
+            const check=await call('verify-d1-read-lab',jwt,'POST',order);
+            console.log('FACT001_CHILD_VERIFICATION_ATTEMPT_'+(i+1)+'_HTTP='+check.status);
+            if(check.status===200&&check.data?.status==='D1_READ_VERIFIED'&&check.data?.read_verified===true){verified=true;break;}
+            if(check.status!==409||check.data?.status!=='PENDING_VERIFICATION')throw Error('CHILD_VERIFY_UNEXPECTED');
+            console.log('FACT001_CHILD_PENDING_REASON='+String(check.data.reason||'UNKNOWN'));
+          }
+          if(!verified)throw Error('CHILD_READ_PENDING_NOT_ACCEPTED');
           console.log('FACT001_APP_CRM_MAIN_UNMODIFIED=true');
           NODE
