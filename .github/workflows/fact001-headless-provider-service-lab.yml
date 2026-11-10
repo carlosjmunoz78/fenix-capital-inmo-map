@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-restore-once.v1.json
 permissions:
   contents: read
   id-token: write
@@ -110,4 +111,52 @@ jobs:
            console.log('FACT001_NOTION_WORKSPACE_VISIBLE_PAGES='+notionRead.data?.accessible_pages_returned);
           }
           if(!authorized)throw Error('NOTION_WORKSPACE_READ_REQUIRES_SCOPED_ACCESS');
+          NODE
+
+      - name: "FACT001 Notion exact-page LAB restore and re-trash ONCE"
+        if: github.event.head_commit.message == 'FACT001_NOTION_RESTORE_ONCE_20261110'
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-restore-once.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.lab_restore_retrash_once',
+            request_id:'FACT001-NOTION-RESTORE-ONCE-20261110',page_id:'41481b1a-756d-8119-b1fa-c38a9d013a35'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('NOTION_RESTORE_EXACT_ORDER_DENIED');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab';
+          async function call(route,jwt,method='POST',body){
+            const r=await fetch(base+'/'+route,{method,headers:{Accept:'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{}),
+              ...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),
+              redirect:'error',signal:AbortSignal.timeout(45000)});
+            let data={};try{data=await r.json()}catch{}
+            return {http:r.status,data};
+          }
+          const anon=await call('notion-restore-once',null,'POST',order);
+          const forged=await call('notion-restore-once','invalid-signed-identity','POST',order);
+          if(anon.http!==401||forged.http!==401)throw Error('NOTION_RESTORE_AUTH_GATE_FAILED');
+          console.log('FACT001_NOTION_RESTORE_ANON_401=PASS');
+          console.log('FACT001_NOTION_RESTORE_FORGED_401=PASS');
+          const url=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!url||!grant)throw Error('OIDC_UNAVAILABLE');
+          const u=url+(url.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1');
+          const identity=await fetch(u,{headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(12000)});
+          if(!identity.ok)throw Error('OIDC_PROVIDER_DENIED');
+          const jwt=(await identity.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const other=await call('notion-restore-once',jwt,'POST',{...order,page_id:'1c481b1a-756d-8002-813d-f3efdd4ecd89'});
+          if(other.http!==403)throw Error('NOTION_RESTORE_FOREIGN_PAGE_GATE_FAILED');
+          console.log('FACT001_NOTION_RESTORE_FOREIGN_PAGE_403=PASS');
+          // Exactly one signed physical restore. NEVER auto-retry uncertain writes.
+          let result;
+          try{result=await call('notion-restore-once',jwt,'POST',order);}
+          catch{console.log('FACT001_NOTION_RESTORE_UNCERTAIN_NO_RETRY=true');throw Error('RESTORE_RECONCILIATION_REQUIRED');}
+          const ok=result.http===200&&result.data?.status==='NOTION_LAB_RESTORE_AND_RETRASH_VERIFIED'&&
+            result.data?.original_in_trash===true&&result.data?.restored===true&&result.data?.final_in_trash===true&&
+            result.data?.wiki_modified===false&&result.data?.other_pages_modified===0&&
+            result.data?.credentials_exposed===false;
+          console.log('FACT001_NOTION_INDEPENDENT_RESTORE='+String(ok?'PASS':'BLOCKED'));
+          console.log('FACT001_NOTION_RESTORE_HTTP='+result.http);
+          console.log('FACT001_NOTION_RESTORE_FINAL_TRASH='+String(result.data?.final_in_trash===true));
+          if(!ok)throw Error('NOTION_RESTORE_PHYSICAL_GATE_FAILED_NO_RETRY');
           NODE
