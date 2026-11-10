@@ -4,7 +4,6 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
-      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-d1-status.v1.json
 permissions:
   contents: read
   id-token: write
@@ -111,51 +110,4 @@ jobs:
            console.log('FACT001_NOTION_WORKSPACE_VISIBLE_PAGES='+notionRead.data?.accessible_pages_returned);
           }
           if(!authorized)throw Error('NOTION_WORKSPACE_READ_REQUIRES_SCOPED_ACCESS');
-          NODE
-
-      - name: CEREBRO signed Notion LAB D1 readonly bridge one-time canary
-        if: github.event.head_commit.message == 'FACT001_NOTION_D1_STATUS_ONCE_20261110'
-        run: |
-          node --input-type=module <<'NODE'
-          import {readFileSync} from 'node:fs';
-          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-d1-status.v1.json','utf8'));
-          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
-            client_id:'cerebro',source:'owner_order',operation:'notion.d1.status.read',
-            request_id:'FACT001-NOTION-D1-STATUS-20261110'};
-          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
-            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('NOTION_D1_READ_ORDER_INVALID');
-          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-d1-status';
-          async function call(jwt,body){
-            const response=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
-              ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(30000)});
-            let result={};try{result=await response.json()}catch{}
-            return {http:response.status,data:result};
-          }
-          const anonymous=await call(null,order);
-          const forged=await call('not-signed',order);
-          if(anonymous.http!==401||forged.http!==401)throw Error('NOTION_D1_AUTH_GATE_FAILED');
-          console.log('FACT001_NOTION_D1_ANON_401=PASS');
-          console.log('FACT001_NOTION_D1_FORGED_401=PASS');
-          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
-          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
-          const u=endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1');
-          const r=await fetch(u,{headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
-          if(!r.ok)throw Error('OIDC_HTTP_ERROR');
-          const jwt=(await r.json()).value;
-          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_NOT_VALID');
-          const deny=await call(jwt,{...order,environment:'PROD'});
-          if(deny.http!==403)throw Error('NOTION_D1_SCOPE_GATE_FAILED');
-          console.log('FACT001_NOTION_D1_WRONG_SCOPE_403=PASS');
-          const data=await call(jwt,order);
-          const result=data.data;
-          const ok=data.http===200&&result?.status==='FACT001_NOTION_D1_SIGNED_READ_VERIFIED'&&
-            result?.provider==='cloudflare-d1'&&result?.scope?.environment==='LAB'&&
-            Number.isSafeInteger(result?.owned_count)&&result.owned_count>=1&&
-            Number.isSafeInteger(result?.approved_count)&&result.approved_count===0&&
-            Number.isSafeInteger(result?.snapshot_count)&&Number.isSafeInteger(result?.audit_count)&&
-            result?.external_provider_writes===0&&result?.mutations===0&&
-            result?.authenticated_service===true&&result?.credential_exposed===false;
-          console.log('FACT001_NOTION_D1_SIGNED_READ='+String(ok?'PASS':'BLOCKED'));
-          console.log('FACT001_NOTION_D1_HTTP='+data.http);
-          if(!ok)throw Error('FACT001_NOTION_D1_LAB_STATUS_GATE_FAILED');
           NODE
