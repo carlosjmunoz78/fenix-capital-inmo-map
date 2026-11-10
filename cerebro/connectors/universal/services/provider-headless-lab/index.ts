@@ -4,6 +4,7 @@ import postgres from 'npm:postgres@3.4.7';
 import {verifyGitHubOidc,assertReadOrder,SCOPE} from './policy.mjs';
 import {providerSpecs,readProviderInventory} from './provider.mjs';
 import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
+import {SERVICE_IDENTITIES,assertIdentityProbeOrder,probeServiceIdentity} from './service-identity.mjs';
 const headers={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(n:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status:n,headers});
 const getBearer=(request:Request)=>{
@@ -36,11 +37,29 @@ function assertPlanOrder(body:unknown){
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan','service-identity'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&request.method==='GET')return reply(200,{status:'SIGNED_HEADLESS_LAB_READY',scope:SCOPE});
+  if(route==='service-identity'&&request.method==='POST'){
+   if(Number(request.headers.get('content-length')||'0')>1500)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
+   let provider;
+   try{provider=assertIdentityProbeOrder(await request.json());}
+   catch{return reply(400,{status:'ORDER_DENIED'});}
+   let token='';
+   try{
+    try{token=await getVaultToken(SERVICE_IDENTITIES[provider].secret_name);}
+    catch(e){
+     if(e instanceof Error&&e.message==='SERVICE_VAULT_TOKEN_MISSING')
+       return reply(424,{status:'HUMAN_REQUIRED',reason:'SERVICE_INTEGRATION_CREDENTIAL_NOT_CONFIGURED',
+         provider,required_vault_secret:SERVICE_IDENTITIES[provider].secret_name,credentials_exposed:false});
+     throw e;
+    }
+    const result=await probeServiceIdentity({provider,token});
+    return reply(200,result);
+   }finally{token='';}
+  }
   if(route==='plan'&&request.method==='POST'){
    if(Number(request.headers.get('content-length')||'0')>2000)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
    let plan;
