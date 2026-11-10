@@ -1,7 +1,7 @@
 // Supabase Management API adapter. Backend injects a trusted HTTPS client whose
 // access token remains in Vault / GitHub Actions secret; no token in model data or logs.
 // Only exact disposable function may be deleted. Prod App/CRM functions are excluded.
-import {SUPABASE_PROJECT_REF,DISPOSABLE_FUNCTION,DISPOSABLE_FUNCTION_ID} from './supabase-admin-catalog.mjs';
+import {SUPABASE_PROJECT_REF,DISPOSABLE_FUNCTION,DISPOSABLE_FUNCTION_ID,DISPOSABLE_FUNCTION_SHA} from './supabase-admin-catalog.mjs';
 const PREFIX='/v1/projects/'+SUPABASE_PROJECT_REF+'/functions';
 const plain=x=>x&&typeof x==='object'&&!Array.isArray(x)&&Object.getPrototypeOf(x)===Object.prototype;
 const fixedRead=x=>x?.result??x;
@@ -32,9 +32,9 @@ export function createSupabaseAdminAdapter({request}={}){
    if(action?.id==='supabase-admin.edge-functions.delete-test-tombstone'){
     if(input.slug!==DISPOSABLE_FUNCTION||input.project_ref!==SUPABASE_PROJECT_REF||input.expected_function_id!==DISPOSABLE_FUNCTION_ID||input.confirm_disposable!==true||Object.keys(input).sort().join(',')!=='confirm_disposable,expected_function_id,project_ref,slug')throw Error('DELETE_SCOPE_DENIED');
     const f=await call('GET',PREFIX+'/'+DISPOSABLE_FUNCTION);
-    if(f?.notFound===true)return {status:'ALREADY_EXISTS_VERIFIED',deleted:false,slug:DISPOSABLE_FUNCTION};
+    if(f?.notFound===true)return {status:'COMPLETED',deleted:false,verified_absent:true,slug:DISPOSABLE_FUNCTION};
     // Must be the v4+ retired test endpoint, not the former live credentials-consuming worker.
-    if(f?.id!==DISPOSABLE_FUNCTION_ID||f.slug!==DISPOSABLE_FUNCTION||f.version<4||f.verify_jwt!==true||f.status!=='ACTIVE')throw Error('FUNCTION_NOT_VERIFIED_AS_RETIRED');
+    if(f?.id!==DISPOSABLE_FUNCTION_ID||f.slug!==DISPOSABLE_FUNCTION||f.version!==4||f.ezbr_sha256!==DISPOSABLE_FUNCTION_SHA||f.verify_jwt!==true||f.status!=='ACTIVE')throw Error('FUNCTION_NOT_VERIFIED_AS_RETIRED');
     const removed=await call('DELETE',PREFIX+'/'+DISPOSABLE_FUNCTION);
     if(removed?.deleted!==true)throw Error('DELETE_RESPONSE_NOT_ACKNOWLEDGED');
     const after=await call('GET',PREFIX+'/'+DISPOSABLE_FUNCTION);
