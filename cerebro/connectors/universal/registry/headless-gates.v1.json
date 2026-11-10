@@ -159,7 +159,10 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42899094633",
         "12/12 second batch privately connected pages/databases GET 200 under GitHub OIDC -> CEREBRO Vault identity, 401 anon/forged, 403 PROD, 0 content/writes. Total 39 distinct root references verified",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42902477443",
-        "Read-only pinned CEREBRO OIDC + own Notion Vault identity checked 19 historic Private pages: 18 HTTP 200, 1 HTTP 404 (page 1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b); total 57/58 tested roots verified; anonymous/forged 401 and PROD 403"
+        "Read-only pinned CEREBRO OIDC + own Notion Vault identity checked 19 historic Private pages: 18 HTTP 200, 1 HTTP 404 (page 1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b); total 57/58 tested roots verified; anonymous/forged 401 and PROD 403",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42903411090",
+        "All 58/58 inventoried existing root IDs GET 200 under CEREBRO independent Notion service; the last 1/1 passed on OIDC signed GitHub Workflow, 401/401/403 negative gates, no content retrieval or writes",
+        "Temporary single-root route retired; Supabase v19 ACTIVE exact bundle hash 645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec matching pre-canary v17"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -213,7 +216,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_ONE_HISTORICAL_ROOT_SHARE_RECHECK",
+        "next_block": "FACT001_NOTION_WORKSPACE_GRAPH_BACKUP_RESTORE_AND_SIGNED_PROVIDER_WRITE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -233,7 +236,7 @@
         "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
         "signed_cerebro_d1_read_run_id": 42873202783,
         "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
-        "service_version": 15,
+        "service_version": 19,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
         "actual_blocker": "FULL_NOTION_WORKSPACE_COVERAGE_AND_BACKUP_NOT_VERIFIED; SIGNED_WORKER_TO_BROKER_WRITE_PIPELINE_NOT_PROVISIONED",
@@ -282,10 +285,10 @@
           "ci_run": 42894767890,
           "existing_verified_default_root": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
           "policy": "New CEREBRO pages must use service-accessible owner-approved connected parent; never create unshared top-level roots",
-          "new_root_permissions_status": "57_OF_58_TESTED_ROOTS_ACCESS_VERIFIED; 1_HISTORIC_IMPORT_LOG_ROOT_NOT_ACCESSIBLE",
+          "new_root_permissions_status": "58_OF_58_KNOWN_ROOTS_INDEPENDENT_SERVICE_READ_VERIFIED; FUTURE_CHILD_GATE_CODE_NOT_DEPLOYED",
           "no_new_oauth_scope": true
         },
-        "full_workspace_access_status": "57/58_INVENTORIED_ROOTS_VERIFIED_ONE_HISTORIC_PRIVATE_ROOT_PENDING; OTHER_TEAMSPACES_UNAUDITED",
+        "full_workspace_access_status": "ALL_58_INVENTORIED_ROOTS_READ_VERIFIED; FULL_WORKSPACE_BLOCKS_ASSETS_RESTORATION_NOT_CERTIFIED",
         "opera_connected_root_access": {
           "status": "VERIFIED_PHYSICAL_CEREBRO_INDEPENDENT_NOTION_SERVICE",
           "checked": 27,
@@ -306,27 +309,40 @@
             "run_id": 42899094633,
             "provider_writes": 0
           },
-          "verified_total_distinct": 57,
+          "verified_total_distinct": 58,
           "third_batch": {
-            "status": "PARTIAL_ONE_ROOT_NOT_ACCESSIBLE",
+            "status": "VERIFIED_ALL_19_AFTER_ONE_ROOT_RECHECK",
             "checked": 19,
-            "accessible": 18,
-            "denied": 1,
+            "accessible": 19,
+            "denied": 0,
             "inconclusive": 0,
             "run_id": 42902477443,
             "blocked_page_id": "1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b",
             "blocked_page_title": "Import Mar 27, 2025 Logs",
-            "provider_writes": 0
+            "provider_writes": 0,
+            "reconciliation": "18/19 original run 42902477443 plus 1/1 signed isolated recheck 42903411090"
           },
-          "total_tested_distinct": 58
+          "total_tested_distinct": 58,
+          "final_single_root": {
+            "status": "VERIFIED_PHYSICAL_CEREBRO_INDEPENDENT_SERVICE",
+            "root_id": "1c381b1a-756d-81f3-9ac6-ec7ac66d4b1b",
+            "checked": 1,
+            "accessible": 1,
+            "denied": 0,
+            "inconclusive": 0,
+            "run_id": 42903411090,
+            "signed_guards": "ANON_401_FORGED_401_PROD_403",
+            "provider_writes": 0
+          }
         },
         "private_top_level_roots": {
           "scope": "Notion user's Private sidebar roots only; not full workspace",
           "known_private_count": 49,
-          "verified_among_private": 48,
-          "still_to_connect": 1,
+          "verified_among_private": 49,
+          "still_to_connect": 0,
           "verified_integration": "CEREBRO own Notion Vault credential"
-        }
+        },
+        "temporary_single_root_route": "ROLLED_BACK_EXACT_V17_HASH"
       }
     },
     {
