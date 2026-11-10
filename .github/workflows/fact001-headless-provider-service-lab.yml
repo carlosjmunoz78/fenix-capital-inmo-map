@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-data-source.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
@@ -202,3 +203,74 @@ jobs:
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
           NODE
+
+      - name: "FACT001 marketing data source encrypted row-property snapshot read-only"
+        if: github.event.head_commit.message == 'FACT001_NOTION_DATASOURCE_ENCRYPTED_ONCE_20261110'
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+          import {createHash} from 'node:crypto';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-data-source.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+           client_id:'cerebro',source:'owner_order',operation:'notion.lab.marketing_source.seal',
+           request_id:'FACT001-NOTION-DATA-SOURCE-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_SOURCE_ORDER_INVALID');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/';
+          async function call(route,jwt,body){
+           const res=await fetch(base+route,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+            ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(90000)});
+           let data={};try{data=await res.json()}catch{}
+           return {http:res.status,data};
+          }
+          const anon=await call('notion-marketing-source-seal',null,order),fake=await call('notion-marketing-source-seal','invalid',order);
+          if(anon.http!==401||fake.http!==401)throw Error('FACT001_SOURCE_OIDC_NEGATIVE_FAIL');
+          console.log('FACT001_SOURCE_ANON_401=PASS');
+          console.log('FACT001_SOURCE_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
+          const auth=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+           {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(15000)});
+          if(!auth.ok)throw Error('OIDC_ISSUER_DENIED');
+          const jwt=(await auth.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const prod=await call('notion-marketing-source-seal',jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('FACT001_SOURCE_PROD_NOT_REJECTED');
+          console.log('FACT001_SOURCE_PROD_403=PASS');
+          const res=await call('notion-marketing-source-seal',jwt,order),a=res.data;
+          if(res.http!==200||a?.status!=='FACT001_SOURCE_AES_GCM_SNAPSHOT'||
+             a.source_id!=='38981b1a-756d-81e0-9936-000b6a8c430c'||
+             a.algorithm!=='AES-256-GCM'||a.write_operations!==0||
+             a.full_workspace_backup!==false||a.row_page_blocks_included!==false||
+             !a.envelope?.ciphertext_b64||!Number.isSafeInteger(a.rows)||
+             !Number.isSafeInteger(a.query_pages)||a.query_pages>4)
+             throw Error('FACT001_SOURCE_SNAPSHOT_UNVERIFIED_HTTP_'+res.http);
+          const verify={...order,operation:'notion.lab.marketing_source.verify',
+             request_id:'FACT001-NOTION-DATA-SOURCE-VERIFY-20261110',artifact:a};
+          const check=await call('notion-marketing-source-verify',jwt,verify);
+          if(check.http!==200||check.data?.status!=='FACT001_SOURCE_MEMORY_REBUILD_PASS'||
+             check.data?.sha256!==a.plaintext_sha256||check.data?.rows!==a.rows||
+             check.data?.notion_physical_restore!==false||check.data?.content_exposed!==false)
+            throw Error('FACT001_SOURCE_REBUILD_FAILED_HTTP_'+check.http);
+          mkdirSync('fact001-source-encrypted',{recursive:true});
+          const bytes=Buffer.from(JSON.stringify(a)+'\n','utf8');
+          if(bytes.length>7000000)throw Error('FACT001_SOURCE_ARTIFACT_OVERSIZE');
+          writeFileSync('fact001-source-encrypted/notion-marketing-source-aes256gcm.json',bytes,{mode:0o600,flag:'wx'});
+          console.log('FACT001_SOURCE_ENCRYPTED_SHA256='+createHash('sha256').update(bytes).digest('hex'));
+          console.log('FACT001_SOURCE_ENCRYPTED_BYTES='+bytes.length);
+          console.log('FACT001_SOURCE_ROWS='+a.rows);
+          console.log('FACT001_SOURCE_QUERY_PAGES='+a.query_pages);
+          console.log('FACT001_SOURCE_HAS_MORE='+a.has_more);
+          console.log('FACT001_SOURCE_MEMORY_REBUILD=PASS');
+          console.log('FACT001_SOURCE_FULL_WORKSPACE=false');
+          console.log('FACT001_SOURCE_PROVIDER_RESTORE=false');
+          NODE
+      - name: "Archive encrypted-only marketing source backup in existing GitHub Actions"
+        if: github.event.head_commit.message == 'FACT001_NOTION_DATASOURCE_ENCRYPTED_ONCE_20261110'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-marketing-source-aes256gcm-20261110
+          path: fact001-source-encrypted/notion-marketing-source-aes256gcm.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
