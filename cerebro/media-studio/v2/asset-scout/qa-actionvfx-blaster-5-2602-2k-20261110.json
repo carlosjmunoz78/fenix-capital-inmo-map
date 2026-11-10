@@ -1,0 +1,70 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "asset-qa-v0.1",
+  "verified_on": "2026-11-10",
+  "provider": "ActionVFX",
+  "asset_name": "Blaster_5_2602_2K.mov",
+  "source_provider_collection": "FREE - Blasters",
+  "source_original_download_claim": "USER_SUBMITTED_FILE",
+  "drive": {
+    "file_id": "17zin_vj51AkVXHtaPUrTspIGxFq0Q4b3",
+    "file_url": "https://drive.google.com/file/d/17zin_vj51AkVXHtaPUrTspIGxFq0Q4b3/view",
+    "folder_id": "1XfHz4u9m6iVlbc-R4WRlLsUS00-iPZkQ",
+    "publicly_shared": false
+  },
+  "forensic": {
+    "sha256": "90b5336ad8cf0b31552b6ca69b58e6d658de6ef319493573c11022bc284af55d",
+    "file_size_bytes": 2429684,
+    "container": "QuickTime MOV",
+    "video_codec": "Apple ProRes Standard",
+    "width": 2048,
+    "height": 1080,
+    "bit_depth": 10,
+    "pixel_format": "yuv422p10le",
+    "frame_rate": "24000/1001",
+    "frame_count": 26,
+    "duration_seconds": 1.084417,
+    "alpha_channel": false,
+    "color_space": "bt709",
+    "audio_stream_found": false
+  },
+  "visual_qa": {
+    "observed_subject": "Horizontal yellow/gold energy streak against black background",
+    "watermark_status": "NOT_VISIBLY_DETECTED_IN_SAMPLED_FRAMES",
+    "sampled_seconds": [
+      0.08,
+      0.25,
+      0.42,
+      0.59,
+      0.76,
+      0.95
+    ],
+    "watermark_guarantee": false,
+    "image_visual_quality": "CLEAN_WITH_BLACK_BACKGROUND",
+    "recommended_compositing": "SCREEN_OR_ADD_BLEND_ON_BLACK; color-adjust and verify on editing timeline",
+    "candidate_uses": [
+      "energy impacts",
+      "spark flashes",
+      "cinematic transitions"
+    ]
+  },
+  "commercial_rights": {
+    "status": "PENDING_FINAL_COMPANY_TIER_CONFIRMATION_AND_PROVIDER_WORKFLOW_CLARIFICATION",
+    "provider_startup_license": "REPORTED_APPLIED_BY_ACTIONVFX_SUPPORT",
+    "api_free_download": "UNAVAILABLE_CONFIRMED_BY_VENDOR",
+    "stock_training_ai": "NOT_AUTHORIZED",
+    "company_wide_use": "DO_NOT_ASSUME_UNRESTRICTED",
+    "production_approval": false
+  },
+  "readiness": {
+    "asset_present": true,
+    "technical_video_valid": true,
+    "watermark_sampled_frames_clean": true,
+    "license_gate": "PENDING",
+    "production_gate": "BLOCKED_PENDING_RIGHTS",
+    "no_media_file_copied_to_github": true
+  },
+  "cost_eur": 0
+}
