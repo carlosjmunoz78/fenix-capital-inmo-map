@@ -81,4 +81,19 @@ jobs:
            if(!valid)throw Error('HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_NOT_VERIFIED_'+x.http);
           }
           console.log('FACT001_HEADLESS_PLANNER_18_ARTIFACTS_PER_UNIT=PASS');
+          for(const provider of ['github','notion']){
+           const order={...request,operation:'provider.service_identity.probe',
+             request_id:'FACT001-INDEPENDENT-IDENTITIES-20261110',provider};
+           const result=await call('service-identity',jwt,'POST',order);
+           const verified=result.http===200&&result.data?.status==='SERVICE_IDENTITY_READ_VERIFIED'&&
+             result.data?.provider===provider&&result.data?.independent_service===true&&
+             result.data?.admin_write_verified===false&&result.data?.mutations===0;
+           const human=result.http===424&&result.data?.status==='HUMAN_REQUIRED'&&
+             result.data?.reason==='SERVICE_INTEGRATION_CREDENTIAL_NOT_CONFIGURED'&&
+             result.data?.provider===provider&&result.data?.credentials_exposed===false;
+           if(!verified&&!human)throw Error('UNEXPECTED_SERVICE_IDENTITY_RESULT_'+provider.toUpperCase()+'_'+result.http);
+           console.log('FACT001_SERVICE_IDENTITY_'+provider.toUpperCase()+'='+String(verified?'VERIFIED_READ':'HUMAN_REQUIRED'));
+           console.log('FACT001_SERVICE_IDENTITY_'+provider.toUpperCase()+'_REASON='+String(human?result.data?.reason:'NONE'));
+          }
+          console.log('FACT001_SERVICE_CREDENTIAL_VALUES_PRINTED=false');
           NODE
