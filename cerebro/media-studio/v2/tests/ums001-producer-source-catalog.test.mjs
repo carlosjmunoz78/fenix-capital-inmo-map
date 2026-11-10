@@ -1,0 +1,12 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {latestFreeMedia} from '../cloudflare/ums001-private-gateway-lab/producer-source-catalog.mjs';
+const task={company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'wikimedia_commons',kind:'video'};
+const entry={id:'commons:123',title:'Royalty free',source:'https://commons.wikimedia.org/wiki/File:Free.webm',kind:'video',provider:'wikimedia_commons',license:'CC0-1.0',downloaded:false,production_approved:false,qa:'PENDING'};
+const env={GATEWAY_ENABLED:'true',SOURCE_SCOUT_ENABLED:'true',COMMONS_ENABLED:'true',MET_ENABLED:'true',OPENVERSE_AUDIO_ENABLED:'false',SOURCE_SCOUT_TOKEN:'a'.repeat(64),SOURCE_SCOUT:{catalog:async x=>({company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:x.provider,kind:x.kind,mode:'METADATA_ONLY',refresh_status:'GREEN_METADATA',refreshed_at:'2026-11-10',downloaded:false,production_approved:false,results:[{...entry,provider:x.provider,kind:x.kind}]})}};
+test('Commons private LATEST returns CC0 and rejects publish',async()=>{const r=await latestFreeMedia(env,task);assert.equal(r.results.length,1);assert.equal(r.publish_authorized,false)});
+test('Commons no public endpoint or wrong company',async()=>{await assert.rejects(latestFreeMedia(env,{...task,company_id:'wrong'}),/SCOPE/)});
+test('reject disabled Commons',async()=>{await assert.rejects(latestFreeMedia({...env,COMMONS_ENABLED:'false'},task),/COMMONS_OFF/)});
+test('reject Openverse images outright',async()=>{await assert.rejects(latestFreeMedia(env,{...task,provider:'openverse',kind:'images'}),/SOURCE_DENIED/)});
+test('Openverse audio gated',async()=>{await assert.rejects(latestFreeMedia(env,{...task,provider:'openverse',kind:'audio'}),/OPENVERSE_AUDIO_OFF/)});
+test('reject CC-BY catalog',async()=>{const bad={...env,SOURCE_SCOUT:{catalog:async()=>({...await env.SOURCE_SCOUT.catalog(task),results:[{...entry,license:'CC-BY'}]})}};await assert.rejects(latestFreeMedia(bad,task),/UNTRUSTED/)});
+test('degraded catalog never reports ready',async()=>{const bad={...env,SOURCE_SCOUT:{catalog:async()=>({...await env.SOURCE_SCOUT.catalog(task),refresh_status:'DEGRADED_UPSTREAM',results:[]})}};const r=await latestFreeMedia(bad,task);assert.equal(r.status,'SOURCE_NOT_READY');assert.equal(r.results.length,0)});

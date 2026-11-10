@@ -1,6 +1,6 @@
 /** Additive CEREBRO orchestration seam, never mutates original creative pipeline. */
 const SCOPE={company_id:'fenix',engine_id:'UMS-001',environment:'LAB'};
-const KINDS={ambientcg:new Set(['textures','hdris','models','decals']),met:new Set(['images'])};
+const KINDS={ambientcg:new Set(['textures','hdris']),met:new Set(['images']),wikimedia_commons:new Set(['images','audio','video']),openverse:new Set(['audio']),polyhaven:new Set(['textures','hdris'])};
 function guard({request,identity,producerService},permission){
  if(!request||Object.entries(SCOPE).some(([k,v])=>request[k]!==v))throw Error('ORCH_UMS_SCOPE_DENIED');
  if(!identity||identity.gateway_verified!==true||identity.company_id!=='fenix'||identity.environment!=='LAB'||
@@ -13,16 +13,32 @@ function guard({request,identity,producerService},permission){
 }
 export async function routeMediaProductionResource({request,identity,producerService}){
  const action=request?.action;
- if(!['SEARCH','SELECT','READ'].includes(action))throw Error('ORCH_UMS_ACTION_DENIED');
- const permission=action==='SEARCH'?'media.search':action==='SELECT'?'media.acquire':'media.read';
+ if(!['SEARCH','LATEST','SELECT','READ'].includes(action))throw Error('ORCH_UMS_ACTION_DENIED');
+ const permission=['SEARCH','LATEST'].includes(action)?'media.search':action==='SELECT'?'media.acquire':'media.read';
  guard({request,identity,producerService},permission);
+ if(action==='LATEST'){
+  if(typeof producerService.latest!=='function')throw Error('ORCH_UMS_LATEST_BINDING_MISSING');
+  const reply=await producerService.latest({...request,action:undefined});
+  const cap=request.provider==='wikimedia_commons'?5:request.provider==='met'?3:8;
+  if(reply?.company_id!=='fenix'||reply.engine_id!=='UMS-001'||reply.environment!=='LAB'||
+   reply.provider!==request.provider||reply.kind!==request.kind||reply.mode!=='METADATA_ONLY'||
+   reply.downloaded!==false||reply.production_approved!==false||reply.publish_authorized!==false||
+   !Array.isArray(reply.results)||reply.results.length>cap||
+   reply.results.some(x=>x.license!=='CC0-1.0'||x.production_approved!==false||x.downloaded!==false||x.provider!==request.provider))
+   throw Error('ORCH_UMS_INVALID_LATEST_REPLY');
+  const ready=reply.refresh_status==='GREEN_METADATA'&&reply.results.length>0&&reply.status==='CACHED_CANDIDATES_FOR_QA';
+  return {status:ready?'CACHED_CANDIDATES_FOR_QA':'SOURCE_NOT_READY',company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
+   provider:request.provider,kind:request.kind,production_id:request.production_id,refresh_status:reply.refresh_status,
+   refreshed_at:reply.refreshed_at,candidates:ready?reply.results:[],downloaded:false,publish_authorized:false,cost_eur:0};
+ }
  if(action==='SEARCH'){
-  if(typeof producerService.scout!=='function')throw Error('ORCH_UMS_PRIVATE_BINDING_REQUIRED');
-  if(typeof request.query!=='string'||request.query.trim().length<3||request.query.length>(request.provider==='met'?80:120))throw Error('ORCH_UMS_QUERY_DENIED');
-  const reply=await producerService.scout({...request,action:undefined});
+  if(typeof (request.provider==='polyhaven'?producerService.search:producerService.scout)!=='function')throw Error('ORCH_UMS_PRIVATE_BINDING_REQUIRED');
+  if(typeof request.query!=='string'||request.query.trim().length<3||request.query.length>120)throw Error('ORCH_UMS_QUERY_DENIED');
+  const reply=await (request.provider==='polyhaven'?producerService.search({...request,action:undefined}):producerService.scout({...request,action:undefined}));
   if(reply?.company_id!=='fenix'||reply.engine_id!=='UMS-001'||reply.environment!=='LAB'||reply.provider!==request.provider||reply.kind!==request.kind||
-     reply.downloaded!==false||reply.production_approved!==false||!Array.isArray(reply.results)||reply.results.length>(request.provider==='met'?3:8)||
-     reply.results.some(x=>x.license!=='CC0-1.0'||x.downloaded!==false||x.production_approved!==false))throw Error('ORCH_UMS_INVALID_SEARCH_REPLY');
+     !Array.isArray(reply.results)||reply.results.length>(request.provider==='wikimedia_commons'?5:request.provider==='met'?3:8)||
+     (request.provider!=='polyhaven'&&(reply.downloaded!==false||reply.production_approved!==false))||
+     reply.results.some(x=>x.license!=='CC0-1.0'||(request.provider!=='polyhaven'&&(x.downloaded!==false||x.production_approved!==false))))throw Error('ORCH_UMS_INVALID_SEARCH_REPLY');
   return {status:'CANDIDATES_FOR_QA',company_id:'fenix',engine_id:'UMS-001',environment:'LAB',production_id:request.production_id,
    provider:request.provider,kind:request.kind,candidates:reply.results,downloaded:false,publish_authorized:false,cost_eur:0};
  }
