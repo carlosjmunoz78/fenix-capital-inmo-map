@@ -98,3 +98,21 @@ No hay cola duradera única de trabajos automatizados por empresa, no hay E2E de
 - **BLOQUEO ESPECÍFICO:** el UUID de la subpágina que el E2E #42853530709 dejó en Trash no se incluyó en su salida ni en el contrato, y la búsqueda del cliente ChatGPT en páginas archivadas no la devolvió. Evitar repetir create/read/update/trash y, sobre todo, evitar restaurar una página ajena por coincidencia de título.
 - **NEXT_BLOCK ÚNICO:** recuperar el ID exacto del objeto de prueba mediante una vía oficial/autorizada, verificar su parent y título, y efectuar una sola restauración+re-Trash física con credencial de servicio en un endpoint de LAB one-shot controlado; retirar la ruta después. Si ese ID no es recuperable, considerar un nuevo fixture sintético únicamente dentro de un procedimiento E2E explícitamente aislado, con reconciliación y limpieza, sin tocar contenido existente.
 - Estado global Notion: **6/11 GATES FÍSICOS**, recuperación LIVE PENDING, broker persistente y PROD pendientes. PR #44 DRAFT, sin cambios en main/App/CRM/DNS, sin coste adicional contratado.
+
+
+## NOTION · RESTORE REAL CEREBRO INDEPENDIENTE — CIERRE 10/11/2026
+
+### HECHO Y FÍSICAMENTE VERIFICADO
+- Como el UUID de la prueba anterior #42853530709 no estaba conservado en la evidencia, se creó **exactamente una nueva subpágina de prueba vacía**, propiedad del flujo, bajo Wiki Fénix Capital. UUID: `41481b1a-756d-8119-b1fa-c38a9d013a35`. ChatGPT Notion Universal la creó y la envió a Trash; el contenido existente de la Wiki no se editó.
+- El **servicio independiente de CEREBRO**, `cerebro-fact001-headless-provider-lab` v11 temporal, usó su propia credencial Notion desde Supabase Vault y GitHub OIDC RS256 del workflow exacto, sin OAuth ni token de ChatGPT, para restaurar **esa página exacta** (PATCH `in_trash=false`) y enviarla otra vez a Trash (PATCH `in_trash=true`), con GET de verificación entre ambos estados y al final.
+- **E2E físico:** [GitHub Actions #42859689267](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42859689267), SUCCESS. Registros semánticos: `FACT001_NOTION_RESTORE_ANON_401=PASS`, `FACT001_NOTION_RESTORE_FORGED_401=PASS`, `FACT001_NOTION_RESTORE_FOREIGN_PAGE_403=PASS`, `FACT001_NOTION_INDEPENDENT_RESTORE=PASS`, `FACT001_NOTION_RESTORE_HTTP=200`, `FACT001_NOTION_RESTORE_FINAL_TRASH=true`.
+- Comprobación independiente mediante Notion Universal `fetch` por UUID: página marcada `deleted` y situada bajo Wiki Fénix Capital. Los demás contenidos permanecen fuera del test.
+- **RETIRO REAL Y ROLLBACK:** tras E2E, la Edge Function quedó `v12 ACTIVE` con exactamente **el hash de bundle original v10** `911cde5f28cf816096f82815cb5754330ebfb041290d477d2de6f43031694c49`, 8 ficheros originales y ninguna ruta `notion-restore-once`. Se retiraron también el disparador y la orden JSON de un solo uso de la rama DRAFT. El helper de restauración y sus 6 tests se conservan para futuras certificaciones, pero **no se sirven en LAB activo ni PROD**.
+- El primer intento de empaquetado v11 rechazó la ausencia de `notion-lifecycle.mjs` antes de desplegar; después se añadió la dependencia, se desplegó v11 una sola vez y se obtuvo E2E verde. No hubo escritura Notion en el intento fallido.
+- No se ha tocado `main`, App, CRM, DNS ni recursos productivos ajenos. No se han contratado planes ni habilitado servicios de pago.
+
+### ESTADO PRECISO
+- **RESTORE FROM TRASH en un hijo aislado: CONFIRMED_OPERATIONAL en LAB.** Se ha probado también su limpieza final real.
+- **NO es Full Notion:** backup completo, restauración de versiones históricas, eliminación permanente, cobertura de todo el workspace, cola autónoma, ejecución de escrituras permanente y promoción PROD **siguen pendientes**.
+- **Registro mantiene 6/11 gates plenamente VERIFICADOS.** `backup_and_rollback=PARTIAL_LAB_TRASH_RESTORE_ONLY`; no convertir una restauración individual en backup/rollback global.
+- `next_block`: cerrar broker CRUD permanente con permisos por página, idempotencia auditable, backup/restore real, observabilidad y activación autónoma solo tras política de producción, sin repetir los tests ya superados.
