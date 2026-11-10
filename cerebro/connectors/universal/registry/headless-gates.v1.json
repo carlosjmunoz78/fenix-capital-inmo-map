@@ -184,13 +184,18 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42916209247",
         "Real first AES sealed content-batch plan from independently archived complete 6632-object index: 25 pages offset 0 to25, OIDC/PROD negative gates, decryption verification, queue OFF, no content provider GETs",
         "Drive first sealed batch ZIP 1X1uO7YZNG0G075tGYvs1G_GoSMFbQUJa, 7293 bytes, exact SHA256 f041759233b1ad746466c3d3a1e275f5c49f286c2425429c7ae6fc840ed0d0b4",
-        "Supabase LAB broker v33 restored same v31 original readonly SHA; one-shot action trigger and actions-read temporary permission removed"
+        "Supabase LAB broker v33 restored same v31 original readonly SHA; one-shot action trigger and actions-read temporary permission removed",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42921160489",
+        "FACT001 first 25 Notion page-body encrypted snapshot: GitHub artifact 13812640522, 25/25 exported, anonymous/forged 401 and PROD 403",
+        "Google Drive readback private 1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p, 454715 bytes, SHA256 e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65 EXACT MATCH",
+        "Git evidence checkpoint 0→25 verified; D1 CAS not yet committed and no Notion physical restore"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
         "Restore-from-Trash and re-Trash of exactly one isolated child VERIFIED with CEREBRO independent service token; full workspace backup, version restore, permanent deletion and general rollback still untested",
         "Governed Notion operator passes local CI; real D1 EU schema and synthetic ownership persist physically, isolated full clone/rollback verified; service-to-service executor and external retained backup archive still pending",
-        "Internal Cloudflare Cron D1-bound queue proved physically one-shot and turned OFF; actual signed Notion provider mutation pipeline, full workspace coverage/backup, cost+audit+promotion still pending"
+        "Internal Cloudflare Cron D1-bound queue proved physically one-shot and turned OFF; actual signed Notion provider mutation pipeline, full workspace coverage/backup, cost+audit+promotion still pending",
+        "First 25 page bodies and nested blocks are safely archived, but remaining 6421 pages + 186 data sources, attachments, comments, independently escrowed key, physical Notion restore and durable D1 CAS checkpoint remain pending."
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
