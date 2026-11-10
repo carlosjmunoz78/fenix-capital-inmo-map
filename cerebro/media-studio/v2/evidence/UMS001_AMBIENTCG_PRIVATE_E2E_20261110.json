@@ -1,0 +1,18 @@
+{
+  "status": "LAB_E2E_VERIFIED",
+  "date": "2026-11-10",
+  "receipt": {
+    "status": "COMPLETED",
+    "at": "2026-11-10T17:02:11.482Z",
+    "provider": "ambientcg",
+    "count": 8,
+    "license_cc0_only": true,
+    "private_service_binding_verified": true,
+    "downloaded": false,
+    "production_approved": false,
+    "additional_cost_eur": 0
+  },
+  "paid_api_cost_eur_reported": 0,
+  "no_new_persistent_cron": true,
+  "production_approved": false
+}
