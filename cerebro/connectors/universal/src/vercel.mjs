@@ -33,17 +33,18 @@ export function createVercelAdapter({request}={}){
      return asResult('COMPLETED',toProject(p));
     }
     case 'vercel.project.create-lab':{
-     // Exactly one project name can be created in this contract; no production
-     // repo linking, DNS, env, builds or deployments.
-     if(input.name!==VERCEL_LAB_PROJECT_NAME||Object.keys(input).sort().join(',')!=='name')throw Error('LAB_CREATE_DENIED');
+     // Quota/billing policy and durable idempotency are mandatory in UniversalConnectorCore.
+     // No Git integration, domains, production env or deployments may be supplied.
+     if(typeof input.name!=='string'||!/^(cerebro-fact001-[a-z0-9-]{4,48}-(?:lab|lab-[0-9]{8}))$/.test(input.name)||Object.keys(input).sort().join(',')!=='name')throw Error('LAB_CREATE_DENIED');
      const inventory=await call('GET','/v10/projects?limit=100');
      const rows=list(inventory);if(!rows)throw Error('UNVERIFIED_INVENTORY');
-     const found=rows.filter(x=>x.name===VERCEL_LAB_PROJECT_NAME);
-     if(found.length===1&&found[0].id===VERCEL_LAB_PROJECT_ID)return asResult('ALREADY_EXISTS_VERIFIED',toProject(found[0]));
+     const found=rows.filter(x=>x.name===input.name);
+     if(found.length===1)return asResult('ALREADY_EXISTS_VERIFIED',toProject(found[0]));
      if(found.length!==0)throw Error('EXISTING_PROJECT_CONFLICT');
-     // New project creation must be reviewed with exactly one scoped LAB ID in contract.
-     // Do not create a different project name from this adapter.
-     throw Error('LAB_PROJECT_ALREADY_CREATED_NO_RECREATE');
+     const response=await call('POST','/v10/projects',{name:input.name,framework:null,skipGitConnectDuringLink:true,enablePreviewFeedback:false,enableProductionFeedback:false});
+     const created=project(response);
+     if(typeof created?.id!=='string'||!created.id.startsWith('prj_')||created.name!==input.name)throw Error('POSTWRITE_RECONCILE');
+     return asResult('COMPLETED',toProject(created));
     }
     case 'vercel.project.update-lab':{
      if(input.idOrName!==VERCEL_LAB_PROJECT_ID||typeof input.enablePreviewFeedback!=='boolean'||Object.keys(input).sort().join(',')!=='enablePreviewFeedback,idOrName')throw Error('LAB_UPDATE_DENIED');
