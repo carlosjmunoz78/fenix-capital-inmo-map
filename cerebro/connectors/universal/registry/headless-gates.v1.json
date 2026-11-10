@@ -167,7 +167,11 @@
         "Independent service paginated Notion search index ended at 67 calls 6632 objects (6446 pages,186 data sources), has_more=false; no content/files exported",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42906293673",
         "Independent signed Wiki child-parent plan PASS: 401 anon/forged, 403 PROD and foreign parent, 200 authorized with token recheck, no page created",
-        "Supabase LAB broker v24 ACTIVE exact original read-only bundle hash 645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec; one-shot routes removed"
+        "Supabase LAB broker v24 ACTIVE exact original read-only bundle hash 645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec; one-shot routes removed",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42909468033",
+        "FACT001 Notion Wiki AES256-GCM pilot root+3 immediate blocks; GitHub Actions encrypted artifact #13805893693; successful in-memory decrypt integrity, NOT physical Notion restore",
+        "CEREBRO Google Drive encrypted ZIP file 1-UTxTWSBEKD3TcxneEOZteR_IULbctGO, readback 3555 bytes, ZIP SHA256 exact c0515a9fedee10932cebfb2e269157b6b97f13f3307d6deeb6396900ef05490f",
+        "Supabase Edge v26 ACTIVE exact original v24 bundle hash after one-time audit routes retired, no active Notion writer"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -219,9 +223,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PARTIAL_D1_LOGICAL_SQL_SQLITE_RESTORE; NOTION_WORKSPACE_FULL_BACKUP_PENDING",
+        "full_backup_gate": "PARTIAL_D1_AND_AES_ENCRYPTED_WIKI_CHUNK; FULL_NOTION_WORKSPACE_BACKUP_NOT_YET_CAPTURED",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_INCREMENTAL_BACKUP_CHUNKS_OFFSITE_RESTORE_AND_WRITE_EXECUTOR",
+        "next_block": "FACT001_NOTION_RECURSIVE_CONTENT_BACKUP_CHUNKS_DRIVE_OFFSITE_ISOLATED_RESTORE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -241,10 +245,10 @@
         "signed_cerebro_d1_read": "VERIFIED_PHYSICAL_CEREBRO_V13_HTTP200",
         "signed_cerebro_d1_read_run_id": 42873202783,
         "signed_cerebro_d1_read_guards": "ANONYMOUS_401_FORGED_401_WRONG_SCOPE_403",
-        "service_version": 24,
+        "service_version": 26,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "SCALABLE_ENCRYPTED_NOTION_BLOCKS_DATA_SOURCES_FILES_BACKUP_AND_RESTORE; SIGNED_MUTATION_EXECUTOR_NOT_CONNECTED",
+        "actual_blocker": "FULL_NOTION_CONTENT_BACKUP_NESTED_ASSETS_ROWS_AND_EXTERNAL_KEY_ESCROW; RESTORE_IN_ISOLATED_NOTION; SIGNED_MUTATION_EXECUTOR_STILL_OFF",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -265,7 +269,7 @@
           "queue_enabled": false,
           "external_provider_writes": 0
         },
-        "workspace_full_backup_gate": "PENDING_6446_PAGES_186_DATA_SOURCES_CONTENT_AND_FILE_EXPORT",
+        "workspace_full_backup_gate": "PENDING_RECURSIVE_CONTENT_6446_PAGES_186_DATA_SOURCES_ATTACHMENTS_KEY_ESCROW_RESTORE",
         "promotion_tribunal": "CODE_CI_GREEN_NOT_LIVE",
         "signed_service_transport": {
           "status": "LOCAL_CI_GREEN_NOT_DEPLOYED",
@@ -371,7 +375,32 @@
           "files_downloaded": false,
           "restore_tested": false
         },
-        "temporary_inventory_and_child_plan_routes": "RETIRED; V24 ACTIVE EXACT ORIGINAL V19 BUNDLE_SHA_645ae399"
+        "temporary_inventory_and_child_plan_routes": "RETIRED; V24 ACTIVE EXACT ORIGINAL V19 BUNDLE_SHA_645ae399",
+        "encrypted_content_backup_pilot": {
+          "status": "VERIFIED_PHYSICAL_ENCRYPTED_SINGLE_PAGE_ROOT_BLOCK_CHUNK",
+          "scope": "WIKI_ROOT_AND_FIRST_BLOCK_CHILDREN_PAGE_ONLY",
+          "site": "Notion Wiki Fénix Capital",
+          "page_id": "1c481b1a-756d-8002-813d-f3efdd4ecd89",
+          "block_count": 3,
+          "nested_blocks_not_exported": 1,
+          "media_blocks": 0,
+          "key_vault_name": "cerebro_fact001_notion_backup_aes256_lab_v1",
+          "key_escrow_independent": false,
+          "ciphertext_digest_sha256": "600d5e9f0c28ae534417dd1a6b1b2b231703eb56a5c96e63915f6705bbb3f5af",
+          "ciphertext_file_bytes": 4452,
+          "github_artifact_id": 13805893693,
+          "github_artifact_expires": "2027-02-08",
+          "github_run_id": 42909468033,
+          "google_drive_file_id": "1-UTxTWSBEKD3TcxneEOZteR_IULbctGO",
+          "google_drive_folder_id": "1xQe5jd-AIQLDUlfZDktVod2qSJkS4M1E",
+          "drive_zip_sha256": "c0515a9fedee10932cebfb2e269157b6b97f13f3307d6deeb6396900ef05490f",
+          "drive_readback_sha256_exact": true,
+          "decrypt_rebuild_in_memory_verified": true,
+          "actual_notion_restore_performed": false,
+          "full_workspace_backup": false,
+          "additional_subscription_cost_eur": 0
+        },
+        "last_cleanup": "SUPABASE_LAB_V26_ACTIVE_EXACT_PRE_PILOT_BUNDLE_SHA_645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec"
       }
     },
     {
