@@ -4,6 +4,7 @@
  */
 import {WorkerEntrypoint} from 'cloudflare:workers';
 import {routeMediaProductionResource} from './ums001-producer-orchestrator-bridge-lab.mjs';
+import {consumeUMS001QueueCommand} from './fact001-ums001-queue-core.mjs';
 
 const SCOPE = Object.freeze({company_id:'fenix',engine_id:'UMS-001',environment:'LAB'});
 const DENIED_RESPONSE='{"status":"DISABLED","engine_id":"FACT-001","environment":"LAB","executed":false}';
@@ -38,5 +39,12 @@ export class CEREBROFactUMS001Lab extends WorkerEntrypoint {
 }
 // Preserve the FACT-001 Worker’s exact existing public response and disabled behavior.
 export default {
+ async queue(batch,env){
+  if(batch.queue!=='cerebro-fact001-ums001-read-lab-eu'||env.UMS001_QUEUE_ENABLED!=='true')throw Error('FACT_UMS_QUEUE_WRONG_SOURCE_OR_DISABLED');
+  for(const message of batch.messages){
+   try{await consumeUMS001QueueCommand(message.body,env,executeFactUMS001Lab);message.ack();}
+   catch(error){console.error('UMS001_QUEUE_REJECTED',String(error?.message||'UNKNOWN').slice(0,120));message.ack();}
+  }
+ },
  async fetch(){return new Response(DENIED_RESPONSE,{status:403,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}});}
 };
