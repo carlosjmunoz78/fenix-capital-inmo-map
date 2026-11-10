@@ -2,8 +2,9 @@
 // Trust boundary: signed GitHub OIDC from exact repo/branch/workflow, NOT ChatGPT session.
 // No arbitrary paths, billing, credential export, user-auth or App/CRM writes. No production project mutation.
 import postgres from 'npm:postgres@3.4.7';
-import {verifyGitHubOidc,assertOrder,assertWriteOrder,TEAM_ID,VAULT_NAME,LAB_PROJECT_ID,LAB_PROJECT_NAME,SCOPE} from './policy.mjs';
+import {verifyGitHubOidc,assertOrder,assertWriteOrder,assertCleanupOrder,TEAM_ID,VAULT_NAME,LAB_PROJECT_ID,LAB_PROJECT_NAME,SCOPE} from './policy.mjs';
 import {updateAndRollbackLab} from './lab-write.mjs';
+import {deleteSoleVercelTestProject} from './cleanup-once.mjs';
 const HEADERS={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const reply=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{status,headers:HEADERS});
 const bearer=(req:Request)=>{
@@ -51,10 +52,23 @@ async function reversibleLabWrite(){
  try{return await updateAndRollbackLab({token});}
  finally{token='';}
 }
+async function cleanupTestVercelProject(){
+ const db=Deno.env.get('SUPABASE_DB_URL');
+ if(!db)throw Error('DB_UNAVAILABLE');
+ const sql=postgres(db,{max:1,connect_timeout:5,idle_timeout:1,prepare:false});
+ let token='';
+ try{
+  const rows=await sql`select decrypted_secret from vault.decrypted_secrets where name=${VAULT_NAME} limit 2`;
+  if(rows.length!==1||typeof rows[0].decrypted_secret!=='string'||rows[0].decrypted_secret.length<20)throw Error('VAULT_SECRET_INVALID');
+  token=rows[0].decrypted_secret;
+ }finally{await sql.end({timeout:2}).catch(()=>{});}
+ try{return await deleteSoleVercelTestProject({token});}
+ finally{token='';}
+}
 Deno.serve(async req=>{
  try{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify-projects','verify-reversible-update'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify-projects','verify-reversible-update','cleanup-vercel-lab'].includes(route))return reply(404,{status:'NOT_FOUND'});
   try{await verifyGitHubOidc(bearer(req));}catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&req.method==='GET')return reply(200,{status:'AUTHENTICATED',client_id:'cerebro',scope:SCOPE,vercel_writes:0});
   if(route==='verify-projects'&&req.method==='POST'){
@@ -69,6 +83,12 @@ Deno.serve(async req=>{
    try{assertWriteOrder(await req.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
    const verified=await reversibleLabWrite();
    return reply(verified.rollback_verified?200:409,verified);
+  }
+  if(route==='cleanup-vercel-lab'&&req.method==='POST'){
+   if(Number(req.headers.get('content-length')||0)>2000)return reply(413,{status:'TOO_LARGE'});
+   try{assertCleanupOrder(await req.json());}catch{return reply(400,{status:'ORDER_DENIED'});}
+   const result=await cleanupTestVercelProject();
+   return reply(result.status==='VERCEL_TEST_PROJECT_DELETED'||result.status==='ALREADY_ABSENT'?200:409,result);
   }
   return reply(405,{status:'METHOD_DENIED'});
  }catch(e){
