@@ -1,0 +1,26 @@
+{
+  "name": "cerebro-ums001-producer-private-gateway-lab-eu",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-10",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    "crons": []
+  },
+  "services": [
+    {
+      "binding": "MEDIA",
+      "service": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+      "entrypoint": "MediaDemandLab"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "LAB_KV",
+      "id": "99c74b3059ec46baa1441bd0d170bf3f"
+    }
+  ],
+  "vars": {
+    "GATEWAY_ENABLED": "false"
+  }
+}
