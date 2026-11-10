@@ -24,25 +24,31 @@
       "id": "cloudflare",
       "state": "PARTIAL",
       "verified": [
-        "inventory_read"
+        "independent_service_identity",
+        "owner_order_headless",
+        "inventory_read",
+        "isolated_lab_create",
+        "isolated_lab_delete"
       ],
       "evidence": [
         "Cloudflare Universal OAuth works in ChatGPT",
-        "FACT-001 OIDC issuer and isolated D1 Read LAB credential historically verified"
+        "FACT-001 OIDC issuer and isolated D1 Read LAB credential historically verified",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42838699207",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42822832223"
       ],
       "gaps": [
-        "general CEREBRO headless broker/write policies",
-        "autonomous queues per capability",
-        "backup rollback PROD tests"
+        "Cloudflare Pages independent LAB create/read/delete succeeded; one-off write endpoint retired",
+        "Full Worker/Pages deploy/update/rollback lifecycle not proven",
+        "No durable autonomous queue, quotas or PROD promotion"
       ],
       "verification": {
-        "independent_service_identity": "PENDING",
-        "owner_order_headless": "PENDING",
+        "independent_service_identity": "VERIFIED",
+        "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
-        "isolated_lab_create": "PENDING",
+        "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "PENDING",
-        "isolated_lab_delete": "PENDING",
+        "isolated_lab_delete": "VERIFIED",
         "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
@@ -53,24 +59,26 @@
       "id": "vercel",
       "state": "PARTIAL",
       "verified": [
+        "independent_service_identity",
+        "owner_order_headless",
         "inventory_read",
         "isolated_lab_create",
         "isolated_lab_update",
-        "isolated_lab_delete",
-        "backup_and_rollback"
+        "isolated_lab_delete"
       ],
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42808203559",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42809634627"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42809634627",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597"
       ],
       "gaps": [
-        "test project and one-off service were removed after cleanup",
-        "owner/automation headless jobs through stable runner",
-        "PROD safety, cost, rollback and autonomous deploy gates"
+        "Shared independent service currently supports read-only listing; former test LAB resource and one-off write runner were removed",
+        "No durable autonomous create/deploy/update/delete/rollback with per-provider cost gate",
+        "No PROD promotion or queue"
       ],
       "verification": {
-        "independent_service_identity": "PENDING",
-        "owner_order_headless": "PENDING",
+        "independent_service_identity": "VERIFIED",
+        "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
         "isolated_lab_create": "VERIFIED",
@@ -86,21 +94,24 @@
       "id": "supabase",
       "state": "PARTIAL",
       "verified": [
+        "independent_service_identity",
+        "owner_order_headless",
         "inventory_read",
         "isolated_lab_delete"
       ],
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750",
-        "Scoped management PAT stored in Vault; test Edge Function deleted"
+        "Scoped management PAT stored in Vault; test Edge Function deleted",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597"
       ],
       "gaps": [
-        "permanent scoped management broker not yet deployed",
-        "independent create/update/backups tested without App/CRM mutation",
-        "owner/automation headless queue and PROD policy"
+        "Scoped Management PAT in Vault; shared read-only broker operational",
+        "One-off Edge delete proved but general management write adapter removed after cleanup",
+        "No standalone persistent write broker, PROD policy or autonomous queue"
       ],
       "verification": {
-        "independent_service_identity": "PENDING",
-        "owner_order_headless": "PENDING",
+        "independent_service_identity": "VERIFIED",
+        "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
         "isolated_lab_create": "PENDING",
@@ -142,24 +153,30 @@
       "id": "github",
       "state": "PARTIAL",
       "verified": [
-        "inventory_read"
+        "independent_service_identity",
+        "owner_order_headless",
+        "inventory_read",
+        "isolated_lab_create",
+        "isolated_lab_update",
+        "isolated_lab_delete"
       ],
       "evidence": [
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42819483887"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42819483887",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42821755132"
       ],
       "gaps": [
-        "GitHub Universal create_repository returned 403, do not claim create/delete repositories",
-        "independent scoped write service identity across repositories",
-        "isolated repo create/update/delete+recover tests without affecting main/PROD"
+        "Only single-repository file CRUD proved via GITHUB_TOKEN; global repository create/delete not authorized",
+        "GitHub App installation with organization/repository administration scopes still required",
+        "No durable cross-repository automation queue or PROD promotion"
       ],
       "verification": {
-        "independent_service_identity": "PENDING",
-        "owner_order_headless": "PENDING",
+        "independent_service_identity": "VERIFIED",
+        "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
-        "isolated_lab_create": "PENDING",
-        "isolated_lab_update": "PENDING",
-        "isolated_lab_delete": "PENDING",
+        "isolated_lab_create": "VERIFIED",
+        "isolated_lab_update": "VERIFIED",
+        "isolated_lab_delete": "VERIFIED",
         "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
