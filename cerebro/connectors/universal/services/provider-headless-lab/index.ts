@@ -6,7 +6,6 @@ import {providerSpecs,readProviderInventory} from './provider.mjs';
 import {generateCloudflareFactoryScaffold} from './cloudflare-scaffold.mjs';
 import {SERVICE_IDENTITIES,assertIdentityProbeOrder,probeServiceIdentity} from './service-identity.mjs';
 import {NOTION_SECRET,probeNotionWorkspace} from './notion-access.mjs';
-import {planNotionConnectedLabChild} from './notion-connected-child-plan.mjs';
 import {probeNotionOpenedRoots} from './notion-root-access.mjs';
 import {probeNotionSecondBatch} from './notion-batch2-access.mjs';
 import {probeNotionThirdBatch} from './notion-batch3-access.mjs';
@@ -51,7 +50,7 @@ function assertNotionReadOrder(body:unknown){
 Deno.serve(async request=>{
  try{
   const route=new URL(request.url).pathname.split('/').filter(Boolean).at(-1)||'';
-  if(!['health','verify','plan','service-identity','notion-workspace','notion-d1-status','notion-root-access','notion-batch2-access','notion-batch3-access','notion-child-plan'].includes(route))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','verify','plan','service-identity','notion-workspace','notion-d1-status','notion-root-access','notion-batch2-access','notion-batch3-access'].includes(route))return reply(404,{status:'NOT_FOUND'});
   // Verify BEFORE parsing JSON or contacting Vault/provider.
   try{await verifyGitHubOidc(getBearer(request));}
   catch{return reply(401,{status:'UNAUTHORIZED'});}
@@ -123,24 +122,6 @@ Deno.serve(async request=>{
     token=await getVaultToken(NOTION_SECRET);
     const result=await probeNotionOpenedRoots({token});
     return reply(200,result);
-   }finally{token='';}
-  }
-  // Future-child connection preflight only. No Notion writes, fixed owner-approved Wiki root.
-  if(route==='notion-child-plan'&&request.method==='POST'){
-   if(Number(request.headers.get('content-length')||'0')>1600)return reply(413,{status:'PAYLOAD_TOO_LARGE'});
-   const expected={...SCOPE,client_id:'cerebro',source:'owner_order',
-    operation:'notion.page.plan.child',request_id:'FACT001-PARENT-PLAN-20261110-01',
-    parent_page_id:'1c481b1a-756d-8002-813d-f3efdd4ecd89',
-    title:'FACT001 CEREBRO Notion LAB Nueva pagina'};
-   let order:Record<string,unknown>;
-   try{order=await request.json();}catch{return reply(400,{status:'ORDER_DENIED'});}
-   if(!order||typeof order!=='object'||Array.isArray(order)||
-      JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
-      Object.entries(expected).some(([k,v])=>order[k]!==v))return reply(403,{status:'ORDER_DENIED'});
-   let token='';
-   try{
-    token=await getVaultToken(NOTION_SECRET);
-    return reply(200,await planNotionConnectedLabChild({token,order:{...order,operation:'notion.page.create.child'}}));
    }finally{token='';}
   }
   if(route==='notion-workspace'&&request.method==='POST'){
