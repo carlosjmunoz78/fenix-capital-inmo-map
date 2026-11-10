@@ -37,7 +37,7 @@ function store(){
 }
 function fixture({invoke,identity=identities.chatgpt,maxAttempts=3}={}){
  let clock=100000;const audit=[];const s=store();
- const guard=createRecoveryGuard({store:s,invoke:invoke||async()=>({status:'COMPLETED'}),audit:e=>audit.push(e),now:()=>clock,sleep:async ms=>{clock+=ms;},maxAttempts,baseDelayMs:1000,leaseMs:2000});
+ const guard=createRecoveryGuard({store:s,invoke:invoke||(async()=>({status:'COMPLETED'})),audit:e=>audit.push(e),now:()=>clock,sleep:async ms=>{clock+=ms;},maxAttempts,baseDelayMs:1000,leaseMs:2000});
  return {guard,s,audit,identity,clock:()=>clock,advance:ms=>{clock+=ms;}};
 }
 test('needs durable transactional CAS store',()=>assert.throws(()=>createRecoveryGuard({store:volatileTestLedger(),invoke:async()=>{},audit:()=>{}}),/DURABLE_ATOMIC_STORE_REQUIRED/));
