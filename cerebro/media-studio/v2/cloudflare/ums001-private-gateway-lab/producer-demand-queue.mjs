@@ -43,7 +43,30 @@ export async function executeProducerDemand(env,body,handlers){
   provider:task.provider,kind:task.kind,error_code:err,downloaded:false,production_approved:false,publish_authorized:false,cost_eur:0};
   await env.LAB_KV.put(key,JSON.stringify(record));return record;}
 }
+/** Distinct explicit-selection contract: never reuse SEARCH/LATEST metadata success receipts. */
+export function validateCommonsQueueSelection(body){
+ const required=['schema_version','actor_id','company_id','engine_id','environment','provider','kind','action','request_id','production_id','mode','selected_asset_id','explicit_selection'];
+ if(!body||typeof body!=='object'||Array.isArray(body)||Object.keys(body).length!==required.length||required.some(k=>!(k in body))||
+ body.schema_version!==1||body.actor_id!=='ums001-producer-lab'||body.company_id!=='fenix'||body.engine_id!=='UMS-001'||body.environment!=='LAB'||
+ body.provider!=='wikimedia_commons'||body.kind!=='images'||body.action!=='SELECT_COMMONS'||body.mode!=='SELECT_ONE'||
+ body.explicit_selection!==true||!/^(?:commons:)[1-9][0-9]{2,10}$/.test(body.selected_asset_id||'')||
+ !KEY_PATTERN.test(body.request_id||'')||!/^[A-Za-z0-9_:-]{3,120}$/.test(body.production_id)||Object.keys(body).some(k=>!required.includes(k)))throw Error('UMS_COMMONS_QUEUE_SELECTION_DENIED');
+ return body;
+}
+export async function executeCommonsQueueSelection(env,body,handlers){
+ if(env?.PRODUCER_DEMAND_QUEUE_ENABLED!=='true'||env?.COMMONS_SELECT_ENABLED!=='true'||!env.LAB_KV||typeof handlers?.commonsSelect!=='function'||typeof handlers?.commonsRead!=='function')throw Error('UMS_COMMONS_QUEUE_DISABLED');
+ const task=validateCommonsQueueSelection(body),key=producerDemandKey(task.request_id);
+ const existing=await env.LAB_KV.get(key,{type:'json'});if(existing?.status==='COMPLETED')return {...existing,duplicate:true};
+ const request={company_id:task.company_id,engine_id:task.engine_id,environment:task.environment,provider:task.provider,kind:task.kind,request_id:task.request_id,production_id:task.production_id,asset_id:task.selected_asset_id,explicit_selection:true};
+ try{
+  const acquired=await handlers.commonsSelect(env,request);
+  const read=await handlers.commonsRead(env,request);
+  if(read.asset_id!==task.selected_asset_id||read.sha256!==acquired.sha256||read.bytes!==acquired.bytes||read.production_approved!==false||read.publish_authorized!==false)throw Error('UMS_COMMONS_SELECT_READ_MISMATCH');
+  const receipt={schema_version:1,company_id:'fenix',engine_id:'UMS-001',environment:'LAB',provider:'wikimedia_commons',kind:'images',action:'SELECT_COMMONS',request_id:task.request_id,production_id:task.production_id,status:'COMPLETED',asset_id:task.selected_asset_id,bytes:acquired.bytes,sha256:acquired.sha256,file_key:acquired.file_key,downloaded:true,integrity_verified:true,license:'CC0-1.0',rights_review:'PENDING',production_approved:false,publish_authorized:false,cost_eur:0,at:new Date().toISOString()};
+  await env.LAB_KV.put(key,JSON.stringify(receipt));return receipt;
+ }catch(e){const error=String(e?.message||'UNKNOWN').slice(0,120);const record={status:'ERROR',action:'SELECT_COMMONS',at:new Date().toISOString(),request_id:task.request_id,provider:'wikimedia_commons',kind:'images',error_code:error,production_approved:false,publish_authorized:false,cost_eur:0};await env.LAB_KV.put(key,JSON.stringify(record));return record;}
+}
 export async function consumeProducerDemandQueue(batch,env,handlers){
  if(batch?.queue!==DEMAND_QUEUE_NAME||env?.PRODUCER_DEMAND_QUEUE_ENABLED!=='true'||!Array.isArray(batch.messages)||batch.messages.length>1)throw Error('UMS_DEMAND_QUEUE_SCOPE_DENIED');
- for(const msg of batch.messages){try{await executeProducerDemand(env,msg.body,handlers)}catch(e){console.error('UMS_DEMAND_REJECTED',String(e?.message||'UNKNOWN').slice(0,110))}msg.ack()}
+ for(const msg of batch.messages){try{if(msg.body?.action==='SELECT_COMMONS')await executeCommonsQueueSelection(env,msg.body,handlers);else await executeProducerDemand(env,msg.body,handlers)}catch(e){console.error('UMS_DEMAND_REJECTED',String(e?.message||'UNKNOWN').slice(0,110))}msg.ack()}
 }

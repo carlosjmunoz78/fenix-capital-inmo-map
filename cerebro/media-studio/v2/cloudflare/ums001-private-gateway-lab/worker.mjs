@@ -1,6 +1,7 @@
 import {WorkerEntrypoint} from 'cloudflare:workers';
 import {acquireMetSelected,readMetSelected} from './met-selected-gateway-lab.mjs';
 import {latestFreeMedia} from './producer-source-catalog.mjs';
+import {selectCommonsOnProducer,readCommonsOnProducer} from './commons-selected-gateway.mjs';
 import {consumeProducerDemandQueue} from './producer-demand-queue.mjs';
 const ENGINE='UMS-001',COMPANY='fenix',ENV='LAB';
 function assertRequest(input,permission){
@@ -63,9 +64,11 @@ export class ProducerLibraryLab extends WorkerEntrypoint {
   async latest(task){return latestFreeMedia(this.env,task)}
   async select(task){return acquireMetSelected(this.env,task)}
   async readSelected(task){return readMetSelected(this.env,task)}
+  async selectCommons(task){return selectCommonsOnProducer(this.env,task)}
+  async readCommons(task){return readCommonsOnProducer(this.env,task)}
 }
 // Private producer RPC plus Cloudflare EU Queue. No periodic job or public endpoint.
 export default {
- async queue(batch,env){await consumeProducerDemandQueue(batch,env,{scout:searchFreeMedia,latest:latestFreeMedia,polyhaven:search});},
+ async queue(batch,env){await consumeProducerDemandQueue(batch,env,{scout:searchFreeMedia,latest:latestFreeMedia,polyhaven:search,commonsSelect:selectCommonsOnProducer,commonsRead:readCommonsOnProducer});},
  async fetch() { return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}}); }
 };
