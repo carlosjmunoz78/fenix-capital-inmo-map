@@ -28,7 +28,7 @@ export async function executeProducerDemand(env,body,handlers){
  const previous=await env.LAB_KV.get(key,{type:'json'});
  if(previous?.status==='COMPLETED')return {...previous,duplicate:true};
  const safeTask={company_id:task.company_id,engine_id:task.engine_id,environment:task.environment,provider:task.provider,kind:task.kind,
- production_id:task.production_id,request_id:task.request_id,...(task.action==='SEARCH'?{query:task.query}:{} )};
+ production_id:task.production_id,request_id:task.request_id,...(task.action==='SEARCH'?{query:task.query}:{} ),...(task.provider==='polyhaven'?{max_results:8}:{})};
  try{
   const reply=task.action==='LATEST'?await handlers.latest(env,safeTask):task.provider==='polyhaven'?await handlers.polyhaven(env,safeTask):await handlers.scout(env,safeTask);
   if(reply?.company_id!==task.company_id||reply.engine_id!==task.engine_id||reply.environment!=='LAB'||!Array.isArray(reply.results)||
