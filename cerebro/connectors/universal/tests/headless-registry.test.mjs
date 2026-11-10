@@ -16,9 +16,9 @@ test('no connector is misleadingly declared fully autonomous without physical ev
   if(c.state==='VERIFIED_FULL')assert.ok(x.green_requires.every(g=>c.verification[g]==='VERIFIED'),c.id);
  }
 });
-test('ChatGPT plugin OCR/OAuth claims are not counted as independent service identity',()=>{
+test('Notion identity was proven by independent Vault-backed service, but autonomous CRUD remains pending',()=>{
  for(const c of x.connectors){
-  if(c.id==='notion')assert.equal(c.verification.independent_service_identity,'PENDING');
+  if(c.id==='notion'){assert.equal(c.verification.independent_service_identity,'VERIFIED');assert.ok(c.evidence.some(e=>e.includes('42849043493')));assert.equal(c.verification.isolated_lab_create,'PENDING');}
   assert.equal(c.verification.autonomous_queue,'PENDING');
   assert.equal(c.verification.production_promotion_policy,'PENDING');
  }
