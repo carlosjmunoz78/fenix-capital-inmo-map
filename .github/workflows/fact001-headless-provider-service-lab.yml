@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-child-plan.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
 permissions:
@@ -201,4 +202,50 @@ jobs:
           console.log('FACT001_BATCH3_INCONCLUSIVE='+v.inconclusive);
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
+          NODE
+
+      - name: "FACT001 child inherits CEREBRO Notion connection: independently signed plan only"
+        if: github.event.head_commit.message == 'FACT001_NOTION_CONNECTED_CHILD_PLAN_ONCE_20261110'
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-child-plan.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+           client_id:'cerebro',source:'owner_order',operation:'notion.page.plan.child',
+           request_id:'FACT001-PARENT-PLAN-20261110-01',
+           parent_page_id:'1c481b1a-756d-8002-813d-f3efdd4ecd89',
+           title:'FACT001 CEREBRO Notion LAB Nueva pagina'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_PARENT_PLAN_ORDER_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-child-plan';
+          const call=async(jwt,body)=>{
+           const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+            ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(30000)});
+           let data={};try{data=await r.json()}catch{};
+           return {status:r.status,data};
+          };
+          const anon=await call(null,order),fake=await call('forged',order);
+          if(anon.status!==401||fake.status!==401)throw Error('FACT001_PARENT_PLAN_IDENTITY_GUARD_FAILED');
+          console.log('FACT001_PARENT_PLAN_ANON_401=PASS');
+          console.log('FACT001_PARENT_PLAN_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_UNAVAILABLE');
+          const issue=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!issue.ok)throw Error('OIDC_DENIED');
+          const jwt=(await issue.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          const root=await call(jwt,{...order,parent_page_id:'37d81b1a-756d-8002-b611-d4ce3a60965a'});
+          if(prod.status!==403||root.status!==403)throw Error('FACT001_PARENT_PLAN_SCOPE_DENIED');
+          console.log('FACT001_PARENT_PLAN_PROD_403=PASS');
+          console.log('FACT001_PARENT_PLAN_OTHER_ROOT_403=PASS');
+          const result=await call(jwt,order),v=result.data;
+          const ok=result.status===200&&v.status==='CONNECTED_PARENT_PLAN_VERIFIED'&&
+            v.authorized===true&&v.connected_parent_id===order.parent_page_id&&
+            v.independent_service_rechecked===true&&v.creation_executed===false&&
+            v.write_operations===0&&v.inherited_connection_expected===true;
+          console.log('FACT001_PARENT_PLAN_VERIFIED='+String(ok?'PASS':'BLOCKED'));
+          console.log('FACT001_PARENT_PLAN_HTTP='+result.status);
+          if(!ok)throw Error('FACT001_PARENT_PLAN_NOT_READY');
           NODE
