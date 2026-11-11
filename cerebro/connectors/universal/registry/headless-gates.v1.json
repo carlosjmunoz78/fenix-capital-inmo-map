@@ -54,7 +54,27 @@
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
-      "service_identity_read": "VERIFIED"
+      "service_identity_read": "VERIFIED",
+      "credential_broker": {
+        "scope_correction": "BLOCKED_REPLACEMENT_NOT_YET_PROVISIONED",
+        "issuer_v1": "ACTIVE_OVERPRIVILEGED_DO_NOT_REVOKE_UNTIL_V2_TESTED",
+        "issuer_v2": "NOT_PROVISIONED",
+        "account_scope": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+        "provider_metadata_checked_on": "2026-11-11",
+        "token_count_readonly": 3,
+        "forbidden_present": [
+          "Billing Write",
+          "Billing Read",
+          "Integration Write",
+          "Account API Gateway",
+          "Account API Gateway Read"
+        ],
+        "required_replacement_permission": "Account API Tokens Write",
+        "child_token_lifecycle": "NOT_TESTED",
+        "gateway_dual_e2e": "NOT_TESTED",
+        "cost_additional_authorized_eur": 0,
+        "evidence": "docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md"
+      }
     },
     {
       "id": "vercel",

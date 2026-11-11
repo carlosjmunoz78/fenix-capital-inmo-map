@@ -97,3 +97,9 @@ Estados obligatorios en respuestas: **HECHO / EXISTENTE / PARCIAL / DEFINIDO / P
 5. Guardar evidencia nueva en esta rama DRAFT y documento; hacer seguimiento de lo que se ha completado y lo que está bloqueado. Revisión adicional de seguridad antes de activar PROD autónomo.
 
 **Referencia del traspaso:** `cerebro/connectors/universal/docs/FACT001_TRASPASO_MAESTRO_CONECTORES_2026-11-11.md`.
+
+## Actualización 11/11/2026 · CF-TOKEN-ISSUER-001 · comprobación LIVE de mínimos permisos
+
+HECHO: lectura directa oficial de Cloudflare: 3 tokens activos; el emisor v1 mantiene 7 permisos, incluidos Billing Write/Read e Integration Write. Se identificó el grupo exacto `Account API Tokens Write`, se conserva v1 íntegro y se añadió guardia determinista fail-closed en la misma PR DRAFT. **Ningún token emitido, revocado o mostrado.**
+
+PARCIAL/BLOQUEADO: la emisión de v2 y el ciclo de token hijo requieren ruta servidor con custodia directa Vault, sin exponer respuesta plaintext; ver `docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md`. El registro conserva todos los gates anteriores sin aumentar cobertura. Los demás proveedores deben continuar por su orden independiente; Opera sigue el último.
