@@ -6,7 +6,7 @@
   "provider": "replicate",
   "model_id": "black-forest-labs/flux-1.1-pro-ultra",
   "cost_cap_usd": 0.3,
-  "predictions_submitted": 3,
+  "predictions_submitted": 4,
   "publication_approved": false,
   "status": "RUNNING",
   "qa_human_realism": "PENDING",
@@ -37,6 +37,17 @@
     {
       "concept_id": "FB-RCV-006",
       "prediction_id": "d6rv6znfkhrmr0d1s6sv2sk93c",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "acacbaab0a354f25461918d9b3823ee26e8b96e18ecdf773f9bcad3cef68fb33",
+      "prompt_sha256": "7f6ebd4eb012a644b89ba4cb69fce97cd5d2982b4dc9f4c269186b1e281e8986",
+      "bytes": 1284234,
+      "filename": "FB-RCV-006_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "FB-RCV-007",
+      "prediction_id": "b01250pxmhrmw0d1s6svpbdst4",
       "status": "SUBMITTED",
       "estimated_cost_usd": 0.06,
       "publication_approved": false
