@@ -128,7 +128,41 @@
         "full_cloudflare_autonomy": "NOT_VERIFIED",
         "lab_heartbeat_queue_proven": true,
         "lab_d1_ledger_proven": true,
-        "production_autonomous_provider_queue_proven": false
+        "production_autonomous_provider_queue_proven": false,
+        "signed_job_rechecked_20261111": true,
+        "signed_job_final_state": "COMPLETED",
+        "signed_job_final_attempts": 1,
+        "latest_signed_job_evidence": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005213602",
+        "ci_regression_green": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005472015",
+        "ci_regression_counts": {
+          "headless": 164,
+          "issuer": 31,
+          "owner_canary": 18,
+          "registry": 5,
+          "onboarding": 8,
+          "scaffold": 4,
+          "total": 230,
+          "failures": 0
+        },
+        "browser_owner_session": "BLOCKED_NO_ORIGINATING_BROWSER_CONTEXT_IN_THIS_CHAT",
+        "prerequisites_to_full": [
+          "real_owner_session_canary_e2e",
+          "main_gateway_v33_parallel_bridge_without_breakage",
+          "provider_scoped_resource_mutation_and_physical_rollback_isolated",
+          "autonomous_queue_external_provider_contracts_and_observability",
+          "production_promotion_gate"
+        ]
+      },
+      "p0_cloudflare_token_broker": {
+        "state": "VERIFIED_LAB",
+        "scope": "Cloudflare Account API Token issuer v2 + child D1 Read issuance/revocation + isolated signed client OIDC; no full provider CRUD or PROD",
+        "signed_service_e2e": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42994346869",
+        "post_cutover": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342",
+        "latest_signed_durable_queue": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005213602",
+        "regression": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005472015",
+        "legacy_token": "DISABLED",
+        "owner_session_gate": "HUMAN_REQUIRED_SESSION_CONTEXT_NOT_AVAILABLE",
+        "cloudflare_full_connector": "PARTIAL_NOT_GREEN"
       }
     },
     {

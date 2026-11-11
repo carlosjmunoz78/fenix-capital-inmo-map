@@ -49,5 +49,8 @@
   "gateway_signed_queue": "LAB_HEARTBEAT_COMPLETED_SINGLE_ATTEMPT",
   "gateway_owner_user_session": "NOT_VERIFIED",
   "gateway_real_console_binding": "NOT_VERIFIED",
-  "full_cloudflare_autonomy": "NOT_VERIFIED"
+  "full_cloudflare_autonomy": "NOT_VERIFIED",
+  "p0_token_broker": "VERIFIED_LAB",
+  "signed_queue_physical_e2e_latest": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005213602",
+  "security_ci_latest": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005472015"
 }
