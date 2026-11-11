@@ -141,6 +141,6 @@ Deno.serve(async(req:Request)=>{
   'GATEWAY_D1_RATE_LIMITED','GATEWAY_ACCOUNT_DENIED']);
   const code=allowed.has(v)?v:v.startsWith('CLOUDFLARE_READ_HTTP_')?v:'BACKEND_ERROR';
   if(code==='CLOUDFLARE_READ_HTTP_429')return reply(429,{status:'RATE_LIMITED',code:'CF_API_QUOTA',retry_automatically:false});
-  return reply(code.startsWith('SCOPE_')||code==='PAIR_CREDENTIAL_DENIED'?400:503,{status:'BLOCKED',code});
+  return reply(code.startsWith('SCOPE_')||code==='PAIR_CREDENTIAL_DENIED'||code==='GATEWAY_QUEUE_ORDER_DENIED'?400:503,{status:'BLOCKED',code});
  }
 });
