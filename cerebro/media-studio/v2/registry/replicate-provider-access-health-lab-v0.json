@@ -20,7 +20,7 @@
     "api_cost_eur": 0
   },
   "capability_status": {
-    "healthcheck": "VERIFIED_IN_GITHUB_ACTIONS",
+    "healthcheck": "VERIFIED_REUSABLE_FROM_BRANCH_REQUEST",
     "persistent_secret": "GITHUB_ACTIONS_ONLY",
     "producer_runtime_access": "BLOCKED_NOT_WIRED",
     "atomic_finops": "NOT_VERIFIED",
@@ -48,5 +48,14 @@
   },
   "rollback": "Delete/disable the isolated LAB health workflow without removing the existing Replicate credential or production provider path.",
   "next_gate": "Integrate UMS-001 trusted runtime with same encrypted Replicate account credential via secure secret injection; FINOPS reservations; trusted callback; durable asset store; preprod OLD_vs_NEW before publication.",
-  "owner": "CEREBRO UMS-001 / FACT-001"
+  "owner": "CEREBRO UMS-001 / FACT-001",
+  "repeated_request_evidence": {
+    "request_file": "cerebro/media-studio/v2/requests/REPLICATE_HEALTH_LAB_REQUEST.json",
+    "request_id": "UMS001-REPLICATE-HEALTH-20261111-02",
+    "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42927922906",
+    "event": "pull_request branch synchronize following request-file update",
+    "conclusion": "success",
+    "authenticated_get_only": true,
+    "paid_prediction_count": 0
+  }
 }
