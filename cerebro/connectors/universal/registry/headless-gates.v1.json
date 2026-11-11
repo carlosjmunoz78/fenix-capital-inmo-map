@@ -775,5 +775,35 @@
     "notion_workspace_visibility": "VERIFIED_TWO_PAGES_AUTHORIZED",
     "notion_lab_lifecycle": "VERIFIED_CREATE_READ_UPDATE_TRASH_ON_OWN_CHILD",
     "notion_oneoff_write_route": "RETIRED_AFTER_TEST"
+  },
+  "integration_p5_20261111": {
+    "state": "LAB_CODE_CI_GREEN_NOT_CONNECTED",
+    "module": "services/provider-headless-lab/fact001-dual-read-ingress.mjs",
+    "ci_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991696940",
+    "ci_headless_tests_pass": 164,
+    "ci_headless_tests_fail": 0,
+    "client_sources": [
+      "chatgpt-human",
+      "cerebro-service"
+    ],
+    "authentication": "REQUIRES_INJECTED_TRUSTED_SIGNATURE_OR_OAUTH_VERIFIER",
+    "automation_source": "REGISTERED_SERVICE_ONLY",
+    "provider_inventory_only": [
+      "cloudflare",
+      "github",
+      "supabase",
+      "vercel",
+      "notion"
+    ],
+    "transport_deployment": "OFF",
+    "external_api_calls_performed": 0,
+    "provider_mutations_performed": 0,
+    "persistence": "DURABLE_QUEUE_ATOMIC_ADAPTER_REQUIRED_NOT_WIRED",
+    "gateway_owner_signed_live": "NOT_VERIFIED",
+    "gateway_automation_live": "NOT_VERIFIED",
+    "quota": "NO_NEW_SUBSCRIPTIONS; METRICS_PENDING",
+    "prod": "OFF",
+    "opera_phase": "P6_PARKED_LAST",
+    "next_block": "FACT001_P5_BACKEND_DURABLE_QUEUE_GATEWAY_OAUTH_SERVICE_REAL_DUAL_E2E"
   }
 }

@@ -128,3 +128,12 @@ El MCP oficial genérico Vercel ve team correcto pero 0 proyectos; el MCP contex
 ## 11/11/2026 · P4 Notion · sincronización incremental en candidato LAB
 
 Se conservó íntegramente el backup de primeros **100 objetos**, checkpoint D1 `100/v4`, sin repetir. Reutilizado el operador gobernado candidato y su cola OFF ya existentes. Añadido exclusivamente un planificador `notion-incremental-sync.mjs` de reconciliación por hashes/snapshots de hijos LAB aprobados: `UNCHANGED`, cambio local pendiente de orden firmada, cambio remoto pendiente de snapshot, conflicto por cambios simultáneos/papelera. No toca páginas de Notion ni incrementa cuota; no copia contenido ni credenciales. [CI físico #42991251014](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991251014): **156/156 pruebas headless PASS**, además 22/22 emisor, 5/5 registry, 8/8 onboarding, 4/4 scaffold, 0 FAIL. Persistencia del operador, write Gateway, cola y recuperación global NOT VERIFIED. `docs/FACT001_NOTION_INCREMENTAL_P4_2026-11-11.md`.
+
+
+## 11/11/2026 · P5 Entrada común de 5 conectores · CI GREEN, runtime OFF
+
+Añadido `services/provider-headless-lab/fact001-dual-read-ingress.mjs` como **módulo candidato read-only** para aceptar órdenes de inventario de Cloudflare/GitHub/Supabase/Vercel/Notion usando el mismo contrato LAB, identidades `chatgpt-human` / `cerebro-service` comprobadas por verificador EXTERNO, `owner_order` / `automation` registrada, 4D, idempotency, hard-cost 0 y encolado + auditoría como transacción de un adaptador durable obligatorio. El módulo NO hace llamadas a proveedores ni a Vault; queda OFF y sin ruta en Gateway/Console hasta implementación física de autenticación + D1 queue + reconciliación. [CI #42991696940](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991696940): **164/164 pruebas headless**, más 22 issuer, 5 registry, 8 onboarding, 4 scaffold, cero fallos. No confundir `writeAtomic` simulado en unit tests con una cola durable instalada. El soporte a mutaciones PROD y a ejecución autónoma sigue **BLOQUEADO** por gates de proveedores/recuperación. Documentado en `docs/FACT001_P5_DUAL_GATEWAY_ADMISSION_2026-11-11.md`.
+
+## P6 OPERA · NO INICIADO
+
+Orden conservado: **Opera después de los cinco conectores y P5**. No se ha consultado ni manipulado Opera/Browser, pestañas, sesiones, clics o archivos en este bloque; quedan para una ejecución posterior una vez cerrados los gates anteriores. No usar Opera para resolver silenciosamente el token-issuer P0 saltando el orden.
