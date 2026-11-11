@@ -59,8 +59,14 @@ export function registerAutoOrder({order,master,history,db}){
  if(plan.status==='HUMAN_REQUIRED'&&d.attempts_remaining!==0)fail('PLAN_LEDGER_DIVERGED');
  if(d.total_attempts!==history.attempts_by_item[order.item_id]+d.new_predictions)
   fail('HISTORY_LEDGER_DIVERGED');
- return {status:'LAB_PRIVATE_ORDER_REGISTERED',plan,ledger:d,paid_execution_enabled:false,
-   publish_enabled:false,video_enabled:false};
+ const frozen=(d.frozen||d.attempts_remaining===0);
+ const safePlan=frozen?{...plan,status:'HUMAN_REQUIRED',human_required_reason:'LOW_CONFIDENCE',
+   attempts_remaining:0,actions:['FREEZE_PIECE','PRESERVE_FAILURES','REQUEST_HUMAN_EXCEPTION'],
+   paid_provider_calls_authorized:false,delivery_allowed:false}:{
+   ...plan,attempts_remaining:Math.min(plan.attempts_remaining,d.attempts_remaining),
+   paid_provider_calls_authorized:false};
+ return {status:frozen?'HUMAN_REQUIRED':'LAB_PRIVATE_ORDER_REGISTERED',
+   plan:safePlan,ledger:d,paid_execution_enabled:false,publish_enabled:false,video_enabled:false};
 }
 function readPrivateJson(path,root){
  const p=privatePath(path,root);
