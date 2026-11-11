@@ -101,7 +101,15 @@ export function accountTokenWriteGroup(groups){
  const found=groups.filter(g=>g?.name==='Account API Tokens Write'&&g.is_selectable===true&&
    Array.isArray(g.scopes)&&g.scopes.includes('com.cloudflare.api.account')&&
    typeof g.id==='string'&&/^[a-f0-9]{32}$/.test(g.id));
- if(found.length!==1)throw Error('ISSUER_GROUP_UNVERIFIED');
+ if(found.length!==1){
+  const byName=groups.filter(g=>g?.name==='Account API Tokens Write');
+  if(byName.length===0)throw Error('ISSUER_GROUP_ABSENT');
+  if(byName.length!==1)throw Error('ISSUER_GROUP_AMBIGUOUS');
+  if(byName[0].is_selectable!==true)throw Error('ISSUER_GROUP_NOT_SELECTABLE');
+  if(!Array.isArray(byName[0].scopes)||!byName[0].scopes.includes('com.cloudflare.api.account'))
+   throw Error('ISSUER_GROUP_WRONG_SCOPE');
+  throw Error('ISSUER_GROUP_INVALID_ID');
+ }
  return found[0].id;
 }
 export function scopedIssuerPolicy(id){
