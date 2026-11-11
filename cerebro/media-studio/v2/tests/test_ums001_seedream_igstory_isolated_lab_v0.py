@@ -15,7 +15,7 @@ class Story(unittest.TestCase):
   self.assertIn("CENTRAL",prompt)
   self.assertIn("top 20 percent",prompt)
   self.assertIn("bottom 18 percent",prompt)
-  self.assertIn("no extra people",prompt)
+  self.assertIn("NO extra people",prompt)
   self.assertEqual(proof["creative_owner"],"CEREBRO_PROMPT_FACTORY_V0")
  def test_finops_only_prepaid_and_single_prediction(self):
   req,_,_,_=m.plan()
