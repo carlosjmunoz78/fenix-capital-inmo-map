@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json
 permissions:
   contents: read
   id-token: write
@@ -24,6 +25,12 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
+          const ev=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          const changed=[...(ev.head_commit?.added||[]),...(ev.head_commit?.modified||[])];
+          if(!changed.includes('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json')){
+            console.log('FACT001_PREVIOUS_D1_CHILD=SKIPPED_ALREADY_VERIFIED');
+            process.exit(0);
+          }
           const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
           const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json','utf8'));
           const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',client_id:'cerebro',operation:'cloudflare.account_token.issue_d1_read_lab',request_id:'CFT-20261110-001'};
@@ -67,4 +74,67 @@ jobs:
           }
           if(!verified)throw Error('CHILD_READ_PENDING_NOT_ACCEPTED');
           console.log('FACT001_APP_CRM_MAIN_UNMODIFIED=true');
+          NODE
+
+      - name: "CF issuer v2 direct Vault only: create once and verify minimum API token scope"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const ev=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
+          const changed=[...(ev.head_commit?.added||[]),...(ev.head_commit?.modified||[])];
+          if(!changed.includes('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json')){
+            console.log('FACT001_V2_SCOPE=SKIPPED_NO_REQUEST_CHANGE');
+            process.exit(0);
+          }
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json','utf8'));
+          const exact={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',client_id:'cerebro',
+            operation:'cloudflare.account_token.issue_minimal_issuer_lab',request_id:'CFT-20261111-SCOPE-001'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(exact).sort())||
+            Object.entries(exact).some(([k,v])=>order[k]!==v))throw Error('V2_ORDER_DENIED');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
+          async function call(route,jwt,method='GET',body){
+            const r=await fetch(base+'/'+route,{method,
+              headers:{Accept:'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{}),...(body?{'Content-Type':'application/json'}:{})},
+              ...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(35000)});
+            let data={};try{data=await r.json()}catch{}
+            return {http:r.status,data};
+          }
+          const anon=await call('health'), forged=await call('health','invalid-bearer');
+          if(anon.http!==401||forged.http!==401)throw Error('AUTH_GUARD_FAILED');
+          const issuer=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!issuer||!grant)throw Error('OIDC_NOT_AVAILABLE');
+          const sep=issuer.includes('?')?'&':'?';
+          const ir=await fetch(issuer+sep+'audience='+encodeURIComponent('cerebro-fact001-cf-token-issuer-lab-20261110'),
+            {headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(12000)});
+          if(!ir.ok)throw Error('OIDC_HTTP_'+ir.status);
+          const jwt=(await ir.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_INVALID');
+          const health=await call('health',jwt);
+          if(health.http!==200||health.data?.status!=='AUTHENTICATED')throw Error('SIGNED_AUTH_FAILED');
+          console.log('FACT001_V2_ANON_401=true');
+          console.log('FACT001_V2_FORGED_401=true');
+          const issue=await call('issue-scoped-issuer-v2',jwt,'POST',order);
+          console.log('FACT001_V2_ISSUE_HTTP='+issue.http);
+          console.log('FACT001_V2_ISSUE_STATUS='+String(issue.data?.status||issue.data?.code||'UNKNOWN'));
+          if(issue.http!==200||!['SCOPED_ISSUER_STORED_PENDING_VERIFICATION','ALREADY_STORED_PENDING_SCOPE_VERIFICATION'].includes(issue.data?.status)||
+            issue.data?.credential_exposed!==false||issue.data?.parent_revoked!==false)
+            throw Error('V2_VAULT_DIRECT_STORAGE_NOT_PROVEN');
+          let green=false;
+          for(let i=0;i<2;i++){
+            if(i===0)await new Promise(resolve=>setTimeout(resolve,5000));
+            else await new Promise(resolve=>setTimeout(resolve,10000));
+            const verified=await call('verify-scoped-issuer-v2',jwt,'POST',order);
+            console.log('FACT001_V2_VERIFY_'+(i+1)+'_HTTP='+verified.http);
+            if(verified.http===200&&verified.data?.status==='SCOPED_ISSUER_V2_VERIFIED'&&
+              verified.data?.billing_permission===false&&verified.data?.integration_permission===false&&
+              verified.data?.credential_exposed===false){green=true;break}
+            console.log('FACT001_V2_VERIFY_'+(i+1)+'_STATUS='+String(verified.data?.code||verified.data?.status||'UNKNOWN'));
+          }
+          if(!green)throw Error('SCOPED_ISSUER_EFFECTIVE_PERMISSION_GATE_NOT_GREEN');
+          console.log('FACT001_V2_SCOPE=ACCOUNT_API_TOKENS_WRITE_ONLY');
+          console.log('FACT001_V2_STORED_IN_VAULT=true');
+          console.log('FACT001_V2_CREDENTIAL_EXPOSED=false');
+          console.log('FACT001_V1_REVOKED=false');
+          console.log('FACT001_PROD_DNS_APP_CRM_WRITES=0');
           NODE
