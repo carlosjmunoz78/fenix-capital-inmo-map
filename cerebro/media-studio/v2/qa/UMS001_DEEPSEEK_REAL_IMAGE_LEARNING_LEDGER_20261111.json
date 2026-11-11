@@ -108,6 +108,27 @@
       ],
       "artifact_id": 13871951087,
       "note": "Second PHYSICAL Facebook 1:1 image. RAW mode and compact photo-first CEREBRO baseline improved living room realism and daylight, but two adults still fully backturned; no readable faces, orange arch instead of small real glass sculpture, modelled CGI feel; DeepSeek strict QA 52/100. Rejected."
+    },
+    {
+      "run_id": 43058501615,
+      "request_id": "UMS001-MULTI11-SEEDREAM-LINKEDIN-CANARY-20261111-01",
+      "provider": "bytedance/seedream-4",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13872611191,
+      "prediction_id": "7st2ycmy5drmw0d1sdqr5n6vtw",
+      "raw_sha256": "0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422",
+      "raw_pixels": [
+        2560,
+        1440
+      ],
+      "target_pixels": [
+        1200,
+        628
+      ],
+      "note": "Real Seedream 4 LinkedIn 16:9 photo: two front-visible natural adult faces, natural hands and professional interaction, bright plausible Andalusian room, small orange glass object with shadows. Qualitatively markedly more realistic than 6 prior FLUX samples. DeepSeek Vision contract failure => NO VALID AUTOMATED GRADE; official Fénix composite/rights and independent evaluation PENDING. NOT PUBLISHED."
     }
   ],
   "rules": [
@@ -179,5 +200,5 @@
     "cost_estimate_replicate_usd": 0.42,
     "estimated_usage_only": true
   },
-  "next_gate": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY: six real candidates IG 2 + SEO 2 + Facebook 2, zero approved, remaining eight different piece IDs unexecuted. CEREBRO-owned prompt 11/11 prepared and DeepSeek mentor fallback functional; but pixel quality unresolved. Halt further same-model spending and video promotion. Next model-routing/visual-compositing A/B isolated, no paid calls until new gate."
+  "next_gate": "Seven actual Replicate images: prior six FLUX rejected; one distinct LinkedIn Seedream4 photo is promising but QA contract failed, independent photographic/brand/rights evaluation pending. Do not call IMAGE_GATE_GREEN or advance video; further paid calls require separate canary gates. Preserve all assets and SHA256 receipts."
 }
