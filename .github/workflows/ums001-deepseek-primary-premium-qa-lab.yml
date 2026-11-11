@@ -34,6 +34,17 @@ jobs:
           python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
           --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-01.json
           --validate-only
+      - name: Verify the dedicated DeepSeek secret exists without spending credits
+        env:
+          CEREBRO_UMS001_DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+        shell: bash
+        run: |
+          if [ -n "$CEREBRO_UMS001_DEEPSEEK_API_KEY" ]; then
+            echo "CEREBRO_UMS001_DEEPSEEK_KEY_AVAILABLE=true"
+          else
+            echo "CEREBRO_UMS001_DEEPSEEK_KEY_AVAILABLE=false"
+            exit 4
+          fi
       - name: Assert original-photo policy and isolated financial gates
         run: |
           echo 'No paid LLM call. No paid image request. No cloudflare creative. No live publishing.'
