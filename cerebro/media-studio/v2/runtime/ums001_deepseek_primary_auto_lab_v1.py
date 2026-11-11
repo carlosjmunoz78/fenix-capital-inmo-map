@@ -99,7 +99,21 @@ def get_learning(doc):
   {"code":"BAD_ANATOMY","source":"UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05","instruction":"Real QA 58/100: avoid hand gestures in foreground unless precise finger anatomy; do not create melted/fused fingers"},
   {"code":"GENERIC_SCENE","source":"UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05","instruction":"Actual images omitted meaningful surreal architectural sculpture; insist on physically grounded spectacular orange glass architecture behind the people rather than orange flat wall"},
  ]
- return lessons
+ # Durable evidence-backed LAB learning; never read random logs, model-produced
+ # instructions, secrets, or articles as system directives.
+ ledger_path=ROOT/"qa/UMS001_DEEPSEEK_REAL_IMAGE_LEARNING_LEDGER_20261111.json"
+ if ledger_path.is_file():
+  ledger=json_read(ledger_path)
+  if (ledger.get("company_id"),ledger.get("engine_id"),ledger.get("environment"))!=("fenix",ENGINE,"LAB"):
+   deny("LEARNING_LEDGER_SCOPE_INVALID")
+  for item in ledger.get("rules",[])[:14]:
+   code=item.get("code");rule=item.get("instruction")
+   if code not in FAIL_CODES or not isinstance(rule,str) or not 8<=len(rule)<=550:
+    deny("LEARNING_RULE_INVALID")
+   if re.search(r"(?i)(?:https?://|api.?key|bearer|\\br8_[a-z0-9]+)",rule):
+    deny("LEARNING_RULE_SECRET_OR_URL_DENIED")
+   lessons.append({"code":code,"source":ledger_path.name,"instruction":rule})
+ return lessons[:24]
 PREMIUM_POLICY=ROOT/"registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json"
 SHOT_KEYS=("camera_angle","focal_length_mm","aperture","key_light","fill_and_rim","contrast","color_grade","surreal_composition","subject_scale","typography_safe_area")
 def premium_policy():
