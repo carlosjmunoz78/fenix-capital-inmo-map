@@ -4,12 +4,12 @@ import {execFileSync} from 'node:child_process';
 import {createCipheriv,createDecipheriv,createHash,randomBytes} from 'node:crypto';
 import {mkdirSync,writeFileSync} from 'node:fs';
 
-const PYMAKE=String.raw\`import sqlite3,sys
+const PYMAKE=String.raw`import sqlite3,sys
 db=sqlite3.connect(':memory:')
 db.executescript("CREATE TABLE fake_queue(id INTEGER PRIMARY KEY, state TEXT); INSERT INTO fake_queue VALUES (1,'COMPLETED'); INSERT INTO fake_queue VALUES (2,'PENDING'); CREATE TABLE fake_audit(id INTEGER PRIMARY KEY, event TEXT); INSERT INTO fake_audit VALUES (1,'TEST_ONLY');")
-sys.stdout.write('\\n'.join(db.iterdump())+'\\n')
-\`;
-const PYRESTORE=String.raw\`import sqlite3,sys
+sys.stdout.write('\n'.join(db.iterdump())+'\n')
+`;
+const PYRESTORE=String.raw`import sqlite3,sys
 payload=sys.stdin.read()
 db=sqlite3.connect(':memory:')
 db.executescript(payload)
@@ -18,7 +18,7 @@ assert db.execute('SELECT COUNT(*) FROM fake_queue').fetchone()[0]==2
 assert db.execute('SELECT COUNT(*) FROM fake_audit').fetchone()[0]==1
 assert db.execute("SELECT state FROM fake_queue WHERE id=1").fetchone()[0]=='COMPLETED'
 print('SYNTHETIC_SQLITE_RESTORE_PASS')
-\`;
+`;
 const sql=execFileSync('python3',['-c',PYMAKE],{encoding:'utf8',timeout:10000,maxBuffer:200000});
 if(!sql.includes('fake_queue')||!sql.includes('fake_audit')||sql.length>100000)throw Error('FIXTURE_INVALID');
 const plain=Buffer.from(sql,'utf8');
