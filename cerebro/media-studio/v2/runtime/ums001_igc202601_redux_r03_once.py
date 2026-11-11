@@ -10,7 +10,7 @@ spec=importlib.util.spec_from_file_location("base",HERE/"replicate-one-shot-cana
 base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
 MODEL=base.MODEL;API=base.API;BRANCH=base.BRANCH;REPO=base.REPO
 ORDER=Path(os.environ.get("UMS001_REDUX_ORDER_FILE","cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json"))
-REF=Path("cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_COVER_CROP_BASE64.json")
+REF=Path(os.environ.get("UMS001_REDUX_REFERENCE_FILE","cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_COVER_CROP_BASE64.json"))
 OUT=Path(os.getenv("RUNNER_TEMP","/tmp"))/"ums001-igc202601-redux-r03"
 def deny(msg):raise RuntimeError("UMS001_REDUX_R03_"+msg)
 def keep(doc):
@@ -18,7 +18,8 @@ def keep(doc):
  (OUT/"receipt.json").write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n")
 def validate(order,reference):
  allowed_paths={"cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json":("UMS001-IGC202601-REDUX-R03-20261111",0.38),
-  "cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json":("UMS001-IGC202601-REDUX-R04-20261111",0.22)}
+  "cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json":("UMS001-IGC202601-REDUX-R04-20261111",0.22),
+  "cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R05_ORDER.json":("UMS001-IGC202601-REDUX-R05-20261111",0.34)}
  if str(ORDER) not in allowed_paths:deny("ORDER_NOT_ALLOWLISTED")
  request_id,strength=allowed_paths[str(ORDER)]
  if request_id.endswith("R04-20261111") and not Path("cerebro/media-studio/v2/qa/IGC202601_S00_R03_REDUX_VERDICT.json").is_file():deny("R03_QA_EVIDENCE_MISSING")
@@ -30,7 +31,10 @@ def validate(order,reference):
  if any(order.get(k)!=v for k,v in allowed.items()) or set(order)!=set(allowed)|{"prompt"}:deny("ORDER_SCOPE_DENIED")
  prompt=order.get("prompt","")
  if not 550<=len(prompt)<=3900 or "photograph" not in prompt.lower() or "surreal" not in prompt.lower() or "no logos" not in prompt.lower():deny("PROMPT_POLICY")
- if reference.get("source_sha256")!="962234ceee5cc42f108fbe911238e892bdbc77213f80d6b53dbf5d5922cbd8bd":deny("SOURCE_IDENTITY_MISMATCH")
+ ref_by_file={"cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_COVER_CROP_BASE64.json":"962234ceee5cc42f108fbe911238e892bdbc77213f80d6b53dbf5d5922cbd8bd",
+ "cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json":"c6341224d5e02ae7bf79e2d7b4effc59566d2aaa7028f2ad129f2045b79dcfe2"}
+ if str(REF) not in ref_by_file or reference.get("source_sha256")!=ref_by_file[str(REF)]:deny("SOURCE_IDENTITY_MISMATCH")
+ if request_id.endswith("R05-20261111") and not str(REF).endswith("IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json"):deny("R05_CLEAN_REFERENCE_REQUIRED")
  raw64=reference.get("base64_image","")
  if not isinstance(raw64,str) or not 20000<len(raw64)<150000:deny("REFERENCE_TOO_LARGE_OR_MISSING")
  try:raw=base64.b64decode(raw64,validate=True)
@@ -79,7 +83,7 @@ def main():
   if last.scheme!="https" or (last.hostname!="replicate.delivery" and not (last.hostname or "").endswith(".replicate.delivery")):deny("UNTRUSTED_REDIRECT")
   raw=f.read(12_000_001)
  if len(raw)<1024 or len(raw)>12_000_000 or raw[:3]!=b"\xff\xd8\xff":deny("OUTPUT_INVALID")
- filename="IGC-2026-01-S00_REPLICATE_REDUX_"+("R04" if order["request_id"].endswith("R04-20261111") else "R03")+"_RAW.jpg";(OUT/filename).write_bytes(raw)
+ filename="IGC-2026-01-S00_REPLICATE_REDUX_"+("R05" if order["request_id"].endswith("R05-20261111") else ("R04" if order["request_id"].endswith("R04-20261111") else "R03"))+"_RAW.jpg";(OUT/filename).write_bytes(raw)
  receipt.update(status="IMAGE_DOWNLOADED_QA_PENDING",asset_sha256=hashlib.sha256(raw).hexdigest(),asset_bytes=len(raw),filename=filename)
  keep(receipt)
  print("CEREBRO_REDUX_R03=REAL_IMAGE_DOWNLOADED_QA_PENDING")
