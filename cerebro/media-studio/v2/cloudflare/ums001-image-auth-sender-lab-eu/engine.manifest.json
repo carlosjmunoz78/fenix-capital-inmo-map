@@ -1,0 +1,161 @@
+{
+  "schema_version": "cerebro-engine-manifest-v1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "component_id": "UMS001_IMAGE_AUTHENTICATED_SENDER_LAB_V0",
+  "factory_first": true,
+  "status": "LAB_CLOUDFLARE_ACCOUNT_TRIGGER_TO_CEREBRO_RPC_AND_QA_SHADOW_PHYSICAL_PASS",
+  "runtime": {
+    "platform": "Cloudflare Workers Free",
+    "name": "cerebro-ums001-image-auth-sender-lab-eu",
+    "worker_code": "worker.mjs",
+    "portable_core": "core.mjs",
+    "worker_execution_geo_verified": false,
+    "worker_dev_subdomain": false,
+    "preview_urls": false,
+    "public_routes": [],
+    "crons": [],
+    "transport": "NEW_EU_PRIVATE_QUEUE_CONSUMER",
+    "batch_size": 1,
+    "max_concurrent": 1,
+    "max_retries": 1,
+    "real_provider_calls": 0
+  },
+  "auth": {
+    "cloudflare_account_authenticated_trigger": true,
+    "private_service_binding_to_existing_gateway": true,
+    "existing_gateway_name": "cerebro-ums001-producer-private-gateway-lab-eu",
+    "existing_gateway_rpc_entrypoint": "ProducerLibraryLab",
+    "existing_gateway_rpc_method": "latest",
+    "existing_gateway_rpc_scope": "MET_METADATA_ONLY_READONLY",
+    "source_order_generated_automatically_by_cerebro_gateway": false,
+    "actor_claim_not_independent_signature": true,
+    "upstream_signed_actor_identity_verified": false,
+    "private_archive_secret_binding_name": "PRIVATE_ARCHIVE_MANIFEST",
+    "no_secrets_or_archive_refs_in_public_repo": true
+  },
+  "permissions": {
+    "allowed": [
+      "qa.command.receive",
+      "cerebro.producer.latest.readonly",
+      "qa.metadata.submit"
+    ],
+    "denied": [
+      "provider.predict",
+      "budget.reserve",
+      "publish",
+      "commercial.delivery",
+      "prod.write",
+      "video.generate",
+      "existing_gateway.redeploy",
+      "social.post"
+    ],
+    "sensitive_source_archive_manifest_from_secret": true
+  },
+  "events": {
+    "inbound_queue_name": "cerebro-ums001-image-sender-command-lab-eu",
+    "inbound_queue_id": "eb196c69f0384170b10c8e9030e38b38",
+    "jurisdiction": "eu",
+    "mode": "QA_METADATA_ONLY",
+    "action": "SUBMIT_ARCHIVED_LINKEDIN_QA",
+    "producer_actor_id": "cerebro-orchestrator-lab",
+    "outbound_queue_name": "cerebro-ums001-image-qa-shadow-lab-eu",
+    "outbound_queue_id": "74c48e70ebc24b00ab56aef6c74aac58",
+    "outbound_destination": "UMS-QA-LAB",
+    "output_stage": "QA_INBOX_RECEIVED_UNVERIFIED",
+    "public_endpoint": false
+  },
+  "jobs": {
+    "queue_consumer": true,
+    "cron": false,
+    "poll_existing_provider": false,
+    "paid_generation": false
+  },
+  "data_contract": {
+    "scope": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "version"
+    ],
+    "required_inbound_fields": 9,
+    "strict_reject_extra_fields": true,
+    "qa_order_constructed_from_secret_not_caller": true,
+    "specific_canary": "LI-FEED-01",
+    "image_bytes_verified_by_sender": false,
+    "image_bytes_verified_by_receiver": false,
+    "originals_preserved_in_private_drive": true
+  },
+  "tests": {
+    "actions_run_id": 43122191058,
+    "all_tests_passed": 100,
+    "failed": 0,
+    "new_sender_test_count": 18,
+    "quality_gate_simulated": false,
+    "physical_e2e": "Cloudflare authenticated admin command Queue → sender Worker → existing CEREBRO producer-Gateway private RPC → QA outbound Queue → QA Worker → private KV readback",
+    "physical_e2e_order_id": "UMS001-LAB-LI-FEED-01-ARCHIVE-20261113",
+    "physical_queue_backlog_end": 0,
+    "negative_publish_true_denied_without_persist": true,
+    "replay_duplicate_one_receipt": true,
+    "consumer_detach_rebind_rollback_verified": true
+  },
+  "tribunal": {
+    "review_state": "UNVERIFIED",
+    "commercial_qa_signature_verified": false,
+    "editorial_signature_verified": false,
+    "rights_signature_verified": false,
+    "destination_signature_verified": false,
+    "publish_approved": false,
+    "image_gate_green": false,
+    "human_exception_only_for": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
+  },
+  "observability": {
+    "audit_in_cloudflare_queue_metadata": true,
+    "no_prompt_or_credentials_in_logs": true,
+    "private_receipt_qa_kv": true,
+    "original_gateway_unchanged": true
+  },
+  "cost": {
+    "new_subscriptions_eur": 0,
+    "additional_spend_authorized_eur": 0,
+    "paid_provider_calls": 0,
+    "within_free_usage_with_bounds": true,
+    "queue_event_count_bounded": true
+  },
+  "rollback": {
+    "new_consumer_connection_only": "disconnect isolated command Queue consumer; keep legacy Gateway/producer contracts",
+    "tested_disconnected_then_reconnected": true,
+    "last_known_consumer_id": "4b88a00c458e48119ff82d2be9a45419",
+    "never_delete_existing_gateway": true,
+    "full_commercial_delivery_rollback_tested": false
+  },
+  "rebuild": {
+    "source_files": [
+      "core.mjs",
+      "worker.mjs"
+    ],
+    "configuration": "service binding to original ProducerLibraryLab; Queue producer to existing QA shadow Queue; private secret PRIVATE_ARCHIVE_MANIFEST; new EU command queue; no public endpoint; bounded consumer; readback",
+    "uses_paid_ai": false
+  },
+  "documentation": "cerebro/media-studio/v2/runbooks/UMS001_AUTONOMOUS_IMAGE_ORDERS_LAB_V1_20261111.md",
+  "training_hooks": {
+    "status": "OFF_UNTIL_VERIFIED_RIGHTS_AND_QA"
+  },
+  "next_gates": [
+    "actual CEREBRO orchestrator emits signed command through private queue binding",
+    "source artifact physical readback at independent QA recipient",
+    "independent identity and rights/editorial/finisher QA signatures",
+    "signed departmental delivery receipt and FINOPS evaluation; no publication or videos"
+  ]
+}
