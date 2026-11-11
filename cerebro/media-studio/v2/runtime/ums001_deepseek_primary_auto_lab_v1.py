@@ -343,6 +343,36 @@ def cerebro_owned_plan(job,panel):
  if not candidate or candidate.get("visual_qa")!="PENDING_PHYSICAL_IMAGE" or candidate.get("publish_enabled") is not False:deny("CEREBRO_FACTORY_GATE_INVALID")
  return candidate
 
+def cerebro_owned_fallback_teacher(anchor):
+ if not isinstance(anchor,dict) or anchor.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":deny("FALLBACK_NOT_CEREBRO_OWNED")
+ # Explicit fallback only for malformed optional mentor responses. The owner
+ # still provides the entire original visual brief, and all pixels require QA.
+ return {"image_prompt":"CEREBRO producer retains its authored photographic storyboard; external creative mentor was not usable.",
+ "risks":["DEEPSEEK_MENTOR_SCHEMA_INVALID","INDEPENDENT_PIXEL_QA_REQUIRED"],
+ "shot_plan":{
+  "camera_angle":"eye-level front three-quarter real estate documentary, both faces unobstructed",
+  "focal_length_mm":"35mm",
+  "aperture":"f/4",
+  "key_light":"natural soft Mediterranean daylight from an actual Córdoba living-room window",
+  "fill_and_rim":"gentle bounce fill, realistic shadows, no synthetic orange rim everywhere",
+  "contrast":"moderate natural photographic contrast with white walls readable",
+  "color_grade":"true skin colors, warm cream apartment daylight, only a small localized orange glass art accent",
+  "surreal_composition":"one small physically refractive glass sculpture only, never a giant tunnel",
+  "subject_scale":"two visible adult buyers waist-up in a recognizable real apartment",
+  "typography_safe_area":"keep negative space for verified brand typography added later"
+ }}
+
+def cerebro_parse_mentor(creative,anchor,channel):
+ if anchor is None:return creative,validate_creative(creative,channel=channel),False
+ try:
+  validated=validate_creative(creative,channel=channel)
+  return creative,validated,False
+ except Blocked as error:
+  allowed_errors=("CREATIVE_JSON_SCHEMA","MISSING_PREMIUM_PHOTO_SHOT_PLAN","CREATIVE_TOO_SHORT_OR_LONG","INVALID_NUMERIC_SHOT_FIELD","INVALID_SHOT_FIELD","EMPTY_SHOT_FIELD")
+  if not any(k in str(error) for k in allowed_errors):raise
+  fallback=cerebro_owned_fallback_teacher(anchor)
+  return fallback,"CEREBRO_DETERMINISTIC_SHOT_PLAN_MENTOR_SCHEMA_REJECTED",True
+
 def cerebro_mentor_final_prompt(baseline,mentor):
  if not isinstance(baseline,dict) or baseline.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":deny("CEREBRO_FACTORY_ANCHOR_MISSING")
  prompt=baseline.get("text")
@@ -411,7 +441,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
    anchor=cerebro_owned_plan(job,panel)
    creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback,
     anchor["text"] if anchor is not None else None),deepseek_key,clock)
-   mentor_draft=validate_creative(creative,channel=job["channel"])
+   creative,mentor_draft,mentor_fallback=cerebro_parse_mentor(creative,anchor,job["channel"])
    prompt=cerebro_mentor_final_prompt(anchor,creative) if anchor is not None else mentor_draft
    # Persist exactly what DeepSeek proposed, including lens, key/fill and contrast, so CEREBRO can learn.
    prompt_path=OUT/(panel["id"]+"-A"+str(attempt)+"-DEEPSEEK-PROMPT.json")
@@ -421,6 +451,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
     "creative_owner":"CEREBRO_PROMPT_FACTORY_V0" if anchor else "LEGACY_DEEPSEEK_PRIMARY",
     "cerebro_source_prompt_sha256":anchor["prompt_sha256"] if anchor else None,
     "mentor_proposed_scene_sha256":hash_bytes(mentor_draft.encode("utf-8")),
+    "mentor_status":"DETERMINISTIC_CEREBRO_SHOT_FALLBACK_EXTERNAL_SCHEMA_INVALID" if mentor_fallback else "VALID_MENTOR",
     "mentor_scene_is_executed":False if anchor else True,
     "mentor_lighting_shot_is_executed":True,
     "shot_plan":creative.get("shot_plan"),"risks":creative.get("risks"),"model":AI})
