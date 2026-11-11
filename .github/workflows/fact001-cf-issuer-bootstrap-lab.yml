@@ -1,4 +1,5 @@
 name: FACT001 Cloudflare issuer single child token OIDC LAB
+# CF-TOKEN-ISSUER-001 rerun limited diagnostic after sanitized group classifier, no old-token revocation
 on:
   push:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
