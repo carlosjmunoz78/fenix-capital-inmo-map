@@ -4,10 +4,10 @@
   "environment": "LAB",
   "version": "1.0.0",
   "provider": "cloudflare",
-  "operation": "worker.create_private",
+  "operation": "worker.delete_private",
   "resource_name": "cerebro-fact001-managed-lab-s001",
-  "job_id": "FACT001-CF-CMD-20261111-SIGNED-01",
-  "request_id": "FACT001-CF-REQ-20261111-SIGNED-01",
-  "idempotency_key": "fact001-cf-intake-signed-20261111-01",
+  "job_id": "FACT001-CF-CMD-20261111-SIGNED-02",
+  "request_id": "FACT001-CF-REQ-20261111-SIGNED-02",
+  "idempotency_key": "fact001-cf-intake-signed-20261111-02",
   "max_cost_eur": 0
 }
