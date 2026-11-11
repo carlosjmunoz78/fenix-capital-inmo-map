@@ -56,7 +56,7 @@ def json_write(path,doc):
 def allowed_job(doc):
  if not isinstance(doc,dict):deny("JOB_NOT_OBJECT")
  required={"schema_version","request_id","company_id","engine_id","environment","version","channel","asset_type","topic","audience","panels","publish_enabled","max_attempts_per_panel","max_image_budget_usd","max_deepseek_calls","max_deepseek_budget_usd","source_request"}
- if not required.issubset(doc) or (set(doc)-required)!={"style_reference_mode"} and (set(doc)-required)!=set():deny("JOB_FIELDS")
+ if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode"}):deny("JOB_FIELDS")
  if doc.get("style_reference_mode","VERIFIED_CROP") not in ("VERIFIED_CROP","NONE"):deny("STYLE_REFERENCE_MODE_INVALID")
  if (doc["company_id"],doc["engine_id"],doc["environment"],doc["version"])!=("fenix",ENGINE,"LAB","1.0"):deny("SCOPE_DENIED")
  if doc["channel"] not in ALLOWED_CHANNELS or doc["asset_type"] not in ("IMAGE","CAROUSEL","SEO_HERO"):deny("CHANNEL_INVALID")
