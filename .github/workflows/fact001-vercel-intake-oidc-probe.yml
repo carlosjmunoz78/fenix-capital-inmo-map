@@ -1,0 +1,44 @@
+name: FACT001 Vercel OIDC signed intake negative-gate probe LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/vercel-intake-lab/probes/run.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-vercel-oidc-intake-probe
+  cancel-in-progress: false
+jobs:
+  vercel-intake-identity-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Verify independent service login, anonymous denial, PROD denial - no queued orders
+        run: |
+          node --input-type=module <<'NODE'
+          const request=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!request||!grant)throw Error('OIDC_NOT_AVAILABLE');
+          const issue=await fetch(request+(request.includes('?')?'&':'?')+'audience=cerebro-fact001-vercel-intake-lab-20261111',{headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(16000)});
+          if(issue.status!==200)throw Error('OIDC_ISSUE_FAILED_'+issue.status);
+          const jwt=(await issue.json()).value;
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-vercel-intake-lab/';
+          const call=async(route,token,body)=>{
+            const resp=await fetch(base+route,{method:body?'POST':'GET',headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+             ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(25000)});
+            let json={};try{json=await resp.json()}catch{}
+            return{http:resp.status,json};
+          };
+          const denied=await call('health',null);
+          const forged=await call('health','forged-token');
+          if(denied.http!==401||forged.http!==401)throw Error('UNAUTHORIZED_HEALTH_OPEN');
+          const signed=await call('health',jwt);
+          if(signed.http!==200||signed.json.status!=='VERCEL_LAB_SIGNED_INTAKE_READY'||signed.json.vercel_api_writes!==false)throw Error('SIGNED_HEALTH_FAILED');
+          const invalid={company_id:'fenix-capital',engine_id:'FACT-001',environment:'PROD',version:'0.1.0',provider:'vercel',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',project_id:'prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu',project_name:'cerebro-fact001-vercel-lab-20261111',max_cost_eur:0,operation:'vercel.project.read_lab',job_id:'FACT001-VERCEL-CMD-20261111-READ-01',request_id:'FACT001-VERCEL-20261111-READ-01',idempotency_key:'fact001-vercel-oidc-20261111-read-01'};
+          const negative=await call('submit',jwt,invalid);
+          if(negative.http!==403)throw Error('PROD_SCOPE_NOT_BLOCKED');
+          console.log('FACT001_VERCEL_SIGNED_IDENTITY_NEGATIVE_GATES=PASS; NO_D1_QUEUE_MUTATIONS');
+          NODE
