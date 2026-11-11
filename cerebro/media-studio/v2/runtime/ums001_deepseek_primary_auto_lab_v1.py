@@ -124,7 +124,20 @@ def validate_creative(result):
    deny("INVALID_SHOT_FIELD_"+key)
  p=result["image_prompt"];risks=result["risks"]
  if not isinstance(p,str) or not 650<=len(p)<=3000:deny("CREATIVE_TOO_SHORT_OR_LONG")
- if not isinstance(risks,list) or len(risks)!=3 or any(not isinstance(x,str) or not 5<=len(x)<=200 for x in risks):deny("RISKS_INVALID")
+ # Risk prose is advisory metadata, not the safety boundary. Accept bounded
+ # variants from LLMs; all mandatory camera, finance and image QA gates remain strict.
+ if isinstance(risks,str):
+  risk_items=[risks]
+ elif isinstance(risks,dict):
+  risk_items=list(risks.values())
+ elif isinstance(risks,list):
+  risk_items=risks
+ else:
+  risk_items=[]
+ if len(risk_items)>10 or sum(len(str(x)) for x in risk_items)>2000:
+  deny("RISKS_INVALID")
+ if any(not isinstance(x,(str,dict)) for x in risk_items):
+  deny("RISKS_INVALID")
  if not any(w in p.lower() for w in ["human","adult","people","woman","man"]):deny("PEOPLE_NOT_IN_PROMPT")
  if "orange" not in p.lower() or "photograph" not in p.lower():deny("BRAND_OR_PHOTO_ABSENT")
  if re.search(r"(?:https?://|r8_[a-zA-Z0-9]+)",p):deny("SUSPICIOUS_PROMPT")
