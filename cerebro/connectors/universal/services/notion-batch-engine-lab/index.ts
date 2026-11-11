@@ -5,20 +5,22 @@ import {verifyGitHubOidc} from './policy.mjs';
 import {sealNotionIndexManifest} from './notion-encrypted-index-manifest.mjs';
 import {planNextNotionBackupBatch,verifyNotionBackupBatch} from './notion-content-batch-planner.mjs';
 import {exportObject,verifyObject,INDEX_SHA,TOTAL_OBJECTS,MAX_BATCH_ITEMS,openBatch} from './content.mjs';
+import {exportSourceChunk} from './source-chunk.mjs';
 const H={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
 const reply=(status:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status,headers:H});
 const SCOPE={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0'};
 const FIXED={...SCOPE,client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-75-100-20261111',index_sha256:INDEX_SHA};
 const LAST_PROVEN='5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f';
 const PREV_DRIVE='1l68TceZpyar7jOoTZI5Nr5OUy4D8-XOg';
-const VALID_OPERATIONS={plan:'notion.lab.batcher.plan',export:'notion.lab.batcher.export'} as const;
-function assertOrder(body:unknown,kind:'plan'|'export'){
+const VALID_OPERATIONS={plan:'notion.lab.batcher.plan',export:'notion.lab.batcher.export','source-chunk':'notion.lab.batcher.source.chunk'} as const;
+function assertOrder(body:unknown,kind:'plan'|'export'|'source-chunk'){
  if(!body||typeof body!=='object'||Array.isArray(body))throw Error('ORDER_DENIED');
  const b=body as Record<string,unknown>;
  const expected={...FIXED,operation:VALID_OPERATIONS[kind],offset:75,max_items:25,previous_zip_sha256:LAST_PROVEN,previous_drive_file_id:PREV_DRIVE};
- const keys=Object.keys(expected).concat(kind==='export'?['item_index','plan_artifact']:[]).sort();
+ const keys=Object.keys(expected).concat(kind==='export'?['item_index','plan_artifact']:kind==='source-chunk'?['item_index','plan_artifact','continuation']:[]).sort();
  if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(keys)||Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('ORDER_DENIED');
  if(kind==='export'&&(!Number.isSafeInteger(b.item_index)||Number(b.item_index)<0||Number(b.item_index)>=25||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)))throw Error('ORDER_DENIED');
+ if(kind==='source-chunk'&&(b.item_index!==23||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)||(b.continuation!==null&&(!b.continuation||typeof b.continuation!=='object'||Array.isArray(b.continuation)))))throw Error('ORDER_DENIED');
  return b;
 }
 async function getVault(){
@@ -32,12 +34,12 @@ async function getVault(){
  }finally{await db.end({timeout:2}).catch(()=>{})}
 }
 Deno.serve(async req=>{
- const path=new URL(req.url).pathname;const kind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan')?'plan':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export')?'export':null;
+ const path=new URL(req.url).pathname;const kind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan')?'plan':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export')?'export':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/source-chunk')?'source-chunk':null;
  if(!kind||req.method!=='POST')return reply(404,{status:'NOT_FOUND'});
  const auth=req.headers.get('authorization')??'';
  try{if(!auth.startsWith('Bearer '))throw Error('AUTH');await verifyGitHubOidc(auth.slice(7));}catch{return reply(401,{status:'UNAUTHORIZED'});}
  let body:Record<string,unknown>;
- try{if(Number(req.headers.get('content-length')||'0')>18500)throw Error('LONG');const raw=await req.text();if(raw.length>18500)throw Error('LONG');body=assertOrder(JSON.parse(raw),kind);}catch{return reply(403,{status:'ORDER_DENIED'});}
+ try{const maxBody=kind==='source-chunk'?28500:18500;if(Number(req.headers.get('content-length')||'0')>maxBody)throw Error('LONG');const raw=await req.text();if(raw.length>maxBody)throw Error('LONG');body=assertOrder(JSON.parse(raw),kind);}catch{return reply(403,{status:'ORDER_DENIED'});}
  try{let {notionToken,encryptionKey}=await getVault();try{
   if(kind==='plan'){
    const idx=await sealNotionIndexManifest({notionToken,encryptionKey,maxPages:85});
@@ -48,12 +50,13 @@ Deno.serve(async req=>{
    return reply(200,{...plan,verify_roundtrip:true,source_index_search_calls:idx.search_api_requests,content_backed_up:false,checkpoint_committed:false});
   }
   const plan=body.plan_artifact as Record<string,unknown>;
+  if(kind==='source-chunk'){const part=await exportSourceChunk({planArtifact:plan,encryptionKey,notionToken,index:23,continuation:body.continuation});return reply(200,part);}
   await openBatch({planArtifact:plan,encryptionKey});
   const item=await exportObject({planArtifact:plan,encryptionKey,notionToken,index:Number(body.item_index)});
   const check=await verifyObject({artifact:item,planArtifact:plan,encryptionKey});
   if(check.status!=='FACT001_CONTENT_MEMORY_REBUILT')throw Error('MEMORY_ROUNDTRIP_DENIED');
   return reply(200,{...item,verify_roundtrip:true});
  }finally{notionToken='';encryptionKey='';}}
- catch(e){const raw=e instanceof Error?e.message:'';const code=/^(VAULT_UNAVAILABLE|VAULT_MISSING|INDEX_PARITY_DENIED|PLAN_PARITY_DENIED|MEMORY_ROUNDTRIP_DENIED|MANIFEST_[A-Z0-9_]+|BATCH_[A-Z0-9_]+|NOTION_[A-Z0-9_]+|SOURCE_[A-Z0-9_]+|PAGE_DENIED|INCOMPLETE_[A-Z0-9_]+|CURSOR_LOOP|CHILD_LOOP|INPUT_DENIED|ARTIFACT_DENIED)$/.test(raw)?raw:'BATCH_ENGINE_BLOCKED';
+ catch(e){const raw=e instanceof Error?e.message:'';const code=/^(VAULT_UNAVAILABLE|VAULT_MISSING|INDEX_PARITY_DENIED|PLAN_PARITY_DENIED|MEMORY_ROUNDTRIP_DENIED|MANIFEST_[A-Z0-9_]+|BATCH_[A-Z0-9_]+|NOTION_[A-Z0-9_]+|SOURCE_[A-Z0-9_]+|SOURCECHUNK_[A-Z0-9_]+|PAGE_DENIED|INCOMPLETE_[A-Z0-9_]+|CURSOR_LOOP|CHILD_LOOP|INPUT_DENIED|ARTIFACT_DENIED)$/.test(raw)?raw:'BATCH_ENGINE_BLOCKED';
   return reply(503,{status:'BLOCKED',code,credentials_exposed:false,content_exposed:false,provider_writes:0,checkpoint_committed:false});}
 });

@@ -1,0 +1,34 @@
+{
+  "format": "FACT001-NOTION-RECOVER24-OFFSITE-EVIDENCE-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "status": "INDEX24_OFFSITE_AES256GCM_VERIFIED",
+  "index": 24,
+  "global_offset": 99,
+  "kind": "page",
+  "block_count": 178,
+  "rows": 0,
+  "source_partial_zip_sha256": "642f2f933d00b5b020aedf5dd69639f66d8c7e0754a5481e93320c66b737fd18",
+  "github": {
+    "run_id": 42934881464,
+    "artifact_id": 13817862497,
+    "sha256": "cce23767fc9752d76bb38d038f7f6425815aebdc4202767252c90fc217edfe40",
+    "zip_bytes": 152103,
+    "crc_pass": true
+  },
+  "drive": {
+    "id": "1n9F6gScAEzXpGZzrk2Gp17faGuRdKMB1",
+    "private": true,
+    "readback_sha256": "cce23767fc9752d76bb38d038f7f6425815aebdc4202767252c90fc217edfe40",
+    "bytes": 152103,
+    "exact_match": true
+  },
+  "checkpoint_offset": 75,
+  "checkpoint_version": 3,
+  "checkpoint_moved": false,
+  "notion_writes": 0
+}

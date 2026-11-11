@@ -5,6 +5,7 @@ on:
     paths:
       - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/execute-20261111.v2.json
       - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/recover-index24-20261111.v1.json
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/recover-source23-20261111.v1.json
 permissions:
   contents: read
   id-token: write
@@ -44,5 +45,23 @@ jobs:
         with:
           name: fact001-notion-75-100-recover-index24-20261111
           path: fact001-notion-batch-75-100-recover-index24-ciphertext
+          if-no-files-found: warn
+          retention-days: 90
+
+  recover-source23:
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_RECOVER_SOURCE23_ONCE_20261111')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Export only heavy source index23 via bounded encrypted chunks
+        run: node cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-source23.mjs
+      - name: Preserve encrypted chunks even if incomplete
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-75-100-recover-source23-chunks-20261111
+          path: fact001-notion-75-100-source23-chunks-ciphertext
           if-no-files-found: warn
           retention-days: 90
