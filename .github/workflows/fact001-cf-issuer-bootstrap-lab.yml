@@ -1,8 +1,9 @@
-name: FACT001 Cloudflare v2 single child lifecycle physical LAB
+name: FACT001 Cloudflare issuer v2 physical scope verification LAB
 on:
   push:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
-    paths: [cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/v2-child-lifecycle-20261111.v1.json]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/verify-v2-20261111.v1.json
 permissions:
   contents: read
   id-token: write
@@ -10,100 +11,52 @@ concurrency:
   group: fact001-cf-token-issuer-once-lab
   cancel-in-progress: false
 jobs:
-  signed-v2-child-read-and-revoke:
+  verify-existing-v2-with-independent-service:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with: {persist-credentials: false}
-      - name: Verify issuer and child safety contracts without secrets
+      - name: "Security gates: existing v2 only; no creation, no secret transfer"
         run: |
           node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/issuer-policy.test.mjs
-      - name: Issue, verify, revoke and readback exactly one v2 child via secure LAB
+      - name: "GitHub OIDC -> existing Supabase Vault -> Cloudflare v2 scope"
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
-          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/v2-child-lifecycle-20261111.v1.json','utf8'));
-          const expected={"company_id":"fenix-capital","engine_id":"FACT-001","environment":"LAB","version":"1.0.0","account_id":"e39a57e1ac42650ca5a6d5307cf0ac8e","client_id":"cerebro","operation":"cloudflare.account_token.d1_read_child_lifecycle_lab","request_id":"CFT-20261111-CHILD-001"};
-          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
-            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('CHILD_ORDER_SCOPE_DENIED');
-          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
-          if(!endpoint||!grant)throw Error('OIDC_SIGNER_MISSING');
-          const response=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+
-            'audience='+encodeURIComponent('cerebro-fact001-cf-token-issuer-lab-20261110'),
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/verify-v2-20261111.v1.json','utf8'));
+          const expect={"company_id":"fenix-capital","engine_id":"FACT-001","environment":"LAB","version":"1.0.0","account_id":"e39a57e1ac42650ca5a6d5307cf0ac8e","client_id":"cerebro","operation":"cloudflare.account_token.issue_minimal_issuer_lab","request_id":"CFT-20261111-SCOPE-001"};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expect).sort())||
+             Object.entries(expect).some(([k,v])=>order[k]!==v))throw Error('V2_ORDER_INVALID');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+          const grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_RUNNER_UNAVAILABLE');
+          const audience='cerebro-fact001-cf-token-issuer-lab-20261110';
+          const response=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent(audience),
             {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
           if(!response.ok)throw Error('OIDC_HTTP_'+response.status);
           const jwt=(await response.json()).value;
-          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_NOT_VERIFIED');
-          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
           async function call(route,token,body){
-            const r=await fetch(base+'/'+route,{method:body?'POST':'GET',redirect:'error',
-              headers:{Accept:'application/json',...(token?{Authorization:'Bearer '+token}:{}),
-                ...(body?{'Content-Type':'application/json'}:{})},
-              ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(30000)});
+            const r=await fetch(url+'/'+route,{method:body?'POST':'GET',redirect:'error',
+              headers:{Accept:'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+              ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(25000)});
             let data={};try{data=await r.json()}catch{}
-            return {http:r.status,data};
+            return {status:r.status,data};
           }
-          const anon=await call('health'),forged=await call('health','not-a-signed-jwt');
-          if(anon.http!==401||forged.http!==401)throw Error('OIDC_NEGATIVE_GATES_FAILED');
-          const good=await call('health',jwt);
-          if(good.http!==200||good.data?.status!=='AUTHENTICATED')throw Error('OIDC_POSITIVE_GATE_FAILED');
-          console.log('CF_V2_OWNER_ONLY_OIDC=PASS');
-          const v2order={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
-            account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',client_id:'cerebro',
-            operation:'cloudflare.account_token.issue_minimal_issuer_lab',request_id:'CFT-20261111-SCOPE-001'};
-          const preflight=await call('verify-scoped-issuer-v2',jwt,v2order);
-          if(preflight.http!==200||preflight.data?.status!=='SCOPED_ISSUER_V2_VERIFIED')
-            throw Error('V2_SCOPE_NOT_READY');
-          console.log('CF_V2_MINIMAL_ISSUER_VAULT=PASS');
-          const issued=await call('v2-child-create',jwt,order);
-          console.log('CF_V2_CHILD_CREATE_HTTP='+issued.http);
-          console.log('CF_V2_CHILD_CREATE_STATUS='+String(issued.data?.status||issued.data?.code||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64));
-          if(issued.http!==200||
-             !['CHILD_V2_STORED_PENDING_VERIFICATION','CHILD_V2_ALREADY_STORED'].includes(issued.data?.status)||
-             issued.data?.credential_exposed!==false)throw Error('CHILD_CREATE_FAIL_CLOSED');
-          console.log('CF_V2_CHILD_VAULT_DIRECT=PASS');
-          let verified=false,revoked=false,problems=[];
-          try{
-            for(let i=0;i<3;i++){
-              if(i>0)await new Promise(r=>setTimeout(r,i===1?9000:15000));
-              const result=await call('v2-child-verify',jwt,order);
-              console.log('CF_V2_CHILD_EFFECTIVE_VERIFY_'+(i+1)+'_HTTP='+result.http);
-              if(result.http===200&&result.data?.status==='CHILD_V2_D1_READ_VERIFIED'&&
-                result.data?.read_http===200&&[401,403].includes(result.data?.admin_http)){
-                verified=true;break;
-              }
-              if(result.http!==409||result.data?.status!=='CHILD_V2_EFFECTIVE_PERMISSIONS_PENDING'){
-                problems.push('CHILD_EFFECTIVE_READ_GATE_BLOCKED');break;
-              }
-            }
-            if(verified)console.log('CF_V2_CHILD_D1_READ_AND_ADMIN_DENIED=PASS');
-            else problems.push('CHILD_EFFECTIVE_SCOPE_NOT_PROVEN');
-          }finally{
-            // Regardless of read propagation, attempt to revoke EXACTLY the tracked child;
-            // no provider child token is ever printed or passed back to GitHub.
-            const stopped=await call('v2-child-revoke',jwt,order);
-            console.log('CF_V2_CHILD_REVOKE_HTTP='+stopped.http);
-            console.log('CF_V2_CHILD_REVOKE_STATUS='+String(stopped.data?.status||stopped.data?.code||'UNKNOWN').replace(/[^A-Z0-9_]/g,'').slice(0,64));
-            if(stopped.http!==200||stopped.data?.status!=='CHILD_V2_REVOKE_SUBMITTED')
-              problems.push('CHILD_REVOKE_UNCERTAIN');
-            else {
-              for(let j=0;j<4;j++){
-                if(j>0)await new Promise(r=>setTimeout(r,[0,5000,10000,15000][j]));
-                const check=await call('v2-child-revocation-check',jwt,order);
-                console.log('CF_V2_CHILD_REVOKED_CHECK_'+(j+1)+'_HTTP='+check.http);
-                if(check.http===200&&check.data?.status==='CHILD_V2_REVOKED_VERIFIED'&&
-                  [401,403].includes(check.data?.read_http)){revoked=true;break}
-                if(check.http!==409||check.data?.status!=='CHILD_V2_REVOCATION_PENDING'){
-                  problems.push('CHILD_REVOKE_RECONCILE_REQUIRED');break;
-                }
-              }
-            }
-          }
-          if(revoked)console.log('CF_V2_CHILD_REVOKED_AND_D1_401=PASS');
-          if(problems.length||!verified||!revoked)throw Error('FACT001_CF_V2_CHILD_E2E_NOT_GREEN_'+problems.join('_'));
-          console.log('CF_V2_PARENT_V1_UNCHANGED=PASS');
-          console.log('CF_V2_PRODUCTION_RESOURCES_WRITES=0');
-          console.log('CF_V2_TOKEN_VALUES_LOGGED=false');
-          console.log('CF_V2_CHILD_LIFECYCLE_FULL_E2E=PASS');
+          const anon=await call('health'),fake=await call('health','forged');
+          if(anon.status!==401||fake.status!==401)throw Error('UNSIGNED_ALLOWED');
+          const health=await call('health',jwt);
+          if(health.status!==200||health.data?.status!=='AUTHENTICATED')throw Error('SIGNED_IDENTITY_DENIED');
+          console.log('FACT001_CF_V2_ANON_401=PASS');
+          console.log('FACT001_CF_V2_FAKE_401=PASS');
+          console.log('FACT001_CF_V2_SIGNED_200=PASS');
+          const test=await call('verify-scoped-issuer-v2',jwt,order);
+          console.log('FACT001_CF_V2_VERIFY_HTTP='+test.status);
+          console.log('FACT001_CF_V2_VERIFY_STATUS='+String(test.data?.status||test.data?.code||'UNKNOWN'));
+          if(test.status!==200||test.data?.status!=='SCOPED_ISSUER_V2_VERIFIED'||test.data?.billing_permission!==false||
+            test.data?.credential_exposed!==false||test.data?.parent_revoked!==false)throw Error('V2_SCOPE_REAL_BACKEND_NOT_VERIFIED');
+          console.log('FACT001_CF_V2_EFFECTIVE_SCOPE=PASS');
+          console.log('FACT001_CF_NO_TOKEN_VALUES_EXPOSED=PASS');
           NODE
