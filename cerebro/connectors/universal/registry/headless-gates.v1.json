@@ -688,7 +688,21 @@
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
-      "service_identity_admin": "HUMAN_REQUIRED"
+      "service_identity_admin": "HUMAN_REQUIRED",
+      "repo_create_p1": {
+        "state": "BLOCKED_INTEGRATION_PERMISSION",
+        "evidence": "docs/FACT001_GITHUB_FACTORY_PERMISSION_P1_2026-11-11.md",
+        "current_actor": "carlosjmunoz78",
+        "connected_installations_visible": 3,
+        "installation_permission_scopes": "NOT_EXPOSED",
+        "service_credential_vault": "ABSENT_BY_METADATA",
+        "known_http": "POST /user/repos => 403 Resource not accessible by integration",
+        "retest_of_failed_create": "NOT_REPEATED",
+        "repo_created_this_block": false,
+        "other_repo_writes": false,
+        "subscribed_extra_eur": 0,
+        "next_block": "EXISTING_GITHUB_APP_ADMIN_SCOPE_OWNER_AUTHORIZATION_AND_VAULT_BACKEND_PAIRING"
+      }
     }
   ],
   "headless_service": {

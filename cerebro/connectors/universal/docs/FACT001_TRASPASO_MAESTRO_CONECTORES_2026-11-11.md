@@ -108,3 +108,8 @@ PARCIAL/BLOQUEADO: la emisión de v2 y el ciclo de token hijo requieren ruta ser
 ## 11/11/2026 · CF-TOKEN-ISSUER-001 · gate LIVE bloqueado por delegación del proveedor
 
 Reutilizado el issuer LAB existente (no se crearon D1/Workers), 22/22 tests CI; candidaturas Edge v5 y v6. Prueba OIDC física con rechazo `ISSUER_GROUP_NOT_SELECTABLE` al intentar que el emisor v1 cree su sustituto v2 con `Account API Tokens Write`. El secreto v2 no existe en Vault y el padre NO está revocado. No insistir ni ampliar permisos. Se retira el disparador de workflow v2; el rollback del runtime LAB original fue **bloqueado por seguridad de la herramienta**, no se puede declarar ejecutado. Ver `docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md`. P1–P4 deben continuar independientemente; Opera continúa en P6.
+
+
+## 11/11/2026 · P1 GitHub · comprobación diferencial sin repetir POST 403
+
+Usuario GitHub y 3 instalaciones de Apps detectados. El servicio de la Factory no tiene todavía `cerebro_github_factory_pat_v1` ni credencial GitHub App en Vault; los metadatos de instalaciones no exponen scope de creación. Se conserva la prueba anterior `POST /user/repos => 403` sin reiterarla ni crear repositorios. P1 admin global **BLOQUEADO POR PERMISO**, CRUD de rama LAB existente conservado. Runbook `docs/FACT001_GITHUB_FACTORY_PERMISSION_P1_2026-11-11.md`. P2 Supabase continúa independientemente.
