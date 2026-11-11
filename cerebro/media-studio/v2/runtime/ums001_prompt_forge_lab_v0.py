@@ -15,7 +15,7 @@ import json
 import re
 import unicodedata
 
-FACTORY_VERSION="UMS001-PROMPT-FORGE-V0.1"
+FACTORY_VERSION="UMS001-PROMPT-FORGE-V0.2"
 MODEL_ID="black-forest-labs/flux-1.1-pro-ultra"
 VALID_FORMATS={"IMAGE","CAROUSEL","SEO_HERO"}
 VALID_CHANNELS={"INSTAGRAM","FACEBOOK","LINKEDIN","SEO"}
@@ -38,6 +38,9 @@ GAITS={
  "PLASTIC_PEOPLE":"Documentary believable skin pores, fine hairs, naturally imperfect facial expressions, human hand anatomy, never 3D or heavily retouched faces.",
  "BRAND_FABRICATED":"No AI-generated logo or wordmark; composite the authenticated original branding separately after generation.",
  "OVERLAY_CONFLICT":"Keep the bottom 25 percent open and calm for a deterministic short headline; avoid faces or hero props under the overlay.",
+ "HUMAN_MISSING":"MUST show real people as the clear primary subject: waist-up close-medium portrait, faces and shoulders clearly visible and taking over half the frame. Absolutely not an empty patio, still-life, architecture-only or product photo.",
+ "SURREAL_WEAK":"Monumental, breathtaking art-gallery-scale surreal architecture behind the people, vibrant orange sculptural spectacle with plausible shadows; NEVER a small hanging keychain as the entire visual hook.",
+ "SCENE_GENERIC":"Extraordinary, immediately striking premium Andalusian commercial advertising composition; no conventional catalog still-life or empty generic courtyard.",
 }
 def slug(x):
  return " ".join(re.findall(r"[a-z0-9]+",unicodedata.normalize("NFKD",str(x).lower()).encode("ascii","ignore").decode()))
@@ -96,7 +99,10 @@ def build_prompt_batch(brief:dict, feedback:dict|None=None)->dict:
   lens=LENSES[(seed+i)%len(LENSES)]
   motif=SURREAL_MOTIFS[(seed//13+i)%len(SURREAL_MOTIFS)]
   location=ENVIRONMENTS[(seed//31+i)%len(ENVIRONMENTS)]
-  visual=[f"Visual story for: {intent}. Intended audience: {audience}.",
+  visual=[
+    "CRITICAL CAST AND LAYOUT: The MAIN SUBJECT is the HUMAN. Show clearly visible authentic adult people in the LEFT/CENTER foreground in a waist-up medium portrait; faces and natural expressions occupy at least half the image height. Human eyes and hands clearly visible, no still-life, NO empty scene, NO house-only product photo.",
+    "CRITICAL SPECTACLE: Behind and around the people construct a vast astonishing physical surreal cinematic art installation. The human remains more visually important than the sculpture; spectacular orange kinetic architecture and dramatic natural light.",
+    f"Visual story for: {intent}. Intended audience: {audience}.",
     f"Single original {brief['platform'].title()} {brief['asset_type'].lower()} visual, shot as expensive, real editorial PHOTOGRAPH, not a 3D illustration.",
     f"Authentic human protagonist: an adult Spanish professional working in Andalusia, specifically {human_role}, {action}; expression and emotional tone: {expression}.",
     f"Original location and story: {setting}. Contextual environment, where suitable: {location}.",
