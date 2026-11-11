@@ -8,8 +8,8 @@
   "project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
   "project_name": "cerebro-fact001-vercel-lab-20261111",
   "max_cost_eur": 0,
-  "operation": "vercel.project.set_framework_vite_lab",
-  "job_id": "FACT001-VERCEL-CMD-20261111-UPDATE-01",
-  "request_id": "FACT001-VERCEL-20261111-UPDATE-01",
-  "idempotency_key": "fact001-vercel-oidc-20261111-update-01"
+  "operation": "vercel.project.rollback_framework_null_lab",
+  "job_id": "FACT001-VERCEL-CMD-20261111-ROLLBACK-01",
+  "request_id": "FACT001-VERCEL-20261111-ROLLBACK-01",
+  "idempotency_key": "fact001-vercel-oidc-20261111-rollback-01"
 }
