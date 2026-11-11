@@ -15,7 +15,7 @@ const ORDER_KEYS=["schema_version","order_id","company_id","engine_id","environm
  "delivery_mode","max_attempts_per_piece","max_model_usd_per_attempt","max_qa_usd_per_attempt",
  "max_additional_cost_eur","prepaid_only","automatic_publication","auto_recharge","video_enabled",
  "paid_execution_enabled","provider"];
-const CANON_RUBRIC=Object.freeze({human_presence_and_cast:20,camera_and_composition:15,lighting_and_realism:15,
+export const CANON_RUBRIC=Object.freeze({human_presence_and_cast:20,camera_and_composition:15,lighting_and_realism:15,
  contrast_and_color:10,surreal_creativity:15,typography_and_brand_integrity:15,context_and_claims:10});
 export const HOLD_CODES=Object.freeze(["LEGAL_REQUIRED","SIGNATURE_REQUIRED","LOW_CONFIDENCE","HIGH_RISK",
  "POLICY_CONFLICT","SECURITY_INCIDENT","MONEY_LIMIT","CUSTOMER_HUMAN_REQUEST"]);
