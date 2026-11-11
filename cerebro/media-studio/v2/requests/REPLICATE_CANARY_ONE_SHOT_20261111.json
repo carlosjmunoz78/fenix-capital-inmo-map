@@ -1,0 +1,12 @@
+{
+  "request_id": "UMS001-REPLICATE-CANARY-20261111-A1",
+  "source_request_id": "UMS001-REPLICATE-IMAGE-BATCH-20261111-01",
+  "concept_id": "UMS-CRE-1111-A",
+  "environment": "LAB",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_provider_spend_usd": 0.06,
+  "paid_execution_scope": "EXISTING_PREPAID_ONLY",
+  "publish": false
+}
