@@ -31,7 +31,20 @@ def safe_style_reference():
  except Exception:deny("STYLE_REFERENCE_ENCODING_DENIED")
  if raw[:3]!=bytes((255,216,255)) or hashlib.sha256(raw).hexdigest()!=SOCIAL_REFERENCE_SHA:
   deny("STYLE_REFERENCE_BYTES_TAMPERED")
- return "data:image/jpeg;base64,"+b
+ # Hard-earned QA: the approved source contains a glowing approval tick near
+ # the BOTTOM. Image conditioning repeated that misleading mark in three images.
+ # Restrict source to upper photography only, preserving its verified pixels.
+ try:
+  from PIL import Image
+  im=Image.open(io.BytesIO(raw)).convert("RGB")
+  if im.size!=(680,467):deny("STYLE_REFERENCE_DIMENSIONS_CHANGED")
+  im=im.crop((0,0,680,286))
+  if hashlib.sha256(im.tobytes()).hexdigest()!="e63239c035ccda9d72f33ee0528e1cd13cabb80ab780f33935342ed2eb642b8b":
+   deny("STYLE_REFERENCE_CROP_PIXELS_CHANGED")
+  buf=io.BytesIO();im.save(buf,format="JPEG",quality=90,optimize=True)
+ except Blocked:raise
+ except Exception:deny("STYLE_REFERENCE_PROCESSING_FAILED")
+ return "data:image/jpeg;base64,"+base64.b64encode(buf.getvalue()).decode()
 
 class Blocked(RuntimeError):pass
 def deny(reason):raise Blocked("UMS001_DEEPSEEK_"+reason)
@@ -118,7 +131,7 @@ def prompt_messages(job,panel,attempt,previous_qa):
   "Start with large realistic Spanish adults visible waist-up in the foreground, photographic pores, believable hands, "
   "professional premium cinematic Córdoba-Andalucía art, spectacular orange glass surreal architecture BEHIND them. "
   "If SEO, do not include text or logos in final image. If social, leave space for separate deterministic hook+logo. "
-  "No AI text, invented watermarks, marks, labels, documents, financial checkmarks, approval implications, fake bank emblems. "
+  "No AI text, invented watermarks, marks, labels, documents, bank approval implications or fake bank emblems. The surreal sculpture is ABSTRACT PHYSICAL ARCHITECTURE, not an icon or symbol. "
   "Image is 4:5 vertical. Image composition must not be a generic tiny-people fantasy. "
   "Never generate the brand icon; original SHA-verified Fénix logo composited separately. JSON only.")
  return [{"role":"system","content":sys_text},{"role":"user","content":"Generate an original creative photographic prompt, not a repeated template. Customer brief JSON: "+json.dumps(customer,ensure_ascii=False)}]
