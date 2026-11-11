@@ -36,12 +36,14 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42838699207",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42822832223",
         "Cloudflare OAuth physical LAB Worker V1->V2->V1 rollback->delete->rebuild->delete 2026-11-11; no public routes, bindings or crons",
-        "Cloudflare OAuth physical LAB Pages project create->branch update->revert->delete 2026-11-11; no deployment"
+        "Cloudflare OAuth physical LAB Pages project create->branch update->revert->delete 2026-11-11; no deployment",
+        "Cloudflare Worker independent scheduled E2E physically COMPLETED attempts=1 phase=CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE 2026-11-11; private D1 job, no leftover target, cron stopped"
       ],
       "gaps": [
         "Cloudflare Pages independent LAB create/read/delete succeeded; one-off write endpoint retired",
-        "Physical Worker deployment+rollback and Pages project-settings update/revert verified via ChatGPT OAuth; independent CEREBRO executor and Pages deployment rollback remain pending",
-        "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending"
+        "Independent CEREBRO Workers one-shot E2E verified, Cloudflare Pages deployment/rollback remains pending; generic CEREBRO headless dispatch and policy still incomplete",
+        "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending",
+        "Workers one-shot credential active without configured expiration: rotation, short-lived delegation and revocation plan pending; not 'forever' guaranteed"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -203,29 +205,40 @@
         "cloudflare_full_connector": "PARTIAL_NOT_GREEN"
       },
       "headless_autonomous_cloudflare_20261111": {
-        "status": "BLOCKED_CREDENTIAL_BOOTSTRAP",
-        "reason": "Cloudflare Account Tokens Write v2 child Workers Scripts Write POST HTTP_400; direct Cloudflare OAuth admin scope probe succeeded then token revoked; platform security controls blocked automated token-to-Worker secret binding; no bypass",
+        "status": "VERIFIED_LAB_WORKERS_ONE_SHOT_LIFECYCLE",
+        "reason": "Physical independent Worker cron now completed using private secret_text token, no token value exposed. Initial incompatible redirect:'error' corrected to redirect:'manual' with verified HTTP200 secret probe. Keep FULL universal pending Pages and repeatable operation dispatch.",
         "service": "cerebro-fact001-headless-operator-lab-20261111",
         "service_public": false,
         "service_previews": false,
         "service_crons": [],
-        "service_secret_bound": false,
+        "service_secret_bound": true,
         "service_d1_binding": "1305f791-7c44-47f9-946b-f330a09c88aa",
         "d1_exclusive_table": "fact001_cf_headless_worker_jobs_v1",
-        "d1_row_state": "QUEUED",
-        "d1_row_attempts": 0,
+        "d1_row_state": "COMPLETED",
+        "d1_row_attempts": 1,
         "new_d1_count": 0,
         "worker_count_before": 13,
         "worker_count_after": 14,
         "disposable_target_present": false,
         "minted_autonomous_token_present": false,
         "owner_oauth_token_probe": "SCOPE_VERIFIED_THEN_REVOKED",
-        "independent_execution": "NOT_PROVEN",
+        "independent_execution": "PHYSICALLY_VERIFIED_WORKERS_ONE_SHOT_ONLY",
         "safe_rollback": "DISABLE_CRONS_ALREADY_NONE; DELETE_ONLY_ISOLATED_SCRIPT_AND_TABLE_AFTER_SEPARATE_AUDIT",
         "source_commit": "0ed0f5721329fd2e7a14749e68265804f520b5bf",
-        "status_record": "docs/FACT001_CF_HEADLESS_AUTH_POLICY_BLOCKER_2026-11-11.md",
-        "gated_next_step": "REQUIRES_APPROVED_CREDENTIAL_PROVISIONING_THROUGH_PLATFORM_WORK_OR_HUMAN_ADMIN_INTERFACE; NEVER_SEND_TOKEN_IN_CHAT",
-        "cost_new_subscriptions_eur": 0
+        "status_record": "docs/FACT001_CF_WORKER_CREDENTIAL_PROBE_2026-11-11.md",
+        "gated_next_step": "VERIFY_GENERIC_ALLOWED_JOB_INGRESS_AND_PAGES_DEPLOY_ROLLBACK; LEAST_PRIVILEGE_POLICY_AND_TOKEN_ROTATION; DO_NOT_MARK_CLOUDFLARE_FULL",
+        "cost_new_subscriptions_eur": 0,
+        "credential_name": "CEREBRO-FACT001-CF-WORKERS-LAB-V2",
+        "credential_scope": "Workers Scripts Write account-only",
+        "credential_expires_on": null,
+        "token_last_used_on": "2026-11-11T12:59:57Z",
+        "physical_lifecycle": "CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE",
+        "error_code": null,
+        "bounded_replay": "VERIFIED_ONE_D1_ATTEMPT; SECOND_ATTEMPT_AFTER_AUDITED_INITIAL_FAILURE",
+        "external_effect_readback": "VERIFIED_D1_AND_FINAL_WORKER_INVENTORY",
+        "cleanup": "CRON_DISABLED_AFTER_COMPLETED; TEMP_WORKER_ABSENT; HEADLESS_RUNNER_PRIVATE",
+        "cross_provider_autonomy": "NOT_VERIFIED",
+        "operational_renewal_and_rotation": "PENDING"
       }
     },
     {

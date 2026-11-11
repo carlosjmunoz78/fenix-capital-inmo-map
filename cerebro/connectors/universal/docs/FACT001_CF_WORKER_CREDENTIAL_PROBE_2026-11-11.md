@@ -38,3 +38,12 @@ Sin costes de suscripción nuevos y sin modificaciones en `main`.
 - Token `CEREBRO-FACT001-CF-WORKERS-LAB-V2` está activo, 1 grupo Workers Scripts Write y `expires_on=null` (sin vencimiento programado; no garantiza validez infinita).
 
 **No declarar FULL ni afirmar que la consola esté conectada.**
+
+
+## RESULTADO FÍSICO · Cloudflare CEREBRO headless · 11/11/2026
+
+**WORKERS ONE-SHOT VERIFIED_LAB**. Se ejecutó físicamente el cron aislado del Worker `cerebro-fact001-headless-operator-lab-20261111`, con secreto Cloudflare `CF_WORKERS_TOKEN` de tipo `secret_text` introducido por el propietario, unido a la D1 LAB preexistente. El primer fallo inicial quedó archivado; se corrigió `fetch` `redirect:'error'` → `redirect:'manual'` (runtime Workers) y se acreditó previamente un GET HTTP 200 desde el Worker con el secreto sin revelar su valor. Se reencoló una única vez tras reconciliación y comparación de estado.
+
+**D1 result**: `fact001_cf_headless_worker_jobs_v1`, `FACT001-CF-HEADLESS-CRON-E2E-20261111-001`, `state=COMPLETED`, `attempts=1`, `phase=CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE`, `error_code=NULL`. API Cloudflare GET final: Worker desechable `cerebro-fact001-owned-worker-lab-20261111` ausente; 14 Workers totales, incluyendo el nuevo ejecutor privado. Cron de prueba `/schedules` explícitamente desactivado y verificado vacío; `workers.dev` y previews OFF. Token de servicio `CEREBRO-FACT001-CF-WORKERS-LAB-V2` activo con único grupo `Workers Scripts Write`, cuenta fija y `expires_on=null` (sin vencimiento programado, **no** garantiza disponibilidad de por vida). No nuevas D1 ni suscripciones; no cambios en App/CRM/DNS/main ni otros Workers.
+
+**Aún PENDIENTE**: dispatcher genérico de órdenes CEREBRO multiempresa, Pages deployment/rollback vía headless, política de PROD, recuperación/observabilidad longitudinal, gestión de rotación de tokens. **Cloudflare Universal FULL sigue PARTIAL.** No confundir verificación del *subgate Workers one-shot* con producto terminado.
