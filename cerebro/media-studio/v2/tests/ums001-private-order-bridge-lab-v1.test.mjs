@@ -17,8 +17,21 @@ const canon=v=>JSON.stringify(v,(_,x)=>x&&typeof x==='object'&&!Array.isArray(x)
  Object.fromEntries(Object.entries(x).sort(([a],[b])=>a.localeCompare(b,'en'))):x);
 const SECRET='TEST_SYNTHETIC_HMAC_SECRET_ONLY_CI_0123456789';
 const withTemp=fn=>{
- const root=mkdtempSync(join(tmpdir(),'ums001-private-bridge-'));
- try{return fn({root,db:join(root,'ledger.sqlite3')})}finally{rmSync(root,{recursive:true,force:true})}
+ const base=mkdtempSync(join(tmpdir(),'ums001-private-bridge-'));
+ const root=join(base,'assets'),trusted=join(base,'separate-iam');
+ mkdirSync(root);mkdirSync(trusted);
+ const oldFile=process.env.UMS001_TRUST_REGISTRY_FILE;
+ const oldSha=process.env.UMS001_TRUST_REGISTRY_SHA256;
+ process.env.UMS001_TRUST_REGISTRY_FILE=join(trusted,'trusted-keys.json');
+ delete process.env.UMS001_TRUST_REGISTRY_SHA256;
+ try{return fn({root,db:join(base,'ledger.sqlite3'),trusted})}
+ finally{
+  if(oldFile===undefined)delete process.env.UMS001_TRUST_REGISTRY_FILE;
+  else process.env.UMS001_TRUST_REGISTRY_FILE=oldFile;
+  if(oldSha===undefined)delete process.env.UMS001_TRUST_REGISTRY_SHA256;
+  else process.env.UMS001_TRUST_REGISTRY_SHA256=oldSha;
+  rmSync(base,{recursive:true,force:true});
+ }
 };
 function signedProviderFixture({root,rawBytes,job=order,prediction='labtest98765'}){
  const pair=generateKeyPairSync('ed25519');
@@ -32,8 +45,20 @@ function signedProviderFixture({root,rawBytes,job=order,prediction='labtest98765
    signature:sign(null,Buffer.from(canon(doc)),pair.privateKey).toString('base64')};
  const providerProofPath=join(root,'provider-proof.json'),trustPath=join(root,'trust.json');
  writeFileSync(providerProofPath,JSON.stringify(file));
+ // A caller-supplied trust file is deliberately ignored by the bridge.
  writeFileSync(trustPath,JSON.stringify({PROVIDER:{
-   key_id:keyId,public_key_pem:pair.publicKey.export({type:'spki',format:'pem'})}}));
+   key_id:'UNTRUSTED_ASSET_KEY',public_key_pem:pair.publicKey.export({type:'spki',format:'pem'})}}));
+ const roles=['PROVIDER','VISUAL','FINISHER','RIGHTS','EDITORIAL','DESTINATION'];
+ const keys=Object.fromEntries(roles.map(role=>{
+  const k=role==='PROVIDER'?pair:generateKeyPairSync('ed25519');
+  return [role,{key_id:role==='PROVIDER'?keyId:'LAB_CI_ONLY_'+role+'_INDEPENDENT',
+    public_key_pem:k.publicKey.export({type:'spki',format:'pem'}),revoked:false}];
+ }));
+ const registry={schema_version:1,company_id:'fenix',engine_id:'UMS-001',
+   environment:'LAB',status:'ACTIVATED_BY_PRIVATE_IAM',keys};
+ const data=Buffer.from(JSON.stringify(registry));
+ writeFileSync(process.env.UMS001_TRUST_REGISTRY_FILE,data);
+ process.env.UMS001_TRUST_REGISTRY_SHA256=sha(data);
  return {providerProofPath,trustPath};
 }
 function fixture(root){
@@ -121,7 +146,45 @@ test('private QA cannot use synthetic CI trust anchors to release',()=>withTemp(
  attestations:join(root,'attestations.json'),trust:join(root,'trust.json')};
  writeFileSync(files.finished,finished);
  for(const k of ['vision','finish','rights','editorial','attestations'])writeFileSync(files[k],'{}');
- writeFileSync(files.trust,JSON.stringify({VISUAL:{key_id:'SYNTHETIC_TEST_BAD_KEY'}}));
+ const pinnedPath=process.env.UMS001_TRUST_REGISTRY_FILE;
+ const pinned=JSON.parse(readFileSync(pinnedPath,'utf8'));
+ pinned.keys.VISUAL.key_id='SYNTHETIC_TEST_BAD_KEY';
+ const bytes=Buffer.from(JSON.stringify(pinned));
+ writeFileSync(pinnedPath,bytes);
+ process.env.UMS001_TRUST_REGISTRY_SHA256=sha(bytes);
  assert.throws(()=>reviewPrivateCandidate({order,master,history:baseline,db,privateRoot:root,files}),
- /SYNTHETIC_TEST_KEY_NOT_AUTHORIZED_FOR_REAL_DELIVERY/);
+ /TRUST_REGISTRY_ROLE_NOT_AUTHORIZED_VISUAL/);
+}));
+
+test('tampering a pinned IAM registry after approval is detected',()=>withTemp(({root,db})=>{
+ const f=fixture(root);
+ const configured=process.env.UMS001_TRUST_REGISTRY_FILE;
+ const x=JSON.parse(readFileSync(configured,'utf8'));x.keys.PROVIDER.revoked=true;
+ writeFileSync(configured,JSON.stringify(x)); // PIN deliberately unchanged
+ assert.throws(()=>recordExistingSignedPrediction({order,master,history:baseline,db,privateRoot:root,...f,bridgeSecret:SECRET}),
+  /TRUST_REGISTRY_SHA_MISMATCH/);
+}));
+test('unconfigured IAM registry fails closed without accepting private asset roots',()=>withTemp(({root,db})=>{
+ const f=fixture(root);
+ delete process.env.UMS001_TRUST_REGISTRY_SHA256;
+ assert.throws(()=>recordExistingSignedPrediction({order,master,history:baseline,db,privateRoot:root,...f,bridgeSecret:SECRET}),
+  /TRUST_REGISTRY_UNCONFIGURED/);
+}));
+test('asset-supplied forged trust cannot override independent pinned IAM identity',()=>withTemp(({root,db})=>{
+ const f=fixture(root);
+ const fake=generateKeyPairSync('ed25519');
+ const malicious={PROVIDER:{key_id:'FAKE_ATTACKER',
+  public_key_pem:fake.publicKey.export({type:'spki',format:'pem'})}};
+ writeFileSync(f.trustPath,JSON.stringify(malicious));
+ const receipt=recordExistingSignedPrediction({order,master,history:baseline,db,privateRoot:root,...f,bridgeSecret:SECRET});
+ assert.equal(receipt.total_attempts,1); // legitimate pinned signer, never the fake
+}));
+test('isolated proof file cannot use registry inside asset directory',()=>withTemp(({root,db})=>{
+ const f=fixture(root);
+ const data=readFileSync(process.env.UMS001_TRUST_REGISTRY_FILE);
+ const unsafePath=join(root,'pretend-iam.json');writeFileSync(unsafePath,data);
+ process.env.UMS001_TRUST_REGISTRY_FILE=unsafePath;
+ process.env.UMS001_TRUST_REGISTRY_SHA256=sha(data);
+ assert.throws(()=>recordExistingSignedPrediction({order,master,history:baseline,db,privateRoot:root,...f,bridgeSecret:SECRET}),
+  /TRUST_REGISTRY_NOT_ISOLATED/);
 }));
