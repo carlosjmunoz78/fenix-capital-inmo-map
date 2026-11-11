@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "topic": "Qué revisar antes de entregar una señal para comprar vivienda en Córdoba",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía",
+  "publish_enabled": false,
+  "max_attempts_per_panel": 1,
+  "max_image_budget_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_budget_usd": 0.02,
+  "source_request": "CEREBRO UMS001 MULTI11 paid-from-prepaid retake after REAL visual QA run 43049681977, only second and last permitted attempt per piece",
+  "style_reference_mode": "NONE",
+  "request_id": "UMS001-MULTI11-IGFEED-20261111-02",
+  "channel": "INSTAGRAM",
+  "asset_type": "IMAGE",
+  "render_aspect_ratio": "4:5",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "EXACTLY two adult buyers (one woman, one man), both faces fully visible in three-quarter front view toward the lens in an authentic historic Cordoba patio. Their expressive human faces and hands foreground, striking luminous physically refractive orange glass architecture behind. No third person, no backs to camera, no corridor symmetry.",
+      "human_subject": "Exactly two natural Spanish adults, one female buyer and one male buyer, both frontal three-quarter faces visible with proper realistic hands",
+      "hook": "Antes de dar la señal",
+      "bullets": [],
+      "required_visuals": [
+        "two adults ONLY facing three-quarter toward camera at eye level, NO backs",
+        "orange glass cathedral sculpture behind adults but not obscuring face or hands",
+        "authentic Cordoba patio natural stone, greenery and directional sunlight",
+        "no writing fake logos badges checkmarks financial symbols"
+      ]
+    }
+  ]
+}
