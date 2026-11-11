@@ -56,8 +56,10 @@ def json_write(path,doc):
 def allowed_job(doc):
  if not isinstance(doc,dict):deny("JOB_NOT_OBJECT")
  required={"schema_version","request_id","company_id","engine_id","environment","version","channel","asset_type","topic","audience","panels","publish_enabled","max_attempts_per_panel","max_image_budget_usd","max_deepseek_calls","max_deepseek_budget_usd","source_request"}
- if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode"}):deny("JOB_FIELDS")
+ if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode","render_aspect_ratio"}):deny("JOB_FIELDS")
  if doc.get("style_reference_mode","VERIFIED_CROP") not in ("VERIFIED_CROP","NONE"):deny("STYLE_REFERENCE_MODE_INVALID")
+ if doc.get("render_aspect_ratio","4:5") not in ("4:5","16:9"):deny("RENDER_ASPECT_RATIO_INVALID")
+ if doc.get("render_aspect_ratio","4:5")=="16:9" and (doc["channel"],doc["asset_type"],doc.get("style_reference_mode"))!=("SEO","SEO_HERO","NONE"):deny("WIDE_CANARY_NOT_AUTHORIZED")
  if (doc["company_id"],doc["engine_id"],doc["environment"],doc["version"])!=("fenix",ENGINE,"LAB","1.0"):deny("SCOPE_DENIED")
  if doc["channel"] not in ALLOWED_CHANNELS or doc["asset_type"] not in ("IMAGE","CAROUSEL","SEO_HERO"):deny("CHANNEL_INVALID")
  if doc["channel"]=="SEO" and doc["asset_type"]!="SEO_HERO":deny("SEO_FORMAT_DENIED")
@@ -147,7 +149,7 @@ def prompt_messages(job,panel,attempt,previous_qa):
   "professional premium cinematic Córdoba-Andalucía art, spectacular orange glass surreal architecture BEHIND them. "
   "If SEO, do not include text or logos in final image. If social, leave space for separate deterministic hook+logo. "
   "No AI text, invented watermarks, marks, labels, documents, bank approval implications or fake bank emblems. The surreal sculpture is ABSTRACT PHYSICAL ARCHITECTURE, not an icon or symbol. "
-  "Image is 4:5 vertical. Image composition must not be a generic tiny-people fantasy. "
+  "Image is "+job.get("render_aspect_ratio","4:5")+" composition; if 16:9 use wide landscape framing, if 4:5 vertical framing. Image composition must not be a generic tiny-people fantasy. "
   "Never generate the brand icon; original SHA-verified Fénix logo composited separately. JSON only.")
  return [{"role":"system","content":sys_text},{"role":"user","content":"Generate an original creative photographic prompt, not a repeated template. Customer brief JSON: "+json.dumps(customer,ensure_ascii=False)}]
 def validate_creative(result):
@@ -279,7 +281,7 @@ def vision_messages(job,panel,jpeg):
 def replicate_image_input(job,prompt):
  # Preserve legacy conditioning unless a LAB order explicitly requests an
  # independent generation. A no-reference trial is NOT an approval.
- image_input={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
+ image_input={"prompt":prompt,"aspect_ratio":job.get("render_aspect_ratio","4:5"),"raw":False,
               "output_format":"jpg","safety_tolerance":2}
  if job["channel"]!="SEO" and job.get("style_reference_mode","VERIFIED_CROP")=="VERIFIED_CROP":
   image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
