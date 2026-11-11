@@ -6,6 +6,8 @@ on:
       - 'cerebro/media-studio/v2/runtime/replicate-image-batch-planner-lab-v1.mjs'
       - 'cerebro/media-studio/v2/runtime/replicate-image-batch-preflight-cli-lab-v1.mjs'
       - 'cerebro/media-studio/v2/tests/replicate-image-batch-planner-lab-v1.test.mjs'
+      - 'cerebro/media-studio/v2/runtime/replicate-image-batch-executor-lab-v1.mjs'
+      - 'cerebro/media-studio/v2/tests/replicate-image-batch-executor-lab-v1.test.mjs'
       - 'cerebro/media-studio/v2/requests/UMS001_REPLICATE_4_ART_IMAGES_LAB_20261111.json'
       - '.github/workflows/cerebro-ums-replicate-image-batch-lab-v1.yml'
 permissions:
@@ -28,6 +30,7 @@ jobs:
         run: |
           node --test cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs
           node --test cerebro/media-studio/v2/tests/replicate-image-batch-planner-lab-v1.test.mjs
+          node --test cerebro/media-studio/v2/tests/replicate-image-batch-executor-lab-v1.test.mjs
       - name: Queue and audit four visually distinct creative briefs (DRY RUN)
         run: >-
           node cerebro/media-studio/v2/runtime/replicate-image-batch-preflight-cli-lab-v1.mjs
