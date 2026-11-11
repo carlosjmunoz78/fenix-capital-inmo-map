@@ -1,5 +1,9 @@
 name: UMS001 DeepSeek premium creative autonomous image LAB one-job
 on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-02.json'
   push:
     branches: [cerebro/ums-replicate-flux-paid-lab-v0-20261108]
     paths:
@@ -12,14 +16,17 @@ concurrency:
 jobs:
   autonomous-creative-canary:
     if: >-
-      github.event_name == 'push' &&
-      github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+      (github.event_name == 'push' &&
+       github.ref_name == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108') ||
+      (github.event_name == 'pull_request' &&
+       github.event.pull_request.head.repo.full_name == github.repository &&
+       github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108')
     runs-on: ubuntu-latest
     timeout-minutes: 13
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 2
           persist-credentials: false
       - name: Detect exactly one unique, isolated LAB image job
