@@ -122,5 +122,6 @@
     "image asset SHA/prediction ID/cost",
     "Spanish-language legible typography postprocessing",
     "no publication until social scheduling rights and QA gates"
-  ]
+  ],
+  "quality_gate_status": "PREFLIGHT_QA_PENDING__NO_PAID_INFERENCE"
 }
