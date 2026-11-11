@@ -30,5 +30,7 @@ test('no public fetch, no dynamic SQL, private and rollback gates',()=>{
  assert.ok(schema.includes("CHECK(environment='LAB')"));
  assert.ok(schema.includes("ON CONFLICT(id) DO NOTHING"));
  assert.ok(!s.includes('console.log'));
+ assert.ok(s.includes("redirect:'manual'"));
+ assert.ok(!s.includes("redirect:'error'"));
  assert.ok(!s.includes('eval('));
 });

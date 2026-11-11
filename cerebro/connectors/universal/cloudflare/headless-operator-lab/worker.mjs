@@ -11,7 +11,7 @@ async function request(token,method,path,body){
  if(body!==undefined&&!(body instanceof FormData))headers['Content-Type']='application/json';
  const result=await fetch(endpoint+path,{method,headers,
   ...(body!==undefined?{body:body instanceof FormData?body:JSON.stringify(body)}:{}),
-  redirect:'error',signal:AbortSignal.timeout(18000)});
+  redirect:'manual',signal:AbortSignal.timeout(18000)});
  if(!result.ok)throw Error('CF_'+method+'_HTTP_'+result.status);
  if(method==='DELETE')return {success:true};
  const value=await result.json();

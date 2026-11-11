@@ -13,7 +13,7 @@ export async function diagnose(env,time=Date.now(),fetchFn=fetch){
  const credential=env.CF_WORKERS_TOKEN;
  if(typeof credential!=='string'||credential.length<24)code='MISSING_OR_MALFORMED_CREDENTIAL';
  else try {
-   const response=await fetchFn(URL,{method:'GET',headers:{Authorization:'Bearer '+credential,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(14000)});
+   const response=await fetchFn(URL,{method:'GET',headers:{Authorization:'Bearer '+credential,Accept:'application/json'},redirect:'manual',signal:AbortSignal.timeout(14000)});
    httpCode=response.status;
    code=response.status===200?'CLOUDFARE_READ_HTTP_200':response.status===401?'TOKEN_REJECTED_401':response.status===403?'PERMISSION_DENIED_403':response.status===429?'RATE_LIMIT_429':'UPSTREAM_HTTP_'+response.status;
  }catch(e){

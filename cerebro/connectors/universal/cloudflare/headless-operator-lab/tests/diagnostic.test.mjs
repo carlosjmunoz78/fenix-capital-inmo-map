@@ -22,6 +22,8 @@ test('no write methods or raw response content',()=>{
  assert.ok(!code.includes("method:'DELETE'"));
  assert.ok(!code.includes("method:'PUT'"));
  assert.ok(!code.includes('console.log'));
+ assert.ok(code.includes("redirect:'manual'"));
+ assert.ok(!code.includes("redirect:'error'"));
  assert.ok(!code.includes('response.text('));
  assert.ok(!code.includes('response.json('));
  assert.ok(code.includes("state='QUEUED' AND attempts=0"));
