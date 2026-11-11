@@ -9,6 +9,7 @@ An authorized, private, trusted gateway must invoke this program. A client-suppl
 from __future__ import annotations
 import argparse
 import hashlib
+import hmac
 import json
 import os
 import sqlite3
@@ -118,11 +119,22 @@ def view(conn,key):
     return {"historical_attempts":row[0],"new_predictions":row[1],"total_attempts":total,
             "attempts_remaining":max(0,2-total),"frozen":bool(row[2]),"status":row[3],
             "paid_execution_enabled":False,"automatic_publication":False,"video_enabled":False}
+def authenticate_privileged(request):
+    """Internal trusted bridge only; never authorize a payment/provider call."""
+    secret=os.environ.get("UMS001_LEDGER_BRIDGE_HMAC_KEY","")
+    require(len(secret)>=32,"TRUSTED_BRIDGE_KEY_NOT_CONFIGURED")
+    provided=request.get("authorization_hmac")
+    require(isinstance(provided,str) and len(provided)==64,"TRUSTED_BRIDGE_MAC_REQUIRED")
+    payload={k:v for k,v in request.items() if k!="authorization_hmac"}
+    expected=hmac.new(secret.encode("utf8"),canonical(payload).encode("utf8"),hashlib.sha256).hexdigest()
+    require(hmac.compare_digest(provided,expected),"TRUSTED_BRIDGE_MAC_INVALID")
 def run(conn, request):
     action = request.get("action")
     require(action in ("register","record_existing_prediction","freeze_unknown","acknowledge_private","inspect"),
             "ACTION_NOT_ALLOWED")
     key=verify_key(request)
+    if action in ("record_existing_prediction","freeze_unknown","acknowledge_private"):
+        authenticate_privileged(request)
     conn.execute("BEGIN IMMEDIATE")
     try:
         if action=="register":
@@ -191,7 +203,7 @@ def run(conn, request):
                 order_id=request.get("order_id")
                 require(all(isinstance(x,str) and len(x)==64 and
                     all(c in "0123456789abcdef" for c in x) for x in (idem,sha,receipt)),"RECEIPT_HASH")
-                require(isinstance(dest,str) and dest.startswith("SOC-") or dest=="SEO-001","DESTINATION_ID")
+                require(isinstance(dest,str) and (dest.startswith("SOC-") or dest=="SEO-001"),"DESTINATION_ID")
                 o=conn.execute("""SELECT item_id FROM orders WHERE order_id=? AND company_id=? AND engine_id=?
                   AND environment=? AND source_request_id=?""",(order_id,*key[:4])).fetchone()
                 require(o is not None and o[0]==key[4],"ORDER_BINDING")
