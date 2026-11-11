@@ -66,7 +66,7 @@ if (!response.ok) {
     'db=sqlite3.connect(":memory:")',
     'db.executescript(sql)',
     'print(db.execute("SELECT count(*) FROM sqlite_master WHERE type = ? AND name NOT LIKE ?", ("table","sqlite_%")).fetchone()[0])',
-  ].join('\\n')], { input: sql, encoding: 'utf8', timeout: 20000, maxBuffer: 100000 });
+  ].join(';')], { input: sql, encoding: 'utf8', timeout: 20000, maxBuffer: 100000 });
   if (restore.status !== 0) throw new Error('D1_SCHEMA_IN_MEMORY_RESTORE_FAILED');
   const restoredTables = Number(restore.stdout.trim());
   if (!Number.isInteger(restoredTables) || restoredTables < 10) throw new Error('D1_RESTORE_TABLE_COUNT_INVALID');
