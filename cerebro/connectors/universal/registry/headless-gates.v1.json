@@ -117,7 +117,26 @@
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
-      "service_identity_read": "VERIFIED"
+      "service_identity_read": "VERIFIED",
+      "team_authorization_p3": {
+        "state": "PARTIAL_CLIENT_GRANT_MISMATCH",
+        "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+        "verified_account": "carlosjmunozcabeza-2582",
+        "official_generic_mcp_project_count": 0,
+        "existing_project_scoped_mcp_project_count": 2,
+        "existing_project_ids": [
+          "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV",
+          "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc"
+        ],
+        "service_vault_name": "cerebro_vercel_service_token_v1",
+        "service_vault_metadata": "PRESENT",
+        "independent_headless_read": "HISTORIC_VERIFIED",
+        "project_resource_writes_this_block": 0,
+        "connectors_disconnected_or_deleted": 0,
+        "subscriptions_added_eur": 0,
+        "next_block": "VERCEL_OFFICIAL_OAUTH_GRANT_SCOPED_REPAIR_WITHOUT_REPEATED_CONSENT_LOOPS",
+        "evidence": "docs/FACT001_VERCEL_ACCOUNT_BINDING_P3_2026-11-11.md"
+      }
     },
     {
       "id": "supabase",

@@ -118,3 +118,8 @@ Usuario GitHub y 3 instalaciones de Apps detectados. El servicio de la Factory n
 ## 11/11/2026 · P2 Supabase
 
 Reverificado solo el nombre del PAT scoped en Vault y el servicio LAB `cerebro-fact001-headless-provider-lab` ACTIVE v33 con hash conocido, sin mutaciones. Se conserva E2E anterior de borrado acotado; falta operador CRUD permanente para Edge/Storage/DB/Auth, cola y Gateway/owner JWT. Estado **PARCIAL**, sin conceder servicio administrativo al frontend. Ver `docs/FACT001_SUPABASE_MGMT_P2_2026-11-11.md`.
+
+
+## 11/11/2026 · P3 Vercel: descubrimiento diferencial de conexión
+
+El MCP oficial genérico Vercel ve team correcto pero 0 proyectos; el MCP contextual YA conectado `Vercel · ChatGPT · Proyecto LAB` ve los 2 proyectos reales en el mismo team (IDs cotejados). **No duplicar proyecto ni repetir OAuth indefinidamente.** Service token `cerebro_vercel_service_token_v1` existe en Vault por metadata; no se leyó. Sin cambios de despliegue, dominio ni suscripción. Estado P3 PARCIAL. Ver `docs/FACT001_VERCEL_ACCOUNT_BINDING_P3_2026-11-11.md`.
