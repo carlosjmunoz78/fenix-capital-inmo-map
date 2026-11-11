@@ -27,3 +27,8 @@
 
 ## Próximo gate concreto
 `CF-OWNER-REAL-JWT-E2E-AND-CONSOLE-GATEWAY-DUAL-ROUTE_LAB`. Se requiere exclusivamente una sesión actual de propietario en App/CEREBRO para verificar el origen `owner`, sin exponer JWT por chat. Hasta entonces mantener la canary, v2 y cron LAB, no abrir escritura a proveedor ni afirmar FULL.
+
+
+## CI acceptance normalization 11/11/2026
+
+Se corrige exclusivamente la representación del Engine Registry: `autonomous_queue=PENDING` y `observability_and_audit=PENDING` porque los gates `VERIFIED` solo acreditan ejecución de proveedor autónoma completa. Las evidencias de la cola de *heartbeat* y ledger permanecen como subgates (`credential_broker.lab_heartbeat_queue_proven`, `lab_d1_ledger_proven`). No se han debilitado ni modificado los tests, ni se declara `VERIFIED_FULL`. Este ajuste restaura el contrato original de `tests/headless-registry.test.mjs`.

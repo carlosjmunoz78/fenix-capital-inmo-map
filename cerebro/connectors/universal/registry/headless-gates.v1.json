@@ -39,12 +39,12 @@
       "gaps": [
         "Cloudflare Pages independent LAB create/read/delete succeeded; one-off write endpoint retired",
         "Full Worker/Pages deploy/update/rollback lifecycle not proven",
-        "No durable autonomous queue, quotas or PROD promotion"
+        "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
         "owner_order_headless": "VERIFIED",
-        "autonomous_queue": "VERIFIED_HEARTBEAT_LAB_ONLY",
+        "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "PENDING",
@@ -52,7 +52,7 @@
         "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
-        "observability_and_audit": "PARTIAL_RECOVERY_D1_HEARTBEAT_LEDGER"
+        "observability_and_audit": "PENDING"
       },
       "service_identity_read": "VERIFIED",
       "credential_broker": {
@@ -125,7 +125,10 @@
         "recovery_runner_cron": "*/5 * * * *",
         "recovery_db": "1305f791-7c44-47f9-946b-f330a09c88aa",
         "owner_session_e2e": "NOT_VERIFIED",
-        "full_cloudflare_autonomy": "NOT_VERIFIED"
+        "full_cloudflare_autonomy": "NOT_VERIFIED",
+        "lab_heartbeat_queue_proven": true,
+        "lab_d1_ledger_proven": true,
+        "production_autonomous_provider_queue_proven": false
       }
     },
     {
