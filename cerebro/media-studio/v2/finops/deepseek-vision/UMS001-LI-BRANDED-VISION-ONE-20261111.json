@@ -1,0 +1,1 @@
+{"request_id": "UMS001-LI-BRANDED-VISION-ONE-20261111", "engine_id": "UMS-001", "environment": "LAB", "status": "RESERVED_ONE_CALL_NO_AUTO_RETRY", "image_sha256": "5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170", "max_deepseek_calls": 1, "max_estimated_usd": 0.02, "publish": false, "video": false, "github_run_id": "43093440062"}
