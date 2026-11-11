@@ -537,12 +537,14 @@
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750",
         "Scoped management PAT stored in Vault; test Edge Function deleted",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597",
+        "2026-11-11 signed GitHub OIDC service using existing Management PAT Vault returned HTTP200 verified for Supabase inventory (run 43051670908); Supabase Pro organization 2 ACTIVE_HEALTHY protected projects, no Supabase universal write promoted."
       ],
       "gaps": [
         "Scoped Management PAT in Vault; shared read-only broker operational",
         "One-off Edge delete proved but general management write adapter removed after cleanup",
-        "No standalone persistent write broker, PROD policy or autonomous queue"
+        "No standalone persistent write broker, PROD policy or autonomous queue",
+        "Both Supabase projects are existing protected resources; no disposable isolated Supabase project, so universal writes must not be tested on them until full dependency contract/backups/rollback; do not create paid project without cost approval."
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -573,6 +575,34 @@
         "customer_data_writes": 0,
         "additional_subscription_eur": 0,
         "next_block": "SUPABASE_SCOPED_MANAGEMENT_PERMANENT_WRITER_WITH_LAB_BACKUP_ROLLBACK"
+      },
+      "live_inventory_20261111": {
+        "state": "READ_ONLY_VERIFIED_NO_WRITES",
+        "organization_id": "fkxsrctlzcddwbivmypl",
+        "organization_plan": "pro",
+        "projects": [
+          {
+            "id": "cluhljgonannaafpmblx",
+            "name": "fenix-capital-prod",
+            "status": "ACTIVE_HEALTHY",
+            "protected": "APP_CRM_CORE"
+          },
+          {
+            "id": "hnqlnvakzaywtafeiybt",
+            "name": "fenix-capital-inmo-map",
+            "status": "ACTIVE_HEALTHY",
+            "protected": "PROJECT_DEPENDENCIES_NOT_FULLY_AUDITED"
+          }
+        ],
+        "existing_management_pat_vault_name": "cerebro_supabase_management_pat_v1",
+        "physically_verified_owner_signed_read": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43051670908",
+        "read_result": "HTTP_200_VERIFIED",
+        "additional_paid_subscription_eur": 0,
+        "new_project_created": false,
+        "existing_data_or_edge_modified_for_supabase_engine": false,
+        "next_gate": "INVENTORY_DEPENDENCIES_SNAPSHOT_CURRENT_BEHAVIOR_BEFORE_ANY_SUPABASE_WRITE",
+        "independent_autonomous_crud": "NOT_VERIFIED",
+        "no_assumption_other_project_is_disposable": true
       }
     },
     {

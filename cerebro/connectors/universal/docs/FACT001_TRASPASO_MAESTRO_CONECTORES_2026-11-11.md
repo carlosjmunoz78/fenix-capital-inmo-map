@@ -209,3 +209,8 @@ CEREBRO private Worker v `fde58260-9a26-4dec-a84f-201114ba071b` completed four D
 ## 11/11/2026 · Vercel signed Vault API physically verified in LAB
 
 Existing `cerebro_vercel_service_token_v1` Supabase Vault PAT was reused in place, no transfer to Cloudflare or chat. Signed GitHub OIDC calls new Edge Function `cerebro-fact001-vercel-intake-lab` v5, D1 durable audit. Four distinct Vercel LAB jobs `COMPLETED`, attempts=1, errors=NULL: read, framework update, rollback, empty deployments; one initial read RECONCILE retained from SSO field `enabled` omission. SSO `deploymentType=all`, framework reverted null, no deploy/domain, no PROD/App/CRM changes. See `docs/FACT001_VERCEL_VAULT_SIGNED_SERVICE_PHYSICAL_E2E_2026-11-11.md`; Vercel universal remains PARTIAL.
+
+
+## Supabase next provider · physical initial inventory 2026-11-11
+
+Supabase org Pro with two ACTIVE_HEALTHY existing projects, one PROD core and one existing `fenix-capital-inmo-map` whose dependencies remain to be audited. Signed GitHub OIDC independent service read verified HTTP200 via existing Supabase Management PAT in Vault (run #43051670908). No database created, no Supabase universal mutations authorized or performed. Supabase remains PARTIAL; see `docs/FACT001_SUPABASE_UNIVERSAL_SAFE_INVENTORY_2026-11-11.md`.
