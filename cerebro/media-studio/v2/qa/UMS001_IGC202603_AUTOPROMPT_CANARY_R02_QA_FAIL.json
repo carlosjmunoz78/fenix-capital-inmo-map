@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "request_id": "UMS001-IGC202603-PROMPTFORGE-S00-R02-20261111",
+  "prediction_id": "b6kraea331rmt0d1s8v9h0jbhr",
+  "image_sha256": "f23251f66be552ebc8e1e65dc7bfaa054d2d2740bc557bbfa0c7b160c7a2d356",
+  "prompt_generator": "UMS001-PROMPT-FORGE-V0.2",
+  "model": "black-forest-labs/flux-1.1-pro-ultra",
+  "estimated_cost_usd": 0.06,
+  "status": "REJECTED_CREATIVE_QA",
+  "pass": [
+    "Real CEREBRO generated prompt passed validation and Replicate produced a second original",
+    "More visually ambitious surreal orange installation",
+    "No false generated Fénix logo or written words"
+  ],
+  "fail": [
+    "People appear but are too small: figure heights about 15% of image, no readable faces",
+    "Oversized architecture dominates image and erases personal relatable human narrative",
+    "Result looks like an architectural artwork rather than marketing photography featuring real professionals"
+  ],
+  "root_cause": "Rules did not enforce photographic crop composition. Hard directives for monumental art led the model to use a very wide environmental perspective despite asking for waist-up human portraits.",
+  "policy_decision": "STOP automatic paid retries at R02 until visual-reference or creative-reasoner redesign; prompt template-only strategy is not proven capable of owner's preferred art quality.",
+  "next_plan": [
+    "Prioritize fixed image-reference portrait layout with image_prompt (clean approved human foreground) at controlled strength",
+    "Explore optional creative reasoning using local language model or DeepSeek API via Model Router if necessary, not mandatory",
+    "Add real independent visual QA for minimum visible human area and scene rather than text-only checks",
+    "Then one new LAB candidate with separate idempotency and approval gates"
+  ],
+  "publication_approved": false,
+  "image_drive_url": "https://drive.google.com/file/d/1TpSIEIb1gvb26WWMBuFaJJHEnqbkNVD-/view"
+}
