@@ -538,13 +538,15 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750",
         "Scoped management PAT stored in Vault; test Edge Function deleted",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597",
-        "2026-11-11 signed GitHub OIDC service using existing Management PAT Vault returned HTTP200 verified for Supabase inventory (run 43051670908); Supabase Pro organization 2 ACTIVE_HEALTHY protected projects, no Supabase universal write promoted."
+        "2026-11-11 signed GitHub OIDC service using existing Management PAT Vault returned HTTP200 verified for Supabase inventory (run 43051670908); Supabase Pro organization 2 ACTIVE_HEALTHY protected projects, no Supabase universal write promoted.",
+        "Supabase live pg_catalog/grant read-only audit 2026-11-11; get_advisors officially confirmed rls_disabled_in_public 8 ERROR and security_definer_view 3 ERROR; none of these existing privileges modified."
       ],
       "gaps": [
         "Scoped Management PAT in Vault; shared read-only broker operational",
         "One-off Edge delete proved but general management write adapter removed after cleanup",
         "No standalone persistent write broker, PROD policy or autonomous queue",
-        "Both Supabase projects are existing protected resources; no disposable isolated Supabase project, so universal writes must not be tested on them until full dependency contract/backups/rollback; do not create paid project without cost approval."
+        "Both Supabase projects are existing protected resources; no disposable isolated Supabase project, so universal writes must not be tested on them until full dependency contract/backups/rollback; do not create paid project without cost approval.",
+        "HUMAN_REQUIRED HIGH_RISK: 8 SEO tables public schema RLS OFF and anon/authenticated SELECT/INSERT/UPDATE/DELETE privileges true; audit callers and API exposure then backup and controlled RLS/GRANT remediation. NO change applied."
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -603,6 +605,71 @@
         "next_gate": "INVENTORY_DEPENDENCIES_SNAPSHOT_CURRENT_BEHAVIOR_BEFORE_ANY_SUPABASE_WRITE",
         "independent_autonomous_crud": "NOT_VERIFIED",
         "no_assumption_other_project_is_disposable": true
+      },
+      "security_gate_20261111": {
+        "risk": "HIGH_RISK",
+        "human_required_code": "HIGH_RISK",
+        "state": "VERIFIED_EXPOSURE_RLS_DISABLED_AND_ANON_ALL_PRIVILEGES",
+        "affected_project_id": "hnqlnvakzaywtafeiybt",
+        "affected_project_name": "fenix-capital-inmo-map",
+        "affected_schema": "public",
+        "affected_tables": [
+          "seo_cerebro_autonomy_capabilities_preprod",
+          "seo_cerebro_b2b_strict_audit_preprod",
+          "seo_cerebro_b2c_strict_audit_preprod",
+          "seo_cerebro_infrastructure_audits_preprod",
+          "seo_cerebro_landing_contract_qa_preprod",
+          "seo_cerebro_paused_cron_jobs_preprod",
+          "seo_cerebro_sitewide_archive_backups_preprod",
+          "seo_cerebro_sitewide_backups_preprod"
+        ],
+        "physical_sql_probe": {
+          "table_count": 8,
+          "rls_enabled": 0,
+          "anon_select": true,
+          "anon_insert": true,
+          "anon_update": true,
+          "anon_delete": true,
+          "authenticated_crud": true,
+          "confirmed_data_api_exposure": false,
+          "confirmed_exploit": false
+        },
+        "official_linter": {
+          "rls_disabled_in_public": {
+            "level": "ERROR",
+            "count": 8
+          },
+          "security_definer_view": {
+            "level": "ERROR",
+            "count": 3
+          },
+          "source": "Supabase get_advisors security 2026-11-11"
+        },
+        "app_crm_prod": {
+          "project": "cluhljgonannaafpmblx",
+          "public_tables": 38,
+          "rls_enabled": 38,
+          "rls_disabled": 0
+        },
+        "metadata_inventory": {
+          "map_public_tables": 157,
+          "map_public_rls_on": 149,
+          "map_public_rls_off": 8,
+          "map_public_foreign_keys": 30,
+          "map_public_sql_functions": 399,
+          "map_edge_functions": 360,
+          "map_migrations": 538,
+          "prod_edge_functions": 110,
+          "prod_migrations": 263
+        },
+        "provider_backup_status": "PRO_PLAN_SCHEDULED_BACKUPS_DOCUMENTED_BY_SUPABASE; EXACT_CURRENT_BACKUP_AND_RESTORE_TEST_NOT_VERIFIED",
+        "mutation_gate": "DENY_ALL_EXISTING_TABLE_AND_EDGE_MUTATIONS",
+        "service_mode": "SIGNED_READ_ONLY_VERIFIED",
+        "cost_new_subscriptions_eur": 0,
+        "mitigation_stage": "PROPOSED_NOT_EXECUTED",
+        "evidence": "docs/FACT001_SUPABASE_SECURITY_GATE_2026-11-11.md",
+        "policy_source": "supabase/universal-lab/policy.mjs",
+        "policy_ci": ".github/workflows/fact001-supabase-universal-policy-ci.yml"
       }
     },
     {

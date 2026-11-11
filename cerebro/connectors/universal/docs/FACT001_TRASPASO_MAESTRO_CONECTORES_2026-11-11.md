@@ -214,3 +214,8 @@ Existing `cerebro_vercel_service_token_v1` Supabase Vault PAT was reused in plac
 ## Supabase next provider · physical initial inventory 2026-11-11
 
 Supabase org Pro with two ACTIVE_HEALTHY existing projects, one PROD core and one existing `fenix-capital-inmo-map` whose dependencies remain to be audited. Signed GitHub OIDC independent service read verified HTTP200 via existing Supabase Management PAT in Vault (run #43051670908). No database created, no Supabase universal mutations authorized or performed. Supabase remains PARTIAL; see `docs/FACT001_SUPABASE_UNIVERSAL_SAFE_INVENTORY_2026-11-11.md`.
+
+
+## 11/11/2026 · Supabase security gate HIGH_RISK verified
+
+Read-only physical pg_catalog and Supabase get_advisors confirmed 8 SEO public tables in existing MAP Supabase project with **RLS OFF and anon/authenticated full CRUD privileges**, linter 8 errors + 3 security-definer-view errors. No exploitation established, API exposure not yet verified. No permissions/DDL/DML changed. PROD 38 public tables all RLS ON; APP/CRM existing relationships preserved. Pro backups daily documented but backup/restore physical evidence pending. Additive factory V0 policy on GitHub branch denies Supabase writes until independent gates. See `docs/FACT001_SUPABASE_SECURITY_GATE_2026-11-11.md`.

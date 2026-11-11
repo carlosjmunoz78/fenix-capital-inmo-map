@@ -12,3 +12,8 @@ The CEREBRO signed owner GitHub OIDC provider broker `cerebro-fact001-headless-p
 Read-only inventory of Edge functions/migrations/contracts, dependency map to App/CRM, backup strategy, no deletions; create an isolated LAB scope through a new namespaced Edge *only if 0 EUR, noninterference proven, rollback and service-bound policy*, or obtain a separate true sandbox (no extra payment without approval). A single management PAT must not grant unrestricted production writes. Independent signed LAB queue + atomic idempotency + physical self-owned resource lifecycle + provider readback + audit + rollback are **PENDING**.
 
 Conserve → understand → wrap → test → improve → migrate. No modification of any existing Supabase table, function, auth, D1 or PROD through this Supabase-specific review.
+
+
+## Read-only dependency/privilege findings
+
+Physical MAP public tables 157, RLS enabled 149, RLS disabled 8. All eight SEO tables have anon/auth SELECT/INSERT/UPDATE/DELETE. Supabase get_advisors security flags eight `rls_disabled_in_public` ERROR and three `security_definer_view` ERROR. No remediation applied, see security gate report. PROD public 38 RLS on, plus 18 FK and 259 public SQL functions. MAP 30 FK, 399 public SQL functions. Backup current physical record not verified.
