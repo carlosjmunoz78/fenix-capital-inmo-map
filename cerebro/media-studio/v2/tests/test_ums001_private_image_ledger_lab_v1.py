@@ -107,7 +107,7 @@ class LedgerLab(unittest.TestCase):
     def test_uncertain_post_freezes_future_attempts(self):
         self.create()
         x=authorized({**BASE,"action":"freeze_unknown","reason":"PROVIDER_POST_UNCERTAIN"})
-        self.assertEqual(self.call(x)[1]["status"],"HUMAN_REQUIRED")
+        self.assertEqual(self.call(x)[1]["piece_status"],"HUMAN_REQUIRED")
         self.assertEqual(self.call(self.record())[1]["status"],"DENIED")
     def test_public_repository_storage_forbidden(self):
         bad=SCRIPT.parents[4]/"ums001-forbidden.sqlite"
