@@ -66,3 +66,22 @@ test('existing scope verifier rejects spoofed groups and duplicate ids',()=>{
  assert.throws(()=>existingTokenWritePermissionId([x,x]));
  assert.throws(()=>existingTokenWritePermissionId([{...x,scopes:['com.cloudflare.api.user']}]));
 });
+
+import {CHILD_V2_NAME,CHILD_V2_VAULT_NAME,CHILD_V2_ID_VAULT_NAME,CHILD_V2_EXPIRY,
+ CHILD_V2_OPERATION,CHILD_V2_REQUEST_ID,assertV2ChildOrder,childV2Policy,verifyChildV2Metadata} from '../policy.mjs';
+test('v2 child E2E is a fixed 4D LAB owner order only',()=>{
+ const b={...SCOPE,client_id:'cerebro',account_id:ACCOUNT_ID,operation:CHILD_V2_OPERATION,request_id:CHILD_V2_REQUEST_ID};
+ assert.equal(assertV2ChildOrder(b),true);
+ for(const extra of [{environment:'PROD'},{operation:'cloudflare.billing.write'},{api_token:'forbidden'},{company_id:'foreign'}])
+  assert.throws(()=>assertV2ChildOrder({...b,...extra}));
+});
+test('v2 child only D1 read, one account, short expiry and distinct Vault names',()=>{
+ const g={id:'192192df92ee43ac90f2aeeffce67e35',name:'D1 Read',is_selectable:true,scopes:['com.cloudflare.api.account']};
+ const body=childV2Policy([g]);
+ assert.equal(body.name,CHILD_V2_NAME);assert.equal(body.expires_on,CHILD_V2_EXPIRY);
+ assert.equal(body.policies.length,1);assert.deepEqual(body.policies[0].permission_groups,[{id:g.id}]);
+ assert.equal(verifyChildV2Metadata({...body,status:'active'},g.id),true);
+ assert.notEqual(CHILD_V2_VAULT_NAME,CHILD_V2_ID_VAULT_NAME);
+ assert.throws(()=>childV2Policy([{...g,is_selectable:false}]));
+ assert.throws(()=>verifyChildV2Metadata({...body,status:'disabled'},g.id));
+});

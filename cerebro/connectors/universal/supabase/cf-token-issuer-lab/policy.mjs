@@ -140,3 +140,33 @@ export function existingTokenWritePermissionId(groups){
  if(matches.length!==1)throw Error('ISSUER_WRITE_PERMISSION_METADATA_UNVERIFIED');
  return TOKEN_WRITE_GROUP_ID;
 }
+
+/* Single-use child E2E with v2 service token. Parent v1 is forbidden. */
+export const CHILD_V2_NAME='CEREBRO-FACT001-V2-D1-READ-LAB-20261111';
+export const CHILD_V2_VAULT_NAME='cerebro_cf_v2_d1_child_lab_20261111';
+export const CHILD_V2_ID_VAULT_NAME='cerebro_cf_v2_d1_child_id_lab_20261111';
+export const CHILD_V2_EXPIRY='2026-11-12T23:59:59Z';
+export const CHILD_V2_OPERATION='cloudflare.account_token.d1_read_child_lifecycle_lab';
+export const CHILD_V2_REQUEST_ID='CFT-20261111-CHILD-001';
+export function assertV2ChildOrder(b){
+ const expected={...SCOPE,client_id:'cerebro',account_id:ACCOUNT_ID,
+   operation:CHILD_V2_OPERATION,request_id:CHILD_V2_REQUEST_ID};
+ if(!b||typeof b!=='object'||Array.isArray(b)||Object.keys(b).length!==Object.keys(expected).length||
+   Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('CHILD_V2_ORDER_DENIED');
+ return true;
+}
+export function childV2Policy(groups){
+ const id=d1ReadGroup(groups);
+ return {name:CHILD_V2_NAME,expires_on:CHILD_V2_EXPIRY,
+   policies:[{effect:'allow',resources:{['com.cloudflare.api.account.'+ACCOUNT_ID]:'*'},
+     permission_groups:[{id}]}]};
+}
+export function verifyChildV2Metadata(t,groupId){
+ if(t?.name!==CHILD_V2_NAME||t?.status!=='active'||
+   t?.policies?.length!==1||t.policies[0].effect!=='allow'||
+   Object.keys(t.policies[0].resources||{}).length!==1||
+   t.policies[0].resources['com.cloudflare.api.account.'+ACCOUNT_ID]!=='*'||
+   t.policies[0].permission_groups?.length!==1||t.policies[0].permission_groups[0].id!==groupId)
+  throw Error('CHILD_V2_SCOPE_MISMATCH');
+ return true;
+}
