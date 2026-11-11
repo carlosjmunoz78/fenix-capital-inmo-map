@@ -170,3 +170,28 @@ export function verifyChildV2Metadata(t,groupId){
   throw Error('CHILD_V2_SCOPE_MISMATCH');
  return true;
 }
+
+/* Factory-managed LAB D1 Writer, exclusively for the known Recovery D1 queue. */
+export const GATEWAY_D1_VAULT_NAME='cerebro_cf_gateway_recovery_d1_write_lab_20261111';
+export const GATEWAY_D1_ID_VAULT_NAME='cerebro_cf_gateway_recovery_d1_write_id_lab_20261111';
+export const GATEWAY_D1_TOKEN_NAME='CEREBRO-FACT001-GATEWAY-RECOVERY-D1-WRITE-LAB-20261111';
+export const GATEWAY_D1_EXPIRY='2026-12-11T00:00:00Z';
+export const GATEWAY_D1_DB_ID='1305f791-7c44-47f9-946b-f330a09c88aa';
+export const GATEWAY_D1_ORDER='cloudflare.gateway_lab_d1_writer.issue_once';
+export const GATEWAY_D1_REQUEST='FACT001-CF-GW-20261111-ISSUE-001';
+export function assertGatewayD1Order(value){
+ const expected={...SCOPE,account_id:ACCOUNT_ID,client_id:'cerebro',operation:GATEWAY_D1_ORDER,request_id:GATEWAY_D1_REQUEST};
+ if(!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==Object.keys(expected).length||
+   Object.entries(expected).some(([k,v])=>value[k]!==v))throw Error('GATEWAY_D1_ORDER_DENIED');
+ return true;
+}
+export function gatewayD1TokenPolicy(groups){
+ if(!Array.isArray(groups)||groups.length>2000)throw Error('GATEWAY_D1_GROUPS_DENIED');
+ const g=groups.filter(x=>x?.name==='D1 Write'&&x?.is_selectable===true&&
+  Array.isArray(x.scopes)&&x.scopes.includes('com.cloudflare.api.account')&&
+  typeof x.id==='string'&&/^[a-f0-9]{32}$/.test(x.id));
+ if(g.length!==1)throw Error('GATEWAY_D1_WRITE_NOT_DELEGABLE');
+ return {name:GATEWAY_D1_TOKEN_NAME,expires_on:GATEWAY_D1_EXPIRY,
+   policies:[{effect:'allow',resources:{['com.cloudflare.api.account.'+ACCOUNT_ID]:'*'},
+    permission_groups:[{id:g[0].id}]}]};
+}

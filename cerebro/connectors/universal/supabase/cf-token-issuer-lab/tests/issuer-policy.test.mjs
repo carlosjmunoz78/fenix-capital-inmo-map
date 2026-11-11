@@ -90,3 +90,21 @@ test('token broker owner-only JWT claims block collaborator and bot pushes',()=>
  assert.throws(()=>assertClaims({...claim,actor:'external-collaborator'},1100),/OIDC_SCOPE_DENIED/);
  assert.throws(()=>assertClaims({...claim,actor:'github-actions[bot]'},1100),/OIDC_SCOPE_DENIED/);
 });
+
+import {GATEWAY_D1_ORDER,GATEWAY_D1_REQUEST,GATEWAY_D1_DB_ID,GATEWAY_D1_EXPIRY,
+ assertGatewayD1Order,gatewayD1TokenPolicy,GATEWAY_D1_TOKEN_NAME} from '../policy.mjs';
+test('Gateway D1 writer is issued only from exact signed 4D LAB order',()=>{
+ const cmd={...SCOPE,account_id:ACCOUNT_ID,client_id:'cerebro',operation:GATEWAY_D1_ORDER,request_id:GATEWAY_D1_REQUEST};
+ assert.equal(assertGatewayD1Order(cmd),true);
+ for(const patch of [{environment:'PROD'},{client_id:'chatgpt'},{operation:'cloudflare.dns.write'},{api_key:'forbidden'}])
+  assert.throws(()=>assertGatewayD1Order({...cmd,...patch}));
+});
+test('Gateway writer is account-scoped D1 Write only, expiry finite, and queue ID fixed',()=>{
+ const g={id:'09b2857d1c31407795e75e3fed8617a1',name:'D1 Write',is_selectable:true,scopes:['com.cloudflare.api.account']};
+ const p=gatewayD1TokenPolicy([g]);
+ assert.equal(p.name,GATEWAY_D1_TOKEN_NAME);assert.equal(p.expires_on,GATEWAY_D1_EXPIRY);
+ assert.equal(GATEWAY_D1_DB_ID,'1305f791-7c44-47f9-946b-f330a09c88aa');
+ assert.deepEqual(p.policies[0].permission_groups,[{id:g.id}]);
+ assert.throws(()=>gatewayD1TokenPolicy([{...g,is_selectable:false}]));
+ assert.throws(()=>gatewayD1TokenPolicy([g,g]));
+});
