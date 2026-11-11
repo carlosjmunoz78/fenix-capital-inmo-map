@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "topic": "Qué revisar antes de entregar una señal para comprar vivienda en Córdoba",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía",
+  "publish_enabled": false,
+  "max_attempts_per_panel": 1,
+  "max_image_budget_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_budget_usd": 0.02,
+  "source_request": "UMS001 LAB no paid inference: owned CEREBRO prompt, DeepSeek temporary camera mentor and independent QA; validate only",
+  "style_reference_mode": "NONE",
+  "request_id": "UMS001-MULTI11-CEREBROFIRST-SEO-20261111-03",
+  "channel": "SEO",
+  "asset_type": "SEO_HERO",
+  "render_aspect_ratio": "16:9",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "Distinct wide photograph of Córdoba property visit; believable adults and natural light, sophisticated abstract orange physical architecture, empty clean space for HTML title; no words or logos.",
+      "human_subject": "Two believable adult buyers at a real Cordoba property, credible emotions, cinematic wide composition",
+      "hook": "Cabecera visual educativa",
+      "bullets": [],
+      "required_visuals": [
+        "Purpose-built wide 16:9 horizontal framing with room for HTML page headline",
+        "Genuine Cordoba property context, natural daylight and strong editorial photography",
+        "No AI text letters numbers logos or CTA printed anywhere in final source photo"
+      ]
+    }
+  ],
+  "creative_owner": "CEREBRO_PROMPT_FACTORY_V0",
+  "master_item_id": "SEO-HERO-01"
+}
