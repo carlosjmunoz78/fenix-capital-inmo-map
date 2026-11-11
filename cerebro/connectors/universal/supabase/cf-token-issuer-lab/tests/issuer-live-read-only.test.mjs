@@ -15,7 +15,7 @@ test('temporary LAB D1 Write issuer requires signed OIDC owner, fixed order, Vau
  assert.ok(source.includes("GATEWAY_D1_DB_ID"));
 });
 test('temporary one-shot route cannot access previous ad hoc child issuer/write API paths',()=>{
- assert.ok(source.includes("['health','verify-scoped-issuer-v2','issue-gateway-d1-writer-once'].includes(route)"));
+ assert.ok(source.includes("['health','verify-scoped-issuer-v2','issue-gateway-d1-writer-once','verify-gateway-d1-writer'].includes(route)"));
  for(const path of ["'v2-child-create'","'v2-child-revoke'","'issue-d1-read-lab'","'issue-scoped-issuer-v2'"])
    assert.ok(!source.includes(path),path);
  assert.ok(!source.includes("ISSUER_NAME"));
