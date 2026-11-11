@@ -8,7 +8,7 @@ from pathlib import Path
 MODEL="black-forest-labs/flux-1.1-pro-ultra"
 BRANCH="cerebro/ums-replicate-flux-paid-lab-v0-20261108"
 REPO="carlosjmunoz78/fenix-capital-inmo-map"
-REQUEST_PATH="cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111.json"
+REQUEST_PATH=os.environ.get("UMS001_CANARY_REQUEST_FILE","cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111.json")
 BATCH_PATH="cerebro/media-studio/v2/requests/UMS001_REPLICATE_4_ART_IMAGES_LAB_20261111.json"
 API="https://api.replicate.com/v1/"
 OUT=Path(os.environ.get("RUNNER_TEMP","/tmp"))/"ums001-replicate-canary"
@@ -55,14 +55,21 @@ def main():
     request=json.loads(Path(REQUEST_PATH).read_text())
     batch=json.loads(Path(BATCH_PATH).read_text())
     if os.getenv("GITHUB_REPOSITORY")!=REPO or os.getenv("GITHUB_HEAD_REF")!=BRANCH:fail("BRANCH_SCOPE_DENIED")
-    if request != {"request_id":"UMS001-REPLICATE-CANARY-20261111-A1",
-       "source_request_id":"UMS001-REPLICATE-IMAGE-BATCH-20261111-01",
+    allowed_req_files={
+       "cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111.json":"UMS001-REPLICATE-CANARY-20261111-A1",
+       "cerebro/media-studio/v2/requests/REPLICATE_CANARY_ONE_SHOT_20261111_A2.json":"UMS001-REPLICATE-CANARY-20261111-A2"}
+    if REQUEST_PATH not in allowed_req_files:fail("REQUEST_FILE_NOT_ALLOWLISTED")
+    allowed_fields={"source_request_id":"UMS001-REPLICATE-IMAGE-BATCH-20261111-01",
        "concept_id":"UMS-CRE-1111-A","environment":"LAB","company_id":"fenix","engine_id":"UMS-001",
-       "model_id":MODEL,"max_provider_spend_usd":0.06,
-       "paid_execution_scope":"EXISTING_PREPAID_ONLY","publish":False}:
-       fail("CANARY_SCOPE_DENIED")
+       "model_id":MODEL,"max_provider_spend_usd":0.06,"paid_execution_scope":"EXISTING_PREPAID_ONLY","publish":False}
+    expected={**allowed_fields,"request_id":allowed_req_files[REQUEST_PATH]}
+    if expected["request_id"].endswith("A2"):
+       p=request.get("prompt_override")
+       if not isinstance(p,str) or not 400<=len(p)<=2200 or "photograph" not in p.lower() or "surreal" not in p.lower():fail("A2_PROMPT_INVALID")
+       expected["prompt_override"]=p
+    if request!=expected:fail("CANARY_SCOPE_DENIED")
     if batch.get("run_mode")!="DRY_RUN" or batch.get("model_id")!=MODEL or batch.get("max_additional_cost_eur")!=0:fail("BATCH_POLICY_DENIED")
-    prompt=batch["concepts"][0]["prompt"]
+    prompt=request.get("prompt_override") or batch["concepts"][0]["prompt"]
     if batch["concepts"][0]["concept_id"]!=request["concept_id"] or not 250<=len(prompt)<=5000:fail("CONCEPT_DENIED")
     token=os.environ.get("REPLICATE_API_TOKEN","")
     gh=os.environ.get("GH_TOKEN_FOR_LAB","")
