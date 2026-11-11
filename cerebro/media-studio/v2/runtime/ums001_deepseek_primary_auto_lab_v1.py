@@ -146,10 +146,14 @@ def http_json(url,method="GET",token=None,data=None,timeout=35):
  except urllib.error.HTTPError as e:return e.code,{}
 def deepseek(messages,api_key,clock,vision=False):
  if clock["deepseek_calls"]>=clock["deepseek_cap"]:deny("MAX_DEEPSEEK_CALLS_REACHED")
+ # DeepSeek Flash upper-bound PEAK token rates, from official pricing (USD / 1M).
+ # Estimate is conservative: all input treated as cache-miss. No hidden subscription or auto top-up.
+ if clock["estimated_cost_usd"]+0.01>clock["max_cost_usd"]+1e-9:
+  deny("FINOPS_DEEPSEEK_SPENDING_CEILING")
  clock["deepseek_calls"]+=1
  payload={"model":AI,"messages":messages,"response_format":{"type":"json_object"},
-   "thinking":{"type":"disabled"},"temperature":0.55 if not vision else 0.1,"max_tokens":1400 if not vision else 600,
-   "stream":False}
+  "thinking":{"type":"disabled"},"temperature":0.55 if not vision else 0.1,"max_tokens":1600 if not vision else 950,
+  "stream":False}
  code,ans=http_json(DS_ENDPOINT,"POST",api_key,payload,timeout=75)
  if code!=200:deny("DEEPSEEK_PROVIDER_ERROR_"+str(code))
  try:
@@ -159,12 +163,22 @@ def deepseek(messages,api_key,clock,vision=False):
   if not isinstance(raw,str) or not raw.strip():deny("DEEPSEEK_EMPTY")
   parsed=json.loads(raw)
   usage=ans.get("usage") or {}
-  tokens=sum(usage.get(k,0) or 0 for k in ["prompt_tokens","completion_tokens"])
-  if tokens>12000:deny("DEEPSEEK_TOKEN_OVERFLOW")
-  clock["total_text_tokens"]+=tokens
-  if clock["total_text_tokens"]>75000:deny("DEEPSEEK_BUDGET_ESTIMATE_EXCEEDED")
-  return parsed,{"model":ans.get("model"),"prompt_tokens":usage.get("prompt_tokens"),"completion_tokens":usage.get("completion_tokens"),"provider_id":ans.get("id")}
- except (KeyError,IndexError,TypeError,ValueError):deny("DEEPSEEK_RESPONSE_INVALID")
+  input_tokens=usage["prompt_tokens"]
+  output_tokens=usage["completion_tokens"]
+  if type(input_tokens) is not int or type(output_tokens) is not int or input_tokens<0 or output_tokens<0:
+   deny("DEEPSEEK_METERING_INVALID")
+  if input_tokens+output_tokens>12000:deny("DEEPSEEK_TOKEN_OVERFLOW")
+  clock["total_text_tokens"]+=input_tokens+output_tokens
+  if clock["total_text_tokens"]>75000:deny("DEEPSEEK_METERED_TOKENS_EXCEEDED")
+  increment=(input_tokens*0.30+output_tokens*1.20)/1000000
+  clock["estimated_cost_usd"]+=increment
+  if clock["estimated_cost_usd"]>clock["max_cost_usd"]+1e-9:
+   deny("FINOPS_DEEPSEEK_ACTUAL_USAGE_ESTIMATE_EXCEEDED")
+  return parsed,{"model":ans.get("model"),"prompt_tokens":input_tokens,"completion_tokens":output_tokens,
+   "provider_id":ans.get("id"),"estimated_peak_cost_usd":round(increment,6)}
+ except (KeyError,IndexError,TypeError,ValueError):
+  deny("DEEPSEEK_RESPONSE_INVALID")
+
 def vision_messages(job,panel,jpeg):
  if len(jpeg)>8_000_000:deny("VISION_IMAGE_TOO_LARGE")
  encoded=base64.b64encode(jpeg).decode()
@@ -222,7 +236,8 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
  json_write(OUT/"receipt.json",out)
  github_reserve(github_key,job)
  out["status"]="ATOMICALLY_RESERVED";json_write(OUT/"receipt.json",out)
- clock={"deepseek_calls":0,"deepseek_cap":job["max_deepseek_calls"],"total_text_tokens":0}
+ clock={"deepseek_calls":0,"deepseek_cap":job["max_deepseek_calls"],"total_text_tokens":0,
+  "estimated_cost_usd":0.0,"max_cost_usd":job["max_deepseek_budget_usd"]}
  img_count=0
  for panel in job["panels"]:
   state={"id":panel["id"],"attempts":[],"status":"QA_PENDING"}
@@ -244,7 +259,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
    stage={"attempt":attempt,"prompt_sha256":hash_bytes(prompt.encode()),"deepseek_provider":creative_meta,
      "replicate_prediction_id":pred["id"],"status":"SUBMITTED"}
    state["attempts"].append(stage)
-   out["deepseek_calls"]=clock["deepseek_calls"];out["replicate_predictions"]=img_count
+   out["deepseek_calls"]=clock["deepseek_calls"];out["replicate_predictions"]=img_count;out["estimated_deepseek_peak_usd"]=round(clock["estimated_cost_usd"],6)
    json_write(OUT/"receipt.json",out)
    for _ in range(14):
     if pred.get("status") in ("succeeded","failed","canceled"):break
