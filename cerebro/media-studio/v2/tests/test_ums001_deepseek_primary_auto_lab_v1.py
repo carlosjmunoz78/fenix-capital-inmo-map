@@ -62,9 +62,21 @@ class DeepseekAutonomousTests(unittest.TestCase):
   with self.assertRaises(m.Blocked):
    m.validate_creative({"image_prompt":"An orange photograph of two adults "+(" cinematic"*80),"risks":["bad light","bad focus","too flat"]})
  def test_vision_requires_independent_weighted_camera_grade(self):
-  good={"pass":True,"score":90,"violations":[],"correction":"","summary":"Excellent image and authentic natural cinematography.","rubric_scores":m.premium_policy()["qa_dimensions"]}
-  with self.assertRaises(m.Blocked):m.validate_vision({**good,"score":90})
-  with self.assertRaises(m.Blocked):m.validate_vision({**good,"score":99})
+  full=m.premium_policy()["qa_dimensions"]
+  good={"pass":True,"score":100,"violations":[],"correction":"","summary":"Excellent image and authentic natural cinematography.","rubric_scores":full}
+  self.assertTrue(m.validate_vision(good)["accepted"])
+  inconsistent=m.validate_vision({**good,"score":99})
+  self.assertFalse(inconsistent["accepted"])
+  self.assertIn("UNKNOWN",inconsistent["violations"])
+  self.assertEqual(inconsistent["score_consistency"],"REJECTED_INCONSISTENT_RUBRIC")
+ def test_social_style_reference_byte_hash_is_pinned(self):
+  uri=m.safe_style_reference()
+  self.assertTrue(uri.startswith("data:image/jpeg;base64,"))
+  self.assertGreater(len(uri),10000)
+ def test_real_qa_failures_transfer_to_prompt_factory(self):
+  codes={x["code"] for x in m.get_learning(self.job)}
+  self.assertIn("BAD_ANATOMY",codes)
+  self.assertIn("GENERIC_SCENE",codes)
  def test_fail_closed_before_paid_calls_without_secret(self):
   with patch.dict(os.environ,{"GITHUB_REPOSITORY":m.REPO,"GITHUB_HEAD_REF":m.BRANCH,"UMS001_DEEPSEEK_AUTOMATION_GATE":"OWNER_AUTHORIZED_LAB_20261111"}):
    with self.assertRaises(m.Blocked):m.run_job(self.job,"","", "")
