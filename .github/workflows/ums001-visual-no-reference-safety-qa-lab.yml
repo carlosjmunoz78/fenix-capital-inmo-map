@@ -1,5 +1,12 @@
 name: UMS001 visual learning no-reference LAB safety QA
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-visual-no-reference-safety-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-08.json'
   push:
     branches:
       - cerebro/ums001-visual-learning-no-reference-lab-20261111
@@ -16,6 +23,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   lab-offline-no-spend:
+    if: github.event_name != 'pull_request' || github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
