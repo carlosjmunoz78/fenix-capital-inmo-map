@@ -432,11 +432,17 @@
         "local_tests": "9_PASS_0_FAIL",
         "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43118980674",
         "ciphertext_offsite_persisted": false,
-        "dedicated_vault_key": false,
+        "dedicated_vault_key": true,
         "independent_key_escrow": false,
         "download_from_offsite_and_restore": false,
         "promotion_authorized": false,
-        "next_block": "SIGNED_BACKEND_SEAL_AND_DRIVE_CIPHERTEXT_CUSTODY_WITH_LAB_RESTORE"
+        "next_block": "PREPARE_SIGNED_BACKEND_WITH_TESTED_ROLLBACK_THEN_SEAL_AND_READBACK_PRIVATE_DRIVE_AND_ISOLATED_RESTORE",
+        "vault_key_name": "cerebro_fact001_d1_backup_aes256_lab_v1",
+        "vault_key_created_server_side": true,
+        "vault_key_value_read_or_exported": false,
+        "vault_key_provisioned": "VERIFIED_METADATA_ONLY",
+        "encryption_backend_active": false,
+        "key_escrow_independent": false
       }
     },
     {
