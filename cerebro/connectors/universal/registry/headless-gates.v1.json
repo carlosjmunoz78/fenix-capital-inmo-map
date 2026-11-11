@@ -199,7 +199,9 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42930782418",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_BATCH_50_75_ENCRYPTED_CAS_OFFSITE_VERIFIED_2026-11-11.md",
         "FACT001 third mixed batch AES encrypted: 23 page bodies, 2 data sources, 30 rows, 879 blocks, 25/25 with GitHub/Drive SHA256 5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f match",
-        "Physical EU D1 CAS checkpoint reached offset75/v3 with 2 append-only audit transitions and stale retry 0 changes; original D1 untouched"
+        "Physical EU D1 CAS checkpoint reached offset75/v3 with 2 append-only audit transitions and stale retry 0 changes; original D1 untouched",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_BATCH_75_100_COMPOSITE_OFFSITE_CAS_VERIFIED_2026-11-11.md",
+        "FACT001 75→100 composite 24 pages, 1 data source with 24 rows and 3877 blocks; 48 encrypted source chunks after Worker 546, complete GitHub/Google Drive SHA256 8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b; D1 100/v4 audit3"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -252,9 +254,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PARTIAL_72_PAGES_3_SOURCES_98_ROWS_OFFSITE_CAS_75; BINARIES_COMMENTS_ESCROW_RESTORE_PENDING",
+        "full_backup_gate": "PARTIAL_96_PAGES_4_SOURCES_122_ROWS_OFFSITE_AND_CAS_100; MEDIA_COMMENTS_ESCROW_NOTION_RESTORE_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_REUSABLE_NOTION_BATCH_ENGINE_75_100_AFTER_OWNER_ORDER_AND_CAS_READBACK; KEY_ESCROW_AND_NOTION_RESTORE_GATE",
+        "next_block": "FACT001_NOTION_BATCH_100_125_CHUNK_AWARE_AFTER_VERIFIED_CAS_100_V4; ALTERNATIVE PRIORITY_ESCROW_AND_ISOLATED_RESTORE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -277,7 +279,7 @@
         "service_version": 33,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "75/6632 objects physically encrypted and independently readback verified, D1 CAS 75/v3; 6374 pages + 183 data sources remaining, assets/comments/escrow/restore pending, D1 Free 10/10; no autonomous CAS writer or global backup",
+        "actual_blocker": "100/6632 searchable objects physically encrypted and verified offsite; 6350 pages and 182 sources remain; attached files/comments/key escrow/physical restore pending; Cloudflare D1 Free 10/10; automated CAS writer not enabled",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -557,9 +559,9 @@
             "environment": "LAB",
             "version": "1.0.0"
           },
-          "current_offset": 75,
-          "cas_version": 3,
-          "audit_rows": 2,
+          "current_offset": 100,
+          "cas_version": 4,
+          "audit_rows": 3,
           "physical_rollback_restored_25": true,
           "restored_to_50": true,
           "replay_rejected": true,
@@ -604,6 +606,23 @@
           "media_binaries": false,
           "independent_key_escrow": false,
           "physical_notion_restore": false
+        },
+        "first_100_encrypted_content": {
+          "status": "VERIFIED_COMPOSITE_FIRST_FOUR_OFFSITE_CIPHERTEXT_BATCHES",
+          "total_objects": 100,
+          "page_objects": 96,
+          "data_source_objects": 4,
+          "data_source_rows": 122,
+          "remaining_pages": 6350,
+          "remaining_sources": 182,
+          "latest_batch_drive_file_id": "1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC",
+          "latest_batch_zip_sha256": "8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b",
+          "latest_batch_source_parts": 48,
+          "d1_cas_database_id": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+          "d1_cas_offset": 100,
+          "d1_cas_version": 4,
+          "physical_restore_notion": false,
+          "full_workspace_backup": false
         }
       }
     },
