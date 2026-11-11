@@ -7,6 +7,8 @@ on:
       - cerebro/connectors/universal/services/provider-headless-lab/**
       - cerebro/connectors/universal/supabase/cf-token-issuer-lab/**
       - cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/**
+      - cerebro/connectors/universal/registry/headless-gates.v1.json
+      - cerebro/connectors/universal/tests/headless-registry.test.mjs
 permissions:
   contents: read
 jobs:
