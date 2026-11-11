@@ -1,0 +1,1 @@
+{"request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-03", "environment": "LAB", "company_id": "fenix", "engine_id": "UMS-001", "status": "RESERVED_FAIL_CLOSED", "max_image_budget_usd": 0.06, "max_deepseek_budget_usd": 0.02, "max_attempts": 1, "publication_enabled": false, "run_id": "43056969985"}
