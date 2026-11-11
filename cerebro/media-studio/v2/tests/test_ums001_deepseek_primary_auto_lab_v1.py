@@ -120,6 +120,18 @@ class DeepseekAutonomousTests(unittest.TestCase):
    m.allowed_job({**self.job,"style_reference_mode":"NONE","environment":"PROD"})
   with self.assertRaises(m.Blocked):
    m.allowed_job({**self.job,"style_reference_mode":"NONE","publish_enabled":True})
+ def test_unknown_external_vision_code_remains_rejected_but_auditable(self):
+  full=m.premium_policy()["qa_dimensions"]
+  bad={"pass":True,"score":100,"violations":["TUNNEL_GENERIC_HUMANS_BACKS"],
+       "correction":"Need visible faces inside a real home",
+       "summary":"Recognizable art failure from real Facebook image.","rubric_scores":full}
+  result=m.validate_vision(bad)
+  self.assertFalse(result["accepted"])
+  self.assertFalse(result["pass"])
+  self.assertIn("UNKNOWN",result["violations"])
+  self.assertEqual(result["qa_contract_rejection"],"UNKNOWN_VIOLATION_CODE")
+  self.assertEqual(result["unrecognized_violation_codes"],["TUNNEL_GENERIC_HUMANS_BACKS"])
+  self.assertEqual(result["score_consistency"],"UNVERIFIED_REJECTED")
  def test_oversized_real_vision_summary_rejected_but_provenance_preserved(self):
   full=m.premium_policy()["qa_dimensions"]
   verdict={"pass":True,"score":100,"violations":[],"correction":"","summary":"X"*700,"rubric_scores":full}
