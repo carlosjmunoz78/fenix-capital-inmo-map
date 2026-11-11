@@ -1,0 +1,3 @@
+# FACT001 CF independent scheduled Worker LAB
+
+New private Worker no HTTP routes, no public subdomain, D1 Recovery DB binding and scoped secret `CF_WORKERS_TOKEN`. Literal disposable target Worker only, durable one-row state machine and replay guard. Bootstrap secret via authorized Cloudflare OAuth without exposing token in chat, source, SQL or GitHub. Independent scheduled executor performs Worker create/update/rollback/delete/rebuild/delete and stores outcome. Token rotation and Pages headless still separate gates. Rollback: remove its cron, drop only its LAB table after data snapshot; never touch shared Recovery tables.
