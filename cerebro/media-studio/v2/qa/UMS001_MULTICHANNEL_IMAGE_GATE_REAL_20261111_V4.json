@@ -1,0 +1,83 @@
+{
+  "schema_version": 4,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "4.0",
+  "request_id": "UMS001-MULTICHANNEL-IMAGE-11-20261111-V1",
+  "recorded_date": "2026-11-11",
+  "overall_status": "IMAGES_AUTONOMY_NOT_YET_CERTIFIED",
+  "original_order_pieces": 11,
+  "distinct_pieces_with_real_model_predictions": 4,
+  "distinct_pieces_not_generated": 7,
+  "model_predictions_total": 7,
+  "original_images_rejected": 6,
+  "original_images_pending_certification": 1,
+  "original_images_editorial_approved": 0,
+  "remaining_video_gate": "BLOCKED_NO_AUTONOMOUS_VIDEO",
+  "real_seedream_linkedin_candidate": {
+    "item_id": "LI-FEED-01",
+    "provider": "bytedance/seedream-4",
+    "prediction_id": "7st2ycmy5drmw0d1sdqr5n6vtw",
+    "original_raw_sha256": "0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422",
+    "branded_preview_sha256": "5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170",
+    "official_logo_sha256": "ec066819ee12c48fa148d6ca70f1434724ff780cc9ccabcfeefc07318c796cc7",
+    "brand_output_pixels": [
+      1200,
+      628
+    ],
+    "headline": "Decide con criterio",
+    "headline_pixels_bbox": [
+      52,
+      545,
+      620,
+      590
+    ],
+    "headline_safe_bottom_margin_px": 38,
+    "first_preview_cut_off_title": "VISUALLY_FOUND_AND_FIXED_IN_LAB",
+    "image_generated_once": true,
+    "postproduction_again_at_zero_inference_cost": true,
+    "original_quality_schema": "HUMAN_REQUIRED_QA_SCHEMA_FAILED",
+    "independent_editorial_score": null,
+    "rights_clearance": "UNVERIFIED",
+    "official_final_publish_approval": false,
+    "qa_only_workflow_run_id": 43092131819,
+    "qa_only_artifact_id": 13889177164,
+    "preview_status": "REAL_PHOTO_AND_VERIFIED_BRAND_FORMAT_PASS__EDITORIAL_AND_RIGHTS_PENDING"
+  },
+  "technical_gates": {
+    "official_brand_sha_integrity": "PASS_REAL_IMAGE",
+    "multichannel_11_form_factor_matrix": "PASS_UNIT",
+    "source_sha_photo_provenance": "PASS_REAL_IMAGE",
+    "safe_caption_bounds_qa": "PASS_REAL_IMAGE_AFTER_FIX",
+    "branding_compositor_physical_e2e": "PASS_ONE_LINKEDIN_IMAGE_ONLY",
+    "prior_11_prompt_art_direction": "PASS_OFFLINE",
+    "model_quality_consistent_88_plus": "FAIL_NOT_DEMONSTRATED",
+    "deepseek_vision_schema_reliable": "FAIL_ON_SEEDREAM_CANARY",
+    "portfolio_11_physical_outputs": "NOT_READY",
+    "branding_all_eleven_physical": "NOT_READY",
+    "production_department_intake_to_delivery": "NOT_CONNECTED_AND_NOT_VERIFIED",
+    "automatic_rights_clearance": "NOT_VERIFIED",
+    "human_exception_policy": "PRESENT_POLICY_ONLY",
+    "model_video_gate": "BLOCKED"
+  },
+  "workflow_proofs": [
+    {
+      "name": "offline_11format_logo_sha_tests",
+      "run_id": 43092131504,
+      "status": "SUCCESS"
+    },
+    {
+      "name": "physical_reused_seedream_sha_verified_logo_and_safe_text",
+      "run_id": 43092131819,
+      "status": "SUCCESS"
+    }
+  ],
+  "publish_enabled": false,
+  "video_jobs_enabled": false,
+  "additional_new_subscription_eur": 0,
+  "new_replicate_predictions_this_change": 0,
+  "new_deepseek_calls_this_change": 0,
+  "change_isolation": "PR45 DRAFT only, main and protected App/CRM/WordPress/Supabase untouched",
+  "next_required": "Repair strict DeepSeek visual QA contract; certify independent visual score>=88, rights and source provenance; then generate/QA remaining 7 real pieces via capped one-shot jobs, validate end-to-end department intake/export/delivery and rollback. ONLY after IMAGE_GATE_GREEN start branded video outro LAB."
+}
