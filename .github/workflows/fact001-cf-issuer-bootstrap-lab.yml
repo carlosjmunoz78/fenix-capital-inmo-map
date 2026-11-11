@@ -5,6 +5,7 @@ on:
     paths:
       - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/bootstrap.v1.json
       - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json
+      - .github/workflows/fact001-cf-issuer-bootstrap-lab.yml
 permissions:
   contents: read
   id-token: write
@@ -80,12 +81,8 @@ jobs:
         run: |
           node --input-type=module <<'NODE'
           import {readFileSync} from 'node:fs';
-          const ev=JSON.parse(readFileSync(process.env.GITHUB_EVENT_PATH,'utf8'));
-          const changed=[...(ev.head_commit?.added||[]),...(ev.head_commit?.modified||[])];
-          if(!changed.includes('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json')){
-            console.log('FACT001_V2_SCOPE=SKIPPED_NO_REQUEST_CHANGE');
-            process.exit(0);
-          }
+          // On this tightly path-filtered workflow, the fixed v2 order is safe and idempotent.
+          // Do not trust webhook file-change arrays: some GitHub API commits omit them.
           const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/scope-v2.v1.json','utf8'));
           const exact={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
             account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',client_id:'cerebro',
