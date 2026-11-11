@@ -463,6 +463,30 @@
         "offsite_ciphertext_uploaded": false,
         "physical_sqlite_restore_from_offsite": false,
         "backup_and_rollback_gate": "PENDING"
+      },
+      "d1_synthetic_offsite_restoration_20261112": {
+        "state": "PHYSICAL_INDEPENDENT_OFFSITE_TRANSPORT_AND_RESTORE_VERIFIED_FIXTURE_ONLY",
+        "source": "SYNTHETIC_SQLITE_2_TABLES_3_ROWS",
+        "github_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43122699486",
+        "github_artifact_id": 13901038278,
+        "github_zip_sha256": "4588c0ff2d5be31f707e34c8c413bc4ba9c6f4c9b9f32271e98f7b772521cb05",
+        "zip_bytes": 1403,
+        "drive_file_id": "1vl7JDbBaKSYOAppzRDUcDpe2GACcNHp1",
+        "drive_private_fixture_folder_id": "19xhE4wuzCXJnAfu1DbMFO95KubZbG7EW",
+        "drive_sha256": "4588c0ff2d5be31f707e34c8c413bc4ba9c6f4c9b9f32271e98f7b772521cb05",
+        "drive_readback_verified": true,
+        "independent_sqlite_restore_from_drive": true,
+        "zip_crc": "PASS",
+        "aes256gcm_authentication": "PASS",
+        "sqlite_integrity": "ok",
+        "fixture_tables": 2,
+        "fixture_rows": 3,
+        "key_class": "PUBLIC_SYNTHETIC_ONLY_NOT_REAL_BACKUP_KEY",
+        "real_d1_export": false,
+        "dedicated_vault_aes_key_read": false,
+        "key_escrow_independent": false,
+        "external_provider_writes": 0,
+        "real_backup_gate": "PENDING"
       }
     },
     {
