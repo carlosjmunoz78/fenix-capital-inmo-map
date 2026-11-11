@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {assertClaims,OIDC_AUDIENCE,BRANCH,REPO} from '../../supabase/d1-backup-seal-lab/auth.mjs';
-import {assertOrder,SEAL_ORDER,VERIFY_ORDER} from '../../supabase/d1-backup-seal-lab/order.mjs';
+import {assertClaims,OIDC_AUDIENCE,BRANCH,REPO} from '../../../supabase/d1-backup-seal-lab/auth.mjs';
+import {assertOrder,SEAL_ORDER,VERIFY_ORDER} from '../../../supabase/d1-backup-seal-lab/order.mjs';
 const now=1794480000;
 const good=()=>({iss:'https://token.actions.githubusercontent.com',aud:OIDC_AUDIENCE,repository:REPO,ref:BRANCH,
 workflow_ref:REPO+'/.github/workflows/fact001-d1-encrypted-backup-once-lab.yml@'+BRANCH,event_name:'push',actor:'carlosjmunoz78',iat:now-40,exp:now+200});
