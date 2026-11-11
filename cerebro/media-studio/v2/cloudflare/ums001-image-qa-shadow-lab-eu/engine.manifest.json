@@ -1,0 +1,165 @@
+{
+  "schema_version": "cerebro-engine-manifest-v1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "component_id": "UMS001_IMAGE_QA_SHADOW_LAB_V0",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "status": "LAB_PHYSICAL_SHADOW_QA_METADATA_ONLY",
+  "factory_first": true,
+  "owns_runtime_separate_from_original": true,
+  "runtime": {
+    "provider": "Cloudflare Workers Free",
+    "name": "cerebro-ums001-image-qa-shadow-lab-eu",
+    "kind": "module_queue_consumer",
+    "jurisdiction": "eu",
+    "worker_file": "worker.mjs",
+    "workers_dev": false,
+    "preview_urls": false,
+    "routes": [],
+    "cron": [],
+    "paid_model_calls": false
+  },
+  "data_contract": {
+    "incoming_event": "UMS001-LAB-LI-FEED-01-ARCHIVE-YYYYMMDD; strict 22-field schema",
+    "format": "json",
+    "max_batch_size": 1,
+    "target_piece": "LI-FEED-01",
+    "consumer_engine_id": "UMS-QA-LAB",
+    "input_scope": "existing private archive ZIP references and source image SHA only",
+    "output_scope": "QA_INBOX_RECEIVED_UNVERIFIED metadata",
+    "no_binary_image_read": true,
+    "commercial_delivery": false,
+    "payment": false
+  },
+  "permissions": {
+    "allowed": [
+      "qa_metadata.receive",
+      "qa_metadata.record_pending",
+      "qa_metadata.readback_by_account_admin"
+    ],
+    "forbidden": [
+      "provider.predict",
+      "finops.reserve",
+      "rights.approve",
+      "editorial.approve",
+      "publish",
+      "video.generate",
+      "prod.write",
+      "existing_gateway.reconfigure"
+    ],
+    "policy": "fail_closed_no_public_endpoint",
+    "secrets_in_repository": false
+  },
+  "queue": {
+    "name": "cerebro-ums001-image-qa-shadow-lab-eu",
+    "id": "74c48e70ebc24b00ab56aef6c74aac58",
+    "jurisdiction": "eu",
+    "batch_size": 1,
+    "max_concurrency": 1,
+    "max_retries": 1,
+    "mode": "CONSUMER_ONLY"
+  },
+  "storage": {
+    "kind": "Workers KV",
+    "name": "cerebro-ums001-image-qa-shadow-kv-lab-eu",
+    "namespace_id": "dc33879e8567422a8722eb47b398a15d",
+    "jurisdiction": "eu",
+    "key_prefix": "meta/ums001-image-qa-shadow/v1/",
+    "eventual_consistency": true,
+    "not_a_finops_ledger": true
+  },
+  "dependencies": [
+    {
+      "name": "cerebro-ums001-producer-private-gateway-lab-eu",
+      "relationship": "ORIGINAL_UNMODIFIED_NOT_CONNECTED"
+    },
+    {
+      "name": "cerebro-ums001-producer-demand-lab-eu",
+      "relationship": "ORIGINAL_METADATA_QUEUE_UNMODIFIED"
+    },
+    {
+      "name": "carlosjmunoz78/cerebro-assets-autonomous-lab",
+      "relationship": "PRIVATE_QA_ARCHIVE_EVIDENCE_SEPARATE"
+    },
+    {
+      "name": "UMS001_PRIVATE_IMAGE_LEDGER_V1",
+      "relationship": "OFFLINE_LEDGER_NOT_YET_LIVE_CONNECTED"
+    }
+  ],
+  "api": {
+    "public_endpoints": [],
+    "fetch_status": 404,
+    "queue_subscription": true,
+    "direct_gateway_producer_binding": false
+  },
+  "tests": {
+    "source": "cerebro/media-studio/v2/tests/ums001-image-qa-shadow-lab-eu.test.mjs",
+    "unit_tests": 15,
+    "entire_lab_suite_total": 82,
+    "entire_lab_suite_pass": 82,
+    "ci_run_id": 43119863247,
+    "physical_e2e": "Queue REST authenticated admin → Worker consumer → KV receipt",
+    "negative_probe_publish": true,
+    "duplicate_probe": true,
+    "rollback_consumer_detach_reattach": true
+  },
+  "evaluation": {
+    "image_gate_green": false,
+    "qa_model_score": 90,
+    "commercial_rights_verified": false,
+    "editorial_signed": false,
+    "destination_signed": false,
+    "provider_provenance_authenticated_by_worker": false,
+    "published": false
+  },
+  "tribunal": {
+    "human_exceptions": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "automatic_promotion": false
+  },
+  "observability": {
+    "queue_backlog_expected": 0,
+    "kv_record_count_expected": 1,
+    "worker_public": false,
+    "cron_count": 0,
+    "log_payloads": false
+  },
+  "cost": {
+    "new_subscriptions_eur": 0,
+    "authorized_extra_spend_eur": 0,
+    "provider_calls": 0,
+    "within_free_cloudflare_worker_queue_kv_quota": true
+  },
+  "backup": {
+    "private_github_branch": "cerebro/ums001-image-private-receipt-lab-20261112",
+    "source_github_pr": 45,
+    "physical_archives_on_private_google_drive": true
+  },
+  "rollback": {
+    "pr_revert_only": "revert new candidate files",
+    "cloudflare_operational": "disconnect new queue consumer, confirm backlog zero, disable QA_ONLY_ENABLED and preserve private QA receipt",
+    "verify_source_untouched": true,
+    "disconnect_and_reattach_tested": true,
+    "full_prod_rollback_tested": false
+  },
+  "rebuild": {
+    "source": "worker.mjs",
+    "deployment_method": "cloudflare authenticated account API multipart Worker upload; bind dedicated KV, new queue consumer; ensure disabled public subdomain; verify strict 404",
+    "secrets": []
+  },
+  "documentation": "cerebro/media-studio/v2/runbooks/UMS001_AUTONOMOUS_IMAGE_ORDERS_LAB_V1_20261111.md",
+  "training_hooks": {
+    "enabled": false,
+    "source_gate": "human-reviewed QA and provenance required before training"
+  },
+  "next_gate": "AUTHORIZED_CEREBRO_GATEWAY_SENDER_BINDING_PLUS_INDEPENDENT_SIGNED_QA_RIGHTS_DESTINATION"
+}
