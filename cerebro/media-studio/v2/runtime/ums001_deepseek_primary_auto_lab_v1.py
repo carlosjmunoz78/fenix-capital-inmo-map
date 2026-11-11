@@ -145,14 +145,15 @@ def prompt_messages(job,panel,attempt,previous_qa):
   "Produce STRICT JSON with keys image_prompt,risks,shot_plan. image_prompt 650-3000 English characters. "
   "shot_plan MUST include camera_angle,focal_length_mm,aperture,key_light,fill_and_rim,contrast,color_grade,surreal_composition,subject_scale,typography_safe_area, all concrete visible instructions. "
   "Every scene must state a professional CAMERA ANGLE and focal LENS 35mm/50mm/85mm, aperture f/2.8-f/4, realistic depth of field, natural KEY LIGHT direction with fill and optional rim, a physically coherent contrast ratio and shadows, dynamic range, orange #FF5F00 cinematic grade while preserving natural skin. "
-  "Start with large realistic Spanish adults visible waist-up in the foreground, photographic pores, believable hands, "
-  "professional premium cinematic Córdoba-Andalucía art, spectacular orange glass surreal architecture BEHIND them. "
+  ("For SEO wide 16:9: composition is first a credible actual Córdoba HOME VISIT, show environmental architecture taking most of the frame, two naturally photographed adults occupy only 25-40% of frame height near one side; leave wide unobstructed negative space for page HTML. Camera back from subjects: no close-up faces, hands not thrust toward lens. Use real Andalusian home textures and authentic soft directional daylight, and original three-dimensional orange glass integrated into the building with real thickness, refraction and realistic shadows; NO flat orange panel or abstract icon. " if job["channel"]=="SEO" else
+  "For Instagram 4:5: EXACTLY TWO Spanish adult buyers, one woman and one man, shot in three-quarter FRONT VIEW FACING CAMERA with both adult FACES CLEAR AND LARGE; no third person, no backs turned, no central distant silhouette. Natural skin and hands, two people in foremost plane occupy 45-65% image height; create tangible extraordinary yet physically credible orange architectural glass behind and around, without dominating their faces. Córdoba patio needs authentic stone, greenery and sun shadows, not a generic symmetrical corridor. ") +
+  "Professional premium cinematic Córdoba-Andalucía photographic style. "
   "If SEO, do not include text or logos in final image. If social, leave space for separate deterministic hook+logo. "
   "No AI text, invented watermarks, marks, labels, documents, bank approval implications or fake bank emblems. The surreal sculpture is ABSTRACT PHYSICAL ARCHITECTURE, not an icon or symbol. "
   "Image is "+job.get("render_aspect_ratio","4:5")+" composition; if 16:9 use wide landscape framing, if 4:5 vertical framing. Image composition must not be a generic tiny-people fantasy. "
   "Never generate the brand icon; original SHA-verified Fénix logo composited separately. JSON only.")
  return [{"role":"system","content":sys_text},{"role":"user","content":"Generate an original creative photographic prompt, not a repeated template. Customer brief JSON: "+json.dumps(customer,ensure_ascii=False)}]
-def validate_creative(result):
+def validate_creative(result,channel="INSTAGRAM"):
  if not isinstance(result,dict) or set(result)!={"image_prompt","risks","shot_plan"}:deny("CREATIVE_JSON_SCHEMA")
  shot=result["shot_plan"]
  if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("MISSING_PREMIUM_PHOTO_SHOT_PLAN")
@@ -195,9 +196,10 @@ def validate_creative(result):
  photo_plan=" PHOTOGRAPHY SHOT SPEC: "+"; ".join(key.replace("_"," ")+": "+shot[key] for key in SHOT_KEYS)+"."
  hard_negatives=" IMPORTANT FOR ORIGINAL GENERATION: no written words anywhere, no fabricated watermarks, no generated logos, no false official paperwork or mortgage approval symbols, no text on clothes, no artifacts covering human faces, no poor anatomy. Authentic original Fénix mark is added later by a SHA-verified compositor only."
  if len(p)+len(photo_plan)+len(hard_negatives)>10000:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
- return ("MAIN SUBJECT: large authentic Spanish adult people in close-up foreground, clear natural faces and hands; "
-  "PREMIUM 50mm CINEMATIC PHOTOGRAPH with vivid orange #FF5F00 artwork behind humans, realistic sunlight. "
-  +p+photo_plan+hard_negatives)
+ prefix=("REAL ESTATE SEO HERO: 16:9 WIDE 35mm documentary environmental photograph of a genuine Córdoba HOME INTERIOR with meaningful architecture occupying more than half the frame; two natural believable adults medium-sized positioned to one side, readable faces without close-up distortion, HANDS AWAY FROM CAMERA. Clean negative space for HTML heading. Physically integrated premium orange translucent glass architecture with refractions and motivated shadows; never an orange flat panel. "
+ if channel=="SEO" else
+ "IG SOCIAL 4:5: EXACTLY TWO adults one woman and one man photographed from their FRONT THREE-QUARTER viewpoint, FACES CLEARLY VISIBLE, never three people, never looking away, large natural faces and anatomically credible hands, genuine Córdoba patio with physical coherent luminous orange glass architecture behind them but not hiding faces. ")
+ return prefix+p+photo_plan+hard_negatives
 def validate_vision(result):
  if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary","rubric_scores"}:deny("VISION_JSON_SCHEMA")
  rubric=premium_policy()["qa_dimensions"]
@@ -268,7 +270,7 @@ def vision_messages(job,panel,jpeg):
   "{\"pass\":boolean,\"score\":integer 0-100,\"violations\":array of codes,\"correction\":string,\"summary\":string,\"rubric_scores\":object}. "
   "Codes: INVENTED_TEXT,INVENTED_LOGO,FACE_MISSING,FACE_TINY,FACE_OBSCURED,CAST_MISMATCH,BAD_ANATOMY,GENERIC_SCENE,DARK_MUDDY,MISLEADING_FINANCE,COMPOSITION_WEAK,BAD_LIGHTING,FLAT_CONTRAST,FOCAL_DISTORTION,WRONG_BRAND_COLOR,UNKNOWN. "
   "Reject any pseudo-writing, watermarks, false logos, money promises, official seals, absent/tiny human face, "
-  "weak art direction. Portraits must clearly show specified people with realistic skin and visible hands. "
+  "weak art direction. For SEO 16:9 verify real Córdoba property-visit context across majority of landscape frame, clear HTML-headline negative space, subjects medium scale rather than portrait-closeup, no malformed foreground hands. For social ensure exact cast and faces directed toward lens, not turned backs. "
   "Score >=88 and zero violations only if PREMIUM Fénix quality, not basic. "
   "Judge photographer-level lens perspective/angle, natural key light, soft fill, edge separation, tonal contrast, human skin, shallow but accurate depth, orange highlights without orange skin, scene originality. "
   "rubric_scores must have EXACT keys and maximums: human_presence_and_cast 20, camera_and_composition 15, lighting_and_realism 15, contrast_and_color 10, surreal_creativity 15, typography_and_brand_integrity 15, context_and_claims 10; each integer 0..maximum and score MUST equal sum. "
@@ -336,7 +338,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
   for attempt in range(1,job["max_attempts_per_panel"]+1):
    if round((img_count+1)*0.06,2)>job["max_image_budget_usd"]+0.000001:deny("FINOPS_IMAGE_BUDGET")
    creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback),deepseek_key,clock)
-   prompt=validate_creative(creative)
+   prompt=validate_creative(creative,channel=job["channel"])
    # Persist exactly what DeepSeek proposed, including lens, key/fill and contrast, so CEREBRO can learn.
    prompt_path=OUT/(panel["id"]+"-A"+str(attempt)+"-DEEPSEEK-PROMPT.json")
    json_write(prompt_path,{"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
