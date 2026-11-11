@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT=Path("cerebro/media-studio/v2")
 RUNTIME=ROOT/"runtime"
 REPO="carlosjmunoz78/fenix-capital-inmo-map"
-BRANCH="cerebro/ums-replicate-flux-paid-lab-v0-20261108"
+BRANCH="cerebro/ums001-visual-learning-no-reference-lab-20261111"
 ENGINE="UMS-001"
 AI="deepseek-flash"
 MODEL="black-forest-labs/flux-1.1-pro-ultra"
