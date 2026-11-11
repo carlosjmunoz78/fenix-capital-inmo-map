@@ -33,7 +33,7 @@ def verified_request(request,brief):
  if row.get("id")!=expected["concept_id"]:stop("FIRST_SLIDE_MISMATCH")
  if ORDER.endswith("_R02.json") and row.get("prompt_revision")!="R02_AFTER_CANARY_QA_FAIL":stop("CORRECTION_EVIDENCE_REQUIRED")
  prompt=row.get("prompt","")
- if not (700<=len(prompt)<=4500) or "SURREAL" not in prompt.upper() or "PHOTOGRAPH" not in prompt.upper() or not ("No text" in prompt or "no text" in prompt):stop("PROMPT_NOT_SAFE")
+ if not (700<=len(prompt)<=4500) or "SURREAL" not in prompt.upper() or "PHOTOGRAPH" not in prompt.upper() or "no text" not in prompt.lower():stop("PROMPT_NOT_SAFE")
  return prompt,expected
 def main():
  if os.getenv("GITHUB_REPOSITORY")!=REPO or (os.getenv("GITHUB_HEAD_REF") or os.getenv("GITHUB_REF_NAME"))!=BRANCH:stop("RUNNER_SCOPE_DENIED")
