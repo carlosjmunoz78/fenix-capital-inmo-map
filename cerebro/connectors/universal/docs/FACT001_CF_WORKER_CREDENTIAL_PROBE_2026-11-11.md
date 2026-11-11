@@ -26,3 +26,15 @@ Estado actual comprobado: **PARCIAL, aún no VERIFIED_FULL ni VERIFIED_LAB del e
 - `CEREBRO FULL` incluye también cola duradera con nuevas órdenes, políticas y proveedor Pages; un único cron de prueba no lo acredita.
 
 Sin costes de suscripción nuevos y sin modificaciones en `main`.
+
+## Actualización diferencial · causa identificada y prueba de clave superada
+- Error de origen: `redirect:'error'` no soportado en el `fetch()` del runtime Cloudflare Workers (la API de Request admite `manual` o `follow`); provocaba `TypeError` antes de que el token se utilizase. Fuente Cloudflare: https://developers.cloudflare.com/workers/runtime-apis/request/
+- Fix seguro en rama PR #44: `redirect:'manual'` con validación de respuesta y rechazo de redirecciones. Código y tests CI verificados en GitHub commit `83e99e22af60c4d9e94806bad827822e85fe730c`.
+- El primer diagnóstico `UPSTREAM_FETCH_FAILED` attempts=1 se archivó en `fact001_cf_token_probe_history_v1` antes de una repetición controlada, sin perder evidencia.
+- Worker diagnóstico corregido `14f41492-71d8-476c-ae4d-d22d2b51b95d`, conservando secret_text/D1 mediante herencia strict. Prueba física D1 `fact001_cf_token_probe_20261111`: **VERIFIED, attempts=1, HTTP200, CLOUDFARE_READ_HTTP_200**; token Cloudflare registra `last_used_on=2026-11-11T12:59:57Z`. Nunca se expuso el secreto.
+- Reinstalada versión de ejecución headless corregida `9550cc16-7e8a-49db-9369-a0bb68b8b608` con herencia estricta; ninguna ruta pública ni previews, bindings confirmados.
+- Primer fallo de trabajo autónomo guardado en tabla `fact001_cf_headless_attempt_history_v1`; D1 bookmark previo `00000150-00000018-00005120-efb996fd1248c95d86b3b4404390777c`.
+- Segundo intento real `fact001_cf_headless_worker_jobs_v1` reencolado **solo tras verificar GET200, no existencia de Worker objetivo y corrección activa**. Cron `* * * * *` temporal; aceptación del subgate **pendiente** hasta ver `COMPLETED` y limpieza.
+- Token `CEREBRO-FACT001-CF-WORKERS-LAB-V2` está activo, 1 grupo Workers Scripts Write y `expires_on=null` (sin vencimiento programado; no garantiza validez infinita).
+
+**No declarar FULL ni afirmar que la consola esté conectada.**
