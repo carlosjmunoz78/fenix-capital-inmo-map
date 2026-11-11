@@ -37,11 +37,12 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42822832223",
         "Cloudflare OAuth physical LAB Worker V1->V2->V1 rollback->delete->rebuild->delete 2026-11-11; no public routes, bindings or crons",
         "Cloudflare OAuth physical LAB Pages project create->branch update->revert->delete 2026-11-11; no deployment",
-        "Cloudflare Worker independent scheduled E2E physically COMPLETED attempts=1 phase=CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE 2026-11-11; private D1 job, no leftover target, cron stopped"
+        "Cloudflare Worker independent scheduled E2E physically COMPLETED attempts=1 phase=CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE 2026-11-11; private D1 job, no leftover target, cron stopped",
+        "Reusable Cloudflare Workers LAB D1 queue+ownership+audit: 6/6 jobs COMPLETED attempts=1; signed GitHub OIDC service submit create/delete physically verified and cron left 5min private, https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43031829238"
       ],
       "gaps": [
         "Cloudflare Pages independent LAB create/read/delete succeeded; one-off write endpoint retired",
-        "Independent CEREBRO Workers one-shot E2E verified, Cloudflare Pages deployment/rollback remains pending; generic CEREBRO headless dispatch and policy still incomplete",
+        "Cloudflare Workers signed OIDC/D1/cron command dispatch physically VERIFIED LAB; Pages, other APIs, console gateway, multi-company service ingress remain pending",
         "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending",
         "Workers one-shot credential active without configured expiration: rotation, short-lived delegation and revocation plan pending; not 'forever' guaranteed"
       ],
@@ -239,6 +240,54 @@
         "cleanup": "CRON_DISABLED_AFTER_COMPLETED; TEMP_WORKER_ABSENT; HEADLESS_RUNNER_PRIVATE",
         "cross_provider_autonomy": "NOT_VERIFIED",
         "operational_renewal_and_rotation": "PENDING"
+      },
+      "command_runtime_20261111": {
+        "status": "VERIFIED_LAB_WORKERS_REUSABLE",
+        "scope": {
+          "company_id": "fenix-capital",
+          "engine_id": "FACT-001",
+          "environment": "LAB",
+          "version": "1.0.0"
+        },
+        "executable_worker": "cerebro-fact001-headless-operator-lab-20261111",
+        "worker_version": "647b73cf-53b7-48bd-8b5d-9c089dc7f6e6",
+        "worker_private": true,
+        "workers_dev": false,
+        "preview_urls": false,
+        "worker_cron": "*/5 * * * *",
+        "single_job_per_tick": true,
+        "recovery_d1_uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "additive_tables": [
+          "fact001_cf_command_jobs_v1",
+          "fact001_cf_owned_workers_v1",
+          "fact001_cf_command_events_v1"
+        ],
+        "commands": [
+          "worker.create_private",
+          "worker.update_private",
+          "worker.rollback_private",
+          "worker.delete_private"
+        ],
+        "resource_allowlist": "^cerebro-fact001-managed-lab-[a-z0-9]{4,20}$",
+        "idempotency": "D1 UNIQUE request_id/idempotency_key; claim only attempts=0",
+        "ownership_gate": "OWNED_LEDGER_AND_PHYSICAL_READBACK",
+        "signed_intake": "cerebro-fact001-cf-command-intake-lab",
+        "intake_auth": "GITHUB_OIDC_RS256_EXACT_REPO_BRANCH_WORKFLOW_ACTOR",
+        "signed_intake_edge_v1": "ACTIVE",
+        "signed_live_e2e": [
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43031323409",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43031829238"
+        ],
+        "completed_e2e_jobs": 6,
+        "errors_final": 0,
+        "all_resource_cleanup_verified": true,
+        "accounts_touched": 1,
+        "active_new_subscriptions": 0,
+        "added_cost_eur": 0,
+        "rollback_version": "9550cc16-7e8a-49db-9369-a0bb68b8b608",
+        "prod_mutations": false,
+        "limits": "NO_PAGES_NO_DNS_NO_ARBITRARY_CODE_NO_OTHER_COMPANIES; LONG_LIVED_TOKEN_ROTATION_PENDING",
+        "evidence": "docs/FACT001_CLOUDFLARE_WORKERS_REUSABLE_COMMAND_E2E_2026-11-11.md"
       }
     },
     {
