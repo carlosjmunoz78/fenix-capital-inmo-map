@@ -23,6 +23,8 @@ test('fail-closed immutable code and ownership gates',()=>{
  const s=readFileSync(new URL('../universal-runtime.mjs',import.meta.url),'utf8');
  const sql=readFileSync(new URL('../universal-schema.sql',import.meta.url),'utf8');
  assert.ok(s.includes('assertJob(job)'));
+ assert.ok(s.includes("import {pagesTick} from './pages-adapter.mjs'"));
+ assert.ok(s.includes('Promise.allSettled([tick(env,controller.scheduledTime),pagesTick(env,controller.scheduledTime)])'));
  assert.ok(s.includes("await requireOwned(db,name,['V2'])"));
  assert.ok(s.includes("await requireOwned(db,name,['V1','V2','ROLLED_BACK'])"));
  assert.ok(s.includes("if(await owned(db,name))throw Error('TARGET_EXISTS')"));
