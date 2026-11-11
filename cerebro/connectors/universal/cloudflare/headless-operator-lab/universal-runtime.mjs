@@ -1,3 +1,4 @@
+import {d1Tick} from './d1-adapter.mjs';
 import {pagesTick} from './pages-adapter.mjs';
 // CEREBRO FACT001 multi-command Cloudflare Worker controller V0, isolated LAB only.
 // Private scheduled control plane; four deterministic operations, never arbitrary code or PROD.
@@ -146,5 +147,5 @@ export async function tick(env,time=Date.now()){
 }
 export default {
  async fetch(){return new Response('Not Found',{status:404,headers:HEAD});},
- async scheduled(controller,env,ctx){ctx.waitUntil(Promise.allSettled([tick(env,controller.scheduledTime),pagesTick(env,controller.scheduledTime)]));}
+ async scheduled(controller,env,ctx){ctx.waitUntil(Promise.allSettled([tick(env,controller.scheduledTime),pagesTick(env,controller.scheduledTime),d1Tick(env,controller.scheduledTime)]));}
 };
