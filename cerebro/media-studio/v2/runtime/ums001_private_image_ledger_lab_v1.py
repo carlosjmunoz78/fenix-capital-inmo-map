@@ -13,6 +13,7 @@ import hmac
 import json
 import os
 import sqlite3
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[4]
@@ -96,8 +97,18 @@ def connect(path):
     conn = sqlite3.connect(p, timeout=5, isolation_level=None)
     conn.execute("PRAGMA busy_timeout=5000")
     conn.execute("PRAGMA foreign_keys=ON")
-    conn.execute("PRAGMA journal_mode=WAL")
-    conn.executescript(SCHEMA)
+    # Concurrent cold starts can race during the first WAL/schema initialization.
+    # Recheck after a bounded retry; never run writes without a transaction.
+    for attempt in range(10):
+        try:
+            conn.execute("PRAGMA journal_mode=WAL")
+            conn.executescript(SCHEMA)
+            break
+        except sqlite3.OperationalError as exc:
+            if "locked" not in str(exc).lower() or attempt==9:
+                conn.close()
+                raise
+            time.sleep(0.04*(attempt+1))
     if os.name == "posix":
         os.chmod(p, 0o600)
     return conn
@@ -217,7 +228,9 @@ def run(conn, request):
                 audit(conn,"PRIVATE_ACK",{"key":key,"order_id":order_id,"output_sha256":sha,"destination_id":dest,"idempotency_key":idem})
         result=view(conn,key)
         conn.execute("COMMIT")
-        return {"status":"LAB_LEDGER_OK","action":action,**result}
+        return {"status":"LAB_LEDGER_OK","action":action,
+                **{k:v for k,v in result.items() if k!="status"},
+                "piece_status":result["status"]}
     except Exception:
         conn.execute("ROLLBACK")
         raise
