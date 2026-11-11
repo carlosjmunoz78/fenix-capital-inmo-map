@@ -59,7 +59,7 @@ class PromptForgeTests(unittest.TestCase):
  def test_social_direction_keeps_faces_in_view_and_not_backturned(self):
   out=m.build_prompt_batch(BRIEF,QA)
   self.assertIn("three-quarter FRONT VIEW",out["prompts"][0]["text"])
-  self.assertIn("number and roles described by the brief",out["prompts"][0]["text"])
+  self.assertIn("Respect requested cast",out["prompts"][0]["text"])
   self.assertNotIn("SEO 16:9 ENVIRONMENTAL",out["prompts"][0]["text"])
  def test_seo_human_missing_lesson_preserves_wide_environment(self):
   seo=json.loads(json.dumps(BRIEF))
