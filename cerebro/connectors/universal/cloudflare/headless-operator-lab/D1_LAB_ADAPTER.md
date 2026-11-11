@@ -1,0 +1,3 @@
+# CEREBRO FACT001 Cloudflare D1 logical engine LAB
+
+Physical D1 Free databases at capacity 10/10. This adapter performs create/update/rollback/logical-delete only in its own additive LAB table, with D1 bound to the existing private Worker and an independent idempotent queue. No new D1, no deletion of database, no schema mutation beyond the three explicitly prefixed tables, no App/CRM/PROD access. Single job per cron with owner/scope verified on every operation and durable readback. No independent D1-create at 10/10 capacity. Current signed service intake covers Workers/Pages, D1 new command ingress remains to be separately certified.
