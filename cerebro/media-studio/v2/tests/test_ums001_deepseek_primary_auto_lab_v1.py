@@ -120,6 +120,23 @@ class DeepseekAutonomousTests(unittest.TestCase):
    m.allowed_job({**self.job,"style_reference_mode":"NONE","environment":"PROD"})
   with self.assertRaises(m.Blocked):
    m.allowed_job({**self.job,"style_reference_mode":"NONE","publish_enabled":True})
+ def test_oversized_real_vision_summary_rejected_but_provenance_preserved(self):
+  full=m.premium_policy()["qa_dimensions"]
+  verdict={"pass":True,"score":100,"violations":[],"correction":"","summary":"X"*700,"rubric_scores":full}
+  result=m.validate_vision(verdict)
+  self.assertFalse(result["accepted"])
+  self.assertFalse(result["pass"])
+  self.assertIn("UNKNOWN",result["violations"])
+  self.assertEqual(result["qa_contract_rejection"],"INVALID_QA_SUMMARY_LENGTH")
+  self.assertEqual(result["original_qa_summary_length"],700)
+  self.assertEqual(len(result["original_qa_summary_sha256"]),64)
+ def test_oversized_vision_correction_cannot_pass(self):
+  full=m.premium_policy()["qa_dimensions"]
+  verdict={"pass":True,"score":100,"violations":[],"correction":"X"*1201,"summary":"Quality verified before checks.","rubric_scores":full}
+  result=m.validate_vision(verdict)
+  self.assertFalse(result["accepted"])
+  self.assertEqual(result["qa_contract_rejection"],"INVALID_QA_CORRECTION_LENGTH")
+  self.assertEqual(len(result["correction"]),1200)
  def test_fail_closed_before_paid_calls_without_secret(self):
   with patch.dict(os.environ,{"GITHUB_REPOSITORY":m.REPO,"GITHUB_HEAD_REF":m.BRANCH,"UMS001_DEEPSEEK_AUTOMATION_GATE":"OWNER_AUTHORIZED_LAB_20261111"}):
    with self.assertRaises(m.Blocked):m.run_job(self.job,"","", "")
