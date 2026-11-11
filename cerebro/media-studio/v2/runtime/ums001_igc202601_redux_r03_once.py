@@ -9,7 +9,7 @@ HERE=Path(__file__).resolve().parent
 spec=importlib.util.spec_from_file_location("base",HERE/"replicate-one-shot-canary-lab-20261111.py")
 base=importlib.util.module_from_spec(spec);spec.loader.exec_module(base)
 MODEL=base.MODEL;API=base.API;BRANCH=base.BRANCH;REPO=base.REPO
-ORDER=Path("cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json")
+ORDER=Path(os.environ.get("UMS001_REDUX_ORDER_FILE","cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json"))
 REF=Path("cerebro/media-studio/v2/references/IGC202601_OWNER_APPROVED_COVER_CROP_BASE64.json")
 OUT=Path(os.getenv("RUNNER_TEMP","/tmp"))/"ums001-igc202601-redux-r03"
 def deny(msg):raise RuntimeError("UMS001_REDUX_R03_"+msg)
@@ -17,11 +17,16 @@ def keep(doc):
  OUT.mkdir(parents=True,exist_ok=True)
  (OUT/"receipt.json").write_text(json.dumps(doc,ensure_ascii=False,indent=2)+"\n")
 def validate(order,reference):
- allowed={"request_id":"UMS001-IGC202601-REDUX-R03-20261111","company_id":"fenix","engine_id":"UMS-001",
+ allowed_paths={"cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R03_ORDER.json":("UMS001-IGC202601-REDUX-R03-20261111",0.38),
+  "cerebro/media-studio/v2/requests/UMS001_IGC202601_REDUX_R04_ORDER.json":("UMS001-IGC202601-REDUX-R04-20261111",0.22)}
+ if str(ORDER) not in allowed_paths:deny("ORDER_NOT_ALLOWLISTED")
+ request_id,strength=allowed_paths[str(ORDER)]
+ if request_id.endswith("R04-20261111") and not Path("cerebro/media-studio/v2/qa/IGC202601_S00_R03_REDUX_VERDICT.json").is_file():deny("R03_QA_EVIDENCE_MISSING")
+ allowed={"request_id":request_id,"company_id":"fenix","engine_id":"UMS-001",
  "environment":"LAB","content_id":"IGC-2026-01","slide_id":"S00","model_id":MODEL,
  "max_predictions":1,"max_cost_usd":0.06,"budget":"EXISTING_PREPAID_ONLY",
  "publish":False,"approval_state":"OWNER_ACCEPTED_REFERENCE_GUIDED_LAB",
- "raw":False,"image_prompt_strength":0.38}
+ "raw":False,"image_prompt_strength":strength}
  if any(order.get(k)!=v for k,v in allowed.items()) or set(order)!=set(allowed)|{"prompt"}:deny("ORDER_SCOPE_DENIED")
  prompt=order.get("prompt","")
  if not 550<=len(prompt)<=3900 or "photograph" not in prompt.lower() or "surreal" not in prompt.lower() or "no logos" not in prompt.lower():deny("PROMPT_POLICY")
@@ -43,14 +48,14 @@ def main():
  if acct!=200 or account.get("type") not in ("user","organization") or mod!=200 or model.get("name")!="flux-1.1-pro-ultra":deny("AUTH_OR_MODEL_NOT_READY")
  receipt={"request_id":order["request_id"],"company_id":"fenix","engine_id":"UMS-001","environment":"LAB",
   "slide_id":"S00","model_id":MODEL,"provider":"replicate","reference_source":"ChatGPT_APPROVED_TOP_CROP","reference_sha256":ref["source_sha256"],
-  "reference_strength":0.38,"raw_mode":False,"prompt_sha256":hashlib.sha256(prompt.encode()).hexdigest(),
+  "reference_strength":order["image_prompt_strength"],"raw_mode":False,"prompt_sha256":hashlib.sha256(prompt.encode()).hexdigest(),
   "prediction_id":None,"estimated_cost_usd":0.06,"status":"PREPARED","publication_approved":False,"qa_status":"PENDING"}
  keep(receipt)
  try:path,sha=base.reserve_once(gh,{"request_id":order["request_id"]})
  except Exception:deny("DUPLICATE_OR_LEDGER_BLOCK")
  receipt["status"]="RESERVED_ONCE";keep(receipt)
  input_data={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
-   "image_prompt":"data:image/jpeg;base64,"+raw64,"image_prompt_strength":0.38,
+   "image_prompt":"data:image/jpeg;base64,"+raw64,"image_prompt_strength":order["image_prompt_strength"],
    "output_format":"jpg","safety_tolerance":2}
  try:status,pred,_=base.http_json(API+"models/"+MODEL+"/predictions","POST",token=token,
    data={"input":input_data},headers={"Prefer":"wait=60","Cancel-After":"120s"},timeout=80)
@@ -74,7 +79,7 @@ def main():
   if last.scheme!="https" or (last.hostname!="replicate.delivery" and not (last.hostname or "").endswith(".replicate.delivery")):deny("UNTRUSTED_REDIRECT")
   raw=f.read(12_000_001)
  if len(raw)<1024 or len(raw)>12_000_000 or raw[:3]!=b"\xff\xd8\xff":deny("OUTPUT_INVALID")
- filename="IGC-2026-01-S00_REPLICATE_REDUX_R03_RAW.jpg";(OUT/filename).write_bytes(raw)
+ filename="IGC-2026-01-S00_REPLICATE_REDUX_"+("R04" if order["request_id"].endswith("R04-20261111") else "R03")+"_RAW.jpg";(OUT/filename).write_bytes(raw)
  receipt.update(status="IMAGE_DOWNLOADED_QA_PENDING",asset_sha256=hashlib.sha256(raw).hexdigest(),asset_bytes=len(raw),filename=filename)
  keep(receipt)
  print("CEREBRO_REDUX_R03=REAL_IMAGE_DOWNLOADED_QA_PENDING")
