@@ -20,13 +20,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: cerebro/ums-replicate-flux-paid-lab-v0-20261108
+          ref: ${{ github.event.after }}
+          fetch-depth: 2
           persist-credentials: false
+      - name: Check this event actually changed the one-shot request (not another PR file)
+        id: changed
+        env:
+          EVENT_SHA: ${{ github.event.after }}
+        run: |
+          if git show --format= --name-only "$EVENT_SHA" | grep -Fxq 'cerebro/media-studio/v2/requests/REPLICATE_BCD_PREPAID_THREE_20261111.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
       - name: Verify generation code before paid calls
+        if: steps.changed.outputs.eligible == 'true'
         run: |
           python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
           python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-three-creative-images-lab-20261111.py
       - name: Run THREE Replicate Ultra RAW images with one time prepaid reservation
+        if: steps.changed.outputs.eligible == 'true'
         env:
           REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
           GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
