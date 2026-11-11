@@ -21,7 +21,7 @@ def prepare(body):
  if not isinstance(filtered.get("panels"),list) or len(filtered["panels"])<1 or len(filtered["panels"])>10:
   raise CreativeRouterBlocked("NO_PANELS")
  text=json.dumps(filtered,ensure_ascii=False)
- if len(text)>12000 or re.search(r"(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}|password|api[_ -]?key|\\br8_[A-Za-z0-9]+\\b)",text,re.I):
+ if len(text)>12000 or re.search(r"(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|password|api[_ -]?key|\br8_[A-Za-z0-9]+\b)",text,re.I):
   raise CreativeRouterBlocked("SENSITIVE_OR_TOO_LARGE")
  instructions=(
   "CEREBRO UMS-001 creative director, premium authentic Spanish/Andalusian cinematic photo. "
@@ -50,7 +50,7 @@ def parse_provider(reply):
  risks=answer.get("quality_risks")
  if not isinstance(prompt,str) or not 700<=len(prompt)<=2600 or not isinstance(risks,list) or len(risks)!=3:
   raise CreativeRouterBlocked("INVALID_CREATIVE_SCHEMA")
- if re.search(r"(?i)(?:https?://|bearer\\s+[A-Z0-9]+|\\br8_[a-z0-9]+)",prompt):
+ if re.search(r"(?i)(?:https?://|bearer\s+[A-Z0-9]+|\br8_[a-z0-9]+)",prompt):
   raise CreativeRouterBlocked("UNSAFE_PROMPT")
  return {"creative_prompt":prompt,"quality_risks":risks,"model_requested":MODEL,
   "model_observed":result.get("model"),"prompt_source":"CEREBRO_WORKERS_AI_FREE",
