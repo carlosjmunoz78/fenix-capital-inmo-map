@@ -90,6 +90,24 @@
       ],
       "artifact_id": 13869733582,
       "note": "Physical Facebook 1:1 square 2048x2048 with CEREBRO-first prompt + DeepSeek camera mentoring. Two adult people only shown FROM BEHIND inside completely orange repetitive arches, no recognisable Córdoba flat or physical orange glass; not a candid photo. Vision failed with unknown violation code; no valid numeric grade. Independent reviewer rejects."
+    },
+    {
+      "run_id": 43056409310,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-02",
+      "predictions": 0,
+      "qa_scores": [],
+      "artifact_id": 13871053633,
+      "note": "Second job request failed on malformed DeepSeek mentor creative schema BEFORE Replicate submission. New job ID needed for safe deterministic fallback, no image charge."
+    },
+    {
+      "run_id": 43056969985,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-03",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13871951087,
+      "note": "Second PHYSICAL Facebook 1:1 image. RAW mode and compact photo-first CEREBRO baseline improved living room realism and daylight, but two adults still fully backturned; no readable faces, orange arch instead of small real glass sculpture, modelled CGI feel; DeepSeek strict QA 52/100. Rejected."
     }
   ],
   "rules": [
@@ -144,6 +162,10 @@
     {
       "code": "GENERIC_SCENE",
       "instruction": "Physical FB canary run 43055263249: intense full-frame monochrome orange nested arch corridor is unacceptable. For real-estate social: authentic Andalusian white/cream apartment with clear window, sofa, masonry and natural skin; orange glass sculpture is secondary physical object only, <20% frame, not an environment or tunnel."
+    },
+    {
+      "code": "CAST_MISMATCH",
+      "instruction": "Real FB 1:1 photo-first plus RAW canary 43056969985 score 52/100: a realistic room is not enough. Repeated two backturned adults/no faces persists in both distinct photo prompts. Shift next LAB generation strategy/model to enforce subject viewpoints and camera framing; no more paid FB repeats on same Replicate FLUX Ultra model without a new evaluated approach."
     }
   ],
   "policy": {
@@ -157,5 +179,5 @@
     "cost_estimate_replicate_usd": 0.42,
     "estimated_usage_only": true
   },
-  "next_gate": "CEREBRO-FIRST pipeline has generated one real Facebook 1:1 image but independent pixel QA rejected; pass only after distinct realistic flat, visible faces and non-dominant orange architecture. Additional image generation must be gated; no publication or video."
+  "next_gate": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY: six real candidates IG 2 + SEO 2 + Facebook 2, zero approved, remaining eight different piece IDs unexecuted. CEREBRO-owned prompt 11/11 prepared and DeepSeek mentor fallback functional; but pixel quality unresolved. Halt further same-model spending and video promotion. Next model-routing/visual-compositing A/B isolated, no paid calls until new gate."
 }
