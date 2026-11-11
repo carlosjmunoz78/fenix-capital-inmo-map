@@ -39,7 +39,8 @@
         "Cloudflare OAuth physical LAB Pages project create->branch update->revert->delete 2026-11-11; no deployment",
         "Cloudflare Worker independent scheduled E2E physically COMPLETED attempts=1 phase=CREATE_UPDATE_ROLLBACK_DELETE_REBUILD_DELETE 2026-11-11; private D1 job, no leftover target, cron stopped",
         "Reusable Cloudflare Workers LAB D1 queue+ownership+audit: 6/6 jobs COMPLETED attempts=1; signed GitHub OIDC service submit create/delete physically verified and cron left 5min private, https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43031829238",
-        "Cloudflare Pages headless LAB 4/4 project-settings jobs completed exactly once; create->update branch->rollback branch->delete, original Fénix Pages project only remains; Pages OIDC signer https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43036193463"
+        "Cloudflare Pages headless LAB 4/4 project-settings jobs completed exactly once; create->update branch->rollback branch->delete, original Fénix Pages project only remains; Pages OIDC signer https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43036193463",
+        "CEREBRO private cron D1 logical CRUD on strictly prefixed own LAB table 4/4 COMPLETED attempts=1; cron restored 5min after readback; existing 10 Cloudflare Free D1 databases preserved 2026-11-11."
       ],
       "gaps": [
         "Cloudflare Pages independent private LAB create/update/rollback/delete empty project-settings now verified; content deployment and rollback pending",
@@ -252,7 +253,7 @@
           "version": "1.0.0"
         },
         "executable_worker": "cerebro-fact001-headless-operator-lab-20261111",
-        "worker_version": "72e6fd58-a306-49aa-b5df-92a7fa6f8d4a",
+        "worker_version": "fde58260-9a26-4dec-a84f-201114ba071b",
         "worker_private": true,
         "workers_dev": false,
         "preview_urls": false,
@@ -293,9 +294,10 @@
         "pages_parallel_tick": "VERIFIED_LAB_EMPTY_PROJECT_SETTINGS",
         "capabilities_verified_lab": [
           "workers.owned_lifecycle_4_operations",
-          "pages.empty_project_settings_4_operations"
+          "pages.empty_project_settings_4_operations",
+          "d1.existing_lab_database_owned_row_lifecycle_4_operations"
         ],
-        "total_physical_jobs_verified": 10,
+        "total_physical_jobs_verified": 14,
         "pages_service_intake": "cerebro-fact001-cf-pages-intake-lab",
         "credential_bindings": [
           "CF_WORKERS_TOKEN:secret_text",
@@ -357,6 +359,39 @@
         "additional_cost_authorized_eur": 0,
         "verified_existing_lab_d1": "1305f791-7c44-47f9-946b-f330a09c88aa",
         "safe_default": "reuse existing LAB D1 with isolated additive tables; no upgrade or destructive cleanup"
+      },
+      "d1_logical_20261111": {
+        "state": "VERIFIED_LAB_EXISTING_D1_SCOPED_ROWS",
+        "worker": "cerebro-fact001-headless-operator-lab-20261111",
+        "worker_version": "fde58260-9a26-4dec-a84f-201114ba071b",
+        "physical_jobs_completed": 4,
+        "physical_jobs_attempts_each": 1,
+        "error_codes": null,
+        "phases": [
+          "D1_OWNED_CREATED_V1",
+          "D1_OWNED_UPDATED_V2",
+          "D1_OWNED_ROLLBACK_V1",
+          "D1_OWNED_SOFT_DELETE"
+        ],
+        "owner_record_final": {
+          "resource_key": "fact001-lab-a001",
+          "state": "DELETED",
+          "value_tag": "DELETED"
+        },
+        "d1_uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "tables": [
+          "fact001_cf_d1_jobs_v1",
+          "fact001_cf_d1_owned_values_v1",
+          "fact001_cf_d1_events_v1"
+        ],
+        "pre_ddl_bookmark": "0000015a-00000004-00005120-bed2e83bb78ad84f1f0f0ee0468ec756",
+        "cron": "*/5 * * * *",
+        "independent_d1_database_create_delete": "NOT_TESTED_CAPACITY_10_OF_10",
+        "service_oidc_intake": "NOT_YET_CONNECTED_TO_D1_COMMANDS",
+        "public_endpoint": false,
+        "prod_mutations": false,
+        "additional_subscriptions_eur": 0,
+        "evidence": "docs/FACT001_CLOUDFLARE_D1_LOGICAL_E2E_2026-11-11.md"
       }
     },
     {

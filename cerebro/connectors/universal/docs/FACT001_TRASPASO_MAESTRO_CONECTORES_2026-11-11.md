@@ -199,3 +199,8 @@ Secuencia obligatoria ahora: **Cloudflare → Vercel → Supabase → GitHub →
 ## 11/11/2026 · Pages secret provisto y E2E autónomo físico completado
 
 Se verificó `CF_PAGES_TOKEN:secret_text`, token único `Pages Write` activo. Worker privado paralelo Pages+Workers desplegado versión `72e6fd58-a306-49aa-b5df-92a7fa6f8d4a`, con tres bindings preservados. La D1 Recovery existente recibió solo dos tablas aditivas de Pages y un proyecto temporal, con **4/4 órdenes COMPLETED, 1 intento cada una, error NULL** para crear, actualizar rama, rollback rama y eliminar. La prueba firmada Pages OIDC/D1 está operativa; único proyecto final Pages el original `fenix-capital-inmo-map`. Cron normal `*/5 * * * *` restaurado. Pages deploy/rollback de contenido PENDIENTE; Cloudflare FULL no certificado. Documento de evidencia: `docs/FACT001_CLOUDFLARE_PAGES_HEADLESS_PHYSICAL_E2E_2026-11-11.md`.
+
+
+## 2026-11-11 · D1 scoped autonomous LAB verification
+
+CEREBRO private Worker v `fde58260-9a26-4dec-a84f-201114ba071b` completed four D1 own-record lifecycle operations at attempts=1 and error_code=NULL, restored cron 5min. Cloudflare Free D1 limit remains 10/10; **no database create/delete** or whole-database restore. Combined physically verified operations 14 LAB jobs, differing scopes. See `docs/FACT001_CLOUDFLARE_D1_LOGICAL_E2E_2026-11-11.md`. Universal Cloudflare PARTIAL.
