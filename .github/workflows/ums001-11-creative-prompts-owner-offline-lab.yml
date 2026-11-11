@@ -1,0 +1,45 @@
+name: UMS001 owner-created 11-channel prompts bridge zero paid QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-11-creative-prompts-owner-offline-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_multichannel_prompt_owner_lab_v1.py'
+      - 'cerebro/media-studio/v2/runtime/ums001_prompt_forge_lab_v0.py'
+      - 'cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json'
+      - 'cerebro/media-studio/v2/qa/UMS001_DEEPSEEK_REAL_IMAGE_LEARNING_LEDGER_20261111.json'
+permissions:
+  contents: read
+jobs:
+  zero-spend-producer-owned-prompts:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Unit test exact brand, 11 formats and real QA lesson transfer
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_prompt_forge_lab_v0.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_prompt_owner_lab_v1.py -v
+      - name: Compose original 11 prompts with CEREBRO own creative factory offline
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py --out cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_11_CEREBRO_OWNED_PROMPTS_LAB.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_11_CEREBRO_OWNED_PROMPTS_LAB.json')
+          x=json.loads(p.read_text())
+          assert x["generated_prompt_count"]==11 and not x["publish_enabled"]
+          assert x["provider_calls_this_execution"]==0
+          PY
+      - name: Retain prompt source with exact learning and consumer formats for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-cerebro-original-prompts-11-formats-offline
+          path: cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_11_CEREBRO_OWNED_PROMPTS_LAB.json
+          retention-days: 14
+      - name: No costs/no publication
+        run: echo 'CEREBRO owner; DeepSeek temporary critic; Replicate OFF; publishing OFF; all image gates remain PENDING'
