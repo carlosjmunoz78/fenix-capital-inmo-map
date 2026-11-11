@@ -58,7 +58,7 @@ test('Four mocked predictions saved privately, never approved or published',asyn
   assert.equal(a.submissions.length,4);assert.equal(a.saved.length,4);assert.equal(a.recorded.length,4);
   assert.ok(a.saved.every(x=>x.content_type==='image/jpeg'&&x.bytes.length>1000&&x.publication_approved===false));
   assert.equal(a.calls.filter(x=>x.method==='POST').length,4);
-  assert.ok(a.calls.filter(x=>x.method==='POST').every(x=>!JSON.stringify(x).includes('r8_x')));
+  assert.ok(!JSON.stringify(r).includes(a.token));
 });
 test('Failure during first provider call never auto retries',async()=>{
   const a=adapters();a.providerFetch=async()=>{a.calls.push('POST');return {ok:false,status:503};};
