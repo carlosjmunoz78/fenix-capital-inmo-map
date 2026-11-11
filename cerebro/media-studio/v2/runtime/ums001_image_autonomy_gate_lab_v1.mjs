@@ -27,6 +27,11 @@ export function certify(order,p){
  if(p.technical_export_qa!=='PASS'||p.originality_verified!==true||p.photo_realism_independently_verified!==true||p.accessibility_verified!==true||p.claims_verified!==true)return no('INDEPENDENT_TECHNICAL_QA_MISSING');
  if(p.legal_rights_verified!==true||!hash(p.rights_evidence_sha256)||p.brand_verified!==true||p.final_editorial_verified!==true||!hash(p.editorial_evidence_sha256))return no('RIGHTS_OR_EDITORIAL_MISSING','LEGAL_REQUIRED');
  const q=p.visual_qa;
+ const RUBRIC={human_presence_and_cast:20,camera_and_composition:15,lighting_and_realism:15,contrast_and_color:10,surreal_creativity:15,typography_and_brand_integrity:15,context_and_claims:10};
+ if(!q||!q.rubric_scores||typeof q.rubric_scores!=='object'||Array.isArray(q.rubric_scores)||
+    JSON.stringify(Object.keys(q.rubric_scores).sort())!==JSON.stringify(Object.keys(RUBRIC).sort())||
+    Object.entries(RUBRIC).some(([key,max])=>!Number.isInteger(q.rubric_scores[key])||q.rubric_scores[key]<0||q.rubric_scores[key]>max)||
+    Object.values(q.rubric_scores).reduce((a,b)=>a+b,0)!==q.score)return again(j,p,'VISION_RUBRIC_INVALID');
  if(!q||q.score_consistency!=='VERIFIED'||q.accepted!==true||q.pass!==true||!Number.isInteger(q.score)||q.score<88||q.score>100||!Array.isArray(q.violations)||q.violations.length||p.critical_violations!==0)return again(j,p,'VISUAL_QA_NOT_ACCEPTED');
  if(p.independent_physical_qa_verified!==true||!hash(p.independent_qa_receipt_sha256))return no('SINGLE_MODEL_CANNOT_SELF_APPROVE');
  if(p.artifact_private_verified!==true||!hash(p.storage_receipt_sha256)||p.signed_delivery_verified!==true||!hash(p.delivery_receipt_sha256))return no('DELIVERY_NOT_ATTESTED');
