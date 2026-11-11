@@ -65,11 +65,28 @@ if (!response.ok) {
     'sql=sys.stdin.read()',
     'db=sqlite3.connect(":memory:")',
     'db.executescript(sql)',
-    'print(db.execute("SELECT count(*) FROM sqlite_master WHERE type = ? AND name NOT LIKE ?", ("table","sqlite_%")).fetchone()[0])',
+    'import json; print(json.dumps([x[0] for x in db.execute("SELECT name FROM sqlite_master WHERE type = ? AND name NOT LIKE ?", ("table","sqlite_%")).fetchall()]))',
   ].join(';')], { input: sql, encoding: 'utf8', timeout: 20000, maxBuffer: 100000 });
   if (restore.status !== 0) throw new Error('D1_SCHEMA_IN_MEMORY_RESTORE_FAILED');
-  const restoredTables = Number(restore.stdout.trim());
-  if (!Number.isInteger(restoredTables) || restoredTables < 10) throw new Error('D1_RESTORE_TABLE_COUNT_INVALID');
+  const restoredNames = JSON.parse(restore.stdout.trim());
+  if (!Array.isArray(restoredNames) || restoredNames.length < 10) throw new Error('D1_RESTORE_TABLE_COUNT_INVALID');
   console.log('D1_SCHEMA_IN_MEMORY_RESTORE=PASS');
-  console.log('D1_RESTORED_TABLE_COUNT=' + restoredTables);
+  console.log('D1_RESTORED_TABLE_COUNT=' + restoredNames.length);
+  // Verify semantic parity with today's LIVE user schema: the Cloudflare _cf_KV
+  // is a provider-internal implementation table and intentionally excluded.
+  const liveRes = await fetch(endpoint.replace('/export', '/query'), {
+    method:'POST',headers:{Authorization:`Bearer ${token}`,'Content-Type':'application/json'},
+    body:JSON.stringify({sql:"SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name"}),
+    redirect:'error', signal:AbortSignal.timeout(25000),
+  });
+  if (!liveRes.ok) throw new Error('D1_LIVE_SCHEMA_READ_FAILED');
+  const live = await liveRes.json();
+  const liveNames = (live.result?.[0]?.results||[]).map(v=>v.name).filter(n=>n!=='_cf_KV');
+  if (!live.success || liveNames.length < 10) throw new Error('D1_LIVE_SCHEMA_INVALID');
+  if (JSON.stringify([...restoredNames].sort()) !== JSON.stringify([...liveNames].sort())) {
+    throw new Error('D1_LIVE_RESTORE_SCHEMA_PARITY_FAILED');
+  }
+  console.log('D1_USER_TABLE_SCHEMA_PARITY=PASS');
+  console.log('D1_USER_TABLE_COUNT=' + liveNames.length);
+  console.log('D1_CLOUDFLARE_INTERNAL_TABLE_EXCLUDED=true');
 }
