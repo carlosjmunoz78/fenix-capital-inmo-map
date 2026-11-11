@@ -41,6 +41,25 @@ class FacebookOneShot(unittest.TestCase):
   self.assertIn("TOWARD CAMERA",plan["text"])
   self.assertIn("not CGI render",plan["text"])
   self.assertIn("parent_prompt_forge_sha256",plan)
+ def test_deepseek_malformed_mentor_preserves_owned_visual_plan(self):
+  anchor=m.cerebro_owned_plan(self.job,self.job["panels"][0])
+  fallback,draft,used=m.cerebro_parse_mentor({"unexpected":"camera only"},anchor,"FACEBOOK")
+  self.assertTrue(used)
+  self.assertEqual(draft,"CEREBRO_DETERMINISTIC_SHOT_PLAN_MENTOR_SCHEMA_REJECTED")
+  prompt=m.cerebro_mentor_final_prompt(anchor,fallback)
+  self.assertIn(anchor["text"],prompt)
+  self.assertIn("natural soft Mediterranean daylight",prompt)
+  self.assertNotIn("unexpected",prompt)
+  self.assertFalse(self.job["publish_enabled"])
+ def test_external_mentor_schema_errors_still_block_legacy_jobs(self):
+  with self.assertRaises(m.Blocked):
+   m.cerebro_parse_mentor({"unexpected":"wrong"} ,None,"INSTAGRAM")
+ def test_malformed_teacher_not_permitted_to_override_physical_brand_scene(self):
+  anchor=m.cerebro_owned_plan(self.job,self.job["panels"][0])
+  plan=m.cerebro_owned_fallback_teacher(anchor)
+  self.assertEqual(plan["shot_plan"]["focal_length_mm"],"35mm")
+  self.assertIn("small localized orange glass",plan["shot_plan"]["color_grade"])
+  self.assertNotIn("apartment approval",m.cerebro_mentor_final_prompt(anchor,plan))
  def test_cost_and_publication_gates(self):
   self.assertEqual(self.job["max_image_budget_usd"],0.06)
   self.assertEqual(self.job["max_attempts_per_panel"],1)
