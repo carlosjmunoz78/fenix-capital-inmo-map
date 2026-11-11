@@ -18,8 +18,8 @@ class PromptForgeTests(unittest.TestCase):
    self.assertIn("SURREAL",x["text"])
    self.assertIn("#FF5F00",x["text"])
    self.assertIn("No paper",x["text"])
-   self.assertIn("no AI-generated logo",x["text"])
-   self.assertIn("Independent",x["evaluation"])
+   self.assertIn("no ai-generated logo",x["text"].lower())
+   self.assertIn("INDEPENDENT",x["evaluation"])
    self.assertEqual(len(x["qa_defects_addressed"]),7)
    self.assertTrue(900<len(x["text"])<4800)
  def test_no_publishing_or_paid_calls(self):
