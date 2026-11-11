@@ -90,7 +90,7 @@ test('unknown failure remains RECONCILE, never automatically retries',async()=>{
  await l.claim(a);
  assert.equal((await l.settle({...a,outcome:'RECONCILE'})).status,'RECONCILE');
  await fail(()=>l.claim(a),'SB_LEDGER_ALREADY_CLAIMED_OR_EXPIRED');
- await fail(()=>l.settle({...a,outcome:'COMPLETED',readback:{verified:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug}}),'SB_LEDGER_ALREADY_SETTLED_RECONCILE');
+ await fail(()=>l.settle({...a,outcome:'COMPLETED',after_sha256:R,readback:{verified:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug,sha256:R,checked_at:NOW-1000}}),'SB_LEDGER_ALREADY_SETTLED_RECONCILE');
 });
 test('cannot claim wrong hash, bad request ID, or skip prepare',async()=>{
  const d=db(),l=ledger({query:d.query,now:()=>NOW});
