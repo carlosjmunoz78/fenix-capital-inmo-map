@@ -31,8 +31,16 @@ class FacebookOneShot(unittest.TestCase):
   self.assertNotIn("INJECT FAKE BANK EMBLEM",final)
   inp=m.replicate_image_input(self.job,final)
   self.assertEqual(inp["aspect_ratio"],"1:1")
-  self.assertFalse(inp["raw"])
+  self.assertTrue(inp["raw"]) # Explicit FB one-shot photorealism opt-in; legacy stays FALSE
   self.assertNotIn("image_prompt",inp)
+ def test_fb_compact_storyboard_counters_repeating_arches(self):
+  plan=m.cerebro_owned_plan(self.job,self.job["panels"][0])
+  self.assertEqual(plan["creative_photo_profile"],"FACEBOOK_AUTHENTIC_PROPERTY_PHOTO_FIRST")
+  self.assertIn("normal full-size window",plan["text"])
+  self.assertIn("LESS THAN TWENTY PERCENT",plan["text"])
+  self.assertIn("TOWARD CAMERA",plan["text"])
+  self.assertIn("not CGI render",plan["text"])
+  self.assertIn("parent_prompt_forge_sha256",plan)
  def test_cost_and_publication_gates(self):
   self.assertEqual(self.job["max_image_budget_usd"],0.06)
   self.assertEqual(self.job["max_attempts_per_panel"],1)
