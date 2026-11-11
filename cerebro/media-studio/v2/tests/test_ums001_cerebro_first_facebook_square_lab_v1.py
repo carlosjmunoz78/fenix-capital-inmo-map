@@ -23,7 +23,7 @@ class FacebookOneShot(unittest.TestCase):
   prompt=m.prompt_messages(self.job,self.job["panels"][0],1,[],m.cerebro_owned_plan(self.job,self.job["panels"][0])["text"])
   self.assertIn("For Facebook 1:1",prompt[0]["content"])
   self.assertNotIn("For Instagram 4:5",prompt[0]["content"])
-  self.assertIn("temporary DeepSeek mentor",prompt[1]["content"])
+  self.assertIn("Temporary DeepSeek mentor, NOT the owner",prompt[1]["content"])
  def test_actual_provider_shape_is_square_without_reference_conditioning(self):
   a=m.cerebro_owned_plan(self.job,self.job["panels"][0])
   shot={key:"50mm natural motivated warm daylight and accurate shadows" for key in m.SHOT_KEYS}
