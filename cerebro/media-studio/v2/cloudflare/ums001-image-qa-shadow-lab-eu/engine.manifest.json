@@ -12,13 +12,14 @@
     "provider": "Cloudflare Workers Free",
     "name": "cerebro-ums001-image-qa-shadow-lab-eu",
     "kind": "module_queue_consumer",
-    "jurisdiction": "eu",
+    "jurisdiction": "WORKER_EXECUTION_GEO_NOT_ATTESTED",
     "worker_file": "worker.mjs",
     "workers_dev": false,
     "preview_urls": false,
     "routes": [],
     "cron": [],
-    "paid_model_calls": false
+    "paid_model_calls": false,
+    "storage_queue_data_jurisdiction": "EU_RESTRICTED"
   },
   "data_contract": {
     "incoming_event": "UMS001-LAB-LI-FEED-01-ARCHIVE-YYYYMMDD; strict 22-field schema",
@@ -111,7 +112,8 @@
     "editorial_signed": false,
     "destination_signed": false,
     "provider_provenance_authenticated_by_worker": false,
-    "published": false
+    "published": false,
+    "worker_execution_geolocation_verified": false
   },
   "tribunal": {
     "human_exceptions": [
