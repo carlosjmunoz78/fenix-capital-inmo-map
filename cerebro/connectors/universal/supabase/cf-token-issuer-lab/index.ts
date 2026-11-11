@@ -32,7 +32,12 @@ async function v2Metadata(){
   const hits=tokens.filter(x=>x?.id===ISSUER_V2_ID&&x?.name===ISSUER_V2_NAME);
   if(hits.length!==1)throw Error('V2_IDENTITY_NOT_VERIFIED');
   assertScopedIssuerMetadata(hits[0],perm);
+  const selectable=(name:string)=>groups.filter(g=>g?.name===name&&
+    Array.isArray(g.scopes)&&g.scopes.includes('com.cloudflare.api.account'))
+    .map(g=>g.is_selectable===true);
   return {status:'SCOPED_ISSUER_V2_VERIFIED',account_id:ACCOUNT_ID,
+   d1_write_selectable:selectable('D1 Write').length===1&&selectable('D1 Write')[0]===true,
+   d1_read_selectable:selectable('D1 Read').length===1&&selectable('D1 Read')[0]===true,
    permission:'Account API Tokens Write',issuer_id:ISSUER_V2_ID,
    service:'cerebro-fact001-cf-issuer-lab',environment:'LAB',
    token_value_exposed:false,external_writes:0,legacy_issuer_read:false};
