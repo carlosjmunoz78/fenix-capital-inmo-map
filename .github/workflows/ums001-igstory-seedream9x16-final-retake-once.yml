@@ -50,7 +50,7 @@ jobs:
       - name: Offline QA all protections before any provider call
         run: |
           python3 -m pip install 'Pillow==11.3.0'
-          python3 cerebro/media-studio/v2/tests/test_ums001_seedream_igstory_retake_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_igstory_retake_lab_v1.py -v
           python3 cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py --preflight
       - name: Generate exactly one original native 9x16 story under prepaid cap
         env:
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ums001-instagram-story-seedream9x16-second-final-prepaid-lab
-          path: ${{ runner.temp }}/ums001-seedream-igstory/
+          path: ${{ runner.temp }}/ums001-seedream-igstory-retake/
           if-no-files-found: warn
           retention-days: 14
       - name: Log no production actions
