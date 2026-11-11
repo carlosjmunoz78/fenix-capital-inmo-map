@@ -11,10 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   three-creative-images:
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108' &&
-      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map'
+    if: false # Paid BCD batch completed once; hard stop prevents accidental resubmission
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
