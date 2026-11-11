@@ -9,7 +9,7 @@
   "project_name": "cerebro-fact001-vercel-lab-20261111",
   "max_cost_eur": 0,
   "operation": "vercel.project.read_lab",
-  "job_id": "FACT001-VERCEL-CMD-20261111-READ-01",
-  "request_id": "FACT001-VERCEL-20261111-READ-01",
-  "idempotency_key": "fact001-vercel-oidc-20261111-read-01"
+  "job_id": "FACT001-VERCEL-CMD-20261111-READ-02",
+  "request_id": "FACT001-VERCEL-20261111-READ-02",
+  "idempotency_key": "fact001-vercel-oidc-20261111-read-02"
 }
