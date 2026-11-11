@@ -1,0 +1,26 @@
+name: UMS001 alternative Seedream LinkedIn canary offline no cost QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-seedream-linkedin-offline-preflight.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_seedream_linkedin_isolated_lab_v0.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_seedream_linkedin_isolated_lab_v0.py'
+      - 'cerebro/media-studio/v2/requests/UMS001_LINKEDIN_SEEDREAM_4_16X9_ONCE_LAB_V0.json'
+permissions:
+  contents: read
+jobs:
+  no-cost-new-model-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate independent UMS Producer + model contract without spending
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 cerebro/media-studio/v2/tests/test_ums001_seedream_linkedin_isolated_lab_v0.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_seedream_linkedin_isolated_lab_v0.py --preflight
+      - name: Explicit no paid API use
+        run: echo 'CEREBRO Prompt Factory owns source; Seedream new model only candidate; no DeepSeek or Replicate inference, no publication'
