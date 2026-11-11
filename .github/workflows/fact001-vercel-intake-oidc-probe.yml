@@ -38,6 +38,13 @@ jobs:
           if(denied.http!==401||forged.http!==401)throw Error('UNAUTHORIZED_HEALTH_OPEN');
           const signed=await call('health',jwt);
           if(signed.http!==200||signed.json.status!=='VERCEL_LAB_SIGNED_INTAKE_READY'||signed.json.vercel_api_writes!=='SIGNED_OWNED_LAB_ONLY')throw Error('SIGNED_HEALTH_FAILED');
+          const diagnostic=await call('diagnose',jwt);
+          if(diagnostic.http!==200||diagnostic.json.status!=='VERCEL_SAFE_SHAPE_PROBE'||diagnostic.json.credentials_exposed!==false||
+             diagnostic.json.writes!==0)throw Error('VERCEL_DIAGNOSTIC_NOT_CONFIRMED');
+          console.log('FACT001_VERCEL_SAFE_SSO_TYPE='+diagnostic.json.sso_type);
+          console.log('FACT001_VERCEL_SAFE_SSO_ENABLED='+diagnostic.json.sso_enabled);
+          console.log('FACT001_VERCEL_SAFE_LIVE='+String(diagnostic.json.live_true));
+          console.log('FACT001_VERCEL_SAFE_DEPLOYED='+String(diagnostic.json.deployed));
           const invalid={company_id:'fenix-capital',engine_id:'FACT-001',environment:'PROD',version:'0.1.0',provider:'vercel',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',project_id:'prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu',project_name:'cerebro-fact001-vercel-lab-20261111',max_cost_eur:0,operation:'vercel.project.read_lab',job_id:'FACT001-VERCEL-CMD-20261111-READ-01',request_id:'FACT001-VERCEL-20261111-READ-01',idempotency_key:'fact001-vercel-oidc-20261111-read-01'};
           const negative=await call('submit',jwt,invalid);
           if(negative.http!==403)throw Error('PROD_SCOPE_NOT_BLOCKED');

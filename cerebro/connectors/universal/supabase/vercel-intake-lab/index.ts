@@ -77,10 +77,33 @@ async function executeQueuedVercelCommand(cmd){
 
 Deno.serve(async(req)=>{
  const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1)||'';
- if(!['health','submit','status','execute'].includes(route))return answer(404,{status:'NOT_FOUND'});
+ if(!['health','submit','status','execute','diagnose'].includes(route))return answer(404,{status:'NOT_FOUND'});
  try{await verifyGitHubOidc(auth(req));}
  catch{return answer(401,{status:'UNAUTHORIZED'});}
  if(route==='health')return req.method==='GET'?answer(200,{status:'VERCEL_LAB_SIGNED_INTAKE_READY',provider:'vercel',scope:SCOPE,writes_to:'D1_QUEUE_ONLY',vercel_api_writes:'SIGNED_OWNED_LAB_ONLY'}):answer(405,{status:'METHOD_DENIED'});
+ if(route==='diagnose'){
+  if(req.method!=='GET')return answer(405,{status:'METHOD_DENIED'});
+  try{
+   return await withVercelServiceToken(async token=>{
+    const id='prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu';
+    const resp=await fetch('https://api.vercel.com/v9/projects/'+id+'?teamId=team_qnh6u1Ofy2WPp0MGEKlyMA50',
+      {method:'GET',headers:{Authorization:'Bearer '+token,Accept:'application/json'},redirect:'manual',signal:AbortSignal.timeout(15000)});
+    if(resp.status!==200)return answer(503,{status:'PROVIDER_DIAGNOSTIC_DENIED',http_status:resp.status});
+    const p=await resp.json();
+    const type=p?.ssoProtection?.deploymentType;
+    return answer(200,{status:'VERCEL_SAFE_SHAPE_PROBE',
+      id_matches:p?.id===id,team_matches:p?.accountId==='team_qnh6u1Ofy2WPp0MGEKlyMA50',
+      name_matches:p?.name==='cerebro-fact001-vercel-lab-20261111',
+      live_true:p?.live===true,
+      deployed:p?.latestDeployment!=null,
+      domains_count:Array.isArray(p?.domains)?p.domains.length:null,
+      sso_type:['all','preview','prod_deployment_urls_and_all_previews'].includes(type)?type:'NOT_PROVEN',
+      sso_enabled:p?.ssoProtection?.enabled===true?'TRUE':p?.ssoProtection?.enabled===false?'FALSE':'UNSET',
+      credentials_exposed:false,
+      writes:0});
+   });
+  }catch{return answer(503,{status:'DIAGNOSTIC_UNAVAILABLE',credentials_exposed:false});}
+ }
  if(req.method!=='POST')return answer(405,{status:'METHOD_DENIED'});
  let data;
  try{
