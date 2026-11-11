@@ -22,6 +22,7 @@ jobs:
       - name: Signed OIDC and safe upstream API tests, no credentials
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
+          python3 cerebro/connectors/universal/services/provider-headless-lab/tests/supabase-mgmt-d1-sqlite-acceptance.py
           node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/*.test.mjs
           node --test cerebro/connectors/universal/supabase/fact001-console-owner-canary-lab/tests/*.test.mjs
           node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
