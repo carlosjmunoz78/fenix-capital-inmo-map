@@ -1,14 +1,23 @@
 {
   "request_id": "UMS001-REPLICATE-BATCH-BCD-20261111-01",
   "company_id": "fenix",
+  "engine_id": "UMS-001",
   "environment": "LAB",
-  "status": "RESERVED_NO_RETRY",
   "provider": "replicate",
   "model_id": "black-forest-labs/flux-1.1-pro-ultra",
-  "max_predictions": 3,
-  "estimated_spend_usd": 0.18,
-  "auto_reload": "DISABLED_CONFIRMED_2026_11_11",
-  "billing_source": "EXISTING_PREPAID_CREDIT_CONFIRMED_2026_11_11",
-  "run_id": "42932346508",
-  "publication_approved": false
+  "cost_cap_usd": 0.18,
+  "predictions_submitted": 1,
+  "publication_approved": false,
+  "status": "RUNNING",
+  "qa_human_realism": "PENDING",
+  "drive_persistence": "PENDING_TRANSFER",
+  "outputs": [
+    {
+      "concept_id": "UMS-CRE-1111-B",
+      "prediction_id": "qhvj165qm5rmr0d1s038knth1m",
+      "status": "SUBMITTED",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false
+    }
+  ]
 }
