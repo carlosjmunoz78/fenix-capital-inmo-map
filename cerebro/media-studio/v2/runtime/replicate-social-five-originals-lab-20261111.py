@@ -34,7 +34,7 @@ def download_image(url):
     if len(data)<1024 or len(data)>12_000_000 or data[:3]!=b"\xff\xd8\xff":fail("BAD_IMAGE_BYTES")
     return data
 def main():
-    if os.getenv("GITHUB_REPOSITORY")!=REPO or os.getenv("GITHUB_REF_NAME")!=BRANCH:fail("BRANCH_DENIED")
+    if os.getenv("GITHUB_REPOSITORY")!=REPO or (os.getenv("GITHUB_HEAD_REF") or os.getenv("GITHUB_REF_NAME"))!=BRANCH:fail("BRANCH_DENIED")
     if os.getenv("UMS001_SOCIAL5_PREPAID_GATE")!="CONFIRMED_20261111_ONLY":fail("PREPAID_GATE_DENIED")
     order=json.loads(Path(REQUEST).read_text(encoding="utf-8"))
     batch=json.loads(Path(BATCH).read_text(encoding="utf-8"))
