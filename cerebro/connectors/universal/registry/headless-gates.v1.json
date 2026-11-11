@@ -45,7 +45,8 @@
         "Cloudflare Pages independent private LAB create/update/rollback/delete empty project-settings now verified; content deployment and rollback pending",
         "Cloudflare Workers signed OIDC/D1/cron command dispatch physically VERIFIED LAB; Pages, other APIs, console gateway, multi-company service ingress remain pending",
         "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending",
-        "Workers one-shot credential active without configured expiration: rotation, short-lived delegation and revocation plan pending; not 'forever' guaranteed"
+        "Workers one-shot credential active without configured expiration: rotation, short-lived delegation and revocation plan pending; not 'forever' guaranteed",
+        "Cloudflare D1 Free currently uses 10/10 allowed databases; independent create/delete new-D1 E2E cannot be certified at 0 EUR without safely reclaiming capacity (not authorized to delete existing databases)"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -347,6 +348,15 @@
         "cron_private": "*/5 * * * *",
         "rollback_bookmark_before_ddl": "00000156-00000002-00005120-fb09bc7ecaf4db07c39adda366dfcf1b",
         "docs": "docs/FACT001_CLOUDFLARE_PAGES_HEADLESS_PHYSICAL_E2E_2026-11-11.md"
+      },
+      "d1_free_capacity_20261111": {
+        "observed_databases": 10,
+        "free_tier_limit": 10,
+        "new_database_create_test": "BLOCKED_BY_FREE_TIER_CAPACITY",
+        "other_database_deleted_or_modified": false,
+        "additional_cost_authorized_eur": 0,
+        "verified_existing_lab_d1": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "safe_default": "reuse existing LAB D1 with isolated additive tables; no upgrade or destructive cleanup"
       }
     },
     {
