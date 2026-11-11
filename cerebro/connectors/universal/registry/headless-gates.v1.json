@@ -686,6 +686,23 @@
           "physical_restore_notion": false,
           "full_workspace_backup": false
         }
+      },
+      "incremental_operator_p4": {
+        "state": "LAB_PLANNER_CI_GREEN_NOT_LIVE",
+        "source": "services/provider-headless-lab/notion-incremental-sync.mjs",
+        "tests": "services/provider-headless-lab/tests/notion-incremental-sync.test.mjs",
+        "commit": "603a61f6ae1e2a6b48939b22a6bbbe7bb003b934",
+        "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991251014",
+        "ci_headless_group": "156 PASS 0 FAIL",
+        "physical_notions_writes": 0,
+        "existing_service_token": "VERIFIED_HISTORIC",
+        "backup_offset": 100,
+        "backup_checkpoint_cas_version": 4,
+        "backup_repeated": false,
+        "workspace_restore": "NOT_VERIFIED",
+        "sync_provider_execution": "OFF",
+        "queue_provider_writes": "OFF",
+        "next_block": "NOTION_INDEPENDENT_PERSISTENT_OPERATOR_DURABLE_LEDGER_PER_PAGE_OWNER_AND_ROLLBACK"
       }
     },
     {

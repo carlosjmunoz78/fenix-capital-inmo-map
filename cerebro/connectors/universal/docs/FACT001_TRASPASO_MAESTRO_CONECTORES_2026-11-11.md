@@ -123,3 +123,8 @@ Reverificado solo el nombre del PAT scoped en Vault y el servicio LAB `cerebro-f
 ## 11/11/2026 · P3 Vercel: descubrimiento diferencial de conexión
 
 El MCP oficial genérico Vercel ve team correcto pero 0 proyectos; el MCP contextual YA conectado `Vercel · ChatGPT · Proyecto LAB` ve los 2 proyectos reales en el mismo team (IDs cotejados). **No duplicar proyecto ni repetir OAuth indefinidamente.** Service token `cerebro_vercel_service_token_v1` existe en Vault por metadata; no se leyó. Sin cambios de despliegue, dominio ni suscripción. Estado P3 PARCIAL. Ver `docs/FACT001_VERCEL_ACCOUNT_BINDING_P3_2026-11-11.md`.
+
+
+## 11/11/2026 · P4 Notion · sincronización incremental en candidato LAB
+
+Se conservó íntegramente el backup de primeros **100 objetos**, checkpoint D1 `100/v4`, sin repetir. Reutilizado el operador gobernado candidato y su cola OFF ya existentes. Añadido exclusivamente un planificador `notion-incremental-sync.mjs` de reconciliación por hashes/snapshots de hijos LAB aprobados: `UNCHANGED`, cambio local pendiente de orden firmada, cambio remoto pendiente de snapshot, conflicto por cambios simultáneos/papelera. No toca páginas de Notion ni incrementa cuota; no copia contenido ni credenciales. [CI físico #42991251014](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991251014): **156/156 pruebas headless PASS**, además 22/22 emisor, 5/5 registry, 8/8 onboarding, 4/4 scaffold, 0 FAIL. Persistencia del operador, write Gateway, cola y recuperación global NOT VERIFIED. `docs/FACT001_NOTION_INCREMENTAL_P4_2026-11-11.md`.
