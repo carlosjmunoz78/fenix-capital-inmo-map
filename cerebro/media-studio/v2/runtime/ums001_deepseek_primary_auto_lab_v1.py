@@ -56,7 +56,8 @@ def json_write(path,doc):
 def allowed_job(doc):
  if not isinstance(doc,dict):deny("JOB_NOT_OBJECT")
  required={"schema_version","request_id","company_id","engine_id","environment","version","channel","asset_type","topic","audience","panels","publish_enabled","max_attempts_per_panel","max_image_budget_usd","max_deepseek_calls","max_deepseek_budget_usd","source_request"}
- if set(doc)!=required:deny("JOB_FIELDS")
+ if not required.issubset(doc) or (set(doc)-required)!={"style_reference_mode"} and (set(doc)-required)!=set():deny("JOB_FIELDS")
+ if doc.get("style_reference_mode","VERIFIED_CROP") not in ("VERIFIED_CROP","NONE"):deny("STYLE_REFERENCE_MODE_INVALID")
  if (doc["company_id"],doc["engine_id"],doc["environment"],doc["version"])!=("fenix",ENGINE,"LAB","1.0"):deny("SCOPE_DENIED")
  if doc["channel"] not in ALLOWED_CHANNELS or doc["asset_type"] not in ("IMAGE","CAROUSEL","SEO_HERO"):deny("CHANNEL_INVALID")
  if doc["channel"]=="SEO" and doc["asset_type"]!="SEO_HERO":deny("SEO_FORMAT_DENIED")
@@ -275,6 +276,15 @@ def vision_messages(job,panel,jpeg):
   {"type":"text","text":"Inspect this image independently against real campaign brief JSON: "+json.dumps(desc,ensure_ascii=False)},
   {"type":"image_url","image_url":{"url":"data:image/jpeg;base64,"+encoded,"detail":"high"}}
  ]}]
+def replicate_image_input(job,prompt):
+ # Preserve legacy conditioning unless a LAB order explicitly requests an
+ # independent generation. A no-reference trial is NOT an approval.
+ image_input={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
+              "output_format":"jpg","safety_tolerance":2}
+ if job["channel"]!="SEO" and job.get("style_reference_mode","VERIFIED_CROP")=="VERIFIED_CROP":
+  image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
+ return image_input
+
 def jpg_from_replicate(pred):
  url=pred.get("output")
  if isinstance(url,list):url=url[0] if url else None
@@ -331,10 +341,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
     "content_id":job["request_id"],"panel_id":panel["id"],"attempt":attempt,
     "prompt":prompt,"prompt_sha256":hash_bytes(prompt.encode()),
     "shot_plan":creative.get("shot_plan"),"risks":creative.get("risks"),"model":AI})
-   image_input={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
-     "output_format":"jpg","safety_tolerance":2}
-   if job["channel"]!="SEO":
-    image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
+   image_input=replicate_image_input(job,prompt)
    # Atomic reservation above means no duplicate run can spend on this job; failures never retry uncertain POST.
    try:
     code,pred=http_json(REPLICATE_ENDPOINT,"POST",replicate_key,{"input":image_input},timeout=85)
