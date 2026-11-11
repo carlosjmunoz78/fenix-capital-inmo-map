@@ -88,7 +88,7 @@ export async function tick(env,time=Date.now()){
   .bind(ID,time).first();
  if(!claim)return {status:'EMPTY_OR_ALREADY_CLAIMED'};
  let outcome;
- try{outcome=await operate(env.CF_WORKERS_TOKEN);}catch(e){outcome={status:'RECONCILE',reason:'UNEXPECTED_OPERATOR_ERROR'};}
+ try{outcome=await operate(env.CF_WORKERS_TOKEN);}catch(e){const c=e instanceof Error?e.message:'';outcome={status:'RECONCILE',reason:/^CF_GET_HTTP_(401|403|404|408|429|500|502|503|504)$/.test(c)?c:'UNEXPECTED_OPERATOR_ERROR'};}
  const result=await db.prepare("UPDATE fact001_cf_headless_worker_jobs_v1 SET state=?2,phase=?3,error_code=?4,updated_at_ms=?5 WHERE id=?1 AND state='RUNNING' AND attempts=1 RETURNING id,state,attempts")
   .bind(ID,outcome.status,outcome.result||'RECONCILE',outcome.reason||null,time).first();
  if(!result)throw Error('DURABLE_AUDIT_NOT_WRITTEN');
