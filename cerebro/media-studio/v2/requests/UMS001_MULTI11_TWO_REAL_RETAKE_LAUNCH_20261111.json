@@ -1,0 +1,16 @@
+{
+  "launch_id": "UMS001-MULTICHANNEL-IMAGE-11-20261111-V1-RETAKE02",
+  "environment": "LAB",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "max_replicate_predictions": 2,
+  "max_replicate_estimated_usd": 0.12,
+  "max_deepseek_calls": 4,
+  "max_deepseek_estimated_usd": 0.04,
+  "prepaid_credit_only": true,
+  "new_subscription_or_reload": false,
+  "publish": false,
+  "replicate_billing_verified_20261111": true,
+  "deepseek_balance_verified_20261111": true,
+  "run_once": true
+}
