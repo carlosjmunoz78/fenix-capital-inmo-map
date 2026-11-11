@@ -18,6 +18,7 @@ jobs:
         run: |
           node --test cerebro/connectors/universal/services/notion-batch-engine-lab/tests/*.test.mjs
           node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-once.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-index24.mjs
           node --experimental-strip-types --check cerebro/connectors/universal/services/notion-batch-engine-lab/index.ts
       - name: Static authorization and no-write policy
         run: |

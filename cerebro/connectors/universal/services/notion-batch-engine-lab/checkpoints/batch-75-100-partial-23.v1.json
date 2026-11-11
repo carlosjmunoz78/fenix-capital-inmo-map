@@ -1,0 +1,42 @@
+{
+  "format": "FACT001-NOTION-PARTIAL-BATCH-EVIDENCE-V1",
+  "status": "PARTIAL_23_OF_25_OFFSITE_VERIFIED",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "batch_start_offset": 75,
+  "batch_next_offset": 100,
+  "items_expected": 25,
+  "items_sealed": 23,
+  "pages_planned": 24,
+  "data_sources_planned": 1,
+  "pages_sealed": 23,
+  "data_sources_sealed": 0,
+  "blocks_sealed": 722,
+  "error": "ITEM_BLOCKED_23_HTTP_546_WORKER_RESOURCE_LIMIT",
+  "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "last_checkpoint_offset": 75,
+  "last_checkpoint_version": 3,
+  "github": {
+    "workflow_run_id": 42933659552,
+    "artifact_id": 13816509464,
+    "sha256": "642f2f933d00b5b020aedf5dd69639f66d8c7e0754a5481e93320c66b737fd18",
+    "zip_bytes": 702553,
+    "crc_pass": true
+  },
+  "drive": {
+    "file_id": "1MeUf70NJ6l2URxIjeYy9jO_5JPeYTh8x",
+    "sha256": "642f2f933d00b5b020aedf5dd69639f66d8c7e0754a5481e93320c66b737fd18",
+    "readback_sha256": "642f2f933d00b5b020aedf5dd69639f66d8c7e0754a5481e93320c66b737fd18",
+    "readback_bytes": 702553,
+    "exact_match": true,
+    "private": true
+  },
+  "checkpoints_moved": false,
+  "notion_writes": 0,
+  "full_batch_verified": false,
+  "full_workspace_backup": false
+}
