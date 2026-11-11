@@ -15,3 +15,7 @@
 - La D1 real sigue **sin archivo cifrado offsite**. La clave AES real sí existe en Vault, pero no se extrajo ni utilizó aquí. La clave fixture es pública: esto NO verifica custodia privada ni restauración de datos productivos.
 - Gate `backup_and_rollback=PENDING` y `production_autonomy=OFF`; faltan despliegue autorizado, export real cifrado, copia Drive + readback y restauración aislada, escrow independiente real.
 - R2 no habilitado y cuota D1 10/10; coste adicional contratado 0 EUR; los minutos incluidos en GitHub Actions sí consumen cuota.
+
+## Gate de caducidad confirmado · Cloudflare API 2026-11-12
+
+`CEREBRO-FACT001-D1-READ-LAB-20261110` está actualmente **active**, pero expira a las **2026-11-17 00:00 UTC**, según GET oficial de Cloudflare. El token emisor v2 permanece active; no se usaron ni revelaron valores. El sidecar inerte impide la exportación real hoy. No renovar por duplicado ahora: antes de la fecha hay que cerrar despliegue autorizado o preparar una rotación de credencial con mínimo privilegio y sin secreto en chat. Después de la expiración no asumir funcional el candidato existente. Backup real `PENDING`.

@@ -462,7 +462,11 @@
         "offsite_drive_folder_private": true,
         "offsite_ciphertext_uploaded": false,
         "physical_sqlite_restore_from_offsite": false,
-        "backup_and_rollback_gate": "PENDING"
+        "backup_and_rollback_gate": "PENDING",
+        "d1_read_token_status": "ACTIVE_2026_11_12",
+        "d1_read_token_name": "CEREBRO-FACT001-D1-READ-LAB-20261110",
+        "d1_read_token_expires_on": "2026-11-17T00:00:00Z",
+        "d1_read_token_rotation_gate": "PENDING_BEFORE_EXPIRY_IF_BACKUP_NOT_COMPLETED"
       },
       "d1_synthetic_offsite_restoration_20261112": {
         "state": "PHYSICAL_INDEPENDENT_OFFSITE_TRANSPORT_AND_RESTORE_VERIFIED_FIXTURE_ONLY",
