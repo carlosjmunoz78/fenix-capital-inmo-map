@@ -1,0 +1,11 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "provider": "cloudflare",
+  "operation": "cloudflare.worker.headless_lifecycle_lab",
+  "request_id": "FACT001-CF-HEADLESS-WORKER-20261111-ONE",
+  "max_cost_eur": 0
+}
