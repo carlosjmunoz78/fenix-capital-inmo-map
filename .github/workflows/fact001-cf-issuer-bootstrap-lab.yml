@@ -60,6 +60,8 @@ jobs:
             test.data?.legacy_issuer_read!==false||test.data?.external_writes!==0)
             throw Error('V2_SCOPE_REAL_BACKEND_NOT_VERIFIED');
           console.log('FACT001_CF_V2_EFFECTIVE_SCOPE=PASS');
+          console.log('FACT001_CF_V2_D1_WRITE_DELEGABLE='+String(test.data?.d1_write_selectable===true));
+          console.log('FACT001_CF_V2_D1_READ_DELEGABLE='+String(test.data?.d1_read_selectable===true));
           for(const route of ['v2-child-create','v2-child-revoke','issue-d1-read-lab','issue-scoped-issuer-v2']){
             const denied=await call(route,jwt,order);
             if(denied.status!==404)throw Error('ONE_TIME_MUTATION_ROUTE_STILL_LIVE');
