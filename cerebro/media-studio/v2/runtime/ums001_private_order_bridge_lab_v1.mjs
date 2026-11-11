@@ -7,7 +7,7 @@
  * autonomous producer. A caller cannot create trust by submitting a JSON flag.
  */
 import {spawnSync} from 'node:child_process';
-import {createHash,createHmac} from 'node:crypto';
+import {createHash,createHmac,createPublicKey,verify} from 'node:crypto';
 import {readFileSync,realpathSync,statSync,lstatSync} from 'node:fs';
 import {resolve,relative,dirname,isAbsolute} from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -68,6 +68,40 @@ function readPrivateJson(path,root){
  if(b.length>1_000_000)fail('JSON_TOO_BIG');
  return JSON.parse(b.toString('utf8'));
 }
+export function recordExistingSignedPrediction({order,master,history,db,privateRoot,
+  imagePath,providerProofPath,trustPath,bridgeSecret}){
+ const intake=registerAutoOrder({order,master,history,db});
+ if(intake.ledger.frozen||intake.ledger.attempts_remaining===0)fail('ATTEMPT_CAP_EXHAUSTED');
+ const rawBytes=readFileSync(privatePath(imagePath,privateRoot));
+ if(rawBytes.length<40_000||rawBytes.length>12_000_000||
+    rawBytes[0]!==0xff||rawBytes[1]!==0xd8||rawBytes[2]!==0xff)
+  fail('PROVIDER_IMAGE_NOT_VERIFIED_JPEG');
+ const providerDoc=readPrivateJson(providerProofPath,privateRoot);
+ const trust=readPrivateJson(trustPath,privateRoot);
+ const providerKey=trust.PROVIDER;
+ if(!providerKey||providerKey.revoked===true||typeof providerKey.public_key_pem!=='string'||
+    typeof providerKey.key_id!=='string'||providerKey.key_id.startsWith('SYNTHETIC_TEST_'))
+  fail('REAL_PROVIDER_TRUST_ANCHOR_MISSING');
+ if(providerDoc?.role!=='PROVIDER'||providerDoc.key_id!==providerKey.key_id||
+    typeof providerDoc.signature!=='string'||!providerDoc.payload)fail('SIGNED_PROVIDER_PROOF_MISSING');
+ const evidence=providerDoc.payload;
+ const expected={schema_version:1,...key(order),order_id:order.order_id,
+  provider:'bytedance/seedream-4',prediction_id:evidence.prediction_id,
+  raw_sha256:hash(rawBytes),model_call_authorized_by_this_bridge:false};
+ if(canon(evidence)!==canon(expected)||typeof evidence.prediction_id!=='string')
+  fail('PROVIDER_PROOF_MISMATCH');
+ let verified=false;
+ try{verified=verify(null,Buffer.from(canon(evidence)),createPublicKey(providerKey.public_key_pem),
+   Buffer.from(providerDoc.signature,'base64'))}catch{}
+ if(!verified)fail('PROVIDER_SIGNATURE_INVALID');
+ const d=runLedger(db,{action:'record_existing_prediction',...key(order),
+    prediction_id:evidence.prediction_id,raw_sha256:evidence.raw_sha256,
+    signed_evidence_sha256:hash(canon(providerDoc)),provider_call_authorized:false},bridgeSecret);
+ return {status:'SIGNED_EXISTING_PREDICTION_RECORDED_FOR_QA_ONLY',
+  item_id:order.item_id,total_attempts:d.total_attempts,attempts_remaining:d.attempts_remaining,
+  provider_calls_this_execution:0,publication_enabled:false,video_enabled:false};
+}
+
 export function reviewPrivateCandidate({order,master,history,db,privateRoot,files,bridgeSecret=undefined}){
  const intake=registerAutoOrder({order,master,history,db});
  // Public or caller-controlled references do not determine trusted public keys.
