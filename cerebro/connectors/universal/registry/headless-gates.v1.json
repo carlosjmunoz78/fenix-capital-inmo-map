@@ -192,7 +192,10 @@
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42926660411",
         "Second 25 encrypted Notion content: 24 pages and 1 source (68 rows), 949 blocks, 25/25 authenticated ciphertext, 0 Notion writes, index identity SHA matches unchanged 6632 objects",
         "Private Google Drive offsite second lot file 12UJyaeYukgOlFIHrLlebxLOgLTsdalcq, 1170629 bytes, ZIP SHA256 d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026 exact GitHub/Drive readback",
-        "Sequential evidence-only immutable Git checkpoints 0→25 and 25→50, D1 CAS not committed; 49 page bodies + 1 data source schema/68 row properties and blocks now backed up"
+        "Sequential evidence-only immutable Git checkpoints 0→25 and 25→50, D1 CAS not committed; 49 page bodies + 1 data source schema/68 row properties and blocks now backed up",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_CHECKPOINT_D1_CAS_EU_ROLLBACK_PHYSICAL_2026-11-11.md",
+        "2026-11-11: EU isolated D1 bc085807-a6ca-4c56-a288-fe56716fec6f checkpoint CAS v1 25→50 v2 verified, replay 0 changes, Time Travel restored 25/audit0 then re-applied 50/audit1",
+        "Cloudflare Free D1 10/10 databases, no new subscriptions; original recovery D1 untouched and native export signed SQL URL fetch 403 (no independent original SQL readback)"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -247,7 +250,7 @@
         "local_ci_failed": 0,
         "full_backup_gate": "PARTIAL_49_PAGES_1_SOURCE_68_ROWS_WITH_OFFSITE_READBACK_FIRST_TWO_LOTS; FULL_WORKSPACE_CONTENT_BINARY_COMMENTS_ESCROW_RESTORE_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_CHECKPOINT_D1_CAS_GATE_THEN_NEXT_50_75_MIXED_BATCH_AND_ISOLATED_RESTORE",
+        "next_block": "FACT001_NOTION_50_75_BATCH_USING_GENERIC_REUSABLE_LAB_PLANNER_AND_EXPORTER; LINK_D1_CAS_WITH_SCOPED_WORKER_ONLY_AFTER TESTS",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -270,7 +273,7 @@
         "service_version": 33,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "49/6446 pages + 1/186 data sources from first 50 manifest objects physically AES-256-GCM backed up offsite, 6397 pages and 185 sources remain in sequential content batches; binary assets, comments, independent key escrow, D1 CAS and isolated Notion restore pending.",
+        "actual_blocker": "D1 isolated checkpoint physically at 50/v2 and rollback proved; full Notion content media/comments/key escrow/physical restore pending, private CAS writer not installed; Free D1 10/10; original SQL download blocked 403",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -539,13 +542,31 @@
           "comments": false
         },
         "d1_content_checkpoint_cas": {
-          "status": "LOCAL_TEST_AND_GITHUB_CI_GREEN_NOT_APPLIED",
-          "tests": 6,
-          "d1_original_database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
-          "d1_changes": 0,
-          "required_gate": "NATIVE_D1_EXPORT_INDEPENDENT_SQL_FILE_AND_ROLLBACK_NOT_YET_VERIFIED",
-          "git_recorded_content_next_offset": 50,
-          "d1_cas_content_next_offset_verified": false
+          "status": "VERIFIED_PHYSICAL_LAB_MANAGEMENT_API_ONLY_NOT_AUTONOMOUS",
+          "database_name": "cerebro-fact001-notion-checkpoint-lab-eu",
+          "database_uuid": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+          "jurisdiction": "eu",
+          "schema_objects": 6,
+          "scope": {
+            "company_id": "fenix-capital",
+            "engine_id": "FACT-001",
+            "environment": "LAB",
+            "version": "1.0.0"
+          },
+          "current_offset": 50,
+          "cas_version": 2,
+          "audit_rows": 1,
+          "physical_rollback_restored_25": true,
+          "restored_to_50": true,
+          "replay_rejected": true,
+          "final_bookmark": "00000001-00000002-00005120-0c8f68f2e989b70ef0b41038a39ed857",
+          "old_recovery_d1_unmodified": true,
+          "independent_original_sql_snapshot_verified": false,
+          "cloudflare_free_d1_databases_used": 10,
+          "cloudflare_free_d1_max": 10,
+          "signed_private_writer_attached": false,
+          "production_promotion": false,
+          "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_CHECKPOINT_D1_CAS_EU_ROLLBACK_PHYSICAL_2026-11-11.md"
         }
       }
     },
