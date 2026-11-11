@@ -1,0 +1,28 @@
+name: UMS001 CEREBRO-first Facebook native 1 to 1 original offline safety QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-cerebro-first-facebook-square-offline-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_FB_SQUARE_CANARY_20261111_01.json'
+      - 'cerebro/media-studio/v2/tests/test_ums001_cerebro_first_facebook_square_lab_v1.py'
+permissions:
+  contents: read
+jobs:
+  no-paid-calls-facebook-square:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate local correct portrait-to-square flow and reject legacy mutation
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_cerebro_first_facebook_square_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_FB_SQUARE_CANARY_20261111_01.json --validate-only
+      - name: No hidden spend
+        run: echo 'OFFLINE only, no provider keys or payments, native 1 to 1 + CEREBRO ownership gate'
