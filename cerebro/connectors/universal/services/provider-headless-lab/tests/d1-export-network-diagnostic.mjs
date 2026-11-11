@@ -1,6 +1,7 @@
 // FACT-001 · non-mutating D1 schema-only signed-download probe. LAB only.
 // Does not log signed URLs, credentials, SQL or response bodies. Never persists data.
 import { createHash } from 'node:crypto';
+import { spawnSync } from 'node:child_process';
 
 const account = 'e39a57e1ac42650ca5a6d5307cf0ac8e';
 const database = '1305f791-7c44-47f9-946b-f330a09c88aa';
@@ -57,4 +58,18 @@ if (!response.ok) {
   console.log('D1_SCHEMA_DOWNLOAD_VERIFIED=true');
   console.log('D1_SCHEMA_BYTES=' + buf.byteLength);
   console.log('D1_SCHEMA_SHA256=' + createHash('sha256').update(buf).digest('hex'));
+  // Validate rebuild semantics entirely in an ephemeral in-memory SQLite database.
+  // Never write SQL to disk or print its contents.
+  const restore = spawnSync('python3', ['-c', [
+    'import sqlite3,sys',
+    'sql=sys.stdin.read()',
+    'db=sqlite3.connect(":memory:")',
+    'db.executescript(sql)',
+    'print(db.execute("SELECT count(*) FROM sqlite_master WHERE type = ? AND name NOT LIKE ?", ("table","sqlite_%")).fetchone()[0])',
+  ].join('\\n')], { input: sql, encoding: 'utf8', timeout: 20000, maxBuffer: 100000 });
+  if (restore.status !== 0) throw new Error('D1_SCHEMA_IN_MEMORY_RESTORE_FAILED');
+  const restoredTables = Number(restore.stdout.trim());
+  if (!Number.isInteger(restoredTables) || restoredTables < 10) throw new Error('D1_RESTORE_TABLE_COUNT_INVALID');
+  console.log('D1_SCHEMA_IN_MEMORY_RESTORE=PASS');
+  console.log('D1_RESTORED_TABLE_COUNT=' + restoredTables);
 }
