@@ -392,6 +392,21 @@
         "prod_mutations": false,
         "additional_subscriptions_eur": 0,
         "evidence": "docs/FACT001_CLOUDFLARE_D1_LOGICAL_E2E_2026-11-11.md"
+      },
+      "d1_schema_export_restore_20261111": {
+        "state": "VERIFIED_SCHEMA_ONLY_NOT_DATA_BACKUP",
+        "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "schema_bytes": 13371,
+        "sha256": "4dfe7b88962813e6874ce920035cf89f5726d66e0a235a75d187e7fbf4bac11b",
+        "download_http_status": 200,
+        "sqlite_memory_restore": "PASS",
+        "live_user_table_parity": "23_OF_23_PASS",
+        "cloudflare_internal_table_excluded": "_cf_KV",
+        "data_backup": "NOT_DONE",
+        "encrypted_offsite_custody": "NOT_DONE",
+        "full_restore": "NOT_DONE",
+        "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43109577679",
+        "source": "docs/FACT001_CONNECTORES_DUAL_ACEPTACION_2026-11-11.md"
       }
     },
     {
@@ -414,7 +429,9 @@
       "gaps": [
         "Shared independent service currently supports read-only listing; former test LAB resource and one-off write runner were removed",
         "Durable signed OIDC LAB queue + fixed-owned project GET/PATCH/rollback + deployment list VERIFIED; broad deployments, project delete, multi-project permissions still pending",
-        "No PROD promotion; LAB signed service queue verified with 4/4 completed and exact owner/project"
+        "No PROD promotion; LAB signed service queue verified with 4/4 completed and exact owner/project",
+        "CEREBRO OIDC+Vault service deployment/rollback not physically verified; ChatGPT Universal Vercel OAuth rollback proven LAB",
+        "Generic Vercel MCP team grant still lacks authorization; 0 projects vs Universal 3"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -424,8 +441,8 @@
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "VERIFIED_PHYSICAL_VAULT_SIGNED",
         "isolated_lab_delete": "VERIFIED",
-        "backup_and_rollback": "VERIFIED_LAB_FRAMEWORK_SETTINGS",
-        "cost_guard_verified": "VERIFIED_0_EUR_NO_DEPLOYMENTS_NEW_HOBBY_PROJECT",
+        "backup_and_rollback": "VERIFIED_LAB_FRAMEWORK_AND_PROTECTED_DEPLOYMENT_ALIAS_ROLLBACK_CHATGPT_ONLY",
+        "cost_guard_verified": "HOBBY_NO_NEW_SUBSCRIPTION_LAB_ONLY_USAGE_NOT_INDEPENDENTLY_RECONCILED",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "VERIFIED_LAB_5_EVENTS"
       },
@@ -523,6 +540,24 @@
           "SECURE_ROTATION_AND_INCIDENT_RECOVERY"
         ],
         "evidence_doc": "docs/FACT001_VERCEL_VAULT_SIGNED_SERVICE_PHYSICAL_E2E_2026-11-11.md"
+      },
+      "protected_lab_deployment_rollback_20261111": {
+        "state": "VERIFIED_LAB_FROM_CHATGPT_OAUTH_NOT_CEREBRO_HEADLESS",
+        "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+        "project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
+        "sso_all": true,
+        "live": false,
+        "baseline_deployment_id": "dpl_DCk7j7wNbeaHmFc28CQ8b8DwHU9z",
+        "update_deployment_id": "dpl_AdnFjkCYenNU3e7fiAp6PgcoamcZ",
+        "both_ready": true,
+        "rollback_target": "baseline_deployment_id",
+        "baseline_alias_count_after_rollback": 2,
+        "update_alias_count_after_rollback": 0,
+        "first_deployment_preview_requested_but_provider_target": "production",
+        "commercial_fenix_projects_modified": false,
+        "created_deployments_retained_under_sso": 2,
+        "full_headless_autonomy": "PENDING",
+        "generic_connector_oauth": "PENDING"
       }
     },
     {
