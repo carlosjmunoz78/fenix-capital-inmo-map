@@ -1,14 +1,23 @@
 {
   "request_id": "UMS001-REPLICATE-SOCIAL-FIVE-20261111-01",
   "company_id": "fenix",
+  "engine_id": "UMS-001",
   "environment": "LAB",
-  "status": "RESERVED_NO_RETRY",
   "provider": "replicate",
   "model_id": "black-forest-labs/flux-1.1-pro-ultra",
-  "max_predictions": 5,
-  "estimated_spend_usd": 0.3,
-  "auto_reload": "DISABLED_CONFIRMED_2026_11_11",
-  "billing_source": "EXISTING_PREPAID_CREDIT_CONFIRMED_2026_11_11",
-  "run_id": "42986485405",
-  "publication_approved": false
+  "cost_cap_usd": 0.3,
+  "predictions_submitted": 1,
+  "publication_approved": false,
+  "status": "RUNNING",
+  "qa_human_realism": "PENDING",
+  "drive_persistence": "PENDING_TRANSFER",
+  "outputs": [
+    {
+      "concept_id": "IGC-2026-01",
+      "prediction_id": "kv33phk7hnrmr0d1s6sswjvba0",
+      "status": "SUBMITTED",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false
+    }
+  ]
 }
