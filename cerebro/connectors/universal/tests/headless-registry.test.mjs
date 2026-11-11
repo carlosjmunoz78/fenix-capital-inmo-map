@@ -9,7 +9,6 @@ const scoped=Object.freeze({
  autonomous_queue:'VERIFIED_LAB_SIGNED_WORKFLOW',
  isolated_lab_update:'VERIFIED_PHYSICAL_VAULT_SIGNED',
  backup_and_rollback:'VERIFIED_LAB_FRAMEWORK_SETTINGS',
- cost_guard_verified:'VERIFIED_0_EUR_NO_DEPLOYMENTS_NEW_HOBBY_PROJECT',
  observability_and_audit:'VERIFIED_LAB_5_EVENTS'
 });
 test('all five targeted connectors have explicit 4D scope and status',()=>{
@@ -45,12 +44,16 @@ test('Notion LAB CRUD evidence exists, but autonomous queue and PROD remain pend
   assert.equal(c.verification.production_promotion_policy,'PENDING',c.id);
  }
 });
-test('Vercel signed workflow and reversible framework settings do not prove deploy rollback',()=>{
+test('Vercel signed service framework rollback and ChatGPT protected deploy rollback remain separate proofs',()=>{
  const v=x.connectors.find(c=>c.id==='vercel');
  assert.equal(v.state,'PARTIAL');
  assert.equal(v.verification.autonomous_queue,'VERIFIED_LAB_SIGNED_WORKFLOW');
  assert.equal(v.verification.backup_and_rollback,'VERIFIED_LAB_FRAMEWORK_SETTINGS');
- assert.equal(v.verification.cost_guard_verified,'VERIFIED_0_EUR_NO_DEPLOYMENTS_NEW_HOBBY_PROJECT');
+ assert.equal(v.verification.cost_guard_verified,'PENDING');
+ assert.equal(v.protected_lab_deployment_rollback_20261111.state,'VERIFIED_LAB_FROM_CHATGPT_OAUTH_NOT_CEREBRO_HEADLESS');
+ assert.equal(v.protected_lab_deployment_rollback_20261111.baseline_alias_count_after_rollback,2);
+ assert.equal(v.protected_lab_deployment_rollback_20261111.update_alias_count_after_rollback,0);
+ assert.equal(v.protected_lab_deployment_rollback_20261111.full_headless_autonomy,'PENDING');
  assert.ok(v.gaps.some(s=>s.includes('broad deployments')&&s.includes('pending')));
  assert.ok(v.evidence.some(s=>s.includes('43054365439')));
 });

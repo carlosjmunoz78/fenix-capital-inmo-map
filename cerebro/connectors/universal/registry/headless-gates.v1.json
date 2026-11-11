@@ -431,7 +431,8 @@
         "Durable signed OIDC LAB queue + fixed-owned project GET/PATCH/rollback + deployment list VERIFIED; broad deployments, project delete, multi-project permissions still pending",
         "No PROD promotion; LAB signed service queue verified with 4/4 completed and exact owner/project",
         "CEREBRO OIDC+Vault service deployment/rollback not physically verified; ChatGPT Universal Vercel OAuth rollback proven LAB",
-        "Generic Vercel MCP team grant still lacks authorization; 0 projects vs Universal 3"
+        "Generic Vercel MCP team grant still lacks authorization; 0 projects vs Universal 3",
+        "Usage and cost hard-stop for two protected synthetic LAB deployments require independent billing/quota readback; no plan purchase was made"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
@@ -441,8 +442,8 @@
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "VERIFIED_PHYSICAL_VAULT_SIGNED",
         "isolated_lab_delete": "VERIFIED",
-        "backup_and_rollback": "VERIFIED_LAB_FRAMEWORK_AND_PROTECTED_DEPLOYMENT_ALIAS_ROLLBACK_CHATGPT_ONLY",
-        "cost_guard_verified": "HOBBY_NO_NEW_SUBSCRIPTION_LAB_ONLY_USAGE_NOT_INDEPENDENTLY_RECONCILED",
+        "backup_and_rollback": "VERIFIED_LAB_FRAMEWORK_SETTINGS",
+        "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "VERIFIED_LAB_5_EVENTS"
       },
