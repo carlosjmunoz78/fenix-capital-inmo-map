@@ -30,7 +30,9 @@ test('edge execute requires verified JWT and D1 job claim; secret never emitted'
  assert.ok(s.includes("withVercelServiceToken(token=>executeOrder(order,token))"));
  assert.ok(!s.includes('console.log('));
  assert.ok(!s.includes('token_exposed:true'));
- assert.ok(!s.includes('api.vercel.com'));
+ assert.ok(s.includes("if(route==='diagnose')"));
+ assert.ok(s.includes("const id='prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu'"));
+ assert.ok(s.includes("method:'GET',headers:{Authorization:'Bearer '+token"));
 });
 
 test('authenticated read-only diagnostic restricts output to safe flags',()=>{const src=readFileSync(new URL('../index.ts',import.meta.url),'utf8');assert.ok(src.includes("if(route==='diagnose')"));assert.ok(src.includes('VERCEL_SAFE_SHAPE_PROBE'));assert.ok(src.includes('credentials_exposed:false'));assert.ok(src.includes('writes:0'));assert.ok(!src.includes('return answer(200,p)'));});

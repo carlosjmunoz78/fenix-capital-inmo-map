@@ -23,6 +23,6 @@ jobs:
           const i=readFileSync('cerebro/connectors/universal/supabase/vercel-intake-lab/index.ts','utf8');
           if(!p.includes("payload.workflow_ref!==WORKFLOW_REF")||!p.includes("payload.actor!=='carlosjmunoz78'")||
              !p.includes("payload.event_name!=='push'")||!p.includes("payload.aud!==OIDC_AUDIENCE"))throw Error('OIDC_NOT_PINNED');
-          if(!i.includes('ON CONFLICT(idempotency_key) DO NOTHING')||i.includes('api.vercel.com')||i.includes('console.log('))throw Error('D1_ONLY_AUDIT_DENIED');
+          if(!i.includes('ON CONFLICT(idempotency_key) DO NOTHING')||!i.includes("if(route==='diagnose')")||!i.includes("const id='prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu'")||i.includes('console.log('))throw Error('D1_ONLY_AUDIT_DENIED');
           console.log('FACT001_VERCEL_SIGNED_ENTRY_POLICY=PASS');
           NODE

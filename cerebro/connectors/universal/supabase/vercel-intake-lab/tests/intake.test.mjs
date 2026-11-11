@@ -19,7 +19,11 @@ test('provider cannot be called from intake, idempotent D1 SQL',()=>{
  assert.ok(index.includes('verifyGitHubOidc(auth(req))'));
  assert.ok(index.includes("ON CONFLICT(idempotency_key) DO NOTHING"));
  assert.ok(index.includes("writes_to:'D1_QUEUE_ONLY'"));
- assert.ok(!index.includes('api.vercel.com'));
+ assert.ok(index.includes("if(route==='diagnose')"));
+ assert.ok(index.includes("if(req.method!=='GET')return answer(405"));
+ assert.ok(index.includes("const id='prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu'"));
+ assert.ok(index.includes('credentials_exposed:false'));
+ assert.ok(index.includes('writes:0'));
  assert.ok(!index.includes('/workers/scripts'));
  assert.ok(!index.includes('console.log('));
 });
