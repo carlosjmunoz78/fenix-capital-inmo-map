@@ -60,6 +60,26 @@
       ],
       "artifact_id": 13868213530,
       "note": "Real SEO 16:9 close-up portrait instead of wide property-visit environmental editorial, malformed right hand, rejected"
+    },
+    {
+      "run_id": 43051178813,
+      "request_id": "UMS001-MULTI11-IGFEED-20261111-02",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13868479391,
+      "note": "REAL IG 4:5: two front-facing people, but generic orange corridor, flattened lighting and no intended Córdoba property context or physical glass sculpture. Rejected."
+    },
+    {
+      "run_id": 43051178813,
+      "request_id": "UMS001-MULTI11-SEOHERO-20261111-02",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13868479391,
+      "note": "REAL SEO 16:9: domestic interior physically generated, human cast absent. DeepSeek Vision summary exceeded schema so NO valid QA score; rejected. Never infer model success from GH workflow status."
     }
   ],
   "rules": [
@@ -98,6 +118,14 @@
     {
       "code": "COMPOSITION_WEAK",
       "instruction": "REAL QA 43049681977 SEO score 62: landscape 16:9 dimensions do not prove SEO framing. Require Córdoba home ENVIRONMENT occupying over half of photo, two adults medium-size on one side, wide negative space for HTML heading, physically integrated orange artwork not a flat rectangle; avoid hands reaching toward lens."
+    },
+    {
+      "code": "GENERIC_SCENE",
+      "instruction": "Physical IG final retake 43051178813 52/100 had two adults facing camera but generic uniform orange corridor. Real Córdoba home/patio architectural context, plausible natural key/fill, precise unusual physical orange glass installation and meaningful narrative are mandatory; frontal faces alone never justify approval."
+    },
+    {
+      "code": "FACE_MISSING",
+      "instruction": "Physical SEO final retake 43051178813 produced 16:9 real estate interior without the two adults required by brief. Reject missing cast even if wide dimensions correct. Avoid generating empty real-estate staged living room when editorial requires people visiting."
     }
   ],
   "policy": {
@@ -111,5 +139,5 @@
     "cost_estimate_replicate_usd": 0.42,
     "estimated_usage_only": true
   },
-  "next_gate": "Design stronger safe cinematic source without approval-like icons, build brand postprocessor and comprehensive visual QA before enabling automatic publication or next video phase."
+  "next_gate": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY: Four physical IG/SEO canaries failed artistic approval; halt paid retries, independent visual QA and creative Prompt Factory intervention needed before remaining 9 or videos. Preserve all rejected raw files and refs."
 }
