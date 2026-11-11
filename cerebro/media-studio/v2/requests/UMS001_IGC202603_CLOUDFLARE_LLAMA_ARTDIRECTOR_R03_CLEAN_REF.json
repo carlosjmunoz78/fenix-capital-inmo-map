@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "asset_type": "CAROUSEL_COVER",
+  "source_role": "CREATIVE_DIRECTION_FROM_CLOUDFLARE_WORKERS_AI",
+  "provider": "CLOUDFLARE_WORKERS_AI",
+  "model_requested": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "model_reported": "@cf/meta/llama-3.3-70b-json",
+  "model_response_format": "JSON_OBJECT",
+  "neuron_usage_reported": 81.0859603881836,
+  "operator_initiated_model_request": true,
+  "fully_automated_model_router": false,
+  "editorial_qa": "PENDING",
+  "prior_test": "UMS001_IGC202603_QWEN_CREATIVE_R01_VERDICT.json",
+  "generated_direction": {
+    "concept_title": "Surreal Due Diligence",
+    "prompt_en": "Create a photorealistic image of a 43-year-old female adviser and a 38-year-old male first-time home buyer standing in a warm, genuine Spanish Córdoba patio with green-orange trees and antique stone arches. The camera is positioned at a 50mm waist-up close-medium shot, with the subjects' faces occupying 60% of the frame. Behind them, a surreal sculptural illusion emerges, comprising vivid orange #FF5F00, translucent gold, and floating home-shaped stone arches that defy gravity. The atmosphere is serene, with natural editorial skin tones and no distracting elements. The focus is on the subjects' faces, conveying a sense of trust and reassurance as they discuss the importance of checking what matters before paying a house purchase deposit. The sculpture behind them adds a touch of wonder, symbolizing the dream of finding the perfect home. Aspect ratio is 4:5.",
+    "negative": "No tiny humans, generic 3D render, neon rejection X, bank logos, text, printed sheets, seals, watermarks, or dominant purple tones. Avoid a generic grand hotel interior and ensure the setting is a authentic Spanish patio. Do not include any symbols of financial judgment or rejection.",
+    "self_critique": "Ensure the image is highly realistic, with intricate details and textures that bring the scene to life. Pay attention to the lighting, making sure it is warm and inviting, with a natural glow that accentuates the subjects' faces and the surreal sculpture behind them. The overall mood should be one of serenity and trust, conveying the importance of due diligence in the home-buying process."
+  },
+  "controls": {
+    "logos": "ORIGINAL_MR_BOGART_SOURCE_ONLY_IN_POSTPROCESS",
+    "no_text_in_base_image": true,
+    "orange_primary": "#FF5F00",
+    "forbid_financial_claims": true,
+    "source_image_guide": "IGC202603_OWNER_APPROVED_FEMALE_FACE_CLEAN_CROP_BASE64.json",
+    "source_image_sha256": "6c1e78c557cca26d475681fa81afc5a805d5bdc909738eb88931b101e27f3019",
+    "intended_replicate_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "max_provider_predictions": 1,
+    "estimated_provider_usage_usd": 0.06,
+    "publish_enabled": false,
+    "next_stage": "REP_D1_SINGLE_PREDICTION_NEW_CLEAN_REFERENCE"
+  },
+  "source_evidence": "Real Workers AI call to account e39a57e1ac42650ca5a6d5307cf0ac8e; request performed by Cloudflare connector; output and usage retained; NOT yet automated inside CEREBRO Gateway.",
+  "version": "R03_CLEAN_FEMALE_FACE_REFERENCE",
+  "visual_qa_correction": "R02 photo had an invented glowing checkmark and a visually ambiguous woman; style reference likely introduced checkmarks and wrong casting. New source is the top cropped woman-face-only area of an owner-approved ChatGPT sample, free from text, checkmarks and brand.",
+  "generative_model_called_again_for_R03": false
+}
