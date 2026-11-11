@@ -5,7 +5,7 @@
   "environment": "LAB",
   "version": "1.0.0",
   "purpose": "CEREBRO headless service autonomy per provider, not ChatGPT MCP OAuth",
-  "updated_on": "2026-11-10",
+  "updated_on": "2026-11-11",
   "green_requires": [
     "independent_service_identity",
     "owner_order_headless",
@@ -56,12 +56,12 @@
       },
       "service_identity_read": "VERIFIED",
       "credential_broker": {
-        "scope_correction": "PROVIDER_DENIED_SELF_DELEGATION",
-        "issuer_v1": "ACTIVE_OVERPRIVILEGED_DO_NOT_REVOKE_UNTIL_V2_TESTED",
-        "issuer_v2": "NOT_PROVISIONED",
+        "scope_correction": "VERIFIED_EFFECTIVE_WRITE_ONLY_V2",
+        "issuer_v1": "ACTIVE_OVERPRIVILEGED_LEGACY_PENDING_DEPENDENCY_CLEARANCE",
+        "issuer_v2": "ACTIVE_MINIMAL_VAULT_BACKEND_VERIFIED",
         "account_scope": "e39a57e1ac42650ca5a6d5307cf0ac8e",
         "provider_metadata_checked_on": "2026-11-11",
-        "token_count_readonly": 3,
+        "token_count_readonly": 4,
         "forbidden_present": [
           "Billing Write",
           "Billing Read",
@@ -70,17 +70,43 @@
           "Account API Gateway Read"
         ],
         "required_replacement_permission": "Account API Tokens Write",
-        "child_token_lifecycle": "NOT_TESTED",
-        "gateway_dual_e2e": "NOT_TESTED",
+        "child_token_lifecycle": "PHYSICAL_LAB_VERIFIED_ISSUE_D1_READ_ADMIN_403_REVOKE_D1_401",
+        "gateway_dual_e2e": "NOT_VERIFIED_FROM_REAL_CONSOLE",
         "cost_additional_authorized_eur": 0,
-        "evidence": "docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md",
+        "evidence": "docs/FACT001_CLOUDFLARE_V2_E2E_CIERRE_2026-11-11.md",
         "blocked_reason": "ISSUER_GROUP_NOT_SELECTABLE_USING_ISSUER_V1",
-        "last_signed_workflow_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42990091152",
-        "lab_sidecar_candidate_version": 6,
-        "lab_sidecar_rollback": "REQUEST_BLOCKED_BY_TOOL_SECURITY_CONTROL",
+        "last_signed_workflow_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342",
+        "lab_sidecar_candidate_version": 10,
+        "lab_sidecar_rollback": "V9_BACKUP_PRESERVED_IN_GIT_COMMIT_40ea6ee6_AND_PRIOR_EDGE_VERSION_HISTORY",
         "v1_revoked": false,
-        "provider_tokens_created": 0,
-        "next_block": "ONE_TIME_OWNER_INTERACTIVE_SCOPED_ISSUER_CREDENTIAL_VAULT_PAIRING"
+        "provider_tokens_created": 1,
+        "next_block": "CF_GATEWAY_DUAL_CLIENT_DURABLE_AUTHORIZED_QUEUE_AFTER_EXISTING_GATEWAY_DEPENDENCY_GATES",
+        "issuer_v2_id": "86074f623bacb356c9b19c7695986c54",
+        "v2_permissions": [
+          "Account API Tokens Write"
+        ],
+        "v2_forbidden_permissions_absent": [
+          "Billing Write",
+          "Billing Read",
+          "Integration Write",
+          "Account API Gateway",
+          "Account API Gateway Read",
+          "DNS Write",
+          "Workers Admin"
+        ],
+        "child_token_leftover": false,
+        "child_vault_test_secrets_leftover": 0,
+        "lab_sidecar_current_version": 10,
+        "lab_sidecar_status": "ACTIVE_READ_ONLY_OIDC_OWNER_SIGNATURE",
+        "lab_sidecar_bundle_sha256": "2e7dc0a823b353022fbb426c2a24e1a718d0351e38c6202a1c2389b3d95a81c8",
+        "legacy_write_routes_access": "HTTP_404_VERIFIED",
+        "provider_test_child_revoked": 1,
+        "additional_subscriptions_created": 0,
+        "d1_inventory_before": 10,
+        "d1_inventory_after": 10,
+        "dual_client": "CHATGPT_CLOUDFLARE_OAUTH_AND_CEREBRO_GITHUB_OIDC_VAULT_BOTH_PHYSICAL_LAB_VERIFIED",
+        "gateway_console": "NOT_CONNECTED_OR_VERIFIED",
+        "automation_signed_jobs": "PROOF_OF_ONE_SHOT_OWNER_TRIGGER_ONLY_NOT_SCHEDULED_AUTONOMY"
       }
     },
     {

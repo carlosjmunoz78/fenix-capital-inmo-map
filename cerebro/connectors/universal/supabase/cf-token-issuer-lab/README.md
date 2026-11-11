@@ -1,9 +1,27 @@
-# CF-TOKEN-ISSUER-001 LAB · Cloudflare account D1 Read child
-Estado: SOURCE CANDIDATE / no publicar PROD. Un único endpoint operativo `POST /issue-d1-read-lab`, sólo con OIDC GitHub firmado del workflow exacto en rama PR #44. El secreto emisor ya existe en `vault.secrets` como `cerebro_cf_account_token_issuer_v1`; esta función no lo recibe por HTTP, no expone los tokens, no imprime el `result.value` de Cloudflare. Token hijo fijo y limitado: `CEREBRO-FACT001-D1-READ-LAB-20261110`, `D1 Read`, cuenta Fénix exacta, caducidad 2026-11-17. Búsqueda antirrepetición por nombre, advisory lock y comprobación Vault; si ya existe, fail-closed o idempotente. Sólo `/accounts/{account_id}/tokens` GET/POST/DELETE exacta para la emisión y rollback, `permission_groups` GET y `/d1/database` GET de verificación. No DNS, Worker, D1 write, billing, tarjetas, suscripciones, App, CRM, main ni CEREBRO Console v33. Aun cuando token padre tiene Billing Write, este código nunca llama a esos endpoints y requiere estrechar sus permisos en su ciclo de vida. Nunca llamar con token plaintext de GitHub.
-La función NO es todavía un broker ChatGPT+CEREBRO genérico ni la autorización de emitir tokens de producción. Se requiere dual E2E, firma real del usuario para acceso ChatGPT y servicio CEREBRO con identidades separadas, token issuer restrictivo, rotación y revocación demostradas y rollback antes de promoción. Máximo coste adicional previsto 0 euros; no nuevas suscripciones.
-## Gate físico
-- Desplegar exclusivamente nuevo slug `cerebro-fact001-cf-issuer-lab` si está ausente; `verify_jwt=false` sólo porque OIDC no es JWT de Supabase; `verifyGitHubOidc` verifica firma RS256, issuer, audience, exp, repo, rama, workflow y evento en cada ruta.
-- Test local `node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/issuer-policy.test.mjs`.
-- El request `requests/bootstrap.v1.json` debe crearse ÚNICAMENTE después del deploy aislado para disparar workflow limitado (sin token en Actions). No ejecutar dos veces si resultado incierto.
-- Comprobar 401 anónimo/falso y 200 OIDC real. 200 emisión debe incluir `credential_exposed=false`. Consulta DB metadata `select name from vault.secrets where name='cerebro_cf_d1_read_lab_20261110'` sin mostrar decrypted secret. Verificar número de tokens y registro sin el valor. No afirmar emisión si 503.
-- Reversibilidad: revocar sólo child exacto, deshabilitar nuevo workflow y retirar sidecar tras auditoría de dependencias, sin tocar token padre ni sistemas existentes.
+# FACT-001 · Cloudflare Issuer v2 LAB · Estado 11/11/2026
+
+**ACTIVE v10 · SOLO LECTURA · NO CONECTADO A CEREBRO CONSOLE PROD.**
+
+## Identidad y seguridad
+- Cuenta fija `e39a57e1ac42650ca5a6d5307cf0ac8e`; token `cerebro_cf_account_token_issuer_v2` almacenado **solo en Supabase Vault** del proyecto `cluhljgonannaafpmblx`.
+- V2 verificado en cuenta con exactamente `Account API Tokens Write` (excluidos Billing, Integration, DNS y Workers).
+- Edge `cerebro-fact001-cf-issuer-lab` v10 `verify_jwt=false` **porque usa OIDC GitHub RS256 custom obligatorio**, exacto repo/rama/workflow/audiencia/actor. No hay bypass anónimo.
+- ALLOWLIST en runtime: `GET /health` y `POST /verify-scoped-issuer-v2`; ambas requieren firma. Mutaciones `v2-child-create`, `v2-child-revoke`, `issue-d1-read-lab`, `issue-scoped-issuer-v2` devuelven **404**.
+- Sin rutas de escritura a Cloudflare en bundle vivo. Tampoco se accede al emisor v1 en este servicio.
+- Bundle sha256: `2e7dc0a823b353022fbb426c2a24e1a718d0351e38c6202a1c2389b3d95a81c8`.
+- Cron y cola de órdenes autónomas **NO habilitados**. NO confundir GitHub OIDC LAB con orden firmada del usuario en Console PROD.
+
+## E2E previo y cleanup completados
+- [Run issuer v2 verificado](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42993618913).
+- [Run E2E D1 Read child + revoke + HTTP401](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42994346869).
+- [Run post-cutover v10 readonly](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342).
+- Hijo efímero revocado y eliminado Cloudflare; dos secretos Vault de prueba retirados. E2E v9 y rollback conservados en historial de la PR #44. No borrar v2.
+- D1 permanece 10/10, sin Worker nuevo, sin rutas públicas, sin compras.
+
+## Rollback y dependencias
+- Código y políticas anteriores preservados en commit `40ea6ee6cc8e79ddbb91234139b71da57b70d7f4` y versiones Edge previas; **rollback físico a v9 no se ha ejecutado** porque restauraría rutas mutantes, contra la política de no exposición tras E2E.
+- Para rollback correctivo de v10 (en caso de error de lectura), restaurar snapshot v7 verificando diff de rutas y re-aplicando cierre de mutaciones; nunca revocar v2 sin recuperar dependencias.
+- Token v1 sigue activo y demasiado privilegiado por compatibilidad/ausencia de inventario global de consumidores; requiere gate específico antes de desactivarlo.
+- Gateway Console/owner JWT, una cola duradera con idempotencia, auditable, quota/cost guard, automatizaciones CEREBRO y promoción de producción siguen **PENDIENTES**.
+
+**Next gate:** `CF-GATEWAY-SIGNED-OWNER-DUAL-E2E-QUEUE-LAB`, sin tocar App/CRM/PROD/DNS/main.

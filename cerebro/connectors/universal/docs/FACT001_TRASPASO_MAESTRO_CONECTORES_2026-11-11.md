@@ -137,3 +137,16 @@ Añadido `services/provider-headless-lab/fact001-dual-read-ingress.mjs` como **m
 ## P6 OPERA · NO INICIADO
 
 Orden conservado: **Opera después de los cinco conectores y P5**. No se ha consultado ni manipulado Opera/Browser, pestañas, sesiones, clics o archivos en este bloque; quedan para una ejecución posterior una vez cerrados los gates anteriores. No usar Opera para resolver silenciosamente el token-issuer P0 saltando el orden.
+
+
+## FACT-001 · CIERRE FÍSICO P0 CLOUDFARE V2 · 11/11/2026 · PREVALECE SOBRE BLOQUEOS ANTERIORES
+
+**HECHO:** El propietario creó el emisor `cerebro_cf_account_token_issuer_v2` y guardó su valor directamente en Supabase Vault. Desde ChatGPT Cloudflare Universal se confirmó el token de cuenta y se retiró su permiso superfluo `Account API Tokens Read`; el token v2 tiene exactamente `Account API Tokens Write`, y ningún privilegio de Billing, Integration, DNS o Workers. No se rotó ni imprimió el secreto.
+
+**CEREBRO LAB INDEPENDIENTE:** Edge Function `cerebro-fact001-cf-issuer-lab` usó GitHub OIDC RS256 (repo, rama, workflow, issuer, audience, expiración y actor exacto `carlosjmunoz78`) para obtener v2 desde Vault. [Prueba 42993618913](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42993618913) confirmó su permiso efectivo. [E2E 42994346869](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42994346869) confirmó creación de un **solo** token D1 Read, custodia Vault directa, GET D1 HTTP 200, administración de tokens DENEGADA, revocación efectiva, GET D1 HTTP 401/403 y token eliminado del listado. 27/27 pruebas del emisor.
+
+**CLEANUP Y ROLLBACK:** Borrados únicamente los dos secretos Vault efímeros del hijo ya revocado; v2 y otros secretos intactos. Worker/D1/DNS y proyectos previos no modificados; **10/10 D1 se conservan**. La versión v9 del servicio y el commit de E2E se guardan en historial; el servicio aislado LAB pasó a **v10 ACTIVE READ-ONLY** con exclusivamente `/health` y `/verify-scoped-issuer-v2`, accesibles solo con identidad OIDC firmada. [Run 42995197342](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342) confirma verificación v2 HTTP 200, anónimo/falso 401, cuatro rutas antiguas de escritura HTTP 404 y cero secretos expuestos. CI 164 headless + 29 issuer + 5 registry + 8 onboarding + 4 scaffold PASS.
+
+**RIESGOS RESIDUALES:** emisor v1 **todavía activo con privilegios excesivos**; no revocar sin inventario/contrato/consumidores, backup y confirmación de que no quedan dependencias. Un cliente ChatGPT OAuth y una identidad firmada GitHub LAB son clientes distintos, pero **NO** demuestra enlace desde la Console/Gateway PROD. La cola autónoma, remediación, Workers/Pages full CRUD y promoción a PROD permanecen pendientes. Por lo tanto **TOKEN-ISSUER-001 = HECHO en LAB** y **CLOUDFLARE UNIVERSAL = PARCIAL**, no VERIFIED_FULL.
+
+**Runbook y contratos:** `docs/FACT001_CLOUDFLARE_V2_E2E_CIERRE_2026-11-11.md`, `registry/cloudflare-issuer-v2.v1.json`, `supabase/cf-token-issuer-lab/README.md`. **Opera no se ha tocado.**
