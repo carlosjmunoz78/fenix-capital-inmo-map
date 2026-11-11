@@ -20,7 +20,7 @@ class IGC202601CanaryContractTests(unittest.TestCase):
     with self.assertRaises(m.RuntimeError if hasattr(m,"RuntimeError") else RuntimeError):m.verified_request({**GOOD,field:val},self.brief)
  def test_generated_logo_forbidden_in_prompt(self):
   self.assertIn("no text",self.brief["images"][0]["prompt"].lower())
-  self.assertIn("original official vector logo",self.brief["images"][0]["prompt"])
+  self.assertIn("original svg",self.brief["images"][0]["prompt"].lower())
  def test_distinct_slides(self):
   ids=[z["id"] for z in self.brief["images"]]
   self.assertEqual(len(set(ids)),6)
