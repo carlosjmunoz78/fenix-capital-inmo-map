@@ -1,0 +1,29 @@
+name: FACT001 Vercel independent LAB engine policy CI
+on:
+  push:
+    branches: [cerebro/fact001-vercel-universal-lab-v0-20261111]
+    paths:
+      - cerebro/connectors/universal/vercel/**
+      - .github/workflows/fact001-vercel-engine-policy-ci.yml
+permissions:
+  contents: read
+jobs:
+  vercel-lab-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - run: node --test cerebro/connectors/universal/vercel/tests/*.test.mjs
+      - name: Strict isolation & no public endpoint
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const path='cerebro/connectors/universal/vercel/';
+          const src=fs.readFileSync(path+'operator.mjs','utf8');
+          const policy=fs.readFileSync(path+'policy.mjs','utf8');
+          if(!src.includes("VERCEL_SSO_NO_DEPLOYMENT_GATE")||!src.includes("redirect:'manual'")||
+             !src.includes("createClient(secret,http)")||!policy.includes("j.max_cost_eur!==0"))throw Error('VERCEL_SAFETY_DENIED');
+          if(src.includes('console.log(')||src.includes("method:'DELETE'")||src.includes("async fetch(){"))throw Error('SIDE_EFFECT_NOT_ALLOWED');
+          console.log('FACT001_VERCEL_ZERO_COST_LAB_POLICY=PASS');
+          NODE

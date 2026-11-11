@@ -1,0 +1,96 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001-VERCEL",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "runtime": "SHARED_CEREBRO_CLOUDFLARE_WORKER_FUTURE",
+  "registry_status": "PARTIAL",
+  "owner_service": "CEREBRO_GATEWAY",
+  "provider": "vercel",
+  "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+  "owned_project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
+  "owned_project_name": "cerebro-fact001-vercel-lab-20261111",
+  "permissions": {
+    "service_token": "VERCEL_API_TOKEN",
+    "state": "NOT_PROVISIONED",
+    "scope": "selected team ONLY",
+    "forbid": [
+      "billing changes",
+      "production promotion",
+      "existing project mutations",
+      "domain changes",
+      "environment secrets read",
+      "project deletion"
+    ]
+  },
+  "events": [
+    "ORDER_RECEIVED",
+    "POLICY_ACCEPTED",
+    "EXECUTED",
+    "READBACK_VERIFIED",
+    "ROLLBACK_COMPLETED",
+    "HUMAN_REQUIRED"
+  ],
+  "jobs": {
+    "queue": "D1_LAB_NAMESPACED_PENDING",
+    "claim_policy": "AT_MOST_ONCE",
+    "idempotency_key_required": true
+  },
+  "api": {
+    "accepted_operations": [
+      "vercel.project.read_lab",
+      "vercel.project.set_framework_vite_lab",
+      "vercel.project.rollback_framework_null_lab",
+      "vercel.deployment.list_lab"
+    ],
+    "public_ingress": false
+  },
+  "tests": {
+    "mocked_policy": "GITHUB_ACTIONS_TO_BE_EXECUTED",
+    "physical_chatgpt_oauth_settings_update_rollback": "VERIFIED_2026-11-11",
+    "physical_independent_runtime": "PENDING"
+  },
+  "costs": {
+    "additional_subscriptions_eur": 0,
+    "account_plan": "hobby",
+    "project_deployments": 0
+  },
+  "backup": {
+    "settings_baseline": {
+      "framework": null,
+      "ssoProtection": {
+        "enabled": true,
+        "deploymentType": "all"
+      },
+      "live": false,
+      "domains": [],
+      "deployment": null
+    }
+  },
+  "rollback": {
+    "provider_project_settings": "framework null",
+    "prev_factory": "no changes to existing projects"
+  },
+  "rebuild": {
+    "method": "recreate empty lab resource after separate admin review if user explicitly authorizes deletion",
+    "existing_project_delete_prohibited": true
+  },
+  "observability": {
+    "audit_event_schema": "FACT001_PENDING",
+    "no_token_logging": true
+  },
+  "training_hooks": {
+    "eligible_after_full_e2e": false
+  },
+  "human_required": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ]
+}
