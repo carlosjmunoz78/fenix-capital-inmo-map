@@ -151,7 +151,23 @@
         "production_promotion_policy": "PENDING",
         "observability_and_audit": "PENDING"
       },
-      "service_identity_read": "VERIFIED"
+      "service_identity_read": "VERIFIED",
+      "management_operator_p2": {
+        "state": "PARTIAL_PERSISTENT_READ_ONLY",
+        "vault_pat_metadata": "VERIFIED_NAME_ONLY_2026-11-11",
+        "vault_name": "cerebro_supabase_management_pat_v1",
+        "headless_slug": "cerebro-fact001-headless-provider-lab",
+        "headless_version": 33,
+        "headless_hash": "645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec",
+        "headless_routes": "EXISTING_READ_ONLY",
+        "edge_function_lifecycle": "HISTORIC_ISOLATED_DELETE_VERIFIED",
+        "auth_storage_db_safe_write": "NOT_TESTED",
+        "backend_sidecar_crud": "NOT_DEPLOYED",
+        "owner_jwt_canary": "PENDING",
+        "customer_data_writes": 0,
+        "additional_subscription_eur": 0,
+        "next_block": "SUPABASE_SCOPED_MANAGEMENT_PERMANENT_WRITER_WITH_LAB_BACKUP_ROLLBACK"
+      }
     },
     {
       "id": "notion",

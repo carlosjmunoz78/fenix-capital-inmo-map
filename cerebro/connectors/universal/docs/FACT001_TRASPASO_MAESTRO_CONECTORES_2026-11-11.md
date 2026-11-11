@@ -113,3 +113,8 @@ Reutilizado el issuer LAB existente (no se crearon D1/Workers), 22/22 tests CI; 
 ## 11/11/2026 · P1 GitHub · comprobación diferencial sin repetir POST 403
 
 Usuario GitHub y 3 instalaciones de Apps detectados. El servicio de la Factory no tiene todavía `cerebro_github_factory_pat_v1` ni credencial GitHub App en Vault; los metadatos de instalaciones no exponen scope de creación. Se conserva la prueba anterior `POST /user/repos => 403` sin reiterarla ni crear repositorios. P1 admin global **BLOQUEADO POR PERMISO**, CRUD de rama LAB existente conservado. Runbook `docs/FACT001_GITHUB_FACTORY_PERMISSION_P1_2026-11-11.md`. P2 Supabase continúa independientemente.
+
+
+## 11/11/2026 · P2 Supabase
+
+Reverificado solo el nombre del PAT scoped en Vault y el servicio LAB `cerebro-fact001-headless-provider-lab` ACTIVE v33 con hash conocido, sin mutaciones. Se conserva E2E anterior de borrado acotado; falta operador CRUD permanente para Edge/Storage/DB/Auth, cola y Gateway/owner JWT. Estado **PARCIAL**, sin conceder servicio administrativo al frontend. Ver `docs/FACT001_SUPABASE_MGMT_P2_2026-11-11.md`.
