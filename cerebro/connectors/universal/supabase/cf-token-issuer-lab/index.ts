@@ -1,6 +1,6 @@
 // CF-TOKEN-ISSUER-001 isolated LAB, exactly one D1 Read child. No generic resource API or frontend access.
 import postgres from 'npm:postgres@3.4.7';
-import {ACCOUNT_ID,SCOPE,ISSUER_NAME,NEW_VAULT_NAME,CHILD_NAME,CHILD_EXPIRY,TOKEN_OP,TOKEN_REQUEST_ID,verifyGitHubOidc,assertIssueOrder,d1ReadGroup,childPolicy} from './policy.mjs';
+import {ACCOUNT_ID,SCOPE,ISSUER_NAME,NEW_VAULT_NAME,CHILD_NAME,CHILD_EXPIRY,TOKEN_OP,TOKEN_REQUEST_ID,verifyGitHubOidc,assertIssueOrder,d1ReadGroup,childPolicy,ISSUER_V2_NAME,ISSUER_V2_VAULT_NAME,ISSUER_V2_EXPIRY,ISSUER_V2_OP,ISSUER_V2_REQUEST_ID,assertIssuerV2Order,accountTokenWriteGroup,scopedIssuerPolicy,assertScopedIssuerMetadata} from './policy.mjs';
 const API='https://api.cloudflare.com/client/v4';
 const HEADERS={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const reply=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{status,headers:HEADERS});
@@ -67,10 +67,59 @@ async function verifyChild(){
  });
 }
 
+
+async function issueScopedIssuerV2(){
+ return await withDb(sql=>sql.begin(async tx=>{
+  await tx`select pg_advisory_xact_lock(hashtext(${ISSUER_V2_VAULT_NAME}))`;
+  const oldVault=await tx`select id from vault.secrets where name=${ISSUER_V2_VAULT_NAME} limit 2`;
+  if(oldVault.length>1)throw Error('ISSUER_VAULT_DUPLICATE');
+  if(oldVault.length===1)return {status:'ALREADY_STORED_PENDING_SCOPE_VERIFICATION',created:false};
+  const v1=await oneSecret(tx,ISSUER_NAME);
+  const listed=await cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens?per_page=100&page=1',v1);
+  if(!Array.isArray(listed.result)||listed.result.some((t:any)=>t?.name===ISSUER_V2_NAME))
+   throw Error('ISSUER_V2_ALREADY_EXISTS_RECONCILE');
+  const groups=await cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens/permission_groups',v1);
+  const groupId=accountTokenWriteGroup(groups.result);
+  let newId:string|undefined;
+  try{
+   const created=await cloudflare('POST','/accounts/'+ACCOUNT_ID+'/tokens',v1,scopedIssuerPolicy(groupId));
+   const tok=created.result;
+   if(typeof tok?.id==='string'&&/^[a-f0-9]{32}$/.test(tok.id))newId=tok.id;
+   if(!newId||typeof tok?.value!=='string'||tok.value.length<24)throw Error('ISSUER_V2_RESPONSE_INVALID');
+   // The plaintext remains in the server runtime and travels only via the encrypted Vault RPC.
+   // Do not print it, put it in pg_net results, GitHub Actions, task output, or caller HTTP.
+   const stored=await tx`select vault.create_secret(${tok.value},${ISSUER_V2_VAULT_NAME},
+      ${'FACT001 scoped Cloudflare issuer v2; Account API Tokens Write only; expiry 2026-12-11'}) as id`;
+   if(stored.length!==1||!stored[0].id)throw Error('ISSUER_V2_VAULT_FAILED');
+   return {status:'SCOPED_ISSUER_STORED_PENDING_VERIFICATION',created:true,expires_on:ISSUER_V2_EXPIRY};
+  }catch{
+   // Preserve issuer v1. Revoke ONLY a known newly created v2 token if Vault write failed.
+   if(newId){try{await cloudflare('DELETE','/accounts/'+ACCOUNT_ID+'/tokens/'+newId,v1);}catch{}}
+   throw Error('ISSUER_V2_ISSUANCE_BLOCKED');
+  }
+ }));
+}
+async function verifyScopedIssuerV2(){
+ return await withDb(async sql=>{
+  const v2=await oneSecret(sql,ISSUER_V2_VAULT_NAME);
+  const [listed,groups]=await Promise.all([
+   cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens?per_page=100&page=1',v2),
+   cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens/permission_groups',v2)
+  ]);
+  const groupId=accountTokenWriteGroup(groups.result);
+  const matches=(listed.result||[]).filter((t:any)=>t?.name===ISSUER_V2_NAME);
+  if(matches.length!==1)throw Error('ISSUER_V2_IDENTITY_UNVERIFIED');
+  assertScopedIssuerMetadata(matches[0],groupId);
+  return {status:'SCOPED_ISSUER_V2_VERIFIED',scope:'ACCOUNT_API_TOKENS_WRITE_ONLY',
+   credential_exposed:false,parent_revoked:false,billing_permission:false,integration_permission:false,
+   cloudflare_writes:0};
+ });
+}
+
 Deno.serve(async(req:Request)=>{
  try{
   const route=new URL(req.url).pathname.split('/').filter(Boolean).at(-1);
-  if(!['health','issue-d1-read-lab','verify-d1-read-lab'].includes(route||''))return reply(404,{status:'NOT_FOUND'});
+  if(!['health','issue-d1-read-lab','verify-d1-read-lab','issue-scoped-issuer-v2','verify-scoped-issuer-v2'].includes(route||''))return reply(404,{status:'NOT_FOUND'});
   try{await verifyGitHubOidc(bearer(req));}catch{return reply(401,{status:'UNAUTHORIZED'});}
   if(route==='health'&&req.method==='GET')return reply(200,{status:'AUTHENTICATED',service:'cf-token-issuer-lab',scope:SCOPE,cloudflare_writes_enabled:false});
   if(route==='issue-d1-read-lab'&&req.method==='POST'){
@@ -84,10 +133,22 @@ Deno.serve(async(req:Request)=>{
    const result=await verifyChild();
    return reply(result.read_verified?200:409,{...result,credential_exposed:false,account_id:ACCOUNT_ID});
   }
+
+  if(route==='issue-scoped-issuer-v2'&&req.method==='POST'){
+   if(Number(req.headers.get('content-length')||0)>1500)return reply(413,{status:'TOO_LARGE'});
+   try{assertIssuerV2Order(await req.json())}catch{return reply(400,{status:'REQUEST_DENIED'});}
+   const result=await issueScopedIssuerV2();
+   return reply(200,{...result,account_id:ACCOUNT_ID,credential_exposed:false,parent_revoked:false,prod_resources_modified:false});
+  }
+  if(route==='verify-scoped-issuer-v2'&&req.method==='POST'){
+   try{assertIssuerV2Order(await req.json())}catch{return reply(400,{status:'REQUEST_DENIED'});}
+   const result=await verifyScopedIssuerV2();
+   return reply(200,result);
+  }
   return reply(405,{status:'METHOD_DENIED'});
  }catch(error){
   const msg=error instanceof Error?error.message:'';
-  const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED']);
+  const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED','ISSUER_VAULT_DUPLICATE','ISSUER_V2_ALREADY_EXISTS_RECONCILE','ISSUER_V2_RESPONSE_INVALID','ISSUER_V2_VAULT_FAILED','ISSUER_V2_ISSUANCE_BLOCKED','ISSUER_V2_IDENTITY_UNVERIFIED','ISSUER_NOT_MINIMAL','ISSUER_GROUP_UNVERIFIED']);
   const code=allowed.has(msg)?msg:/^CF_HTTP_(400|401|403|404|409|429|500|503)$/.test(msg)?msg:'BACKEND_ERROR';
   console.warn('FACT001_LAB_ISSUER_DENIAL='+code);
   return reply(503,{status:'BLOCKED',code});

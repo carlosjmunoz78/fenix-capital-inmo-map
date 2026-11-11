@@ -5,6 +5,7 @@ on:
     paths:
       - .github/workflows/fact001-headless-provider-broker-ci-lab.yml
       - cerebro/connectors/universal/services/provider-headless-lab/**
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/**
 permissions:
   contents: read
 jobs:
@@ -18,6 +19,7 @@ jobs:
       - name: Signed OIDC and safe upstream API tests, no credentials
         run: |
           node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
+          node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/issuer-policy.test.mjs
           node --test cerebro/connectors/universal/tests/headless-registry.test.mjs
           node --test cerebro/connectors/universal/tests/cloudflare-onboarding.test.mjs
           node --test cerebro/connectors/universal/tests/cloudflare-scaffold.test.mjs

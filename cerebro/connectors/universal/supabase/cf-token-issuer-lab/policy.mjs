@@ -82,3 +82,41 @@ export function childPolicy(id){
  if(typeof id!=='string'||!/^[a-f0-9]{32}$/.test(id))throw Error('PERMISSION_ID_DENIED');
  return {name:CHILD_NAME,expires_on:CHILD_EXPIRY,policies:[{effect:'allow',resources:{['com.cloudflare.api.account.'+ACCOUNT_ID]:'*'},permission_groups:[{id}]}]};
 }
+
+/* Replacement scoped issuer v2: ACCOUNT API TOKENS WRITE ONLY; no DNS, Billing, Integration. */
+export const ISSUER_V2_NAME='cerebro_cf_account_token_issuer_v2';
+export const ISSUER_V2_VAULT_NAME='cerebro_cf_account_token_issuer_v2';
+export const ISSUER_V2_EXPIRY='2026-12-11T00:00:00Z';
+export const ISSUER_V2_OP='cloudflare.account_token.issue_minimal_issuer_lab';
+export const ISSUER_V2_REQUEST_ID='CFT-20261111-SCOPE-001';
+export function assertIssuerV2Order(b){
+ if(!b||typeof b!=='object'||Array.isArray(b))throw Error('BAD_ORDER');
+ const expected={...SCOPE,account_id:ACCOUNT_ID,client_id:'cerebro',operation:ISSUER_V2_OP,request_id:ISSUER_V2_REQUEST_ID};
+ if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(Object.keys(expected).sort())||
+   Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('SCOPE_DENIED');
+ return true;
+}
+export function accountTokenWriteGroup(groups){
+ if(!Array.isArray(groups)||groups.length>2000)throw Error('GROUPS_DENIED');
+ const found=groups.filter(g=>g?.name==='Account API Tokens Write'&&g.is_selectable===true&&
+   Array.isArray(g.scopes)&&g.scopes.includes('com.cloudflare.api.account')&&
+   typeof g.id==='string'&&/^[a-f0-9]{32}$/.test(g.id));
+ if(found.length!==1)throw Error('ISSUER_GROUP_UNVERIFIED');
+ return found[0].id;
+}
+export function scopedIssuerPolicy(id){
+ if(!/^[a-f0-9]{32}$/.test(id||''))throw Error('ISSUER_PERMISSION_INVALID');
+ return {name:ISSUER_V2_NAME,expires_on:ISSUER_V2_EXPIRY,
+  policies:[{effect:'allow',resources:{['com.cloudflare.api.account.'+ACCOUNT_ID]:'*'},
+    permission_groups:[{id}]}]};
+}
+export function assertScopedIssuerMetadata(token,requiredGroupId){
+ if(!token||token.name!==ISSUER_V2_NAME||token.status!=='active'||
+   !Array.isArray(token.policies)||token.policies.length!==1)throw Error('ISSUER_NOT_MINIMAL');
+ const p=token.policies[0];
+ if(p.effect!=='allow'||JSON.stringify(Object.keys(p.resources||{}))!==JSON.stringify(['com.cloudflare.api.account.'+ACCOUNT_ID])||
+   p.resources['com.cloudflare.api.account.'+ACCOUNT_ID]!=='*'||
+   !Array.isArray(p.permission_groups)||p.permission_groups.length!==1||
+   p.permission_groups[0]?.id!==requiredGroupId)throw Error('ISSUER_NOT_MINIMAL');
+ return true;
+}

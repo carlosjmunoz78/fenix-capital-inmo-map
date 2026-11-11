@@ -21,3 +21,34 @@ test('claims nonmatching event denied',()=>assert.throws(()=>assertClaims({...cl
 test('claims nonmatching actor denied by repo',()=>assert.throws(()=>assertClaims({...claim,repository:'attacker/repo'},1100)));
 test('unsigned bearer denied',async()=>await assert.rejects(()=>verifyGitHubOidc('unsigned'),/OIDC_TOKEN_INVALID/));
 test('source only LAB and exact workflow',()=>{assert.equal(SCOPE.environment,'LAB');assert.match(WORKFLOW_REF,/fact001-cf-issuer-bootstrap-lab.yml/);});
+
+import {ISSUER_V2_NAME,ISSUER_V2_VAULT_NAME,ISSUER_V2_EXPIRY,ISSUER_V2_OP,ISSUER_V2_REQUEST_ID,
+ assertIssuerV2Order,accountTokenWriteGroup,scopedIssuerPolicy,assertScopedIssuerMetadata} from '../policy.mjs';
+const v2order={...SCOPE,account_id:ACCOUNT_ID,client_id:'cerebro',operation:ISSUER_V2_OP,request_id:ISSUER_V2_REQUEST_ID};
+const write={id:'5bc3f8b21c554832afc660159ab75fa4',name:'Account API Tokens Write',is_selectable:true,scopes:['com.cloudflare.api.account']};
+test('v2 requires fixed signed LAB issuer command',()=>{
+ assert.equal(assertIssuerV2Order(v2order),true);
+ assert.throws(()=>assertIssuerV2Order({...v2order,account_id:'other'}));
+ assert.throws(()=>assertIssuerV2Order({...v2order,extra:'admin'}));
+});
+test('v2 group must be selectable account token write and unique',()=>{
+ assert.equal(accountTokenWriteGroup([write]),write.id);
+ assert.throws(()=>accountTokenWriteGroup([{...write,name:'Billing Write'}]));
+ assert.throws(()=>accountTokenWriteGroup([write,write]));
+});
+test('v2 creates precisely one account scope and finite expiry',()=>{
+ const body=scopedIssuerPolicy(write.id);
+ assert.equal(body.name,ISSUER_V2_NAME);
+ assert.equal(body.expires_on,ISSUER_V2_EXPIRY);
+ assert.equal(body.policies.length,1);
+ assert.deepEqual(body.policies[0].permission_groups,[{id:write.id}]);
+ assert.equal(ISSUER_V2_VAULT_NAME,ISSUER_V2_NAME);
+});
+test('v2 metadata must deny broadened and unknown privileges',()=>{
+ const body=scopedIssuerPolicy(write.id);
+ const t={name:ISSUER_V2_NAME,status:'active',policies:body.policies};
+ assert.equal(assertScopedIssuerMetadata(t,write.id),true);
+ assert.throws(()=>assertScopedIssuerMetadata({...t,policies:[...t.policies,{effect:'allow',resources:{'*':'*'},permission_groups:[{id:'a'.repeat(32)}]}]},write.id));
+ assert.throws(()=>assertScopedIssuerMetadata({...t,policies:[{...t.policies[0],permission_groups:[{id:write.id},{id:'b'.repeat(32)}]}]},write.id));
+ assert.throws(()=>assertScopedIssuerMetadata({...t,status:'disabled'},write.id));
+});
