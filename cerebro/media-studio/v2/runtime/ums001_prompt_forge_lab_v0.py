@@ -100,12 +100,12 @@ def build_prompt_batch(brief:dict, feedback:dict|None=None)->dict:
   motif=SURREAL_MOTIFS[(seed//13+i)%len(SURREAL_MOTIFS)]
   location=ENVIRONMENTS[(seed//31+i)%len(ENVIRONMENTS)]
   visual=[
-    ("CRITICAL SEO 16:9 ENVIRONMENTAL PHOTO: Show the real property setting, architecture, materials and context across the majority of the wide landscape frame, with authentic natural daylight and generous clean negative space for a separate HTML headline. If people are required by the brief, include the correct number of believable visible adults at medium scale interacting naturally with the home; avoid close-up waist-up advertising portraits, oversized hands or empty staged interiors."
+    ("CRITICAL SEO 16:9 ENVIRONMENTAL PHOTO: Show actual Córdoba property setting across most of frame; if requested, adults medium-scale facing lens on one side. Keep daylight and HTML-heading space; no giant close-up portraits or empty showrooms."
      if brief["asset_type"]=="SEO_HERO" else
-     "CRITICAL SOCIAL CAST AND LAYOUT: Show authentic adult people in three-quarter FRONT VIEW where their faces, eyes and natural expressions are actually visible. Respect exactly the number and roles described by the brief; never turn every scene into a three-person backs-to-camera photograph. Realistic natural anatomy and credible human interactions in Córdoba, with safe room for later deterministic typography."),
-    ("CRITICAL SEO ARCHITECTURE: The unusual orange glass sculpture must be physically integrated with the real location, refracted light and real shadows; avoid a flat orange rectangle, abstract icon or visually generic showroom. Never make the building unrecognizable as the location described in the brief."
+     "CRITICAL SOCIAL CAST AND LAYOUT: Respect requested cast; three-quarter FRONT VIEW with faces visible, real anatomy and Córdoba context, never backs to camera or extra people. Safe area for separate typography."),
+    ("CRITICAL SEO ARCHITECTURE: Physically integrated original orange glass with refractions and true shadows; never a flat rectangle or generic showroom."
      if brief["asset_type"]=="SEO_HERO" else
-     "CRITICAL SOCIAL SPECTACLE: Build an original and physically plausible orange sculptural architectural installation BEHIND the cast, without concealing human faces. Preserve distinctive Córdoba scene context, sunlight and storytelling, not a generic glowing-orange corridor."),
+     "CRITICAL SOCIAL SPECTACLE: Original orange glass sculpture behind visible cast, with real physical shadows and Córdoba storytelling; never a generic orange corridor."),
     f"Visual story for: {intent}. Intended audience: {audience}.",
     f"Single original {brief['platform'].title()} {brief['asset_type'].lower()} visual, shot as expensive, real editorial PHOTOGRAPH, not a 3D illustration.",
     f"Authentic human protagonist: an adult Spanish professional working in Andalusia, specifically {human_role}, {action}; expression and emotional tone: {expression}.",
