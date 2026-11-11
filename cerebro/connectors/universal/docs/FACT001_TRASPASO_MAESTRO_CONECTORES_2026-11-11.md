@@ -150,3 +150,8 @@ Orden conservado: **Opera después de los cinco conectores y P5**. No se ha cons
 **RIESGOS RESIDUALES:** emisor v1 **todavía activo con privilegios excesivos**; no revocar sin inventario/contrato/consumidores, backup y confirmación de que no quedan dependencias. Un cliente ChatGPT OAuth y una identidad firmada GitHub LAB son clientes distintos, pero **NO** demuestra enlace desde la Console/Gateway PROD. La cola autónoma, remediación, Workers/Pages full CRUD y promoción a PROD permanecen pendientes. Por lo tanto **TOKEN-ISSUER-001 = HECHO en LAB** y **CLOUDFLARE UNIVERSAL = PARCIAL**, no VERIFIED_FULL.
 
 **Runbook y contratos:** `docs/FACT001_CLOUDFLARE_V2_E2E_CIERRE_2026-11-11.md`, `registry/cloudflare-issuer-v2.v1.json`, `supabase/cf-token-issuer-lab/README.md`. **Opera no se ha tocado.**
+
+
+## Actualización diferencial 11/11/2026 · Cloudflare v1 y Gateway real
+
+**HECHO VERIFICADO EN VIVO:** El emisor v1 ya figuraba `disabled`, con permisos reducidos a Tokens Write/Read, al iniciar el bloque. NO se revocó ni modificó ahora; ID conservado, último uso 08:49:44 UTC. V2 activo, mínimo, Vault y E2E del token hijo correctos. En Cloudflare D1 Recovery se comprobó físicamente `FACT001-CF-GW-SIGNED-20261111-001` `COMPLETED`, attempts=1, config `enabled=1,max_jobs_per_tick=1` y Worker Cron cada cinco minutos con binding correcto. Canary owner independiente ACTIVE v6; Gateway principal ACTIVE v33 intacto. **No existe prueba E2E de JWT real del propietario desde Console**, ni cobertura FULL de Workers/Pages/rollback. Estado Cloudflare **PARCIAL**, Token Broker y heartbeat firmado LAB **HECHO**. Evidencia `docs/FACT001_CF_GATEWAY_LEGACY_CUTOVER_DIFFERENTIAL_2026-11-11.md`. Opera continúa P6.

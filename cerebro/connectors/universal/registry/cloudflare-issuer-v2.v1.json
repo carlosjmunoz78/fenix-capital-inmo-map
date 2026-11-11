@@ -31,7 +31,7 @@
   "child_secret_cleanup": true,
   "existing_d1_count": 10,
   "additional_subscriptions_eur": 0,
-  "legacy_issuer_status": "ACTIVE_OVERPRIVILEGED_PENDING_DEPENDENCIES",
+  "legacy_issuer_status": "DISABLED_REDUCED_TO_ACCOUNT_TOKENS_WRITE_AND_READ",
   "gateway_signed_owner_real": "PENDING",
   "automation_durable_queue": "PENDING",
   "production_autonomy": "OFF",
@@ -45,5 +45,9 @@
     "baseline_before": "V9 E2E available in PR history",
     "current": "V10 read-only verified",
     "restoration_to_mutating_bundle": "NOT_AUTHORIZED_WITHOUT_GATES"
-  }
+  },
+  "gateway_signed_queue": "LAB_HEARTBEAT_COMPLETED_SINGLE_ATTEMPT",
+  "gateway_owner_user_session": "NOT_VERIFIED",
+  "gateway_real_console_binding": "NOT_VERIFIED",
+  "full_cloudflare_autonomy": "NOT_VERIFIED"
 }

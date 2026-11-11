@@ -44,7 +44,7 @@
       "verification": {
         "independent_service_identity": "VERIFIED",
         "owner_order_headless": "VERIFIED",
-        "autonomous_queue": "PENDING",
+        "autonomous_queue": "VERIFIED_HEARTBEAT_LAB_ONLY",
         "inventory_read": "VERIFIED",
         "isolated_lab_create": "VERIFIED",
         "isolated_lab_update": "PENDING",
@@ -52,12 +52,12 @@
         "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
         "production_promotion_policy": "PENDING",
-        "observability_and_audit": "PENDING"
+        "observability_and_audit": "PARTIAL_RECOVERY_D1_HEARTBEAT_LEDGER"
       },
       "service_identity_read": "VERIFIED",
       "credential_broker": {
         "scope_correction": "VERIFIED_EFFECTIVE_WRITE_ONLY_V2",
-        "issuer_v1": "ACTIVE_OVERPRIVILEGED_LEGACY_PENDING_DEPENDENCY_CLEARANCE",
+        "issuer_v1": "DISABLED_BY_PREEXISTING_ACTION_SCOPE_REDUCED_LEGACY_TOKEN_PRESERVED",
         "issuer_v2": "ACTIVE_MINIMAL_VAULT_BACKEND_VERIFIED",
         "account_scope": "e39a57e1ac42650ca5a6d5307cf0ac8e",
         "provider_metadata_checked_on": "2026-11-11",
@@ -73,14 +73,14 @@
         "child_token_lifecycle": "PHYSICAL_LAB_VERIFIED_ISSUE_D1_READ_ADMIN_403_REVOKE_D1_401",
         "gateway_dual_e2e": "NOT_VERIFIED_FROM_REAL_CONSOLE",
         "cost_additional_authorized_eur": 0,
-        "evidence": "docs/FACT001_CLOUDFLARE_V2_E2E_CIERRE_2026-11-11.md",
+        "evidence": "docs/FACT001_CF_GATEWAY_LEGACY_CUTOVER_DIFFERENTIAL_2026-11-11.md",
         "blocked_reason": "ISSUER_GROUP_NOT_SELECTABLE_USING_ISSUER_V1",
         "last_signed_workflow_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42995197342",
         "lab_sidecar_candidate_version": 10,
         "lab_sidecar_rollback": "V9_BACKUP_PRESERVED_IN_GIT_COMMIT_40ea6ee6_AND_PRIOR_EDGE_VERSION_HISTORY",
         "v1_revoked": false,
         "provider_tokens_created": 1,
-        "next_block": "CF_GATEWAY_DUAL_CLIENT_DURABLE_AUTHORIZED_QUEUE_AFTER_EXISTING_GATEWAY_DEPENDENCY_GATES",
+        "next_block": "REAL_OWNER_SUPABASE_SESSION_CANARY_AND_UNIVERSAL_PROVIDER_RESTORE_GATE",
         "issuer_v2_id": "86074f623bacb356c9b19c7695986c54",
         "v2_permissions": [
           "Account API Tokens Write"
@@ -106,7 +106,26 @@
         "d1_inventory_after": 10,
         "dual_client": "CHATGPT_CLOUDFLARE_OAUTH_AND_CEREBRO_GITHUB_OIDC_VAULT_BOTH_PHYSICAL_LAB_VERIFIED",
         "gateway_console": "NOT_CONNECTED_OR_VERIFIED",
-        "automation_signed_jobs": "PROOF_OF_ONE_SHOT_OWNER_TRIGGER_ONLY_NOT_SCHEDULED_AUTONOMY"
+        "automation_signed_jobs": "PROOF_OF_ONE_SHOT_OWNER_TRIGGER_ONLY_NOT_SCHEDULED_AUTONOMY",
+        "issuer_v1_last_used": "2026-11-11T08:49:44Z",
+        "issuer_v1_last_modified": "2026-11-11T10:03:24Z",
+        "legacy_permissions": [
+          "Account API Tokens Write",
+          "Account API Tokens Read"
+        ],
+        "legacy_forbidden_permissions_removed": true,
+        "issuer_v1_not_deleted": true,
+        "issuer_v1_disabled_at_first_read_this_turn": true,
+        "independent_gateway_queue": "D1_JOB_COMPLETED_ONE_ATTEMPT",
+        "gateway_job_id": "FACT001-CF-GW-SIGNED-20261111-001",
+        "gateway_job_environment": "LAB",
+        "gateway_service_version": 6,
+        "gateway_main_version": 33,
+        "gateway_main_modified": false,
+        "recovery_runner_cron": "*/5 * * * *",
+        "recovery_db": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "owner_session_e2e": "NOT_VERIFIED",
+        "full_cloudflare_autonomy": "NOT_VERIFIED"
       }
     },
     {
