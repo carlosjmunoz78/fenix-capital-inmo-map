@@ -113,7 +113,15 @@ def validate_creative(result):
  if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("MISSING_PREMIUM_PHOTO_SHOT_PLAN")
  for key in SHOT_KEYS:
   val=shot[key]
-  if not isinstance(val,str) or not 3<=len(val)<=350:deny("INVALID_SHOT_FIELD_"+key)
+  if key in ("focal_length_mm","aperture") and type(val) in (int,float):
+   if not (18<=val<=200 if key=="focal_length_mm" else 1.2<=val<=22):
+    deny("INVALID_NUMERIC_SHOT_FIELD_"+key)
+   shot[key]=str(val)+"mm" if key=="focal_length_mm" else "f/"+str(val)
+  elif isinstance(val,str) and 2<=len(val)<=350:
+   shot[key]=val.strip()
+   if len(shot[key])<2:deny("EMPTY_SHOT_FIELD_"+key)
+  else:
+   deny("INVALID_SHOT_FIELD_"+key)
  p=result["image_prompt"];risks=result["risks"]
  if not isinstance(p,str) or not 650<=len(p)<=3000:deny("CREATIVE_TOO_SHORT_OR_LONG")
  if not isinstance(risks,list) or len(risks)!=3 or any(not isinstance(x,str) or not 5<=len(x)<=200 for x in risks):deny("RISKS_INVALID")
