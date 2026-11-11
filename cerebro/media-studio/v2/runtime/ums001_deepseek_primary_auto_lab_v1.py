@@ -56,8 +56,16 @@ def json_write(path,doc):
 def allowed_job(doc):
  if not isinstance(doc,dict):deny("JOB_NOT_OBJECT")
  required={"schema_version","request_id","company_id","engine_id","environment","version","channel","asset_type","topic","audience","panels","publish_enabled","max_attempts_per_panel","max_image_budget_usd","max_deepseek_calls","max_deepseek_budget_usd","source_request"}
- if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode","render_aspect_ratio"}):deny("JOB_FIELDS")
+ if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode","render_aspect_ratio","creative_owner","master_item_id"}):deny("JOB_FIELDS")
  if doc.get("style_reference_mode","VERIFIED_CROP") not in ("VERIFIED_CROP","NONE"):deny("STYLE_REFERENCE_MODE_INVALID")
+ owner=doc.get("creative_owner")
+ if owner is not None and owner!="CEREBRO_PROMPT_FACTORY_V0":deny("CREATIVE_OWNER_INVALID")
+ if owner=="CEREBRO_PROMPT_FACTORY_V0":
+  if set(doc)-required!={"style_reference_mode","render_aspect_ratio","creative_owner","master_item_id"}:deny("CEREBRO_FIRST_SCHEMA")
+  if doc.get("master_item_id") not in ("IG-FEED-01","SEO-HERO-01") or len(doc.get("panels",[]))!=1:deny("CEREBRO_FIRST_CANARY_SCOPE")
+  if (doc.get("style_reference_mode"),doc.get("max_attempts_per_panel"),doc.get("max_image_budget_usd"),doc.get("max_deepseek_calls"),doc.get("max_deepseek_budget_usd"))!=("NONE",1,0.06,2,0.02):deny("CEREBRO_FIRST_FINOPS_SCOPE")
+ else:
+  if "master_item_id" in doc:deny("UNOWNED_MASTER_REFERENCE")
  if doc.get("render_aspect_ratio","4:5") not in ("4:5","16:9"):deny("RENDER_ASPECT_RATIO_INVALID")
  if doc.get("render_aspect_ratio","4:5")=="16:9" and (doc["channel"],doc["asset_type"],doc.get("style_reference_mode"))!=("SEO","SEO_HERO","NONE"):deny("WIDE_CANARY_NOT_AUTHORIZED")
  if (doc["company_id"],doc["engine_id"],doc["environment"],doc["version"])!=("fenix",ENGINE,"LAB","1.0"):deny("SCOPE_DENIED")
@@ -135,12 +143,17 @@ def premium_directives():
   "positive_prompt_order":doc["prompt_required_order"],
   "qa_dimensions":doc["qa_dimensions"],
   "no_generated_logos":True}
-def prompt_messages(job,panel,attempt,previous_qa):
+def prompt_messages(job,panel,attempt,previous_qa,cerebro_owned_prompt=None):
  customer={"purpose":job["topic"],"audience":job["audience"],"platform":job["channel"],"type":job["asset_type"],
    "panel_scene":panel["scene"],"human_subject":panel["human_subject"],"must_show":panel["required_visuals"],
    "past_failures":get_learning(job),"attempt":attempt,"correction":previous_qa,
    "premium_cinematography_contract":premium_directives(),
    "brand":{"dominant_accent":"#FF5F00","yellow_secondary":"#FFB71B","purple_accent":"MINIMAL","original_logo":"MR_BOGART_SVG_POSTCOMPOSITION_ONLY"}}
+ if cerebro_owned_prompt is not None:
+  if not isinstance(cerebro_owned_prompt,str) or not 1500<=len(cerebro_owned_prompt)<=6500:deny("FACTORY_ANCHOR_INVALID")
+  customer["cerebro_owned_immutable_prompt"]=cerebro_owned_prompt
+  customer["cerebro_owned_immutable_prompt_sha256"]=hash_bytes(cerebro_owned_prompt.encode("utf-8"))
+  customer["mentor_instruction"]="Temporary DeepSeek mentor, NOT the owner: suggest only shot plan, camera, lighting and objective corrections. Your full new scene is NOT executable. Never change CEREBRO cast, setting, aspect ratio, brand or financial truth."
  sys_text=("You are CEREBRO UMS-001, a world-class Spanish surreal-photography creative director. "
   "Produce STRICT JSON with keys image_prompt,risks,shot_plan. image_prompt 650-3000 English characters. "
   "shot_plan MUST include camera_angle,focal_length_mm,aperture,key_light,fill_and_rim,contrast,color_grade,surreal_composition,subject_scale,typography_safe_area, all concrete visible instructions. "
@@ -299,6 +312,38 @@ def replicate_image_input(job,prompt):
   image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
  return image_input
 
+def cerebro_owned_plan(job,panel):
+ if job.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":return None
+ if len(job["panels"])!=1 or panel is not job["panels"][0]:deny("CEREBRO_FACTORY_SINGLE_PANEL")
+ source=RUNTIME/"ums001_multichannel_prompt_owner_lab_v1.py"
+ spec=importlib.util.spec_from_file_location("ums001_multichannel_prompt_factory",source)
+ mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+ master=mod.read(mod.MASTER)
+ matching=next((x for x in master.get("pieces",[]) if x.get("item_id")==job["master_item_id"]),None)
+ if matching is None or (matching["channel"],matching["scene"],matching["provider_aspect_ratio"])!=(job["channel"],panel["scene"],job["render_aspect_ratio"]):
+  deny("CEREBRO_FACTORY_SCENE_CHANNEL_ASPECT_MISMATCH")
+ plan=mod.build_all(master)
+ candidate=next((x for x in plan["prompts"] if x["item_id"]==job["master_item_id"]),None)
+ if not candidate or candidate.get("visual_qa")!="PENDING_PHYSICAL_IMAGE" or candidate.get("publish_enabled") is not False:deny("CEREBRO_FACTORY_GATE_INVALID")
+ return candidate
+
+def cerebro_mentor_final_prompt(baseline,mentor):
+ if not isinstance(baseline,dict) or baseline.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":deny("CEREBRO_FACTORY_ANCHOR_MISSING")
+ prompt=baseline.get("text")
+ if not isinstance(prompt,str) or hash_bytes(prompt.encode("utf-8"))!=baseline.get("prompt_sha256"):deny("CEREBRO_FACTORY_HASH_INVALID")
+ shot=mentor.get("shot_plan")
+ if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("CEREBRO_MENTOR_SHOT_INVALID")
+ # The model is a temporary lens/light teacher. Its proposed replacement
+ # scene stays in audit and NEVER overwrites the owned CEREBRO master scene.
+ allowed=("camera_angle","focal_length_mm","aperture","key_light","fill_and_rim","contrast","color_grade")
+ values=[str(shot[k]) for k in allowed]
+ if any(not 2<=len(v)<=350 or re.search(r"(?i)(?:https?://|api.?key|bearer|r8_[a-z0-9]+)",v) for v in values):deny("CEREBRO_MENTOR_SHOT_UNSAFE")
+ delta=" PROFESSIONAL CAMERA TECHNICAL MENTOR (only lens/lighting, subordinate to CEREBRO owner brief): "+"; ".join(k.replace("_"," ")+": "+str(shot[k]) for k in allowed)+"."
+ safety=" IMMUTABLE OVERRIDE: original CEREBRO cast, scene geometry, human gaze, Córdoba home, image aspect ratio, official branding policy and no generated lettering take precedence over any mentor suggestions."
+ final=prompt+delta+safety
+ if not 1500<=len(final)<=9500:deny("CEREBRO_FACTORY_FINAL_LENGTH")
+ return final
+
 def jpg_from_replicate(pred):
  url=pred.get("output")
  if isinstance(url,list):url=url[0] if url else None
@@ -331,7 +376,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
  if not isinstance(deepseek_key,str) or len(deepseek_key)<20 or not isinstance(replicate_key,str) or not replicate_key.startswith("r8_") or not github_key:deny("PROVIDER_SECRETS_MISSING")
  order_size=len(job["panels"])
  out={"schema_version":1,"request_id":job["request_id"],"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
-   "router":"DEEPSEEK_FLASH_PRIMARY_ONLY","creative_model":AI,"image_model":MODEL,
+   "router":"CEREBRO_PROMPT_FACTORY_PRIMARY_DEEPSEEK_TEACHER" if job.get("creative_owner")=="CEREBRO_PROMPT_FACTORY_V0" else "DEEPSEEK_FLASH_PRIMARY_ONLY","creative_model":AI,"image_model":MODEL,
    "source_request":job["source_request"],"total_panels":order_size,"publish_enabled":False,
    "request_budget_image_usd":job["max_image_budget_usd"],"request_budget_deepseek_usd":job["max_deepseek_budget_usd"],
    "status":"PRECHECKED_NOT_SUBMITTED","panels":[],"deepseek_calls":0,"replicate_predictions":0}
@@ -347,13 +392,21 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
   feedback=[]
   for attempt in range(1,job["max_attempts_per_panel"]+1):
    if round((img_count+1)*0.06,2)>job["max_image_budget_usd"]+0.000001:deny("FINOPS_IMAGE_BUDGET")
-   creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback),deepseek_key,clock)
-   prompt=validate_creative(creative,channel=job["channel"])
+   anchor=cerebro_owned_plan(job,panel)
+   creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback,
+    anchor["text"] if anchor is not None else None),deepseek_key,clock)
+   mentor_draft=validate_creative(creative,channel=job["channel"])
+   prompt=cerebro_mentor_final_prompt(anchor,creative) if anchor is not None else mentor_draft
    # Persist exactly what DeepSeek proposed, including lens, key/fill and contrast, so CEREBRO can learn.
    prompt_path=OUT/(panel["id"]+"-A"+str(attempt)+"-DEEPSEEK-PROMPT.json")
    json_write(prompt_path,{"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
     "content_id":job["request_id"],"panel_id":panel["id"],"attempt":attempt,
     "prompt":prompt,"prompt_sha256":hash_bytes(prompt.encode()),
+    "creative_owner":"CEREBRO_PROMPT_FACTORY_V0" if anchor else "LEGACY_DEEPSEEK_PRIMARY",
+    "cerebro_source_prompt_sha256":anchor["prompt_sha256"] if anchor else None,
+    "mentor_proposed_scene_sha256":hash_bytes(mentor_draft.encode("utf-8")),
+    "mentor_scene_is_executed":False if anchor else True,
+    "mentor_lighting_shot_is_executed":True,
     "shot_plan":creative.get("shot_plan"),"risks":creative.get("risks"),"model":AI})
    image_input=replicate_image_input(job,prompt)
    # Atomic reservation above means no duplicate run can spend on this job; failures never retry uncertain POST.
