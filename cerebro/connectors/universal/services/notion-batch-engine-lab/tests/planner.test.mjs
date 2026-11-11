@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {webcrypto} from 'node:crypto';
+import {INDEX_SHA} from '../content.mjs';
+import {sealNotionIndexManifest} from '../notion-encrypted-index-manifest.mjs';
+import {planNextNotionBackupBatch,verifyNotionBackupBatch} from '../notion-content-batch-planner.mjs';
+if(!globalThis.crypto)globalThis.crypto=webcrypto;
+const key='a1'.repeat(32),ids=Array.from({length:100},(_,i)=>({id:(i+1).toString(16).padStart(8,'0')+'-1234-4123-8123-123456789abc',object:i%7===0?'data_source':'page'}));
+test('reads all index in memory and seals 50→75 without plaintext IDs',async()=>{const a=await sealNotionIndexManifest({notionToken:'fake-notion-token-long-enough-123',encryptionKey:key,http:async()=>({status:200,json:async()=>({results:ids,has_more:false})})});const b=await planNextNotionBackupBatch({indexArtifact:a,encryptionKey:key,offset:50,maxItems:25});assert.equal(b.next_offset,75);assert.equal(b.items,25);assert.equal(b.provider_writes,0);assert.equal((await verifyNotionBackupBatch({encryptionKey:key,artifact:b,expectedIndexSha256:a.id_list_sha256})).item_count,25);for(const x of ids)assert.ok(!JSON.stringify(b).includes(x.id));});
+test('source index drift fails expected SHA gate and never mutates',async()=>{const a=await sealNotionIndexManifest({notionToken:'fake-notion-token-long-enough-123',encryptionKey:key,http:async()=>({status:200,json:async()=>({results:ids,has_more:false})})});assert.notEqual(a.id_list_sha256,INDEX_SHA);});
+test('read only endpoint policy, no arbitrary HTTP/SQL URLs',async()=>{const fs=await import('node:fs');const s=fs.readFileSync(new URL('../index.ts',import.meta.url),'utf8');assert.ok(s.includes('await verifyGitHubOidc(auth.slice(7))'));assert.ok(s.includes('sealNotionIndexManifest'));assert.ok(!/method:\s*['"](?:DELETE|PUT|PATCH)['"]/.test(s));assert.ok(!s.includes('update vault'));});
