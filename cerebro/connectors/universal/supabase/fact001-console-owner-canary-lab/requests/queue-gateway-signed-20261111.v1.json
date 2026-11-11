@@ -1,9 +1,1 @@
-{
-  "company_id": "fenix-capital",
-  "engine_id": "FACT-001",
-  "environment": "LAB",
-  "version": "1.0.0",
-  "operation": "fact001.lab.heartbeat",
-  "request_id": "FACT001-CF-GW-SIGNED-20261111-001",
-  "max_cost_eur": 0
-}
+{"company_id":"fenix-capital","engine_id":"FACT-001","environment":"LAB","version":"1.0.0","operation":"fact001.lab.heartbeat","request_id":"FACT001-CF-GW-SIGNED-20261111-001","max_cost_eur":0}
