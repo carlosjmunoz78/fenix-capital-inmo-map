@@ -18,7 +18,7 @@ MODEL="black-forest-labs/flux-1.1-pro-ultra"
 DS_ENDPOINT="https://api.deepseek.com/chat/completions"
 REPLICATE_ENDPOINT="https://api.replicate.com/v1/models/"+MODEL+"/predictions"
 ALLOWED_CHANNELS={"INSTAGRAM","FACEBOOK","LINKEDIN","SEO"}
-FAIL_CODES={"INVENTED_TEXT","INVENTED_LOGO","FACE_MISSING","FACE_TINY","FACE_OBSCURED","CAST_MISMATCH","BAD_ANATOMY","GENERIC_SCENE","DARK_MUDDY","MISLEADING_FINANCE","COMPOSITION_WEAK","UNKNOWN"}
+FAIL_CODES={"INVENTED_TEXT","INVENTED_LOGO","FACE_MISSING","FACE_TINY","FACE_OBSCURED","CAST_MISMATCH","BAD_ANATOMY","GENERIC_SCENE","DARK_MUDDY","MISLEADING_FINANCE","COMPOSITION_WEAK","BAD_LIGHTING","FLAT_CONTRAST","FOCAL_DISTORTION","WRONG_BRAND_COLOR","UNKNOWN"}
 OUT=Path(os.environ.get("RUNNER_TEMP","/tmp"))/"ums001-deepseek-autonomous"
 class Blocked(RuntimeError):pass
 def deny(reason):raise Blocked("UMS001_DEEPSEEK_"+reason)
@@ -125,7 +125,12 @@ def validate_creative(result):
  if len(p)+len(photo_plan)>4700:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
  return p+photo_plan
 def validate_vision(result):
- if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary"}:deny("VISION_JSON_SCHEMA")
+ if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary","rubric_scores"}:deny("VISION_JSON_SCHEMA")
+ rubric=premium_policy()["qa_dimensions"]
+ scores=result["rubric_scores"]
+ if not isinstance(scores,dict) or set(scores)!=set(rubric):deny("PREMIUM_VISION_RUBRIC_MISSING")
+ if any(type(scores[k]) is not int or not 0<=scores[k]<=rubric[k] for k in rubric):deny("PREMIUM_VISION_SCORE_OUT_OF_RANGE")
+ if sum(scores.values())!=result.get("score"):deny("PREMIUM_VISION_SCORE_SUM_MISMATCH")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
  if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
  if not isinstance(result["correction"],str) or len(result["correction"])>1200:deny("VISION_CORRECTION")
@@ -166,11 +171,13 @@ def vision_messages(job,panel,jpeg):
  encoded=base64.b64encode(jpeg).decode()
  instr=("You are an independent strict quality inspector of CEREBRO UMS-001, not an image promoter. "
   "Judge ACTUAL IMAGE PIXELS, not the expected prompt. Use STRICT JSON ONLY with EXACT keys "
-  "{\"pass\":boolean,\"score\":integer 0-100,\"violations\":array of codes,\"correction\":string,\"summary\":string}. "
-  "Codes: INVENTED_TEXT,INVENTED_LOGO,FACE_MISSING,FACE_TINY,FACE_OBSCURED,CAST_MISMATCH,BAD_ANATOMY,GENERIC_SCENE,DARK_MUDDY,MISLEADING_FINANCE,COMPOSITION_WEAK,UNKNOWN. "
+  "{\"pass\":boolean,\"score\":integer 0-100,\"violations\":array of codes,\"correction\":string,\"summary\":string,\"rubric_scores\":object}. "
+  "Codes: INVENTED_TEXT,INVENTED_LOGO,FACE_MISSING,FACE_TINY,FACE_OBSCURED,CAST_MISMATCH,BAD_ANATOMY,GENERIC_SCENE,DARK_MUDDY,MISLEADING_FINANCE,COMPOSITION_WEAK,BAD_LIGHTING,FLAT_CONTRAST,FOCAL_DISTORTION,WRONG_BRAND_COLOR,UNKNOWN. "
   "Reject any pseudo-writing, watermarks, false logos, money promises, official seals, absent/tiny human face, "
   "weak art direction. Portraits must clearly show specified people with realistic skin and visible hands. "
   "Score >=88 and zero violations only if PREMIUM Fénix quality, not basic. "
+  "Judge photographer-level lens perspective/angle, natural key light, soft fill, edge separation, tonal contrast, human skin, shallow but accurate depth, orange highlights without orange skin, scene originality. "
+  "rubric_scores must have EXACT keys and maximums: human_presence_and_cast 20, camera_and_composition 15, lighting_and_realism 15, contrast_and_color 10, surreal_creativity 15, typography_and_brand_integrity 15, context_and_claims 10; each integer 0..maximum and score MUST equal sum. "
   "When uncertain reject with UNKNOWN. Do not be lenient to the generating model.")
  desc={"panel":panel,"topic":job["topic"],"social":job["channel"]!="SEO"}
  return [{"role":"system","content":instr},{"role":"user","content":[
