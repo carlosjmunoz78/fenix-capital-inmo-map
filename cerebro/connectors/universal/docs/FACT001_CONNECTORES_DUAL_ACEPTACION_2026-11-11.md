@@ -46,3 +46,40 @@
 - **FINAL GATE:** 11 exigencias por proveedor según `registry/headless-gates.v1.json`, COST=0 y QA OLD vs NEW, tribunal, rollback, observabilidad y aceptación física. Cualquier falta -> `PARCIAL`, no `VERIFIED_FULL`.
 
 **Intervención realizada por este documento:** documentación únicamente, en rama DRAFT. Sin ruta pública, credenciales, cambios de recursos ni promociones.
+
+## Continuación posterior · recuperación D1, Vercel y Opera · 2026-11-11
+
+Esta ampliación es evidencia física adicional **sin modificar ni invalidar** el acta original. Estado global: **PARCIAL**, no FULL; las interfaces de consola quedan explícitamente fuera de este ciclo, pero los gates de seguridad y recuperación NO se dispensan.
+
+### D1 Recovery · Descarga alternativa y restauración de estructura (PASS)
+- Se aisló el HTTP 403 del entorno de descarga del conector Cloudflare Universal; la misma exportación **solo esquema, sin datos** se descargó desde GitHub Actions por HTTPS con HTTP **200**.
+- Runner privado respecto a secretos de Actions, repo PR DRAFT. El workflow solo usa `CEREBRO_CLOUDFLARE_API_TOKEN` secreto existente. No registra token, URL firmada ni SQL, no retiene archivo, no modifica tablas y limita el tamaño de descarga.
+- SHA256 del esquema SQL de **13.371 bytes**: `4dfe7b88962813e6874ce920035cf89f5726d66e0a235a75d187e7fbf4bac11b`.
+- Reproducción efímera en SQLite `:memory:`: **23 tablas usuario restauradas**; comparación de nombres con el D1 LIVE **23/23 PASS**. La tabla `_cf_KV` es interna de Cloudflare y queda fuera de la exportación.
+- CI: [esquema, restore y parity #43109577679](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43109577679) **SUCCESS**; seguridad de broker en [#43109577707](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43109577707) **SUCCESS**. Código: `.github/workflows/fact001-d1-export-network-diagnostic.yml` y `services/provider-headless-lab/tests/d1-export-network-diagnostic.mjs`.
+- **NO CERRADO:** exportación **de datos completos**, custodia cifrada privada/offsite, clave de restauración independiente, restauración de datos real en recurso aislado y comparación de filas. No ejecutar migración DDL ni rollback global de la D1 compartida sobre esta evidencia de esquema.
+
+### Vercel · despliegue protegido y rollback LAB (PASS en cliente ChatGPT)
+- Equipo único `team_qnh6u1Ofy2WPp0MGEKlyMA50`; proyecto LAB exclusivo `prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu`, **sin enlace Git ni dominios Fénix**.
+- Preflight antes del despliegue: `framework=null`, `ssoProtection={enabled:true,deploymentType:'all'}`, cero despliegues, `live=false`.
+- V1 `dpl_DCk7j7wNbeaHmFc28CQ8b8DwHU9z` creada `READY`, V2 `dpl_AdnFjkCYenNU3e7fiAp6PgcoamcZ` creada `READY`. Contenido HTML sintético sin clientes, `noindex`, `robots.txt` disallow, sin contratos externos.
+- **Advertencia comprobada:** Vercel clasificó el primer deployment como `target=production` **dentro del proyecto aislado LAB** pese a solicitar `preview`. Policy necesaria: bloquear despliegues automáticos de primer recurso que puedan exponer activos; exigir SSO all + comprobación de target devuelto.
+- `request_rollback` a V1 ejecutado. Readback `list_deployment_aliases`: **V1 tiene los dos alias del proyecto; V2 ninguno**. SSO permaneció all. Dos deployments sintéticos conservados como historial LAB bajo protección; no desplegar ni alterar App/CRM ni producción de Fénix.
+- **NO CERRADO:** ejecutar el mismo deployment/rollback desde el **servicio CEREBRO OIDC + Vault** en lugar del conector ChatGPT, control de consumo/respaldo, limpieza de versiones con API limitada y aprobación OAuth del Vercel genérico (sigue 0 proyectos frente a 3 de Universal). NO declarar FULL.
+
+### Opera · lectura/navegación real, cierre restringido
+- Instalación `5171b7ce-0de0-4792-93a9-ea5bf64ab645`: listado, apertura de una pestaña sintética `https://example.com/`, recuperación real del árbol accesible, navegación final a `about:blank`.
+- `close_tab` está **deshabilitado por el propietario en la extensión**; intento denegado por el propio MCP. Pestaña sintética creada `1381967525` permanece abierta en blanco, sin credenciales ni acciones comerciales. No tocar las otras pestañas.
+- Instalación `14a97edc-b6f9-44aa-b42b-6bec6e3aa4f8`: timeout persistente. Browser Bridge de CEREBRO headless sigue SIN E2E autónomo.
+- Para cierre de prueba hace falta que el propietario active permiso `close_tab` en la extensión Opera o cierre manualmente la pestaña de prueba; no forzar control.
+
+### Gates no cubiertos por la excepción «consola»
+- Notion: copia integral de 6.632 objetos, adjuntos/comentarios, clave escrow y restore real todavía sin prueba.
+- GitHub: permiso mínimo de creación de repositorios para identidad de servicio sigue no acreditado; no se ha creado repositorio ni elevado permisos.
+- Supabase: gestión Edge function sintética + rollback/delete sin backup completo recuperable de D1 y gate de riesgo no permitida; App/CRM permanecen intactos.
+- Cloudflare: recuperación **de datos**, no solo esquema; costos y políticas por operación; Service IAM más independiente.
+- Vercel: OAuth genérico y ciclo de despliegue **desde CEREBRO** pendiente, aunque el ciclo desde ChatGPT ya está probado en LAB.
+- Opera: `close_tab` disabled, otra instalación timeout, headless Bridge sin demostrar.
+- `CEREBRO Console` y su interfaz son excepción **solo de UI**; no sirve para saltarse permisos, identidad, backups, evidencias, tribunal o recuperación.
+
+**Estado aceptado:** `FACT001_CONNECTORES_DUAL_PARCIAl_CON_CLOUD_D1_SCHEMA_PARITY_GREEN_Y_VERCEL_PROTECTED_ROLLBACK_GREEN`. PR #44 sigue DRAFT y sin merge. Ninguna nueva suscripción, ni alteración de App, CRM, DNS, WordPress, Notion comercial, Trading, otras D1 o proyectos Vercel Fénix.
