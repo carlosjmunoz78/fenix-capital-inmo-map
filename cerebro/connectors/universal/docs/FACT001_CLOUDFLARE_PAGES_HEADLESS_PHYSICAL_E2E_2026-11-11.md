@@ -24,7 +24,7 @@ En los cuatro jobs: `error_code=NULL`. El ledger `fact001_cf_pages_owned_v1` dej
 
 ## Conservación, coste y rollback
 - Recovery D1 existente `1305f791-7c44-47f9-946b-f330a09c88aa`, **ninguna D1 nueva**. Tablas aditivas propias: `fact001_cf_pages_jobs_v1` y `fact001_cf_pages_owned_v1`.
-- Bookmark anterior a Pages DDL `00000156-00000002-00005120-fb09bc9785346c35cc5fbf6a4eee9428` NO USAR: referencia descartada. Bookmark correcto en contrato: `00000156-00000002-00005120-fb09bc7ecaf4db07c39adda366dfcf1b`. Nunca restaurar toda la D1 compartida.
+- Bookmark D1 anterior al DDL Pages verificado en Cloudflare: `00000156-00000002-00005120-fb09bc7ecaf4db07c39adda366dfcf1b`. Nunca restaurar toda la D1 compartida.
 - Versión anterior Worker `02698b93-2e22-4855-ac89-65ef22e24d75` conservada para rollback bajo control, sin renunciar al secreto nuevo de Pages. Sin cambios en App, CRM, DNS, PROD, main o Fénix Pages.
 - No se contrató ni activó un plan de pago; el uso continuado debe vigilar los límites del Free tier.
 
