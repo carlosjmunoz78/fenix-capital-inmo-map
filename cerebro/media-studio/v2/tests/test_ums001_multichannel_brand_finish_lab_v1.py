@@ -25,6 +25,9 @@ class Tests(unittest.TestCase):
   self.assertFalse(result["delivery_allowed"])
   self.assertFalse(result["video_gate_allowed"])
   self.assertEqual(result["pixel_dimensions"],[1200,628])
+  self.assertIsNotNone(result["headline_text_bbox_px"])
+  self.assertLessEqual(result["headline_text_bbox_px"][3],628-result["headline_bottom_margin_px"])
+  self.assertGreaterEqual(result["headline_text_bbox_px"][1],0)
  def test_wrong_source_sha_rejected(self):
   with self.assertRaises(m.Hold):m.verified_image(self.source,"LI-FEED-01","a"*64)
  def test_no_crop_of_wide_photo_into_instagram_portrait(self):
