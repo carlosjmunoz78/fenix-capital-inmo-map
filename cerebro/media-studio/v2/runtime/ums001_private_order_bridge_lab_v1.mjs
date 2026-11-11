@@ -71,7 +71,9 @@ function readPrivateJson(path,root){
 export function recordExistingSignedPrediction({order,master,history,db,privateRoot,
   imagePath,providerProofPath,trustPath,bridgeSecret}){
  const intake=registerAutoOrder({order,master,history,db});
- if(intake.ledger.frozen||intake.ledger.attempts_remaining===0)fail('ATTEMPT_CAP_EXHAUSTED');
+ if(intake.ledger.frozen)fail('PIECE_FROZEN');
+ // Ledger determines whether a signed prediction ID is an exact replay (no-op)
+ // or a forbidden third attempt; do not reject safe replay at quota boundary.
  const rawBytes=readFileSync(privatePath(imagePath,privateRoot));
  if(rawBytes.length<40_000||rawBytes.length>12_000_000||
     rawBytes[0]!==0xff||rawBytes[1]!==0xd8||rawBytes[2]!==0xff)
