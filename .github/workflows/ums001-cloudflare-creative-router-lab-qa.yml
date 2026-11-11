@@ -1,0 +1,33 @@
+name: UMS001 Cloudflare creative router LAB security QA no model calls
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-cloudflare-creative-router-lab-qa.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_cloudflare_creative_router_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_cloudflare_creative_router_lab_v1.py'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-cloudflare-creative-router-test-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  safety-and-schema:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Verify fail closed creative router with deterministic offline tests
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_cloudflare_creative_router_lab_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_cloudflare_creative_router_lab_v1.py -v
+      - name: Cost and environment boundary
+        run: |
+          echo 'Workers AI real inference: 0 for CI; no Cloudflare scoped secret needed for tests.'
+          echo 'Replicate predictions: 0; no DeepSeek calls; no PROD; no publishing.'
