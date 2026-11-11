@@ -80,6 +80,16 @@
       ],
       "artifact_id": 13868479391,
       "note": "REAL SEO 16:9: domestic interior physically generated, human cast absent. DeepSeek Vision summary exceeded schema so NO valid QA score; rejected. Never infer model success from GH workflow status."
+    },
+    {
+      "run_id": 43055263249,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13869733582,
+      "note": "Physical Facebook 1:1 square 2048x2048 with CEREBRO-first prompt + DeepSeek camera mentoring. Two adult people only shown FROM BEHIND inside completely orange repetitive arches, no recognisable Córdoba flat or physical orange glass; not a candid photo. Vision failed with unknown violation code; no valid numeric grade. Independent reviewer rejects."
     }
   ],
   "rules": [
@@ -126,6 +136,14 @@
     {
       "code": "FACE_MISSING",
       "instruction": "Physical SEO final retake 43051178813 produced 16:9 real estate interior without the two adults required by brief. Reject missing cast even if wide dimensions correct. Avoid generating empty real-estate staged living room when editorial requires people visiting."
+    },
+    {
+      "code": "CAST_MISMATCH",
+      "instruction": "Physical FB first CEREBRO-first canary run 43055263249: two adults with backs to camera so no visible faces, instead of requested real mature buyer couple. Strongly require front three-quarter faces actually in pixels; a prompt claim about faces or exact cast does not prove visual compliance."
+    },
+    {
+      "code": "GENERIC_SCENE",
+      "instruction": "Physical FB canary run 43055263249: intense full-frame monochrome orange nested arch corridor is unacceptable. For real-estate social: authentic Andalusian white/cream apartment with clear window, sofa, masonry and natural skin; orange glass sculpture is secondary physical object only, <20% frame, not an environment or tunnel."
     }
   ],
   "policy": {
@@ -139,5 +157,5 @@
     "cost_estimate_replicate_usd": 0.42,
     "estimated_usage_only": true
   },
-  "next_gate": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY: Four physical IG/SEO canaries failed artistic approval; halt paid retries, independent visual QA and creative Prompt Factory intervention needed before remaining 9 or videos. Preserve all rejected raw files and refs."
+  "next_gate": "CEREBRO-FIRST pipeline has generated one real Facebook 1:1 image but independent pixel QA rejected; pass only after distinct realistic flat, visible faces and non-dominant orange architecture. Additional image generation must be gated; no publication or video."
 }
