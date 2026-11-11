@@ -63,6 +63,8 @@ def allowed_job(doc):
  if owner=="CEREBRO_PROMPT_FACTORY_V0":
   if set(doc)-required!={"style_reference_mode","render_aspect_ratio","creative_owner","master_item_id"}:deny("CEREBRO_FIRST_SCHEMA")
   if doc.get("master_item_id") not in ("IG-FEED-01","SEO-HERO-01","FB-FEED-01") or len(doc.get("panels",[]))!=1:deny("CEREBRO_FIRST_CANARY_SCOPE")
+  allowed_master={"IG-FEED-01":("INSTAGRAM","IMAGE","4:5"),"SEO-HERO-01":("SEO","SEO_HERO","16:9"),"FB-FEED-01":("FACEBOOK","IMAGE","1:1")}
+  if (doc.get("channel"),doc.get("asset_type"),doc.get("render_aspect_ratio"))!=allowed_master[doc["master_item_id"]]:deny("CEREBRO_FIRST_MASTER_CHANNEL_RATIO_MISMATCH")
   if (doc.get("style_reference_mode"),doc.get("max_attempts_per_panel"),doc.get("max_image_budget_usd"),doc.get("max_deepseek_calls"),doc.get("max_deepseek_budget_usd"))!=("NONE",1,0.06,2,0.02):deny("CEREBRO_FIRST_FINOPS_SCOPE")
  else:
   if "master_item_id" in doc:deny("UNOWNED_MASTER_REFERENCE")
