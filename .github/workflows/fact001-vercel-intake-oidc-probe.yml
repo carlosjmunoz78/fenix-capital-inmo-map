@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/supabase/vercel-intake-lab/probes/run.json
+      - cerebro/connectors/universal/supabase/vercel-intake-lab/commands/command.v1.json
 permissions:
   contents: read
   id-token: write
@@ -36,9 +37,53 @@ jobs:
           const forged=await call('health','forged-token');
           if(denied.http!==401||forged.http!==401)throw Error('UNAUTHORIZED_HEALTH_OPEN');
           const signed=await call('health',jwt);
-          if(signed.http!==200||signed.json.status!=='VERCEL_LAB_SIGNED_INTAKE_READY'||signed.json.vercel_api_writes!==false)throw Error('SIGNED_HEALTH_FAILED');
+          if(signed.http!==200||signed.json.status!=='VERCEL_LAB_SIGNED_INTAKE_READY'||signed.json.vercel_api_writes!=='SIGNED_OWNED_LAB_ONLY')throw Error('SIGNED_HEALTH_FAILED');
           const invalid={company_id:'fenix-capital',engine_id:'FACT-001',environment:'PROD',version:'0.1.0',provider:'vercel',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',project_id:'prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu',project_name:'cerebro-fact001-vercel-lab-20261111',max_cost_eur:0,operation:'vercel.project.read_lab',job_id:'FACT001-VERCEL-CMD-20261111-READ-01',request_id:'FACT001-VERCEL-20261111-READ-01',idempotency_key:'fact001-vercel-oidc-20261111-read-01'};
           const negative=await call('submit',jwt,invalid);
           if(negative.http!==403)throw Error('PROD_SCOPE_NOT_BLOCKED');
           console.log('FACT001_VERCEL_SIGNED_IDENTITY_NEGATIVE_GATES=PASS; NO_D1_QUEUE_MUTATIONS');
+          NODE
+
+      - name: Signed isolated Vercel LAB one-shot command, audited and replay denied
+        if: contains(github.event.head_commit.message, 'FACT001_VERCEL_SIGNED_CMD')
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const cmd=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/vercel-intake-lab/commands/command.v1.json','utf8'));
+          const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'0.1.0',provider:'vercel',team_id:'team_qnh6u1Ofy2WPp0MGEKlyMA50',project_id:'prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu',project_name:'cerebro-fact001-vercel-lab-20261111',max_cost_eur:0};
+          const keys=[...Object.keys(fixed),'operation','job_id','request_id','idempotency_key'];
+          const allowed=['vercel.project.read_lab','vercel.project.set_framework_vite_lab','vercel.project.rollback_framework_null_lab','vercel.deployment.list_lab'];
+          if(JSON.stringify(Object.keys(cmd).sort())!==JSON.stringify(keys.sort())||Object.entries(fixed).some(([k,v])=>cmd[k]!==v)||
+           !allowed.includes(cmd.operation)||!/^FACT001-VERCEL-CMD-[A-Z0-9-]{8,72}$/.test(cmd.job_id)||
+           !/^FACT001-VERCEL-[A-Z0-9-]{8,70}$/.test(cmd.request_id)||!/^[a-z0-9-]{12,96}$/.test(cmd.idempotency_key))
+            throw Error('SERVICE_VERCEL_COMMAND_POLICY_DENIED');
+          const request=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!request||!grant)throw Error('OIDC_ISSUE_NOT_READY');
+          const signed=await fetch(request+(request.includes('?')?'&':'?')+'audience=cerebro-fact001-vercel-intake-lab-20261111',{headers:{Authorization:'Bearer '+grant},signal:AbortSignal.timeout(12000)});
+          if(signed.status!==200)throw Error('OIDC_ISSUE_FAILED');
+          const jwt=(await signed.json()).value;
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-vercel-intake-lab/';
+          const call=async(route,token,body)=>{
+           const resp=await fetch(base+route,{method:body?'POST':'GET',headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+             ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(32000)});
+           let data={};try{data=await resp.json()}catch{}
+           return{http:resp.status,data};
+          };
+          if((await call('execute',null,cmd)).http!==401||(await call('execute','invalid',cmd)).http!==401)throw Error('UNAUTHORIZED_EXECUTE_NOT_BLOCKED');
+          if((await call('execute',jwt,{...cmd,environment:'PROD'})).http!==403)throw Error('PROD_EXECUTE_NOT_BLOCKED');
+          const submitted=await call('submit',jwt,cmd);
+          if(submitted.http!==200||submitted.data.status!=='QUEUED_VERIFIED'||submitted.data.token_exposed!==false)throw Error('SIGNED_D1_SUBMIT_FAILED');
+          console.log('FACT001_VERCEL_SERVICE_COMMAND_ENQUEUED=VERIFIED');
+          const executed=await call('execute',jwt,cmd);
+          console.log('FACT001_VERCEL_SERVICE_EXECUTE_HTTP='+String(executed.http));
+          console.log('FACT001_VERCEL_SERVICE_EXECUTE_STATE='+String(executed.data?.status||'UNKNOWN'));
+          if(executed.http!==200||executed.data?.status!=='COMPLETED'||executed.data?.attempts!==1||executed.data?.credentials_exposed!==false)throw Error('VERCEL_PROVIDER_COMMAND_FAILED');
+          const status=await call('status',jwt,{company_id:cmd.company_id,engine_id:cmd.engine_id,environment:cmd.environment,version:cmd.version,request_id:cmd.request_id});
+          if(status.http!==200||status.data?.job?.state!=='COMPLETED'||status.data.job.attempts!==1||status.data.job.error_code!==null)
+           throw Error('VERCEL_AUDIT_NOT_VERIFIED');
+          const replay=await call('submit',jwt,cmd);
+          const again=await call('execute',jwt,cmd);
+          if(replay.http!==200||replay.data?.status!=='IDEMPOTENT_EXISTING'||again.http!==409)throw Error('VERCEL_REPLAY_GATE_FAILED');
+          console.log('FACT001_VERCEL_SIGNED_SERVICE_PHYSICAL_E2E=VERIFIED');
+          console.log('FACT001_VERCEL_OPERATION='+cmd.operation);
           NODE

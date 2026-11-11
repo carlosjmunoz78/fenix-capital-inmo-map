@@ -80,7 +80,7 @@ Deno.serve(async(req)=>{
  if(!['health','submit','status','execute'].includes(route))return answer(404,{status:'NOT_FOUND'});
  try{await verifyGitHubOidc(auth(req));}
  catch{return answer(401,{status:'UNAUTHORIZED'});}
- if(route==='health')return req.method==='GET'?answer(200,{status:'VERCEL_LAB_SIGNED_INTAKE_READY',provider:'vercel',scope:SCOPE,writes_to:'D1_QUEUE_ONLY',vercel_api_writes:false}):answer(405,{status:'METHOD_DENIED'});
+ if(route==='health')return req.method==='GET'?answer(200,{status:'VERCEL_LAB_SIGNED_INTAKE_READY',provider:'vercel',scope:SCOPE,writes_to:'D1_QUEUE_ONLY',vercel_api_writes:'SIGNED_OWNED_LAB_ONLY'}):answer(405,{status:'METHOD_DENIED'});
  if(req.method!=='POST')return answer(405,{status:'METHOD_DENIED'});
  let data;
  try{
