@@ -6,6 +6,7 @@ on:
       - '.github/workflows/cerebro-ums-replicate-connection-health-lab-v0.yml'
       - 'cerebro/media-studio/v2/runtime/replicate-credential-health-lab-v0.py'
       - 'cerebro/media-studio/v2/tests/replicate-credential-health-lab-v0.test.py'
+      - 'cerebro/media-studio/v2/requests/REPLICATE_HEALTH_LAB_REQUEST.json'
   push:
     branches:
       - cerebro/ums-replicate-flux-paid-lab-v0-20261108
