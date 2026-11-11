@@ -31,7 +31,9 @@ jobs:
           fetch-depth: 2
           persist-credentials: false
       - name: Run deterministic intake rejection, cap, quality and video gates
-        run: node --test cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs
+        run: |
+          node --test cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs
+          node --test cerebro/media-studio/v2/tests/ums001_image_autonomy_gate_lab_v1.test.mjs
       - name: Detect single incoming order on push
         if: github.event_name == 'push'
         id: incoming
