@@ -1,0 +1,98 @@
+name: UMS001 automatic image-order intake LAB without paid inference
+on:
+  push:
+    branches:
+      - cerebro/ums001-visual-learning-no-reference-lab-20261111
+    paths:
+      - 'cerebro/media-studio/v2/requests/autonomous-inbox/*.json'
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'cerebro/media-studio/v2/runtime/ums001_image_autonomous_intake_lab_v1.mjs'
+      - 'cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs'
+      - 'cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_IMAGE_GATE_REAL_20261111_V5.json'
+      - '.github/workflows/ums001-image-autonomous-intake-lab-v1.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-auto-intake-lab-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  automatic-lab-intake-and-deterministic-planning:
+    if: >-
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' &&
+      ((github.event_name == 'push' && github.ref_name == 'cerebro/ums001-visual-learning-no-reference-lab-20261111') ||
+      (github.event_name == 'pull_request' && github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'))
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Run deterministic intake rejection, cap, quality and video gates
+        run: node --test cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs
+      - name: Detect single incoming order on push
+        if: github.event_name == 'push'
+        id: incoming
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILES="$(git diff-tree --no-commit-id --name-only -r HEAD)"
+          test "$(printf '%s\n' "$FILES" | wc -l)" -eq 1
+          INBOX='cerebro/media-studio/v2/requests/autonomous-inbox/'
+          case "$FILES" in
+            "$INBOX"*.json) ;;
+            *) echo "NOT_SINGLE_INBOX_ORDER";exit 10;;
+          esac
+          case "$FILES" in *'..'*|*'//'*) exit 11;; esac
+          echo "path=$FILES" >> "$GITHUB_OUTPUT"
+          echo 'LAB_ONE_INBOX_ORDER_FILE=PASS'
+      - name: CEREBRO generates eleven canonical owner prompts without model/API calls
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py --out cerebro/media-studio/v2/qa/UMS001_AUTO_INTAKE_OWNER_PROMPTS_CI_ONLY.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open('cerebro/media-studio/v2/qa/UMS001_AUTO_INTAKE_OWNER_PROMPTS_CI_ONLY.json'))
+          assert d['generated_prompt_count']==11
+          assert d['provider_calls_this_execution']==0
+          assert d['publish_enabled'] is False
+          assert len({x['prompt_sha256'] for x in d['prompts']})==11
+          print('CEREBRO_ORIGINAL_11_PROMPTS_OFFLINE_PASS')
+          PY
+      - name: Process incoming order automatically in LAB
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          node cerebro/media-studio/v2/runtime/ums001_image_autonomous_intake_lab_v1.mjs \
+            "${{ steps.incoming.outputs.path }}" \
+            cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json \
+            cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_IMAGE_GATE_REAL_20261111_V5.json \
+            "${{ runner.temp }}/ums001-intake/plan.json"
+          node --input-type=module - <<'JS'
+          import {readFileSync} from 'node:fs';
+          const file=process.env.RUNNER_TEMP+'/ums001-intake/plan.json';
+          const p=JSON.parse(readFileSync(file,'utf8'));
+          if(p.paid_provider_calls_authorized!==false || p.automatic_publication!==false ||
+             p.video_enabled!==false || p.delivery_allowed!==false || p.production_enabled!==false)
+            throw Error('AUTONOMY_GATE_FALSE_PROMOTION');
+          if(!['LAB_INTAKE_ACCEPTED_CREATIVE_PLANNING_ONLY','HUMAN_REQUIRED'].includes(p.status))
+            throw Error('UNEXPECTED_AUTONOMY_STATE');
+          console.log('ACTUAL_LAB_ORDER_ACCEPTED_OR_FROZEN='+p.status);
+          JS
+      - name: Store audit evidence privately in GitHub Actions, never publish/send
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-image-orders-automatic-intake-lab-no-provider
+          path: |
+            ${{ runner.temp }}/ums001-intake/plan.json
+            cerebro/media-studio/v2/qa/UMS001_AUTO_INTAKE_OWNER_PROMPTS_CI_ONLY.json
+          if-no-files-found: warn
+          retention-days: 14
+      - name: No model charge, no content release
+        if: always()
+        run: |
+          echo 'INTAKE AUTO: YES; PROMPT FACTORY AUTO: YES; MODEL PAID CALLS: ZERO.'
+          echo 'DELIVERY: PRIVATE LAB CANDIDATE NOT ENABLED UNTIL IMAGE GATE + RIGHTS.'
+          echo 'APP CRM SUPABASE WORDPRESS MAIN PROD PUBLISH VIDEO: UNCHANGED.'
