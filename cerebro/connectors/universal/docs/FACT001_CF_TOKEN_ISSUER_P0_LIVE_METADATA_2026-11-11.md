@@ -28,3 +28,16 @@ Sustituto de destino: `cerebro_cf_account_token_issuer_v2`, **únicamente `Accou
 - `issuer_v2=NOT_PROVISIONED`, `child_lifecycle=NOT_TESTED`, `gateway_dual_e2e=NOT_TESTED`.
 - `provider_mutations=0`, `subscriptions_added=0`, `PROD=UNCHANGED`.
 - **next_block:** `CF-TOKEN-ISSUER-001_BACKEND_VAULT_DIRECT_PROVISION_AND_E2E`.
+
+
+## Cierre del intento de sustitución · 11/11/2026
+
+**HECHO:** Se reutilizó el Edge sidecar LAB preexistente `cerebro-fact001-cf-issuer-lab`. Candidato v5 y diagnósticos v6 ACTIVE; 22/22 pruebas del contrato en [CI 42989728062](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42989728062). El token v1 ya había creado y custodiado su hijo D1 Read en un ciclo anterior, pero NO puede delegar el permiso necesario para emitir otro emisor de la misma clase.
+
+**Causa exacta LIVE:** [GitHub Actions 42990091152](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42990091152) → Supabase `function_logs` a las 08:49:45 UTC: `FACT001_LAB_ISSUER_DENIAL=ISSUER_GROUP_NOT_SELECTABLE`. El proveedor niega `Account API Tokens Write` como permiso delegable al usar el propio token v1. El OAuth humano de ChatGPT ve el grupo seleccionable, pero eso NO confiere ese derecho a la identidad v1. **No relajar la validación ni intentar repetir indefinidamente**.
+
+**Protecciones verificadas:** firma GitHub OIDC aceptada, anónimo 401, falso 401, no token hijo/v2 nuevo, v1 sin revocar, Vault v2 ausente en comprobación, sin exposición de valores y sin recursos productivos alterados. Se restaura el workflow de emisión original en GitHub, retirando el disparador v2 de CI; el candidato en rama queda solo para diagnóstico/revisión.
+
+**Rollback físico:** intentada la redeploy de los tres archivos originales v4 desde GitHub; la herramienta de ejecución bloqueó la llamada por control de seguridad. Por lo tanto **NO afirmar que v6 se haya revertido**. La ruta v2 de v6 solo admite JWT firmado del workflow original, no hay trigger v2 operativo tras devolver el workflow, y ninguna credencial v2 ha sido creada. El rollback necesita canal autorizado compatible.
+
+**Siguiente paso excepcional:** el titular debe provisionar una sola vez un emisor de mínimo privilegio (exclusivamente `Account API Tokens Write`, cuenta Fénix) mediante flujo oficial humano que lo custodie DIRECTAMENTE en Vault sin pasarlo por el chat. Luego verificar metadatos, token hijo D1 Read, revocación/401 y retirar v1 solo después de éxito. No interpretar el bloqueo como fallo de permisos generales de Cloudflare, solo de delegación de token.

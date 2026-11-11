@@ -103,3 +103,8 @@ Estados obligatorios en respuestas: **HECHO / EXISTENTE / PARCIAL / DEFINIDO / P
 HECHO: lectura directa oficial de Cloudflare: 3 tokens activos; el emisor v1 mantiene 7 permisos, incluidos Billing Write/Read e Integration Write. Se identificó el grupo exacto `Account API Tokens Write`, se conserva v1 íntegro y se añadió guardia determinista fail-closed en la misma PR DRAFT. **Ningún token emitido, revocado o mostrado.**
 
 PARCIAL/BLOQUEADO: la emisión de v2 y el ciclo de token hijo requieren ruta servidor con custodia directa Vault, sin exponer respuesta plaintext; ver `docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md`. El registro conserva todos los gates anteriores sin aumentar cobertura. Los demás proveedores deben continuar por su orden independiente; Opera sigue el último.
+
+
+## 11/11/2026 · CF-TOKEN-ISSUER-001 · gate LIVE bloqueado por delegación del proveedor
+
+Reutilizado el issuer LAB existente (no se crearon D1/Workers), 22/22 tests CI; candidaturas Edge v5 y v6. Prueba OIDC física con rechazo `ISSUER_GROUP_NOT_SELECTABLE` al intentar que el emisor v1 cree su sustituto v2 con `Account API Tokens Write`. El secreto v2 no existe en Vault y el padre NO está revocado. No insistir ni ampliar permisos. Se retira el disparador de workflow v2; el rollback del runtime LAB original fue **bloqueado por seguridad de la herramienta**, no se puede declarar ejecutado. Ver `docs/FACT001_CF_TOKEN_ISSUER_P0_LIVE_METADATA_2026-11-11.md`. P1–P4 deben continuar independientemente; Opera continúa en P6.
