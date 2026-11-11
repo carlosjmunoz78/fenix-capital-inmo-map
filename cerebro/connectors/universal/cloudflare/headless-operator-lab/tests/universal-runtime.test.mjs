@@ -25,8 +25,10 @@ test('fail-closed immutable code and ownership gates',()=>{
  assert.ok(s.includes('assertJob(job)'));
  assert.ok(s.includes("import {d1Tick} from './d1-adapter.mjs'"));
  assert.ok(s.includes('d1Tick(env,controller.scheduledTime)'));
+ assert.ok(s.includes("import {vercelTick} from './vercel-adapter.mjs'"));
+ assert.ok(s.includes('vercelTick(env,controller.scheduledTime)'));
  assert.ok(s.includes("import {pagesTick} from './pages-adapter.mjs'"));
- assert.ok(s.includes('Promise.allSettled([tick(env,controller.scheduledTime),pagesTick(env,controller.scheduledTime),d1Tick(env,controller.scheduledTime)])'));
+ assert.ok(s.includes('Promise.allSettled([tick(env,controller.scheduledTime),pagesTick(env,controller.scheduledTime),d1Tick(env,controller.scheduledTime),vercelTick(env,controller.scheduledTime)])'));
  assert.ok(s.includes("await requireOwned(db,name,['V2'])"));
  assert.ok(s.includes("await requireOwned(db,name,['V1','V2','ROLLED_BACK'])"));
  assert.ok(s.includes("if(await owned(db,name))throw Error('TARGET_EXISTS')"));
