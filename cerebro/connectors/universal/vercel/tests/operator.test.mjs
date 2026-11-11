@@ -33,3 +33,11 @@ test('reject accidental deployment or lost SSO before writes',async()=>{
  await assert.rejects(()=>executeOrder(base,'B'.repeat(32),bad));
  assert.equal(changed,0);
 });
+
+test('Vercel API SSO JSON omits enabled; deploymentType all still protects',async()=>{
+ const request={...SCOPE,provider:'vercel',team_id:TEAM_ID,project_id:PROJECT_ID,project_name:PROJECT_NAME,operation:'vercel.project.read_lab',max_cost_eur:0,request_id:'FACT001-VERCEL-20261111-READ-03',idempotency_key:'fact001-vercel-20261111-read-03'};
+ const ok=async()=>({status:200,json:async()=>({id:PROJECT_ID,name:PROJECT_NAME,accountId:TEAM_ID,live:false,latestDeployment:null,domains:[],ssoProtection:{deploymentType:'all'}})});
+ assert.equal((await executeOrder(request,'A'.repeat(35),ok)).status,'VERIFIED');
+ const denied=async()=>({status:200,json:async()=>({id:PROJECT_ID,name:PROJECT_NAME,accountId:TEAM_ID,live:false,latestDeployment:null,domains:[],ssoProtection:{deploymentType:'all',enabled:false}})});
+ await assert.rejects(()=>executeOrder(request,'A'.repeat(35),denied),/VERCEL_SSO_NO_DEPLOYMENT_GATE/);
+});
