@@ -1,0 +1,84 @@
+{
+  "schema_version": 5,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "request_id": "UMS001-MULTICHANNEL-IMAGE-11-20261111-V1",
+  "recorded_on": "2026-11-11",
+  "image_gate_green": false,
+  "image_generations_real": 9,
+  "distinct_piece_ids_attempted": 5,
+  "distinct_piece_ids_unattempted": 6,
+  "final_editorial_and_rights_approved": 0,
+  "provider_estimate_usd_model": 0.45,
+  "estimated_not_invoice": true,
+  "attempts_by_item": {
+    "IG-FEED-01": 2,
+    "IG-CAROUSEL-01": 0,
+    "IG-CAROUSEL-02": 0,
+    "IG-CAROUSEL-03": 0,
+    "IG-CAROUSEL-04": 0,
+    "IG-CAROUSEL-05": 0,
+    "IG-STORY-01": 2,
+    "FB-FEED-01": 2,
+    "LI-FEED-01": 1,
+    "SEO-HERO-01": 2,
+    "SEO-BODY-01": 0
+  },
+  "real_evidence": [
+    {
+      "item_id": "LI-FEED-01",
+      "provider": "bytedance/seedream-4",
+      "prediction_id": "7st2ycmy5drmw0d1sdqr5n6vtw",
+      "original_sha256": "0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422",
+      "branded_sha256": "5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170",
+      "visual_score": 90,
+      "visual_qa": "VALID_SINGLE_DEEPSEEK_QA__EDITORIAL_RIGHTS_PENDING",
+      "publish_approved": false,
+      "qa_run_id": 43093440062
+    },
+    {
+      "item_id": "IG-STORY-01",
+      "attempt": 1,
+      "provider": "bytedance/seedream-4",
+      "qa_score": 72,
+      "qa_status": "REJECTED_VISUAL",
+      "run_id": 43094403542,
+      "publication": false
+    },
+    {
+      "item_id": "IG-STORY-01",
+      "attempt": 2,
+      "provider": "bytedance/seedream-4",
+      "qa_score": 69,
+      "provider_reported_score": 74,
+      "qa_status": "REJECTED_SCORE_INCONSISTENT_FACE_TINY_GENERIC_SCENE",
+      "prediction_id": "dfatxqjzkdrmr0d1sjavnkqsrc",
+      "original_sha256": "4613fa04b14748a01282e24c3674ff4e1f3fae0e9ce672d97420216c0571a736",
+      "run_id": 43106255862,
+      "artifact_id": 13894316596,
+      "publication": false
+    }
+  ],
+  "technical_passes": [
+    "CEREBRO_11_OWNER_PROMPTS_OFFLINE",
+    "OFFICIAL_FENIX_BRAND_SHA",
+    "LINKEDIN_REAL_POSTPRO_1200x628_SAFE_TEXT",
+    "DEEPSEEK_LINKEDIN_BRANDED_90_VALID_RUBRIC",
+    "IGSTORY_9x16_NATIVE_REAL_PIXELS"
+  ],
+  "blocked_gate_reasons": [
+    "6_OF_11_ITEMS_NOT_YET_GENERATED",
+    "0_EDITORIAL_RIGHTS_SIGNED_FINAL_IMAGES",
+    "STORY_2_OF_2_REJECTED",
+    "NOT_ONE_COMPLETE_AUTONOMOUS_JOB_TO_DELIVERY",
+    "PREPAID_BALANCE_AND_PROVIDER_CHARGE_GATES_NOT_VERIFIED_FOR_UNBOUNDED_EXECUTION",
+    "NOT_MULTIFORMAT_PRODUCTION_APPROVED"
+  ],
+  "prepaid_only": true,
+  "additional_subscriptions_eur": 0,
+  "production_untouched": true,
+  "publication_enabled": false,
+  "video_enabled": false,
+  "status": "LAB_INTAKE_OK__IMAGE_GENERATION_PRODUCTION_GATE_RED"
+}
