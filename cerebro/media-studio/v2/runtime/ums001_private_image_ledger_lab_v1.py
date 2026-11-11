@@ -154,7 +154,7 @@ def run(conn, request):
             if action=="record_existing_prediction":
                 # Only an already-occurred prediction. This does NOT authorize a future POST.
                 require(request.get("provider_call_authorized") is False,"MODEL_POST_DISABLED")
-                require(not v["frozen"] and v["attempts_remaining"]>0,"NO_ATTEMPTS")
+                require(not v["frozen"],"NO_ATTEMPTS")
                 pid=request.get("prediction_id","")
                 raw=request.get("raw_sha256","")
                 ev=request.get("signed_evidence_sha256","")
@@ -166,6 +166,7 @@ def run(conn, request):
                 if existing:
                     require(existing==(ev,raw),"PREDICTION_IDEMPOTENCY_CONFLICT")
                 else:
+                    require(v["attempts_remaining"]>0,"NO_ATTEMPTS")
                     next_attempt=v["total_attempts"]+1
                     conn.execute("""INSERT INTO predictions(prediction_id,company_id,engine_id,environment,
                         source_request_id,item_id,attempt_number,evidence_sha256,raw_sha256,status)
