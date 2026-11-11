@@ -20,6 +20,19 @@ REPLICATE_ENDPOINT="https://api.replicate.com/v1/models/"+MODEL+"/predictions"
 ALLOWED_CHANNELS={"INSTAGRAM","FACEBOOK","LINKEDIN","SEO"}
 FAIL_CODES={"INVENTED_TEXT","INVENTED_LOGO","FACE_MISSING","FACE_TINY","FACE_OBSCURED","CAST_MISMATCH","BAD_ANATOMY","GENERIC_SCENE","DARK_MUDDY","MISLEADING_FINANCE","COMPOSITION_WEAK","BAD_LIGHTING","FLAT_CONTRAST","FOCAL_DISTORTION","WRONG_BRAND_COLOR","UNKNOWN"}
 OUT=Path(os.environ.get("RUNNER_TEMP","/tmp"))/"ums001-deepseek-autonomous"
+SOCIAL_REFERENCE=ROOT/"references/IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json"
+SOCIAL_REFERENCE_SHA="c6341224d5e02ae7bf79e2d7b4effc59566d2aaa7028f2ad129f2045b79dcfe2"
+def safe_style_reference():
+ src=json.loads(SOCIAL_REFERENCE.read_text(encoding="utf-8"))
+ if src.get("source_sha256")!=SOCIAL_REFERENCE_SHA:deny("STYLE_REFERENCE_SHA_DENIED")
+ b=src.get("base64_image","")
+ if not isinstance(b,str) or not 30000<=len(b)<=150000:deny("STYLE_REFERENCE_UNVERIFIED_SIZE")
+ try:raw=base64.b64decode(b,validate=True)
+ except Exception:deny("STYLE_REFERENCE_ENCODING_DENIED")
+ if raw[:3]!=bytes((255,216,255)) or hashlib.sha256(raw).hexdigest()!=SOCIAL_REFERENCE_SHA:
+  deny("STYLE_REFERENCE_BYTES_TAMPERED")
+ return "data:image/jpeg;base64,"+b
+
 class Blocked(RuntimeError):pass
 def deny(reason):raise Blocked("UMS001_DEEPSEEK_"+reason)
 def hash_bytes(data):return hashlib.sha256(data).hexdigest()
@@ -70,6 +83,8 @@ def get_learning(doc):
   {"code":"INVENTED_TEXT","source":"IGC202603_CLOUDFLARE70B_REPLICATE_R02_REJECTED","instruction":"No printed lettering on clothing, walls, keys or physical objects"},
   {"code":"INVENTED_LOGO","source":"IGC202603_CLOUDFLARE70B_REPLICATE_R02_REJECTED","instruction":"Never generate fake marks; real logo added by verified compositor"},
   {"code":"MISLEADING_FINANCE","source":"IGC202603_CLOUDFLARE70B_REPLICATE_PILOT_R01_VERDICT","instruction":"Never suggest bank approval or real legal guarantee"},
+  {"code":"BAD_ANATOMY","source":"UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05","instruction":"Real QA 58/100: avoid hand gestures in foreground unless precise finger anatomy; do not create melted/fused fingers"},
+  {"code":"GENERIC_SCENE","source":"UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05","instruction":"Actual images omitted meaningful surreal architectural sculpture; insist on physically grounded spectacular orange glass architecture behind the people rather than orange flat wall"},
  ]
  return lessons
 PREMIUM_POLICY=ROOT/"registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json"
@@ -159,12 +174,19 @@ def validate_vision(result):
  scores=result["rubric_scores"]
  if not isinstance(scores,dict) or set(scores)!=set(rubric):deny("PREMIUM_VISION_RUBRIC_MISSING")
  if any(type(scores[k]) is not int or not 0<=scores[k]<=rubric[k] for k in rubric):deny("PREMIUM_VISION_SCORE_OUT_OF_RANGE")
- if sum(scores.values())!=result.get("score"):deny("PREMIUM_VISION_SCORE_SUM_MISMATCH")
+ # A contradictory self-reported score MUST be a rejection, never a forced approval.
+ discrepancy=sum(scores.values())!=result.get("score")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
  if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
  if not isinstance(result["correction"],str) or len(result["correction"])>1200:deny("VISION_CORRECTION")
  if not isinstance(result["summary"],str) or not 5<=len(result["summary"])<=500:deny("VISION_SUMMARY")
- return {**result,"accepted":result["pass"] and result["score"]>=88 and len(result["violations"])==0}
+ if discrepancy:
+  issues=sorted(set(result["violations"]+["UNKNOWN"]))
+  return {**result,"reported_score":result["score"],"rubric_sum":sum(scores.values()),
+   "score":min(result["score"],sum(scores.values())),"pass":False,
+   "violations":issues,"accepted":False,"score_consistency":"REJECTED_INCONSISTENT_RUBRIC"}
+ return {**result,"accepted":result["pass"] and result["score"]>=88 and len(result["violations"])==0,
+  "score_consistency":"VERIFIED"}
 def http_json(url,method="GET",token=None,data=None,timeout=35):
  headers={"Accept":"application/json","User-Agent":"CEREBRO-UMS001-DEEPSEEK-LAB/1"}
  if token:headers["Authorization"]="Bearer "+token
@@ -276,12 +298,19 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
    if round((img_count+1)*0.06,2)>job["max_image_budget_usd"]+0.000001:deny("FINOPS_IMAGE_BUDGET")
    creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback),deepseek_key,clock)
    prompt=validate_creative(creative)
+   # Persist exactly what DeepSeek proposed, including lens, key/fill and contrast, so CEREBRO can learn.
+   prompt_path=OUT/(panel["id"]+"-A"+str(attempt)+"-DEEPSEEK-PROMPT.json")
+   json_write(prompt_path,{"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
+    "content_id":job["request_id"],"panel_id":panel["id"],"attempt":attempt,
+    "prompt":prompt,"prompt_sha256":hash_bytes(prompt.encode()),
+    "shot_plan":creative.get("shot_plan"),"risks":creative.get("risks"),"model":AI})
+   image_input={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
+     "output_format":"jpg","safety_tolerance":2}
+   if job["channel"]!="SEO":
+    image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
    # Atomic reservation above means no duplicate run can spend on this job; failures never retry uncertain POST.
    try:
-    code,pred=http_json(REPLICATE_ENDPOINT,"POST",replicate_key,{"input":{
-      "prompt":prompt,"aspect_ratio":"4:5","raw":False,
-      "output_format":"jpg","safety_tolerance":2},
-     },timeout=85)
+    code,pred=http_json(REPLICATE_ENDPOINT,"POST",replicate_key,{"input":image_input},timeout=85)
    except Exception:deny("REPLICATE_POST_UNCERTAIN_NO_RETRY")
    if code not in (200,201) or not re.fullmatch(r"[a-z0-9]{8,80}",str(pred.get("id",""))):deny("REPLICATE_SUBMISSION_NOT_CONFIRMED")
    img_count+=1
