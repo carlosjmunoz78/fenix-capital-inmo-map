@@ -40,6 +40,26 @@
       ],
       "drive_archive": "19kwZwA3hjfkte1PRYVB_1NVGYHvWrK3x",
       "note": "Checkmark source cropped by pixel verified SHA, but art still generic with fake marks"
+    },
+    {
+      "run_id": 43049681977,
+      "request_id": "UMS001-MULTI11-IGFEED-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13868213530,
+      "note": "Real IG 4:5 3 figures shown from behind instead of 2 front-facing, giant corridor artwork, rejected"
+    },
+    {
+      "run_id": 43049681977,
+      "request_id": "UMS001-MULTI11-SEOHERO-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        62
+      ],
+      "artifact_id": 13868213530,
+      "note": "Real SEO 16:9 close-up portrait instead of wide property-visit environmental editorial, malformed right hand, rejected"
     }
   ],
   "rules": [
@@ -70,6 +90,14 @@
     {
       "code": "FLAT_CONTRAST",
       "instruction": "Actual failures: orange slab backgrounds and flat studio-like illumination are insufficient. Require nuanced key/fill, true Mediterranean directional sunlight, readable shadows and premium controlled cinematic color."
+    },
+    {
+      "code": "FACE_MISSING",
+      "instruction": "REAL QA 43049681977 IG score 52: never accept any Instagram two-buyer photo with backs of heads, three people, or tiny side faces. Require EXACTLY two adult characters, both shot three-quarter toward lens, natural faces highly visible, while glass installation remains behind them, not hiding faces."
+    },
+    {
+      "code": "COMPOSITION_WEAK",
+      "instruction": "REAL QA 43049681977 SEO score 62: landscape 16:9 dimensions do not prove SEO framing. Require Córdoba home ENVIRONMENT occupying over half of photo, two adults medium-size on one side, wide negative space for HTML heading, physically integrated orange artwork not a flat rectangle; avoid hands reaching toward lens."
     }
   ],
   "policy": {
