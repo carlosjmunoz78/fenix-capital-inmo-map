@@ -72,11 +72,11 @@
         "binding_count": 6
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_3X_UI_F8469EFD_PROD_READONLY_CANARY",
       "observed_at": "2026-11-11T16:18:53.655Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -90,7 +90,38 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "56167def669080b1ea04bca46d772c420802e4a3bf7342db026115d4a5420118"
+      "capability_hash": "56167def669080b1ea04bca46d772c420802e4a3bf7342db026115d4a5420118",
+      "canary": {
+        "status": "GREEN_DYNAMIC_3X_UI_F8469EFD_PROD_READONLY_CANARY",
+        "candidate_id": "repo:4bcb8f081b51ee77c5125b1dea80",
+        "technical_name": "3x-ui",
+        "head_sha": "e518be11f0487ed34e85838477c869d7d108ea40",
+        "run_id": 43057102369,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "CMP-002",
+          "DPO-001",
+          "IAM-001",
+          "RED-001",
+          "SEC-001",
+          "SEC-002"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-11T16:19:11.739Z"
+      },
+      "promoted_at": "2026-11-11T16:19:11.739Z"
     },
     {
       "candidate_id": "repo:20e3c88e5f9d65bf4287eaf3ac39",
@@ -17780,10 +17811,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 176,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 175
+    "pending_canary": 0,
+    "prod_readonly": 176
   }
 }
