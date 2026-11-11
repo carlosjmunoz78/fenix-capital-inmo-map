@@ -42,6 +42,7 @@ jobs:
           const e=await call('execute-once',jwt,order);
           console.log('CF_HEADLESS_EXEC_HTTP='+e.http);
           console.log('CF_HEADLESS_EXEC_STATUS='+String(e.data.status||e.data.code||'UNKNOWN').replace(/[^a-zA-Z0-9_]/g,'').slice(0,80));
+          console.log('CF_HEADLESS_SAFE_REASON='+String(e.data.code||'NONE').replace(/[^A-Z0-9_]/g,'').slice(0,90));
           if(e.http!==200||e.data.status!=='HEADLESS_CEREBRO_WORKER_LIFECYCLE_VERIFIED'||e.data.child_revoked!==true||e.data.rolled_back!==true||e.data.rebuilt!==true||e.data.credential_exposed!==false)throw Error('HEADLESS_REAL_E2E_FAILED');
           console.log('CF_HEADLESS_REAL_E2E=PASS');
           const again=await call('execute-once',jwt,order);
