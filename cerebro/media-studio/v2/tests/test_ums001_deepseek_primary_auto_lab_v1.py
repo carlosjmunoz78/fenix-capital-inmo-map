@@ -5,7 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 P=ROOT/"runtime/ums001_deepseek_primary_auto_lab_v1.py"
 spec=importlib.util.spec_from_file_location("deepseekauto",P)
 m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-JOB=ROOT/"requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-CANARY-LAB-01.json"
+JOB=ROOT/"requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-01.json"
 class DeepseekAutonomousTests(unittest.TestCase):
  @classmethod
  def setUpClass(cls):cls.job=json.loads(JOB.read_text())
