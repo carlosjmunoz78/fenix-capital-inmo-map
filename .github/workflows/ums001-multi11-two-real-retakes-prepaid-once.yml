@@ -31,8 +31,8 @@ jobs:
           FILE=cerebro/media-studio/v2/requests/UMS001_MULTI11_TWO_REAL_RETAKE_LAUNCH_20261111.json
           test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 1
           test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = "$FILE"
-          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json)" = 9f906642bb0095e294e360b167efb84e3d1fb115
-          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json)" = 17871f463a957d2819553102dd98664fa296672a
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json)" = 0c13575a48918b16e5ced6e6ebae2834ed5ccb61
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json)" = 9ffcfd976aea9557871082dff9f05a1612fda253
           test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json)" = 59f6e8bb4886b858fe12a08bc6c1994962b5e707
           test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py)" = ce691c7e377bffa7554b6d4ba2e4b21fceed5a03
           python3 - <<'PY'
