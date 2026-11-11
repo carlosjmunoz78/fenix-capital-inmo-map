@@ -16,7 +16,7 @@ SLIDES=[
 ("S02","2. Ingresos",["Según tu actividad","Estabilidad y continuidad"]),
 ("S03","3. Ahorros",["Aportación y gastos","Compromisos actuales"]),
 ("S04","4. Vivienda",["Datos del inmueble","Documentación disponible"]),
-("S05","5. Revisión",["Revisa todo","Cada entidad puede pedir más"])
+("S05","5. Revisión",["Revisa los datos","Requisitos variables"])
 ]
 def digest(data):return hashlib.sha256(data).hexdigest()
 def load_logo():
@@ -60,7 +60,12 @@ def draw_one(source,final,header,bullets,logo):
   f=get_font(42)
   for x in bullets:
    d.ellipse((82,yy+14,102,yy+34),fill=(255,183,27,255))
-   d.text((122,yy),x,font=f,fill=(255,255,255,255),stroke_width=1,stroke_fill=(103,29,0,190))
+   # Hard stop against overlay/logo overlap. The entire text must fit left of x=780.
+   body_font=f
+   while d.textbbox((0,0),x,font=body_font)[2]>620 and body_font.size>24:
+    body_font=get_font(body_font.size-1)
+   if d.textbbox((0,0),x,font=body_font)[2]>620:raise RuntimeError("BODY_COPY_OVERFLOW_"+x)
+   d.text((122,yy),x,font=body_font,fill=(255,255,255,255),stroke_width=1,stroke_fill=(103,29,0,190))
    yy+=76
  # Plain cream support patch under exact transparent official full-color logo.
  d.rounded_rectangle((795,1105,1062,1320),radius=28,fill=(255,252,248,248))
