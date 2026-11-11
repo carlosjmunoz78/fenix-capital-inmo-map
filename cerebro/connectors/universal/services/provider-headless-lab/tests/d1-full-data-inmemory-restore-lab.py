@@ -74,11 +74,21 @@ if len(names) != 23:
 def quote_identifier(s):
     return '"' + s.replace('"','""') + '"'
 restored = {name: connection.execute("SELECT COUNT(*) FROM " + quote_identifier(name)).fetchone()[0] for name in names}
-q = " UNION ALL ".join("SELECT " + json.dumps(name) + " AS name, COUNT(*) AS count FROM " + quote_identifier(name) for name in names)
-records = call("/query",{"sql":q})
-if not isinstance(records,list) or len(records) != 1 or not records[0].get("success"):
-    raise RuntimeError("D1_LIVE_QUERY_ERROR")
-live = {row["name"]: int(row["count"]) for row in records[0].get("results",[])}
+# D1 disallows SQLite's double-quoted string fallback; use standard SQL single-quoted literals.
+# Small read-only batches also bound the API query complexity and fail closed.
+def quote_literal(s):
+    return "'" + s.replace("'", "''") + "'"
+live = {}
+for offset in range(0, len(names), 4):
+    group = names[offset:offset+4]
+    q = " UNION ALL ".join("SELECT " + quote_literal(name) + " AS name, COUNT(*) AS count FROM " + quote_identifier(name) for name in group)
+    records = call("/query", {"sql":q})
+    if not isinstance(records, list) or len(records) != 1 or not records[0].get("success"):
+        raise RuntimeError("D1_LIVE_QUERY_ERROR")
+    for row in records[0].get("results", []):
+        if row["name"] in live:
+            raise RuntimeError("D1_LIVE_DUPLICATE_TABLE")
+        live[row["name"]] = int(row["count"])
 if live != restored:
     raise RuntimeError("D1_DATA_RESTORE_ROW_PARITY_FAILED")
 print("D1_IN_MEMORY_INTEGRITY=PASS")
