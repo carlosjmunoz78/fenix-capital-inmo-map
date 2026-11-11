@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {ACCOUNT_ID,SCOPE,TOKEN_OP,TOKEN_REQUEST_ID,CHILD_NAME,CHILD_EXPIRY,REPO,BRANCH,OIDC_AUDIENCE,WORKFLOW_REF,assertIssueOrder,d1ReadGroup,childPolicy,assertClaims,verifyGitHubOidc} from '../policy.mjs';
 const body={...SCOPE,account_id:ACCOUNT_ID,client_id:'cerebro',operation:TOKEN_OP,request_id:TOKEN_REQUEST_ID};
-const claim={iss:'https://token.actions.githubusercontent.com',aud:OIDC_AUDIENCE,repository:REPO,ref:BRANCH,workflow_ref:WORKFLOW_REF,event_name:'push',iat:1000,exp:1300};
+const claim={iss:'https://token.actions.githubusercontent.com',aud:OIDC_AUDIENCE,repository:REPO,ref:BRANCH,workflow_ref:WORKFLOW_REF,event_name:'push',actor:'carlosjmunoz78',iat:1000,exp:1300};
 test('4D approved operation',()=>assert.equal(assertIssueOrder(body),true));
 test('no cross tenant',()=>assert.throws(()=>assertIssueOrder({...body,company_id:'other'})));
 test('no cross account',()=>assert.throws(()=>assertIssueOrder({...body,account_id:'another'})));
@@ -84,4 +84,9 @@ test('v2 child only D1 read, one account, short expiry and distinct Vault names'
  assert.notEqual(CHILD_V2_VAULT_NAME,CHILD_V2_ID_VAULT_NAME);
  assert.throws(()=>childV2Policy([{...g,is_selectable:false}]));
  assert.throws(()=>verifyChildV2Metadata({...body,status:'disabled'},g.id));
+});
+
+test('token broker owner-only JWT claims block collaborator and bot pushes',()=>{
+ assert.throws(()=>assertClaims({...claim,actor:'external-collaborator'},1100),/OIDC_SCOPE_DENIED/);
+ assert.throws(()=>assertClaims({...claim,actor:'github-actions[bot]'},1100),/OIDC_SCOPE_DENIED/);
 });
