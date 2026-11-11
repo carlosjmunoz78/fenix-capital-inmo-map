@@ -89,6 +89,16 @@ class DeepseekAutonomousTests(unittest.TestCase):
   legacy=m.replicate_image_input(self.job,"Original creative image")
   self.assertIn("image_prompt",legacy)
   self.assertEqual(legacy["image_prompt_strength"],0.30)
+ def test_creative_director_discriminates_ig_and_seo_scene_geometry(self):
+  ig={**self.job,"channel":"INSTAGRAM","asset_type":"IMAGE","style_reference_mode":"NONE","render_aspect_ratio":"4:5"}
+  seo={**self.job,"channel":"SEO","asset_type":"SEO_HERO","style_reference_mode":"NONE","render_aspect_ratio":"16:9"}
+  social=m.prompt_messages(ig,ig["panels"][0],1,[])[0]["content"]
+  search=m.prompt_messages(seo,seo["panels"][0],1,[])[0]["content"]
+  self.assertIn("EXACTLY TWO",social)
+  self.assertIn("three-quarter FRONT VIEW",social)
+  self.assertIn("HOME VISIT",search)
+  self.assertIn("no close-up",search)
+  self.assertNotIn("For SEO wide 16:9",social)
  def test_new_seo_landscape_canary_uses_16_9_real_provider_ratio(self):
   job={**self.job,"channel":"SEO","asset_type":"SEO_HERO","style_reference_mode":"NONE","render_aspect_ratio":"16:9"}
   self.assertEqual(m.allowed_job(job)["render_aspect_ratio"],"16:9")
