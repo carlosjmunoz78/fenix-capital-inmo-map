@@ -11,7 +11,7 @@ MODEL=base.MODEL
 BRANCH=base.BRANCH
 REPO=base.REPO
 API=base.API
-ORDER="cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_V1.json"
+ORDER=os.environ.get("UMS001_IGC202601_ORDER_FILE","cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_V1.json")
 BRIEF="cerebro/media-studio/v2/requests/UMS001_IGC202601_LEARNING_REFERENCE_V1.json"
 OUT=Path(os.getenv("RUNNER_TEMP","/tmp"))/"ums001-igc202601-canary"
 def stop(msg): raise RuntimeError("IGC202601_CANARY_"+msg)
@@ -19,7 +19,10 @@ def receipt(data):
  OUT.mkdir(parents=True,exist_ok=True)
  (OUT/"receipt.json").write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
 def verified_request(request,brief):
- expected={"request_id":"UMS001-IGC202601-CANARY-S00-20261111","company_id":"fenix","engine_id":"UMS-001",
+ allowed={"cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_V1.json":"UMS001-IGC202601-CANARY-S00-20261111",
+          "cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_R02.json":"UMS001-IGC202601-CANARY-S00-R02-20261111"}
+ if ORDER not in allowed:stop("ORDER_PATH_NOT_ALLOWLISTED")
+ expected={"request_id":allowed[ORDER],"company_id":"fenix","engine_id":"UMS-001",
   "environment":"LAB","content_id":"IGC-2026-01","concept_id":"IGC-2026-01-S00",
   "model_id":MODEL,"max_predictions":1,"max_cost_usd":0.06,"budget":"EXISTING_PREPAID_ONLY",
   "publish":False,"approval_state":"EXPLICIT_OWNER_TEST_ONLY"}
@@ -28,6 +31,7 @@ def verified_request(request,brief):
  if brief.get("source_generated_by")!="CHATGPT" or len(brief.get("images",[]))!=6:stop("REFERENCE_DATA_INVALID")
  row=brief["images"][0]
  if row.get("id")!=expected["concept_id"]:stop("FIRST_SLIDE_MISMATCH")
+ if ORDER.endswith("_R02.json") and row.get("prompt_revision")!="R02_AFTER_CANARY_QA_FAIL":stop("CORRECTION_EVIDENCE_REQUIRED")
  prompt=row.get("prompt","")
  if not (700<=len(prompt)<=4500) or "SURREAL" not in prompt.upper() or "PHOTOGRAPH" not in prompt.upper() or not ("No text" in prompt or "no text" in prompt):stop("PROMPT_NOT_SAFE")
  return prompt,expected
