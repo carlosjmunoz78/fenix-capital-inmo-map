@@ -138,14 +138,21 @@ def validate_creative(result):
   deny("RISKS_INVALID")
  if any(not isinstance(x,(str,dict)) for x in risk_items):
   deny("RISKS_INVALID")
- if not any(w in p.lower() for w in ["human","adult","people","woman","man"]):deny("PEOPLE_NOT_IN_PROMPT")
- if "orange" not in p.lower() or "photograph" not in p.lower():deny("BRAND_OR_PHOTO_ABSENT")
+ visual_text=(p+" "+" ".join(shot.values())).lower()
+ if not any(w in visual_text for w in ("human","adult","people","woman","man","person","protagonist")):
+  deny("PEOPLE_NOT_IN_PROMPT")
+ if not any(w in visual_text for w in ("orange","#ff5f00","amber","ámbar","golden")):
+  deny("BRAND_COLOR_ABSENT")
+ if not any(w in visual_text for w in ("photo","cinematic","50mm","35mm","85mm","focal","lens","portrait","editorial")):
+  deny("PHOTOGRAPHIC_DIRECTION_ABSENT")
  if re.search(r"(?:https?://|r8_[a-zA-Z0-9]+)",p):deny("SUSPICIOUS_PROMPT")
  # DeepSeek's structured camera/light decisions must be part of the actual Replicate prompt.
  photo_plan=" PHOTOGRAPHY SHOT SPEC: "+"; ".join(key.replace("_"," ")+": "+shot[key] for key in SHOT_KEYS)+"."
  hard_negatives=" IMPORTANT FOR ORIGINAL GENERATION: no written words anywhere, no fabricated watermarks, no generated logos, no false official paperwork or mortgage approval symbols, no text on clothes, no artifacts covering human faces, no poor anatomy. Authentic original Fénix mark is added later by a SHA-verified compositor only."
  if len(p)+len(photo_plan)+len(hard_negatives)>10000:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
- return p+photo_plan+hard_negatives
+ return ("MAIN SUBJECT: large authentic Spanish adult people in close-up foreground, clear natural faces and hands; "
+  "PREMIUM 50mm CINEMATIC PHOTOGRAPH with vivid orange #FF5F00 artwork behind humans, realistic sunlight. "
+  +p+photo_plan+hard_negatives)
 def validate_vision(result):
  if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary","rubric_scores"}:deny("VISION_JSON_SCHEMA")
  rubric=premium_policy()["qa_dimensions"]
