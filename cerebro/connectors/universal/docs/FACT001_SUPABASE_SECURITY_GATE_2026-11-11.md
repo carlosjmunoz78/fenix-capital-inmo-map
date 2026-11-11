@@ -39,3 +39,16 @@ El gate `HIGH_RISK` requiere decisión humana para la modificación del recurso 
 - Escrituras genéricas Supabase Universal: **NO VERIFICADAS**. Ningún nuevo proyecto, tabla, RLS, GRANT ni Edge desplegado por este bloque.
 
 **Próximas evidencias**: revisión de consumidores, snapshot operativo y comprobación física de backup; gate humano solo ante cambio real de permisos con riesgo.
+
+
+## Dependencias SQL físicas (inventario complementario)
+
+Consulta de solo lectura sobre `pg_proc.prosrc`, `pg_trigger`, `pg_constraint` y `pg_rewrite` detectó tres funciones del esquema `public` que referencian directamente las primeras tres tablas:
+
+| Tabla | Función SQL vinculada | SECURITY DEFINER | EXECUTE anon |
+| --- | --- | --- | --- |
+| `seo_cerebro_autonomy_capabilities_preprod` | `public.seo001_refresh_autonomy_capabilities_preprod` | Sí | Sí |
+| `seo_cerebro_b2b_strict_audit_preprod` | `public.seo001_b2b_strict_gate_preprod` | Sí | Sí |
+| `seo_cerebro_b2c_strict_audit_preprod` | `public.seo001_b2c_strict_gate_preprod` | Sí | Sí |
+
+Ninguna de las ocho tablas tiene triggers de usuario, FK o dependencias de vistas declaradas detectadas por estas consultas. **Esto no descarta consumidores externos por Edge/SEO/WordPress ni SQL dinámico**. No se ha ejecutado ninguna de estas funciones ni leído registros de negocio. No se ha auditado todavía el cuerpo de sus controles de autenticación; la capacidad de invocación `anon` no demuestra por sí sola que permitan efectos no autorizados. Mantener HIGH_RISK y bloquear remedios masivos hasta mapear todos los callers.

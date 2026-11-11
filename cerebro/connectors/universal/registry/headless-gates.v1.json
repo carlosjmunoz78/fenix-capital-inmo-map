@@ -669,7 +669,35 @@
         "mitigation_stage": "PROPOSED_NOT_EXECUTED",
         "evidence": "docs/FACT001_SUPABASE_SECURITY_GATE_2026-11-11.md",
         "policy_source": "supabase/universal-lab/policy.mjs",
-        "policy_ci": ".github/workflows/fact001-supabase-universal-policy-ci.yml"
+        "policy_ci": ".github/workflows/fact001-supabase-universal-policy-ci.yml",
+        "sql_consumers_analyzed_20261111": {
+          "method": "pg_proc source name search + pg_trigger + pg_constraint + pg_rewrite dependency only (read-only)",
+          "matching_functions": [
+            {
+              "table": "seo_cerebro_autonomy_capabilities_preprod",
+              "function": "public.seo001_refresh_autonomy_capabilities_preprod",
+              "security_definer": true,
+              "anon_execute": true
+            },
+            {
+              "table": "seo_cerebro_b2b_strict_audit_preprod",
+              "function": "public.seo001_b2b_strict_gate_preprod",
+              "security_definer": true,
+              "anon_execute": true
+            },
+            {
+              "table": "seo_cerebro_b2c_strict_audit_preprod",
+              "function": "public.seo001_b2c_strict_gate_preprod",
+              "security_definer": true,
+              "anon_execute": true
+            }
+          ],
+          "direct_custom_triggers_on_eight_tables": 0,
+          "direct_fk_links_on_eight_tables": 0,
+          "direct_view_rule_links_on_eight_tables": 0,
+          "app_edge_wordpress_consumers": "NOT_FULLY_MAPPED",
+          "important": "Name search is not a complete application caller inventory; SECURITY DEFINER may have internal auth guards not audited"
+        }
       }
     },
     {
