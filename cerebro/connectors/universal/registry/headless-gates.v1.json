@@ -423,6 +423,20 @@
         "independent_key_escrow": "PENDING",
         "isolated_physical_restore": "PENDING",
         "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115287406"
+      },
+      "d1_encrypted_backup_candidate_20261112": {
+        "state": "PURE_CRYPTO_MODULE_CI_GREEN_NOT_DEPLOYED",
+        "format": "FACT001-D1-FULL-DATA-AES256GCM-V1",
+        "source": "services/provider-headless-lab/d1-backup-envelope.mjs",
+        "tests": "services/provider-headless-lab/tests/d1-backup-envelope.test.mjs",
+        "local_tests": "9_PASS_0_FAIL",
+        "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43118980674",
+        "ciphertext_offsite_persisted": false,
+        "dedicated_vault_key": false,
+        "independent_key_escrow": false,
+        "download_from_offsite_and_restore": false,
+        "promotion_authorized": false,
+        "next_block": "SIGNED_BACKEND_SEAL_AND_DRIVE_CIPHERTEXT_CUSTODY_WITH_LAB_RESTORE"
       }
     },
     {
