@@ -77,6 +77,27 @@ class DeepseekAutonomousTests(unittest.TestCase):
   codes={x["code"] for x in m.get_learning(self.job)}
   self.assertIn("BAD_ANATOMY",codes)
   self.assertIn("GENERIC_SCENE",codes)
+ def test_visual_trial_explicitly_omits_legacy_style_reference(self):
+  trial={**self.job,"style_reference_mode":"NONE"}
+  self.assertEqual(m.allowed_job(trial)["style_reference_mode"],"NONE")
+  payload=m.replicate_image_input(trial,"A completely new cinematic editorial photograph")
+  self.assertEqual(payload["aspect_ratio"],"4:5")
+  self.assertNotIn("image_prompt",payload)
+  self.assertNotIn("image_prompt_strength",payload)
+ def test_existing_image_orders_preserve_verified_style(self):
+  self.assertIs(m.allowed_job(self.job),self.job)
+  legacy=m.replicate_image_input(self.job,"Original creative image")
+  self.assertIn("image_prompt",legacy)
+  self.assertEqual(legacy["image_prompt_strength"],0.30)
+ def test_visual_trial_rejects_unexpected_reference_modes(self):
+  for bad in ("AUTO","UNVERIFIED_URL",True,123,None):
+   with self.subTest(mode=bad),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"style_reference_mode":bad})
+ def test_visual_trial_is_lab_only_and_never_publishes(self):
+  with self.assertRaises(m.Blocked):
+   m.allowed_job({**self.job,"style_reference_mode":"NONE","environment":"PROD"})
+  with self.assertRaises(m.Blocked):
+   m.allowed_job({**self.job,"style_reference_mode":"NONE","publish_enabled":True})
  def test_fail_closed_before_paid_calls_without_secret(self):
   with patch.dict(os.environ,{"GITHUB_REPOSITORY":m.REPO,"GITHUB_HEAD_REF":m.BRANCH,"UMS001_DEEPSEEK_AUTOMATION_GATE":"OWNER_AUTHORIZED_LAB_20261111"}):
    with self.assertRaises(m.Blocked):m.run_job(self.job,"","", "")
