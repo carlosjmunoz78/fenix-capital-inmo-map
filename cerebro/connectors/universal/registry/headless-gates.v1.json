@@ -34,11 +34,13 @@
         "Cloudflare Universal OAuth works in ChatGPT",
         "FACT-001 OIDC issuer and isolated D1 Read LAB credential historically verified",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42838699207",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42822832223"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42822832223",
+        "Cloudflare OAuth physical LAB Worker V1->V2->V1 rollback->delete->rebuild->delete 2026-11-11; no public routes, bindings or crons",
+        "Cloudflare OAuth physical LAB Pages project create->branch update->revert->delete 2026-11-11; no deployment"
       ],
       "gaps": [
         "Cloudflare Pages independent LAB create/read/delete succeeded; one-off write endpoint retired",
-        "Full Worker/Pages deploy/update/rollback lifecycle not proven",
+        "Physical Worker deployment+rollback and Pages project-settings update/revert verified via ChatGPT OAuth; independent CEREBRO executor and Pages deployment rollback remain pending",
         "Existing LAB D1 heartbeat queue and replay verified; durable provider operations, quotas and PROD promotion remain pending"
       ],
       "verification": {
@@ -151,7 +153,43 @@
           "provider_scoped_resource_mutation_and_physical_rollback_isolated",
           "autonomous_queue_external_provider_contracts_and_observability",
           "production_promotion_gate"
-        ]
+        ],
+        "physical_lab_resource_e2e": {
+          "worker": {
+            "status": "VERIFIED_VIA_CHATGPT_OAUTH_ONLY",
+            "name": "cerebro-fact001-cf-lifecycle-e2e-lab-20261111",
+            "created": "PASS",
+            "updated": "PASS",
+            "rollback": "V2_TO_V1_PASS",
+            "deleted": "PASS",
+            "rebuilt": "PASS",
+            "rebuild_cleanup": "PASS",
+            "public_routes": 0,
+            "crons": 0,
+            "bindings": 0,
+            "worker_count_before": 13,
+            "worker_count_after": 13
+          },
+          "pages": {
+            "status": "VERIFIED_PROJECT_SETTINGS_ONLY_VIA_CHATGPT_OAUTH",
+            "name": "cerebro-fact001-pages-lifecycle-lab-20261111",
+            "created": "PASS",
+            "updated_branch": "lab-inert-v1_to_lab-inert-v2",
+            "rolled_back": "lab-inert-v1",
+            "deleted": "PASS",
+            "site_deploy_rollback": "NOT_TESTED",
+            "other_pages_projects_untouched": true
+          },
+          "d1": {
+            "count": 10,
+            "new_databases": 0
+          },
+          "independent_cerebro_service_worker_mutations": "NOT_VERIFIED",
+          "independent_cerebro_service_pages_mutations": "NOT_VERIFIED",
+          "state": "PARTIAL_HEADLESS_NEEDS_EXECUTOR_IDENTITY",
+          "extra_cost_eur": 0,
+          "record": "docs/FACT001_CF_LIFECYCLE_WORKERS_PAGES_E2E_2026-11-11.md"
+        }
       },
       "p0_cloudflare_token_broker": {
         "state": "VERIFIED_LAB",

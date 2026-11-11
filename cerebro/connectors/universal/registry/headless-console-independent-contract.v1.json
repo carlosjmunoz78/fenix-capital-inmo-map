@@ -101,5 +101,42 @@
   ],
   "no_new_subscriptions_eur": 0,
   "owner_session_e2e_without_console": "DO_NOT_REQUIRE_AS_CONNECTOR_BACKEND_GATE; reserve for UI integration",
-  "individual_connector_gates": "KEEP_EXISTING registry green_requires and do not convert heartbeat into full autonomous queue"
+  "individual_connector_gates": "KEEP_EXISTING registry green_requires and do not convert heartbeat into full autonomous queue",
+  "control_plane_scope": {
+    "target": "CEREBRO_OS_SINGLE_MULTI_COMPANY_OPERATIONS_CONTROL_PLANE",
+    "systems": [
+      "jarvis",
+      "app_fenix",
+      "crm_fenix",
+      "wordPress",
+      "seo",
+      "social_media",
+      "automations",
+      "training",
+      "trading_lab_strictly_isolated",
+      "supabase",
+      "github",
+      "cloudflare",
+      "vercel",
+      "notion",
+      "gpt_agents",
+      "future_companies"
+    ],
+    "access": [
+      "user_authorized_chatgpt_plugins_today",
+      "cerebro_gateway_verified_service_identity",
+      "cerebro_console_ui_later"
+    ],
+    "relationship": "CEREBRO orchestrates and audits existing systems through versioned wrappers/adapters; it does not replace them",
+    "irreversible_operations": "ONLY_UNDER_SPECIFIC_POLICY_AND_HUMAN_REQUIRED_GATES",
+    "protect_existing_prod": true,
+    "stated_status": "ARCHITECTURE_DEFINED_TARGET_NOT_YET_END_TO_END_IMPLEMENTED"
+  },
+  "cloudflare_evidence": {
+    "oauth_worker_lifecycle": "VERIFIED_LAB_RESOURCE_CREATED_MODIFIED_ROLLED_BACK_DELETED_REBUILT_AND_CLEANED",
+    "oauth_pages_project_lifecycle": "VERIFIED_LAB_PROJECT_SETTINGS_ONLY_NO_DEPLOYMENT",
+    "headless_worker_pages_lifecycle": "PENDING",
+    "console_gate": "DEFERRED",
+    "cloudflare_full": "PARTIAL"
+  }
 }

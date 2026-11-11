@@ -43,3 +43,8 @@ Ruta lógica: **origen autorizado → identidad verificada → políticas/tribun
 Por cada proveedor cerrar primero el contrato de ejecución headless y tests físicos independientes, después su integración futura con el Gateway. La aceptación de un conector no depende de que la consola esté terminada. La aprobación para operaciones ordinarias en LAB no elimina controles humanos exigibles por ley, seguridad o riesgo.
 
 **Registro original:** `registry/headless-gates.v1.json`. **Documento maestro:** `docs/FACT001_TRASPASO_MAESTRO_CONECTORES_2026-11-11.md`.
+
+
+## Alcance corporativo de CEREBRO confirmado 11/11/2026
+
+Además de conectores Cloudflare, GitHub, Supabase, Vercel y Notion, el **objetivo de CEREBRO OS como control central** abarca también **JARVIS, App Fénix, CRM, WordPress, SEO, redes, automatizaciones, Training, GPTs/agentes, Trading LAB aislado y empresas futuras**. Las acciones se realizan mediante adaptadores con contratos versionados y permisos específicos, salvaguardando todas las integraciones existentes. ChatGPT con orden del propietario y CEREBRO con identidad propia son canales de ejecución actuales; CEREBRO Console se conectará al Gateway al finalizarse. No afirmar que el objetivo end-to-end esté operativo sin pruebas. Estado: DEFINIDO.
