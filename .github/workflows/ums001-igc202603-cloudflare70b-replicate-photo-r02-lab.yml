@@ -1,0 +1,65 @@
+name: UMS001 IGC202603 Cloudflare free creative director REVISED -> Replicate photo R02 LAB once
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202603_CLOUDFLARE_CREATIVE_REPLICATE_CANARY_ORDER_R02.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202603-cloudflare70b-to-replicate-retake-r02-one-shot
+  cancel-in-progress: false
+jobs:
+  creative-image-test:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Check exact request in triggering commit
+        id: modified
+        run: |
+          if git show --format= --name-only HEAD | grep -Fxq 'cerebro/media-studio/v2/requests/UMS001_IGC202603_CLOUDFLARE_CREATIVE_REPLICATE_CANARY_ORDER_R02.json'; then
+            echo 'allowed=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'allowed=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Preflight Cloudflare creative source, reference hash, spending rules
+        if: steps.modified.outputs.allowed == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202603_cf_llm_to_replicate_pilot_r02.py
+          python3 - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          spec=importlib.util.spec_from_file_location('pilot',Path('cerebro/media-studio/v2/runtime/ums001_igc202603_cf_llm_to_replicate_pilot_r02.py'))
+          m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+          req,creative,prompt,ref=m.preflight()
+          assert req['max_cost_usd']==0.06 and req['max_predictions']==1
+          assert creative['estimated_additional_cost_eur']==0
+          assert creative['publish_enabled'] is False
+          print('UMS001_LLM_CREATIVE_AND_REPLICATE_PREFLIGHT_GREEN')
+          PY
+      - name: One real Replicate image from free Cloudflare LLM creative concept
+        if: steps.modified.outputs.allowed == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_CFCREATIVE_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202603_cf_llm_to_replicate_pilot_r02.py
+      - name: Preserve actual photo, prompt provenance and provider receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202603-cloudflare70b-replicate-photo-r02-lab
+          path: ${{ runner.temp }}/ums001-cfcreative-igc202603-r02/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Close safety audit
+        if: always()
+        run: echo 'Cloudflare free model pilot; Replicate up to 1 existing prepaid prediction ($0.06 estimate); no DeepSeek, no publication.'
