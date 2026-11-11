@@ -123,7 +123,7 @@ def validate_creative(result):
   else:
    deny("INVALID_SHOT_FIELD_"+key)
  p=result["image_prompt"];risks=result["risks"]
- if not isinstance(p,str) or not 650<=len(p)<=3000:deny("CREATIVE_TOO_SHORT_OR_LONG")
+ if not isinstance(p,str) or not 350<=len(p)<=6000:deny("CREATIVE_TOO_SHORT_OR_LONG")
  # Risk prose is advisory metadata, not the safety boundary. Accept bounded
  # variants from LLMs; all mandatory camera, finance and image QA gates remain strict.
  if isinstance(risks,str):
@@ -143,8 +143,9 @@ def validate_creative(result):
  if re.search(r"(?:https?://|r8_[a-zA-Z0-9]+)",p):deny("SUSPICIOUS_PROMPT")
  # DeepSeek's structured camera/light decisions must be part of the actual Replicate prompt.
  photo_plan=" PHOTOGRAPHY SHOT SPEC: "+"; ".join(key.replace("_"," ")+": "+shot[key] for key in SHOT_KEYS)+"."
- if len(p)+len(photo_plan)>4700:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
- return p+photo_plan
+ hard_negatives=" IMPORTANT FOR ORIGINAL GENERATION: no written words anywhere, no fabricated watermarks, no generated logos, no false official paperwork or mortgage approval symbols, no text on clothes, no artifacts covering human faces, no poor anatomy. Authentic original Fénix mark is added later by a SHA-verified compositor only."
+ if len(p)+len(photo_plan)+len(hard_negatives)>10000:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
+ return p+photo_plan+hard_negatives
 def validate_vision(result):
  if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary","rubric_scores"}:deny("VISION_JSON_SCHEMA")
  rubric=premium_policy()["qa_dimensions"]
