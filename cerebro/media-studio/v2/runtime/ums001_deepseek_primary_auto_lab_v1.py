@@ -72,13 +72,34 @@ def get_learning(doc):
   {"code":"MISLEADING_FINANCE","source":"IGC202603_CLOUDFLARE70B_REPLICATE_PILOT_R01_VERDICT","instruction":"Never suggest bank approval or real legal guarantee"},
  ]
  return lessons
+PREMIUM_POLICY=ROOT/"registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json"
+SHOT_KEYS=("camera_angle","focal_length_mm","aperture","key_light","fill_and_rim","contrast","color_grade","surreal_composition","subject_scale","typography_safe_area")
+def premium_policy():
+ doc=json_read(PREMIUM_POLICY)
+ if doc.get("policy_id")!="UMS001-PREMIUM-CINEMATOGRAPHY-20261111" or doc.get("environment")!="LAB":
+  deny("CINEMATOGRAPHY_POLICY_INVALID")
+ return doc
+def premium_directives():
+ doc=premium_policy()
+ return {"visual_standard":doc["artistic_standard"]["visual_goal"],
+  "photographic_details":doc["artistic_standard"]["camera"],
+  "lighting":doc["artistic_standard"]["lighting"],
+  "contrast_and_color":doc["artistic_standard"]["color_grade"],
+  "materials":doc["artistic_standard"]["texture_and_materials"],
+  "surreal_art":doc["artistic_standard"]["surreal_direction"],
+  "positive_prompt_order":doc["prompt_required_order"],
+  "qa_dimensions":doc["qa_dimensions"],
+  "no_generated_logos":True}
 def prompt_messages(job,panel,attempt,previous_qa):
  customer={"purpose":job["topic"],"audience":job["audience"],"platform":job["channel"],"type":job["asset_type"],
    "panel_scene":panel["scene"],"human_subject":panel["human_subject"],"must_show":panel["required_visuals"],
    "past_failures":get_learning(job),"attempt":attempt,"correction":previous_qa,
+   "premium_cinematography_contract":premium_directives(),
    "brand":{"dominant_accent":"#FF5F00","yellow_secondary":"#FFB71B","purple_accent":"MINIMAL","original_logo":"MR_BOGART_SVG_POSTCOMPOSITION_ONLY"}}
  sys_text=("You are CEREBRO UMS-001, a world-class Spanish surreal-photography creative director. "
-  "Produce STRICT JSON object with exact keys image_prompt,risks. image_prompt 650-3000 English characters. "
+  "Produce STRICT JSON with keys image_prompt,risks,shot_plan. image_prompt 650-3000 English characters. "
+  "shot_plan MUST include camera_angle,focal_length_mm,aperture,key_light,fill_and_rim,contrast,color_grade,surreal_composition,subject_scale,typography_safe_area, all concrete visible instructions. "
+  "Every scene must state a professional CAMERA ANGLE and focal LENS 35mm/50mm/85mm, aperture f/2.8-f/4, realistic depth of field, natural KEY LIGHT direction with fill and optional rim, a physically coherent contrast ratio and shadows, dynamic range, orange #FF5F00 cinematic grade while preserving natural skin. "
   "Start with large realistic Spanish adults visible waist-up in the foreground, photographic pores, believable hands, "
   "professional premium cinematic Córdoba-Andalucía art, spectacular orange glass surreal architecture BEHIND them. "
   "If SEO, do not include text or logos in final image. If social, leave space for separate deterministic hook+logo. "
@@ -87,14 +108,22 @@ def prompt_messages(job,panel,attempt,previous_qa):
   "Never generate the brand icon; original SHA-verified Fénix logo composited separately. JSON only.")
  return [{"role":"system","content":sys_text},{"role":"user","content":"Generate an original creative photographic prompt, not a repeated template. Customer brief JSON: "+json.dumps(customer,ensure_ascii=False)}]
 def validate_creative(result):
- if not isinstance(result,dict) or set(result)!={"image_prompt","risks"}:deny("CREATIVE_JSON_SCHEMA")
+ if not isinstance(result,dict) or set(result)!={"image_prompt","risks","shot_plan"}:deny("CREATIVE_JSON_SCHEMA")
+ shot=result["shot_plan"]
+ if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("MISSING_PREMIUM_PHOTO_SHOT_PLAN")
+ for key in SHOT_KEYS:
+  val=shot[key]
+  if not isinstance(val,str) or not 3<=len(val)<=350:deny("INVALID_SHOT_FIELD_"+key)
  p=result["image_prompt"];risks=result["risks"]
  if not isinstance(p,str) or not 650<=len(p)<=3000:deny("CREATIVE_TOO_SHORT_OR_LONG")
  if not isinstance(risks,list) or len(risks)!=3 or any(not isinstance(x,str) or not 5<=len(x)<=200 for x in risks):deny("RISKS_INVALID")
  if not any(w in p.lower() for w in ["human","adult","people","woman","man"]):deny("PEOPLE_NOT_IN_PROMPT")
  if "orange" not in p.lower() or "photograph" not in p.lower():deny("BRAND_OR_PHOTO_ABSENT")
  if re.search(r"(?:https?://|r8_[a-zA-Z0-9]+)",p):deny("SUSPICIOUS_PROMPT")
- return p
+ # DeepSeek's structured camera/light decisions must be part of the actual Replicate prompt.
+ photo_plan=" PHOTOGRAPHY SHOT SPEC: "+"; ".join(key.replace("_"," ")+": "+shot[key] for key in SHOT_KEYS)+"."
+ if len(p)+len(photo_plan)>4700:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
+ return p+photo_plan
 def validate_vision(result):
  if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary"}:deny("VISION_JSON_SCHEMA")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
