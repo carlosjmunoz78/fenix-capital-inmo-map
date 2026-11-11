@@ -19,7 +19,7 @@ test('empty Pages queue never uses Cloudflare',async()=>{
 test('never deploy public Pages or expose token; owner ledger controls every mutation',()=>{
  const s=readFileSync(new URL('../pages-adapter.mjs',import.meta.url),'utf8');
  assert.ok(s.includes("method:'GET'")===false); // functions call verb as arguments
- assert.ok(s.includes('redirect:\\'manual\\''));
+ assert.ok(s.includes("redirect:'manual'"));
  assert.ok(s.includes("if(await owned(db,name))throw Error('PROJECT_EXISTS')"));
  assert.ok(s.includes('assertOwned(db,name'));
  assert.ok(s.includes('PAGES_PUBLIC_DEPLOYMENT_UNSAFE'));
