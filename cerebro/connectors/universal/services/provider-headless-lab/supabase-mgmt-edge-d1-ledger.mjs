@@ -1,7 +1,7 @@
 // FACT-001 · D1 durable CAS ledger for Supabase synthetic Edge LAB ONLY.
 // CANDIDATE / NOT IMPORTED by the running broker; all vendor writes remain OFF.
 // A server-owned query(sql, bindings) adapter is required; never expose it to callers.
-import {SUPABASE_MGMT_LAB} from './supabase-mgmt-edge-policy.mjs';
+import {SUPABASE_MGMT_LAB,assertServicePrincipal} from './supabase-mgmt-edge-policy.mjs';
 
 const TABLE='fact001_supabase_edge_jobs_v1';
 const EVENT='fact001_supabase_edge_events_v1';
@@ -78,7 +78,8 @@ export async function digestSupabaseEdgePlan(plan,{cryptoImpl=crypto}={}){
  const bits=await cryptoImpl.subtle.digest('SHA-256',new TextEncoder().encode(material));
  return Array.from(new Uint8Array(bits),x=>x.toString(16).padStart(2,'0')).join('');
 }
-export function makeSupabaseEdgeLedger({query,now=Date.now}={}){
+export function makeSupabaseEdgeLedger({query,now=Date.now,principal}={}){
+ assertServicePrincipal(principal);
  if(typeof query!=='function'||typeof now!=='function')reject('SB_LEDGER_TRUSTED_ADAPTER_REQUIRED');
  async function one(sql,values){
    const r=await query(sql,values);
@@ -115,7 +116,9 @@ export function makeSupabaseEdgeLedger({query,now=Date.now}={}){
    if(outcome==='COMPLETED'){
     if(!strict(readback)||readback.verified!==true||readback.project_ref!==SUPABASE_MGMT_LAB.project_ref||
        readback.resource_slug!==SUPABASE_MGMT_LAB.resource_slug ||
-       (after_sha256!==null&&!sha(after_sha256)))
+       !sha(after_sha256)||readback.sha256!==after_sha256||
+       !Number.isSafeInteger(readback.checked_at)||readback.checked_at>now()||
+       readback.checked_at<now()-60000)
        reject('SB_LEDGER_READBACK_REQUIRED');
    }else if(after_sha256!==null)reject('SB_LEDGER_RECONCILE_NO_ASSUMPTIONS');
    const r=await one("UPDATE "+TABLE+
