@@ -408,25 +408,26 @@
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42808203559",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42809634627",
-        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597"
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42837159597",
+        "Physical signed GitHub OIDC service uses existing Vercel PAT in Supabase Vault: 4/4 LAB operations COMPLETED, 1 audit-preserved failed read pre SSO API shape fix, project restored and SSO all, zero deployments; run 43054365439."
       ],
       "gaps": [
         "Shared independent service currently supports read-only listing; former test LAB resource and one-off write runner were removed",
-        "No durable autonomous create/deploy/update/delete/rollback with per-provider cost gate",
-        "No PROD promotion or queue"
+        "Durable signed OIDC LAB queue + fixed-owned project GET/PATCH/rollback + deployment list VERIFIED; broad deployments, project delete, multi-project permissions still pending",
+        "No PROD promotion; LAB signed service queue verified with 4/4 completed and exact owner/project"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
         "owner_order_headless": "VERIFIED",
-        "autonomous_queue": "PENDING",
+        "autonomous_queue": "VERIFIED_LAB_SIGNED_WORKFLOW",
         "inventory_read": "VERIFIED",
         "isolated_lab_create": "VERIFIED",
-        "isolated_lab_update": "VERIFIED",
+        "isolated_lab_update": "VERIFIED_PHYSICAL_VAULT_SIGNED",
         "isolated_lab_delete": "VERIFIED",
-        "backup_and_rollback": "PENDING",
-        "cost_guard_verified": "PENDING",
+        "backup_and_rollback": "VERIFIED_LAB_FRAMEWORK_SETTINGS",
+        "cost_guard_verified": "VERIFIED_0_EUR_NO_DEPLOYMENTS_NEW_HOBBY_PROJECT",
         "production_promotion_policy": "PENDING",
-        "observability_and_audit": "PENDING"
+        "observability_and_audit": "VERIFIED_LAB_5_EVENTS"
       },
       "service_identity_read": "VERIFIED",
       "team_authorization_p3": {
@@ -447,6 +448,81 @@
         "subscriptions_added_eur": 0,
         "next_block": "VERCEL_OFFICIAL_OAUTH_GRANT_SCOPED_REPAIR_WITHOUT_REPEATED_CONSENT_LOOPS",
         "evidence": "docs/FACT001_VERCEL_ACCOUNT_BINDING_P3_2026-11-11.md"
+      },
+      "signed_service_vault_e2e_20261111": {
+        "status": "VERIFIED_LAB_SIGNED_READ_UPDATE_ROLLBACK_DEPLOYMENT_LIST",
+        "provider": "vercel",
+        "service_identity": "GitHub Actions OIDC owner actor strict workflow/audience/branch",
+        "vault_secret_name": "cerebro_vercel_service_token_v1",
+        "vault_protection": "SUPABASE_VAULT_IN_PLACE_NO_CREDENTIAL_TRANSFER",
+        "supabase_edge_service": {
+          "name": "cerebro-fact001-vercel-intake-lab",
+          "version": 5,
+          "state": "ACTIVE",
+          "verify_jwt": false,
+          "external_identity": "RS256_GITHUB_OIDC_VERIFIED_BEFORE_ANY_ROUTE"
+        },
+        "account_plan": "hobby",
+        "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+        "project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
+        "project_name": "cerebro-fact001-vercel-lab-20261111",
+        "scope": {
+          "company_id": "fenix-capital",
+          "engine_id": "FACT-001",
+          "environment": "LAB",
+          "version": "0.1.0"
+        },
+        "operations_verified": [
+          "vercel.project.read_lab",
+          "vercel.project.set_framework_vite_lab",
+          "vercel.project.rollback_framework_null_lab",
+          "vercel.deployment.list_lab"
+        ],
+        "signed_queues": {
+          "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+          "tables": [
+            "fact001_vercel_jobs_v1",
+            "fact001_vercel_events_v1"
+          ],
+          "completed": 4,
+          "attempts_per_successful_job": 1,
+          "reconcile": 1,
+          "event_count": 5,
+          "idempotency": "VERIFIED_REPLAY_409"
+        },
+        "rollback_final": {
+          "framework": null,
+          "live": false,
+          "latest_deployment": null,
+          "domains": [],
+          "ssoProtection": {
+            "enabled": true,
+            "deploymentType": "all"
+          }
+        },
+        "ci_evidence": [
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43053945817",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43054170024",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43054365439",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43054646304"
+        ],
+        "first_failure": "READ-01_RECONCILE_SSO_SCHEMA_OMITTED_ENABLED_PRESERVED",
+        "provider_schema_fix": "require deploymentType all and explicitly deny enabled false",
+        "cloudflare_worker_dormant": {
+          "version": "543b68e8-cd59-4960-9f17-d66276416389",
+          "why": "No VERCEL_API_TOKEN secret; Vault-backed Edge path is physically verified instead"
+        },
+        "prod_mutations": false,
+        "app_crm_mutations": false,
+        "new_paid_subscription": false,
+        "not_yet_verified": [
+          "GENERAL_CEREBRO_GATEWAY_ORDER_DISPATCH",
+          "DEPLOYMENT_CREATION_AND_ROLLBACK",
+          "MULTI_PROJECT_MULTI_COMPANY_ACCESS",
+          "FULL_VERIFICATION_PAGES/DNS_NOT_IN_SCOPE",
+          "SECURE_ROTATION_AND_INCIDENT_RECOVERY"
+        ],
+        "evidence_doc": "docs/FACT001_VERCEL_VAULT_SIGNED_SERVICE_PHYSICAL_E2E_2026-11-11.md"
       }
     },
     {

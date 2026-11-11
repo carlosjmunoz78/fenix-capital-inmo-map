@@ -204,3 +204,8 @@ Se verificó `CF_PAGES_TOKEN:secret_text`, token único `Pages Write` activo. Wo
 ## 2026-11-11 · D1 scoped autonomous LAB verification
 
 CEREBRO private Worker v `fde58260-9a26-4dec-a84f-201114ba071b` completed four D1 own-record lifecycle operations at attempts=1 and error_code=NULL, restored cron 5min. Cloudflare Free D1 limit remains 10/10; **no database create/delete** or whole-database restore. Combined physically verified operations 14 LAB jobs, differing scopes. See `docs/FACT001_CLOUDFLARE_D1_LOGICAL_E2E_2026-11-11.md`. Universal Cloudflare PARTIAL.
+
+
+## 11/11/2026 · Vercel signed Vault API physically verified in LAB
+
+Existing `cerebro_vercel_service_token_v1` Supabase Vault PAT was reused in place, no transfer to Cloudflare or chat. Signed GitHub OIDC calls new Edge Function `cerebro-fact001-vercel-intake-lab` v5, D1 durable audit. Four distinct Vercel LAB jobs `COMPLETED`, attempts=1, errors=NULL: read, framework update, rollback, empty deployments; one initial read RECONCILE retained from SSO field `enabled` omission. SSO `deploymentType=all`, framework reverted null, no deploy/domain, no PROD/App/CRM changes. See `docs/FACT001_VERCEL_VAULT_SIGNED_SERVICE_PHYSICAL_E2E_2026-11-11.md`; Vercel universal remains PARTIAL.
