@@ -8,14 +8,14 @@ import {exportObject,verifyObject,INDEX_SHA,TOTAL_OBJECTS,MAX_BATCH_ITEMS,openBa
 const H={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer'};
 const reply=(status:number,x:Record<string,unknown>)=>new Response(JSON.stringify(x),{status,headers:H});
 const SCOPE={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0'};
-const FIXED={...SCOPE,client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-20261111',index_sha256:INDEX_SHA};
-const LAST_PROVEN='d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026';
-const PREV_DRIVE='12UJyaeYukgOlFIHrLlebxLOgLTsdalcq';
+const FIXED={...SCOPE,client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-75-100-20261111',index_sha256:INDEX_SHA};
+const LAST_PROVEN='5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f';
+const PREV_DRIVE='1l68TceZpyar7jOoTZI5Nr5OUy4D8-XOg';
 const VALID_OPERATIONS={plan:'notion.lab.batcher.plan',export:'notion.lab.batcher.export'} as const;
 function assertOrder(body:unknown,kind:'plan'|'export'){
  if(!body||typeof body!=='object'||Array.isArray(body))throw Error('ORDER_DENIED');
  const b=body as Record<string,unknown>;
- const expected={...FIXED,operation:VALID_OPERATIONS[kind],offset:50,max_items:25,previous_zip_sha256:LAST_PROVEN,previous_drive_file_id:PREV_DRIVE};
+ const expected={...FIXED,operation:VALID_OPERATIONS[kind],offset:75,max_items:25,previous_zip_sha256:LAST_PROVEN,previous_drive_file_id:PREV_DRIVE};
  const keys=Object.keys(expected).concat(kind==='export'?['item_index','plan_artifact']:[]).sort();
  if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(keys)||Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('ORDER_DENIED');
  if(kind==='export'&&(!Number.isSafeInteger(b.item_index)||Number(b.item_index)<0||Number(b.item_index)>=25||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)))throw Error('ORDER_DENIED');
@@ -42,9 +42,9 @@ Deno.serve(async req=>{
   if(kind==='plan'){
    const idx=await sealNotionIndexManifest({notionToken,encryptionKey,maxPages:85});
    if(idx.search_index_complete!==true||idx.object_count!==TOTAL_OBJECTS||idx.page_count!==6446||idx.data_source_count!==186||idx.id_list_sha256!==INDEX_SHA)throw Error('INDEX_PARITY_DENIED');
-   const plan=await planNextNotionBackupBatch({encryptionKey,indexArtifact:idx,offset:50,maxItems:MAX_BATCH_ITEMS});
+   const plan=await planNextNotionBackupBatch({encryptionKey,indexArtifact:idx,offset:75,maxItems:MAX_BATCH_ITEMS});
    const verify=await verifyNotionBackupBatch({encryptionKey,artifact:plan,expectedIndexSha256:INDEX_SHA});
-   if(plan.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||plan.items!==25||plan.offset!==50||plan.next_offset!==75||plan.provider_writes!==0||verify.item_count!==25)throw Error('PLAN_PARITY_DENIED');
+   if(plan.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||plan.items!==25||plan.offset!==75||plan.next_offset!==100||plan.provider_writes!==0||verify.item_count!==25)throw Error('PLAN_PARITY_DENIED');
    return reply(200,{...plan,verify_roundtrip:true,source_index_search_calls:idx.search_api_requests,content_backed_up:false,checkpoint_committed:false});
   }
   const plan=body.plan_artifact as Record<string,unknown>;

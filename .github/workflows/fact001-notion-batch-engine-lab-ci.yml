@@ -30,5 +30,6 @@ jobs:
           if(!src.includes('await verifyGitHubOidc(auth.slice(7))')||!src.includes('assertOrder')||!pol.includes('fact001-notion-batch-engine-once-lab.yml'))throw Error('OIDC_POLICY_MISSING');
           if(/method:\s*['"](?:PUT|PATCH|DELETE)['"]/.test(src+cont)||/update vault|delete from/i.test(src+cont))throw Error('WRITE_OPERATION_DENIED');
           if(!src.includes('INDEX_PARITY_DENIED')||!cont.includes('INCOMPLETE_REQUEST_CAP'))throw Error('BOUNDED_INTEGRITY_GATES_MISSING');
+          if(!src.includes('plan.offset!==75||plan.next_offset!==100')||!fs.readFileSync(root+'run-once.mjs','utf8').includes('checkpoint_version:3'))throw Error('BATCH_75_100_SCOPE_MISSING');
           console.log('FACT001_REUSABLE_ENGINE_LAB_READONLY=PASS');
           NODE

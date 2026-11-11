@@ -3,16 +3,16 @@ on:
   push:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
-      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/execute-20261111.v1.json
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/requests/execute-20261111.v2.json
 permissions:
   contents: read
   id-token: write
 concurrency:
-  group: fact001-notion-batch-engine-owner-50-75-lab
+  group: fact001-notion-batch-engine-owner-lab
   cancel-in-progress: false
 jobs:
   encrypt-readonly:
-    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH_ENGINE_50_75_ONCE_20261111')
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH_ENGINE_75_100_ONCE_20261111')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -24,7 +24,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: fact001-notion-50-75-mixed-content-aes256gcm-20261111
-          path: fact001-notion-batch-engine-encrypted-50-75
+          name: fact001-notion-75-100-mixed-content-aes256gcm-20261111
+          path: fact001-notion-batch-engine-encrypted-75-100
           if-no-files-found: warn
           retention-days: 90

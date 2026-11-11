@@ -13,7 +13,7 @@ const digest=async data=>Array.from(new Uint8Array(await crypto.subtle.digest('S
 async function aesKey(s){if(typeof s!=='string'||!HEX.test(s))throw Error('KEY_DENIED');return crypto.subtle.importKey('raw',Uint8Array.from(s.match(/../g),x=>parseInt(x,16)),'AES-GCM',false,['encrypt','decrypt']);}
 export async function openBatch({planArtifact,encryptionKey}){
  const offset=planArtifact?.offset;const n=TOTAL_OBJECTS-offset>=MAX_BATCH_ITEMS?MAX_BATCH_ITEMS:TOTAL_OBJECTS-offset;
- if(!Number.isSafeInteger(offset)||offset<50||offset%25!==0||n<1||n>MAX_BATCH_ITEMS)throw Error('BATCH_OFFSET_DENIED');
+ if(!Number.isSafeInteger(offset)||offset<75||offset%25!==0||n<1||n>MAX_BATCH_ITEMS)throw Error('BATCH_OFFSET_DENIED');
  const expectedRef=await digest(te.encode(INDEX_SHA+':'+offset+':'+(offset+n)));
  const a=planArtifact;
  if(a?.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||a?.envelope?.format!==PLAN||a.batch_ref!==expectedRef||a.index_sha256!==INDEX_SHA||a.next_offset!==offset+n||a.items!==n||a.pages+a.data_sources!==n||a.content_downloaded!==false)throw Error('BATCH_DENIED');
