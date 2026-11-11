@@ -195,7 +195,11 @@
         "Sequential evidence-only immutable Git checkpoints 0→25 and 25→50, D1 CAS not committed; 49 page bodies + 1 data source schema/68 row properties and blocks now backed up",
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_CHECKPOINT_D1_CAS_EU_ROLLBACK_PHYSICAL_2026-11-11.md",
         "2026-11-11: EU isolated D1 bc085807-a6ca-4c56-a288-fe56716fec6f checkpoint CAS v1 25→50 v2 verified, replay 0 changes, Time Travel restored 25/audit0 then re-applied 50/audit1",
-        "Cloudflare Free D1 10/10 databases, no new subscriptions; original recovery D1 untouched and native export signed SQL URL fetch 403 (no independent original SQL readback)"
+        "Cloudflare Free D1 10/10 databases, no new subscriptions; original recovery D1 untouched and native export signed SQL URL fetch 403 (no independent original SQL readback)",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42930782418",
+        "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_BATCH_50_75_ENCRYPTED_CAS_OFFSITE_VERIFIED_2026-11-11.md",
+        "FACT001 third mixed batch AES encrypted: 23 page bodies, 2 data sources, 30 rows, 879 blocks, 25/25 with GitHub/Drive SHA256 5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f match",
+        "Physical EU D1 CAS checkpoint reached offset75/v3 with 2 append-only audit transitions and stale retry 0 changes; original D1 untouched"
       ],
       "gaps": [
         "Notion access is limited to page(s) explicitly connected to the integration; global workspace visibility not verified",
@@ -248,9 +252,9 @@
         "latest_ci_run": 42862702505,
         "local_ci_total": 71,
         "local_ci_failed": 0,
-        "full_backup_gate": "PARTIAL_49_PAGES_1_SOURCE_68_ROWS_WITH_OFFSITE_READBACK_FIRST_TWO_LOTS; FULL_WORKSPACE_CONTENT_BINARY_COMMENTS_ESCROW_RESTORE_PENDING",
+        "full_backup_gate": "PARTIAL_72_PAGES_3_SOURCES_98_ROWS_OFFSITE_CAS_75; BINARIES_COMMENTS_ESCROW_RESTORE_PENDING",
         "note": "Original LAB D1 now has 3 Notion tables and 2 audit triggers; one synthetic owned fixture registered approved=0. Clone restored physically and removed; no provider writes enabled.",
-        "next_block": "FACT001_NOTION_50_75_BATCH_USING_GENERIC_REUSABLE_LAB_PLANNER_AND_EXPORTER; LINK_D1_CAS_WITH_SCOPED_WORKER_ONLY_AFTER TESTS",
+        "next_block": "FACT001_REUSABLE_NOTION_BATCH_ENGINE_75_100_AFTER_OWNER_ORDER_AND_CAS_READBACK; KEY_ESCROW_AND_NOTION_RESTORE_GATE",
         "d1_schema_status": "PHYSICAL_LAB_PERSISTENCE_VERIFIED",
         "d1_schema_objects": 5,
         "owned_fixture_approved": false,
@@ -273,7 +277,7 @@
         "service_version": 33,
         "service_write_route_enabled": false,
         "cloudflare_d1_write_service_token": false,
-        "actual_blocker": "D1 isolated checkpoint physically at 50/v2 and rollback proved; full Notion content media/comments/key escrow/physical restore pending, private CAS writer not installed; Free D1 10/10; original SQL download blocked 403",
+        "actual_blocker": "75/6632 objects physically encrypted and independently readback verified, D1 CAS 75/v3; 6374 pages + 183 data sources remaining, assets/comments/escrow/restore pending, D1 Free 10/10; no autonomous CAS writer or global backup",
         "d1_scoped_worker_write": {
           "status": "VERIFIED_PHYSICAL_LAB",
           "worker": "cerebro-fact001-notion-queue-lab",
@@ -553,13 +557,13 @@
             "environment": "LAB",
             "version": "1.0.0"
           },
-          "current_offset": 50,
-          "cas_version": 2,
-          "audit_rows": 1,
+          "current_offset": 75,
+          "cas_version": 3,
+          "audit_rows": 2,
           "physical_rollback_restored_25": true,
           "restored_to_50": true,
           "replay_rejected": true,
-          "final_bookmark": "00000001-00000002-00005120-0c8f68f2e989b70ef0b41038a39ed857",
+          "final_bookmark": "00000003-00000002-00005120-65626883ac8f32e6834ce567f2af5c27",
           "old_recovery_d1_unmodified": true,
           "independent_original_sql_snapshot_verified": false,
           "cloudflare_free_d1_databases_used": 10,
@@ -567,6 +571,39 @@
           "signed_private_writer_attached": false,
           "production_promotion": false,
           "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109/cerebro/connectors/universal/docs/FACT001_NOTION_CHECKPOINT_D1_CAS_EU_ROLLBACK_PHYSICAL_2026-11-11.md"
+        },
+        "first_75_encrypted_content": {
+          "status": "VERIFIED_PHYSICAL_FIRST_THREE_ENCRYPTED_OFFSITE_BATCHES",
+          "content_objects": 75,
+          "page_objects": 72,
+          "data_source_objects": 3,
+          "data_source_rows": 98,
+          "remaining_pages": 6374,
+          "remaining_data_sources": 183,
+          "source_index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+          "third_batch": {
+            "github_run_id": 42930782418,
+            "github_artifact_id": 13815744233,
+            "drive_file_id": "1l68TceZpyar7jOoTZI5Nr5OUy4D8-XOg",
+            "sha256": "5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f",
+            "rows": 30,
+            "blocks": 879,
+            "pages": 23,
+            "data_sources": 2
+          },
+          "cas": {
+            "database_id": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+            "content_next_offset": 75,
+            "cas_version": 3,
+            "audit_rows": 2,
+            "replay_rejected": true,
+            "final_bookmark": "00000003-00000002-00005120-65626883ac8f32e6834ce567f2af5c27"
+          },
+          "full_workspace_backup": false,
+          "comments": false,
+          "media_binaries": false,
+          "independent_key_escrow": false,
+          "physical_notion_restore": false
         }
       }
     },
