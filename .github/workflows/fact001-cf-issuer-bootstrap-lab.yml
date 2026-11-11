@@ -55,8 +55,15 @@ jobs:
           const test=await call('verify-scoped-issuer-v2',jwt,order);
           console.log('FACT001_CF_V2_VERIFY_HTTP='+test.status);
           console.log('FACT001_CF_V2_VERIFY_STATUS='+String(test.data?.status||test.data?.code||'UNKNOWN'));
-          if(test.status!==200||test.data?.status!=='SCOPED_ISSUER_V2_VERIFIED'||test.data?.billing_permission!==false||
-            test.data?.credential_exposed!==false||test.data?.parent_revoked!==false)throw Error('V2_SCOPE_REAL_BACKEND_NOT_VERIFIED');
+          if(test.status!==200||test.data?.status!=='SCOPED_ISSUER_V2_VERIFIED'||
+            test.data?.permission!=='Account API Tokens Write'||test.data?.token_value_exposed!==false||
+            test.data?.legacy_issuer_read!==false||test.data?.external_writes!==0)
+            throw Error('V2_SCOPE_REAL_BACKEND_NOT_VERIFIED');
           console.log('FACT001_CF_V2_EFFECTIVE_SCOPE=PASS');
+          for(const route of ['v2-child-create','v2-child-revoke','issue-d1-read-lab','issue-scoped-issuer-v2']){
+            const denied=await call(route,jwt,order);
+            if(denied.status!==404)throw Error('ONE_TIME_MUTATION_ROUTE_STILL_LIVE');
+          }
+          console.log('FACT001_CF_V2_ONE_SHOT_WRITE_ROUTES_404=PASS');
           console.log('FACT001_CF_NO_TOKEN_VALUES_EXPOSED=PASS');
           NODE
