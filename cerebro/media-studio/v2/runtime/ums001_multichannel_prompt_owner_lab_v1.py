@@ -92,7 +92,29 @@ def build_one(item,master,forge=None):
   "Output target "+str(item["width_px"])+"x"+str(item["height_px"])+" ("+target+"), provider-native ratio "+provider+". "
   "All branding and social hooks must be composited later from verified original Fénix assets, never in pixels by the image model. "
   "Photographic anatomy, cast count, architecture, natural sunlight, refraction, Córdoba visual authenticity and rights must pass actual pixel QA. ")
- prompt=contract+" CEREBRO PROMPT FACTORY CAMERA AND ART DIRECTION: "+base["text"]
+ if item["item_id"]=="FB-FEED-01":
+  # Actual FB 1:1 photo run 43055263249 proved the old 5k-token cinematic
+  # template over-dominated with arches despite face and apartment instructions.
+  # Keep the parent Prompt Factory's source SHA and lens, but promote its strict
+  # owner-authored scene to a shorter PHOTOGRAPHY-FIRST factual storyboard.
+  camera=base["camera"]
+  photo_first=(
+   "PRIORITY 1, INSTANTLY VISIBLE HUMAN CAST: exactly TWO real adult home buyers, one mature Spanish woman and one mature Spanish man, standing naturally in a real Córdoba LIVING ROOM. "
+   "Both look three-quarter TOWARD CAMERA, natural unmistakable visible full faces, eyes and expressions. Photograph people at 35mm eye height with shoulders, complete hands and believable finger anatomy; nobody facing away, no extra cast. "
+   "PRIORITY 2, RECOGNIZABLE PROPERTY: white-cream painted living-room walls, a normal full-size window with outdoor Mediterranean sunlight, a real sofa and wood table, lived-in authentic Córdoba textures and true shadow falloff. "
+   "The majority of the square image is realistic home and two visitors, NOT an orange background. This must look like a real estate property-viewing documentary editorial PHOTO, not CGI render, not art exhibition. "
+   "PRIORITY 3, ONLY A SUBTLE SECONDARY BRAND ART OBJECT: one single small original orange translucent glass mobile or sculptural tabletop installation behind the couple, physically coherent with refraction and shadow, covering LESS THAN TWENTY PERCENT of image area. "
+   "Do not generate orange rooms, repeating arches, tunnels, uniform orange wall, fantasy corridors, surreal galleries, or giant sculptures dwarfing faces; keep warm neutral light and naturally colored skin. "
+   "CAMERA AND NATURALISM: "+camera+"; daylight key from real window, soft bounced fill, real-estate photographic contrast, premium authentic texture and sharp correct faces. "
+   "BRAND COMPLIANCE: original official Fénix logo and any type will be SHA-verified in postproduction ONLY; image pixels contain NO generated words, financial promises, approval checkmarks, seals, fabricated watermarks or logos. "
+   "CREATIVE STORYTELLING: two adult buyers at the start of a real property visit, attentive, relaxed, professionally confident, as requested by the existing owner's Facebook brief. "
+   "QA REALITY GATE: reject the output unless two distinct visible authentic faces and a normal Córdoba living room are immediately recognizable in actual pixels, with only a small complementary real-world orange glass accent. "
+   "RIGHTS: no identifiable private residents or third-party marks. "
+   "No guarantee of mortgage approval, no misleading financial claim, no fake bank endorsements."
+  )
+  prompt=contract+" CEREBRO OWNED COMPACT PHOTOGRAPHY FIRST STORYBOARD: "+photo_first
+ else:
+  prompt=contract+" CEREBRO PROMPT FACTORY CAMERA AND ART DIRECTION: "+base["text"]
  if not 1500<=len(prompt)<=6500:deny("OWNED_PROMPT_LENGTH")
  if re.search(r"https?://|r8_[a-z0-9]+",prompt,re.I):deny("SENSITIVE_PROMPT")
  return {
@@ -104,6 +126,8 @@ def build_one(item,master,forge=None):
  "deepseek_role":"TEMPORARY_CREATIVE_MENTOR_AND_VISUAL_QA",
  "input_master_request_id":master["request_id"],
  "text":prompt,"prompt_sha256":h(prompt),"source_scene_sha256":h(scene),
+ "parent_prompt_forge_sha256":base["prompt_sha256"],
+ "creative_photo_profile":"FACEBOOK_AUTHENTIC_PROPERTY_PHOTO_FIRST" if item["item_id"]=="FB-FEED-01" else "LEGACY_STUDIO_PREMIUM",
  "learning_signals":defects,"visual_qa":"PENDING_PHYSICAL_IMAGE",
  "estimated_new_spend_eur":0,"provider_calls":0,"publish_enabled":False
  }
