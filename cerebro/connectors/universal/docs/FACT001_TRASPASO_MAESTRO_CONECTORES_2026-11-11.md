@@ -194,3 +194,8 @@ Nuevo runtime privado `cerebro-fact001-headless-operator-lab-20261111` con cola 
 ## Continuidad 11/11/2026 · orden confirmado por propietario
 
 Secuencia obligatoria ahora: **Cloudflare → Vercel → Supabase → GitHub → Opera**, solo avanzando al siguiente proveedor cuando el alcance aceptado del anterior tenga evidencia física. Las piezas ajenas preexistentes no se eliminan; Notion sigue registrado fuera de esta secuencia concreta. Cloudflare Workers reusable LAB con seis comandos físicos y firma OIDC está en VERDE LAB; Pages headless aún requiere credencial exclusiva `Pages Write`, sin ampliar Workers y sin trasladar tokens entre conectores. Adaptador Pages aislado con tests CI verde, no desplegado ni con DDL aplicado. 
+
+
+## 11/11/2026 · Pages secret provisto y E2E autónomo físico completado
+
+Se verificó `CF_PAGES_TOKEN:secret_text`, token único `Pages Write` activo. Worker privado paralelo Pages+Workers desplegado versión `72e6fd58-a306-49aa-b5df-92a7fa6f8d4a`, con tres bindings preservados. La D1 Recovery existente recibió solo dos tablas aditivas de Pages y un proyecto temporal, con **4/4 órdenes COMPLETED, 1 intento cada una, error NULL** para crear, actualizar rama, rollback rama y eliminar. La prueba firmada Pages OIDC/D1 está operativa; único proyecto final Pages el original `fenix-capital-inmo-map`. Cron normal `*/5 * * * *` restaurado. Pages deploy/rollback de contenido PENDIENTE; Cloudflare FULL no certificado. Documento de evidencia: `docs/FACT001_CLOUDFLARE_PAGES_HEADLESS_PHYSICAL_E2E_2026-11-11.md`.

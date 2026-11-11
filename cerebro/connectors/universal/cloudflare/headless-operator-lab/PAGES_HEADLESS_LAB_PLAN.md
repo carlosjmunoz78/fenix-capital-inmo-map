@@ -7,3 +7,6 @@ Source `pages-adapter.mjs` uses only the Pages REST endpoints, fixed account and
 **ONE manual bootstrap required by security rules:** create a Pages Write *account API token* only and enter its value directly into Cloudflare Worker Settings → Variables and Secrets as **Secret `CF_PAGES_TOKEN`**, never paste to chat, SQL, GitHub or another connector. Only then integrate the adapter as a second module by strict secret inheritance and run physical tests. This code does not bypass the previously blocked token transfer.
 
 Full Cloudflare Pages requires further separate protected deployment and rollback gates; this first adapter covers only empty project settings lifecycle.
+
+
+**EVIDENCIA POSTERIOR:** la provisión y el E2E físico ya se ejecutaron. Ver `../../docs/FACT001_CLOUDFLARE_PAGES_HEADLESS_PHYSICAL_E2E_2026-11-11.md`. El estado previo de este plan queda supersedido por el registro físico de 11/11/2026, sin borrar el histórico.
