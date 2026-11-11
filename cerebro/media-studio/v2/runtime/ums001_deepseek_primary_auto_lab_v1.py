@@ -135,8 +135,7 @@ def validate_vision(result):
  if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
  if not isinstance(result["correction"],str) or len(result["correction"])>1200:deny("VISION_CORRECTION")
  if not isinstance(result["summary"],str) or not 5<=len(result["summary"])<=500:deny("VISION_SUMMARY")
- result["accepted"]=result["pass"] and result["score"]>=88 and len(result["violations"])==0
- return result
+ return {**result,"accepted":result["pass"] and result["score"]>=88 and len(result["violations"])==0}
 def http_json(url,method="GET",token=None,data=None,timeout=35):
  headers={"Accept":"application/json","User-Agent":"CEREBRO-UMS001-DEEPSEEK-LAB/1"}
  if token:headers["Authorization"]="Bearer "+token
