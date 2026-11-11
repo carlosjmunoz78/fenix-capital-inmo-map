@@ -38,9 +38,9 @@ def preflight():
  safety=creative["hard_constraints_added_by_cerebro_router"]
  if not isinstance(raw_text,str) or not 500<len(raw_text)<1900 or not isinstance(safety,str) or not 300<len(safety)<1600:
   fail("CREATIVE_LENGTH_REJECT")
- if "woman" not in raw_text.lower() or "man" not in raw_text.lower() or "faces" not in raw_text.lower() or "orange" not in raw_text.lower():fail("CREATIVE_MISSING_HUMAN_OR_BRAND")
+ if ("adult" not in raw_text.lower() or not any(w in raw_text.lower() for w in ("face","facial","portrait","close-up")) or "orange" not in raw_text.lower()):fail("CREATIVE_MISSING_HUMAN_OR_BRAND")
  prompt=raw_text+" "+safety
- if not 1000<len(prompt)<3400 or "No logos" not in prompt or "Vertical 4:5" not in prompt:fail("PROMPT_COMPOSITION_DENIED")
+ if not 1000<len(prompt)<3400 or "no logos" not in prompt.lower() or "Vertical 4:5" not in prompt:fail("PROMPT_COMPOSITION_DENIED")
  if ref.get("source_sha256")!="c6341224d5e02ae7bf79e2d7b4effc59566d2aaa7028f2ad129f2045b79dcfe2":
   fail("REFERENCE_NOT_APPROVED")
  raw64=ref.get("base64_image","")
