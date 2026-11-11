@@ -7,7 +7,10 @@ test('temporary LAB D1 Write issuer requires signed OIDC owner, fixed order, Vau
  assert.ok(source.includes("assertGatewayD1Order(await req.json())"));
  assert.ok(source.includes("gatewayD1TokenPolicy(groups)"));
  assert.ok(source.includes("vault.create_secret"));
- assert.ok(source.includes("token_admin_denied:true"));
+ assert.ok(source.includes("D1_WRITER_SEALED_PENDING_VERIFICATION"));
+ assert.ok(source.includes("verifyGatewayD1Writer"));
+ assert.ok(source.includes("D1_WRITER_EFFECTIVE_PENDING"));
+ assert.ok(source.includes("admin_denied:true"));
  assert.ok(source.includes("D1_WRITER_ISSUE_RECONCILE_REQUIRED"));
  assert.ok(source.includes("GATEWAY_D1_DB_ID"));
 });
