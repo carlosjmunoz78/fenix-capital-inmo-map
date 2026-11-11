@@ -321,7 +321,8 @@ def vision_messages(job,panel,jpeg):
 def replicate_image_input(job,prompt):
  # Preserve legacy conditioning unless a LAB order explicitly requests an
  # independent generation. A no-reference trial is NOT an approval.
- image_input={"prompt":prompt,"aspect_ratio":job.get("render_aspect_ratio","4:5"),"raw":False,
+ image_input={"prompt":prompt,"aspect_ratio":job.get("render_aspect_ratio","4:5"),
+              "raw":job.get("creative_owner")=="CEREBRO_PROMPT_FACTORY_V0" and job.get("master_item_id")=="FB-FEED-01",
               "output_format":"jpg","safety_tolerance":2}
  if job["channel"]!="SEO" and job.get("style_reference_mode","VERIFIED_CROP")=="VERIFIED_CROP":
   image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
