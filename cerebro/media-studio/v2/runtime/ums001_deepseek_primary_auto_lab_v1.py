@@ -226,7 +226,18 @@ def validate_vision(result):
  # A contradictory self-reported score MUST be a rejection, never a forced approval.
  discrepancy=sum(scores.values())!=result.get("score")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
- if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
+ if not isinstance(result["violations"],list) or len(result["violations"])>32 or any(not isinstance(x,str) or not 1<=len(x)<=80 for x in result["violations"]):deny("VISION_VIOLATIONS_TYPES")
+ unknown=sorted(set(x for x in result["violations"] if x not in FAIL_CODES))
+ if unknown:
+  # Unrecognized vision code is a model contract failure, NEVER evidence of
+  # approval. Preserve it in the raw QA receipt so CEREBRO can learn from it.
+  return {**result,"accepted":False,"pass":False,
+   "score":min(result["score"],sum(scores.values())),
+   "reported_score":result["score"],
+   "violations":sorted(set([x for x in result["violations"] if x in FAIL_CODES]+["UNKNOWN"])),
+   "unrecognized_violation_codes":unknown,
+   "qa_contract_rejection":"UNKNOWN_VIOLATION_CODE",
+   "score_consistency":"UNVERIFIED_REJECTED"}
  if not isinstance(result["correction"],str) or not isinstance(result["summary"],str):deny("VISION_QA_TEXT_TYPES")
  # A too-long model QA response must never erase a paid prediction's real
  # provenance: record a REJECTED verdict and keep its SHA and raw-image receipt.
