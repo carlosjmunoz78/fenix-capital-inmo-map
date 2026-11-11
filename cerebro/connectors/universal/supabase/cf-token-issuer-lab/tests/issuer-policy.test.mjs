@@ -52,3 +52,17 @@ test('v2 metadata must deny broadened and unknown privileges',()=>{
  assert.throws(()=>assertScopedIssuerMetadata({...t,policies:[{...t.policies[0],permission_groups:[{id:write.id},{id:'b'.repeat(32)}]}]},write.id));
  assert.throws(()=>assertScopedIssuerMetadata({...t,status:'disabled'},write.id));
 });
+
+import {existingTokenWritePermissionId,TOKEN_WRITE_GROUP_ID,ISSUER_V2_ID} from '../policy.mjs';
+test('existing issuer can prove Write even when self-delegation is not selectable',()=>{
+ const present=[{id:TOKEN_WRITE_GROUP_ID,name:'Account API Tokens Write',is_selectable:false,scopes:['com.cloudflare.api.account']}];
+ assert.equal(existingTokenWritePermissionId(present),TOKEN_WRITE_GROUP_ID);
+ assert.equal(ISSUER_V2_ID,'86074f623bacb356c9b19c7695986c54');
+ assert.throws(()=>accountTokenWriteGroup(present),/ISSUER_GROUP_NOT_SELECTABLE/);
+});
+test('existing scope verifier rejects spoofed groups and duplicate ids',()=>{
+ const x={id:TOKEN_WRITE_GROUP_ID,name:'Account API Tokens Write',is_selectable:false,scopes:['com.cloudflare.api.account']};
+ assert.throws(()=>existingTokenWritePermissionId([{...x,id:'a'.repeat(32)}]));
+ assert.throws(()=>existingTokenWritePermissionId([x,x]));
+ assert.throws(()=>existingTokenWritePermissionId([{...x,scopes:['com.cloudflare.api.user']}]));
+});

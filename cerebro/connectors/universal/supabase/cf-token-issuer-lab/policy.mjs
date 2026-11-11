@@ -128,3 +128,15 @@ export function assertScopedIssuerMetadata(token,requiredGroupId){
    p.permission_groups[0]?.id!==requiredGroupId)throw Error('ISSUER_NOT_MINIMAL');
  return true;
 }
+
+export const ISSUER_V2_ID='86074f623bacb356c9b19c7695986c54';
+export const TOKEN_WRITE_GROUP_ID='5bc3f8b21c554832afc660159ab75fa4';
+// Reading the effective scope of an existing issuer is NOT the same as permission
+// to mint another issuer with its own token-management powers.
+export function existingTokenWritePermissionId(groups){
+ if(!Array.isArray(groups)||groups.length>2000)throw Error('ISSUER_GROUP_LIST_DENIED');
+ const matches=groups.filter(g=>g?.name==='Account API Tokens Write'&&g?.id===TOKEN_WRITE_GROUP_ID&&
+   Array.isArray(g?.scopes)&&g.scopes.includes('com.cloudflare.api.account'));
+ if(matches.length!==1)throw Error('ISSUER_WRITE_PERMISSION_METADATA_UNVERIFIED');
+ return TOKEN_WRITE_GROUP_ID;
+}

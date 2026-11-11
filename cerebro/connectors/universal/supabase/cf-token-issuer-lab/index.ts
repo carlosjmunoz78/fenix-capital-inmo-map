@@ -1,6 +1,6 @@
 // CF-TOKEN-ISSUER-001 isolated LAB, exactly one D1 Read child. No generic resource API or frontend access.
 import postgres from 'npm:postgres@3.4.7';
-import {ACCOUNT_ID,SCOPE,ISSUER_NAME,NEW_VAULT_NAME,CHILD_NAME,CHILD_EXPIRY,TOKEN_OP,TOKEN_REQUEST_ID,verifyGitHubOidc,assertIssueOrder,d1ReadGroup,childPolicy,ISSUER_V2_NAME,ISSUER_V2_VAULT_NAME,ISSUER_V2_EXPIRY,ISSUER_V2_OP,ISSUER_V2_REQUEST_ID,assertIssuerV2Order,accountTokenWriteGroup,scopedIssuerPolicy,assertScopedIssuerMetadata} from './policy.mjs';
+import {ACCOUNT_ID,SCOPE,ISSUER_NAME,NEW_VAULT_NAME,CHILD_NAME,CHILD_EXPIRY,TOKEN_OP,TOKEN_REQUEST_ID,verifyGitHubOidc,assertIssueOrder,d1ReadGroup,childPolicy,ISSUER_V2_NAME,ISSUER_V2_VAULT_NAME,ISSUER_V2_EXPIRY,ISSUER_V2_OP,ISSUER_V2_REQUEST_ID,assertIssuerV2Order,accountTokenWriteGroup,scopedIssuerPolicy,assertScopedIssuerMetadata,existingTokenWritePermissionId,ISSUER_V2_ID} from './policy.mjs';
 const API='https://api.cloudflare.com/client/v4';
 const HEADERS={'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'};
 const reply=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{status,headers:HEADERS});
@@ -106,8 +106,8 @@ async function verifyScopedIssuerV2(){
    cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens?per_page=100&page=1',v2),
    cloudflare('GET','/accounts/'+ACCOUNT_ID+'/tokens/permission_groups',v2)
   ]);
-  const groupId=accountTokenWriteGroup(groups.result);
-  const matches=(listed.result||[]).filter((t:any)=>t?.name===ISSUER_V2_NAME);
+  const groupId=existingTokenWritePermissionId(groups.result);
+  const matches=(listed.result||[]).filter((t:any)=>t?.name===ISSUER_V2_NAME&&t?.id===ISSUER_V2_ID);
   if(matches.length!==1)throw Error('ISSUER_V2_IDENTITY_UNVERIFIED');
   assertScopedIssuerMetadata(matches[0],groupId);
   return {status:'SCOPED_ISSUER_V2_VERIFIED',scope:'ACCOUNT_API_TOKENS_WRITE_ONLY',
@@ -148,7 +148,7 @@ Deno.serve(async(req:Request)=>{
   return reply(405,{status:'METHOD_DENIED'});
  }catch(error){
   const msg=error instanceof Error?error.message:'';
-  const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED','ISSUER_VAULT_DUPLICATE','ISSUER_V2_ALREADY_EXISTS_RECONCILE','ISSUER_V2_RESPONSE_INVALID','ISSUER_V2_VAULT_FAILED','ISSUER_V2_ISSUANCE_BLOCKED','ISSUER_V2_IDENTITY_UNVERIFIED','ISSUER_NOT_MINIMAL','ISSUER_GROUP_UNVERIFIED','ISSUER_GROUP_ABSENT','ISSUER_GROUP_AMBIGUOUS','ISSUER_GROUP_NOT_SELECTABLE','ISSUER_GROUP_WRONG_SCOPE','ISSUER_GROUP_INVALID_ID']);
+  const allowed=new Set(['NO_BACKEND_DB','VAULT_SECRET_MISSING','VAULT_DUPLICATE','TOKEN_EXISTS_OR_UNTRUSTED','GROUPS_DENIED','D1_READ_GROUP_UNAVAILABLE','D1_GROUP_UNSELECTABLE','LAB_ISSUE_FAILED','TOKEN_ISSUE_INVALID','CHILD_EFFECTIVE_READ_DENIED','VAULT_CREATE_FAILED','ISSUER_VAULT_DUPLICATE','ISSUER_V2_ALREADY_EXISTS_RECONCILE','ISSUER_V2_RESPONSE_INVALID','ISSUER_V2_VAULT_FAILED','ISSUER_V2_ISSUANCE_BLOCKED','ISSUER_V2_IDENTITY_UNVERIFIED','ISSUER_NOT_MINIMAL','ISSUER_GROUP_UNVERIFIED','ISSUER_GROUP_ABSENT','ISSUER_GROUP_AMBIGUOUS','ISSUER_GROUP_NOT_SELECTABLE','ISSUER_GROUP_WRONG_SCOPE','ISSUER_GROUP_INVALID_ID','ISSUER_GROUP_LIST_DENIED','ISSUER_WRITE_PERMISSION_METADATA_UNVERIFIED']);
   const code=allowed.has(msg)?msg:/^CF_HTTP_(400|401|403|404|409|429|500|503)$/.test(msg)?msg:'BACKEND_ERROR';
   console.warn('FACT001_LAB_ISSUER_DENIAL='+code);
   return reply(503,{status:'BLOCKED',code});
