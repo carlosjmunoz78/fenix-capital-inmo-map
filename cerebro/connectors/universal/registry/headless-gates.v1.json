@@ -425,7 +425,7 @@
         "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115287406"
       },
       "d1_encrypted_backup_candidate_20261112": {
-        "state": "PURE_CRYPTO_MODULE_CI_GREEN_NOT_DEPLOYED",
+        "state": "PREPARED_SIGNED_SERVICE_CI_GREEN_BUT_ACTIVATION_BLOCKED",
         "format": "FACT001-D1-FULL-DATA-AES256GCM-V1",
         "source": "services/provider-headless-lab/d1-backup-envelope.mjs",
         "tests": "services/provider-headless-lab/tests/d1-backup-envelope.test.mjs",
@@ -436,13 +436,33 @@
         "independent_key_escrow": false,
         "download_from_offsite_and_restore": false,
         "promotion_authorized": false,
-        "next_block": "PREPARE_SIGNED_BACKEND_WITH_TESTED_ROLLBACK_THEN_SEAL_AND_READBACK_PRIVATE_DRIVE_AND_ISOLATED_RESTORE",
+        "next_block": "REVIEW_POLICY_BLOCKER_AUTHORIZE_SAFE_SIGNED_DEPLOY_WITH_ROLLBACK_NO_BYPASS; THEN ONE_SHOT_ENCRYPTED_ARTIFACT_DRIVE_READBACK",
         "vault_key_name": "cerebro_fact001_d1_backup_aes256_lab_v1",
         "vault_key_created_server_side": true,
         "vault_key_value_read_or_exported": false,
         "vault_key_provisioned": "VERIFIED_METADATA_ONLY",
         "encryption_backend_active": false,
-        "key_escrow_independent": false
+        "key_escrow_independent": false,
+        "signed_service_src": "supabase/d1-backup-seal-lab/index.ts",
+        "auth_contract": "supabase/d1-backup-seal-lab/auth.mjs",
+        "signed_runner": "services/provider-headless-lab/d1-backup-seal-once.mjs",
+        "one_shot_workflow": ".github/workflows/fact001-d1-encrypted-backup-once-lab.yml",
+        "signed_service_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43121588905",
+        "signed_service_pushed_sha": "469976f5002f2a3874a4aba46fee3b34254c6906",
+        "baseline_edge": {
+          "slug": "cerebro-fact001-d1-backup-seal-lab",
+          "version": 1,
+          "status": "ACTIVE",
+          "hash": "a7b8ea376ab5f5e769c9573f268c8463641d1d14ed017d438949f0bef4c2a86c",
+          "mode": "DISABLED_404_NO_VAULT_ACCESS"
+        },
+        "candidate_deploy": "BLOCKED_BY_TOOL_SECURITY_CONTROLS_NO_RETRY",
+        "backend_cryptography_active": false,
+        "offsite_drive_folder_id": "1ho4w2YufG7C_iRgN9iATtERyPTgnXBPR",
+        "offsite_drive_folder_private": true,
+        "offsite_ciphertext_uploaded": false,
+        "physical_sqlite_restore_from_offsite": false,
+        "backup_and_rollback_gate": "PENDING"
       }
     },
     {
