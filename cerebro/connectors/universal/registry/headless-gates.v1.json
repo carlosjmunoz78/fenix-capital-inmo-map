@@ -407,6 +407,22 @@
         "full_restore": "NOT_DONE",
         "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43109577679",
         "source": "docs/FACT001_CONNECTORES_DUAL_ACEPTACION_2026-11-11.md"
+      },
+      "full_data_ephemeral_restore_20261111": {
+        "state": "VERIFIED_EPHEMERAL_ONLY_NOT_DURABLE_BACKUP",
+        "database_id": "1305f791-7c44-47f9-946b-f330a09c88aa",
+        "export_bytes": 97672,
+        "sha256": "56a9036a86ff6ad13699f89ca6aa59f6e4eefdaeb2b212bb33f708aeac23aaae",
+        "download": "HTTP_200",
+        "sqlite_integrity": "PASS",
+        "user_table_count": 23,
+        "total_rows": 497,
+        "live_parity": "23_OF_23_USER_TABLES",
+        "data_artifacts_persisted": false,
+        "durable_encrypted_backup": "PENDING",
+        "independent_key_escrow": "PENDING",
+        "isolated_physical_restore": "PENDING",
+        "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115287406"
       }
     },
     {
@@ -559,6 +575,22 @@
         "created_deployments_retained_under_sso": 2,
         "full_headless_autonomy": "PENDING",
         "generic_connector_oauth": "PENDING"
+      },
+      "anonymous_lab_sso_20261111": {
+        "state": "VERIFIED_PROTECTED_4_OF_4",
+        "http": "302_TO_VERCEL_AUTH",
+        "lab_project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
+        "tested": [
+          "stable_project_alias",
+          "team_alias",
+          "deployment_v1_url",
+          "deployment_v2_url"
+        ],
+        "public_http_200_count": 0,
+        "ssoprotected": true,
+        "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115495388",
+        "commercial_domains_tested": 0,
+        "generic_team_grant": "PENDING"
       }
     },
     {

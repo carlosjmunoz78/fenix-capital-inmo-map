@@ -61,3 +61,17 @@ test('destructive operations on production are not marked independently green',(
  assert.ok(x.connectors.every(c=>c.verification.production_promotion_policy!=='VERIFIED'));
  assert.ok(x.connectors.every(c=>c.state!=='VERIFIED_FULL'));
 });
+
+test('new external LAB evidence never marks autonomous backups or deployment permissions as fully verified',()=>{
+ const c=x.connectors.find(c=>c.id==='cloudflare');
+ const v=x.connectors.find(c=>c.id==='vercel');
+ assert.equal(c.full_data_ephemeral_restore_20261111.state,'VERIFIED_EPHEMERAL_ONLY_NOT_DURABLE_BACKUP');
+ assert.equal(c.full_data_ephemeral_restore_20261111.live_parity,'23_OF_23_USER_TABLES');
+ assert.equal(c.full_data_ephemeral_restore_20261111.total_rows,497);
+ assert.equal(c.full_data_ephemeral_restore_20261111.durable_encrypted_backup,'PENDING');
+ assert.equal(c.verification.backup_and_rollback,'PENDING');
+ assert.equal(v.anonymous_lab_sso_20261111.state,'VERIFIED_PROTECTED_4_OF_4');
+ assert.equal(v.anonymous_lab_sso_20261111.public_http_200_count,0);
+ assert.equal(v.anonymous_lab_sso_20261111.generic_team_grant,'PENDING');
+ assert.equal(v.protected_lab_deployment_rollback_20261111.full_headless_autonomy,'PENDING');
+});

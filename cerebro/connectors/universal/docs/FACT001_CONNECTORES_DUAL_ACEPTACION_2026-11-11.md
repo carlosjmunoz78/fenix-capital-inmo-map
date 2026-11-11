@@ -83,3 +83,14 @@ Esta ampliación es evidencia física adicional **sin modificar ni invalidar** e
 - `CEREBRO Console` y su interfaz son excepción **solo de UI**; no sirve para saltarse permisos, identidad, backups, evidencias, tribunal o recuperación.
 
 **Estado aceptado:** `FACT001_CONNECTORES_DUAL_PARCIAl_CON_CLOUD_D1_SCHEMA_PARITY_GREEN_Y_VERCEL_PROTECTED_ROLLBACK_GREEN`. PR #44 sigue DRAFT y sin merge. Ninguna nueva suscripción, ni alteración de App, CRM, DNS, WordPress, Notion comercial, Trading, otras D1 o proyectos Vercel Fénix.
+
+
+## Datos completos D1 en memoria y protección anónima Vercel · verificación posterior
+
+**Cloudflare D1 recovery LAB: PASS, solo recuperación efímera.** Base EU `cerebro-fact001-recovery-lab-eu`, UUID `1305f791-7c44-47f9-946b-f330a09c88aa`, tamaño proveedor aproximado 303.104 bytes. Runner [Actions #43115287406](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115287406) SUCCESS: full-data export `no_data=false` descargado HTTPS HTTP 200; 97.672 bytes SQL, SHA256 `56a9036a86ff6ad13699f89ca6aa59f6e4eefdaeb2b212bb33f708aeac23aaae`; `sqlite3 :memory:` ejecutó SQL íntegramente, `PRAGMA integrity_check=ok`, **23/23 tablas usuario y 497/497 filas según recuentos READ ONLY en D1 activa**, sin registrar datos/URL/token ni guardar SQL o fichero. Script: `services/provider-headless-lab/tests/d1-full-data-inmemory-restore-lab.py`, workflow `.github/workflows/fact001-d1-full-data-recovery-lab.yml`. **No cubre:** repositorio durable cifrado offsite, escrow independiente, restauración física sobre una nueva D1 aislada, comparación hash de valores ni backup continuado. Por tanto `backup_and_rollback` NO cambia de `PENDING`.
+
+**Vercel SSO LAB externo: PASS.** Runner anónimo [Actions #43115495388](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115495388) SUCCESS; alias estable, alias team y ambos deploy URLs `v1=dpl_DCk7j7wNbeaHmFc28CQ8b8DwHU9z`, `v2=dpl_AdnFjkCYenNU3e7fiAp6PgcoamcZ`, **cuatro pruebas HTTPS sin credenciales devolvieron 302 hacia autenticación Vercel; ninguno devolvió 200 público**. Script `services/provider-headless-lab/tests/vercel-anonymous-sso-lab.py`, workflow `.github/workflows/fact001-vercel-lab-anonymous-sso.yml`. El proyecto LAB conserva SSO `enabled=true/deploymentType=all`; sin pruebas en dominios Fénix. Este control NO prueba permisos OAuth genéricos ni enrutamiento CEREBRO OIDC de despliegue/rollback, ambos pendientes.
+
+**Autorización Vercel genérica recheck:** `mcp__Vercel__list_projects` con el team `team_qnh6u1Ofy2WPp0MGEKlyMA50` sigue devolviendo **0 proyectos**, frente a **3 visibles en Vercel Universal**. No inferir concesión de team scope. 
+
+**Preservación:** PR #44 DRAFT; App/CRM/DNS/PROD/Fénix no se modificaron; 0 suscripciones nuevas, cuotas de uso no conciliadas. Sigue `PARCIAL` para factory headless.
