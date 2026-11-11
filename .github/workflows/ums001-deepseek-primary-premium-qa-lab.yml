@@ -25,6 +25,8 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
+      - name: Install pinned free Pillow image library for hash-based photo regression
+        run: python3 -m pip install 'Pillow==11.3.0'
       - name: Python compile and premium camera/lens/key/fill/contrast unit tests
         run: |
           python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
