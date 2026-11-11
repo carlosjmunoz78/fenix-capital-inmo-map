@@ -3,7 +3,7 @@
   "company_id": "fenix",
   "engine_id": "UMS-001",
   "environment": "LAB",
-  "version": "2026-11-11-v0.4-DEEPSEEK-PRIMARY",
+  "version": "2026-11-11-v0.5-DEEPSEEK-PRIMARY-PREMIUM-QA",
   "policy_id": "UMS001_CREATIVE_PROMPT_MODEL_ROUTER",
   "goal": "For every social/SEO image request CEREBRO generates, validates and iterates its OWN image prompts, never depends on ChatGPT writing them by hand.",
   "current_evidence": {
@@ -63,7 +63,7 @@
   "deepseek_is_required": true,
   "deepseek_is_useful_for_creative_reasoning": true,
   "deepseek_cost_not_authorized_or_activated_by_this_manifest": false,
-  "next_action": "Execute DeepSeek+Replicate LAB canary from strict owner-approved job, verify provider receipt, visual QA, official brand, cost and audit. No PROD promotion pending proof.",
+  "next_action": "Blocked on DeepSeek secret availability in this isolated GitHub LAB repo. Photo premium prompts and visual rubric code physically tested. Reconnect existing secret securely without exposing API key in issue/chat/code.",
   "publication_enabled": false,
   "prod_promotion_allowed": false,
   "no_touch": [
@@ -114,8 +114,8 @@
     "cloudflare_infra_unaffected": true,
     "deterministic_rules": "MANDATORY_CONTRACT_AND_FALLBACK_FOR_NO_COST_DRY_RUN_ONLY",
     "official_logo_source": "MR_BOGART_SHA256_VERIFIED_POSTPROCESS_ONLY",
-    "feature_status": "CONFIGURED_IN_LAB__END_TO_END_NOT_YET_VERIFIED",
-    "production_autonomous": "BLOCKED_UNTIL_REAL_PROVIDER_QA_AND_ROLLBACK",
+    "feature_status": "LAB_AUTOMATIC_REQUEST_TRIGGER_CREATED__OFFLINE_QA_GREEN__DEEPSEEK_SECRET_UNAVAILABLE",
+    "production_autonomous": "BLOCKED",
     "deepseek_calls_per_image_cap": 4,
     "replicate_predictions_per_image_cap": 2,
     "cost_cap_usd_per_image": 0.3,
@@ -123,6 +123,30 @@
     "no_contact_data_to_external_models": true,
     "publish_on_acceptance": false,
     "human_exception_only": "LOW_CONFIDENCE_OR_HIGH_RISK_OR_POLICY_CONFLICT",
-    "backup": "Preserve all prior source, evidence, variant, receipt, and historical Cloudflare experiments."
+    "backup": "Preserve all prior source, evidence, variant, receipt, and historical Cloudflare experiments.",
+    "premium_prompt_contract_path": "cerebro/media-studio/v2/registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json",
+    "quality_dimensions": [
+      "casting",
+      "camera_angle",
+      "focal_length",
+      "aperture",
+      "lighting_key_fill_rim",
+      "contrast",
+      "depth_of_field",
+      "orange_brand_color",
+      "surreal_composition",
+      "natural_human_realism",
+      "text_and_logo_integrity"
+    ],
+    "qa_score_min": 88,
+    "photography_premium_test_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43023964942",
+    "photography_premium_regression": "16/16 PASS",
+    "automatic_lab_canary_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43023964854",
+    "automatic_lab_canary_result": "BLOCKED_BEFORE_ANY_PAID_API_CALL",
+    "blocked_dependency": "DEEPSEEK_API_KEY missing from secrets available to PR #39 branch LAB GitHub Action. REPLICATE_API_TOKEN confirmed present; do not export or hardcode secrets.",
+    "required_next_gate": "Set or grant existing DeepSeek API key in the repository Actions secret DEEPSEEK_API_KEY via secure administrator UI, then initiate a NEW isolated paid canary request ID (do not reuse idempotency key after any reserved run).",
+    "was_replicate_charged_in_latest_failed_run": false,
+    "was_deepseek_charged_in_latest_failed_run": false,
+    "visual_learning_global_rollout": "NOT_PERMITTED_UNTIL_REAL_VISUAL_QA_AND_REVIEW"
   }
 }
