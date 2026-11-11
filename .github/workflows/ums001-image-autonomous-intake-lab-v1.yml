@@ -12,6 +12,8 @@ on:
       - 'cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs'
       - 'cerebro/media-studio/v2/runtime/ums001_image_acceptance_controller_lab_v2.mjs'
       - 'cerebro/media-studio/v2/tests/ums001-image-acceptance-controller-lab-v2.test.mjs'
+      - 'cerebro/media-studio/v2/runtime/ums001_private_image_ledger_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_private_image_ledger_lab_v1.py'
       - 'cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_IMAGE_GATE_REAL_20261111_V5.json'
       - '.github/workflows/ums001-image-autonomous-intake-lab-v1.yml'
 permissions:
@@ -37,6 +39,7 @@ jobs:
           node --test cerebro/media-studio/v2/tests/ums001-image-autonomous-intake-lab-v1.test.mjs
           node --test cerebro/media-studio/v2/tests/ums001_image_autonomy_gate_lab_v1.test.mjs
           node --test cerebro/media-studio/v2/tests/ums001-image-acceptance-controller-lab-v2.test.mjs
+          python3 cerebro/media-studio/v2/tests/test_ums001_private_image_ledger_lab_v1.py
           echo 'SYNTHETIC_CRYPTO_TESTS_ARE_NOT_REAL_IMAGE_CERTIFICATION=true'
       - name: Detect single incoming order on push
         if: github.event_name == 'push'
