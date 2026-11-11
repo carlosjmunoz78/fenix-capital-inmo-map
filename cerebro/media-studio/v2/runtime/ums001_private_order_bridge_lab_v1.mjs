@@ -74,8 +74,45 @@ function readPrivateJson(path,root){
  if(b.length>1_000_000)fail('JSON_TOO_BIG');
  return JSON.parse(b.toString('utf8'));
 }
+/**
+ * Trust anchors are supplied by the trusted LAB host configuration, NOT by
+ * an image, request, department or QA package. The trust file must be
+ * outside both the public checkout and the caller's asset tree, and
+ * SHA256-pinned by a separate IAM/Vault-provided environment variable.
+ * This module never installs trust or signs content itself.
+ */
+function readPinnedTrustRegistry(assetRoot){
+ const configured=process.env.UMS001_TRUST_REGISTRY_FILE;
+ const pin=process.env.UMS001_TRUST_REGISTRY_SHA256;
+ if(typeof configured!=='string'||!isAbsolute(configured)||!HASH.test(pin||''))
+  fail('TRUST_REGISTRY_UNCONFIGURED');
+ const absolute=realpathSync(configured),asset=realpathSync(assetRoot);
+ if(absolute===project||absolute.startsWith(project+'/')||
+    absolute===asset||absolute.startsWith(asset+'/'))fail('TRUST_REGISTRY_NOT_ISOLATED');
+ if(lstatSync(configured).isSymbolicLink()||!statSync(absolute).isFile())
+  fail('TRUST_REGISTRY_NOT_REGULAR');
+ const bytes=readFileSync(absolute);
+ if(bytes.length<100||bytes.length>100_000||hash(bytes)!==pin)
+  fail('TRUST_REGISTRY_SHA_MISMATCH');
+ let doc;
+ try{doc=JSON.parse(bytes.toString('utf8'));}catch{fail('TRUST_REGISTRY_JSON_INVALID');}
+ if(doc?.schema_version!==1||doc.company_id!=='fenix'||doc.engine_id!=='UMS-001'||
+    doc.environment!=='LAB'||doc.status!=='ACTIVATED_BY_PRIVATE_IAM'||
+    !doc.keys||typeof doc.keys!=='object'||Array.isArray(doc.keys))
+  fail('TRUST_REGISTRY_SCOPE_UNVERIFIED');
+ const roles=['PROVIDER','VISUAL','FINISHER','RIGHTS','EDITORIAL','DESTINATION'];
+ const ids=new Set();
+ for(const role of roles){
+  const k=doc.keys[role];
+  if(!k||typeof k.key_id!=='string'||k.key_id.startsWith('SYNTHETIC_TEST_')||
+    typeof k.public_key_pem!=='string'||k.revoked!==false||ids.has(k.key_id))
+   fail('TRUST_REGISTRY_ROLE_NOT_AUTHORIZED_'+role);
+  ids.add(k.key_id);
+ }
+ return doc.keys;
+}
 export function recordExistingSignedPrediction({order,master,history,db,privateRoot,
-  imagePath,providerProofPath,trustPath,bridgeSecret}){
+  imagePath,providerProofPath,bridgeSecret}){
  const intake=registerAutoOrder({order,master,history,db});
  if(intake.ledger.frozen)fail('PIECE_FROZEN');
  // Ledger determines whether a signed prediction ID is an exact replay (no-op)
@@ -85,7 +122,7 @@ export function recordExistingSignedPrediction({order,master,history,db,privateR
     rawBytes[0]!==0xff||rawBytes[1]!==0xd8||rawBytes[2]!==0xff)
   fail('PROVIDER_IMAGE_NOT_VERIFIED_JPEG');
  const providerDoc=readPrivateJson(providerProofPath,privateRoot);
- const trust=readPrivateJson(trustPath,privateRoot);
+ const trust=readPinnedTrustRegistry(privateRoot);
  const providerKey=trust.PROVIDER;
  if(!providerKey||providerKey.revoked===true||typeof providerKey.public_key_pem!=='string'||
     typeof providerKey.key_id!=='string'||providerKey.key_id.startsWith('SYNTHETIC_TEST_'))
@@ -113,7 +150,7 @@ export function recordExistingSignedPrediction({order,master,history,db,privateR
 export function reviewPrivateCandidate({order,master,history,db,privateRoot,files,bridgeSecret=undefined}){
  const intake=registerAutoOrder({order,master,history,db});
  // Public or caller-controlled references do not determine trusted public keys.
- const required=['raw','finished','vision','finish','rights','editorial','attestations','trust'];
+ const required=['raw','finished','vision','finish','rights','editorial','attestations'];
  for(const k of required)if(typeof files?.[k]!=='string')fail('MISSING_PRIVATE_FILE_'+k);
  const rawBytes=readFileSync(privatePath(files.raw,privateRoot));
  const finalBytes=readFileSync(privatePath(files.finished,privateRoot));
@@ -123,11 +160,7 @@ export function reviewPrivateCandidate({order,master,history,db,privateRoot,file
   fail('INVALID_NATIVE_IMAGE_MAGIC');
  const vision=readPrivateJson(files.vision,privateRoot),finish=readPrivateJson(files.finish,privateRoot),
        rights=readPrivateJson(files.rights,privateRoot),editorial=readPrivateJson(files.editorial,privateRoot),
-       attestations=readPrivateJson(files.attestations,privateRoot),trust=readPrivateJson(files.trust,privateRoot);
- // The trusted private registry is file-backed here for LAB; the production
- // trust anchor must later come from IAM/Vault, not a value inside an order.
- if(Object.values(trust).some(x=>x?.key_id?.startsWith('SYNTHETIC_TEST_')))
-  fail('SYNTHETIC_TEST_KEY_NOT_AUTHORIZED_FOR_REAL_DELIVERY');
+       attestations=readPrivateJson(files.attestations,privateRoot),trust=readPinnedTrustRegistry(privateRoot);
  const adjusted=structuredClone(history);
  adjusted.attempts_by_item[order.item_id]=intake.ledger.total_attempts;
  const receipt=typeof files.destination==='string'?readPrivateJson(files.destination,privateRoot):null;
