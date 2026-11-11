@@ -3,7 +3,7 @@
   "company_id": "fenix",
   "engine_id": "UMS-001",
   "environment": "LAB",
-  "version": "2026-11-11-v0.3",
+  "version": "2026-11-11-v0.4-DEEPSEEK-PRIMARY",
   "policy_id": "UMS001_CREATIVE_PROMPT_MODEL_ROUTER",
   "goal": "For every social/SEO image request CEREBRO generates, validates and iterates its OWN image prompts, never depends on ChatGPT writing them by hand.",
   "current_evidence": {
@@ -20,42 +20,24 @@
   "routing_preference": [
     {
       "priority": 1,
-      "engine": "STRUCTURED_TEMPLATE_AND_LEARNED_QA",
-      "type": "deterministic",
-      "extra_cost_eur": 0,
-      "status": "PHYSICALLY_TESTED",
-      "use_for": "brief decomposition, brand, formatting, safety and learned corrections"
+      "engine": "DEEPSEEK_FLASH",
+      "type": "paid_existing_credit",
+      "status": "OWNER_AUTHORIZED__SECRETS_NOT_YET_VERIFIED",
+      "use_for": "autonomous prompt creation, correction and visual QA"
     },
     {
       "priority": 2,
-      "engine": "CLOUDFLARE_WORKERS_AI_FREE_CREATIVE_REASONER",
-      "type": "remote_llm_free_quota",
-      "extra_cost_eur": 0,
-      "status": "CLOUDFLARE_FREE_REMOTE_LLM_PILOT_VALIDATED__PERSISTENT_RUNTIME_NOT_WIRED",
-      "use_for": "novel visual metaphors, multiple composition candidates, semantic correction when deterministic quality poor"
+      "engine": "DETERMINISTIC_CONTRACT_VALIDATOR",
+      "type": "local_zero_cost",
+      "status": "EXISTING",
+      "use_for": "validation, financial caps, original logo, provenance, no-touch environments"
     },
     {
       "priority": 3,
-      "engine": "LOCAL_OSS_CREATIVE_REASONER",
-      "type": "local_llm",
-      "extra_cost_eur": 0,
-      "status": "NOT_CONNECTED_NOT_TESTED",
-      "use_for": "optional fallback if Cloudflare free quota exhausted"
-    },
-    {
-      "priority": 4,
-      "engine": "DEEPSEEK_FLASH",
-      "type": "external_language_api",
-      "extra_cost_eur": "TOKEN_METERED",
-      "status": "NOT_CONNECTED_NOT_VERIFIED",
-      "use_for": "creative concept proposals and structured JSON prompts only if local options insufficient and spending guard approved"
-    },
-    {
-      "priority": 5,
       "engine": "MANUAL_EDITORIAL_EXCEPTION",
       "type": "human",
-      "status": "HIGH_RISK_OR_REPEATED_LOW_CONFIDENCE",
-      "use_for": "legal/financial claims, insufficient quality after bounded correction cycles, owner explicit request"
+      "status": "ONLY_IF_QA_FAILS_OR_LEGAL_RISK",
+      "use_for": "actual human exception"
     }
   ],
   "image_provider": "REPLICATE",
@@ -78,10 +60,10 @@
     "successful network handoff receipt and duplicate prevention",
     "PREPROD isolated, rollback and acceptance evidence"
   ],
-  "deepseek_is_required": false,
+  "deepseek_is_required": true,
   "deepseek_is_useful_for_creative_reasoning": true,
-  "deepseek_cost_not_authorized_or_activated_by_this_manifest": true,
-  "next_action": "Connect an existing free local language reasoning engine if available; otherwise evaluate capped DeepSeek Flash API only after safe secret and budget; test creative drafts against approved art and independent visual QA. No guaranteed perfect prompts.",
+  "deepseek_cost_not_authorized_or_activated_by_this_manifest": false,
+  "next_action": "Execute DeepSeek+Replicate LAB canary from strict owner-approved job, verify provider receipt, visual QA, official brand, cost and audit. No PROD promotion pending proof.",
   "publication_enabled": false,
   "prod_promotion_allowed": false,
   "no_touch": [
@@ -117,5 +99,30 @@
     "private_auth_secret_for_gateway": "NOT_VERIFIED_OR_CONFIGURED",
     "quality_gate": "VISUAL_QA_REQUIRED",
     "next_safe_step": "wire scoped Workers AI secret to isolated LAB/worker once available; compare 2+ model creative candidates and run independent image vision QA before payment; no direct social posting"
+  },
+  "prompt_router_policy": {
+    "company_id": "fenix",
+    "engine_id": "UMS-001",
+    "environment": "LAB",
+    "version": "0.4",
+    "primary_prompt_model": "deepseek-flash",
+    "deepseek_endpoint": "https://api.deepseek.com/chat/completions",
+    "creative_reasoner": "DEEPSEEK_PRIMARY",
+    "quality_vision_model": "deepseek-flash",
+    "image_generation_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "cloudflare_workers_ai_creative": "DISABLED_BY_OWNER_CHOICE",
+    "cloudflare_infra_unaffected": true,
+    "deterministic_rules": "MANDATORY_CONTRACT_AND_FALLBACK_FOR_NO_COST_DRY_RUN_ONLY",
+    "official_logo_source": "MR_BOGART_SHA256_VERIFIED_POSTPROCESS_ONLY",
+    "feature_status": "CONFIGURED_IN_LAB__END_TO_END_NOT_YET_VERIFIED",
+    "production_autonomous": "BLOCKED_UNTIL_REAL_PROVIDER_QA_AND_ROLLBACK",
+    "deepseek_calls_per_image_cap": 4,
+    "replicate_predictions_per_image_cap": 2,
+    "cost_cap_usd_per_image": 0.3,
+    "negative_prompt": "No logos, text, false watermarks or financial guarantees",
+    "no_contact_data_to_external_models": true,
+    "publish_on_acceptance": false,
+    "human_exception_only": "LOW_CONFIDENCE_OR_HIGH_RISK_OR_POLICY_CONFLICT",
+    "backup": "Preserve all prior source, evidence, variant, receipt, and historical Cloudflare experiments."
   }
 }
