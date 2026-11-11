@@ -1,0 +1,53 @@
+name: FACT001 CF signed OIDC command intake one-shot LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-command-intake-lab/requests/submit-one.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-cf-command-intake-20261111-lab
+  cancel-in-progress: false
+jobs:
+  send-signed-owner-command:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: Signed GitHub service OIDC to sealed Cloudflare D1 queue, no token exposure
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const payload=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-command-intake-lab/requests/submit-one.json','utf8'));
+          const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',provider:'cloudflare',operation:'worker.create_private',resource_name:'cerebro-fact001-managed-lab-s001',job_id:'FACT001-CF-CMD-20261111-SIGNED-01',request_id:'FACT001-CF-REQ-20261111-SIGNED-01',idempotency_key:'fact001-cf-intake-signed-20261111-01',max_cost_eur:0};
+          if(Object.keys(payload).sort().join('|')!==Object.keys(fixed).sort().join('|')||Object.entries(fixed).some(([k,v])=>payload[k]!==v))throw Error('SIGNED_ORDER_NOT_MATCH_FIXED_LAB_REQUEST');
+          const source=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!source||!grant)throw Error('OIDC_UNAVAILABLE');
+          const x=await fetch(source+(source.includes('?')?'&':'?')+'audience=cerebro-fact001-cf-command-intake-lab-20261111',
+           {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!x.ok)throw Error('ISSUER_HTTP_'+x.status);
+          const jwt=(await x.json()).value;
+          const endpoint='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-command-intake-lab/';
+          const call=async(route,token,body)=>{
+           const r=await fetch(endpoint+route,{method:body?'POST':'GET',redirect:'error',
+            headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+            ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(32000)});
+           let d={};try{d=await r.json()}catch{}
+           return {http:r.status,data:d};
+          };
+          if((await call('health')).http!==401||(await call('health','forged')).http!==401||
+             (await call('submit',null,payload)).http!==401)throw Error('ANONYMOUS_BYPASS');
+          if((await call('submit',jwt,{...payload,environment:'PROD'})).http!==403)throw Error('SCOPE_BYPASS');
+          const ready=await call('health',jwt);
+          if(ready.http!==200||ready.data?.status!=='SIGNED_COMMAND_INTAKE_READY')throw Error('SIGNED_IDENTITY_FAILED');
+          console.log('FACT001_CF_INTAKE_IDENTITY_NEGATIVE_GATES=PASS');
+          const result=await call('submit',jwt,payload);
+          console.log('FACT001_CF_INTAKE_STATUS='+String(result.data?.status||'FAILED'));
+          if(result.http!==200||result.data?.status!=='QUEUED_VERIFIED'||result.data?.token_exposed!==false)throw Error('D1_SIGNED_ORDER_NOT_ENQUEUED');
+          const replay=await call('submit',jwt,payload);
+          if(replay.http!==200||replay.data?.status!=='IDEMPOTENT_EXISTING')throw Error('IDEMPOTENCY_REPLAY_FAILED');
+          console.log('FACT001_CF_INTAKE_PHYSICAL_QUEUED_AND_REPLAY_DENIED=PASS');
+          NODE
