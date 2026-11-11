@@ -89,6 +89,18 @@ class DeepseekAutonomousTests(unittest.TestCase):
   legacy=m.replicate_image_input(self.job,"Original creative image")
   self.assertIn("image_prompt",legacy)
   self.assertEqual(legacy["image_prompt_strength"],0.30)
+ def test_new_seo_landscape_canary_uses_16_9_real_provider_ratio(self):
+  job={**self.job,"channel":"SEO","asset_type":"SEO_HERO","style_reference_mode":"NONE","render_aspect_ratio":"16:9"}
+  self.assertEqual(m.allowed_job(job)["render_aspect_ratio"],"16:9")
+  self.assertEqual(m.replicate_image_input(job,"Original photo")["aspect_ratio"],"16:9")
+ def test_wide_only_approved_for_seo_without_reference(self):
+  for ch,asset,mode in (("INSTAGRAM","IMAGE","NONE"),("SEO","SEO_HERO","VERIFIED_CROP")):
+   with self.subTest(channel=ch),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"channel":ch,"asset_type":asset,"style_reference_mode":mode,"render_aspect_ratio":"16:9"})
+ def test_unlisted_ratio_never_goes_to_provider(self):
+  for aspect in ("1:1","9:16","3:4",None):
+   with self.subTest(aspect=aspect),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"render_aspect_ratio":aspect})
  def test_visual_trial_rejects_unexpected_reference_modes(self):
   for bad in ("AUTO","UNVERIFIED_URL",True,123,None):
    with self.subTest(mode=bad),self.assertRaises(m.Blocked):
