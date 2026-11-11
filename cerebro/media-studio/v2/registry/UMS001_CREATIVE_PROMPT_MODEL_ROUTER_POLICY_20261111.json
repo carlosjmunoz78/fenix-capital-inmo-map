@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "2026-11-11-v0.2",
+  "policy_id": "UMS001_CREATIVE_PROMPT_MODEL_ROUTER",
+  "goal": "For every social/SEO image request CEREBRO generates, validates and iterates its OWN image prompts, never depends on ChatGPT writing them by hand.",
+  "current_evidence": {
+    "prompt_factory_workflow": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005104029",
+    "autoprompt_real_prediction_workflows": [
+      "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43005514833",
+      "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43006213353"
+    ],
+    "last_real_candidate_qa": "REJECTED_CREATIVE_QA",
+    "image_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "prompt_llm_api_calls": 0,
+    "manual_prompt_writing_for_canary": false
+  },
+  "routing_preference": [
+    {
+      "priority": 1,
+      "engine": "STRUCTURED_TEMPLATE_AND_LEARNED_QA",
+      "type": "deterministic",
+      "extra_cost_eur": 0,
+      "status": "PHYSICALLY_TESTED",
+      "use_for": "brief decomposition, brand, formatting, safety and learned corrections"
+    },
+    {
+      "priority": 2,
+      "engine": "LOCAL_OSS_CREATIVE_REASONER",
+      "type": "local_llm",
+      "extra_cost_eur": 0,
+      "status": "NOT_CONNECTED_NOT_TESTED",
+      "use_for": "novel visual metaphors, multiple composition candidates, semantic correction when deterministic quality poor"
+    },
+    {
+      "priority": 3,
+      "engine": "DEEPSEEK_FLASH",
+      "type": "external_language_api",
+      "extra_cost_eur": "TOKEN_METERED",
+      "status": "NOT_CONNECTED_NOT_VERIFIED",
+      "use_for": "creative concept proposals and structured JSON prompts only if local options insufficient and spending guard approved"
+    },
+    {
+      "priority": 4,
+      "engine": "MANUAL_EDITORIAL_EXCEPTION",
+      "type": "human",
+      "status": "HIGH_RISK_OR_REPEATED_LOW_CONFIDENCE",
+      "use_for": "legal/financial claims, insufficient quality after bounded correction cycles, owner explicit request"
+    }
+  ],
+  "image_provider": "REPLICATE",
+  "image_provider_not_prompt_reasoner": "FLUX consumes prompts and images; the prompt composer and image evaluation remain independent logical motor components.",
+  "critical_learnings": [
+    "Two fully autonomous templates produced real model images but missed owner taste: first no humans, second tiny people among monumental architecture",
+    "Do not infer success from valid prompt JSON or successful provider HTTP call",
+    "High-quality image-conditioned reference must preserve foreground human scale while permitting novel scenes",
+    "Independent actual-image vision QA and editorial acceptance must confirm person scale, gaze, no invented text, brand provenance"
+  ],
+  "go_no_go_requirements": [
+    "independent_visual_QA_on_real_pixels",
+    "official_logo_sha256_postcompositing",
+    "no text/logo SEO",
+    "social short noticeable hook not tiny",
+    "sufficient creative diversity",
+    "accurate Spanish local professional scene",
+    "text/information legally reviewed",
+    "FINOPS atomic idempotence, cost and archive",
+    "successful network handoff receipt and duplicate prevention",
+    "PREPROD isolated, rollback and acceptance evidence"
+  ],
+  "deepseek_is_required": false,
+  "deepseek_is_useful_for_creative_reasoning": true,
+  "deepseek_cost_not_authorized_or_activated_by_this_manifest": true,
+  "next_action": "Connect an existing free local language reasoning engine if available; otherwise evaluate capped DeepSeek Flash API only after safe secret and budget; test creative drafts against approved art and independent visual QA. No guaranteed perfect prompts.",
+  "publication_enabled": false,
+  "prod_promotion_allowed": false,
+  "no_touch": [
+    "App PROD",
+    "CRM PROD",
+    "Supabase PROD",
+    "WordPress PROD",
+    "SEO PROD",
+    "main",
+    "Buffer/Meta publication"
+  ]
+}
