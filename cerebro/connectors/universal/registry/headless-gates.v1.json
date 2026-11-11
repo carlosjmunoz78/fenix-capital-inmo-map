@@ -288,6 +288,33 @@
         "prod_mutations": false,
         "limits": "NO_PAGES_NO_DNS_NO_ARBITRARY_CODE_NO_OTHER_COMPANIES; LONG_LIVED_TOKEN_ROTATION_PENDING",
         "evidence": "docs/FACT001_CLOUDFLARE_WORKERS_REUSABLE_COMMAND_E2E_2026-11-11.md"
+      },
+      "pages_headless_adapter_20261111": {
+        "state": "DEFINED_TESTED_NOT_DEPLOYED",
+        "code": "cloudflare/headless-operator-lab/pages-adapter.mjs",
+        "schema": "cloudflare/headless-operator-lab/pages-schema.sql",
+        "tests_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43033224733",
+        "required_secret": "CF_PAGES_TOKEN",
+        "required_permission": "Pages Write (Developer Platform)",
+        "existing_pages_write_service_token": false,
+        "privileged_token_transfer_prohibited": true,
+        "current_worker_token_workers_only": true,
+        "operations_prepared": [
+          "pages.project.create_empty",
+          "pages.project.update_branch",
+          "pages.project.rollback_branch",
+          "pages.project.delete_empty"
+        ],
+        "public_deployment_operations": false,
+        "existing_pages_project_untouched": "fenix-capital-inmo-map",
+        "pending": [
+          "HUMAN_REQUIRED_SECURE_PAGES_TOKEN_BOOTSTRAP",
+          "STRICT_BINDING_INHERIT",
+          "D1_PAGES_TABLE_ADD_ONLY_AFTER_SNAPSHOT",
+          "PHYSICAL_HEADLESS_E2E",
+          "PAGES_DEPLOYMENT_BACKUP_ROLLBACK_WITH_PRIVATE_ACCESS"
+        ],
+        "status_reason": "Cloudflare API metadata identifies Pages Write separate from Workers Scripts Write; no active Pages Write token present. Do not broaden existing Workers token or move raw credentials via chat."
       }
     },
     {
@@ -1031,5 +1058,12 @@
     "autonomous_execution": "MUST_BE_PROVEN_PER_PROVIDER",
     "chatgpt_actions": "ONLY_VIA_AUTHORIZED_CONNECTED_PROVIDER_TOOLS",
     "no_new_subscription_eur": 0
-  }
+  },
+  "user_confirmed_next_provider_order_20261111": [
+    "cloudflare",
+    "vercel",
+    "supabase",
+    "github",
+    "opera"
+  ]
 }

@@ -189,3 +189,8 @@ E2E CEREBRO OIDC firmado funcional, pero emisor mínimo v2 NO delega Workers Scr
 ## 11/11/2026 · FACT001 Cloudflare Workers autónomo reutilizable VERIFICADO LAB
 
 Nuevo runtime privado `cerebro-fact001-headless-operator-lab-20261111` con cola durable D1, cuatro operaciones Workers propiedad del motor, 6 órdenes físicas culminadas `COMPLETED` a un intento, sin errores ni recursos de prueba sobrantes. Ingreso directo de ChatGPT autorizado + ingreso nuevo GitHub OIDC firmado mediante `cerebro-fact001-cf-command-intake-lab` con secret D1 Vault. Cron permanente LAB cada 5 min. No PROD, main ni App/CRM afectados. Universal Cloudflare **PARCIAL**: Pages headless y demás permisos/auditoría/procedimientos por cerrar. Evidencia completa `docs/FACT001_CLOUDFLARE_WORKERS_REUSABLE_COMMAND_E2E_2026-11-11.md`.
+
+
+## Continuidad 11/11/2026 · orden confirmado por propietario
+
+Secuencia obligatoria ahora: **Cloudflare → Vercel → Supabase → GitHub → Opera**, solo avanzando al siguiente proveedor cuando el alcance aceptado del anterior tenga evidencia física. Las piezas ajenas preexistentes no se eliminan; Notion sigue registrado fuera de esta secuencia concreta. Cloudflare Workers reusable LAB con seis comandos físicos y firma OIDC está en VERDE LAB; Pages headless aún requiere credencial exclusiva `Pages Write`, sin ampliar Workers y sin trasladar tokens entre conectores. Adaptador Pages aislado con tests CI verde, no desplegado ni con DDL aplicado. 

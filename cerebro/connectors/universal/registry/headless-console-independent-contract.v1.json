@@ -138,5 +138,13 @@
     "headless_worker_pages_lifecycle": "PENDING",
     "console_gate": "DEFERRED",
     "cloudflare_full": "PARTIAL"
-  }
+  },
+  "owner_sequence_latest_20261111": [
+    "cloudflare",
+    "vercel",
+    "supabase",
+    "github",
+    "opera"
+  ],
+  "notion_status": "Still a separate tracked connector; no removal or migration implied by this narrower priority list"
 }
