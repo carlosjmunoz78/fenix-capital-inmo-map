@@ -1,0 +1,59 @@
+name: UMS001 IGC202603 Cloudflare Qwen creative director real Replicate one shot
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202603_CLOUDFLARE_QWEN_REPLICATE_CANARY_V1.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202603-qwen-director-replicate-20261111-once
+  cancel-in-progress: false
+jobs:
+  one-qwen-directed-photo:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Exact order file must trigger this paid run
+        id: guard
+        run: |
+          if git show --format= --name-only HEAD | grep -Fxq 'cerebro/media-studio/v2/requests/UMS001_IGC202603_CLOUDFLARE_QWEN_REPLICATE_CANARY_V1.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Offline genuine model-provenance, brand and source-image hash tests
+        if: steps.guard.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202603_qwen_creative_to_replicate_once_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_igc202603_qwen_creative_to_replicate_v1.py -v
+      - name: One real Replicate model generation guided by Cloudflare Workers AI reasoning
+        if: steps.guard.outputs.eligible == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_CLOUDFLARE_QWEN_PREPAID_GATE: ONE_OWNER_APPROVED_20261111
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202603_qwen_creative_to_replicate_once_v1.py
+      - name: Preserve prompt and image with original hashes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202603-qwen-director-replicate-one-original
+          path: ${{ runner.temp }}/ums001-igc202603-qwen-director/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Audit cost and immutable safety
+        if: always()
+        run: |
+          echo 'Qwen art direction used existing Cloudflare free AI allocation.'
+          echo 'Maximum 1 Replicate Ultra photo 0.06 USD estimated from prepaid balance.'
+          echo 'Not autonomously connected to the permanent Gateway.'
+          echo 'No publication, no retries, no main/CRM/SEO/PROD mutations.'
