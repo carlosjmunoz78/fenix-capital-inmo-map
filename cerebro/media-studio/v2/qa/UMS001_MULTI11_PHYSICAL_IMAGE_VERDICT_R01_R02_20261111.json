@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "master_request_id": "UMS001-MULTICHANNEL-IMAGE-11-20261111-V1",
+  "scope": "Two controlled canary formats (Instagram 4:5 + SEO hero 16:9), two attempts each, paid from existing prepaid credit; not all eleven pieces",
+  "state": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY",
+  "artistic_approval": "FAILED_0_OF_4",
+  "approved": 0,
+  "original_replicate_predictions": 4,
+  "full_campaign_expected_pieces": 11,
+  "unexecuted_pieces": 9,
+  "provider_credit_cost_usd_estimated": 0.24,
+  "cost_class": "ESTIMATE_NOT_BILLING_LEDGER",
+  "publication": false,
+  "prod_promotion": false,
+  "video_phase_allowed": false,
+  "runs": [
+    {
+      "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43049681977",
+      "artifact_id": 13868213530
+    },
+    {
+      "url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43051178813",
+      "artifact_id": 13868479391
+    }
+  ],
+  "items": [
+    {
+      "item_id": "IG-FEED-01",
+      "attempt": 1,
+      "format": "4:5",
+      "model_prediction_id": "z9vctch4z9rmy0d1sczvhcqcbg",
+      "raw_sha256": "a806da0293ff0cb93bf8445c7235750dfd1cb729b6c2c869c3e13faf8e86a254",
+      "vision_score": 52,
+      "qa": "REJECTED",
+      "defects": [
+        "Three persons, backs to camera, missing visible faces",
+        "Unreal glass corridor composition"
+      ],
+      "run_id": 43049681977
+    },
+    {
+      "item_id": "SEO-HERO-01",
+      "attempt": 1,
+      "format": "16:9",
+      "model_prediction_id": "vrx9f7446srmt0d1sczsk5av4w",
+      "raw_sha256": "8b246019dd78968fa48086f307099b52059078acca6ee091c8a9a63447d7e742",
+      "vision_score": 62,
+      "qa": "REJECTED",
+      "defects": [
+        "Close-up portraits instead of property-visit editorial",
+        "Incorrect hand anatomy",
+        "Unconvincing flat orange art"
+      ],
+      "run_id": 43049681977
+    },
+    {
+      "item_id": "IG-FEED-01",
+      "attempt": 2,
+      "format": "4:5",
+      "model_prediction_id": "eqsqtdm589rmy0d1sd3szc4rc4",
+      "raw_sha256": "9216f132b77db639cbde36d7dc5b9873dcf0c8d7d80fc1395d19b7a5762e91fd",
+      "vision_score": 52,
+      "qa": "REJECTED",
+      "defects": [
+        "Two front faces improve casting but context generic orange indoor corridor",
+        "No original architectural glass sculpture and weak lighting"
+      ],
+      "run_id": 43051178813
+    },
+    {
+      "item_id": "SEO-HERO-01",
+      "attempt": 2,
+      "format": "16:9",
+      "model_prediction_id": "gfdgzhq06srmr0d1sd3vfxd424",
+      "raw_sha256": "8d573a7e8d4845bad8ab34357fe81d123448adb57a0fce86bea083bc237ca1c3",
+      "vision_score": null,
+      "qa": "REJECTED_QA_CONTRACT_FAILURE",
+      "defects": [
+        "Two buyer characters entirely absent",
+        "DeepSeek Vision oversized summary; no valid score after paid image"
+      ],
+      "run_id": 43051178813
+    }
+  ],
+  "rights_approval": "NOT_YET_VERIFIED",
+  "brand_postprocessor_e2e": "NOT_YET_VERIFIED",
+  "independent_pixel_gate": "NOT_APPROVED",
+  "full_gateway_dispatch": "NOT_VERIFIED",
+  "learned_in": "cerebro/media-studio/v2/qa/UMS001_DEEPSEEK_REAL_IMAGE_LEARNING_LEDGER_20261111.json",
+  "live_action": "HALT_FURTHER_PAID_GENERATION_AND_PRESERVE_EVIDENCE",
+  "remaining_gate": "UMS-001 Prompt Factory must compose channel-specific cinematographic storyboards with actual buyer-cast/real-Córdoba authenticity; DeepSeek as temporary mentor; zero-spend preflight/independent QA with richer reference and visual rubric; only then new capped physical test after explicit financial gate; no false green."
+}
