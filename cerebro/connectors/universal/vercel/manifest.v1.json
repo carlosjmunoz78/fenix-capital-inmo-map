@@ -4,7 +4,7 @@
   "engine_id": "FACT-001-VERCEL",
   "environment": "LAB",
   "version": "0.1.0",
-  "runtime": "SHARED_CEREBRO_CLOUDFLARE_WORKER_FUTURE",
+  "runtime": "SUPABASE_SIGNED_EDGE_V5_VAULT_E2E_LAB; CLOUDFLARE_OPTIONAL_WORKER_NO_TOKEN",
   "registry_status": "PARTIAL",
   "owner_service": "CEREBRO_GATEWAY",
   "provider": "vercel",
@@ -12,8 +12,8 @@
   "owned_project_id": "prj_LxPzJA5AkHJvhYzTAbVJbRrAvvLu",
   "owned_project_name": "cerebro-fact001-vercel-lab-20261111",
   "permissions": {
-    "service_token": "VERCEL_API_TOKEN",
-    "state": "NOT_PROVISIONED",
+    "service_token": "cerebro_vercel_service_token_v1 (Supabase Vault)",
+    "state": "EXISTING_VAULT_SERVICE_REUSED_SECURELY",
     "scope": "selected team ONLY",
     "forbid": [
       "billing changes",
@@ -22,7 +22,8 @@
       "domain changes",
       "environment secrets read",
       "project deletion"
-    ]
+    ],
+    "additional_cloudflare_token": "VERCEL_API_TOKEN NOT_CONFIGURED_OR_REQUIRED_FOR_SIGNED_EDGE_PATH"
   },
   "events": [
     "ORDER_RECEIVED",
@@ -33,9 +34,13 @@
     "HUMAN_REQUIRED"
   ],
   "jobs": {
-    "queue": "D1_LAB_NAMESPACED_PENDING",
+    "queue": "CLOUDFLARE_RECOVERY_D1_FACT001_VERCEL_JOBS_V1",
+    "audit": "fact001_vercel_events_v1",
+    "service_executor": "cerebro-fact001-vercel-intake-lab Supabase Edge v5",
     "claim_policy": "AT_MOST_ONCE",
-    "idempotency_key_required": true
+    "idempotency_key_required": true,
+    "completed": 4,
+    "failed_preserved": 1
   },
   "api": {
     "accepted_operations": [
@@ -47,14 +52,22 @@
     "public_ingress": false
   },
   "tests": {
-    "mocked_policy": "GITHUB_ACTIONS_TO_BE_EXECUTED",
+    "mocked_policy": "CI_SUCCESS_SSO_REQUIRED",
     "physical_chatgpt_oauth_settings_update_rollback": "VERIFIED_2026-11-11",
-    "physical_independent_runtime": "PENDING"
+    "physical_independent_runtime": "VERIFIED_LAB_4_DISTINCT_SIGNED_VAULT_JOBS",
+    "first_failure": "READ-01 RECONCILE, archived SSO schema enabled omitted",
+    "signed_e2e_runs": [
+      "43053945817",
+      "43054170024",
+      "43054365439",
+      "43054646304"
+    ]
   },
   "costs": {
     "additional_subscriptions_eur": 0,
     "account_plan": "hobby",
-    "project_deployments": 0
+    "project_deployments": 0,
+    "actual_deployments": 0
   },
   "backup": {
     "settings_baseline": {
@@ -70,15 +83,17 @@
   },
   "rollback": {
     "provider_project_settings": "framework null",
-    "prev_factory": "no changes to existing projects"
+    "prev_factory": "no changes to existing projects",
+    "physically_verified": "framework vite to null, live false, domains [], latestDeployment null, SSO all"
   },
   "rebuild": {
     "method": "recreate empty lab resource after separate admin review if user explicitly authorizes deletion",
     "existing_project_delete_prohibited": true
   },
   "observability": {
-    "audit_event_schema": "FACT001_PENDING",
-    "no_token_logging": true
+    "audit_event_schema": "fact001_vercel_events_v1",
+    "no_token_logging": true,
+    "five_events_preserved": true
   },
   "training_hooks": {
     "eligible_after_full_e2e": false
