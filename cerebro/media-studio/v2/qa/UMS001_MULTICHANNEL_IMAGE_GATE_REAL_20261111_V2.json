@@ -1,0 +1,107 @@
+{
+  "schema_version": 2,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "2.0",
+  "request_id": "UMS001-MULTICHANNEL-IMAGE-11-20261111-V1",
+  "evidence_date": "2026-11-11",
+  "state": "IMAGE_MULTIFORMAT_VALIDATION_NOT_READY",
+  "total_requested_pieces": 11,
+  "unique_piece_ids_attempted": 3,
+  "unique_piece_ids_unattempted": 8,
+  "real_predictions": 6,
+  "passed_editorial_visual_qa": 0,
+  "rejected_editorial_visual_qa": 6,
+  "provider_used": "replicate",
+  "generator_used": "black-forest-labs/flux-1.1-pro-ultra",
+  "estimated_total_replicate_usd": 0.36,
+  "estimated_only": true,
+  "actual_deepseek_invoice_not_verified": true,
+  "paid_attempts_halted": true,
+  "production_unchanged": true,
+  "publication_approved": false,
+  "video_gate_allowed": false,
+  "original_qa_refs": [
+    {
+      "item_id": "IG-FEED-01",
+      "channel": "INSTAGRAM",
+      "attempt": 1,
+      "run_id": 43049681977,
+      "artifact_id": 13868213530,
+      "sha256": "a806da0293ff0cb93bf8445c7235750dfd1cb729b6c2c869c3e13faf8e86a254",
+      "score": 52,
+      "result": "REJECTED_CAST_BACKS_MISSING_CREATIVE_ARCHITECTURE"
+    },
+    {
+      "item_id": "IG-FEED-01",
+      "channel": "INSTAGRAM",
+      "attempt": 2,
+      "run_id": 43051178813,
+      "artifact_id": 13868479391,
+      "sha256": "9216f132b77db639cbde36d7dc5b9873dcf0c8d7d80fc1395d19b7a5762e91fd",
+      "score": 52,
+      "result": "REJECTED_GENERIC_ORANGE_CORRIDOR"
+    },
+    {
+      "item_id": "SEO-HERO-01",
+      "channel": "SEO",
+      "attempt": 1,
+      "run_id": 43049681977,
+      "artifact_id": 13868213530,
+      "sha256": "8b246019dd78968fa48086f307099b52059078acca6ee091c8a9a63447d7e742",
+      "score": 62,
+      "result": "REJECTED_WRONG_ENVIRONMENTAL_STAGING_AND_ANATOMY"
+    },
+    {
+      "item_id": "SEO-HERO-01",
+      "channel": "SEO",
+      "attempt": 2,
+      "run_id": 43051178813,
+      "artifact_id": 13868479391,
+      "sha256": "8d573a7e8d4845bad8ab34357fe81d123448adb57a0fce86bea083bc237ca1c3",
+      "score": null,
+      "result": "REJECTED_CAST_ABSENT_QA_SCHEMA_INVALID"
+    },
+    {
+      "item_id": "FB-FEED-01",
+      "channel": "FACEBOOK",
+      "attempt": 1,
+      "run_id": 43055263249,
+      "artifact_id": 13869733582,
+      "sha256": "0ac6b4819e457ec9be8d93705e1343f33ce5bbb68cee7ca06328aac70aa92374",
+      "score": null,
+      "result": "REJECTED_NO_FACES_OR_HOME_UNKNOWN_QA_CODE"
+    },
+    {
+      "item_id": "FB-FEED-01",
+      "channel": "FACEBOOK",
+      "attempt": 2,
+      "run_id": 43056969985,
+      "artifact_id": 13871951087,
+      "sha256": "b81e79947bd1691b71dd540169f6a1b04382d5aa0baa120bcb83603a7af7ecac",
+      "score": 52,
+      "result": "REJECTED_BACKTURNED_FACES_AND_NO_GLASS_ART"
+    }
+  ],
+  "technical_gates": {
+    "multi11_brief_schema": "PASS",
+    "cerebro_prompt_forge_11_distinct_prompts": "PASS",
+    "cerebro_first_mentor_contract_offline": "PASS",
+    "facebook_square_native_1_1": "PASS",
+    "seo_16_9_native": "PASS",
+    "instagram_4_5_native": "PASS",
+    "independent_photo_88_plus": "FAIL",
+    "brand_authentic_compositor_end_to_end": "UNVERIFIED",
+    "permanent_delivery_gateway": "UNVERIFIED"
+  },
+  "learning": {
+    "verified_scope": "LAB_ONLY",
+    "creative_owner": "CEREBRO_PROMPT_FACTORY_V0",
+    "deepseek_role": "TEMPORARY_MENTOR_AND_VISUAL_EVALUATOR",
+    "persistent_file": "cerebro/media-studio/v2/qa/UMS001_DEEPSEEK_REAL_IMAGE_LEARNING_LEDGER_20261111.json",
+    "status": "LEARNING_FROM_REAL_FAILURES_NOT_PERFORMANCE_READY"
+  },
+  "next_safe_action": "REGISTER_AND_TEST_ALTERNATIVE_IMAGE_MODEL_ROUTER_WITH_EXISTING_PREPAID_CREDIT_WHEN_A_SEPARATE_UNTRIED_PIECE_HAS_A_STRICT_PER_RUN_RESERVATION; NO REPEAT OF EXHAUSTED IG SEO FB UNTIL EXPLICIT_NEW_APPROVAL_OR_NEW_CAMPAIGN",
+  "rollback": "PR45 isolated; no merge to PR39 or main, no production or social publication, all provider calls off by default"
+}
