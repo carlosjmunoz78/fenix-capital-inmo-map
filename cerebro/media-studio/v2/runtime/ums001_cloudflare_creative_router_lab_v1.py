@@ -21,7 +21,7 @@ def prepare(body):
  if not isinstance(filtered.get("panels"),list) or len(filtered["panels"])<1 or len(filtered["panels"])>10:
   raise CreativeRouterBlocked("NO_PANELS")
  text=json.dumps(filtered,ensure_ascii=False)
- if len(text)>12000 or re.search(r"(?:@gmail\\.com|@hotmail\\.com|@outlook\\.com|password|api[_ -]?key|\\br8_[A-Za-z0-9]+\\b)",text,re.I):
+ if len(text)>12000 or re.search(r"(?:[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}|password|api[_ -]?key|\\br8_[A-Za-z0-9]+\\b)",text,re.I):
   raise CreativeRouterBlocked("SENSITIVE_OR_TOO_LARGE")
  instructions=(
   "CEREBRO UMS-001 creative director, premium authentic Spanish/Andalusian cinematic photo. "
