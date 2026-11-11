@@ -1,0 +1,29 @@
+name: UMS001 multi11 real corrective retakes OFFLINE validation only
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-multi11-real-retake-offline-gate.yml'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/qa/UMS001_DEEPSEEK_REAL_IMAGE_LEARNING_LEDGER_20261111.json'
+permissions:
+  contents: read
+jobs:
+  retake-no-spend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install locked original-image dependencies
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Enforce creative correction, old/new regressions and two exact valid retake orders
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json --validate-only
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json --validate-only
+      - name: Never spend in this quality gate
+        run: echo 'Validated two distinct final retakes; external model calls 0, publication OFF.'
