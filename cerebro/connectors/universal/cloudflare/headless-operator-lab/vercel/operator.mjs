@@ -13,7 +13,7 @@ export function createClient(credential,http=fetch){
  async function checkedProject(){
   const v=await call('GET',projectPath);
   if(v.id!==PROJECT_ID||v.name!==PROJECT_NAME||v.accountId!==TEAM_ID)throw Error('VERCEL_PROJECT_IDENTITY_DRIFT');
-  if(v.latestDeployment!=null||v.live===true||(v.domains||[]).length>0||v.ssoProtection?.enabled!==true||v.ssoProtection?.deploymentType!=='all')throw Error('VERCEL_SSO_NO_DEPLOYMENT_GATE');
+  if(v.latestDeployment!=null||v.live===true||(v.domains||[]).length>0||v.ssoProtection?.enabled===false||v.ssoProtection?.deploymentType!=='all')throw Error('VERCEL_SSO_NO_DEPLOYMENT_GATE');
   return v;
  }
  return{call,checkedProject,projectPath};

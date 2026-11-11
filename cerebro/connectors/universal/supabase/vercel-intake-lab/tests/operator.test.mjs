@@ -36,3 +36,13 @@ test('edge execute requires verified JWT and D1 job claim; secret never emitted'
 });
 
 test('authenticated read-only diagnostic restricts output to safe flags',()=>{const src=readFileSync(new URL('../index.ts',import.meta.url),'utf8');assert.ok(src.includes("if(route==='diagnose')"));assert.ok(src.includes('VERCEL_SAFE_SHAPE_PROBE'));assert.ok(src.includes('credentials_exposed:false'));assert.ok(src.includes('writes:0'));assert.ok(!src.includes('return answer(200,p)'));});
+
+test('Vercel API omits enabled: deploymentType all remains secure, explicit disabled forbidden',async()=>{
+ const scoped={...SCOPE,provider:'vercel',team_id:TEAM_ID,project_id:PROJECT_ID,project_name:PROJECT_NAME,
+  operation:'vercel.project.read_lab',max_cost_eur:0,request_id:'FACT001-VERCEL-20261111-READ-02',idempotency_key:'fact001-vercel-oidc-20261111-read-02'};
+ const mk=enabled=>async()=>({status:200,json:async()=>({
+   id:PROJECT_ID,name:PROJECT_NAME,accountId:TEAM_ID,framework:null,live:false,latestDeployment:null,domains:[],
+   ssoProtection:enabled===undefined?{deploymentType:'all'}:{enabled,deploymentType:'all'}})});
+ assert.equal((await executeOrder(scoped,'T'.repeat(30),mk(undefined))).status,'VERIFIED');
+ await assert.rejects(()=>executeOrder(scoped,'T'.repeat(30),mk(false)),/VERCEL_SSO_NO_DEPLOYMENT_GATE/);
+});
