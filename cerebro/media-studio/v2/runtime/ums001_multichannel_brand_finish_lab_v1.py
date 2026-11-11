@@ -75,8 +75,9 @@ def finish(source_path,output_dir,item_id,source_sha,headline="",receipt=None):
  layer=Image.new("RGBA",size,(0,0,0,0))
  draw=ImageDraw.Draw(layer)
  width,height=size
+ text_bbox=None
  if channel!="SEO":
-  margin=max(26,int(width*.032)); box_w=int(width*.245); box_h=int(box_w*.80);right=width-margin
+  margin=max(26,int(width*.032)); box_w=int(width*.195); box_h=int(box_w*.83);right=width-margin
   rect=(right-box_w,margin,right,margin+box_h)
   draw.rounded_rectangle(rect,radius=20,fill=(255,252,247,250),outline=(255,183,27,210),width=2)
   logo.thumbnail((int(box_w*.78),int(box_h*.73)),Image.Resampling.LANCZOS)
@@ -90,7 +91,12 @@ def finish(source_path,output_dir,item_id,source_sha,headline="",receipt=None):
    face=font(size_font)
    if draw.textbbox((0,0),headline,font=face,stroke_width=1)[2]<=max_width:break
   else:raise Hold("HEADLINE_NO_SAFE_FIT")
-  x=int(width*.045);y=height-int(height*.085)
+  x=int(width*.045)
+  relative_bbox=draw.textbbox((0,0),headline,font=face,stroke_width=2)
+  bottom_safe_margin=max(26,int(height*.062))
+  y=height-bottom_safe_margin-relative_bbox[3]
+  text_bbox=draw.textbbox((x,y),headline,font=face,stroke_width=2)
+  if text_bbox[0]<margin or text_bbox[2]>width-margin or text_bbox[1]<0 or text_bbox[3]>height-bottom_safe_margin:raise Hold("HEADLINE_BORDER_OR_SAFE_AREA_OVERFLOW")
   draw.text((x,y),headline,font=face,fill=(255,255,255,255),stroke_width=2,stroke_fill=(34,34,34,220))
   draw.rounded_rectangle((x,y-15,x+int(width*.065),y-8),radius=3,fill=(255,183,27,255))
  final=Image.alpha_composite(im,layer).convert("RGB")
@@ -104,7 +110,9 @@ def finish(source_path,output_dir,item_id,source_sha,headline="",receipt=None):
  "brand_logo_id":"FENIX_OFFICIAL_01" if logo is not None else None,
  "brand_logo_sha256":LOGO_SHA if logo is not None else None,
  "brand_palette":"FENIX_MANUAL_2025","copy_font":"non-Montserrat system font; Montserrat reserved to original brand logo",
- "headline":headline,"technical_export_qa":"PASS",
+ "headline":headline,"headline_text_bbox_px":list(text_bbox) if text_bbox is not None else None,
+ "headline_bottom_margin_px":max(26,int(height*.062)) if channel!="SEO" else None,
+ "technical_export_qa":"PASS",
  "vision_qa":"NOT_CERTIFIED","rights_qa":"NOT_CERTIFIED","editorial_score":None,
  "final_editorial_approved":False,"signed_delivery_verified":False,
  "publish_enabled":False,"delivery_allowed":False,"video_gate_allowed":False,
