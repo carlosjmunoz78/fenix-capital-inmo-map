@@ -1,0 +1,14 @@
+{
+  "request_id": "UMS001-IGC202603-CLOUDFLARE-LLAMA-REPLICATE-R02-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "status": "RESERVED_NO_RETRY",
+  "model": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_predictions": 1,
+  "estimated_usd": 0.06,
+  "billing_source": "EXISTING_PREPAID_CREDIT_CONFIRMED_2026_11_11",
+  "auto_reload": "DISABLED_CONFIRMED_2026_11_11",
+  "run_id": "43009473933",
+  "publication_approved": false
+}
