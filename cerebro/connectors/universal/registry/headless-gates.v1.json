@@ -887,5 +887,24 @@
     "prod": "OFF",
     "opera_phase": "P6_PARKED_LAST",
     "next_block": "FACT001_P5_BACKEND_DURABLE_QUEUE_GATEWAY_OAUTH_SERVICE_REAL_DUAL_E2E"
+  },
+  "execution_without_console": {
+    "status": "DEFINED_NOT_OPERATIVE_AS_COMMON_RUNTIME",
+    "contract": "docs/FACT001_CONECTOR_HEADLESS_PRIMERO_CONSOLA_DESPUES_2026-11-11.md",
+    "priority": [
+      "cloudflare",
+      "github",
+      "supabase",
+      "vercel",
+      "notion",
+      "gateway",
+      "opera_last"
+    ],
+    "mode": "headless_backends_complete_before_console",
+    "console_dependency_for_backend": "NO",
+    "console_e2e_for_ui": "DEFERRED_NOT_DISCARDED",
+    "autonomous_execution": "MUST_BE_PROVEN_PER_PROVIDER",
+    "chatgpt_actions": "ONLY_VIA_AUTHORIZED_CONNECTED_PROVIDER_TOOLS",
+    "no_new_subscription_eur": 0
   }
 }
