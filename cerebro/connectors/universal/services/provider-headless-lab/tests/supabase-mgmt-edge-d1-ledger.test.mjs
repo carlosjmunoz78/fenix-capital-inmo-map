@@ -29,8 +29,8 @@ function db(){
    r.status='IN_FLIGHT';r.attempts=1;events.push('IN_FLIGHT');return [{request_id:id,status:r.status,attempts:r.attempts,command_sha256:hash}];
   }
   if(sql.startsWith('UPDATE fact001_supabase_edge_jobs_v1')&&sql.includes('SET status=?3')){
-   const [id,hash,outcome,after]=params,r=jobs.get(id);
-   if(!r||r.command_sha256!==hash||r.status!=='IN_FLIGHT'||r.attempts!==1)return [];
+   const [id,hash,outcome,after,operation]=params,r=jobs.get(id);
+   if(!r||r.command_sha256!==hash||r.status!=='IN_FLIGHT'||r.attempts!==1||r.operation!==operation)return [];
    r.status=outcome;r.after_sha256=after;events.push(outcome);return [{request_id:id,status:r.status,attempts:r.attempts,command_sha256:hash}];
   }
   if(sql.startsWith('SELECT request_id,status')){const r=jobs.get(params[0]);return r?[{request_id:r.request_id,status:r.status,attempts:r.attempts,command_sha256:r.command_sha256}]:[];}
@@ -59,8 +59,8 @@ test('reserve/claim/verified-complete exactly one attempt',async()=>{
  const a=await l.prepare({plan:p,expires_at_ms:NOW+5000});
  assert.equal(a.status,'PREPARED');
  const c=await l.claim(a);assert.equal(c.attempts,1);
- const done=await l.settle({...a,outcome:'COMPLETED',after_sha256:R,
- readback:{verified:true,project_ref:p.project_ref,resource_slug:p.resource_slug,sha256:R,checked_at:NOW-1000}});
+ const done=await l.settle({...a,operation:'edge.update',outcome:'COMPLETED',after_sha256:R,
+ readback:{verified:true,metadata_only:true,exists:true,project_ref:p.project_ref,resource_slug:p.resource_slug,sha256:R,checked_at:NOW-1000}});
  assert.equal(done.status,'COMPLETED');assert.deepEqual(d.events,['PREPARED','IN_FLIGHT','COMPLETED']);
  assert.deepEqual(await l.status(a.request_id),{request_id:a.request_id,status:'COMPLETED',attempts:1});
 });
@@ -88,9 +88,9 @@ test('unknown failure remains RECONCILE, never automatically retries',async()=>{
  const d=db(),l=ledger({query:d.query,now:()=>NOW});
  const a=await l.prepare({plan:plan(),expires_at_ms:NOW+10000});
  await l.claim(a);
- assert.equal((await l.settle({...a,outcome:'RECONCILE'})).status,'RECONCILE');
+ assert.equal((await l.settle({...a,operation:'edge.update',outcome:'RECONCILE'})).status,'RECONCILE');
  await fail(()=>l.claim(a),'SB_LEDGER_ALREADY_CLAIMED_OR_EXPIRED');
- await fail(()=>l.settle({...a,outcome:'COMPLETED',after_sha256:R,readback:{verified:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug,sha256:R,checked_at:NOW-1000}}),'SB_LEDGER_ALREADY_SETTLED_RECONCILE');
+ await fail(()=>l.settle({...a,operation:'edge.update',outcome:'COMPLETED',after_sha256:R,readback:{verified:true,metadata_only:true,exists:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug,sha256:R,checked_at:NOW-1000}}),'SB_LEDGER_ALREADY_SETTLED_RECONCILE');
 });
 test('cannot claim wrong hash, bad request ID, or skip prepare',async()=>{
  const d=db(),l=ledger({query:d.query,now:()=>NOW});
@@ -102,7 +102,7 @@ test('completion requires verified exact resource readback',async()=>{
  const a=await l.prepare({plan:plan(),expires_at_ms:NOW+5000});await l.claim(a);
  for(const bad of [null,{verified:false},{verified:true,project_ref:'other',resource_slug:plan().resource_slug},
    {verified:true,project_ref:plan().project_ref,resource_slug:'cerebro-console-gateway-v0'}])
-   await fail(()=>l.settle({...a,outcome:'COMPLETED',readback:bad}),'SB_LEDGER_READBACK_REQUIRED');
+   await fail(()=>l.settle({...a,operation:'edge.update',outcome:'COMPLETED',readback:bad}),'SB_LEDGER_READBACK_REQUIRED');
  assert.equal(d.jobs.get(a.request_id).status,'IN_FLIGHT');
 });
 test('scope injection, another tenant, PROD or paid plans blocked before write',async()=>{
@@ -129,7 +129,7 @@ test('request status query never accepts SQL or arbitrary identifiers',async()=>
 test('no guessed success on RECONCILE',async()=>{
  const d=db(),l=ledger({query:d.query,now:()=>NOW});
  const a=await l.prepare({plan:plan(),expires_at_ms:NOW+3000});await l.claim(a);
- await fail(()=>l.settle({...a,outcome:'RECONCILE',after_sha256:R}),'SB_LEDGER_RECONCILE_NO_ASSUMPTIONS');
+ await fail(()=>l.settle({...a,operation:'edge.update',outcome:'RECONCILE',after_sha256:R}),'SB_LEDGER_RECONCILE_NO_ASSUMPTIONS');
 });
 
 test('independent service principal is mandatory and never derived from an order',()=>{
@@ -141,8 +141,23 @@ test('independent service principal is mandatory and never derived from an order
 test('completion cannot rely on stale readback or self-declared hashes',async()=>{
  const d=db(),l=ledger({query:d.query,now:()=>NOW});
  const a=await l.prepare({plan:plan(),expires_at_ms:NOW+5000});await l.claim(a);
- const good={verified:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug,sha256:R,checked_at:NOW-1000};
+ const good={verified:true,metadata_only:true,exists:true,project_ref:plan().project_ref,resource_slug:plan().resource_slug,sha256:R,checked_at:NOW-1000};
  for(const readback of [{...good,sha256:A},{...good,checked_at:NOW-90000},{...good,checked_at:NOW+1}])
-  await fail(()=>l.settle({...a,outcome:'COMPLETED',after_sha256:R,readback}),'SB_LEDGER_READBACK_REQUIRED');
+  await fail(()=>l.settle({...a,operation:'edge.update',outcome:'COMPLETED',after_sha256:R,readback}),'SB_LEDGER_READBACK_REQUIRED');
  assert.equal(d.jobs.get(a.request_id).status,'IN_FLIGHT');
+});
+
+test('delete completes only with confirmed absence and null hash',async()=>{
+ const p=plan({operation:'edge.delete',artifact_sha256:null}),d=db(),l=ledger({query:d.query,now:()=>NOW});
+ const a=await l.prepare({plan:p,expires_at_ms:NOW+5000});await l.claim(a);
+ const readback={verified:true,metadata_only:true,exists:false,sha256:null,checked_at:NOW-1000,project_ref:p.project_ref,resource_slug:p.resource_slug};
+ await fail(()=>l.settle({...a,operation:'edge.delete',outcome:'COMPLETED',after_sha256:R,readback}),'SB_LEDGER_READBACK_REQUIRED');
+ assert.equal((await l.settle({...a,operation:'edge.delete',outcome:'COMPLETED',readback})).status,'COMPLETED');
+});
+test('read absence can complete and wrong operation is SQL CAS rejected',async()=>{
+ const p=plan({status:'LAB_READ_PLAN_ONLY',operation:'edge.read',before_sha256:null,artifact_sha256:null,rollback_sha256:null});
+ const d=db(),l=ledger({query:d.query,now:()=>NOW});const a=await l.prepare({plan:p,expires_at_ms:NOW+5000});await l.claim(a);
+ const readback={verified:true,metadata_only:true,exists:false,sha256:null,checked_at:NOW-1000,project_ref:p.project_ref,resource_slug:p.resource_slug};
+ await fail(()=>l.settle({...a,operation:'edge.delete',outcome:'COMPLETED',readback}),'SB_LEDGER_ALREADY_SETTLED_RECONCILE');
+ assert.equal((await l.settle({...a,operation:'edge.read',outcome:'COMPLETED',readback})).status,'COMPLETED');
 });

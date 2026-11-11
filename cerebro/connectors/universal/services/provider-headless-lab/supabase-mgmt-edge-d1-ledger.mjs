@@ -110,22 +110,26 @@ export function makeSupabaseEdgeLedger({query,now=Date.now,principal}={}){
      reject('SB_LEDGER_ALREADY_CLAIMED_OR_EXPIRED');
    return Object.freeze({request_id,status:'IN_FLIGHT',attempts:1});
   },
-  async settle({request_id,command_sha256,outcome,readback,after_sha256=null}={}){
-   if(!REQUEST.test(request_id)||!sha(command_sha256)||!['COMPLETED','RECONCILE'].includes(outcome))
+  async settle({request_id,command_sha256,operation,outcome,readback,after_sha256=null}={}){
+   if(!REQUEST.test(request_id)||!sha(command_sha256)||!SUPABASE_MGMT_LAB.operations.includes(operation)||!['COMPLETED','RECONCILE'].includes(outcome))
       reject('SB_LEDGER_SETTLE_INPUT_DENIED');
    if(outcome==='COMPLETED'){
-    if(!strict(readback)||readback.verified!==true||readback.project_ref!==SUPABASE_MGMT_LAB.project_ref||
+    if(!strict(readback)||readback.verified!==true||readback.metadata_only!==true||
+       readback.project_ref!==SUPABASE_MGMT_LAB.project_ref||
        readback.resource_slug!==SUPABASE_MGMT_LAB.resource_slug ||
-       !sha(after_sha256)||readback.sha256!==after_sha256||
+       typeof readback.exists!=='boolean'||
        !Number.isSafeInteger(readback.checked_at)||readback.checked_at>now()||
-       readback.checked_at<now()-60000)
-       reject('SB_LEDGER_READBACK_REQUIRED');
+       readback.checked_at<now()-60000)reject('SB_LEDGER_READBACK_REQUIRED');
+    const expectedExists=operation==='edge.delete'?false:operation==='edge.read'?readback.exists:true;
+    if(readback.exists!==expectedExists ||
+      (readback.exists ? (!sha(after_sha256)||readback.sha256!==after_sha256):
+        (after_sha256!==null||readback.sha256!==null))) reject('SB_LEDGER_READBACK_REQUIRED');
    }else if(after_sha256!==null)reject('SB_LEDGER_RECONCILE_NO_ASSUMPTIONS');
    const r=await one("UPDATE "+TABLE+
     " SET status=?3,after_sha256=?4,settled_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')"+
-    " WHERE request_id=?1 AND command_sha256=?2 AND status='IN_FLIGHT' AND attempts=1"+
+    " WHERE request_id=?1 AND command_sha256=?2 AND status='IN_FLIGHT' AND attempts=1 AND operation=?5"+
     " RETURNING request_id,status,attempts,command_sha256",
-    [request_id,command_sha256,outcome,after_sha256]);
+    [request_id,command_sha256,outcome,after_sha256,operation]);
    if(!r||r.request_id!==request_id||r.status!==outcome||r.attempts!==1||r.command_sha256!==command_sha256)
      reject('SB_LEDGER_ALREADY_SETTLED_RECONCILE');
    return Object.freeze({request_id,status:outcome,attempts:1});

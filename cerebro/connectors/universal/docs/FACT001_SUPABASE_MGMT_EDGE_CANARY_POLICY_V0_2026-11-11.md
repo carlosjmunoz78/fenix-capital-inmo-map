@@ -51,3 +51,10 @@
 5. E2E real desde CEREBRO Gateway con propietario autenticado cuando exista sesión válida, sin suplantar JWT con token de backend. Solo promover tras el tribunal y comprobación de reversibilidad.
 
 **Decisión:** CANDIDATE_LAB_ACCEPTED_IN_CODE_AND_CI; MIGRATION_NOT_APPLIED; AUTONOMOUS_SUPABASE_FULL=PARTIAL; DEPLOYMENT=OFF.
+
+
+## Incremento 11/11/2026 · Metadata exacta y borrado seguro
+- Módulo read-only candidato `supabase-mgmt-edge-readback.mjs`: GET fijo a Management API `/v1/projects/cluhljgonannaafpmblx/functions/cerebro-fact001-sb-mgmt-canary-lab`, exige identidad CEREBRO firmada y token de Vault backend; 404=ausente, 401/403/429/500 no son ausencia ni éxito. Valida slug, version y digest de bundle. No obtiene código ni sustituye backup físico.
+- Contrato oficial: https://supabase.com/docs/reference/api/v1-get-a-function.
+- Ledger: clausura `edge.delete` solo con `exists=false` y hash nulo; lectura ausente igualmente válida. `edge.create/update` exigen existencia y SHA tras la operación. La transición SQL verifica además la operación original mediante CAS. Nunca interpreta un token o resultado autodeclarado como prueba de propiedad.
+- Cambios solo en PR DRAFT; readback no conectado al broker v33; escritura proveedor OFF; Supabase 110 funciones anteriores intactas.
