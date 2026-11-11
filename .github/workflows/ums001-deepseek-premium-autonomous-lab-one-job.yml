@@ -34,7 +34,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mapfile -t changed < <(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '^cerebro/media-studio/v2/requests/deepseek-auto/UMS001-[A-Za-z0-9-]+[.]json
+          mapfile -t changed < <(git diff-tree --no-commit-id --name-only -r HEAD | grep -E '^cerebro/media-studio/v2/requests/deepseek-auto/UMS001-[A-Za-z0-9-]+[.]json$' || true)
+          if [ "${#changed[@]}" -ne 1 ]; then
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+            echo 'No exactly-one-job LAB trigger. No paid calls.'
+            exit 0
+          fi
+          echo "LAB_JOB_FILE=${changed[0]}" >> "$GITHUB_ENV"
+          echo 'eligible=true' >> "$GITHUB_OUTPUT"
       - name: Compile and verify premium photography contract before paid calls
         if: steps.requested.outputs.eligible == 'true'
         run: |
