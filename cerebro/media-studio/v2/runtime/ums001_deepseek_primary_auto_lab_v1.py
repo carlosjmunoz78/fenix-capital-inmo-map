@@ -210,8 +210,18 @@ def validate_vision(result):
  discrepancy=sum(scores.values())!=result.get("score")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
  if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
- if not isinstance(result["correction"],str) or len(result["correction"])>1200:deny("VISION_CORRECTION")
- if not isinstance(result["summary"],str) or not 5<=len(result["summary"])<=500:deny("VISION_SUMMARY")
+ if not isinstance(result["correction"],str) or not isinstance(result["summary"],str):deny("VISION_QA_TEXT_TYPES")
+ # A too-long model QA response must never erase a paid prediction's real
+ # provenance: record a REJECTED verdict and keep its SHA and raw-image receipt.
+ if len(result["correction"])>1200 or not 5<=len(result["summary"])<=500:
+  reason="INVALID_QA_CORRECTION_LENGTH" if len(result["correction"])>1200 else "INVALID_QA_SUMMARY_LENGTH"
+  return {**result,"accepted":False,"pass":False,"score":min(result["score"],sum(scores.values())),
+   "violations":sorted(set(result["violations"]+["UNKNOWN"])),
+   "summary":result["summary"][:500] if len(result["summary"])>=5 else "QA summary missing or malformed",
+   "correction":result["correction"][:1200],"qa_contract_rejection":reason,
+   "original_qa_summary_sha256":hash_bytes(result["summary"].encode("utf-8")),
+   "original_qa_summary_length":len(result["summary"])}
+
  if discrepancy:
   issues=sorted(set(result["violations"]+["UNKNOWN"]))
   return {**result,"reported_score":result["score"],"rubric_sum":sum(scores.values()),
