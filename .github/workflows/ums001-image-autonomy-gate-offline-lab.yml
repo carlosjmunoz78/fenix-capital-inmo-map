@@ -1,0 +1,21 @@
+name: UMS001 automated images request gate offline LAB no API
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-image-autonomy-gate-offline-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_image_autonomy_gate_lab_v1.mjs'
+      - 'cerebro/media-studio/v2/tests/ums001_image_autonomy_gate_lab_v1.test.mjs'
+permissions:
+  contents: read
+jobs:
+  acceptance-safety:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --test cerebro/media-studio/v2/tests/ums001_image_autonomy_gate_lab_v1.test.mjs
+      - run: echo 'SAFE LAB ONLY: queue and acceptance gates, zero provider calls, no publishing, no video'
