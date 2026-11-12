@@ -125,6 +125,7 @@ test('JARVIS visible-language rewrite is scoped only to Jarvis, never to Operati
  const host=read('src/CerebroConsoleHost.tsx');
  const live=read('src/CerebroOperativeLiveConsole.tsx');
  expect(host).toContain("primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null");
+ expect(host).toContain("view==='JARVIS'||view==='V0'?<JarvisVisibleLanguageGuard/>:null");
  expect(live).toContain('aria-label="Mensaje para CEREBRO"');
  expect(live).toContain('Conversación con CEREBRO');
  expect(host).not.toContain('  <JarvisVisibleLanguageGuard/>\n  <CerebroSpeechOutputGuard/>');
