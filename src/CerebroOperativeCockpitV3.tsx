@@ -21,6 +21,7 @@ type Props={
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
  ownerUniverse:OwnerUniverseResult;
+ scopeCanExecute:boolean;
  chatLines:{role:'user'|'cerebro';text:string}[];
  children:ReactNode;
 };
@@ -65,7 +66,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,ownerUniverse,chatLines,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
@@ -84,9 +85,9 @@ export default function CerebroOperativeCockpitV3({
  }[status];
  const provenance=source==='LIVE'?'Datos observados':source==='CACHED'?'Última captura disponible':'Sin conexión verificable';
  const showLive=source!=='UNAVAILABLE';
- function handleSubmit(event:FormEvent){event.preventDefault();onSubmit()}
+ function handleSubmit(event:FormEvent){event.preventDefault();if(scopeCanExecute)onSubmit()}
  function keydown(event:KeyboardEvent<HTMLTextAreaElement>){
-  if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();onSubmit()}
+  if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();if(scopeCanExecute)onSubmit()}
  }
  const recentRuns=runs.slice(0,14);
  const selectPanel=(next:View)=>setView(next);
@@ -100,7 +101,7 @@ export default function CerebroOperativeCockpitV3({
   }
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
- const canSend=snapshot.ready&&!snapshot.sending;
+ const canSend=scopeCanExecute&&snapshot.ready&&!snapshot.sending;
  return <main className={`op3-root op3-${status}`} aria-label="Centro de mando operativo (ensayo)">
   <div className="op3-backplate" aria-hidden="true"/>
   <div className="op3-wrapper">
@@ -158,19 +159,19 @@ export default function CerebroOperativeCockpitV3({
      </div>:null}
      <div className="op3-command-copy"><h1>{chatLines.length?'Continuar conversación':'¿Qué necesitas hacer?'}</h1>
       <p>Pregunta, investiga, ejecuta o supervisa. Un punto de entrada para todo.</p>
-      <span role="status" aria-live="polite" className="op3-voice-status">{statusText}</span>
+      <span role="status" aria-live="polite" className="op3-voice-status">{scopeCanExecute?statusText:'Consulta sin permisos operativos en esta empresa'}</span>
      </div>
      <form className="op3-input-frame" onSubmit={handleSubmit}>
-      <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder="Escribe o habla aquí…"
+      <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder={scopeCanExecute?'Escribe o habla aquí…':'Empresa sin acceso verificado · selecciona Fénix'}
        value={composer} onChange={e=>onComposerChange(e.target.value)}
-       onKeyDown={keydown} rows={1} disabled={!snapshot.ready||snapshot.sending}/>
+       onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending}/>
       <button type="button" className={`op3-icon-button ${dictating?'is-active':''}`}
        title={dictating?'Detener dictado':'Dictar'} aria-label={dictating?'Detener dictado':'Dictar'}
-       disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!dictationSupported}
+       disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||snapshot.voiceActive||!dictationSupported}
        onClick={onToggleDictation}>{dictating?<Square size={17}/>:<Mic size={19}/>}</button>
       <button type="button" className={`op3-icon-button ${snapshot.voiceActive?'is-active':''}`}
        title="Conversación por voz" aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'}
-       aria-pressed={snapshot.voiceActive} disabled={!snapshot.ready||snapshot.sending||dictating}
+       aria-pressed={snapshot.voiceActive} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||dictating}
        onClick={onToggleVoice}><AudioLines size={19}/></button>
       <button className="op3-submit" aria-label="Enviar instrucción" type="submit"
        disabled={!canSend||!composer.trim()}><Send size={18}/></button>
