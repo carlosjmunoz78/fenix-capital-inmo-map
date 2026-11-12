@@ -5,6 +5,7 @@ import { answerCerebroNaturalQuery } from "./conversation_intents.ts";
 import { answerWithVerifiedActivity } from "./activity_reader.ts";
 import { resolveOwnerCapabilities } from "./owner_access.ts";
 import { readOwnerRegistryLive } from "./owner_registry_live.ts";
+import { readFactoryGitOpsCatalog } from "./owner_factory_gitops.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -960,8 +961,7 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
-   // Registry queries are read-only and resolve through the same owner-only server
-   // as the API route. Never pretend that the GitOps Factory is already linked.
+   // Registry and FACT GitOps metadata use the same owner guard; no write permissions.
    if(/^(?:que|cuales|cuantos|dime|lista|listado|muestrame|muestra|ensename|ver|mostrar|estado|mis|todas|todos)\b/.test(text)&&
       /\b(empresas|proyectos|motor(?:es)?)\b/.test(text) &&
       !/\b(crea|crear|borra|borrar|elimina|publica|activa|modifica)\b/.test(text)){
@@ -976,13 +976,17 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
      const companies=registry.companies.map((x:any)=>x.company_id).join(", ")||"ninguna";
      const projects=registry.projects.map((x:any)=>x.project_id+" ("+x.project_status+")").join(", ")||"ninguno registrado en esta fuente";
      const engines=registry.engines.map((x:any)=>x.engine_id+" ("+x.engine_state+")").join(", ")||"ninguno registrado en esta fuente";
+     const factory=await readFactoryGitOpsCatalog({actor:verifiedOwnerActor});
+     const factoryStatus=factory.status==="OK"
+       ?(" FACT-001 GitOps: "+factory.catalog.length+" motores en catálogo de diseño y "+
+         factory.scaffolded.length+" directorios de motores creados, sin afirmar que estén operativos.")
+       :" FACT-001 GitOps no se ha podido verificar en esta consulta.";
      return {status:"OK",intent:"owner_registry_live",executed:false,
        message:"En el contexto propietario verificado he consultado los registros actuales. Empresas vinculadas: "+
          companies+". Proyectos: "+projects+". Estados de motores registrados: "+engines+
-         ". FACT-001 está localizado en GitHub, pero su catálogo GitOps todavía no está conectado a este Gateway. "+
-         "El registro PREPROD de empresas y el de proyectos no representan por sí solos todas tus empresas y proyectos.",
+         "."+factoryStatus+" El registro PREPROD de empresas y el de proyectos no representan por sí solos todas tus empresas y proyectos.",
        source:{system:"SUPABASE_REGISTRY_READ_ONLY",observed_at:registry.observed_at,
-         tables:registry.source_tables},factory:registry.factory};
+         tables:registry.source_tables},factory:{status:factory.status,source_status:factory.source_status,catalog_count:factory.catalog?.length??0,scaffold_count:factory.scaffolded?.length??0}};
    }
    const liveActivityAnswer=await answerWithVerifiedActivity(req,message);
    if(liveActivityAnswer)return liveActivityAnswer;
@@ -1216,6 +1220,28 @@ export default {
         requestedCompany:new URL(req.url).searchParams.get("company_id")
       }));
     }
+    if(req.method==="GET"&&suffix==="owner-factory"){
+      const factory=await readFactoryGitOpsCatalog({actor:owner.actor});
+      return json(req,factory.status==="OK"?200:503,factory);
+    }
+    if(req.method==="GET"&&suffix==="owner-universe"){
+      const url=new URL(req.url);
+      const company=url.searchParams.get("company_id")??"all";
+      const project=url.searchParams.get("project_id");
+      // One shared verified owner identity; each source returns independent evidence.
+      const [registry,factory]=await Promise.all([
+        liveOwnerRegistry(owner.actor,company,project),
+        readFactoryGitOpsCatalog({actor:owner.actor})
+      ]);
+      return json(req,registry.status==="OK"&&factory.status==="OK"?200:207,{
+        status:registry.status==="OK"&&factory.status==="OK"?"OK":"PARTIAL",
+        executed:false,live_writes:false,prod_execution_enabled:false,
+        owner_scope:"SERVER_VERIFIED_FENIX_ONLY",
+        registry,factory,
+        source_status:{registry:registry.source_status??"UNVERIFIED",
+          factory:factory.source_status??"UNVERIFIED"}
+      });
+    }
     if(req.method==="GET"&&suffix==="owner-registry"){
       const url=new URL(req.url);
       const registry=await liveOwnerRegistry(owner.actor,
@@ -1247,6 +1273,6 @@ export default {
       return json(req,200,{status:"OK",preferences:current.preferences});
     }
 
-    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","owner-capabilities","owner-registry","chat"]});
+    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","owner-capabilities","owner-registry","owner-factory","owner-universe","chat"]});
   }),
 };
