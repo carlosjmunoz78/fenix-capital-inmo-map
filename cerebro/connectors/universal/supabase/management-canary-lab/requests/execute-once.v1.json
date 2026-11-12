@@ -9,5 +9,5 @@
   "target_function": "cerebro-fact001-sb-mgmt-canary-lab",
   "max_cost_eur": 0,
   "request_id": "FACT001-SBMGT-CANARY-20261112",
-  "action": "OWNER_AUTHORIZED_ONCE"
+  "action": "OWNER_AUTHORIZED_ONCE_V2"
 }

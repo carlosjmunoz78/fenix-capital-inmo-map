@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 const path='cerebro/connectors/universal/supabase/management-canary-lab/requests/execute-once.v1.json';
 const order=JSON.parse(fs.readFileSync(path,'utf8'));
-const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',source:'owner_order',target_project:'cluhljgonannaafpmblx',target_function:'cerebro-fact001-sb-mgmt-canary-lab',max_cost_eur:0,request_id:'FACT001-SBMGT-CANARY-20261112',action:'OWNER_AUTHORIZED_ONCE'};
+const fixed={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',source:'owner_order',target_project:'cluhljgonannaafpmblx',target_function:'cerebro-fact001-sb-mgmt-canary-lab',max_cost_eur:0,request_id:'FACT001-SBMGT-CANARY-20261112',action:'OWNER_AUTHORIZED_ONCE_V2'};
 if(JSON.stringify(order)!==JSON.stringify(fixed))throw Error('OWNER_ORDER_DENIED');
 const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-sb-mgmt-owner-lab/once';
 const audience='cerebro-fact001-sb-mgmt-owner-lab-20261112';
@@ -33,7 +33,8 @@ const results=[];
 let last=null,created=false,completed=false;
 async function verified(step,expectedSha=null,expectedVersion=null){
  const res=await call(step,expectedSha,expectedVersion,await jwt());
- if(res.http!==200||res.body.status!=='COMPLETED'||res.body.step!==step){
+ const expectedStatuses={preflight:'ABSENT_VERIFIED',create:'CREATE_VERIFIED',update:'UPDATE_VERIFIED',restore:'RESTORE_SOURCE_DEPLOYED',delete:'DELETE_VERIFIED',verify_absent:'ABSENT_VERIFIED'};
+ if(res.http!==200||res.body.status!==expectedStatuses[step]||res.body.step!==step){
   console.log('CEREBRO_SUPABASE_STEP_'+step+'_HTTP='+res.http);
   console.log('CEREBRO_SUPABASE_ERROR_'+step+'='+String(res.body.code||res.body.status||'UNKNOWN').replace(/[^A-Z0-9_]/g,''));
   throw Error('SBMGT_STEP_'+step+'_FAILED');
