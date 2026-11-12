@@ -19,6 +19,30 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await page.goto('/cerebro?section=operativa',{waitUntil:'domcontentloaded'});
  const operative=page.locator('.operativa-premium');
  await expect(operative).toBeVisible();
+ // Regression for the user's captured overlap: the five-tab bar must never sit
+ // across the Operativa chat input. Test old/default UI, not only V3 preview.
+ const menu=page.locator('.cerebro-interface-bar');
+ await expect(menu).toHaveCSS('position','relative');
+ const initialGeometry=await page.evaluate(()=>{
+  const nav=document.querySelector('.cerebro-interface-bar')?.getBoundingClientRect();
+  const stage=document.querySelector('.cerebro-interface-stage')?.getBoundingClientRect();
+  return {navBottom:nav?.bottom??Infinity,stageTop:stage?.top??-Infinity};
+ });
+ expect(initialGeometry.navBottom).toBeLessThanOrEqual(initialGeometry.stageTop+1);
+ await page.setViewportSize({width:390,height:844});
+ const globalMenu=page.getByRole('navigation',{name:'Interfaces'});
+ for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
+  const item=globalMenu.getByRole('button',{name:new RegExp(name,'i')});
+  await expect(item).toBeVisible();
+  const box=await item.boundingBox();
+  expect(box).not.toBeNull();
+  expect((box?.x??-10)).toBeGreaterThanOrEqual(-1);
+  expect((box?.x??500)+(box?.width??999)).toBeLessThanOrEqual(391);
+ }
+ await expect(operative.getByRole('textbox',{name:'Mensaje para Jarvis'})).toBeVisible();
+ await page.screenshot({path:'test-results/operativa-legacy-nav-mobile.png',animations:'disabled'});
+ await page.setViewportSize({width:1280,height:720});
+
  await expect(page.locator('.jarvis-work')).toHaveCount(0);
  await expect(operative.getByText('Ahora',{exact:true}).first()).toBeVisible();
  await expect(operative.getByRole('heading',{name:'Hay trabajo en marcha.'})).toBeVisible();
