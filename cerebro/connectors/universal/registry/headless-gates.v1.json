@@ -716,6 +716,19 @@
         "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115495388",
         "commercial_domains_tested": 0,
         "generic_team_grant": "PENDING"
+      },
+      "functional_lab_acceptance_20261112": {
+        "state": "VERIFIED_LAB_SCOPED_CAPABILITY",
+        "basis": "Real independent OIDC and Vault service signed Vercel project GET/PATCH framework update/rollback/readback, 4/4 final successful LAB operations",
+        "evidence_runs": [
+          43053945817,
+          43054170024,
+          43054365439,
+          43054646304
+        ],
+        "excluded": "Content deployments, domains and global projects permissions remain outside proven scope",
+        "console_dependency": false,
+        "full_universal": false
       }
     },
     {
@@ -891,6 +904,13 @@
           "app_edge_wordpress_consumers": "NOT_FULLY_MAPPED",
           "important": "Name search is not a complete application caller inventory; SECURITY DEFINER may have internal auth guards not audited"
         }
+      },
+      "functional_lab_acceptance_20261112": {
+        "state": "PARTIAL_LAB_PROVEN_READ_AND_ONE_SHOT_DELETE_ONLY",
+        "basis": "Independent OIDC and Vault-backed read inventory; one-off isolated Edge Function delete with provider 404 verified",
+        "excluded": "Persistent signed create/update management adapter, safe isolated CRUD, rollback, and PROD policies not verified",
+        "console_dependency": false,
+        "full_universal": false
       }
     },
     {
@@ -1491,6 +1511,13 @@
         "other_repo_writes": false,
         "subscribed_extra_eur": 0,
         "next_block": "EXISTING_GITHUB_APP_ADMIN_SCOPE_OWNER_AUTHORIZATION_AND_VAULT_BACKEND_PAIRING"
+      },
+      "functional_lab_acceptance_20261112": {
+        "state": "VERIFIED_LAB_SCOPED_CAPABILITY",
+        "basis": "Real repository-scoped file and branch CRUD, Pull Requests and OIDC GitHub Actions operation verified",
+        "excluded": "Global repository/org creation and administration blocked by scope; durable cross-repo autonomy not proven",
+        "console_dependency": false,
+        "full_universal": false
       }
     }
   ],
