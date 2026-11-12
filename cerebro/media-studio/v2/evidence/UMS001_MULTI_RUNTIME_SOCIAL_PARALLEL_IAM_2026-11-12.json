@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-12",
+  "workers": {
+    "cerebro-fact001-gateway-lab-eu-20261109": {
+      "flags": [
+        {
+          "name": "CLOUDFLARE_API_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "GATEWAY_ENABLED",
+          "value": "false"
+        },
+        {
+          "name": "UMS001_PRIVATE_BINDING_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "UMS001_QUEUE_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "UNIVERSAL_IMAGE_RUNTIME_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "UNIVERSAL_RUNTIME_IAM_ENABLED",
+          "value": "false"
+        }
+      ],
+      "secrets": [
+        "CEREBRO_RUNTIME_CALLER_TOKEN",
+        "FACT_EVENT_SIGNING_KEY",
+        "GATEWAY_CALLER_TOKEN",
+        "UMS001_CALLER_TOKEN"
+      ],
+      "services": [
+        {
+          "name": "UMS001_RUNTIME_BROKER",
+          "target": "cerebro-ums001-universal-runtime-broker-lab-eu"
+        },
+        {
+          "name": "UMS_PRODUCER",
+          "target": "cerebro-ums001-producer-private-gateway-lab-eu"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      }
+    },
+    "cerebro-ums001-social-creative-bridge-lab-eu": {
+      "flags": [
+        {
+          "name": "SOCIAL_BRIDGE_ENABLED",
+          "value": "true"
+        },
+        {
+          "name": "SOCIAL_UNIVERSAL_IAM_ENABLED",
+          "value": "false"
+        }
+      ],
+      "secrets": [
+        "SOC_ENGINE_TOKEN"
+      ],
+      "services": [
+        {
+          "name": "FACT_GATEWAY",
+          "target": "cerebro-fact001-gateway-lab-eu-20261109"
+        },
+        {
+          "name": "UNIVERSAL_MEDIA",
+          "target": "cerebro-ums001-owner-access-gateway-lab-eu"
+        }
+      ],
+      "subdomain": {
+        "enabled": false,
+        "previews_enabled": false
+      }
+    }
+  },
+  "registration": {
+    "soc001": "ACTIVE in signed factory LAB Vault",
+    "runtime_secret": "NOT_INSTALLED_SECURITY_CONTROL_BLOCK",
+    "factory_runtime": "GREEN_E2E",
+    "social_legacy": "CONSERVE",
+    "social_universal": "PARALLEL_OFF"
+  },
+  "publication": false,
+  "prod_promoted": false
+}
