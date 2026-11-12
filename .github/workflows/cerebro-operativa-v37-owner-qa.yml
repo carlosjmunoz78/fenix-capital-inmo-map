@@ -26,3 +26,5 @@ jobs:
         run: node --test tests/cerebro-owner-registry-live.test.mjs
       - name: 'FACT-001 GitOps public catalog and unified owner Gateway gates'
         run: node --test tests/cerebro-owner-factory-gitops.test.mjs
+      - name: 'FACT-001 real public GitOps read smoke (no credentials)'
+        run: node tests/cerebro-owner-factory-public-source.smoke.mjs
