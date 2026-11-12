@@ -29,7 +29,7 @@ export function classifyActivityQuestion(message:string):Kind|null{
  return null;
 }
 function validRun(r:ActivityRun){
- return Number.isSafeInteger(r?.run_id)&&r.run_id>0&&typeof r.workflow_name==="string"&&r.workflow_name.length<=250&&typeof r.status==="string"&&["fenix",undefined].includes(r.company_id)&&(!r.source||r.source==="GITHUB_ACTIONS")&&String(r.html_url??"").startsWith("https://github.com/"+REPO+"/actions/runs/");
+ return Number.isSafeInteger(r?.run_id)&&r.run_id>0&&typeof r.workflow_name==="string"&&r.workflow_name.length<=250&&typeof r.status==="string"&&r.company_id==="fenix"&&r.source==="GITHUB_ACTIONS"&&String(r.html_url??"").startsWith("https://github.com/"+REPO+"/actions/runs/");
 }
 function unavailable(reason:string){
  return{status:"ERROR",intent:"work_activity_unavailable",executed:false,message:"No puedo verificar ahora el estado de los trabajos desde la fuente autenticada. Consulta el indicador y la hora de última lectura en Operativa; no voy a inventar cifras ni resultados.",reason,evidence_mode:"SOURCE_NOT_VERIFIED"};
