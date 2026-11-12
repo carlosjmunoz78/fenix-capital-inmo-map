@@ -1374,6 +1374,29 @@
         "sync_provider_execution": "OFF",
         "queue_provider_writes": "OFF",
         "next_block": "NOTION_INDEPENDENT_PERSISTENT_OPERATOR_DURABLE_LEDGER_PER_PAGE_OWNER_AND_ROLLBACK"
+      },
+      "capability_acceptance_20261112": {
+        "scope": "CONNECTOR_FUNCTIONALITY_ONLY_NO_CONSOLE",
+        "status": "VERIFIED_BASIC_CAPABILITIES",
+        "verified_features": [
+          "independent_vault_service_identity",
+          "signed_owner_orders",
+          "read_inventory",
+          "isolated_create_update_delete",
+          "real_AES256GCM_content_backup",
+          "private_drive_offsite_SHA256_READBACK",
+          "D1_CAS_100_V4"
+        ],
+        "real_backup_coverage_objects": 100,
+        "total_indexed_objects_at_baseline": 6632,
+        "execution_orchestration": "NOT_CERTIFIED",
+        "full_disaster_recovery": "NOT_CERTIFIED",
+        "independent_key_escrow": "PENDING",
+        "comment_media_coverage": "PENDING",
+        "full_workspace_export": "NOT_REQUIRED_FOR_CONNECTOR_BASIC_VALIDATION",
+        "parallel_notion_work": "CONTINUES_UNCHANGED",
+        "obsolete_plan_retry": "STOPPED_AFTER_INDEX_DRIFT",
+        "rationale": "Owner requested stop exhaustive tests; capability already physically verified on real content. Formal FULL autonomous production recovery remains outside this limited acceptance."
       }
     },
     {

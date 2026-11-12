@@ -67,7 +67,6 @@ jobs:
           if-no-files-found: warn
           retention-days: 90
   encrypt-next-100-125:
-    permissions: {contents: read, id-token: write, actions: read}
     if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH_ENGINE_100_125_ONCE_20261112')
     runs-on: ubuntu-latest
     timeout-minutes: 30
