@@ -15,7 +15,7 @@ const EXPECTED_PAYLOAD_KEYS=[...Object.keys(SCOPE),'request_id','order_id','issu
  'issued_at','expires_at','nonce'];
 // Single immutable canary; do not authorize any other order even with a
 // valid signature/key. Multi-order autonomy requires a separate audited policy.
-export const EXPECTED_ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261116';
+export const EXPECTED_ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261117';
 export const EXPECTED_REQUEST_ID='UMS001-SENDER-REQ-AUTOSIGNED20261112';
 const HASH=/^[a-f0-9]{64}$/;
 const NONCE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
