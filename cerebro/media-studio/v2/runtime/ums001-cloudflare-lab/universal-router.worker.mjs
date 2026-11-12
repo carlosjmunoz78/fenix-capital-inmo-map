@@ -146,7 +146,7 @@ export default {
        // Additive LAB-only image bridge. Preserve existing ledger and HMAC RPC flag.
        if(env.IMAGE_BRIDGE_ENABLED==='true'&&order.asset_kind==='IMAGE'&&
           order.rights_profile==='SYNTHETIC_ORIGINAL'&&order.format?.output_mime==='image/jpeg'&&
-          order.format?.width_px===512&&order.format?.height_px===512&&
+          order.format?.width_px===1024&&order.format?.height_px===1024&&
           order.budget?.max_additional_cost_eur===0&&order.budget?.publish_requested===false){
          await env.IMAGE_JOB_QUEUE.send(order);
          await env.AUDIT_KV.put('meta/ums001-universal-image-dispatch/v1/'+order.request_id+'/'+order.item_id,

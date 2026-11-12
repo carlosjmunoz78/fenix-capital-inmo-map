@@ -24,7 +24,7 @@ function normalize(i){
  item_id:i.item_id,consumer_engine_id:'SOC-001',channel_id:i.platform_id,placement:'FEED',
  brief_ref:'cerebro://briefs/ums001/'+i.request_id,
  format:{profile_id:i.platform_id==='INSTAGRAM'?'IG_FEED_LAB_PREVIEW':'FB_FEED_LAB_PREVIEW',
- width_px:512,height_px:512,duration_seconds:null,output_mime:'image/jpeg'},
+ width_px:1024,height_px:1024,duration_seconds:null,output_mime:'image/jpeg'},
  rights_profile:'SYNTHETIC_ORIGINAL',priority:'NORMAL',requested_at_utc:new Date().toISOString(),
  deadline_utc:null,policy_version:'ums001-policy-v1',
  budget:{max_additional_cost_eur:0,max_attempts:1,prepaid_only:true,
