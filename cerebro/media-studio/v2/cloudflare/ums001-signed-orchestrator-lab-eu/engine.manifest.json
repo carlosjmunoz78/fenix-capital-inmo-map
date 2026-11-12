@@ -4,7 +4,7 @@
   "engine_id": "UMS-001",
   "environment": "LAB",
   "component_id": "UMS001_ED25519_SCHEDULED_ORCHESTRATOR_V0",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "status": "DEPLOYED_INERT_SECURITY_KEY_PROVISION_BLOCKED",
   "worker": {
     "name": "cerebro-ums001-signed-orchestrator-lab-eu",
@@ -15,7 +15,9 @@
     "workers_dev": false,
     "preview_urls": false,
     "public_routes": [],
-    "cron_count": 0
+    "cron_count": 0,
+    "repository_hardening_deployed_to_cloudflare": false,
+    "physical_cloudflare_version_status": "PRIOR_INERT_DEPLOYMENT; HARDENED_GITHUB_CANDIDATE_NOT_DEPLOYED"
   },
   "event": {
     "source_type": "Cloudflare Worker native scheduled",
@@ -46,7 +48,9 @@
     "secret_provisioned": false,
     "security_platform_blocks_chat_side_key_install": true,
     "private_key_logged": false,
-    "key_id": "UMS001-LAB-ORCH-ED25519-20261112-V1"
+    "key_id": "UMS001-LAB-ORCH-ED25519-20261112-V1",
+    "missing_key_no_longer_claims_one_shot": true,
+    "private_key_preflight_before_KV_claim": true
   },
   "bindings": {
     "queue_name": "cerebro-ums001-image-signed-command-lab-eu",
@@ -57,8 +61,8 @@
     "kv_data_jurisdiction": "eu"
   },
   "tests": {
-    "CI_run_id": 43126372664,
-    "all_tests_passed": 128,
+    "CI_run_id": 43166594450,
+    "all_tests_passed": 133,
     "failed": 0,
     "physical_scheduled_signed_delivery_verified": false
   },
