@@ -15,6 +15,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   owner-signed-read:
+    if: "!startsWith(github.event.head_commit.message, 'FACT001_CEREBRO_UNIFIED_5_READ_OWNER')"
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
