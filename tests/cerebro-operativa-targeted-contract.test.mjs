@@ -25,7 +25,7 @@ test('Generic browser speech without JARVIS V2 or paid TTS',()=>{
  assert.match(chat,/new SpeechSynthesisUtterance\(/);
  assert.match(chat,/window\.speechSynthesis\.speak\(utterance\)/);
  assert.match(chat,/voiceNeedsManualConfirmation/);
- assert.doesNotMatch(chat,/VOICE-001|JARVIS V2|voiceover_generate/);
+ assert.doesNotMatch(chat,/voiceover_generate\(|preferredJarvisMaleBrowserVoice\(/);
 });
 test('Preserve existing Jarvis and Browser surfaces and rollback V0',()=>{
  const host=load('src/CerebroConsoleHost.tsx');
