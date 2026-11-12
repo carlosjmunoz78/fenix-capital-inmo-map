@@ -757,7 +757,9 @@
         "independent_service_identity",
         "owner_order_headless",
         "inventory_read",
-        "isolated_lab_delete"
+        "isolated_lab_delete",
+        "isolated_lab_create",
+        "isolated_lab_update"
       ],
       "evidence": [
         "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42816960750",
@@ -767,19 +769,19 @@
         "Supabase live pg_catalog/grant read-only audit 2026-11-11; get_advisors officially confirmed rls_disabled_in_public 8 ERROR and security_definer_view 3 ERROR; none of these existing privileges modified."
       ],
       "gaps": [
-        "Scoped Management PAT in Vault; shared read-only broker operational",
-        "One-off Edge delete proved but general management write adapter removed after cleanup",
-        "No standalone persistent write broker, PROD policy or autonomous queue",
-        "Both Supabase projects are existing protected resources; no disposable isolated Supabase project, so universal writes must not be tested on them until full dependency contract/backups/rollback; do not create paid project without cost approval.",
-        "HUMAN_REQUIRED HIGH_RISK: 8 SEO tables public schema RLS OFF and anon/authenticated SELECT/INSERT/UPDATE/DELETE privileges true; audit callers and API exposure then backup and controlled RLS/GRANT remediation. NO change applied."
+        "Supabase Management API synthetic Edge canary lifecycle create/update/source-restore/delete VERIFIED physically with CEREBRO own signed Vault-backed service; global management still scoped",
+        "No durable general job queue and ownership registry for Supabase management; the one-shot owner-signed LAB operator is intentionally fixed to one canary slug",
+        "Other existing Edge Functions, Auth, Storage, SQL and PROD customer resources remain protected, not covered by general write scope",
+        "Backup/restore of existing critical resources, cost metering, broader least-privilege policy, autonomous promotion and CEREBRO Console are separate pending gates",
+        "HUMAN_REQUIRED HIGH_RISK remains for the 8 previously documented SEO tables RLS OFF; no permissions or data modified"
       ],
       "verification": {
         "independent_service_identity": "VERIFIED",
         "owner_order_headless": "VERIFIED",
         "autonomous_queue": "PENDING",
         "inventory_read": "VERIFIED",
-        "isolated_lab_create": "PENDING",
-        "isolated_lab_update": "PENDING",
+        "isolated_lab_create": "VERIFIED",
+        "isolated_lab_update": "VERIFIED",
         "isolated_lab_delete": "VERIFIED",
         "backup_and_rollback": "PENDING",
         "cost_guard_verified": "PENDING",
@@ -797,11 +799,11 @@
         "headless_routes": "EXISTING_READ_ONLY",
         "edge_function_lifecycle": "HISTORIC_ISOLATED_DELETE_VERIFIED",
         "auth_storage_db_safe_write": "NOT_TESTED",
-        "backend_sidecar_crud": "NOT_DEPLOYED",
+        "backend_sidecar_crud": "VERIFIED_CEREBRO_SIGNED_ONE_SYNTHETIC_CANARY_ONLY",
         "owner_jwt_canary": "PENDING",
         "customer_data_writes": 0,
         "additional_subscription_eur": 0,
-        "next_block": "SAFE_PRIVATE_ISOLATED_SUPABASE_PREVIEW_FIRST; SIGNED_CREATE_UPDATE_ROLLBACK_LAB_NOT_YET_PHYSICAL"
+        "next_block": "SCOPED_OPERATOR_GENERALIZATION_WITH_OWNERSHIP_LEDGER; KEEP_EXISTING_RESOURCES_PROTECTED"
       },
       "live_inventory_20261111": {
         "state": "READ_ONLY_VERIFIED_NO_WRITES",
@@ -925,11 +927,36 @@
         }
       },
       "functional_lab_acceptance_20261112": {
-        "state": "PARTIAL_LAB_PROVEN_READ_AND_ONE_SHOT_DELETE_ONLY",
-        "basis": "Independent OIDC and Vault-backed read inventory; one-off isolated Edge Function delete with provider 404 verified",
-        "excluded": "Persistent signed create/update management adapter, safe isolated CRUD, rollback, and PROD policies not verified",
+        "state": "VERIFIED_LAB_SCOPED_CAPABILITY",
+        "scope": "ONE_NEW_SYNTHETIC_EDGE_FUNCTION_ONLY",
+        "identity": "CEREBRO_GITHUB_SIGNED_OIDC_AND_OWN_VAULT_MANAGEMENT_PAT",
+        "owner_authorized": "2026-11-12",
+        "canary_slug": "cerebro-fact001-sb-mgmt-canary-lab",
+        "create_verified": true,
+        "update_verified": true,
+        "source_restore_verified": true,
+        "binary_sha_equal_after_restore": false,
+        "delete_verified": true,
+        "final_provider_listing_absent": true,
+        "negative_tests": {
+          "anonymous_401": true,
+          "forged_401": true,
+          "prod_403": true
+        },
+        "operator_slug": "cerebro-fact001-sb-mgmt-owner-lab",
+        "operator_status": "ACTIVE_v1",
+        "old_broker": "cerebro-fact001-headless-provider-lab_v33_SHA645ae3995fa0cf478d589871f00f029be2ee6bfe6228b2e1a8ef1645b98022ec_UNCHANGED",
+        "evidence": [
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43194932955",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43195194500",
+          "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43195194676"
+        ],
+        "no_client_data_changed": true,
+        "no_existing_function_modified": true,
+        "new_subscriptions_eur": 0,
         "console_dependency": false,
-        "full_universal": false
+        "full_universal": false,
+        "full_backup_and_rollback_pending": true
       },
       "capability_acceptance_20261112": {
         "status": "VERIFIED_LIMITED_CAPABILITIES",
@@ -950,7 +977,7 @@
         "security_notice": "HIGH_RISK_RLS_IN_EXISTING_SEO_SCHEMA_DO_NOT_CHANGE_WITHOUT_DEPENDENCY_GATES"
       },
       "supabase_safe_lifecycle_20261112": {
-        "status": "CODE_CI_VERIFIED_NOT_PHYSICAL",
+        "status": "REAL_SCOPED_OWNER_AUTHORIZED_LAB_CANARY_LIFECYCLE_VERIFIED",
         "repo_commit": "7fe17d01dbe5a5f4991fcc04ba5f79987935e3e2",
         "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43193442313",
         "source": "services/provider-headless-lab/supabase-mgmt-edge-deployment-lab.mjs",
@@ -961,14 +988,16 @@
         ],
         "isolated_preview_exists": false,
         "ownership": "CEREBRO_SIGNED_PRINCIPAL_REQUIRED",
-        "canary_create_verified": false,
-        "canary_update_verified": false,
-        "canary_rollback_verified": false,
-        "execution": "NO_PROVIDER_WRITES",
+        "canary_create_verified": true,
+        "canary_update_verified": true,
+        "canary_rollback_verified": true,
+        "execution": "CEREBRO_SIGNED_VAULT_MANAGEMENT_API_REAL",
         "requirement": "ISOLATED_LAB_PROJECT_AND_CONFIRMED_ADDITIONAL_COST_ZERO",
         "docs": "docs/FACT001_SUPABASE_LAB_LIFECYCLE_READY_NO_PROD_WRITES_2026-11-12.md",
-        "reason": "ONLY_TWO_EXISTING_PROTECTED_PROJECTS_NO_SEPARATE_PREVIEW_BRANCH_AVAILABLE",
-        "next_block": "VERIFY_OR_PROVISION_SEPARATE_ZERO_COST_SUPABASE_LAB_PREVIEW_WITH_OWNER_CONSENT_FOR_ANY_COST_AND_DEPLOY_SIGNED_CEREBRO_ONLY"
+        "reason": "USER_AUTHORIZED_NEW_TEMPORARY_ISOLATED_CANARY_WITHIN_EXISTING_PROJECT; NO_OLD_RESOURCES_TOUCHED",
+        "next_block": "FUTURE_FULL_SUPABASE_PROVIDER_SECURITY_AND_AUDIT_GATES; NO_MORE_LAB_CANARY_NEEDED",
+        "canary_delete_verified": true,
+        "final_canary_absent": true
       }
     },
     {
