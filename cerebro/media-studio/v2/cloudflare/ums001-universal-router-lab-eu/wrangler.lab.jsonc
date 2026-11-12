@@ -1,0 +1,11 @@
+{
+  "name": "cerebro-ums001-universal-router-lab-eu",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-12",
+  "workers_dev": false,
+  "preview_urls": false,
+  "durable_objects": { "bindings": [{"name":"LEDGER","class_name":"MediaJobLedger"}] },
+  "migrations": [{"tag":"v1", "new_sqlite_classes":["MediaJobLedger"]}],
+  "vars": {"GATEWAY_ENABLED":"false","CANARY_ENABLED":"false"},
+  "triggers": {"crons":[]}
+}
