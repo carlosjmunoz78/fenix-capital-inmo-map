@@ -962,10 +962,10 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
 
    // Registry queries are read-only and resolve through the same owner-only server
    // as the API route. Never pretend that the GitOps Factory is already linked.
-   if(/^(?:que|cuales|cuantos|dime|lista|listado|muestrame|muestra|ensename|ver|mostrar|estado|mis|todas|todos)\\b/.test(text)&&
-      /\\b(empresas|proyectos|motor(?:es)?)\\b/.test(text) &&
-      !/\\b(crea|crear|borra|borrar|elimina|publica|activa|modifica)\\b/.test(text)){
-     const selectedCompany=/\\b(?:aion|captacasa)\\b/.exec(text)?.[0]??"all";
+   if(/^(?:que|cuales|cuantos|dime|lista|listado|muestrame|muestra|ensename|ver|mostrar|estado|mis|todas|todos)\b/.test(text)&&
+      /\b(empresas|proyectos|motor(?:es)?)\b/.test(text) &&
+      !/\b(crea|crear|borra|borrar|elimina|publica|activa|modifica)\b/.test(text)){
+     const selectedCompany=/\b(?:aion|captacasa)\b/.exec(text)?.[0]??"all";
      const registry=await liveOwnerRegistry(verifiedOwnerActor,selectedCompany,null);
      if(registry.status!=="OK")
        return {status:registry.status,intent:"owner_registry_live",executed:false,
