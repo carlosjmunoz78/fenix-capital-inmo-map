@@ -90,8 +90,13 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
    return route.fulfill({status:207,headers:cors,body:result({
     status:'PARTIAL',owner_scope:'SERVER_VERIFIED_FENIX_ONLY',
     live_writes:false,prod_execution_enabled:false,
-    registry:{status:'NOT_CONNECTED',source_status:'LIVE_SERVER_READ',
-      companies:[],projects:[],engines:[]},
+    registry:{status:'OK',source_status:'LIVE_SERVER_READ',
+      // A spoofed, undocumented status MUST NOT become an authorization.
+      companies:[{company_id:'aion',environment:'LAB',registry_state:'UNKNOWN',
+       access_status:'EXPERIMENTAL_MEMBERSHIP',prod_authorized:false}],
+      projects:[{company_id:'aion',project_id:'MUST-NOT-DISPLAY',environment:'LAB',
+       project_status:'INTERNAL',access_status:'PROJECT_RECORD_PRESENT_INTEGRATION_UNVERIFIED'}],
+      engines:[]},
     factory:{status:'OK',source_status:'PUBLIC_GITHUB_LIVE',catalog:[],scaffolded:[]}
    })});
   return route.fulfill({status:200,headers:cors,body:result({
@@ -173,6 +178,7 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/cockpit-v3-scope-denied.png',fullPage:true,animations:'disabled'});
  await expect(cockpit.getByText('PRJ-SUPERAGENT-001',{exact:true})).toHaveCount(0);
+ await expect(cockpit.getByText('MUST-NOT-DISPLAY',{exact:true})).toHaveCount(0);
  await cockpit.getByRole('button',{name:'Resumen',exact:true}).click();
  await expect(cockpit.getByText('Actividad sin verificar')).toBeVisible();
  await expect(cockpit.locator('.op3-indicators')).toContainText('—');
