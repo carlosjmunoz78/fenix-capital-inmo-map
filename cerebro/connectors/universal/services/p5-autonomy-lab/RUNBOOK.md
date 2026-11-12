@@ -1,0 +1,5 @@
+# FACT001 P5 Autonomy LAB
+Single private cron-only Cloudflare Worker and single scoped Supabase Edge function with Supabase Vault credentials. One 256-bit random per-run bearer capability; only SHA256 in existing EU D1. No public Worker, no customer data, no provider mutations, cost target zero.
+Initial OFF: Worker binding P5_ENABLED=false, cron empty; D1 registry enabled=0.
+Enable only after physically verifying: CI pass, D1 schema own tables, Worker private, Supabase Edge no credential leakage and invalid-ticket 401, scope/expiry/replay validation, quota one read/day. Never restore whole D1 shared database; only own tables.
+The physical signed 5-provider read run 43196619003 remains evidence for CEREBRO service identity. This scheduled read uses independent registered automation identity and a different one-use D1 capability. GitHub is read via PUBLIC API only, not a private GitHub App token. Future CEREBRO Gateway on-demand general command ingress is a separate gate and MUST NOT be represented as complete.
