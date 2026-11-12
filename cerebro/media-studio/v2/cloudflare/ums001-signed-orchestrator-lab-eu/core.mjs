@@ -48,17 +48,20 @@ export async function runScheduledOnce(event,env){
   return {status:'OUTSIDE_CANARY_WINDOW_NO_SEND',sent:0};
  const prior=await env.ONCE_KV.get(ONCE_KEY,{type:'json'});
  if(prior)return {status:'ONCE_GATE_ALREADY_CLAIMED_NO_SEND',sent:0};
- // Claim first, then sign. On network or state errors no automatic second
- // attempt: terminal review is safer than silently duplicating deliveries.
+ // Cryptographic preflight BEFORE consuming the unique claim:
+ // a missing/malformed signer key must never burn the one-shot gate.
+ // This creates no message, provider call or publishing permission.
+ const nonce=crypto.randomUUID();
+ const payload=buildScheduledPayload(now,nonce);
+ const envelope=await signScheduledPayload(payload,env.ORCH_SIGNER_PRIVATE_PKCS8_BASE64);
+ // Claim first, then QUEUE SEND. On queue/network errors the claim remains
+ // terminal and requires reconciliation rather than blind automatic replay.
  await env.ONCE_KV.put(ONCE_KEY,JSON.stringify({
   company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
   version:'1',status:'CLAIMED',order_id:ORDER_ID,
   triggered_at:new Date(now).toISOString(),
   publication:false,cost_eur:0,video:false
  }));
- const nonce=crypto.randomUUID();
- const payload=buildScheduledPayload(now,nonce);
- const envelope=await signScheduledPayload(payload,env.ORCH_SIGNER_PRIVATE_PKCS8_BASE64);
  await env.SIGNED_COMMAND_QUEUE.send(envelope);
  await env.ONCE_KV.put(ONCE_KEY,JSON.stringify({
   company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
