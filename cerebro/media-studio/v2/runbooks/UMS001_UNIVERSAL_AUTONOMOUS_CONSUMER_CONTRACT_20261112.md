@@ -78,3 +78,11 @@ HECHO: schema, registry, planner, tests, runbook.
 PARCIAL: integraciones históricas de entrada y firma Ed25519 (la firma DIAG03 está validada en LAB, no equivale a canal universal conectado).
 DEFINIDO: FACT-001 consumidor de medios, Social/SEO, nuevos canales y ChatGPT/Console como clientes Gateway.
 PENDIENTE: despliegue universal real y autonomía end-to-end. No afirmar operación completa por pasar tests offline.
+
+## Contrato de eventos de retorno
+
+contracts/media-job-response.v1.schema.json cierra también la **salida**, no solamente la entrada. Todos los motores reciben la misma estructura con:
+
+schema_version, event_id, event_type, company_id, engine_id, environment, version, request_id, origin_engine_id, consumer_engine_id, item_id, idempotency_key, occurred_at_utc, status, asset, exception, policy_version, publication_authorized, additional_cost_eur.
+
+El estado debe coincidir exactamente con el tipo de evento. Antes de una entrega, asset es null; cuando el estado sea DELIVERED, asset incluye private_ref, sha256, mime_type y referencias PRIVADAS a los cuatro comprobantes: QA, derechos, procedencia y entrega firmada. **Las referencias NO prueban por sí solas una firma**: el receptor deberá verificar esas pruebas y sus hashes contra el almacén privado. Ningún evento de esta primera versión concede publicación ni gasto adicional.
