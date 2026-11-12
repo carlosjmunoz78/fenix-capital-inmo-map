@@ -31,7 +31,8 @@ test('CEREBRO is served by the authenticated SPA route, not a shadow static page
   expect(work).toContain("document.querySelector<HTMLTextAreaElement>('.jarvis-conversation .cerebro-chat-form textarea')");
   expect(work).toContain("document.querySelector<HTMLButtonElement>('.jarvis-conversation .cerebro-voice-main')");
   expect(work).toContain("document.querySelector<HTMLButtonElement>('.jarvis-input-tools button[aria-label=\"Añadir archivo\"]')");
-  expect(work.match(/document\.querySelector/g)??[]).toHaveLength(3);
+  expect(work).toContain("document.querySelector<HTMLTextAreaElement>('.jarvis-center-pane .operativa-composer-form textarea')");
+  expect(work.match(/document\.querySelector/g)??[]).toHaveLength(4);
   const embedded=fs.readFileSync('src/JarvisEmbeddedConsole.tsx','utf8');
   expect(embedded).toContain("import CerebroConsoleShell from './CerebroConsoleShell';");
   expect(embedded).toContain('<CerebroConsoleShell key={workspaceKey||\'jarvis-default\'}/>');

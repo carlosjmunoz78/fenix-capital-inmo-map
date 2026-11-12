@@ -199,3 +199,97 @@ test('JARVIS dictation diagnostic explains Chrome microphone permission denial',
  await page.getByRole('button',{name:'Conversación por voz',exact:true}).click();
  await expect(page.getByRole('alert')).toContainText('el navegador no tiene acceso al micrófono');
 });
+
+
+test('JARVIS Work PREPROD · history exposes real runs, search and evidence without voice',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Historial',exact:true}).click();
+ const history=page.getByLabel('Historial de ejecuciones');
+ await expect(history.getByText('Historial recibido · 1 ejecuciones')).toBeVisible();
+ await expect(history.getByText('Workspace QA')).toBeVisible();
+ await expect(history.getByRole('link',{name:'Evidencia'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions');
+ await history.getByRole('textbox',{name:'Filtrar historial'}).fill('sin coincidencias');
+ await expect(history.getByText('Ninguna ejecución coincide con la búsqueda.')).toBeVisible();
+ await history.getByRole('textbox',{name:'Filtrar historial'}).fill('QA-001');
+ await expect(history.getByText('Workspace QA')).toBeVisible();
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test('JARVIS Work PREPROD · project actions draft into visible composer, not hidden transport',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ const composer=page.locator('.jarvis-center-pane .operativa-composer-form textarea');
+ await expect(composer).toBeVisible();
+ await page.getByRole('button',{name:'Editar con Jarvis'}).click();
+ await expect(composer).toHaveValue(/Quiero actualizar el proyecto Auditoría Total/);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Herramientas',exact:true}).last().click();
+ await page.locator('.jarvis-tool-grid button').filter({hasText:'Código'}).click();
+ await expect(composer).toHaveValue(/Trabaja con código para Auditoría Total/);
+ await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toHaveCount(0);
+});
+
+
+test('JARVIS Work PREPROD · engine panel distinguishes observed runs from PROD readiness',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Motores',exact:true}).click();
+ const panel=page.getByLabel('Motores con actividad observada');
+ await expect(panel.getByText('1 motores observados')).toBeVisible();
+ await expect(panel.getByText('QA-001',{exact:true})).toBeVisible();
+ await expect(panel.getByText('fenix · PREPROD · 1 ejecuciones observadas')).toBeVisible();
+ await expect(panel.getByText(/no certifica que el motor esté operativo en PROD/)).toBeVisible();
+ await expect(panel.getByRole('link',{name:'Evidencia'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions');
+ await expectNoHorizontalOverflow(page);
+});
+
+
+test('JARVIS tenant scope · only current-company activity is visible',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-activity-v0/**`,async route=>{
+  const now=new Date().toISOString();
+  const item=(id:number,company:string,engine:string)=>({run_id:id,workflow_name:'QA',workflow_alias:engine,workflow_path:'qa.yml',status:'completed',conclusion:'success',event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions',created_at:now,run_started_at:now,updated_at:now,engine_id:engine,company_id:company,environment:'PREPROD',version:'v1',source:'GITHUB_ACTIONS',provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'ENGINE_ID',progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,progress_provenance:'TERMINAL_STATUS',jobs_provenance:'UNAVAILABLE'});
+  await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'OK',observed_at:now,source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'qa',runs:[item(1,'fenix','QA-001'),item(2,'demo','OTHER-001')]})});
+ });
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await ensureExecutionVisible(page);
+ await page.getByRole('button',{name:'Motores',exact:true}).click();
+ const panel=page.getByLabel('Motores con actividad observada');
+ await expect(panel.getByText('QA-001',{exact:true})).toBeVisible();
+ await expect(panel.getByText('OTHER-001',{exact:true})).toHaveCount(0);
+ await page.getByRole('button',{name:'Historial',exact:true}).click();
+ const history=page.getByLabel('Historial de ejecuciones');
+ await expect(history.getByText('Historial recibido · 1 ejecuciones')).toBeVisible();
+ await expect(history.getByText('OTHER-001',{exact:true})).toHaveCount(0);
+});
+
+
+test('JARVIS Work PREPROD · reconcile submits once through Gateway and displays reply',async({page})=>{
+ await page.setViewportSize({width:1440,height:900});
+ await installIsolatedPreprod(page);
+ let calls=0;
+ await page.route(`${SUPABASE_PROD}/functions/v1/cerebro-console-gateway-v0/chat`,async route=>{
+   calls+=1;
+   const body=route.request().postDataJSON() as {message?:string};
+   expect(body.message).toContain('Reconciliación de Auditoría Total');
+   expect((body as {company_id?:string}).company_id).toBe('fenix');
+   await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({status:'ok',message:'Resultado seguro de reconciliación',executed:false,context_applied:true})});
+ });
+ await page.goto('/cerebro?section=jarvis');
+ await openAuditProject(page);
+ await page.getByRole('button',{name:'Reconciliar',exact:true}).click();
+ await expect(page.getByText('Resultado seguro de reconciliación',{exact:true})).toBeVisible();
+ expect(calls).toBe(1);
+});

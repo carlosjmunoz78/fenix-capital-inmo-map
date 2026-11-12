@@ -3,6 +3,7 @@ import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { authorizedCompanyScope, authorizedCompanies } from "./companyScope.ts";
 
 const ALLOWED_ORIGINS = new Set([
   "https://app.fenixcapital.es",
@@ -1170,6 +1171,7 @@ export default {
       try{body=await req.json()}catch{return json(req,400,{status:"INVALID",message:"JSON inválido.",executed:false})}
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
+      if(!authorizedCompanyScope(obj.company_id))return json(req,403,{status:"FORBIDDEN",reason:"COMPANY_SCOPE_NOT_AUTHORIZED",message:"La empresa solicitada no está autorizada para este Gateway.",executed:false});
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
       return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate,obj.conversation_context));
     }
@@ -1183,12 +1185,13 @@ export default {
     });
     if(suffix==="contract")return json(req,200,CONTRACT);
     if(suffix==="engines")return json(req,200,{engines:ENGINES});
+    if(suffix==="companies")return json(req,200,{status:"OK",companies:authorizedCompanies(),multi_company_enabled:false});
     if(suffix==="preferences"){
       const current=await loadPreferences(req);
       if(!current.ok)return json(req,503,{status:"ERROR",reason:"PREFERENCES_UNAVAILABLE",preferences:current.preferences});
       return json(req,200,{status:"OK",preferences:current.preferences});
     }
 
-    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","chat"]});
+    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","companies","preferences","chat"]});
   }),
 };
