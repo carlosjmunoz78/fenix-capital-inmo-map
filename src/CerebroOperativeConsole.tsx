@@ -1,6 +1,7 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {AudioLines,ChevronDown,ExternalLink,Mic,Send,ShieldCheck,Square,X} from 'lucide-react';
 import CerebroConsoleShell from './CerebroConsoleShell';
+import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
@@ -41,7 +42,7 @@ function WorkRow({run,now,onOpen}:{run:CerebroActivityRun;now:number;onOpen:(run
  </article>;
 }
 
-export default function CerebroOperativeConsole(){
+export default function CerebroOperativeConsole({visualPreview=false}:{visualPreview?:boolean}={}){
  const[composer,setComposer]=useState('');
  const[snapshot,setSnapshot]=useState<CoreSnapshot>(EMPTY);
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
@@ -80,6 +81,18 @@ export default function CerebroOperativeConsole(){
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false)}
  function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
+
+ if(visualPreview)return <CerebroOperativeCockpitV3
+   snapshot={snapshot} composer={composer} onComposerChange={setComposer}
+   onSubmit={()=>submit()} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
+   dictating={dictating} dictationSupported={voiceRecognitionSupported()}
+   dictationError={dictationError} composerRef={composerRef}
+   source={source} observedAt={observedAt} company={company} onCompanyChange={setCompany}
+   runs={filteredRuns} onOpenRun={setSelectedRun}
+  >
+  {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
+   <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
+  </CerebroOperativeCockpitV3>;
 
  return <main className="operativa-premium" aria-label="Operativa">
   <div className="operativa-hud-grid" aria-hidden="true"/>
