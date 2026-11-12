@@ -1,0 +1,75 @@
+name: CEREBRO Operativa · Vercel targeted staging only
+on:
+  push:
+    branches: [fix/cerebro-operativa-legibilidad-20261112]
+permissions: {contents: read}
+concurrency:
+  group: cerebro-operativa-legibilidad-20261112-stage
+  cancel-in-progress: false
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    env:
+      VITE_FENIX_ENV: test
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false, fetch-depth: 0}
+      - name: Assert exact current Vercel source and isolated UI scope
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=bb9aed7ffa3dd9a6f8d38670ebb3eaee514b2542
+          git cat-file -e "$BASE^{commit}"
+          git merge-base --is-ancestor "$BASE" HEAD
+          git diff --name-only "$BASE" HEAD > /tmp/changes
+          while IFS= read -r file; do
+            case "$file" in
+              src/CerebroOperativeConsole.tsx|src/cerebro-operative-console.css|tests/cerebro-operativa-v3-e2e.spec.ts|tests/cerebro-operativa-legibilidad-contract.test.mjs|.github/workflows/cerebro-operativa-legibilidad-qa.yml|.github/workflows/cerebro-operativa-legibilidad-vercel-stage.yml) ;;
+              *) echo "OUT_OF_SCOPE $file" >&2; exit 2 ;;
+            esac
+          done < /tmp/changes
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24', cache: npm}
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build
+      - run: node --test tests/cerebro-operativa-legibilidad-contract.test.mjs
+      - run: npx playwright install chromium
+      - run: npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+  stage-no-domain:
+    needs: qa
+    if: ${{ contains(github.event.head_commit.message, '[STAGE_OPERATIVA_UI]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 24
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Install reviewed Vercel CLI
+        run: npm install --global vercel@48.0.0
+      - name: Pull production settings without public-domain modification
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test "$VERCEL_PROJECT_ID" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects --token "$VERCEL_TOKEN"
+      - name: Stage verified production artifact without public domains
+        shell: bash
+        run: |
+          set -euo pipefail
+          staged="$(vercel deploy --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects --token "$VERCEL_TOKEN")"
+          case "$staged" in https://*.vercel.app) ;; *) echo 'UNEXPECTED_STAGE_URL' >&2; exit 2;; esac
+          echo "STAGED_UI_URL=$staged"
+          echo "STAGED_UI_SHA=$GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "STAGED_UI_URL=$staged" >> "$GITHUB_STEP_SUMMARY"
+          echo "NO_PROMOTION_PERFORMED"
