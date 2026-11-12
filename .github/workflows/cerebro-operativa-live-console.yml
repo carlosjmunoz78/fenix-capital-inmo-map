@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'src/CerebroOperativeConsole.tsx'
+      - 'src/useCerebroOperativaChat.ts'
       - 'src/CerebroConsoleShell.tsx'
       - 'src/JarvisEmbeddedConsole.tsx'
       - 'src/JarvisOperativaComposerPortal.tsx'
