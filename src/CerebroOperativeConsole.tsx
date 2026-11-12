@@ -63,7 +63,13 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
 
  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
  useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else setSource('UNAVAILABLE')};void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)}},[]);
- useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot({ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')})})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
+ useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot(previous=>{
+  const next:CoreSnapshot={ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')};
+  // A DOM mutation is not necessarily a new assistant state: avoid render/observe loops.
+  return previous.ready===next.ready&&previous.sending===next.sending&&previous.voiceActive===next.voiceActive&&
+    previous.voiceListening===next.voiceListening&&previous.voiceSpeaking===next.voiceSpeaking?previous:next;
+ })})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.querySelector<HTMLElement>('.operativa-core-bridge')||document.body,
+  {subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  // Mirror the existing authenticated chat messages as plain text for the V3 view.
  // Never send a second request; DOM is the readonly output of the ONE V0 Gateway.
@@ -88,7 +94,8 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
   };
   inspect();
   const observer=new MutationObserver(inspect);
-  observer.observe(document.body,{childList:true,characterData:true,subtree:true});
+  observer.observe(document.querySelector<HTMLElement>('.operativa-core-bridge')||document.body,
+   {childList:true,characterData:true,subtree:true});
   return()=>{cancelAnimationFrame(raf);observer.disconnect()};
  },[visualPreview]);
  useEffect(()=>{try{window.sessionStorage.setItem('operativa_power_mode',power)}catch{/* optional */}},[power]);
