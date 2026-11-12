@@ -93,3 +93,11 @@ test('Source-specific engine, project and company states do not grant PROD permi
  assert.ok(views.includes('no deben sumarse'));
  assert.ok(views.includes('Sin vínculo verificado'));
 });
+
+test('DOM observation stays inside the existing V0 bridge and unchanged voice state does not trigger render loops',()=>{
+ assert.ok(operative.includes("previous.ready===next.ready&&previous.sending===next.sending"));
+ assert.ok(operative.includes("previous.voiceListening===next.voiceListening&&previous.voiceSpeaking===next.voiceSpeaking?previous:next"));
+ assert.ok((operative.match(/observer\.observe\(document\.querySelector<HTMLElement>\('\.operativa-core-bridge'\)\|\|document\.body/g)||[]).length>=2);
+ assert.ok(operative.includes("setChatMirror(previous=>{"));
+ assert.ok(!operative.includes("observer.observe(document.body,"));
+});
