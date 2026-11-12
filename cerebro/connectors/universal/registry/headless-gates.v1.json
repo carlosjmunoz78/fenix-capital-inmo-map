@@ -476,7 +476,20 @@
         "cross_service_credential_reuse_review": "PENDING",
         "export_locks_d1": "REQUIRES_QUIESCENCE_OR_MAINTENANCE_WINDOW",
         "activated_edge_version": 1,
-        "activated_edge_is_inert": true
+        "activated_edge_is_inert": true,
+        "owner_authorization": "CONFIRMED_REPEATED_2026_11_12",
+        "provider_d1_metadata_verified": {
+          "database_name": "cerebro-fact001-recovery-lab-eu",
+          "database_uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+          "jurisdiction": "eu"
+        },
+        "security_review_gate": "HUMAN_REQUIRED_POLICY_CONFLICT_BEFORE_DEPLOYMENT",
+        "security_gate_runbook": "docs/FACT001_D1_BACKUP_DEPLOYMENT_SECURITY_GATE_2026-11-12.md",
+        "d1_write_token_account_scoped": true,
+        "reuse_d1_write_token_with_gateway": "REVIEW_REQUIRED",
+        "maintenance_window_or_quiescence": "REQUIRED_DUE_TO_EXPORT_LOCK",
+        "deployed_edge_v1_verified_inert": true,
+        "runtime_v2_deployed": false
       },
       "d1_synthetic_offsite_restoration_20261112": {
         "state": "PHYSICAL_INDEPENDENT_OFFSITE_TRANSPORT_AND_RESTORE_VERIFIED_FIXTURE_ONLY",
