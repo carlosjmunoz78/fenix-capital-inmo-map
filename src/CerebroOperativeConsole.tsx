@@ -88,7 +88,7 @@ export default function CerebroOperativeConsole(){
   else setDictationError('No se ha confirmado el envío. Conservo el mensaje para que puedas reintentarlo.');
  }
  async function changePower(next:PowerMode){
-  const accepted=await sendCommand(`Solicito ritmo operativo ${next}. Sin elevar permisos ni costes; explica si el Gateway puede aplicarlo y qué ha cambiado de verdad.`);
+  const accepted=await sendCommand(`Solicito ritmo operativo ${next}. Mantén todas las protecciones, no generes gasto no autorizado. Explica si el Gateway puede aplicarlo y qué ha cambiado de verdad.`);
   if(accepted)setPower(next);
   else setDictationError('No se ha podido solicitar el cambio de ritmo.');
  }
