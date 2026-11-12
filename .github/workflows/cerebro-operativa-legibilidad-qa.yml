@@ -28,7 +28,7 @@ jobs:
           git diff --name-only "$BASE" HEAD > /tmp/operativa-diff
           while IFS= read -r file; do
             case "$file" in
-              src/CerebroOperativeConsole.tsx|src/cerebro-operative-console.css|tests/cerebro-operativa-v3-e2e.spec.ts|tests/cerebro-operativa-legibilidad-contract.test.mjs|.github/workflows/cerebro-operativa-legibilidad-qa.yml) ;;
+              src/CerebroOperativeConsole.tsx|src/cerebro-operative-console.css|tests/cerebro-operativa-v3-e2e.spec.ts|tests/cerebro-operativa-legibilidad-contract.test.mjs|.github/workflows/cerebro-operativa-legibilidad-qa.yml|.github/workflows/cerebro-operativa-legibilidad-vercel-stage.yml) ;;
               *) echo "OUT_OF_SCOPE $file" >&2; exit 2;;
             esac
           done < /tmp/operativa-diff
