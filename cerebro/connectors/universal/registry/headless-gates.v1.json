@@ -1645,7 +1645,7 @@
     "notion_oneoff_write_route": "RETIRED_AFTER_TEST"
   },
   "integration_p5_20261111": {
-    "state": "LAB_CODE_CI_GREEN_NOT_CONNECTED",
+    "state": "PHYSICAL_5_OF_5_CEREBRO_SIGNED_INDEPENDENT_READ_LAB_VERIFIED",
     "module": "services/provider-headless-lab/fact001-dual-read-ingress.mjs",
     "ci_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42991696940",
     "ci_headless_tests_pass": 164,
@@ -1672,7 +1672,23 @@
     "quota": "NO_NEW_SUBSCRIPTIONS; METRICS_PENDING",
     "prod": "OFF",
     "opera_phase": "P6_PARKED_LAST",
-    "next_block": "FACT001_P5_BACKEND_DURABLE_QUEUE_GATEWAY_OAUTH_SERVICE_REAL_DUAL_E2E"
+    "next_block": "FACT001_DURABLE_INTERNAL_AUTOMATION_PRINCIPAL_AND_ATOMIC_QUEUED_DISPATCH_EXISTING_GATEWAY_LAB_WITH_BACKUP_NO_PROD_CHANGE",
+    "real_workflow": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
+    "real_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196521419",
+    "dispatcher_module": "services/five-provider-read-lab/five-provider-read.mjs",
+    "dispatcher_runner": "services/five-provider-read-lab/run-once.mjs",
+    "dispatcher_owner_signed_git_push": true,
+    "physical_reads_all_five": true,
+    "physical_provider_writes": 0,
+    "chatgpt_oauth_used": false,
+    "own_provider_identities": true,
+    "github_repository_scoped_actions_token": true,
+    "action_gateway_automatic_dispatch_connected": false,
+    "durable_queue_atomic_connected": false,
+    "registered_automation_own_credential_verified": false,
+    "console_client_e2e_out_of_scope": true,
+    "cost_subscription_added_eur": 0,
+    "provider_systems_mutated": false
   },
   "execution_without_console": {
     "status": "DEFINED_NOT_OPERATIVE_AS_COMMON_RUNTIME",
@@ -1691,7 +1707,12 @@
     "console_e2e_for_ui": "DEFERRED_NOT_DISCARDED",
     "autonomous_execution": "MUST_BE_PROVEN_PER_PROVIDER",
     "chatgpt_actions": "ONLY_VIA_AUTHORIZED_CONNECTED_PROVIDER_TOOLS",
-    "no_new_subscription_eur": 0
+    "no_new_subscription_eur": 0,
+    "physical_five_read_one_signed_owner_order_20261112": "VERIFIED_LAB",
+    "evidence_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
+    "general_autonomous_on_demand": "NOT_YET_VERIFIED",
+    "reason": "NO_ATOMIC_DURABLE_QUEUE_BOUND_TO_OWN_CEREBRO_GATEWAY_AND_NO_REGISTERED_AUTOMATION_PRINCIPAL_PHYSICALLY_TRUSTED",
+    "no_new_subscriptions": true
   },
   "user_confirmed_next_provider_order_20261111": [
     "cloudflare",
