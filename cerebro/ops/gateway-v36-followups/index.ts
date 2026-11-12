@@ -3,6 +3,7 @@ import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import { answerCerebroNaturalQuery } from "./conversation_intents.ts";
 import { answerWithVerifiedActivity } from "./activity_reader.ts";
+import { resolveOwnerCapabilities } from "./owner_access.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -1171,6 +1172,13 @@ export default {
     const owner=await authorizedOwner(req);
     if(!owner.ok)return json(req,403,{status:"FORBIDDEN",reason:"OWNER_ONLY",message:"CEREBRO Console está reservada al propietario autorizado."});
 
+    if(req.method==="GET"&&suffix==="owner-capabilities"){
+      // Owner identity was verified by authorizedOwner above; the query is not authority.
+      return json(req,200,resolveOwnerCapabilities({
+        actor:owner.actor,
+        requestedCompany:new URL(req.url).searchParams.get("company_id")
+      }));
+    }
     if(req.method==="POST"&&suffix==="chat"){
       let body:unknown;
       try{body=await req.json()}catch{return json(req,400,{status:"INVALID",message:"JSON inválido.",executed:false})}
@@ -1195,6 +1203,6 @@ export default {
       return json(req,200,{status:"OK",preferences:current.preferences});
     }
 
-    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","chat"]});
+    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","owner-capabilities","chat"]});
   }),
 };
