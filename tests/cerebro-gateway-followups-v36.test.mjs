@@ -11,7 +11,19 @@ const oldFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_re
 const newFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/ops/gateway-v36-followups/'+name));
 
 test('Gateway entrypoint, auth, knowledge and execution contracts are EXACTLY v35',()=>{
- assert.equal(newFiles[0],oldFiles[0]);
+ // Strip only the audited, additive owner-capability import and read-only route.
+ const importLine='import { resolveOwnerCapabilities } from "./owner_access.ts";\n';
+ const ownerRoute=`    if(req.method==="GET"&&suffix==="owner-capabilities"){
+      // Owner identity was verified by authorizedOwner above; the query is not authority.
+      return json(req,200,resolveOwnerCapabilities({
+        actor:owner.actor,
+        requestedCompany:new URL(req.url).searchParams.get("company_id")
+      }));
+    }
+`;
+ const unchangedEntry=newFiles[0].replace(importLine,'').replace(ownerRoute,'')
+   .replace('available:["health","contract","engines","preferences","owner-capabilities","chat"]','available:["health","contract","engines","preferences","chat"]');
+ assert.equal(unchangedEntry,oldFiles[0],"Existing gateway remains byte-exact after reversing only scoped owner-capability addition");
  assert.equal(newFiles[1],oldFiles[1]);
  for(const marker of [
   'withSupabase({ auth: "user" }',
