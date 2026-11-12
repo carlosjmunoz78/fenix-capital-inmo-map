@@ -19,7 +19,7 @@ test('recovery is executed as before when P5 is switched off; no additional data
  const r=await composite.fetch(request,env,ctx);
  assert.equal(r.status,404);
  composite.scheduled({scheduledTime:Date.UTC(2026,10,12,10,0)},env,ctx);
- assert.equal(promises.length,2);
+ assert.equal(promises.length,3);
  await Promise.all(promises);
  assert.equal(calls.length,1);
  assert.match(calls[0],/fact001_runner_config_v1/);
