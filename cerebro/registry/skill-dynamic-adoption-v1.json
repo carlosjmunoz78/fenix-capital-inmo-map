@@ -1024,6 +1024,76 @@
       "promoted_at": "2026-11-02T06:54:46.077Z"
     },
     {
+      "candidate_id": "repo:4756dad9ef13e4e98424a290dc09",
+      "technical_name": "alpine",
+      "source_locator": "github://TerminalSkills/skills@42289059901710441bfa8081c08c3a9f36b93f9c/skills/alpine",
+      "pinned_sha": "42289059901710441bfa8081c08c3a9f36b93f9c",
+      "snapshot_sha256": "4756dad9ef13e4e98424a290dc093d03927b8d9683d9afae59a50f9329d7b038",
+      "manifest_sha256": "d9fea95920bd46184fb039f91aaef9eddae39702791f15797cf6d9d97fdd859e",
+      "outcome_hash": "12a154da71a5105be884bd70542bce88aaa7385c0b270d874c1f9770961814c8",
+      "target_engine_bindings": [
+        "APP-001",
+        "ARCH-001",
+        "QA-001",
+        "WAUD-001",
+        "WEB-001"
+      ],
+      "capability_contracts": [
+        {
+          "capability_id": "repo:4756dad9ef13e4e9:cap:1",
+          "technical_name": "alpine",
+          "description": "|",
+          "domains": [
+            {
+              "domain_id": "web-wordpress-frontend",
+              "engine_bindings": [
+                "APP-001",
+                "ARCH-001",
+                "QA-001",
+                "WAUD-001",
+                "WEB-001"
+              ]
+            }
+          ]
+        }
+      ],
+      "closure_summary": {
+        "full_safe_preprod": true,
+        "per_binding_old_vs_new_pass": true,
+        "tribunal_pass": true,
+        "learning_feedback_green": true,
+        "observability_green": true,
+        "finops_green": true,
+        "audit_green": true,
+        "backup_ready": true,
+        "rollback_green": true,
+        "rebuild_green": true,
+        "idempotency_proven": true,
+        "cost_eur": 0,
+        "binding_count": 5
+      },
+      "company_id": "fenix",
+      "environment": "PREPROD",
+      "version": "1.2.0",
+      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
+      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
+      "current_evidence": null,
+      "observed_at": "2026-11-12T19:42:54.889Z",
+      "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
+      "prod_authorized": false,
+      "prod_write_authorized": false,
+      "prod_mutation_authorized": false,
+      "permission_expansion_authorized": false,
+      "external_skill_code_execution": false,
+      "dependency_install_authorized": false,
+      "customer_data_authorized": false,
+      "paid_fallback": false,
+      "spend_authorized": false,
+      "trading_access": false,
+      "additional_cost_eur": 0,
+      "capability_hash": "6342b8686c505bf6789872d561a6873dc36ab603b1f9fa8c3469b0a58e4d7c33"
+    },
+    {
       "candidate_id": "repo:d5ce3f78bf63e730e592b8ed8dbc",
       "technical_name": "alpine",
       "source_locator": "github://TerminalSkills/skills@33b765f0904561257112a98d21df5383a6e77113/skills/alpine",
@@ -17910,11 +17980,11 @@
   ],
   "adoption_skips": [],
   "summary": {
-    "total": 177,
-    "inserted": 0,
+    "total": 178,
+    "inserted": 1,
     "updated": 0,
     "skipped": 0,
-    "pending_canary": 0,
+    "pending_canary": 1,
     "prod_readonly": 177
   }
 }
