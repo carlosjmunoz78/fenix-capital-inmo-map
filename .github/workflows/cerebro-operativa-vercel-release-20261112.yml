@@ -1,0 +1,108 @@
+name: CEREBRO Operativa · Vercel active-base QA and staging
+on:
+  push:
+    branches: [release/cerebro-operativa-vercel-20261112]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-operativa-vercel-active-20261112
+  cancel-in-progress: false
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - name: Assert exact LIVE Vercel source and tiny reviewed change allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          LIVE_BASE=80089fae5930e63ea8d90237522b1fc16c2f6a4a
+          git cat-file -e "${LIVE_BASE}^{commit}"
+          git merge-base --is-ancestor "$LIVE_BASE" HEAD
+          git diff --name-only "$LIVE_BASE" HEAD > /tmp/operativa-only-files
+          while IFS= read -r p; do
+            case "$p" in
+              src/CerebroOperativeConsole.tsx|src/useCerebroOperativaChat.ts|src/CerebroConsoleHost.tsx|src/JarvisVisibleLanguageGuard.tsx|src/cerebro-interface-bar.css|src/cerebro-operative-console.css|src/cerebro-console-host.css|tests/cerebro-operativa-v3-e2e.spec.ts|tests/cerebro-operativa-targeted-contract.test.mjs|.github/workflows/cerebro-operativa-vercel-release-20261112.yml) ;;
+              *) echo "OUT_OF_SCOPE: $p" >&2; exit 2;;
+            esac
+          done < /tmp/operativa-only-files
+          test -z "$(git diff --name-only "$LIVE_BASE" HEAD -- src/CerebroJarvisWorkConsole.tsx src/CerebroBrowserConsole.tsx src/CerebroConsoleShell.tsx src/DetailShell.tsx src/ExpedienteManualPhaseGuard.tsx src/ExpedientesSharedShell.tsx src/expedientePhaseModel.ts src/supabase.ts package.json package-lock.json)"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Compile exact current PROD source + isolated Operativa
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+        run: npm run build
+      - name: Console owner and browser voice contracts
+        run: node --test tests/cerebro-operativa-targeted-contract.test.mjs
+      - run: npx playwright install chromium
+      - name: Desktop browser chat, history, tabs and workflow inspector
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-inert-key
+          VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: |
+          npm run build
+          npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts tests/expedientes-eight-phases.spec.ts tests/expedientes-active-order.spec.ts --project=desktop-chromium --reporter=line
+      - name: Upload failure diagnostics only
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-operativa-vercel-qa-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  stage-vercel-prod-no-domain:
+    needs: qa
+    if: ${{ github.ref == 'refs/heads/release/cerebro-operativa-vercel-20261112' && contains(github.event.head_commit.message, '[STAGE_CEREBRO_OPERATIVA]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    env:
+      VERCEL_ORG_ID: team_qnh6u1Ofy2WPp0MGEKlyMA50
+      VERCEL_PROJECT_ID: prj_4ElVl8e2KzrHS7r5yvBGBban1DXV
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - name: Install previously verified CLI
+        run: npm install --global vercel@48.0.0
+      - name: Verify protected project and load production env
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$VERCEL_TOKEN"
+          test "$VERCEL_PROJECT_ID" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects
+      - name: Stage immutable PRODUCTION artifact without assigning public domains
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          url="$(vercel deploy --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
+          case "$url" in https://*.vercel.app) ;; *) echo "Invalid staging URL" >&2; exit 2;; esac
+          printf 'STAGED_OPERATIVA_VERCEL_URL=%s\n' "$url" >> "$GITHUB_STEP_SUMMARY"
+          echo "STAGED_OPERATIVA_VERCEL_URL=$url"
