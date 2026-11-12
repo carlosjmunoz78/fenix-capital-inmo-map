@@ -20,6 +20,8 @@ jobs:
         run: node --test tests/cerebro-gateway-followup-v37.test.mjs
       - name: 'Owner Access Resolver - tenant denial and read-only contract'
         run: node --test tests/cerebro-owner-access-resolver.test.mjs
+      - name: 'Dynamic company and project scope discovery contract'
+        run: node --test tests/cerebro-owner-scope-registry.test.mjs
       - name: 'Owner authenticated LAB smoke - only if existing secret is configured'
         env:
           OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
