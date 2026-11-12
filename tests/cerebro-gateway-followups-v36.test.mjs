@@ -11,8 +11,13 @@ const oldFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_re
 const newFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/ops/gateway-v36-followups/'+name));
 
 test('Gateway owner auth, knowledge and governed execution remain preserved while read-only registry is additive',()=>{
- const oldAuth=oldFiles[0].match(/async function authorizedOwner\\(req:Request\\)\\{[\\s\\S]*?\\n\\}/)?.[0];
- const newAuth=newFiles[0].match(/async function authorizedOwner\\(req:Request\\)\\{[\\s\\S]*?\\n\\}/)?.[0];
+ const authBlock=(src)=>{
+  const i=src.indexOf("async function authorizedOwner(req:Request){");
+  const next=src.indexOf("\\nasync function ",i+1);
+  return i<0||next<0?"":src.slice(i,next).trim();
+ };
+ const oldAuth=authBlock(oldFiles[0]);
+ const newAuth=authBlock(newFiles[0]);
  assert.ok(oldAuth&&newAuth);
  assert.equal(newAuth,oldAuth,"owner authentication implementation stays byte-exact");
  assert.ok(newFiles[0].includes('readOwnerRegistryLive'));
