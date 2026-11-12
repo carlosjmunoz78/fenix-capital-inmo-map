@@ -93,7 +93,7 @@ export async function readOwnerRegistryLive({
    source_tables:COMPANY_SOURCES.map(x=>x.table),
    counts:source_counts,truncated,
    factory:{engine_id:"FACT-001",repository:"carlosjmunoz78/capital-mapa-pro",
-    branch:"cerebro-engine-factory-v0",integration_status:"GITOPS_ADAPTER_NOT_YET_CONNECTED"},
+    branch:"cerebro-engine-factory-v0",integration_status:"ADAPTER_AVAILABLE_E2E_PENDING"},
    prod_execution_enabled:false,live_writes:false,
    message:"Lectura real de registros existentes. Los proyectos y motores no conectados a ejecución se señalan; ningún dato concede permiso o ejecuta operaciones."};
  }catch{return refused("SOURCE_UNAVAILABLE","REGISTRY_READ_EXCEPTION")}
