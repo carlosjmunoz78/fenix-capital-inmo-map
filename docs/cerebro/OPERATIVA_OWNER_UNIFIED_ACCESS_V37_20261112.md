@@ -70,5 +70,7 @@ Gateway PROD v36 no se ha modificado por esta rama; respaldos exactos v35 consta
 HECHO: PR #56 DRAFT, parche de simplificación v37, contrato Owner Unified Access y prueba aislada sobre código exacto GitHub: **8/8 PASS**.
 HECHO: LAB existente `cerebro-console-gateway-v36-followups-lab` actualizado a **versión 4 ACTIVE** con los cuatro archivos v37 exactos (comparación física GitHub vs Supabase: **4/4**); ninguna función adicional creada.
 HECHO: PROD `cerebro-console-gateway-v0` sigue en **v36 ACTIVE**, y mantiene exactamente los archivos v36. **No** se ha promocionado v37 a PROD.
-POR VERIFICAR: GitHub Actions v37 (no hay resultado confirmado), HTTP E2E owner-only y navegador Opera; el intento HTTP directo desde el canal de consulta no fue accesible. Persistencia tras recarga pendiente.
+HECHO: GitHub Actions QA v37 run [43276664670](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43276664670) **SUCCESS**, incluidos pasos `Existing v35 and v36 regressions` y `Owner follow-up v37 - true simplification and security regression`.
+HECHO: lectura no mutante de la pestaña Operativa real en Opera: la respuesta antigua acaba exactamente en `Pue`, coincidiendo con el código v36 que aplicaba `slice(0,400)`.
+POR VERIFICAR: HTTP E2E autenticado owner-only con v37, prueba en navegador contra v37 (Opera sigue usando PROD v36), memoria tras recarga y revisión final de seguridad/coste antes de promoción. El intento HTTP directo desde el canal de consulta no fue accesible.
 NEXT_BLOCK: CI/HTTP E2E v37 LAB -> verificar memoria y UI reales -> inventario de conectividad (sin repetir auditorías terminadas) -> resolver owner multiempresa -> promoción solo con gates.
