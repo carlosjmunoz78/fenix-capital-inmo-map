@@ -39,3 +39,16 @@ El administrador autorizado puede usar el flujo oficial de Cloudflare **Workers 
 **Coste autorizado:** adicional 0 €; Cloudflare Workers, Queues, KV Free dentro de límites; sin IA de pago, sin crons heredados ni activaciones de billing.
 
 **Nota de autoridad:** el disparo anterior autenticado por cuenta Cloudflare NO prueba identidad de CEREBRO; el objetivo pendiente es `Native Scheduler (Worker LAB) → firma privada Ed25519 → verificador con fingerprint independiente → RPC de Gateway → QA Queue → KV`. No declarar físicamente VERDE sin un mensaje genuino y su readback.
+
+
+## Extensión general IMÁGENES + VÍDEOS · identidad compartida (12/11/2026)
+
+**HECHO EN CÓDIGO / NO INSTALADO EN WORKERS:** se ha añadido `cerebro/media-studio/v2/security/media-command-signature-v1.mjs` como contrato común **Ed25519 CEREBRO MEDIA** para ambos tipos de trabajo. El par de claves **se instala una sola vez**, y el verificador usa `key_id=CEREBRO-UMS001-MEDIA-ED25519-V1`, empresa, entorno, motor, versión, fecha, nonce, medio, capacidad, order_id, request_id y fingerprint SPKI. Pruebas en `tests/media-command-signature-v1.test.mjs`.
+
+**Dos permisos, una sola identidad:** `media.image.qa.metadata` para imágenes; `media.video.qa.metadata` para vídeos. Son **contratos de autentificación de orden y revisión**, NO conceden `generate`, `pay`, `publish`, `deliver` ni `rights_approved`. El receptor debe aplicar lista de capacidades y order_id permitidos; firma válida sola **no** autoriza trabajo.
+
+**Importante:** el nuevo `KEY_ID` define un **contrato futuro compartido**; NO sustituye a la identidad LAB de imagen que aún no está provisionada, ni se añade un secreto inexistente. Los Workers actuales siguen **INERTES** y el permiso de vídeo **no está operativo**. Antes de consumir vídeos se debe conectar el contrato común al runtime aislado de vídeos, con sus propios tests/evaluación/política, e integrar el almacenamiento antirreplay transaccional o limitarse a pruebas idempotentes sin gasto.
+
+**Instalación única posterior:** el administrador autorizado provisiona un único PKCS8 privado en CEREBRO Media Orchestrator; fija su SPKI público y huella SHA-256 independientemente en receptores de imagen y vídeo. Los receptores reciben permisos de medios separados. No hay que generar un par nuevo por vídeo. El procedimiento administrativo Cloudflare y bloqueo vigente están explicados arriba; está prohibido pegar claves en el chat o evitar las restricciones del conector.
+
+**Gate físico pendiente:** generar e instalar la identidad por flujo autorizado, desplegar un Worker orquestador que use el contrato compartido, probar firma de una orden de imagen y de una orden de vídeo sintética; comprobar prohibición cruzada, caducidad y rollback sin publicación ni gasto. Solo entonces registrar `MEDIA_SIGNING_IMAGE_VIDEO_OPERATIONAL=true`.
