@@ -1,7 +1,7 @@
 name: CEREBRO Activity · Feed Trigger QA
 on:
   push:
-    branches: [fix/cerebro-activity-feed-trigger-20261112]
+    branches: [fix/cerebro-activity-feed-trigger-20261112, fix/cerebro-feed-no-cancel-20261112]
 permissions: {contents: read}
 jobs:
   contract:

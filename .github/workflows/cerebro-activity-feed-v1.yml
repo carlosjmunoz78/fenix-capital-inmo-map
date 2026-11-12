@@ -20,7 +20,7 @@ permissions:
 
 concurrency:
   group: cerebro-activity-feed-v1
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   publish:
