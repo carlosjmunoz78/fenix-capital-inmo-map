@@ -29,7 +29,7 @@ const NAV:readonly [View,string,typeof Building2][]=[
  ['evidencias','Evidencias',FileCheck2]
 ];
 const NAMES:Record<Company,string>={
- all:'Todas las entidades',fenix:'Fénix',aion:'AION',captacasa:'CAPTACASA'
+ all:'Empresas vinculadas',fenix:'Fénix',aion:'AION',captacasa:'CAPTACASA'
 };
 const CURRENT=new Set(['in_progress']);
 const PENDING=new Set(['queued','waiting','requested','pending']);
@@ -105,12 +105,12 @@ export default function CerebroOperativeCockpitV3({
   <div className="op3-wrapper">
    <div className="op3-toolbar">
     <div className="op3-selectors">
-     <label><span>ENTIDAD</span><select aria-label="Entidad" value={company}
+     <label><span>EMPRESA</span><select aria-label="Entidad" value={company}
       onChange={event=>onCompanyChange(event.target.value as Company)}>
        {Object.entries(NAMES).map(([key,name])=><option key={key} value={key}>{name}</option>)}
       </select></label>
      <span className="op3-separator" aria-hidden="true"/>
-     <div className="op3-scope"><span>ALCANCE</span><strong>Consulta verificada · Fénix</strong></div>
+     <div className="op3-scope"><span>ALCANCE</span><strong>{company==='all'?'Alcance verificado: Fénix':company==='fenix'?'Fénix · acceso del propietario':NAMES[company]+' · acceso sin verificar'}</strong></div>
     </div>
     <div className="op3-observation"><span className={`op3-dot is-${source.toLowerCase()}`}/>
      <span>{provenance}</span>{observedAt?<time dateTime={observedAt}>{runTime(observedAt)}</time>:null}
@@ -123,7 +123,7 @@ export default function CerebroOperativeCockpitV3({
       <span className="op3-overline"><ShieldCheck size={15}/> ESTADO OBSERVADO</span>
       <span className={`op3-primary-state ${source==='UNAVAILABLE'?'is-unavailable':''}`}>
        {showLive?<CheckCircle2 size={23}/>:<CircleAlert size={23}/>}
-       {showLive?source==='LIVE'?'Fuente conectada':'Fuente en caché':'Sin datos disponibles'}
+       {showLive?source==='LIVE'?'Actividad GitHub disponible':'Actividad GitHub en caché':'Actividad sin verificar'}
       </span>
       <span className="op3-indicators">
        <span><b className="is-blue">{showLive?running:'—'}</b> En ejecución</span>
