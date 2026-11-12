@@ -1,1 +1,15 @@
-{"company_id":"fenix-capital","engine_id":"FACT-001","environment":"LAB","version":"1.0.0","action":"BACKUP_100_125_ONCE","offset":100,"max_items":25,"index_sha256":"205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca","previous_zip_sha256":"8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b","previous_drive_file_id":"1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC","checkpoint_db_id":"bc085807-a6ca-4c56-a288-fe56716fec6f","checkpoint_offset":100,"checkpoint_version":4}
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "action": "BACKUP_100_125_ONCE",
+  "offset": 100,
+  "max_items": 25,
+  "index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+  "previous_zip_sha256": "8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b",
+  "previous_drive_file_id": "1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC",
+  "checkpoint_db_id": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+  "checkpoint_offset": 100,
+  "checkpoint_version": 4
+}
