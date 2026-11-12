@@ -54,6 +54,11 @@ export function answerCerebroNaturalQuery(message:string,context:SafeTurn[]=[]):
   return reply("OK","explain_previous",simplifyPreviousAnswer(prev.text),"CONVERSATION_CONTEXT_BOUNDED");
  }
  if(/\b(aion|captacasa)\b/.test(q)&&/\b(muestrame|mostrar|consulta|consultar|dame|lista|trabajos|expedientes|datos)\b/.test(q))return reply("OK","company_scope","Esta consola todavía no tiene autorización operativa para consultar datos de AION o CAPTACASA. Solo puedo trabajar en el contexto autorizado de Fénix Capital; no voy a mezclar información entre empresas.");
+ // Owner scope is the canonical goal across all interfaces, never a claim that missing adapters are deployed.
+ if(/\b(todo|toda|todas|todos)\b/.test(q)&&/\b(interfaz|interfaces|informacion|sistemas|empresas|motores|hacer|ver|acceso|consultar)\b/.test(q)&&/\b(puedo|puedes|quiero|acceso|ver|hacer|consultar)\b/.test(q)){
+  return reply("NOT_APPLIED","owner_unified_access_scope",
+   "Como propietario, debes poder consultar toda la información autorizada y ordenar cualquier operación de tus empresas desde cualquiera de las interfaces de CEREBRO. Ese es el alcance objetivo común del Gateway, no un límite de cuatro consultas. Hoy todavía faltan conexiones y pruebas para algunos sistemas: no voy a decirte que ya accedo a todo ni que he ejecutado nada. Las acciones disponibles se verifican por identidad, empresa y permisos, con controles legales, de seguridad y coste.");
+ }
  // These ask ABOUT sources, not for any secret or new privileged access.
  if((/\b(puedes|podrias|tienes|eres capaz|capacidad|consultas|accedes|acceso)\b/.test(q)&&/\b(informacion|fuentes|datos|web|internet|documentos|guardad[oa]s?|tiempo real|en vivo)\b/.test(q))||
     /(?:informacion|datos)\s+real(?:es)?\s+o\s+(?:solo|solamente)/.test(q)){
@@ -63,7 +68,7 @@ export function answerCerebroNaturalQuery(message:string,context:SafeTurn[]=[]):
  if((/^(?:que|como|dime|sugiere|propon|recomienda)\b/.test(q)&&/\b(puedes|podrias|hacer|ayudarme|ayuda|tareas?|acciones?|cosas?)\b/.test(q)&&/\b(por mi|para mi|util|ahora mismo|fenix|capital|concretas?)\b/.test(q))||
     /\b(?:tres|3|varias|algunas)\s+(?:tareas|cosas|acciones)\s+(?:concretas|utiles|que puedes hacer)/.test(q)){
   return reply("OK","owner_useful_actions",
-   "Para Fénix Capital puedo ayudarte ahora con tareas concretas de consulta: 1) comprobar cuántos expedientes activos constan en App Fénix; 2) buscar inmobiliarias por localidad, por ejemplo Córdoba; 3) consultar los trabajos de CEREBRO en ejecución, en cola y su resultado reciente, con la hora de los datos; 4) comprobar una próxima publicación social cuando esa fuente autorizada esté disponible. Puedes empezar con «¿Cuántos expedientes activos hay?» o «¿Qué trabajos de CEREBRO están en cola?». No he ejecutado ninguna consulta ni cambio al darte estas opciones.");
+   "Para Fénix Capital puedo ayudarte ahora con tareas concretas de consulta: 1) comprobar cuántos expedientes activos constan en App Fénix; 2) buscar inmobiliarias por localidad, por ejemplo Córdoba; 3) consultar los trabajos de CEREBRO en ejecución, en cola y su resultado reciente, con la hora de los datos; 4) comprobar una próxima publicación social cuando esa fuente autorizada esté disponible. Puedes empezar con «¿Cuántos expedientes activos hay?» o «¿Qué trabajos de CEREBRO están en cola?». Estos son ejemplos, no el límite de CEREBRO: puedes pedirme cualquier consulta u operación y te indicaré qué conexión verificada puede atenderla o qué integración falta. No he ejecutado ninguna consulta ni cambio al darte estas opciones.");
  }
  if(/^(?:que|cuales)\s+(?:funciones|capacidades|herramientas)\s+(?:tienes|hay|estan)\b|(?:que|como)\s+(?:puedo|podemos)\s+(?:pedirte|hacer contigo)\b|(?:que|cuales)\s+(?:cosas|acciones)\s+(?:todavia\s+)?(?:puedes|no puedes)\s+(?:hacer|ejecutar)\b|^que\s+puedes\s+hacer\b|^(?:que|quien)\s+eres\b/.test(q)){
   return reply("OK","owner_capabilities",
