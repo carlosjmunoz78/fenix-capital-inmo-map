@@ -1,13 +1,16 @@
 import {useEffect,useState} from 'react';
-import {useLocation} from 'react-router-dom';
+import {useLocation,useNavigate} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
 import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
+import CerebroOperativeConsole from './CerebroOperativeConsole';
+import CerebroNeuralView from './CerebroNeuralView';
+import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
 import {fetchAppApi,supabase} from './supabase';
 import './cerebro-console-host.css';
 
-type CerebroView='V0'|'OPERATIVA'|'NAVEGADOR';
+type CerebroView='V0'|CerebroPrimaryView;
 type OwnerAccess='checking'|'allowed'|'denied';
 type SessionContext={actor_code?:string;role?:string};
 const VIEW_STORAGE_KEY='cerebro_console_view_v1';
@@ -16,16 +19,22 @@ function initialView():CerebroView{
  if(typeof window==='undefined')return'OPERATIVA';
  const section=new URLSearchParams(window.location.search).get('section');
  if(section==='browser')return'NAVEGADOR';
+ if(section==='jarvis')return'JARVIS';
+ if(section==='neuronal'||section==='neural')return'NEURONAL';
+ if(section==='operativa')return'OPERATIVA';
  if(section==='legacy-v0')return'V0';
  return'OPERATIVA';
 }
 
 export default function CerebroConsoleHost(){
  const location=useLocation();
+ const navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
- const changeView=(next:CerebroView)=>setView(next==='V0'?'OPERATIVA':next);
+ const changeView=(next:CerebroPrimaryView)=>{setView(next);const section={JARVIS:'jarvis',OPERATIVA:'operativa',NEURONAL:'neuronal',NAVEGADOR:'browser'}[next];navigate({pathname:'/cerebro',search:`?section=${section}`},{replace:true})};
+
+ useEffect(()=>{if(isCerebroPath)setView(initialView())},[isCerebroPath,location.search]);
 
  useEffect(()=>{
   if(!isCerebroPath)return;
@@ -61,17 +70,16 @@ export default function CerebroConsoleHost(){
  if(ownerAccess!=='allowed')return <CerebroConsoleShell/>;
 
  const legacy=view==='V0';
- const browser=view==='NAVEGADOR';
-
  return <div className={`cerebro-console-host view-${view.toLowerCase()}`}>
   <CerebroSpeechOutputGuard/>
-  {legacy?<>
-   <div className="cerebro-host-topbar"><nav className="cerebro-view-switch" aria-label="Rollback técnico de CEREBRO"><span className="cerebro-view-switch-label">ROLLBACK</span><button type="button" className="is-active">LEGACY V0</button><button type="button" onClick={()=>changeView('OPERATIVA')}>JARVIS WORK</button><button type="button" onClick={()=>changeView('NAVEGADOR')}>NAVEGADOR</button></nav></div>
-   <div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>
-  </>:null}
-  {!legacy?<div className="cerebro-work-mount cerebro-host-v0" hidden={browser} aria-hidden={browser}>
-   <CerebroJarvisWorkConsole onViewChange={next=>changeView(next)}/>
-  </div>:null}
-  {browser?<CerebroBrowserConsole onViewChange={changeView}/>:null}
+  {legacy?<div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div>:<>
+   <CerebroInterfaceBar view={view as CerebroPrimaryView} onViewChange={changeView}/>
+   <div className="cerebro-interface-stage">
+    {view==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole onViewChange={changeView}/></div>:null}
+    {view==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
+    {view==='NEURONAL'?<CerebroNeuralView/>:null}
+    {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={changeView}/>:null}
+   </div>
+  </>}
  </div>;
 }
