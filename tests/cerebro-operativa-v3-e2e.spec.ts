@@ -39,6 +39,17 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
   expect(bounds!.x).toBeGreaterThanOrEqual(-1);
   expect(bounds!.x+bounds!.width).toBeLessThanOrEqual(391);
  }
+ console.log('OPERATIVA_LIVE_DIAGNOSTIC',JSON.stringify(await page.evaluate(()=>{
+   const r=document.querySelector('.operativa-premium');
+   const dialog=r?.querySelector('.operativa-dialogue');
+   const field=r?.querySelector('textarea');
+   const nav=document.querySelector('.cerebro-interface-bar');
+   return {hasRoot:!!r,hasDialog:!!dialog,hasTextarea:!!field,
+    textareaLabel:field?.getAttribute('aria-label'),dialogVisible:dialog?getComputedStyle(dialog).display:null,
+    textareaVisible:field?getComputedStyle(field).visibility:null,
+    headerPosition:nav?getComputedStyle(nav).position:null};
+ })));
+ await expect(operative.locator('textarea[aria-label="Mensaje para CEREBRO"]')).toBeVisible();
  await expect(operative.getByRole('textbox',{name:'Mensaje para CEREBRO'})).toBeVisible();
  await page.screenshot({path:'test-results/operativa-real-chat-mobile.png',animations:'disabled'});
  await page.setViewportSize({width:1280,height:720});
