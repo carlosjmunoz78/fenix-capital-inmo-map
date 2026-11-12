@@ -4,6 +4,9 @@
  --op3-line:rgba(97,208,244,.18);--op3-text:#eef8ff;position:relative;isolation:isolate;min-height:calc(100vh - 55px);
  overflow:hidden;background:radial-gradient(ellipse at 48% 30%,#0b2539 0%,#061622 33%,#030b12 80%),#030b12;
  color:var(--op3-text);font:14px/1.45 Inter,ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif}
+/* A visual LAB inspector is a modal and must sit ABOVE the sticky five-tab bar.
+   Scope to an actually open inspector; never alter the normal navigation. */
+.op3-root:has(> .operativa-inspector-backdrop){z-index:160}
 .op3-root *{box-sizing:border-box}.op3-root button,.op3-root select,.op3-root textarea{font:inherit}
 .op3-root button{cursor:pointer}.op3-root button:focus-visible,.op3-root select:focus-visible,.op3-root textarea:focus-visible,
 .op3-root a:focus-visible{outline:2px solid #80e9ff;outline-offset:4px}
