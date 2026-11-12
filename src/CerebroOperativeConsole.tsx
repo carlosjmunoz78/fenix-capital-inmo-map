@@ -56,6 +56,7 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
  const[dictationError,setDictationError]=useState('');
  const[universeRecord,setUniverseRecord]=useState<{company:CompanyKey;result:OwnerUniverseResult}|null>(null);
  const[selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
+ const[chatMirror,setChatMirror]=useState<{role:'user'|'cerebro';text:string}[]>([]);
  const[now,setNow]=useState(()=>Date.now());
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
@@ -64,6 +65,32 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
  useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else setSource('UNAVAILABLE')};void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)}},[]);
  useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot({ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')})})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
+ // Mirror the existing authenticated chat messages as plain text for the V3 view.
+ // Never send a second request; DOM is the readonly output of the ONE V0 Gateway.
+ useEffect(()=>{
+  if(!visualPreview)return;
+  let raf=0;
+  const inspect=()=>{
+   cancelAnimationFrame(raf);
+   raf=requestAnimationFrame(()=>{
+    const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-chat-log');
+    const nodes=root?.querySelectorAll<HTMLElement>('.cerebro-chat-line')??[];
+    const next=Array.from(nodes).slice(-24).map(node=>({
+     role:(node.classList.contains('cerebro-chat-user')?'user':'cerebro') as 'user'|'cerebro',
+     text:(node.querySelector('span')?.textContent??'').trim().slice(0,6000)
+    })).filter(item=>item.text);
+    setChatMirror(previous=>{
+     if(previous.length===next.length&&previous.every((line,i)=>line.role===next[i].role&&line.text===next[i].text))
+      return previous;
+     return next;
+    });
+   });
+  };
+  inspect();
+  const observer=new MutationObserver(inspect);
+  observer.observe(document.body,{childList:true,characterData:true,subtree:true});
+  return()=>{cancelAnimationFrame(raf);observer.disconnect()};
+ },[visualPreview]);
  useEffect(()=>{try{window.sessionStorage.setItem('operativa_power_mode',power)}catch{/* optional */}},[power]);
  // LAB preview only: no new reads in the existing production/default interface.
  useEffect(()=>{
@@ -105,6 +132,7 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
    source={company==='all'||company==='fenix'?source:'UNAVAILABLE'} observedAt={observedAt} company={company} onCompanyChange={setCompany}
    runs={company==='all'||company==='fenix'?filteredRuns:[]} onOpenRun={setSelectedRun}
    ownerUniverse={universeRecord?.company===company?universeRecord.result:{kind:'loading',data:null}}
+   chatLines={chatMirror}
   >
   {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
    <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
