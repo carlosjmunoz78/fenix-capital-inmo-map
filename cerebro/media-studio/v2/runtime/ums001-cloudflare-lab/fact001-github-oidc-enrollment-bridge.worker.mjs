@@ -44,11 +44,12 @@ export class GithubOidcReplay extends DurableObject {
   this.ctx=ctx;
   ctx.storage.sql.exec('CREATE TABLE IF NOT EXISTS claims (claim_id TEXT PRIMARY KEY, engine_id TEXT NOT NULL, expires_at INTEGER NOT NULL, claimed_at TEXT NOT NULL)');
  }
- async claim(jti,engine,expiry){
+ async claim(jti,engine,expiry,purpose='enroll'){
   if(typeof jti!=='string'||!rxEngine.test(engine)||!Number.isInteger(expiry))throw Error('REPLAY_SCOPE');
   const now=Math.floor(Date.now()/1000);
   this.ctx.storage.sql.exec('DELETE FROM claims WHERE expires_at<?',now-3600);
-  const id=jti+':'+engine;
+  if(!['enroll','image'].includes(purpose))throw Error('REPLAY_PURPOSE');
+  const id=jti+':'+engine+(purpose==='image'?':image':'');
   const exists=[...this.ctx.storage.sql.exec('SELECT claim_id FROM claims WHERE claim_id=?',id)][0];
   if(exists)return false;
   this.ctx.storage.sql.exec('INSERT INTO claims(claim_id,engine_id,expires_at,claimed_at) VALUES(?,?,?,?)',id,engine,expiry,new Date().toISOString());
@@ -63,7 +64,7 @@ function scopeManifest(m,engine){
 }
 async function fetchManifest(sha,engine){
  const path='https://raw.githubusercontent.com/'+REPO+'/'+sha+'/cerebro-os/engines/'+engine+'/manifest.json';
- const r=await fetch(path,{headers:{'accept':'application/json'},redirect:'error',cf:{cacheTtl:60}});
+ const r=await fetch(path,{headers:{'accept':'application/json'},redirect:'manual',cf:{cacheTtl:60}});
  if(!r.ok||Number(r.headers.get('content-length')||0)>12000)throw Error('MANIFEST_NOT_VERIFIED');
  const text=await r.text();if(text.length>12000)throw Error('MANIFEST_TOO_LARGE');
  return scopeManifest(JSON.parse(text),engine);
@@ -86,10 +87,28 @@ async function enroll(body,cl,env){
  return {ok:true,state:'ACTIVE',engine_id:en,company_id:'fenix',environment:'LAB',gateway:'UMS-001',
  signed_probe_status:receipt.signing_test,publication:false,paid_enabled:false};
 }
+async function requestImage(body,cl,env){
+ if(env.OIDC_BRIDGE_ENABLED!=='true'||typeof env.FACT_BRIDGE_TOKEN!=='string'||env.FACT_BRIDGE_TOKEN.length<48||!env.PROVISIONER||!env.OIDC_REPLAY)throw Error('BRIDGE_OFF');
+ if(!body||Object.keys(body).sort().join('|')!=='engine_id|prompt|request_id|sha'||
+ !rxEngine.test(body.engine_id||'')||body.sha!==cl.sha||
+ !/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(body.request_id||'')||
+ typeof body.prompt!=='string'||body.prompt.length<40||body.prompt.length>630)throw Error('IMAGE_INPUT_DENIED');
+ await fetchManifest(cl.sha,body.engine_id);
+ const nonce=env.OIDC_REPLAY.get(env.OIDC_REPLAY.idFromName('fenix-factory-oidc-lab'));
+ const first=await nonce.claim(cl.jti,body.engine_id,cl.exp,'image');
+ if(!first)throw Error('OIDC_IMAGE_REPLAY_REJECTED');
+ const outcome=await env.PROVISIONER.requestImageFromTrustedGithub({
+  company_id:'fenix',environment:'LAB',engine_id:body.engine_id,request_id:body.request_id,
+  channel_id:'GENERIC',publish_requested:false,prompt:body.prompt
+ },env.FACT_BRIDGE_TOKEN);
+ if(outcome?.state!=='ACCEPTED')throw Error('SIGNED_IMAGE_NOT_ACCEPTED');
+ return {ok:true,state:'ACCEPTED',engine_id:body.engine_id,request_id:body.request_id,
+  publication:false,environment:'LAB'};
+}
 export default {
  async fetch(request,env){
   const url=new URL(request.url);
-  if(request.method!=='POST'||url.pathname!=='/v1/factory/engine-created')return bad('NOT_FOUND',404);
+  if(request.method!=='POST'||!['/v1/factory/engine-created','/v1/factory/image-request'].includes(url.pathname))return bad('NOT_FOUND',404);
   if(env.OIDC_BRIDGE_ENABLED!=='true')return bad('BRIDGE_OFF',503);
   try{
    const auth=request.headers.get('authorization')||'';
@@ -98,11 +117,12 @@ export default {
    const content=await request.text();if(content.length>1000)throw Error('BODY_TOO_LONG');
    // JWT verification precedes all resource modifications.
    const cl=await validateJwt(auth.slice(7));
-   const result=await enroll(JSON.parse(content),cl,env);
+   const input=JSON.parse(content);
+   const result=url.pathname==='/v1/factory/image-request'?await requestImage(input,cl,env):await enroll(input,cl,env);
    return response(result,200);
   }catch(e){
    // The response deliberately omits submitted values and signed token fragments.
-   return bad(String(e?.message||'DENIED').replace(/[^A-Z0-9_]/gi,'_').slice(0,75),403);
+   return bad(String(e?.message||'DENIED').replace(/[^A-Z0-9_]/gi,'_').toUpperCase().slice(0,75),403);
   }
  }
 };

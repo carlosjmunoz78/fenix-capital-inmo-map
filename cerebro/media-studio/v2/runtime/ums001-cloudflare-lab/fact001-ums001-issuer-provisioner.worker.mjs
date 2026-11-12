@@ -150,6 +150,39 @@ export class FactoryIssuerProvisioner extends WorkerEntrypoint{
   return enroll({...event,signature:signed},this.env);
  }
  async imageReceipt(engine_id,request_id,item_id){if(!id.test(engine_id||'')||!(/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(request_id||''))||!(/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(item_id||'')))throw Error('RESULT_ID_DENIED');const approved=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+engine_id,{type:'json'});if(approved?.state!=='ACTIVE')throw Error('ENGINE_NOT_REGISTERED');return await this.env.ISSUER_VAULT.get(PREFIX+'deliveries/'+engine_id+'/'+request_id+'/'+item_id,{type:'json'});}
+ async requestImageFromTrustedGithub(input,token){
+  const expected=this.env.GITHUB_OIDC_BRIDGE_SECRET;
+  if(this.env.FACT_PROVISION_ENABLED!=='true'||typeof expected!=='string'||expected.length<48||typeof token!=='string'||token.length!==expected.length)throw Error('TRUSTED_GITHUB_IMAGE_DENIED');
+  const a=utf(token),b=utf(expected);let bad=0;for(let i=0;i<a.length;i++)bad|=a[i]^b[i];
+  if(bad!==0)throw Error('TRUSTED_GITHUB_IMAGE_DENIED');
+  if(!input||input.company_id!=='fenix'||input.environment!=='LAB'||!id.test(input.engine_id||'')||
+    !/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(input.request_id||'')||
+    input.channel_id!=='GENERIC'||input.publish_requested!==false||
+    typeof input.prompt!=='string'||input.prompt.length<40||input.prompt.length>630||
+    /api[._ -]?key|access[._ -]?token|password\s*:/i.test(input.prompt))throw Error('TRUSTED_GITHUB_IMAGE_SCOPE');
+  const rec=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+input.engine_id,{type:'json'});
+  if(rec?.state!=='ACTIVE'||rec.environment!=='LAB'||rec.company_id!=='fenix'||!rec.encrypted_private_key)throw Error('IMAGE_ENGINE_NOT_REGISTERED');
+  const briefKey='meta/ums001-ai-image-factory/v1/briefs/'+input.engine_id+'/'+input.request_id;
+  const before=await this.env.IMAGE_KV.get(briefKey,{type:'json'});
+  if(before&&before.prompt!==input.prompt)throw Error('IMAGE_REQUEST_ID_CONFLICT');
+  if(!before)await this.env.IMAGE_KV.put(briefKey,JSON.stringify({
+    company_id:'fenix',environment:'LAB',origin_engine_id:input.engine_id,request_id:input.request_id,
+    rights_profile:'SYNTHETIC_ORIGINAL',publish_requested:false,prompt:input.prompt
+  }));
+  const e={engine_id:input.engine_id,company_id:'fenix',environment:'LAB',version:rec.version,allowed_channels:['GENERIC']};
+  const payload=makeProbe(e,rec);
+  payload.request_id=input.request_id;
+  payload.brief_ref='cerebro://briefs/ums001/'+input.request_id;
+  payload.policy_version='ums001-execution-lab-v1';
+  const unsigned={schema_version:1,key_id:rec.key_id,issuer:input.engine_id,sent_at_utc:new Date().toISOString(),
+    nonce:crypto.randomUUID(),payload};
+  const privateKey=await unseal(rec,this.env);
+  const signed={...unsigned,signature:base64(await crypto.subtle.sign('Ed25519',privateKey,utf(canon(unsigned))))};
+  const result=await this.env.SIGNED_GATEWAY.submitSignedJob(signed);
+  if(!['REGISTERED_QA_PENDING','DUPLICATE_ACCEPTED'].includes(result?.status))throw Error('IMAGE_GATEWAY_DID_NOT_ACCEPT');
+  return {state:'ACCEPTED',request_id:input.request_id,engine_id:input.engine_id,channel_id:'GENERIC',
+    signed_gateway_status:result.status,publication:false};
+ }
  async engineStatus(engine_id){
   if(!id.test(engine_id||''))throw Error('INVALID_ENGINE');
   const r=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+engine_id,{type:'json'});
