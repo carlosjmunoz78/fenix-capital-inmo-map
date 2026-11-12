@@ -9,6 +9,9 @@ on:
       - src/cerebroOperativaLabUniverseApi.ts
       - src/cerebro-operative-cockpit-v3.css
       - src/CerebroOperativeConsole.tsx
+      - src/CerebroOperativeLiveConsole.tsx
+      - src/useCerebroOperativaChat.ts
+      - src/cerebro-operative-live-console.css
       - src/CerebroConsoleHost.tsx
       - tests/cerebro-operativa-cockpit-v3-visual.test.mjs
       - tests/cerebro-operativa-cockpit-v3-e2e.spec.ts
@@ -21,6 +24,9 @@ on:
       - src/cerebroOperativaLabUniverseApi.ts
       - src/cerebro-operative-cockpit-v3.css
       - src/CerebroOperativeConsole.tsx
+      - src/CerebroOperativeLiveConsole.tsx
+      - src/useCerebroOperativaChat.ts
+      - src/cerebro-operative-live-console.css
       - src/CerebroConsoleHost.tsx
       - tests/cerebro-operativa-cockpit-v3-visual.test.mjs
       - .github/workflows/cerebro-operativa-cockpit-v3-visual-lab.yml
