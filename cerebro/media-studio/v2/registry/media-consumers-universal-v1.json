@@ -1,0 +1,122 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "status": "REGISTRY_CONTRACT_ONLY_NOT_IAM",
+  "transport": "CEREBRO_GATEWAY_PRIVATE_BUS",
+  "default_budget": {
+    "max_additional_cost_eur": 0,
+    "paid_execution_enabled": false,
+    "auto_recharge": false,
+    "publish_requested": false
+  },
+  "capability_families": [
+    "IMAGE",
+    "VIDEO",
+    "AUDIO",
+    "AV_PACKAGE",
+    "THREED",
+    "VFX",
+    "ADAPTATION"
+  ],
+  "canonical_request_event": "MEDIA_JOB_REQUESTED",
+  "legacy_event_aliases": {
+    "SOCIAL_CONTENT_REQUESTED": "MEDIA_JOB_REQUESTED",
+    "SEO_MEDIA_REQUESTED": "MEDIA_JOB_REQUESTED"
+  },
+  "response_events": [
+    "UMS001_ORDER_ACCEPTED",
+    "UMS001_ORDER_HELD",
+    "UMS001_ASSET_QA_PENDING",
+    "UMS001_ASSET_DELIVERED",
+    "UMS001_JOB_FAILED",
+    "UMS001_HUMAN_REQUIRED"
+  ],
+  "profiles": {
+    "FACEBOOK": {
+      "status": "EXISTING_CONTRACT_NOT_CONNECTED",
+      "consumer_class": "SOCIAL",
+      "placements": [
+        "FEED",
+        "STORY",
+        "REEL",
+        "COVER"
+      ]
+    },
+    "INSTAGRAM": {
+      "status": "EXISTING_CONTRACT_NOT_CONNECTED",
+      "consumer_class": "SOCIAL",
+      "placements": [
+        "FEED",
+        "STORY",
+        "REEL",
+        "CAROUSEL",
+        "COVER"
+      ]
+    },
+    "LINKEDIN": {
+      "status": "EXISTING_CONTRACT_NOT_CONNECTED_DEPARTMENT_UPGRADE_PENDING",
+      "consumer_class": "SOCIAL",
+      "placements": [
+        "FEED",
+        "CAROUSEL",
+        "VIDEO",
+        "COVER"
+      ]
+    },
+    "SEO": {
+      "status": "EXISTING_CONTRACT_NOT_CONNECTED",
+      "consumer_class": "SEARCH",
+      "placements": [
+        "HERO",
+        "BODY",
+        "FEATURED",
+        "THUMBNAIL",
+        "INFOGRAPHIC"
+      ]
+    },
+    "YOUTUBE": {
+      "status": "FUTURE_ADAPTER_NOT_CONNECTED",
+      "consumer_class": "SOCIAL",
+      "placements": [
+        "THUMBNAIL",
+        "SHORT",
+        "LONG_VIDEO",
+        "COVER"
+      ]
+    },
+    "TIKTOK": {
+      "status": "FUTURE_ADAPTER_NOT_CONNECTED",
+      "consumer_class": "SOCIAL",
+      "placements": [
+        "SHORT",
+        "COVER",
+        "STORY"
+      ]
+    },
+    "GENERIC": {
+      "status": "SCAFFOLD_PROFILE_NOT_IAM_AUTHORIZED",
+      "consumer_class": "GENERIC",
+      "placements": [
+        "ANY_REGISTERED_PLACEMENT"
+      ]
+    }
+  },
+  "factory_hook": {
+    "template": "MEDIA_CONSUMER_V1",
+    "activation": "FACT-001 scaffolds consumer interface and event handlers; Gateway IAM approval, routing, tests and real consumer bind required independently",
+    "enabled_for_all_new_engines": "SCAFFOLD_ONLY",
+    "default_channel_id": "GENERIC",
+    "default_capabilities": [
+      "IMAGE",
+      "VIDEO",
+      "AUDIO",
+      "AV_PACKAGE"
+    ],
+    "auto_grant_permissions": false
+  },
+  "publishing_ownership": "THE_ORIGIN_CONSUMER_OWNS_PUBLISHING_AFTER_INDEPENDENT_GATE; UMS001 NEVER_PUBLISHES",
+  "production_ready": false,
+  "physical_status": "NO_NEW_REAL_SOCIAL_SEO_GATEWAY_EVENT_WIRED"
+}
