@@ -10,10 +10,10 @@
 export const SCOPE={schema_version:1,actor_id:'cerebro-orchestrator-lab',
  company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
  mode:'QA_METADATA_ONLY',action:'SUBMIT_ARCHIVED_LINKEDIN_QA'};
-export const SIGNATURE_KEY_ID='UMS001-LAB-ORCH-ED25519-20261112-V1';
+export const SIGNATURE_KEY_ID='UMS001-LAB-ORCH-ED25519-20261112-V2';
 export const ISSUER='cerebro-ums001-signed-orchestrator-lab-eu';
-export const ONCE_KEY='meta/ums001-signed-once/v1/fenix/UMS-001/LAB/LI-FEED-01-DIAG02';
-export const ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261117';
+export const ONCE_KEY='meta/ums001-signed-once/v1/fenix/UMS-001/LAB/LI-FEED-01-DIAG03';
+export const ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261118';
 const REQUEST_ID='UMS001-SENDER-REQ-AUTOSIGNED20261112';
 const DEADLINE=Date.parse('2026-11-13T00:00:00Z');
 const fail=code=>{throw Error('UMS001_ORCH_SIGNED_'+code)};
