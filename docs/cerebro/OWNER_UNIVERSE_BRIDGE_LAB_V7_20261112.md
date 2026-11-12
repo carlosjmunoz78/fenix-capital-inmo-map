@@ -51,3 +51,6 @@ Rollback versionado verificable: rama PR #56 commit `0054eb75bb461ae5a06df57c42f
 5. Backup, rollback probado, OLD vs NEW, E2E, logs, tribunal, presupuesto y gate de promoción; no fusionar ni publicar hasta terminar.
 
 Estado global: **PARCIAL**, progreso real en GitHub/servidor LAB, producción preservada. Coste: cero suscripciones o servicios adicionales creados (consumo normal de CI/free-tier no auditado como facturación).
+
+## Observación adicional 12/11 · Denegación anónima física
+Solicitud real desde Opera a `https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v36-followups-lab/owner-universe?company_id=fenix` **sin credenciales**: respuesta `MISSING_CREDENTIALS` de `@supabase/server`, sin proyecto, empresa ni catálogo en la respuesta. Esto acredita el rechazo de un cliente anónimo; **NO acredita la respuesta autenticada del propietario**. El gate E2E positivo sigue pendiente.
