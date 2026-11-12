@@ -27,7 +27,7 @@ export class UniversalLedger extends DurableObject{
  async issuerCount(){return this.sql.exec('SELECT COUNT(*) AS n FROM media_issuers WHERE enabled=1').one().n}
  async stats(){const a=this.sql.exec('SELECT COUNT(*) AS n FROM media_jobs').one().n,b=this.sql.exec('SELECT COUNT(*) AS n FROM media_events').one().n,c=this.sql.exec('SELECT COUNT(*) AS n FROM media_rejections').one().n;return {jobs:a,events:b,rejections:c}}
 }
-const target=(env,company)=>env.MEDIA_LEDGER.get(env.MEDIA_LEDGER.idFromName(company+'/UMS-001/LAB'));
+const target=(env,company)=>{const ns=env.MEDIA_LEDGER.jurisdiction('eu');return ns.get(ns.idFromName(company+'/UMS-001/LAB'))};
 export class UniversalMediaLab extends WorkerEntrypoint{
  async submitSignedJob(e){if(this.env.UNIVERSAL_GATEWAY_ENABLED!=='true')throw Error('OFF');validateEnvelope(e);return target(this.env,e.payload.company_id).submitSignedJob(e)}
  async stats(){return target(this.env,'fenix').stats()}
