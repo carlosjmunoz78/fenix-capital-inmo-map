@@ -151,7 +151,7 @@ export default function CerebroOperativeCockpitV3({
       <span role="status" aria-live="polite" className="op3-voice-status">{statusText}</span>
      </div>
      <form className="op3-input-frame" onSubmit={handleSubmit}>
-      <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder="Escribe una instrucción, pregunta o análisis…"
+      <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder="Escribe o habla aquí…"
        value={composer} onChange={e=>onComposerChange(e.target.value)}
        onKeyDown={keydown} rows={1} disabled={!snapshot.ready||snapshot.sending}/>
       <button type="button" className={`op3-icon-button ${dictating?'is-active':''}`}
