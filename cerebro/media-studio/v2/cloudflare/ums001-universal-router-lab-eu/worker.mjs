@@ -41,14 +41,14 @@ export class MediaJobLedger extends DurableObject {
  async read(key){return [...this.ctx.storage.sql.exec("SELECT * FROM jobs WHERE job_key=?",key)][0]||null;}
  async stats(){return [...this.ctx.storage.sql.exec("SELECT state,COUNT(*) AS count FROM jobs GROUP BY state")];}
 }
-async function reserve(env,request){
+async function reserve(env,request,source='PRIVATE_UNIVERSAL_RPC_OR_CANARY'){
  validate(request);if(!consumerAllowed(request))throw Error('UMS001_UNREGISTERED_CONSUMER_ROUTE');
  const key=await jobKey(request),digest=await fingerprint(request);
  const stub=env.LEDGER.get(env.LEDGER.idFromName(request.company_id+'|'+request.environment));
  const receipt=await stub.reserve({request,key,digest});
  await env.AUDIT_KV.put(PREFIX+request.origin_engine_id+'/'+request.request_id+'/'+request.item_id,
    JSON.stringify({...status(receipt.state,receipt.code,request),idempotency_key:key,
-    duplicate:receipt.duplicate,provider_calls:0,source:'PRIVATE_UNIVERSAL_RPC_OR_CANARY'}));
+    duplicate:receipt.duplicate,provider_calls:0,source}));
  return {...receipt,company_id:request.company_id,engine_id:'UMS-001',environment:'LAB',
    request_id:request.request_id,origin_engine_id:request.origin_engine_id,
    item_id:request.item_id,additional_cost_eur:0,publish_authorized:false,
@@ -84,6 +84,30 @@ export default {
    for(const engine of ['SOC-001','SEO-001']){
      const request=makeCanary(engine,fixed);
      await reserve(env,request);
+   }
+ },
+ async queue(batch,env){
+   if(batch.queue!=='cerebro-ums001-universal-chatgpt-intake-lab-eu')
+     throw Error('UMS001_UNEXPECTED_INTAKE_QUEUE');
+   for(const message of batch.messages){
+     let order=message.body;
+     try{
+       if(env.CHATGPT_QUEUE_ENABLED!=='true')throw Error('UMS001_CHATGPT_INTAKE_OFF');
+       validate(order);
+       if(order.origin_engine_id!=='CHATGPT-001'||order.trigger!=='CHATGPT')
+         throw Error('UMS001_CHATGPT_ACCOUNT_QUEUE_SCOPE');
+       const receipt=await reserve(env,order,'CLOUDFLARE_ACCOUNT_API_MANAGED_CHATGPT_QUEUE');
+       message.ack();
+     }catch(e){
+       const safe=String(e?.message||'UNKNOWN').replace(/[^A-Z0-9_]/gi,'_').slice(0,100);
+       try{
+         await env.AUDIT_KV.put('meta/ums001-universal-deadletter/v1/'+String(message.id).slice(0,80),
+          JSON.stringify({state:'HELD',code:safe,at:new Date().toISOString(),
+           publication:false,paid_execution:false,provider_calls:0,engine_id:'UMS-001',
+           environment:'LAB',source:'CLOUDFLARE_MANAGEMENT_QUEUE'}));
+         message.ack();
+       }catch{message.retry();}
+     }
    }
  },
  async fetch(){return new Response('Not Found',{status:404,headers:{'Cache-Control':'no-store'}});}

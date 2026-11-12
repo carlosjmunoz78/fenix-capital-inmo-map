@@ -7,7 +7,7 @@ export const REQUEST_FIELDS=Object.freeze([
 const FORMAT_FIELDS=['profile_id','width_px','height_px','duration_seconds','output_mime'];
 const BUDGET_FIELDS=['max_additional_cost_eur','max_attempts','prepaid_only','paid_execution_enabled','auto_recharge','publish_requested'];
 export const ALLOWED_KINDS=['IMAGE','VIDEO','AUDIO','AV_PACKAGE','THREED','VFX','ADAPTATION'];
-export const SUPPORTED_ENGINES=['SOC-001','SEO-001'];
+export const SUPPORTED_ENGINES=['SOC-001','SEO-001','CHATGPT-001'];
 export const LAB_SCOPE=Object.freeze({company_id:'fenix',engine_id:'UMS-001',environment:'LAB'});
 export const LAB_KEY_PREFIX='meta/ums001-universal-job/v1/';
 function reject(reason){throw Error('UMS001_UNIVERSAL_'+reason)}
@@ -24,7 +24,7 @@ export function validate(request,{allowOtherEngines=false}={}){
  if(!/^[A-Z][A-Z0-9-]{2,63}$/.test(r.origin_engine_id||'')||
  !/^[A-Z][A-Z0-9-]{2,63}$/.test(r.consumer_engine_id||'')||
  (!allowOtherEngines&&!SUPPORTED_ENGINES.includes(r.origin_engine_id)))reject('ENGINE');
- if(r.trigger!=='ENGINE_EVENT'&&r.trigger!=='CHATGPT')reject('TRIGGER');
+ if(r.origin_engine_id==='CHATGPT-001' ? r.trigger!=='CHATGPT' : r.trigger!=='ENGINE_EVENT')reject('TRIGGER');
  if(!/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(r.request_id||'')||
  !/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(r.item_id||''))reject('ID');
  if(!ALLOWED_KINDS.includes(r.asset_kind)||typeof r.capability_id!=='string'||
@@ -78,7 +78,10 @@ export async function verifyHmac(secret,contents,signature){
 export function secretBinding(company,engine){return 'AUTH_'+company.toUpperCase().replace(/-/g,'_')+'_'+engine.replace(/-/g,'_')}
 export function consumerAllowed(r){return (r.origin_engine_id==='SOC-001'&&r.consumer_engine_id==='SOC-001'&&
  ['FACEBOOK','INSTAGRAM','LINKEDIN','YOUTUBE','TIKTOK'].includes(r.channel_id))||
- (r.origin_engine_id==='SEO-001'&&r.consumer_engine_id==='SEO-001'&&r.channel_id==='SEO')}
+ (r.origin_engine_id==='SEO-001'&&r.consumer_engine_id==='SEO-001'&&r.channel_id==='SEO')||
+ (r.origin_engine_id==='CHATGPT-001'&&r.trigger==='CHATGPT'&&
+ ((r.consumer_engine_id==='SEO-001'&&r.channel_id==='SEO')||
+  (r.consumer_engine_id==='SOC-001'&&['FACEBOOK','INSTAGRAM','LINKEDIN','YOUTUBE','TIKTOK'].includes(r.channel_id))))}
 export function makeCanary(origin,now){
  const social=origin==='SOC-001',r={schema_version:'1.0.0',event_type:'MEDIA_JOB_REQUESTED',
  request_id:'UMS001-LAB-UNIVERSAL-CANARY-20261112-V1',company_id:'fenix',engine_id:'UMS-001',
