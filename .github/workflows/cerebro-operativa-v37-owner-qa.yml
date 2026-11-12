@@ -16,5 +16,5 @@ jobs:
         with: {node-version: '24'}
       - name: Existing v35 and v36 regressions
         run: node --test tests/cerebro-gateway-followups-v36.test.mjs tests/cerebro-gateway-activity-v35.test.mjs tests/cerebro-gateway-natural-v35.test.mjs
-      - name: Owner follow-up v37: true simplification and security regression
+      - name: 'Owner follow-up v37 - true simplification and security regression'
         run: node --test tests/cerebro-gateway-followup-v37.test.mjs
