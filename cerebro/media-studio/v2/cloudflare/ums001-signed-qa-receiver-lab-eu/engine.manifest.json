@@ -4,7 +4,7 @@
   "engine_id": "UMS-001",
   "environment": "LAB",
   "component_id": "UMS001_ED25519_SIGNED_QA_RECEIVER_V0",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "status": "DEPLOYED_INERT_TRUST_ANCHOR_NOT_PROVISIONED",
   "worker": {
     "name": "cerebro-ums001-signed-qa-receiver-lab-eu",
@@ -16,7 +16,9 @@
     "workers_dev": false,
     "preview_urls": false,
     "public_routes": [],
-    "cron_count": 0
+    "cron_count": 0,
+    "repository_hardening_deployed_to_cloudflare": false,
+    "physical_cloudflare_version_status": "PRIOR_INERT_DEPLOYMENT; HARDENED_GITHUB_CANDIDATE_NOT_DEPLOYED"
   },
   "permissions": {
     "allowed": [
@@ -42,7 +44,12 @@
     "strict_ttl_seconds": 180,
     "nonce_replay_detection": true,
     "nonce_store_is_kv_eventually_consistent": true,
-    "signed_approval_is_not_image_rights": true
+    "signed_approval_is_not_image_rights": true,
+    "independent_pinned_public_spki_sha256_name": "ORCH_PUBLIC_SPKI_SHA256",
+    "independent_pinned_spki_sha256_provisioned": false,
+    "only_authorized_order_id": "UMS001-LAB-LI-FEED-01-ARCHIVE-20261116",
+    "only_authorized_request_id": "UMS001-SENDER-REQ-AUTOSIGNED20261112",
+    "fingerprint_mismatch_fails_closed": true
   },
   "bindings": {
     "inbound_queue_name": "cerebro-ums001-image-signed-command-lab-eu",
@@ -55,8 +62,8 @@
     "data_jurisdiction": "eu"
   },
   "tests": {
-    "CI_run_id": 43126372664,
-    "total_lab_tests_pass": 128,
+    "CI_run_id": 43166594450,
+    "total_lab_tests_pass": 133,
     "failed": 0,
     "physical_ED25519_verified_qa_delivery": false
   },
