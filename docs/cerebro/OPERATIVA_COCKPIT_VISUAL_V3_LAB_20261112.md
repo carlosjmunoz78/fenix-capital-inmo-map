@@ -112,5 +112,6 @@ de facturación sin revisar consumo.
 - Workflow: [GitHub Actions #43320900100](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43320900100) — **SUCCESS**.
 - Petición `OPTIONS` real a `/owner-universe?company_id=fenix` en Gateway LAB: **204**. La plataforma Supabase responde `Access-Control-Allow-Origin: *` en preflight; esto no acredita que el allowlist dentro del handler se aplique antes de CORS, y el test **NO** afirma restricción por origen. `Access-Control-Allow-Credentials: true` no aparece.
 - `GET` anónimo real en LAB: **401**, sin contenido de empresa/proyecto, secretos ni catálogo verificado.
+- `GET` con cabecera `Authorization: Bearer qa-invalid-not-a-jwt` (valor fijo deliberadamente inválido, **no una credencial**) también devuelve **401**, sin datos del propietario. Evidencia: [Actions #43321402379](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43321402379) — **SUCCESS**, incluyendo regresión visual y compilación.
 - No se ha accedido con una identidad legítima para saltar esta barrera: la **prueba positiva del propietario sigue PENDIENTE**. La QA en Chromium emplea solo fixtures y no constituye evidencia E2E con sesión de usuario real.
 - No se ha modificado PROD, ni se han almacenado JWT o credenciales en GitHub/logs/chat.
