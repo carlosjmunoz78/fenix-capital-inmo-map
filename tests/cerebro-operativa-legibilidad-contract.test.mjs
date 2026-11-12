@@ -9,6 +9,8 @@ test('real workflow names, statuses and audit IDs',()=>{
  assert.ok(ui.includes('En cola de GitHub Actions; todavía no está ejecutándose.'));
  assert.ok(ui.includes('GitHub Actions confirma la ejecución, pero no ha publicado un paso verificable.'));
  assert.ok(ui.includes('run.run_id'));
+ assert.ok(ui.includes('humanName(run)!==run.workflow_name'));
+ assert.ok(ui.includes("function humanDetail(run:CerebroActivityRun){if(QUEUED_STATUSES.has(run.status))"));
 });
 test('chat before jobs and deterministic five-row expansion',()=>{
  assert.ok(ui.indexOf('<section className="operativa-dialogue"')<ui.indexOf('<section className="operativa-stage"'));
