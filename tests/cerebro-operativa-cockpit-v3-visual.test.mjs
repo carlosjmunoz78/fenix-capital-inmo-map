@@ -8,6 +8,7 @@ const nav=read('src/CerebroInterfaceBar.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
 const cockpit=read('src/CerebroOperativeCockpitV3.tsx');
 const css=read('src/cerebro-operative-cockpit-v3.css');
+const liveCss=read('src/cerebro-operative-live-console.css');
 const universe=read('src/cerebroOperativaLabUniverseApi.ts');
 const views=read('src/CerebroOperativaUniverseViews.tsx');
 
@@ -18,7 +19,17 @@ test('Five original navigation destinations remain intact, without replacing the
 });
 test('Cockpit is explicit opt-in and original Operativa is unchanged by default',()=>{
  assert.ok(host.includes("get('visual_lab')==='cockpit-v3'"));
- assert.ok(host.includes('visualPreview?<CerebroOperativeConsole visualPreview/>:<CerebroOperativeConsole/>'));
+ assert.ok(host.includes("import CerebroOperativeConsole from './CerebroOperativeLiveConsole';"));
+ assert.ok(host.includes("import CerebroOperativeLabConsole from './CerebroOperativeConsole';"));
+ assert.ok(host.includes('visualPreview?<CerebroOperativeLabConsole visualPreview/>:<CerebroOperativeConsole/>'));
+ const live=read('src/CerebroOperativeLiveConsole.tsx');
+ const hook=read('src/useCerebroOperativaChat.ts');
+ assert.ok(live.includes('Conversación con CEREBRO'));
+ assert.ok(live.includes('className="operativa-dialogue-log"'));
+ assert.ok(live.includes('aria-label="Mensaje para CEREBRO"'));
+ assert.ok(hook.includes('postCerebroConsoleChat'));
+ assert.ok(hook.includes('voiceNeedsManualConfirmation'));
+ assert.ok(!live.includes('<CerebroConsoleShell/>'));
  assert.ok(operative.includes("visualPreview=false"));
  assert.ok(operative.includes('if(visualPreview)return <CerebroOperativeCockpitV3'));
  assert.ok(operative.includes('return <main className="operativa-premium"'));
@@ -100,4 +111,14 @@ test('DOM observation stays inside the existing V0 bridge and unchanged voice st
  assert.ok((operative.match(/observer\.observe\(document\.querySelector<HTMLElement>\('\.operativa-core-bridge'\)\|\|document\.body/g)||[]).length>=2);
  assert.ok(operative.includes("setChatMirror(previous=>{"));
  assert.ok(!operative.includes("observer.observe(document.body,"));
+});
+
+test('Existing live company conversation and the new V3 are different intentional mount targets',()=>{
+ const live=read('src/CerebroOperativeLiveConsole.tsx');
+ assert.ok(live.includes('useCerebroOperativaChat()'));
+ assert.ok(live.includes('operativa-dialogue'));
+ assert.ok(liveCss.includes('.operativa-dialogue>.operativa-jarvis-composer'));
+ assert.ok(liveCss.includes('position:relative'));
+ assert.ok(!live.includes('visualPreview='));
+ assert.ok(host.includes("get('visual_lab')==='cockpit-v3'"));
 });
