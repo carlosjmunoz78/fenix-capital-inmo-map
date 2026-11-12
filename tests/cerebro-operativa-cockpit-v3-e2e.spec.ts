@@ -185,8 +185,11 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await expect(cockpit.locator('.op3-pulse.is-typing')).toBeVisible();
  await cockpit.getByRole('button',{name:'Enviar instrucción'}).click();
  await expect.poll(()=>postedChat?.message??null,{timeout:7_000}).toBe('Consulta el estado operativo');
+ await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('Consulta el estado operativo');
+ await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
+ await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
  await page.setViewportSize({width:390,height:844});
- await expect(cockpit.getByRole('heading',{name:'¿Qué necesitas hacer?'})).toBeVisible();
+ await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
  for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
   const tab=bar.getByRole('button',{name:new RegExp(name,'i')});
   await expect(tab).toBeVisible();
