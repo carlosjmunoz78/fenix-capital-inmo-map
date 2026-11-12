@@ -729,6 +729,25 @@
         "excluded": "Content deployments, domains and global projects permissions remain outside proven scope",
         "console_dependency": false,
         "full_universal": false
+      },
+      "capability_acceptance_20261112": {
+        "status": "VERIFIED_SCOPED_CAPABILITIES",
+        "scope": "SIGNED_HEADLESS_VAULT_LAB_PROJECT_ONLY",
+        "features": [
+          "read",
+          "update_settings",
+          "rollback_settings",
+          "deployment_list",
+          "oidc_negative_401_403",
+          "audited_job_idempotency"
+        ],
+        "evidence": "docs/FACT001_VERCEL_VAULT_SIGNED_SERVICE_PHYSICAL_E2E_2026-11-11.md",
+        "excluding": [
+          "deployments_and_rollback",
+          "full_project_admin",
+          "PROD",
+          "Console"
+        ]
       }
     },
     {
@@ -911,6 +930,24 @@
         "excluded": "Persistent signed create/update management adapter, safe isolated CRUD, rollback, and PROD policies not verified",
         "console_dependency": false,
         "full_universal": false
+      },
+      "capability_acceptance_20261112": {
+        "status": "VERIFIED_LIMITED_CAPABILITIES",
+        "scope": "CEREBRO_HEADLESS_OIDC_VAULT_READ_AND_SYNTHETIC_EDGE_DELETE",
+        "features": [
+          "service_identity",
+          "read_inventory",
+          "readonly_edge_broker",
+          "synthetic_single_edge_delete_proof"
+        ],
+        "evidence": "docs/FACT001_SUPABASE_MGMT_P2_2026-11-11.md",
+        "excluding": [
+          "persistent_general_management_write",
+          "DB_Auth_modification",
+          "PROD",
+          "Console"
+        ],
+        "security_notice": "HIGH_RISK_RLS_IN_EXISTING_SEO_SCHEMA_DO_NOT_CHANGE_WITHOUT_DEPENDENCY_GATES"
       }
     },
     {
@@ -1518,6 +1555,23 @@
         "excluded": "Global repository/org creation and administration blocked by scope; durable cross-repo autonomy not proven",
         "console_dependency": false,
         "full_universal": false
+      },
+      "capability_acceptance_20261112": {
+        "status": "VERIFIED_REPOSITORY_SCOPED_CAPABILITIES",
+        "scope": "CEREBRO_GITHUB_ACTIONS_OWN_REPO",
+        "features": [
+          "repo_read",
+          "file_crud",
+          "branch_and_pr_workflows",
+          "signed_owner_order"
+        ],
+        "evidence": "docs/FACT001_GITHUB_FACTORY_PERMISSION_P1_2026-11-11.md",
+        "excluding": [
+          "global_repository_creation",
+          "organization_admin",
+          "PROD",
+          "Console"
+        ]
       }
     }
   ],
