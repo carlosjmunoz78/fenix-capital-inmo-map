@@ -425,7 +425,7 @@
         "run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43115287406"
       },
       "d1_encrypted_backup_candidate_20261112": {
-        "state": "PREPARED_SIGNED_SERVICE_CI_GREEN_BUT_ACTIVATION_BLOCKED",
+        "state": "CORRECTED_D1_WRITE_SOURCE_CI_GREEN_DEPLOY_SECURITY_BLOCKED",
         "format": "FACT001-D1-FULL-DATA-AES256GCM-V1",
         "source": "services/provider-headless-lab/d1-backup-envelope.mjs",
         "tests": "services/provider-headless-lab/tests/d1-backup-envelope.test.mjs",
@@ -436,7 +436,7 @@
         "independent_key_escrow": false,
         "download_from_offsite_and_restore": false,
         "promotion_authorized": false,
-        "next_block": "REVIEW_POLICY_BLOCKER_AUTHORIZE_SAFE_SIGNED_DEPLOY_WITH_ROLLBACK_NO_BYPASS; THEN ONE_SHOT_ENCRYPTED_ARTIFACT_DRIVE_READBACK",
+        "next_block": "SECURITY_REVIEW_GATE_OR_OFFICIAL_DEPLOYMENT_APPROVAL_WITH_EXISTING_INERT_BASELINE_AND_NO_GUARD_BYPASS",
         "vault_key_name": "cerebro_fact001_d1_backup_aes256_lab_v1",
         "vault_key_created_server_side": true,
         "vault_key_value_read_or_exported": false,
@@ -456,7 +456,7 @@
           "hash": "a7b8ea376ab5f5e769c9573f268c8463641d1d14ed017d438949f0bef4c2a86c",
           "mode": "DISABLED_404_NO_VAULT_ACCESS"
         },
-        "candidate_deploy": "BLOCKED_BY_TOOL_SECURITY_CONTROLS_NO_RETRY",
+        "candidate_deploy": "BLOCKED_BY_TOOL_SECURITY_CONTROLS_RECHECKED_20261112_NO_ALTERNATE_PATH",
         "backend_cryptography_active": false,
         "offsite_drive_folder_id": "1ho4w2YufG7C_iRgN9iATtERyPTgnXBPR",
         "offsite_drive_folder_private": true,
@@ -466,7 +466,17 @@
         "d1_read_token_status": "ACTIVE_2026_11_12",
         "d1_read_token_name": "CEREBRO-FACT001-D1-READ-LAB-20261110",
         "d1_read_token_expires_on": "2026-11-17T00:00:00Z",
-        "d1_read_token_rotation_gate": "PENDING_BEFORE_EXPIRY_IF_BACKUP_NOT_COMPLETED"
+        "d1_read_token_rotation_gate": "PENDING_BEFORE_EXPIRY_IF_BACKUP_NOT_COMPLETED",
+        "corrected_source_commit": "5a6952872023a5fba5a83842340e5b89e97fef92",
+        "ci_corrected": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43126052486",
+        "d1_export_requires_permission": "D1 Write",
+        "existing_d1_write_token_name": "CEREBRO-FACT001-GATEWAY-RECOVERY-D1-WRITE-LAB-20261111",
+        "existing_d1_write_token_vault_name": "cerebro_cf_gateway_recovery_d1_write_lab_20261111",
+        "existing_d1_write_token_expires_on": "2026-12-11T00:00:00Z",
+        "cross_service_credential_reuse_review": "PENDING",
+        "export_locks_d1": "REQUIRES_QUIESCENCE_OR_MAINTENANCE_WINDOW",
+        "activated_edge_version": 1,
+        "activated_edge_is_inert": true
       },
       "d1_synthetic_offsite_restoration_20261112": {
         "state": "PHYSICAL_INDEPENDENT_OFFSITE_TRANSPORT_AND_RESTORE_VERIFIED_FIXTURE_ONLY",
