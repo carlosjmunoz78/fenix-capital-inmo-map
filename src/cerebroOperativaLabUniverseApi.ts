@@ -43,9 +43,13 @@ function decode(raw:unknown):OwnerUniverse|null{
  if(!['OK','PARTIAL'].includes(str(raw.status)))return null;
  // The LAB endpoint must explicitly state it has not executed/write-promoted.
  if(raw.live_writes!==false||raw.prod_execution_enabled!==false)return null;
+ // V0 server only validates Fénix. Refuse unknown future scope labels until
+ // their membership contract has been implemented and tested server-side.
+ const verifiedScope=str(raw.owner_scope,90);
+ if(verifiedScope!=='SERVER_VERIFIED_FENIX_ONLY')return null;
  const registry=raw.registry,factory=raw.factory;
  const companies=convert(registry.companies,r=>{
-  const id=str(r.company_id,80).toLowerCase();if(!ID.test(id))return null;
+  const id=str(r.company_id,80).toLowerCase();if(!ID.test(id)||id!=='fenix')return null;
   return {company_id:id,environment:str(r.environment,32),registry_state:str(r.registry_state,48),
    access_status:str(r.access_status,90),prod_authorized:flag(r.prod_authorized)};
  });
