@@ -6,7 +6,7 @@
  */
 import {sendImageQaFromCerebro} from './sender-core.mjs';
 export const SIGNED_QUEUE='cerebro-ums001-image-signed-command-lab-eu';
-export const SIGNATURE_KEY_ID='UMS001-LAB-ORCH-ED25519-20261112-V1';
+export const SIGNATURE_KEY_ID='UMS001-LAB-ORCH-ED25519-20261112-V2';
 export const ISSUER='cerebro-ums001-signed-orchestrator-lab-eu';
 const SCOPE=Object.freeze({schema_version:1,actor_id:'cerebro-orchestrator-lab',
  company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
@@ -15,7 +15,7 @@ const EXPECTED_PAYLOAD_KEYS=[...Object.keys(SCOPE),'request_id','order_id','issu
  'issued_at','expires_at','nonce'];
 // Single immutable canary; do not authorize any other order even with a
 // valid signature/key. Multi-order autonomy requires a separate audited policy.
-export const EXPECTED_ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261117';
+export const EXPECTED_ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261118';
 export const EXPECTED_REQUEST_ID='UMS001-SENDER-REQ-AUTOSIGNED20261112';
 const HASH=/^[a-f0-9]{64}$/;
 const NONCE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
