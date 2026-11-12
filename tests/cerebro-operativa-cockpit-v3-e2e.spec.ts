@@ -118,6 +118,17 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador'])
   await expect(bar.getByRole('button',{name:new RegExp(name,'i')})).toBeVisible();
  await expect(cockpit.getByRole('heading',{name:'¿Qué necesitas hacer?'})).toBeVisible();
+ // The five-tab bar must stay before content and must never float over the command field.
+ await expect(page.locator('.cerebro-interface-bar')).toHaveCSS('position','relative');
+ const command=cockpit.getByRole('textbox',{name:'Pregunta u orden'});
+ await command.scrollIntoViewIfNeeded();
+ const overlaps=await page.evaluate(()=>{
+  const bar=document.querySelector('.cerebro-interface-bar')?.getBoundingClientRect();
+  const field=document.querySelector('.op3-input-frame')?.getBoundingClientRect();
+  return Boolean(bar&&field&&bar.bottom>field.top&&bar.top<field.bottom);
+ });
+ expect(overlaps).toBe(false);
+
  await expect(cockpit.getByText('Actividad GitHub disponible')).toBeVisible();
  await expect(cockpit.locator('.op3-pulse.is-working')).toBeVisible();
  await expect(cockpit.locator('.op3-indicators')).toContainText('En ejecución');
