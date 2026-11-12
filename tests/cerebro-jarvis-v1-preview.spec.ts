@@ -93,8 +93,9 @@ test('JARVIS Work PREPROD · clean home + project workspace + Codex/Work + Opera
  await expect(composer).toBeEnabled();
  await composer.fill('Prueba aislada PREPROD');
  await page.locator('.operativa-send').click();
- await expect(page.getByText('Prueba aislada PREPROD',{exact:true})).toBeVisible();
- await expect(page.getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
+ // Only an actual chat bubble counts as sent. A draft in either textarea is not delivery.
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-user').getByText('Prueba aislada PREPROD',{exact:true})).toBeVisible();
+ await expect(page.locator('.jarvis-conversation .cerebro-chat-line.cerebro-chat-cerebro').getByText('Respuesta aislada PREPROD.',{exact:true})).toBeVisible();
  await expectNoLegacyBrand(page);
 
  await page.getByRole('button',{name:'Herramientas',exact:true}).click();
