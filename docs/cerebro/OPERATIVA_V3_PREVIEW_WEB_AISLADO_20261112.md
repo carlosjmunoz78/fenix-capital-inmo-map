@@ -79,3 +79,22 @@
 - Evidencia en GitHub Actions: [Operativa V1 Gate #43329265717](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265717) **SUCCESS**; [Cockpit V3 Chromium #43329265791](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265791) **SUCCESS**; [Voice Contract #43329265940](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265940) **SUCCESS**.
 
 **No afirmar publicación:** este cambio no se ha fusionado a main, no se ha desplegado en App PROD, ni se ha probado el resultado en una sesión real de esa versión. La captura de usuario no representa el código V3 del PR. Pueden quedar estilos adicionales en el paquete PROD que solo se acreditarán mediante OLD vs NEW y aceptación visual real. El próximo gate sigue siendo el E2E positivo del propietario para Gateway LAB y después promoción gradual con rollback.
+
+## Reconciliación con la Operativa del navegador · 13/11/2026
+
+**Inventario OLD vs V3** (separado de su identificación exacta de despliegue):
+- En la pestaña autenticada de Opera, la Operativa real incluye `Conversación con CEREBRO`, historial y compositor `Mensaje para CEREBRO`, con las cinco pestañas Inicio/JARVIS/Operativa/Neuronal/Navegador.
+- El componente de Operativa utilizado originalmente en PR #57 **no contenía ese chat visible**, porque se creó desde una línea de código anterior. Se identificó el código funcional equivalente en `fix/cerebro-operativa-chat-dock-layout-20261112`. La equivalencia es visual/estructural; **no se ha identificado de manera concluyente el SHA desplegado en app.fenixcapital.es**.
+- Se incorporaron al PR #57, **sin sustituir ni modificar main**, los ficheros `src/CerebroOperativeLiveConsole.tsx`, `src/useCerebroOperativaChat.ts` y `src/cerebro-operative-live-console.css` como contrato de la Operativa visible que se conserva por defecto.
+- `src/CerebroConsoleHost.tsx` monta el chat existente por defecto y reserva `CerebroOperativeConsole visualPreview` para la V3 opcional. Solo una de estas vistas se monta por vez; los chats no se ejecutan simultáneamente. El chat real utiliza `postCerebroConsoleChat` y conserva su protección de confirmación de voz; la V3 opcional conserva temporalmente el wrapper V0, hasta validación positiva autenticada.
+- Causa de una regresión adicional: `JarvisVisibleLanguageGuard` reescribía etiquetas `CEREBRO`→`JARVIS` durante el acceso inicial a la ruta, lo que cambiaba el nombre accesible del compositor y alteraba el contrato de Operativa. Ahora el guard de nombres se monta solo para JARVIS/V0, **también durante la comprobación inicial de sesión**. No cambia las funciones de seguridad del Gateway.
+- La cabecera original de cinco pestañas permanece en el flujo del documento solo para `view-operativa`; el composer no queda bajo un menú flotante. En móviles se conservan las cinco pestañas en una fila con ancho disponible.
+
+**Evidencia de pruebas físicas con navegador sintético, NO sesión real:**
+- [Operativa con chat auténtico y OLD vs NEW #43332079954](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43332079954): SUCCESS, incluido montaje de chat, escritura, respuesta, política de potencia, inspector, navegación, etiquetas correctas y capturas.
+- [Cockpit V3 visual LAB #43332080017](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43332080017): SUCCESS.
+- [Contrato de voz #43332079963](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43332079963): SUCCESS.
+- Tras la ampliación del flujo CI, [Operativa con capturas #43331717981](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43331717981) resultó ERROR en la primera iteración por el guard temporal, y después se corrigió; el resultado final SUPERADO es el indicado en los runs superiores y NO debe atribuirse a ese run fallido.
+- Artefacto final `operativa-live-chat-default-qa` del workflow #43332079954: dos imágenes sintéticas (1280×1563 escritorio y 390×844 móvil). El compositor móvil queda debajo del primer pliegue por su contenido; es desplazable y visible, no está cubierto por el menú. No se certifica UX móvil premium final.
+
+**Pendiente (NO PROMOVER):** E2E positivo del propietario en Gateway LAB, permisos completos multiempresa, confirmación del SHA exacto desplegado en App real, revisión visual definitiva, comparación OLD vs NEW en sesión real, rollback y tribunal. PR #57 permanece DRAFT; no ha habido actualización de App/CRM/DNS/PROD.
