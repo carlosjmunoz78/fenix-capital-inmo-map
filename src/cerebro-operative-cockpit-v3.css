@@ -89,7 +89,7 @@
  box-shadow:0 0 0 1px rgba(62,182,234,.12),0 0 35px rgba(25,190,252,.11),inset 0 2px 19px rgba(3,16,30,.6)}
 .op3-input-frame:focus-within{border-color:#83e6ff;box-shadow:0 0 0 2px #45c8ee4d,0 0 36px #0cb8f82e}
 .op3-input-frame textarea{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#f2fbff;
- resize:vertical;padding:11px 17px;font-size:15px;max-height:150px}
+ resize:none;padding:11px 17px;font-size:15px;max-height:150px}
 .op3-input-frame textarea::placeholder{color:#81a5b9}
 .op3-icon-button{width:39px;height:39px;border:0;border-radius:50%;background:transparent;color:#b7d8e6;display:grid;place-items:center}
 .op3-icon-button.is-active{color:#96ecff;background:#0f536b}
