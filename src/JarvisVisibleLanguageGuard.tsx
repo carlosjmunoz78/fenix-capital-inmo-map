@@ -12,7 +12,7 @@ const REPLACEMENTS:[RegExp,string][]=[
 const ATTRIBUTES=['placeholder','title','aria-label','alt'] as const;
 
 function isJarvisSurface(){
- if(typeof window==='undefined'||window.location.pathname.replace(/\\/+$/,'')!=='/cerebro')return false;
+ if(typeof window==='undefined'||window.location.pathname.replace(/\/+$/,'')!=='/cerebro')return false;
  const section=new URLSearchParams(window.location.search).get('section');
  return !section||section==='jarvis'||section==='v0'||section==='legacy-v0';
 }
