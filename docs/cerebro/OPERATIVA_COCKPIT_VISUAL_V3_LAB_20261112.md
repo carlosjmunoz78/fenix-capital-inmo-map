@@ -27,12 +27,39 @@ JARVIS, Neuronal, Navegador, CRM, Supabase, DNS, Wordpress ni main.
 - El inspector se muestra sobre la barra principal solo cuando está abierto,
   para que el botón de cierre sea alcanzable con ratón y teclado.
 
+## Conexión funcional LAB · Implementada en esta rama (sin promoción)
+- `GET /owner-universe?company_id=all` en el Gateway LAB v11 existente,
+  mediante sesión Supabase del usuario, mismo dominio del proyecto, GET
+  de solo lectura y respuesta saneada.
+- El componente permite consultar **Entidades, Proyectos y Motores**:
+  empresas verificadas y sin vincular diferenciadas, proyectos con ID/estado,
+  estados de motores registrados, catálogo FACT-001 (definiciones) y directorios
+  GitOps (estructura), además de ejecución observada en GitHub.
+- La petición se cancela al cambiar de empresa/desmontar; los datos de otra
+  selección no aparecen temporalmente al cambiar el contexto.
+- Si el servidor niega AION o CAPTACASA, aparece `Sin autorización` y no se
+  muestran los proyectos ni los motores de Fénix en la vista de esa empresa.
+- Solo se habilitan acciones de consulta de empresa cuando su contexto está
+  verificado por el servidor; un selector nunca concede permisos.
+- `status=PARTIAL` muestra fuentes parciales; ausencia de registros no
+  equivale a ausencia de recursos en todo CEREBRO.
+- Datos del E2E nuevo **sintéticos**, no constituye prueba HTTP autenticada
+  con el propietario real: ese gate continúa PENDIENTE.
+
 ### Datos disponibles vs no verificados
 - Trabajos/motores se muestran solo cuando existen en la respuesta autorizada de
   actividad de GitHub, con los enlaces originales de evidencia.
 - Empresas distintas a Fénix no reciben permisos por seleccionar una opción.
-- El inventario de proyectos aún no está conectado a esta vista. Se indica
-  expresamente en pantalla; no se rellenan datos de ejemplo como si fueran reales.
+- **El inventario parcial de proyectos YA ESTÁ CONECTADO EN CÓDIGO DEL PREVIEW**
+  por `GET owner-universe` en `cerebro-console-gateway-v36-followups-lab`.
+  Se muestra únicamente una empresa/proyecto si la identidad y el Gateway
+  confirman su contexto, no el censo de todos los sistemas.
+- Cliente de la vista aislada: `src/cerebroOperativaLabUniverseApi.ts`
+  y `src/CerebroOperativaUniverseViews.tsx`, filtrado server-side.
+  No cambia el Gateway PROD de chat ni la página Operativa predeterminada.
+- Estados actuales conocidos (última lectura administrativa previa): registro
+  PREPROD de empresas vacío, overlay de JARVIS con un proyecto Fénix
+  parcial, tabla PREPROD de motores vacía. No se presentan como inventario completo.
 - Las decisiones humanas/HEM no se infieren de los fallos de workflow;
   esos fallos se denominan **revisiones**, no autorizaciones humanas.
 - Los pasos internos INVESTIGAR/ANALIZAR/EJECUTAR/VERIFICAR/APRENDER se muestran
@@ -69,7 +96,7 @@ porque la rama no se ha promocionado.
 ### Gates para futuras promociones
 1. Aprobación visual de escritorio/tablet/móvil con capturas reales.
 2. E2E autenticado del propietario en entorno aislado y pruebas de permisos;
-   el E2E actual usa exclusivamente fixtures.
+   el E2E actual usa exclusivamente fixtures para validar navegación, fuente LAB y denegación cross-company.
 3. Conectar de forma verificada el inventario completo de empresas, proyectos,
    motores, costes, automatizaciones y decisiones humanas al mismo Gateway.
 4. Auditoría OLD vs NEW, accesibilidad, rollback y política de producción.
