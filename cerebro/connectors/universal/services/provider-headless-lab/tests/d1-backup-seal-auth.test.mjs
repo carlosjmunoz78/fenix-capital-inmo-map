@@ -30,4 +30,8 @@ test('Edge refuses unauthenticated calls before Vault and never returns plaintex
  assert.ok(s.includes("return reply(401,{status:'UNAUTHORIZED'})"));
  assert.ok(s.includes("plaintext_returned:false")&&s.includes('plaintext.fill(0)'));
  assert.ok(!s.includes('service_role')&&!s.includes('DROP TABLE'));
+ assert.ok(s.includes("cerebro_cf_gateway_recovery_d1_write_lab_20261111"));
+ assert.ok(!s.includes("cerebro_cf_d1_read_lab_20261110"));
+ assert.ok(!s.includes("sql.unsafe("));
+ assert.ok(s.includes("finally {secrets.key.fill(0);}"));
 });

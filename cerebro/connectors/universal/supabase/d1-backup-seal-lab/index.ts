@@ -4,7 +4,7 @@ import {verifyGitHubOidc} from './auth.mjs';
 import {assertOrder} from './order.mjs';
 import {sealD1Backup,openD1Backup,D1_BACKUP_SCOPE} from './d1-backup-envelope.mjs';
 const ACCOUNT='e39a57e1ac42650ca5a6d5307cf0ac8e',DB='1305f791-7c44-47f9-946b-f330a09c88aa';
-const SECRET_D1='cerebro_cf_d1_read_lab_20261110',SECRET_AES='cerebro_fact001_d1_backup_aes256_lab_v1',CAP=8_000_000;
+const SECRET_D1='cerebro_cf_gateway_recovery_d1_write_lab_20261111',SECRET_AES='cerebro_fact001_d1_backup_aes256_lab_v1',CAP=8_000_000;
 const H={'content-type':'application/json','cache-control':'no-store','x-content-type-options':'nosniff'};
 const reply=(status:number,body:Record<string,unknown>)=>new Response(JSON.stringify(body),{status,headers:H});
 const bearer=(req:Request)=>{const s=req.headers.get('authorization')||'';return s.startsWith('Bearer ')?s.slice(7):'';};
@@ -12,7 +12,7 @@ async function vault(){
  const url=Deno.env.get('SUPABASE_DB_URL');if(!url)throw Error('VAULT_DB_UNAVAILABLE');
  const sql=postgres(url,{max:1,prepare:false,connect_timeout:5,idle_timeout:1});
  try{
-  const rows=await sql.unsafe("select name,decrypted_secret from vault.decrypted_secrets where name in ('cerebro_cf_d1_read_lab_20261110','cerebro_fact001_d1_backup_aes256_lab_v1')");
+  const rows=await sql`select name,decrypted_secret from vault.decrypted_secrets where name=${SECRET_D1} or name=${SECRET_AES}`;
   const m=new Map(rows.map(x=>[x.name,x.decrypted_secret]));
   const token=m.get(SECRET_D1),hex=m.get(SECRET_AES);
   if(rows.length!==2||typeof token!=='string'||typeof hex!=='string'||!/^[a-fA-F0-9]{64}$/.test(hex))throw Error('VAULT_KEY_OR_TOKEN_MISSING');
@@ -63,15 +63,20 @@ Deno.serve(async req=>{
  try{assertOrder(route==='seal-once'?body:body.order,route==='seal-once'?'seal':'verify');}catch{return reply(403,{status:'ORDER_DENIED'});}
  try{
   const secrets=await vault();
-  if(route==='seal-once'){
-   const sql=await exportSql(secrets.token);const envelope=await sealD1Backup({scope:D1_BACKUP_SCOPE,plaintext:sql,keyBytes:secrets.key});
-   sql.fill(0);secrets.key.fill(0);
-   return reply(200,{status:'D1_BACKUP_CIPHERTEXT_SEALED_LAB',envelope,provider_writes:0,plaintext_returned:false});
-  }
-  const envelope=body.envelope;
-  const plaintext=await openD1Backup({scope:D1_BACKUP_SCOPE,envelope,keyBytes:secrets.key});
-  const bytes=plaintext.byteLength;plaintext.fill(0);secrets.key.fill(0);
-  return reply(200,{status:'D1_BACKUP_DECRYPT_ROUNDTRIP_LAB',plaintext_bytes:bytes,plaintext_sha256:(envelope as {plaintext_sha256:string}).plaintext_sha256,plaintext_returned:false,provider_writes:0});
+  try {
+   if(route==='seal-once'){
+    const plaintext=await exportSql(secrets.token);
+    try {
+     const envelope=await sealD1Backup({scope:D1_BACKUP_SCOPE,plaintext,keyBytes:secrets.key});
+     return reply(200,{status:'D1_BACKUP_CIPHERTEXT_SEALED_LAB',envelope,provider_writes:0,plaintext_returned:false});
+    } finally {plaintext.fill(0);}
+   }
+   const envelope=body.envelope;
+   const plaintext=await openD1Backup({scope:D1_BACKUP_SCOPE,envelope,keyBytes:secrets.key});
+   const bytes=plaintext.byteLength;
+   plaintext.fill(0);
+   return reply(200,{status:'D1_BACKUP_DECRYPT_ROUNDTRIP_LAB',plaintext_bytes:bytes,plaintext_sha256:(envelope as {plaintext_sha256:string}).plaintext_sha256,plaintext_returned:false,provider_writes:0});
+  } finally {secrets.key.fill(0);}
  }catch(e){
   const raw=e instanceof Error?e.message:'';
   const code=/^(D1_EXPORT_HTTP_(401|403|404|429|503)|D1_DOWNLOAD_HTTP_(401|403|404|429|503)|D1_EXPORT_(FAILED|INCOMPLETE|BOOKMARK_INVALID|URL_DENIED|SIZE_DENIED)|VAULT_(DB_UNAVAILABLE|KEY_OR_TOKEN_MISSING)|ENVELOPE_[A-Z0-9_]+)$/.test(raw)?raw:'BACKUP_BLOCKED';
