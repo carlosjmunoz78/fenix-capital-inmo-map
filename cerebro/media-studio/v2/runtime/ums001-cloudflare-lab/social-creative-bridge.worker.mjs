@@ -54,7 +54,7 @@ export default {
   if(batch.queue!==INBOX)deny('WRONG_QUEUE');
   for(const message of batch.messages){
    try{
-    if(env.SOCIAL_BRIDGE_ENABLED!=='true'||!env.OUT_QUEUE||!env.IMAGE_KV)deny('OFF');
+    if(env.SOCIAL_BRIDGE_ENABLED!=='true'||!env.UNIVERSAL_MEDIA||!env.SOC_ENGINE_TOKEN||!env.IMAGE_KV)deny('OFF');
     const item=validate(message.body),key=AUDIT+'events/'+item.request_id+'/'+item.item_id;
     const old=await env.IMAGE_KV.get(key,{type:'json'});
     if(old&&old.state==='QUEUED_FOR_UNIVERSAL_ROUTER'){message.ack();continue;}
@@ -65,12 +65,18 @@ export default {
       publish_requested:false,prompt};
     const briefKey='meta/ums001-ai-image-factory/v1/briefs/SOC-001/'+item.request_id;
     await env.IMAGE_KV.put(briefKey,JSON.stringify(brief));
+    // The bridge is a bound Cloudflare Worker and authenticates itself to the universal gateway.
     const order=normalize(item);
-    await env.OUT_QUEUE.send(order);
     await env.IMAGE_KV.put(key,JSON.stringify({state:'QUEUED_FOR_UNIVERSAL_ROUTER',
       company_id:'fenix',origin_engine_id:'SOC-001',request_id:item.request_id,
       item_id:item.item_id,platform_id:item.platform_id,at:new Date().toISOString(),
-      source:'SOCIAL_CONTENT_REQUESTED_PRIVATE_QUEUE',publish_authorized:false}));
+      source:'SOCIAL_SERVICE_AUTHENTICATED_GATEWAY_LAB',publish_authorized:false}));
+    try{await env.UNIVERSAL_MEDIA.submitEngine({
+       company_id:'fenix',environment:'LAB',origin_engine_id:'SOC-001',
+       request_id:item.request_id,item_id:item.item_id,channel_id:item.platform_id,
+       prompt,rights_profile:'SYNTHETIC_ORIGINAL',publish_requested:false
+      },env.SOC_ENGINE_TOKEN);
+    }catch(e){await env.IMAGE_KV.put(key,JSON.stringify({state:'HELD',code:'AUTHENTICATED_DISPATCH_FAILED',at:new Date().toISOString(),publish_authorized:false}));throw e;}
     message.ack();
    }catch(e){
     const code=String(e?.message||'ERROR').replace(/[^A-Z0-9_]/gi,'_').slice(0,85);
