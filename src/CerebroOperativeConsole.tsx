@@ -1,17 +1,14 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {AudioLines,ChevronDown,ExternalLink,Mic,Send,ShieldCheck,Square,X} from 'lucide-react';
-import CerebroConsoleShell from './CerebroConsoleShell';
-import {JarvisConversationBridgeContext,JarvisTranscriptContext,type JarvisConversationDriver,type JarvisTranscriptTurn} from './jarvisConversationBridge';
+import {useCerebroOperativaChat} from './useCerebroOperativaChat';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
 
-type CoreSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
 type CompanyKey='all'|'fenix'|'aion'|'captacasa';
 type PowerMode='Suave'|'Normal'|'Alto'|'Máximo';
 type QuickView='Ahora'|'Hoy'|'Esta noche'|'Próximamente'|'Terminado'|'Historial';
 
-const EMPTY:CoreSnapshot={ready:false,sending:false,voiceActive:false,voiceListening:false,voiceSpeaking:false};
 const ACTIVE_STATUSES=new Set(['in_progress']);
 const QUEUED_STATUSES=new Set(['queued','waiting','requested','pending']);
 const COMPANY_LABELS:Record<CompanyKey,string>={all:'Todas las empresas',fenix:'Fénix Capital',aion:'AION',captacasa:'CAPTACASA'};
@@ -43,9 +40,10 @@ function WorkRow({run,now,onOpen}:{run:CerebroActivityRun;now:number;onOpen:(run
 
 export default function CerebroOperativeConsole(){
  const[composer,setComposer]=useState('');
- const[transcript,setTranscript]=useState<JarvisTranscriptTurn[]>([]);
+ const chat=useCerebroOperativaChat();
+ const transcript=chat.lines;
+ const snapshot={ready:chat.ready,sending:chat.sending,voiceActive:chat.voiceActive,voiceListening:chat.voiceListening,voiceSpeaking:chat.voiceSpeaking};
  const[sourceReason,setSourceReason]=useState('');
- const[snapshot,setSnapshot]=useState<CoreSnapshot>(EMPTY);
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
  const[source,setSource]=useState<'LIVE'|'CACHED'|'UNAVAILABLE'>('UNAVAILABLE');
  const[observedAt,setObservedAt]=useState('');
@@ -57,12 +55,11 @@ export default function CerebroOperativeConsole(){
  const[selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
  const[now,setNow]=useState(()=>Date.now());
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
- const driverRef=useRef<JarvisConversationDriver|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
 
  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
  useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){setRuns((data.runs||[]).filter(run=>run.company_id==='fenix'));setSource(data.source_status);setObservedAt(data.observed_at);setSourceReason('')}else{setSource('UNAVAILABLE');setRuns([]);setSourceReason(data?.reason?.slice(0,160)||`La fuente de actividad no respondió correctamente (HTTP ${status||'sin conexión'}).`)}};void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)}},[]);
- useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot({ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')})})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
+
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  useEffect(()=>{try{window.sessionStorage.setItem('operativa_power_mode',power)}catch{/* optional */}},[power]);
 
@@ -77,10 +74,10 @@ export default function CerebroOperativeConsole(){
 
  async function sendCommand(raw:string){
   const clean=raw.trim();
-  if(!clean||snapshot.sending||!driverRef.current)return false;
+  if(!clean||snapshot.sending||!chat.ready)return false;
   // Fénix is the only backend-authorized scope at this stage. UI labels never grant tenant rights.
   if(company!=='fenix')return false;
-  return driverRef.current.sendText(clean);
+  return chat.sendText(clean);
  }
  async function submit(event?:FormEvent){
   event?.preventDefault();
@@ -99,13 +96,13 @@ export default function CerebroOperativeConsole(){
   const prompts={Concentración:'Solicito modo concentración: prioriza el trabajo seleccionado dentro de políticas.', 'Esta noche':'Solicito planificar el trabajo de esta noche sin publicar cambios no autorizados.',Emergencia:'Solicito revisar prioridades críticas sin desactivar controles.'};
   void sendCommand(prompts[mode]).then(ok=>{if(!ok)setDictationError('No se ha podido enviar la solicitud al Gateway.')});
  }
- function toggleVoice(){if(dictating)return;driverRef.current?.toggleVoice();}
+ function toggleVoice(){if(dictating)return;chat.toggleVoice();}
 
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false)}
  function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
 
- return <JarvisConversationBridgeContext.Provider value={driverRef}><JarvisTranscriptContext.Provider value={setTranscript}><main className="operativa-premium" aria-label="Operativa">
+ return <main className="operativa-premium" aria-label="Operativa">
   <div className="operativa-hud-grid" aria-hidden="true"/>
   <section className="operativa-contextbar">
    <div className="operativa-context-selectors"><label><span className="sr-only">Empresa</span><select value={company} onChange={event=>setCompany(event.target.value as CompanyKey)} aria-label="Empresa">{Object.entries(COMPANY_LABELS).map(([value,label])=><option key={value} value={value} disabled={value!=='fenix'}>{label}{value!=='fenix'?' · Pendiente de conexión':''}</option>)}</select></label><span>/</span><span className="operativa-project" title="Contexto general de Fénix">General</span></div>
@@ -128,7 +125,7 @@ export default function CerebroOperativeConsole(){
   </section>
 
   <section className="operativa-dialogue" aria-label="Conversación con CEREBRO">
-   <header><strong>Conversación con CEREBRO</strong><small>Sesión autenticada · voz genérica del navegador</small></header>
+   <header><strong>Conversación con CEREBRO</strong><small>{chat.statusMessage} · Voz genérica del navegador</small></header>
    <div className="operativa-dialogue-log" role="log" aria-live="polite">
     {transcript.length?transcript.map((turn,index)=><article key={index} className={turn.role==='user'?'is-user':'is-cerebro'}><strong>{turn.role==='user'?'Tú':'CEREBRO'}</strong><p>{turn.text}</p></article>):<p className="operativa-dialogue-empty">Escribe abajo para iniciar la conversación. Aquí aparecerán tus mensajes y las respuestas verificadas del Gateway.</p>}
    </div>
@@ -137,6 +134,5 @@ export default function CerebroOperativeConsole(){
   <section className="operativa-jarvis-composer" aria-label="Hablar con CEREBRO"><button type="button" className="operativa-attach" aria-label="Archivos todavía no disponibles" title="Archivos: conexión pendiente" disabled><span>+</span></button><form onSubmit={submit} className="operativa-composer-form"><textarea ref={composerRef} value={composer} onChange={event=>setComposer(event.target.value)} onKeyDown={onComposerKeyDown} disabled={!snapshot.ready||snapshot.sending} rows={1} aria-label="Mensaje para CEREBRO"/><button type="button" className={`operativa-dictate ${dictating?'is-active':''}`} onClick={toggleDictation} disabled={!snapshot.ready||snapshot.sending||snapshot.voiceActive||!voiceRecognitionSupported()} aria-label={dictating?'Detener dictado':'Dictar'}>{dictating?<Square size={17}/>:<Mic size={19}/>}</button><button type="button" className={`operativa-voice ${snapshot.voiceActive?'is-active':''} ${snapshot.voiceListening?'is-listening':''} ${snapshot.voiceSpeaking?'is-speaking':''}`} onClick={toggleVoice} disabled={!snapshot.ready||snapshot.sending||dictating} aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'}><AudioLines size={20}/><span/><span/><span/></button>{composer.trim()?<button type="submit" className="operativa-send" disabled={!snapshot.ready||snapshot.sending}><Send size={18}/></button>:null}</form>{dictationError?<small className="operativa-dictation-error" role="status">{dictationError}</small>:null}</section>
 
   {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
-  <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
- </main></JarvisTranscriptContext.Provider></JarvisConversationBridgeContext.Provider>;
+ </main>;
 }
