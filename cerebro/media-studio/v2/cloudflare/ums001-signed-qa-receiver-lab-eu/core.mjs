@@ -13,9 +13,11 @@ const SCOPE=Object.freeze({schema_version:1,actor_id:'cerebro-orchestrator-lab',
  mode:'QA_METADATA_ONLY',action:'SUBMIT_ARCHIVED_LINKEDIN_QA'});
 const EXPECTED_PAYLOAD_KEYS=[...Object.keys(SCOPE),'request_id','order_id','issuer',
  'issued_at','expires_at','nonce'];
-const HASH=/^[A-Fa-f0-9]{64}$/;
-const ID=/^UMS001-LAB-LI-FEED-01-ARCHIVE-[0-9]{8}$/;
-const REQ=/^UMS001-SENDER-REQ-[A-Z0-9_-]{8,64}$/;
+// Single immutable canary; do not authorize any other order even with a
+// valid signature/key. Multi-order autonomy requires a separate audited policy.
+export const EXPECTED_ORDER_ID='UMS001-LAB-LI-FEED-01-ARCHIVE-20261116';
+export const EXPECTED_REQUEST_ID='UMS001-SENDER-REQ-AUTOSIGNED20261112';
+const HASH=/^[a-f0-9]{64}$/;
 const NONCE=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const fail=code=>{throw Error('UMS001_SIGNED_INBOX_'+code)};
 const canon=o=>JSON.stringify(o,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?
@@ -25,7 +27,9 @@ const stableDate=s=>typeof s==='string'&&Number.isFinite(Date.parse(s))&&
  new Date(s).toISOString()===s;
 export async function verifyScheduledCommand(e,env,nowMs=Date.now()){
  if(env?.SIGNED_SENDER_ENABLED!=='true'||typeof env.ORCH_PUBLIC_SPKI_BASE64!=='string'||
-    env.ORCH_PUBLIC_SPKI_BASE64.length<40)fail('TRUST_NOT_CONFIGURED');
+    env.ORCH_PUBLIC_SPKI_BASE64.length<40||
+    typeof env.ORCH_PUBLIC_SPKI_SHA256!=='string'||
+    !HASH.test(env.ORCH_PUBLIC_SPKI_SHA256))fail('TRUST_NOT_CONFIGURED');
  if(!e||typeof e!=='object'||Array.isArray(e)||Object.keys(e).length!==4||
     e.schema_version!==2||e.key_id!==SIGNATURE_KEY_ID||
     !Object.hasOwn(e,'payload')||!Object.hasOwn(e,'signature')||
@@ -34,8 +38,9 @@ export async function verifyScheduledCommand(e,env,nowMs=Date.now()){
  if(!p||typeof p!=='object'||Array.isArray(p)||Object.keys(p).length!==EXPECTED_PAYLOAD_KEYS.length||
     EXPECTED_PAYLOAD_KEYS.some(k=>!Object.hasOwn(p,k)))fail('SIGNED_PAYLOAD_SCHEMA');
  for(const [k,v] of Object.entries(SCOPE))if(p[k]!==v)fail('SIGNED_SCOPE_'+k);
- if(p.issuer!==ISSUER||!REQ.test(p.request_id||'')||
-    !ID.test(p.order_id||'')||!NONCE.test(p.nonce||''))fail('SIGNED_IDENTITY');
+ if(p.issuer!==ISSUER||p.request_id!==EXPECTED_REQUEST_ID||
+    p.order_id!==EXPECTED_ORDER_ID||!NONCE.test(p.nonce||''))
+    fail('SIGNED_IDENTITY');
  if(!stableDate(p.issued_at)||!stableDate(p.expires_at)||
     !Number.isFinite(nowMs))fail('SIGNED_TIME_SCHEMA');
  const issued=Date.parse(p.issued_at),expires=Date.parse(p.expires_at);
@@ -45,11 +50,21 @@ export async function verifyScheduledCommand(e,env,nowMs=Date.now()){
   fail('SIGNED_SIGNATURE_ENCODING');
  let ok=false;
  try{
-  const key=await crypto.subtle.importKey('spki',fromBase64(env.ORCH_PUBLIC_SPKI_BASE64),
+  // Fingerprint comes from separately pinned deployment configuration.
+  // A malformed or unexpectedly rotated public key never becomes trusted
+  // just because it appears as a Worker binding.
+  const pub=fromBase64(env.ORCH_PUBLIC_SPKI_BASE64);
+  const digest=await crypto.subtle.digest('SHA-256',pub);
+  const fingerprint=Array.from(new Uint8Array(digest),v=>v.toString(16).padStart(2,'0')).join('');
+  if(fingerprint!==env.ORCH_PUBLIC_SPKI_SHA256)fail('TRUST_FINGERPRINT_MISMATCH');
+  const key=await crypto.subtle.importKey('spki',pub,
    {name:'Ed25519'},false,['verify']);
   ok=await crypto.subtle.verify('Ed25519',key,fromBase64(e.signature),
    new TextEncoder().encode(canon(p)));
- }catch{ok=false}
+ }catch(error){
+  if(String(error?.message||'').includes('TRUST_FINGERPRINT_MISMATCH'))throw error;
+  ok=false;
+ }
  if(!ok)fail('SIGNED_SIGNATURE_INVALID');
  return {command:Object.fromEntries(Object.keys(SCOPE).concat(['request_id','order_id'])
    .map(k=>[k,p[k]])),nonce:p.nonce,issuer:p.issuer,key_id:e.key_id};
