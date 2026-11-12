@@ -115,24 +115,38 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
  const queuedCount=useMemo(()=>filteredRuns.reduce((sum,run)=>sum+physicalQueued(run),0),[filteredRuns]);
  const nextRun=queuedRuns[0]||null,latestResult=completedRuns[0]||null;
 
- function sendCommand(raw:string){const clean=raw.trim();if(!clean||!snapshot.ready||snapshot.sending)return false;const core=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console'),textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea'),form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return false;const prefix=company==='all'?'':`Contexto de empresa: ${COMPANY_LABELS[company]}. `;setReactTextareaValue(textarea,`${prefix}${clean}`);window.setTimeout(()=>form.requestSubmit(),0);return true}
+ const previewScopePermitted=company==='all'||company==='fenix';
+ function sendCommand(raw:string){const clean=raw.trim();if((visualPreview&&!previewScopePermitted)||!clean||!snapshot.ready||snapshot.sending)return false;const core=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console'),textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea'),form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return false;const prefix=company==='all'?'':`Contexto de empresa: ${COMPANY_LABELS[company]}. `;setReactTextareaValue(textarea,`${prefix}${clean}`);window.setTimeout(()=>form.requestSubmit(),0);return true}
  function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('')}
  function changePower(next:PowerMode){setPower(next);sendCommand(`Ajusta el ritmo operativo a ${next}. Mantén todas las protecciones, no generes gasto no autorizado y no publiques nada saltándote controles. Confirma solo cuando el cambio esté realmente aplicado.`)}
  function activateMode(mode:'Concentración'|'Esta noche'|'Emergencia'){const prompts={Concentración:'Activa modo concentración: prioriza el trabajo seleccionado o más importante y reduce el resto sin detener obligaciones críticas.','Esta noche':'Organiza el trabajo de esta noche para avanzar todo lo seguro posible sin publicar cambios reales salvo que ya estén autorizados.',Emergencia:'Activa modo emergencia: contiene lo no esencial y prioriza únicamente lo crítico y seguro. No desactives controles de seguridad.'};sendCommand(prompts[mode])}
- function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main');if(button&&!button.disabled)button.click()}
+ function toggleVoice(){if((visualPreview&&!previewScopePermitted)||dictating)return;const button=document.querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main');if(button&&!button.disabled)button.click()}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false)}
- function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function toggleDictation(){if(dictating){stopDictation();return}if((visualPreview&&!previewScopePermitted)||!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
 
+ function changePreviewCompany(next:CompanyKey){
+  if(next===company)return;
+  // Never switch visible tenant scope while the shared V0 voice session can still issue commands.
+  if(snapshot.voiceActive||dictating||snapshot.sending){
+   setDictationError('Finaliza la conversación o la orden actual antes de cambiar de empresa.');
+   return;
+  }
+  setDictationError('');
+  setComposer('');
+  setCompany(next);
+ }
+ 
  if(visualPreview)return <CerebroOperativeCockpitV3
    snapshot={snapshot} composer={composer} onComposerChange={setComposer}
    onSubmit={()=>submit()} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
    dictating={dictating} dictationSupported={voiceRecognitionSupported()}
    dictationError={dictationError} composerRef={composerRef}
-   source={company==='all'||company==='fenix'?source:'UNAVAILABLE'} observedAt={observedAt} company={company} onCompanyChange={setCompany}
-   runs={company==='all'||company==='fenix'?filteredRuns:[]} onOpenRun={setSelectedRun}
+   source={previewScopePermitted?source:'UNAVAILABLE'} observedAt={observedAt} company={company} onCompanyChange={changePreviewCompany}
+   scopeCanExecute={previewScopePermitted}
+   runs={previewScopePermitted?filteredRuns:[]} onOpenRun={setSelectedRun}
    ownerUniverse={universeRecord?.company===company?universeRecord.result:{kind:'loading',data:null}}
-   chatLines={chatMirror}
+   chatLines={previewScopePermitted?chatMirror:[]}
   >
   {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
    <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
