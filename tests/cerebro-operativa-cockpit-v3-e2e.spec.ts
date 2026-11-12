@@ -82,6 +82,34 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
    source:'GITHUB_ACTIONS',source_status:'LIVE',repository:'carlosjmunoz78/fenix-capital-inmo-map',
    runs:[run(12345,'in_progress','FACT-001',null),run(12344,'completed','SEO-001','success')]})});
  });
+ await page.route('https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v36-followups-lab/owner-universe**',route=>{
+  const request=route.request();
+  if(request.method()==='OPTIONS')return route.fulfill({status:204,headers:cors,body:''});
+  const scope=new URL(request.url()).searchParams.get('company_id');
+  if(scope!=='all'&&scope!=='fenix')
+   return route.fulfill({status:207,headers:cors,body:result({
+    status:'PARTIAL',owner_scope:'SERVER_VERIFIED_FENIX_ONLY',
+    live_writes:false,prod_execution_enabled:false,
+    registry:{status:'NOT_CONNECTED',source_status:'LIVE_SERVER_READ',
+      companies:[],projects:[],engines:[]},
+    factory:{status:'OK',source_status:'PUBLIC_GITHUB_LIVE',catalog:[],scaffolded:[]}
+   })});
+  return route.fulfill({status:200,headers:cors,body:result({
+   status:'OK',owner_scope:'SERVER_VERIFIED_FENIX_ONLY',
+   live_writes:false,prod_execution_enabled:false,
+   registry:{status:'OK',source_status:'LIVE_SERVER_READ',
+    companies:[{company_id:'fenix',environment:'PROD',registry_state:'AUTHENTICATED_OWNER_CONTEXT',
+     access_status:'VERIFIED_OWNER_CONTEXT_NOT_REGISTERED',prod_authorized:false}],
+    projects:[{company_id:'fenix',project_id:'PRJ-SUPERAGENT-001',environment:'PROD',
+     project_status:'PARCIAL',access_status:'PROJECT_RECORD_PRESENT_INTEGRATION_UNVERIFIED'}],
+    engines:[]},
+   factory:{status:'OK',source_status:'PUBLIC_GITHUB_LIVE',
+    catalog:[{engine_id:'FACT-001',name:'Fábrica de Motores',version:'0.1',
+     environment:'LAB',declared_state:'DEFINED_NOT_RUNTIME_VERIFIED',source_type:'FACT_ENGINE_SEED_NOT_RUNTIME_EVIDENCE'}],
+    scaffolded:[{engine_id:'FACT-001',source_type:'FACT_SCAFFOLD_DIRECTORY',
+     manifest_verified:false,runtime_verified:false,execution_enabled:false}]}
+  })});
+ });
  await page.goto('/cerebro?section=operativa&visual_lab=cockpit-v3',{waitUntil:'domcontentloaded'});
  const cockpit=page.locator('.op3-root');
  await expect(cockpit).toBeVisible();
@@ -97,13 +125,22 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await cockpit.getByRole('button',{name:'Motores',exact:true}).click();
  await expect(cockpit.getByRole('heading',{name:'Motores observados'})).toBeVisible();
  await expect(cockpit.getByText('FACT-001',{exact:true}).first()).toBeVisible();
+ await expect(cockpit.getByText('Definido · no certifica ejecución')).toBeVisible();
+ await expect(cockpit.getByText('Runtime sin verificar')).toBeVisible();
  await cockpit.getByRole('button',{name:'Trabajos',exact:true}).click();
  await expect(cockpit.getByRole('heading',{name:'Trabajos y ejecuciones'})).toBeVisible();
  await cockpit.getByRole('button',{name:/Inspeccionar/}).first().click();
  await expect(page.getByRole('dialog',{name:'Detalle del trabajo'})).toBeVisible();
  await page.getByRole('dialog',{name:'Detalle del trabajo'}).getByRole('button',{name:'Cerrar'}).click();
  await cockpit.getByRole('button',{name:'Proyectos',exact:true}).click();
- await expect(cockpit.getByText('Sin inventario de proyectos verificado en esta interfaz')).toBeVisible();
+ await expect(cockpit.getByText('PRJ-SUPERAGENT-001',{exact:true})).toBeVisible();
+ await expect(cockpit.getByText('PARCIAL',{exact:true})).toBeVisible();
+ await cockpit.getByRole('button',{name:'Entidades',exact:true}).click();
+ await expect(cockpit.getByText('Contexto del propietario confirmado; registro PREPROD aún sin alta')).toBeVisible();
+ await cockpit.getByRole('combobox',{name:'Entidad'}).selectOption('aion');
+ await expect(cockpit.getByText('No hay acceso verificado a este contexto. Cambiar el selector no concede permisos.')).toBeVisible();
+ await expect(cockpit.getByText('PRJ-SUPERAGENT-001',{exact:true})).toHaveCount(0);
+ await cockpit.getByRole('combobox',{name:'Entidad'}).selectOption('all');
  await cockpit.getByRole('button',{name:'Resumen',exact:true}).click();
  const input=cockpit.getByRole('textbox',{name:'Pregunta u orden'});
  await expect(input).toBeEnabled();
