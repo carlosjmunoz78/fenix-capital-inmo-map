@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-12T13:16:25.281Z",
+  "updated_at": "2026-11-12T13:18:07.522Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -538,7 +538,8 @@
     "github-wide-skills:adf6d8d88d1398bf9ea5",
     "github-wide-skills:da289de3dfbcff3a114b",
     "github-wide-skills:2dba5c2ed390442a3195",
-    "github-wide-skills:46dd1954329035b8393c"
+    "github-wide-skills:46dd1954329035b8393c",
+    "github-wide-skills:f93f0effc1845ca0d3f0"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1668,6 +1669,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 43117139618,
       "checkpointed_at": "2026-11-11T23:06:37.907Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:f93f0effc1845ca0d3f0": {
+      "candidate_id": "github-wide-skills:f93f0effc1845ca0d3f0",
+      "name": "coding-with-agents",
+      "human_alias": "Coding With Agents",
+      "wrapper_id": "skillwrap:710e956d0af34efa0711",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 88.5,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "fralapo/awesome-agent-skills",
+        "upstream_head_commit": "b169016ec6aae764931f919e9ae38a3819266751",
+        "manifest_sha256": "f122988b73010c8a8be4ec32e6f6512b7a074ea18e28c23859606c1f1a1d5243",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 43225886294,
+      "checkpointed_at": "2026-11-12T13:18:07.522Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32815,7 +32852,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "SKILL_AUTONOMY_ACTION_WORKER_IDLE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32828,7 +32865,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 43205606796,
+  "last_discovery_run_id": 43225886294,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
