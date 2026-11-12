@@ -6,6 +6,7 @@ on:
       - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
       - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
+      - cerebro/connectors/universal/services/five-provider-read-lab/requests/order.v1.json
 permissions:
   contents: read
   id-token: write
@@ -202,3 +203,25 @@ jobs:
           for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
           console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
           NODE
+
+  unified-five-read:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_CEREBRO_UNIFIED_5_READ_OWNER')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Test allowlisted 5-provider service router
+        run: node --test cerebro/connectors/universal/services/five-provider-read-lab/tests/*.test.mjs
+      - name: Signed CEREBRO LAB unified 5 provider independent read
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/connectors/universal/services/five-provider-read-lab/run-once.mjs
+      - name: Preserve redacted evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-five-provider-read-lab-evidence
+          path: fact001-five-provider-lab-evidence.json
+          if-no-files-found: ignore
+          retention-days: 30
