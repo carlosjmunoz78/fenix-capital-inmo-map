@@ -10,7 +10,7 @@ const NAMES={d1:'cerebro_cf_gateway_recovery_d1_write_lab_20261111',cloudflare:'
 const SCOPE={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0'};
 const EXPECTED={...SCOPE,source:'registered_automation',operation:'providers.five.inventory.read',provider_set:'cloudflare,vercel,supabase,notion,github',max_cost_eur:0};
 const HEX=/^[a-f0-9]{64}$/;
-const REQUEST=/^FACT001-P5-[0-9]{8}$/;
+const REQUEST=/^(?:FACT001-P5-[0-9]{8}|FACT001-P5-20261112-A1)$/;
 const stop=code=>{throw Error(code)};
 const reply=(status,data)=>new Response(JSON.stringify(data),{status,headers:{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 async function sha(text){const h=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text));return Array.from(new Uint8Array(h),x=>x.toString(16).padStart(2,'0')).join('');}
@@ -72,7 +72,7 @@ Deno.serve(async req=>{
   let claimed=false;
   try{
    const now=Date.now(),digest=await sha(ticket);
-   const claim=await d1("UPDATE fact001_p5_jobs_v1 SET state='RUNNING',attempts=1,claimed_at_ms=?3 WHERE request_id=?1 AND ticket_sha256=?2 AND state='QUEUED' AND attempts=0 AND expires_at_ms>?3 AND automation_id='FACT001_P5_DAILY_READ_V1' AND EXISTS(SELECT 1 FROM fact001_p5_automation_registry_v1 WHERE automation_id='FACT001_P5_DAILY_READ_V1' AND enabled=1) RETURNING request_id,state,attempts",[order.request_id,digest,now],tokens);
+   const claim=await d1("UPDATE fact001_p5_jobs_v1 SET state='RUNNING',attempts=1,claimed_at_ms=?3 WHERE request_id=?1 AND ticket_sha256=?2 AND state='QUEUED' AND attempts=0 AND expires_at_ms>?3 AND automation_id='FACT001_P5_DAILY_READ_V1' AND (request_id!='FACT001-P5-20261112-A1' OR day_key='ACCEPT01') AND EXISTS(SELECT 1 FROM fact001_p5_automation_registry_v1 WHERE automation_id='FACT001_P5_DAILY_READ_V1' AND enabled=1) RETURNING request_id,state,attempts",[order.request_id,digest,now],tokens);
    if(claim.length!==1||claim[0].request_id!==order.request_id||claim[0].state!=='RUNNING'||claim[0].attempts!==1)return reply(409,{status:'DENIED_OR_ALREADY_CLAIMED'});
    claimed=true;
    const report=await readAll(tokens);

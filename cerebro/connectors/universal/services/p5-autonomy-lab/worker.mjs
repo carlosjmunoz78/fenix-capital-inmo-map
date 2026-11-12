@@ -9,8 +9,12 @@ export async function scheduledP5(env,now=Date.now(),http=fetch){
  if(env?.P5_ENABLED!=='true'||!env.RECOVERY_DB)return {status:'DISABLED'};
  const config=await env.RECOVERY_DB.prepare("SELECT enabled,max_daily_jobs,company_id,engine_id,environment,version FROM fact001_p5_automation_registry_v1 WHERE automation_id=?1 LIMIT 1").bind(AUTOMATION).first();
  if(!config||config.enabled!==1||config.max_daily_jobs!==1||Object.entries(SCOPE).some(([k,v])=>config[k]!==v))return {status:'NOT_REGISTERED'};
- const day=new Date(now).toISOString().slice(0,10).replaceAll('-','');
- const requestId='FACT001-P5-'+day;
+ // Single owner-approved physical acceptance, never a replay of the expired daily job.
+ const acceptance=env.P5_ACCEPTANCE_ONCE==='true';
+ const today=new Date(now).toISOString().slice(0,10).replaceAll('-','');
+ if(acceptance&&today!=='20261112')return {status:'ACCEPTANCE_DATE_EXPIRED'};
+ const day=acceptance?'ACCEPT01':today;
+ const requestId=acceptance?'FACT001-P5-20261112-A1':'FACT001-P5-'+today;
  const secret=ticket(),digest=await sha(secret);
  const expires=now+10*60*1000;
  const row=await env.RECOVERY_DB.prepare(
