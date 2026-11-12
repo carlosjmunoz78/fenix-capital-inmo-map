@@ -155,3 +155,24 @@
  .op3-navigation button:nth-child(3){border-right:0}.op3-navigation button:nth-child(-n+3){border-bottom:1px solid var(--op3-line)}
  .op3-toolbar .op3-selectors{gap:10px}.op3-selectors select{max-width:190px}.op3-scope{display:none}}
 @media(prefers-reduced-motion:reduce){.op3-root *,.op3-root *:before,.op3-root *:after{animation:none!important;transition:none!important}}
+
+
+/* Cockpit-only premium treatment of the EXISTING five-tab bar. */
+.cerebro-console-host:has(.op3-root) .cerebro-interface-bar{
+ background:linear-gradient(180deg,rgba(2,13,21,.98),rgba(3,19,32,.96));
+ border-bottom:1px solid rgba(97,211,246,.24);
+ box-shadow:0 12px 30px rgba(0,0,0,.3),0 1px 24px rgba(41,149,214,.045)}
+.cerebro-console-host:has(.op3-root) .cerebro-interface-nav{
+ background:rgba(6,27,42,.72);border-color:rgba(101,190,229,.18)}
+.cerebro-console-host:has(.op3-root) .cerebro-interface-nav button.is-active{
+ color:#ffe7b7;background:linear-gradient(180deg,rgba(153,100,31,.36),rgba(67,45,19,.28));
+ box-shadow:inset 0 -2px 0 #f0b65c,inset 0 0 0 1px rgba(232,179,93,.36),0 0 20px rgba(240,182,92,.12)}
+@media(max-width:660px){
+ .cerebro-console-host:has(.op3-root) .cerebro-interface-bar{padding:5px;overflow:visible;justify-content:center}
+ .cerebro-console-host:has(.op3-root) .cerebro-interface-nav{
+  min-width:0;width:100%;grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1px;padding:3px;margin:0}
+ .cerebro-console-host:has(.op3-root) .cerebro-interface-nav button{
+  min-width:0;max-width:100%;padding:0 2px;font-size:9px;letter-spacing:0;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
