@@ -108,8 +108,8 @@ export function useCerebroOperativaChat(){
    if(!ok&&[401,403].includes(status)){readyRef.current=false;setReady(false)}
    if(ok){
     if(data?.read_context)readContextRef.current=data.read_context;
-    if(Object.prototype.hasOwnProperty.call(data,'learning_candidate'))learningRef.current=data.learning_candidate??null;
-    if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data.action))actionRef.current=null;
+    if(Object.prototype.hasOwnProperty.call(data??{},'learning_candidate'))learningRef.current=data?.learning_candidate??null;
+    if(data?.status==='CANCELED'||data?.status==='ACTION_ACCEPTED'||(data?.status==='ACTION_CONFIRMED'&&!data?.action))actionRef.current=null;
     else if(data?.action)actionRef.current=data.action;
    }
    const next=[...linesRef.current,{role:'cerebro' as const,text:reply}].slice(-24);
