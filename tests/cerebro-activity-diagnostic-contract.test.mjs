@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {transformSync} from 'esbuild';
+import {stripTypeScriptTypes} from 'node:module';
 const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const original=read('cerebro/rollback/operativa-activity-v4-20261112/index.ts');
 const next=read('supabase/functions/cerebro-console-activity-v0/index.ts');
@@ -16,6 +16,6 @@ test('v5 differs from exact live v4 only by safe bounded diagnosis',()=>{
  assert.doesNotMatch(insert2,/console\.log\(token\)|console\.warn\(token\)/);
 });
 test('diagnostic Edge TypeScript source transpiles',()=>{
- const compiled=transformSync(next,{loader:'ts',target:'es2022',format:'esm'});
- assert.ok(compiled.code.length>100);
+ const stripped=stripTypeScriptTypes(next,{mode:'strip'});
+ assert.ok(stripped.length>100);
 });
