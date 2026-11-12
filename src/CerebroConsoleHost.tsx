@@ -56,7 +56,7 @@ export default function CerebroConsoleHost(){
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole visualPreview={visualPreview}/></div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">visualPreview?<CerebroOperativeConsole visualPreview/>:<CerebroOperativeConsole/></div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
