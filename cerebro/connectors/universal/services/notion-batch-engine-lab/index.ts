@@ -12,6 +12,10 @@ const SCOPE={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',v
 const FIXED={...SCOPE,client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-75-100-20261111',index_sha256:INDEX_SHA};
 const LAST_PROVEN='5ad72bef9789927e0caab76ad1f907d7cdef4583d3d2c556c6c5c7ef04bc187f';
 const PREV_DRIVE='1l68TceZpyar7jOoTZI5Nr5OUy4D8-XOg';
+const NEXT_PREVIOUS='8501eb64a02b3bdaa9351fe2c460e81181781e399da7f839f86f0070b1a0c49b';
+const NEXT_DRIVE='1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC';
+const NEXT_FIXED={...SCOPE,client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-100-125-20261112',index_sha256:INDEX_SHA};
+const NEXT_OPERATIONS={'plan-next':'notion.lab.batcher.plan_next','export-next':'notion.lab.batcher.export_next'} as const;
 const VALID_OPERATIONS={plan:'notion.lab.batcher.plan',export:'notion.lab.batcher.export','source-chunk':'notion.lab.batcher.source.chunk'} as const;
 function assertOrder(body:unknown,kind:'plan'|'export'|'source-chunk'){
  if(!body||typeof body!=='object'||Array.isArray(body))throw Error('ORDER_DENIED');
@@ -21,6 +25,16 @@ function assertOrder(body:unknown,kind:'plan'|'export'|'source-chunk'){
  if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(keys)||Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('ORDER_DENIED');
  if(kind==='export'&&(!Number.isSafeInteger(b.item_index)||Number(b.item_index)<0||Number(b.item_index)>=25||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)))throw Error('ORDER_DENIED');
  if(kind==='source-chunk'&&(b.item_index!==23||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)||(b.continuation!==null&&(!b.continuation||typeof b.continuation!=='object'||Array.isArray(b.continuation)))))throw Error('ORDER_DENIED');
+ return b;
+}
+function assertNextOrder(body:unknown,kind:'plan-next'|'export-next'){
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('NEXT_ORDER_DENIED');
+ const b=body as Record<string,unknown>;
+ const expected={...NEXT_FIXED,operation:NEXT_OPERATIONS[kind],offset:100,max_items:25,previous_zip_sha256:NEXT_PREVIOUS,previous_drive_file_id:NEXT_DRIVE};
+ const keys=Object.keys(expected).concat(kind==='export-next'?['item_index','plan_artifact']:[]).sort();
+ if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(keys)||Object.entries(expected).some(([k,v])=>b[k]!==v))
+  throw Error('NEXT_ORDER_DENIED');
+ if(kind==='export-next'&&(!Number.isSafeInteger(b.item_index)||Number(b.item_index)<0||Number(b.item_index)>=25||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)))throw Error('NEXT_ORDER_DENIED');
  return b;
 }
 async function getVault(){
@@ -35,22 +49,25 @@ async function getVault(){
 }
 Deno.serve(async req=>{
  const path=new URL(req.url).pathname;const kind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan')?'plan':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export')?'export':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/source-chunk')?'source-chunk':null;
- if(!kind||req.method!=='POST')return reply(404,{status:'NOT_FOUND'});
+ const nextKind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan-next')?'plan-next':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export-next')?'export-next':null;
+ if((!kind&&!nextKind)||req.method!=='POST')return reply(404,{status:'NOT_FOUND'});
  const auth=req.headers.get('authorization')??'';
  try{if(!auth.startsWith('Bearer '))throw Error('AUTH');await verifyGitHubOidc(auth.slice(7));}catch{return reply(401,{status:'UNAUTHORIZED'});}
  let body:Record<string,unknown>;
- try{const maxBody=kind==='source-chunk'?28500:18500;if(Number(req.headers.get('content-length')||'0')>maxBody)throw Error('LONG');const raw=await req.text();if(raw.length>maxBody)throw Error('LONG');body=assertOrder(JSON.parse(raw),kind);}catch{return reply(403,{status:'ORDER_DENIED'});}
+ try{const maxBody=kind==='source-chunk'?28500:18500;if(Number(req.headers.get('content-length')||'0')>maxBody)throw Error('LONG');const raw=await req.text();if(raw.length>maxBody)throw Error('LONG');body=nextKind?assertNextOrder(JSON.parse(raw),nextKind):assertOrder(JSON.parse(raw),kind!);}catch{return reply(403,{status:'ORDER_DENIED'});}
  try{let {notionToken,encryptionKey}=await getVault();try{
-  if(kind==='plan'){
+  if(kind==='plan'||nextKind==='plan-next'){
+   const offset=nextKind==='plan-next'?100:75;
    const idx=await sealNotionIndexManifest({notionToken,encryptionKey,maxPages:85});
    if(idx.search_index_complete!==true||idx.object_count!==TOTAL_OBJECTS||idx.page_count!==6446||idx.data_source_count!==186||idx.id_list_sha256!==INDEX_SHA)throw Error('INDEX_PARITY_DENIED');
-   const plan=await planNextNotionBackupBatch({encryptionKey,indexArtifact:idx,offset:75,maxItems:MAX_BATCH_ITEMS});
+   const plan=await planNextNotionBackupBatch({encryptionKey,indexArtifact:idx,offset,maxItems:MAX_BATCH_ITEMS});
    const verify=await verifyNotionBackupBatch({encryptionKey,artifact:plan,expectedIndexSha256:INDEX_SHA});
-   if(plan.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||plan.items!==25||plan.offset!==75||plan.next_offset!==100||plan.provider_writes!==0||verify.item_count!==25)throw Error('PLAN_PARITY_DENIED');
+   if(plan.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||plan.items!==25||plan.offset!==offset||plan.next_offset!==offset+25||plan.provider_writes!==0||verify.item_count!==25)throw Error('PLAN_PARITY_DENIED');
    return reply(200,{...plan,verify_roundtrip:true,source_index_search_calls:idx.search_api_requests,content_backed_up:false,checkpoint_committed:false});
   }
   const plan=body.plan_artifact as Record<string,unknown>;
   if(kind==='source-chunk'){const part=await exportSourceChunk({planArtifact:plan,encryptionKey,notionToken,index:23,continuation:body.continuation});return reply(200,part);}
+  if(nextKind==='export-next'&&(plan?.offset!==100||plan?.next_offset!==125||plan?.index_sha256!==INDEX_SHA))throw Error('NEXT_PLAN_SCOPE_DENIED');
   await openBatch({planArtifact:plan,encryptionKey});
   const item=await exportObject({planArtifact:plan,encryptionKey,notionToken,index:Number(body.item_index)});
   const check=await verifyObject({artifact:item,planArtifact:plan,encryptionKey});
