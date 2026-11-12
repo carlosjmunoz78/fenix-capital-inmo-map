@@ -57,3 +57,12 @@
 - [QA V3 con navegador y HTTP real](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589065): **SUCCESS**; [Operativa V1](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589016): **SUCCESS**; [Contrato de voz](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589196): **SUCCESS**.
 - Gate NO SUPERADO: ninguna prueba HTTP positiva con la sesión real del propietario; no se ha solicitado copiar JWT, no se ha relajado autorización ni se ha promocionado main/PROD.
 - Si se amplía a otra empresa, debe cambiar PRIMERO el contrato de identidad/membresía del servidor y pasar QA de segregación, después el whitelist cliente; nunca habilitarla solo mediante selector de UI.
+
+## Revisión de rendimiento y sesión real · 13/11/2026
+
+- **HECHO EN PR (sin modificar App PROD):** el observador del estado de voz/comandos deja de producir un estado React distinto en cada mutación de DOM. Se usa comparación de los 5 campos de `CoreSnapshot` y se devuelve el estado previo cuando son idénticos, evitando renderizados redundantes.
+- Los observadores de `snapshot` y del espejo de conversación quedan limitados a `.operativa-core-bridge` cuando está presente, en vez de observar cambios ajenos de toda la App. No se crea ni cambia ningún transporte de chat.
+- **PRUEBAS VERDES:** [QA visual y Chromium V3 #43328376790](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43328376790), [Operativa V1 Gate #43328376729](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43328376729), [Voice Contract #43328376706](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43328376706). Todas concluidas **SUCCESS**.
+- **SOLO LECTURA, sesión de Opera:** la App `https://app.fenixcapital.es/cerebro?section=operativa` renderiza conversación, selector Fénix y el estado visual `CEREBRO conectado con transporte autenticado`. Esto es evidencia de funcionamiento de la **UI actual**, no un resultado de HTTP con JWT del propietario contra la función LAB.
+- **POR VALIDAR:** ni el conector Opera ni el conector de pestañas disponibles ofrecen ejecución de JavaScript/acciones de formularios autenticados; no pueden generar una prueba positiva `GET /owner-universe` usando la sesión vigente. No se extraen, copian, imprimen, exportan ni rotan secretos, y no se inventan resultados de autenticación.
+- **NO PROMOVER:** faltan E2E positivo real, alcance multiempresa y aceptación final, conforme a las restricciones del proyecto.
