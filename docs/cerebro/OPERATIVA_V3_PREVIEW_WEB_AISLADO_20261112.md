@@ -46,3 +46,14 @@
 - Los datos de la demostración son **sintéticos**; sus indicadores y peticiones no representan tareas reales. No se utiliza credencial personal, Supabase, CRM, Gateway ni proveedor de voz real.
 - **Promoción bloqueada** hasta E2E positivo autenticado del propietario, prueba de permisos multiempresa reales, comparación OLD vs NEW, revisión de accesibilidad y aceptación visual.
 - **Sin cambios a main, App PROD, CRM, Supabase PROD, Vercel histórico ni DNS** en esta evolución. La demo usa un proyecto ya creado en la fase anterior, sin contratar servicios nuevos; el coste facturable final de su cuota no se ha auditado.
+
+## Gate adicional 13/11/2026 · Membresía cerrada por defecto
+
+- El adaptador cliente de Owner Universe de `src/cerebroOperativaLabUniverseApi.ts` valida expresamente `owner_scope=SERVER_VERIFIED_FENIX_ONLY` mientras ese sea el contrato actual del Gateway LAB. Una etiqueta de scope desconocida se rechaza; no se asume acceso multiempresa.
+- Dentro de ese scope solo se aceptan filas `company_id=fenix`; no se publican filas/proyectos/motores de otras empresas aunque apareciesen accidentalmente en una respuesta inconsistente.
+- Para consultar una empresa concreta, se exige `access_status=VERIFIED_OWNER_CONTEXT_NOT_REGISTERED` exacto; `REGISTRY_PRESENT_INTEGRATION_UNVERIFIED`, cadenas desconocidas y campos ausentes no habilitan operaciones.
+- Prueba Chromium con respuesta sintética deliberadamente mal formada para AION, incluyendo una fila de proyecto `MUST-NOT-DISPLAY`: el registro aparece no autorizado, la fila no se muestra y texto/voz siguen bloqueados.
+- Verificaciones en Supabase **solo lectura**: `public.fenix_prod_actor_context_by_auth_server(uuid)` es SECURITY DEFINER, pero la lista de permisos PostgreSQL solo concede EXECUTE a `service_role` y `postgres`, no a `anon` ni `authenticated`. No se cambian permisos ni definiciones de funciones.
+- [QA V3 con navegador y HTTP real](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589065): **SUCCESS**; [Operativa V1](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589016): **SUCCESS**; [Contrato de voz](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43327589196): **SUCCESS**.
+- Gate NO SUPERADO: ninguna prueba HTTP positiva con la sesión real del propietario; no se ha solicitado copiar JWT, no se ha relajado autorización ni se ha promocionado main/PROD.
+- Si se amplía a otra empresa, debe cambiar PRIMERO el contrato de identidad/membresía del servidor y pasar QA de segregación, después el whitelist cliente; nunca habilitarla solo mediante selector de UI.
