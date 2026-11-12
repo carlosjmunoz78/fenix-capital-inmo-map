@@ -66,3 +66,16 @@
 - **SOLO LECTURA, sesión de Opera:** la App `https://app.fenixcapital.es/cerebro?section=operativa` renderiza conversación, selector Fénix y el estado visual `CEREBRO conectado con transporte autenticado`. Esto es evidencia de funcionamiento de la **UI actual**, no un resultado de HTTP con JWT del propietario contra la función LAB.
 - **POR VALIDAR:** ni el conector Opera ni el conector de pestañas disponibles ofrecen ejecución de JavaScript/acciones de formularios autenticados; no pueden generar una prueba positiva `GET /owner-universe` usando la sesión vigente. No se extraen, copian, imprimen, exportan ni rotan secretos, y no se inventan resultados de autenticación.
 - **NO PROMOVER:** faltan E2E positivo real, alcance multiempresa y aceptación final, conforme a las restricciones del proyecto.
+
+## Incidencia de barra superpuesta · Captura real del usuario · 13/11/2026
+
+**Problema observado:** en `app.fenixcapital.es/cerebro?section=operativa`, la barra global Inicio/JARVIS/Operativa/Neuronal/Navegador aparece sobre el área del chat, dificultando ver y pulsar el compositor. Esa URL sigue siendo la App antigua en PROD, no la V3 de laboratorio.
+
+**Corrección propuesta y probada SOLO en PR #57 DRAFT:**
+- `src/cerebro-interface-bar.css`: regla de `position:relative` estrictamente bajo `.cerebro-console-host.view-operativa > .cerebro-interface-bar`. Evita que la cabecera `sticky` intercepte el chat al desplazarse. JARVIS, Neuronal, Navegador e Inicio conservan sus estilos y navegación sin cambio.
+- Móvil (<=660px): las cinco pestañas siguen visibles a la vez en una distribución de cinco columnas sin una barra deslizante de 510px. El texto de cada pestaña se ajusta a su celda.
+- `tests/cerebro-operativa-v3-e2e.spec.ts`: nueva regresión de la vista anterior con sesión sintética, aserción de posición relativa, orden de barra anterior al contenido, pestañas dentro de 390px y compositor visible; captura `test-results/operativa-legacy-nav-mobile.png`.
+- El E2E de Cockpit V3 sigue verificando compositor, voz, inspector, navegación y no solapamiento.
+- Evidencia en GitHub Actions: [Operativa V1 Gate #43329265717](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265717) **SUCCESS**; [Cockpit V3 Chromium #43329265791](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265791) **SUCCESS**; [Voice Contract #43329265940](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43329265940) **SUCCESS**.
+
+**No afirmar publicación:** este cambio no se ha fusionado a main, no se ha desplegado en App PROD, ni se ha probado el resultado en una sesión real de esa versión. La captura de usuario no representa el código V3 del PR. Pueden quedar estilos adicionales en el paquete PROD que solo se acreditarán mediante OLD vs NEW y aceptación visual real. El próximo gate sigue siendo el E2E positivo del propietario para Gateway LAB y después promoción gradual con rollback.
