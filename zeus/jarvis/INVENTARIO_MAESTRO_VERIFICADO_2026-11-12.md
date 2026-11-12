@@ -49,7 +49,7 @@ Inventario de evidencias vivas GitHub (repo, main, PRs y CI), Supabase (Edge met
 1. **Registry**: PR34 documenta 179 motores + 11 perfiles; archivo `cerebro/registry/skill-dynamic-adoption-v1.json` de main 2026-11-12 muestra summary total=177. No asumir conteo actual canónico sin cotejar definición y release; un ID registrado NO equivale a ejecutor certificado.
 2. **PRs**: PR25 seguridad, PR34 delegación, PR35 integradora están abiertas y tienen bases diversas; no fusionar por numeración ni cherry-pick ciego. PR35 CUT50 es candidato técnico y requiere comparación/QA actual.
 3. **Access**: divergencia UI histórica / API actual sobre destino de CUT32; la API ahora muestra binding de destino pero hace falta identidad, challenge anónimo, denegación no-owner y E2E; mantener sin rutas públicas hasta completar.
-4. **Cloudflare CUT32 vs Git**: deploy `a0fda472...` no cotejado aún byte/hash contra candidato PR25/35. No encender flags ni endpoint de test hasta equivalencia.
+4. **Cloudflare CUT32 vs Git**: se verificó posteriormente coincidencia exacta de **7/7 archivos de código fuente** del deploy `a0fda472...` con la rama candidata PR25; tras añadir secretos en LAB, la revisión de sourcemap comprobó que sus siete fuentes permanecían inalteradas. La equivalencia de código no sustituye un E2E de Access.
 5. **PROD**: Gateway legacy y funciones ACTIVE; no se demuestra OWNER_ROOT ligado a B3 ni a `jarvis-orchestrator-v0`. Conservar actor y callbacks previos hasta paridad.
 6. **Vercel**: falta evidencia autorizada del proyecto de App real y despliegue actual.
 7. **Voz**: PR37 fracaso físico y revertida; PR38 aún LAB. Voz temporal no debe confundirse con JARVIS V2.
@@ -85,3 +85,13 @@ Interfaces ANA fuera de las superficies CEREBRO, CRM real y Trading LAB aislado 
 
 ## 7. Gate del paso
 **PASO 1 · INVENTARIO DOCUMENTAL = HECHO CON LIMITACIONES EXPLÍCITAS.** No equivale a cierre B2–B10 ni certificación física. **NEXT_BLOCK: B2 CUT32 OWNER_ACCESS_ENFORCEMENT_PREFLIGHT**, mantener fail-closed si no es demostrable. **ROLLBACK DOCUMENTAL:** revertir el commit de este único documento en PR35; no muta runtime.
+
+## Addendum vivo B2 · Verificación ampliada del 12-11-2026
+- D1 real `cerebro-jarvis-lab-eu` comprobada en Cloudflare: tablas de sesión, inscripción B2, auditoría, grants B3, misiones y denegaciones existentes. **Consultas vivas:** 0 sesiones, 0 inscripciones auditadas, 0 grants de lectura B3; ninguna modificación de filas.
+- CUT32: App Access exacta vinculada a un destino Worker, política Allow con **una regla de correo** que coincide con el usuario autenticado de Cloudflare; sin regla Everyone. **No equivale todavía a prueba física de enforcement.**
+- La fuente desplegada se obtuvo del sourcemap del Worker. **Los 7 archivos coinciden exactamente con Git** en `cerebro/jarvis-b3-owner-auth-hardening-lab-v0-20261105`; después de actualizar secretos, el bundle conserva las mismas fuentes.
+- Faltaban dos bindings exigidos por el propio canario `/__jarvis/owner-check`: **`JARVIS_ACCESS_AUD` y `JARVIS_OWNER_EMAIL`**. Se han instalado como `secret_text` **exclusivamente en CUT32 LAB**, usando identidad y AUD verificados desde el propio proveedor; no se han impreso valores ni incorporado al repositorio.
+- Nuevo despliegue de CUT32 tras esos secretos: versión `7705dda9-57e5-4baf-9e95-db75a0bf1e62`; se verificó configuración final: D1 intacta, seis flags (incluido entorno LAB) sin alteración, **B2/B3/Gateway OFF**, `workers.dev=false`, previews `false`.
+- Se habilitó `workers.dev` **temporalmente** únicamente para comprobar anónimo; el comprobador externo no obtuvo respuesta utilizable. **Se ejecutó y verificó inmediatamente el rollback** `workers.dev=false`, previews `false`. Por tanto **NO hay prueba de challenge Access anónimo y no se mantiene ninguna URL pública**.
+- **B2 continúa PARCIAL**: faltan desafío anónimo observado, canario propietario real, sesión auténtica en dos dispositivos físicos, revocación selectiva y recuperación. No se pasa a Paso 3 sin B2 VERDE. Próxima acción en Work/Cloud Browser autenticado y dos dispositivos reales, sin pedir secretos por chat.
+- Registro estructurado: `zeus/jarvis/STATE_MASTER_2026-11-12.json`. Este addendum actualiza los hallazgos documentales y no implica promoción, fusión, modificación de App/CRM/ANA/PROD/CUT30 ni coste contratado adicional.
