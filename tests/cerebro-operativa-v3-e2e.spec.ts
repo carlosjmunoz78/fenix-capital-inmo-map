@@ -24,7 +24,7 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByRole('heading',{name:'Hay trabajo en marcha.'})).toBeVisible();
  await expect(operative.getByText('Construir y validar capacidades',{exact:true})).toBeVisible();
  await expect(operative.locator('.operativa-dialogue')).toBeVisible();
- await expect(operative.locator('.operativa-dialogue').evaluate(el=>Boolean(el.compareDocumentPosition(document.querySelector('.operativa-stage'))&Node.DOCUMENT_POSITION_FOLLOWING))).resolves.toBe(true);
+ expect(await operative.locator('.operativa-dialogue').evaluate(el=>Boolean(el.compareDocumentPosition(document.querySelector('.operativa-stage'))&Node.DOCUMENT_POSITION_FOLLOWING))).toBe(true);
  await expect(operative.getByText('Preparando estructura y reglas',{exact:true})).toBeVisible();
  await expect(operative.getByText('42%',{exact:true})).toBeVisible();
  await expect(operative.getByText('Scaffold · contracts',{exact:true})).toHaveCount(0);
