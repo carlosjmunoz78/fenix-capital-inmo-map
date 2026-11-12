@@ -45,7 +45,7 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath)return;try{window.sessionStorage.setItem(VIEW_STORAGE_KEY,view)}catch{/* optional */}},[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
- if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
+ if(ownerAccess!=='allowed')return <>{view==='JARVIS'||view==='V0'?<JarvisVisibleLanguageGuard/>:null}<CerebroConsoleShell/></>;
  if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
