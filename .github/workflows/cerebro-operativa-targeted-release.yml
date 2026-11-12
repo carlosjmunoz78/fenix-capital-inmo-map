@@ -1,0 +1,140 @@
+name: CEREBRO Operativa targeted live release
+on:
+  push:
+    branches:
+      - release/cerebro-operativa-targeted-20261112
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-operativa-targeted-live-20261112
+  cancel-in-progress: false
+
+jobs:
+  isolated-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    env:
+      VITE_FENIX_ENV: test
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Exact live-source baseline plus isolated allowlist
+        shell: bash
+        run: |
+          set -euo pipefail
+          BASE=7f1e92434cdb365b8e9cf552553ac5b4476fb8b2
+          git cat-file -e "$BASE^{commit}"
+          git diff --name-only "$BASE" HEAD > /tmp/operativa-changed
+          while IFS= read -r file; do
+            case "$file" in
+              src/CerebroConsoleHost.tsx|src/CerebroOperativeConsole.tsx|src/useCerebroOperativaChat.ts|src/cerebroActivityApi.ts|src/cerebro-operative-console.css|src/CerebroInterfaceBar.tsx|src/cerebro-interface-bar.css|src/CerebroNeuralView.tsx|src/cerebro-neural-view.css|tests/cerebro-operativa-v3-e2e.spec.ts|tests/cerebro-operativa-targeted-contract.test.mjs|.github/workflows/cerebro-operativa-targeted-release.yml) ;;
+              *) echo "OUT_OF_SCOPE: $file" >&2; exit 2;;
+            esac
+          done < /tmp/operativa-changed
+          test "$(git diff --name-only "$BASE" HEAD -- src/CerebroConsoleShell.tsx src/supabase.ts src/CerebroBrowserConsole.tsx src/CerebroJarvisWorkConsole.tsx package.json package-lock.json | wc -l)" -eq 0
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Strict TypeScript and frontend build
+        run: npm run build
+      - name: Safety and routing contract
+        run: node --test tests/cerebro-operativa-targeted-contract.test.mjs
+      - name: Install Chromium
+        run: npx playwright install chromium
+      - name: Synthetic owner browser acceptance
+        run: npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Store synthetic failure artifacts only
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-operativa-targeted-qa-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  publish-targeted:
+    needs: isolated-qa
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/release/cerebro-operativa-targeted-20261112' && contains(github.event.head_commit.message, '[PUBLISH_OPERATIVA_TARGETED]') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 19
+    permissions:
+      contents: write
+    env:
+      VITE_FENIX_ENV: prod
+      VITE_SUPABASE_URL: https://cluhljgonannaafpmblx.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.PROD_SUPABASE_PUBLISHABLE_KEY }}
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-human-v1-owner100/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify production secret availability
+        shell: bash
+        run: |
+          test -n "$VITE_SUPABASE_PUBLISHABLE_KEY"
+          case "$VITE_SUPABASE_PUBLISHABLE_KEY" in sb_publishable_*) ;; *) exit 3 ;; esac
+      - run: npm ci --no-audit --no-fund
+      - name: Build current source in exact PROD environment
+        run: npx vite build --base=/ --outDir dist-live
+      - name: Validate deployment isolation
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! grep -R -F 'hnqlnvakzaywtafeiybt.supabase.co' dist-live
+          grep -R -F 'cerebro-console-gateway-human-v1-owner100' dist-live >/dev/null
+          grep -R -F 'cluhljgonannaafpmblx.supabase.co' dist-live >/dev/null
+          cp dist-live/index.html dist-live/404.html
+          touch dist-live/.nojekyll
+          printf '%s\n' "${GITHUB_SHA}" > dist-live/PROD_SOURCE_SHA.txt
+          printf '%s\n' 'app.fenixcapital.es' > dist-live/CNAME
+          cat > dist-live/package.json <<'JSON'
+          {"name":"fenix-capital-prod-static","private":true,"version":"1.0.0","scripts":{"build":"node build-static.cjs"}}
+          JSON
+          cat > dist-live/build-static.cjs <<'JS'
+          const fs=require('fs'),path=require('path'),root=process.cwd(),out=path.join(root,'dist');
+          fs.rmSync(out,{recursive:true,force:true});fs.mkdirSync(out,{recursive:true});
+          const skip=new Set(['dist','.git','node_modules','package.json','package-lock.json','build-static.cjs','vercel.json']);
+          for(const name of fs.readdirSync(root))if(!skip.has(name))fs.cpSync(path.join(root,name),path.join(out,name),{recursive:true});
+          JS
+          printf '%s\n' '{"buildCommand":"npm run build","outputDirectory":"dist","cleanUrls":false}' > dist-live/vercel.json
+      - name: Atomic publish with precise gh-pages lease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED_PAGES_SHA=879df50e64ecb280c9f1cbedf2fbbdcee027cc7f
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          actual="$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)"
+          test "$actual" = "$EXPECTED_PAGES_SHA"
+          mkdir -p /tmp/operativa-targeted-static
+          cp -R dist-live/. /tmp/operativa-targeted-static/
+          cd /tmp/operativa-targeted-static
+          git init -q
+          git checkout -q -b gh-pages
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A
+          git commit -qm "deploy: targeted CEREBRO Operativa ${GITHUB_SHA}"
+          git remote add origin "$remote"
+          git push --force-with-lease="refs/heads/gh-pages:${EXPECTED_PAGES_SHA}" origin HEAD:refs/heads/gh-pages
+          new="$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)"
+          test -n "$new"
+          test "$new" != "$EXPECTED_PAGES_SHA"
+          echo "Published exact source commit ${GITHUB_SHA}; prior pages snapshot ${EXPECTED_PAGES_SHA}; new pages commit ${new}"
