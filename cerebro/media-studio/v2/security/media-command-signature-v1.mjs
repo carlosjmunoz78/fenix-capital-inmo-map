@@ -33,7 +33,7 @@ const isExact=(obj,keys)=>obj&&typeof obj==='object'&&!Array.isArray(obj)&&
  Object.keys(obj).length===keys.length&&keys.every(k=>Object.hasOwn(obj,k));
 function assertPayload(p,nowMs){
  if(!isExact(p,REQUIRED))fail('PAYLOAD_SCHEMA');
- for(const k of ['company_id','engine_id','environment','version','request_id','order_id'])
+ for(const k of ['company_id','engine_id','environment','request_id','order_id'])
   if(typeof p[k]!=='string'||!IDENT.test(p[k]))fail('PAYLOAD_ID');
  if(p.company_id!=='fenix'||p.engine_id!=='UMS-001'||p.environment!=='LAB'||
     p.version!=='1'||p.issuer!==ISSUER)fail('PAYLOAD_SCOPE');
