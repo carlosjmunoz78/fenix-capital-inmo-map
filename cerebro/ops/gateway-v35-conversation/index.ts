@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "jsr:@supabase/server@^1";
 import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import { answerCerebroNaturalQuery } from "./conversation_intents.ts";
+import { answerWithVerifiedActivity } from "./activity_reader.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
