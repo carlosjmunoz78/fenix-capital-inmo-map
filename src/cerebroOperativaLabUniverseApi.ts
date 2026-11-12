@@ -102,7 +102,7 @@ export async function fetchOwnerUniverseLab(company:UniverseCompanyRequest,signa
   const parsed=decode(raw);
   if(!parsed)return {kind:'unavailable',data:null,reason:'LAB_RESPONSE_INVALID'};
   // A non-Fénix company is only displayable after the server returns a verified scope.
-  if(company!=='all'&&!parsed.registry.companies.some(c=>c.company_id===company&&c.access_status!=='REGISTRY_PRESENT_INTEGRATION_UNVERIFIED'))
+  if(company!=='all'&&!parsed.registry.companies.some(c=>c.company_id===company&&c.access_status==='VERIFIED_OWNER_CONTEXT_NOT_REGISTERED'))
    return {kind:'denied',data:null,reason:'COMPANY_NOT_VERIFIED'};
   return {kind:parsed.status==='OK'?'ready':'partial',data:parsed};
  }catch(error){
