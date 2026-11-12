@@ -35,6 +35,7 @@ jobs:
           if(/method:\s*['"](?:PUT|PATCH|DELETE)['"]/.test(src+cont)||/update vault|delete from/i.test(src+cont))throw Error('WRITE_OPERATION_DENIED');
           if(!src.includes('INDEX_PARITY_DENIED')||!cont.includes('INCOMPLETE_REQUEST_CAP'))throw Error('BOUNDED_INTEGRITY_GATES_MISSING');
           if(!src.includes("offset=nextKind==='plan-next'?100:75")||!src.includes('plan.offset!==offset||plan.next_offset!==offset+25')||!src.includes('const LAST_PROVEN=')||!fs.readFileSync(root+'run-once.mjs','utf8').includes('checkpoint_version:3'))throw Error('BATCH_75_100_SCOPE_MISSING');
+          if(!src.includes('assertFrozenOrder')||!src.includes('await verifyNotionIndexManifest')||!src.includes('frozen?2500000')||!src.includes("source_archived_index:frozen"))throw Error('FROZEN_INDEX_AUTH_POLICY_MISSING');
           if(!src.includes("assertNextOrder")||!src.includes("plan.offset!==offset||plan.next_offset!==offset+25")||!src.includes("NEXT_PREVIOUS")||!src.includes("NEXT_PLAN_SCOPE_DENIED"))throw Error('NEXT_100_125_POLICY_MISSING');
           if(!src.includes("kind==='source-chunk'")||!src.includes('await verifyGitHubOidc(auth.slice(7))')||!fs.readFileSync(root+'source-chunk.mjs','utf8').includes('maxReads=3'))throw Error('SOURCECHUNK_BOUNDED_OIDC_GUARD_MISSING');
           console.log('FACT001_REUSABLE_ENGINE_LAB_READONLY=PASS');

@@ -2,7 +2,7 @@
 // No App/CRM/Notion mutations. Pinned owner GitHub OIDC; original headless broker and v1/v2 services untouched.
 import postgres from 'npm:postgres@3.4.7';
 import {verifyGitHubOidc} from './policy.mjs';
-import {sealNotionIndexManifest} from './notion-encrypted-index-manifest.mjs';
+import {sealNotionIndexManifest,verifyNotionIndexManifest} from './notion-encrypted-index-manifest.mjs';
 import {planNextNotionBackupBatch,verifyNotionBackupBatch} from './notion-content-batch-planner.mjs';
 import {exportObject,verifyObject,INDEX_SHA,TOTAL_OBJECTS,MAX_BATCH_ITEMS,openBatch} from './content.mjs';
 import {exportSourceChunk} from './source-chunk.mjs';
@@ -37,6 +37,16 @@ function assertNextOrder(body:unknown,kind:'plan-next'|'export-next'){
  if(kind==='export-next'&&(!Number.isSafeInteger(b.item_index)||Number(b.item_index)<0||Number(b.item_index)>=25||!b.plan_artifact||typeof b.plan_artifact!=='object'||Array.isArray(b.plan_artifact)))throw Error('NEXT_ORDER_DENIED');
  return b;
 }
+function assertFrozenOrder(body:unknown){
+ if(!body||typeof body!=='object'||Array.isArray(body))throw Error('FROZEN_ORDER_DENIED');
+ const b=body as Record<string,unknown>;
+ const expected={...NEXT_FIXED,operation:'notion.lab.batcher.plan_frozen',offset:100,max_items:25,previous_zip_sha256:NEXT_PREVIOUS,previous_drive_file_id:NEXT_DRIVE};
+ const expectedKeys=[...Object.keys(expected),'index_artifact'].sort();
+ if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(expectedKeys)||Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('FROZEN_ORDER_DENIED');
+ const a=b.index_artifact as Record<string,unknown>;
+ if(!a||typeof a!=='object'||Array.isArray(a)||a.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||a.object_count!==6632||a.page_count!==6446||a.data_source_count!==186||a.id_list_sha256!==INDEX_SHA||a.search_index_complete!==true||a.envelope?.['format']!=='FACT001-NOTION-INDEX-MANIFEST-AES256GCM-V1')throw Error('FROZEN_ARCHIVE_SCOPE_DENIED');
+ return b;
+}
 async function getVault(){
  const url=Deno.env.get('SUPABASE_DB_URL');if(!url)throw Error('VAULT_UNAVAILABLE');
  const db=postgres(url,{max:1,connect_timeout:5,idle_timeout:1,prepare:false});
@@ -50,20 +60,22 @@ async function getVault(){
 Deno.serve(async req=>{
  const path=new URL(req.url).pathname;const kind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan')?'plan':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export')?'export':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/source-chunk')?'source-chunk':null;
  const nextKind=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan-next')?'plan-next':path.endsWith('/cerebro-fact001-notion-batch-engine-lab/export-next')?'export-next':null;
- if((!kind&&!nextKind)||req.method!=='POST')return reply(404,{status:'NOT_FOUND'});
+ const frozen=path.endsWith('/cerebro-fact001-notion-batch-engine-lab/plan-frozen');
+ if((!kind&&!nextKind&&!frozen)||req.method!=='POST')return reply(404,{status:'NOT_FOUND'});
  const auth=req.headers.get('authorization')??'';
  try{if(!auth.startsWith('Bearer '))throw Error('AUTH');await verifyGitHubOidc(auth.slice(7));}catch{return reply(401,{status:'UNAUTHORIZED'});}
  let body:Record<string,unknown>;
- try{const maxBody=kind==='source-chunk'?28500:18500;if(Number(req.headers.get('content-length')||'0')>maxBody)throw Error('LONG');const raw=await req.text();if(raw.length>maxBody)throw Error('LONG');body=nextKind?assertNextOrder(JSON.parse(raw),nextKind):assertOrder(JSON.parse(raw),kind!);}catch{return reply(403,{status:'ORDER_DENIED'});}
+ try{const maxBody=frozen?2500000:kind==='source-chunk'?28500:18500;if(Number(req.headers.get('content-length')||'0')>maxBody)throw Error('LONG');const raw=await req.text();if(raw.length>maxBody)throw Error('LONG');body=frozen?assertFrozenOrder(JSON.parse(raw)):nextKind?assertNextOrder(JSON.parse(raw),nextKind):assertOrder(JSON.parse(raw),kind!);}catch{return reply(403,{status:'ORDER_DENIED'});}
  try{let {notionToken,encryptionKey}=await getVault();try{
-  if(kind==='plan'||nextKind==='plan-next'){
-   const offset=nextKind==='plan-next'?100:75;
-   const idx=await sealNotionIndexManifest({notionToken,encryptionKey,maxPages:85});
+  if(kind==='plan'||nextKind==='plan-next'||frozen){
+   const offset=nextKind==='plan-next'||frozen?100:75;
+   const idx=frozen?body.index_artifact:await sealNotionIndexManifest({notionToken,encryptionKey,maxPages:85});
+   if(frozen){const verified=await verifyNotionIndexManifest({encryptionKey,artifact:idx});if(verified.status!=='FACT001_NOTION_INDEX_MEMORY_REBUILD_VERIFIED')throw Error('FROZEN_INDEX_AUTH_DENIED');}
    if(idx.search_index_complete!==true||idx.object_count!==TOTAL_OBJECTS||idx.page_count!==6446||idx.data_source_count!==186||idx.id_list_sha256!==INDEX_SHA)throw Error('INDEX_PARITY_DENIED');
    const plan=await planNextNotionBackupBatch({encryptionKey,indexArtifact:idx,offset,maxItems:MAX_BATCH_ITEMS});
    const verify=await verifyNotionBackupBatch({encryptionKey,artifact:plan,expectedIndexSha256:INDEX_SHA});
    if(plan.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||plan.items!==25||plan.offset!==offset||plan.next_offset!==offset+25||plan.provider_writes!==0||verify.item_count!==25)throw Error('PLAN_PARITY_DENIED');
-   return reply(200,{...plan,verify_roundtrip:true,source_index_search_calls:idx.search_api_requests,content_backed_up:false,checkpoint_committed:false});
+   return reply(200,{...plan,verify_roundtrip:true,source_index_search_calls:frozen?0:idx.search_api_requests,source_archived_index:frozen,content_backed_up:false,checkpoint_committed:false});
   }
   const plan=body.plan_artifact as Record<string,unknown>;
   if(kind==='source-chunk'){const part=await exportSourceChunk({planArtifact:plan,encryptionKey,notionToken,index:23,continuation:body.continuation});return reply(200,part);}
