@@ -1,11 +1,11 @@
 # CEREBRO OS · Owner Universe Bridge LAB V7
-Fecha: 2026-11-12. Estado: LAB ACTIVE V7 / NO PROMOVIDO A PROD.
+Fecha: 2026-11-12. Estado: módulo OWNER UNIVERSE BRIDGE V7; función LAB ACTIVE **v11** tras rollback físico; NO PROMOVIDO A PROD.
 
 ## Misión y alcance
 Una única capa Owner Gateway para datos de empresas, proyectos y motores presentes y futuros. Esta entrega NO promete que todas las empresas o acciones estén ya integradas. Reutiliza FACT-001 GitOps existente en `carlosjmunoz78/capital-mapa-pro`, tablas Supabase existentes y autenticación del propietario. No crea motor adicional, tabla, recurso, suscripción, Worker, cola, credencial ni publicación.
 
 ## Evidencia física
-1. `cerebro-console-gateway-v36-followups-lab` Supabase **v7 ACTIVE**, con OCHO archivos exactos respecto de PR #56. `cerebro-console-gateway-v0` PROD **v36 ACTIVE**, intacto; App/CRM, DNS, main, WP, Trading sin cambios.
+1. `cerebro-console-gateway-v36-followups-lab` Supabase **v11 ACTIVE**, con OCHO archivos exactos respecto de PR #56. `cerebro-console-gateway-v0` PROD **v36 ACTIVE**, intacto; App/CRM, DNS, main, WP, Trading sin cambios.
 2. GitHub CI [43286219674](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43286219674): ocho pasos de QA y regresión, todos SUCCESS en HEAD previo.
 3. GitHub CI [43286753585](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43286753585) **SUCCESS** incluyendo prueba HTTP pública real `FACT-001 real public GitOps read smoke` (19:06 UTC): catálogo de diseño **13**; directorios scaffold **6**; no afirmación de runtime.
 4. Supabase SQL read-only: `cerebro_company_registry_preprod` **0 registros**, `jarvis_project_overlay_v1` **1 proyecto** (`company_id=fenix`, `project_id=PRJ-SUPERAGENT-001`, estado `PARCIAL`), `cerebro_company_engine_state_preprod` **0 registros**. Estos recuentos se refieren SOLO a estas tablas: no son el censo completo de empresas/proyectos/motores.
@@ -36,21 +36,28 @@ Las rutas LAB nuevas son:
 ## Gate NO SUPERADO (impide promoción)
 - La prueba autenticada E2E del propietario en LAB sigue sin completarse: secreto GitHub Actions `CEREBRO_E2E_USER_JWT` devuelve `INVALID_JWT`. La sesión de Opera/App es independiente: no revela ese token al Gateway de GitHub Actions.
 - No se ha demostrado E2E positivo de las rutas nuevas dentro de la sesión real del propietario ni su uso desde Operativa/JARVIS/voz.
-- No se ha probado todavía el rollback físico V7→V6→V7.
+- **ROLLBACK FÍSICO YA PROBADO**: función LAB V9→V10 (baseline V6, 7/7 exactos) →V11 (integración actual, 8/8 exactos); servicio ACTIVE al final, PROD permaneció v36.
 - No están conectados ni verificados el Owner Company Membership multiempresa real ni el Company Registry completo, ni todos los proyectos ajenos a esa tabla.
 - No se ha probado disponibilidad HTTP de FACT desde el runtime Supabase; la prueba HTTP real se ejecutó **desde GitHub Actions**. El deploy ACTIVE prueba carga de artefacto, no lectura autenticada de respuesta.
 
 ## Recuperación / rollback LAB
-Rollback versionado verificable: rama PR #56 commit `0054eb75bb461ae5a06df57c42f58392f7f53740` contiene los **siete** archivos V6 anteriores a FACT. Re-desplegar en el MISMO slug LAB con `verify_jwt=false`, comprobar 7/7 SHA contenido y owner-only; si es seguro, volver a V7 desde HEAD validado. **No se ha ejecutado esta reversión**, y no debe mencionarse como prueba completada. PROD v36 no necesita rollback: permanece intacto.
+Rollback versionado verificable: rama PR #56 commit `0054eb75bb461ae5a06df57c42f58392f7f53740` contiene los **siete** archivos V6 anteriores a FACT. Re-desplegar en el MISMO slug LAB con `verify_jwt=false`, comprobar 7/7 SHA contenido y owner-only; si es seguro, volver a V7 desde HEAD validado. **Reversión físicamente ejecutada el 12/11/2026**: versión LAB V10 ACTIVE confirmó **7/7 archivos exactos** frente al commit V6; se restauró la integración en LAB V11 ACTIVE y confirmó **8/8 archivos exactos** con GitHub. El Gateway PROD siguió V36 ACTIVE. PROD v36 no necesita rollback: permanece intacto.
 
 ## Próxima fase de cierre
 1. E2E autenticado owner tras renovar de forma segura referencia cifrada o mediante un canal de sesión soportado; no copiar JWT al chat ni desactivar validaciones.
 2. Comprobar HTTP desde la Edge Function Supabase y respuestas `owner-registry/owner-factory/owner-universe` con titular real; probar denegación no owner y otra empresa.
 3. Registrar pertenencias multiempresa desde una fuente de identidad **autorizada**, conectar nuevas empresas a FACT/Company Registry, y asegurar sincronización sin duplicar objetos. PREPROD no puede autorizar PROD.
 4. Unificar interfaz Operativa/JARVIS/otros canales contra el mismo Gateway, con vistas para empresas, proyectos, motores, trabajos, costes, estado y órdenes gobernadas.
-5. Backup, rollback probado, OLD vs NEW, E2E, logs, tribunal, presupuesto y gate de promoción; no fusionar ni publicar hasta terminar.
+5. Backup y rollback LAB probado (HECHO), OLD vs NEW, E2E autenticado, logs, tribunal, presupuesto y gate de promoción (PENDIENTES); no fusionar ni publicar hasta terminar.
 
 Estado global: **PARCIAL**, progreso real en GitHub/servidor LAB, producción preservada. Coste: cero suscripciones o servicios adicionales creados (consumo normal de CI/free-tier no auditado como facturación).
 
 ## Observación adicional 12/11 · Denegación anónima física
 Solicitud real desde Opera a `https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v36-followups-lab/owner-universe?company_id=fenix` **sin credenciales**: respuesta `MISSING_CREDENTIALS` de `@supabase/server`, sin proyecto, empresa ni catálogo en la respuesta. Esto acredita el rechazo de un cliente anónimo; **NO acredita la respuesta autenticada del propietario**. El gate E2E positivo sigue pendiente.
+
+
+## Estado final comprobado en la misma sesión
+- **LAB v11 ACTIVE**, v10 ensayo de rollback exacto, v11 restauración exacta, PROD v36 ACTIVE. Comprobación de GitHub/Supabase directamente en ambas versiones: **7/7 + 8/8 PASS**, sin tocar PROD.
+- Código de integración: `owner_registry_live.ts`, `owner_factory_gitops.ts` y las rutas del Gateway. GitHub Actions prueba de contrato y HTTP real pública: [43286753585](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43286753585) SUCCESS.
+- El requisito de **acceso total a todas las empresas y proyectos actuales/futuros** sigue como OBJETIVO EN DESARROLLO: identidad backend verificada solamente para Fénix, registro PREPROD vacío, proyecto JARVIS conocido, lectura FACT GitOps; no falsear un censo completo ni operatividad de los motores.
+- Gate aún bloqueado: JWT E2E válido en sesión segura + E2E positivo de `owner-registry`, `owner-factory`, `owner-universe` en Supabase, integración App/JARVIS/móvil, sincronización de Company Membership y permisos cross-company.
