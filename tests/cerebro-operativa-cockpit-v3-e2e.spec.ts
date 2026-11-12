@@ -176,6 +176,15 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await cockpit.getByRole('button',{name:'Resumen',exact:true}).click();
  await expect(cockpit.getByText('Actividad sin verificar')).toBeVisible();
  await expect(cockpit.locator('.op3-indicators')).toContainText('—');
+ const restrictedInput=cockpit.getByRole('textbox',{name:'Pregunta u orden'});
+ await expect(restrictedInput).toBeDisabled();
+ await expect(cockpit.getByRole('button',{name:'Dictar'})).toBeDisabled();
+ await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toBeDisabled();
+ await expect(cockpit.getByRole('button',{name:'Enviar instrucción'})).toBeDisabled();
+ await cockpit.locator('form.op3-input-frame').evaluate(form=>form.dispatchEvent(
+  new Event('submit',{bubbles:true,cancelable:true})));
+ expect(postedChat).toBeNull();
+ await expect(cockpit.getByText('Consulta sin permisos operativos en esta empresa')).toBeVisible();
  await cockpit.getByRole('button',{name:'Entidades',exact:true}).click();
  await cockpit.getByRole('combobox',{name:'Empresa'}).selectOption('all');
  await cockpit.getByRole('button',{name:'Evidencias',exact:true}).click();
@@ -197,6 +206,11 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('Consulta el estado operativo');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
  await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
+ await cockpit.getByRole('combobox',{name:'Empresa'}).selectOption('aion');
+ await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toHaveCount(0);
+ await expect(cockpit.getByText('Consulta sin permisos operativos en esta empresa')).toBeVisible();
+ await cockpit.getByRole('combobox',{name:'Empresa'}).selectOption('all');
+ await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
  await page.setViewportSize({width:390,height:844});
  await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
  for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
