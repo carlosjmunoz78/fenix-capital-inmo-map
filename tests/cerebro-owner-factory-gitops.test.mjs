@@ -1,5 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import {readFactoryGitOpsCatalog} from '../cerebro/ops/gateway-v36-followups/owner_factory_gitops.ts';
 
 const seed=[
@@ -61,4 +62,20 @@ test('A new engine appears automatically from the repo directory, without preten
  assert.equal(r.status,"OK");
  assert.ok(r.scaffolded.some(x=>x.engine_id==="NEW-999"));
  assert.ok(r.scaffolded.every(x=>x.execution_enabled===false));
+});
+
+test('Unified owner routes cannot bypass pre-existing server auth; only GET and read-only calls',()=>{
+ const code=readFileSync(new URL('../cerebro/ops/gateway-v36-followups/index.ts',import.meta.url),'utf8');
+ const auth=code.indexOf('const owner=await authorizedOwner(req);',code.indexOf('fetch: withSupabase'));
+ const denied=code.indexOf('if(!owner.ok)return json(req,403',auth);
+ for(const suffix of ['owner-factory','owner-universe','owner-registry']){
+   const route=code.indexOf('if(req.method==="GET"&&suffix==="'+suffix+'")',auth);
+   assert.ok(auth>0&&denied>auth&&route>denied,suffix);
+   assert.ok(!code.includes('req.method==="POST"&&suffix==="'+suffix+'"'));
+ }
+ assert.match(code,/readFactoryGitOpsCatalog\\(\\{actor:owner\\.actor\\}\\)/);
+ assert.match(code,/liveOwnerRegistry\\(owner\\.actor/);
+ assert.match(code,/verifiedCompanyIds:\\["fenix"\\]/);
+ assert.match(code,/prod_execution_enabled:false/);
+ assert.match(code,/live_writes:false/);
 });
