@@ -1,5 +1,28 @@
 # CEREBRO Universal Media Studio V2 · Changelog
 
+## 2026-11-12 · Universal Media Request V1 · FACT-001 + motores de CEREBRO sin Console
+
+**Entorno:** LAB, PR #45 DRAFT. **Coste adicional:** 0 €. **Autonomía física:** NO OPERATIVA AÚN.
+
+### HECHO
+- Contrato de entrada cerrado: contracts/media-job-request.v1.schema.json, estandarizado por compañía, origen, destino, pieza, modalidad, canal, permisos y presupuesto.
+- Contrato de eventos de salida cerrado: contracts/media-job-response.v1.schema.json, con referencias privadas a comprobantes de QA, derechos, procedencia y entrega firmada.
+- Registro de canales: registry/media-consumers-universal-v1.json: Facebook, Instagram, LinkedIn, SEO, perfiles futuros YouTube/TikTok y GENERIC para nuevos motores.
+- Validador y planificador offline: runtime/ums001_universal_media_request_lab_v1.mjs; normalización compatible Social/SEO solo para payload completo.
+- Descriptor genérico de consumo FACT-001 con IAM desactivado hasta verificación real.
+- Regresión en tests/ums001-universal-media-request-lab-v1.test.mjs; GitHub Media Studio V2 Gate + automatic image intake CI en VERDE.
+- Runbook: runbooks/UMS001_UNIVERSAL_AUTONOMOUS_CONSUMER_CONTRACT_20261112.md.
+
+### PENDIENTE / NO CONFUNDIR
+- Gateway IAM y bus universales, registro durable con idempotencia, FACT-001 físico, Social/SEO como emisores reales, entrega con recibos verificados, generación+QA y activación gradual.
+- La firma Ed25519 DIAG03 fue probada anteriormente, pero NO convierte automáticamente en operativa esta nueva entrada universal.
+- Sin cambios a main, PROD, DNS, App, CRM, Supabase, WordPress, publicadores, credenciales, Cloudflare Workers ni crons.
+
+### Rollback / rebuild
+- Restaurar rama LAB al estado previo del bloque: 48ffef988ffa517d3fad4caf79eb8cf823df8a7e, o revertir exclusivamente archivos aditivos.
+- Rebuild: contratos JSON, registro universal, runtime sin IO, tests, runbook y PR #45. Conservar OLD intacto.
+
+
 ## 2026-10-25 · Character Clone Engine V0 · persistent character governance
 
 Environment: `PREPROD -> main control-plane candidate`

@@ -100,8 +100,12 @@ def build_prompt_batch(brief:dict, feedback:dict|None=None)->dict:
   motif=SURREAL_MOTIFS[(seed//13+i)%len(SURREAL_MOTIFS)]
   location=ENVIRONMENTS[(seed//31+i)%len(ENVIRONMENTS)]
   visual=[
-    "CRITICAL CAST AND LAYOUT: The MAIN SUBJECT is the HUMAN. Show clearly visible authentic adult people in the LEFT/CENTER foreground in a waist-up medium portrait; faces and natural expressions occupy at least half the image height. Human eyes and hands clearly visible, no still-life, NO empty scene, NO house-only product photo.",
-    "CRITICAL SPECTACLE: Behind and around the people construct a vast astonishing physical surreal cinematic art installation. The human remains more visually important than the sculpture; spectacular orange kinetic architecture and dramatic natural light.",
+    ("CRITICAL SEO 16:9 ENVIRONMENTAL PHOTO: Show actual Córdoba property setting across most of frame; if requested, adults medium-scale facing lens on one side. Keep daylight and HTML-heading space; no giant close-up portraits or empty showrooms."
+     if brief["asset_type"]=="SEO_HERO" else
+     "CRITICAL SOCIAL CAST AND LAYOUT: Respect requested cast; three-quarter FRONT VIEW with faces visible, real anatomy and Córdoba context, never backs to camera or extra people. Safe area for separate typography."),
+    ("CRITICAL SEO ARCHITECTURE: Physically integrated original orange glass with refractions and true shadows; never a flat rectangle or generic showroom."
+     if brief["asset_type"]=="SEO_HERO" else
+     "CRITICAL SOCIAL SPECTACLE: Original orange glass sculpture behind visible cast, with real physical shadows and Córdoba storytelling; never a generic orange corridor."),
     f"Visual story for: {intent}. Intended audience: {audience}.",
     f"Single original {brief['platform'].title()} {brief['asset_type'].lower()} visual, shot as expensive, real editorial PHOTOGRAPH, not a 3D illustration.",
     f"Authentic human protagonist: an adult Spanish professional working in Andalusia, specifically {human_role}, {action}; expression and emotional tone: {expression}.",
@@ -120,7 +124,10 @@ def build_prompt_batch(brief:dict, feedback:dict|None=None)->dict:
   else:
    visual.append("SEO hero photo must have no lettering and no logos in the final pixels. Alt text and title belong in HTML, outside this image.")
   for signal in sorted(lessons):
-   visual.append("Learned correction ("+signal+"): "+GAITS[signal])
+   if signal=="HUMAN_MISSING" and brief["asset_type"]=="SEO_HERO":
+    visual.append("Learned SEO correction (HUMAN_MISSING): If people are required in this search image, place those requested adults at medium scale inside a wide authentic property setting with readable faces. The house must remain the environmental subject; a portrait close-up or an empty showroom is unacceptable.")
+   else:
+    visual.append("Learned correction ("+signal+"): "+GAITS[signal])
   prompt=" ".join(visual)
   if not 900<=len(prompt)<=4800:raise ValueError("PROMPT_FACTORY_PROMPT_LENGTH_OUT_OF_RANGE")
   out.append({"concept_id":panel_id,"model_id":MODEL_ID,"text":prompt,

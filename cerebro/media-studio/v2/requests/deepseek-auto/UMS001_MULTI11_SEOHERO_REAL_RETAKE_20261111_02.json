@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "topic": "Qué revisar antes de entregar una señal para comprar vivienda en Córdoba",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía",
+  "publish_enabled": false,
+  "max_attempts_per_panel": 1,
+  "max_image_budget_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_budget_usd": 0.02,
+  "source_request": "CEREBRO UMS001 MULTI11 paid-from-prepaid retake after REAL visual QA run 43049681977, only second and last permitted attempt per piece",
+  "style_reference_mode": "NONE",
+  "request_id": "UMS001-MULTI11-SEOHERO-20261111-02",
+  "channel": "SEO",
+  "asset_type": "SEO_HERO",
+  "render_aspect_ratio": "16:9",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "Wide 16:9 documentary scene inside a real bright Córdoba apartment with tiled floor, windows and furnishings. Two adults medium-small at right, actual rooms and daylight dominate; clear empty space left for HTML heading. Integrated refractive orange glass sculpture, never flat orange panel or hands close to lens.",
+      "human_subject": "Two Spanish adults in medium-scale, natural poses and realistic faces, no foreground hand close-ups or forced gestures",
+      "hook": "Fotografía inmobiliaria sin texto",
+      "bullets": [],
+      "required_visuals": [
+        "wide Córdoba property interior occupies >50% of image, contextual environmental story",
+        "two adults occupy 25-40% image height at one side, correct anatomy",
+        "genuine negative space for HTML headline not baked into image",
+        "3D orange translucent glass with realistic thickness and refraction, not flat logo-like square",
+        "zero visible text, watermarks, logos, CTA"
+      ]
+    }
+  ]
+}

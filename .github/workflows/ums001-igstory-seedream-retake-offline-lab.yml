@@ -1,0 +1,27 @@
+name: UMS001 Seedream Instagram Story final retake offline QA LAB no spend
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-igstory-seedream-retake-offline-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_4_9X16_RETAKE_LAB_V1.json'
+      - 'cerebro/media-studio/v2/tests/test_ums001_igstory_retake_lab_v1.py'
+permissions:
+  contents: read
+jobs:
+  photorealistic-native-story-retake-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Free Pillow only
+        run: python3 -m pip install Pillow==11.3.0
+      - name: Assert one attempt maximum, original CEREBRO story and no spend
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_igstory_retake_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py --preflight
+      - name: No inference here
+        run: echo 'Only preflight. Existing real rejected story is preserved.'

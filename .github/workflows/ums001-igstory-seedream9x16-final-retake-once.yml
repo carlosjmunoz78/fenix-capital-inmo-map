@@ -1,0 +1,76 @@
+name: UMS001 SECOND final native 9x16 Instagram Seedream4 LAB retake
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_FINAL_RETAKE_LAUNCH_20261111.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igstory-seedream9x16-20261111-second-final
+  cancel-in-progress: false
+jobs:
+  one-original-prepaid-story-no-publishing:
+    if: >-
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' &&
+      github.event.pull_request.number == 45 &&
+      github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111' &&
+      github.event.pull_request.base.ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Validate unique signed launch and immutable existing creative contracts
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_FINAL_RETAKE_LAUNCH_20261111.json
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 1
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = "$FILE"
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py)" = a437697f222459b1d627809e95acd5fb04a53c81
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_4_9X16_RETAKE_LAB_V1.json)" = 5dcd6bd3fd5d9051d9cfac7c607a8ad779b95835
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py)" = d169bd1af12ded46d7b61bce79a81c60ab416ad6
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json)" = 59f6e8bb4886b858fe12a08bc6c1994962b5e707
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py)" = 2b36f5569d999d2262d2bab103de7e9a5568b9dc
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path('cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_FINAL_RETAKE_LAUNCH_20261111.json').read_text())
+          assert j=={'launch_id':'UMS001-IG-STORY-SEEDREAM9X16-20261111-SECOND-FINAL',
+             'company_id':'fenix','engine_id':'UMS-001','environment':'LAB',
+             'item_id':'IG-STORY-01','provider':'bytedance/seedream-4',
+             'max_predictions':1,'max_model_budget_usd':0.03,'max_deepseek_calls':1,
+             'max_deepseek_budget_usd':0.02,'prepaid_only':True,
+             'auto_reload':False,'publish':False,'video':False,'run_once':True}
+          PY
+      - name: Offline QA all protections before any provider call
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 cerebro/media-studio/v2/tests/test_ums001_igstory_retake_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py --preflight
+      - name: Generate exactly one original native 9x16 story under prepaid cap
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+          GH_TOKEN_FOR_LAB: ${{ github.token }}
+          UMS001_SEEDREAM_ONE_SHOT_GATE: PREPAID_OWNER_ONE_IGSTORY_RETAKE_20261111
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_seedream_igstory_retake_lab_v1.py --execute
+      - name: Preserve original physical story JPG, source prompt, exact QA and provider receipt even if rejected
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-instagram-story-seedream9x16-second-final-prepaid-lab
+          path: ${{ runner.temp }}/ums001-seedream-igstory-retake/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Log no production actions
+        if: always()
+        run: |
+          echo 'ONE image at <=$0.03 estimate; one DeepSeek QA <=$0.02; all from existing prepayment.'
+          echo 'No subscription, no autoload, no retry, no Facebook, LinkedIn, SEO, WordPress, App, CRM, PROD or publishing.'
+          echo 'Raw quality alone never certifies rights, brand, editorial or video.'

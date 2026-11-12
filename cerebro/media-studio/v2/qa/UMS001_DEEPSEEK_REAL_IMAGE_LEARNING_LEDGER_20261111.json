@@ -40,6 +40,95 @@
       ],
       "drive_archive": "19kwZwA3hjfkte1PRYVB_1NVGYHvWrK3x",
       "note": "Checkmark source cropped by pixel verified SHA, but art still generic with fake marks"
+    },
+    {
+      "run_id": 43049681977,
+      "request_id": "UMS001-MULTI11-IGFEED-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13868213530,
+      "note": "Real IG 4:5 3 figures shown from behind instead of 2 front-facing, giant corridor artwork, rejected"
+    },
+    {
+      "run_id": 43049681977,
+      "request_id": "UMS001-MULTI11-SEOHERO-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        62
+      ],
+      "artifact_id": 13868213530,
+      "note": "Real SEO 16:9 close-up portrait instead of wide property-visit environmental editorial, malformed right hand, rejected"
+    },
+    {
+      "run_id": 43051178813,
+      "request_id": "UMS001-MULTI11-IGFEED-20261111-02",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13868479391,
+      "note": "REAL IG 4:5: two front-facing people, but generic orange corridor, flattened lighting and no intended Córdoba property context or physical glass sculpture. Rejected."
+    },
+    {
+      "run_id": 43051178813,
+      "request_id": "UMS001-MULTI11-SEOHERO-20261111-02",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13868479391,
+      "note": "REAL SEO 16:9: domestic interior physically generated, human cast absent. DeepSeek Vision summary exceeded schema so NO valid QA score; rejected. Never infer model success from GH workflow status."
+    },
+    {
+      "run_id": 43055263249,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-01",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13869733582,
+      "note": "Physical Facebook 1:1 square 2048x2048 with CEREBRO-first prompt + DeepSeek camera mentoring. Two adult people only shown FROM BEHIND inside completely orange repetitive arches, no recognisable Córdoba flat or physical orange glass; not a candid photo. Vision failed with unknown violation code; no valid numeric grade. Independent reviewer rejects."
+    },
+    {
+      "run_id": 43056409310,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-02",
+      "predictions": 0,
+      "qa_scores": [],
+      "artifact_id": 13871053633,
+      "note": "Second job request failed on malformed DeepSeek mentor creative schema BEFORE Replicate submission. New job ID needed for safe deterministic fallback, no image charge."
+    },
+    {
+      "run_id": 43056969985,
+      "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-03",
+      "predictions": 1,
+      "qa_scores": [
+        52
+      ],
+      "artifact_id": 13871951087,
+      "note": "Second PHYSICAL Facebook 1:1 image. RAW mode and compact photo-first CEREBRO baseline improved living room realism and daylight, but two adults still fully backturned; no readable faces, orange arch instead of small real glass sculpture, modelled CGI feel; DeepSeek strict QA 52/100. Rejected."
+    },
+    {
+      "run_id": 43058501615,
+      "request_id": "UMS001-MULTI11-SEEDREAM-LINKEDIN-CANARY-20261111-01",
+      "provider": "bytedance/seedream-4",
+      "predictions": 1,
+      "qa_scores": [
+        null
+      ],
+      "artifact_id": 13872611191,
+      "prediction_id": "7st2ycmy5drmw0d1sdqr5n6vtw",
+      "raw_sha256": "0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422",
+      "raw_pixels": [
+        2560,
+        1440
+      ],
+      "target_pixels": [
+        1200,
+        628
+      ],
+      "note": "Real Seedream 4 LinkedIn 16:9 photo: two front-visible natural adult faces, natural hands and professional interaction, bright plausible Andalusian room, small orange glass object with shadows. Qualitatively markedly more realistic than 6 prior FLUX samples. DeepSeek Vision contract failure => NO VALID AUTOMATED GRADE; official Fénix composite/rights and independent evaluation PENDING. NOT PUBLISHED."
     }
   ],
   "rules": [
@@ -70,6 +159,34 @@
     {
       "code": "FLAT_CONTRAST",
       "instruction": "Actual failures: orange slab backgrounds and flat studio-like illumination are insufficient. Require nuanced key/fill, true Mediterranean directional sunlight, readable shadows and premium controlled cinematic color."
+    },
+    {
+      "code": "FACE_MISSING",
+      "instruction": "REAL QA 43049681977 IG score 52: never accept any Instagram two-buyer photo with backs of heads, three people, or tiny side faces. Require EXACTLY two adult characters, both shot three-quarter toward lens, natural faces highly visible, while glass installation remains behind them, not hiding faces."
+    },
+    {
+      "code": "COMPOSITION_WEAK",
+      "instruction": "REAL QA 43049681977 SEO score 62: landscape 16:9 dimensions do not prove SEO framing. Require Córdoba home ENVIRONMENT occupying over half of photo, two adults medium-size on one side, wide negative space for HTML heading, physically integrated orange artwork not a flat rectangle; avoid hands reaching toward lens."
+    },
+    {
+      "code": "GENERIC_SCENE",
+      "instruction": "Physical IG final retake 43051178813 52/100 had two adults facing camera but generic uniform orange corridor. Real Córdoba home/patio architectural context, plausible natural key/fill, precise unusual physical orange glass installation and meaningful narrative are mandatory; frontal faces alone never justify approval."
+    },
+    {
+      "code": "FACE_MISSING",
+      "instruction": "Physical SEO final retake 43051178813 produced 16:9 real estate interior without the two adults required by brief. Reject missing cast even if wide dimensions correct. Avoid generating empty real-estate staged living room when editorial requires people visiting."
+    },
+    {
+      "code": "CAST_MISMATCH",
+      "instruction": "Physical FB first CEREBRO-first canary run 43055263249: two adults with backs to camera so no visible faces, instead of requested real mature buyer couple. Strongly require front three-quarter faces actually in pixels; a prompt claim about faces or exact cast does not prove visual compliance."
+    },
+    {
+      "code": "GENERIC_SCENE",
+      "instruction": "Physical FB canary run 43055263249: intense full-frame monochrome orange nested arch corridor is unacceptable. For real-estate social: authentic Andalusian white/cream apartment with clear window, sofa, masonry and natural skin; orange glass sculpture is secondary physical object only, <20% frame, not an environment or tunnel."
+    },
+    {
+      "code": "CAST_MISMATCH",
+      "instruction": "Real FB 1:1 photo-first plus RAW canary 43056969985 score 52/100: a realistic room is not enough. Repeated two backturned adults/no faces persists in both distinct photo prompts. Shift next LAB generation strategy/model to enforce subject viewpoints and camera framing; no more paid FB repeats on same Replicate FLUX Ultra model without a new evaluated approach."
     }
   ],
   "policy": {
@@ -83,5 +200,5 @@
     "cost_estimate_replicate_usd": 0.42,
     "estimated_usage_only": true
   },
-  "next_gate": "Design stronger safe cinematic source without approval-like icons, build brand postprocessor and comprehensive visual QA before enabling automatic publication or next video phase."
+  "next_gate": "Seven actual Replicate images: prior six FLUX rejected; one distinct LinkedIn Seedream4 photo is promising but QA contract failed, independent photographic/brand/rights evaluation pending. Do not call IMAGE_GATE_GREEN or advance video; further paid calls require separate canary gates. Preserve all assets and SHA256 receipts."
 }

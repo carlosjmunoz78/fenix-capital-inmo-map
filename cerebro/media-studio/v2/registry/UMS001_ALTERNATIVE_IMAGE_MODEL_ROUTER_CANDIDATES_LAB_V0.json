@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "0.1",
+  "status": "CANDIDATES_ONLY_NO_PROVIDER_CALLS",
+  "master_gate_ref": "cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_IMAGE_GATE_REAL_20261111_V2.json",
+  "selected_for_paid_execution": null,
+  "creative_owner": "CEREBRO_PROMPT_FACTORY_V0",
+  "teacher": "DEEPSEEK_TEMPORARY",
+  "regulatory_and_brand": "OFFICIAL_FENIX_BRAND_COMPOSITED_ONLY_POSTPROCESS",
+  "financial_policy": {
+    "additional_new_subscription_eur": 0,
+    "prepaid_only": true,
+    "automatic_provider_retry": false,
+    "auto_reload": false,
+    "per_call_estimate_cap_usd": 0.06,
+    "requires_new_atomic_finops_reservation": true
+  },
+  "candidates": [
+    {
+      "id": "black-forest-labs/flux-1.1-pro-ultra",
+      "price_usd_estimate": 0.06,
+      "pricing_basis": "per image",
+      "status": "REAL_FAIL_6_OF_6",
+      "source": "https://replicate.com/black-forest-labs/flux-1.1-pro-ultra/api/schema"
+    },
+    {
+      "id": "bytedance/seedream-4",
+      "price_usd_estimate": 0.03,
+      "pricing_basis": "per image",
+      "status": "UNTESTED",
+      "schema_differences": "size=2K, max_images=1, sequential_image_generation=disabled, enhance_prompt=false, output array; output url and bytes independently validated",
+      "source": "https://replicate.com/bytedance/seedream-4/api/schema"
+    },
+    {
+      "id": "google/imagen-4",
+      "price_usd_estimate": 0.04,
+      "pricing_basis": "per image",
+      "status": "UNTESTED",
+      "source": "https://replicate.com/google/imagen-4"
+    },
+    {
+      "id": "black-forest-labs/flux-2-pro",
+      "price_usd_estimate": null,
+      "pricing_basis": "USD 0.015/run plus USD 0.015 each output MP and each input MP; needs actual shape-specific cap",
+      "status": "UNTESTED",
+      "source": "https://replicate.com/black-forest-labs/flux-2-pro"
+    }
+  ],
+  "selection_rules": {
+    "must_be_new_independent_cold_model_trial": true,
+    "do_not_rerun_exhausted_pieces": true,
+    "default_paid_calls": false,
+    "independent_human_pixel_qa_required": true,
+    "minimum_score": 88,
+    "max_critical_violations": 0,
+    "all_platform_ratios_require_native_generation": true,
+    "video_gate": "BLOCKED_UNTIL_IMAGES_WITH_EVIDENCE"
+  },
+  "notes": "External official price listings are point-in-time candidates, not authenticated invoice or provider SLA; no model was called by creating this file."
+}

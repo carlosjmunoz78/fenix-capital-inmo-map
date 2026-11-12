@@ -45,6 +45,30 @@ class PromptForgeTests(unittest.TestCase):
   seo["panels"]=seo["panels"][:1]
   o=m.build_prompt_batch(seo,{**QA,"content_id":seo["content_id"]})
   self.assertIn("SEO hero photo must have no lettering",o["prompts"][0]["text"])
+ def test_seo_wide_directs_real_property_not_closeup_portrait(self):
+  seo=json.loads(json.dumps(BRIEF))
+  seo.update(platform="SEO",asset_type="SEO_HERO")
+  seo["panels"]=seo["panels"][:1]
+  output=m.build_prompt_batch(seo,{**QA,"content_id":seo["content_id"]})
+  prompt=output["prompts"][0]["text"]
+  self.assertIn("SEO 16:9 ENVIRONMENTAL PHOTO",prompt)
+  self.assertIn("property setting",prompt)
+  self.assertNotIn("waist-up medium portrait",prompt)
+  self.assertIn("authentic",prompt)
+  self.assertFalse(output["social_publishing_enabled"] if "social_publishing_enabled" in output else False)
+ def test_social_direction_keeps_faces_in_view_and_not_backturned(self):
+  out=m.build_prompt_batch(BRIEF,QA)
+  self.assertIn("three-quarter FRONT VIEW",out["prompts"][0]["text"])
+  self.assertIn("Respect requested cast",out["prompts"][0]["text"])
+  self.assertNotIn("SEO 16:9 ENVIRONMENTAL",out["prompts"][0]["text"])
+ def test_seo_human_missing_lesson_preserves_wide_environment(self):
+  seo=json.loads(json.dumps(BRIEF))
+  seo.update(platform="SEO",asset_type="SEO_HERO")
+  seo["panels"]=seo["panels"][:1]
+  qa={**QA,"content_id":seo["content_id"],"quality_defects":["HUMAN_MISSING"]}
+  output=m.build_prompt_batch(seo,qa)
+  self.assertIn("Learned SEO correction (HUMAN_MISSING)",output["prompts"][0]["text"])
+  self.assertNotIn("waist-up close-medium portrait",output["prompts"][0]["text"])
  def test_inconsistent_seo_rejected(self):
   with self.assertRaises(ValueError):m.build_prompt_batch({**BRIEF,"platform":"SEO"},QA)
  def test_creative_prompt_reproducible_for_same_input(self):

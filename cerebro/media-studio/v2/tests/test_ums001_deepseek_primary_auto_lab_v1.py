@@ -77,6 +77,78 @@ class DeepseekAutonomousTests(unittest.TestCase):
   codes={x["code"] for x in m.get_learning(self.job)}
   self.assertIn("BAD_ANATOMY",codes)
   self.assertIn("GENERIC_SCENE",codes)
+ def test_visual_trial_explicitly_omits_legacy_style_reference(self):
+  trial={**self.job,"style_reference_mode":"NONE"}
+  self.assertEqual(m.allowed_job(trial)["style_reference_mode"],"NONE")
+  payload=m.replicate_image_input(trial,"A completely new cinematic editorial photograph")
+  self.assertEqual(payload["aspect_ratio"],"4:5")
+  self.assertNotIn("image_prompt",payload)
+  self.assertNotIn("image_prompt_strength",payload)
+ def test_existing_image_orders_preserve_verified_style(self):
+  self.assertIs(m.allowed_job(self.job),self.job)
+  legacy=m.replicate_image_input(self.job,"Original creative image")
+  self.assertIn("image_prompt",legacy)
+  self.assertEqual(legacy["image_prompt_strength"],0.30)
+ def test_creative_director_discriminates_ig_and_seo_scene_geometry(self):
+  ig={**self.job,"channel":"INSTAGRAM","asset_type":"IMAGE","style_reference_mode":"NONE","render_aspect_ratio":"4:5"}
+  seo={**self.job,"channel":"SEO","asset_type":"SEO_HERO","style_reference_mode":"NONE","render_aspect_ratio":"16:9"}
+  social=m.prompt_messages(ig,ig["panels"][0],1,[])[0]["content"]
+  search=m.prompt_messages(seo,seo["panels"][0],1,[])[0]["content"]
+  self.assertIn("EXACTLY TWO",social)
+  self.assertIn("three-quarter FRONT VIEW",social)
+  self.assertIn("HOME VISIT",search)
+  self.assertIn("no close-up",search)
+  self.assertNotIn("For SEO wide 16:9",social)
+ def test_new_seo_landscape_canary_uses_16_9_real_provider_ratio(self):
+  job={**self.job,"channel":"SEO","asset_type":"SEO_HERO","style_reference_mode":"NONE","render_aspect_ratio":"16:9"}
+  self.assertEqual(m.allowed_job(job)["render_aspect_ratio"],"16:9")
+  self.assertEqual(m.replicate_image_input(job,"Original photo")["aspect_ratio"],"16:9")
+ def test_wide_only_approved_for_seo_without_reference(self):
+  for ch,asset,mode in (("INSTAGRAM","IMAGE","NONE"),("SEO","SEO_HERO","VERIFIED_CROP")):
+   with self.subTest(channel=ch),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"channel":ch,"asset_type":asset,"style_reference_mode":mode,"render_aspect_ratio":"16:9"})
+ def test_unlisted_ratio_never_goes_to_provider(self):
+  for aspect in ("1:1","9:16","3:4",None):
+   with self.subTest(aspect=aspect),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"render_aspect_ratio":aspect})
+ def test_visual_trial_rejects_unexpected_reference_modes(self):
+  for bad in ("AUTO","UNVERIFIED_URL",True,123,None):
+   with self.subTest(mode=bad),self.assertRaises(m.Blocked):
+    m.allowed_job({**self.job,"style_reference_mode":bad})
+ def test_visual_trial_is_lab_only_and_never_publishes(self):
+  with self.assertRaises(m.Blocked):
+   m.allowed_job({**self.job,"style_reference_mode":"NONE","environment":"PROD"})
+  with self.assertRaises(m.Blocked):
+   m.allowed_job({**self.job,"style_reference_mode":"NONE","publish_enabled":True})
+ def test_unknown_external_vision_code_remains_rejected_but_auditable(self):
+  full=m.premium_policy()["qa_dimensions"]
+  bad={"pass":True,"score":100,"violations":["TUNNEL_GENERIC_HUMANS_BACKS"],
+       "correction":"Need visible faces inside a real home",
+       "summary":"Recognizable art failure from real Facebook image.","rubric_scores":full}
+  result=m.validate_vision(bad)
+  self.assertFalse(result["accepted"])
+  self.assertFalse(result["pass"])
+  self.assertIn("UNKNOWN",result["violations"])
+  self.assertEqual(result["qa_contract_rejection"],"UNKNOWN_VIOLATION_CODE")
+  self.assertEqual(result["unrecognized_violation_codes"],["TUNNEL_GENERIC_HUMANS_BACKS"])
+  self.assertEqual(result["score_consistency"],"UNVERIFIED_REJECTED")
+ def test_oversized_real_vision_summary_rejected_but_provenance_preserved(self):
+  full=m.premium_policy()["qa_dimensions"]
+  verdict={"pass":True,"score":100,"violations":[],"correction":"","summary":"X"*700,"rubric_scores":full}
+  result=m.validate_vision(verdict)
+  self.assertFalse(result["accepted"])
+  self.assertFalse(result["pass"])
+  self.assertIn("UNKNOWN",result["violations"])
+  self.assertEqual(result["qa_contract_rejection"],"INVALID_QA_SUMMARY_LENGTH")
+  self.assertEqual(result["original_qa_summary_length"],700)
+  self.assertEqual(len(result["original_qa_summary_sha256"]),64)
+ def test_oversized_vision_correction_cannot_pass(self):
+  full=m.premium_policy()["qa_dimensions"]
+  verdict={"pass":True,"score":100,"violations":[],"correction":"X"*1201,"summary":"Quality verified before checks.","rubric_scores":full}
+  result=m.validate_vision(verdict)
+  self.assertFalse(result["accepted"])
+  self.assertEqual(result["qa_contract_rejection"],"INVALID_QA_CORRECTION_LENGTH")
+  self.assertEqual(len(result["correction"]),1200)
  def test_fail_closed_before_paid_calls_without_secret(self):
   with patch.dict(os.environ,{"GITHUB_REPOSITORY":m.REPO,"GITHUB_HEAD_REF":m.BRANCH,"UMS001_DEEPSEEK_AUTOMATION_GATE":"OWNER_AUTHORIZED_LAB_20261111"}):
    with self.assertRaises(m.Blocked):m.run_job(self.job,"","", "")

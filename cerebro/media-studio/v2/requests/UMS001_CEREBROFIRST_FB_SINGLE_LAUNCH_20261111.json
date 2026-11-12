@@ -1,0 +1,16 @@
+{
+  "launch_id": "UMS001-CEREBROFIRST-FB-20261111-FIRST-ONLY",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-01",
+  "max_replicate_predictions": 1,
+  "max_replicate_estimated_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_estimated_usd": 0.02,
+  "replicate_prepaid_verified": true,
+  "autoreload_disabled_verified": true,
+  "no_new_subscriptions": true,
+  "publish": false,
+  "run_once": true
+}

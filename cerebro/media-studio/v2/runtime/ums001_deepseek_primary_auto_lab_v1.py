@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT=Path("cerebro/media-studio/v2")
 RUNTIME=ROOT/"runtime"
 REPO="carlosjmunoz78/fenix-capital-inmo-map"
-BRANCH="cerebro/ums-replicate-flux-paid-lab-v0-20261108"
+BRANCH="cerebro/ums001-visual-learning-no-reference-lab-20261111"
 ENGINE="UMS-001"
 AI="deepseek-flash"
 MODEL="black-forest-labs/flux-1.1-pro-ultra"
@@ -56,7 +56,21 @@ def json_write(path,doc):
 def allowed_job(doc):
  if not isinstance(doc,dict):deny("JOB_NOT_OBJECT")
  required={"schema_version","request_id","company_id","engine_id","environment","version","channel","asset_type","topic","audience","panels","publish_enabled","max_attempts_per_panel","max_image_budget_usd","max_deepseek_calls","max_deepseek_budget_usd","source_request"}
- if set(doc)!=required:deny("JOB_FIELDS")
+ if not required.issubset(doc) or not (set(doc)-required).issubset({"style_reference_mode","render_aspect_ratio","creative_owner","master_item_id"}):deny("JOB_FIELDS")
+ if doc.get("style_reference_mode","VERIFIED_CROP") not in ("VERIFIED_CROP","NONE"):deny("STYLE_REFERENCE_MODE_INVALID")
+ owner=doc.get("creative_owner")
+ if owner is not None and owner!="CEREBRO_PROMPT_FACTORY_V0":deny("CREATIVE_OWNER_INVALID")
+ if owner=="CEREBRO_PROMPT_FACTORY_V0":
+  if set(doc)-required!={"style_reference_mode","render_aspect_ratio","creative_owner","master_item_id"}:deny("CEREBRO_FIRST_SCHEMA")
+  if doc.get("master_item_id") not in ("IG-FEED-01","SEO-HERO-01","FB-FEED-01") or len(doc.get("panels",[]))!=1:deny("CEREBRO_FIRST_CANARY_SCOPE")
+  allowed_master={"IG-FEED-01":("INSTAGRAM","IMAGE","4:5"),"SEO-HERO-01":("SEO","SEO_HERO","16:9"),"FB-FEED-01":("FACEBOOK","IMAGE","1:1")}
+  if (doc.get("channel"),doc.get("asset_type"),doc.get("render_aspect_ratio"))!=allowed_master[doc["master_item_id"]]:deny("CEREBRO_FIRST_MASTER_CHANNEL_RATIO_MISMATCH")
+  if (doc.get("style_reference_mode"),doc.get("max_attempts_per_panel"),doc.get("max_image_budget_usd"),doc.get("max_deepseek_calls"),doc.get("max_deepseek_budget_usd"))!=("NONE",1,0.06,2,0.02):deny("CEREBRO_FIRST_FINOPS_SCOPE")
+ else:
+  if "master_item_id" in doc:deny("UNOWNED_MASTER_REFERENCE")
+ if doc.get("render_aspect_ratio","4:5") not in ("4:5","16:9","1:1"):deny("RENDER_ASPECT_RATIO_INVALID")
+ if doc.get("render_aspect_ratio")=="1:1" and (doc.get("channel"),doc.get("asset_type"),doc.get("creative_owner"),doc.get("master_item_id"),doc.get("style_reference_mode"))!=("FACEBOOK","IMAGE","CEREBRO_PROMPT_FACTORY_V0","FB-FEED-01","NONE"):deny("FACEBOOK_SQUARE_CANARY_NOT_AUTHORIZED")
+ if doc.get("render_aspect_ratio","4:5")=="16:9" and (doc["channel"],doc["asset_type"],doc.get("style_reference_mode"))!=("SEO","SEO_HERO","NONE"):deny("WIDE_CANARY_NOT_AUTHORIZED")
  if (doc["company_id"],doc["engine_id"],doc["environment"],doc["version"])!=("fenix",ENGINE,"LAB","1.0"):deny("SCOPE_DENIED")
  if doc["channel"] not in ALLOWED_CHANNELS or doc["asset_type"] not in ("IMAGE","CAROUSEL","SEO_HERO"):deny("CHANNEL_INVALID")
  if doc["channel"]=="SEO" and doc["asset_type"]!="SEO_HERO":deny("SEO_FORMAT_DENIED")
@@ -132,24 +146,31 @@ def premium_directives():
   "positive_prompt_order":doc["prompt_required_order"],
   "qa_dimensions":doc["qa_dimensions"],
   "no_generated_logos":True}
-def prompt_messages(job,panel,attempt,previous_qa):
+def prompt_messages(job,panel,attempt,previous_qa,cerebro_owned_prompt=None):
  customer={"purpose":job["topic"],"audience":job["audience"],"platform":job["channel"],"type":job["asset_type"],
    "panel_scene":panel["scene"],"human_subject":panel["human_subject"],"must_show":panel["required_visuals"],
    "past_failures":get_learning(job),"attempt":attempt,"correction":previous_qa,
    "premium_cinematography_contract":premium_directives(),
    "brand":{"dominant_accent":"#FF5F00","yellow_secondary":"#FFB71B","purple_accent":"MINIMAL","original_logo":"MR_BOGART_SVG_POSTCOMPOSITION_ONLY"}}
+ if cerebro_owned_prompt is not None:
+  if not isinstance(cerebro_owned_prompt,str) or not 1500<=len(cerebro_owned_prompt)<=6500:deny("FACTORY_ANCHOR_INVALID")
+  customer["cerebro_owned_immutable_prompt"]=cerebro_owned_prompt
+  customer["cerebro_owned_immutable_prompt_sha256"]=hash_bytes(cerebro_owned_prompt.encode("utf-8"))
+  customer["mentor_instruction"]="Temporary DeepSeek mentor, NOT the owner: suggest only shot plan, camera, lighting and objective corrections. Your full new scene is NOT executable. Never change CEREBRO cast, setting, aspect ratio, brand or financial truth."
  sys_text=("You are CEREBRO UMS-001, a world-class Spanish surreal-photography creative director. "
   "Produce STRICT JSON with keys image_prompt,risks,shot_plan. image_prompt 650-3000 English characters. "
   "shot_plan MUST include camera_angle,focal_length_mm,aperture,key_light,fill_and_rim,contrast,color_grade,surreal_composition,subject_scale,typography_safe_area, all concrete visible instructions. "
   "Every scene must state a professional CAMERA ANGLE and focal LENS 35mm/50mm/85mm, aperture f/2.8-f/4, realistic depth of field, natural KEY LIGHT direction with fill and optional rim, a physically coherent contrast ratio and shadows, dynamic range, orange #FF5F00 cinematic grade while preserving natural skin. "
-  "Start with large realistic Spanish adults visible waist-up in the foreground, photographic pores, believable hands, "
-  "professional premium cinematic Córdoba-Andalucía art, spectacular orange glass surreal architecture BEHIND them. "
+  + ("For SEO wide 16:9: composition is first a credible actual Córdoba HOME VISIT, show environmental architecture taking most of the frame, two naturally photographed adults occupy only 25-40% of frame height near one side; leave wide unobstructed negative space for page HTML. Camera back from subjects: no close-up faces, hands not thrust toward lens. Use real Andalusian home textures and authentic soft directional daylight, and original three-dimensional orange glass integrated into the building with real thickness, refraction and realistic shadows; NO flat orange panel or abstract icon. " if job["channel"]=="SEO" else
+  ("For Facebook 1:1: one distinct warm documentary photograph in a believable authentic Córdoba apartment, with a mature Spanish buyer couple in natural three-quarter front view, two clean visible faces, no third party and no backs to camera. Compose naturally for a square, not an Instagram crop. Create a physically plausible refractive amber-orange sculpture IN THE REAL ROOM, without using glowing orange corridors or falsely staged documents. " if job["channel"]=="FACEBOOK" else
+  "For Instagram 4:5: EXACTLY TWO Spanish adult buyers, one woman and one man, shot in three-quarter FRONT VIEW FACING CAMERA with both adult FACES CLEAR AND LARGE; no third person, no backs turned, no central distant silhouette. Natural skin and hands, two people in foremost plane occupy 45-65% image height; create tangible extraordinary yet physically credible orange architectural glass behind and around, without dominating their faces. Córdoba patio needs authentic stone, greenery and sun shadows, not a generic symmetrical corridor. ")) +
+  "Professional premium cinematic Córdoba-Andalucía photographic style. "
   "If SEO, do not include text or logos in final image. If social, leave space for separate deterministic hook+logo. "
   "No AI text, invented watermarks, marks, labels, documents, bank approval implications or fake bank emblems. The surreal sculpture is ABSTRACT PHYSICAL ARCHITECTURE, not an icon or symbol. "
-  "Image is 4:5 vertical. Image composition must not be a generic tiny-people fantasy. "
+  "Image is "+job.get("render_aspect_ratio","4:5")+" composition; if 16:9 use wide landscape framing, if 4:5 vertical framing. Image composition must not be a generic tiny-people fantasy. "
   "Never generate the brand icon; original SHA-verified Fénix logo composited separately. JSON only.")
  return [{"role":"system","content":sys_text},{"role":"user","content":"Generate an original creative photographic prompt, not a repeated template. Customer brief JSON: "+json.dumps(customer,ensure_ascii=False)}]
-def validate_creative(result):
+def validate_creative(result,channel="INSTAGRAM"):
  if not isinstance(result,dict) or set(result)!={"image_prompt","risks","shot_plan"}:deny("CREATIVE_JSON_SCHEMA")
  shot=result["shot_plan"]
  if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("MISSING_PREMIUM_PHOTO_SHOT_PLAN")
@@ -192,9 +213,10 @@ def validate_creative(result):
  photo_plan=" PHOTOGRAPHY SHOT SPEC: "+"; ".join(key.replace("_"," ")+": "+shot[key] for key in SHOT_KEYS)+"."
  hard_negatives=" IMPORTANT FOR ORIGINAL GENERATION: no written words anywhere, no fabricated watermarks, no generated logos, no false official paperwork or mortgage approval symbols, no text on clothes, no artifacts covering human faces, no poor anatomy. Authentic original Fénix mark is added later by a SHA-verified compositor only."
  if len(p)+len(photo_plan)+len(hard_negatives)>10000:deny("COMBINED_PREMIUM_PROMPT_TOO_LARGE")
- return ("MAIN SUBJECT: large authentic Spanish adult people in close-up foreground, clear natural faces and hands; "
-  "PREMIUM 50mm CINEMATIC PHOTOGRAPH with vivid orange #FF5F00 artwork behind humans, realistic sunlight. "
-  +p+photo_plan+hard_negatives)
+ prefix=("REAL ESTATE SEO HERO: 16:9 WIDE 35mm documentary environmental photograph of a genuine Córdoba HOME INTERIOR with meaningful architecture occupying more than half the frame; two natural believable adults medium-sized positioned to one side, readable faces without close-up distortion, HANDS AWAY FROM CAMERA. Clean negative space for HTML heading. Physically integrated premium orange translucent glass architecture with refractions and motivated shadows; never an orange flat panel. "
+ if channel=="SEO" else
+ "IG SOCIAL 4:5: EXACTLY TWO adults one woman and one man photographed from their FRONT THREE-QUARTER viewpoint, FACES CLEARLY VISIBLE, never three people, never looking away, large natural faces and anatomically credible hands, genuine Córdoba patio with physical coherent luminous orange glass architecture behind them but not hiding faces. ")
+ return prefix+p+photo_plan+hard_negatives
 def validate_vision(result):
  if not isinstance(result,dict) or set(result)!={"pass","score","violations","correction","summary","rubric_scores"}:deny("VISION_JSON_SCHEMA")
  rubric=premium_policy()["qa_dimensions"]
@@ -204,9 +226,30 @@ def validate_vision(result):
  # A contradictory self-reported score MUST be a rejection, never a forced approval.
  discrepancy=sum(scores.values())!=result.get("score")
  if type(result["pass"]) is not bool or type(result["score"]) is not int or not 0<=result["score"]<=100:deny("VISION_TYPES")
- if not isinstance(result["violations"],list) or any(x not in FAIL_CODES for x in result["violations"]):deny("UNKNOWN_VIOLATION")
- if not isinstance(result["correction"],str) or len(result["correction"])>1200:deny("VISION_CORRECTION")
- if not isinstance(result["summary"],str) or not 5<=len(result["summary"])<=500:deny("VISION_SUMMARY")
+ if not isinstance(result["violations"],list) or len(result["violations"])>32 or any(not isinstance(x,str) or not 1<=len(x)<=80 for x in result["violations"]):deny("VISION_VIOLATIONS_TYPES")
+ unknown=sorted(set(x for x in result["violations"] if x not in FAIL_CODES))
+ if unknown:
+  # Unrecognized vision code is a model contract failure, NEVER evidence of
+  # approval. Preserve it in the raw QA receipt so CEREBRO can learn from it.
+  return {**result,"accepted":False,"pass":False,
+   "score":min(result["score"],sum(scores.values())),
+   "reported_score":result["score"],
+   "violations":sorted(set([x for x in result["violations"] if x in FAIL_CODES]+["UNKNOWN"])),
+   "unrecognized_violation_codes":unknown,
+   "qa_contract_rejection":"UNKNOWN_VIOLATION_CODE",
+   "score_consistency":"UNVERIFIED_REJECTED"}
+ if not isinstance(result["correction"],str) or not isinstance(result["summary"],str):deny("VISION_QA_TEXT_TYPES")
+ # A too-long model QA response must never erase a paid prediction's real
+ # provenance: record a REJECTED verdict and keep its SHA and raw-image receipt.
+ if len(result["correction"])>1200 or not 5<=len(result["summary"])<=500:
+  reason="INVALID_QA_CORRECTION_LENGTH" if len(result["correction"])>1200 else "INVALID_QA_SUMMARY_LENGTH"
+  return {**result,"accepted":False,"pass":False,"score":min(result["score"],sum(scores.values())),
+   "violations":sorted(set(result["violations"]+["UNKNOWN"])),
+   "summary":result["summary"][:500] if len(result["summary"])>=5 else "QA summary missing or malformed",
+   "correction":result["correction"][:1200],"qa_contract_rejection":reason,
+   "original_qa_summary_sha256":hash_bytes(result["summary"].encode("utf-8")),
+   "original_qa_summary_length":len(result["summary"])}
+
  if discrepancy:
   issues=sorted(set(result["violations"]+["UNKNOWN"]))
   return {**result,"reported_score":result["score"],"rubric_sum":sum(scores.values()),
@@ -265,7 +308,7 @@ def vision_messages(job,panel,jpeg):
   "{\"pass\":boolean,\"score\":integer 0-100,\"violations\":array of codes,\"correction\":string,\"summary\":string,\"rubric_scores\":object}. "
   "Codes: INVENTED_TEXT,INVENTED_LOGO,FACE_MISSING,FACE_TINY,FACE_OBSCURED,CAST_MISMATCH,BAD_ANATOMY,GENERIC_SCENE,DARK_MUDDY,MISLEADING_FINANCE,COMPOSITION_WEAK,BAD_LIGHTING,FLAT_CONTRAST,FOCAL_DISTORTION,WRONG_BRAND_COLOR,UNKNOWN. "
   "Reject any pseudo-writing, watermarks, false logos, money promises, official seals, absent/tiny human face, "
-  "weak art direction. Portraits must clearly show specified people with realistic skin and visible hands. "
+  "weak art direction. For SEO 16:9 verify real Córdoba property-visit context across majority of landscape frame, clear HTML-headline negative space, subjects medium scale rather than portrait-closeup, no malformed foreground hands. For social ensure exact cast and faces directed toward lens, not turned backs. "
   "Score >=88 and zero violations only if PREMIUM Fénix quality, not basic. "
   "Judge photographer-level lens perspective/angle, natural key light, soft fill, edge separation, tonal contrast, human skin, shallow but accurate depth, orange highlights without orange skin, scene originality. "
   "rubric_scores must have EXACT keys and maximums: human_presence_and_cast 20, camera_and_composition 15, lighting_and_realism 15, contrast_and_color 10, surreal_creativity 15, typography_and_brand_integrity 15, context_and_claims 10; each integer 0..maximum and score MUST equal sum. "
@@ -275,6 +318,78 @@ def vision_messages(job,panel,jpeg):
   {"type":"text","text":"Inspect this image independently against real campaign brief JSON: "+json.dumps(desc,ensure_ascii=False)},
   {"type":"image_url","image_url":{"url":"data:image/jpeg;base64,"+encoded,"detail":"high"}}
  ]}]
+def replicate_image_input(job,prompt):
+ # Preserve legacy conditioning unless a LAB order explicitly requests an
+ # independent generation. A no-reference trial is NOT an approval.
+ image_input={"prompt":prompt,"aspect_ratio":job.get("render_aspect_ratio","4:5"),
+              "raw":job.get("creative_owner")=="CEREBRO_PROMPT_FACTORY_V0" and job.get("master_item_id")=="FB-FEED-01",
+              "output_format":"jpg","safety_tolerance":2}
+ if job["channel"]!="SEO" and job.get("style_reference_mode","VERIFIED_CROP")=="VERIFIED_CROP":
+  image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
+ return image_input
+
+def cerebro_owned_plan(job,panel):
+ if job.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":return None
+ if len(job["panels"])!=1 or panel is not job["panels"][0]:deny("CEREBRO_FACTORY_SINGLE_PANEL")
+ source=RUNTIME/"ums001_multichannel_prompt_owner_lab_v1.py"
+ spec=importlib.util.spec_from_file_location("ums001_multichannel_prompt_factory",source)
+ mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+ master=mod.read(mod.MASTER)
+ matching=next((x for x in master.get("pieces",[]) if x.get("item_id")==job["master_item_id"]),None)
+ if matching is None or (matching["channel"],matching["scene"],matching["provider_aspect_ratio"])!=(job["channel"],panel["scene"],job["render_aspect_ratio"]):
+  deny("CEREBRO_FACTORY_SCENE_CHANNEL_ASPECT_MISMATCH")
+ plan=mod.build_all(master)
+ candidate=next((x for x in plan["prompts"] if x["item_id"]==job["master_item_id"]),None)
+ if not candidate or candidate.get("visual_qa")!="PENDING_PHYSICAL_IMAGE" or candidate.get("publish_enabled") is not False:deny("CEREBRO_FACTORY_GATE_INVALID")
+ return candidate
+
+def cerebro_owned_fallback_teacher(anchor):
+ if not isinstance(anchor,dict) or anchor.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":deny("FALLBACK_NOT_CEREBRO_OWNED")
+ # Explicit fallback only for malformed optional mentor responses. The owner
+ # still provides the entire original visual brief, and all pixels require QA.
+ return {"image_prompt":"CEREBRO producer retains its authored photographic storyboard; external creative mentor was not usable.",
+ "risks":["DEEPSEEK_MENTOR_SCHEMA_INVALID","INDEPENDENT_PIXEL_QA_REQUIRED"],
+ "shot_plan":{
+  "camera_angle":"eye-level front three-quarter real estate documentary, both faces unobstructed",
+  "focal_length_mm":"35mm",
+  "aperture":"f/4",
+  "key_light":"natural soft Mediterranean daylight from an actual Córdoba living-room window",
+  "fill_and_rim":"gentle bounce fill, realistic shadows, no synthetic orange rim everywhere",
+  "contrast":"moderate natural photographic contrast with white walls readable",
+  "color_grade":"true skin colors, warm cream apartment daylight, only a small localized orange glass art accent",
+  "surreal_composition":"one small physically refractive glass sculpture only, never a giant tunnel",
+  "subject_scale":"two visible adult buyers waist-up in a recognizable real apartment",
+  "typography_safe_area":"keep negative space for verified brand typography added later"
+ }}
+
+def cerebro_parse_mentor(creative,anchor,channel):
+ if anchor is None:return creative,validate_creative(creative,channel=channel),False
+ try:
+  validated=validate_creative(creative,channel=channel)
+  return creative,validated,False
+ except Blocked as error:
+  allowed_errors=("CREATIVE_JSON_SCHEMA","MISSING_PREMIUM_PHOTO_SHOT_PLAN","CREATIVE_TOO_SHORT_OR_LONG","INVALID_NUMERIC_SHOT_FIELD","INVALID_SHOT_FIELD","EMPTY_SHOT_FIELD")
+  if not any(k in str(error) for k in allowed_errors):raise
+  fallback=cerebro_owned_fallback_teacher(anchor)
+  return fallback,"CEREBRO_DETERMINISTIC_SHOT_PLAN_MENTOR_SCHEMA_REJECTED",True
+
+def cerebro_mentor_final_prompt(baseline,mentor):
+ if not isinstance(baseline,dict) or baseline.get("creative_owner")!="CEREBRO_PROMPT_FACTORY_V0":deny("CEREBRO_FACTORY_ANCHOR_MISSING")
+ prompt=baseline.get("text")
+ if not isinstance(prompt,str) or hash_bytes(prompt.encode("utf-8"))!=baseline.get("prompt_sha256"):deny("CEREBRO_FACTORY_HASH_INVALID")
+ shot=mentor.get("shot_plan")
+ if not isinstance(shot,dict) or set(shot)!=set(SHOT_KEYS):deny("CEREBRO_MENTOR_SHOT_INVALID")
+ # The model is a temporary lens/light teacher. Its proposed replacement
+ # scene stays in audit and NEVER overwrites the owned CEREBRO master scene.
+ allowed=("camera_angle","focal_length_mm","aperture","key_light","fill_and_rim","contrast","color_grade")
+ values=[str(shot[k]) for k in allowed]
+ if any(not 2<=len(v)<=350 or re.search(r"(?i)(?:https?://|api.?key|bearer|r8_[a-z0-9]+)",v) for v in values):deny("CEREBRO_MENTOR_SHOT_UNSAFE")
+ delta=" PROFESSIONAL CAMERA TECHNICAL MENTOR (only lens/lighting, subordinate to CEREBRO owner brief): "+"; ".join(k.replace("_"," ")+": "+str(shot[k]) for k in allowed)+"."
+ safety=" IMMUTABLE OVERRIDE: original CEREBRO cast, scene geometry, human gaze, Córdoba home, image aspect ratio, official branding policy and no generated lettering take precedence over any mentor suggestions."
+ final=prompt+delta+safety
+ if not 1500<=len(final)<=9500:deny("CEREBRO_FACTORY_FINAL_LENGTH")
+ return final
+
 def jpg_from_replicate(pred):
  url=pred.get("output")
  if isinstance(url,list):url=url[0] if url else None
@@ -307,7 +422,7 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
  if not isinstance(deepseek_key,str) or len(deepseek_key)<20 or not isinstance(replicate_key,str) or not replicate_key.startswith("r8_") or not github_key:deny("PROVIDER_SECRETS_MISSING")
  order_size=len(job["panels"])
  out={"schema_version":1,"request_id":job["request_id"],"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
-   "router":"DEEPSEEK_FLASH_PRIMARY_ONLY","creative_model":AI,"image_model":MODEL,
+   "router":"CEREBRO_PROMPT_FACTORY_PRIMARY_DEEPSEEK_TEACHER" if job.get("creative_owner")=="CEREBRO_PROMPT_FACTORY_V0" else "DEEPSEEK_FLASH_PRIMARY_ONLY","creative_model":AI,"image_model":MODEL,
    "source_request":job["source_request"],"total_panels":order_size,"publish_enabled":False,
    "request_budget_image_usd":job["max_image_budget_usd"],"request_budget_deepseek_usd":job["max_deepseek_budget_usd"],
    "status":"PRECHECKED_NOT_SUBMITTED","panels":[],"deepseek_calls":0,"replicate_predictions":0}
@@ -323,18 +438,24 @@ def run_job(job,deepseek_key,replicate_key,github_key,provider=None):
   feedback=[]
   for attempt in range(1,job["max_attempts_per_panel"]+1):
    if round((img_count+1)*0.06,2)>job["max_image_budget_usd"]+0.000001:deny("FINOPS_IMAGE_BUDGET")
-   creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback),deepseek_key,clock)
-   prompt=validate_creative(creative)
+   anchor=cerebro_owned_plan(job,panel)
+   creative,creative_meta=deepseek(prompt_messages(job,panel,attempt,feedback,
+    anchor["text"] if anchor is not None else None),deepseek_key,clock)
+   creative,mentor_draft,mentor_fallback=cerebro_parse_mentor(creative,anchor,job["channel"])
+   prompt=cerebro_mentor_final_prompt(anchor,creative) if anchor is not None else mentor_draft
    # Persist exactly what DeepSeek proposed, including lens, key/fill and contrast, so CEREBRO can learn.
    prompt_path=OUT/(panel["id"]+"-A"+str(attempt)+"-DEEPSEEK-PROMPT.json")
    json_write(prompt_path,{"company_id":"fenix","engine_id":ENGINE,"environment":"LAB",
     "content_id":job["request_id"],"panel_id":panel["id"],"attempt":attempt,
     "prompt":prompt,"prompt_sha256":hash_bytes(prompt.encode()),
+    "creative_owner":"CEREBRO_PROMPT_FACTORY_V0" if anchor else "LEGACY_DEEPSEEK_PRIMARY",
+    "cerebro_source_prompt_sha256":anchor["prompt_sha256"] if anchor else None,
+    "mentor_proposed_scene_sha256":hash_bytes(mentor_draft.encode("utf-8")),
+    "mentor_status":"DETERMINISTIC_CEREBRO_SHOT_FALLBACK_EXTERNAL_SCHEMA_INVALID" if mentor_fallback else "VALID_MENTOR",
+    "mentor_scene_is_executed":False if anchor else True,
+    "mentor_lighting_shot_is_executed":True,
     "shot_plan":creative.get("shot_plan"),"risks":creative.get("risks"),"model":AI})
-   image_input={"prompt":prompt,"aspect_ratio":"4:5","raw":False,
-     "output_format":"jpg","safety_tolerance":2}
-   if job["channel"]!="SEO":
-    image_input.update({"image_prompt":safe_style_reference(),"image_prompt_strength":0.30})
+   image_input=replicate_image_input(job,prompt)
    # Atomic reservation above means no duplicate run can spend on this job; failures never retry uncertain POST.
    try:
     code,pred=http_json(REPLICATE_ENDPOINT,"POST",replicate_key,{"input":image_input},timeout=85)

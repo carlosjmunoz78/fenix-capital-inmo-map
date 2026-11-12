@@ -1,0 +1,68 @@
+name: UMS001 REAL Seedream LinkedIn OFFLINE official brand postproduction QA-only
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-real-seedream-linkedin-brand-qa-only-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_brand_finish_lab_v1.py'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  produce-real-branded-review-artifact:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download EXACT existing paid seedream physical image, NO NEW PREDICTION
+        uses: actions/download-artifact@v4
+        with:
+          name: ums001-alt-seedream-linkedin-one-real-picture-lab
+          run-id: 43058501615
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/ums001-seedream-existing
+      - name: Install free local renderer
+        run: python3 -m pip install Pillow==11.3.0
+      - name: Verify SHA and official brand, compose original LinkedIn candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          RAW="${{ runner.temp }}/ums001-seedream-existing/SEEDREAM-LINKEDIN-RAW.jpg"
+          test -f "$RAW"
+          echo '0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422  '"$RAW" | sha256sum -c
+          python3 cerebro/media-studio/v2/runtime/ums001_multichannel_brand_finish_lab_v1.py \
+            --source "$RAW" \
+            --sha256 0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422 \
+            --item-id LI-FEED-01 --headline 'Decide con criterio' \
+            --out "${{ runner.temp }}/ums001-li-official-brand-qa"
+          python3 - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'ums001-li-official-brand-qa'
+          doc=json.loads((p/'LI-FEED-01_QA_REVIEW_ONLY.json').read_text())
+          assert doc['pixel_dimensions']==[1200,628]
+          assert doc['brand_logo_sha256']=='ec066819ee12c48fa148d6ca70f1434724ff780cc9ccabcfeefc07318c796cc7'
+          assert doc['headline']=='Decide con criterio'
+          assert doc['source_sha256']=='0f3f50ec36384f1e9127044949f493bb14ab300ecad930dce8826c1f356c5422'
+          assert doc['technical_export_qa']=='PASS'
+          assert doc['vision_qa']=='NOT_CERTIFIED' and doc['rights_qa']=='NOT_CERTIFIED'
+          assert doc['final_editorial_approved'] is False
+          assert doc['video_gate_allowed'] is False
+          f=p/doc['output_file']
+          assert hashlib.sha256(f.read_bytes()).hexdigest()==doc['output_sha256']
+          print('UMS001_REAL_BRAND_SHA256_AND_FORMAT_PASS')
+          print('UMS001_EDITORIAL_RELEASE=false')
+          PY
+      - name: Retain original branded candidate and audit manifest (review only)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-li-seedream-real-sha-verified-official-brand-preview
+          path: ${{ runner.temp }}/ums001-li-official-brand-qa/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Absolutely no paid inference, no posting
+        run: echo 'PREPAID IMAGE REUSED, NO PROVIDER CALLS, OFFICIAL LOGO ONLY, REVIEW ARTIFACT, NO PRODUCTION'

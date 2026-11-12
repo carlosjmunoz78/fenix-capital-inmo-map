@@ -1,0 +1,83 @@
+{
+  "schema_version": "cerebro-engine-manifest-v1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "component_id": "UMS001_ED25519_SCHEDULED_ORCHESTRATOR_V0",
+  "version": "0.1.1",
+  "status": "DEPLOYED_INERT_SECURITY_KEY_PROVISION_BLOCKED",
+  "worker": {
+    "name": "cerebro-ums001-signed-orchestrator-lab-eu",
+    "source": [
+      "core.mjs",
+      "worker.mjs"
+    ],
+    "workers_dev": false,
+    "preview_urls": false,
+    "public_routes": [],
+    "cron_count": 0,
+    "repository_hardening_deployed_to_cloudflare": false,
+    "physical_cloudflare_version_status": "PRIOR_INERT_DEPLOYMENT; HARDENED_GITHUB_CANDIDATE_NOT_DEPLOYED"
+  },
+  "event": {
+    "source_type": "Cloudflare Worker native scheduled",
+    "registered_trigger": false,
+    "cron_prepared": "* * * * *",
+    "run_mode": "ONE_SHOT_ONLY",
+    "one_order_id": "UMS001-LAB-LI-FEED-01-ARCHIVE-20261116",
+    "company_id": "fenix",
+    "engine_id": "UMS-001",
+    "environment": "LAB"
+  },
+  "permissions": {
+    "allowed": [
+      "UMS001.QA.METADATA.ISSUE_SIGNED_ONCE"
+    ],
+    "denied": [
+      "PROD",
+      "BILLING",
+      "VIDEO",
+      "SOCIAL",
+      "PUBLISH",
+      "REAL_IMAGE_INFERENCE"
+    ]
+  },
+  "crypto": {
+    "algorithm": "Ed25519",
+    "private_key_secret_name": "ORCH_SIGNER_PRIVATE_PKCS8_BASE64",
+    "secret_provisioned": false,
+    "security_platform_blocks_chat_side_key_install": true,
+    "private_key_logged": false,
+    "key_id": "UMS001-LAB-ORCH-ED25519-20261112-V1",
+    "missing_key_no_longer_claims_one_shot": true,
+    "private_key_preflight_before_KV_claim": true
+  },
+  "bindings": {
+    "queue_name": "cerebro-ums001-image-signed-command-lab-eu",
+    "queue_id": "39d92161f2ac429791bbcc3dfd25c6b8",
+    "kv_name": "cerebro-ums001-signed-once-lab-eu",
+    "kv_id": "475ba0abb99640848b0bfacfb5431f70",
+    "queue_data_jurisdiction": "eu",
+    "kv_data_jurisdiction": "eu"
+  },
+  "tests": {
+    "CI_run_id": 43166594450,
+    "all_tests_passed": 133,
+    "failed": 0,
+    "physical_scheduled_signed_delivery_verified": false
+  },
+  "budget": {
+    "new_subscriptions": 0,
+    "additional_spend_eur": 0,
+    "paid_provider_calls": 0
+  },
+  "rollback": {
+    "action": "keep schedules empty and keys unprovisioned; for future trials remove only dedicated cron and consumer",
+    "tested": false
+  },
+  "rebuild": {
+    "source": "GitHub PR #45, module Worker upload, queue+KV bindings. Protected signer secret supplied by approved administrative secret workflow, never GitHub public."
+  },
+  "promotion": "NOT_ALLOWED",
+  "image_gate_green": false
+}

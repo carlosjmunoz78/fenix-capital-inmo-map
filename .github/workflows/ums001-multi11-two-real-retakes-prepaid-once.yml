@@ -1,0 +1,101 @@
+name: UMS001 Multi11 two REAL corrective retakes from prepaid LAB
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_MULTI11_TWO_REAL_RETAKE_LAUNCH_20261111.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-multi11-two-real-retakes-20261111-once
+  cancel-in-progress: false
+jobs:
+  run-only-two-canaries:
+    if: >-
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' &&
+      github.event.pull_request.number == 45 &&
+      github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111' &&
+      github.event.pull_request.base.ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify signed-off single launch file and immutable inputs before any paid call
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=cerebro/media-studio/v2/requests/UMS001_MULTI11_TWO_REAL_RETAKE_LAUNCH_20261111.json
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 1
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = "$FILE"
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json)" = 0c13575a48918b16e5ced6e6ebae2834ed5ccb61
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json)" = 9ffcfd976aea9557871082dff9f05a1612fda253
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json)" = 59f6e8bb4886b858fe12a08bc6c1994962b5e707
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py)" = ce691c7e377bffa7554b6d4ba2e4b21fceed5a03
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path('cerebro/media-studio/v2/requests/UMS001_MULTI11_TWO_REAL_RETAKE_LAUNCH_20261111.json').read_text())
+          assert j=={
+            "launch_id":"UMS001-MULTICHANNEL-IMAGE-11-20261111-V1-RETAKE02",
+            "environment":"LAB","company_id":"fenix","engine_id":"UMS-001",
+            "max_replicate_predictions":2,"max_replicate_estimated_usd":0.12,
+            "max_deepseek_calls":4,"max_deepseek_estimated_usd":0.04,
+            "prepaid_credit_only":True,"new_subscription_or_reload":False,"publish":False,
+            "replicate_billing_verified_20261111":True,"deepseek_balance_verified_20261111":True,
+            "run_once":True}
+          PY
+      - name: Install locked open-source image processor; run offline tests
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_format_export_lab_v0.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json --validate-only
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json --validate-only
+      - name: Execute max 2 original photographs through Producer DeepSeek and Replicate one time
+        shell: bash
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_DEEPSEEK_AUTOMATION_GATE: OWNER_AUTHORIZED_LAB_20261111
+        run: |
+          set -euo pipefail
+          RAW="$RUNNER_TEMP/ums001-deepseek-autonomous"
+          QA="$RUNNER_TEMP/ums001-multi11-real-retakes"
+          mkdir -p "$QA/IG" "$QA/SEO"
+          set +e
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_RETAKE_20261111_02.json
+          IG_RESULT=$?
+          set -e
+          if test -d "$RAW"; then cp -a "$RAW/." "$QA/IG/"; fi
+          if test "$IG_RESULT" -ne 0 && test "$IG_RESULT" -ne 3; then echo 'IG_PROVIDER_OR_FINOPS_BLOCKED_DO_NOT_START_SEO'; exit 2; fi
+          rm -rf "$RAW"
+          set +e
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_RETAKE_20261111_02.json
+          SEO_RESULT=$?
+          set -e
+          if test -d "$RAW"; then cp -a "$RAW/." "$QA/SEO/"; fi
+          if test "$SEO_RESULT" -ne 0 && test "$SEO_RESULT" -ne 3; then echo 'SEO_PROVIDER_OR_FINOPS_BLOCKED_NO_RETRY'; exit 2; fi
+          printf 'IG_RAW_QA_EXIT=%s\nSEO_RAW_QA_EXIT=%s\nIMAGE_MULTIFORMAT_VALIDATION=NOT_READY_INDEPENDENT_EDITORIAL_QA_REQUIRED\n' "$IG_RESULT" "$SEO_RESULT"
+      - name: Derive exact native aspect format exports from actual generated raw JPG only
+        if: always()
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_multichannel_format_export_lab_v0.py --root "$RUNNER_TEMP/ums001-multi11-real-retakes" || true
+      - name: Preserve both real originals, QA critique, prompt provenance and format candidates
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-multichannel-real-two-retakes-ig-seo
+          path: ${{ runner.temp }}/ums001-multi11-real-retakes/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Prohibit social publishing, arbitrary reruns and automatic production promotion
+        if: always()
+        run: |
+          echo 'LAB ONE-SHOT ONLY; MAX REPLICATE 2 x USD 0.06 FROM PREPAID; MAX DEEPSEEK 4 CALLS; NO SUBSCRIPTION'
+          echo 'NO social publication, NO WordPress, NO App, NO CRM, NO PROD, NO auto-reload.'
+          echo 'Independent pixel QA+brand+rights still required before GREEN.'

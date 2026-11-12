@@ -1,0 +1,16 @@
+{
+  "launch_id": "UMS001-LI-BRANDED-VISION-ONE-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "item_id": "LI-FEED-01",
+  "source_image_sha256": "5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170",
+  "max_image_predictions": 0,
+  "max_deepseek_calls": 1,
+  "max_deepseek_usd_estimate": 0.02,
+  "existing_prepaid_only": true,
+  "auto_reload": false,
+  "publish": false,
+  "video": false,
+  "run_once": true
+}

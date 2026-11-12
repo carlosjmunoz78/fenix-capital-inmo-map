@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-MULTI11-SEEDREAM-IGSTORY-CANARY-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "provider": "bytedance/seedream-4",
+  "item_id": "IG-STORY-01",
+  "max_predictions": 1,
+  "max_replicate_usd": 0.03,
+  "max_deepseek_calls": 1,
+  "max_deepseek_usd": 0.02,
+  "auto_reload": false,
+  "publish": false,
+  "execute_enabled": false,
+  "image_ratio": "9:16",
+  "target_pixels": [
+    1080,
+    1920
+  ]
+}

@@ -1,0 +1,44 @@
+name: UMS001 visual learning no-reference LAB safety QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-visual-no-reference-safety-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-08.json'
+  push:
+    branches:
+      - cerebro/ums001-visual-learning-no-reference-lab-20261111
+    paths:
+      - '.github/workflows/ums001-visual-no-reference-safety-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-08.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: ums001-no-reference-safety-lab
+  cancel-in-progress: true
+jobs:
+  lab-offline-no-spend:
+    if: github.event_name != 'pull_request' || github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install pinned Pillow for verified original style tests
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Python compile
+        run: python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
+      - name: Quality and safety regressions (no provider secrets)
+        run: python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+      - name: Validate isolated no-reference candidate without provider calls
+        run: python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-08.json --validate-only
+      - name: Confirm isolated original-image trial remains non-production
+        run: |
+          echo 'LAB only, no secrets, no DeepSeek API, no Replicate prediction.'
+          echo 'NO paid image generation; NO PROD; NO publishing; no main mutation.'

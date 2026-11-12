@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "topic": "Qué revisar antes de entregar una señal para comprar vivienda en Córdoba",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía",
+  "publish_enabled": false,
+  "max_attempts_per_panel": 1,
+  "max_image_budget_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_budget_usd": 0.02,
+  "source_request": "UMS001 LAB Facebook first square original canary; CEREBRO Prompt Factory owns scene, DeepSeek temporary camera mentor, no publication",
+  "style_reference_mode": "NONE",
+  "request_id": "UMS001-MULTI11-CEREBROFIRST-FB-20261111-01",
+  "channel": "FACEBOOK",
+  "asset_type": "IMAGE",
+  "render_aspect_ratio": "1:1",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "Distinct warm documentary photograph: mature couple viewing authentic Cordoba apartment, subtle orange architectural sculpture; not an Instagram crop.",
+      "human_subject": "Two mature Spanish adult home buyers, natural faces and hands visible in three-quarter front view",
+      "hook": "Antes de firmar la señal",
+      "bullets": [],
+      "required_visuals": [
+        "exactly two believable adults in real Córdoba apartment setting",
+        "square 1:1 original documentary editorial composition, not a crop",
+        "physical refractive orange glass art with accurate natural shadow",
+        "no model-generated text, false logos, approval icons, financial paperwork"
+      ]
+    }
+  ],
+  "creative_owner": "CEREBRO_PROMPT_FACTORY_V0",
+  "master_item_id": "FB-FEED-01"
+}

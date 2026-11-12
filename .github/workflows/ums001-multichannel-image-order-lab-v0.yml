@@ -1,0 +1,36 @@
+name: UMS001 11-image multichannel order intake LAB OFF
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-multichannel-image-order-lab-v0.yml'
+      - 'cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json'
+      - 'cerebro/media-studio/v2/runtime/multichannel-image-gate-lab-v0.mjs'
+      - 'cerebro/media-studio/v2/tests/multichannel-image-gate-lab-v0.test.mjs'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-image-order-lab
+  cancel-in-progress: true
+jobs:
+  intake-no-api-calls:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Prove 11-piece producer intake, formats, brand and budget gates
+        run: node --test cerebro/media-studio/v2/tests/multichannel-image-gate-lab-v0.test.mjs
+      - name: Generate visible deterministic UMS001 pending production plan
+        run: |
+          node cerebro/media-studio/v2/runtime/multichannel-image-gate-lab-v0.mjs cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json > "$RUNNER_TEMP/ums001-plan.json"
+          node -e "const p=require(process.env.RUNNER_TEMP+'/ums001-plan.json'); if(p.pieces.length!==11 || p.paid_inference_allowed || p.artifacts_generated!==0) process.exit(1);"
+      - name: Retain reviewed order manifest without tokens, money or public releases
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-multichannel-11-image-request-off
+          path: ${{ runner.temp }}/ums001-plan.json
+          retention-days: 14
+      - name: Assert zero provider use and NO automatic publication
+        run: echo 'PENDING UMS001 PRODUCER / ZERO provider API calls / no publication / no PROD'

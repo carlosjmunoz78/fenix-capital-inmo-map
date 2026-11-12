@@ -1,0 +1,38 @@
+name: UMS001 multichannel official brand SHA compositor offline LAB QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-multichannel-brand-finish-offline-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_brand_finish_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_multichannel_brand_finish_lab_v1.py'
+      - 'cerebro/media-studio/v2/brand_assets/fenix/official_20251020/FENIX_OFFICIAL_01_PNG_BASE64.json'
+permissions:
+  contents: read
+jobs:
+  brand-multiformat-provenance:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Free deterministic dependencies only
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Brand and eleven size contracts, fail closed on SHA or false approval
+        run: python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_brand_finish_lab_v1.py -v
+      - name: Verify actual official SHA registry, never export logo from another source
+        run: |
+          python3 - <<'PY'
+          import importlib.util
+          from pathlib import Path
+          p=Path('cerebro/media-studio/v2/runtime/ums001_multichannel_brand_finish_lab_v1.py')
+          spec=importlib.util.spec_from_file_location('brand',p)
+          mod=importlib.util.module_from_spec(spec);spec.loader.exec_module(mod)
+          img=mod.verified_logo()
+          assert img.width>=77 and img.height>=59
+          assert len(mod.FORMATS)==11
+          print('REAL_OFFICIAL_FENIX_LOGO_SHA_GREEN')
+          print('ACTUAL_IMAGES_EDITORIAL_QA_STILL_PENDING')
+          PY

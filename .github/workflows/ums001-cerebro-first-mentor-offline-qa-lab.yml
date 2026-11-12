@@ -1,0 +1,36 @@
+name: UMS001 CEREBRO owns prompts DeepSeek mentors LAB offline QA
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-cerebro-first-mentor-offline-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_cerebro_first_deepseek_mentor_offline_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_IG_OFFLINE_20261111_03.json'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_SEO_OFFLINE_20261111_03.json'
+permissions:
+  contents: read
+jobs:
+  verify-owner-not-external-model:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Open-source local deps only
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Existing photo executor safety and backward compatibility
+        run: python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+      - name: Prove all 11 company-owned prompts and independent temporary mentor
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_prompt_owner_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_cerebro_first_deepseek_mentor_offline_lab_v1.py -v
+      - name: Validate exact two next-generation requests without provider credentials
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_IG_OFFLINE_20261111_03.json --validate-only
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_SEO_OFFLINE_20261111_03.json --validate-only
+      - name: Explicit test proof no paid inference, no auto launch
+        run: echo 'CEREBRO=creative-owner, DeepSeek=temporary mentor, Replicate=NOT_CALLED, publication=false'

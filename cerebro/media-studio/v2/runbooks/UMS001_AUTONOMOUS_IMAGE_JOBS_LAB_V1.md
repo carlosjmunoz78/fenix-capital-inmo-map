@@ -1,0 +1,9 @@
+# UMS-001 · Motor de encargos de imágenes V1 · LAB, no autonomía aprobada
+
+Módulo **aditivo**, no sustituye el gateway ni altera los runners físicos o la Productora. `intake(order)` valida empresa, entorno, ID, canal, máximo 2 intentos, presupuesto máximo por pedido 0,10 USD de **saldo prepagado verificado**, protege producción, vídeo y publicación. Devuelve una **cola lógica**, no inicia ninguna llamada externa. `certify(order, evidence)` solo permite entrega **privada al departamento** si están verificados origen, proveedor, imagen real, dimensiones, coste, editorial, derechos, marca, contraste/copy, QA visual >=88 sin infracciones, revisión física independiente, almacenamiento y recibo firmado de entrega. Si no, reintento solo con nueva reserva prepagada (máximo 2) o HUMAN_REQUIRED real; evita loops. `videoGate(receipts)` no habilita vídeo por sí mismo incluso con 11 imágenes: requiere tribunal independiente.
+
+**No confundir este gate con una automatización productiva**: el conector vivo de colas/jobs y los recibos independientes aún no están integrados. Ningún objeto debe recibir flags de `legal_rights_verified`, `signed_delivery_verified` o similar sólo por el score de un modelo ni por SHA ficticio. Para confiar en esos campos se requieren recibos firmados por sistemas autorizados y comprobación de hash contra bytes reales.
+
+Estado de referencia: un LinkedIn 90/100 en DeepSeek, revisión de derechos y editorial pendiente; Instagram Story original 72/100 rechazo con primera generación real; retake #2 solo autorizado si hay saldo vigente, sin publicación. Las demás piezas aún necesitan validación multiformato.
+
+**Roll back**: cerrar PR #45 y no integrar este módulo. Main, App, CRM, SEO, Supabase, WordPress y redes no se han tocado.

@@ -1,0 +1,28 @@
+name: UMS001 Seedream Instagram native 9x16 story zero-spend preflight LAB
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-seedream-igstory-offline-preflight-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_seedream_igstory_isolated_lab_v0.py'
+      - 'cerebro/media-studio/v2/requests/UMS001_IGSTORY_SEEDREAM_4_9X16_ONCE_LAB_V0.json'
+      - 'cerebro/media-studio/v2/tests/test_ums001_seedream_igstory_isolated_lab_v0.py'
+permissions:
+  contents: read
+jobs:
+  story-original-single-format-no-credits:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Free Pillow dependency only
+        run: python3 -m pip install Pillow==11.3.0
+      - name: Verify exact Story 9x16, native source and original CEREBRO visual directive
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_seedream_igstory_isolated_lab_v0.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_seedream_igstory_isolated_lab_v0.py --preflight
+      - name: Confirm no provider API or publishing
+        run: echo 'ZERO spend; no credentials configured; no image or video generation; no publication'

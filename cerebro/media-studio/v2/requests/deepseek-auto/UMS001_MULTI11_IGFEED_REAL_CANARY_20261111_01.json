@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "topic": "Qué revisar antes de entregar una señal para comprar vivienda en Córdoba",
+  "audience": "Personas adultas que compran vivienda en Córdoba y Andalucía",
+  "publish_enabled": false,
+  "max_attempts_per_panel": 1,
+  "max_image_budget_usd": 0.06,
+  "max_deepseek_calls": 2,
+  "max_deepseek_budget_usd": 0.02,
+  "source_request": "CEREBRO UMS001 11 image multichannel official order two original-photo LAB canaries only no publishing",
+  "style_reference_mode": "NONE",
+  "request_id": "UMS001-MULTI11-IGFEED-20261111-01",
+  "channel": "INSTAGRAM",
+  "asset_type": "IMAGE",
+  "render_aspect_ratio": "4:5",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "Two real adult Spanish home buyers explore an authentic Cordoba patio; brilliant physically plausible sculptural orange glass arch behind them, cinematic daylight, large natural faces.",
+      "human_subject": "Two real adult buyers, a woman and a man, photoreal in the foreground at authentic Cordoba patio",
+      "hook": "Antes de la señal",
+      "bullets": [],
+      "required_visuals": [
+        "Large genuine natural skin adult faces and credible realistic hands",
+        "Spectacular physically coherent orange glass sculptural architecture in a real Cordoba patio",
+        "No fabricated writing emblems trademarks watermarks approval symbols or finance paperwork"
+      ]
+    }
+  ]
+}

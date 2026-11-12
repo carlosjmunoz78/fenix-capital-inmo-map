@@ -1,0 +1,167 @@
+name: UMS001 single existing branded LinkedIn DeepSeek vision QA prepaid LAB
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_LI_BRANDED_DEEPSEEK_VISION_SINGLE_LAUNCH_20261111.json'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: ums001-li-final-branded-independent-vision-20261111-once
+  cancel-in-progress: false
+jobs:
+  exact-one-vision-call-no-image-generation:
+    if: >-
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' &&
+      github.event.pull_request.number == 45 &&
+      github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111' &&
+      github.event.pull_request.base.ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Authorize only unique one-shot immutable job
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=cerebro/media-studio/v2/requests/UMS001_LI_BRANDED_DEEPSEEK_VISION_SINGLE_LAUNCH_20261111.json
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 1
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = "$FILE"
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py)" = 2b36f5569d999d2262d2bab103de7e9a5568b9dc
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_multichannel_brand_finish_lab_v1.py)" = e8c9f04676bcf1c20de1ab7b5c6c8a65f4ea3686
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          x=json.loads(Path('cerebro/media-studio/v2/requests/UMS001_LI_BRANDED_DEEPSEEK_VISION_SINGLE_LAUNCH_20261111.json').read_text())
+          assert x=={
+           'launch_id':'UMS001-LI-BRANDED-VISION-ONE-20261111',
+           'company_id':'fenix','engine_id':'UMS-001','environment':'LAB',
+           'item_id':'LI-FEED-01','source_image_sha256':'5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170',
+           'max_image_predictions':0,'max_deepseek_calls':1,'max_deepseek_usd_estimate':0.02,
+           'existing_prepaid_only':True,'auto_reload':False,'publish':False,'video':False,'run_once':True}
+          PY
+      - name: Download existing exact verified official branded still
+        uses: actions/download-artifact@v4
+        with:
+          name: ums001-li-seedream-real-sha-verified-official-brand-preview
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          run-id: 43092131819
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/ums001-branded-existing
+      - name: Install free image conversion only
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Reserve one QA invocation atomically in same isolated LAB branch
+        env:
+          GH_TOKEN_FOR_LAB: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64,json,os,urllib.request
+          x={'request_id':'UMS001-LI-BRANDED-VISION-ONE-20261111','engine_id':'UMS-001',
+            'environment':'LAB','status':'RESERVED_ONE_CALL_NO_AUTO_RETRY',
+            'image_sha256':'5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170',
+            'max_deepseek_calls':1,'max_estimated_usd':0.02,'publish':False,'video':False,
+            'github_run_id':os.environ.get('GITHUB_RUN_ID','')}
+          url='https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/contents/cerebro/media-studio/v2/finops/deepseek-vision/UMS001-LI-BRANDED-VISION-ONE-20261111.json'
+          body={'branch':'cerebro/ums001-visual-learning-no-reference-lab-20261111',
+                'message':'finops(ums001 LAB): reserve one existing branded image DeepSeek QA only',
+                'content':base64.b64encode(json.dumps(x).encode()).decode()}
+          req=urllib.request.Request(url,data=json.dumps(body).encode(),method='PUT',
+             headers={'Authorization':'Bearer '+os.environ['GH_TOKEN_FOR_LAB'],
+              'Accept':'application/vnd.github+json','Content-Type':'application/json'})
+          with urllib.request.urlopen(req,timeout=25) as response:
+           assert response.status==201,'Already reserved or permission denied'
+          print('ONE_SHOT_VISION_QA_RESERVATION_OK')
+          PY
+      - name: Exactly one DeepSeek Vision evaluation of real branded still
+        env:
+          CEREBRO_UMS001_DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,importlib.util,io,json,os,urllib.request
+          from pathlib import Path
+          from PIL import Image
+          source=Path(os.environ['RUNNER_TEMP'])/'ums001-branded-existing'
+          p=source/'LI-FEED-01_BRANDED_QA_REVIEW_ONLY.webp'
+          doc=json.loads((source/'LI-FEED-01_QA_REVIEW_ONLY.json').read_text())
+          photo=p.read_bytes()
+          check=lambda b:hashlib.sha256(b).hexdigest()
+          assert check(photo)==doc['output_sha256']=='5e65cfc30f9cdee5c8e9a93942d05e85a3f1e362d66fd623689525b8b7b2e170'
+          assert doc['brand_logo_sha256']=='ec066819ee12c48fa148d6ca70f1434724ff780cc9ccabcfeefc07318c796cc7'
+          assert doc['pixel_dimensions']==[1200,628] and doc['final_editorial_approved'] is False
+          encoded=io.BytesIO(); Image.open(io.BytesIO(photo)).convert('RGB').save(encoded,'JPEG',quality=89)
+          raw=encoded.getvalue()
+          rubric={'human_presence_and_cast':20,'camera_and_composition':15,'lighting_and_realism':15,
+          'contrast_and_color':10,'surreal_creativity':15,'typography_and_brand_integrity':15,'context_and_claims':10}
+          codes='INVENTED_TEXT INVENTED_LOGO FACE_MISSING FACE_TINY FACE_OBSCURED CAST_MISMATCH BAD_ANATOMY GENERIC_SCENE DARK_MUDDY MISLEADING_FINANCE COMPOSITION_WEAK BAD_LIGHTING FLAT_CONTRAST FOCAL_DISTORTION WRONG_BRAND_COLOR UNKNOWN'
+          example={'pass':False,'score':70,'violations':['COMPOSITION_WEAK'],
+            'correction':'Increase clarity and composition.',
+            'summary':'This professional image does not yet meet the premium standard.',
+            'rubric_scores':{'human_presence_and_cast':15,'camera_and_composition':11,
+             'lighting_and_realism':11,'contrast_and_color':7,'surreal_creativity':7,
+             'typography_and_brand_integrity':11,'context_and_claims':8}}
+          instructions='''You are an INDEPENDENT strict photographic QA reviewer. Judge ONLY ACTUAL visible pixels of an official Fénix Capital LinkedIn still. Two adult faces, plausible hands, natural home interior, subtle orange art object, already verified original Fénix logo and safe headline must be correct. Return ONLY JSON with EXACT six keys: pass, score, violations, correction, summary, rubric_scores. The rubric keys and maximum integer values are: '''+json.dumps(rubric)+'''. Every category score is integer 0 to max. score MUST equal the sum, between 0..100. pass true only score>=88 and no violations. Allowed violations codes ONLY: '''+codes+'''. correction text <=1200 chars; summary 5..500 chars. Do not make up financing claims. No extra keys, no markdown. Valid REJECTION example: '''+json.dumps(example)+'.'
+          payload={'model':'deepseek-flash','messages':[{'role':'system','content':instructions},
+            {'role':'user','content':[{'type':'text','text':'Inspect this real photographic candidate after Fénix branding and typography. Reply with strict scored JSON only. Do not approve merely because it contains a real logo.'},
+              {'type':'image_url','image_url':{'url':'data:image/jpeg;base64,'+base64.b64encode(raw).decode(),'detail':'high'}}]}],
+            'temperature':0.0,'thinking':{'type':'disabled'},'max_tokens':1900,
+            'stream':False,'response_format':{'type':'json_object'}}
+          out=Path(os.environ['RUNNER_TEMP'])/'ums001-li-vision-one'
+          out.mkdir(parents=True,exist_ok=True)
+          receipt={'request_id':'UMS001-LI-BRANDED-VISION-ONE-20261111',
+            'company_id':'fenix','engine_id':'UMS-001','environment':'LAB','model':'deepseek-flash',
+            'provider_calls':1,'image_predictions':0,'publish':False,'video':False,
+            'image_sha256':check(photo),'status':'PROVIDER_POST_UNCERTAIN_NO_RETRY',
+            'editorial_final_approved':False}
+          (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          key=os.environ.get('CEREBRO_UMS001_DEEPSEEK_API_KEY','')
+          if len(key)<20:raise SystemExit('NO_EXISTING_PREPAID_QA_KEY')
+          req=urllib.request.Request('https://api.deepseek.com/chat/completions',
+            data=json.dumps(payload).encode(),method='POST',
+            headers={'Authorization':'Bearer '+key,'Content-Type':'application/json'})
+          try:
+            with urllib.request.urlopen(req,timeout=75) as response:
+              assert response.status==200
+              answer=json.load(response)
+            choice=answer['choices'][0]
+            if choice.get('finish_reason')!='stop':raise ValueError('DEEPSEEK_QA_TRUNCATED')
+            txt=choice['message']['content']
+            usage=answer['usage'];ip=usage['prompt_tokens'];op=usage['completion_tokens']
+            estimated=(ip*.30+op*1.20)/1_000_000
+            if estimated>0.02:raise ValueError('COST_LIMIT_EXCEEDED')
+            parsed=json.loads(txt)
+            receipt.update({'provider_response_sha256':check(txt.encode()),'prompt_tokens':ip,
+              'completion_tokens':op,'estimated_prepaid_usd':round(estimated,6),
+              'raw_provider_qa':parsed})
+            sp=importlib.util.spec_from_file_location('qa','cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py')
+            m=importlib.util.module_from_spec(sp);sp.loader.exec_module(m)
+            try:
+              verdict=m.validate_vision(parsed)
+              receipt['verdict']=verdict
+              receipt['status']='AI_SCORE_VALID__INDEPENDENT_BRAND_RIGHTS_REVIEW_STILL_REQUIRED' if verdict.get('accepted') else 'AI_SCORE_REJECTED'
+            except Exception as e:
+              receipt['status']='AI_SCHEMA_INVALID_NO_ACCEPTANCE'
+              receipt['schema_error_type']=type(e).__name__
+          except Exception as e:
+            receipt['status']='AI_CALL_FAILED_NO_RETRY'
+            receipt['error_class']=type(e).__name__
+          (out/'receipt.json').write_text(json.dumps(receipt,indent=2,ensure_ascii=False)+'\n')
+          print('UMS001_BRANDED_VISION_STATUS='+receipt['status'])
+          print('UMS001_PUBLICATION=false')
+          print('UMS001_VIDEO=false')
+          if receipt['status'] in ('AI_SCHEMA_INVALID_NO_ACCEPTANCE','AI_CALL_FAILED_NO_RETRY'):
+            raise SystemExit(3)
+          PY
+      - name: Save complete QA receipts even on invalid response
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-li-branded-deepseek-independent-vision-one-real-qa
+          path: ${{ runner.temp }}/ums001-li-vision-one/
+          retention-days: 14
+          if-no-files-found: warn

@@ -1,0 +1,82 @@
+name: UMS001 CEREBRO owned Facebook final photo-first 1:1 prepaid LAB canary
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_CEREBROFIRST_FB_FINAL_RETAKE_LAUNCH_20261111.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-cerebrofirst-facebook-native-square-final-20261111
+  cancel-in-progress: false
+jobs:
+  one-real-cerebro-owned-image:
+    if: >-
+      github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' &&
+      github.event.pull_request.number == 45 &&
+      github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111' &&
+      github.event.pull_request.base.ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - name: Strong one-shot immutable source contract before provider API
+        shell: bash
+        run: |
+          set -euo pipefail
+          FILE=cerebro/media-studio/v2/requests/UMS001_CEREBROFIRST_FB_FINAL_RETAKE_LAUNCH_20261111.json
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD | wc -l)" -eq 1
+          test "$(git diff-tree --no-commit-id --name-only -r HEAD)" = "$FILE"
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_FB_PHOTO_FIRST_RETAKE_20261111_02.json)" = f9f0fbe33045bd849b812d5e4d1b986dcf1bf753
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py)" = f6199903456b90849a1fa0b4b7bf906aaa8d5419
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_multichannel_prompt_owner_lab_v1.py)" = d169bd1af12ded46d7b61bce79a81c60ab416ad6
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/runtime/ums001_prompt_forge_lab_v0.py)" = 099ff16d87a0ad504084e6fee37549015afa0cfa
+          test "$(git rev-parse HEAD:cerebro/media-studio/v2/requests/UMS001_MULTICHANNEL_IMAGE_11_20261111.json)" = 59f6e8bb4886b858fe12a08bc6c1994962b5e707
+          python3 - <<'PY'
+          import json,pathlib
+          f=pathlib.Path('cerebro/media-studio/v2/requests/UMS001_CEREBROFIRST_FB_FINAL_RETAKE_LAUNCH_20261111.json')
+          j=json.loads(f.read_text())
+          assert j=={
+          'launch_id':'UMS001-CEREBROFIRST-FB-20261111-SECOND-FINAL',
+          'company_id':'fenix','engine_id':'UMS-001','environment':'LAB',
+          'request_id':'UMS001-MULTI11-CEREBROFIRST-FB-20261111-02',
+          'max_replicate_predictions':1,'max_replicate_estimated_usd':0.06,
+          'max_deepseek_calls':2,'max_deepseek_estimated_usd':0.02,
+          'replicate_prepaid_verified':True,'autoreload_disabled_verified':True,
+          'no_new_subscriptions':True,'publish':False,'run_once':True}
+          PY
+      - name: Validate creative owner, 11-piece master, existing photo runtime and budget
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_prompt_owner_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_cerebro_first_deepseek_mentor_offline_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_cerebro_first_facebook_square_lab_v1.py -v
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_FB_PHOTO_FIRST_RETAKE_20261111_02.json --validate-only
+      - name: Submit ONLY SECOND and FINAL Facebook native-square CEREBRO-created image with DeepSeek camera mentorship
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_DEEPSEEK_AUTOMATION_GATE: OWNER_AUTHORIZED_LAB_20261111
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_CEREBRO_FIRST_FB_PHOTO_FIRST_RETAKE_20261111_02.json
+      - name: Save original raw, SHA256, CEREBRO prompt and DeepSeek vision grading even if rejected
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-cerebrofirst-facebook-photo-first-final-image-real-lab
+          path: ${{ runner.temp }}/ums001-deepseek-autonomous/
+          if-no-files-found: warn
+          retention-days: 14
+      - name: Physical LAB and prepaid-only report
+        if: always()
+        run: |
+          echo 'ONE genuine provider prediction MAX 0.06 USD estimated from existing prepaid. DeepSeek maximum 2 calls / 0.02 USD.'
+          echo 'Owner=CEREBRO Prompt Factory, DeepSeek=temporary technical mentor and strict QA.'
+          echo 'NO social publishing, NO WordPress, NO CRM, NO APP, NO PROD, NO main, no reloading or subscriptions.'
+          echo 'Even a provider 100/100 is NOT final acceptance without independent pixel and brand QA.'

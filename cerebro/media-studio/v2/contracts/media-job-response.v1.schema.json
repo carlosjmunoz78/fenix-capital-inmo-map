@@ -1,0 +1,342 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://ums001/contracts/media-job-response.v1.schema.json",
+  "title": "CEREBRO OS Universal Media Job Response V1",
+  "description": "Contract for authenticated private event bus; signed receipts are references that MUST be independently verified by recipient, NEVER Boolean self-assertions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_id",
+    "event_type",
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "request_id",
+    "origin_engine_id",
+    "consumer_engine_id",
+    "item_id",
+    "idempotency_key",
+    "occurred_at_utc",
+    "status",
+    "asset",
+    "exception",
+    "policy_version",
+    "publication_authorized",
+    "additional_cost_eur"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "event_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$"
+    },
+    "event_type": {
+      "enum": [
+        "UMS001_ORDER_ACCEPTED",
+        "UMS001_ORDER_HELD",
+        "UMS001_ASSET_QA_PENDING",
+        "UMS001_ASSET_DELIVERED",
+        "UMS001_JOB_FAILED",
+        "UMS001_HUMAN_REQUIRED"
+      ]
+    },
+    "company_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,62}$"
+    },
+    "engine_id": {
+      "const": "UMS-001"
+    },
+    "environment": {
+      "enum": [
+        "LAB",
+        "PREPROD",
+        "PROD"
+      ]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$"
+    },
+    "origin_engine_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,63}$"
+    },
+    "consumer_engine_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,63}$"
+    },
+    "item_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9][A-Z0-9_-]{2,79}$"
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "occurred_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "ACCEPTED",
+        "HELD",
+        "QA_PENDING",
+        "DELIVERED",
+        "FAILED",
+        "HUMAN_REQUIRED"
+      ]
+    },
+    "asset": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "private_ref",
+            "sha256",
+            "mime_type",
+            "qa_receipt_ref",
+            "rights_receipt_ref",
+            "provenance_receipt_ref",
+            "signed_delivery_receipt_ref"
+          ],
+          "properties": {
+            "private_ref": {
+              "type": "string",
+              "pattern": "^(cerebro|artifact):[A-Za-z0-9/_:.#-]{4,250}$"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "mime_type": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 100
+            },
+            "qa_receipt_ref": {
+              "type": "string",
+              "pattern": "^cerebro://receipts/[A-Za-z0-9/_-]{4,200}$"
+            },
+            "rights_receipt_ref": {
+              "type": "string",
+              "pattern": "^cerebro://receipts/[A-Za-z0-9/_-]{4,200}$"
+            },
+            "provenance_receipt_ref": {
+              "type": "string",
+              "pattern": "^cerebro://receipts/[A-Za-z0-9/_-]{4,200}$"
+            },
+            "signed_delivery_receipt_ref": {
+              "type": "string",
+              "pattern": "^cerebro://receipts/[A-Za-z0-9/_-]{4,200}$"
+            }
+          }
+        }
+      ]
+    },
+    "exception": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "LEGAL_REQUIRED",
+        "SIGNATURE_REQUIRED",
+        "LOW_CONFIDENCE",
+        "HIGH_RISK",
+        "POLICY_CONFLICT",
+        "SECURITY_INCIDENT",
+        "MONEY_LIMIT",
+        "CUSTOMER_HUMAN_REQUEST",
+        null
+      ]
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$"
+    },
+    "publication_authorized": {
+      "const": false
+    },
+    "additional_cost_eur": {
+      "const": 0
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_ORDER_ACCEPTED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "ACCEPTED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_ORDER_HELD"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "HELD"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_ASSET_QA_PENDING"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "QA_PENDING"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_ASSET_DELIVERED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "DELIVERED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_JOB_FAILED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "FAILED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "UMS001_HUMAN_REQUIRED"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "HUMAN_REQUIRED"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "DELIVERED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "asset": {
+            "type": "object"
+          },
+          "exception": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "asset": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "HUMAN_REQUIRED"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "exception": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

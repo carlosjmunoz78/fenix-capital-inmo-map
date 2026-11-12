@@ -1,0 +1,32 @@
+name: UMS001 two real canaries independent no-spend QA
+on:
+  pull_request:
+    types: [synchronize, reopened]
+    paths:
+      - 'cerebro/media-studio/v2/runtime/ums001_multichannel_format_export_lab_v0.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_multichannel_format_export_lab_v0.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_CANARY_20261111_01.json'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_CANARY_20261111_01.json'
+permissions:
+  contents: read
+jobs:
+  no-paid-qa:
+    if: github.head_ref == 'cerebro/ums001-visual-learning-no-reference-lab-20261111'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install locked image editor for testing
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Validate provider and QA tests
+        run: |
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+          python3 cerebro/media-studio/v2/tests/test_ums001_multichannel_format_export_lab_v0.py -v
+      - name: Validate both genuine provider requests without paying
+        run: |
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_IGFEED_REAL_CANARY_20261111_01.json --validate-only
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001_MULTI11_SEOHERO_REAL_CANARY_20261111_01.json --validate-only
