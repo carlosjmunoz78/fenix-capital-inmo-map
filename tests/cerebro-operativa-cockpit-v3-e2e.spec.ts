@@ -132,6 +132,15 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await expect(cockpit.getByText('Actividad GitHub disponible')).toBeVisible();
  await expect(cockpit.locator('.op3-pulse.is-working')).toBeVisible();
  await expect(cockpit.locator('.op3-indicators')).toContainText('En ejecución');
+ // A shorter 1300×645 desktop viewport must keep the real composer on screen.
+ await page.setViewportSize({width:1300,height:645});
+ await page.evaluate(()=>window.scrollTo(0,0));
+ const shortField=await cockpit.getByRole('textbox',{name:'Pregunta u orden'}).boundingBox();
+ expect(shortField).not.toBeNull();
+ expect((shortField?.y??10000)+(shortField?.height??10000)).toBeLessThanOrEqual(645);
+ await page.screenshot({path:'test-results/cockpit-v3-compact-desktop.png',animations:'disabled'});
+ await page.setViewportSize({width:1280,height:720});
+
  await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/cockpit-v3-desktop.png',fullPage:true,animations:'disabled'});
  await cockpit.getByRole('button',{name:'Motores',exact:true}).click();
