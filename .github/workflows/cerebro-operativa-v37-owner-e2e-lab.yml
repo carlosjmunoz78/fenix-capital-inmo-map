@@ -1,0 +1,37 @@
+name: CEREBRO Operativa V37 · Owner E2E LAB (manual only)
+on:
+  workflow_dispatch:
+permissions: {contents: read}
+concurrency:
+  group: cerebro-owner-e2e-lab
+  cancel-in-progress: false
+jobs:
+  owner-auth-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: 'Validate owner-only LAB route and cross-company denial'
+        env:
+          OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+        run: |
+          set -eu
+          test -n "${OWNER_E2E_JWT:-}" || { echo "AUTH_E2E_BLOCKED: CEREBRO_E2E_USER_JWT missing"; exit 1; }
+          tmpdir=$(mktemp -d)
+          trap 'rm -rf "$tmpdir"' EXIT
+          url="https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v36-followups-lab/owner-capabilities"
+          status=$(curl --silent --show-error --retry 0 --max-time 15 --output "$tmpdir/owner.json" --write-out '%{http_code}' --header "Authorization: Bearer ${OWNER_E2E_JWT}" "$url?company_id=fenix")
+          if [ "$status" != 200 ]; then
+            reason=$(jq -r '.code // .error_code // "AUTH_REJECTED"' "$tmpdir/owner.json" 2>/dev/null || echo "NON_JSON")
+            case "$reason" in
+              INVALID_JWT|EXPIRED_JWT|JWT_EXPIRED|MISSING_CREDENTIALS|AUTH_REJECTED|NON_JSON) echo "OWNER_LAB_AUTH_BLOCKED_${reason}" ;;
+              *) echo "OWNER_LAB_AUTH_BLOCKED_OTHER" ;;
+            esac
+            exit 1
+          fi
+          jq -e '.status=="OK" and .owner_scope=="VERIFIED_FENIX_ONLY" and .executed==false and .data_returned==false and ((.capabilities | length)>=8)' "$tmpdir/owner.json" >/dev/null
+          status=$(curl --silent --show-error --retry 0 --max-time 15 --output "$tmpdir/other.json" --write-out '%{http_code}' --header "Authorization: Bearer ${OWNER_E2E_JWT}" "$url?company_id=aion")
+          test "$status" = 200 || { echo "CROSS_TENANT_REQUEST_FAILED_HTTP_${status}"; exit 1; }
+          jq -e '.status=="NOT_CONNECTED" and .executed==false and .data_returned==false and .capabilities==[]' "$tmpdir/other.json" >/dev/null
+          status=$(curl --silent --show-error --retry 0 --max-time 15 --output "$tmpdir/anon.json" --write-out '%{http_code}' "$url?company_id=fenix")
+          test "$status" != 200 || { echo "SECURITY_FAIL_ANONYMOUS_ACCESS"; exit 1; }
+          echo "OWNER_LAB_E2E_VERIFIED: owner read-only, cross-company denied, anonymous denied"

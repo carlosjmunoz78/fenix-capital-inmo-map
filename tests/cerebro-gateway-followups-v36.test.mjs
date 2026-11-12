@@ -10,8 +10,20 @@ const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const oldFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/rollback/gateway-v35-20261112/'+name));
 const newFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/ops/gateway-v36-followups/'+name));
 
-test('Gateway entrypoint, auth, knowledge and execution contracts are EXACTLY v35',()=>{
- assert.equal(newFiles[0],oldFiles[0]);
+test('Gateway owner auth, knowledge and governed execution remain preserved while read-only registry is additive',()=>{
+ const authBlock=(src)=>{
+  const i=src.indexOf("async function authorizedOwner(req:Request){");
+  const next=src.indexOf(String.fromCharCode(10)+"async function ",i+1);
+  return i<0||next<0?"":src.slice(i,next).trim();
+ };
+ const oldAuth=authBlock(oldFiles[0]);
+ const newAuth=authBlock(newFiles[0]);
+ assert.ok(oldAuth&&newAuth);
+ assert.equal(newAuth,oldAuth,"owner authentication implementation stays byte-exact");
+ assert.ok(newFiles[0].includes('readOwnerRegistryLive'));
+ assert.ok(newFiles[0].includes('if(req.method==="GET"&&suffix==="owner-registry")'));
+ assert.ok(newFiles[0].indexOf('if(!owner.ok)return json(req,403')<
+   newFiles[0].indexOf('if(req.method==="GET"&&suffix==="owner-registry")'));
  assert.equal(newFiles[1],oldFiles[1]);
  for(const marker of [
   'withSupabase({ auth: "user" }',
