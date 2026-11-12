@@ -98,3 +98,29 @@ NEXT_BLOCK: CI/HTTP E2E v37 LAB -> verificar memoria y UI reales -> inventario d
 **NEXT_BLOCK ÚNICO**: recuperar un JWT válido **mediante una sesión autorizada** y actualizar la referencia cifrada `CEREBRO_E2E_USER_JWT` sin mostrarla; repetir la llamada autenticada LAB (Fénix 200/scope limitado, AION `NOT_CONNECTED`, anónimo denegado), E2E Opera y comparación OLD vs NEW. Solo entonces valorar promoción. La fase siguiente será conectar por contratos el Owner Resolver con el verdadero Company Registry/Engine Registry y el mismo Gateway desde JARVIS/otras interfaces.
 
 **Objetivo que sigue vigente:** todas las interfaces sirven al CEREBRO completo, con máxima autoridad real del propietario sobre sus empresas, pero sin afirmar que todos los adaptadores estén ya operativos.
+
+
+## Anexo de continuidad · Empresas + proyectos actuales y futuros · 12/11/2026
+
+**Mandato del propietario confirmado:** no existen "interfaces limitadas" por producto, empresa o proyecto. Operativa, JARVIS, móvil, desktop y cualquier canal futuro deben utilizar el mismo Gateway/Orchestrator, Company Registry, Project Registry, Engine Registry y Policy/Identity para **saber, ver y ordenar cualquier capacidad autorizada de todos los proyectos y empresas actuales y futuros**. Una interfaz no concede por sí sola permiso nuevo; la identidad validada en backend determina los alcances. Una conexión pendiente es un gap técnico, no una decisión de excluirla.
+
+**Evidencia read-only de Supabase `fenix-capital-prod`:**
+- EXISTENTE: tabla `public.cerebro_company_registry_preprod`, funciones `cerebro_company_registry_get_preprod`, `cerebro_company_register_preprod` y `cerebro_company_tenant_boundary_check_preprod`. **El registro PREPROD consultado contiene 0 filas**, por lo que no es un inventario completo de las empresas reales y no debe usarse para afirmar que AION/CAPTACASA están conectadas.
+- EXISTENTE: `public.jarvis_project_overlay_v1`, con `company_id`, `project_id`, `environment`, `version`, además de estado y jerarquía de subproyectos. La consulta agrupada mostró **1 registro asociado a `fenix`**. No equivale a cobertura completa de todos los proyectos de la organización.
+- La RPC `cerebro_company_registry_get_preprod` es `SECURITY DEFINER` y retorna un registro PREPROD individual; no se asumirá que autentica al propietario ni que autoriza PROD. Integrar solo detrás de owner auth con comprobaciones de permisos y seguridad específicas.
+
+**NUEVO / DEFINIDO EN CÓDIGO, NO RUNTIME:**
+- `cerebro/ops/gateway-v36-followups/owner_scope_registry.ts`: parser/selector determinista de compañías y proyectos **provenientes de una fuente del servidor validada** (no del frontend). No contiene lista fija de nombres. Si mañana se registra una nueva empresa/proyecto y el Gateway recibe los registros autenticados, se descubre sin reescribir la interfaz.
+- `tests/cerebro-owner-scope-registry.test.mjs`: pruebas sobre fixtures de tres empresas, proyectos por compañía, aislamiento cross-tenant, rechazo de registros no verificados y filtrado de identificadores inválidos.
+- No está incorporado todavía al endpoint LAB `/owner-capabilities`; ese endpoint sigue limitado al inventario explícito de los adaptadores de Fénix y preserva todas sus protecciones. No promoverlo a PROD sin pruebas.
+
+**Bloqueo real que NO afecta a la disponibilidad general de los conectores:** `CEREBRO_E2E_USER_JWT` cifrado en GitHub Actions produce `INVALID_JWT` 401. No implica que el conector GitHub/Supabase entero esté caído. Renovar únicamente mediante sesión autenticada autorizada y actualizar secreto de GitHub por canal seguro; jamás copiar token/contraseña al chat ni desactivar el control.
+
+**Plan de cierre:**
+1. Resolver solo el JWT E2E, manteniendo v36 PROD intacto.
+2. Vincular Company Registry y Project Registry con lectura server-side, registrar fuente/frescura, **sin** convertir el registro PREPROD en permiso PROD.
+3. Añadir registro de adaptadores/acciones por fuente y empresa: `CONNECTED_VERIFIED`, `PARTIAL`, `NOT_CONNECTED`, `HUMAN_REQUIRED`, evidencias y coste.
+4. Llevar el mismo acceso/órdenes a Operativa y JARVIS/voz/móvil a través de un único Gateway, con tests de identidad, aislamiento y OLD vs NEW. Proyectos y empresas nuevos se incorporan mediante registro, no hardcode.
+5. E2E autenticado, regresiones, backup/rollback, PREPROD y promoción gradual. Sin reescribir App/CRM ni dar acceso público.
+
+**Situación actual:** HECHO = inspección de registros existentes + módulo de descubrimiento dinámico y tests en PR #56; POR VERIFICAR = CI nuevo, conexión de registros a runtime, login E2E y pruebas de todas las interfaces; PROD permanece v36.
