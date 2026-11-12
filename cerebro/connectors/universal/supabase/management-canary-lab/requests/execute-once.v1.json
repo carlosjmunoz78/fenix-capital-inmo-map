@@ -1,0 +1,13 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "source": "owner_order",
+  "target_project": "cluhljgonannaafpmblx",
+  "target_function": "cerebro-fact001-sb-mgmt-canary-lab",
+  "max_cost_eur": 0,
+  "request_id": "FACT001-SBMGT-CANARY-20261112",
+  "action": "OWNER_AUTHORIZED_ONCE"
+}
