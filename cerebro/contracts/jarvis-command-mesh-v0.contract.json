@@ -1,0 +1,62 @@
+{
+  "schema_version": "1.0",
+  "contract_id": "JARVIS_COMMAND_MESH_CUT49",
+  "environment": "PREPROD",
+  "existing_gateways": [
+    "CerebroGatewayV0",
+    "ActionGatewayV1"
+  ],
+  "gateway_required": true,
+  "commands": {
+    "jarvis.network.inspect": {
+      "method": "IN_PROCESS_CONSOLE_COMMAND",
+      "effect": "READONLY_METADATA",
+      "input": "optional target_id canonical registry string",
+      "result": "catalog state; no implied live capability"
+    },
+    "jarvis.network.dispatch": {
+      "method": "IN_PROCESS_CONSOLE_COMMAND",
+      "effect": "OPTIONAL_AUTHORIZED_PREPROD_ONLY",
+      "input": {
+        "target_id": "canonical registered ID",
+        "idempotency_key": "required",
+        "parameters": "plain object",
+        "estimated_additional_cost_eur": 0
+      },
+      "target_source": "trusted server-side verified_targets only; never a prompt, chat or client claim",
+      "owner_verifier": "mandatory independent server callback, unavailable by default",
+      "result": "ActionGateway result or precise fail-closed status"
+    }
+  },
+  "constraints": {
+    "company_id": "required exact session context",
+    "engine_id": "ACTGW-001 via existing Gateway",
+    "environment": "PREPROD only",
+    "version": "required",
+    "cost": "zero",
+    "prod_writes": false,
+    "trading_access": false,
+    "risk_high": "HUMAN_REQUIRED HIGH_RISK",
+    "signed": "HUMAN_REQUIRED SIGNATURE_REQUIRED",
+    "paid": "HUMAN_REQUIRED MONEY_LIMIT",
+    "unknown": "TARGET_UNKNOWN or TARGET_NOT_CONNECTED",
+    "role": "only if reporting chain and agent runtime physically attested",
+    "idempotency": "required"
+  },
+  "evidence": {
+    "source": "cerebro/registry/engine-registry.v1.json",
+    "engines_catalogue": 179,
+    "roles_catalogue": 11,
+    "console_engines": 5,
+    "target_count_by_default": 0,
+    "live_owner_verified": false,
+    "test_dispatch": "ACTGW -> ROUTE-001#budgetDecision in process only"
+  },
+  "backup_rollback": {
+    "old": "CUT48 source preserved",
+    "new": "CUT49 DRAFT isolated",
+    "production_modified": false,
+    "rollback": "discard draft branch, no migration",
+    "live_restore_tested": false
+  }
+}

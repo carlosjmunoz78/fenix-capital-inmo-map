@@ -1,0 +1,26 @@
+name: JARVIS CUT51 Anonymous Access LAB Negative
+on:
+  pull_request:
+    paths:
+      - 'zeus/jarvis/gates/cut51-worker-access-negative*'
+      - '.github/workflows/jarvis-cut51-anonymous-access-negative.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  anonymous-negative-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify no false Access certification and reject public 2xx
+        run: node --test zeus/jarvis/gates/cut51-worker-access-negative.test.mjs
+      - name: Unauthenticated GET to existing original and parallel LAB canaries (no redirects, no secrets, no writes)
+        run: node zeus/jarvis/gates/cut51-worker-access-negative.mjs --probe
+      - name: Enforce NO-GO for production promotion
+        run: |
+          echo "CUT51 checks only anonymous network exposure and cannot certify owner Access, physical B2 devices or B3/Gateway."
+          echo "No deployment, no Cloudflare API writes, production promotion remains NO-GO."
