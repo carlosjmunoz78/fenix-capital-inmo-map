@@ -23,6 +23,8 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByText('Ahora',{exact:true}).first()).toBeVisible();
  await expect(operative.getByRole('heading',{name:'Hay trabajo en marcha.'})).toBeVisible();
  await expect(operative.getByText('Construir y validar capacidades',{exact:true})).toBeVisible();
+ await expect(operative.locator('.operativa-work-row').getByText('CEREBRO FACT-001 Engine Factory',{exact:true})).toBeVisible();
+ await expect(operative.locator('.operativa-work-row').getByText('En cola de GitHub Actions; todavía no está ejecutándose.',{exact:true}).first()).toBeVisible();
  await expect(operative.locator('.operativa-work-row')).toHaveCount(5);
  await expect(operative.getByRole('button',{name:'Ver los 9 trabajos'})).toBeVisible();
  await expect(operative.locator('.operativa-work-row').getByText('UMS001 CEREBRO Facebook offline QA 1',{exact:true})).toBeVisible();
