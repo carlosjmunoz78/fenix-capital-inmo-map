@@ -17,6 +17,7 @@
     "trigger",
     "asset_kind",
     "capability_id",
+    "item_id",
     "consumer_engine_id",
     "channel_id",
     "placement",
@@ -224,6 +225,10 @@
     "reply_to": {
       "type": "string",
       "pattern": "^cerebro://events/[A-Za-z0-9/_-]{4,200}$"
+    },
+    "item_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9][A-Z0-9_-]{2,79}$"
     }
   }
 }
