@@ -1,0 +1,77 @@
+{
+  "schema_version": "cerebro-engine-manifest-v1",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "component_id": "UMS001_ED25519_SIGNED_QA_RECEIVER_V0",
+  "version": "0.1.0",
+  "status": "DEPLOYED_INERT_TRUST_ANCHOR_NOT_PROVISIONED",
+  "worker": {
+    "name": "cerebro-ums001-signed-qa-receiver-lab-eu",
+    "source": [
+      "core.mjs",
+      "worker.mjs",
+      "sender-core.mjs"
+    ],
+    "workers_dev": false,
+    "preview_urls": false,
+    "public_routes": [],
+    "cron_count": 0
+  },
+  "permissions": {
+    "allowed": [
+      "UMS001.QA.METADATA.VERIFY_ED25519",
+      "UMS001.CEREBRO_GATEWAY.READ_ONLY",
+      "UMS001.QA.METADATA.QUEUE"
+    ],
+    "denied": [
+      "UNSIGNED_ORDERS",
+      "PROD",
+      "BILLING",
+      "VIDEO",
+      "SOCIAL",
+      "PUBLISH",
+      "RIGHTS.AUTO_APPROVE"
+    ]
+  },
+  "crypto": {
+    "algorithm": "Ed25519",
+    "trust_secret_name": "ORCH_PUBLIC_SPKI_BASE64",
+    "trust_key_provisioned": false,
+    "key_id": "UMS001-LAB-ORCH-ED25519-20261112-V1",
+    "strict_ttl_seconds": 180,
+    "nonce_replay_detection": true,
+    "nonce_store_is_kv_eventually_consistent": true,
+    "signed_approval_is_not_image_rights": true
+  },
+  "bindings": {
+    "inbound_queue_name": "cerebro-ums001-image-signed-command-lab-eu",
+    "inbound_queue_id": "39d92161f2ac429791bbcc3dfd25c6b8",
+    "consumer_attached": false,
+    "origin_gateway_service": "cerebro-ums001-producer-private-gateway-lab-eu / ProducerLibraryLab",
+    "outbound_queue_name": "cerebro-ums001-image-qa-shadow-lab-eu",
+    "private_replay_kv_id": "561e0d5ce2be437085144c16eae5f712",
+    "separate_immutable_archive_manifest_secret_present": true,
+    "data_jurisdiction": "eu"
+  },
+  "tests": {
+    "CI_run_id": 43126372664,
+    "total_lab_tests_pass": 128,
+    "failed": 0,
+    "physical_ED25519_verified_qa_delivery": false
+  },
+  "budget": {
+    "new_subscriptions": 0,
+    "additional_spend_eur": 0,
+    "paid_provider_calls": 0
+  },
+  "rollback": {
+    "action": "keep signed queue without any consumers until trust key is provisioned; never alter original V1 gateway",
+    "verified_no_consumer": true
+  },
+  "rebuild": {
+    "source": "GitHub PR #45: core.mjs + stable V1 sender-core snapshot + worker.mjs. Secure public key from approved IAM provisioning only."
+  },
+  "promotion": "NOT_ALLOWED",
+  "image_gate_green": false
+}
