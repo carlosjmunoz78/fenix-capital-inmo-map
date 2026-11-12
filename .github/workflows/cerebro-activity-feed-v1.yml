@@ -1,0 +1,88 @@
+name: CEREBRO Activity · Authenticated GitHub metadata feed
+on:
+  push:
+    branches: [main]
+    paths: [scripts/cerebro-activity-feed-v1.mjs, .github/workflows/cerebro-activity-feed-v1.yml]
+  schedule:
+    - cron: "3-58/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: cerebro-activity-feed-v1
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Fetch authenticated public Actions status with ephemeral token
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/cerebro-activity-feed-v1.mjs --publish
+      - name: Verify source, age, JSON size and documented schema
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module -e '
+            import {readFileSync} from "node:fs";
+            const d=JSON.parse(readFileSync(process.env.RUNNER_TEMP+"/cerebro-activity-feed-v1.json","utf8"));
+            if(d.schema!=="cerebro-actions-feed-v1"||d.repository!=="carlosjmunoz78/fenix-capital-inmo-map")process.exit(2);
+            const age=Date.now()-Date.parse(d.generated_at);
+            if(!Number.isFinite(age)||age<0||age>300000)process.exit(3);
+            if(JSON.stringify(d).length>450000)process.exit(4);
+            for(const key of ["in_progress","queued"])if(!Array.isArray(d[key].workflow_runs))process.exit(5);
+            console.log("FEED_SCHEMA_VALID");
+          '
+      - name: Publish only isolated feed branch with ref lease
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REPOSITORY" = 'carlosjmunoz78/fenix-capital-inmo-map'
+          remote="https://github.com/$GITHUB_REPOSITORY.git"
+          auth_file="$(mktemp)"
+          trap 'rm -f "$auth_file"' EXIT
+          cat > "$auth_file" <<'ASKPASS'
+          #!/usr/bin/env sh
+          case "$1" in
+            *Username*) printf '%s\n' x-access-token ;;
+            *Password*) printf '%s\n' "$GITHUB_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          ASKPASS
+          chmod 700 "$auth_file"
+          export GIT_ASKPASS="$auth_file"
+          export GIT_TERMINAL_PROMPT=0
+          expected="$(git ls-remote "$remote" refs/heads/cerebro-activity-feed-v1 | cut -f1)"
+          test -n "$expected"
+          git fetch --quiet --no-tags "$remote" refs/heads/cerebro-activity-feed-v1
+          test "$(git rev-parse FETCH_HEAD)" = "$expected"
+          git show FETCH_HEAD:activity.json | node --input-type=module -e '
+            let s="";
+            for await(const c of process.stdin)s+=c;
+            const d=JSON.parse(s);
+            if(d.schema!=="cerebro-actions-feed-v1"||d.repository!=="carlosjmunoz78/fenix-capital-inmo-map")process.exit(2);
+          '
+          feed_dir="$(mktemp -d)"
+          trap 'rm -f "$auth_file"; rm -rf "$feed_dir"' EXIT
+          cp "$RUNNER_TEMP/cerebro-activity-feed-v1.json" "$feed_dir/activity.json"
+          cd "$feed_dir"
+          git init --quiet
+          git checkout --quiet -b cerebro-activity-feed-v1
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- activity.json
+          git commit --quiet -m 'data(activity): authenticated GitHub Actions public snapshot'
+          git remote add origin "$remote"
+          git push --quiet --force-with-lease="refs/heads/cerebro-activity-feed-v1:$expected" origin HEAD:refs/heads/cerebro-activity-feed-v1
+          echo "FEED_UPDATED: isolated metadata branch only"
