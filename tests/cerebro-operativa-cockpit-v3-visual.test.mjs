@@ -8,6 +8,8 @@ const nav=read('src/CerebroInterfaceBar.tsx');
 const operative=read('src/CerebroOperativeConsole.tsx');
 const cockpit=read('src/CerebroOperativeCockpitV3.tsx');
 const css=read('src/cerebro-operative-cockpit-v3.css');
+const universe=read('src/cerebroOperativaLabUniverseApi.ts');
+const views=read('src/CerebroOperativaUniverseViews.tsx');
 
 test('Five original navigation destinations remain intact, without replacing the global bar',()=>{
  for(const item of ["navigate('/inicio')","['JARVIS','Jarvis']","['OPERATIVA','Operativa']","['NEURONAL','Neuronal']","['NAVEGADOR','Navegador']"])
@@ -44,7 +46,11 @@ test('Context tabs open functional in-page detail views, with no misleading unve
  }
  assert.ok(cockpit.includes('onClick={()=>selectPanel(key)}'));
  assert.ok(cockpit.includes('onClick={()=>onOpenRun(run)}'));
- assert.ok(cockpit.includes('Sin inventario de proyectos verificado'));
+ assert.ok(cockpit.includes('<CerebroOperativaUniverseViews'));
+ assert.ok(views.includes('projects.map'));
+ assert.ok(views.includes('catalog.map'));
+ assert.ok(views.includes('scaffolded.map'));
+ assert.ok(views.includes('Sin acceso verificado')||views.includes('No hay acceso verificado'));
  assert.ok(cockpit.includes('Fases internas no verificadas')||
    cockpit.includes('fases internas no verificadas'));
  assert.ok(!cockpit.includes('98%'));
@@ -60,4 +66,30 @@ test('New component reads existing activity and does not create a second credent
  assert.ok(!cockpit.includes('dangerouslySetInnerHTML'));
  assert.ok(cockpit.includes('validLink(run)'));
  assert.ok(cockpit.includes('github.com'));
+});
+
+test('Owner LAB universe reads only through the existing owner session; source status must be explicit',()=>{
+ assert.ok(operative.includes('fetchOwnerUniverseLab(company,controller.signal)'));
+ assert.ok(operative.includes('if(!visualPreview)return'));
+ assert.ok(operative.includes('universeRecord?.company===company'));
+ assert.ok(universe.includes("cerebro-console-gateway-v36-followups-lab/owner-universe"));
+ assert.ok(universe.includes('supabase.auth.getSession()'));
+ assert.ok(universe.includes('Authorization:'));
+ assert.ok(universe.includes("company!=='all'"));
+ assert.ok(universe.includes("COMPANY_NOT_VERIFIED"));
+ assert.ok(universe.includes('raw.live_writes!==false'));
+ assert.ok(universe.includes('raw.prod_execution_enabled!==false'));
+ assert.ok(!universe.includes('SUPABASE_SERVICE_ROLE_KEY'));
+ assert.ok(!universe.includes('localStorage'));
+ assert.ok(!universe.includes('sessionStorage'));
+ assert.ok(!universe.includes("method:'POST'"));
+ assert.ok(!universe.includes('dangerouslySetInnerHTML'));
+});
+test('Source-specific engine, project and company states do not grant PROD permissions',()=>{
+ assert.ok(views.includes("registry?.status==='OK'"));
+ assert.ok(views.includes("factory?.status==='OK'"));
+ assert.ok(views.includes('Registro PREPROD')||views.includes('registro PREPROD'));
+ assert.ok(views.includes('no certifica ejecución'));
+ assert.ok(views.includes('no deben sumarse'));
+ assert.ok(views.includes('Sin vínculo verificado'));
 });
