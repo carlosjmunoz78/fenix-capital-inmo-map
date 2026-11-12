@@ -11,6 +11,11 @@ const REPLACEMENTS:[RegExp,string][]=[
 ];
 const ATTRIBUTES=['placeholder','title','aria-label','alt'] as const;
 
+function isJarvisSurface(){
+ if(typeof window==='undefined'||window.location.pathname.replace(/\/+$/,'')!=='/cerebro')return false;
+ const section=new URLSearchParams(window.location.search).get('section');
+ return !section||section==='jarvis'||section==='v0'||section==='legacy-v0';
+}
 function replace(value:string){let next=value;for(const[pattern,replacement]of REPLACEMENTS)next=next.replace(pattern,replacement);return next;}
 function rewrite(root:ParentNode){
  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
@@ -24,7 +29,7 @@ function rewrite(root:ParentNode){
 export default function JarvisVisibleLanguageGuard(){
  useEffect(()=>{
   let frame=0;
-  const apply=()=>{frame=0;rewrite(document.body);document.title=replace(document.title)};
+  const apply=()=>{frame=0;if(!isJarvisSurface())return;rewrite(document.body);document.title=replace(document.title)};
   const schedule=()=>{if(!frame)frame=window.requestAnimationFrame(apply)};
   apply();
   const observer=new MutationObserver(schedule);
