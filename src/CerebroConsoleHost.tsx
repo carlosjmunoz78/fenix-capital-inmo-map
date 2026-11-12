@@ -48,13 +48,15 @@ export default function CerebroConsoleHost(){
  if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
+ // Explicit LAB preview only: the existing Operativa remains the default.
+ const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
   <JarvisVisibleLanguageGuard/>
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole visualPreview={visualPreview}/></div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
