@@ -1688,7 +1688,12 @@
     "registered_automation_own_credential_verified": false,
     "console_client_e2e_out_of_scope": true,
     "cost_subscription_added_eur": 0,
-    "provider_systems_mutated": false
+    "provider_systems_mutated": false,
+    "real_five_read_verified": true,
+    "autonomy_dispatch_verified": false,
+    "provider_read_only_scope": "LAB_ONLY",
+    "provider_mutation_enabled": false,
+    "latest_p5_gate": "P5_AUTONOMY_OFF_AFTER_EXPIRED_QUEUE_TICKET_NOT_CLAIMED"
   },
   "execution_without_console": {
     "status": "DEFINED_NOT_OPERATIVE_AS_COMMON_RUNTIME",
@@ -1720,5 +1725,40 @@
     "supabase",
     "github",
     "opera"
-  ]
+  ],
+  "p5_autonomy_lab_20261112": {
+    "state": "PHYSICAL_QUEUE_VERIFIED_DISPATCH_BLOCKED_OFF",
+    "proof_provider_read_5_of_5": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
+    "isolated_d1_schema": "fact001_p5_automation_registry_v1/fact001_p5_jobs_v1/fact001_p5_audit_v1",
+    "registry_enabled": false,
+    "effective_worker_p5_enabled": false,
+    "existing_recovery_runner_script": "cerebro-fact001-recovery-runner-lab",
+    "recovery_original_source_preserved": true,
+    "recovery_cron": "*/5 * * * *",
+    "recovery_current_deployed_version": "8b6448d3-3fb6-4124-bba6-c4b077a09cd0",
+    "recovery_original_version_backup": "a9caa600-c26d-4368-b060-57275f983963",
+    "cloudflare_account_cron_quota": "5/5 Free; no new cron allowed",
+    "new_worker_created_then_removed": "cerebro-fact001-p5-auto-lab",
+    "independent_supabase_dispatch": "cerebro-fact001-p5-dispatch-lab v1 ACTIVE",
+    "negative_live_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43199780121",
+    "shared_wrapper_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43200942447",
+    "fail_closed_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43203935317",
+    "first_job": {
+      "request_id": "FACT001-P5-20261112",
+      "state": "RECONCILE",
+      "attempts": 0,
+      "error_code": "DISPATCH_UNVERIFIED_TICKET_EXPIRED",
+      "audit": [
+        "QUEUED",
+        "RECONCILE"
+      ]
+    },
+    "security": "ONE_TIME_TICKET_EXPIRED; NO_RETRY; NO_PROVIDER_WRITES_VERIFIED",
+    "full_autonomy": false,
+    "general_gateway_to_queue": false,
+    "tomorrow_scheduler_armed": false,
+    "next_required": "DIAGNOSE_CLOUDFLARE_CRON_TO_SUPABASE_EDGE_EGRESS_IN_PRIVATE_LAB; VERIFY_REGISTERED_AUTOMATION_PHYSICAL_D1_CLAIM_5_READ_AND_RESTORE; THEN_ENABLE_BOUND_1_JOB_PER_DAY",
+    "extra_subscription_cost_eur": 0,
+    "notes": "Do not represent queued job or CI as dispatch success; preserve existing recovery Worker and customer resources."
+  }
 }
