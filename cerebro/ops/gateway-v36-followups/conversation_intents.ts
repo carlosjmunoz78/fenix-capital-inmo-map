@@ -11,6 +11,35 @@ function norm(value:string){
 function reply(status:Reply["status"],intent:string,message:string,evidence_mode:Reply["evidence_mode"]="GATEWAY_CAPABILITIES_V1"):Reply{
  return{status,intent,executed:false,message,evidence_mode};
 }
+/**
+ * Real simplification, not a verbatim copy of the prior answer.
+ * All capabilities mentioned here must be present in the supplied previous turn.
+ * No new tools are invoked and no execution is implied.
+ */
+function simplifyPreviousAnswer(previous:string):string{
+ const plain=String(previous||"").replace(/\s+/g," ").trim();
+ const actions=[
+  {test:/expedientes activos|expedientes.{0,35}activos/i,phrase:"ver cuántos expedientes están activos"},
+  {test:/inmobiliarias por localidad|buscar inmobiliarias/i,phrase:"buscar inmobiliarias por localidad"},
+  {test:/trabajos de CEREBRO|trabajos.{0,35}(?:ejecución|cola)/i,phrase:"consultar los trabajos de CEREBRO"},
+  {test:/próxima publicación social|publicación social/i,phrase:"revisar la próxima publicación en redes si su fuente está disponible"}
+ ].filter(item=>item.test.test(plain)).map(item=>item.phrase);
+ if(actions.length>=2&&/\b(?:puedo|ayudarte|consulta|comprobar|buscar)\b/i.test(plain)){
+  const tasks=actions.length===1?actions[0]:actions.slice(0,-1).join(", ")+" y "+actions.at(-1);
+  const note=/no he ejecutado|no he realizado|no he consultado/i.test(plain)
+   ?" Solo te he explicado las opciones; todavía no he hecho ninguna consulta ni cambio.":"";
+  return "En resumen: puedo "+tasks+", cuando las fuentes autorizadas estén disponibles."+note;
+ }
+ // The previous turn may be a factual answer, not a list of capabilities.
+ // Preserve its key factual sentence without cutting halfway through a word.
+ const first=(plain.match(/[^.!?]+[.!?]?/)||[plain])[0].trim();
+ if(first.length<=260)return "Dicho de forma sencilla: "+first;
+ const cut=first.slice(0,240);
+ const lastWord=cut.lastIndexOf(" ");
+ const safeCut=(lastWord>=120?cut.slice(0,lastWord):cut).trim().replace(/[,:;\s]+$/,"");
+ return "Resumen parcial de mi respuesta anterior: "+safeCut+"… Si quieres, puedo explicarte una parte concreta.";
+}
+
 export function answerCerebroNaturalQuery(message:string,context:SafeTurn[]=[]):Reply|null{
  const q=norm(message);
  if(!q||q.length>2000)return null;
@@ -22,9 +51,7 @@ export function answerCerebroNaturalQuery(message:string,context:SafeTurn[]=[]):
  if((/^(?:(?:puedes|podrias|me puedes|me podrias)\s+)?(?:explicame|explicarme|explicar|resume|resumeme|resumir|aclara|aclarame|simplifica|repite|dime)\b/.test(q)&&/\b(anterior|ultima respuesta|lo anterior|eso que has dicho|lo que acabas de decir)\b/.test(q))||/^(?:mas|mucho)\s+(?:simple|sencillo|corto)\s+(?:lo anterior|eso)/.test(q)){
   const prev=[...context].reverse().find(t=>t.role==="cerebro"&&t.text.trim());
   if(!prev)return reply("LOW_CONFIDENCE","explain_previous_missing","No veo una respuesta anterior en el contexto de esta sesión. Indícame el tema y te lo explicaré sin inventar información.","CONVERSATION_CONTEXT_BOUNDED");
-  const sentences=prev.text.replace(/\s+/g," ").trim().match(/[^.!?]+[.!?]?/g)||[prev.text];
-  const short=sentences.map(t=>t.trim()).filter(Boolean).slice(0,2).join(" ").slice(0,400);
-  return reply("OK","explain_previous","Dicho más sencillamente, mi respuesta anterior fue: "+short,"CONVERSATION_CONTEXT_BOUNDED");
+  return reply("OK","explain_previous",simplifyPreviousAnswer(prev.text),"CONVERSATION_CONTEXT_BOUNDED");
  }
  if(/\b(aion|captacasa)\b/.test(q)&&/\b(muestrame|mostrar|consulta|consultar|dame|lista|trabajos|expedientes|datos)\b/.test(q))return reply("OK","company_scope","Esta consola todavía no tiene autorización operativa para consultar datos de AION o CAPTACASA. Solo puedo trabajar en el contexto autorizado de Fénix Capital; no voy a mezclar información entre empresas.");
  // These ask ABOUT sources, not for any secret or new privileged access.
