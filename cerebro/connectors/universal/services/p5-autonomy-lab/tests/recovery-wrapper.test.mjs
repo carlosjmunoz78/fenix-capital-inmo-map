@@ -5,7 +5,7 @@ import composite from '../recovery-wrapper.mjs';
 const dir=new URL('../',import.meta.url);
 test('old recovery Worker is exactly preserved in composite upload',()=>{
  const actual=readFileSync(new URL('legacy-recovery.mjs',dir),'utf8');
- const canonical=readFileSync(new URL('../../../cloudflare/recovery-runner-lab/worker.mjs',dir),'utf8');
+ const canonical=readFileSync(new URL('../../cloudflare/recovery-runner-lab/worker.mjs',dir),'utf8');
  assert.equal(actual,canonical);
  assert.match(actual,/processRecoveryTick/);
  assert.match(actual,/fact001\.lab\.heartbeat/);
