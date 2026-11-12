@@ -18,17 +18,19 @@ function safeRegisteredEntry(item){
   registry_state:String(item.state||"UNKNOWN").slice(0,48),
   prod_authorized:item.prod_authorized===true,
   prod_write_authorized:item.prod_write_authorized===true,
-  access_status:"REGISTRY_PRESENT_INTEGRATION_UNVERIFIED"
+  access_status:item.__verified_owner_context===true?"VERIFIED_OWNER_CONTEXT_NOT_REGISTERED":"REGISTRY_PRESENT_INTEGRATION_UNVERIFIED"
  };
 }
 function safeProjectEntry(item,registeredCompanyIds){
  if(!item||typeof item!=="object"||Array.isArray(item))return null;
  const company_id=normalizeId(item.company_id);
  const project_id=normalizeId(item.project_id);
+ const canonical_project_id=typeof item.project_id==="string"?item.project_id.trim():"";
  if(!SAFE_ID.test(project_id)||!registeredCompanyIds.has(company_id))return null;
  return {
-  company_id,project_id,
+  company_id,project_id:canonical_project_id,
   environment:String(item.environment||"PREPROD").slice(0,24),
+  project_status:typeof item.status==="string"?item.status.slice(0,48):"UNKNOWN",
   access_status:"PROJECT_RECORD_PRESENT_INTEGRATION_UNVERIFIED"
  };
 }
@@ -57,7 +59,7 @@ export function listOwnerRegisteredScopes({
  };
  const chosenCompanies=companies.filter(x=>!company||company==="all"||company==="todas"||x.company_id===company);
  const chosenIds=new Set(chosenCompanies.map(x=>x.company_id));
- const chosenProjects=projects.filter(x=>chosenIds.has(x.company_id)&&(!project||x.project_id===project));
+ const chosenProjects=projects.filter(x=>chosenIds.has(x.company_id)&&(!project||x.project_id.toLowerCase()===project));
  if(project&&!chosenProjects.length)return {
    status:"NOT_CONNECTED",reason:"PROJECT_NOT_IN_VERIFIED_COMPANY_SCOPE",executed:false,
    companies:chosenCompanies,projects:[]
