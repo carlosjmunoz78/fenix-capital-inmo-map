@@ -5,6 +5,7 @@ const RAW_ACTIVITY_URL=(import.meta.env.VITE_CEREBRO_ACTIVITY_URL as string|unde
 
 export type CerebroActivityStatus='queued'|'in_progress'|'completed'|'waiting'|'requested'|'pending'|string;
 export type CerebroProgressProvenance='REAL_GITHUB_JOBS'|'TERMINAL_STATUS'|'UNAVAILABLE';
+export type CerebroJobsProvenance='REAL_GITHUB_JOBS'|'UNAVAILABLE';
 
 export type CerebroActivityRun={
   run_id:number;
@@ -12,6 +13,7 @@ export type CerebroActivityRun={
   workflow_alias:string;
   workflow_path:string;
   status:CerebroActivityStatus;
+  parent_status?:CerebroActivityStatus;
   conclusion:string|null;
   event:string;
   html_url:string;
@@ -32,6 +34,19 @@ export type CerebroActivityRun={
   current_step:string|null;
   next_step:string|null;
   progress_provenance:CerebroProgressProvenance;
+  running_jobs?:number|null;
+  queued_jobs?:number|null;
+  completed_jobs?:number|null;
+  total_jobs?:number|null;
+  jobs_provenance?:CerebroJobsProvenance;
+};
+
+export type CerebroActivityTotals={
+  running_observed:number;
+  queued_observed:number;
+  active_observed:number;
+  provenance:'GITHUB_ACTION_RUN_TOTALS';
+  semantics:'LOWER_BOUND_PHYSICAL_JOBS';
 };
 
 export type CerebroActivityResponse={
@@ -41,6 +56,7 @@ export type CerebroActivityResponse={
   source_status:'LIVE'|'CACHED'|'UNAVAILABLE';
   repository:string;
   runs:CerebroActivityRun[];
+  physical_totals?:CerebroActivityTotals;
   reason?:string;
 };
 
