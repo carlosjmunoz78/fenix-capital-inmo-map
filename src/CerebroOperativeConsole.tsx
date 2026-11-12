@@ -2,6 +2,7 @@ import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} fro
 import {AudioLines,ChevronDown,ExternalLink,Mic,Send,ShieldCheck,Square,X} from 'lucide-react';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
+import {fetchOwnerUniverseLab,type OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
@@ -53,6 +54,7 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
  const[power,setPower]=useState<PowerMode>('Normal');
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
+ const[universeRecord,setUniverseRecord]=useState<{company:CompanyKey;result:OwnerUniverseResult}|null>(null);
  const[selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
  const[now,setNow]=useState(()=>Date.now());
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
@@ -63,6 +65,19 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
  useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot({ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')})})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  useEffect(()=>{try{window.sessionStorage.setItem('operativa_power_mode',power)}catch{/* optional */}},[power]);
+ // LAB preview only: no new reads in the existing production/default interface.
+ useEffect(()=>{
+  if(!visualPreview)return;
+  let alive=true;
+  const controller=new AbortController();
+  const refresh=async()=>{
+   const result=await fetchOwnerUniverseLab(company,controller.signal);
+   if(alive)setUniverseRecord({company,result});
+  };
+  void refresh();
+  const timer=window.setInterval(()=>{void refresh()},60_000);
+  return()=>{alive=false;controller.abort();window.clearInterval(timer)};
+ },[company,visualPreview]);
 
  const filteredRuns=useMemo(()=>company==='all'?runs:runs.filter(run=>companyKey(run)===company),[runs,company]);
  const activeRuns=useMemo(()=>filteredRuns.filter(run=>physicalRunning(run)>0||ACTIVE_STATUSES.has(run.status)),[filteredRuns]);
@@ -89,6 +104,7 @@ export default function CerebroOperativeConsole({visualPreview=false}:{visualPre
    dictationError={dictationError} composerRef={composerRef}
    source={source} observedAt={observedAt} company={company} onCompanyChange={setCompany}
    runs={filteredRuns} onOpenRun={setSelectedRun}
+   ownerUniverse={universeRecord?.company===company?universeRecord.result:{kind:'loading',data:null}}
   >
   {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
    <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
