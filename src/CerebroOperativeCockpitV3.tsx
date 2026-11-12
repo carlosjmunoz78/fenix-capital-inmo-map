@@ -105,7 +105,7 @@ export default function CerebroOperativeCockpitV3({
   <div className="op3-wrapper">
    <div className="op3-toolbar">
     <div className="op3-selectors">
-     <label><span>EMPRESA</span><select aria-label="Entidad" value={company}
+     <label><span>EMPRESA</span><select aria-label="Empresa" value={company}
       onChange={event=>onCompanyChange(event.target.value as Company)}>
        {Object.entries(NAMES).map(([key,name])=><option key={key} value={key}>{name}</option>)}
       </select></label>
