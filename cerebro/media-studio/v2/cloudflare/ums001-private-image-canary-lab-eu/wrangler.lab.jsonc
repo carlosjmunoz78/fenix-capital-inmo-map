@@ -1,0 +1,9 @@
+{
+  "name": "cerebro-ums001-private-image-canary-lab-eu",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-12",
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {"RENDER_ENABLED":"false"},
+  "triggers": {"crons":[]}
+}
