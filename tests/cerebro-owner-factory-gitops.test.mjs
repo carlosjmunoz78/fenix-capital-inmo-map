@@ -73,9 +73,9 @@ test('Unified owner routes cannot bypass pre-existing server auth; only GET and 
    assert.ok(auth>0&&denied>auth&&route>denied,suffix);
    assert.ok(!code.includes('req.method==="POST"&&suffix==="'+suffix+'"'));
  }
- assert.match(code,/readFactoryGitOpsCatalog\\(\\{actor:owner\\.actor\\}\\)/);
- assert.match(code,/liveOwnerRegistry\\(owner\\.actor/);
- assert.match(code,/verifiedCompanyIds:\\["fenix"\\]/);
- assert.match(code,/prod_execution_enabled:false/);
- assert.match(code,/live_writes:false/);
+ assert.ok(code.includes('readFactoryGitOpsCatalog({actor:owner.actor})'));
+ assert.ok(code.includes('liveOwnerRegistry(owner.actor'));
+ assert.ok(code.includes('verifiedCompanyIds:["fenix"]'));
+ assert.ok(code.includes('prod_execution_enabled:false'));
+ assert.ok(code.includes('live_writes:false'));
 });
