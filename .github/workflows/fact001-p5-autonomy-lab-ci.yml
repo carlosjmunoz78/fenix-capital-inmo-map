@@ -16,6 +16,7 @@ jobs:
       - run: |
           node --check cerebro/connectors/universal/services/p5-autonomy-lab/worker.mjs
           node --test cerebro/connectors/universal/services/p5-autonomy-lab/tests/*.test.mjs
+          node --check cerebro/connectors/universal/services/p5-autonomy-lab/recovery-wrapper.mjs
           node --experimental-strip-types --check cerebro/connectors/universal/services/p5-autonomy-lab/edge/index.ts
 
   negative-live:
