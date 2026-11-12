@@ -1672,7 +1672,7 @@
     "quota": "NO_NEW_SUBSCRIPTIONS; METRICS_PENDING",
     "prod": "OFF",
     "opera_phase": "P6_PARKED_LAST",
-    "next_block": "FACT001_DURABLE_INTERNAL_AUTOMATION_PRINCIPAL_AND_ATOMIC_QUEUED_DISPATCH_EXISTING_GATEWAY_LAB_WITH_BACKUP_NO_PROD_CHANGE",
+    "next_block": "EVENT_DRIVEN_OWNER_SIGNED_INGRESS_TO_GATEWAY_WITHOUT_APP_CRM_PROD_CHANGE",
     "real_workflow": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
     "real_ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196521419",
     "dispatcher_module": "services/five-provider-read-lab/five-provider-read.mjs",
@@ -1693,7 +1693,12 @@
     "autonomy_dispatch_verified": false,
     "provider_read_only_scope": "LAB_ONLY",
     "provider_mutation_enabled": false,
-    "latest_p5_gate": "P5_AUTONOMY_OFF_AFTER_EXPIRED_QUEUE_TICKET_NOT_CLAIMED"
+    "latest_p5_gate": "P5_AUTONOMY_OFF_AFTER_EXPIRED_QUEUE_TICKET_NOT_CLAIMED",
+    "autonomous_scheduled_5_provider_read_verified": true,
+    "autonomous_live_d1_queue_claim_and_ack_verified": true,
+    "autonomous_gateway_when_needed_verified": false,
+    "physical_provider_reads_no_writes": true,
+    "scoped_supplier_execution": "LAB_ONLY"
   },
   "execution_without_console": {
     "status": "DEFINED_NOT_OPERATIVE_AS_COMMON_RUNTIME",
@@ -1717,7 +1722,11 @@
     "evidence_run": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
     "general_autonomous_on_demand": "NOT_YET_VERIFIED",
     "reason": "NO_ATOMIC_DURABLE_QUEUE_BOUND_TO_OWN_CEREBRO_GATEWAY_AND_NO_REGISTERED_AUTOMATION_PRINCIPAL_PHYSICALLY_TRUSTED",
-    "no_new_subscriptions": true
+    "no_new_subscriptions": true,
+    "physical_registered_automation_read_5_20261112": "VERIFIED_LAB_QUEUED_RUNNING_COMPLETED",
+    "automated_schedule_enabled": true,
+    "evidence_d1": "FACT001-P5-20261112-A1",
+    "prod_write_enabled": false
   },
   "user_confirmed_next_provider_order_20261111": [
     "cloudflare",
@@ -1727,7 +1736,7 @@
     "opera"
   ],
   "p5_autonomy_lab_20261112": {
-    "state": "PHYSICAL_QUEUE_VERIFIED_DISPATCH_BLOCKED_OFF",
+    "state": "SCHEDULED_CEREBRO_READ_5_OF_5_PHYSICAL_SUCCESS_LAB",
     "proof_provider_read_5_of_5": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43196619003",
     "isolated_d1_schema": "fact001_p5_automation_registry_v1/fact001_p5_jobs_v1/fact001_p5_audit_v1",
     "registry_enabled": false,
@@ -1759,6 +1768,55 @@
     "tomorrow_scheduler_armed": false,
     "next_required": "DIAGNOSE_CLOUDFLARE_CRON_TO_SUPABASE_EDGE_EGRESS_IN_PRIVATE_LAB; VERIFY_REGISTERED_AUTOMATION_PHYSICAL_D1_CLAIM_5_READ_AND_RESTORE; THEN_ENABLE_BOUND_1_JOB_PER_DAY",
     "extra_subscription_cost_eur": 0,
-    "notes": "Do not represent queued job or CI as dispatch success; preserve existing recovery Worker and customer resources."
+    "notes": "Do not represent queued job or CI as dispatch success; preserve existing recovery Worker and customer resources.",
+    "physical_provider_read_5_of_5": true,
+    "scheduled_registered_automation": true,
+    "command_gateway_event_driven_on_demand": false,
+    "real_execution": {
+      "request_id": "FACT001-P5-20261112-A1",
+      "state": "COMPLETED",
+      "attempts": 1,
+      "flow": [
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED"
+      ],
+      "providers_returned": {
+        "cloudflare": 10,
+        "vercel": 3,
+        "supabase": 113,
+        "notion": 1,
+        "github": 1
+      },
+      "supabase_http_200_timestamp_utc": "2026-11-12T11:15:48.877Z"
+    },
+    "last_production_like_mode": {
+      "registry_enabled": true,
+      "P5_ENABLED": true,
+      "P5_ACCEPTANCE_ONCE": false,
+      "P5_DIAG_ENABLED": false,
+      "limiter": "1 READ_ALL per UTC day",
+      "cron": "*/5 * * *",
+      "shared_recovery_unchanged": true
+    },
+    "physical_egress_diagnostic": {
+      "before": "EGRESS_TYPE_ERROR_ZERO_MS",
+      "reason": "Cloudflare Workers reject redirect:error",
+      "fix": "redirect:manual with 3xx non-success",
+      "after": "EDGE_HTTP_401_1391_MS"
+    },
+    "old_failed_job": {
+      "request_id": "FACT001-P5-20261112",
+      "state": "RECONCILE",
+      "attempts": 0,
+      "never_retried": true
+    },
+    "current_cron_worker_version": "ac13e307-5c82-4d17-80f2-4459bdb80ac3",
+    "independent_edge_version": 2,
+    "independent_gateway_to_queue_on_demand": "NOT_CONNECTED",
+    "prod_autonomous_write": false,
+    "no_new_crons": true,
+    "no_new_subscription": true,
+    "next_block": "P5_OWNER_OR_REGISTERED_AUTOMATION_EVENT_DRIVEN_COMMAND_GATEWAY_LAB_ADAPTER; KEEP EXISTING CEREBRO CONSOLE PROD UNTOUCHED"
   }
 }
