@@ -113,6 +113,14 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await expect.poll(()=>postedChat?.message??null,{timeout:7_000}).toBe('Consulta el estado operativo');
  await page.setViewportSize({width:390,height:844});
  await expect(cockpit.getByRole('heading',{name:'¿Qué necesitas hacer?'})).toBeVisible();
+ for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
+  const tab=bar.getByRole('button',{name:new RegExp(name,'i')});
+  await expect(tab).toBeVisible();
+  const box=await tab.boundingBox();
+  expect(box?.x??1000).toBeGreaterThanOrEqual(-1);
+  expect((box?.x??1000)+(box?.width??0)).toBeLessThanOrEqual(391);
+ }
+ await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/cockpit-v3-mobile.png',fullPage:true,animations:'disabled'});
  const dimensions=await page.evaluate(()=>({document:document.documentElement.scrollWidth,
   viewport:document.documentElement.clientWidth}));
