@@ -234,3 +234,30 @@
  .op3-motor-metrics strong{font-size:24px}
  .op3-motor-metrics span{font-size:9px}
 }
+
+
+/* Conversation is reflected from V0, not a second network client. */
+.op3-command.has-chat{gap:8px;justify-content:flex-start;padding:18px 0 10px}
+.op3-command.has-chat .op3-pulse{width:82px;height:82px;flex-shrink:0;margin:-2px auto}
+.op3-command.has-chat .op3-pulse .op3-ring-c{inset:28px}
+.op3-command.has-chat .op3-pulse .op3-core{height:26px;width:26px}
+.op3-command.has-chat .op3-command-copy h1{font-size:19px;font-weight:550}
+.op3-command.has-chat .op3-command-copy p{display:none}
+.op3-command.has-chat .op3-voice-status{margin:5px 0 10px}
+.op3-command.has-chat:before,.op3-command.has-chat:after{display:none}
+.op3-chat-history{width:min(840px,100%);max-height:270px;overflow-y:auto;
+ scrollbar-color:#2e738c transparent;padding:8px 4px 5px;margin:2px 0;
+ display:flex;flex-direction:column;gap:11px;text-align:left;align-self:center;
+ border-top:1px solid rgba(98,214,247,.15);border-bottom:1px solid rgba(98,214,247,.15)}
+.op3-chat-entry{max-width:95%;padding:4px 12px 7px;border-left:2px solid #3c8ab2}
+.op3-chat-entry.is-user{align-self:flex-end;border-left:0;border-right:2px solid #d0a55e;
+ text-align:right;background:linear-gradient(90deg,transparent,rgba(200,154,70,.07))}
+.op3-chat-entry strong{display:block;color:#84d6ef;font-size:9px;letter-spacing:.13em;
+ text-transform:uppercase;margin-bottom:5px}
+.op3-chat-entry.is-user strong{color:#e1bb7f}
+.op3-chat-entry p{font-size:12px;line-height:1.65;margin:0;color:#deecf6;
+ white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:600px){.op3-chat-history{max-height:280px}.op3-chat-entry{max-width:100%}
+ .op3-command.has-chat .op3-pulse{width:65px;height:65px}
+ .op3-command.has-chat .op3-pulse .op3-ring-c{inset:20px}
+ .op3-command.has-chat .op3-command-copy h1{font-size:17px}}
