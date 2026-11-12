@@ -26,6 +26,7 @@ export function answerCerebroNaturalQuery(message:string,context:SafeTurn[]=[]):
   const short=sentences.map(t=>t.trim()).filter(Boolean).slice(0,2).join(" ").slice(0,400);
   return reply("OK","explain_previous","Mi respuesta anterior, resumida sin añadir información nueva: "+short,"CONVERSATION_CONTEXT_BOUNDED");
  }
+ if(/\b(aion|captacasa)\b/.test(q)&&/\b(muestrame|mostrar|consulta|consultar|dame|lista|trabajos|expedientes|datos)\b/.test(q))return reply("OK","company_scope","Esta consola todavía no tiene autorización operativa para consultar datos de AION o CAPTACASA. Solo puedo trabajar en el contexto autorizado de Fénix Capital; no voy a mezclar información entre empresas.");
  // These ask ABOUT sources, not for any secret or new privileged access.
  if((/\b(puedes|podrias|tienes|eres capaz|capacidad|consultas|accedes|acceso)\b/.test(q)&&/\b(informacion|fuentes|datos|web|internet|documentos|guardad[oa]s?|tiempo real|en vivo)\b/.test(q))||
     /(?:informacion|datos)\s+real(?:es)?\s+o\s+(?:solo|solamente)/.test(q)){
