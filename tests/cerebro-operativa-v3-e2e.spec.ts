@@ -41,6 +41,19 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  }
  await expect(operative.locator('textarea[aria-label="Mensaje para CEREBRO"]')).toBeVisible();
  await expect(operative.getByRole('textbox',{name:'Mensaje para CEREBRO'})).toBeVisible();
+ // Keep the hint to a single readable line instead of clipping under the mobile send icon.
+ await expect.poll(async()=>page.evaluate(()=>{
+  const field=document.querySelector<HTMLTextAreaElement>('.operativa-dialogue textarea[aria-label="Mensaje para CEREBRO"]');
+  if(!field)return false;
+  const visible=field.getBoundingClientRect().width;
+  const test=document.createElement('canvas').getContext('2d');
+  if(!test)return false;
+  const style=getComputedStyle(field);
+  test.font=style.font;
+  const innerWidth=visible-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+  return test.measureText(field.placeholder).width<=innerWidth;
+ })).toBe(true);
+
  // Mobile first screen must allow sending an owner instruction without scrolling.
  // This checks viewport geometry, not just Playwright's DOM-level visibility.
  await page.evaluate(()=>window.scrollTo(0,0));
@@ -93,7 +106,7 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(inlineComposer).toBeVisible();
  await expect(inlineComposer).toHaveCSS('position','relative');
  expect(await inlineComposer.evaluate(el=>el.parentElement?.classList.contains('operativa-dialogue'))).toBe(true);
- await expect(composer).toHaveAttribute('placeholder','Escribe o dicta a CEREBRO…');
+ await expect(composer).toHaveAttribute('placeholder','Escribe o dicta…');
  await expect(operative.getByRole('button',{name:'Enviar mensaje'})).toBeDisabled();
  await expect(operative.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(operative.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
