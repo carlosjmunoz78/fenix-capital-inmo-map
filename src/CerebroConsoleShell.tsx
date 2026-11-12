@@ -5,7 +5,7 @@ import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
-import {JarvisConversationBridgeContext,type JarvisConversationDriver} from './jarvisConversationBridge';
+import {JarvisConversationBridgeContext,JarvisTranscriptContext,type JarvisConversationDriver} from './jarvisConversationBridge';
 import {preferredJarvisMaleBrowserVoice} from './jarvisMaleBrowserVoice';
 import './cerebro-console.css';
 
@@ -30,6 +30,7 @@ function renderMessage(text:string){
 export default function CerebroConsoleShell(){
  const location=useLocation(),navigate=useNavigate();
  const jarvisDriverRef=useContext(JarvisConversationBridgeContext);
+ const transcriptSink=useContext(JarvisTranscriptContext);
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const configured=cerebroConsoleLinkEnabled();
  const [ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
@@ -38,6 +39,7 @@ export default function CerebroConsoleShell(){
  const [message,setMessage]=useState('');
  const [sending,setSending]=useState(false);
  const [lines,setLines]=useState<ChatLine[]>([]);
+ useEffect(()=>{transcriptSink?.(lines.slice(-24));},[lines,transcriptSink]);
  const [pendingAction,setPendingAction]=useState<CerebroPendingAction|null>(null);
  const [readContext,setReadContext]=useState<CerebroReadContext|null>(null);
  const [voiceSessionActive,setVoiceSessionActive]=useState(false);
