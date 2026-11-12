@@ -44,7 +44,8 @@ function assertFrozenOrder(body:unknown){
  const expectedKeys=[...Object.keys(expected),'index_artifact'].sort();
  if(JSON.stringify(Object.keys(b).sort())!==JSON.stringify(expectedKeys)||Object.entries(expected).some(([k,v])=>b[k]!==v))throw Error('FROZEN_ORDER_DENIED');
  const a=b.index_artifact as Record<string,unknown>;
- if(!a||typeof a!=='object'||Array.isArray(a)||a.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||a.object_count!==6632||a.page_count!==6446||a.data_source_count!==186||a.id_list_sha256!==INDEX_SHA||a.search_index_complete!==true||a.envelope?.['format']!=='FACT001-NOTION-INDEX-MANIFEST-AES256GCM-V1')throw Error('FROZEN_ARCHIVE_SCOPE_DENIED');
+ const envelope=(a?.envelope??{}) as Record<string,unknown>;
+ if(!a||typeof a!=='object'||Array.isArray(a)||a.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||a.object_count!==6632||a.page_count!==6446||a.data_source_count!==186||a.id_list_sha256!==INDEX_SHA||a.search_index_complete!==true||envelope.format!=='FACT001-NOTION-INDEX-MANIFEST-AES256GCM-V1')throw Error('FROZEN_ARCHIVE_SCOPE_DENIED');
  return b;
 }
 async function getVault(){

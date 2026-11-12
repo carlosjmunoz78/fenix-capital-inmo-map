@@ -1,6 +1,9 @@
 // FACT-001: GitHub OIDC owner-signed read-only Notion backup 100→125.
 // Never persist cleartext, keys, bearer, page IDs or unencrypted Notion API responses.
-import {readFileSync,writeFileSync,mkdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,mkdtempSync,rmSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {deriveNotionNextBatch} from './notion-batch-continuation-guard.mjs';
 const sha=b=>createHash('sha256').update(b).digest('hex');
@@ -11,6 +14,31 @@ const request=JSON.parse(readFileSync(root+'requests/execute-100-125-20261112.v1
 const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',action:'BACKUP_100_125_ONCE',offset:100,max_items:25,index_sha256:v.index_sha256,previous_zip_sha256:v.previous_zip_sha256,previous_drive_file_id:v.previous_drive_file_id,checkpoint_db_id:v.checkpoint_db_id,checkpoint_offset:100,checkpoint_version:4};
 if(JSON.stringify(request)!==JSON.stringify(expected))throw Error('OWNER_ORDER_DENIED');
 const target='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-notion-batch-engine-lab';
+// Original sealed workspace-ID inventory, previously independently verified in private Drive.
+const INVENTORY={artifact_id:13808862248,zip_sha256:'9c2c31831683c89186d76e466ec19de74eaa0eb20d1a2676aea21e56dbe3a702',
+ json_sha256:'582d5bf5eab871c6f86fdb0256bb2bf2785b8f4a284b65f6ba50cb378f2b7957'};
+async function getSealedOriginalIndex(){
+ const token=process.env.GITHUB_TOKEN;if(!token)throw Error('ARCHIVE_ACTIONS_READ_UNAVAILABLE');
+ const r=await fetch('https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/actions/artifacts/'+INVENTORY.artifact_id+'/zip',
+  {headers:{Authorization:'Bearer '+token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28'},redirect:'manual',signal:AbortSignal.timeout(20000)});
+ if(r.status!==302)throw Error('ARCHIVE_DOWNLOAD_API_'+r.status);
+ const location=r.headers.get('location');if(!location)throw Error('ARCHIVE_REDIRECT_MISSING');
+ const u=new URL(location);
+ if(u.protocol!=='https:'||!(/\\.blob\\.core\\.windows\\.net$|\\.actions\\.githubusercontent\\.com$/.test(u.hostname)))throw Error('ARCHIVE_REDIRECT_HOST_DENIED');
+ const rr=await fetch(location,{redirect:'error',signal:AbortSignal.timeout(30000)});
+ if(rr.status!==200)throw Error('ARCHIVE_DOWNLOAD_HTTP_'+rr.status);
+ const data=Buffer.from(await rr.arrayBuffer());if(data.length!==1614735||sha(data)!==INVENTORY.zip_sha256)throw Error('ARCHIVE_ZIP_HASH_DENIED');
+ const tmp=mkdtempSync(join(tmpdir(),'fact001-n-index-'));
+ try{
+  const filename=join(tmp,'original-encrypted-index.zip');writeFileSync(filename,data,{flag:'wx',mode:0o600});
+  const raw=execFileSync('unzip',['-p',filename,'notion-search-id-index-aes256gcm.json'],{maxBuffer:5_000_000});
+  if(sha(raw)!==INVENTORY.json_sha256||raw.length!==2143534)throw Error('ARCHIVE_JSON_HASH_DENIED');
+  const obj=JSON.parse(raw.toString('utf8'));
+  if(obj.status!=='FACT001_NOTION_INDEX_ENCRYPTED'||obj.object_count!==6632||obj.id_list_sha256!==v.index_sha256||obj.search_index_complete!==true)throw Error('ARCHIVE_INVENTORY_SCOPE_DENIED');
+  return obj;
+ }finally{rmSync(tmp,{recursive:true,force:true});}
+}
+
 const dir='fact001-notion-batch-engine-encrypted-100-125';
 mkdirSync(dir,{recursive:true});
 let planOK=false, sealed=0, failed=null, rows=0,blocks=0,pages=0,sources=0;
@@ -32,12 +60,15 @@ async function call(path,token,body){
 }
 const base={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',source:'owner_order',request_id:'FACT001-NOTION-BATCH-ENGINE-100-125-20261112',index_sha256:v.index_sha256,offset:100,max_items:25,previous_zip_sha256:v.previous_zip_sha256,previous_drive_file_id:v.previous_drive_file_id};
 try{
- const jwt=await oidc(),req={...base,operation:'notion.lab.batcher.plan_next'};
- const anon=await call('plan-next',null,req),forged=await call('plan-next','invalid-token',req),prod=await call('plan-next',jwt,{...req,environment:'PROD'});
+ const indexArtifact=await getSealedOriginalIndex();
+ const jwt=await oidc(),req={...base,operation:'notion.lab.batcher.plan_frozen',index_artifact:indexArtifact};
+ const negative={...base,operation:'notion.lab.batcher.plan_frozen'};
+ const anon=await call('plan-frozen',null,negative),forged=await call('plan-frozen','invalid-token',negative),prod=await call('plan-frozen',jwt,{...negative,environment:'PROD'});
  if(anon.status!==401||forged.status!==401||prod.status!==403)throw Error('NEGATIVE_GATE_DENIED');
  console.log('NOTION_100_125_ANON_401=PASS;FORGED_401=PASS;PROD_403=PASS');
- const response=await call('plan-next',jwt,req),p=response.data;
+ const response=await call('plan-frozen',jwt,req),p=response.data;
  if(response.status!==200||p.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||p.offset!==100||p.next_offset!==125||p.items!==25||p.batch_ref!==v.batch_ref||p.index_sha256!==v.index_sha256||p.verify_roundtrip!==true||p.provider_writes!==0||p.envelope?.format!=='FACT001-NOTION-CONTENT-BATCH-PLAN-AES256GCM-V1')throw Error('PLAN_GATE_DENIED_HTTP_'+response.status+'_'+String(p.code||'UNSPECIFIED').slice(0,65).replace(/[^A-Z0-9_]/g,''));
+ if(p.source_archived_index!==true||p.source_index_search_calls!==0)throw Error('ARCHIVE_PLAN_PROVENANCE_DENIED');
  planOK=true;pages=p.pages;sources=p.data_sources;
  writeFileSync(dir+'/plan.aes256gcm.json',JSON.stringify(p),{flag:'wx',mode:0o600});
  for(let i=0;i<25;i++){
@@ -49,7 +80,7 @@ try{
  }
 }catch(e){
  const raw=e instanceof Error?e.message:'UNKNOWN';
- failed=/^(OIDC_[A-Z0-9_]+|NEGATIVE_GATE_DENIED|PLAN_GATE_DENIED_HTTP_\d+_[A-Z0-9_]+|ITEM_GATE_DENIED_[A-Z0-9_]+)$/.test(raw)?raw:'REQUEST_OR_RUNTIME_BLOCKED';
+ failed=/^(OIDC_[A-Z0-9_]+|NEGATIVE_GATE_DENIED|PLAN_GATE_DENIED_HTTP_\d+_[A-Z0-9_]+|ARCHIVE_[A-Z0-9_]+|ITEM_GATE_DENIED_[A-Z0-9_]+)$/.test(raw)?raw:'REQUEST_OR_RUNTIME_BLOCKED';
  console.warn('NOTION_100_125_RESULT='+failed);
 }finally{
  writeFileSync(dir+'/proof.json',JSON.stringify({scope:'fenix-capital/FACT-001/LAB/1.0.0',index_sha256:v.index_sha256,offset:100,next_offset:125,expected:25,encrypted_objects:sealed,plan_verified:planOK,pages_planned:pages,sources_planned:sources,rows,blocks,failed,objects:entries,provider_writes:0,checkpoint_committed:false,attachments_backed_up:false,comments_backed_up:false},null,2),{flag:'wx',mode:0o600});
