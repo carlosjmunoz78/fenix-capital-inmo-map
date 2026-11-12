@@ -57,3 +57,19 @@ test('owner identity gateway and no arbitrary data grants are preserved',()=>{
  assert.match(src,/direct_model_access: false/);
  assert.match(src,/const owner=await authorizedOwner\(req\)/);
 });
+
+
+test('owner unified access is acknowledged as scope, not asserted as deployed',()=>{
+ const query='¿Desde todas las interfaces puedo ver toda la información y hacer de todo?';
+ const r=answerCerebroNaturalQuery(query);
+ assert.equal(r?.intent,'owner_unified_access_scope');
+ assert.equal(r?.status,'NOT_APPLIED');
+ assert.equal(r?.executed,false);
+ assert.match(r.message,/cualquiera de las interfaces/);
+ assert.match(r.message,/todavía faltan conexiones/);
+ assert.doesNotMatch(r.message,/ya puedo acceder a todo|ya he conectado todo/);
+ const useful=answerCerebroNaturalQuery('¿Qué puedes hacer por mí ahora mismo que sea útil para Fénix Capital?');
+ assert.equal(useful?.intent,'owner_useful_actions');
+ assert.match(useful.message,/ejemplos, no el límite de CEREBRO/);
+ assert.match(useful.message,/No he ejecutado/);
+});
