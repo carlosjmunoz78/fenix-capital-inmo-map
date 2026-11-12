@@ -1,5 +1,4 @@
 import {useEffect,useRef} from 'react';
-import {JarvisConversationBridgeContext,type JarvisConversationDriver} from './jarvisConversationBridge';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import JarvisOperativaComposerPortal from './JarvisOperativaComposerPortal';
 import './jarvis-work-premium-final.css';
@@ -42,7 +41,6 @@ function rewriteVisibleText(root:HTMLElement){
 
 export default function JarvisEmbeddedConsole({workspaceKey}:Props){
   const rootRef=useRef<HTMLDivElement>(null);
-  const driverRef=useRef<JarvisConversationDriver|null>(null);
   useEffect(()=>{
     const root=rootRef.current;
     if(!root)return;
@@ -54,5 +52,5 @@ export default function JarvisEmbeddedConsole({workspaceKey}:Props){
     observer.observe(root,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['placeholder','title','aria-label']});
     return()=>{observer.disconnect();if(scheduled)window.cancelAnimationFrame(scheduled)};
   },[]);
-  return <JarvisConversationBridgeContext.Provider value={driverRef}><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell key={workspaceKey||'jarvis-default'}/></div><JarvisOperativaComposerPortal/></JarvisConversationBridgeContext.Provider>;
+  return <><div ref={rootRef} className="jarvis-console-presentation"><CerebroConsoleShell key={workspaceKey||'jarvis-default'}/></div><JarvisOperativaComposerPortal/></>;
 }
