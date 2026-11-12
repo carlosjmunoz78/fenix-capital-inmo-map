@@ -8,3 +8,28 @@
   bottom:auto;
   z-index:2;
 }
+
+/* On phone widths preserve ALL five interface destinations, never a 510px scroll rail. */
+@media (max-width:660px){
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar{
+  overflow-x:visible;
+  justify-content:center;
+ }
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar .cerebro-interface-nav{
+  min-width:0;
+  width:100%;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1px;
+  margin:0;
+ }
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar .cerebro-interface-nav button{
+  min-width:0;
+  width:100%;
+  padding:0 1px;
+  font-size:9px;
+  letter-spacing:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+ }
+}
