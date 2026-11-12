@@ -38,7 +38,7 @@ test('Actual previously existing data: authenticated Fénix context and JARVIS p
  assert.equal(out.projects[0].project_id,"PRJ-SUPERAGENT-001");
  assert.equal(out.projects[0].project_status,"PARCIAL");
  assert.deepEqual(out.engines,[]);
- assert.equal(out.factory.integration_status,"GITOPS_ADAPTER_NOT_YET_CONNECTED");
+ assert.equal(out.factory.integration_status,"ADAPTER_AVAILABLE_E2E_PENDING");
  assert.equal(out.live_writes,false);
  assert.equal(out.prod_execution_enabled,false);
  assert.ok(db.calls.every(x=>["FROM","SELECT","EQ","LIMIT"].includes(x.operation)));
