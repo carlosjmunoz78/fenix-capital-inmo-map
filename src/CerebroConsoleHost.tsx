@@ -3,7 +3,8 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
 import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
-import CerebroOperativeConsole from './CerebroOperativeConsole';
+import CerebroOperativeConsole from './CerebroOperativeLiveConsole';
+import CerebroOperativeLabConsole from './CerebroOperativeConsole';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
@@ -56,7 +57,7 @@ export default function CerebroConsoleHost(){
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{visualPreview?<CerebroOperativeConsole visualPreview/>:<CerebroOperativeConsole/>}</div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{visualPreview?<CerebroOperativeLabConsole visualPreview/>:<CerebroOperativeConsole/>}</div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
