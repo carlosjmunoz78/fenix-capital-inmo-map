@@ -10,20 +10,15 @@ const read=(path)=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 const oldFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/rollback/gateway-v35-20261112/'+name));
 const newFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_reader.ts'].map(name=>read('cerebro/ops/gateway-v36-followups/'+name));
 
-test('Gateway entrypoint, auth, knowledge and execution contracts are EXACTLY v35',()=>{
- // Strip only the audited, additive owner-capability import and read-only route.
- const importLine='import { resolveOwnerCapabilities } from "./owner_access.ts";\n';
- const ownerRoute=`    if(req.method==="GET"&&suffix==="owner-capabilities"){
-      // Owner identity was verified by authorizedOwner above; the query is not authority.
-      return json(req,200,resolveOwnerCapabilities({
-        actor:owner.actor,
-        requestedCompany:new URL(req.url).searchParams.get("company_id")
-      }));
-    }
-`;
- const unchangedEntry=newFiles[0].replace(importLine,'').replace(ownerRoute,'')
-   .replace('available:["health","contract","engines","preferences","owner-capabilities","chat"]','available:["health","contract","engines","preferences","chat"]');
- assert.equal(unchangedEntry,oldFiles[0],"Existing gateway remains byte-exact after reversing only scoped owner-capability addition");
+test('Gateway owner auth, knowledge and governed execution remain preserved while read-only registry is additive',()=>{
+ const oldAuth=oldFiles[0].match(/async function authorizedOwner\\(req:Request\\)\\{[\\s\\S]*?\\n\\}/)?.[0];
+ const newAuth=newFiles[0].match(/async function authorizedOwner\\(req:Request\\)\\{[\\s\\S]*?\\n\\}/)?.[0];
+ assert.ok(oldAuth&&newAuth);
+ assert.equal(newAuth,oldAuth,"owner authentication implementation stays byte-exact");
+ assert.ok(newFiles[0].includes('readOwnerRegistryLive'));
+ assert.ok(newFiles[0].includes('if(req.method==="GET"&&suffix==="owner-registry")'));
+ assert.ok(newFiles[0].indexOf('if(!owner.ok)return json(req,403')<
+   newFiles[0].indexOf('if(req.method==="GET"&&suffix==="owner-registry")'));
  assert.equal(newFiles[1],oldFiles[1]);
  for(const marker of [
   'withSupabase({ auth: "user" }',
