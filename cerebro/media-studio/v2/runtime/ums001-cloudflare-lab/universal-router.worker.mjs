@@ -9,6 +9,13 @@ const status=(state,code,req)=>({state,code,at:new Date().toISOString(),
  origin_engine_id:req.origin_engine_id,consumer_engine_id:req.consumer_engine_id,
  item_id:req.item_id,additional_cost_eur:0,automatic_publication:false,
  image_generated:false,video_generated:false,delivery_authorized:false});
+async function sendSocImageReply(env,row,result){
+ if(row.origin_engine_id!=='SOC-001'||!env.SOCIAL_REPLY_QUEUE)return;
+ const bridge=await env.IMAGE_ASSET_KV.get('meta/ums001-social-creative-bridge/v1/events/'+row.request_id+'/'+row.item_id,{type:'json'});
+ if(!bridge||bridge.state!=='QUEUED_FOR_UNIVERSAL_ROUTER'||bridge.origin_engine_id!=='SOC-001'||!['INSTAGRAM','FACEBOOK'].includes(bridge.platform_id))throw Error('UMS001_SOC_RETURN_NOT_TRUSTED');
+ if(result.state!=='PRIVATE_READY'||result.company_id!==row.company_id||result.request_id!==row.request_id||result.item_id!==row.item_id||!/^[a-f0-9]{64}$/.test(result.asset_sha256||'')||result.publish_authorized!==false)throw Error('UMS001_SOC_RETURN_RECEIPT_INVALID');
+ await env.SOCIAL_REPLY_QUEUE.send({state:'PRIVATE_READY',company_id:'fenix',origin_engine_id:'SOC-001',environment:'LAB',request_id:row.request_id,item_id:row.item_id,platform_id:bridge.platform_id,asset_sha256:result.asset_sha256,private_artifact_ref:result.private_artifact_ref,publish_authorized:false});
+}
 export class MediaJobLedger extends DurableObject {
  constructor(ctx,env){super(ctx,env);this.ctx=ctx;this.env=env;
    ctx.storage.sql.exec("CREATE TABLE IF NOT EXISTS jobs (job_key TEXT PRIMARY KEY, request_sha TEXT NOT NULL, company_id TEXT NOT NULL, origin_engine_id TEXT NOT NULL, request_id TEXT NOT NULL, item_id TEXT NOT NULL, state TEXT NOT NULL, code TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)");
@@ -23,10 +30,10 @@ export class MediaJobLedger extends DurableObject {
   return {job_key:key,state:row.state,code:row.code,duplicate:row.created_at!==now};
  }
  async drain(){
-  const items=[...this.ctx.storage.sql.exec("SELECT * FROM jobs WHERE state='ACCEPTED' OR (state='HELD' AND origin_engine_id='CHATGPT-001') LIMIT 20")];
+  const items=[...this.ctx.storage.sql.exec("SELECT * FROM jobs WHERE state='ACCEPTED' OR (state='HELD' AND origin_engine_id IN ('CHATGPT-001','SOC-001')) LIMIT 20")];
   for(const row of items){
     const now=new Date().toISOString(),origin=row.origin_engine_id;
-    const eligible=this.env.IMAGE_BRIDGE_ENABLED==='true'&&origin==='CHATGPT-001';
+    const eligible=this.env.IMAGE_BRIDGE_ENABLED==='true'&&['CHATGPT-001','SOC-001'].includes(origin);
     const dispatch=eligible?await this.env.AUDIT_KV.get('meta/ums001-universal-image-dispatch/v1/'+row.request_id+'/'+row.item_id,{type:'json'}):null;
     const result=dispatch&&this.env.IMAGE_ASSET_KV?
       await this.env.IMAGE_ASSET_KV.get('meta/ums001-ai-image-factory/v1/receipts/'+origin+'/'+row.request_id+'/'+row.item_id,{type:'json'}):null;
@@ -35,6 +42,7 @@ export class MediaJobLedger extends DurableObject {
       if(result?.state==='PRIVATE_READY'&&result.request_id===row.request_id&&result.item_id===row.item_id&&
          result.company_id===row.company_id&&/^[0-9a-f]{64}$/.test(result.asset_sha256||'')&&
          result.publish_authorized===false){
+        await sendSocImageReply(this.env,row,result);
         this.ctx.storage.sql.exec("UPDATE jobs SET state='PRIVATE_READY',code='TECHNICAL_QA_PASS',updated_at=? WHERE job_key=? AND state='HELD'",now,row.job_key);
         await this.env.AUDIT_KV.put(PREFIX+origin+'/'+row.request_id+'/'+row.item_id,
           JSON.stringify({state:'PRIVATE_READY',code:'TECHNICAL_QA_PASS',at:now,company_id:row.company_id,
@@ -55,6 +63,7 @@ export class MediaJobLedger extends DurableObject {
        /^[0-9a-f]{64}$/.test(result.asset_sha256||'')&&
        result.private_delivery_available===true&&result.publish_authorized===false){
       state='PRIVATE_READY';code='TECHNICAL_QA_PASS';
+      await sendSocImageReply(this.env,row,result);
     }else if(result?.state==='HELD'){code=String(result.code||'FACTORY_HELD').slice(0,90)}
     else if(eligible&&dispatch){code='IMAGE_BRIDGE_TIMEOUT_OR_NO_RECEIPT'}
     this.ctx.storage.sql.exec("UPDATE jobs SET state=?,code=?,updated_at=? WHERE job_key=? AND state='ACCEPTED'",
@@ -122,16 +131,18 @@ export default {
    }
  },
  async queue(batch,env){
-   if(batch.queue!=='cerebro-ums001-universal-chatgpt-intake-lab-eu')
-     throw Error('UMS001_UNEXPECTED_INTAKE_QUEUE');
+   const chatSource=batch.queue==='cerebro-ums001-universal-chatgpt-intake-lab-eu';
+   const socialSource=batch.queue==='cerebro-ums001-universal-social-intake-lab-eu';
+   if(!chatSource&&!socialSource)throw Error('UMS001_UNEXPECTED_INTAKE_QUEUE');
    for(const message of batch.messages){
      let order=message.body;
      try{
-       if(env.CHATGPT_QUEUE_ENABLED!=='true')throw Error('UMS001_CHATGPT_INTAKE_OFF');
+       if(chatSource&&env.CHATGPT_QUEUE_ENABLED!=='true')throw Error('UMS001_CHATGPT_INTAKE_OFF');
+       if(socialSource&&env.SOCIAL_QUEUE_ENABLED!=='true')throw Error('UMS001_SOCIAL_INTAKE_OFF');
        validate(order);
-       if(order.origin_engine_id!=='CHATGPT-001'||order.trigger!=='CHATGPT')
-         throw Error('UMS001_CHATGPT_ACCOUNT_QUEUE_SCOPE');
-       const receipt=await reserve(env,order,'CLOUDFLARE_ACCOUNT_API_MANAGED_CHATGPT_QUEUE');
+       if(chatSource&&(order.origin_engine_id!=='CHATGPT-001'||order.trigger!=='CHATGPT'))throw Error('UMS001_CHATGPT_ACCOUNT_QUEUE_SCOPE');
+       if(socialSource&&(order.origin_engine_id!=='SOC-001'||order.trigger!=='ENGINE_EVENT'||order.consumer_engine_id!=='SOC-001'||!['FACEBOOK','INSTAGRAM'].includes(order.channel_id)))throw Error('UMS001_SOCIAL_QUEUE_SCOPE');
+       const receipt=await reserve(env,order,(socialSource?'PRIVATE_SOC001_LAB_BRIDGE':'CLOUDFLARE_ACCOUNT_API_MANAGED_CHATGPT_QUEUE'));
        // Additive LAB-only image bridge. Preserve existing ledger and HMAC RPC flag.
        if(env.IMAGE_BRIDGE_ENABLED==='true'&&order.asset_kind==='IMAGE'&&
           order.rights_profile==='SYNTHETIC_ORIGINAL'&&order.format?.output_mime==='image/jpeg'&&

@@ -40,7 +40,10 @@ async function run(r,env){
  if(!brief||brief.company_id!=='fenix'||brief.environment!=='LAB'||brief.origin_engine_id!==r.origin_engine_id||brief.request_id!==r.request_id||brief.rights_profile!=='SYNTHETIC_ORIGINAL'||typeof brief.prompt!=='string'||brief.prompt.length<25||brief.prompt.length>700||brief.publish_requested!==false)err('BRIEF_MISSING_OR_DENIED');
  const day=new Date().toISOString().slice(0,10),quotaKey=ROOT+'quota/'+day;
  const spent=await env.ASSET_KV.get(quotaKey,{type:'json'})||{count:0};
- if(spent.count>=3){await env.ASSET_KV.put(key,JSON.stringify({state:'HELD',code:'DAILY_LIMIT_3',at:new Date().toISOString(),provider_calls:0}));return {state:'HELD',code:'DAILY_LIMIT_3'};}
+ const perImageNeurons=43.20; // Cloudflare FLUX.1 schnell: 4.80 per 512 tile + 9.60 x 4 steps (2026-10).
+ const estimatedUsed=Number.isFinite(spent.estimated_neurons)?spent.estimated_neurons:Number(spent.count||0)*perImageNeurons;
+ const budget=8000; // conservative buffer below shared Free allowance of 10,000 neurons/day.
+ if(estimatedUsed+perImageNeurons>budget){await env.ASSET_KV.put(key,JSON.stringify({state:'HELD',code:'ESTIMATED_FREE_NEURON_BUDGET_EXHAUSTED',at:new Date().toISOString(),provider_calls:0}));return {state:'HELD',code:'ESTIMATED_FREE_NEURON_BUDGET_EXHAUSTED'};}
  await env.ASSET_KV.put(key,JSON.stringify({state:'GENERATING',at:new Date().toISOString(),provider_calls:0}));
  // No retries or second provider. Workers Free has its own daily hard limit.
  let output;
@@ -55,7 +58,15 @@ async function run(r,env){
  if(!persisted||await digest(persisted)!==sha)err('STORAGE_INTEGRITY');
  const receipt={state:'PRIVATE_READY',code:'TECHNICAL_QA_PASS',company_id:'fenix',engine_id:'UMS-001',environment:'LAB',origin_engine_id:r.origin_engine_id,consumer_engine_id:r.consumer_engine_id,request_id:r.request_id,item_id:r.item_id,mime:'image/jpeg',bytes:bytes.length,asset_sha256:sha,private_artifact_ref:file,model:MODEL,provider_calls:1,technical_qa:'PASS',visual_qa:'NOT_AUTOMATICALLY_CERTIFIED',brand_qa:'NOT_AUTOMATICALLY_CERTIFIED',copyright_policy:'SYNTHETIC_ORIGINAL_DRAFT',private_delivery_available:true,commercial_delivery_authorized:false,publish_authorized:false,additional_cost_eur:'NOT_VERIFIED',at:new Date().toISOString()};
  await env.ASSET_KV.put(key,JSON.stringify(receipt));
- await env.ASSET_KV.put(quotaKey,JSON.stringify({count:spent.count+1,day,limit:3,last_request_id:r.request_id}));
+ // FACTORY_SOCIAL_CALLBACK: return validated LAB image to private Social, no public delivery.
+ if(r.origin_engine_id==='SOC-001'&&env.SOCIAL_REPLY_QUEUE){
+   const social=await env.ASSET_KV.get('meta/ums001-social-creative-bridge/v1/events/'+r.request_id+'/'+r.item_id,{type:'json'});
+   if(social?.state==='QUEUED_FOR_UNIVERSAL_ROUTER'&&social.origin_engine_id==='SOC-001'&&['INSTAGRAM','FACEBOOK'].includes(social.platform_id)){
+     await env.SOCIAL_REPLY_QUEUE.send({state:'PRIVATE_READY',company_id:'fenix',origin_engine_id:'SOC-001',environment:'LAB',request_id:r.request_id,item_id:r.item_id,platform_id:social.platform_id,asset_sha256:sha,private_artifact_ref:file,publish_authorized:false});
+     await env.ASSET_KV.put(ROOT+'callback/'+r.request_id+'/'+r.item_id,JSON.stringify({state:'DELIVERY_QUEUED',at:new Date().toISOString(),origin:'SOC-001',no_publication:true}));
+   }
+ }
+ await env.ASSET_KV.put(quotaKey,JSON.stringify({count:Number(spent.count||0)+1,estimated_neurons:estimatedUsed+perImageNeurons,free_neuron_budget:budget,neurons_per_image:perImageNeurons,day,last_request_id:r.request_id}));
  return {state:receipt.state,sha256:sha};
 }
 export default {
