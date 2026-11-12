@@ -105,14 +105,14 @@ jobs:
           set -euo pipefail
           test -n "$VERCEL_TOKEN"
           test "$VERCEL_PROJECT_ID" = "prj_4ElVl8e2KzrHS7r5yvBGBban1DXV"
-          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects
+          vercel pull --yes --environment=production --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}"
       - name: Stage immutable PRODUCTION artifact without assigning public domains
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         shell: bash
         run: |
           set -euo pipefail
-          url="$(vercel deploy --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects)"
+          url="$(vercel deploy --prod --skip-domain --yes --scope=carlosjmunozcabeza-2582s-projects --token "${VERCEL_TOKEN}")"
           case "$url" in https://*.vercel.app) ;; *) echo "Invalid staging URL" >&2; exit 2;; esac
           printf 'STAGED_OPERATIVA_VERCEL_URL=%s\n' "$url" >> "$GITHUB_STEP_SUMMARY"
           echo "STAGED_OPERATIVA_VERCEL_URL=$url"
