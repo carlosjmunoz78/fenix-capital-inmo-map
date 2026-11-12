@@ -4,6 +4,7 @@ on:
     branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
     paths:
       - cerebro/connectors/universal/supabase/management-canary-lab/requests/execute-once.v1.json
+      - cerebro/connectors/universal/supabase/management-canary-lab/requests/cleanup-once.v1.json
 permissions:
   contents: read
   id-token: write
@@ -20,3 +21,13 @@ jobs:
         with: {persist-credentials: false}
       - name: Owner-signed CEREBRO service only; no PAT on runner
         run: node cerebro/connectors/universal/supabase/management-canary-lab/run-once.mjs
+
+  scoped-cleanup-only:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_SUPABASE_MGMT_CLEANUP_ONCE_20261112')
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Signed deletion of exact verified owned synthetic canary ONLY
+        run: node cerebro/connectors/universal/supabase/management-canary-lab/run-cleanup-once.mjs
