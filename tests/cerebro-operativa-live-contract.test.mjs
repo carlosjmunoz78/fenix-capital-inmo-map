@@ -13,17 +13,17 @@ test('Activity backend uses canonical GitHub repo without changing owner auth',(
  assert.doesNotMatch(activity,/const REPOSITORY="fenix-cerebro\//);
 });
 
-test('Operativa sends through the existing authenticated React conversation',()=>{
+test('Operativa talks to the existing owner-only Gateway without a second JARVIS core',()=>{
  const operative=source('src/CerebroOperativeConsole.tsx');
- const shell=source('src/CerebroConsoleShell.tsx');
- const bridge=source('src/jarvisConversationBridge.ts');
- assert.match(operative,/driverRef\.current\.sendText\(clean\)/);
- assert.match(operative,/JarvisConversationBridgeContext\.Provider/);
- assert.match(operative,/JarvisTranscriptContext\.Provider/);
- assert.match(shell,/transcriptSink\?\.\(lines\.slice\(-24\)\)/);
- assert.match(bridge,/JarvisTranscriptContext/);
- assert.doesNotMatch(operative,/requestSubmit\(/);
- assert.doesNotMatch(operative,/setReactTextareaValue\(/);
+ const hook=source('src/useCerebroOperativaChat.ts');
+ assert.match(operative,/useCerebroOperativaChat\(\)/);
+ assert.match(operative,/chat\.sendText\(clean\)/);
+ assert.match(operative,/transcript\.map\(/);
+ assert.match(hook,/postCerebroConsoleChat\(clean,actionRef\.current,readContextRef\.current/);
+ assert.match(hook,/fetchCerebroConsoleHealth\(\)/);
+ assert.match(hook,/authenticated_transport===true/);
+ assert.match(hook,/direct_model_access===false/);
+ assert.doesNotMatch(operative,/requestSubmit\(|setReactTextareaValue\(|CerebroConsoleShell/);
 });
 
 test('Tenant scope remains fail-closed until authorized by server',()=>{
@@ -40,10 +40,11 @@ test('Failing activity is not advertised as healthy or zero work',()=>{
  assert.match(operative,/No se puede comprobar el estado de trabajos/);
 });
 
-test('Generic browser voice remains separate from future canonical JARVIS',()=>{
- const shell=source('src/CerebroConsoleShell.tsx');
+test('Generic browser voice stays isolated from JARVIS and ANA',()=>{
  const operative=source('src/CerebroOperativeConsole.tsx');
- assert.match(shell,/window\.speechSynthesis\.speak\(utterance\)/);
+ const hook=source('src/useCerebroOperativaChat.ts');
+ assert.match(hook,/window\.speechSynthesis\.speak\(utterance\)/);
+ assert.match(hook,/new SpeechSynthesisUtterance/);
  assert.match(operative,/createVoiceRecognition\(/);
- assert.doesNotMatch(operative,/VOICE-001.*synthesize|voiceover_generate/);
+ assert.doesNotMatch(hook,/VOICE-001|voiceover_generate|jarvisVoiceSurfacePolicy/);
 });
