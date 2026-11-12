@@ -36,7 +36,7 @@ export default function CerebroConsoleHost(){
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
- const changeView=(next:CerebroPrimaryView)=>{setView(next);navigate({pathname:'/cerebro',search:`?section=${SECTION_BY_VIEW[next]}`},{replace:true})};
+ const changeView=(next:CerebroPrimaryView)=>{setView(next);const preview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';navigate({pathname:'/cerebro',search:`?section=${SECTION_BY_VIEW[next]}${preview?'&visual_lab=cockpit-v3':''}`},{replace:true})};
 
  useEffect(()=>{if(!isCerebroPath)return;const next=initialView();setView(current=>current===next?current:next)},[isCerebroPath,location.search]);
  useEffect(()=>{if(!isCerebroPath)return;const ensure=()=>{if(document.documentElement.dataset.cerebroConsole!=='1')document.documentElement.dataset.cerebroConsole='1'};ensure();const observer=new MutationObserver(ensure);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-cerebro-console']});return()=>{observer.disconnect();delete document.documentElement.dataset.cerebroConsole}},[isCerebroPath]);
