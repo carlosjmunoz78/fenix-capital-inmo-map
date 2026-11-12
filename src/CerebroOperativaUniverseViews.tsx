@@ -32,7 +32,7 @@ export default function CerebroOperativaUniverseViews({
  const sourceReady=registry?.status==='OK';
  const factoryReady=factory?.status==='OK';
  const observed=scope==='fenix'||scope==='all'?observedEngines:[];
- const known=new Set([...KNOWN,...companies.map(c=>c.company_id)]);
+ const known=new Set(scope==='all'?[...KNOWN,...companies.map(c=>c.company_id)]:[scope]);
  const status=stateMessage(result);
  return <div className="op3-universe">
   <div className="op3-source-identity">
@@ -69,7 +69,7 @@ export default function CerebroOperativaUniverseViews({
      <Layers3 size={20}/>
      <div><strong>{p.project_id}</strong><small>{label(p.company_id)} · {p.environment} · {p.access_status==='PROJECT_RECORD_PRESENT_INTEGRATION_UNVERIFIED'?'Integración operativa no acreditada':'Registro visible'}</small></div>
      <span className="is-amber">{p.project_status||'Sin estado'}</span>
-     <button type="button" onClick={()=>onNavigate('trabajos')}>Ver trabajos <ChevronRight size={16}/></button>
+     <button type="button" onClick={()=>onNavigate('trabajos')}>Actividad visible <ChevronRight size={16}/></button>
     </article>):<Empty text="Sin proyectos registrados en esta fuente para el contexto autorizado; pueden existir proyectos en otros sistemas."/ >}</>:
     <Empty text="No se ha podido verificar el registro de proyectos para este contexto."/ >}
    <p className="op3-source-note">Fuente: jarvis_project_overlay_v1. No representa el inventario de todos los proyectos de todas las empresas.</p>
