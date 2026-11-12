@@ -946,6 +946,8 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
+   const liveActivityAnswer=await answerWithVerifiedActivity(req,message);
+   if(liveActivityAnswer)return liveActivityAnswer;
    const naturalAnswer=answerCerebroNaturalQuery(message,conversationContext);
    if(naturalAnswer)return naturalAnswer;
   if (/^(hola|buenas|buenos dias|buenas tardes|buenas noches|hey|ey)$/.test(text)) {
