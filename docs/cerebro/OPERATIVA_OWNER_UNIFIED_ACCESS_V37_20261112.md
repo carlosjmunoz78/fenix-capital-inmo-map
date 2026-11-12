@@ -67,6 +67,8 @@ Este es **contrato objetivo**, no declaración de que v36 ya emita ese JSON.
 Gateway PROD v36 no se ha modificado por esta rama; respaldos exactos v35 constan en `cerebro/rollback/gateway-v35-20261112`. Para futuras implementaciones cada adaptador deberá tener rollback propio, baseline y comparar OLD vs NEW.
 
 ## Estado y next_block
-HECHO: rama de seguimiento v37 + parche para simplificar respuesta; contrato owner-unified definido.
-POR VERIFICAR: QA GitHub, E2E navegador, deploy LAB y PR. 
-NEXT_BLOCK: CI v37 -> E2E en gateway LAB (con backend owner-only) -> inventario de conectividad real -> resolver permisos owner -> promoción controlada.
+HECHO: PR #56 DRAFT, parche de simplificación v37, contrato Owner Unified Access y prueba aislada sobre código exacto GitHub: **8/8 PASS**.
+HECHO: LAB existente `cerebro-console-gateway-v36-followups-lab` actualizado a **versión 4 ACTIVE** con los cuatro archivos v37 exactos (comparación física GitHub vs Supabase: **4/4**); ninguna función adicional creada.
+HECHO: PROD `cerebro-console-gateway-v0` sigue en **v36 ACTIVE**, y mantiene exactamente los archivos v36. **No** se ha promocionado v37 a PROD.
+POR VERIFICAR: GitHub Actions v37 (no hay resultado confirmado), HTTP E2E owner-only y navegador Opera; el intento HTTP directo desde el canal de consulta no fue accesible. Persistencia tras recarga pendiente.
+NEXT_BLOCK: CI/HTTP E2E v37 LAB -> verificar memoria y UI reales -> inventario de conectividad (sin repetir auditorías terminadas) -> resolver owner multiempresa -> promoción solo con gates.
