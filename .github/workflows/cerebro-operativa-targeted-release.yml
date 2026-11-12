@@ -114,6 +114,7 @@ jobs:
           JS
           printf '%s\n' '{"buildCommand":"npm run build","outputDirectory":"dist","cleanUrls":false}' > dist-live/vercel.json
       - name: Atomic publish with precise gh-pages lease
+        id: publish
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -133,8 +134,43 @@ jobs:
           git add -A
           git commit -qm "deploy: targeted CEREBRO Operativa ${GITHUB_SHA}"
           git remote add origin "$remote"
+          git fetch --no-tags origin refs/heads/gh-pages:refs/remotes/origin/prior-gh-pages
+          test "$(git rev-parse refs/remotes/origin/prior-gh-pages)" = "$EXPECTED_PAGES_SHA"
           git push --force-with-lease="refs/heads/gh-pages:${EXPECTED_PAGES_SHA}" origin HEAD:refs/heads/gh-pages
           new="$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)"
           test -n "$new"
           test "$new" != "$EXPECTED_PAGES_SHA"
+          echo "pages_sha=${new}" >> "$GITHUB_OUTPUT"
           echo "Published exact source commit ${GITHUB_SHA}; prior pages snapshot ${EXPECTED_PAGES_SHA}; new pages commit ${new}"
+      - name: Verify public site and automatically restore prior Pages snapshot on failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISHED_PAGES_SHA: ${{ steps.publish.outputs.pages_sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd /tmp/operativa-targeted-static
+          site='https://app.fenixcapital.es'
+          ok=false
+          for attempt in $(seq 1 30); do
+            live="$(curl --fail --silent --show-error --location --max-time 20 --header 'Cache-Control: no-cache' "${site}/PROD_SOURCE_SHA.txt?source=${GITHUB_SHA}&attempt=${attempt}" 2>/dev/null | tr -d '\r\n[:space:]' || true)"
+            if [ "$live" = "$GITHUB_SHA" ]; then
+              status="$(curl --silent --output /dev/null --location --max-time 20 --write-out '%{http_code}' "${site}/cerebro?section=operativa" 2>/dev/null || true)"
+              if [ "$status" = '200' ]; then ok=true; break; fi
+            fi
+            sleep 10
+          done
+          if [ "$ok" = 'true' ]; then
+            echo "LIVE_OK: exact targeted release SHA and operative SPA HTTP 200"
+            exit 0
+          fi
+          echo 'LIVE_CHECK_FAILED: attempting safe rollback to the captured prior gh-pages snapshot' >&2
+          remote="$(git remote get-url origin)"
+          current="$(git ls-remote "$remote" refs/heads/gh-pages | cut -f1)"
+          if [ -n "$current" ] && [ "$current" = "$PUBLISHED_PAGES_SHA" ] && git show-ref --verify --quiet refs/remotes/origin/prior-gh-pages; then
+            git push --force-with-lease="refs/heads/gh-pages:${current}" origin refs/remotes/origin/prior-gh-pages:refs/heads/gh-pages
+            echo 'ROLLBACK_PAGES_RESTORED'
+          else
+            echo 'ROLLBACK_CONFLICT: remote moved, no overwrite attempted' >&2
+          fi
+          exit 1
