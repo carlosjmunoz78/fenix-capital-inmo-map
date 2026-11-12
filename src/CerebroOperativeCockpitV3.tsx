@@ -5,6 +5,8 @@ import {
  Search,Send,ShieldCheck,Square,Workflow
 } from 'lucide-react';
 import type {CerebroActivityRun} from './cerebroActivityApi';
+import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
+import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
@@ -18,6 +20,7 @@ type Props={
  composerRef:Ref<HTMLTextAreaElement>;source:FeedStatus;observedAt:string;
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
+ ownerUniverse:OwnerUniverseResult;
  children:ReactNode;
 };
 const NAV:readonly [View,string,typeof Building2][]=[
@@ -61,7 +64,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
@@ -194,35 +197,19 @@ export default function CerebroOperativeCockpitV3({
      resumen:'Resumen'
     } as Record<View,string>)[view]}</h2>
     <p className="op3-detail-lede">{({
-     entidades:'El selector filtra el contexto. No concede acceso a otras empresas.',
-     proyectos:'Los proyectos se mostrarán al conectar una fuente autorizada.',
-     motores:'Solo motores identificados en las ejecuciones de GitHub visibles.',
+     entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
+     proyectos:'Proyectos registrados y comprobados en el Gateway de laboratorio; fuente parcial, no inventario global.',
+     motores:'Registros, catálogo de diseño FACT-001 y ejecuciones observadas, sin equipararlos.',
      trabajos:'Actividad publicada por la fuente autenticada, con acceso a su evidencia.',
      evidencias:'Referencias originales de ejecución; no se generan informes ficticios.',
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
      resumen:''
     } as Record<View,string>)[view]}</p>
-    {view==='entidades'?<div className="op3-data-lines">
-      {(['fenix','aion','captacasa'] as const).map(c=><div key={c} className="op3-data-row">
-       <Building2 size={18}/><div><strong>{NAMES[c]}</strong>
-        <small>{c==='fenix'?'Origen actual de los trabajos GitHub visibles':
-         'Vinculación y permisos no verificados en esta fuente'}</small></div>
-       <span className={c==='fenix'?'op3-small-blue':'op3-small-muted'}>{c==='fenix'?'Origen conocido':'Por verificar'}</span>
-       <button type="button" onClick={()=>{onCompanyChange(c);selectPanel('trabajos')}}>
-        Consultar <ChevronRight size={15}/></button>
-      </div>)}
-      </div>:null}
-    {view==='proyectos'?<div className="op3-empty-proof"><Layers3 size={30}/>
-     <strong>Sin inventario de proyectos verificado en esta interfaz</strong>
-     <p>El Gateway de laboratorio dispone de un adaptador de proyectos; la App aún no lo consume. Se conserva el acceso actual a trabajos.</p>
-     <button type="button" onClick={()=>selectPanel('trabajos')}>Explorar trabajos relacionados <ChevronRight size={15}/></button>
-    </div>:null}
-    {view==='motores'?<div className="op3-data-lines">
-     {modules.length?modules.map(([engine_id,metric])=><div className="op3-data-row" key={engine_id}>
-      <Cpu size={19}/><div><strong>{engine_id}</strong><small>{metric.count} ejecuciones visibles en la captura</small></div>
-      <span className="op3-small-blue">{metric.running?metric.running+' en ejecución':'Sin ejecución actual'}</span>
-     </div>):<div className="op3-empty-proof">No hay motores identificables en la captura actual. Esto no significa que no existan motores.</div>}
-     </div>:null}
+    {(view==='entidades'||view==='proyectos'||view==='motores')?
+      <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
+       onCompanyChange={onCompanyChange} onNavigate={selectPanel}
+       observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
+      />:null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?
      <div className="op3-data-lines">
       {((view==='decisiones'?failed:view==='evidencias'?runs.filter(x=>validLink(x)):recentRuns)
