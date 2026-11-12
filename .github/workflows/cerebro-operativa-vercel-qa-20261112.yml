@@ -36,7 +36,7 @@ jobs:
           git diff --name-only "$BASE" HEAD >/tmp/console-diff
           while IFS= read -r file; do
             case "$file" in
-              src/CerebroConsoleHost.tsx|src/CerebroOperativeConsole.tsx|src/useCerebroOperativaChat.ts|src/cerebro-operative-console.css|src/cerebro-interface-bar.css|src/JarvisVisibleLanguageGuard.tsx|tests/cerebro-operativa-live-vercel-e2e.spec.ts|tests/cerebro-operativa-live-vercel-contract.test.mjs|.github/workflows/cerebro-operativa-vercel-qa-20261112.yml) ;;
+              src/CerebroConsoleHost.tsx|src/CerebroOperativeConsole.tsx|src/useCerebroOperativaChat.ts|src/cerebro-operative-console.css|src/cerebro-interface-bar.css|src/JarvisVisibleLanguageGuard.tsx|supabase/functions/cerebro-console-activity-v0/index.ts|tests/cerebro-operativa-live-vercel-e2e.spec.ts|tests/cerebro-operativa-live-vercel-contract.test.mjs|.github/workflows/cerebro-operativa-vercel-qa-20261112.yml) ;;
               *) echo "OUT_OF_SCOPE: $file" >&2; exit 2;;
             esac
           done </tmp/console-diff
