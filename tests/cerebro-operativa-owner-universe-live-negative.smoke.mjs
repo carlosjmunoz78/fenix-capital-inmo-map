@@ -29,10 +29,16 @@ try{
   headers:{Origin:origin,Accept:'application/json'}});
  assert.ok([401,403].includes(r.status),'Anonymous LAB Owner Universe must reject');
  const text=await r.text();
+ const forged=await fetch(endpoint,{method:'GET',redirect:'manual',signal:controller.signal,
+  headers:{Origin:origin,Accept:'application/json',Authorization:'Bearer qa-invalid-not-a-jwt'}});
+ assert.ok([401,403].includes(forged.status),'A forged authorization header must not access owner LAB');
+ const forgedText=await forged.text();
+ assert.ok(!forgedText.includes('PRJ-SUPERAGENT-001')&&!forgedText.includes('AUTHENTICATED_OWNER_CONTEXT'),
+   'Invalid token revealed owner details');
  const forbidden=['PRJ-SUPERAGENT-001','AUTHENTICATED_OWNER_CONTEXT','public_media_url',
    'cerebro_company_registry_preprod','SUPABASE_SERVICE_ROLE_KEY'];
  assert.ok(forbidden.every(x=>!text.includes(x)),'Anonymous response leaked owner detail');
  console.log(JSON.stringify({status:'LAB_ANON_DENIED_AND_APP_CORS_VERIFIED',
-   preflight_status:opts.status,anon_status:r.status,app_origin_allowed:true,cors_origin: corsOrigin==='*'?'WILDCARD_PLATFORM_PREFLIGHT':'EXACT_APP_ORIGIN',
+   preflight_status:opts.status,anon_status:r.status,forged_status:forged.status,app_origin_allowed:true,cors_origin: corsOrigin==='*'?'WILDCARD_PLATFORM_PREFLIGHT':'EXACT_APP_ORIGIN',
    cookie_credentials_allowed:credentials==='true',owner_data_exposed:false,positive_owner_E2E:'NOT_TESTED'}));
 }finally{clearTimeout(abort)}
