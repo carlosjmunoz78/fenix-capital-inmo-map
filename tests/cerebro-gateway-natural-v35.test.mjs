@@ -12,11 +12,12 @@ const afterKnowledge=read('cerebro/ops/gateway-v35-conversation/knowledge.ts');
 
 test('live Gateway v34 is exactly preserved; v35 only imports and calls safe natural router',()=>{
  assert.equal(afterKnowledge,beforeKnowledge);
- const addedImport='\nimport { answerCerebroNaturalQuery } from "./conversation_intents.ts";';
- const addedRoute='   const naturalAnswer=answerCerebroNaturalQuery(message,conversationContext);\n   if(naturalAnswer)return naturalAnswer;\n';
- assert.ok(candidate.includes(addedImport));
- assert.ok(candidate.includes(addedRoute));
- assert.equal(candidate.replace(addedImport,'').replace(addedRoute,''),original);
+ const naturalImport='\nimport { answerCerebroNaturalQuery } from "./conversation_intents.ts";';
+ const activityImport='\nimport { answerWithVerifiedActivity } from "./activity_reader.ts";';
+ const naturalRoute='   const naturalAnswer=answerCerebroNaturalQuery(message,conversationContext);\n   if(naturalAnswer)return naturalAnswer;\n';
+ const activityRoute='   const liveActivityAnswer=await answerWithVerifiedActivity(req,message);\n   if(liveActivityAnswer)return liveActivityAnswer;\n';
+ for(const block of [naturalImport,activityImport,naturalRoute,activityRoute])assert.ok(candidate.includes(block));
+ assert.equal(candidate.replace(naturalImport,'').replace(activityImport,'').replace(naturalRoute,'').replace(activityRoute,''),original);
  for(const marker of [
   'withSupabase({ auth: "user" }','const owner=await authorizedOwner(req);',
   'if(!owner.ok)return json(req,403','direct_model_access: false',
@@ -79,6 +80,9 @@ test('night planning is a proposal, not a scheduling or publishing action',()=>{
 });
 test('tenant scope and human exception are not bypassed',()=>{
  const tenant=answerCerebroNaturalQuery('Estoy trabajando en Fénix Capital. ¿Qué empresa y contexto tienes activos?');
+ const refused=answerCerebroNaturalQuery('Muéstrame los trabajos de AION sin mezclar los de Fénix');
+ assert.equal(refused?.intent,'company_scope');
+ assert.match(refused.message,/no tiene autorización operativa/);
  assert.equal(tenant?.intent,'company_scope');
  assert.match(tenant.message,/AION y CAPTACASA/);
  const risk=answerCerebroNaturalQuery('¿Qué harías si una orden pudiera ocasionar un coste?');
