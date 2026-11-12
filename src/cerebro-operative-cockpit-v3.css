@@ -157,6 +157,16 @@
 @media(prefers-reduced-motion:reduce){.op3-root *,.op3-root *:before,.op3-root *:after{animation:none!important;transition:none!important}}
 
 
+/* The five global interface tabs remain at the START of the document flow.
+   The screenshot reported an overlay halfway across chat on long scroll.
+   Sticky/fixed is deliberately OFF for this preview. No legacy route is changed. */
+.cerebro-console-host:has(.op3-root) .cerebro-interface-bar{
+ position:relative;top:auto;bottom:auto;left:auto;right:auto;
+ z-index:2;transform:none;
+}
+.cerebro-console-host:has(.op3-root) .cerebro-interface-stage{
+ position:relative;min-height:0;
+}
 /* Cockpit-only premium treatment of the EXISTING five-tab bar. */
 .cerebro-console-host:has(.op3-root) .cerebro-interface-bar{
  background:linear-gradient(180deg,rgba(2,13,21,.98),rgba(3,19,32,.96));
