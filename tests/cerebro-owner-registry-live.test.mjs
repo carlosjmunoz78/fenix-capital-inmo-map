@@ -78,11 +78,16 @@ test('Unexpected source rows from another company are filtered at the trusted bo
  const db=client({projects:[{company_id:"fenix",project_id:"good",environment:"LAB"}]});
  const v=await call(db);
  assert.deepEqual(v.projects.map(x=>x.project_id),["good"]);
- const untrust={from(table){
-  return {select(){return {eq(){return {async limit(){
-   return {data:[{company_id:"intruder",project_id:"bad",engine_id:"BAD-001"}],error:null};
-  }};}};}
- }};
+ const untrust={
+   from(){
+     return {select(){
+       return {eq(){
+         return {async limit(){
+           return {data:[{company_id:"intruder",project_id:"bad",engine_id:"BAD-001"}],error:null};
+         }};
+       }};
+     }};
+   }
  };
  const out=await call(untrust);
  assert.equal(out.status,"OK");
