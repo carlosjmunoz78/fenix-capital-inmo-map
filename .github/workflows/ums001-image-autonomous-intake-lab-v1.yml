@@ -24,6 +24,8 @@ on:
       - 'cerebro/media-studio/v2/cloudflare/ums001-signed-orchestrator-lab-eu/**'
       - 'cerebro/media-studio/v2/cloudflare/ums001-signed-qa-receiver-lab-eu/**'
       - 'cerebro/media-studio/v2/tests/ums001-signed-orchestrator-e2e-lab.test.mjs'
+      - 'cerebro/media-studio/v2/security/media-command-signature-v1.mjs'
+      - 'cerebro/media-studio/v2/tests/media-command-signature-v1.test.mjs'
       - 'cerebro/media-studio/v2/qa/UMS001_MULTICHANNEL_IMAGE_GATE_REAL_20261111_V5.json'
       - '.github/workflows/ums001-image-autonomous-intake-lab-v1.yml'
 permissions:
@@ -54,6 +56,7 @@ jobs:
           node --test cerebro/media-studio/v2/tests/ums001-image-qa-shadow-lab-eu.test.mjs
           node --test cerebro/media-studio/v2/tests/ums001-image-auth-sender-lab-eu.test.mjs
           node --test cerebro/media-studio/v2/tests/ums001-signed-orchestrator-e2e-lab.test.mjs
+          node --test cerebro/media-studio/v2/tests/media-command-signature-v1.test.mjs
           echo 'SYNTHETIC_CRYPTO_TESTS_ARE_NOT_REAL_IMAGE_CERTIFICATION=true'
       - name: Detect single incoming order on push
         if: github.event_name == 'push'
