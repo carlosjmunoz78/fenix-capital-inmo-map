@@ -117,7 +117,38 @@ async function receiveImageResult(msg,env){
 }
 
 export class FactoryIssuerProvisioner extends WorkerEntrypoint{
+ async enrollFromGitHubOIDC(payload,token){
+  if(this.env.FACT_PROVISION_ENABLED!=='true'||typeof this.env.FACT_GITHUB_BRIDGE_TOKEN!=='string'||this.env.FACT_GITHUB_BRIDGE_TOKEN.length<48||
+    typeof token!=='string'||token.length!==this.env.FACT_GITHUB_BRIDGE_TOKEN.length)throw Error('FACT_GITHUB_BRIDGE_UNAUTHORIZED');
+  const a=utf(token),b=utf(this.env.FACT_GITHUB_BRIDGE_TOKEN);if(a.length!==b.length)throw Error('FACT_GITHUB_BRIDGE_UNAUTHORIZED');
+  let mismatch=0;for(let i=0;i<a.length;i++)mismatch|=a[i]^b[i];
+  if(mismatch!==0)throw Error('FACT_GITHUB_BRIDGE_UNAUTHORIZED');
+  if(!payload||payload.schema_version!==1||payload.event_type!=='FACT001_ENGINE_CREATED'||payload.company_id!=='fenix'||
+   payload.environment!=='LAB'||!id.test(payload.engine_id||'')||payload.allowed_channels?.length!==1||
+   !['GENERIC','SEO'].includes(payload.allowed_channels[0])||JSON.stringify(payload.media_capabilities)!=='["IMAGE.SYNTHETIC"]')
+   throw Error('FACT_GITHUB_BRIDGE_SCOPE_DENIED');
+  const hash=hex(await crypto.subtle.digest('SHA-256',utf('fenix/LAB/'+payload.engine_id+'/'+payload.version))).slice(0,32).toUpperCase();
+  if(payload.event_id!=='FACT-ENROLL-'+hash)throw Error('FACT_GITHUB_BRIDGE_EVENT_ID_DENIED');
+  const now={...payload,issued_at_utc:new Date().toISOString()};
+  const k=await crypto.subtle.importKey('raw',utf(this.env.FACT_EVENT_SIGNING_KEY),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const signature=base64(await crypto.subtle.sign('HMAC',k,utf(canon(now))));
+  const result=await enroll({...now,signature},this.env);
+  await this.env.ISSUER_VAULT.put(PREFIX+'github-oidc/'+payload.event_id,JSON.stringify({state:result.state,engine_id:payload.engine_id,event_id:payload.event_id,at:new Date().toISOString(),authenticated_via:'GITHUB_ACTIONS_OIDC_BRIDGE',no_publication:true}));
+  return result;
+ }
+
  async enrollEngine(e){return enroll(e,this.env)}
+ async enrollTrustedGithubEvent(e,token){
+  if(this.env.FACT_PROVISION_ENABLED!=='true'||typeof this.env.GITHUB_OIDC_BRIDGE_SECRET!=='string'||this.env.GITHUB_OIDC_BRIDGE_SECRET.length<48||typeof token!=='string'||token.length!==this.env.GITHUB_OIDC_BRIDGE_SECRET.length)throw Error('TRUSTED_GITHUB_BRIDGE_DENIED');
+  const a=utf(token),b=utf(this.env.GITHUB_OIDC_BRIDGE_SECRET);
+  let mismatch=0;for(let i=0;i<a.length;i++)mismatch|=a[i]^b[i];
+  if(mismatch!==0)throw Error('TRUSTED_GITHUB_BRIDGE_DENIED');
+  const {signature,...event}=e||{};
+  if(signature!==undefined)throw Error('BRIDGE_EVENT_MUST_NOT_BE_PRESIGNED');
+  const key=await crypto.subtle.importKey('raw',utf(this.env.FACT_EVENT_SIGNING_KEY),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const signed=base64(await crypto.subtle.sign('HMAC',key,utf(canon(event))));
+  return enroll({...event,signature:signed},this.env);
+ }
  async imageReceipt(engine_id,request_id,item_id){if(!id.test(engine_id||'')||!(/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(request_id||''))||!(/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(item_id||'')))throw Error('RESULT_ID_DENIED');const approved=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+engine_id,{type:'json'});if(approved?.state!=='ACTIVE')throw Error('ENGINE_NOT_REGISTERED');return await this.env.ISSUER_VAULT.get(PREFIX+'deliveries/'+engine_id+'/'+request_id+'/'+item_id,{type:'json'});}
  async engineStatus(engine_id){
   if(!id.test(engine_id||''))throw Error('INVALID_ENGINE');
