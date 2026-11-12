@@ -9,11 +9,34 @@
     "name": "master_inventory_and_recovery",
     "status": "HECHO_DOCUMENTAL",
     "evidence_path": "zeus/jarvis/INVENTARIO_MAESTRO_VERIFICADO_2026-11-12.md",
-    "caveat": "Live enforcement and 420-requirement mapping remain gates in subsequent steps"
+    "caveat": "Live enforcement and 420-requirement mapping remain gates in subsequent steps",
+    "rc2_integrity": {
+      "master_original_found_in_private_library": true,
+      "sha256": "278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e",
+      "index_validated_against_master": true,
+      "indexed_titles_on_exact_source_lines": 421,
+      "functional_requirements": 420,
+      "chapter_zero": 1,
+      "per_item_evidence_attached_in_2026_11_07_index": 0,
+      "gate_file": "zeus/jarvis/RC2_420_REQUIREMENTS_SOURCE_GATE_2026-11-12.json"
+    },
+    "registry_count_reconciliation": {
+      "seed_engine_ids": 177,
+      "extension_engine_ids": 2,
+      "additional_engine_ids": [
+        "HCI-001",
+        "MOTION-001"
+      ],
+      "master_engine_ids": 179,
+      "role_agent_profiles": 11,
+      "role_supervisor_bindings_unresolved": 11,
+      "skill_adoption_capabilities": 177,
+      "skill_catalog_is_not_engine_catalog": true
+    }
   },
   "step_2": {
     "name": "owner_identity_two_devices_B2",
-    "status": "PARCIAL_REAL_CONFIGURATION_COMPLETED_PHYSICAL_E2E_PENDING",
+    "status": "PARCIAL_ACCESS_CHALLENGE_VERIFIED_KEY_READY_OWNER_DEVICE_ENROLLMENT_PENDING",
     "preflight": {
       "cloudflare_identity_connected": true,
       "cut32_worker_exists": true,
@@ -53,21 +76,42 @@
       "secret_values_disclosed": false,
       "physical_anon_challenge_verified": false,
       "temporary_subdomain_canary_attempt": "Enabled only for read-only test, external test tool could not reach URL; reverted",
-      "subdomain_rollback_verified": true
+      "subdomain_rollback_verified": true,
+      "cloud_subdomain_access_test": {
+        "worker": "cerebro-jarvis-cut32-lab-eu",
+        "source": "Opera second installation without owner Access session",
+        "observed": "CLOUDFLARE_ACCESS_LOGIN_CHALLENGE",
+        "outcome": "ACCESS_CHALLENGE_PHYSICAL_OBSERVED",
+        "owner_original_worker": "cerebro-jarvis-lab-eu",
+        "owner_original_status": "ACCESS_OWNER_VERIFIED",
+        "cut32_after_test_public": false,
+        "cut32_after_test_preview": false,
+        "rollback_confirmed": true,
+        "cut32_owner_runtime_canary_status": "ACCESS_CANARY_DISABLED",
+        "note": "Second installation was not proven to be an unrelated named identity; it was a separate unauthenticated browser installation."
+      },
+      "encrypted_secret_names_present": [
+        "JARVIS_ACCESS_AUD",
+        "JARVIS_OWNER_EMAIL",
+        "JARVIS_B2_HMAC_KEY_HEX"
+      ],
+      "owner_id_secret_configured": false,
+      "owner_auth_link_attempt": "BLOCKED_BY_SECURITY_CONTROL_NO_RETRY"
     },
     "blockers": [
       "CUT32 Access destination enforcement not proven by real network challenge",
       "No authenticated OWNER_ROOT device session in this connected chat",
       "Two independent physical devices cannot be enrolled or selectively revoked without authenticated browser session",
       "No session enrolled currently (zero D1 rows)",
-      "Temporary anonymous canary response could not be retrieved by external test tool; Access enforcement still requires real network verification"
+      "Canonical OWNER_ID transfer into isolated Cloudflare secret blocked by security controls: require sanctioned identity provisioning; do not bypass.",
+      "No owner session B2 cookie from PC or phone; no physical independent revocation."
     ],
     "next_safe_actions": [
-      "Use authenticated Work/Cloud Browser and a controlled anonymous client to verify CUT32 Access 302/401 before enabling B2 features",
-      "Keep CUT32 subdomain disabled unless executing a short protected physical test with immediate rollback",
-      "Verify owner Access with protected canary and real owner session; no sensitive identifiers in logs",
-      "Enroll two real independent owner devices and verify selective revocation",
-      "Do not enable B3, Gateway, PROD or cost-positive services until B2 gate is GREEN"
+      "Provision JARVIS_OWNER_ID through an approved owner-authenticated identity workflow; never copy user identifiers across blocked connector boundaries.",
+      "Perform protected CUT32 owner canary GET with Access owner session; keep only canary flag ON within a tightly bounded test window.",
+      "Enroll owner PC and mobile with separate Access-authenticated sessions, short server enrollment window and no direct D1 inserts.",
+      "Run selective revocation, restore after disconnect, verify Access deny on unauthenticated session.",
+      "Only then mark B2 GREEN and proceed to minimal B3 read grant; Gateway and PROD remain OFF."
     ],
     "security_flags": {
       "prod_not_modified": true,
@@ -101,9 +145,27 @@
     38,
     40
   ],
-  "next_block": "STEP2_B2_REAL_ACCESS_CHALLENGE_AND_OWNER_TWO_DEVICE_E2E",
+  "next_block": "B2_OWNER_ID_APPROVED_PROVISIONING_AND_OWNER_TWO_REAL_DEVICES",
   "rollback": "Discard unmerged PR35 changes; no Cloudflare/Supabase runtime mutations were made in this session",
   "human_required_if_applicable": [
     "External login/MFA/owner physical device verification"
-  ]
+  ],
+  "step_3": {
+    "status": "AUDITED_READONLY_NOT_ACTIVATED",
+    "supabase": {
+      "schema": "zeus_jarvis",
+      "b3_runtime_enabled": false,
+      "b3_kill_switch": true,
+      "b3_grants": 0,
+      "b3_secret_inventory_rows": 0,
+      "b3_audit_events": 0,
+      "b4_memory_enabled": false,
+      "b4_kill_switch": true,
+      "b4_events": 0,
+      "anon_and_authenticated_explicit_grants_found": 0,
+      "pg_policies_found_for_private_schema": 0
+    },
+    "next": "No policy/grant changes before B2 real and direct physical E2E"
+  },
+  "footnote": "All 420 functional requirements still require per-item implementation and physical acceptance evidence; RC2 source verification is NOT operational certification."
 }
