@@ -22,3 +22,5 @@ jobs:
         run: node --test tests/cerebro-owner-access-resolver.test.mjs
       - name: 'Dynamic company and project scope discovery contract'
         run: node --test tests/cerebro-owner-scope-registry.test.mjs
+      - name: 'LIVE owner registry - Supabase companies, projects and engines mocked contract'
+        run: node --test tests/cerebro-owner-registry-live.test.mjs
