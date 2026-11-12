@@ -41,6 +41,23 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  }
  await expect(operative.locator('textarea[aria-label="Mensaje para CEREBRO"]')).toBeVisible();
  await expect(operative.getByRole('textbox',{name:'Mensaje para CEREBRO'})).toBeVisible();
+ // Mobile first screen must allow sending an owner instruction without scrolling.
+ // This checks viewport geometry, not just Playwright's DOM-level visibility.
+ await page.evaluate(()=>window.scrollTo(0,0));
+ await expect.poll(async()=>page.evaluate(()=>{
+  const field=document.querySelector('.operativa-dialogue textarea[aria-label="Mensaje para CEREBRO"]')?.getBoundingClientRect();
+  const talk=document.querySelector('.operativa-dialogue');
+  const deck=document.querySelector('.operativa-command-deck');
+  const root=document.querySelector('.operativa-premium');
+  if(!field||!talk||!deck||!root)return {fieldVisible:false,first:false,scrollY:window.scrollY};
+  const rootStyle=getComputedStyle(root);
+  return {
+   fieldVisible:field.top>=0&&field.bottom<=window.innerHeight,
+   first:rootStyle.display==='flex'&&Number(getComputedStyle(talk).order)<Number(getComputedStyle(deck).order),
+   scrollY:window.scrollY
+  };
+ }),{timeout:5000}).toMatchObject({fieldVisible:true,first:true,scrollY:0});
+
  await page.screenshot({path:'test-results/operativa-real-chat-mobile.png',animations:'disabled'});
  await page.setViewportSize({width:1280,height:720});
 
