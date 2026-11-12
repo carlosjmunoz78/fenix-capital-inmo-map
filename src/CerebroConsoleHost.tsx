@@ -78,7 +78,7 @@ export default function CerebroConsoleHost(){
     {view==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole onViewChange={changeView}/></div>:null}
     {view==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
     {view==='NEURONAL'?<CerebroNeuralView/>:null}
-    {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={changeView}/>:null}
+    {view==='NAVEGADOR'?<CerebroBrowserConsole onViewChange={next=>{if(next==='V0'){setView('V0');navigate({pathname:'/cerebro',search:'?section=legacy-v0'},{replace:true})}else changeView(next)}}/>:null}
    </div>
   </>}
  </div>;
