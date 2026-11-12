@@ -1073,11 +1073,11 @@
         "binding_count": 5
       },
       "company_id": "fenix",
-      "environment": "PREPROD",
+      "environment": "PROD_CAPABILITY",
       "version": "1.2.0",
-      "status": "FULL_SAFE_PREPROD_PENDING_PROD_READONLY_CANARY",
-      "current_scope": "INTERNAL_NORMALIZED_WRAPPER_READONLY_PENDING_CANARY",
-      "current_evidence": null,
+      "status": "PROD_CAPABILITY_AVAILABLE_READONLY",
+      "current_scope": "READONLY_ADVISORY_ANALYZE_REVIEW_PLAN_OBSERVE",
+      "current_evidence": "GREEN_DYNAMIC_ALPINE_AE3670A4_PROD_READONLY_CANARY",
       "observed_at": "2026-11-12T19:42:54.889Z",
       "learning_impact_status": "LRN_IMPACT_GREEN_PREPROD",
       "prod_authorized": false,
@@ -1091,7 +1091,37 @@
       "spend_authorized": false,
       "trading_access": false,
       "additional_cost_eur": 0,
-      "capability_hash": "6342b8686c505bf6789872d561a6873dc36ab603b1f9fa8c3469b0a58e4d7c33"
+      "capability_hash": "6342b8686c505bf6789872d561a6873dc36ab603b1f9fa8c3469b0a58e4d7c33",
+      "canary": {
+        "status": "GREEN_DYNAMIC_ALPINE_AE3670A4_PROD_READONLY_CANARY",
+        "candidate_id": "repo:4756dad9ef13e4e98424a290dc09",
+        "technical_name": "alpine",
+        "head_sha": "0d3491a132e837157f1a3fd12c0e0e4e6de06dae",
+        "run_id": 43293009268,
+        "ref": "refs/heads/main",
+        "checked_bindings": [
+          "APP-001",
+          "ARCH-001",
+          "QA-001",
+          "WAUD-001",
+          "WEB-001"
+        ],
+        "checked_modes": [
+          "ADVISE",
+          "ANALYZE",
+          "REVIEW",
+          "PLAN",
+          "READONLY_OBSERVE"
+        ],
+        "side_effects": false,
+        "external_skill_code_execution": false,
+        "prod_write_authorized": false,
+        "prod_mutation_authorized": false,
+        "trading_access": false,
+        "additional_cost_eur": 0,
+        "observed_at": "2026-11-12T19:43:12.876Z"
+      },
+      "promoted_at": "2026-11-12T19:43:12.876Z"
     },
     {
       "candidate_id": "repo:d5ce3f78bf63e730e592b8ed8dbc",
@@ -17981,10 +18011,9 @@
   "adoption_skips": [],
   "summary": {
     "total": 178,
-    "inserted": 1,
-    "updated": 0,
+    "promoted": 1,
     "skipped": 0,
-    "pending_canary": 1,
-    "prod_readonly": 177
+    "pending_canary": 0,
+    "prod_readonly": 178
   }
 }
