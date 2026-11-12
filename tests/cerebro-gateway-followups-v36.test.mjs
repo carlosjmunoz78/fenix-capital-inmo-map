@@ -13,7 +13,7 @@ const newFiles=['index.ts','knowledge.ts','conversation_intents.ts','activity_re
 test('Gateway owner auth, knowledge and governed execution remain preserved while read-only registry is additive',()=>{
  const authBlock=(src)=>{
   const i=src.indexOf("async function authorizedOwner(req:Request){");
-  const next=src.indexOf("\\nasync function ",i+1);
+  const next=src.indexOf(String.fromCharCode(10)+"async function ",i+1);
   return i<0||next<0?"":src.slice(i,next).trim();
  };
  const oldAuth=authBlock(oldFiles[0]);
