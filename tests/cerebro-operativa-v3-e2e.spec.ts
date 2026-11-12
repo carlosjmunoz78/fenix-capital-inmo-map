@@ -25,7 +25,7 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByText('Construir y validar capacidades',{exact:true})).toBeVisible();
  await expect(operative.locator('.operativa-work-row')).toHaveCount(5);
  await expect(operative.getByRole('button',{name:'Ver los 9 trabajos'})).toBeVisible();
- await expect(operative.getByText('UMS001 CEREBRO Facebook offline QA 1',{exact:true})).toBeVisible();
+ await expect(operative.locator('.operativa-work-row').getByText('UMS001 CEREBRO Facebook offline QA 1',{exact:true})).toBeVisible();
  await operative.getByRole('button',{name:'Ver los 9 trabajos'}).click();
  await expect(operative.locator('.operativa-work-row')).toHaveCount(9);
  await operative.getByRole('button',{name:'Mostrar menos trabajos'}).click();
