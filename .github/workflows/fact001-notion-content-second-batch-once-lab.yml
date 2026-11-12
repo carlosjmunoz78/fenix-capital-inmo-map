@@ -1,0 +1,33 @@
+name: FACT001 Notion Second 25 Mixed Content LAB One Shot
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-content-export-v2-lab/requests/execute-20261111.v1.json
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+concurrency:
+  group: fact001-notion-second-25-content-once
+  cancel-in-progress: false
+jobs:
+  export-mixed-readonly:
+    if: github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_NOTION_SECOND_25_CONTENT_RUN_ONCE_20261111')
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Export 24 pages and 1 data source via pinned OIDC, ciphertext only
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/connectors/universal/services/notion-content-export-v2-lab/run-once.mjs
+      - name: Preserve completed or partial encrypted-only evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-notion-second-25-mixed-content-aes256gcm-20261111
+          path: fact001-notion-second-25-encrypted-content
+          if-no-files-found: warn
+          retention-days: 90

@@ -1,0 +1,39 @@
+name: FACT-001 Cloudflare Universal - permissions GET-only LAB
+# One-off push on this new isolated workflow only. No repeating schedules.
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/cerebro-cloudflare-universal-scopes-readonly-lab.yml
+      - cerebro/connectors/universal/tests/cloudflare-account-scope-readonly.test.mjs
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cerebro-cloudflare-universal-readonly
+  cancel-in-progress: false
+jobs:
+  permission-scope-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout isolated branch with no persisted credentials
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify GET-only probe against simulated Cloudflare
+        run: node --test cerebro/connectors/universal/tests/cloudflare-account-scope-readonly.test.mjs
+      - name: Prove exclusive HTTP GET requests in source
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const s=fs.readFileSync('cerebro/connectors/universal/preflight/cloudflare-account-scope-readonly.mjs','utf8');
+          if(!s.includes("method:'GET'"))process.exit(1);
+          if(/method:\s*['"](?:POST|PUT|PATCH|DELETE)['"]/.test(s))process.exit(2);
+          console.log('CF_UNIVERSAL_GET_ONLY=true');
+          NODE
+      - name: Probe Cloudflare account product permission scopes without writes
+        run: node cerebro/connectors/universal/preflight/cloudflare-account-scope-readonly.mjs

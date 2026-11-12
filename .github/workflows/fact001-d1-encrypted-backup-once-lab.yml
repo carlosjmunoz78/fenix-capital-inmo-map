@@ -1,0 +1,31 @@
+name: FACT001 D1 Encrypted Offsite One-Shot LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/d1-backup-execute-once-20261112.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-d1-backup-encrypted-once-lab
+  cancel-in-progress: false
+jobs:
+  seal-readonly:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_D1_ENCRYPTED_ONCE_20261112')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Seal and verify D1 via GitHub OIDC plus Vault, ciphertext only
+        run: node cerebro/connectors/universal/services/provider-headless-lab/d1-backup-seal-once.mjs
+      - name: Retain encrypted-only artifact for independent Drive copy
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-d1-recovery-encrypted-20261112
+          path: fact001-d1-encrypted-offsite/
+          if-no-files-found: error
+          retention-days: 90

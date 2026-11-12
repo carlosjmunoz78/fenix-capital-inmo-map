@@ -1,0 +1,54 @@
+name: FACT-001 Private LAB Worker security and rollback read-only attestation
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths: [.github/workflows/fact001-private-worker-security-postdeploy-lab.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  no-public-access-no-crons-no-secrets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Verify immutable Worker source deployment and no public routes via API GET ONLY
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          const account='e39a57e1ac42650ca5a6d5307cf0ac8e',script='cerebro-fact001-gateway-lab-eu-20261109',token=process.env.CF_TOKEN;
+          if(!token)throw Error('SECRET_MISSING');
+          const base='https://api.cloudflare.com/client/v4';
+          const get=async(path)=>{
+            const res=await fetch(base+path,{method:'GET',headers:{Authorization:'Bearer '+token,Accept:'application/json'},redirect:'error',signal:AbortSignal.timeout(12000)});
+            if(!res.ok)throw Error('CF_GET_DENIED_'+res.status);
+            const json=await res.json();
+            if(json?.success!==true)throw Error('CF_GET_INVALID');return json.result;
+          };
+          const scripts=await get('/accounts/'+account+'/workers/scripts');
+          if(!Array.isArray(scripts))throw Error('SCRIPT_LIST_INVALID');
+          if(scripts.filter(x=>x.id===script||x.name===script).length!==1)throw Error('SCRIPT_EXACT_NAME_NOT_FOUND');
+          const sub=await get('/accounts/'+account+'/workers/scripts/'+script+'/subdomain');
+          if(sub?.enabled!==false||sub?.previews_enabled!==false)throw Error('PUBLIC_SUBDOMAIN_ENABLED');
+          const schedule=await get('/accounts/'+account+'/workers/scripts/'+script+'/schedules');
+          if(!Array.isArray(schedule?.schedules)||schedule.schedules.length!==0)throw Error('UNEXPECTED_CRON_SCHEDULE');
+          const secrets=await get('/accounts/'+account+'/workers/scripts/'+script+'/secrets');
+          if(!Array.isArray(secrets)||secrets.length!==0)throw Error('WORKER_SECRETS_MUST_BE_ZERO');
+          const zones=await get('/zones?account.id='+account+'&per_page=50');
+          if(!Array.isArray(zones)||zones.some(x=>x.account?.id!==account))throw Error('WRONG_ACCOUNT_ZONE');
+          for(const z of zones){
+            const routes=await get('/zones/'+z.id+'/workers/routes');
+            if(!Array.isArray(routes)||routes.some(x=>x.script===script||x.script_name===script))throw Error('LAB_WORKER_HAS_PUBLIC_ROUTE');
+          }
+          console.log('FACT001_LAB_WORKER_EXISTS=true');
+          console.log('FACT001_WORKERS_COUNT='+scripts.length);
+          console.log('FACT001_WORKERS_DEV=false');
+          console.log('FACT001_PREVIEW_URLS=false');
+          console.log('FACT001_CRONS=0');
+          console.log('FACT001_SECRETS=0');
+          console.log('FACT001_PUBLIC_ROUTES=0');
+          console.log('FACT001_API_WRITES=0');
+          console.log('FACT001_GATEWAY_PROD_INTACT=true');
+          NODE

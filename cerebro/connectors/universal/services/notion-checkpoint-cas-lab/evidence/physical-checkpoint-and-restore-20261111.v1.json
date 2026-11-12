@@ -1,0 +1,77 @@
+{
+  "format": "FACT001-NOTION-D1-CAS-EU-PHYSICAL-RESTORE-EVIDENCE-V1",
+  "scope": {
+    "company_id": "fenix-capital",
+    "engine_id": "FACT-001",
+    "environment": "LAB",
+    "version": "1.0.0"
+  },
+  "date": "2026-11-11",
+  "cloudflare_account": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "database": {
+    "name": "cerebro-fact001-notion-checkpoint-lab-eu",
+    "uuid": "bc085807-a6ca-4c56-a288-fe56716fec6f",
+    "jurisdiction": "eu",
+    "created_new_isolated": true,
+    "public_worker_binding": false,
+    "cron": false,
+    "free_database_capacity_used": "10_of_10"
+  },
+  "original_recovery_d1": {
+    "uuid": "1305f791-7c44-47f9-946b-f330a09c88aa",
+    "name": "cerebro-fact001-recovery-lab-eu",
+    "checkpoint_schema_objects": 0,
+    "modified": false,
+    "sql_native_export_status": "COMPLETE_SIGNED_URL_FETCH_HTTP_403_NO_EXTERNAL_SQL_READBACK",
+    "independent_current_full_sql_backup": false
+  },
+  "schema": {
+    "source_path": "cerebro/connectors/universal/services/notion-checkpoint-cas-lab/schema.sql",
+    "sha256": "9fe5fb2dbe989c457f374a2104221d5f7215216029406cdad73d601d5d8964b7",
+    "created_tables": 2,
+    "created_triggers": 4,
+    "foreign_existing_tables_modified": 0,
+    "local_tests_passed": 6,
+    "local_ci_run_id": 42924240468
+  },
+  "checkpoint": {
+    "index_sha256": "205ca4905aafee82d1205c11b90685349b90e8c86062e4cca0dbb5edf4ca79ca",
+    "seed": {
+      "offset": 25,
+      "cas_version": 1,
+      "sha256": "e38acdbaea08a7e79ca7e74636fb2781b39b483db346f1bc3d6fa5509c7e2f65",
+      "drive_id": "1sGt2mXOLwK0AJCxfRNr8fY-dYVHjrR5p"
+    },
+    "final": {
+      "offset": 50,
+      "cas_version": 2,
+      "batch_ref": "f84ce878daf73f1a8567779b50d720937bd0876474861f71d40041af7ddfe787",
+      "sha256": "d8e93417190470f1d9ed34ffdd40962ff33a869869378b5ee580b1fca1641026",
+      "drive_id": "12UJyaeYukgOlFIHrLlebxLOgLTsdalcq"
+    },
+    "idempotent_replay_affected_rows": 0,
+    "audit_count": 1
+  },
+  "physical_time_travel": {
+    "before_schema": "00000000-00000006-00005120-2d4f0d04be543fce366b1dea157e83be",
+    "after_seed_offset25": "00000000-0000000c-00005120-c2494fa0d8dcc8f7dd99bc67053a92f8",
+    "first_after_cas50": "00000000-0000000e-00005120-ee082f2ca96f7cbf183d890509d61486",
+    "restored_to_offset25": true,
+    "restored_audit_count": 0,
+    "restored_schema_objects": 6,
+    "reapplied_cas50": true,
+    "final_bookmark": "00000001-00000002-00005120-0c8f68f2e989b70ef0b41038a39ed857"
+  },
+  "guardrails": {
+    "provider_notion_writes": 0,
+    "app_crm_writes": 0,
+    "production_promoted": false,
+    "manual_management_api_only": true,
+    "worker_service_binding_enabled": false,
+    "independent_key_escrow": false,
+    "physical_notion_restore": false,
+    "full_workspace_backup": false,
+    "cost_added_subscription_eur": 0,
+    "marginal_usage_cost_measured": false
+  }
+}

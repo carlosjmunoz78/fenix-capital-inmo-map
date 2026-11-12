@@ -1,0 +1,52 @@
+name: FACT001 Cloudflare CEREBRO independent Worker headless LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-headless-worker-e2e-lab/requests/execute-once-20261111.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-cf-headless-worker-one-shot
+  cancel-in-progress: false
+jobs:
+  physical-headless-worker-lifecycle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: "Signed CEREBRO OIDC to Vault v2, ephemeral token, isolated Worker E2E"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-headless-worker-e2e-lab/requests/execute-once-20261111.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',provider:'cloudflare',operation:'cloudflare.worker.headless_lifecycle_lab',request_id:'FACT001-CF-HEADLESS-WORKER-20261111-ONE',max_cost_eur:0};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FIXED_ORDER_MISMATCH');
+          const u=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,t=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!u||!t)throw Error('RUNNER_IDENTITY_UNAVAILABLE');
+          const response=await fetch(u+(u.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-cf-headless-worker-e2e-lab-20261111'),{headers:{Authorization:'Bearer '+t},signal:AbortSignal.timeout(12000)});
+          if(!response.ok)throw Error('RUNNER_OIDC_HTTP_'+response.status);
+          const jwt=(await response.json()).value;
+          const endpoint='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-headless-worker-e2e-lab/';
+          const call=async(route,token,body)=>{
+           const r=await fetch(endpoint+route,{method:body?'POST':'GET',headers:{...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}),redirect:'error',signal:AbortSignal.timeout(140000)});
+           let b={};try{b=await r.json()}catch{}return{http:r.status,data:b};
+          };
+          if((await call('health')).http!==401||(await call('health','fake')).http!==401||(await call('execute-once',null,order)).http!==401)throw Error('UNSIGNED_ALLOWED');
+          const h=await call('health',jwt);
+          if(h.http!==200||h.data.status!=='SIGNED_LAB_READY')throw Error('SIGNED_IDENTITY_DENIED');
+          if((await call('execute-once',jwt,{...order,environment:'PROD'})).http!==403)throw Error('PROD_DENIED_GATE_FAILED');
+          console.log('CF_HEADLESS_AUTH_NEGATIVE_GATES=PASS');
+          const e=await call('execute-once',jwt,order);
+          console.log('CF_HEADLESS_EXEC_HTTP='+e.http);
+          console.log('CF_HEADLESS_EXEC_STATUS='+String(e.data.status||e.data.code||'UNKNOWN').replace(/[^a-zA-Z0-9_]/g,'').slice(0,80));
+          console.log('CF_HEADLESS_SAFE_REASON='+String(e.data.code||'NONE').replace(/[^A-Z0-9_]/g,'').slice(0,90));
+          if(e.http!==200||e.data.status!=='HEADLESS_CEREBRO_WORKER_LIFECYCLE_VERIFIED'||e.data.child_revoked!==true||e.data.rolled_back!==true||e.data.rebuilt!==true||e.data.credential_exposed!==false)throw Error('HEADLESS_REAL_E2E_FAILED');
+          console.log('CF_HEADLESS_REAL_E2E=PASS');
+          const again=await call('execute-once',jwt,order);
+          if(again.http!==200||again.data.status!=='ALREADY_COMPLETED')throw Error('REPLAY_GUARD_FAILED');
+          console.log('CF_HEADLESS_DURABLE_REPLAY_GUARD=PASS');
+          console.log('CF_HEADLESS_NO_SECRETS_LOGGED=PASS');
+          NODE

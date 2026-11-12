@@ -1,0 +1,41 @@
+name: FACT001 Notion Reusable Batch Engine LAB CI
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/notion-batch-engine-lab/**
+      - .github/workflows/fact001-notion-batch-engine-lab-ci.yml
+permissions:
+  contents: read
+jobs:
+  engine-ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Run deterministic tests and syntax gates
+        run: |
+          node --test cerebro/connectors/universal/services/notion-batch-engine-lab/tests/*.test.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-once.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-once-100-125.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-index24.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/run-recover-source23.mjs
+          node --check cerebro/connectors/universal/services/notion-batch-engine-lab/source-chunk.mjs
+          node --experimental-strip-types --check cerebro/connectors/universal/services/notion-batch-engine-lab/index.ts
+      - name: Static authorization and no-write policy
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const root='cerebro/connectors/universal/services/notion-batch-engine-lab/';
+          const src=fs.readFileSync(root+'index.ts','utf8');
+          const pol=fs.readFileSync(root+'policy.mjs','utf8');
+          const cont=fs.readFileSync(root+'content.mjs','utf8');
+          if(!src.includes('await verifyGitHubOidc(auth.slice(7))')||!src.includes('assertOrder')||!pol.includes('fact001-notion-batch-engine-once-lab.yml'))throw Error('OIDC_POLICY_MISSING');
+          if(/method:\s*['"](?:PUT|PATCH|DELETE)['"]/.test(src+cont)||/update vault|delete from/i.test(src+cont))throw Error('WRITE_OPERATION_DENIED');
+          if(!src.includes('INDEX_PARITY_DENIED')||!cont.includes('INCOMPLETE_REQUEST_CAP'))throw Error('BOUNDED_INTEGRITY_GATES_MISSING');
+          if(!src.includes("offset=nextKind==='plan-next'?100:75")||!src.includes('plan.offset!==offset||plan.next_offset!==offset+25')||!src.includes('const LAST_PROVEN=')||!fs.readFileSync(root+'run-once.mjs','utf8').includes('checkpoint_version:3'))throw Error('BATCH_75_100_SCOPE_MISSING');
+          if(!src.includes("assertNextOrder")||!src.includes("plan.offset!==offset||plan.next_offset!==offset+25")||!src.includes("NEXT_PREVIOUS")||!src.includes("NEXT_PLAN_SCOPE_DENIED"))throw Error('NEXT_100_125_POLICY_MISSING');
+          if(!src.includes("kind==='source-chunk'")||!src.includes('await verifyGitHubOidc(auth.slice(7))')||!fs.readFileSync(root+'source-chunk.mjs','utf8').includes('maxReads=3'))throw Error('SOURCECHUNK_BOUNDED_OIDC_GUARD_MISSING');
+          console.log('FACT001_REUSABLE_ENGINE_LAB_READONLY=PASS');
+          NODE

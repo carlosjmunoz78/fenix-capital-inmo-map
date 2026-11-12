@@ -1,0 +1,10 @@
+{
+  "request_id": "CFN-20261109-002",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "chatgpt-normal",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "operation": "account_readonly_audit"
+}

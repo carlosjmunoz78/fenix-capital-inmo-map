@@ -1,0 +1,20 @@
+name: FACT001 Scoped Cloudflare token cutover non-deploy regression
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/console/owner-canary-v2-scoped-token-switch.mjs
+      - cerebro/connectors/universal/console/owner-canary-v2-scoped-token-switch.test.mjs
+      - .github/workflows/fact001-scoped-token-cutover-lab-tests.yml
+permissions:
+  contents: read
+jobs:
+  verify-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: node --test cerebro/connectors/universal/console/owner-canary-v2-scoped-token-switch.test.mjs
+      - run: node cerebro/connectors/universal/console/owner-canary-v2-scoped-token-switch.mjs

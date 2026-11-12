@@ -1,0 +1,71 @@
+name: FACT001 Cloudflare issuer v2 physical scope verification LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/verify-v2-20261111.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-cf-token-issuer-once-lab
+  cancel-in-progress: false
+jobs:
+  verify-existing-v2-with-independent-service:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - name: "Security gates: existing v2 only; no creation, no secret transfer"
+        run: |
+          node --test cerebro/connectors/universal/supabase/cf-token-issuer-lab/tests/issuer-policy.test.mjs
+      - name: "GitHub OIDC -> existing Supabase Vault -> Cloudflare v2 scope"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/supabase/cf-token-issuer-lab/requests/verify-v2-20261111.v1.json','utf8'));
+          const expect={"company_id":"fenix-capital","engine_id":"FACT-001","environment":"LAB","version":"1.0.0","account_id":"e39a57e1ac42650ca5a6d5307cf0ac8e","client_id":"cerebro","operation":"cloudflare.account_token.issue_minimal_issuer_lab","request_id":"CFT-20261111-SCOPE-001"};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expect).sort())||
+             Object.entries(expect).some(([k,v])=>order[k]!==v))throw Error('V2_ORDER_INVALID');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL;
+          const grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('OIDC_RUNNER_UNAVAILABLE');
+          const audience='cerebro-fact001-cf-token-issuer-lab-20261110';
+          const response=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent(audience),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!response.ok)throw Error('OIDC_HTTP_'+response.status);
+          const jwt=(await response.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-cf-issuer-lab';
+          async function call(route,token,body){
+            const r=await fetch(url+'/'+route,{method:body?'POST':'GET',redirect:'error',
+              headers:{Accept:'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{})},
+              ...(body?{body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(25000)});
+            let data={};try{data=await r.json()}catch{}
+            return {status:r.status,data};
+          }
+          const anon=await call('health'),fake=await call('health','forged');
+          if(anon.status!==401||fake.status!==401)throw Error('UNSIGNED_ALLOWED');
+          const health=await call('health',jwt);
+          if(health.status!==200||health.data?.status!=='AUTHENTICATED')throw Error('SIGNED_IDENTITY_DENIED');
+          console.log('FACT001_CF_V2_ANON_401=PASS');
+          console.log('FACT001_CF_V2_FAKE_401=PASS');
+          console.log('FACT001_CF_V2_SIGNED_200=PASS');
+          const test=await call('verify-scoped-issuer-v2',jwt,order);
+          console.log('FACT001_CF_V2_VERIFY_HTTP='+test.status);
+          console.log('FACT001_CF_V2_VERIFY_STATUS='+String(test.data?.status||test.data?.code||'UNKNOWN'));
+          if(test.status!==200||test.data?.status!=='SCOPED_ISSUER_V2_VERIFIED'||
+            test.data?.permission!=='Account API Tokens Write'||test.data?.token_value_exposed!==false||
+            test.data?.legacy_issuer_read!==false||test.data?.external_writes!==0)
+            throw Error('V2_SCOPE_REAL_BACKEND_NOT_VERIFIED');
+          console.log('FACT001_CF_V2_EFFECTIVE_SCOPE=PASS');
+          console.log('FACT001_CF_V2_D1_WRITE_DELEGABLE='+String(test.data?.d1_write_selectable===true));
+          console.log('FACT001_CF_V2_D1_READ_DELEGABLE='+String(test.data?.d1_read_selectable===true));
+          for(const route of ['v2-child-create','v2-child-revoke','issue-d1-read-lab','issue-scoped-issuer-v2']){
+            const denied=await call(route,jwt,order);
+            if(denied.status!==404)throw Error('ONE_TIME_MUTATION_ROUTE_STILL_LIVE');
+          }
+          console.log('FACT001_CF_V2_ONE_SHOT_WRITE_ROUTES_404=PASS');
+          console.log('FACT001_CF_NO_TOKEN_VALUES_EXPOSED=PASS');
+          NODE

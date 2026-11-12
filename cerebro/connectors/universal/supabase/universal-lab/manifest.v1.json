@@ -1,0 +1,77 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "provider": "supabase",
+  "status": "PARTIAL_HIGH_RISK_GATE",
+  "runtime": "SHARED_CEREBRO_GATEWAY",
+  "engine_type": "LOGICAL_NO_NEW_SERVER",
+  "scoped_projects": [
+    "cluhljgonannaafpmblx",
+    "hnqlnvakzaywtafeiybt"
+  ],
+  "permissions": {
+    "read_operations": [
+      "project.inventory",
+      "edge.inventory",
+      "security.advisors"
+    ],
+    "write_status": "DENIED_UNTIL_VERIFIED",
+    "management_pat_name": "cerebro_supabase_management_pat_v1",
+    "secret_location": "SUPABASE_VAULT_ONLY",
+    "no_export": true
+  },
+  "security": {
+    "human_required": "HIGH_RISK",
+    "finding": "8 public SEO tables have RLS OFF and anon FULL CRUD",
+    "confirmed_exploit": false
+  },
+  "events": [
+    "READ_VERIFIED",
+    "SECURITY_GATE_OPEN",
+    "BACKUP_VERIFIED",
+    "DEP_COMPARISON_COMPLETE",
+    "ROLLBACK_DRILL_COMPLETE"
+  ],
+  "jobs": {
+    "signed_oidc_inventory": "VERIFIED",
+    "autonomous_write_queue": "PENDING"
+  },
+  "api": {
+    "allowed_public_endpoints": [],
+    "read_contract": "fixed scoped projects and metadata only",
+    "mutations": "BLOCKED"
+  },
+  "tests": {
+    "policy": "CI_ONLY",
+    "physical_provider_read": "VERIFIED",
+    "physical_writes": "NOT_ATTEMPTED"
+  },
+  "costs": {
+    "new_subscription_eur": 0,
+    "new_project_created": false
+  },
+  "backup": {
+    "daily_pro_plan_offered_documented": true,
+    "current_backup_physically_verified": false,
+    "full_restore_drill": false
+  },
+  "rollback": {
+    "policy_modules": "git branch reversion",
+    "own_resources": "future with physical evidence",
+    "existing_resources": "never touched"
+  },
+  "rebuild": {
+    "plan": "FACT001 factory scaffold only",
+    "physical_tested": false
+  },
+  "observability": {
+    "security_audit": "2026-11-11 official linter plus catalog metadata",
+    "data_rows_read": false
+  },
+  "training_hooks": {
+    "eligible": false
+  }
+}

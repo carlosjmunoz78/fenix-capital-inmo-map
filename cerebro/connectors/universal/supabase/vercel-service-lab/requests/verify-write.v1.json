@@ -1,0 +1,11 @@
+{
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "client_id": "cerebro",
+  "team_id": "team_qnh6u1Ofy2WPp0MGEKlyMA50",
+  "project_id": "prj_vvil5epQ99mngK29vpLVOWmlVRP1",
+  "operation": "vercel.project.lab_framework_change_and_restore",
+  "request_id": "FACT001-VERCEL-SERVICE-WRITE-20261110"
+}

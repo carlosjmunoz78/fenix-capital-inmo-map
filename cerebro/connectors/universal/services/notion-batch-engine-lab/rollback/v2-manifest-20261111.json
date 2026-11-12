@@ -1,0 +1,9 @@
+{
+  "format":"FACT001-ROLLBACK-ENGINE-V2-PINNED",
+  "scope":"fenix-capital/FACT-001/LAB/1.0.0",
+  "old_code_git_commit":"cdf0efdb0fa168f781d5af2e12dab5172972e2e4",
+  "old_edge_slug":"cerebro-fact001-notion-batch-engine-lab",
+  "old_edge_version":2,
+  "old_edge_bundle_sha256":"603d10f52121b88845634433ae4acb5cd2a28e33f7c9df1f00edbd7000c781f9",
+  "rollback":"Re-deploy exactly 6 source files (index.ts, content.mjs, policy.mjs, notion-content-batch-planner.mjs, notion-encrypted-index-manifest.mjs, deno.json) from the pinned git commit with import_map_path deno.json; verify OIDC and original bundle hash. Do not alter D1, Notion, App/CRM, or other services."
+}

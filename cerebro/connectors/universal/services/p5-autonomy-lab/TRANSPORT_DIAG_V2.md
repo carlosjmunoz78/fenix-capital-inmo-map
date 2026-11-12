@@ -1,0 +1,4 @@
+# P5 transport fix, 2026-11-12
+Root cause established by physical 0 ms TypeError in Cloudflare Workers during cron-to-Supabase outbound call, and Cloudflare Workers Request official docs: `redirect: 'error'` is unsupported and raises a synchronous `TypeError` before network. Change **only Cloudflare Worker** requests to `redirect: 'manual'`; disallow any 3xx explicitly by status verification. Do not change Supabase Deno redirect policy.
+Old diagnostic `fact001_p5_diag_v1` remains immutable evidence of blocked EGRESS_TYPE_ERROR. New one-shot `fact001_p5_diag_v2` with dedicated ID is for post-fix egress proof. Do not repeat job FACT001-P5-20261112 or edit its RECONCILE audit.
+No cron additions, no provider writes, no token to GitHub/logs. Continue real 5-provider dispatch only with separately authorized bounded acceptance ticket after 401 egress verified.

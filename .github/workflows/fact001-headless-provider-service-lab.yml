@@ -1,0 +1,228 @@
+name: FACT001 Headless Service 3 Providers LAB
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json
+      - cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json
+      - cerebro/connectors/universal/services/five-provider-read-lab/requests/order.v1.json
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: fact001-headless-provider-read-lab
+  cancel-in-progress: false
+jobs:
+  owner-signed-read:
+    if: "!startsWith(github.event.head_commit.message, 'FACT001_CEREBRO_UNIFIED_5_READ_OWNER')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Verify fixed owner signature claims and read-only providers
+        run: |
+          node --test cerebro/connectors/universal/services/provider-headless-lab/tests/*.test.mjs
+      - name: "Signed CEREBRO service reads Cloudflare Vercel Supabase from Vault"
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const request=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/verify.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',client_id:'cerebro',source:'owner_order',operation:'provider.inventory.read',request_id:'FACT001-HEADLESS-PROVIDER-READ-20261110'};
+          if(JSON.stringify(Object.keys(request).sort())!==JSON.stringify(Object.keys(expected).sort())||Object.entries(expected).some(([k,v])=>request[k]!==v))throw Error('COMMAND_SCOPE_DENIED');
+          const base='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab';
+          async function call(route,jwt,method='GET',body){
+           const response=await fetch(base+'/'+route,{method,headers:{Accept:'application/json',...(jwt?{Authorization:'Bearer '+jwt}:{}),...(body?{'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{}) ,redirect:'error',signal:AbortSignal.timeout(25000)});
+           let data={};try{data=await response.json()}catch{}
+           return {http:response.status,data};
+          }
+          const anonymous=await call('health');
+          const fake=await call('health','not-a-signed-token');
+          if(anonymous.http!==401||fake.http!==401)throw Error('UNAUTHENTICATED_HTTP_ACCESS');
+          console.log('FACT001_HEADLESS_ANONYMOUS_401=true');
+          console.log('FACT001_HEADLESS_FORGED_401=true');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('SIGNED_IDENTITY_UNAVAILABLE');
+          const u=endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1');
+          const r=await fetch(u,{headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!r.ok)throw Error('OIDC_HTTP_'+r.status);
+          const jwt=(await r.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('OIDC_MALFORMED');
+          const health=await call('health',jwt);
+          if(health.http!==200||health.data?.status!=='SIGNED_HEADLESS_LAB_READY')throw Error('SIGNED_IDENTITY_DENIED');
+          console.log('FACT001_HEADLESS_SIGNED_SERVICE=VERIFIED');
+          let errors=0;
+          for(const provider of ['cloudflare','vercel','supabase']){
+           const response=await call('verify',jwt,'POST',{...request,provider});
+           const ok=response.http===200&&response.data?.status==='VERIFIED_READ'&&response.data?.provider===provider&&response.data?.writes===0&&response.data?.credentials_exposed===false;
+           console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'='+String(ok?'VERIFIED':'BLOCKED'));
+           console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_HTTP='+response.http);
+           if(ok)console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_OBJECTS='+response.data.object_count);
+           if(!ok){console.log('FACT001_HEADLESS_PROVIDER_'+provider.toUpperCase()+'_ERROR='+String(response.data?.code||response.data?.status||'UNEXPECTED').replace(/[^A-Z0-9_]/g,'').slice(0,48));errors++;}
+          }
+          console.log('FACT001_HEADLESS_ADDITIONAL_PROVIDER_WRITES=0');
+          if(errors)throw Error('PROVIDER_READ_GATES_FAILED_'+errors);
+          console.log('FACT001_HEADLESS_PROVIDER_READ_ALL_3=PASS');
+          for(const candidate of [
+           {type:'department',slug:'social-instagram',resources:['compute','relational','async_jobs']},
+           {type:'website',slug:'nueva-web',resources:['website','objects','private_access']}
+          ]){
+           const payload={...request,operation:'factory.plan_internal_unit',
+             request_id:'FACT001-PLAN-20261110-'+(candidate.type==='department'?'DEPARTMENT':'WEBSITE'),
+             unit_type:candidate.type,unit_slug:candidate.slug,required_resources:candidate.resources};
+           const x=await call('plan',jwt,'POST',payload);
+           const generated=x.data?.files||[];
+           const manifest=generated.find(f=>f.path.endsWith('/manifest.json'));
+           const config=generated.find(f=>f.path.endsWith('/config.json'));
+           const valid=x.http===200&&x.data?.status==='FACT001_FACTORY_SCAFFOLD_GENERATED'&&
+             generated.length===18&&x.data?.provider_writes===0&&x.data?.additional_cost_eur===0&&
+             x.data?.unit?.slug===candidate.slug&&
+             manifest?.content?.includes('"status": "DEFINED_NOT_DEPLOYED"')&&
+             config?.content?.includes('"deploy_enabled": false');
+           console.log('FACT001_HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'='+String(valid?'VERIFIED':'BLOCKED'));
+           console.log('FACT001_HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_FILES='+generated.length);
+           if(!valid)throw Error('HEADLESS_PLANNER_'+candidate.type.toUpperCase()+'_NOT_VERIFIED_'+x.http);
+          }
+          console.log('FACT001_HEADLESS_PLANNER_18_ARTIFACTS_PER_UNIT=PASS');
+          for(const provider of ['github','notion']){
+           const order={...request,operation:'provider.service_identity.probe',
+             request_id:'FACT001-INDEPENDENT-IDENTITIES-20261110',provider};
+           const result=await call('service-identity',jwt,'POST',order);
+           const verified=result.http===200&&result.data?.status==='SERVICE_IDENTITY_READ_VERIFIED'&&
+             result.data?.provider===provider&&result.data?.independent_service===true&&
+             result.data?.admin_write_verified===false&&result.data?.mutations===0;
+           const human=result.http===424&&result.data?.status==='HUMAN_REQUIRED'&&
+             result.data?.reason==='SERVICE_INTEGRATION_CREDENTIAL_NOT_CONFIGURED'&&
+             result.data?.provider===provider&&result.data?.credentials_exposed===false;
+           if(!verified&&!human)throw Error('UNEXPECTED_SERVICE_IDENTITY_RESULT_'+provider.toUpperCase()+'_'+result.http);
+           console.log('FACT001_SERVICE_IDENTITY_'+provider.toUpperCase()+'='+String(verified?'VERIFIED_READ':'HUMAN_REQUIRED'));
+           console.log('FACT001_SERVICE_IDENTITY_'+provider.toUpperCase()+'_REASON='+String(human?result.data?.reason:'NONE'));
+          }
+          console.log('FACT001_SERVICE_CREDENTIAL_VALUES_PRINTED=false');
+          const notionRead=await call('notion-workspace',jwt,'POST',{
+           ...request,operation:'notion.workspace.read',request_id:'FACT001-NOTION-WORKSPACE-20261110'
+          });
+          const authorized=notionRead.http===200&&notionRead.data?.status==='NOTION_INDEPENDENT_WORKSPACE_READ'&&
+           notionRead.data?.provider==='notion'&&notionRead.data?.write_operations===0&&
+           notionRead.data?.credentials_exposed===false&&notionRead.data?.content_returned===false;
+          console.log('FACT001_NOTION_WORKSPACE_READ='+String(authorized?'VERIFIED':'BLOCKED'));
+          console.log('FACT001_NOTION_WORKSPACE_HTTP='+notionRead.http);
+          console.log('FACT001_NOTION_WORKSPACE_CODE='+String(notionRead.data?.code||'NONE'));
+          if(authorized){
+           console.log('FACT001_NOTION_WORKSPACE_HAS_ACCESSIBLE_OBJECTS='+String(notionRead.data?.has_accessible_objects));
+           console.log('FACT001_NOTION_WORKSPACE_VISIBLE_PAGES='+notionRead.data?.accessible_pages_returned);
+          }
+          if(!authorized)throw Error('NOTION_WORKSPACE_READ_REQUIRES_SCOPED_ACCESS');
+          NODE
+
+      - name: "Verify 27 newly shared Opera roots with CEREBRO's pinned OIDC identity (read only)"
+        if: startsWith(github.event.head_commit.message, 'FACT001_NOTION_OPERA_ROOTS_VERIFY')
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-opera-roots.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.opera_roots.access_read',
+            request_id:'FACT001-NOTION-OPERA-ROOTS-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+             Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_ORDER_SCOPE_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-root-access';
+          async function call(jwt,body){
+           const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+            ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(110000)});
+           let data={};try{data=await r.json()}catch{}
+           return {status:r.status,data};
+          }
+          const anon=await call(null,order),fake=await call('not-a-jwt',order);
+          if(anon.status!==401||fake.status!==401)throw Error('FACT001_OIDC_GATE_DENIED');
+          console.log('FACT001_OPERA_ANON_401=PASS');
+          console.log('FACT001_OPERA_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('FACT001_OIDC_UNAVAILABLE');
+          const u=endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1');
+          const identity=await fetch(u,{headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!identity.ok)throw Error('FACT001_OIDC_PROVIDER_DENIED');
+          const jwt=(await identity.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('FACT001_OIDC_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          if(prod.status!==403)throw Error('FACT001_PROD_SCOPE_GATE_FAILED_HTTP_'+prod.status);
+          console.log('FACT001_OPERA_PROD_403=PASS');
+          const r=await call(jwt,order),v=r.data;
+          if(r.status!==200||v?.status!=='NOTION_INDEPENDENT_ROOT_PERMISSION_AUDIT'||
+            v?.checked!==27||v?.results?.length!==27||v?.read_only!==true||
+            v?.write_operations!==0||v?.content_returned!==false||v?.credentials_exposed!==false)
+            throw Error('FACT001_NOTION_ROOT_AUDIT_UNVERIFIED_HTTP_'+r.status);
+          console.log('FACT001_OPERA_TOTAL='+v.checked);
+          console.log('FACT001_OPERA_ACCESSIBLE='+v.accessible);
+          console.log('FACT001_OPERA_DENIED='+v.denied);
+          console.log('FACT001_OPERA_INCONCLUSIVE='+v.inconclusive);
+          for(const e of v.results)console.log('FACT001_OPERA_ROOT '+JSON.stringify({name:e.name,status:e.status}));
+          console.log('FACT001_OPERA_READ_ONLY_AUDIT=PASS');
+          NODE
+
+      - name: "Verify 19 historical Notion private roots via CEREBRO signed identity"
+        if: startsWith(github.event.head_commit.message, 'FACT001_NOTION_BATCH3_VERIFY_20261110')
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const order=JSON.parse(readFileSync('cerebro/connectors/universal/services/provider-headless-lab/requests/notion-batch3.v1.json','utf8'));
+          const expected={company_id:'fenix-capital',engine_id:'FACT-001',environment:'LAB',version:'1.0.0',
+            client_id:'cerebro',source:'owner_order',operation:'notion.opera_batch3.access_read',
+            request_id:'FACT001-NOTION-OPERA-BATCH3-20261110'};
+          if(JSON.stringify(Object.keys(order).sort())!==JSON.stringify(Object.keys(expected).sort())||
+            Object.entries(expected).some(([k,v])=>order[k]!==v))throw Error('FACT001_BATCH3_ORDER_DENIED');
+          const url='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-fact001-headless-provider-lab/notion-batch3-access';
+          const call=async(jwt,body)=>{
+            const r=await fetch(url,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json',
+             ...(jwt?{Authorization:'Bearer '+jwt}:{})},body:JSON.stringify(body),redirect:'error',signal:AbortSignal.timeout(65000)});
+            let data={};try{data=await r.json()}catch{}
+            return {http:r.status,data};
+          };
+          const [anon,fake]=await Promise.all([call(null,order),call('invalid',order)]);
+          if(anon.http!==401||fake.http!==401)throw Error('FACT001_BATCH3_AUTH_GATE_FAILED');
+          console.log('FACT001_BATCH3_ANON_401=PASS');
+          console.log('FACT001_BATCH3_FORGED_401=PASS');
+          const endpoint=process.env.ACTIONS_ID_TOKEN_REQUEST_URL,grant=process.env.ACTIONS_ID_TOKEN_REQUEST_TOKEN;
+          if(!endpoint||!grant)throw Error('FACT001_OIDC_MISSING');
+          const signed=await fetch(endpoint+(endpoint.includes('?')?'&':'?')+'audience='+encodeURIComponent('cerebro-fact001-provider-headless-lab-v1'),
+            {headers:{Authorization:'Bearer '+grant},redirect:'error',signal:AbortSignal.timeout(12000)});
+          if(!signed.ok)throw Error('FACT001_OIDC_ISSUER_DENIED');
+          const jwt=(await signed.json()).value;
+          if(typeof jwt!=='string'||jwt.split('.').length!==3)throw Error('FACT001_OIDC_MALFORMED');
+          const prod=await call(jwt,{...order,environment:'PROD'});
+          if(prod.http!==403)throw Error('FACT001_BATCH3_PROD_NOT_REJECTED_'+prod.http);
+          console.log('FACT001_BATCH3_PROD_403=PASS');
+          const result=await call(jwt,order),v=result.data;
+          if(result.http!==200||v?.status!=='FACT001_NOTION_BATCH3_INDEPENDENT_READ'||v.checked!==19||
+           v.results?.length!==19||v.content_returned!==false||v.write_operations!==0||v.credential_exposed!==false)
+            throw Error('FACT001_BATCH3_RESPONSE_INVALID_HTTP_'+result.http);
+          console.log('FACT001_BATCH3_CHECKED='+v.checked);
+          console.log('FACT001_BATCH3_ACCESSIBLE='+v.accessible);
+          console.log('FACT001_BATCH3_DENIED='+v.denied);
+          console.log('FACT001_BATCH3_INCONCLUSIVE='+v.inconclusive);
+          for(const item of v.results)console.log('FACT001_BATCH3_ROOT '+JSON.stringify({name:item.name,status:item.status}));
+          console.log('FACT001_BATCH3_READONLY_AUDIT=PASS');
+          NODE
+
+  unified-five-read:
+    if: github.repository == 'carlosjmunoz78/fenix-capital-inmo-map' && github.actor == 'carlosjmunoz78' && startsWith(github.event.head_commit.message, 'FACT001_CEREBRO_UNIFIED_5_READ_OWNER')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with: {persist-credentials: false}
+      - name: Test allowlisted 5-provider service router
+        run: node --test cerebro/connectors/universal/services/five-provider-read-lab/tests/*.test.mjs
+      - name: Signed CEREBRO LAB unified 5 provider independent read
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node cerebro/connectors/universal/services/five-provider-read-lab/run-once.mjs
+      - name: Preserve redacted evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: fact001-five-provider-read-lab-evidence
+          path: fact001-five-provider-lab-evidence.json
+          if-no-files-found: ignore
+          retention-days: 30

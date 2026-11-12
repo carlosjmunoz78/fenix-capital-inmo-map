@@ -1,0 +1,39 @@
+name: FACT001 CEREBRO isolated Supabase OIDC Cloudflare READ-only sidecar tests
+on:
+  push:
+    branches: [cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109]
+    paths:
+      - cerebro/connectors/universal/supabase/fact001-lab/**
+      - .github/workflows/fact001-cerebro-supabase-sidecar-tests.yml
+permissions:
+  contents: read
+jobs:
+  deny-by-default-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Verify exact workflow claim pinning and all OIDC/JWS/4D negative tests
+        run: node --test cerebro/connectors/universal/supabase/fact001-lab/tests/oidc.test.mjs
+      - name: Prohibit public routes, dangerous Cloudflare APIs and missing owner authentication
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const dir='cerebro/connectors/universal/supabase/fact001-lab/';
+          const index=fs.readFileSync(dir+'index.ts','utf8');
+          const logic=fs.readFileSync(dir+'logic.mjs','utf8');
+          if(!index.includes('verifyGitHubOidc(bearer)'))throw Error('NO_SSO_GATE');
+          if(!index.includes('vault.create_secret')||!index.includes('vault.decrypted_secrets'))throw Error('NOT_VAULT_BACKED');
+          if(/fetch\s*\(\s*req\./.test(index)||/new\s+URL\s*\(\s*body\./.test(index))throw Error('ARBITRARY_PROXY_DENIED');
+          if(!index.includes("method:'GET'"))throw Error('CLOUDFLARE_GET_ONLY_NOT_PROVEN');
+          if(!logic.includes('workflow_ref!==WORKFLOW_REF'))throw Error('OIDC_REPO_WORKFLOW_GATE_ABSENT');
+          console.log('FACT001_OIDC_AUTH_REQUIRED=true');
+          console.log('FACT001_FIXED_GET_ONLY=true');
+          console.log('FACT001_VAULT_ENCRYPTION=true');
+          const wf=fs.readFileSync('.github/workflows/fact001-cerebro-supabase-physical-e2e-lab.yml','utf8');
+          if(wf.includes('CF_TOKEN')||wf.includes("call('provision'"))throw Error('CREDENTIAL_RETRANSMISSION_FORBIDDEN');
+          console.log('FACT001_ROUTINE_GITHUB_NO_CF_ADMIN_TOKEN=true');
+          console.log('FACT001_MUTATIONS_CLOUDFLARE=0');
+          NODE

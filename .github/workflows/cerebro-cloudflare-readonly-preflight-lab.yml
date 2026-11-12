@@ -1,0 +1,40 @@
+name: FACT-001 Cloudflare LAB - physical read-only preflight
+
+# One isolated push probe; no PR/fork secrets; no scheduled execution.
+on:
+  push:
+    branches:
+      - cerebro/fact001-cloudflare-universal-dual-lab-v0-20261109
+    paths:
+      - .github/workflows/cerebro-cloudflare-readonly-preflight-lab.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-cloudflare-readonly-preflight-lab
+  cancel-in-progress: false
+
+jobs:
+  prove-secret-and-account-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      CEREBRO_CLOUDFLARE_API_TOKEN: ${{ secrets.CEREBRO_CLOUDFLARE_API_TOKEN }}
+    steps:
+      - name: Checkout current feature branch only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Attest Cloudflare token status and exact-account D1/Worker inventory (GET only)
+        run: node cerebro/connectors/universal/preflight/cloudflare-readonly.mjs
+      - name: Prove no mutations are present in the preflight source
+        run: |
+          node - <<'NODE'
+          const fs=require('node:fs');
+          const source=fs.readFileSync('cerebro/connectors/universal/preflight/cloudflare-readonly.mjs','utf8');
+          if (!source.includes("method: 'GET'")) process.exit(1);
+          if (/method:\s*['"](?:POST|PUT|PATCH|DELETE)['"]/.test(source)) process.exit(2);
+          console.log('CF_CODE_GET_ONLY=true');
+          NODE

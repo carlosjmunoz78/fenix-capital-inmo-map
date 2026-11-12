@@ -1,0 +1,13 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {readFileSync} from 'node:fs';
+import {SRC,BASE,FLAG,ROUTE,sha,patch,rollback} from './owner-console-v33-shadow-patch.mjs';
+const old=readFileSync(SRC,'utf8');const next=patch(old);
+test('exact deployed old gateway matches Git SHA',()=>assert.equal(sha(old),BASE));
+test('preserve original byte-for-byte via rollback',()=>assert.equal(rollback(next),old));
+test('remain OFF by default',()=>assert.ok(next.includes(FLAG)));
+test('owner authenticated before route',()=>assert.ok(next.indexOf('const owner=await authorizedOwner(req);')<next.indexOf('suffix==="cloudflare-inventory"')));
+test('only read-only fixed LAB owner-canary',()=>assert.ok(ROUTE.includes('owner-inventory')&&!ROUTE.includes('api.cloudflare.com')&&ROUTE.includes('cloudflare_writes!==0')));
+test('429 fail closed no retries',()=>assert.ok(ROUTE.includes('r.status===429')&&ROUTE.includes('retry_automatically:false')));
+test('old chat retained',()=>assert.ok(next.includes('if(req.method==="POST"&&suffix==="chat"){')));
+test('old 4 read endpoints retained',()=>{for(const k of ['suffix==="health"','suffix==="contract"','suffix==="engines"','suffix==="preferences"'])assert.ok(next.includes(k))});
+test('no duplicate patch',()=>assert.throws(()=>patch(next)));
+test('source drift blocks deployment',()=>assert.throws(()=>patch(old+' ')));

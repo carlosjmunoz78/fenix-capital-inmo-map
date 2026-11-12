@@ -1,0 +1,76 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix-capital",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "token_id": "45c74c2de351bf8c1deeb1bee3f8f7ef",
+  "name": "cerebro_cf_account_token_issuer_v1",
+  "issued_on": "2026-11-10T08:10:11Z",
+  "last_used_on": "2026-11-11T08:49:44Z",
+  "source": "Cloudflare Account API GET /accounts/{account_id}/tokens/{token_id}",
+  "original": {
+    "name": "cerebro_cf_account_token_issuer_v1",
+    "policies": [
+      {
+        "effect": "allow",
+        "resources": {
+          "com.cloudflare.api.account.e39a57e1ac42650ca5a6d5307cf0ac8e": "*"
+        },
+        "permission_groups": [
+          {
+            "id": "c6f97eeee13345db8cc00af0953a42de"
+          },
+          {
+            "id": "5e5d3e8efeec49f3afb67bafecbcd511"
+          },
+          {
+            "id": "05a2a65760a546439ed29762b163cece"
+          },
+          {
+            "id": "5bc3f8b21c554832afc660159ab75fa4"
+          },
+          {
+            "id": "eb56a6953c034b9d97dd838155666f06"
+          },
+          {
+            "id": "6c80e02421494afc9ae14414ed442632"
+          },
+          {
+            "id": "7cf72faf220841aabcfdfab81c43c4f6"
+          }
+        ]
+      }
+    ]
+  },
+  "candidate": {
+    "name": "cerebro_cf_account_token_issuer_v1",
+    "policies": [
+      {
+        "effect": "allow",
+        "resources": {
+          "com.cloudflare.api.account.e39a57e1ac42650ca5a6d5307cf0ac8e": "*"
+        },
+        "permission_groups": [
+          {
+            "id": "5bc3f8b21c554832afc660159ab75fa4"
+          },
+          {
+            "id": "eb56a6953c034b9d97dd838155666f06"
+          }
+        ]
+      }
+    ]
+  },
+  "safety": {
+    "description": "Remove redundant Billing/Integration/Gateway scopes but preserve token lifecycle capabilities",
+    "requires_live_get_before_put": true,
+    "requires_backup": true,
+    "requires_paired_v2": true,
+    "legacy_revocation": false,
+    "no_billing_dns_worker_changes": true,
+    "rollback": "PUT original policy on exact token ID only if service smoke fails, readback required",
+    "cost_eur": 0
+  }
+}
