@@ -26,7 +26,7 @@ const PRIORITY = Object.freeze(['NORMAL','HIGH','CRITICAL']);
 const MIMES = Object.freeze(['image/png','image/jpeg','image/webp','video/mp4','audio/wav','audio/mpeg','application/zip','model/gltf-binary']);
 const REQUEST_KEYS = Object.freeze(['schema_version','event_type','request_id','company_id','engine_id','origin_engine_id',
   'environment','version','trigger','asset_kind','capability_id','consumer_engine_id','channel_id','placement',
-  'brief_ref','format','rights_profile','priority','requested_at_utc','deadline_utc','policy_version','budget','reply_to']);
+  'item_id','brief_ref','format','rights_profile','priority','requested_at_utc','deadline_utc','policy_version','budget','reply_to']);
 const FORMAT_KEYS = Object.freeze(['profile_id','width_px','height_px','duration_seconds','output_mime']);
 const BUDGET_KEYS = Object.freeze(['max_additional_cost_eur','max_attempts','prepaid_only',
   'paid_execution_enabled','auto_recharge','publish_requested']);
@@ -65,6 +65,7 @@ export function validateMediaRequest(request) {
     typeof r.capability_id!=='string'||r.capability_id.length>80||
     !CAPABILITY.test(r.capability_id)||!r.capability_id.startsWith(r.asset_kind+'.'))
     fail('CAPABILITY');
+  if(!/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(r.item_id||''))fail('ITEM_ID');
   if(!SEGMENT.test(r.channel_id||'')||!SEGMENT.test(r.placement||'')||
     !REF.test(r.brief_ref||'')||!REPLY.test(r.reply_to||'')||
     !POLICY.test(r.policy_version||'')||!RIGHTS.includes(r.rights_profile)||
@@ -94,7 +95,7 @@ export function validateMediaRequest(request) {
 export function idempotencyKey(r) {
   validateMediaRequest(r);
   return createHash('sha256').update([r.company_id,r.environment,r.origin_engine_id,
-    r.request_id,r.consumer_engine_id].join('\0')).digest('hex');
+    r.request_id,r.consumer_engine_id,r.item_id].join('\0')).digest('hex');
 }
 /**
  * trustedIdentity + trustedEngineRegistry MUST be supplied by Gateway internal
@@ -156,7 +157,7 @@ export function planUniversalMediaRequest(request, {trustedIdentity, trustedEngi
     state:'LAB_REQUEST_VALIDATED_NO_DISPATCH',event_type:MEDIA_EVENTS.request,
     company_id:r.company_id,engine_id:r.engine_id,origin_engine_id:r.origin_engine_id,
     consumer_engine_id:r.consumer_engine_id,environment:r.environment,
-    request_id:r.request_id,asset_kind:r.asset_kind,capability_id:r.capability_id,
+    request_id:r.request_id,item_id:r.item_id,asset_kind:r.asset_kind,capability_id:r.capability_id,
     channel_id:r.channel_id,placement:r.placement,format_profile_id:r.format.profile_id,
     idempotency_key:key,rights_gate:'PENDING',visual_qa:'PENDING',
     producer_execution:'NOT_AUTHORIZED_BY_THIS_PLANNER',
