@@ -1,0 +1,18 @@
+name: CEREBRO Gateway v36 · Conversation followups isolated QA
+on:
+  push:
+    branches: [fix/cerebro-operativa-followups-v36-20261112]
+permissions: {contents: read}
+jobs:
+  contract-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with: {persist-credentials: false}
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with: {node-version: '24'}
+      - name: Source and security regression tests against exact live v35
+        run: node --test tests/cerebro-gateway-followups-v36.test.mjs
+      - name: Existing work and natural response regression
+        run: node --test tests/cerebro-gateway-activity-v35.test.mjs tests/cerebro-gateway-natural-v35.test.mjs
