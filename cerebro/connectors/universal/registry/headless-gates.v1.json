@@ -526,6 +526,28 @@
         "limitations": "NOT universal all-products PROD permissions; native complete D1 backup/escrow and deployment promotion remain separate resiliency work",
         "stop_repetitive_bulk_backups": true,
         "console_dependency": false
+      },
+      "capability_acceptance_20261112": {
+        "scope": "FUNCTIONAL_SCOPED_CONNECTOR_NOT_CONSOLE_OR_UNIVERSAL_AUTONOMY",
+        "status": "VERIFIED_SCOPED_CAPABILITIES",
+        "evidence": [
+          "docs/FACT001_CLOUDFLARE_D1_LOGICAL_E2E_2026-11-11.md",
+          "docs/FACT001_CF_LIFECYCLE_WORKERS_PAGES_E2E_2026-11-11.md",
+          "docs/FACT001_CLOUDFLARE_V2_E2E_CIERRE_2026-11-11.md"
+        ],
+        "verified_cerebro_headless": [
+          "vault_service_identity",
+          "github_oidc_signed_read",
+          "scoped_d1_create_update_rollback_soft_delete",
+          "d1_queue_replay"
+        ],
+        "verified_with_separate_chatgpt_oauth": [
+          "workers_create_update_rollback_delete_rebuild",
+          "pages_project_create_update_rollback_delete"
+        ],
+        "independent_service_worker_pages_write": "NOT_YET_VERIFIED",
+        "full_d1_real_offsite_disaster_recovery": "PENDING",
+        "note": "Stop repeating lifecycle probes. Do not infer headless all-product write from ChatGPT OAuth. Functional acceptance is narrower than universal FULL."
       }
     },
     {
