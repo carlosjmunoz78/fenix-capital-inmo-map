@@ -43,7 +43,13 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await expect(operative.getByRole('radio',{name:'Normal'})).toHaveAttribute('aria-checked','true');
  await expect(operative.getByRole('button',{name:'Archivos todavía no disponibles'})).toBeDisabled();
  const composer=operative.getByRole('textbox',{name:'Mensaje para CEREBRO'});
- expect(await composer.getAttribute('placeholder')).toBeNull();
+ const chatPanel=operative.locator('.operativa-dialogue');
+ const inlineComposer=chatPanel.locator('.operativa-jarvis-composer');
+ await expect(inlineComposer).toBeVisible();
+ await expect(inlineComposer).toHaveCSS('position','relative');
+ expect(await inlineComposer.evaluate(el=>el.parentElement?.classList.contains('operativa-dialogue'))).toBe(true);
+ await expect(composer).toHaveAttribute('placeholder','Escribe o dicta a CEREBRO…');
+ await expect(operative.getByRole('button',{name:'Enviar mensaje'})).toBeDisabled();
  await expect(operative.getByRole('button',{name:'Dictar'})).toBeVisible();
  await expect(operative.getByRole('button',{name:'Conversación por voz'})).toBeVisible();
 
@@ -55,6 +61,7 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await inspector.getByRole('button',{name:'Cerrar'}).click();
 
  await composer.fill('Prueba Operativa nueva');
+ await expect(operative.getByRole('button',{name:'Enviar mensaje'})).toBeEnabled();
  await operative.getByRole('button').filter({has:page.locator('svg')}).count();
  await composer.press('Enter');
  await expect.poll(()=>postedChat?.message??null,{timeout:5_000}).toBe('Prueba Operativa nueva');

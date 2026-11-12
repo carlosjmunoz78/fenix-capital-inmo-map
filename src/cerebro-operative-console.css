@@ -43,3 +43,16 @@
 .operativa-work-meta{flex-wrap:wrap;gap:6px 12px;font-size:10px}
 @media(max-width:900px){.operativa-dialogue{width:calc(100% - 48px)}}
 @media(max-width:720px){.operativa-dialogue{width:calc(100% - 32px);margin:12px auto 2px}.operativa-dialogue-log{max-height:230px}.operativa-work-main{padding:15px 4px}.operativa-work-copy strong{font-size:13px}}
+
+/* CEREBRO Operativa v3 · one in-flow composer, never two competing floating layers. */
+.operativa-dialogue{overflow:hidden}
+.operativa-dialogue-log{max-height:min(340px,46vh);scrollbar-gutter:stable}
+.operativa-dialogue>.operativa-jarvis-composer{position:relative;inset:auto;left:auto;right:auto;bottom:auto;transform:none;z-index:auto;width:100%;margin:0;border:0;border-top:1px solid rgba(97,220,255,.2);border-radius:0 0 17px 17px;box-shadow:none;backdrop-filter:none;background:rgba(3,18,25,.97);padding:10px 14px;flex-wrap:wrap;gap:8px}
+.operativa-dialogue .operativa-composer-form{min-width:0}
+.operativa-dialogue .operativa-composer-form textarea{min-height:44px;padding:12px 8px;font-size:15px}
+.operativa-dialogue .operativa-composer-form textarea::placeholder{color:#7d9eac;opacity:1}
+.operativa-dialogue .operativa-send:disabled{opacity:.3;cursor:not-allowed}
+.operativa-dialogue .operativa-dictation-error{position:static;display:block;flex-basis:100%;margin:0;padding:0 12px 4px;color:#ffc4bd;font-size:12px;line-height:1.5;white-space:normal}
+.operativa-premium{padding-bottom:26px}
+.operativa-premium .operativa-modes button:disabled,.operativa-premium .operativa-power-options button:disabled{opacity:.45;cursor:wait}
+@media(max-width:720px){.operativa-dialogue>.operativa-jarvis-composer{bottom:auto;left:auto;width:100%;padding:9px 8px}.operativa-dialogue .operativa-composer-form{gap:3px}.operativa-dialogue .operativa-composer-form textarea{font-size:16px}.operativa-dialogue .operativa-dictate,.operativa-dialogue .operativa-send{width:34px;height:38px}.operativa-dialogue .operativa-voice{width:40px;height:40px}.operativa-premium{padding-bottom:20px}}
