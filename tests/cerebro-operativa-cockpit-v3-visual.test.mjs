@@ -16,7 +16,7 @@ test('Five original navigation destinations remain intact, without replacing the
 });
 test('Cockpit is explicit opt-in and original Operativa is unchanged by default',()=>{
  assert.ok(host.includes("get('visual_lab')==='cockpit-v3'"));
- assert.ok(host.includes('<CerebroOperativeConsole visualPreview={visualPreview}/>'));
+ assert.ok(host.includes('visualPreview?<CerebroOperativeConsole visualPreview/>:<CerebroOperativeConsole/>'));
  assert.ok(operative.includes("visualPreview=false"));
  assert.ok(operative.includes('if(visualPreview)return <CerebroOperativeCockpitV3'));
  assert.ok(operative.includes('return <main className="operativa-premium"'));
