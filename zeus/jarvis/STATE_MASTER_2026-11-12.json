@@ -145,7 +145,7 @@
     38,
     40
   ],
-  "next_block": "B2_OWNER_ID_APPROVED_PROVISIONING_AND_OWNER_TWO_REAL_DEVICES",
+  "next_block": "B2_OWNER_LINK_VIA_APPROVED_AUTHENTICATED_WORKFLOW_AND_PC_MOBILE_E2E",
   "rollback": "Discard unmerged PR35 changes; no Cloudflare/Supabase runtime mutations were made in this session",
   "human_required_if_applicable": [
     "External login/MFA/owner physical device verification"
@@ -167,5 +167,16 @@
     },
     "next": "No policy/grant changes before B2 real and direct physical E2E"
   },
-  "footnote": "All 420 functional requirements still require per-item implementation and physical acceptance evidence; RC2 source verification is NOT operational certification."
+  "footnote": "All 420 functional requirements still require per-item implementation and physical acceptance evidence; RC2 source verification is NOT operational certification.",
+  "library_continuity": {
+    "path": "/ZEUS/JARVIS/JARVIS_EJECUCION_ESTADO_2026-11-12.md",
+    "verified_upload": true,
+    "source": "PR35 verification snapshot",
+    "no_secrets": true
+  },
+  "step_9": {
+    "status": "POR_AUDITAR",
+    "observed": "App /cerebro reached in owner Opera session; Inicio content and 'Identidad no disponible' displayed; JARVIS Console session not physically confirmed.",
+    "no_production_changes": true
+  }
 }
