@@ -14,3 +14,8 @@ html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz']{displ
 
 @media(max-width:900px){.cerebro-browser-entry-button{top:58px;right:12px}.cerebro-jarvis-shell .cerebro-header{padding-right:0;margin-top:40px}.cerebro-jarvis-shell .cerebro-panel{padding:18px}.cerebro-jarvis-shell .cerebro-chat-log{min-height:300px;max-height:56vh}}
 @media(max-width:760px){.cerebro-host-topbar{min-height:42px;padding:5px 8px;justify-content:stretch;overflow-x:auto}.cerebro-view-switch{width:100%;min-width:max-content}.cerebro-view-switch-label{display:none}.cerebro-view-switch button{white-space:nowrap;flex:1}.cerebro-browser-entry-button{top:56px;right:8px;height:31px;padding:0 9px;font-size:9px}.cerebro-jarvis-shell .cerebro-console{padding:12px 8px 18px}.cerebro-jarvis-shell .cerebro-header{grid-template-columns:1fr auto;margin-top:42px}.cerebro-jarvis-shell .cerebro-header>div{grid-column:1/-1;grid-row:1}.cerebro-jarvis-shell .cerebro-back{grid-column:1;grid-row:2}.cerebro-jarvis-shell .cerebro-lab{grid-column:2;grid-row:2}.cerebro-jarvis-shell .cerebro-fields{grid-template-columns:1fr}.cerebro-jarvis-shell .cerebro-panel{padding:15px;border-radius:16px}.cerebro-jarvis-shell .cerebro-chat-log{min-height:330px;max-height:58vh}.cerebro-jarvis-shell .cerebro-chat-form{grid-template-columns:1fr}.cerebro-jarvis-shell .cerebro-chat-form button{width:100%}.cerebro-jarvis-shell .cerebro-voice-main{width:100%;min-width:0}}
+
+/* Console route isolation: suppress duplicate App launchers only while /cerebro owns the UI. */
+html[data-cerebro-console='1'] button[aria-label='Abrir chat interno'],
+html[data-cerebro-console='1'] button[aria-label='Abrir acciones por voz'],
+html[data-cerebro-console='1'] .calc-launcher{display:none!important}
