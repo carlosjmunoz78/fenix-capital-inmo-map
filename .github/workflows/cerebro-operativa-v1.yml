@@ -6,6 +6,9 @@ on:
     paths:
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
+      - 'src/CerebroOperativeLiveConsole.tsx'
+      - 'src/useCerebroOperativaChat.ts'
+      - 'src/cerebro-operative-live-console.css'
       - 'src/cerebroActivityApi.ts'
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
@@ -22,6 +25,9 @@ on:
     paths:
       - 'src/CerebroConsoleHost.tsx'
       - 'src/CerebroOperativeConsole.tsx'
+      - 'src/CerebroOperativeLiveConsole.tsx'
+      - 'src/useCerebroOperativaChat.ts'
+      - 'src/cerebro-operative-live-console.css'
       - 'src/cerebroActivityApi.ts'
       - 'src/cerebro-console-host.css'
       - 'src/cerebro-operative-console.css'
