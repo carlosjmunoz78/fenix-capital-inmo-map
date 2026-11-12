@@ -26,3 +26,5 @@
 .operativa-attach:disabled{opacity:.3;cursor:not-allowed}
 .operativa-live-state.is-unavailable{color:#e7bb90}
 @media(max-width:720px){.operativa-dialogue{width:calc(100% - 18px);margin:8px auto 12px}.operativa-dialogue header{align-items:flex-start;flex-direction:column;gap:4px}.operativa-dialogue-log{max-height:205px}.operativa-jarvis-composer{bottom:calc(73px + env(safe-area-inset-bottom,0px))}}
+/* Operativa modal must outrank the fixed/sticky 5-tab navigation. */
+.operativa-inspector-backdrop{z-index:180}
