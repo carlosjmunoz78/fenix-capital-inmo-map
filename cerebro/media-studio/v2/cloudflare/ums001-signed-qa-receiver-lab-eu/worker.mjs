@@ -16,7 +16,7 @@ export default {
    }catch(error){
     // Never log the signed payload, key material, archive identifiers or user data.
     const code=String(error?.message||'UNKNOWN')
-      .replace(/[^A-Z0-9_]/gi,'_').slice(0,100);
+      .replace(/[^A-Z0-9_]/gi,'_').toUpperCase().slice(0,100);
     console.error('UMS001_SIGNED_QA_DENIED',code);
     // Use a fixed key: one canary only, no unbounded diagnostic records.
     // No error message body or stack is persisted.
