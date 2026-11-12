@@ -68,7 +68,6 @@ export default function CerebroOperativeCockpitV3({
  const queued=useMemo(()=>runs.reduce((n,r)=>n+realPending(r),0),[runs]);
  const failed=useMemo(()=>runs.filter(isFailed),[runs]);
  const recent=useMemo(()=>runs.filter(r=>r.status==='completed'&&r.conclusion==='success'),[runs]);
- const [highlight,setHighlight]=useState<number|null>(null);
  const status= snapshot.voiceSpeaking?'speaking':
   snapshot.voiceListening?'listening':
   (snapshot.sending?'responding':
@@ -86,7 +85,7 @@ export default function CerebroOperativeCockpitV3({
   if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();onSubmit()}
  }
  const recentRuns=runs.slice(0,14);
- const selectPanel=(next:View)=>{setView(next);setHighlight(null)};
+ const selectPanel=(next:View)=>setView(next);
  const modules=useMemo(()=>{
   const engines=new Map<string,{count:number;running:number}>();
   for(const run of runs){
