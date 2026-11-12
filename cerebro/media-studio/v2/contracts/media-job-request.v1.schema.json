@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "cerebro://ums001/contracts/media-job-request.v1.schema.json",
+  "title": "CEREBRO OS Universal Media Job Request V1",
+  "description": "Contrato canónico de solicitud agnóstica de motor y canal; autenticar al emisor EXTERNAMENTE en CEREBRO Gateway. No confiere permisos, coste, publicación ni ejecución por sí mismo.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event_type",
+    "request_id",
+    "company_id",
+    "engine_id",
+    "origin_engine_id",
+    "environment",
+    "version",
+    "trigger",
+    "asset_kind",
+    "capability_id",
+    "consumer_engine_id",
+    "channel_id",
+    "placement",
+    "brief_ref",
+    "format",
+    "rights_profile",
+    "priority",
+    "requested_at_utc",
+    "deadline_utc",
+    "policy_version",
+    "budget",
+    "reply_to"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "event_type": {
+      "const": "MEDIA_JOB_REQUESTED"
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$"
+    },
+    "company_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]{1,62}$"
+    },
+    "engine_id": {
+      "const": "UMS-001"
+    },
+    "origin_engine_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,63}$"
+    },
+    "environment": {
+      "enum": [
+        "LAB",
+        "PREPROD",
+        "PROD"
+      ]
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "trigger": {
+      "enum": [
+        "ENGINE_EVENT",
+        "CHATGPT",
+        "CONSOLE"
+      ]
+    },
+    "asset_kind": {
+      "enum": [
+        "IMAGE",
+        "VIDEO",
+        "AUDIO",
+        "AV_PACKAGE",
+        "THREED",
+        "VFX",
+        "ADAPTATION"
+      ]
+    },
+    "capability_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]*(\\.[A-Z][A-Z0-9_]*)*$",
+      "maxLength": 80
+    },
+    "consumer_engine_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]{2,63}$"
+    },
+    "channel_id": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,63}$"
+    },
+    "placement": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9_]{1,79}$"
+    },
+    "brief_ref": {
+      "type": "string",
+      "pattern": "^(cerebro|artifact):[A-Za-z0-9/_:.#-]{4,250}$"
+    },
+    "format": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile_id",
+        "width_px",
+        "height_px",
+        "duration_seconds",
+        "output_mime"
+      ],
+      "properties": {
+        "profile_id": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]{2,63}$"
+        },
+        "width_px": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 64,
+          "maximum": 16384
+        },
+        "height_px": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 64,
+          "maximum": 16384
+        },
+        "duration_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "output_mime": {
+          "type": "string",
+          "enum": [
+            "image/png",
+            "image/jpeg",
+            "image/webp",
+            "video/mp4",
+            "audio/wav",
+            "audio/mpeg",
+            "application/zip",
+            "model/gltf-binary"
+          ]
+        }
+      }
+    },
+    "rights_profile": {
+      "enum": [
+        "SYNTHETIC_ORIGINAL",
+        "LICENSED_LIBRARY",
+        "OWNED_ASSET",
+        "AUTHORIZED_PERSON"
+      ]
+    },
+    "priority": {
+      "enum": [
+        "NORMAL",
+        "HIGH",
+        "CRITICAL"
+      ]
+    },
+    "requested_at_utc": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "deadline_utc": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "policy_version": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{1,63}$"
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_additional_cost_eur",
+        "max_attempts",
+        "prepaid_only",
+        "paid_execution_enabled",
+        "auto_recharge",
+        "publish_requested"
+      ],
+      "properties": {
+        "max_additional_cost_eur": {
+          "type": "number",
+          "minimum": 0
+        },
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "prepaid_only": {
+          "type": "boolean"
+        },
+        "paid_execution_enabled": {
+          "type": "boolean"
+        },
+        "auto_recharge": {
+          "type": "boolean"
+        },
+        "publish_requested": {
+          "type": "boolean"
+        }
+      }
+    },
+    "reply_to": {
+      "type": "string",
+      "pattern": "^cerebro://events/[A-Za-z0-9/_-]{4,200}$"
+    }
+  }
+}
