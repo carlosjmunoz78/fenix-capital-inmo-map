@@ -21,6 +21,7 @@ type Props={
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
  ownerUniverse:OwnerUniverseResult;
+ chatLines:{role:'user'|'cerebro';text:string}[];
  children:ReactNode;
 };
 const NAV:readonly [View,string,typeof Building2][]=[
@@ -64,7 +65,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,ownerUniverse,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,chatLines,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
@@ -143,13 +144,19 @@ export default function CerebroOperativeCockpitV3({
      </button>
     </div>
 
-    <div className="op3-command">
+    <div className={`op3-command ${chatLines.length?'has-chat':''}`}>
      <div className={`op3-pulse is-${status}`} aria-label={statusText} role="img">
       <i className="op3-ring op3-ring-a"/><i className="op3-ring op3-ring-b"/>
       <i className="op3-ring op3-ring-c"/><i className="op3-core"/>
       <span className="op3-wave" aria-hidden="true"><i/><i/><i/><i/><i/></span>
      </div>
-     <div className="op3-command-copy"><h1>¿Qué necesitas hacer?</h1>
+     {chatLines.length?<div className="op3-chat-history" role="log" aria-label="Historial de conversación" aria-live="polite">
+      {chatLines.map((line,index)=><div key={index} className={`op3-chat-entry is-${line.role}`}>
+       <strong>{line.role==='user'?'Tú':'Respuesta'}</strong>
+       <p>{line.text}</p>
+      </div>)}
+     </div>:null}
+     <div className="op3-command-copy"><h1>{chatLines.length?'Continuar conversación':'¿Qué necesitas hacer?'}</h1>
       <p>Pregunta, investiga, ejecuta o supervisa. Un punto de entrada para todo.</p>
       <span role="status" aria-live="polite" className="op3-voice-status">{statusText}</span>
      </div>
