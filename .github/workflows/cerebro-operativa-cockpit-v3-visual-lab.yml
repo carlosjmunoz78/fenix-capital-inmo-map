@@ -9,6 +9,7 @@ on:
       - src/CerebroOperativeConsole.tsx
       - src/CerebroConsoleHost.tsx
       - tests/cerebro-operativa-cockpit-v3-visual.test.mjs
+      - tests/cerebro-operativa-cockpit-v3-e2e.spec.ts
       - .github/workflows/cerebro-operativa-cockpit-v3-visual-lab.yml
   pull_request:
     paths:
@@ -39,6 +40,22 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: TypeScript and Vite compile
         run: npm run build
+      - name: Install isolated Chromium for visual regression
+        run: npx playwright install --with-deps chromium
+      - name: Real browser QA of cockpit and conversation bridge (mock authentication)
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+        run: npx playwright test tests/cerebro-operativa-cockpit-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Preserve isolated desktop/mobile visual evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: operativa-cockpit-v3-visual-evidence
+          path: test-results/cockpit-v3-*.png
+          if-no-files-found: ignore
+          retention-days: 7
       - name: Confirm no production deployment configured
         run: |
           test "${{ github.event_name }}" != "workflow_dispatch" || exit 1
