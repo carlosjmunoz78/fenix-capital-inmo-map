@@ -25,8 +25,10 @@ const live={company_id:'fenix',engine_id:'UMS-001',environment:'LAB',
 async function keys(){
  const pair=await crypto.subtle.generateKey('Ed25519',true,['sign','verify']);
  const priv=Buffer.from(await crypto.subtle.exportKey('pkcs8',pair.privateKey)).toString('base64');
- const pub=Buffer.from(await crypto.subtle.exportKey('spki',pair.publicKey)).toString('base64');
- return {priv,pub};
+ const spki=await crypto.subtle.exportKey('spki',pair.publicKey);
+ const pub=Buffer.from(spki).toString('base64');
+ const fingerprint=Buffer.from(await crypto.subtle.digest('SHA-256',spki)).toString('hex');
+ return {priv,pub,fingerprint};
 }
 function createStore(){
  const data=new Map();let writes=0;
@@ -40,6 +42,7 @@ function environment(pair){
  ORCH_SIGNER_PRIVATE_PKCS8_BASE64:pair.priv,ONCE_KV:once,
  SIGNED_COMMAND_QUEUE:{async send(v){sent.push(v)}},
  SIGNED_SENDER_ENABLED:'true',ORCH_PUBLIC_SPKI_BASE64:pair.pub,
+ ORCH_PUBLIC_SPKI_SHA256:pair.fingerprint,
  SIGNED_REPLAY_KV:replay,
  SENDER_ENABLED:'true',PRIVATE_ARCHIVE_MANIFEST:JSON.stringify(manifest),
  CEREBRO_PRODUCER:{async latest(x){called.push(x);return live}},
@@ -93,7 +96,7 @@ test('spoofing actor_id despite retaining signature is rejected',async()=>{
 test('tampered signed order id cannot swap target',async()=>{
  const p=await keys(),env=environment(p),s=await eSource(env);
  s.payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261117';
- await assert.rejects(acceptSignedCommand(s,env,TEST_TIME),/SIGNED_SIGNATURE_INVALID/);
+ await assert.rejects(acceptSignedCommand(s,env,TEST_TIME),/SIGNED_IDENTITY/);
  assert.equal(env._out.length,0);
 });
 test('original signature cannot be reused for a modified paid/PROD request',async()=>{
@@ -180,12 +183,15 @@ test('schedule outside authorized one-shot date is inert',async()=>{
  const r=await runScheduledOnce({cron:'* * * * *',scheduledTime:Date.parse('2026-11-14T00:00:00Z')},env);
  assert.equal(r.sent,0);assert.equal(env._once.data.size,0);
 });
-test('missing signer cannot create message and leaves claimed fail-closed audit',async()=>{
+test('missing signer cannot create message or consume one-shot claim',async()=>{
  const p=await keys(),env=environment(p);delete env.ORCH_SIGNER_PRIVATE_PKCS8_BASE64;
  await assert.rejects(runScheduledOnce({cron:'* * * * *',scheduledTime:TEST_TIME},env),/PRIVATE_SIGNING_KEY_MISSING/);
- assert.equal(env._sent.length,0);assert.equal(env._once.data.size,1);
+ assert.equal(env._sent.length,0);assert.equal(env._once.data.size,0);
+ // If the operator later provisions a valid signer, the one-shot remains available.
+ env.ORCH_SIGNER_PRIVATE_PKCS8_BASE64=p.priv;
  const again=await runScheduledOnce({cron:'* * * * *',scheduledTime:TEST_TIME},env);
- assert.equal(again.sent,0);
+ assert.equal(again.sent,1);
+ assert.equal(env._sent.length,1);
 });
 test('queue outage leaves one claimed state, never retries automatically into duplicate',async()=>{
  const p=await keys(),env=environment(p);
@@ -236,4 +242,41 @@ test('real queue handler dismisses tampered signature without requeue loop',asyn
  try{await receiver.queue({queue:SIGNED_QUEUE,messages:[{body:signed,ack(){ack++},retry(){retry++}}]},env)}
  finally{console.error=log}
  assert.equal(ack,1);assert.equal(retry,0);assert.equal(env._out.length,0);
+});
+
+test('signature for a different valid-looking canary order is denied even if fully re-signed',async()=>{
+ const pair=await keys(),env=environment(pair);
+ const payload=buildScheduledPayload(TEST_TIME,TEST_NONCE);
+ payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261117';
+ const signed=await signScheduledPayload(payload,pair.priv);
+ await assert.rejects(acceptSignedCommand(signed,env,TEST_TIME),/SIGNED_IDENTITY/);
+ assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
+});
+test('signature for a different valid-looking request id is denied even if fully re-signed',async()=>{
+ const pair=await keys(),env=environment(pair);
+ const payload=buildScheduledPayload(TEST_TIME,TEST_NONCE);
+ payload.request_id='UMS001-SENDER-REQ-OTHERVALID123456';
+ const signed=await signScheduledPayload(payload,pair.priv);
+ await assert.rejects(acceptSignedCommand(signed,env,TEST_TIME),/SIGNED_IDENTITY/);
+ assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
+});
+test('independently pinned fingerprint cannot be silently replaced with a second valid public key',async()=>{
+ const pair=await keys(),attacker=await keys(),env=environment(pair);
+ const signed=await eSource(env);
+ env.ORCH_PUBLIC_SPKI_BASE64=attacker.pub;
+ await assert.rejects(acceptSignedCommand(signed,env,TEST_TIME),/TRUST_FINGERPRINT_MISMATCH/);
+ assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
+});
+test('mismatched fingerprint denies otherwise fully valid Ed25519 signature',async()=>{
+ const pair=await keys(),env=environment(pair);
+ const signed=await eSource(env);
+ env.ORCH_PUBLIC_SPKI_SHA256='0'.repeat(64);
+ await assert.rejects(acceptSignedCommand(signed,env,TEST_TIME),/TRUST_FINGERPRINT_MISMATCH/);
+ assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
+});
+test('missing fingerprint denies cryptographic verification entirely',async()=>{
+ const pair=await keys(),env=environment(pair);
+ delete env.ORCH_PUBLIC_SPKI_SHA256;
+ await assert.rejects(acceptSignedCommand(await eSource(env),env,TEST_TIME),/TRUST_NOT_CONFIGURED/);
+ assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
 });
