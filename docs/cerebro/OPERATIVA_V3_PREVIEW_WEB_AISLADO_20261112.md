@@ -30,3 +30,19 @@
 2. Owner E2E positivo sobre Gateway LAB **sin copiar JWT ni permitir acceso anónimo**.
 3. Fuente verificable de empresas, proyectos, motores, trabajos/decisiones.
 4. Tribunal, accesibilidad/seguridad, OLD vs NEW, rollback probado y promoción gradual.
+
+## Evolución 13/11/2026 · Denegación por empresa y demo renovada
+
+- Cambios **solo en PR #57 DRAFT**: `CerebroOperativeConsole.tsx` incorpora barrera de envío a empresa distinta de Fénix/alcance vinculado, tanto en llamada de chat como inicio de voz y dictado. Rechaza también enviar eventos `submit` artificiales, independientemente de deshabilitar el botón.
+- `CerebroOperativeCockpitV3.tsx` deshabilita controles de texto, voz y dictado cuando no hay contexto de empresa autorizado; muestra razón legible al usuario.
+- El historial del chat de Fénix se oculta al seleccionar un contexto no verificado y vuelve a aparecer al regresar; no se envía ningún dato a esa otra empresa.
+- Para cambiar empresa durante una conversación/orden activa es necesario terminar dicha sesión; no se crea un segundo canal de ejecución ni se manipulan permisos del servidor.
+- [Cockpit V3 Chromium #43326180174](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43326180174): **SUCCESS**, verifica el bloqueo de voz/dictado/envío e historial por empresa, el intento directo de enviar, la vuelta al contexto permitido y la compatibilidad de los controles.
+- [Operativa V1 Gate #43326180204](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43326180204): **SUCCESS**.
+- [Voice Contract #43326180277](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43326180277): **SUCCESS**.
+- Se publicó una nueva **demostración sintética aislada**, deployment Vercel `dpl_JD4eNQoHEa4ud5aSTEmEc1CfkH66`, READY:
+  `https://operativa-v3-visual-bkk7ueaat-carlosjmunozcabeza-2582s-projects.vercel.app/`.
+- Revisión física por navegador Opera: pestaña `Operativa V3 · Vista previa` actualizada, UI renderizada, barra global completa y campo central visible. El enlace temporal protegido vence en siete días; **no guardar secretos de bypass aquí**.
+- Los datos de la demostración son **sintéticos**; sus indicadores y peticiones no representan tareas reales. No se utiliza credencial personal, Supabase, CRM, Gateway ni proveedor de voz real.
+- **Promoción bloqueada** hasta E2E positivo autenticado del propietario, prueba de permisos multiempresa reales, comparación OLD vs NEW, revisión de accesibilidad y aceptación visual.
+- **Sin cambios a main, App PROD, CRM, Supabase PROD, Vercel histórico ni DNS** en esta evolución. La demo usa un proyecto ya creado en la fase anterior, sin contratar servicios nuevos; el coste facturable final de su cuota no se ha auditado.
