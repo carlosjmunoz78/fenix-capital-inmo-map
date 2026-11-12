@@ -74,3 +74,27 @@ HECHO: GitHub Actions QA v37 run [43276664670](https://github.com/carlosjmunoz78
 HECHO: lectura no mutante de la pestaña Operativa real en Opera: la respuesta antigua acaba exactamente en `Pue`, coincidiendo con el código v36 que aplicaba `slice(0,400)`.
 POR VERIFICAR: HTTP E2E autenticado owner-only con v37, prueba en navegador contra v37 (Opera sigue usando PROD v36), memoria tras recarga y revisión final de seguridad/coste antes de promoción. El intento HTTP directo desde el canal de consulta no fue accesible.
 NEXT_BLOCK: CI/HTTP E2E v37 LAB -> verificar memoria y UI reales -> inventario de conectividad (sin repetir auditorías terminadas) -> resolver owner multiempresa -> promoción solo con gates.
+
+## ESTADO VIVO POSTERIOR · OWNER_ACCESS_RESOLVER_V0 · 12/11/2026
+**Estado real:** PARCIAL / LAB. No reemplaza el registro histórico anterior.
+
+**HECHO / verificable:**
+- En el mismo Gateway se añadió ruta estrictamente GET `/owner-capabilities`, siempre posterior a `withSupabase({auth:"user"})` + `authorizedOwner(req)`. La identidad `CARLOS-ADMIN` solo se deriva del backend; ningún selector ni prompt la inventa.
+- `cerebro/ops/gateway-v36-followups/owner_access.ts` declara 10 capacidades con estado concreto: rutas reales, adaptadores presentes no validados extremo a extremo, fuentes condicionales, propuestas gobernadas y router global no conectado. Solo metadatos, ninguna lectura de expedientes/secreto.
+- Fénix se admite como contexto de inventario. Otros `company_id` retornan `NOT_CONNECTED`, sin información cruzada ni grants.
+- Regresiones v35/v36, interpretación natural v37 y pruebas de aislamiento Owner Access Resolver pasaron en [run 43278801311](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43278801311) (pasos individuales SUCCESS).
+- Desplegado **únicamente LAB existente** `cerebro-console-gateway-v36-followups-lab` **v5 ACTIVE**, cinco archivos iguales a GitHub; el gateway PROD `cerebro-console-gateway-v0` continúa en **v36 ACTIVE**. Sin nuevas funciones, gastos, migraciones ni cambios App/CRM/voz.
+- En Opera, acceso a GET `/owner-capabilities?company_id=fenix` sin cabecera de usuario devolvió `MISSING_CREDENTIALS` (fail closed).
+
+**BLOQUEADO / causa concreta**:
+- La prueba E2E de GitHub Actions usó `CEREBRO_E2E_USER_JWT` ya configurado, sin revelar su valor y con alcance solo al LAB; respondió `401` y el código `INVALID_JWT`.
+- `INVALID_JWT` confirma que la credencial no sirve para la llamada actual; **no demuestra por sí solo si caducó, fue revocada o era de otro entorno**. No desactivar `withSupabase`, no relajar owner-only, no introducir service-role en browser ni manipular firmas.
+- Debido al fallo de E2E autenticado, **el conjunto no está certificado GREEN y v37 no se promociona a PROD**. No llamar al error "test verde".
+
+**ROLLBACK LAB probado documentalmente / por ejecutar si falla el nuevo cambio**:
+- Fuente exacta v37 anterior en Git commit `0fd88c9689e6ba2e667d8f0ec5e3879897e6fd06`, con `index.ts`, `knowledge.ts`, `conversation_intents.ts`, `activity_reader.ts`, sin `owner_access.ts`. Re-desplegar esos cuatro archivos sobre el **mismo LAB** con `verify_jwt=false` y comprobar coincidencia/owner guard; PROD no necesita rollback porque no se ha modificado.
+- La historia de v35 y v36 sigue en PR #55.
+
+**NEXT_BLOCK ÚNICO**: recuperar un JWT válido **mediante una sesión autorizada** y actualizar la referencia cifrada `CEREBRO_E2E_USER_JWT` sin mostrarla; repetir la llamada autenticada LAB (Fénix 200/scope limitado, AION `NOT_CONNECTED`, anónimo denegado), E2E Opera y comparación OLD vs NEW. Solo entonces valorar promoción. La fase siguiente será conectar por contratos el Owner Resolver con el verdadero Company Registry/Engine Registry y el mismo Gateway desde JARVIS/otras interfaces.
+
+**Objetivo que sigue vigente:** todas las interfaces sirven al CEREBRO completo, con máxima autoridad real del propietario sobre sus empresas, pero sin afirmar que todos los adaptadores estén ya operativos.
