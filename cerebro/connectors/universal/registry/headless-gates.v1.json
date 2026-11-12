@@ -801,7 +801,7 @@
         "owner_jwt_canary": "PENDING",
         "customer_data_writes": 0,
         "additional_subscription_eur": 0,
-        "next_block": "SUPABASE_SCOPED_MANAGEMENT_PERMANENT_WRITER_WITH_LAB_BACKUP_ROLLBACK"
+        "next_block": "SAFE_PRIVATE_ISOLATED_SUPABASE_PREVIEW_FIRST; SIGNED_CREATE_UPDATE_ROLLBACK_LAB_NOT_YET_PHYSICAL"
       },
       "live_inventory_20261111": {
         "state": "READ_ONLY_VERIFIED_NO_WRITES",
@@ -948,6 +948,27 @@
           "Console"
         ],
         "security_notice": "HIGH_RISK_RLS_IN_EXISTING_SEO_SCHEMA_DO_NOT_CHANGE_WITHOUT_DEPENDENCY_GATES"
+      },
+      "supabase_safe_lifecycle_20261112": {
+        "status": "CODE_CI_VERIFIED_NOT_PHYSICAL",
+        "repo_commit": "7fe17d01dbe5a5f4991fcc04ba5f79987935e3e2",
+        "ci": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43193442313",
+        "source": "services/provider-headless-lab/supabase-mgmt-edge-deployment-lab.mjs",
+        "target_slug": "cerebro-fact001-sb-mgmt-canary-lab",
+        "protected_projects": [
+          "cluhljgonannaafpmblx",
+          "hnqlnvakzaywtafeiybt"
+        ],
+        "isolated_preview_exists": false,
+        "ownership": "CEREBRO_SIGNED_PRINCIPAL_REQUIRED",
+        "canary_create_verified": false,
+        "canary_update_verified": false,
+        "canary_rollback_verified": false,
+        "execution": "NO_PROVIDER_WRITES",
+        "requirement": "ISOLATED_LAB_PROJECT_AND_CONFIRMED_ADDITIONAL_COST_ZERO",
+        "docs": "docs/FACT001_SUPABASE_LAB_LIFECYCLE_READY_NO_PROD_WRITES_2026-11-12.md",
+        "reason": "ONLY_TWO_EXISTING_PROTECTED_PROJECTS_NO_SEPARATE_PREVIEW_BRANCH_AVAILABLE",
+        "next_block": "VERIFY_OR_PROVISION_SEPARATE_ZERO_COST_SUPABASE_LAB_PREVIEW_WITH_OWNER_CONSENT_FOR_ANY_COST_AND_DEPLOY_SIGNED_CEREBRO_ONLY"
       }
     },
     {
