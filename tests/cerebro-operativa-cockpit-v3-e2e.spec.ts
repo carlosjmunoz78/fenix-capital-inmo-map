@@ -92,7 +92,7 @@ test('Operativa Cockpit V3 · visual responsive, source evidence, navigation, re
  await expect(cockpit.getByRole('heading',{name:'¿Qué necesitas hacer?'})).toBeVisible();
  await expect(cockpit.getByText('Fuente conectada')).toBeVisible();
  await expect(cockpit.locator('.op3-pulse.is-working')).toBeVisible();
- await expect(cockpit.getByText('En ejecución',{exact:true}).first()).toBeVisible();
+ await expect(cockpit.locator('.op3-indicators')).toContainText('En ejecución');
  await page.screenshot({path:'test-results/cockpit-v3-desktop.png',fullPage:true,animations:'disabled'});
  await cockpit.getByRole('button',{name:'Motores',exact:true}).click();
  await expect(cockpit.getByRole('heading',{name:'Motores observados'})).toBeVisible();
