@@ -70,9 +70,10 @@ export async function readOwnerRegistryLive({
     source_counts[source.name]=(source_counts[source.name]??0)+data.length;
     if(data.length>=PAGE)truncated.push(source.name+":"+company_id);
     const rows=data.slice(0,PAGE-1);
-    if(source.name==="companies")companies.push(...rows);
-    if(source.name==="projects")projects.push(...rows);
-    if(source.name==="engines")engines.push(...rows);
+    const authorizedRows=rows.filter(x=>String(x?.company_id??"").trim().toLowerCase()===company_id);
+    if(source.name==="companies")companies.push(...authorizedRows);
+    if(source.name==="projects")projects.push(...authorizedRows);
+    if(source.name==="engines")engines.push(...authorizedRows);
    }
    if(!companies.some(x=>String(x.company_id??"").toLowerCase()===company_id)){
     // Validated owner context is REAL, but it is NOT a registered PREPROD row.
@@ -86,7 +87,8 @@ export async function readOwnerRegistryLive({
   if(selected.status!=="OK")return {...selected,engines:[],
    source_status:"LIVE_SERVER_READ",source_tables:COMPANY_SOURCES.map(x=>x.table)};
   return {...selected,version:"OWNER_REGISTRY_LIVE_LAB_V0",observed_at:now(),
-   engines:engines.map(x=>safeEngine(x,String(x?.company_id??"").toLowerCase())).filter(Boolean),
+   engines:engines.filter(x=>effectiveIds.includes(String(x?.company_id??"").toLowerCase()))
+     .map(x=>safeEngine(x,String(x?.company_id??"").toLowerCase())).filter(Boolean),
    source_status:"LIVE_SERVER_READ",
    source_tables:COMPANY_SOURCES.map(x=>x.table),
    counts:source_counts,truncated,
