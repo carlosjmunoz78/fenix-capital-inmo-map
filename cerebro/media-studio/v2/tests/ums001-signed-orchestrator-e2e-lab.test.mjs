@@ -95,7 +95,7 @@ test('spoofing actor_id despite retaining signature is rejected',async()=>{
 });
 test('tampered signed order id cannot swap target',async()=>{
  const p=await keys(),env=environment(p),s=await eSource(env);
- s.payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261118';
+ s.payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261119';
  await assert.rejects(acceptSignedCommand(s,env,TEST_TIME),/SIGNED_IDENTITY/);
  assert.equal(env._out.length,0);
 });
@@ -247,7 +247,7 @@ test('real queue handler dismisses tampered signature without requeue loop',asyn
 test('signature for a different valid-looking canary order is denied even if fully re-signed',async()=>{
  const pair=await keys(),env=environment(pair);
  const payload=buildScheduledPayload(TEST_TIME,TEST_NONCE);
- payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261118';
+ payload.order_id='UMS001-LAB-LI-FEED-01-ARCHIVE-20261119';
  const signed=await signScheduledPayload(payload,pair.priv);
  await assert.rejects(acceptSignedCommand(signed,env,TEST_TIME),/SIGNED_IDENTITY/);
  assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
@@ -281,7 +281,7 @@ test('missing fingerprint denies cryptographic verification entirely',async()=>{
  assert.equal(env._out.length,0);assert.equal(env._replay.data.size,0);
 });
 
-test('DIAG02 safely persists only failure code, not payload or secret',async()=>{
+test('DIAG03 safely persists only failure code, not payload or secret',async()=>{
  const p=await keys(),env=environment(p),now=Date.now();
  const draft=buildScheduledPayload(TEST_TIME,TEST_NONCE);
  draft.issued_at=new Date(now).toISOString();draft.expires_at=new Date(now+180000).toISOString();
@@ -289,20 +289,20 @@ test('DIAG02 safely persists only failure code, not payload or secret',async()=>
  let ack=0;const old=console.error;console.error=()=>{};
  try{await receiver.queue({queue:SIGNED_QUEUE,messages:[{body:signed,ack(){ack++},retry(){}}]},env)}
  finally{console.error=old}
- const diagnostic=JSON.parse(env._replay.data.get('meta/ums001-signed-diagnostic/v1/DIAG02'));
+ const diagnostic=JSON.parse(env._replay.data.get('meta/ums001-signed-diagnostic/v1/DIAG03'));
  assert.equal(diagnostic.state,'DENIED');
  assert.equal(diagnostic.code,'UMS001_SIGNED_INBOX_SIGNED_SCOPE_COMPANY_ID');
  assert.equal(Object.keys(diagnostic).length,3);
  assert.equal(ack,1);
  assert.equal(env._out.length,0);
 });
-test('DIAG02 records accepted status only after QA queue is submitted',async()=>{
+test('DIAG03 records accepted status only after QA queue is submitted',async()=>{
  const p=await keys(),env=environment(p),now=Date.now();
  const draft=buildScheduledPayload(TEST_TIME,TEST_NONCE);
  draft.issued_at=new Date(now).toISOString();draft.expires_at=new Date(now+180000).toISOString();
  const signed=await signScheduledPayload(draft,p.priv);
  let ack=0;await receiver.queue({queue:SIGNED_QUEUE,messages:[{body:signed,ack(){ack++},retry(){}}]},env);
- const diagnostic=JSON.parse(env._replay.data.get('meta/ums001-signed-diagnostic/v1/DIAG02'));
+ const diagnostic=JSON.parse(env._replay.data.get('meta/ums001-signed-diagnostic/v1/DIAG03'));
  assert.equal(diagnostic.state,'ACCEPTED');assert.equal(diagnostic.code,'QA_SUBMITTED');
  assert.equal(ack,1);assert.equal(env._out.length,1);
 });
