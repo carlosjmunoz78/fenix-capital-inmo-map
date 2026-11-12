@@ -14,7 +14,8 @@ test('v7 preserves owner-only GET function with unchanged authentication gates',
  assert.ok(now.includes('SNAPSHOT_MAX_AGE_MS'));
  assert.ok(now.includes('if(!GITHUB_TOKEN_CONFIGURED)return loadPublishedSnapshot()'));
  assert.ok(now.includes('cache={at:Date.now(),payload}'));
- assert.ok(!now.includes('SUPABASE_SERVICE_ROLE_KEY"'));
+ assert.ok(now.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'));
+ assert.ok(old.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'));
 });
 test('v7 is exact v6 plus constrained feed fallback and cache freshness',()=>{
  const marker='async function loadPublishedSnapshot():Promise<ActivityPayload>{';
