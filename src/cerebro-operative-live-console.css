@@ -56,3 +56,20 @@
 .operativa-premium{padding-bottom:26px}
 .operativa-premium .operativa-modes button:disabled,.operativa-premium .operativa-power-options button:disabled{opacity:.45;cursor:wait}
 @media(max-width:720px){.operativa-dialogue>.operativa-jarvis-composer{bottom:auto;left:auto;width:100%;padding:9px 8px}.operativa-dialogue .operativa-composer-form{gap:3px}.operativa-dialogue .operativa-composer-form textarea{font-size:16px}.operativa-dialogue .operativa-dictate,.operativa-dialogue .operativa-send{width:34px;height:38px}.operativa-dialogue .operativa-voice{width:40px;height:40px}.operativa-premium{padding-bottom:20px}}
+
+/* Operativa live · mobile-first command surface. Keep the real authenticated
+ * composer in-flow, but present it before the activity summary on narrow
+ * screens. No fixed overlays and no duplicate chat/voice client. */
+@media (max-width:720px){
+ .operativa-premium{display:flex;flex-direction:column;min-width:0}
+ .operativa-hud-grid{pointer-events:none}
+ .operativa-contextbar{order:0}
+ .operativa-dialogue{order:1;margin-top:9px;margin-bottom:8px}
+ .operativa-dialogue-log{min-height:48px;max-height:min(220px,26vh);padding:8px 12px}
+ .operativa-dialogue header{padding:10px 12px}
+ .operativa-dialogue>.operativa-jarvis-composer{padding:7px 9px}
+ .operativa-command-deck{order:2;padding-top:8px}
+ .operativa-deck-main h1{font-size:clamp(28px,7vw,42px)}
+ .operativa-stage{order:3;padding-top:16px}
+ .operativa-jarvis-composer{position:relative;inset:auto;transform:none}
+}
