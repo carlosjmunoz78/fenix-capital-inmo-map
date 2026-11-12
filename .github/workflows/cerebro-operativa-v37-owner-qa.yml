@@ -20,3 +20,27 @@ jobs:
         run: node --test tests/cerebro-gateway-followup-v37.test.mjs
       - name: 'Owner Access Resolver - tenant denial and read-only contract'
         run: node --test tests/cerebro-owner-access-resolver.test.mjs
+      - name: 'Owner authenticated LAB smoke - only if existing secret is configured'
+        env:
+          OWNER_E2E_JWT: ${{ secrets.CEREBRO_E2E_USER_JWT }}
+        run: |
+          set -eu
+          if [ -z "${OWNER_E2E_JWT:-}" ]; then
+            echo "AUTH_E2E_PENDING: owner test token is not configured in GitHub Actions"
+            exit 0
+          fi
+          url="https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v36-followups-lab/owner-capabilities"
+          code=$(curl --silent --show-error --connect-timeout 5 --max-time 20 --output "$RUNNER_TEMP/owner-lab.json" --write-out '%{http_code}' --header "Authorization: Bearer ${OWNER_E2E_JWT}" "${url}?company_id=fenix")
+          if [ "$code" != 200 ]; then
+            echo "AUTH_E2E_FAIL_OWNER_HTTP_${code}"
+            exit 1
+          fi
+          jq -e '(.status == "OK") and (.owner_scope == "VERIFIED_FENIX_ONLY") and (.executed == false) and (.data_returned == false) and ((.capabilities | length) >= 8)' "$RUNNER_TEMP/owner-lab.json" >/dev/null
+          code=$(curl --silent --show-error --connect-timeout 5 --max-time 20 --output "$RUNNER_TEMP/cross-tenant-lab.json" --write-out '%{http_code}' --header "Authorization: Bearer ${OWNER_E2E_JWT}" "${url}?company_id=aion")
+          if [ "$code" != 200 ]; then
+            echo "AUTH_E2E_FAIL_CROSS_TENANT_HTTP_${code}"
+            exit 1
+          fi
+          jq -e '(.status == "NOT_CONNECTED") and (.executed == false) and (.data_returned == false) and (.capabilities == [])' "$RUNNER_TEMP/cross-tenant-lab.json" >/dev/null
+          rm -f "$RUNNER_TEMP/owner-lab.json" "$RUNNER_TEMP/cross-tenant-lab.json"
+          echo "AUTH_E2E_PASS: owner read-only scope and cross-company deny"
