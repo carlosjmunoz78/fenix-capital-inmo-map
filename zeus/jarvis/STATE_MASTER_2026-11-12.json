@@ -13,7 +13,7 @@
   },
   "step_2": {
     "name": "owner_identity_two_devices_B2",
-    "status": "PARCIAL",
+    "status": "PARCIAL_REAL_CONFIGURATION_COMPLETED_PHYSICAL_E2E_PENDING",
     "preflight": {
       "cloudflare_identity_connected": true,
       "cut32_worker_exists": true,
@@ -41,21 +41,33 @@
       "b2_device_enrollment_audit_rows": 0,
       "b3_read_grants_in_d1": 0,
       "deployed_script_source_bundled": true,
-      "exact_source_equivalence_proven": false
+      "exact_source_equivalence_proven": false,
+      "cut32_deployment_after_secret_update": "7705dda9-57e5-4baf-9e95-db75a0bf1e62",
+      "deployed_source_exact_git_7_of_7": true,
+      "source_map_verified_after_secret_update": true,
+      "access_policy_email_matches_authenticated_owner": true,
+      "access_owner_secret_bindings_configured": [
+        "JARVIS_ACCESS_AUD",
+        "JARVIS_OWNER_EMAIL"
+      ],
+      "secret_values_disclosed": false,
+      "physical_anon_challenge_verified": false,
+      "temporary_subdomain_canary_attempt": "Enabled only for read-only test, external test tool could not reach URL; reverted",
+      "subdomain_rollback_verified": true
     },
     "blockers": [
       "CUT32 Access destination enforcement not proven by real network challenge",
-      "Worker deployed bundle not proven equivalent to Git candidate",
       "No authenticated OWNER_ROOT device session in this connected chat",
       "Two independent physical devices cannot be enrolled or selectively revoked without authenticated browser session",
-      "No session enrolled currently (zero D1 rows)"
+      "No session enrolled currently (zero D1 rows)",
+      "Temporary anonymous canary response could not be retrieved by external test tool; Access enforcement still requires real network verification"
     ],
     "next_safe_actions": [
-      "Verify deployed bundle equivalence and owner-only Access policy against target Worker",
-      "Prepare Access-guarded canary only after proving no anonymous path or wrong destination exposure",
-      "Run real owner login through controlled Work Browser and physical mobile/PC session",
-      "Enroll first and second devices with legitimate user authentication; revoke one and verify other remains",
-      "Keep all B3, gateway, PROD and Trading privileges OFF until this step GREEN"
+      "Use authenticated Work/Cloud Browser and a controlled anonymous client to verify CUT32 Access 302/401 before enabling B2 features",
+      "Keep CUT32 subdomain disabled unless executing a short protected physical test with immediate rollback",
+      "Verify owner Access with protected canary and real owner session; no sensitive identifiers in logs",
+      "Enroll two real independent owner devices and verify selective revocation",
+      "Do not enable B3, Gateway, PROD or cost-positive services until B2 gate is GREEN"
     ],
     "security_flags": {
       "prod_not_modified": true,
@@ -89,7 +101,7 @@
     38,
     40
   ],
-  "next_block": "STEP2_B2_PHYSICAL_OWNER_ACCESS_AND_2_DEVICE_E2E",
+  "next_block": "STEP2_B2_REAL_ACCESS_CHALLENGE_AND_OWNER_TWO_DEVICE_E2E",
   "rollback": "Discard unmerged PR35 changes; no Cloudflare/Supabase runtime mutations were made in this session",
   "human_required_if_applicable": [
     "External login/MFA/owner physical device verification"
