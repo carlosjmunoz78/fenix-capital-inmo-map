@@ -94,8 +94,31 @@ async function enroll(e,env){
   signed_probe_status:verified.status,no_publication:true,provider_calls:0,at:new Date().toISOString()}));
  return {state:'ACTIVE',engine_id:e.engine_id,company_id:e.company_id,key_id:record.key_id,signing_test:verified.status,media_generated:false};
 }
+
+const RESULTS='cerebro-ums001-registered-image-results-lab-eu';
+async function receiveImageResult(msg,env){
+ if(!msg||msg.event_type!=='UMS001_IMAGE_PRIVATE_READY'||msg.company_id!=='fenix'||msg.environment!=='LAB'||!id.test(msg.engine_id||'')||
+ !/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(msg.request_id||'')||
+ !/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(msg.item_id||'')||!(/^[a-f0-9]{64}$/.test(msg.asset_sha256||''))||
+ msg.publish_authorized!==false)throw Error('RESULT_INVALID');
+ const registered=await env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+msg.engine_id,{type:'json'});
+ if(registered?.state!=='ACTIVE')throw Error('RESULT_ENGINE_UNREGISTERED');
+ const r=await env.IMAGE_KV.get('meta/ums001-ai-image-factory/v1/receipts/'+msg.engine_id+'/'+msg.request_id+'/'+msg.item_id,{type:'json'});
+ if(!r||r.state!=='PRIVATE_READY'||r.company_id!=='fenix'||r.origin_engine_id!==msg.engine_id||r.asset_sha256!==msg.asset_sha256||r.private_artifact_ref!==msg.private_artifact_ref||r.publish_authorized!==false)throw Error('RESULT_RECEIPT_MISMATCH');
+ const bytes=await env.IMAGE_KV.get(r.private_artifact_ref,{type:'arrayBuffer'});
+ if(!bytes||bytes.byteLength<4000||bytes.byteLength>4500000)throw Error('RESULT_FILE_MISSING');
+ const observed=hex(await crypto.subtle.digest('SHA-256',bytes));
+ if(observed!==msg.asset_sha256)throw Error('RESULT_HASH_MISMATCH');
+ const ack={state:'PRIVATE_ASSET_RECEIVED',company_id:'fenix',engine_id:msg.engine_id,environment:'LAB',request_id:msg.request_id,item_id:msg.item_id,
+ asset_sha256:observed,private_artifact_ref:r.private_artifact_ref,bytes:bytes.byteLength,technical_qa:'PASS',
+ visual_qa:'PENDING',brand_qa:'PENDING',publish_authorized:false,at:new Date().toISOString()};
+ await env.ISSUER_VAULT.put(PREFIX+'deliveries/'+msg.engine_id+'/'+msg.request_id+'/'+msg.item_id,JSON.stringify(ack));
+ return {state:ack.state};
+}
+
 export class FactoryIssuerProvisioner extends WorkerEntrypoint{
  async enrollEngine(e){return enroll(e,this.env)}
+ async imageReceipt(engine_id,request_id,item_id){if(!id.test(engine_id||'')||!(/^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/.test(request_id||''))||!(/^[A-Z0-9][A-Z0-9_-]{2,79}$/.test(item_id||'')))throw Error('RESULT_ID_DENIED');const approved=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+engine_id,{type:'json'});if(approved?.state!=='ACTIVE')throw Error('ENGINE_NOT_REGISTERED');return await this.env.ISSUER_VAULT.get(PREFIX+'deliveries/'+engine_id+'/'+request_id+'/'+item_id,{type:'json'});}
  async engineStatus(engine_id){
   if(!id.test(engine_id||''))throw Error('INVALID_ENGINE');
   const r=await this.env.ISSUER_VAULT.get(PREFIX+'engines/fenix/LAB/'+engine_id,{type:'json'});
@@ -104,7 +127,8 @@ export class FactoryIssuerProvisioner extends WorkerEntrypoint{
 }
 export default {
  async queue(batch,env){
-  if(batch.queue!==INBOX)throw Error('FACT_WRONG_QUEUE');
+  if(batch.queue!==INBOX&&batch.queue!==RESULTS)throw Error('FACT_WRONG_QUEUE');
+  if(batch.queue===RESULTS){for(const m of batch.messages){try{await receiveImageResult(m.body,env);m.ack()}catch(e){try{await env.ISSUER_VAULT.put(PREFIX+'result-errors/'+String(m.id).slice(0,60),JSON.stringify({code:String(e?.message||'ERROR').slice(0,85),at:new Date().toISOString()}));m.ack()}catch{m.retry({delaySeconds:60})}}}return;}
   for(const m of batch.messages){
    try{await enroll(m.body,env);m.ack()}
    catch(e){
