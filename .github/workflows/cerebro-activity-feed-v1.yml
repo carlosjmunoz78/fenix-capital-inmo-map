@@ -6,6 +6,13 @@ on:
   schedule:
     - cron: "3-58/5 * * * *"
   workflow_dispatch:
+  workflow_run:
+    workflows:
+      - CEREBRO Governed Main Integration V0
+      - CEREBRO Browser 1 V2 Live Worker
+      - PROD Live Deploy
+      - CEREBRO Operativa · Legibilidad QA isolated
+    types: [completed]
 
 permissions:
   actions: read
