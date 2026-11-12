@@ -1,0 +1,35 @@
+name: CEREBRO Operativa · LIVE Read-Only Smoke
+on:
+  push:
+    branches:
+      - release/cerebro-operativa-vercel-targeted-20261112
+    paths:
+      - '.github/workflows/cerebro-operativa-live-smoke-20261112.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-site-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - name: Validate CEREBRO production SPA and bundled assets without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='https://app.fenixcapital.es'
+          temp="$(mktemp -d)"
+          for location in '/' '/cerebro?section=operativa' '/cerebro?section=jarvis'; do
+            target="${root}${location}"
+            code="$(curl -sS --location --max-time 20 --retry 2 --retry-delay 1 --output "$temp/page.html" --write-out '%{http_code}' "$target")"
+            test "$code" = '200' || { echo "ROUTE_UNAVAILABLE: $location $code" >&2; exit 2; }
+            grep -Eiq '<!doctype html|<html' "$temp/page.html" || { echo "SPA_CONTENT_INVALID: $location" >&2; exit 3; }
+            echo "SPA_OK $location $code"
+          done
+          asset="$(grep -Eo 'src="/assets/[^"]+\.js"' "$temp/page.html" | head -1 | sed -e 's#src="##' -e 's#"$##' || true)"
+          test -n "$asset" || { echo 'BUNDLE_MISSING' >&2; exit 4; }
+          status="$(curl -sS --location --max-time 20 --output "$temp/bundle.js" --write-out '%{http_code}' "${root}${asset}")"
+          test "$status" = '200' || { echo "BUNDLE_HTTP_$status" >&2; exit 5; }
+          test "$(wc -c <"$temp/bundle.js")" -gt 30000 || { echo 'BUNDLE_TOO_SMALL' >&2; exit 6; }
+          grep -Fq 'operativa-premium' "$temp/bundle.js" || { echo 'OPERATIVA_BUNDLE_SIGNATURE_MISSING' >&2; exit 7; }
+          echo 'CEREBRO_PROD_UI_AND_ASSET_OK'
