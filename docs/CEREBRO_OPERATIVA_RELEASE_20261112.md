@@ -8,7 +8,7 @@
 - QA del source activo: GitHub Actions run `43240647964`, PASS (contrato, browser sintético, regresiones).
 - El Gateway `cerebro-console-gateway-v0` permanece existente; el compositor Operativa apunta al Gateway con JWT autenticado, no directamente a modelos. Sin voz clonada.
 - `cerebro-console-activity-v0` Supabase PROD (`cluhljgonannaafpmblx`) versión **6 ACTIVE**, `verify_jwt=true`, registro actualizado a las `2026-11-12T15:13:56.815Z`.
-- Actividad: se observaron HTTP 503 intermitentes y GET 200 a las 15:10-15:13 UTC. **Pendiente medir estabilidad posterior al despliegue v6.**
+- Actividad: se observaron GET 200 a las 15:10-15:13 UTC, pero también **HTTP 503 posteriores al despliegue v6** a las 15:14:18 y 15:15:17 UTC. **NO VERDE: la consulta sigue intermitente y no se garantiza lectura en directo**. La UI debe mostrar estado no verificable cuando falle.
 - GitHub Pages `gh-pages` fue restaurado al commit `879df50e64ecb280c9f1cbedf2fbbdcee027cc7f`; no es el hosting del dominio.
 
 ## Cambios permitidos
