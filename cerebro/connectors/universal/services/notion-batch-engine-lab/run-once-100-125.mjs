@@ -37,7 +37,7 @@ try{
  if(anon.status!==401||forged.status!==401||prod.status!==403)throw Error('NEGATIVE_GATE_DENIED');
  console.log('NOTION_100_125_ANON_401=PASS;FORGED_401=PASS;PROD_403=PASS');
  const response=await call('plan-next',jwt,req),p=response.data;
- if(response.status!==200||p.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||p.offset!==100||p.next_offset!==125||p.items!==25||p.batch_ref!==v.batch_ref||p.index_sha256!==v.index_sha256||p.verify_roundtrip!==true||p.provider_writes!==0||p.envelope?.format!=='FACT001-NOTION-CONTENT-BATCH-PLAN-AES256GCM-V1')throw Error('PLAN_GATE_DENIED_HTTP_'+response.status);
+ if(response.status!==200||p.status!=='FACT001_NOTION_CONTENT_BATCH_SEALED'||p.offset!==100||p.next_offset!==125||p.items!==25||p.batch_ref!==v.batch_ref||p.index_sha256!==v.index_sha256||p.verify_roundtrip!==true||p.provider_writes!==0||p.envelope?.format!=='FACT001-NOTION-CONTENT-BATCH-PLAN-AES256GCM-V1')throw Error('PLAN_GATE_DENIED_HTTP_'+response.status+'_'+String(p.code||'UNSPECIFIED').slice(0,65).replace(/[^A-Z0-9_]/g,''));
  planOK=true;pages=p.pages;sources=p.data_sources;
  writeFileSync(dir+'/plan.aes256gcm.json',JSON.stringify(p),{flag:'wx',mode:0o600});
  for(let i=0;i<25;i++){
@@ -49,7 +49,7 @@ try{
  }
 }catch(e){
  const raw=e instanceof Error?e.message:'UNKNOWN';
- failed=/^(OIDC_[A-Z0-9_]+|NEGATIVE_GATE_DENIED|PLAN_GATE_DENIED_HTTP_\d+|ITEM_GATE_DENIED_[A-Z0-9_]+)$/.test(raw)?raw:'REQUEST_OR_RUNTIME_BLOCKED';
+ failed=/^(OIDC_[A-Z0-9_]+|NEGATIVE_GATE_DENIED|PLAN_GATE_DENIED_HTTP_\d+_[A-Z0-9_]+|ITEM_GATE_DENIED_[A-Z0-9_]+)$/.test(raw)?raw:'REQUEST_OR_RUNTIME_BLOCKED';
  console.warn('NOTION_100_125_RESULT='+failed);
 }finally{
  writeFileSync(dir+'/proof.json',JSON.stringify({scope:'fenix-capital/FACT-001/LAB/1.0.0',index_sha256:v.index_sha256,offset:100,next_offset:125,expected:25,encrypted_objects:sealed,plan_verified:planOK,pages_planned:pages,sources_planned:sources,rows,blocks,failed,objects:entries,provider_writes:0,checkpoint_committed:false,attachments_backed_up:false,comments_backed_up:false},null,2),{flag:'wx',mode:0o600});
