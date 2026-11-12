@@ -32,3 +32,14 @@
 .operativa-inspector-backdrop{z-index:180}
 .operativa-premium{padding-bottom:185px}
 @media(max-width:720px){.operativa-jarvis-composer{bottom:calc(77px + env(safe-area-inset-bottom,0px))}}
+
+/* CEREBRO Operativa: focused first-screen conversation, real job identity and controlled density. */
+.operativa-dialogue{width:min(1100px,calc(100% - 96px));margin:24px auto 8px}
+.operativa-dialogue-log{max-height:260px}
+.operativa-show-all{width:100%;padding:13px 14px;border:1px solid rgba(97,220,255,.22);background:rgba(6,33,44,.53);color:#a6e8f8;border-radius:12px;font-size:13px;font-weight:680;text-align:center;cursor:pointer;margin:12px 0 6px}
+.operativa-show-all:hover{background:rgba(25,84,107,.37);border-color:rgba(97,220,255,.45)}
+.operativa-show-all:focus-visible{outline:2px solid var(--op-cyan);outline-offset:3px}
+.operativa-work-copy strong{overflow-wrap:anywhere}
+.operativa-work-meta{flex-wrap:wrap;gap:6px 12px;font-size:10px}
+@media(max-width:900px){.operativa-dialogue{width:calc(100% - 48px)}}
+@media(max-width:720px){.operativa-dialogue{width:calc(100% - 32px);margin:12px auto 2px}.operativa-dialogue-log{max-height:230px}.operativa-work-main{padding:15px 4px}.operativa-work-copy strong{font-size:13px}}
