@@ -291,7 +291,7 @@ test('DIAG02 safely persists only failure code, not payload or secret',async()=>
  finally{console.error=old}
  const diagnostic=JSON.parse(env._replay.data.get('meta/ums001-signed-diagnostic/v1/DIAG02'));
  assert.equal(diagnostic.state,'DENIED');
- assert.equal(diagnostic.code,'UMS001_SIGNED_INBOX_SIGNED_SCOPE_company_id');
+ assert.equal(diagnostic.code,'UMS001_SIGNED_INBOX_SIGNED_SCOPE_COMPANY_ID');
  assert.equal(Object.keys(diagnostic).length,3);
  assert.equal(ack,1);
  assert.equal(env._out.length,0);
