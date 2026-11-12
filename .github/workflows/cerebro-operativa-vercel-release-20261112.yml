@@ -51,7 +51,7 @@ jobs:
       - name: Console owner and browser voice contracts
         run: node --test tests/cerebro-operativa-targeted-contract.test.mjs
       - run: npx playwright install chromium
-      - name: Desktop browser chat, history, tabs and workflow inspector
+      - name: Operativa chat, history, tabs and modal in synthetic owner session
         env:
           VITE_FENIX_ENV: test
           VITE_SUPABASE_URL: http://127.0.0.1:54321
@@ -60,7 +60,17 @@ jobs:
           PLAYWRIGHT_SKIP_BUILD: '1'
         run: |
           npm run build
-          npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts tests/expedientes-eight-phases.spec.ts tests/expedientes-active-order.spec.ts --project=desktop-chromium --reporter=line
+          npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Expedientes eight phases and active order regressions (unaltered PROD auth storage)
+        env:
+          VITE_FENIX_ENV: prod
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: qa-inert-key
+          PLAYWRIGHT_SKIP_BUILD: '1'
+          VITE_CEREBRO_CONSOLE_URL: ''
+        run: |
+          npm run build
+          npx playwright test tests/expedientes-eight-phases.spec.ts tests/expedientes-active-order.spec.ts --project=desktop-chromium --reporter=line
       - name: Upload failure diagnostics only
         if: failure()
         uses: actions/upload-artifact@v4
