@@ -4,6 +4,7 @@ import { queryCerebroKnowledge, type CerebroReadContext } from "./knowledge.ts";
 import { answerCerebroNaturalQuery } from "./conversation_intents.ts";
 import { answerWithVerifiedActivity } from "./activity_reader.ts";
 import { resolveOwnerCapabilities } from "./owner_access.ts";
+import { readOwnerRegistryLive } from "./owner_registry_live.ts";
 import nacl from "npm:tweetnacl@1.0.3";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -261,6 +262,18 @@ async function authorizedOwner(req:Request){
   const role=String(ctx.role??"");
   const actor=String(ctx.actor_code);
   return {ok:actor==="CARLOS-ADMIN",actor,role};
+}
+
+async function liveOwnerRegistry(actor:string,requestedCompany:string|null="all",requestedProject:string|null=null){
+  const U=Deno.env.get("SUPABASE_URL")??"";
+  const S=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")??"";
+  const svc=U&&S?createClient(U,S,{auth:{persistSession:false,autoRefreshToken:false}}):null;
+  return await readOwnerRegistryLive({
+    actor,serviceClient:svc,requestedCompany,requestedProject,
+    // The existing actor-context RPC verifies Fénix, not global owner membership.
+    // Further companies require an explicit server-verified membership contract.
+    verifiedCompanyIds:["fenix"]
+  });
 }
 
 async function liveExpedientesSummary(req:Request){
@@ -787,7 +800,7 @@ function seoExplanation(action:PendingAction){
   return `El proceso para ${location} (${coverage}) comprende: investigación y clustering de palabras clave; mapa de ciudades/zonas e intención; arquitectura y contenidos; enlazado interno; SEO local; activos de captación cuando correspondan; controles técnicos/QA; publicación solo mediante los gates autorizados; monitorización, medición y mejora. Si algún paso exige firma, pago, riesgo alto, conflicto de política o un permiso que CEREBRO no tenga, te explicaré exactamente qué falta y te llevaré al enlace o decisión necesaria. ¿Quieres que active este proceso?`;
 }
 
-async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown,learningRaw:unknown,conversationRaw:unknown){
+async function chatReply(req:Request,message:string,pendingRaw:unknown,readContextRaw:unknown,learningRaw:unknown,conversationRaw:unknown,verifiedOwnerActor:string){
   const text=cleanText(message);
   const readContext=(readContextRaw&&typeof readContextRaw==="object"&&!Array.isArray(readContextRaw))?readContextRaw as CerebroReadContext:null;
   const conversationContext=validateConversationContext(conversationRaw);
@@ -947,6 +960,30 @@ async function chatReply(req:Request,message:string,pendingRaw:unknown,readConte
     };
   }
 
+   // Registry queries are read-only and resolve through the same owner-only server
+   // as the API route. Never pretend that the GitOps Factory is already linked.
+   if(/^(?:que|cuales|cuantos|dime|lista|listado|muestrame|muestra|ensename|ver|mostrar|estado|mis|todas|todos)\\b/.test(text)&&
+      /\\b(empresas|proyectos|motor(?:es)?)\\b/.test(text) &&
+      !/\\b(crea|crear|borra|borrar|elimina|publica|activa|modifica)\\b/.test(text)){
+     const selectedCompany=/\\b(?:aion|captacasa)\\b/.exec(text)?.[0]??"all";
+     const registry=await liveOwnerRegistry(verifiedOwnerActor,selectedCompany,null);
+     if(registry.status!=="OK")
+       return {status:registry.status,intent:"owner_registry_live",executed:false,
+         message:registry.status==="NOT_CONNECTED"
+          ?"Esa empresa todavía no está vinculada al contexto autenticado de CEREBRO. No voy a simular acceso."
+          :"No puedo verificar ahora los registros de empresas, proyectos y motores. No presentaré datos inventados.",
+         source_status:registry.source_status??"UNVERIFIED"};
+     const companies=registry.companies.map((x:any)=>x.company_id).join(", ")||"ninguna";
+     const projects=registry.projects.map((x:any)=>x.project_id+" ("+x.project_status+")").join(", ")||"ninguno registrado en esta fuente";
+     const engines=registry.engines.map((x:any)=>x.engine_id+" ("+x.engine_state+")").join(", ")||"ninguno registrado en esta fuente";
+     return {status:"OK",intent:"owner_registry_live",executed:false,
+       message:"En el contexto propietario verificado he consultado los registros actuales. Empresas vinculadas: "+
+         companies+". Proyectos: "+projects+". Estados de motores registrados: "+engines+
+         ". FACT-001 está localizado en GitHub, pero su catálogo GitOps todavía no está conectado a este Gateway. "+
+         "El registro PREPROD de empresas y el de proyectos no representan por sí solos todas tus empresas y proyectos.",
+       source:{system:"SUPABASE_REGISTRY_READ_ONLY",observed_at:registry.observed_at,
+         tables:registry.source_tables},factory:registry.factory};
+   }
    const liveActivityAnswer=await answerWithVerifiedActivity(req,message);
    if(liveActivityAnswer)return liveActivityAnswer;
    const naturalAnswer=answerCerebroNaturalQuery(message,conversationContext);
@@ -1179,13 +1216,20 @@ export default {
         requestedCompany:new URL(req.url).searchParams.get("company_id")
       }));
     }
+    if(req.method==="GET"&&suffix==="owner-registry"){
+      const url=new URL(req.url);
+      const registry=await liveOwnerRegistry(owner.actor,
+        url.searchParams.get("company_id")??"all",url.searchParams.get("project_id"));
+      const http=registry.status==="SOURCE_UNAVAILABLE"?503:registry.status==="FORBIDDEN"?403:200;
+      return json(req,http,registry);
+    }
     if(req.method==="POST"&&suffix==="chat"){
       let body:unknown;
       try{body=await req.json()}catch{return json(req,400,{status:"INVALID",message:"JSON inválido.",executed:false})}
       const obj=typeof body==="object"&&body!==null?body as Record<string,unknown>:{};
       const message=obj.message;
       if(typeof message!=="string"||message.length>2000)return json(req,400,{status:"INVALID",message:"Mensaje inválido.",executed:false});
-      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate,obj.conversation_context));
+      return json(req,200,await chatReply(req,message,obj.pending_action,obj.read_context,obj.learning_candidate,obj.conversation_context,owner.actor));
     }
 
     if(req.method!=="GET")return json(req,405,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE"});
@@ -1203,6 +1247,6 @@ export default {
       return json(req,200,{status:"OK",preferences:current.preferences});
     }
 
-    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","owner-capabilities","chat"]});
+    return json(req,404,{status:"CLOSED",reason:"ROUTE_NOT_AVAILABLE",available:["health","contract","engines","preferences","owner-capabilities","owner-registry","chat"]});
   }),
 };
