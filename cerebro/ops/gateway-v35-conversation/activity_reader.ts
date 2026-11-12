@@ -16,7 +16,7 @@ function norm(value:string){
 export function classifyActivityQuestion(message:string):Kind|null{
  const q=norm(message);
  if(!q||q.length>2000)return null;
- if(/^(?:activa|lanza|crea|prepara|ejecuta|cancela|borra|elimina|modifica|programa|publica)\b/.test(q))return null;
+ if(/^(?:activa|lanza|crea|prepara|ejecuta|cancela|borra|elimina|modifica|programa|publica)\b/.test(q)||/\b(aion|captacasa)\b/.test(q))return null;
  if(/(?:hay algun|hay alguna|tenemos|existen)\s+(?:fallo|bloqueo|incidente|decision)/.test(q)&&/\b(mi intervencion|requiera|atencion|pendiente)\b/.test(q))return"incidents";
  if(/\b(?:trabajos?|ejecuciones?|workflows?|cola|motores?|tareas?)\b/.test(q)||/que esta haciendo cerebro ahora|que hace cerebro ahora/.test(q)){
   if(/mas tiempo esperando|mas antiguo|mas tiempo en cola|lleva mas esperando/.test(q))return"oldest";
