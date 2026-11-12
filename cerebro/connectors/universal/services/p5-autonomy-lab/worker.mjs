@@ -30,7 +30,7 @@ export async function scheduledP5(env,now=Date.now(),http=fetch){
   }catch{ /* Fail closed; ticket expiry prevents replay even if audit write fails */ }
   return {status:'RECONCILE',reason:code,request_id:requestId};
  }
- let response;try{response=await http(ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(cmd),redirect:'error',signal:AbortSignal.timeout(105000)});}
+ let response;try{response=await http(ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(cmd),redirect:'manual',signal:AbortSignal.timeout(105000)});}
  catch{return await reconcile('DISPATCH_UNVERIFIED');}
  if(response.status!==200)return await reconcile('DISPATCH_HTTP_'+response.status);
  let result;try{result=await response.json()}catch{return await reconcile('DISPATCH_NOT_JSON');}

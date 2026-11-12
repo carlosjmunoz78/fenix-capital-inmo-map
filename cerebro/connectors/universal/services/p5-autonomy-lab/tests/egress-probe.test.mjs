@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {probeP5Egress} from '../egress-probe.mjs';
 function f(enabled='true'){
  const writes=[];let count=0;
- const db={prepare(sql){return{bind(...args){return{async first(){if(sql.startsWith('INSERT'))return count++?null:{id:'FACT001-P5-EGRESS-PROBE-20261112'};throw Error('not first')},async run(){writes.push({sql,args});return {success:true};}}}}}};
+ const db={prepare(sql){return{bind(...args){return{async first(){if(sql.startsWith('INSERT'))return count++?null:{id:'FACT001-P5-EGRESS-PROBE-20261112-V2'};throw Error('not first')},async run(){writes.push({sql,args});return {success:true};}}}}}};
  return{writes,env:{P5_DIAG_ENABLED:enabled,RECOVERY_DB:db}};
 }
 test('no diagnostic unless explicitly enabled',async()=>{const x=f('false');const r=await probeP5Egress(x.env);assert.equal(r.status,'OFF');assert.equal(x.writes.length,0)});
