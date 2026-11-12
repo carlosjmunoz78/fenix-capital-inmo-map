@@ -52,7 +52,7 @@ export default function CerebroConsoleHost(){
  // Explicit LAB preview only: the existing Operativa remains the default.
  const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
-  <JarvisVisibleLanguageGuard/>
+  {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
