@@ -514,6 +514,18 @@
         "key_escrow_independent": false,
         "external_provider_writes": 0,
         "real_backup_gate": "PENDING"
+      },
+      "functional_lab_acceptance_20261112": {
+        "state": "VERIFIED_LAB_SCOPED_CAPABILITY",
+        "basis": "Independent CEREBRO Worker executor live, cron */5, D1 jobs state COMPLETED Workers=6 Pages=4, OIDC flows and CRUD/rollback verified for owned LAB resources",
+        "worker": "cerebro-fact001-headless-operator-lab-20261111",
+        "counts": {
+          "worker_completed": 6,
+          "pages_completed": 4
+        },
+        "limitations": "NOT universal all-products PROD permissions; native complete D1 backup/escrow and deployment promotion remain separate resiliency work",
+        "stop_repetitive_bulk_backups": true,
+        "console_dependency": false
       }
     },
     {
@@ -1397,6 +1409,15 @@
         "parallel_notion_work": "CONTINUES_UNCHANGED",
         "obsolete_plan_retry": "STOPPED_AFTER_INDEX_DRIFT",
         "rationale": "Owner requested stop exhaustive tests; capability already physically verified on real content. Formal FULL autonomous production recovery remains outside this limited acceptance."
+      },
+      "functional_lab_acceptance_20261112": {
+        "state": "VERIFIED_LAB_SCOPED_CAPABILITY",
+        "basis": "Real encrypted 100-object backup, private Drive readback CRC+SHA verified, Notion independent service identity and isolated CRUD/Trash restore demonstrated",
+        "last_confirmed_checkpoint": "100/v4",
+        "drive_id": "1jqCgm1qY2euqCy9uO_KGHrV4hMqSI0BC",
+        "limitations": "NOT full 6632-object workspace backup, assets/comments/independent escrow/physical content rehydration remain separate resiliency work",
+        "stop_repetitive_bulk_backups": true,
+        "console_dependency": false
       }
     },
     {
