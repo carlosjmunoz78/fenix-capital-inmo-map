@@ -1,0 +1,37 @@
+{
+  "schema": "cerebro.jarvis.superagent.rc2.source_integrity.v1",
+  "verified_on": "2026-11-12",
+  "company_id": "fenix",
+  "engine_id": "JARVIS",
+  "environment": "LAB",
+  "version": "source-gate-2026-11-12",
+  "source_master": {
+    "library_name": "JARVIS_MASTER_V1_RC2_2026-10-30.md",
+    "library_path": "Biblioteca personal / JARVIS_MASTER_V1_RC2_2026-10-30.md",
+    "source_sha256": "278e3754ae032ec62f763d81d097110c8b35afb99972985d9c952fd0d564e05e",
+    "bytes": 105024,
+    "source_lines": 6978,
+    "sha256_compared_directly_against_original": true
+  },
+  "source_index": {
+    "library_path": "/ZEUS/JARVIS/JARVIS_SUPERAGENTE_RC2_INDICE_420_REQUISITOS_CUT49_2026-11-07.json",
+    "numbered_functional_requirements": 420,
+    "chapter_zero": 1,
+    "total_sections": 421,
+    "unique_requirement_ids": 421,
+    "indexed_section_headings_matched_source_lines": 421,
+    "missing_requirement_ids": 0,
+    "missing_or_invalid_titles": 0,
+    "per_item_status_counts": {
+      "POR_AUDITAR": 421
+    },
+    "per_item_evidence_refs_attached": 0,
+    "source_sha_matches_master": true
+  },
+  "independent_gate_result": "SOURCE_INTEGRITY_PASS_REQUIREMENTS_IMPLEMENTATION_NOT_CERTIFIED",
+  "release_gate": "NO_GO",
+  "interpretation": "Source/index have full structural integrity; 0 of 421 items carry per-item evidence in this index. Do not treat this as proof zero code exists or that 420 requirements are complete. Each functional item requires its own independent contract/test/physical evidence/acceptance before CONFIRMED_OPERATIONAL.",
+  "sensitive_source_copied_to_public_repository": false,
+  "next_action": "Produce per-item evidence mapping from live code/runtimes and maintain physical B2/B3/Gateway gating; never elevate a synthetic test into physical acceptance.",
+  "rollback": "Delete this additive metadata only from unmerged PR35; no runtime modifications"
+}
