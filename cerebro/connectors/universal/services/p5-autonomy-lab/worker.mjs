@@ -19,11 +19,22 @@ export async function scheduledP5(env,now=Date.now(),http=fetch){
  if(!row)return {status:'ALREADY_SCHEDULED',day};
  if(row.request_id!==requestId)throw Error('P5_D1_INSERT_DRIFT');
  const cmd={...SCOPE,request_id:requestId,operation:'providers.five.inventory.read',provider_set:PROVIDER_SET,max_cost_eur:0,source:'registered_automation'};
+ // The original requester must never leave an expired ticket in QUEUED after a failed
+ // outbound call. We only reconcile a still-QUEUED job: never overwrite a dispatcher
+ // that may have atomically claimed RUNNING/COMPLETED. No automatic retry.
+ async function reconcile(reason){
+  const code=/^DISPATCH_(UNVERIFIED|HTTP_[0-9]{3}|NOT_JSON|RESULT_UNVERIFIED)$/.test(reason)?reason:'DISPATCH_UNVERIFIED';
+  try{
+   await env.RECOVERY_DB.prepare("UPDATE fact001_p5_jobs_v1 SET state='RECONCILE',error_code=?2,completed_at_ms=?3 WHERE request_id=?1 AND state='QUEUED' AND attempts=0 RETURNING request_id")
+      .bind(requestId,code,Date.now()).first();
+  }catch{ /* Fail closed; ticket expiry prevents replay even if audit write fails */ }
+  return {status:'RECONCILE',reason:code,request_id:requestId};
+ }
  let response;try{response=await http(ENDPOINT,{method:'POST',headers:{Authorization:'Bearer '+secret,'Content-Type':'application/json',Accept:'application/json'},body:JSON.stringify(cmd),redirect:'error',signal:AbortSignal.timeout(105000)});}
- catch {return {status:'RECONCILE',reason:'DISPATCH_UNVERIFIED',request_id:requestId};}
- if(response.status!==200)return {status:'RECONCILE',reason:'DISPATCH_HTTP_'+response.status,request_id:requestId};
- let result;try{result=await response.json()}catch{return {status:'RECONCILE',reason:'DISPATCH_NOT_JSON',request_id:requestId};}
- if(result?.status!=='COMPLETED'||result?.provider_count!==5||result?.request_id!==requestId)return {status:'RECONCILE',reason:'DISPATCH_RESULT_UNVERIFIED',request_id:requestId};
+ catch{return await reconcile('DISPATCH_UNVERIFIED');}
+ if(response.status!==200)return await reconcile('DISPATCH_HTTP_'+response.status);
+ let result;try{result=await response.json()}catch{return await reconcile('DISPATCH_NOT_JSON');}
+ if(result?.status!=='COMPLETED'||result?.provider_count!==5||result?.request_id!==requestId)return await reconcile('DISPATCH_RESULT_UNVERIFIED');
  return {status:'COMPLETED',request_id:requestId,provider_count:5};
 }
 export default {
