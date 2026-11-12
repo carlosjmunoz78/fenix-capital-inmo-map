@@ -11,3 +11,7 @@ export type JarvisConversationDriver={
 };
 export const JarvisConversationBridgeContext=
  createContext<RefObject<JarvisConversationDriver|null>|null>(null);
+
+export type JarvisTranscriptTurn={role:'user'|'cerebro';text:string;mediaUrl?:string|null};
+/** Read-only projection of the currently authenticated chat, kept in React memory. */
+export const JarvisTranscriptContext=createContext<((turns:JarvisTranscriptTurn[])=>void)|null>(null);
