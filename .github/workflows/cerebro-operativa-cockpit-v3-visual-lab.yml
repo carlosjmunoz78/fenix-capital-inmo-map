@@ -5,6 +5,8 @@ on:
       - cerebro/operativa-cockpit-visual-lab-v0-20261112
     paths:
       - src/CerebroOperativeCockpitV3.tsx
+      - src/CerebroOperativaUniverseViews.tsx
+      - src/cerebroOperativaLabUniverseApi.ts
       - src/cerebro-operative-cockpit-v3.css
       - src/CerebroOperativeConsole.tsx
       - src/CerebroConsoleHost.tsx
@@ -14,6 +16,8 @@ on:
   pull_request:
     paths:
       - src/CerebroOperativeCockpitV3.tsx
+      - src/CerebroOperativaUniverseViews.tsx
+      - src/cerebroOperativaLabUniverseApi.ts
       - src/cerebro-operative-cockpit-v3.css
       - src/CerebroOperativeConsole.tsx
       - src/CerebroConsoleHost.tsx
