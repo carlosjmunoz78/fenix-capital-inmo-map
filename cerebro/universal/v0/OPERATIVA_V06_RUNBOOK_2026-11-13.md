@@ -35,3 +35,9 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 ## Changelog
 
 2026-11-13: Added existing owner-universe read adapter, read-only metadata summary panel, six-interface SDK `readOwnerSources()` and negative tests; no modifications to main, Supabase, App/CRM, SEO, Trading or PROD.
+
+## V0.6 operator dry-run / physical deployment (13 Nov 2026)
+
+- Strict Preview API allowlist now accepts `submit_command` **only** when `dry_run:true`, company `fenix`, environment `LAB`, engine `FACT-001`, capability `fact.registry.summary`, exact version and empty payload; every other command is rejected before owner calls. Owner is verified again server-side. `executed:false`, `prod_execution_enabled:false`, `durable_audit:false`, `idempotency_persisted:false` are explicit, so never claim a real order was scheduled or an audited idempotency guarantee. No separate queue or writes.
+- Isolated Vercel Preview deployment `dpl_BsTNGRzGfaHNYHW3JMFfkZtPFBkx` at `fenix-capital-preprod-qs5nvwkj9.vercel.app`, code SHA `d057465846a038c25c5e74b8a610452b85aeef3c`, `target=null`, status READY. **Do not navigate or open another Opera tab**; user remains in existing authenticated older Preview. This is not an E2E of the latest UI.
+- Current login/physical acceptance remains PENDING. No movement to main, production or DNS.

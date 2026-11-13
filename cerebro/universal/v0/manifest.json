@@ -38,7 +38,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "NO_JOB001_LIVE_RUNTIME_EVIDENCE_NO_DURABLE_AUDIT_NO_OWNER_SOURCES_PREVIEW_E2E"
+    "reason": "JOB001_LIVE_ABSENT_AUDIT_NOT_DURABLE_NEW_OWNER_AND_DRYRUN_OWNER_E2E_PENDING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -93,7 +93,29 @@
     "prod_authorized": false,
     "production_changes": false,
     "tests": "33/33_CI_PASS_AT_2026_11_13_BEFORE_DOC_UPDATE",
-    "physical_owner_e2e": "PENDING_NEW_PREVIEW_DEPLOYMENT",
+    "physical_owner_e2e": "PENDING",
     "record_absence_note": "Existing JOB001 telemetry and company engine state tables in inspected Supabase project returned no rows at 2026-11-13; this does not certify runtime zero elsewhere."
+  },
+  "lab_command_preview": {
+    "action": "submit_command",
+    "feature": "FACT-001_DRY_RUN_ONLY",
+    "preview_endpoint": "/api/cerebro-universal-preview",
+    "operational_execution": false,
+    "no_write_executor": true,
+    "durable_audit": false,
+    "idempotency_persisted": false,
+    "physical_owner_e2e": "PENDING",
+    "cost_additional_eur": 0,
+    "promotion_authorized": false,
+    "human_exception_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ]
   }
 }

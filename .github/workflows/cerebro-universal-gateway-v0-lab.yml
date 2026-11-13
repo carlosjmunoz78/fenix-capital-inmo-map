@@ -36,7 +36,7 @@ jobs:
           npm run build
       - name: Remote LAB Preview anonymous SSO negative security smoke
         env:
-          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-preprod-e5k3jxvrq.vercel.app/
+          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-preprod-qs5nvwkj9.vercel.app/
         run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
       - name: Check no-Prod and zero additional cost
         run: |
