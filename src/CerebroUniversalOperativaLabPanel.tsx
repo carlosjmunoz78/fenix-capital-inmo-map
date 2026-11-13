@@ -37,7 +37,18 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <span>Capacidades consultables: <b>{result.capabilities.length}</b></span>
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>
    <span>Motores operativos: <b>No verificados</b></span>
-   <small>Fuente: {result.source}. No controla ni ejecuta trabajos reales.</small>
+   <small>Fuente: {result.source}. Esta capacidad solo consulta el registro; NO ejecuta motores.</small>
+   <div className="op-uni-lab-work" aria-label="Actividad de GitHub Actions mediante Gateway Universal">
+    <strong>Trabajos observados · GitHub Actions</strong>
+    <span>Fuente: {result.workActivity?.source||'NO CONECTADA'} · {result.workActivity?.state||'UNAVAILABLE'}</span>
+    {result.workActivity?.observedAt?<small>Última captura: {result.workActivity.observedAt}</small>:null}
+    <small>Es una muestra de workflows, NO la cola JOB-001 ni la ejecución de 179 motores.</small>
+    {result.workActivity?.rows.map(run=><div key={run.run_id} className="op-uni-lab-work-row">
+     <a href={run.html_url} target="_blank" rel="noreferrer">{run.workflow_name||'Workflow #'+run.run_id}</a>
+     <small>{run.status} · {run.environment} · {run.engine_id||'Motor no atribuido'}</small>
+    </div>)}
+    {result.workActivity?.state==='UNAVAILABLE'?<small>Fuente no disponible: sin estimaciones ni estados inventados.</small>:null}
+   </div>
   </div>:null}
  </section>;
 }

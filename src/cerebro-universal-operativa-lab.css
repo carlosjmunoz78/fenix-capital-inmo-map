@@ -7,3 +7,8 @@
 .op-uni-lab button:disabled{opacity:.65;cursor:default}
 .op-uni-lab-proof{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
 .op-uni-lab-proof small{flex-basis:100%}
+
+.op-uni-lab-work{flex:1 0 100%;display:flex;flex-direction:column;gap:5px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(120,170,197,.25);font-size:13px}
+.op-uni-lab-work>strong{font-size:14px}
+.op-uni-lab-work-row{padding:7px 0;border-bottom:1px solid rgba(120,170,197,.15);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.op-uni-lab-work-row a{color:#a9eaff;text-decoration:underline;text-underline-offset:3px}

@@ -18,6 +18,13 @@ export function canPreviewUniversalOperativa(location:Pick<Location,'hostname'|'
   &&new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3'
   &&new URLSearchParams(location.search).get('section')==='operativa';
 }
+export type UniversalWorkActivityLab={
+ state:'LIVE'|'CACHED'|'UNAVAILABLE';
+ observedAt:string|null;
+ rows:{run_id:number;engine_id:string|null;workflow_name:string;status:string;environment:string;html_url:string}[];
+ source:'GITHUB_ACTIONS';
+ job001Connected:false;
+};
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
  kind:'ready'|'unavailable'|'denied';
@@ -25,6 +32,7 @@ export type UniversalLabProof={
  registeredDefinitions:number|null;
  operationalState:string;
  source:string;
+ workActivity?:UniversalWorkActivityLab;
 };
 export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<UniversalLabProof>{
  const unavailable=(kind:'unavailable'|'denied'):UniversalLabProof=>({
@@ -34,7 +42,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return unavailable('denied');
  const endpoint=new URL('/api/cerebro-universal-preview',window.location.origin);
- const call=async(action:'list_capabilities'|'invoke_read',extra:Record<string,unknown>={})=>{
+ const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity',extra:Record<string,unknown>={})=>{
   const response=await fetch(endpoint.href,{
    method:'POST',signal,cache:'no-store',
    headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
@@ -65,8 +73,34 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   if(parsed?.status!=='READ_EXECUTED'||!Number.isSafeInteger(count)||count!==179||
     parsed?.result?.operational_engine_count!=='NOT_VERIFIED')
    return unavailable('unavailable');
+  // Work is an optional, separate source: never let a failed GitHub read
+  // invalidate the successful FACT capability handshake.
+  let workActivity:UniversalWorkActivityLab={
+   state:'UNAVAILABLE',observedAt:null,rows:[],source:'GITHUB_ACTIONS',job001Connected:false
+  };
+  try{
+   const work=await call('list_work_activity') as {
+    status?:unknown;source?:unknown;source_status?:unknown;observed_at?:unknown;
+    job001_connected?:unknown;runs?:unknown;transport?:unknown
+   };
+   if(work?.status==='OK'&&work.source==='GITHUB_ACTIONS'&&work.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&work.job001_connected===false&&
+     (work.source_status==='LIVE'||work.source_status==='CACHED')&&Array.isArray(work.runs)){
+    const rows=work.runs.slice(0,6).flatMap((item):UniversalWorkActivityLab['rows']=>{
+     if(!item||typeof item!=='object')return [];
+     const row=item as Record<string,unknown>;
+     if(!Number.isSafeInteger(row.run_id)||typeof row.workflow_name!=='string'||typeof row.html_url!=='string'||
+       !/^https:\/\/github\.com\/carlosjmunoz78\/fenix-capital-inmo-map\/actions\/runs\/\d+$/.test(row.html_url))return [];
+     return [{
+      run_id:row.run_id as number,engine_id:typeof row.engine_id==='string'?row.engine_id:null,
+      workflow_name:row.workflow_name,status:typeof row.status==='string'?row.status:'UNKNOWN',
+      environment:typeof row.environment==='string'?row.environment:'UNKNOWN',html_url:row.html_url
+     }];
+    });
+    workActivity={state:work.source_status,observedAt:typeof work.observed_at==='string'?work.observed_at:null,rows,source:'GITHUB_ACTIONS',job001Connected:false};
+   }
+  }catch{/* work stays UNAVAILABLE, owner identity/FACT remain unchanged */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,
-   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB'};
+   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
   const code=error instanceof Error?error.message:'';
