@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {projectJob001ReadSnapshot,projectCronObservation,projectDispatchRpcObservation,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
+import {projectJob001ReadSnapshot,projectCronObservation,projectDispatchRpcObservation,projectSeoBacklogObservation,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
 
 const source=fs.readFileSync(new URL('./preprod-job001-reader/index.ts',import.meta.url),'utf8');
 const observedAt='2026-11-13T18:30:00.000Z';
@@ -126,4 +126,29 @@ test('JOB001 PostgREST call observation is cumulative only and cannot claim job 
   {rpc_calls_since_reset:'79994'},{matching_normalized_statements:0},
   {stats_reset_at:'INVALID'}
  ])assert.equal(projectDispatchRpcObservation({...raw,...patch}).status,'UNAVAILABLE');
+});
+
+test('real FENIX_CAPITAL SEO backlog observation is read-only, closed to staging and not a publication proof',()=>{
+ const raw={source:'PREPROD_SEO_BACKLOG_READ_ONLY',company_id:'fenix',source_company_id:'FENIX_CAPITAL',
+  source_environment:'PREPROD',engine_id:'SEO-001',
+  observed_at:'2026-11-13T21:00:00Z',total:1666,queued:1360,done:270,waiting_prerequisites:33,cancelled:3,
+  latest_done_at:'2026-11-13T20:55:03Z',supervisor_state:'DEGRADED',
+  supervisor_last_measured_at:'2026-11-02T06:00:09Z',
+  staging_status:'SUSPENDED_BY_OWNER_NO_PROBE',staging_probe_performed:false,
+  seo_dispatch_authorized:false,downstream_publication_verified:false,
+  other_company_private_payload:'NEVER_RETURN'};
+ const x=projectSeoBacklogObservation(raw);
+ assert.equal(x.status,'OK');assert.equal(x.queued,1360);assert.equal(x.total,1666);
+ assert.equal(x.supervisor_state,'DEGRADED');
+ assert.equal(x.seo_dispatch_authorized,false);assert.equal(x.downstream_publication_verified,false);
+ assert.equal(JSON.stringify(x).includes('NEVER_RETURN'),false);
+ for(const patch of [
+  {source_company_id:'AION'},{source_environment:'PROD'},{company_id:'aion'},
+  {staging_probe_performed:true},{seo_dispatch_authorized:true},{downstream_publication_verified:true},
+  {staging_status:'ONLINE'},{total:1667},{supervisor_state:'EXCELLENT'}
+ ]){
+  const bad=projectSeoBacklogObservation({...raw,...patch});
+  assert.equal(bad.status,'UNAVAILABLE');
+  assert.equal(bad.queued,null);
+ }
 });

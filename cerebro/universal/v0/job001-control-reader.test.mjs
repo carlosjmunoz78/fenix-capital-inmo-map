@@ -97,6 +97,24 @@ test('owner reader admits only sanitized SQL RPC totals with false Hostinger and
  const forged=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>rjson({...good(),rpc_observation:{...rpc_observation,downstream_effect_verified:true}})});
  assert.equal((await forged.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN})).rpc_observation.status,'UNAVAILABLE');
 });
+test('SEO backlog from existing PREPROD reader is counts-only and refuses forged dispatch proof',async()=>{
+ const seo_backlog={status:'OK',source:'PREPROD_SEO_BACKLOG_READ_ONLY',company_id:'fenix',
+  source_environment:'PREPROD',total:1666,queued:1360,done:270,waiting_prerequisites:33,cancelled:3,
+  supervisor_state:'DEGRADED',latest_done_at:'2026-11-13T20:55:03Z',
+  supervisor_last_measured_at:'2026-11-02T06:00:09Z',staging_probe_performed:false,
+  seo_dispatch_authorized:false,downstream_publication_verified:false,secret:'SHOULD_NOT_ESCAPE'};
+ const client=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>rjson({...good(),seo_backlog})});
+ const ok=await client.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(ok.seo_backlog.status,'OK');
+ assert.equal(ok.seo_backlog.queued,1360);
+ assert.equal(ok.seo_backlog.supervisor_state,'DEGRADED');
+ assert.equal(JSON.stringify(ok).includes('SHOULD_NOT_ESCAPE'),false);
+ const bad=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async()=>rjson({...good(),seo_backlog:{...seo_backlog,seo_dispatch_authorized:true}})});
+ const blocked=await bad.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(blocked.seo_backlog.status,'UNAVAILABLE');
+ assert.equal(blocked.seo_backlog.queued,null);
+});
 test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
  let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
  for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
