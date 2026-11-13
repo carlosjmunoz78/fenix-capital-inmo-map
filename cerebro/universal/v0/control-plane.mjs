@@ -1,6 +1,7 @@
 import crypto from 'node:crypto';
+import {getLabDependencyStatusV0,assessLabOperationV0,rejectSuspendedTargetV0} from './dependency-policy.mjs';
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
-const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_evidence','submit_command','invoke_read','audit_log'];
+const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_evidence','submit_command','invoke_read','audit_log'];
 const error=s=>{throw Error(s);};
 const value=(v,name)=>typeof v==='string'&&v.length>0&&v.length<=160?v:error('INVALID_'+name);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -49,6 +50,14 @@ export class UniversalGatewayLabV0 {
     const id=value(params.engine_id,'ENGINE_ID');
     if(!this.#registry.engine_ids.includes(id))error('ENGINE_NOT_REGISTERED');
     response={status:'OK',engine_id:id,defined_in_registry:true,definition_environment:'SCAFFOLD',runtime:'NOT_VERIFIED',lab_read_capabilities:cap&&id==='FACT-001'?[cap.capability_id]:[],source:'REPOSITORY_SNAPSHOT_NOT_LIVE'};break;
+   }
+   case 'get_dependency_status':{
+    response=getLabDependencyStatusV0({company_id,environment:'LAB'});break;
+   }
+   case 'assess_operation':{
+    if(typeof params.operation!=='string'||params.operation.length>90)
+     error('OPERATION_INVALID');
+    response=assessLabOperationV0({company_id,environment:'LAB',operation:params.operation});break;
    }
    case 'list_owner_sources':{
     if(!actor.scopes.includes('cerebro:factory:inspect'))error('SCOPE_DENIED');
@@ -111,6 +120,7 @@ export class UniversalGatewayLabV0 {
    case 'submit_command':{
     if(!actor.scopes.includes('cerebro:command:dryrun'))error('SCOPE_DENIED');
     if(params.dry_run!==true)error('LAB_WRITES_DISABLED');
+    rejectSuspendedTargetV0(params);
     requireCap();payload();
     if(params.engine_id!=='FACT-001'||params.version!==this.#cap.version)error('CAPABILITY_VERSION_MISMATCH');
     const id=value(params.idempotency_key,'IDEMPOTENCY_KEY'),key=actor.actor_id+'|'+company_id+'|'+id;

@@ -11,7 +11,7 @@ type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','submit_command']);
+const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','submit_command']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
@@ -39,6 +39,18 @@ export default async function handler(req:Req,res:Res){
  const params=req.body.params;
  if(!obj(params)||params.company_id!=='fenix'||params.environment!=='LAB')
   return res.status(403).json({status:'CLOSED',reason:'COMPANY_OR_ENV_DENIED'});
+ // Owner suspension is never a reason to route a request to WordPress PROD.
+ // No user-controlled network destination may enter this LAB API.
+ if(req.body.action==='assess_operation'&&
+    (typeof params.operation!=='string'||params.operation.length>90))
+  return res.status(404).json({status:'CLOSED',reason:'OPERATION_REQUIRED'});
+ if(req.body.action==='submit_command'&&
+    Object.keys(params).some(key=>!new Set([
+     'company_id','environment','engine_id','capability_id','version',
+     'dry_run','idempotency_key','payload','estimated_additional_cost_eur',
+     'risk','human_exception','signature_required'
+    ]).has(key)))
+  return res.status(404).json({status:'CLOSED',reason:'EXTERNAL_DESTINATION_DENIED'});
  // A command can be structurally validated in LAB, never executed here.
  // The runtime has no write executor and this API refuses every non-dry-run request.
  if(req.body.action==='submit_command'){
