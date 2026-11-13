@@ -38,6 +38,8 @@ jobs:
         env:
           CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-preprod-qs5nvwkj9.vercel.app/
         run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
+      - name: Remote PREPROD JOB001 owner-only anonymous negative security probe
+        run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
       - name: Check no-Prod and zero additional cost
         run: |
           node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
