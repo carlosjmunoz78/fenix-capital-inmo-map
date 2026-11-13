@@ -98,3 +98,17 @@
 - Artefacto final `operativa-live-chat-default-qa` del workflow #43332079954: dos imágenes sintéticas (1280×1563 escritorio y 390×844 móvil). El compositor móvil queda debajo del primer pliegue por su contenido; es desplazable y visible, no está cubierto por el menú. No se certifica UX móvil premium final.
 
 **Pendiente (NO PROMOVER):** E2E positivo del propietario en Gateway LAB, permisos completos multiempresa, confirmación del SHA exacto desplegado en App real, revisión visual definitiva, comparación OLD vs NEW en sesión real, rollback y tribunal. PR #57 permanece DRAFT; no ha habido actualización de App/CRM/DNS/PROD.
+
+
+## Mejora verificada · Orden conversacional móvil · 13/11/2026
+
+**HECHO exclusivamente en PR #57 DRAFT** — no publicado en la App real:
+- `src/cerebro-operative-live-console.css`: en pantallas de hasta 720px, la **conversación autenticada existente** se muestra inmediatamente después del selector de empresa y **antes del resumen de trabajos**. No hay duplicación de chat ni nuevo cliente Gateway. La entrada permanece en flujo normal, sin barra flotante que tape el campo.
+- Reducción de altura del historial vacío y márgenes en móvil sin ocultar mensajes; el historial con respuestas mantiene scroll.
+- `src/CerebroOperativeLiveConsole.tsx`: placeholder abreviado a **«Escribe o dicta…»** para que se lea en una línea a 390px, manteniendo texto real del campo a 16px y etiqueta accesible `Mensaje para CEREBRO`.
+- En <=420px el contexto redundante «General» se oculta visualmente para evitar clipping; siguen visibles el selector de Fénix y **ACTIVIDAD VERIFICADA** dentro de 390px. No se pierde el contexto del lado servidor.
+- **Prueba browser física con autenticación simulada**, no E2E propietario real: `tests/cerebro-operativa-v3-e2e.spec.ts` verifica que el compositor cabe en el primer viewport sin scroll (`390x844`), la conversación aparece antes del resumen, el placeholder cabe en una sola línea, no hay desbordamiento horizontal, y la empresa y estado de actividad son visibles.
+- Evidencias finales: [Operativa V1 Gate #43333713203](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43333713203), [Cockpit V3 Visual LAB #43333713477](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43333713477), [Voice Contract #43333713210](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43333713210): **SUCCESS** todos, compilación y navegador.
+- Artifact GitHub `operativa-live-chat-default-qa` de #43333713203: capturas escritorio + móvil, solo datos sintéticos, sin JWT ni sesiones reales. Inspeccionado visualmente: entrada y estado ya no quedan recortados.
+- Coste adicional de suscripción: **ninguna contratación**. Se ha usado CI ya existente; no se acredita coste absoluto de consumo.
+- **NO PROMOVER** hasta que exista evidencia de E2E positivo del propietario en Gateway LAB, comparación del binario/código realmente servido por App PROD, rollback, tribunal y aceptación visual.
