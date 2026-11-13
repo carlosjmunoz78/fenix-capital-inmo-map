@@ -31,7 +31,7 @@
       "source": "EXISTING_SUPABASE_PREPROD",
       "project_id": "hnqlnvakzaywtafeiybt",
       "function_slug": "cerebro-operativa-job001-read-lab-v0",
-      "deployed_version": 2,
+      "deployed_version": 3,
       "deployment_status": "ACTIVE",
       "gateway_action": "get_job001_controls",
       "scope": {
@@ -55,8 +55,19 @@
       },
       "operational_execution_verified": false,
       "preview_deployment": "dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh",
-      "physical_owner_e2e": "PENDING",
-      "remote_unauthenticated_probe": "HTTP_401_VERIFIED_GITHUB_CI"
+      "physical_owner_e2e": "VERIFIED_IN_OPERA_EXISTING_TAB_1381967780",
+      "remote_unauthenticated_probe": "HTTP_401_VERIFIED_GITHUB_CI",
+      "physical_observed_status": "OK",
+      "physical_read_values": {
+        "job_controls": 20,
+        "enabled_controls": 20,
+        "external_controls": 2,
+        "engine_state_records": 17,
+        "telemetry_records": 0,
+        "stale_control_rows": 22
+      },
+      "runtime_execution_verified": false,
+      "auth_gate_fix": "CANONICAL_CONTEXT_SHAPE_WITH_STRICT_CARLOS_ADMIN_AND_EXPLICIT_DENIAL"
     },
     "engine_binding_summary": {
       "state": "IMPLEMENTED_IN_LAB_DEPLOYMENT_AND_CI",
@@ -81,7 +92,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "OWNER_E2E_PREVIEW_PENDING_JOB001_RUNTIME_NOT_VERIFIED_DURABLE_AUDIT_AND_ROLLBACK_NOT_READY"
+    "reason": "JOB001_CONFIG_ONLY_NO_RUNTIME_TELEMETRY_NO_DURABLE_AUDIT_ROLLBACK_OR_CANARY"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -166,11 +177,12 @@
     "environment": "preview",
     "target_production": false,
     "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
-    "owner_authenticated_latest_e2e": "PENDING_SINGLE_TAB",
-    "mapped_deployment": "dpl_C8XwLVpDTdYwHBFoHiywBw42tEBK",
-    "mapped_source_sha": "fefce1bd0566de36db028c04abca0cfc1165585f",
+    "owner_authenticated_latest_e2e": "VERIFIED_CEREBRO_OPERATIVA_FACT_OWNER_AND_JOB001_READ",
+    "mapped_deployment": "dpl_Eyz5HVkwe85s7L7AwYPWs6Xe3h5v",
+    "mapped_source_sha": "64cb3c5a5fa809d9a4a6506ea34818e823876033",
     "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
     "no_new_tabs": true,
-    "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc"
+    "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
+    "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780"
   }
 }
