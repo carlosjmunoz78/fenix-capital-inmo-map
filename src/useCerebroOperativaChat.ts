@@ -73,7 +73,7 @@ export function useCerebroOperativaChat(){
   try{
    const utterance=new SpeechSynthesisUtterance(spoken);
    utterance.lang='es-ES';
-   utterance.rate=1.05;
+   utterance.rate=1.15;
    utterance.pitch=1;
    utterance.voice=preferredSpanishVoice(spanishVoices())||null;
    utterance.onend=()=>{voiceSpeakingRef.current=false;setVoiceSpeaking(false);scheduleListen()};
