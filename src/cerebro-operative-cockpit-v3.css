@@ -116,7 +116,7 @@
 .op3-navigation button span{font-weight:600;font-size:12px}
 .op3-navigation button:hover,.op3-navigation button.is-active{background:linear-gradient(180deg,#1a536622,rgba(62,172,221,.12));color:#fff}
 .op3-navigation button.is-active{box-shadow:inset 0 -3px 0 #f5b960}.op3-navigation button.is-active svg{color:#facb76}
-.op3-footer{display:flex;justify-content:space-between;gap:10px;padding:14px 0;color:#557e90;font-size:9px;letter-spacing:.1em}
+ .op3-footer{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;padding:14px 0;color:#557e90;font-size:9px;letter-spacing:.1em}
 .op3-detail{padding:26px 0 34px;min-height:560px}
 .op3-detail-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:24px}
 .op3-back{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;color:#86d5f0;padding:9px 2px}

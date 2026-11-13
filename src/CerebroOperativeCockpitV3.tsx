@@ -245,6 +245,7 @@ export default function CerebroOperativeCockpitV3({
    <footer className="op3-footer">
     <span>FUENTE: {source==='UNAVAILABLE'?'NO VERIFICADA':'GITHUB ACTIONS · '+source}</span>
     <span>{typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'V3 EN PRODUCCIÓN · VISTA PRIVADA DEL PROPIETARIO':'ENSAYO VISUAL · SIN PROMOCIÓN A PRODUCCIÓN'}</span>
+    {typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?<a href="/cerebro?section=operativa&operativa_legacy=1" style={{color:'#83d5f2',textDecoration:'underline'}}>Operativa anterior</a>:null}
    </footer>
   </div>
   {children}

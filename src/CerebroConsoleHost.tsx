@@ -36,7 +36,12 @@ export default function CerebroConsoleHost(){
  const navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const previewHost=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname);
- const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
+ const params=new URLSearchParams(location.search);
+ const visualPreview=params.get('visual_lab')==='cockpit-v3';
+ // The owner-only V3 is the production Operativa default. Legacy remains reversible.
+ const realProduction=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
+ const legacyRequested=params.get('operativa_legacy')==='1';
+ const showPremiumV3=(realProduction||visualPreview)&&!legacyRequested;
  const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview);
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
@@ -75,7 +80,7 @@ export default function CerebroConsoleHost(){
  if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
- // Explicit LAB-only opt-in. Normal Operativa remains the physically verified production chat.
+ // Owner authentication is unchanged; V3 and classic share the canonical chat/voice hook.
 
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
   {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
@@ -83,7 +88,7 @@ export default function CerebroConsoleHost(){
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{visualPreview?<CerebroOperativeCockpitV3Bridge/>:<CerebroOperativeConsole/>}</div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{showPremiumV3?<CerebroOperativeCockpitV3Bridge/>:<><CerebroOperativeConsole/>{realProduction?<div style={{padding:'12px 20px',textAlign:'center'}}><a href="/cerebro?section=operativa" style={{color:'#8bdcf8'}}>Abrir Operativa Premium V3</a></div>:null}</>}</div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>

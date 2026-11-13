@@ -8,9 +8,15 @@ const original=read('src/CerebroOperativeConsole.tsx');
 const hook=read('src/useCerebroOperativaChat.ts');
 const css=read('src/cerebro-interface-bar.css');
 const cockpit=read('src/CerebroOperativeCockpitV3.tsx');
-test('V3 is opt-in and old owner chat stays default',()=>{
- assert.ok(host.includes("get('visual_lab')==='cockpit-v3'"));
- assert.ok(host.includes('visualPreview?<CerebroOperativeCockpitV3Bridge/>:<CerebroOperativeConsole/>'));
+test('V3 is production default for verified owner while original chat is reversible',()=>{
+ assert.ok(host.includes("params.get('visual_lab')==='cockpit-v3'"));
+ assert.ok(host.includes("window.location.hostname==='app.fenixcapital.es'"));
+ assert.ok(host.includes("params.get('operativa_legacy')==='1'"));
+ assert.ok(host.includes("const showPremiumV3=(realProduction||visualPreview)&&!legacyRequested"));
+ assert.ok(host.includes('showPremiumV3?<CerebroOperativeCockpitV3Bridge/>'));
+ assert.ok(host.includes('<CerebroOperativeConsole/>'));
+ assert.ok(host.includes('href="/cerebro?section=operativa"'));
+ assert.ok(cockpit.includes('href="/cerebro?section=operativa&operativa_legacy=1"'));
  assert.ok(original.includes('Conversación con CEREBRO'));
  assert.ok(css.includes('.cerebro-console-host.view-operativa > .cerebro-interface-bar'));
 });
