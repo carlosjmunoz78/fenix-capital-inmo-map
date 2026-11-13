@@ -36,7 +36,7 @@ test('Preview-only owner authenticated FACT dryrun validates but never executes'
  assert.deepEqual(calls.map(x=>x.url),[OWNER,AUDIT]);
 });
 test('non-dryrun and other engine / payload are denied before authorisation or side effects',async t=>{
- const originalFetch=globalThis.fetch,env=process.env.VERCEL_ENV,vercel=process.env.VERCEL_URL;
+ const originalFetch=globalThis.fetch,env=process.env.VERCEL_ENV,vercel=process.env.VERCEL_URL,oldPreprod=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY;
  t.after(()=>{globalThis.fetch=originalFetch;process.env.VERCEL_ENV=env;process.env.VERCEL_URL=vercel;process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY=oldPreprod});
  process.env.VERCEL_ENV='preview';process.env.VERCEL_URL=HOST;
  let calls=0;globalThis.fetch=async()=>{calls++;throw Error('NOT_ALLOWED')};
