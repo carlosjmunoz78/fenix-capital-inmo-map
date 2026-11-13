@@ -21,7 +21,14 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    catch{return empty('PREPROD_GATEWAY_UNREACHABLE')}
    if(response.status!==200){
     if(response.status===404)return empty('PREPROD_SOURCE_HTTP_404');
-    if(response.status===401||response.status===403)return empty('PREPROD_OWNER_DENIED');
+    if(response.status===401||response.status===403){
+     const safeDenial=new Set(['FENIX_LAB_SCOPE_ONLY','OWNER_CONTEXT_NOT_AUTHORIZED','OWNER_ONLY','OWNER_CONTEXT_INVALID','OWNER_RESOLVER_UNAVAILABLE','OWNER_SESSION_REQUIRED']);
+     try{const data=await response.json();
+      if(data?.status==='UNAVAILABLE'&&safeDenial.has(data?.reason))return empty('PREPROD_'+data.reason);
+      if(data?.status==='CLOSED'&&safeDenial.has(data?.reason))return empty('PREPROD_'+data.reason);
+     }catch{/* No raw error leakage */}
+     return empty('PREPROD_OWNER_DENIED');
+    }
     const safeErrors=new Set(['PREPROD_DB_AUTH_UNAVAILABLE','PREPROD_READ_FAILED','OWNER_RESOLVER_UNAVAILABLE','OWNER_CONTEXT_NOT_AUTHORIZED','PREPROD_PROJECT_MISMATCH','READ_EXCEPTION']);
     try{const fault=await response.json();
      if(fault?.status==='UNAVAILABLE'&&safeErrors.has(fault?.reason))

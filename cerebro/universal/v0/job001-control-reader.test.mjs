@@ -50,6 +50,14 @@ test('PREPROD controls reader enforces two publishable key scopes and returns sa
  assert.equal(calls[0].options.headers.apikey,PREPROD);
  assert.equal(calls[0].options.headers['x-cerebro-owner-prod-apikey'],PROD);
 });
+test('403 from PREPROD Edge exposes only safe authorization reason, never raw context',async()=>{
+ const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>
+  rjson({status:'UNAVAILABLE',reason:'OWNER_CONTEXT_NOT_AUTHORIZED',internal:'TOP_SECRET'},403)});
+ const value=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(value.status,'UNAVAILABLE');
+ assert.equal(value.reason,'PREPROD_OWNER_CONTEXT_NOT_AUTHORIZED');
+ assert.equal(JSON.stringify(value).includes('TOP_SECRET'),false);
+});
 test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
  let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
  for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
