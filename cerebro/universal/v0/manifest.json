@@ -105,6 +105,59 @@
       "master_hostinger_scheduler_verified": false,
       "job001_runtime_verified": false,
       "downstream_effect_verified": false
+    },
+    "hostinger_master_observation": {
+      "state": "EXTERNALLY_OBSERVED_NOT_FULL_END_TO_END_CERTIFIED",
+      "source": "SUPABASE_PREPROD_FUNCTION_EDGE_LOGS",
+      "user_agent": "CEREBRO-JOB-001-Hostinger-Master/0.1",
+      "method": "POST",
+      "path": "/functions/v1/cerebro-job001-gateway-preprod",
+      "window": "PREVIOUS_24H_2026-11-13_20:20_UTC",
+      "requests": 1725,
+      "http_200": 1723,
+      "http_500": 2,
+      "last_seen_at": "2026-11-13T20:20:04.661Z",
+      "last_two_hour_window": {
+        "http_200": 144,
+        "http_500": 0
+      },
+      "identity_by_user_agent_only": true,
+      "hostinger_admin_installation_verified": false,
+      "job_results_completed_verified": false
+    },
+    "rpc_observation": {
+      "state": "DEPLOYED_PREPROD_OWNER_E2E_VERIFIED",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "function": "public.cerebro_operativa_job001_rpc_observation_lab_v0()",
+      "edge_reader_version": 5,
+      "stats_reset_at": "2026-08-14T16:57:07.773309Z",
+      "last_owner_e2e_count": 80001,
+      "source": "PREPROD_JOB001_DISPATCH_RPC_STATS",
+      "interpretation": "CUMULATIVE_POSTGREST_SQL_RPC_CALLS_NOT_COMPLETED_JOBS",
+      "service_role_only": true,
+      "raw_sql_exposed": false
+    },
+    "seo_downstream_state": {
+      "state": "DEGRADED_PARTIAL_REAL_ACTIVITY",
+      "supervisor": "DEGRADED",
+      "supervisor_last_measured": "2026-11-02T06:00:09Z",
+      "expansion_jobs_done_total": 270,
+      "expansion_jobs_done_updated_in_last_day": 1,
+      "expansion_jobs_queued_historical": 1360,
+      "wordpress_staging_status": {
+        "endpoint": "https://staging.fenixcapital.es/wp-json/fenix-guard/v1/cerebro/status",
+        "plugin_version": "1.0.0-rc22",
+        "mode": "observer",
+        "operations_locked": true,
+        "pending_jobs": 0,
+        "checks_ok": true,
+        "verified_at": "2026-11-13T20:41:47Z"
+      },
+      "wordpress_bridge_last_24h": {
+        "not_ready_http200": 93,
+        "dispatched_without_http": 2
+      },
+      "automatic_publication_authorized": false
     }
   },
   "backup": {
@@ -117,7 +170,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "JOB001_HOSTINGER_MASTER_AND_DOWNSTREAM_RUNTIME_NOT_VERIFIED; REAL_DISPATCH_TELEMETRY_AND_FULL_ROLLBACK_PENDING"
+    "reason": "WORDPRESS_STAGING_OBSERVER_LOCK_AND_SEO_SUPERVISOR_DEGRADED; DOWNSTREAM_RESULTS_NOT_CERTIFIED; ROLLBACK_AND_TRIBUNAL_MISSING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
