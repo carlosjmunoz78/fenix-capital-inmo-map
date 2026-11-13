@@ -170,7 +170,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "WORDPRESS_STAGING_OBSERVER_LOCK_AND_SEO_SUPERVISOR_DEGRADED; DOWNSTREAM_RESULTS_NOT_CERTIFIED; ROLLBACK_AND_TRIBUNAL_MISSING"
+    "reason": "OWNER_SUSPENDED_WORDPRESS_STAGING_UNTIL_FURTHER_NOTICE; NO WP_E2E; SEO_SUPERVISOR_DEGRADED; JOB001_RUNTIME_DOWNSTREAM_NOT_CERTIFIED"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -297,5 +297,20 @@
     "one_shot_query_cleaned_verified": true,
     "repeated_navigation_db_rows": 1,
     "visible_owner_success_message_verified": true
+  },
+  "external_dependencies": {
+    "wordpress_staging": {
+      "host": "staging.fenixcapital.es",
+      "status": "SUSPENDED_BY_OWNER_UNTIL_FURTHER_NOTICE",
+      "owner_notice_date": "2026-11-13",
+      "can_probe": false,
+      "can_publish": false,
+      "can_modify": false,
+      "can_reactivate_automatically": false,
+      "requires_explicit_owner_reactivation": true,
+      "impact": "WP_BRIDGE_PREPROD_AND_SEO_PUBLICATION_E2E_BLOCKED",
+      "scope": "No requests, browser navigation, changes, repairs, or gate bypass for staging until owner lifts suspension.",
+      "observation_prior_to_suspension": "Last known plugin status was observer/operations_locked; not current health proof."
+    }
   }
 }
