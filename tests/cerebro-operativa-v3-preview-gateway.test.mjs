@@ -40,3 +40,10 @@ test('PREVIEW preserves verified owner context when navigating among the five ex
  assert.ok(host.includes("SECTION_BY_VIEW[next]"));
  assert.ok(host.includes("if(previewOwnerGate&&!previewLogged)return null"));
 });
+
+test('V3 labels accurately distinguish production private canary from LAB',()=>{
+ const cockpit=read('src/CerebroOperativeCockpitV3.tsx');
+ assert.ok(cockpit.includes("window.location.hostname==='app.fenixcapital.es'"));
+ assert.ok(cockpit.includes('V3 EN PRODUCCIÓN · VISTA PRIVADA DEL PROPIETARIO'));
+ assert.ok(cockpit.includes('ENSAYO VISUAL · SIN PROMOCIÓN A PRODUCCIÓN'));
+});

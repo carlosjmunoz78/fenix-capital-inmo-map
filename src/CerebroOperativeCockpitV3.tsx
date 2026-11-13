@@ -102,7 +102,7 @@ export default function CerebroOperativeCockpitV3({
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
  const canSend=scopeCanExecute&&snapshot.ready&&!snapshot.sending;
- return <main className={`op3-root op3-${status}`} aria-label="Centro de mando operativo (ensayo)">
+ return <main className={`op3-root op3-${status}`} aria-label={typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'Centro de mando operativo (acceso privado)':'Centro de mando operativo (ensayo)'}>
   <div className="op3-backplate" aria-hidden="true"/>
   <div className="op3-wrapper">
    <div className="op3-toolbar">
@@ -244,7 +244,7 @@ export default function CerebroOperativeCockpitV3({
    </nav>
    <footer className="op3-footer">
     <span>FUENTE: {source==='UNAVAILABLE'?'NO VERIFICADA':'GITHUB ACTIONS · '+source}</span>
-    <span>ENSAYO VISUAL · SIN PROMOCIÓN A PRODUCCIÓN</span>
+    <span>{typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'V3 EN PRODUCCIÓN · VISTA PRIVADA DEL PROPIETARIO':'ENSAYO VISUAL · SIN PROMOCIÓN A PRODUCCIÓN'}</span>
    </footer>
   </div>
   {children}
