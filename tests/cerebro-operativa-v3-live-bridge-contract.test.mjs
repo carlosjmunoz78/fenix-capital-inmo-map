@@ -54,3 +54,17 @@ test('isolated preview validates canonical owner server-side and never grants ac
  assert.ok(!api.includes('service_role'));
  assert.ok(!api.includes('SERVICE_ROLE_KEY'));
 });
+
+test('Opera fallback exposes Windows dictation and independent output speech without bypassing gateway',()=>{
+ const bridge=read('src/CerebroOperativeCockpitV3Bridge.tsx');
+ const visual=read('src/CerebroOperativeCockpitV3.tsx');
+ assert.ok(bridge.includes('Windows + H'));
+ assert.ok(bridge.includes('composerRef.current?.focus()'));
+ assert.ok(bridge.includes('if(!voiceRecognitionSupported())'));
+ assert.ok(bridge.includes("find(line=>line.role==='cerebro')"));
+ assert.ok(bridge.includes('speechSynthesisSupported()'));
+ assert.ok(visual.includes('Escuchar última respuesta'));
+ assert.ok(visual.includes('voiceFeedback'));
+ assert.ok(!visual.includes('snapshot.voiceActive||!dictationSupported'));
+ assert.ok(bridge.includes('chat.sendText(text)'));
+});

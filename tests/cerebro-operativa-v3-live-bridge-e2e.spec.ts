@@ -212,6 +212,7 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('Consulta el estado operativo');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
  await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
+ await expect(cockpit.getByRole('button',{name:'Escuchar última respuesta'})).toBeVisible();
  // Real controls, simulated browser SpeechRecognition: no microphone, no gateway writes.
  const sendsBeforeVoice=postedChat?.message;
  const dictation=cockpit.getByRole('button',{name:'Dictar',exact:true});

@@ -95,7 +95,8 @@
 .op3-icon-button.is-active{color:#96ecff;background:#0f536b}
 .op3-submit{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:1px solid #fce1a2;
  color:#101315;background:linear-gradient(140deg,#ffd58a,#e3a348);box-shadow:0 0 18px #e6b65d5e}
-.op3-input-error{margin-top:6px;color:#ffc0ae}
+.op3-input-error{margin-top:6px;color:#ffc0ae;font-size:12px;max-width:840px}
+.op3-input-help{display:block;margin-top:7px;color:#9ac5d5;font-size:11px;max-width:840px}
 .op3-live-track{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:24px;
  padding:16px 20px 15px;margin-bottom:19px;border-top:1px solid var(--op3-line);border-bottom:1px solid var(--op3-line);
  background:linear-gradient(90deg,rgba(5,42,58,.18),rgba(3,20,35,.55),rgba(5,42,58,.18))}

@@ -3,7 +3,7 @@ import {X} from 'lucide-react';
 import {useCerebroOperativaChat} from './useCerebroOperativaChat';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
-import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import './cerebro-operative-console.css';
 
@@ -22,6 +22,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
  const[composer,setComposer]=useState('');
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
+ const[ttsActive,setTtsActive]=useState(false);
  const[source,setSource]=useState<FeedStatus>('UNAVAILABLE');
  const[observedAt,setObservedAt]=useState('');
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
@@ -77,13 +78,41 @@ export default function CerebroOperativeCockpitV3Bridge(){
   }
   setDictationError('');setComposer('');setSelectedRun(null);setCompany(next);
  }
- function toggleVoice(){if(!isOwnerCompany||dictating||!chat.ready||chat.sending)return;chat.toggleVoice()}
+ function toggleVoice(){
+  if(!isOwnerCompany||dictating||!chat.ready||chat.sending)return;
+  if(!voiceRecognitionSupported()){
+   setDictationError('Este Opera no admite conversación por reconocimiento de voz. Para dictar, coloca el cursor en el campo y pulsa Windows + H. Revisa el texto antes de pulsar Enviar.');
+   composerRef.current?.focus();return;
+  }
+  setDictationError('');chat.toggleVoice();
+ }
+ function readLastReply(){
+  if(!isOwnerCompany||dictating||chat.voiceActive)return;
+  const latest=[...chat.lines].reverse().find(line=>line.role==='cerebro')?.text||'';
+  if(!latest)return;
+  if(!speechSynthesisSupported()){
+   setDictationError('La voz de salida tampoco está disponible en este navegador; el texto sigue visible.');return;
+  }
+  try{
+   const utterance=new SpeechSynthesisUtterance(speechText(latest,650));
+   utterance.lang='es-ES';utterance.rate=1;
+   utterance.voice=preferredSpanishVoice(spanishVoices())||null;
+   utterance.onstart=()=>{setTtsActive(true);setDictationError('')};
+   utterance.onend=()=>setTtsActive(false);
+   utterance.onerror=()=>{setTtsActive(false);setDictationError('No se ha podido reproducir la respuesta; el texto permanece visible.')};
+   window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);
+  }catch{setTtsActive(false);setDictationError('No se ha podido iniciar el altavoz del navegador.')}
+ }
  function toggleDictation(){
   if(dictating){
    try{dictationRef.current?.stop()}catch{/* stopped */}
    dictationRef.current=null;setDictating(false);return;
   }
-  if(!isOwnerCompany||!chat.ready||chat.sending||chat.voiceActive||!voiceRecognitionSupported())return;
+  if(!isOwnerCompany||!chat.ready||chat.sending||chat.voiceActive)return;
+  if(!voiceRecognitionSupported()){
+   setDictationError('Opera no tiene dictado integrado. Pulsa Windows + H con el cursor en este campo para dictar. El texto no se envía hasta que tú pulses Enviar.');
+   composerRef.current?.focus();return;
+  }
   const recognition=createVoiceRecognition();
   if(!recognition){setDictationError('Dictado no disponible.');return}
   dictationRef.current=recognition;
@@ -98,17 +127,31 @@ export default function CerebroOperativeCockpitV3Bridge(){
    const transcript=String(result?.[0]?.transcript||'').trim();
    if(transcript){setComposer(current=>current+(current.trim()?' ':'')+transcript);composerRef.current?.focus()}
   };
-  recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');
+  recognition.onerror=event=>{
+   const reason=String(event.error||'');
+   const label=reason==='not-allowed'||reason==='service-not-allowed'?'Falta permiso de micrófono en el navegador.'
+     :reason==='audio-capture'?'No se ha detectado un micrófono.'
+     :reason==='network'?'El servicio de reconocimiento del navegador no responde.'
+     :reason==='no-speech'?'No se ha detectado voz.':'No se pudo completar el dictado.';
+   setDictationError(label+' Alternativa: pulsa Windows + H con el cursor en el campo.');
+   setDictating(false);
+  };
   recognition.onend=()=>{dictationRef.current=null;setDictating(false)};
   try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}
  }
+ const browserStt=voiceRecognitionSupported();
+ const voiceFeedback=!browserStt
+   ?'Dictado integrado no disponible en Opera. Para dictar gratis, pulsa Windows + H con el cursor en el campo.'
+   :chat.voiceActive?(chat.voiceListening?'Micrófono escuchando…':chat.voiceSpeaking?'CEREBRO está hablando…':'Preparando micrófono; comprueba el permiso del navegador.')
+   :/micrófono|reconocimiento de voz|audio no|voz no/i.test(chat.statusMessage)?chat.statusMessage:'';
  const snapshot={ready:chat.ready,sending:chat.sending,voiceActive:chat.voiceActive,
   voiceListening:chat.voiceListening,voiceSpeaking:chat.voiceSpeaking};
  return <CerebroOperativeCockpitV3
   snapshot={snapshot}
   composer={composer} onComposerChange={setComposer}
   onSubmit={()=>{void submit()}} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
-  dictating={dictating} dictationSupported={voiceRecognitionSupported()} dictationError={dictationError}
+  dictating={dictating} dictationSupported={browserStt} dictationError={dictationError}
+  voiceFeedback={voiceFeedback} onReadLastReply={readLastReply} ttsActive={ttsActive}
   composerRef={composerRef}
   source={isOwnerCompany?source:'UNAVAILABLE'} observedAt={isOwnerCompany?observedAt:''}
   company={company} onCompanyChange={changeCompany} scopeCanExecute={isOwnerCompany}

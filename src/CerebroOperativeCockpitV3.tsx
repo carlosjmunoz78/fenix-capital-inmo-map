@@ -2,7 +2,7 @@ import {useMemo,useState,type FormEvent,type KeyboardEvent,type ReactNode,type R
 import {
  Activity,AudioLines,BarChart3,Building2,CheckCircle2,ChevronLeft,ChevronRight,
  CircleAlert,Clock3,Cpu,Database,ExternalLink,FileCheck2,Layers3,Mic,Play,
- Search,Send,ShieldCheck,Square,Workflow
+ Search,Send,ShieldCheck,Square,Workflow,Volume2
 } from 'lucide-react';
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
@@ -17,6 +17,7 @@ type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
  onSubmit:()=>void;onToggleVoice:()=>void;onToggleDictation:()=>void;
  dictating:boolean;dictationSupported:boolean;dictationError:string;
+ voiceFeedback:string;onReadLastReply:()=>void;ttsActive:boolean;
  composerRef:Ref<HTMLTextAreaElement>;source:FeedStatus;observedAt:string;
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
@@ -65,7 +66,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
- dictating,dictationSupported,dictationError,composerRef,source,observedAt,
+ dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,composerRef,source,observedAt,
  company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
@@ -166,17 +167,23 @@ export default function CerebroOperativeCockpitV3({
        value={composer} onChange={e=>onComposerChange(e.target.value)}
        onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending}/>
       <button type="button" className={`op3-icon-button ${dictating?'is-active':''}`}
-       title={dictating?'Detener dictado':'Dictar'} aria-label={dictating?'Detener dictado':'Dictar'}
-       disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||snapshot.voiceActive||!dictationSupported}
+       title={dictating?'Detener dictado':dictationSupported?'Dictar':'Dictado con Windows + H'} aria-label={dictating?'Detener dictado':'Dictar'}
+       disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||snapshot.voiceActive}
        onClick={onToggleDictation}>{dictating?<Square size={17}/>:<Mic size={19}/>}</button>
       <button type="button" className={`op3-icon-button ${snapshot.voiceActive?'is-active':''}`}
        title="Conversación por voz" aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'}
        aria-pressed={snapshot.voiceActive} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||dictating}
        onClick={onToggleVoice}><AudioLines size={19}/></button>
+      {chatLines.some(line=>line.role==='cerebro')?<button type="button"
+       className={`op3-icon-button ${ttsActive?'is-active':''}`}
+       aria-label="Escuchar última respuesta" title="Escuchar última respuesta"
+       disabled={!scopeCanExecute||snapshot.sending||snapshot.voiceActive||dictating}
+       onClick={onReadLastReply}><Volume2 size={19}/></button>:null}
       <button className="op3-submit" aria-label="Enviar instrucción" type="submit"
        disabled={!canSend||!composer.trim()}><Send size={18}/></button>
      </form>
-     {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
+     {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
+      {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
     </div>
 
     <div className="op3-live-track" aria-label="Actividad por fases">
