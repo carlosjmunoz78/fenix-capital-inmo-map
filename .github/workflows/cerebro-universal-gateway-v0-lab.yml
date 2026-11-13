@@ -38,6 +38,8 @@ jobs:
         env:
           CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
         run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
+      - name: Remote PREPROD durable audit anonymous POST negative security probe
+        run: node cerebro/universal/v0/audit-lab-v0/anon-smoke.mjs
       - name: Remote PREPROD JOB001 owner-only anonymous negative security probe
         run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
       - name: Check no-Prod and zero additional cost
