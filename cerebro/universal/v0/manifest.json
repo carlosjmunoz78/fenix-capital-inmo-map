@@ -51,7 +51,19 @@
       "UNAVAILABLE"
     ],
     "not_JOB001": true,
-    "no_new_queue": true
+    "no_new_queue": true,
+    "public_fallback": {
+      "transport": "FIXED_PUBLIC_GITHUB_REST_GET_ONCE",
+      "endpoint": "https://api.github.com/repos/carlosjmunoz78/fenix-capital-inmo-map/actions/runs?per_page=30",
+      "auth": "NO_GITHUB_TOKEN",
+      "max_runs": 30,
+      "when": "EXISTING_AUTHENTICATED_ACTIVITY_SOURCE_UNAVAILABLE_OR_STALE",
+      "owner_authorized_by_gateway": true,
+      "result_provenance": "PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK",
+      "job_level_telemetry": "UNAVAILABLE",
+      "rate_limited_fail_closed": true,
+      "state": "LAB_CI_VERIFIED_REMOTE_OWNER_E2E_PENDING"
+    }
   },
   "interface_autoconnect": {
     "adapter": "cerebro/universal/v0/interface-autoconnect.mjs",
