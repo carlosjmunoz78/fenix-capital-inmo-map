@@ -27,7 +27,16 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
   if(url.searchParams.get('op3_audit_once')!=='approved-20261113')return;
   qaAuditOnce.current=true;
   setDryRunning(true);
-  void simulateFactRegistryDryRunLab().then(setDryRun).finally(()=>setDryRunning(false));
+  void simulateFactRegistryDryRunLab().then(value=>{
+   setDryRun(value);
+   // Remove the one-time LAB QA marker without a reload, while preserving
+   // the persisted audit result visible to its owner in the current tab.
+   const clean=new URL(window.location.href);
+   if(clean.searchParams.get('op3_audit_once')==='approved-20261113'){
+    clean.searchParams.delete('op3_audit_once');
+    window.history.replaceState(window.history.state,'',clean.pathname+clean.search+clean.hash);
+   }
+  }).finally(()=>setDryRunning(false));
  },[enabled,result?.kind]);
  if(!enabled)return null;
  return <section className="op-uni-lab" aria-label="Gateway Universal en ensayo">
