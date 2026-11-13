@@ -9,7 +9,7 @@ select pg_catalog.jsonb_build_object(
  'observed_at',pg_catalog.now(),
  'stats_reset_at',(select i.stats_reset from extensions.pg_stat_statements_info i limit 1),
  'matching_normalized_statements',pg_catalog.count(*)::int,
- 'rpc_calls_since_reset',pg_catalog.coalesce(pg_catalog.sum(s.calls),0)::bigint,
+ 'rpc_calls_since_reset',coalesce(pg_catalog.sum(s.calls),0)::bigint,
  'runtime_execution_verified',false,
  'hostinger_origin_verified',false,
  'downstream_effect_verified',false,
