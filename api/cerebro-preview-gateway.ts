@@ -7,7 +7,7 @@ type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>;query?:Record<string,string|string[]|undefined>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(key:string,value:string)=>void;json:(value:unknown)=>void};
 function hdr(v:H){return Array.isArray(v)?v[0]||'':v||''}
-const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 const BASE='https://cluhljgonannaafpmblx.supabase.co/functions/v1/';
 const RESOURCES:Record<string,{path:string;method:'GET'|'POST'}>={
  health:{path:'cerebro-console-gateway-v0/health',method:'GET'},

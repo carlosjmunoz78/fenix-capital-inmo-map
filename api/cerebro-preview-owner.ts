@@ -4,7 +4,7 @@ type Req={method?:string;headers:Record<string,H>};
 type Res={status:(code:number)=>Res;setHeader:(key:string,value:string)=>void;json:(value:unknown)=>void};
 function h(value:H){return Array.isArray(value)?value[0]||'':value||''}
 const TARGET='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
-const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const PREVIEW_HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 export default async function handler(req:Req,res:Res){
  res.setHeader('Cache-Control','no-store, max-age=0');
  res.setHeader('Vary','Authorization');
