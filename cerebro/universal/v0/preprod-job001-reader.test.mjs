@@ -66,6 +66,8 @@ test('new isolated Edge route has only GET + owner resolver + Fénix LAB gate + 
  assert.ok(source.includes('.select("company_id",{head:true,count:"exact"}).eq("company_id","fenix")'));
  assert.ok(source.includes('hnqlnvakzaywtafeiybt.supabase.co'));
  assert.ok(source.includes('Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")'));
+ assert.ok(source.includes('db.rpc("cerebro_operativa_seo_backlog_summary_lab_v0").abortSignal(AbortSignal.timeout(3500))'));
+
  assert.ok(!source.includes('cerebro_job001_dispatch_preprod'));
  assert.ok(!source.includes('x-cerebro-job-secret'));
  assert.ok(!source.includes('.insert('));

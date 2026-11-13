@@ -115,6 +115,33 @@ test('SEO backlog from existing PREPROD reader is counts-only and refuses forged
  assert.equal(blocked.seo_backlog.status,'UNAVAILABLE');
  assert.equal(blocked.seo_backlog.queued,null);
 });
+test('bounded safe GET retries one transient transport failure and verifies successful source',async()=>{
+ let count=0;
+ const src=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async(url,opts)=>{
+  count++;
+  assert.equal(opts.method,'GET');
+  assert.equal(url,URL);
+  if(count===1)throw Error('temporary transport failure');
+  return rjson(good());
+ }});
+ const v=await src.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(v.status,'OK');assert.equal(count,2);
+});
+test('reader does not retry owner denial or untrusted service HTTP status',async()=>{
+ let count=0;
+ const src=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async()=>{count++;return rjson({status:'CLOSED',reason:'OWNER_ONLY'},403)}});
+ const denied=await src.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(denied.status,'UNAVAILABLE');assert.equal(count,1);
+});
+test('two transport failures stay unavailable without a third retry or any writes',async()=>{
+ let count=0;
+ const src=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async()=>{count++;throw Error('unavailable')}});
+ const denied=await src.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(denied.status,'UNAVAILABLE');assert.equal(denied.reason,'PREPROD_GATEWAY_UNREACHABLE');
+ assert.equal(count,2);assert.equal(denied.prod_execution_enabled,false);
+});
 test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
  let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
  for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
