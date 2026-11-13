@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useState} from 'react';
+import {useCallback,useEffect,useRef,useState} from 'react';
 import {canPreviewUniversalOperativa,readUniversalOperativaLab,simulateFactRegistryDryRunLab,type UniversalLabDryRun,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
 import './cerebro-universal-operativa-lab.css';
 export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
@@ -6,6 +6,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
  const [loading,setLoading]=useState(false);
  const [dryRun,setDryRun]=useState<UniversalLabDryRun|null>(null);
  const [dryRunning,setDryRunning]=useState(false);
+ const qaAuditOnce=useRef(false);
  const enabled=company==='fenix'&&typeof window!=='undefined'&&canPreviewUniversalOperativa(window.location);
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   if(!enabled)return;
@@ -19,6 +20,15 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
   void refresh(controller.signal);
   return()=>controller.abort();
  },[enabled,refresh]);
+ useEffect(()=>{
+  if(!enabled||result?.kind!=='ready'||qaAuditOnce.current)return;
+  // One owner-requested acceptance check, explicitly isolated LAB preview URL.
+  const url=new URL(window.location.href);
+  if(url.searchParams.get('op3_audit_once')!=='approved-20261113')return;
+  qaAuditOnce.current=true;
+  setDryRunning(true);
+  void simulateFactRegistryDryRunLab().then(setDryRun).finally(()=>setDryRunning(false));
+ },[enabled,result?.kind]);
  if(!enabled)return null;
  return <section className="op-uni-lab" aria-label="Gateway Universal en ensayo">
   <div className="op-uni-lab-head">
@@ -39,7 +49,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <button type="button" disabled={dryRunning} onClick={()=>{setDryRunning(true);void simulateFactRegistryDryRunLab().then(setDryRun).finally(()=>setDryRunning(false))}}>
     {dryRunning?'Validando…':'Simular orden FACT-001 (no ejecutar)'}
    </button>
-   <small>Solo comprobación de contrato y políticas. Sin ejecución, sin auditoría duradera y sin promoción a producción.</small>
+   <small>Validación LAB sin ejecución. Si se aprueba, se guarda auditoría persistente en PREPROD; producción sigue bloqueada.</small>
    {dryRun?<span role="status">{dryRun.message}</span>:null}
   </div>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-proof">
