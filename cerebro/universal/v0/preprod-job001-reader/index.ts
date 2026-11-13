@@ -62,7 +62,7 @@ Deno.serve(async(req:Request)=>{
     .select("company_id,engine_id,environment,version,state,updated_at")
     .eq("company_id","fenix").eq("environment","PREPROD").limit(64),
    db.from("cerebro_job001_telemetry_preprod")
-    .select("company_id",{head:true,count:"exact"})
+    .select("company_id",{head:true,count:"exact"}).eq("company_id","fenix")
   ]);
   if(jobs.error||external.error||engines.error||telemetry.error)
    return secretlessFailure("PREPROD_READ_FAILED");
