@@ -33,10 +33,16 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
      this.onend?.(new Event('end'));return;
     }
     this.onstart?.(new Event('start'));
+    if((this as any).processLocally){
+     (this as any).onresult?.({results:[[{transcript:'Dictado local de prueba',confidence:0.99}]]});
+     this.onend?.(new Event('end'));
+    }
    }
    stop(){this.onend?.(new Event('end'))}
    abort(){this.onend?.(new Event('end'))}}
   class QAPhrase{constructor(_phrase:string,_boost:number){}}
+  (QARecognition as any).available=async()=> 'available';
+  (QARecognition as any).install=async()=> true;
   (window as any).__qaPhraseUnsupportedCount=0;
   (window as any).SpeechRecognitionPhrase=QAPhrase;
   (window as any).SpeechRecognition=QARecognition;
@@ -224,6 +230,12 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('Consulta el estado operativo');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
  await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
+ await cockpit.getByRole('button',{name:'Diagnóstico de micrófono y voz'}).click();
+ await cockpit.getByRole('button',{name:'Dictado local en español'}).click();
+ await expect(cockpit.getByRole('textbox',{name:'Pregunta u orden'})).toHaveValue('Dictado local de prueba');
+ expect(postedChat?.message).toBe('Consulta el estado operativo');
+ await cockpit.getByRole('button',{name:'Cerrar'}).click();
+ await cockpit.getByRole('textbox',{name:'Pregunta u orden'}).fill('');
  await expect(cockpit.getByRole('button',{name:'Escuchar última respuesta'})).toBeVisible();
  // Real controls, simulated browser SpeechRecognition: no microphone, no gateway writes.
  const sendsBeforeVoice=postedChat?.message;

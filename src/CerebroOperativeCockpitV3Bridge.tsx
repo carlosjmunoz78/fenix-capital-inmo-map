@@ -153,6 +153,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   onSubmit={()=>{void submit()}} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
   dictating={dictating} dictationSupported={browserStt} dictationError={dictationError}
   voiceFeedback={voiceFeedback} onReadLastReply={readLastReply} ttsActive={ttsActive}
+  onLocalTranscript={text=>{if(isOwnerCompany&&!chat.sending&&!chat.voiceActive&&!dictating){setComposer(prev=>(prev.trim()?prev+' ':'')+text);composerRef.current?.focus()}}}
   composerRef={composerRef}
   source={isOwnerCompany?source:'UNAVAILABLE'} observedAt={isOwnerCompany?observedAt:''}
   company={company} onCompanyChange={changeCompany} scopeCanExecute={isOwnerCompany}

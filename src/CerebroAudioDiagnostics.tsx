@@ -1,10 +1,11 @@
 import {useEffect,useRef,useState} from 'react';
 import {Mic,Volume2,Stethoscope} from 'lucide-react';
+import CerebroLocalDictation from './CerebroLocalDictation';
 import {createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-audio-diagnostics.css';
 
 /** Consent-based diagnostic: App does not retain/send recordings or chat instructions. Browser-managed SpeechRecognition may contact the browser vendor's recognition service. */
-export default function CerebroAudioDiagnostics(){
+export default function CerebroAudioDiagnostics({allowed,onTranscript}:{allowed:boolean;onTranscript:(text:string)=>void}){
  const [open,setOpen]=useState(false);
  const [busy,setBusy]=useState(false);
  const [micStatus,setMicStatus]=useState('Sin comprobar');
@@ -133,6 +134,7 @@ export default function CerebroAudioDiagnostics(){
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkRecognition}><Mic size={15}/> Comprobar dictado</button><span role="status">{speechStatus}</span></div>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkOutput}><Volume2 size={15}/> Comprobar altavoces</button><span role="status">{outputStatus}</span></div>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkSpeechOutput}><Volume2 size={15}/> Comprobar voz hablada</button><span role="status">{ttsStatus}</span></div>
+  <CerebroLocalDictation allowed={allowed} onTranscript={onTranscript}/>
   <p className="op3-audio-note">Si ambos navegadores fallan, revisa también Configuración de Windows → Privacidad y seguridad → Micrófono, y Configuración → Sistema → Sonido → Entrada.</p>
  </section>;
 }
