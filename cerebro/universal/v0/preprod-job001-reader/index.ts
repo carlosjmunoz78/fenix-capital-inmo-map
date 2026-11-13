@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
-import {projectJob001ReadSnapshot,ownerIsVerified} from "./job001-projection.mjs";
+import {projectJob001ReadSnapshot,projectCronObservation,ownerIsVerified} from "./job001-projection.mjs";
 
 const PROD_OWNER="https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context";
 const MAX_BODY=45000;
@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   return secretlessFailure("PREPROD_PROJECT_MISMATCH");
  try{
   const db=createClient(dbUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
-  const [jobs,external,engines,telemetry]=await Promise.all([
+  const [jobs,external,engines,telemetry,cron]=await Promise.all([
    db.from("cerebro_job001_control_preprod")
     .select("job_id,company_id,engine_id,environment,version,enabled,updated_at")
     .eq("company_id","FENIX_CAPITAL").eq("environment","PREPROD").limit(64),
@@ -62,7 +62,8 @@ Deno.serve(async(req:Request)=>{
     .select("company_id,engine_id,environment,version,state,updated_at")
     .eq("company_id","fenix").eq("environment","PREPROD").limit(64),
    db.from("cerebro_job001_telemetry_preprod")
-    .select("company_id",{head:true,count:"exact"}).eq("company_id","fenix")
+    .select("company_id",{head:true,count:"exact"}).eq("company_id","fenix"),
+   db.rpc("cerebro_job001_pgcron_observation_lab_v0")
   ]);
   if(jobs.error||external.error||engines.error||telemetry.error)
    return secretlessFailure("PREPROD_READ_FAILED");
@@ -70,8 +71,11 @@ Deno.serve(async(req:Request)=>{
    jobs:jobs.data,external:external.data,engines:engines.data,
    telemetryCount:telemetry.count,observedAt:new Date().toISOString()
   });
-  const encoded=JSON.stringify(snapshot);
+  // The cron observation is optional: a failure never falsifies source control records.
+  const cron_observation=projectCronObservation(cron.error?null:cron.data,{observedAt:new Date().toISOString()});
+  const result={...snapshot,cron_observation};
+  const encoded=JSON.stringify(result);
   if(encoded.length>MAX_BODY)return secretlessFailure("RESULT_TOO_LARGE");
-  return json(200,snapshot);
+  return json(200,result);
  }catch{return secretlessFailure("READ_EXCEPTION")}
 });

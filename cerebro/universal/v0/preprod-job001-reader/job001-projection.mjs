@@ -46,3 +46,39 @@ export function projectJob001ReadSnapshot({jobs,external,engines,telemetryCount,
   no_new_queue:true,write_operations:0
  };
 }
+
+/** Fixed four existing PREPROD pg_cron jobs; observational proof of scheduler SQL completion only. */
+export function projectCronObservation(raw,{observedAt=new Date().toISOString()}={}){
+ const unavailable=reason=>({status:'UNAVAILABLE',source:'PREPROD_PG_CRON_OBSERVATION',reason,
+  active:0,run_records:0,recent_successful_cron_commands:0,jobs:[],
+  is_job001_hostinger_master:false,is_job001_runtime_proof:false});
+ const now=Date.parse(observedAt);
+ if(!Number.isFinite(now))throw Error('CRON_OBSERVED_TIME_INVALID');
+ if(!raw||raw.source!=='PREPROD_PG_CRON_OBSERVATION'||raw.is_job001_hostinger_master!==false||
+    raw.is_job001_runtime_proof!==false||!Array.isArray(raw.jobs)||raw.jobs.length>4)
+  return unavailable('CRON_CONTRACT_INVALID');
+ const allowed=new Set([6,22,23,25]),statuses=new Set(['succeeded','failed','running','starting','sending','UNKNOWN']);
+ const ids=new Set(),jobs=[];
+ for(const j of raw.jobs){
+  const id=j?.legacy_pg_cron_job_id;
+  if(!allowed.has(id)||ids.has(id)||typeof j.active!=='boolean'||
+    !statuses.has(j.last_status)||typeof j.run_record_present!=='boolean'||
+    j.downstream_effect_verified!==false)
+   return unavailable('CRON_JOB_CONTRACT_INVALID');
+  ids.add(id);
+  const started=j.last_run_at===null?null:moment(j.last_run_at);
+  const ended=j.last_finished_at===null?null:moment(j.last_finished_at);
+  if(j.run_record_present!==Boolean(started)||j.last_run_at!==null&&!started||
+    j.last_finished_at!==null&&!ended)
+   return unavailable('CRON_TIME_INVALID');
+  const recent=started!==null&&now-Date.parse(started)>=-120000&&now-Date.parse(started)<=86400000;
+  jobs.push({job_id:id,active:j.active,last_status:j.last_status,last_run_at:started,
+   last_finished_at:ended,run_record_present:j.run_record_present,run_recent:recent,
+   downstream_effect_verified:false,job001_execution_verified:false});
+ }
+ jobs.sort((a,b)=>a.job_id-b.job_id);
+ return {status:'OK',source:'PREPROD_PG_CRON_OBSERVATION',observed_at:new Date(now).toISOString(),
+  active:jobs.filter(j=>j.active).length,run_records:jobs.filter(j=>j.run_record_present).length,
+  recent_successful_cron_commands:jobs.filter(j=>j.active&&j.last_status==='succeeded'&&j.run_recent).length,
+  jobs,is_job001_hostinger_master:false,is_job001_runtime_proof:false};
+}
