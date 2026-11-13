@@ -45,15 +45,18 @@ test('Operativa exposes current multi-company scope and protected power modes',a
  expect(source).toContain('Mantén todas las protecciones, no generes gasto no autorizado');
 });
 
-test('Jarvis composer is empty, separates dictation and voice, and reuses canonical voice session',async()=>{
+test('Operativa owner composer retains canonical authenticated chat, dictation and voice',async()=>{
  const source=read('src/CerebroOperativeConsole.tsx');
+ const hook=read('src/useCerebroOperativaChat.ts');
  expect(source).toContain('className="operativa-jarvis-composer"');
- expect(source).toContain('aria-label="Mensaje para Jarvis"');
- expect(source).not.toContain('placeholder=');
- expect(source).toContain('createVoiceRecognition');
- expect(source).toContain("querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main')");
+ expect(source).toContain('aria-label="Mensaje para CEREBRO"');
+ expect(source).toContain('placeholder="Escribe o dicta a CEREBRO…"');
+ expect(source).toContain('useCerebroOperativaChat()');
  expect(source).toContain("dictating?'Detener dictado':'Dictar'");
  expect(source).toContain("snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'");
+ expect(hook).toContain('postCerebroConsoleChat');
+ expect(hook).toContain('createVoiceRecognition');
+ expect(hook).toContain('voiceNeedsManualConfirmation');
 });
 
 test('attachment bridge reuses existing local extractor from Operativa',async()=>{
@@ -97,9 +100,14 @@ test('activity projection still exposes real GitHub job-step progress',async()=>
 
 test('canonical Gateway and voice core remain the execution path',async()=>{
  const operative=read('src/CerebroOperativeConsole.tsx');
+ const hook=read('src/useCerebroOperativaChat.ts');
  const shell=read('src/CerebroConsoleShell.tsx');
- expect(operative).toContain('<CerebroConsoleShell/>');
- expect(operative).toContain(".operativa-core-bridge .cerebro-console");
+ expect(operative).toContain('useCerebroOperativaChat()');
+ expect(operative).not.toContain('<CerebroConsoleShell/>');
+ expect(hook).toContain('postCerebroConsoleChat');
+ expect(hook).toContain('createVoiceRecognition');
+ expect(hook).toContain('voiceNeedsManualConfirmation');
+ // Original legacy route still owns the historical standalone V0 shell.
  expect(shell).toContain('postCerebroConsoleChat');
  expect(shell).toContain('createVoiceRecognition');
  expect(shell).toContain('window.speechSynthesis.speak');
