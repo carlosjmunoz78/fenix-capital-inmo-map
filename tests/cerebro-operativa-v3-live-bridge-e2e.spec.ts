@@ -27,6 +27,7 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
    phrases:unknown[]=[];
    onstart:any=null;onresult:any=null;onend:any=null;onerror:any=null;
    start(){
+    (window as any).__qaActiveRecognition=this;
     if(this.phrases.length){
      (window as any).__qaPhraseUnsupportedCount=((window as any).__qaPhraseUnsupportedCount||0)+1;
      this.onerror?.({error:'phrases-not-supported'});
@@ -163,8 +164,15 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await cockpit.getByRole('button',{name:'Motores',exact:true}).click();
  await expect(cockpit.getByRole('heading',{name:'Motores observados'})).toBeVisible();
  await expect(cockpit.getByText('FACT-001',{exact:true}).first()).toBeVisible();
- await expect(cockpit.getByText('Definido · no certifica ejecución')).toBeVisible();
- await expect(cockpit.getByText('Runtime sin verificar')).toBeVisible();
+ await expect(cockpit.getByRole('option',{name:'Todos los motores (179)'})).toHaveCount(1);
+ await expect(cockpit.getByText('Definido · no certifica ejecución').first()).toBeVisible();
+ await cockpit.getByRole('button',{name:/FACT-001/}).first().click();
+ await expect(cockpit.getByRole('complementary',{name:'Ficha de motor'})).toContainText('Fábrica de Motores');
+ await expect(cockpit.getByRole('complementary',{name:'Ficha de motor'})).toContainText('Runtime sin verificar');
+ await cockpit.getByRole('searchbox',{name:'Buscar motor por nombre, ID o función'}).fill('SEO-001');
+ await expect(cockpit.getByText('SEO-001',{exact:true})).toHaveCount(1);
+ await cockpit.getByRole('searchbox',{name:'Buscar motor por nombre, ID o función'}).fill('');
+ await expect(cockpit.getByRole('complementary',{name:'Ficha de motor'})).toContainText('Runtime sin verificar');
  await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/cockpit-v3-engines.png',fullPage:true,animations:'disabled'});
  await cockpit.getByRole('button',{name:'Trabajos',exact:true}).click();
@@ -240,7 +248,15 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await expect(activeVoice).toHaveAttribute('aria-pressed','true');
  await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeDisabled();
  await expect(cockpit.locator('.op3-pulse.is-listening')).toBeVisible();
- await activeVoice.click();
+ await expect(cockpit.getByRole('button',{name:'Parar voz ahora'})).toBeVisible();
+ await cockpit.getByRole('button',{name:'Parar voz ahora'}).click();
+ await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toHaveAttribute('aria-pressed','false');
+ // The spoken interrupt word must be handled locally, not sent as a gateway request.
+ await cockpit.getByRole('button',{name:'Conversación por voz'}).click();
+ await page.evaluate(()=>{
+  const recognition=(window as any).__qaActiveRecognition;
+  recognition?.onresult?.({results:[[{transcript:'para',confidence:0.99}]]});
+ });
  await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toHaveAttribute('aria-pressed','false');
  await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeEnabled();
  // Neither dictation nor continuous voice should send unsupported contextual hints.

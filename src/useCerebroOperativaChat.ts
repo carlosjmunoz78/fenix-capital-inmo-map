@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConversationTurn,type CerebroPendingAction,type CerebroReadContext,type CerebroLearningCandidate} from './cerebroConsoleApi';
-import {createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsClarification,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsClarification,voiceNeedsManualConfirmation,voiceRecognitionSupported,voiceInterruptRequested,type CerebroSpeechRecognition} from './cerebroVoice';
 
 /** Dedicated Operativa UI client. The existing owner-only CEREBRO Gateway is the sole authority.
  * Browser STT/TTS are provisional and do not use the future JARVIS V2 voice.
@@ -20,6 +20,7 @@ export function useCerebroOperativaChat(){
  const voiceEnabledRef=useRef(false);
  const voiceSpeakingRef=useRef(false);
  const listeningRef=useRef<CerebroSpeechRecognition|null>(null);
+ const interruptRef=useRef<CerebroSpeechRecognition|null>(null);
  const restartTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);
  const linesRef=useRef<OperativaTurn[]>([]);
  const actionRef=useRef<CerebroPendingAction|null>(null);
@@ -42,6 +43,8 @@ export function useCerebroOperativaChat(){
    if(restartTimerRef.current)clearTimeout(restartTimerRef.current);
    try{listeningRef.current?.abort()}catch{/* denied */}
    listeningRef.current=null;
+   try{interruptRef.current?.abort()}catch{/* already stopped */}
+   interruptRef.current=null;
    if(speechSynthesisSupported())window.speechSynthesis.cancel();
   };
  },[]);
@@ -57,14 +60,38 @@ export function useCerebroOperativaChat(){
   if(recognition){try{recognition.abort()}catch{/* stopped */}}
   setVoiceListening(false);
  }
+ function stopInterruptRecognition(){
+  const recognition=interruptRef.current;interruptRef.current=null;
+  if(recognition){try{recognition.abort()}catch{/* stopped */}}
+ }
  function stopVoice(){
   voiceEnabledRef.current=false;
   setVoiceActive(false);
   if(restartTimerRef.current){clearTimeout(restartTimerRef.current);restartTimerRef.current=null}
   stopRecognition();
+  stopInterruptRecognition();
   if(speechSynthesisSupported())window.speechSynthesis.cancel();
   voiceSpeakingRef.current=false;
   setVoiceSpeaking(false);
+  setStatusMessage('Voz detenida. Puedes continuar escribiendo o volver a hablar.');
+ }
+ // Best-effort spoken barge-in during browser TTS; never sends interruption text to Gateway.
+ // Chrome may refuse parallel recognition: the visible STOP button / Escape remain reliable.
+ function listenForStopWhileSpeaking(){
+  if(!voiceEnabledRef.current||!voiceSpeakingRef.current||!voiceRecognitionSupported())return;
+  stopInterruptRecognition();
+  const recognizer=createVoiceRecognition();if(!recognizer)return;
+  interruptRef.current=recognizer;
+  recognizer.lang='es-ES';recognizer.continuous=true;recognizer.interimResults=true;recognizer.maxAlternatives=1;
+  recognizer.onresult=event=>{
+   if(interruptRef.current!==recognizer)return;
+   const result=event.results[event.results.length-1];
+   const transcript=String(result?.[0]?.transcript||'').trim();
+   if(voiceInterruptRequested(transcript))stopVoice();
+  };
+  recognizer.onerror=()=>{if(interruptRef.current===recognizer)interruptRef.current=null};
+  recognizer.onend=()=>{if(interruptRef.current===recognizer)interruptRef.current=null};
+  try{recognizer.start()}catch{interruptRef.current=null}
  }
  function speakResponse(text:string){
   if(!voiceEnabledRef.current||!speechSynthesisSupported()){scheduleListen();return}
@@ -76,12 +103,13 @@ export function useCerebroOperativaChat(){
    utterance.rate=1.15;
    utterance.pitch=1;
    utterance.voice=preferredSpanishVoice(spanishVoices())||null;
-   utterance.onend=()=>{voiceSpeakingRef.current=false;setVoiceSpeaking(false);scheduleListen()};
-   utterance.onerror=()=>{voiceSpeakingRef.current=false;setVoiceSpeaking(false);setStatusMessage('No se pudo reproducir el audio. La respuesta escrita sigue disponible.');scheduleListen()};
+   utterance.onend=()=>{stopInterruptRecognition();voiceSpeakingRef.current=false;setVoiceSpeaking(false);scheduleListen()};
+   utterance.onerror=()=>{stopInterruptRecognition();voiceSpeakingRef.current=false;setVoiceSpeaking(false);if(voiceEnabledRef.current)setStatusMessage('No se pudo reproducir el audio. La respuesta escrita sigue disponible.');scheduleListen()};
    voiceSpeakingRef.current=true;
    setVoiceSpeaking(true);
    window.speechSynthesis.cancel();
    window.speechSynthesis.speak(utterance);
+   listenForStopWhileSpeaking();
   }catch{voiceSpeakingRef.current=false;setVoiceSpeaking(false);scheduleListen()}
  }
 
@@ -146,6 +174,7 @@ export function useCerebroOperativaChat(){
    const result=event.results[event.results.length-1];
    const transcript=String(result?.[0]?.transcript||'').trim();
    const confidence=typeof result?.[0]?.confidence==='number'?result[0].confidence:null;
+   if(transcript&&voiceInterruptRequested(transcript)){stopVoice();return}
    if(transcript)void speechSenderRef.current(transcript,confidence);
   };
   recognition.onerror=event=>{
@@ -171,5 +200,5 @@ export function useCerebroOperativaChat(){
   setVoiceActive(true);
   beginListening();
  }
- return {ready,sending,voiceActive,voiceListening,voiceSpeaking,lines,statusMessage,sendText,toggleVoice};
+ return {ready,sending,voiceActive,voiceListening,voiceSpeaking,lines,statusMessage,sendText,toggleVoice,stopVoice};
 }

@@ -18,7 +18,7 @@ type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
  onSubmit:()=>void;onToggleVoice:()=>void;onToggleDictation:()=>void;
  dictating:boolean;dictationSupported:boolean;dictationError:string;
- voiceFeedback:string;onReadLastReply:()=>void;ttsActive:boolean;
+ voiceFeedback:string;onReadLastReply:()=>void;ttsActive:boolean;onStopVoice:()=>void;
  composerRef:Ref<HTMLTextAreaElement>;source:FeedStatus;observedAt:string;
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
@@ -67,7 +67,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
- dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,composerRef,source,observedAt,
+ dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onStopVoice,composerRef,source,observedAt,
  company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
@@ -175,6 +175,10 @@ export default function CerebroOperativeCockpitV3({
        title="Conversación por voz" aria-label={snapshot.voiceActive?'Finalizar conversación por voz':'Conversación por voz'}
        aria-pressed={snapshot.voiceActive} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||dictating}
        onClick={onToggleVoice}><AudioLines size={19}/></button>
+      {(snapshot.voiceActive||snapshot.voiceSpeaking||ttsActive)?<button type="button"
+       className="op3-icon-button op3-stop-voice"
+       aria-label="Parar voz ahora" title="Parar voz inmediatamente (o pulsa Escape)"
+       onClick={onStopVoice}><Square size={19}/></button>:null}
       {chatLines.some(line=>line.role==='cerebro')?<button type="button"
        className={`op3-icon-button ${ttsActive?'is-active':''}`}
        aria-label="Escuchar última respuesta" title="Escuchar última respuesta"
