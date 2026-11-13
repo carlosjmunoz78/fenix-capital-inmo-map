@@ -3,7 +3,8 @@ import {useLocation,useNavigate} from 'react-router-dom';
 import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
 import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
-import CerebroOperativeConsole from './CerebroOperativeConsole';
+import CerebroOperativeConsole from './CerebroOperativeLiveConsole';
+import CerebroOperativeLabConsole from './CerebroOperativeConsole';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
@@ -36,7 +37,7 @@ export default function CerebroConsoleHost(){
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
- const changeView=(next:CerebroPrimaryView)=>{setView(next);navigate({pathname:'/cerebro',search:`?section=${SECTION_BY_VIEW[next]}`},{replace:true})};
+ const changeView=(next:CerebroPrimaryView)=>{setView(next);const preview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';navigate({pathname:'/cerebro',search:`?section=${SECTION_BY_VIEW[next]}${preview?'&visual_lab=cockpit-v3':''}`},{replace:true})};
 
  useEffect(()=>{if(!isCerebroPath)return;const next=initialView();setView(current=>current===next?current:next)},[isCerebroPath,location.search]);
  useEffect(()=>{if(!isCerebroPath)return;const ensure=()=>{if(document.documentElement.dataset.cerebroConsole!=='1')document.documentElement.dataset.cerebroConsole='1'};ensure();const observer=new MutationObserver(ensure);observer.observe(document.documentElement,{attributes:true,attributeFilter:['data-cerebro-console']});return()=>{observer.disconnect();delete document.documentElement.dataset.cerebroConsole}},[isCerebroPath]);
@@ -44,17 +45,19 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath)return;try{window.sessionStorage.setItem(VIEW_STORAGE_KEY,view)}catch{/* optional */}},[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
- if(ownerAccess!=='allowed')return <><JarvisVisibleLanguageGuard/><CerebroConsoleShell/></>;
+ if(ownerAccess!=='allowed')return <>{view==='JARVIS'||view==='V0'?<JarvisVisibleLanguageGuard/>:null}<CerebroConsoleShell/></>;
  if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
+ // Explicit LAB preview only: the existing Operativa remains the default.
+ const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
-  <JarvisVisibleLanguageGuard/>
+  {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{visualPreview?<CerebroOperativeLabConsole visualPreview/>:<CerebroOperativeConsole/>}</div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>

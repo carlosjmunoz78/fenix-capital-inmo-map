@@ -1,6 +1,8 @@
 import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {AudioLines,ChevronDown,ExternalLink,Mic,Send,ShieldCheck,Square,X} from 'lucide-react';
 import CerebroConsoleShell from './CerebroConsoleShell';
+import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
+import {fetchOwnerUniverseLab,type OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
@@ -41,7 +43,7 @@ function WorkRow({run,now,onOpen}:{run:CerebroActivityRun;now:number;onOpen:(run
  </article>;
 }
 
-export default function CerebroOperativeConsole(){
+export default function CerebroOperativeConsole({visualPreview=false}:{visualPreview?:boolean}={}){
  const[composer,setComposer]=useState('');
  const[snapshot,setSnapshot]=useState<CoreSnapshot>(EMPTY);
  const[runs,setRuns]=useState<CerebroActivityRun[]>([]);
@@ -52,16 +54,64 @@ export default function CerebroOperativeConsole(){
  const[power,setPower]=useState<PowerMode>('Normal');
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
+ const[universeRecord,setUniverseRecord]=useState<{company:CompanyKey;result:OwnerUniverseResult}|null>(null);
  const[selectedRun,setSelectedRun]=useState<CerebroActivityRun|null>(null);
+ const[chatMirror,setChatMirror]=useState<{role:'user'|'cerebro';text:string}[]>([]);
  const[now,setNow]=useState(()=>Date.now());
  const composerRef=useRef<HTMLTextAreaElement|null>(null);
  const dictationRef=useRef<CerebroSpeechRecognition|null>(null);
 
  useEffect(()=>{const timer=window.setInterval(()=>setNow(Date.now()),1000);return()=>window.clearInterval(timer)},[]);
  useEffect(()=>{let cancelled=false;const refresh=async()=>{const{status,data}=await fetchCerebroActivity();if(cancelled)return;if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else setSource('UNAVAILABLE')};void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)}},[]);
- useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot({ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')})})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.body,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
+ useEffect(()=>{let raf=0;const inspect=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(()=>{const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console');if(!root){setSnapshot(EMPTY);return}const title=root.querySelector<HTMLElement>('.cerebro-panel h2')?.textContent?.trim()||'';const ready=title.includes('Transporte autenticado verificado');const sendButton=root.querySelector<HTMLButtonElement>('.cerebro-chat-form button[type="submit"]');const voiceButton=root.querySelector<HTMLButtonElement>('.cerebro-voice-main');const voiceStatus=root.querySelector<HTMLElement>('.cerebro-voice-status')?.textContent?.trim().toLowerCase()||'';setSnapshot(previous=>{
+  const next:CoreSnapshot={ready,sending:Boolean(sendButton?.textContent?.includes('Enviando')||voiceStatus.includes('procesando')),voiceActive:voiceButton?.getAttribute('aria-pressed')==='true',voiceListening:voiceStatus.includes('escuchando'),voiceSpeaking:voiceStatus.includes('hablando')};
+  // A DOM mutation is not necessarily a new assistant state: avoid render/observe loops.
+  return previous.ready===next.ready&&previous.sending===next.sending&&previous.voiceActive===next.voiceActive&&
+    previous.voiceListening===next.voiceListening&&previous.voiceSpeaking===next.voiceSpeaking?previous:next;
+ })})};inspect();const observer=new MutationObserver(inspect);observer.observe(document.querySelector<HTMLElement>('.operativa-core-bridge')||document.body,
+  {subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['disabled','aria-pressed','class']});const interval=window.setInterval(inspect,1200);return()=>{cancelAnimationFrame(raf);observer.disconnect();window.clearInterval(interval)}},[]);
  useEffect(()=>()=>{const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
+ // Mirror the existing authenticated chat messages as plain text for the V3 view.
+ // Never send a second request; DOM is the readonly output of the ONE V0 Gateway.
+ useEffect(()=>{
+  if(!visualPreview)return;
+  let raf=0;
+  const inspect=()=>{
+   cancelAnimationFrame(raf);
+   raf=requestAnimationFrame(()=>{
+    const root=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-chat-log');
+    const nodes=root?.querySelectorAll<HTMLElement>('.cerebro-chat-line')??[];
+    const next=Array.from(nodes).slice(-24).map(node=>({
+     role:(node.classList.contains('cerebro-chat-user')?'user':'cerebro') as 'user'|'cerebro',
+     text:(node.querySelector('span')?.textContent??'').trim().slice(0,6000)
+    })).filter(item=>item.text);
+    setChatMirror(previous=>{
+     if(previous.length===next.length&&previous.every((line,i)=>line.role===next[i].role&&line.text===next[i].text))
+      return previous;
+     return next;
+    });
+   });
+  };
+  inspect();
+  const observer=new MutationObserver(inspect);
+  observer.observe(document.querySelector<HTMLElement>('.operativa-core-bridge')||document.body,
+   {childList:true,characterData:true,subtree:true});
+  return()=>{cancelAnimationFrame(raf);observer.disconnect()};
+ },[visualPreview]);
  useEffect(()=>{try{window.sessionStorage.setItem('operativa_power_mode',power)}catch{/* optional */}},[power]);
+ // LAB preview only: no new reads in the existing production/default interface.
+ useEffect(()=>{
+  if(!visualPreview)return;
+  let alive=true;
+  const controller=new AbortController();
+  const refresh=async()=>{
+   const result=await fetchOwnerUniverseLab(company,controller.signal);
+   if(alive)setUniverseRecord({company,result});
+  };
+  void refresh();
+  const timer=window.setInterval(()=>{void refresh()},60_000);
+  return()=>{alive=false;controller.abort();window.clearInterval(timer)};
+ },[company,visualPreview]);
 
  const filteredRuns=useMemo(()=>company==='all'?runs:runs.filter(run=>companyKey(run)===company),[runs,company]);
  const activeRuns=useMemo(()=>filteredRuns.filter(run=>physicalRunning(run)>0||ACTIVE_STATUSES.has(run.status)),[filteredRuns]);
@@ -72,14 +122,42 @@ export default function CerebroOperativeConsole(){
  const queuedCount=useMemo(()=>filteredRuns.reduce((sum,run)=>sum+physicalQueued(run),0),[filteredRuns]);
  const nextRun=queuedRuns[0]||null,latestResult=completedRuns[0]||null;
 
- function sendCommand(raw:string){const clean=raw.trim();if(!clean||!snapshot.ready||snapshot.sending)return false;const core=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console'),textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea'),form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return false;const prefix=company==='all'?'':`Contexto de empresa: ${COMPANY_LABELS[company]}. `;setReactTextareaValue(textarea,`${prefix}${clean}`);window.setTimeout(()=>form.requestSubmit(),0);return true}
+ const previewScopePermitted=company==='all'||company==='fenix';
+ function sendCommand(raw:string){const clean=raw.trim();if((visualPreview&&!previewScopePermitted)||!clean||!snapshot.ready||snapshot.sending)return false;const core=document.querySelector<HTMLElement>('.operativa-core-bridge .cerebro-console'),textarea=core?.querySelector<HTMLTextAreaElement>('.cerebro-chat-form textarea'),form=core?.querySelector<HTMLFormElement>('.cerebro-chat-form');if(!textarea||!form)return false;const prefix=company==='all'?'':`Contexto de empresa: ${COMPANY_LABELS[company]}. `;setReactTextareaValue(textarea,`${prefix}${clean}`);window.setTimeout(()=>form.requestSubmit(),0);return true}
  function submit(event?:FormEvent){event?.preventDefault();if(sendCommand(composer))setComposer('')}
  function changePower(next:PowerMode){setPower(next);sendCommand(`Ajusta el ritmo operativo a ${next}. Mantén todas las protecciones, no generes gasto no autorizado y no publiques nada saltándote controles. Confirma solo cuando el cambio esté realmente aplicado.`)}
  function activateMode(mode:'Concentración'|'Esta noche'|'Emergencia'){const prompts={Concentración:'Activa modo concentración: prioriza el trabajo seleccionado o más importante y reduce el resto sin detener obligaciones críticas.','Esta noche':'Organiza el trabajo de esta noche para avanzar todo lo seguro posible sin publicar cambios reales salvo que ya estén autorizados.',Emergencia:'Activa modo emergencia: contiene lo no esencial y prioriza únicamente lo crítico y seguro. No desactives controles de seguridad.'};sendCommand(prompts[mode])}
- function toggleVoice(){if(dictating)return;const button=document.querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main');if(button&&!button.disabled)button.click()}
+ function toggleVoice(){if((visualPreview&&!previewScopePermitted)||dictating)return;const button=document.querySelector<HTMLButtonElement>('.operativa-core-bridge .cerebro-voice-main');if(button&&!button.disabled)button.click()}
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false)}
- function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function toggleDictation(){if(dictating){stopDictation();return}if((visualPreview&&!previewScopePermitted)||!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
+
+ function changePreviewCompany(next:CompanyKey){
+  if(next===company)return;
+  // Never switch visible tenant scope while the shared V0 voice session can still issue commands.
+  if(snapshot.voiceActive||dictating||snapshot.sending){
+   setDictationError('Finaliza la conversación o la orden actual antes de cambiar de empresa.');
+   return;
+  }
+  setDictationError('');
+  setComposer('');
+  setCompany(next);
+ }
+ 
+ if(visualPreview)return <CerebroOperativeCockpitV3
+   snapshot={snapshot} composer={composer} onComposerChange={setComposer}
+   onSubmit={()=>submit()} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
+   dictating={dictating} dictationSupported={voiceRecognitionSupported()}
+   dictationError={dictationError} composerRef={composerRef}
+   source={previewScopePermitted?source:'UNAVAILABLE'} observedAt={observedAt} company={company} onCompanyChange={changePreviewCompany}
+   scopeCanExecute={previewScopePermitted}
+   runs={previewScopePermitted?filteredRuns:[]} onOpenRun={setSelectedRun}
+   ownerUniverse={universeRecord?.company===company?universeRecord.result:{kind:'loading',data:null}}
+   chatLines={previewScopePermitted?chatMirror:[]}
+  >
+  {selectedRun?<div className="operativa-inspector-backdrop" onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}><aside className="operativa-inspector" role="dialog" aria-modal="true" aria-label="Detalle del trabajo"><header><div><span>Detalle</span><h2>{humanName(selectedRun)}</h2></div><button type="button" onClick={()=>setSelectedRun(null)} aria-label="Cerrar"><X size={18}/></button></header><div className="operativa-inspector-status"><i className={`is-${humanState(selectedRun).tone}`}/><strong>{humanState(selectedRun).label}</strong></div><section><span>Qué está haciendo</span><p>{humanDetail(selectedRun)}</p></section><section><span>Ahora</span><p>{humanStep(selectedRun.current_step,'No hay un paso concreto publicado.')}</p></section><section><span>Después</span><p>{humanStep(selectedRun.next_step,'No hay un siguiente paso publicado.')}</p></section><div className="operativa-inspector-facts"><div><span>Tiempo</span><strong>{selectedRun.status==='completed'?'Finalizado':elapsed(selectedRun.run_started_at||selectedRun.created_at,now)}</strong></div><div><span>Progreso</span><strong>{progressValue(selectedRun)!==null?`${progressValue(selectedRun)}%`:'Sin porcentaje fiable'}</strong></div></div>{selectedRun.html_url?<a href={selectedRun.html_url} target="_blank" rel="noreferrer"><ShieldCheck size={15}/> Ver comprobaciones</a>:null}</aside></div>:null}
+   <div className="operativa-core-bridge" aria-hidden="true"><CerebroConsoleShell/></div>
+  </CerebroOperativeCockpitV3>;
 
  return <main className="operativa-premium" aria-label="Operativa">
   <div className="operativa-hud-grid" aria-hidden="true"/>
