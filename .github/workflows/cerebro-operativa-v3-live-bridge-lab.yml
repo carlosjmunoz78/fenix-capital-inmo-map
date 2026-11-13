@@ -1,0 +1,40 @@
+name: Operativa V3 on live-chat baseline · LAB QA (no deploy)
+on:
+  push:
+    branches:
+      - cerebro/operativa-v3-live-chat-bridge-lab-20261113
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Live chat + scope + isolated flag contracts
+        run: node --test tests/cerebro-operativa-v3-live-bridge-contract.test.mjs
+      - name: Locked install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript/Vite build
+        run: npm run build
+      - name: Isolated Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Authenticated synthetic owner V3 regression
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+        run: npx playwright test tests/cerebro-operativa-v3-live-bridge-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Screenshots synthetic only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operativa-v3-live-bridge-lab-evidence
+          path: test-results/cockpit-v3-*.png
+          if-no-files-found: ignore
+          retention-days: 7

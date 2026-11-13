@@ -4,6 +4,7 @@ import CerebroConsoleShell from './CerebroConsoleShell';
 import CerebroBrowserConsole from './CerebroBrowserConsole';
 import CerebroJarvisWorkConsole from './CerebroJarvisWorkConsole';
 import CerebroOperativeConsole from './CerebroOperativeConsole';
+import CerebroOperativeCockpitV3Bridge from './CerebroOperativeCockpitV3Bridge';
 import CerebroInterfaceBar,{type CerebroPrimaryView} from './CerebroInterfaceBar';
 import CerebroNeuralView from './CerebroNeuralView';
 import CerebroSpeechOutputGuard from './CerebroSpeechOutputGuard';
@@ -48,13 +49,15 @@ export default function CerebroConsoleHost(){
  if(view==='V0')return <div className="cerebro-console-host view-v0"><JarvisVisibleLanguageGuard/><CerebroSpeechOutputGuard/><div className="cerebro-host-v0 is-visible"><CerebroConsoleShell/></div></div>;
 
  const primaryView=view as CerebroPrimaryView;
+ // Explicit LAB-only opt-in. Normal Operativa remains the physically verified production chat.
+ const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
  return <div className={`cerebro-console-host view-${primaryView.toLowerCase()}`}>
   {primaryView==='JARVIS'?<JarvisVisibleLanguageGuard/>:null}
   <CerebroSpeechOutputGuard/>
   <CerebroInterfaceBar view={primaryView} onViewChange={changeView}/>
   <div className="cerebro-interface-stage">
    {primaryView==='JARVIS'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroJarvisWorkConsole surface="JARVIS"/></div>:null}
-   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0"><CerebroOperativeConsole/></div>:null}
+   {primaryView==='OPERATIVA'?<div className="cerebro-work-mount cerebro-host-v0">{visualPreview?<CerebroOperativeCockpitV3Bridge/>:<CerebroOperativeConsole/>}</div>:null}
    {primaryView==='NEURONAL'?<CerebroNeuralView/>:null}
    {primaryView==='NAVEGADOR'?<CerebroBrowserConsole/>:null}
   </div>
