@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {projectJob001ReadSnapshot,projectCronObservation,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
+import {projectJob001ReadSnapshot,projectCronObservation,projectDispatchRpcObservation,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
 
 const source=fs.readFileSync(new URL('./preprod-job001-reader/index.ts',import.meta.url),'utf8');
 const observedAt='2026-11-13T18:30:00.000Z';
@@ -106,4 +106,24 @@ test('pg_cron PREPROD observed runs are sanitized, fixed to 4 IDs, not Hostinger
   const response=projectCronObservation(change,{observedAt:'2026-11-13T19:30:00Z'});
   assert.equal(response.status,'UNAVAILABLE');
  }
+});
+
+test('JOB001 PostgREST call observation is cumulative only and cannot claim job completion',()=>{
+ const raw={source:'PREPROD_JOB001_DISPATCH_RPC_STATS',
+  source_semantics:'POSTGREST_SQL_RPC_INVOCATION_COUNTER_NOT_JOB_COMPLETION',
+  observed_at:'2026-11-13T20:29:37Z',stats_reset_at:'2026-08-14T16:57:07Z',
+  matching_normalized_statements:1,rpc_calls_since_reset:79994,
+  hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false,
+  secret:'DO_NOT_LEAK'};
+ const x=projectDispatchRpcObservation(raw);
+ assert.equal(x.status,'OK');assert.equal(x.rpc_calls_since_reset,79994);
+ assert.equal(x.runtime_execution_verified,false);
+ assert.equal(x.downstream_effect_verified,false);
+ assert.equal(JSON.stringify(x).includes('DO_NOT_LEAK'),false);
+ for(const patch of [
+  {runtime_execution_verified:true},{downstream_effect_verified:true},
+  {hostinger_origin_verified:true},{rpc_calls_since_reset:-2},
+  {rpc_calls_since_reset:'79994'},{matching_normalized_statements:0},
+  {stats_reset_at:'INVALID'}
+ ])assert.equal(projectDispatchRpcObservation({...raw,...patch}).status,'UNAVAILABLE');
 });

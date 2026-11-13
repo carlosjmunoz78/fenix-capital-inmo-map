@@ -81,6 +81,22 @@ test('existing owner read exposes only four sanitized PREPROD pg_cron run observ
  assert.equal(invalid.cron_observation.status,'UNAVAILABLE');
  assert.equal(invalid.cron_observation.active,null);
 });
+test('owner reader admits only sanitized SQL RPC totals with false Hostinger and runtime assertions',async()=>{
+ const rpc_observation={status:'OK',source:'PREPROD_JOB001_DISPATCH_RPC_STATS',
+  observed_at:'2026-11-13T20:29:37Z',stats_reset_at:'2026-08-14T16:57:07Z',
+  rpc_calls_since_reset:79994,hostinger_origin_verified:false,
+  runtime_execution_verified:false,downstream_effect_verified:false,
+  raw_sql:'NEVER_LEAK_THIS_SQL'};
+ const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>rjson({...good(),rpc_observation})});
+ const result=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(result.rpc_observation.status,'OK');
+ assert.equal(result.rpc_observation.rpc_calls_since_reset,79994);
+ assert.equal(result.rpc_observation.runtime_execution_verified,false);
+ assert.equal(result.job001_queue_connected,false);
+ assert.equal(JSON.stringify(result).includes('NEVER_LEAK_THIS_SQL'),false);
+ const forged=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>rjson({...good(),rpc_observation:{...rpc_observation,downstream_effect_verified:true}})});
+ assert.equal((await forged.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN})).rpc_observation.status,'UNAVAILABLE');
+});
 test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
  let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
  for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
