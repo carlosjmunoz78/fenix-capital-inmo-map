@@ -55,6 +55,19 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
      <small>Controles externos: {result.job001.externalControls} · Estados de motores declarados: {result.job001.engineRecords}.</small>
      <small>Telemetría: {result.job001.telemetryRecords} registros · Configuraciones antiguas: {result.job001.staleControls}.</small>
      <small>Fuente: SQL existente PREPROD; no conecta la cola de ejecución ni cambia permisos.</small>
+     {result.job001.controlEngineBindings.length>0?<div className="op-uni-lab-evidence">
+      <strong>Vínculos de control por motor</strong>
+      {result.job001.controlEngineBindings.map(record=><small key={record.engine_id}>
+       {record.engine_id}: {record.configured_controls} controles configurados, {record.enabled_controls} habilitados, {record.stale_controls} antiguos. Ejecución no verificada.
+      </small>)}
+     </div>:null}
+     {result.job001.engineBindings.length>0?<div className="op-uni-lab-evidence">
+      <strong>Estados declarados en PREPROD (históricos)</strong>
+      {result.job001.engineBindings.slice(0,6).map(record=><small key={record.engine_id}>
+       {record.engine_id}: {record.declared_state} · {record.freshness==='STALE_CONFIG'?'información antigua':'configuración reciente'} · {record.observed_config_at.slice(0,10)}. No acredita ejecución.
+      </small>)}
+      {result.job001.engineBindings.length>6?<small>Y {result.job001.engineBindings.length-6} estados documentados adicionales (no operativos verificados).</small>:null}
+     </div>:null}
     </>:<small>Fuente JOB-001 no comprobable; no se muestran ceros inventados.</small>}
    </div>
    <div className="op-uni-lab-work" aria-label="Registro multiempresa y Fábrica FACT-001 mediante Gateway Universal">

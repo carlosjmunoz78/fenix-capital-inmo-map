@@ -38,6 +38,8 @@ export type UniversalJob001ControlLab={
  controlRows:number|null;enabledControls:number|null;externalControls:number|null;
  engineRecords:number|null;telemetryRecords:number|null;staleControls:number|null;
  observedAt:string|null;executionVerified:false;
+ engineBindings:{engine_id:string;version:string;declared_state:string;freshness:'STALE_CONFIG'|'RECENT_CONFIG';observed_config_at:string}[];
+ controlEngineBindings:{engine_id:string;configured_controls:number;enabled_controls:number;stale_controls:number}[];
 };
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
@@ -147,7 +149,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   let job001:UniversalJob001ControlLab={
    state:'UNAVAILABLE',source_environment:'PREPROD',controlRows:null,
    enabledControls:null,externalControls:null,engineRecords:null,telemetryRecords:null,
-   staleControls:null,observedAt:null,executionVerified:false
+   staleControls:null,observedAt:null,executionVerified:false,engineBindings:[],controlEngineBindings:[]
   };
   try{
    const j=await call('get_job001_controls') as {
@@ -155,7 +157,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     job001_queue_connected?:unknown;live_execution_verified?:unknown;prod_execution_enabled?:unknown;
     control_rows?:unknown;enabled_control_rows?:unknown;external_control_rows?:unknown;
     engine_state_records?:unknown;telemetry_records?:unknown;stale_control_rows?:unknown;
-    observed_at?:unknown
+    observed_at?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown
    };
    const n=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):null;
    if(j?.status==='OK'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&
@@ -166,7 +168,27 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      controlRows:n(j.control_rows),enabledControls:n(j.enabled_control_rows),
      externalControls:n(j.external_control_rows),engineRecords:n(j.engine_state_records),
      telemetryRecords:n(j.telemetry_records),staleControls:n(j.stale_control_rows),
-     observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false};
+     observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false,
+     engineBindings:Array.isArray(j.engine_bindings)?j.engine_bindings.slice(0,64).flatMap(item=>{
+      if(!item||typeof item!=='object')return [];
+      const r=item as Record<string,unknown>;
+      if(typeof r.engine_id!=='string'||!/^[A-Z][A-Z0-9-]{2,60}$/.test(r.engine_id)||
+         typeof r.version!=='string'||r.version.length>40||
+         typeof r.declared_state!=='string'||r.declared_state.length>32||
+         !['STALE_CONFIG','RECENT_CONFIG'].includes(String(r.freshness))||
+         typeof r.observed_config_at!=='string'||!Number.isFinite(Date.parse(r.observed_config_at)))return [];
+      return [{engine_id:r.engine_id,version:r.version,declared_state:r.declared_state,
+       freshness:r.freshness as 'STALE_CONFIG'|'RECENT_CONFIG',observed_config_at:r.observed_config_at}];
+     }):[],
+     controlEngineBindings:Array.isArray(j.control_engine_bindings)?j.control_engine_bindings.slice(0,32).flatMap(item=>{
+      if(!item||typeof item!=='object')return [];
+      const r=item as Record<string,unknown>,num=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):null;
+      if(typeof r.engine_id!=='string'||!/^[A-Z][A-Z0-9-]{2,60}$/.test(r.engine_id)||
+         num(r.configured_controls)===null||num(r.enabled_controls)===null||
+         num(r.stale_controls)===null)return [];
+      return [{engine_id:r.engine_id,configured_controls:num(r.configured_controls) as number,
+       enabled_controls:num(r.enabled_controls) as number,stale_controls:num(r.stale_controls) as number}];
+     }):[]};
    }
   }catch{/* unavailable JOB-001 metadata never blocks existing owner/FACT evidence */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,
