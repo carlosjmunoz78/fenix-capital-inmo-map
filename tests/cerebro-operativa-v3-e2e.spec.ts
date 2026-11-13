@@ -108,6 +108,8 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
 
  await page.goto('/cerebro?section=jarvis',{waitUntil:'domcontentloaded'});
  await expect(page.locator('.jarvis-work')).toBeVisible();
+ // No changes to the four other interfaces: JARVIS keeps its existing fixed bar.
+ await expect(page.locator('.cerebro-console-host.view-jarvis > .cerebro-interface-bar')).toHaveCSS('position','fixed');
  await expect(page.locator('.operativa-premium')).toHaveCount(0);
 
  await page.goto('/cerebro?section=legacy-v0',{waitUntil:'domcontentloaded'});
