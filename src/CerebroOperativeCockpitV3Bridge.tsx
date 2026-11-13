@@ -95,7 +95,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   }
   try{
    const utterance=new SpeechSynthesisUtterance(speechText(latest,650));
-   utterance.lang='es-ES';utterance.rate=1;
+   utterance.lang='es-ES';utterance.rate=1.15;
    utterance.voice=preferredSpanishVoice(spanishVoices())||null;
    utterance.onstart=()=>{setTtsActive(true);setDictationError('')};
    utterance.onend=()=>setTtsActive(false);

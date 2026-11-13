@@ -114,7 +114,7 @@ export default function CerebroAudioDiagnostics(){
   }
   try{
    const utterance=new SpeechSynthesisUtterance('Hola. Soy CEREBRO. Esta es una prueba de la voz del navegador.');
-   utterance.lang='es-ES';utterance.rate=1;
+   utterance.lang='es-ES';utterance.rate=1.15;
    utterance.onstart=()=>{voiceTestRunning.current=true;setTtsStatus('Reproduciendo la voz. ¿La escuchas?')};
    utterance.onend=()=>{voiceTestRunning.current=false;setTtsStatus('La reproducción terminó. Confirma si escuchaste la voz.')};
    utterance.onerror=e=>{voiceTestRunning.current=false;setTtsStatus('Error de síntesis de voz: '+String(e.error||'desconocido'))};
