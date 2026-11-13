@@ -42,11 +42,18 @@ export type UniversalRpcObservationLab={
  state:'OK'|'UNAVAILABLE';calls:number|null;statsResetAt:string|null;observedAt:string|null;
  source:'PREPROD_JOB001_DISPATCH_RPC_STATS';runtimeVerified:false;downstreamVerified:false;
 };
+export type UniversalSeoBacklogLab={
+ state:'OK'|'UNAVAILABLE';queued:number|null;done:number|null;
+ waiting:number|null;cancelled:number|null;total:number|null;
+ supervisorState:'DEGRADED'|'GREEN'|'PLANNED'|'UNVERIFIED'|'BLOCKED';
+ lastDoneAt:string|null;supervisorMeasuredAt:string|null;
+ dispatchAuthorized:false;publicationVerified:false;
+};
 export type UniversalJob001ControlLab={
  state:'OK'|'UNAVAILABLE';source_environment:'PREPROD';
  controlRows:number|null;enabledControls:number|null;externalControls:number|null;
  engineRecords:number|null;telemetryRecords:number|null;staleControls:number|null;
- observedAt:string|null;executionVerified:false;reason:string|null;cron:UniversalCronObservationLab;rpc:UniversalRpcObservationLab;
+ observedAt:string|null;executionVerified:false;reason:string|null;cron:UniversalCronObservationLab;rpc:UniversalRpcObservationLab;seo:UniversalSeoBacklogLab;
  engineBindings:{engine_id:string;version:string;declared_state:string;freshness:'STALE_CONFIG'|'RECENT_CONFIG';observed_config_at:string}[];
  controlEngineBindings:{engine_id:string;configured_controls:number;enabled_controls:number;stale_controls:number}[];
 };
@@ -165,7 +172,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   let job001:UniversalJob001ControlLab={
    state:'UNAVAILABLE',source_environment:'PREPROD',controlRows:null,
    enabledControls:null,externalControls:null,engineRecords:null,telemetryRecords:null,
-   staleControls:null,observedAt:null,executionVerified:false,reason:null,engineBindings:[],controlEngineBindings:[],cron:{state:'UNAVAILABLE',active:null,recentSuccessful:null,jobs:[],source:'PREPROD_PG_CRON_OBSERVATION',hostingerMasterVerified:false,job001ExecutionVerified:false},rpc:{state:'UNAVAILABLE',calls:null,statsResetAt:null,observedAt:null,source:'PREPROD_JOB001_DISPATCH_RPC_STATS',runtimeVerified:false,downstreamVerified:false}
+   staleControls:null,observedAt:null,executionVerified:false,reason:null,engineBindings:[],controlEngineBindings:[],cron:{state:'UNAVAILABLE',active:null,recentSuccessful:null,jobs:[],source:'PREPROD_PG_CRON_OBSERVATION',hostingerMasterVerified:false,job001ExecutionVerified:false},rpc:{state:'UNAVAILABLE',calls:null,statsResetAt:null,observedAt:null,source:'PREPROD_JOB001_DISPATCH_RPC_STATS',runtimeVerified:false,downstreamVerified:false},seo:{state:'UNAVAILABLE',queued:null,done:null,waiting:null,cancelled:null,total:null,supervisorState:'UNVERIFIED',lastDoneAt:null,supervisorMeasuredAt:null,dispatchAuthorized:false,publicationVerified:false}
   };
   try{
    const j=await call('get_job001_controls') as {
@@ -173,7 +180,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     job001_queue_connected?:unknown;live_execution_verified?:unknown;prod_execution_enabled?:unknown;
     control_rows?:unknown;enabled_control_rows?:unknown;external_control_rows?:unknown;
     engine_state_records?:unknown;telemetry_records?:unknown;stale_control_rows?:unknown;
-    observed_at?:unknown;reason?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown;cron_observation?:unknown;rpc_observation?:unknown
+    observed_at?:unknown;reason?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown;cron_observation?:unknown;rpc_observation?:unknown;seo_backlog?:unknown
    };
    const why=new Set(['PREPROD_OWNER_CONTEXT_NOT_AUTHORIZED','PREPROD_OWNER_ONLY','PREPROD_OWNER_CONTEXT_INVALID','PREPROD_OWNER_RESOLVER_UNAVAILABLE','PREPROD_FENIX_LAB_SCOPE_ONLY','PREPROD_OWNER_SESSION_REQUIRED','PREPROD_GATEWAY_UNREACHABLE','PREPROD_OWNER_DENIED','PREPROD_SOURCE_UNAVAILABLE','PREPROD_SOURCE_CONTRACT_INVALID','PREPROD_COUNTS_INVALID','PREPROD_COUNT_MISMATCH','PREPROD_OBSERVED_AT_INVALID','PREPROD_TENANT_OR_RUNTIME_INVALID','ENGINE_BINDING_CONTRACT_INVALID','JOB_ENGINE_CONTRACT_INVALID','PREPROD_SOURCE_HTTP_404','PREPROD_DB_AUTH_UNAVAILABLE','PREPROD_READ_FAILED','PREPROD_OWNER_CONTEXT_UNAVAILABLE']);
    if(j.status==='UNAVAILABLE'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&why.has(String(j.reason)))job001.reason=String(j.reason);
@@ -187,6 +194,28 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      externalControls:n(j.external_control_rows),engineRecords:n(j.engine_state_records),
      telemetryRecords:n(j.telemetry_records),staleControls:n(j.stale_control_rows),
      observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false,reason:null,
+     seo:(()=>{
+      const x=j.seo_backlog;
+      const no:UniversalSeoBacklogLab={state:'UNAVAILABLE',queued:null,done:null,waiting:null,
+       cancelled:null,total:null,supervisorState:'UNVERIFIED',lastDoneAt:null,supervisorMeasuredAt:null,
+       dispatchAuthorized:false,publicationVerified:false};
+      if(!x||typeof x!=='object')return no;
+      const r=x as Record<string,unknown>;
+      const valid=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0;
+      if(r.status!=='OK'||r.source!=='PREPROD_SEO_BACKLOG_READ_ONLY'||
+         r.staging_probe_performed!==false||r.seo_dispatch_authorized!==false||
+         r.downstream_publication_verified!==false||
+         ![r.queued,r.done,r.waiting_prerequisites,r.cancelled,r.total].every(valid)||
+         Number(r.total)!==Number(r.queued)+Number(r.done)+Number(r.waiting_prerequisites)+Number(r.cancelled)||
+         !['DEGRADED','GREEN','PLANNED','UNVERIFIED','BLOCKED'].includes(String(r.supervisor_state)))
+       return no;
+      const date=(v:unknown)=>typeof v==='string'&&Number.isFinite(Date.parse(v))?v:null;
+      return {state:'OK',queued:Number(r.queued),done:Number(r.done),
+       waiting:Number(r.waiting_prerequisites),cancelled:Number(r.cancelled),total:Number(r.total),
+       supervisorState:r.supervisor_state as UniversalSeoBacklogLab['supervisorState'],
+       lastDoneAt:date(r.latest_done_at),supervisorMeasuredAt:date(r.supervisor_last_measured_at),
+       dispatchAuthorized:false,publicationVerified:false};
+     })(),
      rpc:(()=>{
       const raw=j.rpc_observation;
       const fallback:UniversalRpcObservationLab={state:'UNAVAILABLE',calls:null,statsResetAt:null,observedAt:null,

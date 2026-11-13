@@ -81,6 +81,14 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
      <small>Controles externos: {result.job001.externalControls} · Estados de motores declarados: {result.job001.engineRecords}.</small>
      <small>Telemetría: {result.job001.telemetryRecords} registros · Configuraciones antiguas: {result.job001.staleControls}.</small>
      <small>Fuente: SQL existente PREPROD; no conecta la cola de ejecución ni cambia permisos.</small>
+     <div className="op-uni-lab-evidence" aria-label="Cola SEO y supervisor, sin acceso a staging">
+      <strong>SEO-001 · cola existente (sin usar staging)</strong>
+      {result.job001.seo.state==='OK'?<>
+       <small>{result.job001.seo.queued?.toLocaleString('es-ES')} pendientes · {result.job001.seo.done?.toLocaleString('es-ES')} DONE · {result.job001.seo.waiting} esperando requisitos · {result.job001.seo.cancelled} canceladas.</small>
+       <small>Supervisor: {result.job001.seo.supervisorState} · Última medición: {result.job001.seo.supervisorMeasuredAt?.slice(0,16).replace('T',' ')||'sin evidencia'} UTC.</small>
+       <small>Staging suspendida. Cola en observación; NO se ha autorizado despacho SEO ni acreditado publicación externa.</small>
+      </>:<small>No se ha podido comprobar la cola SEO; permanece bloqueada para publicaciones dependientes de staging.</small>}
+     </div>
      <div className="op-uni-lab-evidence" aria-label="Invocaciones registradas en el despacho JOB-001">
       <strong>JOB-001 · invocaciones SQL observadas</strong>
       {result.job001.rpc.state==='OK'?<>
