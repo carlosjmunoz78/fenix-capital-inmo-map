@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict';
 import {setTimeout as sleep} from 'node:timers/promises';
 
-const ALLOWED_HOST='fenix-capital-preprod-pkalcpwre.vercel.app';
+const ALLOWED_HOST='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app';
 const url=process.env.CEREBRO_LAB_PREVIEW_URL||'';
 const target=new URL(url);
 assert.equal(target.protocol,'https:');
