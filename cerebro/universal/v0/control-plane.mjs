@@ -25,7 +25,8 @@ export class UniversalGatewayLabV0 {
  }
  contract(){return{environment:'LAB',version:'0.1.0',auth:'SERVER_SESSION_RESOLVER',writes:false,new_queue:false,external_network:false,trading:false,methods:clone(METHODS),additional_cost_eur:0};}
  async handle({session_token,action,params={}}){
-  value(session_token,'SESSION');if(!METHODS.includes(action))error('METHOD_NOT_ALLOWED');
+  if(typeof session_token!=='string'||session_token.length<1||session_token.length>8192||/\s/.test(session_token))error('INVALID_SESSION');
+  if(!METHODS.includes(action))error('METHOD_NOT_ALLOWED');
   if(!object(params))error('PARAMS_REQUIRED');
   const actor=await this.#authenticate(session_token);
   if(!object(actor)||!value(actor.actor_id,'ACTOR')||!Array.isArray(actor.company_ids)||!Array.isArray(actor.scopes))error('AUTH_DENIED');

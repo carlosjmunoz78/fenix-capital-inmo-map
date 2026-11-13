@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import {allowedUniversalPreviewRequest} from '../../../api/cerebro-universal-preview.ts';
 import handler from '../../../api/cerebro-universal-preview.ts';
 const HOST='fenix-capital-preprod-labread123.vercel.app';
-const TOKEN='test-owner-token-without-secret-1234567890';
+// A real Supabase JWT normally exceeds 160 characters; server MUST NOT reject it before auth.
+const TOKEN='test-owner-token-without-secret-1234567890'.repeat(10);
 const KEY='public-publishable-test-key-12345';
 function req(overrides={}){
  return{method:'POST',headers:{host:HOST,origin:'https://'+HOST,
