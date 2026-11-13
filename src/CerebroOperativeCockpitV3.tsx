@@ -19,6 +19,7 @@ type Props={
  onSubmit:()=>void;onToggleVoice:()=>void;onToggleDictation:()=>void;
  dictating:boolean;dictationSupported:boolean;dictationError:string;
  voiceFeedback:string;onReadLastReply:()=>void;ttsActive:boolean;
+ onLocalTranscript:(text:string)=>void;
  composerRef:Ref<HTMLTextAreaElement>;source:FeedStatus;observedAt:string;
  company:Company;onCompanyChange:(value:Company)=>void;
  runs:CerebroActivityRun[];onOpenRun:(run:CerebroActivityRun)=>void;
@@ -67,7 +68,7 @@ function spanCount(n:number,one:string,many:string){return n===1?one:many}
 
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
- dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,composerRef,source,observedAt,
+ dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onLocalTranscript,composerRef,source,observedAt,
  company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
 }:Props){
  const[view,setView]=useState<View>('resumen');
@@ -185,7 +186,7 @@ export default function CerebroOperativeCockpitV3({
      </form>
      {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
       {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
-     <CerebroAudioDiagnostics/>
+     <CerebroAudioDiagnostics allowed={scopeCanExecute&&!snapshot.sending&&!snapshot.voiceActive&&!dictating} onTranscript={onLocalTranscript}/>
     </div>
 
     <div className="op3-live-track" aria-label="Actividad por fases">
