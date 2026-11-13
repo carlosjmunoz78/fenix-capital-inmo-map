@@ -111,7 +111,7 @@ export default async function handler(req:Req,res:Res){
     durable_audit:true,idempotency_persisted:true,audit_ref:persisted.audit_id,audit_replayed:persisted.replayed===true});
   }
   return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
-   source:['list_work_activity','list_owner_sources','get_job001_controls'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
+   source:['list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
    prod_execution_enabled:false,...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
  }catch{
   // No upstream error, actor data, access token or headers ever returned to client.
