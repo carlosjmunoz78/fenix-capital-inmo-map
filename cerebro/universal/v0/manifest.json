@@ -194,7 +194,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "STAGING_SUSPENDED_OWNER_GATEWAY_ENFORCED_LAB_ONLY; EXTERNAL_HOSTINGER_CRONS_NOT_YET_ENFORCED; SEO_SUPERVISOR_DEGRADED; PROD_CANARY_NOT_APPROVED"
+    "reason": "OWNER_STAGING_SUSPENSION_NOT_ENFORCED_IN_LEGACY_SCHEDULERS; REAL_STAGING_CHECK_RECORDS_AFTER_NOTICE; PROD_BLOCKED"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -280,14 +280,15 @@
     "environment": "preview",
     "target_production": false,
     "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
-    "owner_authenticated_latest_e2e": "VERIFIED_CRON_OBSERVATION_AND_FACT_DURABLE_DRYRUN",
-    "mapped_deployment": "dpl_Dr5a4AdAihaEQ758vD3rviDarH8M",
-    "mapped_source_sha": "6dff0330a9a93326b72be8ff210263459aaca666",
+    "owner_authenticated_latest_e2e": "PENDING_CURRENT_DEPLOYMENT_OWNER_VIEW",
+    "mapped_deployment": "dpl_4Vc2a2DNHNnt79x26VgiRofADq9V",
+    "mapped_source_sha": "5ffc05ffeb50f7a644197d914eff36c4f741a9b7",
     "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
     "no_new_tabs": true,
     "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
     "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780",
-    "opened_new_tabs": false
+    "opened_new_tabs": false,
+    "deployment_status": "READY"
   },
   "lab_durable_audit": {
     "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
@@ -347,6 +348,30 @@
         "physical_preview_owner_e2e": "PENDING_DEPLOYMENT",
         "legacy_hostinger_scheduler_enforcement": "NOT_VERIFIED",
         "prod_mutation": false
+      },
+      "legacy_external_checks_after_suspension": {
+        "status": "OBSERVED_NOT_STOPPED",
+        "environment": "PREPROD",
+        "source": "seo_cerebro_wp_bridge_health_preprod",
+        "check_kind": "CORE_GUARD_CEREBRO_STATUS",
+        "reference_window_start_utc": "2026-11-13T21:00:00Z",
+        "recorded_not_ready_count": 4,
+        "timestamps_utc": [
+          "2026-11-13T21:05:03Z",
+          "2026-11-13T21:20:04Z",
+          "2026-11-13T21:35:03Z",
+          "2026-11-13T21:50:04Z"
+        ],
+        "has_dispatched_at": true,
+        "last_http_status": 200,
+        "external_actual_network_not_independently_proven": true,
+        "scheduler_origin": "UNIDENTIFIED",
+        "actions_taken": "READ_ONLY_INVENTORY_NO_CRON_MODIFICATION",
+        "gates": {
+          "staging_probes_authorized": false,
+          "legacy_execution_enforced": false,
+          "requires_targeted_dependency_audit": true
+        }
       }
     }
   }
