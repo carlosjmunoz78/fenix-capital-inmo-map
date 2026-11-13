@@ -47,6 +47,16 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>
    <span>Motores operativos: <b>No verificados</b></span>
    <small>Fuente: {result.source}. Esta capacidad solo consulta el registro; NO ejecuta motores.</small>
+   <div className="op-uni-lab-work" aria-label="JOB-001 fuente real de configuración PREPROD, solo lectura">
+    <strong>JOB-001 · controles existentes (PREPROD)</strong>
+    <span>Lectura: {result.job001?.state||'UNAVAILABLE'} · Ejecución: NO VERIFICADA</span>
+    {result.job001?.state==='OK'?<>
+     <small>Controles: {result.job001.controlRows} configurados, {result.job001.enabledControls} habilitados (no implica que estén corriendo).</small>
+     <small>Controles externos: {result.job001.externalControls} · Estados de motores declarados: {result.job001.engineRecords}.</small>
+     <small>Telemetría: {result.job001.telemetryRecords} registros · Configuraciones antiguas: {result.job001.staleControls}.</small>
+     <small>Fuente: SQL existente PREPROD; no conecta la cola de ejecución ni cambia permisos.</small>
+    </>:<small>Fuente JOB-001 no comprobable; no se muestran ceros inventados.</small>}
+   </div>
    <div className="op-uni-lab-work" aria-label="Registro multiempresa y Fábrica FACT-001 mediante Gateway Universal">
     <strong>Registro de empresas y Fábrica · fuentes existentes</strong>
     <span>Conexión: {result.ownerSources?.state||'UNAVAILABLE'} · Registro: {result.ownerSources?.registryState||'UNAVAILABLE'} · FACT GitOps: {result.ownerSources?.factoryState||'UNAVAILABLE'}</span>

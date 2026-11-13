@@ -33,6 +33,12 @@ export type UniversalOwnerSourcesLab={
  factoryState:string;factorySource:string;factoryCatalog:number;factoryScaffolds:number;
  job001Connected:false;
 };
+export type UniversalJob001ControlLab={
+ state:'OK'|'UNAVAILABLE';source_environment:'PREPROD';
+ controlRows:number|null;enabledControls:number|null;externalControls:number|null;
+ engineRecords:number|null;telemetryRecords:number|null;staleControls:number|null;
+ observedAt:string|null;executionVerified:false;
+};
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
  kind:'ready'|'unavailable'|'denied';
@@ -42,6 +48,7 @@ export type UniversalLabProof={
  source:string;
  workActivity?:UniversalWorkActivityLab;
  ownerSources?:UniversalOwnerSourcesLab;
+ job001?:UniversalJob001ControlLab;
 };
 export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<UniversalLabProof>{
  const unavailable=(kind:'unavailable'|'denied'):UniversalLabProof=>({
@@ -51,7 +58,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return unavailable('denied');
  const endpoint=new URL('/api/cerebro-universal-preview',window.location.origin);
- const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity'|'list_owner_sources',extra:Record<string,unknown>={})=>{
+ const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity'|'list_owner_sources'|'get_job001_controls',extra:Record<string,unknown>={})=>{
   const response=await fetch(endpoint.href,{
    method:'POST',signal,cache:'no-store',
    headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
@@ -137,8 +144,33 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     };
    }
   }catch{/* optional source unavailable: FACT proof remains valid, no false LIVE */}
+  let job001:UniversalJob001ControlLab={
+   state:'UNAVAILABLE',source_environment:'PREPROD',controlRows:null,
+   enabledControls:null,externalControls:null,engineRecords:null,telemetryRecords:null,
+   staleControls:null,observedAt:null,executionVerified:false
+  };
+  try{
+   const j=await call('get_job001_controls') as {
+    status?:unknown;source?:unknown;transport?:unknown;source_environment?:unknown;
+    job001_queue_connected?:unknown;live_execution_verified?:unknown;prod_execution_enabled?:unknown;
+    control_rows?:unknown;enabled_control_rows?:unknown;external_control_rows?:unknown;
+    engine_state_records?:unknown;telemetry_records?:unknown;stale_control_rows?:unknown;
+    observed_at?:unknown
+   };
+   const n=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):null;
+   if(j?.status==='OK'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&
+     j.source_environment==='PREPROD'&&j.job001_queue_connected===false&&j.live_execution_verified===false&&
+     j.prod_execution_enabled===false&&
+     [j.control_rows,j.enabled_control_rows,j.external_control_rows,j.engine_state_records,j.telemetry_records,j.stale_control_rows].every(x=>n(x)!==null)){
+    job001={state:'OK',source_environment:'PREPROD',
+     controlRows:n(j.control_rows),enabledControls:n(j.enabled_control_rows),
+     externalControls:n(j.external_control_rows),engineRecords:n(j.engine_state_records),
+     telemetryRecords:n(j.telemetry_records),staleControls:n(j.stale_control_rows),
+     observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false};
+   }
+  }catch{/* unavailable JOB-001 metadata never blocks existing owner/FACT evidence */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,
-   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources};
+   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources,job001};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
   const code=error instanceof Error?error.message:'';
