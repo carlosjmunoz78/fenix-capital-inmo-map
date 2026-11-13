@@ -34,7 +34,7 @@ export class UniversalGatewayLabV0 {
   if(params.environment!=='LAB')error('ENVIRONMENT_LAB_ONLY');
   if(!actor.scopes.includes('cerebro:universal:read'))error('SCOPE_DENIED');
   const can=actor.scopes.includes('cerebro:factory:inspect');
-  const cap=can?clone(this.#cap):null;
+  const cap=can?{...clone(this.#cap),company_id}:null;
   const requireCap=()=>{if(!cap||params.capability_id!==cap.capability_id)error('CAPABILITY_UNAVAILABLE');return cap;};
   const payload=()=>{const p=params.payload??{};if(!object(p)||Object.keys(p).length!==0)error('PAYLOAD_SCHEMA_DENIED');return p;};
   let response;
@@ -66,11 +66,15 @@ export class UniversalGatewayLabV0 {
     if(params.dry_run!==true)error('LAB_WRITES_DISABLED');
     requireCap();payload();
     if(params.engine_id!=='FACT-001'||params.version!==this.#cap.version)error('CAPABILITY_VERSION_MISMATCH');
-    const id=value(params.idempotency_key,'IDEMPOTENCY_KEY'),key=company_id+'|'+id;
-    const fp=crypto.createHash('sha256').update(stable({engine_id:params.engine_id,version:params.version,payload:params.payload||{}})).digest('hex');
+    const id=value(params.idempotency_key,'IDEMPOTENCY_KEY'),key=actor.actor_id+'|'+company_id+'|'+id;
+    const estimate=params.estimated_additional_cost_eur??0;
+    if(typeof estimate!=='number'||!Number.isFinite(estimate)||estimate<0)error('INVALID_COST_ESTIMATE');
+    if(params.human_exception!==undefined&&!HUMAN_CODES.includes(params.human_exception))error('INVALID_HUMAN_EXCEPTION');
+    const fp=crypto.createHash('sha256').update(stable({engine_id:params.engine_id,version:params.version,payload:params.payload||{},estimate,signature:params.signature_required===true,risk:params.risk||'LOW',human_exception:params.human_exception||null})).digest('hex');
     const prior=this.#idem.get(key);if(prior&&prior!==fp)error('IDEMPOTENCY_CONFLICT');
     this.#idem.set(key,fp);
-    response={status:'DRY_RUN_VALIDATED',executed:false,company_id,engine_id:'FACT-001',environment:'LAB',version:this.#cap.version,capability_id:this.#cap.capability_id,replayed:Boolean(prior),additional_cost_eur:0};break;
+    const reason=estimate>0?'MONEY_LIMIT':params.signature_required===true?'SIGNATURE_REQUIRED':params.risk==='HIGH'?'HIGH_RISK':params.human_exception||null;
+    response=reason?{status:'HUMAN_REQUIRED',reason,executed:false,company_id,environment:'LAB',engine_id:'FACT-001',replayed:Boolean(prior)}:{status:'DRY_RUN_VALIDATED',executed:false,company_id,engine_id:'FACT-001',environment:'LAB',version:this.#cap.version,capability_id:this.#cap.capability_id,replayed:Boolean(prior),additional_cost_eur:0};break;
    }
    case 'invoke_read':{
     if(!actor.scopes.includes('cerebro:invoke:read'))error('SCOPE_DENIED');
