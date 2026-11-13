@@ -39,6 +39,32 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    if(all.some(x=>x?.company_id!=='fenix'||x?.environment!=='PREPROD'||x?.runtime_verified!==false||x?.dispatch_verified!==false||typeof x?.enabled!=='boolean')||
       raw.engine_state_records.some(x=>x?.company_id!=='fenix'||x?.environment!=='PREPROD'||x?.runtime_verified!==false))
     return empty('PREPROD_TENANT_OR_RUNTIME_INVALID');
+   // Bounded per-engine bindings: source declarations only. Never executable.
+   const id=/^[A-Z][A-Z0-9-]{2,60}$/;
+   const safeDate=v=>typeof v==='string'&&Number.isFinite(Date.parse(v))?new Date(v).toISOString():null;
+   const engine_bindings=[];
+   for(const rec of raw.engine_state_records){
+    if(!id.test(rec.engine_id||'')||typeof rec.version!=='string'||rec.version.length>40||
+       typeof rec.declared_state!=='string'||rec.declared_state.length>32||
+       !['STALE_CONFIG','RECENT_CONFIG'].includes(rec.freshness)||!safeDate(rec.last_changed_at))
+     return empty('ENGINE_BINDING_CONTRACT_INVALID');
+    engine_bindings.push({engine_id:rec.engine_id,version:rec.version,environment:'PREPROD',
+     declared_state:rec.declared_state,observed_config_at:safeDate(rec.last_changed_at),
+     freshness:rec.freshness,runtime_verified:false});
+   }
+   const byEngine=new Map();
+   for(const rec of all){
+    if(!id.test(rec.engine_id||'')||!['STALE_CONFIG','RECENT_CONFIG'].includes(rec.freshness))
+     return empty('JOB_ENGINE_CONTRACT_INVALID');
+    const prev=byEngine.get(rec.engine_id)||{engine_id:rec.engine_id,environment:'PREPROD',
+     configured_controls:0,enabled_controls:0,stale_controls:0,runtime_verified:false};
+    prev.configured_controls+=1;
+    if(rec.enabled)prev.enabled_controls+=1;
+    if(rec.freshness==='STALE_CONFIG')prev.stale_controls+=1;
+    byEngine.set(rec.engine_id,prev);
+   }
+   const control_engine_bindings=[...byEngine.values()].sort((a,b)=>a.engine_id.localeCompare(b.engine_id));
+   engine_bindings.sort((a,b)=>a.engine_id.localeCompare(b.engine_id));
    return {
     status:'OK',source:'PREPROD_JOB001_CONTROL_METADATA',observed_at,
     control_rows:t.job_controls,enabled_control_rows:raw.job_controls.filter(x=>x.enabled).length,
@@ -46,6 +72,7 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
     engine_state_records:t.engine_state_records,telemetry_records:t.telemetry_records,
     stale_control_rows:all.filter(x=>x.freshness==='STALE_CONFIG').length,
     stale_engine_state_records:raw.engine_state_records.filter(x=>x.freshness==='STALE_CONFIG').length,
+    engine_bindings,control_engine_bindings,
     source_environment:'PREPROD',source_provenance:'EXISTING_PREPROD_SQL_READ_ONLY',
     job001_queue_connected:false,live_execution_verified:false,prod_execution_enabled:false,
     note:'CONTROL_CONFIG_AND_DECLARED_ENGINE_STATE_NOT_RUNTIME_PROOF'
