@@ -55,6 +55,16 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
      <small>Controles externos: {result.job001.externalControls} · Estados de motores declarados: {result.job001.engineRecords}.</small>
      <small>Telemetría: {result.job001.telemetryRecords} registros · Configuraciones antiguas: {result.job001.staleControls}.</small>
      <small>Fuente: SQL existente PREPROD; no conecta la cola de ejecución ni cambia permisos.</small>
+     <div className="op-uni-lab-evidence" aria-label="Actividad observada del programador de Supabase">
+      <strong>Planificador Supabase PREPROD · actividad registrada</strong>
+      {result.job001.cron.state==='OK'?<>
+       <small>Programaciones activas verificadas: {result.job001.cron.active}. Comandos pg_cron completados recientemente: {result.job001.cron.recentSuccessful}. No demuestra el funcionamiento de Hostinger ni resultados externos.</small>
+       {result.job001.cron.jobs.map(item=><small key={item.job_id}>
+        #{item.job_id} · {item.active?'activo':'inactivo'} · {item.last_status} · {item.last_run_at?item.last_run_at.slice(0,16).replace('T',' ')+' UTC':'sin ejecución registrada'} · efecto externo no comprobado
+       </small>)}
+      </>:<small>Actividad del planificador no comprobable. No se sustituyen resultados ausentes por ceros.</small>}
+      <small>Estas cuatro programaciones SQL no equivalen a los veinte controles JOB-001 ni a la ejecución del planificador maestro.</small>
+     </div>
      {result.job001.controlEngineBindings.length>0?<div className="op-uni-lab-evidence">
       <strong>Vínculos de control por motor</strong>
       {result.job001.controlEngineBindings.map(record=><small key={record.engine_id}>

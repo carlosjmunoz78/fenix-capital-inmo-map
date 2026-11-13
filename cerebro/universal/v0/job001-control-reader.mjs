@@ -81,6 +81,31 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    }
    const control_engine_bindings=[...byEngine.values()].sort((a,b)=>a.engine_id.localeCompare(b.engine_id));
    engine_bindings.sort((a,b)=>a.engine_id.localeCompare(b.engine_id));
+   const safeCron=(()=>{
+    const c=raw.cron_observation;
+    const defaultValue={status:'UNAVAILABLE',active:null,run_records:null,recent_successful_cron_commands:null,jobs:[],
+     source:'PREPROD_PG_CRON_OBSERVATION',is_job001_hostinger_master:false,is_job001_runtime_proof:false};
+    if(!c||c.status!=='OK'||c.source!=='PREPROD_PG_CRON_OBSERVATION'||c.is_job001_hostinger_master!==false||
+       c.is_job001_runtime_proof!==false||!Array.isArray(c.jobs)||c.jobs.length>4)return defaultValue;
+    const allowed=new Set([6,22,23,25]),statuses=new Set(['succeeded','failed','running','starting','sending','UNKNOWN']);
+    const ids=new Set(),jobs=[];
+    for(const r of c.jobs){
+     if(!r||!allowed.has(r.job_id)||ids.has(r.job_id)||typeof r.active!=='boolean'||
+        !statuses.has(r.last_status)||typeof r.run_recent!=='boolean'||r.job001_execution_verified!==false||
+        r.downstream_effect_verified!==false||typeof r.run_record_present!=='boolean')
+       return defaultValue;
+     if(r.last_run_at!==null&&(typeof r.last_run_at!=='string'||!Number.isFinite(Date.parse(r.last_run_at))))return defaultValue;
+     ids.add(r.job_id);
+     jobs.push({job_id:r.job_id,active:r.active,last_status:r.last_status,
+      last_run_at:r.last_run_at,run_recent:r.run_recent,downstream_effect_verified:false});
+    }
+    if(c.active!==jobs.filter(j=>j.active).length||
+       c.recent_successful_cron_commands!==jobs.filter(j=>j.active&&j.last_status==='succeeded'&&j.run_recent).length)
+     return defaultValue;
+    return {status:'OK',source:'PREPROD_PG_CRON_OBSERVATION',active:c.active,
+     run_records:jobs.filter(j=>j.last_run_at!==null).length,recent_successful_cron_commands:c.recent_successful_cron_commands,
+     jobs:jobs.sort((a,b)=>a.job_id-b.job_id),is_job001_hostinger_master:false,is_job001_runtime_proof:false};
+   })();
    return {
     status:'OK',source:'PREPROD_JOB001_CONTROL_METADATA',observed_at,
     control_rows:t.job_controls,enabled_control_rows:raw.job_controls.filter(x=>x.enabled).length,
@@ -88,7 +113,7 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
     engine_state_records:t.engine_state_records,telemetry_records:t.telemetry_records,
     stale_control_rows:all.filter(x=>x.freshness==='STALE_CONFIG').length,
     stale_engine_state_records:raw.engine_state_records.filter(x=>x.freshness==='STALE_CONFIG').length,
-    engine_bindings,control_engine_bindings,
+    engine_bindings,control_engine_bindings,cron_observation:safeCron,
     source_environment:'PREPROD',source_provenance:'EXISTING_PREPROD_SQL_READ_ONLY',
     job001_queue_connected:false,live_execution_verified:false,prod_execution_enabled:false,
     note:'CONTROL_CONFIG_AND_DECLARED_ENGINE_STATE_NOT_RUNTIME_PROOF'
