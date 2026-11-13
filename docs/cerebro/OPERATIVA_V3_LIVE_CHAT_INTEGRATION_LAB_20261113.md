@@ -17,3 +17,9 @@
 
 ## Rollback
 No publicar este branch. El prod físico permanece en `99d3aca48229f6bd730d51bd1d21aedb226dc763` / Vercel `dpl_94Wp3aB42YykrpDwrM2VNqk2br9i`. Para retirar la vista previa, descartar rama/PR.
+
+## 13 Nov · CORS del preview resuelto por puente propio Vercel (sin tocar Supabase)
+- Preview Vercel de PR #59 únicamente: API REST `/api/cerebro-preview-gateway`, con `VERCEL_ENV=preview`, allowlist de host, comprobación SERVER-SIDE de `CARLOS-ADMIN` en cada solicitud, JWT de sesión y origen local. Permite health/preferences/activity/universe de solo lectura y conversación QA sin token de confirmación ni escrituras.
+- Rutas PROD, CORS Supabase, permisos, CRM, App y `main` no se modifican. No insertar claves secretas ni service-role en cliente.
+- `visual_lab=cockpit-v3` + hostname preview son obligatorios; la Operativa antigua usa la ruta original.
+- Bloqueos restantes: probar conversación real de un usuario desde el nuevo preview; comprobar voz mediante interacción humana; confirmar que las otras cuatro interfaces permanecen sin cambio; promocionar solo tras aceptación.

@@ -11,7 +11,15 @@ export function cerebroConsoleUrl():string|null{
   }catch{return null;}
 }
 
+
+function usePreviewGateway():boolean{
+ if(typeof window==='undefined')return false;
+ return /^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)
+  &&new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3';
+}
+
 export function cerebroConsoleEndpoint(path:string):string|null{
+ if(usePreviewGateway()&&['health','preferences','chat'].includes(path))return '/api/cerebro-preview-gateway?resource='+encodeURIComponent(path);
   const base=cerebroConsoleUrl();
   if(!base)return null;
   const clean=path.replace(/^\/+/, '');
