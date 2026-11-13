@@ -22,7 +22,7 @@ const good=()=>({
  engine_state_records:[{engine_id:'SEOBOOT-001',company_id:'fenix',environment:'PREPROD',
  version:'1.0.0',declared_state:'GREEN',runtime_verified:false,freshness:'STALE_CONFIG'}],
  totals:{job_controls:1,external_controls:1,engine_state_records:1,telemetry_records:0},
- live_execution_verified:false,actual_dispatch_enabled:false,job001_queue_connected:false,write_operations:0
+ live_execution_verified:false,actual_dispatch_enabled:false,prod_execution_enabled:false,job001_queue_connected:false,write_operations:0
 });
 test('PREPROD controls reader enforces two publishable key scopes and returns sanitised counts only',async()=>{
  const calls=[];

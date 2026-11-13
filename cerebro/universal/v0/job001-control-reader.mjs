@@ -23,7 +23,7 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    let raw;try{raw=await response.json()}catch{return empty('PREPROD_JSON_INVALID')}
    if(raw?.status!=='OK'||raw?.source!=='PREPROD_JOB001_CONTROL_METADATA'||
        raw?.company_id!=='fenix'||raw?.source_company_id!=='FENIX_CAPITAL'||raw?.environment!=='PREPROD'||
-       raw?.live_execution_verified!==false||raw?.actual_dispatch_enabled!==false||
+       raw?.live_execution_verified!==false||raw?.actual_dispatch_enabled!==false||raw?.prod_execution_enabled!==false||
        raw?.job001_queue_connected!==false||raw?.write_operations!==0||
        !Array.isArray(raw.job_controls)||!Array.isArray(raw.external_controls)||!Array.isArray(raw.engine_state_records)||
        raw.job_controls.length>64||raw.external_controls.length>64||raw.engine_state_records.length>64)

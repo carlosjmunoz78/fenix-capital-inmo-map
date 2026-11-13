@@ -35,7 +35,7 @@ export function projectJob001ReadSnapshot({jobs,external,engines,telemetryCount,
   job_controls:jobRows,external_controls:externalRows,engine_state_records:engineRows,
   totals:{job_controls:jobRows.length,external_controls:externalRows.length,engine_state_records:engineRows.length,telemetry_records:telemetryCount},
   telemetry_status:telemetryCount===0?'NO_TELEMETRY_ROWS':'RECORDS_PRESENT_NOT_VALIDATED',
-  live_execution_verified:false,actual_dispatch_enabled:false,job001_queue_connected:false,
+  live_execution_verified:false,actual_dispatch_enabled:false,prod_execution_enabled:false,job001_queue_connected:false,
   source_provenance:'EXISTING_PREPROD_SQL_READ_ONLY',
   no_new_queue:true,write_operations:0
  };
