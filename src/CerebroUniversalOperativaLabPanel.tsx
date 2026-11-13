@@ -38,6 +38,13 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>
    <span>Motores operativos: <b>No verificados</b></span>
    <small>Fuente: {result.source}. Esta capacidad solo consulta el registro; NO ejecuta motores.</small>
+   <div className="op-uni-lab-work" aria-label="Registro multiempresa y Fábrica FACT-001 mediante Gateway Universal">
+    <strong>Registro de empresas y Fábrica · fuentes existentes</strong>
+    <span>Conexión: {result.ownerSources?.state||'UNAVAILABLE'} · Registro: {result.ownerSources?.registryState||'UNAVAILABLE'} · FACT GitOps: {result.ownerSources?.factoryState||'UNAVAILABLE'}</span>
+    <small>Registro: {result.ownerSources?.companyRecords||0} empresas, {result.ownerSources?.projectRecords||0} proyectos, {result.ownerSources?.engineRecords||0} motores con fichas en fuente.</small>
+    <small>FACT GitOps: {result.ownerSources?.factoryCatalog||0} definiciones, {result.ownerSources?.factoryScaffolds||0} directorios detectados.</small>
+    <small>Solo metadatos; no prueba runtime, permisos de ejecución ni JOB-001. Fuente del registro: {result.ownerSources?.registrySource||'UNVERIFIED'}.</small>
+   </div>
    <div className="op-uni-lab-work" aria-label="Actividad de GitHub Actions mediante Gateway Universal">
     <strong>Trabajos observados · GitHub Actions</strong>
     <span>Fuente: {result.workActivity?.source||'NO CONECTADA'} · {result.workActivity?.state||'UNAVAILABLE'}</span>

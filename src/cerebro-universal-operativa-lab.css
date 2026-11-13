@@ -12,3 +12,5 @@
 .op-uni-lab-work>strong{font-size:14px}
 .op-uni-lab-work-row{padding:7px 0;border-bottom:1px solid rgba(120,170,197,.15);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .op-uni-lab-work-row a{color:#a9eaff;text-decoration:underline;text-underline-offset:3px}
+
+.op-uni-lab-work small{word-break:break-word}

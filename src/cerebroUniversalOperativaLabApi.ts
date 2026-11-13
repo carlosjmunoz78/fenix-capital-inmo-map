@@ -26,6 +26,13 @@ export type UniversalWorkActivityLab={
  job001Connected:false;
  provenance:'EXISTING_ACTIVITY_EDGE_GITHUB_ACTIONS'|'PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK'|'UNAVAILABLE';
 };
+export type UniversalOwnerSourcesLab={
+ state:'OK'|'PARTIAL'|'UNAVAILABLE';
+ registryState:string;registrySource:string;
+ companyRecords:number;projectRecords:number;engineRecords:number;
+ factoryState:string;factorySource:string;factoryCatalog:number;factoryScaffolds:number;
+ job001Connected:false;
+};
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
  kind:'ready'|'unavailable'|'denied';
@@ -34,6 +41,7 @@ export type UniversalLabProof={
  operationalState:string;
  source:string;
  workActivity?:UniversalWorkActivityLab;
+ ownerSources?:UniversalOwnerSourcesLab;
 };
 export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<UniversalLabProof>{
  const unavailable=(kind:'unavailable'|'denied'):UniversalLabProof=>({
@@ -43,7 +51,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return unavailable('denied');
  const endpoint=new URL('/api/cerebro-universal-preview',window.location.origin);
- const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity',extra:Record<string,unknown>={})=>{
+ const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity'|'list_owner_sources',extra:Record<string,unknown>={})=>{
   const response=await fetch(endpoint.href,{
    method:'POST',signal,cache:'no-store',
    headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
@@ -101,8 +109,36 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     workActivity={state:work.source_status,observedAt:typeof work.observed_at==='string'?work.observed_at:null,rows,source:'GITHUB_ACTIONS',job001Connected:false,provenance};
    }
   }catch{/* work stays UNAVAILABLE, owner identity/FACT remain unchanged */}
+  let ownerSources:UniversalOwnerSourcesLab={
+   state:'UNAVAILABLE',registryState:'UNAVAILABLE',registrySource:'UNVERIFIED',
+   companyRecords:0,projectRecords:0,engineRecords:0,
+   factoryState:'UNAVAILABLE',factorySource:'UNVERIFIED',factoryCatalog:0,factoryScaffolds:0,job001Connected:false
+  };
+  try{
+   const sources=await call('list_owner_sources') as {
+    status?:unknown;source?:unknown;transport?:unknown;
+    registry?:{status?:unknown;source_status?:unknown;companies?:unknown;projects?:unknown;engine_records?:unknown};
+    factory?:{status?:unknown;source_status?:unknown;catalog_definitions?:unknown;scaffold_directories?:unknown};
+    job001_connected?:unknown;execution_enabled?:unknown;prod_execution_enabled?:unknown;
+   };
+   if(['OK','PARTIAL'].includes(String(sources.status))&&sources.source==='EXISTING_OWNER_UNIVERSE_LAB'&&
+     sources.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&sources.job001_connected===false&&
+     sources.execution_enabled===false&&sources.prod_execution_enabled===false){
+    const reg=sources.registry,fac=sources.factory;
+    const num=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):0;
+    ownerSources={
+     state:sources.status as 'OK'|'PARTIAL',registryState:String(reg?.status||'UNAVAILABLE').slice(0,24),
+     registrySource:String(reg?.source_status||'UNVERIFIED').slice(0,50),
+     companyRecords:num(reg?.companies),projectRecords:num(reg?.projects),engineRecords:num(reg?.engine_records),
+     factoryState:String(fac?.status||'UNAVAILABLE').slice(0,24),
+     factorySource:String(fac?.source_status||'UNVERIFIED').slice(0,50),
+     factoryCatalog:num(fac?.catalog_definitions),factoryScaffolds:num(fac?.scaffold_directories),
+     job001Connected:false
+    };
+   }
+  }catch{/* optional source unavailable: FACT proof remains valid, no false LIVE */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,
-   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity};
+   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
   const code=error instanceof Error?error.message:'';
