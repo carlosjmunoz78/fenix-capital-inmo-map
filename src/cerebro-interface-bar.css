@@ -12,3 +12,51 @@
 .cerebro-interface-bar{position:fixed;inset:auto 0 0;top:auto;z-index:130;min-height:60px;border-top:1px solid rgba(97,220,255,.25);border-bottom:0;box-shadow:0 -8px 28px rgba(0,0,0,.25)}
 .cerebro-interface-stage{padding-bottom:calc(82px + env(safe-area-inset-bottom,0px))}
 @media(min-width:661px){.cerebro-interface-nav{max-width:760px;width:100%}}
+
+
+/*
+ * Operativa-only overlap hotfix (from exact Vercel deployed commit
+ * 173a512445768a9aa29f0a18e09b424ad355c311).
+ * The global fixed bottom bar obscures the authenticated chat composer.
+ * Keep all five destinations; move only Operativa's bar into document flow.
+ * No DOM/backend/auth/voice changes. The global bar stays untouched elsewhere.
+ */
+.cerebro-console-host.view-operativa > .cerebro-interface-bar{
+ position:relative;
+ inset:auto;
+ top:auto;
+ left:auto;
+ right:auto;
+ bottom:auto;
+ z-index:2;
+ border-top:0;
+ border-bottom:1px solid rgba(97,220,255,.25);
+ box-shadow:0 8px 28px rgba(0,0,0,.18);
+}
+.cerebro-console-host.view-operativa > .cerebro-interface-stage{
+ padding-bottom:16px;
+}
+@media(max-width:660px){
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar{
+  justify-content:center;
+  overflow-x:visible;
+  padding:6px 7px;
+ }
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar .cerebro-interface-nav{
+  min-width:0;
+  width:100%;
+  grid-template-columns:repeat(5,minmax(0,1fr));
+  gap:1px;
+  margin:0 auto;
+ }
+ .cerebro-console-host.view-operativa > .cerebro-interface-bar .cerebro-interface-nav button{
+  min-width:0;
+  width:100%;
+  padding:0 1px;
+  font-size:9px;
+  letter-spacing:0;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+ }
+}

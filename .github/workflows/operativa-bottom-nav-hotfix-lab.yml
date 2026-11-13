@@ -1,0 +1,65 @@
+name: Operativa LIVE · Bottom Nav Hotfix LAB (no deploy)
+
+on:
+  push:
+    branches:
+      - hotfix/operativa-nav-no-overlap-lab-20261113
+    paths:
+      - 'src/cerebro-interface-bar.css'
+      - 'tests/cerebro-operativa-v3-e2e.spec.ts'
+      - 'tests/cerebro-operative-v3-contract.spec.ts'
+      - '.github/workflows/operativa-bottom-nav-hotfix-lab.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Existing owner-chat contract + visual no-overlap
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Assert only Operativa changes global bar behavior
+        run: |
+          node --input-type=module -e "
+            import fs from 'node:fs';
+            import assert from 'node:assert/strict';
+            const css=fs.readFileSync('src/cerebro-interface-bar.css','utf8');
+            assert(css.includes('.cerebro-console-host.view-operativa > .cerebro-interface-bar{'));
+            assert(css.includes('position:relative;'));
+            assert(css.includes('grid-template-columns:repeat(5,minmax(0,1fr))'));
+            const host=fs.readFileSync('src/CerebroConsoleHost.tsx','utf8');
+            assert(host.includes('primaryView===\'OPERATIVA\''));
+            const chat=fs.readFileSync('src/CerebroOperativeConsole.tsx','utf8');
+            assert(chat.includes('Conversación con CEREBRO'));
+            assert(chat.includes('Mensaje para CEREBRO'));
+            console.log('LIVE_CHAT_AND_NAV_SCOPE_INTACT');
+          "
+      - name: Install from existing locked dependencies
+        run: npm ci
+      - name: Install isolated Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Test real layout with synthetic authentication only
+        env:
+          VITE_FENIX_ENV: test
+          VITE_SUPABASE_URL: http://127.0.0.1:54321
+          VITE_SUPABASE_PUBLISHABLE_KEY: operativa-e2e-not-a-real-key
+        run: npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts tests/cerebro-operative-v3-contract.spec.ts --project=desktop-chromium --reporter=line
+      - name: Build
+        run: npm run build
+      - name: Retain synthetic screenshots only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operativa-bottom-nav-hotfix-lab
+          path: |
+            test-results/operativa-hotfix-desktop.png
+            test-results/operativa-hotfix-mobile.png
+          if-no-files-found: ignore
+          retention-days: 7
