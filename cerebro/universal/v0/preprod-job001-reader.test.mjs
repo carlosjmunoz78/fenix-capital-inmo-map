@@ -58,7 +58,7 @@ test('cross-tenant, PROD, malformed job IDs and missing authentic source rows ar
 test('new isolated Edge route has only GET + owner resolver + Fénix LAB gate + fixed PREPROD queries',()=>{
  assert.ok(source.includes('if(req.method!=="GET")'));
  assert.ok(source.includes('ownerResponse=await fetch(PROD_OWNER'));
- assert.ok(source.includes('principal?.context?.actor_code!=="CARLOS-ADMIN"'));
+ assert.ok(source.includes('if(!ownerIsVerified(principal))'));
  assert.ok(source.includes('url.searchParams.get("environment")!=="LAB"'));
  assert.ok(source.includes('url.searchParams.get("company_id")!=="fenix"'));
  assert.ok(source.includes('.eq("company_id","FENIX_CAPITAL").eq("environment","PREPROD")'));
