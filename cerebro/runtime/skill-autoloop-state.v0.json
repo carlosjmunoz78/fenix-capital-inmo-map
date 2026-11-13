@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-12T22:42:11.133Z",
+  "updated_at": "2026-11-13T00:20:08.977Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -541,7 +541,8 @@
     "github-wide-skills:46dd1954329035b8393c",
     "github-wide-skills:f93f0effc1845ca0d3f0",
     "github-wide-skills:4c2cacaddbd2bdd4aab1",
-    "github-wide-skills:500d130ad553d9d0b809"
+    "github-wide-skills:500d130ad553d9d0b809",
+    "github-wide-skills:ed4fe5369602c453794e"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1779,6 +1780,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 43307087212,
       "checkpointed_at": "2026-11-12T21:08:12.271Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:ed4fe5369602c453794e": {
+      "candidate_id": "github-wide-skills:ed4fe5369602c453794e",
+      "name": "create-project-move-card",
+      "human_alias": "Create Project Move Card",
+      "wrapper_id": "skillwrap:9843d9556e1b6f9c103d",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 85.55,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "kajisho5/stepcap",
+        "upstream_head_commit": "3613a7ad42da4aa2097af1f685a00ebe483fc093",
+        "manifest_sha256": "9ff65d02a527109ab4eaf731605bd3f433ab8b02f232b704c1bdbe5a205b4f78",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 43336183673,
+      "checkpointed_at": "2026-11-13T00:20:08.977Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -32926,7 +32961,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -32939,7 +32974,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 43322242602,
+  "last_discovery_run_id": 43336183673,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
