@@ -37,7 +37,7 @@ export type UniversalJob001ControlLab={
  state:'OK'|'UNAVAILABLE';source_environment:'PREPROD';
  controlRows:number|null;enabledControls:number|null;externalControls:number|null;
  engineRecords:number|null;telemetryRecords:number|null;staleControls:number|null;
- observedAt:string|null;executionVerified:false;
+ observedAt:string|null;executionVerified:false;reason:string|null;
  engineBindings:{engine_id:string;version:string;declared_state:string;freshness:'STALE_CONFIG'|'RECENT_CONFIG';observed_config_at:string}[];
  controlEngineBindings:{engine_id:string;configured_controls:number;enabled_controls:number;stale_controls:number}[];
 };
@@ -149,7 +149,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   let job001:UniversalJob001ControlLab={
    state:'UNAVAILABLE',source_environment:'PREPROD',controlRows:null,
    enabledControls:null,externalControls:null,engineRecords:null,telemetryRecords:null,
-   staleControls:null,observedAt:null,executionVerified:false,engineBindings:[],controlEngineBindings:[]
+   staleControls:null,observedAt:null,executionVerified:false,reason:null,engineBindings:[],controlEngineBindings:[]
   };
   try{
    const j=await call('get_job001_controls') as {
@@ -157,8 +157,10 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     job001_queue_connected?:unknown;live_execution_verified?:unknown;prod_execution_enabled?:unknown;
     control_rows?:unknown;enabled_control_rows?:unknown;external_control_rows?:unknown;
     engine_state_records?:unknown;telemetry_records?:unknown;stale_control_rows?:unknown;
-    observed_at?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown
+    observed_at?:unknown;reason?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown
    };
+   const why=new Set(['PREPROD_GATEWAY_UNREACHABLE','PREPROD_OWNER_DENIED','PREPROD_SOURCE_UNAVAILABLE','PREPROD_SOURCE_CONTRACT_INVALID','PREPROD_COUNTS_INVALID','PREPROD_COUNT_MISMATCH','PREPROD_OBSERVED_AT_INVALID','PREPROD_TENANT_OR_RUNTIME_INVALID','ENGINE_BINDING_CONTRACT_INVALID','JOB_ENGINE_CONTRACT_INVALID','PREPROD_SOURCE_HTTP_404','PREPROD_DB_AUTH_UNAVAILABLE','PREPROD_READ_FAILED','PREPROD_OWNER_CONTEXT_UNAVAILABLE']);
+   if(j.status==='UNAVAILABLE'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&why.has(String(j.reason)))job001.reason=String(j.reason);
    const n=(v:unknown)=>Number.isSafeInteger(v)&&Number(v)>=0?Number(v):null;
    if(j?.status==='OK'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&
      j.source_environment==='PREPROD'&&j.job001_queue_connected===false&&j.live_execution_verified===false&&
@@ -168,7 +170,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      controlRows:n(j.control_rows),enabledControls:n(j.enabled_control_rows),
      externalControls:n(j.external_control_rows),engineRecords:n(j.engine_state_records),
      telemetryRecords:n(j.telemetry_records),staleControls:n(j.stale_control_rows),
-     observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false,
+     observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false,reason:null,
      engineBindings:Array.isArray(j.engine_bindings)?j.engine_bindings.slice(0,64).flatMap(item=>{
       if(!item||typeof item!=='object')return [];
       const r=item as Record<string,unknown>;

@@ -27,7 +27,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
     {loading?'Comprobando…':'Verificar conexión'}
    </button>
   </div>
-  <p role="status" aria-live="polite">
+  <p className={`op-uni-lab-status ${result?.kind==='denied'?'is-denied':''}`} role="status" aria-live="polite">
    {loading?'Comprobando autorización y contrato FACT-001…':
     result?.kind==='ready'?
      'Conexión de lectura acreditada en LAB. El funcionamiento de los motores en producción sigue sin verificarse.':
@@ -68,7 +68,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
       </small>)}
       {result.job001.engineBindings.length>6?<small>Y {result.job001.engineBindings.length-6} estados documentados adicionales (no operativos verificados).</small>:null}
      </div>:null}
-    </>:<small>Fuente JOB-001 no comprobable; no se muestran ceros inventados.</small>}
+    </>:<small>Fuente JOB-001 no comprobable; no se muestran ceros inventados.{result.job001?.reason?` Código: ${result.job001.reason}.`:''}</small>}
    </div>
    <div className="op-uni-lab-work" aria-label="Registro multiempresa y Fábrica FACT-001 mediante Gateway Universal">
     <strong>Registro de empresas y Fábrica · fuentes existentes</strong>

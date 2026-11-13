@@ -19,7 +19,16 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    try{response=await fetchImpl(URL,{method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8500),
     headers:{authorization:'Bearer '+session_token,apikey:preprodApiKey,'x-cerebro-owner-prod-apikey':ownerApiKey,accept:'application/json'}})}
    catch{return empty('PREPROD_GATEWAY_UNREACHABLE')}
-   if(response.status!==200)return empty(response.status===401||response.status===403?'PREPROD_OWNER_DENIED':'PREPROD_SOURCE_UNAVAILABLE');
+   if(response.status!==200){
+    if(response.status===404)return empty('PREPROD_SOURCE_HTTP_404');
+    if(response.status===401||response.status===403)return empty('PREPROD_OWNER_DENIED');
+    const safeErrors=new Set(['PREPROD_DB_AUTH_UNAVAILABLE','PREPROD_READ_FAILED','OWNER_RESOLVER_UNAVAILABLE','OWNER_CONTEXT_NOT_AUTHORIZED','PREPROD_PROJECT_MISMATCH','READ_EXCEPTION']);
+    try{const fault=await response.json();
+     if(fault?.status==='UNAVAILABLE'&&safeErrors.has(fault?.reason))
+      return empty(fault.reason==='OWNER_RESOLVER_UNAVAILABLE'?'PREPROD_OWNER_CONTEXT_UNAVAILABLE':fault.reason);
+    }catch{/* no raw error details */}
+    return empty('PREPROD_SOURCE_UNAVAILABLE');
+   }
    let raw;try{raw=await response.json()}catch{return empty('PREPROD_JSON_INVALID')}
    if(raw?.status!=='OK'||raw?.source!=='PREPROD_JOB001_CONTROL_METADATA'||
        raw?.company_id!=='fenix'||raw?.source_company_id!=='FENIX_CAPITAL'||raw?.environment!=='PREPROD'||
