@@ -6,7 +6,7 @@ import {createUniversalInterfaceAutoConnectV0,UNIVERSAL_INTERFACE_TYPES_V0} from
 import {UniversalGatewayLabV0} from './control-plane.mjs';
 import handler from '../../../api/cerebro-universal-preview.ts';
 
-const URL='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
+const ACTIVITY_URL='https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-activity-v0/';
 const OWNER_URL='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
 const REPO='carlosjmunoz78/fenix-capital-inmo-map';
 const KEY='public-lab-publishable-key-1234567890';
@@ -31,7 +31,7 @@ test('reuses existing actual GitHub Actions source: GET only, tenant isolation, 
  assert.equal(r.runs.length,1);assert.equal(r.runs[0].run_id,1001);
  assert.equal(r.runs[0].origin_environment,'PREPROD');assert.equal(r.runs[0].running_jobs,2);
  assert.equal(r.job001_connected,false);assert.equal(r.sample_limited,true);
- assert.equal(calls.length,1);assert.equal(calls[0].url,URL);assert.equal(calls[0].opt.method,'GET');
+ assert.equal(calls.length,1);assert.equal(calls[0].url,ACTIVITY_URL);assert.equal(calls[0].opt.method,'GET');
  assert.equal(calls[0].opt.headers.authorization,'Bearer '+TOKEN);
  assert.equal(JSON.stringify(r).includes(TOKEN),false);
  assert.equal(JSON.stringify(r).includes(KEY),false);
@@ -79,7 +79,7 @@ test('physical Preview route contracts: server verifies owner before only one ex
  globalThis.fetch=async(url,opts)=>{
   calls.push({url,method:opts.method});
   if(url===OWNER_URL)return response({ok:true,context:{actor_code:'CARLOS-ADMIN'}});
-  if(url===URL)return response(good({source_status:'LIVE'}));
+  if(url===ACTIVITY_URL)return response(good({source_status:'LIVE'}));
   throw Error('Unapproved endpoint: '+url);
  };
  const data={method:'POST',headers:{host:'fenix-capital-preprod-labread123.vercel.app',origin:'https://fenix-capital-preprod-labread123.vercel.app',authorization:'Bearer '+TOKEN,apikey:KEY},
@@ -94,7 +94,7 @@ test('physical Preview route contracts: server verifies owner before only one ex
  assert.equal(logs.body.runs.length,1);
  assert.equal(logs.body.prod_execution_enabled,false);
  assert.deepEqual(calls.map(x=>x.method),['GET','GET']);
- assert.deepEqual(calls.map(x=>x.url),[OWNER_URL,URL]);
+ assert.deepEqual(calls.map(x=>x.url),[OWNER_URL,ACTIVITY_URL]);
  await handler({...data,body:{action:'execute',params:data.body.params}},res);
  assert.equal(logs.status,404);assert.equal(calls.length,2);
 });
