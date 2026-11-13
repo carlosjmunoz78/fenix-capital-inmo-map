@@ -11,6 +11,7 @@ export function createUniversalSdkV0({request,session_token,company_id,environme
   getEngineStatus:engine_id=>call('get_engine_status',{engine_id}),
   listJobs:(engine_id,version)=>call('list_jobs',{engine_id,version}),
   listWorkActivity:()=>call('list_work_activity'),
+  getJob001Controls:()=>call('get_job001_controls'),
   listOwnerSources:()=>call('list_owner_sources'),
   getJob:(engine_id,version,job_id)=>call('get_job',{engine_id,version,job_id}),
   getEvidence:capability_id=>call('get_evidence',{capability_id}),

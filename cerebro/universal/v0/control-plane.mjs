@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
-const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_evidence','submit_command','invoke_read','audit_log'];
+const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_evidence','submit_command','invoke_read','audit_log'];
 const error=s=>{throw Error(s);};
 const value=(v,name)=>typeof v==='string'&&v.length>0&&v.length<=160?v:error('INVALID_'+name);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -8,14 +8,15 @@ const clone=v=>structuredClone(v);
 const stable=v=>JSON.stringify(v,Object.keys(v).sort());
 const required=['company_id','engine_id','environment','version'];
 export class UniversalGatewayLabV0 {
- #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #audit=[]; #idem=new Map(); #cap;
- constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null}){
+ #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #jobControls; #audit=[]; #idem=new Map(); #cap;
+ constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null,jobControls=null}){
   if(!object(registry)||registry.count!==179||registry.engine_ids?.length!==179||new Set(registry.engine_ids).size!==179||registry.defaults?.environment!=='SCAFFOLD'||registry.extension?.prod_authorized!==false||registry.extension?.trading_access!==false) error('REGISTRY_UNSAFE');
   if(typeof authenticate!=='function')error('AUTHENTICATOR_REQUIRED');
   if(jobs!==null&&typeof jobs.listForContext!=='function')error('JOB_READER_REQUIRED');
   if(workActivity!==null&&typeof workActivity.listForContext!=='function')error('WORK_ACTIVITY_READER_REQUIRED');
   if(ownerSources!==null&&typeof ownerSources.listForContext!=='function')error('OWNER_SOURCES_READER_REQUIRED');
-  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;
+  if(jobControls!==null&&typeof jobControls.listForContext!=='function')error('JOB_CONTROLS_READER_REQUIRED');
+  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;this.#jobControls=jobControls;
   this.#cap={
    company_id:'SERVER_AUTHENTICATED',engine_id:'FACT-001',environment:'LAB',version:'0.1.0-lab',
    capability_id:'fact.registry.summary',input_schema:{type:'object',properties:{},additionalProperties:false},
@@ -62,6 +63,22 @@ export class UniversalGatewayLabV0 {
     if(!object(observed)||!['OK','PARTIAL','UNAVAILABLE'].includes(observed.status)||observed.execution_enabled!==false||
       observed.prod_execution_enabled!==false||observed.job001_connected!==false)error('OWNER_SOURCES_CONTRACT_INVALID');
     response=clone(observed);
+    break;
+   }
+   case 'get_job001_controls':{
+    if(!actor.scopes.includes('cerebro:jobs:read'))error('SCOPE_DENIED');
+    if(!this.#jobControls){
+     response={status:'UNAVAILABLE',source:'PREPROD_JOB001_CONTROL_METADATA',
+      reason:'JOB001_PREPROD_CONTROL_READER_NOT_CONNECTED',control_rows:null,
+      enabled_control_rows:null,external_control_rows:null,engine_state_records:null,
+      telemetry_records:null,source_environment:'PREPROD',
+      job001_queue_connected:false,live_execution_verified:false,prod_execution_enabled:false};break;
+    }
+    const observation=await this.#jobControls.listForContext({company_id,environment:'LAB',session_token});
+    if(!object(observation)||!['OK','UNAVAILABLE'].includes(observation.status)||
+      observation.job001_queue_connected!==false||observation.live_execution_verified!==false||
+      observation.prod_execution_enabled!==false)error('JOB001_CONTROLS_CONTRACT_INVALID');
+    response=clone(observation);
     break;
    }
    case 'list_work_activity':{

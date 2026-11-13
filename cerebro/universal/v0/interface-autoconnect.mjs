@@ -20,6 +20,7 @@ export function createUniversalInterfaceAutoConnectV0({interface_id,request,getS
   },
   async readWorkActivity(){return(await sdk()).listWorkActivity();},
   async readOwnerSources(){return(await sdk()).listOwnerSources();},
+  async readJob001Controls(){return(await sdk()).getJob001Controls();},
   async getEngineStatus(engine_id){return(await sdk()).getEngineStatus(engine_id);}
  });
 }
