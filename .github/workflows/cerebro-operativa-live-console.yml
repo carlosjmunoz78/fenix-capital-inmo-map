@@ -1,0 +1,59 @@
+name: CEREBRO Operativa · Live Console candidate
+on:
+  pull_request:
+    paths:
+      - 'src/CerebroOperativeConsole.tsx'
+      - 'src/useCerebroOperativaChat.ts'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'src/JarvisEmbeddedConsole.tsx'
+      - 'src/JarvisOperativaComposerPortal.tsx'
+      - 'src/jarvisConversationBridge.ts'
+      - 'src/cerebroConsoleApi.ts'
+      - 'src/jarvisMaleBrowserVoice.ts'
+      - 'src/cerebro-interface-bar.css'
+      - 'src/cerebro-operative-console.css'
+      - 'supabase/functions/cerebro-console-activity-v0/**'
+      - 'tests/cerebro-operativa-v3-e2e.spec.ts'
+      - 'tests/cerebro-operativa-live-contract.test.mjs'
+      - '.github/workflows/cerebro-operativa-live-console.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  isolated-console-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    env:
+      CEREBRO_PROD_WRITE: 'false'
+      CEREBRO_CRM_WRITE: 'false'
+      VITE_FENIX_ENV: preprod
+      VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_uvtiidkBBkFRt2K34so27g_JpCbMUZw
+      VITE_CEREBRO_CONSOLE_URL: https://cluhljgonannaafpmblx.supabase.co/functions/v1/cerebro-console-gateway-v0/
+      PLAYWRIGHT_SKIP_BUILD: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Strict frontend build
+        run: npm run build
+      - name: Scope, user-visible truth and conversation contracts
+        run: node --test tests/cerebro-operativa-live-contract.test.mjs
+      - run: npx playwright install chromium
+      - name: Desktop browser E2E with isolated synthetic Gateway
+        run: npx playwright test tests/cerebro-operativa-v3-e2e.spec.ts --project=desktop-chromium --reporter=line
+      - name: Failure-only synthetic traces
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: operativa-console-qa-${{ github.run_id }}
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
