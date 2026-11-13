@@ -36,3 +36,15 @@ test('V3 can never grant tenant rights or hide missing data',()=>{
  assert.ok(adapter.includes("raw.prod_execution_enabled!==false"));
  assert.ok(adapter.includes("method:'GET'"));
 });
+
+test('isolated preview validates canonical owner server-side and never grants access by client metadata',()=>{
+ const host=read('src/CerebroConsoleHost.tsx');
+ const api=read('api/cerebro-preview-owner.ts');
+ assert.ok(host.includes('previewOwnerGate'));
+ assert.ok(host.includes("fetch('/api/cerebro-preview-owner'"));
+ assert.ok(api.includes("process.env.VERCEL_ENV!=='preview'"));
+ assert.ok(api.includes("ctx.actor_code!=='CARLOS-ADMIN'"));
+ assert.ok(api.includes("req.method!=='GET'"));
+ assert.ok(!api.includes('service_role'));
+ assert.ok(!api.includes('SERVICE_ROLE_KEY'));
+});
