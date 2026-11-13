@@ -19,6 +19,36 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  await page.goto('/cerebro?section=operativa',{waitUntil:'domcontentloaded'});
  const operative=page.locator('.operativa-premium');
  await expect(operative).toBeVisible();
+ // Screen-overlap regression from the owner's live screenshot.
+ // This is the DEFAULT authenticated Operativa, not a V3 mock.
+ const globalBar=page.locator('.cerebro-console-host.view-operativa > .cerebro-interface-bar');
+ await expect(globalBar).toHaveCSS('position','relative');
+ const desktopRects=await page.evaluate(()=>{
+  const nav=document.querySelector('.cerebro-console-host.view-operativa > .cerebro-interface-bar')?.getBoundingClientRect();
+  const stage=document.querySelector('.cerebro-console-host.view-operativa > .cerebro-interface-stage')?.getBoundingClientRect();
+  return {navBottom:nav?.bottom??Infinity,stageTop:stage?.top??-Infinity};
+ });
+ expect(desktopRects.navBottom).toBeLessThanOrEqual(desktopRects.stageTop+1);
+ for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
+  await expect(page.getByRole('navigation',{name:'Interfaces'}).getByRole('button',{name:new RegExp(name,'i')})).toBeVisible();
+ }
+ await page.screenshot({path:'test-results/operativa-hotfix-desktop.png',animations:'disabled'});
+ await page.setViewportSize({width:390,height:844});
+ for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
+  const item=page.getByRole('navigation',{name:'Interfaces'}).getByRole('button',{name:new RegExp(name,'i')});
+  await expect(item).toBeVisible();
+  const rect=await item.boundingBox();
+  expect(rect?.x??-9).toBeGreaterThanOrEqual(-1);
+  expect((rect?.x??1000)+(rect?.width??1000)).toBeLessThanOrEqual(391);
+ }
+ const mobileRect=await globalBar.boundingBox();
+ const composerRect=await operative.locator('.operativa-dialogue .operativa-jarvis-composer').boundingBox();
+ expect(mobileRect).not.toBeNull();expect(composerRect).not.toBeNull();
+ // Fixed bar would stay over the composer at the current scroll position.
+ await expect(globalBar).toHaveCSS('position','relative');
+ await page.screenshot({path:'test-results/operativa-hotfix-mobile.png',animations:'disabled'});
+ await page.setViewportSize({width:1280,height:720});
+
  await expect(page.locator('.jarvis-work')).toHaveCount(0);
  await expect(operative.getByText('Ahora',{exact:true}).first()).toBeVisible();
  await expect(operative.getByRole('heading',{name:'Hay trabajo en marcha.'})).toBeVisible();
