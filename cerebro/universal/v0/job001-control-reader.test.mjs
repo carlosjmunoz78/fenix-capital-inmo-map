@@ -20,7 +20,7 @@ const good=()=>({
  external_controls:[{job_id:25,company_id:'fenix',engine_id:'SOCIAL-001',environment:'PREPROD',
  version:'v0',enabled:false,runtime_verified:false,dispatch_verified:false,freshness:'STALE_CONFIG'}],
  engine_state_records:[{engine_id:'SEOBOOT-001',company_id:'fenix',environment:'PREPROD',
- version:'1.0.0',declared_state:'GREEN',runtime_verified:false,freshness:'STALE_CONFIG'}],
+ version:'1.0.0',declared_state:'GREEN',runtime_verified:false,freshness:'STALE_CONFIG',last_changed_at:'2026-10-13T12:52:01Z'}],
  totals:{job_controls:1,external_controls:1,engine_state_records:1,telemetry_records:0},
  live_execution_verified:false,actual_dispatch_enabled:false,prod_execution_enabled:false,job001_queue_connected:false,write_operations:0
 });
@@ -34,6 +34,14 @@ test('PREPROD controls reader enforces two publishable key scopes and returns sa
  assert.equal(v.stale_control_rows,2);
  assert.equal(v.job001_queue_connected,false);assert.equal(v.live_execution_verified,false);
  assert.equal(v.source_environment,'PREPROD');
+ assert.equal(v.engine_bindings.length,1);
+ assert.equal(v.engine_bindings[0].engine_id,'SEOBOOT-001');
+ assert.equal(v.engine_bindings[0].declared_state,'GREEN');
+ assert.equal(v.engine_bindings[0].freshness,'STALE_CONFIG');
+ assert.equal(v.engine_bindings[0].runtime_verified,false);
+ assert.equal(v.control_engine_bindings.length,2);
+ assert.equal(v.control_engine_bindings.find(x=>x.engine_id==='SEO-001').enabled_controls,1);
+ assert.equal(JSON.stringify(v.engine_bindings).includes('private_data'),false);
  assert.equal(JSON.stringify(v).includes('DO_NOT_LEAK'),false);
  assert.equal(JSON.stringify(v).includes(TOKEN),false);
  assert.equal(JSON.stringify(v).includes(PREPROD),false);
@@ -54,6 +62,8 @@ test('cross-tenant rows and forged running status fail closed',async()=>{
   {job_controls:[{...good().job_controls[0],runtime_verified:true}]},
   {job001_queue_connected:true},{live_execution_verified:true},{prod_execution_enabled:true},
   {totals:{...good().totals,job_controls:10}},
+  {engine_state_records:[{...good().engine_state_records[0],runtime_verified:true}]},
+  {engine_state_records:[{...good().engine_state_records[0],declared_state:'G'.repeat(200)}]},
  ]){
   const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
    fetchImpl:async()=>rjson({...good(),...change})});
