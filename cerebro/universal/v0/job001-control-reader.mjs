@@ -114,6 +114,19 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
     stale_control_rows:all.filter(x=>x.freshness==='STALE_CONFIG').length,
     stale_engine_state_records:raw.engine_state_records.filter(x=>x.freshness==='STALE_CONFIG').length,
     engine_bindings,control_engine_bindings,cron_observation:safeCron,
+    rpc_observation:(()=>{
+     const x=raw.rpc_observation,empty={status:'UNAVAILABLE',source:'PREPROD_JOB001_DISPATCH_RPC_STATS',
+      rpc_calls_since_reset:null,stats_reset_at:null,observed_at:null,
+      hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
+     if(!x||x.status!=='OK'||x.source!==empty.source||x.hostinger_origin_verified!==false||
+       x.runtime_execution_verified!==false||x.downstream_effect_verified!==false||
+       !Number.isSafeInteger(x.rpc_calls_since_reset)||x.rpc_calls_since_reset<0||
+       typeof x.stats_reset_at!=='string'||!Number.isFinite(Date.parse(x.stats_reset_at))||
+       typeof x.observed_at!=='string'||!Number.isFinite(Date.parse(x.observed_at)))return empty;
+     return {status:'OK',source:empty.source,rpc_calls_since_reset:x.rpc_calls_since_reset,
+      stats_reset_at:x.stats_reset_at,observed_at:x.observed_at,
+      hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
+    })(),
     source_environment:'PREPROD',source_provenance:'EXISTING_PREPROD_SQL_READ_ONLY',
     job001_queue_connected:false,live_execution_verified:false,prod_execution_enabled:false,
     note:'CONTROL_CONFIG_AND_DECLARED_ENGINE_STATE_NOT_RUNTIME_PROOF'
