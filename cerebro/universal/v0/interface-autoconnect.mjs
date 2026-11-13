@@ -19,6 +19,7 @@ export function createUniversalInterfaceAutoConnectV0({interface_id,request,getS
    return Object.freeze({connected:true,interface_id,source:'FACT001_REGISTRY_SNAPSHOT',capabilities:handshake.capabilities.filter(x=>x?.policy==='READ_ONLY'&&x?.side_effects==='NONE').map(x=>x.capability_id),prod_authorized:false});
   },
   async readWorkActivity(){return(await sdk()).listWorkActivity();},
+  async readOwnerSources(){return(await sdk()).listOwnerSources();},
   async getEngineStatus(engine_id){return(await sdk()).getEngineStatus(engine_id);}
  });
 }

@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
-const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','get_evidence','submit_command','invoke_read','audit_log'];
+const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_evidence','submit_command','invoke_read','audit_log'];
 const error=s=>{throw Error(s);};
 const value=(v,name)=>typeof v==='string'&&v.length>0&&v.length<=160?v:error('INVALID_'+name);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -8,13 +8,14 @@ const clone=v=>structuredClone(v);
 const stable=v=>JSON.stringify(v,Object.keys(v).sort());
 const required=['company_id','engine_id','environment','version'];
 export class UniversalGatewayLabV0 {
- #registry; #authenticate; #jobs; #workActivity; #audit=[]; #idem=new Map(); #cap;
- constructor({registry,authenticate,jobs=null,workActivity=null}){
+ #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #audit=[]; #idem=new Map(); #cap;
+ constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null}){
   if(!object(registry)||registry.count!==179||registry.engine_ids?.length!==179||new Set(registry.engine_ids).size!==179||registry.defaults?.environment!=='SCAFFOLD'||registry.extension?.prod_authorized!==false||registry.extension?.trading_access!==false) error('REGISTRY_UNSAFE');
   if(typeof authenticate!=='function')error('AUTHENTICATOR_REQUIRED');
   if(jobs!==null&&typeof jobs.listForContext!=='function')error('JOB_READER_REQUIRED');
   if(workActivity!==null&&typeof workActivity.listForContext!=='function')error('WORK_ACTIVITY_READER_REQUIRED');
-  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;
+  if(ownerSources!==null&&typeof ownerSources.listForContext!=='function')error('OWNER_SOURCES_READER_REQUIRED');
+  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;
   this.#cap={
    company_id:'SERVER_AUTHENTICATED',engine_id:'FACT-001',environment:'LAB',version:'0.1.0-lab',
    capability_id:'fact.registry.summary',input_schema:{type:'object',properties:{},additionalProperties:false},
@@ -47,6 +48,21 @@ export class UniversalGatewayLabV0 {
     const id=value(params.engine_id,'ENGINE_ID');
     if(!this.#registry.engine_ids.includes(id))error('ENGINE_NOT_REGISTERED');
     response={status:'OK',engine_id:id,defined_in_registry:true,definition_environment:'SCAFFOLD',runtime:'NOT_VERIFIED',lab_read_capabilities:cap&&id==='FACT-001'?[cap.capability_id]:[],source:'REPOSITORY_SNAPSHOT_NOT_LIVE'};break;
+   }
+   case 'list_owner_sources':{
+    if(!actor.scopes.includes('cerebro:factory:inspect'))error('SCOPE_DENIED');
+    if(!this.#ownerSources){
+     response={status:'UNAVAILABLE',source:'EXISTING_OWNER_UNIVERSE_LAB',
+      reason:'OWNER_UNIVERSE_NOT_CONNECTED',company_id,registry:{status:'UNAVAILABLE',source_status:'UNVERIFIED',companies:0,projects:0,engine_records:0},
+      factory:{status:'UNAVAILABLE',source_status:'UNVERIFIED',catalog_definitions:0,scaffold_directories:0},
+      runtime_engines_verified:0,execution_enabled:false,prod_execution_enabled:false,job001_connected:false};
+     break;
+    }
+    const observed=await this.#ownerSources.listForContext({company_id,environment:'LAB',session_token});
+    if(!object(observed)||!['OK','PARTIAL','UNAVAILABLE'].includes(observed.status)||observed.execution_enabled!==false||
+      observed.prod_execution_enabled!==false||observed.job001_connected!==false)error('OWNER_SOURCES_CONTRACT_INVALID');
+    response=clone(observed);
+    break;
    }
    case 'list_work_activity':{
     if(!actor.scopes.includes('cerebro:jobs:read'))error('SCOPE_DENIED');
