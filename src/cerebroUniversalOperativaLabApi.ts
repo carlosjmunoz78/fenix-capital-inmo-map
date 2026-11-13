@@ -1,7 +1,7 @@
 /** Operativa-only LAB preview reader: never alters canonical chat/voice or PROD source. */
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 
-const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 export type UniversalLabCapability={
  company_id:string;engine_id:string;environment:'LAB';version:string;capability_id:string;
  policy:string;side_effects:string;executor:string;health:string

@@ -40,6 +40,9 @@ test('preview guard requires exact allowed host, same origin and optionally VERC
  assert.equal(allowedUniversalPreviewRequest(req({headers:{...req().headers,host:'app.fenixcapital.es'}}),'preview',undefined),false);
  assert.equal(allowedUniversalPreviewRequest(req(),'preview','different.vercel.app'),false);
  assert.equal(allowedUniversalPreviewRequest(req(),'preview','fenix-capital-preprod-otherlab.vercel.app'),true);
+ const stable='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app';
+ assert.equal(allowedUniversalPreviewRequest(req({headers:{...req().headers,host:stable,origin:'https://'+stable}}),'preview',stable),true);
+ assert.equal(allowedUniversalPreviewRequest(req({headers:{...req().headers,host:'fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects.vercel.app',origin:'https://fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects.vercel.app'}}),'preview',stable),false);
 });
 test('owner-only real FACT Gateway imported, no write path, correct source flags',async t=>{
  const prev=globalThis.fetch,env=process.env.VERCEL_ENV,vercel=process.env.VERCEL_URL;

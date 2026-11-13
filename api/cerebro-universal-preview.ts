@@ -10,7 +10,7 @@ type H = string | string[] | undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
-const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
+const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','submit_command']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
