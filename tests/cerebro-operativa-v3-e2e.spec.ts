@@ -30,6 +30,14 @@ test('Operativa premium separates Jarvis, shows real work in human Spanish and p
  });
  expect(navGap.navBottom).toBeLessThanOrEqual(navGap.stageTop+1);
  await page.setViewportSize({width:390,height:844});
+ await expect.poll(async()=>page.evaluate(()=>{
+  const company=document.querySelector<HTMLSelectElement>('.operativa-contextbar select[aria-label="Empresa"]')?.getBoundingClientRect();
+  const source=document.querySelector<HTMLElement>('.operativa-live-state')?.getBoundingClientRect();
+  return !!company&&!!source&&company.left>=0&&company.right<=window.innerWidth&&
+    source.left>=0&&source.right<=window.innerWidth&&
+    document.documentElement.scrollWidth<=window.innerWidth;
+ })).toBe(true);
+
  const menu=page.getByRole('navigation',{name:'Interfaces'});
  for(const name of ['Inicio','Jarvis','Operativa','Neuronal','Navegador']){
   const tab=menu.getByRole('button',{name:new RegExp(name,'i')});
