@@ -1,0 +1,9 @@
+.op-uni-lab{margin:14px 0 22px;padding:17px 18px;border:1px solid rgba(123,175,205,.35);border-radius:14px;background:rgba(5,19,35,.5);color:#ecf7ff}
+.op-uni-lab-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.op-uni-lab-head>div{display:flex;flex-direction:column;gap:4px}
+.op-uni-lab-head strong{font-size:15px}
+.op-uni-lab-head span,.op-uni-lab p,.op-uni-lab small{color:#b4cadb;font-size:13px}
+.op-uni-lab button{border:1px solid rgba(123,196,223,.6);background:transparent;color:#daf7ff;border-radius:10px;padding:9px 13px;cursor:pointer}
+.op-uni-lab button:disabled{opacity:.65;cursor:default}
+.op-uni-lab-proof{display:flex;gap:14px;flex-wrap:wrap;font-size:13px}
+.op-uni-lab-proof small{flex-basis:100%}
