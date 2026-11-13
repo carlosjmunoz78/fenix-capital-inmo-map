@@ -7,6 +7,7 @@ import {
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
+import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
@@ -184,6 +185,7 @@ export default function CerebroOperativeCockpitV3({
      </form>
      {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
       {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
+     <CerebroAudioDiagnostics/>
     </div>
 
     <div className="op3-live-track" aria-label="Actividad por fases">
