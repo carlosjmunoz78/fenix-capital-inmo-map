@@ -86,6 +86,21 @@ export default function CerebroOperativeCockpitV3Bridge(){
   }
   setDictationError('');chat.toggleVoice();
  }
+ function stopAllAudio(){
+  if(speechSynthesisSupported())window.speechSynthesis.cancel();
+  chat.stopVoice();
+  if(dictationRef.current){try{dictationRef.current.abort()}catch{/* stopped */}dictationRef.current=null}
+  setDictating(false);setTtsActive(false);setDictationError('');
+ }
+ useEffect(()=>{
+  const keydown=(event:KeyboardEvent)=>{
+   if(event.key==='Escape'&&(chat.voiceActive||chat.voiceSpeaking||ttsActive)){
+    event.preventDefault();stopAllAudio();
+   }
+  };
+  window.addEventListener('keydown',keydown);
+  return()=>window.removeEventListener('keydown',keydown);
+ },[chat.voiceActive,chat.voiceSpeaking,ttsActive]);
  function readLastReply(){
   if(!isOwnerCompany||dictating||chat.voiceActive)return;
   const latest=[...chat.lines].reverse().find(line=>line.role==='cerebro')?.text||'';
@@ -99,7 +114,10 @@ export default function CerebroOperativeCockpitV3Bridge(){
    utterance.voice=preferredSpanishVoice(spanishVoices())||null;
    utterance.onstart=()=>{setTtsActive(true);setDictationError('')};
    utterance.onend=()=>setTtsActive(false);
-   utterance.onerror=()=>{setTtsActive(false);setDictationError('No se ha podido reproducir la respuesta; el texto permanece visible.')};
+   utterance.onerror=event=>{
+    setTtsActive(false);
+    if(!['interrupted','canceled'].includes(String(event.error||'')))setDictationError('No se ha podido reproducir la respuesta; el texto permanece visible.');
+   };
    window.speechSynthesis.cancel();window.speechSynthesis.speak(utterance);
   }catch{setTtsActive(false);setDictationError('No se ha podido iniciar el altavoz del navegador.')}
  }
@@ -153,6 +171,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   onSubmit={()=>{void submit()}} onToggleVoice={toggleVoice} onToggleDictation={toggleDictation}
   dictating={dictating} dictationSupported={browserStt} dictationError={dictationError}
   voiceFeedback={voiceFeedback} onReadLastReply={readLastReply} ttsActive={ttsActive}
+  onStopVoice={stopAllAudio}
   composerRef={composerRef}
   source={isOwnerCompany?source:'UNAVAILABLE'} observedAt={isOwnerCompany?observedAt:''}
   company={company} onCompanyChange={changeCompany} scopeCanExecute={isOwnerCompany}

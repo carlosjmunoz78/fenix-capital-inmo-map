@@ -1,4 +1,5 @@
-import {Building2,ChevronRight,Cpu,Layers3,ShieldCheck,Workflow} from 'lucide-react';
+import {Building2,ChevronRight,Layers3,ShieldCheck} from 'lucide-react';
+import CerebroEngineCatalog from './CerebroEngineCatalog';
 import type {OwnerUniverseResult,UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
 
 type Section='entidades'|'proyectos'|'motores';
@@ -74,32 +75,8 @@ export default function CerebroOperativaUniverseViews({
     <Empty text="No se ha podido verificar el registro de proyectos para este contexto."/ >}
    <p className="op3-source-note">Fuente: jarvis_project_overlay_v1. No representa el inventario de todos los proyectos de todas las empresas.</p>
   </div>}
-  {section==='motores'&&<div className="op3-universe-list">
-   <div className="op3-motor-metrics">
-    <div><span>REGISTRO DE MOTORES</span><strong>{sourceReady?engines.length:'—'}</strong><small>Filas actuales</small></div>
-    <div><span>CATÁLOGO FACT-001</span><strong>{factoryReady?catalog.length:'—'}</strong><small>Definiciones de diseño</small></div>
-    <div><span>DIRECTORIOS GITOPS</span><strong>{factoryReady?scaffolded.length:'—'}</strong><small>Estructuras creadas</small></div>
-   </div>
-   {sourceReady&&engines.length?<><div className="op3-subheading"><Cpu size={16}/> ESTADOS REGISTRADOS</div>
-    {engines.map(e=><article key={e.company_id+'/'+e.engine_id} className="op3-universe-line">
-     <Cpu size={18}/><div><strong>{e.engine_id}</strong><small>{e.environment} · {e.version||'Sin versión'}</small></div>
-     <span className="is-amber">{e.engine_state||'Sin estado'}</span></article>)}</>:null}
-   {factoryReady?<><div className="op3-subheading"><Cpu size={16}/> FACT-001 · CATÁLOGO DE DISEÑO</div>
-    {catalog.map(e=><article key={'design-'+e.engine_id} className="op3-universe-line">
-     <Cpu size={18}/><div><strong>{e.engine_id}</strong><small>{e.name||'Definición de motor'}</small></div>
-     <span className="is-muted">Definido · no certifica ejecución</span>
-    </article>)}
-    <div className="op3-subheading"><Workflow size={16}/> FACT-001 · ESTRUCTURAS CREADAS</div>
-    {scaffolded.map(e=><article key={'scaffold-'+e.engine_id} className="op3-universe-line">
-     <Workflow size={18}/><div><strong>{e.engine_id}</strong><small>Estructura GitOps registrada</small></div>
-     <span className="is-muted">Runtime sin verificar</span>
-    </article>)}
-   </>:<Empty text="Catálogo GitOps no verificado desde el Gateway LAB."/ >}
-   {observed.length?<><div className="op3-subheading"><Workflow size={16}/> EJECUCIONES OBSERVADAS EN GITHUB</div>
-    {observed.map(e=><article key={'observed-'+e.id} className="op3-universe-line">
-     <Workflow size={18}/><div><strong>{e.id}</strong><small>{e.count} ejecuciones en la captura de actividad</small></div>
-     <span className={e.running?'is-blue':'is-muted'}>{e.running?`${e.running} en ejecución`:'Sin ejecución visible'}</span></article>)}</>:null}
-   <p className="op3-source-note">Las tres cifras de registro/catálogo/directorios no deben sumarse: un motor puede estar en varias fuentes. La actividad de GitHub tampoco acredita autonomía ni permisos PROD.</p>
-  </div>}
+  {section==='motores'&&<CerebroEngineCatalog sourceReady={sourceReady} factoryReady={factoryReady}
+   engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}/>}
+
  </div>;
 }
