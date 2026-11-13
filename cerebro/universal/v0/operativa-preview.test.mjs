@@ -79,7 +79,8 @@ test('canonical Operativa voice, STOP and chat files remain unchanged by this br
  const client=fs.readFileSync(new URL('../../../src/cerebroUniversalOperativaLabApi.ts',import.meta.url),'utf8');
  const config=JSON.parse(fs.readFileSync(new URL('../../../vercel.json',import.meta.url),'utf8'));
  assert.equal(config.git.deploymentEnabled,false);
- assert.ok(catalog.includes('<CerebroUniversalOperativaLabPanel/>'));
+ assert.ok(catalog.includes('<CerebroUniversalOperativaLabPanel company={scope}/>'));
+ assert.ok(bridge.includes("company==='fenix'"));
  assert.ok(bridge.includes('if(!enabled)return null'));
  assert.ok(client.includes("get('visual_lab')==='cockpit-v3'"));
  assert.ok(client.includes("get('section')==='operativa'"));
