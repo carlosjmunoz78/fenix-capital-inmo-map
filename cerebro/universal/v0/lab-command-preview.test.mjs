@@ -52,6 +52,23 @@ test('non-dryrun and other engine / payload are denied before authorisation or s
  }
  assert.equal(calls,0);
 });
+test('audit source failure blocks validation rather than claiming a successful durable command',async t=>{
+ const oldFetch=globalThis.fetch,oldEnv=process.env.VERCEL_ENV,oldUrl=process.env.VERCEL_URL,oldKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY;
+ t.after(()=>{globalThis.fetch=oldFetch;process.env.VERCEL_ENV=oldEnv;process.env.VERCEL_URL=oldUrl;process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY=oldKey});
+ process.env.VERCEL_ENV='preview';process.env.VERCEL_URL=HOST;process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY=PREPROD_KEY;
+ const calls=[];
+ globalThis.fetch=async(url,opts)=>{
+  calls.push({url,method:opts.method});
+  if(url===OWNER)return new Response(JSON.stringify({context:{actor_code:'CARLOS-ADMIN'}}),{status:200});
+  if(url===AUDIT)return new Response(JSON.stringify({status:'UNAVAILABLE'}),{status:503});
+  throw Error('UNEXPECTED_UPSTREAM');
+ };
+ const result=await call(make());
+ assert.equal(result.code,503);
+ assert.equal(result.body.reason,'DURABLE_AUDIT_NOT_CONFIRMED');
+ assert.deepEqual(calls.map(x=>x.url),[OWNER,AUDIT]);
+ assert.equal(JSON.stringify(result).includes(TOKEN),false);
+});
 test('dryrun is blocked in Vercel production by host/environment gate',async t=>{
  const env=process.env.VERCEL_ENV,vercel=process.env.VERCEL_URL;
  t.after(()=>{process.env.VERCEL_ENV=env;process.env.VERCEL_URL=vercel});
