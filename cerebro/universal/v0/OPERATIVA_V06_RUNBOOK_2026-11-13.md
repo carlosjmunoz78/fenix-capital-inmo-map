@@ -54,3 +54,11 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 **Physical evidence:** GitHub Actions `45/45` tests, isolated PREPROD Edge anonymous GET **HTTP 401**, and Preview `dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh` READY `https://fenix-capital-preprod-pkalcpwre.vercel.app/`, with Vercel SSO enabled. Full owner session E2E latest Preview **PENDING** because Opera stays on the user's existing older Preview without switching tabs or re-logging. No PROD migration or execution tested.
 
 **Rollback:** stop using new Preview URL; new PREPROD Edge function is an isolated side-by-side reader with no scheduler modification. Rebuild from `cerebro/universal/v0/preprod-job001-reader/index.ts` and `job001-projection.mjs`, never from the original secret-protected JOB001 scheduler. Removing the new function requires confirming it has no consumers; not done. Existing PREPROD/PROD remain intact. No direct evidence of job execution or audit yet.
+
+## V0.8 · Preview estable y evidencias por motor (13 nov 2026)
+
+- Despliegue aislado Vercel **READY** `dpl_C8XwLVpDTdYwHBFoHiywBw42tEBK` (SHA `fefce1bd0566de36db028c04abca0cfc1165585f`) en la dirección estable `fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app`, verificada mediante `list_deployment_aliases`. No es `app.fenixcapital.es` ni tiene dominio PROD.
+- Una misma dirección evita alternar hostnames. La sesión actual de Opera sigue en el host antiguo; no se abrió otra pestaña ni se cambió la existente. La validación de propietario en el origen estable queda PENDIENTE, porque las cookies no se comparten automáticamente.
+- Seguridad física negativa de alias estable: GitHub Actions run 43483810816 pasó 45/45 pruebas, build OK y redirección SSO anónima. La nueva Edge JOB-001 PREPROD devolvió HTTP 401 sin credenciales.
+- El adaptador `job001-control-reader.mjs` ahora incluye vínculos históricos por `engine_id`, con estado PREPROD, versión, antigüedad y `runtime_verified:false`. La interfaz no considera `enabled` o `GREEN` equivalentes a ejecución.
+- Mantener bloqueada la promoción hasta owner E2E, evidencia reciente de trabajo JOB-001, auditoría durable, evaluación, backup y rollback físico. No hubo merge ni PROD deploy; consumo de plataformas existentes sin importe auditado.

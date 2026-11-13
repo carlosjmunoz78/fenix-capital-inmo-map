@@ -57,6 +57,18 @@
       "preview_deployment": "dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh",
       "physical_owner_e2e": "PENDING",
       "remote_unauthenticated_probe": "HTTP_401_VERIFIED_GITHUB_CI"
+    },
+    "engine_binding_summary": {
+      "state": "IMPLEMENTED_IN_LAB_DEPLOYMENT_AND_CI",
+      "source": "PREPROD_JOB001_CONTROL_METADATA",
+      "action": "get_job001_controls",
+      "per_engine_control_bindings": true,
+      "per_engine_declared_state_bindings": true,
+      "runtime_verified": false,
+      "expected_historical_control_count": 20,
+      "expected_historical_engine_state_records": 17,
+      "expected_telemetry_count": 0,
+      "note": "Historical GREEN in PREPROD is NOT evidence of a running engine."
     }
   },
   "backup": {
@@ -69,7 +81,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "JOB001_CONFIG_READ_ONLY_RUNTIME_UNVERIFIED_TELEMETRY_EMPTY_DURABLE_AUDIT_NOT_PROVEN_PREVIEW_OWNER_E2E_PENDING"
+    "reason": "OWNER_E2E_PREVIEW_PENDING_JOB001_RUNTIME_NOT_VERIFIED_DURABLE_AUDIT_AND_ROLLBACK_NOT_READY"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -148,5 +160,17 @@
       "MONEY_LIMIT",
       "CUSTOMER_HUMAN_REQUEST"
     ]
+  },
+  "preview_stable_alias": {
+    "host": "fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app",
+    "environment": "preview",
+    "target_production": false,
+    "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
+    "owner_authenticated_latest_e2e": "PENDING_SINGLE_TAB",
+    "mapped_deployment": "dpl_C8XwLVpDTdYwHBFoHiywBw42tEBK",
+    "mapped_source_sha": "fefce1bd0566de36db028c04abca0cfc1165585f",
+    "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
+    "no_new_tabs": true,
+    "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc"
   }
 }

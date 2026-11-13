@@ -39,3 +39,7 @@ At 13-Nov-2026 10:21 UTC: 26 queued runs all on 11-Nov-2026 20:18:20 UTC from UM
 **Client compatibility:** `createUniversalInterfaceAutoConnectV0` now exposes `readOwnerSources()` for six interface types (Operativa, JARVIS, Neuronal, Navigator, App, Mobile), subject to server owner grants. This is a reusable SDK contract, not proof that six physical UI applications are deployed.
 
 **Production promotion gate:** blocked until physical E2E owner read, traceable engine-to-source bindings, durable audit/job runtime, OLD vs NEW, preflight/rollback tests and canary. PR #66 stays DRAFT.
+
+## V0.8 Stable Preview and engine historical bindings
+
+Stable LAB hostname: `fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app`, mapped to the isolated Vercel deployment `dpl_C8XwLVpDTdYwHBFoHiywBw42tEBK`. `get_job001_controls` emits bounded, historical per-engine PREPROD evidence only, not runtime proof. The owner's active Opera tab has not been navigated; physical owner E2E on the stable alias remains pending. No PROD promotion and no extra subscription.
