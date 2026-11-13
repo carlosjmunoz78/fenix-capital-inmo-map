@@ -41,8 +41,12 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <div className="op-uni-lab-work" aria-label="Registro multiempresa y Fábrica FACT-001 mediante Gateway Universal">
     <strong>Registro de empresas y Fábrica · fuentes existentes</strong>
     <span>Conexión: {result.ownerSources?.state||'UNAVAILABLE'} · Registro: {result.ownerSources?.registryState||'UNAVAILABLE'} · FACT GitOps: {result.ownerSources?.factoryState||'UNAVAILABLE'}</span>
-    <small>Registro: {result.ownerSources?.companyRecords||0} empresas, {result.ownerSources?.projectRecords||0} proyectos, {result.ownerSources?.engineRecords||0} motores con fichas en fuente.</small>
-    <small>FACT GitOps: {result.ownerSources?.factoryCatalog||0} definiciones, {result.ownerSources?.factoryScaffolds||0} directorios detectados.</small>
+    {result.ownerSources?.registryState==='OK'
+     ?<small>Registro: {result.ownerSources.companyRecords} empresas, {result.ownerSources.projectRecords} proyectos, {result.ownerSources.engineRecords} motores con fichas en fuente.</small>
+     :<small>Registro: sin conteos verificados; no se interpretan como cero registros.</small>}
+    {result.ownerSources?.factoryState==='OK'
+     ?<small>FACT GitOps: {result.ownerSources.factoryCatalog} definiciones, {result.ownerSources.factoryScaffolds} directorios detectados.</small>
+     :<small>FACT GitOps: sin conteos verificados; no se interpretan como cero directorios.</small>}
     <small>Solo metadatos; no prueba runtime, permisos de ejecución ni JOB-001. Fuente del registro: {result.ownerSources?.registrySource||'UNVERIFIED'}.</small>
    </div>
    <div className="op-uni-lab-work" aria-label="Actividad de GitHub Actions mediante Gateway Universal">
