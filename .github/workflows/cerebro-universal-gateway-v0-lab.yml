@@ -29,7 +29,7 @@ jobs:
           node --check cerebro/universal/v0/control-plane.mjs
           node --check cerebro/universal/v0/interface-sdk.mjs
           node --check cerebro/universal/v0/concurrency-shadow.mjs
-          node --test cerebro/universal/v0/universal-gateway.test.mjs
+          node --test cerebro/universal/v0/*.test.mjs
       - name: Check no-Prod and zero additional cost
         run: |
           node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
