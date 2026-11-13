@@ -1,0 +1,93 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createJob001ControlReaderLabV0} from './job001-control-reader.mjs';
+import {UniversalGatewayLabV0} from './control-plane.mjs';
+import handler from '../../../api/cerebro-universal-preview.ts';
+const REPO=JSON.parse(fs.readFileSync(new URL('../../registry/engine-registry.v1.json',import.meta.url),'utf8'));
+const URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-operativa-job001-read-lab-v0?company_id=fenix&environment=LAB';
+const OWNER='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
+const PREPROD='sb_publishable_preprod_lab_test_0123456789';
+const PROD='sb_publishable_owner_lab_test_0123456789';
+const TOKEN='owner-long-session-jwt-1234567890'.repeat(12);
+const HOST='fenix-capital-preprod-job001lab.vercel.app';
+const rjson=(value,status=200)=>new Response(JSON.stringify(value),{status,headers:{'content-type':'application/json'}});
+const good=()=>({
+ status:'OK',source:'PREPROD_JOB001_CONTROL_METADATA',company_id:'fenix',source_company_id:'FENIX_CAPITAL',
+ environment:'PREPROD',observed_at:'2026-11-13T18:40:00Z',
+ job_controls:[{job_id:2,company_id:'fenix',engine_id:'SEO-001',environment:'PREPROD',
+ version:'v0',enabled:true,runtime_verified:false,dispatch_verified:false,freshness:'STALE_CONFIG',private_data:'DO_NOT_LEAK'}],
+ external_controls:[{job_id:25,company_id:'fenix',engine_id:'SOCIAL-001',environment:'PREPROD',
+ version:'v0',enabled:false,runtime_verified:false,dispatch_verified:false,freshness:'STALE_CONFIG'}],
+ engine_state_records:[{engine_id:'SEOBOOT-001',company_id:'fenix',environment:'PREPROD',
+ version:'1.0.0',declared_state:'GREEN',runtime_verified:false,freshness:'STALE_CONFIG'}],
+ totals:{job_controls:1,external_controls:1,engine_state_records:1,telemetry_records:0},
+ live_execution_verified:false,actual_dispatch_enabled:false,job001_queue_connected:false,write_operations:0
+});
+test('PREPROD controls reader enforces two publishable key scopes and returns sanitised counts only',async()=>{
+ const calls=[];
+ const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async(url,options)=>{calls.push({url,options});return rjson(good())}});
+ const v=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(v.status,'OK');assert.equal(v.control_rows,1);assert.equal(v.enabled_control_rows,1);
+ assert.equal(v.external_control_rows,1);assert.equal(v.engine_state_records,1);assert.equal(v.telemetry_records,0);
+ assert.equal(v.stale_control_rows,2);
+ assert.equal(v.job001_queue_connected,false);assert.equal(v.live_execution_verified,false);
+ assert.equal(v.source_environment,'PREPROD');
+ assert.equal(JSON.stringify(v).includes('DO_NOT_LEAK'),false);
+ assert.equal(JSON.stringify(v).includes(TOKEN),false);
+ assert.equal(JSON.stringify(v).includes(PREPROD),false);
+ assert.equal(calls.length,1);assert.equal(calls[0].url,URL);
+ assert.equal(calls[0].options.method,'GET');
+ assert.equal(calls[0].options.headers.apikey,PREPROD);
+ assert.equal(calls[0].options.headers['x-cerebro-owner-prod-apikey'],PROD);
+});
+test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
+ let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
+ for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
+  await assert.rejects(reader.listForContext(params));
+ assert.equal(calls,0);
+});
+test('cross-tenant rows and forged running status fail closed',async()=>{
+ for(const change of [
+  {job_controls:[{...good().job_controls[0],company_id:'aion'}]},
+  {job_controls:[{...good().job_controls[0],runtime_verified:true}]},
+  {job001_queue_connected:true},{live_execution_verified:true},{prod_execution_enabled:true},
+  {totals:{...good().totals,job_controls:10}},
+ ]){
+  const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+   fetchImpl:async()=>rjson({...good(),...change})});
+  const v=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+  assert.equal(v.status,'UNAVAILABLE');
+  assert.equal(v.control_rows,null);
+ }
+});
+test('real Preview API allows one owner-verified GET to existing separate PREPROD read-only function',async t=>{
+ const oldFetch=globalThis.fetch,oldEnv=process.env.VERCEL_ENV,oldUrl=process.env.VERCEL_URL,oldKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY;
+ t.after(()=>{globalThis.fetch=oldFetch;process.env.VERCEL_ENV=oldEnv;process.env.VERCEL_URL=oldUrl;process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY=oldKey});
+ process.env.VERCEL_ENV='preview';process.env.VERCEL_URL=HOST;process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY=PREPROD;
+ const calls=[];
+ globalThis.fetch=async(url,opt)=>{
+  calls.push({url,method:opt.method});
+  if(url===OWNER)return rjson({ok:true,context:{actor_code:'CARLOS-ADMIN'}});
+  if(url===URL)return rjson(good());
+  throw Error('OUT_OF_SCOPE');
+ };
+ const req={method:'POST',headers:{host:HOST,origin:'https://'+HOST,authorization:'Bearer '+TOKEN,apikey:PROD},body:{action:'get_job001_controls',params:{company_id:'fenix',environment:'LAB'}}};
+ const out={code:0,body:null};const res={setHeader(){},status(v){out.code=v;return res},json(v){out.body=v;return res}};
+ await handler(req,res);
+ assert.equal(out.code,200);assert.equal(out.body.control_rows,1);
+ assert.equal(out.body.transport,'PREVIEW_ONLY_SERVER_VERIFIED');
+ assert.equal(out.body.prod_execution_enabled,false);
+ assert.equal(out.body.live_execution_verified,false);
+ assert.equal(out.body.job001_queue_connected,false);
+ assert.deepEqual(calls.map(x=>x.url),[OWNER,URL]);
+ assert.deepEqual(calls.map(x=>x.method),['GET','GET']);
+});
+test('no job controls reader, non-owner and write requests fail closed',async()=>{
+ const g=new UniversalGatewayLabV0({registry:REPO,authenticate:async()=>({actor_id:'CARLOS-ADMIN',company_ids:['fenix'],scopes:['cerebro:universal:read','cerebro:jobs:read']})});
+ const result=await g.handle({session_token:TOKEN,action:'get_job001_controls',params:{company_id:'fenix',environment:'LAB'}});
+ assert.equal(result.status,'UNAVAILABLE');assert.equal(result.job001_queue_connected,false);
+ await assert.rejects(g.handle({session_token:TOKEN,action:'get_job001_controls',params:{company_id:'fenix',environment:'PROD'}}),/ENVIRONMENT_LAB_ONLY/);
+ await assert.rejects(g.handle({session_token:TOKEN,action:'get_job001_controls',params:{company_id:'aion',environment:'LAB'}}),/COMPANY_SCOPE_DENIED/);
+});
