@@ -28,3 +28,14 @@ The concurrency-shadow module is a pure diagnostic planner: DAG dependencies, pr
 
 ## GitHub Actions queue snapshot
 At 13-Nov-2026 10:21 UTC: 26 queued runs all on 11-Nov-2026 20:18:20 UTC from UMS-001 PR45. Example run 43095209609 shows zero materialized jobs, so there is no proof of runner saturation. Browser1 workflow on main was in progress; its named concurrency group intentionally serializes that workflow's runs. UMS root cause remains unproven. This is GitHub's queue only, NOT Cloudflare/DB/CEREBRO total jobs.
+
+
+## V0.6 Owner Universe metadata · 13/11/2026
+
+**ADAPTER IMPLEMENTED AND CI TESTED, NOT PHYSICALLY ACCEPTED IN PREVIEW YET:** the `list_owner_sources` action wraps the existing server-verified GET `cerebro-console-gateway-v36-followups-lab/owner-universe?company_id=fenix`, returning only bounded Fénix registry/FACT GitOps counts and source provenance. It never returns customer records, credentials, other-company data, or grants. If registry/factory is partial or unavailable, the UI shows that state, not false zero. There is **no new Edge Function**, no SQL write, no runtime execution.
+
+**Live read-only verification:** `public.cerebro_job001_telemetry_preprod` and `public.cerebro_company_engine_state_preprod` returned no rows in inspected Supabase project on 13/11/2026. No live JOB-001 adapter is connected. It would be incorrect to state all engines work. Existing App/CRM and Production remain untouched.
+
+**Client compatibility:** `createUniversalInterfaceAutoConnectV0` now exposes `readOwnerSources()` for six interface types (Operativa, JARVIS, Neuronal, Navigator, App, Mobile), subject to server owner grants. This is a reusable SDK contract, not proof that six physical UI applications are deployed.
+
+**Production promotion gate:** blocked until physical E2E owner read, traceable engine-to-source bindings, durable audit/job runtime, OLD vs NEW, preflight/rollback tests and canary. PR #66 stays DRAFT.

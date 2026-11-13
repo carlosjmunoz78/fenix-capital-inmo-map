@@ -38,7 +38,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "LAB_CI_GREEN_REAL_OWNER_WORK_ACTIVITY_E2E_AND_JOB001_PENDING"
+    "reason": "NO_JOB001_LIVE_RUNTIME_EVIDENCE_NO_DURABLE_AUDIT_NO_OWNER_SOURCES_PREVIEW_E2E"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -79,5 +79,21 @@
     "role_authority": "SERVER_SESSION_RESOLVER",
     "allowed_environment": "LAB",
     "writes": false
+  },
+  "owner_universe": {
+    "capability": "list_owner_sources",
+    "adapter": "cerebro/universal/v0/owner-universe-reader.mjs",
+    "read_endpoint": "cerebro-console-gateway-v36-followups-lab/owner-universe?company_id=fenix",
+    "source": "EXISTING_OWNER_UNIVERSE_LAB",
+    "company_scope": "fenix",
+    "environment": "LAB",
+    "query_method": "GET",
+    "output": "BOUNDED_METADATA_COUNTS_ONLY",
+    "execution": false,
+    "prod_authorized": false,
+    "production_changes": false,
+    "tests": "33/33_CI_PASS_AT_2026_11_13_BEFORE_DOC_UPDATE",
+    "physical_owner_e2e": "PENDING_NEW_PREVIEW_DEPLOYMENT",
+    "record_absence_note": "Existing JOB001 telemetry and company engine state tables in inspected Supabase project returned no rows at 2026-11-13; this does not certify runtime zero elsewhere."
   }
 }
