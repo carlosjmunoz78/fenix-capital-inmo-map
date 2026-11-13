@@ -46,7 +46,54 @@ test('source outage, malformed repository and missing timestamps fail closed not
  }
  const down=createGithubWorkActivityReaderV0({apiKey:KEY,fetchImpl:async()=>{throw Error('timeout')}});
  const v=await down.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
- assert.equal(v.status,'UNAVAILABLE');assert.equal(v.reason,'SOURCE_NETWORK_UNAVAILABLE');
+ assert.equal(v.status,'UNAVAILABLE');assert.equal(v.reason,'BOTH_SOURCES_NETWORK_UNAVAILABLE');
+});
+test('expired or denied activity feed falls back once to read-only public GitHub metadata without tokens',async()=>{
+ const FALLBACK_URL='https://api.github.com/repos/'+REPO+'/actions/runs?per_page=30';
+ const calls=[];
+ const mock={
+  total_count:2,workflow_runs:[
+   {id:43469603691,name:'CEREBRO Browser 1 V2 Live Worker',path:'.github/workflows/cerebro-browser-job-runner-v2-live.yml',
+    status:'in_progress',html_url:'https://github.com/'+REPO+'/actions/runs/43469603691',
+    head_sha:'a'.repeat(40),conclusion:null},
+   {id:43469603692,name:'Sensitive data should not be displayed',status:'queued',
+    html_url:'https://evil.example/hijack',head_sha:'b'.repeat(40)}
+  ]
+ };
+ const reader=createGithubWorkActivityReaderV0({apiKey:KEY,fetchImpl:async(url,options)=>{
+  calls.push({url,method:options.method,headers:options.headers});
+  if(url===ACTIVITY_URL)return response({status:'ERROR',source_status:'UNAVAILABLE'},503);
+  if(url===FALLBACK_URL)return response(mock);
+  throw Error('UNEXPECTED_ENDPOINT');
+ }});
+ const r=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.deepEqual(calls.map(x=>x.url),[ACTIVITY_URL,FALLBACK_URL]);
+ assert.deepEqual(calls.map(x=>x.method),['GET','GET']);
+ assert.equal(calls[1].headers.authorization,undefined);
+ assert.equal(r.status,'OK');
+ assert.equal(r.source_status,'LIVE');
+ assert.equal(r.activity_provenance,'PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK');
+ assert.equal(r.job001_connected,false);
+ assert.equal(r.runs.length,1);
+ assert.equal(r.runs[0].run_id,43469603691);
+ assert.equal(r.runs[0].running_jobs,null);
+ assert.equal(r.runs[0].jobs_provenance,'UNAVAILABLE');
+ assert.equal(JSON.stringify(r).includes(TOKEN),false);
+});
+test('public GitHub fallback also fails closed if rate limited or malformed',async()=>{
+ const fallback='https://api.github.com/repos/'+REPO+'/actions/runs?per_page=30';
+ for(const responseStatus of [403,429,500]){
+  const reader=createGithubWorkActivityReaderV0({apiKey:KEY,fetchImpl:async(url)=>{
+   if(url===ACTIVITY_URL)return response({},503);
+   if(url===fallback)return response({message:'rate limit'},responseStatus);
+   throw Error('wrong URL');
+  }});
+  const value=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+  assert.equal(value.status,'UNAVAILABLE');
+  assert.equal(value.source_status,'UNAVAILABLE');
+  assert.deepEqual(value.runs,[]);
+  assert.equal(value.reason,'PUBLIC_GITHUB_REST_UNAVAILABLE');
+ }
 });
 test('one Gateway / SDK protocol: all six future interface connectors use same owner rights; none self-grants permission',async()=>{
  const fetchImpl=async()=>response(good());

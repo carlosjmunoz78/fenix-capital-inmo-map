@@ -24,6 +24,7 @@ export type UniversalWorkActivityLab={
  rows:{run_id:number;engine_id:string|null;workflow_name:string;status:string;environment:string;html_url:string}[];
  source:'GITHUB_ACTIONS';
  job001Connected:false;
+ provenance:'EXISTING_ACTIVITY_EDGE_GITHUB_ACTIONS'|'PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK'|'UNAVAILABLE';
 };
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
@@ -76,12 +77,12 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   // Work is an optional, separate source: never let a failed GitHub read
   // invalidate the successful FACT capability handshake.
   let workActivity:UniversalWorkActivityLab={
-   state:'UNAVAILABLE',observedAt:null,rows:[],source:'GITHUB_ACTIONS',job001Connected:false
+   state:'UNAVAILABLE',observedAt:null,rows:[],source:'GITHUB_ACTIONS',job001Connected:false,provenance:'UNAVAILABLE'
   };
   try{
    const work=await call('list_work_activity') as {
     status?:unknown;source?:unknown;source_status?:unknown;observed_at?:unknown;
-    job001_connected?:unknown;runs?:unknown;transport?:unknown
+    job001_connected?:unknown;runs?:unknown;transport?:unknown;activity_provenance?:unknown
    };
    if(work?.status==='OK'&&work.source==='GITHUB_ACTIONS'&&work.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&work.job001_connected===false&&
      (work.source_status==='LIVE'||work.source_status==='CACHED')&&Array.isArray(work.runs)){
@@ -96,7 +97,8 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
       environment:typeof row.environment==='string'?row.environment:'UNKNOWN',html_url:row.html_url
      }];
     });
-    workActivity={state:work.source_status,observedAt:typeof work.observed_at==='string'?work.observed_at:null,rows,source:'GITHUB_ACTIONS',job001Connected:false};
+    const provenance=(work.activity_provenance==='PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK'?'PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK':'EXISTING_ACTIVITY_EDGE_GITHUB_ACTIONS') as UniversalWorkActivityLab['provenance'];
+    workActivity={state:work.source_status,observedAt:typeof work.observed_at==='string'?work.observed_at:null,rows,source:'GITHUB_ACTIONS',job001Connected:false,provenance};
    }
   }catch{/* work stays UNAVAILABLE, owner identity/FACT remain unchanged */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,

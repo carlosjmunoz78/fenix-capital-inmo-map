@@ -41,6 +41,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <div className="op-uni-lab-work" aria-label="Actividad de GitHub Actions mediante Gateway Universal">
     <strong>Trabajos observados · GitHub Actions</strong>
     <span>Fuente: {result.workActivity?.source||'NO CONECTADA'} · {result.workActivity?.state||'UNAVAILABLE'}</span>
+    {result.workActivity?.provenance==='PUBLIC_GITHUB_REST_READ_ONLY_FALLBACK'?<small>Lectura directa de GitHub; muestra limitada, sin datos de jobs ni cola.</small>:null}
     {result.workActivity?.observedAt?<small>Última captura: {result.workActivity.observedAt}</small>:null}
     <small>Es una muestra de workflows, NO la cola JOB-001 ni la ejecución de 179 motores.</small>
     {result.workActivity?.rows.map(run=><div key={run.run_id} className="op-uni-lab-work-row">
