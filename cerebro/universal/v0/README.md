@@ -2,6 +2,8 @@
 
 Status: **LAB implementation, NOT production certified**.
 
+**Current V0.4 addendum (13-Nov-2026):** Earlier V0-only notes below describe the in-process starting point. Since V0.2, a **private Vercel Preview-only** read endpoint exists; it is NOT a PROD/public execution endpoint. See [INTERFACE_AUTOCONNECT_V04.md](./INTERFACE_AUTOCONNECT_V04.md) and PR #66 for the verified 26/26 tests and deployment evidence. A separate existing GitHub Actions activity source is now wrapped as `list_work_activity`; it is **not JOB-001**. The owner-authenticated Preview E2E for this latest activity reader remains PENDING because the new hostname displays the login page. Factory FACT-001 read owner E2E from earlier V0.3 is verified. No new subscriptions or PROD migrations. Future UI contracts do not certify six live UI connections.
+
 ## Existing preserved systems
 Reuses the actual FACT-001 V1 179-engine registry, preserving 177 base IDs plus HCI-001 and MOTION-001. Also preserves existing Action Gateway, JOB-001 Durable Runtime, Dynamic Concurrency Policy, V4 and its deployment. Nothing in their source files was changed.
 
