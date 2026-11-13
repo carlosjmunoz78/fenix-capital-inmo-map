@@ -29,7 +29,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    {loading?'Comprobando autorización y contrato FACT-001…':
     result?.kind==='ready'?
      'Conexión de lectura acreditada en LAB. El funcionamiento de los motores en producción sigue sin verificarse.':
-    result?.kind==='denied'?'Acceso no autorizado a este contexto de laboratorio.':
+    result?.kind==='denied'?`Acceso no autorizado a este contexto de laboratorio (${result.reason||'SIN_CODIGO'}).`:
     result?.kind==='unavailable'?'No hay verificación disponible. La Operativa actual continúa sin cambios.':
     'Preparando verificación de LAB…'}
   </p>

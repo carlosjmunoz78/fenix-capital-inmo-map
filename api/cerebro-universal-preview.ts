@@ -13,7 +13,10 @@ const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Ar
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
  if(environment!=='preview'||!HOST.test(host))return false;
- if(vercelUrl&&vercelUrl.toLowerCase()!==host)return false;
+ // A safe alternate deployment hostname is legitimate when VERCEL_URL resolves
+ // to a different immutable Preview hostname in the same allowlisted family.
+ // Refuse arbitrary VERCEL_URL values. Still restrict request Host and owner.
+ if(vercelUrl&&!HOST.test(vercelUrl.toLowerCase().replace(/^https?:\/\//,'').replace(/\/.*$/,'')))return false;
  const origin=h(req.headers.origin);
  return !origin||origin==='https://'+host;
 }

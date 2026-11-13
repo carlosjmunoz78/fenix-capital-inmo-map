@@ -19,6 +19,7 @@ export function canPreviewUniversalOperativa(location:Pick<Location,'hostname'|'
   &&new URLSearchParams(location.search).get('section')==='operativa';
 }
 export type UniversalLabProof={
+ reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
  kind:'ready'|'unavailable'|'denied';
  capabilities:UniversalLabCapability[];
  registeredDefinitions:number|null;
@@ -39,7 +40,13 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
    headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
    body:JSON.stringify({action,params:{company_id:'fenix',environment:'LAB',...extra}})
   });
-  if(response.status===401||response.status===403)throw Error('DENIED');
+  if(response.status===401||response.status===403){
+   let reason='HTTP_401_403';
+   try{const body=await response.json() as {reason?:unknown};
+    if(['AUTH_REQUIRED','PREVIEW_ONLY','OWNER_AUTH_OR_POLICY_DENIED','COMPANY_OR_ENV_DENIED','READ_ACTION_NOT_ALLOWED'].includes(String(body?.reason)))reason=String(body.reason);
+   }catch{/* keep redacted generic reason */}
+   throw Error('DENIED:'+reason);
+  }
   if(response.status!==200)throw Error('UNAVAILABLE');
   return response.json() as Promise<unknown>;
  };
@@ -62,6 +69,8 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
    operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB'};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
-  return unavailable(error instanceof Error&&error.message==='DENIED'?'denied':'unavailable');
+  const code=error instanceof Error?error.message:'';
+  if(code.startsWith('DENIED:'))return {...unavailable('denied'),reason:code.slice(7) as UniversalLabProof['reason']};
+  return unavailable('unavailable');
  }
 }
