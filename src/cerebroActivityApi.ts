@@ -81,7 +81,10 @@ async function authHeaders(){
 }
 
 export async function fetchCerebroActivity():Promise<{status:number;data:CerebroActivityResponse|null}>{
-  const endpoint=activityEndpoint();
+  const isPreview=typeof window!=='undefined'
+   &&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)
+   &&new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3';
+  const endpoint=isPreview?'/api/cerebro-preview-gateway?resource=activity':activityEndpoint();
   if(!endpoint)return{status:0,data:null};
   const headers=await authHeaders();
   if(!headers)return{status:401,data:null};
