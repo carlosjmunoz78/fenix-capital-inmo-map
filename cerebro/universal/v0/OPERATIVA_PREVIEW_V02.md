@@ -8,3 +8,6 @@
 - **No deployment triggered:** `vercel.json` has `git.deploymentEnabled=false`. The preview route remains unverified in an actual human session until a controlled authorized LAB deployment can be demonstrated.
 - Test gates: Node read security tests, existing 16 V0.1 tests, TypeScript/Vite build, host/preview guard, deny without owner, no real writes and leave prod untouched.
 - Cost target additional 0 EUR; GitHub CI minutes are usage and require billing reconciliation.
+
+## LAB-only direct Motors panel for physical Browser E2E
+The Preview URL accepts `?section=operativa&visual_lab=cockpit-v3&op3_panel=motores` and opens the existing Motors section on first render. This is strictly hostname-and-preview gated. It does not grant permissions or alter production default routing, jobs, or JARVIS. The panel automatically calls the owner-authenticated read-only Gateway when mounted, so Opera can inspect the resulting status without browser click automation.
