@@ -41,3 +41,16 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 - Strict Preview API allowlist now accepts `submit_command` **only** when `dry_run:true`, company `fenix`, environment `LAB`, engine `FACT-001`, capability `fact.registry.summary`, exact version and empty payload; every other command is rejected before owner calls. Owner is verified again server-side. `executed:false`, `prod_execution_enabled:false`, `durable_audit:false`, `idempotency_persisted:false` are explicit, so never claim a real order was scheduled or an audited idempotency guarantee. No separate queue or writes.
 - Isolated Vercel Preview deployment `dpl_BsTNGRzGfaHNYHW3JMFfkZtPFBkx` at `fenix-capital-preprod-qs5nvwkj9.vercel.app`, code SHA `d057465846a038c25c5e74b8a610452b85aeef3c`, `target=null`, status READY. **Do not navigate or open another Opera tab**; user remains in existing authenticated older Preview. This is not an E2E of the latest UI.
 - Current login/physical acceptance remains PENDING. No movement to main, production or DNS.
+
+
+## V0.7 PREPROD JOB-001 real control inventory · 13/11/2026
+
+**HECHO:** `Supabase PREPROD hnqlnvakzaywtafeiybt` contains 20 `cerebro_job001_control_preprod` rows (SEO-001, FENIX_CAPITAL, all enabled, last modified Sept 28), 2 `cerebro_external_job_control_preprod` rows (disabled, last modified Sept 28), 17 `cerebro_company_engine_state_preprod` rows (fenix, last modified Oct 13), **0 telemetry rows**. These are SOURCE RECORDS, not verified running workers or a deployed real JOB001 queue.
+
+**New side-by-side read-only Edge Function:** `cerebro-operativa-job001-read-lab-v0`, project `hnqlnvakzaywtafeiybt`, version 2 ACTIVE. Auth from existing PROD owner session/context GET verified server-side, legacy mapping `fenix` → `FENIX_CAPITAL` only within this read service, four bounded existing SELECT tables, secret stays in PREPROD environment, server returns metadata only. Existing `cerebro-job001-gateway-preprod` remains version 11 ACTIVE and unchanged; original scheduler/Hostinger secret not imported into the Universal Gateway.
+
+**LAB Universal Gateway action:** `get_job001_controls` returns only counts of job controls, enabled records, external records, engine-state declarations, telemetry, stale records, original source PREPROD and `job001_queue_connected:false`, `live_execution_verified:false`. Both upstream and Gateway authenticate owner; wrong company/environment, forged running claims and POST dispatch are denied.
+
+**Physical evidence:** GitHub Actions `45/45` tests, isolated PREPROD Edge anonymous GET **HTTP 401**, and Preview `dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh` READY `https://fenix-capital-preprod-pkalcpwre.vercel.app/`, with Vercel SSO enabled. Full owner session E2E latest Preview **PENDING** because Opera stays on the user's existing older Preview without switching tabs or re-logging. No PROD migration or execution tested.
+
+**Rollback:** stop using new Preview URL; new PREPROD Edge function is an isolated side-by-side reader with no scheduler modification. Rebuild from `cerebro/universal/v0/preprod-job001-reader/index.ts` and `job001-projection.mjs`, never from the original secret-protected JOB001 scheduler. Removing the new function requires confirming it has no consumers; not done. Existing PREPROD/PROD remain intact. No direct evidence of job execution or audit yet.

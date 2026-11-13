@@ -26,7 +26,38 @@
     "uses_existing_JOB001": true,
     "second_queue": false,
     "shadow_planner_only": true,
-    "live_adapter_connected": false
+    "live_adapter_connected": false,
+    "control_metadata_reader": {
+      "source": "EXISTING_SUPABASE_PREPROD",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "function_slug": "cerebro-operativa-job001-read-lab-v0",
+      "deployed_version": 2,
+      "deployment_status": "ACTIVE",
+      "gateway_action": "get_job001_controls",
+      "scope": {
+        "company_id": "fenix",
+        "environment": "LAB",
+        "source_environment": "PREPROD"
+      },
+      "read_only": true,
+      "method": "GET",
+      "authorizes_using": "PROD_OWNER_JWT_SERVER_CONTEXT",
+      "no_scheduler_secret": true,
+      "no_dml": true,
+      "no_dispatch": true,
+      "fields": "COUNTS_ONLY_SANITISED",
+      "latest_provenance": "PREPROD_JOB001_CONTROL_METADATA",
+      "evidence": {
+        "job_control_rows": 20,
+        "external_control_rows": 2,
+        "engine_state_records": 17,
+        "telemetry_rows": 0
+      },
+      "operational_execution_verified": false,
+      "preview_deployment": "dpl_4D9T2JdF2o7Z7EJiyuqzw1CqmXdh",
+      "physical_owner_e2e": "PENDING",
+      "remote_unauthenticated_probe": "HTTP_401_VERIFIED_GITHUB_CI"
+    }
   },
   "backup": {
     "method": "unchanged_git_parent",
@@ -38,7 +69,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "JOB001_LIVE_ABSENT_AUDIT_NOT_DURABLE_NEW_OWNER_AND_DRYRUN_OWNER_E2E_PENDING"
+    "reason": "JOB001_CONFIG_READ_ONLY_RUNTIME_UNVERIFIED_TELEMETRY_EMPTY_DURABLE_AUDIT_NOT_PROVEN_PREVIEW_OWNER_E2E_PENDING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
