@@ -191,7 +191,7 @@ export default function CerebroNeuralView(){
    <aside className="cerebro-neural-panel cerebro-neural-policy">
     <header><div><small>SEGURIDAD Y APRENDIZAJE</small><h2>Gobierno, antes que autonomía</h2></div><ShieldCheck size={19}/></header>
     <p>Este mapa es de solo lectura. GitHub Actions no certifica por sí mismo los motores JOB-001, el aprendizaje LRN-001, ni la ejecución de los 179 motores definidos.</p>
-    <dl><div><dt>Estado de fuente</dt><dd>{source}</dd></div><div><dt>Observado</dt><dd>{validSource?observedDate(observedAt):'No disponible'}</dd></div><div><dt>Staging WordPress</dt><dd>SUSPENDIDA · SIN SONDEOS</dd></div><div><dt>Aprendizaje LRN-001</dt><dd>PARCIAL / POR AUDITAR</dd></div><div><dt>Acciones desde este mapa</dt><dd>NINGUNA</dd></div></dl>
+    <dl><div><dt>Estado de fuente</dt><dd>{source}</dd></div><div><dt>Observado</dt><dd>{validSource?observedDate(observedAt):'No disponible'}</dd></div><div><dt>Staging WordPress</dt><dd>SUSPENDIDA · AISLAMIENTO PARCIAL</dd></div><div><dt>Aprendizaje LRN-001</dt><dd>PARCIAL / POR AUDITAR</dd></div><div><dt>Acciones desde este mapa</dt><dd>NINGUNA</dd></div></dl>
    </aside>
   </section>
  </main>;
