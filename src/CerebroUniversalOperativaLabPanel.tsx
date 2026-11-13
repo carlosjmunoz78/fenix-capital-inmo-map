@@ -1,10 +1,10 @@
 import {useCallback,useEffect,useState} from 'react';
 import {canPreviewUniversalOperativa,readUniversalOperativaLab,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
 import './cerebro-universal-operativa-lab.css';
-export default function CerebroUniversalOperativaLabPanel(){
+export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
  const [result,setResult]=useState<UniversalLabProof|null>(null);
  const [loading,setLoading]=useState(false);
- const enabled=typeof window!=='undefined'&&canPreviewUniversalOperativa(window.location);
+ const enabled=company==='fenix'&&typeof window!=='undefined'&&canPreviewUniversalOperativa(window.location);
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   if(!enabled)return;
   setLoading(true);
