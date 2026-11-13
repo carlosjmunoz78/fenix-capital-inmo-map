@@ -158,6 +158,30 @@
         "dispatched_without_http": 2
       },
       "automatic_publication_authorized": false
+    },
+    "seo_backlog_observation": {
+      "state": "PREPROD_READER_DEPLOYED_OWNER_E2E_PENDING",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "rpc": "public.cerebro_operativa_seo_backlog_summary_lab_v0()",
+      "preprod_edge_slug": "cerebro-operativa-job001-read-lab-v0",
+      "preprod_edge_version": 6,
+      "company_id": "fenix",
+      "source_company_id": "FENIX_CAPITAL",
+      "engine_id": "SEO-001",
+      "environment": "PREPROD",
+      "last_observed_counts": {
+        "total": 1666,
+        "queued": 1360,
+        "done": 270,
+        "waiting_prerequisites": 33,
+        "cancelled": 3
+      },
+      "last_supervisor_state": "DEGRADED",
+      "last_supervisor_measured_at": "2026-11-02T06:00:09Z",
+      "staging_probe_performed": false,
+      "seo_dispatch_authorized": false,
+      "downstream_publication_verified": false,
+      "note": "DONE rows not proof of external publication; queued jobs cannot be launched while staging suspended"
     }
   },
   "backup": {
@@ -170,7 +194,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "OWNER_SUSPENDED_WORDPRESS_STAGING_UNTIL_FURTHER_NOTICE; NO WP_E2E; SEO_SUPERVISOR_DEGRADED; JOB001_RUNTIME_DOWNSTREAM_NOT_CERTIFIED"
+    "reason": "STAGING_SUSPENDED_OWNER_GATEWAY_ENFORCED_LAB_ONLY; EXTERNAL_HOSTINGER_CRONS_NOT_YET_ENFORCED; SEO_SUPERVISOR_DEGRADED; PROD_CANARY_NOT_APPROVED"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -310,7 +334,20 @@
       "requires_explicit_owner_reactivation": true,
       "impact": "WP_BRIDGE_PREPROD_AND_SEO_PUBLICATION_E2E_BLOCKED",
       "scope": "No requests, browser navigation, changes, repairs, or gate bypass for staging until owner lifts suspension.",
-      "observation_prior_to_suspension": "Last known plugin status was observer/operations_locked; not current health proof."
+      "observation_prior_to_suspension": "Last known plugin status was observer/operations_locked; not current health proof.",
+      "gateway_policy": {
+        "state": "IMPLEMENTED_GATEWAY_LAB_TESTED",
+        "policy_version": "STAGING_SUSPENSION_2026_11_13",
+        "implementation": "cerebro/universal/v0/dependency-policy.mjs",
+        "action": "get_dependency_status",
+        "operation_assessment": "assess_operation",
+        "all_six_sdk_contract_types": true,
+        "no_staging_probes": true,
+        "dynamic_external_target_rejected": true,
+        "physical_preview_owner_e2e": "PENDING_DEPLOYMENT",
+        "legacy_hostinger_scheduler_enforcement": "NOT_VERIFIED",
+        "prod_mutation": false
+      }
     }
   }
 }

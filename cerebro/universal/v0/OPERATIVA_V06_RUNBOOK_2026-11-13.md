@@ -120,3 +120,17 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 **ÁREAS QUE PUEDEN SEGUIR:** Operativa LAB (consulta de registro, evidencias, estado), Supabase PREPROD (solo lectura), telemetría y auditoría persistente FACT de simulaciones, análisis de gateway Hostinger sin ejecutar despachos ni llamar staging. Ninguna reactivación de SEO o modificación a automatizaciones existentes sin inventario y pruebas OLD/NEW/rollback. Mantener PR #66 DRAFT sin merge a PROD.
 
 **NOTA:** La suspensión ha sido registrada en documentos/manifest LAB, pero NO certifica que todos los ejecutores externos ya hayan dejado de hacer peticiones al staging; sus cron y políticas deben inventariarse sin tocarlos a ciegas. Evitar confundir este registro con un cortacircuitos instalado en todos los runtimes.
+
+## V0.14 · Gate ejecutable staging OFF + cola SEO observada, sin tocar staging (13 nov 2026)
+
+**Política ejecutable en Gateway LAB:** `cerebro/universal/v0/dependency-policy.mjs` (v `STAGING_SUSPENSION_2026_11_13`) suministra acciones owner-only `get_dependency_status`, `assess_operation`. `WP_STAGING_PROBE`, `WP_STAGING_PUBLISH`, `WP_STAGING_WRITE`, `SEO_STAGING_BRIDGE`, `SEO_PUBLICATION_DEPENDENT_ON_STAGING` siempre resultan `BLOCKED_DEPENDENCY`; acciones desconocidas se deniegan. Las seis clases de SDK comparten el contrato, pero solo Operativa LAB se ha desplegado físicamente. Los `submit_command` rechazan cualquier campo de destino URL/host y siguen siendo únicamente simulación FACT-001 sin ejecución.
+
+**Fuente SEO real independiente de staging:** SQL de lectura `public.cerebro_operativa_seo_backlog_summary_lab_v0()` en PREPROD `hnqlnvakzaywtafeiybt`, envuelto en esquema privado SECURITY DEFINER, wrapper público SECURITY INVOKER, EXECUTE solo service_role. Lee exclusivamente sumarios de `seo_cerebro_expansion_jobs_preprod` y supervisor `seo_cerebro_supervisor_preprod` para `FENIX_CAPITAL / SEO-001 / PREPROD`. Sin URL de staging, sin comprobar disponibilidad, sin writes, sin jobs/crons nuevos. Edge aislada `cerebro-operativa-job001-read-lab-v0` v6 ACTIVE incluye este RPC como observación opcional.
+
+**Snapshot SQL:** 1.666 registros en total: 1.360 QUEUED, 270 DONE, 33 WAITING_PREREQUISITES, 3 CANCELLED. Supervisor DEGRADED con última medición 2 nov 2026. Ningún status DONE acredita publicación externa; las tareas en cola no reciben permiso de despacho de esta lectura. `seo_dispatch_authorized=false`; `downstream_publication_verified=false`.
+
+**CI:** GitHub Actions 43507659725, 73/73 tests, frontend build OK, SSO del Preview protegido, POST anónimo a auditoría PREPROD denegado. La política de suspensión fue comprobada en LAB en 69/69 tests previos y en seis contratos de interfaz.
+
+**GATE EXTERNO PENDIENTE:** Este bloqueo es real en el Gateway Universal LAB y su interfaz, no en todos los ejecutores Hostinger/Supabase que ya existían. NO se han detenido, alterado ni reiniciado cron externos. Es posible que esos sistemas aún emitan peticiones hacia staging: solo inventario y pruebas de no-efecto; no alterar automatizaciones heredadas sin rollback. No acceder ni reactivar staging hasta orden explícita del propietario.
+
+**Rollback/rebuild:** fuente y migraciones aisladas versionadas en esta PR. Para revertir UI/Gateway LAB, volver al Preview anterior de esta rama; para RPC nuevo, retirar consumidores primero, exportar snapshot si preciso y eliminar exclusivamente wrapper público y función privada. No existe rollback físico probado de producción; no promover.
