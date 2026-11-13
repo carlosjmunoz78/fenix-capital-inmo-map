@@ -1,0 +1,7 @@
+.op3-audio-diagnostic-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;margin:12px auto 0;padding:9px 13px;background:transparent;color:#b0deed;border:1px solid #2d657b;border-radius:18px;cursor:pointer;font-size:12px}
+.op3-audio-diagnostic{width:min(840px,100%);box-sizing:border-box;margin:12px auto 0;padding:15px;color:#dcf1fa;background:#061e2c;border:1px solid #2d657b;border-radius:12px;font-size:13px}
+.op3-audio-head{display:flex;align-items:center;justify-content:space-between;gap:15px}.op3-audio-head button,.op3-audio-test button{border:1px solid #377188;border-radius:8px;padding:8px 11px;color:#d2f4ff;background:#11384a;cursor:pointer}
+.op3-audio-diagnostic p{margin:10px 0;color:#a4c7d7;line-height:1.5}
+.op3-audio-test{display:flex;align-items:center;gap:12px;margin:10px 0}.op3-audio-test button{display:inline-flex;gap:7px;align-items:center;min-width:180px;justify-content:center}
+.op3-audio-test button:disabled{opacity:.55;cursor:not-allowed}.op3-audio-test span{flex:1;overflow-wrap:anywhere}.op3-audio-diagnostic .op3-audio-note{font-size:12px}
+@media(max-width:600px){.op3-audio-test{flex-direction:column;align-items:stretch}.op3-audio-test button{width:100%}}
