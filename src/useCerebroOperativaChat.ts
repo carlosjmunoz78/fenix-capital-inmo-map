@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import {fetchCerebroConsoleHealth,postCerebroConsoleChat,type CerebroConversationTurn,type CerebroPendingAction,type CerebroReadContext,type CerebroLearningCandidate} from './cerebroConsoleApi';
-import {applyVoiceContextHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsClarification,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSynthesisSupported,speechText,voiceNeedsClarification,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 
 /** Dedicated Operativa UI client. The existing owner-only CEREBRO Gateway is the sole authority.
  * Browser STT/TTS are provisional and do not use the future JARVIS V2 voice.
@@ -140,7 +140,7 @@ export function useCerebroOperativaChat(){
   recognition.continuous=false;
   recognition.interimResults=false;
   recognition.maxAlternatives=3;
-  applyVoiceContextHints(recognition);
+  /* No contextual phrase list: Chrome can expose SpeechRecognitionPhrase but reject it with phrases-not-supported. */
   recognition.onstart=()=>setVoiceListening(true);
   recognition.onresult=event=>{
    const result=event.results[event.results.length-1];
@@ -149,8 +149,15 @@ export function useCerebroOperativaChat(){
    if(transcript)void speechSenderRef.current(transcript,confidence);
   };
   recognition.onerror=event=>{
-   setStatusMessage('El reconocimiento de voz no ha funcionado: '+String(event.error||'error desconocido')+'. Puedes seguir escribiendo.');
-   if(['not-allowed','service-not-allowed','audio-capture'].includes(String(event.error||'')))stopVoice();
+   const code=String(event.error||'error desconocido');
+   if(code==='phrases-not-supported'){
+    // Defensive compatibility guard for stale/browser-specific recognition providers.
+    stopVoice();
+    setStatusMessage('Este servicio rechaza el vocabulario opcional del reconocimiento. Recarga la App y vuelve a probar la voz.');
+    return;
+   }
+   setStatusMessage('El reconocimiento de voz no ha funcionado: '+code+'. Puedes seguir escribiendo.');
+   if(['not-allowed','service-not-allowed','audio-capture','language-not-supported'].includes(code))stopVoice();
   };
   recognition.onend=()=>{if(listeningRef.current===recognition){listeningRef.current=null;setVoiceListening(false);scheduleListen()}};
   try{recognition.start()}catch{listeningRef.current=null;setVoiceListening(false);setStatusMessage('El navegador no ha permitido iniciar el micrófono.');stopVoice()}

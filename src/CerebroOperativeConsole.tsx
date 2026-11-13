@@ -2,7 +2,7 @@ import {useEffect,useMemo,useRef,useState,type FormEvent,type KeyboardEvent} fro
 import {AudioLines,ChevronDown,ExternalLink,Mic,Send,ShieldCheck,Square,X} from 'lucide-react';
 import {useCerebroOperativaChat} from './useCerebroOperativaChat';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
-import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
+import {createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-operative-console.css';
 
 type CompanyKey='all'|'fenix'|'aion'|'captacasa';
@@ -103,7 +103,9 @@ export default function CerebroOperativeConsole(){
  function toggleVoice(){if(dictating)return;chat.toggleVoice();}
 
  function stopDictation(){const recognition=dictationRef.current;dictationRef.current=null;if(recognition){try{recognition.stop()}catch{/* stopped */}}setDictating(false)}
- function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;applyVoiceContextHints(recognition);recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=()=>setDictationError('No se pudo completar el dictado.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
+ function toggleDictation(){if(dictating){stopDictation();return}if(!snapshot.ready||snapshot.voiceActive||!voiceRecognitionSupported())return;const recognition=createVoiceRecognition();if(!recognition){setDictationError('El dictado no está disponible ahora.');return}dictationRef.current=recognition;recognition.lang='es-ES';recognition.continuous=false;recognition.interimResults=false;recognition.maxAlternatives=3;/* No contextual phrase list: Chrome can expose SpeechRecognitionPhrase but reject it with phrases-not-supported. */recognition.onstart=()=>{setDictating(true);setDictationError('')};recognition.onresult=event=>{const result=event.results[event.results.length-1],transcript=String(result?.[0]?.transcript||'').trim();if(transcript){setComposer(current=>`${current}${current.trim()?' ':''}${transcript}`);window.setTimeout(()=>composerRef.current?.focus(),0)}};recognition.onerror=event=>setDictationError(String(event.error||'')==='phrases-not-supported'
+  ?'El servicio rechaza frases opcionales de voz. Actualiza la App y reintenta.'
+  :'No se pudo completar el dictado: '+String(event.error||'error desconocido')+'.');recognition.onend=()=>{dictationRef.current=null;setDictating(false)};try{recognition.start()}catch{dictationRef.current=null;setDictating(false);setDictationError('No se pudo iniciar el dictado.')}}
  function onComposerKeyDown(event:KeyboardEvent<HTMLTextAreaElement>){if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit()}}
 
  return <main className="operativa-premium" aria-label="Operativa">

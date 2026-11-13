@@ -22,11 +22,23 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
   localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(value));
   localStorage.setItem('fenix-remember-device','true');
   sessionStorage.setItem('fenix-session-active','1');
+  // Emulate Chrome: exposes contextual phrase API but recognizer rejects nonempty hints.
   class QARecognition{lang='';continuous=false;interimResults=false;maxAlternatives=1;
+   phrases:unknown[]=[];
    onstart:any=null;onresult:any=null;onend:any=null;onerror:any=null;
-   start(){this.onstart?.(new Event('start'))}
+   start(){
+    if(this.phrases.length){
+     (window as any).__qaPhraseUnsupportedCount=((window as any).__qaPhraseUnsupportedCount||0)+1;
+     this.onerror?.({error:'phrases-not-supported'});
+     this.onend?.(new Event('end'));return;
+    }
+    this.onstart?.(new Event('start'));
+   }
    stop(){this.onend?.(new Event('end'))}
    abort(){this.onend?.(new Event('end'))}}
+  class QAPhrase{constructor(_phrase:string,_boost:number){}}
+  (window as any).__qaPhraseUnsupportedCount=0;
+  (window as any).SpeechRecognitionPhrase=QAPhrase;
   (window as any).SpeechRecognition=QARecognition;
  },session);
  await page.route('http://127.0.0.1:54321/auth/v1/**',route=>{
@@ -231,6 +243,8 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await activeVoice.click();
  await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toHaveAttribute('aria-pressed','false');
  await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeEnabled();
+ // Neither dictation nor continuous voice should send unsupported contextual hints.
+ expect(await page.evaluate(()=>(window as any).__qaPhraseUnsupportedCount)).toBe(0);
  expect(postedChat?.message).toBe(sendsBeforeVoice);
  await cockpit.getByRole('combobox',{name:'Empresa'}).selectOption('aion');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toHaveCount(0);

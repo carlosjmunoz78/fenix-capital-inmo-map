@@ -3,7 +3,7 @@ import {X} from 'lucide-react';
 import {useCerebroOperativaChat} from './useCerebroOperativaChat';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
-import {applyVoiceContextHints,createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
+import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import './cerebro-operative-console.css';
 
@@ -120,7 +120,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   recognition.continuous=false;
   recognition.interimResults=false;
   recognition.maxAlternatives=3;
-  applyVoiceContextHints(recognition);
+  /* No contextual phrase list: Chrome can expose SpeechRecognitionPhrase but reject it with phrases-not-supported. */
   recognition.onstart=()=>{setDictating(true);setDictationError('')};
   recognition.onresult=event=>{
    const result=event.results[event.results.length-1];
@@ -129,7 +129,8 @@ export default function CerebroOperativeCockpitV3Bridge(){
   };
   recognition.onerror=event=>{
    const reason=String(event.error||'');
-   const label=reason==='not-allowed'||reason==='service-not-allowed'?'Falta permiso de micrófono en el navegador.'
+   const label=reason==='phrases-not-supported'?'El servicio rechaza las frases opcionales del reconocimiento. Actualiza la App y prueba de nuevo.'
+     :reason==='not-allowed'||reason==='service-not-allowed'?'Falta permiso de micrófono en el navegador.'
      :reason==='audio-capture'?'No se ha detectado un micrófono.'
      :reason==='network'?'El servicio de reconocimiento del navegador no responde.'
      :reason==='no-speech'?'No se ha detectado voz.':'No se pudo completar el dictado.';
