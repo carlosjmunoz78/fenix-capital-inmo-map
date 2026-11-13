@@ -5,7 +5,7 @@ const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
 test('audio diagnostics are local, opt-in and never submit messages',()=>{
  const code=read('src/CerebroAudioDiagnostics.tsx');
  const cockpit=read('src/CerebroOperativeCockpitV3.tsx');
- assert.ok(cockpit.includes('<CerebroAudioDiagnostics/>'));
+ assert.ok(cockpit.includes('<CerebroAudioDiagnostics allowed={scopeCanExecute'));
  for(const value of ['getUserMedia({audio:true','getFloatTimeDomainData','createVoiceRecognition()','oscillator.frequency','release','track.stop()','token.current++']){
   if(value==='release')continue;
   assert.ok(code.includes(value),value);
