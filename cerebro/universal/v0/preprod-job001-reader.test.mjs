@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {projectJob001ReadSnapshot} from './preprod-job001-reader/job001-projection.mjs';
+import {projectJob001ReadSnapshot,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
 
 const source=fs.readFileSync(new URL('./preprod-job001-reader/index.ts',import.meta.url),'utf8');
 const observedAt='2026-11-13T18:30:00.000Z';
@@ -9,6 +9,19 @@ const jobs=[{job_id:2,company_id:'FENIX_CAPITAL',engine_id:'SEO-001',environment
 const external=[{job_id:25,company_id:'FENIX_CAPITAL',engine_id:'SOCIAL-001',environment:'PREPROD',version:'v0',enabled:false,updated_at:'2026-09-28T12:08:28Z'}];
 const engines=[{company_id:'fenix',engine_id:'COMP-REG-001',environment:'PREPROD',version:'1.0.0',state:'GREEN',updated_at:'2026-10-13T12:52:01Z'}];
 
+test('owner identity accepts canonical wrapped or flat context without widening privileges',()=>{
+ assert.equal(ownerIsVerified({actor_code:'CARLOS-ADMIN'}),true);
+ assert.equal(ownerIsVerified({context:{actor_code:'CARLOS-ADMIN'}}),true);
+ assert.equal(ownerIsVerified({ok:true,context:{actor_code:'CARLOS-ADMIN'}}),true);
+ assert.equal(ownerIsVerified({ok:false,context:{actor_code:'CARLOS-ADMIN'}}),false);
+ assert.equal(ownerIsVerified({context:{actor_code:'CARLOS-ADMIN',company_id:'aion'},ok:false}),false);
+ assert.equal(ownerIsVerified({actor_code:'OTHER'}),false);
+ assert.equal(ownerIsVerified({context:{actor_code:'OTHER'}}),false);
+ assert.equal(ownerIsVerified(null),false);
+ assert.equal(ownerIsVerified({}),false);
+ assert.ok(source.includes('if(!ownerIsVerified(principal))'));
+ assert.equal(source.includes('principal?.ok!==true'),false);
+});
 test('legacy PREPROD controls are non-operational metadata with evidence and environment preserved',()=>{
  const r=projectJob001ReadSnapshot({jobs,external,engines,telemetryCount:0,observedAt});
  assert.equal(r.status,'OK');

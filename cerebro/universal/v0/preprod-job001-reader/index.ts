@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
-import {projectJob001ReadSnapshot} from "./job001-projection.mjs";
+import {projectJob001ReadSnapshot,ownerIsVerified} from "./job001-projection.mjs";
 
 const PROD_OWNER="https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context";
 const MAX_BODY=45000;
@@ -40,7 +40,7 @@ Deno.serve(async(req:Request)=>{
  if(!ownerResponse.ok)return secretlessFailure("OWNER_CONTEXT_NOT_AUTHORIZED",403);
  let principal;
  try{principal=await ownerResponse.json()}catch{return secretlessFailure("OWNER_CONTEXT_INVALID",403)}
- if(principal?.ok!==true||principal?.context?.actor_code!=="CARLOS-ADMIN")
+ if(!ownerIsVerified(principal))
   return secretlessFailure("OWNER_ONLY",403);
  const dbUrl=Deno.env.get("SUPABASE_URL")||"";
  const serviceKey=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")||"";

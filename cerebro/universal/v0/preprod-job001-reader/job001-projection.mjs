@@ -1,4 +1,10 @@
 /** CEREBRO JOB-001 existing PREPROD metadata: safe, bounded, no execution in this module. */
+export function ownerIsVerified(raw){
+ if(!raw||typeof raw!=='object'||Array.isArray(raw)||raw.ok===false)return false;
+ const principal=raw.context??raw;
+ return !!principal&&typeof principal==='object'&&!Array.isArray(principal)&&principal.actor_code==='CARLOS-ADMIN';
+}
+
 const RE_ID=/^[A-Z][A-Z0-9-]{2,60}$/;
 const STALE_MS=24*60*60*1000;
 const str=(v,n=90)=>typeof v==='string'?v.slice(0,n):'';
