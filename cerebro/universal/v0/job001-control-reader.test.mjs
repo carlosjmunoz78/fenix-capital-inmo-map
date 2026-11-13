@@ -5,7 +5,7 @@ import {createJob001ControlReaderLabV0} from './job001-control-reader.mjs';
 import {UniversalGatewayLabV0} from './control-plane.mjs';
 import handler from '../../../api/cerebro-universal-preview.ts';
 const REPO=JSON.parse(fs.readFileSync(new URL('../../registry/engine-registry.v1.json',import.meta.url),'utf8'));
-const URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-operativa-job001-read-lab-v0?company_id=fenix&environment=LAB';
+const SOURCE_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-operativa-job001-read-lab-v0?company_id=fenix&environment=LAB';
 const OWNER='https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context';
 const PREPROD='sb_publishable_preprod_lab_test_0123456789';
 const PROD='sb_publishable_owner_lab_test_0123456789';
@@ -37,7 +37,7 @@ test('PREPROD controls reader enforces two publishable key scopes and returns sa
  assert.equal(JSON.stringify(v).includes('DO_NOT_LEAK'),false);
  assert.equal(JSON.stringify(v).includes(TOKEN),false);
  assert.equal(JSON.stringify(v).includes(PREPROD),false);
- assert.equal(calls.length,1);assert.equal(calls[0].url,URL);
+ assert.equal(calls.length,1);assert.equal(calls[0].url,SOURCE_URL);
  assert.equal(calls[0].options.method,'GET');
  assert.equal(calls[0].options.headers.apikey,PREPROD);
  assert.equal(calls[0].options.headers['x-cerebro-owner-prod-apikey'],PROD);
@@ -70,7 +70,7 @@ test('real Preview API allows one owner-verified GET to existing separate PREPRO
  globalThis.fetch=async(url,opt)=>{
   calls.push({url,method:opt.method});
   if(url===OWNER)return rjson({ok:true,context:{actor_code:'CARLOS-ADMIN'}});
-  if(url===URL)return rjson(good());
+  if(url===SOURCE_URL)return rjson(good());
   throw Error('OUT_OF_SCOPE');
  };
  const req={method:'POST',headers:{host:HOST,origin:'https://'+HOST,authorization:'Bearer '+TOKEN,apikey:PROD},body:{action:'get_job001_controls',params:{company_id:'fenix',environment:'LAB'}}};
@@ -81,7 +81,7 @@ test('real Preview API allows one owner-verified GET to existing separate PREPRO
  assert.equal(out.body.prod_execution_enabled,false);
  assert.equal(out.body.live_execution_verified,false);
  assert.equal(out.body.job001_queue_connected,false);
- assert.deepEqual(calls.map(x=>x.url),[OWNER,URL]);
+ assert.deepEqual(calls.map(x=>x.url),[OWNER,SOURCE_URL]);
  assert.deepEqual(calls.map(x=>x.method),['GET','GET']);
 });
 test('no job controls reader, non-owner and write requests fail closed',async()=>{
