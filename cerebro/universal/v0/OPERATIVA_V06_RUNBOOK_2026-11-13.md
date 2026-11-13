@@ -74,3 +74,22 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 - **CI tras reparación:** [GitHub run 43488382871](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43488382871) con **51/51 tests** correctos. Último Vercel Preview `dpl_Eyz5HVkwe85s7L7AwYPWs6Xe3h5v` READY, código `64cb3c5a5fa809d9a4a6506ea34818e823876033`; la función PREPROD desplegada después aplica la reparación de identidad. No nuevos dominios ni suscripciones.
 - **Pendientes genuinos:** telemetría real de ejecución, auditoría duradera, cola de ejecución JOB-001 plenamente enlazada, OLD vs NEW, pruebas físicas de rollback, canary, interfaz móvil/JARVIS/Neuronal real, tribunal y autorización de PROD. Mantener `promotion.allowed=false`.
 
+
+## V0.10 · pg_cron + auditoría duradera FACT en PREPROD (13 nov 2026)
+
+### HECHO / físicamente verificado
+- Proyecto separado Supabase PREPROD `hnqlnvakzaywtafeiybt`: módulo de consulta `public.cerebro_job001_pgcron_observation_lab_v0()` con función segura interna `cerebro_lab_private.job001_pgcron_observe_v0()`. Únicamente service_role puede ejecutar la consulta pública; `anon` y `authenticated` no, comprobado por SQL. No expone el texto de comandos de pg_cron, no añade jobs/crons.
+- Cuatro ejecuciones cron observables por IDs 6, 22, 23, 25, activos, último `succeeded` en 2026-11-13 19:17–19:22 UTC en la pestaña Opera 1381967780. **No son pruebas de ejecución del planificador maestro Hostinger ni resultados de los motores SEO.** Los demás 16 controles antiguos no aparecen como estos cuatro cron activos.
+- Nueva tabla `public.cerebro_operativa_lab_audit_v0` con RLS y columnas CHECK fijas a LAB, FACT-001, propietario, `executed=false`, producción bloqueada y coste adicional registrado cero; escritura de service_role solamente. Nueva Edge `cerebro-operativa-lab-audit-v0` v1 ACTIVE, owner autenticado de forma independiente.
+- Vercel Preview aislado `dpl_DosHmz7iEVra2SPmJjcu9xfunreT` READY, SHA `6a875253a0663c702897f345e12d1184e72ac62d`, asignado al alias estable con protección SSO. No se ha modificado la App/CRM real, main, PROD ni DNS.
+- E2E con sesión real en **la misma pestaña Opera**: Gateway valida simulación FACT-001, audita en Supabase PREPROD a las 19:36:23 UTC. SQL confirma **1 registro**, **0 ejecutados**, **0 producción autorizada**, **0 importe adicional registrado**. Repetir el mismo idempotency key conserva **1 registro**, sin duplicados.
+- Última CI de implementación: GitHub Actions 43493420966, 58/58 pruebas, build OK, Vercel Preview SSO negativo y auditoría Edge rechaza POST anónimo con HTTP 401.
+
+### LIMITACIONES / bloqueos genuinos
+- El planificador maestro de Hostinger y sus credenciales siguen sin evidencia de instalación y actividad. La escritura duradera es exclusivamente para orden de SIMULACIÓN de FACT-001; no se ha activado despacho de JOB-001 ni producción.
+- JOB-001 tiene controles históricos, pero tabla de telemetría PREPROD sigue en cero; los cuatro pg_cron observados no equivalen a veinte motores de JOB-001. Mantener `live_adapter_connected=false` y `promotion.allowed=false`.
+- Auditoría de comandos de ejecución real, comparación OLD vs NEW, backup/rebuild de todo el runtime, rollback físico de la App y canary de PROD **no están completados**. No confundir este test de idempotencia con un rollback de producción.
+
+### Backup y rollback aislados
+- Snapshot lógico en PR #66: migraciones `preprod-job001-reader/cron-observation-v0.sql` y `audit-lab-v0/migration.sql`, códigos Edge versiones v4 (lector) y v1 (auditoría), y SHA del último Vercel Preview. No hay ninguna migración de tablas legadas.
+- Si hay fallo: detener uso del Preview; mantener el Gateway original. No borrar nada hasta inventariar consumidores. Para revertir la observación cron, retirar el uso de la RPC y después eliminar wrapper + función interna; para revertir auditoría, exportar y respaldar previamente registros y después retirar Edge y tabla aislados con control de dependencias. NO ejecutado ese borrado, porque el entorno ya contiene evidencia válida.

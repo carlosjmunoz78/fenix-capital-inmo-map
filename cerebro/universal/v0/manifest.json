@@ -80,6 +80,31 @@
       "expected_historical_engine_state_records": 17,
       "expected_telemetry_count": 0,
       "note": "Historical GREEN in PREPROD is NOT evidence of a running engine."
+    },
+    "cron_observation": {
+      "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
+      "source": "PREPROD_PG_CRON_OBSERVATION",
+      "project_id": "hnqlnvakzaywtafeiybt",
+      "migration": "cerebro_job001_preprod_pgcron_observation_lab_v0",
+      "public_service_role_rpc": "public.cerebro_job001_pgcron_observation_lab_v0()",
+      "private_definer": "cerebro_lab_private.job001_pgcron_observe_v0()",
+      "active_legacy_pgcron_job_ids": [
+        6,
+        22,
+        23,
+        25
+      ],
+      "active_count_verified": 4,
+      "recent_succeeded_count_verified": 4,
+      "last_e2e_in_opera": "2026-11-13_19:22_UTC",
+      "scope": "SERVICE_ROLE_ONLY_READ_ONLY",
+      "anon_execute": false,
+      "authenticated_execute": false,
+      "no_cron_schedule_changed": true,
+      "no_command_or_secret_exposure": true,
+      "master_hostinger_scheduler_verified": false,
+      "job001_runtime_verified": false,
+      "downstream_effect_verified": false
     }
   },
   "backup": {
@@ -92,7 +117,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "JOB001_CONFIG_ONLY_NO_RUNTIME_TELEMETRY_NO_DURABLE_AUDIT_ROLLBACK_OR_CANARY"
+    "reason": "JOB001_HOSTINGER_MASTER_UNVERIFIED_REAL_JOB_DISPATCH_AND_TELEMETRY_MISSING_FULL_ROLLBACK_AND_CANARY_PENDING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -156,9 +181,9 @@
     "preview_endpoint": "/api/cerebro-universal-preview",
     "operational_execution": false,
     "no_write_executor": true,
-    "durable_audit": false,
-    "idempotency_persisted": false,
-    "physical_owner_e2e": "PENDING",
+    "durable_audit": true,
+    "idempotency_persisted": true,
+    "physical_owner_e2e": "VERIFIED_SINGLE_TAB_UNIQUE_DB_ROW_NO_EXECUTION",
     "cost_additional_eur": 0,
     "promotion_authorized": false,
     "human_exception_codes": [
@@ -177,12 +202,42 @@
     "environment": "preview",
     "target_production": false,
     "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
-    "owner_authenticated_latest_e2e": "VERIFIED_CEREBRO_OPERATIVA_FACT_OWNER_AND_JOB001_READ",
-    "mapped_deployment": "dpl_Eyz5HVkwe85s7L7AwYPWs6Xe3h5v",
-    "mapped_source_sha": "64cb3c5a5fa809d9a4a6506ea34818e823876033",
+    "owner_authenticated_latest_e2e": "VERIFIED_CRON_OBSERVATION_AND_FACT_DURABLE_DRYRUN",
+    "mapped_deployment": "dpl_DosHmz7iEVra2SPmJjcu9xfunreT",
+    "mapped_source_sha": "6a875253a0663c702897f345e12d1184e72ac62d",
     "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
     "no_new_tabs": true,
     "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
     "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780"
+  },
+  "lab_durable_audit": {
+    "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
+    "project_id": "hnqlnvakzaywtafeiybt",
+    "table": "public.cerebro_operativa_lab_audit_v0",
+    "migration": "cerebro_operativa_lab_durable_fact_dryrun_audit_v0",
+    "edge_function": "cerebro-operativa-lab-audit-v0",
+    "edge_version": 1,
+    "action": "FACT001_DRY_RUN_AUDIT",
+    "company_id": "fenix",
+    "environment": "LAB",
+    "engine_id": "FACT-001",
+    "executed": false,
+    "prod_authorized": false,
+    "rls_enabled": true,
+    "anon_read": false,
+    "authenticated_read": false,
+    "service_role_write": true,
+    "physical_proof": {
+      "owner_tab": 1381967780,
+      "at_utc": "2026-11-13 19:36:23",
+      "audit_rows": 1,
+      "replay_same_key_rows": 1,
+      "unsafe_rows": 0,
+      "policy_decision": "DRY_RUN_VALIDATED"
+    },
+    "source": "PREPROD_OWNER_VERIFIED_DURABLE_AUDIT",
+    "rollback_documented": true,
+    "full_physical_prod_rollback_verified": false,
+    "no_job_queue_or_runtime_execution": true
   }
 }
