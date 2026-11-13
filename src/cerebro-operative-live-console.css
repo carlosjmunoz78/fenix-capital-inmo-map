@@ -73,3 +73,15 @@
  .operativa-stage{order:3;padding-top:16px}
  .operativa-jarvis-composer{position:relative;inset:auto;transform:none}
 }
+
+
+/* Small mobile header: show company and verifiable activity signal without
+ * clipping "General" or pushing the status outside the viewport. General
+ * context remains available through the desktop presentation. */
+@media (max-width:420px){
+ .operativa-contextbar{gap:6px}
+ .operativa-context-selectors{min-width:0;flex:0 1 auto}
+ .operativa-context-selectors select{max-width:150px;min-width:0}
+ .operativa-context-selectors>span,.operativa-context-selectors .operativa-project{display:none}
+ .operativa-live-state{min-width:0;font-size:9px;letter-spacing:0;white-space:nowrap}
+}
