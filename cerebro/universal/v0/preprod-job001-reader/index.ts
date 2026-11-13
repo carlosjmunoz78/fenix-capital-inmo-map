@@ -27,7 +27,7 @@ Deno.serve(async(req:Request)=>{
     [...url.searchParams.keys()].some(k=>k!=="company_id"&&k!=="environment"))
   return json(403,{status:"CLOSED",reason:"FENIX_LAB_SCOPE_ONLY"});
  const authorization=req.headers.get("authorization")||"";
- const apikey=req.headers.get("apikey")||"";
+ const apikey=req.headers.get("x-cerebro-owner-prod-apikey")||"";
  if(!/^Bearer\s+\S{20,8192}$/i.test(authorization)||apikey.length<12||apikey.length>256)
   return json(401,{status:"CLOSED",reason:"OWNER_SESSION_REQUIRED"});
  let ownerResponse;
