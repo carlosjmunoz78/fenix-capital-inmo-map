@@ -77,6 +77,14 @@ Deno.serve(async(req:Request)=>{
   const cron_observation=projectCronObservation(cron.error?null:cron.data,{observedAt:new Date().toISOString()});
   const rpc_observation=projectDispatchRpcObservation(rpcStats.error?null:rpcStats.data);
   const seo_backlog=projectSeoBacklogObservation(seoBacklog.error?null:seoBacklog.data);
+  if(seo_backlog.status!=='OK'){
+   // Only fixed error codes. Never log request bodies, SQL, URLs or credentials.
+   const known=new Set(['PGRST202','PGRST301','42501','42P01','PGRST116']);
+   const code=String(seoBacklog.error?.code||'');
+   console.info(JSON.stringify({event:'CEREBRO_LAB_SEO_BACKLOG_DIAGNOSTIC',
+    reason:known.has(code)?code:(seoBacklog.error?'RPC_UNAVAILABLE':'PROJECTION_INVALID'),
+    staging_probed:false,execution_triggered:false}));
+  }
   const result={...snapshot,cron_observation,rpc_observation,seo_backlog};
   const encoded=JSON.stringify(result);
   if(encoded.length>MAX_BODY)return secretlessFailure("RESULT_TOO_LARGE");
