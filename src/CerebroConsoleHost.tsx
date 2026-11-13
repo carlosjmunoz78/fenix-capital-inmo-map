@@ -35,11 +35,12 @@ export default function CerebroConsoleHost(){
  const location=useLocation();
  const navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
- const previewHost=typeof window!=='undefined'&&/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname);
+ const previewHost=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname);
  const visualPreview=new URLSearchParams(location.search).get('visual_lab')==='cockpit-v3';
  const previewOwnerGate=Boolean(isCerebroPath&&previewHost&&visualPreview);
  const[view,setView]=useState<CerebroView>(initialView);
  const[ownerAccess,setOwnerAccess]=useState<OwnerAccess>('checking');
+ const[previewLogged,setPreviewLogged]=useState(false);
  const changeView=(next:CerebroPrimaryView)=>{setView(next);navigate({pathname:'/cerebro',search:`?section=${SECTION_BY_VIEW[next]}`},{replace:true})};
 
  useEffect(()=>{if(!isCerebroPath)return;const next=initialView();setView(current=>current===next?current:next)},[isCerebroPath,location.search]);
@@ -47,7 +48,8 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath){setOwnerAccess('checking');return}let cancelled=false;const check=async()=>{
   const{data:{session}}=await supabase.auth.getSession();
   if(cancelled)return;
-  if(!session){setOwnerAccess(previewOwnerGate?'denied':'checking');return}
+  if(!session){setPreviewLogged(false);setOwnerAccess(previewOwnerGate?'denied':'checking');return}
+  if(previewOwnerGate){setPreviewLogged(true);setOwnerAccess('checking')}
   if(previewOwnerGate){
    let allowed=false;
    try{
@@ -64,6 +66,7 @@ export default function CerebroConsoleHost(){
  useEffect(()=>{if(!isCerebroPath)return;try{window.sessionStorage.setItem(VIEW_STORAGE_KEY,view)}catch{/* optional */}},[isCerebroPath,view]);
 
  if(!isCerebroPath)return <CerebroConsoleShell/>;
+ if(previewOwnerGate&&!previewLogged)return null;
  if(previewOwnerGate&&ownerAccess!=='allowed')return <section role="status" style={{padding:'3rem',minHeight:'65vh',background:'#06131d',color:'#e9f6ff'}}>
    <h1>Operativa V3 · vista previa protegida</h1>
    <p>{ownerAccess==='checking'?'Comprobando acceso de propietario…':'No se ha podido verificar tu acceso de propietario. No se han cambiado tus permisos.'}</p>
