@@ -1,9 +1,11 @@
 import {useCallback,useEffect,useState} from 'react';
-import {canPreviewUniversalOperativa,readUniversalOperativaLab,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
+import {canPreviewUniversalOperativa,readUniversalOperativaLab,simulateFactRegistryDryRunLab,type UniversalLabDryRun,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
 import './cerebro-universal-operativa-lab.css';
 export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
  const [result,setResult]=useState<UniversalLabProof|null>(null);
  const [loading,setLoading]=useState(false);
+ const [dryRun,setDryRun]=useState<UniversalLabDryRun|null>(null);
+ const [dryRunning,setDryRunning]=useState(false);
  const enabled=company==='fenix'&&typeof window!=='undefined'&&canPreviewUniversalOperativa(window.location);
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   if(!enabled)return;
@@ -33,6 +35,13 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
     result?.kind==='unavailable'?'No hay verificación disponible. La Operativa actual continúa sin cambios.':
     'Preparando verificación de LAB…'}
   </p>
+  {result?.kind==='ready'?<div className="op-uni-lab-dryrun">
+   <button type="button" disabled={dryRunning} onClick={()=>{setDryRunning(true);void simulateFactRegistryDryRunLab().then(setDryRun).finally(()=>setDryRunning(false))}}>
+    {dryRunning?'Validando…':'Simular orden FACT-001 (no ejecutar)'}
+   </button>
+   <small>Solo comprobación de contrato y políticas. Sin ejecución, sin auditoría duradera y sin promoción a producción.</small>
+   {dryRun?<span role="status">{dryRun.message}</span>:null}
+  </div>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-proof">
    <span>Capacidades consultables: <b>{result.capabilities.length}</b></span>
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>

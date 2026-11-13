@@ -146,3 +146,37 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   return unavailable('unavailable');
  }
 }
+
+export type UniversalLabDryRun={kind:'validated'|'human_required'|'denied'|'unavailable';message:string;executed:false};
+export async function simulateFactRegistryDryRunLab():Promise<UniversalLabDryRun>{
+ const blocked=(kind:'denied'|'unavailable',message:string):UniversalLabDryRun=>({kind,message,executed:false});
+ if(typeof window==='undefined'||!canPreviewUniversalOperativa(window.location))
+  return blocked('denied','Solo disponible en la Operativa LAB autenticada');
+ const {data:{session}}=await supabase.auth.getSession();
+ if(!session?.access_token)return blocked('denied','No hay sesión válida');
+ try{
+  const response=await fetch(new URL('/api/cerebro-universal-preview',window.location.origin),{
+   method:'POST',cache:'no-store',headers:{authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
+   body:JSON.stringify({action:'submit_command',params:{
+    company_id:'fenix',environment:'LAB',engine_id:'FACT-001',
+    capability_id:'fact.registry.summary',version:'0.1.0-lab',
+    dry_run:true,estimated_additional_cost_eur:0,risk:'LOW',
+    idempotency_key:'lab-fact001-dryrun-read-20261113',payload:{}
+   }})
+  });
+  if(response.status===401||response.status===403)return blocked('denied','El servidor no autorizó la simulación');
+  if(response.status!==200)return blocked('unavailable','La simulación LAB no pudo verificarse');
+  const result=await response.json() as {
+   status?:unknown;reason?:unknown;executed?:unknown;transport?:unknown;
+   durable_audit?:unknown;idempotency_persisted?:unknown;prod_execution_enabled?:unknown
+  };
+  if(result.executed!==false||result.transport!=='PREVIEW_ONLY_SERVER_VERIFIED'||
+    result.prod_execution_enabled!==false||result.durable_audit!==false||result.idempotency_persisted!==false)
+   return blocked('unavailable','Contrato seguro no acreditado');
+  if(result.status==='DRY_RUN_VALIDATED')
+   return {kind:'validated',executed:false,message:'Orden FACT-001 validada solo en simulación; ejecución REAL bloqueada y auditoría duradera pendiente'};
+  if(result.status==='HUMAN_REQUIRED')
+   return {kind:'human_required',executed:false,message:'Revisión humana necesaria: '+String(result.reason||'LOW_CONFIDENCE').slice(0,50)};
+  return blocked('unavailable','El Gateway no confirmó la simulación');
+ }catch{return blocked('unavailable','La conexión LAB no respondió')}
+}
