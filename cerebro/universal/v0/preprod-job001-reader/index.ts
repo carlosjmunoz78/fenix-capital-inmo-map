@@ -65,7 +65,7 @@ Deno.serve(async(req:Request)=>{
     .select("company_id",{head:true,count:"exact"}).eq("company_id","fenix"),
    db.rpc("cerebro_job001_pgcron_observation_lab_v0"),
    db.rpc("cerebro_operativa_job001_rpc_observation_lab_v0"),
-   db.rpc("cerebro_operativa_seo_backlog_summary_lab_v0")
+   db.rpc("cerebro_operativa_seo_backlog_summary_lab_v0").abortSignal(AbortSignal.timeout(3500))
   ]);
   if(jobs.error||external.error||engines.error||telemetry.error)
    return secretlessFailure("PREPROD_READ_FAILED");

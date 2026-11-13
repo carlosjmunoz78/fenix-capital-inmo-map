@@ -16,9 +16,19 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    if(company_id!=='fenix'||environment!=='LAB')throw Error('LAB_FENIX_SCOPE_REQUIRED');
    if(typeof session_token!=='string'||session_token.length<20||session_token.length>8192||/\s/.test(session_token))throw Error('OWNER_SESSION_REQUIRED');
    let response;
-   try{response=await fetchImpl(URL,{method:'GET',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8500),
-    headers:{authorization:'Bearer '+session_token,apikey:preprodApiKey,'x-cerebro-owner-prod-apikey':ownerApiKey,accept:'application/json'}})}
-   catch{return empty('PREPROD_GATEWAY_UNREACHABLE')}
+   // The only upstream is a fixed owner-authenticated GET. Retry at most once
+   // on transport failure/cold start; never retry a denied HTTP response.
+   // Total bounded budget < original 8.5 seconds.
+   for(const budgetMs of [3800,3800]){
+    try{
+     response=await fetchImpl(URL,{method:'GET',redirect:'error',cache:'no-store',
+      signal:AbortSignal.timeout(budgetMs),
+      headers:{authorization:'Bearer '+session_token,apikey:preprodApiKey,
+       'x-cerebro-owner-prod-apikey':ownerApiKey,accept:'application/json'}});
+     break;
+    }catch{/* transient network error; one bounded retry only */}
+   }
+   if(!response)return empty('PREPROD_GATEWAY_UNREACHABLE');
    if(response.status!==200){
     if(response.status===404)return empty('PREPROD_SOURCE_HTTP_404');
     if(response.status===401||response.status===403){
