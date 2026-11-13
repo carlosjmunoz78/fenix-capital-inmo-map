@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {projectJob001ReadSnapshot,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
+import {projectJob001ReadSnapshot,projectCronObservation,ownerIsVerified} from './preprod-job001-reader/job001-projection.mjs';
 
 const source=fs.readFileSync(new URL('./preprod-job001-reader/index.ts',import.meta.url),'utf8');
 const observedAt='2026-11-13T18:30:00.000Z';
@@ -81,4 +81,29 @@ test('stale vs recent config timestamps distinguish metadata from live operation
  assert.equal(r.job_controls[0].runtime_verified,false);
  assert.equal(r.telemetry_status,'RECORDS_PRESENT_NOT_VALIDATED');
  assert.equal(r.live_execution_verified,false);
+});
+
+test('pg_cron PREPROD observed runs are sanitized, fixed to 4 IDs, not Hostinger master runtime',()=>{
+ const jobs=[6,22,23,25].map(id=>({legacy_pg_cron_job_id:id,active:true,last_status:'succeeded',
+  last_run_at:'2026-11-13T19:07:00+00:00',last_finished_at:'2026-11-13T19:07:01+00:00',
+  run_record_present:true,downstream_effect_verified:false,secret:'NEVER_LEAK'}));
+ const raw={source:'PREPROD_PG_CRON_OBSERVATION',is_job001_hostinger_master:false,is_job001_runtime_proof:false,jobs};
+ const projected=projectCronObservation(raw,{observedAt:'2026-11-13T19:30:00Z'});
+ assert.equal(projected.status,'OK');
+ assert.equal(projected.active,4);
+ assert.equal(projected.run_records,4);
+ assert.equal(projected.recent_successful_cron_commands,4);
+ assert.equal(projected.is_job001_hostinger_master,false);
+ assert.equal(projected.is_job001_runtime_proof,false);
+ assert.equal(JSON.stringify(projected).includes('NEVER_LEAK'),false);
+ for(const change of [
+  {...raw,is_job001_hostinger_master:true},
+  {...raw,is_job001_runtime_proof:true},
+  {...raw,jobs:[...jobs,{...jobs[0],legacy_pg_cron_job_id:9}]},
+  {...raw,jobs:[jobs[0],jobs[0]]},
+  {...raw,jobs:[{...jobs[0],downstream_effect_verified:true}]}
+ ]){
+  const response=projectCronObservation(change,{observedAt:'2026-11-13T19:30:00Z'});
+  assert.equal(response.status,'UNAVAILABLE');
+ }
 });

@@ -58,6 +58,29 @@ test('403 from PREPROD Edge exposes only safe authorization reason, never raw co
  assert.equal(value.reason,'PREPROD_OWNER_CONTEXT_NOT_AUTHORIZED');
  assert.equal(JSON.stringify(value).includes('TOP_SECRET'),false);
 });
+test('existing owner read exposes only four sanitized PREPROD pg_cron run observations; not JOB001 runtime',async()=>{
+ const cron_observation={
+  status:'OK',source:'PREPROD_PG_CRON_OBSERVATION',
+  is_job001_hostinger_master:false,is_job001_runtime_proof:false,active:4,recent_successful_cron_commands:4,
+  jobs:[6,22,23,25].map(id=>({job_id:id,active:true,last_status:'succeeded',
+   last_run_at:'2026-11-13T19:07:00Z',run_recent:true,run_record_present:true,
+   job001_execution_verified:false,downstream_effect_verified:false,command:'SECRET_NOT_ALLOWED'}))
+ };
+ const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async()=>rjson({...good(),cron_observation})});
+ const result=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(result.cron_observation.status,'OK');
+ assert.equal(result.cron_observation.active,4);
+ assert.equal(result.cron_observation.recent_successful_cron_commands,4);
+ assert.equal(result.cron_observation.is_job001_runtime_proof,false);
+ assert.equal(result.job001_queue_connected,false);
+ assert.equal(JSON.stringify(result).includes('SECRET_NOT_ALLOWED'),false);
+ const denied=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:async()=>rjson({...good(),cron_observation:{...cron_observation,is_job001_runtime_proof:true}})});
+ const invalid=await denied.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(invalid.cron_observation.status,'UNAVAILABLE');
+ assert.equal(invalid.cron_observation.active,null);
+});
 test('non-Fénix, PROD or missing owner session cannot read PREPROD and no upstream requests are made',async()=>{
  let calls=0;const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async()=>{calls++;return rjson(good())}});
  for(const params of [{company_id:'aion',environment:'LAB',session_token:TOKEN},{company_id:'fenix',environment:'PROD',session_token:TOKEN},{company_id:'fenix',environment:'LAB',session_token:'bad'}])
