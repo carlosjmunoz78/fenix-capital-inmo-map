@@ -56,8 +56,8 @@ export class UniversalGatewayLabV0 {
     const got=await this.#jobs.listForContext(ctx);
     if(!Array.isArray(got))error('JOB_READER_INVALID');
     const rows=got.filter(j=>j&&required.every(k=>j.context?.[k]===ctx[k])).map(clone);
-    if(action==='get_job')response={status:'OK',source:'LAB_JOB001_ADAPTER',job:rows.find(j=>j.job_id===value(params.job_id,'JOB_ID'))??null};
-    else response={status:'OK',source:'LAB_JOB001_ADAPTER',jobs:rows};
+    if(action==='get_job')response={status:'OK',source:this.#jobs.source||'JOB001_ADAPTER_UNVERIFIED',job:rows.find(j=>j.job_id===value(params.job_id,'JOB_ID'))??null};
+    else response={status:'OK',source:this.#jobs.source||'JOB001_ADAPTER_UNVERIFIED',jobs:rows};
     break;
    }
    case 'get_evidence':response={status:'OK',source:'STATIC_REGISTRY_REFERENCE',evidence_refs:requireCap().evidence_refs,live_test_verified:false};break;
