@@ -1,6 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import {createClient} from "https://esm.sh/@supabase/supabase-js@2";
-import {projectJob001ReadSnapshot,projectCronObservation,projectDispatchRpcObservation,ownerIsVerified} from "./job001-projection.mjs";
+import {projectJob001ReadSnapshot,projectCronObservation,projectDispatchRpcObservation,projectSeoBacklogObservation,ownerIsVerified} from "./job001-projection.mjs";
 
 const PROD_OWNER="https://cluhljgonannaafpmblx.supabase.co/functions/v1/fenix-app-gateway/session/context";
 const MAX_BODY=45000;
@@ -51,7 +51,7 @@ Deno.serve(async(req:Request)=>{
   return secretlessFailure("PREPROD_PROJECT_MISMATCH");
  try{
   const db=createClient(dbUrl,serviceKey,{auth:{persistSession:false,autoRefreshToken:false}});
-  const [jobs,external,engines,telemetry,cron,rpcStats]=await Promise.all([
+  const [jobs,external,engines,telemetry,cron,rpcStats,seoBacklog]=await Promise.all([
    db.from("cerebro_job001_control_preprod")
     .select("job_id,company_id,engine_id,environment,version,enabled,updated_at")
     .eq("company_id","FENIX_CAPITAL").eq("environment","PREPROD").limit(64),
@@ -64,7 +64,8 @@ Deno.serve(async(req:Request)=>{
    db.from("cerebro_job001_telemetry_preprod")
     .select("company_id",{head:true,count:"exact"}).eq("company_id","fenix"),
    db.rpc("cerebro_job001_pgcron_observation_lab_v0"),
-   db.rpc("cerebro_operativa_job001_rpc_observation_lab_v0")
+   db.rpc("cerebro_operativa_job001_rpc_observation_lab_v0"),
+   db.rpc("cerebro_operativa_seo_backlog_summary_lab_v0")
   ]);
   if(jobs.error||external.error||engines.error||telemetry.error)
    return secretlessFailure("PREPROD_READ_FAILED");
@@ -75,7 +76,8 @@ Deno.serve(async(req:Request)=>{
   // The cron observation is optional: a failure never falsifies source control records.
   const cron_observation=projectCronObservation(cron.error?null:cron.data,{observedAt:new Date().toISOString()});
   const rpc_observation=projectDispatchRpcObservation(rpcStats.error?null:rpcStats.data);
-  const result={...snapshot,cron_observation,rpc_observation};
+  const seo_backlog=projectSeoBacklogObservation(seoBacklog.error?null:seoBacklog.data);
+  const result={...snapshot,cron_observation,rpc_observation,seo_backlog};
   const encoded=JSON.stringify(result);
   if(encoded.length>MAX_BODY)return secretlessFailure("RESULT_TOO_LARGE");
   return json(200,result);

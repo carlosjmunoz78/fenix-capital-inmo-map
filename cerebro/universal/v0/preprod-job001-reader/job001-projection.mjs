@@ -101,3 +101,29 @@ export function projectDispatchRpcObservation(raw){
   stats_reset_at:new Date(raw.stats_reset_at).toISOString(),observed_at:new Date(raw.observed_at).toISOString(),
   hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
 }
+
+/** Existing SEO-001 PREPROD backlog status only. No staging calls or execution. */
+export function projectSeoBacklogObservation(raw){
+ const unavailable={status:'UNAVAILABLE',source:'PREPROD_SEO_BACKLOG_READ_ONLY',
+  company_id:'fenix',source_environment:'PREPROD',queued:null,done:null,
+  waiting_prerequisites:null,cancelled:null,total:null,supervisor_state:'UNVERIFIED',
+  latest_done_at:null,supervisor_last_measured_at:null,staging_probe_performed:false,
+  seo_dispatch_authorized:false,downstream_publication_verified:false};
+ if(!raw||raw.source!==unavailable.source||raw.company_id!=='fenix'||
+  raw.source_company_id!=='FENIX_CAPITAL'||raw.source_environment!=='PREPROD'||
+  raw.engine_id!=='SEO-001'||raw.staging_status!=='SUSPENDED_BY_OWNER_NO_PROBE'||
+  raw.staging_probe_performed!==false||raw.seo_dispatch_authorized!==false||
+  raw.downstream_publication_verified!==false)
+  return unavailable;
+ const keys=['queued','done','waiting_prerequisites','cancelled','total'];
+ if(!keys.every(k=>Number.isSafeInteger(raw[k])&&raw[k]>=0))return unavailable;
+ if(raw.total!==raw.queued+raw.done+raw.waiting_prerequisites+raw.cancelled)return unavailable;
+ const last=(v)=>v===null?null:(typeof v==='string'&&Number.isFinite(Date.parse(v))?new Date(v).toISOString():undefined);
+ const doneAt=last(raw.latest_done_at),supervisorAt=last(raw.supervisor_last_measured_at);
+ if(doneAt===undefined||supervisorAt===undefined||!['DEGRADED','GREEN','PLANNED','UNVERIFIED','BLOCKED'].includes(raw.supervisor_state))
+  return unavailable;
+ return {status:'OK',source:unavailable.source,company_id:'fenix',source_environment:'PREPROD',
+  queued:raw.queued,done:raw.done,waiting_prerequisites:raw.waiting,cancelled:raw.cancelled,total:raw.total,
+  latest_done_at:doneAt,supervisor_last_measured_at:supervisorAt,supervisor_state:raw.supervisor_state,
+  staging_probe_performed:false,seo_dispatch_authorized:false,downstream_publication_verified:false};
+}
