@@ -120,7 +120,7 @@ test('bounded safe GET retries one transient transport failure and verifies succ
  const src=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,fetchImpl:async(url,opts)=>{
   count++;
   assert.equal(opts.method,'GET');
-  assert.equal(url,URL);
+  assert.equal(url,SOURCE_URL);
   if(count===1)throw Error('temporary transport failure');
   return rjson(good());
  }});
