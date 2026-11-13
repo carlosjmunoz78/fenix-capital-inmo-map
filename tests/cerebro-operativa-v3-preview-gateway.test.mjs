@@ -28,9 +28,12 @@ test('Preview server enforces owner rights and never allows confirmation actions
  assert.ok(!server.includes("req.query?.url"));
  assert.ok(!server.includes('cookie'));
 });
-test('Baseline still retains physical PROD chat and corrected navigation',()=>{
+test('PROD V3 default preserves classic fallback and corrected navigation',()=>{
  const host=read('src/CerebroConsoleHost.tsx'),style=read('src/cerebro-interface-bar.css');
- assert.ok(host.includes('visualPreview?<CerebroOperativeCockpitV3Bridge/>:<CerebroOperativeConsole/>'));
+ assert.ok(host.includes("const showPremiumV3=(realProduction||visualPreview)&&!legacyRequested"));
+ assert.ok(host.includes("params.get('operativa_legacy')==='1'"));
+ assert.ok(host.includes('showPremiumV3?<CerebroOperativeCockpitV3Bridge/>'));
+ assert.ok(host.includes('<CerebroOperativeConsole/>'));
  assert.ok(style.includes('.cerebro-console-host.view-operativa > .cerebro-interface-bar'));
 });
 
