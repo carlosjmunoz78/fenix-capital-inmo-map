@@ -194,7 +194,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "OWNER_STAGING_SUSPENSION_NOT_ENFORCED_IN_LEGACY_SCHEDULERS; REAL_STAGING_CHECK_RECORDS_AFTER_NOTICE; PROD_BLOCKED"
+    "reason": "STAGING_JOB13_BLOCKED_BUT_OTHER_LEGACY_STAGING_CAPABLE_FUNCTIONS_NOT_AUDITED; PROD_CANARY_AND_GLOBAL_ROLLBACK_PENDING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -372,6 +372,46 @@
           "legacy_execution_enforced": false,
           "requires_targeted_dependency_audit": true
         }
+      },
+      "legacy_job13_probe_guard": {
+        "status": "APPLIED_AND_PHYSICALLY_VERIFIED_PREPROD",
+        "project": "hnqlnvakzaywtafeiybt",
+        "target_function": "public.seo001_probe_wp_bridge_preprod()",
+        "original_snapshot_path": "cerebro/universal/v0/staging-suspension/original-probe-snapshot.sql",
+        "original_snapshot_md5": "078cdfaa118c036e9548ffb8b73d77c",
+        "parallel_candidate_path": "cerebro/universal/v0/staging-suspension/parallel-blocked-probe-lab.sql",
+        "parallel_function": "public.seo001_probe_wp_bridge_suspended_lab_v0()",
+        "protected_dispatch_branch": "public.cerebro_job001_dispatch_preprod(13)",
+        "preprod_migration": "seo001_owner_staging_suspension_guard_preprod_20261113",
+        "expected_response": "BLOCKED_DEPENDENCY",
+        "network_calls": false,
+        "db_write_calls": false,
+        "physical_test": {
+          "job13_returned": "BLOCKED_DEPENDENCY",
+          "request_id": null,
+          "target_url": null,
+          "side_effects": false,
+          "probe_rows_before": 5,
+          "probe_rows_after": 5,
+          "last_probe": "2026-11-13T22:05:03Z",
+          "sample_checked_at": "2026-11-13T22:12:22Z"
+        },
+        "other_dispatch_cases_changed": false,
+        "rollback_requires_owner_reactivation": true,
+        "rollback_original_runtime_tested": false,
+        "note": "A targeted job13 branch is blocked. Other legacy functions referring to staging must be individually inventoried; not a global staging network guarantee."
+      },
+      "legacy_other_footprint": {
+        "status": "INVENTORIED_NOT_ALL_BLOCKED",
+        "other_functions_with_literal_staging_target": 11,
+        "direct_http_capable_examples": [
+          "seo001_dispatch_page_quality_for_city_v2_preprod",
+          "seo001_dispatch_render_qa_preprod",
+          "seo001_wp_staging_http_preprod"
+        ],
+        "active_direct_pgcron_references_to_these_examples": 0,
+        "possible_indirect_callers": "NOT_FULLY_AUDITED",
+        "no_bulk_changes": true
       }
     }
   }
