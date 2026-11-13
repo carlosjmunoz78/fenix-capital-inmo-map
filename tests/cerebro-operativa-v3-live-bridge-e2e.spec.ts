@@ -212,6 +212,25 @@ test('Operativa Cockpit V3 · bridge to authenticated current chat and preview i
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('Consulta el estado operativo');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toContainText('RESPUESTA_QA');
  await expect(cockpit.getByRole('heading',{name:'Continuar conversación'})).toBeVisible();
+ // Real controls, simulated browser SpeechRecognition: no microphone, no gateway writes.
+ const sendsBeforeVoice=postedChat?.message;
+ const dictation=cockpit.getByRole('button',{name:'Dictar',exact:true});
+ await expect(dictation).toBeEnabled();
+ await dictation.click();
+ await expect(cockpit.getByRole('button',{name:'Detener dictado'})).toBeVisible();
+ await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toBeDisabled();
+ await cockpit.getByRole('button',{name:'Detener dictado'}).click();
+ await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeEnabled();
+ const voice=cockpit.getByRole('button',{name:'Conversación por voz'});
+ await voice.click();
+ const activeVoice=cockpit.getByRole('button',{name:'Finalizar conversación por voz'});
+ await expect(activeVoice).toHaveAttribute('aria-pressed','true');
+ await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeDisabled();
+ await expect(cockpit.locator('.op3-pulse.is-listening')).toBeVisible();
+ await activeVoice.click();
+ await expect(cockpit.getByRole('button',{name:'Conversación por voz'})).toHaveAttribute('aria-pressed','false');
+ await expect(cockpit.getByRole('button',{name:'Dictar',exact:true})).toBeEnabled();
+ expect(postedChat?.message).toBe(sendsBeforeVoice);
  await cockpit.getByRole('combobox',{name:'Empresa'}).selectOption('aion');
  await expect(cockpit.getByRole('log',{name:'Historial de conversación'})).toHaveCount(0);
  await expect(cockpit.getByText('Consulta sin permisos operativos en esta empresa')).toBeVisible();
