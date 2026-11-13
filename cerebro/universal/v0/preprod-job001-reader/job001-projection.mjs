@@ -82,3 +82,22 @@ export function projectCronObservation(raw,{observedAt=new Date().toISOString()}
   recent_successful_cron_commands:jobs.filter(j=>j.active&&j.last_status==='succeeded'&&j.run_recent).length,
   jobs,is_job001_hostinger_master:false,is_job001_runtime_proof:false};
 }
+
+/** Read-only cumulative PostgREST invocation observations; never job results. */
+export function projectDispatchRpcObservation(raw){
+ const none={status:'UNAVAILABLE',source:'PREPROD_JOB001_DISPATCH_RPC_STATS',
+  rpc_calls_since_reset:null,stats_reset_at:null,observed_at:null,
+  hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
+ if(!raw||raw.source!==none.source||raw.source_semantics!=='POSTGREST_SQL_RPC_INVOCATION_COUNTER_NOT_JOB_COMPLETION'||
+   raw.hostinger_origin_verified!==false||raw.runtime_execution_verified!==false||
+   raw.downstream_effect_verified!==false||!Number.isSafeInteger(raw.rpc_calls_since_reset)||
+   raw.rpc_calls_since_reset<0||!Number.isSafeInteger(raw.matching_normalized_statements)||
+   raw.matching_normalized_statements<1||raw.matching_normalized_statements>4||
+   typeof raw.stats_reset_at!=='string'||typeof raw.observed_at!=='string'||
+   !Number.isFinite(Date.parse(raw.stats_reset_at))||!Number.isFinite(Date.parse(raw.observed_at))||
+   Date.parse(raw.stats_reset_at)>Date.parse(raw.observed_at))
+  return none;
+ return {status:'OK',source:none.source,rpc_calls_since_reset:raw.rpc_calls_since_reset,
+  stats_reset_at:new Date(raw.stats_reset_at).toISOString(),observed_at:new Date(raw.observed_at).toISOString(),
+  hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
+}
