@@ -32,6 +32,8 @@ test('neuronal nodes are evidence-based, capped, Fénix-scoped and not invented'
  assert.match(view,/No se generan nodos ficticios/);
  assert.match(view,/GitHub Actions no certifica por sí mismo/);
  assert.ok(!view.includes('staging.fenixcapital.es/wp-json'));
+ assert.match(view,/SUSPENDIDA · AISLAMIENTO PARCIAL/);
+ assert.ok(!view.includes('SUSPENDIDA · SIN SONDEOS'));
 });
 test('selected node links cannot become arbitrary external URLs',()=>{
  assert.match(view,/url\.hostname==='github\.com'/);
