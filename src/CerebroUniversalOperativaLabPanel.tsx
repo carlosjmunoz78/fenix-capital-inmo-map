@@ -74,6 +74,13 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
      <small>Controles externos: {result.job001.externalControls} · Estados de motores declarados: {result.job001.engineRecords}.</small>
      <small>Telemetría: {result.job001.telemetryRecords} registros · Configuraciones antiguas: {result.job001.staleControls}.</small>
      <small>Fuente: SQL existente PREPROD; no conecta la cola de ejecución ni cambia permisos.</small>
+     <div className="op-uni-lab-evidence" aria-label="Invocaciones registradas en el despacho JOB-001">
+      <strong>JOB-001 · invocaciones SQL observadas</strong>
+      {result.job001.rpc.state==='OK'?<>
+       <small>{result.job001.rpc.calls?.toLocaleString('es-ES')} llamadas acumuladas al despacho desde el reinicio de estadísticas ({result.job001.rpc.statsResetAt?.slice(0,10)}).</small>
+       <small>Última lectura {result.job001.rpc.observedAt?.slice(0,16).replace('T',' ')} UTC. No mide trabajos completados ni identifica por sí sola el origen Hostinger.</small>
+      </>:<small>Estadísticas de invocación no verificables; no se muestran ceros inventados.</small>}
+     </div>
      <div className="op-uni-lab-evidence" aria-label="Actividad observada del programador de Supabase">
       <strong>Planificador Supabase PREPROD · actividad registrada</strong>
       {result.job001.cron.state==='OK'?<>

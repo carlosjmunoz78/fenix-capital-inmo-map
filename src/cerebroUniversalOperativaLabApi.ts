@@ -38,11 +38,15 @@ export type UniversalCronObservationLab={
  jobs:{job_id:number;active:boolean;last_status:string;last_run_at:string|null;run_recent:boolean}[];
  source:'PREPROD_PG_CRON_OBSERVATION';hostingerMasterVerified:false;job001ExecutionVerified:false;
 };
+export type UniversalRpcObservationLab={
+ state:'OK'|'UNAVAILABLE';calls:number|null;statsResetAt:string|null;observedAt:string|null;
+ source:'PREPROD_JOB001_DISPATCH_RPC_STATS';runtimeVerified:false;downstreamVerified:false;
+};
 export type UniversalJob001ControlLab={
  state:'OK'|'UNAVAILABLE';source_environment:'PREPROD';
  controlRows:number|null;enabledControls:number|null;externalControls:number|null;
  engineRecords:number|null;telemetryRecords:number|null;staleControls:number|null;
- observedAt:string|null;executionVerified:false;reason:string|null;cron:UniversalCronObservationLab;
+ observedAt:string|null;executionVerified:false;reason:string|null;cron:UniversalCronObservationLab;rpc:UniversalRpcObservationLab;
  engineBindings:{engine_id:string;version:string;declared_state:string;freshness:'STALE_CONFIG'|'RECENT_CONFIG';observed_config_at:string}[];
  controlEngineBindings:{engine_id:string;configured_controls:number;enabled_controls:number;stale_controls:number}[];
 };
@@ -154,7 +158,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   let job001:UniversalJob001ControlLab={
    state:'UNAVAILABLE',source_environment:'PREPROD',controlRows:null,
    enabledControls:null,externalControls:null,engineRecords:null,telemetryRecords:null,
-   staleControls:null,observedAt:null,executionVerified:false,reason:null,engineBindings:[],controlEngineBindings:[],cron:{state:'UNAVAILABLE',active:null,recentSuccessful:null,jobs:[],source:'PREPROD_PG_CRON_OBSERVATION',hostingerMasterVerified:false,job001ExecutionVerified:false}
+   staleControls:null,observedAt:null,executionVerified:false,reason:null,engineBindings:[],controlEngineBindings:[],cron:{state:'UNAVAILABLE',active:null,recentSuccessful:null,jobs:[],source:'PREPROD_PG_CRON_OBSERVATION',hostingerMasterVerified:false,job001ExecutionVerified:false},rpc:{state:'UNAVAILABLE',calls:null,statsResetAt:null,observedAt:null,source:'PREPROD_JOB001_DISPATCH_RPC_STATS',runtimeVerified:false,downstreamVerified:false}
   };
   try{
    const j=await call('get_job001_controls') as {
@@ -162,7 +166,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
     job001_queue_connected?:unknown;live_execution_verified?:unknown;prod_execution_enabled?:unknown;
     control_rows?:unknown;enabled_control_rows?:unknown;external_control_rows?:unknown;
     engine_state_records?:unknown;telemetry_records?:unknown;stale_control_rows?:unknown;
-    observed_at?:unknown;reason?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown;cron_observation?:unknown
+    observed_at?:unknown;reason?:unknown;engine_bindings?:unknown;control_engine_bindings?:unknown;cron_observation?:unknown;rpc_observation?:unknown
    };
    const why=new Set(['PREPROD_OWNER_CONTEXT_NOT_AUTHORIZED','PREPROD_OWNER_ONLY','PREPROD_OWNER_CONTEXT_INVALID','PREPROD_OWNER_RESOLVER_UNAVAILABLE','PREPROD_FENIX_LAB_SCOPE_ONLY','PREPROD_OWNER_SESSION_REQUIRED','PREPROD_GATEWAY_UNREACHABLE','PREPROD_OWNER_DENIED','PREPROD_SOURCE_UNAVAILABLE','PREPROD_SOURCE_CONTRACT_INVALID','PREPROD_COUNTS_INVALID','PREPROD_COUNT_MISMATCH','PREPROD_OBSERVED_AT_INVALID','PREPROD_TENANT_OR_RUNTIME_INVALID','ENGINE_BINDING_CONTRACT_INVALID','JOB_ENGINE_CONTRACT_INVALID','PREPROD_SOURCE_HTTP_404','PREPROD_DB_AUTH_UNAVAILABLE','PREPROD_READ_FAILED','PREPROD_OWNER_CONTEXT_UNAVAILABLE']);
    if(j.status==='UNAVAILABLE'&&j.source==='PREPROD_JOB001_CONTROL_METADATA'&&j.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&why.has(String(j.reason)))job001.reason=String(j.reason);
@@ -176,6 +180,20 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      externalControls:n(j.external_control_rows),engineRecords:n(j.engine_state_records),
      telemetryRecords:n(j.telemetry_records),staleControls:n(j.stale_control_rows),
      observedAt:typeof j.observed_at==='string'?j.observed_at:null,executionVerified:false,reason:null,
+     rpc:(()=>{
+      const raw=j.rpc_observation;
+      const fallback:UniversalRpcObservationLab={state:'UNAVAILABLE',calls:null,statsResetAt:null,observedAt:null,
+       source:'PREPROD_JOB001_DISPATCH_RPC_STATS',runtimeVerified:false,downstreamVerified:false};
+      if(!raw||typeof raw!=='object')return fallback;
+      const r=raw as Record<string,unknown>;
+      if(r.status!=='OK'||r.source!==fallback.source||r.hostinger_origin_verified!==false||
+         r.runtime_execution_verified!==false||r.downstream_effect_verified!==false||
+         !Number.isSafeInteger(r.rpc_calls_since_reset)||Number(r.rpc_calls_since_reset)<0||
+         typeof r.stats_reset_at!=='string'||!Number.isFinite(Date.parse(r.stats_reset_at))||
+         typeof r.observed_at!=='string'||!Number.isFinite(Date.parse(r.observed_at)))return fallback;
+      return {state:'OK',calls:Number(r.rpc_calls_since_reset),statsResetAt:r.stats_reset_at,
+       observedAt:r.observed_at,source:fallback.source,runtimeVerified:false,downstreamVerified:false};
+     })(),
      cron:(()=>{
       const c=j.cron_observation;
       const fallback:UniversalCronObservationLab={state:'UNAVAILABLE',active:null,recentSuccessful:null,jobs:[],
