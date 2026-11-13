@@ -10,7 +10,7 @@ type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources']);
+const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','submit_command']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
@@ -38,6 +38,15 @@ export default async function handler(req:Req,res:Res){
  const params=req.body.params;
  if(!obj(params)||params.company_id!=='fenix'||params.environment!=='LAB')
   return res.status(403).json({status:'CLOSED',reason:'COMPANY_OR_ENV_DENIED'});
+ // A command can be structurally validated in LAB, never executed here.
+ // The runtime has no write executor and this API refuses every non-dry-run request.
+ if(req.body.action==='submit_command'){
+  const p=params as Record<string,unknown>;
+  if(p.dry_run!==true||p.engine_id!=='FACT-001'||p.capability_id!=='fact.registry.summary'||
+   p.version!=='0.1.0-lab'||!obj(p.payload)||Object.keys(p.payload).length!==0||
+   typeof p.idempotency_key!=='string'||!/^lab-[a-z0-9-]{12,48}$/.test(p.idempotency_key))
+   return res.status(404).json({status:'CLOSED',reason:'LAB_DRYRUN_CONTRACT_REQUIRED'});
+ }
  if(JSON.stringify(req.body).length>4096)
   return res.status(413).json({status:'CLOSED',reason:'REQUEST_TOO_LARGE'});
  try{
@@ -54,7 +63,7 @@ export default async function handler(req:Req,res:Res){
    params
   });
   if(!obj(result))return res.status(502).json({status:'UNAVAILABLE'});
-  return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:['list_work_activity','list_owner_sources'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',prod_execution_enabled:false});
+  return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:['list_work_activity','list_owner_sources'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',prod_execution_enabled:false, ...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
  }catch{
   // No upstream error, actor data, access token or headers ever returned to client.
   return res.status(403).json({status:'CLOSED',reason:'OWNER_AUTH_OR_POLICY_DENIED'});
