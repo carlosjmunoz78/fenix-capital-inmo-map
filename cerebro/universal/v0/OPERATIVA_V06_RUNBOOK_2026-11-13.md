@@ -93,3 +93,12 @@ No new paid subscriptions or dedicated worker infrastructure. GitHub CI and Verc
 ### Backup y rollback aislados
 - Snapshot lógico en PR #66: migraciones `preprod-job001-reader/cron-observation-v0.sql` y `audit-lab-v0/migration.sql`, códigos Edge versiones v4 (lector) y v1 (auditoría), y SHA del último Vercel Preview. No hay ninguna migración de tablas legadas.
 - Si hay fallo: detener uso del Preview; mantener el Gateway original. No borrar nada hasta inventariar consumidores. Para revertir la observación cron, retirar el uso de la RPC y después eliminar wrapper + función interna; para revertir auditoría, exportar y respaldar previamente registros y después retirar Edge y tabla aislados con control de dependencias. NO ejecutado ese borrado, porque el entorno ya contiene evidencia válida.
+
+## V0.11 · cierre de auditoría idempotente en la misma pestaña (13 nov 2026)
+
+- El despliegue Vercel Preview `dpl_Dr5a4AdAihaEQ758vD3rviDarH8M` está READY, SHA `6dff0330a9a93326b72be8ff210263459aaca666`, alias LAB estable. No se ha cambiado App/CRM/PROD/DNS ni fusionado PR #66.
+- En Opera pestaña `1381967780`, la comprobación autorizada FACT-001 devolvió **simulación validada y auditada en PREPROD**, sin ejecución. La marca de aceptación de un solo uso se eliminó automáticamente de la URL mediante history.replaceState (sin nueva pestaña y sin recargar la pantalla).
+- SQL de aceptación: `public.cerebro_operativa_lab_audit_v0` conserva **1 registro**, **1 clave única**, **0 filas con executed/prod_execution_enabled o coste adicional distinto de cero**, incluso después de repetir la operación con la misma clave. Esto acredita persistencia e idempotencia de la simulación, NO ejecución de motores.
+- Seguridad negativa de auditoría: HTTP 401 a POST anónimo; RLS activo, `anon/authenticated` sin SELECT, escritura solo del servicio interno; pruebas UI/API/Gateway + build y smoke en GitHub Actions `43494561862` con resultado SUCCESS. No se han transmitido claves por el chat.
+- En PREPROD los cuatro pg_cron activos muestran ejecuciones SQL correctas, pero el planificador maestro Hostinger y la telemetría completa de JOB-001 **siguen sin certificarse**. Los 179 ID del catálogo continúan siendo definiciones, no 179 motores ejecutándose.
+- El contrato multiinterfaz SDK está implementado en LAB, pero no acredita que JARVIS, Neuronal, Navegador y móvil estén conectados físicamente. Ninguna promoción a PROD está autorizada sin tribunal, backup, OLD vs NEW y rollback.

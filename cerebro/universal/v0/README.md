@@ -43,3 +43,7 @@ At 13-Nov-2026 10:21 UTC: 26 queued runs all on 11-Nov-2026 20:18:20 UTC from UM
 ## V0.8 Stable Preview and engine historical bindings
 
 Stable LAB hostname: `fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app`, mapped to the isolated Vercel deployment `dpl_C8XwLVpDTdYwHBFoHiywBw42tEBK`. `get_job001_controls` emits bounded, historical per-engine PREPROD evidence only, not runtime proof. The owner's active Opera tab has not been navigated; physical owner E2E on the stable alias remains pending. No PROD promotion and no extra subscription.
+
+## V0.11 Owner audit acceptance
+
+FACT-001 dry-run policy check now writes an owner-verified idempotent audit record exclusively in isolated PREPROD. E2E verified with the same authenticated Opera tab; 1 durable row after repeated replay, 0 executions, 0 PROD authorizations. One-time QA marker removed from URL after confirmation without a tab reload. **JOB-001 Hostinger master still unverified and autonomous PROD dispatch disabled.**

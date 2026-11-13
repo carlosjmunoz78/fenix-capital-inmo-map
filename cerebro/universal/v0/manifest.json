@@ -117,7 +117,7 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "JOB001_HOSTINGER_MASTER_UNVERIFIED_REAL_JOB_DISPATCH_AND_TELEMETRY_MISSING_FULL_ROLLBACK_AND_CANARY_PENDING"
+    "reason": "JOB001_HOSTINGER_MASTER_AND_DOWNSTREAM_RUNTIME_NOT_VERIFIED; REAL_DISPATCH_TELEMETRY_AND_FULL_ROLLBACK_PENDING"
   },
   "work_activity": {
     "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
@@ -195,7 +195,8 @@
       "SECURITY_INCIDENT",
       "MONEY_LIMIT",
       "CUSTOMER_HUMAN_REQUEST"
-    ]
+    ],
+    "qa_auto_trigger_status": "OWNER_APPROVED_ONCE_ONLY_PREVIEW_FLAG_REMOVED_AFTER_RESPONSE"
   },
   "preview_stable_alias": {
     "host": "fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app",
@@ -203,12 +204,13 @@
     "target_production": false,
     "sso_anonymous_denial": "VERIFIED_GITHUB_ACTIONS_HTTP_302",
     "owner_authenticated_latest_e2e": "VERIFIED_CRON_OBSERVATION_AND_FACT_DURABLE_DRYRUN",
-    "mapped_deployment": "dpl_DosHmz7iEVra2SPmJjcu9xfunreT",
-    "mapped_source_sha": "6a875253a0663c702897f345e12d1184e72ac62d",
+    "mapped_deployment": "dpl_Dr5a4AdAihaEQ758vD3rviDarH8M",
+    "mapped_source_sha": "6dff0330a9a93326b72be8ff210263459aaca666",
     "vercel_alias_assignment": "VERIFIED_LIST_DEPLOYMENT_ALIASES",
     "no_new_tabs": true,
     "project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
-    "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780"
+    "visual_polish_verified": "SCREENSHOT_EXISTING_TAB_1381967780",
+    "opened_new_tabs": false
   },
   "lab_durable_audit": {
     "state": "DEPLOYED_PREPROD_AND_OWNER_E2E_VERIFIED",
@@ -238,6 +240,9 @@
     "source": "PREPROD_OWNER_VERIFIED_DURABLE_AUDIT",
     "rollback_documented": true,
     "full_physical_prod_rollback_verified": false,
-    "no_job_queue_or_runtime_execution": true
+    "no_job_queue_or_runtime_execution": true,
+    "one_shot_query_cleaned_verified": true,
+    "repeated_navigation_db_rows": 1,
+    "visible_owner_success_message_verified": true
   }
 }
