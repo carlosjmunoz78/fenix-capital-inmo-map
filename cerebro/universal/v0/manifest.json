@@ -38,6 +38,34 @@
   },
   "promotion": {
     "allowed": false,
-    "reason": "LAB_ONLY_NOT_PHYSICALLY_INTEGRATED"
+    "reason": "LAB_CI_GREEN_REAL_OWNER_WORK_ACTIVITY_E2E_AND_JOB001_PENDING"
+  },
+  "work_activity": {
+    "source": "EXISTING_CEREBRO_CONSOLE_ACTIVITY_V0_GITHUB_ACTIONS",
+    "adapter": "cerebro/universal/v0/github-work-activity-reader.mjs",
+    "method": "list_work_activity",
+    "state": "IMPLEMENTED_LAB_CI_VERIFIED_OWNER_E2E_PENDING",
+    "statuses": [
+      "LIVE",
+      "CACHED",
+      "UNAVAILABLE"
+    ],
+    "not_JOB001": true,
+    "no_new_queue": true
+  },
+  "interface_autoconnect": {
+    "adapter": "cerebro/universal/v0/interface-autoconnect.mjs",
+    "supported_contracts": [
+      "OPERATIVA",
+      "JARVIS",
+      "NEURONAL",
+      "NAVEGADOR",
+      "APP",
+      "MOBILE"
+    ],
+    "state": "CONTRACT_TESTED_NOT_ALL_PHYSICAL_UI_CONNECTED",
+    "role_authority": "SERVER_SESSION_RESOLVER",
+    "allowed_environment": "LAB",
+    "writes": false
   }
 }
