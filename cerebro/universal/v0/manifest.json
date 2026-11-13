@@ -1,0 +1,43 @@
+{
+  "schema_version": "0.1.0",
+  "engine_id": "FACT-001",
+  "capability_id": "fact.registry.summary",
+  "environment": "LAB",
+  "version": "0.1.0-lab",
+  "company_id": "SERVER_AUTH_REQUIRED",
+  "sdk_targets": [
+    "Operativa",
+    "JARVIS",
+    "Neuronal",
+    "Browser",
+    "App",
+    "Mobile"
+  ],
+  "registry_source": "cerebro/registry/engine-registry.v1.json",
+  "security": {
+    "server_resolved_actor": true,
+    "deny_by_default": true,
+    "write_execution": false,
+    "trading_access": false,
+    "required_secrets": [],
+    "additional_cost_eur": 0
+  },
+  "jobs": {
+    "uses_existing_JOB001": true,
+    "second_queue": false,
+    "shadow_planner_only": true,
+    "live_adapter_connected": false
+  },
+  "backup": {
+    "method": "unchanged_git_parent",
+    "sha": "a51dd14eac11f02424dce5db426346b041c1824f"
+  },
+  "rollback": {
+    "method": "revert_isolated_branch_commit",
+    "production_changed": false
+  },
+  "promotion": {
+    "allowed": false,
+    "reason": "LAB_ONLY_NOT_PHYSICALLY_INTEGRATED"
+  }
+}

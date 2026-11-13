@@ -1,0 +1,28 @@
+# CEREBRO Universal Gateway V0 · parallel LAB
+
+Status: **LAB implementation, NOT production certified**.
+
+## Existing preserved systems
+Reuses the actual FACT-001 V1 179-engine registry, preserving 177 base IDs plus HCI-001 and MOTION-001. Also preserves existing Action Gateway, JOB-001 Durable Runtime, Dynamic Concurrency Policy, V4 and its deployment. Nothing in their source files was changed.
+
+## FACT-001 proof-of-capability
+One executable **read-only** deterministic capability is exposed: fact.registry.summary. It reports 179 registered definitions and explicitly NOT_VERIFIED for operational count. Data source is REPOSITORY_SNAPSHOT_NOT_LIVE, not a live PROD state.
+
+## One protocol
+Authenticated server -> session resolver -> UniversalGatewayLabV0 -> FACT-001 Registry read wrapper / optional JOB-001 read adapter -> audit -> SDK. Same SDK contract for Operativa, JARVIS, Neuronal, Browser, App and mobile. The Gateway is in-process only; NO new public endpoint is deployed.
+
+Methods: list_capabilities, get_capability, get_engine_status, list_jobs, get_job, get_evidence, submit_command, invoke_read and audit_log. Submit_command supports dry_run=true ONLY; no write executor registered. No secrets and no new provider calls. Identity scopes are resolved on server; changing UI company cannot grant rights.
+
+## Scheduler boundary
+The concurrency-shadow module is a pure diagnostic planner: DAG dependencies, priorities, per-company/global/provider concurrency, resource locks, hard additional-cost stop. It does not enqueue/start jobs. Any real execution must be wrapped onto preexisting JOB-001, not a second queue.
+
+## Acceptance & recovery
+- CI: node 24, FACT-001 registry validation + explicit 10 contract tests.
+- Explicit negative tests: unauthorized scope/tenant, PROD denies, idempotent dryrun, payload validation, missing job adapter, cross-tenant filtering, audit redaction, concurrency resource locks, zero-cost.
+- OLD vs NEW: compare only metadata/contract to existing FACT V1 and V4; no production behaviors changed. Integration E2E pending.
+- Backup: immutable V4 source SHA a51dd14eac11f02424dce5db426346b041c1824f retained.
+- Rollback: revert the new isolated LAB commit/close draft PR; no PROD rollback operation required.
+- Next: server-auth binding to an isolated non-PROD listener, read-only JOB-001 adapter, compare output, physical E2E and rollback; no App alias changes.
+
+## GitHub Actions queue snapshot
+At 13-Nov-2026 10:21 UTC: 26 queued runs all on 11-Nov-2026 20:18:20 UTC from UMS-001 PR45. Example run 43095209609 shows zero materialized jobs, so there is no proof of runner saturation. Browser1 workflow on main was in progress; its named concurrency group intentionally serializes that workflow's runs. UMS root cause remains unproven. This is GitHub's queue only, NOT Cloudflare/DB/CEREBRO total jobs.

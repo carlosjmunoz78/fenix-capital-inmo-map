@@ -1,0 +1,35 @@
+name: CEREBRO Universal Gateway V0 LAB contract CI
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/universal/v0/**'
+      - '.github/workflows/cerebro-universal-gateway-v0-lab.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-gateway-v0-lab-ci
+  cancel-in-progress: false
+
+jobs:
+  lab-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: FACT-001 canonical V1 registry unchanged
+        run: node cerebro/factory-v1.mjs validate --registry cerebro/registry/engine-registry.v1.json
+      - name: Zero-IO universal LAB V0 tests
+        run: |
+          node --check cerebro/universal/v0/control-plane.mjs
+          node --check cerebro/universal/v0/interface-sdk.mjs
+          node --check cerebro/universal/v0/concurrency-shadow.mjs
+          node --test cerebro/universal/v0/universal-gateway.test.mjs
+      - name: Check no-Prod and zero additional cost
+        run: |
+          node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
