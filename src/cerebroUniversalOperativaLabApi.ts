@@ -255,10 +255,11 @@ export async function simulateFactRegistryDryRunLab():Promise<UniversalLabDryRun
    durable_audit?:unknown;idempotency_persisted?:unknown;prod_execution_enabled?:unknown
   };
   if(result.executed!==false||result.transport!=='PREVIEW_ONLY_SERVER_VERIFIED'||
-    result.prod_execution_enabled!==false||result.durable_audit!==false||result.idempotency_persisted!==false)
+    result.prod_execution_enabled!==false||
+    (result.status==='DRY_RUN_VALIDATED'&&(result.durable_audit!==true||result.idempotency_persisted!==true)))
    return blocked('unavailable','Contrato seguro no acreditado');
   if(result.status==='DRY_RUN_VALIDATED')
-   return {kind:'validated',executed:false,message:'Orden FACT-001 validada solo en simulación; ejecución REAL bloqueada y auditoría duradera pendiente'};
+   return {kind:'validated',executed:false,message:'Simulación FACT-001 validada y auditada de forma persistente en PREPROD. Sin ejecución ni permisos de producción.'};
   if(result.status==='HUMAN_REQUIRED')
    return {kind:'human_required',executed:false,message:'Revisión humana necesaria: '+String(result.reason||'LOW_CONFIDENCE').slice(0,50)};
   return blocked('unavailable','El Gateway no confirmó la simulación');

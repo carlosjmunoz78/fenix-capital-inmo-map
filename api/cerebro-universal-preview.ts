@@ -66,7 +66,41 @@ export default async function handler(req:Req,res:Res){
    params
   });
   if(!obj(result))return res.status(502).json({status:'UNAVAILABLE'});
-  return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:['list_work_activity','list_owner_sources','get_job001_controls'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',prod_execution_enabled:false, ...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
+  // A dry-run is considered durable only when the separate PREPROD lab audit
+  // confirms a committed idempotent row. Never forward service_role or payloads.
+  if(req.body.action==='submit_command'&&result.status==='DRY_RUN_VALIDATED'){
+   if(result.executed!==false||result.environment!=='LAB'||result.engine_id!=='FACT-001')
+    return res.status(503).json({status:'UNAVAILABLE',reason:'DRYRUN_RESULT_CONTRACT_INVALID'});
+   const preprodKey=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY;
+   if(!preprodKey?.startsWith('sb_publishable_'))
+    return res.status(503).json({status:'UNAVAILABLE',reason:'AUDIT_BACKEND_NOT_CONFIGURED'});
+   let persisted:Record<string,unknown>;
+   try{
+    const response=await fetch('https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-operativa-lab-audit-v0',{
+     method:'POST',redirect:'error',cache:'no-store',signal:AbortSignal.timeout(8500),
+     headers:{authorization:bearer,apikey:preprodKey,'x-cerebro-owner-prod-apikey':apikey,
+      'content-type':'application/json',accept:'application/json'},
+     body:JSON.stringify({action:'FACT001_DRY_RUN_AUDIT',company_id:'fenix',environment:'LAB',
+      engine_id:'FACT-001',capability_id:'fact.registry.summary',version:'0.1.0-lab',
+      idempotency_key:params.idempotency_key,dry_run:true,policy_decision:'DRY_RUN_VALIDATED'})
+    });
+    if(!response.ok)return res.status(503).json({status:'UNAVAILABLE',reason:'DURABLE_AUDIT_NOT_CONFIRMED'});
+    const value:unknown=await response.json();
+    if(!obj(value))throw Error('AUDIT_INVALID');
+    persisted=value;
+   }catch{return res.status(503).json({status:'UNAVAILABLE',reason:'DURABLE_AUDIT_NOT_CONFIRMED'});}
+   if(persisted.status!=='AUDIT_PERSISTED'||persisted.source!=='PREPROD_LAB_DURABLE_AUDIT'||
+      persisted.executed!==false||persisted.prod_execution_enabled!==false||
+      persisted.decision!=='DRY_RUN_VALIDATED'||typeof persisted.audit_id!=='string'||
+      !/^[0-9a-f]{8}-[0-9a-f-]{27,}$/.test(persisted.audit_id))
+    return res.status(503).json({status:'UNAVAILABLE',reason:'DURABLE_AUDIT_PROOF_INVALID'});
+   return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
+    source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',prod_execution_enabled:false,
+    durable_audit:true,idempotency_persisted:true,audit_ref:persisted.audit_id,audit_replayed:persisted.replayed===true});
+  }
+  return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
+   source:['list_work_activity','list_owner_sources','get_job001_controls'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
+   prod_execution_enabled:false,...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
  }catch{
   // No upstream error, actor data, access token or headers ever returned to client.
   return res.status(403).json({status:'CLOSED',reason:'OWNER_AUTH_OR_POLICY_DENIED'});
