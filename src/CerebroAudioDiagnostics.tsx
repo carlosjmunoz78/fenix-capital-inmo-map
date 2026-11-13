@@ -10,13 +10,16 @@ export default function CerebroAudioDiagnostics(){
  const [micStatus,setMicStatus]=useState('Sin comprobar');
  const [speechStatus,setSpeechStatus]=useState('Sin comprobar');
  const [outputStatus,setOutputStatus]=useState('Sin comprobar');
+ const [ttsStatus,setTtsStatus]=useState('Sin comprobar');
  const stream=useRef<MediaStream|null>(null);
  const context=useRef<AudioContext|null>(null);
  const recognition=useRef<CerebroSpeechRecognition|null>(null);
  const recognitionTimeout=useRef<number|null>(null);
  const token=useRef(0);
+ const voiceTestRunning=useRef(false);
  const available=voiceRecognitionSupported();
  function stop(){
+  if(voiceTestRunning.current&&'speechSynthesis'in window){window.speechSynthesis.cancel();voiceTestRunning.current=false}
   recognition.current?.abort();recognition.current=null;
   if(recognitionTimeout.current!==null){clearTimeout(recognitionTimeout.current);recognitionTimeout.current=null}
   stream.current?.getTracks().forEach(track=>track.stop());stream.current=null;
@@ -69,18 +72,18 @@ export default function CerebroAudioDiagnostics(){
   rec.lang='es-ES';rec.continuous=false;rec.interimResults=false;rec.maxAlternatives=1;
   rec.onstart=()=>{if(token.current===current)setSpeechStatus('Reconocimiento iniciado. Di una frase corta…')};
   rec.onresult=event=>{
-   if(token.current!==current)return;
+   if(token.current!==current||recognition.current!==rec)return;
    const result=event.results[event.results.length-1];
    const transcript=String(result?.[0]?.transcript||'').trim();
    setSpeechStatus(transcript?'Transcripción detectada: «'+transcript.slice(0,100)+'». No se ha enviado a CEREBRO.':'No se ha detectado ninguna palabra.');
    stop();
   };
   rec.onerror=event=>{
-   if(token.current!==current)return;
+   if(token.current!==current||recognition.current!==rec)return;
    setSpeechStatus('Error de reconocimiento: '+String(event.error||'desconocido')+'. La captura de audio y el reconocimiento son pruebas diferentes.');
    stop();
   };
-  rec.onend=()=>{if(token.current!==current)return;recognition.current=null;
+  rec.onend=()=>{if(token.current!==current||recognition.current!==rec)return;recognition.current=null;
    if(recognitionTimeout.current!==null){clearTimeout(recognitionTimeout.current);recognitionTimeout.current=null}
    setSpeechStatus(s=>s==='Reconocimiento iniciado. Di una frase corta…'?'Terminó sin transcribir. Prueba de nuevo o revisa el permiso.':s);
   };
@@ -105,6 +108,22 @@ export default function CerebroAudioDiagnostics(){
    }).catch(()=>{setOutputStatus('No se pudo iniciar el altavoz.');void ctx.close().catch(()=>{})});
   }catch{setOutputStatus('No se ha podido acceder a la salida de audio.')}
  }
+ function checkSpeechOutput(){
+  if(!('speechSynthesis'in window)||typeof SpeechSynthesisUtterance==='undefined'){
+   setTtsStatus('El navegador no ofrece lectura de texto en voz alta.');return;
+  }
+  try{
+   const utterance=new SpeechSynthesisUtterance('Hola. Soy CEREBRO. Esta es una prueba de la voz del navegador.');
+   utterance.lang='es-ES';utterance.rate=1;
+   utterance.onstart=()=>{voiceTestRunning.current=true;setTtsStatus('Reproduciendo la voz. ¿La escuchas?')};
+   utterance.onend=()=>{voiceTestRunning.current=false;setTtsStatus('La reproducción terminó. Confirma si escuchaste la voz.')};
+   utterance.onerror=e=>{voiceTestRunning.current=false;setTtsStatus('Error de síntesis de voz: '+String(e.error||'desconocido'))};
+   window.speechSynthesis.cancel();
+   voiceTestRunning.current=true;
+   setTtsStatus('Iniciando la voz del navegador…');
+   window.speechSynthesis.speak(utterance);
+  }catch{voiceTestRunning.current=false;setTtsStatus('No se pudo iniciar la voz del navegador.')}
+ }
  function close(){token.current++;stop();setBusy(false);setOpen(false)}
  if(!open)return <button type="button" className="op3-audio-diagnostic-toggle" onClick={()=>setOpen(true)}><Stethoscope size={15}/> Diagnóstico de micrófono y voz</button>;
  return <section className="op3-audio-diagnostic" aria-label="Diagnóstico local de audio">
@@ -112,7 +131,8 @@ export default function CerebroAudioDiagnostics(){
   <p>Son pruebas locales: no graban ni guardan audio, ni envían instrucciones. Solo solicitan acceso cuando pulsas una prueba.</p>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={()=>void checkMic()}><Mic size={15}/> Comprobar micrófono</button><span role="status">{micStatus}</span></div>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkRecognition}><Mic size={15}/> Comprobar dictado</button><span role="status">{speechStatus}</span></div>
-  <div className="op3-audio-test"><button type="button" onClick={checkOutput}><Volume2 size={15}/> Comprobar altavoces</button><span role="status">{outputStatus}</span></div>
+  <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkOutput}><Volume2 size={15}/> Comprobar altavoces</button><span role="status">{outputStatus}</span></div>
+  <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkSpeechOutput}><Volume2 size={15}/> Comprobar voz hablada</button><span role="status">{ttsStatus}</span></div>
   <p className="op3-audio-note">Si ambos navegadores fallan, revisa también Configuración de Windows → Privacidad y seguridad → Micrófono, y Configuración → Sistema → Sonido → Entrada.</p>
  </section>;
 }

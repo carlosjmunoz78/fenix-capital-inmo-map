@@ -10,5 +10,7 @@ test('audio diagnostics are local, opt-in and never submit messages',()=>{
   if(value==='release')continue;
   assert.ok(code.includes(value),value);
  }
+ assert.ok(code.includes('speechSynthesis.speak'));
+ assert.ok(code.includes('Comprobar voz hablada'));
  for(const forbidden of ['MediaRecorder','localStorage','fetch(','postCerebroConsoleChat','sendText(','SERVICE_ROLE_KEY'])assert.ok(!code.includes(forbidden),forbidden);
 });
