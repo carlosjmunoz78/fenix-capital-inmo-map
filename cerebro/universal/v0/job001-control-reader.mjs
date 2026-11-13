@@ -127,6 +127,27 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
       stats_reset_at:x.stats_reset_at,observed_at:x.observed_at,
       hostinger_origin_verified:false,runtime_execution_verified:false,downstream_effect_verified:false};
     })(),
+    seo_backlog:(()=>{
+     const v=raw.seo_backlog;
+     const none={status:'UNAVAILABLE',source:'PREPROD_SEO_BACKLOG_READ_ONLY',
+      queued:null,done:null,waiting_prerequisites:null,cancelled:null,total:null,
+      supervisor_state:'UNVERIFIED',latest_done_at:null,supervisor_last_measured_at:null,
+      staging_probe_performed:false,seo_dispatch_authorized:false,downstream_publication_verified:false};
+     if(!v||v.status!=='OK'||v.source!==none.source||v.company_id!=='fenix'||v.source_environment!=='PREPROD'||
+       v.staging_probe_performed!==false||v.seo_dispatch_authorized!==false||
+       v.downstream_publication_verified!==false)return none;
+     const keys=['queued','done','waiting_prerequisites','cancelled','total'];
+     if(!keys.every(k=>Number.isSafeInteger(v[k])&&v[k]>=0)||
+       v.total!==v.queued+v.done+v.waiting_prerequisites+v.cancelled||
+       !['DEGRADED','GREEN','PLANNED','UNVERIFIED','BLOCKED'].includes(v.supervisor_state))
+      return none;
+     return {status:'OK',source:none.source,queued:v.queued,done:v.done,
+      waiting_prerequisites:v.waiting_prerequisites,cancelled:v.cancelled,total:v.total,
+      supervisor_state:v.supervisor_state,
+      latest_done_at:typeof v.latest_done_at==='string'&&Number.isFinite(Date.parse(v.latest_done_at))?v.latest_done_at:null,
+      supervisor_last_measured_at:typeof v.supervisor_last_measured_at==='string'&&Number.isFinite(Date.parse(v.supervisor_last_measured_at))?v.supervisor_last_measured_at:null,
+      staging_probe_performed:false,seo_dispatch_authorized:false,downstream_publication_verified:false};
+    })(),
     source_environment:'PREPROD',source_provenance:'EXISTING_PREPROD_SQL_READ_ONLY',
     job001_queue_connected:false,live_execution_verified:false,prod_execution_enabled:false,
     note:'CONTROL_CONFIG_AND_DECLARED_ENGINE_STATE_NOT_RUNTIME_PROOF'
