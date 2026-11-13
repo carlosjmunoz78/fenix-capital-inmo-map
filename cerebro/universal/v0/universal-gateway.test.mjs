@@ -97,3 +97,16 @@ test('shadow planner excludes paid, PROD and unknown DAG dependencies',()=>{
  assert.deepEqual(r.parallel_candidates,['x']);
  for(const reason of ['MONEY_LIMIT','ENVIRONMENT_NOT_LAB','UNKNOWN_DEPENDENCY'])assert.ok(r.blocked.some(x=>x.reason===reason));
 });
+
+test('HUMAN_REQUIRED policy is explicit for cost, signature and high-risk dry-runs',async()=>{
+ const {gateway}=fixture();
+ const call=(key,override)=>gateway.handle({session_token:'owner',action:'submit_command',params:{
+   company_id:'fenix',environment:'LAB',engine_id:'FACT-001',capability_id:'fact.registry.summary',
+   version:'0.1.0-lab',payload:{},dry_run:true,idempotency_key:key,...override
+ }});
+ assert.equal((await call('cost',{estimated_additional_cost_eur:0.01})).reason,'MONEY_LIMIT');
+ assert.equal((await call('sign',{signature_required:true})).reason,'SIGNATURE_REQUIRED');
+ assert.equal((await call('risk',{risk:'HIGH'})).reason,'HIGH_RISK');
+ await assert.rejects(call('invalid',{human_exception:'NOT_VALID'}),/INVALID_HUMAN_EXCEPTION/);
+ await assert.rejects(call('cost',{estimated_additional_cost_eur:0}),/IDEMPOTENCY_CONFLICT/);
+});
