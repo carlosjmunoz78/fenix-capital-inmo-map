@@ -33,3 +33,10 @@ test('Baseline still retains physical PROD chat and corrected navigation',()=>{
  assert.ok(host.includes('visualPreview?<CerebroOperativeCockpitV3Bridge/>:<CerebroOperativeConsole/>'));
  assert.ok(style.includes('.cerebro-console-host.view-operativa > .cerebro-interface-bar'));
 });
+
+test('PREVIEW preserves verified owner context when navigating among the five existing interfaces',()=>{
+ const host=read('src/CerebroConsoleHost.tsx');
+ assert.ok(host.includes("previewOwnerGate?'&visual_lab=cockpit-v3':''"));
+ assert.ok(host.includes("SECTION_BY_VIEW[next]"));
+ assert.ok(host.includes("if(previewOwnerGate&&!previewLogged)return null"));
+});
