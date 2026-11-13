@@ -61,6 +61,13 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <small>Validación LAB sin ejecución. Si se aprueba, se guarda auditoría persistente en PREPROD; producción sigue bloqueada.</small>
    {dryRun?<span role="status">{dryRun.message}</span>:null}
   </div>:null}
+  {result?.kind==='ready'?<div className="op-uni-lab-dependency" aria-label="Estado de dependencia WordPress staging">
+   <strong>Staging suspendida hasta nuevo aviso</strong>
+   <span>{result.dependencies?.state==='SUSPENDED_VERIFIED'
+    ?'Bloqueo acreditado en Gateway LAB: no consultar, publicar, modificar ni reactivar automáticamente.'
+    :'No se pudo verificar el guard de Gateway; la suspensión del propietario sigue vigente y no autoriza operaciones.'}</span>
+   <small>Operativa puede seguir consultando FACT-001, JOB-001 y la auditoría de simulaciones sin acceder a staging. Los cron externos necesitan verificación independiente.</small>
+  </div>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-proof">
    <span>Capacidades consultables: <b>{result.capabilities.length}</b></span>
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>

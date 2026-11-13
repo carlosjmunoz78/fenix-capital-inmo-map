@@ -50,6 +50,12 @@ export type UniversalJob001ControlLab={
  engineBindings:{engine_id:string;version:string;declared_state:string;freshness:'STALE_CONFIG'|'RECENT_CONFIG';observed_config_at:string}[];
  controlEngineBindings:{engine_id:string;configured_controls:number;enabled_controls:number;stale_controls:number}[];
 };
+export type UniversalDependencyPolicyLab={
+ state:'SUSPENDED_VERIFIED'|'UNAVAILABLE';
+ policyVersion:string|null;host:'staging.fenixcapital.es';
+ canProbe:false;canPublish:false;canAutoResume:false;
+ legacyCronEnforcement:'NOT_VERIFIED_OUTSIDE_UNIVERSAL_GATEWAY';
+};
 export type UniversalLabProof={
  reason?:'AUTH_REQUIRED'|'PREVIEW_ONLY'|'OWNER_AUTH_OR_POLICY_DENIED'|'COMPANY_OR_ENV_DENIED'|'READ_ACTION_NOT_ALLOWED'|'HTTP_401_403';
  kind:'ready'|'unavailable'|'denied';
@@ -60,6 +66,7 @@ export type UniversalLabProof={
  workActivity?:UniversalWorkActivityLab;
  ownerSources?:UniversalOwnerSourcesLab;
  job001?:UniversalJob001ControlLab;
+ dependencies?:UniversalDependencyPolicyLab;
 };
 export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<UniversalLabProof>{
  const unavailable=(kind:'unavailable'|'denied'):UniversalLabProof=>({
@@ -69,7 +76,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return unavailable('denied');
  const endpoint=new URL('/api/cerebro-universal-preview',window.location.origin);
- const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity'|'list_owner_sources'|'get_job001_controls',extra:Record<string,unknown>={})=>{
+ const call=async(action:'list_capabilities'|'invoke_read'|'list_work_activity'|'list_owner_sources'|'get_job001_controls'|'get_dependency_status',extra:Record<string,unknown>={})=>{
   const response=await fetch(endpoint.href,{
    method:'POST',signal,cache:'no-store',
    headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,'content-type':'application/json'},
@@ -239,8 +246,35 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      }):[]};
    }
   }catch{/* unavailable JOB-001 metadata never blocks existing owner/FACT evidence */}
+  let dependencies:UniversalDependencyPolicyLab={
+   state:'UNAVAILABLE',policyVersion:null,host:'staging.fenixcapital.es',
+   canProbe:false,canPublish:false,canAutoResume:false,
+   legacyCronEnforcement:'NOT_VERIFIED_OUTSIDE_UNIVERSAL_GATEWAY'
+  };
+  try{
+   const d=await call('get_dependency_status') as {
+    status?:unknown;source?:unknown;transport?:unknown;policy_version?:unknown;
+    wordpress_staging?:{host?:unknown;state?:unknown;can_probe?:unknown;can_read?:unknown;
+     can_publish?:unknown;can_modify?:unknown;can_auto_resume?:unknown;requires_explicit_owner_reactivation?:unknown};
+    supported_execution?:unknown;prod_execution_enabled?:unknown;
+    legacy_cron_enforcement?:unknown;
+   };
+   if(d.status==='OK'&&d.source==='OWNER_DIRECTIVE_LAB_POLICY'&&d.transport==='PREVIEW_ONLY_SERVER_VERIFIED'&&
+     d.policy_version==='STAGING_SUSPENSION_2026_11_13'&&
+     d.wordpress_staging?.host==='staging.fenixcapital.es'&&
+     d.wordpress_staging.state==='SUSPENDED_BY_OWNER_UNTIL_FURTHER_NOTICE'&&
+     d.wordpress_staging.can_probe===false&&d.wordpress_staging.can_read===false&&
+     d.wordpress_staging.can_publish===false&&d.wordpress_staging.can_modify===false&&
+     d.wordpress_staging.can_auto_resume===false&&d.wordpress_staging.requires_explicit_owner_reactivation===true&&
+     d.supported_execution===false&&d.prod_execution_enabled===false&&
+     d.legacy_cron_enforcement==='NOT_VERIFIED_OUTSIDE_UNIVERSAL_GATEWAY'){
+    dependencies={state:'SUSPENDED_VERIFIED',policyVersion:d.policy_version,
+     host:'staging.fenixcapital.es',canProbe:false,canPublish:false,canAutoResume:false,
+     legacyCronEnforcement:'NOT_VERIFIED_OUTSIDE_UNIVERSAL_GATEWAY'};
+   }
+  }catch{/* Never present an unknown status as permitted or reactivated. */}
   return {kind:'ready',capabilities:caps,registeredDefinitions:count,
-   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources,job001};
+   operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources,job001,dependencies};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
   const code=error instanceof Error?error.message:'';
