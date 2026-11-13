@@ -3,7 +3,7 @@ import {Mic,Volume2,Stethoscope} from 'lucide-react';
 import {createVoiceRecognition,voiceRecognitionSupported,type CerebroSpeechRecognition} from './cerebroVoice';
 import './cerebro-audio-diagnostics.css';
 
-/** Local, consent-based diagnostics. No audio upload, retention, external requests or chat sends. */
+/** Consent-based diagnostic: App does not retain/send recordings or chat instructions. Browser-managed SpeechRecognition may contact the browser vendor's recognition service. */
 export default function CerebroAudioDiagnostics(){
  const [open,setOpen]=useState(false);
  const [busy,setBusy]=useState(false);
@@ -128,7 +128,7 @@ export default function CerebroAudioDiagnostics(){
  if(!open)return <button type="button" className="op3-audio-diagnostic-toggle" onClick={()=>setOpen(true)}><Stethoscope size={15}/> Diagnóstico de micrófono y voz</button>;
  return <section className="op3-audio-diagnostic" aria-label="Diagnóstico local de audio">
   <div className="op3-audio-head"><strong>Comprobar voz y micrófono</strong><button type="button" onClick={close}>Cerrar</button></div>
-  <p>Son pruebas locales: no graban ni guardan audio, ni envían instrucciones. Solo solicitan acceso cuando pulsas una prueba.</p>
+  <p>El comprobador de micrófono y el pitido funcionan localmente, sin guardar ni enviar grabaciones a CEREBRO. La prueba de dictado puede enviar audio al servicio de reconocimiento del navegador (por ejemplo Chrome); úsala solo si aceptas. No se envía ninguna instrucción a CEREBRO.</p>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={()=>void checkMic()}><Mic size={15}/> Comprobar micrófono</button><span role="status">{micStatus}</span></div>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkRecognition}><Mic size={15}/> Comprobar dictado</button><span role="status">{speechStatus}</span></div>
   <div className="op3-audio-test"><button type="button" disabled={busy} onClick={checkOutput}><Volume2 size={15}/> Comprobar altavoces</button><span role="status">{outputStatus}</span></div>
