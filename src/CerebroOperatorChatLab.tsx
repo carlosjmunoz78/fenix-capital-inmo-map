@@ -1,11 +1,11 @@
 import {useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {planOwnerInstructionLab,type OperatorIntent} from './cerebroOperatorChatLabApi';
 import {readUniversalOperativaLab,simulateFactRegistryDryRunLab} from './cerebroUniversalOperativaLabApi';
-import {readStagingSuspensionLab} from './cerebroStagingSuspensionLabApi';
+import {readStagingSuspensionLab,captureStagingSuspensionLab} from './cerebroStagingSuspensionLabApi';
 import {readFactRegistryAttestationLab,executeFactRegistryAttestationLab} from './cerebroFactRegistryExecutionLabApi';
 
 type Line={id:number;who:'owner'|'cerebro';body:string;receipt?:string};
-const HELP='Órdenes disponibles: «estado de motores», «estado del motor SEO-001», «estado de job-001», «estado de staging», «última certificación», «simular FACT-001» y «certificar FACT-001». Solo LAB de Fénix; no ejecuta motores de negocio ni publicación.';
+const HELP='Órdenes disponibles: «estado de motores», «estado del motor SEO-001», «estado de job-001», «estado de staging», «última certificación», «simular FACT-001», «certificar FACT-001» y «certificar suspensión de staging». Solo LAB de Fénix; no ejecuta motores de negocio ni publicación.';
 export default function CerebroOperatorChatLab(){
  const [input,setInput]=useState('');
  const [lines,setLines]=useState<Line[]>([{id:0,who:'cerebro',body:'Conectado al Gateway LAB. Soy un intérprete de órdenes verificables, no una IA general. Escribe «ayuda» para consultar acciones disponibles.'}]);
@@ -38,6 +38,15 @@ export default function CerebroOperatorChatLab(){
     add('cerebro',r.kind==='observed'&&s
      ?'Staging SUSPENDIDA POR EL PROPIETARIO. JOB-001 '+s.staging_job001.paused+'/15 pausados; pg_cron '+s.staging_cron.paused+'/14; funciones SQL '+s.sql_guard.protected+'/4 protegidas. Aislamiento GLOBAL NO CERTIFICADO. No he visitado staging.'
      :'No hay lectura SQL verificada en este momento. La suspensión continúa vigente; no se han ejecutado trabajos.');
+    return;
+   }
+   if(intent==='STAGING_CAPTURE'){
+    // Durable PREPROD evidence only. Existing Gateway enforces owner scope,
+    // idempotency and negative staging I/O. No staging probe or job dispatch.
+    const r=await captureStagingSuspensionLab();
+    add('cerebro',r.kind==='observed'&&r.evidence_id
+     ?'Evidencia de suspensión registrada en LAB: '+r.evidence_id+'. Controles conocidos: '+(r.snapshot?.known_controls_closed?'bloqueados':'DEGRADADOS')+'. Aislamiento global: NO CERTIFICADO. Sin conexión a staging.'
+     :r.message,r.evidence_id);
     return;
    }
    if(intent==='FACT_LATEST'){
@@ -79,17 +88,18 @@ export default function CerebroOperatorChatLab(){
    }
    if(plan.requiresConfirmation){
     setPending({intent:plan.intent,label:plan.label});
-    add('cerebro','Orden autorizable en LAB: '+plan.label+'. Solo guardará un justificante FACT-001. Confirma explícitamente abajo o cancela; aún NO se ha ejecutado.');
+    add('cerebro','Orden autorizable en LAB: '+plan.label+'. Solo guardará una evidencia permitida en LAB. Confirma explícitamente abajo o cancela; aún NO se ha ejecutado.');
     return;
    }
    await execute(plan.intent);
   }finally{busyRef.current=false;setBusy(false);}
  }
  async function confirm(){
-  if(busyRef.current||pending?.intent!=='FACT_ATTEST')return;
+  if(busyRef.current||!pending||!['FACT_ATTEST','STAGING_CAPTURE'].includes(pending.intent))return;
+  const intent=pending.intent;
   busyRef.current=true;setBusy(true);setPending(null);
-  add('owner','Confirmar certificación FACT-001 (LAB)');
-  try{await execute('FACT_ATTEST');}finally{busyRef.current=false;setBusy(false);}
+  add('owner',intent==='STAGING_CAPTURE'?'Confirmar registro de suspensión de staging (LAB)':'Confirmar certificación FACT-001 (LAB)');
+  try{await execute(intent);}finally{busyRef.current=false;setBusy(false);}
  }
  function cancel(){
   if(busyRef.current)return;
@@ -112,8 +122,8 @@ export default function CerebroOperatorChatLab(){
   </div>
   {pending?<div className="op-uni-lab-chat-pending" aria-label="Confirmación de orden">
    <strong>{pending.label}</strong>
-   <small>Confirmación obligatoria · solo certificación FACT-001 en LAB. Sin publicación ni ejecución de otros motores.</small>
-   <div><button type="button" disabled={busy} onClick={()=>{void confirm()}}>Confirmar certificación</button>
+   <small>Confirmación obligatoria · recibo de LAB únicamente. Sin publicación, conexión a staging ni ejecución de motores empresariales.</small>
+   <div><button type="button" disabled={busy} onClick={()=>{void confirm()}}>{pending.intent==='STAGING_CAPTURE'?'Guardar evidencia de suspensión':'Confirmar certificación'}</button>
    <button type="button" disabled={busy} onClick={cancel}>Cancelar</button></div>
   </div>:null}
   <form onSubmit={e=>{void submit(e)}} className="op-uni-lab-chat-form">
