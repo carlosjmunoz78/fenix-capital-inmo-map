@@ -12,6 +12,7 @@ export type StagingLiveSnapshot={
  sql_guard:{expected:4;found:number;protected:number};
  bridge_health:{last_recorded_at:string|null;rows_total:number};
  durable_evidence?:{recorded:number;last_recorded_at:string|null;latest_evidence_id:string|null};
+ edge_backups?:{source_snapshots:number;sql_source_snapshots:number;live_versions_verified_in_this_rpc:false};
 };
 export type StagingLiveResult={
  kind:'observed'|'unavailable'|'denied';
@@ -34,6 +35,7 @@ function validate(snapshot:unknown):snapshot is StagingLiveSnapshot{
   r.sql_guard?.expected===4&&['found','protected'].every(k=>integer(r.sql_guard[k]))&&
   ['total','paused','active'].every(k=>integer(r.gateway_job001?.[k]))&&
   integer(r.bridge_health?.rows_total)&&
+  (r.edge_backups===undefined||(integer(r.edge_backups?.source_snapshots)&&integer(r.edge_backups?.sql_source_snapshots)&&r.edge_backups.live_versions_verified_in_this_rpc===false))&&
   (r.durable_evidence===undefined||(
    integer(r.durable_evidence?.recorded)&&
    (r.durable_evidence.last_recorded_at===null||typeof r.durable_evidence.last_recorded_at==='string'&&Number.isFinite(Date.parse(r.durable_evidence.last_recorded_at)))&&
