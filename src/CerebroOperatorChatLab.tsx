@@ -5,7 +5,7 @@ import {readStagingSuspensionLab} from './cerebroStagingSuspensionLabApi';
 import {readFactRegistryAttestationLab,executeFactRegistryAttestationLab} from './cerebroFactRegistryExecutionLabApi';
 
 type Line={id:number;who:'owner'|'cerebro';body:string;receipt?:string};
-const HELP='Órdenes disponibles: «estado de motores», «estado de job-001», «estado de staging», «última certificación», «simular FACT-001» y «certificar FACT-001». Solo LAB de Fénix; no ejecuta motores de negocio ni publicación.';
+const HELP='Órdenes disponibles: «estado de motores», «estado del motor SEO-001», «estado de job-001», «estado de staging», «última certificación», «simular FACT-001» y «certificar FACT-001». Solo LAB de Fénix; no ejecuta motores de negocio ni publicación.';
 export default function CerebroOperatorChatLab(){
  const [input,setInput]=useState('');
  const [lines,setLines]=useState<Line[]>([{id:0,who:'cerebro',body:'Conectado al Gateway LAB. Soy un intérprete de órdenes verificables, no una IA general. Escribe «ayuda» para consultar acciones disponibles.'}]);
@@ -71,6 +71,12 @@ export default function CerebroOperatorChatLab(){
   try{
    const plan=await planOwnerInstructionLab(text);
    if(plan.kind!=='planned'||!plan.intent){add('cerebro',plan.message);return;}
+   if(plan.intent==='ENGINE_STATUS'){
+    add('cerebro',plan.engineId&&plan.runtime==='NOT_VERIFIED'&&plan.definitionEnvironment==='SCAFFOLD'
+     ?'Motor '+plan.engineId+' acreditado en el registro de FACT-001. Estado: SCAFFOLD. Runtime: NO VERIFICADO. No se ha ejecutado el motor ni consultado producción.'
+     :'No puedo verificar el estado individual del motor. Ninguna operación ejecutada.');
+    return;
+   }
    if(plan.requiresConfirmation){
     setPending({intent:plan.intent,label:plan.label});
     add('cerebro','Orden autorizable en LAB: '+plan.label+'. Solo guardará un justificante FACT-001. Confirma explícitamente abajo o cancela; aún NO se ha ejecutado.');
