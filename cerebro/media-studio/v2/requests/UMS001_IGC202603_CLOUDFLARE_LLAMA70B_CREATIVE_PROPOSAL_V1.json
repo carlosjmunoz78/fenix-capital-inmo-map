@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "panel_id": "IGC-2026-03-S00",
+  "proposal_id": "UMS001-IGC202603-CF-LLAMA70B-CREATIVE-V1",
+  "provider": "cloudflare-workers-ai",
+  "model_requested": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "model_observed": "@cf/meta/llama-3.3-70b-instruct-sd",
+  "provider_completion_id": "chatcmpl-a3646ef2-b4d0-444d-89b3-db67e41aeb59",
+  "inference_invoked_by": "CEREBRO_CLOUDFLARE_CONNECTOR_MANUAL_PILOT",
+  "usage": {
+    "prompt_tokens": 409,
+    "completion_tokens": 328,
+    "total_tokens": 737,
+    "neurons": 78.08322143554688
+  },
+  "estimated_additional_cost_eur": 0,
+  "paid_text_llm_called": false,
+  "deepseek_called": false,
+  "source_prompt_request": "CEREBRO visual critique+creative concept IGC202603: after two failed images (no humans / tiny humans) propose original 4:5 cinematic photo foreground human 60 percent, monumental surreal orange architectural backdrop, no AI logos/text",
+  "model_response": {
+    "image_prompt": "Two authentic adult Spanish individuals, a woman and a man, stand in front of a surreal installation, their faces each taking up 25-35% of the frame height, with genuine hands and ordinary Andalusian clothing, conveying believable human candid emotion. The woman's face is at y=25%, with a subtle concerned expression, while the man's face is at y=35%, displaying a thoughtful gaze. Both faces are positioned between x=10%-70% of the frame, with the woman at x=20% and the man at x=50%. A monumental orange glass architectural arc rises behind them, complemented by a copper key and an alabaster house facade, all bathed in theatrical yet natural sunlight. The dominant brand accent is orange #FF5F00, blended with natural warm Mediterranean colors. The camera framing is explicit, with the human foreground occupying the top 78% of the frame and the surreal background installation taking up the remaining space. The 50mm film lens is positioned at eye level, capturing the scene with a close and intimate perspective.",
+    "hard_reject": [
+      "images with tiny or distant humans",
+      "images with prominent logos or text",
+      "images that appear to be generic or fantasy-like, rather than photorealistic and authentic"
+    ],
+    "reference_guidance": "Choose clean model references that feature authentic, real-life individuals with genuine emotions and anatomy, avoiding models with overly posed or artificial expressions. Prioritize references with a strong emphasis on photorealistic textures, lighting, and environments, and ensure that the background installation does not overshadow the human subjects."
+  },
+  "hard_constraints_added_by_cerebro_router": "IMPORTANT: THIS IS A CLOSE-UP CINEMATIC PHOTOGRAPH featuring two adult people visibly photographed waist-up large in foreground; faces must not be obscured; NO TINY PEOPLE, no empty architecture or still-life. Surreal architecture MUST be BEHIND subjects and visually spectacular with accurate sunlight and physical shadow, photorealistic human pores and hands. No logos, no visible letters or text, no documents, no bank stamps, no invented brand mark, no watermark, no fake official details. Original Fénix logo and one short Instagram curiosity hook are ONLY added in deterministic postprocessing, never by generative image model. Vertical 4:5. Use source photo only for realistic human scale and photographic warmth; invent new scenes and new adult subjects.",
+  "reference_source": "IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json",
+  "reference_strength": 0.33,
+  "status": "LLM_CREATIVE_PILOT_COMPLETED__REPLICATE_CANDIDATE_PENDING",
+  "actual_persistent_auto_router": false,
+  "publish_enabled": false
+}

@@ -1,0 +1,51 @@
+name: UMS001 IGC202603 Llama-to-Replicate official Fenix brand cover LAB no spend
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-igc202603-brand-cover-free-r03.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_igc202603_brand_microhook_cover_v1.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: ums001-igc202603-brand-cover-no-spend
+  cancel-in-progress: true
+jobs:
+  deterministic-postproduction:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Install open source Pillow and check compositor syntax
+        run: |
+          python3 -m pip install 'Pillow==11.3.0'
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202603_brand_microhook_cover_v1.py
+      - name: Retrieve exact real R03 Replicate photo from sealed prior run
+        uses: actions/download-artifact@v4
+        with:
+          name: ums001-igc202603-llama-director-replicate-r03-original
+          run-id: 43010563321
+          repository: carlosjmunoz78/fenix-capital-inmo-map
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/ums001-image-source/
+      - name: Composite photo, original official multicolor logo and one visible hook
+        run: >-
+          python3 cerebro/media-studio/v2/runtime/ums001_igc202603_brand_microhook_cover_v1.py
+          "${{ runner.temp }}/ums001-image-source/IGC202603_S00_CLOUDFLARE_LLAMA_DIRECTOR_REPLICATE_R03_RAW.jpg"
+          "${{ runner.temp }}/ums001-igc202603-branded-cover/"
+      - name: Preserve finished branded preview and reproducible QA receipt
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202603-cover-official-brand-lab-v1
+          path: ${{ runner.temp }}/ums001-igc202603-branded-cover/
+          retention-days: 14
+          if-no-files-found: error
+      - name: No social publishing; original model cost already accounted
+        run: echo 'Brand and one short hook only; 0 new AI API calls; LAB QA pending.'

@@ -1,0 +1,54 @@
+name: UMS-001 Replicate four image LAB preflight no spend
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'cerebro/media-studio/v2/runtime/replicate-image-batch-planner-lab-v1.mjs'
+      - 'cerebro/media-studio/v2/runtime/replicate-image-batch-preflight-cli-lab-v1.mjs'
+      - 'cerebro/media-studio/v2/tests/replicate-image-batch-planner-lab-v1.test.mjs'
+      - 'cerebro/media-studio/v2/runtime/replicate-image-batch-executor-lab-v1.mjs'
+      - 'cerebro/media-studio/v2/tests/replicate-image-batch-executor-lab-v1.test.mjs'
+      - 'cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py'
+      - 'cerebro/media-studio/v2/runtime/replicate-three-creative-images-lab-20261111.py'
+      - 'cerebro/media-studio/v2/runtime/replicate-social-five-originals-lab-20261111.py'
+      - '.github/workflows/cerebro-ums-replicate-social-five-20261111.yml'
+      - '.github/workflows/cerebro-ums-replicate-creative-bcd-prepaid-20261111.yml'
+      - '.github/workflows/cerebro-ums-replicate-ultra-one-shot-canary-20261111.yml'
+      - 'cerebro/media-studio/v2/requests/UMS001_REPLICATE_4_ART_IMAGES_LAB_20261111.json'
+      - '.github/workflows/cerebro-ums-replicate-image-batch-lab-v1.yml'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-replicate-image-preflight-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  preflight:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate existing Replicate adapter and new image contracts without spend
+        run: |
+          node --test cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs
+          node --test cerebro/media-studio/v2/tests/replicate-image-batch-planner-lab-v1.test.mjs
+          node --test cerebro/media-studio/v2/tests/replicate-image-batch-executor-lab-v1.test.mjs
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-one-shot-canary-lab-20261111.py
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-three-creative-images-lab-20261111.py
+          python3 -m py_compile cerebro/media-studio/v2/runtime/replicate-social-five-originals-lab-20261111.py
+      - name: Queue and audit four visually distinct creative briefs (DRY RUN)
+        run: >-
+          node cerebro/media-studio/v2/runtime/replicate-image-batch-preflight-cli-lab-v1.mjs
+          cerebro/media-studio/v2/requests/UMS001_REPLICATE_4_ART_IMAGES_LAB_20261111.json
+          "$RUNNER_TEMP/ums001-replicate-preflight"
+      - name: Preserve planning receipt for independent QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-replicate-creative-plan-lab
+          path: ${{ runner.temp }}/ums001-replicate-preflight/preflight_receipt.json
+          if-no-files-found: error
+          retention-days: 7

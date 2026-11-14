@@ -1,0 +1,58 @@
+name: UMS001 IGC202601 Replicate RETAKE R02 once
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_R02.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202601-cover-retake-r02-20261111
+  cancel-in-progress: false
+jobs:
+  retake-r02:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Demand exact retake file in trigger commit
+        id: change
+        run: |
+          if git show --format= --name-only HEAD | grep -Fxq 'cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_R02.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Contract tests and syntax before real inference
+        if: steps.change.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_igc202601_canary_v1.py -v
+      - name: CEREBRO generates one corrected original via Replicate FLUX Ultra
+        if: steps.change.outputs.eligible == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_IGC202601_CANARY_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+          UMS001_IGC202601_ORDER_FILE: cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_R02.json
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py
+      - name: Save corrected original and provider receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-replicate-cover-r02
+          path: ${{ runner.temp }}/ums001-igc202601-canary/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: No publication or accidental retries
+        if: always()
+        run: |
+          echo 'CEREBRO UMS-001 single prepaid $0.06 retake, idempotency key unique.'
+          echo 'No social publication, no PROD, no model-generated logo.'

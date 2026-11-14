@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-REPLICATE-IMAGE-BATCH-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "run_mode": "DRY_RUN",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_additional_cost_eur": 0,
+  "publish": false,
+  "concepts": [
+    {
+      "concept_id": "UMS-CRE-1111-A",
+      "subject_key": "female_ceramic_artist_46",
+      "setting_key": "ceramic_studio_cold_morning",
+      "hook": "Tu trabajo construye más de lo que imaginas",
+      "prompt": "Premium avant-garde commercial photograph, real Spanish woman ceramic artist about 46, natural beautiful asymmetry, pores, real fine lines, imperfect hair strands, five anatomically accurate fingers, physically credible expression and aproned work clothes. In a large authentic Cordoban pottery studio on an overcast cool morning, terracotta clay vessels and a half-built architectural house made of levitating ceramic tiles and impossibly balanced clay sculptures; surreal conceptual CGI appears ONLY in background props while the human is entirely a natural 50mm editorial photograph. Turquoise, terracotta, raw textures, elegant art direction, documentary lighting consistent with real shadows, photoreal face, believable hands and pose, not a drawing or game character. No legible lettering, brand logo, finance paperwork, cartoon skin, glowing portals or generic sunset.",
+      "aspect_ratio": "4:5",
+      "image_quality": "PREMIUM",
+      "publication_approved": false
+    },
+    {
+      "concept_id": "UMS-CRE-1111-B",
+      "subject_key": "male_restaurant_chef_60",
+      "setting_key": "industrial_kitchen_night_tungsten",
+      "hook": "Tu esfuerzo no cabe en una nómina",
+      "prompt": "Luxury creative advertising photograph, 60-year-old male Spanish self-employed chef with silver hair and authentic wrinkles, genuine tired but hopeful human eyes and believable skin microtextures, hands and accurate anatomy, shot on a 35mm lens. The scene is a restaurant's real industrial kitchen after service at midnight, steel worktops, steam, practical tungsten light, cool black shadows. Unique surreal installation behind the chef: hundreds of white invoices folded into a monumental staircase climbing toward a life-size ordinary oak door, physically plausible compositing shadows on metal, sophisticated art museum installation rather than video-game CGI. Human photographed with candid expression, no perfect teeth, no decorative halos, no repeated Córdoba skyline, not illustration, natural color grading, no text or logos.",
+      "aspect_ratio": "4:5",
+      "image_quality": "PREMIUM",
+      "publication_approved": false
+    },
+    {
+      "concept_id": "UMS-CRE-1111-C",
+      "subject_key": "female_florist_31_greenhouse",
+      "setting_key": "glass_greenhouse_rain_fuchsia",
+      "hook": "Los sueños también echan raíces",
+      "prompt": "World-class surrealistic luxury editorial photograph of an adult Black female independent florist aged about 31 in a huge rain-soaked greenhouse full of translucent glass panels and lush subtropical leaves, carefully realistic skin pores, hair texture, natural eyes, authentic smile, correct hands assembling a bouquet. A surreal tree grows behind her with countless brass house keys as leaves and impossibly delicate metallic blossoms, an art direction masterpiece with emerald greens and dramatic vibrant fuchsia blooms, soft overcast real diffuse lighting and condensation droplets on glass. She must look genuinely photographed with an 85mm portrait lens and natural photographic imperfections, NOT a 3D human, clean photorealistic compositing, unusual composition, no paperwork, no Spanish bridge or houses floating in sunlight, no text or logos.",
+      "aspect_ratio": "4:5",
+      "image_quality": "PREMIUM",
+      "publication_approved": false
+    },
+    {
+      "concept_id": "UMS-CRE-1111-D",
+      "subject_key": "male_vehicle_mechanic_39",
+      "setting_key": "garage_rain_midnight_blue",
+      "hook": "Trabajas por tu cuenta. ¿Y tu futuro?",
+      "prompt": "Experimental editorial film still, photoreal photograph of a 39-year-old East Asian male self-employed vehicle mechanic standing naturally in a working neighborhood garage late at night, realistic oil on fingers, short hair with imperfect texture, human skin with pores, serious authentic expression and anatomically correct hands. Deep electric blue and muted purple from wet street reflections, fluorescent work lights. A highly artistic surreal phenomenon freezes every raindrop in mid-air like tiny pieces of transparent glass, while individual motorcycle and car parts levitate to create an impossible but intricate architectural house-shaped doorway in the distance. Human remains fully credible, integrated shadows, real 35mm camera response, sophisticated fashion editorial rather than illustration, no warm sunset, no invoices, no golden spiral, no magic aura on person, no text or logos.",
+      "aspect_ratio": "4:5",
+      "image_quality": "PREMIUM",
+      "publication_approved": false
+    }
+  ],
+  "instructions": "CEREBRO UMS-001 is the producer. Preflight this order only; stop before paid execution until verified prepaid-only billing, atomic FINOPS and private persistent storage. Cost plan 4 x USD 0.06 = 0.24 USD. Do not substitute ChatGPT-generated images."
+}

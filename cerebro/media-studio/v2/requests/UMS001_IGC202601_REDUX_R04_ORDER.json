@@ -1,0 +1,17 @@
+{
+  "request_id": "UMS001-IGC202601-REDUX-R04-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_predictions": 1,
+  "max_cost_usd": 0.06,
+  "budget": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "approval_state": "OWNER_ACCEPTED_REFERENCE_GUIDED_LAB",
+  "raw": false,
+  "image_prompt_strength": 0.22,
+  "prompt": "Award-winning premium editorial PHOTOGRAPH, stunning original SURREAL advertising artwork for an educational Instagram carousel about preparing a mortgage file. Bright authentic Córdoba/Andalusia whitewashed residential courtyard and sunlit interiors, beautiful realistic cinematic faces, luminous amber. Two distinct real Spanish adults, a woman mortgage adviser around 45 and a male potential homebuyer around 39, in a natural editorial waist-up portrait seated together behind a stylish wooden table. Both faces are large and prominent, perfectly clear and naturally expressive, 40% or more of image height, realistic hair and human skin pores and hands. The fantastical artistic element is a compact, spectacular ORANGE #FF5F00 glass-and-ceramic home-shaped closed portfolio resting on the table, glowing golden #FFB71B with swirling elegant luminous ribbons and brass house keys floating in an elegant spiral at the sides BEHIND the people. Warm cinematic sunshine, high-end advertising photograph and expensive beautiful compositing. The magic is visually spectacular and bold, but zero clutter and an elegant confident atmosphere. Keep the lower 25 percent as uncluttered bright orange/dark amber table for a large postproduction hook. Use image reference only for lighting, warm color grading and cinematic photography; completely new people and a newly invented orange art installation. NO SHEETS OF PAPER ANYWHERE, no printed pages, no envelopes, no documents, no files with visible markings, no letter-like marks, no floating documents, no books, no writing on objects, no fake words or numbers. No logos, no generated brand mark, no watermarks, no subtitles, no official identity cards, no bank stamps or insignia. The Fénix Capital official original logo and text must be added after generation by trusted compositor. Faces unobstructed and orange foreground. Aspect ratio 4:5."
+}

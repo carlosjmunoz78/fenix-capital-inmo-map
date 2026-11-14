@@ -1,0 +1,58 @@
+name: UMS001 IGC202601 Replicate FIRST real cover canary once
+on:
+  pull_request:
+    types: [synchronize]
+    paths:
+      - 'cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_V1.json'
+permissions:
+  contents: write
+concurrency:
+  group: ums001-igc202601-cover-one-shot-20261111
+  cancel-in-progress: false
+jobs:
+  canary:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Verify explicit request file in this trigger commit
+        id: changed
+        run: |
+          if git show --format= --name-only HEAD | grep -Fxq 'cerebro/media-studio/v2/requests/UMS001_IGC202601_CANARY_AUTHORIZED_V1.json'; then
+            echo 'eligible=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'eligible=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Offline tests before any paid prediction
+        if: steps.changed.outputs.eligible == 'true'
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_igc202601_canary_v1.py -v
+      - name: ONE Replicate FLUX Ultra image using prepaid credit
+        if: steps.changed.outputs.eligible == 'true'
+        env:
+          REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+          GH_TOKEN_FOR_LAB: ${{ secrets.GITHUB_TOKEN }}
+          UMS001_IGC202601_CANARY_PREPAID_GATE: OWNER_APPROVED_PREPAID_20261111
+        run: python3 cerebro/media-studio/v2/runtime/ums001_igc202601_replicate_cover_canary_v1.py
+      - name: Preserve Replicate raw output and prediction receipt for independent review
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ums001-igc202601-replicate-canary-s00
+          path: ${{ runner.temp }}/ums001-igc202601-canary/
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Safety receipt
+        if: always()
+        run: |
+          echo 'Exactly one paid prediction maximum per unique GitHub reservation.'
+          echo 'Estimated cost USD 0.06 from existing prepaid credit; no reload, no retries.'
+          echo 'No brand-generated logo; no social posting, no PROD mutations.'

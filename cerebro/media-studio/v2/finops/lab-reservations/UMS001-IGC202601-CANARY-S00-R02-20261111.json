@@ -1,0 +1,18 @@
+{
+  "request_id": "UMS001-IGC202601-CANARY-S00-R02-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "source_reference_generator": "ChatGPT",
+  "provider": "replicate",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "prompt_sha256": "29751cc6a8180c0a84a4c276197630d1d4ad1f5cf6ef63131e98234fd9092a6b",
+  "status": "SUBMITTED",
+  "prediction_id": "c788hs62f5rmr0d1s84taqr5yw",
+  "estimated_cost_usd": 0.06,
+  "asset_sha256": null,
+  "publication_approved": false,
+  "artistic_qa": "PENDING",
+  "official_logo_added": false
+}

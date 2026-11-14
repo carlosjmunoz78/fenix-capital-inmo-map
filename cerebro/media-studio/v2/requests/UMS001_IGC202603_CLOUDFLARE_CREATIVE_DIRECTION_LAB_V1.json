@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "asset_type": "CAROUSEL_COVER",
+  "source_role": "CREATIVE_DIRECTION_FROM_CLOUDFLARE_WORKERS_AI",
+  "provider": "CLOUDFLARE_WORKERS_AI",
+  "model_requested": "@cf/qwen/qwen3-30b-a3b-fp8",
+  "model_reported": "@cf/qwen/qwen3-30b-a3b-fp8",
+  "model_response_format": "JSON_OBJECT",
+  "neuron_usage_reported": 11.159221649169922,
+  "free_allocation_applies_if_within_workers_free_daily_limit": true,
+  "operator_initiated_model_request": true,
+  "fully_automated_model_router": false,
+  "editorial_qa": "PENDING",
+  "brief_topic": "Compraventa: qué comprobar antes de entregar una señal",
+  "reasoning_from_prior_failures": [
+    "R01 model-generated scene contained no people",
+    "R02 model-generated scene showed tiny people in giant architecture"
+  ],
+  "generated_direction": {
+    "concept_title": "Surreal Real Estate Transaction",
+    "prompt_en": "A photograph of two adult Spanish real estate professionals near Córdoba, an adult woman adviser and a male homebuyer, in a close medium waist-up portrait with faces occupying 55% height. Actual photographic humans. Surreal impossible orange glass and gold architecture behind and between their shoulders. Warm orange #FF5F00 dominant accent. Real Córdoba light. 4:5 format. Clear lower right quarter reserved for text. No papers, no texts, no fake logos, official Fenix logo only in later postproduction. Content: what to verify before handing over a property-purchase deposit; no legal guarantees, no invented bank forms. Great imaginative motif, distinct from previous giant flat folder.",
+    "negative": "Wide shots, tiny humans, no humans, still life",
+    "qa_check": "Is the image a photograph? Yes. Are there two adult Spanish real estate professionals? Yes. Is the portrait close medium waist-up with faces 55% height? Yes. Is the architecture surreal impossible orange glass and gold between their shoulders? Yes. Is the dominant color warm orange #FF5F00? Yes. Is the light real Córdoba? Yes. Is the format 4:5? Yes. Is the lower right quarter clear for text? Yes. Are there no papers, texts, or fake logos? Yes. Is the official Fenix logo added later? Yes. Is the content about verifying property-purchase deposit? Yes. Are the humans the focus? Yes. Is the motif imaginative and distinct? Yes."
+  },
+  "controls": {
+    "logos": "ORIGINAL_MR_BOGART_SOURCE_ONLY_IN_POSTPROCESS",
+    "no_text_in_base_image": true,
+    "theme": "CINEMATIC_PHOTOREAL_SURREAL_HUMAN_FOREGROUND",
+    "orange_primary": "#FF5F00",
+    "forbid_financial_claims": true,
+    "creative_model_does_not_publish": true,
+    "source_image_guide": "IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json",
+    "source_image_sha256": "c6341224d5e02ae7bf79e2d7b4effc59566d2aaa7028f2ad129f2045b79dcfe2",
+    "intended_replicate_model": "black-forest-labs/flux-1.1-pro-ultra",
+    "next_stage": "DETERMINISTIC_SAFETY_PROMPT_EXPANSION_AND_ONE_REPLICATE_CANDIDATE",
+    "max_provider_predictions": 1,
+    "estimated_provider_usage_usd": 0.06,
+    "publish_enabled": false
+  }
+}

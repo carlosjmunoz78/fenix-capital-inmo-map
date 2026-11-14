@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "iteration": "R03",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "provider": "replicate",
+  "prediction_id": "cgar073jjhrmw0d1s878hrqn98",
+  "sha256": "d79f2f26056aa6338e74f8d7a2f04b03ad5d60b5915febc8d9f344935212c491",
+  "estimated_prepaid_cost_usd": 0.06,
+  "status": "ARTISTIC_QA_PARTIAL_TYPOGRAPHY_FAIL",
+  "evidence_drive_id": "19cQL3HURXOm6GLIoOCtZSfpn_0Px4fWK",
+  "pass_gates": [
+    "better bright warmth and orange cinematic color",
+    "faces remain visible",
+    "surreal neon magical folder and keys work",
+    "Flux Redux reference conditioning creates better composition than text-only in these 3 trials"
+  ],
+  "fail_gates": [
+    "floating papers have invented nonsensical pseudo-Spanish lettering",
+    "human faces slightly over-retouched",
+    "tiny third person cut off at right edge",
+    "no logo/headline final compositor yet"
+  ],
+  "controlled_learnings": [
+    "Keep source reference image guidance for cinematic style and scene structure",
+    "Avoid surfaces where generative model may produce illegible text; completely omit floating paper sheets in next canary",
+    "Reduce image_prompt_strength to ~0.22 and retain raw=false",
+    "use correct postcomposition only with immutable original brand SVG and deterministic copy"
+  ],
+  "next_action": "R04 one-shot prepaid image without floating sheets; then human/QA review; no automatic publication",
+  "publication_approved": false
+}

@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-05",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "version": "1.0",
+  "channel": "INSTAGRAM",
+  "asset_type": "IMAGE",
+  "topic": "Compraventa de vivienda en Córdoba: qué revisar antes de entregar una señal, sin sugerir aprobación hipotecaria",
+  "audience": "Compradores adultos de vivienda en Córdoba y Andalucía; información orientativa, no asesoramiento legal individual",
+  "panels": [
+    {
+      "id": "S00",
+      "scene": "Photographic editorial story: a real Andalusian buyer and adviser reviewing a future home without legal paperwork in frame",
+      "human_subject": "Two authentic Spanish adults, a woman and a man, large waist-up in front, truthful candid emotion, natural skin and hands",
+      "hook": "Antes de dar la señal",
+      "bullets": [],
+      "required_visuals": [
+        "two real adults 55-70% image height with eyes fully visible",
+        "spectacular orange translucent glass architectural art behind subjects",
+        "natural warm Cordoba patio sunlight with correct shadows",
+        "clearly no fabricated logos, letters, approval symbols or documents"
+      ]
+    }
+  ],
+  "publish_enabled": false,
+  "max_attempts_per_panel": 2,
+  "max_image_budget_usd": 0.12,
+  "max_deepseek_calls": 4,
+  "max_deepseek_budget_usd": 0.05,
+  "source_request": "LAB isolated creative canary after normalizing semantic photography terms and mandatory human/orange priority, preserve source and review, no publishing"
+}

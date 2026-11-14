@@ -1,0 +1,17 @@
+{
+  "request_id": "UMS001-IGC202601-REDUX-R05-20261111",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-01",
+  "slide_id": "S00",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_predictions": 1,
+  "max_cost_usd": 0.06,
+  "budget": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "approval_state": "OWNER_ACCEPTED_REFERENCE_GUIDED_LAB",
+  "raw": false,
+  "image_prompt_strength": 0.34,
+  "prompt": "Premium luxury editorial PHOTOGRAPH of a real Spanish man in his late thirties and a professional Spanish woman in her mid-forties talking about their future home in a real sunny whitewashed Córdoba courtyard with orange blossoms. Intimate candid human emotions, physically realistic hands, authentic slightly imperfect skin pores and hair, sharp credible eye detail, not CGI portraits. Magical SURREAL scene: a gorgeous closed orange folder rests naturally on a real wooden desk beside a brass home key; a brilliant abstract luminous orange line gracefully loops from folder to a miniature home sculpture made from translucent amber glass BEHIND the people, physically convincing reflections, elegant cinematic visual storytelling. Warm Mediterranean sunshine, high-end luxury advertising photograph, deep rich orange #FF5F00 and subtle gold #FFB71B as BRAND mood, cool green foliage, premium color grading, spectacular composition with both subjects occupying the upper half and the fantastic sculptural orange folder occupying the lower right. Clean bottom third suitable for one large postproduction curiosity hook, no facial occlusions. Use attached photo only as an artistic guide to photographic realism, sunlit Córdoba architecture and artistic orange glowing folder, create original people and layout. No logos, no typography, no labels, no signs, no readable letters, no fake watermarks. No paper, no pages, no magazines, no books, no printed documents, no writing surfaces, no floating paper, no money, no financial approval symbols. The illustration of the home must be a small sculptural object, not a generic illustration. No invented bank documents or government seals. No fictional Fénix logo. The only lettering and the true original official Fénix SVG are added later by an independent postprocessing compositor. Vertical 4:5 magazine advertisement cover."
+}

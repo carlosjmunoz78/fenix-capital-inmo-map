@@ -1,0 +1,13 @@
+{
+  "request_id": "UMS001-REPLICATE-CANARY-20261111-A2",
+  "source_request_id": "UMS001-REPLICATE-IMAGE-BATCH-20261111-01",
+  "concept_id": "UMS-CRE-1111-A",
+  "environment": "LAB",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_provider_spend_usd": 0.06,
+  "paid_execution_scope": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "prompt_override": "High-end surreal commercial portrait photograph, 4:5 vertical. ONE SINGLE REAL HUMAN, a self-employed Spanish woman ceramic artist aged 46, occupies the LEFT FOREGROUND and at least 65 percent of the total image height. CLOSE MEDIUM SHOT, her head, face, shoulders, apron and both real hands large and clearly visible, natural asymmetrical human face, skin pores and fine lines, realistic hair, natural teeth and eyes, subtle authentic expression, hands shaped anatomically correctly, no beautifying filter. She looks directly toward the camera with quiet confident warmth. She stands in a working ceramic artist's studio under COOL SOFT MORNING WINDOW LIGHT, real shelves with pottery, wet clay and believable floor contact shadows. On the RIGHT BACKGROUND, slightly behind her, an astonishing SURREAL architectural art installation: a dream home composed of suspended terracotta ceramic tiles and magnificent twisted glazed-clay staircases that spiral in midair like a museum sculpture, exquisite contemporary visual advertising, teal shadows and burnt orange ceramics. Main subject remains a normal editorial PHOTOGRAPH of a real person, not a drawing, not a 3D human. Reality and fantasy expertly composited, believable lens depth and realistic shadows; absurd yet tasteful. Professional 50mm portrait lens, editorial fashion photography quality, human expression must be visibly real. NO other people, statues shaped like people, plastic faces, figurines, mannequins, tiny humans, text, watermarks, logos, generic sunset, floating paperwork or giant building obscuring the protagonist."
+}

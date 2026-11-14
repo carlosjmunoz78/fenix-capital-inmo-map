@@ -1,0 +1,67 @@
+{
+  "request_id": "UMS001-REPLICATE-SOCIAL-FIVE-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "provider": "replicate",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "cost_cap_usd": 0.3,
+  "predictions_submitted": 5,
+  "publication_approved": false,
+  "status": "RUNNING",
+  "qa_human_realism": "PENDING",
+  "drive_persistence": "PENDING_TRANSFER",
+  "outputs": [
+    {
+      "concept_id": "IGC-2026-01",
+      "prediction_id": "kv33phk7hnrmr0d1s6sswjvba0",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "daab89f025d9c4f15302c1ea4b0c7a33cf55856dd90d90dc447912bfcfe13cdf",
+      "prompt_sha256": "85d0e8cf01f919b8511a09cb28b6729dcc8e73732e2814e75ec662089bf08c59",
+      "bytes": 1010066,
+      "filename": "IGC-2026-01_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "IGC-2026-04",
+      "prediction_id": "4bx4vmw90nrmt0d1s6ssr2dfd8",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "fe61b9dda162c38f523f31af291c1fff45fab5b2e6488e10f5d35dd1d3c267d2",
+      "prompt_sha256": "4d42e9e9e93242dc58edf90d5b6456fa03ce20821b724637fc5cbf2f3647be53",
+      "bytes": 1237342,
+      "filename": "IGC-2026-04_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "FB-RCV-006",
+      "prediction_id": "d6rv6znfkhrmr0d1s6sv2sk93c",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "acacbaab0a354f25461918d9b3823ee26e8b96e18ecdf773f9bcad3cef68fb33",
+      "prompt_sha256": "7f6ebd4eb012a644b89ba4cb69fce97cd5d2982b4dc9f4c269186b1e281e8986",
+      "bytes": 1284234,
+      "filename": "FB-RCV-006_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "FB-RCV-007",
+      "prediction_id": "b01250pxmhrmw0d1s6svpbdst4",
+      "status": "IMAGE_DOWNLOADED_QA_PENDING",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false,
+      "sha256": "592d43e2a3d621fd5308a752f011ac95f9410464ecae0224ca8d874d5fdd036b",
+      "prompt_sha256": "7a5ff2239c176ecd5fe761aa9028171bf1871724c3a6e794f091349d3d7cffd5",
+      "bytes": 1161304,
+      "filename": "FB-RCV-007_REPLICATE_ULTRA_RAW.jpg"
+    },
+    {
+      "concept_id": "LI-B2B-20261111-01",
+      "prediction_id": "299cdbqyk5rmy0d1s6svnsz0km",
+      "status": "SUBMITTED",
+      "estimated_cost_usd": 0.06,
+      "publication_approved": false
+    }
+  ]
+}

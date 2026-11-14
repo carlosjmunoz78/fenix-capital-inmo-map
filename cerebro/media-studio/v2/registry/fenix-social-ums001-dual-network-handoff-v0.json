@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0.0",
+  "name": "CEREBRO UMS-001 — Fénix Capital social creative handoff",
+  "environment": "LAB",
+  "company_id": "fenix-capital",
+  "producer_company_id": "fenix",
+  "producer_identity_mapping_verified": false,
+  "media_studio_engine_id": "UMS-001",
+  "producer_repo": "carlosjmunoz78/fenix-capital-inmo-map",
+  "consumer_repo": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "consumer_controller_branch": "cerebro/facebook-autoqual-cloudflare-lab-v0-20261108",
+  "consumer_controller_path": "social_orchestration_v0/producer-publish-contract.v1.json",
+  "consumer_networks": {
+    "INSTAGRAM": {
+      "family_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
+      "prior_request": "INSTAGRAM_7_PIECES_UMS001_PENDING_PRODUCER_20261108.md",
+      "status": "PENDING_REAL_PRODUCER_DELIVERY_NOT_DUPLICATED"
+    },
+    "FACEBOOK": {
+      "family_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
+      "status": "NO_CREATIVE_BRIEF_DISPATCHED_YET"
+    }
+  },
+  "request_event": "SOCIAL_CONTENT_REQUESTED",
+  "ack_event": "UMS001_ORDER_ACCEPTED",
+  "delivery_event": "UMS001_ASSET_DELIVERED",
+  "delivery_minimum": [
+    "request_id",
+    "item_id",
+    "company_id",
+    "platform_id",
+    "asset_sha256",
+    "durable_asset_ref",
+    "rights_ok",
+    "brand_qa_ok",
+    "accessibility_qa_ok",
+    "financial_claims_ok",
+    "originality_ok",
+    "sources_current_ok",
+    "signed_delivery_verified",
+    "private_storage_verified"
+  ],
+  "publishing_rule": "PRODUCER_NEVER_PUBLISHES; ONLY CEREBRO_SOCIAL_TO_EXISTING_BUFFER_ADAPTER_WITH_INDEPENDENT_GATES",
+  "mandatory_network_adaptation": true,
+  "duplicate_crosspost_blocked": true,
+  "producer_owns_model_selection": true,
+  "producer_finops_reservation_live_verified": false,
+  "real_asset_signed_delivery_e2e_verified": false,
+  "existing_publisher_reused": "BUFFER_EXISTING",
+  "new_publisher": false,
+  "auto_spend_authorized": false,
+  "no_app_crm_wordpress_supabase_prod_changes": true,
+  "status": "HANDOFF_CONTRACT_ONLY_LAB_NO_EVENTS_CONNECTED_NO_PUBLISHING"
+}

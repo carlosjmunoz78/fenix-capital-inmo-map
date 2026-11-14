@@ -1,0 +1,15 @@
+{
+  "request_id": "UMS001-IGC202603-PROMPTFORGE-S00-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "panel_id": "IGC-2026-03-S00",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "max_predictions": 1,
+  "max_cost_usd": 0.06,
+  "budget": "EXISTING_PREPAID_ONLY",
+  "publish": false,
+  "generator": "UMS001-PROMPT-FORGE-V0.1",
+  "run_mode": "ONE_SHOT_PAID_LAB"
+}

@@ -1,0 +1,14 @@
+{
+  "request_id": "UMS001-IGC202601-S01-S05-20261111-01",
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "status": "RESERVED_NO_AUTO_RETRY",
+  "max_predictions": 5,
+  "estimated_cost_usd": 0.3,
+  "provider": "replicate",
+  "model_id": "black-forest-labs/flux-1.1-pro-ultra",
+  "publication_approved": false,
+  "cover_prediction_id": "vnmptp4s6drmw0d1s8at0tmc3c",
+  "run_id": "43002156297"
+}

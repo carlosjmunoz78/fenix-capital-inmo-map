@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "iteration": "CLOUDFLARE_QWEN_DIRECTOR_R01",
+  "provider": "replicate",
+  "model": "black-forest-labs/flux-1.1-pro-ultra",
+  "language_provider": "cloudflare_workers_ai",
+  "language_model": "@cf/qwen/qwen3-30b-a3b-fp8",
+  "prediction_id": "c7gydkpzgdrmr0d1s928gn2we0",
+  "sha256": "6ee272d96aac9644e73a30bc23be85c95bffdfcb7d405482c5a6f24cad5bc479",
+  "estimated_prepaid_usd": 0.06,
+  "asset_drive_file_id": "1XbgHa1R_XFyvfbVFKvJQjtPtHYyq8eVL",
+  "evaluation": "COMPOSITION_IMPROVEMENT__CASTING_AND_STORY_QA_FAIL",
+  "positives": [
+    "Adults foregrounded with large believable faces and natural hands; no ghost human absence or tiny distant people",
+    "Bright photographic skin detail and glowing orange special effects integrated into foreground",
+    "No visibly fabricated Fénix logo in image"
+  ],
+  "defects": [
+    "Two men instead of the requested female advisor plus male buyer",
+    "Floating illuminated X sign reads as mortgage rejection or negation; may be misleading",
+    "Grand-lobby/hotel atmosphere not recognizable Córdoba residence or genuine Andalusian patio",
+    "The impossible architecture feels like golden ornaments rather than a vivid relevant art installation"
+  ],
+  "correction_policy": [
+    "CREATIVE_MODEL_MUST_DEFINE_ONE_WOMAN_ADVISER_AND_ONE_MAN_BUYER",
+    "EXCLUDE_X_CROSS_CHECK_SIGN_OR_UI_STYLE_ICON",
+    "EXPLICIT_ANDALUSIAN_PATIO_ORANGE_TREE_STONE_ARCHES",
+    "SURREAL_SCULPTURE_BACKGROUND_ONLY",
+    "PRESERVE_55_PERCENT_FACE_SCALE_AND_DOCUMENTARY_SKIN",
+    "NO_FAKE_BRAND"
+  ],
+  "publication_approved": false,
+  "next_model": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "next_visual_strength": 0.18,
+  "max_next_paid_predictions": 1
+}

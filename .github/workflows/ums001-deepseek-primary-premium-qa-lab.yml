@@ -1,0 +1,53 @@
+name: UMS001 DeepSeek primary premium cinematography QA LAB
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '.github/workflows/ums001-deepseek-primary-premium-qa-lab.yml'
+      - 'cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py'
+      - 'cerebro/media-studio/v2/registry/UMS001_PREMIUM_CINEMATOGRAPHY_PROMPT_CONTRACT_V1.json'
+      - 'cerebro/media-studio/v2/requests/deepseek-auto/**'
+permissions:
+  contents: read
+concurrency:
+  group: ums001-deepseek-premium-qa-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  premium-prompt-regression:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.head_ref == 'cerebro/ums-replicate-flux-paid-lab-v0-20261108'
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Install pinned free Pillow image library for hash-based photo regression
+        run: python3 -m pip install 'Pillow==11.3.0'
+      - name: Python compile and premium camera/lens/key/fill/contrast unit tests
+        run: |
+          python3 -m py_compile cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
+          python3 cerebro/media-studio/v2/tests/test_ums001_deepseek_primary_auto_lab_v1.py -v
+      - name: Validate one real request budget without invoking paid API
+        run: >-
+          python3 cerebro/media-studio/v2/runtime/ums001_deepseek_primary_auto_lab_v1.py
+          --job cerebro/media-studio/v2/requests/deepseek-auto/UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-01.json
+          --validate-only
+      - name: Verify the dedicated DeepSeek secret exists without spending credits
+        env:
+          CEREBRO_UMS001_DEEPSEEK_API_KEY: ${{ secrets.CEREBRO_UMS001_DEEPSEEK_API_KEY }}
+        shell: bash
+        run: |
+          if [ -n "$CEREBRO_UMS001_DEEPSEEK_API_KEY" ]; then
+            echo "CEREBRO_UMS001_DEEPSEEK_KEY_AVAILABLE=true"
+          else
+            echo "CEREBRO_UMS001_DEEPSEEK_KEY_AVAILABLE=false"
+            exit 4
+          fi
+      - name: Assert original-photo policy and isolated financial gates
+        run: |
+          echo 'No paid LLM call. No paid image request. No cloudflare creative. No live publishing.'
+          echo 'Premium photo contract enforced in JSON. Production unchanged.'

@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "panel_id": "IGC-2026-03-S00",
+  "proposal_id": "UMS001-IGC202603-CF70B-CREATIVE-R02-20261111",
+  "provider": "cloudflare-workers-ai",
+  "model_requested": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+  "model_observed": "@cf/meta/llama-3.3-70b-instruct-sd",
+  "provider_completion_id": "chatcmpl-1bd8f641-7c40-4b0f-908f-a6879c18130e",
+  "inference_invoked_by": "CEREBRO_CLOUDFLARE_CONNECTOR_MANUAL_PILOT",
+  "usage": {
+    "prompt_tokens": 303,
+    "completion_tokens": 277,
+    "total_tokens": 580,
+    "neurons": 64.8113784790039
+  },
+  "estimated_additional_cost_eur": 0,
+  "paid_text_llm_called": false,
+  "deepseek_called": false,
+  "source_prompt_request": "Improve actual creative R01 image after independent QA: omit manufactured approval checkmark, meaningless text on jacket cuff, coat of arms on key, generated documents. Human 65% close-up.",
+  "model_response": {
+    "image_prompt": "Two real Spanish adults photographed close-up, waist-up, taking up 65% of the vertical 4:5 frame, set against the bright daylight of Córdoba, with a monumental orange translucent glass architectural arc and an unmarked physical alabaster miniature house sculpture behind their shoulders, conveying a sense of contemplation and consideration as they discuss the prospect of buying a home, their facial expressions and body language telling the story of a thoughtful and emotional decision-making process, with a hyper-photoreal 50mm film commercial quality and magical golden light, no fantasy elements or surreal art in front of their faces, leaving the lower 20% of the frame calm and empty for a separate headline, focusing on the human emotions and the miniature house as a symbol of their potential future, with the adults' natural skin tones and authentic clothing, capturing the essence of a real-life moment, free from any distractions or symbols, and emphasizing the importance of this life-changing decision, with the orange glass arc and alabaster house adding a touch of elegance and sophistication to the scene, and the overall atmosphere being one of serenity and thoughtful deliberation.",
+    "hard_reject": [
+      "fantasy dolls",
+      "surreal art in front of faces",
+      "symbols or logos on clothing or accessories"
+    ]
+  },
+  "hard_constraints_added_by_cerebro_router": "CRITICAL photoreal waist-up adult woman and adult man dominate 65% of foreground in 50mm vertical 4:5 photographed with visible realistic natural eyes, hands, skin pores. In BACKGROUND only: majestic ORANGE #FF5F00 clean translucent glass curved arc and smooth off-white alabaster small house, no keys. Plain unbranded shirts with smooth sleeves no stitching, text, labels, cuff embroidery, logos, watches, badges or decorative marks. NO CHECKMARKS, NO APPROVAL SIGNS, no symbols, no crests, no badges, no seals, no emblems, NO PAPER, NO BILLS, NO DOCUMENTS, NO BOOKS, NO INVOICES, NO PRINTED AREAS, no logo-like or letter-like shapes, no signs, no numerals and no graphical text. Attractive luminous Andalusian sunlight. Fénix official logo and an external short hook added later by controlled source-verified postprocessor; absolutely no invented Fénix logo in AI pixels. Keep lower 20% uncluttered for later type. NO mortgage approval or bank claims. No logos of any kind may be generated; real original logo is added only by trusted compositor after visual quality approval.",
+  "reference_source": "IGC202601_OWNER_APPROVED_CLEAN_REVIEW_CROP_BASE64.json",
+  "reference_strength": 0.3,
+  "previous_qa_file": "cerebro/media-studio/v2/qa/IGC202603_CLOUDFLARE70B_REPLICATE_PILOT_R01_VERDICT.json",
+  "status": "CREATIVE_REVISION_FROM_REAL_QA_READY_FOR_ONE_SHOT_LAB_REPLICATE",
+  "actual_persistent_auto_router": false,
+  "publish_enabled": false
+}

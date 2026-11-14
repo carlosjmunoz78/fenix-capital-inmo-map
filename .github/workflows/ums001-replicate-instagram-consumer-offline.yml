@@ -1,0 +1,32 @@
+name: UMS-001 Replicate Instagram consumer · offline contract gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/media-studio/v2/runtime/replicate-provider-lab-v0.mjs'
+      - 'cerebro/media-studio/v2/registry/replicate-flux-rollout-lab-v0.json'
+      - 'cerebro/media-studio/v2/registry/instagram-replicate-ums001-consumer-contract-20261108.v1.json'
+      - 'cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs'
+      - 'cerebro/media-studio/v2/tests/instagram-ums001-replicate-consumer-contract.test.mjs'
+      - '.github/workflows/ums001-replicate-instagram-consumer-offline.yml'
+permissions:
+  contents: read
+jobs:
+  safe-consumer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate canonical LAB Replicate adapter and new Instagram consumer
+        run: |
+          node --test \
+            cerebro/media-studio/v2/tests/replicate-provider-lab-v0.test.mjs \
+            cerebro/media-studio/v2/tests/instagram-ums001-replicate-consumer-contract.test.mjs
+      - name: Confirm no external paid calls or publication controls present
+        run: |
+          node - <<'JS'
+          const fs=require('fs');
+          const c=JSON.parse(fs.readFileSync('cerebro/media-studio/v2/registry/instagram-replicate-ums001-consumer-contract-20261108.v1.json'));
+          if(c.budget.atomic_finops_reservation_deployed || c.trusted_pipeline.private_media_storage_end_to_end_tested) throw Error('UNVERIFIED_LIVE_GATE');
+          if(c.release.instagram_publish_enabled || c.release.buffer_queue_changes_allowed) throw Error('UNAUTHORIZED_SOCIAL_MUTATION');
+          console.log('NO_PAID_PREDICTIONS=TRUE, NO_INSTAGRAM_MUTATIONS=TRUE');
+          JS

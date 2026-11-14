@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "content_id": "IGC-2026-03",
+  "request_id": "UMS001-IGC202603-DEEPSEEK-ARTLAB-20261111-07",
+  "run_id": 43031579487,
+  "run_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43031579487",
+  "status": "HUMAN_REQUIRED_LOW_CONFIDENCE",
+  "credentials": {
+    "isolated_deepseek": "VERIFIED_AVAILABLE_IN_GITHUB_ACTIONS",
+    "replicate": "VERIFIED_AVAILABLE_IN_GITHUB_ACTIONS",
+    "secret_values_saved": false
+  },
+  "provider_execution": {
+    "deepseek_flash_calls": 4,
+    "replicate_predictions": 2,
+    "generated_images": 2,
+    "passed_visual_qa": 0,
+    "publication_enabled": false
+  },
+  "qa_observations": [
+    {
+      "attempt": 1,
+      "score": 52,
+      "failed": [
+        "INVENTED_TEXT",
+        "INVENTED_LOGO",
+        "BAD_ANATOMY",
+        "GENERIC_SCENE",
+        "COMPOSITION_WEAK",
+        "FOCAL_DISTORTION"
+      ],
+      "notes": "Fake lower-left watermark and stylized orange mural, wrist/watch issue, weak surreal physical artwork"
+    },
+    {
+      "attempt": 2,
+      "score": 48,
+      "failed": [
+        "BAD_ANATOMY",
+        "COMPOSITION_WEAK",
+        "FACE_TINY",
+        "GENERIC_SCENE",
+        "INVENTED_LOGO",
+        "MISLEADING_FINANCE"
+      ],
+      "notes": "Too-large man foreground versus blurred tiny woman, generic room, watch markings; model's stated score 58 not equal weighted 48, rejected"
+    }
+  ],
+  "transferable_corrections": [
+    "Do not let Replicate produce any typography, pseudo-watermark, watch emblems or visible apparel badges; constrain garments/jewelry or use deterministic retouch if safe",
+    "Keep both requested subjects equally prominent, large waist-up and visible eyes; no deep depth-of-field that blurs required face",
+    "Require a distinct physically plausible sculptural surreal centerpiece in backdrop rather than flat orange backdrop",
+    "Preserve realistic warm Andalusian daylight with motivated key/fill and realistic shadows",
+    "Independent pixel-level visual QA is mandatory, hard-fail on score inconsistency",
+    "Do not promote on merely valid DeepSeek prompt, completed image or QA API success"
+  ],
+  "next_gate": "New uniquely idempotent job only after reading this QA; no repeat paid calls for original request; maintain private LAB and social publish OFF.",
+  "production_autonomy": "NOT_VERIFIED",
+  "user_authorized_existing_api_credit": true
+}

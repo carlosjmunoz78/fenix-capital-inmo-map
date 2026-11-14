@@ -1,0 +1,23 @@
+{
+  "company_id": "fenix",
+  "engine_id": "UMS-001",
+  "environment": "LAB",
+  "request_id": "UMS001-IGC202603-CLOUDFLARE-LLAMA-REPLICATE-R03-20261111",
+  "content_id": "IGC-2026-03",
+  "language_model": "@cf/meta/llama-3.3-70b-json",
+  "language_provider": "cloudflare_workers_ai",
+  "creative_llm_called_by": "CEREBRO_Cloudflare_Universal_connector",
+  "creative_model_called_in_same_runner": false,
+  "creative_model_neurons_reported": 81.0859603881836,
+  "image_model": "black-forest-labs/flux-1.1-pro-ultra",
+  "image_provider": "replicate",
+  "reference_sha256": "6c1e78c557cca26d475681fa81afc5a805d5bdc909738eb88931b101e27f3019",
+  "reference_strength": 0.26,
+  "prompt_sha256": "44f7c914bd6b9372d7a9e54b90ef4f010aaf4e771e949e97e1926a9212279462",
+  "prediction_id": "63k2yyqb7hrmy0d1s9990616p4",
+  "status": "SUBMITTED",
+  "estimated_provider_usd": 0.06,
+  "estimated_language_extra_cost_eur": 0,
+  "social_publication": false,
+  "qa": "PENDING"
+}
