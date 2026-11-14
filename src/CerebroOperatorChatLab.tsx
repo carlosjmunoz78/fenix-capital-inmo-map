@@ -1,4 +1,4 @@
-import {useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
+import {useEffect,useRef,useState,type FormEvent,type KeyboardEvent} from 'react';
 import {planOwnerInstructionLab,type OperatorIntent} from './cerebroOperatorChatLabApi';
 import {readUniversalOperativaLab,simulateFactRegistryDryRunLab} from './cerebroUniversalOperativaLabApi';
 import {readStagingSuspensionLab} from './cerebroStagingSuspensionLabApi';
@@ -16,6 +16,20 @@ export default function CerebroOperatorChatLab(){
  const add=(who:Line['who'],body:string,receipt?:string)=>{
   setLines(list=>[...list,{id:++count.current,who,body,receipt}].slice(-35));
  };
+ // Temporary one-shot owner-only, read-only acceptance probe; removed after E2E.
+ useEffect(()=>{
+  if(new URLSearchParams(window.location.search).get('op3_operator_qa_once')!=='owner-approved-read-20261114')return;
+  const clean=new URL(window.location.href);
+  clean.searchParams.delete('op3_operator_qa_once');
+  window.history.replaceState(window.history.state,'',clean.pathname+clean.search+clean.hash);
+  add('owner','estado de staging [QA lectura desde la consola]');
+  void planOwnerInstructionLab('estado de staging').then(plan=>{
+   if(plan.kind!=='planned'||plan.intent!=='STAGING_STATUS'){
+    add('cerebro','QA PLAN DENIED: '+plan.message);return;
+   }
+   void execute('STAGING_STATUS');
+  });
+ },[]);
  const execute=async(intent:OperatorIntent)=>{
   try{
    if(intent==='HELP'){add('cerebro',HELP);return;}
