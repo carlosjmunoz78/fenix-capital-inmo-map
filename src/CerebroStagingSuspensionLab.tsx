@@ -37,6 +37,7 @@ export default function CerebroStagingSuspensionLab(){
    <small>Controles generales JOB-001: {s.gateway_job001.active} activos, {s.gateway_job001.paused} pausados (de {s.gateway_job001.total}).</small>
    <small>Último registro del puente: {s.bridge_health.last_recorded_at?new Date(s.bridge_health.last_recorded_at).toLocaleString('es-ES'):'sin datos'}.
      Lectura: {new Date(s.observed_at).toLocaleString('es-ES')}.</small>
+   {s.edge_backups?<small>Recuperación protegida: <strong>{s.edge_backups.source_snapshots} snapshots Edge</strong> y {s.edge_backups.sql_source_snapshots} snapshots SQL. Es respaldo de fuentes, no prueba de actividad de las Edge.</small>:null}
    {s.durable_evidence?<small><strong>Evidencias persistidas en LAB: {s.durable_evidence.recorded}.</strong>
     {s.durable_evidence.latest_evidence_id?' Última: '+s.durable_evidence.latest_evidence_id:''}
     {s.durable_evidence.last_recorded_at?' · '+new Date(s.durable_evidence.last_recorded_at).toLocaleString('es-ES'):''}
