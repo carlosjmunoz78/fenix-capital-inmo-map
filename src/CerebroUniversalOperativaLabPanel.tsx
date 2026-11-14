@@ -44,7 +44,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
  if(!enabled)return null;
  return <section className="op-uni-lab" aria-label="Gateway Universal en ensayo">
   <div className="op-uni-lab-head">
-   <div><strong>Gateway Universal · LAB</strong><span>Operativa · Lecturas y certificación FACT-001 LAB · Otros motores sin activar</span></div>
+   <div><strong>Gateway Universal · LAB</strong><span>Operativa · FACT-001 y GOV-001 en LAB · Otros motores sin activar</span></div>
    <button type="button" onClick={()=>{void refresh()}} disabled={loading} aria-label="Verificar conexión del Gateway Universal">
     {loading?'Comprobando…':'Verificar conexión'}
    </button>
@@ -75,10 +75,10 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <CerebroStagingSuspensionLab/>
   </div>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-proof">
-   <span>Capacidades consultables: <b>{result.capabilities.length}</b></span>
+   <span>Capacidades anunciadas en LAB (lectura y recibos): <b>{result.capabilities.length}</b></span>
    <span>Definiciones registradas: <b>{result.registeredDefinitions}</b></span>
    <span>Motores operativos: <b>No verificados</b></span>
-   <small>Fuente: {result.source}. Esta capacidad solo consulta el registro; NO ejecuta motores.</small>
+   <small>Fuente principal: {result.source}. Los justificantes FACT/GOV son operaciones LAB aisladas, no ejecución de motores empresariales.</small>
    <div className="op-uni-lab-work" aria-label="JOB-001 fuente real de configuración PREPROD, solo lectura">
     <strong>JOB-001 · controles existentes (PREPROD)</strong>
     <span>Lectura: {result.job001?.state||'UNAVAILABLE'} · Ejecución: NO VERIFICADA</span>
