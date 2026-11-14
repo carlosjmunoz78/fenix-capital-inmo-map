@@ -22,6 +22,13 @@ export function planOperatorInstructionLab(text){
   return plan('REGISTRY_STATUS','Consultar registro de 179 motores (sin verificar ejecución)');
  if(/^(?:estado|ver|consultar|revisar) (?:de |del |los )?(?:jobs|trabajos|job 001|job001|programador)$/.test(s))
   return plan('JOB001_STATUS','Consultar controles de JOB-001 en PREPROD');
+ // An individual motor can only be INSPECTED; the server must check the
+ // candidate against all 179 canonical registry IDs before answering.
+ const motor=/^(?:estado|ver|consultar) (?:de |del )?motor ([a-z][a-z0-9 ]{2,70})$/.exec(s);
+ if(motor){
+  const target_engine_id=motor[1].toUpperCase().replace(/ /g,'-');
+  return {...plan('ENGINE_STATUS','Consultar estado registrado de '+target_engine_id+' (runtime no acreditado)'),target_engine_id};
+ }
  if(/^(?:ultima|ultima certificacion|ver ultima certificacion|consultar ultima certificacion|ver recibo fact 001|ultimo recibo)$/.test(s))
   return plan('FACT_LATEST','Consultar justificante persistido FACT-001');
  if(/^(?:simular|simula|validar|valida) (?:orden |la orden )?(?:fact 001|fact001|certificacion fact 001)$/.test(s))
