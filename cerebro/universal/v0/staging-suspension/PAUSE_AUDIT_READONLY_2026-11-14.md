@@ -140,3 +140,22 @@ Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `S
 Los tres endpoints adicionales bloqueados más tarde tienen snapshots separados en `cerebro_lab_private.staging_edge_source_snapshot_v1`; su prueba remota 423 e idempotencia se documentan arriba.
 
 **Continuidad documental:** `STATE_2026-11-14.md` registra un corte histórico anterior a los tres bloqueos adicionales. Su declaración temporal «fenix-seo-conversion-e2e-preprod no modificado» está **SUPERADA**: versión v8 bloqueada, backup v7 disponible. Este runbook posterior es fuente vigente para el estado de ese endpoint. No reactivar staging.
+
+
+## V0.21 · Auditoría completa de código vivo de las 94 funciones Edge
+
+**HECHO · 14/11/2026 · Supabase PREPROD · SOLO LECTURA (sin visitar staging):**
+- Se extrajo la lista exhaustiva de los **94 `artifact_name`** guardados previamente en `cerebro_lab_private.staging_suspension_snapshot_v1` con `artifact_type='SUPABASE_EDGE'`.
+- Se inspeccionó el **código desplegado** de cada una mediante la administración Supabase `get_edge_function` en siete bloques disjuntos de índices 0–14, 15–29, 30–44, 45–59, 60–74, 75–89 y 90–93.
+- **94/94** versiones actuales corresponden a la versión original respaldada **+1**; **94/94** contienen `STAGING_SUSPENDED_BY_OWNER` o `BLOCKED_DEPENDENCY`; **94/94** no contienen llamadas `fetch()` ni operaciones de escritura `.insert()`, `.update()`, `.delete()`, `.upsert()` en su código vigente.
+- Dos cuerpos completos contrastados adicionalmente: `fenix-blog-card-image-size-fix-preprod` v3 y `fenix-seo-autonomos-runtime-repair-preprod` v4. Ambos son stubs de `Deno.serve` con HTTP 423, `BLOCKED_DEPENDENCY`, `STAGING_SUSPENDED_BY_OWNER`, `executed=false`, `side_effects=false`, sin HTTP saliente. Se conservan respaldos de las versiones previas.
+- **Límite**: esta inspección completa certifica el código vivo de esas 94 funciones, **no** el código de otras Edge no incluidas ni el Hostinger maestro. El RPC de observación SQL continúa indicando `global_isolation_verified=false`; no cambiar ese campo por la auditoría de un subconjunto.
+
+### Otras rutas activas revisadas
+- El Gateway externo PREPROD `cerebro-job001-gateway-preprod` v11 contiene el control `enabled` antes del despacho. JOB-001/24 y JOB-001/25 están `enabled=false`; no son rutas a staging en su `target` actual.
+- Hay 21 trabajos `pg_cron` activos **ajenos al conjunto staging pausado**; sus comandos no contienen un destino staging literal. Se inspeccionaron 15 funciones SQL sociales invocadas por sus cron; ninguna contiene la cadena staging.
+- Rutas dinámicas sociales: 45 URL base activas de `cerebro_social_content_patterns_preprod` apuntan a `fenixcapital.es`. En `cerebro_social_queue_preprod`, los 89 `media_urls` inspeccionados apuntan a `fenixcapital.es` (65) y a Supabase PREPROD (24); los 78 `source_media_urls` apuntan a `fenixcapital.es`. No se envió ninguna petición HTTP para verificar disponibilidad de esos destinos.
+- Los accesos dinámicos podrían cambiar en el futuro. Estos resultados son **fotografías de datos y código actuales**, no un bloqueo universal de red ni garantía de ausencia de redirecciones.
+- En una ventana de dos horas el Gateway JOB-001 PREPROD registró 143 solicitudes HTTP 200, **sin identidad de origen certificada** ni prueba de finalización de trabajos. No atribuirlas a Hostinger como hecho.
+
+**Decisión de conservación**: no se pausaron los 21 cron activos de otros motores, ni se alteraron WordPress PROD, redes sociales, DNS, App, CRM, otros tenants o los cinco JOB-001 no clasificados como dependientes de staging. Para cerrar al 100 % el control de origen hace falta auditoría física de Hostinger y sus jobs externos. No se autoriza reactivación.
