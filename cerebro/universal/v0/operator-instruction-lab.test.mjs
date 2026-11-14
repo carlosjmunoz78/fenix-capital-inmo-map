@@ -27,6 +27,18 @@ for(const [phrase,expected,confirmation] of [
   assert.equal(r.additional_cost_eur,0);
  });
 }
+test('governance evidence intent requires confirmation, not FACT engine execution',()=>{
+ const r=plan('certificar suspensión de staging');
+ assert.equal(r.status,'PLAN_READY');
+ assert.equal(r.engine_id,'GOV-001');
+ assert.equal(r.intent,'STAGING_CAPTURE');
+ assert.equal(r.execution_scope,'STAGING_SUSPENSION_RECEIPT_ONLY');
+ assert.equal(r.requires_confirmation,true);
+ assert.equal(r.production_allowed,false);
+ assert.equal(r.external_destination_allowed,false);
+ assert.equal(r.staging_allowed,false);
+});
+
 test('individual motor status request is a READ-ONLY candidate (registry authorization remains server-side)',()=>{
  const r=plan('estado del motor SEO-001');
  assert.equal(r.status,'PLAN_READY');
