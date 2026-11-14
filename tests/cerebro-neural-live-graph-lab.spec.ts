@@ -63,6 +63,15 @@ test('neuronal: unavailable activity does not generate fictional executions',asy
 test('neuronal: mobile inspection retains usable touch controls and no panel overflow',async({page})=>{
  await page.setViewportSize({width:375,height:812});
  await setup(page,'LIVE',[run(914,'queued','QA-001')]);
+ const nav=page.getByRole('navigation',{name:'Interfaces'});
+ const tabs=nav.locator('button');
+ await expect(tabs).toHaveCount(5);
+ for(const tab of await tabs.all()){
+  const b=await tab.boundingBox();
+  expect(b).not.toBeNull();
+  expect(b!.x).toBeGreaterThanOrEqual(-1);
+  expect(b!.x+b!.width).toBeLessThanOrEqual(376);
+ }
  const panel=page.getByRole('region',{name:'Red neuronal de actividad comprobada'});
  const rect=await panel.boundingBox();
  expect(rect).not.toBeNull();
