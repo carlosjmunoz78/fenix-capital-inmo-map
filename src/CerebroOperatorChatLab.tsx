@@ -5,6 +5,13 @@ import {readStagingSuspensionLab,captureStagingSuspensionLab} from './cerebroSta
 import {readFactRegistryAttestationLab,executeFactRegistryAttestationLab} from './cerebroFactRegistryExecutionLabApi';
 
 type Line={id:number;who:'owner'|'cerebro';body:string;receipt?:string};
+const READ_SHORTCUTS=[
+ {label:'Estado de motores',command:'estado de motores'},
+ {label:'JOB-001',command:'estado de job-001'},
+ {label:'SEO-001',command:'estado del motor SEO-001'},
+ {label:'Último recibo',command:'última certificación'},
+ {label:'Estado de suspensión',command:'estado de staging'}
+] as const;
 const HELP='Órdenes disponibles: «estado de motores», «estado del motor SEO-001», «estado de job-001», «estado de staging», «última certificación», «simular FACT-001», «certificar FACT-001» y «certificar suspensión de staging». Solo LAB de Fénix; no ejecuta motores de negocio ni publicación.';
 export default function CerebroOperatorChatLab(){
  const [input,setInput]=useState('');
@@ -71,10 +78,9 @@ export default function CerebroOperatorChatLab(){
    }
   }catch{add('cerebro','El Gateway no confirmó esta operación. Sin resultado acreditado; consulta el estado antes de repetir.');}
  };
- async function submit(e?:FormEvent<HTMLFormElement>){
-  e?.preventDefault();
+ async function dispatchInstruction(instruction:string){
   if(busyRef.current||pending)return;
-  const text=input.trim();
+  const text=instruction.trim();
   if(text.length<2||text.length>240)return;
   busyRef.current=true;setBusy(true);setInput('');add('owner',text);
   try{
@@ -93,6 +99,10 @@ export default function CerebroOperatorChatLab(){
    }
    await execute(plan.intent);
   }finally{busyRef.current=false;setBusy(false);}
+ }
+ async function submit(e?:FormEvent<HTMLFormElement>){
+  e?.preventDefault();
+  await dispatchInstruction(input);
  }
  async function confirm(){
   if(busyRef.current||!pending||!['FACT_ATTEST','STAGING_CAPTURE'].includes(pending.intent))return;
@@ -126,6 +136,12 @@ export default function CerebroOperatorChatLab(){
    <div><button type="button" disabled={busy} onClick={()=>{void confirm()}}>{pending.intent==='STAGING_CAPTURE'?'Guardar evidencia de suspensión':'Confirmar certificación'}</button>
    <button type="button" disabled={busy} onClick={cancel}>Cancelar</button></div>
   </div>:null}
+  <div className="op-uni-lab-chat-quick" role="group" aria-label="Consultas rápidas de solo lectura">
+   <strong>Consultar sin escribir</strong>
+   <div>{READ_SHORTCUTS.map(item=><button type="button" key={item.command} disabled={busy||!!pending}
+     onClick={()=>{void dispatchInstruction(item.command)}}>{item.label}</button>)}</div>
+   <small>Solo consultas autorizadas. No inician motores ni trabajos, no escriben en staging ni publican cambios.</small>
+  </div>
   <form onSubmit={e=>{void submit(e)}} className="op-uni-lab-chat-form">
    <label htmlFor="cerebro-lab-command">Escribe tu orden</label>
    <textarea id="cerebro-lab-command" value={input} onChange={e=>setInput(e.target.value)}
