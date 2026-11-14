@@ -70,3 +70,30 @@ Con base en esa evidencia se guardaron las **15 filas completas originales** (`e
 Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `SKIPPED_DISABLED` del Gateway para los 15 jobs seleccionados. **No hay equivalencia de aislamiento global**: faltan verificar otros consumidores externos y las posibles invocaciones directas que no pasen por el Gateway.
 
 **Rollback documentado, NO EJECUTAR ahora:** tras nueva orden explícita y revisión de seguridad/contrato, restaurar cada `enabled` desde `cerebro_lab_private.staging_job001_control_snapshot_v1.prior_row` con comparación OLD vs NEW y pruebas de no regresión. No restaurar toda la tabla a ciegas ni antes de autorizar staging.
+
+
+## V0.16 · Live Observation integrada en Operativa
+
+**Misión:** continuar Operativa/CEREBRO sin levantar staging ni abrir un segundo Gateway. Esta intervención introduce una única capacidad determinista, acotada, con evidencia real y sin ejecutar motores externos.
+
+### HECHO · Fuentes y entorno
+1. Se creó `public.cerebro_universal_staging_status_lab_v0()` en Supabase PREPROD desde SQL GitOps `cerebro/universal/v0/staging-suspension/lab-live-observation-v0.sql`. SQL de solo lectura y sin tráfico hacia WordPress. La función es `SECURITY DEFINER`, `search_path=pg_catalog`, cero parámetros, sin SQL dinámico, y **EXECUTE solo para service_role**. Revocado para anon/authenticated; permisos comprobados mediante SQL.
+2. Se creó la tabla de auditoría `public.cerebro_universal_staging_observation_lab_v0`, RLS activa, grants anon/authenticated revocados, inserción/consulta service_role exclusiva, `idempotency_key` UNIQUE y `executed_external_actions=false` obligatorio. **No se registró aún una fila vía UI**: `COUNT(*) = 0` en la lectura a 08:48 UTC del 14/11.
+3. Se desplegó `cerebro-universal-staging-observe-lab-v0` **v1 ACTIVE**, Edge PREPROD con permiso solo para propietario mediante verificación server-to-server del contexto `CARLOS-ADMIN` existente. `GET` observa, `POST` inserta únicamente evidencia con control idempotente. No recibe URLs dinámicas, no publica y no tiene ruta de reactivación.
+4. Se amplió **el Gateway Universal Preview existente** con `get_staging_suspension_live` y `capture_staging_suspension`, sin ampliar permisos de AION/CAPTACASA ni abrir PROD, sin alterar las operaciones FACT-001/JOB-001/voz.
+5. Interfaz Operativa V3: panel **«Suspensión de staging · evidencia en vivo»**, botón `Actualizar estado real`, botón `Guardar evidencia LAB`, advertencia explícita **«Aislamiento global: NO CERTIFICADO»**.
+6. **Consulta SQL real** (08:39 UTC): 15/15 JOB-001 pausados, 8/8 cron de staging inactivos, 4/4 SQL guardados, cinco de veinte controles generales JOB-001 aún activos y última fila del puente 2026-11-13T22:05:03Z. `known_controls_closed=true`, `global_isolation_verified=false`.
+7. **CI real** GitHub Universal Gateway LAB [43577501403](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43577501403): **SUCCESS**, incluye tests con mocks del adapter y negative smoke remoto anon GET/POST del nuevo Edge, sin credenciales. Governed Main Integration [43577501378](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43577501378): SUCCESS.
+8. **Preview Vercel real** `dpl_7HwbjupdTeDrebgsojHBtbZ22q6h`, `READY`, commit `d62632a8b901cc89e46c60465b2545ee50545a9b`, dirección inmutable `https://fenix-capital-preprod-2710i8ofb.vercel.app` (NO PROD). Alias estable del Preview conservado.
+9. **Owner UI E2E de lectura acreditada**: sesión Opera en la pestaña existente 1381967780 con alias estable. El panel cargó el snapshot real 15/15 · 8/8 · 4/4, cinco activos de veinte, último puente 23:05 hora Madrid. No se visitó staging. El **POST de captura vía clic owner sigue SIN prueba física**, no atribuirle auditoría persistida hasta una fila real.
+
+### Gates abiertos
+- No hay certificado global de Hostinger, WordPress, otros ejecutores remotos y llamadas externas que puedan saltarse Supabase. DNS staging `proxied=false` impide aplicar WAF Cloudflare con cobertura total; no se cambió DNS.
+- El nuevo sistema observa y guarda evidencia, **NO** ejecuta órdenes empresariales; todavía faltan executor por capacidad, POLICY/JDG, colas existentes verificadas, idempotencia de efectos, rollback de operaciones reales y pruebas old/new para pasar CEREBRO a autonomía.
+- La captura owner autenticada del botón está implementada, pero NO se ha pulsado ni auditado E2E. El almacenamiento permanece vacío según consulta.
+- PR #66 continúa **DRAFT**, sin fusionar. `app.fenixcapital.es`, CRM PROD, WordPress PROD, DNS, main y trading intactos. No se ha contratado suscripción nueva. El consumo exacto de infraestructura no se ha medido.
+
+### Recuperación
+- Reversión del código UI/Gateway: revertir los commits aislados de PR #66 o restaurar el Preview anterior; el despliegue original permanece inmutable.
+- Edge y RPC son recursos nuevos y aislados; conservar evidencia y no borrar automáticamente. El alta de esta capacidad **no autoriza** reactivar staging ni alterar las 15 suspensiones.
+- Cualquier corrección debe conservar esquema, permisos, RLS, ids de evidencia y la política de owner. Migración PROD prohibida hasta los gates correspondientes.
