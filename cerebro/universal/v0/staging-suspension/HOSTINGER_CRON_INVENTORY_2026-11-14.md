@@ -61,3 +61,15 @@ El listado **ya no contiene** `job001_wp_bridge_canary_FIXED.php`. Por comparaci
 **Referencia del código esperado, NO prueba de identidad del vivo:** la misma Edge v11 conserva una copia `MASTER_ARTIFACT` de 196 líneas, con destino fijo al gateway PREPROD, configuración de jobs en fichero local `job001_enabled_jobs.json`, secreto almacenado fuera del PHP y llamadas cURL al Gateway con `CURLOPT_FOLLOWLOCATION=false`. La copia no contiene `staging.fenixcapital.es`, pero debe contrastarse el final del editor vivo antes de certificar el master.
 
 **Pendiente:** que el propietario desplace el editor a su final para completar lectura del código realmente instalado, sin pulsar Guardar, ejecutar script ni abrir staging.
+
+
+## JOB-001 Master PHP · final del archivo vivo revisado
+
+**14/11/2026 · revisión física del final del editor de Hostinger (sin ejecutar ni guardar):**
+- Tras desplazarse el propietario con Ctrl+Fin, el árbol del editor Hostinger muestra las líneas finales del archivo `job001_master_scheduler.php`. Se revisó estructura y comportamiento sin divulgar los valores de credenciales.
+- Confirma la carga de secreto local mediante `file_get_contents` y el rechazo de secreto vacío; bucle `foreach ($due as $id)`, clave `$minuteKey . ':' . $id`, salto `SKIP_ALREADY_DONE`, invocación de `dispatchJob($id,...)`, registro de `DISPATCHED` / `DISPATCH_FAILED`, persistencia de `$stateFile` mediante `file_put_contents(..., LOCK_EX)` y liberación de bloqueo mediante `flock(..., LOCK_UN)` y `fclose`.
+- No se observó ninguna URL de staging en los fragmentos inicial y final accesibles. **No se ha leído íntegramente el tramo central virtualizado del editor**, por lo que no se certifica igualdad byte a byte con el `MASTER_ARTIFACT` embebido en la Edge PREPROD.
+- Se revalidó simultáneamente la tabla `public.cerebro_job001_control_preprod`: 15 jobs dependientes de staging `enabled=false`; los 5 jobs `[2,6,12,17,19]` siguen `enabled=true`. La Edge Gateway tiene control `enabled` previo al dispatch.
+- **Próximo control más eficiente:** abrir para lectura `cerebro/job001_enabled_jobs.json` desde Hostinger y comparar sus IDs habilitados contra el estado real de Supabase. No abrir `job001_master_secret` ni otro archivo de credenciales, no pulsar Guardar, no ejecutar scripts. La mera presencia de IDs en JSON no prueba despacho si la Edge los bloquea, pero puede señalar configuraciones por depurar.
+
+**Estado:** `MASTER_DISPATCH_PATH_PARTIALLY_VERIFIED`, `HOSTINGER_CANARY_CRONS_REMOVED_VERIFIED`, `GLOBAL_ISOLATION_NOT_YET_CERTIFIED`. Preservar el cron maestro de 1 minuto.
