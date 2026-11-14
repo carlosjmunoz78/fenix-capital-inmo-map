@@ -73,3 +73,14 @@ El listado **ya no contiene** `job001_wp_bridge_canary_FIXED.php`. Por comparaci
 - **Próximo control más eficiente:** abrir para lectura `cerebro/job001_enabled_jobs.json` desde Hostinger y comparar sus IDs habilitados contra el estado real de Supabase. No abrir `job001_master_secret` ni otro archivo de credenciales, no pulsar Guardar, no ejecutar scripts. La mera presencia de IDs en JSON no prueba despacho si la Edge los bloquea, pero puede señalar configuraciones por depurar.
 
 **Estado:** `MASTER_DISPATCH_PATH_PARTIALLY_VERIFIED`, `HOSTINGER_CANARY_CRONS_REMOVED_VERIFIED`, `GLOBAL_ISOLATION_NOT_YET_CERTIFIED`. Preservar el cron maestro de 1 minuto.
+
+
+## HOSTINGER JSON · discrepancia de 20 frente a 5 trabajos
+
+**Verificación física, 14/11/2026:** el propietario abrió `cerebro/job001_enabled_jobs.json` en el editor del Administrador de archivos de Hostinger. Se leyó íntegramente en modo solo lectura a través del árbol de accesibilidad de Opera: `{"enabled_job_ids":[2,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]}` (20 IDs).
+
+**Comprobación actual SQL PREPROD:** `cerebro_job001_control_preprod`, empresa `FENIX_CAPITAL`, motor `SEO-001`, entorno `PREPROD` devuelve solo cinco `enabled=true`: `[2,6,12,17,19]`, y 15 `enabled=false`: `[5,7,8,9,10,11,13,14,15,16,18,20,21,22,23]`.
+
+**Diagnóstico:** el fichero Hostinger de scheduling sigue enumerando 20 candidatos, aunque la Edge `cerebro-job001-gateway-preprod` rechaza los 15 deshabilitados mediante `SKIPPED_DISABLED`. Corregir el archivo local para enumerar **solo** `[2,6,12,17,19]` reduciría despachos innecesarios hacia el Gateway y reforzaría la suspensión a nivel de origen, sin cambiar el PHP maestro.
+
+**Plan reversible pendiente de ejecución humana:** (1) duplicar/descargar `job001_enabled_jobs.json` bajo nombre de copia fechada en alojamiento, sin ejecutar script; (2) sustituir únicamente contenido JSON por `{"enabled_job_ids":[2,6,12,17,19]}`; (3) guardar una sola vez, inspeccionar JSON leído otra vez desde el editor y confirmar cinco IDs; (4) validar cinco controles habilitados y 15 deshabilitados en Supabase. Nunca borrar el PHP maestro ni tocar secretos o staging. Hasta completar y verificar, estado `HOSTINGER_JSON_MISMATCH_PENDING_HUMAN_EDIT`.
