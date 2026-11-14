@@ -114,7 +114,7 @@ export default async function handler(req:Req,res:Res){
       reason:'ENGINE_NOT_REGISTERED',transport:'PREVIEW_ONLY_SERVER_VERIFIED',
       source:'DETERMINISTIC_OWNER_LAB_ROUTER',executed:false,
       prod_execution_enabled:false,staging_probed:false,durable_audit:false,conversation_persisted:false});
-    const checked=await gateway.handle({session_token:bearer.replace(/^Bearer\\s+/i,''),
+    const checked=await gateway.handle({session_token:bearer.replace(/^Bearer\s+/i,''),
      action:'get_engine_status',params:{company_id:'fenix',environment:'LAB',engine_id:id}});
     if(checked.status!=='OK'||checked.engine_id!==id||
       checked.defined_in_registry!==true||checked.runtime!=='NOT_VERIFIED'||checked.source!=='REPOSITORY_SNAPSHOT_NOT_LIVE')
