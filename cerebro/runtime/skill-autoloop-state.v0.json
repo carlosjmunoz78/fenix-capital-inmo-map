@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-14T14:33:28.903Z",
+  "updated_at": "2026-11-14T17:05:29.882Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -549,7 +549,8 @@
     "github-wide-skills:6d2d933506adcc2f6746",
     "github-wide-skills:96004659a28b28e8f6f1",
     "github-wide-skills:a9a33fd9a8003b6cca8f",
-    "github-wide-skills:8962e4cfc22029b3958a"
+    "github-wide-skills:8962e4cfc22029b3958a",
+    "github-wide-skills:5d898678ba9302d5d000"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -1993,6 +1994,42 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 43605428563,
       "checkpointed_at": "2026-11-14T14:33:28.903Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:5d898678ba9302d5d000": {
+      "candidate_id": "github-wide-skills:5d898678ba9302d5d000",
+      "name": "only-a-skill",
+      "human_alias": "Only A Skill",
+      "wrapper_id": "skillwrap:3ad8bca6d4f8a646910a",
+      "domain": "software-engineering-devops",
+      "engine_bindings": [
+        "FACT-001",
+        "ARCH-001",
+        "API-001",
+        "DEP-001",
+        "MIG-001",
+        "QA-001",
+        "REG-001",
+        "DOCS-001"
+      ],
+      "value_score": 86,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "abdumateen/skill-diag",
+        "upstream_head_commit": "d174b27341be404a423d4c60771d8ff0979e8d2b",
+        "manifest_sha256": "6304e514cfb2e17681712acafdb6fd07b52a84ac4bcc7b536898232b21d0b4ee",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 43619121933,
+      "checkpointed_at": "2026-11-14T17:05:29.882Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -33253,7 +33290,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 43605428563,
+  "last_discovery_run_id": 43619121933,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
