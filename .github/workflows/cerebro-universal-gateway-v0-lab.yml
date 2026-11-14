@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'cerebro/universal/v0/**'
+      - 'tests/cerebro-operativa-owner-quickreads-lab.spec.ts'
       - '.github/workflows/cerebro-universal-gateway-v0-lab.yml'
 
 permissions:
@@ -54,6 +55,8 @@ jobs:
           path: |
             test-results/operativa-owner-lab-desktop.png
             test-results/operativa-owner-lab-mobile.png
+            test-results/**/test-failed-1.png
+            test-results/**/error-context.md
           if-no-files-found: ignore
           retention-days: 7
       - name: Remote LAB Preview anonymous SSO negative security smoke
