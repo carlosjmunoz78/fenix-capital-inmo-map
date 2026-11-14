@@ -66,4 +66,4 @@ async function call(action:'get_staging_suspension_live'|'capture_staging_suspen
  }catch{return blocked('unavailable','No se pudo verificar la conexión del Gateway')}
 }
 export const readStagingSuspensionLab=()=>call('get_staging_suspension_live');
-export const captureStagingSuspensionLab=()=>call('capture_staging_suspension','lab-observe-'+crypto.randomUUID());
+export const captureStagingSuspensionLab=(idempotencyKey?:string)=>call('capture_staging_suspension',idempotencyKey||'lab-observe-'+crypto.randomUUID());
