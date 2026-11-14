@@ -84,3 +84,11 @@ El listado **ya no contiene** `job001_wp_bridge_canary_FIXED.php`. Por comparaci
 **Diagnóstico:** el fichero Hostinger de scheduling sigue enumerando 20 candidatos, aunque la Edge `cerebro-job001-gateway-preprod` rechaza los 15 deshabilitados mediante `SKIPPED_DISABLED`. Corregir el archivo local para enumerar **solo** `[2,6,12,17,19]` reduciría despachos innecesarios hacia el Gateway y reforzaría la suspensión a nivel de origen, sin cambiar el PHP maestro.
 
 **Plan reversible pendiente de ejecución humana:** (1) duplicar/descargar `job001_enabled_jobs.json` bajo nombre de copia fechada en alojamiento, sin ejecutar script; (2) sustituir únicamente contenido JSON por `{"enabled_job_ids":[2,6,12,17,19]}`; (3) guardar una sola vez, inspeccionar JSON leído otra vez desde el editor y confirmar cinco IDs; (4) validar cinco controles habilitados y 15 deshabilitados en Supabase. Nunca borrar el PHP maestro ni tocar secretos o staging. Hasta completar y verificar, estado `HOSTINGER_JSON_MISMATCH_PENDING_HUMAN_EDIT`.
+
+## Hostinger JSON · alineación verificada después de guardar
+
+**HECHO · 14/11/2026.** El propietario cambió el fichero `cerebro/job001_enabled_jobs.json` según el plan anterior. Se comprobó el editor abierto y después **se volvió a abrir la misma URL en una pestaña nueva independiente de Opera**, para descartar cambios pendientes de guardar. La lectura nueva confirmó que el JSON persistido es exactamente `{"enabled_job_ids":[2,6,12,17,19]}` y ya no incluye los otros quince IDs previamente enumerados.
+
+**Estado de la ruta origen:** cuatro cron canary con destino directo staging retirados (verificación física previa); un cron `job001_master_scheduler.php` conservado con ejecución de 1 minuto; JSON maestro reducido a 5 IDs; Supabase Gateway `cerebro_job001_control_preprod` mantiene `enabled=true` solo para `[2,6,12,17,19]` y `enabled=false` para quince trabajos de staging. No se reactivó ni contactó con staging.
+
+**Límite:** bloqueos de canary y configuración de scheduler verificados, pero la certificación de aislamiento global de cualquier integración Hostinger/tercero sigue pendiente de una auditoría exhaustiva de consumidores no inventariados. No recuperar ni reprogramar cron canary mientras staging permanezca suspendida.
