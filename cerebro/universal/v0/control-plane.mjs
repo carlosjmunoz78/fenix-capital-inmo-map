@@ -30,7 +30,7 @@ export class UniversalGatewayLabV0 {
    rollback:'REMOVE_LAB_WRAPPER',cost_budget_eur:0,human_exception_policy:HUMAN_CODES
   };
  }
- contract(){return{environment:'LAB',version:'0.1.0',auth:'SERVER_SESSION_RESOLVER',writes:false,audit_receipt_writes_enabled:Boolean(this.#factAdapter),business_writes_enabled:false,general_engine_execution:false,lab_deterministic_capabilities:[...(this.#factAdapter?['fact.registry.attest']:[]),...(this.#stagingReader?['gov.staging.suspension.capture']:[])],new_queue:false,external_network:this.#workActivity?'FIXED_OWNER_AUTH_READ_ONLY_ACTIVITY_ENDPOINT':false,trading:false,methods:clone(METHODS),additional_cost_eur:0};}
+ contract(){return{environment:'LAB',version:'0.1.0',auth:'SERVER_SESSION_RESOLVER',writes:false,audit_receipt_writes_enabled:Boolean(this.#factAdapter),staging_evidence_receipt_writes_enabled:Boolean(this.#stagingReader),business_writes_enabled:false,general_engine_execution:false,lab_deterministic_capabilities:[...(this.#factAdapter?['fact.registry.attest']:[]),...(this.#stagingReader?['gov.staging.suspension.capture']:[])],new_queue:false,external_network:this.#workActivity?'FIXED_OWNER_AUTH_READ_ONLY_ACTIVITY_ENDPOINT':false,trading:false,methods:clone(METHODS),additional_cost_eur:0};}
  async handle({session_token,action,params={}}){
   if(typeof session_token!=='string'||session_token.length<1||session_token.length>8192||/\s/.test(session_token))error('INVALID_SESSION');
   if(!METHODS.includes(action))error('METHOD_NOT_ALLOWED');
@@ -69,7 +69,7 @@ export class UniversalGatewayLabV0 {
   let response;
   switch(action){
    case 'list_capabilities':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capabilities:[...(cap?[cap]:[]),...(attestCap?[attestCap]:[]),...(govCap?[govCap]:[])]};break;
-   case 'get_capability':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capability:params.capability_id===govCap?.capability_id?govCap:params.capability_id===attestCap?.capability_id?attestCap:requireCap()};break;
+   case 'get_capability':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capability:govCap&&params.capability_id===govCap.capability_id?govCap:attestCap&&params.capability_id===attestCap.capability_id?attestCap:requireCap()};break;
    case 'get_engine_status':{
     const id=value(params.engine_id,'ENGINE_ID');
     if(!this.#registry.engine_ids.includes(id))error('ENGINE_NOT_REGISTERED');
