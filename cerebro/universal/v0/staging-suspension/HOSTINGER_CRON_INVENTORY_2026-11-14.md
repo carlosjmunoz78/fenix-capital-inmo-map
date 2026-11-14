@@ -33,3 +33,16 @@ Suspensión de staging por orden del propietario: **HASTA NUEVA ORDEN**. No modi
 **Conclusión:** las cuatro tareas HOST-01 a HOST-04 son consumidores externos de una ruta expresamente suspendida y deben quedar **pausadas/deshabilitadas**, manteniendo íntegro el archivo PHP y su registro. hPanel en la vista observada mostraba `Borrar`, sin interruptor de pausa; si no hay opción de desactivar, se puede retirar la programación de esas cuatro tareas, **solo después de conservar el inventario completo arriba**, con restauración exacta de cron y comando únicamente tras nueva orden explícita. No borrar ni editar `job001_master_scheduler.php`: se inspeccionará por separado.
 
 **Estado de intervención:** `BLOCKER_FOUND_HOSTINGER_CANARY`; **cron de Hostinger todavía no verificados como detenidos** en este punto. Se requiere comprobación en hPanel después de la acción humana. No declarar aislamiento global hasta verificar cese de estas cuatro programaciones y revisar el PHP maestro.
+
+
+## Cierre físico HOST-01 a HOST-04
+
+**HECHO · 14 de noviembre de 2026 · Hostinger hPanel leído con Opera tras confirmación del propietario.**
+
+El propietario indicó que retiró las cuatro tareas. Se volvió a leer en tiempo real el árbol de accesibilidad de la pestaña autenticada de hPanel `/websites/fenixcapital.es/advanced/cron-jobs` (página 1/1). En la sección `Lista de Cron jobs` figura **una sola** tarea:
+
+- `* * * * *` — `/usr/bin/php /home/<hosting-user>/domains/fenixcapital.es/cerebro/job001_master_scheduler.php`.
+
+El listado **ya no contiene** `job001_wp_bridge_canary_FIXED.php`. Por comparación con el inventario previo se acredita que HOST-01, HOST-02, HOST-03 y HOST-04 han sido retiradas y HOST-05 sigue configurada. **No se eliminó el archivo PHP ni se alteró el programador maestro en esta intervención**; la acción de borrado la completó el propietario desde hPanel.
+
+**GATE ACTUAL:** `HOSTINGER_CANARY_CRONS_PAUSED_VERIFIED` · `MASTER_CRON_PRESERVED` · `MASTER_SCRIPT_PENDING_SOURCE_AUDIT`. No afirmar aún que todo Hostinger carece de vías hacia staging hasta inspeccionar en solo lectura el archivo PHP maestro y sus inclusiones/destinos. No consultar staging ni reactivar cron canary sin nueva orden expresa.
