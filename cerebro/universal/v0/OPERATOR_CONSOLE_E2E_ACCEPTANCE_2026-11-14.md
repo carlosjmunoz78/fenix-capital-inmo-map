@@ -31,3 +31,10 @@
 
 ## Recuperación
 Desactivar mediante rollback aislado del commit de interfaz/endpoint en PR #66, manteniendo intactas las funciones y tablas PREPROD existentes. El chat no modifica los mecanismos de ejecución de los motores.
+
+
+## Ampliación: consulta individual de motor registrado
+
+**14/11/2026:** la consola acepta `estado del motor SEO-001` y otros IDs canónicos mediante `ENGINE_STATUS`, exclusivamente como lectura. El intérprete genera un candidato; el API propietario verifica que aparezca entre los 179 IDs de `engine-registry.v1.json`. El Gateway ejecuta `get_engine_status` y exige la respuesta `defined_in_registry=true`, `definition_environment='SCAFFOLD'`, `runtime='NOT_VERIFIED'`, `source='REPOSITORY_SNAPSHOT_NOT_LIVE'`. No se ejecuta el motor ni se presupone que esté operativo. Los IDs no registrados se deniegan. El cliente valida el contrato antes de mostrarlo.
+
+**Pruebas:** `CEREBRO Universal Gateway V0 LAB contract CI` run `43590974986` finalizó `SUCCESS`, commit `be5aff3c5d9dea7dda4213d847b01a24e4fa779b`. Preview Vercel `dpl_2FK1vAtKhShZhJfDfibM5TVXhup2` READY. No es prueba de clic manual del nuevo comando individual. El E2E real autenticado anterior del chat sí verificó interpretación y lectura de staging. El CI también comprueba rechazo de POST anónimo al intérprete. Sin modificación de PROD, staging ni main.
