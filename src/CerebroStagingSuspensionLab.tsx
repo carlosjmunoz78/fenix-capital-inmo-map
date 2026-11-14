@@ -35,7 +35,7 @@ export default function CerebroStagingSuspensionLab(){
    <small>Controles generales JOB-001: {s.gateway_job001.active} activos, {s.gateway_job001.paused} pausados (de {s.gateway_job001.total}).</small>
    <small>Último registro del puente: {s.bridge_health.last_recorded_at?new Date(s.bridge_health.last_recorded_at).toLocaleString('es-ES'):'sin datos'}.
      Lectura: {new Date(s.observed_at).toLocaleString('es-ES')}.</small>
-   <small>**Aislamiento global: NO CERTIFICADO.** Hostinger y otros consumidores externos siguen sujetos a auditoría independiente.</small>
+   <small><strong>Aislamiento global: NO CERTIFICADO.</strong> Hostinger y otros consumidores externos siguen sujetos a auditoría independiente.</small>
   </>:<small>{result?.message||'Sin datos de control verificados.'}</small>}
   <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:8}}>
    <button type="button" disabled={busy||captureBusy} onClick={()=>{void refresh()}}>
