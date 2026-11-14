@@ -46,6 +46,8 @@ jobs:
         run: node cerebro/universal/v0/staging-suspension/edge-423-remote-smoke.mjs
       - name: Remote anonymous denial for owner-only suspension observer
         run: node --test cerebro/universal/v0/staging-suspension/staging-observer-anon-smoke.mjs
+      - name: Remote anonymous denial for shared FACT deterministic LAB executor
+        run: node --test cerebro/universal/v0/execution-lab/anon-smoke.mjs
       - name: Check no-Prod and zero additional cost
         run: |
           node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
