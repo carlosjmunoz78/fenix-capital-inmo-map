@@ -54,6 +54,11 @@ test('governed suspension receipt is advertised as a LAB capability only with ow
  const detail=await g.handle({session_token:owner,action:'get_capability',
   params:{...ctx,capability_id:'gov.staging.suspension.capture'}});
  assert.equal(detail.capability.policy,'LAB_ALLOWLISTED_DURABLE_EVIDENCE_ONLY');
+ await assert.rejects(g.handle({session_token:owner,action:'get_capability',params:ctx}),/CAPABILITY_UNAVAILABLE/);
+ await assert.rejects(g.handle({session_token:owner,action:'get_capability',
+  params:{...ctx,capability_id:'fact.registry.attest'}}),/CAPABILITY_UNAVAILABLE/);
+ assert.equal(g.contract().staging_evidence_receipt_writes_enabled,true);
+ assert.equal(g.contract().business_writes_enabled,false);
  const status=await g.handle({session_token:owner,action:'get_engine_status',
   params:{...ctx,engine_id:'GOV-001'}});
  assert.deepEqual(status.lab_evidence_capabilities,['gov.staging.suspension.capture']);
