@@ -35,3 +35,22 @@ Proyecto Supabase PREPROD: `hnqlnvakzaywtafeiybt`. GitHub: PR #66, rama `cerebro
 
 ## Semántica
 `HECHO` = verificación física del alcance citado; `PARCIAL` = rutas fuera del alcance no verificadas; `BLOCKED_DEPENDENCY` = staging suspendido; `NO VERIFICADO` = no inferir ejecución de un estado histórico o test simulado.
+
+
+## Ampliación aplicada y probada · endpoints adicionales
+
+A raíz de la orden directa de suspensión se han **reemplazado exclusivamente tres Edge Functions PREPROD dedicadas a staging** por respuestas estáticas HTTP 423. Sus versiones originales se guardaron ANTES de reemplazarlas en `cerebro_lab_private.staging_edge_source_snapshot_v1` (schema privado, sin acceso a `anon`/`authenticated`, RLS habilitado):
+
+| Función | Versión anterior → bloqueada | Snapshot |
+|---|---|---|
+| `fenix-seo-conversion-e2e-preprod` | v7 → v8 | 1 fichero exacto, checksum de bundle conservado |
+| `fenix-cerebro-city-signer-preprod` | v5 → v6 | 1 fichero exacto, checksum de bundle conservado |
+| `fenix-seo-coreguard-bootstrap-probe-preprod` | v2 → v3 | 1 fichero exacto, checksum de bundle conservado |
+
+**Verificación posterior física de código desplegado**: las tres Edge son ACTIVE, responden con contrato `423/BLOCKED_DEPENDENCY/STAGING_SUSPENDED_BY_OWNER`, y su código vigente carece de `fetch`, `net.http_*`, URL de staging y escrituras `insert/update/delete`. No hay reactivación automática. `verify_jwt=false` se ha conservado exactamente como configuración anterior (no se han relajado controles existentes).
+
+**Smoke remoto independiente sin credenciales:** PR #66 incorpora `staging-suspension/edge-423-remote-smoke.mjs` ejecutado en el workflow `CEREBRO Universal Gateway V0 LAB contract CI`. GitHub Actions run **43575968721 = SUCCESS** en commit `c4771e73c457d9308d625a3d93fddb910edaeb1c`. El smoke hace GET **solo a Supabase PREPROD**, NO a `staging.fenixcapital.es`, y exige respuesta 423, estado bloqueado y ausencia de ejecución.
+
+**Rollback preparado, NO ejecutado:** el código original y `verify_jwt` de cada versión se encuentran en la tabla privada, recuperables únicamente bajo nueva orden explícita del propietario, pre-check de dependencias y tests. La reversión no significa autorizar el tráfico; mientras staging esté suspendido, mantener siempre el bloqueo.
+
+**Limite de certificación:** existen numerosos consumidores históricos de WordPress y funciones de otros sistemas. Esta verificación asegura las rutas nombradas, pero no permite declarar el cierre integral de todas las rutas externas. La conexión de Operativa sigue LAB READ-ONLY + FACT dry-run; el ejecutor general human-by-exception no está certificado.
