@@ -3,7 +3,7 @@
 const disallow=/\b(?:no|nunca|sin)\s+(?:quiero\s+)?(?:ejecutar|certificar|registrar|guardar|simular|haz|hacer)\b/i;
 const banned=/\b(?:prod(?:uccion|ucción)?|publicar|publica|wordpress|staging|dinero|cobrar|transferir|borrar|eliminar|desactivar|activar|modificar|trading|comprar|venta|vender|token|password|clave|secreto|ssh|dns|http|www|ftp)\b/i;
 const canon=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
-const plan=(code,label,requires_confirmation=false)=>({status:'PLAN_READY',environment:'LAB',company_id:'fenix',version:'0.1.0-lab',engine_id:'FACT-001',intent:code,label,requires_confirmation,additional_cost_eur:0,execution_scope:requires_confirmation?'FACT_REGISTRY_RECEIPT_ONLY':'OWNER_READ_OR_AUDITED_DRY_RUN',production_allowed:false,external_destination_allowed:false,staging_allowed:false});
+const plan=(code,label,requires_confirmation=false)=>({status:'PLAN_READY',environment:'LAB',company_id:'fenix',version:'0.1.0-lab',engine_id:'FACT-001',intent:code,label,requires_confirmation,additional_cost_eur:0,execution_scope:code==='STAGING_CAPTURE'?'STAGING_SUSPENSION_RECEIPT_ONLY':requires_confirmation?'FACT_REGISTRY_RECEIPT_ONLY':'OWNER_READ_OR_AUDITED_DRY_RUN',production_allowed:false,external_destination_allowed:false,staging_allowed:false});
 export function planOperatorInstructionLab(text){
  if(typeof text!=='string'||text.length<1||text.length>240||/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text))
   return {status:'INSTRUCTION_INVALID',execution_allowed:false};
@@ -14,6 +14,9 @@ export function planOperatorInstructionLab(text){
  // A read-only question about suspended staging is the only accepted staging reference.
  if(/^(?:estado|ver|consultar|como esta|comprueba|comprueba el estado|consultar estado|revisar estado|estado actual) (?:de |del |la )?(?:staging|suspension de staging)$/.test(s))
   return plan('STAGING_STATUS','Consultar controles de suspensión de staging');
+ // EXACT suspended-dependency evidence capture, never a request to staging.
+ if(/^(?:certificar|certifica|registrar|registra|guardar|guarda) (?:la )?(?:suspension de staging|pausa de staging)$/.test(s))
+  return plan('STAGING_CAPTURE','Registrar evidencia de suspensión de staging sin acceder al sitio',true);
  if(banned.test(s))return {status:'NOT_SUPPORTED_IN_LAB',execution_allowed:false,reason:'RISK_OR_NON_LAB_ACTION'};
  if(disallow.test(s))return {status:'NOT_SUPPORTED_IN_LAB',execution_allowed:false,reason:'NEGATED_COMMAND'};
  if(/^(?:ayuda|comandos|que puedes hacer|que ordenes puedo dar)$/.test(s))
