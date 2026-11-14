@@ -54,3 +54,17 @@ La última inspección de `cron.job_run_details` arrojó `succeeded` en los seis
 **Gate P0 adicional:** antes de permitir ejecuciones desde Operativa, revisar en lectura el código, los guardas, las llamadas `fetch`, el estado de la cola y los efectos externos para estos cinco Edge. Determinar si invocan staging en operación ordinaria y si hay un interruptor seguro aislado. Documentar snapshots/contratos y probar bloqueos fail-closed en paralelo sin llamadas exteriores; no sobrescribir Edge ni desactivar cron sin demostrar dependencias, no ejecutar probing. Un cron SQL `succeeded` nunca equivale a motor `CONFIRMED_OPERATIONAL`.
 
 Continuar LAB Universal/Operativa mediante Gateway existente; no alterar otros sistemas.
+
+
+### Evidencia adicional · Edge ejecutadas durante suspensión
+
+Se consultaron registros **solo lectura** de `function_edge_logs` del 14/11/2026 entre 06:00 y 08:00 UTC. Se observó tráfico **HTTP 200 del endpoint Edge**, que no acredita HTTP 200 contra staging ni una publicación:
+- `fenix-seo-sitewide-regression-preprod`: 111 invocaciones; última 07:50:02 UTC.
+- `fenix-web-content-ux-audit-v1-preprod`: 111 invocaciones; última 07:50:05 UTC.
+- `fenix-seo-page-quality-preprod`: 7 invocaciones; última 07:38:05 UTC.
+- `fenix-blog-visual-audit-preprod`: 2 invocaciones; última 07:12:04 UTC.
+- No se hallaron invocaciones en este intervalo para los dos restantes del filtro (`fenix-seo-elementor-safe-writer-preprod`, `fenix-seo-infrastructure-autopilot-preprod`).
+
+Inspección del código desplegado: las cinco Edge del mapa cron contienen literal `staging.fenixcapital.es` y llamadas `fetch`, **sin guardia explícita `STAGING_SUSPENDED_BY_OWNER`**. En base SQL los registros de auditoría/páginas del sitewide se actualizaron incluso hasta 07:49 UTC; se desconoce si como resultado de un acceso HTTP real a staging. **No afirmar aislamiento global ni inferir visita web confirmada a partir de HTTP 200 del Edge.**
+
+**RIESGO ABIERTO P0:** la suspensión central del Gateway y JOB-001/13 no gobierna estas rutas heredadas vivas. No hay permiso para reactivar staging, y no se ha cambiado ningún scheduler o Edge sin prueba de dependencias. Cerrar este circuito en controles de ejecución de Edge, con snapshots, pruebas fallidas seguras y rollback, ANTES de declarar Operativa globalmente lista.
