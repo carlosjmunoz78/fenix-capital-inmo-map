@@ -110,3 +110,19 @@ Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `S
 **Hardening posterior:** commit `634d2a1c4b5c6024a30e96f9ae215f28fcdd9c40` retiró del componente React el disparador automático temporal por URL. Permanecen los controles normales `Actualizar estado real` y `Guardar evidencia LAB`. La fuente conserva el helper tipado opcional para QA; ya no hay ejecución automática asociada al marcador de aceptación. No se ha modificado PROD, ninguna ruta a staging, ni la configuración de jobs.
 
 **No atribuir:** la ruta de botón manual `onClick` no se probó mediante un clic sintético real; se probó la misma función de captura desde el componente con sesión auténtica. No extrapolar esta primera escritura auditable a los 179 motores ni al resto de órdenes generales. La funcionalidad human-by-exception necesita inventario y certificados individuales.
+
+
+## V0.19 · Estado completo visible y aceptación final del Preview
+
+**HECHO y físicamente verificado:**
+- La consulta live `public.cerebro_universal_staging_status_lab_v0()` fue ampliada, con SQL de solo lectura y esquema privado de snapshots, para observar **14/14 cron pausados** (IDs 22,23,52,53,55,56,61,62,65,66,67,68,69,70), **15/15 controles JOB-001 pausados** y **4/4 funciones SQL de red protegidas**.
+- El mismo RPC devuelve `edge_backups.source_snapshots=94`, `edge_backups.sql_source_snapshots=3` y `edge_backups.live_versions_verified_in_this_rpc=false`. **Son copias de seguridad, NO certificación de tráfico Edge en directo.**
+- La fuente también devuelve `durable_evidence.recorded=1` y el UUID `4250fbc1-f5b8-4df2-b37c-2ebc3e5659b8`; fecha `2026-11-14T09:03:54.120602Z`. El replay por clave dejó **exactamente una** fila.
+- SQL v2 fuente GitOps: `cerebro/universal/v0/staging-suspension/lab-live-observation-v2.sql`. El Edge nuevo `cerebro-universal-staging-observe-lab-v0` fue actualizado exclusivamente en PREPROD a **v2 ACTIVE**; retorna observación de solo lectura y registro de evidencia owner-auth.
+- El gateway, SDK de seis contratos y Operativa V3 fueron actualizados **únicamente en PR DRAFT #66**, sin modificar App/CRM PROD ni DNS.
+- **CI de contratos** GitHub Actions [43579292131](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43579292131): `SUCCESS` en commit `06aacb4d7900b19dbd99ecab2d007a2dab46508c`. Governed Main Integration [43579292015](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43579292015): `SUCCESS`.
+- **Preview inmutable Vercel `dpl_3EUtS3LkRWqgrBabXhXRfqGXFbUP` READY**, URL `https://fenix-capital-preprod-mmbfl12se.vercel.app`, commit `06aacb4d7900b19dbd99ecab2d007a2dab46508c`. Alias privado estable conservado, target preview (no PROD).
+- **Owner E2E lectura en Opera**: en pestaña 1381967780, después de recargar desde el alias estable, aparecen en la UI: 15/15 JOB-001, **14/14 cron**, 4/4 SQL, **94 backups Edge y 3 SQL**, y **1 evidencia durable** con el UUID de aceptación. La advertencia `Aislamiento global: NO CERTIFICADO` sigue presente.
+- El disparador QA de URL fue retirado del UI después de la aceptación física; ya no se activa por navegar. `Guardar evidencia LAB` permanece disponible bajo acción expresa del propietario.
+
+**Gates restantes, sin ocultarlos:** la suspensión global de otras rutas externas (especialmente Hostinger y scripts no inventariados) sigue PARCIAL; el Gateway actual ejecuta una **capacidad determinista auditada** de LAB, pero **NO** un ejecutor universal de 179 motores. PR sigue DRAFT, sin canary/tribunal/rollback general ni autorización de promover a producción. Cero suscripciones nuevas; coste total de proveedor no medido.
