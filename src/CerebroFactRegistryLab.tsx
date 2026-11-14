@@ -1,4 +1,4 @@
-import {useEffect,useRef,useState} from 'react';
+import {useEffect,useState} from 'react';
 import {readFactRegistryAttestationLab,executeFactRegistryAttestationLab,type FactResult} from './cerebroFactRegistryExecutionLabApi';
 
 /** Owner-LAB only, deterministic FACT attestation with durable receipt.
@@ -8,26 +8,11 @@ export default function CerebroFactRegistryLab(){
  const [latest,setLatest]=useState<FactResult|null>(null);
  const [outcome,setOutcome]=useState<FactResult|null>(null);
  const [busy,setBusy]=useState(false);
- const acceptanceOnce=useRef(false);
  useEffect(()=>{
   let mounted=true;
   void readFactRegistryAttestationLab().then(r=>{if(mounted)setLatest(r)});
   return()=>{mounted=false};
  },[]);
- // Isolated one-time owner-authorized E2E acceptance in LAB Preview.
- // Consume URL flag BEFORE writing, and use stable idempotency key across retries.
- useEffect(()=>{
-  if(acceptanceOnce.current||latest===null)return;
-  const url=new URL(window.location.href);
-  if(url.searchParams.get('op3_fact_attest_once')!=='owner-accepted-20261114')return;
-  acceptanceOnce.current=true;
-  url.searchParams.delete('op3_fact_attest_once');
-  window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
-  setBusy(true);
-  void executeFactRegistryAttestationLab('lab-fact-attest-owner-accepted-20261114')
-   .then(result=>{setOutcome(result);if(result.kind==='verified')setLatest(result)})
-   .finally(()=>setBusy(false));
- },[latest?.kind]);
  async function attest(){
   if(busy)return;
   setBusy(true);
