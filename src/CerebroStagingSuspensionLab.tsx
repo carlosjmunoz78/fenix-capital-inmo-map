@@ -1,4 +1,4 @@
-import {useEffect,useState} from 'react';
+import {useEffect,useRef,useState} from 'react';
 import {readStagingSuspensionLab,captureStagingSuspensionLab,type StagingLiveResult} from './cerebroStagingSuspensionLabApi';
 
 /** Isolated, owner-only LAB widget. Does not probe staging or control schedulers. */
@@ -7,10 +7,27 @@ export default function CerebroStagingSuspensionLab(){
  const [busy,setBusy]=useState(false);
  const [captureBusy,setCaptureBusy]=useState(false);
  const [captured,setCaptured]=useState<StagingLiveResult|null>(null);
+ const ownerAcceptanceOnce=useRef(false);
  useEffect(()=>{let mounted=true;
   void readStagingSuspensionLab().then(r=>{if(mounted)setResult(r)});
   return()=>{mounted=false};
  },[]);
+ // Explicit owner-approved one-shot LAB acceptance. No staging traffic.
+ // The URL flag is removed BEFORE the evidence write; reload cannot repeat it.
+ useEffect(()=>{
+  if(result?.kind!=='observed'||ownerAcceptanceOnce.current)return;
+  const url=new URL(window.location.href);
+  if(url.searchParams.get('op3_capture_once')!=='owner-accepted-20261114')return;
+  ownerAcceptanceOnce.current=true;
+  url.searchParams.delete('op3_capture_once');
+  window.history.replaceState(window.history.state,'',url.pathname+url.search+url.hash);
+  let mounted=true;
+  setCaptureBusy(true);
+  void captureStagingSuspensionLab('lab-observe-owner-acceptance-20261114')
+   .then(r=>{if(mounted){setCaptured(r);if(r.kind==='observed')setResult(r)}})
+   .finally(()=>{if(mounted)setCaptureBusy(false)});
+  return()=>{mounted=false};
+ },[result?.kind]);
  async function refresh(){
   if(busy||captureBusy)return;
   setBusy(true);
