@@ -54,3 +54,19 @@ A raíz de la orden directa de suspensión se han **reemplazado exclusivamente t
 **Rollback preparado, NO ejecutado:** el código original y `verify_jwt` de cada versión se encuentran en la tabla privada, recuperables únicamente bajo nueva orden explícita del propietario, pre-check de dependencias y tests. La reversión no significa autorizar el tráfico; mientras staging esté suspendido, mantener siempre el bloqueo.
 
 **Limite de certificación:** existen numerosos consumidores históricos de WordPress y funciones de otros sistemas. Esta verificación asegura las rutas nombradas, pero no permite declarar el cierre integral de todas las rutas externas. La conexión de Operativa sigue LAB READ-ONLY + FACT dry-run; el ejecutor general human-by-exception no está certificado.
+
+
+## JOB-001 · suspensión selectiva aplicada
+
+**HECHO en Supabase PREPROD:** el Gateway heredado `cerebro-job001-gateway-preprod` v11 se auditó en lectura y contiene un control efectivo antes de despachar: si `cerebro_job001_control_preprod.enabled != true` devuelve `SKIPPED_DISABLED` y no invoca `cerebro_job001_dispatch_preprod`.
+
+Con base en esa evidencia se guardaron las **15 filas completas originales** (`enabled=true`) en la tabla privada `cerebro_lab_private.staging_job001_control_snapshot_v1` (RLS ON, no grants anon/authenticated) y se aplicó una actualización **limitada** a empresa `FENIX_CAPITAL`, motor `SEO-001`, entorno `PREPROD`:
+
+- **15 desactivados:** job IDs `5,7,8,9,10,11,13,14,15,16,18,20,21,22,23`. Todos se verificaron con `enabled=false`.
+- **5 conservados activos (no acreditados como dependencias de staging):** job IDs `2,6,12,17,19`; siguen `enabled=true`. No se cambió su configuración ni sus programadores.
+- **15 snapshots originales verificados**, con `prior_row.enabled=true`. Se conserva trazabilidad de los IDs y de sus parámetros anteriores.
+- Sin modificar el código del Gateway JOB-001, Hostinger Master, App/CRM PROD, WordPress PROD, DNS ni main.
+
+Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `SKIPPED_DISABLED` del Gateway para los 15 jobs seleccionados. **No hay equivalencia de aislamiento global**: faltan verificar otros consumidores externos y las posibles invocaciones directas que no pasen por el Gateway.
+
+**Rollback documentado, NO EJECUTAR ahora:** tras nueva orden explícita y revisión de seguridad/contrato, restaurar cada `enabled` desde `cerebro_lab_private.staging_job001_control_snapshot_v1.prior_row` con comparación OLD vs NEW y pruebas de no regresión. No restaurar toda la tabla a ciegas ni antes de autorizar staging.
