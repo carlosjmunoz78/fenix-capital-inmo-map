@@ -109,7 +109,7 @@ export default async function handler(req:Req,res:Res){
     return res.status(503).json({status:'UNAVAILABLE',reason:'FACT_ATTEST_PREPARATION_INVALID'});
    const adapter=createFactAttestationAdapterLabV0({preprodApiKey:key,ownerApiKey:apikey});
    const receipt=await adapter.executeForContext({company_id:'fenix',environment:'LAB',
-    session_token:bearer.replace(/^Bearer\\s+/i,''),idempotency_key:params.idempotency_key,
+    session_token:bearer.replace(/^Bearer\s+/i,''),idempotency_key:params.idempotency_key,
     registry_digest:result.registry_digest,registry_count:179,base_count:177,preserved_base:true});
    if(receipt?.status!=='FACT_ATTESTATION_EXECUTED'||receipt?.executed!==true||
       receipt.registry_digest!==result.registry_digest||receipt.prod_execution_enabled!==false||
