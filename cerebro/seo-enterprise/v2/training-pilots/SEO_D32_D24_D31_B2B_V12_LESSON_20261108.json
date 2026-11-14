@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "12.0.0",
+  "lesson_id": "SEO-D24-D31-LRN-V12-PROD-ROUTE-AND-MOCK-LIMITS",
+  "source_evidence": {
+    "github_run": 42472665788,
+    "registry": "cerebro/seo-enterprise/v2/registry/seo001-v12-physical-gap-result-2026-11-08.json"
+  },
+  "target_existing_roles": [
+    "SEO-D24:SPECIALIST:04",
+    "SEO-D31:SPECIALIST:01",
+    "SEO-D31:SPECIALIST:04",
+    "SEO-D32:SPECIALIST:01"
+  ],
+  "known_error": "Simulated PHP 201 response is mistaken for a real CRM lead, or active preprod function assumed safe for testing.",
+  "corrective_skill": "Distinguish source route/handler mock, isolated HTTP sink with reversible dummy persistence, actual preprod E2E with verified side-effect isolation, and production CRM release. Never promote from stage 1 to stage 3 without physical receipt.",
+  "required_independent_evidence": [
+    "no real HTTP on source-handler tests",
+    "isolated sink snapshot/restore verification",
+    "unique correlation and immutable idempotency proof",
+    "notifications and newsletter disabled or intercepted",
+    "positive readback in isolated datastore",
+    "real gateway+IAM verification before PROD"
+  ],
+  "current_level": "SOURCE_HANDLER_ISOLATED_PHP_MOCK_PASS",
+  "real_agent_exam_completed": false,
+  "real_agent_iam_verified": false,
+  "independent_training_certified": false,
+  "release_authorized": false,
+  "case_study_status": "DOCUMENTED_TECHNICAL_LESSON_NOT_A_LIVE_AGENT_CREDENTIAL"
+}

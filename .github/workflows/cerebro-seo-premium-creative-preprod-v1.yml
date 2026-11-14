@@ -1,0 +1,69 @@
+name: CEREBRO SEO · FACT-001 Fénix Premium OG · PREPROD V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-premium-creative-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-premium-creative-v1.test.mjs'
+      - '.github/workflows/cerebro-seo-premium-creative-preprod-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  brand-preview-independent-verification:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      NODE_ENV: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked existing dependencies
+        run: npm ci
+      - name: Verify SEO ownership, no paid API, no publication, first-party assets
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-premium-creative-v1.test.mjs
+      - name: Reuse existing Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Render one physically verified original image using Fénix assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/fenix-seo-preview"
+          node cerebro/seo-enterprise/v2/runtime/seo-premium-creative-v1.mjs \
+            "$RUNNER_TEMP/fenix-seo-preview/hipoteca-autonomos-cordoba-og-v2-preview.png" \
+            | tee "$RUNNER_TEMP/fenix-seo-preview/receipt.json"
+      - name: Independent receipt validation
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import crypto from 'node:crypto';
+          import path from 'node:path';
+          const dir=path.join(process.env.RUNNER_TEMP,'fenix-seo-preview');
+          const receipt=JSON.parse(fs.readFileSync(path.join(dir,'receipt.json'),'utf8'));
+          const png=fs.readFileSync(path.join(dir,'hipoteca-autonomos-cordoba-og-v2-preview.png'));
+          const digest=crypto.createHash('sha256').update(png).digest('hex');
+          const ok=receipt.status==='PREPROD_PHYSICAL_RENDER_QA_PENDING' &&
+            receipt.sha256===digest&&receipt.width===1200&&receipt.height===630 &&
+            receipt.checks.font_loaded===true&&receipt.checks.logo_transparent_fraction>=0.05 &&
+            receipt.checks.image_count===1&&receipt.provider_calls===0 &&
+            receipt.publish_authorized===false&&receipt.uploaded_to_wordpress===false &&
+            receipt.visual_quality_approved===false&&receipt.tribunal_approved===false;
+          if(!ok)throw Error('PREPROD_BRAND_OR_GOVERNANCE_QA_FAILED');
+          console.log(JSON.stringify({status:'PREPROD_BRAND_TECHNICAL_PASS__TRIBUNAL_PENDING',
+            sha256:digest,bytes:png.length,font_loaded:true,logo_alpha_verified:true,
+            publishing:false,site_changes:0,api_cost_eur:0}));
+          NODE
+      - name: Attach private PREPROD visual + receipt for independent human/tribunal QA
+        uses: actions/upload-artifact@v4
+        with:
+          name: cerebro-seo-premium-autonomos-preprod-v1
+          path: ${{ runner.temp }}/fenix-seo-preview/
+          retention-days: 7
+          if-no-files-found: error

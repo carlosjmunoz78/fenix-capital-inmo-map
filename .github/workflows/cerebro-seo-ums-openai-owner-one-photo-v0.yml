@@ -1,0 +1,101 @@
+name: CEREBRO SEO · UMS owner-authorized ONE OpenAI image LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-ums-openai-single-photo-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-ums-openai-single-photo-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-ums-openai-owner-one-photo-v0.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-owner-one-openai-photo-lab
+  cancel-in-progress: false
+jobs:
+  one-authorized-original-photo:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Run security and bounded API canary tests without real API key
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-ums-openai-single-photo-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-ums-openai-single-photo-v0.test.mjs
+      - name: Gate an explicit OWNER previously authorized single paid image ONLY
+        id: permit
+        run: |
+          if [ "$(git log -1 --format='%s')" = "ci(ums): SINGLE_OPENAI_IMAGE_MEDIUM_20261106" ]; then
+            echo 'generate=true' >> "$GITHUB_OUTPUT"
+            echo 'ONE_OWNER_AUTHORIZED_OPENAI_IMAGE_TEST=TRUE'
+          else
+            echo 'generate=false' >> "$GITHUB_OUTPUT"
+            echo 'IMAGE_PROVIDER_CALLS=0:NO_ONE_SHOT_COMMIT'
+          fi
+      - name: One real image API request, zero retries, no provider fallback
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OWNER_AUTHORIZED_ONE_OPENAI_IMAGE_TEST: 'TRUE'
+          DEST: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-ums-openai-single-photo-v0.mjs "$DEST"
+      - name: Persist original OpenAI bytes BEFORE optional FFmpeg conversion
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-ums-one-openai-original-preserved-before-conversion
+          path: |
+            ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}/single-original-provider.webp
+            ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}/api-image-receipt.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Normalize actual WebP to 1200x630 in ephemeral cloud
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        env:
+          DEST: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}
+        run: |
+          timeout 70s sudo apt-get update -qq
+          timeout 60s sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg >/dev/null
+          ffmpeg -hide_banner -loglevel error -i "$DEST/single-original-provider.webp" \
+            -vf "scale=1200:630:force_original_aspect_ratio=increase,crop=1200:630" \
+            -frames:v 1 -c:v libwebp -q:v 85 -y "$DEST/seo-original-cropped-1200x630.webp"
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height,codec_name -of json "$DEST/seo-original-cropped-1200x630.webp"
+      - name: UMS physical pixel digest without claiming rights or independent no-text QA
+        if: ${{ steps.permit.outputs.generate == 'true' }}
+        env:
+          DEST: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}
+        run: |
+          node --input-type=module - "$DEST" <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import {inspectSeoWebpPhysicalIntake,buildExistingMediaTestOrder} from './cerebro/seo-enterprise/v2/runtime/seo-ums-photo-physical-intake-v0.mjs';
+          const dir=process.argv[2],order=buildExistingMediaTestOrder();
+          const r=inspectSeoWebpPhysicalIntake({
+           file_path:path.join(dir,'seo-original-cropped-1200x630.webp'),
+           order,origin:'NEW_UMS_IMAGE',inventory_verified:false
+          });
+          if(r.width!==1200||r.height!==630||r.publish_authorized!==false||
+             r.media_upload_authorized!==false||r.wordpress_writes!==0||
+             r.producer_receipt_and_license_verified!==false||
+             r.independent_visual_no_text_logo_watermark_verified!==false)
+            throw Error('MEDIA_GATE_NOT_CLOSED');
+          fs.writeFileSync(path.join(dir,'ums-physical-intake-receipt.json'),
+           JSON.stringify(r,null,2)+'\n',{flag:'wx',mode:0o600});
+          console.log(JSON.stringify({physical_webp:true,sha256:r.image_sha256,
+           pixel_perceptual_hash:r.perceptual_hash,commercial_rights_hold:true,
+           independent_visual_qa_hold:true,wordpress_writes:0}));
+          NODE
+      - name: Preserve original image and derivative for independent visual inspection
+        if: ${{ always() && steps.permit.outputs.generate == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-ums-one-owner-authorized-openai-image-visual-review-hold
+          path: ${{ runner.temp }}/seo001-owner-one-real-photo-${{ github.run_id }}/*
+          if-no-files-found: warn
+          retention-days: 14
+      - name: No extra spend or publishing
+        if: ${{ always() }}
+        run: echo 'MAX_PAID_PROVIDER_CALLS=1 NO_AUTO_RETRY=YES NO_NEW_SUBSCRIPTION=YES WP_WRITES=0 PUBLISH=NO'

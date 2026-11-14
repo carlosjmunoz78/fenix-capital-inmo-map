@@ -1,0 +1,47 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4.3-REVIEW-ONLY",
+  "status": "SOURCE_LOCKED_D31_MACHINE_PRECHECK_PASS_INDEPENDENT_RELEASE_HOLD",
+  "content_class": "FINANCIAL_MORTGAGE",
+  "persona": "INMOBILIARIAS",
+  "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+  "source_file": "cerebro/seo-enterprise/v2/drafts/v4-2-review-only/inmobiliarias-v4-2-review-only.html",
+  "source_sha256": "3884b376c91516d28d3b3b82ec429964f134c32c164ec6e2649af01099b59a4c",
+  "source_git_blob": "019ca268df22adb7e995a39771446a3774740398",
+  "candidate_file": "cerebro/seo-enterprise/v2/drafts/v4-3-review-only/inmobiliarias-v4-3-review-only.html",
+  "candidate_sha256": "24c851be15c2cd558c3ae74046f1fd98f8cf500eaab30357a909edfa705c6e0b",
+  "changes": [
+    {
+      "risk": "UNWARRANTED_MORTGAGE_SUCCESS_GUARANTEE",
+      "resolution": "Explicitly state coordination cannot guarantee approval or signing"
+    },
+    {
+      "risk": "UNILATERAL_TRANSACTION_DISMISSAL_REQUIRES_REVIEW",
+      "resolution": "Decisions respect parties, prior commitments and applicable advice"
+    }
+  ],
+  "proof": {
+    "github_workflow_run": 42288032135,
+    "github_job": 128133843756,
+    "result": "SUCCESS",
+    "tests_passed": 11,
+    "tests_failed": 0
+  },
+  "machine_d31_precheck_pass": true,
+  "professional_ymyl_review_verified": false,
+  "independent_seo_review_verified": false,
+  "legal_review_completed": false,
+  "owner_exact_digest_approved": false,
+  "core_guard_authorized_write": false,
+  "wordpress_restore_real_verified": false,
+  "ums_original_photo_ready": false,
+  "wordpress_drafts_created": false,
+  "wordpress_writes": 0,
+  "paid_api_calls_this_revision": 0,
+  "publish_authorized": false,
+  "autonomous_production_ready": false,
+  "next_block": "Independent YMYL source and commercial fact-check; original photos + full private WordPress restore; then owner digest and gated first draft"
+}

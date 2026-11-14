@@ -1,0 +1,98 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "2026-11-06",
+  "strategy_source": "cerebro/seo-enterprise/v2/seo-marketing-plan-for-owner-approval-v1.json",
+  "strategy_owner_direction_in_chat": "PROCEED_TO_PREPARE_NOT_A_CRYPTOGRAPHIC_STRATEGY_APPROVAL",
+  "strategy_approved_via_authenticated_gateway": false,
+  "publish_authorized": false,
+  "wordpress_connector": "Cowboy_MCP_web",
+  "blocked_plugins": [
+    "WPVibe",
+    "Make"
+  ],
+  "live_wp_writes": 0,
+  "source_corpus": "cerebro/seo-enterprise/v2/data/fenix-prod-wp-url-media-inventory-2026-11-05-v1.json",
+  "new_drafts": [
+    {
+      "id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "type": "blog",
+      "target_slug": "comparar-dos-pisos-despues-visita-cordoba",
+      "target_company": "fenix",
+      "title": "Cómo comparar dos pisos después de visitarlos en Córdoba sin decidir por impulso",
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2c-comparar-pisos-cordoba.draft.html",
+      "source_wp_post_ids": [
+        52656,
+        46982,
+        49153,
+        49151
+      ],
+      "existing_draft_to_preserve": 52656,
+      "status": "REPO_DRAFT_REQUIRES_INDEPENDENT_QA_AND_OWNER_APPROVAL",
+      "intent": "INFORMATIONAL_POST_VISIT_TO_MORTGAGE_STUDY",
+      "funnel": "B2C_COMPRADOR",
+      "target_keyword_candidate": "comparar dos pisos en Córdoba",
+      "offer": "PRICE_AND_EXPENSE_CALCULATOR",
+      "lead_capture_state": "NOT_CONNECTED",
+      "consent_marketing_auto_enroll": false,
+      "regulatory_claims_verified": false
+    },
+    {
+      "id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "type": "blog",
+      "target_slug": "derivacion-hipotecaria-comprador-inmobiliaria-cordoba",
+      "title": "Derivación hipotecaria desde una inmobiliaria: protocolo para coordinar compradores en Córdoba",
+      "content_path": "cerebro/seo-enterprise/v2/drafts/2026-11-06-b2b-derivacion-comprador-cordoba.draft.html",
+      "source_wp_post_ids": [
+        49079,
+        49071,
+        49073,
+        49128,
+        49074
+      ],
+      "status": "REPO_DRAFT_REQUIRES_INDEPENDENT_QA_LEGAL_PRIVACY_AND_OWNER_APPROVAL",
+      "intent": "B2B_PROCESS_TO_PARTNER_CONTACT",
+      "funnel": "B2B_AGENCIA",
+      "target_keyword_candidate": "derivación hipotecaria inmobiliaria Córdoba",
+      "lead_capture_state": "SEPARATE_B2B_REQUIRED_NOT_CONNECTED",
+      "consent_marketing_auto_enroll": false,
+      "regulatory_claims_verified": false
+    }
+  ],
+  "follow_up_briefs": [
+    {
+      "id": "SEO001-FENIX-B2C-003",
+      "persona": "PARTICULARES",
+      "topic": "Ficha comparativa editable de viviendas",
+      "format": "DOWNLOAD",
+      "reuse_asset": "CHECKLIST_V2_52656",
+      "status": "HOLD_UNTIL_PRIVATE_DELIVERY_AND_BREVO_RECEIPT"
+    },
+    {
+      "id": "SEO001-FENIX-B2B-004",
+      "persona": "INMOBILIARIAS",
+      "topic": "Ficha mínima de derivación y seguimiento de compradores",
+      "format": "DOWNLOAD",
+      "related_posts": [
+        49074,
+        49128
+      ],
+      "status": "HOLD_UNTIL_PRIVACY_AND_B2B_INTAKE_E2E"
+    }
+  ],
+  "required_gates": [
+    "SOURCE_URL_RECHECK",
+    "CURRENT_WP_SLUG_COLLISION_RECHECK",
+    "SEO_YMYL_INDEPENDENT_QA",
+    "COPY_AND_IMAGE_LICENSE_QA",
+    "CORE_GUARD_STATUS",
+    "PHYSICAL_BACKUP_AND_ROLLBACK",
+    "OWNER_APPROVAL_EXACT_REVISION",
+    "CMS_DRAFT_WRITE_IAM",
+    "PUBLISH_SEPARATE_AUTHORIZATION"
+  ]
+}

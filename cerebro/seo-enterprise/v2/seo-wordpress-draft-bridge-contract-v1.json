@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "status": "WORDPRESS_OFFICIAL_DRAFT_CREATE_TOOL_DRY_RUN_VERIFIED_NOT_ACTUAL_WRITE",
+  "date": "2026-11-05",
+  "tool_provider": "Cowboy_MCP_web",
+  "tool_name": "wp_create_post",
+  "tool_schema_verified": true,
+  "accepts_status_draft": true,
+  "accepts_dry_run": true,
+  "observed_response": {
+    "dry_run": true,
+    "tool": "wp_create_post",
+    "action": "create",
+    "resource": "post",
+    "description": "Would create post with the provided parameters."
+  },
+  "official_wordpress_new_posts_created": 0,
+  "official_wordpress_pages_modified": 0,
+  "official_wordpress_site_reaudited": false,
+  "connector_token_exposed": false,
+  "implementation": "cerebro/seo-enterprise/v2/runtime/seo-wordpress-draft-bridge-v1.mjs",
+  "operative_mode": "PLAN_AND_DRY_RUN_ONLY",
+  "protected_fields": [
+    "post_status",
+    "post_slug",
+    "post_type",
+    "published_page_IDs",
+    "canonical",
+    "original_wp_blocks"
+  ],
+  "excluded_operations": [
+    "wp_update_post_on_published",
+    "wp_create_post_publish",
+    "wp_delete_post",
+    "edit_existing_published",
+    "schedule_publish"
+  ],
+  "external_write_authorized": false,
+  "require_next": [
+    "IAM_LEAST_PRIVILEGE",
+    "DRAFT_ONLY_ROLE",
+    "PREPARED_CONTENT_BACKUP",
+    "QA_FINANCIAL_CLAIMS",
+    "QA_IMAGE_RIGHTS",
+    "TRIBUNAL",
+    "PHYSICAL_ROLLBACK"
+  ],
+  "expected_additional_subscription_cost_eur": 0
+}

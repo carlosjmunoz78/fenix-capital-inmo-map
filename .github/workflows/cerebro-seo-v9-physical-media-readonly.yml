@@ -1,0 +1,107 @@
+name: CEREBRO SEO V9 Real Media Readonly LAB
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v9-media-live-gate-2026-11-08.json'
+      - '.github/workflows/cerebro-seo-v9-physical-media-readonly.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-v9-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  media-intake-readonly:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Install free isolated decoder
+        run: python -m pip install --quiet --disable-pip-version-check Pillow==11.3.0
+      - name: Read four public photos once, verify physical bytes and near duplicates
+        env:
+          OUT_DIR: ${{ runner.temp }}/seo001-v9-${{ github.run_id }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os,json,io,hashlib,urllib.request
+          from pathlib import Path
+          from urllib.parse import urlsplit
+          from PIL import Image,ImageOps
+          m=json.loads(Path('cerebro/seo-enterprise/v2/registry/seo001-v9-media-live-gate-2026-11-08.json').read_text())
+          assert m['batch_id']=='SEO001-V9-LIVE-MEDIA-READONLY-20261108'
+          assert m['company_id']=='fenix' and m['engine_id']=='SEO-001' and m['environment']=='LAB'
+          assert m['status']=='PREPARED_READONLY' and len(m['images'])==4
+          assert [v['post_id'] for v in m['images']]==[52713,52714,52715,52716]
+          assert [v['media_id'] for v in m['images']]==[52718,52719,52720,52721]
+          assert all(x is False for x in m['permissions'].values())
+          assert all(x==0 for x in m['cost'].values())
+          assert len(m['unverified'])==7
+          class DenyRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self,*args,**kwargs):return None
+          opener=urllib.request.build_opener(DenyRedirect())
+          out=Path(os.environ['OUT_DIR']);out.mkdir(mode=0o700)
+          receipt={'status':'INCOMPLETE_HOLD','company_id':'fenix','engine_id':'SEO-001','environment':'LAB',
+            'images':[],'hash_pairs':[],'provider_receipts_verified':False,'rights_verified':False,
+            'visual_professional_approved':False,'wordpress_live_mobile_approved':False,
+            'b2b_crm_e2e_approved':False,'legal_signoff':False,'backup_restore_complete':False,
+            'owner_release_approved':False,'model_calls':0,'image_generation_calls':0,
+            'wordpress_writes':0,'crm_writes':0,'published':0,'autopublish_allowed':False}
+          def dhash(im):
+              a=list(ImageOps.grayscale(im).resize((9,8)).getdata())
+              return sum(1<<(63-(y*8+x)) for y in range(8) for x in range(8) if a[y*9+x]>a[y*9+x+1])
+          try:
+              for i,x in enumerate(m['images']):
+                  assert x['post_id']==52713+i and x['media_id']==52718+i
+                  assert (x['expected_width'],x['expected_height'])==(1536,1024)
+                  assert x['metadata_alt_present'] is True
+                  assert x['independent_provider_receipt'] is False and x['rights_review_approved'] is False
+                  u=urlsplit(x['url'])
+                  assert u.scheme=='https' and u.hostname=='fenixcapital.es' and not u.port
+                  assert not (u.username or u.password or u.query or u.fragment)
+                  assert u.path.startswith('/wp-content/uploads/2026/11/fenix-seo001-')
+                  assert u.path.endswith('-hero-original.jpg')
+                  req=urllib.request.Request(x['url'],headers={'Accept':'image/jpeg','User-Agent':'CEREBRO-SEO001-readonly/1'})
+                  with opener.open(req,timeout=15) as resp:
+                      assert resp.status==200 and 'image/jpeg' in resp.headers.get('Content-Type','').lower()
+                      assert int(resp.headers.get('Content-Length','0'))<=1500000
+                      buf=resp.read(1500001)
+                  assert 50000<len(buf)<=1500000 and buf[:2]==bytes([255,216])
+                  im=Image.open(io.BytesIO(buf))
+                  assert im.format=='JPEG' and im.size==(1536,1024)
+                  im.load()
+                  rec={'post_id':x['post_id'],'media_id':x['media_id'],'sha256':hashlib.sha256(buf).hexdigest(),
+                       'dhash':format(dhash(im),'016x'),'bytes':len(buf),'width':im.width,'height':im.height}
+                  receipt['images'].append(rec)
+              for i in range(4):
+                  for j in range(i+1,4):
+                      a,b=receipt['images'][i],receipt['images'][j]
+                      assert a['sha256']!=b['sha256'],'DUPLICATE_ORIGINAL_IMAGE'
+                      distance=(int(a['dhash'],16)^int(b['dhash'],16)).bit_count()
+                      receipt['hash_pairs'].append({'ids':[a['media_id'],b['media_id']],
+                                                  'distance':distance,'needs_visual_review':distance<=8})
+              receipt['status']='PHYSICAL_IMAGES_DISTINCT_RELEASE_HOLD'
+          except Exception as e:
+              receipt['status']='PHYSICAL_IMAGE_HOLD'
+              receipt['error_type']=type(e).__name__
+              raise
+          finally:
+              (out/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
+          print(json.dumps({'status':receipt['status'],'checked':len(receipt['images']),
+                  'possible_similar_pairs':sum(v['needs_visual_review'] for v in receipt['hash_pairs']),
+                  'published':0,'model_calls':0}))
+          PY
+      - name: Save small technical receipt only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v9-media-readonly-LAB-UNAPPROVED
+          path: ${{ runner.temp }}/seo001-v9-${{ github.run_id }}/receipt.json
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Release hard HOLD
+        if: always()
+        run: echo 'Original provenance and licensing unverified; no generation, publication, WordPress or CRM writes.'

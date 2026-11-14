@@ -1,0 +1,19 @@
+name: CEREBRO SEO · D31 quality voice and YMYL anti-template PREPROD
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d31-human-voice-risk-gate-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d31-human-voice-risk-gate-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d31-human-voice-gate-v0.yml'
+permissions:
+  contents: read
+jobs:
+  enforce-d31:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - run: node --check cerebro/seo-enterprise/v2/runtime/seo-d31-human-voice-risk-gate-v0.mjs
+      - run: node --test cerebro/seo-enterprise/v2/tests/seo-d31-human-voice-risk-gate-v0.test.mjs
+      - run: echo 'OWNER_EDITORIAL_GAP_CAPTURED CAN_PUBLISH=FALSE INDEPENDENT_QA_REQUIRED=TRUE'

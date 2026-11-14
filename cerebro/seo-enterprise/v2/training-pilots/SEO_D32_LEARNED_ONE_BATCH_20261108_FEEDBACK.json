@@ -1,0 +1,155 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "2026-11-08",
+  "training_source": "REAL_GEMINI_FREE_ONE_BATCH_WITH_HUMAN_REVIEW_NOT_MODEL_FINETUNE",
+  "batch_id": "SEO001-AUTONOMY-PILOT-20261108-ONE",
+  "workflow_run_id": 42426883897,
+  "workflow_result": "SUCCESS_EXECUTION_NOT_CONTENT_APPROVAL",
+  "artifact_id": 13596355315,
+  "artifact_name": "seo001-learned-one-batch-20261108-LAB-UNAPPROVED",
+  "input_learning_gate_count": 10,
+  "pre_inference_tests_passed": 13,
+  "provider_requests_actual": 2,
+  "paid_fallbacks": 0,
+  "model_retries": 0,
+  "wordpress_writes": 0,
+  "crm_writes": 0,
+  "image_generation_calls": 0,
+  "published_count": 0,
+  "eval_status": "TWO_GENERATED_CANDIDATES_HELD_NO_RELEASE",
+  "candidates": [
+    {
+      "work_id": "SEO001-FENIX-LRN-20261108-B2C-001",
+      "persona": "PARTICULARES",
+      "provider_status": "REAL_CLOUD_DRAFT_STYLE_HOLD",
+      "model_reported_words": 1247,
+      "html_h1": 1,
+      "html_h2_core": 5,
+      "required_h2_core": 6,
+      "html_h3_faq": 6,
+      "model_faq_gate_count": 0,
+      "invalid_structure": "MISSING_SECTION_CLASS_FAQ_AND_DIV_CLASS_FAQ_ITEM",
+      "faq_word_counts": [
+        25,
+        24,
+        23,
+        24,
+        22,
+        22
+      ],
+      "model_reported_voice_issues": [],
+      "content_sha256": "f55572d04c9bef8da7290abf5fd4abab5143c8623c062db5bf449bf154a47ee4",
+      "substantive_flags": [
+        {
+          "severity": "HIGH",
+          "category": "YMYL_LEGAL",
+          "evidence_short": "El vendedor debe abonar las derramas aprobadas antes de la firma",
+          "assessment": "Unqualified legal allocation of approved community assessments; needs fact-checked, contextual rewrite before publication"
+        },
+        {
+          "severity": "MEDIUM",
+          "category": "EDITORIAL",
+          "evidence_short": "Los expertos recomiendan dotar este fondo...",
+          "assessment": "Generic attribution without named verifiable evidence"
+        }
+      ],
+      "independent_approval": false
+    },
+    {
+      "work_id": "SEO001-FENIX-LRN-20261108-B2B-002",
+      "persona": "INMOBILIARIAS",
+      "provider_status": "REAL_CLOUD_DRAFT_STYLE_HOLD",
+      "model_reported_words": 1580,
+      "html_h1": 1,
+      "html_h2_core": 6,
+      "required_h2_core": 6,
+      "html_h3_faq": 6,
+      "model_faq_gate_count": 0,
+      "invalid_structure": "MISSING_SECTION_CLASS_FAQ_AND_DIV_CLASS_FAQ_ITEM",
+      "faq_word_counts": [
+        30,
+        26,
+        25,
+        27,
+        25,
+        19
+      ],
+      "model_reported_voice_issues": [],
+      "content_sha256": "c477b26cea68faee5e7f92b09f568e56fa14682b412e6a66d0997b23f7365a9b",
+      "substantive_flags": [
+        {
+          "severity": "HIGH",
+          "category": "YMYL_LEGAL",
+          "evidence_short": "La demora depende exclusivamente de la sociedad tasadora o de la entidad bancaria",
+          "assessment": "Unsupported exclusive attribution; must distinguish actual cause and contractual roles"
+        },
+        {
+          "severity": "HIGH",
+          "category": "CONTRACTUAL",
+          "evidence_short": "El retraso administrativo no invalida el acuerdo privado",
+          "assessment": "Contract-specific outcome must not be declared generically without contract review"
+        },
+        {
+          "severity": "MEDIUM",
+          "category": "EDITORIAL",
+          "evidence_short": "mejoran notablemente la satisfacción final",
+          "assessment": "Unsupported performance assertion"
+        }
+      ],
+      "independent_approval": false
+    }
+  ],
+  "learning_delta": [
+    {
+      "id": "LRN-FAQ-DOM-001",
+      "owner": "SEO-D13",
+      "cause": "Prompt demanded six questions but failed to specify exact DOM classes per gate",
+      "hard_requirement": "FAQ markup exactly one <section class=\"faq\"><h2>..</h2> and six <div class=\"faq-item\"><h3>..</h3><p>..</p></div></section>",
+      "test": "Parse actual HTML DOM, do not equate 6 H3 with valid FAQ; fail closed"
+    },
+    {
+      "id": "LRN-H2-COUNT-002",
+      "owner": "SEO-D15",
+      "cause": "B2C writer produced five main H2, one FAQ H2",
+      "hard_requirement": "Exactly six main H2 plus one FAQ H2 for article deep-content policy",
+      "test": "DOM core heading count exact, not generic allowed H2 range"
+    },
+    {
+      "id": "LRN-FAQ-LENGTH-003",
+      "owner": "SEO-D15",
+      "cause": "One B2B FAQ answer contained 19 words",
+      "hard_requirement": "Each FAQ answer 20-40 words",
+      "test": "Extract FAQ answer DOM text and count tokens per answer"
+    },
+    {
+      "id": "LRN-YMYL-004",
+      "owner": "SEO-D16",
+      "cause": "Legal and financial claims appeared despite generic no-guarantee prompt",
+      "hard_requirement": "Flag unconditional legal obligations, seller responsibility, contractual validity or exclusive causes; require independent source-linked review; never deterministic-rewrite legal conclusions",
+      "test": "Risk pattern prefilter + human verified official-source gate, block before publication"
+    },
+    {
+      "id": "LRN-MEDIA-005",
+      "owner": "SEO-D26/UMS-001",
+      "cause": "Text-only writer has no original hero image or rights receipts",
+      "hard_requirement": "Check existing WP media/filename first then original UMS with SHA/phash/licence/visual proof; never say complete without actual image",
+      "test": "Require physical receipt and desktop-mobile proof"
+    },
+    {
+      "id": "LRN-PERSONA-006",
+      "owner": "SEO-D31",
+      "cause": "B2B article is text-only, form routing never tested with a legitimate lead",
+      "hard_requirement": "Preserve separate PARTNER form and server privacy; route to professional followup only after supervised CRM E2E",
+      "test": "No automatic promotion from text QA"
+    }
+  ],
+  "training_acceptance": "FEEDBACK_DOCUMENTED_NOT_MODEL_WEIGHTS_UPDATED",
+  "autonomous_production_ready": false,
+  "one_batch_completed": true,
+  "next_batch_authorized": false,
+  "owner_gate_required": true,
+  "followup": "UPDATE_SHARED_GENERATOR_PROMPT_AND_QA_TESTS_THEN_SCHEDULE_NEW_TRIAL_ONLY_ON_FRESH_OWNER_AUTHORIZATION"
+}

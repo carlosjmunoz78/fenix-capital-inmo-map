@@ -20,9 +20,15 @@
       "provider": "github",
       "auth_mode": "EPHEMERAL_GITHUB_JOB_TOKEN",
       "identity_id": "iam:github-actions-job",
-      "credential_ref_ids": ["credref:github-actions-token"],
+      "credential_ref_ids": [
+        "credref:github-actions-token"
+      ],
       "integration_class": "OFFICIAL_INTEGRATION",
-      "environments": ["LAB", "PREPROD", "PROD_CONTROL_PLANE"],
+      "environments": [
+        "LAB",
+        "PREPROD",
+        "PROD_CONTROL_PLANE"
+      ],
       "effective_scope_source": "WORKFLOW_PERMISSIONS_BLOCK",
       "real_execution_state": "EXISTING",
       "browser_fallback": false,
@@ -33,9 +39,13 @@
       "provider": "supabase",
       "auth_mode": "PUBLISHABLE_KEY_PLUS_OPTIONAL_USER_JWT",
       "identity_id": "iam:supabase-browser-public",
-      "credential_ref_ids": ["credref:prod-supabase-publishable-key"],
+      "credential_ref_ids": [
+        "credref:prod-supabase-publishable-key"
+      ],
       "integration_class": "API_OR_WEBHOOK",
-      "environments": ["PROD"],
+      "environments": [
+        "PROD"
+      ],
       "effective_scope_source": "SUPABASE_RLS_AND_GATEWAY_POLICY",
       "real_execution_state": "EXISTING",
       "browser_fallback": false,
@@ -46,9 +56,14 @@
       "provider": "supabase",
       "auth_mode": "PUBLISHABLE_KEY_PLUS_USER_SESSION_JWT",
       "identity_id": "iam:supabase-e2e-user",
-      "credential_ref_ids": ["credref:prod-supabase-publishable-key", "credref:cerebro-e2e-user-jwt"],
+      "credential_ref_ids": [
+        "credref:prod-supabase-publishable-key",
+        "credref:cerebro-e2e-user-jwt"
+      ],
       "integration_class": "API_OR_WEBHOOK",
-      "environments": ["PROD_READONLY_E2E"],
+      "environments": [
+        "PROD_READONLY_E2E"
+      ],
       "effective_scope_source": "AUTHENTICATED_READONLY_PARITY_SCRIPT",
       "real_execution_state": "EXISTING_TOKEN_LIFECYCLE_PARTIAL",
       "browser_fallback": false,
@@ -59,9 +74,13 @@
       "provider": "notion",
       "auth_mode": "SERVICE_INTEGRATION_TOKEN",
       "identity_id": "iam:notion-private-doc-reader",
-      "credential_ref_ids": ["credref:notion-token"],
+      "credential_ref_ids": [
+        "credref:notion-token"
+      ],
       "integration_class": "API_OR_WEBHOOK",
-      "environments": ["QA_PRIVATE_DOC_GATE"],
+      "environments": [
+        "QA_PRIVATE_DOC_GATE"
+      ],
       "effective_scope_source": "POR_AUDITAR_PROVIDER_SIDE",
       "real_execution_state": "EXISTING_READ_INTENT",
       "browser_fallback": false,
@@ -72,9 +91,13 @@
       "provider": "google-gemini-api",
       "auth_mode": "API_KEY",
       "identity_id": "iam:gemini-free-lab",
-      "credential_ref_ids": ["credref:cerebro-gemini-api-key"],
+      "credential_ref_ids": [
+        "credref:cerebro-gemini-api-key"
+      ],
       "integration_class": "API_OR_WEBHOOK",
-      "environments": ["LAB"],
+      "environments": [
+        "LAB"
+      ],
       "effective_scope_source": "CEREBRO_HARD_QUOTA_AND_NO_PAID_FALLBACK",
       "real_execution_state": "EXISTING_SYNTHETIC_LAB_ONLY",
       "browser_fallback": false,
@@ -85,9 +108,15 @@
       "provider": "gmail-imap-smtp",
       "auth_mode": "MAILBOX_CREDENTIAL",
       "identity_id": "iam:owner-private-mailbox",
-      "credential_ref_ids": ["credref:cerebro-mail-username", "credref:cerebro-mail-password", "credref:cerebro-owner-email"],
+      "credential_ref_ids": [
+        "credref:cerebro-mail-username",
+        "credref:cerebro-mail-password",
+        "credref:cerebro-owner-email"
+      ],
       "integration_class": "API_OR_WEBHOOK",
-      "environments": ["PROD_CONTROL_PLANE"],
+      "environments": [
+        "PROD_CONTROL_PLANE"
+      ],
       "effective_scope_source": "MAIL_PROTOCOL_CREDENTIAL_AND_CONTROLLER_POLICY",
       "real_execution_state": "EXISTING",
       "browser_fallback": false,
@@ -100,11 +129,31 @@
       "identity_id": "iam:local-browser-profile",
       "credential_ref_ids": [],
       "integration_class": "BROWSER_COMPUTER_USE",
-      "environments": ["LAB", "PREPROD"],
+      "environments": [
+        "LAB",
+        "PREPROD"
+      ],
       "effective_scope_source": "FAIL_CLOSED_SYNTHETIC_BEHAVIORAL_LAB",
       "real_execution_state": "SYNTHETIC_ONLY",
       "browser_fallback": true,
       "audit_state": "POR_AUDITAR_REAL_PROFILE_SESSION_BINDING"
+    },
+    {
+      "connector_id": "connector:seo-gemini-free-lab",
+      "provider": "google-gemini-api",
+      "auth_mode": "API_KEY",
+      "identity_id": "iam:seo-gemini-free-lab",
+      "credential_ref_ids": [
+        "credref:cerebro-gemini-free-api-key"
+      ],
+      "integration_class": "API_OR_WEBHOOK",
+      "environments": [
+        "LAB"
+      ],
+      "effective_scope_source": "GOOGLE_AI_STUDIO_FREE_PROJECT_OWNER_UI_AND_IAM_LIFECYCLE",
+      "real_execution_state": "REGISTERED_UNBOUND_NO_GENERATION",
+      "browser_fallback": false,
+      "audit_state": "FREE_PROJECT_CONFIRMED_SECRET_NOT_BOUND_NO_LIVE_INFERENCE"
     }
   ],
   "invariants": {

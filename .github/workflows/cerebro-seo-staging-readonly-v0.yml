@@ -1,0 +1,169 @@
+name: CEREBRO SEO V2 STAGING Readonly Probe
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/**'
+      - '.github/workflows/cerebro-seo-staging-readonly-v0.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readonly-staging:
+    # Paused at owner direction on 2026-11-05: no STAGING activity. Preserve historical job for later explicit re-authorization.
+    if: ${{ false }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate public snapshot inspector
+        run: node --test cerebro/seo-enterprise/v2/tests/staging-readonly-inspector-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-transversal-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/staging-multidepartment-readonly-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-workunit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-job001-roles-e2e-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-merit-candidate-ledger-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-training-shadow-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-ymyl-claims-audit-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-github-workload-verify-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-process-signature-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-role-access-gate-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-isolated-workload-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-isolated-role-jobs-v0.test.mjs
+      - name: Verify this GitHub workload against provider API with existing read-only token
+        env:
+          GH_READONLY_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-stage-readonly"
+          node cerebro/seo-enterprise/v2/runtime/seo-github-workload-verify-v0.mjs "$RUNNER_TEMP/seo-stage-readonly/workload-identity.json"
+      - name: Single bounded HTTP GET for staging homepage, no redirects and no mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/seo-stage-readonly"
+          cd "$RUNNER_TEMP/seo-stage-readonly"
+          if ! code=$(curl --proto '=https' --tlsv1.2 --silent --show-error --max-time 15 --connect-timeout 5 --max-filesize 2000000 --max-redirs 0 -D headers.txt -o body.html -w '%{http_code}' 'https://staging.fenixcapital.es/'); then
+            echo 'STAGING_READ_BLOCKED: network/HTTP client failed; 0 external mutations'
+            exit 2
+          fi
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-readonly-inspector-v0.mjs" body.html headers.txt "$code"
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-transversal-readonly-v0.mjs" body.html headers.txt "$code"
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/staging-multidepartment-readonly-v0.mjs" body.html headers.txt "$code"
+          # Separate real OS processes; existing JOB-001 durable journal is local to this CI run.
+          export SEO_ROLE_GATE_REQUIRED=1
+          export SEO_ROLE_ATTESTATION_FILE="$RUNNER_TEMP/seo-stage-readonly/workload-identity.json"
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-workunit-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-independent-review-v0.mjs" body.html headers.txt "$code" job001.v8 worker-receipt.json independent-review.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-job001-tribunal-v0.mjs" worker-receipt.json independent-review.json tribunal.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-merit-candidate-ledger-v0.mjs" worker-receipt.json independent-review.json tribunal.json merit-journal.v8 merit-receipt.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-training-shadow-v0.mjs" > training-shadow.json
+          node "$GITHUB_WORKSPACE/cerebro/seo-enterprise/v2/runtime/seo-ymyl-claims-audit-v0.mjs" body.html headers.txt "$code" ymyl-claims.json
+      - name: Retain limited durable execution evidence (no public HTML)
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-v2-job001-readonly-evidence
+          path: |
+            ${{ runner.temp }}/seo-stage-readonly/job001.v8
+            ${{ runner.temp }}/seo-stage-readonly/worker-receipt.json
+            ${{ runner.temp }}/seo-stage-readonly/independent-review.json
+            ${{ runner.temp }}/seo-stage-readonly/tribunal.json
+            ${{ runner.temp }}/seo-stage-readonly/merit-journal.v8
+            ${{ runner.temp }}/seo-stage-readonly/merit-receipt.json
+            ${{ runner.temp }}/seo-stage-readonly/training-shadow.json
+            ${{ runner.temp }}/seo-stage-readonly/ymyl-claims.json
+            ${{ runner.temp }}/seo-stage-readonly/workload-identity.json
+          retention-days: 14
+          if-no-files-found: error
+
+  # Additive LAB: three separate GitHub jobs, all read-only and synthetic.
+  seo-worker-isolated:
+    name: seo-worker-isolated
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify worker job and execute durable synthetic LAB fixture
+        env:
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs worker "$RUNNER_TEMP/seo-isolated-worker"
+      - name: Transfer only signed worker receipt and JOB-001 journal
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-v2-isolated-worker-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/seo-isolated-worker/worker.json
+            ${{ runner.temp }}/seo-isolated-worker/job001.v8
+          retention-days: 14
+          if-no-files-found: error
+
+  seo-qa-isolated:
+    name: seo-qa-isolated
+    needs: seo-worker-isolated
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download successful worker evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: seo-v2-isolated-worker-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-input-worker
+      - name: Verify worker identity and independently recompute LAB fixture
+        env:
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs qa \
+            "$RUNNER_TEMP/seo-isolated-input-worker/worker.json" \
+            "$RUNNER_TEMP/seo-isolated-input-worker" \
+            "$RUNNER_TEMP/seo-isolated-qa"
+      - name: Transfer QA signed record only
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-v2-isolated-qa-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-qa/review.json
+          retention-days: 14
+          if-no-files-found: error
+
+  seo-tribunal-isolated:
+    name: seo-tribunal-isolated
+    needs: [seo-worker-isolated, seo-qa-isolated]
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download signed worker evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: seo-v2-isolated-worker-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal-input-worker
+      - name: Download signed QA evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: seo-v2-isolated-qa-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal-input-qa
+      - name: Check independent job IDs, provider success and signed verdict
+        env:
+          GH_READONLY_TOKEN: ${{ github.token }}
+          SEO_EXPECTED_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-isolated-role-jobs-v0.mjs tribunal \
+            "$RUNNER_TEMP/seo-isolated-tribunal-input-worker/worker.json" \
+            "$RUNNER_TEMP/seo-isolated-tribunal-input-qa/review.json" \
+            "$RUNNER_TEMP/seo-isolated-tribunal"
+      - name: Store signed tribunal record
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-v2-isolated-tribunal-${{ github.run_id }}
+          path: ${{ runner.temp }}/seo-isolated-tribunal/tribunal.json
+          retention-days: 14
+          if-no-files-found: error

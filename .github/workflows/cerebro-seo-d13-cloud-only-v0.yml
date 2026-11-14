@@ -1,0 +1,28 @@
+name: CEREBRO SEO · D13 cloud-only provider and zero-cost IAM
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-cloud-only-writer-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-d13-cloud-only-writer-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-d13-cloud-only-v0.yml'
+permissions:
+  contents: read
+jobs:
+  cloud-writer:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cloud routing, IAM, billing and draft safety contracts
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-cloud-only-writer-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-cloud-only-writer-v0.test.mjs
+      - name: Real GitHub cloud runner confirms fail-closed until provider verified
+        run: |
+          node --input-type=module <<'NODE'
+          import {SEO_D13_CLOUD_ONLY} from './cerebro/seo-enterprise/v2/runtime/seo-d13-cloud-only-writer-v0.mjs';
+          if(!SEO_D13_CLOUD_ONLY.cloud_only||SEO_D13_CLOUD_ONLY.local_pc_required!==false||
+          SEO_D13_CLOUD_ONLY.allow_paid_fallback!==false)throw Error('INVALID_CLOUD_SCOPE');
+          process.stdout.write('CLOUD_ONLY=TRUE LOCAL_OLLAMA=NOT_USED PAID_FALLBACK=NO SECRET_CHECK=NOT_ATTEMPTED WORDPRESS_WRITES=0\n');
+          NODE

@@ -1,0 +1,50 @@
+name: CEREBRO SEO · Real WordPress 225 slugs + V4.1 draft-only staging
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v4-1-wordpress-draft-guard-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v4-1-wordpress-draft-guard-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v4-1-wordpress-post-page-slug-inventory-readonly-2026-11-06.json'
+      - '.github/workflows/cerebro-seo-v4-1-wordpress-draft-guard-v0.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  draft-only-staging:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Download verified V4.1 content; never commit draft bodies to main
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-1-official-sources-corrections-release-hold
+          run-id: 42242988793
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-v4-1-real-html
+      - name: Verify zero-write WordPress post and page slug gate with real content SHA
+        env:
+          SEO_V41_DRAFT_SOURCE_DIR: ${{ runner.temp }}/seo001-v4-1-real-html
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v4-1-wordpress-draft-guard-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v4-1-wordpress-draft-guard-v0.test.mjs
+      - name: Materialize 2 source-locked WordPress draft-only dry run requests
+        env:
+          SOURCE: ${{ runner.temp }}/seo001-v4-1-real-html
+          OUTPUT: ${{ runner.temp }}/seo001-v4-1-wp-dryrun-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-v4-1-wordpress-draft-guard-v0.mjs "$SOURCE" "$OUTPUT"
+      - name: Archive PREPROD plans; never execute them as WordPress writes
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v4-1-real-source-wordpress-draft-only-plans-no-write
+          path: ${{ runner.temp }}/seo001-v4-1-wp-dryrun-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: Do not upgrade CMS rights on a historical slug snapshot
+        run: echo 'POST_PAGE_SLUG_SNAPSHOT=225 CUSTOM_TYPES_UNVERIFIED=YES JUST_IN_TIME_RECHECK=REQUIRED WP_WRITES=0 WP_DRAFT_CREATED=NO'

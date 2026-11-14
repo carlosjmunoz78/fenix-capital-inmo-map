@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4.1-OFFICIAL-DOCUMENTARY-CORRECTIONS",
+  "status": "CONTENT_REPAIRED_STRUCTURAL_QA_PASS_INDEPENDENT_QA_AND_MEDIA_HOLD",
+  "source_generation_run_id": 42231912203,
+  "prior_repair_run_id": 42233493715,
+  "source_risk_run_id": 42242414446,
+  "source_guided_repair_run_id": 42242988793,
+  "work": [
+    {
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "persona": "PARTICULARES",
+      "content_type": "ARTICLE",
+      "source_sha256": "875720fb5d22a3b325ab81eef39c10b9f4de71a4577a52c26a7e127c5625548b",
+      "version_sha256": "96b340eba8d97d56fd9e2ce9644df9d2b8855759301180fbf0351630e351d88d",
+      "visible_words": 1685,
+      "main_words_excluding_faq": 1474,
+      "faq": 6,
+      "documentary_issues_addressed": 5,
+      "professionally_validated": false
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "persona": "INMOBILIARIAS",
+      "content_type": "ARTICLE",
+      "source_sha256": "8342799e75d8ec1aca3afa9df362dffa8948d92473dde0a8953339833bfbd83f",
+      "version_sha256": "ffc9d8d4f32dbc8e77ec9d9f4e7ba2bfb98a35141a91a85f1b420e27bed00583",
+      "visible_words": 1625,
+      "main_words_excluding_faq": 1457,
+      "faq": 6,
+      "documentary_issues_addressed": 4,
+      "professionally_validated": false
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://www.aepd.es/preguntas-frecuentes/2-tus-obligaciones-como-responsable-del-tratamiento/5-bases-legitimadoras-del-tratamiento/FAQ-0214-cuales-son-las-bases-de-legitimacion-para-el-tratamiento-de-datos",
+      "topic": "GDPR multiple lawful bases"
+    },
+    {
+      "url": "https://www.registradores.org/es/-/%C2%BFque-diferencias-existen-entre-una-nota-simple-y-una-certificacio-n-registral-",
+      "topic": "Nota simple informational status"
+    },
+    {
+      "url": "https://www.boe.es/eli/es/l/1960/07/21/49/con/20250724",
+      "topic": "LPH community debt and certificate"
+    },
+    {
+      "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2019-3814",
+      "topic": "LCCI regulated mortgage intermediation and tied sale"
+    },
+    {
+      "url": "https://www.bde.es/hnb/es/criterios-buenas-practicas/tasacion-para-la-concesion-de-prestamos-y-creditos-hipotecarios.html",
+      "topic": "Independent approved mortgage valuation"
+    }
+  ],
+  "media_binding": {
+    "producer_engine": "UMS-001",
+    "provider_status": "NOT_BOUND",
+    "graphic_overlay_renderer_forbidden": true,
+    "created_assets": 0,
+    "commercial_use_rights_verified": false,
+    "visual_text_logo_qa_verified": false,
+    "existing_assets_inventory_verified": false
+  },
+  "wordpress": {
+    "provider": "Cowboy_MCP_web",
+    "draft_dry_run_tested_for_legacy_v3": true,
+    "draft_plan_ready_for_v4_1": false,
+    "live_draft_created": false,
+    "core_guard_enabled": true,
+    "physical_isolated_restore_tested": false,
+    "production_modified": false
+  },
+  "release_gates": {
+    "owner_exact_sha_approved": false,
+    "independent_legal_ymyl_review": false,
+    "seo_editorial_review": false,
+    "photo_delivery_and_rights": false,
+    "wordpress_backup_and_restore": false,
+    "wordpress_draft_iam": false,
+    "live_slug_collision_exhaustive_check": false,
+    "publish_authorized": false
+  },
+  "model_calls_during_v4_1_repair": 0,
+  "additional_paid_api_calls": 0,
+  "new_subscriptions": 0,
+  "note": "Correction of selected observed risks does not certify all facts or legal compliance. Never import old owner SHA approvals. Requires independent review and authenticated media and backup gates.",
+  "physical_evidence": {
+    "status": "CROSS_ENGINE_PREPROD_TRIBUNAL_GREEN_FOR_TESTS_RELEASE_HOLD",
+    "version": "0.1.0",
+    "company_id": "fenix",
+    "engine_id": "SEO-001",
+    "environment": "PREPROD",
+    "git_actions": {
+      "physical_wp_synthetic_restore": {
+        "run_id": 42247533380,
+        "artifact_id": 13518237189,
+        "succeeded": true,
+        "full_prod_restore_verified": false
+      },
+      "physical_photo_intake": {
+        "run_id": 42248337759,
+        "artifact_id": 13518628463,
+        "succeeded": true,
+        "original_photo_generated": false
+      },
+      "cross_engine_tribunal": {
+        "run_id": 42248914390,
+        "artifact_id": 13519123892,
+        "succeeded": true,
+        "report_sha256": "5aec40e9196955728960d3c1979e4ba5528f531573c9dd8dca46c597d1917da9",
+        "publish_authorized": false
+      }
+    },
+    "open_blockers": [
+      "INDEPENDENT_YMYL_SEO_EDITORIAL_APPROVAL",
+      "UMS_ORIGINAL_CLEAN_PHOTO_PROVIDER_RIGHTS",
+      "FULL_WP_PRODUCTION_SNAPSHOT_ISOLATED_RESTORE",
+      "WORDPRESS_DRAFT_ONLY_IAM_AND_IDEMPOTENCY",
+      "OWNER_EXACT_CONTENT_SHA_APPROVAL"
+    ],
+    "cost": {
+      "new_subscriptions": 0,
+      "paid_provider_calls": 0,
+      "github_actions_minutes_consumed": true,
+      "statement_of_account_checked": false
+    },
+    "publisher_status": "OFF_NO_PROD_WRITES"
+  }
+}

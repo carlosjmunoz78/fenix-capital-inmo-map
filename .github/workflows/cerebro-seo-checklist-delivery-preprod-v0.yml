@@ -1,0 +1,45 @@
+name: CEREBRO SEO · Checklist PDF Brevo delivery PREPROD contract V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs'
+      - 'cerebro/seo-enterprise/v2/contracts/seo-checklist-delivery-ledger-preprod-v0.sql'
+      - '.github/workflows/cerebro-seo-checklist-delivery-preprod-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preprod-transactional-attachment-contract:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Syntax preflight with no new dependencies
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-checklist-transactional-delivery-v0.mjs
+          node --check cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-checklist-ledger-supabase-v0.mjs
+          node --check cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs
+      - name: Private PDF integrity, privacy & no marketing without opt-in
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-checklist-transactional-delivery-v0.test.mjs cerebro/seo-enterprise/v2/tests/seo-checklist-ledger-supabase-v0.test.mjs
+      - name: Prove no remote email, CRM mutation, storage upload or newsletter subscription
+        env:
+          CEREBRO_SEO_DELIVERY_MODE: 'DRY_RUN'
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CEREBRO_SEO_DELIVERY_MODE" = "DRY_RUN"
+          echo "SEO_CHECKLIST_PREPROD_CONTRACT=TESTED"
+          echo "BREVO_LIVE_SEND=NOT_RUN"
+          echo "BREVO_CONTACT_SUBSCRIBE=NOT_RUN"
+          echo "CUSTOMER_DATA_USED=NONE"
+          echo "ATTACHMENT_SOURCE_PDF=EXISTING_LOCAL_BINARY_WITH_PINNED_SHA"
+          echo "PRIVATE_BUCKET_UPLOAD=NOT_RUN"
+          echo "TRANSACTIONAL_DELIVERY_E2E=NOT_CERTIFIED"
+          echo "WORDPRESS_OR_CRM_MUTATION=NONE"

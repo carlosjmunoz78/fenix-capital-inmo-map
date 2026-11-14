@@ -1,0 +1,63 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4.3-REVIEW-ONLY",
+  "status": "SOURCE_LOCKED_D31_MACHINE_PRECHECK_PASS_INDEPENDENT_RELEASE_HOLD",
+  "content_class": "FINANCIAL_MORTGAGE",
+  "persona": "PARTICULARES",
+  "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+  "source_file": "cerebro/seo-enterprise/v2/drafts/v4-2-review-only/compradores-v4-2-review-only.html",
+  "source_sha256": "96b340eba8d97d56fd9e2ce9644df9d2b8855759301180fbf0351630e351d88d",
+  "source_git_blob": "c7595cd49a1fc8d86dd41aa6db6bee24d4e531fa",
+  "candidate_file": "cerebro/seo-enterprise/v2/drafts/v4-3-review-only/compradores-v4-3-review-only.html",
+  "candidate_sha256": "091957f47867bc27f736bf757a7e141bf0b26b1bb9706b235994a34f9c252785",
+  "changes": [
+    {
+      "risk": "PURCHASE_MORTGAGE_FEES_UNDIFFERENTIATED",
+      "resolution": "Separate property purchase costs from mortgage loan formalization expenses per Banco de España / Law 5/2019"
+    },
+    {
+      "risk": "OVERGENERALIZED_HUMIDITY_REPAIR_COST",
+      "resolution": "Request technical diagnosis, avoid blanket high-cost statements"
+    },
+    {
+      "risk": "ELECTRICAL_COMPLIANCE_ABSOLUTE",
+      "resolution": "Recommend professional assessment rather than universally requiring retrofit"
+    },
+    {
+      "risk": "EURIBOR_APPLIES_TO_ALL_MORTGAGES",
+      "resolution": "Limit euribor sensitivity to variable-rate and variable periods"
+    },
+    {
+      "risk": "B2C_FAQ_PURCHASE_LOAN_COSTS",
+      "resolution": "Clarify cost allocation in FAQ"
+    }
+  ],
+  "sources": [
+    "https://clientebancario.bde.es/pcb/es/blog/que-gastos-te-toca-pagar-cuando-contratas-una-hipoteca-.html?blog=%2Fwebcb%2FBlog",
+    "https://clientebancario.bde.es/pcb/es/menu-horizontal/productosservici/financiacion/hipotecas/guia-textual/primerospasoscon/Gastos_asociados_a_la_hipoteca.html"
+  ],
+  "proof": {
+    "github_workflow_run": 42288583619,
+    "github_job": 128135752970,
+    "result": "SUCCESS",
+    "tests_passed": 13,
+    "tests_failed": 0
+  },
+  "machine_d31_precheck_pass": true,
+  "professional_ymyl_review_verified": false,
+  "independent_seo_review_verified": false,
+  "legal_review_completed": false,
+  "owner_exact_digest_approved": false,
+  "core_guard_authorized_write": false,
+  "wordpress_restore_real_verified": false,
+  "ums_original_photo_ready": false,
+  "wordpress_drafts_created": false,
+  "wordpress_writes": 0,
+  "paid_api_calls_this_revision": 0,
+  "publish_authorized": false,
+  "autonomous_production_ready": false,
+  "next_block": "Independent professional review and real-backup private restore, UMS photos, IAM owner SHA approval"
+}

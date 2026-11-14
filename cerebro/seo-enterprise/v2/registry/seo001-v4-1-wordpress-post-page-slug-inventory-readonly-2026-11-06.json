@@ -1,0 +1,1731 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4.1-SLUG-INVENTORY-READONLY",
+  "observed_on": "2026-11-06",
+  "source": "Cowboy_MCP_web/wp_list_posts status=any post_type=post/page pages 1-2",
+  "source_readonly": true,
+  "captured_posts": 45,
+  "captured_pages": 180,
+  "captured_rows": 225,
+  "inventory_complete_for_post_and_page_at_capture": true,
+  "inventory_complete_for_other_custom_post_types": false,
+  "wp_cli_exact_name_query_unavailable_because_shell_exec_disabled": true,
+  "proposed_slugs": [
+    {
+      "slug": "comparar-dos-pisos-despues-visita-cordoba",
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "same_slug_in_post_or_page": false,
+      "same_slug_global_custom_post_type_unverified": true
+    },
+    {
+      "slug": "derivacion-hipotecaria-comprador-inmobiliaria-cordoba",
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "same_slug_in_post_or_page": false,
+      "same_slug_global_custom_post_type_unverified": true
+    }
+  ],
+  "existing_related_content": [
+    {
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "id": 52656,
+      "relationship": "OLDER_DRAFT_BEFORE_VISIT_NOT_POST_VISIT",
+      "recommendation": "DO_NOT_OVERWRITE_OR_PUBLISH_OLDER_DRAFT",
+      "existing": {
+        "id": 52656,
+        "post_type": "post",
+        "slug": "checklist-visitar-piso-cordoba-antes-hipoteca",
+        "status": "draft",
+        "title": "Checklist para visitar un piso en Córdoba antes de pedir una hipoteca"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "id": 46982,
+      "relationship": "PUBLISHED_FINANCING_AFFORDABILITY_SEPARATE_INTENT",
+      "recommendation": "KEEP_PUBLISHED_LINK_TO_AFFORDABILITY",
+      "existing": {
+        "id": 46982,
+        "post_type": "post",
+        "slug": "que-piso-te-puedes-permitir",
+        "status": "publish",
+        "title": "Qué piso te puedes permitir con tu sueldo"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49079,
+      "relationship": "PUBLISHED_FINANCING_VALUE_PITCH",
+      "recommendation": "KEEP_LIVE_LINK_AS_DISTINCT_PHASE",
+      "existing": {
+        "id": 49079,
+        "post_type": "post",
+        "slug": "financiacion-servicio-valor-inmobiliaria",
+        "status": "publish",
+        "title": "Cómo presentar la financiación sin prometer resultados"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49071,
+      "relationship": "PUBLISHED_MORTGAGE_FOLLOWUP_STAGES",
+      "recommendation": "KEEP_LIVE_LINK_AS_DISTINCT_PHASE",
+      "existing": {
+        "id": 49071,
+        "post_type": "post",
+        "slug": "seguimiento-hipotecario-por-fases-inmobiliaria",
+        "status": "publish",
+        "title": "Seguimiento hipotecario por fases para inmobiliarias"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49065,
+      "relationship": "PUBLISHED_RESERVATION_READINESS",
+      "recommendation": "AVOID_DETAILED_DUPLICATION",
+      "existing": {
+        "id": 49065,
+        "post_type": "post",
+        "slug": "comprador-preparado-antes-reserva-inmobiliaria",
+        "status": "publish",
+        "title": "Cómo saber si un comprador está listo para reservar"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49067,
+      "relationship": "PUBLISHED_BUYER_FINANCIAL_DATA",
+      "recommendation": "LINK_WHEN_DISCUSSING_CONSENT_AND_DATA_MINIMISATION",
+      "existing": {
+        "id": 49067,
+        "post_type": "post",
+        "slug": "datos-comprador-antes-estudiar-financiacion",
+        "status": "publish",
+        "title": "Datos clave antes de estudiar la financiación del comprador"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49073,
+      "relationship": "PUBLISHED_ARRAS_VALUATION_TIMING",
+      "recommendation": "AVOID_REDUNDANT_ARRAS_SECTION",
+      "existing": {
+        "id": 49073,
+        "post_type": "post",
+        "slug": "coordinar-arras-tasacion-banco-plazos",
+        "status": "publish",
+        "title": "Cómo coordinar arras, tasación y banco"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49072,
+      "relationship": "PUBLISHED_SELF_EMPLOYED_BUYER_REFERRAL",
+      "recommendation": "KEEP_AS_SPECIALIZED_SEGMENT",
+      "existing": {
+        "id": 49072,
+        "post_type": "post",
+        "slug": "derivar-comprador-autonomo-inmobiliaria",
+        "status": "publish",
+        "title": "Cómo derivar correctamente a un comprador autónomo"
+      }
+    },
+    {
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "id": 49126,
+      "relationship": "PUBLISHED_CITY_FINANCING_LANDING",
+      "recommendation": "MAINTAIN_CITY_LANDING_DISTINCT_FROM_B2B_WORKFLOW",
+      "existing": {
+        "id": 49126,
+        "post_type": "page",
+        "slug": "financiacion-compradores-inmobiliarias-cordoba",
+        "status": "publish",
+        "title": "Financiación para los compradores de tu inmobiliaria en Córdoba"
+      }
+    }
+  ],
+  "needs_google_search_console_cannibalization_comparison": true,
+  "requires_revalidation_before_draft": true,
+  "requires_independent_editorial_review": true,
+  "wordpress_write_authorized": false,
+  "publish_authorized": false,
+  "rows": [
+    {
+      "id": 52656,
+      "post_type": "post",
+      "slug": "checklist-visitar-piso-cordoba-antes-hipoteca",
+      "status": "draft",
+      "title": "Checklist para visitar un piso en Córdoba antes de pedir una hipoteca"
+    },
+    {
+      "id": 1153,
+      "post_type": "post",
+      "slug": "hipoteca-despues-divorcio-que-revisar",
+      "status": "publish",
+      "title": "Hipoteca después de un divorcio: qué revisar antes de comprar"
+    },
+    {
+      "id": 889,
+      "post_type": "post",
+      "slug": "hipoteca-extranjero-espana-documentacion",
+      "status": "publish",
+      "title": "Hipoteca en España si eres extranjero: qué documentación preparar"
+    },
+    {
+      "id": 1065,
+      "post_type": "post",
+      "slug": "hipoteca-pareja-nomina-autonomo",
+      "status": "publish",
+      "title": "Hipoteca en pareja: qué revisar si uno es autónomo"
+    },
+    {
+      "id": 960,
+      "post_type": "post",
+      "slug": "hipoteca-autonomos-cordoba-requisitos-documentacion",
+      "status": "publish",
+      "title": "Hipoteca para autónomos en Córdoba: requisitos y documentación"
+    },
+    {
+      "id": 52256,
+      "post_type": "post",
+      "slug": "cuando-preparar-hipoteca-compra-linares",
+      "status": "draft",
+      "title": "Cuándo empezar a preparar una hipoteca si vas a comprar vivienda en Linares"
+    },
+    {
+      "id": 52255,
+      "post_type": "post",
+      "slug": "documentacion-estudiar-hipoteca-linares",
+      "status": "draft",
+      "title": "Qué documentación preparar antes de estudiar una hipoteca en Linares"
+    },
+    {
+      "id": 52248,
+      "post_type": "post",
+      "slug": "cuando-preparar-hipoteca-compra-jaen",
+      "status": "draft",
+      "title": "Cuándo empezar a preparar una hipoteca si vas a comprar vivienda en Jaén"
+    },
+    {
+      "id": 52247,
+      "post_type": "post",
+      "slug": "documentacion-estudiar-hipoteca-jaen",
+      "status": "draft",
+      "title": "Qué documentación preparar antes de estudiar una hipoteca en Jaén"
+    },
+    {
+      "id": 49080,
+      "post_type": "post",
+      "slug": "tasacion-inferior-precio-compraventa-inmobiliaria",
+      "status": "publish",
+      "title": "Cómo afecta una tasación inferior al precio a una compraventa"
+    },
+    {
+      "id": 49079,
+      "post_type": "post",
+      "slug": "financiacion-servicio-valor-inmobiliaria",
+      "status": "publish",
+      "title": "Cómo presentar la financiación sin prometer resultados"
+    },
+    {
+      "id": 49081,
+      "post_type": "post",
+      "slug": "prestamos-tarjetas-coche-bloquean-compra",
+      "status": "publish",
+      "title": "Cómo afectan préstamos y tarjetas a una compra"
+    },
+    {
+      "id": 49082,
+      "post_type": "post",
+      "slug": "reducir-visitas-inutiles-filtrar-compradores-inmobiliaria",
+      "status": "publish",
+      "title": "Cómo reducir visitas filtrando compradores"
+    },
+    {
+      "id": 49075,
+      "post_type": "post",
+      "slug": "comprador-banco-en-banco-inmobiliaria",
+      "status": "publish",
+      "title": "Por qué no conviene enviar al comprador de banco en banco"
+    },
+    {
+      "id": 49076,
+      "post_type": "post",
+      "slug": "funcionarios-interinos-capacidad-compra-inmobiliaria",
+      "status": "publish",
+      "title": "Funcionarios e interinos: claves para evaluar al comprador"
+    },
+    {
+      "id": 49078,
+      "post_type": "post",
+      "slug": "ingresos-extranjero-comprador-inmobiliaria",
+      "status": "publish",
+      "title": "Compradores con ingresos del extranjero: qué revisar"
+    },
+    {
+      "id": 49072,
+      "post_type": "post",
+      "slug": "derivar-comprador-autonomo-inmobiliaria",
+      "status": "publish",
+      "title": "Cómo derivar correctamente a un comprador autónomo"
+    },
+    {
+      "id": 49077,
+      "post_type": "post",
+      "slug": "compradores-ingresos-variables-inmobiliaria",
+      "status": "publish",
+      "title": "Compradores con ingresos variables: qué revisar"
+    },
+    {
+      "id": 49071,
+      "post_type": "post",
+      "slug": "seguimiento-hipotecario-por-fases-inmobiliaria",
+      "status": "publish",
+      "title": "Seguimiento hipotecario por fases para inmobiliarias"
+    },
+    {
+      "id": 49073,
+      "post_type": "post",
+      "slug": "coordinar-arras-tasacion-banco-plazos",
+      "status": "publish",
+      "title": "Cómo coordinar arras, tasación y banco"
+    },
+    {
+      "id": 49074,
+      "post_type": "post",
+      "slug": "documentacion-minima-estudiar-comprador-inmobiliaria",
+      "status": "publish",
+      "title": "Documentación mínima para estudiar a un comprador"
+    },
+    {
+      "id": 49068,
+      "post_type": "post",
+      "slug": "que-hacer-banco-comprador-dice-no",
+      "status": "publish",
+      "title": "Qué hacer si el banco del comprador dice que no"
+    },
+    {
+      "id": 49069,
+      "post_type": "post",
+      "slug": "senales-compraventa-puede-caerse-financiacion",
+      "status": "publish",
+      "title": "Señales de que una compraventa puede caerse por financiación"
+    },
+    {
+      "id": 49070,
+      "post_type": "post",
+      "slug": "preok-preaprobacion-aprobacion-bancaria-diferencias-inmobiliarias",
+      "status": "publish",
+      "title": "Pre-OK, preaprobación y aprobación bancaria: diferencias"
+    },
+    {
+      "id": 49065,
+      "post_type": "post",
+      "slug": "comprador-preparado-antes-reserva-inmobiliaria",
+      "status": "publish",
+      "title": "Cómo saber si un comprador está listo para reservar"
+    },
+    {
+      "id": 49067,
+      "post_type": "post",
+      "slug": "datos-comprador-antes-estudiar-financiacion",
+      "status": "publish",
+      "title": "Datos clave antes de estudiar la financiación del comprador"
+    },
+    {
+      "id": 48354,
+      "post_type": "post",
+      "slug": "hipoteca-100-poco-ahorro-sin-pasos-falsos",
+      "status": "publish",
+      "title": "Hipoteca 100 con poco ahorro sin dar pasos en falso"
+    },
+    {
+      "id": 46982,
+      "post_type": "post",
+      "slug": "que-piso-te-puedes-permitir",
+      "status": "publish",
+      "title": "Qué piso te puedes permitir con tu sueldo"
+    },
+    {
+      "id": 46969,
+      "post_type": "post",
+      "slug": "comprar-o-alquilar-2026",
+      "status": "publish",
+      "title": "Comprar o alquilar en 2026, qué sale mejor ahora"
+    },
+    {
+      "id": 46467,
+      "post_type": "post",
+      "slug": "gestionar-herencia-cordoba",
+      "status": "publish",
+      "title": "Herencias en Córdoba: trámites, impuestos y vivienda"
+    },
+    {
+      "id": 46464,
+      "post_type": "post",
+      "slug": "impuestos-a-pagar-por-obra-nueva",
+      "status": "publish",
+      "title": "Impuestos de obra nueva e IVA del autopromotor"
+    },
+    {
+      "id": 46458,
+      "post_type": "post",
+      "slug": "compra-vivienda-sin-entrada-menos-que-alquiler",
+      "status": "draft",
+      "title": "Caso real: comprar sin entrada en Córdoba"
+    },
+    {
+      "id": 46456,
+      "post_type": "post",
+      "slug": "hipoteca-funcionarios-100-financiacion",
+      "status": "publish",
+      "title": "Funcionarios en Córdoba y financiación hasta el 100%"
+    },
+    {
+      "id": 1350,
+      "post_type": "post",
+      "slug": "hipoteca-vivienda-rustica-cordoba",
+      "status": "publish",
+      "title": "Cómo comprar una vivienda rústica con hipoteca en Córdoba"
+    },
+    {
+      "id": 1341,
+      "post_type": "post",
+      "slug": "seguros-obligatorios-hipoteca",
+      "status": "publish",
+      "title": "Seguros obligatorios en una hipoteca y cuáles puedes rechazar"
+    },
+    {
+      "id": 1337,
+      "post_type": "post",
+      "slug": "invertir-en-vivienda-siendo-joven",
+      "status": "publish",
+      "title": "Invertir en vivienda siendo joven"
+    },
+    {
+      "id": 1250,
+      "post_type": "post",
+      "slug": "intereses-moratorios-2025-reclamar-calculo-legalidad",
+      "status": "draft",
+      "title": "Intereses moratorios en 2025 y cuándo reclamarlos"
+    },
+    {
+      "id": 1242,
+      "post_type": "post",
+      "slug": "comprar-vivienda-funcionarios-verano-cordoba",
+      "status": "draft",
+      "title": "El verano de 2025 puede ser clave para comprar vivienda"
+    },
+    {
+      "id": 1234,
+      "post_type": "post",
+      "slug": "nueva-ley-okupas-y-vivienda-turistica-2025",
+      "status": "draft",
+      "title": "Nueva ley de okupas 2025"
+    },
+    {
+      "id": 1104,
+      "post_type": "post",
+      "slug": "aeropuerto-cordoba-conflicto-aena-ayuntamiento",
+      "status": "draft",
+      "title": "Aeropuerto de Córdoba, promesa rota y conflicto con AENA"
+    },
+    {
+      "id": 1098,
+      "post_type": "post",
+      "slug": "notario-espanol-vs-frances-ingles-compraventa",
+      "status": "publish",
+      "title": "Notario en una compraventa de vivienda: qué revisa y quién paga"
+    },
+    {
+      "id": 1088,
+      "post_type": "post",
+      "slug": "compra-vivienda-sin-entrada-menos-que-alquiler-2",
+      "status": "draft",
+      "title": "Caso real, compra una vivienda sin entrada y pagar menos que un alquiler"
+    },
+    {
+      "id": 1023,
+      "post_type": "post",
+      "slug": "prestamo-lombardo-para-inversion-inmobiliaria",
+      "status": "publish",
+      "title": "Por qué algunos inversores usan el préstamo lombardo"
+    },
+    {
+      "id": 764,
+      "post_type": "post",
+      "slug": "hipoteca-mixta-familia-opiniones",
+      "status": "publish",
+      "title": "Hipoteca mixta con hijos en Córdoba"
+    },
+    {
+      "id": 40826,
+      "post_type": "post",
+      "slug": "hipotecas-jovenes-sin-ahorros-2025",
+      "status": "publish",
+      "title": "Hipoteca joven con poco ahorro en 2026: avales y opciones en Andalucía"
+    },
+    {
+      "id": 52546,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-almeria",
+      "status": "publish",
+      "title": "Asesor hipotecario en Almería"
+    },
+    {
+      "id": 52547,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-cadiz",
+      "status": "publish",
+      "title": "Asesor hipotecario en Cádiz"
+    },
+    {
+      "id": 52548,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-huelva",
+      "status": "publish",
+      "title": "Asesor hipotecario en Huelva"
+    },
+    {
+      "id": 52376,
+      "post_type": "page",
+      "slug": "home-andalucia-v2-prod-candidate",
+      "status": "publish",
+      "title": "Fénix Capital · Home Andalucía V2 · PROD CANDIDATE"
+    },
+    {
+      "id": 52205,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-martos-legacy-draft-52205",
+      "status": "draft",
+      "title": "Asesor hipotecario en Martos | Fénix Capital"
+    },
+    {
+      "id": 52201,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-linares-legacy-draft-52201",
+      "status": "draft",
+      "title": "Asesor hipotecario en Linares | Fénix Capital"
+    },
+    {
+      "id": 52202,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-andujar-legacy-draft-52202",
+      "status": "draft",
+      "title": "Asesor hipotecario en Andújar | Fénix Capital"
+    },
+    {
+      "id": 52218,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-villacarrillo",
+      "status": "publish",
+      "title": "Asesor hipotecario en Villacarrillo"
+    },
+    {
+      "id": 52238,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-utrera",
+      "status": "publish",
+      "title": "Asesor hipotecario en Utrera"
+    },
+    {
+      "id": 52206,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-ubeda",
+      "status": "publish",
+      "title": "Asesor hipotecario en Úbeda"
+    },
+    {
+      "id": 52216,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-torredelcampo",
+      "status": "publish",
+      "title": "Asesor hipotecario en Torredelcampo"
+    },
+    {
+      "id": 52217,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-torredonjimeno",
+      "status": "publish",
+      "title": "Asesor hipotecario en Torredonjimeno"
+    },
+    {
+      "id": 52237,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-tomares",
+      "status": "publish",
+      "title": "Asesor hipotecario en Tomares"
+    },
+    {
+      "id": 52235,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-san-juan-de-aznalfarache",
+      "status": "publish",
+      "title": "Asesor hipotecario en San Juan de Aznalfarache"
+    },
+    {
+      "id": 52236,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-sevilla",
+      "status": "publish",
+      "title": "Asesor hipotecario en Sevilla"
+    },
+    {
+      "id": 52234,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-moron-de-la-frontera",
+      "status": "publish",
+      "title": "Asesor hipotecario en Morón de la Frontera"
+    },
+    {
+      "id": 52215,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-mengibar",
+      "status": "publish",
+      "title": "Asesor hipotecario en Mengíbar"
+    },
+    {
+      "id": 52198,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-martos",
+      "status": "publish",
+      "title": "Asesor hipotecario en Martos"
+    },
+    {
+      "id": 52233,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-marchena",
+      "status": "publish",
+      "title": "Asesor hipotecario en Marchena"
+    },
+    {
+      "id": 52214,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-mancha-real",
+      "status": "publish",
+      "title": "Asesor hipotecario en Mancha Real"
+    },
+    {
+      "id": 52318,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-malaga",
+      "status": "publish",
+      "title": "Asesor hipotecario en Málaga"
+    },
+    {
+      "id": 52232,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-mairena-del-aljarafe",
+      "status": "publish",
+      "title": "Asesor hipotecario en Mairena del Aljarafe"
+    },
+    {
+      "id": 52231,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-mairena-del-alcor",
+      "status": "publish",
+      "title": "Asesor hipotecario en Mairena del Alcor"
+    },
+    {
+      "id": 52230,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-los-palacios-y-villafranca",
+      "status": "publish",
+      "title": "Asesor hipotecario en Los Palacios y Villafranca"
+    },
+    {
+      "id": 52197,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-linares",
+      "status": "publish",
+      "title": "Asesor hipotecario en Linares"
+    },
+    {
+      "id": 52228,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-la-rinconada",
+      "status": "publish",
+      "title": "Asesor hipotecario en La Rinconada"
+    },
+    {
+      "id": 52229,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-lebrija",
+      "status": "publish",
+      "title": "Asesor hipotecario en Lebrija"
+    },
+    {
+      "id": 52213,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-la-carolina",
+      "status": "publish",
+      "title": "Asesor hipotecario en La Carolina"
+    },
+    {
+      "id": 52212,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-jodar",
+      "status": "publish",
+      "title": "Asesor hipotecario en Jódar"
+    },
+    {
+      "id": 52302,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-granada",
+      "status": "publish",
+      "title": "Asesor hipotecario en Granada"
+    },
+    {
+      "id": 52227,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-el-viso-del-alcor",
+      "status": "publish",
+      "title": "Asesor hipotecario en El Viso del Alcor"
+    },
+    {
+      "id": 52226,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-ecija",
+      "status": "publish",
+      "title": "Asesor hipotecario en Écija"
+    },
+    {
+      "id": 52224,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-coria-del-rio",
+      "status": "publish",
+      "title": "Asesor hipotecario en Coria del Río"
+    },
+    {
+      "id": 52225,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-dos-hermanas",
+      "status": "publish",
+      "title": "Asesor hipotecario en Dos Hermanas"
+    },
+    {
+      "id": 52211,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-cazorla",
+      "status": "publish",
+      "title": "Asesor hipotecario en Cazorla"
+    },
+    {
+      "id": 52222,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-camas",
+      "status": "publish",
+      "title": "Asesor hipotecario en Camas"
+    },
+    {
+      "id": 52221,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-bormujos",
+      "status": "publish",
+      "title": "Asesor hipotecario en Bormujos"
+    },
+    {
+      "id": 52210,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-bailen",
+      "status": "publish",
+      "title": "Asesor hipotecario en Bailén"
+    },
+    {
+      "id": 52220,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-arahal",
+      "status": "publish",
+      "title": "Asesor hipotecario en Arahal"
+    },
+    {
+      "id": 52195,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-andujar",
+      "status": "publish",
+      "title": "Asesor hipotecario en Andújar"
+    },
+    {
+      "id": 52208,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-alcaudete",
+      "status": "publish",
+      "title": "Asesor hipotecario en Alcaudete"
+    },
+    {
+      "id": 52207,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-alcala-la-real",
+      "status": "publish",
+      "title": "Asesor hipotecario en Alcalá la Real"
+    },
+    {
+      "id": 52219,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-alcala-de-guadaira",
+      "status": "publish",
+      "title": "Asesor hipotecario en Alcalá de Guadaíra"
+    },
+    {
+      "id": 52223,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-carmona",
+      "status": "publish",
+      "title": "Asesor hipotecario en Carmona"
+    },
+    {
+      "id": 52209,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-baeza",
+      "status": "publish",
+      "title": "Asesor hipotecario en Baeza"
+    },
+    {
+      "id": 52199,
+      "post_type": "page",
+      "slug": "cerebro-archive-jaen-52199",
+      "status": "draft",
+      "title": "Asesor hipotecario en Jaén | Fénix Capital"
+    },
+    {
+      "id": 52196,
+      "post_type": "page",
+      "slug": "cerebro-archive-jaen-52196",
+      "status": "draft",
+      "title": "Asesor hipotecario en Jaén | Fénix Capital"
+    },
+    {
+      "id": 52200,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-jaen",
+      "status": "publish",
+      "title": "Asesor hipotecario en Jaén"
+    },
+    {
+      "id": 51942,
+      "post_type": "page",
+      "slug": "",
+      "status": "draft",
+      "title": "QA Biblioteca Elementor Premium v1"
+    },
+    {
+      "id": 51908,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-lopera",
+      "status": "publish",
+      "title": "Asesor hipotecario en Lopera para preparar bien tu financiación"
+    },
+    {
+      "id": 51901,
+      "post_type": "page",
+      "slug": "",
+      "status": "draft",
+      "title": ""
+    },
+    {
+      "id": 51900,
+      "post_type": "page",
+      "slug": "",
+      "status": "draft",
+      "title": ""
+    },
+    {
+      "id": 51899,
+      "post_type": "page",
+      "slug": "",
+      "status": "draft",
+      "title": ""
+    },
+    {
+      "id": 51099,
+      "post_type": "page",
+      "slug": "calculadora-hipotecaria-nueva-respaldo",
+      "status": "draft",
+      "title": "Calculadora de hipoteca online"
+    },
+    {
+      "id": 50593,
+      "post_type": "page",
+      "slug": "",
+      "status": "draft",
+      "title": "ROLLBACK · Precio máximo · PROD · 19-08-2026 14:30"
+    },
+    {
+      "id": 49063,
+      "post_type": "page",
+      "slug": "evitar-operaciones-caidas",
+      "status": "publish",
+      "title": "Evitar operaciones caídas por financiación"
+    },
+    {
+      "id": 49064,
+      "post_type": "page",
+      "slug": "formacion-inmobiliarias",
+      "status": "publish",
+      "title": "Formación hipotecaria para inmobiliarias"
+    },
+    {
+      "id": 49059,
+      "post_type": "page",
+      "slug": "preok-hipotecario",
+      "status": "publish",
+      "title": "Pre-OK hipotecario para inmobiliarias"
+    },
+    {
+      "id": 49186,
+      "post_type": "page",
+      "slug": "hipoteca-trabajadores-agrarios",
+      "status": "publish",
+      "title": "Hipoteca para trabajadores agrarios y de campaña, cómo demostrar estabilidad cuando tus ingresos cambian durante el año"
+    },
+    {
+      "id": 49185,
+      "post_type": "page",
+      "slug": "hipoteca-doctorandos-investigadores",
+      "status": "publish",
+      "title": "Hipoteca para doctorandos e investigadores, cómo demostrar continuidad cuando tu contrato tiene fecha"
+    },
+    {
+      "id": 49183,
+      "post_type": "page",
+      "slug": "hipoteca-vpo",
+      "status": "publish",
+      "title": "Hipoteca VPO, primero confirma qué régimen tiene la vivienda y qué límites afectan a la compra"
+    },
+    {
+      "id": 49184,
+      "post_type": "page",
+      "slug": "hipoteca-docentes",
+      "status": "publish",
+      "title": "Hipoteca para docentes, qué cambia si eres fijo, interino o temporal"
+    },
+    {
+      "id": 49182,
+      "post_type": "page",
+      "slug": "comprar-vivienda-con-inquilino",
+      "status": "publish",
+      "title": "Comprar una vivienda con inquilino, la hipoteca y el contrato deben entenderse antes de firmar"
+    },
+    {
+      "id": 49181,
+      "post_type": "page",
+      "slug": "suelo-rustico",
+      "status": "publish",
+      "title": "Hipoteca para suelo rústico, primero hay que saber qué estás comprando y qué puede aceptar el banco"
+    },
+    {
+      "id": 49179,
+      "post_type": "page",
+      "slug": "hipoteca-pension-incapacidad",
+      "status": "publish",
+      "title": "Hipoteca con pensión de incapacidad permanente, el análisis debe centrarse en el ingreso, no en detalles médicos innecesarios"
+    },
+    {
+      "id": 49180,
+      "post_type": "page",
+      "slug": "segunda-vivienda",
+      "status": "publish",
+      "title": "Hipoteca para segunda vivienda, compra sin convertir una segunda casa en una primera preocupación"
+    },
+    {
+      "id": 49178,
+      "post_type": "page",
+      "slug": "pension-alimenticia-hipoteca",
+      "status": "publish",
+      "title": "Pensión alimenticia e hipoteca, el ingreso debe ser regular, documentado y prudente"
+    },
+    {
+      "id": 49176,
+      "post_type": "page",
+      "slug": "invertir-en-vivienda",
+      "status": "publish",
+      "title": "Invertir en vivienda con hipoteca, la operación debe aguantar incluso cuando el alquiler no sale perfecto"
+    },
+    {
+      "id": 49177,
+      "post_type": "page",
+      "slug": "hipoteca-jornada-parcial",
+      "status": "publish",
+      "title": "Hipoteca con jornada parcial, calcula la compra con el ingreso que puedes demostrar hoy"
+    },
+    {
+      "id": 49175,
+      "post_type": "page",
+      "slug": "ingresos-alquiler-hipoteca",
+      "status": "publish",
+      "title": "Ingresos por alquiler y nueva hipoteca, no cuentes como seguro todo lo que cobras"
+    },
+    {
+      "id": 49173,
+      "post_type": "page",
+      "slug": "dos-titulares-un-ingreso",
+      "status": "publish",
+      "title": "Dos titulares y un solo ingreso, cómo preparar una hipoteca sin hacer cuentas falsas"
+    },
+    {
+      "id": 49174,
+      "post_type": "page",
+      "slug": "hipoteca-enfermeria",
+      "status": "publish",
+      "title": "Hipoteca para enfermería, ordena contratos, turnos y complementos antes de pedir financiación"
+    },
+    {
+      "id": 49172,
+      "post_type": "page",
+      "slug": "cuerpos-seguridad",
+      "status": "publish",
+      "title": "Hipoteca para cuerpos de seguridad, prepara el expediente con tus ingresos reales"
+    },
+    {
+      "id": 49170,
+      "post_type": "page",
+      "slug": "tasacion-inferior-precio",
+      "status": "publish",
+      "title": "Si la tasación sale por debajo del precio, la diferencia puede cambiar toda la financiación"
+    },
+    {
+      "id": 49171,
+      "post_type": "page",
+      "slug": "vivienda-con-cargas",
+      "status": "publish",
+      "title": "Una vivienda con cargas no debe comprarse sin saber exactamente qué hay que cancelar, coordinar o documentar"
+    },
+    {
+      "id": 49169,
+      "post_type": "page",
+      "slug": "subrogacion-hipoteca",
+      "status": "publish",
+      "title": "Cambiar la hipoteca de banco debe mejorar el conjunto, no solo el tipo anunciado"
+    },
+    {
+      "id": 49166,
+      "post_type": "page",
+      "slug": "novacion-hipoteca",
+      "status": "publish",
+      "title": "Antes de cambiar de banco, comprueba si tu propia entidad puede mejorar la hipoteca"
+    },
+    {
+      "id": 49164,
+      "post_type": "page",
+      "slug": "mejorar-hipoteca",
+      "status": "publish",
+      "title": "Tu hipoteca actual puede revisarse desde cinco ángulos distintos"
+    },
+    {
+      "id": 49165,
+      "post_type": "page",
+      "slug": "hipoteca-mir",
+      "status": "publish",
+      "title": "Tu contrato MIR es temporal, pero tu expediente no debe analizarse como un contrato temporal cualquiera"
+    },
+    {
+      "id": 49163,
+      "post_type": "page",
+      "slug": "inmigrantes",
+      "status": "publish",
+      "title": "Si resides en España, tu hipoteca debe demostrar estabilidad, ahorro y documentación, no una etiqueta de nacionalidad"
+    },
+    {
+      "id": 49162,
+      "post_type": "page",
+      "slug": "hipoteca-ingresos-extranjero",
+      "status": "publish",
+      "title": "Cobrar desde otro país cambia la documentación y el análisis, no solo la nómina"
+    },
+    {
+      "id": 49160,
+      "post_type": "page",
+      "slug": "guia-hipoteca-100",
+      "status": "publish",
+      "title": "Antes de buscar una hipoteca al 100 %, entiende qué debe encajar en tu expediente"
+    },
+    {
+      "id": 49161,
+      "post_type": "page",
+      "slug": "hipoteca-denegada",
+      "status": "publish",
+      "title": "Si te han denegado la hipoteca, no repitas la misma solicitud sin saber qué falló"
+    },
+    {
+      "id": 49159,
+      "post_type": "page",
+      "slug": "deudas-antes-de-pedir-hipoteca",
+      "status": "publish",
+      "title": "Antes de pedir hipoteca, suma todas tus cuotas, el banco también lo hará"
+    },
+    {
+      "id": 49157,
+      "post_type": "page",
+      "slug": "cambiar-hipoteca",
+      "status": "publish",
+      "title": "Cambiar de hipoteca solo tiene sentido si mejora el conjunto, no solo la cuota del primer mes"
+    },
+    {
+      "id": 49158,
+      "post_type": "page",
+      "slug": "comparador-hipoteca-fija-mixta-variable",
+      "status": "publish",
+      "title": "Compara fija, mixta y variable con el mismo importe, plazo y supuestos"
+    },
+    {
+      "id": 49155,
+      "post_type": "page",
+      "slug": "autonomos-societarios",
+      "status": "publish",
+      "title": "Si tus ingresos dependen de tu sociedad, la hipoteca debe explicar las dos partes"
+    },
+    {
+      "id": 49156,
+      "post_type": "page",
+      "slug": "aval-familiar-hipoteca",
+      "status": "publish",
+      "title": "Aval familiar para una hipoteca, qué arriesga el avalista y qué revisar antes de firmar"
+    },
+    {
+      "id": 49153,
+      "post_type": "page",
+      "slug": "precio-maximo",
+      "status": "publish",
+      "title": "Calcula qué vivienda puedes permitirte sin empezar la búsqueda a ciegas"
+    },
+    {
+      "id": 49154,
+      "post_type": "page",
+      "slug": "hipoteca-con-asnef",
+      "status": "publish",
+      "title": "Estar en ASNEF cambia el análisis hipotecario, primero hay que entender la incidencia"
+    },
+    {
+      "id": 49152,
+      "post_type": "page",
+      "slug": "pre-ok-hipotecario",
+      "status": "publish",
+      "title": "Consigue una respuesta hipotecaria inicial antes de comprometer tu compra"
+    },
+    {
+      "id": 49151,
+      "post_type": "page",
+      "slug": "gastos-compra",
+      "status": "publish",
+      "title": "Calcula cuánto dinero necesitas también del precio de la vivienda"
+    },
+    {
+      "id": 49150,
+      "post_type": "page",
+      "slug": "hipoteca-autonomos",
+      "status": "publish",
+      "title": "Tu hipoteca como autónomo necesita explicar bien tu actividad, no solo enseñar una renta"
+    },
+    {
+      "id": 49148,
+      "post_type": "page",
+      "slug": "antes-de-reservar",
+      "status": "publish",
+      "title": "Antes de reservar una vivienda, comprueba que la operación puede llegar a notaría"
+    },
+    {
+      "id": 49149,
+      "post_type": "page",
+      "slug": "autodiagnostico-hipoteca",
+      "status": "publish",
+      "title": "Comprueba cómo llega tu operación a un estudio hipotecario"
+    },
+    {
+      "id": 49147,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-villanueva-de-cordoba",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Villanueva de Córdoba"
+    },
+    {
+      "id": 49146,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-villafranca-de-cordoba",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Villafranca de Córdoba"
+    },
+    {
+      "id": 49144,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-montoro",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Montoro"
+    },
+    {
+      "id": 49145,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-rute",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Rute"
+    },
+    {
+      "id": 49143,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-montalban-de-cordoba",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Montalbán de Córdoba"
+    },
+    {
+      "id": 49142,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-la-carlota",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en La Carlota"
+    },
+    {
+      "id": 49141,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-hinojosa-del-duque",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Hinojosa del Duque"
+    },
+    {
+      "id": 49140,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-fuente-palmera",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Fuente Palmera"
+    },
+    {
+      "id": 49139,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-fernan-nunez",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Fernán Núñez"
+    },
+    {
+      "id": 49137,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-castro-del-rio",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Castro del Río"
+    },
+    {
+      "id": 49138,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-el-carpio",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en El Carpio"
+    },
+    {
+      "id": 49136,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-bujalance",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Bujalance"
+    },
+    {
+      "id": 49134,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-aguilar-de-la-frontera",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Aguilar de la Frontera"
+    },
+    {
+      "id": 49135,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-benameji",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Benamejí"
+    },
+    {
+      "id": 49133,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-puente-genil",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Puente Genil"
+    },
+    {
+      "id": 49132,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-priego-de-cordoba",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Priego de Córdoba"
+    },
+    {
+      "id": 49130,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-penarroya-pueblonuevo",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Peñarroya Pueblonuevo"
+    },
+    {
+      "id": 49131,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-pozoblanco",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Pozoblanco"
+    },
+    {
+      "id": 49129,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-palma-del-rio",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Palma del Río"
+    },
+    {
+      "id": 49128,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-montilla",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Montilla"
+    },
+    {
+      "id": 49126,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-cordoba",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Córdoba"
+    },
+    {
+      "id": 49127,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-lucena",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Lucena"
+    },
+    {
+      "id": 49125,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-cabra",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Cabra"
+    },
+    {
+      "id": 49124,
+      "post_type": "page",
+      "slug": "financiacion-compradores-inmobiliarias-baena",
+      "status": "publish",
+      "title": "Financiación para los compradores de tu inmobiliaria en Baena"
+    },
+    {
+      "id": 49122,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-villafranca-de-cordoba",
+      "status": "publish",
+      "title": "Asesor hipotecario en Villafranca de Córdoba para preparar tu operación antes de reservar"
+    },
+    {
+      "id": 49123,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-villanueva-de-cordoba",
+      "status": "publish",
+      "title": "Asesor hipotecario en Villanueva de Córdoba para comprar desde fuera sin perder el control"
+    },
+    {
+      "id": 49121,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-rute",
+      "status": "publish",
+      "title": "Asesor hipotecario en Rute para coordinar la compra cuando tu ahorro aún no está disponible"
+    },
+    {
+      "id": 48903,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-puente-genil",
+      "status": "publish",
+      "title": "Asesor hipotecario en Puente Genil para preparar la financiación antes de firmar arras"
+    },
+    {
+      "id": 49119,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-priego-de-cordoba",
+      "status": "publish",
+      "title": "Asesor hipotecario en Priego de Córdoba para llegar a tiempo a la compra"
+    },
+    {
+      "id": 49117,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-penarroya-pueblonuevo",
+      "status": "publish",
+      "title": "Asesor hipotecario en Peñarroya Pueblonuevo para comprobar si una compra de importe reducido encaja de verdad"
+    },
+    {
+      "id": 49116,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-palma-del-rio",
+      "status": "publish",
+      "title": "Asesor hipotecario en Palma del Río para demostrar tu ahorro antes de pedir la hipoteca"
+    },
+    {
+      "id": 49115,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-montoro",
+      "status": "publish",
+      "title": "Asesor hipotecario en Montoro para comprobar la operación antes de firmar"
+    },
+    {
+      "id": 49113,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-montalban-de-cordoba",
+      "status": "publish",
+      "title": "Asesor hipotecario en Montalbán de Córdoba para conocer el coste real antes de comprar"
+    },
+    {
+      "id": 49114,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-montilla",
+      "status": "publish",
+      "title": "Asesor hipotecario en Montilla para empezar a buscar vivienda con números reales"
+    },
+    {
+      "id": 49112,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-la-carlota",
+      "status": "publish",
+      "title": "Asesor hipotecario en La Carlota para saber qué parte de tu compra puede financiar el banco"
+    },
+    {
+      "id": 49111,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-hinojosa-del-duque",
+      "status": "publish",
+      "title": "Asesor hipotecario en Hinojosa del Duque para defender tu compra antes de comprometerte"
+    },
+    {
+      "id": 49109,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-fernan-nunez",
+      "status": "publish",
+      "title": "Asesor hipotecario en Fernán Núñez para saber si puedes avanzar con seguridad"
+    },
+    {
+      "id": 49110,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-fuente-palmera",
+      "status": "publish",
+      "title": "Asesor hipotecario en Fuente Palmera para calcular la compra completa antes de avanzar"
+    },
+    {
+      "id": 49108,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-el-carpio",
+      "status": "publish",
+      "title": "Asesor hipotecario en El Carpio para revisar tu compra antes de comprometerte"
+    },
+    {
+      "id": 49107,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-cordoba",
+      "status": "publish",
+      "title": "Asesor hipotecario en Córdoba"
+    },
+    {
+      "id": 49106,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-castro-del-rio",
+      "status": "publish",
+      "title": "Asesor hipotecario en Castro del Río para revisar la compra antes de entregar señal"
+    },
+    {
+      "id": 49105,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-cabra",
+      "status": "publish",
+      "title": "Asesor hipotecario en Cabra para revisar tu compra antes de comprometer dinero"
+    },
+    {
+      "id": 49104,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-bujalance",
+      "status": "publish",
+      "title": "Asesor hipotecario en Bujalance para ordenar tu expediente antes de comprar"
+    },
+    {
+      "id": 49102,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-baena",
+      "status": "publish",
+      "title": "Asesor hipotecario en Baena para revisar una hipoteca bloqueada y volver a mover la compra"
+    },
+    {
+      "id": 49103,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-benameji",
+      "status": "publish",
+      "title": "Asesor hipotecario en Benamejí para comprobar tu hipoteca antes de reservar"
+    },
+    {
+      "id": 49101,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-aguilar-de-la-frontera",
+      "status": "publish",
+      "title": "Asesor hipotecario en Aguilar de la Frontera para presentar bien tus ingresos variables"
+    },
+    {
+      "id": 47174,
+      "post_type": "page",
+      "slug": "reunificar-deudas",
+      "status": "publish",
+      "title": "Reunificar deudas no consiste solo en pagar una cuota, hay que medir qué ocurre con el coste total"
+    },
+    {
+      "id": 49167,
+      "post_type": "page",
+      "slug": "refinanciacion-de-deudas",
+      "status": "publish",
+      "title": "Refinanciar puede bajar la presión mensual, pero hay que medir cuánto cuesta hacerlo"
+    },
+    {
+      "id": 48901,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-lucena",
+      "status": "publish",
+      "title": "Asesor hipotecario en Lucena"
+    },
+    {
+      "id": 48905,
+      "post_type": "page",
+      "slug": "asesor-hipotecario-pozoblanco",
+      "status": "publish",
+      "title": "Asesor hipotecario en Pozoblanco para revisar comprador y vivienda antes de avanzar"
+    },
+    {
+      "id": 48834,
+      "post_type": "page",
+      "slug": "calculadora-preanalisis-hipotecario",
+      "status": "publish",
+      "title": "Calculadora de preanálisis hipotecario para inmobiliarias"
+    },
+    {
+      "id": 48741,
+      "post_type": "page",
+      "slug": "hipoteca-cambio-de-casa",
+      "status": "publish",
+      "title": "Hipoteca cambio de casa en Córdoba"
+    },
+    {
+      "id": 48724,
+      "post_type": "page",
+      "slug": "hipoteca-con-reforma",
+      "status": "publish",
+      "title": "Compra y reforma"
+    },
+    {
+      "id": 48674,
+      "post_type": "page",
+      "slug": "hipoteca-80",
+      "status": "publish",
+      "title": "Hipoteca 80"
+    },
+    {
+      "id": 48646,
+      "post_type": "page",
+      "slug": "hipoteca-95",
+      "status": "publish",
+      "title": "Hipoteca 95"
+    },
+    {
+      "id": 48623,
+      "post_type": "page",
+      "slug": "hipoteca-90",
+      "status": "publish",
+      "title": "Hipoteca 90 para comprar vivienda"
+    },
+    {
+      "id": 48577,
+      "post_type": "page",
+      "slug": "hipoteca-autopromotor",
+      "status": "publish",
+      "title": "Hipoteca autopromotor en Córdoba"
+    },
+    {
+      "id": 48559,
+      "post_type": "page",
+      "slug": "hipoteca-variable",
+      "status": "publish",
+      "title": "Hipoteca variable en Córdoba"
+    },
+    {
+      "id": 48541,
+      "post_type": "page",
+      "slug": "hipoteca-mixta",
+      "status": "publish",
+      "title": "Hipoteca mixta en Córdoba"
+    },
+    {
+      "id": 48511,
+      "post_type": "page",
+      "slug": "hipoteca-fija",
+      "status": "publish",
+      "title": "Hipoteca fija en Córdoba"
+    },
+    {
+      "id": 48467,
+      "post_type": "page",
+      "slug": "documentacion-para-pedir-una-hipoteca",
+      "status": "publish",
+      "title": "Documentación para pedir una hipoteca"
+    },
+    {
+      "id": 48431,
+      "post_type": "page",
+      "slug": "requisitos-para-pedir-hipoteca",
+      "status": "publish",
+      "title": "Requisitos para pedir una hipoteca"
+    },
+    {
+      "id": 47579,
+      "post_type": "page",
+      "slug": "politica-de-cookies-ue",
+      "status": "publish",
+      "title": "Política de cookies (UE)"
+    },
+    {
+      "id": 47569,
+      "post_type": "page",
+      "slug": "declaracion-de-privacidad",
+      "status": "publish",
+      "title": "Declaración de privacidad"
+    },
+    {
+      "id": 47554,
+      "post_type": "page",
+      "slug": "aviso-legal",
+      "status": "publish",
+      "title": "Aviso Legal de Fénix Capital"
+    },
+    {
+      "id": 47203,
+      "post_type": "page",
+      "slug": "bloques-personales",
+      "status": "draft",
+      "title": "bloques personales"
+    },
+    {
+      "id": 47179,
+      "post_type": "page",
+      "slug": "familias-monoparentales",
+      "status": "publish",
+      "title": "Hipoteca 100% para familias monoparentales"
+    },
+    {
+      "id": 47148,
+      "post_type": "page",
+      "slug": "divorciados",
+      "status": "publish",
+      "title": "Hipoteca 100 después de un divorcio en Andalucía"
+    },
+    {
+      "id": 47120,
+      "post_type": "page",
+      "slug": "parejas",
+      "status": "publish",
+      "title": "Hipoteca 100 para parejas en Andalucía"
+    },
+    {
+      "id": 47095,
+      "post_type": "page",
+      "slug": "poco-ahorro",
+      "status": "publish",
+      "title": "Hipoteca 100 con poco ahorro en Andalucía"
+    },
+    {
+      "id": 47042,
+      "post_type": "page",
+      "slug": "hipoteca-100",
+      "status": "publish",
+      "title": "100% para comprar vivienda"
+    },
+    {
+      "id": 47003,
+      "post_type": "page",
+      "slug": "hipotecas",
+      "status": "publish",
+      "title": "Tipos de hipoteca y financiación"
+    },
+    {
+      "id": 46037,
+      "post_type": "page",
+      "slug": "contacto",
+      "status": "publish",
+      "title": "Contacto"
+    },
+    {
+      "id": 46036,
+      "post_type": "page",
+      "slug": "calculadora-hipotecaria",
+      "status": "publish",
+      "title": "Calculadora de hipoteca online"
+    },
+    {
+      "id": 46035,
+      "post_type": "page",
+      "slug": "obras-nuevas",
+      "status": "publish",
+      "title": "Gestión de obras nuevas"
+    },
+    {
+      "id": 46029,
+      "post_type": "page",
+      "slug": "inmobiliarias",
+      "status": "publish",
+      "title": "Inmobiliarias"
+    },
+    {
+      "id": 46028,
+      "post_type": "page",
+      "slug": "funcionarios",
+      "status": "publish",
+      "title": "Funcionarios"
+    },
+    {
+      "id": 46027,
+      "post_type": "page",
+      "slug": "mayores-de-35-sin-hijos",
+      "status": "publish",
+      "title": "Hipoteca para mayores de 35 sin hijos en Andalucía"
+    },
+    {
+      "id": 46026,
+      "post_type": "page",
+      "slug": "familias",
+      "status": "publish",
+      "title": "Hipotecas para familias en Andalucía"
+    },
+    {
+      "id": 46025,
+      "post_type": "page",
+      "slug": "hipoteca-joven",
+      "status": "publish",
+      "title": "Menores de 35"
+    },
+    {
+      "id": 40901,
+      "post_type": "page",
+      "slug": "reembolso_devoluciones",
+      "status": "draft",
+      "title": "Política de devoluciones y reembolsos"
+    },
+    {
+      "id": 40858,
+      "post_type": "page",
+      "slug": "blog",
+      "status": "publish",
+      "title": "Blog"
+    },
+    {
+      "id": 25,
+      "post_type": "page",
+      "slug": "quienes-somos",
+      "status": "publish",
+      "title": "Quiénes somos"
+    },
+    {
+      "id": 22,
+      "post_type": "page",
+      "slug": "inicio",
+      "status": "publish",
+      "title": "Inicio"
+    },
+    {
+      "id": 3,
+      "post_type": "page",
+      "slug": "politica-de-privacidad",
+      "status": "draft",
+      "title": "Política de privacidad"
+    }
+  ]
+}

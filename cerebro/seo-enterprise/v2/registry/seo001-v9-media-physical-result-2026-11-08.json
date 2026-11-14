@@ -1,0 +1,84 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "9.0.0",
+  "batch_id": "SEO001-V9-LIVE-MEDIA-READONLY-20261108",
+  "status": "PHYSICAL_IMAGES_DISTINCT_RELEASE_HOLD",
+  "source": {
+    "manifest": "cerebro/seo-enterprise/v2/registry/seo001-v9-media-live-gate-2026-11-08.json",
+    "run_id": 42455494395,
+    "job_id": 128653490540,
+    "artifact_id": 13607039593,
+    "conclusion": "success"
+  },
+  "images": [
+    {
+      "post_id": 52713,
+      "media_id": 52718,
+      "sha256": "a5cc42939469c07caba061b46d34170a525a9b1324021e21171785f15a584716",
+      "dhash64": "d44c4d49c99d1485",
+      "bytes": 267862,
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "post_id": 52714,
+      "media_id": 52719,
+      "sha256": "8dcbcfbabc06c58ce44bced09863ef86694d1daabdf1a40d0a628aa2f4fdd64c",
+      "dhash64": "e6e6e72777777eee",
+      "bytes": 275204,
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "post_id": 52715,
+      "media_id": 52720,
+      "sha256": "6764114aeaf98c85a984112b210e1d096f55eeda41272f91b6bd33aa5cb6344f",
+      "dhash64": "242525263747c1c3",
+      "bytes": 216034,
+      "width": 1536,
+      "height": 1024
+    },
+    {
+      "post_id": 52716,
+      "media_id": 52721,
+      "sha256": "33ae5c24d1118a6938feed5b8a45248345c1d0efb42e8310f1f010c130552d8f",
+      "dhash64": "5b573531635f3f5f",
+      "bytes": 256800,
+      "width": 1536,
+      "height": 1024
+    }
+  ],
+  "hamming_distances": [
+    36,
+    37,
+    33,
+    25,
+    27,
+    32
+  ],
+  "possible_near_duplicate_pairs": 0,
+  "sources_limit": "Only four public media JPEGs were physically fetched; live WordPress draft states were checked separately by connected WordPress read-only tools, not by the GitHub workflow",
+  "unverified": {
+    "independent_provider_origin_receipt": false,
+    "commercial_usage_rights": false,
+    "independent_visual_quality": false,
+    "live_wordpress_mobile_qa": false,
+    "positive_b2b_form_crm_e2e": false,
+    "independent_legal_ymyl_signoff": false,
+    "production_restore_and_rollback": false,
+    "owner_exact_digest_approval": false
+  },
+  "safety": {
+    "model_calls": 0,
+    "image_generation_calls": 0,
+    "wordpress_writes": 0,
+    "crm_writes": 0,
+    "published": 0,
+    "autopublish_allowed": false,
+    "release_authorized": false
+  },
+  "cost_note": "No new model/image provider requests or subscriptions. GitHub runner minutes consumed; invoice amount not audited."
+}

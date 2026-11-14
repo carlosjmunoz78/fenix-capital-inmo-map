@@ -1,0 +1,276 @@
+{
+  "schema_version": "1.0.0",
+  "plan_id": "FENIX_SEO_MARKETING_DIRECTION_PROPOSAL_20261105",
+  "company_id": "fenix",
+  "engine_id": "MKT-001",
+  "environment": "PROPOSAL",
+  "version": "1.0.0",
+  "approval_state": "PENDING_OWNER_STRATEGIC_APPROVAL",
+  "strategy_has_not_been_approved_by_owner": true,
+  "publication_or_spend_permission_granted": false,
+  "premise": "SEO full team not just blog drafts; integrated acquisition for Fenix mortgage and real estate in Cordoba, then Jaen/Sevilla; keep existing URLs and city-specific funnels",
+  "objectives": [
+    "MORE_QUALIFIED_ORGANIC_LEADS",
+    "BETTER_CONVERSION_ON_EXISTING_CONTENT",
+    "VERIFIABLE_VISIBILITY_AND_ATTRIBUTION",
+    "REUSABLE_CITY_COMPLETE_MODEL",
+    "REPUTATION_AND_TRUST_WITHOUT_FAKE_FINANCIAL_CLAIMS"
+  ],
+  "markets": {
+    "priority": [
+      "CÓRDOBA_CITY_AND_PROVINCE",
+      "JAÉN_CITY_AND_PROVINCE_AFTER_CERTIFICATION",
+      "SEVILLA_CITY_AND_PROVINCE_AFTER_PILOT"
+    ],
+    "localities": "PHASED_ONE_AT_A_TIME_TO_HARMONIZE_TOWN_STYLE",
+    "rollouts_on_hold": "NO_MASS_CITY_ACTIVATION_BEFORE_JAEN_AND_LINARES_GATES"
+  },
+  "segments": [
+    {
+      "id": "PARTICULAR_COMPRADOR",
+      "intent": "FINANCIACION_COMPRA",
+      "assets": [
+        "LOCAL_SERVICE_LANDING",
+        "CHECKLIST_DOWNLOAD",
+        "PRESTUDY_FORM",
+        "BLOG_FAQ",
+        "CALL_WHATSAPP_CTA"
+      ]
+    },
+    {
+      "id": "PARTICULAR_PROPIETARIO",
+      "intent": "SELL_OR_VALUATION",
+      "assets": [
+        "SELLER_LANDING",
+        "VALUATION_AND_NEXT_STEPS",
+        "QUALIFIED_CONTACT_FORM",
+        "CONTENT_AND_LOCAL_TRUST"
+      ]
+    },
+    {
+      "id": "INMOBILIARIA_ASOCIADA",
+      "intent": "BROKER_MORTGAGE_PARTNERS",
+      "assets": [
+        "B2B_LANDING",
+        "PARTNER_INTAKE_FORM",
+        "AGENCY_NEWSLETTER",
+        "PROFESSIONAL_INFORMATION"
+      ]
+    },
+    {
+      "id": "FINANCIACION_ESPECIAL",
+      "intent": "COMPLEX_MORTGAGE_CASE",
+      "assets": [
+        "CONDITIONAL_FAQ",
+        "DOCUMENTATION_GUIDE",
+        "CLAIMS_FACTCHECK",
+        "HUMAN_LEGAL_OR_MONEY_EXCEPTION"
+      ]
+    }
+  ],
+  "channels": [
+    {
+      "id": "SEO_TECH_AND_INTERNAL",
+      "owned_by": [
+        "SEO-D09",
+        "SEO-D11",
+        "SEO-D31"
+      ],
+      "goal": "MAINTAIN_DISCOVERY_AND_CANONICALS"
+    },
+    {
+      "id": "SEO_EDITORIAL_CONTENT",
+      "owned_by": [
+        "SEO-D05",
+        "SEO-D08",
+        "SEO-D13",
+        "SEO-D16"
+      ],
+      "goal": "ORIGINAL_CONTENT_AND_CLUSTERS"
+    },
+    {
+      "id": "LOCAL_GBP_AUTHORITY",
+      "owned_by": [
+        "SEO-D17",
+        "SEO-D18",
+        "SEO-D19",
+        "SEO-D20"
+      ],
+      "goal": "LOCAL_TRUST"
+    },
+    {
+      "id": "CRO_CAPTURE",
+      "owned_by": [
+        "SEO-D14",
+        "SEO-D21",
+        "SEO-D24",
+        "SEO-D30"
+      ],
+      "goal": "QUALIFIED_LEADS_NOT_CLICKS_ONLY"
+    },
+    {
+      "id": "SEARCH_SOCIAL_CONTENT",
+      "owned_by": [
+        "SEO-D26",
+        "SEO-D28"
+      ],
+      "goal": "REPURPOSE_APPROVED_CONTENT_WITHOUT_AUTOPUBLISH"
+    },
+    {
+      "id": "MEASUREMENT_TRAINING",
+      "owned_by": [
+        "SEO-D29",
+        "SEO-D30",
+        "SEO-D31",
+        "SEO-D32"
+      ],
+      "goal": "PROVEN_KPI_AND_ITERATIVE_IMPROVEMENT"
+    }
+  ],
+  "cadence": {
+    "cycle": "WEEKLY_AFTER_OWNER_STRATEGY_APPROVAL",
+    "planning": "MONDAY_DIRECTOR_PRIORITY_AND_BACKLOG",
+    "execution": "TUESDAY_THROUGH_THURSDAY_DEPENDENCY_DRIVEN",
+    "review": "FRIDAY_OLD_NEW_KPIS_QA_LEARN_AND_ADJUST",
+    "publishing": "TEMPORARY_DRAFT_REVIEW_THEN_CERTIFIED_SCOPED_AUTONOMY"
+  },
+  "content_funnel_requirements": [
+    "DIFFERENT_FORMS_BY_BUYER_PERSONA",
+    "LEAD_MAGNET_TO_OPT_IN",
+    "TWO_SEGMENTED_WEEKLY_NEWSLETTERS_FOR_PRIVATE_AND_AGENCIES",
+    "CTA_WHATSAPP_CALL_AND_FORM",
+    "CONSENT_VALIDATION_AND_WELCOME_SEQUENCES",
+    "CITY_COMPLETE_LINKS_AND_CANONICALS",
+    "CLAIMS_LEGAL_AND_FINANCIAL_REVIEW_WHEN_REQUIRED",
+    "NO_DUPLICATE_URLS_OR_CANIBALIZATION"
+  ],
+  "proposed_first_batch": [
+    {
+      "id": "P01",
+      "task": "VALIDATE_GOVERNANCE_AND_PROVISION_TRAINING_ROLES",
+      "owner": [
+        "SEO-D01",
+        "SEO-D31",
+        "SEO-D32"
+      ],
+      "write_in_prod": false
+    },
+    {
+      "id": "P02",
+      "task": "PRESENT_MARKETING_PLAN_AND_CONTENT_PRIORITIES_TO_OWNER",
+      "owner": [
+        "SEO-D01",
+        "SEO-D04",
+        "SEO-D13",
+        "SEO-D24"
+      ],
+      "write_in_prod": false
+    },
+    {
+      "id": "P03",
+      "task": "COMPLETE_JAEN_P0_FROM_EXISTING_EVIDENCE_WITH_OWNER_RELEASE_GATE",
+      "owner": [
+        "SEO-D09",
+        "SEO-D12",
+        "SEO-D20",
+        "SEO-D31"
+      ],
+      "write_in_prod": false
+    },
+    {
+      "id": "P04",
+      "task": "PILOT_ONE_TOWN_STYLE_NORMALIZATION_AFTER_OWNER_PRIORITY",
+      "owner": [
+        "SEO-D21",
+        "SEO-D22",
+        "SEO-D23",
+        "SEO-D31"
+      ],
+      "write_in_prod": false
+    },
+    {
+      "id": "P05",
+      "task": "PREPARE_2_LANDING_AND_2_BLOG_OUTLINES_PER_SEGMENT_AFTER_STRATEGY_APPROVAL",
+      "owner": [
+        "SEO-D05",
+        "SEO-D08",
+        "SEO-D13",
+        "SEO-D16"
+      ],
+      "write_in_prod": false
+    },
+    {
+      "id": "P06",
+      "task": "SET_FUNNEL_MEASUREMENT_AND_NEWSLETTER_READINESS_WITHOUT_CUSTOMER_PII",
+      "owner": [
+        "SEO-D24",
+        "SEO-D29",
+        "SEO-D30"
+      ],
+      "write_in_prod": false
+    }
+  ],
+  "kpis": {
+    "positions_and_clicks": "ONLY_WITH_VERIFIED_FREE_GSC_DATA",
+    "lead_quality": "AGGREGATE_MEASURED_NOT_PERSONAL_DATA",
+    "website_conversion": "TRACKED_WITH_VALID_CONSENT",
+    "cost_ceiling_eur": 0,
+    "training": "CERTIFIED_REAL_MISSIONS_NOT_SIMULATED_SUCCESS"
+  },
+  "executive_decisions_requested": [
+    "APPROVE_MARKETS_SEQUENCE",
+    "APPROVE_SEGMENTS_AND_FUNNEL_ARCHITECTURE",
+    "APPROVE_CONTENT_PRIORITY_AND_VISUAL_PILOT_SCOPE",
+    "APPROVE_WEEKLY_REVIEW_CADENCE"
+  ],
+  "explicitly_not_requested": [
+    "PAYMENTS",
+    "PUBLISH_NEW_URLS",
+    "CHANGE_EXISTING_PRODUCTION_PAGES",
+    "BULK_TOWN_REDESIGN",
+    "NEW_SUBSCRIPTIONS"
+  ],
+  "existing_assets_first": {
+    "source_registry": "cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json",
+    "historical_snapshot_repo": "carlosjmunoz78/fenix-capital-inmo-map",
+    "historical_snapshot_branch": "cerebro/seo001-staging-audit-v5-20261018",
+    "archive": "docs/web-baseline/2026-10-18-v4/CEREBRO_FENIX_STAGING_BASELINE_2026-10-18.zip",
+    "source_environment": "STAGING",
+    "historical_urls": 204,
+    "historical_images": 680,
+    "internal_links": 42073,
+    "actual_zip_ingested_in_planning_runtime": false,
+    "planning_action": "USE_PREEXISTING_URL_COPY_IMAGE_CTA_FUNNEL_LINK_MAP_BEFORE_NEW_ASSETS",
+    "content_creation_allowed_without_per_url_asset_evidence": false,
+    "source_must_be_compared_to_selected_url_in_prod_before_write": true,
+    "no_global_audit_requested": true,
+    "marketing_plan_preliminary_until_asset_reconciliation": true,
+    "town_color_redesign_one_at_a_time": true,
+    "verification": {
+      "status": "READ_AND_VALIDATED_IN_ISOLATED_GITHUB_ACTIONS_LAB",
+      "verified_commit": "33203008d99d6b7a3339dce8b3d44db5af40bf3f",
+      "run_id": 42087026853,
+      "workflow_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/42087026853",
+      "artifact_id": 13444185541,
+      "sha256_validated": true,
+      "url_rows": 204,
+      "copy_html_files": 204,
+      "copy_text_files": 204,
+      "copy_json_files": 204,
+      "images": 680,
+      "image_usage_rows": 1534,
+      "urls_with_image_usage": 204,
+      "customer_private_editor_source_coverage_unverified": true,
+      "original_archive_unchanged": true,
+      "historical_source_environment": "STAGING",
+      "current_prod_corpus_reconciled": false,
+      "wordPress_prod_writes": 0,
+      "job001_prod_mounted": false,
+      "cost_additional_eur": 0
+    },
+    "asset_preflight_required_for_every_new_marketing_plan": true,
+    "old_vs_new_for_targeted_url_before_edit": true,
+    "historical_zip_ref_is_pinned": true,
+    "live_website_reaudit_requested": false
+  }
+}

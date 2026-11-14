@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.0.0",
+  "training_id": "SEO001_D32_OWNER_PROOFED_VISUAL_PERSONA_BATCH2_20261107",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "v1",
+  "source": "OWNER_REAL_WORDPRESS_PREVIEW_FEEDBACK_2026-11-07",
+  "status": "TRAINING_EXAMPLE_AND_GATE_CONTRACT_ONLY_NOT_ROLLED_OUT_TO_PROD_AGENTS",
+  "target_roles": [
+    "SEO-D03_BUYER_PERSONA",
+    "SEO-D05_SEARCH_INTENT",
+    "SEO-D13_COPY",
+    "SEO-D14_CONVERSION",
+    "SEO-D15_EDITORIAL_INSPECTOR",
+    "SEO-D26_VISUAL",
+    "SEO-D31_INDEPENDENT_QA",
+    "SEO-D32_LEARNING",
+    "SEO_JUDGE_A"
+  ],
+  "owner_lesson": [
+    {
+      "id": "H1_VISITOR_FIRST",
+      "rejected": "Protocolo de derivación hipotecaria para inmobiliarias de Córdoba",
+      "accepted": "¿Tu comprador necesita hipoteca? Así coordinas la operación con claridad",
+      "rule": "Visible page titles must speak to the actual persona and its concrete need. SEO title/slug/OG can differ. Do not write taxonomy-like headings for robots.",
+      "check": "HUMAN_READABILITY_INDEPENDENT_REVIEW"
+    },
+    {
+      "id": "THEME_VS_CONTENT_HEADLINE",
+      "rejected": "Theme post hero renders title AND body inserts another h1",
+      "accepted": "Theme H1 only for single post; interior editorial lead uses H2",
+      "rule": "Count H1 in actual authenticated rendered DOM, not only in post_content. Never touch global template to fix one draft.",
+      "check": "RENDERED_SINGLE_H1"
+    },
+    {
+      "id": "NEVER_CALL_DEMO_PREVIEW_GREEN",
+      "rejected": "Single Services / Lorem ipsum despite saved content",
+      "accepted": "Elementor Full Width actually saved on specific draft and exact-content preview visually verified",
+      "rule": "CMS metadata write acknowledgement is not a saved template receipt; check meta and preview actual rendered content.",
+      "check": "REAL_TEMPLATE_RENDER_AND_NO_DEMO"
+    },
+    {
+      "id": "PHOTO_PREMIUM",
+      "rejected": "Simplistic diagram or washed-out repeated overlaid banner",
+      "accepted": "Premium original realistic, distinct image per URL, proper focal composition, alt/title/caption/description, rights receipt",
+      "rule": "Do not approve synthetic diagrams as premium photos; reject duplicated, oversaturated or washed-out headers; inspect real desktop and mobile pixels.",
+      "check": "INDEPENDENT_PIXEL_QA"
+    },
+    {
+      "id": "PRODUCER_ONLY",
+      "rejected": "Unverified external photo manually labeled as Producer output",
+      "accepted": "UMS-001 provider receipt + authorized OpenAI API call, controlled cost, license, SHA256/pHash + QA",
+      "rule": "Do not attribute images to UMS/OpenAI without provider receipt. ChatGPT image output or programmatic vector is not evidence of connected producer. No paid retries/fallback.",
+      "check": "SIGNED_PRODUCER_ASSET_RECEIPT"
+    },
+    {
+      "id": "EDITORIAL_STRUCTURE",
+      "rejected": "Long flat text, no useful visuals or FAQ block",
+      "accepted": "Distinct topical article and landing with descriptive headings, true CTA, contextual internal links, real infographic/timeline, FENIX FAQ I01",
+      "rule": "Format for buyer persona, accessibility and performance. No filler, invented facts or unsupported financial outcomes.",
+      "check": "EDITORIAL_AND_FAQ_QA"
+    }
+  ],
+  "prior_drafts": [
+    52660,
+    52661,
+    52662,
+    52663
+  ],
+  "batch2_drafts": [
+    {
+      "id": 52713,
+      "type": "post",
+      "persona": "B2C_COMPRADOR_PISO_DERRAMA",
+      "url_intent": "INFORMATIONAL_GUIDE",
+      "media": "PENDING_UMS_OPENAI",
+      "template_qa": "BLOG_THEME_NOT_CERTIFIED"
+    },
+    {
+      "id": 52714,
+      "type": "post",
+      "persona": "B2B_AGENCIA_VENTA_ENCADENADA",
+      "url_intent": "INFORMATIONAL_GUIDE",
+      "media": "PENDING_UMS_OPENAI",
+      "template_qa": "BLOG_THEME_NOT_CERTIFIED"
+    },
+    {
+      "id": 52715,
+      "type": "page",
+      "persona": "B2C_COMPRADOR_PISO_DERRAMA",
+      "url_intent": "TRANSACTIONAL_CONSULTATION",
+      "media": "PENDING_UMS_OPENAI",
+      "template_qa": "BLOCKED_SINGLE_SERVICES_ACTUAL_PREVIEW"
+    },
+    {
+      "id": 52716,
+      "type": "page",
+      "persona": "B2B_AGENCIA_VENTA_ENCADENADA",
+      "url_intent": "TRANSACTIONAL_COLLABORATION",
+      "media": "PENDING_UMS_OPENAI",
+      "template_qa": "BLOCKED_SINGLE_SERVICES_ACTUAL_PREVIEW"
+    }
+  ],
+  "media_briefs": [
+    {
+      "id": "SEO001-52713-HERO",
+      "post_id": 52713,
+      "persona": "B2C_COMPRADOR_PISO_DERRAMA",
+      "prompt": "Premium photoreal editorial photograph of a home buyer in an authentic Cordoba Spain apartment discussing building maintenance and costs with a qualified advisor. Natural Mediterranean light, realistic residential details, calm empathetic authentic expressions, no staged stock-photo feel. Wide 16:9 horizontal, clear focal point, subjects fully visible, text-free, logo-free, no watermarks or legible documents. Distinct original location and people.",
+      "negative": "no pixel text, no fake seals, no Google logo, no private customer data"
+    },
+    {
+      "id": "SEO001-52714-HERO",
+      "post_id": 52714,
+      "persona": "B2B_AGENCIA_VENTA_ENCADENADA",
+      "prompt": "High-end photoreal editorial scene in a contemporary Cordoba Spain real-estate office, responsible agent and client coordinating the sale of one home before purchase of another. Two sets of property documents without legible text, natural daylight and professional yet candid gestures; visually distinct from every previous Fenix image. Wide 16:9, no overlay, logo or watermark.",
+      "negative": "no pixel text, no mock title overlay, no false approval badge"
+    },
+    {
+      "id": "SEO001-52715-HERO",
+      "post_id": 52715,
+      "persona": "B2C_COMPRADOR_PISO_DERRAMA",
+      "prompt": "Editorial-quality premium architectural photograph of a well-maintained Cordoba residential apartment building entrance and sunlit living room, subtly suggesting careful review of extraordinary community repair costs. Elegant natural materials, human scale, 16:9 wide with subjects framed for split hero, authentic not artificial, no graphics or text.",
+      "negative": "not the same building, composition or image used in the B2C derrama article; no labels"
+    },
+    {
+      "id": "SEO001-52716-HERO",
+      "post_id": 52716,
+      "persona": "B2B_AGENCIA_VENTA_ENCADENADA",
+      "prompt": "Premium photoreal commercial image of two Spanish real-estate professionals planning interconnected home sale and purchase dates in an attractive but realistic Cordoba office, visually clear collaboration, tasteful neutral palette, candid documentary style. Separate people, location and composition from other media briefs. Landscape 16:9, no text, logos, charts or watermark.",
+      "negative": "no identical people, set, posture or lighting as 52714"
+    }
+  ],
+  "release_gates": [
+    "TEMPLATE_RENDER_ACTUAL_PREVIEW_NO_SINGLE_SERVICES",
+    "RENDERED_DOM_SINGLE_H1",
+    "DISTINCT_ORIGINAL_UMS_OPENAI_RECEIPT_FOR_EACH_URL",
+    "PROVIDER_COST_BOUND_ONE_ATTEMPT_NO_AUTORETRY",
+    "LEGAL_AND_FINANCIAL_YMYL_INDEPENDENT_QA",
+    "FAQ_I01_COUNT_6_POST_8_PAGE",
+    "REAL_MOBILE_AND_DESKTOP_VISUAL_REVIEW",
+    "NO_IMAGE_DUPLICATE_PHASH_GLOBAL_INVENTORY",
+    "SEO_NO_CANNIBALIZATION_WITH_EXISTING_PILLARS",
+    "HOSTINGER_FULL_FILES_SQL_ISOLATED_RESTORE_ROLLBACK",
+    "OWNER_APPROVES_EXACT_DIGEST_FIRST_THREE"
+  ],
+  "policy": {
+    "wordpress_publish": false,
+    "wordpress_auto_publication": false,
+    "paid_image_request_executed": false,
+    "provider_automation_verified": false,
+    "no_new_subscription": true,
+    "do_not_touch_main": true,
+    "do_not_mutate_existing_published_pages": true
+  },
+  "next_step": "Fix per-draft templates without global theme changes; verify UMS-001 OpenAI API provider IAM and bounded request route; generate at most one controlled photo per item and review; then independent full QA of draft previews. Only after gates owner may authorize initial supervised releases.",
+  "last_physical_preview_audit": {
+    "date": "2026-11-07",
+    "registry_ref": "cerebro/seo-enterprise/v2/registry/seo001-batch2-wordpress-physical-qa-2026-11-07.json",
+    "status": "REAL_WORDPRESS_QA_HOLD",
+    "owner_screenshot_item": 52714,
+    "verified_that_four_drafts_preexist": true,
+    "verified_media_pending": true,
+    "verified_two_pages_render_wrong_demo": true,
+    "verified_post_sidebar_banner_issue": true,
+    "wordpress_global_template_changes": 0,
+    "openai_paid_api_calls_from_this_review": 0,
+    "first_batch_and_published_content_untouched": true,
+    "lessons": [
+      {
+        "id": "DONOT_GENERATE_DUPLICATE_BATCH",
+        "rule": "On every resumed loop, fetch live draft ids and slug inventory before creating new pages. Existing 52713 52714 52715 52716 should never be duplicated."
+      },
+      {
+        "id": "HTML_STORED_NOT_RENDERED_PAGE",
+        "rule": "Require rendered preview to show exact content. If Elementor Single Services / Lorem ipsum appears, reject release regardless of stored content."
+      },
+      {
+        "id": "ASTRA_META_RECEIPT_IS_NOT_RENDERED_PROOF",
+        "rule": "Per-post Astra banner/title meta persistence alone is insufficient. Existing 52714 experiment had no visual effect and was reversed. Never repeat ineffective mutation."
+      },
+      {
+        "id": "NO_IMAGE_PROVIDER_PROVENANCE_FABRICATION",
+        "rule": "If UMS-001 OpenAI provider receipt, image bytes, rights and media QA are absent, image_state remains PENDING_UMS_OPENAI; no vector fallback labeled photo; no automatic spending."
+      },
+      {
+        "id": "BUYER_PERSONA_TWO_DIFFERENT_FUNNEL_ROLES",
+        "rule": "Do not reuse an article headline as a commercial landing headline; article solves knowledge question, landing makes clear consultation offer. D03 D05 D13 D14 D15 D31 and D32 all must evaluate buyer utility."
+      }
+    ]
+  }
+}

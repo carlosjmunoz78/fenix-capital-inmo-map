@@ -1,0 +1,118 @@
+{
+  "schema_version": "0.1.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "0.1.0",
+  "status": "THREE_DISTINCT_PROVIDER_VERIFIED_GITHUB_JOBS_SIGNED_LAB_HANDOFFS_IAM_NOT_CERTIFIED",
+  "runtime_module": "cerebro/runtime/durable-job-runtime-v1.mjs",
+  "runtime_engine_id": "JOB-001",
+  "factory_engine_id": "FACT-001",
+  "web_source": "https://staging.fenixcapital.es/",
+  "scope": "public_home_readonly",
+  "auth_context": {
+    "workload_identity_source": "iam:github-actions-job",
+    "provenance": "cerebro/registry/identity-access-registry.v0.json",
+    "workflow_permissions": "contents:read",
+    "github_workload_identity_attested_in_agent_runtime": false,
+    "role_actor_credential_mapping_verified": false,
+    "github_workload_run_verified_by_provider_api": true,
+    "workflow_verification_event": "pull_request",
+    "workflow_id": 41982256299,
+    "verified_workload_provider": "GITHUB_ACTIONS_API",
+    "role_scope_gate_physically_exercised": true,
+    "process_ed25519_signatures_physically_verified": true,
+    "github_oidc_token_verified": false,
+    "role_signatures_signed_by_external_iam": false,
+    "github_actions_token_scope_provider_verified": false,
+    "process_receipt_key_trust_boundary": "EPHEMERAL_SELF_SIGNED_WITHIN_SAME_GITHUB_RUNNER",
+    "evidence_url": "https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/41989528379",
+    "isolated_workflow_run_id": 41989528379,
+    "distinct_github_jobs_provider_verified": true,
+    "isolated_workflow_path": ".github/workflows/cerebro-seo-staging-readonly-v0.yml",
+    "isolated_fixture_source": "SYNTHETIC_LAB_NOT_PHYSICAL_STAGING",
+    "isolated_workload_job_ids": [
+      127118165570,
+      127118220340,
+      127118306547
+    ],
+    "prior_job_success_reverified_by_provider": true,
+    "individual_workload_github_job_id_verified": true,
+    "provider_oidc_verified": false,
+    "individual_agent_account_iam_verified": false,
+    "site_content_cross_job_review_verified": false,
+    "artifact_retention_days": 14
+  },
+  "roles": [
+    {
+      "role_id": "SEO_D15_WORKER",
+      "role_type": "SUBAGENT",
+      "department_id": "SEO-D15",
+      "skill": "COPY_QA_READONLY",
+      "worker_type": "DETERMINISTIC_LOCAL",
+      "executor": "cerebro/seo-enterprise/v2/runtime/seo-workforce-lab-v0.mjs",
+      "scope": [
+        "site:public:read",
+        "mission:execute"
+      ],
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-worker-isolated",
+      "isolated_github_job_id": 127118165570,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
+    },
+    {
+      "role_id": "SEO_D31_QA",
+      "role_type": "QA_AGENT",
+      "department_id": "SEO-D31",
+      "skill": "COPY_EVIDENCE_REVIEW",
+      "worker_type": "DETERMINISTIC_LOCAL",
+      "executor": "cerebro/seo-enterprise/v2/runtime/seo-job001-independent-review-v0.mjs",
+      "scope": [
+        "mission:evidence:read",
+        "mission:evaluate"
+      ],
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-qa-isolated",
+      "isolated_github_job_id": 127118220340,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
+    },
+    {
+      "role_id": "SEO_JUDGE_A",
+      "role_type": "JUDGE",
+      "department_id": "SEO-D31",
+      "skill": "TRIBUNAL_RELEASE_GATE",
+      "worker_type": "DETERMINISTIC_LOCAL",
+      "executor": "cerebro/runtime/evaluation-tribunal.mjs",
+      "scope": [
+        "mission:verdict:read"
+      ],
+      "identity_verified": false,
+      "scope_enforced_on_physical_runner": true,
+      "ed25519_process_receipt_verified": true,
+      "isolated_github_job_name": "seo-tribunal-isolated",
+      "isolated_github_job_id": 127118306547,
+      "separate_github_job_physically_verified": true,
+      "isolated_job_role_iam_credential_verified": false,
+      "isolated_lab_synthetic_fixture_only": true
+    }
+  ],
+  "governance": {
+    "any_actor_self_judgement_forbidden": true,
+    "permissions_from_merit": false,
+    "automatic_publishing": false,
+    "money_transfers": false,
+    "prod_writes": false,
+    "app_crm_writes": false,
+    "critical_permissions_granted": false,
+    "agent_self_certification": false
+  },
+  "operational_definition": "Three distinct Github Actions jobs and provider-checked read-only job IDs physically worked on one synthetic fixture; receipts were signed and reviewed across jobs. Not three independently provisioned IAM agents. No FULL_READY, WordPress publication, paid AI, or PROD writes."
+}

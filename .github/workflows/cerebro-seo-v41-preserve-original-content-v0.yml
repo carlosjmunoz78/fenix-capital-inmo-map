@@ -1,0 +1,86 @@
+name: CEREBRO SEO · Preserve exact V4.1 review files on PR branch
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/cerebro-seo-v41-preserve-original-content-v0.yml'
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: seo001-v41-preserve-single
+  cancel-in-progress: false
+jobs:
+  commit-reviewed-v41-source:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'cerebro/seo-enterprise-family-staging-contract-v1-20261105' && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source branch without merging to main
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: true
+      - name: Verify existing immutable review copies before attempting historical one-shot
+        id: inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          b2c='cerebro/seo-enterprise/v2/drafts/v4-1-review-only/compradores-v4-1-review-only.html'
+          b2b='cerebro/seo-enterprise/v2/drafts/v4-1-review-only/inmobiliarias-v4-1-review-only.html'
+          if [[ -f "$b2c" && -f "$b2b" ]]; then
+            test "$(sha256sum "$b2c" | cut -d' ' -f1)" = '96b340eba8d97d56fd9e2ce9644df9d2b8855759301180fbf0351630e351d88d'
+            test "$(sha256sum "$b2b" | cut -d' ' -f1)" = 'ffc9d8d4f32dbc8e77ec9d9f4e7ba2bfb98a35141a91a85f1b420e27bed00583'
+            echo 'already_preserved=true' >> "$GITHUB_OUTPUT"
+            echo 'V4.1 originals already SHA-verified, NO new commit required'
+          else
+            echo 'already_preserved=false' >> "$GITHUB_OUTPUT"
+          fi
+      - name: Confirm exact authorized PR branch
+        if: ${{ steps.inventory.outputs.already_preserved != 'true' }}
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          test "$(git log -1 --format='%s')" = "ci(seo): preserve V4.1 SHA-verified review-only articles"
+      - name: Download original Gemini Free V4.1 corrected artifact
+        if: ${{ steps.inventory.outputs.already_preserved != 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-1-official-sources-corrections-release-hold
+          run-id: 42242988793
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-v41-original
+      - name: Verify exact source hashes and stage only two unapproved HTML blobs
+        if: ${{ steps.inventory.outputs.already_preserved != 'true' }}
+        env:
+          INPUT: ${{ runner.temp }}/seo001-v41-original
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          const dest='cerebro/seo-enterprise/v2/drafts/v4-1-review-only';
+          fs.mkdirSync(dest,{recursive:true});
+          const expected=[
+           ['compradores-v4-1-review-only.html','96b340eba8d97d56fd9e2ce9644df9d2b8855759301180fbf0351630e351d88d'],
+           ['inmobiliarias-v4-1-review-only.html','ffc9d8d4f32dbc8e77ec9d9f4e7ba2bfb98a35141a91a85f1b420e27bed00583']
+          ];
+          for(const [file,digest] of expected){
+           const bytes=fs.readFileSync(path.join(process.env.INPUT,file));
+           const actual=crypto.createHash('sha256').update(bytes).digest('hex');
+           if(actual!==digest)throw Error('SOURCE_ARTIFACT_DRIFT_'+file);
+           const output=path.join(dest,file);
+           if(fs.existsSync(output)&&!fs.readFileSync(output).equals(bytes))throw Error('EXISTING_SOURCE_MUTATION_FORBIDDEN');
+           fs.writeFileSync(output,bytes,{flag:fs.existsSync(output)?'w':'wx'});
+          }
+          NODE
+          git add -- cerebro/seo-enterprise/v2/drafts/v4-1-review-only/compradores-v4-1-review-only.html cerebro/seo-enterprise/v2/drafts/v4-1-review-only/inmobiliarias-v4-1-review-only.html
+          test "$(git diff --cached --name-only | wc -l)" -eq 2
+      - name: Commit review artifacts to this PR branch ONLY
+        if: ${{ steps.inventory.outputs.already_preserved != 'true' }}
+        run: |
+          git config user.name 'cerebro-seo-review-bot'
+          git config user.email 'cerebro-seo-review-bot@users.noreply.github.com'
+          git commit -m 'seo(d13): preserve two source-sha V4.1 review candidates no publish'
+          git push origin "HEAD:refs/heads/cerebro/seo-enterprise-family-staging-contract-v1-20261105"
+      - name: Report bounds
+        run: echo 'V4_1_SOURCE_HASHES_CHECKED=TRUE ROOT_BRANCH_PROD_UNCHANGED=TRUE UMS_WRITES=0 WORDPRESS_WRITES=0'

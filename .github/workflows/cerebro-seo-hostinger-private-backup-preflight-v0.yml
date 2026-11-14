@@ -1,0 +1,25 @@
+name: CEREBRO SEO · Hostinger private-backup structural safety tests only
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-hostinger-private-backup-preflight-v0.py'
+      - 'cerebro/seo-enterprise/v2/tests/seo-hostinger-private-backup-preflight-v0.test.py'
+      - '.github/workflows/cerebro-seo-hostinger-private-backup-preflight-v0.yml'
+permissions:
+  contents: read
+jobs:
+  test-with-fully-synthetic-data:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Run Python stdlib synthetics; never connect real backup to Actions
+        run: |
+          python3 -m py_compile cerebro/seo-enterprise/v2/runtime/seo-hostinger-private-backup-preflight-v0.py
+          python3 cerebro/seo-enterprise/v2/tests/seo-hostinger-private-backup-preflight-v0.test.py -v
+      - name: Assert physical full-site Hostinger restoration remains unverified
+        run: echo 'HOSTINGER_REAL_BACKUP_COPIED_TO_GITHUB=NO BACKUP_PROD_RESTORED=NO WP_WRITES=0 PRIVATE_PREFLIGHT_TESTED=YES'

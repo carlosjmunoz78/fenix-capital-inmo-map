@@ -1,0 +1,592 @@
+{
+  "schema_version": "1.0.0",
+  "contract_id": "SEO-001-ENTERPRISE-FAMILY-STAGING-V1",
+  "engine_id": "SEO-001",
+  "company_id": "GLOBAL",
+  "version": "1.0.0",
+  "environment": "LAB",
+  "status": "SUPERSEDED_PROVISIONAL_ARCHITECTURE_DO_NOT_MATERIALIZE_WITHOUT_V2_RECONCILIATION",
+  "intent": "Preserve the already-built WordPress website; professionalize one shared SEO organization, three sector families and a fail-closed STAGING-to-PROD release process.",
+  "source_of_truth": [
+    "cerebro/registry/engine-registry.v1.json",
+    "cerebro/registry/existing-engine-bindings.json",
+    "cerebro/multicompany/post-scan-parallel-v1.mjs",
+    "cerebro/multicompany/bootstrap-tier-v1.mjs",
+    "cerebro/registry/phase13-marketing-seo-feedback-profile.v0.json",
+    "notion://SEO-001",
+    "notion://CITY_COMPLETE_V2",
+    "notion://STAGING_V4_25_LAYERS"
+  ],
+  "preservation": {
+    "strategy": "CONSERVAR_ENTENDER_ENVOLVER_PROBAR_MEJORAR_MIGRAR",
+    "replace_existing_seo_engine": false,
+    "create_new_engines": false,
+    "mutate_wordpress": false,
+    "mutate_app_crm_supabase": false,
+    "mutate_main": false,
+    "external_writes": false,
+    "prod_publish": false,
+    "spend_eur": 0
+  },
+  "architecture": {
+    "functional_departments": [
+      {
+        "department_id": "SEO-D01",
+        "name": "Estrategia, mercado y priorizacion",
+        "skills": [
+          "strategy",
+          "portfolio",
+          "ROI",
+          "territory"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D02",
+        "name": "Inteligencia competitiva y SERP",
+        "skills": [
+          "competitor-research",
+          "search-intent",
+          "serp-patterns",
+          "opportunity"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D03",
+        "name": "Keywords y ownership de intencion",
+        "skills": [
+          "keyword-research",
+          "topic-clusters",
+          "query-url-ownership",
+          "cannibalization"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D04",
+        "name": "SEO tecnico",
+        "skills": [
+          "crawl",
+          "render",
+          "indexability",
+          "canonical-and-redirects",
+          "sitemap"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D05",
+        "name": "Arquitectura y enlazado interno",
+        "skills": [
+          "site-architecture",
+          "internal-link-graph",
+          "taxonomy",
+          "consolidation"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D06",
+        "name": "Contenido y autoridad tematica",
+        "skills": [
+          "research",
+          "editorial",
+          "fact-check",
+          "refresh",
+          "local-differentiation"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D07",
+        "name": "SEO local",
+        "skills": [
+          "gbp",
+          "real-service-areas",
+          "nap",
+          "local-evidence",
+          "reviews"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D08",
+        "name": "Datos estructurados y entidades",
+        "skills": [
+          "structured-data",
+          "entity-graph",
+          "real-world-verification",
+          "rich-results"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D09",
+        "name": "Autoridad externa y reputacion",
+        "skills": [
+          "digital-pr",
+          "legitimate-mentions",
+          "backlinks",
+          "brand-reputation"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D10",
+        "name": "Visibilidad en busquedas con IA",
+        "skills": [
+          "AI-answer-visibility",
+          "citation-measurement",
+          "entity-consistency",
+          "content-quality"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D11",
+        "name": "SEO multimedia",
+        "skills": [
+          "image-seo",
+          "video-seo",
+          "asset-rights",
+          "performance"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D12",
+        "name": "CRO, captacion y embudos",
+        "skills": [
+          "landing-conversion",
+          "form-integrity",
+          "lead-qualification",
+          "crm-journey"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D13",
+        "name": "Analitica, experimentacion y aprendizaje",
+        "skills": [
+          "gsc",
+          "ga4",
+          "experiment-design",
+          "old-vs-new",
+          "business-impact"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      },
+      {
+        "department_id": "SEO-D14",
+        "name": "Operaciones WordPress, QA y release",
+        "skills": [
+          "core-guard",
+          "elementor-safe",
+          "qa",
+          "backup",
+          "rollback",
+          "release"
+        ],
+        "role_model": "HEAD_PLUS_SPECIALISTS_ON_DEMAND",
+        "cost_model": "SHARED_RUNTIME",
+        "evaluation": "ROLE_SPECIFIC_EVIDENCE",
+        "status": "DEFINED_CANDIDATE_NOT_MATERIALIZED",
+        "work_owner": "CEREBRO_DEPARTMENT_HEAD_AND_SUBAGENTS",
+        "plugin_role": "OPTIONAL_TOOL_ONLY"
+      }
+    ],
+    "sector_families": [
+      {
+        "family_id": "SEO-FIN-RE",
+        "name": "Financiera e inmobiliaria",
+        "priority": 1,
+        "subspecializations": [
+          "HIPOTECAS_Y_FINANCIACION",
+          "COMPRAVENTA_INMOBILIARIA",
+          "INVERSION_Y_VIVIENDA",
+          "B2B_INMOBILIARIAS",
+          "B2C_PARTICULARES"
+        ],
+        "company_examples": [
+          "fenix-capital"
+        ],
+        "mandatory_gates": [
+          "YMYL_CLAIM_PROVENANCE",
+          "CURRENT_LEGAL_FINANCIAL_REVIEW_WHEN_REQUIRED",
+          "NO_UNVERIFIED_FINANCIAL_PROMISES",
+          "REAL_LOCAL_SERVICE_PROOF"
+        ],
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
+      },
+      {
+        "family_id": "SEO-ECOM",
+        "name": "Comercio electronico",
+        "priority": 2,
+        "subspecializations": [
+          "CATEGORY_AND_PRODUCT",
+          "VARIANTS_AND_FACETS",
+          "INVENTORY_AND_AVAILABILITY",
+          "MERCHANT_AND_SHOPPING",
+          "PURCHASE_CONVERSION"
+        ],
+        "company_examples": [],
+        "mandatory_gates": [
+          "PRODUCT_FACT_ACCURACY",
+          "STOCK_AND_PRICE_PROVENANCE",
+          "CANONICAL_FILTER_VALIDATION"
+        ],
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
+      },
+      {
+        "family_id": "SEO-TECH",
+        "name": "Tecnologia y SaaS",
+        "priority": 3,
+        "subspecializations": [
+          "SAAS_PRODUCT",
+          "DEVELOPER_DOCS",
+          "INTEGRATIONS_AND_APIS",
+          "COMPARISON_PAGES",
+          "TRIAL_AND_DEMO_CONVERSION"
+        ],
+        "company_examples": [],
+        "mandatory_gates": [
+          "PRODUCT_CAPABILITY_EVIDENCE",
+          "VERSIONED_TECH_DOCS",
+          "JAVASCRIPT_RENDER_AND_CANONICAL_QA"
+        ],
+        "status": "DEFINED_CANDIDATE_NO_LIVE_EXECUTION",
+        "target_agents": 14,
+        "target_subagents": 70,
+        "department_count": 14,
+        "subagents_per_department_agent": 5,
+        "staffing_status": "DEFINED_NOT_MATERIALIZED"
+      }
+    ],
+    "company_isolation": true,
+    "tenant_context": [
+      "company_id",
+      "engine_id",
+      "environment",
+      "version"
+    ],
+    "runtime": "SHARED_EVENT_WORKER_ROUTER",
+    "no_per_role_servers": true,
+    "oversight": {
+      "roles": [
+        "SEO_DIRECTOR",
+        "FAMILY_SUPERVISOR",
+        "INDEPENDENT_QA",
+        "TRIBUNAL_QUALITY",
+        "TRIBUNAL_PERFORMANCE",
+        "TRIBUNAL_POLICY",
+        "TRIBUNAL_COST",
+        "TRIBUNAL_LEARNING",
+        "RIGHTS_AND_SECURITY_GUARD"
+      ],
+      "applies_to_all_roles_including_oversight": true,
+      "ultimate_human_authority": "AUTHORIZED_OWNER",
+      "independent_internal_evaluation": true,
+      "never_self_certify": true,
+      "merit_policy_reference": "CEREBRO-UNIVERSAL-EXCELLENCE-MERIT-V1",
+      "merit_policy_binding_status": "PENDING_CANONICAL_MERGE_AND_RUNTIME_VERIFICATION"
+    },
+    "operating_principle": "AGENTS_AND_SUBAGENTS_DO_THE_ORDINARY_WORK;PLUGINS_ARE_NON_DECISION_MAKING_EXECUTION_ADAPTERS",
+    "accountability": {
+      "execution_owner": "CEREBRO_AGENT_AND_SUBAGENT_TEAMS",
+      "planning_owner": "SEO_DIRECTOR_AND_SPECIALIST_AGENTS",
+      "research_owner": "RESEARCH_AND_SEO_SPECIALIST_AGENTS",
+      "content_creation_owner": "EDITORIAL_AND_SEO_SPECIALIST_AGENTS",
+      "site_qa_owner": "SEO_QA_AGENTS_AND_INDEPENDENT_SUPERVISION",
+      "orchestration_owner": "CEREBRO_GATEWAY_AND_SHARED_RUNTIME",
+      "ultimate_human_authority": "AUTHORIZED_OWNER",
+      "plugin_autonomous_decision_making": false
+    },
+    "plugin_contract": {
+      "role": "AUXILIARY_WORDPRESS_TOOL_AND_PERMISSIONED_ADAPTER",
+      "work_ownership": "NONE",
+      "may": [
+        "READ_AND_EXPOSE_WORDPRESS_STATE",
+        "EXECUTE_EXPLICIT_AUTHORIZED_OPERATIONS",
+        "RETURN_RECEIPTS_AND_HASHES",
+        "ENFORCE_LOCAL_TECHNICAL_SECURITY_GATES",
+        "ASSIST_BACKUP_AND_ROLLBACK_ON_AUTHORIZED_CHANGE"
+      ],
+      "must_not": [
+        "OWN_SEO_STRATEGY",
+        "INDEPENDENTLY_PRIORITIZE_BUSINESS_WORK",
+        "WRITE_CONTENT_AS_THE_AUTHORITATIVE_AGENT",
+        "SUPERVISE_OR_REWARD_AGENTS",
+        "SELF_SCHEDULE_UNREQUESTED_PUBLICATION",
+        "PROMOTE_STAGING_TO_PROD_WITHOUT_CEREBRO_APPROVAL",
+        "BECOME_SINGLE_POINT_OF_INTELLIGENCE"
+      ],
+      "alternatives": [
+        "EXISTING_WORDPRESS_PLUGIN_ADAPTER",
+        "DIRECT_OFFICIAL_WORDPRESS_REST_OR_ABILITIES",
+        "SUPPORTED_BROWSER_BRIDGE_OR_BROWSER_EXECUTOR",
+        "GIT_AND_ISOLATED_RUNNERS"
+      ],
+      "fallback_without_plugin": "USE_AUTHORIZED_ALTERNATIVE_ADAPTER_WITH_EQUIVALENT_POLICY_AND_EVIDENCE",
+      "requires_signed_mission_or_explicit_approved_job": true,
+      "execution_without_agent_authorization": "DENY",
+      "new_plugin_subscription_required": false
+    },
+    "agent_workflow": {
+      "mission_source": "CEREBRO_GATEWAY",
+      "work_units": [
+        "COMPETITIVE_RESEARCH",
+        "KEYWORD_INTELLIGENCE",
+        "SEO_TECHNICAL_AUDIT",
+        "PAGE_STRATEGY",
+        "EDITORIAL_RESEARCH_AND_WRITING",
+        "LOCAL_DIFFERENTIATION",
+        "MEDIA_PRODUCTION_BRIEF",
+        "INTERNAL_LINK_PLAN",
+        "QA_AND_EXPERIMENTS",
+        "RELEASE_PLAN",
+        "MONITORING",
+        "CONTINUOUS_LEARNING"
+      ],
+      "for_each_task": [
+        "ASSIGN_QUALIFIED_PARENT_AGENT",
+        "DELEGATE_TO_SPECIALIST_SUBAGENTS",
+        "CONSOLIDATE_OUTPUT_WITH_SOURCES_AND_EVIDENCE",
+        "INDEPENDENT_SUPERVISORY_AND_TRIBUNAL_GATES",
+        "ISSUE_MINIMAL_AUTHORIZED_ADAPTER_COMMAND_IF_NEEDED",
+        "VERIFY_RESULT",
+        "LEARN"
+      ],
+      "system_requirement": "NOT_MERELY_PAPER_PROFILES;MUST_HAVE_TASK_WORKER_BINDING_OWNERSHIP_AUDIT_AND_OUTCOME_TEST_BEFORE_OPERATIONAL_CLAIM",
+      "current_state": "DEFINED_NOT_RUNTIME_BOUND"
+    },
+    "family_workforce_plan": {
+      "status": "OBSOLETE_UNVALIDATED_HEADCOUNT",
+      "counting_policy": "Per family: 14 department-level lead agents, each with five specialized logical subagents. Shared central director, supervisor, independent judges and guardians are not included in these family counts.",
+      "agents_per_family": 14,
+      "subagents_per_agent": 5,
+      "subagents_per_family": 70,
+      "number_of_families": 3,
+      "total_family_agents": 42,
+      "total_family_subagents": 210,
+      "total_family_execution_roles": 252,
+      "shared_runtime": true,
+      "not_individual_servers": true,
+      "execution_bindings_verified": false
+    }
+  },
+  "reuse": {
+    "seo": "SEO-001",
+    "keywords": "KW-001",
+    "site_audit": "WAUD-001",
+    "local_presence": "LOCALP-001",
+    "website": "WEB-001",
+    "website_scan": "SCAN-001",
+    "seo_bootstrap": "SEOBOOT-001",
+    "competitor": "COMPET-001",
+    "research": "RSH-001",
+    "content": "KNW-001",
+    "marketing": "MKT-001",
+    "conversion": "CAP-001",
+    "crm": "CRM-001",
+    "learning": "LRN-001",
+    "evaluation": "EVA-001",
+    "tribunal": "JDG-001",
+    "factory": "FACT-001",
+    "observability": "OBSERV-001",
+    "quality": "QA-001"
+  },
+  "environments": {
+    "development": {
+      "role": "LAB_OR_ISOLATED_DRAFT",
+      "writes_allowed": "ONLY_EXPLICIT_ISOLATED_ARTIFACTS"
+    },
+    "staging": {
+      "url": "https://staging.fenixcapital.es",
+      "role": "SOLE_WEB_MUTATION_TEST_TARGET",
+      "read_only_current_audit": true,
+      "robots_expected": "NOINDEX",
+      "promote_from_staging_automatically": false
+    },
+    "production": {
+      "url": "https://fenixcapital.es",
+      "role": "PROTECTED_CANONICAL_WEBSITE",
+      "writes_allowed": false,
+      "read_only_comparison_only": true
+    }
+  },
+  "pipeline": [
+    "INVENTORY_OLD",
+    "DEPENDENCY_MAP",
+    "BACKUP_AND_HASH",
+    "CANONICAL_CONTENT_AND_INTENT_MAP",
+    "PROPOSE_CHANGE",
+    "ISOLATED_STAGING_DRAFT",
+    "STAGING_RENDER_AND_E2E",
+    "SEO_CONTENT_YMYL_AND_LOCAL_GATES",
+    "TECH_CWV_A11Y_SECURITY_AND_CONSENT_GATES",
+    "INDEPENDENT_QA_AND_TRIBUNAL",
+    "OLD_VS_NEW_DIFF",
+    "ROLLBACK_RESTORE_PROVEN",
+    "PROD_DEPLOY_AUTHORIZATION_POLICY",
+    "GRADUAL_PROD_PROMOTION",
+    "POST_DEPLOY_READONLY_MONITOR",
+    "LEARN"
+  ],
+  "required_staging_to_prod_gates": [
+    "NO_STAGING_NOINDEX_LEAK",
+    "PROD_INDEXABILITY_AND_SELF_CANONICAL",
+    "NO_LIVE_CONTENT_DELETION",
+    "NO_CHANGE_TO_PROTECTED_SYSTEMS",
+    "BACKUP_EXISTS",
+    "RESTORE_TEST_PASS",
+    "NO_CRITICAL_REGRESSION",
+    "SCREENSHOT_DESKTOP_AND_MOBILE",
+    "ELEMENTOR_DATA_AND_THEME_DEPENDENCY_PRESERVED",
+    "NO_DUPLICATE_QUERY_OWNER",
+    "REAL_LOCAL_DIFFERENTIATION",
+    "YMYL_SOURCE_VALIDATION",
+    "SCHEMA_MATCHES_VISIBLE_CONTENT",
+    "ACCESSIBILITY_AND_CWV_MEASURED",
+    "FORMS_TO_CRM_E2E_AND_CONSENT",
+    "IDEMPOTENCE",
+    "INDEPENDENT_EVALUATION",
+    "OWNER_REVIEW_ONLY_IF_CANONICAL_HUMAN_REQUIRED"
+  ],
+  "quality_layers": "EXISTING_25_LAYER_AUDIT_REUSED_NO_NEW_25_ENGINES",
+  "city_complete": "CITY_COMPLETE_V2_REQUIRED_BEFORE_CITY_CERTIFICATION",
+  "release": {
+    "default": "BLOCKED",
+    "staging_write": "NOT_GRANTED_BY_THIS_CONTRACT",
+    "prod_write": "NOT_GRANTED_BY_THIS_CONTRACT",
+    "prod_release_automatic": false,
+    "require_evidence_receipt": true,
+    "rollback_before_release": true,
+    "canary_then_expand": true,
+    "owner_exception_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "initiated_by": "CEREBRO_SEO_AGENT_RELEASE_PLAN",
+    "executed_by": "AUTHORISED_INTEGRATION_ADAPTER_ONLY_AFTER_GATES",
+    "plugin_direct_promotion_forbidden": true
+  },
+  "measurables": {
+    "role": [
+      "EVIDENCE_QUALITY",
+      "NO_REGRESSION",
+      "COST",
+      "RELIABILITY",
+      "EXPERTISE_GAIN"
+    ],
+    "business": [
+      "QUALIFIED_LEADS",
+      "QUALIFIED_B2B_ACCOUNTS",
+      "VIABLE_CASES",
+      "SIGNED_TRANSACTIONS",
+      "REVENUE"
+    ],
+    "seo": [
+      "IMPRESSION",
+      "CLICK",
+      "INDEXING",
+      "CTR",
+      "QUERY_URL_CONFLICT",
+      "LOCAL_COVERAGE",
+      "CONVERSION_RATE"
+    ],
+    "no_vanity_metric_only": true,
+    "only_measure_verified_data": true
+  },
+  "open_gates": [
+    "NO_LIVE_SEARCH_CONSOLE_VERIFIED_IN_CURRENT_AUDIT",
+    "NO_FULL_PROD_VS_STAGING_DIFF_PROVEN",
+    "NO_SEO_ROLE_RUNTIME_MATERIALIZATION",
+    "NO_SEO_OWNER_TO_ROLE_MERIT_BINDING",
+    "NO_STAGING_TO_PROD_RELEASE_EXECUTOR",
+    "NO_CURRENT_BACKUP_RESTORE_DRILL",
+    "WORDPRESS_STAGING_AND_PROD_SEPARATION_NOT_PROVEN_AT_DB_INFRA_LEVEL"
+  ],
+  "superseded_by": "cerebro/seo-enterprise/v2/organization.manifest.json"
+}

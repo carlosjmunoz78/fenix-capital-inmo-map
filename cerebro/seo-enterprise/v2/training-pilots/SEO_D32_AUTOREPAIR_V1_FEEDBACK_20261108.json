@@ -1,0 +1,150 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "batch_id": "SEO001-AUTOREPAIR-PILOT-20261108-V1",
+  "source_workflow_run_id": 42441908078,
+  "source_artifact_id": 13600984615,
+  "status": "REAL_ITERATIVE_GENERATION_EXECUTED_BUT_HOLD",
+  "provider_calls_consumed": 6,
+  "attempts_per_work": 3,
+  "paid_fallbacks": 0,
+  "wordpress_writes": 0,
+  "crm_writes": 0,
+  "published": 0,
+  "billing_eur_independently_verified": false,
+  "results": [
+    {
+      "work_id": "SEO001-FENIX-AR20261108-B2C-001",
+      "persona": "PARTICULARES",
+      "h2_main": 6,
+      "faq_dom_items": 6,
+      "paragraphs_out_of_range": 5,
+      "paragraph_lengths": [
+        [
+          84,
+          70,
+          65
+        ],
+        [
+          81,
+          72,
+          74
+        ],
+        [
+          64,
+          70,
+          53
+        ],
+        [
+          68,
+          67,
+          59
+        ],
+        [
+          65,
+          63,
+          47
+        ],
+        [
+          74,
+          52,
+          47
+        ]
+      ],
+      "insufficient_section_totals": [
+        {
+          "section": 5,
+          "total": 175,
+          "needed": 180
+        },
+        {
+          "section": 6,
+          "total": 173,
+          "needed": 180
+        }
+      ],
+      "rejected": true,
+      "other_original_style_gate": "REAL_CLOUD_DRAFT_STYLE_HOLD"
+    },
+    {
+      "work_id": "SEO001-FENIX-AR20261108-B2B-002",
+      "persona": "INMOBILIARIAS",
+      "h2_main": 6,
+      "faq_dom_items": 6,
+      "paragraphs_out_of_range": 2,
+      "paragraph_lengths": [
+        [
+          80,
+          74,
+          67
+        ],
+        [
+          74,
+          72,
+          74
+        ],
+        [
+          70,
+          70,
+          69
+        ],
+        [
+          74,
+          71,
+          54
+        ],
+        [
+          74,
+          74,
+          57
+        ],
+        [
+          75,
+          73,
+          65
+        ]
+      ],
+      "rejected": true,
+      "other_original_style_gate": "REAL_CLOUD_DRAFT_STYLE_HOLD"
+    }
+  ],
+  "corrective_rules": [
+    {
+      "id": "LRN-DIAGNOSTIC-LOCATION-007",
+      "status": "IMPLEMENTED_TESTED",
+      "rule": "Emit SECTION_XX_PARAGRAPH_YY_WORDS_N_NEEDS_60_TO_85 and SECTION_XX_TOTAL_N_WORDS_BELOW_180 rather than only repeating MAIN_PARAGRAPH_WORD_RANGE",
+      "quality": "Add substance when section short; do not pad for word count"
+    },
+    {
+      "id": "LRN-REAL-QA-PROPAGATION-008",
+      "status": "IMPLEMENTED_TESTED",
+      "rule": "Forward model's exact style_issues, voice_issues and content_depth_issues on every revision, not only when FAQ HTML normalization changes."
+    },
+    {
+      "id": "LRN-LEGAL-MEDIA-GATE-009",
+      "status": "PREVIOUS_RULE_PRESERVED",
+      "rule": "Text precheck never equals legal or visual approval; original source/rights, desktop mobile screenshot, B2B real CRM test remain mandatory"
+    }
+  ],
+  "regression_run_id": 42442349298,
+  "regression_suite_counts": [
+    5,
+    13,
+    13,
+    6
+  ],
+  "regression_total_pass": 37,
+  "new_model_calls_during_regression": 0,
+  "original_workflow_result": "SUCCESS_EXECUTION_ONLY",
+  "copy_qa_result": "HOLD_BOTH",
+  "last_qa_feedback_was_generic": true,
+  "learning_applied_to_next_prompt": true,
+  "learning_is_model_finetuning": false,
+  "physical_validation_done": false,
+  "next_batch_authorized": false,
+  "new_trial_requires_new_id_budget_and_reconfirmed_free_tier": true,
+  "report": "cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-result-2026-11-08.json"
+}

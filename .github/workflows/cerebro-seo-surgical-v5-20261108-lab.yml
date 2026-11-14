@@ -1,0 +1,76 @@
+name: CEREBRO SEO · V5 Surgical Repair One Free LAB Batch
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-surgical-patch-v5-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-surgical-v5-one-batch-lab.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-surgical-v5-one-batch-lab.test.mjs'
+      - '.github/workflows/cerebro-seo-surgical-v5-20261108-lab.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: seo001-surgical-v5-one-batch-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  surgical-free-lab:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      # QA-only commit. Exact provider trigger subject is not present.
+      - name: Offline regression tests before anything billable
+        run: |
+          node --version
+          node --check cerebro/seo-enterprise/v2/runtime/seo-surgical-v5-one-batch-lab.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-surgical-v5-one-batch-lab.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
+      - name: Exact one-time owner subject and FREE V5 manifest
+        id: permit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          subject="$(git log -1 --format=%s)"
+          if [ "$subject" = "seo(surgical): ONE_BATCH_FREE_LAB_20261108_V5" ]; then
+            node --input-type=module -e "import {verifySurgicalV5} from './cerebro/seo-enterprise/v2/runtime/seo-surgical-v5-one-batch-lab.mjs';const m=verifySurgicalV5();if(m.max_real_model_calls!==2||m.owner_cost_ceiling_eur!==0)process.exit(1)"
+            echo 'launch=true' >> "$GITHUB_OUTPUT"
+            echo 'SEO001_SURGICAL=ONE_FREE_BATCH_PERMITTED'
+          else
+            echo 'launch=false' >> "$GITHUB_OUTPUT"
+            echo 'SEO001_SURGICAL=HOLD_NO_TRIGGER'
+          fi
+      - name: Retrieve immutable original V4 drafts and QA
+        if: ${{ steps.permit.outputs.launch == 'true' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-autorepair-20261108-v4-LAB-UNAPPROVED
+          run-id: 42445381306
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo001-surgical-v4-source-${{ github.run_id }}
+      - name: One patch generation for buyer and one for agency maximum
+        if: ${{ steps.permit.outputs.launch == 'true' }}
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+          SOURCE_DIR: ${{ runner.temp }}/seo001-surgical-v4-source-${{ github.run_id }}
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-surgical-v5-output-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-surgical-v5-one-batch-lab.mjs "$SOURCE_DIR" "$OUTPUT_DIR"
+      - name: Archive only unapproved V5 patch and QA
+        if: ${{ always() && steps.permit.outputs.launch == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-surgical-v5-20261108-LAB-UNAPPROVED
+          path: ${{ runner.temp }}/seo001-surgical-v5-output-${{ github.run_id }}/*
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Production release hard HOLD
+        if: ${{ always() }}
+        run: echo 'MAX MODEL CALLS 2 FREE TIER; ZERO WORDPRESS CRM IMAGE WRITE; LEGAL MOBILE SOURCE RIGHTS STILL BLOCK'

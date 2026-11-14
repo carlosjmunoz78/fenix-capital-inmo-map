@@ -1,0 +1,50 @@
+name: CEREBRO SEO · V4 official-documentary risk audit with real artifacts
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-v4-documentary-risk-gate-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-v4-documentary-risk-gate-v1.test.mjs'
+      - 'cerebro/seo-enterprise/v2/registry/seo001-v4-documentary-risk-ledger-v1.json'
+      - '.github/workflows/cerebro-seo-v4-documentary-risk-v1.yml'
+permissions:
+  contents: read
+  actions: read
+jobs:
+  documentary-risk:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Download original immutable corrected V4 candidate artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-v4-source-locked-repair-review-only
+          run-id: 42233493715
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/seo-v4-source-audit
+      - name: Validate official-source risk ledger against physical exact-byte articles
+        env:
+          SEO_V4_QA_INPUT_DIR: ${{ runner.temp }}/seo-v4-source-audit
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-v4-documentary-risk-gate-v1.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-v4-documentary-risk-gate-v1.test.mjs
+      - name: Produce versioned source-risk receipt
+        env:
+          SOURCE: ${{ runner.temp }}/seo-v4-source-audit
+          OUTPUT: ${{ runner.temp }}/seo-v4-documentary-risk-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-v4-documentary-risk-gate-v1.mjs "$SOURCE" "$OUTPUT"
+      - name: Upload inspectable receipt of actual textual risks
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-v4-exact-sha-documentary-research-hold
+          path: ${{ runner.temp }}/seo-v4-documentary-risk-${{ github.run_id }}/*
+          if-no-files-found: error
+          retention-days: 14
+      - name: No release authority
+        run: echo 'EXACT_SHA_CHECKED=YES OFFICIAL_RESEARCH_DOCUMENTED=YES INDEPENDENT_LEGAL_SIGNOFF=NO IMAGE_CALLS=0 WP_WRITES=0'

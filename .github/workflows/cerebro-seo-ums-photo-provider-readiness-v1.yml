@@ -1,0 +1,23 @@
+name: CEREBRO SEO · UMS zero-spend provider readiness and retirement gate
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-ums-cloud-photo-provider-readiness-v1.json'
+      - 'cerebro/seo-enterprise/v2/tests/seo-ums-photo-provider-readiness-v1.test.mjs'
+      - '.github/workflows/cerebro-seo-ums-photo-provider-readiness-v1.yml'
+permissions:
+  contents: read
+jobs:
+  zero-spend-provider:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - name: Enforce free-first and exclude retired GPT Image 1
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-ums-photo-provider-readiness-v1.test.mjs
+      - name: No paid image generations or new subscriptions
+        run: echo 'FREE_CANVA_OR_ADOBE_CREDITS=UNKNOWN OPENAI_API_PAID=HOLD RETIRED_GPT_IMAGE_1=BLOCKED NEW_PROVIDER_CALLS=0'

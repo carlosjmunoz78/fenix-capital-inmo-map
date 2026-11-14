@@ -1,0 +1,29 @@
+name: CEREBRO SEO · B2B B2C funnel segregation PREPROD V0
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-lead-segmentation-contract-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-lead-segmentation-contract-v0.test.mjs'
+      - '.github/workflows/cerebro-seo-funnel-segmentation-preprod-v0.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  independent-persona-consent-qa:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify local B2B/B2C isolation, Montilla legacy collision and separate consent
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-lead-segmentation-contract-v0.test.mjs
+      - name: Explicitly deny CRM updates or emails
+        shell: bash
+        run: |
+          echo 'FENIX_SEO_B2B_B2C_CONTRACT=TESTED_PREPROD_ONLY'
+          echo 'ACTUAL_CRM_INGEST_E2E=NOT_RUN'
+          echo 'BREVO_INDIVIDUAL_LISTS=NOT_VERIFIED'
+          echo 'LEAD_MAGNET_DELIVERY=NOT_VERIFIED'
+          echo 'APP_CRM_WORDPRESS_MODIFICATIONS=NONE'

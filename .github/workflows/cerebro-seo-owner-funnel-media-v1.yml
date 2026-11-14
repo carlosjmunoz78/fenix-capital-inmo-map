@@ -1,0 +1,83 @@
+name: CEREBRO SEO · 200 URL ownership + funnels + Creative briefs V1
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-intent-funnel-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-audiovisual-brief-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-owner-funnel-cli-v1.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-owner-intent-funnel-v1.test.mjs'
+      - 'cerebro/seo-enterprise/v2/data/**'
+      - '.github/workflows/cerebro-seo-owner-funnel-media-v1.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  compile-strategy:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.number == 22 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test 200 existing URL buyer persona, overlap and media policy
+        run: node --test cerebro/seo-enterprise/v2/tests/seo-owner-intent-funnel-v1.test.mjs
+      - name: Compile strategy from saved documents only
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-owner-funnel-cli-v1.mjs build "$RUNNER_TEMP/seo-owner"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-owner-200-url-strategy-v1
+          path: ${{ runner.temp }}/seo-owner/
+          if-no-files-found: error
+          retention-days: 14
+
+  independent-qa:
+    needs: compile-strategy
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-owner-200-url-strategy-v1
+          path: ${{ runner.temp }}/seo-owner
+      - name: Recompute ownership, conversion funnels and visual brief from frozen corpus
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-owner-funnel-cli-v1.mjs qa "$RUNNER_TEMP/seo-owner" "$RUNNER_TEMP/seo-qa"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-owner-independent-qa-v1
+          path: ${{ runner.temp }}/seo-qa/qa-receipt.json
+          if-no-files-found: error
+          retention-days: 14
+
+  tribunal:
+    needs: [compile-strategy, independent-qa]
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-owner-200-url-strategy-v1
+          path: ${{ runner.temp }}/seo-owner
+      - uses: actions/download-artifact@v4
+        with:
+          name: seo-owner-independent-qa-v1
+          path: ${{ runner.temp }}/seo-qa
+      - name: Approve planning evidence only, deny site and CMS mutations
+        shell: bash
+        run: |
+          set -euo pipefail
+          node cerebro/seo-enterprise/v2/runtime/seo-owner-funnel-cli-v1.mjs tribunal "$RUNNER_TEMP/seo-owner" "$RUNNER_TEMP/seo-qa"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: seo-owner-tribunal-v1
+          path: ${{ runner.temp }}/seo-qa/tribunal-verdict.json
+          if-no-files-found: error
+          retention-days: 14

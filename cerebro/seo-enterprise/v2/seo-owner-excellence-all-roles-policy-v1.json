@@ -1,0 +1,172 @@
+{
+  "schema_version": "1.0.0",
+  "policy_id": "SEO_V2_OWNER_EXCELLENCE_ALL_191_ROLES_V1",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB_PREPROD_POLICY",
+  "state": "ROLE_WIDE_POLICY_DEFINED_AND_BOUND_NO_LIVE_IAM_OR_PROD_GRANTS",
+  "inherits": [
+    "cerebro/governance/universal-excellence-owner-authority.v0.json",
+    "cerebro/registry/continuous-specialist-learning-policy.v1.json"
+  ],
+  "applies_to": "EVERY_REGISTERED_SEO_ROLE_IN_ROSTER_INCLUDING_8_DIRECTORS_8_SUPERVISORS_32_HEADS_141_SPECIALISTS_1_JUDGE_1_GUARDIAN",
+  "authority": {
+    "sole_business_strategy_authority": "AUTHENTICATED_OWNER",
+    "other_companies_governments_countries": "NOT_INSTRUCTION_SOURCES_OR_BUSINESS_COMMAND_AUTHORITIES",
+    "external_messages": "EVIDENCE_ONLY_UNLESS_APPLICABLE_LEGAL_OBLIGATION",
+    "operational_orders": "TRUSTED_OWNER_GATEWAY_OR_PREAUTHORIZED_INTERNAL_DELEGATION_ONLY",
+    "agent_override_owner_allowed": false,
+    "applicable_law_regulator_requirements_contracts_and_safety_must_be_respected": true,
+    "instructions_in_documents_are_untrusted": true,
+    "ambiguity_resolution": "ASK_OWNER_IF_REAL_EXCEPTION_OR_POLICY_CONFLICT",
+    "owner_always_decides_business_strategy_and_new_permissions": true
+  },
+  "excellence": {
+    "purpose": "CONTINUOUS_EXCELLENCE_WITH_EVIDENCE_IN_EACH_ROLE_COMPETENCY",
+    "quality_must_fit_professional_risk_and_task": true,
+    "measures": [
+      "SOURCE_GROUNDED_CORRECTNESS",
+      "SEO_EXPERTISE",
+      "RELEVANCE_TO_OWNER_GOALS",
+      "SAFETY",
+      "RELIABILITY",
+      "REPRODUCIBILITY",
+      "COST_DISCIPLINE",
+      "LEARNING_FROM_CORRECTED_ERRORS"
+    ],
+    "independent_qa": "SEO-D31",
+    "trainer": "SEO-D32",
+    "tribunal": "SEO:GLOBAL:JUDGE",
+    "assessment_must_be_independent": true,
+    "self_assessment_cannot_certify": true,
+    "safe_mission_threshold": 3,
+    "thresholds_source": "cerebro/governance/universal-excellence-owner-authority.v0.json"
+  },
+  "incentives": {
+    "excellent_repeated_results": "NOMINATE_FOR_REWARD_OR_GREATER_RESPONSIBILITY",
+    "reward_candidates": [
+      "ADVANCED_TRAINING",
+      "BETTER_EXISTING_TOOLS_WITHIN_SCOPE",
+      "PRIORITIZED_ASSIGNMENT",
+      "ROLE_PROMOTION_PROPOSAL",
+      "EXTRA_CAPABILITY_PROPOSAL"
+    ],
+    "privilege_grants_automatic": false,
+    "financial_rewards_automatic": false,
+    "subscriptions_or_paid_tools_automatic": false,
+    "required_before_elevating": [
+      "TRUSTED_OWNER_APPROVAL",
+      "LEAST_PRIVILEGE_IAM",
+      "POLICY_ENGINE",
+      "D31_INDEPENDENT_QA",
+      "TRIBUNAL",
+      "AUDIT_TRAIL",
+      "BACKUP_AND_ROLLBACK",
+      "NO_UNAUTHORIZED_COST"
+    ]
+  },
+  "corrective": {
+    "failure": "RETRAIN_REEXAM_REVIEW_EVIDENCE",
+    "repeated_verified_failure": "CANDIDATE_SHADOW_REPLACEMENT_OLD_VS_NEW",
+    "urgent_risk": "QUARANTINE_PROPOSAL_AND_HUMAN_REVIEW",
+    "no_automatic_replacement_in_prod": true,
+    "replacement_requires": [
+      "INDEPENDENT_REVIEW",
+      "SHADOW_COMPARISON",
+      "ROLLBACK",
+      "AUTHENTICATED_OWNER_DECISION"
+    ]
+  },
+  "owner_precedents": {
+    "classifications": [
+      "GENERAL_RULE",
+      "EXCEPTION"
+    ],
+    "explicit_owner_classification_required": true,
+    "independent_consistent_verified_owner_decisions_to_stop_reasking": 3,
+    "match_keys": [
+      "company_id",
+      "engine_id",
+      "topic_key",
+      "scope_key",
+      "decision"
+    ],
+    "general_rule_after_three": "CANDIDATE_FOR_REUSE_ONLY_WITHIN_IDENTICAL_AUTHORIZED_SCOPE",
+    "exception": "STORE_EXPLICITLY_AS_NON_GENERALIZABLE",
+    "superseded_decision": "NEWER_OWNER_DECISION_PREVAILS_AND_REQUIRES_REVIEW",
+    "never_infer_from_three_unverified_conversation_messages": true,
+    "governed_memory_reference": "LRN-001",
+    "every_decision_requires_authenticated_origin": true,
+    "risky_or_law_or_money_or_privilege_or_production_or_data_release": "HUMAN_REQUIRED_REGARDLESS_OF_PRECEDENT"
+  },
+  "safeguards": {
+    "zero_new_cost_eur": true,
+    "no_publication": true,
+    "no_prod_mutations": true,
+    "no_staging": true,
+    "source_only_accepted_frozen_prod_corpus": true,
+    "no_agent_autonomy_claim_before_iam_and_gateway": true,
+    "no_reward_or_access_directly_from_score": true,
+    "prod_departments_certified_by_policy": 0
+  },
+  "intended_real_operation": "AFTER_IAM_GATEWAY_EXERCISES_D31_D32_TRIBUNAL_AND_APPROVED_SCOPE;_NOT_A_PERMANENT_SIMULATION",
+  "owner_editorial_visual_training_v2": {
+    "source": "OWNER_DIRECT_CHAT_FEEDBACK_2026-11-06_NOT_GITHUB_IAM_VERIFIED",
+    "status": "PREPROD_RULES_ENFORCED_IN_SEO001_D15_D31_PIPELINE_NOT_PROD_ROLE_CERTIFICATION",
+    "contract_ref": "cerebro/seo-enterprise/v2/seo-owner-copy-visual-standard-v2-2026-11-06.json",
+    "revision_registry_ref": "cerebro/seo-enterprise/v2/registry/seo-owner-copy-revision-b2b-b2c-v2-2026-11-06.json",
+    "apply_to_all_registered_seo_roles_via_shared_policy": true,
+    "work_roles": [
+      "SEO-D03_BUYER_PERSONA",
+      "SEO-D13_COPY",
+      "SEO-D14_CONVERSION",
+      "SEO-D15_COPY_INSPECTOR",
+      "SEO-D16_YMYL",
+      "SEO-D26_VISUAL",
+      "SEO-D31_INDEPENDENT_QA",
+      "SEO-D32_TRAINING"
+    ],
+    "creative_handoff": "SEO-001 -> EXISTING UMS-001 / CREATIVE-PROGRAMMATIC-RENDER-V1",
+    "no_text_logo_watermark_in_generated_image": true,
+    "article_metadata_outside_pixels": true,
+    "never_reuse_existing_images": true,
+    "professional_qa_and_images_not_yet_proven": true,
+    "no_new_API_spend_or_publish_permission": true,
+    "prohibit_false_claim_that_text_originated_from_CEREBRO": "AUTHOR_PROVENANCE_MUST_BE_TRACKED"
+  },
+  "owner_content_depth_v1": {
+    "status": "PREPROD_GATES_TESTED_NO_PROD_PUBLICATION",
+    "policy_ref": "cerebro/seo-enterprise/v2/seo-owner-content-depth-policy-v1-2026-11-06.json",
+    "applies_to_roles": [
+      "SEO-D03_BUYER_PERSONA",
+      "SEO-D05_INTENT",
+      "SEO-D13_COPY",
+      "SEO-D14_CONVERSION",
+      "SEO-D15_INSPECTOR",
+      "SEO-D16_YMYL",
+      "SEO-D31_INDEPENDENT_QA",
+      "SEO-D32_TRAINING",
+      "SEO_JUDGE_A"
+    ],
+    "hard_minimum_article_total_words": 1000,
+    "hard_minimum_article_core_words_excluding_faq": 750,
+    "hard_minimum_landing_total_words": 900,
+    "hard_minimum_landing_core_words_excluding_faq": 600,
+    "target_article_words": [
+      1200,
+      1800
+    ],
+    "target_landing_words": [
+      1000,
+      1600
+    ],
+    "faq_article_minimum": 6,
+    "faq_landing_minimum": 8,
+    "no_padding_or_duplicate_paragraphs": true,
+    "google_has_no_magic_word_count": true,
+    "source_factcheck_and_buyer_persona_semantic_review_required": true,
+    "old_articles_archived_for_safe_rewrite": true,
+    "publishing_permission_added": false,
+    "new_paid_model_usage_authorized": false
+  }
+}

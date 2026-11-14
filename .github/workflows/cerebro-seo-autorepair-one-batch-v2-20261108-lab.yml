@@ -1,0 +1,69 @@
+name: CEREBRO SEO · Self-Repair V2 · Quality-First LAB Batch
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-autorepair-one-batch-v2-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-autorepair-one-batch-live-runner-v2.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-autorepair-one-batch-live-runner-v2.test.mjs'
+      - '.github/workflows/cerebro-seo-autorepair-one-batch-v2-20261108-lab.yml'
+permissions:
+  contents: read
+concurrency:
+  group: seo001-autorepair-v2-one-batch-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+jobs:
+  guarded-autorepair-one-batch:
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && github.run_attempt == 1 }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      # QA-only updates, including post-locked-batch regressions, never call provider.
+      # Regressions for typed previous-draft context and off-topic paragraph guards.
+      - name: All learned SEO and self-repair safety tests
+        run: |
+          node --version
+          node --check cerebro/seo-enterprise/v2/runtime/seo-autorepair-one-batch-live-runner-v2.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-quality-self-repair-v0.mjs
+          node --check cerebro/seo-enterprise/v2/runtime/seo-d13-free-project-one-shot-canary-v0.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-autorepair-one-batch-live-runner-v2.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-learned-one-batch-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-quality-self-repair-v0.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-d13-free-project-one-shot-canary-v0.test.mjs
+      - name: Verify one-shot owner commit and zero-euro manifest
+        id: permit
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.pull_request.head.sha }}"
+          subject="$(git log -1 --format=%s)"
+          if [ "$subject" = "seo(autorepair): ONE_BATCH_LAB_20261108_V2" ]; then
+            node --input-type=module -e "import {verifyAutoRepairPilot} from './cerebro/seo-enterprise/v2/runtime/seo-autorepair-one-batch-live-runner-v2.mjs';const v=verifyAutoRepairPilot();if(v.max_calls!==6)process.exit(1)"
+            echo 'launch=true' >> "$GITHUB_OUTPUT"
+            echo 'SEO001_AUTOREPAIR=ONE_BOUNDED_LAB_BATCH_PERMITTED'
+          else
+            echo 'launch=false' >> "$GITHUB_OUTPUT"
+            echo 'SEO001_AUTOREPAIR=HOLD_NO_APPROVED_TRIGGER'
+          fi
+      - name: Run one real LAB batch with maximum six Free model requests
+        if: ${{ steps.permit.outputs.launch == 'true' }}
+        env:
+          CEREBRO_GEMINI_FREE_API_KEY: ${{ secrets.CEREBRO_GEMINI_FREE_API_KEY }}
+          OUTPUT_DIR: ${{ runner.temp }}/seo001-autorepair-${{ github.run_id }}
+        run: |
+          node cerebro/seo-enterprise/v2/runtime/seo-autorepair-one-batch-live-runner-v2.mjs "$OUTPUT_DIR"
+      - name: Archive QA and drafts, never publish
+        if: ${{ always() && steps.permit.outputs.launch == 'true' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-autorepair-20261108-v2-LAB-UNAPPROVED
+          path: ${{ runner.temp }}/seo001-autorepair-${{ github.run_id }}/*
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Explicit gate remains closed
+        if: ${{ always() }}
+        run: echo 'NO WP CRM MEDIA WRITE NO AUTO PUBLISH NO PAID FALLBACK 2 PIECES MAX 3 ATTEMPTS EACH 6 TOTAL CALLS'

@@ -1,0 +1,50 @@
+name: CEREBRO SEO V6 Offline Agency Repair LAB Zero Provider
+on:
+  pull_request:
+    paths:
+      - 'cerebro/seo-enterprise/v2/registry/seo001-surgical-deterministic-v6-2026-11-08.json'
+      - 'cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs'
+      - 'cerebro/seo-enterprise/v2/tests/seo-surgical-v6-offline-lab.test.mjs'
+      - '.github/workflows/cerebro-seo-surgical-v6-offline-lab.yml'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: seo001-surgical-v6-offline
+  cancel-in-progress: false
+jobs:
+  offline-b2b-surgical:
+    if: github.event.pull_request.number == 22 && github.run_attempt == 1
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Offline regression and zero-cost tests
+        run: |
+          node --check cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-surgical-v6-offline-lab.test.mjs
+          # Historical V5 launch test expects a PREPARED nonce; V5 is sealed now.
+          # V6's own tests verify the immutable V5 COMPLETED manifest instead.
+          node --test cerebro/seo-enterprise/v2/tests/seo-v3-real-score-replay.test.mjs
+      - name: Download sealed V5 evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: seo001-surgical-v5-20261108-LAB-UNAPPROVED
+          run-id: 42446075036
+          github-token: ${{ github.token }}
+          path: /tmp/seo001-v5-readonly
+      - name: Repair B2B two paragraphs exactly
+        run: node cerebro/seo-enterprise/v2/runtime/seo-surgical-v6-offline-lab.mjs /tmp/seo001-v5-readonly /tmp/seo001-v6-unapproved
+      - name: Archive zero-provider unapproved output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo001-surgical-v6-offline-LAB-UNAPPROVED
+          path: /tmp/seo001-v6-unapproved/*
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Permanent publication block
+        if: always()
+        run: echo 'ZERO MODEL CALLS / ZERO PAID / NO WORDPRESS CRM SUPABASE MEDIA / NO PUBLICATION'

@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0.0",
+  "batch_id": "SEO001-V14-REAL-EVIDENCE-TRIAGE-20261108",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "14.0.0",
+  "source_commit": "a175e1da4b52ae6f4d76e82823a321b61a3682d5",
+  "status": "REAL_EVIDENCE_IDENTIFIED_RELEASE_HOLD",
+  "artifacts": {
+    "legal_pack": "cerebro/seo-enterprise/v2/evidence/SEO001_V14_CIERRE_EVIDENCIAS_REALES_2026-11-08.md",
+    "baseline_v7": [
+      "c4d9ccbf5175884033edb7c0c350bcbf48f7202b36250c691ed9969172c69918",
+      "a01cd9e03baeb421c5565658197eb2a63ff2a63833066991b2183feb1156beec"
+    ],
+    "wordpress_db_checkpoints": [
+      71,
+      72
+    ],
+    "media_ids": [
+      52718,
+      52719,
+      52720,
+      52721
+    ],
+    "last_successful_http_loopback_run": 42473590980
+  },
+  "real_verified": [
+    "WP_DB_CHECKPOINTS_EXIST",
+    "V7_LAB_CI",
+    "V9_JPEG_PHYSICAL_BYTES",
+    "V12_ORIGINAL_PLUGIN_PHP_MOCK",
+    "V13_LOCAL_HTTP_WRITE_READBACK_ROLLBACK",
+    "PREPROD_EDGE_FUNCTION_READONLY_INSPECTED"
+  ],
+  "still_unverified": [
+    "MEDIA_PROVIDER_ORIGINAL_RECEIPT_AND_COMMERCIAL_RIGHTS",
+    "ACTUAL_MOBILE_WORDPRESS_SESSION",
+    "POSITIVE_ISOLATED_CRM_E2E",
+    "MATCHED_PRIVATE_FULL_WORDPRESS_BACKUP_AND_RESTORE",
+    "INDEPENDENT_LEGAL_FINANCIAL_SIGNOFF",
+    "LEAST_PRIVILEGE_PUBLISHER_IAM_REVOKE_TEST",
+    "THREE_OWNER_SHA_APPROVED_SUPERVISED_PUBLISHES"
+  ],
+  "risk": {
+    "wordpress_prod_writes": 0,
+    "crm_prod_writes": 0,
+    "supabase_writes": 0,
+    "new_model_calls": 0,
+    "publish_allowed": false,
+    "autopublish_allowed": false,
+    "full_quality_certified": false,
+    "owner_grant_verified": false
+  }
+}

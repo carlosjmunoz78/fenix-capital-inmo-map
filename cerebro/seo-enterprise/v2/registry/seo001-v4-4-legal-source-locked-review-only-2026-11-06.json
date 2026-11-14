@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "PREPROD",
+  "version": "V4.4-REVIEW-ONLY",
+  "based_on": "V4.3-REVIEW-ONLY",
+  "status": "SOURCE_LOCKED_LEGAL_RISK_REVIEW_ONLY_INDEPENDENT_SIGNOFF_HOLD",
+  "owner_strategy_approval_scope": "BRIEFS_AND_DRAFTS_ONLY",
+  "source_commit_sha": "a7b53ef346d9319136ca4e1786555499f9c15618",
+  "candidates": [
+    {
+      "persona": "PARTICULARES",
+      "work_id": "SEO001-FENIX-B2C-EDITORIAL-001",
+      "source_file": "cerebro/seo-enterprise/v2/drafts/v4-3-review-only/compradores-v4-3-review-only.html",
+      "source_git_blob": "4f39eb8467e3a1d826d58c73904e14cd8e8bca35",
+      "source_sha256": "091957f47867bc27f736bf757a7e141bf0b26b1bb9706b235994a34f9c252785",
+      "candidate_file": "cerebro/seo-enterprise/v2/drafts/v4-4-review-only/compradores-v4-4-review-only.html",
+      "candidate_sha256": "6fb1131a0db8a4eb00bc891beb99724589378fd394483bb918242bc90844f551",
+      "changes": [
+        {
+          "risk": "LPH_COMMUNITY_DEBT_CERTIFICATE_ISSUER_AND_WAIVER",
+          "from": "Asimismo, resulta conveniente solicitar el certificado de estar al corriente en el pago de las cuotas comunitarias emitido por el administrador de la finca. Este certificado ayuda a conocer el estado de deudas comunitarias, aunque no elimina por sí solo la responsabilidad que la ley puede vincular al inmueble por cantidades pendientes. Revisa esa situación antes de la firma.",
+          "to": "Asimismo, conviene que el vendedor aporte para la escritura la certificación sobre el estado de deudas con la comunidad. Según el artículo 9.1.e de la Ley de Propiedad Horizontal, la emite quien ejerza las funciones de secretario, con el visto bueno del presidente, salvo que el comprador exonere expresamente al vendedor de aportarla. El certificado no elimina por sí solo la afección legal del inmueble por determinadas deudas anteriores. Revisa su alcance antes de firmar."
+        },
+        {
+          "risk": "B2C_EDITORIAL_ACTAS_AGREEMENT",
+          "from": "Solicita al vendedor los últimos actas de la comunidad",
+          "to": "Solicita al vendedor las últimas actas de la comunidad"
+        }
+      ],
+      "sources": [
+        "https://www.boe.es/buscar/act.php?id=BOE-A-1960-10906"
+      ],
+      "professional_legal_review_verified": false
+    },
+    {
+      "persona": "INMOBILIARIAS",
+      "work_id": "SEO001-FENIX-B2B-EDITORIAL-002",
+      "source_file": "cerebro/seo-enterprise/v2/drafts/v4-3-review-only/inmobiliarias-v4-3-review-only.html",
+      "source_git_blob": "dd70e7d2839a7da1e8bd87468118ec9bf6cb6dfd",
+      "source_sha256": "24c851be15c2cd558c3ae74046f1fd98f8cf500eaab30357a909edfa705c6e0b",
+      "candidate_file": "cerebro/seo-enterprise/v2/drafts/v4-4-review-only/inmobiliarias-v4-4-review-only.html",
+      "candidate_sha256": "61ccdfbcc235a5c450eac7a9de28344abffc49fd9a5483fcb1ccb21de2fc8f66",
+      "changes": [
+        {
+          "risk": "GDPR_REFERRAL_LAWFUL_BASIS_ACCOUNTABILITY",
+          "from": "<h3>¿Hace falta consentimiento para derivar al comprador?</h3><p>No necesariamente. La comunicación de datos personales exige una base jurídica válida y una información transparente al comprador. El consentimiento puede ser una de esas bases, pero no la única. Conviene documentar el procedimiento y revisar cada supuesto antes de transmitir datos.</p>",
+          "to": "<h3>¿Qué base jurídica permite compartir datos del comprador con un asesor hipotecario?</h3><p>Depende de la finalidad y del papel de la agencia y el asesor como responsables, corresponsables o encargados del tratamiento. Antes de comunicar datos, deben identificar y documentar la base jurídica aplicable e informar al comprador. Si se utiliza el consentimiento, este debe ser libre, informado e inequívoco; la cesión a terceros puede requerir una manifestación diferenciada. Las derivaciones con finalidad comercial pueden exigir garantías adicionales. Conviene revisar el supuesto concreto antes de transmitir información.</p>"
+        },
+        {
+          "risk": "B2B_EDITORIAL_VERB_AGREEMENT",
+          "from": "los nuevos agentes que se incorpore al equipo de Córdoba",
+          "to": "los nuevos agentes que se incorporen al equipo de Córdoba"
+        }
+      ],
+      "sources": [
+        "https://www.aepd.es/preguntas-frecuentes/2-tus-obligaciones-como-responsable-del-tratamiento/5-bases-legitimadoras-del-tratamiento/FAQ-0214-cuales-son-las-bases-de-legitimacion-para-el-tratamiento-de-datos",
+        "https://www.aepd.es/preguntas-frecuentes/2-tus-obligaciones-como-responsable-del-tratamiento/5-bases-legitimadoras-del-tratamiento/FAQ-0211-segun-el-rgpd-como-debe-solicitarse-el-consentimiento-de-los-interesados-para-tratar-sus-datos-personales"
+      ],
+      "professional_legal_review_verified": false
+    }
+  ],
+  "professional_ymyl_review_verified": false,
+  "independent_seo_review_verified": false,
+  "legal_review_completed": false,
+  "wordpress_restore_real_verified": false,
+  "core_guard_authorized_write": false,
+  "wordpress_draft_iam_verified": false,
+  "ums_original_photo_ready": false,
+  "owner_exact_digest_approved": false,
+  "wordpress_drafts_created": false,
+  "publish_authorized": false,
+  "autonomous_production_ready": false,
+  "wordpress_writes": 0,
+  "paid_api_calls_this_revision": 0,
+  "next_block": "Human legal YMYL review of exact V4.4 digests, original UMS images/licences, private WordPress backup restore, draft IAM, owner approved SHA; no publication"
+}
