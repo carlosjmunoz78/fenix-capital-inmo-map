@@ -7,6 +7,7 @@ export type FactAttestationLab={
  registry_count:179;base_count:177;registry_digest:string;
  executed:true;external_actions_executed:false;prod_execution_enabled:false;additional_cost_eur:0;
  operational_engines_verified:false;replayed:boolean;
+ durable_audit?:true;other_engines_executed?:false;staging_probed?:false;
 };
 export type FactResult={kind:'verified'|'unavailable'|'denied'|'not_recorded';latest:FactAttestationLab|null;message:string};
 const unavailable=(kind:'unavailable'|'denied'|'not_recorded',message:string):FactResult=>({kind,latest:null,message});
