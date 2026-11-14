@@ -24,3 +24,12 @@ Desde hPanel, `Archivos → Administrador de archivos → domains/fenixcapital.e
 
 ## Regla permanente
 Suspensión de staging por orden del propietario: **HASTA NUEVA ORDEN**. No modificar App/CRM/WordPress PROD, DNS ni rama main. Preservar contratos, snapshots y rollback antes de cualquier modificación; cambio solo en el recurso exacto imprescindible para proteger staging.
+
+
+## Diagnóstico de código PHP vivo · Canary FIXED
+
+**HECHO, 14/11/2026:** el propietario abrió en modo editor `cerebro/job001_wp_bridge_canary_FIXED.php` en el administrador de archivos Hostinger; se inspeccionó su contenido actual desde el árbol de accesibilidad de Opera, **sin pulsar Save ni ejecutar PHP**. El archivo contiene literalmente el endpoint `https://staging.fenixcapital.es/wp-json/fenix-guard/v1/cerebro/status` y un uso de `curl_init`. El propio comentario `READ_ONLY_CANARY · PREPROD` no convierte el chequeo en una operación autorizada mientras el propietario exige no contactar staging; además, el script puede registrar resultados en `job001_wp_bridge_canary.log`.
+
+**Conclusión:** las cuatro tareas HOST-01 a HOST-04 son consumidores externos de una ruta expresamente suspendida y deben quedar **pausadas/deshabilitadas**, manteniendo íntegro el archivo PHP y su registro. hPanel en la vista observada mostraba `Borrar`, sin interruptor de pausa; si no hay opción de desactivar, se puede retirar la programación de esas cuatro tareas, **solo después de conservar el inventario completo arriba**, con restauración exacta de cron y comando únicamente tras nueva orden explícita. No borrar ni editar `job001_master_scheduler.php`: se inspeccionará por separado.
+
+**Estado de intervención:** `BLOCKER_FOUND_HOSTINGER_CANARY`; **cron de Hostinger todavía no verificados como detenidos** en este punto. Se requiere comprobación en hPanel después de la acción humana. No declarar aislamiento global hasta verificar cese de estas cuatro programaciones y revisar el PHP maestro.
