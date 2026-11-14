@@ -2,6 +2,7 @@ import {useCallback,useEffect,useRef,useState} from 'react';
 import {canPreviewUniversalOperativa,readUniversalOperativaLab,simulateFactRegistryDryRunLab,type UniversalLabDryRun,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
 import './cerebro-universal-operativa-lab.css';
 import CerebroStagingSuspensionLab from './CerebroStagingSuspensionLab';
+import CerebroFactRegistryLab from './CerebroFactRegistryLab';
 export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
  const [result,setResult]=useState<UniversalLabProof|null>(null);
  const [loading,setLoading]=useState(false);
@@ -42,7 +43,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
  if(!enabled)return null;
  return <section className="op-uni-lab" aria-label="Gateway Universal en ensayo">
   <div className="op-uni-lab-head">
-   <div><strong>Gateway Universal · LAB</strong><span>Operativa · Consultas y evidencia LAB · Sin ejecución de motores</span></div>
+   <div><strong>Gateway Universal · LAB</strong><span>Operativa · Lecturas y certificación FACT-001 LAB · Otros motores sin activar</span></div>
    <button type="button" onClick={()=>{void refresh()}} disabled={loading} aria-label="Verificar conexión del Gateway Universal">
     {loading?'Comprobando…':'Verificar conexión'}
    </button>
@@ -62,6 +63,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <small>Validación LAB sin ejecución. Si se aprueba, se guarda auditoría persistente en PREPROD; producción sigue bloqueada.</small>
    {dryRun?<span role="status">{dryRun.message}</span>:null}
   </div>:null}
+  {result?.kind==='ready'?<CerebroFactRegistryLab/>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-dependency" aria-label="Estado de dependencia WordPress staging">
    <strong>Staging suspendida hasta nuevo aviso</strong>
    <span>{result.dependencies?.state==='SUSPENDED_VERIFIED'
