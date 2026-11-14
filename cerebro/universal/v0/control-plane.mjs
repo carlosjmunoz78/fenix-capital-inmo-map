@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {getLabDependencyStatusV0,assessLabOperationV0,rejectSuspendedTargetV0} from './dependency-policy.mjs';
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
-const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_evidence','submit_command','invoke_read','audit_log'];
+const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_fact_attestation_latest','get_evidence','submit_command','invoke_read','audit_log'];
 const error=s=>{throw Error(s);};
 const value=(v,name)=>typeof v==='string'&&v.length>0&&v.length<=160?v:error('INVALID_'+name);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -9,8 +9,8 @@ const clone=v=>structuredClone(v);
 const stable=v=>JSON.stringify(v,Object.keys(v).sort());
 const required=['company_id','engine_id','environment','version'];
 export class UniversalGatewayLabV0 {
- #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #jobControls; #stagingReader; #audit=[]; #idem=new Map(); #cap;
- constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null,jobControls=null,stagingReader=null}){
+ #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #jobControls; #stagingReader; #factAdapter; #audit=[]; #idem=new Map(); #cap;
+ constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null,jobControls=null,stagingReader=null,factAdapter=null}){
   if(!object(registry)||registry.count!==179||registry.engine_ids?.length!==179||new Set(registry.engine_ids).size!==179||registry.defaults?.environment!=='SCAFFOLD'||registry.extension?.prod_authorized!==false||registry.extension?.trading_access!==false) error('REGISTRY_UNSAFE');
   if(typeof authenticate!=='function')error('AUTHENTICATOR_REQUIRED');
   if(jobs!==null&&typeof jobs.listForContext!=='function')error('JOB_READER_REQUIRED');
@@ -18,6 +18,8 @@ export class UniversalGatewayLabV0 {
   if(ownerSources!==null&&typeof ownerSources.listForContext!=='function')error('OWNER_SOURCES_READER_REQUIRED');
   if(jobControls!==null&&typeof jobControls.listForContext!=='function')error('JOB_CONTROLS_READER_REQUIRED');
   if(stagingReader!==null&&(typeof stagingReader.readForContext!=='function'||typeof stagingReader.captureForContext!=='function'))error('STAGING_READER_REQUIRED');
+  if(factAdapter!==null&&(typeof factAdapter.executeForContext!=='function'||typeof factAdapter.latestForContext!=='function'))error('FACT_EXECUTOR_ADAPTER_REQUIRED');
+  this.#factAdapter=factAdapter;
   this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;this.#jobControls=jobControls;this.#stagingReader=stagingReader;
   this.#cap={
    company_id:'SERVER_AUTHENTICATED',engine_id:'FACT-001',environment:'LAB',version:'0.1.0-lab',
@@ -41,16 +43,27 @@ export class UniversalGatewayLabV0 {
   if(!actor.scopes.includes('cerebro:universal:read'))error('SCOPE_DENIED');
   const can=actor.scopes.includes('cerebro:factory:inspect');
   const cap=can?{...clone(this.#cap),company_id}:null;
+  const attestCap=can&&this.#factAdapter?{
+   company_id,engine_id:'FACT-001',environment:'LAB',version:'0.1.0-lab',
+   capability_id:'fact.registry.attest',input_schema:{type:'object',properties:{},additionalProperties:false},
+   output_schema:{type:'object'},permissions:['cerebro:factory:inspect','cerebro:command:dryrun'],
+   policy:'LAB_ALLOWLISTED_DETERMINISTIC_EXECUTION',required_secrets:[],
+   side_effects:'APPEND_ONLY_LAB_RECEIPT',executor:'CEREBRO_SHARED_LAB_EXECUTOR_V0',
+   dependencies:['GOV-001'],health:'LAB_EXECUTION_REQUIRES_E2E',
+   evidence_refs:['cerebro/registry/engine-registry.v1.json'],
+   rollback:'DISABLE_ADAPTER_OR_REVERT_ISOLATED_LAB_PR',cost_budget_eur:0,
+   human_exception_policy:HUMAN_CODES
+  }:null;
   const requireCap=()=>{if(!cap||params.capability_id!==cap.capability_id)error('CAPABILITY_UNAVAILABLE');return cap;};
   const payload=()=>{const p=params.payload??{};if(!object(p)||Object.keys(p).length!==0)error('PAYLOAD_SCHEMA_DENIED');return p;};
   let response;
   switch(action){
-   case 'list_capabilities':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capabilities:cap?[cap]:[]};break;
-   case 'get_capability':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capability:requireCap()};break;
+   case 'list_capabilities':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capabilities:cap?[cap,...(attestCap?[attestCap]:[])]:[]};break;
+   case 'get_capability':response={status:'OK',source:'REPOSITORY_SNAPSHOT_NOT_LIVE',capability:params.capability_id===attestCap?.capability_id?attestCap:requireCap()};break;
    case 'get_engine_status':{
     const id=value(params.engine_id,'ENGINE_ID');
     if(!this.#registry.engine_ids.includes(id))error('ENGINE_NOT_REGISTERED');
-    response={status:'OK',engine_id:id,defined_in_registry:true,definition_environment:'SCAFFOLD',runtime:'NOT_VERIFIED',lab_read_capabilities:cap&&id==='FACT-001'?[cap.capability_id]:[],source:'REPOSITORY_SNAPSHOT_NOT_LIVE'};break;
+    response={status:'OK',engine_id:id,defined_in_registry:true,definition_environment:'SCAFFOLD',runtime:'NOT_VERIFIED',lab_read_capabilities:cap&&id==='FACT-001'?[cap.capability_id,...(attestCap?[attestCap.capability_id]:[])]:[],source:'REPOSITORY_SNAPSHOT_NOT_LIVE'};break;
    }
    case 'get_dependency_status':{
     response=getLabDependencyStatusV0({company_id,environment:'LAB'});break;
@@ -91,6 +104,16 @@ export class UniversalGatewayLabV0 {
        evidence.prod_execution_enabled!==false||evidence.executed_external_actions!==false)
      error('STAGING_EVIDENCE_CONTRACT_INVALID');
     response=clone(evidence);break;
+   }
+   case 'get_fact_attestation_latest':{
+    if(!actor.scopes.includes('cerebro:factory:inspect'))error('SCOPE_DENIED');
+    if(!this.#factAdapter){
+     response={status:'UNAVAILABLE',reason:'FACT_EXECUTOR_NOT_CONNECTED',executed:false,prod_execution_enabled:false};break;
+    }
+    const latest=await this.#factAdapter.latestForContext({company_id,environment:'LAB',session_token});
+    if(!object(latest)||!['OK','UNAVAILABLE'].includes(latest.status)||latest.prod_execution_enabled!==false)
+     error('FACT_LATEST_CONTRACT_INVALID');
+    response=clone(latest);break;
    }
    case 'list_owner_sources':{
     if(!actor.scopes.includes('cerebro:factory:inspect'))error('SCOPE_DENIED');
@@ -152,6 +175,26 @@ export class UniversalGatewayLabV0 {
    case 'get_evidence':response={status:'OK',source:'STATIC_REGISTRY_REFERENCE',evidence_refs:requireCap().evidence_refs,live_test_verified:false};break;
    case 'submit_command':{
     if(!actor.scopes.includes('cerebro:command:dryrun'))error('SCOPE_DENIED');
+    if(params.capability_id==='fact.registry.attest'){
+     if(!attestCap)error('CAPABILITY_UNAVAILABLE');
+     rejectSuspendedTargetV0(params);payload();
+     if(params.engine_id!=='FACT-001'||params.version!=='0.1.0-lab'||params.dry_run!==false)
+      error('FACT_ATTEST_CONTRACT_DENIED');
+     if(typeof params.idempotency_key!=='string'||!/^lab-fact-attest-[a-z0-9-]{12,48}$/.test(params.idempotency_key))
+      error('FACT_ATTEST_IDEMPOTENCY_DENIED');
+     if(params.estimated_additional_cost_eur!==undefined&&params.estimated_additional_cost_eur!==0)
+      error('FACT_ATTEST_COST_DENIED');
+     if(params.risk!==undefined&&params.risk!=='LOW')error('FACT_ATTEST_RISK_DENIED');
+     if(params.signature_required===true||params.human_exception!==undefined)error('FACT_ATTEST_HUMAN_REQUIRED');
+     if(this.#registry.base_source?.base_count!==177||this.#registry.extension?.preserve_base_ids!==true||
+       JSON.stringify(this.#registry.engine_ids.slice(-2))!==JSON.stringify(['HCI-001','MOTION-001']))
+      error('FACT_REGISTRY_DRIFT');
+     const digest=crypto.createHash('sha256').update(this.#registry.engine_ids.join('|')).digest('hex');
+     response={status:'FACT_ATTESTATION_PREPARED',executed:false,company_id,engine_id:'FACT-001',
+      environment:'LAB',version:'0.1.0-lab',capability_id:'fact.registry.attest',
+      registry_count:179,base_count:177,preserved_base:true,registry_digest:digest,
+      prod_execution_enabled:false,external_actions_executed:false,additional_cost_eur:0};break;
+    }
     if(params.dry_run!==true)error('LAB_WRITES_DISABLED');
     rejectSuspendedTargetV0(params);
     requireCap();payload();
