@@ -34,3 +34,23 @@ Estado de esta comprobación: **POR AUDITAR / read-only**, salvo el bloqueo del 
 5. No promover a PROD ni habilitar ejecución arbitraria desde Operativa mientras falten permisos específicos, auditoría durable, observabilidad de trabajo real, OLD vs NEW, rollback probado y tribunal.
 
 **Política permanente:** staging suspendido por el propietario hasta instrucción explícita; no probarlo, visitarlo, reiniciarlo ni reactivarlo. App, CRM, WordPress PROD, DNS, main y Trading LAB fuera de alcance. Coste adicional autorizado 0 €.
+
+
+### Ampliación de cadena cron → Edge · 2026-11-14
+
+**Hallazgo posterior en SOLO LECTURA:** seis cron SEO adicionales siguen activos en `cron.job`, y cinco de sus funciones SQL invocan Edge Functions que contienen la URL literal `staging.fenixcapital.es` y llamadas `fetch`. **Riesgo de acceso indirecto**, NO evidencia de que hayan accedido realmente a staging ni de que se hayan ejecutado cambios web.
+
+| cron jobid | plan | SQL dispatch | Edge destino | estado |
+|---|---|---|---|---|
+| 61 | cada minuto | `seo001_dispatch_elementor_safe_writer_batch_preprod()` | `fenix-seo-elementor-safe-writer-preprod` v8 | ACTIVE |
+| 62 | cada minuto | `seo001_dispatch_sitewide_regression_preprod()` | `fenix-seo-sitewide-regression-preprod` v7 | ACTIVE |
+| 65 | cada minuto | `seo001_dispatch_infrastructure_autopilot_preprod()` | `fenix-seo-infrastructure-autopilot-preprod` v4 | ACTIVE |
+| 67 | cada minuto | `seo001_dispatch_web_content_ux_audit_v1_preprod()` | `fenix-web-content-ux-audit-v1-preprod` v5 | ACTIVE |
+| 68 | a las :17 cada 6 h | `seo001_dispatch_all_landing_contract_audits_preprod()` | derivación SQL a auditar | ACTIVE |
+| 70 | minuto :12 cada hora | `seo001_dispatch_blog_visual_audit_preprod()` | `fenix-blog-visual-audit-preprod` v2 | ACTIVE |
+
+La última inspección de `cron.job_run_details` arrojó `succeeded` en los seis cron (cuatro de ellos a **2026-11-14 07:47 UTC**), **pero esto acredita SOLO la finalización del comando SQL, no la respuesta downstream de Edge, WordPress ni una llamada a staging**. Ningún cron fue pausado, reprogramado ni ejecutado manualmente.
+
+**Gate P0 adicional:** antes de permitir ejecuciones desde Operativa, revisar en lectura el código, los guardas, las llamadas `fetch`, el estado de la cola y los efectos externos para estos cinco Edge. Determinar si invocan staging en operación ordinaria y si hay un interruptor seguro aislado. Documentar snapshots/contratos y probar bloqueos fail-closed en paralelo sin llamadas exteriores; no sobrescribir Edge ni desactivar cron sin demostrar dependencias, no ejecutar probing. Un cron SQL `succeeded` nunca equivale a motor `CONFIRMED_OPERATIONAL`.
+
+Continuar LAB Universal/Operativa mediante Gateway existente; no alterar otros sistemas.
