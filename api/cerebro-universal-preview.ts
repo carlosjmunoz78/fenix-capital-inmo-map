@@ -106,8 +106,26 @@ export default async function handler(req:Req,res:Res){
     params:{company_id:'fenix',environment:'LAB'}
    });
    if(probe?.status!=='OK')throw Error('OWNER_ACCESS_DENIED');
-   return res.status(200).json({
-    ...planOperatorInstructionLab(params.instruction),
+   const planned=planOperatorInstructionLab(params.instruction);
+   if(planned.status==='PLAN_READY'&&planned.intent==='ENGINE_STATUS'){
+    const id=planned.target_engine_id;
+    if(typeof id!=='string'||!registry.engine_ids.includes(id))
+     return res.status(200).json({status:'NOT_SUPPORTED_IN_LAB',execution_allowed:false,
+      reason:'ENGINE_NOT_REGISTERED',transport:'PREVIEW_ONLY_SERVER_VERIFIED',
+      source:'DETERMINISTIC_OWNER_LAB_ROUTER',executed:false,
+      prod_execution_enabled:false,staging_probed:false,durable_audit:false,conversation_persisted:false});
+    const checked=await gateway.handle({session_token:bearer.replace(/^Bearer\\s+/i,''),
+     action:'get_engine_status',params:{company_id:'fenix',environment:'LAB',engine_id:id}});
+    if(checked.status!=='OK'||checked.engine_id!==id||
+      checked.defined_in_registry!==true||checked.runtime!=='NOT_VERIFIED'||checked.source!=='REPOSITORY_SNAPSHOT_NOT_LIVE')
+     return res.status(503).json({status:'UNAVAILABLE',reason:'ENGINE_STATE_SOURCE_INVALID'});
+    return res.status(200).json({...planned,engine_runtime:checked.runtime,
+     engine_definition_environment:checked.definition_environment,engine_status_source:checked.source,
+     transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:'DETERMINISTIC_OWNER_LAB_ROUTER',
+     executed:false,prod_execution_enabled:false,staging_probed:false,
+     durable_audit:false,conversation_persisted:false});
+   }
+   return res.status(200).json({...planned,
     transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:'DETERMINISTIC_OWNER_LAB_ROUTER',
     executed:false,prod_execution_enabled:false,staging_probed:false,
     durable_audit:false,conversation_persisted:false
