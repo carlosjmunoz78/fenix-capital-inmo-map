@@ -8,6 +8,10 @@ const slugs = Object.freeze([
   'fenix-seo-conversion-e2e-preprod',
   'fenix-cerebro-city-signer-preprod',
   'fenix-seo-coreguard-bootstrap-probe-preprod',
+  'fenix-web-gold-pattern-remediator-preprod',
+  'fenix-web-gold-feedback-fix-preprod',
+  'fenix-public-content-sentinel-preprod',
+  'fenix-precio-maximo-public-clean-preprod',
 ]);
 
 for (const slug of slugs) {
