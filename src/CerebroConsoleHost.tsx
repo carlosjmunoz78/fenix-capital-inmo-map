@@ -35,7 +35,7 @@ export default function CerebroConsoleHost(){
  const location=useLocation();
  const navigate=useNavigate();
  const isCerebroPath=location.pathname.replace(/\/+$/,'')==='/cerebro';
- const previewHost=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname);
+ const previewHost=typeof window!=='undefined'&&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname);
  const params=new URLSearchParams(location.search);
  const visualPreview=params.get('visual_lab')==='cockpit-v3';
  // The owner-only V3 is the production Operativa default. Legacy remains reversible.

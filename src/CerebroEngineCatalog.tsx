@@ -1,6 +1,7 @@
 import {useMemo,useState} from 'react';
 import {Cpu,Search,ShieldCheck,Workflow,ChevronRight} from 'lucide-react';
 import type {UniverseEngine,FactoryEngine,FactoryDirectory,UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
+import CerebroUniversalOperativaLabPanel from './CerebroUniversalOperativaLabPanel';
 import registry from '../cerebro/registry/engine-registry-detailed-20261113.json';
 import bindings from '../cerebro/registry/existing-engine-bindings.json';
 import './cerebro-engine-catalog.css';
@@ -40,6 +41,7 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
    <div><small>FACT-001 · DISEÑO</small><strong>{factoryReady?factoryCatalog.length:'—'}</strong><span>Definiciones del diseño</span></div>
    <div><small>GITHUB · CAPTURA</small><strong>{observed.length}</strong><span>IDs con actividad observada</span></div>
   </div>
+  <CerebroUniversalOperativaLabPanel company={scope}/>
   <p className="op3-source-note">El diseño histórico de septiembre de 2026 NO certifica el estado actual. Los registros de producción, las dependencias y la capacidad de ejecutar requieren evidencias independientes.</p>
   <div className="op3-engine-tools">
    <label htmlFor="op3-engine-mode">Mostrar</label>

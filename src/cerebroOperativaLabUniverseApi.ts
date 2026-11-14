@@ -95,7 +95,7 @@ export async function fetchOwnerUniverseLab(company:UniverseCompanyRequest,signa
  const {data:{session}}=await supabase.auth.getSession();
  if(!session?.access_token)return {kind:'denied',data:null,reason:'AUTHENTICATION_REQUIRED'};
  const isPreview=typeof window!=='undefined'
-  &&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-326d86-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)
+  &&/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname)
   &&new URLSearchParams(window.location.search).get('visual_lab')==='cockpit-v3';
  const url=isPreview?new URL('/api/cerebro-preview-gateway?resource=universe',window.location.origin):new URL(OWNER_UNIVERSE_LAB);
  url.searchParams.set('company_id',company);

@@ -1,0 +1,154 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "FACT-001",
+  "environment": "LAB",
+  "version": "0.1.0-lab",
+  "capability_id": "fact.registry.attest",
+  "state": "SINGLE_CAPABILITY_LAB_E2E_VERIFIED",
+  "general_engine_runtime_verified": false,
+  "other_engines_autonomous_verified": false,
+  "description": "Deterministic attestation of the canonical 179-ID repository registry, followed by an append-only LAB receipt; does not launch registered engines.",
+  "input_contract": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {},
+    "idempotency_pattern": "^lab-fact-attest-[a-z0-9-]{12,48}$"
+  },
+  "output_contract": {
+    "status": "FACT_ATTESTATION_EXECUTED",
+    "registry_count": 179,
+    "base_count": 177,
+    "receipt_id": "uuid",
+    "registry_digest": "sha256_of_ordered_id_list"
+  },
+  "permissions": {
+    "owner_actor": "CARLOS-ADMIN",
+    "company_scope": [
+      "fenix"
+    ],
+    "allow_environment": [
+      "LAB"
+    ],
+    "scopes": [
+      "cerebro:universal:read",
+      "cerebro:factory:inspect",
+      "cerebro:command:dryrun"
+    ]
+  },
+  "policy": {
+    "default_deny": true,
+    "cost_ceiling_additional_eur": 0,
+    "requires_no_signature": true,
+    "risk": "LOW",
+    "requires_staging": false,
+    "human_exception_codes": [
+      "LEGAL_REQUIRED",
+      "SIGNATURE_REQUIRED",
+      "LOW_CONFIDENCE",
+      "HIGH_RISK",
+      "POLICY_CONFLICT",
+      "SECURITY_INCIDENT",
+      "MONEY_LIMIT",
+      "CUSTOMER_HUMAN_REQUEST"
+    ],
+    "prod_execution_allowed": false,
+    "trading_allowed": false,
+    "dynamic_url_allowed": false
+  },
+  "runtime": {
+    "gateway": "/api/cerebro-universal-preview",
+    "shared_edge": "cerebro-operativa-command-executor-lab-v0",
+    "edge_project": "hnqlnvakzaywtafeiybt",
+    "new_worker_per_engine": false,
+    "new_cron": false,
+    "new_queue": false,
+    "model_route": "DETERMINISTIC_NODE_CRYPTO",
+    "paid_ai_required": false
+  },
+  "events": [
+    {
+      "type": "FACT_ATTESTATION_EXECUTED",
+      "side_effect": "APPEND_ONLY_PREPROD_LAB_RECEIPT",
+      "idempotent": true
+    }
+  ],
+  "jobs": [],
+  "api_methods": [
+    "list_capabilities",
+    "get_capability",
+    "submit_command",
+    "get_fact_attestation_latest"
+  ],
+  "observability": {
+    "source": "public.cerebro_universal_fact_attestation_lab_v0",
+    "row_level_security": true,
+    "actor": "CARLOS-ADMIN",
+    "service_role_select": true,
+    "service_role_insert": true,
+    "service_role_update": false,
+    "service_role_delete": false
+  },
+  "data_contracts": {
+    "source_registry": "cerebro/registry/engine-registry.v1.json",
+    "base_registry": "cerebro/registry/engine-registry.seed.json",
+    "source_count": 179,
+    "base_count": 177,
+    "extensions": [
+      "HCI-001",
+      "MOTION-001"
+    ]
+  },
+  "tests": [
+    "cerebro/universal/v0/fact-execution.test.mjs",
+    "cerebro/universal/v0/execution-lab/anon-smoke.mjs",
+    ".github/workflows/cerebro-universal-gateway-v0-lab.yml"
+  ],
+  "evaluation": {
+    "physical_owner_e2e": true,
+    "first_receipt_id": "9bac7b1c-3ccc-4634-8866-e4a82eb6716f",
+    "first_receipt_created_at": "2026-11-14T09:34:33.460125Z",
+    "idempotency_replay_verified": true,
+    "duplicate_rows": 0,
+    "engine_execution_outside_fact_verified": false
+  },
+  "tribunal": {
+    "scope": "LAB_SINGLE_CAPABILITY",
+    "no_autonomy_promotion_without_full_gates": true,
+    "prod_gate": "CLOSED",
+    "staging_gate": "SUSPENDED_BY_OWNER"
+  },
+  "cost": {
+    "additional_subscriptions_added": 0,
+    "additional_cost_eur_budget": 0,
+    "provider_metered_cost_verified": false
+  },
+  "backup": {
+    "code": "GITHUB_PR_66_DRAFT",
+    "receipt_table": "APPEND_ONLY_PREPROD",
+    "original_gateway_unchanged_in_PROD": true
+  },
+  "rollback": {
+    "revert_branch_commits": true,
+    "disable_lab_executor": true,
+    "preserve_receipts": true,
+    "never_reactivate_staging": true
+  },
+  "rebuild": {
+    "reapply_sql": [
+      "execution-lab/fact-attest-receipts-v0.sql",
+      "execution-lab/fact-attest-appendonly-privileges-v1.sql"
+    ],
+    "redeploy_edge": "execution-lab/command-executor-edge-v0.ts",
+    "restore_gateway_only_after_gates": true
+  },
+  "training_hooks": {
+    "enabled": false,
+    "notes": "No model required for deterministic registry attestation."
+  },
+  "external_dependencies": {
+    "staging_fenixcapital_es": "OWNER_SUSPENDED_NO_REQUESTS",
+    "hostinger": "NOT_FULLY_VERIFIED",
+    "app_prod": "READ_OWNER_IDENTITY_ONLY"
+  }
+}

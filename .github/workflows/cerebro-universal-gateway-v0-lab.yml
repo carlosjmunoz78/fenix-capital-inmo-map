@@ -1,0 +1,90 @@
+name: CEREBRO Universal Gateway V0 LAB contract CI
+
+on:
+  pull_request:
+    paths:
+      - 'cerebro/universal/v0/**'
+      - '.github/workflows/cerebro-universal-gateway-v0-lab.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cerebro-universal-gateway-v0-lab-ci
+  cancel-in-progress: false
+
+jobs:
+  lab-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: FACT-001 canonical V1 registry unchanged
+        run: node cerebro/factory-v1.mjs validate --registry cerebro/registry/engine-registry.v1.json
+      - name: FACT-001 physical 179-engine scaffold generation in isolated runner temp
+        run: node cerebro/universal/v0/factory-batch-lab-acceptance.mjs
+      - name: Zero-IO universal LAB V0 tests
+        run: |
+          node --check cerebro/universal/v0/control-plane.mjs
+          node --check cerebro/universal/v0/interface-sdk.mjs
+          node --check cerebro/universal/v0/concurrency-shadow.mjs
+          node --test cerebro/universal/v0/*.test.mjs
+      - name: Typecheck and build Operativa LAB preview integration (no deployment)
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+      - name: Remote LAB Preview anonymous SSO negative security smoke
+        env:
+          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
+        run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
+      - name: Remote anonymous command planning denial (owner LAB)
+        env:
+          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
+        run: node cerebro/universal/v0/operator-instruction-anon-smoke.mjs
+      - name: Remote PREPROD durable audit anonymous POST negative security probe
+        run: node cerebro/universal/v0/audit-lab-v0/anon-smoke.mjs
+      - name: Remote PREPROD JOB001 owner-only anonymous negative security probe
+        run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
+      - name: Remote PREPROD suspended-staging 423 negative security smoke
+        run: node cerebro/universal/v0/staging-suspension/edge-423-remote-smoke.mjs
+      - name: Remote staging-origin lead gates reject before any downstream action
+        run: node cerebro/universal/v0/staging-suspension/lead-origin-negative-smoke.mjs
+      - name: Remote anonymous denial for owner-only suspension observer
+        run: node --test cerebro/universal/v0/staging-suspension/staging-observer-anon-smoke.mjs
+      - name: Remote anonymous denial for shared FACT deterministic LAB executor
+        run: node --test cerebro/universal/v0/execution-lab/anon-smoke.mjs
+      - name: Check no-Prod and zero additional cost
+        run: |
+          node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
+      # Build reproducible deliverables only for this isolated LAB PR; never deploy.
+      - name: FACT-001 prepare validated 179-scaffold review bundle
+        if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
+        env:
+          FACT_ARTIFACT_DIR: ${{ runner.temp }}/cerebro-fact-001-179-lab
+        run: |
+          test ! -e "$FACT_ARTIFACT_DIR"
+          node cerebro/factory-v1.mjs generate --registry cerebro/registry/engine-registry.v1.json --out "$FACT_ARTIFACT_DIR"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import path from "node:path";
+            import assert from "node:assert/strict";
+            const root=process.env.FACT_ARTIFACT_DIR;
+            const index=JSON.parse(fs.readFileSync(path.join(root,"skeleton-index.json"),"utf8"));
+            const registry=JSON.parse(fs.readFileSync("cerebro/registry/engine-registry.v1.json","utf8"));
+            assert.equal(index.engine_count,179);
+            assert.deepEqual(index.engines.map(x=>x.engine_id),registry.engine_ids);
+            assert(index.engines.every(x=>x.files===18 && /^[0-9a-f]{64}$/.test(x.sha256)));
+            assert.equal(index.engines.reduce((n,x)=>n+x.files,0),3222);
+            console.log("FACT-001 portable LAB bundle verified: 179 scaffolds / 3222 files / no deployment");
+          '
+      - name: Store FACT-001 LAB generated review bundle for owner
+        if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
+        uses: actions/upload-artifact@v4
+        with:
+          name: FACT-001-179-SCAFFOLDS-LAB-${{ github.sha }}
+          path: ${{ runner.temp }}/cerebro-fact-001-179-lab/
+          if-no-files-found: error
+          retention-days: 7

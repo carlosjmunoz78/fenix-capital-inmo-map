@@ -1,0 +1,125 @@
+
+/* Operativa LAB · legible 2026 owner cockpit. Only .op-uni-lab namespace. */
+.op-uni-lab{
+ margin:18px 0 28px;padding:clamp(17px,2vw,25px);
+ border:1px solid rgba(109,183,211,.36);border-radius:20px;
+ background:linear-gradient(155deg,rgba(10,40,58,.95),rgba(4,17,28,.97) 72%);
+ box-shadow:0 18px 55px rgba(0,0,0,.16),inset 0 1px 0 rgba(169,231,248,.08);
+ color:#f1faff;
+}
+.op-uni-lab *, .op-uni-lab *::before,.op-uni-lab *::after{box-sizing:border-box}
+.op-uni-lab-head{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.op-uni-lab-head>div{display:grid;gap:4px}
+.op-uni-lab-head strong{font-size:clamp(18px,1.8vw,22px);font-weight:710;letter-spacing:-.02em;line-height:1.3}
+.op-uni-lab-head span{font-size:13px;color:#9fbccc}
+.op-uni-lab button{
+ border:1px solid rgba(135,199,225,.52);border-radius:11px;
+ background:rgba(23,71,91,.32);color:#e6f9ff;padding:11px 15px;
+ font:inherit;font-size:13px;font-weight:650;line-height:1.25;
+ transition:background-color .16s ease,border-color .16s ease,transform .16s ease
+}
+.op-uni-lab button:hover:not(:disabled){background:rgba(38,102,133,.6);border-color:#9ce7ff;transform:translateY(-1px)}
+.op-uni-lab button:focus-visible,.op-uni-lab a:focus-visible{outline:2px solid #a5eeff;outline-offset:3px}
+.op-uni-lab button:disabled{opacity:.6;cursor:default}
+.op-uni-lab small{color:#b6ccda;font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.op-uni-lab-status{
+ margin:16px 0 0;padding:10px 13px;border:1px solid rgba(105,183,209,.28);
+ border-left:3px solid #6ecaaa;border-radius:8px;
+ background:rgba(37,99,109,.15);color:#cce8ed;font-size:13.5px;line-height:1.48
+}
+.op-uni-lab-status.is-denied{border-left-color:#ffbb75;background:rgba(100,49,24,.2)}
+.op-uni-lab-dryrun{
+ display:flex;flex-wrap:wrap;align-items:center;gap:11px 16px;
+ margin:14px 0;padding:12px 14px;border:1px solid rgba(225,180,104,.25);
+ border-radius:12px;background:rgba(167,125,56,.07)
+}
+.op-uni-lab-dryrun button{border-color:rgba(240,195,115,.7);background:rgba(102,74,29,.36);color:#ffe0a6}
+.op-uni-lab-dryrun>small{flex:1 1 320px}
+.op-uni-lab-dryrun>span[role=status]{flex:1 1 100%;color:#ffe6b1;font-size:13px}
+.op-uni-lab-proof{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+ gap:12px;margin-top:14px;align-items:stretch
+}
+.op-uni-lab-proof>span{
+ display:flex;flex-direction:column;gap:6px;
+ min-height:80px;padding:15px;border:1px solid rgba(111,185,214,.23);
+ border-radius:13px;background:rgba(5,24,38,.68);
+ color:#acc8d8;font-size:12px;font-weight:650
+}
+.op-uni-lab-proof>span>b{display:block;font-size:clamp(16px,1.8vw,24px);color:#f2fbff;line-height:1.15;letter-spacing:-.025em}
+.op-uni-lab-proof>small{grid-column:1/-1;order:1;line-height:1.5}
+.op-uni-lab-work{
+ min-width:0;min-height:205px;max-height:450px;overflow:auto;
+ display:flex;flex-direction:column;align-items:stretch;gap:8px;
+ padding:17px;border:1px solid rgba(111,185,214,.28);
+ border-radius:13px;background:rgba(4,18,30,.56);
+ box-shadow:inset 0 1px 0 rgba(211,250,255,.05)
+}
+.op-uni-lab-work>strong{
+ color:#effaff;font-size:15px;font-weight:700;line-height:1.4;letter-spacing:-.013em
+}
+.op-uni-lab-work>span{font-size:12px;color:#8cdbf0;line-height:1.45;font-weight:600}
+.op-uni-lab-work>small{display:block;color:#b0c9d8}
+.op-uni-lab-work-row{
+ display:flex;flex-direction:column;gap:4px;
+ padding:9px 0;border-bottom:1px solid rgba(112,184,211,.15)
+}
+.op-uni-lab-work-row:last-child{border-bottom:0}
+.op-uni-lab-work-row a{color:#9ce4f6;text-decoration:none;font-size:13px;font-weight:650;line-height:1.38}
+.op-uni-lab-work-row a:hover{text-decoration:underline;text-underline-offset:3px}
+.op-uni-lab-evidence{
+ margin-top:6px;padding:10px 0 0;display:grid;gap:6px;
+ border-top:1px solid rgba(133,193,218,.2)
+}
+.op-uni-lab-evidence>strong{font-size:12px;color:#d2eaf4}
+.op-uni-lab-evidence>small{padding-left:9px;border-left:2px solid rgba(117,178,206,.3)}
+.op-uni-lab-work::-webkit-scrollbar{width:7px}
+.op-uni-lab-work::-webkit-scrollbar-thumb{background:rgba(119,191,223,.28);border-radius:9px}
+@media(max-width:1020px){
+ .op-uni-lab-proof{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .op-uni-lab-work{max-height:440px}
+}
+@media(max-width:680px){
+ .op-uni-lab{padding:15px;border-radius:13px}
+ .op-uni-lab-proof{grid-template-columns:1fr;gap:9px}
+ .op-uni-lab-proof>span{min-height:60px}
+ .op-uni-lab-work{max-height:none;min-height:0}
+ .op-uni-lab-head button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.op-uni-lab button{transition:none}.op-uni-lab button:hover:not(:disabled){transform:none}}
+
+/* Explicit owner suspension status, not a generic summary card. */
+.op-uni-lab-dependency{margin:14px 0 0;padding:10px 0 10px 13px;border-left:3px solid #e4b876;display:flex;flex-direction:column;gap:4px}
+.op-uni-lab-dependency strong{font-size:14px;color:#ffe1af}
+.op-uni-lab-dependency span{font-size:13px;line-height:1.55;color:#dce9f1}
+.op-uni-lab-dependency small{font-size:12px;color:#aec2cf}
+
+
+/* Owner command console: explicit confirmation and interpretable receipts. */
+.op-uni-lab-chat{margin:14px 0;padding:17px;display:grid;gap:12px;background:rgba(2,20,31,.72);border:1px solid rgba(123,196,215,.42);border-radius:15px}
+.op-uni-lab-chat-head{display:grid;gap:4px}
+.op-uni-lab-chat-head>strong{font-size:16px;color:#e4faff}
+.op-uni-lab-chat-log{display:flex;flex-direction:column;gap:10px;max-height:340px;overflow:auto;padding:10px;border:1px solid rgba(111,185,214,.25);background:rgba(6,23,36,.9);border-radius:10px;min-height:120px}
+.op-uni-lab-chat-line{max-width:min(93%,680px);padding:10px 13px;border:1px solid rgba(111,185,214,.24);border-radius:12px;display:grid;gap:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.op-uni-lab-chat-line>strong{font-size:11px;letter-spacing:.05em;color:#a3d9ee}
+.op-uni-lab-chat-line>span{font-size:13.5px;line-height:1.55;color:#e2f2fa}
+.op-uni-lab-chat-line.is-owner{align-self:flex-end;background:rgba(29,86,111,.5)}
+.op-uni-lab-chat-line.is-cerebro{align-self:flex-start;background:rgba(12,38,49,.72)}
+.op-uni-lab-chat-form{display:flex;flex-wrap:wrap;gap:9px;align-items:end}
+.op-uni-lab-chat-form label{font-size:12px;font-weight:650;color:#c4e9f7;flex-basis:100%}
+.op-uni-lab-chat-form textarea{flex:1 1 260px;min-width:0;resize:vertical;padding:11px 13px;color:#f6fdff;background:rgba(4,18,30,.9);border:1px solid rgba(135,199,225,.45);border-radius:10px;font:inherit;font-size:14px;line-height:1.45}
+.op-uni-lab-chat-form textarea:focus-visible{outline:2px solid #a5eeff;outline-offset:2px}
+.op-uni-lab-chat-form button{min-width:125px}
+.op-uni-lab-chat-pending{display:grid;gap:8px;padding:12px;background:rgba(148,103,39,.2);border:1px solid rgba(241,182,96,.56);border-radius:11px}
+.op-uni-lab-chat-pending>strong{color:#ffe0ad;font-size:14px}
+.op-uni-lab-chat-pending>div{display:flex;flex-wrap:wrap;gap:9px}
+.op-uni-lab-chat-pending button:first-child{background:rgba(118,83,34,.6);border-color:#f5cf86}
+@media(max-width:680px){.op-uni-lab-chat{padding:12px}.op-uni-lab-chat-form button{width:100%}.op-uni-lab-chat-line{max-width:100%}.op-uni-lab-chat-log{max-height:300px}}
+
+/* Owner LAB shortcuts reuse the authenticated command planner; no execution endpoints. */
+.op-uni-lab-chat-quick{display:grid;gap:9px;padding:12px 0;border-top:1px solid rgba(123,196,215,.18);border-bottom:1px solid rgba(123,196,215,.18)}
+.op-uni-lab-chat-quick>strong{font-size:13px;color:#e0f8ff}
+.op-uni-lab-chat-quick>div{display:flex;gap:9px;flex-wrap:wrap}
+.op-uni-lab-chat-quick button{min-height:44px;padding:10px 13px;border-color:rgba(122,201,235,.4);background:rgba(18,63,89,.5)}
+.op-uni-lab-chat-quick>small{font-size:12px}
+@media(max-width:680px){.op-uni-lab-chat-quick>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.op-uni-lab-chat-quick button{width:100%;text-align:center;padding:10px 6px}}
