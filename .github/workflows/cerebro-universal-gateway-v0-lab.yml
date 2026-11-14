@@ -50,6 +50,8 @@ jobs:
         run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
       - name: Remote PREPROD suspended-staging 423 negative security smoke
         run: node cerebro/universal/v0/staging-suspension/edge-423-remote-smoke.mjs
+      - name: Remote staging-origin lead gates reject before any downstream action
+        run: node cerebro/universal/v0/staging-suspension/lead-origin-negative-smoke.mjs
       - name: Remote anonymous denial for owner-only suspension observer
         run: node --test cerebro/universal/v0/staging-suspension/staging-observer-anon-smoke.mjs
       - name: Remote anonymous denial for shared FACT deterministic LAB executor
