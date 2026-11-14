@@ -7,6 +7,7 @@ on:
       - 'src/CerebroNeuralGraph.tsx'
       - 'src/CerebroNeuralView.tsx'
       - 'src/cerebro-neural-graph.css'
+      - 'src/cerebro-interface-bar.css'
       - 'tests/cerebro-neural-live-graph-lab.spec.ts'
       - '.github/workflows/cerebro-neural-live-graph-lab.yml'
 
