@@ -38,6 +38,7 @@ export default function CerebroFactRegistryLab(){
    </button>
   </div>
   {outcome?<small role="status">{outcome.message}</small>:null}
+  <small><strong>Fábrica FACT-001 validada en CI (14/11/2026):</strong> 179 scaffolds generados y 3.222 archivos comprobados en entorno temporal, sin despliegue de motores. <a href="https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43582352885" target="_blank" rel="noreferrer noopener">Ver evidencia de CI</a>.</small>
   <small>Única ejecución autorizada: FACT-001 / fact.registry.attest · escritura de justificante LAB. Autonomía de los demás motores: NO VERIFICADA.</small>
  </div>;
 }
