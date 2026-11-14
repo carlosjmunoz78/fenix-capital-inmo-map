@@ -24,6 +24,8 @@ jobs:
           node-version: '24'
       - name: FACT-001 canonical V1 registry unchanged
         run: node cerebro/factory-v1.mjs validate --registry cerebro/registry/engine-registry.v1.json
+      - name: FACT-001 physical 179-engine scaffold generation in isolated runner temp
+        run: node cerebro/universal/v0/factory-batch-lab-acceptance.mjs
       - name: Zero-IO universal LAB V0 tests
         run: |
           node --check cerebro/universal/v0/control-plane.mjs
