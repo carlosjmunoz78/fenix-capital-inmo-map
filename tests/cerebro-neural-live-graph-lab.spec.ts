@@ -36,6 +36,7 @@ test('neuronal: live evidence, organic graph, interaction, trustworthy link and 
  await panel.getByRole('button',{name:'Inspeccionar FACT-001'}).focus();
  await page.keyboard.press('Enter');
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toBeVisible();
+ await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/neural-desktop.png',fullPage:true});
 });
 
@@ -82,6 +83,7 @@ test('neuronal: mobile inspection retains usable touch controls and no panel ove
  expect(itemRect?.height||0).toBeGreaterThanOrEqual(43);
  await item.click();
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toBeVisible();
+ await page.evaluate(()=>window.scrollTo(0,0));
  await page.screenshot({path:'test-results/neural-mobile.png',fullPage:true});
 });
 
