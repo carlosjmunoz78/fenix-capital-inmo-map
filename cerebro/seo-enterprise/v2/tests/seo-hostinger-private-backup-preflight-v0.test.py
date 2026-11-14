@@ -99,6 +99,23 @@ class TestOfflinePreflight(unittest.TestCase):
     if name.endswith('wp-config.php'):continue
     x=tarfile.TarInfo(name);x.size=len(body);t.addfile(x,io.BytesIO(body))
   with self.assertRaisesRegex(mod.UnsafeBackup,'WP_ROOT_MISSING_OR_AMBIGUOUS'):self.evaluate(files=p)
+ def test_reject_comment_only_sql_masquerading_as_schema(self):
+  p=self.root/'comment-only.sql'
+  p.write_bytes(b'-- '+b'\n-- '.join(f'CREATE TABLE wp_{name} (id INT);'.encode() for name in mod.CORE))
+  with self.assertRaisesRegex(mod.UnsafeBackup,'WP_CORE_TABLE_SET_INCOMPLETE'):
+   self.evaluate(db=p)
+ def test_reject_multiline_block_comments_masquerading_as_schema(self):
+  p=self.root/'comment-block.sql'
+  p.write_bytes(b'/* SQL backup with no actual tables\n'+b'\n'.join(
+   f'CREATE TABLE wp_{name} (id INT);'.encode() for name in mod.CORE)+b'\n*/')
+  with self.assertRaisesRegex(mod.UnsafeBackup,'WP_CORE_TABLE_SET_INCOMPLETE'):
+   self.evaluate(db=p)
+ def test_accept_authentic_ddl_with_comments_and_mysql_backticks(self):
+  p=self.root/'schema.sql.gz'
+  data=b'-- MySQL dump\n/* comment\n CREATE TABLE wp_fake (id INT);\n*/\n'
+  data+=b'\n'.join(f'CREATE TABLE IF NOT EXISTS {chr(96)}wp_{name}{chr(96)} (id INT);'.encode() for name in mod.CORE)
+  with gzip.open(p,'wb') as stream: stream.write(data)
+  self.assertEqual(self.evaluate(db=p)['database']['core_tables_observed'],10)
  def test_reject_incomplete_wordpress_sql(self):
   p=self.root/'incomplete.sql.gz'
   with gzip.open(p,'wb') as s:s.write(b'CREATE TABLE wp_posts (id INT);'*50)

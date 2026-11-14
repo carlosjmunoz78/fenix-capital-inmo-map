@@ -9,7 +9,7 @@ from pathlib import Path, PurePosixPath
 MAX_FILES, MAX_BYTES, MAX_SQL = 250000, 20*1024**3, 8*1024**3
 CORE = frozenset(('posts','postmeta','options','users','usermeta',
                   'terms','term_taxonomy','term_relationships','comments','commentmeta'))
-TABLE = re.compile(rb'CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\x60\"]?([A-Za-z0-9_]{2,128})[\x60\"]?\s*\(',re.I)
+TABLE = re.compile(rb'^[ \t]*CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[\x60\"]?([A-Za-z0-9_]{2,128})[\x60\"]?\s*\(',re.I)
 
 class UnsafeBackup(ValueError): pass
 
@@ -128,23 +128,56 @@ def examine_files(p):
     else: fail('UNSUPPORTED_FILES_FORMAT')
     return dict(report,format=fmt,archive_bytes=p.stat().st_size,archive_sha256=digest(p))
 
+def uncomment_sql_line(line, in_block):
+    """Remove SQL comments before matching schema DDL (not a SQL parser)."""
+    out, i = [], 0
+    while i < len(line):
+        if in_block:
+            end = line.find(b'*/', i)
+            if end < 0: return b''.join(out), True
+            i, in_block = end + 2, False
+            continue
+        block = line.find(b'/*', i)
+        hashmark = line.find(b'#', i)
+        dash = line.find(b'--', i)
+        # MySQL '--' only starts a comment when followed by whitespace/control.
+        while dash >= 0 and dash + 2 < len(line) and line[dash+2] not in b' \t\r\n\v\f':
+            dash = line.find(b'--', dash + 2)
+        candidates = [(j, kind) for j, kind in ((block, 'block'), (hashmark, 'line'), (dash, 'line')) if j >= 0]
+        if not candidates:
+            out.append(line[i:]); break
+        pos, kind = min(candidates)
+        out.append(line[i:pos])
+        if kind == 'line': break
+        out.append(b' ')  # A block comment separates SQL tokens.
+        i, in_block = pos + 2, True
+    return b''.join(out), in_block
+
 def examine_sql(p):
     if not p.name.lower().endswith(('.sql','.sql.gz')): fail('UNSUPPORTED_DATABASE_FORMAT')
     opener=gzip.open if p.name.lower().endswith('.gz') else open
-    groups,carry,size={},b'',0
+    groups, carry, size, in_block = {}, b'', 0, False
+    def check(line):
+        nonlocal in_block
+        clean, in_block = uncomment_sql_line(line, in_block)
+        matched = TABLE.match(clean)
+        if matched:
+            table=matched.group(1).decode('ascii').lower()
+            for core in CORE:
+                if table.endswith('_'+core) and len(table)>len(core)+1:
+                    groups.setdefault(table[:-len(core)],set()).add(core)
     try:
         with opener(p,'rb') as stream:
             for chunk in iter(lambda:stream.read(1024*1024),b''):
                 size+=len(chunk)
                 if size>MAX_SQL: fail('SQL_TOO_LARGE')
-                scanned=carry+chunk
-                for matched in TABLE.finditer(scanned):
-                    table=matched.group(1).decode('ascii').lower()
-                    for core in CORE:
-                        if table.endswith('_'+core) and len(table)>len(core)+1:
-                            groups.setdefault(table[:-len(core)],set()).add(core)
-                carry=scanned[-255:]
+                lines=(carry+chunk).split(b'\n')
+                carry=lines.pop()
+                if len(carry)>128*1024**2: fail('SQL_LINE_TOO_LARGE')
+                for line in lines: check(line)
+            if carry: check(carry)
     except (OSError,EOFError,gzip.BadGzipFile): fail('SQL_ARCHIVE_INVALID')
+    if in_block: fail('SQL_UNCLOSED_BLOCK_COMMENT')
     if sum(found==CORE for found in groups.values())!=1:
         fail('WP_CORE_TABLE_SET_INCOMPLETE_OR_AMBIGUOUS')
     return {'core_tables_observed':len(CORE),'uncompressed_bytes':size,
