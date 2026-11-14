@@ -2,7 +2,7 @@
 // This is NOT an LLM or a general engine executor. No network, secrets, URLs or writes.
 const disallow=/\b(?:no|nunca|sin)\s+(?:quiero\s+)?(?:ejecutar|certificar|registrar|guardar|simular|haz|hacer)\b/i;
 const banned=/\b(?:prod(?:uccion|ucción)?|publicar|publica|wordpress|staging|dinero|cobrar|transferir|borrar|eliminar|desactivar|activar|modificar|trading|comprar|venta|vender|token|password|clave|secreto|ssh|dns|http|www|ftp)\b/i;
-const canon=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9 -]+/g,' ').replace(/\s+/g,' ').trim();
+const canon=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 const plan=(code,label,requires_confirmation=false)=>({status:'PLAN_READY',environment:'LAB',company_id:'fenix',version:'0.1.0-lab',engine_id:'FACT-001',intent:code,label,requires_confirmation,additional_cost_eur:0,execution_scope:requires_confirmation?'FACT_REGISTRY_RECEIPT_ONLY':'OWNER_READ_OR_AUDITED_DRY_RUN',production_allowed:false,external_destination_allowed:false,staging_allowed:false});
 export function planOperatorInstructionLab(text){
  if(typeof text!=='string'||text.length<1||text.length>240||/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(text))
