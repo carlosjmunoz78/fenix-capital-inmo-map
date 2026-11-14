@@ -12,7 +12,7 @@ export function planOperatorInstructionLab(text){
   return {status:'INSTRUCTION_INVALID',execution_allowed:false};
  // Classification is fail-closed: no requests to modify production or arbitrary engines.
  // A read-only question about suspended staging is the only accepted staging reference.
- if(/^(?:estado|ver|consultar|como esta|comprueba|comprueba el estado|revisar estado|estado actual) (?:de |del |la )?(?:staging|suspension de staging)$/.test(s))
+ if(/^(?:estado|ver|consultar|como esta|comprueba|comprueba el estado|consultar estado|revisar estado|estado actual) (?:de |del |la )?(?:staging|suspension de staging)$/.test(s))
   return plan('STAGING_STATUS','Consultar controles de suspensión de staging');
  if(banned.test(s))return {status:'NOT_SUPPORTED_IN_LAB',execution_allowed:false,reason:'RISK_OR_NON_LAB_ACTION'};
  if(disallow.test(s))return {status:'NOT_SUPPORTED_IN_LAB',execution_allowed:false,reason:'NEGATED_COMMAND'};
