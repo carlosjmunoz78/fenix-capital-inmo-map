@@ -6,13 +6,14 @@ import {createGithubWorkActivityReaderV0} from '../cerebro/universal/v0/github-w
 import {createOwnerUniverseReaderLabV0} from '../cerebro/universal/v0/owner-universe-reader.mjs';
 import {createJob001ControlReaderLabV0} from '../cerebro/universal/v0/job001-control-reader.mjs';
 import {createStagingObservationReaderLabV0} from '../cerebro/universal/v0/staging-observation-reader.mjs';
+import {createFactAttestationAdapterLabV0} from '../cerebro/universal/v0/execution-lab/fact-attest-adapter.mjs';
 
 type H = string | string[] | undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','submit_command']);
+const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_fact_attestation_latest','submit_command']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
@@ -49,6 +50,9 @@ export default async function handler(req:Req,res:Res){
     (Object.keys(params).some(k=>!['company_id','environment','idempotency_key'].includes(k))||
      typeof params.idempotency_key!=='string'||!/^lab-observe-[a-z0-9-]{12,48}$/.test(params.idempotency_key)))
   return res.status(404).json({status:'CLOSED',reason:'STAGING_CAPTURE_CONTRACT_REQUIRED'});
+ if(req.body.action==='get_fact_attestation_latest'&&
+    Object.keys(params).some(k=>!['company_id','environment'].includes(k)))
+  return res.status(404).json({status:'CLOSED',reason:'READ_FIELDS_DENIED'});
  if(req.body.action==='get_staging_suspension_live'&&
     Object.keys(params).some(k=>!['company_id','environment'].includes(k)))
   return res.status(404).json({status:'CLOSED',reason:'READ_FIELDS_DENIED'});
@@ -63,10 +67,15 @@ export default async function handler(req:Req,res:Res){
  // The runtime has no write executor and this API refuses every non-dry-run request.
  if(req.body.action==='submit_command'){
   const p=params as Record<string,unknown>;
-  if(p.dry_run!==true||p.engine_id!=='FACT-001'||p.capability_id!=='fact.registry.summary'||
-   p.version!=='0.1.0-lab'||!obj(p.payload)||Object.keys(p.payload).length!==0||
-   typeof p.idempotency_key!=='string'||!/^lab-[a-z0-9-]{12,48}$/.test(p.idempotency_key))
-   return res.status(404).json({status:'CLOSED',reason:'LAB_DRYRUN_CONTRACT_REQUIRED'});
+  const dry=p.dry_run===true&&p.engine_id==='FACT-001'&&p.capability_id==='fact.registry.summary'&&
+   p.version==='0.1.0-lab'&&obj(p.payload)&&Object.keys(p.payload).length===0&&
+   typeof p.idempotency_key==='string'&&/^lab-[a-z0-9-]{12,48}$/.test(p.idempotency_key);
+  const fact=p.dry_run===false&&p.engine_id==='FACT-001'&&p.capability_id==='fact.registry.attest'&&
+   p.version==='0.1.0-lab'&&obj(p.payload)&&Object.keys(p.payload).length===0&&
+   typeof p.idempotency_key==='string'&&/^lab-fact-attest-[a-z0-9-]{12,48}$/.test(p.idempotency_key)&&
+   (p.estimated_additional_cost_eur===undefined||p.estimated_additional_cost_eur===0)&&
+   (p.risk===undefined||p.risk==='LOW')&&p.human_exception===undefined&&p.signature_required!==true;
+  if(!dry&&!fact)return res.status(404).json({status:'CLOSED',reason:'LAB_CAPABILITY_CONTRACT_REQUIRED'});
  }
  if(JSON.stringify(req.body).length>4096)
   return res.status(413).json({status:'CLOSED',reason:'REQUEST_TOO_LARGE'});
@@ -80,7 +89,9 @@ export default async function handler(req:Req,res:Res){
    jobControls:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
     createJob001ControlReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null,
    stagingReader:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
-    createStagingObservationReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null
+    createStagingObservationReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null,
+   factAdapter:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
+    createFactAttestationAdapterLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null
   });
   const result:unknown=await gateway.handle({
    session_token:bearer.replace(/^Bearer\s+/i,''),
@@ -88,6 +99,26 @@ export default async function handler(req:Req,res:Res){
    params
   });
   if(!obj(result))return res.status(502).json({status:'UNAVAILABLE'});
+  // LAB FACT attestation is one allowlisted deterministic operation, not a motor runner.
+  // It is acknowledged as executed ONLY when a durable receipt is physically committed.
+  if(req.body.action==='submit_command'&&result.status==='FACT_ATTESTATION_PREPARED'){
+   const key=process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY;
+   if(!key?.startsWith('sb_publishable_')||result.executed!==false||
+      result.registry_count!==179||result.base_count!==177||result.preserved_base!==true||
+      typeof result.registry_digest!=='string'||!/^[0-9a-f]{64}$/.test(result.registry_digest))
+    return res.status(503).json({status:'UNAVAILABLE',reason:'FACT_ATTEST_PREPARATION_INVALID'});
+   const adapter=createFactAttestationAdapterLabV0({preprodApiKey:key,ownerApiKey:apikey});
+   const receipt=await adapter.executeForContext({company_id:'fenix',environment:'LAB',
+    session_token:bearer.replace(/^Bearer\\s+/i,''),idempotency_key:params.idempotency_key,
+    registry_digest:result.registry_digest,registry_count:179,base_count:177,preserved_base:true});
+   if(receipt?.status!=='FACT_ATTESTATION_EXECUTED'||receipt?.executed!==true||
+      receipt.registry_digest!==result.registry_digest||receipt.prod_execution_enabled!==false||
+      receipt.external_actions_executed!==false||typeof receipt.receipt_id!=='string')
+    return res.status(503).json({status:'UNAVAILABLE',reason:'FACT_ATTEST_DURABILITY_NOT_CONFIRMED'});
+   return res.status(200).json({...receipt,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
+    durable_audit:true,scope:'SINGLE_FACT_REGISTRY_CAPABILITY_LAB',
+    other_engines_executed:false,staging_probed:false});
+  }
   // A dry-run is considered durable only when the separate PREPROD lab audit
   // confirms a committed idempotent row. Never forward service_role or payloads.
   if(req.body.action==='submit_command'&&result.status==='DRY_RUN_VALIDATED'){
@@ -121,7 +152,7 @@ export default async function handler(req:Req,res:Res){
     durable_audit:true,idempotency_persisted:true,audit_ref:persisted.audit_id,audit_replayed:persisted.replayed===true});
   }
   return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
-   source:['list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
+   source:['list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_fact_attestation_latest'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
    prod_execution_enabled:false,...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
  }catch{
   // No upstream error, actor data, access token or headers ever returned to client.
