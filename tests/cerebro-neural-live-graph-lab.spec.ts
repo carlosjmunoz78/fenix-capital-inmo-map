@@ -30,7 +30,7 @@ test('neuronal: live evidence, organic graph, interaction, trustworthy link and 
  await panel.getByRole('button',{name:'Reducir movimiento'}).click();
  await expect(panel.getByRole('button',{name:'Activar movimiento'})).toHaveAttribute('aria-pressed','true');
  await panel.getByText('Explorar ejecuciones por nombre (3)').click();
- await panel.getByRole('button',{name:'FACT-001'}).click();
+ await panel.getByRole('button',{name:'FACT-001',exact:true}).click();
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/911');
  await expect(page.getByRole('region',{name:'Resumen neuronal verificable'})).toContainText('PARCIAL');
 });
@@ -41,7 +41,7 @@ test('neuronal: cached evidence is not animated or falsely claimed as live; link
  await expect(panel).toHaveClass(/is-quiet/);
  await expect(panel).toContainText('Última información disponible');
  await panel.getByText('Explorar ejecuciones por nombre (1)').click();
- await panel.getByRole('button',{name:'FACT-001'}).click();
+ await panel.getByRole('button',{name:'FACT-001',exact:true}).click();
  await expect(panel).toContainText('Último estado: En curso');
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toHaveCount(0);
  await expect(panel).toContainText('Enlace de evidencia no validado');
@@ -64,7 +64,7 @@ test('neuronal: mobile inspection retains usable touch controls and no panel ove
  expect(rect).not.toBeNull();
  expect(rect!.width).toBeLessThanOrEqual(376);
  await panel.getByText('Explorar ejecuciones por nombre (1)').click();
- const item=panel.getByRole('button',{name:'QA-001'});
+ const item=panel.getByRole('button',{name:'QA-001',exact:true});
  const itemRect=await item.boundingBox();
  expect(itemRect?.height||0).toBeGreaterThanOrEqual(43);
  await item.click();
