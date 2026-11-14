@@ -15,7 +15,7 @@ const valid=(data,method)=>{
     r.host!=='staging.fenixcapital.es'||r.global_isolation_verified!==false||
     r.staging_probed!==false||r.executed_external_actions!==false||
     r.prod_execution_enabled!==false||typeof r.known_controls_closed!=='boolean')return false;
- for(const [k,count,number] of [['staging_job001','expected',15],['staging_cron','expected',8],['sql_guard','expected',4]]){
+ for(const [k,count,number] of [['staging_job001','expected',15],['staging_cron','expected',14],['sql_guard','expected',4]]){
   const obj=r[k];if(!obj||typeof obj!=='object'||obj[count]!==number)return false;
  }
  if(method==='POST'&&(!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(data.evidence_id||'')||
