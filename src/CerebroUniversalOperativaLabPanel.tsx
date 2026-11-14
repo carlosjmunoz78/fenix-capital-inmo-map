@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useRef,useState} from 'react';
 import {canPreviewUniversalOperativa,readUniversalOperativaLab,simulateFactRegistryDryRunLab,type UniversalLabDryRun,type UniversalLabProof} from './cerebroUniversalOperativaLabApi';
 import './cerebro-universal-operativa-lab.css';
+import CerebroStagingSuspensionLab from './CerebroStagingSuspensionLab';
 export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
  const [result,setResult]=useState<UniversalLabProof|null>(null);
  const [loading,setLoading]=useState(false);
@@ -41,7 +42,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
  if(!enabled)return null;
  return <section className="op-uni-lab" aria-label="Gateway Universal en ensayo">
   <div className="op-uni-lab-head">
-   <div><strong>Gateway Universal · LAB</strong><span>Operativa, sin JARVIS · Solo lectura</span></div>
+   <div><strong>Gateway Universal · LAB</strong><span>Operativa · Consultas y evidencia LAB · Sin ejecución de motores</span></div>
    <button type="button" onClick={()=>{void refresh()}} disabled={loading} aria-label="Verificar conexión del Gateway Universal">
     {loading?'Comprobando…':'Verificar conexión'}
    </button>
@@ -66,7 +67,8 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
    <span>{result.dependencies?.state==='SUSPENDED_VERIFIED'
     ?'Bloqueo acreditado en Gateway LAB: no consultar, publicar, modificar ni reactivar automáticamente.'
     :'No se pudo verificar el guard de Gateway; la suspensión del propietario sigue vigente y no autoriza operaciones.'}</span>
-   <small>Operativa puede seguir consultando FACT-001, JOB-001 y la auditoría de simulaciones sin acceder a staging. Los cron externos necesitan verificación independiente.</small>
+   <small>Las protecciones identificadas en Supabase son verificables en tiempo real. Los consumidores externos aún requieren comprobaciones independientes.</small>
+   <CerebroStagingSuspensionLab/>
   </div>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-proof">
    <span>Capacidades consultables: <b>{result.capabilities.length}</b></span>
