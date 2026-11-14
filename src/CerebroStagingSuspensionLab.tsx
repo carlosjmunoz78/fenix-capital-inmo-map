@@ -19,7 +19,9 @@ export default function CerebroStagingSuspensionLab(){
  async function capture(){
   if(captureBusy||busy||result?.kind!=='observed')return;
   setCaptureBusy(true);
-  try{const r=await captureStagingSuspensionLab();setCaptured(r);if(r.kind==='observed')setResult(r)}
+  try{const r=await captureStagingSuspensionLab();setCaptured(r);if(r.kind==='observed'){
+   const latest=await readStagingSuspensionLab();setResult(latest.kind==='observed'?latest:r)
+  }}
   finally{setCaptureBusy(false)}
  }
  const s=result?.snapshot;
@@ -35,6 +37,10 @@ export default function CerebroStagingSuspensionLab(){
    <small>Controles generales JOB-001: {s.gateway_job001.active} activos, {s.gateway_job001.paused} pausados (de {s.gateway_job001.total}).</small>
    <small>Último registro del puente: {s.bridge_health.last_recorded_at?new Date(s.bridge_health.last_recorded_at).toLocaleString('es-ES'):'sin datos'}.
      Lectura: {new Date(s.observed_at).toLocaleString('es-ES')}.</small>
+   {s.durable_evidence?<small><strong>Evidencias persistidas en LAB: {s.durable_evidence.recorded}.</strong>
+    {s.durable_evidence.latest_evidence_id?' Última: '+s.durable_evidence.latest_evidence_id:''}
+    {s.durable_evidence.last_recorded_at?' · '+new Date(s.durable_evidence.last_recorded_at).toLocaleString('es-ES'):''}
+   </small>:<small>Historial durable de evidencias aún no verificado.</small>}
    <small><strong>Aislamiento global: NO CERTIFICADO.</strong> Hostinger y otros consumidores externos siguen sujetos a auditoría independiente.</small>
   </>:<small>{result?.message||'Sin datos de control verificados.'}</small>}
   <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:8}}>
