@@ -108,6 +108,17 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
   const caps=r.capabilities.filter(c=>c&&c.company_id==='fenix'&&c.environment==='LAB'&&
    c.policy==='READ_ONLY'&&c.side_effects==='NONE'&&c.engine_id==='FACT-001'&&c.capability_id==='fact.registry.summary');
   if(caps.length!==1)return unavailable('unavailable');
+  // Additional advertisements are contracts, not proof that 179 engines run.
+  const extras=r.capabilities.filter(c=>c&&c.company_id==='fenix'&&c.environment==='LAB'&&
+   c.version==='0.1.0-lab'&&(
+    (c.engine_id==='FACT-001'&&c.capability_id==='fact.registry.attest'&&
+     c.policy==='LAB_ALLOWLISTED_DETERMINISTIC_EXECUTION'&&c.side_effects==='APPEND_ONLY_LAB_RECEIPT'&&
+     c.executor==='CEREBRO_SHARED_LAB_EXECUTOR_V0')||
+    (c.engine_id==='GOV-001'&&c.capability_id==='gov.staging.suspension.capture'&&
+     c.policy==='LAB_ALLOWLISTED_DURABLE_EVIDENCE_ONLY'&&c.side_effects==='APPEND_ONLY_LAB_EVIDENCE'&&
+     c.executor==='EXISTING_STAGING_OBSERVATION_PREPROD_EDGE')
+   ));
+  if(extras.length>2||new Set(extras.map(c=>c.capability_id)).size!==extras.length)return unavailable('unavailable');
   const response=await call('invoke_read',{capability_id:'fact.registry.summary'});
   const parsed=response as SummaryResponse;
   const count=parsed?.result?.engine_registry_count;
@@ -302,7 +313,7 @@ export async function readUniversalOperativaLab(signal?:AbortSignal):Promise<Uni
      legacyCronEnforcement:'NOT_VERIFIED_OUTSIDE_UNIVERSAL_GATEWAY'};
    }
   }catch{/* Never present an unknown status as permitted or reactivated. */}
-  return {kind:'ready',capabilities:caps,registeredDefinitions:count,
+  return {kind:'ready',capabilities:[...caps,...extras],registeredDefinitions:count,
    operationalState:'NO_VERIFICADO',source:'FACT-001 · REPOSITORIO LAB',workActivity,ownerSources,job001,dependencies};
  }catch(error){
   if(signal?.aborted)return unavailable('unavailable');
