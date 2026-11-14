@@ -43,6 +43,28 @@ test('gateway capture only permits LAB owner scope and a strict idempotent key',
    params:{...params,environment:'PROD'}}));
 });
 
+test('governed suspension receipt is advertised as a LAB capability only with owner scopes and reader',async()=>{
+ const g=new UniversalGatewayLabV0({registry,authenticate:mockActor,stagingReader:observationReader});
+ const list=await g.handle({session_token:owner,action:'list_capabilities',params:ctx});
+ assert.equal(list.status,'OK');
+ assert.deepEqual(list.capabilities.map(c=>c.capability_id),['gov.staging.suspension.capture']);
+ assert.equal(list.capabilities[0].engine_id,'GOV-001');
+ assert.equal(list.capabilities[0].side_effects,'APPEND_ONLY_LAB_EVIDENCE');
+ assert.equal(list.capabilities[0].cost_budget_eur,0);
+ const detail=await g.handle({session_token:owner,action:'get_capability',
+  params:{...ctx,capability_id:'gov.staging.suspension.capture'}});
+ assert.equal(detail.capability.policy,'LAB_ALLOWLISTED_DURABLE_EVIDENCE_ONLY');
+ const status=await g.handle({session_token:owner,action:'get_engine_status',
+  params:{...ctx,engine_id:'GOV-001'}});
+ assert.deepEqual(status.lab_evidence_capabilities,['gov.staging.suspension.capture']);
+ assert.equal(status.runtime,'NOT_VERIFIED');
+ const unconnected=new UniversalGatewayLabV0({registry,authenticate:mockActor});
+ assert.equal((await unconnected.handle({session_token:owner,action:'list_capabilities',params:ctx})).capabilities.length,0);
+ const denied=new UniversalGatewayLabV0({registry,
+  authenticate:async()=>({actor_id:'VIEWER',company_ids:['fenix'],scopes:['cerebro:universal:read']}),stagingReader:observationReader});
+ assert.equal((await denied.handle({session_token:owner,action:'list_capabilities',params:ctx})).capabilities.length,0);
+});
+
 test('reader calls only fixed Supabase URL and never accepts fake evidence',async()=>{
  const requests=[];
  const reader=createStagingObservationReaderLabV0({
