@@ -7,13 +7,14 @@ import {createOwnerUniverseReaderLabV0} from '../cerebro/universal/v0/owner-univ
 import {createJob001ControlReaderLabV0} from '../cerebro/universal/v0/job001-control-reader.mjs';
 import {createStagingObservationReaderLabV0} from '../cerebro/universal/v0/staging-observation-reader.mjs';
 import {createFactAttestationAdapterLabV0} from '../cerebro/universal/v0/execution-lab/fact-attest-adapter.mjs';
+import {planOperatorInstructionLab} from '../cerebro/universal/v0/operator-instruction-lab.mjs';
 
 type H = string | string[] | undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_fact_attestation_latest','submit_command']);
+const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_fact_attestation_latest','submit_command','plan_instruction']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
@@ -56,6 +57,10 @@ export default async function handler(req:Req,res:Res){
  if(req.body.action==='get_staging_suspension_live'&&
     Object.keys(params).some(k=>!['company_id','environment'].includes(k)))
   return res.status(404).json({status:'CLOSED',reason:'READ_FIELDS_DENIED'});
+ if(req.body.action==='plan_instruction'&&(
+    Object.keys(params).some(k=>!['company_id','environment','instruction'].includes(k))||
+    typeof params.instruction!=='string'||params.instruction.length<1||params.instruction.length>240))
+  return res.status(404).json({status:'CLOSED',reason:'INSTRUCTION_FIELDS_DENIED'});
  if(req.body.action==='submit_command'&&
     Object.keys(params).some(key=>!new Set([
      'company_id','environment','engine_id','capability_id','version',
@@ -93,6 +98,21 @@ export default async function handler(req:Req,res:Res){
    factAdapter:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
     createFactAttestationAdapterLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null
   });
+  // Owner authentication happens in the existing Gateway before any instruction
+  // is interpreted. Planning alone cannot execute any engine, job or external I/O.
+  if(req.body.action==='plan_instruction'){
+   const probe=await gateway.handle({
+    session_token:bearer.replace(/^Bearer\s+/i,''),action:'list_capabilities',
+    params:{company_id:'fenix',environment:'LAB'}
+   });
+   if(probe?.status!=='OK')throw Error('OWNER_ACCESS_DENIED');
+   return res.status(200).json({
+    ...planOperatorInstructionLab(params.instruction),
+    transport:'PREVIEW_ONLY_SERVER_VERIFIED',source:'DETERMINISTIC_OWNER_LAB_ROUTER',
+    executed:false,prod_execution_enabled:false,staging_probed:false,
+    durable_audit:false,conversation_persisted:false
+   });
+  }
   const result:unknown=await gateway.handle({
    session_token:bearer.replace(/^Bearer\s+/i,''),
    action:req.body.action,
