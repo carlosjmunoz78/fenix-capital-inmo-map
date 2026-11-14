@@ -26,6 +26,35 @@ jobs:
         run: node cerebro/factory-v1.mjs validate --registry cerebro/registry/engine-registry.v1.json
       - name: FACT-001 physical 179-engine scaffold generation in isolated runner temp
         run: node cerebro/universal/v0/factory-batch-lab-acceptance.mjs
+      # Build reproducible deliverables only for this isolated LAB PR; never deploy.
+      - name: FACT-001 prepare validated 179-scaffold review bundle
+        if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
+        env:
+          FACT_ARTIFACT_DIR: ${{ runner.temp }}/cerebro-fact-001-179-lab
+        run: |
+          test ! -e "$FACT_ARTIFACT_DIR"
+          node cerebro/factory-v1.mjs generate --registry cerebro/registry/engine-registry.v1.json --out "$FACT_ARTIFACT_DIR"
+          node --input-type=module -e '
+            import fs from "node:fs";
+            import path from "node:path";
+            import assert from "node:assert/strict";
+            const root=process.env.FACT_ARTIFACT_DIR;
+            const index=JSON.parse(fs.readFileSync(path.join(root,"skeleton-index.json"),"utf8"));
+            const registry=JSON.parse(fs.readFileSync("cerebro/registry/engine-registry.v1.json","utf8"));
+            assert.equal(index.engine_count,179);
+            assert.deepEqual(index.engines.map(x=>x.engine_id),registry.engine_ids);
+            assert(index.engines.every(x=>x.files===18 && /^[0-9a-f]{64}$/.test(x.sha256)));
+            assert.equal(index.engines.reduce((n,x)=>n+x.files,0),3222);
+            console.log("FACT-001 portable LAB bundle verified: 179 scaffolds / 3222 files / no deployment");
+          '
+      - name: Store FACT-001 LAB generated review bundle for owner
+        if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
+        uses: actions/upload-artifact@v4
+        with:
+          name: FACT-001-179-SCAFFOLDS-LAB-${{ github.sha }}
+          path: ${{ runner.temp }}/cerebro-fact-001-179-lab/
+          if-no-files-found: error
+          retention-days: 1
       - name: Zero-IO universal LAB V0 tests
         run: |
           node --check cerebro/universal/v0/control-plane.mjs
