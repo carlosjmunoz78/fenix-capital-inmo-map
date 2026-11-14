@@ -26,6 +26,33 @@ jobs:
         run: node cerebro/factory-v1.mjs validate --registry cerebro/registry/engine-registry.v1.json
       - name: FACT-001 physical 179-engine scaffold generation in isolated runner temp
         run: node cerebro/universal/v0/factory-batch-lab-acceptance.mjs
+      - name: Zero-IO universal LAB V0 tests
+        run: |
+          node --check cerebro/universal/v0/control-plane.mjs
+          node --check cerebro/universal/v0/interface-sdk.mjs
+          node --check cerebro/universal/v0/concurrency-shadow.mjs
+          node --test cerebro/universal/v0/*.test.mjs
+      - name: Typecheck and build Operativa LAB preview integration (no deployment)
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+      - name: Remote LAB Preview anonymous SSO negative security smoke
+        env:
+          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
+        run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
+      - name: Remote PREPROD durable audit anonymous POST negative security probe
+        run: node cerebro/universal/v0/audit-lab-v0/anon-smoke.mjs
+      - name: Remote PREPROD JOB001 owner-only anonymous negative security probe
+        run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
+      - name: Remote PREPROD suspended-staging 423 negative security smoke
+        run: node cerebro/universal/v0/staging-suspension/edge-423-remote-smoke.mjs
+      - name: Remote anonymous denial for owner-only suspension observer
+        run: node --test cerebro/universal/v0/staging-suspension/staging-observer-anon-smoke.mjs
+      - name: Remote anonymous denial for shared FACT deterministic LAB executor
+        run: node --test cerebro/universal/v0/execution-lab/anon-smoke.mjs
+      - name: Check no-Prod and zero additional cost
+        run: |
+          node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
       # Build reproducible deliverables only for this isolated LAB PR; never deploy.
       - name: FACT-001 prepare validated 179-scaffold review bundle
         if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
@@ -54,31 +81,4 @@ jobs:
           name: FACT-001-179-SCAFFOLDS-LAB-${{ github.sha }}
           path: ${{ runner.temp }}/cerebro-fact-001-179-lab/
           if-no-files-found: error
-          retention-days: 1
-      - name: Zero-IO universal LAB V0 tests
-        run: |
-          node --check cerebro/universal/v0/control-plane.mjs
-          node --check cerebro/universal/v0/interface-sdk.mjs
-          node --check cerebro/universal/v0/concurrency-shadow.mjs
-          node --test cerebro/universal/v0/*.test.mjs
-      - name: Typecheck and build Operativa LAB preview integration (no deployment)
-        run: |
-          npm ci --ignore-scripts
-          npm run build
-      - name: Remote LAB Preview anonymous SSO negative security smoke
-        env:
-          CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
-        run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
-      - name: Remote PREPROD durable audit anonymous POST negative security probe
-        run: node cerebro/universal/v0/audit-lab-v0/anon-smoke.mjs
-      - name: Remote PREPROD JOB001 owner-only anonymous negative security probe
-        run: node cerebro/universal/v0/preprod-job001-reader/anon-smoke.mjs
-      - name: Remote PREPROD suspended-staging 423 negative security smoke
-        run: node cerebro/universal/v0/staging-suspension/edge-423-remote-smoke.mjs
-      - name: Remote anonymous denial for owner-only suspension observer
-        run: node --test cerebro/universal/v0/staging-suspension/staging-observer-anon-smoke.mjs
-      - name: Remote anonymous denial for shared FACT deterministic LAB executor
-        run: node --test cerebro/universal/v0/execution-lab/anon-smoke.mjs
-      - name: Check no-Prod and zero additional cost
-        run: |
-          node --input-type=module -e "import fs from 'node:fs';let m=JSON.parse(fs.readFileSync('cerebro/universal/v0/manifest.json'));if(m.environment!=='LAB'||m.security.write_execution!==false||m.jobs.second_queue!==false||m.security.additional_cost_eur!==0||m.promotion.allowed!==false)process.exit(1)"
+          retention-days: 7
