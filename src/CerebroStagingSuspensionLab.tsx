@@ -42,7 +42,8 @@ export default function CerebroStagingSuspensionLab(){
     {s.durable_evidence.latest_evidence_id?' Última: '+s.durable_evidence.latest_evidence_id:''}
     {s.durable_evidence.last_recorded_at?' · '+new Date(s.durable_evidence.last_recorded_at).toLocaleString('es-ES'):''}
    </small>:<small>Historial durable de evidencias aún no verificado.</small>}
-   <small><strong>Aislamiento global: NO CERTIFICADO.</strong> Hostinger y otros consumidores externos siguen sujetos a auditoría independiente.</small>
+   <small><strong>Hostinger · evidencia manual (14/11/2026):</strong> cuatro cron canary que contactaban staging retirados; cron maestro conservado; fichero job001_enabled_jobs.json reducido a los cinco IDs 2, 6, 12, 17 y 19, confirmado tras reabrirlo. <a href="https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/universal/v0/staging-suspension/HOSTINGER_CRON_INVENTORY_2026-11-14.md" target="_blank" rel="noopener noreferrer">Ver inventario y recuperación</a>. Esta es una comprobación manual histórica, no una lectura en vivo de Hostinger.</small>
+   <small><strong>Aislamiento global: NO CERTIFICADO.</strong> Los controles actuales de Supabase están verificados en vivo; posibles consumidores externos no inventariados siguen pendientes de una auditoría independiente.</small>
   </>:<small>{result?.message||'Sin datos de control verificados.'}</small>}
   <div style={{display:'flex',flexWrap:'wrap',gap:8,marginTop:8}}>
    <button type="button" disabled={busy||captureBusy} onClick={()=>{void refresh()}}>
