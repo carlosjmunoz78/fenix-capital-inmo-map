@@ -3,6 +3,7 @@ import {canPreviewUniversalOperativa,readUniversalOperativaLab,simulateFactRegis
 import './cerebro-universal-operativa-lab.css';
 import CerebroStagingSuspensionLab from './CerebroStagingSuspensionLab';
 import CerebroFactRegistryLab from './CerebroFactRegistryLab';
+import CerebroOperatorChatLab from './CerebroOperatorChatLab';
 export default function CerebroUniversalOperativaLabPanel({company}:{company:'fenix'|'all'|'aion'|'captacasa'}){
  const [result,setResult]=useState<UniversalLabProof|null>(null);
  const [loading,setLoading]=useState(false);
@@ -56,6 +57,7 @@ export default function CerebroUniversalOperativaLabPanel({company}:{company:'fe
     result?.kind==='unavailable'?'No hay verificación disponible. La Operativa actual continúa sin cambios.':
     'Preparando verificación de LAB…'}
   </p>
+  {result?.kind==='ready'?<CerebroOperatorChatLab/>:null}
   {result?.kind==='ready'?<div className="op-uni-lab-dryrun">
    <button type="button" disabled={dryRunning} onClick={()=>{setDryRunning(true);void simulateFactRegistryDryRunLab().then(setDryRun).finally(()=>setDryRunning(false))}}>
     {dryRunning?'Validando…':'Simular orden FACT-001 (no ejecutar)'}
