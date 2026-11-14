@@ -97,3 +97,16 @@ Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `S
 - Reversión del código UI/Gateway: revertir los commits aislados de PR #66 o restaurar el Preview anterior; el despliegue original permanece inmutable.
 - Edge y RPC son recursos nuevos y aislados; conservar evidencia y no borrar automáticamente. El alta de esta capacidad **no autoriza** reactivar staging ni alterar las 15 suspensiones.
 - Cualquier corrección debe conservar esquema, permisos, RLS, ids de evidencia y la política de owner. Migración PROD prohibida hasta los gates correspondientes.
+
+
+## V0.17 · Aceptación física owner: evidencia durable e idempotencia
+
+**HECHO en la misma sesión Opera del propietario y en el Preview aislado de Vercel** (14-11-2026, 09:03:54 UTC, 10:03:54 Europe/Madrid). Usando temporalmente un marcador QA de URL, consumido antes del POST, el componente `CerebroStagingSuspensionLab` llamó al **Gateway Universal autenticado** `capture_staging_suspension` y a la Edge PREPROD de auditoría. El navegador mostró literalmente que la evidencia real se había registrado.
+
+**Prueba física en SQL:** tabla `public.cerebro_universal_staging_observation_lab_v0`, 1 fila con `idempotency_key='lab-observe-owner-acceptance-20261114'`, `evidence_id='4250fbc1-f5b8-4df2-b37c-2ebc3e5659b8'`, `created_at='2026-11-14T09:03:54.120602Z'`, `executed_external_actions=false`, `prod_execution_enabled=false`, `additional_cost_eur=0`. Esta es una **escritura durable real de evidencia en LAB**, no una orden de negocio ni una operación de WordPress.
+
+**Replay E2E:** se repitió la aceptación con la misma clave. Opera mostró **«Evidencia anterior recuperada por idempotencia»** con idéntico UUID. La consulta SQL siguió dando 1 fila y el mismo UUID y timestamp. Por tanto: **a lo sumo una escritura** para esa clave, con replay auditable, sin nuevas acciones externas.
+
+**Hardening posterior:** commit `634d2a1c4b5c6024a30e96f9ae215f28fcdd9c40` retiró del componente React el disparador automático temporal por URL. Permanecen los controles normales `Actualizar estado real` y `Guardar evidencia LAB`. La fuente conserva el helper tipado opcional para QA; ya no hay ejecución automática asociada al marcador de aceptación. No se ha modificado PROD, ninguna ruta a staging, ni la configuración de jobs.
+
+**No atribuir:** la ruta de botón manual `onClick` no se probó mediante un clic sintético real; se probó la misma función de captura desde el componente con sesión auténtica. No extrapolar esta primera escritura auditable a los 179 motores ni al resto de órdenes generales. La funcionalidad human-by-exception necesita inventario y certificados individuales.
