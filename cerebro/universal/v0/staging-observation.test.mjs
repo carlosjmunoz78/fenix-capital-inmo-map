@@ -9,7 +9,7 @@ const observation={status:'OK',source:'PREPROD_SQL_LIVE_AGGREGATE_NO_EXTERNAL_IO
   environment:'LAB',source_environment:'PREPROD',global_isolation_verified:false,
   known_controls_closed:true,staging_probed:false,executed_external_actions:false,
   prod_execution_enabled:false,staging_job001:{expected:15,found:15,paused:15,active:0},
-  staging_cron:{expected:8,found:8,paused:8,active:0},
+  staging_cron:{expected:14,found:8,paused:8,active:0},
   sql_guard:{expected:4,found:4,protected:4}};
 const mockActor=async()=>({actor_id:'CARLOS-ADMIN',company_ids:['fenix'],
  scopes:['cerebro:universal:read','cerebro:jobs:read','cerebro:audit:read','cerebro:command:dryrun']});
