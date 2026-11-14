@@ -115,3 +115,11 @@
 .op-uni-lab-chat-pending>div{display:flex;flex-wrap:wrap;gap:9px}
 .op-uni-lab-chat-pending button:first-child{background:rgba(118,83,34,.6);border-color:#f5cf86}
 @media(max-width:680px){.op-uni-lab-chat{padding:12px}.op-uni-lab-chat-form button{width:100%}.op-uni-lab-chat-line{max-width:100%}.op-uni-lab-chat-log{max-height:300px}}
+
+/* Owner LAB shortcuts reuse the authenticated command planner; no execution endpoints. */
+.op-uni-lab-chat-quick{display:grid;gap:9px;padding:12px 0;border-top:1px solid rgba(123,196,215,.18);border-bottom:1px solid rgba(123,196,215,.18)}
+.op-uni-lab-chat-quick>strong{font-size:13px;color:#e0f8ff}
+.op-uni-lab-chat-quick>div{display:flex;gap:9px;flex-wrap:wrap}
+.op-uni-lab-chat-quick button{min-height:44px;padding:10px 13px;border-color:rgba(122,201,235,.4);background:rgba(18,63,89,.5)}
+.op-uni-lab-chat-quick>small{font-size:12px}
+@media(max-width:680px){.op-uni-lab-chat-quick>div{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.op-uni-lab-chat-quick button{width:100%;text-align:center;padding:10px 6px}}
