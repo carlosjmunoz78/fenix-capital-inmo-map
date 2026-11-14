@@ -23,7 +23,7 @@ function validatedObservation(raw:unknown):raw is Record<string,unknown>{
   x.source==="PREPROD_SQL_LIVE_AGGREGATE_NO_EXTERNAL_IO"&&
   typeof x.known_controls_closed==="boolean"&&
   j?.expected===15&&Number.isSafeInteger(j?.paused)&&
-  c?.expected===8&&Number.isSafeInteger(c?.paused)&&
+  c?.expected===14&&Number.isSafeInteger(c?.paused)&&
   g?.expected===4&&Number.isSafeInteger(g?.protected);
 }
 Deno.serve(async req=>{
