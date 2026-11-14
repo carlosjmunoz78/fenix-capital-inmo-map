@@ -33,6 +33,10 @@ test('neuronal: live evidence, organic graph, interaction, trustworthy link and 
  await panel.getByRole('button',{name:'FACT-001',exact:true}).click();
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toHaveAttribute('href','https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/911');
  await expect(page.getByRole('region',{name:'Resumen neuronal verificable'})).toContainText('PARCIAL');
+ await panel.getByRole('button',{name:'Inspeccionar FACT-001'}).focus();
+ await page.keyboard.press('Enter');
+ await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toBeVisible();
+ await page.screenshot({path:'test-results/neural-desktop.png',fullPage:true});
 });
 
 test('neuronal: cached evidence is not animated or falsely claimed as live; links are validated',async({page})=>{
@@ -69,4 +73,22 @@ test('neuronal: mobile inspection retains usable touch controls and no panel ove
  expect(itemRect?.height||0).toBeGreaterThanOrEqual(43);
  await item.click();
  await expect(panel.getByRole('link',{name:'Ver ejecución original'})).toBeVisible();
+ await page.screenshot({path:'test-results/neural-mobile.png',fullPage:true});
+});
+
+test('four primary views preserve isolation and can be navigated without a reload',async({page})=>{
+ await setup(page,'LIVE',[run(915,'in_progress','FACT-001')]);
+ const bar=page.getByRole('navigation',{name:'Interfaces'});
+ await bar.getByRole('button',{name:'Jarvis',exact:true}).click();
+ await expect(page.locator('.jarvis-work')).toBeVisible();
+ await expect(page.locator('.cerebro-neural-graph')).toHaveCount(0);
+ await bar.getByRole('button',{name:'Operativa',exact:true}).click();
+ await expect(page.locator('.operativa-premium')).toBeVisible();
+ await expect(page.locator('.jarvis-work')).toHaveCount(0);
+ await bar.getByRole('button',{name:'Navegador',exact:true}).click();
+ await expect(page.locator('.cerebro-browser-console')).toBeVisible();
+ await expect(page.locator('.operativa-premium')).toHaveCount(0);
+ await bar.getByRole('button',{name:'Neuronal',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Núcleo de actividad'})).toBeVisible();
+ await expect(page.locator('.cerebro-browser-console')).toHaveCount(0);
 });
