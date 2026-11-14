@@ -12,6 +12,8 @@ export function createUniversalSdkV0({request,session_token,company_id,environme
   listJobs:(engine_id,version)=>call('list_jobs',{engine_id,version}),
   listWorkActivity:()=>call('list_work_activity'),
   getDependencyStatus:()=>call('get_dependency_status'),
+  readStagingSuspension:()=>call('get_staging_suspension_live'),
+  captureStagingEvidence:idempotency_key=>call('capture_staging_suspension',{idempotency_key}),
   assessOperation:operation=>call('assess_operation',{operation}),
   getJob001Controls:()=>call('get_job001_controls'),
   listOwnerSources:()=>call('list_owner_sources'),
