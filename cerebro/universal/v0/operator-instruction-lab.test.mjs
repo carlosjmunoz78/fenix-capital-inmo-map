@@ -25,6 +25,15 @@ for(const [phrase,expected,confirmation] of [
   assert.equal(r.additional_cost_eur,0);
  });
 }
+test('individual motor status request is a READ-ONLY candidate (registry authorization remains server-side)',()=>{
+ const r=plan('estado del motor SEO-001');
+ assert.equal(r.status,'PLAN_READY');
+ assert.equal(r.intent,'ENGINE_STATUS');
+ assert.equal(r.target_engine_id,'SEO-001');
+ assert.equal(r.requires_confirmation,false);
+ assert.equal(r.production_allowed,false);
+ assert.equal(r.external_destination_allowed,false);
+});
 for(const phrase of [
  'no quiero certificar fact-001','certifica fact-001 en producción',
  'haz SEO de Córdoba','activar staging','publicar wordpress',
