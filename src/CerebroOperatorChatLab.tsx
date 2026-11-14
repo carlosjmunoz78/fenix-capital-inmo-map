@@ -130,7 +130,7 @@ export default function CerebroOperatorChatLab(){
    <label htmlFor="cerebro-lab-command">Escribe tu orden</label>
    <textarea id="cerebro-lab-command" value={input} onChange={e=>setInput(e.target.value)}
     onKeyDown={keydown} maxLength={240} rows={2} disabled={busy||!!pending}
-    placeholder="Ej.: estado de staging · certificar FACT-001"/>
+    placeholder="Ej.: certificar suspensión de staging · estado de motores"/>
    <button type="submit" disabled={busy||!!pending||input.trim().length<2}>Enviar orden</button>
   </form>
   <small>Historial de conversación solo de esta sesión, no persistido. Las certificaciones y simulaciones confirmadas se auditan en PREPROD. No hay control de producción, publicación ni acceso a staging.</small>
