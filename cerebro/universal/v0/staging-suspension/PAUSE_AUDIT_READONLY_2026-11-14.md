@@ -126,3 +126,17 @@ Esta suspensión **es doble**: bloqueo de las Edge y SQL específicas más el `S
 - El disparador QA de URL fue retirado del UI después de la aceptación física; ya no se activa por navegar. `Guardar evidencia LAB` permanece disponible bajo acción expresa del propietario.
 
 **Gates restantes, sin ocultarlos:** la suspensión global de otras rutas externas (especialmente Hostinger y scripts no inventariados) sigue PARCIAL; el Gateway actual ejecuta una **capacidad determinista auditada** de LAB, pero **NO** un ejecutor universal de 179 motores. PR sigue DRAFT, sin canary/tribunal/rollback general ni autorización de promover a producción. Cero suscripciones nuevas; coste total de proveedor no medido.
+
+
+## V0.20 · Auditoría de deriva 94/94 Edge
+
+**HECHO (solo lectura, sin visitas a staging):** el inventario privado `cerebro_lab_private.staging_suspension_snapshot_v1` contiene **94 snapshots Edge originales**. Se compararon por `artifact_name` y `original_version` con el catálogo administrativo `list_edge_functions` de Supabase PREPROD (362 Edge en revisión previa), con resultado:
+
+- **94/94 funciones localizadas** con el mismo nombre.
+- **94/94 estado administrativo ACTIVE** (significa Edge desplegada, no que su carga original esté ejecutándose).
+- **94/94 versión desplegada = versión original + 1**, sin versiones rezagadas, desaparecidas ni cambios adicionales tras el corte inventariado.
+- Esta prueba acredita **integridad de inventario y ausencia de deriva de versión**; no sustituye a una prueba de tráfico negativo exhaustiva de cada ruta, ni acredita bloqueo de posibles accesos externos que no atraviesen las Edge.
+
+Los tres endpoints adicionales bloqueados más tarde tienen snapshots separados en `cerebro_lab_private.staging_edge_source_snapshot_v1`; su prueba remota 423 e idempotencia se documentan arriba.
+
+**Continuidad documental:** `STATE_2026-11-14.md` registra un corte histórico anterior a los tres bloqueos adicionales. Su declaración temporal «fenix-seo-conversion-e2e-preprod no modificado» está **SUPERADA**: versión v8 bloqueada, backup v7 disponible. Este runbook posterior es fuente vigente para el estado de ese endpoint. No reactivar staging.
