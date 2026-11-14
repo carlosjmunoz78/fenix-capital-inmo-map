@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {getLabDependencyStatusV0,assessLabOperationV0,rejectSuspendedTargetV0} from './dependency-policy.mjs';
 const HUMAN_CODES=['LEGAL_REQUIRED','SIGNATURE_REQUIRED','LOW_CONFIDENCE','HIGH_RISK','POLICY_CONFLICT','SECURITY_INCIDENT','MONEY_LIMIT','CUSTOMER_HUMAN_REQUEST'];
-const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_evidence','submit_command','invoke_read','audit_log'];
+const METHODS=['list_capabilities','get_capability','get_engine_status','list_jobs','get_job','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','get_evidence','submit_command','invoke_read','audit_log'];
 const error=s=>{throw Error(s);};
 const value=(v,name)=>typeof v==='string'&&v.length>0&&v.length<=160?v:error('INVALID_'+name);
 const object=v=>v!==null&&typeof v==='object'&&!Array.isArray(v);
@@ -9,15 +9,16 @@ const clone=v=>structuredClone(v);
 const stable=v=>JSON.stringify(v,Object.keys(v).sort());
 const required=['company_id','engine_id','environment','version'];
 export class UniversalGatewayLabV0 {
- #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #jobControls; #audit=[]; #idem=new Map(); #cap;
- constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null,jobControls=null}){
+ #registry; #authenticate; #jobs;  #workActivity; #ownerSources; #jobControls; #stagingReader; #audit=[]; #idem=new Map(); #cap;
+ constructor({registry,authenticate,jobs=null,workActivity=null,ownerSources=null,jobControls=null,stagingReader=null}){
   if(!object(registry)||registry.count!==179||registry.engine_ids?.length!==179||new Set(registry.engine_ids).size!==179||registry.defaults?.environment!=='SCAFFOLD'||registry.extension?.prod_authorized!==false||registry.extension?.trading_access!==false) error('REGISTRY_UNSAFE');
   if(typeof authenticate!=='function')error('AUTHENTICATOR_REQUIRED');
   if(jobs!==null&&typeof jobs.listForContext!=='function')error('JOB_READER_REQUIRED');
   if(workActivity!==null&&typeof workActivity.listForContext!=='function')error('WORK_ACTIVITY_READER_REQUIRED');
   if(ownerSources!==null&&typeof ownerSources.listForContext!=='function')error('OWNER_SOURCES_READER_REQUIRED');
   if(jobControls!==null&&typeof jobControls.listForContext!=='function')error('JOB_CONTROLS_READER_REQUIRED');
-  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;this.#jobControls=jobControls;
+  if(stagingReader!==null&&(typeof stagingReader.readForContext!=='function'||typeof stagingReader.captureForContext!=='function'))error('STAGING_READER_REQUIRED');
+  this.#registry=clone(registry);this.#authenticate=authenticate;this.#jobs=jobs;this.#workActivity=workActivity;this.#ownerSources=ownerSources;this.#jobControls=jobControls;this.#stagingReader=stagingReader;
   this.#cap={
    company_id:'SERVER_AUTHENTICATED',engine_id:'FACT-001',environment:'LAB',version:'0.1.0-lab',
    capability_id:'fact.registry.summary',input_schema:{type:'object',properties:{},additionalProperties:false},
@@ -58,6 +59,38 @@ export class UniversalGatewayLabV0 {
     if(typeof params.operation!=='string'||params.operation.length>90)
      error('OPERATION_INVALID');
     response=assessLabOperationV0({company_id,environment:'LAB',operation:params.operation});break;
+   }
+   case 'get_staging_suspension_live':{
+    if(!actor.scopes.includes('cerebro:jobs:read'))error('SCOPE_DENIED');
+    if(!this.#stagingReader){
+     response={status:'UNAVAILABLE',source:'LIVE_STAGING_SUSPENSION_PREPROD',
+      reason:'STAGING_READER_NOT_CONNECTED',executed_external_actions:false,prod_execution_enabled:false};
+     break;
+    }
+    const observed=await this.#stagingReader.readForContext({company_id,environment:'LAB',session_token});
+    if(!object(observed)||!['OBSERVED','UNAVAILABLE'].includes(observed.status)||
+       observed.prod_execution_enabled!==false||observed.executed_external_actions!==false)
+     error('STAGING_OBSERVATION_CONTRACT_INVALID');
+    response=clone(observed);break;
+   }
+   case 'capture_staging_suspension':{
+    if(!actor.scopes.includes('cerebro:command:dryrun')||!actor.scopes.includes('cerebro:audit:read'))error('SCOPE_DENIED');
+    rejectSuspendedTargetV0(params);
+    if(Object.keys(params).some(k=>!['company_id','environment','idempotency_key'].includes(k)))
+     error('STAGING_CAPTURE_FIELDS_DENIED');
+    if(typeof params.idempotency_key!=='string'||!/^lab-observe-[a-z0-9-]{12,48}$/.test(params.idempotency_key))
+     error('IDEMPOTENCY_KEY_INVALID');
+    if(!this.#stagingReader){
+     response={status:'UNAVAILABLE',source:'LIVE_STAGING_SUSPENSION_PREPROD',
+      reason:'STAGING_READER_NOT_CONNECTED',executed_external_actions:false,prod_execution_enabled:false};
+     break;
+    }
+    const evidence=await this.#stagingReader.captureForContext({
+     company_id,environment:'LAB',session_token,idempotency_key:params.idempotency_key});
+    if(!object(evidence)||!['EVIDENCE_PERSISTED','UNAVAILABLE'].includes(evidence.status)||
+       evidence.prod_execution_enabled!==false||evidence.executed_external_actions!==false)
+     error('STAGING_EVIDENCE_CONTRACT_INVALID');
+    response=clone(evidence);break;
    }
    case 'list_owner_sources':{
     if(!actor.scopes.includes('cerebro:factory:inspect'))error('SCOPE_DENIED');
