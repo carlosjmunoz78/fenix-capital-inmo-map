@@ -5,13 +5,14 @@ import {createFenixOwnerContextResolverV0} from '../cerebro/universal/v0/owner-a
 import {createGithubWorkActivityReaderV0} from '../cerebro/universal/v0/github-work-activity-reader.mjs';
 import {createOwnerUniverseReaderLabV0} from '../cerebro/universal/v0/owner-universe-reader.mjs';
 import {createJob001ControlReaderLabV0} from '../cerebro/universal/v0/job001-control-reader.mjs';
+import {createStagingObservationReaderLabV0} from '../cerebro/universal/v0/staging-observation-reader.mjs';
 
 type H = string | string[] | undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>;body?:unknown};
 type Res={status:(code:number)=>Res;setHeader:(name:string,value:string)=>void;json:(value:unknown)=>void};
 const h=(v:H):string=>Array.isArray(v)?v[0]||'':v||'';
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
-const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','submit_command']);
+const ACTIONS=new Set(['list_capabilities','get_capability','get_engine_status','invoke_read','get_evidence','list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension','submit_command']);
 const obj=(v:unknown):v is Record<string,unknown>=>!!v&&typeof v==='object'&&!Array.isArray(v);
 export function allowedUniversalPreviewRequest(req:Req,environment:string|undefined,vercelUrl:string|undefined){
  const host=h(req.headers.host).toLowerCase();
@@ -44,6 +45,13 @@ export default async function handler(req:Req,res:Res){
  if(req.body.action==='assess_operation'&&
     (typeof params.operation!=='string'||params.operation.length>90))
   return res.status(404).json({status:'CLOSED',reason:'OPERATION_REQUIRED'});
+ if(req.body.action==='capture_staging_suspension'&&
+    (Object.keys(params).some(k=>!['company_id','environment','idempotency_key'].includes(k))||
+     typeof params.idempotency_key!=='string'||!/^lab-observe-[a-z0-9-]{12,48}$/.test(params.idempotency_key)))
+  return res.status(404).json({status:'CLOSED',reason:'STAGING_CAPTURE_CONTRACT_REQUIRED'});
+ if(req.body.action==='get_staging_suspension_live'&&
+    Object.keys(params).some(k=>!['company_id','environment'].includes(k)))
+  return res.status(404).json({status:'CLOSED',reason:'READ_FIELDS_DENIED'});
  if(req.body.action==='submit_command'&&
     Object.keys(params).some(key=>!new Set([
      'company_id','environment','engine_id','capability_id','version',
@@ -70,7 +78,9 @@ export default async function handler(req:Req,res:Res){
    workActivity:createGithubWorkActivityReaderV0({apiKey:apikey}),
    ownerSources:createOwnerUniverseReaderLabV0({apiKey:apikey}),
    jobControls:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
-    createJob001ControlReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null
+    createJob001ControlReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null,
+   stagingReader:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY?.startsWith('sb_publishable_')?
+    createStagingObservationReaderLabV0({preprodApiKey:process.env.CEREBRO_PREPROD_PUBLISHABLE_KEY,ownerApiKey:apikey}):null
   });
   const result:unknown=await gateway.handle({
    session_token:bearer.replace(/^Bearer\s+/i,''),
@@ -111,7 +121,7 @@ export default async function handler(req:Req,res:Res){
     durable_audit:true,idempotency_persisted:true,audit_ref:persisted.audit_id,audit_replayed:persisted.replayed===true});
   }
   return res.status(200).json({...result,transport:'PREVIEW_ONLY_SERVER_VERIFIED',
-   source:['list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
+   source:['list_work_activity','list_owner_sources','get_job001_controls','get_dependency_status','assess_operation','get_staging_suspension_live','capture_staging_suspension'].includes(req.body.action)?result.source:'LAB_REPOSITORY_SNAPSHOT_NOT_LIVE',
    prod_execution_enabled:false,...(req.body.action==='submit_command'?{durable_audit:false,idempotency_persisted:false}: {})});
  }catch{
   // No upstream error, actor data, access token or headers ever returned to client.
