@@ -18,7 +18,7 @@ export default function CerebroNeuralView(){
   const refresh=async()=>{
    const{status,data}=await fetchCerebroActivity();
    if(cancelled)return;
-   if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else setSource('UNAVAILABLE');
+   if(status===200&&data?.status==='OK'){setRuns(data.runs||[]);setSource(data.source_status);setObservedAt(data.observed_at)}else{setSource('UNAVAILABLE');setRuns([]);setObservedAt('')}
   };
   void refresh();const timer=window.setInterval(()=>{void refresh()},30_000);return()=>{cancelled=true;window.clearInterval(timer)};
  },[]);
@@ -33,15 +33,15 @@ export default function CerebroNeuralView(){
   </section>
   <CerebroNeuralGraph runs={runs} source={source}/>
   <section className="cerebro-neural-metrics" aria-label="Resumen neuronal verificable">
-   <article><small>EN CURSO</small><strong>{running.length}</strong><span>ejecuciones observadas</span></article>
-   <article><small>EN COLA</small><strong>{queued.length}</strong><span>trabajo observable</span></article>
-   <article><small>COMPLETADAS</small><strong>{completed.length}</strong><span>en la ventana actual</span></article>
+   <article><small>EN CURSO</small><strong>{source==='LIVE'?running.length:'—'}</strong><span>{source==='LIVE'?'ejecuciones observadas':'sin verificación en directo'}</span></article>
+   <article><small>EN COLA</small><strong>{source==='LIVE'?queued.length:'—'}</strong><span>{source==='LIVE'?'trabajo observable':'sin verificación en directo'}</span></article>
+   <article><small>COMPLETADAS</small><strong>{source==='UNAVAILABLE'?'—':completed.length}</strong><span>{source==='LIVE'?'en la ventana actual':'última muestra disponible'}</span></article>
    <article><small>LRN-001</small><strong>PARCIAL</strong><span>sin fabricar métricas neuronales</span></article>
   </section>
   <section className="cerebro-neural-grid">
    <article className="cerebro-neural-panel">
     <header><div><small>SEÑALES</small><h2>Trabajo que alimenta CEREBRO</h2></div><Activity size={18}/></header>
-    <div className="cerebro-neural-list">{visible.length?visible.map(run=><a key={run.run_id} href={run.html_url} target="_blank" rel="noreferrer"><span className={ACTIVE.has(run.status)?'is-running':'is-queued'}/><div><strong>{label(run)}</strong><small>{run.current_step||run.workflow_name}</small></div><em>{ACTIVE.has(run.status)?'EN CURSO':'EN COLA'}</em></a>):<div className="cerebro-neural-empty"><Clock3 size={20}/><strong>Sin señales activas visibles</strong><span>La vista no inventa trabajo para llenar el panel.</span></div>}</div>
+    <div className="cerebro-neural-list">{visible.length?visible.map(run=><a key={run.run_id} href={run.html_url} target="_blank" rel="noreferrer"><span className={ACTIVE.has(run.status)?'is-running':'is-queued'}/><div><strong>{label(run)}</strong><small>{run.current_step||run.workflow_name}</small></div><em>{source==='LIVE'?(ACTIVE.has(run.status)?'EN CURSO':'EN COLA'):'ÚLTIMO ESTADO'}</em></a>):<div className="cerebro-neural-empty"><Clock3 size={20}/><strong>Sin señales activas visibles</strong><span>La vista no inventa trabajo para llenar el panel.</span></div>}</div>
    </article>
    <aside className="cerebro-neural-panel cerebro-neural-policy"><header><div><small>GOBERNANZA</small><h2>Aprender sin romper</h2></div><ShieldCheck size={18}/></header><p>Los resultados observados pueden alimentar aprendizaje, pero cualquier mutación debe seguir contratos, tests, Tribunal, rollback y límites de coste.</p><dl><div><dt>Fuente visible</dt><dd>{source}</dd></div><div><dt>Observado</dt><dd>{observedAt?new Date(observedAt).toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}):'—'}</dd></div><div><dt>Estado de puente LRN</dt><dd>POR AUDITAR / PARCIAL</dd></div></dl></aside>
   </section>
