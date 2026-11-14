@@ -2,6 +2,7 @@ import {useEffect,useMemo,useState} from 'react';
 import {Activity,BrainCircuit,Clock3,Radio,ShieldCheck} from 'lucide-react';
 import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi';
 import './cerebro-neural-view.css';
+import CerebroNeuralGraph from './CerebroNeuralGraph';
 
 const ACTIVE=new Set(['in_progress']);
 const QUEUED=new Set(['queued','waiting','requested','pending']);
@@ -30,6 +31,7 @@ export default function CerebroNeuralView(){
    <div><span className="cerebro-neural-kicker"><BrainCircuit size={16}/> CEREBRO · NEURONAL</span><h1>Aprendizaje y actividad observable</h1><p>Vista nativa. Solo representa señales verificables; no reutiliza la visualización histórica ni fabrica estados de aprendizaje.</p></div>
    <span className={`cerebro-neural-source is-${source.toLowerCase()}`}><Radio size={13}/>{source}</span>
   </section>
+  <CerebroNeuralGraph runs={runs} source={source}/>
   <section className="cerebro-neural-metrics" aria-label="Resumen neuronal verificable">
    <article><small>EN CURSO</small><strong>{running.length}</strong><span>ejecuciones observadas</span></article>
    <article><small>EN COLA</small><strong>{queued.length}</strong><span>trabajo observable</span></article>
