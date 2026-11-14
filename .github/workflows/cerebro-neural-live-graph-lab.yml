@@ -1,0 +1,54 @@
+name: CEREBRO Neural Graph · isolated LAB QA
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/CerebroNeuralGraph.tsx'
+      - 'src/CerebroNeuralView.tsx'
+      - 'src/cerebro-neural-graph.css'
+      - 'src/cerebro-interface-bar.css'
+      - 'tests/cerebro-neural-live-graph-lab.spec.ts'
+      - '.github/workflows/cerebro-neural-live-graph-lab.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neural-lab-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  neural-lab-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    env:
+      VITE_FENIX_ENV: test
+      VITE_SUPABASE_URL: http://127.0.0.1:54321
+      VITE_SUPABASE_PUBLISHABLE_KEY: neural-lab-dummy-not-a-real-key
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci
+      - name: Compile isolated interface
+        run: npm run build
+      - name: Install Chromium for LAB proof
+        run: npx playwright install --with-deps chromium
+      - name: Test live, cached, offline and phone-sized interface
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/cerebro-neural-live-graph-lab.spec.ts --project=desktop-chromium --reporter=line
+      - name: Store LAB QA screenshots and failure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: neural-lab-evidence-${{ github.run_id }}
+          path: |
+            playwright-report
+            test-results
+          if-no-files-found: ignore
+          retention-days: 7
