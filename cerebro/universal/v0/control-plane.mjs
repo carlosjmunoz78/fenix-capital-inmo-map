@@ -57,7 +57,14 @@ export class UniversalGatewayLabV0 {
   const govCap=this.#stagingReader&&actor.scopes.includes('cerebro:command:dryrun')&&actor.scopes.includes('cerebro:audit:read')?{
    company_id,engine_id:'GOV-001',environment:'LAB',version:'0.1.0-lab',
    capability_id:'gov.staging.suspension.capture',
-   input_schema:{type:'object',required:['idempotency_key'],properties:{idempotency_key:{type:'string',pattern:'^lab-observe-[a-z0-9-]{12,48}
+   input_schema:{type:'object',required:['idempotency_key'],properties:{idempotency_key:{type:'string'}},additionalProperties:false},
+   output_schema:{type:'object'},permissions:['cerebro:universal:read','cerebro:command:dryrun','cerebro:audit:read'],
+   policy:'LAB_ALLOWLISTED_DURABLE_EVIDENCE_ONLY',required_secrets:[],side_effects:'APPEND_ONLY_LAB_EVIDENCE',
+   executor:'EXISTING_STAGING_OBSERVATION_PREPROD_EDGE',dependencies:['cerebro-universal-staging-observe-lab-v0'],
+   health:'LAB_EVIDENCE_RECEIPT_REQUIRES_E2E',evidence_refs:['cerebro/universal/v0/staging-suspension/STATE_2026-11-14.md'],
+   rollback:'DISABLE_LAB_ADAPTER_NO_STAGING_REACTIVATION',cost_budget_eur:0,human_exception_policy:HUMAN_CODES
+  }:null;
+  const requireCap=()=>{if(!cap||params.capability_id!==cap.capability_id)error('CAPABILITY_UNAVAILABLE');return cap;};
   const payload=()=>{const p=params.payload??{};if(!object(p)||Object.keys(p).length!==0)error('PAYLOAD_SCHEMA_DENIED');return p;};
   let response;
   switch(action){
