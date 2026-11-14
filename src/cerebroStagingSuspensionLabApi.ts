@@ -8,7 +8,7 @@ export type StagingLiveSnapshot={
  external_hostinger_verified:false;staging_probed:false;executed_external_actions:false;
  gateway_job001:{total:number;paused:number;active:number};
  staging_job001:{expected:15;found:number;paused:number;active:number};
- staging_cron:{expected:8;found:number;paused:number;active:number};
+ staging_cron:{expected:14;found:number;paused:number;active:number};
  sql_guard:{expected:4;found:number;protected:number};
  bridge_health:{last_recorded_at:string|null;rows_total:number};
  durable_evidence?:{recorded:number;last_recorded_at:string|null;latest_evidence_id:string|null};
@@ -30,7 +30,7 @@ function validate(snapshot:unknown):snapshot is StagingLiveSnapshot{
   typeof r.known_controls_closed==='boolean'&&
   typeof r.observed_at==='string'&&Number.isFinite(Date.parse(r.observed_at))&&
   r.staging_job001?.expected===15&&['paused','active','found'].every(k=>integer(r.staging_job001[k]))&&
-  r.staging_cron?.expected===8&&['paused','active','found'].every(k=>integer(r.staging_cron[k]))&&
+  r.staging_cron?.expected===14&&['paused','active','found'].every(k=>integer(r.staging_cron[k]))&&
   r.sql_guard?.expected===4&&['found','protected'].every(k=>integer(r.sql_guard[k]))&&
   ['total','paused','active'].every(k=>integer(r.gateway_job001?.[k]))&&
   integer(r.bridge_health?.rows_total)&&
