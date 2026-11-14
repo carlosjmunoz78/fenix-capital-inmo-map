@@ -68,3 +68,39 @@ Se consultaron registros **solo lectura** de `function_edge_logs` del 14/11/2026
 Inspección del código desplegado: las cinco Edge del mapa cron contienen literal `staging.fenixcapital.es` y llamadas `fetch`, **sin guardia explícita `STAGING_SUSPENDED_BY_OWNER`**. En base SQL los registros de auditoría/páginas del sitewide se actualizaron incluso hasta 07:49 UTC; se desconoce si como resultado de un acceso HTTP real a staging. **No afirmar aislamiento global ni inferir visita web confirmada a partir de HTTP 200 del Edge.**
 
 **RIESGO ABIERTO P0:** la suspensión central del Gateway y JOB-001/13 no gobierna estas rutas heredadas vivas. No hay permiso para reactivar staging, y no se ha cambiado ningún scheduler o Edge sin prueba de dependencias. Cerrar este circuito en controles de ejecución de Edge, con snapshots, pruebas fallidas seguras y rollback, ANTES de declarar Operativa globalmente lista.
+
+
+## 2026-11-14 · Suspensión física extendida autorizada por el propietario
+
+El propietario confirma: **TODO staging debe permanecer pausado hasta nueva orden**. Se aplicaron cambios exclusivamente sobre rutas de PREPROD asociadas a staging, manteniendo App, CRM, WordPress PROD, DNS, GitHub main y Trading sin modificar.
+
+**Snapshots previos registrados:**
+- Cron originales: `CRON_ACTIVE_SNAPSHOT_2026-11-14.md` (seis IDs).
+- Tabla privada Supabase `cerebro_lab_private.staging_suspension_snapshot_v1`: tres definiciones SQL y siete versiones originales de Edge, con SHA-256 y versión de origen; RLS enabled; permisos PUBLIC/anon/authenticated/service_role revocados. Migración `cerebro_lab_staging_suspension_private_snapshots_v1_20261114`.
+- Para los tres SQL se conservaron los argumentos con valores DEFAULT, el `SECURITY DEFINER`, `search_path` y los grants originales. Hubo un intento de migración fallido transaccional por defaults faltantes que no aplicó cambios; segunda migración con defaults preservados dio `success=true`.
+
+**Parada de cron efectiva:**
+- Jobs `61,62,65,67,68,70`: `cron.alter_job(job_id:=...,active:=false)` después de comparar `active=true`, cron schedule y SQL exacto; confirmación directa `active=false` en los seis, sin borrar ni modificar command/schedule.
+- JOB-001/13 conserva el bloqueo `seo001_probe_wp_bridge_preprod` del bloque anterior.
+
+**Guards SQL efectivos:**
+- `seo001_dispatch_page_quality_for_city_v2_preprod(text,text)`
+- `seo001_dispatch_render_qa_preprod(text,text,text,text,text)`
+- `seo001_wp_staging_http_preprod(text,text,jsonb)`
+  
+Migración: `cerebro_lab_suspend_three_staging_sql_http_paths_v2_20261114`. Ejecutados los tres en una transacción `BEGIN READ ONLY`: `ok=false`, `BLOCKED_DEPENDENCY`, `STAGING_SUSPENDED_BY_OWNER`, `side_effects=false`, `request_id=null`. No llamadas HTTP ni escrituras desde sus nuevas definiciones.
+
+**Guards Edge efectivos:**
+1. `fenix-seo-page-quality-preprod` original v5 → guard v6
+2. `fenix-blog-visual-audit-preprod` original v2 → guard v3
+3. `fenix-seo-elementor-safe-writer-preprod` original v8 → guard v9
+4. `fenix-seo-infrastructure-autopilot-preprod` original v4 → guard v5
+5. `fenix-seo-sitewide-regression-preprod` original v7 → guard v8
+6. `fenix-web-content-ux-audit-v1-preprod` original v5 → guard v6
+7. `fenix-seo-landing-contract-audit-preprod` original v4 → guard v5
+
+Cada redeploy se hizo después de comparar igualdad exacta entre código fuente vivo y snapshot privado, manteniendo `verify_jwt`; guard `HTTP 423`, JSON `BLOCKED_DEPENDENCY`, `executed=false`, `side_effects=false`, sin `fetch`, secretos, storage ni DB. No se probó mediante peticiones externas ni visita a staging. `ACTIVE` en Supabase significa que **está sirviendo el guard**, no que el procesamiento staging esté activo.
+
+**Reversión:** PROHIBIDA mientras dure suspensión. Tras orden explícita de reanudar, recuperar `source_sql_or_code` por clave (SQL_FUNCTION/SUPABASE_EDGE) de la tabla privada, verificar SHA-256, versionar, ejecutar pruebas y restaurar las funciones por migración y despliegue Edge. Reactivar crons originales únicamente después de gates. No reactivar por accidente al fusionar PR o al promover otro runtime.
+
+**Alcance limitado:** pueden existir otros Edge, automatizaciones Hostinger, scripts remotos, llamadas HTTP directas a host, o vías a staging fuera de estos controles. Por tanto el estado global sigue **PARCIAL / POR AUDITAR**, no CERTIFICADO, hasta inventario de todas las rutas y verificación egress. El dominio staging está en Cloudflare DNS-only (proxied=false), por lo que un WAF de Cloudflare no bloquearía su tráfico actualmente. Se preservó DNS.
