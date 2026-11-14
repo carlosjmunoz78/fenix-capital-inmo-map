@@ -26,6 +26,9 @@ async function setup(page:Page){
  await page.route('**/*',async route=>{
   const request=route.request(),url=new URL(request.url());
   if(url.hostname==='fenix-capital-preprod-qa.vercel.app'){
+   // Synthetic replacement for the existing server-side owner GET; never deployed.
+   if(url.pathname==='/api/cerebro-preview-owner')
+    return route.fulfill({status:200,headers,body:JSON.stringify({allowed:true,source:'SYNTHETIC_QA_OWNER'})});
    if(url.pathname==='/api/cerebro-universal-preview'){
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers,body:''});
     const body=request.postDataJSON() as {action:string;params:{instruction?:string;company_id?:string;environment?:string}};
@@ -72,7 +75,11 @@ async function setup(page:Page){
  });
  await page.goto(ORIGIN+'/cerebro?section=operativa&visual_lab=cockpit-v3&op3_panel=motores',{waitUntil:'domcontentloaded'});
  const quick=page.getByRole('group',{name:'Consultas rápidas de solo lectura'});
- await expect(quick).toBeVisible({timeout:15_000});
+ try{await expect(quick).toBeVisible({timeout:15_000});}
+ catch(error){
+  console.error('LAB_UI_DIAGNOSTIC',JSON.stringify({url:page.url(),body:(await page.locator('body').innerText().catch(()=>'' )).slice(0,1200),calls,outside:outside.slice(0,10)}));
+  throw error;
+ }
  return{calls,outside,quick};
 }
 
