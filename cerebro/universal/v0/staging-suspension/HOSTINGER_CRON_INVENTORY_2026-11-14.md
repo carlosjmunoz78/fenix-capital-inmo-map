@@ -46,3 +46,18 @@ El propietario indicó que retiró las cuatro tareas. Se volvió a leer en tiemp
 El listado **ya no contiene** `job001_wp_bridge_canary_FIXED.php`. Por comparación con el inventario previo se acredita que HOST-01, HOST-02, HOST-03 y HOST-04 han sido retiradas y HOST-05 sigue configurada. **No se eliminó el archivo PHP ni se alteró el programador maestro en esta intervención**; la acción de borrado la completó el propietario desde hPanel.
 
 **GATE ACTUAL:** `HOSTINGER_CANARY_CRONS_PAUSED_VERIFIED` · `MASTER_CRON_PRESERVED` · `MASTER_SCRIPT_PENDING_SOURCE_AUDIT`. No afirmar aún que todo Hostinger carece de vías hacia staging hasta inspeccionar en solo lectura el archivo PHP maestro y sus inclusiones/destinos. No consultar staging ni reactivar cron canary sin nueva orden expresa.
+
+
+## JOB-001 Master PHP · inspección parcial del archivo vivo
+
+**14/11/2026 · Solo lectura del editor vivo de Hostinger**: el propietario abrió `cerebro/job001_master_scheduler.php` en la pestaña Opera File Browser. Las primeras líneas accesibles del archivo muestran:
+- `COMPANY_ID='FENIX_CAPITAL'`, `ENGINE_ID='SEO-001'`, `ENVIRONMENT='PREPROD'`
+- `GATEWAY_URL='https://hnqlnvakzaywtafeiybt.supabase.co/functions/v1/cerebro-job001-gateway-preprod'`
+- lista de `$jobs` con ID y cron PREPROD, incluyendo JOB-001/13 `seo001-wp-bridge-probe`.
+- El texto mostrado no contiene ninguna URL directa de staging, **pero el editor de Hostinger virtualiza el archivo y solo expuso el tramo inicial hasta el job 17**. No confundir esta lectura con inspección física completa del PHP en Hostinger.
+
+**Contrato del servidor remoto contrastado por separado:** la Edge PREPROD `cerebro-job001-gateway-preprod` v11 exige secreto de gateway, lee `cerebro_job001_control_preprod.enabled` y devuelve `SKIPPED_DISABLED` antes del despacho cuando `enabled=false`. El mismo día se volvió a verificar que las 15 tareas dependientes de staging `[5,7,8,9,10,11,13,14,15,16,18,20,21,22,23]` siguen deshabilitadas y solo `[2,6,12,17,19]` están habilitadas.
+
+**Referencia del código esperado, NO prueba de identidad del vivo:** la misma Edge v11 conserva una copia `MASTER_ARTIFACT` de 196 líneas, con destino fijo al gateway PREPROD, configuración de jobs en fichero local `job001_enabled_jobs.json`, secreto almacenado fuera del PHP y llamadas cURL al Gateway con `CURLOPT_FOLLOWLOCATION=false`. La copia no contiene `staging.fenixcapital.es`, pero debe contrastarse el final del editor vivo antes de certificar el master.
+
+**Pendiente:** que el propietario desplace el editor a su final para completar lectura del código realmente instalado, sin pulsar Guardar, ejecutar script ni abrir staging.
