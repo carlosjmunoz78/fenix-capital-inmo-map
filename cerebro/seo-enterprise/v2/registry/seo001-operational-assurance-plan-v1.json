@@ -285,6 +285,13 @@
       "severity": "P0",
       "state": "ACTIVE_PROD_BRIDGE_STILL_POINTS_TO_STAGING_PRIVATE_PATCH_NOT_DEPLOYED",
       "next_action": "After authentic full WP files+SQL private restore and rollback, deploy exact guarded patch to live existing bridge v0.4.1. Default OFF, owner reactivates manually; verify zero STAGING network requests. Do not change staging or PROD until gates pass."
+    },
+    {
+      "id": "CITY_GROWTH_SCHEMA_CONTRACT_RETIREMENT_REVIEW",
+      "owner": "SEO-D17-D20",
+      "severity": "P1",
+      "state": "GOOGLE_FAQ_RICH_RESULT_RETIRED_V1_CITY_CONTRACT_UNREVIEWED",
+      "next_action": "Research verified 2026 Google FAQ retirement; version contract so visible FAQ and correct eligible schema matter, not obsolete rich result. Maintain mass rollout locked until page-level QA and owner tribunal."
     }
   ],
   "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry.",
