@@ -1,5 +1,6 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-2026-11-15.json';
+import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
  scheduled:boolean|null;active_execution_verified:false;worker_agent_id:null;
@@ -67,15 +68,17 @@ export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):s
   if(read.kind==='denied')return 'Acceso de propietario denegado. No se muestran fuentes Cloudflare.';
   const date=audited.observed_at;
   if(worker){
+   if(worker===cronGate.resource_name)return 'ARCHIVO, no en vivo: '+worker+' creado como canario LAB privado. Cron: ninguno; workers.dev: OFF; motor '+cronGate.engine_id+'. Cloudflare Free tenía '+cronGate.quota.existing_cron_triggers+'/'+cronGate.quota.limit_cron_triggers_per_account+' crons ocupados en '+cronGate.observed_at+'. No ejecuta trabajos empresariales.';
    const found=audited.workers.find(x=>x.worker_id===worker);
    return found?'ARCHIVO SIN LECTURA ACTUAL ('+date+'): Worker '+worker+'; motor declarado '+(found.engine_id||'SIN IDENTIFICAR')+
     '; cron '+(found.cron_schedules===null?'NO VERIFICADO':found.cron_schedules.length?found.cron_schedules.join(', '):'NO CONFIGURADO')+
     '. Estado de ejecución HOY: DESCONOCIDO. Error de conexión: '+read.reason+'.':
     'Cloudflare actual NO ACCESIBLE. El Worker '+worker+' no figura en el archivo de '+date+'; no se infiere que no exista.';
   }
-  return 'Cloudflare en tiempo real NO DISPONIBLE ('+read.reason+'). Última auditoría '+date+
-   ': '+audited.worker_count+' Workers, '+audited.scheduled_workers+' con cron configurado, '+
-   audited.without_cron_workers+' sin cron y '+audited.engine_id_mapped_workers+' con motor declarado vinculado. '+
+  return 'Cloudflare en tiempo real NO DISPONIBLE ('+read.reason+'). Auditoría compuesta: inventario inicial '+date+' y canario validado '+cronGate.observed_at+
+   ': '+cronGate.worker_count_now+' Workers, '+audited.scheduled_workers+' con cron configurado, '+
+   (audited.without_cron_workers+1)+' sin cron en sus últimas comprobaciones y '+audited.engine_id_mapped_workers+' scripts con motor declarado vinculado. '+
+   'Capacidad Workers Free auditada: '+cronGate.quota.existing_cron_triggers+'/'+cronGate.quota.limit_cron_triggers_per_account+' cron ocupados (HTTP 400, código '+cronGate.quota.api_error_code+'). No hay permiso para contratar ni borrar programaciones existentes. '+
    'Última observabilidad auditada: '+audited.observability.total_events+' eventos en 24 h, no trabajos, en '+audited.observability.services.length+' servicios. '+
    'Estas cifras son históricas, no demuestran agentes activos ni el estado actual.';
  }
