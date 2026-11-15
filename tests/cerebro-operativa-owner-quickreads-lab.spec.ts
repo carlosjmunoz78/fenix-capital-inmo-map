@@ -29,6 +29,42 @@ async function setup(page:Page){
    // Synthetic replacement for the existing server-side owner GET; never deployed.
    if(url.pathname==='/api/cerebro-preview-owner')
     return route.fulfill({status:200,headers,body:JSON.stringify({allowed:true,source:'SYNTHETIC_QA_OWNER'})});
+   if(url.pathname==='/api/cerebro-preview-gateway'){
+    const resource=url.searchParams.get('resource');
+    calls.push('gateway_'+resource);
+    if(resource==='health')return route.fulfill({status:200,headers,
+     body:JSON.stringify({status:'ok',authenticated_transport:true,direct_model_access:false,
+      prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'DETERMINISTIC_READ_ONLY'})});
+    return route.fulfill({status:503,headers,body:'{"status":"UNAVAILABLE"}'});
+   }
+   if(url.pathname==='/api/cerebro-fleet-observe'){
+    calls.push('fleet_observe');
+    if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
+    const entries=Array.from({length:11},(_,i)=>({id:i===10?'AGT-SALES-EXECUTIVE':'ENG-TEST-'+String(i).padStart(2,'0'),
+     name:i===10?'Ventas':'Especialista '+i,department:i===10?'REVENUE_SALES':'ENGINEERING',
+     company_id:'GLOBAL',environment:'PREPROD',state:'DECLARED',reports_to:null,runtime_verified:false}));
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+     status:'OK',source:'OWNER_LAB_FLEET_SOURCES_V1',environment:'LAB',company_id:'fenix',
+     observed_at:'2026-11-15T00:50:00Z',verified_owner:true,read_only:true,execution_enabled:false,additional_cost_eur:0,
+     roles:{declared_role_profiles:11,active_agent_count:null,verified_subagent_count:null,
+      unknown_agent_count:true,unknown_subagent_count:true,hierarchy_complete:false,
+      by_department:{ENGINEERING:10,REVENUE_SALES:1},entries,registry_id:'CEREBRO_ROLE_AGENT_REGISTRY_V1',
+      registry_environment:'PREPROD',registry_status:'ACTIVE_PREPROD_ADDITIVE'},
+     engine_registry_count:179,engine_registry_semantics:'DEFINED_NOT_RUNNING',
+     sources:[{platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-inmo-map',
+       name:'App / CEREBRO',state:'LIVE',reason:null,observed_at:'2026-11-15T00:50:00Z',
+       observed_sample:1,active_in_sample:1,queued_in_sample:0,total_repo_run_count:15,
+       recent:[{run_id:101,name:'LAB contrato vivo',status:'in_progress',conclusion:null,
+        updated_at:'2026-11-15T00:50:00Z',url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',
+        agent_id:null,engine_id:null,subagent_id:null}]},
+      {platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-cerebro-social',
+       name:'Social / AUTOQUAL',state:'UNAVAILABLE',reason:'PRIVATE_REPO_RUNTIME_CONNECTOR_NOT_CONFIGURED',observed_at:null,
+       observed_sample:null,active_in_sample:null,queued_in_sample:null,total_repo_run_count:null,recent:[]},
+      {platform:'Cloudflare',state:'UNAVAILABLE',reason:'OWNER_RUNTIME_CONNECTOR_NOT_VERIFIED',observed_at:null}],
+     control:{pause:'NOT_CONNECTED',resume:'NOT_CONNECTED',prioritize:'NOT_CONNECTED',
+      reason:'NO_VERIFIED_CONTROL_EXECUTOR',staging_status:'SUSPENDED_BY_OWNER'}
+    })});
+   }
    if(url.pathname==='/api/cerebro-universal-preview'){
     if(request.method()==='OPTIONS')return route.fulfill({status:204,headers,body:''});
     const body=request.postDataJSON() as {action:string;params:{instruction?:string;company_id?:string;environment?:string}};
@@ -114,4 +150,27 @@ test('Owner LAB controls fit 375px phones without clipped touch targets',async({
  await buttons.first().click();
  await expect(page.getByRole('log',{name:'Conversación de Operativa LAB'})).toContainText('179 definiciones');
  await page.screenshot({path:'test-results/operativa-owner-lab-mobile.png',fullPage:false,animations:'disabled'});
+});
+
+test('Control tab shows real vs unavailable sources, answers agent questions and fails closed on controls',async({page})=>{
+ const {calls}=await setup(page);
+ const nav=page.getByRole('navigation',{name:'Áreas de Operativa'});
+ await nav.getByRole('button',{name:'Control'}).click();
+ const fleet=page.getByRole('region',{name:'Inventario operativo CEREBRO por plataforma'});
+ await expect(fleet).toBeVisible();
+ await expect(fleet).toContainText('11');
+ await expect(fleet).toContainText('Agentes vivos · censo pendiente');
+ await expect(fleet).toContainText('PRIVATE_REPO_RUNTIME_CONNECTOR_NOT_CONFIGURED');
+ await expect(fleet).toContainText('LAB contrato vivo');
+ await fleet.getByRole('button',{name:'Comprobar pausar'}).click();
+ await expect(fleet.getByRole('status').last()).toContainText('Acción NO ejecutada');
+ await nav.getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('¿Cuántos agentes y subagentes tenemos?');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Respuesta del control operativo'})).toContainText('11 perfiles especializados documentados');
+ await expect(page.getByRole('status').filter({hasText:'Respuesta del control operativo'})).toContainText('SIN CENSO VERIFICADO');
+ expect(calls).toContain('fleet_observe');
+ expect(calls).not.toContain('submit_command');
+ await page.screenshot({path:'test-results/operativa-fleet-owner-qa.png',fullPage:false,animations:'disabled'});
 });
