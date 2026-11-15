@@ -22,6 +22,7 @@ const commands:Record<string,keyof typeof details>={
 };
 async function setup(page:Page){
  const calls:string[]=[];const outside:string[]=[];
+ let cloudflareReadUnbound=false;
  let lab={desired_state:'PAUSED' as 'PAUSED'|'RUNNING',priority:3,revision:1,work_units:0,last_receipt_id:null as string|null};
  await page.addInitScript(s=>{localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(s));sessionStorage.setItem('fenix-session-active','1')},session);
  await page.route('**/*',async route=>{
@@ -65,6 +66,7 @@ async function setup(page:Page){
    }
    if(url.pathname==='/api/cerebro-cloudflare-fleet'){
     calls.push('cloudflare_fleet');
+    if(cloudflareReadUnbound)return route.fulfill({status:503,headers,body:JSON.stringify({status:'UNAVAILABLE',reason:'CLOUDFLARE_READ_TOKEN_NOT_BOUND',read_only:true,controls_enabled:false,workers:[]})});
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
     return route.fulfill({status:200,headers,body:JSON.stringify({
      status:'OK',source:'CLOUDFLARE_REST_ACCOUNT_WORKERS_LIVE_V1',
@@ -182,7 +184,7 @@ async function setup(page:Page){
   console.error('LAB_UI_DIAGNOSTIC',JSON.stringify({url:page.url(),body:(await page.locator('body').innerText().catch(()=>'' )).slice(0,1200),calls,outside:outside.slice(0,10)}));
   throw error;
  }
- return{calls,outside,quick};
+ return{calls,outside,quick,setCloudflareReadUnbound:(value:boolean)=>{cloudflareReadUnbound=value}};
 }
 
 test('Owner Operativa answers missing-agent, ETA/cost and priority advice without executing any motor',async({page})=>{
@@ -217,6 +219,22 @@ test('Owner Operativa answers missing-agent, ETA/cost and priority advice withou
  await expect(answer).toContainText('ORDEN NO EJECUTADA: ACCELERATE');
  expect(calls.filter(x=>x==='lab_control'||x==='submit_command')).toHaveLength(0);
  expect(calls.filter(x=>x==='fleet_observe').length).toBeGreaterThanOrEqual(3);
+});
+
+test('Cloudflare owner Preview reports missing read-only binding precisely, never a fictitious live connection',async({page})=>{
+ const {calls,setCloudflareReadUnbound}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const provider=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
+ await expect(provider).toContainText('Cloudflare API');
+ setCloudflareReadUnbound(true);
+ await provider.getByRole('button',{name:'Actualizar Cloudflare desde origen'}).click();
+ const alert=provider.getByRole('status',{name:'Conexión Cloudflare Preview pendiente'});
+ await expect(alert).toContainText('SIN CREDENCIAL DE LECTURA CONFIGURADA');
+ await expect(alert).toContainText('CEREBRO_CF_READ_TOKEN_PREVIEW');
+ await expect(provider).toContainText('ARCHIVO COMPUESTO, NO EN VIVO');
+ await expect(provider).not.toContainText('EN VIVO · Cloudflare API');
+ expect(calls.filter(x=>x==='cloudflare_fleet').length).toBeGreaterThanOrEqual(2);
+ expect(calls).not.toContain('submit_command');
 });
 
 test('Owner LAB quick reads use existing planner, no execution or production routes',async({page})=>{
