@@ -14,6 +14,7 @@ export type FleetSnapshot={
  unknown_agent_count:true;unknown_subagent_count:true;hierarchy_complete:boolean;
  by_department:Record<string,number>;entries:FleetRole[];
  registry_id:string;registry_environment:string;registry_status:string};
+ media_studio?:{studio_brain:number;departments:number;specialists:number;supervisors:number;tribunals:number;judges:number;guardians:number;total_roles:number;source:'MEDIA_STUDIO_ROLE_REGISTRY_DESIGN_ONLY';runtime_verified:false};
  engine_registry_count:179;engine_registry_semantics:'DEFINED_NOT_RUNNING';
  sources:FleetSource[];
  control:{pause:'NOT_CONNECTED';resume:'NOT_CONNECTED';prioritize:'NOT_CONNECTED';reason:'NO_VERIFIED_CONTROL_EXECUTOR';staging_status:'SUSPENDED_BY_OWNER'};
@@ -27,6 +28,7 @@ function validate(raw:unknown):raw is FleetSnapshot{
  return s.status==='OK'&&s.source==='OWNER_LAB_FLEET_SOURCES_V1'&&s.environment==='LAB'&&s.company_id==='fenix'&&
   s.verified_owner===true&&s.read_only===true&&s.execution_enabled===false&&s.additional_cost_eur===0&&
   s.engine_registry_count===179&&s.engine_registry_semantics==='DEFINED_NOT_RUNNING'&&
+  (!s.media_studio||(s.media_studio.source==='MEDIA_STUDIO_ROLE_REGISTRY_DESIGN_ONLY'&&s.media_studio.runtime_verified===false&&Number.isSafeInteger(s.media_studio.total_roles)&&s.media_studio.total_roles>=0))&&
   typeof s.observed_at==='string'&&Number.isFinite(Date.parse(s.observed_at))&&
   Array.isArray(s.sources)&&s.sources.length>=3&&s.sources.length<=25&&
   !!s.roles&&Array.isArray(s.roles.entries)&&s.roles.declared_role_profiles===s.roles.entries.length&&
@@ -70,8 +72,9 @@ export function answerFleetQuestion(result:FleetRead,question:FleetQuestion):str
  const connected=s.sources.filter(x=>x.state==='LIVE');
  const active=connected.reduce((n,x)=>n+Number(x.active_in_sample||0),0);
  const missing=s.sources.filter(x=>x.state!=='LIVE');
+ const studio=s.media_studio?' La productora tiene '+s.media_studio.total_roles+' funciones de rol definidas ('+s.media_studio.departments+' departamentos, '+s.media_studio.specialists+' especialistas), sin evidencia de ejecución.':'';
  return 'Comprobación '+new Date(s.observed_at).toLocaleString('es-ES')+
-  ': '+s.roles.declared_role_profiles+' perfiles especializados documentados; agentes vivos y subagentes: SIN CENSO VERIFICADO. '+
+  ': '+s.roles.declared_role_profiles+' perfiles especializados documentados; agentes vivos y subagentes: SIN CENSO VERIFICADO.'+studio+' '+
   s.engine_registry_count+' motores definidos, no ejecutándose necesariamente. '+
   connected.length+' fuentes de actividad GitHub conectadas; '+active+' ejecuciones de workflow en curso entre las muestras observadas (NO equivale a agentes activos). '+
   missing.length+' fuentes sin lectura acreditada. Consulta la pestaña Control para ver qué servicio falta y las ejecuciones concretas.';
