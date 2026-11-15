@@ -74,7 +74,7 @@ export function classifyFleetQuestion(input:string):FleetQuestion|null{
   // Questions about what to prioritize are advice, NOT permission to modify a queue.
   if(/^[¿?\s]*(?:qu[eé]|cu[aá]les|c[oó]mo|deber[ií]amos)\b/i.test(s))return {kind:'query'};
   const v=m[1],a=/paus|deten/.test(v)?'PAUSE':/reanud|reactiv|activar|arrancar/.test(v)?'RESUME':/aceler/.test(v)?'ACCELERATE':/ralent/.test(v)?'SLOW_DOWN':/cancel/.test(v)?'CANCEL':/reintent/.test(v)?'RETRY':/reasign/.test(v)?'REASSIGN':'PRIORITIZE';
-  return{kind:'control',action:a,engine:input.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]||null};
+  return{kind:'control',action:a,engine:input.toUpperCase().match(/\b[A-Z][A-Z0-9]{1,11}-\d{3}\b/)?.[0]||null};
  }
  return /agentes?|subagentes?|motores?|workers?|cloudflare|colas?|queues?|backlog|consumidores?|lab-cf-canary-001|trabajos?|workflow|ejecuciones?|departamentos?|plataformas?|cu[aá]ntos?|inventario|actividad|qu[eé].*(?:haciendo|trabajando)|(?:estado|situaci[oó]n).*cerebro/i.test(s)?{kind:'query'}:null;
 }
