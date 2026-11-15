@@ -50,3 +50,11 @@ test('simulated success or self-declared training never activates PROD',()=>{
  assert.equal(trainingGate('SEO-D32',valid).eligible_for_external_human_authority_review,true);
  assert.equal(trainingGate('SEO-D32',valid).certified_for_prod,false);
 });
+
+test('SEO specialist planner cannot target suspended staging',()=>{
+ const d=getSeoDepartmentKnowledge('SEO-D05');
+ const o={company_id:'fenix',department_id:'SEO-D05',subagent_role_id:d.workforce.subagents[0].role_id,
+  request_id:'SEO_STAGE_001',objective:'Preparar análisis offline',
+  source_refs:['https://staging.fenixcapital.es/'],allow_writes:false,allow_paid_ai:false,budget_eur:0};
+ assert.throws(()=>compileSeoSpecialistMission(o),/SEO_STAGING_SUSPENDED/);
+});

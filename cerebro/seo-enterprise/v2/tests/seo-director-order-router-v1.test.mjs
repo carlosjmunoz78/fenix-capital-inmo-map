@@ -152,3 +152,8 @@ test('marketing and all department courses reuse existing complete URL/copy/imag
  assert.equal(routed.only_proposal,true);
  assert.equal(routed.auto_publish,false);
 });
+
+test('director cannot route tasks to STAGING while suspension is active',()=>{
+ assert.throws(()=>planSeoDirectorOrder({...base('TECHNICAL_SEO'),target_url:'https://staging.fenixcapital.es/'}),/SEO_STAGING_SUSPENDED/);
+ assert.equal(planSeoDirectorOrder(base('TECHNICAL_SEO')).staging_policy.allow_staging_requests,false);
+});

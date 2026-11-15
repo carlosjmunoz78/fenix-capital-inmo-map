@@ -1,6 +1,7 @@
 /** SEO-001 · Workforce V2. Deterministic read-only LAB compilation, no external adapters or writes. */
 import fs from 'node:fs';
 import {seoRoleOwnerPolicy,allSeoRolePolicyBindings} from './seo-owner-role-governance-v1.mjs';
+import {requireSeoStagingOff,seoStagingSuspensionStatus} from './seo-staging-suspension-v1.mjs';
 const base = new URL('../', import.meta.url);
 const read = p => JSON.parse(fs.readFileSync(new URL(p, base), 'utf8'));
 const idx = read('seo-full-knowledge-index-v2.json');
@@ -38,6 +39,7 @@ export function getSeoDepartmentKnowledge(id){
  return p;
 }
 export function compileSeoSpecialistMission(order={}){
+ requireSeoStagingOff(order);
  const {company_id,department_id,subagent_role_id,request_id,objective,source_refs,environment='LAB'}=order;
  if(company_id!=='fenix'||environment!=='LAB')throw Error('TENANT_OR_ENV_DENIED');
  safe(request_id,'REQUEST_ID');safe(objective,'OBJECTIVE');
@@ -48,7 +50,7 @@ export function compileSeoSpecialistMission(order={}){
  const a=p.workforce.subagents.find(x=>x.role_id===subagent_role_id);
  if(!a)throw Error('ROLE_SCOPE_MISMATCH');
  return {schema_version:'2.1.0',company_id,engine_id:'SEO-001',environment,version:'2.1.0',
-  state:'LAB_PLAN_NOT_EXECUTED',request_id,objective,department_id,role_id:a.role_id,
+  state:'LAB_PLAN_NOT_EXECUTED',staging_off:true,staging_requests_allowed:false,request_id,objective,department_id,role_id:a.role_id,
   owner_excellence_governance:seoRoleOwnerPolicy(a.role_id),
   assigned_competency:a.competency,allowed_actions:a.allowed_actions,source_refs,
   required_sources:p.knowledge.required_sources,checklist:p.knowledge.operational_directives,
@@ -78,5 +80,5 @@ export function workforceStatus(){
  heads:roster.counts.department_heads,knowledge_packs:idx.knowledge_packs.length,
  inherited_owner_governance_roles:allSeoRolePolicyBindings().role_count,
  real_iam_agents_verified:0,departments_certified_prod:0,publish_authorized:false,
- scope:'STATIC_KNOWLEDGE_AND_LAB_ROUTING_ONLY'};
+ staging_policy:seoStagingSuspensionStatus(),scope:'STATIC_KNOWLEDGE_AND_LAB_ROUTING_ONLY'};
 }

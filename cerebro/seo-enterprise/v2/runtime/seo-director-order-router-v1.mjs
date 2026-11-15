@@ -6,6 +6,7 @@
 import fs from 'node:fs';
 import crypto from 'node:crypto';
 import {DurableJobRuntimeV1} from '../../../runtime/durable-job-runtime-v1.mjs';
+import {requireSeoStagingOff,seoStagingSuspensionStatus} from './seo-staging-suspension-v1.mjs';
 const load=p=>JSON.parse(fs.readFileSync(new URL('../'+p,import.meta.url),'utf8'));
 const catalog=load('seo-specialist-training-and-commands-v1.json');
 const marketing=load('seo-marketing-plan-for-owner-approval-v1.json');
@@ -41,6 +42,7 @@ const isSafeTopic=t=>!/@|(?:\b\d{8}[A-Z]\b)|(?:\b(?:IBAN|TOKEN|PASSWORD|CONTRASE
 export const SEO_ORDER_TYPES=Object.freeze(Object.keys(TYPES));
 
 export function planSeoDirectorOrder(order={}){
+ requireSeoStagingOff(order);
  const {company_id='fenix',work_type,objective,territory='Cordoba',
   scope='SITE',source='OWNER_STRATEGY_PENDING_AUTH',request_ref='SEO_ORDER_DEMO'}=order;
  if(company_id!=='fenix'||!safe(territory)||!safe(objective)||!isSafeTopic(objective)||
@@ -72,6 +74,7 @@ export function planSeoDirectorOrder(order={}){
   current_corpus_images:approved.baseline.media_library_images,
   current_corpus_fragment_glob:'cerebro/seo-enterprise/v2/data/live-copy-chunk-{01..10}.json',
   operational_source_policy:'PROD_FROZEN_ONLY_NO_STAGING_NO_REAUDIT',
+  staging_policy:seoStagingSuspensionStatus(),
   historical_archive_operational:false,
   historical_reference_registry:'cerebro/seo-enterprise/v2/seo-existing-content-assets-source-registry-v1.json',
   existing_asset_archive_status:assets.canonical_snapshot.status,
