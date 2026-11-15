@@ -108,7 +108,7 @@
 .op3-steps .is-current,.op3-steps .is-current svg{color:var(--op3-amber)}
 .op3-steps .is-current svg{filter:drop-shadow(0 0 7px #f4a7368b);animation:op3-breathe 1.7s ease-in-out infinite}
 .op3-live-note{font-size:10px;color:#6c9fb2;text-align:right;max-width:170px}
-.op3-navigation{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border-top:1px solid #2c5872;
+.op3-navigation{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));border-top:1px solid #2c5872;
  border-bottom:1px solid #2c5872;border-radius:13px;background:linear-gradient(180deg,rgba(10,40,58,.75),rgba(5,24,40,.9));
  overflow:hidden;box-shadow:inset 0 3px 20px #1875a41a}
 .op3-navigation button{background:transparent;border:0;border-right:1px solid #2a4b61;color:#a9c9d8;
@@ -153,7 +153,7 @@
  .op3-command-copy h1{font-size:26px}.op3-command-copy p{font-size:12px}.op3-input-frame{border-radius:22px}
  .op3-input-frame textarea{font-size:16px;padding:8px}.op3-icon-button{width:32px;height:32px}.op3-submit{width:38px;height:38px}
  .op3-steps{gap:12px}.op3-steps>span{flex-direction:column;gap:3px}.op3-navigation{grid-template-columns:repeat(3,minmax(0,1fr))}
- .op3-navigation button:nth-child(3){border-right:0}.op3-navigation button:nth-child(-n+3){border-bottom:1px solid var(--op3-line)}
+ .op3-navigation button:nth-child(4){border-right:0}.op3-navigation button:nth-child(-n+4){border-bottom:1px solid var(--op3-line)}
  .op3-toolbar .op3-selectors{gap:10px}.op3-selectors select{max-width:190px}.op3-scope{display:none}}
 @media(prefers-reduced-motion:reduce){.op3-root *,.op3-root *:before,.op3-root *:after{animation:none!important;transition:none!important}}
 
@@ -288,3 +288,8 @@
  .op3-navigation button{padding:9px 6px;gap:5px}
  .op3-footer{padding:9px 0}
 }
+
+/* Owner-only fleet questions appear in the existing conversation workspace. */
+.op3-operator-answer{width:min(850px,100%);border:1px solid #477890;border-radius:13px;background:#0b2a39;padding:13px 16px;text-align:left;display:flex;flex-direction:column;gap:6px;margin:10px auto}
+.op3-operator-answer strong{font-size:12px;color:#f3fbff}.op3-operator-answer small{font-size:11px;color:#a2c9da}.op3-operator-answer p{font-size:13px;color:#d5f1fc;line-height:1.55;margin:0;white-space:pre-wrap}
+@media(max-width:520px){.op3-navigation button{min-height:54px}.op3-navigation button span{font-size:10px}.op3-operator-answer{padding:10px}}
