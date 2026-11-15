@@ -6,7 +6,7 @@ import path from 'node:path';
 import {verifySurgicalV5,bodyParagraphs,mergeOnlyFourParagraphs,auditSurgicalText,V5,M}
  from '../runtime/seo-surgical-v5-one-batch-lab.mjs';
 const rootPath='cerebro/seo-enterprise/v2/registry/';
-function fixture(){
+function fixture({historicalPreflight=false}={}){
  const root=fs.mkdtempSync(path.join(os.tmpdir(),'seo001-surgical-v5-'));
  for(const f of [M,rootPath+'seo001-autorepair-one-batch-v4-2026-11-08.json',
    rootPath+'seo001-autorepair-one-batch-v4-result-2026-11-08.json']){
@@ -14,7 +14,16 @@ function fixture(){
   fs.copyFileSync(f,path.join(root,f));
  }
  const p=path.join(root,M),m=JSON.parse(fs.readFileSync(p,'utf8'));
- m.workflow_trigger_nonce='TRIGGER_ONCE_20261108_SURGICAL_V5';
+ if(historicalPreflight){
+  // Reconstruct the *pre-execution* contract only inside this temporary fixture.
+  // Never mutate the real consumed V5 registry or issue another model request.
+  m.status='PREPARED_NOT_EXECUTED';
+  m.workflow_trigger_nonce='TRIGGER_ONCE_20261108_SURGICAL_V5';
+  m.model_calls_consumed=0;
+  m.model_calls_remaining_this_batch=2;
+  m.executed_run_id=null;
+  m.executed_artifact_id=null;
+ }
  fs.writeFileSync(p,JSON.stringify(m));
  return {root,m};
 }
@@ -32,7 +41,7 @@ function makeHtml({bad=false}={}){
 }
 test('V5 refused until exact single-use trigger and V4 remains sealed',()=>{
  assert.equal(V5,'SEO001-SURGICAL-PATCH-20261108-V5');
- const {root,m}=fixture();
+ const {root,m}=fixture({historicalPreflight:true});
  try{
   const v=verifySurgicalV5({root});
   assert.equal(v.max_real_model_calls,2);
@@ -46,6 +55,18 @@ test('V5 refused until exact single-use trigger and V4 remains sealed',()=>{
    assert.throws(()=>verifySurgicalV5({root}),/NO_FREE_EXACT_BATCH_OR_PUBLISH_GUARD/);
   }
  }finally{fs.rmSync(root,{recursive:true,force:true});}
+});
+test('current V5 record remains consumed, cannot relaunch and has no production rights',()=>{
+ const {root,m}=fixture();
+ try{
+  assert.equal(m.status,'COMPLETED_PARTIAL_HOLD');
+  assert.equal(m.workflow_trigger_nonce,'CONSUMED_20261108_SURGICAL_V5');
+  assert.equal(m.model_calls_consumed,2);
+  assert.equal(m.model_calls_remaining_this_batch,0);
+  assert.equal(m.actual_release_authorized,false);
+  assert.equal(m.allow_wordpress_publication,false);
+  assert.throws(()=>verifySurgicalV5({root}),/NO_FREE_EXACT_BATCH_OR_PUBLISH_GUARD/);
+ }finally{fs.rmSync(root,{recursive:true,force:true})}
 });
 test('exactly two changes preserve every other HTML paragraph and all FAQ',()=>{
  const original=makeHtml({bad:true}),proposal=makeHtml({bad:false});

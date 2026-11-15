@@ -9,8 +9,50 @@ permissions:
   contents: read
   actions: read
 jobs:
-  cross-engine-tribunal:
+  evidence-preflight:
+    name: Evidence availability · fail-closed, no site access
     if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      all_available: ${{ steps.archive-gate.outputs.all_available }}
+    steps:
+      - name: Check pinned archived GitHub Action artifacts; keep tribunal HOLD when expired
+        id: archive-gate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          missing=()
+          check_artifact() {
+            local run_id="$1" wanted="$2" payload count
+            payload="$(gh api -H "Accept: application/vnd.github+json" "repos/${GITHUB_REPOSITORY}/actions/runs/${run_id}/artifacts?per_page=100")"
+            count="$(jq --arg wanted "$wanted" '[.artifacts[] | select(.name == $wanted and (.expired == false))] | length' <<<"$payload")"
+            if [[ "$count" != 1 ]]; then missing+=("$wanted"); fi
+          }
+          check_artifact 42242988793 seo001-v4-1-official-sources-corrections-release-hold
+          check_artifact 42247533380 seo001-isolated-wordpress-fixture-restore-no-prod-snapshot
+          check_artifact 42248337759 seo001-ums-physical-photo-intake-existing-asset-hold
+          if (( ${#missing[@]} > 0 )); then
+            echo "all_available=false" >> "$GITHUB_OUTPUT"
+            echo "### RELEASE_HOLD · historical bytes unavailable" >> "$GITHUB_STEP_SUMMARY"
+            echo "Physical tribunal SKIPPED (not PASSED): cannot verify missing source artifacts." >> "$GITHUB_STEP_SUMMARY"
+            printf -- "- Missing: %s\n" "${missing[@]}" >> "$GITHUB_STEP_SUMMARY"
+            echo "Restored real WP PROD snapshot: NOT VERIFIED. Original UMS photo and rights: NOT VERIFIED." >> "$GITHUB_STEP_SUMMARY"
+            echo "::warning::SEO physical tribunal HOLD: original historical artifacts unavailable; no release credentials or WordPress writes granted"
+          else
+            echo "all_available=true" >> "$GITHUB_OUTPUT"
+            echo "### Evidence available · running physical HOLD tribunal" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "No website, staging, WordPress, CRM, model API or secrets consulted." >> "$GITHUB_STEP_SUMMARY"
+  cross-engine-tribunal:
+    needs: evidence-preflight
+    # Never run the physical tribunal on absent/expired historical bytes.
+    if: ${{ github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository && needs.evidence-preflight.outputs.all_available == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
