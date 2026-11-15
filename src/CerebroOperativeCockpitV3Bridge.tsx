@@ -9,6 +9,7 @@ import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroF
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
+import socialAudit from '../cerebro/universal/v0/provider-social/social-private-meta-audit-2026-11-15.json';
 import './cerebro-operative-console.css';
 
 /**
@@ -90,6 +91,20 @@ export default function CerebroOperativeCockpitV3Bridge(){
      setLabPending(null);
      setOperatorAnswer({question:text,text:'LAB-DEMO-001 · lectura actual: '+read.data.desired_state+', prioridad '+read.data.priority+', revisión '+read.data.revision+', '+read.data.work_units+' pasos realizados. Observado: '+read.data.observed_at+'. Worker manual y aislado, no implica actividad de otros motores.'});
     }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(preview&&/(?:SOC-(?:IG|FB)-FINANCIAL-REAL-ESTATE-V1|(?:instagram|facebook)\\s+autoqual)/i.test(text)){
+   setFleetSending(true);
+   try{
+    const key=/instagram|SOC-IG/i.test(text)?'SOC-IG-FINANCIAL-REAL-ESTATE-V1':'SOC-FB-FINANCIAL-REAL-ESTATE-V1';
+    const e=socialAudit.engines.find(x=>x.engine_id===key);
+    if(!e)throw Error('SOCIAL_AUDIT_MISSING');
+    setOperatorAnswer({question:text,text:question?.kind==='control'?
+     'ORDEN NO EJECUTADA. El motor '+key+' tiene registro histórico en LAB, pero Operativa no tiene adaptador autenticado para pausar, reanudar ni activar AUTOQUAL. No se ha cambiado nada.':
+     'AUDITORÍA HISTÓRICA (NO EN VIVO, '+socialAudit.audit_date+'): motor '+key+' tiene Worker '+e.provider_worker+
+     ' desplegado y D1 con jurisdicción UE, PR #'+e.github_pr+' en borrador; sin cron ni URL workers.dev. AUTOQUAL_ENABLED=false y GROQ_ENABLED=false en la configuración comprobada. Agentes y subagentes activos, últimos jobs y salud de ejecución: DESCONOCIDOS. Sin permisos de escritura desde Operativa.'});
     setComposer('');
    }finally{setFleetSending(false)}
    return;
