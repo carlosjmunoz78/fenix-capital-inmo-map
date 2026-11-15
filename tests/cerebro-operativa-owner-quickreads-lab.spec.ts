@@ -45,7 +45,7 @@ async function setup(page:Page){
       version:'0.1.0',source:'PREPROD_LAB_WORKER_RPC_V0',transport:'PREPROD_OWNER_LAB_RUNTIME_V0',
       autonomous_scheduling:false,prod_execution_enabled:false};
     if(request.method()==='GET')return route.fulfill({status:200,headers,body:JSON.stringify({
-     ...common,...lab,updated_at:'2026-11-15T09:20:00Z',observed_at:'2026-11-15T09:20:01Z',
+     ...common,...lab,updated_at:new Date(Date.now()-1000).toISOString(),observed_at:new Date().toISOString(),
      runtime_kind:'DETERMINISTIC_MANUAL_LAB_WORKER',executed:false
     })});
     const input=request.postDataJSON() as {action:string;priority:number|null;expected_revision:number;idempotency_key:string};
@@ -320,10 +320,18 @@ test('isolated LAB worker responds to actual revisioned pause, resume, tick and 
  await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
  const worker=page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'});
  await expect(worker).toContainText('Estado observado: PAUSED');
+ const evidence=worker.getByRole('region',{name:'Evidencia de identidad y actividad LAB'});
+ await expect(evidence).toContainText('LECTURA DE ESTADO RECIENTE: PAUSED');
+ await expect(evidence).toContainText('Agente, subagente, job activo y latido independiente:');
+ await expect(evidence).toContainText('NO VERIFICADOS');
+ await expect(evidence).toContainText('Coste real: NO_MEDIDO');
+ await expect(evidence).not.toContainText('agentes activos: 1');
  await worker.getByRole('button',{name:'Reanudar LAB'}).click();
  await worker.getByRole('button',{name:'Confirmar una vez'}).click();
  await expect(worker).toContainText('CONTROL LAB VERIFICADO: RESUME');
  await expect(worker).toContainText('Estado observado: RUNNING');
+ await expect(evidence).toContainText('LECTURA DE ESTADO RECIENTE: RUNNING');
+ await expect(evidence).toContainText('Autónomo: NO');
  await worker.getByRole('button',{name:'Ejecutar 1 paso LAB'}).click();
  await worker.getByRole('button',{name:'Confirmar una vez'}).click();
  await expect(worker).toContainText('Pasos terminados: 1');
