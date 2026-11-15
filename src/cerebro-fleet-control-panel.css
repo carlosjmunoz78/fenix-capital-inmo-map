@@ -84,3 +84,15 @@
 .op4-device-live .op4-device-grid{margin-top:13px}
 .op4-device-live[aria-label] p[role="status"]{font-size:13px;line-height:1.6}
 @media(max-width:430px){.op4-device-live{padding:12px}}
+
+/* LAB job sources: recorded state vs currently verified execution are deliberately separate. */
+.op4-job-live{padding:17px;background:#0a2333;border:1px solid #416c78;border-radius:14px}
+.op4-job-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.op4-job-source{min-width:0;display:flex;flex-direction:column;gap:8px;background:#092838;border:1px solid #30576b;border-radius:11px;padding:13px;overflow-wrap:anywhere}
+.op4-job-source strong{font-size:13px;color:#def4ff}
+.op4-job-source span{font-size:12px;color:#c1dce6}
+.op4-job-source small{display:block;font-size:11px;color:#a4c9d9;line-height:1.55}
+.op4-job-status{display:flex;flex-direction:column;gap:8px}
+.op4-job-status>div{display:flex;flex-direction:column;gap:4px;border-top:1px solid #355469;padding-top:7px}
+@media(max-width:740px){.op4-job-source-grid{grid-template-columns:1fr}}
+@media(max-width:430px){.op4-job-live{padding:12px}}
