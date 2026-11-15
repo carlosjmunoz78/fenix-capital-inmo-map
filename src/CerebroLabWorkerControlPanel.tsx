@@ -1,5 +1,6 @@
 import {useCallback,useEffect,useState} from 'react';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction,type LabWorkerState,type LabWorkerReceipt} from './cerebroLabWorkerControlApi';
+import {summarizeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
 
 const ACTIONS:{action:LabWorkerAction;label:string}[]=[
  {action:'PAUSE',label:'Pausar LAB'}, {action:'RESUME',label:'Reanudar LAB'},
@@ -14,6 +15,7 @@ export default function CerebroLabWorkerControlPanel(){
  const[pending,setPending]=useState<LabWorkerAction|null>(null);
  const[receipt,setReceipt]=useState<LabWorkerReceipt|null>(null);
  const[verified,setVerified]=useState(false);
+ const runtime=summarizeLabRuntimeEvidence(state);
  const refresh=useCallback(async()=>{
   setLoading(true);
   const r=await readLabWorkerState();
@@ -63,6 +65,18 @@ export default function CerebroLabWorkerControlPanel(){
    <span>Revisión: {state?.revision??'—'} · Prioridad: {state?.priority??'—'} · Pasos terminados: {state?.work_units??'—'}</span>
    <small>Última comprobación: {state?.observed_at||'sin lectura'} · Programación autónoma: NO</small>
    <small>Último recibo persistente: {state?.last_receipt_id||'sin operaciones registradas'} · Estado final verificado por lectura directa</small>
+  </div>
+  <div className="op4-fleet-note" role="region" aria-label="Evidencia de identidad y actividad LAB">
+   <strong>Identidad y actividad · evidencia de runtime</strong>
+   {runtime.kind==='ready'?<>
+    <p>LECTURA DE ESTADO RECIENTE: {runtime.proof.state} (estado deseado, no ejecución simultánea).
+     Motor {runtime.proof.engine_id}, empresa {runtime.proof.company_id}, entorno {runtime.proof.environment}, versión 0.1.0.</p>
+    <p>Instancia manual determinista: verificada por su estado.
+     Agente, subagente, job activo y latido independiente: <strong>NO VERIFICADOS</strong>.
+     Autónomo: NO. Coste real: {runtime.proof.cost_eur}.</p>
+    <small>Observado: {runtime.proof.observed_at}. Revisión: {runtime.proof.revision}.
+     Este worker LAB no aumenta el censo de agentes activos de Fénix.</small>
+   </>:<p>SIN EVIDENCIA RECIENTE: {runtime.reason}. No concluir ausencia ni actividad.</p>}
   </div>
   <div className="op4-lab-actions">
    <button type="button" disabled={loading} onClick={()=>{void refresh()}}>{loading?'Consultando…':'Comprobar estado ahora'}</button>
