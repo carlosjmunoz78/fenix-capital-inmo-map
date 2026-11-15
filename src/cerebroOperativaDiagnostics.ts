@@ -1,0 +1,67 @@
+import type {FleetRead,FleetRun,FleetSource} from './cerebroFleetObserveApi';
+
+/** LAB read-only owner diagnostic: evidence is never promoted into inferred active agents, costs or ETAs. */
+export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES';
+const canon=(input:string)=>input.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
+const MUTATION=/^\s*(?:pausa|pausar|deten|detener|reanuda|reanudar|reactiva|reactivar|acelera|acelerar|prioriza|priorizar|cancela|cancelar|reintenta|reintentar|reasigna|reasignar|ejecuta|ejecutar|crea|crear|publica|publicar|activa|activar)\b/;
+export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
+ if(typeof query!=='string'||query.length>4000)return null;
+ const q=canon(query);
+ if(!q||MUTATION.test(q))return null;
+ if(/\b(cuanto|cuantos|cuanta|cuantas|coste|costara|costaria|cuesta|precio|presupuesto|tiempo|tardara|tarda|duracion|eta|euros?|horas?|minutos?)\b/.test(q)&&
+    /\b(cost|tard|duracion|eta|euros?|horas?|minutos?|tiempo|precio|presupuesto)\w*/.test(q))return 'ESTIMATES';
+ if(/\b(falla|fallan|fallando|fallos?|errores?|incidencias?|averiados?|rotos?|bloqueados?|atascados?|no funciona|sin funcionar)\b/.test(q))return 'FAILURES';
+ if(/\b(faltan?|falta|necesitamos?|necesitaria|carecemos|sin agente|sin subagente|que necesitamos|que hace falta)\b/.test(q))return 'MISSING';
+ if(/\b(puede|puedes|podemos|capacidades?|sabe hacer|sirve para|que hace cerebro)\b/.test(q)&&
+    /\b(cerebro|hacer|capacidades?|automatiz|motor|agente)\w*/.test(q))return 'CAPABILITIES';
+ if(/\b(avanzar|siguiente|prioridad|prioridades|priorizariamos|priorizarias|conviene priorizar|que hacer|plan de trabajo|proximos pasos|por donde seguimos)\b/.test(q))return 'PROGRESS';
+ return null;
+}
+const maxDate=(d:string|null)=>d&&Number.isFinite(Date.parse(d))?d:'SIN_FECHA';
+const short=(text:string)=>text.slice(0,95).replace(/[\u0000-\u001f]/g,' ').trim();
+function evidence(read:FleetRead){
+ if(read.kind!=='ready'||!read.snapshot)return null;
+ const s=read.snapshot;
+ const age=Date.now()-Date.parse(s.observed_at);
+ if(!Number.isFinite(age)||age<0||age>300000)return null;
+ const live=s.sources.filter((item):item is FleetSource=>item.state==='LIVE');
+ const disconnected=s.sources.filter(item=>item.state!=='LIVE');
+ return {s,live,disconnected,stamp:maxDate(s.observed_at)};
+}
+export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,query:string):string{
+ const scoped=typeof query==='string'?query.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]:null;
+ const intro=scoped?'Objetivo consultado: '+scoped+'. Esta fuente no acredita telemetría individual de ese motor. ':'';
+ const data=evidence(read);
+ if(!data)return intro+'DATOS EN VIVO NO DISPONIBLES ('+(read.reason||'FLEET_STALE_OR_UNAVAILABLE')+'). No se puede concluir que haya cero agentes, cero fallos ni actividad en marcha. Tiempos y costes: NO_MEDIDOS. No se ha ejecutado ninguna acción.';
+ const {s,live,disconnected,stamp}=data;
+ const base='Fuente: inventario propietario LAB '+stamp+'; '+live.length+' fuentes GitHub de metadatos LIVE, '+disconnected.length+' conectores SIN LECTURA. ';
+ const missing=disconnected.map(item=>short(item.name||item.repo||item.platform)).slice(0,8);
+ if(intent==='ESTIMATES')return intro+base+
+  'TIEMPO: NO_MEDIDO (faltan inicio, fin, historial por tarea, cola, capacidad y dependencias). ETA: SIN_BASE_SUFICIENTE. '+
+  'COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS (faltan cuota, uso y tarifa efectiva por proveedor). '+
+  'El catálogo de 179 motores y la presencia de workflows no establecen duraciones ni gastos. '+
+  'Siguiente paso: conectar recibos de job/run con FinOps y calcular intervalos a partir de ejecuciones reales. Ningún gasto autorizado ni realizado.';
+ if(intent==='MISSING')return intro+base+
+  'AGENTES QUE FALTAN: NO CUANTIFICABLES aún. Hay '+s.roles.declared_role_profiles+' perfiles registrados y '+
+  s.engine_registry_count+' motores lógicos DEFINIDOS, pero no existe un censo de agent_id/subagent_id enlazado a contratos de capacidad y latidos de ejecución. '+
+  (missing.length?'Fuentes pendientes de conexión: '+missing.join(', ')+'. ':'')+
+  'Para detectar carencias reales: definir objetivo/capacidades exigidas, inventariar ejecutores por fuente autenticada y contrastar permisos, skills, dependencias, training y tribunal. No crear agentes por intuición.';
+ if(intent==='FAILURES'){
+  const recent: {run:FleetRun;source:string}[]=live.flatMap(x=>(x.recent||[]).map(run=>({run,source:x.name||x.repo||x.platform})));
+  const failed=recent.filter(x=>x.run.status==='completed'&&['failure','timed_out','startup_failure','action_required'].includes(x.run.conclusion||'')).slice(0,5);
+  const examples=failed.map(x=>short(x.run.name)+' ['+x.run.conclusion+'] '+maxDate(x.run.updated_at)+' '+x.run.url).join(' | ');
+  return intro+base+'DIAGNÓSTICO DE FALLOS: '+(failed.length?failed.length+' incidencias identificadas en la muestra reciente (NO censo global): '+examples+'. ':
+   'ningún fallo confirmado dentro de los '+recent.length+' runs de la muestra reciente disponible; NO significa ausencia de fallos generales. ')+
+   (disconnected.length?'Fuentes sin diagnóstico: '+missing.join(', ')+'. ':'')+
+   'Causa raíz, salud de agentes y tareas JOB-001: NO VERIFICADAS. Para reparar: asociar logs/receipt y dependencia exacta al run antes de atribuir causa. Sin órdenes ejecutadas.';
+ if(intent==='CAPABILITIES')return intro+base+
+  'CAPACIDADES ACREDITADAS POR ESTA LECTURA: consultar '+s.engine_registry_count+' definiciones de motores y '+s.roles.declared_role_profiles+
+  ' perfiles registrados; observar muestras de workflows en '+live.length+' repositorios. '+
+  'NO ACREDITADO por esta fuente: autonomía de los motores, ejecución de agentes, publicación, entrenamiento, control universal ni actividad de proveedores desconectados. '+
+  'Capacidad disponible ≠ agente activo. Consulta un motor concreto para buscar evidencia adicional.';
+ return intro+base+
+  'SIGUIENTE AVANCE RECOMENDABLE (propuesta, no ejecución): primero enlazar fuentes privadas y latidos de agent/job/run con empresa y permisos; después verificar fallos y dependencias; '+
+  'medir duración real y FinOps; finalmente habilitar priorización/aceleración/pausa sólo con adaptador certificado, recibo, readback y rollback. '+
+  (missing.length?'Primeras conexiones por verificar: '+missing.join(', ')+'. ':'')+
+  'No existe ETA o ROI medido para reordenar esto por beneficio económico. Staging permanece suspendida y no se activará por esta consulta.';
+}
