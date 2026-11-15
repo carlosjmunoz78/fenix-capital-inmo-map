@@ -40,6 +40,8 @@ test('Spanish natural language routes inventory and blocks actions until target 
  assert.equal(planFleetControl({action:'RESUME',engine_id:'SEO-001',environment:'STAGING'}).reason,'PROTECTED_ENVIRONMENT');
  assert.equal(planFleetControl({action:'PAUSE'}).reason,'EXACT_TARGET_REQUIRED');
  assert.equal(planFleetControl({action:'DELETE',engine_id:'SEO-001'}).reason,'ACTION_NOT_ALLOWLISTED');
+ assert.deepEqual(classifyFleetMessage('pausar C360-001'),{kind:'CONTROL_PRECHECK',action:'PAUSE',engine_id:'C360-001'});
+ assert.equal(planFleetControl({action:'PAUSE',engine_id:'C360-001'}).reason,'NO_VERIFIED_CONTROL_EXECUTOR');
 });
 test('fleet control source excludes all real mutation primitives by construction',()=>{
  const c=fs.readFileSync(new URL('./operator-fleet-logic.mjs',import.meta.url),'utf8');
