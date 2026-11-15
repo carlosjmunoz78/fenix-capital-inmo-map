@@ -86,7 +86,7 @@ async function setup(page:Page){
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
     const entries=Array.from({length:11},(_,i)=>({id:i===10?'AGT-SALES-EXECUTIVE':'ENG-TEST-'+String(i).padStart(2,'0'),
      name:i===10?'Ventas':'Especialista '+i,department:i===10?'REVENUE_SALES':'ENGINEERING',
-     engine_bindings:i===10?['SALE-001','LEAD-001','CRM-001']:['FACT-001','QA-001'],
+     engine_bindings:i===10?['SALE-001','LEAD-001','CRM-001','C360-001']:['FACT-001','QA-001'],
      company_id:'GLOBAL',environment:'PREPROD',state:'DECLARED',reports_to:null,runtime_verified:false}));
     return route.fulfill({status:200,headers,body:JSON.stringify({
      status:'OK',source:'OWNER_LAB_FLEET_SOURCES_V1',environment:'LAB',company_id:'fenix',
@@ -243,6 +243,17 @@ test('Control tab shows real vs unavailable sources, answers agent questions and
  await expect(fleet).toContainText('Agentes vivos · censo pendiente');
  await expect(fleet).toContainText('PRIVATE_REPO_RUNTIME_CONNECTOR_NOT_CONFIGURED');
  await expect(fleet).toContainText('LAB contrato vivo');
+ const inspector=fleet.getByRole('region',{name:'Inspector de motores no listados'});
+ await expect(inspector).toContainText('ASIGNACIÓN DECLARADA en el registro para FACT-001');
+ await expect(inspector).toContainText('NO agentes ejecutándose');
+ const inspectorField=inspector.getByRole('textbox',{name:'Identificador del motor a consultar'});
+ await inspectorField.fill('SEO-001');
+ await expect(inspector).toContainText('SIN ASIGNACIÓN EN ESTE REGISTRO para SEO-001');
+ await inspectorField.fill('C360-001');
+ await expect(inspector).toContainText('Sales Executive (AGT-SALES-EXECUTIVE)');
+ await inspectorField.fill('https://invalid.test');
+ await expect(inspector).toContainText('Escribe el identificador exacto del motor');
+
  await fleet.getByRole('button',{name:'Comprobar pausar'}).click();
  await expect(fleet.getByRole('status').last()).toContainText('Acción NO ejecutada');
  await nav.getByRole('button',{name:'Resumen'}).click();
