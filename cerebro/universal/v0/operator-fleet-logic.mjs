@@ -78,7 +78,7 @@ export function classifyFleetMessage(text){
  if(CONTROL.test(value)){
   const verb=value.match(CONTROL)?.[1]?.toLowerCase()||'';
   const action=/pausar|pausa|detener/.test(verb)?'PAUSE':/reanudar|reactivar|reactiva|activar|arrancar/.test(verb)?'RESUME':'PRIORITIZE';
-  const engine=value.match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]||null;
+  const engine=value.match(/\b[A-Z][A-Z0-9]{1,11}-\d{3}\b/)?.[0]||null;
   return {kind:'CONTROL_PRECHECK',action,engine_id:engine};
  }
  if(QUERY.test(value))return {kind:'FLEET_QUERY'};
@@ -88,7 +88,7 @@ export function planFleetControl({action,engine_id,environment='LAB'}={}){
  if(!['PAUSE','RESUME','PRIORITIZE'].includes(action))return{status:'DENIED',reason:'ACTION_NOT_ALLOWLISTED'};
  if(environment==='PROD'||environment==='STAGING')return{status:'BLOCKED',reason:'PROTECTED_ENVIRONMENT'};
  if(environment!=='LAB')return{status:'BLOCKED',reason:'ENVIRONMENT_UNVERIFIED'};
- if(!engine_id||!/^[A-Z]{2,12}-\d{3}$/.test(engine_id))
+ if(!engine_id||!/^[A-Z][A-Z0-9]{1,11}-\d{3}$/.test(engine_id))
   return{status:'BLOCKED',reason:'EXACT_TARGET_REQUIRED'};
  return {status:'BLOCKED',reason:'NO_VERIFIED_CONTROL_EXECUTOR',
   action,engine_id,company_id:'fenix',environment:'LAB',
