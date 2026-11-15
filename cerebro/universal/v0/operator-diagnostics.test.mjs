@@ -59,7 +59,7 @@ test('failures are reported only from actual sampled run conclusions, never as e
 test('cost and ETA are unknown until measured, without fabricated numbers',()=>{
  const text=answerDiagnosticRequest('ESTIMATES',live(),'Cuánto cuesta y tarda');
  assert.match(text,/TIEMPO: NO_MEDIDO/);
- assert.match(text,/ETA: SIN_BASE_SUFICIENTE/);
+ assert.match(text,/ETA DEL MOTOR: SIN_BASE_SUFICIENTE/);
  assert.match(text,/COSTE REAL.*NO_MEDIDOS/);
  assert.doesNotMatch(text,/0 €|1 hora|2 horas|gratis garantizado/);
 });
