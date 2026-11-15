@@ -89,14 +89,14 @@ async function setup(page:Page){
      company_id:'GLOBAL',environment:'PREPROD',state:'DECLARED',reports_to:null,runtime_verified:false}));
     return route.fulfill({status:200,headers,body:JSON.stringify({
      status:'OK',source:'OWNER_LAB_FLEET_SOURCES_V1',environment:'LAB',company_id:'fenix',
-     observed_at:'2026-11-15T00:50:00Z',verified_owner:true,read_only:true,execution_enabled:false,additional_cost_eur:0,
+     observed_at:new Date().toISOString(),verified_owner:true,read_only:true,execution_enabled:false,additional_cost_eur:0,
      roles:{declared_role_profiles:11,active_agent_count:null,verified_subagent_count:null,
       unknown_agent_count:true,unknown_subagent_count:true,hierarchy_complete:false,
       by_department:{ENGINEERING:10,REVENUE_SALES:1},entries,registry_id:'CEREBRO_ROLE_AGENT_REGISTRY_V1',
       registry_environment:'PREPROD',registry_status:'ACTIVE_PREPROD_ADDITIVE'},
      engine_registry_count:179,engine_registry_semantics:'DEFINED_NOT_RUNNING',
      sources:[{platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-inmo-map',
-       name:'App / CEREBRO',state:'LIVE',reason:null,observed_at:'2026-11-15T00:50:00Z',
+       name:'App / CEREBRO',state:'LIVE',reason:null,observed_at:new Date().toISOString(),
        observed_sample:1,active_in_sample:1,queued_in_sample:0,total_repo_run_count:15,
        recent:[{run_id:101,name:'LAB contrato vivo',status:'in_progress',conclusion:null,
         updated_at:'2026-11-15T00:50:00Z',url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',
@@ -162,6 +162,30 @@ async function setup(page:Page){
  }
  return{calls,outside,quick};
 }
+
+test('Owner Operativa answers missing-agent, ETA/cost and priority advice without executing any motor',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ const prompt=page.getByRole('textbox',{name:'Pregunta u orden'});
+ const send=page.getByRole('button',{name:'Enviar instrucción'});
+ const answer=page.getByRole('status').filter({hasText:'Respuesta del control operativo'});
+ await prompt.fill('Qué agentes faltan para SEO-001');
+ await send.click();
+ await expect(answer).toContainText('AGENTES QUE FALTAN: NO CUANTIFICABLES');
+ await expect(answer).toContainText('179 motores lógicos DEFINIDOS');
+ await prompt.fill('¿Cuánto tarda y cuesta SEO-001?');
+ await send.click();
+ await expect(answer).toContainText('TIEMPO: NO_MEDIDO');
+ await expect(answer).toContainText('COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS');
+ await prompt.fill('¿Qué deberíamos priorizar?');
+ await send.click();
+ await expect(answer).toContainText('SIGUIENTE AVANCE RECOMENDABLE');
+ await prompt.fill('acelerar LAB-DEMO-001');
+ await send.click();
+ await expect(answer).toContainText('ORDEN NO EJECUTADA: ACCELERATE');
+ expect(calls.filter(x=>x==='lab_control'||x==='submit_command')).toHaveLength(0);
+ expect(calls.filter(x=>x==='fleet_observe').length).toBeGreaterThanOrEqual(3);
+});
 
 test('Owner LAB quick reads use existing planner, no execution or production routes',async({page})=>{
  const {calls,quick}=await setup(page);
