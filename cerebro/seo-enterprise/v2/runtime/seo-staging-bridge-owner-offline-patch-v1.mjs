@@ -49,9 +49,15 @@ function localCli(){
  const real=fs.realpathSync(root),stat=fs.statSync(real);
  if(!stat.isDirectory()||(stat.mode&0o077)!==0)deny('PRIVATE_ROOT_PERMISSIONS');
  if(argv.length!==2||!argv.every(path.isAbsolute))deny('PRIVATE_PATHS_REQUIRED');
- const src=fs.realpathSync(argv[0]),dest=path.resolve(argv[1]);
- if(!src.startsWith(real+path.sep)||!dest.startsWith(real+path.sep)||
-   fs.existsSync(dest)||fs.lstatSync(src).isSymbolicLink()||src===dest)deny('PATH_SCOPE');
+ const rawSrc=path.resolve(argv[0]),rawDest=path.resolve(argv[1]);
+ // Reject symlink source and output parents (including dangling leaf links);
+ // only canonical paths strictly under the private root are acceptable.
+ if(fs.lstatSync(rawSrc).isSymbolicLink())deny('SOURCE_SYMLINK');
+ const src=fs.realpathSync(rawSrc),parent=fs.realpathSync(path.dirname(rawDest));
+ const dest=path.join(parent,path.basename(rawDest));
+ if(!src.startsWith(real+path.sep)||!parent.startsWith(real+path.sep)||
+   (fs.statSync(parent).mode&0o077)!==0||
+   fs.existsSync(rawDest)||src===dest)deny('PATH_SCOPE');
  const {candidate,receipt}=prepareStagingBridgeOwnerOffPatch(fs.readFileSync(src,'utf8'));
  fs.writeFileSync(dest,candidate,{flag:'wx',mode:0o600});
  process.stdout.write(JSON.stringify(receipt)+'\n');

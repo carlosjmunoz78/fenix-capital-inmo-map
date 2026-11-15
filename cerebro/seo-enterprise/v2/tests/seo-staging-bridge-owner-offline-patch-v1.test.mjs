@@ -47,3 +47,11 @@ test('rejects unknown version, a missing hook anchor and double application',()=
  assert.throws(()=>prepareStagingBridgeOwnerOffPatch(original.replace("'0.4.1'","'0.9.0'")),/SOURCE_VERSION_DRIFT/);
  assert.throws(()=>prepareStagingBridgeOwnerOffPatch(original.replace("return $transient;","return null;")),/ANCHOR_DRIFT/);
 });
+
+test('generator runs only from a private source and never authorizes live update',()=>{
+ const p=prepareStagingBridgeOwnerOffPatch(original);
+ assert.equal(p.receipt.state,'PREPARED_PRIVATE_NOT_DEPLOYED');
+ assert.equal(p.receipt.production_changes,0);
+ assert.equal(p.receipt.site_update_authorized,false);
+ assert.equal(p.receipt.backup_and_restore_verified,false);
+});
