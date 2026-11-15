@@ -60,6 +60,11 @@ export default function CerebroFleetControlPanel(){
    <div><Workflow size={19}/><strong>—</strong><span>Subagentes vivos · censo pendiente</span></div>
    <div><Activity size={19}/><strong>{connected.length||'—'}</strong><span>Fuentes GitHub leídas ahora</span></div>
   </div>
+  {snapshot?.media_studio?<div className="op4-fleet-studio" aria-label="Productora audiovisual · jerarquía declarada">
+   <strong>Productora audiovisual · registro de funciones especializadas</strong>
+   <span>{snapshot.media_studio.total_roles} funciones descritas · {snapshot.media_studio.departments} departamentos · {snapshot.media_studio.specialists} especialistas · {snapshot.media_studio.supervisors} supervisores · {snapshot.media_studio.judges} jueces · {snapshot.media_studio.guardians} guardianes.</span>
+   <small>Fuente: jerarquía de Media Studio V2. Solo perfiles diseñados; no son agentes activos comprobados. No se suman al censo de otros sistemas por posibles solapamientos.</small>
+  </div>:null}
   <div className="op4-fleet-grid">
    <section aria-label="Estado de los conectores">
     <h4>Plataformas y fuentes de verdad</h4>
