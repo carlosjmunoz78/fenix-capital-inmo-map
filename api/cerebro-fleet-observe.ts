@@ -1,5 +1,6 @@
 /** LAB PREVIEW owner-only live fleet observation. Read-only; no secrets or run controls. */
 import registry from '../cerebro/registry/role-agent-registry.v1.json';
+import {registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 import {summarizeFleetRoles,summarizeFleetRuns} from '../cerebro/universal/v0/operator-fleet-logic.mjs';
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
@@ -71,6 +72,7 @@ export default async function handler(req:Req,res:Res){
   verified_owner:true,read_only:true,execution_enabled:false,additional_cost_eur:0,
   roles:{...roles,registry_id:registry.registry_id,registry_environment:registry.environment,
    registry_status:registry.status},
+  media_studio:{...registrySummary(),source:'MEDIA_STUDIO_ROLE_REGISTRY_DESIGN_ONLY',runtime_verified:false},
   engine_registry_count:179,engine_registry_semantics:'DEFINED_NOT_RUNNING',
   sources,control:{pause:'NOT_CONNECTED',resume:'NOT_CONNECTED',prioritize:'NOT_CONNECTED',
    reason:'NO_VERIFIED_CONTROL_EXECUTOR',staging_status:'SUSPENDED_BY_OWNER'},
