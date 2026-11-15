@@ -56,6 +56,19 @@ test('failures are reported only from actual sampled run conclusions, never as e
  assert.match(text,/NO censo global/);
  assert.match(text,/Causa raíz.*NO VERIFICADAS/);
 });
+test('repaired GitHub workflow failure is not still announced as active failure',()=>{
+ const f=live();
+ f.snapshot.sources[0].recent.unshift({
+  run_id:55,name:'CEREBRO QA',status:'completed',conclusion:'success',
+  updated_at:new Date(Date.now()+1000).toISOString(),
+  url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/55',
+  engine_id:null,agent_id:null,subagent_id:null
+ });
+ const answer=answerDiagnosticRequest('FAILURES',f,'Qué falla ahora');
+ assert.match(answer,/ningún último resultado fallido acreditado/);
+ assert.doesNotMatch(answer,/CEREBRO QA \[failure\]/);
+});
+
 test('cost and ETA are unknown until measured, without fabricated numbers',()=>{
  const text=answerDiagnosticRequest('ESTIMATES',live(),'Cuánto cuesta y tarda');
  assert.match(text,/TIEMPO: NO_MEDIDO/);
