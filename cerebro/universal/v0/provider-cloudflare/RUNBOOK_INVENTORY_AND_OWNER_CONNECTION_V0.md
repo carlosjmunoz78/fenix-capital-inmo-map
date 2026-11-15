@@ -53,3 +53,13 @@ No habilitar Worker's `workers.dev`, no tocar Access, DNS, cron, D1, producción
 
 ## 5. Changelog
 15-11-2026: auditoría 37/37 crons, subdomains y settings; registro de 10 D1 y 7 scripts con motor declarado, instantánea JSON versionada. API/UX Preview lista para conexión de solo lectura. Credencial bloqueada y revocada, sin nuevas suscripciones ni escrituras Cloudflare.
+
+## 6. Incidencia real Free cron 5/5 y nuevo canario (15/11/2026)
+- El primer inventario íntegro de 37 Workers se conserva como fotografía de 10:44 UTC. Se creó posteriormente el único Worker aislado `cerebro-operativa-control-canary-lab`, privado, sin rutas, URL ni cron; el número físico registrado pasó a **38 Workers** a las 15:43 UTC. La consola muestra **ARCHIVO COMPUESTO**, no lectura en vivo, porque la credencial server-side sigue sin conectarse.
+- La llamada de reanudación del cron exclusivamente sobre el canario recibió **HTTP 400 / error Cloudflare 10072**: límite Workers Free de **5 cron triggers por cuenta**, ya agotado. No es un fallo de sintaxis ni de la aplicación; el proveedor denegó la sexta programación. La cuota es **MONEY_LIMIT** y permanece bloqueada. Queda documentada en `observations/cloudflare-free-cron-capacity-2026-11-15.json`.
+- Se confirmó mediante GET final: canario crons=[], workers.dev=false, preview_urls=false. Los cinco cron existentes conservaron exactamente sus expresiones. No se tocaron los otros 37 Workers. No se contrató un plan y se prohíbe liberar cuota destruyendo programación anterior.
+- El canario cuenta con `canary/manifest.json`, `canary/worker.mjs` y `canary/RUNBOOK_REAL_CRON_CONTROL_V0.md`. No se añade a los 179 motores canónicos FACT ni se interpreta como agente autónomo.
+- Arquitectura económica siguiente: evaluar reutilización segura de un scheduler compartido existente, **sin modificar todavía ninguno**, con inventario de dependencias, backup, OLD vs NEW y rollback físico. Una alternativa que implique Workers Paid precisa autorización económica, no aplicar por defecto.
+- Verificación independiente de Supabase LAB-DEMO-001: se ejecutaron **RESUME revision 1→2** y **PAUSE revision 2→3** contra los RPC privados reales, con recibos durables, y quedó `PAUSED / revision=3 / work_units=0`; evidencia `../control-runtime-lab-v0/evidence-sql-real-control-2026-11-15.json`. Aún pendiente POST autenticado desde Opera.
+
+**Estado al cierre: consola Cloudflare auditada, control real de canario cron impedido por límite de cuota Free; LAB SQL control físicamente aplicado; todos los sistemas productivos intactos.**
