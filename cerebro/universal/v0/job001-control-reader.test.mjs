@@ -127,6 +127,23 @@ test('bounded safe GET retries one transient transport failure and verifies succ
  const v=await src.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
  assert.equal(v.status,'OK');assert.equal(count,2);
 });
+test('PREPROD cold start longer than old 3.8s budget succeeds once without execution', {timeout:10000}, async()=>{
+ let calls=0;
+ const reader=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
+  fetchImpl:(_url,options)=>new Promise((resolve,reject)=>{
+   calls++;
+   const abort=()=>{clearTimeout(timer);reject(Error('OLD_TIMEOUT_ABORT'))};
+   const timer=setTimeout(()=>{options.signal.removeEventListener('abort',abort);resolve(rjson(good()))},4100);
+   options.signal.addEventListener('abort',abort,{once:true});
+  })
+ });
+ const result=await reader.listForContext({company_id:'fenix',environment:'LAB',session_token:TOKEN});
+ assert.equal(result.status,'OK');
+ assert.equal(calls,1);
+ assert.equal(result.live_execution_verified,false);
+ assert.equal(result.prod_execution_enabled,false);
+});
+
 test('reader does not retry owner denial or untrusted service HTTP status',async()=>{
  let count=0;
  const src=createJob001ControlReaderLabV0({preprodApiKey:PREPROD,ownerApiKey:PROD,
