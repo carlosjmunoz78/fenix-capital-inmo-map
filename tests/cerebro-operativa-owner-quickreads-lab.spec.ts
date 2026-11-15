@@ -387,3 +387,26 @@ test('Cloudflare 22-Queue historical consumer topology, backlog and owner chat d
  await expect(page.getByRole('status').filter({hasText:'ORDEN NO EJECUTADA'})).toContainText('controles de despacho');
  expect(calls).not.toContain('submit_command');
 });
+
+test('Private Social PR and Worker inventory is dated, read-only and does not assert active agent counts',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const social=page.getByRole('region',{name:'Social · Instagram y Facebook AUTOQUAL auditados'});
+ await expect(social).toContainText('NO EN VIVO');
+ await expect(social).toContainText('SOC-IG-FINANCIAL-REAL-ESTATE-V1');
+ await expect(social).toContainText('SOC-FB-FINANCIAL-REAL-ESTATE-V1');
+ await expect(social).toContainText('AUTOQUAL OFF');
+ await expect(social).toContainText('Agentes activos: DESCONOCIDO');
+ await social.getByRole('button',{name:'Comprobar detalles auditados SOC-IG-FINANCIAL-REAL-ESTATE-V1'}).click();
+ await expect(social.getByRole('status')).toContainText('NO CONECTADOS');
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('estado Instagram AUTOQUAL');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'AUDITORÍA HISTÓRICA'})).toContainText('SOC-IG-FINANCIAL-REAL-ESTATE-V1');
+ await input.fill('pausar Facebook AUTOQUAL');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'ORDEN NO EJECUTADA'})).toContainText('adaptador autenticado');
+ expect(calls).not.toContain('submit_command');
+ await page.screenshot({path:'test-results/operativa-private-social-lab-audit.png',fullPage:false,animations:'disabled'});
+});
