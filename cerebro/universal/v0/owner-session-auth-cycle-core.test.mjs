@@ -35,7 +35,7 @@ const run=(f,extra={})=>runOfficialLabSessionCycle({...f,email,password,now:()=>
 test('mocked official LAB Auth sequence accepts live and rejects after logout; scoped cleanup',async()=>{
  const f=fixture();const r=await run(f);
  assert.deepEqual(r,{status:'PASS',stage:'COMPLETE',cleanup_status:'DONE',issuer_scope:'LAB_ISSUER_ONLY',real_owner_prod_certified:false,secrets_in_result:false});
- assert.deepEqual(f.calls,{create:1,signin:1,claims:1,read:[[ '00000000-0000-4000-8000-000000000002',U],[SID,'00000000-0000-4000-8000-000000000001'],[SID,U],[SID,U]],logout:1,delete:1});
+ assert.deepEqual(f.calls,{create:1,signin:1,claims:1,read:[[ '00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000000001'],[ '00000000-0000-4000-8000-000000000002',U],[SID,'00000000-0000-4000-8000-000000000001'],[SID,U],[SID,U]],logout:1,delete:1});
 });
 test('create error without user means no cleanup and never logs or falsely reports pass',async()=>{
  const f=fixture({create:{data:{user:null},error:{message:'could contain PII'}}});
@@ -57,7 +57,7 @@ test('sign in failed after create still deletes only created user',async()=>{
 test('invalid signed claims deny before session lookup and still revoke/delete created test user',async()=>{
  const f=fixture({claims:{data:{claims:{iss:'https://evil.example',sub:U,session_id:SID,aud:'authenticated',role:'authenticated',exp:2000000000}}}});
  const r=await run(f);assert.equal(r.status,'FAIL');assert.equal(r.stage,'CLAIMS');
- assert.equal(f.calls.read.length,0);assert.equal(f.calls.logout,1);assert.equal(f.calls.delete,1);
+ assert.equal(f.calls.read.length,1);assert.equal(f.calls.logout,1);assert.equal(f.calls.delete,1);
 });
 test('session never active fails closed and cleans up',async()=>{
  const f=fixture({rpc:async()=>({data:false,error:null})});
@@ -79,4 +79,28 @@ test('missing dependencies/invalid caller email deny without creating any accoun
  const f=fixture();const r=await run(f,{email:'owner@example.com'});
  assert.equal(r.status,'FAIL');assert.equal(r.cleanup_status,'NOT_NEEDED');
  assert.deepEqual(f.calls,{create:0,signin:0,claims:0,read:[],logout:0,delete:0});
+});
+
+test('LAB private reader preflight rejects unexpected true before creating any account',async()=>{
+ const f=fixture({rpc:async()=>({data:true,error:null})});
+ const result=await run(f);
+ assert.equal(result.status,'FAIL');assert.equal(result.stage,'PREFLIGHT');
+ assert.equal(result.cleanup_status,'NOT_NEEDED');
+ assert.deepEqual(f.calls.read,[['00000000-0000-4000-8000-000000000002','00000000-0000-4000-8000-000000000001']]);
+ assert.equal(f.calls.create,0);assert.equal(f.calls.signin,0);
+ assert.equal(f.calls.logout,0);assert.equal(f.calls.delete,0);
+});
+test('LAB private reader preflight rejects missing/failed service privilege before account creation',async()=>{
+ for(const rpc of [
+  async()=>({data:null,error:{message:'permission denied + SECRET'}}),
+  async()=>{throw Error('network permission denied SECRET')},
+  async()=>({data:'false',error:null})
+ ]){
+  const f=fixture({rpc});
+  const result=await run(f);
+  assert.equal(result.status,'FAIL');assert.equal(result.stage,'PREFLIGHT');
+  assert.equal(result.cleanup_status,'NOT_NEEDED');
+  assert.equal(f.calls.create,0);assert.equal(f.calls.delete,0);
+  assert.ok(!JSON.stringify(result).includes('SECRET'));
+ }
 });

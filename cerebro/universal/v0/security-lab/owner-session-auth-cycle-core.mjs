@@ -9,7 +9,7 @@ const REF='hnqlnvakzaywtafeiybt';
 const ISSUER='https://'+REF+'.supabase.co/auth/v1';
 const INVALID_SESSION='00000000-0000-4000-8000-000000000002';
 const INVALID_USER='00000000-0000-4000-8000-000000000001';
-const STAGES=new Set(['CREATE','SIGN_IN','CLAIMS','NEGATIVES','ACTIVE','LOGOUT','REVOKED','COMPLETE']);
+const STAGES=new Set(['PREFLIGHT','CREATE','SIGN_IN','CLAIMS','NEGATIVES','ACTIVE','LOGOUT','REVOKED','COMPLETE']);
 const safe=(passed,stage,cleanup)=>Object.freeze({
  status:passed&&cleanup!=='FAILED'?'PASS':'FAIL',
  stage:STAGES.has(stage)?stage:'CREATE',
@@ -38,7 +38,7 @@ export async function runOfficialLabSessionCycle(input={}){
     typeof password!=='string'||password.length<30||
     typeof now!=='function'||typeof sleep!=='function')
    return safe(false,'CREATE','NOT_NEEDED');
- let userId=null,sessionOpened=false,loggedOut=false,passed=false,stage='CREATE';
+ let userId=null,sessionOpened=false,loggedOut=false,passed=false,stage='PREFLIGHT';
  let cleanup='NOT_NEEDED',failedCleanupSignout=false;
  const check=async(sid,uid)=>{
   const {data,error}=await admin.rpc('cerebro_operativa_session_guard_lab_v0',
@@ -47,6 +47,12 @@ export async function runOfficialLabSessionCycle(input={}){
   return data;
  };
  try{
+  // Verify this is an internally authorised LAB reader *before* creating
+  // any temporary Auth user. This single fixed, negative RPC leaks no session
+  // metadata and cannot pass with a publishable/anon key.
+  if(await check(INVALID_SESSION,INVALID_USER)!==false)
+   throw Error('LAB_READER_PREFLIGHT_DENIED');
+  stage='CREATE';
   const created=await admin.auth.admin.createUser({email,password,email_confirm:true,
    app_metadata:{cerebro_lab_only_test:'p0a_auth_session_v1'}});
   if(UUID.test(created?.data?.user?.id||''))userId=created.data.user.id;

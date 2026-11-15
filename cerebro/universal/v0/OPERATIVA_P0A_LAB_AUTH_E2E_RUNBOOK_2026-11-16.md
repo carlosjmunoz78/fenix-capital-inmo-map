@@ -24,3 +24,8 @@ Se añade `security-lab/owner-session-auth-e2e-private.mjs`, un runner **desarma
 - Coste nueva suscripción 0 €, consumo marginal de Auth/Supabase/GitHub no medido.
 
 **Rollback:** no crear más usuarios; eliminar exclusivamente la cuenta de ensayo si quedase pendiente; no eliminar migraciones ni funciones existentes.
+## P0-A · nuevo gate previo a la creación de usuario · 2026-11-16
+
+**REFUERZO EN CÓDIGO LAB, NO EJECUTADO CON CREDENCIALES REALES.** Antes de `admin.auth.admin.createUser`, el runner ahora exige que el cliente administrador pueda ejecutar la RPC **privada, ya creada en Supabase LAB** `cerebro_operativa_session_guard_lab_v0` con el par UUID sintético inexistente y que devuelva exactamente `false`. Si falta permiso (p. ej. clave de usuario público, servicio ajeno), hay error, `null` o respuesta inesperada, **FAIL_CLOSED `PREFLIGHT` y 0 cuentas creadas**. Esta comprobación no sustituye la validación de la procedencia de los secretos, fijación del URL al emisor LAB ni la protección del runner, pero impide intentar crear una cuenta si el lector privado LAB no responde correctamente con las credenciales inyectadas.
+
+Las nuevas pruebas cubren preflight true anómalo, permiso denegado/error de transporte y respuesta no booleana; los tests anteriores se adaptan al nuevo primer RPC. NUNCA reutilizar secretos de PROD ni activar el runner automáticamente. Evidencia del ciclo verdadero `true→false` aún **PENDIENTE**.
