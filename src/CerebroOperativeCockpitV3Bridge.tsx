@@ -7,6 +7,7 @@ import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupporte
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperativaDiagnostics';
+import {readDeviceLive} from './cerebroDeviceLiveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
@@ -82,8 +83,32 @@ export default function CerebroOperativeCockpitV3Bridge(){
   if(diagnostic&&question?.kind!=='control'){
    setFleetSending(true);
    try{
-    const fleet=await readFleetLab();
-    setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
+    if(diagnostic==='DEVICE_HISTORY'){
+     const current=await readDeviceLive();
+     if(current.kind==='ready'){
+      const d=current.data;
+      const rows=d.environments.map(x=>x.environment+' (solo etiquetas de la BD LAB): '+
+       x.not_revoked_count+' registros no revocados, '+x.heartbeat_5m_count+' latidos últimos 5 min, '+
+       x.heartbeat_24h_count+' latidos últimas 24 h, '+x.commands_total+' órdenes, '+
+       x.commands_completed+' completadas, '+x.commands_failed+' fallidas históricas, '+
+       x.semantically_verified_receipts+' resultados semánticamente verificados; duración de éxitos comparables ('+
+       x.comparable_successful_duration_samples+'): p50 '+(x.p50_completed_seconds??'NO_MEDIDO')+
+       ' s, p90 '+(x.p90_completed_seconds??'NO_MEDIDO')+' s.').join(' ');
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL LAB, origen '+d.source+
+       ', observada '+d.observed_at+'. '+rows+
+       ' Agentes, subagentes y trabajos autónomos activos: DESCONOCIDOS, no cero. '+
+       'Estado ONLINE almacenado y latido de dispositivo NO acreditan autonomía. '+
+       'PREPROD es etiqueta histórica en Supabase LAB, NO App PREPROD activa. '+
+       'Coste real: NO_MEDIDO; duraciones históricas no son ETA futura. Consulta de solo lectura; ninguna orden ejecutada.'});
+     }else{
+      const fleet=await readFleetLab();
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL NO DISPONIBLE: '+current.reason+
+       '. A continuación, información fechada, NO EN VIVO. '+answerDiagnosticRequest(diagnostic,fleet,text)});
+     }
+    }else{
+     const fleet=await readFleetLab();
+     setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
+    }
     setComposer('');
    }finally{setFleetSending(false)}
    return;
