@@ -7,12 +7,13 @@ import {
 import type {CerebroActivityRun} from './cerebroActivityApi';
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import CerebroOperativaUniverseViews from './CerebroOperativaUniverseViews';
+import CerebroFleetControlPanel from './CerebroFleetControlPanel';
 import CerebroAudioDiagnostics from './CerebroAudioDiagnostics';
 import './cerebro-operative-cockpit-v3.css';
 
 type VoiceSnapshot={ready:boolean;sending:boolean;voiceActive:boolean;voiceListening:boolean;voiceSpeaking:boolean};
 type Company='all'|'fenix'|'aion'|'captacasa';
-type View='resumen'|'entidades'|'proyectos'|'motores'|'trabajos'|'evidencias'|'decisiones';
+type View='resumen'|'control'|'entidades'|'proyectos'|'motores'|'trabajos'|'evidencias'|'decisiones';
 type FeedStatus='LIVE'|'CACHED'|'UNAVAILABLE';
 type Props={
  snapshot:VoiceSnapshot;composer:string;onComposerChange:(value:string)=>void;
@@ -25,10 +26,11 @@ type Props={
  ownerUniverse:OwnerUniverseResult;
  scopeCanExecute:boolean;
  chatLines:{role:'user'|'cerebro';text:string}[];
+ operatorAnswer?:{question:string;text:string}|null;
  children:ReactNode;
 };
 const NAV:readonly [View,string,typeof Building2][]=[
- ['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
+ ['control','Control',ShieldCheck],['entidades','Entidades',Building2],['proyectos','Proyectos',Layers3],
  ['motores','Motores',Cpu],['trabajos','Trabajos',Workflow],
  ['evidencias','Evidencias',FileCheck2]
 ];
@@ -76,7 +78,7 @@ function initialOperativaPreviewPanel():View{
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onStopVoice,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,operatorAnswer,children
 }:Props){
  const[view,setView]=useState<View>(initialOperativaPreviewPanel);
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
@@ -195,7 +197,10 @@ export default function CerebroOperativeCockpitV3({
       <button className="op3-submit" aria-label="Enviar instrucción" type="submit"
        disabled={!canSend||!composer.trim()}><Send size={18}/></button>
      </form>
-     {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
+     {operatorAnswer?<div className="op3-operator-answer" role="status" aria-live="polite">
+       <strong>Respuesta del control operativo</strong><small>{operatorAnswer.question}</small><p>{operatorAnswer.text}</p>
+      </div>:null}
+      {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
       {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
      <CerebroAudioDiagnostics/>
     </div>
@@ -220,13 +225,14 @@ export default function CerebroOperativeCockpitV3({
      <span className="op3-overline">DATOS DE FUENTES EXISTENTES · SOLO LECTURA</span>
     </div>
     <h2>{({
-     entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
+     control:'Control operativo e inventario vivo',entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',
      motores:'Motores observados',trabajos:'Trabajos y ejecuciones',
      evidencias:'Evidencias de ejecución',decisiones:'Estado y revisiones',
      resumen:'Resumen'
     } as Record<View,string>)[view]}</h2>
     <p className="op3-detail-lede">{({
-     entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
+     control:'Fuentes de agentes, subagentes, motores y ejecuciones. Controles disponibles solo cuando haya un ejecutor autorizado.',
+      entidades:'Empresas realmente devueltas por el Gateway de laboratorio; selector sin concesión de permisos.',
      proyectos:'Proyectos registrados y comprobados en el Gateway de laboratorio; fuente parcial, no inventario global.',
      motores:'Registros, catálogo de diseño FACT-001 y ejecuciones observadas, sin equipararlos.',
      trabajos:'Actividad publicada por la fuente autenticada, con acceso a su evidencia.',
@@ -234,7 +240,8 @@ export default function CerebroOperativeCockpitV3({
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
      resumen:''
     } as Record<View,string>)[view]}</p>
-    {(view==='entidades'||view==='proyectos'||view==='motores')?
+    {view==='control'?<CerebroFleetControlPanel/>:null}
+     {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
        onCompanyChange={onCompanyChange} onNavigate={selectPanel}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
