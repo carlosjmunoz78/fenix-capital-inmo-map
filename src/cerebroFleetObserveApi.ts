@@ -56,6 +56,8 @@ export function classifyFleetQuestion(input:string):FleetQuestion|null{
  if(!s||s.length>4000)return null;
  const m=s.match(/(?:^|\s)(pausar|pausa|detener|reanudar|reactivar|reactiva|activar|acelerar|acelera|ralentizar|ralentiza|priorizar|prioriza|arrancar|cancelar|cancela|reintentar|reintenta|reasignar|reasigna)(?:\s|$)/);
  if(m){
+  // Questions about what to prioritize are advice, NOT permission to modify a queue.
+  if(/^[¿?\s]*(?:que|cuales|como|deberiamos)\b/i.test(s))return {kind:'query'};
   const v=m[1],a=/paus|deten/.test(v)?'PAUSE':/reanud|reactiv|activar|arrancar/.test(v)?'RESUME':/aceler/.test(v)?'ACCELERATE':/ralent/.test(v)?'SLOW_DOWN':/cancel/.test(v)?'CANCEL':/reintent/.test(v)?'RETRY':/reasign/.test(v)?'REASSIGN':'PRIORITIZE';
   return{kind:'control',action:a,engine:input.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]||null};
  }
