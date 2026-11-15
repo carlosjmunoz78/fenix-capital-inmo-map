@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0.0",
+  "schema_version": "1.1.0",
   "source": "CLOUDFLARE_API_POINT_IN_TIME_SNAPSHOT",
   "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
   "observed_at": "2026-11-15T10:44:45.565Z",
@@ -64,20 +64,28 @@
   "workers": [
     {
       "worker_id": "cerebro-facebook-autoqual-lab",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-12T18:20:19.22527Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.629Z"
+      "cron_verified_at": "2026-11-15T10:44:30.629Z",
+      "settings_observed_at": "2026-11-15T10:51:39.329Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "AUTOQUAL_ENABLED": false,
+        "GROQ_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-facebook-buffer-replenisher-lab",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-FB-BUFFER-REPLENISHER-LAB",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-14T16:20:05.680618Z",
@@ -86,19 +94,42 @@
       ],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.495Z"
+      "cron_verified_at": "2026-11-15T10:44:30.495Z",
+      "settings_observed_at": "2026-11-15T10:51:39.359Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "FB_BUFFER_PROBE_ENABLED": false,
+        "FB_BUFFER_PUBLISH_ENABLED": false,
+        "FB_BUFFER_READONLY_ENABLED": true,
+        "KNW_MULTIPLEX_ENABLED": true,
+        "KNW_PROBE_ENABLED": false,
+        "SOC_ALL_BUFFER_READONLY_ENABLED": true,
+        "SOC_ALL_DISPATCH_ENABLED": false,
+        "SOC_ALL_LEDGER_PROBE_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-facebook-knowledge-autoqual-lab-eu",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-13T09:07:37.379455Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.514Z"
+      "cron_verified_at": "2026-11-15T10:44:30.514Z",
+      "settings_observed_at": "2026-11-15T10:51:39.440Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "KNW_AUTOMATIC_ENABLED": true,
+        "KNW_PROMOTION_ENABLED": false,
+        "KNW_PUBLICATION_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-gateway-lab-eu-20261109",
@@ -110,7 +141,19 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.533Z"
+      "cron_verified_at": "2026-11-15T10:44:30.533Z",
+      "settings_observed_at": "2026-11-15T10:51:39.297Z",
+      "environment": null,
+      "boolean_flags": {
+        "CLOUDFLARE_API_ENABLED": false,
+        "GATEWAY_ENABLED": false,
+        "UMS001_PRIVATE_BINDING_ENABLED": true,
+        "UMS001_QUEUE_ENABLED": true,
+        "UNIVERSAL_IMAGE_RUNTIME_ENABLED": true,
+        "UNIVERSAL_RUNTIME_IAM_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-github-oidc-enroll-lab-eu",
@@ -122,7 +165,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": true,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.616Z"
+      "cron_verified_at": "2026-11-15T10:44:30.616Z",
+      "settings_observed_at": "2026-11-15T10:51:39.385Z",
+      "environment": null,
+      "boolean_flags": {
+        "OIDC_BRIDGE_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-headless-operator-lab-20261111",
@@ -136,7 +186,12 @@
       ],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:30.521Z"
+      "cron_verified_at": "2026-11-15T10:44:30.521Z",
+      "settings_observed_at": "2026-11-15T10:51:39.281Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-notion-queue-lab",
@@ -148,7 +203,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:31.483Z"
+      "cron_verified_at": "2026-11-15T10:44:31.483Z",
+      "settings_observed_at": "2026-11-15T10:51:40.186Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-recovery-runner-lab",
@@ -162,7 +222,14 @@
       ],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.351Z"
+      "cron_verified_at": "2026-11-15T10:44:33.351Z",
+      "settings_observed_at": "2026-11-15T10:51:41.156Z",
+      "environment": null,
+      "boolean_flags": {
+        "P5_DIAG_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-fact001-ums001-issuer-provisioner-lab-eu",
@@ -174,31 +241,61 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.350Z"
+      "cron_verified_at": "2026-11-15T10:44:33.350Z",
+      "settings_observed_at": "2026-11-15T10:51:41.134Z",
+      "environment": null,
+      "boolean_flags": {
+        "FACT_PROVISION_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-instagram-autoqual-lab",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-08T21:28:25.810317Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.345Z"
+      "cron_verified_at": "2026-11-15T10:44:33.345Z",
+      "settings_observed_at": "2026-11-15T10:51:41.103Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "AUTOQUAL_ENABLED": false,
+        "GROQ_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-instagram-knowledge-autoqual-lab-eu",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-13T18:25:55.746188Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.452Z"
+      "cron_verified_at": "2026-11-15T10:44:33.452Z",
+      "settings_observed_at": "2026-11-15T10:51:41.214Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "DEEPSEEK_FALLBACK_ENABLED": false,
+        "IG_DOC_CATCHUP_ENABLED": false,
+        "IG_DOCUMENTARY_ENABLED": true,
+        "IG_QUOTA_AUTORF_ENABLED": true,
+        "IG_SEMANTIC_FULL_ENABLED": true,
+        "IG_TICKER_ENABLED": true,
+        "IG_UMS_CANARY_ENABLED": false,
+        "KNW_AUTOMATIC_ENABLED": true,
+        "KNW_PUBLICATION_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-jarvis-cut32-lab-eu",
@@ -210,7 +307,18 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.344Z"
+      "cron_verified_at": "2026-11-15T10:44:33.344Z",
+      "settings_observed_at": "2026-11-15T10:51:41.159Z",
+      "environment": null,
+      "boolean_flags": {
+        "JARVIS_ACCESS_PROBE_ENABLED": false,
+        "JARVIS_B2_B3_LIVE_ENABLED": false,
+        "JARVIS_B2_DEVICE_ENABLED": false,
+        "JARVIS_B2_ENROLLMENT_ENABLED": false,
+        "JARVIS_GATEWAY_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-jarvis-lab-eu",
@@ -222,35 +330,72 @@
       "cron_schedules": [],
       "workers_dev_enabled": true,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:33.284Z"
+      "cron_verified_at": "2026-11-15T10:44:33.284Z",
+      "settings_observed_at": "2026-11-15T10:51:41.214Z",
+      "environment": null,
+      "boolean_flags": {
+        "JARVIS_ACCESS_PROBE_ENABLED": true,
+        "JARVIS_B2_B3_LIVE_ENABLED": false,
+        "JARVIS_GATEWAY_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-linkedin-autonomy-ticker-lab-eu",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-LI-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-14T10:16:22.874808Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:34.227Z"
+      "cron_verified_at": "2026-11-15T10:44:34.227Z",
+      "settings_observed_at": "2026-11-15T10:51:42.148Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "BUFFER_READONLY_ENABLED": true,
+        "CANARY_ENABLED": false,
+        "DEEPSEEK_FALLBACK_ENABLED": false,
+        "LI_ARBITER_ENABLED": false,
+        "LI_ARBITER_V2_ENABLED": false,
+        "LI_AUTONOMY_CONTROL_ENABLED": true,
+        "LI_REFERENCE_REVIEW_ENABLED": false,
+        "LI_REMEDIATION_EXAMS_ENABLED": false,
+        "LI_ROLE_EXAMS_ENABLED": false,
+        "LI_ROLE_SECOND_BATCH_ENABLED": false,
+        "LI_SHADOW_BATCH_ENABLED": false,
+        "LI_TRIBUNAL_ENABLED": true,
+        "PUBLISH_ENABLED": false,
+        "SEMANTIC_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-linkedin-buffer-writer-lab-eu",
-      "company_id": null,
-      "engine_id": null,
+      "company_id": "fenix-capital",
+      "engine_id": "SOC-LI-FINANCIAL-REAL-ESTATE-V1",
       "agent_id": null,
       "subagent_id": null,
       "modified_on": "2026-11-14T10:14:28.00621Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.047Z"
+      "cron_verified_at": "2026-11-15T10:44:36.047Z",
+      "settings_observed_at": "2026-11-15T10:51:43.075Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "PUBLISH_ENABLED": false,
+        "WRITER_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-model-router-deepseek-lab-eu",
-      "company_id": null,
+      "company_id": "fenix-capital",
       "engine_id": null,
       "agent_id": null,
       "subagent_id": null,
@@ -258,7 +403,18 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.054Z"
+      "cron_verified_at": "2026-11-15T10:44:36.054Z",
+      "settings_observed_at": "2026-11-15T10:51:43.096Z",
+      "environment": "LAB",
+      "boolean_flags": {
+        "AUTO_TOPUP_ENABLED": false,
+        "INFER_ENABLED": false,
+        "PAID_EXECUTION_ENABLED": false,
+        "READONLY_BALANCE_PROBE_ENABLED": false,
+        "ROUTER_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-social-buffer-ledger-lab-eu",
@@ -270,7 +426,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.053Z"
+      "cron_verified_at": "2026-11-15T10:44:36.053Z",
+      "settings_observed_at": "2026-11-15T10:51:43.120Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-ai-image-factory-lab-eu",
@@ -282,7 +443,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.053Z"
+      "cron_verified_at": "2026-11-15T10:44:36.053Z",
+      "settings_observed_at": "2026-11-15T10:51:43.066Z",
+      "environment": null,
+      "boolean_flags": {
+        "GENERATION_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-image-auth-sender-lab-eu",
@@ -294,7 +462,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.171Z"
+      "cron_verified_at": "2026-11-15T10:44:36.171Z",
+      "settings_observed_at": "2026-11-15T10:51:43.120Z",
+      "environment": null,
+      "boolean_flags": {
+        "SENDER_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-image-qa-shadow-lab-eu",
@@ -306,7 +481,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.088Z"
+      "cron_verified_at": "2026-11-15T10:44:36.088Z",
+      "settings_observed_at": "2026-11-15T10:51:43.097Z",
+      "environment": null,
+      "boolean_flags": {
+        "QA_ONLY_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-multisource-scout-lab-eu",
@@ -320,7 +502,27 @@
       ],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:36.972Z"
+      "cron_verified_at": "2026-11-15T10:44:36.972Z",
+      "settings_observed_at": "2026-11-15T10:51:44.026Z",
+      "environment": null,
+      "boolean_flags": {
+        "COMMONS_ENABLED": true,
+        "COMMONS_PROBE_ENABLED": false,
+        "COMMONS_SELECT_ENABLED": true,
+        "MET_ENABLED": true,
+        "MET_PROBE_ENABLED": false,
+        "OPENVERSE_AUDIO_ENABLED": true,
+        "OPENVERSE_ENABLED": false,
+        "OPENVERSE_IMAGES_ENABLED": true,
+        "OPENVERSE_PROBE_ENABLED": false,
+        "SCOUT_ACQUIRE_ENABLED": true,
+        "SCOUT_ENABLED": true,
+        "SCOUT_PROBE_ENABLED": false,
+        "SOURCE_REFRESH_ENABLED": true,
+        "SOURCE_REFRESH_SCHEDULE_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-owner-access-gateway-lab-eu",
@@ -332,7 +534,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": true,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.758Z"
+      "cron_verified_at": "2026-11-15T10:44:38.758Z",
+      "settings_observed_at": "2026-11-15T10:51:44.996Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-polyhaven-autonomous-lab-eu",
@@ -344,7 +551,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.815Z"
+      "cron_verified_at": "2026-11-15T10:44:38.815Z",
+      "settings_observed_at": "2026-11-15T10:51:44.987Z",
+      "environment": null,
+      "boolean_flags": {
+        "DEMAND_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
@@ -358,7 +572,14 @@
       ],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.810Z"
+      "cron_verified_at": "2026-11-15T10:44:38.810Z",
+      "settings_observed_at": "2026-11-15T10:51:44.961Z",
+      "environment": null,
+      "boolean_flags": {
+        "DEMAND_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-private-image-canary-lab-eu",
@@ -370,7 +591,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.866Z"
+      "cron_verified_at": "2026-11-15T10:44:38.866Z",
+      "settings_observed_at": "2026-11-15T10:51:45.026Z",
+      "environment": null,
+      "boolean_flags": {
+        "RENDER_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-producer-private-gateway-lab-eu",
@@ -382,7 +610,22 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.839Z"
+      "cron_verified_at": "2026-11-15T10:44:38.839Z",
+      "settings_observed_at": "2026-11-15T10:51:44.975Z",
+      "environment": null,
+      "boolean_flags": {
+        "COMMONS_ENABLED": true,
+        "COMMONS_SELECT_ENABLED": true,
+        "GATEWAY_ENABLED": true,
+        "MET_ENABLED": true,
+        "MET_SELECT_ENABLED": true,
+        "OPENVERSE_AUDIO_ENABLED": true,
+        "OPENVERSE_IMAGES_ENABLED": true,
+        "PRODUCER_DEMAND_QUEUE_ENABLED": true,
+        "SOURCE_SCOUT_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-registered-image-executor-lab-eu",
@@ -394,7 +637,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:38.768Z"
+      "cron_verified_at": "2026-11-15T10:44:38.768Z",
+      "settings_observed_at": "2026-11-15T10:51:44.998Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-signed-orchestrator-lab-eu",
@@ -406,7 +654,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:39.634Z"
+      "cron_verified_at": "2026-11-15T10:44:39.634Z",
+      "settings_observed_at": "2026-11-15T10:51:45.972Z",
+      "environment": null,
+      "boolean_flags": {
+        "SCHEDULE_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-signed-qa-receiver-lab-eu",
@@ -418,7 +673,15 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.412Z"
+      "cron_verified_at": "2026-11-15T10:44:41.412Z",
+      "settings_observed_at": "2026-11-15T10:51:47.004Z",
+      "environment": null,
+      "boolean_flags": {
+        "SENDER_ENABLED": true,
+        "SIGNED_SENDER_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-social-creative-bridge-lab-eu",
@@ -430,7 +693,16 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.436Z"
+      "cron_verified_at": "2026-11-15T10:44:41.436Z",
+      "settings_observed_at": "2026-11-15T10:51:46.894Z",
+      "environment": null,
+      "boolean_flags": {
+        "SOCIAL_BRIDGE_ENABLED": true,
+        "SOCIAL_NATIVE_V2_ENABLED": true,
+        "SOCIAL_UNIVERSAL_IAM_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-universal-engine-adapter-lab-eu",
@@ -442,7 +714,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.375Z"
+      "cron_verified_at": "2026-11-15T10:44:41.375Z",
+      "settings_observed_at": "2026-11-15T10:51:46.986Z",
+      "environment": null,
+      "boolean_flags": {
+        "ADAPTER_ENABLED": false
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-universal-gateway-lab-eu",
@@ -454,7 +733,17 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.491Z"
+      "cron_verified_at": "2026-11-15T10:44:41.491Z",
+      "settings_observed_at": "2026-11-15T10:51:47.022Z",
+      "environment": null,
+      "boolean_flags": {
+        "FACT_ENROLL_ENABLED": true,
+        "REGISTERED_IMAGE_ENABLED": true,
+        "REGISTRATION_WINDOW_ENABLED": false,
+        "UNIVERSAL_GATEWAY_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-universal-router-lab-eu",
@@ -466,7 +755,18 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.385Z"
+      "cron_verified_at": "2026-11-15T10:44:41.385Z",
+      "settings_observed_at": "2026-11-15T10:51:46.853Z",
+      "environment": null,
+      "boolean_flags": {
+        "CANARY_ENABLED": false,
+        "CHATGPT_QUEUE_ENABLED": true,
+        "GATEWAY_ENABLED": false,
+        "IMAGE_BRIDGE_ENABLED": true,
+        "SOCIAL_QUEUE_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "cerebro-ums001-universal-runtime-broker-lab-eu",
@@ -478,7 +778,14 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:41.426Z"
+      "cron_verified_at": "2026-11-15T10:44:41.426Z",
+      "settings_observed_at": "2026-11-15T10:51:46.951Z",
+      "environment": null,
+      "boolean_flags": {
+        "BROKER_ENABLED": true
+      },
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "fenix-capital-cerebro-social",
@@ -490,7 +797,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
-      "cron_verified_at": "2026-11-15T10:44:42.358Z"
+      "cron_verified_at": "2026-11-15T10:44:42.358Z",
+      "settings_observed_at": "2026-11-15T10:51:47.870Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "fenix-capital-inmo-map",
@@ -502,7 +814,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": true,
       "preview_urls_enabled": true,
-      "cron_verified_at": "2026-11-15T10:44:44.246Z"
+      "cron_verified_at": "2026-11-15T10:44:44.246Z",
+      "settings_observed_at": "2026-11-15T10:51:48.847Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     },
     {
       "worker_id": "fenix-capital-inmo-maps",
@@ -514,7 +831,12 @@
       "cron_schedules": [],
       "workers_dev_enabled": true,
       "preview_urls_enabled": true,
-      "cron_verified_at": "2026-11-15T10:44:44.332Z"
+      "cron_verified_at": "2026-11-15T10:44:44.332Z",
+      "settings_observed_at": "2026-11-15T10:51:48.774Z",
+      "environment": null,
+      "boolean_flags": {},
+      "error": null,
+      "runtime_execution_verified": false
     }
   ],
   "semantics": {
@@ -522,6 +844,10 @@
     "cron_configured_is_work_execution": false,
     "company_mapping": "UNVERIFIED",
     "runtime_execution": "NOT_CHECKED",
-    "worker_action_allowed": false
-  }
+    "worker_action_allowed": false,
+    "config_flags_are_permissions_granted": false,
+    "config_flags_are_running_state": false
+  },
+  "settings_verified_workers": 37,
+  "engine_id_mapped_workers": 7
 }
