@@ -83,3 +83,21 @@ test('no mutation and no provider/network imports in diagnostic reader',async()=
  const data=await import('node:fs/promises').then(x=>x.readFile(new URL('../../../src/cerebroOperativaDiagnostics.ts',import.meta.url),'utf8'));
  assert.ok(!/\bfetch\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(|\bPOST\b/.test(data));
 });
+
+test('specific GitHub workflow reports observed bounded timing, not an engine ETA or verified cost',()=>{
+ const sample=live();
+ sample.snapshot.sources[0].timing_samples=[{
+  workflow_name:'CEREBRO Universal Gateway V0 LAB contract CI',
+  sample_size:4,p50_upper_bound_seconds:20,p90_upper_bound_seconds:40,
+  method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY',engine_mapping_verified:false
+ }];
+ const answer=answerDiagnosticRequest('ESTIMATES',sample,'¿Cuánto tarda CEREBRO Universal Gateway V0 LAB contract CI?');
+ assert.match(answer,/TIEMPO DEL WORKFLOW GITHUB/);
+ assert.match(answer,/p50=20 s, p90=40 s/);
+ assert.match(answer,/NO duración exacta/);
+ assert.match(answer,/ETA DEL MOTOR: SIN_BASE_SUFICIENTE/);
+ assert.match(answer,/COSTE REAL.*NO_MEDIDOS/);
+ const unknown=answerDiagnosticRequest('ESTIMATES',sample,'Cuánto tarda SEO-001');
+ assert.match(unknown,/TIEMPO: NO_MEDIDO/);
+ assert.doesNotMatch(unknown,/p50=20 s/);
+});
