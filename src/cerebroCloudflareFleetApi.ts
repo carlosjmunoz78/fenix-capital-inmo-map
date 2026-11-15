@@ -1,5 +1,5 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
-import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-2026-11-15.json';
+import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
