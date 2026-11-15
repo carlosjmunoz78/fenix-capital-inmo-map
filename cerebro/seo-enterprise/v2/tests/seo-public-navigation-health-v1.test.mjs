@@ -36,3 +36,4 @@ test('reject unsafe target, duplicates and excessive concurrency',async()=>{
  await assert.rejects(()=>checkPublicNavigation({paths:['/','/']}),/SCOPE/);
  await assert.rejects(()=>checkPublicNavigation({paths:['/'],concurrency:20}),/BOUNDS/);
 });
+\ntest('isolated network timeout retries once, remains degraded and never claims website fully checked',async()=>{\n let calls=0;\n const report=await checkPublicNavigation({paths:['/calculadora-hipotecaria/'],fetchImpl:async()=>{calls++;throw new Error('timeout')}});\n assert.equal(calls,2);\n assert.equal(report.status,'DEGRADED');\n assert.equal(report.healthy,0);\n assert.equal(report.unverified,1);\n assert.equal(report.audited_urls[0].attempts,2);\n assert.equal(report.audited_urls[0].issue,'NETWORK_UNVERIFIED');\n});\n

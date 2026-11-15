@@ -39,17 +39,25 @@ export async function checkPublicNavigation({
  async function work(){
   while(cursor<paths.length){
    const index=cursor++,pathname=paths[index];
-   let http=null,issue=null;
-   try{
-    const resp=await fetchImpl(route(pathname),{
-      method:'HEAD',redirect:'manual',signal:AbortSignal.timeout(timeoutMs),
-      headers:{'user-agent':'Fenix-CEREBRO-SEO001-PublicNav/1.0'}
-    });
-    http=Number(resp.status);
-    if(!Number.isInteger(http)||http<100||http>599){http=null;issue='INVALID_HTTP_STATUS'}
-    else if(http!==200)issue=(http>=300&&http<400)?'REDIRECT_REVIEW':http>=400?'HTTP_ERROR':'OTHER_HTTP_STATUS';
-   }catch{issue='NETWORK_UNVERIFIED'}
-   out[index]={path:pathname,http,issue};
+   let http=null,issue=null,attempts=0;
+   for(let attempt=0;attempt<2;attempt++){
+    attempts++;
+    http=null;issue=null;
+    try{
+     const resp=await fetchImpl(route(pathname),{
+       method:'HEAD',redirect:'manual',signal:AbortSignal.timeout(timeoutMs),
+       headers:{'user-agent':'Fenix-CEREBRO-SEO001-PublicNav/1.0'}
+     });
+     http=Number(resp.status);
+     if(!Number.isInteger(http)||http<100||http>599){http=null;issue='INVALID_HTTP_STATUS'}
+     else if(http!==200)issue=(http>=300&&http<400)?'REDIRECT_REVIEW':http>=400?'HTTP_ERROR':'OTHER_HTTP_STATUS';
+     break;
+    }catch{
+     issue='NETWORK_UNVERIFIED';
+     if(attempt===0)await new Promise(resolve=>setTimeout(resolve,400));
+    }
+   }
+   out[index]={path:pathname,http,issue,attempts};
   }
  }
  await Promise.all(Array.from({length:Math.min(concurrency,paths.length)},()=>work()));
@@ -61,7 +69,8 @@ export async function checkPublicNavigation({
    company_id:'fenix',engine_id:'SEO-001',environment:'PUBLIC_READ_ONLY',
    schema_version:'1.0.0',checked:out.length,healthy:valid,http_errors:broken,
    redirects_to_review:redirects,unverified,
-   status:valid===out.length?'PASS':'HOLD',
+   status:(broken>0||redirects>0||out.some(x=>x.issue==='OTHER_HTTP_STATUS'))?'HOLD':
+    unverified>0?'DEGRADED':valid===out.length?'PASS':'HOLD',
    proof:'PUBLIC_HTTP_HEAD_ONLY_NOT_GSC_URL_DIAGNOSIS',
    audited_urls:out,production_writes:0,customer_contacts:0,
    model_calls:0,staging_requests:0,new_subscription_eur:0
@@ -70,5 +79,6 @@ export async function checkPublicNavigation({
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  const result=await checkPublicNavigation();
  process.stdout.write(JSON.stringify(result)+'\n');
- if(result.status!=='PASS')process.exitCode=1;
+ if(result.status==='HOLD')process.exitCode=1;
+ if(result.status==='DEGRADED')process.stdout.write('::warning title=SEO-001 public link probe::Some public HEAD checks were not verified; investigate runner network separately from confirmed HTTP errors.\n');
 }
