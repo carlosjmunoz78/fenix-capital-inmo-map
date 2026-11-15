@@ -1,6 +1,7 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
+import controlProof from '../cerebro/universal/v0/provider-cloudflare/canary/physical-provider-control-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
  scheduled:boolean|null;active_execution_verified:false;worker_agent_id:null;
@@ -63,12 +64,19 @@ export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boole
   return{kind:'ready',snapshot:data,reason:''};
  }catch{return unavailable('unavailable','CLOUDFLARE_SOURCE_NETWORK_UNAVAILABLE')}
 }
+export function resolveCloudflareWorkerMention(query:string,read:CloudflareFleetRead):string|null{
+ const s=query.toLowerCase();
+ if(s.includes('lab-cf-canary-001'))return controlProof.resource_name;
+ const candidates=read.snapshot?.workers.map(w=>w.id)||audited.workers.map(w=>w.worker_id);
+ // Prefer the longest exact ID so shorter parent names never shadow specific child Workers.
+ return [...candidates].sort((a,b)=>b.length-a.length).find(id=>s.includes(id.toLowerCase()))||null;
+}
 export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):string{
  if(read.kind!=='ready'||!read.snapshot){
   if(read.kind==='denied')return 'Acceso de propietario denegado. No se muestran fuentes Cloudflare.';
   const date=audited.base_observed_at;
   if(worker){
-   if(worker===cronGate.resource_name)return 'ARCHIVO, no en vivo: '+worker+' creado como canario LAB privado. Cron: ninguno; workers.dev: OFF; motor '+cronGate.engine_id+'. Cloudflare Free tenía '+cronGate.quota.existing_cron_triggers+'/'+cronGate.quota.limit_cron_triggers_per_account+' crons ocupados en '+cronGate.observed_at+'. No ejecuta trabajos empresariales.';
+   if(worker===controlProof.resource_name)return 'ARCHIVO, no en vivo: '+worker+' es un canario LAB privado. Último control físico Cloudflare verificado '+controlProof.proof_window_utc.paused_at+': desplegado CONTROL_PAUSED=true, cron ninguno, workers.dev OFF y previews OFF. Se probó configuración RESUME y PAUSE directamente en Cloudflare, no desde esta consola. Trabajo programado y agentes activos: NO VERIFICADOS. Los cinco cron previos siguen intactos. Control de escritura de consola: NO CONECTADO.';
    const found=audited.workers.find(x=>x.worker_id===worker);
    return found?'ARCHIVO SIN LECTURA ACTUAL ('+date+'): Worker '+worker+'; motor declarado '+(found.engine_id||'SIN IDENTIFICAR')+
     '; cron '+(found.cron_schedules===null?'NO VERIFICADO':found.cron_schedules.length?found.cron_schedules.join(', '):'NO CONFIGURADO')+
