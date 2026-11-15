@@ -3,6 +3,7 @@ import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cl
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 import controlProof from '../cerebro/universal/v0/provider-cloudflare/canary/physical-provider-control-2026-11-15.json';
 import queueProof from '../cerebro/universal/v0/provider-cloudflare/canary/queue-physical-acceptance-2026-11-15.json';
+import queueAudit from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-queues-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
  scheduled:boolean|null;active_execution_verified:false;worker_agent_id:null;
@@ -64,6 +65,22 @@ export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boole
   if(!validateCloudflareFleet(data))return unavailable('unavailable','CLOUDFLARE_SOURCE_CONTRACT_INVALID');
   return{kind:'ready',snapshot:data,reason:''};
  }catch{return unavailable('unavailable','CLOUDFLARE_SOURCE_NETWORK_UNAVAILABLE')}
+}
+export function answerCloudflareQueueAudit(query:string):string{
+ const normalized=query.toLowerCase();
+ const chosen=queueAudit.queues
+  .filter(q=>normalized.includes(q.queue_name.toLowerCase()))
+  .sort((a,b)=>b.queue_name.length-a.queue_name.length)[0];
+ if(chosen)return 'AUDITORÍA ARCHIVADA, no en vivo: cola '+chosen.queue_name+
+  ', jurisdicción '+(chosen.jurisdiction||'NO VERIFICADA')+', backlog observado '+(chosen.backlog_count===null?'DESCONOCIDO':chosen.backlog_count+' (aproximado)')+
+  ', consumidores '+chosen.consumers.map(c=>c.script_name||c.type).join(', ')+'. Fecha de origen '+queueAudit.observed_at+
+  '. Backlog cero no garantiza éxito de los trabajos ni certifica agentes activos. Acciones desde consola NO CONECTADAS.';
+ return 'AUDITORÍA ARCHIVADA, no en vivo: Cloudflare tenía '+queueAudit.queue_count+
+  ' colas registradas, '+queueAudit.consumer_verified_count+' lecturas de consumidores, '+
+  queueAudit.metric_verified_count+' métricas de backlog verificadas, '+queueAudit.known_backlog_count+
+  ' mensajes pendientes observados (valor aproximado de ese momento) y '+queueAudit.unknown_backlog_queues+
+  ' sin métricas. Fecha '+queueAudit.observed_at+
+  '. No equivale a trabajos completados ni agentes activos. Control de colas desde consola NO CONECTADO.';
 }
 export function resolveCloudflareWorkerMention(query:string,read:CloudflareFleetRead):string|null{
  const s=query.toLowerCase();
