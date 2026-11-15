@@ -33,12 +33,12 @@ export default function CerebroCloudflareFleetPanel(){
     id:w.id,modified_on:w.modified_on,cron:w.cron,
     engine_id:null as string|null,company_id:null as string|null,
     environment:null as string|null,workers_dev_enabled:null as boolean|null,
-    boolean_flags:{} as Record<string,boolean>
+    boolean_flags:{} as Record<string,boolean>,observability_events_24h:null as number|null
   })):(archived?.workers.map(w=>({
     id:w.worker_id,modified_on:w.modified_on,cron:w.cron_schedules,
     engine_id:w.engine_id,company_id:w.company_id,environment:w.environment,
     workers_dev_enabled:w.workers_dev_enabled,
-    boolean_flags:w.boolean_flags as Record<string,boolean>
+    boolean_flags:w.boolean_flags as Record<string,boolean>,observability_events_24h:w.observability_events_24h as number|null
   }))||[]);
   return mapped.filter(w=>w.id.toLowerCase().includes(filter.trim().toLowerCase()));
  },[x,archived,filter]);
@@ -61,6 +61,7 @@ export default function CerebroCloudflareFleetPanel(){
    <div><strong>{x?.without_cron??archived?.without_cron_workers??'—'}</strong><small>Sin cron verificado</small></div>
    <div><strong>{x?.cron_unknown_count??(archived?archived.worker_count-archived.cron_verified_workers:null)??'—'}</strong><small>Crons no comprobados</small></div>
   </div>
+  {archived?.observability?<p className="op4-cf-note">AUDITORÍA DE EVENTOS (no en vivo): {archived.observability.total_events} eventos de observabilidad en 24 horas, en {archived.observability.services.length} servicios identificados. Ventana hasta {format(archived.observability.to)}. No son trabajos completados ni publicaciones.</p>:null}
   {(x||archived)?<><label className="op4-cf-filter"><Search size={14}/> Filtrar Workers
    <input aria-label="Buscar Worker Cloudflare" value={filter} onChange={e=>{setFilter(e.target.value);setAll(false)}} placeholder="facebook, instagram, jarvis, fact001…"/>
   </label>
@@ -69,6 +70,7 @@ export default function CerebroCloudflareFleetPanel(){
     <div><strong>{w.id}</strong>
      <small>{x?'EN VIVO':'ARCHIVO '+format(archived?.observed_at||null)} · Último cambio de script: {format(w.modified_on)}</small>
      {w.engine_id?<small>Motor declarado: {w.engine_id} · {w.environment||'entorno sin verificar'}</small>:null}
+     {w.observability_events_24h!==null?<small>Observabilidad en la última auditoría: {w.observability_events_24h} eventos/24 h (no trabajos)</small>:null}
      <small>{w.cron===null?'Cron NO VERIFICADO':w.cron.length===0?'Sin cron configurado':'Cron '+w.cron.join(', ')} · Ejecución no verificada</small></div>
     <button type="button" onClick={()=>setSelected(previous=>previous===w.id?null:w.id)} aria-label={'Examinar '+w.id}>Examinar</button>
    </div>)}
@@ -79,6 +81,7 @@ export default function CerebroCloudflareFleetPanel(){
   {target?<div className="op4-cf-detail" role="status">
    <strong>{target.id}</strong>
    {target.engine_id?<p>Motor declarado: {target.engine_id} · Empresa declarada: {target.company_id||'no verificada'} · Entorno: {target.environment||'no verificado'}.</p>:null}
+   {target.observability_events_24h!==null?<p>Eventos registrados en la auditoría de 24 horas: {target.observability_events_24h}. No confirma ejecución completa ni éxito de jobs.</p>:null}
    {target.workers_dev_enabled!==null?<p>URL workers.dev configurada: {target.workers_dev_enabled?'SÍ':'NO'}. No equivale a acceso anónimo confirmado.</p>:null}
    {Object.keys(target.boolean_flags).length?<p>Indicadores de configuración auditados: {Object.entries(target.boolean_flags).map(([key,value])=>key+'='+value).join(' · ')}. No acreditan actividad.</p>:null}
    <p>{target.cron===null?'No hay evidencia de sus crons en esta lectura.':target.cron.length?'Cron verificado: '+target.cron.join(', '):'Sin cron verificado.'} No se han comprobado latidos ni últimas ejecuciones del motor.</p>
