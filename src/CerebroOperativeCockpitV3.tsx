@@ -114,7 +114,7 @@ export default function CerebroOperativeCockpitV3({
   }
   return [...engines.entries()].sort((a,b)=>b[1].count-a[1].count);
  },[runs]);
- const canSend=scopeCanExecute&&snapshot.ready&&!snapshot.sending;
+ const canSend=scopeCanExecute&&!snapshot.sending; // Inventory reads have an independent owner-authenticated Preview source.
  return <main className={`op3-root op3-${status}`} aria-label={typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es'?'Centro de mando operativo (acceso privado)':'Centro de mando operativo (ensayo)'}>
   <div className="op3-backplate" aria-hidden="true"/>
   <div className="op3-wrapper">
@@ -177,7 +177,7 @@ export default function CerebroOperativeCockpitV3({
      <form className="op3-input-frame" onSubmit={handleSubmit}>
       <textarea ref={composerRef} aria-label="Pregunta u orden" placeholder={scopeCanExecute?'Escribe o habla aquí…':'Empresa sin acceso verificado · selecciona Fénix'}
        value={composer} onChange={e=>onComposerChange(e.target.value)}
-       onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending}/>
+       onKeyDown={keydown} rows={1} disabled={!scopeCanExecute||snapshot.sending}/>
       <button type="button" className={`op3-icon-button ${dictating?'is-active':''}`}
        title={dictating?'Detener dictado':dictationSupported?'Dictar':'Dictado con Windows + H'} aria-label={dictating?'Detener dictado':'Dictar'}
        disabled={!scopeCanExecute||!snapshot.ready||snapshot.sending||snapshot.voiceActive}
