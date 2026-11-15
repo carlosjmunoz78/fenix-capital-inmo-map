@@ -95,7 +95,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    }finally{setFleetSending(false)}
    return;
   }
-  if(preview&&/(?:SOC-(?:IG|FB)-FINANCIAL-REAL-ESTATE-V1|(?:instagram|facebook)\\s+autoqual)/i.test(text)){
+  if(preview&&/(?:SOC-(?:IG|FB)-FINANCIAL-REAL-ESTATE-V1|(?:instagram|facebook)\s+autoqual)/i.test(text)){
    setFleetSending(true);
    try{
     const key=/instagram|SOC-IG/i.test(text)?'SOC-IG-FINANCIAL-REAL-ESTATE-V1':'SOC-FB-FINANCIAL-REAL-ESTATE-V1';
