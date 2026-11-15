@@ -60,8 +60,9 @@ export function summarizeFleetRoles(registry){
     environment:String(r.environment||'UNKNOWN').slice(0,30),
     state:String(r.state||'DEFINED').slice(0,55),
     reports_to:typeof r.reports_to==='string'?r.reports_to:null,
+    engine_bindings:Array.isArray(r.engines)&&r.engines.length<=32&&r.engines.every(e=>typeof e==='string'&&/^[A-Z]{2,12}-[0-9]{3}$/.test(e))&&new Set(r.engines).size===r.engines.length?[...r.engines]:null,
     runtime_verified:false}]:[]);
- if(entries.length!==roles.length||new Set(entries.map(x=>x.id)).size!==entries.length)return null;
+ if(entries.length!==roles.length||new Set(entries.map(x=>x.id)).size!==entries.length||entries.some(x=>x.engine_bindings===null))return null;
  const by_department={};
  for(const r of entries)by_department[r.department]=(by_department[r.department]||0)+1;
  return {declared_role_profiles:entries.length,active_agent_count:null,
