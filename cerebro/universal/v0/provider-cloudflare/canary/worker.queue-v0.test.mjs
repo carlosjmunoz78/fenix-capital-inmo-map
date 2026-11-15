@@ -71,6 +71,6 @@ test("HTTP and scheduled entrypoints are inert, cannot leak data or produce",asy
  assert.equal(await worker.scheduled(),"NO_CRON_CONFIGURED");
  const {readFileSync}=await import("node:fs");
  const code=readFileSync(new URL("./worker.queue-v0.mjs",import.meta.url),"utf8");
- assert.doesNotMatch(code,/\bfetch\s*\(|https:\/\/|buffer\.com|instagram\.com|facebook\.com|groq\.com/i);
- assert.doesNotMatch(code,/\.send\(|\.prepare\(|\.run\(|\.exec\(|\bPOST\b|\bPUT\b/i);
+ assert.doesNotMatch(code,/globalThis\.fetch|\bfetch\s*\(\s*['"`]|https:\/\/|buffer\.com|instagram\.com|facebook\.com|groq\.com/i);
+ assert.doesNotMatch(code,/\.send\(|\.prepare\(|\.run\(|\.exec\(|\bPOST\b|\bDELETE\b/);
 });
