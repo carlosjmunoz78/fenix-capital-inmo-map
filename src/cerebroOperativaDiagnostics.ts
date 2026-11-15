@@ -1,4 +1,5 @@
-import type {FleetRead,FleetRun,FleetSource} from './cerebroFleetObserveApi';
+import type {FleetRead,FleetSource} from './cerebroFleetObserveApi';
+import {triageFleet} from './cerebroOperativaTriage';
 
 /** LAB read-only owner diagnostic: evidence is never promoted into inferred active agents, costs or ETAs. */
 export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES';
@@ -71,20 +72,31 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
   (missing.length?'Fuentes pendientes de conexión: '+missing.join(', ')+'. ':'')+
   'Para detectar carencias reales: definir objetivo/capacidades exigidas, inventariar ejecutores por fuente autenticada y contrastar permisos, skills, dependencias, training y tribunal. No crear agentes por intuición.';
  if(intent==='FAILURES'){
-  const recent: {run:FleetRun;source:string}[]=live.flatMap(x=>(x.recent||[]).map(run=>({run,source:x.name||x.repo||x.platform})));
-  const failed=recent.filter(x=>x.run.status==='completed'&&['failure','timed_out','startup_failure','action_required'].includes(x.run.conclusion||'')).slice(0,5);
-  const examples=failed.map(x=>short(x.run.name)+' ['+x.run.conclusion+'] '+maxDate(x.run.updated_at)+' '+x.run.url).join(' | ');
-  return intro+base+'DIAGNÓSTICO DE FALLOS: '+(failed.length?failed.length+' incidencias identificadas en la muestra reciente (NO censo global): '+examples+'. ':
-   'ningún fallo confirmado dentro de los '+recent.length+' runs de la muestra reciente disponible; NO significa ausencia de fallos generales. ')+
-   (disconnected.length?'Fuentes sin diagnóstico: '+missing.join(', ')+'. ':'')+
-   'Causa raíz, salud de agentes y tareas JOB-001: NO VERIFICADAS. Para reparar: asociar logs/receipt y dependencia exacta al run antes de atribuir causa. Sin órdenes ejecutadas.';
+  const triage=triageFleet(read);
+  if(triage.status!=='READY_PARTIAL')return intro+'DIAGNÓSTICO NO DISPONIBLE: '+triage.reason+
+   '. No se ha demostrado ausencia de fallos. Ninguna acción ejecutada.';
+  const incidents=triage.items.filter(item=>item.kind==='WORKFLOW_FAILURE'||item.kind==='WORKFLOW_ACTION_REQUIRED');
+  const examples=incidents.slice(0,5).map(item=>short(item.title.replace('Último resultado fallido: ','').replace('Acción requerida: ',''))
+   +' ['+item.reason.replace('GITHUB_RUN_','')+'] '+maxDate(item.observed_at)+
+   ' '+(item.evidence_url||'SIN_URL')+'; siguiente: inspeccionar logs antes de reintentar').join(' | ');
+  return intro+base+'DIAGNÓSTICO DE FALLOS: '+
+   (incidents.length?triage.verified_failure_count+' últimos resultados fallidos y '+
+    triage.needs_attention_count+' casos de acción requerida EN MUESTRA, no censo global. '+examples+'. ':
+    'ningún último resultado fallido acreditado en la muestra reciente; NO demuestra ausencia de fallos generales. ')+
+   'Conectores sin diagnóstico acreditado: '+triage.unavailable_source_count+'. '+
+   'Causa raíz, salud de agentes y tareas JOB-001: NO VERIFICADAS. La cola de reparación es PROPUESTA, NO ejecutada.';
  }
  if(intent==='CAPABILITIES')return intro+base+
   'CAPACIDADES ACREDITADAS POR ESTA LECTURA: consultar '+s.engine_registry_count+' definiciones de motores y '+s.roles.declared_role_profiles+
   ' perfiles registrados; observar muestras de workflows en '+live.length+' repositorios. '+
   'NO ACREDITADO por esta fuente: autonomía de los motores, ejecución de agentes, publicación, entrenamiento, control universal ni actividad de proveedores desconectados. '+
   coverage+'Capacidad disponible ≠ agente activo. Consulta un motor concreto para buscar evidencia adicional.';
- return intro+base+
+ const triage=triageFleet(read);
+ const first=triage.status==='READY_PARTIAL'?triage.items[0]:null;
+ const priority=first?'PRIORIDAD ORIENTATIVA '+first.priority+': '+first.title+
+  '. Próximo paso sin ejecución: '+first.next_action+
+  ' ETA SIN_BASE_SUFICIENTE, COSTE NO_MEDIDO. ':'Sin prioridad calculable por fuentes actuales. ';
+ return intro+base+priority+
   'SIGUIENTE AVANCE RECOMENDABLE (propuesta, no ejecución): primero enlazar fuentes privadas y latidos de agent/job/run con empresa y permisos; después verificar fallos y dependencias; '+
   'medir duración real y FinOps; finalmente habilitar priorización/aceleración/pausa sólo con adaptador certificado, recibo, readback y rollback. '+
   (missing.length?'Primeras conexiones por verificar: '+missing.join(', ')+'. ':'')+
