@@ -28,7 +28,7 @@ function evidence(read:FleetRead){
  return {s,live,disconnected,stamp:maxDate(s.observed_at)};
 }
 export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,query:string):string{
- const scoped=typeof query==='string'?query.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]:null;
+ const scoped=typeof query==='string'?query.toUpperCase().match(/\b[A-Z][A-Z0-9]{1,11}-\d{3}\b/)?.[0]:null;
  const intro=scoped?'Objetivo consultado: '+scoped+'. Esta fuente no acredita telemetría individual de ese motor. ':'';
  const data=evidence(read);
  if(!data)return intro+'DATOS EN VIVO NO DISPONIBLES ('+(read.reason||'FLEET_STALE_OR_UNAVAILABLE')+'). No se puede concluir que haya cero agentes, cero fallos ni actividad en marcha. Tiempos y costes: NO_MEDIDOS. No se ha ejecutado ninguna acción.';
