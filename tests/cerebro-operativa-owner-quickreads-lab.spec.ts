@@ -339,6 +339,11 @@ test('Cloudflare canary physical deployed-version receipts are dated and never t
  await nav.getByRole('button',{name:'Control'}).click();
  const cf=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
  await expect(cf.getByRole('status').first()).toContainText('ARCHIVO COMPUESTO, NO EN VIVO');
+ const queueProof=cf.getByRole('region',{name:'Cola Cloudflare · prueba física de trabajo LAB'});
+ await expect(queueProof).toContainText('PAUSED_SKIPPED');
+ await expect(queueProof).toContainText('WORK_UNIT_ACK');
+ await expect(queueProof).toContainText('1 unidad de prueba');
+ await expect(queueProof).toContainText('NO CONECTADO');
  const physical=cf.getByRole('region',{name:'Control físico de configuración del canario LAB'});
  await expect(physical).toContainText('CONTROL_PAUSED=false');
  await expect(physical).toContainText('CONTROL_PAUSED=true');
@@ -351,6 +356,7 @@ test('Cloudflare canary physical deployed-version receipts are dated and never t
  const input=page.getByRole('textbox',{name:'Pregunta u orden'});
  await input.fill('estado LAB-CF-CANARY-001');
  await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'ARCHIVO, no en vivo'})).toContainText('WORK_UNIT_ACK');
  await expect(page.getByRole('status').filter({hasText:'ARCHIVO, no en vivo'})).toContainText('CONTROL_PAUSED=true');
  await expect(page.getByRole('status').filter({hasText:'ARCHIVO, no en vivo'})).toContainText('NO CONECTADO');
  expect(calls).not.toContain('submit_command');
