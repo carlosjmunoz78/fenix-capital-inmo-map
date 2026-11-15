@@ -81,6 +81,21 @@ async function setup(page:Page){
      ]
     })});
    }
+   if(url.pathname==='/api/cerebro-fleet-job-detail'){
+    calls.push('job_detail');
+    if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"UNAVAILABLE"}'});
+    if(url.searchParams.get('repo')!=='fenix-capital-inmo-map'||url.searchParams.get('run_id')!=='105')
+     return route.fulfill({status:403,headers,body:'{"status":"UNAVAILABLE","reason":"TARGET_NOT_ALLOWLISTED"}'});
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+     status:'OK',job_status:'FAILED_STEP_VERIFIED',source:'GITHUB_ACTIONS_PUBLIC_JOB_METADATA',
+     company_id:'fenix',environment:'LAB',observed_at:new Date().toISOString(),
+     owner_verified:true,read_only:true,executed:false,repo:'carlosjmunoz78/fenix-capital-inmo-map',
+     run_id:105,job_id:505,job_name:'QA con fallo',failed_step_number:2,
+     failed_step_name:'Ejecutar pruebas',
+     evidence_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/105/job/505',
+     engine_id:null,agent_id:null,subagent_id:null,runtime_failure_verified:false
+    })});
+   }
    if(url.pathname==='/api/cerebro-fleet-observe'){
     calls.push('fleet_observe');
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
@@ -98,12 +113,16 @@ async function setup(page:Page){
      engine_registry_count:179,engine_registry_semantics:'DEFINED_NOT_RUNNING',
      sources:[{platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-inmo-map',
        name:'App / CEREBRO',state:'LIVE',reason:null,observed_at:new Date().toISOString(),
-       observed_sample:1,active_in_sample:1,queued_in_sample:0,total_repo_run_count:15,
+       observed_sample:2,active_in_sample:1,queued_in_sample:0,total_repo_run_count:15,
        timing_samples:[{workflow_name:'LAB contrato vivo',sample_size:4,p50_upper_bound_seconds:20,p90_upper_bound_seconds:41,
         method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY',engine_mapping_verified:false}],
        recent:[{run_id:101,name:'LAB contrato vivo',status:'in_progress',conclusion:null,
         updated_at:'2026-11-15T00:50:00Z',url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',
-        agent_id:null,engine_id:null,subagent_id:null}]},
+        agent_id:null,engine_id:null,subagent_id:null},
+        {run_id:105,name:'QA con fallo',status:'completed',conclusion:'failure',
+         updated_at:new Date(Date.now()-15000).toISOString(),
+         url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/105',
+         agent_id:null,engine_id:null,subagent_id:null}]},
       {platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-cerebro-social',
        name:'Social / AUTOQUAL',state:'UNAVAILABLE',reason:'PRIVATE_REPO_RUNTIME_CONNECTOR_NOT_CONFIGURED',observed_at:null,
        observed_sample:null,active_in_sample:null,queued_in_sample:null,total_repo_run_count:null,recent:[]},
@@ -247,6 +266,12 @@ test('Control tab shows real vs unavailable sources, answers agent questions and
  await expect(triage).toContainText('proveedores sin diagnóstico');
  await expect(triage).toContainText('Sin diagnóstico en vivo: Cloudflare');
  await expect(triage).toContainText('Coste: NO_MEDIDO');
+ await expect(triage).toContainText('Último resultado fallido: QA con fallo');
+ expect(calls).not.toContain('job_detail');
+ await triage.getByRole('button',{name:'Analizar paso fallido (solo lectura)'}).click();
+ await expect(triage).toContainText('Paso fallido: 2 · Ejecutar pruebas');
+ await expect(triage).toContainText('No acredita fallo del motor, del agente ni causa raíz');
+ expect(calls.filter(x=>x==='job_detail')).toHaveLength(1);
 
  const inspector=fleet.getByRole('region',{name:'Inspector de motores no listados'});
  await expect(inspector).toContainText('ASIGNACIÓN DECLARADA en el registro para FACT-001');
