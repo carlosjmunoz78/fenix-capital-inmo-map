@@ -50,8 +50,8 @@ export default async function handler(req:Req,res:Res){
   const data=await result.json();
   const evidence=summarizeFailedJob(data,{repo,run_id});
   if(!evidence)return response(res,503,'JOB_FAILURE_STEP_NOT_VERIFIED');
-  return res.status(200).json({status:'OK',company_id:'fenix',environment:'LAB',
-   observed_at:new Date().toISOString(),owner_verified:true,read_only:true,executed:false,
-   ...evidence});
+  return res.status(200).json({...evidence,status:'OK',job_status:evidence.status,
+   company_id:'fenix',environment:'LAB',observed_at:new Date().toISOString(),
+   owner_verified:true,read_only:true,executed:false});
  }catch{return response(res,503,'GITHUB_JOBS_UNREACHABLE')}
 }
