@@ -77,3 +77,10 @@
 .op4-device-item small{font-size:11px;color:#a7cad9;line-height:1.55}
 @media(max-width:740px){.op4-device-grid{grid-template-columns:1fr}}
 @media(max-width:430px){.op4-device-snapshot{padding:12px}}
+
+/* Fresh owner-gated device metrics, isolated from dated archive. */
+.op4-device-live{background:#0a2531;border:1px solid #4a7987;border-radius:13px;padding:17px}
+.op4-device-live .op4-fleet-head{margin-bottom:9px}
+.op4-device-live .op4-device-grid{margin-top:13px}
+.op4-device-live[aria-label] p[role="status"]{font-size:13px;line-height:1.6}
+@media(max-width:430px){.op4-device-live{padding:12px}}
