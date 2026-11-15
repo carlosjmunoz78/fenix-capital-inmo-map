@@ -50,3 +50,13 @@
 .op4-fleet-inspector input{display:block;width:100%;max-width:360px;min-height:44px;font:inherit;font-size:16px;padding:11px;color:#fff;background:#071825;border:1px solid #49768e;border-radius:9px;box-sizing:border-box}
 .op4-fleet-inspect-answer{padding:12px;border:1px solid #376176;border-radius:9px;background:#0a293a;color:#dbf5ff!important;overflow-wrap:anywhere}
 @media(max-width:430px){.op4-fleet-inspector{padding:12px}.op4-fleet-inspector input{max-width:100%}}
+
+/* Advisory triage uses read-only evidence; colours distinguish urgency, not actual engine health. */
+.op4-fleet-triage{padding:17px;border:1px solid #376d75;border-radius:14px;background:#081d2a}
+.op4-fleet-triage-items{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:10px 0}
+.op4-fleet-triage-item{min-width:0;display:flex;flex-direction:column;gap:5px;border:1px solid #35566b;background:#0a2636;border-radius:10px;padding:12px;overflow-wrap:anywhere}
+.op4-fleet-triage-item strong{font-size:13px;color:#e8f8ff}
+.op4-fleet-triage-item span,.op4-fleet-triage-item small{font-size:11px;color:#a5cbdc;line-height:1.55}
+.op4-fleet-triage-item a{font-size:12px;color:#9ce0f8;text-decoration:underline}
+@media(max-width:740px){.op4-fleet-triage-items{grid-template-columns:1fr}}
+@media(max-width:430px){.op4-fleet-triage{padding:12px}}
