@@ -234,10 +234,13 @@ test('Owner Operativa answers missing-agent, ETA/cost and priority advice withou
  await expect(answer).toContainText('ETA DEL MOTOR: SIN_BASE_SUFICIENTE');
  await prompt.fill('¿Cuántos dispositivos tienen latido?');
  await send.click();
- await expect(answer).toContainText('AUDITORÍA FECHADA (NO EN VIVO)');
- await expect(answer).toContainText('Registros no revocados: 5');
- await expect(answer).toContainText('agentes y subagentes actualmente activos: DESCONOCIDOS');
- await expect(answer).toContainText('PREPROD no es una App PREPROD activa');
+ await expect(answer).toContainText('LECTURA ACTUAL LAB');
+ await expect(answer).toContainText('0 latidos últimos 5 min');
+ await expect(answer).toContainText('0 latidos últimas 24 h');
+ await expect(answer).toContainText('Agentes, subagentes y trabajos autónomos activos: DESCONOCIDOS');
+ await expect(answer).toContainText('NO App PREPROD activa');
+ await expect(answer).toContainText('Coste real: NO_MEDIDO');
+ expect(calls).toContain('device_live_read');
  await prompt.fill('¿Qué deberíamos priorizar?');
  await send.click();
  await expect(answer).toContainText('SIGUIENTE AVANCE RECOMENDABLE');
