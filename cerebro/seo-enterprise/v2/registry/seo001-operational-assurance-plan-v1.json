@@ -116,7 +116,14 @@
       "frequency": "daily",
       "source": "HOSTINGER_Hpanel_Authenticated_UI_Readonly_2026-11-15",
       "backup_archive_download_verified": false,
-      "real_restore_tested": false
+      "real_restore_tested": false,
+      "owner_reported_files_downloaded": true,
+      "owner_reported_database_downloaded": true,
+      "reported_on": "2026-11-15",
+      "downloaded_to_private_local_device_only": true,
+      "local_file_hashes_verified": false,
+      "private_preflight_verified": false,
+      "status": "USER_CONFIRMED_TWO_LOCAL_DOWNLOADS_NO_AGENT_FILE_ACCESS"
     },
     "staging_release_bridge": {
       "active_version": "0.4.1",
@@ -234,8 +241,8 @@
       "id": "BACKUP_RESTORE_WP",
       "owner": "CEREBRO-BKP",
       "severity": "P0",
-      "state": "PARTIAL_DB_CHECKPOINT_73_HOSTINGER_BACKUP_20261114_RESTORE_NOT_TESTED",
-      "next_action": "Obtain Hostinger files/media + SQL in private encrypted environment; run existing private preflight, full isolated restore and physical rollback. No WordPress updates before actual attested restore."
+      "state": "OWNER_CONFIRMED_TWO_LOCAL_DOWNLOADS_PRIVATE_INTEGRITY_RESTORE_NOT_ATTESTED",
+      "next_action": "Do NOT re-ask for download. Run existing offline preflight on original files in encrypted private runtime (not chat/public GitHub); physically restore isolated full WP files+SQL and prove rollback before PROD changes."
     },
     {
       "id": "WORDPRESS_PENDING_UPDATES",
