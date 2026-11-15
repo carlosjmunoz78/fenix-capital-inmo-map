@@ -53,6 +53,7 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
    'ningún fallo confirmado dentro de los '+recent.length+' runs de la muestra reciente disponible; NO significa ausencia de fallos generales. ')+
    (disconnected.length?'Fuentes sin diagnóstico: '+missing.join(', ')+'. ':'')+
    'Causa raíz, salud de agentes y tareas JOB-001: NO VERIFICADAS. Para reparar: asociar logs/receipt y dependencia exacta al run antes de atribuir causa. Sin órdenes ejecutadas.';
+ }
  if(intent==='CAPABILITIES')return intro+base+
   'CAPACIDADES ACREDITADAS POR ESTA LECTURA: consultar '+s.engine_registry_count+' definiciones de motores y '+s.roles.declared_role_profiles+
   ' perfiles registrados; observar muestras de workflows en '+live.length+' repositorios. '+
