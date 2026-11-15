@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,Clock,RefreshCcw,Shield,Users,Workflow} from 'lucide-react';
 import {readFleetLab,type FleetRead} from './cerebroFleetObserveApi';
+import {triageFleet} from './cerebroOperativaTriage';
 import CerebroLabWorkerControlPanel from './CerebroLabWorkerControlPanel';
 import CerebroCloudflareFleetPanel from './CerebroCloudflareFleetPanel';
 import CerebroCloudflareQueuesPanel from './CerebroCloudflareQueuesPanel';
@@ -43,6 +44,7 @@ export default function CerebroFleetControlPanel(){
   return()=>{abort.abort();window.clearInterval(timer);document.removeEventListener('visibilitychange',onVisibility)};
  },[refresh]);
  const snapshot=result.snapshot;
+ const triage=triageFleet(result);
  const roles=snapshot?.roles.entries||[];
  const sources=snapshot?.sources||[];
  const connected=sources.filter(s=>s.state==='LIVE');
@@ -101,6 +103,26 @@ export default function CerebroFleetControlPanel(){
    </p>
    <p className="op4-fleet-note">Fuente: role-agent-registry.v1.json, sólo ámbito Fénix autorizado.
     Ejecución, salud, agentes y subagentes activos: NO VERIFICADOS por este registro.</p>
+  </section>
+  <section className="op4-fleet-triage" aria-label="Diagnóstico de fallos y prioridades sugeridas">
+   <h4>Incidencias y próximos pasos · solo lectura</h4>
+   <p>Datos procedentes de muestras recientes de GitHub y conexión a proveedores. Un fallo de workflow no acredita fallo de motor ni de agente.</p>
+   {triage.status!=='READY_PARTIAL'?<p role="status">Diagnóstico NO DISPONIBLE: {triage.reason}. No significa que no existan incidencias.</p>:<>
+    <p role="status">Último resultado fallido en muestras: {triage.verified_failure_count};
+     acciones requeridas: {triage.needs_attention_count};
+     proveedores sin diagnóstico: {triage.unavailable_source_count}.
+     Priorización orientativa, sin ejecución.</p>
+    <div className="op4-fleet-triage-items">
+     {triage.items.length?triage.items.slice(0,8).map(item=><article className="op4-fleet-triage-item" key={item.key}>
+      <strong>{item.priority} · {item.title}</strong>
+      <span>{item.source} · {item.reason} · {date(item.observed_at)}</span>
+      <small>{item.next_action}</small>
+      <small>Tiempo: {item.eta} · Coste: {item.cost} · Ámbito: {item.scope}</small>
+      {item.evidence_url?<a href={item.evidence_url} target="_blank" rel="noreferrer">Ver ejecución GitHub</a>:null}
+     </article>):<p>No se han acreditado incidencias en esta muestra. No significa cero fallos globales.</p>}
+    </div>
+   </>}
+   <p className="op4-fleet-note">P1/P2 son prioridades PROPUESTAS, no cambios de cola. Para intervenir hacen falta contrato del proveedor, política, recibo, comprobación física y rollback.</p>
   </section>
   <div className="op4-fleet-grid">
    <section aria-label="Estado de los conectores">
