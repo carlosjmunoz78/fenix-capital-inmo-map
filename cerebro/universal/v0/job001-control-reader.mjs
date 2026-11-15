@@ -16,10 +16,12 @@ export function createJob001ControlReaderLabV0({preprodApiKey,ownerApiKey,fetchI
    if(company_id!=='fenix'||environment!=='LAB')throw Error('LAB_FENIX_SCOPE_REQUIRED');
    if(typeof session_token!=='string'||session_token.length<20||session_token.length>8192||/\s/.test(session_token))throw Error('OWNER_SESSION_REQUIRED');
    let response;
-   // The only upstream is a fixed owner-authenticated GET. Retry at most once
-   // on transport failure/cold start; never retry a denied HTTP response.
-   // Total bounded budget < original 8.5 seconds.
-   for(const budgetMs of [3800,3800]){
+   // A PREPROD Edge cold start + canonical owner resolution + bounded DB reads
+   // can exceed 3.8 seconds. Match the proven 9s window of the adjacent
+   // staging-observation read adapter. A retry has a shorter fallback budget;
+   // never retry an HTTP denial. No job dispatch and no external destination.
+   // Hard upper bound: 9s + 3s on transport failure; normally one read.
+   for(const budgetMs of [9000,3000]){
     try{
      response=await fetchImpl(URL,{method:'GET',redirect:'error',cache:'no-store',
       signal:AbortSignal.timeout(budgetMs),
