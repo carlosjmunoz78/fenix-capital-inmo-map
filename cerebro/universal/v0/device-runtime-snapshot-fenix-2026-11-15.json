@@ -1,0 +1,73 @@
+{
+  "schema": "CEREBRO_DEVICE_RUNTIME_SNAPSHOT_V1",
+  "kind": "DATED_READ_ONLY_EVIDENCE",
+  "company_id": "fenix",
+  "source_project": "hnqlnvakzaywtafeiybt",
+  "source_project_role": "SUPABASE_LAB_NOT_PROD",
+  "observed_at": "2026-11-15T21:23:08.532188Z",
+  "observed_from": "SQL_AGGREGATES_READ_ONLY",
+  "active_agents_verified": null,
+  "active_subagents_verified": null,
+  "jobs_running_verified": null,
+  "cost_eur_measured": null,
+  "contains_device_ids": false,
+  "contains_command_payloads": false,
+  "contains_personal_data": false,
+  "environments": [
+    {
+      "environment": "LAB",
+      "meaning": "HISTORICAL_LAB_RECORDS",
+      "declared_online": 1,
+      "not_revoked": 1,
+      "heartbeat_5m": 0,
+      "heartbeat_24h": 0,
+      "last_seen_at": "2026-11-03T07:35:51.927Z",
+      "commands_total": 8,
+      "completed": 6,
+      "failed": 2,
+      "latest_command_created_at": "2026-10-28T15:04:18.048532Z",
+      "latest_completed_at": "2026-10-28T14:51:33.120Z",
+      "receipt_count": 6,
+      "semantic_verified_count": 6,
+      "comparable_successful_duration_samples": 6,
+      "p50_completed_seconds": 28.2,
+      "p90_completed_seconds": 113.1
+    },
+    {
+      "environment": "PREPROD",
+      "meaning": "HISTORICAL_ENV_LABEL_IN_LAB_DATABASE_NOT_AN_APP_PREPROD_DEPLOYMENT",
+      "declared_online": 4,
+      "not_revoked": 4,
+      "heartbeat_5m": 0,
+      "heartbeat_24h": 0,
+      "last_seen_at": "2026-11-12T13:04:02.895Z",
+      "commands_total": 96,
+      "completed": 75,
+      "failed": 21,
+      "latest_command_created_at": "2026-11-04T15:59:32.71674Z",
+      "latest_completed_at": "2026-11-04T16:02:09.353Z",
+      "receipt_count": 96,
+      "semantic_verified_count": 75,
+      "comparable_successful_duration_samples": 66,
+      "p50_completed_seconds": 3.7,
+      "p90_completed_seconds": 127.7
+    }
+  ],
+  "caveats": [
+    "ONLINE is a stored status, not a verified current heartbeat",
+    "No device had last_seen_at within 24 hours of the observed_at value",
+    "No new activity in prior 24h in selected command tables",
+    "Numbers are historical scoped counts, not global agent census",
+    "Duration values are historical completed-success intervals; not an ETA or budget",
+    "No device ID, tokens, payload, result content or customer data included",
+    "PREPROD is only a historical environment label in a LAB database, not a revived App PREPROD",
+    "No new live connector or Supabase writes"
+  ],
+  "query_provenance": [
+    "information_schema.columns scoped to cerebro_device_agents_preprod, cerebro_device_commands_preprod, cerebro_device_results_preprod",
+    "SELECT count, max(last_seen_at), COUNT(*) FILTER (WHERE revoked_at IS NULL AND last_seen_at>now()-interval '24 hours') FROM public.cerebro_device_agents_preprod WHERE company_id='fenix' GROUP BY company_id,environment,status",
+    "SELECT count, count FILTER state, max(completed_at) FROM public.cerebro_device_commands_preprod WHERE company_id='fenix' GROUP BY company_id,environment,state",
+    "SELECT count and semantic_verified aggregates on LEFT JOIN public.cerebro_device_results_preprod using command_id and device_id, scoped to company_id='fenix'",
+    "SELECT percentile_cont(0.5/0.9) WITHIN GROUP (ORDER BY EXTRACT(EPOCH FROM completed_at-created_at)) FILTER state='COMPLETED' AND completed_at>=created_at, grouped by environment"
+  ]
+}
