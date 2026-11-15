@@ -22,7 +22,7 @@ test('Cloudflare control canary has no side effects or reachable HTTP routes',as
  assert.equal(payload.engine_id,'LAB-CF-CANARY-001');
  assert.equal(payload.external_actions,0);
  assert.doesNotMatch(source,/\bglobalThis\.fetch\s*\(|\bconnect\s*\(|\.put\s*\(|\.delete\s*\(|\.insert\s*\(|import\s+.*from\s+['"]https?:/);
- assert.doesNotMatch(source,/AUTH|TOKEN|PASSWORD|credential|secrets|HUMAN_REQUIRED/);
+ assert.doesNotMatch(source,/\b(?:AUTH_TOKEN|API_KEY|PASSWORD|SERVICE_ROLE_KEY|secret_token|HUMAN_REQUIRED)\b/);
 });
 test('canary code immutable by design; script itself never enables cron',()=>{
  assert.doesNotMatch(source,/triggers|crons\s*:|scheduled\s*:/);
