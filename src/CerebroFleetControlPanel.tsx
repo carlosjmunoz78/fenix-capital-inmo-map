@@ -2,6 +2,7 @@ import {useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,Clock,RefreshCcw,Shield,Users,Workflow} from 'lucide-react';
 import {readFleetLab,type FleetRead} from './cerebroFleetObserveApi';
 import CerebroLabWorkerControlPanel from './CerebroLabWorkerControlPanel';
+import CerebroCloudflareFleetPanel from './CerebroCloudflareFleetPanel';
 import {readUniversalOperativaLab,type UniversalJob001ControlLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-fleet-control-panel.css';
 const INITIAL:FleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
@@ -119,6 +120,7 @@ export default function CerebroFleetControlPanel(){
     <a href={r.url} target="_blank" rel="noreferrer">Evidencia GitHub</a>
    </div>):<p>Sin actividad comprobable en la lectura actual. No significa ausencia global de trabajos.</p>}
   </section>
+  <CerebroCloudflareFleetPanel/>
   <CerebroLabWorkerControlPanel/>
   <section className="op4-fleet-control" aria-label="Precomprobación de controles">
    <h4>Control operativo · verificación de capacidad</h4>
