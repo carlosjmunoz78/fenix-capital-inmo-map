@@ -31,3 +31,15 @@
 
 .op4-fleet-studio{display:flex;flex-direction:column;gap:6px;background:#102b39;border:1px solid #376b7e;border-radius:12px;padding:13px 16px}
 .op4-fleet-studio strong{font-size:13px;color:#f3faff}.op4-fleet-studio span{font-size:13px;color:#badff1;line-height:1.5}.op4-fleet-studio small{font-size:11px;color:#8bb7c9;line-height:1.5}
+
+/* LAB-DEMO-001 only. No business engine controls implied. */
+.op4-lab-actuator{padding:16px;border:1px solid #376d75;border-radius:15px;background:#0a2530;display:flex;flex-direction:column;gap:8px}
+.op4-lab-actuator h4{margin-bottom:0}.op4-lab-actual{display:flex;flex-direction:column;gap:5px;background:#081b26;border:1px solid #336176;border-radius:10px;padding:12px}
+.op4-lab-actual strong{font-size:16px;color:#effffb}.op4-lab-actual span,.op4-lab-actual small{font-size:12px;color:#aad2e1}
+.op4-lab-actions{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+.op4-lab-actions label{display:flex;align-items:center;gap:8px;font-size:12px;color:#acced9}
+.op4-lab-actions select{background:#0a1a29;color:#fff;font-size:16px;padding:8px;border:1px solid #52778d;border-radius:8px}
+.op4-lab-confirm{background:#172d35;border:1px solid #b1a06b;padding:14px;border-radius:10px}
+.op4-lab-confirm p{color:#f4e6c3}.op4-lab-confirm button{margin:3px 7px 3px 0}
+.op4-lab-success{color:#9aefd3!important;font-weight:650;overflow-wrap:anywhere}
+.op4-lab-result{color:#e2c89e!important;overflow-wrap:anywhere}
