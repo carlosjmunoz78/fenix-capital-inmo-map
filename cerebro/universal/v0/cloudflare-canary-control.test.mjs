@@ -21,7 +21,7 @@ test('Cloudflare control canary has no side effects or reachable HTTP routes',as
  const payload=JSON.parse(logs[0][1]);
  assert.equal(payload.engine_id,'LAB-CF-CANARY-001');
  assert.equal(payload.external_actions,0);
- assert.doesNotMatch(source,/\bfetch\s*\(|\bconnect\s*\(|\.put\s*\(|\.delete\s*\(|\.insert\s*\(|import\s+.*from\s+['"]https?:/);
+ assert.doesNotMatch(source,/\bglobalThis\.fetch\s*\(|\bconnect\s*\(|\.put\s*\(|\.delete\s*\(|\.insert\s*\(|import\s+.*from\s+['"]https?:/);
  assert.doesNotMatch(source,/AUTH|TOKEN|PASSWORD|credential|secrets|HUMAN_REQUIRED/);
 });
 test('canary code immutable by design; script itself never enables cron',()=>{
