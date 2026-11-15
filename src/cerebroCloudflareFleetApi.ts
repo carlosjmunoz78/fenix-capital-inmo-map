@@ -1,4 +1,5 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
+import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
  scheduled:boolean|null;active_execution_verified:false;worker_agent_id:null;
@@ -62,7 +63,21 @@ export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boole
  }catch{return unavailable('unavailable','CLOUDFLARE_SOURCE_NETWORK_UNAVAILABLE')}
 }
 export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):string{
- if(read.kind!=='ready'||!read.snapshot)return 'Cloudflare no disponible para lectura actual ('+read.reason+'). No se inventan estados ni cantidades.';
+ if(read.kind!=='ready'||!read.snapshot){
+  if(read.kind==='denied')return 'Acceso de propietario denegado. No se muestran fuentes Cloudflare.';
+  const date=audited.observed_at;
+  if(worker){
+   const found=audited.workers.find(x=>x.worker_id===worker);
+   return found?'ARCHIVO SIN LECTURA ACTUAL ('+date+'): Worker '+worker+'; motor declarado '+(found.engine_id||'SIN IDENTIFICAR')+
+    '; cron '+(found.cron_schedules===null?'NO VERIFICADO':found.cron_schedules.length?found.cron_schedules.join(', '):'NO CONFIGURADO')+
+    '. Estado de ejecución HOY: DESCONOCIDO. Error de conexión: '+read.reason+'.':
+    'Cloudflare actual NO ACCESIBLE. El Worker '+worker+' no figura en el archivo de '+date+'; no se infiere que no exista.';
+  }
+  return 'Cloudflare en tiempo real NO DISPONIBLE ('+read.reason+'). Última auditoría '+date+
+   ': '+audited.worker_count+' Workers, '+audited.scheduled_workers+' con cron configurado, '+
+   audited.without_cron_workers+' sin cron y '+audited.engine_id_mapped_workers+' con motor declarado vinculado. '+
+   'Estas cifras son históricas, no demuestran agentes activos ni el estado actual.';
+ }
  const s=read.snapshot;
  if(worker){
   const match=s.workers.find(x=>x.id===worker);
