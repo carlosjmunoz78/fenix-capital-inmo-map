@@ -27,6 +27,8 @@ type Props={
  scopeCanExecute:boolean;
  chatLines:{role:'user'|'cerebro';text:string}[];
  operatorAnswer?:{question:string;text:string}|null;
+ labProposal?:{action:'PAUSE'|'RESUME'|'PRIORITIZE';revision:number;priority:number|null}|null;
+ onConfirmLabProposal?:()=>void;onCancelLabProposal?:()=>void;
  children:ReactNode;
 };
 const NAV:readonly [View,string,typeof Building2][]=[
@@ -79,7 +81,7 @@ function initialOperativaPreviewPanel():View{
 export default function CerebroOperativeCockpitV3({
  snapshot,composer,onComposerChange,onSubmit,onToggleVoice,onToggleDictation,
  dictating,dictationSupported,dictationError,voiceFeedback,onReadLastReply,ttsActive,onStopVoice,composerRef,source,observedAt,
- company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,operatorAnswer,children
+ company,onCompanyChange,runs,onOpenRun,ownerUniverse,scopeCanExecute,chatLines,operatorAnswer,labProposal,onConfirmLabProposal,onCancelLabProposal,children
 }:Props){
  const[view,setView]=useState<View>(initialOperativaPreviewPanel);
  const running=useMemo(()=>runs.reduce((n,r)=>n+realRunning(r),0),[runs]);
@@ -200,6 +202,12 @@ export default function CerebroOperativeCockpitV3({
      </form>
      {operatorAnswer?<div className="op3-operator-answer" role="status" aria-live="polite">
        <strong>Respuesta del control operativo</strong><small>{operatorAnswer.question}</small><p>{operatorAnswer.text}</p>
+      </div>:null}
+      {labProposal?<div className="op3-operator-confirm" aria-label="Confirmar orden real LAB">
+       <strong>Control LAB-DEMO-001 · confirmación obligatoria</strong>
+       <p>{labProposal.action} · Fénix LAB · revisión {labProposal.revision}{labProposal.priority!==null?' · prioridad '+labProposal.priority:''}. Sin efectos empresariales externos.</p>
+       <button type="button" onClick={onConfirmLabProposal}>Confirmar control LAB</button>
+       <button type="button" onClick={onCancelLabProposal}>Cancelar orden LAB</button>
       </div>:null}
       {voiceFeedback&&!dictationError?<small role="status" className="op3-input-help">{voiceFeedback}</small>:null}
       {dictationError?<small role="alert" className="op3-input-error">{dictationError}</small>:null}
