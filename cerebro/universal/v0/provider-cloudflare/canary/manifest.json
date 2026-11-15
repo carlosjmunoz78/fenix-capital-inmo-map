@@ -1,0 +1,83 @@
+{
+  "schema_version": "1.0.0",
+  "name": "LAB-CF-CANARY-001",
+  "company_id": "fenix",
+  "engine_id": "LAB-CF-CANARY-001",
+  "environment": "LAB",
+  "version": "0.1.0",
+  "role": "CLOUDFLARE_PROVIDER_CONTROL_CANARY",
+  "canonical_fact_registry_179_modified": false,
+  "state": {
+    "deployed": true,
+    "provider": "Cloudflare",
+    "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+    "resource_id": "cerebro-operativa-control-canary-lab",
+    "workers_dev": false,
+    "preview_urls": false,
+    "schedules": [],
+    "routes": [],
+    "requests_verified": false,
+    "cron_events_verified": false,
+    "observed_at": "2026-11-15T15:43:01.301Z"
+  },
+  "constraints": {
+    "cron_free_quota_total": 5,
+    "cron_in_use": 5,
+    "incremental_cron_attempted": true,
+    "incremental_cron_accepted": false,
+    "provider_error": 10072,
+    "additional_subscription_eur": 0,
+    "canary_external_effects": 0
+  },
+  "controls": {
+    "pause_cron": {
+      "status": "INERT_EMPTY_FINAL_CONFIRMED"
+    },
+    "resume_cron": {
+      "status": "BLOCKED",
+      "reason": "MONEY_LIMIT",
+      "provider_error": 10072
+    },
+    "readback": {
+      "status": "VERIFIED"
+    },
+    "write_from_console": {
+      "status": "NOT_CONNECTED"
+    }
+  },
+  "dependencies": {
+    "external_services": [],
+    "database": [],
+    "queues": [],
+    "secrets": [],
+    "web_routes": [],
+    "other_workers_mutated": []
+  },
+  "backups": {
+    "source": "worker.mjs",
+    "configuration": "../observations/cloudflare-free-cron-capacity-2026-11-15.json",
+    "existing_crons_snapshot": true
+  },
+  "rollback": {
+    "target_crons": [],
+    "target_workers_dev": false,
+    "target_preview_urls": false,
+    "physical_readback": true,
+    "delete_without_snapshot": false
+  },
+  "human_required": [
+    "MONEY_LIMIT",
+    "SECURITY_INCIDENT"
+  ],
+  "release": {
+    "mode": "DRAFT_LAB_ONLY",
+    "production_eligible": false,
+    "no_paid_plan": true,
+    "next_gate": "Shared scheduler design within existing Cloudflare Free quota; do not touch existing 5 crons without detailed analysis and tested rollback"
+  },
+  "source_paths": [
+    "worker.mjs",
+    "RUNBOOK_REAL_CRON_CONTROL_V0.md",
+    "../observations/cloudflare-free-cron-capacity-2026-11-15.json"
+  ]
+}
