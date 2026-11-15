@@ -243,6 +243,11 @@ test('Control tab shows real vs unavailable sources, answers agent questions and
  await expect(fleet).toContainText('Agentes vivos · censo pendiente');
  await expect(fleet).toContainText('PRIVATE_REPO_RUNTIME_CONNECTOR_NOT_CONFIGURED');
  await expect(fleet).toContainText('LAB contrato vivo');
+ const triage=fleet.getByRole('region',{name:'Diagnóstico de fallos y prioridades sugeridas'});
+ await expect(triage).toContainText('proveedores sin diagnóstico');
+ await expect(triage).toContainText('Sin diagnóstico en vivo: Cloudflare');
+ await expect(triage).toContainText('Coste: NO_MEDIDO');
+
  const inspector=fleet.getByRole('region',{name:'Inspector de motores no listados'});
  await expect(inspector).toContainText('ASIGNACIÓN DECLARADA en el registro para FACT-001');
  await expect(inspector).toContainText('NO agentes ejecutándose');
