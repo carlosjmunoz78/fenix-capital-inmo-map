@@ -1,10 +1,14 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 export type FleetRole={id:string;name:string;department:string;company_id:string;environment:string;state:string;reports_to:string|null;runtime_verified:false};
 export type FleetRun={run_id:number;name:string;status:string;conclusion:string|null;updated_at:string|null;url:string;engine_id:null;agent_id:null;subagent_id:null};
+export type FleetTimingSample={
+ workflow_name:string;sample_size:number;p50_upper_bound_seconds:number;p90_upper_bound_seconds:number;
+ method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY';engine_mapping_verified:false;
+};
 export type FleetSource={
  platform:string;repo?:string;name?:string;state:'LIVE'|'UNAVAILABLE';reason:string|null;
  observed_at:string|null;observed_sample?:number|null;active_in_sample?:number|null;
- queued_in_sample?:number|null;total_repo_run_count?:number|null;recent?:FleetRun[];
+ queued_in_sample?:number|null;total_repo_run_count?:number|null;recent?:FleetRun[];timing_samples?:FleetTimingSample[];
  registered_agents?:number|null;active_agents?:number|null;subagents?:number|null;
 };
 export type FleetSnapshot={
@@ -31,6 +35,14 @@ function validate(raw:unknown):raw is FleetSnapshot{
   (!s.media_studio||(s.media_studio.source==='MEDIA_STUDIO_ROLE_REGISTRY_DESIGN_ONLY'&&s.media_studio.runtime_verified===false&&Number.isSafeInteger(s.media_studio.total_roles)&&s.media_studio.total_roles>=0))&&
   typeof s.observed_at==='string'&&Number.isFinite(Date.parse(s.observed_at))&&
   Array.isArray(s.sources)&&s.sources.length>=3&&s.sources.length<=25&&
+  s.sources.every(x=>!x.timing_samples||
+   (Array.isArray(x.timing_samples)&&x.timing_samples.length<=8&&x.state==='LIVE'&&
+    x.timing_samples.every(t=>t.method==='GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY'&&
+     t.engine_mapping_verified===false&&typeof t.workflow_name==='string'&&t.workflow_name.length>0&&t.workflow_name.length<=115&&
+     Number.isSafeInteger(t.sample_size)&&t.sample_size>=3&&t.sample_size<=35&&
+     Number.isSafeInteger(t.p50_upper_bound_seconds)&&t.p50_upper_bound_seconds>0&&
+     Number.isSafeInteger(t.p90_upper_bound_seconds)&&t.p90_upper_bound_seconds>=t.p50_upper_bound_seconds&&
+     t.p90_upper_bound_seconds<=604800)))&&
   !!s.roles&&Array.isArray(s.roles.entries)&&s.roles.declared_role_profiles===s.roles.entries.length&&
   s.roles.entries.length<=200&&s.roles.active_agent_count===null&&s.roles.verified_subagent_count===null&&
   !!s.control&&s.control.pause==='NOT_CONNECTED'&&s.control.resume==='NOT_CONNECTED'&&
