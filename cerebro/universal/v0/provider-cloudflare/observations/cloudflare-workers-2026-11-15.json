@@ -1,0 +1,527 @@
+{
+  "schema_version": "1.0.0",
+  "source": "CLOUDFLARE_API_POINT_IN_TIME_SNAPSHOT",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "observed_at": "2026-11-15T10:44:45.565Z",
+  "worker_count": 37,
+  "cron_verified_workers": 37,
+  "scheduled_workers": 5,
+  "without_cron_workers": 32,
+  "subdomain_exposed_workers": 5,
+  "subdomain_unknown_workers": 0,
+  "d1_databases": [
+    {
+      "name": "cerebro-fact001-notion-checkpoint-lab-eu",
+      "jurisdiction": "eu",
+      "uuid": "bc085807-a6ca-4c56-a288-fe56716fec6f"
+    },
+    {
+      "name": "cerebro-fact001-recovery-lab-eu",
+      "jurisdiction": "eu",
+      "uuid": "1305f791-7c44-47f9-946b-f330a09c88aa"
+    },
+    {
+      "name": "cerebro-facebook-autoqual-lab",
+      "jurisdiction": "eu",
+      "uuid": "e8fe801d-4b01-4e34-ac12-26014b79adc1"
+    },
+    {
+      "name": "cerebro-instagram-autoqual-lab",
+      "jurisdiction": "eu",
+      "uuid": "c428b85c-dbaf-4844-a2f8-15cadc23a6c9"
+    },
+    {
+      "name": "cerebro-jarvis-cut33-lab-eu-jur",
+      "jurisdiction": "eu",
+      "uuid": "968e86d4-617c-4539-adde-541edc9ec215"
+    },
+    {
+      "name": "cerebro-jarvis-cut33-lab-eu",
+      "jurisdiction": null,
+      "uuid": "be037644-3da6-4a96-8cb7-9ee3af9ba196"
+    },
+    {
+      "name": "cerebro-jarvis-lab-eu-restore-cut32",
+      "jurisdiction": "eu",
+      "uuid": "8f966fb3-32db-43a0-aa55-67f88616a522"
+    },
+    {
+      "name": "cerebro-jarvis-lab-eu-restore-cut29",
+      "jurisdiction": "eu",
+      "uuid": "c446f17c-c26d-4c76-a3ea-f62c843d461b"
+    },
+    {
+      "name": "cerebro-jarvis-lab-eu",
+      "jurisdiction": "eu",
+      "uuid": "988b11e1-21aa-4cf9-8b9d-110319df7ccc"
+    },
+    {
+      "name": "cerebro-jarvis-lab-cut21",
+      "jurisdiction": null,
+      "uuid": "a859fde1-126b-4c40-bc0d-aec2f8839f7b"
+    }
+  ],
+  "workers": [
+    {
+      "worker_id": "cerebro-facebook-autoqual-lab",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T18:20:19.22527Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.629Z"
+    },
+    {
+      "worker_id": "cerebro-facebook-buffer-replenisher-lab",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-14T16:20:05.680618Z",
+      "cron_schedules": [
+        "*/20 * * * *"
+      ],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.495Z"
+    },
+    {
+      "worker_id": "cerebro-facebook-knowledge-autoqual-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-13T09:07:37.379455Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.514Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-gateway-lab-eu-20261109",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T17:51:02.252303Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.533Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-github-oidc-enroll-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T16:27:26.895089Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.616Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-headless-operator-lab-20261111",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-11T15:37:16.546964Z",
+      "cron_schedules": [
+        "*/5 * * * *"
+      ],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:30.521Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-notion-queue-lab",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-10T18:36:21.641572Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:31.483Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-recovery-runner-lab",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T11:18:45.266845Z",
+      "cron_schedules": [
+        "*/5 * * * *"
+      ],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.351Z"
+    },
+    {
+      "worker_id": "cerebro-fact001-ums001-issuer-provisioner-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T16:44:01.473283Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.350Z"
+    },
+    {
+      "worker_id": "cerebro-instagram-autoqual-lab",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-08T21:28:25.810317Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.345Z"
+    },
+    {
+      "worker_id": "cerebro-instagram-knowledge-autoqual-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-13T18:25:55.746188Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.452Z"
+    },
+    {
+      "worker_id": "cerebro-jarvis-cut32-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T16:30:31.736799Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.344Z"
+    },
+    {
+      "worker_id": "cerebro-jarvis-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-06T09:10:37.404461Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:33.284Z"
+    },
+    {
+      "worker_id": "cerebro-linkedin-autonomy-ticker-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-14T10:16:22.874808Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:34.227Z"
+    },
+    {
+      "worker_id": "cerebro-linkedin-buffer-writer-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-14T10:14:28.00621Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.047Z"
+    },
+    {
+      "worker_id": "cerebro-model-router-deepseek-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-14T08:19:30.030861Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.054Z"
+    },
+    {
+      "worker_id": "cerebro-social-buffer-ledger-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-14T11:43:14.556189Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.053Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-ai-image-factory-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T13:21:02.000813Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.053Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-image-auth-sender-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-11T23:46:42.528019Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.171Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-image-qa-shadow-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-11T23:28:45.268349Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.088Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-multisource-scout-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-10T22:27:12.902865Z",
+      "cron_schedules": [
+        "12 7 * * *"
+      ],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:36.972Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-owner-access-gateway-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T14:21:22.750447Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.758Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-polyhaven-autonomous-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-10T13:27:23.709224Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.815Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-10T16:14:25.981178Z",
+      "cron_schedules": [
+        "23 6 * * *"
+      ],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.810Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-private-image-canary-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T11:49:27.930577Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.866Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-producer-private-gateway-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-10T22:16:45.925382Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.839Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-registered-image-executor-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T15:38:36.310402Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:38.768Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-signed-orchestrator-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T10:09:40.51855Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:39.634Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-signed-qa-receiver-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T10:09:35.65602Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.412Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-social-creative-bridge-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T18:16:00.085374Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.436Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-universal-engine-adapter-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T11:26:41.636062Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.375Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-universal-gateway-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T15:37:00.034287Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.491Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-universal-router-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T13:21:17.649217Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.385Z"
+    },
+    {
+      "worker_id": "cerebro-ums001-universal-runtime-broker-lab-eu",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-12T16:52:03.504705Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:41.426Z"
+    },
+    {
+      "worker_id": "fenix-capital-cerebro-social",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-11-08T16:37:23.368889Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": false,
+      "preview_urls_enabled": false,
+      "cron_verified_at": "2026-11-15T10:44:42.358Z"
+    },
+    {
+      "worker_id": "fenix-capital-inmo-map",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-10-14T16:06:29.712633Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": true,
+      "cron_verified_at": "2026-11-15T10:44:44.246Z"
+    },
+    {
+      "worker_id": "fenix-capital-inmo-maps",
+      "company_id": null,
+      "engine_id": null,
+      "agent_id": null,
+      "subagent_id": null,
+      "modified_on": "2026-10-14T16:07:29.654262Z",
+      "cron_schedules": [],
+      "workers_dev_enabled": true,
+      "preview_urls_enabled": true,
+      "cron_verified_at": "2026-11-15T10:44:44.332Z"
+    }
+  ],
+  "semantics": {
+    "deployed_worker_is_agent": false,
+    "cron_configured_is_work_execution": false,
+    "company_mapping": "UNVERIFIED",
+    "runtime_execution": "NOT_CHECKED",
+    "worker_action_allowed": false
+  }
+}
