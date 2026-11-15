@@ -35,11 +35,25 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
  const {s,live,disconnected,stamp}=data;
  const base='Fuente: inventario propietario LAB '+stamp+'; '+live.length+' fuentes GitHub de metadatos LIVE, '+disconnected.length+' conectores SIN LECTURA. ';
  const missing=disconnected.map(item=>short(item.name||item.repo||item.platform)).slice(0,8);
- if(intent==='ESTIMATES')return intro+base+
-  'TIEMPO: NO_MEDIDO (faltan inicio, fin, historial por tarea, cola, capacidad y dependencias). ETA: SIN_BASE_SUFICIENTE. '+
-  'COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS (faltan cuota, uso y tarifa efectiva por proveedor). '+
-  'El catálogo de 179 motores y la presencia de workflows no establecen duraciones ni gastos. '+
-  'Siguiente paso: conectar recibos de job/run con FinOps y calcular intervalos a partir de ejecuciones reales. Ningún gasto autorizado ni realizado.';
+ if(intent==='ESTIMATES'){
+  // Match only a complete workflow name from the live, authenticated source.
+  // Never extrapolate a workflow timing to an engine or autonomous agent.
+  const q=canon(query);
+  const measured=live.flatMap(source=>(source.timing_samples||[])
+   .filter(item=>q.includes(canon(item.workflow_name)))
+   .map(item=>({item,source:source.name||source.repo||source.platform})))
+   .sort((a,b)=>b.item.workflow_name.length-a.item.workflow_name.length)[0];
+  const clock=measured?
+   'TIEMPO DEL WORKFLOW GITHUB '+measured.item.workflow_name+' (NO del motor): muestra de '+measured.item.sample_size+
+   ' ejecuciones exitosas de '+measured.source+', p50='+measured.item.p50_upper_bound_seconds+
+   ' s, p90='+measured.item.p90_upper_bound_seconds+
+   ' s. METODO: intervalo run_started_at → última actualización GitHub; cota aproximada, NO duración exacta, ni ETA futura garantizada. ':
+   'TIEMPO: NO_MEDIDO para ese objetivo (faltan inicio, fin, historial por tarea, cola, capacidad y dependencias). ';
+  return intro+base+clock+'ETA DEL MOTOR: SIN_BASE_SUFICIENTE. '+
+   'COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS (faltan cuota, uso y tarifa efectiva por proveedor). '+
+   'Un workflow GitHub no acredita duración del motor, del agente ni de un proceso empresarial. '+
+   'Siguiente paso: conectar recibos de job/run con FinOps y calcular intervalos a partir de ejecuciones reales. Ningún gasto autorizado ni realizado.';
+ }
  if(intent==='MISSING')return intro+base+
   'AGENTES QUE FALTAN: NO CUANTIFICABLES aún. Hay '+s.roles.declared_role_profiles+' perfiles registrados y '+
   s.engine_registry_count+' motores lógicos DEFINIDOS, pero no existe un censo de agent_id/subagent_id enlazado a contratos de capacidad y latidos de ejecución. '+
