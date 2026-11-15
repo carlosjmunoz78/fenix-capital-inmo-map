@@ -22,6 +22,7 @@ const commands:Record<string,keyof typeof details>={
 };
 async function setup(page:Page){
  const calls:string[]=[];const outside:string[]=[];
+ let lab={desired_state:'PAUSED' as 'PAUSED'|'RUNNING',priority:3,revision:1,work_units:0,last_receipt_id:null as string|null};
  await page.addInitScript(s=>{localStorage.setItem('fenix-preprod-auth-v2',JSON.stringify(s));sessionStorage.setItem('fenix-session-active','1')},session);
  await page.route('**/*',async route=>{
   const request=route.request(),url=new URL(request.url());
@@ -36,6 +37,31 @@ async function setup(page:Page){
      body:JSON.stringify({status:'ok',authenticated_transport:true,direct_model_access:false,
       prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'DETERMINISTIC_READ_ONLY'})});
     return route.fulfill({status:503,headers,body:'{"status":"UNAVAILABLE"}'});
+   }
+   if(url.pathname==='/api/cerebro-lab-worker-control'){
+    calls.push(request.method()==='GET'?'lab_state':'lab_control');
+    const common={status:'OK',company_id:'fenix',environment:'LAB',engine_id:'LAB-DEMO-001',
+      version:'0.1.0',source:'PREPROD_LAB_WORKER_RPC_V0',transport:'PREPROD_OWNER_LAB_RUNTIME_V0',
+      autonomous_scheduling:false,prod_execution_enabled:false};
+    if(request.method()==='GET')return route.fulfill({status:200,headers,body:JSON.stringify({
+     ...common,...lab,updated_at:'2026-11-15T09:20:00Z',observed_at:'2026-11-15T09:20:01Z',
+     runtime_kind:'DETERMINISTIC_MANUAL_LAB_WORKER',executed:false
+    })});
+    const input=request.postDataJSON() as {action:string;priority:number|null;expected_revision:number;idempotency_key:string};
+    if(input.expected_revision!==lab.revision)return route.fulfill({status:409,headers,body:'{"status":"CONFLICT"}'});
+    const before={desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units};
+    if(input.action==='PAUSE')lab.desired_state='PAUSED';
+    if(input.action==='RESUME')lab.desired_state='RUNNING';
+    if(input.action==='PRIORITIZE'&&input.priority!==null)lab.priority=input.priority;
+    if(input.action==='TICK'&&lab.desired_state==='RUNNING')lab.work_units++;
+    lab.revision++;
+    const receiptId='123e4567-e89b-42d3-a456-'+String(lab.revision).padStart(12,'0');
+    lab.last_receipt_id=receiptId;
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+     ...common,status:'APPLIED',receipt_id:receiptId,executed:true,
+     executed_work_units:lab.work_units-before.work_units,external_actions_executed:false,additional_cost_eur:0,
+     before,after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
+    })});
    }
    if(url.pathname==='/api/cerebro-fleet-observe'){
     calls.push('fleet_observe');
@@ -173,4 +199,31 @@ test('Control tab shows real vs unavailable sources, answers agent questions and
  expect(calls).toContain('fleet_observe');
  expect(calls).not.toContain('submit_command');
  await page.screenshot({path:'test-results/operativa-fleet-owner-qa.png',fullPage:false,animations:'disabled'});
+});
+
+test('isolated LAB worker responds to actual revisioned pause, resume, tick and priority contracts',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const worker=page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'});
+ await expect(worker).toContainText('Estado observado: PAUSED');
+ await worker.getByRole('button',{name:'Reanudar LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker).toContainText('CONTROL LAB VERIFICADO: RESUME');
+ await expect(worker).toContainText('Estado observado: RUNNING');
+ await worker.getByRole('button',{name:'Ejecutar 1 paso LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker).toContainText('Pasos terminados: 1');
+ await worker.getByRole('button',{name:'Pausar LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker).toContainText('CONTROL LAB VERIFICADO: PAUSE');
+ await worker.getByRole('button',{name:'Ejecutar 1 paso LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker).toContainText('Pasos terminados: 1');
+ await worker.getByRole('combobox',{name:'Prioridad del worker LAB'}).selectOption('5');
+ await worker.getByRole('button',{name:'Cambiar prioridad LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker).toContainText('Prioridad: 5');
+ expect(calls.filter(c=>c==='lab_control')).toHaveLength(5);
+ expect(calls).not.toContain('submit_command');
+ await page.screenshot({path:'test-results/operativa-lab-control-verified.png',fullPage:false,animations:'disabled'});
 });
