@@ -14,7 +14,7 @@ const exactKeys=(value,keys)=>value!==null&&typeof value==="object"&&!Array.isAr
 const frozenReceipt=(body,status,execution,metadata={})=>Object.freeze({
  schema_version:"1.0.0",company_id:IDENTITY.company_id,engine_id:IDENTITY.engine_id,
  environment:IDENTITY.environment,version:IDENTITY.version,job_id:body.job_id,
- idempotency_key:body.idempotency_key,status,work_units:execution,
+ idempotency_key:body.idempotency_key,priority:body.priority,action:body.action,status,work_units:execution,
  external_actions:0,paid_ai_calls:0,additional_cost_eur:0,queue_name:IDENTITY.queue_name,...metadata
 });
 export function validateLabMessage(body){
@@ -60,7 +60,7 @@ export async function processLabBatch(batch,env){
   const existing=await env.RECEIPT_KV.get(key);
   if(existing!==null){
    try{const saved=JSON.parse(existing);
-    if(saved.job_id===body.job_id&&saved.idempotency_key===body.idempotency_key&&
+    if(saved.job_id===body.job_id&&saved.idempotency_key===body.idempotency_key&&saved.priority===body.priority&&saved.action===body.action&&
        ["PAUSED_SKIPPED","WORK_UNIT_ACK"].includes(saved.status)){
       message.ack();acknowledgements++;continue;
     }
