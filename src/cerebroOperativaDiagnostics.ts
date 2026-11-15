@@ -1,5 +1,5 @@
 import type {FleetRead,FleetSource} from './cerebroFleetObserveApi';
-import {triageFleet} from './cerebroOperativaTriage';
+import {triageFleet} from './cerebroOperativaTriage.ts';
 
 /** LAB read-only owner diagnostic: evidence is never promoted into inferred active agents, costs or ETAs. */
 export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES';
