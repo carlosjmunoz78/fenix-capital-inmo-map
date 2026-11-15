@@ -121,4 +121,8 @@ test('named motor diagnosis distinguishes declared role binding from a globally 
  assert.match(general,/NO constituye el censo global de 179 motores/);
  const capability=answerDiagnosticRequest('CAPABILITIES',f,'Qué puede hacer FACT-001');
  assert.match(capability,/ASIGNACIÓN DECLARADA PARA FACT-001/);
+ f.snapshot.roles.entries[1].engine_bindings.push('C360-001');
+ const alphanumeric=answerDiagnosticRequest('MISSING',f,'Qué agentes faltan para C360-001');
+ assert.match(alphanumeric,/ASIGNACIÓN DECLARADA PARA C360-001/);
+ assert.match(alphanumeric,/Sales Executive/);
 });
