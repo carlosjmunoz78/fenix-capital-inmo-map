@@ -45,7 +45,7 @@ function validate(raw:unknown):raw is FleetSnapshot{
      t.p90_upper_bound_seconds<=604800)))&&
   !!s.roles&&Array.isArray(s.roles.entries)&&s.roles.declared_role_profiles===s.roles.entries.length&&
   s.roles.entries.length<=200&&s.roles.entries.every(r=>Array.isArray(r.engine_bindings)&&
-   r.engine_bindings.length<=32&&r.engine_bindings.every(id=>typeof id==='string'&&/^[A-Z]{2,12}-[0-9]{3}$/.test(id))&&
+   r.engine_bindings.length<=32&&r.engine_bindings.every(id=>typeof id==='string'&&/^[A-Z][A-Z0-9]{1,11}-[0-9]{3}$/.test(id))&&
    new Set(r.engine_bindings).size===r.engine_bindings.length)&&
   s.roles.active_agent_count===null&&s.roles.verified_subagent_count===null&&
   !!s.control&&s.control.pause==='NOT_CONNECTED'&&s.control.resume==='NOT_CONNECTED'&&
