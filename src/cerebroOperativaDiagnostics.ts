@@ -81,7 +81,7 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
    ' '+(item.evidence_url||'SIN_URL')+'; siguiente: inspeccionar logs antes de reintentar').join(' | ');
   return intro+base+'DIAGNÓSTICO DE FALLOS: '+
    (incidents.length?triage.verified_failure_count+' últimos resultados fallidos y '+
-    triage.needs_attention_count+' casos de acción requerida EN MUESTRA, no censo global. '+examples+'. ':
+    triage.needs_attention_count+' casos de acción requerida EN MUESTRA, NO censo global. '+examples+'. ':
     'ningún último resultado fallido acreditado en la muestra reciente; NO demuestra ausencia de fallos generales. ')+
    'Conectores sin diagnóstico acreditado: '+triage.unavailable_source_count+'. '+
    'Causa raíz, salud de agentes y tareas JOB-001: NO VERIFICADAS. La cola de reparación es PROPUESTA, NO ejecutada.';
