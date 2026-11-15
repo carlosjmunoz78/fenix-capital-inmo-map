@@ -25,3 +25,14 @@ Se incluyen pruebas: allow con lector simulado que devuelve sesión vigente, tok
 4. Solo después de pruebas, costes, controles de política y tribunal, considerar promoción. Mientras tanto `P0A_REVOKED_SESSION_GUARD=PARTIAL`, `PROD=HOLD`.
 
 **Coste incremental suscripciones:** 0 €; coste real de GitHub Actions y consultas NO_MEDIDO.
+
+## Hallazgo real de permisos: acceso directo NO disponible
+Inspección de metadatos SQL de `auth.sessions` en el proyecto emisor (sin leer filas):
+- `id` UUID, `user_id` UUID y `not_after` timestamptz (nullable) existen.
+- `has_table_privilege('anon', 'auth.sessions','SELECT')=false`.
+- `has_table_privilege('authenticated', 'auth.sessions','SELECT')=false`.
+- **`has_table_privilege('service_role', 'auth.sessions','SELECT')=false`.**
+
+**Consecuencia obligatoria:** no implementar `readActiveSession` como una consulta directa con service_role a `auth.sessions`, y NO otorgar SELECT sobre auth.sessions a roles públicos. No se identificó una función propia existente que consultase `auth.sessions` por búsqueda acotada en `pg_proc.prosrc` para `public` y `fenix_prod`. La integración futura requiere un read path privilegiado *del lado del emisor*, revisado por seguridad, que compruebe session_id+user_id, devuelva solo si existe sesión vigente, y tenga ejecución limitada al servicio autorizado con rollback probado. **Ningún cambio en PROD realizado.**
+
+**Vercel:** proyecto LAB `prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc` confirmado en conector específico, SSO enabled/all_except_custom_domains, latest Deployment `dpl_GUsDv7y88Vnf3ugBfurbmQM1DU8x` READY, target=null. Conector general de alias devolvió lista vacía y endpoints proyecto/alias 404; por ello no hay prueba de target actual del alias ni rollback físico. Prohibido `assign_alias` sin resolver previamente la discrepancia. 
