@@ -2,10 +2,10 @@
   "status": "GREEN",
   "remote_outbox": {
     "status": "REMOTE_OUTBOX_GREEN",
-    "downloaded_total": 2,
-    "skipped_total": 1134,
+    "downloaded_total": 4,
+    "skipped_total": 1136,
     "legacy_checksum_total": 0,
-    "index_batches_total": 1136,
+    "index_batches_total": 1140,
     "credentials_required": false,
     "additional_cost_eur": 0,
     "prod_authorized": false,
@@ -18,15 +18,15 @@
     "environment": "PREPROD",
     "version": "0.6.0",
     "status": "GREEN",
-    "cycle_started_at": "2026-11-15T06:58:55.655Z",
-    "cycle_finished_at": "2026-11-15T06:58:55.655Z",
-    "last_success_at": "2026-11-15T06:58:55.655Z",
-    "last_batch_ref": "sha256:c375ae98f56161a3ae0474eedb9870d66a1986b4ef68a2ae8077a3d8dc941739",
+    "cycle_started_at": "2026-11-15T12:00:50.301Z",
+    "cycle_finished_at": "2026-11-15T12:00:50.301Z",
+    "last_success_at": "2026-11-15T12:00:50.301Z",
+    "last_batch_ref": "sha256:73e37fd375851de15a3131a93f13650f92813b73cf7b0e200d54a000b2112376",
     "last_result": {
-      "processed_batches": 2,
-      "skipped_receipts": 1134,
-      "persisted_total": 3,
-      "duplicates_total": 3,
+      "processed_batches": 4,
+      "skipped_receipts": 1136,
+      "persisted_total": 16,
+      "duplicates_total": 9,
       "held_total": 0,
       "human_required": [],
       "ledger_exists": true
@@ -43,15 +43,15 @@
   },
   "candidates": {
     "status": "CANDIDATES_GREEN",
-    "source_learning_total": 3796,
-    "persisted_total": 3,
-    "duplicates_total": 3793,
+    "source_learning_total": 3812,
+    "persisted_total": 16,
+    "duplicates_total": 3796,
     "held_total": 0,
     "human_required": [],
     "held": [],
     "skipped_cross_company": 0,
     "candidate_ledger_file": "/tmp/cerebro-rsi-learning-state/cerebro/runtime/rsi-learning-state/data/fenix/LRN-001/improvement-candidates.v8",
-    "candidate_total": 3796,
+    "candidate_total": 3812,
     "next_gate": "OLD_VS_NEW_EXPERIMENT",
     "prod_authorized": false,
     "prod_write_authorized": false,
@@ -60,9 +60,70 @@
   },
   "orchestration": {
     "status": "ORCHESTRATOR_GREEN",
-    "planned_total": 0,
-    "created_total": 0,
-    "plans": [],
+    "planned_total": 2,
+    "created_total": 2,
+    "plans": [
+      {
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "version": "0.6.0",
+        "cadence": "DAILY",
+        "event_type": null,
+        "scheduled_at": "2026-11-15T12:00:50.301Z",
+        "checkpoint": {
+          "task": "LEARNING_METRICS_AND_FAILURE_SCAN",
+          "horizon_bucket": "2026-11-15"
+        },
+        "lock_key": "837b426fe340b7a2bf196a0faacc1e30a45fdf750ee50bf7aefb724c06d2f437",
+        "max_attempts": 3,
+        "backoff_seconds": [
+          30,
+          120,
+          600
+        ],
+        "budget_eur": 0,
+        "execution_mode": "INCREMENTAL_PLAN_ONLY",
+        "allow_prod_writes": false,
+        "prod_authorized": false,
+        "paid_fallback": false,
+        "trading_access": false,
+        "customer_data_access": false,
+        "horizon_bucket": "2026-11-15",
+        "task": "LEARNING_METRICS_AND_FAILURE_SCAN",
+        "execution_authority": "PREPROD_PLAN_ONLY"
+      },
+      {
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "version": "0.6.0",
+        "cadence": "WEEKLY",
+        "event_type": null,
+        "scheduled_at": "2026-11-15T12:00:50.301Z",
+        "checkpoint": {
+          "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+          "horizon_bucket": "2026-11-09"
+        },
+        "lock_key": "bf948b53a9b83729d02abc665fcaad48f22420ef65f0ff4cf5013f9fb38d57ba",
+        "max_attempts": 3,
+        "backoff_seconds": [
+          30,
+          120,
+          600
+        ],
+        "budget_eur": 0,
+        "execution_mode": "INCREMENTAL_PLAN_ONLY",
+        "allow_prod_writes": false,
+        "prod_authorized": false,
+        "paid_fallback": false,
+        "trading_access": false,
+        "customer_data_access": false,
+        "horizon_bucket": "2026-11-09",
+        "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+        "execution_authority": "PREPROD_PLAN_ONLY"
+      }
+    ],
     "state": {
       "schema_version": "1.0.0",
       "state_type": "CEREBRO_LRN_ORCHESTRATOR_STATE",
@@ -75,12 +136,12 @@
         "WEEKLY": "2026-11-08T11:21:43.518Z",
         "MONTHLY": "2026-11-05T22:47:09.910Z"
       },
-      "plans_emitted": 39,
+      "plans_emitted": 41,
       "additional_cost_eur": 0,
       "prod_authorized": false,
       "prod_write_authorized": false,
       "trading_access": false,
-      "last_planned_at": "2026-11-15T06:58:55.655Z",
+      "last_planned_at": "2026-11-15T12:00:50.301Z",
       "last_result": {
         "cadence": "DAILY",
         "status": "GREEN",
@@ -108,9 +169,172 @@
   },
   "horizons": {
     "status": "HORIZON_EXECUTORS_GREEN",
-    "completed_total": 0,
+    "completed_total": 2,
     "skipped_total": 39,
-    "completed": [],
+    "completed": [
+      {
+        "schema_version": "1.0.0",
+        "state_type": "CEREBRO_LRN_HORIZON_RESULT",
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "version": "0.6.0",
+        "lock_key": "837b426fe340b7a2bf196a0faacc1e30a45fdf750ee50bf7aefb724c06d2f437",
+        "horizon_bucket": "2026-11-15",
+        "cadence": "DAILY",
+        "task": "LEARNING_METRICS_AND_FAILURE_SCAN",
+        "status": "GREEN",
+        "completed_at": "2026-11-15T12:00:50.301Z",
+        "evidence": {
+          "schema_version": "1.0.0",
+          "state_type": "CEREBRO_LRN_DAILY_EVIDENCE",
+          "company_id": "fenix",
+          "engine_id": "LRN-001",
+          "environment": "PREPROD",
+          "version": "0.6.0",
+          "observed_at": "2026-11-15T12:00:50.301Z",
+          "learning_records_total": 3812,
+          "receipts_total": 1140,
+          "persisted_total": 3812,
+          "duplicates_total": 1010,
+          "held_total": 0,
+          "human_required": [],
+          "risk_counts": {
+            "LOW": 3197,
+            "MEDIUM": 615,
+            "HIGH": 0,
+            "CRITICAL": 0
+          },
+          "source_type_counts": {
+            "SKILL_SUPPLY_CHAIN": 621,
+            "ENGINE_ERROR": 158,
+            "METRIC_OBSERVATION": 114,
+            "COST_OBSERVATION": 105,
+            "TRIBUNAL_DECISION": 2,
+            "ENGINE_EVENT": 2,
+            "ENGINE_RESULT": 2804,
+            "HUMAN_CORRECTION": 2,
+            "OBSERVABILITY_ALERT": 4
+          },
+          "average_confidence": 0.8559548793284317,
+          "heartbeat_status": "GREEN",
+          "heartbeat_last_success_at": "2026-11-15T12:00:50.301Z",
+          "raw_customer_data_included": false,
+          "additional_cost_eur": 0,
+          "prod_authorized": false,
+          "prod_write_authorized": false,
+          "trading_access": false
+        },
+        "meta_candidate_generated": false,
+        "factory_candidate_generated": false,
+        "additional_cost_eur": 0,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false
+      },
+      {
+        "schema_version": "1.0.0",
+        "state_type": "CEREBRO_LRN_HORIZON_RESULT",
+        "company_id": "fenix",
+        "engine_id": "LRN-001",
+        "environment": "PREPROD",
+        "version": "0.6.0",
+        "lock_key": "bf948b53a9b83729d02abc665fcaad48f22420ef65f0ff4cf5013f9fb38d57ba",
+        "horizon_bucket": "2026-11-09",
+        "cadence": "WEEKLY",
+        "task": "METALEARN_BOTTLENECK_AND_SUPERVISOR_SCAN",
+        "status": "GREEN",
+        "completed_at": "2026-11-15T12:00:50.301Z",
+        "evidence": {
+          "reports_considered": 7,
+          "learning_records_latest": 2332,
+          "held_total": 0,
+          "human_required": [],
+          "meta_metrics_ready": true,
+          "meta_review_status": "META_CANDIDATE_CREATED_HELD"
+        },
+        "meta_candidate_generated": true,
+        "meta_review": {
+          "schema_version": "1.0.0",
+          "company_id": "fenix",
+          "engine_id": "METALEARN-001",
+          "environment": "PREPROD",
+          "version": "0.6.0",
+          "reviewed_at": "2026-11-15T12:00:50.301Z",
+          "status": "META_CANDIDATE_CREATED_HELD",
+          "minimum_samples": 3,
+          "samples_total": 120,
+          "bottleneck": {
+            "stage": "learn",
+            "cost_or_latency": 1204.3469878583337
+          },
+          "candidate": {
+            "meta_learning_id": "e557069c16da5c97f38b46352d3deef389385a4578ef6888707a183759268354",
+            "company_id": "fenix",
+            "engine_id": "METALEARN-001",
+            "environment": "PREPROD",
+            "version": "0.6.0",
+            "target_stage": "learn",
+            "prior_strategy_version": "lrn-orchestration-0.6.0",
+            "candidate_strategy_version": "lrn-orchestration-0.6.0-opt-learn",
+            "dataset_scope": "LOCAL_PREPROD_STAGE_TIMINGS_LAST_120",
+            "metric_definition": {
+              "name": "mean_stage_duration_ms",
+              "direction": "MINIMIZE",
+              "current_value_ms": 1204.3469878583337,
+              "p95_ms": 2892.8350819999996
+            },
+            "leakage_checks": {
+              "raw_customer_data": false,
+              "tenant_scope": "fenix",
+              "holdout_required_before_claim": true
+            },
+            "anti_gaming_checks": {
+              "quality_gates_must_not_degrade": true,
+              "cost_budget_eur": 0,
+              "authority_must_not_expand": true
+            },
+            "proposed_change": {
+              "type": "PROFILE_AND_OPTIMIZE_STAGE",
+              "target_stage": "learn",
+              "claim_status": "HYPOTHESIS_ONLY",
+              "requires_old_vs_new": true
+            },
+            "decision": null,
+            "state": "META_CANDIDATE",
+            "reduces_requirements": false,
+            "may_edit_judge": false,
+            "may_elevate_permissions": false,
+            "may_elevate_budget": false,
+            "prod_authorized": false,
+            "additional_cost_budget_eur": 0
+          },
+          "gate": {
+            "ok": false,
+            "reasons": [
+              "independent_evaluation_required",
+              "independent_judge_required",
+              "rollback_required",
+              "rebuild_required"
+            ],
+            "next_gate": "HOLD",
+            "prod_authorized": false,
+            "prod_write_authorized": false
+          },
+          "automatic_promotion": false,
+          "additional_cost_eur": 0,
+          "prod_authorized": false,
+          "prod_write_authorized": false,
+          "trading_access": false
+        },
+        "factory_candidate_generated": false,
+        "supervisor_reason": "NO_CROSS_ENGINE_REPEATED_FAILURE_EVIDENCE",
+        "additional_cost_eur": 0,
+        "prod_authorized": false,
+        "prod_write_authorized": false,
+        "trading_access": false
+      }
+    ],
     "prod_authorized": false,
     "prod_write_authorized": false,
     "trading_access": false,
@@ -127,25 +351,25 @@
     "status": "META_METRICS_GREEN",
     "accepted": true,
     "not_due": false,
-    "samples_total": 120,
+    "samples_total": 121,
     "stage_metrics": {
       "collect": {
-        "mean_ms": 989.7161511166661,
+        "mean_ms": 988.425057528925,
         "p95_ms": 2084.50178,
         "max_ms": 5710.938260999999,
-        "samples": 120
+        "samples": 121
       },
       "learn": {
-        "mean_ms": 1204.3469878583337,
+        "mean_ms": 1207.6969500909092,
         "p95_ms": 2892.8350819999996,
         "max_ms": 13140.949834,
-        "samples": 120
+        "samples": 121
       },
       "evaluate": {
-        "mean_ms": 876.0997488749997,
+        "mean_ms": 878.9555341818178,
         "p95_ms": 1622.5629710000003,
         "max_ms": 8183.608602,
-        "samples": 120
+        "samples": 121
       }
     },
     "prod_authorized": false,
@@ -160,7 +384,7 @@
     "engine_id": "LRN-001",
     "environment": "PREPROD",
     "version": "0.6.0",
-    "github_run_id": "43687839304",
+    "github_run_id": "43711649347",
     "source_head_sha": "f841c721f346e2de2b4750b0a08c4bfb6e0f28dd",
     "execution_model": "HOSTLESS_BOUNDED_ITERATION",
     "schedule_semantics": "BEST_EFFORT_15_MINUTE_PLUS_EVENT",
