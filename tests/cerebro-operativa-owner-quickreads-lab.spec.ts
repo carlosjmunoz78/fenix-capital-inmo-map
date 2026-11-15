@@ -64,6 +64,27 @@ async function setup(page:Page){
      before,after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
     })});
    }
+   if(url.pathname==='/api/cerebro-device-live'){
+    calls.push('device_live_read');
+    if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"UNAVAILABLE"}'});
+    const current=new Date().toISOString();
+    const row=(environment:'LAB'|'PREPROD',devices:number,total:number,done:number,failed:number,verified:number,median:number,p90:number)=>({
+      environment,meaning:environment==='LAB'?'LAB_DEVICE_RECORDS':'HISTORICAL_PREPROD_LABEL_IN_LAB_PROJECT',
+      stored_online_count:devices,not_revoked_count:devices,heartbeat_5m_count:0,
+      heartbeat_24h_count:0,last_seen_at:environment==='LAB'?'2026-11-03T07:35:51.927Z':'2026-11-12T13:04:02.895Z',
+      commands_total:total,commands_completed:done,commands_failed:failed,commands_other:0,
+      commands_created_24h:0,latest_completed_at:environment==='LAB'?'2026-10-28T14:51:33.120Z':'2026-11-04T16:02:09.353Z',
+      receipt_count:total,semantically_verified_receipts:verified,
+      comparable_successful_duration_samples:environment==='LAB'?6:66,
+      p50_completed_seconds:median,p90_completed_seconds:p90
+    });
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+      status:'OK',source:'FENIX_DEVICE_LAB_OWNER_READ_V1',company_id:'fenix',environment:'LAB',
+      observed_at:current,read_only:true,executed:false,data_freshness:'SOURCE_READ_AT_REQUEST_TIME',
+      active_agents_verified:null,active_subagents_verified:null,active_jobs_verified:null,cost_eur_measured:null,
+      environments:[row('LAB',1,8,6,2,6,28.2,113.1),row('PREPROD',4,96,75,21,75,3.7,127.7)]
+    })});
+   }
    if(url.pathname==='/api/cerebro-cloudflare-fleet'){
     calls.push('cloudflare_fleet');
     if(cloudflareReadUnbound)return route.fulfill({status:503,headers,body:JSON.stringify({status:'UNAVAILABLE',reason:'CLOUDFLARE_READ_TOKEN_NOT_BOUND',read_only:true,controls_enabled:false,workers:[]})});
@@ -240,6 +261,24 @@ test('Cloudflare owner Preview reports missing read-only binding precisely, neve
  await expect(provider).toContainText('ARCHIVO COMPUESTO, NO EN VIVO');
  await expect(provider).not.toContainText('EN VIVO · Cloudflare API');
  expect(calls.filter(x=>x==='cloudflare_fleet').length).toBeGreaterThanOrEqual(2);
+ expect(calls).not.toContain('submit_command');
+});
+
+test('Owner lab current device reader is authenticated, never becomes autonomous agent count',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const live=page.getByRole('region',{name:'Latidos y trabajos de dispositivo · fuente actual LAB'});
+ await expect(live).toContainText('LECTURA ACTUAL LAB');
+ await expect(live).toContainText('Dispositivos no revocados: 1');
+ await expect(live).toContainText('Dispositivos no revocados: 4');
+ await expect(live).toContainText('Contacto últimos 5 minutos: 0');
+ await expect(live).toContainText('Agentes, subagentes y jobs activos: DESCONOCIDOS');
+ await expect(live).toContainText('Costes reales: NO_MEDIDOS');
+ await expect(live).toContainText('PREPROD · etiqueta histórica en Supabase LAB');
+ const before=calls.filter(x=>x==='device_live_read').length;
+ await live.getByRole('button',{name:'Actualizar latidos ahora'}).click();
+ await expect.poll(()=>calls.filter(x=>x==='device_live_read').length).toBeGreaterThan(before);
+ expect(calls).not.toContain('lab_control');
  expect(calls).not.toContain('submit_command');
 });
 
