@@ -66,6 +66,12 @@ export default function CerebroCloudflareFleetPanel(){
    {x?'EN VIVO · Cloudflare API · '+format(x.observed_at)+(x.cache_status==='HOT_60S'?' · caché ≤60 s':' · lectura nueva'):
     archived?'ARCHIVO COMPUESTO, NO EN VIVO · auditoría base '+format(archived.base_observed_at)+'; canario '+format(cronGate.observed_at)+' · conexión actual: '+read.reason:
     'SIN AUTORIZACIÓN: '+read.reason}</p>
+  {read.kind==='unavailable'&&read.reason==='CLOUDFLARE_READ_TOKEN_NOT_BOUND'?<div role="status" className="op4-cf-provider-proof" aria-label="Conexión Cloudflare Preview pendiente">
+    <strong>Conector Cloudflare del Preview: SIN CREDENCIAL DE LECTURA CONFIGURADA</strong>
+    <p>La API de Cloudflare no se está consultando desde esta interfaz. El proyecto Vercel Preview requiere la variable de servidor <code>CEREBRO_CF_READ_TOKEN_PREVIEW</code> con un token específico para inventario de Workers y cron, de mínimo privilegio y restringido a la cuenta autorizada.</p>
+    <p>La credencial debe incorporarse directamente en la administración segura de Vercel Preview, nunca en el chat, código, captura ni logs. Tras configurarla, crear un nuevo Preview, consultar «Cloudflare ahora» y comprobar origen y fecha. No introducir suscripciones ni habilitar controles de escritura.</p>
+    <small>Los datos de archivo mostrados a continuación siguen siendo históricos, no estado en vivo. El acceso a Cloudflare desde una conexión externa no conecta automáticamente esta consola.</small>
+   </div>:null}
   <div className="op4-cf-stats" aria-label="Resumen Cloudflare">
    <div><strong>{x?.worker_count??(archived?cronGate.worker_count_now:null)??'—'}</strong><small>Workers registrados</small></div>
    <div><strong>{x?.with_cron??archived?.scheduled_workers??'—'}</strong><small>Con cron verificado</small></div>
