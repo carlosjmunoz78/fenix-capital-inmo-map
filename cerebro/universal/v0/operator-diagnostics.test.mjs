@@ -101,3 +101,24 @@ test('specific GitHub workflow reports observed bounded timing, not an engine ET
  assert.match(unknown,/TIEMPO: NO_MEDIDO/);
  assert.doesNotMatch(unknown,/p50=20 s/);
 });
+
+test('named motor diagnosis distinguishes declared role binding from a globally absent agent',()=>{
+ const f=live();
+ f.snapshot.roles.entries=[
+  {id:'ENG-ARCHITECT',name:'Arquitecto',engine_bindings:['FACT-001','QA-001']},
+  {id:'AGT-SALES-EXECUTIVE',name:'Sales Executive',engine_bindings:['SALE-001','CRM-001']}
+ ];
+ const mapped=answerDiagnosticRequest('MISSING',f,'Qué agentes faltan para FACT-001');
+ assert.match(mapped,/ASIGNACIÓN DECLARADA PARA FACT-001/);
+ assert.match(mapped,/Arquitecto \(ENG-ARCHITECT\)/);
+ assert.match(mapped,/NO procesos ejecutándose/);
+ const unmapped=answerDiagnosticRequest('MISSING',f,'Qué agentes faltan para SEO-001');
+ assert.match(unmapped,/SIN ASIGNACIÓN DE PERFIL PARA SEO-001 EN ESTE REGISTRO/);
+ assert.match(unmapped,/NO demuestra ausencia global/);
+ assert.doesNotMatch(unmapped,/SEO-001 no existe|falta un agente SEO/);
+ const general=answerDiagnosticRequest('MISSING',f,'Qué agentes faltan');
+ assert.match(general,/2 identificadores distintos de motor|4 identificadores distintos de motor/);
+ assert.match(general,/NO constituye el censo global de 179 motores/);
+ const capability=answerDiagnosticRequest('CAPABILITIES',f,'Qué puede hacer FACT-001');
+ assert.match(capability,/ASIGNACIÓN DECLARADA PARA FACT-001/);
+});
