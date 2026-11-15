@@ -33,6 +33,7 @@ jobs:
           node --check cerebro/universal/v0/interface-sdk.mjs
           node --check cerebro/universal/v0/concurrency-shadow.mjs
           node --test cerebro/universal/v0/*.test.mjs
+          node --test cerebro/universal/v0/provider-cloudflare/canary/worker.control-v0.test.mjs cerebro/universal/v0/provider-cloudflare/shared-scheduler-shadow.test.mjs
       - name: Typecheck and build Operativa LAB preview integration (no deployment)
         run: |
           npm ci --ignore-scripts
