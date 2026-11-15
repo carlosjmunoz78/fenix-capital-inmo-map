@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-15T21:43:22.860Z",
+  "updated_at": "2026-11-15T21:47:59.399Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -552,7 +552,8 @@
     "github-wide-skills:8962e4cfc22029b3958a",
     "github-wide-skills:5d898678ba9302d5d000",
     "github-wide-skills:f373e0dd43608257c212",
-    "github-wide-skills:419d0072d7e72eba08b0"
+    "github-wide-skills:419d0072d7e72eba08b0",
+    "github-wide-skills:32e50084a852b13d7759"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2102,6 +2103,39 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 43744177655,
       "checkpointed_at": "2026-11-15T17:59:59.964Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:32e50084a852b13d7759": {
+      "candidate_id": "github-wide-skills:32e50084a852b13d7759",
+      "name": "code-anti-slop",
+      "human_alias": "Code Anti Slop",
+      "wrapper_id": "skillwrap:f990e3dc13a8ea5341f5",
+      "domain": "data-database-supabase",
+      "engine_bindings": [
+        "DATA-001",
+        "DBOFF-001",
+        "STOROFF-001",
+        "API-001",
+        "CRM-001"
+      ],
+      "value_score": 88.11,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "imranbru99/anti-ai-slop",
+        "upstream_head_commit": "305b84b04853424b20a860d3c244b6e8f085af4c",
+        "manifest_sha256": "79889dabea71e9b54276146eb2bcf88e8cfff6ccae80bd5fab24b93fc1ae7e07",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 43765619612,
+      "checkpointed_at": "2026-11-15T21:47:59.399Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -33349,7 +33383,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -33362,7 +33396,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 43765205869,
+  "last_discovery_run_id": 43765619612,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
