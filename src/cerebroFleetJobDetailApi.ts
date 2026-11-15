@@ -32,8 +32,7 @@ export async function readFailedJobDetail(repo:string,run_id:number):Promise<Job
   const expected='https://github.com/carlosjmunoz78/'+repo+'/actions/runs/'+run_id+'/job/';
   if(s.status!=='OK'||s.company_id!=='fenix'||s.environment!=='LAB'||s.owner_verified!==true||
    s.read_only!==true||s.executed!==false||
-   !['FAILED_STEP_VERIFIED','FAILED_JOB_STEP_UNKNOWN'].includes(String(s.status? s.source_status:''))&&
-     !['FAILED_STEP_VERIFIED','FAILED_JOB_STEP_UNKNOWN'].includes(String(s.job_status||''))) {
+   !['FAILED_STEP_VERIFIED','FAILED_JOB_STEP_UNKNOWN'].includes(String(s.job_status||''))) {
    // Endpoint returns its normalized job status in the job evidence itself; it is overwritten
    // by the envelope status OK, so the transport must expose a distinct job_status field.
    return failed('unavailable','JOB_DETAIL_CONTRACT_INVALID');
