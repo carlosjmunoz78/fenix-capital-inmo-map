@@ -127,7 +127,7 @@ export default function CerebroFleetControlPanel(){
      proveedores sin diagnóstico: {triage.unavailable_source_count}.
      Priorización orientativa, sin ejecución.</p>
     <div className="op4-fleet-triage-items">
-     {triage.items.length?triage.items.slice(0,8).map(item=><article className="op4-fleet-triage-item" key={item.key}>
+     {triage.items.length?triage.items.slice(0,8).map(item=>{const detail=jobDetails[item.key];return <article className="op4-fleet-triage-item" key={item.key}>
       <strong>{item.priority} · {item.title}</strong>
       <span>{item.source} · {item.reason} · {date(item.observed_at)}</span>
       <small>{item.next_action}</small>
@@ -137,18 +137,18 @@ export default function CerebroFleetControlPanel(){
        <button type="button" disabled={inspectingJob!==null} onClick={()=>{void inspectFailedJob(item.key,item.evidence_url!)}}>
         {inspectingJob===item.key?'Analizando paso GitHub…':'Analizar paso fallido (solo lectura)'}
        </button>
-       {jobDetails[item.key]&&<div className="op4-fleet-job-evidence" role="status">
-        {jobDetails[item.key].kind==='ready'&&jobDetails[item.key].data?<>
-         <strong>Job GitHub comprobado: {jobDetails[item.key].data.job_name}</strong>
-         <span>{jobDetails[item.key].data.status==='FAILED_STEP_VERIFIED'?
-          'Paso fallido: '+jobDetails[item.key].data.failed_step_number+' · '+jobDetails[item.key].data.failed_step_name:
+       {detail&&<div className="op4-fleet-job-evidence" role="status">
+        {detail.kind==='ready'&&detail.data?<>
+         <strong>Job GitHub comprobado: {detail.data.job_name}</strong>
+         <span>{detail.data.status==='FAILED_STEP_VERIFIED'?
+          'Paso fallido: '+detail.data.failed_step_number+' · '+detail.data.failed_step_name:
           'Job fallido acreditado; paso concreto NO VERIFICADO.'}</span>
          <small>Origen: metadatos públicos de GitHub Actions. No acredita fallo del motor, del agente ni causa raíz.</small>
-         <a href={jobDetails[item.key].data.evidence_url} target="_blank" rel="noreferrer">Ver job en GitHub</a>
-        </>:<span>Detalle no disponible: {jobDetails[item.key].reason}. No se conoce el paso ni la causa raíz.</span>}
+         <a href={detail.data.evidence_url} target="_blank" rel="noreferrer">Ver job en GitHub</a>
+        </>:<span>Detalle no disponible: {detail.reason}. No se conoce el paso ni la causa raíz.</span>}
        </div>}
       </>:null}
-     </article>):<p>No se han acreditado incidencias en esta muestra. No significa cero fallos globales.</p>}
+     </article>}):<p>No se han acreditado incidencias en esta muestra. No significa cero fallos globales.</p>}
     </div>
    </>}
    <p className="op4-fleet-note">P1/P2 son prioridades PROPUESTAS, no cambios de cola. Para intervenir hacen falta contrato del proveedor, política, recibo, comprobación física y rollback.</p>
