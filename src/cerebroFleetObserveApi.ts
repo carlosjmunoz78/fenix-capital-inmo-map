@@ -50,13 +50,13 @@ export async function readFleetLab(signal?:AbortSignal):Promise<FleetRead>{
   return validate(data)?{kind:'ready',snapshot:data,reason:''}:no('unavailable','FLEET_CONTRACT_INVALID');
  }catch{return no('unavailable','FLEET_NETWORK_UNAVAILABLE')}
 }
-export type FleetQuestion={kind:'query'}|{kind:'control';action:'PAUSE'|'RESUME'|'PRIORITIZE';engine:string|null};
+export type FleetQuestion={kind:'query'}|{kind:'control';action:'PAUSE'|'RESUME'|'PRIORITIZE'|'ACCELERATE'|'SLOW_DOWN'|'CANCEL'|'RETRY'|'REASSIGN';engine:string|null};
 export function classifyFleetQuestion(input:string):FleetQuestion|null{
  const s=input.trim().toLowerCase();
  if(!s||s.length>4000)return null;
- const m=s.match(/(?:^|\s)(pausar|pausa|detener|reanudar|reactivar|reactiva|activar|acelerar|acelera|priorizar|prioriza|arrancar)(?:\s|$)/);
+ const m=s.match(/(?:^|\s)(pausar|pausa|detener|reanudar|reactivar|reactiva|activar|acelerar|acelera|ralentizar|ralentiza|priorizar|prioriza|arrancar|cancelar|cancela|reintentar|reintenta|reasignar|reasigna)(?:\s|$)/);
  if(m){
-  const v=m[1],a=/paus|deten/.test(v)?'PAUSE':/reanud|reactiv|activar|arrancar/.test(v)?'RESUME':'PRIORITIZE';
+  const v=m[1],a=/paus|deten/.test(v)?'PAUSE':/reanud|reactiv|activar|arrancar/.test(v)?'RESUME':/aceler/.test(v)?'ACCELERATE':/ralent/.test(v)?'SLOW_DOWN':/cancel/.test(v)?'CANCEL':/reintent/.test(v)?'RETRY':/reasign/.test(v)?'REASSIGN':'PRIORITIZE';
   return{kind:'control',action:a,engine:input.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]||null};
  }
  return /agentes?|subagentes?|motores?|workers?|cloudflare|colas?|queues?|backlog|consumidores?|lab-cf-canary-001|trabajos?|workflow|ejecuciones?|departamentos?|plataformas?|cu[aá]ntos?|inventario|actividad|qu[eé].*(?:haciendo|trabajando)|(?:estado|situaci[oó]n).*cerebro/i.test(s)?{kind:'query'}:null;
@@ -65,7 +65,7 @@ export function answerFleetQuestion(result:FleetRead,question:FleetQuestion):str
  if(question.kind==='control'){
   if(/staging|prod/i.test(question.engine||''))return 'BLOQUEADO: el objetivo protegido no admite órdenes desde LAB.';
   const target=question.engine||'SIN OBJETIVO EXACTO';
-  return 'ORDEN NO EJECUTADA: '+question.action+' '+target+'. No hay un adaptador de control propietario acreditado para pausar, reactivar o modificar prioridades. Faltan contrato de control, identidad, snapshot, pruebas, confirmación, auditoría y rollback. Staging sigue suspendida.';
+  return 'ORDEN NO EJECUTADA: '+question.action+' '+target+'. No hay un adaptador de control propietario acreditado para esta acción. Acelerar no equivale a priorizar y se requieren ETA/coste verificados antes de cambiar recursos. Faltan contrato de control, identidad, snapshot, pruebas, confirmación, auditoría y rollback. Staging sigue suspendida.';
  }
  if(result.kind!=='ready'||!result.snapshot)return 'No puedo consultar el inventario ahora ('+result.reason+'). Ningún dato anterior se presenta como actual.';
  const s=result.snapshot;
