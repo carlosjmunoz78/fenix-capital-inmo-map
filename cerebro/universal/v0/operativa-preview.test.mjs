@@ -90,7 +90,10 @@ test('canonical Operativa voice, STOP and chat files remain unchanged by this br
  assert.ok(client.includes("get('visual_lab')==='cockpit-v3'"));
  assert.ok(client.includes("get('section')==='operativa'"));
  const cockpit=fs.readFileSync(new URL('../../../src/CerebroOperativeCockpitV3.tsx',import.meta.url),'utf8');
- assert.ok(cockpit.includes("query.get('op3_panel')==='motores'"));
+ assert.ok(cockpit.includes("const requested=query.get('op3_panel')"));
+ assert.ok(cockpit.includes("requested==='motores'||requested==='control'"));
+ assert.ok(cockpit.includes("return requested==='motores'||requested==='control'?requested:'resumen'"));
+ assert.ok(!cockpit.includes("requested==='prod'"));
  assert.ok(cockpit.includes("query.get('visual_lab')!=='cockpit-v3'"));
  assert.ok(cockpit.includes('initialOperativaPreviewPanel'));
  assert.ok(client.includes('lab'));
