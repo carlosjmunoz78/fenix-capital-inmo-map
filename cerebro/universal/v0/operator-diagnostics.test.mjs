@@ -79,7 +79,7 @@ test('stale records and disconnected source never become live evidence or inferr
  assert.match(denied,/UPSTREAM_DOWN/);
  assert.match(denied,/NO_MEDIDOS/);
 });
-test('no mutation and no provider/network imports in diagnostic reader',()=>{
+test('no mutation and no provider/network imports in diagnostic reader',async()=>{
  const data=await import('node:fs/promises').then(x=>x.readFile(new URL('../../../src/cerebroOperativaDiagnostics.ts',import.meta.url),'utf8'));
  assert.ok(!/\bfetch\s*\(|\.insert\s*\(|\.update\s*\(|\.delete\s*\(|\bPOST\b/.test(data));
 });
