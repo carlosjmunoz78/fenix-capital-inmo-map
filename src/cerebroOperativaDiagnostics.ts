@@ -1,14 +1,16 @@
 import type {FleetRead,FleetSource} from './cerebroFleetObserveApi';
 import {triageFleet} from './cerebroOperativaTriage.ts';
+import deviceHistory from '../cerebro/universal/v0/device-runtime-snapshot-fenix-2026-11-15.json';
 
 /** LAB read-only owner diagnostic: evidence is never promoted into inferred active agents, costs or ETAs. */
-export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES';
+export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES'|'DEVICE_HISTORY';
 const canon=(input:string)=>input.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 const MUTATION=/^\s*(?:pausa|pausar|deten|detener|reanuda|reanudar|reactiva|reactivar|acelera|acelerar|prioriza|priorizar|cancela|cancelar|reintenta|reintentar|reasigna|reasignar|ejecuta|ejecutar|crea|crear|publica|publicar|activa|activar)\b/;
 export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
  if(typeof query!=='string'||query.length>4000)return null;
  const q=canon(query);
  if(!q||MUTATION.test(q))return null;
+ if(/\b(dispositivos?|latidos?|heartbeats?|device bridge)\b/.test(q))return 'DEVICE_HISTORY';
  if(/\b(coste|costara|costaria|costos?|cuesta|cuestan|precio|presupuesto|tiempo|tardara|tarda|tardaria|duracion|eta|euros?|horas?|minutos?)\b/.test(q))return 'ESTIMATES';
  if(/\b(falla|fallan|fallando|fallos?|errores?|incidencias?|averiados?|rotos?|bloqueados?|atascados?|no funciona|sin funcionar)\b/.test(q))return 'FAILURES';
  if(/\b(faltan?|falta|necesitamos?|necesitaria|carecemos|sin agente|sin subagente|que necesitamos|que hace falta)\b/.test(q))return 'MISSING';
@@ -47,6 +49,25 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
    'SIN ASIGNACIÓN DE PERFIL PARA '+scoped+' EN ESTE REGISTRO (NO demuestra ausencia global de agentes o capacidades). ':
   'Este registro relaciona '+s.roles.declared_role_profiles+' perfiles con '+declaredMappings.length+
    ' identificadores distintos de motor; NO constituye el censo global de 179 motores ni de agentes. ';
+ if(intent==='DEVICE_HISTORY'){
+  const d=deviceHistory;
+  if(d.schema!=='CEREBRO_DEVICE_RUNTIME_SNAPSHOT_V1'||d.kind!=='DATED_READ_ONLY_EVIDENCE'||
+   d.company_id!=='fenix'||d.source_project_role!=='SUPABASE_LAB_NOT_PROD'||
+   d.contains_device_ids!==false||d.contains_command_payloads!==false||
+   d.active_agents_verified!==null||!Number.isFinite(Date.parse(d.observed_at))||
+   d.environments.length!==2)return intro+base+'ARCHIVO DE DISPOSITIVOS NO VERIFICADO; sin cifras y sin ejecución.';
+  const r=d.environments;
+  const devices=r.reduce((v,x)=>v+x.not_revoked,0);
+  const recent=r.reduce((v,x)=>v+x.heartbeat_24h,0);
+  return intro+base+'AUDITORÍA FECHADA (NO EN VIVO) DE DISPOSITIVOS DEL SUPABASE LAB, observada '+d.observed_at+'. '+
+   'Registros no revocados: '+devices+'; con latido en las 24 horas anteriores a esa auditoría: '+recent+'. '+
+   'Esto NO acredita cero agentes; agentes y subagentes actualmente activos: DESCONOCIDOS. '+
+   r.map(x=>x.environment+' (solo etiqueta histórica de BD LAB): '+x.commands_total+' órdenes históricas, '+
+    x.completed+' completadas, '+x.failed+' fallidas, '+x.semantic_verified_count+
+    ' resultados verificados, p50 '+x.p50_completed_seconds+' s y p90 '+x.p90_completed_seconds+
+    ' s sobre '+x.comparable_successful_duration_samples+' finalizaciones exitosas comparables.').join(' ')+
+   ' PREPROD no es una App PREPROD activa. No son tiempos futuros ni estimaciones de coste (NO_MEDIDO). No se ha ejecutado ninguna orden.';
+ }
  if(intent==='ESTIMATES'){
   // Match only a complete workflow name from the live, authenticated source.
   // Never extrapolate a workflow timing to an engine or autonomous agent.
