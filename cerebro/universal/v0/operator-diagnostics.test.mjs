@@ -32,6 +32,10 @@ for(const [q,expectation] of [
  ['¿Cuánto tarda cada trabajo?','ESTIMATES'],
  ['¿Cuánto cuesta terminar Instagram?','ESTIMATES'],
  ['Tiempo y coste de SEO-001','ESTIMATES'],
+ ['¿Cuántos dispositivos tienen latido?','DEVICE_HISTORY'],
+ ['¿Cuánto tardan las órdenes de dispositivos?','DEVICE_HISTORY'],
+ ['¿Están conectados los agentes de dispositivo?','DEVICE_HISTORY'],
+ ['pausar dispositivos',null],
  ['¿Cuántos agentes tenemos?',null],
  ['pausar SEO-001',null],
  ['acelerar SEO-001',null],
@@ -67,6 +71,23 @@ test('repaired GitHub workflow failure is not still announced as active failure'
  const answer=answerDiagnosticRequest('FAILURES',f,'Qué falla ahora');
  assert.match(answer,/ningún último resultado fallido acreditado/);
  assert.doesNotMatch(answer,/CEREBRO QA \[failure\]/);
+});
+
+test('hidden device telemetry question uses dated LAB evidence, no inferred current agent counts',()=>{
+ const question='¿Cuántos dispositivos tienen latido?';
+ const response=answerDiagnosticRequest('DEVICE_HISTORY',live(),question);
+ assert.match(response,/AUDITORÍA FECHADA \(NO EN VIVO\)/);
+ assert.match(response,/Registros no revocados: 5/);
+ assert.match(response,/latido en las 24 horas anteriores a esa auditoría: 0/);
+ assert.match(response,/agentes y subagentes actualmente activos: DESCONOCIDOS/);
+ assert.match(response,/LAB \(solo etiqueta histórica de BD LAB\): 8 órdenes históricas/);
+ assert.match(response,/PREPROD \(solo etiqueta histórica de BD LAB\): 96 órdenes históricas/);
+ assert.match(response,/p50 28.2 s y p90 113.1 s/);
+ assert.match(response,/p50 3.7 s y p90 127.7 s/);
+ assert.match(response,/PREPROD no es una App PREPROD activa/);
+ assert.match(response,/NO_MEDIDO/);
+ assert.match(response,/No se ha ejecutado ninguna orden/);
+ assert.doesNotMatch(response,/5 agentes activos|coste 0 €/);
 });
 
 test('cost and ETA are unknown until measured, without fabricated numbers',()=>{
