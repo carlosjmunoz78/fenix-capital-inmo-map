@@ -18,3 +18,8 @@
 .op4-cf-detail strong{font-size:13px;overflow-wrap:anywhere}
 .op4-cf-detail p:last-child{display:flex;align-items:center;gap:7px;color:#e5cf9f}
 @media(max-width:650px){.op4-cf{padding:12px}.op4-cf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.op4-cf-worker{align-items:flex-start}.op4-cf-worker button{flex-shrink:0}}
+
+.op4-cf-capacity{padding:13px;border:1px solid #7e7146;background:#172c36;border-radius:10px;display:flex;flex-direction:column;gap:5px}
+.op4-cf-capacity strong{font-size:13px;color:#f5dc9d}
+.op4-cf-capacity p{font-size:12px;color:#e6d5b6}
+.op4-cf-capacity small{font-size:11px;color:#a8c2ca;overflow-wrap:anywhere}
