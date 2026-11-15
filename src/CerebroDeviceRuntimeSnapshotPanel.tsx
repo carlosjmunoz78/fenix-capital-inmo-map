@@ -46,3 +46,4 @@ export default function CerebroDeviceRuntimeSnapshotPanel(){
   <p className="op4-fleet-note">PREPROD es una etiqueta de registros anteriores del proyecto Supabase LAB, no un despliegue activo de App PREPROD.
    No se han creado agentes, ejecutado comandos ni reactivado cron. Para pasar de archivo a estado real harán falta lecturas periódicas autenticadas, identidad verificada y latidos frescos.</p>
  </section>;
+}
