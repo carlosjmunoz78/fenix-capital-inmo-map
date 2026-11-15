@@ -25,7 +25,10 @@ export function validateCloudflareFleet(raw:unknown):raw is CloudflareFleetSnaps
  typeof x.observed_at!=='string'||!Number.isFinite(Date.parse(x.observed_at))||
  !Number.isSafeInteger(x.worker_count)||x.worker_count!==x.workers.length||
  !Number.isSafeInteger(x.cron_verified_count)||!Number.isSafeInteger(x.with_cron)||!Number.isSafeInteger(x.without_cron)||
- !Number.isSafeInteger(x.cron_unknown_count)||x.cron_verified_count!==x.with_cron+x.without_cron||
+ !Number.isSafeInteger(x.cron_unknown_count)||
+ typeof x.with_cron!=='number'||typeof x.without_cron!=='number'||typeof x.cron_unknown_count!=='number'||
+ x.with_cron<0||x.without_cron<0||x.cron_unknown_count<0||
+ x.cron_verified_count!==x.with_cron+x.without_cron||
  x.worker_count!==x.cron_verified_count+x.cron_unknown_count||
  (x.status==='OK'&&x.cron_unknown_count!==0)||
  !['FRESH','HOT_60S'].includes(String(x.cache_status)))return false;
