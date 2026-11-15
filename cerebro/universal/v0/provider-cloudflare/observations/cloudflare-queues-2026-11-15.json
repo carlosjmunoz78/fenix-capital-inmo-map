@@ -1,0 +1,476 @@
+{
+  "schema_version": "1.0.0",
+  "source": "CLOUDFLARE_ACCOUNT_QUEUES_GET_SNAPSHOT",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "observed_at": "2026-11-15T17:22:24.053Z",
+  "queue_count": 22,
+  "consumer_verified_count": 22,
+  "metric_verified_count": 22,
+  "known_backlog_count": 0,
+  "unknown_backlog_queues": 0,
+  "queues": [
+    {
+      "queue_id": "45f17e040bcb4c10a509f31b1460da49",
+      "queue_name": "cerebro-fact001-ums001-enrollment-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "1bb3034a77e845638d5e54aeab29882f",
+          "type": "worker",
+          "script_name": "cerebro-fact001-ums001-issuer-provisioner-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "dbfb6b4bde2d448f88ca60ca9aa2cd5b",
+      "queue_name": "cerebro-fact001-ums001-read-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "54a8996624344930a34c07146cdeecea",
+          "type": "worker",
+          "script_name": "cerebro-fact001-gateway-lab-eu-20261109",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "9889bd52244a405c8c56b868e640bddd",
+      "queue_name": "cerebro-instagram-autoqual-ticker-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "bd21ba9e4bcb4f0d84017375c7161fb9",
+          "type": "worker",
+          "script_name": "cerebro-instagram-knowledge-autoqual-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 91
+    },
+    {
+      "queue_id": "4637b0216dbd457ca253c3d5ed520d47",
+      "queue_name": "cerebro-instagram-ums001-canary-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "084571add3874dcb9b0dbc11b45828c6",
+          "type": "worker",
+          "script_name": "cerebro-instagram-knowledge-autoqual-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "995d03d8045b409bbdcde8a4afe0c15e",
+      "queue_name": "cerebro-linkedin-autonomy-ticker-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "50bdc2711956492f84dfbb57769b6154",
+          "type": "worker",
+          "script_name": "cerebro-linkedin-autonomy-ticker-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 128
+    },
+    {
+      "queue_id": "2404f1e2dbe2407dbdd37e6957855033",
+      "queue_name": "cerebro-operativa-control-canary-queue-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "4583df6a9ab34844b3c759ca15a26da1",
+          "type": "worker",
+          "script_name": "cerebro-operativa-control-canary-lab",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 2
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "69ea34926acd4f42a12d442759304e8e",
+      "queue_name": "cerebro-ums001-ai-image-factory-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "b83141a01b6e433dbc1b5f0d7515d226",
+          "type": "worker",
+          "script_name": "cerebro-ums001-ai-image-factory-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "478190e1084342e988aee173d04253c7",
+      "queue_name": "cerebro-ums001-engine-intake-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "f498b821d6894023b7c8cc809e94254b",
+          "type": "worker",
+          "script_name": "cerebro-ums001-universal-engine-adapter-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "74c48e70ebc24b00ab56aef6c74aac58",
+      "queue_name": "cerebro-ums001-image-qa-shadow-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "df703b5d6b4e460c99f9ef3761372202",
+          "type": "worker",
+          "script_name": "cerebro-ums001-image-qa-shadow-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "eb196c69f0384170b10c8e9030e38b38",
+      "queue_name": "cerebro-ums001-image-sender-command-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "4b88a00c458e48119ff82d2be9a45419",
+          "type": "worker",
+          "script_name": "cerebro-ums001-image-auth-sender-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "39d92161f2ac429791bbcc3dfd25c6b8",
+      "queue_name": "cerebro-ums001-image-signed-command-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "f27969f3465541b28f0def5814d47e93",
+          "type": "worker",
+          "script_name": "cerebro-ums001-signed-qa-receiver-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "1e4bfba2e187485ca232edfaba31c43b",
+      "queue_name": "cerebro-ums001-producer-demand-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "02bdf1b19307447aacc13aea274cfacb",
+          "type": "worker",
+          "script_name": "cerebro-ums001-producer-private-gateway-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "2cff3625d19b4c90a48a7b6b01567bf5",
+      "queue_name": "cerebro-ums001-registered-image-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "6f3a349057e243518594ecd97e96e874",
+          "type": "worker",
+          "script_name": "cerebro-ums001-registered-image-executor-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "cf35d9d865594db8ac5f9ea3f9dfb667",
+      "queue_name": "cerebro-ums001-registered-image-results-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "6c50a63c21db4603bc58615c7e2eca74",
+          "type": "worker",
+          "script_name": "cerebro-fact001-ums001-issuer-provisioner-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "98d3edbe67d145d5949322d15bbb83db",
+      "queue_name": "cerebro-ums001-social-approved-creative-v2-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "e66da126ecc843a3b5820c4a741b7365",
+          "type": "worker",
+          "script_name": "cerebro-ums001-social-creative-bridge-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "bc357a2feb5e4c6fa0c979a964c5c8d0",
+      "queue_name": "cerebro-ums001-social-creative-event-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "3c746ac3517642ca85f2a6cd4a1cb397",
+          "type": "worker",
+          "script_name": "cerebro-ums001-social-creative-bridge-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "8ec1e374e4ee48728a1c8f4b0564942f",
+      "queue_name": "cerebro-ums001-social-private-reply-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "739f53b49b7d46049c333fdd679f1862",
+          "type": "worker",
+          "script_name": "cerebro-ums001-social-creative-bridge-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "4809731454194234b6a503de75d2d668",
+      "queue_name": "cerebro-ums001-source-refresh-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "58a24008555c4940bfbc43e2bb884941",
+          "type": "worker",
+          "script_name": "cerebro-ums001-multisource-scout-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "8125ce194b9146aa801fde07f53a1f43",
+      "queue_name": "cerebro-ums001-universal-chatgpt-intake-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "6c49c69246f74bf5844eca66b3e61ccd",
+          "type": "worker",
+          "script_name": "cerebro-ums001-universal-router-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "6fcbedd9ad484d48a03432688f04f748",
+      "queue_name": "cerebro-ums001-universal-demand-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "987811ca524b49b89c51cf3a18bacfa6",
+          "type": "worker",
+          "script_name": "cerebro-ums001-universal-gateway-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "3eb1ca478a104aaeaaf8684d24e2142a",
+      "queue_name": "cerebro-ums001-universal-render-canary-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "2acdc7485fd9431e9dddab0a6abdfac7",
+          "type": "worker",
+          "script_name": "cerebro-ums001-private-image-canary-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 0
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    },
+    {
+      "queue_id": "adaf3bda0a9b4bfeb8ca0c02bebe6f40",
+      "queue_name": "cerebro-ums001-universal-social-intake-lab-eu",
+      "jurisdiction": "eu",
+      "consumer_read": "VERIFIED",
+      "consumers": [
+        {
+          "id": "0bb60833dfac48e3bd167af9ed78193c",
+          "type": "worker",
+          "script_name": "cerebro-ums001-universal-router-lab-eu",
+          "settings": {
+            "batch_size": 1,
+            "max_concurrency": 1,
+            "max_retries": 1
+          }
+        }
+      ],
+      "metrics_read": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    }
+  ],
+  "meaning": "backlog best-effort, consumer configured not an agent active, zero backlog not historical success; no existing queue mutated"
+}
