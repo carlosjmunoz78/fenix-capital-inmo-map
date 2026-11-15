@@ -4,7 +4,7 @@
   "company_id": "fenix",
   "engine_id": "LAB-CF-CANARY-001",
   "environment": "LAB",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "role": "CLOUDFLARE_PROVIDER_CONTROL_CANARY",
   "canonical_fact_registry_179_modified": false,
   "state": {
@@ -18,7 +18,10 @@
     "routes": [],
     "requests_verified": false,
     "cron_events_verified": false,
-    "observed_at": "2026-11-15T15:43:01.301Z"
+    "observed_at": "2026-11-15T15:43:01.301Z",
+    "version_active": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+    "paused_flag_effective": true,
+    "control_config_verified_at": "2026-11-15T16:29:49.567Z"
   },
   "constraints": {
     "cron_free_quota_total": 5,
@@ -43,6 +46,14 @@
     },
     "write_from_console": {
       "status": "NOT_CONNECTED"
+    },
+    "provider_config_pause_resume": {
+      "status": "PHYSICAL_VERIFIED_CANARY_ONLY",
+      "effective_source": "Cloudflare deployments + deployed version resources",
+      "receipts": "physical-provider-control-2026-11-15.json",
+      "paused_final": true,
+      "autonomous_work_verified": false,
+      "console_write_connected": false
     }
   },
   "dependencies": {
@@ -56,14 +67,19 @@
   "backups": {
     "source": "worker.mjs",
     "configuration": "../observations/cloudflare-free-cron-capacity-2026-11-15.json",
-    "existing_crons_snapshot": true
+    "existing_crons_snapshot": true,
+    "original_cloudflare_deployed_version": "99aeccb9-190f-4110-8267-ff58de59ae8e",
+    "control_source": "worker.control-v0.mjs",
+    "paused_version": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+    "resumed_version": "44d92703-d66c-467f-b59d-eba113e2d954"
   },
   "rollback": {
     "target_crons": [],
     "target_workers_dev": false,
     "target_preview_urls": false,
     "physical_readback": true,
-    "delete_without_snapshot": false
+    "delete_without_snapshot": false,
+    "control_flag_true_redeployed_from_resumed": true
   },
   "human_required": [
     "MONEY_LIMIT",
@@ -73,11 +89,14 @@
     "mode": "DRAFT_LAB_ONLY",
     "production_eligible": false,
     "no_paid_plan": true,
-    "next_gate": "Shared scheduler design within existing Cloudflare Free quota; do not touch existing 5 crons without detailed analysis and tested rollback"
+    "next_gate": "Console owner-gated Cloudflare write adapter remains unconnected; evaluate existing 5-cron scheduler via parallel shadow with OLD vs NEW and rollback, never modify existing schedules by default."
   },
   "source_paths": [
     "worker.mjs",
     "RUNBOOK_REAL_CRON_CONTROL_V0.md",
-    "../observations/cloudflare-free-cron-capacity-2026-11-15.json"
+    "../observations/cloudflare-free-cron-capacity-2026-11-15.json",
+    "worker.control-v0.mjs",
+    "worker.control-v0.test.mjs",
+    "physical-provider-control-2026-11-15.json"
   ]
 }
