@@ -86,6 +86,7 @@ async function setup(page:Page){
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
     const entries=Array.from({length:11},(_,i)=>({id:i===10?'AGT-SALES-EXECUTIVE':'ENG-TEST-'+String(i).padStart(2,'0'),
      name:i===10?'Ventas':'Especialista '+i,department:i===10?'REVENUE_SALES':'ENGINEERING',
+     engine_bindings:i===10?['SALE-001','LEAD-001','CRM-001']:['FACT-001','QA-001'],
      company_id:'GLOBAL',environment:'PREPROD',state:'DECLARED',reports_to:null,runtime_verified:false}));
     return route.fulfill({status:200,headers,body:JSON.stringify({
      status:'OK',source:'OWNER_LAB_FLEET_SOURCES_V1',environment:'LAB',company_id:'fenix',
@@ -175,7 +176,12 @@ test('Owner Operativa answers missing-agent, ETA/cost and priority advice withou
  await send.click();
  await expect(answer).toContainText('AGENTES QUE FALTAN: NO CUANTIFICABLES');
  await expect(answer).toContainText('179 motores lógicos DEFINIDOS');
- await prompt.fill('¿Cuánto tarda y cuesta SEO-001?');
+ await expect(answer).toContainText('SIN ASIGNACIÓN DE PERFIL PARA SEO-001 EN ESTE REGISTRO');
+ await prompt.fill('Qué agentes faltan para FACT-001');
+ await send.click();
+ await expect(answer).toContainText('ASIGNACIÓN DECLARADA PARA FACT-001 EN ESTE REGISTRO');
+ await expect(answer).toContainText('Especialista 0');
+  await prompt.fill('¿Cuánto tarda y cuesta SEO-001?');
  await send.click();
  await expect(answer).toContainText('TIEMPO: NO_MEDIDO');
  await expect(answer).toContainText('COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS');
