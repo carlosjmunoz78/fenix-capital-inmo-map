@@ -92,3 +92,19 @@ test('no ETA extrapolation when fewer than three matching successful runs exist'
   run_started_at:'2026-11-15T10:00:00Z',updated_at:'2026-11-15T10:00:10Z'}]};
  assert.deepEqual(summarizeFleetRuns(raw,repo)?.timing_samples,[]);
 });
+
+test('declared role engine mappings are explicit, bounded and never count live agents',()=>{
+ const actual=summarizeFleetRoles(reg);
+ assert.ok(actual);
+ assert.equal(actual.entries.length,11);
+ assert.deepEqual(actual.entries.find(r=>r.id==='AGT-SALES-EXECUTIVE').engine_bindings,
+  ['SALE-001','LEAD-001','NBA-001','COM-001','CRM-001','C360-001','CTX-001']);
+ assert.equal(actual.entries.filter(r=>r.engine_bindings.includes('FACT-001')).length,10);
+ assert.equal(actual.entries.filter(r=>r.engine_bindings.includes('SEO-001')).length,0);
+ assert.equal(actual.active_agent_count,null);
+ assert.equal(actual.entries.every(r=>r.runtime_verified===false),true);
+ const forged={roles:[{...reg.roles[0],engines:['FACT-001','FACT-001']}]};
+ assert.equal(summarizeFleetRoles(forged),null);
+ const forged2={roles:[{...reg.roles[0],engines:['https://attacker.invalid/agent']}]};
+ assert.equal(summarizeFleetRoles(forged2),null);
+});
