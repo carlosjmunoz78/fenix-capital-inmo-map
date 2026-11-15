@@ -60,3 +60,35 @@ test('new fleet lambda loads under Node24 and refuses any non-Preview request be
   headers:{host:'fenix-capital-preprod-qa.vercel.app'}},res);
  assert.equal(status,403);assert.equal(body.reason,'PREVIEW_ONLY');assert.equal(calls,0);
 });
+
+test('completed successful GitHub workflow run timings are bounded proxies, never engine timings',()=>{
+ const completed=(id,s,updated)=>({...run(id,'completed'),name:'CEREBRO Universal Gateway V0 LAB contract CI',
+  conclusion:'success',run_started_at:s,updated_at:updated});
+ const source=[
+  completed(201,'2026-11-15T10:00:00Z','2026-11-15T10:00:10Z'),
+  completed(202,'2026-11-15T10:00:00Z','2026-11-15T10:00:20Z'),
+  completed(203,'2026-11-15T10:00:00Z','2026-11-15T10:00:30Z'),
+  completed(204,'2026-11-15T10:00:00Z','2026-11-15T10:00:40Z'),
+  {...completed(205,'2026-11-15T10:00:00Z','2026-11-15T10:00:25Z'),conclusion:'failure'}
+ ];
+ const summary=summarizeFleetRuns({workflow_runs:source},repo);
+ assert.equal(summary.timing_samples.length,1);
+ assert.deepEqual(summary.timing_samples[0],{
+  workflow_name:'CEREBRO Universal Gateway V0 LAB contract CI',sample_size:4,
+  p50_upper_bound_seconds:20,p90_upper_bound_seconds:40,
+  method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY',engine_mapping_verified:false
+ });
+ assert.equal(summary.recent[0].engine_id,null);
+ assert.equal(summary.recent[0].agent_id,null);
+ assert.equal(summary.recent[0].duration_upper_bound_seconds,10);
+ assert.equal(summary.recent[4].duration_upper_bound_seconds,null);
+ assert.equal(normalizeFleetRun({...run(303,'completed'),conclusion:'success',
+  run_started_at:'2026-11-14T00:00:00Z',updated_at:'2026-11-15T10:00:00Z'},repo)?.duration_upper_bound_seconds,122400);
+ assert.equal(normalizeFleetRun({...run(304,'completed'),conclusion:'success',
+  run_started_at:'INVALID'},repo)?.duration_upper_bound_seconds,null);
+});
+test('no ETA extrapolation when fewer than three matching successful runs exist',()=>{
+ const raw={workflow_runs:[{...run(12,'completed'),conclusion:'success',
+  run_started_at:'2026-11-15T10:00:00Z',updated_at:'2026-11-15T10:00:10Z'}]};
+ assert.deepEqual(summarizeFleetRuns(raw,repo)?.timing_samples,[]);
+});
