@@ -50,6 +50,17 @@ export function validateCloudflareFleet(raw:unknown):raw is CloudflareFleetSnaps
  }
  return true;
 }
+const CF_ERROR_CODES=new Set([
+ 'CLOUDFLARE_READ_TOKEN_NOT_BOUND','CLOUDFLARE_SCRIPTS_UNAVAILABLE',
+ 'CLOUDFLARE_SCRIPT_CONTRACT_INVALID','CLOUDFLARE_PAGINATION_OUT_OF_BOUNDS',
+ 'CLOUDFLARE_PAGE_UNAVAILABLE','OWNER_RESOLVER_UNAVAILABLE',
+]);
+export function parseCloudflareProviderError(status:number,raw:unknown):string{
+ if(status!==503||!raw||typeof raw!=='object')return 'CLOUDFLARE_SOURCE_HTTP_'+status;
+ const v=raw as {status?:unknown;reason?:unknown;controls_enabled?:unknown};
+ return v.status==='UNAVAILABLE'&&v.controls_enabled===false&&typeof v.reason==='string'&&CF_ERROR_CODES.has(v.reason)?
+  v.reason:'CLOUDFLARE_SOURCE_HTTP_'+status;
+}
 export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boolean;signal?:AbortSignal}={}):Promise<CloudflareFleetRead>{
  if(typeof window==='undefined'||!HOST.test(window.location.hostname)||new URLSearchParams(window.location.search).get('visual_lab')!=='cockpit-v3')
   return unavailable('denied','OWNER_PREVIEW_ONLY');
@@ -60,7 +71,11 @@ export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boole
    method:'GET',headers:{authorization:'Bearer '+session.access_token,apikey:SUPABASE_PUBLISHABLE_KEY,
     accept:'application/json'},cache:'no-store',signal});
   if(res.status===401||res.status===403)return unavailable('denied','OWNER_DENIED');
-  if(res.status!==200)return unavailable('unavailable','CLOUDFLARE_SOURCE_HTTP_'+res.status);
+  if(res.status!==200){
+   // Owner-only endpoint returns an allowlisted reason; never echo arbitrary upstream text or tokens.
+   const body:unknown=await res.json().catch(()=>null);
+   return unavailable('unavailable',parseCloudflareProviderError(res.status,body));
+  }
   const data:unknown=await res.json();
   if(!validateCloudflareFleet(data))return unavailable('unavailable','CLOUDFLARE_SOURCE_CONTRACT_INVALID');
   return{kind:'ready',snapshot:data,reason:''};
