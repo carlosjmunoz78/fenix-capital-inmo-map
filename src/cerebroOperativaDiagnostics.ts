@@ -8,8 +8,7 @@ export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
  if(typeof query!=='string'||query.length>4000)return null;
  const q=canon(query);
  if(!q||MUTATION.test(q))return null;
- if(/\b(cuanto|cuantos|cuanta|cuantas|coste|costara|costaria|cuesta|precio|presupuesto|tiempo|tardara|tarda|duracion|eta|euros?|horas?|minutos?)\b/.test(q)&&
-    /\b(cost|tard|duracion|eta|euros?|horas?|minutos?|tiempo|precio|presupuesto)\w*/.test(q))return 'ESTIMATES';
+ if(/\b(coste|costara|costaria|costos?|cuesta|cuestan|precio|presupuesto|tiempo|tardara|tarda|tardaria|duracion|eta|euros?|horas?|minutos?)\b/.test(q))return 'ESTIMATES';
  if(/\b(falla|fallan|fallando|fallos?|errores?|incidencias?|averiados?|rotos?|bloqueados?|atascados?|no funciona|sin funcionar)\b/.test(q))return 'FAILURES';
  if(/\b(faltan?|falta|necesitamos?|necesitaria|carecemos|sin agente|sin subagente|que necesitamos|que hace falta)\b/.test(q))return 'MISSING';
  if(/\b(puede|puedes|podemos|capacidades?|sabe hacer|sirve para|que hace cerebro)\b/.test(q)&&
