@@ -25,14 +25,14 @@ const realVerifier=async(token,expectedIssuer)=>{
 };
 function fixture(overrides={}){
  const calls={verified:0,actor:0,session:0};
- const verifyIssuerJwt=overrides.verifyIssuerJwt||async(t,iss)=>{calls.verified++;return realVerifier(t,iss)};
- const resolveOwnerByVerifiedUser=overrides.resolveOwnerByVerifiedUser||async id=>{
+ const verifyIssuerJwt=overrides.verifyIssuerJwt || (async (t,iss)=>{calls.verified++;return realVerifier(t,iss)});
+ const resolveOwnerByVerifiedUser=overrides.resolveOwnerByVerifiedUser || (async id=>{
   calls.actor++;assert.equal(id,USER);return {actor_code:'CARLOS-ADMIN',active:true};
- };
- const readActiveSession=overrides.readActiveSession||async query=>{
+ });
+ const readActiveSession=overrides.readActiveSession || (async query=>{
   calls.session++;assert.deepEqual(query,{sessionId:SID,userId:USER});
   return {id:SID,user_id:USER,not_after:null};
- };
+ });
  return {gate:createOwnerBearerSessionGateShadow({verifyIssuerJwt,resolveOwnerByVerifiedUser,readActiveSession}),calls};
 }
 test('shadow signed synthetic JWT, actor and live session produce read-only allow',async()=>{
