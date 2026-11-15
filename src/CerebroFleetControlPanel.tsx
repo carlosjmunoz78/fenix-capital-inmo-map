@@ -2,6 +2,7 @@ import {useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,Clock,RefreshCcw,Shield,Users,Workflow} from 'lucide-react';
 import {readFleetLab,type FleetRead} from './cerebroFleetObserveApi';
 import {triageFleet} from './cerebroOperativaTriage';
+import {readFailedJobDetail,type JobDetailRead} from './cerebroFleetJobDetailApi';
 import CerebroLabWorkerControlPanel from './CerebroLabWorkerControlPanel';
 import CerebroCloudflareFleetPanel from './CerebroCloudflareFleetPanel';
 import CerebroCloudflareQueuesPanel from './CerebroCloudflareQueuesPanel';
@@ -21,9 +22,12 @@ export default function CerebroFleetControlPanel(){
  const[lastError,setLastError]=useState('');
  const[controlTarget,setControlTarget]=useState('SEO-001');
  const[inspectTarget,setInspectTarget]=useState('FACT-001');
+ const[inspectingJob,setInspectingJob]=useState<string|null>(null);
+ const[jobDetails,setJobDetails]=useState<Record<string,JobDetailRead>>({});
  const[controlStatus,setControlStatus]=useState('');
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   setLoading(true);
+  setJobDetails({});
   const result=await readFleetLab(signal);
   if(signal?.aborted)return;
   setResult(result);setLastError(result.reason);
@@ -52,6 +56,16 @@ export default function CerebroFleetControlPanel(){
  const inspectedEngine=inspectTarget.trim().toUpperCase();
  const inspectedIsValid=/^[A-Z][A-Z0-9]{1,11}-[0-9]{3}$/.test(inspectedEngine);
  const inspectedProfiles=inspectedIsValid?roles.filter(r=>r.engine_bindings.includes(inspectedEngine)):[];
+ const inspectFailedJob=async(key:string,url:string)=>{
+  if(inspectingJob)return;
+  const target=url.match(/^https:\/\/github\.com\/carlosjmunoz78\/(fenix-capital-inmo-map|capital-mapa-pro)\/actions\/runs\/([1-9]\d{0,14})$/);
+  if(!target){setJobDetails(prev=>({...prev,[key]:{kind:'denied',reason:'EVIDENCE_URL_NOT_ALLOWLISTED',data:null}}));return;}
+  setInspectingJob(key);
+  try{
+   const read=await readFailedJobDetail(target[1],Number(target[2]));
+   setJobDetails(prev=>({...prev,[key]:read}));
+  }finally{setInspectingJob(null);}
+ };
  const control=(action:string)=>{
   const id=controlTarget.trim().toUpperCase();
   const reason=/(?:STAGING|PROD)/.test(id)?'Entorno protegido: no se permite control desde el Preview.':
@@ -119,6 +133,21 @@ export default function CerebroFleetControlPanel(){
       <small>{item.next_action}</small>
       <small>Tiempo: {item.eta} · Coste: {item.cost} · Ámbito: {item.scope}</small>
       {item.evidence_url?<a href={item.evidence_url} target="_blank" rel="noreferrer">Ver ejecución GitHub</a>:null}
+      {item.kind==='WORKFLOW_FAILURE'&&item.evidence_url?<>
+       <button type="button" disabled={inspectingJob!==null} onClick={()=>{void inspectFailedJob(item.key,item.evidence_url!)}}>
+        {inspectingJob===item.key?'Analizando paso GitHub…':'Analizar paso fallido (solo lectura)'}
+       </button>
+       {jobDetails[item.key]&&<div className="op4-fleet-job-evidence" role="status">
+        {jobDetails[item.key].kind==='ready'&&jobDetails[item.key].data?<>
+         <strong>Job GitHub comprobado: {jobDetails[item.key].data.job_name}</strong>
+         <span>{jobDetails[item.key].data.status==='FAILED_STEP_VERIFIED'?
+          'Paso fallido: '+jobDetails[item.key].data.failed_step_number+' · '+jobDetails[item.key].data.failed_step_name:
+          'Job fallido acreditado; paso concreto NO VERIFICADO.'}</span>
+         <small>Origen: metadatos públicos de GitHub Actions. No acredita fallo del motor, del agente ni causa raíz.</small>
+         <a href={jobDetails[item.key].data.evidence_url} target="_blank" rel="noreferrer">Ver job en GitHub</a>
+        </>:<span>Detalle no disponible: {jobDetails[item.key].reason}. No se conoce el paso ni la causa raíz.</span>}
+       </div>}
+      </>:null}
      </article>):<p>No se han acreditado incidencias en esta muestra. No significa cero fallos globales.</p>}
     </div>
    </>}
