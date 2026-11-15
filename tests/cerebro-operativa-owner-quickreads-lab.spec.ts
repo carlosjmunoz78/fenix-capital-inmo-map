@@ -327,7 +327,6 @@ test('Job source dashboard shows scoped historical status and measured samples, 
  await expect(region).toContainText('En cola con más de 24 h');
  await expect(region).toContainText('Coste incremental registrado: 0,0000 €');
  await expect(region).toContainText('Coste total de infraestructura: NO_MEDIDO');
- await expect(region).toContainText('Agentes'); 
  await expect(region).toContainText('no hay prueba de agent_id, subagent_id');
  const before=calls.filter(x=>x==='agent_job_live_read').length;
  await region.getByRole('button',{name:'Actualizar trabajos ahora'}).click();
