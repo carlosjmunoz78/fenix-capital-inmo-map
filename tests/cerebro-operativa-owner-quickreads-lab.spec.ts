@@ -227,3 +227,25 @@ test('isolated LAB worker responds to actual revisioned pause, resume, tick and 
  expect(calls).not.toContain('submit_command');
  await page.screenshot({path:'test-results/operativa-lab-control-verified.png',fullPage:false,animations:'disabled'});
 });
+
+test('Main owner conversation plans but never executes a LAB command before exact confirmation',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ const prompt=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await prompt.fill('reanudar LAB-DEMO-001');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('button',{name:'Confirmar control LAB'})).toBeVisible();
+ await expect(page.getByRole('status').filter({hasText:'PROPUESTA, NO EJECUTADA'})).toBeVisible();
+ expect(calls.filter(x=>x==='lab_control')).toHaveLength(0);
+ await page.getByRole('button',{name:'Cancelar orden LAB'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Orden cancelada sin ejecución'})).toBeVisible();
+ await prompt.fill('reanudar LAB-DEMO-001');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await page.getByRole('button',{name:'Confirmar control LAB'}).click();
+ await expect(page.getByRole('status').filter({hasText:'CONTROL REAL LAB VERIFICADO'})).toContainText('RESUME');
+ expect(calls.filter(x=>x==='lab_control')).toHaveLength(1);
+ await prompt.fill('estado LAB-DEMO-001');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'LAB-DEMO-001 · lectura actual'})).toContainText('RUNNING');
+ await page.screenshot({path:'test-results/operativa-lab-chat-confirmation.png',fullPage:false,animations:'disabled'});
+});
