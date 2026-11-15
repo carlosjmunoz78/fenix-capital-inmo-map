@@ -5,6 +5,7 @@ import {fetchCerebroActivity,type CerebroActivityRun} from './cerebroActivityApi
 import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyRequest} from './cerebroOperativaLabUniverseApi';
 import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
+import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import './cerebro-operative-console.css';
 
 /**
@@ -20,6 +21,8 @@ export default function CerebroOperativeCockpitV3Bridge(){
  const chat=useCerebroOperativaChat();
  const[company,setCompany]=useState<Company>('fenix');
  const[composer,setComposer]=useState('');
+ const[operatorAnswer,setOperatorAnswer]=useState<{question:string;text:string}|null>(null);
+ const[fleetSending,setFleetSending]=useState(false);
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
  const[ttsActive,setTtsActive]=useState(false);
@@ -63,7 +66,21 @@ export default function CerebroOperativeCockpitV3Bridge(){
   if(recognition){try{recognition.abort()}catch{/* stopped */}}},[]);
  async function submit(){
   const text=composer.trim();
-  if(!isOwnerCompany||!chat.ready||chat.sending||!text)return;
+  if(!isOwnerCompany||chat.sending||fleetSending||!text)return;
+  const host=typeof window!=='undefined'?window.location.hostname:'';
+  const preview=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\\.vercel\\.app$/.test(host);
+  const question=preview?classifyFleetQuestion(text):null;
+  if(question){
+   setFleetSending(true);
+   try{
+    const read=question.kind==='query'?await readFleetLab():{kind:'unavailable',snapshot:null,reason:'CONTROL_PREFLIGHT_ONLY'} as const;
+    setOperatorAnswer({question:text,text:answerFleetQuestion(read,question)});
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(!chat.ready)return;
+  setOperatorAnswer(null);
   const ok=await chat.sendText(text);
   if(ok){
    setComposer(previous=>previous.trim()===text?'':previous);
@@ -76,7 +93,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    setDictationError('Finaliza la conversación o el dictado antes de cambiar de empresa.');
    return;
   }
-  setDictationError('');setComposer('');setSelectedRun(null);setCompany(next);
+  setDictationError('');setComposer('');setOperatorAnswer(null);setSelectedRun(null);setCompany(next);
  }
  function toggleVoice(){
   if(!isOwnerCompany||dictating||!chat.ready||chat.sending)return;
@@ -163,7 +180,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    ?'Dictado integrado no disponible en Opera. Para dictar gratis, pulsa Windows + H con el cursor en el campo.'
    :chat.voiceActive?(chat.voiceListening?'Micrófono escuchando…':chat.voiceSpeaking?'CEREBRO está hablando…':'Preparando micrófono; comprueba el permiso del navegador.')
    :/micrófono|reconocimiento de voz|audio no|voz no/i.test(chat.statusMessage)?chat.statusMessage:'';
- const snapshot={ready:chat.ready,sending:chat.sending,voiceActive:chat.voiceActive,
+ const snapshot={ready:chat.ready,sending:chat.sending||fleetSending,voiceActive:chat.voiceActive,
   voiceListening:chat.voiceListening,voiceSpeaking:chat.voiceSpeaking};
  return <CerebroOperativeCockpitV3
   snapshot={snapshot}
@@ -178,6 +195,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   runs={isOwnerCompany?runs:[]} onOpenRun={setSelectedRun}
   ownerUniverse={ownerResult?.company===company?ownerResult.result:EMPTY}
   chatLines={isOwnerCompany?chat.lines:[]}
+  operatorAnswer={isOwnerCompany?operatorAnswer:null}
  >
   {selectedRun?<div className="operativa-inspector-backdrop"
    onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}>
