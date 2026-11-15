@@ -1,0 +1,246 @@
+{
+  "schema_version": "1.0.0",
+  "id": "SEO001_OPERATIONS_GOVERNED_CONTINUITY_2026_11_15",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "LAB",
+  "version": "1.0.0",
+  "prod_writes_allowed": false,
+  "staging_access_allowed": false,
+  "preserves": [
+    "App PROD",
+    "CRM PROD",
+    "WordPress PROD",
+    "Supabase",
+    "Notion",
+    "DNS",
+    "Trading",
+    "main",
+    "PR22 DRAFT",
+    "200 URL WordPress corpus"
+  ],
+  "baseline": {
+    "role_templates": 191,
+    "specialists": 141,
+    "oversight": 50,
+    "departments": 32,
+    "drills": 573,
+    "source_urls": 200,
+    "note": "Counts are a coverage inventory, not independent IAM agents or completed professional training."
+  },
+  "deepseek": {
+    "mode": "FALLBACK_ONLY_WHEN_GROUNDED",
+    "api_provider": "DEEPSEEK_EXISTING_CREDIT_ONLY",
+    "model_key_present_verified": false,
+    "allow_unmetered_calls": false,
+    "no_new_subscription": true,
+    "never_send_pii": true,
+    "route_order": [
+      "DETERMINISTIC",
+      "EXISTING_FREE_PROVIDER",
+      "EXISTING_PAID_DEEPSEEK_ONLY_IF_TOKEN_QUIETLY_AVAILABLE_AND_COST_CEILING_VERIFIED"
+    ],
+    "conditions": [
+      "ACTGW_SCOPED_PERMISSION",
+      "COST_PRE_FLIGHT_WITH_HARD_LIMIT",
+      "MONTHLY_SPEND_COUNTER",
+      "NO_SECRET_IN_LOGS",
+      "QA_ONLY_UNLESS_OWNER_RELEASES"
+    ],
+    "limits": {
+      "additional_subscription_eur": 0,
+      "automatic_spend_without_verified_hard_limit_eur": 0
+    },
+    "note": "User permits prudent use of existing DeepSeek credits, not unlimited spending. No token access or price cap verified."
+  },
+  "alerts": {
+    "use_existing_automation_only": true,
+    "title": "CEREBRO SEO · Operativa integral",
+    "daily": "08:00 Europe/Madrid",
+    "notify_only": [
+      "P0_PROD_BROKEN",
+      "SECURITY_INCIDENT",
+      "NEW_REAL_GSC_INDEXING_DROP_WHEN_AUTHENTICATED",
+      "MATERIAL_SEO_KPI_LOSS_WHEN_AUTHENTICATED",
+      "CORPUS_OR_IAM_REGRESSION",
+      "LEGAL_RISK",
+      "COST_LIMIT",
+      "REQUIRED_OWNER_APPROVAL"
+    ],
+    "no_duplicate_notifications": true,
+    "do_not_delete_unrelated_automations": true
+  },
+  "wordpress": {
+    "observed_on": "2026-11-15",
+    "source": "COWBOY_MCP_WEB_READONLY",
+    "core": "7.1.4",
+    "release_source": "https://wordpress.org/download/releases/",
+    "core_latest_stable_as_of_date": true,
+    "active_theme": {
+      "slug": "astra",
+      "version": "4.14.2",
+      "available": "4.14.3"
+    },
+    "pending_plugin_updates": [
+      "cowboy-mcp",
+      "elementor",
+      "elementor-pro",
+      "integromat-connector",
+      "insert-headers-and-footers",
+      "wp-mail-smtp"
+    ],
+    "latest_php_errors_on_record": "2026-11-10 Jetpack autoloader commands out of sync",
+    "snapshot_hash": "1b54efd2aac364b26c30da64b53cc9da",
+    "snapshot_is_not_restore_backup": true,
+    "update_policy": "HOLD_UNTIL_REAL_SQL_AND_WP_FILES_RESTORE_TESTED_AND_OLD_NEW_VISUAL_QA",
+    "change_order": [
+      "REAL_RESTORABLE_SQL_FILES_MEDIA_BACKUP",
+      "ISOLATED_RESTORE",
+      "PLUGINS_COMPATIBILITY_CHECK",
+      "ONE_BY_ONE_UPDATE",
+      "MOBILE_DESKTOP_VISUAL_QA",
+      "FORMS_CONSENT_CTA",
+      "ROLLBACK_PROVED"
+    ]
+  },
+  "design": {
+    "source": "LIVE_WP_ELEMENTOR_KIT_AND_FENIX_OWNER_STYLE_POLICY_2026_11_06",
+    "brand_palette": [
+      "#222222",
+      "#870064",
+      "#FFB71B",
+      "#FF5F00"
+    ],
+    "target_font": "Montserrat",
+    "detected_font_used_in_elementor_kit": "Arimo",
+    "status": "NEEDS_RENDERED_OLD_NEW_VISUAL_VALIDATION",
+    "do_not_mass_edit_shared_elementor_kit": true,
+    "required_pages": [
+      "HOME",
+      "MORTGAGE",
+      "LOCAL_LANDING",
+      "BLOG",
+      "B2B_FORM",
+      "B2C_FORM"
+    ]
+  },
+  "google": {
+    "data_source": "GSC_WIZARD",
+    "state": "BLOCKED_NO_ACTIVE_SUBSCRIPTION",
+    "no_new_subscription": true,
+    "authentic_metrics_available": false,
+    "alternative": "DIRECT_FREE_GSC_API_USING_EXISTING_AUTHENTICATED_GOOGLE_CREDENTIALS_IF_PRESENT",
+    "official_docs": [
+      "https://developers.google.com/search/docs/essentials",
+      "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
+      "https://developers.google.com/search/docs/crawling-indexing/overview-google-crawlers",
+      "https://developers.google.com/search/docs/appearance/structured-data/intro-structured-data"
+    ],
+    "controls": [
+      "NO_INVENTED_CLICK_POSITION_CTR",
+      "NO_FORCED_REDIRECT_ON_CANNIBALIZATION_HYPOTHESIS",
+      "FINANCIAL_YMYL_FACT_CHECK",
+      "URL_INSPECTION_AS_AVAILABLE",
+      "CITE_OFFICIAL_SOURCES"
+    ]
+  },
+  "cadence": {
+    "daily": [
+      "CHECK_REAL_FAILING_JOBS",
+      "CHECK_GSC_AUTH_IF_AVAILABLE",
+      "CHECK_CRITICAL_WP_STATUS_AND_UPDATES_READONLY",
+      "CHECK_CTA_ERRORS",
+      "CHECK_P0_ONLY"
+    ],
+    "monday": [
+      "D01_PRIORITIZE_BACKLOG",
+      "D05_D08_KEYWORD_OWNERSHIP",
+      "D17_D20_LOCAL"
+    ],
+    "tuesday_thursday": [
+      "DELIVER_SOURCE_BASED_IMPROVEMENT_PROPOSALS",
+      "D31_SEPARATE_QA"
+    ],
+    "friday": [
+      "D29_KPI_GSC_GA4_IF_VERIFIED",
+      "D32_RETRAIN_ON_REAL_FAILS",
+      "OLD_VS_NEW",
+      "TRIBUNAL",
+      "WEEKLY_OWNER_REPORT"
+    ],
+    "monthly": [
+      "SOURCE_DOCS_GOOGLE_CHANGES",
+      "VISUAL_DESIGN_REVIEW",
+      "PLUGIN_PATCH_RISK_REVIEW",
+      "COST_DEEPSEEK_IF_METERED"
+    ],
+    "source_reference": "cerebro/registry/continuous-specialist-learning-policy.v1.json",
+    "real_periodic_learner_verified": false
+  },
+  "gates": [
+    {
+      "id": "IAM_INDIVIDUAL_ACTOR",
+      "owner": "IAM-001",
+      "severity": "P0",
+      "state": "PARTIAL_OIDC_DEDICATED_D05_ONLY",
+      "next_action": "Real independent identity per actor or strictly attested provider delegation with revocation"
+    },
+    {
+      "id": "SEMANTIC_TRAINING_191",
+      "owner": "SEO-D32",
+      "severity": "P0",
+      "state": "BLOCKED",
+      "next_action": "Real non-deterministic specialty attempts; independent D31 scoring, D32 feedback, tribunal"
+    },
+    {
+      "id": "GSC_REAL_TELEMETRY",
+      "owner": "SEO-D29",
+      "severity": "P0",
+      "state": "BLOCKED_PROVIDER_SUBSCRIPTION",
+      "next_action": "Use existing free Google OAuth/API; no paid GSC Wizard subscription"
+    },
+    {
+      "id": "BACKUP_RESTORE_WP",
+      "owner": "CEREBRO-BKP",
+      "severity": "P0",
+      "state": "PARTIAL_BACKUP_SQL_ONLY",
+      "next_action": "Verify files/media and isolate physical restore, smoke and rollback"
+    },
+    {
+      "id": "WORDPRESS_PENDING_UPDATES",
+      "owner": "SEO-D22",
+      "severity": "P1",
+      "state": "BLOCKED_BACKUP",
+      "next_action": "6 plugins + Astra after compatibility, backup and OLD-vs-NEW"
+    },
+    {
+      "id": "VISUAL_CONSISTENCY",
+      "owner": "SEO-D21",
+      "severity": "P1",
+      "state": "PARTIAL",
+      "next_action": "Compare Astra/Elementor pages; Arimo vs Montserrat; no bulk global styles edits"
+    },
+    {
+      "id": "SEO_EXECUTION_AND_ATTRIBUTION",
+      "owner": "SEO-D01",
+      "severity": "P1",
+      "state": "PARTIAL",
+      "next_action": "Verify current scheduled work, 4 personas and tracked lead conversions before claiming results"
+    },
+    {
+      "id": "DEEPSEEK_METERED_FALLBACK",
+      "owner": "MODEL_ROUTER",
+      "severity": "P2",
+      "state": "NOT_CONNECTED",
+      "next_action": "Existing credential, budget cap and cost ledger before first charge"
+    },
+    {
+      "id": "V6_HISTORY_ARTIFACT",
+      "owner": "SEO-001",
+      "severity": "P2",
+      "state": "BLOCKED_EXPIRED_V5",
+      "next_action": "Preserve evidence-missing HOLD, don't fabricate or bypass historical V5 record"
+    }
+  ],
+  "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry."
+}

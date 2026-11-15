@@ -66,6 +66,11 @@ jobs:
           node cerebro/seo-enterprise/v2/runtime/seo-gh-oidc-workload-v1.mjs "$RUNNER_TEMP/d05-actor/identity.json"
       - name: Test non-bearer signatures and revocation gates
         run: node --test cerebro/seo-enterprise/v2/tests/seo-d05-verified-actor-training-v1.test.mjs
+      - name: Validate all 32 knowledge packs and honest operational readiness
+        run: |
+          set -euo pipefail
+          node --test cerebro/seo-enterprise/v2/tests/seo-department-ops-supervisor-v1.test.mjs
+          node cerebro/seo-enterprise/v2/runtime/seo-department-ops-supervisor-v1.mjs "$RUNNER_TEMP/d05-actor/seo-readiness.json"
       - name: Execute 3 signed case responses in isolated durable JOB001
         run: |
           set -euo pipefail
@@ -79,6 +84,7 @@ jobs:
           path: |
             ${{ runner.temp }}/d05-actor/identity.json
             ${{ runner.temp }}/d05-actor/submissions.json
+            ${{ runner.temp }}/d05-actor/seo-readiness.json
           retention-days: 14
           if-no-files-found: error
 
