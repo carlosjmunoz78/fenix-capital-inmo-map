@@ -1,4 +1,4 @@
-import {useCallback,useEffect,useMemo,useState} from 'react';
+import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Cloud,RefreshCw,Search,ShieldAlert,Clock} from 'lucide-react';
 import {readCloudflareFleet,type CloudflareFleetRead} from './cerebroCloudflareFleetApi';
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-2026-11-15.json';
@@ -7,6 +7,7 @@ const INITIAL:CloudflareFleetRead={kind:'unavailable',snapshot:null,reason:'NOT_
 const format=(v:string|null)=>v&&Number.isFinite(Date.parse(v))?new Date(v).toLocaleString('es-ES'):'sin fecha';
 export default function CerebroCloudflareFleetPanel(){
  const[read,setRead]=useState<CloudflareFleetRead>(INITIAL);
+ const liveConnected=useRef(false);
  const[busy,setBusy]=useState(false);
  const[filter,setFilter]=useState('');
  const[all,setAll]=useState(false);
@@ -15,13 +16,13 @@ export default function CerebroCloudflareFleetPanel(){
   setBusy(true);
   const next=await readCloudflareFleet({refresh:force,signal});
   if(signal?.aborted)return;
-  setRead(next);setBusy(false);
+  liveConnected.current=next.kind==='ready';setRead(next);setBusy(false);
  },[]);
  useEffect(()=>{
   const c=new AbortController();
   void refresh(false,c.signal);
-  const timer=window.setInterval(()=>{if(document.visibilityState==='visible')void refresh(false,c.signal)},180000);
-  const onShow=()=>{if(document.visibilityState==='visible')void refresh(false,c.signal)};
+  const timer=window.setInterval(()=>{if(liveConnected.current&&document.visibilityState==='visible')void refresh(false,c.signal)},180000);
+  const onShow=()=>{if(liveConnected.current&&document.visibilityState==='visible')void refresh(false,c.signal)};
   document.addEventListener('visibilitychange',onShow);
   return()=>{c.abort();window.clearInterval(timer);document.removeEventListener('visibilitychange',onShow)};
  },[refresh]);
