@@ -9,6 +9,7 @@ import CerebroCloudflareQueuesPanel from './CerebroCloudflareQueuesPanel';
 import CerebroSocialProviderPanel from './CerebroSocialProviderPanel';
 import CerebroDeviceRuntimeSnapshotPanel from './CerebroDeviceRuntimeSnapshotPanel';
 import CerebroDeviceLivePanel from './CerebroDeviceLivePanel';
+import CerebroAgentJobLivePanel from './CerebroAgentJobLivePanel';
 import {readUniversalOperativaLab,type UniversalJob001ControlLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-fleet-control-panel.css';
 const INITIAL:FleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
@@ -100,6 +101,7 @@ export default function CerebroFleetControlPanel(){
    <small>Fuente: jerarquía de Media Studio V2. Solo perfiles diseñados; no son agentes activos comprobados. No se suman al censo de otros sistemas por posibles solapamientos.</small>
   </div>:null}
   <CerebroDeviceLivePanel/>
+  <CerebroAgentJobLivePanel/>
   <CerebroDeviceRuntimeSnapshotPanel/>
   <section className="op4-fleet-inspector" aria-label="Inspector de motores no listados">
    <h4>Consultar cualquier motor por ID</h4>
