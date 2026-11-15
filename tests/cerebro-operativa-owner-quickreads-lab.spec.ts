@@ -64,6 +64,45 @@ async function setup(page:Page){
      before,after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
     })});
    }
+   if(url.pathname==='/api/cerebro-agent-job-live'){
+    calls.push('agent_job_live_read');
+    if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"UNAVAILABLE"}'});
+    const stamp=new Date().toISOString();
+    const group=(source:string,engine_id:string,status:string,records:number,updated=stamp)=>({
+     source,environment:'PREPROD',engine_id,status,records,latest_updated_at:updated,
+     created_24h_count:0,heartbeat_5m_count:0,heartbeat_24h_count:0,
+     unexpired_lease_count:0,stale_queued_24h_count:status==='QUEUED'?1:0
+    });
+    const groups=[
+     group('JARVIS_WORK','CONSOLE-001','SUCCEEDED',5),
+     group('JARVIS_WORK','CONSOLE-001','DEAD_LETTER',1),
+     group('BROWSER_V2','CONSOLE-001','SUCCEEDED',92),
+     group('BROWSER_V2','CONSOLE-001','DEAD_LETTER',13),
+     group('BROWSER_V2','CONSOLE-001','HOLD',6),
+     group('BROWSER_V2','CONSOLE-001','QUEUED',1),
+     group('BROWSER_V2','CONSOLE-001','CANCELLED',5),
+     group('CREATIVE_V1','FACT-001','SUCCEEDED',7),
+     group('CREATIVE_V1','FACT-001','HOLD',10),
+     group('CREATIVE_V1','UMS-001','HOLD',1)
+    ];
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+     status:'OK',source:'FENIX_LAB_AGENT_JOB_AGGREGATE_V1',
+     company_id:'fenix',environment:'LAB',observed_at:stamp,read_only:true,executed:false,
+     agent_identity_verified:false,active_agent_count:null,active_subagent_count:null,
+     active_job_count:null,independent_worker_heartbeat_verified:false,
+     source_semantics:'HISTORICAL_JOB_RECORDS_IN_LAB_PROJECT',
+     groups,source_totals:[
+      {source:'JARVIS_WORK',total_rows:6,last_updated_at:stamp},
+      {source:'BROWSER_V2',total_rows:117,last_updated_at:stamp},
+      {source:'CREATIVE_V1',total_rows:18,last_updated_at:stamp}
+     ],attention_groups:groups.filter(x=>['DEAD_LETTER','HOLD','QUEUED'].includes(x.status))
+      .map(x=>({...x,priority_suggestion:x.status==='DEAD_LETTER'?'P1_REVIEW_HISTORICAL':'P2_REVIEW_HISTORICAL'})),
+     cost_metrics:{source:'BROWSER_WORKER_METRIC_V2',total_samples:60,cost_samples:60,
+      recorded_incremental_cost_eur:0,overall_infrastructure_cost_eur:null,
+      duration_samples:60,p50_duration_seconds:5.4,p90_duration_seconds:38.7,
+      last_observation_at:stamp,warning:'ZERO_RECORDED_INCREMENTAL_COST_IS_NOT_ZERO_PROVIDER_BILL'}
+    })});
+   }
    if(url.pathname==='/api/cerebro-device-live'){
     calls.push('device_live_read');
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"UNAVAILABLE"}'});
@@ -265,6 +304,27 @@ test('Cloudflare owner Preview reports missing read-only binding precisely, neve
  await expect(provider).not.toContainText('EN VIVO · Cloudflare API');
  expect(calls.filter(x=>x==='cloudflare_fleet').length).toBeGreaterThanOrEqual(2);
  expect(calls).not.toContain('submit_command');
+});
+
+test('Job source dashboard shows scoped historical status and measured samples, not live agents',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const region=page.getByRole('region',{name:'Trabajos y costes registrados · fuentes LAB'});
+ await expect(region).toContainText('FUENTE CONSULTADA AHORA');
+ await expect(region).toContainText('JARVIS · trabajos');
+ await expect(region).toContainText('Navegador · trabajos V2');
+ await expect(region).toContainText('Productora · trabajos');
+ await expect(region).toContainText('CONSOLE-001 · DEAD_LETTER: 13');
+ await expect(region).toContainText('En cola con más de 24 h');
+ await expect(region).toContainText('Coste incremental registrado: 0,0000 €');
+ await expect(region).toContainText('Coste total de infraestructura: NO_MEDIDO');
+ await expect(region).toContainText('Agentes'); 
+ await expect(region).toContainText('no hay prueba de agent_id, subagent_id');
+ const before=calls.filter(x=>x==='agent_job_live_read').length;
+ await region.getByRole('button',{name:'Actualizar trabajos ahora'}).click();
+ await expect.poll(()=>calls.filter(x=>x==='agent_job_live_read').length).toBeGreaterThan(before);
+ expect(calls).not.toContain('submit_command');
+ expect(calls).not.toContain('lab_control');
 });
 
 test('Owner lab current device reader is authenticated, never becomes autonomous agent count',async({page})=>{
