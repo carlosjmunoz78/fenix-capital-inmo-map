@@ -6,6 +6,7 @@ import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyReque
 import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
+import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-operative-console.css';
 
 /**
@@ -74,12 +75,26 @@ export default function CerebroOperativeCockpitV3Bridge(){
    setFleetSending(true);
    try{
     const read=question.kind==='query'?await readFleetLab():{kind:'unavailable',snapshot:null,reason:'CONTROL_PREFLIGHT_ONLY'} as const;
-    setOperatorAnswer({question:text,text:answerFleetQuestion(read,question)});
+    let answer=answerFleetQuestion(read,question);
+    const engine=question.kind==='query'?text.toUpperCase().match(/\\b[A-Z]{2,12}-\\d{3}\\b/)?.[0]:null;
+    if(engine){
+     const proof=await readUniversalOperativaLab();
+     const job=proof.job001;
+     const state=job?.engineBindings.find(x=>x.engine_id===engine);
+     const controls=job?.controlEngineBindings.find(x=>x.engine_id===engine);
+     answer='Motor '+engine+': '+(state?'estado DECLARADO '+state.declared_state+' ('+(state.freshness==='STALE_CONFIG'?'configuración antigua':'configuración reciente')+', '+state.observed_config_at.slice(0,10)+')':'sin estado individual acreditado')+'. '+
+      (controls?'Controles configurados: '+controls.configured_controls+', habilitados: '+controls.enabled_controls+', antiguos: '+controls.stale_controls+'.':'Sin controles individuales acreditados en esta fuente.')+
+      ' Ejecución real del motor: NO VERIFICADA. '+(job?.state==='OK'?'Fuente: metadatos PREPROD de JOB-001.':'Fuente JOB-001 no disponible; no se infiere un estado activo.');
+    }
+    setOperatorAnswer({question:text,text:answer});
     setComposer('');
    }finally{setFleetSending(false)}
    return;
   }
-  if(!chat.ready)return;
+  if(!chat.ready){
+   setOperatorAnswer({question:text,text:'El Gateway conversacional general no está verificado. La consulta no se ha enviado ni ha ejecutado cambios.'});
+   return;
+  }
   setOperatorAnswer(null);
   const ok=await chat.sendText(text);
   if(ok){
