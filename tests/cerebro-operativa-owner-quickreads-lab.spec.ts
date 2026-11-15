@@ -63,6 +63,24 @@ async function setup(page:Page){
      before,after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
     })});
    }
+   if(url.pathname==='/api/cerebro-cloudflare-fleet'){
+    calls.push('cloudflare_fleet');
+    if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
+    return route.fulfill({status:200,headers,body:JSON.stringify({
+     status:'OK',source:'CLOUDFLARE_REST_ACCOUNT_WORKERS_LIVE_V1',
+     account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',company_id:'fenix',environment:'LAB_OBSERVATION',
+     observed_at:'2026-11-15T10:20:00Z',worker_count:2,cron_verified_count:2,with_cron:1,without_cron:1,
+     cron_unknown_count:0,active_agent_count:null,active_execution_verified:false,
+     read_only:true,controls_enabled:false,cache_status:'FRESH',workers:[
+      {id:'cerebro-facebook-autoqual-lab',modified_on:'2026-11-12T18:20:19Z',
+       cron:[],scheduled:false,cron_observed_at:'2026-11-15T10:20:00Z',
+       active_execution_verified:false,worker_agent_id:null},
+      {id:'cerebro-fact001-headless-operator-lab-20261111',modified_on:'2026-11-11T15:37:16Z',
+       cron:['*/5 * * * *'],scheduled:true,cron_observed_at:'2026-11-15T10:20:00Z',
+       active_execution_verified:false,worker_agent_id:null}
+     ]
+    })});
+   }
    if(url.pathname==='/api/cerebro-fleet-observe'){
     calls.push('fleet_observe');
     if(request.method()!=='GET')return route.fulfill({status:405,headers,body:'{"status":"CLOSED"}'});
@@ -259,4 +277,29 @@ test('non-Fenix company selector never exposes another tenant LAB worker control
  await expect(page.getByText('Control LAB disponible únicamente en Fénix')).toBeVisible();
  await page.getByRole('combobox',{name:'Empresa'}).selectOption('fenix');
  await expect(page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'})).toBeVisible();
+});
+
+test('Cloudflare live Worker inventory, manual refresh and chat grounded answers without writes',async({page})=>{
+ const {calls}=await setup(page);
+ const nav=page.getByRole('navigation',{name:'Áreas de Operativa'});
+ await nav.getByRole('button',{name:'Control'}).click();
+ const cloudflare=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
+ await expect(cloudflare).toContainText('Cloudflare · Workers reales');
+ await expect(cloudflare).toContainText('2');
+ await expect(cloudflare).toContainText('cerebro-facebook-autoqual-lab');
+ await cloudflare.getByRole('button',{name:'Examinar cerebro-facebook-autoqual-lab'}).click();
+ await expect(cloudflare.getByRole('status').last()).toContainText('Sin cron verificado');
+ await expect(cloudflare.getByRole('status').last()).toContainText('NO CONECTADO');
+ await cloudflare.getByRole('button',{name:'Actualizar Cloudflare desde origen'}).click();
+ await expect.poll(()=>calls.filter(x=>x==='cloudflare_fleet').length).toBeGreaterThan(1);
+ await nav.getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('¿Cuántos Workers hay en Cloudflare?');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Cloudflare cuenta Fénix'})).toContainText('2 Workers registrados');
+ await input.fill('Pausar cerebro-facebook-autoqual-lab en Cloudflare');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'ORDEN NO EJECUTADA'})).toContainText('solo lectura');
+ expect(calls).not.toContain('submit_command');
+ await page.screenshot({path:'test-results/operativa-cloudflare-live-qa.png',fullPage:false,animations:'disabled'});
 });
