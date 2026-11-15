@@ -1,7 +1,7 @@
 import {useCallback,useEffect,useMemo,useRef,useState} from 'react';
 import {Cloud,RefreshCw,Search,ShieldAlert,Clock} from 'lucide-react';
 import {readCloudflareFleet,type CloudflareFleetRead} from './cerebroCloudflareFleetApi';
-import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-2026-11-15.json';
+import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 import './cerebro-cloudflare-fleet.css';
 const INITIAL:CloudflareFleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
