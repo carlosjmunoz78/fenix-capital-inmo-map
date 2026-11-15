@@ -328,3 +328,31 @@ test('Cloudflare outage shows composite 38-worker dated inventory and 5/5 Free c
  await expect(page.getByRole('status').filter({hasText:'Cloudflare en tiempo real NO DISPONIBLE'})).toContainText('Auditoría compuesta');
  expect(calls).not.toContain('submit_command');
 });
+
+test('Cloudflare canary physical deployed-version receipts are dated and never treated as app control',async({page})=>{
+ const {calls}=await setup(page);
+ await page.route('**/api/cerebro-cloudflare-fleet?**',async route=>{
+  calls.push('cf_unavailable');
+  await route.fulfill({status:503,headers,body:JSON.stringify({status:'UNAVAILABLE',reason:'OWNER_READ_TOKEN_NOT_BOUND'})});
+ });
+ const nav=page.getByRole('navigation',{name:'Áreas de Operativa'});
+ await nav.getByRole('button',{name:'Control'}).click();
+ const cf=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
+ await expect(cf.getByRole('status').first()).toContainText('ARCHIVO COMPUESTO, NO EN VIVO');
+ const physical=cf.getByRole('region',{name:'Control físico de configuración del canario LAB'});
+ await expect(physical).toContainText('CONTROL_PAUSED=false');
+ await expect(physical).toContainText('CONTROL_PAUSED=true');
+ await expect(physical).toContainText('NO CONECTADO');
+ await expect(physical).toContainText('fe57b5f7-48b7-44a9-8cbc-ddbbcbca5134');
+ await cf.getByRole('textbox',{name:'Buscar Worker Cloudflare'}).fill('control-canary');
+ await cf.getByRole('button',{name:'Examinar cerebro-operativa-control-canary-lab'}).click();
+ await expect(cf.getByRole('status').last()).toContainText('CONTROL_PAUSED=true');
+ await nav.getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('estado LAB-CF-CANARY-001');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'ARCHIVO, no en vivo'})).toContainText('CONTROL_PAUSED=true');
+ await expect(page.getByRole('status').filter({hasText:'ARCHIVO, no en vivo'})).toContainText('NO CONECTADO');
+ expect(calls).not.toContain('submit_command');
+ await page.screenshot({path:'test-results/operativa-cloudflare-canary-provider-proof.png',fullPage:false,animations:'disabled'});
+});
