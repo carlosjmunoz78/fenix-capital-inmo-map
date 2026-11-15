@@ -303,3 +303,26 @@ test('Cloudflare live Worker inventory, manual refresh and chat grounded answers
  expect(calls).not.toContain('submit_command');
  await page.screenshot({path:'test-results/operativa-cloudflare-live-qa.png',fullPage:false,animations:'disabled'});
 });
+
+test('Cloudflare outage retains audited 37-worker history without claiming live state or write powers',async({page})=>{
+ const {calls}=await setup(page);
+ await page.route('**/api/cerebro-cloudflare-fleet?**',async route=>{
+  calls.push('cloudflare_unavailable');
+  await route.fulfill({status:503,headers,body:JSON.stringify({status:'UNAVAILABLE',reason:'TOKEN_NOT_BOUND'})});
+ });
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const cloud=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
+ await expect(cloud.getByRole('status').first()).toContainText('ARCHIVO, NO EN VIVO');
+ await expect(cloud).toContainText('37');
+ await expect(cloud).toContainText('cerebro-facebook-autoqual-lab');
+ await cloud.getByRole('button',{name:'Examinar cerebro-facebook-autoqual-lab'}).click();
+ await expect(cloud.getByRole('status').last()).toContainText('SOC-FB-FINANCIAL-REAL-ESTATE-V1');
+ await expect(cloud.getByRole('status').last()).toContainText('AUTOQUAL_ENABLED=false');
+ await expect(cloud.getByRole('status').last()).toContainText('NO CONECTADO');
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('¿Cuántos Workers tenemos en Cloudflare?');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'Cloudflare en tiempo real NO DISPONIBLE'})).toContainText('Última auditoría');
+ expect(calls).not.toContain('submit_command');
+});
