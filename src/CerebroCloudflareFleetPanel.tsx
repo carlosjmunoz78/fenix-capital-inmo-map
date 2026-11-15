@@ -3,6 +3,7 @@ import {Cloud,RefreshCw,Search,ShieldAlert,Clock} from 'lucide-react';
 import {readCloudflareFleet,type CloudflareFleetRead} from './cerebroCloudflareFleetApi';
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
+import controlProof from '../cerebro/universal/v0/provider-cloudflare/canary/physical-provider-control-2026-11-15.json';
 import './cerebro-cloudflare-fleet.css';
 const INITIAL:CloudflareFleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
 const format=(v:string|null)=>v&&Number.isFinite(Date.parse(v))?new Date(v).toLocaleString('es-ES'):'sin fecha';
@@ -75,6 +76,13 @@ export default function CerebroCloudflareFleetPanel(){
    <p>Sin plazas disponibles en la comprobación del {format(cronGate.observed_at)}. Cloudflare rechazó una programación nueva (error {cronGate.quota.api_error_code}). No se contratará un plan, alterará un cron existente ni se reintentará automáticamente. La capacidad actual requiere nueva consulta.</p>
    <small>Canario aislado {cronGate.resource_name}: sin cron, workers.dev y preview desactivados; otros cinco cron conservados.</small>
   </div>
+  <div className="op4-cf-provider-proof" role="region" aria-label="Control físico de configuración del canario LAB">
+   <strong>Canario Cloudflare · control de configuración real certificado (histórico)</strong>
+   <p>Se cambió la versión activa a CONTROL_PAUSED=false y después se restauró CONTROL_PAUSED=true. El proveedor confirmó ambas versiones desplegadas y sus valores. Última lectura: {format(controlProof.proof_window_utc.paused_at)}.</p>
+   <p>Estado final acreditado de {controlProof.resource_name}: <b>PAUSADO</b>; sin cron, sin workers.dev, sin rutas públicas, sin tareas empresariales. Los cinco cron anteriores permanecen intactos.</p>
+   <p>Recibos Cloudflare: reanudar configuración <code>{controlProof.changes[1].deployment_id}</code>; pausar configuración <code>{controlProof.changes[2].deployment_id}</code>. No se ha verificado ninguna invocación programada.</p>
+   <p><ShieldAlert size={14}/> Control desde esta consola: <b>NO CONECTADO</b>. Estos recibos proceden de operaciones directas autorizadas y no demuestran un control autónomo de motores.</p>
+  </div>
   {archived?.observability?<p className="op4-cf-note">AUDITORÍA DE EVENTOS (no en vivo): {archived.observability.total_events} eventos de observabilidad en 24 horas, en {archived.observability.services.length} servicios identificados. Ventana hasta {format(archived.observability.to)}. No son trabajos completados ni publicaciones.</p>:null}
   {(x||archived)?<><label className="op4-cf-filter"><Search size={14}/> Filtrar Workers
    <input aria-label="Buscar Worker Cloudflare" value={filter} onChange={e=>{setFilter(e.target.value);setAll(false)}} placeholder="facebook, instagram, jarvis, fact001…"/>
@@ -99,7 +107,7 @@ export default function CerebroCloudflareFleetPanel(){
    {target.workers_dev_enabled!==null?<p>URL workers.dev configurada: {target.workers_dev_enabled?'SÍ':'NO'}. No equivale a acceso anónimo confirmado.</p>:null}
    {Object.keys(target.boolean_flags).length?<p>Indicadores de configuración auditados: {Object.entries(target.boolean_flags).map(([key,value])=>key+'='+value).join(' · ')}. No acreditan actividad.</p>:null}
    <p>{target.cron===null?'No hay evidencia de sus crons en esta lectura.':target.cron.length?'Cron verificado: '+target.cron.join(', '):'Sin cron verificado.'} No se han comprobado latidos ni últimas ejecuciones del motor.</p>
-   <p><ShieldAlert size={14}/> Pausar, reanudar y priorizar este recurso: <b>NO CONECTADO</b>. No se ha ejecutado ningún cambio en Cloudflare.</p>
+   {target.id===controlProof.resource_name?<p><ShieldAlert size={14}/> Configuración PAUSED verificada en Cloudflare (archivo {format(controlProof.proof_window_utc.paused_at)}). El control de consola sigue <b>NO CONECTADO</b> y no se ejecutaron trabajos externos.</p>:<p><ShieldAlert size={14}/> Pausar, reanudar y priorizar este recurso desde Operativa: <b>NO CONECTADO</b>. No se ha enviado ninguna orden desde esta consola.</p>}
   </div>:null}
   </>:<p>Acceso Cloudflare no autorizado. No se muestra ni la fotografía anterior.</p>}
  </section>;
