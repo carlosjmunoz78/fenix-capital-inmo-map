@@ -8,7 +8,7 @@ import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
-import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention} from './cerebroCloudflareFleetApi';
+import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
 import './cerebro-operative-console.css';
 
 /**
@@ -90,6 +90,15 @@ export default function CerebroOperativeCockpitV3Bridge(){
      setLabPending(null);
      setOperatorAnswer({question:text,text:'LAB-DEMO-001 · lectura actual: '+read.data.desired_state+', prioridad '+read.data.priority+', revisión '+read.data.revision+', '+read.data.work_units+' pasos realizados. Observado: '+read.data.observed_at+'. Worker manual y aislado, no implica actividad de otros motores.'});
     }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(question&&/(?:colas?|queues?|backlog|mensajes pendientes|consumidores?)/i.test(text)){
+   setFleetSending(true);
+   try{
+    if(question.kind==='control')setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: la inspección de Cloudflare Queues es un archivo auditado. Los controles de despacho y prioridad todavía no están autenticados desde esta consola.'});
+    else setOperatorAnswer({question:text,text:answerCloudflareQueueAudit(text)});
     setComposer('');
    }finally{setFleetSending(false)}
    return;
