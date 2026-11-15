@@ -368,7 +368,7 @@ test('Main owner conversation plans but never executes a LAB command before exac
  expect(calls.filter(x=>x==='lab_control')).toHaveLength(1);
  await prompt.fill('estado LAB-DEMO-001');
  await page.getByRole('button',{name:'Enviar instrucción'}).click();
- await expect(page.getByRole('status').filter({hasText:'LAB-DEMO-001 · lectura actual'})).toContainText('RUNNING');
+ await expect(page.getByRole('status').filter({hasText:'LAB-DEMO-001 · ESTADO OBSERVADO RECIENTEMENTE'})).toContainText('RUNNING (estado deseado, no ejecución activa)');
  await page.screenshot({path:'test-results/operativa-lab-chat-confirmation.png',fullPage:false,animations:'disabled'});
 });
 
