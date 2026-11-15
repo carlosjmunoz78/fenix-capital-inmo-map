@@ -43,7 +43,7 @@ test('PAUSED is only desired state, not proof a worker has stopped every externa
  assert.match(describeLabRuntimeEvidence(state,now),/PAUSED \(estado deseado, no ejecución activa\)/);
 });
 test('stale, future or malformed observations fail closed without invented zero agents',()=>{
- const stale={...baseline(),observed_at:'2026-11-15T19:54:00.000Z'};
+ const stale={...baseline(),observed_at:'2026-11-15T19:54:00.000Z',updated_at:'2026-11-15T19:53:00.000Z'};
  assert.deepEqual(summarizeLabRuntimeEvidence(stale,now),{kind:'unavailable',proof:null,reason:'OBSERVATION_STALE'});
  const future={...baseline(),observed_at:'2026-11-15T20:02:00.000Z'};
  assert.equal(summarizeLabRuntimeEvidence(future,now).reason,'OBSERVATION_CLOCK_INVALID');
