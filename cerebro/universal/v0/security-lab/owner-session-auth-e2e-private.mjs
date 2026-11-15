@@ -4,7 +4,7 @@
  * Execute only in a secure temporary runner with isolated LAB-only keys.
  */
 import {randomBytes} from 'node:crypto';
-import {createClient} from '@supabase/supabase-js';
+
 
 const REF='hnqlnvakzaywtafeiybt';
 const URL='https://'+REF+'.supabase.co';
@@ -23,6 +23,9 @@ if(!armed){
   console.log('CEREBRO_LAB_SESSION_E2E=BLOCKED_MISSING_LAB_ONLY_CREDENTIALS');
   process.exitCode=2;
  }else{
+  // Lazy import: DISARMED mode must run without dependencies or any network.
+  // A secure, armed runner installs the already declared supabase-js dependency.
+  const {createClient}=await import('@supabase/supabase-js');
   const options={auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}};
   const admin=createClient(URL,adminKey,options);
   const userClient=createClient(URL,publicKey,options);
