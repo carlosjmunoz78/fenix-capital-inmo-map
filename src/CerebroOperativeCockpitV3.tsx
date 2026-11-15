@@ -27,7 +27,7 @@ type Props={
  scopeCanExecute:boolean;
  chatLines:{role:'user'|'cerebro';text:string}[];
  operatorAnswer?:{question:string;text:string}|null;
- labProposal?:{action:'PAUSE'|'RESUME'|'PRIORITIZE';revision:number;priority:number|null}|null;
+ labProposal?:{action:'PAUSE'|'RESUME'|'PRIORITIZE'|'TICK';revision:number;priority:number|null}|null;
  onConfirmLabProposal?:()=>void;onCancelLabProposal?:()=>void;
  children:ReactNode;
 };
