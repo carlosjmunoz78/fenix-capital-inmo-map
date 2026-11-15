@@ -7,6 +7,7 @@ import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupporte
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
+import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import './cerebro-operative-console.css';
 
 /**
@@ -24,6 +25,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
  const[composer,setComposer]=useState('');
  const[operatorAnswer,setOperatorAnswer]=useState<{question:string;text:string}|null>(null);
  const[fleetSending,setFleetSending]=useState(false);
+ const[labPending,setLabPending]=useState<{action:LabWorkerAction;revision:number;priority:number|null}|null>(null);
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
  const[ttsActive,setTtsActive]=useState(false);
@@ -71,6 +73,26 @@ export default function CerebroOperativeCockpitV3Bridge(){
   const host=typeof window!=='undefined'?window.location.hostname:'';
   const preview=host==='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app'||/^fenix-capital-preprod-[a-z0-9]+[.]vercel[.]app$/.test(host);
   const question=preview?classifyFleetQuestion(text):null;
+  if(preview&&/(?:^|[^A-Z0-9])LAB-DEMO-001(?:$|[^A-Z0-9])/i.test(text)){
+   setFleetSending(true);
+   try{
+    const read=await readLabWorkerState();
+    if(read.kind!=='ready'||!read.data){setOperatorAnswer({question:text,text:'El estado del worker LAB no es verificable: '+read.reason+'. Sin ejecución.'});return;}
+    if(question?.kind==='control'){
+     const action=question.action as LabWorkerAction;
+     const priorityText=text.match(/(?:prioridad\s*|\bal\s*)([1-5])\b/i)?.[1];
+     const priority=action==='PRIORITIZE'?(priorityText?Number(priorityText):null):null;
+     if(action==='PRIORITIZE'&&priority===null){setOperatorAnswer({question:text,text:'Indica una prioridad exacta entre 1 y 5 (por ejemplo: «priorizar LAB-DEMO-001 al 4»). Ningún cambio aplicado.'});return;}
+     setLabPending({action,revision:read.data.revision,priority});
+     setOperatorAnswer({question:text,text:'PROPUESTA, NO EJECUTADA: '+action+' sobre LAB-DEMO-001, empresa Fénix, entorno LAB, revisión '+read.data.revision+(priority!==null?', prioridad '+priority:'')+'. Confirma la operación exacta o cancela. No afecta a otros motores.'});
+    }else{
+     setLabPending(null);
+     setOperatorAnswer({question:text,text:'LAB-DEMO-001 · lectura actual: '+read.data.desired_state+', prioridad '+read.data.priority+', revisión '+read.data.revision+', '+read.data.work_units+' pasos realizados. Observado: '+read.data.observed_at+'. Worker manual y aislado, no implica actividad de otros motores.'});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
   if(question){
    setFleetSending(true);
    try{
@@ -102,13 +124,30 @@ export default function CerebroOperativeCockpitV3Bridge(){
    setDictationError('');
   }else setDictationError('No se ha confirmado el envío. Se conserva el mensaje para reintentar.');
  }
+ async function confirmLabControl(){
+  if(!labPending||fleetSending)return;
+  const expected=labPending;
+  setLabPending(null);setFleetSending(true);
+  try{
+   const receipt=await applyLabWorkerAction({action:expected.action,priority:expected.priority,
+    expected_revision:expected.revision,idempotency_key:'labctrl-'+crypto.randomUUID()});
+   if(receipt.kind!=='ready'||!receipt.data){setOperatorAnswer({question:'Control LAB-DEMO-001',text:'Operación NO CERTIFICADA: '+receipt.reason+'. Comprobar estado y recibos antes de reintentar.'});return;}
+   const post=await readLabWorkerState();
+   const a=receipt.data.after,p=post.data;
+   const confirmed=post.kind==='ready'&&!!p&&p.revision===a.revision&&p.desired_state===a.desired_state&&
+    p.priority===a.priority&&p.work_units===a.work_units&&p.last_receipt_id===receipt.data.receipt_id;
+   setOperatorAnswer({question:'Control '+expected.action+' LAB-DEMO-001',text:confirmed?
+    'CONTROL REAL LAB VERIFICADO: '+expected.action+' · antes '+receipt.data.before.desired_state+' / revisión '+receipt.data.before.revision+', después '+a.desired_state+' / revisión '+a.revision+', prioridad '+a.priority+', pasos '+a.work_units+'. Recibo '+receipt.data.receipt_id+'.':
+    'Recibo '+receipt.data.receipt_id+' recibido pero lectura posterior NO COINCIDE; no se declara éxito. Se requiere revisión.'});
+  }finally{setFleetSending(false)}
+ }
  function changeCompany(next:Company){
   if(next===company)return;
   if(chat.voiceActive||chat.sending||dictating){
    setDictationError('Finaliza la conversación o el dictado antes de cambiar de empresa.');
    return;
   }
-  setDictationError('');setComposer('');setOperatorAnswer(null);setSelectedRun(null);setCompany(next);
+  setDictationError('');setComposer('');setOperatorAnswer(null);setLabPending(null);setSelectedRun(null);setCompany(next);
  }
  function toggleVoice(){
   if(!isOwnerCompany||dictating||!chat.ready||chat.sending)return;
@@ -195,7 +234,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    ?'Dictado integrado no disponible en Opera. Para dictar gratis, pulsa Windows + H con el cursor en el campo.'
    :chat.voiceActive?(chat.voiceListening?'Micrófono escuchando…':chat.voiceSpeaking?'CEREBRO está hablando…':'Preparando micrófono; comprueba el permiso del navegador.')
    :/micrófono|reconocimiento de voz|audio no|voz no/i.test(chat.statusMessage)?chat.statusMessage:'';
- const snapshot={ready:chat.ready,sending:chat.sending||fleetSending,voiceActive:chat.voiceActive,
+ const snapshot={ready:chat.ready,sending:chat.sending||fleetSending||!!labPending,voiceActive:chat.voiceActive,
   voiceListening:chat.voiceListening,voiceSpeaking:chat.voiceSpeaking};
  return <CerebroOperativeCockpitV3
   snapshot={snapshot}
@@ -211,6 +250,9 @@ export default function CerebroOperativeCockpitV3Bridge(){
   ownerUniverse={ownerResult?.company===company?ownerResult.result:EMPTY}
   chatLines={isOwnerCompany?chat.lines:[]}
   operatorAnswer={isOwnerCompany?operatorAnswer:null}
+  labProposal={isOwnerCompany?labPending:null}
+  onConfirmLabProposal={()=>{void confirmLabControl()}}
+  onCancelLabProposal={()=>{setLabPending(null);setOperatorAnswer({question:'Control LAB',text:'Orden cancelada sin ejecución.'})}}
  >
   {selectedRun?<div className="operativa-inspector-backdrop"
    onMouseDown={event=>{if(event.target===event.currentTarget)setSelectedRun(null)}}>
