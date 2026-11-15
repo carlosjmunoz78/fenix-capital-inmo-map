@@ -77,6 +77,16 @@ export default function CerebroOperativeCockpitV3Bridge(){
   const preview=host==='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app'||/^fenix-capital-preprod-[a-z0-9]+[.]vercel[.]app$/.test(host);
   const question=preview?classifyFleetQuestion(text):null;
   const diagnostic=preview?classifyDiagnosticRequest(text):null;
+  // Answer advisory questions even about off-screen or named providers; never intercept control intents.
+  if(diagnostic&&question?.kind!=='control'){
+   setFleetSending(true);
+   try{
+    const fleet=await readFleetLab();
+    setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
   if(preview&&/(?:^|[^A-Z0-9])LAB-DEMO-001(?:$|[^A-Z0-9])/i.test(text)){
    setFleetSending(true);
    try{
@@ -134,15 +144,6 @@ export default function CerebroOperativeCockpitV3Bridge(){
      const matched=resolveCloudflareWorkerMention(text,read)||undefined;
      setOperatorAnswer({question:text,text:answerCloudflareFleet(read,matched)});
     }
-    setComposer('');
-   }finally{setFleetSending(false)}
-   return;
-  }
-  if(diagnostic){
-   setFleetSending(true);
-   try{
-    const fleet=await readFleetLab();
-    setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
     setComposer('');
    }finally{setFleetSending(false)}
    return;
