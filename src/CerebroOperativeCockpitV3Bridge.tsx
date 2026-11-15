@@ -153,7 +153,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
    try{
     const read=question.kind==='query'?await readFleetLab():{kind:'unavailable',snapshot:null,reason:'CONTROL_PREFLIGHT_ONLY'} as const;
     let answer=answerFleetQuestion(read,question);
-    const engine=question.kind==='query'?text.toUpperCase().match(/(?:^|[^A-Z0-9])([A-Z]{2,12}-[0-9]{3})(?=$|[^A-Z0-9])/)?.[1]:null;
+    const engine=question.kind==='query'?text.toUpperCase().match(/(?:^|[^A-Z0-9])([A-Z][A-Z0-9]{1,11}-[0-9]{3})(?=$|[^A-Z0-9])/)?.[1]:null;
     if(engine){
      const proof=await readUniversalOperativaLab();
      const job=proof.job001;
