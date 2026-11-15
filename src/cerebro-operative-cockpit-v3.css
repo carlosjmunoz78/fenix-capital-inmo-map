@@ -293,3 +293,8 @@
 .op3-operator-answer{width:min(850px,100%);border:1px solid #477890;border-radius:13px;background:#0b2a39;padding:13px 16px;text-align:left;display:flex;flex-direction:column;gap:6px;margin:10px auto}
 .op3-operator-answer strong{font-size:12px;color:#f3fbff}.op3-operator-answer small{font-size:11px;color:#a2c9da}.op3-operator-answer p{font-size:13px;color:#d5f1fc;line-height:1.55;margin:0;white-space:pre-wrap}
 @media(max-width:520px){.op3-navigation button{min-height:54px}.op3-navigation button span{font-size:10px}.op3-operator-answer{padding:10px}}
+
+.op3-operator-confirm{width:min(850px,100%);margin:10px auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap;background:#163442;border:1px solid #a38f63;border-radius:12px;padding:13px}
+.op3-operator-confirm strong{font-size:13px;color:#f4f8ff;width:100%}.op3-operator-confirm p{font-size:12px;color:#cbe1ee;width:100%;line-height:1.5;margin:0}
+.op3-operator-confirm button{border:1px solid #7095a6;background:#0b293a;color:#f2fcff;border-radius:9px;min-height:44px;padding:9px 13px;cursor:pointer}
+.op3-operator-confirm button:hover{background:#25526a}
