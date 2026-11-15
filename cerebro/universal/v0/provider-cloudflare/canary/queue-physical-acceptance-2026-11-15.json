@@ -1,0 +1,134 @@
+{
+  "schema_version": "1.0.0",
+  "evidence_kind": "PHYSICAL_PROVIDER_QUEUE_ACCEPTANCE",
+  "observed_date": "2026-11-15",
+  "company_id": "fenix",
+  "engine_id": "LAB-CF-CANARY-001",
+  "environment": "LAB",
+  "version": "0.3.0",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "queue": {
+    "name": "cerebro-operativa-control-canary-queue-lab-eu",
+    "id": "2404f1e2dbe2407dbdd37e6957855033",
+    "jurisdiction": "eu",
+    "new_only": true,
+    "existing_21_queues_untouched": true,
+    "consumer": {
+      "id": "4583df6a9ab34844b3c759ca15a26da1",
+      "script_name": "cerebro-operativa-control-canary-lab",
+      "type": "worker",
+      "settings": {
+        "batch_size": 1,
+        "max_concurrency": 1,
+        "max_retries": 2,
+        "max_wait_time_ms": 1000,
+        "retry_delay": 5
+      }
+    },
+    "metrics": {
+      "status": "VERIFIED_BEST_EFFORT",
+      "backlog_count": 0,
+      "backlog_bytes": 0
+    }
+  },
+  "kv": {
+    "name": "cerebro-operativa-control-canary-receipts-lab-eu",
+    "id": "afe8a24354714ebcb317326415003b7e",
+    "jurisdiction": "eu",
+    "new_only": true,
+    "existing_12_namespaces_untouched": true,
+    "receipt_ttl_seconds": 86400,
+    "consistency": "EVENTUAL_NOT_TRANSACTIONAL"
+  },
+  "immutable_versions": {
+    "paused": "3e25b452-96c9-492f-9f7e-9b57bcc81c69",
+    "resumed": "823ad15a-7af3-4f07-80f1-7601ab6919fb",
+    "pre_queue_paused": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c"
+  },
+  "deployment_receipts": {
+    "initial_paused": "ed1a8c2e-506a-403a-9ed8-ff948c0904c5",
+    "resumed": "c7279c19-c26b-4a78-81e4-2ecd2bca7980",
+    "rollback_paused": "dd80be77-a812-42d7-a96b-0099fa43ef7b"
+  },
+  "physical_messages": [
+    {
+      "job_id": "labcf-pause-probe-20261115-a1",
+      "idempotency_key": "labcfkey-pause-probe-20261115-a1",
+      "action": "TICK_ONLY",
+      "expected_pause": true,
+      "kv_receipt": {
+        "status": "PAUSED_SKIPPED",
+        "work_units": 0,
+        "observed_pause": true,
+        "external_actions": 0,
+        "received_at": "2026-11-15T17:11:17.926Z"
+      },
+      "kv_key": "receipt:labcfkey-pause-probe-20261115-a1",
+      "source": "KV_GET_REAL"
+    },
+    {
+      "job_id": "labcf-resume-proof-20261115-b1",
+      "idempotency_key": "labcfkey-resume-proof-20261115-b1",
+      "action": "TICK_ONLY",
+      "expected_pause": false,
+      "kv_receipt": {
+        "status": "WORK_UNIT_ACK",
+        "work_units": 1,
+        "observed_pause": false,
+        "external_actions": 0,
+        "additional_cost_eur": 0,
+        "priority": 3,
+        "received_at": "2026-11-15T17:13:43.345Z"
+      },
+      "kv_key": "receipt:labcfkey-resume-proof-20261115-b1",
+      "source": "KV_GET_REAL"
+    }
+  ],
+  "final_state": {
+    "observed_at": "2026-11-15T17:14:56.513Z",
+    "deployed_version": "3e25b452-96c9-492f-9f7e-9b57bcc81c69",
+    "control_paused": true,
+    "canary_cron": [],
+    "workers_dev_enabled": false,
+    "preview_urls_enabled": false,
+    "queue_consumer_count": 1,
+    "all_original_five_crons_preserved": true,
+    "rollback_effective_state_verified": true
+  },
+  "scope_and_cost": {
+    "new_subscriptions": 0,
+    "cloudflare_free_queues_available": true,
+    "operations_per_day_included_free": 10000,
+    "additional_provider_usage_exists": true,
+    "provider_invoice_incremental_cost_unverified": true,
+    "public_routes_added": 0,
+    "existing_workers_touched": 0,
+    "external_business_actions": 0
+  },
+  "caveats": {
+    "no_auto_timing_scheduler": true,
+    "queue_messages_are_operator_enqueued": true,
+    "queue_at_least_once_delivery": true,
+    "kv_idempotency_not_strongly_consistent": true,
+    "receipt_ttl_24h": true,
+    "external_agent_runtime_not_verified": true,
+    "console_write_adapter_connected": false,
+    "cloudflare_private_token_not_transferred": true,
+    "production_eligible": false
+  },
+  "references": {
+    "worker_source": "worker.queue-v0.mjs",
+    "worker_tests": "worker.queue-v0.test.mjs",
+    "shadow_scheduler": "../shared-scheduler-shadow.mjs",
+    "prior_cloudflare_control": "physical-provider-control-2026-11-15.json"
+  },
+  "gate_status": {
+    "real_cloudflare_queue_execution": "HECHO",
+    "pause_flag_effective": "HECHO",
+    "receipt_readback": "HECHO",
+    "rollback": "HECHO",
+    "shared_cron_scheduler_in_production": "NO",
+    "operator_console_execution": "NO",
+    "business_engine_execution": "NO"
+  }
+}
