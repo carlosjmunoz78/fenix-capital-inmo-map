@@ -108,3 +108,32 @@ Medición: derivar ETA de tiempos reales históricos por tarea/etapa, percentile
 ### 8.5 Estado en esta revisión
 
 **HECHO DOCUMENTAL**: requisitos capturados y versionados; sin código de ejecutor nuevo, despliegues, suscripciones, tokens, políticas relajadas ni modificaciones de Social, Cloudflare, Supabase, App, CRM, SEO, staging o PROD. **PARCIAL OPERATIVO**: lecturas y controles LAB ya documentados en la PR. **SIGUIENTE BLOQUE TÉCNICO**: discovery/health/gaps desde fuentes privadas autorizadas → medición de ETA/FinOps → planificación/priorización/aceleración LAB → adaptadores de control con readback/rollback → E2E/tribunal.
+
+
+## 9. Evidencia de implementación LAB · diagnóstico conversacional seguro
+
+Fecha: 15/11/2026. Commit funcional ensayado: 14411506b5345a9b54a9b1be0b9f8a35d292e62b (PR #66 DRAFT).
+
+### HECHO · Código LAB, sin I/O nuevo
+- src/cerebroOperativaDiagnostics.ts: respuestas de carencias, fallos, capacidades, próximos pasos, duración/ETA y coste medido/desconocido desde el lector owner actual; sin fabricar números ni agentes activos.
+- src/CerebroOperativeCockpitV3Bridge.tsx: preguntas del chat principal consultan el mismo lector propietario autenticado, incluso sobre elementos fuera de panel, sin ejecutar órdenes.
+- src/cerebroFleetObserveApi.ts: ACCELERATE, SLOW_DOWN, CANCEL, RETRY y REASSIGN no se confunden con PRIORITIZE; acciones no acreditadas no ejecutan. Las preguntas de orientación siguen siendo lectura.
+- cerebro/universal/v0/operator-diagnostics.test.mjs y tests/cerebro-operativa-owner-quickreads-lab.spec.ts: pruebas de clasificación, información desconocida, frescura, guardas y E2E de conversación en navegador sintético.
+
+### Evidencia de aceptación del commit funcional
+- GitHub Actions CEREBRO Universal Gateway V0 LAB contract CI: run 43753380853 SUCCESS (unit tests, TypeScript/build, navegador sintético, denegación anónima y PROD).
+- GitHub Actions CEREBRO Governed Main Integration V0: run 43753380788 SUCCESS.
+- GitHub Actions CEREBRO Enterprise Acceleration V0: run 43753380783 SUCCESS.
+- Las pruebas sintéticas interceptan solicitudes externas. NO acreditan nueva versión desplegada ni E2E físico con el propietario.
+
+### Estado y recuperación
+- Estado: IMPLEMENTADO EN RAMA LAB + CI GREEN; PREVIEW FÍSICO PENDIENTE; PROD BLOQUEADO.
+- Backup / rollback: conservar última versión de Preview existente; reversión del commit aislado de diagnóstico si hace falta, no hay migración SQL nueva ni estado real que borrar.
+- No se han desplegado motores, cambiado flags, generado cron, contratado servicios ni alterado App/CRM, Social PR #8/#9, Cloudflare, staging suspendida, producción o main.
+- Coste marginal de minutos de GitHub CI no medido en euros; no declarar un coste total verificado de cero.
+
+### next_block
+1. Desplegar exclusivamente Preview aislado del SHA aceptado, sólo mediante ruta autorizada con coste adicional comprobado.
+2. Probar las cinco familias de consultas con sesión propietaria real, negativas, OLD vs NEW, observabilidad y rollback físico del Preview.
+3. Conectar fuentes privadas y latidos agent_id/subagent_id/job_id/run_id; medir ETA/FinOps con recibos; control provider específico con readback, permisos y tribunal.
+4. No promover producción ni reactivar staging sin gates de seguridad y orden expresa.
