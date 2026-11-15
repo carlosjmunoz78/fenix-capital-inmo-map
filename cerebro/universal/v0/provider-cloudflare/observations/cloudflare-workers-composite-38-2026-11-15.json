@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.3.0",
+  "schema_version": "1.4.0",
   "source": "CLOUDFLARE_API_POINT_IN_TIME_SNAPSHOT",
   "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
   "observed_at": "2026-11-15T16:17:05.960Z",
@@ -438,16 +438,23 @@
       "engine_id": "LAB-CF-CANARY-001",
       "agent_id": null,
       "subagent_id": null,
-      "modified_on": "2026-11-15T15:41:13.595551Z",
+      "modified_on": "2026-11-15T16:27:30.058652Z",
       "cron_schedules": [],
       "workers_dev_enabled": false,
       "preview_urls_enabled": false,
       "cron_verified_at": "2026-11-15T16:17:05.960Z",
-      "settings_observed_at": "2026-11-15T16:17:05.960Z",
+      "settings_observed_at": "2026-11-15T16:29:49.567Z",
       "environment": "LAB",
-      "boolean_flags": {},
+      "boolean_flags": {
+        "CONTROL_PAUSED": true
+      },
       "runtime_execution_verified": false,
-      "observability_events_24h": null
+      "observability_events_24h": null,
+      "control_deployed_version": "1a6d2051-e14e-4ed9-ae04-04f642b3d56c",
+      "control_paused": true,
+      "control_readback_at": "2026-11-15T16:29:49.567Z",
+      "provider_config_pause_resume_verified": true,
+      "actual_work_executed_verified": false
     },
     {
       "worker_id": "cerebro-social-buffer-ledger-lab-eu",
@@ -926,5 +933,7 @@
   "snapshot_kind": "COMPOSITE_AUDITED_NOT_LIVE",
   "base_worker_count": 37,
   "base_observed_at": "2026-11-15T10:44:45.565Z",
-  "canary_observed_at": "2026-11-15T16:17:05.960Z"
+  "canary_observed_at": "2026-11-15T16:17:05.960Z",
+  "last_canary_provider_control_at": "2026-11-15T16:29:49.567Z",
+  "canary_control_receipt_path": "../canary/physical-provider-control-2026-11-15.json"
 }
