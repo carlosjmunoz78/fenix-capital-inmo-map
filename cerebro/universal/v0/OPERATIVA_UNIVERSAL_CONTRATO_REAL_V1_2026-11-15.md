@@ -137,3 +137,16 @@ Fecha: 15/11/2026. Commit funcional ensayado: 14411506b5345a9b54a9b1be0b9f8a35d2
 2. Probar las cinco familias de consultas con sesión propietaria real, negativas, OLD vs NEW, observabilidad y rollback físico del Preview.
 3. Conectar fuentes privadas y latidos agent_id/subagent_id/job_id/run_id; medir ETA/FinOps con recibos; control provider específico con readback, permisos y tribunal.
 4. No promover producción ni reactivar staging sin gates de seguridad y orden expresa.
+
+
+## 10. ACTUALIZACIÓN DE CONTINUIDAD · CIERRE 15/11/2026
+
+**IMPORTANTE:** Las fotografías de estado de las secciones previas (especialmente 8.5 y 9) describen hitos ANTERIORES. El registro de continuación actual, pruebas, rollout, bloqueos y tareas pendientes por orden de prioridad está íntegro en:
+- [TRASPASO MAESTRO A CHAT NORMAL](./CEREBRO_OPERATIVA_TRASPASO_CHAT_NORMAL_2026-11-15.md)
+- [PROMPT DE CONTINUACIÓN SIN WORK](./PROMPT_CONTINUAR_OPERATIVA_CHAT_NORMAL_2026-11-15.md)
+
+Último SHA FUNCIONAL comprobado: 986eed50a47dcf519d52dfbb0dfc2c12a3c2fee2, PR #66 DRAFT (sin merge), GitHub 3/3 SUCCESS (43768086907 / 43768086914 / 43768086899). Vercel Preview protegido READY dpl_GUsDv7y88Vnf3ugBfurbmQM1DU8x. Lector Supabase LAB de dispositivos ACTIVE v1 y lector Supabase LAB de trabajos JARVIS/navegador/productora ACTIVE v1. Lectura REAL de ambos paneles observada en Opera; chat LIVE probado sintéticamente, no envío manual desde Opera.
+
+**Distinción obligatoria:** los datos PREPROD son etiquetas históricas dentro de BD LAB; no existe autorización para reactivar App PREPROD. Estado almacenado ONLINE y jobs históricos NO prueban agentes activos. El gasto incremental 0,0000 EUR en 60 muestras no acredita coste total 0. Edge verify_jwt=false es excepción técnica con owner verificado server-side; faltan pruebas negativas y rollback físicos. Cloudflare Vercel sin token de lectura; NO recrear tokens bloqueados. Operativa aún NO habilita control empresarial autónomo. Ver nuevas prioridades P0/P1/P2 en handoff.
+
+Seguir conservando main, PROD, App/CRM, DNS, Social, staging suspendida y Trading aislado; no promover esta PR ni desplegar en PROD sin gates completos y autorización independiente.
