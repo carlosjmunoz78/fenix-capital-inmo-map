@@ -250,7 +250,7 @@ test('Control tab shows real vs unavailable sources, answers agent questions and
  await inspectorField.fill('SEO-001');
  await expect(inspector).toContainText('SIN ASIGNACIÓN EN ESTE REGISTRO para SEO-001');
  await inspectorField.fill('C360-001');
- await expect(inspector).toContainText('Sales Executive (AGT-SALES-EXECUTIVE)');
+ await expect(inspector).toContainText('Ventas (AGT-SALES-EXECUTIVE)');
  await inspectorField.fill('https://invalid.test');
  await expect(inspector).toContainText('Escribe el identificador exacto del motor');
 
