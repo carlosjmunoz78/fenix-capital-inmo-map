@@ -1,13 +1,43 @@
 /** Owner fleet observability: a declared role is not a process, workflow or live agent. */
 const GH_RUN=/^https:\/\/github\.com\/carlosjmunoz78\/(?:fenix-capital-inmo-map|capital-mapa-pro)\/actions\/runs\/\d+$/;
 const STATUS=new Set(['queued','in_progress','completed','waiting','pending','requested']);
+const asStamp=value=>typeof value==='string'&&Number.isFinite(Date.parse(value))?value:null;
+const maxObservedRunSeconds=7*24*60*60; // defensive provider-bound interval
+/**
+ * Github Actions exposes run_started_at and updated_at, not a true per-step duration.
+ * The interval below is a proxy upper bound for successful completed workflow runs.
+ */
+export function observedRunDurationUpperBound(row){
+ const start=asStamp(row?.run_started_at),end=asStamp(row?.updated_at);
+ if(!start||!end||row.status!=='completed'||row.conclusion!=='success')return null;
+ const seconds=Math.ceil((Date.parse(end)-Date.parse(start))/1000);
+ return Number.isSafeInteger(seconds)&&seconds>0&&seconds<=maxObservedRunSeconds?seconds:null;
+}
+export function summarizeWorkflowTiming(runs){
+ const byName=new Map();
+ for(const run of runs){
+  if(!Number.isSafeInteger(run.duration_upper_bound_seconds)||run.duration_upper_bound_seconds<=0||!run.name)continue;
+  const prev=byName.get(run.name)||[];
+  if(prev.some(x=>x.id===run.run_id))continue;
+  prev.push({id:run.run_id,seconds:run.duration_upper_bound_seconds});
+  byName.set(run.name,prev);
+ }
+ return [...byName.entries()].filter(([,v])=>v.length>=3).sort((a,b)=>b[1].length-a[1].length).slice(0,8).map(([name,v])=>{
+  const sorted=v.map(x=>x.seconds).sort((a,b)=>a-b);
+  return {workflow_name:name,sample_size:sorted.length,
+   p50_upper_bound_seconds:sorted[Math.ceil(.5*sorted.length)-1],
+   p90_upper_bound_seconds:sorted[Math.ceil(.9*sorted.length)-1],
+   method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY',engine_mapping_verified:false};
+ });
+}
 export function normalizeFleetRun(row,repo){
  if(!row||!Number.isSafeInteger(row.id)||row.id<1||!STATUS.has(row.status)||
   typeof row.html_url!=='string'||!GH_RUN.test(row.html_url)||
   row.repository?.full_name!==repo)return null;
  return {run_id:row.id,name:String(row.name||'Trabajo sin título').slice(0,115),
   status:row.status,conclusion:typeof row.conclusion==='string'?row.conclusion.slice(0,35):null,
-  updated_at:typeof row.updated_at==='string'&&Number.isFinite(Date.parse(row.updated_at))?row.updated_at:null,
+  updated_at:asStamp(row.updated_at),run_started_at:asStamp(row.run_started_at),
+  duration_upper_bound_seconds:observedRunDurationUpperBound(row),
   url:row.html_url,engine_id:null,agent_id:null,subagent_id:null};
 }
 export function summarizeFleetRuns(raw,repo){
@@ -17,6 +47,7 @@ export function summarizeFleetRuns(raw,repo){
   active_in_sample:runs.filter(x=>x.status==='in_progress').length,
   queued_in_sample:runs.filter(x=>x.status==='queued'||x.status==='waiting'||x.status==='pending').length,
   recent:runs.slice(0,8),
+  timing_samples:summarizeWorkflowTiming(runs),
   total_repo_run_count:Number.isSafeInteger(raw.total_count)&&raw.total_count>=0?raw.total_count:null};
 }
 export function summarizeFleetRoles(registry){
