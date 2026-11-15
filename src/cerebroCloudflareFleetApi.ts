@@ -76,6 +76,7 @@ export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):s
   return 'Cloudflare en tiempo real NO DISPONIBLE ('+read.reason+'). Última auditoría '+date+
    ': '+audited.worker_count+' Workers, '+audited.scheduled_workers+' con cron configurado, '+
    audited.without_cron_workers+' sin cron y '+audited.engine_id_mapped_workers+' con motor declarado vinculado. '+
+   'Última observabilidad auditada: '+audited.observability.total_events+' eventos en 24 h, no trabajos, en '+audited.observability.services.length+' servicios. '+
    'Estas cifras son históricas, no demuestran agentes activos ni el estado actual.';
  }
  const s=read.snapshot;
