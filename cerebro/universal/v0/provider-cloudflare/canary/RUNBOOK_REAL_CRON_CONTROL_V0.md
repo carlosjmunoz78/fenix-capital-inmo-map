@@ -23,4 +23,14 @@ Worker sin cron sigue pudiendo recibir otros tipos de eventos; los controles emp
 Conservar el nuevo canario inerte con schedule vacío y subdomain OFF; nunca destruir datos, eliminar recursos ni publicar sin procedimiento de recuperación.
 Si no se confirma el estado final: HUMAN_REQUIRED SECURITY_INCIDENT y detener nuevos cambios Cloudflare.
 
-Estado inicial: DEFINIDO; actualizar a HECHO con pruebas físicas y SHA de origen después de ejecutar.
+## Evidencia física del 15/11/2026 (15:41–15:43 UTC)
+- HECHO: Worker creado con el código fuente versionado y respuesta de Cloudflare CREATE_SAFE. Subdominio workers.dev false, preview_urls false, schedules [] en GET.
+- BLOQUEADO POR CUOTA ECONÓMICA: Cloudflare rechazó PUT de cron nuevo */30 * * * * con HTTP 400, error 10072: el plan Workers Free limita a 5 cron triggers por cuenta. La cuenta ya tenía los cinco ocupados.
+- RECUPERACIÓN VERIFICADA: se consultó otra vez el canario, schedules [] y subdominios false. Los cinco crons originales conservaron sus expresiones, verificados con GET nominal posterior.
+- El canario nuevo lleva el total de Workers a 38, pero sólo se han verificado cinco cron configurados. No se ejecutaron trabajos empresariales ni se habilitaron rutas públicas. No hay evidencia de scheduled() ejecutado.
+- La prueba de RESUME_CRON fue RECHAZADA y no se puede declarar ejecutada ni validada. PAUSE_CRON no cambió ningún cron activo; el estado objetivo OFF ya estaba aplicado y se releyó.
+- No eliminar ni suspender uno de los cinco crons existentes para liberar el cupo. No contratar Workers Paid sin autorización económica explícita.
+- Evidencia JSON: ../observations/cloudflare-free-cron-capacity-2026-11-15.json.
+- PLAN ALTERNATIVO: diseñar un único scheduler compartido dentro del cupo existente con estudio de dependencias, backup, comparación OLD vs NEW, pruebas, rollback físico y tribunal. No intervenir staging suspendida.
+
+**ESTADO FINAL: BLOQUEADO PARA RESUME_CRON, PRIVADO + PAUSADO PARA EL CANARIO, SIN CAMBIOS EN CRONS EXISTENTES.**
