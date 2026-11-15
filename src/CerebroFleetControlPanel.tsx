@@ -7,6 +7,7 @@ import CerebroLabWorkerControlPanel from './CerebroLabWorkerControlPanel';
 import CerebroCloudflareFleetPanel from './CerebroCloudflareFleetPanel';
 import CerebroCloudflareQueuesPanel from './CerebroCloudflareQueuesPanel';
 import CerebroSocialProviderPanel from './CerebroSocialProviderPanel';
+import CerebroDeviceRuntimeSnapshotPanel from './CerebroDeviceRuntimeSnapshotPanel';
 import {readUniversalOperativaLab,type UniversalJob001ControlLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-fleet-control-panel.css';
 const INITIAL:FleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
@@ -97,6 +98,7 @@ export default function CerebroFleetControlPanel(){
    <span>{snapshot.media_studio.total_roles} funciones descritas · {snapshot.media_studio.departments} departamentos · {snapshot.media_studio.specialists} especialistas · {snapshot.media_studio.supervisors} supervisores · {snapshot.media_studio.judges} jueces · {snapshot.media_studio.guardians} guardianes.</span>
    <small>Fuente: jerarquía de Media Studio V2. Solo perfiles diseñados; no son agentes activos comprobados. No se suman al censo de otros sistemas por posibles solapamientos.</small>
   </div>:null}
+  <CerebroDeviceRuntimeSnapshotPanel/>
   <section className="op4-fleet-inspector" aria-label="Inspector de motores no listados">
    <h4>Consultar cualquier motor por ID</h4>
    <p>Busca perfiles declarados aunque el motor no aparezca en las tarjetas. Esta consulta no ejecuta acciones.</p>
