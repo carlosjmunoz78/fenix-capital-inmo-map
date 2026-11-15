@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0.0",
+  "company_id": "fenix",
+  "engine_id": "SEO-001",
+  "environment": "READ_ONLY_WORDPRESS_SOURCE_OBSERVATION",
+  "observed_on": "2026-11-15",
+  "source": "COWBOY_MCP_WEB_AUTHENTICATED_WP_GET_POST",
+  "privacy": "PUBLIC_REPOSITORY_NO_UNPUBLISHED_HTML_STORED",
+  "hold": "DO_NOT_MODIFY_DRAFTS_OR_PUBLISH_WITHOUT_BACKUP_AND_VISUAL_QA",
+  "counting_rule": "COUNT_ONLY_DETAILS_INSIDE_section.fenix-faq_NOT_HERO_OR_OTHER_DETAILS",
+  "records": [
+    {
+      "post_id": 52660,
+      "type": "post",
+      "status": "draft",
+      "faq_section_questions": 6,
+      "faq_minimum": 6,
+      "other_disclosures": 2,
+      "raw_body_h1": 0,
+      "raw_body_h2": 10,
+      "form_shortcodes": 2,
+      "owner_style_h3_mismatch": true,
+      "other_detected": [
+        "H2_POLICY_REVIEW",
+        "CHECK_ASTRA_RENDERED_H1"
+      ]
+    },
+    {
+      "post_id": 52661,
+      "type": "post",
+      "status": "draft",
+      "faq_section_questions": 6,
+      "faq_minimum": 6,
+      "other_disclosures": 1,
+      "raw_body_h1": 0,
+      "raw_body_h2": 10,
+      "form_shortcodes": 2,
+      "owner_style_h3_mismatch": true,
+      "other_detected": [
+        "FAQ_ANSWER_75_WORDS_REVIEW",
+        "COLON_VISIBLE_TEXT",
+        "H2_POLICY_REVIEW",
+        "CHECK_ASTRA_RENDERED_H1"
+      ]
+    },
+    {
+      "post_id": 52662,
+      "type": "page",
+      "status": "draft",
+      "faq_section_questions": 8,
+      "faq_minimum": 8,
+      "other_disclosures": 3,
+      "raw_body_h1": 1,
+      "raw_body_h2": 10,
+      "form_shortcodes": 3,
+      "owner_style_h3_mismatch": true,
+      "other_detected": [
+        "OWNER_BANNED_ADEMAS",
+        "TWO_COLON_H2",
+        "H2_POLICY_REVIEW"
+      ]
+    },
+    {
+      "post_id": 52663,
+      "type": "page",
+      "status": "draft",
+      "faq_section_questions": 8,
+      "faq_minimum": 8,
+      "other_disclosures": 2,
+      "raw_body_h1": 1,
+      "raw_body_h2": 11,
+      "form_shortcodes": 3,
+      "owner_style_h3_mismatch": true,
+      "other_detected": [
+        "COLON_VISIBLE_TEXT",
+        "H2_POLICY_REVIEW"
+      ]
+    }
+  ],
+  "findings": [
+    "FAQ_NUMBERS_PASS_ON_ALL_FOUR_DRAFTS",
+    "FAQ_SEMANTIC_HEADING_CONTRACT_REQUIRES_ACCESSIBLE_VISUAL_REVIEW",
+    "WORDPRESS_TITLE_H1_MAY_BE_RENDERED_BY_ASTRA_OUTSIDE_BODY",
+    "KEEP_EXISTING_DISCLOSURE_UI_UNTIL_TESTED",
+    "COUNT_FAQ_WITH_SECTION_BOUNDARY_NOT_GLOBAL_DETAILS",
+    "NOT_ALL_OWNER_EDITORIAL_GATES_PASS"
+  ],
+  "security": {
+    "unpublished_contents_committed_to_public_repository": false,
+    "wordpress_writes": 0,
+    "site_published": false,
+    "new_model_spend_eur": 0
+  }
+}
