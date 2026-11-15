@@ -59,6 +59,7 @@ jobs:
             test-results/operativa-lab-control-verified.png
             test-results/operativa-lab-chat-confirmation.png
             test-results/operativa-cloudflare-live-qa.png
+            test-results/operativa-cloudflare-canary-provider-proof.png
             test-results/**/test-failed-1.png
             test-results/**/error-context.md
           if-no-files-found: ignore
