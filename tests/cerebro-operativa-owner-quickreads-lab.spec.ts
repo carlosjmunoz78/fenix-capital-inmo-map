@@ -280,6 +280,15 @@ test('Owner Operativa answers missing-agent, ETA/cost and priority advice withou
  await expect(answer).toContainText('NO App PREPROD activa');
  await expect(answer).toContainText('Coste real: NO_MEDIDO');
  expect(calls).toContain('device_live_read');
+ await prompt.fill('¿Cuántos trabajos tiene JARVIS?');
+ await send.click();
+ await expect(answer).toContainText('LECTURA ACTUAL DE REGISTROS HISTÓRICOS LAB');
+ await expect(answer).toContainText('JARVIS: 6 trabajos históricos');
+ await expect(answer).toContainText('Navegador V2: 117 trabajos históricos');
+ await expect(answer).toContainText('Productora: 18 trabajos históricos');
+ await expect(answer).toContainText('Coste TOTAL de infraestructura NO_MEDIDO');
+ await expect(answer).toContainText('Agentes y subagentes reales, trabajo actual y latidos independientes: NO VERIFICADOS');
+ expect(calls).toContain('agent_job_live_read');
  await prompt.fill('¿Qué deberíamos priorizar?');
  await send.click();
  await expect(answer).toContainText('SIGUIENTE AVANCE RECOMENDABLE');
