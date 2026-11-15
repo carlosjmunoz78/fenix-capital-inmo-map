@@ -19,6 +19,7 @@ export default function CerebroFleetControlPanel(){
  const[loading,setLoading]=useState(false);
  const[lastError,setLastError]=useState('');
  const[controlTarget,setControlTarget]=useState('SEO-001');
+ const[inspectTarget,setInspectTarget]=useState('FACT-001');
  const[controlStatus,setControlStatus]=useState('');
  const refresh=useCallback(async(signal?:AbortSignal)=>{
   setLoading(true);
@@ -46,10 +47,13 @@ export default function CerebroFleetControlPanel(){
  const sources=snapshot?.sources||[];
  const connected=sources.filter(s=>s.state==='LIVE');
  const liveRuns=connected.flatMap(s=>s.recent||[]).sort((a,b)=>String(b.updated_at||'').localeCompare(String(a.updated_at||''))).slice(0,16);
+ const inspectedEngine=inspectTarget.trim().toUpperCase();
+ const inspectedIsValid=/^[A-Z][A-Z0-9]{1,11}-[0-9]{3}$/.test(inspectedEngine);
+ const inspectedProfiles=inspectedIsValid?roles.filter(r=>r.engine_bindings.includes(inspectedEngine)):[];
  const control=(action:string)=>{
   const id=controlTarget.trim().toUpperCase();
   const reason=/(?:STAGING|PROD)/.test(id)?'Entorno protegido: no se permite control desde el Preview.':
-   !/^[A-Z]{2,12}-\d{3}$/.test(id)?'Identifica primero un motor exacto, por ejemplo SEO-001.':
+   !/^[A-Z][A-Z0-9]{1,11}-\d{3}$/.test(id)?'Identifica primero un motor exacto, por ejemplo SEO-001.':
    'El motor '+id+' no tiene un ejecutor de control verificado para '+action.toLowerCase()+
    '. Acción NO ejecutada. Necesita conexión al runtime propietario, permisos, auditoría y rollback.';
   setControlStatus(reason);
@@ -77,6 +81,27 @@ export default function CerebroFleetControlPanel(){
    <span>{snapshot.media_studio.total_roles} funciones descritas · {snapshot.media_studio.departments} departamentos · {snapshot.media_studio.specialists} especialistas · {snapshot.media_studio.supervisors} supervisores · {snapshot.media_studio.judges} jueces · {snapshot.media_studio.guardians} guardianes.</span>
    <small>Fuente: jerarquía de Media Studio V2. Solo perfiles diseñados; no son agentes activos comprobados. No se suman al censo de otros sistemas por posibles solapamientos.</small>
   </div>:null}
+  <section className="op4-fleet-inspector" aria-label="Inspector de motores no listados">
+   <h4>Consultar cualquier motor por ID</h4>
+   <p>Busca perfiles declarados aunque el motor no aparezca en las tarjetas. Esta consulta no ejecuta acciones.</p>
+   <label htmlFor="op4-inspect-engine">Identificador del motor</label>
+   <input id="op4-inspect-engine" aria-label="Identificador del motor a consultar"
+    value={inspectTarget} maxLength={32} spellCheck={false} autoComplete="off"
+    onChange={event=>setInspectTarget(event.target.value)} placeholder="FACT-001, SEO-001, C360-001"/>
+   <p role="status" className="op4-fleet-inspect-answer">
+    {result.kind!=='ready'||!snapshot?
+      'SIN LECTURA VERIFICADA: '+(result.reason||'SOURCE_UNAVAILABLE')+'. No se infiere ausencia de perfiles.':
+      !inspectedIsValid?'Escribe el identificador exacto del motor (por ejemplo, SEO-001 o C360-001).':
+      inspectedProfiles.length?
+       'ASIGNACIÓN DECLARADA en el registro para '+inspectedEngine+': '+
+       inspectedProfiles.map(role=>role.name+' ('+role.id+')').join(', ')+
+       '. Son perfiles definidos, NO agentes ejecutándose.':
+       'SIN ASIGNACIÓN EN ESTE REGISTRO para '+inspectedEngine+
+       '. No demuestra ausencia del motor ni de agentes en otros sistemas.'}
+   </p>
+   <p className="op4-fleet-note">Fuente: role-agent-registry.v1.json, sólo ámbito Fénix autorizado.
+    Ejecución, salud, agentes y subagentes activos: NO VERIFICADOS por este registro.</p>
+  </section>
   <div className="op4-fleet-grid">
    <section aria-label="Estado de los conectores">
     <h4>Plataformas y fuentes de verdad</h4>
