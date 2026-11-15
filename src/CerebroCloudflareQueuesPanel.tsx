@@ -12,7 +12,7 @@ export default function CerebroCloudflareQueuesPanel(){
  return <section className="op4-cf op4-cf-queues" aria-label="Cloudflare Queues · mapa de consumidores">
   <div className="op4-cf-head"><div>
    <h4>Cloudflare Queues · trabajos pendientes y conexiones</h4>
-   <p>Mapa de colas y consumidores verificado directamente en Cloudflare. **Archivo fechado**, no telemetría en tiempo real.</p>
+   <p>Mapa de colas y consumidores verificado directamente en Cloudflare. Archivo fechado, no telemetría en tiempo real.</p>
   </div></div>
   <p className="op4-cf-status" role="status">ARCHIVO, NO EN VIVO · observado {format(evidence.observed_at)} · consumidores {evidence.consumer_verified_count}/{evidence.queue_count} · métricas {evidence.metric_verified_count}/{evidence.queue_count}</p>
   <div className="op4-cf-stats">
