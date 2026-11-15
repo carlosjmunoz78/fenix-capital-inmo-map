@@ -3,7 +3,7 @@ import {triageFleet} from './cerebroOperativaTriage.ts';
 import deviceHistory from '../cerebro/universal/v0/device-runtime-snapshot-fenix-2026-11-15.json' with { type: 'json' };
 
 /** LAB read-only owner diagnostic: evidence is never promoted into inferred active agents, costs or ETAs. */
-export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES'|'DEVICE_HISTORY';
+export type DiagnosticIntent='MISSING'|'FAILURES'|'CAPABILITIES'|'PROGRESS'|'ESTIMATES'|'DEVICE_HISTORY'|'JOB_EVIDENCE';
 const canon=(input:string)=>input.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 const MUTATION=/^\s*(?:pausa|pausar|deten|detener|reanuda|reanudar|reactiva|reactivar|acelera|acelerar|prioriza|priorizar|cancela|cancelar|reintenta|reintentar|reasigna|reasignar|ejecuta|ejecutar|crea|crear|publica|publicar|activa|activar)\b/;
 export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
@@ -11,6 +11,8 @@ export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
  const q=canon(query);
  if(!q||MUTATION.test(q))return null;
  if(/\b(dispositivos?|latidos?|heartbeats?|device bridge)\b/.test(q))return 'DEVICE_HISTORY';
+ if(/\b(jarvis|productora|navegadores?|browser|dead.letter)\b/.test(q)&&
+    /\b(trabajos?|jobs?|colas?|fallas?|fallos?|retenidos?|pendientes?|cuantos?|cuantas?|coste|costos?|tardan?|duracion|estado|situacion|que)\b/.test(q))return 'JOB_EVIDENCE';
  if(/\b(coste|costara|costaria|costos?|cuesta|cuestan|precio|presupuesto|tiempo|tardara|tarda|tardaria|duracion|eta|euros?|horas?|minutos?)\b/.test(q))return 'ESTIMATES';
  if(/\b(falla|fallan|fallando|fallos?|errores?|incidencias?|averiados?|rotos?|bloqueados?|atascados?|no funciona|sin funcionar)\b/.test(q))return 'FAILURES';
  if(/\b(faltan?|falta|necesitamos?|necesitaria|carecemos|sin agente|sin subagente|que necesitamos|que hace falta)\b/.test(q))return 'MISSING';
@@ -49,6 +51,7 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
    'SIN ASIGNACIÓN DE PERFIL PARA '+scoped+' EN ESTE REGISTRO (NO demuestra ausencia global de agentes o capacidades). ':
   'Este registro relaciona '+s.roles.declared_role_profiles+' perfiles con '+declaredMappings.length+
    ' identificadores distintos de motor; NO constituye el censo global de 179 motores ni de agentes. ';
+ if(intent==='JOB_EVIDENCE')return intro+base+'Los trabajos de JARVIS/navegador/productora requieren consulta del lector privado LAB; en este registro general NO hay evidencia de actividad ni costes verificables. No se ha ejecutado ninguna orden.';
  if(intent==='DEVICE_HISTORY'){
   const d=deviceHistory;
   if(d.schema!=='CEREBRO_DEVICE_RUNTIME_SNAPSHOT_V1'||d.kind!=='DATED_READ_ONLY_EVIDENCE'||
