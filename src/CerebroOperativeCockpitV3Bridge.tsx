@@ -8,7 +8,7 @@ import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
-import {readCloudflareFleet,answerCloudflareFleet} from './cerebroCloudflareFleetApi';
+import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention} from './cerebroCloudflareFleetApi';
 import './cerebro-operative-console.css';
 
 /**
@@ -94,14 +94,14 @@ export default function CerebroOperativeCockpitV3Bridge(){
    }finally{setFleetSending(false)}
    return;
   }
-  if(question&&(/cloudflare|workers?/i.test(text)||/cerebro-(?:instagram|facebook|jarvis|fact001|ums001|linkedin|social|model)-[a-z0-9-]+/i.test(text))){
+  if(question&&(/cloudflare|workers?/i.test(text)||/LAB-CF-CANARY-001/i.test(text)||/cerebro-(?:instagram|facebook|jarvis|fact001|ums001|linkedin|social|model)-[a-z0-9-]+/i.test(text))){
    setFleetSending(true);
    try{
     if(question.kind==='control'){
      setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA. El conector Cloudflare disponible en Operativa es estrictamente de solo lectura. Antes de pausar o reactivar este Worker se necesitan su contrato, snapshot, permisos específicos, rollback y confirmación verificable.'});
     }else{
      const read=await readCloudflareFleet({refresh:true});
-     const matched=read.snapshot?.workers.find(w=>text.toLowerCase().includes(w.id))?.id;
+     const matched=resolveCloudflareWorkerMention(text,read)||undefined;
      setOperatorAnswer({question:text,text:answerCloudflareFleet(read,matched)});
     }
     setComposer('');
