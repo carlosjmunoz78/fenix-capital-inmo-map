@@ -62,12 +62,12 @@ export default function CerebroCloudflareFleetPanel(){
   </div>
   <p role="status" className="op4-cf-status"><Clock size={14}/>
    {x?'EN VIVO · Cloudflare API · '+format(x.observed_at)+(x.cache_status==='HOT_60S'?' · caché ≤60 s':' · lectura nueva'):
-    archived?'ARCHIVO COMPUESTO, NO EN VIVO · auditoría base '+format(archived.observed_at)+'; canario '+format(cronGate.observed_at)+' · conexión actual: '+read.reason:
+    archived?'ARCHIVO COMPUESTO, NO EN VIVO · auditoría base '+format(archived.base_observed_at)+'; canario '+format(cronGate.observed_at)+' · conexión actual: '+read.reason:
     'SIN AUTORIZACIÓN: '+read.reason}</p>
   <div className="op4-cf-stats" aria-label="Resumen Cloudflare">
    <div><strong>{x?.worker_count??(archived?cronGate.worker_count_now:null)??'—'}</strong><small>Workers registrados</small></div>
    <div><strong>{x?.with_cron??archived?.scheduled_workers??'—'}</strong><small>Con cron verificado</small></div>
-   <div><strong>{x?.without_cron??(archived?archived.without_cron_workers+1:null)??'—'}</strong><small>Sin cron verificado</small></div>
+   <div><strong>{x?.without_cron??(archived?archived.without_cron_workers:null)??'—'}</strong><small>Sin cron verificado</small></div>
    <div><strong>{x?.cron_unknown_count??(archived?archived.worker_count-archived.cron_verified_workers:null)??'—'}</strong><small>Crons no comprobados</small></div>
   </div>
   <div className="op4-cf-capacity" role="region" aria-label="Gate de capacidad cron Cloudflare Free">
