@@ -292,6 +292,20 @@
       "severity": "P1",
       "state": "GOOGLE_FAQ_RICH_RESULT_RETIRED_V1_CITY_CONTRACT_UNREVIEWED",
       "next_action": "Research verified 2026 Google FAQ retirement; version contract so visible FAQ and correct eligible schema matter, not obsolete rich result. Maintain mass rollout locked until page-level QA and owner tribunal."
+    },
+    {
+      "id": "LEAD_PRIVACY_CONTRACT_ATTESTATION",
+      "owner": "SEO-D28_D31",
+      "severity": "P0",
+      "state": "PRIVATE_SOURCE_VERIFIED_FIX_CANDIDATE_ONLY_NO_PROD_RELEASE",
+      "next_action": "Require private attested consent checks for existing B2C, B2B, Elementor and backend; independent OWASP-style QA with no fictitious client writes, full restore and rollback. Hold PROD until approved. Do not disclose details or client data in public repo."
+    },
+    {
+      "id": "LEAD_CONTACT_SLA_REVIEW",
+      "owner": "SEO-D29_HUMAN",
+      "severity": "P0",
+      "state": "PRIVATE_AGGREGATE_SOURCE_REQUIRES_REVIEW",
+      "next_action": "Read existing pending client follow-up tasks privately, reconcile legacy accepted events without client references; do not duplicate tasks, leak PII or mark contacts complete."
     }
   ],
   "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry.",
