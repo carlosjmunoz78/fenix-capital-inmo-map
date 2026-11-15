@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0.0",
+  "registry_id": "CEREBRO_OPERATIVA_LAB_WORKER_CONTROL_V0",
+  "identity": {
+    "company_id": "fenix",
+    "engine_id": "LAB-DEMO-001",
+    "environment": "LAB",
+    "version": "0.1.0",
+    "agent_id": null,
+    "subagent_id": null,
+    "worker_type": "DETERMINISTIC_MANUAL_LAB"
+  },
+  "roles": [
+    "OWNER_AUTHENTICATED_OPERATOR",
+    "ISOLATED_LAB_WORKER"
+  ],
+  "status": "ACTIVE_LAB_PREPROD_VERIFY_NOT_PROD",
+  "canonical_179_registry_mutated": false,
+  "required_context": [
+    "company_id",
+    "engine_id",
+    "environment",
+    "version",
+    "expected_revision",
+    "idempotency_key"
+  ],
+  "runtime": {
+    "provider": "SUPABASE_EDGE_PREPROD",
+    "project_ref": "hnqlnvakzaywtafeiybt",
+    "region": "eu-north-1",
+    "slug": "cerebro-operativa-lab-runtime-v0",
+    "version_deployed": 1,
+    "verify_jwt": false,
+    "auth_mode": "OWN_EXPLICIT_OWNER_PROD_CONTEXT_VERIFICATION",
+    "database_schema": "cerebro_lab_private",
+    "tables": [
+      "console_worker_control_v0",
+      "console_worker_audit_v0"
+    ],
+    "rpcs": [
+      "public.cerebro_operativa_lab_control_rpc_v0",
+      "public.cerebro_operativa_lab_observe_rpc_v0"
+    ],
+    "default_desired_state": "PAUSED",
+    "cron_configured": false,
+    "work_type": "MANUAL_DETERMINISTIC_COUNTER"
+  },
+  "frontend": {
+    "preview_only": true,
+    "vercel_project_id": "prj_tz5NfMwhscoVj2OCBOIvb0oXC6jc",
+    "route": "/cerebro?section=operativa&visual_lab=cockpit-v3&op3_panel=control",
+    "preview_api": "/api/cerebro-lab-worker-control?company_id=fenix",
+    "production_enabled": false
+  },
+  "actions": [
+    {
+      "action": "PAUSE",
+      "real_effect": "worker desired_state PAUSED"
+    },
+    {
+      "action": "RESUME",
+      "real_effect": "worker desired_state RUNNING"
+    },
+    {
+      "action": "PRIORITIZE",
+      "real_effect": "priority 1..5, no concurrency/budget changes"
+    },
+    {
+      "action": "TICK",
+      "real_effect": "increment work_units only if RUNNING, no external network side effects"
+    }
+  ],
+  "observability": {
+    "fresh_get": true,
+    "read_after_write": true,
+    "audit_receipt": true,
+    "revision_optimistic_lock": true,
+    "idempotent_replay": true,
+    "external_telemetry": false,
+    "live_autonomous_agents_verified": false
+  },
+  "permissions": {
+    "actor": "CARLOS-ADMIN",
+    "source": "fenix-app-gateway/session/context",
+    "verify_on_every_request": true,
+    "anonymous_allowed": false,
+    "cross_company_allowed": false,
+    "staging_operations": false,
+    "crm_operations": false,
+    "app_production_operations": false,
+    "trading_operations": false
+  },
+  "human_exception_reasons": [
+    "LEGAL_REQUIRED",
+    "SIGNATURE_REQUIRED",
+    "LOW_CONFIDENCE",
+    "HIGH_RISK",
+    "POLICY_CONFLICT",
+    "SECURITY_INCIDENT",
+    "MONEY_LIMIT",
+    "CUSTOMER_HUMAN_REQUEST"
+  ],
+  "cost": {
+    "additional_subscription_eur": 0,
+    "paid_ai_calls": 0,
+    "actual_provider_incremental_usage_unmeasured": true,
+    "cost_cap_allowlist_eur": 0
+  },
+  "promotion": {
+    "allowed": false,
+    "requires": [
+      "owner_UI_POST_E2E",
+      "full_provider_integration",
+      "unit_and_browser_tests",
+      "enterprise_regression",
+      "OLD_VS_NEW",
+      "tribunal",
+      "backup",
+      "rollback_physical",
+      "cost_measured"
+    ]
+  },
+  "files": {
+    "contract": "cerebro/universal/v0/OPERATIVA_UNIVERSAL_CONTRATO_REAL_V1_2026-11-15.md",
+    "migration": "cerebro/universal/v0/control-runtime-lab-v0/migration.sql",
+    "runtime": "cerebro/universal/v0/control-runtime-lab-v0/edge.ts",
+    "preview_proxy": "api/cerebro-lab-worker-control.ts",
+    "client": "src/cerebroLabWorkerControlApi.ts",
+    "ui": "src/CerebroLabWorkerControlPanel.tsx",
+    "tests": [
+      "cerebro/universal/v0/control-runtime-lab-v0/control-lab.test.mjs",
+      "cerebro/universal/v0/control-runtime-lab-v0/anon-smoke.mjs",
+      "tests/cerebro-operativa-owner-quickreads-lab.spec.ts"
+    ]
+  },
+  "source_evidence": {
+    "migration_applied": true,
+    "project_objects_checked": true,
+    "anon_function_execute": false,
+    "authenticated_function_execute": false,
+    "service_role_execute": true,
+    "physical_sql_transaction_rollback_test": "PASS",
+    "new_edge_version": 1,
+    "opera_owner_state_get": "HTTP_200_PAUSED_REV_1",
+    "owner_post_e2e_verified": false
+  }
+}
