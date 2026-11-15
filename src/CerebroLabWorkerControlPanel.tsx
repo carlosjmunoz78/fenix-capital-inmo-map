@@ -62,6 +62,7 @@ export default function CerebroLabWorkerControlPanel(){
    <strong>Estado observado: {state?.desired_state||'SIN VERIFICAR'}</strong>
    <span>Revisión: {state?.revision??'—'} · Prioridad: {state?.priority??'—'} · Pasos terminados: {state?.work_units??'—'}</span>
    <small>Última comprobación: {state?.observed_at||'sin lectura'} · Programación autónoma: NO</small>
+   <small>Último recibo persistente: {state?.last_receipt_id||'sin operaciones registradas'} · Estado final verificado por lectura directa</small>
   </div>
   <div className="op4-lab-actions">
    <button type="button" disabled={loading} onClick={()=>{void refresh()}}>{loading?'Consultando…':'Comprobar estado ahora'}</button>
