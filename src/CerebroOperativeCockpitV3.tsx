@@ -72,7 +72,8 @@ function initialOperativaPreviewPanel():View{
  if(!/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/.test(window.location.hostname))return 'resumen';
  if(query.get('section')!=='operativa'||query.get('visual_lab')!=='cockpit-v3')return 'resumen';
  // Preview-only deep link; user/role checks remain in the existing ConsoleHost.
- return query.get('op3_panel')==='motores'?'motores':'resumen';
+ const requested=query.get('op3_panel');
+ return requested==='motores'||requested==='control'?requested:'resumen';
 }
 
 export default function CerebroOperativeCockpitV3({
