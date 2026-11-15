@@ -362,3 +362,28 @@ test('Cloudflare canary physical deployed-version receipts are dated and never t
  expect(calls).not.toContain('submit_command');
  await page.screenshot({path:'test-results/operativa-cloudflare-canary-provider-proof.png',fullPage:false,animations:'disabled'});
 });
+
+test('Cloudflare 22-Queue historical consumer topology, backlog and owner chat distinguish data from jobs',async({page})=>{
+ const {calls}=await setup(page);
+ const nav=page.getByRole('navigation',{name:'Áreas de Operativa'});
+ await nav.getByRole('button',{name:'Control'}).click();
+ const queues=page.getByRole('region',{name:'Cloudflare Queues · mapa de consumidores'});
+ await expect(queues).toContainText('22');
+ await expect(queues.getByRole('status').first()).toContainText('ARCHIVO, NO EN VIVO');
+ await expect(queues).toContainText('Consumidor configurado NO equivale a agente activo');
+ await queues.getByRole('textbox',{name:'Filtrar colas Cloudflare'}).fill('control-canary-queue');
+ await expect(queues).toContainText('cerebro-operativa-control-canary-queue-lab-eu');
+ await queues.getByRole('button',{name:'Examinar cola cerebro-operativa-control-canary-queue-lab-eu'}).click();
+ await expect(queues.getByRole('status').last()).toContainText('cerebro-operativa-control-canary-lab');
+ await expect(queues.getByRole('status').last()).toContainText('NO CONECTADAS');
+ await nav.getByRole('button',{name:'Resumen'}).click();
+ const input=page.getByRole('textbox',{name:'Pregunta u orden'});
+ await input.fill('¿Cuántas colas Cloudflare tenemos y qué backlog hay?');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'AUDITORÍA ARCHIVADA, no en vivo'})).toContainText('22');
+ await expect(page.getByRole('status').filter({hasText:'AUDITORÍA ARCHIVADA, no en vivo'})).toContainText('0 mensajes pendientes observados');
+ await input.fill('Pausar cola Cloudflare');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await expect(page.getByRole('status').filter({hasText:'ORDEN NO EJECUTADA'})).toContainText('controles de despacho');
+ expect(calls).not.toContain('submit_command');
+});
