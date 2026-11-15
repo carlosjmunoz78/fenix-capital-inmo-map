@@ -68,7 +68,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   const text=composer.trim();
   if(!isOwnerCompany||chat.sending||fleetSending||!text)return;
   const host=typeof window!=='undefined'?window.location.hostname:'';
-  const preview=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\\.vercel\\.app$/.test(host);
+  const preview=host==='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app'||/^fenix-capital-preprod-[a-z0-9]+[.]vercel[.]app$/.test(host);
   const question=preview?classifyFleetQuestion(text):null;
   if(question){
    setFleetSending(true);
