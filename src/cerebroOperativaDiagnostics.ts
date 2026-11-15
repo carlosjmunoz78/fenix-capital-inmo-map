@@ -11,7 +11,7 @@ export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
  const q=canon(query);
  if(!q||MUTATION.test(q))return null;
  if(/\b(dispositivos?|latidos?|heartbeats?|device bridge)\b/.test(q))return 'DEVICE_HISTORY';
- if(/\b(jarvis|productora|navegadores?|browser|dead.letter)\b/.test(q)&&
+ if(/\b(jarvis|productora|navegador(?:es)?|browser|dead.letter)\b/.test(q)&&
     /\b(trabajos?|jobs?|colas?|fallas?|fallos?|retenidos?|pendientes?|cuantos?|cuantas?|coste|costos?|tardan?|duracion|estado|situacion|que)\b/.test(q))return 'JOB_EVIDENCE';
  if(/\b(coste|costara|costaria|costos?|cuesta|cuestan|precio|presupuesto|tiempo|tardara|tarda|tardaria|duracion|eta|euros?|horas?|minutos?)\b/.test(q))return 'ESTIMATES';
  if(/\b(falla|fallan|fallando|fallos?|errores?|incidencias?|averiados?|rotos?|bloqueados?|atascados?|no funciona|sin funcionar)\b/.test(q))return 'FAILURES';
