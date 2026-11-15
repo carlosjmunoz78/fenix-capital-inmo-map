@@ -60,3 +60,10 @@
 .op4-fleet-triage-item a{font-size:12px;color:#9ce0f8;text-decoration:underline}
 @media(max-width:740px){.op4-fleet-triage-items{grid-template-columns:1fr}}
 @media(max-width:430px){.op4-fleet-triage{padding:12px}}
+
+/* Explicit owner-only, on-demand GitHub job step inspection; no retry, logs or secret display. */
+.op4-fleet-job-evidence{border:1px solid #416e80;border-radius:10px;padding:10px;background:#102b38;display:flex;flex-direction:column;gap:5px;overflow-wrap:anywhere}
+.op4-fleet-job-evidence strong{font-size:12px;color:#e7faff}
+.op4-fleet-job-evidence span,.op4-fleet-job-evidence small{font-size:11px;line-height:1.55;color:#abcddc}
+.op4-fleet-job-evidence a{color:#9ce0f8;font-size:11px;text-decoration:underline}
+.op4-fleet-triage-item button{align-self:flex-start;font-size:12px;min-height:44px}
