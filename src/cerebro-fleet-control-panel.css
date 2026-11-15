@@ -9,7 +9,7 @@
 .op4-fleet-metrics>div{background:#0a2434;border:1px solid #2a5169;border-radius:12px;padding:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .op4-fleet-metrics strong{font-size:27px}.op4-fleet-metrics span{display:block;flex-basis:100%;font-size:11px;color:#9bc0d4}
 .op4-fleet-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-.op4-fleet-grid>section,.op4-fleet-runs,.op4-fleet-control{padding:17px;border:1px solid #284d63;border-radius:14px;background:#081d2a}
+.op4-fleet-grid>section,.op4-fleet-runs,.op4-fleet-job,.op4-fleet-control{padding:17px;border:1px solid #284d63;border-radius:14px;background:#081d2a}
 .op4-fleet-source{display:flex;gap:10px;border-bottom:1px solid #224459;padding:10px 0;align-items:flex-start}
 .op4-fleet-source>span{font-size:9px;font-weight:700;white-space:nowrap;min-width:94px}
 .op4-ok{color:#75e7b8}.op4-missing{color:#f2c981}
