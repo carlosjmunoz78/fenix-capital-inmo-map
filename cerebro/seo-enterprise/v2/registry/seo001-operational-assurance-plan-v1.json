@@ -126,10 +126,10 @@
   },
   "google": {
     "data_source": "GSC_WIZARD",
-    "state": "BLOCKED_NO_ACTIVE_SUBSCRIPTION",
+    "state": "OFFICIAL_GSC_BROWSER_AUTHENTICATED_READONLY_API_NOT_CONNECTED",
     "no_new_subscription": true,
-    "authentic_metrics_available": false,
-    "alternative": "DIRECT_FREE_GSC_API_USING_EXISTING_AUTHENTICATED_GOOGLE_CREDENTIALS_IF_PRESENT",
+    "authentic_metrics_available": true,
+    "alternative": "USE_EXISTING_AUTHENTICATED_OFFICIAL_SEARCH_CONSOLE_UI;CONNECT_DIRECT_GOOGLE_API_IF_VERIFIED_NO_NEW_SUBSCRIPTION",
     "official_docs": [
       "https://developers.google.com/search/docs/essentials",
       "https://developers.google.com/search/docs/fundamentals/creating-helpful-content",
@@ -142,7 +142,10 @@
       "FINANCIAL_YMYL_FACT_CHECK",
       "URL_INSPECTION_AS_AVAILABLE",
       "CITE_OFFICIAL_SOURCES"
-    ]
+    ],
+    "authentic_metrics_scope": "MANUAL_BROWSER_VERIFIED_NOT_SCHEDULED_API",
+    "verified_ui_evidence_ref": "cerebro/seo-enterprise/v2/evidence/SEO001_GSC_PAGESPEED_VISUAL_LIVE_2026-11-15.json",
+    "api_oauth_binding_verified": false
   },
   "cadence": {
     "daily": [
@@ -196,8 +199,8 @@
       "id": "GSC_REAL_TELEMETRY",
       "owner": "SEO-D29",
       "severity": "P0",
-      "state": "BLOCKED_PROVIDER_SUBSCRIPTION",
-      "next_action": "Use existing free Google OAuth/API; no paid GSC Wizard subscription"
+      "state": "PARTIAL_REAL_BROWSER_EVIDENCE_AUTOMATED_API_PENDING",
+      "next_action": "Inspect URL-level 403,404,redirect issue with authenticated Google UI; connect free Google API to existing schedule when verified"
     },
     {
       "id": "BACKUP_RESTORE_WP",
@@ -242,5 +245,8 @@
       "next_action": "Preserve evidence-missing HOLD, don't fabricate or bypass historical V5 record"
     }
   ],
-  "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry."
+  "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry.",
+  "live_evidence_refs": [
+    "cerebro/seo-enterprise/v2/evidence/SEO001_GSC_PAGESPEED_VISUAL_LIVE_2026-11-15.json"
+  ]
 }

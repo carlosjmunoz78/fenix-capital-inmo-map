@@ -74,7 +74,7 @@ export function auditSeoDepartmentReadiness({environment='LAB',externalEvidence=
   specialist_template_count:roles.size,oversight_template_count:50,training_cases_prepared:573,
   independent_agent_accounts_verified:0,semantic_exams_passed:0,
   production_departments_certified:0,real_google_metrics_read:false,
-  google_connector_status:'GSC_WIZARD_SUBSCRIPTION_REQUIRED_OBSERVED_NOT_AUTHENTICATED_DATA',
+  google_connector_status:'GOOGLE_DIRECT_BROWSER_READ_VERIFIED_OUTSIDE_RUNNER_API_NOT_CONNECTED',
   live_wordpress_state:'READONLY_POINT_IN_TIME_OBSERVATION_NOT_A_PROD_UPDATE',
   weekly_learning_state:'POLICY_DEFINED_NOT_CONFIRMED_191_INDEPENDENT_ACTORS',
   deepseek_state:'OPTIONAL_NO_AUTH_KEY_OR_HARD_CAP_VERIFIED_NO_API_CALL',

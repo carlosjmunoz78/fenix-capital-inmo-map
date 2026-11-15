@@ -37,3 +37,13 @@ Conservar **única** automatización “CEREBRO SEO · Operativa integral” a 0
 
 ## Autorización, límites y continuidad
 PR #22 DRAFT. main, PROD WordPress, App/CRM, DNS, Supabase, Trading y STAGING protegidos. Estructura preparada no implica ejecución en PROD; cambios de contenido quedan HOLD hasta backups, permisos, aprobación exacta, D31, D32, tribunal, prueba real OLD/NEW y rollback. Coste adicional suscripciones=0. Siguiente ejecución debe leer HEAD/CI, [registro operativo](registry/seo001-operational-assurance-plan-v1.json), identificar el primer gate que realmente pueda cerrar y dejar recibo. No se autoriza una arquitectura paralela ni un nuevo scheduler.
+
+## Google + WordPress + diseño · Observación autenticada 15/11/2026
+**Evidencia de Google recuperada sin pagar GSC Wizard:** `cerebro/seo-enterprise/v2/evidence/SEO001_GSC_PAGESPEED_VISUAL_LIVE_2026-11-15.json`. GSC oficial en Opera autenticado; el conector GSC Wizard sigue bloqueado, por lo que la lectura automática desde runners NO está verificada.
+- 3 meses WEB: 75 clics, ~15.100 impresiones, CTR 0,5 %, posición 25,5 (sin comparativa, no afirmar caída).
+- Indexación (actualización 09/11): 180 indexadas y 93 excluidas: 33 rastreadas no indexadas, 28 404, 25 redirects, 3 noindex, 2 403, 1 robots, 1 redirect error; prioridad verificar afectación de URLs concretas antes de tocar enlaces.
+- Sitemap /sitemap_index.xml Correcto, 205 URLs descubiertas, última lectura 13/11. La diferencia con corpus 200 no equivale por sí sola a error.
+- Core Web Vitals CrUX: sin suficientes datos reales de 90 días ni móvil ni escritorio.
+- PageSpeed LAB MOBILE portada 15/11 10:54: 98 rendimiento / 97 accesibilidad / 96 buenas prácticas / 100 SEO; FCP 1,5s, LCP 2,3s, TBT 0ms, CLS 0, SpeedIndex 2,8s. Incidencias a estudiar: contraste, recursos bloqueantes, CSS y consola. No extrapolar a la web entera.
+- Cuatro capturas reales desktop (HOME, Blog, Córdoba, Inmobiliarias) muestran logotipo y menú alineados y paleta común; hero oscuro Córdoba frente a beige en otras secciones. Consistencia completa, responsive y formularios aún no certificados. No aplicar rediseños masivos.
+- Mantener WP core 7.1.4, evitar updates de 6 plugins y Astra sin SQL+files backup restaurado, OLD/NEW y rollback. Automatización SEO diaria debe comparar GSC autenticado sin pagar y priorizar leads útiles.
