@@ -249,7 +249,7 @@ export default function CerebroOperativeCockpitV3({
      decisiones:'Fallos observados; las aprobaciones humanas requieren su propia fuente.',
      resumen:''
     } as Record<View,string>)[view]}</p>
-    {view==='control'?<CerebroFleetControlPanel/>:null}
+    {view==='control'?(company==='fenix'?<CerebroFleetControlPanel/>:<p className="op3-empty-proof">Control LAB disponible únicamente en Fénix con acceso verificado. Esta empresa o vista global no tiene derechos de control concedidos.</p>):null}
      {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
        onCompanyChange={onCompanyChange} onNavigate={selectPanel}
