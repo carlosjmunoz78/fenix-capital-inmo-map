@@ -2,6 +2,7 @@ import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 import controlProof from '../cerebro/universal/v0/provider-cloudflare/canary/physical-provider-control-2026-11-15.json';
+import queueProof from '../cerebro/universal/v0/provider-cloudflare/canary/queue-physical-acceptance-2026-11-15.json';
 export type CloudflareWorkerObservation={
  id:string;modified_on:string|null;cron:string[]|null;cron_observed_at:string|null;
  scheduled:boolean|null;active_execution_verified:false;worker_agent_id:null;
@@ -76,7 +77,7 @@ export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):s
   if(read.kind==='denied')return 'Acceso de propietario denegado. No se muestran fuentes Cloudflare.';
   const date=audited.base_observed_at;
   if(worker){
-   if(worker===controlProof.resource_name)return 'ARCHIVO, no en vivo: '+worker+' es un canario LAB privado. Último control físico Cloudflare verificado '+controlProof.proof_window_utc.paused_at+': desplegado CONTROL_PAUSED=true, cron ninguno, workers.dev OFF y previews OFF. Se probó configuración RESUME y PAUSE directamente en Cloudflare, no desde esta consola. Trabajo programado y agentes activos: NO VERIFICADOS. Los cinco cron previos siguen intactos. Control de escritura de consola: NO CONECTADO.';
+   if(worker===controlProof.resource_name)return 'ARCHIVO, no en vivo: '+worker+' es un canario LAB privado. Cloudflare Queues ejecutó una prueba real: '+queueProof.physical_messages[0].kv_receipt.status+' (0 unidades con pausa) y '+queueProof.physical_messages[1].kv_receipt.status+' (1 unidad determinista reanudada). Recibos físicos guardados en KV, sin acciones externas. Último estado verificado '+queueProof.final_state.observed_at+': CONTROL_PAUSED=true, cero cron, URL pública OFF. Los cinco cron originales siguen intactos. No es trabajo comercial. Control Cloudflare desde esta consola: NO CONECTADO.';
    const found=audited.workers.find(x=>x.worker_id===worker);
    return found?'ARCHIVO SIN LECTURA ACTUAL ('+date+'): Worker '+worker+'; motor declarado '+(found.engine_id||'SIN IDENTIFICAR')+
     '; cron '+(found.cron_schedules===null?'NO VERIFICADO':found.cron_schedules.length?found.cron_schedules.join(', '):'NO CONFIGURADO')+
