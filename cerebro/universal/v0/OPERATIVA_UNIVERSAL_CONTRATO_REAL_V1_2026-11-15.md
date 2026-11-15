@@ -53,3 +53,58 @@ Esta primera capacidad **no** significa control de SEO-001, Instagram, Facebook 
 
 ## 7. Changelog V1
 2026-11-15: documentación inicial de contrato operativo real y fuente de verdad; aprobado solamente para PREVIEW/LAB. Cualquier avance se registra con SHA, migration_id, Edge version, run_id, Vercel deployment id y comprobación física, **no por intención**.
+
+
+## 8. CONTRATO AMPLIADO · DIAGNÓSTICO, CAPACIDADES, TIEMPOS, COSTES Y CONTROL UNIVERSAL
+
+**Directiva del propietario · 15/11/2026.** Operativa debe funcionar como centro de mando conversacional y de control: el dashboard no delimita qué puede consultarse. REQUISITO DEFINIDO, NO IMPLEMENTADO POR ESTA MODIFICACIÓN. Preservar PR #66 DRAFT/LAB, sistemas existentes, gasto adicional 0 € por defecto.
+
+### 8.1 Descubrimiento y diagnóstico consultables, incluso si no aparecen en pantalla
+
+- **Qué agentes faltan**: comparar necesidades reales de cada empresa/proceso con capacidades, skills, motores, roles, workers y ejecutores existentes. Detectar gaps de cobertura, permisos, capacidades, integración, training, tribunal y observabilidad. No inventar agentes ni equiparar roles definidos con procesos activos.
+- **Qué está fallando**: motor, agente, subagente, job, pipeline, recurso o dependencia; estado real, severidad, duración, último éxito, error concreto, causa confirmada frente a hipótesis, impacto, responsable y siguiente reparación verificable.
+- **Qué hay que avanzar**: backlog priorizado con dependencias, bloqueo, acción próxima, tiempo, coste, impacto económico, ahorro y confianza de la recomendación. Priorizar capacidad existente y reutilización antes de fabricar o duplicar.
+- **Qué puede hacer CEREBRO**: diferenciar capacidades operativas acreditadas, capacidades ensayadas sólo en LAB, definiciones/scaffolds y propuestas no construidas; indicar los prerequisitos para pasar de una categoría a otra.
+- **Qué necesitaríamos que hiciera**: traducir cualquier objetivo de negocio en capacidades requeridas, análisis de carencias, opciones de implementación, riesgos, calidad, permisos y contratos, con coste/tiempo estimados o desconocidos.
+- **Cuánto tarda y cuesta cada cosa**: duración histórica real, tiempo transcurrido, ETA con intervalo y base estadística, dependencias, posición de cola, coste real medido y coste incremental previsto separado por IA, infraestructura, servicios y recursos existentes. Incluir límites de free tiers y coste de acelerar.
+- **Todo consultable aunque no se muestre**: búsqueda y respuesta por lenguaje natural, voz, ID, empresa, función o dependencia. Resolver mediante los mismos conectores autenticados de lectura de backend, no mediante una lista cerrada de tarjetas. Si un recurso es inaccesible, mostrar UNAVAILABLE/NOT_CONNECTED, no cero o inexistencia.
+
+Ejemplos: «qué agentes faltan para SEO», «qué está fallando ahora», «qué tenemos que avanzar hoy», «qué hace realmente CEREBRO», «qué necesitaríamos para X», «cuánto cuesta y tarda Y», «qué lleva parado más de dos horas», «prioriza lo que genere antes ingresos sin gastar más».
+
+### 8.2 Operaciones con control real por recurso
+
+Acciones objetivo: consultar, planificar, priorizar, despriorizar, acelerar, ralentizar, pausar, reanudar, detener/cancelar, reintentar, reasignar, crear trabajo autorizado y supervisar. Cada opción sólo es visible/ejecutable cuando el proveedor implementa y certifica su semántica. Si no existe adaptador seguro: CAPABILITY_NOT_CONNECTED, con explicación y siguiente integración.
+
+- **Priorizar** reordena colas conforme a dependencias, SLA, urgencia, ingresos, seguridad y coste; nunca equivale a «pasarse por delante» de locks o gates.
+- **Acelerar** puede adelantar trabajos, utilizar concurrencia ociosa, paralelizar etapas compatibles o usar un runtime/modelo aprobado; siempre proyecta ETA anterior/nueva, impacto económico, capacidad libre, calidad y riesgo. No saltar tests, tribunal, controles legales ni activar pago sin MONEY_LIMIT.
+- **Pausar** distingue detener admisión, suspender scheduler, suspender consumo, congelar trabajos nuevos o finalizar trabajos en vuelo. La pausa de un Worker no siempre pausa sus Queue consumers ni implica detener eventos externos. Explicar el alcance, asegurar consistencia y retención.
+- **Reanudar** recupera exactamente versiones, binds y configuración respaldadas; nunca reactiva staging suspendida, autopublicación o PROD por inferencia.
+- **Cancelar, reintentar y reasignar**: idempotencia transaccional, control de efectos, compensación, destinatario y recibo, según contrato particular del proveedor.
+- **Voz, chat y paneles** comparten el mismo gateway, identidad server-side y políticas. Una frase no otorga permisos nuevos. Las operaciones ordinarias preautorizadas no deben requerir autorizaciones reiterativas, salvo confirmación exacta necesaria o HUMAN_REQUIRED canónico.
+
+Pipeline obligatorio: DISCOVER → PLAN → ESTIMAR IMPACTO/TIEMPO/COSTE/RIESGO → POLICY → CONFIRMAR CUANDO PROCEDA → EXECUTE → RECEIPT → READBACK FÍSICO → OBSERVABILITY → ROLLBACK.
+
+### 8.3 Modelo de datos y medidas
+
+Identidad mínima vinculable: company_id, engine_id, environment, version, department_id, role_id, agent_id, subagent_id, provider, provider_resource_id, capability_id, job_id, run_id, owner, dependencies, desired_state, observed_state, health, blocker_code, last_heartbeat, last_success, last_error, source, observed_at, ttl_seconds, queue_position, priority, elapsed_seconds, eta_low_seconds, eta_high_seconds, eta_basis, confidence, cost_actual_eur, cost_estimate_low_eur, cost_estimate_high_eur, cost_incremental_eur, quota_remaining, permissions, allowed_actions, receipt_id, backup_ref, rollback_ref, next_block.
+
+No observado = null + causa + fuente. Separar DEFINIDO, OBSERVADO, EJECUCIÓN_VERIFICADA, ESTIMADO, PROPUESTO, CACHED, STALE, DENIED y UNAVAILABLE.
+
+Medición: derivar ETA de tiempos reales históricos por tarea/etapa, percentiles cuando haya muestras suficientes, cola, capacidad y dependencias. Si falta evidencia: SIN_BASE_SUFICIENTE / NO_MEDIDO, sin cifras ni promesas inventadas. En coste separar suscripción incremental (puede ser 0 €), consumo marginal y factura real no auditada; medir hard-stop para impedir gastos no aprobados.
+
+### 8.4 Criterios obligatorios de aceptación
+
+1. Consulta libre de motor/agente NO VISIBLE en el panel, resuelta por fuente autenticada y validación de empresa; sin accesos cruzados.
+2. «Agentes que faltan» explica gap por contrato/capacidad necesaria, distingue inexistencia de falta de observabilidad.
+3. «Agentes fallando» devuelve error, último éxito, responsable y dependencia; no confunde PAUSED, BLOCKED, UNAVAILABLE y ERROR.
+4. «Qué puede hacer CEREBRO» separa demostración física de definiciones, roles y propuestas.
+5. «Qué hay que avanzar» ofrece dependencias, prioridades justificadas, siguiente acción, riesgo y efecto económico.
+6. Cada duración/coste muestra fuente, medición/estimación/ausencia, banda de incertidumbre y variación al acelerar.
+7. Al menos un ejecutor LAB aislado prueba PRIORITIZE, ACCELERATE cuando sea viable, PAUSE, RESUME y readback, o bloqueo explícito por capacidad; recibos durables, no duplicados y rollback físico.
+8. Equivalencia de consultas/acciones por chat, voz y panel; historial auditable, responsive, seguridad server-side.
+9. Tests negativos: desconexión/frescura, cross-company, conflicto de versión, carrera concurrente, cuota agotada, gasto prohibido, credencial caducada y rollback.
+10. «100 % DE LA CONSOLA» exige funcionamiento y E2E completo para los proveedores declarados conectados. No significa que los 179 motores, 529 roles o todos los proveedores externos estén operativos. Otros se muestran con su estado y camino pendiente sin ocultarlos.
+
+### 8.5 Estado en esta revisión
+
+**HECHO DOCUMENTAL**: requisitos capturados y versionados; sin código de ejecutor nuevo, despliegues, suscripciones, tokens, políticas relajadas ni modificaciones de Social, Cloudflare, Supabase, App, CRM, SEO, staging o PROD. **PARCIAL OPERATIVO**: lecturas y controles LAB ya documentados en la PR. **SIGUIENTE BLOQUE TÉCNICO**: discovery/health/gaps desde fuentes privadas autorizadas → medición de ETA/FinOps → planificación/priorización/aceleración LAB → adaptadores de control con readback/rollback → E2E/tribunal.
