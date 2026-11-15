@@ -1,0 +1,107 @@
+{
+  "schema_version": "1.0.0",
+  "provider": "GITHUB_PRIVATE_SOCIAL_AND_CLOUDFLARE_METADATA",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "audit_date": "2026-11-15",
+  "read_mode": "DATED_SNAPSHOT_ONLY",
+  "runtime_autonomy_verified": false,
+  "private_repository": "carlosjmunoz78/fenix-capital-cerebro-social",
+  "source_access": "OWNER_AUTHENTICATED_PRIVATE_GITHUB_CONNECTOR",
+  "secrets_exported": false,
+  "private_source_code_exported": false,
+  "sources": [
+    {
+      "type": "GITHUB_PULL_REQUEST",
+      "pr": 8,
+      "title": "Instagram LAB",
+      "state": "OPEN_DRAFT",
+      "branch": "cerebro/instagram-enterprise-lab-v0-20261108",
+      "updated_at": "2026-11-13T19:37:02Z",
+      "role_claims_from_title_not_verified": true
+    },
+    {
+      "type": "GITHUB_PULL_REQUEST",
+      "pr": 9,
+      "title": "Facebook AUTOQUAL LAB",
+      "state": "OPEN_DRAFT",
+      "branch": "cerebro/facebook-autoqual-cloudflare-lab-v0-20261108",
+      "updated_at": "2026-11-11T09:22:08Z"
+    }
+  ],
+  "engines": [
+    {
+      "engine_id": "SOC-IG-FINANCIAL-REAL-ESTATE-V1",
+      "provider_worker": "cerebro-instagram-autoqual-lab",
+      "github_pr": 8,
+      "config": {
+        "workers_dev": false,
+        "preview_urls": false,
+        "crons": [],
+        "AUTOQUAL_ENABLED": false,
+        "GROQ_ENABLED": false
+      },
+      "runtime": {
+        "deployment_exists": true,
+        "active_version": "c62a60b0-47a2-497c-ab29-6468fac419e0",
+        "work_running_verified": false,
+        "active_agent_count": null,
+        "active_subagent_count": null,
+        "last_job_receipt": null
+      },
+      "d1": {
+        "name": "cerebro-instagram-autoqual-lab",
+        "jurisdiction": "eu",
+        "uuid": "c428b85c-dbaf-4844-a2f8-15cadc23a6c9"
+      }
+    },
+    {
+      "engine_id": "SOC-FB-FINANCIAL-REAL-ESTATE-V1",
+      "provider_worker": "cerebro-facebook-autoqual-lab",
+      "github_pr": 9,
+      "config": {
+        "workers_dev": false,
+        "preview_urls": false,
+        "crons": [],
+        "AUTOQUAL_ENABLED": false,
+        "GROQ_ENABLED": false
+      },
+      "runtime": {
+        "deployment_exists": true,
+        "active_version": "4226e103-e7c1-48ea-930b-9d5760347dd2",
+        "work_running_verified": false,
+        "active_agent_count": null,
+        "active_subagent_count": null,
+        "last_job_receipt": null
+      },
+      "d1": {
+        "name": "cerebro-facebook-autoqual-lab",
+        "jurisdiction": "eu",
+        "uuid": "e8fe801d-4b01-4e34-ac12-26014b79adc1"
+      }
+    }
+  ],
+  "caveats": [
+    "Deployment does not prove active agent or job executions",
+    "GitHub PR draft does not prove agent/subagent counts",
+    "No social source code, tokens or credentials are exported",
+    "This is a dated private-owner audit, NOT a live polling service"
+  ],
+  "action_capabilities": {
+    "read_from_console": "DATED_METADATA_ONLY",
+    "pause": false,
+    "resume": false,
+    "prioritize": false,
+    "activate_autoqual": false,
+    "publish": false
+  },
+  "verification": {
+    "cloudflare_worker_deployments": "OBSERVED",
+    "cloudflare_worker_crons": "OBSERVED_EMPTY",
+    "cloudflare_worker_subdomains": "OBSERVED_DISABLED",
+    "github_private_prs": "OBSERVED_DRAFT",
+    "d1_eu_jurisdiction": "OBSERVED",
+    "worker_last_execution": "NOT_VERIFIED"
+  },
+  "next_gate": "Private OAuth-backed read-only service connector, source freshness, current-worker binding version and job receipts; no public endpoints."
+}
