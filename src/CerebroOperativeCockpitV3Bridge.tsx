@@ -8,6 +8,7 @@ import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
 import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperativaDiagnostics';
 import {readDeviceLive} from './cerebroDeviceLiveApi';
+import {readJobFleetLive} from './cerebroAgentJobLiveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
@@ -83,7 +84,33 @@ export default function CerebroOperativeCockpitV3Bridge(){
   if(diagnostic&&question?.kind!=='control'){
    setFleetSending(true);
    try{
-    if(diagnostic==='DEVICE_HISTORY'){
+    if(diagnostic==='JOB_EVIDENCE'){
+     const current=await readJobFleetLive();
+     if(current.kind==='ready'){
+      const d=current.data;
+      const names:{[key:string]:string}={JARVIS_WORK:'JARVIS',BROWSER_V2:'Navegador V2',CREATIVE_V1:'Productora'};
+      const totals=d.source_totals.map(x=>names[x.source]+': '+x.total_rows+
+       ' trabajos históricos, último cambio '+(x.last_updated_at||'SIN_FECHA')).join('. ');
+      const alert=d.attention_groups.map(x=>names[x.source]+' '+x.engine_id+
+       ' '+x.status+' '+x.records+' casos (prioridad de REVISIÓN '+x.priority_suggestion+
+       ', no actuación ni fallo actual demostrado)').join('; ');
+      const cost=d.cost_metrics;
+      const metrics='Métricas del navegador: '+cost.total_samples+' muestras; '+
+       cost.cost_samples+' costes incrementales registrados, suma '+
+       (cost.recorded_incremental_cost_eur===null?'NO_MEDIDO':String(cost.recorded_incremental_cost_eur)+' EUR')+
+       '; duración p50 '+(cost.p50_duration_seconds??'NO_MEDIDO')+' s, p90 '+
+       (cost.p90_duration_seconds??'NO_MEDIDO')+' s. Coste TOTAL de infraestructura NO_MEDIDO.';
+      setOperatorAnswer({question:text,text:'LECTURA ACTUAL DE REGISTROS HISTÓRICOS LAB: '+d.observed_at+
+       '. '+totals+'. Pendientes de revisión: '+(alert||'no acreditados en esta muestra')+
+       '. '+metrics+' Agentes y subagentes reales, trabajo actual y latidos independientes: NO VERIFICADOS. '+
+       'PREPROD es etiqueta de registros en BD LAB, no App PREPROD operativa. '+
+       'Los tiempos históricos no son una ETA; sin ejecución ni control de trabajos.'});
+     }else{
+      setOperatorAnswer({question:text,text:'TRABAJOS NO VERIFICADOS: '+current.reason+
+       '. Sin lectura actual de JARVIS, navegador y productora; no se atribuyen cero fallos ni actividad. '+
+       'No se ha ejecutado ningún control.'});
+     }
+    }else if(diagnostic==='DEVICE_HISTORY'){
      const current=await readDeviceLive();
      if(current.kind==='ready'){
       const d=current.data;
