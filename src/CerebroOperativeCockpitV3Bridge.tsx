@@ -6,6 +6,7 @@ import {fetchOwnerUniverseLab,type OwnerUniverseResult,type UniverseCompanyReque
 import {createVoiceRecognition,voiceRecognitionSupported,speechSynthesisSupported,preferredSpanishVoice,spanishVoices,speechText,type CerebroSpeechRecognition} from './cerebroVoice';
 import CerebroOperativeCockpitV3 from './CerebroOperativeCockpitV3';
 import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroFleetObserveApi';
+import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperativaDiagnostics';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
@@ -75,6 +76,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
   const host=typeof window!=='undefined'?window.location.hostname:'';
   const preview=host==='fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app'||/^fenix-capital-preprod-[a-z0-9]+[.]vercel[.]app$/.test(host);
   const question=preview?classifyFleetQuestion(text):null;
+  const diagnostic=preview?classifyDiagnosticRequest(text):null;
   if(preview&&/(?:^|[^A-Z0-9])LAB-DEMO-001(?:$|[^A-Z0-9])/i.test(text)){
    setFleetSending(true);
    try{
@@ -82,6 +84,10 @@ export default function CerebroOperativeCockpitV3Bridge(){
     if(read.kind!=='ready'||!read.data){setOperatorAnswer({question:text,text:'El estado del worker LAB no es verificable: '+read.reason+'. Sin ejecución.'});return;}
     if(question?.kind==='control'){
      const action=question.action as LabWorkerAction;
+     if(!['PAUSE','RESUME','PRIORITIZE'].includes(action)){
+      setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: '+action+' no tiene ejecutor seguro conectado para LAB-DEMO-001. Acelerar no equivale a priorizar. Estado del worker intacto.'});
+      setComposer('');return;
+     }
      const priorityText=text.match(/(?:prioridad\s*|\bal\s*)([1-5])\b/i)?.[1];
      const priority=action==='PRIORITIZE'?(priorityText?Number(priorityText):null):null;
      if(action==='PRIORITIZE'&&priority===null){setOperatorAnswer({question:text,text:'Indica una prioridad exacta entre 1 y 5 (por ejemplo: «priorizar LAB-DEMO-001 al 4»). Ningún cambio aplicado.'});return;}
@@ -128,6 +134,15 @@ export default function CerebroOperativeCockpitV3Bridge(){
      const matched=resolveCloudflareWorkerMention(text,read)||undefined;
      setOperatorAnswer({question:text,text:answerCloudflareFleet(read,matched)});
     }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
+  if(diagnostic){
+   setFleetSending(true);
+   try{
+    const fleet=await readFleetLab();
+    setOperatorAnswer({question:text,text:answerDiagnosticRequest(diagnostic,fleet,text)});
     setComposer('');
    }finally{setFleetSending(false)}
    return;
