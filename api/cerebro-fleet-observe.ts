@@ -1,5 +1,5 @@
 /** LAB PREVIEW owner-only live fleet observation. Read-only; no secrets or run controls. */
-import registry from '../cerebro/registry/role-agent-registry.v1.json';
+import registry from '../cerebro/registry/role-agent-registry.v1.json' with {type:'json'};
 import {registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 import {summarizeFleetRoles,summarizeFleetRuns} from '../cerebro/universal/v0/operator-fleet-logic.mjs';
 type H=string|string[]|undefined;
