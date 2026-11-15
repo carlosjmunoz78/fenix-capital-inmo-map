@@ -249,3 +249,14 @@ test('Main owner conversation plans but never executes a LAB command before exac
  await expect(page.getByRole('status').filter({hasText:'LAB-DEMO-001 · lectura actual'})).toContainText('RUNNING');
  await page.screenshot({path:'test-results/operativa-lab-chat-confirmation.png',fullPage:false,animations:'disabled'});
 });
+
+test('non-Fenix company selector never exposes another tenant LAB worker controls',async({page})=>{
+ await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ await expect(page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'})).toBeVisible();
+ await page.getByRole('combobox',{name:'Empresa'}).selectOption('aion');
+ await expect(page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'})).toHaveCount(0);
+ await expect(page.getByText('Control LAB disponible únicamente en Fénix')).toBeVisible();
+ await page.getByRole('combobox',{name:'Empresa'}).selectOption('fenix');
+ await expect(page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'})).toBeVisible();
+});
