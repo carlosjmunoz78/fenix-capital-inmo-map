@@ -4,6 +4,7 @@ import {readCloudflareFleet,type CloudflareFleetRead} from './cerebroCloudflareF
 import audited from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-workers-composite-38-2026-11-15.json';
 import cronGate from '../cerebro/universal/v0/provider-cloudflare/observations/cloudflare-free-cron-capacity-2026-11-15.json';
 import controlProof from '../cerebro/universal/v0/provider-cloudflare/canary/physical-provider-control-2026-11-15.json';
+import queueProof from '../cerebro/universal/v0/provider-cloudflare/canary/queue-physical-acceptance-2026-11-15.json';
 import './cerebro-cloudflare-fleet.css';
 const INITIAL:CloudflareFleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
 const format=(v:string|null)=>v&&Number.isFinite(Date.parse(v))?new Date(v).toLocaleString('es-ES'):'sin fecha';
@@ -83,6 +84,13 @@ export default function CerebroCloudflareFleetPanel(){
    <p>Recibos Cloudflare: reanudar configuración <code>{controlProof.changes[1].deployment_id}</code>; pausar configuración <code>{controlProof.changes[2].deployment_id}</code>. No se ha verificado ninguna invocación programada.</p>
    <p><ShieldAlert size={14}/> Control desde esta consola: <b>NO CONECTADO</b>. Estos recibos proceden de operaciones directas autorizadas y no demuestran un control autónomo de motores.</p>
   </div>
+  <div className="op4-cf-provider-proof" role="region" aria-label="Cola Cloudflare · prueba física de trabajo LAB">
+   <strong>Cola LAB · ejecución real verificada (histórica, no en vivo)</strong>
+   <p>Cloudflare Queues Free / UE · {queueProof.queue.name}. Consumidor máximo 1; no cron añadido ni acceso público.</p>
+   <p>Con PAUSA: <b>{queueProof.physical_messages[0].kv_receipt.status}</b>, {queueProof.physical_messages[0].kv_receipt.work_units} unidades. Con reanudación: <b>{queueProof.physical_messages[1].kv_receipt.status}</b>, {queueProof.physical_messages[1].kv_receipt.work_units} unidad de prueba. Dos recibos comprobados en KV.</p>
+   <p>Tras la prueba: <b>PAUSADO</b> y rollback confirmado {format(queueProof.final_state.observed_at)}. Cinco cron originales intactos. Solo se reconoció un mensaje: ninguna publicación, agente comercial ni ejecución externa.</p>
+   <p>El consumidor Queue puede recibir mensajes aun estando pausado, pero los marca omitidos sin ejecutar trabajo. El control por chat de Cloudflare sigue <b>NO CONECTADO</b>.</p>
+  </div>
   {archived?.observability?<p className="op4-cf-note">AUDITORÍA DE EVENTOS (no en vivo): {archived.observability.total_events} eventos de observabilidad en 24 horas, en {archived.observability.services.length} servicios identificados. Ventana hasta {format(archived.observability.to)}. No son trabajos completados ni publicaciones.</p>:null}
   {(x||archived)?<><label className="op4-cf-filter"><Search size={14}/> Filtrar Workers
    <input aria-label="Buscar Worker Cloudflare" value={filter} onChange={e=>{setFilter(e.target.value);setAll(false)}} placeholder="facebook, instagram, jarvis, fact001…"/>
@@ -107,7 +115,7 @@ export default function CerebroCloudflareFleetPanel(){
    {target.workers_dev_enabled!==null?<p>URL workers.dev configurada: {target.workers_dev_enabled?'SÍ':'NO'}. No equivale a acceso anónimo confirmado.</p>:null}
    {Object.keys(target.boolean_flags).length?<p>Indicadores de configuración auditados: {Object.entries(target.boolean_flags).map(([key,value])=>key+'='+value).join(' · ')}. No acreditan actividad.</p>:null}
    <p>{target.cron===null?'No hay evidencia de sus crons en esta lectura.':target.cron.length?'Cron verificado: '+target.cron.join(', '):'Sin cron verificado.'} No se han comprobado latidos ni últimas ejecuciones del motor.</p>
-   {target.id===controlProof.resource_name?<p><ShieldAlert size={14}/> Configuración PAUSED verificada en Cloudflare (archivo {format(controlProof.proof_window_utc.paused_at)}). El control de consola sigue <b>NO CONECTADO</b> y no se ejecutaron trabajos externos.</p>:<p><ShieldAlert size={14}/> Pausar, reanudar y priorizar este recurso desde Operativa: <b>NO CONECTADO</b>. No se ha enviado ninguna orden desde esta consola.</p>}
+   {target.id===controlProof.resource_name?<p><ShieldAlert size={14}/> Cola LAB verificada: PAUSED_SKIPPED 0 unidades y WORK_UNIT_ACK 1 unidad; final PAUSED {format(queueProof.final_state.observed_at)} (archivo). Ninguna acción empresarial externa. El control desde esta consola sigue <b>NO CONECTADO</b>.</p>:<p><ShieldAlert size={14}/> Pausar, reanudar y priorizar este recurso desde Operativa: <b>NO CONECTADO</b>. No se ha enviado ninguna orden desde esta consola.</p>}
   </div>:null}
   </>:<p>Acceso Cloudflare no autorizado. No se muestra ni la fotografía anterior.</p>}
  </section>;
