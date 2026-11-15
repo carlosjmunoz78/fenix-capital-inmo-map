@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react';
 import {Activity,AlertTriangle,Clock,RefreshCcw,Shield,Users,Workflow} from 'lucide-react';
 import {readFleetLab,type FleetRead} from './cerebroFleetObserveApi';
+import {readUniversalOperativaLab,type UniversalJob001ControlLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-fleet-control-panel.css';
 const INITIAL:FleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
 function date(s:string|null|undefined){
@@ -9,6 +10,8 @@ function date(s:string|null|undefined){
 }
 export default function CerebroFleetControlPanel(){
  const[result,setResult]=useState<FleetRead>(INITIAL);
+ const[job,setJob]=useState<UniversalJob001ControlLab|null>(null);
+ const[jobReason,setJobReason]=useState('NOT_READ_YET');
  const[loading,setLoading]=useState(false);
  const[lastError,setLastError]=useState('');
  const[controlTarget,setControlTarget]=useState('SEO-001');
@@ -17,7 +20,12 @@ export default function CerebroFleetControlPanel(){
   setLoading(true);
   const result=await readFleetLab(signal);
   if(signal?.aborted)return;
-  setResult(result);setLastError(result.reason);setLoading(false);
+  setResult(result);setLastError(result.reason);
+  const extra=await readUniversalOperativaLab(signal);
+  if(signal?.aborted)return;
+  setJob(extra.kind==='ready'?extra.job001||null:null);
+  setJobReason(extra.kind==='ready'?(extra.job001?.reason||'SOURCE_UNAVAILABLE'):extra.reason||extra.kind);
+  setLoading(false);
  },[]);
  useEffect(()=>{
   const abort=new AbortController();
@@ -87,6 +95,21 @@ export default function CerebroFleetControlPanel(){
     </div>):<p>Perfiles sin comprobación verificable.</p>}
    </section>
   </div>
+  <section className="op4-fleet-job" aria-label="Motor y programación PREPROD desde JOB-001">
+   <h4>Estado de motores · controles PREPROD</h4>
+   {job?.state==='OK'?<>
+    <p>Fuente SQL comprobada: {job.controlRows} controles configurados, {job.enabledControls} habilitados, {job.engineRecords} estados de motor declarados y {job.telemetryRecords} registros de telemetría. Ninguna cifra demuestra ejecución autónoma.</p>
+    <p className="op4-fleet-note">Lectura: {date(job.observedAt)} · Preparación/ejecución de motores: NO VERIFICADA · staging suspendida.</p>
+    {job.engineBindings.map(engine=>{
+     const control=job.controlEngineBindings.find(x=>x.engine_id===engine.engine_id);
+     return <div className="op4-fleet-role" key={engine.engine_id}>
+      <strong>{engine.engine_id}: {engine.declared_state}</strong>
+      <span>{engine.freshness==='STALE_CONFIG'?'Configuración antigua':'Configuración reciente'} · {date(engine.observed_config_at)}</span>
+      <small>{control?control.configured_controls+' controles, '+control.enabled_controls+' habilitados':'Sin control asociado en esta lectura'} · Runtime no verificado</small>
+     </div>
+    })}
+   </>:<p>Sin lectura completa de controles PREPROD en este momento ({jobReason}). El estado real no puede deducirse de definiciones históricas.</p>}
+  </section>
   <section className="op4-fleet-runs" aria-label="Actividad GitHub actual">
    <h4>Trabajos con ejecución publicada</h4>
    <p className="op4-fleet-note">Estos registros son ejecuciones de GitHub Actions; no se contabilizan como agentes. Actualización automática cada 2 minutos mientras esta pestaña está visible.</p>
