@@ -13,7 +13,7 @@ export function classifyDiagnosticRequest(query:string):DiagnosticIntent|null{
  if(/\b(faltan?|falta|necesitamos?|necesitaria|carecemos|sin agente|sin subagente|que necesitamos|que hace falta)\b/.test(q))return 'MISSING';
  if(/\b(puede|puedes|podemos|capacidades?|sabe hacer|sirve para|que hace cerebro)\b/.test(q)&&
     /\b(cerebro|hacer|capacidades?|automatiz|motor|agente)\w*/.test(q))return 'CAPABILITIES';
- if(/\b(avanzar|siguiente|prioridad|prioridades|priorizariamos|priorizarias|conviene priorizar|que hacer|plan de trabajo|proximos pasos|por donde seguimos)\b/.test(q))return 'PROGRESS';
+ if(/\b(avanzar|siguiente|prioridad|prioridades|priorizariamos|priorizarias|conviene priorizar|deberiamos priorizar|que hacer|plan de trabajo|proximos pasos|por donde seguimos)\b/.test(q))return 'PROGRESS';
  return null;
 }
 const maxDate=(d:string|null)=>d&&Number.isFinite(Date.parse(d))?d:'SIN_FECHA';
