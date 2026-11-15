@@ -304,7 +304,7 @@ test('Cloudflare live Worker inventory, manual refresh and chat grounded answers
  await page.screenshot({path:'test-results/operativa-cloudflare-live-qa.png',fullPage:false,animations:'disabled'});
 });
 
-test('Cloudflare outage retains audited 37-worker history without claiming live state or write powers',async({page})=>{
+test('Cloudflare outage shows composite 38-worker dated inventory and 5/5 Free cron quota without write powers',async({page})=>{
  const {calls}=await setup(page);
  await page.route('**/api/cerebro-cloudflare-fleet?**',async route=>{
   calls.push('cloudflare_unavailable');
@@ -312,8 +312,10 @@ test('Cloudflare outage retains audited 37-worker history without claiming live 
  });
  await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
  const cloud=page.getByRole('region',{name:'Cloudflare · inventario vivo de Workers'});
- await expect(cloud.getByRole('status').first()).toContainText('ARCHIVO, NO EN VIVO');
- await expect(cloud).toContainText('37');
+ await expect(cloud.getByRole('status').first()).toContainText('ARCHIVO COMPUESTO, NO EN VIVO');
+ await expect(cloud).toContainText('38');
+ await expect(cloud.getByRole('region',{name:'Gate de capacidad cron Cloudflare Free'})).toContainText('5/5');
+ await expect(cloud).toContainText('cerebro-operativa-control-canary-lab');
  await expect(cloud).toContainText('cerebro-facebook-autoqual-lab');
  await cloud.getByRole('button',{name:'Examinar cerebro-facebook-autoqual-lab'}).click();
  await expect(cloud.getByRole('status').last()).toContainText('SOC-FB-FINANCIAL-REAL-ESTATE-V1');
@@ -323,6 +325,6 @@ test('Cloudflare outage retains audited 37-worker history without claiming live 
  const input=page.getByRole('textbox',{name:'Pregunta u orden'});
  await input.fill('¿Cuántos Workers tenemos en Cloudflare?');
  await page.getByRole('button',{name:'Enviar instrucción'}).click();
- await expect(page.getByRole('status').filter({hasText:'Cloudflare en tiempo real NO DISPONIBLE'})).toContainText('Última auditoría');
+ await expect(page.getByRole('status').filter({hasText:'Cloudflare en tiempo real NO DISPONIBLE'})).toContainText('Auditoría compuesta');
  expect(calls).not.toContain('submit_command');
 });
