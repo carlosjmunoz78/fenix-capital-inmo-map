@@ -66,7 +66,7 @@ export async function readCloudflareFleet({refresh=false,signal}:{refresh?:boole
 export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):string{
  if(read.kind!=='ready'||!read.snapshot){
   if(read.kind==='denied')return 'Acceso de propietario denegado. No se muestran fuentes Cloudflare.';
-  const date=audited.observed_at;
+  const date=audited.base_observed_at;
   if(worker){
    if(worker===cronGate.resource_name)return 'ARCHIVO, no en vivo: '+worker+' creado como canario LAB privado. Cron: ninguno; workers.dev: OFF; motor '+cronGate.engine_id+'. Cloudflare Free tenía '+cronGate.quota.existing_cron_triggers+'/'+cronGate.quota.limit_cron_triggers_per_account+' crons ocupados en '+cronGate.observed_at+'. No ejecuta trabajos empresariales.';
    const found=audited.workers.find(x=>x.worker_id===worker);
@@ -77,7 +77,7 @@ export function answerCloudflareFleet(read:CloudflareFleetRead,worker?:string):s
   }
   return 'Cloudflare en tiempo real NO DISPONIBLE ('+read.reason+'). Auditoría compuesta: inventario inicial '+date+' y canario validado '+cronGate.observed_at+
    ': '+cronGate.worker_count_now+' Workers, '+audited.scheduled_workers+' con cron configurado, '+
-   (audited.without_cron_workers+1)+' sin cron en sus últimas comprobaciones y '+audited.engine_id_mapped_workers+' scripts con motor declarado vinculado. '+
+   audited.without_cron_workers+' sin cron en sus últimas comprobaciones y '+audited.engine_id_mapped_workers+' scripts con motor declarado vinculado. '+
    'Capacidad Workers Free auditada: '+cronGate.quota.existing_cron_triggers+'/'+cronGate.quota.limit_cron_triggers_per_account+' cron ocupados (HTTP 400, código '+cronGate.quota.api_error_code+'). No hay permiso para contratar ni borrar programaciones existentes. '+
    'Última observabilidad auditada: '+audited.observability.total_events+' eventos en 24 h, no trabajos, en '+audited.observability.services.length+' servicios. '+
    'Estas cifras son históricas, no demuestran agentes activos ni el estado actual.';
