@@ -9,6 +9,7 @@ import {answerFleetQuestion,classifyFleetQuestion,readFleetLab} from './cerebroF
 import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperativaDiagnostics';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
+import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
 import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
 import socialAudit from '../cerebro/universal/v0/provider-social/social-private-meta-audit-2026-11-15.json';
 import './cerebro-operative-console.css';
@@ -105,7 +106,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
      setOperatorAnswer({question:text,text:'PROPUESTA, NO EJECUTADA: '+action+' sobre LAB-DEMO-001, empresa Fénix, entorno LAB, revisión '+read.data.revision+(priority!==null?', prioridad '+priority:'')+'. Confirma la operación exacta o cancela. No afecta a otros motores.'});
     }else{
      setLabPending(null);
-     setOperatorAnswer({question:text,text:'LAB-DEMO-001 · lectura actual: '+read.data.desired_state+', prioridad '+read.data.priority+', revisión '+read.data.revision+', '+read.data.work_units+' pasos realizados. Observado: '+read.data.observed_at+'. Worker manual y aislado, no implica actividad de otros motores.'});
+     setOperatorAnswer({question:text,text:describeLabRuntimeEvidence(read.data)});
     }
     setComposer('');
    }finally{setFleetSending(false)}
