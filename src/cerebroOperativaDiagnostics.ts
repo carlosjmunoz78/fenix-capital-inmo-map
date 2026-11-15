@@ -35,6 +35,17 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
  const {s,live,disconnected,stamp}=data;
  const base='Fuente: inventario propietario LAB '+stamp+'; '+live.length+' fuentes GitHub de metadatos LIVE, '+disconnected.length+' conectores SIN LECTURA. ';
  const missing=disconnected.map(item=>short(item.name||item.repo||item.platform)).slice(0,8);
+ // The role registry is a limited declared mapping; absence here is not an absent agent.
+ const roleMatches=scoped?s.roles.entries.filter(role=>role.engine_bindings.includes(scoped)):[];
+ const declaredMappings=[...new Set(s.roles.entries.flatMap(role=>role.engine_bindings))];
+ const coverage=scoped?
+  roleMatches.length?
+   'ASIGNACIÓN DECLARADA PARA '+scoped+' EN ESTE REGISTRO: '+
+    roleMatches.slice(0,15).map(role=>role.name+' ('+role.id+')').join(', ')+
+    '. Son perfiles definidos, NO procesos ejecutándose. ':
+   'SIN ASIGNACIÓN DE PERFIL PARA '+scoped+' EN ESTE REGISTRO (NO demuestra ausencia global de agentes o capacidades). ':
+  'Este registro relaciona '+s.roles.declared_role_profiles+' perfiles con '+declaredMappings.length+
+   ' identificadores distintos de motor; NO constituye el censo global de 179 motores ni de agentes. ';
  if(intent==='ESTIMATES'){
   // Match only a complete workflow name from the live, authenticated source.
   // Never extrapolate a workflow timing to an engine or autonomous agent.
@@ -56,7 +67,7 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
  }
  if(intent==='MISSING')return intro+base+
   'AGENTES QUE FALTAN: NO CUANTIFICABLES aún. Hay '+s.roles.declared_role_profiles+' perfiles registrados y '+
-  s.engine_registry_count+' motores lógicos DEFINIDOS, pero no existe un censo de agent_id/subagent_id enlazado a contratos de capacidad y latidos de ejecución. '+
+  s.engine_registry_count+' motores lógicos DEFINIDOS, pero no existe un censo de agent_id/subagent_id enlazado a contratos de capacidad y latidos de ejecución. '+coverage+
   (missing.length?'Fuentes pendientes de conexión: '+missing.join(', ')+'. ':'')+
   'Para detectar carencias reales: definir objetivo/capacidades exigidas, inventariar ejecutores por fuente autenticada y contrastar permisos, skills, dependencias, training y tribunal. No crear agentes por intuición.';
  if(intent==='FAILURES'){
@@ -72,7 +83,7 @@ export function answerDiagnosticRequest(intent:DiagnosticIntent,read:FleetRead,q
   'CAPACIDADES ACREDITADAS POR ESTA LECTURA: consultar '+s.engine_registry_count+' definiciones de motores y '+s.roles.declared_role_profiles+
   ' perfiles registrados; observar muestras de workflows en '+live.length+' repositorios. '+
   'NO ACREDITADO por esta fuente: autonomía de los motores, ejecución de agentes, publicación, entrenamiento, control universal ni actividad de proveedores desconectados. '+
-  'Capacidad disponible ≠ agente activo. Consulta un motor concreto para buscar evidencia adicional.';
+  coverage+'Capacidad disponible ≠ agente activo. Consulta un motor concreto para buscar evidencia adicional.';
  return intro+base+
   'SIGUIENTE AVANCE RECOMENDABLE (propuesta, no ejecución): primero enlazar fuentes privadas y latidos de agent/job/run con empresa y permisos; después verificar fallos y dependencias; '+
   'medir duración real y FinOps; finalmente habilitar priorización/aceleración/pausa sólo con adaptador certificado, recibo, readback y rollback. '+
