@@ -71,6 +71,7 @@ jobs:
           set -euo pipefail
           node --test cerebro/seo-enterprise/v2/tests/seo-department-ops-supervisor-v1.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-existing-wp-draft-qa-v1.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-staging-bridge-owner-offline-patch-v1.test.mjs
           node cerebro/seo-enterprise/v2/runtime/seo-department-ops-supervisor-v1.mjs "$RUNNER_TEMP/d05-actor/seo-readiness.json"
       - name: Execute 3 signed case responses in isolated durable JOB001
         run: |

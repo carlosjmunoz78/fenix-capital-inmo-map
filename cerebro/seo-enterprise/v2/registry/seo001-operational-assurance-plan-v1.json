@@ -117,6 +117,18 @@
       "source": "HOSTINGER_Hpanel_Authenticated_UI_Readonly_2026-11-15",
       "backup_archive_download_verified": false,
       "real_restore_tested": false
+    },
+    "staging_release_bridge": {
+      "active_version": "0.4.1",
+      "verified_code": "LIVE_COWBOY_WP_READ_FILE_ON_2026_11_15",
+      "risk": "site_transient_update_plugins requests staging.fenixcapital.es (timeout 5s) when WordPress checks updates; prior call counts unverified",
+      "stale_package_risk": "upgrader_pre_download may fetch staging packages with 30s timeout; own auto_update_plugin filter can return true",
+      "prepared_candidate": "cerebro/seo-enterprise/v2/runtime/seo-staging-bridge-owner-offline-patch-v1.mjs",
+      "source_not_committed_publicly": true,
+      "production_modified": false,
+      "owner_default_off": true,
+      "tests_are_synthetic": true,
+      "restore_and_rollback_not_verified": true
     }
   },
   "design": {
@@ -259,6 +271,13 @@
       "severity": "P2",
       "state": "BLOCKED_EXPIRED_V5_RUN_42446075036_ARTIFACT_13603278337",
       "next_action": "Workflow now preflights artifact: if missing, emits verified HOLD not destructive repair; secure source reacquisition or historical lineage required, no false success."
+    },
+    {
+      "id": "STAGING_BRIDGE_RELEASE_CHANNEL",
+      "owner": "SEO-D22",
+      "severity": "P0",
+      "state": "ACTIVE_PROD_BRIDGE_STILL_POINTS_TO_STAGING_PRIVATE_PATCH_NOT_DEPLOYED",
+      "next_action": "After authentic full WP files+SQL private restore and rollback, deploy exact guarded patch to live existing bridge v0.4.1. Default OFF, owner reactivates manually; verify zero STAGING network requests. Do not change staging or PROD until gates pass."
     }
   ],
   "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry.",
