@@ -70,7 +70,9 @@ jobs:
   # Additive LAB: three separate GitHub jobs, all read-only and synthetic.
   seo-worker-isolated:
     name: seo-worker-isolated
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    # Paused by owner; synthetic training job receipts are historical and remain preserved.
+    # Re-activation requires a new explicit order and separate safety review.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -98,7 +100,9 @@ jobs:
   seo-qa-isolated:
     name: seo-qa-isolated
     needs: seo-worker-isolated
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    # Paused by owner; synthetic training job receipts are historical and remain preserved.
+    # Re-activation requires a new explicit order and separate safety review.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -132,7 +136,9 @@ jobs:
   seo-tribunal-isolated:
     name: seo-tribunal-isolated
     needs: [seo-worker-isolated, seo-qa-isolated]
-    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.number == 22 && github.event.pull_request.head.repo.full_name == github.repository }}
+    # Paused by owner; synthetic training job receipts are historical and remain preserved.
+    # Re-activation requires a new explicit order and separate safety review.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
