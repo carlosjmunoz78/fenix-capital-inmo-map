@@ -237,6 +237,25 @@ test('Cloudflare owner Preview reports missing read-only binding precisely, neve
  expect(calls).not.toContain('submit_command');
 });
 
+test('Dated Supabase LAB device audit shows historical heartbeats and command receipts, never agents active',async({page})=>{
+ const {calls}=await setup(page);
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const region=page.getByRole('region',{name:'Auditoría histórica de agentes de dispositivo LAB'});
+ await expect(region).toContainText('ARCHIVO FECHADO, NO EN VIVO');
+ await expect(region).toContainText('Registros de dispositivo no revocados: 5');
+ await expect(region).toContainText('Con latido durante las 24 horas anteriores a la auditoría: 0');
+ await expect(region).toContainText('Censo de agentes y subagentes activos: DESCONOCIDO');
+ await expect(region).toContainText('LAB · dispositivos históricos');
+ await expect(region).toContainText('PREPROD · etiqueta histórica en BD LAB');
+ await expect(region).toContainText('Órdenes anteriores: 8 · completadas 6 · fallidas 2');
+ await expect(region).toContainText('Órdenes anteriores: 96 · completadas 75 · fallidas 21');
+ await expect(region).toContainText('p50 28.2 s · p90 113.1 s');
+ await expect(region).toContainText('p50 3.7 s · p90 127.7 s');
+ await expect(region).toContainText('no un despliegue activo de App PREPROD');
+ expect(calls).not.toContain('lab_control');
+ expect(calls).not.toContain('submit_command');
+});
+
 test('Owner LAB quick reads use existing planner, no execution or production routes',async({page})=>{
  const {calls,quick}=await setup(page);
  await expect(quick.getByRole('button')).toHaveCount(5);
