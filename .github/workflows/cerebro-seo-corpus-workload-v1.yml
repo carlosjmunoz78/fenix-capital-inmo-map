@@ -75,6 +75,7 @@ jobs:
           node --test cerebro/seo-enterprise/v2/tests/seo-source-bound-herencias-review-v1.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo001-google-structured-data-policy-2026-v1.test.mjs
           node --test cerebro/seo-enterprise/v2/tests/seo-lead-privacy-release-guard-v1.test.mjs
+          node --test cerebro/seo-enterprise/v2/tests/seo-lead-sla-aggregate-supervisor-v1.test.mjs
           node cerebro/seo-enterprise/v2/runtime/seo-department-ops-supervisor-v1.mjs "$RUNNER_TEMP/d05-actor/seo-readiness.json"
       - name: Execute 3 signed case responses in isolated durable JOB001
         run: |
