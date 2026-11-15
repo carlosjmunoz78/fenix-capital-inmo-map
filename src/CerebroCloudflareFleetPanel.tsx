@@ -70,7 +70,7 @@ export default function CerebroCloudflareFleetPanel(){
    <div><strong>{x?.without_cron??(archived?archived.without_cron_workers+1:null)??'—'}</strong><small>Sin cron verificado</small></div>
    <div><strong>{x?.cron_unknown_count??(archived?archived.worker_count-archived.cron_verified_workers:null)??'—'}</strong><small>Crons no comprobados</small></div>
   </div>
-  <div className="op4-cf-capacity" aria-label="Gate de capacidad cron Cloudflare Free">
+  <div className="op4-cf-capacity" role="region" aria-label="Gate de capacidad cron Cloudflare Free">
    <strong>Cuota cron Workers Free · {cronGate.quota.existing_cron_triggers}/{cronGate.quota.limit_cron_triggers_per_account}</strong>
    <p>Sin plazas disponibles en la comprobación del {format(cronGate.observed_at)}. Cloudflare rechazó una programación nueva (error {cronGate.quota.api_error_code}). No se contratará un plan, alterará un cron existente ni se reintentará automáticamente. La capacidad actual requiere nueva consulta.</p>
    <small>Canario aislado {cronGate.resource_name}: sin cron, workers.dev y preview desactivados; otros cinco cron conservados.</small>
