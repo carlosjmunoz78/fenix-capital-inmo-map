@@ -101,7 +101,23 @@
       "MOBILE_DESKTOP_VISUAL_QA",
       "FORMS_CONSENT_CTA",
       "ROLLBACK_PROVED"
-    ]
+    ],
+    "latest_verified_sql_checkpoint": {
+      "checkpoint_id": 73,
+      "tables_count": 124,
+      "bytes": 40157135,
+      "created": "2026-11-15",
+      "location": "WORDPRESS_SERVER_PRIVATE_CHECKPOINT",
+      "is_files_media_backup": false,
+      "real_restore_tested": false
+    },
+    "hostinger_backup_observation": {
+      "last_backup_ui": "2026-11-14 21:50",
+      "frequency": "daily",
+      "source": "HOSTINGER_Hpanel_Authenticated_UI_Readonly_2026-11-15",
+      "backup_archive_download_verified": false,
+      "real_restore_tested": false
+    }
   },
   "design": {
     "source": "LIVE_WP_ELEMENTOR_KIT_AND_FENIX_OWNER_STYLE_POLICY_2026_11_06",
@@ -206,8 +222,8 @@
       "id": "BACKUP_RESTORE_WP",
       "owner": "CEREBRO-BKP",
       "severity": "P0",
-      "state": "PARTIAL_BACKUP_SQL_ONLY",
-      "next_action": "Verify files/media and isolate physical restore, smoke and rollback"
+      "state": "PARTIAL_DB_CHECKPOINT_73_HOSTINGER_BACKUP_20261114_RESTORE_NOT_TESTED",
+      "next_action": "Obtain Hostinger files/media + SQL in private encrypted environment; run existing private preflight, full isolated restore and physical rollback. No WordPress updates before actual attested restore."
     },
     {
       "id": "WORDPRESS_PENDING_UPDATES",
@@ -241,8 +257,8 @@
       "id": "V6_HISTORY_ARTIFACT",
       "owner": "SEO-001",
       "severity": "P2",
-      "state": "BLOCKED_EXPIRED_V5",
-      "next_action": "Preserve evidence-missing HOLD, don't fabricate or bypass historical V5 record"
+      "state": "BLOCKED_EXPIRED_V5_RUN_42446075036_ARTIFACT_13603278337",
+      "next_action": "Workflow now preflights artifact: if missing, emits verified HOLD not destructive repair; secure source reacquisition or historical lineage required, no false success."
     }
   ],
   "release_policy": "No release, update, page write, model spend or autonomous IAM grant from this registry.",

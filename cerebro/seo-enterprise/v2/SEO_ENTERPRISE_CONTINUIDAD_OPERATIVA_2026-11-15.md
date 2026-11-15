@@ -47,3 +47,9 @@ PR #22 DRAFT. main, PROD WordPress, App/CRM, DNS, Supabase, Trading y STAGING pr
 - PageSpeed LAB MOBILE portada 15/11 10:54: 98 rendimiento / 97 accesibilidad / 96 buenas prácticas / 100 SEO; FCP 1,5s, LCP 2,3s, TBT 0ms, CLS 0, SpeedIndex 2,8s. Incidencias a estudiar: contraste, recursos bloqueantes, CSS y consola. No extrapolar a la web entera.
 - Cuatro capturas reales desktop (HOME, Blog, Córdoba, Inmobiliarias) muestran logotipo y menú alineados y paleta común; hero oscuro Córdoba frente a beige en otras secciones. Consistencia completa, responsive y formularios aún no certificados. No aplicar rediseños masivos.
 - Mantener WP core 7.1.4, evitar updates de 6 plugins y Astra sin SQL+files backup restaurado, OLD/NEW y rollback. Automatización SEO diaria debe comparar GSC autenticado sin pagar y priorizar leads útiles.
+
+## Bloque de continuación 15/11 · Copias reales observadas y retención V6
+- **SQL checkpoint WordPress #73 creado**, 124 tablas, 40.157.135 bytes; sin cambios de contenido. NO sustituye restauración completa, copia de archivos/uploads ni rollback verificado.
+- **Hostinger hPanel autenticado** refrescado, última copia automática visible **2026-11-14 21:50** y periodicidad «Diariamente». La existencia en el panel no prueba la integridad de sus archivos ni su recuperabilidad.
+- **V5 GitHub run 42446075036**: API de Actions devuelve lista vacía de artefactos y V6 fallaba por `actions/download-artifact`. Se modifica *únicamente* el workflow V6 para consultar el ID 13603278337 por API; si falta, atestigua `V6_HOLD_SOURCE_ARTIFACT_MISSING`, no repara, no publica, no llama a IA y evita el reintento destructivo/inútil. Si existe artefacto exacto, se mantiene la reparación V6 original y sus QA. **CI verde en control HOLD no equivale a V6 reparado**.
+- Reutilizar el preflight de backups Hostinger, restauración física aislada y validador de recibo privado existentes. No construir otra plataforma ni activar staging.
