@@ -98,6 +98,8 @@ async function setup(page:Page){
      sources:[{platform:'GitHub',repo:'carlosjmunoz78/fenix-capital-inmo-map',
        name:'App / CEREBRO',state:'LIVE',reason:null,observed_at:new Date().toISOString(),
        observed_sample:1,active_in_sample:1,queued_in_sample:0,total_repo_run_count:15,
+       timing_samples:[{workflow_name:'LAB contrato vivo',sample_size:4,p50_upper_bound_seconds:20,p90_upper_bound_seconds:41,
+        method:'GITHUB_RUN_STARTED_TO_LAST_UPDATE_PROXY',engine_mapping_verified:false}],
        recent:[{run_id:101,name:'LAB contrato vivo',status:'in_progress',conclusion:null,
         updated_at:'2026-11-15T00:50:00Z',url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/101',
         agent_id:null,engine_id:null,subagent_id:null}]},
@@ -177,6 +179,11 @@ test('Owner Operativa answers missing-agent, ETA/cost and priority advice withou
  await send.click();
  await expect(answer).toContainText('TIEMPO: NO_MEDIDO');
  await expect(answer).toContainText('COSTE REAL, INCREMENTAL Y DE ACELERACIÓN: NO_MEDIDOS');
+ await prompt.fill('¿Cuánto tarda LAB contrato vivo?');
+ await send.click();
+ await expect(answer).toContainText('TIEMPO DEL WORKFLOW GITHUB LAB contrato vivo');
+ await expect(answer).toContainText('p50=20 s, p90=41 s');
+ await expect(answer).toContainText('ETA DEL MOTOR: SIN_BASE_SUFICIENTE');
  await prompt.fill('¿Qué deberíamos priorizar?');
  await send.click();
  await expect(answer).toContainText('SIGUIENTE AVANCE RECOMENDABLE');
