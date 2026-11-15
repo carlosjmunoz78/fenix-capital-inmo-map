@@ -4,6 +4,7 @@ import {readFleetLab,type FleetRead} from './cerebroFleetObserveApi';
 import CerebroLabWorkerControlPanel from './CerebroLabWorkerControlPanel';
 import CerebroCloudflareFleetPanel from './CerebroCloudflareFleetPanel';
 import CerebroCloudflareQueuesPanel from './CerebroCloudflareQueuesPanel';
+import CerebroSocialProviderPanel from './CerebroSocialProviderPanel';
 import {readUniversalOperativaLab,type UniversalJob001ControlLab} from './cerebroUniversalOperativaLabApi';
 import './cerebro-fleet-control-panel.css';
 const INITIAL:FleetRead={kind:'unavailable',snapshot:null,reason:'NOT_READ_YET'};
@@ -121,6 +122,7 @@ export default function CerebroFleetControlPanel(){
     <a href={r.url} target="_blank" rel="noreferrer">Evidencia GitHub</a>
    </div>):<p>Sin actividad comprobable en la lectura actual. No significa ausencia global de trabajos.</p>}
   </section>
+  <CerebroSocialProviderPanel/>
   <CerebroCloudflareFleetPanel/>
   <CerebroCloudflareQueuesPanel/>
   <CerebroLabWorkerControlPanel/>
