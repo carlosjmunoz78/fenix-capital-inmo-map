@@ -42,3 +42,9 @@ F. Sin evidencia real, todos los estados de agente/actividad autónoma se muestr
 `P0-A_AUTH_NEGATIVES_REAL=GREEN` + `REVOCATION_POLICY=VERIFIED` + `PREVIEW_ROLLBACK_READBACK=GREEN` + `P0B_EXECUTOR_PROVENANCE=VERIFIED` + `FINOPS_MEASURED` + `POLICY/TRIBUNAL` + `OLD_VS_NEW=GREEN`. Hasta entonces: **`PROD=HOLD`, `AUTONOMOUS_CONTROL=false`**.
 
 **Rollback de este documento:** revertir su commit de documentación únicamente, sin tocar servicio. **Coste nueva suscripción:** 0 €, consumo marginal NO_MEDIDO.
+
+## 6. Ensayo ya realizado · cierre del gate de alias 2026-11-16
+
+**Los pasos 1–2 que antes estaban BLOQUEADOS han sido resueltos sin cambiar configuración de proyecto:** `get_deployment({idOrUrl: alias})` confirma el destino REAL actual aun cuando `get_alias` responde 404. Se ejecutó `assign_alias` a la versión recuperable, readback `READY` del deployment viejo, carga en Opera de pantalla `Acceso seguro`, `assign_alias` al original y readback `READY` del original; SSO verificado después. **Resultado: PASS en rollback/restauración física del alias Preview; NO E2E login propietario, Edge ni PROD.** Referencia principal `cerebro/universal/v0/OPERATIVA_PREVIEW_ALIAS_ROLLBACK_RECEIPT_2026-11-16.md`.
+
+La sección 3 debe interpretarse como PRECAUCIÓN PARA FUTURAS REPETICIONES, no como bloqueo pendiente del ensayo ya concluido. No repetir salvo necesidad funcional, especialmente para evitar cambios de tráfico y gastos innecesarios.
