@@ -31,7 +31,7 @@ if(!armed){
   const userClient=createClient(URL,publicKey,options);
   const email='cerebro-p0a-'+randomBytes(16).toString('hex')+'@example.invalid';
   const password=randomBytes(40).toString('base64url')+'aA7!';
-  let createdUserId=null, sessionOpened=false,sessionRevoked=false,cleanupOk=false;
+  let createdUserId=null, sessionOpened=false,sessionRevoked=false,cleanupOk=true;
   let stage='create',pass=false;
   const uuid=s=>typeof s==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s);
   async function mustRead(sessionId,userId){
@@ -44,8 +44,9 @@ if(!armed){
    // Use the official admin API, not direct SQL inserts into auth.users/sessions.
    const made=await admin.auth.admin.createUser({email,password,email_confirm:true,
      app_metadata:{cerebro_lab_only_test:'p0a_auth_session_v1'}});
-   if(made.error||!uuid(made.data?.user?.id))throw Error('OFFICIAL_USER_CREATE_FAILED');
-   createdUserId=made.data.user.id;
+   // Record even a partial response with a valid user ID, so cleanup can run on error.
+   if(uuid(made.data?.user?.id))createdUserId=made.data.user.id;
+   if(made.error||!createdUserId)throw Error('OFFICIAL_USER_CREATE_FAILED');
    stage='sign_in';
    const signed=await userClient.auth.signInWithPassword({email,password});
    const accessToken=signed.data?.session?.access_token;

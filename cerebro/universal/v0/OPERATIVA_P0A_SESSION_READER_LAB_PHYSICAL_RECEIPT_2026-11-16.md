@@ -24,3 +24,10 @@ La nueva función es privada en términos de **EXECUTE roles** aunque resida en 
 - Tests en CI: registrar conclusión del SHA por separado antes de proclamar verde.
 - Coste: sin suscripciones nuevas; costes operativos marginales NO_MEDIDO.
 - Estado de promoción: `P0A_LAB_READER_PHYSICAL=PASS_LIMITED`; `P0A_REVOKED_SESSION_E2E=NOT_TESTED`; `OWNER_PROD_ISSUER_READER=NOT_IMPLEMENTED`; `PROD=HOLD`.
+
+## 16/11/2026 · Nueva prueba positiva no invasiva + auditoría de guardas
+- **READ-ONLY / SOLO LAB**: selección interna de hasta una fila de `auth.sessions` vigente, sin devolver ni registrar `session_id`, `user_id`, JWT, correo o cualquier identificador. El agregado SQL devolvió `sample_size_max_one=1`, `privileged_reader_recognizes_sample=true`, `rejects_wrong_test_user=true`. Demuestra una **aceptación positiva de sesión real existente** por el lector y rechazo de asociación con UUID de ensayo no coincidente. **No se revocó esa sesión**, no es prueba logout E2E ni del JWT dueño PROD.
+- Auditor de seguridad de Supabase LAB: la función `cerebro_operativa_session_guard_lab_v0` **no aparece entre los hallazgos**. El proyecto contiene avisos históricos de otras familias; no equivalen a estar todo el proyecto libre de riesgos. No se modificaron esos recursos.
+- No se ha encontrado un ejecutor conectado que permita lanzar el flujo completo de Auth con secretos LAB aislados sin transferirlos por chat o ruta pública. El runner permanece desarmado; no hacer signups desde PROD ni insertar sesiones vía SQL.
+- Endurecimiento del runner: si `createUser` falla sin ID válido, no declara `CLEANUP_FAILED` por inexistencia de cuenta; si devuelve un ID en un resultado parcial, lo captura para efectuar `deleteUser` al finalizar. Prueba adicional con armado solicitado pero llaves ausentes: `BLOCKED_MISSING_LAB_ONLY_CREDENTIALS` **sin carga del SDK, sin llamadas**.
+- **Gates pendientes**: LAB account create/signin/signout oficial true→false, negativas HTTP con JWT reales, revocación de sesiones emisor PROD (requiere cambio separado), costes medidos, política. `PROD=HOLD`.

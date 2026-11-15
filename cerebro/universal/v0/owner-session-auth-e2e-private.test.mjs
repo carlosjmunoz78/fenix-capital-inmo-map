@@ -31,3 +31,22 @@ test('E2E harness is pinned exclusively to LAB, uses official Auth and keeps sec
  assert.match(source,/admin\.auth\.admin\.deleteUser\(createdUserId\)/);
  assert.doesNotMatch(source,/console\.(log|error)\([^;]*(?:accessToken|adminKey|password|session_id|email)/);
 });
+
+test('armed without LAB-only credentials fails before any SDK import or network',()=>{
+ const run=spawnSync(process.execPath,[fileURLToPath(target)],{
+  encoding:'utf8',timeout:7000,env:{...process.env,
+   CEREBRO_LAB_SESSION_E2E_ARM:'CEREBRO-LAB-SESSION-E2E-ONE-SHOT-hnqlnvakzaywtafeiybt',
+   CEREBRO_LAB_PROJECT_REF:'hnqlnvakzaywtafeiybt',
+   CEREBRO_LAB_SERVICE_ROLE_KEY:'',CEREBRO_LAB_PUBLISHABLE_KEY:''}
+ });
+ assert.equal(run.status,2);
+ assert.match(run.stdout,/BLOCKED_MISSING_LAB_ONLY_CREDENTIALS/);
+ assert.doesNotMatch(run.stdout,/PASS_LAB_ISSUER_ONLY|CREATE|SIGN_IN|CLEANUP_FAILED/);
+ assert.equal(run.stderr,'');
+});
+test('cleanup semantics are fail-closed but do not falsely fail when no user exists',()=>{
+ assert.match(source,/cleanupOk=true/);
+ assert.match(source,/if\(uuid\(made\.data\?\.user\?\.id\)\)createdUserId=made\.data\.user\.id;/);
+ assert.match(source,/if\(made\.error\|\|!createdUserId\)throw Error\('OFFICIAL_USER_CREATE_FAILED'\)/);
+ assert.match(source,/if\(createdUserId\)\{[\s\S]*?admin\.auth\.admin\.deleteUser\(createdUserId\)/);
+});
