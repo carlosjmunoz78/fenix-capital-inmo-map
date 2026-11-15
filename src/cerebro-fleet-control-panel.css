@@ -67,3 +67,13 @@
 .op4-fleet-job-evidence span,.op4-fleet-job-evidence small{font-size:11px;line-height:1.55;color:#abcddc}
 .op4-fleet-job-evidence a{color:#9ce0f8;font-size:11px;text-decoration:underline}
 .op4-fleet-triage-item button{align-self:flex-start;font-size:12px;min-height:44px}
+
+/* Dated aggregate device-runtime evidence; intentionally no active-agent badge. */
+.op4-device-snapshot{background:#0a2333;border:1px solid #3a6c7a;border-radius:13px;padding:17px}
+.op4-device-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0}
+.op4-device-item{display:flex;flex-direction:column;gap:7px;min-width:0;background:#092a3a;border:1px solid #356178;border-radius:10px;padding:12px;overflow-wrap:anywhere}
+.op4-device-item strong{font-size:13px;color:#e5f6ff}
+.op4-device-item span{font-size:12px;color:#b9d8e7;line-height:1.55}
+.op4-device-item small{font-size:11px;color:#a7cad9;line-height:1.55}
+@media(max-width:740px){.op4-device-grid{grid-template-columns:1fr}}
+@media(max-width:430px){.op4-device-snapshot{padding:12px}}
