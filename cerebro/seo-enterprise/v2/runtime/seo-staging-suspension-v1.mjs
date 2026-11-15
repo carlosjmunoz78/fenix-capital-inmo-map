@@ -5,7 +5,7 @@ const HOST='staging.fenixcapital.es';
 const matchesStage=value=>{
  if(typeof value!=='string')return false;
  // Blocks literal host, ports, URL forms, mixed-case and nested stage subdomains.
- return /(?:^|[^a-z0-9_-])(?:[a-z0-9_-]+\\.)*staging\\.fenixcapital\\.es(?:\\.|(?=$|[^a-z0-9_.-]))/i.test(value);
+ return /(?:^|[^a-z0-9_-])(?:[a-z0-9_-]+\.)*staging\.fenixcapital\.es(?:\.|(?=$|[^a-z0-9_.-]))/i.test(value);
 };
 function configValid(){
  return config.company_id==='fenix'&&config.engine_id==='SEO-001'&&
