@@ -59,7 +59,7 @@ export function classifyFleetQuestion(input:string):FleetQuestion|null{
   const v=m[1],a=/paus|deten/.test(v)?'PAUSE':/reanud|reactiv|activar|arrancar/.test(v)?'RESUME':'PRIORITIZE';
   return{kind:'control',action:a,engine:input.toUpperCase().match(/\b[A-Z]{2,12}-\d{3}\b/)?.[0]||null};
  }
- return /agentes?|subagentes?|motores?|trabajos?|workflow|ejecuciones?|departamentos?|plataformas?|cu[aá]ntos?|inventario|actividad|qu[eé].*(?:haciendo|trabajando)|(?:estado|situaci[oó]n).*cerebro/i.test(s)?{kind:'query'}:null;
+ return /agentes?|subagentes?|motores?|workers?|cloudflare|trabajos?|workflow|ejecuciones?|departamentos?|plataformas?|cu[aá]ntos?|inventario|actividad|qu[eé].*(?:haciendo|trabajando)|(?:estado|situaci[oó]n).*cerebro/i.test(s)?{kind:'query'}:null;
 }
 export function answerFleetQuestion(result:FleetRead,question:FleetQuestion):string{
  if(question.kind==='control'){
