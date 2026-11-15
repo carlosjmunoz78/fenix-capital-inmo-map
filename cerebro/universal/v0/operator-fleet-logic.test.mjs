@@ -46,3 +46,17 @@ test('fleet control source excludes all real mutation primitives by construction
  assert.ok(!/fetch\s*\(|\.delete\s*\(|\.insert\s*\(|\.update\s*\(/.test(c));
  assert.ok(c.includes('NO_VERIFIED_CONTROL_EXECUTOR'));
 });
+
+test('new fleet lambda loads under Node24 and refuses any non-Preview request before network access',async(t)=>{
+ const originalEnv=process.env.VERCEL_ENV,originalFetch=globalThis.fetch;
+ t.after(()=>{process.env.VERCEL_ENV=originalEnv;globalThis.fetch=originalFetch});
+ process.env.VERCEL_ENV='production';
+ let calls=0;
+ globalThis.fetch=async()=>{calls++;throw Error('UNAUTHORIZED_NETWORK')};
+ const {default:handler}=await import('../../../api/cerebro-fleet-observe.ts');
+ let status=null,body=null;
+ const res={setHeader(){},status(code){status=code;return this},json(o){body=o;return this}};
+ await handler({method:'GET',url:'/api/cerebro-fleet-observe?company_id=fenix',
+  headers:{host:'fenix-capital-preprod-qa.vercel.app'}},res);
+ assert.equal(status,403);assert.equal(body.reason,'PREVIEW_ONLY');assert.equal(calls,0);
+});
