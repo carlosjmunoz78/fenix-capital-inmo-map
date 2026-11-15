@@ -17,7 +17,9 @@ export const HOST_ROLES=Object.freeze({
  'seo-corpus-worker':'SEO_CORPUS_WORKER',
  'seo-corpus-qa':'SEO_CORPUS_INDEPENDENT_QA',
  'seo-corpus-tribunal':'SEO_CORPUS_TRIBUNAL',
- 'seo-corpus-sandbox-writer':'SEO_SANDBOX_DRAFT_WRITER'
+ 'seo-corpus-sandbox-writer':'SEO_SANDBOX_DRAFT_WRITER',
+ 'seo-d05-actor':'SEO_D05_SPECIALIST_01_READONLY',
+ 'seo-d05-d32':'SEO_D32_TRAINING_REVIEW'
 });
 const fail=code=>{throw Error('SEO_GH_WORKLOAD_'+code)};
 const dec=x=>JSON.parse(Buffer.from(x,'base64url').toString('utf8'));
