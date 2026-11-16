@@ -1,0 +1,69 @@
+name: JARVIS DeepSeek Markdown LAB isolated browser gate
+on:
+  push:
+    branches:
+      - cerebro/jarvis-deepseek-chat-demo-ui-lab-20261116
+    paths:
+      - 'src/jarvis-deepseek-lab/**'
+      - 'src/JarvisEmbeddedConsole.tsx'
+      - 'src/CerebroConsoleShell.tsx'
+      - 'tests/jarvis-deepseek-*'
+      - '.github/workflows/jarvis-deepseek-markdown-lab.yml'
+      - 'docs/JARVIS_DEEPSEEK_CHAT_DEMO_UI_LAB_2026-11-16.md'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: jarvis-deepseek-ui-lab
+  cancel-in-progress: true
+jobs:
+  lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install existing dependencies without scripts
+        run: npm ci --ignore-scripts
+      - name: Parser and links regression
+        run: node --experimental-strip-types --test tests/jarvis-deepseek-chat-demo-lab.test.mjs tests/jarvis-deepseek-chat-renderer-lab.test.mjs tests/jarvis-deepseek-direct-react-contract.test.mjs
+      - name: Ordinary production build remains unaffected
+        env:
+          VITE_FENIX_ENV: prod
+        run: npm run build
+      - name: Default OFF browser fixture build (same Gateway contract)
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: jarvis-lab-fixture-not-real-key
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '0'
+        run: npm run build
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Verify old renderer survives with LAB flag OFF
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-deepseek-default-off.spec.ts --project=desktop-chromium
+      - name: Build isolated lab variant (only opt-in)
+        env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: jarvis-lab-fixture-not-real-key
+          VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '1'
+        run: npm run build -- --mode lab
+      - name: Synthetic Gateway and owner desktop/mobile viewport E2E
+        env:
+          PLAYWRIGHT_SKIP_BUILD: '1'
+        run: npx playwright test tests/jarvis-deepseek-lab-ui.spec.ts --project=desktop-chromium
+      - name: Preserve failed browser evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jarvis-deepseek-ui-lab-e2e-failure
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 3
