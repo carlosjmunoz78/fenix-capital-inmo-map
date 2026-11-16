@@ -1,0 +1,173 @@
+{
+  "schema_version": "1.0.0",
+  "snapshot_kind": "IMMUTABLE_READ_ONLY_AUDIT",
+  "company_id": "fenix",
+  "environment": "LAB",
+  "runtime_claims": {
+    "active_agent_count": null,
+    "active_subagent_count": null,
+    "active_worker_count": null,
+    "active_job_count": null,
+    "verified_zero_active": false,
+    "live_runtime_certified": false
+  },
+  "sources": {
+    "cloudflare": {
+      "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+      "observed_window": {
+        "from": "2026-11-15T05:59:46.522Z",
+        "to": "2026-11-16T05:59:46.522Z"
+      },
+      "control_plane_workers_total": 38,
+      "checked_lab_scripts": [
+        {
+          "name": "cerebro-jarvis-lab-eu",
+          "deployment_exists": true,
+          "cron_count": 0,
+          "workers_dev_enabled": true,
+          "runtime_verified": false
+        },
+        {
+          "name": "cerebro-jarvis-cut32-lab-eu",
+          "deployment_exists": true,
+          "cron_count": 0,
+          "workers_dev_enabled": false,
+          "runtime_verified": false
+        },
+        {
+          "name": "cerebro-instagram-autoqual-lab",
+          "deployment_exists": true,
+          "cron_count": 0,
+          "workers_dev_enabled": false,
+          "runtime_verified": false
+        },
+        {
+          "name": "cerebro-facebook-autoqual-lab",
+          "deployment_exists": true,
+          "cron_count": 0,
+          "workers_dev_enabled": false,
+          "runtime_verified": false
+        }
+      ],
+      "observability": {
+        "event_count": 232,
+        "not_requests_or_successes": true,
+        "services": [
+          {
+            "name": "cerebro-facebook-buffer-replenisher-lab",
+            "events": 160
+          },
+          {
+            "name": "cerebro-facebook-knowledge-autoqual-lab-eu",
+            "events": 72
+          }
+        ],
+        "no_observed_events_does_not_prove_no_invocations": true
+      },
+      "measured_cost_eur": null
+    },
+    "supabase_lab": {
+      "project_ref": "hnqlnvakzaywtafeiybt",
+      "observed_at": "2026-11-16T05:58:05.872514Z",
+      "control_plane_edge_functions_total": 367,
+      "control_plane_edge_functions_marked_active": 367,
+      "edge_status_is_not_runtime_heartbeat": true,
+      "edge_observers": [
+        {
+          "name": "cerebro-operativa-device-observe-lab-v0",
+          "deployment_version": 1,
+          "deploy_status": "ACTIVE",
+          "verify_jwt_flag": false,
+          "owner_resolver_gateway": "EXTERNAL_ISSUER_PROD_GATEWAY",
+          "live_owner_e2e_certified": false
+        },
+        {
+          "name": "cerebro-operativa-job-telemetry-lab-v0",
+          "deployment_version": 1,
+          "deploy_status": "ACTIVE",
+          "verify_jwt_flag": false,
+          "owner_resolver_gateway": "EXTERNAL_ISSUER_PROD_GATEWAY",
+          "live_owner_e2e_certified": false
+        }
+      ],
+      "scope": {
+        "company_id": "fenix",
+        "historical_environment_label": "PREPROD",
+        "is_current_app_preprod": false
+      },
+      "jobs": {
+        "browser_v2": {
+          "total": 117,
+          "by_status": {
+            "SUCCEEDED": 92,
+            "DEAD_LETTER": 13,
+            "HOLD": 6,
+            "QUEUED": 1,
+            "CANCELLED": 5
+          },
+          "last_updated_at": "2026-10-26T12:24:30.771481Z",
+          "updated_last24h": 0,
+          "unexpired_lease_count": 0,
+          "heartbeat5m_count": 0
+        },
+        "jarvis_v1": {
+          "total": 6,
+          "by_status": {
+            "SUCCEEDED": 5,
+            "DEAD_LETTER": 1
+          },
+          "updated_last24h": 0,
+          "unexpired_lease_count": 0,
+          "last_updated_at": "2026-11-09T00:56:24.810383Z"
+        },
+        "creative_v1": {
+          "total": 18,
+          "by_status": {
+            "SUCCEEDED": 7,
+            "HOLD": 11
+          },
+          "updated_last24h": 0,
+          "unexpired_lease_count": 0,
+          "last_updated_at": "2026-11-05T16:24:12.536746Z"
+        },
+        "browser_v1": {
+          "total": 14,
+          "by_status": {
+            "SUCCEEDED": 14
+          },
+          "last_updated_at": "2026-10-23T10:13:01.009654Z"
+        },
+        "job001_telemetry": {
+          "row_count": 0,
+          "unexpired_count": 0,
+          "not_evidence_of_global_zero_jobs": true
+        }
+      },
+      "runtime_evidence": {
+        "device_records_fenix": 5,
+        "device_heartbeats_fresh5m": 0,
+        "latest_device_seen_at": "2026-11-12T13:04:02.895Z",
+        "device_commands_historical": 104,
+        "device_commands_created_last24h": 0,
+        "worker_metrics_fenix_samples": 60,
+        "distinct_worker_labels_historical": 60,
+        "worker_metric_samples_last24h": 0,
+        "recorded_incremental_cost_eur_in_samples": 0,
+        "overall_provider_cost_eur": null,
+        "historical_worker_ids_are_not_verified_live_agents": true
+      },
+      "tenant_isolation_observation": {
+        "other_company_browser_v2_rows_excluded": 84,
+        "global_browser_v2_row_count": 201
+      },
+      "active_worker_proof": "NOT_VERIFIED_IN_SAMPLED_RUNTIME_SOURCES",
+      "access": "AGGREGATED_PRIVILEGED_READ_ONLY"
+    }
+  },
+  "use_policy": {
+    "minimum_runtime_proof": "SIGNED_WORKER_HEARTBEAT_WITH_VALID_TTL_AND_CORRELATED_JOB_RECEIPT",
+    "no_activation_from_snapshot": true,
+    "no_control_write_from_snapshot": true,
+    "refresh_needed_before_real_time_answer": true
+  }
+}
