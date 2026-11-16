@@ -1,0 +1,14 @@
+import {test} from 'node:test';
+import {strict as assert} from 'node:assert';
+import {oneShotIntent} from './intent.mjs';
+const params={intent:'LAB_AUTH_E2E_ONE_SHOT'};
+test('object event payload',()=>assert.equal(oneShotIntent({payload:params}),true));
+test('JSON string event payload',()=>assert.equal(oneShotIntent({payload:JSON.stringify(params)}),true));
+test('API params string event',()=>assert.equal(oneShotIntent({params:JSON.stringify(params)}),true));
+test('no intent',()=>assert.equal(oneShotIntent({payload:{}}),false));
+test('different intent',()=>assert.equal(oneShotIntent({payload:{intent:'PROD'}}),false));
+test('invalid json',()=>assert.equal(oneShotIntent({payload:'{' }),false));
+test('extra fields',()=>assert.equal(oneShotIntent({payload:{...params,environment:'LAB'}}),false));
+test('null event',()=>assert.equal(oneShotIntent(null),false));
+test('oversized input',()=>assert.equal(oneShotIntent({payload:'x'.repeat(513)}),false));
+test('payload is array',()=>assert.equal(oneShotIntent({payload:[params]}),false));
