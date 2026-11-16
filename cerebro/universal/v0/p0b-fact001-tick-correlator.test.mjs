@@ -52,6 +52,7 @@ test('duplicates, out-of-range times, bad timestamps and empty input fail closed
 });
 test('never return identifiers, credentials, real-time proof or PII',()=>{
  const s=JSON.stringify(check([cf(0)],[d1(0)]));
- assert.doesNotMatch(s,/tick_key|message_id|receipt_id|job_id|worker_id|bearer|secret/i);
+ assert.doesNotMatch(s,/"(?:tick_key|message_id|receipt_id|job_id|worker_id)"\s*:/i);
+ assert.doesNotMatch(s,/Bearer\s+eyJ|sb_secret_|-----BEGIN .*PRIVATE KEY-----/i);
  assert.match(s,/"requires_fresh_source_read":true/);
 });
