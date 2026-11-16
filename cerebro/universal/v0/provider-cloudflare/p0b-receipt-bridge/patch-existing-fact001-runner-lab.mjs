@@ -6,10 +6,12 @@
 const BEFORE="import {pagesTick} from './pages-adapter.mjs';";
 const RETURN=" return {status:state,request_id:job.request_id,attempts:out.attempts};";
 const IMPORT="import {emitFact001ReceiptIfEnabledLabV0} from './fact001-runner-receipt-hook-lab.mjs';";
+const IMPORT_AUDIT="import {auditFact001ReceiptFailureLabV0} from './fact001-receipt-failure-audit-lab.mjs';";
 const HOOK=[
  " if(env?.FACT001_RECEIPTS_ENABLED==='true'&&state==='COMPLETED'){",
  "  try{",
  "   const evidence=await emitFact001ReceiptIfEnabledLabV0({env,jobId:job.id});",
+ "   if(evidence?.status==='NOT_CERTIFIED')await auditFact001ReceiptFailureLabV0({env,jobId:job.id,result:evidence});",
  "   // Sanitized status only; never log receipt contents, request IDs or secrets.",
  "   console.log('FACT001_P0B_RECEIPT_STATUS='+",
  "    (['DURABLE_LAB_RECEIPT_UNATTESTED','NOT_CERTIFIED'].includes(evidence?.status)?evidence.status:'NOT_CERTIFIED'));",
@@ -25,15 +27,15 @@ export function patchOriginalFact001RunnerLabV0(original){
     !original.includes("export async function tick(env,time=Date.now())")||
     original.includes("fact001-runner-receipt-hook-lab.mjs"))
   throw Error('FACT001_BASELINE_UNRECOGNIZED');
- const patched=original.replace(BEFORE,BEFORE+'\n'+IMPORT).replace(RETURN,HOOK+'\n'+RETURN);
+ const patched=original.replace(BEFORE,BEFORE+'\n'+IMPORT+'\n'+IMPORT_AUDIT).replace(RETURN,HOOK+'\n'+RETURN);
  if(unpatchFact001RunnerLabV0(patched)!==original)
   throw Error('OLD_NEW_SOURCE_REVERSIBILITY_FAILED');
  return Object.freeze({source:patched,feature_flag:'FACT001_RECEIPTS_ENABLED',default_state:'OFF',
   old_behavior_preserved_when_flag_absent:true});
 }
 export function unpatchFact001RunnerLabV0(candidate){
- if(typeof candidate!=='string'||occurrences(candidate,IMPORT)!==1||
+ if(typeof candidate!=='string'||occurrences(candidate,IMPORT)!==1||occurrences(candidate,IMPORT_AUDIT)!==1||
     occurrences(candidate,HOOK)!==1)throw Error('FACT001_CANDIDATE_UNKNOWN');
- return candidate.replace(BEFORE+'\n'+IMPORT,BEFORE)
+ return candidate.replace(BEFORE+'\n'+IMPORT+'\n'+IMPORT_AUDIT,BEFORE)
   .replace(HOOK+'\n'+RETURN,RETURN);
 }
