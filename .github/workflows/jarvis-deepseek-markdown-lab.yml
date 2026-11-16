@@ -5,6 +5,7 @@ on:
       - cerebro/jarvis-deepseek-chat-demo-ui-lab-20261116
     paths:
       - 'src/jarvis-deepseek-lab/**'
+      - 'src/JarvisEmbeddedConsole.tsx'
       - 'src/CerebroConsoleShell.tsx'
       - 'tests/jarvis-deepseek-*'
       - '.github/workflows/jarvis-deepseek-markdown-lab.yml'
@@ -29,9 +30,14 @@ jobs:
       - name: Parser and links regression
         run: node --experimental-strip-types --test tests/jarvis-deepseek-chat-demo-lab.test.mjs tests/jarvis-deepseek-chat-renderer-lab.test.mjs
       - name: Ordinary production build remains unaffected
+        env:
+          VITE_FENIX_ENV: prod
         run: npm run build
       - name: Build isolated lab variant (only opt-in)
         env:
+          VITE_FENIX_ENV: preprod
+          VITE_SUPABASE_URL: https://hnqlnvakzaywtafeiybt.supabase.co
+          VITE_SUPABASE_PUBLISHABLE_KEY: jarvis-lab-fixture-not-real-key
           VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB: '1'
         run: npm run build -- --mode lab
       - name: Install Chromium

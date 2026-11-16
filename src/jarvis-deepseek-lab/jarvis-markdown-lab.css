@@ -11,3 +11,6 @@
 .cerebro-chat-line .jarvis-safe-markdown-lab a{overflow-wrap:anywhere}
 .cerebro-chat-line .jarvis-safe-markdown-lab :last-child{margin-bottom:0}
 @media(max-width:720px){.cerebro-chat-line .jarvis-safe-markdown-lab pre{font-size:.86em}}
+/* El texto canónico permanece en DOM y solo se oculta en LAB si existe un slot auxiliar. */
+.cerebro-chat-line[data-jarvis-markdown-lab-line="1"] > span{display:none}
+.cerebro-chat-line .jarvis-markdown-slot{min-width:0;max-width:100%}

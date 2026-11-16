@@ -5,11 +5,8 @@ import {cerebroConsoleLinkEnabled} from './cerebroConsoleAccess';
 import {fetchAppApi,supabase} from './supabase';
 import {fetchCerebroConsoleHealth,fetchCerebroConsolePreferences,postCerebroConsoleChat,type CerebroConsoleHealth,type CerebroConversationTurn,type CerebroLearningCandidate,type CerebroPendingAction,type CerebroPreferences,type CerebroReadContext} from './cerebroConsoleApi';
 import {applyVoiceContextHints,applyVoiceInterruptHints,createVoiceRecognition,preferredSpanishVoice,spanishVoices,speechSegments,speechSynthesisSupported,voiceActivityFrame,voiceActivityThreshold,voiceAlternativeScore,voiceInterruptRequested,voiceNeedsClarification,voiceResumeRequested,voiceNeedsManualConfirmation,voiceRecognitionSupported,type CerebroSpeechRecognition,type CerebroSpokenMeta} from './cerebroVoice';
-import JarvisSafeMarkdownLab from './jarvis-deepseek-lab/JarvisSafeMarkdownLab';
 import './cerebro-console.css';
 
-// Feature se activa solo en build con --mode lab y flag explícita, nunca en producción habitual.
-const JARVIS_DEEPSEEK_MARKDOWN_LAB = import.meta.env.MODE === 'lab' && import.meta.env.VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB === '1';
 const CONTEXTS=['GENERAL','EMPRESA','ENGINE','CRM','APP','SEO','MARKETING','TRAINING','AUTOMATION'];
 const DEFAULT_VOICE_PREFERENCES:CerebroPreferences={tone:'warm_close_caring',response_length:'concise',speech_rate:'1.08',speech_pitch:'1.04'};
 type GatewayState='closed'|'checking'|'ready'|'error';
@@ -663,7 +660,7 @@ export default function CerebroConsoleShell(){
    <p>{detail}</p>
    <div className="cerebro-fields"><label>Empresa<select disabled><option>Fénix · sesión autenticada</option></select></label><label>Contexto<select disabled>{CONTEXTS.map(item=><option key={item}>{item}</option>)}</select></label></div>
    <div className="cerebro-chat-log" aria-live="polite">
-    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong>{line.role==='cerebro' && JARVIS_DEEPSEEK_MARKDOWN_LAB ? <JarvisSafeMarkdownLab content={line.text}/> : <span>{renderMessage(line.text)}</span>}{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
+    {lines.length===0?<div className="cerebro-chat-empty">Pregunta lo que necesites o pide una acción. CEREBRO separará lectura de ejecución.</div>:lines.map((line,index)=><div key={index} className={`cerebro-chat-line cerebro-chat-${line.role}`}><strong>{line.role==='user'?'Tú':'CEREBRO'}</strong><span>{renderMessage(line.text)}</span>{line.role==='cerebro'&&line.mediaUrl?<a className="cerebro-media-link" href={line.mediaUrl} target="_blank" rel="noreferrer"><img className="cerebro-media-preview" src={line.mediaUrl} alt="Imagen asociada a la publicación"/><span>Abrir imagen</span></a>:null}</div>)}
    </div>
    <div className={`cerebro-voice-session ${voiceSessionActive?'is-active':''} ${voiceListening?'is-listening':''} ${voiceSpeaking?'is-speaking':''}`}>
     <button type="button" className="cerebro-voice-main" onClick={toggleVoiceSession} disabled={!chatReady||!voiceSupport.stt} aria-pressed={voiceSessionActive}>
