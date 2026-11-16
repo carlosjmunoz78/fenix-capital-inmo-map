@@ -1,6 +1,6 @@
 # CEREBRO OS · OPERATIVA V3 · CIERRE TOTAL 100 % · TRASPASO CANÓNICO
 **Corte:** 2026-11-16 · **Modo:** ChatGPT NORMAL dentro del proyecto CEREBRO OS · ENGINE FACTORY & MULTIEMPRESA · **PROHIBIDO Work**.
-**Ámbito exclusivo:** terminar la interfaz **OPERATIVA** para ver, consultar, diagnosticar y controlar desde un único cockpit todos los recursos **autorizados** de CEREBRO, con ejecución REAL, recibo, historial, política y costes verificables. No desarrollar JARVIS, Neuronal ni Navegador como productos por separado. Operativa sí debe observarlos y operar sus APIs seguras donde estén certificadas.
+**Ámbito exclusivo:** terminar la interfaz **OPERATIVA** para ver, consultar, diagnosticar y controlar desde un único cockpit todos los recursos **autorizados** de CEREBRO, con ejecución REAL, recibo, historial, política y costes verificables. **Objetivo final: entregar OPERATIVA también en PRODUCCIÓN** mediante promoción controlada después de P0-A...P0-H y autorización final específica del propietario; no se autoriza alterar PROD durante LAB. No desarrollar JARVIS, Neuronal ni Navegador como productos por separado. Operativa sí debe observarlos y operar sus APIs seguras donde estén certificadas.
 
 ## 0. Fuente de verdad / no perder el hilo
 - PR única: https://github.com/carlosjmunoz78/fenix-capital-inmo-map/pull/66 · repo `carlosjmunoz78/fenix-capital-inmo-map` · rama `cerebro/universal-control-plane-lab-v0-20261113` · base `cerebro/operativa-stop-and-engine-catalog-20261113`.
@@ -41,6 +41,7 @@
 | P0-F | FinOps real: coste, cuota, impacto, ETA por recurso/empresa | PARCIAL / coste global NO_MEDIDO |
 | P0-G | Historial duradero consultable de orden→acción→resultado→recibo→rollback | PARCIAL / conversación temporal |
 | P0-H | UX impecable PC/móvil/tablet, accesible, sesión estable, cero datos inventados, E2E dueño+negativos+rollback | POR CERTIFICAR / Preview antiguo |
+| P0-I · RELEASE | Promoción gradual **solo de OPERATIVA** a PROD, tras gates verdes y autorización final específica; canary/readback/rollback/aceptación real | OBJETIVO FINAL, NO AUTORIZADO TODAVÍA |
 **No mover P0-H a VERDE por CI sintética.** El "100 %" final exige completar estos criterios o identificar formalmente los recursos externos que no permiten control y el HUMAN_REQUIRED correspondiente.
 
 ## 4. Secuencia de implementación sin repetir informes
@@ -49,7 +50,8 @@
 3. **Correlación física de trabajos**: añadir sólo el contrato mínimo `run_id,job_id,receipt_id,provider_message_id/digest,worker_id,company_id,environment,version,policy_version,outcome,created_at,finished_at,cost_observed` a un ejecutor LAB EXISTENTE con snapshot, tests, implementación paralela y rollback; no abrir un servicio/cron nuevo. Prueba en al menos una operación LAB real que no publique ni toque clientes.
 4. **Control real reusando Gateway**: construir tabla de capacidades proveedor/acción y un adaptador genérico con validación server-side, permisos, idempotency key, CAS/revisión, preflight impacto/coste, compensación y recibo. Primero demostrar operación reversible LAB con GET anterior y posterior. Luego ampliar solo motores autorizados. No interpretar "acelerar" como simple prioridad si cambia concurrencia/gasto.
 5. **Cerrar experiencia desde UI**: chat y botones comparten Command Bus, estados y recibos; voz mismo alcance; pantallas registro → ficha recurso → orden → estado → recibo; historial persistente sin PII; bandeja de excepciones; multiempresa server-side.
-6. **FinOps, supervisor y QA visual**: cuotas reales, coste marginal, ETA fundada, errores sin secretos, métricas y fallos; tests unit/contract/typecheck/OLD vs NEW y pruebas negativas HTTP E2E; PC/móvil/tablet; pantalla y chat con sesión autenticada. Solo Preview LAB con gate y rollback probado. PROD HOLD hasta promoción autorizada independiente.
+6. **FinOps, supervisor y QA visual**: cuotas reales, coste marginal, ETA fundada, errores sin secretos, métricas y fallos; tests unit/contract/typecheck/OLD vs NEW y pruebas negativas HTTP E2E; PC/móvil/tablet; pantalla y chat con sesión autenticada. Solo Preview LAB hasta todos los gates verdes.
+7. **P0-I PRODUCCIÓN (meta obligatoria, autorización aún pendiente):** preparar release exacto, backup, OLD vs NEW, canary, rollback físico, coste medido y criterios de cancelación; solicitar autorización final específica del propietario UNA VEZ. Si se concede, publicar gradualmente SOLO OPERATIVA y validar en PROD con readback, E2E propietario y negativas sin cambiar App/CRM/Gateway/DNS ni otras empresas. Si no hay autorización, no ejecutar y dejar `READY_FOR_PROD_AWAITING_OWNER_AUTH`. No calificar como '100% en producción' un Preview.
 
 ## 5. Criterios obligatorios de aceptación 100 %
 - El propietario pide "Muéstrame todo Fénix" y ve recursos registrados, desplegados, ejecutándose, bloqueados o NO_VERIFICADOS con **filtro por empresa y proveedor**, fecha/fuente de cada valor; AION/CAPTACASA no filtran datos ajenos.
