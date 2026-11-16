@@ -18,3 +18,8 @@ CI funcional: 43861114937/43861114921/43861114897 SUCCESS, 26 checks SUCCESS, 1 
 FinOps: API Vercel Billing Charges devolvió `costs_not_found` (404). No es evidencia de coste 0. Cuotas nuevas 0; costes reales `NO_MEDIDO`.
 
 Gates: P0-B reconciliación histórica PASS_LIMITED, recibo causal por trabajo NO_CERTIFIED; P0-A runner privado y revocación real pendientes; P0-I PROD HOLD.
+
+
+## Relectura de alcance mínimo · 16/11/2026 (continuación)
+
+Consultado mediante Cloudflare API D1 existente `1305f791-7c44-47f9-946b-f330a09c88aa`, solo `PRAGMA table_info` y `SELECT` agregados sin IDs, nombres de workers ni payloads. `fact001_cf_command_jobs_v1`: 6 jobs con `state=COMPLETED`, `environment=LAB`, 6 request_ids presentes, actualización máxima `1794404707627` ms. **No se observa incremento respecto al inventario histórico anterior**, ni nuevo `receipt_id` trazable. Estado `HISTORICAL_RECONCILIATION=PASS_LIMITED`; `BUSINESS_PROVIDER_RECEIPT_E2E=NOT_CERTIFIED`. Para verde exigir job real con run_id/job_id/request_id/receipt_id ligado a readback y compañía; queda prohibido inventar equivalencias de empresas. Cero escrituras en D1 o Workers.
