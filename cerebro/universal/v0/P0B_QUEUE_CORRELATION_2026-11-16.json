@@ -1,0 +1,186 @@
+{
+  "schema_version": "1.0.0",
+  "kind": "P0B_TRANSPORT_AGGREGATE_RECEIPT",
+  "observed_date": "2026-11-16",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "source": "CLOUDFLARE_ACCOUNT_ANALYTICS_SQL_PLUS_QUEUE_GET",
+  "query_window_start_utc": "2026-11-15T06:00:00Z",
+  "query_window_end_utc": "2026-11-16T06:00:00Z",
+  "analytics_sampling": "ADAPTIVE",
+  "sources": {
+    "queue_dataset": "events.queuesMessages",
+    "queue_actions": [
+      "WriteMessage",
+      "ReadMessage",
+      "DeleteMessage"
+    ],
+    "delete_outcome": "success",
+    "queue_consumers_get": "GET /accounts/{account_id}/queues/{queue_id}/consumers",
+    "queue_metrics_get": "GET /accounts/{account_id}/queues/{queue_id}/metrics",
+    "worker_invocations_receipt": "P0B_CLOUDFLARE_INVOCATIONS_2026-11-16.json"
+  },
+  "account_inventory": {
+    "queues_total": 22,
+    "d1_databases_total": 10,
+    "not_business_job_or_agent_count": true
+  },
+  "queues": [
+    {
+      "queue_name": "cerebro-operativa-control-canary-queue-lab-eu",
+      "consumer_script": "cerebro-operativa-control-canary-lab",
+      "consumer_type": "worker",
+      "consumer_binding_company_id": null,
+      "queue_aggregate": {
+        "write_weighted": 2,
+        "read_weighted": 2,
+        "delete_success_weighted": 2,
+        "write_sampled_rows": 2,
+        "read_sampled_rows": 2,
+        "delete_sampled_rows": 2,
+        "write_billable_operations_counter": 2,
+        "read_billable_operations_counter": 2,
+        "delete_billable_operations_counter": 2,
+        "source": "events.queuesMessages",
+        "dataset_sampling": "ADAPTIVE",
+        "has_per_message_correlation": false,
+        "job_outcome_verified": false
+      },
+      "instant_queue_metrics": {
+        "backlog_count": 0,
+        "backlog_bytes": 0,
+        "backlog_consistency": "NO_CONFLICT_IN_RETURNED_COUNT_BYTES",
+        "certifies_no_pending_messages": false
+      },
+      "consumer_binding_fenix_is_not_registry_proof": true
+    },
+    {
+      "queue_name": "cerebro-instagram-autoqual-ticker-lab-eu",
+      "consumer_script": "cerebro-instagram-knowledge-autoqual-lab-eu",
+      "consumer_type": "worker",
+      "consumer_binding_company_id": "fenix-capital",
+      "queue_aggregate": {
+        "write_weighted": 72,
+        "read_weighted": 72,
+        "delete_success_weighted": 72,
+        "write_sampled_rows": 72,
+        "read_sampled_rows": 72,
+        "delete_sampled_rows": 72,
+        "write_billable_operations_counter": 72,
+        "read_billable_operations_counter": 72,
+        "delete_billable_operations_counter": 72,
+        "source": "events.queuesMessages",
+        "dataset_sampling": "ADAPTIVE",
+        "has_per_message_correlation": false,
+        "job_outcome_verified": false
+      },
+      "instant_queue_metrics": {
+        "backlog_count": 0,
+        "backlog_bytes": 91,
+        "backlog_consistency": "INCONSISTENT_COUNT_ZERO_BYTES_NONZERO",
+        "certifies_no_pending_messages": false
+      },
+      "consumer_binding_fenix_is_not_registry_proof": true
+    },
+    {
+      "queue_name": "cerebro-linkedin-autonomy-ticker-lab-eu",
+      "consumer_script": "cerebro-linkedin-autonomy-ticker-lab-eu",
+      "consumer_type": "worker",
+      "consumer_binding_company_id": "fenix-capital",
+      "queue_aggregate": {
+        "write_weighted": 72,
+        "read_weighted": 72,
+        "delete_success_weighted": 72,
+        "write_sampled_rows": 72,
+        "read_sampled_rows": 72,
+        "delete_sampled_rows": 72,
+        "write_billable_operations_counter": 72,
+        "read_billable_operations_counter": 72,
+        "delete_billable_operations_counter": 72,
+        "source": "events.queuesMessages",
+        "dataset_sampling": "ADAPTIVE",
+        "has_per_message_correlation": false,
+        "job_outcome_verified": false
+      },
+      "instant_queue_metrics": {
+        "backlog_count": 0,
+        "backlog_bytes": 128,
+        "backlog_consistency": "INCONSISTENT_COUNT_ZERO_BYTES_NONZERO",
+        "certifies_no_pending_messages": false
+      },
+      "consumer_binding_fenix_is_not_registry_proof": true
+    },
+    {
+      "queue_name": "cerebro-ums001-source-refresh-lab-eu",
+      "consumer_script": "cerebro-ums001-multisource-scout-lab-eu",
+      "consumer_type": "worker",
+      "consumer_binding_company_id": null,
+      "queue_aggregate": {
+        "write_weighted": 8,
+        "read_weighted": 12,
+        "delete_success_weighted": 14,
+        "write_sampled_rows": 4,
+        "read_sampled_rows": 8,
+        "delete_sampled_rows": 8,
+        "write_billable_operations_counter": 4,
+        "read_billable_operations_counter": 8,
+        "delete_billable_operations_counter": 8,
+        "source": "events.queuesMessages",
+        "dataset_sampling": "ADAPTIVE",
+        "has_per_message_correlation": false,
+        "job_outcome_verified": false
+      },
+      "instant_queue_metrics": {
+        "backlog_count": 0,
+        "backlog_bytes": 0,
+        "backlog_consistency": "NO_CONFLICT_IN_RETURNED_COUNT_BYTES",
+        "certifies_no_pending_messages": false
+      },
+      "consumer_binding_fenix_is_not_registry_proof": true
+    }
+  ],
+  "canary": {
+    "queue_name": "cerebro-operativa-control-canary-queue-lab-eu",
+    "script": "cerebro-operativa-control-canary-lab",
+    "worker_invocations_queue_in_same_window": 2,
+    "queue_write_weighted": 2,
+    "queue_read_weighted": 2,
+    "queue_delete_success_weighted": 2,
+    "cron_count": 0,
+    "workers_dev_enabled": false,
+    "preview_urls_enabled": false,
+    "correlation_grade": "SAME_WINDOW_SAME_CONSUMER_AGGREGATE_ONLY",
+    "message_id_join_verified": false,
+    "job_receipt_join_verified": false
+  },
+  "instagram": {
+    "worker_queue_invocations_in_same_window": 71,
+    "queue_delete_success_weighted": 72,
+    "reconciliation_grade": "MISMATCH_71_VS_72_ADAPTIVE_SAMPLING_OR_BATCHING_NOT_PROVEN",
+    "job_receipt_join_verified": false
+  },
+  "linkedin": {
+    "worker_queue_invocations_in_same_window": 72,
+    "queue_delete_success_weighted": 72,
+    "reconciliation_grade": "MATCHED_AGGREGATE_NOT_PER_MESSAGE_JOIN",
+    "job_receipt_join_verified": false
+  },
+  "ums": {
+    "write_weighted": 8,
+    "read_weighted": 12,
+    "delete_success_weighted": 14,
+    "reconciliation_grade": "DIFFERENT_WEIGHTS_ADAPTIVE_SAMPLING_NO_ONE_TO_ONE_INFERENCE"
+  },
+  "proof_boundaries": {
+    "queue_transport_activity_verified": true,
+    "queue_message_ack_outcome_observed": true,
+    "individual_message_id_correlation": false,
+    "business_job_result_verified": false,
+    "customer_publication_verified": false,
+    "live_worker_agent_count_verified": false,
+    "cost_eur_measured": null,
+    "safe_for_prod_promotion": false,
+    "refresh_needed_before_current_claim": true
+  },
+  "source_scope": "ACCOUNT_LEVEL_NOT_CANONICAL_COMPANY_REGISTRY",
+  "mutations": "NONE"
+}
