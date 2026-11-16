@@ -3,7 +3,7 @@
  * No business job, signed agent identity, or global cost is certified here.
  */
 import type {LabWorkerAction,LabWorkerReceipt,LabWorkerState} from './cerebroLabWorkerControlApi';
-import {summarizeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
+import {summarizeLabRuntimeEvidence} from './cerebroRuntimeEvidence.ts';
 
 export type LabTransitionVerdict={verified:boolean;reason:string};
 const rejected=(reason:string):LabTransitionVerdict=>({verified:false,reason});
