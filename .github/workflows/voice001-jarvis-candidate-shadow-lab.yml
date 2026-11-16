@@ -54,8 +54,13 @@ jobs:
           test "$(git -C candidate rev-parse HEAD)" = "$JARVIS_CANDIDATE_SHA"
           test "$CEREBRO_PROD_WRITE" = false
           test "$CEREBRO_TRADING_ACCESS" = false
-      - name: Original policy guard unit and rejection tests
-        run: node --test tests/voice001-render-port-policy.test.mjs
+      - name: Original policy guard unit and rejection tests (canonical policy checkout)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          export VOICE001_CANONICAL_BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          node --test tests/voice001-render-port-policy.test.mjs
       - name: Cross-check proposed policy against real PR 72 candidate code
         working-directory: candidate
         shell: bash
@@ -64,6 +69,9 @@ jobs:
           git fetch origin main --depth=1
           base="$(git rev-parse FETCH_HEAD)"
           test -n "$base"
+          # Reproduce the normal VOICE-001 test suite on the REAL modified candidate.
+          export VOICE001_CANONICAL_BASE_SHA="$base"
+          node --test ../tests/voice001-render-port-policy.test.mjs
           node ../scripts/voice001-render-port-guard.mjs "$base"
           echo "POLICY_CANDIDATE_CROSS_SHA=$JARVIS_CANDIDATE_SHA" >> "$GITHUB_STEP_SUMMARY"
           echo "POLICY_SHADOW_ONLY=true" >> "$GITHUB_STEP_SUMMARY"

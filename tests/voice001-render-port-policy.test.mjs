@@ -1,9 +1,19 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
+import {execFileSync} from 'node:child_process';
 import {permittedConsoleSource,assertConsoleSourceDelta,assertPortCompanionScope,assertLabPresentationOnly,assertCandidateScope,assertCandidateRuntimeBlobs,APPROVED_CANDIDATE_FILES,APPROVED_RUNTIME_BLOBS,CORE,POLICY,WORKFLOW} from '../scripts/voice001-render-port-guard.mjs';
-const mainCore=readFileSync(CORE,'utf8');
+// Never derive the canonical fixture from the candidate worktree: this suite
+// must also run on the actual React-port candidate after VOICE-001 is revised.
+const base=process.env.VOICE001_CANONICAL_BASE_SHA;
+assert.match(base??'',/^[a-f0-9]{40}$/,'VOICE001_DENY: immutable canonical base SHA required');
+const mainCore=execFileSync('git',['show',base+':'+CORE],{encoding:'utf8',maxBuffer:1024*1024});
+const candidateCore=readFileSync(CORE,'utf8');
 const port=permittedConsoleSource(mainCore);
+test('Current exact HEAD is either canonical or the byte-exact presentation port',()=>{
+ assert.ok(candidateCore===mainCore||candidateCore===port,
+  'VOICE001_DENY: candidate fixture differs from approved canonical/React port');
+});
 test('VOICE001 canonical unchanged still passes',()=>{
  assert.equal(assertConsoleSourceDelta(mainCore,mainCore),'CANONICAL_UNCHANGED');
  assert.equal(assertPortCompanionScope([WORKFLOW,'tests/voice001-render-port-policy.test.mjs']),'NO_CORE_CHANGE');
