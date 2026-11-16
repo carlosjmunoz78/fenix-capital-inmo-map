@@ -11,7 +11,7 @@ const ref='hnqlnvakzaywtafeiybt';
 const arm='CEREBRO-LAB-SESSION-E2E-ONE-SHOT-'+ref;
 const directory=dirname(fileURLToPath(import.meta.url));
 const cycle=resolve(directory,'owner-session-auth-e2e-private.mjs');
-const root=resolve(directory,'../../..');
+const root=resolve(directory,'../../../..');
 const mode=process.argv[2]||'--status';
 const permitted=new Set(['--status','--self-test','--live']);
 const report=(name,value)=>console.log('CEREBRO_NO_ACTIONS_'+name+'='+value);
