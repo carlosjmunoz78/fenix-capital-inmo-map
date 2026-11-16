@@ -232,6 +232,9 @@ export default function CerebroOperativeCockpitV3({
     <div className="op3-detail-header">
      <button type="button" className="op3-back" onClick={()=>selectPanel('resumen')}><ChevronLeft size={18}/> Volver al centro</button>
      <span className="op3-overline">DATOS DE FUENTES EXISTENTES · SOLO LECTURA</span>
+     <button type="button" className="op3-back op3-chat-jump"
+      disabled={!scopeCanExecute} onClick={()=>selectPanel('resumen')} title="Ir al chat de OPERATIVA sin perder la sesión"
+      aria-label="Hablar con Operativa"><Send size={16}/> Hablar con Operativa</button>
     </div>
     <h2>{({
      control:'Control operativo e inventario vivo',entidades:'Entidades y conexiones',proyectos:'Proyectos y dependencias',

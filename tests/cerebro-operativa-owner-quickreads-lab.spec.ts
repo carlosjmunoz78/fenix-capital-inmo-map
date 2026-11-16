@@ -249,6 +249,9 @@ async function setup(page:Page){
 
 test('OPERATIVA LAB exact off-card motor lookup is honest and controls fail closed in UI',async({page})=>{
  const {calls,outside}=await setup(page);
+ const jump=page.getByRole('button',{name:'Hablar con Operativa'});
+ await expect(jump).toBeVisible();
+ await jump.click();
  const prompt=page.getByRole('textbox',{name:'Pregunta u orden'});
  const send=page.getByRole('button',{name:'Enviar instrucción'});
  const answer=page.getByRole('status').filter({hasText:'Respuesta del control operativo'});

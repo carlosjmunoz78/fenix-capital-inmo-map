@@ -121,6 +121,10 @@
 .op3-detail{padding:26px 0 34px;min-height:560px}
 .op3-detail-header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:24px}
 .op3-back{display:inline-flex;align-items:center;gap:4px;background:transparent;border:0;color:#86d5f0;padding:9px 2px}
+.op3-chat-jump{border:1px solid #436a83;border-radius:12px;background:#0c2c40;color:#d8f7ff;padding:9px 13px;min-height:42px;white-space:nowrap;font-size:12px;font-weight:650}
+.op3-chat-jump:hover:not(:disabled){border-color:#82d9f1;background:#13445b}
+.op3-chat-jump:focus-visible{outline:2px solid #7de3ff;outline-offset:2px}
+@media(max-width:780px){.op3-chat-jump{width:100%;justify-content:center}}
 .op3-detail h2{font-size:clamp(22px,3vw,34px);font-weight:620;margin:0}
 .op3-detail-lede{color:#8ab1c4;max-width:670px;margin:8px 0 25px;font-size:13px}
 .op3-data-lines{max-width:1200px;margin:0 auto;display:grid;gap:0}
