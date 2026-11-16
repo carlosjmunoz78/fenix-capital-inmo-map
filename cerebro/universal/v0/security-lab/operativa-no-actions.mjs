@@ -15,9 +15,21 @@ const root=resolve(directory,'../../../..');
 const mode=process.argv[2]||'--status';
 const permitted=new Set(['--status','--self-test','--live']);
 const report=(name,value)=>console.log('CEREBRO_NO_ACTIONS_'+name+'='+value);
-const scrubbedEnv=()=>({...process.env,
+// Explicit environment allowlist: never forward PROD/CRM/Vercel/GitHub secrets.
+const baseEnv=()=>Object.fromEntries(
+ ['PATH','Path','HOME','USERPROFILE','SystemRoot','SYSTEMROOT','TMP','TEMP','TMPDIR']
+  .filter(name=>typeof process.env[name]==='string')
+  .map(name=>[name,process.env[name]])
+);
+const scrubbedEnv=()=>({...baseEnv(),
  CEREBRO_LAB_SESSION_E2E_ARM:'',CEREBRO_LAB_PROJECT_REF:'',
  CEREBRO_LAB_SERVICE_ROLE_KEY:'',CEREBRO_LAB_PUBLISHABLE_KEY:''});
+const labOnlyEnv=()=>({...baseEnv(),
+ CEREBRO_LAB_SESSION_E2E_ARM:process.env.CEREBRO_LAB_SESSION_E2E_ARM,
+ CEREBRO_LAB_PROJECT_REF:process.env.CEREBRO_LAB_PROJECT_REF,
+ CEREBRO_LAB_SERVICE_ROLE_KEY:process.env.CEREBRO_LAB_SERVICE_ROLE_KEY,
+ CEREBRO_LAB_PUBLISHABLE_KEY:process.env.CEREBRO_LAB_PUBLISHABLE_KEY
+});
 const invalid=()=>{report('RESULT','FAIL_CLOSED_INVALID_ARGUMENTS');process.exitCode=2;};
 if(process.argv.length>3||!permitted.has(mode)){invalid();}
 else if(mode==='--status'){
@@ -68,7 +80,7 @@ else if(mode==='--live'){
  }else{
   // Only the existing LAB Auth script can create and clean an ephemeral test user.
   const run=spawnSync(process.execPath,[cycle],{
-   cwd:root,encoding:'utf8',env:process.env,timeout:120000,
+   cwd:root,encoding:'utf8',env:labOnlyEnv(),timeout:120000,
    windowsHide:true,maxBuffer:8192
   });
   const safe=String(run.stdout||'');
