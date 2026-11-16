@@ -15,7 +15,8 @@ const base=(operation='worker.create_private')=>{
    name,state:del?'DELETED':'V1',created_by_request:job.request_id,v1_version_id:v1,v2_version_id:null,current_version_id:del?null:v1};
  const provider={name,account_id:'e39a57e1ac42650ca5a6d5307cf0ac8e',exists:!del,
    api_read_success:true,workers_dev_enabled:false,preview_urls_enabled:false,
-   routes_count:0,domains_count:0,crons_count:0,bindings_count:0,version_id:del?null:v1};
+   routes_count:0,domains_count:0,crons_count:0,bindings_count:0,
+   list_read_success:del?true:undefined,script_get_http_status:del?404:undefined,version_id:del?null:v1};
  const readback={source:'CLOUDFLARE_PROVIDER_API',name,exists:!del,version_id:del?null:v1,observed_at_ms:NOW-3000};
  return {job,event,ownership,provider,readback,observed_at_ms:NOW};
 };
