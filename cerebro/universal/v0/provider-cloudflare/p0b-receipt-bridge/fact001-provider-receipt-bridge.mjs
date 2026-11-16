@@ -41,10 +41,16 @@ export function validateFact001ProviderReadbackV0({job,event,ownership,provider,
  const expected=OPERATIONS[job.operation];
  if(!provider||provider.name!==job.resource_name||provider.exists!==expected.exists||
     provider.account_id!=='e39a57e1ac42650ca5a6d5307cf0ac8e'||
-    provider.api_read_success!==true||
-    provider.workers_dev_enabled!==false||provider.preview_urls_enabled!==false||
-    provider.routes_count!==0||provider.domains_count!==0||provider.crons_count!==0||
-    provider.bindings_count!==0)return fail('PROVIDER_PRIVATE_READBACK_INVALID');
+    provider.api_read_success!==true)return fail('PROVIDER_READBACK_INVALID');
+ if(expected.exists){
+  if(provider.workers_dev_enabled!==false||provider.preview_urls_enabled!==false||
+     provider.routes_count!==0||provider.domains_count!==0||provider.crons_count!==0||
+     provider.bindings_count!==0)return fail('PROVIDER_PRIVATE_READBACK_INVALID');
+ }else{
+  if(provider.list_read_success!==true||provider.script_get_http_status!==404||
+     provider.routes_count!==0||provider.domains_count!==0)
+    return fail('DELETED_ABSENCE_NOT_PROVEN');
+ }
  if(!readback||readback.source!=='CLOUDFLARE_PROVIDER_API'||
     readback.name!==job.resource_name||readback.exists!==expected.exists||
     !validTime(readback.observed_at_ms)||readback.observed_at_ms>observed_at_ms||
