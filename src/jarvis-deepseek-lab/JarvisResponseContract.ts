@@ -6,7 +6,7 @@
  */
 import type {CerebroConsoleChatResponse} from '../cerebroConsoleApi';
 
-export type JarvisPresentationSource='gateway-response'|'legacy-console-lab';
+export type JarvisPresentationSource='gateway-response'|'legacy-console-lab'|'canonical-console-react';
 export type JarvisAssistantViewModel=Readonly<{
   role:'cerebro';
   text:string;
@@ -24,4 +24,10 @@ export function fromGatewayResponse(
 export function fromLegacyConsoleText(text:unknown):JarvisAssistantViewModel|null{
  if(typeof text!=='string'||!text.trim())return null;
  return {role:'cerebro',text,source:'legacy-console-lab'};
+}
+
+/** El puerto React recibe líneas ya autorizadas por Console; no certifica origen Gateway. */
+export function fromCanonicalConsoleLine(text:unknown):JarvisAssistantViewModel|null{
+ if(typeof text!=='string'||!text.trim())return null;
+ return {role:'cerebro',text,source:'canonical-console-react'};
 }

@@ -53,6 +53,8 @@ test('JARVIS: responder por Gateway simulado con Markdown seguro en desktop y m√
  await composer.fill('Prueba de Markdown desde el Gateway');await page.locator('.operativa-send').click();
  const result=page.locator('[data-jarvis-markdown-lab="true"]').first();
  await expect(result).toBeVisible();
+ await expect(page.locator('[data-jarvis-markdown-slot]')).toHaveCount(0);
+ await expect(page.locator('[data-message-source="canonical-console-react"]').first()).toBeVisible();
  await expect(result.locator('h4')).toHaveText('Informe de JARVIS');
  await expect(result.locator('ul li')).toHaveCount(2);
  await expect(result.locator('a[href="https://example.org/info"]')).toHaveCount(1);

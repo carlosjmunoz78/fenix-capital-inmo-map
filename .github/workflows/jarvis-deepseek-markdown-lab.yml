@@ -3,18 +3,20 @@ on:
   push:
     branches:
       - cerebro/jarvis-deepseek-chat-demo-ui-lab-20261116
+      - cerebro/jarvis-deepseek-react-port-lab-20261116
     paths:
       - 'src/jarvis-deepseek-lab/**'
       - 'src/JarvisEmbeddedConsole.tsx'
       - 'src/CerebroConsoleShell.tsx'
       - 'tests/jarvis-deepseek-*'
+      - 'tests/cerebro-operative-voice-contract.spec.ts'
       - '.github/workflows/jarvis-deepseek-markdown-lab.yml'
       - 'docs/JARVIS_DEEPSEEK_CHAT_DEMO_UI_LAB_2026-11-16.md'
   workflow_dispatch:
 permissions:
   contents: read
 concurrency:
-  group: jarvis-deepseek-ui-lab
+  group: jarvis-deepseek-ui-lab-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   lab:
@@ -30,6 +32,8 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Parser and links regression
         run: node --experimental-strip-types --test tests/jarvis-deepseek-chat-demo-lab.test.mjs tests/jarvis-deepseek-chat-renderer-lab.test.mjs tests/jarvis-deepseek-direct-react-contract.test.mjs
+      - name: Preserved core and voice contract (static)
+        run: npx playwright test tests/jarvis-deepseek-react-core-contract.spec.ts tests/cerebro-operative-voice-contract.spec.ts --project=desktop-chromium
       - name: Ordinary production build remains unaffected
         env:
           VITE_FENIX_ENV: prod
