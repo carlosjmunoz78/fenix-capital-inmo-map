@@ -1,0 +1,21 @@
+{
+  "name": "cerebro-operativa-auth-p0a-lab-eu",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-11-16",
+  "workers_dev": false,
+  "preview_urls": false,
+  "triggers": {
+    "crons": []
+  },
+  "vars": {
+    "CEREBRO_P0A_ENABLED": "false",
+    "CEREBRO_LAB_PROJECT_REF": "hnqlnvakzaywtafeiybt"
+  },
+  "workflows": [
+    {
+      "name": "cerebro-operativa-p0a-auth-lab-eu",
+      "binding": "P0A_WORKFLOW",
+      "class_name": "CerebroP0AAuthWorkflow"
+    }
+  ]
+}

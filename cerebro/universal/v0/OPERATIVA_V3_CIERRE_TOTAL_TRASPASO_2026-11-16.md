@@ -244,3 +244,8 @@
 **HECHO · D1 FACT-001 relectura de solo lectura:** D1 LAB existente `cerebro-fact001-recovery-lab-eu` registra a fecha de consulta 6 jobs `COMPLETED` de `environment=LAB`, con 6/6 `request_id`, `max(updated_at_ms)=1794404707627`. **Ningún nuevo trabajo** desde la reconciliación de seis jobs del 11/11. Este dato es una consulta agregada propia de D1, no un recibo causal firmado de proveedor. `P0-B_BUSINESS_RECEIPT=NOT_CERTIFIED`.
 
 **FRONTERA Y BLOQUEO HONESTOS:** Hostinger pública mantiene `READ_ONLY_PREFLIGHT` y no recibe `service_role` ni ejecutar `--live`. El operador privado `security-lab/operativa-no-actions.mjs` existe, pero **NO se ha ejecutado contra Auth real** por falta de un transporte privado acreditado y credenciales del mismo LAB inyectables sin divulgación. Solo LAB verificado previamente `ACTIVE_HEALTHY`, ACL RPC servicio único y sesión sintética inexistente false. P0-A auth live BLOCKED; P0-B causal BLOCKED; P0-C...H siguen sin acreditación final; PROD HOLD. No nueva suscripción, no cambio de App/CRM/WordPress/DNS/PROD/Cloudflare recursos ni Vercel.
+
+
+## 19. Cloudflare Workflows privado P0-A LAB · 16/11/2026
+
+Prueba REAL de transporte privado: Worker y Workflow nuevos, sin URL, cron ni credenciales; instancia `p0a_cf_no_keys_preflight_v2_20261116` completada con `BLOCKED_AUTH_NOT_CONFIGURED`, `no_users_created=true` y `prod_execution=DISABLED`. Primer intento falló por formato de reintentos; se corrigió y se conservó evidencia. Recibo y rollback: `cerebro/universal/v0/cloudflare/p0a-private-lab/RECEIPT_2026-11-16.md`. **No equivale a Auth E2E**, P0-A y OPERATIVA PROD siguen bloqueados.
