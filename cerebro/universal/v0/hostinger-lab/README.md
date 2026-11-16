@@ -32,3 +32,7 @@ Si hace falta restaurar la sonda, desde Hostinger → Web App EXISTENTE → Desp
 MCP consulta directa `hnqlnvakzaywtafeiybt`, `ACTIVE_HEALTHY`: función `public.cerebro_operativa_session_guard_lab_v0(uuid,uuid)` existe, solo `service_role` y postgres con EXECUTE; anon/authenticated denegados; sesión UUID inexistente = false. No hay cuenta temporal real creada. Estado, dependencia y changelog en documentos hermanos de OPERATIVA y Hostinger.
 
 **Coste adicional de suscripción:** 0 €. **Consumo infra:** no medido.
+
+## Gate automático del ZIP público — prueba 16/11/2026
+
+Archivo `hostinger-lab-public-boundary.test.mjs`, ejecutable offline con `node --test cerebro/universal/v0/hostinger-lab/hostinger-lab-public-boundary.test.mjs` desde el checkout del PR. Comprueba integridad SHA-256 fijada al ZIP V3 físico, whitelist de cuatro archivos, ausencia de dependencias/secretos embebidos, que `server.mjs` solo utilice `node:http`, arranque incondicional y no importe ejecutor, base ni credenciales. **Evidencia local: 4/4 PASS**. La suite original del ZIP V3 permanece **8/8 PASS**. Caso negativo: alterar un byte del ZIP produce fallo cerrado `ZIP V3 must be the physically accepted immutable artifact`, exit code 1. Es un gate de integridad y regresión estática, **NO demuestra la privacidad de un ejecutor distinto, Auth E2E ni que la aplicación pública esté preparada para `service_role`**. No se cambió el artefacto publicado en Hostinger ni ningún recurso de red.
