@@ -58,3 +58,27 @@ test('historical operator P0-B proof cannot be promoted as FACT runner receipt',
  const x=base();x.job.resource_name='cerebro-fact001-p0b-proof-20261116-lab';
  assert.equal(verify(x).status,'NOT_CERTIFIED');
 });
+
+
+test('append-only LAB receipt must join same job, request, idem, engine, version and readback',async()=>{
+ const {validateFact001DurableReceiptV0}=await import('./fact001-provider-receipt-bridge.mjs');
+ const b=base();const j=b.job;
+ const receipt={receipt_id:'fact001-lab-receipt-20261116',run_id:'fact001-lab-run-20261116',
+  job_id:j.id,request_id:j.request_id,idempotency_key:j.idempotency_key,
+  company_id:j.company_id,engine_id:j.engine_id,environment:j.environment,
+  version:j.version,operation:j.operation,resource_name:j.resource_name,
+  provider:'CLOUDFLARE_WORKERS',provider_version_id:v1,source:'FACT001_RUNNER_LAB',
+  policy_version:'fact001-policy-lab-v1',message_digest:'a'.repeat(64),
+  readback_status:'READBACK_MATCHED_UNATTESTED',signed_runtime_receipt_verified:0,
+  prod_promotion_allowed:0,observed_at_ms:NOW};
+ const good=validateFact001DurableReceiptV0({...b,receipt});
+ assert.equal(good.status,'DURABLE_RECEIPT_UNATTESTED');
+ assert.equal(good.provider_causality_certified,false);
+ assert.equal(good.prod_promotion_allowed,false);
+ for(const [field,wrong] of [['job_id','other-job'],['request_id','OTHER-REQUEST'],['run_id','?'],
+    ['idempotency_key','other'],['company_id','fenix'],['policy_version','bad value'],
+    ['message_digest','garbage'],['provider_version_id','other'],
+    ['signed_runtime_receipt_verified',1],['prod_promotion_allowed',1],['source','CHATGPT_OPERATOR']]){
+   assert.equal(validateFact001DurableReceiptV0({...b,receipt:{...receipt,[field]:wrong}}).status,'NOT_CERTIFIED',field);
+ }
+});
