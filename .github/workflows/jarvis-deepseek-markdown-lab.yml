@@ -9,6 +9,7 @@ on:
       - 'src/CerebroConsoleShell.tsx'
       - 'tests/jarvis-deepseek-*'
       - '.github/workflows/jarvis-deepseek-markdown-lab.yml'
+      - 'docs/JARVIS_DEEPSEEK_CHAT_DEMO_UI_LAB_2026-11-16.md'
   workflow_dispatch:
 permissions:
   contents: read
