@@ -70,3 +70,26 @@ export function validateFact001ProviderReadbackV0({job,event,ownership,provider,
   company_id:job.company_id,engine_id:job.engine_id,environment:job.environment,
   provider:'CLOUDFLARE_WORKERS',observed_at_ms});
 }
+
+
+/** Evidence from the proposed append-only D1 table. Still not an authenticated receipt. */
+export function validateFact001DurableReceiptV0({receipt,...evidence}={}){
+ const base=validateFact001ProviderReadbackV0(evidence);
+ if(base.status!=='READBACK_MATCHED_UNATTESTED')return base;
+ const job=evidence.job;
+ if(!receipt||!ID.test(receipt.receipt_id||'')||!ID.test(receipt.run_id||'')||
+    !/^[a-f0-9]{64}$/.test(receipt.message_digest||'')||
+    !/^[a-zA-Z0-9_.-]{4,80}$/.test(receipt.policy_version||'')||
+    receipt.job_id!==job.id||receipt.request_id!==job.request_id||
+    receipt.idempotency_key!==job.idempotency_key||receipt.company_id!==job.company_id||
+    receipt.engine_id!==job.engine_id||receipt.environment!==job.environment||
+    receipt.version!==job.version||receipt.operation!==job.operation||
+    receipt.resource_name!==job.resource_name||receipt.provider!=='CLOUDFLARE_WORKERS'||
+    receipt.source!=='FACT001_RUNNER_LAB'||receipt.readback_status!=='READBACK_MATCHED_UNATTESTED'||
+    receipt.signed_runtime_receipt_verified!==0||receipt.prod_promotion_allowed!==0||
+    receipt.observed_at_ms!==evidence.observed_at_ms||
+    receipt.provider_version_id!==(evidence.ownership.current_version_id||null))
+  return fail('DURABLE_RECEIPT_CONTRACT_INVALID');
+ return Object.freeze({...base,status:'DURABLE_RECEIPT_UNATTESTED',
+  receipt_id:receipt.receipt_id,run_id:receipt.run_id,message_digest:receipt.message_digest});
+}
