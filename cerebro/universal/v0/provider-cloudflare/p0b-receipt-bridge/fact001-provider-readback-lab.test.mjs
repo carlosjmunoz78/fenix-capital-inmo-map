@@ -7,7 +7,7 @@ const TOKEN='a'.repeat(32),NOW=1794855339700;
 const fake=(overrides={})=>{
  const requested=[];
  const fetchImpl=async(url,init)=>{
-  requested.push({url,method:init.method});
+  requested.push({url,method:init.method,token_kind:init.headers.Authorization==='Bearer '+TOKEN?'workers':init.headers.Authorization==='Bearer '+'b'.repeat(32)?'routes':'unexpected'});
   if(init.method!=='GET')throw Error('MUTATION_FORBIDDEN');
   const loc=new URL(url);
   let body={success:true,result:null};
@@ -44,6 +44,9 @@ test('private create readback requires real provider inventory, GET, routes, dom
  assert.equal(r.prod_promotion_allowed,false);
  assert.equal(requested.length,8);
  assert(requested.every(x=>x.method==='GET'));
+ assert.equal(requested.filter(x=>x.url.endsWith('/workers/routes')).length,1);
+ assert(requested.filter(x=>x.url.endsWith('/workers/routes')).every(x=>x.token_kind==='routes'));
+ assert(requested.filter(x=>!x.url.endsWith('/workers/routes')).every(x=>x.token_kind==='workers'));
  assert(requested.every(x=>x.url.startsWith('https://api.cloudflare.com/client/v4/')));
 });
 test('deleted worker requires absence in list AND HTTP 404; does not invent deleted settings',async()=>{
@@ -81,4 +84,10 @@ test('fail closed on missing permissions, suspicious inventory or false deletion
  assert.equal(d.status,'NOT_CERTIFIED');
  assert.equal((await observe({token:TOKEN,routeToken:'b'.repeat(32),name:'cerebro-jarvis-lab-eu',
   operation:'worker.delete_private',fetchImpl:fake().fetchImpl,clock:()=>NOW})).status,'NOT_CERTIFIED');
+});
+
+test('route token is mandatory; no fall-through to mutation token for zone scope',async()=>{
+ let calls=0;
+ const r=await observe({token:TOKEN,name,operation:'worker.create_private',fetchImpl:async()=>{calls++;throw Error('IO_NOT_ALLOWED')}});
+ assert.equal(r.status,'NOT_CERTIFIED');assert.equal(calls,0);
 });
