@@ -30,6 +30,13 @@ jobs:
           cache: npm
       - name: Install existing dependencies without scripts
         run: npm ci --ignore-scripts
+      - name: Assert exact protected core diff relative to immutable canonical main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch origin main --depth=1
+          export CEREBRO_CANONICAL_BASE_SHA="$(git rev-parse FETCH_HEAD)"
+          node --test tests/jarvis-deepseek-core-immutable-diff.test.mjs
       - name: Parser and links regression
         run: node --experimental-strip-types --test tests/jarvis-deepseek-chat-demo-lab.test.mjs tests/jarvis-deepseek-chat-renderer-lab.test.mjs tests/jarvis-deepseek-direct-react-contract.test.mjs
       - name: Preserved core and voice contract (static)

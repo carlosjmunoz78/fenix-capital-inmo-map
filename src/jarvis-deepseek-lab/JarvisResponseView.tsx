@@ -1,5 +1,6 @@
 import type {JarvisAssistantViewModel} from './JarvisResponseContract';
 import JarvisSafeMarkdownLab from './JarvisSafeMarkdownLab';
+import JarvisMarkdownRenderBoundary from './JarvisMarkdownRenderBoundary';
 
 /**
  * API React directa. Cuando Console exponga la respuesta como prop explícita,
@@ -8,6 +9,8 @@ import JarvisSafeMarkdownLab from './JarvisSafeMarkdownLab';
  */
 export default function JarvisResponseView({message}:{message:JarvisAssistantViewModel}){
  return <div data-jarvis-response-contract="v1" data-message-source={message.source}>
-  <JarvisSafeMarkdownLab content={message.text}/>
+  <JarvisMarkdownRenderBoundary key={message.text} fallbackText={message.text}>
+   <JarvisSafeMarkdownLab content={message.text}/>
+  </JarvisMarkdownRenderBoundary>
  </div>;
 }
