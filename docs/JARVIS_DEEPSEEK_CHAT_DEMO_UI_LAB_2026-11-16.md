@@ -1,6 +1,6 @@
 # CEREBRO OS · JARVIS · DeepSeek Chat Demo UI · LAB
 
-**Corte:** 2026-11-16 · **Versión:** 0.2.0 · **Estado:** LAB_GREEN_SYNTHETIC / PARCIAL / PROD_NO_GO.
+**Corte:** 2026-11-16 · **Versión:** 0.3.0 · **Estado:** LAB_GREEN_SYNTHETIC / PARCIAL / PROD_NO_GO.
 
 ## Objetivo y fuente oficial
 - Reutilizar únicamente patrones ligeros de presentación y actualización de respuestas de https://github.com/deepseek-ai/chat-demo (referencia v0.1.1), bajo licencia MIT, Copyright (c) 2026 DeepSeek.
@@ -43,7 +43,34 @@
 5. Registro en GOV-001 sin duplicar motor y promoción gradual únicamente si todos los gates son verdes.
 
 ## Gobierno y coste
-`company_id=fenix-capital`; `capability_id=JARVIS-UI-DEEPSEEK-LAB`; `environment=LAB`; `version=0.2.0`.
+`company_id=fenix-capital`; `capability_id=JARVIS-UI-DEEPSEEK-LAB`; `environment=LAB`; `version=0.3.0`.
 Licencia de código: 0 €. Suscripciones nuevas: ninguna. CI consume recursos de GitHub y su impacto en factura **no está auditado**. Coste total adicional 0 € no se afirma sin verificación de billing. Todo el sistema actual permanece intacto.
 
 **Estado consolidado: probado en CI y navegador sintético de LAB; no desplegado ni operativo en producción.**
+
+## CUT V0.3 · Contrato React de mensaje y rollback de presentación
+
+**Estado: HECHO en rama LAB; integración final al core sigue PENDIENTE.**
+
+- `JarvisResponseContract.ts` define contrato puro, tipado, de respuesta de Gateway y distingue `gateway-response` de `legacy-console-lab`. Esta distinción no convierte la lectura de DOM en evidencia de Gateway autenticado.
+- `JarvisResponseView.tsx` presenta mensajes con props React explícitas; sin consultas HTTP ni HTML inyectado. Esta pieza ya es reutilizable al introducir un punto de extensión canónico.
+- `JarvisMarkdownLabSidecar.tsx` solo actúa como puente temporal de LAB. La respuesta canónica queda visible hasta que el renderizador alternativo se monta; se restaura al desmontar. Un boundary captura errores React sin exponer mensajes privados en logs.
+- `src/CerebroConsoleShell.tsx` y `src/cerebroConsoleApi.ts` **sin modificaciones**. La protección VOICE-001 mantiene el bloqueo para modificar directamente el core. No se han debilitado pruebas ni controles.
+- `tests/jarvis-deepseek-direct-react-contract.test.mjs`: cinco pruebas nuevas del contrato. `tests/jarvis-deepseek-default-off.spec.ts`: navegador sintético prueba la ruta OLD si la flag está OFF.
+- **CI para código del commit `1a75df1ca7bbd5ecb05cb83328a59f346c7c8070`:**
+  - 22/22 Node PASS; 1/1 Playwright baseline OFF + 2/2 Playwright LAB ON PASS.
+  - Normal PROD build: PASS; build OFF en fixture PREPROD sintético: PASS; build LAB ON: PASS.
+  - [LAB CI 43952925394](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43952925394) SUCCESS.
+  - [App Restoration 43952937120](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43952937120) SUCCESS.
+  - [Session Context 43952937144](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43952937144) SUCCESS.
+  - [Governed Integration 43952937158](https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/43952937158) SUCCESS.
+  - PROD rollout SKIPPED. Ninguno de estos jobs realizó promoción.
+- **Autenticación física:** lectura de `https://app.fenixcapital.es/cerebro?section=jarvis` en navegador Opera autorizado el 16/11/2026 mostró el formulario «Acceso seguro», sin sesión iniciada. **E2E real propietario BLOQUEADO**. No se han leído ni usado credenciales.
+- **OLD vs NEW parcial:** ambos renderizados se probaron con Gateway y propietario sintéticos, mismo contrato de solicitud. No hay prueba comparativa de latencia ni evaluación de voz, datos reales o pantalla física.
+- **Rollback:** apagar `VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB` (o compilar modo distinto de `lab`) conserva la renderización original. Probado en Chromium sintético; falta probar rollback de una entrega remota real. En este corte no existe deployment que revertir.
+- **Rebuild:** ejecutar `npm ci --ignore-scripts`; `npm run build` para versión ordinaria; `VITE_FENIX_ENV=preprod VITE_SUPABASE_URL=<fixture> VITE_SUPABASE_PUBLISHABLE_KEY=<fixture> VITE_JARVIS_DEEPSEEK_MARKDOWN_LAB=1 npm run build -- --mode lab` exclusivamente en CI aislada.
+- **Observabilidad y coste:** CI y PR constituyen evidencia; cero invocaciones DeepSeek API; sin suscripciones nuevas. La facturación de minutos CI no ha sido contrastada.
+- **Capacidad registrada:** `cerebro/registry/jarvis-deepseek-ui-capability-lab.v1.json`, sin crear motor nuevo ni cambiar Engine Registry central.
+- **Criterio de promoción pendiente:** punto de extensión React en core auditado sin relajar VOICE-001; pruebas reales propietario/voz; móvil físico; backup, OLD vs NEW completo, evaluación, rollback remoto y tribunal. No integrar sidecar experimental en PROD.
+
+**Next block gobernado:** `JARVIS_UI_REACT_RENDER_PROP_PROTECTED_CORE_GATE`. Exige coordinar cambio canónico de superficie protegida con pruebas de comportamiento y gate VOICE-001 reforzado, no suprimido. `HUMAN_REQUIRED = LOW_CONFIDENCE` para E2E real no verificable con sesión actual. Se mantiene PR #71 DRAFT, sin merge.
