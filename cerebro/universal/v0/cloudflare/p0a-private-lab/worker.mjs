@@ -1,19 +1,16 @@
-/** CEREBRO OPERATIVA P0-A PRIVATE LAB · initial fail-closed transport probe.
- * No public fetch execution, no secrets, no Auth side effects, no scheduled/queue triggers.
- * Workflow instances are invoked only through the authenticated Cloudflare account API.
- */
+/** CEREBRO P0-A · Private Workflow, no HTTP execution and no scheduled triggers. */
 import {WorkflowEntrypoint} from 'cloudflare:workers';
+import {runLabP0ACycle} from './cycle.mjs';
+const blocked=status=>({status,environment:'LAB',owner_auth_test:'NOT_RUN',
+  no_users_created:true,prod_execution:'DISABLED',temp_user_cleanup:'NOT_NEEDED'});
 export class CerebroP0AAuthWorkflow extends WorkflowEntrypoint {
-  async run(_event, step) {
-    return await step.do('p0a-preflight-disabled', {retries:{limit:0,delay:'1 second',backoff:'constant'},timeout:'60 seconds'}, async () => ({
-      status:'BLOCKED_AUTH_NOT_CONFIGURED',
-      environment:'LAB',
-      project_ref:'hnqlnvakzaywtafeiybt',
-      owner_auth_test:'NOT_RUN',
-      no_users_created:true,
-      prod_execution:'DISABLED',
-      temp_user_cleanup:'NOT_NEEDED'
-    }));
+  async run(event,step){
+    if(this.env.CEREBRO_P0A_ENABLED!=='true')return blocked('BLOCKED_DISABLED');
+    if(event?.payload?.intent!=='LAB_AUTH_E2E_ONE_SHOT')
+      return blocked('BLOCKED_NO_EXPLICIT_ONE_SHOT_INTENT');
+    return step.do('p0a-lab-one-shot-private',
+      {retries:{limit:0,delay:'1 second',backoff:'constant'},timeout:'120 seconds'},
+      async()=>runLabP0ACycle(this.env));
   }
 }
 export default {
