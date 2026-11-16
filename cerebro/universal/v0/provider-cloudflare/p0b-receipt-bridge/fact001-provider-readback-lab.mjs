@@ -49,8 +49,7 @@ export async function observeFact001CloudflareWorkerLabV0({token,name,operation,
    if(!Number.isSafeInteger(observed)||observed<=0)return deny('OBSERVATION_TIME_INVALID');
    return {status:'PROVIDER_READBACK',provider:{
     name,account_id:ACCOUNT,exists:false,api_read_success:true,
-    list_read_success:true,script_get_http_status:404,workers_dev_enabled:false,
-    preview_urls_enabled:false,bindings_count:0,crons_count:0,
+    list_read_success:true,script_get_http_status:404,
     routes_count:0,domains_count:0,version_id:null
    },readback:{source:'CLOUDFLARE_PROVIDER_API',name,exists:false,version_id:null,
     observed_at_ms:observed},observed_at_ms:observed,prod_promotion_allowed:false};
