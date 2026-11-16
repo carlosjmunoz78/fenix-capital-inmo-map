@@ -68,6 +68,11 @@ jobs:
         env:
           CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
         run: node cerebro/universal/v0/preview-external-protection-smoke.mjs
+      - name: Remote immutable OPERATIVA LAB candidate anonymous GET and invalid POST denial
+        if: github.event.pull_request.number == 66 && github.head_ref == 'cerebro/universal-control-plane-lab-v0-20261113'
+        env:
+          CEREBRO_LAB_REFERENCE_CANDIDATE_URL: https://fenix-capital-preprod-hyr2rrwvi.vercel.app/
+        run: node cerebro/universal/v0/preview-immutable-candidate-anon-smoke.mjs
       - name: Remote anonymous command planning denial (owner LAB)
         env:
           CEREBRO_LAB_PREVIEW_URL: https://fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects.vercel.app/
