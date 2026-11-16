@@ -60,7 +60,8 @@ export const APPROVED_RUNTIME_BLOBS={
  ".github/workflows/jarvis-deepseek-markdown-lab.yml": "81d8a321d16cbde9ab2f1185f4cc7a848b120119"
 };
 export function assertCandidateScope(paths){
- assert.deepEqual([...new Set(paths)].sort(),[...APPROVED_CANDIDATE_FILES].sort(),
+ assert.equal(new Set(paths).size,paths.length,'VOICE001_DENY: duplicate candidate paths');
+ assert.deepEqual([...paths].sort(),[...APPROVED_CANDIDATE_FILES].sort(),
   'VOICE001_DENY: unexpected, missing or duplicate candidate paths');
  return 'EXACT_CANDIDATE_SCOPE_ONLY';
 }
