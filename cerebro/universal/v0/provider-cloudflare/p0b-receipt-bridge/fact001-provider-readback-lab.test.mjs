@@ -36,7 +36,7 @@ const fake=(overrides={})=>{
 test('private create readback requires real provider inventory, GET, routes, domains, version and 0 bindings',async()=>{
  const {fetchImpl,requested}=fake();
  const r=await observe({token:TOKEN,name,operation:'worker.create_private',fetchImpl,clock:()=>NOW});
- assert.equal(r.status,'PROVIDER_READBACK');
+ assert.equal(r.status,'PROVIDER_READBACK',JSON.stringify({reason:r.reason,requested}));
  assert.equal(r.provider.exists,true);
  assert.equal(r.provider.workers_dev_enabled,false);
  assert.equal(r.provider.version_id,version);
