@@ -8,13 +8,13 @@ const API='https://api.cloudflare.com/client/v4';
 const SAFE=/^cerebro-fact001-managed-lab-[a-z0-9]{4,20}$/;
 const OPS=new Set(['worker.create_private','worker.update_private','worker.rollback_private','worker.delete_private']);
 const deny=reason=>({status:'NOT_CERTIFIED',reason,provider:null,readback:null,prod_promotion_allowed:false});
-export async function observeFact001CloudflareWorkerLabV0({token,name,operation,fetchImpl=fetch,clock=Date.now}={}){
- if(typeof token!=='string'||token.length<24||!SAFE.test(name||'')||
+export async function observeFact001CloudflareWorkerLabV0({token,routeToken,name,operation,fetchImpl=fetch,clock=Date.now}={}){
+ if(typeof token!=='string'||token.length<24||typeof routeToken!=='string'||routeToken.length<24||!SAFE.test(name||'')||
     !OPS.has(operation)||typeof fetchImpl!=='function'||typeof clock!=='function')
   return deny('OBSERVATION_SCOPE_INVALID');
  const request=async(path,allow404=false)=>{
   const res=await fetchImpl(API+path,{method:'GET',
-   headers:{Authorization:'Bearer '+token,Accept:'application/json'},
+   headers:{Authorization:'Bearer '+(path==='/zones/'+ZONE+'/workers/routes'?routeToken:token),Accept:'application/json'},
    redirect:'manual',signal:AbortSignal.timeout(12000)});
   if(allow404&&res?.status===404)return {status:404,body:null};
   if(res?.status!==200)throw Error('PROVIDER_HTTP_UNAVAILABLE');
