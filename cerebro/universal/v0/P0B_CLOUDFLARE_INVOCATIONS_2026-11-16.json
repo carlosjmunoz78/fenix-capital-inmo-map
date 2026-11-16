@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0.0",
+  "source": "CLOUDFLARE_ACCOUNT_ANALYTICS_SQL",
+  "snapshot_type": "READ_ONLY_BOUNDED_AUDIT_NOT_LIVE_DASHBOARD",
+  "account_id": "e39a57e1ac42650ca5a6d5307cf0ac8e",
+  "dataset": "events.workersInvocations",
+  "dataset_sampling": "ADAPTIVE",
+  "window_start_utc": "2026-11-15T06:00:00Z",
+  "window_end_utc": "2026-11-16T06:00:00Z",
+  "query_shape": "GROUP BY scriptName, invocationType, status; SUM(sampleInterval) weighted count; APPROX_MAX(timestamp) latest",
+  "source_rows": 11,
+  "observed_script_names": 10,
+  "weighted_invocation_total": 992,
+  "sampled_rows_total": 992,
+  "weighted_invocations_by_type": {
+    "cron": 648,
+    "fetch": 191,
+    "queue": 153
+  },
+  "weighted_invocations_by_status": {
+    "success": 992
+  },
+  "tagged_fenix_capital": {
+    "scripts": 5,
+    "weighted_invocations": 405,
+    "binding_value": "fenix-capital",
+    "canonical_registry_mapping_verified": false
+  },
+  "without_verified_company_binding": {
+    "scripts": 5,
+    "weighted_invocations": 587,
+    "attribution": "ACCOUNT_LEVEL_NOT_ATTRIBUTABLE_TO_FENIX_WITHOUT_REGISTRY"
+  },
+  "priority_lab_scripts_not_returned": [
+    "cerebro-jarvis-lab-eu",
+    "cerebro-jarvis-cut32-lab-eu",
+    "cerebro-instagram-autoqual-lab",
+    "cerebro-facebook-autoqual-lab"
+  ],
+  "priority_silence_meaning": "NO_ROWS_IN_SAMPLED_QUERY_NOT_PROOF_OF_ZERO_INVOCATIONS",
+  "canary_queue_invocations_recorded": 2,
+  "canary_has_cron": false,
+  "metadata_read_only": true,
+  "worker_runtimes_live_at_instant": null,
+  "verified_agent_count": null,
+  "verified_business_job_success_count": null,
+  "verified_publications_count": null,
+  "cost_eur_measured": null,
+  "requires_job_receipt_correlation": true,
+  "rows": [
+    {
+      "script_name": "cerebro-facebook-buffer-replenisher-lab",
+      "invocation_type": "cron",
+      "status": "success",
+      "sampled_rows": 71,
+      "weighted_invocations": 71,
+      "last_invocation_utc": "2026-11-16T05:40:46Z",
+      "company_id_plain_text_binding": "fenix-capital",
+      "engine_id_plain_text_binding": "SOC-FB-BUFFER-REPLENISHER-LAB"
+    },
+    {
+      "script_name": "cerebro-facebook-knowledge-autoqual-lab-eu",
+      "invocation_type": "fetch",
+      "status": "success",
+      "sampled_rows": 71,
+      "weighted_invocations": 71,
+      "last_invocation_utc": "2026-11-16T05:40:46Z",
+      "company_id_plain_text_binding": "fenix-capital",
+      "engine_id_plain_text_binding": "SOC-FB-FINANCIAL-REAL-ESTATE-V1"
+    },
+    {
+      "script_name": "cerebro-fact001-headless-operator-lab-20261111",
+      "invocation_type": "cron",
+      "status": "success",
+      "sampled_rows": 287,
+      "weighted_invocations": 287,
+      "last_invocation_utc": "2026-11-16T05:55:39Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    },
+    {
+      "script_name": "cerebro-fact001-recovery-runner-lab",
+      "invocation_type": "cron",
+      "status": "success",
+      "sampled_rows": 288,
+      "weighted_invocations": 288,
+      "last_invocation_utc": "2026-11-16T05:55:43Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    },
+    {
+      "script_name": "cerebro-instagram-knowledge-autoqual-lab-eu",
+      "invocation_type": "queue",
+      "status": "success",
+      "sampled_rows": 71,
+      "weighted_invocations": 71,
+      "last_invocation_utc": "2026-11-16T05:57:34Z",
+      "company_id_plain_text_binding": "fenix-capital",
+      "engine_id_plain_text_binding": "SOC-IG-FINANCIAL-REAL-ESTATE-V1"
+    },
+    {
+      "script_name": "cerebro-linkedin-autonomy-ticker-lab-eu",
+      "invocation_type": "queue",
+      "status": "success",
+      "sampled_rows": 72,
+      "weighted_invocations": 72,
+      "last_invocation_utc": "2026-11-16T05:58:45Z",
+      "company_id_plain_text_binding": "fenix-capital",
+      "engine_id_plain_text_binding": "SOC-LI-FINANCIAL-REAL-ESTATE-V1"
+    },
+    {
+      "script_name": "cerebro-linkedin-buffer-writer-lab-eu",
+      "invocation_type": "fetch",
+      "status": "success",
+      "sampled_rows": 120,
+      "weighted_invocations": 120,
+      "last_invocation_utc": "2026-11-16T05:58:45Z",
+      "company_id_plain_text_binding": "fenix-capital",
+      "engine_id_plain_text_binding": "SOC-LI-FINANCIAL-REAL-ESTATE-V1"
+    },
+    {
+      "script_name": "cerebro-operativa-control-canary-lab",
+      "invocation_type": "queue",
+      "status": "success",
+      "sampled_rows": 2,
+      "weighted_invocations": 2,
+      "last_invocation_utc": "2026-11-15T17:13:43Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    },
+    {
+      "script_name": "cerebro-ums001-multisource-scout-lab-eu",
+      "invocation_type": "cron",
+      "status": "success",
+      "sampled_rows": 1,
+      "weighted_invocations": 1,
+      "last_invocation_utc": "2026-11-15T07:12:22Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    },
+    {
+      "script_name": "cerebro-ums001-multisource-scout-lab-eu",
+      "invocation_type": "queue",
+      "status": "success",
+      "sampled_rows": 8,
+      "weighted_invocations": 8,
+      "last_invocation_utc": "2026-11-15T07:12:35Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    },
+    {
+      "script_name": "cerebro-ums001-polyhaven-dualmode-candidate-lab-eu",
+      "invocation_type": "cron",
+      "status": "success",
+      "sampled_rows": 1,
+      "weighted_invocations": 1,
+      "last_invocation_utc": "2026-11-15T06:23:34Z",
+      "company_id_plain_text_binding": null,
+      "engine_id_plain_text_binding": null
+    }
+  ]
+}
