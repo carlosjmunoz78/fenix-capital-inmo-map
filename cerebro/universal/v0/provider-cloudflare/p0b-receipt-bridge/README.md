@@ -30,3 +30,19 @@ La interfaz OPERATIVA **no recibe aún datos de este bridge**. Este corte añade
 **Rollback de este corte:** revertir solo los commits de archivos nuevos en PR #66. No hay rollback de Cloudflare/Supabase que ejecutar: **no se desplegó ni alteró ninguno**. Producción, App, CRM, WordPress, DNS, JARVIS, Instagram, Facebook, Trading y main intactos.
 
 **Coste:** 0 € de nuevas suscripciones; consumo de las herramientas ya contratadas **NO_MEDIDO**.
+
+
+### P0-B physical runner proof · same date · AFTER baseline
+**VERIFIED IN REAL CLOUDFlARE LAB**, not merely mocks:
+- Existing scheduled FACT-001 executor `cerebro-fact001-headless-operator-lab-20261111` consumed a single queued CREATE job. Terminal status: `COMPLETED / CREATED_V1_PRIVATE`, D1 `JOB_FINISHED`; Cloudflare showed Worker present, deployed version `10801551-eb14-4ce1-b947-1032cdda565c`, no public subdomain, preview URL, cron, bindings, or secrets.
+- A second queued DELETE job was consumed by **the same existing executor**, terminal status `COMPLETED / OWNED_WORKER_REMOVED` and a second D1 `JOB_FINISHED`; D1 ownership is `DELETED` with `current_version_id=NULL`. Independent Cloudflare inventory confirms Worker absent and account `39 → 40 → 39`.
+- D1 now has **8** completed FACT-001 command rows: 3 create / 3 delete / 1 update / 1 rollback. The original 6 are preserved; 2 new jobs are added as audit, not removed.
+- Exact causal IDs, timestamps, version/deployment and flags: `FACT001_P0B_REAL_RUNNER_CREATE_DELETE_2026-11-16.json`.
+- The true independent provider readback confirms actual action **through the normal FACT Runner**, but the existing runtime still does **not** emit a signed durable receipt with `receipt_id` and `message_digest`. The new pure code and signing helper are in this PR only, not on Cloudflare.
+- Current gate: `P0B_FACT_RUNNER_PROVIDER_LIFECYCLE=PASS_PHYSICAL_LAB`, `P0B_SIGNED_DURABLE_RECEIPT=NOT_CERTIFIED`, `OPERATIVA_PROD=HOLD`.
+- Rollback of test infrastructure physically succeeded; 39 Workers, no test resource or public route. No changes to existing Worker versions, GitHub main or production.
+
+### Signing helper and CI update
+`fact001-receipt-signature-lab.mjs` and its anti-replay tests use a deterministic HMAC-SHA256 envelope scoped to the one LAB company, engine, job, request, idempotency, resource, version, policy and provider readback fields; no real signing key in GitHub. The SQL candidate now reserves `signer_key_id`/`signature_hex` and remains **NOT DEPLOYED**. GitHub Action `CEREBRO Universal Gateway V0 LAB contract CI` explicitly tests all bridge and signing tests on Node 24; run `43934545534` **SUCCESS** on revision `6c8c30a1394742b58d25bfad69cf677fb9c5fad5`. The newer receipt-only commit does not change executable code. The signing code is not yet integrated into the Worker runtime.
+
+**Next block:** exact old/new versioned Worker candidate with signing+provider readback behind disabled feature flag, isolated regression/rollback, ledger addition only after gate, then authenticated owner Gateway/UI integration and other P0 gates. Never promote a candidate with failing signing, provenance, security or owner acceptance tests.
