@@ -247,6 +247,17 @@ async function setup(page:Page){
  return{calls,outside,quick,setCloudflareReadUnbound:(value:boolean)=>{cloudflareReadUnbound=value}};
 }
 
+test('OPERATIVA motor catalog does not misreport unavailable GitHub activity as zero live engines',async({page})=>{
+ const {calls}=await setup(page);
+ const catalog=page.getByRole('region',{name:'Catálogo completo de motores'});
+ await expect(catalog).toContainText('GITHUB · SIN LECTURA');
+ await expect(catalog).toContainText('Sin muestra verificable; no implica cero motores');
+ await catalog.getByLabel('Mostrar').selectOption('observed');
+ await expect(catalog).toContainText('Actividad GitHub no disponible; no implica cero motores ni cero ejecutores.');
+ expect(calls).not.toContain('lab_control');
+ expect(calls).not.toContain('submit_command');
+});
+
 test('OPERATIVA LAB exact off-card motor lookup is honest and controls fail closed in UI',async({page})=>{
  const {calls,outside}=await setup(page);
  const jump=page.getByRole('button',{name:'Hablar con Operativa'});

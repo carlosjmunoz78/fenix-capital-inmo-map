@@ -255,7 +255,7 @@ export default function CerebroOperativeCockpitV3({
     {view==='control'?(company==='fenix'?<CerebroFleetControlPanel/>:<p className="op3-empty-proof">Control LAB disponible únicamente en Fénix con acceso verificado. Esta empresa o vista global no tiene derechos de control concedidos.</p>):null}
      {(view==='entidades'||view==='proyectos'||view==='motores')?
       <CerebroOperativaUniverseViews section={view} scope={company} result={ownerUniverse}
-       onCompanyChange={onCompanyChange} onNavigate={selectPanel}
+       activitySource={source} onCompanyChange={onCompanyChange} onNavigate={selectPanel}
        observedEngines={modules.map(([id,metric])=>({id,count:metric.count,running:metric.running}))}
       />:null}
     {(view==='trabajos'||view==='evidencias'||view==='decisiones')?

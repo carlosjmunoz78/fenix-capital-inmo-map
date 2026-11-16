@@ -7,16 +7,17 @@ import bindings from '../cerebro/registry/existing-engine-bindings.json';
 import './cerebro-engine-catalog.css';
 type Mode='all'|'observed'|'registered'|'factory';
 type Props={sourceReady:boolean;factoryReady:boolean;engines:UniverseEngine[];factoryCatalog:FactoryEngine[];
- scaffolded:FactoryDirectory[];observed:{id:string;count:number;running:number}[];scope:UniverseCompanyRequest};
+ scaffolded:FactoryDirectory[];observed:{id:string;count:number;running:number}[];scope:UniverseCompanyRequest;
+ activitySource:'LIVE'|'CACHED'|'UNAVAILABLE'};
 const records=registry.engines;
-export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,factoryCatalog,scaffolded,observed,scope}:Props){
+export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,factoryCatalog,scaffolded,observed,scope,activitySource}:Props){
  const[mode,setMode]=useState<Mode>('all');
  const[query,setQuery]=useState('');
  const[selected,setSelected]=useState<string|null>(null);
  const byId=useMemo(()=>new Map(engines.map(row=>[row.engine_id,row])),[engines]);
  const designs=useMemo(()=>new Map(factoryCatalog.map(row=>[row.engine_id,row])),[factoryCatalog]);
  const structures=useMemo(()=>new Set(scaffolded.map(row=>row.engine_id)),[scaffolded]);
- const observedById=useMemo(()=>new Map(observed.map(row=>[row.id,row])),[observed]);
+ const observedById=useMemo(()=>new Map((activitySource==='UNAVAILABLE'?[]:observed).map(row=>[row.id,row])),[observed,activitySource]);
  const boundById=useMemo(()=>new Map(bindings.engines.map(row=>[row.engine_id,row])),[]);
  const list=useMemo(()=>{
   const q=query.trim().toLocaleLowerCase('es-ES');
@@ -39,7 +40,11 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
    <div><small>REGISTRO MAESTRO · HISTÓRICO</small><strong>{records.length}</strong><span>Motores definidos, no todos conectados</span></div>
    <div><small>GATEWAY · LECTURA</small><strong>{sourceReady?engines.length:'—'}</strong><span>Registros visibles, no ejecución probada</span></div>
    <div><small>FACT-001 · DISEÑO</small><strong>{factoryReady?factoryCatalog.length:'—'}</strong><span>Definiciones del diseño</span></div>
-   <div><small>GITHUB · CAPTURA</small><strong>{observed.length}</strong><span>IDs con actividad observada</span></div>
+   <div><small>GITHUB · {activitySource==='LIVE'?'CAPTURA':activitySource==='CACHED'?'CACHÉ':'SIN LECTURA'}</small>
+    <strong>{activitySource==='UNAVAILABLE'?'—':observed.length}</strong>
+    <span>{activitySource==='LIVE'?'IDs de workflow en muestra reciente, no agentes activos':
+      activitySource==='CACHED'?'IDs en última captura, NO estado actual':
+      'Sin muestra verificable; no implica cero motores'}</span></div>
   </div>
   <CerebroUniversalOperativaLabPanel company={scope}/>
   <p className="op3-source-note">El diseño histórico de septiembre de 2026 NO certifica el estado actual. Los registros de producción, las dependencias y la capacidad de ejecutar requieren evidencias independientes.</p>
@@ -57,7 +62,8 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
    <div className="op3-engine-list" aria-label="Listado de motores">
     {list.map(row=>{
      const state=byId.has(row.engine_id)?'Registrado · ejecución no acreditada':
-      observedById.has(row.engine_id)?'Ejecución observada · sin control acreditado':
+      observedById.has(row.engine_id)?activitySource==='LIVE'?
+       'Workflow GitHub observado · motor no certificado':'Workflow en caché · estado actual desconocido':
       structures.has(row.engine_id)?'Estructura GitOps · runtime sin verificar':'Definido · no certifica ejecución';
      return <button type="button" key={row.engine_id} className={'op3-engine-row '+(selected===row.engine_id?'is-selected':'')}
       aria-pressed={selected===row.engine_id} onClick={()=>setSelected(row.engine_id)}>
@@ -66,7 +72,9 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
      </button>;
     })}
     {mode==='all'?<small className="op3-engine-list-note">Runtime sin verificar para los motores sin evidencia específica.</small>:null}
-    {!list.length?<p className="op3-source-empty">Sin coincidencias para este filtro. Puedes volver a «Todos los motores».</p>:null}
+    {!list.length?<p className="op3-source-empty">{mode==='observed'&&activitySource==='UNAVAILABLE'?
+     'Actividad GitHub no disponible; no implica cero motores ni cero ejecutores.':
+     'Sin coincidencias para este filtro. Puedes volver a «Todos los motores».'}</p>:null}
    </div>
    <aside className="op3-engine-detail" aria-label="Ficha de motor">
     {chosen?<><div className="op3-engine-detail-title"><Cpu size={24}/><div><small>{chosen.layer} · {chosen.engine_id}</small><h3>{chosen.name}</h3></div></div>
@@ -76,7 +84,10 @@ export default function CerebroEngineCatalog({sourceReady,factoryReady,engines,f
      <div className="op3-engine-fact"><strong>Aspectos pendientes del diseño</strong><p>{chosen.missing}</p></div>
      <div className="op3-engine-fact"><strong>Conexión y uso comprobables ahora</strong>
       <p>{active?'Registro del Gateway: '+active.environment+' · '+(active.version||'sin versión')+' · '+(active.engine_state||'estado sin verificar'):'Sin conexión activa acreditada por este Gateway.'}</p>
-      <p>{run?run.count+' ejecuciones observadas en GitHub ('+run.running+' en curso). No implica control autónomo.':'Sin ejecución atribuida a este ID en la última captura visible.'}</p>
+      <p>{run?(activitySource==='CACHED'?'Última captura GitHub EN CACHÉ: ':'Muestra GitHub: ')+
+       run.count+' workflows asociados ('+run.running+' en curso según esa captura). No prueba que el motor esté ejecutándose.':
+       activitySource==='UNAVAILABLE'?'Actividad GitHub NO VERIFICADA; no puede concluirse cero ejecuciones.':
+       'Sin workflows atribuidos a este ID en la muestra visible, sin prueba de ausencia global.'}</p>
       <p>{created?'Estructura GitOps identificada. Runtime sin verificar.':'Sin estructura GitOps verificada desde esta fuente.'}</p>
       {design?<p>FACT-001: {design.declared_state||'Definición visible'} · {design.version||'versión no indicada'}</p>:null}
       <small>Esta pantalla es de consulta; no concede EXECUTE ni nuevos permisos.</small>

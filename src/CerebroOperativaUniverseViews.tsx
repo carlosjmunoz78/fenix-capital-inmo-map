@@ -5,6 +5,7 @@ import type {OwnerUniverseResult,UniverseCompanyRequest} from './cerebroOperativ
 type Section='entidades'|'proyectos'|'motores';
 type Props={
  section:Section;scope:UniverseCompanyRequest;result:OwnerUniverseResult;
+  activitySource:'LIVE'|'CACHED'|'UNAVAILABLE';
  onCompanyChange:(company:UniverseCompanyRequest)=>void;
  onNavigate:(section:Section|'trabajos')=>void;
  observedEngines:{id:string;count:number;running:number}[];
@@ -20,7 +21,7 @@ function stateMessage(result:OwnerUniverseResult){
 }
 function Empty({text}:{text:string}){return <p className="op3-source-empty">{text}</p>}
 export default function CerebroOperativaUniverseViews({
- section,scope,result,onCompanyChange,onNavigate,observedEngines
+ section,scope,result,activitySource,onCompanyChange,onNavigate,observedEngines
 }:Props){
  const data=result.data;
  const registry=result.kind==='ready'||result.kind==='partial'?data?.registry:null;
@@ -76,7 +77,8 @@ export default function CerebroOperativaUniverseViews({
    <p className="op3-source-note">Fuente: jarvis_project_overlay_v1. No representa el inventario de todos los proyectos de todas las empresas.</p>
   </div>}
   {section==='motores'&&<CerebroEngineCatalog sourceReady={sourceReady} factoryReady={factoryReady}
-   engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}/>}
+   engines={engines} factoryCatalog={catalog} scaffolded={scaffolded} observed={observed} scope={scope}
+    activitySource={activitySource}/>}
 
  </div>;
 }
