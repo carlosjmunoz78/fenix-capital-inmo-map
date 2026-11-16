@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 const script=readFileSync(new URL('./preview-immutable-candidate-anon-smoke.mjs',import.meta.url),'utf8');
 test('reference candidate is pinned to immutable preprod hostname and cannot target a production domain',()=>{
- assert.match(script,/const HOST='fenix-capital-preprod-hyr2rrwvi\\.vercel\\.app'/);
+ assert.ok(script.includes("const HOST='fenix-capital-preprod-hyr2rrwvi.vercel.app'"));
  assert.match(script,/assert\.equal\(value,ROOT/);
  assert.match(script,/redirect:'manual'/);
  assert.match(script,/new Set\(\[301,302,303,307,308,401,403\]\)/);
