@@ -35,7 +35,7 @@ const fake=(overrides={})=>{
 };
 test('private create readback requires real provider inventory, GET, routes, domains, version and 0 bindings',async()=>{
  const {fetchImpl,requested}=fake();
- const r=await observe({token:TOKEN,name,operation:'worker.create_private',fetchImpl,clock:()=>NOW});
+ const r=await observe({token:TOKEN,routeToken:'b'.repeat(32),name,operation:'worker.create_private',fetchImpl,clock:()=>NOW});
  assert.equal(r.status,'PROVIDER_READBACK',JSON.stringify({reason:r.reason,requested}));
  assert.equal(r.provider.exists,true);
  assert.equal(r.provider.workers_dev_enabled,false);
@@ -48,7 +48,7 @@ test('private create readback requires real provider inventory, GET, routes, dom
 });
 test('deleted worker requires absence in list AND HTTP 404; does not invent deleted settings',async()=>{
  const {fetchImpl,requested}=fake({scripts:[],scriptStatus:404});
- const r=await observe({token:TOKEN,name,operation:'worker.delete_private',fetchImpl,clock:()=>NOW});
+ const r=await observe({token:TOKEN,routeToken:'b'.repeat(32),name,operation:'worker.delete_private',fetchImpl,clock:()=>NOW});
  assert.equal(r.status,'PROVIDER_READBACK');
  assert.equal(r.provider.exists,false);
  assert.equal(r.provider.script_get_http_status,404);
@@ -64,7 +64,7 @@ test('fail closed when any provider route, custom domain, binding, cron or publi
   {schedules:{schedules:[{cron:'* * * * *'}]}},
   {deployments:{deployments:[]}}
  ]){
-  const r=await observe({token:TOKEN,name,operation:'worker.create_private',fetchImpl:fake(o).fetchImpl,clock:()=>NOW});
+  const r=await observe({token:TOKEN,routeToken:'b'.repeat(32),name,operation:'worker.create_private',fetchImpl:fake(o).fetchImpl,clock:()=>NOW});
   assert.equal(r.status,'NOT_CERTIFIED');
  }
 });
@@ -73,12 +73,12 @@ test('fail closed on missing permissions, suspicious inventory or false deletion
   {http403:'/workers/routes'}, {domains:[{}]}, {routes:[{}]},
   {scripts:[{id:'another-worker'}]}, {scriptStatus:404}
  ]){
-  const r=await observe({token:TOKEN,name,operation:'worker.create_private',fetchImpl:fake(o).fetchImpl,clock:()=>NOW});
+  const r=await observe({token:TOKEN,routeToken:'b'.repeat(32),name,operation:'worker.create_private',fetchImpl:fake(o).fetchImpl,clock:()=>NOW});
   assert.equal(r.status,'NOT_CERTIFIED');
  }
- const d=await observe({token:TOKEN,name,operation:'worker.delete_private',
+ const d=await observe({token:TOKEN,routeToken:'b'.repeat(32),name,operation:'worker.delete_private',
   fetchImpl:fake({scripts:[],scriptStatus:200}).fetchImpl,clock:()=>NOW});
  assert.equal(d.status,'NOT_CERTIFIED');
- assert.equal((await observe({token:TOKEN,name:'cerebro-jarvis-lab-eu',
+ assert.equal((await observe({token:TOKEN,routeToken:'b'.repeat(32),name:'cerebro-jarvis-lab-eu',
   operation:'worker.delete_private',fetchImpl:fake().fetchImpl,clock:()=>NOW})).status,'NOT_CERTIFIED');
 });
