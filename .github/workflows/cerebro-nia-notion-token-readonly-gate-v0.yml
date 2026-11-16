@@ -1,0 +1,77 @@
+name: CEREBRO NIA Existing Notion Credential Read-only Proof V0
+
+# One bounded, non-destructive gate on this exact internal PR branch.
+# Secrets stay within a no-checkout job. No third-party actions or PR code run.
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/cerebro-nia-notion-token-readonly-gate-v0.yml'
+
+permissions: {}
+
+concurrency:
+  group: cerebro-nia-notion-auth-proof-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  nia-private-scope-proof:
+    if: ${{ github.event.pull_request.head.repo.full_name == 'carlosjmunoz78/fenix-capital-inmo-map' && github.event.pull_request.head.ref == 'cerebro/nia-notion-actgw-readonly-lab-v0-20261116' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+    steps:
+      - name: Verify preexisting Notion integration can GET exact NIA page and first block
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          // Do not import or checkout PR code into a job holding the token.
+          // No secret, response body, request header, or page text is logged.
+          const pageId = '41a81b1a756d815ab877f0d264a6a0d4';
+          const canonicalTitle = 'NIA · Uso responsable de Notion Business en CEREBRO';
+          const token = process.env.NOTION_TOKEN;
+          function stop(reason, code=2) {
+            console.log('NIA_PRIVATE_SCOPE_PROOF=' + reason);
+            process.exit(code);
+          }
+          if (!token || token.trim().length < 15) stop('BLOCKED_EXISTING_SECRET_MISSING');
+          const headers = {
+            Authorization: 'Bearer ' + token,
+            'Notion-Version': '2022-06-28',
+            Accept: 'application/json'
+          };
+          const get = async path => {
+            try {
+              return await fetch('https://api.notion.com/v1/' + path, {
+                method: 'GET',
+                headers,
+                redirect: 'error',
+                signal: AbortSignal.timeout(12000)
+              });
+            } catch {
+              stop('BLOCKED_PROVIDER_NETWORK');
+            }
+          };
+          const normalized = value => String(value ?? '').replace(/-/g,'').toLowerCase();
+          const pageResponse = await get('pages/' + pageId);
+          if (pageResponse.status !== 200) stop('BLOCKED_PAGE_HTTP_' + pageResponse.status);
+          let page;
+          try { page = await pageResponse.json(); } catch { stop('BLOCKED_PAGE_INVALID_JSON'); }
+          const p = page?.properties?.title?.title || [];
+          const title = Array.isArray(p) ? p.map(item=>item?.plain_text || item?.text?.content || '').join('') : '';
+          if (normalized(page?.id) !== normalized(pageId) ||
+              title !== canonicalTitle || page.archived === true || page.in_trash === true) {
+            stop('BLOCKED_PAGE_IDENTITY_OR_STATE');
+          }
+          console.log('NIA_PRIVATE_PAGE_READ=PASS');
+          const blockResponse = await get('blocks/' + pageId + '/children?page_size=1');
+          if (blockResponse.status !== 200) stop('BLOCKED_BLOCKS_HTTP_' + blockResponse.status);
+          let blocks;
+          try { blocks = await blockResponse.json(); } catch { stop('BLOCKED_BLOCKS_INVALID_JSON'); }
+          if (!Array.isArray(blocks.results) || blocks.results.length < 1) stop('BLOCKED_BLOCKS_NOT_READABLE');
+          console.log('NIA_PRIVATE_BLOCKS_READ=PASS');
+          console.log('NIA_PRIVATE_SCOPE_PROOF=PASS_EXISTING_TOKEN_READONLY');
+          console.log('NIA_GATEWAY_RUNTIME_DEPLOYMENT=NOT_TESTED');
+          NODE
