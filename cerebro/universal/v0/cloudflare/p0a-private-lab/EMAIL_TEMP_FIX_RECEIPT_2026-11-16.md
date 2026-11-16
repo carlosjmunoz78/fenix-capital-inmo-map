@@ -7,3 +7,8 @@
 **Corrección aislada:** se cambia exclusivamente el sufijo de correo efímero por `@fenixcapital.es` (dominio controlado por Fénix). El prefijo sigue siendo `cerebro-p0a-<UUID>`; `admin.users` recibe `email_confirm:true`. La llamada oficial `auth.admin.createUser` no envía mensajes de confirmación. No usar direcciones ajenas, no configurar SMTP y no contactar a terceros. No toca ningún dato de cliente.
 
 **GATE:** antes de redeploy, conservar instantánea y la frontera de Worker privada, 0 secretos a logs, test local y documentación. Después ejecutar como máximo **una** instancia LAB con ID único, comprobar resultado y conteo temporal pre/post por SQL, restaurar flag OFF incluso en error. Si falla `CREATE` o `CLEANUP`, detener y revisar sin bucles. No alcanzar PROD; P0-A LIVE todavía BLOQUEADO.
+
+
+## RECTIFICACIÓN BASADA EN LOGS REALES
+
+El rechazo no fue por el dominio de ejemplo: dos logs Auth LAB del 16/11 devolvieron `POST 400 validation_failed`, mensaje clasificado `PASSWORD_TOO_LONG`. El generador original usaba 112 caracteres. Sustituido por 48 caracteres aleatorios+complejidad, véase `PASSWORD_FIX_RECEIPT_2026-11-16.md`. El dominio propio se conserva para evitar un problema independiente. Estado P0-A aún BLOQUEADO hasta prueba física y cleanup.

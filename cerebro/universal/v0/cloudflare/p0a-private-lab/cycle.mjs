@@ -56,7 +56,7 @@ export async function runLabP0ACycle(env={},fetcher=fetch){
     if(await rpc(INVALID_SID,INVALID_UID)!==false)throw Error('RPC_NOT_SAFE');
     stage='CREATE';
     const email='cerebro-p0a-'+crypto.randomUUID().replace(/-/g,'')+'@fenixcapital.es';
-    const password=crypto.randomUUID()+crypto.randomUUID()+crypto.randomUUID()+'Aa7!';
+    const password=crypto.randomUUID().replace(/-/g,'')+crypto.randomUUID().replace(/-/g,'').slice(0,12)+'Aa7!';
     const created=await call(service,service,'POST','/auth/v1/admin/users',
       {email,password,email_confirm:true,app_metadata:{cerebro_lab_only_test:'p0a_cf_workflow'}});
     if(UUID.test(created?.id||''))userId=created.id;
