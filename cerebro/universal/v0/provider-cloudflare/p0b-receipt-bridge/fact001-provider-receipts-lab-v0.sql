@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS fact001_provider_receipts_lab_v0 (
   policy_version TEXT NOT NULL,
   provider TEXT NOT NULL CHECK(provider='CLOUDFLARE_WORKERS'),
   provider_version_id TEXT,
-  message_digest TEXT NOT NULL CHECK(length(message_digest)=64),
+  message_digest TEXT NOT NULL CHECK(length(message_digest)=64 AND message_digest NOT GLOB '*[^0-9a-f]*'),
   signer_key_id TEXT NOT NULL CHECK(length(signer_key_id) BETWEEN 4 AND 128),
   signature_hex TEXT NOT NULL CHECK(length(signature_hex)=64 AND signature_hex NOT GLOB '*[^0-9a-f]*'),
   signature_scheme TEXT NOT NULL CHECK(signature_scheme='HMAC-SHA256-LAB-V0'),
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS fact001_provider_receipts_lab_v0 (
   source TEXT NOT NULL CHECK(source='FACT001_RUNNER_LAB'),
   signed_runtime_receipt_verified INTEGER NOT NULL DEFAULT 0 CHECK(signed_runtime_receipt_verified=0),
   prod_promotion_allowed INTEGER NOT NULL DEFAULT 0 CHECK(prod_promotion_allowed=0),
-  observed_at_ms INTEGER NOT NULL
+  observed_at_ms INTEGER NOT NULL CHECK(observed_at_ms > 0)
 );
 CREATE INDEX IF NOT EXISTS idx_fact001_receipts_observed_lab_v0
  ON fact001_provider_receipts_lab_v0(observed_at_ms);
