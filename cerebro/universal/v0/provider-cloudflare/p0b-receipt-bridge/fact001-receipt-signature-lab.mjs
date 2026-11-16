@@ -20,7 +20,7 @@ function valid(r){
     !RESOURCE.test(r.resource_name||'')||r.provider!=='CLOUDFLARE_WORKERS'||
     r.readback_status!=='READBACK_MATCHED_UNATTESTED'||
     !Number.isSafeInteger(r.observed_at_ms)||r.observed_at_ms<=0)return false;
- for(const k of SIGN_FIELDS.filter(x=>!['observed_at_ms','provider_version_id'].includes(x)))
+ for(const k of SIGN_FIELDS.filter(x=>!['observed_at_ms','provider_version_id','environment'].includes(x)))
   if(typeof r[k]!=='string'||!CODE.test(r[k]))return false;
  return r.provider_version_id===null||
   (typeof r.provider_version_id==='string'&&CODE.test(r.provider_version_id));
