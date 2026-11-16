@@ -56,3 +56,23 @@ La interfaz OPERATIVA **no recibe aún datos de este bridge**. Este corte añade
 - Antes de aplicar, SQL SQLite local ejecutado y cuatro negativos confirmados (UPDATE / DELETE / INSERT duplicado / tenant incorrecto rechazados). La tabla está vacía, no se ha alterado el registro anterior y **ningún Worker ha cambiado de versión**.
 - Este D1 schema es infraestructura de auditoría LAB, **no evidencia de recibo real emitido o firmado**. `P0B_SIGNED_DURABLE_RECEIPT=NOT_CERTIFIED`; `OPERATIVA_PROD=HOLD`.
 - Rollback preciso: con tabla vacía y sin consumidores, suprimir únicamente los dos triggers, índice y tabla mencionados; no tocar otras tablas, workers, crons ni secretos. Actualizar runbook tras cada paso.
+
+
+### P0-B · Firma real LAB y reconciliación fail-closed · 16/11/2026
+**No declarar P0-B GREEN ni promover OPERATIVA PROD.**
+
+**Hecho físico (Cloudflare API + D1):**
+- Tabla de recibos `fact001_provider_receipts_lab_v0` instalada con índice y triggers de inmutabilidad. Punto de recuperación anterior `0000074d-00000000-00005125-5647742514d7faf3ee1c4307e079923a`. Sin backfill histórico.
+- FACT Runner original `cerebro-fact001-headless-operator-lab-20261111` versión `543b68e8-cd59-4960-9f17-d66276416389` conservado. Se prepararon en paralelo versiones de 11–13 módulos con firmador HMAC privado y flag de prueba, sin revelar secreto.
+- Prueba real firma ON: CREATE `FACT001-OPERATIVA-P0B-261116-SIGNED-CREATE-01` `COMPLETED/CREATED_V1_PRIVATE`, Worker nuevo privado efectivamente presente. **Recibo D1: 0 filas. Firma E2E: NO CERTIFICADA**.
+- DELETE `FACT001-OPERATIVA-P0B-261116-SIGNED-DELETE-01` fue marcado por el ejecutor `RECONCILE / EXTERNAL_CHANGE_DETECTED`. La API Cloudflare confirmó independientemente **ausencia del Worker por inventario y GET HTTP 404**, cero rutas/dominios y regreso a 39 scripts. Es consistente con un rechazo por la lectura inmediata posterior al DELETE; la causa temporal precisa sigue por auditar.
+- Tras comprobar propiedad y versión, el estado de ownership D1 se reconcilió como `DELETED`, `current_version_id=NULL`. **Se mantuvo el job original RECONCILE** y se añadió el evento distinto `PROVIDER_ABSENCE_RECONCILED`. No se fabricó ningún `JOB_FINISHED COMPLETED` falso.
+- Se restauró físicamente la versión original a 100% tras el test firmado, y nuevamente tras una sonda de permisos solo GET; rollback final deployment `ddcd9e40-fb52-42d1-82a6-f09b01a8fec0`. Worker original privado y cron `*/5 * * * *` intactos.
+- Sonda de permisos con flag de una sola ejecución: versión `a8c9415d-8027-463b-b41b-e12446b6aae3` llegó a estar desplegada, pero la tabla `fact001_p0b_permission_probe_lab_v0` **no recibió ningún resultado** durante la ventana observada. No inferir que el token permite o deniega endpoints; estado **UNVERIFIED**. El código quedó en el PR y el Worker volvió al baseline.
+- El paquete contiene un registrador de fallos estrictamente sanitizado, un probe GET-only y sus tests. Todo es LAB. No se incorporó un emisor de recibos operativo a producción.
+
+**Recibo exacto:** `FACT001_P0B_SIGNED_RECEIPT_FAIL_CLOSED_ROLLBACK_2026-11-16.json`.
+
+**Gates pendientes:** comprobar causa física de `NO_RECEIPT` y observabilidad del cron; controlar latencia del GET posterior a DELETE mediante pruebas de eventual consistency; verificar HMAC firmado + lector independiente; resolver Company Registry `fenix-capital` vs `fenix`; conectar Gateway propietario y panel OPERATIVA; completar QA/tribunal/FinOps/rollback/release E2E antes de PROD.
+
+**Estado:** `FACT_RUNNER_CREATE_PROVIDER=PASS`, `FACT_WORKER_PHYSICALLY_REMOVED=PASS`, `SIGNED_RECEIPT_REAL=FAIL_NOT_CERTIFIED`, `P0B_RECONCILIATION=PARTIAL`, `OPERATIVA_PROD=HOLD`. Nueva suscripción 0 €, consumo marginal de plataforma no medido. Ninguna modificación a App, CRM, DNS, Supabase PROD, WordPress o main.
