@@ -1,16 +1,24 @@
 /** Exact motor lookup for OPERATIVA LAB. Presentation only; never executes a command. */
 import type {OwnerUniverseResult} from './cerebroOperativaLabUniverseApi';
 import type {UniversalLabProof} from './cerebroUniversalOperativaLabApi';
+import masterRegistry from '../cerebro/registry/engine-registry-detailed-20261113.json' with {type:'json'};
 type Definition={engine_id:string;name:string;purpose?:string};
 type Input={engineId:string;universe:OwnerUniverseResult;proof:UniversalLabProof;definition?:Definition|null};
-const VALID=/^[A-Z][A-Z0-9]{1,23}-[0-9]{3}$/;
+// The master contains multi-part, digit-leading and nonnumeric LAB IDs; their exact
+// spelling is authoritative. Unknown conventional IDs may still be queried, never executed.
+const registeredIds=new Set(masterRegistry.engines.map(row=>row.engine_id));
+const VALID=/^[A-Z][A-Z0-9]{1,23}(?:-[A-Z][A-Z0-9]{1,23}){0,3}-[0-9]{3}$/;
+const LAB_CONTROL_ID='LAB-DEMO-001';
 export function extractExactEngineId(question:string):string|null{
  if(typeof question!=='string'||question.length>4000)return null;
- return question.toUpperCase().match(/(?<![A-Z0-9-])([A-Z][A-Z0-9]{1,23}-[0-9]{3})(?![A-Z0-9-])/)?.[1]??null;
+ const tokens=question.toUpperCase().match(/[A-Z0-9]+(?:-[A-Z0-9]+)*/g)||[];
+ // Don't turn LAB-DEMO-001 commands into read-only master engine queries.
+ return tokens.find(token=>token!==LAB_CONTROL_ID&&(registeredIds.has(token)||VALID.test(token)))??null;
 }
 export function describeEngineLookup({engineId,universe,proof,definition}:Input):string{
  const id=engineId.toUpperCase();
- if(!VALID.test(id))return 'Identificador de motor inválido. Ningún cambio ejecutado.';
+ if(id===LAB_CONTROL_ID||(!registeredIds.has(id)&&!VALID.test(id)))
+  return 'Identificador de motor inválido o reservado al control LAB. Ningún cambio ejecutado.';
  if(universe.kind==='denied'||proof.kind==='denied')
   return 'DENEGADO: autorización insuficiente para '+id+'. Ningún dato privado ni acción ejecutada.';
  const scope=(universe.kind==='ready'||universe.kind==='partial')&&universe.data?.owner_scope==='SERVER_VERIFIED_FENIX_ONLY';

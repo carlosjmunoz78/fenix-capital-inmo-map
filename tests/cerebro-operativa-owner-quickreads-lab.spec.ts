@@ -273,6 +273,14 @@ test('OPERATIVA LAB exact off-card motor lookup is honest and controls fail clos
  await expect(answer).toContainText('Estado operativo/latido: NO_VERIFICADO');
  await expect(answer).toContainText('Control: NO_CONECTADO');
  await expect(answer).toContainText('FinOps global: NO_MEDIDO');
+ // These three registry IDs do not fit the old two-segment pattern.
+ for(const id of ['COMP-DEP-001','LAB-SEO','3RD-001']){
+  await prompt.fill('Estado de '+id);
+  await send.click();
+  await expect(answer).toContainText('Motor '+id+' · empresa Fénix · solo lectura.');
+  await expect(answer).toContainText('REGISTRO HISTÓRICO: DEFINIDO');
+  await expect(answer).toContainText('Control: NO_CONECTADO');
+ }
  await prompt.fill('pausar SEO-001');
  await send.click();
  await expect(answer).toContainText('ORDEN NO EJECUTADA: PAUSE SEO-001');

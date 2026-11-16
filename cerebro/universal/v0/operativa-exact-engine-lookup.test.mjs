@@ -1,6 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {extractExactEngineId,describeEngineLookup} from '../../../src/cerebroOperativaEngineLookup.ts';
+import masterRegistry from '../../registry/engine-registry-detailed-20261113.json' with {type:'json'};
 const proof=()=>({kind:'ready',capabilities:[],registeredDefinitions:179,operationalState:'NO_VERIFICADO',source:'LAB'});
 const universe=(engines=[],catalog=[],scaffolded=[])=>({kind:'ready',data:{
  owner_scope:'SERVER_VERIFIED_FENIX_ONLY',status:'OK',
@@ -13,6 +14,10 @@ test('exact motor ID is not a substring of a compound resource',()=>{
  assert.equal(extractExactEngineId('BRANDBOOT-001'),'BRANDBOOT-001');
  assert.equal(extractExactEngineId('LAB-DEMO-001'),null);
  assert.equal(extractExactEngineId('SEO-001-extra'),null);
+ assert.equal(extractExactEngineId('Estado de COMP-DEP-001'),'COMP-DEP-001');
+ assert.equal(extractExactEngineId('Estado de COMP-HLT-001'),'COMP-HLT-001');
+ assert.equal(extractExactEngineId('Estado de LAB-SEO'),'LAB-SEO');
+ assert.equal(extractExactEngineId('Estado de 3RD-001'),'3RD-001');
 });
 test('historical registry cannot become LIVE or an agent count',()=>{
  const text=describeEngineLookup({engineId:'SEO-001',universe:universe(),proof:proof(),definition});
@@ -50,4 +55,22 @@ test('unavailable is not zero and no unknown motor is invented',()=>{
   proof:{kind:'unavailable',capabilities:[],registeredDefinitions:null,operationalState:'NO_VERIFICADO',source:'SIN_EVIDENCIA_LIVE'}});
  assert.match(out,/no demuestra inexistencia/);assert.match(out,/NO_CONECTADO o NO_VERIFICADO/);
  assert.match(out,/Agentes\/subagentes activos: DESCONOCIDOS/);
+});
+
+test('all 179 master IDs are searchable, including unconventional exact names',()=>{
+ assert.equal(masterRegistry.engines.length,179);
+ const unique=new Set(masterRegistry.engines.map(x=>x.engine_id));
+ assert.equal(unique.size,179);
+ for(const item of masterRegistry.engines){
+  assert.equal(extractExactEngineId('Consulta el motor '+item.engine_id),item.engine_id);
+  const answer=describeEngineLookup({engineId:item.engine_id,universe:universe(),proof:proof(),definition:item});
+  assert.match(answer,/REGISTRO HISTÓRICO: DEFINIDO/);
+  assert.doesNotMatch(answer,/Identificador de motor inválido/);
+  assert.match(answer,/Control: NO_CONECTADO/);
+ }
+});
+test('unknown compound tokens never accidentally match the suffix engine',()=>{
+ assert.equal(extractExactEngineId('INVENTED-COMP-DEP-001-TAIL'),null);
+ assert.equal(extractExactEngineId('LAB-DEMO-001'),null);
+ assert.match(describeEngineLookup({engineId:'LAB-DEMO-001',universe:universe(),proof:proof()}),/reservado al control LAB/);
 });
