@@ -46,3 +46,13 @@ La interfaz OPERATIVA **no recibe aún datos de este bridge**. Este corte añade
 `fact001-receipt-signature-lab.mjs` and its anti-replay tests use a deterministic HMAC-SHA256 envelope scoped to the one LAB company, engine, job, request, idempotency, resource, version, policy and provider readback fields; no real signing key in GitHub. The SQL candidate now reserves `signer_key_id`/`signature_hex` and remains **NOT DEPLOYED**. GitHub Action `CEREBRO Universal Gateway V0 LAB contract CI` explicitly tests all bridge and signing tests on Node 24; run `43934545534` **SUCCESS** on revision `6c8c30a1394742b58d25bfad69cf677fb9c5fad5`. The newer receipt-only commit does not change executable code. The signing code is not yet integrated into the Worker runtime.
 
 **Next block:** exact old/new versioned Worker candidate with signing+provider readback behind disabled feature flag, isolated regression/rollback, ledger addition only after gate, then authenticated owner Gateway/UI integration and other P0 gates. Never promote a candidate with failing signing, provenance, security or owner acceptance tests.
+
+
+### Corte D1 · 16/11/2026, 20:25 UTC · instalación física verificada
+- Baseline previo: el ejecutor Cloudflare `cerebro-fact001-headless-operator-lab-20261111` continuaba en versión `543b68e8-cd59-4960-9f17-d66276416389`, cron original `*/5 * * * *` y tres bindings existentes (dos secretos y RECOVERY_DB); sin lecturas de valores de credenciales.
+- D1 histórica EU `cerebro-fact001-recovery-lab-eu`: 8 jobs completados, 0 QUEUED/RUNNING, sin objetos de recibo preexistentes.
+- **Punto de recuperación Time Travel PRE-CHANGE:** `0000074d-00000000-00005125-5647742514d7faf3ee1c4307e079923a`. No ejecutar restauración global: revertir solamente nuevos objetos si fuese preciso para no perder otros eventos de D1.
+- **HECHO:** tabla `fact001_provider_receipts_lab_v0`, índice `idx_fact001_receipts_observed_lab_v0`, triggers `fact001_receipts_lab_no_update_v0` y `fact001_receipts_lab_no_delete_v0` creados físicamente mediante cuatro llamadas D1. Lectura `sqlite_master` confirma 4/4 objetos y SELECT COUNT = 0.
+- Antes de aplicar, SQL SQLite local ejecutado y cuatro negativos confirmados (UPDATE / DELETE / INSERT duplicado / tenant incorrecto rechazados). La tabla está vacía, no se ha alterado el registro anterior y **ningún Worker ha cambiado de versión**.
+- Este D1 schema es infraestructura de auditoría LAB, **no evidencia de recibo real emitido o firmado**. `P0B_SIGNED_DURABLE_RECEIPT=NOT_CERTIFIED`; `OPERATIVA_PROD=HOLD`.
+- Rollback preciso: con tabla vacía y sin consumidores, suprimir únicamente los dos triggers, índice y tabla mencionados; no tocar otras tablas, workers, crons ni secretos. Actualizar runbook tras cada paso.
