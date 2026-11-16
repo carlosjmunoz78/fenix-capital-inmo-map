@@ -161,7 +161,38 @@
         "global_browser_v2_row_count": 201
       },
       "active_worker_proof": "NOT_VERIFIED_IN_SAMPLED_RUNTIME_SOURCES",
-      "access": "AGGREGATED_PRIVILEGED_READ_ONLY"
+      "access": "AGGREGATED_PRIVILEGED_READ_ONLY",
+      "historical_failure_families": {
+        "browser_dead_letter": {
+          "total": 13,
+          "identity_session_or_permission_related": 10,
+          "lease_expired": 1,
+          "browser_code_error": 1,
+          "navigation_timeout": 1,
+          "classifications_are_diagnostic_not_verified_root_cause": true
+        },
+        "browser_hold": {
+          "total": 6,
+          "reauth_required": 3,
+          "identity_unverified": 3
+        },
+        "browser_queued": {
+          "total": 1,
+          "older_than_24h": 1,
+          "not_evidence_of_live_runner": true
+        },
+        "jarvis_dead_letter": {
+          "total": 1,
+          "git_safe_worker_failed": 1
+        },
+        "creative_hold": {
+          "total": 11,
+          "paid_lane_or_security_gate_pending": 10,
+          "owner_rejected": 1
+        },
+        "replay_or_release_authorized": false,
+        "contains_unredacted_error_code": false
+      }
     }
   },
   "use_policy": {

@@ -36,3 +36,9 @@ Se realizaron lecturas directas **GET Cloudflare** (cuenta `e39a57e1ac42650ca5a6
 4. **No modificar** Cron Free, Workers, App, CRM, Gateway PROD, DNS, main, laboratorio de Trading ni abrir producción. PR #66 DRAFT. Coste de suscripciones 0 €, **consumo marginal NO_MEDIDO**.
 
 **Rollback:** revertir únicamente la adición de esta instantánea/documentación/tests en PR DRAFT; no se cambió infraestructura, no existe rollback de servicios para este bloque.
+
+## P0-B · Clasificación adicional de fallos históricos (SQL agregado, sin payloads)
+- Browser V2 **13 DEAD_LETTER**, con códigos agrupados de forma conservadora: **10** relacionados con autorización/identidad/precondición de sesión, **1** lease expirado, **1** excepción de código del navegador y **1** timeout de navegación. **No atribuir causalidad definitiva sin logs de ejecución y correlación**.
+- Browser V2 **6 HOLD**: **3** reautenticación requerida, **3** identidad de cuenta sin verificar. **1 QUEUED** sin actualización desde hace más de 24 horas: es cola histórica, no prueba de un runner vivo.
+- JARVIS **1 DEAD_LETTER** en la familia de fallo de worker Git seguro. Creativo **11 HOLD**: **10** relacionados con dependencia/gate de pago y **1** rechazo por el propietario. No se ha intentado reanudar, pagar ni publicar contenido.
+- Los códigos fuente fueron inspeccionados como **agrupados SQL de diagnóstico**. El JSON sólo conserva familias y conteos, sin URL, mensajes brutos, IDs ni credenciales. Los siguientes pasos deberían priorizar reconciliar bloqueos de identidad y sesión en LAB, no reejecutar jobs antiguos a ciegas.

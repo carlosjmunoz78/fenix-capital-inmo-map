@@ -64,3 +64,19 @@ test('P0B source snapshot does not invent costs or a current LIVE agent count',(
  const source=readFileSync(p,'utf8');
  assert.doesNotMatch(source,/sb_secret_|-----BEGIN PRIVATE KEY-----|authorization: Bearer|Fenix2020!/i);
 });
+
+test('P0B historical failure classes reconcile without replay or exposing error payloads',()=>{
+ const d=s.sources.supabase_lab, f=d.historical_failure_families;
+ assert.equal(f.browser_dead_letter.total,d.jobs.browser_v2.by_status.DEAD_LETTER);
+ assert.equal(f.browser_dead_letter.total,f.browser_dead_letter.identity_session_or_permission_related+f.browser_dead_letter.lease_expired+f.browser_dead_letter.browser_code_error+f.browser_dead_letter.navigation_timeout);
+ assert.equal(f.browser_hold.total,f.browser_hold.reauth_required+f.browser_hold.identity_unverified);
+ assert.equal(f.browser_hold.total,d.jobs.browser_v2.by_status.HOLD);
+ assert.equal(f.browser_queued.total,d.jobs.browser_v2.by_status.QUEUED);
+ assert.equal(f.browser_queued.older_than_24h,1);
+ assert.equal(f.creative_hold.total,f.creative_hold.paid_lane_or_security_gate_pending+f.creative_hold.owner_rejected);
+ assert.equal(f.creative_hold.total,d.jobs.creative_v1.by_status.HOLD);
+ assert.equal(f.jarvis_dead_letter.total,d.jobs.jarvis_v1.by_status.DEAD_LETTER);
+ assert.equal(f.replay_or_release_authorized,false);
+ assert.equal(f.contains_unredacted_error_code,false);
+ assert.equal(f.browser_dead_letter.classifications_are_diagnostic_not_verified_root_cause,true);
+});
