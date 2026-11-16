@@ -17,7 +17,10 @@ function fakeDb(){
      values=args;return {state:'COMPLETE'};
     }
     throw Error('UNEXPECTED_SQL');
-   }}};
+   }
+   };
+   }
+  };
   }
  };
 }
