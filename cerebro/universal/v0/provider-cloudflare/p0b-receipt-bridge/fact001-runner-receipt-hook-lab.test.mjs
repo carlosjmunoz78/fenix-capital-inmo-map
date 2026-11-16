@@ -62,13 +62,13 @@ test('default-OFF preserves existing Worker behavior: no D1, no HTTP, no signing
 test('flag ON requires dedicated signer before touching provider or database',async()=>{
  const x=provider(),db=fakeD1();
  const result=await emit({env:{FACT001_RECEIPTS_ENABLED:'true',
-  RECOVERY_DB:db,CF_WORKERS_TOKEN:'a'.repeat(32)},jobId:id,fetchImpl:x.fetchImpl});
+  RECOVERY_DB:db,CF_WORKERS_TOKEN:'a'.repeat(32),FACT001_ROUTES_READ_TOKEN:'b'.repeat(32)},jobId:id,fetchImpl:x.fetchImpl});
  assert.equal(result.reason,'SIGNER_SECRET_MISSING');assert.equal(db.writes,0);
  assert.equal(x.calls,0);
 });
 test('authorized LAB run signs, writes, reads back D1, but does not assert external attestation',async()=>{
  const x=provider(),db=fakeD1(),env={FACT001_RECEIPTS_ENABLED:'true',
-  RECOVERY_DB:db,CF_WORKERS_TOKEN:'a'.repeat(32),
+  RECOVERY_DB:db,CF_WORKERS_TOKEN:'a'.repeat(32),FACT001_ROUTES_READ_TOKEN:'b'.repeat(32),
   FACT001_RECEIPT_SIGNING_KEY_HEX:'a1'.repeat(32)}; // inert test key
  const out=await emit({env,jobId:id,fetchImpl:x.fetchImpl,clock:()=>NOW});
  assert.equal(out.status,'DURABLE_LAB_RECEIPT_UNATTESTED',JSON.stringify({reason:out.reason,calls:x.calls}));
@@ -87,7 +87,7 @@ test('fail closed before provider IO if wrong tenant, duplicate terminal event o
  ]){
   const x=provider();
   const r=await emit({env:{FACT001_RECEIPTS_ENABLED:'true',RECOVERY_DB:d,
-   CF_WORKERS_TOKEN:'a'.repeat(32),FACT001_RECEIPT_SIGNING_KEY_HEX:'01'.repeat(32)},
+   CF_WORKERS_TOKEN:'a'.repeat(32),FACT001_ROUTES_READ_TOKEN:'b'.repeat(32),FACT001_RECEIPT_SIGNING_KEY_HEX:'01'.repeat(32)},
    jobId:id,fetchImpl:x.fetchImpl,clock:()=>NOW});
   assert.equal(r.status,'NOT_CERTIFIED');
   assert.equal(x.calls,0);
