@@ -247,6 +247,27 @@ async function setup(page:Page){
  return{calls,outside,quick,setCloudflareReadUnbound:(value:boolean)=>{cloudflareReadUnbound=value}};
 }
 
+test('OPERATIVA LAB exact off-card motor lookup is honest and controls fail closed in UI',async({page})=>{
+ const {calls,outside}=await setup(page);
+ const prompt=page.getByRole('textbox',{name:'Pregunta u orden'});
+ const send=page.getByRole('button',{name:'Enviar instrucción'});
+ const answer=page.getByRole('status').filter({hasText:'Respuesta del control operativo'});
+ await prompt.fill('Estado de SEO-001');
+ await send.click();
+ await expect(answer).toContainText('Motor SEO-001 · empresa Fénix · solo lectura.');
+ await expect(answer).toContainText('REGISTRO HISTÓRICO: DEFINIDO');
+ await expect(answer).toContainText('Estado operativo/latido: NO_VERIFICADO');
+ await expect(answer).toContainText('Control: NO_CONECTADO');
+ await expect(answer).toContainText('FinOps global: NO_MEDIDO');
+ await prompt.fill('pausar SEO-001');
+ await send.click();
+ await expect(answer).toContainText('ORDEN NO EJECUTADA: PAUSE SEO-001');
+ await expect(answer).toContainText('NO_CONECTADO');
+ expect(calls).not.toContain('lab_control');
+ expect(calls).not.toContain('submit_command');
+ expect(outside).toHaveLength(0);
+});
+
 test('Owner Operativa answers missing-agent, ETA/cost and priority advice without executing any motor',async({page})=>{
  const {calls}=await setup(page);
  await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
