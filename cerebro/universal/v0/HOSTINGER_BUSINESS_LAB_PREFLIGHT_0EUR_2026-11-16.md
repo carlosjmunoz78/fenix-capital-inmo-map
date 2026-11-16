@@ -33,3 +33,18 @@ Hostinger desplegado: POR AUDITAR. Runner Auth LAB sin Actions: preparado en PR 
 P0-A logout/revocación real: BLOQUEADO; P0-B provider receipt: PARCIAL; P0-C...H pendientes. OPERATIVA PROD: HOLD.
 Rollback del piloto: desactivar/eliminar **solo** Web App temporal sin tocar WordPress, DNS, App, CRM ni planes.
 Coste de suscripción nueva: **0 €**. Consumo real incremental: NO_MEDIDO.
+
+
+## 17. Hostinger Node piloto · DNS de subdominio individual creado en Cloudflare · 16/11/2026
+
+**AUTORIZACIÓN/PROCEDENCIA:** usuario siguió hPanel, subió el ZIP aislado y mostró pantalla de app `cerebro-lab.fenixcapital.es` en Business Web Hosting, Node 22.x, `server.mjs`, `npm`, ninguna variable de entorno; después aportó panel `Detalles del plan` con **IP 92.113.19.11**, Frankfurt, 3072 MB RAM y 2 CPU de hosting. El usuario pidió conexión y permitió revisar los recursos. El panel indica nameservers Cloudflare `harlee.ns.cloudflare.com`, `rene.ns.cloudflare.com`; **NO deben cambiarse**, independientemente de la recomendación de Hostinger. La pantalla de aplicación mostraba `Dominio conectado`, pero esta es una etiqueta de hPanel, no prueba DNS pública ni HTTP.
+
+**INVENTARIO DNS ANTES:** consulta Cloudflare API a cuenta `e39a57e1ac42650ca5a6d5307cf0ac8e`, zona activa `fenixcapital.es` id `a00ec81375b4acb02f9bd6e0fd64942f`: `cerebro-lab.fenixcapital.es` sin registros DNS; wildcard `*.fenixcapital.es` sin A/CNAME. Apex `fenixcapital.es` A **92.113.19.11** ya existente (proxied=true, NO alterado). `app.fenixcapital.es` CNAME `cname.vercel-dns.com` (NO alterado). El dominio mostró `DNS_PROBE_FINISHED_NXDOMAIN` antes del cambio.
+
+**HECHO FÍSICO EN CLOUDFLARE (ÚNICA MUTACIÓN):** se creó exclusivamente el DNS `A cerebro-lab.fenixcapital.es → 92.113.19.11`, `proxied=false` (DNS-only, adecuado para permitir a Hostinger gestionar SSL de la app), TTL=300 s. **ID real del recurso nuevo `91942f6c1a703382f7c93ed969b09093`**. Relectura Cloudflare API posterior confirmó exactamente un registro A coincidente. Sin cambios de nameservers, apex, `www`, `app`, `staging`, MX, Mail, CRM, App, WordPress ni otros registros. Sin suscripción nueva.
+
+**VERIFICACIÓN DISTINTA:** éxito confirmado de escritura/lectura Cloudflare API. La prueba inmediata de resolución pública desde un contenedor auxiliar no resolvió aún y el navegador web tampoco pudo abrir `/healthz`; puede haber propagación o caché NXDOMAIN, y acceso externo de esa herramienta limitado. **NO afirmar que HTTPS, certificado SSL, app Node o endpoint READY funcionen aún.** No cambiar DNS over HTTPS de Opera como solución principal. Verificación pendiente: respuesta pública HTTPS `https://cerebro-lab.fenixcapital.es/healthz` con `status=READY`, sin redirección a WordPress; comprobar despliegues Hostinger/SSL si no responde y que WordPress original sigue normal.
+
+**ROLLBACK ACOTADO Y SEGURO:** si se comprueba error, eliminar únicamente Cloudflare DNS record ID `91942f6c1a703382f7c93ed969b09093` de la zona indicada, tras verificar que sigue teniendo nombre/tipo/valor originales; NO `DELETE` de ningún registro antiguo ni del apex. Hostinger app piloto puede retirarse por separado solo ante decisión; NO es necesario tocar WordPress ni comprar servicios.
+
+**ESTADOS:** `HOSTINGER_PILOT_ZIP_UPLOADED=USER_EVIDENCE`; `HOSTINGER_PLAN_RESOURCES=USER_SCREENSHOT`; `CF_DNS_LAB_A=HECHO_API_READBACK`; `PUBLIC_DNS_RESOLUTION=NO_VERIFICADO`; `HTTPS_HEALTHZ=NO_VERIFICADO`; `P0A_LIVE_AUTH_E2E=BLOCKED`; `OPERATIVA_PROD=HOLD`. Esta es una **app de diagnóstico LAB**, no un motor conectado ni la interfaz OPERATIVA. Coste adicional contratado 0 € en esta operación; coste real de recursos NO_MEDIDO.
