@@ -1,0 +1,13 @@
+.cerebro-chat-line .jarvis-safe-markdown-lab{display:block;min-width:0;max-width:100%;overflow-wrap:anywhere;line-height:1.55}
+.cerebro-chat-line .jarvis-safe-markdown-lab p{margin:0 0 .65em;color:inherit;font-size:inherit;line-height:inherit;white-space:pre-wrap}
+.cerebro-chat-line .jarvis-safe-markdown-lab :is(h3,h4,h5){font-size:1.05em;font-weight:750;line-height:1.4;margin:.8em 0 .3em;overflow-wrap:anywhere}
+.cerebro-chat-line .jarvis-safe-markdown-lab :is(h3,h4,h5):first-child{margin-top:0}
+.cerebro-chat-line .jarvis-safe-markdown-lab :is(ul,ol){margin:.35em 0 .65em;padding-left:1.4em}
+.cerebro-chat-line .jarvis-safe-markdown-lab li{margin:.15em 0;overflow-wrap:anywhere}
+.cerebro-chat-line .jarvis-safe-markdown-lab blockquote{margin:.5em 0;padding:.3em .7em;border-left:3px solid currentColor;white-space:pre-wrap;opacity:.85}
+.cerebro-chat-line .jarvis-safe-markdown-lab pre{max-width:100%;overflow-x:auto;white-space:pre;tab-size:2;padding:.75em;margin:.6em 0;background:rgba(127,127,127,.08);border:1px solid rgba(127,127,127,.2);border-radius:.6em}
+.cerebro-chat-line .jarvis-safe-markdown-lab :is(code,pre){font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.92em}
+.cerebro-chat-line .jarvis-safe-markdown-lab p code{padding:.1em .2em;background:rgba(127,127,127,.1);border-radius:.2em}
+.cerebro-chat-line .jarvis-safe-markdown-lab a{overflow-wrap:anywhere}
+.cerebro-chat-line .jarvis-safe-markdown-lab :last-child{margin-bottom:0}
+@media(max-width:720px){.cerebro-chat-line .jarvis-safe-markdown-lab pre{font-size:.86em}}
