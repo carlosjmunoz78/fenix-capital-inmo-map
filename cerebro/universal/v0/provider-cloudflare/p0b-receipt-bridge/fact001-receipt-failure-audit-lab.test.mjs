@@ -2,7 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {auditFact001ReceiptFailureLabV0 as record} from './fact001-receipt-failure-audit-lab.mjs';
 const jobId='FACT001-OPERATIVA-P0B-261116-SIGNED-CREATE-01';
-const db=()=>{let writes=[];return {get writes(){return writes;},prepare(sql){return {bind(...values){return {async first(){writes.push({sql,values});return {event_id:17};}};}};}};
+function db(){
+ const writes=[];
+ return {
+  get writes(){return writes;},
+  prepare(sql){
+   return {
+    bind(...values){
+     return {
+      async first(){
+       writes.push({sql,values});
+       return {event_id:17};
+      }
+     };
+    }
+   };
+  }
+ };
+}
 test('OFF mode creates no audit entries and does not inspect D1',async()=>{
  let calls=0;
  const result=await record({env:{FACT001_RECEIPTS_ENABLED:'false',RECOVERY_DB:{prepare(){calls++;throw Error('UNEXPECTED_IO')}}},
