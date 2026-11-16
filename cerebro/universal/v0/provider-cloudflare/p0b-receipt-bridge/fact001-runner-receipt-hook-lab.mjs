@@ -15,6 +15,7 @@ export async function emitFact001ReceiptIfEnabledLabV0({
 }={}){
  if(env?.FACT001_RECEIPTS_ENABLED!=='true')return {status:'OFF',prod_promotion_allowed:false};
  if(!JOB_ID.test(jobId||'')||!env?.RECOVERY_DB||!env.CF_WORKERS_TOKEN||
+    typeof env.FACT001_ROUTES_READ_TOKEN!=='string'||env.FACT001_ROUTES_READ_TOKEN.length<24||
     typeof fetchImpl!=='function'||typeof clock!=='function')
   return blocked('RUNTIME_BINDING_OR_JOB_INVALID');
  const signer=decodeFact001SignerSecretV0(env.FACT001_RECEIPT_SIGNING_KEY_HEX);
@@ -32,7 +33,7 @@ export async function emitFact001ReceiptIfEnabledLabV0({
   const ownership=await db.prepare(OWNER_SQL).bind(job.resource_name).first();
   if(!ownership)return blocked('OWNERSHIP_MISSING');
   const observed=await observeFact001CloudflareWorkerLabV0({
-   token:env.CF_WORKERS_TOKEN,name:job.resource_name,
+   token:env.CF_WORKERS_TOKEN,routeToken:env.FACT001_ROUTES_READ_TOKEN,name:job.resource_name,
    operation:job.operation,fetchImpl,clock
   });
   if(observed.status!=='PROVIDER_READBACK')return blocked(observed.reason||'PROVIDER_READBACK_MISSING');
