@@ -71,7 +71,7 @@ test('authorized LAB run signs, writes, reads back D1, but does not assert exter
   RECOVERY_DB:db,CF_WORKERS_TOKEN:'a'.repeat(32),
   FACT001_RECEIPT_SIGNING_KEY_HEX:'a1'.repeat(32)}; // inert test key
  const out=await emit({env,jobId:id,fetchImpl:x.fetchImpl,clock:()=>NOW});
- assert.equal(out.status,'DURABLE_LAB_RECEIPT_UNATTESTED');
+ assert.equal(out.status,'DURABLE_LAB_RECEIPT_UNATTESTED',JSON.stringify({reason:out.reason,calls:x.calls}));
  assert.equal(out.durable,true);
  assert.equal(out.provider_readback_matched,true);
  assert.equal(out.prod_promotion_allowed,false);
