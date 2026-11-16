@@ -24,5 +24,5 @@ test('issuer-side guard checks exact UUID pair and expiry, no caller identity or
 test('rollback removes ONLY this named function, blocks dependencies and never cascades',()=>{
  assert.match(rollback,/DROP FUNCTION public\.cerebro_operativa_session_guard_prod_v0\(uuid,uuid\) RESTRICT;/);
  assert.match(rollback,/CEREBRO_READER_USED_BY_OTHER_FUNCTION_STOP/);
- assert.doesNotMatch(rollback,/CASCADE|DROP TABLE|DROP SCHEMA|ALTER TABLE|TRUNCATE|DELETE\s+FROM|UPDATE\s+[a-z]/i);
+ assert.doesNotMatch(rollback.replace(/^--.*$/gm,''),/CASCADE|DROP TABLE|DROP SCHEMA|ALTER TABLE|TRUNCATE|DELETE\s+FROM|UPDATE\s+[a-z]/i);
 });
