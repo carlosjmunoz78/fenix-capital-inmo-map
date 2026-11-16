@@ -78,7 +78,7 @@ export async function observeFact001CloudflareWorkerLabV0({token,name,operation,
    bindings_count:0,crons_count:0,routes_count:0,domains_count:0,
    version_id:version
   },readback:{source:'CLOUDFLARE_PROVIDER_API',name,exists:true,
-   version_id:version,observed_at_ms:observed},observed_at_ms:observ,
+   version_id:version,observed_at_ms:observed},observed_at_ms:observed,
    prod_promotion_allowed:false};
  }catch{return deny('PROVIDER_GET_OR_PERMISSION_FAILURE');}
 }
