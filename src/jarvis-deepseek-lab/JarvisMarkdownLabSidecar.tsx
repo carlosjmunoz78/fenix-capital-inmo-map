@@ -45,7 +45,7 @@ export default function JarvisMarkdownLabSidecar({hostRef}:{hostRef:RefObject<HT
    for(const line of root.querySelectorAll<HTMLElement>('.cerebro-chat-line.cerebro-chat-cerebro')){
     const original=line.querySelector<HTMLSpanElement>(':scope > span');
     if(!original)continue;
-    let target=original.nextElementSibling;
+    let target=original.nextElementSibling as HTMLElement|null;
     if(!(target instanceof HTMLElement)||target.dataset.jarvisMarkdownSlot!=='1'){
      target=document.createElement('div');
      target.setAttribute('data-jarvis-markdown-slot','1');
