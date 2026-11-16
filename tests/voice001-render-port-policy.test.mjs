@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {permittedConsoleSource,assertConsoleSourceDelta,assertPortCompanionScope,assertLabPresentationOnly,CORE,POLICY,WORKFLOW} from '../scripts/voice001-render-port-guard.mjs';
+import {permittedConsoleSource,assertConsoleSourceDelta,assertPortCompanionScope,assertLabPresentationOnly,assertCandidateScope,assertCandidateRuntimeBlobs,APPROVED_CANDIDATE_FILES,APPROVED_RUNTIME_BLOBS,CORE,POLICY,WORKFLOW} from '../scripts/voice001-render-port-guard.mjs';
 const mainCore=readFileSync(CORE,'utf8');
 const port=permittedConsoleSource(mainCore);
 test('VOICE001 canonical unchanged still passes',()=>{
@@ -38,4 +38,21 @@ test('LAB flag, fallback and no old bridge are mandatory',()=>{
  assert.throws(()=>assertLabPresentationOnly(embedded.replace("import.meta.env.MODE==='lab'","import.meta.env.MODE==='production'")));
  assert.throws(()=>assertLabPresentationOnly(embedded.replace("<CerebroConsoleShell key={workspaceKey||'jarvis-default'}/>","")));
  assert.throws(()=>assertLabPresentationOnly(embedded+' JarvisMarkdownLabSidecar'));
+});
+
+test('Candidate scope is the exact reviewed path set (no hidden App, test, script or extra workflow)',()=>{
+ assert.equal(assertCandidateScope(APPROVED_CANDIDATE_FILES),'EXACT_CANDIDATE_SCOPE_ONLY');
+ assert.throws(()=>assertCandidateScope([...APPROVED_CANDIDATE_FILES,'src/App.tsx']));
+ assert.throws(()=>assertCandidateScope(APPROVED_CANDIDATE_FILES.filter(x=>x!==CORE)));
+ assert.throws(()=>assertCandidateScope([...APPROVED_CANDIDATE_FILES,'src/cerebroConsoleApi.ts']));
+ assert.throws(()=>assertCandidateScope([...APPROVED_CANDIDATE_FILES,'scripts/exfiltrate.mjs']));
+ assert.throws(()=>assertCandidateScope([...APPROVED_CANDIDATE_FILES,'supabase/functions/cerebro-console-gateway-v0/index.ts']));
+ assert.throws(()=>assertCandidateScope([...APPROVED_CANDIDATE_FILES,'src/JarvisEmbeddedConsole.tsx']));
+});
+test('Any mutation to UI renderer, parser or LAB workflow requires a new policy review',()=>{
+ assert.equal(assertCandidateRuntimeBlobs(APPROVED_RUNTIME_BLOBS),'EXACT_REVIEWED_UI_ONLY');
+ for(const path of Object.keys(APPROVED_RUNTIME_BLOBS)){
+  const mutated={...APPROVED_RUNTIME_BLOBS,[path]:'0000000000000000000000000000000000000000'};
+  assert.throws(()=>assertCandidateRuntimeBlobs(mutated),undefined,path);
+ }
 });

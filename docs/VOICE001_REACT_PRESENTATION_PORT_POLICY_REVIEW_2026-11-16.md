@@ -1,6 +1,6 @@
 # VOICE-001 · Narrow React Presentation Port Policy Proposal
 
-Version: 0.1 · 2026-11-16 · STATUS: DRAFT_POLICY_REVIEW · NO PROD PROMOTION.
+Version: 0.2 · 2026-11-16 · STATUS: DRAFT_POLICY_REVIEW · NO PROD PROMOTION.
 
 ## Origin
 The safeguard in .github/workflows/cerebro-owned-voice-preprod.yml rejects every change to src/CerebroConsoleShell.tsx. It protects speech but blocks the strictly optional UI presentation prop in LAB PR #72 (stacked on PR #71).
@@ -29,3 +29,9 @@ environment: LAB
 state: DRAFT_POLICY_REVIEW
 human_required: POLICY_CONFLICT
 cost: zero new subscriptions; GitHub CI minutes not audited
+
+## Hardening · PR #71/#72 exact candidate
+- The **complete 22-path candidate diff** is allowlisted, with no extra or missing paths accepted when Console changes.
+- The embedded UI, Markdown parser, view, exception boundary, supporting modules/CSS and isolated workflow are **pinned to Git blob SHA-1 identifiers from PR #72 HEAD `ca45040b04052c1c1ea9edec45bf783f85885be6`**. The filename and blob checks are not sufficient alone as a security review; runtime voice and browser gates remain mandatory.
+- A later legitimate change to the candidate will fail closed until a **new independent policy review**. Policy and Console may never be modified in the same promotion PR.
+- The policy-only PR #73 is not allowed to prove production readiness by itself. The cross-branch shadow gate must exercise the exact candidate code with the exact updated policy.

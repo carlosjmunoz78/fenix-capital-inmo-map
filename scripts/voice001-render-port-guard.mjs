@@ -20,6 +20,56 @@ const EDITS=[
   ['<span>{renderMessage(line.text)}</span>',
    "{line.role==='cerebro'&&renderAssistantMessage?renderAssistantMessage(line.text):<span>{renderMessage(line.text)}</span>}"],
 ];
+/** Exactly the known PR #71 + #72 candidate file set, no additional surface. */
+export const APPROVED_CANDIDATE_FILES=[
+ ".github/workflows/jarvis-deepseek-markdown-lab.yml",
+ "docs/JARVIS_DEEPSEEK_CHAT_DEMO_UI_LAB_2026-11-16.md",
+ "docs/capabilities/jarvis-deepseek-ui-capability-lab.v0.3.json",
+ "src/CerebroConsoleShell.tsx",
+ "src/JarvisEmbeddedConsole.tsx",
+ "src/jarvis-deepseek-lab/JarvisMarkdownLabSidecar.tsx",
+ "src/jarvis-deepseek-lab/JarvisMarkdownRenderBoundary.tsx",
+ "src/jarvis-deepseek-lab/JarvisResponseContract.ts",
+ "src/jarvis-deepseek-lab/JarvisResponseView.tsx",
+ "src/jarvis-deepseek-lab/JarvisSafeMarkdownLab.tsx",
+ "src/jarvis-deepseek-lab/LICENSE-DEEPSEEK-CHAT-DEMO",
+ "src/jarvis-deepseek-lab/deepseekUiUtils.ts",
+ "src/jarvis-deepseek-lab/jarvis-markdown-lab.css",
+ "src/jarvis-deepseek-lab/markdownSafe.ts",
+ "src/jarvis-deepseek-lab/useThrottledJarvisMarkdown.ts",
+ "tests/jarvis-deepseek-chat-demo-lab.test.mjs",
+ "tests/jarvis-deepseek-chat-renderer-lab.test.mjs",
+ "tests/jarvis-deepseek-core-immutable-diff.test.mjs",
+ "tests/jarvis-deepseek-default-off.spec.ts",
+ "tests/jarvis-deepseek-direct-react-contract.test.mjs",
+ "tests/jarvis-deepseek-lab-ui.spec.ts",
+ "tests/jarvis-deepseek-react-core-contract.spec.ts"
+];
+/** Executable UI and its LAB workflow pinned to reviewed Git blob content IDs. */
+export const APPROVED_RUNTIME_BLOBS={
+ "src/JarvisEmbeddedConsole.tsx": "058763db22e468da5b07aaf5d3a94bac1086584b",
+ "src/jarvis-deepseek-lab/JarvisMarkdownLabSidecar.tsx": "7d07241705689145648208ac95f1d1cad9e35ebb",
+ "src/jarvis-deepseek-lab/JarvisMarkdownRenderBoundary.tsx": "c6a7238e1b28d27d036a7cf0ec36939f131eef08",
+ "src/jarvis-deepseek-lab/JarvisResponseContract.ts": "17974f6398c16a478b1988f6c4e71d5db9ec0575",
+ "src/jarvis-deepseek-lab/JarvisResponseView.tsx": "91499921a189c5c6a750298564a7c8ec4f195478",
+ "src/jarvis-deepseek-lab/JarvisSafeMarkdownLab.tsx": "effdfa109c16911fe67f04b03cf391214e063911",
+ "src/jarvis-deepseek-lab/deepseekUiUtils.ts": "46f6a4e5901726c9d7ef97428d1e876c9db86680",
+ "src/jarvis-deepseek-lab/jarvis-markdown-lab.css": "d7369a6bbb057e5693dd13485a613ffbe6956b9a",
+ "src/jarvis-deepseek-lab/markdownSafe.ts": "413c1a96d8da55a3b883df6a76d45e3950285b4c",
+ "src/jarvis-deepseek-lab/useThrottledJarvisMarkdown.ts": "d335a5282b46a78b7cbe1765ee0d63398111c83c",
+ ".github/workflows/jarvis-deepseek-markdown-lab.yml": "81d8a321d16cbde9ab2f1185f4cc7a848b120119"
+};
+export function assertCandidateScope(paths){
+ assert.deepEqual([...new Set(paths)].sort(),[...APPROVED_CANDIDATE_FILES].sort(),
+  'VOICE001_DENY: unexpected, missing or duplicate candidate paths');
+ return 'EXACT_CANDIDATE_SCOPE_ONLY';
+}
+export function assertCandidateRuntimeBlobs(actualBlobs){
+ for(const [path,expected] of Object.entries(APPROVED_RUNTIME_BLOBS)){
+  assert.equal(actualBlobs[path],expected,'VOICE001_DENY: reviewed UI blob changed: '+path);
+ }
+ return 'EXACT_REVIEWED_UI_ONLY';
+}
 export const DISALLOWED_COMPANIONS=[
   'src/cerebroVoice.ts','src/cerebroConsoleApi.ts',
   'src/CerebroConsoleHost.tsx','src/CerebroOperativeConsole.tsx',
@@ -63,6 +113,11 @@ function main(){
   return;
  }
  assertPortCompanionScope(changed);
+ assertCandidateScope(changed);
+ const currentBlobs=Object.fromEntries(Object.keys(APPROVED_RUNTIME_BLOBS).map(
+  path=>[path,git('rev-parse','HEAD:'+path).trim()]
+ ));
+ assertCandidateRuntimeBlobs(currentBlobs);
  const canonical=git('show',base+':'+CORE);
  const current=readFileSync(CORE,'utf8');
  assert.equal(assertConsoleSourceDelta(canonical,current),'EXACT_PRESENTATION_PORT_ONLY');
