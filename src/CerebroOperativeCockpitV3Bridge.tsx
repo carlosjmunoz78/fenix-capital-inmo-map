@@ -10,8 +10,9 @@ import {answerDiagnosticRequest,classifyDiagnosticRequest} from './cerebroOperat
 import {readDeviceLive} from './cerebroDeviceLiveApi';
 import {readJobFleetLive} from './cerebroAgentJobLiveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
-import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
+import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction,type LabWorkerState} from './cerebroLabWorkerControlApi';
 import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
+import {verifyLabReceiptCausality} from './cerebroLabReceiptCausality';
 import {extractExactEngineId,describeEngineLookup} from './cerebroOperativaEngineLookup';
 import engineRegistry from '../cerebro/registry/engine-registry-detailed-20261113.json';
 import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
@@ -33,7 +34,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
  const[composer,setComposer]=useState('');
  const[operatorAnswer,setOperatorAnswer]=useState<{question:string;text:string}|null>(null);
  const[fleetSending,setFleetSending]=useState(false);
- const[labPending,setLabPending]=useState<{action:LabWorkerAction;revision:number;priority:number|null}|null>(null);
+ const[labPending,setLabPending]=useState<{action:LabWorkerAction;revision:number;priority:number|null;before:LabWorkerState}|null>(null);
  const[dictating,setDictating]=useState(false);
  const[dictationError,setDictationError]=useState('');
  const[ttsActive,setTtsActive]=useState(false);
@@ -156,7 +157,7 @@ export default function CerebroOperativeCockpitV3Bridge(){
      const priorityText=text.match(/(?:prioridad\s*|\bal\s*)([1-5])\b/i)?.[1];
      const priority=action==='PRIORITIZE'?(priorityText?Number(priorityText):null):null;
      if(action==='PRIORITIZE'&&priority===null){setOperatorAnswer({question:text,text:'Indica una prioridad exacta entre 1 y 5 (por ejemplo: «priorizar LAB-DEMO-001 al 4»). Ningún cambio aplicado.'});return;}
-     setLabPending({action,revision:read.data.revision,priority});
+     setLabPending({action,revision:read.data.revision,priority,before:read.data});
      setOperatorAnswer({question:text,text:'PROPUESTA, NO EJECUTADA: '+action+' sobre LAB-DEMO-001, empresa Fénix, entorno LAB, revisión '+read.data.revision+(priority!==null?', prioridad '+priority:'')+'. Confirma la operación exacta o cancela. No afecta a otros motores.'});
     }else{
      setLabPending(null);
@@ -252,11 +253,11 @@ export default function CerebroOperativeCockpitV3Bridge(){
    if(receipt.kind!=='ready'||!receipt.data){setOperatorAnswer({question:'Control LAB-DEMO-001',text:'Operación NO CERTIFICADA: '+receipt.reason+'. Comprobar estado y recibos antes de reintentar.'});return;}
    const post=await readLabWorkerState();
    const a=receipt.data.after,p=post.data;
-   const confirmed=post.kind==='ready'&&!!p&&p.revision===a.revision&&p.desired_state===a.desired_state&&
-    p.priority===a.priority&&p.work_units===a.work_units&&p.last_receipt_id===receipt.data.receipt_id;
+   const proof=verifyLabReceiptCausality(expected.before,expected.action,expected.priority,receipt.data,p);
+   const confirmed=post.kind==='ready'&&proof.verified;
    setOperatorAnswer({question:'Control '+expected.action+' LAB-DEMO-001',text:confirmed?
     'CONTROL REAL LAB VERIFICADO: '+expected.action+' · antes '+receipt.data.before.desired_state+' / revisión '+receipt.data.before.revision+', después '+a.desired_state+' / revisión '+a.revision+', prioridad '+a.priority+', pasos '+a.work_units+'. Recibo '+receipt.data.receipt_id+'.':
-    'Recibo '+receipt.data.receipt_id+' recibido pero lectura posterior NO COINCIDE; no se declara éxito. Se requiere revisión.'});
+    'Recibo '+receipt.data.receipt_id+' recibido pero la transición NO ESTÁ CERTIFICADA ('+proof.reason+'); no se declara éxito. Se requiere revisión.'});
   }finally{setFleetSending(false)}
  }
  function changeCompany(next:Company){

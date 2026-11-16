@@ -20,7 +20,7 @@ const commands:Record<string,keyof typeof details>={
  'estado del motor SEO-001':'ENGINE_STATUS','última certificación':'FACT_LATEST',
  'estado de staging':'STAGING_STATUS'
 };
-async function setup(page:Page,{activityCache=false}:{activityCache?:boolean}={}){
+async function setup(page:Page,{activityCache=false,receiptMismatch=false}:{activityCache?:boolean;receiptMismatch?:boolean}={}){
  const calls:string[]=[];const outside:string[]=[];
  let cloudflareReadUnbound=false;
  let lab={desired_state:'PAUSED' as 'PAUSED'|'RUNNING',priority:3,revision:1,work_units:0,last_receipt_id:null as string|null};
@@ -79,7 +79,8 @@ async function setup(page:Page,{activityCache=false}:{activityCache?:boolean}={}
     return route.fulfill({status:200,headers,body:JSON.stringify({
      ...common,status:'APPLIED',receipt_id:receiptId,executed:true,
      executed_work_units:lab.work_units-before.work_units,external_actions_executed:false,additional_cost_eur:0,
-     before,after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
+     before:receiptMismatch?{...before,priority:before.priority===5?4:5}:before,
+     after:{desired_state:lab.desired_state,priority:lab.priority,revision:lab.revision,work_units:lab.work_units}
     })});
    }
    if(url.pathname==='/api/cerebro-agent-job-live'){
@@ -570,6 +571,31 @@ test('isolated LAB worker responds to actual revisioned pause, resume, tick and 
  await page.screenshot({path:'test-results/operativa-lab-control-verified.png',fullPage:false,animations:'disabled'});
 });
 
+test('LAB receipt with forged pre-state never becomes verified after matching persisted readback',async({page})=>{
+ const {calls}=await setup(page,{receiptMismatch:true});
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Control'}).click();
+ const worker=page.getByRole('region',{name:'Control real del trabajador determinista aislado LAB'});
+ await expect(worker).toContainText('Estado observado: PAUSED');
+ await worker.getByRole('button',{name:'Reanudar LAB'}).click();
+ await worker.getByRole('button',{name:'Confirmar una vez'}).click();
+ await expect(worker.getByRole('status')).toContainText('BEFORE_STATE_MISMATCH');
+ await expect(worker.getByRole('status')).toContainText('NO ESTÁ CERTIFICADA');
+ await expect(worker).not.toContainText('CONTROL LAB VERIFICADO');
+ expect(calls.filter(x=>x==='lab_control')).toHaveLength(1);
+ expect(calls).not.toContain('submit_command');
+});
+
+test('LAB chat also rejects a forged pre-state even if readback is matching',async({page})=>{
+ const {calls}=await setup(page,{receiptMismatch:true});
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ await page.getByRole('textbox',{name:'Pregunta u orden'}).fill('reanudar LAB-DEMO-001');
+ await page.getByRole('button',{name:'Enviar instrucción'}).click();
+ await page.getByRole('button',{name:'Confirmar control LAB'}).click();
+ const answer=page.getByRole('status').filter({hasText:'Respuesta del control operativo'});
+ await expect(answer).toContainText('BEFORE_STATE_MISMATCH');
+ await expect(answer).not.toContainText('CONTROL REAL LAB VERIFICADO');
+ expect(calls.filter(x=>x==='lab_control')).toHaveLength(1);
+});
 test('Main owner conversation plans but never executes a LAB command before exact confirmation',async({page})=>{
  const {calls}=await setup(page);
  await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();

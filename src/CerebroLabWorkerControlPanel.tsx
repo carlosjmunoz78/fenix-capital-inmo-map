@@ -1,6 +1,7 @@
 import {useCallback,useEffect,useState} from 'react';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction,type LabWorkerState,type LabWorkerReceipt} from './cerebroLabWorkerControlApi';
 import {summarizeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
+import {verifyLabReceiptCausality} from './cerebroLabReceiptCausality';
 
 const ACTIONS:{action:LabWorkerAction;label:string}[]=[
  {action:'PAUSE',label:'Pausar LAB'}, {action:'RESUME',label:'Reanudar LAB'},
@@ -47,15 +48,14 @@ export default function CerebroLabWorkerControlPanel(){
   }
   setState(check.data);setPriority(check.data.priority);
   const after=r.data.after;
-  const matches=check.data.revision===after.revision&&check.data.desired_state===after.desired_state&&
-   check.data.priority===after.priority&&check.data.work_units===after.work_units&&
-   check.data.last_receipt_id===r.data.receipt_id;
+  const proof=verifyLabReceiptCausality(state,action,proposed.priority,r.data,check.data);
+  const matches=proof.verified;
   setVerified(matches);
   setMessage(matches?
    'CONTROL LAB VERIFICADO: '+action+' · '+after.desired_state+' · revisión '+after.revision+
    ' · trabajo completado por el paso: '+r.data.executed_work_units+
    ' · recibo '+r.data.receipt_id:
-   'Recibo disponible, pero estado leído no coincide; requiere revisión. ID '+r.data.receipt_id);
+   'Recibo disponible, pero la transición NO ESTÁ CERTIFICADA ('+proof.reason+'); requiere revisión. ID '+r.data.receipt_id);
  }
  return <section className="op4-lab-actuator" aria-label="Control real del trabajador determinista aislado LAB">
   <h4>Primer ejecutor de control REAL · LAB-DEMO-001</h4>
