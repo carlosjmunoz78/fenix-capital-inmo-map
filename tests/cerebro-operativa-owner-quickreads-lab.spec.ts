@@ -20,7 +20,7 @@ const commands:Record<string,keyof typeof details>={
  'estado del motor SEO-001':'ENGINE_STATUS','última certificación':'FACT_LATEST',
  'estado de staging':'STAGING_STATUS'
 };
-async function setup(page:Page){
+async function setup(page:Page,{activityCache=false}:{activityCache?:boolean}={}){
  const calls:string[]=[];const outside:string[]=[];
  let cloudflareReadUnbound=false;
  let lab={desired_state:'PAUSED' as 'PAUSED'|'RUNNING',priority:3,revision:1,work_units:0,last_receipt_id:null as string|null};
@@ -37,6 +37,24 @@ async function setup(page:Page){
     if(resource==='health')return route.fulfill({status:200,headers,
      body:JSON.stringify({status:'ok',authenticated_transport:true,direct_model_access:false,
       prod_execution_enabled:false,live_writes:false,chat_available:true,chat_mode:'DETERMINISTIC_READ_ONLY'})});
+    if(resource==='activity'&&activityCache){
+     const older='2026-11-15T13:00:00Z';
+     const run=(id:number,status:string,conclusion:string|null)=>({
+      run_id:id,workflow_name:'Workflow '+id,workflow_alias:'Workflow '+id,
+      workflow_path:'.github/workflows/lab.yml',status,conclusion,parent_status:status,
+      event:'workflow_dispatch',html_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/actions/runs/'+id,
+      created_at:older,run_started_at:older,updated_at:older,engine_id:null,
+      company_id:'fenix',environment:'LAB',version:'1',source:'GITHUB_ACTIONS',
+      provenance:'REAL',company_provenance:'DERIVED_REPOSITORY_SCOPE',alias_provenance:'DERIVED_WORKFLOW_NAME',
+      progress_percent:null,progress_completed_steps:null,progress_total_steps:null,current_step:null,next_step:null,
+      progress_provenance:'UNAVAILABLE',running_jobs:null,queued_jobs:null
+     });
+     return route.fulfill({status:200,headers,body:JSON.stringify({
+      status:'OK',observed_at:older,source:'GITHUB_ACTIONS',source_status:'CACHED',
+      repository:'carlosjmunoz78/fenix-capital-inmo-map',
+      runs:[run(901,'in_progress',null),run(902,'queued',null),run(903,'completed','failure')]
+     })});
+    }
     return route.fulfill({status:503,headers,body:'{"status":"UNAVAILABLE"}'});
    }
    if(url.pathname==='/api/cerebro-lab-worker-control'){
@@ -246,6 +264,24 @@ async function setup(page:Page){
  }
  return{calls,outside,quick,setCloudflareReadUnbound:(value:boolean)=>{cloudflareReadUnbound=value}};
 }
+
+test('OPERATIVA refuses to present CACHED workflows as currently executing or in queue',async({page})=>{
+ const {calls}=await setup(page,{activityCache:true});
+ await page.getByRole('navigation',{name:'Áreas de Operativa'}).getByRole('button',{name:'Resumen'}).click();
+ const summary=page.getByRole('region',{name:'Visión general y conversación'});
+ await expect(summary).toContainText('Actividad GitHub en caché');
+ await expect(summary).toContainText('En ejecución ahora');
+ await expect(summary).toContainText('Última captura (NO actual):');
+ await expect(summary).toContainText('vigencia NO_VERIFICADA');
+ await expect(summary).toContainText('Estado actual desconocido · datos en caché');
+ await expect(summary).not.toContainText('Hay trabajos en ejecución');
+ await expect(summary).not.toContainText('resultados requieren revisión');
+ await expect(summary).toContainText('actividad actual NO_VERIFICADA');
+ const steps=page.getByLabel('Actividad por fases');
+ await expect(steps.locator('.is-current')).toHaveCount(0);
+ expect(calls).not.toContain('lab_control');
+ expect(calls).not.toContain('submit_command');
+});
 
 test('OPERATIVA motor catalog does not misreport unavailable GitHub activity as zero live engines',async({page})=>{
  const {calls}=await setup(page);
