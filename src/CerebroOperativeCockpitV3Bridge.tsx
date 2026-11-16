@@ -12,6 +12,8 @@ import {readJobFleetLive} from './cerebroAgentJobLiveApi';
 import {readUniversalOperativaLab} from './cerebroUniversalOperativaLabApi';
 import {readLabWorkerState,applyLabWorkerAction,type LabWorkerAction} from './cerebroLabWorkerControlApi';
 import {describeLabRuntimeEvidence} from './cerebroRuntimeEvidence';
+import {extractExactEngineId,describeEngineLookup} from './cerebroOperativaEngineLookup';
+import engineRegistry from '../cerebro/registry/engine-registry-detailed-20261113.json';
 import {readCloudflareFleet,answerCloudflareFleet,resolveCloudflareWorkerMention,answerCloudflareQueueAudit} from './cerebroCloudflareFleetApi';
 import socialAudit from '../cerebro/universal/v0/provider-social/social-private-meta-audit-2026-11-15.json';
 import './cerebro-operative-console.css';
@@ -201,21 +203,29 @@ export default function CerebroOperativeCockpitV3Bridge(){
    }finally{setFleetSending(false)}
    return;
   }
+
+  // Query named motors even when absent from the visible cards; never grant control from a selector.
+  const exactEngine=preview?extractExactEngineId(text):null;
+  if(exactEngine){
+   setFleetSending(true);
+   try{
+    if(question?.kind==='control'){
+     setOperatorAnswer({question:text,text:'ORDEN NO EJECUTADA: '+question.action+' '+exactEngine+
+      '. NO_CONECTADO: adaptador no certificado. Sin cambios de estado, costes o permisos.'});
+    }else{
+     const [universe,proof]=await Promise.all([fetchOwnerUniverseLab('fenix'),readUniversalOperativaLab()]);
+     const definition=engineRegistry.engines.find(x=>x.engine_id===exactEngine);
+     setOperatorAnswer({question:text,text:describeEngineLookup({engineId:exactEngine,universe,proof,definition})});
+    }
+    setComposer('');
+   }finally{setFleetSending(false)}
+   return;
+  }
   if(question){
    setFleetSending(true);
    try{
     const read=question.kind==='query'?await readFleetLab():{kind:'unavailable',snapshot:null,reason:'CONTROL_PREFLIGHT_ONLY'} as const;
     let answer=answerFleetQuestion(read,question);
-    const engine=question.kind==='query'?text.toUpperCase().match(/(?:^|[^A-Z0-9])([A-Z][A-Z0-9]{1,11}-[0-9]{3})(?=$|[^A-Z0-9])/)?.[1]:null;
-    if(engine){
-     const proof=await readUniversalOperativaLab();
-     const job=proof.job001;
-     const state=job?.engineBindings.find(x=>x.engine_id===engine);
-     const controls=job?.controlEngineBindings.find(x=>x.engine_id===engine);
-     answer='Motor '+engine+': '+(state?'estado DECLARADO '+state.declared_state+' ('+(state.freshness==='STALE_CONFIG'?'configuración antigua':'configuración reciente')+', '+state.observed_config_at.slice(0,10)+')':'sin estado individual acreditado')+'. '+
-      (controls?'Controles configurados: '+controls.configured_controls+', habilitados: '+controls.enabled_controls+', antiguos: '+controls.stale_controls+'.':'Sin controles individuales acreditados en esta fuente.')+
-      ' Ejecución real del motor: NO VERIFICADA. '+(job?.state==='OK'?'Fuente: metadatos PREPROD de JOB-001.':'Fuente JOB-001 no disponible; no se infiere un estado activo.');
-    }
     setOperatorAnswer({question:text,text:answer});
     setComposer('');
    }finally{setFleetSending(false)}

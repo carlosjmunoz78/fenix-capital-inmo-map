@@ -84,7 +84,9 @@ function decode(raw:unknown):OwnerUniverse|null{
   registry:{status:str(registry.status,40),source_status:str(registry.source_status,90),
    companies,projects,engines},
   factory:{status:str(factory.status,40),source_status:str(factory.source_status,90),
-   repository:str(factory.repository,130),branch:str(factory.branch,110),catalog,scaffolded},
+   repository:str(factory.repository,130),branch:str(factory.branch,110),
+    observed_at:typeof factory.observed_at==='string'&&Number.isFinite(Date.parse(factory.observed_at))?str(factory.observed_at,40):undefined,
+    catalog,scaffolded},
   source_status:isObject(raw.source_status)?
    {registry:str(raw.source_status.registry,90),factory:str(raw.source_status.factory,90)}:undefined,
   live_writes:false,prod_execution_enabled:false
