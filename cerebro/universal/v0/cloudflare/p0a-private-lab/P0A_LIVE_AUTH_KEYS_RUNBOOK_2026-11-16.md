@@ -27,3 +27,8 @@ La validación basada en GET `/auth/v1/user` es el equivalente HTTP de verificac
 ## Rollback y coste
 
 Rollback: restaurar versión anterior del Worker privado desde despliegue de Cloudflare, desactivar flag; no tocar otros scripts, DNS, Supabase PROD ni WordPress. Solo se ha usado cuenta Workers/Workflows Free sin suscripciones nuevas; el consumo marginal de CPU/peticiones **NO_MEDIDO**.
+
+
+## Cierre de gate P0-A LAB (recibo físico 16/11/2026)
+
+La acción de introducir claves se completó por el usuario en Cloudflare UI, sin copiar claves a GitHub. La prueba real se realizó y finalizó `PASS_LAB_ISSUER_ONLY`, con `TEMP_USER_CLEANUP=SUCCESS`; SQL posterior count=0; se devolvió flag a false. No se requieren más pruebas destructivas de autenticación para este gate. Ver `RECEIPT_P0A_AUTH_LAB_PASS_2026-11-16.md`. Prohibida promoción global a PROD hasta P0-B y siguientes, y tratar riesgo residual de exposición histórica de la clave legacy de LAB antes de ampliar permisos.

@@ -249,3 +249,8 @@
 ## 19. Cloudflare Workflows privado P0-A LAB · 16/11/2026
 
 Prueba REAL de transporte privado: Worker y Workflow nuevos, sin URL, cron ni credenciales; instancia `p0a_cf_no_keys_preflight_v2_20261116` completada con `BLOCKED_AUTH_NOT_CONFIGURED`, `no_users_created=true` y `prod_execution=DISABLED`. Primer intento falló por formato de reintentos; se corrigió y se conservó evidencia. Recibo y rollback: `cerebro/universal/v0/cloudflare/p0a-private-lab/RECEIPT_2026-11-16.md`. **No equivale a Auth E2E**, P0-A y OPERATIVA PROD siguen bloqueados.
+
+
+## 21. P0-A LAB autenticación real · PASS cerrado (16/11/2026)
+
+**HECHO REAL por API Cloudflare y SQL de Supabase LAB:** única instancia final `p0a_lab_real_auth_password_fix_20261116_run5`, versión verificada `4a853a87-2841-4dbc-bbb3-794bfada2b3f`, `status=complete`, `PASS_LAB_ISSUER_ONLY`, `stage=COMPLETE`, `temp_user_cleanup=SUCCESS`, `prod_execution=DISABLED`. En Supabase LAB (`hnqlnvakzaywtafeiybt`) quedaron **0** usuarios temporales coincidentes con los patrones del test. Worker nuevamente OFF (`CEREBRO_P0A_ENABLED=false`), sin URL pública ni cron. Origen de errores previos: Supabase `auth_logs` confirmó `POST 400 validation_failed` por contraseña de 112 caracteres; corregida a 48. **P0-A emisor/sesiones/limpieza LAB = PASS REAL; P0-B y demás gates siguen abiertos, OPERATIVA PROD = HOLD**. Riesgo residual: clave legacy service_role LAB se mostró como variable normal durante configuración inicial, antes de convertirse en `secret_text`; valorar rotación solo tras inventario de dependencias, sin afectar otros recursos. Recibo completo: `cerebro/universal/v0/cloudflare/p0a-private-lab/RECEIPT_P0A_AUTH_LAB_PASS_2026-11-16.md`.
