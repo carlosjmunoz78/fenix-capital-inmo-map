@@ -7,7 +7,7 @@
   "version": "0.1.0",
   "enabled": true,
   "mode": "SAFE_AUTONOMY_V0",
-  "updated_at": "2026-11-17T00:46:33.166Z",
+  "updated_at": "2026-11-17T03:51:01.694Z",
   "baseline_main_sha": "30d6a43170c9eccd30690093c858cdca539f00ad",
   "safe_autonomy": {
     "discovery": true,
@@ -559,7 +559,8 @@
     "github-wide-skills:fc1e96e7d13b4b66b606",
     "github-wide-skills:02ca72bb05235bb0a23e",
     "github-wide-skills:071cd79eb08a1425898c",
-    "github-wide-skills:cab5fe47aaf159f031c0"
+    "github-wide-skills:cab5fe47aaf159f031c0",
+    "github-wide-skills:bff64d376d0bb76233e3"
   ],
   "in_flight": {},
   "waiting_human": {},
@@ -2312,6 +2313,40 @@
       "status": "WAITING_SAFE_HANDLER",
       "source_discovery_run_id": 43949844060,
       "checkpointed_at": "2026-11-16T20:27:06.867Z",
+      "human_required": null,
+      "external_skill_code_execution": false,
+      "customer_data_used": false,
+      "prod_write": false,
+      "trading_access": false,
+      "paid_fallback": false,
+      "additional_cost_eur": 0
+    },
+    "github-wide-skills:bff64d376d0bb76233e3": {
+      "candidate_id": "github-wide-skills:bff64d376d0bb76233e3",
+      "name": "nova-skill-creator",
+      "human_alias": "Nova Skill Creator",
+      "wrapper_id": "skillwrap:91dcdd251949b1fe2595",
+      "domain": "agent-ai-orchestration",
+      "engine_bindings": [
+        "ORCH-001",
+        "ROUTE-001",
+        "FACT-001",
+        "RAG-001",
+        "LRN-001",
+        "ACTGW-001"
+      ],
+      "value_score": 86.56,
+      "recommendation": "HIGH_VALUE_LAB_BENCHMARK",
+      "evidence_refs": {
+        "upstream_full_name": "chuong1224/nova-skill-creator",
+        "upstream_head_commit": "4572676a1580c1851ce7d9dd0442abfa7a781ddb",
+        "manifest_sha256": "4b67628c942234c4b672ef71c64402e11906de7a10c218f9ec73207b2b76ca2c",
+        "license_status": "EXACT_LICENSE_FILE_EVIDENCE"
+      },
+      "stage": "DISCOVERY_VALUE_SCREENED_NEEDS_CANDIDATE_SPECIFIC_SAFE_HANDLER",
+      "status": "WAITING_SAFE_HANDLER",
+      "source_discovery_run_id": 44012994676,
+      "checkpointed_at": "2026-11-17T03:51:01.694Z",
       "human_required": null,
       "external_skill_code_execution": false,
       "customer_data_used": false,
@@ -33610,7 +33645,7 @@
       "prod_authorized": false
     }
   },
-  "last_action": "IDLE_NO_NEW_ELIGIBLE_CANDIDATE",
+  "last_action": "CHECKPOINT_NEXT_CANDIDATE_AND_CONTINUE_QUEUE",
   "human_exception_policy": [
     "LEGAL_REQUIRED",
     "SIGNATURE_REQUIRED",
@@ -33623,7 +33658,7 @@
   ],
   "prod_authorized": false,
   "autonomous_prod_promotion_authorized": false,
-  "last_discovery_run_id": 43990272094,
+  "last_discovery_run_id": 44012994676,
   "autonomy_action_ledger": {
     "github-wide-skills:28b33318e96c4dcfb74a": {
       "schema_version": "1.0.0",
