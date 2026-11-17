@@ -9,7 +9,7 @@ export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
  transport:'PREVIEW_ONLY_SERVER_VERIFIED';read_only:true;executed:false;
  active_agents_verified:false;subagent_instances_verified:false;
- counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;subagent_templates_not_instances:number;
+ counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;facebook_source_components:number;subagent_templates_not_instances:number;
  total_runtime_instances:null;unindexed_sources_possible:boolean};
  page:{offset:number;limit:number;total:number;next_offset:number|null};
  sources:string[];records:AgentDirectoryRecord[]

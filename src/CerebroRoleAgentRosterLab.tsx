@@ -36,12 +36,13 @@ export default function CerebroRoleAgentRosterLab({
    <strong className={data?'is-ok':'is-amber'}>{data?'Fuentes consultadas · inventario parcial':result.kind==='denied'?'Acceso denegado':'Sin lectura verificable'}</strong>
   </div>
   <p className="op3-source-note">Los ingenieros aparecen primero, pero <b>no son todos los agentes de CEREBRO</b>. La Productora UMS-001 incorpora 529 roles fuente, incluidos 384 especialistas.
-   Se consultan las fuentes indexadas sin inventar ejecutores. El total global de agentes y subagentes aún no está certificado.
+   Se consultan las fuentes indexadas (incluidos los subagentes de Facebook con su agente superior) sin inventar ejecutores. El total global de agentes y subagentes aún no está certificado.
    Cada entrada distingue ficha técnica, explicación sencilla y actividad demostrada.</p>
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
    <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
    <div><strong>{count?.media_studio_source_roles??'—'}</strong><small>Roles registrados en Productora UMS-001</small></div>
+   <div><strong>{count?.facebook_source_components??'—'}</strong><small>Componentes Facebook · 42 agentes y 527 subagentes</small></div>
    <div><strong>{count?.subagent_templates_not_instances??'—'}</strong><small>Plantillas de especialidades no instanciadas</small></div>
    <div><strong>—</strong><small>Agentes y subagentes ejecutándose: NO VERIFICADO</small></div>
    <div><strong>PARCIAL</strong><small>Quedan fuentes de CEREBRO por incorporar · sin falso total global</small></div>
@@ -72,7 +73,7 @@ export default function CerebroRoleAgentRosterLab({
   {loading?<p role="status">Consultando registros autorizados…</p>:result.kind!=='ready'?
    <p className="op3-source-empty" role="alert">No se puede verificar el catálogo ahora: {result.reason}. No se mostrarán cifras inventadas.</p>:<>
    <p className="op3-source-note" role="status">Mostrando {rows.length?(page!.offset+1)+'–'+(page!.offset+rows.length):'0'} de {page!.total} coincidencias
-    · Fuentes: GitHub Registry + Social Family + Productora UMS-001
+    · Fuentes: GitHub Registry + Facebook Factory (SHA fijado) + Productora UMS-001
     · Estado: <b>cobertura parcial, no inventario global completo</b>.</p>
    <div className="op3-universe-list op3-agent-list" aria-label="Listado paginado de agentes y subagentes">
     {rows.map(item=><article className="op3-universe-line op3-agent-entry" key={item.kind+item.id}>
