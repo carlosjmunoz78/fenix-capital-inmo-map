@@ -7,6 +7,7 @@
 import roles from '../cerebro/registry/role-agent-registry.v1.json' with {type:'json'};
 import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:'json'};
 import facebook from '../cerebro/registry/social-facebook-agent-role-design.v1.json' with {type:'json'};
+import fbComponents from '../cerebro/registry/social-facebook-financial-real-estate-components.v1.json' with {type:'json'};
 import {materializeRoles,registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 
 type H=string|string[]|undefined;
@@ -48,12 +49,34 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   runtime_verified:false,company_scope:r.company_scope,
   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/registry/role-agent-registry.v1.json'
  }));
- const fb:AgentDirectoryEntry[]=facebook.roles.map(r=>({
-  id:r.id,name:r.technical_name,kind:'AGENT_ROLE',family:'SOCIAL_FACEBOOK',
-  state:'DEFINED_ONLY',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',purpose_plain:r.plain_purpose,
-  purpose_technical:r.technical_name,engine_ids:[],parent_id:null,hierarchy_verified:false,
-  runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',source_url:facebook.source_url
- }));
+ const fblist=fbComponents.components;
+ if(fbComponents.registry_id!=='CEREBRO_FB_FINANCIAL_REAL_ESTATE_COMPONENTS_SOURCED_V1'||
+  fbComponents.source_commit_sha!=='07b40c571e3d58879fdda56b833417cc5c7aed9c'||
+  fblist.length!==569||fblist.filter(r=>r.component_kind==='AGENT_ROLE').length!==42||
+  fblist.filter(r=>r.component_kind==='SUBAGENT_ROLE').length!==527)
+  throw Error('FB_SOURCE_COMPONENTS_REGISTRY_DRIFT');
+ const fbParents=new Map(fblist.filter(x=>x.component_kind==='AGENT_ROLE').map(x=>[x.id,x.name]));
+ const fbPurpose=new Map(facebook.roles.map(r=>[r.id,r.plain_purpose]));
+ const fb:AgentDirectoryEntry[]=fblist.map(r=>{
+  const child=r.component_kind==='SUBAGENT_ROLE';
+  const parent=r.parent_id?fbParents.get(r.parent_id):null;
+  if(child&&(!r.parent_id||!parent))throw Error('FB_PARENT_CHILD_CONTRACT_BROKEN');
+  return {
+   id:r.id,name:r.name,kind:child?'SUBAGENT_ROLE':'AGENT_ROLE',family:'SOCIAL_FACEBOOK',
+   state:'SCAFFOLDED_PREPROD_ADDITIVE_RUNTIME_NOT_VERIFIED',
+   source:'FACEBOOK_FAMILY_SOURCE_PINNED_SHA',
+   purpose_plain:child?
+    'Ayuda al agente '+parent+' con tareas de '+r.name+'. Su ejecución autónoma todavía no está verificada.':
+    fbPurpose.get(r.id)||'Coordina la especialidad '+r.name+' de la familia Facebook.',
+   purpose_technical:'SOC-001 / FACEBOOK FINANCIAL REAL ESTATE / '+r.id+
+     (r.parent_id?' / parent '+r.parent_id:''),
+   engine_ids:[], // SOC-001 is a source-associated engine, absent from historical 179; no false link
+   parent_id:r.parent_id||null,hierarchy_verified:child,runtime_verified:false,
+   company_scope:'GLOBAL_OR_SCOPED',
+   source_url:'https://github.com/carlosjmunoz78/fenix-capital-cerebro-social/blob/'+
+    fbComponents.source_commit_sha+'/families/facebook/financial-real-estate/roles.v1.json'
+  };
+ });
  const templates:AgentDirectoryEntry[]=facebook.subagent_templates.map(r=>({
   id:r.family_template_id,name:r.name,kind:'SUBAGENT_TEMPLATE',family:'SOCIAL_FACEBOOK',
   state:'TEMPLATE_CONCEPT_NOT_AGENT_INSTANCE',source:'NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT',
@@ -131,9 +154,10 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
   counts:{known_agent_roles:all.filter(r=>r.kind==='AGENT_ROLE').length,
    registered_logical_subagent_roles:all.filter(r=>r.kind==='SUBAGENT_ROLE').length,
    media_studio_source_roles:media.length,
+   facebook_source_components:fb.length,
    subagent_templates_not_instances:all.filter(r=>r.kind==='SUBAGENT_TEMPLATE').length,
    total_runtime_instances:null,unindexed_sources_possible:true},
-  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2'],
+  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','FACEBOOK_FAMILY_SOURCE_PINNED_SHA','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2'],
   page:{offset,limit,total:records.length,next_offset:offset+limit<records.length?offset+limit:null},
   records:records.slice(offset,offset+limit)
  };
