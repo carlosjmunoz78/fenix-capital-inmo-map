@@ -1,10 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
+import { createStagedOwnerAuthStorage } from './stagedOwnerAuthStorage';
 
 const runtimeEnv=(import.meta.env.VITE_FENIX_ENV||'').toLowerCase();
 const productionHostname=typeof window!=='undefined'&&window.location.hostname==='app.fenixcapital.es';
 // Only immutable/staged Vercel candidate hosts use same-origin owner bootstrap.
 // app.fenixcapital.es keeps its unchanged direct Supabase Gateway contract.
 const stagedOwnerHostname=typeof window!=='undefined'&&/^fenix-capital-preprod-[a-z0-9]+\.vercel\.app$/.test(window.location.hostname);
+export const STAGED_OWNER_HOST=stagedOwnerHostname;
 export const IS_PRODUCTION=productionHostname||runtimeEnv==='production'||runtimeEnv==='prod';
 
 const PROD_SUPABASE_URL='https://cluhljgonannaafpmblx.supabase.co';
@@ -24,7 +26,7 @@ const FUNCTION_SUFFIX=IS_PRODUCTION?'':'-test';
 const functionName=(base:string)=>`${base}${FUNCTION_SUFFIX}`;
 const AUTH_STORAGE_KEY=IS_PRODUCTION?'fenix-prod-auth-v1':'fenix-preprod-auth-v2';
 const LEGACY_AUTH_STORAGE_KEY='fenix-preprod-auth';
-const authStorage={
+const legacyAuthStorage={
   getItem(key:string){
     const current=window.localStorage.getItem(key);
     if(current!==null)return current;
@@ -40,6 +42,12 @@ const authStorage={
   setItem(key:string,value:string){window.localStorage.setItem(key,value)},
   removeItem(key:string){window.localStorage.removeItem(key)}
 };
+
+// Isolate staged, non-remembered sessions; production and all other hosts use
+// exactly the legacy adapter. In particular this does not change App PROD.
+const authStorage=stagedOwnerHostname
+  ?createStagedOwnerAuthStorage(window.localStorage,window.sessionStorage,AUTH_STORAGE_KEY)
+  :legacyAuthStorage;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
