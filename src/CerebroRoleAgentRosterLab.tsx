@@ -10,7 +10,7 @@ export default function CerebroRoleAgentRosterLab({
  onShowEngines
 }:{onShowEngines?:(item:AgentDirectoryRecord)=>void}){
  const [result,setResult]=useState<AgentDirectoryResult>(initial);
- const [kind,setKind]=useState<AgentDirectoryFilters['kind']>('AGENT_ROLE');
+ const [kind,setKind]=useState<AgentDirectoryFilters['kind']>('ALL');
  const [family,setFamily]=useState<AgentDirectoryFilters['family']>('ALL');
  const [draft,setDraft]=useState('');
  const [q,setQ]=useState('');
@@ -35,25 +35,30 @@ export default function CerebroRoleAgentRosterLab({
    <span>DIRECTORIO FEDERADO · REGISTROS + DISEÑOS · SOLO LECTURA</span>
    <strong className={data?'is-ok':'is-amber'}>{data?'Fuentes consultadas · inventario parcial':result.kind==='denied'?'Acceso denegado':'Sin lectura verificable'}</strong>
   </div>
-  <p className="op3-source-note">Los ingenieros aparecen primero, pero <b>no son todos los agentes de CEREBRO</b>.
+  <p className="op3-source-note">Los ingenieros aparecen primero, pero <b>no son todos los agentes de CEREBRO</b>. La Productora UMS-001 incorpora 529 roles fuente, incluidos 384 especialistas.
    Se consultan las fuentes indexadas sin inventar ejecutores. El total global de agentes y subagentes aún no está certificado.
    Cada entrada distingue ficha técnica, explicación sencilla y actividad demostrada.</p>
   <div className="op3-agent-counts" aria-label="Cobertura de fuentes">
    <div><strong>{count?.known_agent_roles??'—'}</strong><small>Roles/perfiles documentados en fuentes indexadas</small></div>
-   <div><strong>{count?.subagent_templates_not_instances??'—'}</strong><small>Especialidades de subagentes propuestas · no instancias</small></div>
+   <div><strong>{count?.registered_logical_subagent_roles??'—'}</strong><small>Especialistas/subagentes lógicos · ejecución no verificada</small></div>
+   <div><strong>{count?.media_studio_source_roles??'—'}</strong><small>Roles registrados en Productora UMS-001</small></div>
+   <div><strong>{count?.subagent_templates_not_instances??'—'}</strong><small>Plantillas de especialidades no instanciadas</small></div>
    <div><strong>—</strong><small>Agentes y subagentes ejecutándose: NO VERIFICADO</small></div>
    <div><strong>PARCIAL</strong><small>Quedan fuentes de CEREBRO por incorporar · sin falso total global</small></div>
   </div>
   <div className="op3-engine-tools">
    <label>Mostrar
     <select aria-label="Tipo de agentes" value={kind} onChange={e=>{setKind(e.target.value as AgentDirectoryFilters['kind']);setOffset(0)}}>
-     <option value="AGENT_ROLE">Agentes y roles</option><option value="SUBAGENT_TEMPLATE">Subagentes · especialidades previstas</option>
+     <option value="AGENT_ROLE">Agentes principales</option>
+     <option value="SUBAGENT_ROLE">Especialistas y subagentes registrados</option>
+     <option value="SUBAGENT_TEMPLATE">Plantillas · no instaladas</option>
      <option value="ALL">Todos los registros</option>
     </select>
    </label>
    <label>Área
     <select aria-label="Filtrar por familia" value={family} onChange={e=>{setFamily(e.target.value as AgentDirectoryFilters['family']);setOffset(0)}}>
-     <option value="ALL">Todas las áreas</option><option value="ENGINEERING">Ingeniería</option>
+     <option value="ALL">Todas las áreas</option><option value="MEDIA_STUDIO">Productora UMS-001 · 529 roles</option>
+     <option value="ENGINEERING">Ingeniería</option>
      <option value="REVENUE_SALES">Comercial</option><option value="SOCIAL_FACEBOOK">Facebook · Social Family</option>
     </select>
    </label>
@@ -67,7 +72,7 @@ export default function CerebroRoleAgentRosterLab({
   {loading?<p role="status">Consultando registros autorizados…</p>:result.kind!=='ready'?
    <p className="op3-source-empty" role="alert">No se puede verificar el catálogo ahora: {result.reason}. No se mostrarán cifras inventadas.</p>:<>
    <p className="op3-source-note" role="status">Mostrando {rows.length?(page!.offset+1)+'–'+(page!.offset+rows.length):'0'} de {page!.total} coincidencias
-    · Fuentes: GitHub Registry + Social Family Factory documentada
+    · Fuentes: GitHub Registry + Social Family + Productora UMS-001
     · Estado: <b>cobertura parcial, no inventario global completo</b>.</p>
    <div className="op3-universe-list op3-agent-list" aria-label="Listado paginado de agentes y subagentes">
     {rows.map(item=><article className="op3-universe-line op3-agent-entry" key={item.kind+item.id}>
@@ -77,7 +82,7 @@ export default function CerebroRoleAgentRosterLab({
       <p className="op3-agent-human" title={item.purpose_plain}>¿Para qué sirve? <span>{item.purpose_plain}</span></p>
       <details><summary>Ficha técnica y procedencia</summary>
        <p><b>Función técnica:</b> {item.purpose_technical}</p>
-       <p><b>Tipo:</b> {item.kind==='AGENT_ROLE'?'Agente lógico / rol':'Plantilla conceptual de subagente'}</p>
+       <p><b>Tipo:</b> {item.kind==='AGENT_ROLE'?'Agente lógico / rol':item.kind==='SUBAGENT_ROLE'?'Especialista/subagente lógico':'Plantilla conceptual de subagente'}</p>
        <p><b>Estado declarado:</b> {item.state}. <b>Runtime:</b> NO VERIFICADO.</p>
        <p><b>Jerarquía:</b> {item.hierarchy_verified?'Verificada':'SIN VERIFICAR'}. <b>Empresa:</b> {item.company_scope}.</p>
        <a href={item.source_url} target="_blank" rel="noreferrer">Abrir fuente original</a>

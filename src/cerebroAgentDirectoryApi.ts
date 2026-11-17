@@ -1,6 +1,6 @@
 import {supabase,SUPABASE_PUBLISHABLE_KEY} from './supabase';
 export type AgentDirectoryRecord={
- id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
+ id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string
@@ -9,14 +9,14 @@ export type AgentDirectoryResponse={
  status:'OK';company_id:'fenix';coverage:'PARTIAL_SOURCED_INVENTORY_NOT_ALL_AGENTS';
  transport:'PREVIEW_ONLY_SERVER_VERIFIED';read_only:true;executed:false;
  active_agents_verified:false;subagent_instances_verified:false;
- counts:{known_agent_roles:number;subagent_templates_not_instances:number;
+ counts:{known_agent_roles:number;registered_logical_subagent_roles:number;media_studio_source_roles:number;subagent_templates_not_instances:number;
  total_runtime_instances:null;unindexed_sources_possible:boolean};
  page:{offset:number;limit:number;total:number;next_offset:number|null};
  sources:string[];records:AgentDirectoryRecord[]
 };
 export type AgentDirectoryResult={kind:'ready'|'denied'|'unavailable';data:AgentDirectoryResponse|null;reason:string};
-export type AgentDirectoryFilters={offset:number;limit:number;kind:'AGENT_ROLE'|'SUBAGENT_TEMPLATE'|'ALL';
- family:'ALL'|'ENGINEERING'|'REVENUE_SALES'|'SOCIAL_FACEBOOK';q:string};
+export type AgentDirectoryFilters={offset:number;limit:number;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE'|'ALL';
+ family:'ALL'|'ENGINEERING'|'REVENUE_SALES'|'SOCIAL_FACEBOOK'|'MEDIA_STUDIO';q:string};
 const HOST=/^(?:fenix-capital-preprod-[a-z0-9]+|fenix-capital-prep-git-b7776b-carlosjmunozcabeza-2582s-projects)\.vercel\.app$/;
 export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal?:AbortSignal):Promise<AgentDirectoryResult>{
  const unavailable=(kind:AgentDirectoryResult['kind'],reason:string):AgentDirectoryResult=>({kind,data:null,reason});
@@ -40,8 +40,8 @@ export async function readAgentDirectoryLab(filters:AgentDirectoryFilters,signal
    data.page?.offset!==filters.offset||data.page?.limit!==filters.limit||
    !Number.isSafeInteger(data.page.total)||data.page.total<0||
    data.records.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source||
-     !['AGENT_ROLE','SUBAGENT_TEMPLATE'].includes(x.kind)||!Array.isArray(x.engine_ids)||
-     x.runtime_verified!==false||x.hierarchy_verified!==false))
+     !['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE'].includes(x.kind)||!Array.isArray(x.engine_ids)||
+     x.runtime_verified!==false||typeof x.hierarchy_verified!=='boolean'))
     return unavailable('unavailable','DIRECTORY_CONTRACT_INVALID');
   return {kind:'ready',data,reason:''};
  }catch{
