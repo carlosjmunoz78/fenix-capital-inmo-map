@@ -40,3 +40,16 @@ Comprobado en `main`: `src/CerebroConsoleHost.tsx` selecciona **JARVIS** por def
 Dentro de esa pantalla, con sesión propia del propietario, escribir o dictar exactamente `consulta NIA`. Esperado: `status:QUEUED`, sin publicación ni modificación Notion. Confirmar después los logs de FACT y NIA. Si la prueba falla, restaurar el snapshot original v36 desde GitHub; no enviar tokens de usuario al chat.
 
 La vista JARVIS por defecto no está acreditada como cliente de este endpoint y **no debe confundirse** con la Console V0. La integración de JARVIS con NIA sigue pendiente; este parche cubre la Console V0 existente.
+
+## 17/11/2026 · VALIDACIÓN REAL DESDE SESIÓN DEL PROPIETARIO · GATE VERDE
+
+El usuario ejecutó `consulta NIA` en Console V0 y aportó la respuesta visible de JARVIS/Console: *«He enviado la consulta de lectura a NIA en el entorno LAB. Está en cola…»*. El backend v37 exige `withSupabase({auth:'user'})`, validación `auth.getUser` y el actor `CARLOS-ADMIN`, por lo que una respuesta de encolado implica paso por ese gate.
+
+**Evidencia física con tiempos correlativos:**
+- Supabase Function Logs `cerebro-console-gateway-v0`: **2026-11-17 11:38:09.823 UTC**, `CONSOLE_NIA_EDGE_QUEUE_ACCEPTED`, `topic=documentation`.
+- Cloudflare FACT-001 Worker `cerebro-fact001-gateway-lab-eu-20261109`: **11:38:11.132 UTC**, `FACT_NIA_PRIVATE_RESULT=PASS`.
+- Cloudflare NIA Worker `cerebro-nia-notion-proof-lab`: **11:38:11.128 UTC**, `NIA_CENTRAL_RECEIVER_GATE=PASS`.
+
+**HECHO:** petición real de Console V0 autenticada → Supabase Queue Write exclusiva → Queue FACT-001 → RPC HMAC firmado → NIA Action Gateway/nonce SQLite → lectura autorizada Notion. `QUEUED` de la UI es una respuesta asíncrona de recepción, no su resultado final; Cloudflare confirmó después el procesamiento PASS.
+
+**PENDIENTE, sin falsear autonomía:** La vista JARVIS predeterminada no se ha verificado como canal independiente; se probó Console V0, aunque su presentación use marca JARVIS. No se ha invocado Notion AI nativa ni configurado respuesta de contenido en chat, ni auditoría duradera unificada por actor/correlation_id (registros correlacionados aquí por tiempos y etapa, no un mismo ID propagado). Sigue prohibida ejecución autónoma PROD. Requiere rotar el token Queues Write antes del 01/12/2026. PR #70 permanece DRAFT, sin GitHub Actions ni nueva suscripción.

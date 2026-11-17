@@ -21,7 +21,7 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.gateway_live_connected,true);
  assert.equal(candidate.state.gateway_central_fact_lab_connected,true);
  assert.equal(candidate.state.gateway_production_connected,false);
- assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
+ assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,true);
  assert.equal(candidate.state.real_fact_issuer_hmac_verified,true);
  assert.equal(candidate.state.gateway_real_rollback_tested,true);
  assert.equal(candidate.state.central_issuer_real_signature_verified,true);
@@ -30,7 +30,7 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.console_lab_rollback_tested,true);
  assert.equal(candidate.state.console_private_rpc_deployed,true);
  assert.equal(candidate.state.console_rpc_authenticated_remote_e2e_verified,false);
- assert.equal(candidate.state.console_authenticated_web_ui_connected,false);
+ assert.equal(candidate.state.console_authenticated_web_ui_connected,true);
  assert.equal(candidate.state.cerebro_console_automatic_dispatch_connected,false);
  assert.equal(candidate.evidence.console_lab.physical_proof.length,7);
  assert.equal(candidate.evidence.console_lab.qa_queue_deleted,true);
@@ -40,7 +40,7 @@ test('NIA dedicated LAB identity is bounded and independent',()=>{
  assert.equal(candidate.state.console_backend_actual_version,37);
  assert.equal(candidate.state.console_backend_canary_rollback_verified,true);
  assert.equal(candidate.state.console_backend_unauth_smoke_verified,true);
- assert.equal(candidate.state.console_authenticated_owner_request_verified,false);
+ assert.equal(candidate.state.console_authenticated_owner_request_verified,true);
  assert.equal(candidate.state.console_durable_actor_audit_verified,false);
  assert.equal(candidate.state.console_frontend_modified,false);
  assert.equal(candidate.evidence.console_backend_20261117.intent_parser_cases_passed,14);
