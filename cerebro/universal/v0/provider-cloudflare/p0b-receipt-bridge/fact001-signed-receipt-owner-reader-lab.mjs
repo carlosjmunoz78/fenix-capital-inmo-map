@@ -38,7 +38,16 @@ const denied=(reason)=>Object.freeze({
 });
 const goodScope=(row)=>row&&Object.entries(SCOPED).every(([field,v])=>row[field]===v);
 const timestamp=(v)=>Number.isSafeInteger(v)&&v>0;
-export async function readFact001SignedReceiptOwnerLabV0({db,jobId,signingKey}={}){
+export async function readFact001SignedReceiptOwnerLabV0({db,jobId,signingKey,ownerContext}={}){
+ // Must be injected from existing server-side createFenixOwnerContextResolverV0.
+ // NEVER accept an ownerContext object from client parameters or persisted D1.
+ if(ownerContext?.auth_source!=='SERVER_VERIFIED_FENIX_CONTEXT'||
+    ownerContext?.actor_id!=='CARLOS-ADMIN'||
+    !Array.isArray(ownerContext?.company_ids)||
+    !ownerContext.company_ids.includes('fenix')||
+    !Array.isArray(ownerContext?.scopes)||
+    !ownerContext.scopes.includes('cerebro:audit:read'))
+  return denied('OWNER_SERVER_CONTEXT_NOT_VERIFIED');
  if(!JOB_ID.test(jobId||'')||typeof db?.prepare!=='function'||
     !(signingKey instanceof Uint8Array)||![32,64].includes(signingKey.length))
   return denied('OWNER_READER_SCOPE_OR_SECRET_MISSING');
