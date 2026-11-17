@@ -7,6 +7,7 @@
 import roles from '../cerebro/registry/role-agent-registry.v1.json' with {type:'json'};
 import packs from '../cerebro/registry/role-knowledge-packs.v1.json' with {type:'json'};
 import facebook from '../cerebro/registry/social-facebook-agent-role-design.v1.json' with {type:'json'};
+import {materializeRoles,registrySummary} from '../cerebro/media-studio/v2/registry/role-registry.mjs';
 
 type H=string|string[]|undefined;
 type Req={method?:string;url?:string;headers:Record<string,H>};
@@ -30,7 +31,7 @@ const simple:Record<string,string>={
 };
 const packMap=new Map(packs.packs.map(p=>[p.role_id,p]));
 export type AgentDirectoryEntry={
- id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
+ id:string;name:string;kind:'AGENT_ROLE'|'SUBAGENT_ROLE'|'SUBAGENT_TEMPLATE';family:string;
  state:string;source:string;purpose_plain:string;purpose_technical:string;
  engine_ids:string[];parent_id:string|null;hierarchy_verified:boolean;runtime_verified:boolean;
  company_scope:string;source_url:string;
@@ -61,7 +62,38 @@ export function buildCerebroAgentDirectoryV0():AgentDirectoryEntry[]{
   hierarchy_verified:false,runtime_verified:false,company_scope:'GLOBAL_OR_SCOPED',
   source_url:facebook.source_url
  }));
- const all=[...engineers,...fb,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
+
+ type MediaRole={id:string;name:string;role_kind:string;parent_id?:string|null};
+ const summary=registrySummary();
+ const mediaRoles=materializeRoles() as MediaRole[];
+ if(summary.total_roles!==529||summary.departments!==48||summary.specialists!==384||
+    summary.supervisors!==32||summary.judges!==48||summary.guardians!==16||
+    mediaRoles.length!==529)throw Error('UMS_ROLE_SOURCE_COUNT_DRIFT');
+ const names=new Map(mediaRoles.map(r=>[r.id,r.name]));
+ if(names.size!==mediaRoles.length)throw Error('UMS_ROLE_SOURCE_ID_COLLISION');
+ const media:AgentDirectoryEntry[]=mediaRoles.map(r=>{
+  const child=r.role_kind==='SPECIALIST';
+  const parentId=typeof r.parent_id==='string'?r.parent_id:null;
+  const parentName=parentId?(names.get(parentId)||parentId):'Dirección de la productora';
+  const purpose=child?'Realiza tareas especializadas de '+r.name+' para '+parentName+' en la productora audiovisual.':
+   r.role_kind==='DEPARTMENT_HEAD'?'Dirige el departamento '+r.name+' y coordina sus especialistas.':
+   r.role_kind==='STUDIO_BRAIN'?'Coordina departamentos, producción, decisiones y controles de la productora audiovisual.':
+   r.role_kind==='SUPERVISOR'?'Supervisa de forma independiente la calidad audiovisual en '+r.name+'.':
+   r.role_kind==='JUDGE'?'Revisa las evidencias y participa en las decisiones del tribunal '+parentName+'.':
+   'Controla políticas, derechos, seguridad o permisos relacionados con '+r.name+'.';
+  return {
+   id:'UMS:'+r.id,name:r.name,kind:child?'SUBAGENT_ROLE':'AGENT_ROLE',family:'MEDIA_STUDIO',
+   state:'REGISTERED_LOGICAL_ROLE_RUNTIME_NOT_VERIFIED',
+   source:'UMS001_ROLE_REGISTRY_V2',purpose_plain:purpose,
+   purpose_technical:'UMS-001 / '+r.role_kind+' / '+r.name+(parentId?' / parent='+parentId:''),
+   engine_ids:[], // UMS-001 is NOT in the 179 historical engine IDs; do not invent a catalog link
+   parent_id:parentId?'UMS:'+parentId:null,hierarchy_verified:parentId!==null,
+   runtime_verified:false,company_scope:'GLOBAL_MULTI_COMPANY',
+   source_url:'https://github.com/carlosjmunoz78/fenix-capital-inmo-map/blob/cerebro/universal-control-plane-lab-v0-20261113/cerebro/media-studio/v2/registry/role-registry.mjs'
+  };
+ });
+
+ const all=[...engineers,...fb,...media,...templates],keys=new Set(all.map(x=>x.kind+':'+x.id));
  if(keys.size!==all.length||all.some(x=>!x.id||!x.name||!x.purpose_plain||!x.source_url||
    !Array.isArray(x.engine_ids)||x.engine_ids.some(y=>!/^[A-Z0-9-]+$/.test(y))))
   throw Error('DIRECTORY_DUPLICATE_OR_INCOMPLETE');
@@ -79,9 +111,9 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
  const offset=pInt(q.get('offset'),0,10000000),limit=pInt(q.get('limit'),30,100);
  if(limit<1)throw Error('INVALID_PAGINATION');
  const kind=q.get('kind')||'AGENT_ROLE';
- if(!['AGENT_ROLE','SUBAGENT_TEMPLATE','ALL'].includes(kind))throw Error('INVALID_KIND');
+ if(!['AGENT_ROLE','SUBAGENT_ROLE','SUBAGENT_TEMPLATE','ALL'].includes(kind))throw Error('INVALID_KIND');
  const family=q.get('family')||'ALL';
- if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK'].includes(family))throw Error('INVALID_FAMILY');
+ if(!['ALL','ENGINEERING','REVENUE_SALES','SOCIAL_FACEBOOK','MEDIA_STUDIO'].includes(family))throw Error('INVALID_FAMILY');
  const term=(q.get('q')||'').normalize('NFKC').trim().toLocaleLowerCase('es-ES');
  if(term.length>100||/[\u0000-\u001F]/.test(term))throw Error('INVALID_SEARCH');
  const all=buildCerebroAgentDirectoryV0();
@@ -93,9 +125,11 @@ export function queryCerebroAgentDirectoryV0(q:URLSearchParams){
   transport:'PREVIEW_ONLY_SERVER_VERIFIED' as const,read_only:true as const,executed:false as const,
   active_agents_verified:false as const,subagent_instances_verified:false as const,
   counts:{known_agent_roles:all.filter(r=>r.kind==='AGENT_ROLE').length,
+   registered_logical_subagent_roles:all.filter(r=>r.kind==='SUBAGENT_ROLE').length,
+   media_studio_source_roles:media.length,
    subagent_templates_not_instances:all.filter(r=>r.kind==='SUBAGENT_TEMPLATE').length,
    total_runtime_instances:null,unindexed_sources_possible:true},
-  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT'],
+  sources:['GITHUB_CANONICAL_ROLE_REGISTRY','NOTION_SOCIAL_ARCHITECTURE_SNAPSHOT','UMS001_ROLE_REGISTRY_V2'],
   page:{offset,limit,total:records.length,next_offset:offset+limit<records.length?offset+limit:null},
   records:records.slice(offset,offset+limit)
  };
