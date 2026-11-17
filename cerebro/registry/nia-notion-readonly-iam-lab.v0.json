@@ -1,13 +1,13 @@
 {
   "schema_version": "0.1.0",
   "document_type": "NIA_NOTION_READONLY_LAB_IAM_CANDIDATE",
-  "status": "LAB_CONSOLE_V0_TO_FACT_NIA_PHYSICAL_E2E_PASS_UI_UNTOUCHED",
+  "status": "CONSOLE_BACKEND_V37_NIA_EXPLICIT_READ_DEPLOYED_OWNER_E2E_PENDING",
   "alias_es": "NIA · Lectura exclusiva de documentación en LAB",
   "company_id": "fenix",
   "engine_id": "ACTGW-001",
   "environment": "PREPROD",
   "lab_environment": "CEREBRO-NIA-LAB",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "notion_integration": {
     "name": "CEREBRO NIA · Lectura LAB",
     "bot_id": "41b81b1a-756d-8132-b0d6-0027f800e898",
@@ -87,7 +87,19 @@
     "console_durable_actor_audit_verified": false,
     "console_preview_and_crons_disabled": true,
     "console_test_queue_cleaned": true,
-    "console_ui_prod_untouched": true
+    "console_ui_prod_untouched": false,
+    "console_backend_integration_deployed": true,
+    "console_backend_actual_version": 37,
+    "console_backend_previous_version": 36,
+    "console_backend_source_parity_verified": true,
+    "console_backend_canary_rollback_verified": true,
+    "console_backend_unauth_smoke_verified": true,
+    "console_backend_signed_queue_transport_verified": true,
+    "console_authenticated_owner_request_verified": false,
+    "console_frontend_modified": false,
+    "console_scoped_token_vault_verified": true,
+    "console_scoped_token_expiry": "2026-12-01T00:00:00Z",
+    "console_prod_autonomous_enabled": false
   },
   "rollback": "Remove only this LAB secret and optional binding; do not revoke or alter existing FACT-001 or Fénix Notion Bridge integrations.",
   "references": [
@@ -268,6 +280,46 @@
       "durable_actor_audit_pending": true,
       "notion_ai_invoked": false,
       "additional_subscription_created": false
+    },
+    "console_backend_20261117": {
+      "date_utc": "2026-11-17",
+      "project_id": "cluhljgonannaafpmblx",
+      "project_name": "fenix-capital-prod",
+      "edge_function": "cerebro-console-gateway-v0",
+      "before_version": 36,
+      "before_sha256": "236eafba0c4c3a401df2cd4c05fedeb7b635aa9658488a155622a4f52360e041",
+      "after_version": 37,
+      "after_sha256": "7642123e75ccd00249dc54cc53ae4b836037a48f3fed2fac79f0dac242d84b53",
+      "parallel_canary": "cerebro-console-nia-v36-parallel-lab",
+      "canary_original_rollback_version": 2,
+      "canary_restored_candidate_version": 3,
+      "canary_rollback_verified": true,
+      "old_new_diff": "one new import and two command-handler lines in index.ts; the other four source files unchanged; two additive modules",
+      "exact_command_only": true,
+      "authenticated_owner_gate_reused": "withSupabase auth:user, auth.getUser, fénix actor-context RPC requires CARLOS-ADMIN",
+      "missing_credentials_http_code": 401,
+      "invalid_jwt_http_code": 401,
+      "verified_on_original_and_canary": true,
+      "intent_parser_cases_passed": 14,
+      "queue_scoped_token": {
+        "type": "Cloudflare Queues Write",
+        "name": "cerebro_nia_cf_queues_write_lab_20261117",
+        "stored": "SUPABASE_VAULT",
+        "expires_on": "2026-12-01T00:00:00Z",
+        "value_exposed": false,
+        "token_issuer_bootstrap_closed": true
+      },
+      "queue_http_authenticated_proof": "QUEUE_HTTP_AUTH_PASS",
+      "fact_cloudflare_proof": "FACT_NIA_PRIVATE_RESULT=PASS",
+      "nia_cloudflare_proof": "NIA_CENTRAL_RECEIVER_GATE=PASS",
+      "owner_authenticated_chat_request_pass": false,
+      "async_completion_trace_by_actor": false,
+      "supabase_actual_ui_frontend_modified": false,
+      "supabase_backend_prod_modified": true,
+      "rollback_main_function_performed": false,
+      "rollback_main_instruction": "Redeploy four original v36 files from cerebro/backups/console-gateway-v36-20261117/* with verify_jwt=false",
+      "paid_subscription_added": false,
+      "github_actions_used": false
     }
   }
 }
